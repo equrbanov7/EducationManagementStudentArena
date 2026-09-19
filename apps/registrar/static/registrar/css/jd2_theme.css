@@ -1,0 +1,181 @@
+/* ═══ Elektron jurnal — detal səhifəsi teması (2026-09-20 redizayn) ══════════
+   Sahib: «bu hissədəki dizaynı düzəlt, rəngləri; modalda da açılan rəngi,
+   buttonda; müəllim yeri səliqəsiz; ✕ scroll-da itməsin; Tətbiq et daim
+   görünsün; yadda saxlamadan çıxanda xəbərdarlıq».
+
+   jd2.css-dən SONRA yüklənir və mockup-un sərt hex rənglərini design-tokens
+   ilə əvəz edir. Struktur/JS qarmaqları dəyişmir — yalnız görünüş.
+   Bölmələr: səhifə başlığı · stepper · jurnal pəncərəsi (başlıq, tab zolağı,
+   düymələr) · dərs modalı («sheet» düzümü: yapışqan başlıq + alt panel). */
+
+/* ── Səhifə başlığı + stepper ─────────────────────────────────────────── */
+.jd2 .jd2-pagehead { gap: var(--ems-sp-5); margin-bottom: var(--ems-sp-6); }
+.jd2 .jd2-mark {
+    width: 42px; height: 42px; border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-nav-active); font-size: var(--ems-fs-xl);
+}
+.jd2 .jd2-pagetitle { font-size: var(--ems-fs-2xl); color: var(--ems-text); letter-spacing: -0.2px; }
+.jd2 .jd2-pagesub { font-size: var(--ems-fs-base); color: var(--ems-text-muted); font-weight: 600; }
+.jd2 .jd2-stepper { border-radius: var(--ems-r-2xl); border-color: var(--ems-border); box-shadow: var(--ems-sh-card); padding: 12px 16px; }
+.jd2 .jd2-step-no { border-color: var(--ems-neutral-300); color: var(--ems-neutral-400); }
+.jd2 .jd2-step-no.is-active { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); box-shadow: none; }
+.jd2 .jd2-step-no.is-done { background: var(--ems-primary-100); border-color: var(--ems-primary-100); color: var(--ems-primary-700); }
+.jd2 .jd2-step-label { color: var(--ems-neutral-400); }
+.jd2 .jd2-step-label.is-active { color: var(--ems-text); }
+.jd2 .jd2-step-label.is-done { color: var(--ems-neutral-600); }
+.jd2 .jd2-step-line { background: var(--ems-border); }
+.jd2 .jd2-correct-link { background: var(--ems-primary-600); border-radius: var(--ems-r-lg); }
+.jd2 .jd2-correct-link:hover { background: var(--ems-primary-700); }
+
+/* ── Jurnal pəncərəsi ─────────────────────────────────────────────────── */
+.jd2 .jd2-window { border-radius: var(--ems-r-2xl); border-color: var(--ems-border); box-shadow: var(--ems-sh-raised); }
+/* Başlıq: navy əvəzinə ağ + sol vurğu — məlumat oxunaqlı, rəng yükü az. */
+.jd2 .jd2-winhead {
+    background: var(--ems-bg); color: var(--ems-text);
+    border-bottom: 1px solid var(--ems-border); border-left: 4px solid var(--ems-primary-600);
+    padding: 14px 18px 14px 20px;
+}
+.jd2 .jd2-wintitle { font-size: var(--ems-fs-lg); color: var(--ems-text); }
+.jd2 .jd2-wincode {
+    display: inline-flex; align-items: center; min-height: var(--ems-h-chip); padding: 0 9px;
+    border-radius: var(--ems-r-sm); background: var(--ems-primary-50); color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm); font-weight: 700;
+}
+.jd2 .jd2-winsub { color: var(--ems-text-muted); font-weight: 600; font-size: var(--ems-fs-base); }
+.jd2 .jd2-winlock { background: var(--ems-warning-bg); color: var(--ems-warning-800); border: 1px solid var(--ems-warning-bd); }
+.jd2 .jd2-windate {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); padding: 0 10px;
+    border-radius: var(--ems-r-pill); background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm); font-weight: 700;
+}
+.jd2 .jd2-winclose {
+    width: 30px; height: 30px; border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-600);
+}
+.jd2 .jd2-winclose:hover { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+
+/* Tab zolağı — seqment görünüşü */
+.jd2 .jd2-tabsbar { background: var(--ems-bg-subtle); border-bottom-color: var(--ems-border); padding: 10px 16px; }
+.jd2 .jd2-tab { border-radius: var(--ems-r-lg); color: var(--ems-neutral-600); min-height: var(--ems-h-tab); padding: 0 14px; }
+.jd2 .jd2-tab:hover:not(.is-active) { color: var(--ems-text); background: var(--ems-neutral-100); }
+.jd2 .jd2-tab.is-active { background: var(--ems-primary-600); color: var(--ems-neutral-0); box-shadow: var(--ems-sh-card); }
+.jd2 .jd2-newlesson-btn {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-field);
+    background: var(--ems-primary-600); border-radius: var(--ems-r-lg); box-shadow: none;
+    font-size: var(--ems-fs-base); padding: 0 16px;
+}
+.jd2 .jd2-newlesson-btn:hover { background: var(--ems-primary-700); }
+.jd2 .jd2-export-btn,
+.jd2 .jd2-guest-btn {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-field);
+    border: 1px solid var(--ems-neutral-300); background: var(--ems-bg); color: var(--ems-neutral-700);
+    border-radius: var(--ems-r-lg); font-size: var(--ems-fs-base); font-weight: 700; padding: 0 14px;
+}
+.jd2 .jd2-export-btn:hover,
+.jd2 .jd2-guest-btn:hover { background: var(--ems-bg-subtle); color: var(--ems-primary-700); border-color: var(--ems-primary-300); }
+.jd2 .jd2-panel-label { color: var(--ems-neutral-500); border-bottom-color: var(--ems-border); }
+.jd2 .jd2-table thead th { background: var(--ems-bg-subtle); color: var(--ems-neutral-500); box-shadow: inset 0 -1px 0 var(--ems-border); }
+.jd2 .jd2-th-student { background: var(--ems-bg-subtle); }
+.jd2 .jd2-save-btn { background: var(--ems-primary-600); border-radius: var(--ems-r-lg); box-shadow: none; }
+.jd2 .jd2-save-btn:hover { background: var(--ems-primary-700); transform: none; box-shadow: none; }
+.jd2 .jd2-footbar { background: var(--ems-bg-subtle); border-top-color: var(--ems-border); }
+
+/* ── Dərs modalı — «sheet» düzümü ─────────────────────────────────────── */
+/* Kart flex sütundur: başlıq və alt panel sabit qalır, YALNIZ gövdə sürüşür.
+   Beləcə ✕ və «Tətbiq et» uzun formada da həmişə görünür. */
+.jd-modal-card--sheet { display: flex; flex-direction: column; overflow: hidden; max-height: min(92vh, 860px); }
+.jd-modal-card--sheet .jd-modal-form { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.jd-modal-card--sheet .jd-modal-body { overflow-y: auto; flex: 1 1 auto; min-height: 0; padding: 16px 20px 8px; }
+.jd-modal-card--sheet .jd-modal-foot {
+    flex: 0 0 auto; position: sticky; bottom: 0; background: var(--ems-bg);
+    border-top: 1px solid var(--ems-border); padding: 12px 20px 14px;
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.05);
+}
+.jd2 .jd2-modal-head,
+.jd2-modal-head {
+    flex: 0 0 auto; background: var(--ems-bg); color: var(--ems-text);
+    border-bottom: 1px solid var(--ems-border); border-radius: 18px 18px 0 0;
+    padding: 14px 18px 12px 20px; align-items: flex-start;
+}
+.jd2-modal-head h3 { color: var(--ems-text); font-size: var(--ems-fs-xl); }
+.jd2-modal-head__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.jd2-modal-head__sub { font-size: var(--ems-fs-sm); color: var(--ems-text-muted); font-weight: 600; }
+.jd2-modal-close,
+.jd2 .jd2-modal-close {
+    position: static; flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-600); font-size: var(--ems-fs-md);
+}
+.jd2-modal-close:hover { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+
+/* Sahələr: tokenli kontur, fokusda/açıqda nazik neytral kontur (göy halqa yox) */
+.jd2-field-label { color: var(--ems-neutral-500); letter-spacing: 0.05em; }
+.jd2-field input,
+.jd2-field select,
+.jd2-field textarea {
+    border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg);
+    color: var(--ems-text); font-weight: 600; min-height: var(--ems-h-field); padding: 8px 12px;
+}
+.jd2-field input:focus,
+.jd2-field select:focus,
+.jd2-field textarea:focus { outline: none; border-color: var(--ems-neutral-500); box-shadow: none; }
+.jd2-field input[type="file"] { padding: 7px 10px; font-weight: 500; }
+.jd2-field .bootstrap-single-select__toggle,
+.jd2-field .bootstrap-single-select--ems .bootstrap-single-select__toggle {
+    min-height: var(--ems-h-field); padding: 8px 12px; border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg); background: var(--ems-bg); color: var(--ems-text);
+    font-weight: 600; font-size: var(--ems-fs-base); box-shadow: none;
+}
+.jd2-field .bootstrap-single-select__toggle:hover { border-color: var(--ems-primary-300); }
+.jd2-field .bootstrap-single-select__toggle:focus,
+.jd2-field .bootstrap-single-select__toggle.show,
+.jd2-field .bootstrap-single-select__toggle[aria-expanded="true"] {
+    border-color: var(--ems-neutral-500); background: var(--ems-bg-subtle); box-shadow: none; outline: none;
+}
+.jd2-field .bootstrap-single-select__toggle.is-placeholder { color: var(--ems-neutral-400); font-weight: 500; }
+.jd2-locked-kind { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); }
+.jd-field-hint { color: var(--ems-neutral-500); font-size: var(--ems-fs-xs); }
+.jd-modal-note { background: var(--ems-primary-50); color: var(--ems-neutral-700); border: 1px solid var(--ems-primary-100); border-radius: var(--ems-r-xl); }
+
+/* Paritet nişanı — tarixin yanında */
+.jd2-parity-badge { border-radius: var(--ems-r-pill); padding: 5px 10px; font-size: var(--ems-fs-2xs); }
+.jd2-parity-badge.is-ust { background: var(--ems-primary-100); color: var(--ems-primary-800); }
+.jd2-parity-badge.is-alt { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+
+/* Müəllim seçicisi (axtarışlı) — bir konturlu, input içində ikinci qutu YOX */
+.jd2-field .ems-ss {
+    min-height: var(--ems-h-field); border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg);
+    background: var(--ems-bg); padding: 4px 8px; box-shadow: none;
+}
+.jd2-field .ems-ss:focus-within { border-color: var(--ems-neutral-500); box-shadow: none; }
+.jd2-field .ems-ss__chips { min-height: 0; padding: 0; gap: 6px; align-items: center; }
+.jd2-field .ems-ss__chip { min-height: var(--ems-h-chip); }
+.jd2-field .ems-ss .ems-ss__search,
+.jd2-field .ems-ss .ems-ss__search:focus {
+    min-height: 28px; border: 0; padding: 0 4px; background: transparent; box-shadow: none;
+    font-weight: 500; font-size: var(--ems-fs-base); color: var(--ems-text);
+}
+
+/* Alt panel düymələri */
+.jd2-apply-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: var(--ems-h-action); background: var(--ems-primary-600); border-radius: var(--ems-r-lg);
+    box-shadow: none; font-size: var(--ems-fs-md);
+}
+.jd2-apply-btn:hover { background: var(--ems-primary-700); }
+.jd2-cancel-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: var(--ems-h-action); border: 1px solid var(--ems-neutral-300); color: var(--ems-neutral-700);
+    border-radius: var(--ems-r-lg); font-size: var(--ems-fs-md);
+}
+.jd2-cancel-btn:hover { background: var(--ems-bg-subtle); }
+.jd-danger-btn { border-radius: var(--ems-r-lg); min-height: var(--ems-h-action); }
+.jd2-apply-btn:focus-visible,
+.jd2-cancel-btn:focus-visible,
+.jd2-modal-close:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+
+@media (max-width: 640px) {
+    .jd-modal { padding: 0; align-items: flex-end; }
+    .jd-modal-card--sheet { max-height: 96vh; border-radius: 18px 18px 0 0; }
+    .jd2 .jd2-winhead { border-left-width: 0; border-top: 4px solid var(--ems-primary-600); }
+}
