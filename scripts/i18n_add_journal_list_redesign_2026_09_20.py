@@ -21,6 +21,17 @@ STRINGS = {
         "<b>%(count)s</b> günlük",
     ),
     ("registrar.journal", "Vakant"): ("Vacant", "Вакантно", "Boş"),
+    ("registrar.journal", "Dəyişikliklər yadda saxlanmayıb"): (
+        "Unsaved changes",
+        "Изменения не сохранены",
+        "Değişiklikler kaydedilmedi",
+    ),
+    ("registrar.journal", "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."): (
+        "The form has changes that were not applied. If you close it, they will be lost.",
+        "В форме есть неприменённые изменения. Если закрыть, они будут потеряны.",
+        "Formda uygulanmamış değişiklikler var. Kapatırsanız kaybolacak.",
+    ),
+    ("registrar.journal", "Bağla, itsin"): ("Close and discard", "Закрыть и отменить", "Kapat, vazgeç"),
     (
         "registrar.journal",
         "Korpus qrupun ixtisasına görə «%(building)s» seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür. Otaq məcburi deyil.",

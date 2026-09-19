@@ -75615,3 +75615,17 @@ msgid ""
 msgstr ""
 "Building “%(building)s” is preselected from the group's programme — you can "
 "change it; rooms are filtered by building. Room is optional."
+
+msgctxt "registrar.journal"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Unsaved changes"
+
+msgctxt "registrar.journal"
+msgid "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."
+msgstr ""
+"The form has changes that were not applied. If you close it, they will be "
+"lost."
+
+msgctxt "registrar.journal"
+msgid "Bağla, itsin"
+msgstr "Close and discard"

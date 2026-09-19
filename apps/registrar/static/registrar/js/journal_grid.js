@@ -615,6 +615,7 @@
         }
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı
+        modalDirty = false;
         modal.hidden = false;
         lockPageScroll();
     }
@@ -634,9 +635,30 @@
 
     function closeModal() {
         modal.hidden = true;
+        modalDirty = false;
         unlockPageScroll();
         var mapped = stepOfActiveTab();
         if (mapped) setStep(mapped); // modal bağlandı → aktiv tabın addımına qayıt
+    }
+
+    // Yadda saxlanılmamış dəyişiklik qoruyucusu (sahib 2026-09-20): modal açılandan
+    // sonra hər hansı sahə dəyişibsə ✕ / İmtina / fon / Escape əvvəlcə soruşur.
+    // Bayraq açılışda sıfırlanır; kaskad/paritet kimi PROQRAM dəyişiklikləri
+    // `input` hadisəsi yaratmadığı üçün saxta «dirty» olmur.
+    var modalDirty = false;
+    var unsavedHint = modal.querySelector("[data-jd-modal-unsaved]");
+    if (form) {
+        form.addEventListener("input", function () { modalDirty = true; });
+        form.addEventListener("change", function (ev) {
+            if (ev.isTrusted) modalDirty = true;
+        });
+    }
+    function requestClose() {
+        if (modalDirty && unsavedHint) {
+            showJdConfirm(unsavedHint, closeModal);
+            return;
+        }
+        closeModal();
     }
 
     document.addEventListener("click", function (event) {
@@ -660,10 +682,10 @@
             });
             return;
         }
-        if (event.target.closest("[data-jd-modal-close]")) closeModal();
+        if (event.target.closest("[data-jd-modal-close]")) requestClose();
     });
 
     document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && !modal.hidden) closeModal();
+        if (event.key === "Escape" && !modal.hidden && !document.querySelector(".jd-sw-del-overlay")) requestClose();
     });
 })();

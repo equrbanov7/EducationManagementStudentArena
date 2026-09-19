@@ -75187,3 +75187,15 @@ msgid ""
 msgstr ""
 "Bina, grubun programına göre «%(building)s» olarak seçildi — "
 "değiştirebilirsiniz; odalar binaya göre süzülür. Oda zorunlu değildir."
+
+msgctxt "registrar.journal"
+msgid "Dəyişikliklər yadda saxlanmayıb"
+msgstr "Değişiklikler kaydedilmedi"
+
+msgctxt "registrar.journal"
+msgid "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar itəcək."
+msgstr "Formda uygulanmamış değişiklikler var. Kapatırsanız kaybolacak."
+
+msgctxt "registrar.journal"
+msgid "Bağla, itsin"
+msgstr "Kapat, vazgeç"
