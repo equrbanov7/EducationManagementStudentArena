@@ -76039,3 +76039,27 @@ msgid "Sorğu kənar şəbəkədən gəldi; bu bölmə üçün daxili zona təl�
 msgstr ""
 "The request came from an outside network; this section requires the internal"
 " zone."
+
+msgctxt "accounts.syllabus"
+msgid "əlavə"
+msgstr "extra"
+
+msgctxt "accounts.syllabus"
+msgid "Sətir əlavə et"
+msgstr "Add a row"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Sətir sayı tədris planının saatından özü hesablanır (bir dərs = 2 saat); "
+"lazım olsa əlavə sətir açın."
+msgstr ""
+"The number of rows is derived from the curriculum hours (one lesson = 2 "
+"hours); add extra rows if needed."
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Müəllim seçiləndə siyahı onun dərs yükü və açılışları ilə, seçilməyəndə "
+"qrupun tədris planı və açıq fənn açılışları ilə məhduddur."
+msgstr ""
+"With a teacher selected the list is limited to their teaching load and "
+"offerings; otherwise to the group's curriculum and open course offerings."

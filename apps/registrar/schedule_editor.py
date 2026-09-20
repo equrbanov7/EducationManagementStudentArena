@@ -62,38 +62,92 @@ def _person_name(user) -> str:
 # ── Seçici siyahıları ────────────────────────────────────────────────────────
 
 
-def allowed_subjects(*, organization, group, period) -> list[dict]:
-    """Bu qrupa cədvələ yazıla bilən FƏNLƏR (kurikulum + açıq açılışlar).
+def allowed_subjects(*, organization, group, period, instructor=None) -> list[dict]:
+    """Bu qrupa cədvələ yazıla bilən FƏNLƏR (müəllimin yükü + kurikulum + açılışlar).
 
-    Sahibin tələbi «fənn seçilsin» — amma ixtiyari kataloq fənni yox: qrupun
-    tədris planı (``CurriculumSubject``) nə deyirsə o. Plan qrupun AKTİV
-    tələbələrinin akademik qeydlərindəki kurikulumlardan gəlir; artıq açılmış
-    açılışların fənni həmişə əlavə olunur (köçürmə/əl ilə açılan hallar üçün).
+    Sahibin tələbi «fənn seçilsin» — amma ixtiyari kataloq fənni yox. Mənbələr:
+
+    * qrupun tədris planı (``CurriculumSubject``) — plan qrupun AKTİV
+      tələbələrinin akademik qeydlərindəki kurikulumlardan gəlir;
+    * artıq açılmış açılışların fənni (köçürmə/əl ilə açılan hallar üçün);
+    * kafedra TAPŞIRIĞININ bu qrupa aid sətirləri (``workload.TeachingTaskRow``,
+      ``get_model`` ilə — registrar workload-u import etmir);
+    * **müəllim seçilibsə** (sahib 2026-09-21: «müəllimi seçirəm, fənni
+      görünmür») — həmin müəllimin bu dövrdəki açılışları və dərs yükü
+      bölgüsü (``workload.TeacherAssignment``).  Müəllimin fənləri qrup
+      siyahısı ilə kəsişirsə kəsişmə, kəsişmirsə müəllimin öz fənləri
+      göstərilir; müəllimin heç bir fənni yoxdursa qrup siyahısı qalır.
+
+    Qrup siyahısı tamamilə boşdursa (ATİS köçürməsində akademik qeydin
+    kurikulumu olmaya bilər) dövrün bütün açılışlarının fənləri, o da yoxdursa
+    kataloq göstərilir — modal boş qalmasın.
     """
-    if organization is None or group is None or period is None:
+    if organization is None or period is None:
         return []
     from apps.registrar.models import AcademicStatus, CurriculumSubject, StudentAcademicRecord
 
-    curriculum_ids = set(
-        StudentAcademicRecord.objects.filter(
-            organization=organization, group=group, status=AcademicStatus.ENROLLED
-        ).values_list("curriculum_id", flat=True)
-    )
-    subject_ids = set(
-        CourseOffering.objects.filter(organization=organization, group=group, period=period).values_list(
-            "subject_id", flat=True
+    subject_ids: set = set()
+    if group is not None:
+        curriculum_ids = set(
+            StudentAcademicRecord.objects.filter(
+                organization=organization, group=group, status=AcademicStatus.ENROLLED
+            ).values_list("curriculum_id", flat=True)
         )
-    )
-    if curriculum_ids:
         subject_ids |= set(
-            CurriculumSubject.objects.filter(organization=organization, curriculum_id__in=curriculum_ids).values_list(
+            CourseOffering.objects.filter(organization=organization, group=group, period=period).values_list(
                 "subject_id", flat=True
             )
         )
+        if curriculum_ids:
+            subject_ids |= set(
+                CurriculumSubject.objects.filter(
+                    organization=organization, curriculum_id__in=curriculum_ids
+                ).values_list("subject_id", flat=True)
+            )
+        subject_ids |= _task_subject_ids(organization, period, group=group)
+    subject_ids.discard(None)
+
+    if instructor is not None:
+        teacher_ids = set(
+            CourseOffering.objects.filter(organization=organization, period=period, instructor=instructor).values_list(
+                "subject_id", flat=True
+            )
+        )
+        teacher_ids |= _task_subject_ids(organization, period, teacher=instructor)
+        teacher_ids.discard(None)
+        if teacher_ids:
+            subject_ids = (subject_ids & teacher_ids) or teacher_ids
+
     if not subject_ids:
-        return []
-    rows = Subject.objects.filter(organization=organization, pk__in=subject_ids).order_by("code")[:CHOICE_LIMIT]
+        subject_ids = set(
+            CourseOffering.objects.filter(organization=organization, period=period).values_list("subject_id", flat=True)
+        )
+        subject_ids.discard(None)
+    if subject_ids:
+        rows = Subject.objects.filter(organization=organization, pk__in=subject_ids).order_by("code")[:CHOICE_LIMIT]
+    else:
+        rows = Subject.objects.filter(organization=organization).order_by("code")[:CHOICE_LIMIT]
     return [{"id": str(row.pk), "code": row.code or "", "name": row.name or ""} for row in rows]
+
+
+def _task_subject_ids(organization, period, *, group=None, teacher=None) -> set:
+    """Kafedra tapşırığından fənn id-ləri — qrupa görə və/və ya müəllimə görə."""
+    try:
+        TaskRow = django_apps.get_model("workload", "TeachingTaskRow")
+        Assignment = django_apps.get_model("workload", "TeacherAssignment")
+    except LookupError:
+        return set()
+    if teacher is not None:
+        rows = Assignment.objects.filter(
+            organization=organization, teacher=teacher, row__period=period, row__subject__isnull=False
+        )
+        if group is not None:
+            rows = rows.filter(row__groups=group)
+        return set(rows.values_list("row__subject_id", flat=True))
+    if group is None:
+        return set()
+    rows = TaskRow.objects.filter(organization=organization, period=period, groups=group, subject__isnull=False)
+    return set(rows.values_list("subject_id", flat=True))
 
 
 def teacher_choices(organization) -> list[dict]:
