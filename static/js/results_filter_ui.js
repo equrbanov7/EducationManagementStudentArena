@@ -1,6 +1,21 @@
 (function () {
+    // Sahib 2026-09-21: filtr dəyişəndə nəticə kartı spinner əvəzinə SKELETON göstərir
+    // (`[data-results-skeleton-target]` — səhifə yenidən yüklənənə qədər).
+    function showSkeleton() {
+        var target = document.querySelector("[data-results-skeleton-target]");
+        if (!target) return;
+        var rows = "";
+        for (var i = 0; i < 6; i += 1) {
+            rows += '<div class="ems-skelrow"><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div>' +
+                '<div class="skeleton-line skeleton-line--sm"></div><div class="skeleton-line skeleton-line--sm"></div></div>';
+        }
+        target.setAttribute("aria-busy", "true");
+        target.innerHTML = '<div class="skeleton ems-results-skeleton" aria-hidden="true">' + rows + "</div>";
+    }
+
     function submitForm(form) {
         if (!form) return;
+        showSkeleton();
         if (typeof form.requestSubmit === "function") {
             form.requestSubmit();
         } else {

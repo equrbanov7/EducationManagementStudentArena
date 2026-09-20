@@ -4,7 +4,11 @@
 
     function getLoadingMarkup(ctx) {
         var loadingText = ctx.i18n.loadingForm || "Loading...";
-        return '<div class="create-exam-modal-loading">' + loadingText + "</div>";
+        return '<div class="create-exam-modal-loading skeleton" aria-busy="true" role="status">' +
+            '<span class="visually-hidden">' + loadingText + "</span>" +
+            '<div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div><div class="skeleton-line"></div>' +
+            '<div class="skeleton-line skeleton-line--sm"></div><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div>' +
+            "</div>";
     }
 
     function getErrorMarkup(ctx) {
