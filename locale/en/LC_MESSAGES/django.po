@@ -75769,3 +75769,39 @@ msgstr ""
 "independent work 10, seminar/laboratory average 10 (semester 50) and final "
 "exam 50 — the teacher does not change it. The activity type comes from the "
 "teaching load."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Suallar yoxlanılır, önizləmə hazırlanır…"
+msgstr "Checking questions, preparing the preview…"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Göndərişi təsdiqləyin"
+msgstr "Confirm the submission"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Bəli, göndər"
+msgstr "Yes, send"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Geri qayıt"
+msgstr "Go back"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."
+msgstr "No question is selected — pick questions from the list first."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Seçilmiş sual"
+msgstr "Selected questions"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xətalı sual"
+msgstr "Questions with errors"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xəbərdarlıqlı sual"
+msgstr "Questions with warnings"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
+msgstr "Fill in the required fields — the missing field is highlighted."

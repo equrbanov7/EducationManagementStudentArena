@@ -75439,3 +75439,39 @@ msgstr ""
 "Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst "
 "iş 10, seminar/laboratoriya ədədi ortası 10 (semestr 50) və yekun imtahan 50"
 " — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Suallar yoxlanılır, önizləmə hazırlanır…"
+msgstr "Suallar yoxlanılır, önizləmə hazırlanır…"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Göndərişi təsdiqləyin"
+msgstr "Göndərişi təsdiqləyin"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Bəli, göndər"
+msgstr "Bəli, göndər"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Geri qayıt"
+msgstr "Geri qayıt"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."
+msgstr "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Seçilmiş sual"
+msgstr "Seçilmiş sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xətalı sual"
+msgstr "Xətalı sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xəbərdarlıqlı sual"
+msgstr "Xəbərdarlıqlı sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
+msgstr "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
