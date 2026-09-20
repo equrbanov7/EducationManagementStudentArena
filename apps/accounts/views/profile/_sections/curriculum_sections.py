@@ -348,6 +348,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     }
     section["dialog_hidden"] = [{"name": "action"}, {"name": "id"}]
     section["reason_hidden"] = [{"name": "action"}, {"name": "id"}]
+    # Alt qruplara bölmə (sahib 2026-09-20): bölgü JSON-u JS-dən gizli sahəyə yazılır.
+    section["split_hidden"] = [{"name": "action", "value": "split_group"}, {"name": "id"}, {"name": "subgroups"}]
     # «Tələbə əlavə et» — seçilmiş qeyd id-ləri JS-in doldurduğu gizli `record_ids`
     # sahəsindən gedir (bax `_group_add_students_fields.html`).
     section["add_students_hidden"] = [{"name": "action"}, {"name": "id"}, {"name": "record_ids"}]
