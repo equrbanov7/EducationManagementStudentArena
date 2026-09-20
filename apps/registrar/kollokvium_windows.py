@@ -20,9 +20,25 @@ import datetime
 
 from django.apps import apps as django_apps
 
+_WINDOWS_MEMO_ATTR = "_kollokvium_windows_memo"
+
+
+def preload_windows(offering):
+    """YALNIZ oxu yolu (journal_detail GET): dövrün bütün K-pəncərələrini bir sorğu ilə
+    oxuyub offering obyektinə yapışdırır — `window_for` K1/K2/K3 üçün 3 sorğu əvəzinə
+    memo-dan qayıdır. Yazı yolları memo qoymur (canlı sorğu qalır)."""
+    KollokviumWindow = django_apps.get_model("registrar", "KollokviumWindow")
+    rows = KollokviumWindow.objects.filter(
+        organization_id=offering.organization_id, period_id=offering.period_id
+    ).prefetch_related("extra_grants")
+    setattr(offering, _WINDOWS_MEMO_ATTR, {row.k_index: row for row in rows})
+
 
 def window_for(offering, k_index):
     """(offering.organization, offering.period, k_index) üçün pəncərə və ya None."""
+    memo = getattr(offering, _WINDOWS_MEMO_ATTR, None)
+    if memo is not None:
+        return memo.get(k_index)
     KollokviumWindow = django_apps.get_model("registrar", "KollokviumWindow")
     return (
         KollokviumWindow.objects.filter(

@@ -40,7 +40,9 @@ from .offerings import (  # noqa: F401
     STATE_REVISION,
     approved_version_for,
     offering_syllabus_state,
+    preload_syllabus_for_offering,
     syllabus_for_offering,
+    syllabus_for_offering_obj,
 )
 from .queries import (  # noqa: F401
     QUEUE_SORT_KEYS,
@@ -125,7 +127,9 @@ __all__ = [
     "structural_changes",
     "status_counts",
     "submit",
+    "preload_syllabus_for_offering",
     "syllabus_for_offering",
+    "syllabus_for_offering_obj",
     "version_diff",
     "version_timeline",
     "withdraw",

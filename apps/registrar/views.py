@@ -41,7 +41,7 @@ from .handover import is_handover_observer as _is_handover_observer  # noqa: E40
 from .journal_access import can_edit_journal as _can_edit_journal  # noqa: E402
 from .journal_access import can_observe_journal as _can_observe_journal  # noqa: E402
 from .journal_access import is_direct_editor as _is_direct_editor  # noqa: E402
-from .journal_access import offering_or_404 as _offering_or_404  # noqa: E402
+from .journal_read_memo import offering_for_detail as _offering_for_detail  # noqa: E402
 
 
 @login_required
@@ -71,7 +71,7 @@ def journal_detail(request, offering_id):
     TƏSDİQ ZƏNCİRİ YOXDUR (sahibin qərarı, 2026-08): müəllim balı yazır və bitir.
     Jurnalı semestr sonunda RİM toplu BAĞLAYIR — bax
     :mod:`apps.registrar.journal_close`."""
-    offering = _offering_or_404(request, offering_id)
+    offering = _offering_for_detail(request, offering_id)
     from apps.registrar import corrections as corrections_service
     from apps.registrar import guest_roster
 
@@ -282,7 +282,7 @@ def rubric_grade_view(request, offering_id, component_id):
     from apps.registrar import rubrics as rubrics_service
     from apps.registrar.models import AssessmentComponent
 
-    offering = _offering_or_404(request, offering_id)
+    offering = _offering_for_detail(request, offering_id)
     # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
     if not _is_direct_editor(request.user, offering):
         raise Http404
