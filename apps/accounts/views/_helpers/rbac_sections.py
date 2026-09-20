@@ -30,6 +30,28 @@ def _effective_permissions(user, organization) -> list:
     return list(permissions)
 
 
+def _is_rim_head(user, organization) -> bool:
+    """Aktiv təşkilatda AKTİV `ikt_rehber` üzvlüyü varmı (rol adı normallaşdırılır)."""
+    if user is None or organization is None or not getattr(user, "is_authenticated", False):
+        return False
+    from apps.organizations.models import Membership
+
+    from ...models import ProfileRole
+    from .rbac_memberships import _bound_active_org_memberships
+
+    # Middleware-in bağladığı üzvlük siyahısı varsa əlavə SELECT getmir
+    # (bax test_rbac_permission_cache — kabinet qabığı sorğu büdcəlidir).
+    memberships = _bound_active_org_memberships(user, getattr(organization, "pk", None))
+    if memberships is None:
+        memberships = Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
+            "role"
+        )
+    return any(
+        ProfileRole.normalize_membership_role_name(getattr(m.role, "name", "") or "") == ProfileRole.IKT_REHBER
+        for m in memberships
+    )
+
+
 def apply_permission_section_gates(
     user,
     organization,
@@ -54,7 +76,12 @@ def apply_permission_section_gates(
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
     from core.permissions import has_permission
 
-    privileged = bool(is_superadmin or is_owner)
+    # RİM rəhbəri (`ikt_rehber`) — SAHİBİN QƏRARI (2026-09-14 «hər şeyin icazəsi»,
+    # 2026-09-21 «hər roldakı bütün özəllikləri görsün»): bölmə görünürlüyü üçün
+    # sahib/superadmin kimi privileged sayılır. Rolun DB icazə siyahısı
+    # tenantda əl ilə daralsa belə («Qruplar» bölməsi itmişdi) menyu itmir;
+    # faktiki əməllər hər modulun öz servis qatında yenidən yoxlanılır.
+    privileged = bool(is_superadmin or is_owner or _is_rim_head(user, organization))
 
     # Təşkilat konteksti yoxdursa icazə həll oluna bilmir — yalnız superadmin/sahib.
     permissions: list = []
