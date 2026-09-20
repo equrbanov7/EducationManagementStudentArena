@@ -99,3 +99,9 @@ class BackButtonNeverSticksTest(_UnitFixture):
         self.assertTrue(response.context["profile_return_url"].startswith(detail))
         html = response.content.decode()
         self.assertIn(f'href="{detail}?', html.split('class="ter-back-btn"')[0][-400:])
+        # Kabinet `return_to`-su axının başlanğıcıdır — nəticələrdə «Geri» yenə detala aparır.
+        response = client.get(results, {"from_section": "my-exams", "return_to": "/accounts/profile/?section=my-exams"})
+        self.assertTrue(response.context["profile_return_url"].startswith(detail))
+        # Xarici (imtahan olmayan, kabinet olmayan) səhifə isə hörmətlə saxlanır.
+        response = client.get(results, {"return_to": "/courses/"})
+        self.assertEqual(response.context["profile_return_url"], "/courses/")
