@@ -34,6 +34,7 @@ from core.rls import bypass_rls
 
 from ..identity import request_user_login_blocked, user_access_is_login_blocked
 from ..models import ProfileRole
+from .person_search import person_q
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
 # dəyişir və servis məntiqini oxumağı çətinləşdirirdi).
@@ -72,16 +73,36 @@ UNIT_SCOPED_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head"}
 #: yəni bu üç rol SƏSSİZCƏ tam view-as alırdı və org_admin-i (80) impersonasiya
 #: edə bilirdi. Səviyyə iyerarxiyası hədəf seçimi üçündür, səlahiyyət
 #: qapısı üçün deyil.
+#:
+#: SAHİBİN QƏRARI (2026-09-21): «əməkdaşlar və adminlər daxil olanda "istifadəçi
+#: profilinə bax" boş göstərir» — rektor/prorektor xəritədə yox idi (403 → boş
+#: siyahı); «RİM rəhbərinin hər roldakı bütün özəllikləri görmə özəlliyi olsun» —
+#: `ikt_rehber` LIMITED-dən FULL-a keçdi (2026-07-31 auditindəki LIMITED qərarı
+#: sahib tərəfindən açıq şəkildə ləğv edildi; iyerarxiya filtri qalır — 95-dən
+#: yuxarı yalnız rektordur). İnzibati vəzifəlilər (tədris şöbəsi, inzibati şöbə
+#: müdiri, tələbə xidmətləri, proqram koordinatoru, RİM əməkdaşı, qəyyum, kafedra
+#: müdiri) READONLY alır; imtahan mərkəzi işçisi rəhbər kimi LIMITED-dir.
 ROLE_MODE_MAP = {
     ProfileRole.ORG_OWNER: MODE_FULL,
     ProfileRole.ORG_ADMIN: MODE_FULL,
+    "rector": MODE_FULL,
+    "vice_rector": MODE_FULL,
+    ProfileRole.IKT_REHBER: MODE_FULL,
     ProfileRole.EXAM_CENTER: MODE_LIMITED,
     ProfileRole.EXAM_CENTER_HEAD: MODE_LIMITED,
-    ProfileRole.IKT_REHBER: MODE_LIMITED,
+    ProfileRole.EXAM_CENTER_STAFF: MODE_LIMITED,
     "tutor": MODE_READONLY,
     "dean": MODE_READONLY,
     "vice_dean": MODE_READONLY,
     "department_head": MODE_READONLY,
+    "chair_head": MODE_READONLY,
+    "teaching_office_head": MODE_READONLY,
+    "teaching_office_staff": MODE_READONLY,
+    "admin_unit_head": MODE_READONLY,
+    "student_services": MODE_READONLY,
+    "program_coordinator": MODE_READONLY,
+    "trustee": MODE_READONLY,
+    ProfileRole.RIM_STAFF: MODE_READONLY,
     ProfileRole.HR: MODE_READONLY,
 }
 
@@ -104,14 +125,28 @@ ROLE_FILTER_MAP = {
     },
     "student": {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
     "admin": {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN, "rector", "vice_rector"},
+    # «Əməkdaşlar» = inzibati vəzifəlilər də daxil (sahib 2026-09-21): tədris
+    # şöbəsi, RİM, imtahan mərkəzi, inzibati şöbə, tələbə xidmətləri, dekanlıq,
+    # kafedra müdiri, koordinator, qəyyum, HR, tyutor, adi üzv.
     "staff": {
         ProfileRole.HR,
         ProfileRole.MEMBER,
-        "exam_center",
+        ProfileRole.IKT_REHBER,
+        ProfileRole.RIM_STAFF,
+        ProfileRole.EXAM_CENTER,
+        ProfileRole.EXAM_CENTER_HEAD,
+        ProfileRole.EXAM_CENTER_STAFF,
         "tutor",
         "dean",
         "vice_dean",
         "department_head",
+        "chair_head",
+        "teaching_office_head",
+        "teaching_office_staff",
+        "admin_unit_head",
+        "student_services",
+        "program_coordinator",
+        "trustee",
     },
 }
 
@@ -321,15 +356,12 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     if mode == MODE_LIMITED:
         users = users.exclude(pk__in=_admin_equivalent_user_ids(organization))
 
+    # Tokenləşmiş + diakritikaya dözümlü («Ad Soyad», «Huseynov»→«Hüseynov»);
+    # bax `services/person_search.py`. Qrup nömrəsi tam sətirlə ayrıca yoxlanır.
     q = (q or "").strip()[:120]
     if q:
-        users = users.filter(
-            Q(username__icontains=q)
-            | Q(first_name__icontains=q)
-            | Q(last_name__icontains=q)
-            | Q(email__icontains=q)
-            | Q(profile__student_group_number__icontains=q)
-        )
+        name_q = person_q(q, ("username", "first_name", "last_name", "email"))
+        users = users.filter(name_q | Q(profile__student_group_number__icontains=q))
 
     role_filter = (role_filter or "").strip()
     role_names = ROLE_FILTER_MAP.get(role_filter)
