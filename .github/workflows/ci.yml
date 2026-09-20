@@ -75,28 +75,35 @@ jobs:
       python-version: "3.11"
 
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
-  # 6 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı), coverage yox: kritik yol 38 → ~8 dəq.
+  # 8 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı), coverage yox.
   unit-tests-312:
     needs: lint
     strategy:
       fail-fast: false
       matrix:
-        shard: ["1", "2", "3", "4", "5", "6"]
+        shard: ["1", "2", "3", "4", "5", "6", "7", "8"]
     uses: ./.github/workflows/_unit-tests.yml
     with:
       python-version: "3.12"
       shard: ${{ matrix.shard }}
-      shards: "6"
+      shards: "8"
       coverage: false
 
   # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
   # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
   # tenant izolyasiyasının transaction-pooling rejimində qorunmasını yoxlayır.
+  # 2026-09-21: 2 shard (8–11 dəq → ~5 dəq); 3.12 — prod image ilə eyni.
   rls-txn-pool:
     needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ["1", "2"]
     uses: ./.github/workflows/_rls-txn-pool.yml
     with:
-      python-version: "3.11"
+      python-version: "3.12"
+      shard: ${{ matrix.shard }}
+      shards: "2"
 
   # ── 3. Build Check (collectstatic + migration check) ───────────────────
   build:
