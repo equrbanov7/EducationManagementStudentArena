@@ -105,6 +105,16 @@ else:
     # SECURE_SSL_REDIRECT açıqdır — sorğular HTTPS kimi getməlidir (əks halda hər şey 301).
     client = Client(secure=True)
     client.force_login(user)
+    # İnzibati/superadmin hesab admin 2FA qapısına (/manage/verify-otp/) 302 alır — zond
+    # yalnız OXU GET üçündür, sessiyada təsdiq bayrağını qoyuruq (parol/OTP yoxdur).
+    try:
+        from core.admin_auth import ADMIN_2FA_VERIFIED_USER_SESSION_KEY
+
+        session = client.session
+        session[ADMIN_2FA_VERIFIED_USER_SESSION_KEY] = str(user.pk)
+        session.save()
+    except Exception as exc:  # noqa: BLE001
+        print("2FA bayrağı qoyulmadı:", exc)
     pages = [
         reverse("accounts:profile"),
         reverse("accounts:profile") + "?section=my-exams",
