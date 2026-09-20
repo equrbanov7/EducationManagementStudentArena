@@ -72,10 +72,34 @@ except Exception as exc:  # noqa: BLE001
 print()
 print("== Tətbiq (superadmin sessiyası, GET, sorğu sayı / ms)")
 User = get_user_model()
-user = User.objects.filter(is_superuser=True, is_active=True).order_by("id").first()
+
+
+def _probe_user():
+    """Zond hesabı: superadmin çox vaxt 2FA/parol qapısına 302 alır — əvvəl RİM rəhbəri,
+    sonra sahib, sonra superadmin (hamısı yalnız OXU GET üçün, parolsuz force_login)."""
+    from apps.organizations.models import Membership
+
+    for role_name in ("ikt_rehber", "rector", "teaching_office_head"):
+        member = (
+            Membership.objects.filter(is_active=True, role__name=role_name, user__is_active=True)
+            .select_related("user")
+            .order_by("user_id")
+            .first()
+        )
+        if member is not None:
+            return member.user, role_name
+    owner = User.objects.filter(owned_organizations__isnull=False, is_active=True).order_by("id").first()
+    if owner is not None:
+        return owner, "org_owner"
+    admin = User.objects.filter(is_superuser=True, is_active=True).order_by("id").first()
+    return admin, "superuser"
+
+
+user, user_kind = _probe_user()
 if user is None:
-    print("aktiv superadmin yoxdur — tətbiq zondu ötürüldü")
+    print("zond üçün uyğun aktiv hesab yoxdur — tətbiq zondu ötürüldü")
 else:
+    print(f"zond hesabı: {user_kind} (#{user.pk})")
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = ["*"]
     # SECURE_SSL_REDIRECT açıqdır — sorğular HTTPS kimi getməlidir (əks halda hər şey 301).
@@ -116,11 +140,12 @@ else:
         try:
             resp = client.get(url, HTTP_HOST=HOST, follow=False, secure=True)
             status = resp.status_code
+            location = resp.headers.get("Location", "") if status in (301, 302) else ""
         except Exception as exc:  # noqa: BLE001
-            status = f"ERR {type(exc).__name__}"
+            status, location = f"ERR {type(exc).__name__}", ""
         ms = int((time.time() - t0) * 1000)
         n = len(connection.queries)
-        print(f"{str(status):>6} {n:>4} {ms:>6}  {url}")
+        print(f"{str(status):>6} {n:>4} {ms:>6}  {url}" + (f"  → {location[:80]}" if location else ""))
         if n > 80 or ms > 1500:
             slow.append((url, n, ms))
     print()
