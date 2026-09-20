@@ -68,3 +68,40 @@ class ResultsFilterLayoutTest(_UnitFixture):
         filters_close = html.index("</form>", filters_form)
         grant_form = html.index("ter-group-grant-form")
         self.assertLess(filters_close, grant_form)
+
+
+class BackButtonNeverSticksTest(_UnitFixture):
+    """«Geri» həmişə əvvəlki krambdır — referer və imtahan-daxili `return_to` ilişməsi yoxdur."""
+
+    def test_detail_back_ignores_self_referer_and_internal_return_to(self):
+        exam = self._exam()
+        client = _login(self.teacher, self.org)
+        detail = reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+        response = client.get(detail, HTTP_REFERER=f"http://testserver{detail}")
+        self.assertIn("section=my-exams", response.context["profile_return_url"])
+        self.assertNotEqual(response.context["profile_return_url"].split("?")[0], detail)
+        results = reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug})
+        response = client.get(detail, {"return_to": results})
+        self.assertIn("section=my-exams", response.context["profile_return_url"])
+        # Kabinetdən kənar, imtahan olmayan səhifə isə hörmətlə saxlanır.
+        response = client.get(detail, {"return_to": "/accounts/profile/?section=courses"})
+        self.assertEqual(response.context["profile_return_url"], "/accounts/profile/?section=courses")
+
+    def test_results_back_is_exam_detail_even_after_filter_reloads(self):
+        exam = self._exam()
+        client = _login(self.teacher, self.org)
+        results = reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug})
+        detail = reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug})
+        response = client.get(
+            results, {"status": "submitted", "return_to": results}, HTTP_REFERER=f"http://testserver{results}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["profile_return_url"].startswith(detail))
+        html = response.content.decode()
+        self.assertIn(f'href="{detail}?', html.split('class="ter-back-btn"')[0][-400:])
+        # Kabinet `return_to`-su axının başlanğıcıdır — nəticələrdə «Geri» yenə detala aparır.
+        response = client.get(results, {"from_section": "my-exams", "return_to": "/accounts/profile/?section=my-exams"})
+        self.assertTrue(response.context["profile_return_url"].startswith(detail))
+        # Xarici (imtahan olmayan, kabinet olmayan) səhifə isə hörmətlə saxlanır.
+        response = client.get(results, {"return_to": "/courses/"})
+        self.assertEqual(response.context["profile_return_url"], "/courses/")
