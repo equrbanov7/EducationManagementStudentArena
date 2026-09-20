@@ -23,10 +23,18 @@ on:
         description: "Python version to use"
         type: string
         default: "3.11"
+      shard:
+        description: "Bu job-un shard nömrəsi (1..shards)"
+        type: string
+        default: "1"
+      shards:
+        description: "Shard sayı (1 = bölmə yoxdur)"
+        type: string
+        default: "1"
 
 jobs:
   rls-txn-pool:
-    name: 🛡️ RLS -m postgres (RLS_TRANSACTION_SCOPED=True)
+    name: 🛡️ RLS -m postgres (RLS_TRANSACTION_SCOPED=True${{ inputs.shards != '1' && format(' · shard {0}/{1}', inputs.shard, inputs.shards) || '' }})
     runs-on: ubuntu-latest
 
     env:
@@ -88,17 +96,7 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           pip install -r requirements/test.txt
 
-      - name: 🗃️ Run migrations
-        env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key-for-ci-only-not-production
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: |
-          echo "::group::🗃️ Database Migrations"
-          python manage.py migrate --verbosity=2
-          echo "::endgroup::"
+      # 2026-09-21: ayrıca `migrate` addımı silindi — pytest-django test bazasını özü qurur.
 
       - name: 🛡️ Run RLS + postgres tests under RLS_TRANSACTION_SCOPED=True
         env:
@@ -114,7 +112,12 @@ jobs:
           # production-a keçirilməsi BLOKLANIR.
           # pytest-xdist: _unit-tests.yml ilə eyni naxış (hər worker öz DB-si,
           # probe rolları worker-suffiksli — bax apps/*/tests/*_postgres.py).
+          extra=()
+          if [ "${{ inputs.shards }}" != "1" ]; then
+            extra+=(--splits "${{ inputs.shards }}" --group "${{ inputs.shard }}" --splitting-algorithm least_duration)
+          fi
           pytest \
+            "${extra[@]}" \
             -n 4 --dist loadfile \
             --ds=config.settings.test \
             --ignore=tests/e2e \
