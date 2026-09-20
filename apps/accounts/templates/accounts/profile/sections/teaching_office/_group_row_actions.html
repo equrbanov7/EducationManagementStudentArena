@@ -39,6 +39,18 @@ yazır (səbəb məcburi) — bax `_group_add_students_fields.html`.{% endcommen
     <i class="fas fa-user-plus" aria-hidden="true"></i>
 </button>
 {% endif %}
+{% if groups_registry_section.can_manage and row.data.is_active and row.data.students %}
+{% comment %}Sahib 2026-09-20: ana qrupu alt qruplara bölmə (bax _group_split_fields.html).{% endcomment %}
+<button type="button" class="ems-btn ems-btn--sm ems-btn--icon tof-row-split"
+        data-tof-split-open
+        data-students-url="{{ row.data.students_url }}"
+        data-group-id="{{ row.data.id }}"
+        data-group-name="{{ row.data.name }}"
+        title="{% trans 'Alt qruplara böl' context 'accounts.groups' %}"
+        aria-label="{% blocktrans context 'accounts.groups' with name=row.data.name %}{{ name }} qrupunu alt qruplara böl{% endblocktrans %}">
+    <i class="fas fa-object-ungroup" aria-hidden="true"></i>
+</button>
+{% endif %}
 <a class="ems-btn ems-btn--sm ems-btn--icon" href="{{ row.data.plan_url }}" download
    title="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}"
    aria-label="{% trans 'Fərdi tədris planı (DOCX) — bütöv qrup' context 'accounts.groups' %}">

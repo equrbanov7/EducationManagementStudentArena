@@ -75805,3 +75805,135 @@ msgstr "Questions with warnings"
 msgctxt "exams.template.test_question_bank"
 msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
 msgstr "Fill in the required fields — the missing field is highlighted."
+
+msgctxt "accounts.groups"
+msgid "Alt qruplara böl"
+msgstr "Split into subgroups"
+
+msgctxt "accounts.groups"
+msgid "%(name)s qrupunu alt qruplara böl"
+msgstr "Split group %(name)s into subgroups"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupu alt qruplara böl"
+msgstr "Split the parent group into subgroups"
+
+msgctxt "accounts.groups"
+msgid ""
+"Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları "
+"adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi "
+"xidmətlə yazılır — tarixçə silinmir."
+msgstr ""
+"Students are first split evenly; you can move them between lists and name "
+"the subgroups. Unselected students stay in the parent group. Every move is "
+"written by the official transfer service — history is kept."
+
+msgctxt "accounts.groups"
+msgid "Alt qrupları yarat"
+msgstr "Create subgroups"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupda qalır"
+msgstr "Stays in the parent group"
+
+msgctxt "accounts.groups"
+msgid "tələbə"
+msgstr "students"
+
+msgctxt "accounts.groups"
+msgid "Seçilmişləri bura keçir"
+msgstr "Move selected here"
+
+msgctxt "accounts.groups"
+msgid "Hamısını seç"
+msgstr "Select all"
+
+msgctxt "accounts.groups"
+msgid "Seçimi ləğv et"
+msgstr "Clear selection"
+
+msgctxt "accounts.groups"
+msgid "Alt qrupun adı"
+msgstr "Subgroup name"
+
+msgctxt "accounts.groups"
+msgid "Tələbə siyahısı yüklənmədi — yenidən cəhd edin."
+msgstr "Student list failed to load — try again."
+
+msgctxt "accounts.groups"
+msgid "Ən azı iki alt qrupda tələbə olmalıdır."
+msgstr "At least two subgroups must contain students."
+
+msgctxt "accounts.groups"
+msgid "Hər alt qrupun adı olmalıdır."
+msgstr "Every subgroup needs a name."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup sayı"
+msgstr "Number of subgroups"
+
+msgctxt "accounts.groups"
+msgid "Bərabər böl"
+msgstr "Split evenly"
+
+msgctxt "accounts.groups"
+msgid ""
+"Sütunlarda tələbəni işarələyib başqa sütunun «Seçilmişləri bura keçir» "
+"düyməsi ilə keçirin. Ana qrupda qalan tələbələr köçürülmür."
+msgstr ""
+"Tick students in a column and move them with another column's “Move selected"
+" here” button. Students left in the parent group are not transferred."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü"
+msgstr "Subgroup split"
+
+msgctxt "accounts.groups"
+msgid "Məs.: laboratoriya dərsləri üçün alt qruplara bölünür"
+msgstr "e.g. split into subgroups for laboratory classes"
+
+msgctxt "accounts.groups"
+msgid "Səbəb hər tələbənin köçürmə qeydinə və audit jurnalına yazılır."
+msgstr ""
+"The reason is written to each student's transfer record and the audit log."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü oxunmadı — səhifəni yeniləyib yenidən cəhd edin."
+msgstr ""
+"The subgroup split could not be read — refresh the page and try again."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup adları bir-birindən fərqli olmalıdır."
+msgstr "Subgroup names must differ from each other."
+
+msgctxt "accounts.groups"
+msgid "Bir tələbə yalnız bir alt qrupda ola bilər."
+msgstr "A student can be in only one subgroup."
+
+msgctxt "accounts.groups"
+msgid "Ən azı 2 alt qrup olmalıdır."
+msgstr "At least 2 subgroups are required."
+
+msgctxt "accounts.groups"
+msgid "Ən çoxu 6 alt qrup yaratmaq olar."
+msgstr "At most 6 subgroups can be created."
+
+msgctxt "accounts.groups"
+msgid "Arxivlənmiş qrup bölünmür."
+msgstr "An archived group cannot be split."
+
+msgctxt "accounts.groups"
+msgid "«%(name)s» adlı qrup artıq var — başqa ad seçin."
+msgstr "A group named “%(name)s” already exists — choose another name."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə alt qrupa yerləşdirilməyib."
+msgstr "No student has been placed in a subgroup."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələrdən bəziləri bu qrupun aktiv tələbəsi deyil — siyahını "
+"yeniləyin."
+msgstr ""
+"Some selected students are not active students of this group — refresh the "
+"list."

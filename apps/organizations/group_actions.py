@@ -418,7 +418,15 @@ _HANDLERS = {
     "archive": lambda request, organization, scope: _archive(request, organization, scope, restore=False),
     "restore": lambda request, organization, scope: _archive(request, organization, scope, restore=True),
     "promote": lambda request, organization, scope: _promote(request, organization, scope),
+    # Ana qrupu alt qruplara bölmə (sahib 2026-09-20) — ayrı modul (ölçü büdcəsi).
+    "split_group": lambda request, organization, scope: _split_group(request, organization, scope),
 }
+
+
+def _split_group(request, organization, scope):
+    from .group_split import split_group
+
+    return split_group(request, organization, scope)
 
 
 @login_required
