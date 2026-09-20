@@ -1,0 +1,90 @@
+name: 🛡️ Prod Sərtləşdirmə (audit qalıqları)
+
+# Sahib 2026-09-21: «qalanları da et». Serverdə (self-hosted runner) üç dəyişiklik:
+#   1. .env-də ADMIN_ALLOWED_IPS boşdursa LAN CIDR-i yazılır (admin paneli yalnız
+#      daxili şəbəkədən) — dəyər input ilə dəyişdirilə bilər;
+#   2. app replikaları yenidən başladılır ki, yeni .env dəyəri oxunsun;
+#   3. Postgres-də pg_stat_statements extension-ı yaradılır (compose artıq
+#      shared_preload_libraries ilə gəlir — deploy postgres-i yenidən qaldırıb).
+# Hər addım idempotentdir; .env-in ehtiyat nüsxəsi .env.bak-<tarix> kimi saxlanır.
+on:
+  workflow_dispatch:
+    inputs:
+      admin_allowed_ips:
+        description: "ADMIN_ALLOWED_IPS (vergüllə; CIDR dəstəklənir). Boş = mövcud dəyərə toxunma."
+        required: false
+        type: string
+        default: "10.0.0.0/19,127.0.0.1"
+      force_ips:
+        description: "Mövcud (boş olmayan) ADMIN_ALLOWED_IPS-i də üzərinə yaz"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  harden:
+    name: 🛡️ prod-harden
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      NEW_IPS: ${{ inputs.admin_allowed_ips }}
+      FORCE_IPS: ${{ inputs.force_ips && 'yes' || 'no' }}
+    steps:
+      - name: 🛡️ ADMIN_ALLOWED_IPS
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          cur=$(grep -E '^ADMIN_ALLOWED_IPS=' .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'" || true)
+          echo "cari: '${cur:-<boş>}'"
+          if [ -z "$NEW_IPS" ]; then echo "input boşdur — toxunulmur"; exit 0; fi
+          if [ -n "$cur" ] && [ "$FORCE_IPS" != "yes" ]; then echo "dəyər artıq var, force_ips işarələnməyib — toxunulmur"; exit 0; fi
+          cp -p .env ".env.bak-$(date +%Y%m%d-%H%M%S)"
+          if grep -qE '^ADMIN_ALLOWED_IPS=' .env; then
+            sed -i "s#^ADMIN_ALLOWED_IPS=.*#ADMIN_ALLOWED_IPS=${NEW_IPS}#" .env
+          else
+            printf '\nADMIN_ALLOWED_IPS=%s\n' "$NEW_IPS" >> .env
+          fi
+          chmod 600 .env
+          echo "yazıldı: ADMIN_ALLOWED_IPS=$NEW_IPS"
+          echo "changed=1" >> "$GITHUB_ENV"
+
+      - name: 🔁 app replikalarını yenidən başlat (.env oxunsun)
+        if: env.changed == '1'
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate app celery_worker celery_worker_heavy celery_beat
+          for i in $(seq 1 30); do
+            n=$(docker compose -f docker-compose.prod.yml ps app --format '{{.Health}}' | grep -c healthy || true)
+            [ "$n" -ge 1 ] && break; sleep 5
+          done
+          docker compose -f docker-compose.prod.yml ps app --format 'table {{.Name}}\t{{.Status}}'
+
+      - name: 📊 pg_stat_statements
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          dotenv() { grep -E "^$1=" .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"; }
+          DB=$(dotenv POSTGRES_DB); U=$(dotenv POSTGRES_USER)
+          if ! docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -tAc "SHOW shared_preload_libraries" | grep -q pg_stat_statements; then
+            echo "::warning::shared_preload_libraries-də pg_stat_statements yoxdur — postgres hələ köhnə compose ilə işləyir (növbəti deploy-dan sonra yenidən işlədin)"
+            exit 0
+          fi
+          docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements"
+          docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -tAc "SELECT count(*) FROM pg_stat_statements" | sed 's/^/pg_stat_statements sətir: /'
+
+      - name: ✅ Yoxlama
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          grep -E '^ADMIN_ALLOWED_IPS=' .env || echo "ADMIN_ALLOWED_IPS sətri yoxdur"
+          docker compose -f docker-compose.prod.yml exec -T --index 1 app python manage.py shell -c "from django.conf import settings; print('settings.ADMIN_ALLOWED_IPS =', settings.ADMIN_ALLOWED_IPS)"
