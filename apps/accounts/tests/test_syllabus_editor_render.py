@@ -63,7 +63,7 @@ FIELD_HOOKS = (
     "data-outcome",
     "data-week=",
     "data-syl-method=",
-    "data-syl-midterm",
+    "data-syl-weight=",
     "data-syl-selfwork=",
     "data-selfwork-title",
     "data-syl-slot=",

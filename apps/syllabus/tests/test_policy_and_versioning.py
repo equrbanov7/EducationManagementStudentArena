@@ -49,7 +49,14 @@ def test_policy_defaults_match_the_owner_decisions():
     assert policy.sla_days(None) == 5
     assert policy.escalation_days(None) == 10
     assert policy.second_approval_enabled(None) is False
-    assert policy.assessment_weights(None) == {"attendance": 10, "selfwork": 10, "final": 50, "flex": 30}
+    assert policy.assessment_weights(None) == {
+        "attendance": 10,
+        "midterm": 20,
+        "selfwork": 10,
+        "activity": 10,
+        "final": 50,
+        "flex": 0,
+    }
 
 
 def test_policy_reads_the_organization_override():
@@ -73,8 +80,8 @@ def test_broken_policy_values_fall_back_instead_of_raising():
 def test_flex_is_derived_so_a_policy_change_cannot_break_the_hundred():
     org = _Org({"syllabus": {"assessment": {"final": 40}}})
     weights = policy.assessment_weights(org)
-    assert weights["flex"] == 40
-    assert sum(weights[key] for key in ("attendance", "selfwork", "final", "flex")) == 100
+    assert weights["flex"] == 10
+    assert sum(weights[key] for key in ("attendance", "midterm", "selfwork", "activity", "final", "flex")) == 100
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -138,30 +145,27 @@ def _fill(version, actor, data=None):
 def test_a_new_draft_starts_with_a_valid_assessment_split(world):
     _syllabus, version, _actor_obj = _draft(world)
     data = services.section_data_map(version)[SectionKey.ASSESS.value]
-    assert data["midterm"] + data["project"] == 30
+    assert (data["midterm"], data["project"]) == (20, 10)
 
 
-def test_the_server_rejects_an_assessment_split_that_does_not_add_up(world):
+def test_the_server_replaces_any_client_split_with_the_standard(world):
+    """Sahib 2026-09-20: bal bölgüsü universitet standartıdır — kliyent dəyəri nəzərə alınmır."""
     _syllabus, version, actor = _draft(world)
-    with pytest.raises(TransitionDenied) as excinfo:
-        services.save_section(
-            version=version,
-            section_id=SectionKey.ASSESS.value,
-            data={"midterm": 90, "project": 90},
-            actor=actor,
-        )
-    assert excinfo.value.code == "assess.split_mismatch"
-
-
-def test_a_partial_assessment_payload_is_validated_against_the_stored_half(world):
-    """Kliyent yalnız `midterm` göndərəndə `project` sətirdən gəlir."""
-    _syllabus, version, actor = _draft(world)
-    with pytest.raises(TransitionDenied):
-        services.save_section(version=version, section_id=SectionKey.ASSESS.value, data={"midterm": 25}, actor=actor)
     services.save_section(
-        version=version, section_id=SectionKey.ASSESS.value, data={"midterm": 25, "project": 5}, actor=actor
+        version=version,
+        section_id=SectionKey.ASSESS.value,
+        data={"midterm": 90, "project": 90, "note": "qeyd"},
+        actor=actor,
     )
-    assert services.section_data_map(version)[SectionKey.ASSESS.value]["project"] == 5
+    data = services.section_data_map(version)[SectionKey.ASSESS.value]
+    assert (data["midterm"], data["project"], data["note"]) == (20, 10, "qeyd")
+
+
+def test_a_partial_assessment_payload_still_lands_on_the_standard(world):
+    _syllabus, version, actor = _draft(world)
+    services.save_section(version=version, section_id=SectionKey.ASSESS.value, data={"midterm": 25}, actor=actor)
+    data = services.section_data_map(version)[SectionKey.ASSESS.value]
+    assert (data["midterm"], data["project"]) == (20, 10)
 
 
 def test_an_unallocated_split_blocks_submission(world):
@@ -261,7 +265,8 @@ def test_a_minor_version_with_untouched_structure_stays_minor(world):
 @pytest.mark.parametrize(
     ("section_id", "payload"),
     [
-        (SectionKey.ASSESS.value, {"midterm": 5, "project": 25}),
+        # `assess` bal bölgüsü 2026-09-20-dən standartdır (müəllim dəyişə bilmir) —
+        # struktur eskalasiyası yalnız sərbəst iş / həftəlik plan ilə yoxlanır.
         (SectionKey.SELF.value, {"option": "1x10", "topics": [{"title": "Tək böyük sərbəst iş"}], "archived": []}),
     ],
 )
@@ -304,7 +309,7 @@ def test_a_teacher_chosen_major_is_never_renumbered(world):
     major = services.create_next_version(syllabus=syllabus, actor=actor, kind=ChangeKind.MAJOR.value)
     assert major.label == "v2.0"
     services.save_section(
-        version=major, section_id=SectionKey.ASSESS.value, data={"midterm": 5, "project": 25}, actor=actor
+        version=major, section_id=SectionKey.ASSESS.value, data={"midterm": 20, "project": 10}, actor=actor
     )
     major.refresh_from_db()
     submitted = services.submit(version=major, actor=actor)

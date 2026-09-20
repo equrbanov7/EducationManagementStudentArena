@@ -3,6 +3,9 @@
 <link rel="stylesheet" href="{% static 'exams/css/bulk_question_workbench.css' %}">
 {% comment %}W3 2026-09-14: preview-da LaTeX düsturlar KaTeX ilə (data-ems-math); DOCX şəkil/düstur inam nişanları.{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-2">
+{% comment %}2026-09-20 tema qatı (sahib): token-əsaslı görünüş, önizləmə skeletonu və
+göndərişdən əvvəl təsdiq xülasəsi — 5 səhifədə eyni (workbench_confirm.js).{% endcomment %}
+<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20260920-theme">
 {% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
@@ -43,6 +46,21 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
 
 <div class="bulk-page-wrapper"
      data-workbench-key="{{ wb_workbench_key|default:'workbench' }}"
+     data-skeleton-text="{% trans 'Suallar yoxlanılır, önizləmə hazırlanır…' context 'exams.template.test_question_bank' %}"
+     data-confirm-title="{% trans 'Göndərişi təsdiqləyin' context 'exams.template.test_question_bank' %}"
+     data-confirm-ok="{% trans 'Bəli, göndər' context 'exams.template.test_question_bank' %}"
+     data-confirm-back="{% trans 'Geri qayıt' context 'exams.template.test_question_bank' %}"
+     data-confirm-invalid="{% trans 'Məcburi sahələri doldurun — çatışmayan sahə vurğulandı.' context 'exams.template.test_question_bank' %}"
+     data-confirm-none="{% trans 'Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin.' context 'exams.template.test_question_bank' %}"
+     data-confirm-selected="{% trans 'Seçilmiş sual' context 'exams.template.test_question_bank' %}"
+     data-confirm-errors="{% trans 'Xətalı sual' context 'exams.template.test_question_bank' %}"
+     data-confirm-warnings="{% trans 'Xəbərdarlıqlı sual' context 'exams.template.test_question_bank' %}"
+     data-label-title="{% trans 'Başlıq' context 'exams.template.question_submission' %}"
+     data-label-language="{% trans 'İmtahan dili' context 'exams.template.question_submission' %}"
+     data-label-subject="{% trans 'Fənn' context 'exams.template.question_submission' %}"
+     data-label-exam-kind="{% trans 'İmtahan növü' context 'exams.template.question_submission' %}"
+     data-label-groups="{% trans 'Qrup(lar)' context 'exams.template.question_submission' %}"
+     data-label-note="{% trans 'İmtahan mərkəzinə qeyd' context 'exams.template.question_submission' %}"
      {% if wb_paste_url %}data-paste-url="{{ wb_paste_url }}"{% endif %}
      {% if parsed and request.method == 'POST' %}data-auto-scroll-preview="true"{% endif %}>
 

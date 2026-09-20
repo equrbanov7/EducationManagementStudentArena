@@ -45,6 +45,7 @@ from .movements import RULES  # noqa: F401
 from .page_contexts import _season_label as season_label  # noqa: F401
 from .plan_hours import plan_hours_for_offering  # noqa: F401
 from .plan_hours import program_for_offering  # noqa: F401
+from .plan_hours import workload_hours_for_offering  # noqa: F401
 from .semester_open import build_semester_opening  # noqa: F401
 from .semester_open import offering_counts_by_chair  # noqa: F401
 from .syllabus_pdf import render_syllabus_pdf  # noqa: F401
@@ -82,6 +83,7 @@ __all__ = [
     "movements",
     "offering_counts_by_chair",
     "plan_hours_for_offering",
+    "workload_hours_for_offering",
     "program_for_offering",
     "recompute_absence_hours",
     "render_syllabus_pdf",
