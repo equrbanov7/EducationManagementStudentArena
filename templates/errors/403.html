@@ -1,68 +1,18 @@
-{% load static i18n %}
-<!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans '403 – Giriş Qadağandır' %} | {{ site_brand_name }}</title>
-    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
-    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
-</head>
-<body class="error-page error-403">
-    <div class="error-page-shell">
-        <div class="error-orb error-orb-one"></div>
-        <div class="error-orb error-orb-two"></div>
-        <section class="error-card" aria-labelledby="error-title">
-            <div class="error-brand">
-                <span class="error-brand-mark"><i class="fas fa-shield-halved"></i></span>
-                <span>{{ site_brand_name }}</span>
-            </div>
-
-            <div class="error-grid">
-                <div class="error-copy">
-                    <div class="error-kicker">
-                        <i class="fas fa-lock"></i>
-                        {% trans 'İcazə məhduddur' %}
-                    </div>
-                    <h1 id="error-title" class="error-title">{% trans 'Bu səhifəyə giriş qadağandır' %}</h1>
-                    <p class="error-description">
-                        {% trans 'Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.' %}
-                        {% trans 'Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.' %}
-                    </p>
-                    <div class="error-meta">
-                        <span class="error-pill"><i class="fas fa-user-check"></i> {% trans 'Hesabınızı yenidən yoxlayın' %}</span>
-                        <span class="error-pill"><i class="fas fa-building-shield"></i> {% trans 'Təşkilat icazələri tətbiq oluna bilər' %}</span>
-                    </div>
-                    <div class="error-actions">
-                        <a href="/" class="error-btn error-btn-primary">
-                            <i class="fas fa-house"></i>
-                            {% trans 'Ana səhifəyə qayıt' %}
-                        </a>
-                        <a href="{% firstof request.META.HTTP_REFERER '/' %}" class="error-btn error-btn-secondary">
-                            <i class="fas fa-arrow-left"></i>
-                            {% trans 'Əvvəlki səhifəyə dön' %}
-                        </a>
-                    </div>
-                    <p class="error-footer-note">
-                        {% trans 'Giriş hüququ sizdə olmalıdırsa, sistem administratoru ilə paylaşın.' %}
-                    </p>
-                </div>
-
-                <div class="error-visual" aria-hidden="true">
-                    <div class="error-code-panel">
-                        <div class="error-code-top">
-                            <span>Status</span>
-                            <span class="error-status-dot"></span>
-                        </div>
-                        <div>
-                            <div class="error-code">403</div>
-                            <div class="error-code-caption">{% trans 'Sorğu tanındı, amma bu resursa girişə icazə verilmədi.' %}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</body>
-</html>
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans '403 – Giriş Qadağandır' %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block code_big %}403{% endblock %}
+{% block kicker_icon %}fa-lock{% endblock %}
+{% block kicker %}{% trans 'İcazə məhduddur' %}{% endblock %}
+{% block title %}{% trans 'Bu səhifəyə giriş qadağandır' %}{% endblock %}
+{% block description %}
+    {% trans 'Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.' %}
+    {% trans 'Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.' %}
+{% endblock %}
+{% block pills %}
+    <span class="error-pill"><i class="fas fa-user-check"></i> {% trans 'Hesabınızı yenidən yoxlayın' %}</span>
+    <span class="error-pill"><i class="fas fa-building-shield"></i> {% trans 'Təşkilat icazələri tətbiq oluna bilər' %}</span>
+{% endblock %}
+{% block footer_note %}{% trans 'Giriş hüququ sizdə olmalıdırsa, sistem administratoru ilə paylaşın.' %}{% endblock %}
+{% block caption %}{% trans 'Sorğu tanındı, amma bu resursa girişə icazə verilmədi.' %}{% endblock %}

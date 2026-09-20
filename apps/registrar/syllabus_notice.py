@@ -111,13 +111,7 @@ def journal_syllabus_notice(offering) -> dict:
     «Sillabusa bax» keçidini bu dict-dən oxuyur, sadəcə ``show_banner`` False
     olur — dizayn tələbi «APPROVED → banner yox, yalnız keçid».
     """
-    syllabus = syllabus_services.syllabus_for_offering(
-        organization=offering.organization,
-        offering_id=offering.id,
-        subject_id=offering.subject_id,
-        period_id=offering.period_id,
-        instructor_id=offering.instructor_id,
-    )
+    syllabus = syllabus_services.syllabus_for_offering_obj(offering)
     state = syllabus_services.offering_syllabus_state(syllabus)
     key = state["state"]
     tone, title, message = _NOTICE.get(key, (None, None, None))

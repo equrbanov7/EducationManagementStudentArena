@@ -98,11 +98,36 @@ class SubgroupRollupTest(TestCase):
     def test_base_name_and_pattern(self):
         self.assertEqual(subgroup_rollup.base_group_name("234 K az"), "234 K")
         self.assertEqual(subgroup_rollup.base_group_name("234 K-1"), "234 K-1")
-        pattern = subgroup_rollup.subgroup_pattern("234 K")
-        self.assertTrue(pattern.match("234 k-1"))
-        self.assertTrue(pattern.match("234 k az-2"))
-        self.assertFalse(pattern.match("234 ke-1"))
-        self.assertFalse(pattern.match("234 k az"))
+        self.assertEqual(subgroup_rollup.group_sector("234 K ing"), "ing")
+        self.assertEqual(subgroup_rollup.group_sector("234 K-1"), "az")
+        yes = [
+            ("234 K az", "234 K-1"),
+            ("234 K az", "234 k az-2"),
+            ("234 K", "234 K-1"),
+            ("234 K ing", "234 K ing-1"),
+            ("234 K ing", "234 K-2 ing"),
+            ("235 İT az", "235 İT-1 az"),
+            ("235 İT", "235 İT-2 az"),
+            ("534 TB az", "534 TB 1"),
+            ("535 Bİ", "535 Bİ 2"),
+            ("233KE", "233 KE-1"),
+            ("233 KE", "233KE-2"),
+            ("229 PM", "229 PM /1"),
+            ("635", "635 1"),
+        ]
+        no = [
+            ("234 K az", "234 KE-1"),
+            ("234 K az", "234 K az"),
+            ("234 K ing", "234 K-1"),  # sektor fərqli
+            ("234 K az", "234 K ing-1"),
+            ("036", "0361"),  # baza rəqəmlə bitir → ayırıcı mütləqdir
+            ("236 K", "236 K ing"),
+            ("235 K", "2345 K ing"),
+        ]
+        for combined, candidate in yes:
+            self.assertTrue(subgroup_rollup.is_subgroup_of(combined, candidate), (combined, candidate))
+        for combined, candidate in no:
+            self.assertFalse(subgroup_rollup.is_subgroup_of(combined, candidate), (combined, candidate))
 
     def test_candidates_only_for_student_less_groups_with_matching_subgroups(self):
         with bypass_rls():

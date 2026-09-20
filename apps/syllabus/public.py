@@ -120,7 +120,9 @@ from .services import (
     review_queue,
     section_data_map,
     status_counts,
+    preload_syllabus_for_offering,
     syllabus_for_offering,
+    syllabus_for_offering_obj,
     version_timeline,
 )
 from .services.offerings import (
@@ -312,7 +314,9 @@ __all__ = [
     "formula_text",
     "approved_version_for",
     "offering_syllabus_state",
+    "preload_syllabus_for_offering",
     "syllabus_for_offering",
+    "syllabus_for_offering_obj",
     "section_data_map",
     "SyllabusStatus",
     "SectionKey",
