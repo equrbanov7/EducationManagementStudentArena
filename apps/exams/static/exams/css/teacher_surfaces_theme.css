@@ -1,0 +1,168 @@
+/* ═══ Müəllim imtahan səthləri — ORTAQ TOKEN TEMASI (sahib 2026-09-21) ══════
+   İmtahan detalından açılan səhifələr eyni dildə danışsın: sual bankı (.qb-page),
+   nəticələr (.ter-page), statistika + canlı sessiya detalı (.sd-page), canlı
+   nəticələr (.lr-page). Bu qat mövcud səhifə CSS-lərinin ÜSTÜNDƏN yüklənir;
+   markup/JS qarmaqları dəyişmir. Prinsip: neytral kart səthi, rəngi yalnız
+   ikon çipi / status / əsas düymə daşıyır (design-tokens: --ems-*). */
+
+/* ───────────────── ortaq parçalar ───────────────── */
+.qb-page, .ter-page, .sd-page, .lr-page { color: var(--ems-text); font-family: inherit; }
+.qb-page .qb-header h1, .ter-page .ter-title, .sd-page .sd-header__left h1, .lr-page .lr-header h1 {
+    font-size: var(--ems-fs-3xl); font-weight: 800; letter-spacing: -0.02em; color: var(--ems-text); margin: 0; line-height: 1.15;
+}
+.qb-page .qb-header p, .ter-page .ter-subtitle, .sd-page .sd-header__left p, .lr-page .lr-header p {
+    color: var(--ems-text-muted); font-size: var(--ems-fs-base); margin: 6px 0 0;
+}
+.sd-page .sd-header__left h1 i, .lr-page .lr-header h1 i { color: var(--ems-primary-600); font-size: 0.85em; margin-right: 6px; }
+/* Geri keçidi — pill */
+.qb-page .qb-btn-light, .ter-page .ter-back-btn, .sd-page .sd-back, .lr-page .lr-back {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-xs, 32px); padding: 0 12px;
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-pill); background: var(--ems-bg);
+    color: var(--ems-neutral-700); font-size: var(--ems-fs-sm); font-weight: 700; text-decoration: none; box-shadow: none;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+}
+.qb-page .qb-btn-light:hover, .ter-page .ter-back-btn:hover, .sd-page .sd-back:hover, .lr-page .lr-back:hover {
+    background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700); transform: none;
+}
+/* Düymə bazası */
+.qb-page .qb-btn, .ter-page .ter-btn, .ter-page .ter-action-btn, .sd-page .sd-filter-btn, .sd-page .sd-ai-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 14px;
+    border-radius: var(--ems-r-lg); border: 1px solid var(--ems-border); background: var(--ems-bg); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base); font-weight: 700; text-decoration: none; cursor: pointer; box-shadow: none; line-height: 1.2;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+}
+.qb-page .qb-btn:hover, .ter-page .ter-btn:hover, .sd-page .sd-filter-btn:hover { background: var(--ems-bg-subtle); border-color: var(--ems-neutral-300); color: var(--ems-text); transform: none; box-shadow: none; }
+.ter-page .ter-btn--sm { min-height: 32px; padding: 0 10px; font-size: var(--ems-fs-sm); border-radius: var(--ems-r-md); }
+/* Əsas (primary) düymələr */
+.qb-page .qb-btn-blue, .qb-page .qb-btn-teal, .qb-page .qb-btn-green,
+.ter-page .ter-btn--primary, .ter-page .ter-action-btn--export, .sd-page .sd-filter-btn--apply, .sd-page .sd-ai-btn {
+    background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0);
+}
+.qb-page .qb-btn-blue:hover, .qb-page .qb-btn-teal:hover, .qb-page .qb-btn-green:hover,
+.ter-page .ter-btn--primary:hover, .ter-page .ter-action-btn--export:hover, .sd-page .sd-filter-btn--apply:hover, .sd-page .sd-ai-btn:hover:not(:disabled) {
+    background: var(--ems-primary-700); border-color: var(--ems-primary-700); color: var(--ems-neutral-0);
+}
+/* Yumşaq / ikinci dərəcəli */
+.qb-page .qb-btn-soft, .qb-page .qb-btn-soft-blue, .qb-page .qb-btn-outline, .qb-page .qb-btn-report,
+.ter-page .ter-btn--info, .ter-page .ter-btn--ghost, .sd-page .sd-filter-btn--clear {
+    background: var(--ems-bg); border-color: var(--ems-border); color: var(--ems-primary-700);
+}
+.qb-page .qb-btn-soft:hover, .qb-page .qb-btn-soft-blue:hover, .qb-page .qb-btn-outline:hover, .qb-page .qb-btn-report:hover,
+.ter-page .ter-btn--info:hover, .ter-page .ter-btn--ghost:hover, .sd-page .sd-filter-btn--clear:hover {
+    background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700);
+}
+/* Xəbərdarlıq / təhlükə */
+.qb-page .qb-btn-amber, .ter-page .ter-btn--warning { background: var(--ems-warning-100); border-color: var(--ems-warning-bd); color: var(--ems-warning-800); }
+.qb-page .qb-btn-amber:hover, .ter-page .ter-btn--warning:hover { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.qb-page .qb-btn-red, .qb-page .qb-btn-outline-danger, .ter-page .ter-btn--danger, .ter-page .ter-btn--ghost-danger {
+    background: var(--ems-bg); border-color: var(--ems-danger-200); color: var(--ems-danger-700);
+}
+.qb-page .qb-btn-red:hover, .qb-page .qb-btn-outline-danger:hover, .ter-page .ter-btn--danger:hover, .ter-page .ter-btn--ghost-danger:hover {
+    background: var(--ems-danger-100); border-color: var(--ems-danger-500); color: var(--ems-danger-700);
+}
+/* Kart səthi */
+.qb-page .qb-stat-card, .qb-page .qb-filters, .qb-page .qb-card, .qb-page .qb-modal-dialog, .qb-page .qb-empty,
+.ter-page .ter-header-card, .ter-page .ter-stat, .ter-page .ter-filter-card, .ter-page .ter-results-card, .ter-page .ter-empty,
+.sd-page .sd-filter-card, .sd-page .sd-card, .sd-page .sd-chart-box, .sd-page .sd-panel, .sd-page .sd-ai-panel,
+.lr-page .lr-card, .lr-page .lr-empty {
+    background: var(--ems-bg); border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); box-shadow: none;
+}
+.ter-page .ter-header-card { background: linear-gradient(135deg, var(--ems-primary-50) 0%, var(--ems-bg) 55%); border-radius: var(--ems-r-2xl); }
+.ter-page .ter-header-card::before { display: none; }
+.qb-page .qb-card:hover, .ter-page .ter-stat:hover, .sd-page .sd-card:hover, .lr-page .lr-card:hover { box-shadow: var(--ems-sh-card); border-color: var(--ems-primary-200); transform: none; }
+.lr-page .lr-card::before { display: none; }
+
+/* ───────────────── KPI / stat kartları ───────────────── */
+.qb-page .qb-stat-card, .ter-page .ter-stat, .sd-page .sd-card { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.qb-page .qb-stat-card__icon, .ter-page .ter-stat-icon, .sd-page .sd-card__icon {
+    width: 40px; height: 40px; flex: 0 0 auto; border-radius: var(--ems-r-lg); display: inline-flex; align-items: center; justify-content: center;
+    font-size: var(--ems-fs-md); background: var(--ems-primary-50); color: var(--ems-primary-700); box-shadow: none;
+}
+.qb-page .qb-ic-green, .ter-page .ter-stat--graded .ter-stat-icon, .sd-page .sd-card--green .sd-card__icon, .sd-page .sd-card--teal .sd-card__icon { background: var(--ems-emerald-50); color: var(--ems-emerald-600); }
+.qb-page .qb-ic-red, .sd-page .sd-card--red .sd-card__icon { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+.qb-page .qb-ic-amber, .ter-page .ter-stat--pending .ter-stat-icon, .sd-page .sd-card--amber .sd-card__icon { background: var(--ems-warning-100); color: var(--ems-warning-700); }
+.qb-page .qb-ic-purple, .ter-page .ter-stat--max .ter-stat-icon, .sd-page .sd-card--purple .sd-card__icon { background: var(--ems-violet-100); color: var(--ems-violet-600); }
+.qb-page .qb-ic-slate { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+.qb-page .qb-stat-card__label, .ter-page .ter-stat-label, .sd-page .sd-card__label, .lr-page .lr-stat__label {
+    font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 800; color: var(--ems-neutral-500);
+}
+.qb-page .qb-stat-card__body strong, .ter-page .ter-stat-value, .sd-page .sd-card__value, .lr-page .lr-stat__value {
+    font-size: var(--ems-fs-2xl); font-weight: 800; color: var(--ems-text); line-height: 1.1;
+}
+.sd-page .sd-card--blue, .sd-page .sd-card--green, .sd-page .sd-card--red, .sd-page .sd-card--teal, .sd-page .sd-card--amber, .sd-page .sd-card--purple { background: var(--ems-bg); color: var(--ems-text); }
+.sd-page .sd-card--blue .sd-card__value, .sd-page .sd-card--green .sd-card__value, .sd-page .sd-card--red .sd-card__value,
+.sd-page .sd-card--teal .sd-card__value, .sd-page .sd-card--amber .sd-card__value, .sd-page .sd-card--purple .sd-card__value { color: var(--ems-text); }
+.qb-page .qb-stat-card--clickable.is-active { border-color: var(--ems-primary-400); box-shadow: var(--ems-sh-focus); background: var(--ems-primary-50); }
+.lr-page .lr-stat--green .lr-stat__value { color: var(--ems-success-700); }
+.lr-page .lr-stat--blue .lr-stat__value { color: var(--ems-primary-700); }
+
+/* ───────────────── başlıq zolağı düzümü ───────────────── */
+.qb-page .qb-header, .sd-page .sd-header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 0 0 16px; margin: 0 0 16px; border-bottom: 1px solid var(--ems-border); background: transparent; box-shadow: none; }
+.lr-page .lr-header { display: block; padding: 0 0 16px; margin: 0 0 16px; border-bottom: 1px solid var(--ems-border); background: transparent; box-shadow: none; }
+.qb-page .qb-header-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.sd-page .sd-header__badge, .ter-page .ter-meta-pill {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip, 26px); padding: 2px 10px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .04em; text-transform: uppercase; border: 0;
+}
+.ter-page .ter-meta-pill--active { background: var(--ems-success-100); color: var(--ems-success-700); }
+.ter-page .ter-meta-pill--inactive { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+.ter-page .ter-meta-pill--type { background: var(--ems-primary-50); color: var(--ems-primary-700); }
+
+/* ───────────────── filtr kartları ───────────────── */
+.qb-page .qb-filters, .ter-page .ter-filter-card, .sd-page .sd-filter-card { padding: 16px; background: var(--ems-bg-subtle); }
+.sd-page .sd-filter-card__title, .qb-page .qb-chip-bar__label { font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 800; color: var(--ems-neutral-500); }
+.sd-page .sd-filter-field label, .ter-page .ter-filter-label { font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 800; color: var(--ems-neutral-500); }
+.sd-page .sd-filter-field input, .qb-page .qb-input-wrap input, .sd-page .sd-search input {
+    min-height: var(--ems-h-field, 40px); border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); background: var(--ems-bg); color: var(--ems-text); font-size: var(--ems-fs-base);
+}
+.sd-page .sd-filter-field input:focus, .qb-page .qb-input-wrap input:focus, .sd-page .sd-search input:focus { border-color: var(--ems-primary-400); box-shadow: var(--ems-sh-focus); outline: none; }
+
+/* ───────────────── çiplər / nişanlar ───────────────── */
+.qb-page .qb-chip, .qb-page .qb-chip-tag, .qb-page .qb-badge, .ter-page .ter-badge, .qb-page .qb-status {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 24px; padding: 2px 9px; border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-xs); font-weight: 700; background: var(--ems-neutral-100); color: var(--ems-neutral-700); border: 1px solid transparent;
+}
+.qb-page .qb-chip-bar .qb-chip:hover { border-color: var(--ems-primary-200); background: var(--ems-primary-50); }
+.qb-page .qb-chip-bar .qb-chip.is-active { background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.qb-page .qb-status-active, .ter-page .ter-badge--success, .ter-page .ter-badge--checked, .qb-page .qb-badge--clean { background: var(--ems-success-100); color: var(--ems-success-700); }
+.qb-page .qb-status-inactive, .ter-page .ter-badge--removed, .qb-page .qb-badge--error { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+.qb-page .qb-badge--warning, .qb-page .qb-badge--duplicate { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.ter-page .ter-badge--info, .qb-page .qb-badge--balance { background: var(--ems-primary-50); color: var(--ems-primary-700); }
+
+/* ───────────────── siyahılar / cədvəllər ───────────────── */
+.qb-page .qb-card { padding: 14px 16px; }
+.qb-page .qb-card.is-selected { border-color: var(--ems-primary-400); background: var(--ems-primary-50); }
+.qb-page .qb-card__num { background: var(--ems-primary-50); color: var(--ems-primary-700); border-radius: var(--ems-r-md); font-weight: 800; }
+.qb-page .qb-opt.is-correct { background: var(--ems-success-100); border-color: var(--ems-success-bd); }
+.qb-page .qb-opt.is-correct .qb-opt__label { background: var(--ems-success-600); color: var(--ems-neutral-0); }
+.ter-page .ter-table thead th, .sd-page .sd-table th {
+    background: var(--ems-bg-subtle); color: var(--ems-neutral-600); font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid var(--ems-border);
+}
+.ter-page .ter-table tbody tr:nth-child(even) { background: var(--ems-bg-subtle); }
+.ter-page .ter-table tbody tr:hover, .sd-page .sd-table tbody tr:hover { background: var(--ems-primary-50); }
+.ter-page .ter-results-title, .sd-page .sd-panel__title, .sd-page .sd-chart-box__title, .sd-page .sd-ai-panel__title { font-size: var(--ems-fs-lg); font-weight: 800; color: var(--ems-text); }
+.ter-page .ter-results-title i, .sd-page .sd-panel__title i, .sd-page .sd-chart-box__title i { color: var(--ems-primary-600); }
+.sd-page .sd-bar__track { background: var(--ems-neutral-100); border-radius: var(--ems-r-pill); }
+.sd-page .sd-bar__fill { background: var(--ems-primary-500); border-radius: var(--ems-r-pill); }
+.sd-page .sd-bar__fill--green { background: var(--ems-success-600); }
+.sd-page .sd-bar__fill--red { background: var(--ems-danger-500); }
+.sd-page .sd-pagination button, .qb-page .qb-pagination a, .qb-page .qb-pagination span {
+    min-width: 34px; min-height: 34px; border-radius: var(--ems-r-md); border: 1px solid var(--ems-border); background: var(--ems-bg); color: var(--ems-neutral-700); font-weight: 700;
+}
+.sd-page .sd-pagination button.is-active, .qb-page .qb-pagination .is-current { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
+
+/* ───────────────── boş vəziyyət ───────────────── */
+.qb-page .qb-empty, .ter-page .ter-empty, .lr-page .lr-empty { border-style: dashed; border-color: var(--ems-neutral-300); background: var(--ems-bg-subtle); color: var(--ems-text-muted); padding: 40px 20px; text-align: center; }
+.qb-page .qb-empty i, .ter-page .ter-empty i, .lr-page .lr-empty i { color: var(--ems-primary-400); font-size: 2rem; margin-bottom: 8px; }
+
+/* ───────────────── canlı nəticə kartları ───────────────── */
+.lr-page .lr-card { padding: 16px; }
+.lr-page .lr-card__pin { background: var(--ems-primary-50); color: var(--ems-primary-700); border-radius: var(--ems-r-pill); padding: 2px 10px; font-weight: 800; }
+.lr-page .lr-card__date { color: var(--ems-text-muted); font-size: var(--ems-fs-sm); }
+.lr-page .lr-card__link { color: var(--ems-primary-700); font-weight: 800; }
+.lr-page .lr-card__link:hover { color: var(--ems-primary-800); }
+
+@media (max-width: 640px) {
+    .qb-page .qb-header h1, .ter-page .ter-title, .sd-page .sd-header__left h1, .lr-page .lr-header h1 { font-size: var(--ems-fs-2xl); }
+    .qb-page .qb-header-actions .qb-btn, .ter-page .ter-header-actions .ter-action-btn { flex: 1 1 auto; }
+}

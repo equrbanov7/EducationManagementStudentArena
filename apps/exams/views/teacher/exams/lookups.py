@@ -164,7 +164,7 @@ def group_search(request):
     if organization is None:
         return JsonResponse({"results": [], "has_more": False})
 
-    query = (request.GET.get("q") or "").strip()
+    query = (request.GET.get("q") or "").strip()[:120]
     if (request.GET.get("kind") or "").strip() == "units":
         from apps.registrar.public import subgroup_rollup
         from core.search_text import tolerant_regex
