@@ -32,6 +32,35 @@ STRINGS = {
         "Formda uygulanmamış değişiklikler var. Kapatırsanız kaybolacak.",
     ),
     ("registrar.journal", "Bağla, itsin"): ("Close and discard", "Закрыть и отменить", "Kapat, vazgeç"),
+    ("ai_assistant.tooltip", "Sualınızı yazın — dərhal cavab alın"): (
+        "Type your question — get an instant answer",
+        "Напишите вопрос — получите ответ сразу",
+        "Sorunuzu yazın — hemen yanıt alın",
+    ),
+    ("ai_assistant.status", "Tezliklə"): ("Coming soon", "Скоро", "Yakında"),
+    ("ai_assistant.status", "Onlayn"): ("Online", "Онлайн", "Çevrimiçi"),
+    (
+        "ai_assistant.status",
+        "AI assistent hazırlanır — bu pəncərə tezliklə suallarınızı cavablandıracaq. Hələlik sualları kafedra və ya RİM-ə ünvanlayın.",
+    ): (
+        "The AI assistant is being prepared — this window will answer your questions soon. For now, address questions to your department or the Digital Development Centre.",
+        "AI-ассистент готовится — это окно скоро будет отвечать на ваши вопросы. Пока обращайтесь на кафедру или в Центр цифрового развития.",
+        "AI asistan hazırlanıyor — bu pencere yakında sorularınızı yanıtlayacak. Şimdilik soruları bölümünüze veya Dijital Gelişim Merkezi'ne yöneltin.",
+    ),
+    ("ai_assistant.limit", "Saatlıq sorğu limiti"): ("Hourly request limit", "Часовой лимит запросов", "Saatlik istek sınırı"),
+    (
+        "ai_assistant.footnote",
+        "Cavablar avtomatik yaradılır və səhv ola bilər. Şəxsi məlumat (şifrə, kart, FİN) yazmayın.",
+    ): (
+        "Answers are generated automatically and may be wrong. Do not enter personal data (passwords, cards, FIN).",
+        "Ответы формируются автоматически и могут быть неточными. Не вводите личные данные (пароли, карты, FIN).",
+        "Yanıtlar otomatik üretilir ve hatalı olabilir. Kişisel veri (şifre, kart, FİN) girmeyin.",
+    ),
+    ("ai_assistant.disabled", "AI assistent hazırda söndürülüb — tezliklə yenidən aktiv olacaq."): (
+        "The AI assistant is currently switched off — it will be back soon.",
+        "AI-ассистент сейчас отключён — скоро снова заработает.",
+        "AI asistan şu anda kapalı — yakında yeniden etkinleşecek.",
+    ),
     (
         "registrar.journal",
         "Korpus qrupun ixtisasına görə «%(building)s» seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür. Otaq məcburi deyil.",

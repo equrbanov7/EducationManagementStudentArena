@@ -29,6 +29,43 @@ from .security import check_message_safety, sanitize_ai_response
 logger = logging.getLogger(__name__)
 
 _RATE_SCOPE = "ai_assistant"
+#: JSON gövdəsi üçün sərt tavan (2026-09-20 sərtləşdirmə): mesaj onsuz da 2000
+#: simvoldur; daha böyük gövdə yalnız yaddaş/CPU yükü deməkdir → 413.
+_MAX_BODY_BYTES = 16 * 1024
+_MAX_PAGE_PATH = 300
+
+
+def _json(data: dict, status: int = 200) -> JsonResponse:
+    """Çat cavabları şəxsi məlumat daşıyır — heç bir ara keş saxlamasın."""
+    response = JsonResponse(data, status=status)
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+def assistant_enabled() -> bool:
+    """Sahib açarı: ``AI_ASSISTANT_ENABLED`` (default açıq). Söndürüləndə vidcet
+    «tezliklə» vəziyyətini göstərir, çat endpoint-i 503 qaytarır."""
+    return bool(getattr(settings, "AI_ASSISTANT_ENABLED", True))
+
+
+def assistant_configured() -> bool:
+    """Gemini açarı verilibmi — vidcet «hələ qoşulmayıb» vəziyyəti üçün."""
+    return bool((getattr(settings, "GEMINI_API_KEY", "") or "").strip())
+
+
+def _page_path(raw: str) -> str:
+    """`current_page` yalnız EYNİ saytın YOLU kimi saxlanılır (sorğu sətri,
+    host, fraqment atılır) — konteksti keçmişdəki kimi tam URL ilə göndərmək
+    token/axtarış parametrlərini modelə və audit jurnalına sızdıra bilərdi."""
+    from urllib.parse import urlsplit
+
+    try:
+        path = urlsplit((raw or "").strip()).path
+    except ValueError:
+        return ""
+    if not path.startswith("/"):
+        return ""
+    return path[:_MAX_PAGE_PATH]
 
 
 def _get_rate_limit() -> str:
@@ -66,9 +103,15 @@ def _get_quota_info(user_id: int) -> dict:
 def quota_view(request):
     """Return the authenticated user's current AI assistant quota."""
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "Authentication required."}, status=401)
+        return _json({"error": "Authentication required."}, status=401)
 
-    return JsonResponse(_get_quota_info(request.user.id))
+    return _json(
+        {
+            **_get_quota_info(request.user.id),
+            "enabled": assistant_enabled(),
+            "configured": assistant_configured(),
+        }
+    )
 
 
 @require_POST
@@ -77,21 +120,36 @@ def chat_view(request):
     """Handle an AI assistant chat request."""
     # ── Authentication check ──────────────────────────────────────────
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "Authentication required."}, status=401)
+        return _json({"error": "Authentication required."}, status=401)
+    if not assistant_enabled():
+        return _json(
+            {
+                "error": "assistant_disabled",
+                "answer": pgettext(
+                    "ai_assistant.disabled", "AI assistent hazırda söndürülüb — tezliklə yenidən aktiv olacaq."
+                ),
+            },
+            status=503,
+        )
 
     user = request.user
     organization = getattr(request, "organization", None)
     memberships = list(getattr(request, "org_memberships", []) or [])
 
     # ── Parse request body ────────────────────────────────────────────
+    if len(request.body) > _MAX_BODY_BYTES:
+        return _json({"error": "Request body too large."}, status=413)
     try:
         body = json.loads(request.body)
     except (json.JSONDecodeError, ValueError):
-        return JsonResponse({"error": "Invalid JSON body."}, status=400)
+        return _json({"error": "Invalid JSON body."}, status=400)
+    if not isinstance(body, dict):
+        return _json({"error": "Invalid JSON body."}, status=400)
 
-    message = (body.get("message") or "").strip()
+    message = body.get("message")
+    message = message.strip() if isinstance(message, str) else ""
     if not message:
-        return JsonResponse({"error": "Message is required."}, status=400)
+        return _json({"error": "Message is required."}, status=400)
 
     # ── Security: prompt injection check ──────────────────────────────
     is_safe, block_reason = check_message_safety(message)
@@ -104,7 +162,7 @@ def chat_view(request):
             status=AIAssistantLog.Status.BLOCKED,
             block_reason=block_reason,
         )
-        return JsonResponse(
+        return _json(
             {
                 "answer": _blocked_response(block_reason),
                 **_get_quota_info(user.id),
@@ -122,7 +180,7 @@ def chat_view(request):
             prompt=message,
             status=AIAssistantLog.Status.RATE_LIMITED,
         )
-        return JsonResponse(
+        return _json(
             {
                 "error": "rate_limit_exceeded",
                 "answer": pgettext(
@@ -135,7 +193,7 @@ def chat_view(request):
         )
 
     # ── Build permission-filtered context ─────────────────────────────
-    current_page = (body.get("current_page") or "").strip()[:500]
+    current_page = _page_path(body.get("current_page") if isinstance(body.get("current_page"), str) else "")
     try:
         context = build_user_context(request, current_page=current_page)
     except Exception:
@@ -154,7 +212,7 @@ def chat_view(request):
             status=AIAssistantLog.Status.ERROR,
             response_summary=result.get("error", "")[:500],
         )
-        return JsonResponse(
+        return _json(
             {
                 "error": "ai_service_error",
                 "answer": pgettext("ai_assistant.error", "Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin."),
@@ -192,7 +250,7 @@ def chat_view(request):
             user.id,
         )
 
-    return JsonResponse(
+    return _json(
         {
             "answer": answer,
             **_get_quota_info(user.id),
