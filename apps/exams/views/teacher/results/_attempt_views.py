@@ -39,6 +39,7 @@ from ._helpers import (
     _sync_coding_answers_from_final_submissions,
     _user_display_name,
 )
+from ._results_views import _explicit_return_url  # noqa: E402
 
 
 @login_required
@@ -115,6 +116,12 @@ def teacher_view_attempt(request, slug, attempt_id):
     exam = get_result_viewable_exam_or_404(request, slug=slug, include_deleted=True)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
+    # «Geri» = nəticələr səhifəsi (əvvəlki kramb); yalnız «yoxlama növbəsi»ndən gələn
+    # kabinet bölməsinə qayıdır (sahib 2026-09-21: ilişən referer-lər ləğv edildi).
+    if navigation_params.get("from_section") != "pending-review" and not _explicit_return_url(request):
+        profile_return_url = _append_query_params(
+            reverse("exams:teacher_exam_results", kwargs={"slug": exam.slug}), **navigation_params
+        )
     _sync_coding_answers_from_final_submissions(attempt)
 
     # Cavabları al
