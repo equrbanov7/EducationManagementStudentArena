@@ -33,7 +33,13 @@
          ki, var(--ems-*) hər yerdə əlçatan olsun. Sənəd: docs/frontend/UI_COLOR_TOKENS_MIGRASIYA.md -->
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260911-1">
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260911-1">
+    {% comment %}Naviqasiya üslubu modul ölçüsü qaydasına (SOFT_CAP=600) görə üçə
+    bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl başlıq +
+    desktop menyu, sonra mobil overlay/panel + media query-lər, ən sonda
+    «+ Yarat» / dil pilləsi / zəngin istifadəçi menyusu.{% endcomment %}
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}?v=20260709-profile-menu">
+    <link rel="stylesheet" href="{% static 'css/navbar_mobile.css' %}?v=20260709-profile-menu">
+    <link rel="stylesheet" href="{% static 'css/navbar_menus.css' %}?v=20260709-profile-menu">
     {% comment %}Başlığın brend kilidi + ritm/fokus qatı. `navbar.css` ölçü
     büdcəsində dondurulduğu üçün yeni qaydalar ayrıca fayldadır və ondan SONRA
     yüklənməlidir (bax static/css/navbar_brand.css).{% endcomment %}

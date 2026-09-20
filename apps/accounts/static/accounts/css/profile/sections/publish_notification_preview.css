@@ -1,0 +1,192 @@
+/* [BÖLÜNMÜŞ 2026-09-21] `publish_notification.css`-dən (694 sətir, sətir 507–694) mexaniki
+   çıxarılıb — 2/2-ci hissə; qaydalar və sıra dəyişdirilməyib (SOFT_CAP 600).
+   YÜKLƏNMƏ SIRASI KASKADA görə saxlanılmalıdır: publish_notification.css → publish_notification_preview.css. */
+
+/* ── Önizləmə kartı — alıcının bildiriş qutusundakı sətrin eynisi ──────── */
+.pn-preview__card {
+    border-radius: 14px;
+    border-color: var(--ems-neutral-200);
+    overflow: hidden;
+}
+
+.pn-preview__head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+}
+
+.pn-preview__note {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.pn-preview__row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.pn-preview__icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 10px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-md);
+}
+
+.pn-preview__main {
+    flex: 1;
+    min-width: 0;
+    padding-right: 14px;
+}
+
+.pn-preview__top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pn-preview__title {
+    min-width: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.pn-preview__time {
+    flex: none;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-500);
+    white-space: nowrap;
+}
+
+.pn-preview__message {
+    margin: 3px 0 0;
+    font-size: var(--ems-fs-base);
+    line-height: 1.5;
+    color: var(--ems-neutral-500);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 8;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pn-preview__title.is-placeholder,
+.pn-preview__message.is-placeholder {
+    color: var(--ems-neutral-500);
+    font-weight: 500;
+    font-style: italic;
+}
+
+.pn-preview__image {
+    display: block;
+    max-width: 100%;
+    max-height: 160px;
+    margin-top: 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+    object-fit: contain;
+}
+
+.pn-preview__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    margin-top: 8px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-link);
+    text-decoration: none;
+}
+
+.pn-preview__link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pn-preview__link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+/* Oxunmamışlıq nöqtəsi — inbox-dakı `nfx-row__dot` ilə eyni məna. */
+.pn-preview__dot {
+    position: absolute;
+    top: 20px;
+    right: 16px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ems-primary-600);
+}
+
+.pn-preview__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 12px 16px;
+    border-top: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg-subtle);
+}
+
+.pn-preview__kv {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: var(--ems-fs-sm);
+}
+
+.pn-preview__kv dt {
+    flex: none;
+    min-width: 64px;
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
+.pn-preview__kv dd {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
+
+/* ── Dar ekran ───────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .pn-block {
+        padding: 16px;
+    }
+
+    .pn-form__foot {
+        padding: 10px 16px;
+    }
+
+    .pn-form__summary {
+        flex-basis: 100%;
+    }
+
+    .pn-form__foot .ems-btn {
+        flex: 1 1 auto;
+    }
+
+    .pn-target-scroll {
+        max-height: 200px;
+    }
+}

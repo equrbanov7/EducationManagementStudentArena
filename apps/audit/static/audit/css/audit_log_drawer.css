@@ -1,0 +1,303 @@
+/* [BÖLÜNMÜŞ 2026-09-21] `audit_log.css`-dən (609 sətir, sətir 311–609) mexaniki
+   çıxarılıb — 2/2-ci hissə; qaydalar və sıra dəyişdirilməyib (SOFT_CAP 600).
+   YÜKLƏNMƏ SIRASI KASKADA görə saxlanılmalıdır: audit_log.css → audit_log_drawer.css. */
+
+/* ── Detal çekmecəsi ─────────────────────────────────────────────────── */
+
+.al-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.al-detail__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.al-detail__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.al-detail__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.al-detail__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg, 1.05rem);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.al-detail__time {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm);
+}
+
+.al-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px 14px;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 10px);
+    background: var(--ems-neutral-50);
+}
+
+.al-meta__item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.al-meta__item--wide {
+    grid-column: 1 / -1;
+}
+
+.al-meta dt {
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ems-neutral-500);
+}
+
+.al-meta dd {
+    margin: 0;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.al-meta__mono {
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-800);
+}
+
+.al-meta__agent {
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-700);
+    line-height: 1.45;
+}
+
+.al-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-inline-start: 6px;
+    padding: 0 6px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-600);
+    font: inherit;
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.al-copy:hover {
+    color: var(--ems-primary-700);
+    border-color: var(--ems-primary-200);
+}
+
+.al-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.al-section__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.al-section__title {
+    margin: 0;
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ems-neutral-500);
+}
+
+.al-section__count {
+    font-size: var(--ems-fs-xs, 0.78rem);
+    color: var(--ems-neutral-600);
+}
+
+.al-quote {
+    margin: 0;
+    padding: 10px 14px;
+    border-inline-start: 3px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-primary-50);
+    color: var(--ems-neutral-800);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.al-quote--missing {
+    border-inline-start-color: var(--ems-warning-500);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    white-space: normal;
+}
+
+.al-empty {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px dashed var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 10px);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs, 0.78rem);
+}
+
+/* Fərq cədvəli */
+.al-diffwrap {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md, 10px);
+    overflow-x: auto;
+    background: var(--ems-neutral-0);
+}
+
+.al-diff {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: var(--ems-fs-sm);
+}
+
+.al-diff th[scope="col"] {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ems-neutral-600);
+    background: var(--ems-bg-subtle);
+    border-bottom: 1px solid var(--ems-neutral-200);
+    white-space: nowrap;
+}
+
+.al-diff th[scope="row"] {
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs, 0.78rem);
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+    white-space: nowrap;
+}
+
+.al-diff td {
+    padding: 8px 12px;
+    vertical-align: top;
+    color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+.al-diff tbody tr + tr {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.al-diff__row--same {
+    color: var(--ems-neutral-500);
+}
+
+.al-diff__row--same td {
+    color: var(--ems-neutral-500);
+}
+
+.al-diff__row--changed .al-diff__old,
+.al-diff__row--removed .al-diff__old {
+    background: var(--ems-danger-100);
+}
+
+.al-diff__row--changed .al-diff__new,
+.al-diff__row--added .al-diff__new {
+    background: var(--ems-success-100);
+}
+
+.al-val {
+    white-space: pre-wrap;
+}
+
+.al-val--empty {
+    color: var(--ems-neutral-500);
+    font-style: italic;
+}
+
+.al-val--mono {
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs, 0.78rem);
+}
+
+.al-json {
+    margin: 0;
+    padding: 8px 10px;
+    max-height: 260px;
+    overflow: auto;
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    line-height: 1.5;
+    color: var(--ems-neutral-800);
+    white-space: pre;
+}
+
+.al-diff__toggle {
+    align-self: flex-start;
+}
+
+.al-raw summary {
+    cursor: pointer;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.al-raw[open] summary {
+    margin-bottom: 8px;
+}
+
+.al-detail__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-inline-end: auto;
+}
+
+/* Müstəqil səhifə (qabıqsız) */
+.al-standalone .ems-header__title {
+    margin: 0 0 4px;
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+@media (max-width: 760px) {
+    .al-actor,
+    .al-res {
+        min-width: 0;
+    }
+    .al-meta {
+        grid-template-columns: 1fr;
+    }
+}
