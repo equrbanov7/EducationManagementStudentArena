@@ -50,6 +50,62 @@ STRINGS = {
         "Шаблон банка тестовых вопросов",
         "Test soru bankası şablonu",
     ),
+    ("accounts.network_zone", "Yalnız universitet şəbəkəsindən"): (
+        "University network only",
+        "Только из сети университета",
+        "Yalnızca üniversite ağından",
+    ),
+    ("accounts.network_zone", "Şəbəkə məhdudiyyəti"): ("Network restriction", "Сетевое ограничение", "Ağ kısıtlaması"),
+    ("accounts.network_zone", "Elektron jurnal yalnız universitet şəbəkəsində açılır"): (
+        "The electronic journal opens only on the university network",
+        "Электронный журнал открывается только из сети университета",
+        "Elektronik günlük yalnızca üniversite ağında açılır",
+    ),
+    ("accounts.network_zone", "Bu hesabla giriş yalnız universitet şəbəkəsindən mümkündür"): (
+        "This account can sign in only from the university network",
+        "Вход с этой учётной записью возможен только из сети университета",
+        "Bu hesapla giriş yalnızca üniversite ağından mümkündür",
+    ),
+    (
+        "accounts.network_zone",
+        "Jurnal qeydləri kampus daxilindən (universitet Wi-Fi/LAN) aparılır. Digər bölmələr — fənlər, imtahanlar, sillabuslar — kənardan da işləyir.",
+    ): (
+        "Journal entries are made from inside the campus (university Wi-Fi/LAN). Other sections — subjects, exams, syllabi — also work from outside.",
+        "Записи в журнал ведутся из кампуса (Wi-Fi/LAN университета). Остальные разделы — предметы, экзамены, силлабусы — работают и извне.",
+        "Günlük kayıtları kampüs içinden (üniversite Wi-Fi/LAN) yapılır. Diğer bölümler — dersler, sınavlar, izlenceler — dışarıdan da çalışır.",
+    ),
+    (
+        "accounts.network_zone",
+        "İnzibati hesablar təhlükəsizlik səbəbindən kənar şəbəkədən açılmır. Universitet şəbəkəsinə qoşulub yenidən daxil olun.",
+    ): (
+        "For security, administrative accounts do not open from outside networks. Connect to the university network and sign in again.",
+        "В целях безопасности административные учётные записи не открываются из внешних сетей. Подключитесь к сети университета и войдите снова.",
+        "Güvenlik nedeniyle yönetici hesapları dış ağlardan açılmaz. Üniversite ağına bağlanıp yeniden giriş yapın.",
+    ),
+    ("accounts.network_zone", "Universitet Wi-Fi / LAN"): (
+        "University Wi-Fi / LAN",
+        "Wi-Fi / LAN университета",
+        "Üniversite Wi-Fi / LAN",
+    ),
+    ("accounts.network_zone", "Şəbəkə zonası qaydası"): (
+        "Network zone rule",
+        "Правило сетевой зоны",
+        "Ağ bölgesi kuralı",
+    ),
+    ("accounts.network_zone", "Çıxış"): ("Sign out", "Выйти", "Çıkış"),
+    (
+        "accounts.network_zone",
+        "Bu qayda sistem administratoru tərəfindən təyin olunub; sual olarsa RİM-ə müraciət edin.",
+    ): (
+        "This rule is set by the system administrator; contact the Digital Development Centre with questions.",
+        "Это правило задано системным администратором; по вопросам обращайтесь в Центр цифрового развития.",
+        "Bu kural sistem yöneticisi tarafından belirlenmiştir; sorularınız için Dijital Gelişim Merkezi'ne başvurun.",
+    ),
+    ("accounts.network_zone", "Sorğu kənar şəbəkədən gəldi; bu bölmə üçün daxili zona tələb olunur."): (
+        "The request came from an outside network; this section requires the internal zone.",
+        "Запрос пришёл из внешней сети; для этого раздела требуется внутренняя зона.",
+        "İstek dış ağdan geldi; bu bölüm iç bölge gerektirir.",
+    ),
     ("exams.crumbs", "Naviqasiya yolu"): ("Breadcrumb navigation", "Навигационная цепочка", "Gezinti yolu"),
     ("exams.template.question_bank_detail", "Yazılı sual bankı şablonu"): (
         "Written question bank template",
