@@ -1,0 +1,81 @@
+/* «Yeni sual əlavə et» / «Sualı redaktə et» modalı — TOKEN TEMASI (sahib 2026-09-21).
+   question_form_modal.css + question_form.css üstündən: qradiyent başlıq əvəzinə
+   tək tonlu primary, bölmə kartları neytral, sahələr standart giriş ölçüsü,
+   variant kartları və düymələr design-tokens ilə. Markup/JS dəyişmir. */
+
+.question-form-modal .modal-content { border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-dialog); overflow: hidden; }
+.question-form-modal .question-form-modal__header,
+.question-form-modal .question-form-modal__header--create,
+.question-form-modal .question-form-modal__header--edit {
+    background: var(--ems-primary-600); border-bottom: 0; padding: 14px 20px;
+}
+.question-form-modal .question-form-modal__header--edit { background: var(--ems-primary-700); }
+.question-form-modal .question-form-modal__header .modal-title { font-size: var(--ems-fs-lg); font-weight: 800; letter-spacing: -0.01em; color: var(--ems-neutral-0); }
+.question-form-modal .question-form-modal__header .btn-close { width: 34px; height: 34px; border-radius: 50%; background-color: rgba(255,255,255,0.14); opacity: 1; box-shadow: none; }
+.question-form-modal .question-form-modal__header .btn-close:hover { background-color: rgba(255,255,255,0.26); transform: none; }
+.question-form-modal .modal-body { background: var(--ems-bg-subtle); padding: 20px; }
+
+/* Kontekst kartı */
+.question-form-modal .question-form-modal-intro {
+    background: var(--ems-bg); border: 1px solid var(--ems-border); border-left: 4px solid var(--ems-primary-500);
+    border-radius: var(--ems-r-xl); padding: 12px 16px; margin-bottom: 16px; box-shadow: none;
+}
+.question-form-modal .question-form-modal-context { font-weight: 800; color: var(--ems-primary-700); font-size: var(--ems-fs-base); margin: 0 0 2px; }
+.question-form-modal .question-form-modal-intro .info-text { color: var(--ems-text-muted); font-size: var(--ems-fs-sm); margin: 0; }
+
+/* Sahələr */
+.question-form-modal .form-group > label, .question-form-modal .label-text {
+    font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase; font-weight: 800; color: var(--ems-neutral-500);
+}
+.question-form-modal .form-group input[type="text"], .question-form-modal .form-group input[type="number"],
+.question-form-modal .form-group textarea, .question-form-modal .form-group select,
+.question-form-modal .variant-input {
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); background: var(--ems-bg); color: var(--ems-text);
+    font-size: var(--ems-fs-base); min-height: var(--ems-h-field, 40px); box-shadow: none;
+}
+.question-form-modal .form-group input:focus, .question-form-modal .form-group textarea:focus, .question-form-modal .variant-input:focus {
+    border-color: var(--ems-primary-400); box-shadow: var(--ems-sh-focus); outline: none;
+}
+.question-form-modal .help-text, .question-form-modal .info-text { color: var(--ems-text-muted); font-size: var(--ems-fs-sm); }
+.question-form-modal .error-msg { color: var(--ems-danger-700); font-size: var(--ems-fs-sm); font-weight: 600; }
+
+/* Media / bölmə kartları */
+.question-form-modal .question-form-shell--modal .form-row,
+.question-form-modal .question-paint-toggle__box, .question-form-modal .question-paint-state-card {
+    background: var(--ems-bg); border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); box-shadow: none;
+}
+.question-form-modal .file-input-wrapper { border: 1px dashed var(--ems-neutral-300); border-radius: var(--ems-r-lg); background: var(--ems-bg); }
+.question-form-modal .file-input-wrapper:hover { border-color: var(--ems-primary-300); background: var(--ems-primary-50); }
+.question-form-modal .single-answer-mode-warning { background: var(--ems-warning-100); border: 1px solid var(--ems-warning-bd); color: var(--ems-warning-800); border-radius: var(--ems-r-lg); }
+
+/* Variantlar */
+.question-form-modal .variants-section { background: var(--ems-bg); border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); padding: 14px 16px; }
+.question-form-modal .question-form-shell--modal .variants-header { background: transparent; border: 0; padding: 0 0 10px; }
+.question-form-modal .variants-header h3, .question-form-modal .variants-header .label-text { font-size: var(--ems-fs-md); font-weight: 800; color: var(--ems-text); text-transform: none; letter-spacing: 0; }
+.question-form-modal .variant-card { border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); background: var(--ems-bg-subtle); box-shadow: none; }
+.question-form-modal .variant-card:has(.variant-check:checked) { border-color: var(--ems-success-bd); background: var(--ems-success-100); }
+.question-form-modal .question-form-shell--modal .variant-card-header { background: transparent; border: 0; }
+.question-form-modal .variant-card-title { font-weight: 800; color: var(--ems-neutral-700); }
+.question-form-modal .variant-remove-btn { color: var(--ems-danger-700); background: var(--ems-danger-100); border: 1px solid transparent; border-radius: var(--ems-r-md); }
+.question-form-modal .variant-remove-btn:hover { border-color: var(--ems-danger-500); }
+.question-form-modal .variant-add-btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 14px;
+    border: 1px dashed var(--ems-primary-300); border-radius: var(--ems-r-lg); background: var(--ems-primary-50); color: var(--ems-primary-700); font-weight: 700;
+}
+.question-form-modal .variant-add-btn:hover { background: var(--ems-primary-100); }
+.question-form-modal .custom-checkbox-container .checkmark { border-radius: 6px; border: 1px solid var(--ems-neutral-300); }
+.question-form-modal .custom-checkbox-container input:checked ~ .checkmark { background: var(--ems-success-600); border-color: var(--ems-success-600); }
+
+/* Alt düymələr */
+.question-form-modal .question-form-modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; padding-top: 14px; border-top: 1px solid var(--ems-border); margin-top: 16px; }
+.question-form-modal .question-form-modal-actions button, .question-form-modal .question-form-modal-actions a {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 16px;
+    border-radius: var(--ems-r-lg); border: 1px solid var(--ems-border); background: var(--ems-bg); color: var(--ems-neutral-700); font-weight: 700; box-shadow: none; text-decoration: none;
+}
+.question-form-modal .question-form-modal-actions [type="submit"], .question-form-modal .question-form-modal-actions .btn-primary,
+.question-form-modal .question-form-modal-actions .primary-btn {
+    background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0);
+}
+.question-form-modal .question-form-modal-actions [type="submit"]:hover, .question-form-modal .question-form-modal-actions .btn-primary:hover,
+.question-form-modal .question-form-modal-actions .primary-btn:hover { background: var(--ems-primary-700); border-color: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.question-form-modal .question-form-modal-actions .js-close-question-form-modal:hover { background: var(--ems-bg-subtle); color: var(--ems-text); }

@@ -81,17 +81,25 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 </a>
                 {% endif %}
                 {% if wb_picker_url %}
-                <button type="button" class="page-header-link page-header-link--accent"
+                <button type="button" class="page-header-link page-header-link--accent{% if wb_picker_hint %} page-header-link--hinted{% endif %}"
                         data-bank-picker-open
-                        data-picker-url="{{ wb_picker_url }}">
+                        data-picker-url="{{ wb_picker_url }}"
+                        {% if wb_picker_hint %}title="{{ wb_picker_hint }}"{% endif %}>
                     <i class="fas fa-book-bookmark"></i>
-                    {{ wb_picker_label|default:default_wb_picker_label }}
+                    <span class="page-header-link__body">
+                        <span class="page-header-link__label">{{ wb_picker_label|default:default_wb_picker_label }}</span>
+                        {% if wb_picker_hint %}<span class="page-header-link__hint">{{ wb_picker_hint }}</span>{% endif %}
+                    </span>
                 </button>
                 {% endif %}
                 {% if wb_secondary_url %}
-                <a href="{{ wb_secondary_url }}" class="page-header-link">
+                <a href="{{ wb_secondary_url }}" class="page-header-link{% if wb_secondary_hint %} page-header-link--hinted{% endif %}"
+                   {% if wb_secondary_hint %}title="{{ wb_secondary_hint }}"{% endif %}>
                     <i class="fas {{ wb_secondary_icon|default:'fa-layer-group' }}"></i>
-                    {{ wb_secondary_label }}
+                    <span class="page-header-link__body">
+                        <span class="page-header-link__label">{{ wb_secondary_label }}</span>
+                        {% if wb_secondary_hint %}<span class="page-header-link__hint">{{ wb_secondary_hint }}</span>{% endif %}
+                    </span>
                 </a>
                 {% endif %}
             </div>
@@ -315,7 +323,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         <span>{% trans "Necə yazmalı olduğunu bilmirsən?" context "exams.template.test_question_bank" %}</span>
                     </div>
                     <p class="template-download__desc">
-                        {% trans "Hazır şablonu endirib doldurub geri yüklə." context "exams.template.test_question_bank" %}
+                        {% trans "Word (.docx) şablonunu endir, Word-də aç, nümunə suallara bax və öz suallarını eyni formada yaz — sonra faylı bura yüklə. TXT variantı da eyni formatdadır." context "exams.template.test_question_bank" %}
                     </p>
                     <div class="template-download__actions">
                         {% for tpl in wb_templates %}

@@ -148,9 +148,16 @@ def _test_workbench_context(exam, navigation_query, *, selected_language=None):
         "wb_secondary_url": questions_url,
         "wb_secondary_label": pgettext("exams.template.test_question_bank", "Sualları idarə et"),
         "wb_secondary_icon": "fa-sliders",
+        # SAHİB (2026-09-21): keçidlərin nə iş gördüyü aydın olsun — qısa izah.
+        "wb_secondary_hint": pgettext(
+            "exams.template.test_question_bank", "İmtahandakı mövcud sualları redaktə et, aktiv/deaktiv et və ya sil"
+        ),
         # "Suallar bankına bax" → kitabxana picker MODALINI açır (Part B).
         "wb_picker_url": picker_url,
         "wb_picker_label": pgettext("exams.template.test_question_bank", "Suallar bankına bax"),
+        "wb_picker_hint": pgettext(
+            "exams.template.test_question_bank", "Kafedranın qəbul olunmuş sual bankından hazır sualları seçib əlavə et"
+        ),
         "wb_show_settings": True,
         "wb_ai_url": reverse("exams:ai_generate_question_bank", kwargs={"slug": exam.slug}),
         "wb_ai_context": "test",
@@ -163,6 +170,7 @@ def _test_workbench_context(exam, navigation_query, *, selected_language=None):
         "wb_format": "test",
         "wb_show_report": True,
         "wb_templates": [
+            {"url": f"{download_base}?format=docx", "label": "Word (.docx)", "kind": "docx"},
             {"url": f"{download_base}?format=txt", "label": "TXT", "kind": "txt"},
         ],
         "wb_save_label": pgettext("exams.template.test_question_bank", "action_save_selected"),
