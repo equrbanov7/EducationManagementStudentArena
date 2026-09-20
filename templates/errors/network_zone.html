@@ -1,0 +1,22 @@
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'accounts.network_zone' %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block code_big %}403{% endblock %}
+{% block kicker_icon %}fa-building-lock{% endblock %}
+{% block kicker %}{% trans 'Şəbəkə məhdudiyyəti' context 'accounts.network_zone' %}{% endblock %}
+{% block title %}{% if zone_reason == 'journal_internal_only' %}{% trans 'Elektron jurnal yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% else %}{% trans 'Bu hesabla giriş yalnız universitet şəbəkəsindən mümkündür' context 'accounts.network_zone' %}{% endif %}{% endblock %}
+{% block description %}
+    {% if zone_reason == 'journal_internal_only' %}
+        {% trans 'Jurnal qeydləri kampus daxilindən (universitet Wi-Fi/LAN) aparılır. Digər bölmələr — fənlər, imtahanlar, sillabuslar — kənardan da işləyir.' context 'accounts.network_zone' %}
+    {% else %}
+        {% trans 'İnzibati hesablar təhlükəsizlik səbəbindən kənar şəbəkədən açılmır. Universitet şəbəkəsinə qoşulub yenidən daxil olun.' context 'accounts.network_zone' %}
+    {% endif %}
+{% endblock %}
+{% block pills %}
+    <span class="error-pill"><i class="fas fa-wifi"></i> {% trans 'Universitet Wi-Fi / LAN' context 'accounts.network_zone' %}</span>
+    <span class="error-pill"><i class="fas fa-shield-halved"></i> {% trans 'Şəbəkə zonası qaydası' context 'accounts.network_zone' %}</span>
+{% endblock %}
+{% block back_label %}{% trans 'Çıxış' context 'accounts.network_zone' %}{% endblock %}
+{% block footer_note %}{% trans 'Bu qayda sistem administratoru tərəfindən təyin olunub; sual olarsa RİM-ə müraciət edin.' context 'accounts.network_zone' %}{% endblock %}
+{% block caption %}{% trans 'Sorğu kənar şəbəkədən gəldi; bu bölmə üçün daxili zona tələb olunur.' context 'accounts.network_zone' %}{% endblock %}
