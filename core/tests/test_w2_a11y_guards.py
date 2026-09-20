@@ -174,9 +174,7 @@ class AuthErrorMarkupTest(SimpleTestCase):
 class IconOnlyButtonNamesTest(SimpleTestCase):
     # FE-F17 siyahısı: (şablon, düyməni tanıdan fraqment)
     CASES = [
-        ("apps/assignments/templates/assignments/review.html", 'class="btn btn-outline-secondary" type="submit"'),
-        ("apps/assignments/templates/assignments/review.html", "js-edit-assignment"),
-        ("apps/assignments/templates/assignments/review.html", "js-delete-assignment"),
+        # assignments/review.html 2026-09-20 silindi (istinadsız ölü şablon).
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", "jsOpenEditGroup"),
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", "jsConfirmDeleteGroup"),
         ("apps/exams/templates/exams/teacher/teacher_group_list.html", 'id="deleteBtn"'),

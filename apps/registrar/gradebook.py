@@ -57,10 +57,26 @@ def _to_decimal(raw) -> Decimal:
         return Decimal("0")
 
 
+_SCHEME_MEMO_ATTR = "_assessment_scheme_memo"
+
+
 def ensure_assessment_scheme(*, offering):
-    """Idempotently return the offering's journal config."""
+    """Idempotently return the offering's journal config.
+
+    Oxu yolunda (`preload_assessment_scheme`) eyni offering obyektinə memo
+    qoyulubsa təkrar ``get_or_create`` getmir — jurnal səhifəsi bunu 4 dəfə
+    çağırırdı (journal_is_locked, roster_block_reason, get_offering_journal…)."""
+    memo = getattr(offering, _SCHEME_MEMO_ATTR, None)
+    if memo is not None:
+        return memo
     scheme, _created = AssessmentScheme.objects.get_or_create(organization=offering.organization, offering=offering)
     return scheme
+
+
+def preload_assessment_scheme(offering):
+    """YALNIZ oxu yolu (journal_detail GET): sxemi bir dəfə oxuyub obyektə yapışdırır.
+    Yazı yolları memo qoymur — testlər/servislər həmişə canlı sorğu görür."""
+    setattr(offering, _SCHEME_MEMO_ATTR, ensure_assessment_scheme(offering=offering))
 
 
 # Jurnalı donduran YEGANƏ vəziyyət: RİM-in bağladığı jurnal. Ara statuslar

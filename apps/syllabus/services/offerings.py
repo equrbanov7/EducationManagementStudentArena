@@ -103,6 +103,34 @@ def syllabus_for_offering(*, organization, offering_id=None, subject_id=None, pe
     )
 
 
+_SYLLABUS_MEMO_ATTR = "_syllabus_memo"
+
+
+def syllabus_for_offering_obj(offering):
+    """`syllabus_for_offering`-in offering OBYEKTİ ilə qısa forması.
+
+    Jurnal səhifəsi eyni açılış üçün bunu 4 dəfə çağırır (bildiriş zolağı, mövzu
+    seçimləri, mövzu meta…); view `preload_syllabus_for_offering` ilə memo
+    qoyubsa oradan qayıdır — memo yoxdursa həmişə canlı sorğu (yazı yolları və
+    testlər dəyişmir). ``None`` də memo-lanır (sillabussuz açılış)."""
+    if hasattr(offering, _SYLLABUS_MEMO_ATTR):
+        return getattr(offering, _SYLLABUS_MEMO_ATTR)
+    return syllabus_for_offering(
+        organization=offering.organization,
+        offering_id=offering.id,
+        subject_id=offering.subject_id,
+        period_id=offering.period_id,
+        instructor_id=offering.instructor_id,
+    )
+
+
+def preload_syllabus_for_offering(offering):
+    """YALNIZ oxu yolu: dosyeni bir dəfə tapıb offering obyektinə yapışdırır."""
+    if hasattr(offering, _SYLLABUS_MEMO_ATTR):
+        delattr(offering, _SYLLABUS_MEMO_ATTR)
+    setattr(offering, _SYLLABUS_MEMO_ATTR, syllabus_for_offering_obj(offering))
+
+
 def approved_version_for(syllabus):
     """Tələbənin GÖRDÜYÜ versiya — qüvvədə olan təsdiqlənmiş nüsxə.
 
