@@ -1,0 +1,324 @@
+/* [BÖLÜNMÜŞ 2026-09-21] `people_directory.css`-dən (956 sətir, sətir 371–690) mexaniki
+   çıxarılıb — 2/3-ci hissə; qaydalar və sıra dəyişdirilməyib (SOFT_CAP 600).
+   YÜKLƏNMƏ SIRASI KASKADA görə saxlanılmalıdır: people_directory.css → people_directory_table.css → people_directory_dialogs.css. */
+
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
+.people__table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 14px;
+    background: var(--ems-surface, #ffffff);
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+}
+
+.people__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 760px;
+}
+
+.people__table th,
+.people__table td {
+    padding: 11px 12px;
+    text-align: start;
+    border-bottom: 1px solid var(--ems-border-subtle, #eef1f6);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.people__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--ems-bg-subtle, #f8fafc);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500, #6b7280);
+}
+
+.people__table tbody tr {
+    transition: background-color 0.12s ease;
+}
+
+.people__table tbody tr:hover {
+    background: var(--ems-primary-50, #f3f7ff);
+}
+
+.people__table tbody tr.is-selected {
+    background: var(--ems-primary-50, #eef4ff);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600, #2563eb);
+}
+
+.people__table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.people__table td.is-muted {
+    color: var(--ems-neutral-400, #9ca3af);
+}
+
+.people__th-check,
+.people__cell-check {
+    width: 40px;
+    padding-inline-end: 0;
+}
+
+.people__th-check input,
+.people__cell-check input {
+    width: 18px;
+    height: 18px;
+    margin: 3px; /* 2026-09-14 (FE-F11): 24 px hədəf dairəsi boş — 2.5.8 aralıq istisnası; xana JS-də sarğısız */
+    accent-color: var(--ems-primary-600, #2563eb);
+    cursor: pointer;
+}
+
+.people__th-actions {
+    text-align: end;
+}
+
+.people__th-sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 24px; padding: 3px 0; /* 2026-09-14 (audit FE-F11, WCAG 2.5.8): 64×18 → ≥24 px hədəf */
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.people__th-sort:hover {
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.people__th-sort-icon::after {
+    content: "⇅";
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+
+th[aria-sort="ascending"] .people__th-sort-icon::after {
+    content: "↑";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+
+th[aria-sort="descending"] .people__th-sort-icon::after {
+    content: "↓";
+    opacity: 1;
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.people__cell-person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 220px;
+}
+
+.people__avatar {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 12px;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--ems-primary-100, #dbe7ff), var(--ems-primary-50, #eef4ff));
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.people__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.people__name-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    min-width: 0;
+}
+
+.people__name {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    color: var(--ems-text, #1f2937);
+    cursor: pointer;
+    text-align: start;
+    border-radius: 4px;
+}
+
+.people__name:hover {
+    color: var(--ems-primary-700, #1d4ed8);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.people__username,
+.people__meta {
+    font-size: 0.76rem;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+.people__cell-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.people__contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    color: var(--ems-text, #1f2937);
+    text-decoration: none;
+}
+
+.people__contact i {
+    color: var(--ems-neutral-400, #9ca3af);
+    font-size: 11px;
+}
+
+.people__contact:hover {
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__cell-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.people__cell-status .ems-badge,
+.people__cell-group .ems-badge {
+    white-space: nowrap;
+}
+
+.people__cell-actions {
+    text-align: end;
+}
+
+.people__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 34px;
+    margin-inline-start: 4px;
+    padding: 0 10px;
+    border: 1px solid var(--ems-border, #d5dbe5);
+    border-radius: 9px;
+    background: var(--ems-surface, #ffffff);
+    color: var(--ems-text, #1f2937);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: border-color 0.12s ease, background-color 0.12s ease, color 0.12s ease;
+}
+
+.people__action i {
+    font-size: 12px;
+    color: var(--ems-neutral-500, #6b7280);
+}
+
+.people__action:hover {
+    border-color: var(--ems-primary-300, #9dbaf5);
+    background: var(--ems-primary-50, #eef4ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__action:hover i {
+    color: inherit;
+}
+
+.people__action--manage {
+    border-color: var(--ems-primary-200, #c7d7fe);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.people__action--manage i {
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.people__action--icon {
+    width: 34px;
+    padding: 0;
+    justify-content: center;
+}
+
+.people__action--danger:hover {
+    border-color: var(--ems-danger, #dc2626);
+    background: #fef2f2;
+    color: var(--ems-danger-strong, #b91c1c);
+}
+
+.people__action--ok:hover {
+    border-color: #34d399;
+    background: #ecfdf5;
+    color: #047857;
+}
+
+/* ── Boş vəziyyət / səhifələmə ──────────────────────────────────────────── */
+.people__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 36px 16px;
+    border: 1px dashed var(--ems-border, #d5dbe5);
+    border-radius: 14px;
+    color: var(--ems-text-muted, #5b6472);
+    text-align: center;
+}
+
+.people__empty > i {
+    font-size: 26px;
+    opacity: 0.45;
+}
+
+.people__empty p {
+    margin: 0;
+}
+
+.people__denied,
+.people__placeholder {
+    margin: 0;
+    color: var(--ems-text-muted, #5b6472);
+}
+
+.people__pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.people__pager[hidden] {
+    display: none;
+}
+
+.people__pager-info {
+    font-size: 0.86rem;
+    color: var(--ems-text-muted, #5b6472);
+    font-weight: 600;
+}
+

@@ -12,6 +12,7 @@ verir. CSS xarici fayldadır (CSP); JS `profile.html`-də bir sətirlə yüklən
          data-profile-section-panel="audit-log"
          data-source-url="{{ profile_base_url }}?section=audit-log">
 <link rel="stylesheet" href="{% static 'audit/css/audit_log.css' %}?v=20260908-1">
+<link rel="stylesheet" href="{% static 'audit/css/audit_log_drawer.css' %}?v=20260908-1">
 {% include "audit/partials/_audit_log_content.html" with audit_log_section=audit_log_section filter_base_url=profile_base_url %}
 </section>
 {% endif %}
