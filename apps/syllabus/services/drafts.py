@@ -26,7 +26,7 @@ from ..constants import (
     SyllabusStatus,
 )
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
-from ..policy import assessment_weights
+from ..policy import assessment_weights, standard_midterm, standard_project
 from ..state_machine import TransitionDenied
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .scoping import is_author
@@ -55,20 +55,19 @@ def default_assess_data(organization=None) -> dict:
     boş sxem 0/0 DEYİL: yeni qaralama dərhal etibarlı bölgü ilə açılır, müəllim
     isə sürüşdürücü ilə nisbəti dəyişir.
     """
-    flex = assessment_weights(organization)["flex"]
-    midterm = flex // 2
-    return {"midterm": midterm, "project": flex - midterm, "note": ""}
+    weights = assessment_weights(organization)
+    return {"midterm": standard_midterm(weights), "project": standard_project(weights), "note": ""}
 
 
 def assess_split_is_valid(data, organization=None) -> bool:
-    """``midterm + project == flex`` və hər ikisi mənfi deyil."""
-    flex = assessment_weights(organization)["flex"]
+    """Bölgü STANDARTA bərabərdirmi (sahib 2026-09-20: müəllim bal seçmir)."""
+    weights = assessment_weights(organization)
     try:
         midterm = int((data or {}).get("midterm") or 0)
         project = int((data or {}).get("project") or 0)
     except (TypeError, ValueError):
         return False
-    return midterm >= 0 and project >= 0 and midterm + project == flex
+    return midterm == standard_midterm(weights) and project == standard_project(weights)
 
 
 def blank_section_data(section_id: str, organization=None) -> dict:
@@ -383,15 +382,14 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     old_data = row.data
     # Merge, PUT deyil: göndərilməyən açar saxlanılır (bax docstring).
     merged = {**(old_data or {}), **(data or {})}
-    if section_id == SectionKey.ASSESS.value and ("midterm" in (data or {}) or "project" in (data or {})):
-        # SERVER kilidi: kilidli çəkilər (10/10/50) müəllimə açıq deyil, qalan
-        # `flex` isə TAM bölünməlidir.  Redaktor sürüşdürücüsü bunu onsuz da
-        # təmin edir, amma HTTP səthi ixtiyari JSON qəbul etdiyi üçün invariant
-        # BURADA da qorunur (README §8/4).  Yoxlama BİRLƏŞMİŞ nəticə üzərindədir:
-        # kliyent yalnız bir açarı göndərəndə digəri sətirdən gəlir.
-        if not assess_split_is_valid(merged, version.organization):
-            flex = assessment_weights(version.organization)["flex"]
-            raise TransitionDenied("assess.split_mismatch", params={"need": flex})
+    if section_id == SectionKey.ASSESS.value:
+        # SERVER kilidi (sahib 2026-09-20): bal bölgüsü universitet STANDARTIDIR,
+        # müəllim seçmir.  HTTP səthi ixtiyari JSON qəbul etdiyi üçün gələn
+        # `midterm`/`project` dəyərləri NƏZƏRƏ ALINMIR — həmişə standart yazılır;
+        # `note`/`exam_questions` kimi mətn açarları isə birləşmə ilə qorunur.
+        split = default_assess_data(version.organization)
+        merged["midterm"] = split["midterm"]
+        merged["project"] = split["project"]
     row.data = merged
     row.revision += 1
     row.updated_by = actor.user

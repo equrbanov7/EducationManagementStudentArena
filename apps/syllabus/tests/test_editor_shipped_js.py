@@ -62,7 +62,7 @@ PERMS = ["syllabus.view", "syllabus.edit", "syllabus.submit", "grade.input"]
 #:
 #: ⚠️ Bu sabiti yeniləmək = «güzgünü (``editor_dom.py``) da nəzərdən keçirdim»
 #: demək.  Yalnız həmin nəzərdən keçirmə ilə birlikdə dəyişdirin.
-CONTRACT_DIGEST = "9f3dfc2e329496c143e8fc32fc8d962e18c700bda8b59e5dd9a629e90a20e725"
+CONTRACT_DIGEST = "e7ba5e688b3a29a8366cc485ae001730574c9fc8595c724fd79613e4eadb8632"
 
 #: Unicode-un sətir ayırıcıları — ``str.splitlines`` onların HAMISINI bölür,
 #: yəni köçürmə təmizləyicisi hamısını ``\n``-ə çevirir.  Ona görə hədəfdə
@@ -178,20 +178,13 @@ def test_assess_collector_does_not_invent_the_note_key():
     assert 'note: ""' not in body
 
 
-def test_assess_collector_writes_scores_only_after_the_slider_was_touched():
-    """Bal açarları MÜƏLLİMİN ƏMƏLİ olmadan göndərilmir.
-
-    Ölçülmüş itki yolu: köçürmə ``midterm: 0, project: 0`` (= «bölgü YOXDUR»)
-    yazır; müəllim «Qiymətləndirmə» addımına keçib sürüşdürücüyə TOXUNMADAN
-    «Qaralama saxla» basanda toplayıcı ``project: 30`` göndərirdi və tələbənin
-    sənədinə heç kimin yazmadığı bal qaydası düşürdü.  Şərt `data-touched`
-    bayrağıdır — 0 seçmək də toxunmaqdır, ona görə silmə niyyəti qorunur.
-    """
+def test_assess_collector_never_sends_score_keys():
+    """Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — redaktor bal
+    açarlarını HEÇ VAXT göndərmir (server onsuz da standartı yazır); yalnız
+    `note` (inputu varsa) gedir."""
     body = _body(shipped_collector_source(), "collectAssess")
-    assert (
-        'slider.getAttribute("data-touched") === "1"' in body
-    ), "toxunma şərti itdi: bal açarları yenidən müəllim toxunmadan göndərilir"
-    assert "data.project" in body and body.index("data-touched") < body.index("data.project")
+    assert "data.midterm" not in body and "data.project" not in body
+    assert '["note"]' in body
 
 
 # ── 3. Render qapısı: sətir sonu UDAN elementə çox sətirli dəyər YOX ───────

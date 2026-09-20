@@ -18,7 +18,20 @@
 .ai-bot-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37, 99, 235, 0.4); }
 .ai-bot-btn:focus-visible { outline: 3px solid var(--ems-primary-300); outline-offset: 3px; }
 .ai-bot-btn--hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
-.ai-bot-btn__icon { width: 30px; height: 30px; }
+.ai-bot-btn__icon { width: 34px; height: 34px; overflow: visible; }
+/* Əl ~14 s-də bir yellənir (sahib: «arada əl eləsin ki, görsünlər orda var»);
+   gözlər arada qırpır. reduced-motion-da hər ikisi söndürülür (aşağıda). */
+.ai-bot-btn__hand { transform-origin: 44px 32px; animation: ai-hand-wave 14s ease-in-out infinite; }
+.ai-bot-btn__eye { transform-origin: center; animation: ai-blink-eyes 6s ease-in-out infinite; }
+@keyframes ai-hand-wave {
+    0%, 78%, 100% { transform: rotate(0); }
+    82% { transform: rotate(-22deg); }
+    86% { transform: rotate(18deg); }
+    90% { transform: rotate(-22deg); }
+    94% { transform: rotate(14deg); }
+    97% { transform: rotate(0); }
+}
+@keyframes ai-blink-eyes { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.15); } }
 .ai-bot-btn__screen, .ai-avatar-screen { fill: var(--ems-navy-900); }
 .ai-bot-btn__pulse {
     position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
@@ -164,5 +177,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
     .ai-bot-btn, .ai-chat-panel, .ai-bot-tooltip { transition: none; }
-    .ai-bot-btn--wave .ai-bot-btn__pulse, .ai-bot-btn--wave .ai-bot-btn__icon, .ai-typing-dot { animation: none; }
+    .ai-bot-btn--wave .ai-bot-btn__pulse, .ai-bot-btn--wave .ai-bot-btn__icon, .ai-typing-dot,
+    .ai-bot-btn__hand, .ai-bot-btn__eye { animation: none; }
 }

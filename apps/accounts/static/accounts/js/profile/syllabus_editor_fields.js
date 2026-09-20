@@ -200,33 +200,11 @@
         return data;
     }
 
-    /* Qiymətləndirmə: yalnız `midterm` sürüşdürülür — `project` ONDAN törəyir
-       (cəm universitet siyasəti ilə sabitdir), ona görə burada hesablanır.
-
-       ⚠️ `note` yalnız onun üçün input VARSA göndərilir.  Panelə hələ belə
-       input əlavə edilməyib (`legacy_syllabus_assessment_note_unsurfaced`),
-       ona görə açar adətən heç göndərilmir və serverdəki mətn qorunur.
-
-       ⚠️ BAL AÇARLARI YALNIZ SÜRÜŞDÜRÜCÜYƏ TOXUNULANDAN SONRA GEDİR.  Əvvəllər
-       panel render olunubsa hər saxlamada `project = data-flex − midterm`
-       göndərilirdi.  Köçürmə isə qəsdən `midterm: 0, project: 0` yazır (=
-       «bölgü YOXDUR») və oxu sənədi bu cütü `None` sayıb tələbəyə heç nə
-       göstərmir.  Nəticə ölçülüb: müəllim «Qiymətləndirmə» addımına keçib
-       sürüşdürücüyə TOXUNMADAN «Qaralama saxla» basanda sənədə heç kimin
-       yazmadığı `project: 30` düşürdü.  İndi toxunma bayrağı şərtdir:
-       redaktor onu `input`/`change` hadisəsində qoyur, yəni 0 SEÇMƏK də
-       toxunmaqdır və silmə niyyəti kimi göndərilir; toxunulmayıbsa açar
-       ümumiyyətlə göndərilmir və serverdəki bölgü toxunulmaz qalır.
-       Bayraq yoxdursa (hadisə qatı sınıbsa) davranış TƏHLÜKƏSİZ tərəfə düşür:
-       heç nə yazılmır.  Bal siyasəti/cəmi BURADA DEYİL — bax `_assessment`. */
+    /* Qiymətləndirmə (sahib 2026-09-20): bal bölgüsü universitet STANDARTIDIR,
+       redaktorda seçilmir — server hər halda standartı yazır.  Buradan yalnız
+       `note` (varsa inputu) gedir; bal açarları GÖNDƏRİLMİR. */
     function collectAssess(box) {
-        var slider = box ? box.querySelector("[data-syl-midterm]") : null;
         var data = {};
-        if (slider && slider.getAttribute("data-touched") === "1") {
-            var midterm = int(slider.value);
-            data.midterm = midterm;
-            data.project = Math.max(0, int(slider.getAttribute("data-flex")) - midterm);
-        }
         assign(data, plainFields(box), ["note"]);
         return data;
     }
