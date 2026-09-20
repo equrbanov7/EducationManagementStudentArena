@@ -78,7 +78,8 @@ if user is None:
 else:
     settings.DEBUG = True
     settings.ALLOWED_HOSTS = ["*"]
-    client = Client()
+    # SECURE_SSL_REDIRECT açıqdır — sorğular HTTPS kimi getməlidir (əks halda hər şey 301).
+    client = Client(secure=True)
     client.force_login(user)
     pages = [
         reverse("accounts:profile"),
@@ -113,7 +114,7 @@ else:
         reset_queries()
         t0 = time.time()
         try:
-            resp = client.get(url, HTTP_HOST=HOST, follow=False)
+            resp = client.get(url, HTTP_HOST=HOST, follow=False, secure=True)
             status = resp.status_code
         except Exception as exc:  # noqa: BLE001
             status = f"ERR {type(exc).__name__}"
