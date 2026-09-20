@@ -4,8 +4,9 @@ Redaktorun 4–6-cı bölmələri: `week`, `method`, `assess`.
 
 `week` cədvəli 16 sətirdir və hər dərs növü (mühazirə/seminar/laboratoriya) üzrə
 saat AYRICA yoxlanılır — bir mövzu həm mühazirədə, həm seminarda keçilə bilər.
-`assess`-də davamiyyət/sərbəst iş/yekun çəkiləri SİYASƏTLƏ kilidlidir; müəllim
-yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
+`assess`-də bölgü universitet STANDARTIDIR (sahib 2026-09-20): davamiyyət 10 ·
+kollokvium 20 · sərbəst iş 10 · seminar/lab ədədi ortası 10 · yekun 50; müəllim
+heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
 {% endcomment %}
 
 {% with p=se.panels.week %}
@@ -38,6 +39,21 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
     </span>
     {% endfor %}
   </div>
+
+  {% if not se.hours.has_plan and not se.readonly %}
+  {% comment %}Sahib 2026-09-20: plan/yük sətri tapılmayanda müəllim fənnin saatını
+  özü yazır (syllabus_action → plan_hours). Tapılanda bu blok görünmür.{% endcomment %}
+  <form class="syl-planhours" data-syl-planhours data-action-url="{% url 'accounts:syllabus_action' %}" data-version="{{ se.version_id }}">
+    <p class="syl-planhours__text">{% trans "Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr saatını növ üzrə yazın:" context "accounts.syllabus" %}</p>
+    <div class="syl-planhours__fields">
+      <label class="syl-planhours__field"><span>{% trans "Mühazirə" context "accounts.syllabus" %}</span><input type="number" name="lecture" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
+      <label class="syl-planhours__field"><span>{% trans "Seminar" context "accounts.syllabus" %}</span><input type="number" name="seminar" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
+      <label class="syl-planhours__field"><span>{% trans "Laboratoriya" context "accounts.syllabus" %}</span><input type="number" name="lab" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
+      <button type="submit" class="ems-btn ems-btn--primary">{% trans "Saatı yadda saxla" context "accounts.syllabus" %}</button>
+    </div>
+    <p class="syl-planhours__msg" data-syl-planhours-msg role="status" hidden></p>
+  </form>
+  {% endif %}
 
   {% if se.week_extra_count %}
   {% comment %}Köçürülmüş cədvəl tədris planının 16 həftəsindən uzun ola bilər
@@ -195,37 +211,23 @@ yalnız 30 balı aralıq imtahan ↔ semestr layihəsi arasında bölür.
   </header>
   <p class="syl-panel__hint">{{ p.hint }}</p>
 
-  <ul class="syl-weights">
-    <li class="syl-weight syl-weight--fixed">
-      <span class="syl-weight__label">{% trans "Davamiyyət" context "accounts.syllabus" %}</span>
-      <span class="syl-weight__value">{{ a.attendance }}</span>
-      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
+  {% comment %}Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — müəllim
+  seçmir. Fəaliyyət sətri (seminar / laboratoriya / hər ikisi) dərs yükündən
+  gəlir (apps.syllabus.assessment_formula). Sürüşdürücü yoxdur; yalnız izah.{% endcomment %}
+  <ul class="syl-weights syl-weights--standard">
+    {% for row in a.rows %}
+    <li class="syl-weight syl-weight--fixed{% if row.key == 'final' %} syl-weight--final{% endif %}" data-syl-weight="{{ row.key }}">
+      <span class="syl-weight__label">{{ row.label }}</span>
+      <span class="syl-weight__value">{{ row.score }}</span>
+      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet standartı" context "accounts.syllabus" %}</span>
     </li>
-    <li class="syl-weight syl-weight--fixed">
-      <span class="syl-weight__label">{% trans "Sərbəst iş" context "accounts.syllabus" %}</span>
-      <span class="syl-weight__value">{{ a.selfwork }}</span>
-      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
-    </li>
-    <li class="syl-weight">
-      <label class="syl-weight__label" for="syl-midterm">{% trans "Aralıq imtahan" context "accounts.syllabus" %}</label>
-      <input id="syl-midterm" type="range" min="0" max="{{ a.flex }}" step="5" value="{{ a.midterm }}"
-             data-field="midterm" data-syl-midterm data-flex="{{ a.flex }}" {% if se.readonly %}disabled{% endif %}>
-      <span class="syl-weight__value" data-syl-midterm-value>{{ a.midterm }}</span>
-    </li>
-    <li class="syl-weight syl-weight--fixed">
-      <span class="syl-weight__label">{% trans "Semestr layihəsi" context "accounts.syllabus" %}</span>
-      <span class="syl-weight__value" data-syl-project-value>{{ a.project }}</span>
-    </li>
-    <li class="syl-weight syl-weight--fixed">
-      <span class="syl-weight__label">{% trans "Yekun imtahan" context "accounts.syllabus" %}</span>
-      <span class="syl-weight__value">{{ a.final }}</span>
-      <span class="syl-weight__lock"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Universitet siyasəti" context "accounts.syllabus" %}</span>
-    </li>
+    {% endfor %}
   </ul>
 
   <p class="syl-hintbox syl-hintbox--ok">
-    {% trans "Davamiyyət, sərbəst iş və yekun imtahan universitet siyasəti ilə kilidlidir. Yalnız qalan 30 bal aralıq imtahan və semestr layihəsi arasında bölünür — cəm həmişə 100 qalır." context "accounts.syllabus" %}
-    <b>{% trans "Cəmi 100 bal" context "accounts.syllabus" %}</b>
+    {% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + kollokvium + sərbəst iş + seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}
+    <b>{{ a.formula }}</b>
   </p>
+  <p class="syl-hintbox">{{ a.activity_note }}</p>
 </article>
 {% endwith %}

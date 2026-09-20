@@ -266,24 +266,12 @@ def collect_out(root) -> dict:
 
 
 def collect_assess(root) -> dict:
-    """`collectAssess` — bal yalnız sürüşdürücüyə TOXUNULUBSA, `note` input VARSA.
-
-    ⚠️ Toxunma bayrağı (``data-touched="1"``) redaktorun ``input``/``change``
-    hadisəsində qoyulur.  Render olunmuş DOM-da o YOXDUR, yəni bu güzgü
-    «müəllim toxunmadı» halını modelləyir: bal açarları göndərilmir və serverin
-    bölgüsü toxunulmaz qalır.  Əvvəllər açarlar həmişə gedirdi və köçürmənin
-    «bölgü yoxdur» yazısı (``midterm: 0, project: 0``) müəllimin ilk
-    saxlamasında ``project: 30``-a çevrilirdi.
-    """
+    """`collectAssess` — sahib 2026-09-20: bal bölgüsü standartdır, redaktordan
+    yalnız `note` (inputu VARSA) gedir; bal açarları heç vaxt göndərilmir."""
     box = panel(root, "assess")
     data: dict = {}
     if box is None:
         return data
-    sliders = box.xpath(".//*[@data-syl-midterm]")
-    if sliders and sliders[0].get("data-touched") == "1":
-        midterm = _int(sliders[0].get("value"))
-        data["midterm"] = midterm
-        data["project"] = max(0, _int(sliders[0].get("data-flex")) - midterm)
     return _assign(data, _plain_fields(box), ["note"])
 
 

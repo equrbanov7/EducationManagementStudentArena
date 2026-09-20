@@ -402,8 +402,8 @@ def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world):
     )
 
     data = services.section_data_map(version)[SectionKey.ASSESS.value]
-    # Göndərilən açarlar yenilənib…
-    assert (data["midterm"], data["project"]) == (15, 15)
+    # Bal açarları STANDARTA gətirilib (sahib 2026-09-20 — kliyent dəyəri nəzərə alınmır)…
+    assert (data["midterm"], data["project"]) == (20, 10)
     # …göndərilməyənlər İSƏ toxunulmaz qalıb.
     assert data["note"] == MIGRATED_ASSESS["note"]
     assert data["exam_questions"] == MIGRATED_ASSESS["exam_questions"]
@@ -426,8 +426,8 @@ def test_the_reader_still_shows_the_source_rule_text_after_that_autosave(world):
 
     assert "348 nömrəli qərarına" in body
     assert "1. Alqoritm nədir?" in body
-    # Bal cütü DOLDURULUB → bölgü sətri indi HAQLI olaraq çıxır (cəm 100).
-    assert body.split("\n")[0].endswith(f"= 100 {_POINTS}")
+    # Standart düstur birinci sətirdir (cəm 100), mənbə mətni onun ardınca.
+    assert f"= 100 {_POINTS}" in body.split("\n")[0]
 
 
 def test_an_explicit_empty_value_still_deletes(world):

@@ -165,16 +165,19 @@ class SyllabusAutosaveConflictTest(_Base):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["revision"], before + 1)
 
-    def test_an_assessment_split_outside_the_policy_is_refused_by_the_endpoint(self):
+    def test_an_assessment_split_sent_by_the_client_is_replaced_by_the_standard(self):
+        """Sahib 2026-09-20: bölgü universitet standartıdır — kliyentin dəyəri nəzərə alınmır."""
         client = self._client()
         response = client.post(
             reverse("accounts:syllabus_section_save", kwargs={"version_id": str(self.version.pk)}),
             data=json.dumps({"section": SectionKey.ASSESS.value, "data": {"midterm": 80, "project": 80}}),
             content_type="application/json",
         )
-        # Validasiya xətası kliyent xətasıdır (QA 2026-09-05 SYLLABUS-06): 400, icazə 403 deyil.
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["code"], "assess.split_mismatch")
+        self.assertEqual(response.status_code, 200)
+        from apps.syllabus.models import SyllabusSection
+
+        row = SyllabusSection.objects.get(version=self.version, section_id=SectionKey.ASSESS.value)
+        self.assertEqual((row.data["midterm"], row.data["project"]), (20, 10))
 
 
 class SyllabusInputGuardTest(_Base):
