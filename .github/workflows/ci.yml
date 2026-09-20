@@ -75,18 +75,18 @@ jobs:
       python-version: "3.11"
 
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
-  # 4 paralel shard (hər biri öz Postgres/Redis-i ilə), coverage yox: kritik yol 38 → ~10–12 dəq.
+  # 6 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı), coverage yox: kritik yol 38 → ~8 dəq.
   unit-tests-312:
     needs: lint
     strategy:
       fail-fast: false
       matrix:
-        shard: ["1", "2", "3", "4"]
+        shard: ["1", "2", "3", "4", "5", "6"]
     uses: ./.github/workflows/_unit-tests.yml
     with:
       python-version: "3.12"
       shard: ${{ matrix.shard }}
-      shards: "4"
+      shards: "6"
       coverage: false
 
   # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
@@ -121,8 +121,11 @@ jobs:
     uses: ./.github/workflows/_secret-scan.yml
 
   # ── 6. Docker Production Build ─────────────────────────────────────────
+  # Sahib 2026-09-21: Docker build → Trivy → prod-smoke → e2e zənciri (~10 dəq) yalnız
+  # main push-larında və PR-larda; Develop/Staging push-ları onu gözləmir.
   docker-build:
     needs: lint
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     uses: ./.github/workflows/_docker-build.yml
 
   # ── 7. Container CVE Scan (Trivy) ──────────────────────────────────────
@@ -166,6 +169,9 @@ jobs:
 
     steps:
       - name: 📋 Check all jobs status
+        env:
+          # Develop/Staging push-larında Docker zənciri qəsdən ötürülür (bax docker-build.if).
+          DOCKER_CHAIN_OPTIONAL: ${{ (github.event_name == 'push' && github.ref != 'refs/heads/main') && '1' || '0' }}
         run: |
           echo "=== CI Pipeline Summary ==="
           echo "Lint:             ${{ needs.lint.result }}"
@@ -223,22 +229,22 @@ jobs:
           # deploy oluna bilirdi. Artıq bunlar da merge/deploy gate-ini
           # bloklayır. Docker Hub keçici problemləri (rate-limit/timeout)
           # üçün həll — job-u YENİDƏN İŞƏ SALMAQ, ətrafından keçmək yox.
-          if [[ "${{ needs.docker-build.result }}" != "success" ]]; then
+          if [[ "${{ needs.docker-build.result }}" != "success" && ! ( "${{ needs.docker-build.result }}" == "skipped" && "$DOCKER_CHAIN_OPTIONAL" == "1" ) ]]; then
             echo "❌ Docker Build did not succeed: ${{ needs.docker-build.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.container-scan.result }}" != "success" ]]; then
+          if [[ "${{ needs.container-scan.result }}" != "success" && ! ( "${{ needs.container-scan.result }}" == "skipped" && "$DOCKER_CHAIN_OPTIONAL" == "1" ) ]]; then
             echo "❌ Container Scan (Trivy) did not succeed: ${{ needs.container-scan.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.prod-smoke.result }}" != "success" ]]; then
+          if [[ "${{ needs.prod-smoke.result }}" != "success" && ! ( "${{ needs.prod-smoke.result }}" == "skipped" && "$DOCKER_CHAIN_OPTIONAL" == "1" ) ]]; then
             echo "❌ Prod Smoke Test did not succeed: ${{ needs.prod-smoke.result }}"
             exit 1
           fi
 
-          if [[ "${{ needs.e2e-smoke.result }}" != "success" ]]; then
+          if [[ "${{ needs.e2e-smoke.result }}" != "success" && ! ( "${{ needs.e2e-smoke.result }}" == "skipped" && "$DOCKER_CHAIN_OPTIONAL" == "1" ) ]]; then
             echo "❌ E2E Smoke Test did not succeed: ${{ needs.e2e-smoke.result }}"
             exit 1
           fi
