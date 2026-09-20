@@ -408,9 +408,29 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
         mode, _level, _m = resolve_actor_access(self.exam_center, self.org)
         self.assertEqual(mode, MODE_LIMITED)
 
-    def test_ikt_gets_limited_not_full(self):
+    def test_ikt_gets_full_by_owner_decision(self):
+        """SAHİB 2026-09-21: RİM rəhbəri hər roldakı bütün özəllikləri görsün."""
         mode, _level, _m = resolve_actor_access(self.ikt, self.org)
-        self.assertEqual(mode, MODE_LIMITED)
+        self.assertEqual(mode, MODE_FULL)
+
+    def test_rector_and_vice_rector_get_full(self):
+        """Rektor/prorektor xəritədə yox idi → 403 → panel boş görünürdü."""
+        for name, level in (("rector", 100), ("vice_rector", 90)):
+            with self.subTest(role=name):
+                role = _make_role(self.org, name, level)
+                user = User.objects.create_user(f"{name}_u", f"{name}@example.com", PASSWORD)
+                _add_member(user, self.org, role)
+                mode, _level, _m = resolve_actor_access(user, self.org)
+                self.assertEqual(mode, MODE_FULL)
+
+    def test_administrative_staff_get_readonly(self):
+        for name, level in (("teaching_office_head", 85), ("admin_unit_head", 65), ("program_coordinator", 45)):
+            with self.subTest(role=name):
+                role = _make_role(self.org, name, level)
+                user = User.objects.create_user(f"{name}_u", f"{name}@example.com", PASSWORD)
+                _add_member(user, self.org, role)
+                mode, _level, _m = resolve_actor_access(user, self.org)
+                self.assertEqual(mode, MODE_READONLY)
 
     def test_high_level_role_without_mapping_gets_no_access(self):
         """Səviyyə tək başına səlahiyyət vermir — xəritədə olmayan rol girə bilməz."""
@@ -424,7 +444,7 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
 
     def test_limited_actor_cannot_target_org_admin(self):
         """Məxfi HR/idarəçi məlumatı: admin hesabı hədəf ola bilməz."""
-        target, mode = validate_target(self.ikt, self.org, self.admin.pk)
+        target, mode = validate_target(self.exam_center, self.org, self.admin.pk)
 
         self.assertIsNone(target)
         self.assertIsNone(mode)
@@ -447,7 +467,7 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
                 victim = User.objects.create_user(f"victim_{role_name}", f"{role_name}@example.com", PASSWORD)
                 _add_member(victim, self.org, role)
 
-                target, mode = validate_target(self.ikt, self.org, victim.pk)
+                target, mode = validate_target(self.exam_center, self.org, victim.pk)
 
                 self.assertIsNone(target, f"{role_name} hədəf ola bilməməlidir")
                 self.assertIsNone(mode)
@@ -458,7 +478,7 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
         victim = User.objects.create_user("victim_custom", "custom@example.com", PASSWORD)
         _add_member(victim, self.org, role)
 
-        target, mode = validate_target(self.ikt, self.org, victim.pk)
+        target, mode = validate_target(self.exam_center, self.org, victim.pk)
 
         self.assertIsNone(target)
         self.assertIsNone(mode)
@@ -480,7 +500,7 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
         staff = User.objects.create_user("ec_staff", "ecstaff@example.com", PASSWORD)
         _add_member(staff, self.org, staff_role)
 
-        target, mode = validate_target(self.ikt, self.org, staff.pk)
+        target, mode = validate_target(self.exam_center, self.org, staff.pk)
 
         self.assertEqual(target, staff)
         self.assertEqual(mode, MODE_LIMITED)
