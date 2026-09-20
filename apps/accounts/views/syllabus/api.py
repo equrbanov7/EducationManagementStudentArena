@@ -251,6 +251,23 @@ def syllabus_action(request):
             version, message = _do_copy(request, organization, actor, payload)
         elif action == "new_version":
             version, message = _do_new_version(request, organization, actor, payload)
+        elif action == "plan_hours":
+            # Sahib 2026-09-20: plan/yük sətri tapılmayanda müəllim saatı özü yazır.
+            version = _version(organization, payload.get("version"))
+            if version is None:
+                return _fail(_NOT_FOUND, status=404)
+            if not services.is_author(actor, version.syllabus):
+                return _fail(transition_text("transition.author_only"), status=403)
+            hours = {}
+            for kind in ("lecture", "seminar", "lab"):
+                try:
+                    hours[kind] = max(0, min(int(payload.get(kind) or 0), 300))
+                except (TypeError, ValueError):
+                    return _fail(_BAD_REQUEST)
+            if not any(hours.values()):
+                return _fail(_BAD_REQUEST)
+            version = services.set_plan_hours(version, hours)
+            message = _SAVED
         elif action in {"submit", "withdraw", "resume"}:
             version = _version(organization, payload.get("version"))
             if version is None:

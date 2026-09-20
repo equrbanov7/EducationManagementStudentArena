@@ -75301,3 +75301,177 @@ msgstr "Formada tətbiq olunmamış dəyişikliklər var. Bağlasanız, onlar it
 msgctxt "registrar.journal"
 msgid "Bağla, itsin"
 msgstr "Bağla, itsin"
+
+msgctxt "ai_assistant.tooltip"
+msgid "Sualınızı yazın — dərhal cavab alın"
+msgstr "Sualınızı yazın — dərhal cavab alın"
+
+msgctxt "ai_assistant.status"
+msgid "Tezliklə"
+msgstr "Tezliklə"
+
+msgctxt "ai_assistant.status"
+msgid "Onlayn"
+msgstr "Onlayn"
+
+msgctxt "ai_assistant.status"
+msgid ""
+"AI assistent hazırlanır — bu pəncərə tezliklə suallarınızı cavablandıracaq. "
+"Hələlik sualları kafedra və ya RİM-ə ünvanlayın."
+msgstr ""
+"AI assistent hazırlanır — bu pəncərə tezliklə suallarınızı cavablandıracaq. "
+"Hələlik sualları kafedra və ya RİM-ə ünvanlayın."
+
+msgctxt "ai_assistant.limit"
+msgid "Saatlıq sorğu limiti"
+msgstr "Saatlıq sorğu limiti"
+
+msgctxt "ai_assistant.footnote"
+msgid ""
+"Cavablar avtomatik yaradılır və səhv ola bilər. Şəxsi məlumat (şifrə, kart, "
+"FİN) yazmayın."
+msgstr ""
+"Cavablar avtomatik yaradılır və səhv ola bilər. Şəxsi məlumat (şifrə, kart, "
+"FİN) yazmayın."
+
+msgctxt "ai_assistant.disabled"
+msgid "AI assistent hazırda söndürülüb — tezliklə yenidən aktiv olacaq."
+msgstr "AI assistent hazırda söndürülüb — tezliklə yenidən aktiv olacaq."
+
+msgctxt "syllabus.assessment"
+msgid "Davamiyyət"
+msgstr "Davamiyyət"
+
+msgctxt "syllabus.assessment"
+msgid "Kollokvium (aralıq qiymətləndirmə)"
+msgstr "Kollokvium (aralıq qiymətləndirmə)"
+
+msgctxt "syllabus.assessment"
+msgid "Sərbəst iş"
+msgstr "Sərbəst iş"
+
+msgctxt "syllabus.assessment"
+msgid "Yekun imtahan"
+msgstr "Yekun imtahan"
+
+msgctxt "syllabus.assessment"
+msgid "Seminar (ədədi orta)"
+msgstr "Seminar (ədədi orta)"
+
+msgctxt "syllabus.assessment"
+msgid "Laboratoriya (ədədi orta)"
+msgstr "Laboratoriya (ədədi orta)"
+
+msgctxt "syllabus.assessment"
+msgid "Seminar + laboratoriya (birgə ədədi orta — cəm 2n-ə bölünür)"
+msgstr "Seminar + laboratoriya (birgə ədədi orta — cəm 2n-ə bölünür)"
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Seminar balı: semestr ərzindəki bütün seminar qiymətlərinin ədədi ortası "
+"(maksimum 10)."
+msgstr ""
+"Seminar balı: semestr ərzindəki bütün seminar qiymətlərinin ədədi ortası "
+"(maksimum 10)."
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Laboratoriya balı: semestr ərzindəki bütün laboratoriya qiymətlərinin ədədi "
+"ortası (maksimum 10)."
+msgstr ""
+"Laboratoriya balı: semestr ərzindəki bütün laboratoriya qiymətlərinin ədədi "
+"ortası (maksimum 10)."
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Fənndə həm seminar, həm laboratoriya var: bütün seminar və laboratoriya "
+"qiymətləri toplanıb ümumi sayına (2n) bölünür — birgə ədədi orta, maksimum "
+"10."
+msgstr ""
+"Fənndə həm seminar, həm laboratoriya var: bütün seminar və laboratoriya "
+"qiymətləri toplanıb ümumi sayına (2n) bölünür — birgə ədədi orta, maksimum "
+"10."
+
+msgctxt "syllabus.assessment"
+msgid "bal"
+msgstr "bal"
+
+msgctxt "syllabus.assessment"
+msgid "semestr"
+msgstr "semestr"
+
+msgctxt "syllabus.assessment"
+msgid "imtahan"
+msgstr "imtahan"
+
+msgctxt "accounts.syllabus"
+msgid "Universitet standartı"
+msgstr "Universitet standartı"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Semestr balı %(semester)s (davamiyyət + kollokvium + sərbəst iş + "
+"seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi %(total)s bal. "
+"Bölgü universitet standartıdır və dəyişdirilmir."
+msgstr ""
+"Semestr balı %(semester)s (davamiyyət + kollokvium + sərbəst iş + "
+"seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi %(total)s bal. "
+"Bölgü universitet standartıdır və dəyişdirilmir."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə yazın:"
+msgstr ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə yazın:"
+
+msgctxt "accounts.syllabus"
+msgid "Saatı yadda saxla"
+msgstr "Saatı yadda saxla"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst "
+"iş 10, seminar/laboratoriya ədədi ortası 10 (semestr 50) və yekun imtahan 50"
+" — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+msgstr ""
+"Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst "
+"iş 10, seminar/laboratoriya ədədi ortası 10 (semestr 50) və yekun imtahan 50"
+" — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Suallar yoxlanılır, önizləmə hazırlanır…"
+msgstr "Suallar yoxlanılır, önizləmə hazırlanır…"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Göndərişi təsdiqləyin"
+msgstr "Göndərişi təsdiqləyin"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Bəli, göndər"
+msgstr "Bəli, göndər"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Geri qayıt"
+msgstr "Geri qayıt"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."
+msgstr "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."
+
+msgctxt "exams.template.test_question_bank"
+msgid "Seçilmiş sual"
+msgstr "Seçilmiş sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xətalı sual"
+msgstr "Xətalı sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Xəbərdarlıqlı sual"
+msgstr "Xəbərdarlıqlı sual"
+
+msgctxt "exams.template.test_question_bank"
+msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
+msgstr "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."

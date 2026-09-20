@@ -78,6 +78,13 @@ BÖLMƏ MƏZMUN SXEMİ (``SyllabusSection.data``) — bax
 from __future__ import annotations
 
 from . import completion as completion_rules
+from .assessment_formula import (  # noqa: F401
+    activity_kinds_for_syllabus,
+    activity_label,
+    activity_note,
+    formula_rows,
+    formula_text,
+)
 from .constants import (
     EDITABLE_STATUSES,
     PERM_APPROVE,
@@ -96,6 +103,7 @@ from .constants import (
 )
 from .document import build_document  # noqa: F401
 from .policy import assessment_weights  # noqa: F401
+from .services import set_plan_hours  # noqa: F401
 from .services import (
     GROUP_CHAIR,
     GROUP_PROGRAM,
@@ -294,6 +302,12 @@ def build_review_queue_context(
 __all__ = [
     "build_document",
     "assessment_weights",
+    "set_plan_hours",
+    "activity_kinds_for_syllabus",
+    "activity_label",
+    "activity_note",
+    "formula_rows",
+    "formula_text",
     "approved_version_for",
     "offering_syllabus_state",
     "syllabus_for_offering",

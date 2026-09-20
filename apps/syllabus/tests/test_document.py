@@ -14,14 +14,13 @@ Kilidlənən presedent (düşmən baxışı, 2026-08-30): qiymətləndirmə blok
 
 from __future__ import annotations
 
-import logging
 import re
 
+from apps.syllabus.assessment_formula import formula_text
 from apps.syllabus.constants import SectionKey
 from apps.syllabus.document import (
     _EMPTY,
     _POINTS,
-    _WEIGHTS_UNSPECIFIED,
     BLOCK_TITLES,
     build_preview_blocks,
 )
@@ -49,7 +48,9 @@ SPLIT_RE = re.compile(r"\d+ \+ \d+ \+ \d+ \+ \d+ \+ \d+ = ")
 # olmasın»).  Yoxlanan şey mətnin tərcüməsi deyil, blokun DAVRANIŞIDIR.
 POINTS = str(_POINTS)
 EMPTY = str(_EMPTY)
-UNSPECIFIED = str(_WEIGHTS_UNSPECIFIED)
+#: Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR və HƏMİŞƏ çap olunur
+#: (uydurma deyil — siyasətin özü). Defolt fəaliyyət: seminar.
+FORMULA = formula_text(("seminar",))
 
 
 def _blocks(section_map):
@@ -67,36 +68,29 @@ def _migrated_map(**assess):
     return data
 
 
-# ── 1. Köçürülmüş sillabus: mənbə mətni görünür, uydurma bölgü YOX ───────────
+# ── 1. Standart düstur HƏMİŞƏ çap olunur, mənbə mətni onun ardınca ────────────
 
 
-def test_the_migrated_rule_text_reaches_the_reader_instead_of_a_default_split():
+def _lines_after_formula(body):
+    lines = body.split("\n")
+    assert lines[0] == FORMULA
+    # 2-ci sətir fəaliyyət izahıdır (seminar/lab ədədi ortası qaydası).
+    return lines[2:]
+
+
+def test_the_migrated_rule_text_reaches_the_reader_after_the_standard_formula():
     body = _assessment(_migrated_map(note=LEGACY_RULE_TEXT))
 
-    assert SPLIT_RE.search(body) is None
     assert "348" in body
-    # Mənbə mətni blokun BAŞINDADIR — üstünə heç nə əlavə edilmir.
-    assert body.split("\n") == LEGACY_RULE_TEXT.split("\n")
+    assert _lines_after_formula(body) == LEGACY_RULE_TEXT.split("\n")
 
 
-def test_the_unspecified_label_never_contradicts_the_text_under_it():
-    """Canlı ölçmə (8,260 uniqid): etiket 5,942 blokda çıxırdı, 4,071-i (68.5 %)
-    bölgünü elə öz mətnində AÇIQ deyirdi — tələbə əvvəlcə «göstərilməyib»,
-    sonra bölgünün özünü oxuyurdu.  Etiket indi yalnız blok BOŞ olanda çıxır.
-    """
-    note = "məşğələ (0-30 bal), sərbəst iş (0-10 bal), davamiyyət (0-10 bal), imtahan (0-50 bal)"
-
-    body = _assessment(_migrated_map(note=note))
-
-    assert body == note
-    assert UNSPECIFIED not in body
-
-
-def test_an_unfilled_split_is_named_honestly_when_the_block_is_otherwise_empty():
-    body = _assessment(_migrated_map())
-
-    assert body == UNSPECIFIED  # boşluq susmur — açıq deyilir
-    assert "=" not in body and "+" not in body  # cəm sətri YOXDUR
+def test_the_stored_split_never_changes_the_printed_formula():
+    """Köhnə 0/0, 15/15, 20/20 — hamısı eyni STANDART düsturu verir (uydurma cəm yox)."""
+    for pair in ({}, {"midterm": 15, "project": 15}, {"midterm": 20, "project": 20}, {"midterm": 0, "project": 30}):
+        body = _assessment(_migrated_map(**pair))
+        assert body.split("\n")[0] == FORMULA
+        assert "= 110" not in body and "= 70" not in body
 
 
 def test_exam_questions_are_shown_too():
@@ -107,70 +101,16 @@ def test_exam_questions_are_shown_too():
     assert "2. Yığın və növbə" in body
 
 
-def test_questions_alone_are_enough_to_fill_the_block():
-    body = _assessment(_migrated_map(exam_questions=["Sual 1"]))
-
-    assert "Sual 1" in body
-    assert SPLIT_RE.search(body) is None
-
-
-def test_an_empty_assessment_section_names_the_missing_split_not_a_generic_blank():
-    """Blokun struktur məzmunu MƏHZ bölgüdür, ona görə ümumi «— doldurulmayıb —»
-    əvəzinə dəqiq etiket çıxır.  Digər bloklar ümumi işarəni saxlayır."""
+def test_an_empty_assessment_section_still_prints_the_standard_formula():
     section_map = _migrated_map()
 
-    assert _assessment(section_map) == UNSPECIFIED
+    assert _assessment(section_map).split("\n")[0] == FORMULA
     assert _blocks(section_map)[str(BLOCK_TITLES["description"])] == EMPTY
 
 
-# ── 2. Canlı redaktə axını: müəllimin doldurduğu bölgü GÖSTƏRİLİR ────────────
-
-
-def test_a_teacher_filled_split_is_still_printed_in_full():
-    body = _assessment(complete_section_data())  # midterm 20 / project 10
-
-    assert body == f"10 + 10 + 20 + 10 + 50 = 100 {POINTS}"
-
-
-def test_a_zero_midterm_saved_by_the_teacher_is_not_mistaken_for_an_empty_split():
-    """Sürüşdürücü 0-da qalanda avtosave ``project``-i 30 yazır — bu, REAL bölgüdür."""
-    body = _assessment(_migrated_map(midterm=0, project=30))
-
-    assert body == f"10 + 10 + 0 + 30 + 50 = 100 {POINTS}"
-
-
-def test_an_impossible_total_is_refused_and_warned_about(caplog):
-    """Cəm HESABLANIR (köhnə kod dəyərdən asılı olmayaraq «= 100» yazırdı), amma
-    siyasətlə MÜMKÜN OLMAYAN cəm tələbəyə qayda kimi verilmir.
-
-    ``save_section`` sərbəst JSON qəbul edir, yəni 20/20 cütlüyü saxlanıla
-    bilər — onun cəmi 110-dur, belə qayda universitetdə yoxdur.  Əvvəl bu sətir
-    olduğu kimi çıxırdı və heç bir xəbərdarlıq qalxmırdı.
-    """
-    with caplog.at_level(logging.WARNING, logger="apps.syllabus.document"):
-        body = _assessment(_migrated_map(midterm=20, project=20, note=LEGACY_RULE_TEXT))
-
-    assert SPLIT_RE.search(body) is None
-    assert "348" in body  # müəllimin ÖZ mətni susdurulmur
-    assert "assessment_weights_off_policy" in caplog.text
-    assert "total=110" in caplog.text
-
-
-def test_a_half_filled_pair_is_not_completed_from_the_policy(caplog):
-    """``project`` açarı YOXDURSA ikinci yarı siyasətdən ÇIXARILMIR.
-
-    Köhnə budaq ``project = 30 − midterm`` yazırdı: heç kimin saxlamadığı rəqəm
-    tələbəyə real qayda kimi çıxırdı — məhz ləğv etdiyimiz sinifdən.  İndi
-    yarımçıq cütlük cəmi 100 vermir, ona görə fail-closed süzülür.
-    """
-    section_map = _migrated_map(midterm=20, note=LEGACY_RULE_TEXT)
-    del section_map[SectionKey.ASSESS.value]["project"]  # açar HEÇ YAZILMAYIB
-
-    with caplog.at_level(logging.WARNING, logger="apps.syllabus.document"):
-        body = _assessment(section_map)
-
-    assert SPLIT_RE.search(body) is None
-    assert "assessment_weights_off_policy" in caplog.text
+def test_the_formula_names_every_component_and_the_hundred():
+    assert "10" in FORMULA and "20" in FORMULA and "50" in FORMULA
+    assert f"= 100 {POINTS}" in FORMULA
 
 
 # ── 2b. Abzas boşluğu OXUCUYA ÇATIR ──────────────────────────────────────────
@@ -183,7 +123,7 @@ def test_a_paragraph_break_inside_the_rule_text_survives_the_reader():
 
     body = _assessment(_migrated_map(note=note))
 
-    assert body.split("\n") == ["Birinci abzas.", "", "İkinci abzas."]
+    assert _lines_after_formula(body) == ["Birinci abzas.", "", "İkinci abzas."]
 
 
 def test_the_numbered_outcome_list_still_drops_blank_lines():
@@ -199,7 +139,7 @@ def test_the_numbered_outcome_list_still_drops_blank_lines():
 def test_a_teacher_split_and_the_rule_text_live_together():
     body = _assessment(_migrated_map(midterm=20, project=10, note=LEGACY_RULE_TEXT))
 
-    assert body.split("\n")[0] == f"10 + 10 + 20 + 10 + 50 = 100 {POINTS}"
+    assert body.split("\n")[0] == FORMULA
     assert "348" in body
 
 

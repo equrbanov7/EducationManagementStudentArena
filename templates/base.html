@@ -50,7 +50,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_confirm.css' %}?v=20260906-1">
     {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
     <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260815-1">
-    <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}?v=20260920-hand">
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'css/legacy_mark.css' %}?v=20260901-notice">
     <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260913-1">
@@ -193,7 +193,7 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
    
 
     <!-- AI Assistant Widget -->
-    {% block ai_assistant_js %}<script src="{% static 'js/ai_assistant.js' %}"></script>{% endblock %}
+    {% block ai_assistant_js %}<script src="{% static 'js/ai_assistant.js' %}?v=20260920-redesign"></script>{% endblock %}
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>
