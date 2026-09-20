@@ -295,7 +295,11 @@
         }
 
         function getLoadingMarkup() {
-            return '<div class="create-exam-modal-loading">' + (i18n.loadingForm || "Loading...") + "</div>";
+            return '<div class="create-exam-modal-loading skeleton" aria-busy="true" role="status">' +
+                '<span class="visually-hidden">' + (i18n.loadingForm || "Loading...") + "</span>" +
+                '<div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div><div class="skeleton-line"></div>' +
+                '<div class="skeleton-line skeleton-line--sm"></div><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div>' +
+                "</div>";
         }
 
         function getErrorMarkup() {

@@ -14,6 +14,7 @@ from apps.exams.models import ExamQuestion
 from apps.exams.services.bulk_workbench import parse_points_payload, parse_selected_indices
 from apps.exams.services.language_variants import active_variants
 from apps.exams.services.parsing import END_QUESTION_RE
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 
 WRITTEN_QUESTION_PREFIX_RE = re.compile(r"^\s*\d+\s*[\.\)]\s*", re.MULTILINE)
 
@@ -125,7 +126,7 @@ def _normalize_exam_language(value, exam):
     return _default_exam_language(exam)
 
 
-def _test_workbench_context(exam, navigation_query, *, selected_language=None):
+def _test_workbench_context(exam, navigation_query, *, selected_language=None, request=None):
     """Ortaq ``_bulk_question_workbench`` partial-ı üçün imtahan test bankı konteksti."""
     download_base = reverse("exams:test_question_bank_template_download", kwargs={"slug": exam.slug})
     detail_url = _append_navigation_query(
@@ -138,6 +139,16 @@ def _test_workbench_context(exam, navigation_query, *, selected_language=None):
         reverse("exams:exam_bank_picker", kwargs={"slug": exam.slug}), navigation_query
     )
     return {
+        "exam_crumbs": (
+            exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=navigation_query,
+                current=pgettext("exams.template.test_question_bank", "subtitle_management_panel"),
+            )
+            if request is not None
+            else []
+        ),
         "wb_workbench_key": f"exam-{exam.slug}",
         "wb_title": exam.title,
         "wb_subtitle": pgettext("exams.template.test_question_bank", "subtitle_management_panel"),

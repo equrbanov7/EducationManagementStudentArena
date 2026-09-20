@@ -23,6 +23,7 @@ from apps.exams.services.question_invariants import (
     deactivate_exam_questions,
     delete_exam_questions,
 )
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
 from ._shared import (
@@ -306,6 +307,12 @@ def teacher_questions_bank(request, slug):
         "exams/teacher/teacher_questions_bank.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=navigation_query,
+                current=pgettext("exams.template.teacher_questions_bank", "title_questions_bank"),
+            ),
             **qm_context,
             "page_obj": page_obj,
             "search_query": search_query,

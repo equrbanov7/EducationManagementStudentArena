@@ -36,7 +36,7 @@
     }
 
     function loadingMarkup() {
-      return '<div class="create-exam-modal-loading">' + (config.loadingText || "Yuklenir...") + "</div>";
+      return '<div class="create-exam-modal-loading skeleton" aria-busy="true" role="status"><span class="visually-hidden">' + (config.loadingText || "Yuklenir...") + '</span><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line skeleton-line--sm"></div><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div></div>';
     }
 
     function errorMarkup() {

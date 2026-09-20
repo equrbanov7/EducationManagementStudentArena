@@ -76126,3 +76126,7 @@ msgstr "Шаблон банка тестовых вопросов"
 msgctxt "exams.template.question_bank_detail"
 msgid "Yazılı sual bankı şablonu"
 msgstr "Шаблон банка письменных вопросов"
+
+msgctxt "exams.crumbs"
+msgid "Naviqasiya yolu"
+msgstr "Навигационная цепочка"

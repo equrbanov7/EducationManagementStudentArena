@@ -1,0 +1,18 @@
+{% load static i18n %}
+{% comment %}Breadcrumb zənciri — kontekst `exam_crumbs` = [{label, url}] (bax
+views/shared/breadcrumbs.py). Sonuncu element cari səhifədir (keçidsiz). CSS
+kabinetin ortaq `ems_ui/header.css` qatındandır (partial öz linkini qoyur ki,
+qabıqsız səhifələrdə də işləsin).{% endcomment %}
+{% if exam_crumbs %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}">
+<nav class="exam-crumbs" aria-label="{% trans 'Naviqasiya yolu' context 'exams.crumbs' %}">
+    <ol class="ems-crumbs">
+        {% for crumb in exam_crumbs %}
+        <li class="ems-crumbs__item"{% if forloop.last %} aria-current="page"{% endif %}>
+            {% if crumb.url and not forloop.last %}<a class="ems-crumbs__link" href="{{ crumb.url }}">{{ crumb.label }}</a>{% else %}{{ crumb.label }}{% endif %}
+            {% if not forloop.last %}<span class="ems-crumbs__sep" aria-hidden="true">/</span>{% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}

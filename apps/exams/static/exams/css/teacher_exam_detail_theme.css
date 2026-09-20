@@ -151,3 +151,27 @@
     .exam-detail-page-wrapper .action-btn { flex: 1 1 auto; justify-content: center; }
     .exam-detail-page-wrapper .action-btn.danger-btn { margin-left: 0; }
 }
+
+/* ── Detal səhifəsinin kiçik modalları («Sil» təsdiqi, «Sınaq keçmək mümkün deyil») — sahib 2026-09-21 ── */
+.exam-detail-modal .modal-content { border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-dialog); overflow: hidden; }
+.exam-detail-modal .modal-header { padding: 16px 20px; border-bottom: 1px solid var(--ems-border); background: var(--ems-bg); align-items: center; }
+.exam-detail-modal .modal-header.bg-danger { background: var(--ems-danger-100) !important; color: var(--ems-danger-700) !important; }
+.exam-detail-modal .modal-header.bg-danger .btn-close { filter: none; }
+.exam-detail-modal .modal-title { display: inline-flex; align-items: center; gap: 10px; font-size: var(--ems-fs-lg); font-weight: 800; color: var(--ems-text); letter-spacing: -0.01em; }
+.exam-detail-modal .modal-header.bg-danger .modal-title { color: var(--ems-danger-700); }
+.exam-detail-modal .modal-title i { width: 36px; height: 36px; border-radius: var(--ems-r-lg); display: inline-flex; align-items: center; justify-content: center; background: var(--ems-primary-50); color: var(--ems-primary-700); margin: 0 !important; font-size: var(--ems-fs-md); }
+.exam-detail-modal .modal-header.bg-danger .modal-title i { background: var(--ems-danger-200); color: var(--ems-danger-700); }
+.exam-detail-modal .btn-close { width: 34px; height: 34px; border-radius: 50%; background-color: var(--ems-neutral-100); opacity: 1; background-size: 12px; }
+.exam-detail-modal .btn-close:hover { background-color: var(--ems-neutral-200); }
+.exam-detail-modal .modal-body { padding: 18px 20px; color: var(--ems-text); font-size: var(--ems-fs-base); line-height: 1.5; background: var(--ems-bg); }
+.exam-detail-modal .modal-body .text-muted { color: var(--ems-text-muted) !important; }
+.exam-detail-modal .modal-footer { padding: 12px 20px 18px; border-top: 1px solid var(--ems-border); background: var(--ems-bg-subtle); gap: 10px; }
+.exam-detail-modal .modal-footer .btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 16px; border-radius: var(--ems-r-lg);
+    font-weight: 700; font-size: var(--ems-fs-base); box-shadow: none; border: 1px solid var(--ems-border); background: var(--ems-bg); color: var(--ems-neutral-700);
+}
+.exam-detail-modal .modal-footer .btn:hover { background: var(--ems-bg-subtle); color: var(--ems-text); border-color: var(--ems-neutral-300); }
+.exam-detail-modal .modal-footer .btn-primary { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.exam-detail-modal .modal-footer .btn-primary:hover { background: var(--ems-primary-700); border-color: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.exam-detail-modal .modal-footer .btn-danger { background: var(--ems-danger-600); border-color: var(--ems-danger-600); color: var(--ems-neutral-0); }
+.exam-detail-modal .modal-footer .btn-danger:hover { background: var(--ems-danger-700); border-color: var(--ems-danger-700); color: var(--ems-neutral-0); }
