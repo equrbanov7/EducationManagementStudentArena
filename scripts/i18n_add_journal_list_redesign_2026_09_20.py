@@ -139,6 +139,28 @@ STRINGS = {
         "Распределение баллов — стандарт университета: посещаемость 10, коллоквиум 20, самостоятельная работа 10, среднее за семинары/лабораторные 10 (семестр 50) и итоговый экзамен 50 — преподаватель его не меняет. Вид занятий берётся из нагрузки.",
         "Puan dağılımı üniversite standardıdır: devam 10, kolokyum 20, bağımsız çalışma 10, seminer/laboratuvar ortalaması 10 (dönem 50) ve final sınavı 50 — öğretim elemanı değiştirmez. Etkinlik türü ders yükünden gelir.",
     ),
+    # ── Workbench: önizləmə skeletonu + təsdiq xülasəsi (sahib 2026-09-20) ────
+    ("exams.template.test_question_bank", "Suallar yoxlanılır, önizləmə hazırlanır…"): (
+        "Checking questions, preparing the preview…",
+        "Проверяем вопросы, готовим предпросмотр…",
+        "Sorular kontrol ediliyor, önizleme hazırlanıyor…",
+    ),
+    ("exams.template.test_question_bank", "Göndərişi təsdiqləyin"): ("Confirm the submission", "Подтвердите отправку", "Gönderimi onaylayın"),
+    ("exams.template.test_question_bank", "Bəli, göndər"): ("Yes, send", "Да, отправить", "Evet, gönder"),
+    ("exams.template.test_question_bank", "Geri qayıt"): ("Go back", "Вернуться", "Geri dön"),
+    ("exams.template.test_question_bank", "Heç bir sual seçilməyib — əvvəlcə siyahıdan sual seçin."): (
+        "No question is selected — pick questions from the list first.",
+        "Не выбран ни один вопрос — сначала выберите вопросы в списке.",
+        "Hiç soru seçilmedi — önce listeden soru seçin.",
+    ),
+    ("exams.template.test_question_bank", "Seçilmiş sual"): ("Selected questions", "Выбрано вопросов", "Seçilen soru"),
+    ("exams.template.test_question_bank", "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."): (
+        "Fill in the required fields — the missing field is highlighted.",
+        "Заполните обязательные поля — незаполненное поле выделено.",
+        "Zorunlu alanları doldurun — eksik alan vurgulandı.",
+    ),
+    ("exams.template.test_question_bank", "Xətalı sual"): ("Questions with errors", "Вопросов с ошибками", "Hatalı soru"),
+    ("exams.template.test_question_bank", "Xəbərdarlıqlı sual"): ("Questions with warnings", "Вопросов с предупреждениями", "Uyarılı soru"),
 }  # fmt: skip
 
 
