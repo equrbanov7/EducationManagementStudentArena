@@ -27,6 +27,7 @@ from apps.exams.services.review_visibility import (
     resolve_exam_attempt_review_window_seconds as _resolve_attempt_review_window_seconds,
 )
 from apps.exams.services.supervision import attach_attempt_interventions
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.permissions import request_has_permission
 
@@ -339,6 +340,12 @@ def teacher_exam_results(request, slug):
         "exams/teacher/teacher_exam_results.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=exam_navigation_query,
+                current=pgettext("exams.template.teacher_exam_results", "page_title_suffix"),
+            ),
             "attempts": page_obj.object_list,
             "attempts_data": attempts_data,
             "page_obj": page_obj,
