@@ -26,7 +26,18 @@ def question_bank_template_download(request, bank_id):
     q_format = _normalize_format(bank.default_question_type)
     template_text = _bank_template_written_txt() if q_format == "written" else _bank_template_test_txt()
 
-    # Yalnız TXT — DOCX importu söndürüldüyü üçün DOCX şablonu da verilmir.
+    if (request.GET.get("format") or "").strip().lower() == "docx":
+        # SAHİB (2026-09-21): Word-də açıb nümunəyə baxmaq üçün .docx variantı.
+        from apps.exams.services.question_template_docx import DOCX_CONTENT_TYPE, build_template_docx
+
+        title = (
+            pgettext("exams.template.question_bank_detail", "Yazılı sual bankı şablonu")
+            if q_format == "written"
+            else pgettext("exams.template.question_bank_detail", "Test sual bankı şablonu")
+        )
+        response = HttpResponse(build_template_docx(template_text, title=title), content_type=DOCX_CONTENT_TYPE)
+        response["Content-Disposition"] = 'attachment; filename="sual_sablonu.docx"'
+        return response
     response = HttpResponse(template_text, content_type="text/plain; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="sual_sablonu.txt"'
     return response
