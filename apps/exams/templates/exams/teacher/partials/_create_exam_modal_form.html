@@ -354,7 +354,7 @@
                                     <div class="d-none">
                                         <select name="allowed_units" multiple>
                                             {% for unit in selected_allowed_units %}
-                                                <option value="{{ unit.pk }}" selected>{{ unit.name }}{% if unit.parent %} — {{ unit.parent.name }}{% endif %}</option>
+                                                <option value="{{ unit.pk }}" selected data-subgroups="{{ unit.subgroups_json|default:'[]' }}">{{ unit.name }}{% if unit.parent %} — {{ unit.parent.name }}{% endif %}</option>
                                             {% endfor %}
                                         </select>
                                     </div>

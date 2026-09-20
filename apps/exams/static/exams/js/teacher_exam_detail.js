@@ -475,6 +475,25 @@
             );
         });
 
+        // `?question_modal=create|edit` (crud.py yönləndirməsi): modal avtomatik açılır,
+        // URL-dən parametr təmizlənir ki, yeniləmə modalı təkrar açmasın.
+        (function autoOpenQuestionModal() {
+            var root = document.querySelector("[data-exam-detail-root]");
+            var url = root ? root.getAttribute("data-question-modal-autoopen-url") : "";
+            if (!root || !url || !questionModal) {
+                return;
+            }
+            openQuestionModal(url, root.getAttribute("data-question-modal-autoopen-mode") || "create");
+            try {
+                var clean = new URL(window.location.href);
+                clean.searchParams.delete("question_modal");
+                clean.searchParams.delete("question");
+                window.history.replaceState({}, "", clean.pathname + clean.search + clean.hash);
+            } catch (error) {
+                /* URL API yoxdursa sadəcə keç */
+            }
+        })();
+
         if (questionModalElement) {
             questionModalElement.addEventListener("hidden.bs.modal", function () {
                 submitInFlight = false;

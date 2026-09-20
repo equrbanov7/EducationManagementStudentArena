@@ -26,6 +26,7 @@ from . import schedule_manage  # noqa: F401
 from . import schedule_manage_actions  # noqa: F401
 from . import services  # noqa: F401
 from . import status  # noqa: F401
+from . import subgroup_rollup  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
 from . import exam_eligibility as eligibility_rules  # noqa: F401
@@ -97,6 +98,7 @@ __all__ = [
     "season_label",
     "services",
     "status",
+    "subgroup_rollup",
     "transcript",
     "transcript_policy",
     "transfer",

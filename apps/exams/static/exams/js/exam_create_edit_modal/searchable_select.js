@@ -33,8 +33,20 @@
 
         // Seçili variantlar (value -> text), server-side render-dən başlayır.
         var selected = Object.create(null);
+        // Ana qrup → alt qrupları (server `subgroups` / `data-subgroups` ilə verir):
+        // «234 K az» seçiləndə 234 K-1 / 234 K-2 də avtomatik seçilir, geri alınanda
+        // birlikdə çıxır (sahib 2026-09-21).
+        var subgroupsOf = Object.create(null);
         Array.prototype.slice.call(hiddenSelect.selectedOptions || []).forEach(function (o) {
             selected[String(o.value)] = o.textContent || String(o.value);
+            try {
+                var subs = JSON.parse(o.getAttribute("data-subgroups") || "[]");
+                if (subs && subs.length) {
+                    subgroupsOf[String(o.value)] = subs;
+                }
+            } catch (error) {
+                /* atribut yoxdur / korlanıb — sadəcə keç */
+            }
         });
         var excluded = Object.create(null);
         Array.prototype.slice.call((excludedSelect && excludedSelect.selectedOptions) || []).forEach(function (o) {
@@ -146,6 +158,22 @@
             }
 
             checkbox.checked = checked;
+            function applySubgroups(next) {
+                (subgroupsOf[v] || []).forEach(function (sub) {
+                    var sid = String(sub.id);
+                    if (next) {
+                        selected[sid] = sub.text;
+                        syncHiddenOption(sid, sub.text, true);
+                        var subRow = resultsWrap.querySelector('[data-value="' + sid.replace(/"/g, '\\"') + '"]');
+                        if (subRow) {
+                            subRow.parentNode.removeChild(subRow);
+                        }
+                    } else if (selected[sid]) {
+                        delete selected[sid];
+                        syncHiddenOption(sid, sub.text, false);
+                    }
+                });
+            }
             function toggle(next) {
                 if (next) {
                     selected[v] = text;
@@ -154,6 +182,7 @@
                     delete selected[v];
                     syncHiddenOption(v, text, false);
                 }
+                applySubgroups(next);
                 updateCounter();
                 renderSelected();
                 // Seçilən element YALNIZ yuxarı (selectedWrap) siyahıda qalmalıdır.
@@ -202,6 +231,9 @@
         function appendResults(items) {
             items.forEach(function (item) {
                 var id = String(item.id);
+                if (item.subgroups && item.subgroups.length) {
+                    subgroupsOf[id] = item.subgroups;
+                }
                 if (selected[id]) {
                     return; // artıq fərdi seçilibsə yuxarıda göstərilir
                 }
