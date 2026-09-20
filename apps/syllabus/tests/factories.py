@@ -19,6 +19,7 @@ from ..constants import (
     WEEK_ROWS,
     SectionKey,
 )
+from ..week_plan import default_distribution, expected_week_rows
 
 User = get_user_model()
 
@@ -110,18 +111,23 @@ def make_offering(organization, stack, instructor):
 
 
 def complete_section_data(plan_hours=None):
-    """BÜTÜN biznes qaydalarını ödəyən bölmə məzmunu (100% tamamlanma)."""
+    """BÜTÜN biznes qaydalarını ödəyən bölmə məzmunu (100% tamamlanma).
+
+    Həftə cədvəli sahibin 2026-09-21 qaydası ilə qurulur: bir dərs = 2 saat,
+    hər növün saatı yuxarıdan aşağı 2-2-…-qalıq düzülür, sətir sayı plandan
+    çıxarılır (30/16/14 → 15 sətir); qalan sətirlər boş qalır.
+    """
     plan = dict(plan_hours or PLAN_HOURS)
-    base = {kind: plan[kind] // MIN_FILLED_WEEKS for kind in LESSON_HOUR_KINDS}
-    remainder = {kind: plan[kind] - base[kind] * MIN_FILLED_WEEKS for kind in LESSON_HOUR_KINDS}
+    filled = expected_week_rows(plan) or MIN_FILLED_WEEKS
+    spread = {kind: default_distribution(plan.get(kind, 0)) for kind in LESSON_HOUR_KINDS}
     rows = []
-    for index in range(WEEK_ROWS):
-        if index >= MIN_FILLED_WEEKS:
+    for index in range(max(WEEK_ROWS, filled)):
+        if index >= filled:
             rows.append({"topic": "", **{kind: 0 for kind in LESSON_HOUR_KINDS}, "outcome": ""})
             continue
         row = {"topic": f"Mövzu {index + 1}", "outcome": f"TN{(index % 3) + 1}"}
         for kind in LESSON_HOUR_KINDS:
-            row[kind] = base[kind] + (remainder[kind] if index == 0 else 0)
+            row[kind] = spread[kind][index] if index < len(spread[kind]) else 0
         rows.append(row)
     return {
         SectionKey.INFO.value: {

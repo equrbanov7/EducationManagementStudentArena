@@ -27,6 +27,7 @@ from .drafts import (  # noqa: F401
     resolve_pointer_versions,
     save_section,
     section_data_map,
+    seed_week_hours,
     set_plan_hours,
 )
 from .offerings import (  # noqa: F401
@@ -121,6 +122,7 @@ __all__ = [
     "review_queue",
     "review_scope_queryset",
     "save_section",
+    "seed_week_hours",
     "section_data_map",
     "set_plan_hours",
     "start_review",

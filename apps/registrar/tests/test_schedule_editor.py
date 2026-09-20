@@ -247,6 +247,34 @@ class CellCreateTest(ScheduleEditorBase):
         self.assertIn("CS202", codes)
         self.assertNotIn(other.code, codes)
 
+    def test_allowed_subjects_follow_the_selected_teacher(self):
+        """Sahib 2026-09-21: müəllim seçiləndə onun fənləri görünməlidir.
+
+        Müəllimin fənləri qrup siyahısı ilə kəsişmirsə (başqa qrupa açılmış
+        fənn) müəllimin öz fənləri qayıdır; kəsişirsə kəsişmə.
+        """
+        with bypass_rls():
+            own = Subject.objects.create(organization=self.org, code="ZZ777", name="Yalnız müəllimin fənni")
+            offering = services.get_or_create_offering(
+                organization=self.org, subject=own, period=self.period, group=self.group_b
+            )
+            offering.instructor = self.teacher_b
+            offering.save(update_fields=["instructor"])
+            for_b = schedule_editor.allowed_subjects(
+                organization=self.org, group=self.group, period=self.period, instructor=self.teacher_b
+            )
+            for_a = schedule_editor.allowed_subjects(
+                organization=self.org, group=self.group, period=self.period, instructor=self.teacher
+            )
+        self.assertEqual({row["code"] for row in for_b}, {"ZZ777"})
+        self.assertEqual({row["code"] for row in for_a}, {"CS101"})
+
+    def test_allowed_subjects_fall_back_to_the_period_offerings_without_a_group(self):
+        """Qrup siyahısı boşdursa modal boş qalmır — dövrün açılışları göstərilir."""
+        with bypass_rls():
+            rows = schedule_editor.allowed_subjects(organization=self.org, group=None, period=self.period)
+        self.assertIn("CS101", {row["code"] for row in rows})
+
 
 class ConflictEngineTest(ScheduleEditorBase):
     """Müəllim / qrup / otaq toqquşmaları — üst/alt həftə və vaxt kəsişməsi."""
