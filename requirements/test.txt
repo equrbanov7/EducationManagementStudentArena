@@ -34,3 +34,5 @@ pytest-timeout==2.4.0
 # CI paralelləşdirmə (2026-09-03): `-n 4 --dist loadfile` — hər worker öz
 # test DB-sini (test_<db>_gwN) yaradır; bax .github/workflows/_unit-tests.yml.
 pytest-xdist==3.8.0
+# CI: test dəstini paralel job-lara bölmək (sahib 2026-09-21: 38 dəq → ~12 dəq).
+pytest-split==0.11.0

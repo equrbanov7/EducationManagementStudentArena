@@ -62,8 +62,11 @@ jobs:
       python-version: "3.11"
 
   # ── 2a. Unit Tests (Python 3.11) ───────────────────────────────────────
+  # Sahib 2026-09-21: push-larda (Develop/Staging/main) 3.11 job-u kritik yolda deyildi,
+  # amma 30 dəq runner vaxtı yeyirdi; prod image 3.12-dir. PR/dispatch-da tam dəst + coverage.
   unit-tests-311:
     needs: lint
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
       pull-requests: write
@@ -72,11 +75,19 @@ jobs:
       python-version: "3.11"
 
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
+  # 4 paralel shard (hər biri öz Postgres/Redis-i ilə), coverage yox: kritik yol 38 → ~10–12 dəq.
   unit-tests-312:
     needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: ["1", "2", "3", "4"]
     uses: ./.github/workflows/_unit-tests.yml
     with:
       python-version: "3.12"
+      shard: ${{ matrix.shard }}
+      shards: "4"
+      coverage: false
 
   # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
   # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
@@ -176,8 +187,13 @@ jobs:
             exit 1
           fi
 
-          if [[ "${{ needs.unit-tests-311.result }}" != "success" || "${{ needs.unit-tests-312.result }}" != "success" ]]; then
-            echo "❌ Unit Tests did not both succeed!"
+          # 3.12 (shard-lı) həmişə məcburidir; 3.11 push-larda qəsdən ötürülür (skipped).
+          if [[ "${{ needs.unit-tests-312.result }}" != "success" ]]; then
+            echo "❌ Unit Tests (3.12) did not succeed: ${{ needs.unit-tests-312.result }}"
+            exit 1
+          fi
+          if [[ "${{ needs.unit-tests-311.result }}" != "success" && "${{ needs.unit-tests-311.result }}" != "skipped" ]]; then
+            echo "❌ Unit Tests (3.11) failed: ${{ needs.unit-tests-311.result }}"
             exit 1
           fi
 
