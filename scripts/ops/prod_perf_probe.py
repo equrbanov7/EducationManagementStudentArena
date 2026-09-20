@@ -160,3 +160,66 @@ else:
             slow.append((url, n, ms))
     print()
     print("⚠️ yavaş/sorğu-ağır (q>80 və ya >1500ms):", slow or "yoxdur")
+
+    # ── Funksional zond (sahib 2026-09-21, OXU-YALNIZ): sillabus həftə cədvəli
+    # plandan özü tənzimlənir; cədvəl modalının fənn siyahısı müəllimə görə gəlir.
+    print()
+    print("== Funksional: sillabus həftə cədvəli (plan → sətir/növ/seçim)")
+    try:
+        from apps.accounts.views.syllabus import editor_panels
+        from apps.syllabus.models import SyllabusVersion
+        from apps.syllabus.public import SectionKey, expected_week_rows, section_data_map
+
+        versions = (
+            SyllabusVersion.objects.exclude(plan_hours={})
+            .exclude(plan_hours__isnull=True)
+            .select_related("syllabus__subject")
+            .order_by("-updated_at")[:4]
+        )
+        for version in versions:
+            data = section_data_map(version).get(SectionKey.WEEK.value, {})
+            rows = editor_panels.week_rows(data, (), version.plan_hours)
+            totals = editor_panels.hour_totals(rows, version.plan_hours)
+            choices = rows[0]["cells"][0]["choices"] if rows and rows[0]["cells"] else "-"
+            print(
+                f"   {version.syllabus.subject.code:<10} {version.status:<9} plan={version.plan_hours} → "
+                f"sətir={len(rows)} (gözlənilən {expected_week_rows(version.plan_hours) or 16}) "
+                f"növlər={totals['kinds']} seçim={choices}"
+            )
+        if not versions:
+            print("   plan saatı olan sillabus versiyası yoxdur")
+    except Exception as exc:  # noqa: BLE001
+        print("   sillabus zondu xətası:", exc)
+
+    print("== Funksional: cədvəl modalı — fənn siyahısı müəllimə görə")
+    try:
+        from apps.registrar import schedule_editor
+        from apps.registrar.models import CourseOffering
+
+        off = (
+            CourseOffering.objects.filter(is_active=True, period__is_current=True, instructor__isnull=False)
+            .select_related("instructor", "organization", "period", "group")
+            .order_by("-created_at")
+            .first()
+        )
+        if off is None:
+            print("   müəllimli aktiv açılış yoxdur")
+        else:
+            base = schedule_editor.allowed_subjects(organization=off.organization, group=off.group, period=off.period)
+            mine = schedule_editor.allowed_subjects(
+                organization=off.organization, group=off.group, period=off.period, instructor=off.instructor
+            )
+            own_present = any(row["id"] == str(off.subject_id) for row in mine)
+            print(
+                f"   qrup={off.group} müəllim=#{off.instructor_id} → qrup siyahısı {len(base)} fənn, "
+                f"müəllimə görə {len(mine)} fənn {[row['code'] for row in mine][:6]} "
+                f"öz fənni siyahıda: {'bəli' if own_present else 'XEYR ⚠️'}"
+            )
+        resp = client.get(reverse("accounts:profile") + "?section=schedule-manage", HTTP_HOST=HOST, secure=True)
+        body = resp.content.decode("utf-8", "ignore")
+        print(
+            f"   schedule-manage GET {resp.status_code}; schedule_editor_subjects.js yüklənir: "
+            f"{'bəli' if 'schedule_editor_subjects.js' in body else 'XEYR ⚠️'}"
+        )
+    except Exception as exc:  # noqa: BLE001
+        print("   cədvəl zondu xətası:", exc)
