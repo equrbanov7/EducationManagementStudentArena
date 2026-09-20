@@ -69,10 +69,13 @@ DBG=$(dotenv DEBUG); [ -z "$DBG" ] || [ "$DBG" = "False" ] || [ "$DBG" = "false"
 [ "$(dotenv INSECURE_TRANSPORT_OK)" = "1" ] && warn "INSECURE_TRANSPORT_OK=1 (TLS məcburiyyəti söndürülüb)" || ok "TLS məcburiyyəti aktivdir"
 [ -n "$(dotenv ADMIN_ALLOWED_IPS)" ] && ok "ADMIN_ALLOWED_IPS təyin olunub" || warn "ADMIN_ALLOWED_IPS boşdur — admin paneli IP ilə məhdudlaşmayıb"
 [ "$(dotenv ADMIN_2FA_REQUIRED)" = "False" ] && bad "ADMIN_2FA_REQUIRED=False" || ok "admin 2FA məcburidir"
-# rsync ilə köçürülən canlı qovluqda runtime artefaktları (media/, staticfiles/, .env, sertifikatlar…)
-# git üçün izlənməyəndir — onlar sayılmır; yalnız İZLƏNƏN faylların dəyişməsi xəbərdarlıqdır.
-GS=$(git status --porcelain 2>/dev/null | grep -vE '^\?\? ' | wc -l | tr -d ' '); UNT=$(git status --porcelain 2>/dev/null | grep -cE '^\?\? ' | tr -d ' ')
-[ "$GS" = "0" ] && ok "APP_DIR-də izlənən fayl dəyişməyib (izlənməyən runtime faylı: $UNT)" || { warn "APP_DIR-də $GS izlənən fayl dəyişib (deploy rsync-i ilə üst-üstə düşmür?)"; echo '```'; git status --porcelain 2>/dev/null | grep -vE '^\?\? ' | head -12; echo "-- rejim/icazə fərqi (core.fileMode): $(git -c core.fileMode=false status --porcelain 2>/dev/null | grep -vcE '^\?\? ') fayl məzmunca dəyişib"; echo '```'; }
+# Canlı qovluq rsync ilə runner checkout-undan doldurulur; APP_DIR-in öz .git-i köçürülmür
+# (köhnə HEAD) — ona görə `git status` yalnış «dəyişib» deyir. Düzgün müqayisə: checkout ↔ APP_DIR
+# (checksum, runtime istisnaları ilə). GITHUB_WORKSPACE yoxdursa bu yoxlama ötürülür.
+if [ -n "${GITHUB_WORKSPACE:-}" ] && [ -f "$GITHUB_WORKSPACE/scripts/deploy/rsync-excludes.txt" ]; then
+  DIFF=$(rsync -rcn --out-format='%n' --exclude-from="$GITHUB_WORKSPACE/scripts/deploy/rsync-excludes.txt" "$GITHUB_WORKSPACE/" "$APP_DIR/" 2>/dev/null | grep -v '/$' | wc -l | tr -d ' ')
+  [ "$DIFF" = "0" ] && ok "APP_DIR canlı kodu deploy olunan commit ilə eynidir (rsync checksum)" || { warn "APP_DIR-də $DIFF fayl deploy olunan commit-dən fərqlənir"; echo '```'; rsync -rcn --out-format='%n' --exclude-from="$GITHUB_WORKSPACE/scripts/deploy/rsync-excludes.txt" "$GITHUB_WORKSPACE/" "$APP_DIR/" 2>/dev/null | grep -v '/$' | head -12; echo '```'; }
+fi
 for f in docker/nginx/certs/origin.key; do [ -f "$f" ] && { p=$(stat -c %a "$f"); [ "$p" = "600" ] || [ "$p" = "640" ] && ok "$f icazəsi $p" || warn "$f icazəsi $p"; }; done
 
 section "5. nginx + HTTP başlıqları (https://127.0.0.1, Host: $HOST)"
