@@ -166,10 +166,17 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
         requested_profile_section = default_section
 
     fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    # SAHİB (2026-09-21): referer İŞLƏDİLMİR — filtr/sıralama GET-indən sonra referer
+    # nəticə səhifəsinin özü olurdu və «Geri» ilişirdi. Açıq `return_to` yalnız
+    # imtahan səhifəsi DEYİLSƏ qəbul edilir (dövr olmasın).
+    from apps.exams.views.teacher.question_bank._helpers import _is_internal_exam_management_path
+
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
-        request.GET.get("return_to") or request.GET.get("next") or request.META.get("HTTP_REFERER"),
+        request.GET.get("return_to") or request.GET.get("next"),
     )
+    if _is_internal_exam_management_path(explicit_return_url):
+        explicit_return_url = ""
     profile_return_url = explicit_return_url or fallback_profile_return_url
 
     navigation_params = {
