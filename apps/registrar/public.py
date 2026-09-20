@@ -463,13 +463,7 @@ def _student_syllabus_available(offering) -> bool:
     """
     from apps.syllabus import public as syllabus_services
 
-    syllabus = syllabus_services.syllabus_for_offering(
-        organization=offering.organization,
-        offering_id=offering.id,
-        subject_id=offering.subject_id,
-        period_id=offering.period_id,
-        instructor_id=offering.instructor_id,
-    )
+    syllabus = syllabus_services.syllabus_for_offering_obj(offering)
     return syllabus_services.approved_version_for(syllabus) is not None
 
 

@@ -16,9 +16,13 @@ yeni yazı yolu deyil.
 Namizəd qaydası (fail-closed):
 * açılış aktivdir, dövrü verilən dövrdür, qrupu var;
 * qrupun AKTİV+ENROLLED akademik qeydi YOXDUR;
-* eyni ata (ixtisas) altında ``<baza>-<n>`` adlı alt qruplar var (baza = qrup adı
-  sondakı sektor işarəsi «az/ing/ru/en» olmadan; alt qrup adı sektor ilə də ola
-  bilər: «234 K az-1»);
+* eyni ata (ixtisas) altında ``<baza><ayırıcı><n>`` adlı alt qruplar var — baza =
+  qrup adı sondakı sektor işarəsi «az/ing/ru/en» olmadan, BOŞLUQLARA HƏSSAS DEYİL
+  («233KE» ↔ «233 KE-1»); ayırıcı «-», «/» və ya boşluq («534 TB 1»); sektor
+  nömrədən əvvəl və ya sonra ola bilər («234 K ing-1», «235 İT-1 az»); baza
+  rəqəmlə bitirsə ayırıcı MÜTLƏQDİR («036» ↔ «0361» toqquşmasın);
+* alt qrupun sektoru birləşik qrupun sektoru ilə EYNİDİR (yazılmayan = az) —
+  «234 K ing» «234 K-1»-i götürmür;
 * həmin alt qrupların aktiv tələbələri var.
 """
 
@@ -31,8 +35,10 @@ from django.core.exceptions import ValidationError
 
 from apps.registrar.models import AcademicStatus, CourseOffering, StudentAcademicRecord
 
-_SECTOR_SUFFIX = re.compile(r"\s+(az|ing|ru|en)$", re.IGNORECASE)
+_SECTOR = "(az|ing|ru|en)"
+_SECTOR_SUFFIX = re.compile(rf"\s+{_SECTOR}$", re.IGNORECASE)
 _WS = re.compile(r"\s+")
+DEFAULT_SECTOR = "az"
 
 
 def _norm(name: str) -> str:
@@ -44,8 +50,38 @@ def base_group_name(name: str) -> str:
     return _SECTOR_SUFFIX.sub("", _WS.sub(" ", str(name or "")).strip())
 
 
+def group_sector(name: str) -> str:
+    """Birləşik qrupun sektoru: «234 K ing» → ing; «234 K» → az (susmaya görə)."""
+    match = _SECTOR_SUFFIX.search(_WS.sub(" ", str(name or "")).strip())
+    return match.group(1).casefold() if match else DEFAULT_SECTOR
+
+
 def subgroup_pattern(base: str) -> re.Pattern:
-    return re.compile(rf"^{re.escape(_norm(base))}(\s+(az|ing|ru|en))?-\d+$")
+    """Bazaya görə alt qrup şablonu (ad ``_norm``-dan keçmiş olmalıdır).
+
+    Baza boşluqlara həssas deyil (hər simvol arasında ``\\s*``); nömrədən əvvəl
+    sektor və/və ya ayırıcı («-», «/», boşluq), sonra isə sektor ola bilər.
+    Baza rəqəmlə bitirsə nömrədən əvvəl sektor və ya ayırıcı mütləqdir.
+    """
+    key = _WS.sub("", str(base or "")).casefold()
+    loose = r"\s*".join(re.escape(ch) for ch in key)
+    sep = r"[-/\s]"
+    before = (
+        rf"(?:\s*(?P<sec1>{_SECTOR})\s*{sep}?|{sep})"
+        if key[-1:].isdigit()
+        else rf"(?:\s*(?P<sec1>{_SECTOR}))?\s*{sep}?"
+    )
+    return re.compile(rf"^{loose}{before}\s*(?P<num>\d+)(?:\s*(?P<sec2>{_SECTOR}))?$")
+
+
+def is_subgroup_of(combined_name: str, candidate_name: str) -> bool:
+    """«234 K az» ↔ «234 K-1» ✓, «534 TB az» ↔ «534 TB 1» ✓, «233KE» ↔ «233 KE-1» ✓,
+    «234 K ing» ↔ «234 K-1» ✗ (sektor fərqli), «036» ↔ «0361» ✗."""
+    match = subgroup_pattern(base_group_name(combined_name)).match(_norm(candidate_name))
+    if not match:
+        return False
+    sector = (match.group("sec1") or match.group("sec2") or DEFAULT_SECTOR).casefold()
+    return sector == group_sector(combined_name)
 
 
 @dataclass
@@ -85,12 +121,11 @@ def find_candidates(organization, period) -> list[Candidate]:
             ).exists()
             subgroups, records = [], []
             if not own and group.parent_id:
-                pattern = subgroup_pattern(base_group_name(group.name))
                 siblings = OrgUnit.objects.filter(
                     organization=organization, parent_id=group.parent_id, is_active=True, unit_type="group"
                 ).exclude(pk=group.pk)
                 for sibling in siblings.order_by("name"):
-                    if not pattern.match(_norm(sibling.name)):
+                    if not is_subgroup_of(group.name, sibling.name):
                         continue
                     rows = _active_records(organization, sibling)
                     if rows:
