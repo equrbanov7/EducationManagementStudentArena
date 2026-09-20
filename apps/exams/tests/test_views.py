@@ -1426,7 +1426,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         )
         self.assertEqual(remaining_orders, [1, 2])
 
-    def test_teacher_exam_detail_falls_back_to_safe_referer_when_return_to_missing(self):
+    def test_teacher_exam_detail_ignores_referer_and_falls_back_to_cabinet_section(self):
+        """Sahib 2026-09-21: «Geri» referer-ə YOX, kabinet bölməsinə (əvvəlki kramb) qayıdır —
+        referer POST→redirect-dən sonra səhifənin özü olub ilişirdi."""
         referer = reverse("exams:teacher_exam_list")
         response = self.client.get(
             reverse("exams:teacher_exam_detail", args=[self.exam_visible.slug]),
@@ -1434,7 +1436,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["profile_return_url"], referer)
+        self.assertEqual(response.context["profile_return_url"], f"{reverse('accounts:profile')}?section=my-exams")
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
 

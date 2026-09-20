@@ -45,6 +45,22 @@ from ._helpers import (
 )
 
 
+def _explicit_return_url(request):
+    """Yalnız açıq verilmiş və imtahan səhifəsi OLMAYAN `return_to`/`next` (sahib 2026-09-21)."""
+    from apps.exams.views.teacher.question_bank._helpers import _is_internal_exam_management_path
+
+    from ._helpers import _safe_same_origin_redirect_path
+
+    candidate = _safe_same_origin_redirect_path(request, request.GET.get("return_to") or request.GET.get("next"))
+    if not candidate or _is_internal_exam_management_path(candidate):
+        return ""
+    # Kabinet URL-i axının BAŞLANĞICIDIR (detal səhifəsinin «Geri»si) — alt səhifədə
+    # «Geri» onu yox, əvvəlki krambı (detalı) göstərməlidir.
+    if candidate.startswith(reverse("accounts:profile")):
+        return ""
+    return candidate
+
+
 @login_required
 def teacher_exam_results(request, slug):
     """
@@ -351,7 +367,9 @@ def teacher_exam_results(request, slug):
             "page_obj": page_obj,
             "selected_attempt": selected_attempt,
             "selected_answers": selected_answers,
-            "profile_return_url": profile_return_url,
+            # «Geri» = açıq xarici `return_to` (kurs paneli və s.) və ya əvvəlki kramb
+            # (imtahan detalı) — referer/imtahan-daxili return_to ilişməsi yoxdur.
+            "profile_return_url": _explicit_return_url(request) or exam_detail_url,
             "exam_detail_url": exam_detail_url,
             "exam_navigation_query": exam_navigation_query,
             "source_back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),

@@ -54,7 +54,13 @@ def _is_internal_exam_management_path(candidate_path):
     except Resolver404:
         return False
 
+    # SAHİB (2026-09-21): «Geri» heç vaxt imtahan səhifələrinin özünə ilişməsin —
+    # canlı imtahan səhifələri və detal/statistika da daxildir.
+    if match.namespace == "liveExam":
+        return True
     return match.namespace == "exams" and match.url_name in {
+        "teacher_exam_detail",
+        "teacher_exam_statistics",
         "teacher_questions_bank",
         "test_question_bank",
         "create_question_bank",
