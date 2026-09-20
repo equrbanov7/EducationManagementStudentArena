@@ -175,3 +175,21 @@ class AdminLoginRateLimitTest(TestCase):
         request = self.factory.post("/admin/auth/user/add/", REMOTE_ADDR="192.168.1.70")
         response = self.middleware(request)
         self.assertNotEqual(response.status_code, 429)
+
+
+class AdminAllowedIpsCidrTest(__import__("django.test", fromlist=["SimpleTestCase"]).SimpleTestCase):
+    """CIDR dəstəyi (2026-09-21): LAN şəbəkəsi ilə icazə, kənar IP rədd, zibil fail-closed."""
+
+    def test_exact_and_cidr_matching(self):
+        from core.admin_security import ip_is_allowed
+
+        allowed = ["10.0.0.0/19", "127.0.0.1", " 192.168.1.5 "]
+        self.assertTrue(ip_is_allowed("10.0.2.120", allowed))
+        self.assertTrue(ip_is_allowed("10.0.31.254", allowed))
+        self.assertFalse(ip_is_allowed("10.0.32.1", allowed))
+        self.assertTrue(ip_is_allowed("127.0.0.1", allowed))
+        self.assertTrue(ip_is_allowed("192.168.1.5", allowed))
+        self.assertFalse(ip_is_allowed("8.8.8.8", allowed))
+        self.assertFalse(ip_is_allowed("not-an-ip", allowed))
+        self.assertFalse(ip_is_allowed("10.0.2.120", ["garbage/99", ""]))
+        self.assertTrue(ip_is_allowed("2001:db8::1", ["2001:db8::/32"]))

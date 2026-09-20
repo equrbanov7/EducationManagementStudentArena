@@ -30,6 +30,33 @@ def _admin_path_prefix() -> str:
     return "/" + raw.strip("/")
 
 
+def ip_is_allowed(client_ip, allowed) -> bool:
+    """`ADMIN_ALLOWED_IPS` uyğunluğu — dəqiq IP VƏ YA CIDR şəbəkəsi (2026-09-21 auditi).
+
+    LAN yerləşdirməsində admin maşınları DHCP alır — tək-tək IP siyahısı praktik
+    deyil; ``10.0.0.0/19`` kimi şəbəkə yazmaq mümkündür. Yanlış giriş (nə IP, nə
+    şəbəkə) fail-closed sayılır: heç nə ilə uyğunlaşmır.
+    """
+    import ipaddress
+
+    try:
+        client = ipaddress.ip_address(str(client_ip or "").strip())
+    except ValueError:
+        return False
+    for entry in allowed or []:
+        raw = str(entry or "").strip()
+        if not raw:
+            continue
+        if raw == str(client):
+            return True
+        try:
+            if client in ipaddress.ip_network(raw, strict=False):
+                return True
+        except ValueError:
+            continue
+    return False
+
+
 class AdminSecurityMiddleware:
     """Security middleware for the Django admin panel.
 
@@ -67,7 +94,7 @@ class AdminSecurityMiddleware:
 
         # ── 1. IP allowlist ──────────────────────────────────────────────────
         allowed_ips = getattr(settings, "ADMIN_ALLOWED_IPS", [])
-        if allowed_ips and client_ip not in allowed_ips:
+        if allowed_ips and not ip_is_allowed(client_ip, allowed_ips):
             logger.warning(
                 "Admin access denied — IP %s not in ADMIN_ALLOWED_IPS",
                 client_ip,
