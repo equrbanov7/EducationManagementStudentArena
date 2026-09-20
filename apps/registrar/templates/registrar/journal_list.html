@@ -15,5 +15,7 @@
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260721-jteach"></script>
+    {# journal_grid 2 hissədə (2026-09-21 bölgüsü); siyahıda dərs modalı yoxdur — 2-ci hissə null-safe çıxır. #}
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260921-split"></script>
+    <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
 {% endblock %}

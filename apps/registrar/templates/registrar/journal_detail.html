@@ -295,7 +295,9 @@
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     <script src="{% static 'registrar/js/journal_lesson_room.js' %}?v=20260920-rooms2"></script>
     <script src="{% static 'registrar/js/journal_lesson_modal_guard.js' %}?v=20260920-guard"></script>
-    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260920-modal"></script>
+    {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
+    <script src="{% static 'registrar/js/journal_grid.js' %}?v=20260921-split"></script>
+    <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
