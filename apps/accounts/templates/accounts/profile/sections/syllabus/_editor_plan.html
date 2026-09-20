@@ -2,8 +2,11 @@
 {% comment %}
 Redaktorun 4–6-cı bölmələri: `week`, `method`, `assess`.
 
-`week` cədvəli 16 sətirdir və hər dərs növü (mühazirə/seminar/laboratoriya) üzrə
-saat AYRICA yoxlanılır — bir mövzu həm mühazirədə, həm seminarda keçilə bilər.
+`week` cədvəlinin sətir sayı tədris planının saatından çıxarılır (bir dərs =
+2 saat; 15/15 → 8 sətir; plan yoxdursa 16), saat seçimi «—»/1/2-dir, planda
+saatı olmayan növün sütunu göstərilmir; müəllim «+» ilə sətir artıra bilər
+(sahib 2026-09-21). Hər dərs növü üzrə saat AYRICA yoxlanılır — bir mövzu həm
+mühazirədə, həm seminarda keçilə bilər.
 `assess`-də bölgü universitet STANDARTIDIR (sahib 2026-09-20): davamiyyət 10 ·
 kollokvium 20 · sərbəst iş 10 · seminar/lab ədədi ortası 10 · yekun 50; müəllim
 heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
@@ -55,7 +58,7 @@ heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
   </form>
   {% endif %}
 
-  {% if se.week_extra_count %}
+  {% if se.week_extra_count and not se.hours.has_plan %}
   {% comment %}Köçürülmüş cədvəl tədris planının 16 həftəsindən uzun ola bilər
   (canlı mənbədə 120 sətrə qədər). Artıq sətirlər KƏSİLMİR — kəsmək ilk
   autosave-də məzmunu silərdi; onlar damğalanıb göstərilir ki, müəllim
@@ -72,81 +75,35 @@ heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
         <tr>
           <th scope="col">{% trans "Həftə" context "accounts.syllabus" %}</th>
           <th scope="col">{% trans "Mövzu" context "accounts.syllabus" %}</th>
-          <th scope="col" class="syl-weeks__h syl-weeks__h--lecture">{% trans "Mühazirə" context "accounts.syllabus" %}</th>
-          <th scope="col" class="syl-weeks__h syl-weeks__h--seminar">{% trans "Seminar" context "accounts.syllabus" %}</th>
-          <th scope="col" class="syl-weeks__h syl-weeks__h--lab">{% trans "Laboratoriya" context "accounts.syllabus" %}</th>
+          {% comment %}Yalnız GÖRÜNƏN dərs növləri (planda saatı olmayan növ — məs.
+          laboratoriya 0 — sütun açmır; bax `apps.syllabus.week_plan`).{% endcomment %}
+          {% for kind in se.hours.rows %}
+          <th scope="col" class="syl-weeks__h syl-weeks__h--{{ kind.kind }}">{{ kind.label }}</th>
+          {% endfor %}
           <th scope="col">{% trans "Təlim nəticəsi" context "accounts.syllabus" %}</th>
         </tr>
       </thead>
       <tbody data-syl-weeks>
         {% for row in se.week_rows %}
-        {% comment %}`data-extra` — sətrin redaktorda İNPUTU OLMAYAN açarları
-        (`practical`, `note`, gələcək sahələr). Toplayıcı sətri məhz ondan
-        qurur, sonra DOM açarlarını üstələyir: göndərilməyən heç nə silinmir.{% endcomment %}
-        <tr data-syl-week-row="{{ row.index }}"{% if row.extra %} data-extra="{{ row.extra }}"{% endif %}
-            class="{% if row.is_extra %}syl-weeks__row--extra{% endif %}">
-          <th scope="row">
-            {{ row.index }}
-            {% if row.is_extra %}<span class="syl-tagx">{% trans "plandan artıq" context "accounts.syllabus" %}</span>{% endif %}
-          </th>
-          <td>
-            {% comment %}Mövzu TƏK SƏTİRDİR: köçürmə burada `clean_text` işlədir
-            (mənbədə 131,056 sətrin heç birində sətir sonu yoxdur), ona görə
-            `<input>` heç nə itirmir.  Bu fakt qapı ilə bağlanıb — render olunan
-            hər `<input>` dəyəri sətir ayırıcısına qarşı yoxlanılır
-            (`test_editor_shipped_js.test_no_single_line_control_carries_a_line_break`).{% endcomment %}
-            <input type="text" class="syl-input syl-input--sm" data-week="topic" value="{{ row.topic }}"
-                   {% if se.readonly %}disabled{% endif %}
-                   aria-label="{{ row.index }}. {% trans 'həftənin mövzusu' context 'accounts.syllabus' %}"
-                   placeholder="{% trans 'Həftənin mövzusu' context 'accounts.syllabus' %}">
-            {% if row.extra_note %}
-            {% comment %}Sətrin redaktorda İNPUTU OLMAYAN, amma SAXLANILAN açarları
-            (`practical`, `qeyd`, gələcək sahələr).  Əvvəllər onlar tamamilə
-            görünməz idi: müəllim sətri boşaldıb «sildim» sanırdı, halbuki dəyər
-            `data-extra` ilə geri yazılırdı.  İndi ən azı GÖRÜNÜR.{% endcomment %}
-            <p class="syl-carrynote">
-              <i class="fas fa-lock" aria-hidden="true"></i>
-              <span>{% trans "Köhnə sistemdən saxlanılır:" context "accounts.syllabus" %} {{ row.extra_note }}</span>
-            </p>
-            {% endif %}
-          </td>
-          {% comment %}Seçicilər `bootstrap-single-select` ilə verilir (layihə qaydası:
-          xam native `<select>` göndərilmir). Native element `data-week` açarını və
-          dəyəri OLDUĞU KİMİ saxlayır — toplayıcı (`syllabus_editor_fields.js`) onu
-          `tr.querySelector("[data-week='…']").value` ilə oxuyur, `change` isə
-          delegasiya ilə tutulur (enhancer `bubbles: true` göndərir).{% endcomment %}
-          {% for cell in row.cells %}
-          <td class="syl-weeks__cell">
-            <div class="bootstrap-single-select bootstrap-single-select--ems syl-cellselect">
-              <select class="syl-select syl-select--xs bootstrap-single-select__native"
-                      data-bootstrap-select data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
-                      aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
-                {% comment %}Seçimlər SƏTİR-SƏTİR gəlir: mənbədəki saat 4-dən böyük
-                ola bilər, siyahıda olmasa `<select>` onu itirər və autosave 0 yazardı.{% endcomment %}
-                {% for value in cell.choices %}
-                <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </td>
-          {% endfor %}
-          <td>
-            <div class="bootstrap-single-select bootstrap-single-select--ems syl-outcomeselect">
-              <select class="syl-select syl-select--sm bootstrap-single-select__native"
-                      data-bootstrap-select data-week="outcome" {% if se.readonly %}disabled{% endif %}
-                      aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
-                <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
-                {% for tag in row.outcome_choices %}
-                <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </td>
-        </tr>
+        {% include "accounts/profile/sections/syllabus/_editor_week_row.html" with row=row %}
         {% endfor %}
       </tbody>
     </table>
   </div>
+  {% if not se.readonly %}
+  <div class="syl-weeks__foot">
+    <button type="button" class="syl-btn syl-btn--dashed" data-syl-week-add>
+      + {% trans "Sətir əlavə et" context "accounts.syllabus" %}
+    </button>
+    <span class="syl-meta">{% trans "Sətir sayı tədris planının saatından özü hesablanır (bir dərs = 2 saat); lazım olsa əlavə sətir açın." context "accounts.syllabus" %}</span>
+  </div>
+  {% comment %}Boş sətir şablonu — server EYNİ partial ilə render edir, JS
+  klonlayıb `__N__`-i növbəti nömrə ilə əvəz edir və seçiciləri
+  `EMSBootstrapSelect.init` ilə gücləndirir.{% endcomment %}
+  <template data-syl-week-template>
+    {% include "accounts/profile/sections/syllabus/_editor_week_row.html" with row=se.week_blank_row %}
+  </template>
+  {% endif %}
   <p class="syl-note">{% trans "İmtahanlar auditoriya saatına daxil edilmir — onlar semestr cədvəlindən gəlir." context "accounts.syllabus" %}</p>
 </article>
 {% endwith %}

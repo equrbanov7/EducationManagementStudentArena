@@ -103,8 +103,7 @@ from .constants import (
 )
 from .document import build_document  # noqa: F401
 from .policy import assessment_weights, standard_midterm, standard_project  # noqa: F401
-from .services import set_plan_hours  # noqa: F401
-from .services import (
+from .services import (  # noqa: F401
     GROUP_CHAIR,
     GROUP_PROGRAM,
     approved_version_for,
@@ -120,6 +119,8 @@ from .services import (
     resolve_actor,
     review_queue,
     section_data_map,
+    seed_week_hours,
+    set_plan_hours,
     status_counts,
     syllabus_for_offering,
     syllabus_for_offering_obj,
@@ -134,6 +135,7 @@ from .services.offerings import (
     STATE_REJECTED,
     STATE_REVISION,
 )
+from .week_plan import expected_week_rows, hour_choices, visible_hour_kinds  # noqa: F401
 
 #: Status kataloqu — şablon bu siyahını olduğu kimi render edir (7 çip).
 STATUS_CATALOG = tuple(
@@ -307,6 +309,10 @@ __all__ = [
     "standard_midterm",
     "standard_project",
     "set_plan_hours",
+    "seed_week_hours",
+    "expected_week_rows",
+    "hour_choices",
+    "visible_hour_kinds",
     "activity_kinds_for_syllabus",
     "activity_label",
     "activity_note",

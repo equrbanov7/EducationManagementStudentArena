@@ -137,6 +137,10 @@ MIN_OUTCOMES = 3
 MIN_TOPIC_CHARS = 4
 WEEK_ROWS = 16
 MIN_FILLED_WEEKS = 14
+#: Bir dərs (cüt) — 2 akademik saat. Sahib 2026-09-21: həftəlik cədvəldə saat
+#: seçimi yalnız «—», 1 (qalıq) və 2-dir; sətir sayı isə plan saatından çıxarılır
+#: (``ceil(saat / 2)``) — 15 saat → 8 sətir (7×2 + 1). Bax ``week_plan.py``.
+WEEK_SESSION_HOURS = 2
 MIN_METHODS = 2
 MIN_PRIMARY_SOURCES = 2
 MIN_ADDITIONAL_SOURCES = 1

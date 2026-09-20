@@ -500,6 +500,12 @@
         on("click", "[data-syl-outcome-add]", function () {
             addOutcome(root());
         });
+        on("click", "[data-syl-week-add]", function (event, button) {
+            var api = fields();
+            if (api && typeof api.addWeekRow === "function") {
+                api.addWeekRow(root(), button);
+            }
+        });
         on("click", "[data-syl-outcome-remove]", function (event, button) {
             removeOutcome(root(), button);
         });
