@@ -99,7 +99,9 @@
             if (building && room.building !== building) return;
             var opt = document.createElement("option");
             opt.value = room.id;
-            opt.textContent = room.capacity ? room.name + " · " + room.capacity : room.name;
+            // Yalnız otaq NÖMRƏSİ (köhnə sistemdəki kimi) — tutum yazılmır: «11 · 18» iki
+            // otaq kimi oxunurdu (sahib 2026-09-20).
+            opt.textContent = room.name;
             sel.appendChild(opt);
             if (room.id === keepId) found = true;
         });

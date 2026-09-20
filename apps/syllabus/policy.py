@@ -29,9 +29,18 @@ from __future__ import annotations
 
 from .constants import SELFWORK_TOTAL_SCORE
 
-#: Qiymətləndirmə çəkiləri — universitet siyasəti ilə KİLİDLİ (README §8/4).
-#: Müəllim yalnız ``flex`` (100 − kilidli cəm) hissəsini bölür; cəm HƏMİŞƏ 100.
-DEFAULT_ASSESSMENT = {"attendance": 10, "selfwork": SELFWORK_TOTAL_SCORE, "final": 50}
+#: Qiymətləndirmə çəkiləri — universitet STANDARTI (sahib qərarı 2026-09-20):
+#: davamiyyət 10 · kollokvium 20 · sərbəst iş 10 · seminar/lab ədədi ortası
+#: (``activity``) 10 → semestr 50; yekun imtahan 50. Müəllim HEÇ NƏ bölmür —
+#: ``flex`` (100 − kilidli cəm) hesablanır və standartda 0-dır; saxlanır ki,
+#: siyasət sonradan yumşaldılsa köhnə «sərbəst pay» yolu işləsin.
+DEFAULT_ASSESSMENT = {
+    "attendance": 10,
+    "midterm": 20,
+    "selfwork": SELFWORK_TOTAL_SCORE,
+    "activity": 10,
+    "final": 50,
+}
 
 #: Qiymətləndirmənin ÜMUMİ balı — dəyişməz (universitet normativi).
 ASSESSMENT_TOTAL = 100
@@ -65,10 +74,12 @@ def _positive_int(value, fallback: int) -> int:
 
 
 def assessment_weights(organization=None) -> dict:
-    """Kilidli çəkilər + hesablanmış ``flex`` (müəllimin bölə biləcəyi bal).
+    """Kilidli çəkilər + hesablanmış ``flex`` (standartda 0).
 
     ``flex`` SAXLANILMIR, hər dəfə ``100 − kilidli cəm`` kimi hesablanır ki,
-    siyasət dəyişəndə iki mənbə bir-birindən ayrılmasın.
+    siyasət dəyişəndə iki mənbə bir-birindən ayrılmasın.  ``assess`` bölməsinin
+    saxlanan açarları köhnə adlarla qalır: ``midterm`` = kollokvium payı,
+    ``project`` = seminar/lab ədədi ortası payı (``activity``).
     """
     override = _raw(organization).get("assessment")
     weights = dict(DEFAULT_ASSESSMENT)
@@ -82,6 +93,20 @@ def assessment_weights(organization=None) -> dict:
     locked = sum(weights.values())
     weights["flex"] = max(0, ASSESSMENT_TOTAL - locked)
     return weights
+
+
+def standard_midterm(weights) -> int:
+    """Kollokvium payı — standart 20 (siyasət ``midterm``); köhnə siyasətdə flex-in yarısı."""
+    if "midterm" in weights:
+        return int(weights["midterm"])
+    return int(weights.get("flex", 0)) // 2
+
+
+def standard_project(weights) -> int:
+    """Seminar/lab ədədi ortası payı — standart 10 (siyasət ``activity``)."""
+    if "activity" in weights:
+        return int(weights["activity"])
+    return int(weights.get("flex", 0)) - standard_midterm(weights)
 
 
 def sla_days(organization=None) -> int:
@@ -121,4 +146,6 @@ __all__ = [
     "policy_for",
     "second_approval_enabled",
     "sla_days",
+    "standard_midterm",
+    "standard_project",
 ]

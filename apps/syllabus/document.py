@@ -48,7 +48,7 @@ import logging
 
 from django.utils.translation import pgettext_lazy
 
-from .constants import SELFWORK_OPTIONS, SELFWORK_TOTAL_SCORE, SectionKey, SyllabusStatus
+from .constants import SELFWORK_OPTIONS, SectionKey, SyllabusStatus
 
 _CTX = "syllabus.document"
 
@@ -78,28 +78,7 @@ _HOURS_SUFFIX = pgettext_lazy(_CTX, "saat")
 _NO_HOURS = pgettext_lazy(_CTX, "saat yazılmayıb")
 _POINTS = pgettext_lazy(_CTX, "bal")
 
-#: Qiymətləndirmə blokunun BOŞ hallı.  Uydurma cəm (defolt rəqəmlərdən
-#: qurulmuş «10 + 10 + 0 + 30 + 50 = 100 bal») tələbəyə REAL siyasət kimi
-#: görünürdü; boşluq indi AÇIQ deyilir.  ⚠️ Bu etiket blokun YEGANƏ sətri
-#: olanda çıxır — mənbə mətninin üstündə çıxanda o mətni təkzib edirdi
-#: (bax :func:`_assessment_body`).
-_WEIGHTS_UNSPECIFIED = pgettext_lazy(_CTX, "Bal bölgüsü göstərilməyib")
 _EXAM_QUESTIONS_LABEL = pgettext_lazy(_CTX, "İmtahan sualları")
-
-# ── Universitet siyasəti ilə KİLİDLİ çəkilər ─────────────────────────────────
-# Redaktorun ``ASSESSMENT_POLICY`` cədvəli ilə (apps.accounts.views.syllabus.
-# editor) EYNİ rəqəmlər: davamiyyət 10, sərbəst iş 10 (``SELFWORK_TOTAL_SCORE``),
-# yekun imtahan 50; qalan 30 bal isə aralıq imtahan ↔ semestr layihəsi arasında
-# müəllim tərəfindən bölünür. ⚠️ Bu rəqəmlər YALNIZ müəllim bölgünü DOLDURANDA
-# göstərilir — doldurulmamış dosyedə (o cümlədən köçürülmüş sillabusda) onları
-# çap etmək mənbədə olmayan struktur uydurmaq deməkdir.
-_ATTENDANCE_SCORE = 10
-_FINAL_EXAM_SCORE = 50
-_FLEX_SCORE = 30
-#: Siyasətin YEGANƏ mümkün cəmi.  Bölgü sətri bu rəqəmə düşmürsə o, bölgü DEYİL
-#: (bax :func:`_assessment_weights`) — tələbəyə «= 110 bal» kimi mümkün olmayan
-#: qayda göstərmək uydurmanın başqa formasıdır.
-_POLICY_TOTAL = _ATTENDANCE_SCORE + SELFWORK_TOTAL_SCORE + _FLEX_SCORE + _FINAL_EXAM_SCORE
 
 
 def _text(value) -> str:
@@ -176,80 +155,24 @@ def _int_or_zero(value) -> int:
         return 0
 
 
-def _assessment_weights(assess: dict):
-    """Müəllimin DOLDURDUĞU bal bölgüsü — YOXDURSA və ya MÜMKÜN DEYİLSƏ ``None``.
+def _assessment_body(assess: dict, activity_kinds=None) -> str:
+    """Qiymətləndirmə bloku — STANDART düstur + qaydanın öz mətni + imtahan sualları.
 
-    Bölgü redaktorda TƏK sürüşdürücüdən gəlir və avtosave həmişə CÜTLÜKDƏ yazır
-    (``project = 30 − midterm``), yəni müəllim paneli bir dəfə də olsun
-    saxlayıbsa çəkilərdən ƏN AZI BİRİ müsbətdir — sürüşdürücü 0-da qalsa belə
-    ``project`` 30 olur.  Boş sxem (``drafts.BLANK_SECTION_DATA``) və köçürmə
-    borusu isə hər ikisini 0 yazır: bu, «bölgü YOXDUR» deməkdir, «hər ikisi
-    sıfırdır» yox.  Fərq məhz burada saxlanılır — əks halda tələbə mənbədə
-    olmayan defolt cəmi real bölgü kimi görür.
-
-    ⚠️ İKİ fail-closed qapı — hər ikisi məhz UYDURMANIN qarşısını alır:
-
-    1. **Yarımçıq cütlük bölgü DEYİL.**  Əvvəl ``project`` açarı olmayan sətir
-       üçün ikinci yarı siyasətdən ÇIXARILIRDI (``project = 30 − midterm``) —
-       yəni tələbə heç kimin yazmadığı rəqəmi real qayda kimi görürdü.  Bu,
-       məhz ləğv etdiyimiz sinifdəndir; ``project`` indi yalnız YAZILANDA
-       oxunur, yoxdursa 0-dır (və 2-ci qapı onu süzür).
-    2. **Siyasətlə mümkün olmayan cəm göstərilmir.**  ``save_section`` sərbəst
-       JSON qəbul edir, yəni ``midterm=20, project=20`` kimi cütlük saxlanıla
-       bilər.  Onun cəmi 110-dur — belə qayda universitetdə YOXDUR, ona görə
-       sətir çap edilmir və hadisə operator üçün log-a düşür.  Rəqəmlər
-       susdurulmur: onlar log-dadır, sadəcə tələbəyə «qayda» kimi verilmir.
+    Sahib qərarı 2026-09-20: bal bölgüsü universitet standartıdır və müəllim
+    tərəfindən doldurulmur, ona görə düstur HƏMİŞƏ çap olunur (uydurma deyil —
+    siyasətin özüdür).  Fəaliyyət növü (seminar / laboratoriya / hər ikisi)
+    dərs yükündən gəlir (bax :mod:`apps.syllabus.assessment_formula`).
     """
-    midterm = max(0, _int_or_zero(assess.get("midterm")))
-    project = max(0, _int_or_zero(assess.get("project")))
-    if midterm <= 0 and project <= 0:
-        return None
-    total = _ATTENDANCE_SCORE + SELFWORK_TOTAL_SCORE + midterm + project + _FINAL_EXAM_SCORE
-    if total != _POLICY_TOTAL:
-        logger.warning(
-            "syllabus.assessment_weights_off_policy midterm=%s project=%s total=%s expected=%s",
-            midterm,
-            project,
-            total,
-            _POLICY_TOTAL,
-        )
-        return None
-    return midterm, project
+    from .assessment_formula import activity_note, formula_text
 
-
-def _assessment_body(assess: dict) -> str:
-    """Qiymətləndirmə bloku — QURAŞDIRILMIR, yazılanı göstərir.
-
-    Ardıcıllıq: bal bölgüsü (yalnız doldurulubsa) → qiymətləndirmə qaydasının
-    ÖZ mətni (``note``) → imtahan sualları.
-
-    ⚠️ «Bal bölgüsü göstərilməyib» etiketi YALNIZ blokda BAŞQA HEÇ NƏ olmayanda
-    yazılır.  Əvvəl o, mətnin ÜSTÜNDƏ çap olunurdu və canlı ölçmədə (8,260
-    uniqid) etiketin göründüyü 5,942 blokun **4,071-i (68.5 %)** bölgünü elə öz
-    ardınca gələn mənbə mətnində AÇIQ deyirdi — məsələn «məşğələ (0-30 bal),
-    sərbəst iş (0-10 bal), davamiyyət (0-10 bal), imtahan (0-50 bal)».  Tələbə
-    əvvəlcə «göstərilməyib» oxuyur, sonra bölgünün özünü — etiket öz altındakı
-    mətni TƏKZİB edirdi.  Mətn varsa o, boşluğun cavabıdır; etiket isə yalnız
-    həqiqətən heç nə olmayanda mənalıdır (orada da ümumi «— doldurulmayıb —»
-    işarəsindən daha dəqiqdir: bu blokun struktur məzmunu MƏHZ bölgüdür).
-    """
-    weights = _assessment_weights(assess)
     note = _prose_lines(assess.get("note"))
     questions = _prose_lines(assess.get("exam_questions"))
-
-    body: list = []
-    if weights is not None:
-        midterm, project = weights
-        total = _ATTENDANCE_SCORE + SELFWORK_TOTAL_SCORE + midterm + project + _FINAL_EXAM_SCORE
-        body.append(
-            f"{_ATTENDANCE_SCORE} + {SELFWORK_TOTAL_SCORE} + {midterm} + {project}"
-            f" + {_FINAL_EXAM_SCORE} = {total} {_POINTS}"
-        )
+    body: list = [formula_text(activity_kinds), activity_note(activity_kinds)]
     body.extend(note)
     if questions:
         body.append(f"{_EXAM_QUESTIONS_LABEL}:")
         body.extend(questions)
-    return "\n".join(body) or str(_WEIGHTS_UNSPECIFIED)
+    return "\n".join(body)
 
 
 def _selfwork_line(index, row, config) -> str:
@@ -265,8 +188,12 @@ def _selfwork_line(index, row, config) -> str:
     return f"{index}. {title} ({config['per_score']} {_POINTS})"
 
 
-def build_preview_blocks(section_map: dict) -> list:
-    """``{section_id: data}`` → oxunaqlı bloklar (başlıq + çoxsətirli gövdə)."""
+def build_preview_blocks(section_map: dict, activity_kinds=None) -> list:
+    """``{section_id: data}`` → oxunaqlı bloklar (başlıq + çoxsətirli gövdə).
+
+    ``activity_kinds`` — qiymətləndirmə düsturunun seminar/lab sətri üçün
+    (bax :mod:`apps.syllabus.assessment_formula`); verilməsə defolt (seminar).
+    """
     info = section_map.get(SectionKey.DESC.value, {}) or {}
     outcomes = _lines((section_map.get(SectionKey.OUT.value, {}) or {}).get("outcomes"))
     weeks = [
@@ -296,7 +223,7 @@ def build_preview_blocks(section_map: dict) -> list:
             "title": BLOCK_TITLES["methods"],
             "body": "\n".join(_prose_lines(method.get("methods")) + _prose_lines(method.get("note"))) or str(_EMPTY),
         },
-        {"title": BLOCK_TITLES["assessment"], "body": _assessment_body(assess)},
+        {"title": BLOCK_TITLES["assessment"], "body": _assessment_body(assess, activity_kinds)},
         {
             "title": BLOCK_TITLES["selfwork"],
             "body": "\n".join(_selfwork_line(index, row, config) for index, row in enumerate(topics, start=1))

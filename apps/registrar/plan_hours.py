@@ -68,11 +68,49 @@ def plan_hours_for_offering(offering):
     """
     if offering is None:
         return {}
-    return plan_hours_for_subject(
+    hours = plan_hours_for_subject(
         organization=offering.organization,
         subject=offering.subject,
         program=program_for_offering(offering),
     )
+    return hours or workload_hours_for_offering(offering)
+
+
+def workload_hours_for_offering(offering) -> dict:
+    """Təsdiqlənmiş plan sətri YOXDURSA — dərs yükü (TAPŞIRIQ) sətrindən bölgü.
+
+    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür».
+    Kafedra tapşırığının sətri (eyni fənn + dövr + qrup) mühazirə/seminar/lab
+    saatını daşıyır — ``*_plan`` (plan saatı), yoxdursa ``*_total``.  Model
+    ``get_model`` ilə həll olunur: registrar → workload Python import kənarı
+    yaranmır (modul-sərhəd qapısı; workload onsuz da registrar.public-i oxuyur).
+    """
+    from django.apps import apps as django_apps
+
+    if offering is None or not (offering.subject_id and offering.period_id):
+        return {}
+    try:
+        TaskRow = django_apps.get_model("workload", "TeachingTaskRow")
+    except LookupError:
+        return {}
+    rows = TaskRow.objects.filter(
+        organization_id=offering.organization_id, subject_id=offering.subject_id, period_id=offering.period_id
+    )
+    if offering.group_id:
+        rows = rows.filter(groups=offering.group_id)
+    row = (
+        rows.order_by("-updated_at")
+        .values("lecture_plan", "lecture_total", "seminar_plan", "seminar_total", "lab_plan", "lab_total")
+        .first()
+    )
+    if not row:
+        return {}
+    hours = {}
+    for kind in ("lecture", "seminar", "lab"):
+        value = int(row[f"{kind}_plan"] or 0) or int(row[f"{kind}_total"] or 0)
+        if value > 0:
+            hours[kind] = value
+    return hours
 
 
 def program_for_offering(offering):
@@ -99,4 +137,5 @@ __all__ = [
     "plan_hours_for_offering",
     "plan_hours_for_subject",
     "program_for_offering",
+    "workload_hours_for_offering",
 ]
