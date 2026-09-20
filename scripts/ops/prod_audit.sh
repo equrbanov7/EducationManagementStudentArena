@@ -72,7 +72,7 @@ DBG=$(dotenv DEBUG); [ -z "$DBG" ] || [ "$DBG" = "False" ] || [ "$DBG" = "false"
 # rsync ilə köçürülən canlı qovluqda runtime artefaktları (media/, staticfiles/, .env, sertifikatlar…)
 # git üçün izlənməyəndir — onlar sayılmır; yalnız İZLƏNƏN faylların dəyişməsi xəbərdarlıqdır.
 GS=$(git status --porcelain 2>/dev/null | grep -vE '^\?\? ' | wc -l | tr -d ' '); UNT=$(git status --porcelain 2>/dev/null | grep -cE '^\?\? ' | tr -d ' ')
-[ "$GS" = "0" ] && ok "APP_DIR-də izlənən fayl dəyişməyib (izlənməyən runtime faylı: $UNT)" || warn "APP_DIR-də $GS izlənən fayl dəyişib (deploy rsync-i ilə üst-üstə düşmür?)"
+[ "$GS" = "0" ] && ok "APP_DIR-də izlənən fayl dəyişməyib (izlənməyən runtime faylı: $UNT)" || { warn "APP_DIR-də $GS izlənən fayl dəyişib (deploy rsync-i ilə üst-üstə düşmür?)"; echo '```'; git status --porcelain 2>/dev/null | grep -vE '^\?\? ' | head -12; echo "-- rejim/icazə fərqi (core.fileMode): $(git -c core.fileMode=false status --porcelain 2>/dev/null | grep -vcE '^\?\? ') fayl məzmunca dəyişib"; echo '```'; }
 for f in docker/nginx/certs/origin.key; do [ -f "$f" ] && { p=$(stat -c %a "$f"); [ "$p" = "600" ] || [ "$p" = "640" ] && ok "$f icazəsi $p" || warn "$f icazəsi $p"; }; done
 
 section "5. nginx + HTTP başlıqları (https://127.0.0.1, Host: $HOST)"
