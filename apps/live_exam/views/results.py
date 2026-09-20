@@ -14,9 +14,10 @@ from django.db.models import Avg, Case, Count, IntegerField, Q, Sum, When
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamQuestion
-from apps.exams.public import generate_exam_statistics_summary, is_teacher_user
+from apps.exams.public import exam_breadcrumbs, generate_exam_statistics_summary, is_teacher_user
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
@@ -157,6 +158,12 @@ def teacher_live_exam_results(request, slug):
         "liveExam/teacher_live_results.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=navigation_query,
+                current=pgettext("liveExam.template.results", "page_title"),
+            ),
             "sessions": sessions,
             "exam_detail_url": exam_detail_url,
             "live_results_navigation_query": navigation_query,
@@ -362,6 +369,13 @@ def teacher_live_session_detail(request, slug, pin):
         "liveExam/teacher_live_session_detail.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=navigation_query,
+                middle=[{"label": pgettext("liveExam.template.results", "page_title"), "url": live_results_url}],
+                current=f"PIN {session.pin}",
+            ),
             "session": session,
             "players": players,
             "question_stats": question_stats,

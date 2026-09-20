@@ -17,10 +17,12 @@ from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAnswer, ExamAttempt, ExamQuestion, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.ai_summary import generate_exam_statistics_summary
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.helpers import _safe_same_origin_redirect_path
 
@@ -433,6 +435,15 @@ def teacher_exam_statistics(request, slug):
         "exams/teacher/teacher_exam_statistics.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(
+                request,
+                exam,
+                navigation_query=nav_query,
+                middle=[
+                    {"label": pgettext("exams.template.teacher_exam_results", "page_title_suffix"), "url": results_url}
+                ],
+                current=pgettext("exams.template.exam_statistics", "page_title"),
+            ),
             "is_written": is_written,
             "exam_detail_url": exam_detail_url,
             "results_url": results_url,

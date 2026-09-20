@@ -75645,3 +75645,7 @@ msgstr "Test sual bankı şablonu"
 msgctxt "exams.template.question_bank_detail"
 msgid "Yazılı sual bankı şablonu"
 msgstr "Yazılı sual bankı şablonu"
+
+msgctxt "exams.crumbs"
+msgid "Naviqasiya yolu"
+msgstr "Naviqasiya yolu"

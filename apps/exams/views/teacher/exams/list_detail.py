@@ -15,6 +15,7 @@ from django.views.decorators.http import require_GET
 from apps.exams.constants import get_live_active_states, get_live_session_model
 from apps.exams.forms import ExamForm
 from apps.exams.services.access_policy import _ensure_teacher, can_manage_exam_questions
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_active_organization, get_teacher_exam_or_404
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization, request_has_active_organization_context
@@ -362,6 +363,7 @@ def teacher_exam_detail(request, slug):
         "exams/teacher/teacher_exam_detail.html",
         {
             "exam": exam,
+            "exam_crumbs": exam_breadcrumbs(request, exam, navigation_query=nav_query),
             "question_modal_autoopen_url": auto_modal_url,
             "question_modal_autoopen_mode": auto_modal_mode if auto_modal_url else "",
             "questions": question_page["questions"],

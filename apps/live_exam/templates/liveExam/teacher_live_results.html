@@ -11,6 +11,7 @@
 
 {% block content %}
 <div class="lr-page">
+    {% include "exams/partials/_exam_crumbs.html" %}
     <a href="{{ exam_detail_url }}" class="lr-back">
         <i class="fas fa-arrow-left"></i> {{ exam.title }}
     </a>
