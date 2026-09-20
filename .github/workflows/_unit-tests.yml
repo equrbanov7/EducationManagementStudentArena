@@ -128,17 +128,9 @@ jobs:
           python manage.py check --fail-level WARNING
           echo "::endgroup::"
 
-      - name: 🗃️ Run migrations
-        env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key-for-ci-only-not-production
-          DEBUG: "False"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: |
-          echo "::group::🗃️ Database Migrations"
-          python manage.py migrate --verbosity=2
-          echo "::endgroup::"
+      # 2026-09-21: ayrıca `manage.py migrate` addımı SİLİNDİ — pytest-django test bazasını
+      # (`test_db`) özü yaradıb miqrasiya edir; bu addım eyni işi CI bazasında bir də
+      # görürdü (~94 s / shard). Miqrasiya yoxlaması `build` job-undadır.
 
       - name: 🧪 Run tests with coverage
         env:
