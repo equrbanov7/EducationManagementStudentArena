@@ -1,0 +1,43 @@
+name: 🔎 Prod Audit (oxu-yalnız)
+
+# Sahib 2026-09-21: «serverə qoşulub real performans və təhlükəsizlik testləri
+# apar». Self-hosted runner serverin özündədir — skript orada işləyir, HEÇ NƏ
+# DƏYİŞMİR (heç bir POST, heç bir yazı), hesabat Actions summary + artefaktdır.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: prod-ops
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: 🔎 prod-audit
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+    steps:
+      - name: 📥 Checkout (skript mənbəyi)
+        uses: actions/checkout@v4
+
+      - name: 🔎 Audit
+        run: |
+          set -uo pipefail
+          # Skriptlər canlı APP_DIR-dəki köçürülmüş nüsxədən YOX, bu checkout-dan gəlir
+          # (deploy olunmamış düzəlişi də sınamaq mümkün olsun); APP_DIR yalnız
+          # compose/.env üçündür.
+          cp "$GITHUB_WORKSPACE/scripts/ops/prod_perf_probe.py" "$APP_DIR/scripts/ops/prod_perf_probe.py" 2>/dev/null || true
+          bash "$GITHUB_WORKSPACE/scripts/ops/prod_audit.sh" | tee "$RUNNER_TEMP/prod-audit.md"
+          cat "$RUNNER_TEMP/prod-audit.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📎 Hesabat artefaktı
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-audit-report
+          path: ${{ runner.temp }}/prod-audit.md
+          retention-days: 30
