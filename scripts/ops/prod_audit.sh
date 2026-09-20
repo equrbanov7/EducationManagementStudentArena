@@ -41,7 +41,12 @@ for port in $PUB; do
 done
 ok "publik portlar: ${PUB:-yoxdur}"
 command -v ufw >/dev/null 2>&1 && { echo '```'; sudo -n ufw status 2>/dev/null || ufw status 2>/dev/null || echo "ufw status: sudo icazəsi yoxdur"; echo '```'; }
-command -v fail2ban-client >/dev/null 2>&1 && { sudo -n fail2ban-client status 2>/dev/null | sed 's/^/    /' || echo "    fail2ban: status oxunmadı"; } || warn "fail2ban quraşdırılmayıb (SSH brute-force qoruması hostda yoxdur)"
+if command -v fail2ban-client >/dev/null 2>&1 || systemctl list-unit-files 2>/dev/null | grep -q '^fail2ban'; then
+  FB=$(systemctl is-active fail2ban 2>/dev/null || echo unknown); [ "$FB" = "active" ] && ok "fail2ban aktivdir" || warn "fail2ban quraşdırılıb amma aktiv deyil ($FB)"
+else
+  warn "fail2ban quraşdırılmayıb (SSH brute-force qoruması hostda yoxdur; 22 publikdir)"
+fi
+SSHPW=$(sshd -T 2>/dev/null | awk '/^passwordauthentication/{print $2}'); [ -n "$SSHPW" ] && { [ "$SSHPW" = "no" ] && ok "SSH parol girişi bağlıdır" || warn "SSH PasswordAuthentication=$SSHPW (yalnız açar tövsiyə olunur)"; }
 
 section "3. Konteynerlər"
 echo '```'
@@ -58,11 +63,16 @@ ok "konteyner yoxlaması bitdi"
 section "4. Fayl/konfiq gigiyenası"
 P=$(stat -c %a .env 2>/dev/null); [ "$P" = "600" ] || [ "$P" = "640" ] && ok ".env icazəsi $P" || warn ".env icazəsi $P (600 gözlənilir)"
 DBG=$(dotenv DEBUG); [ -z "$DBG" ] || [ "$DBG" = "False" ] || [ "$DBG" = "false" ] || [ "$DBG" = "0" ] && ok "DEBUG söndürülüb" || bad "DEBUG=$DBG (.env)"
-for k in SECRET_KEY DATABASE_URL; do [ -n "$(dotenv $k)" ] && ok "$k təyin olunub" || bad "$k boşdur"; done
+[ -n "$(dotenv SECRET_KEY)" ] && ok "SECRET_KEY təyin olunub" || bad "SECRET_KEY boşdur"
+# DB girişi ya DATABASE_URL, ya da compose-un yığdığı POSTGRES_* ilə gəlir (canlı serverdə ikincidir).
+{ [ -n "$(dotenv DATABASE_URL)" ] || [ -n "$(dotenv POSTGRES_PASSWORD)" ]; } && ok "DB girişi (.env) təyin olunub" || bad "nə DATABASE_URL, nə POSTGRES_PASSWORD təyin olunub"
 [ "$(dotenv INSECURE_TRANSPORT_OK)" = "1" ] && warn "INSECURE_TRANSPORT_OK=1 (TLS məcburiyyəti söndürülüb)" || ok "TLS məcburiyyəti aktivdir"
 [ -n "$(dotenv ADMIN_ALLOWED_IPS)" ] && ok "ADMIN_ALLOWED_IPS təyin olunub" || warn "ADMIN_ALLOWED_IPS boşdur — admin paneli IP ilə məhdudlaşmayıb"
 [ "$(dotenv ADMIN_2FA_REQUIRED)" = "False" ] && bad "ADMIN_2FA_REQUIRED=False" || ok "admin 2FA məcburidir"
-GS=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' '); [ "$GS" = "0" ] && ok "APP_DIR git ağacı təmizdir" || warn "APP_DIR-də $GS izlənməyən/dəyişmiş fayl (rsync artığı?)"
+# rsync ilə köçürülən canlı qovluqda runtime artefaktları (media/, staticfiles/, .env, sertifikatlar…)
+# git üçün izlənməyəndir — onlar sayılmır; yalnız İZLƏNƏN faylların dəyişməsi xəbərdarlıqdır.
+GS=$(git status --porcelain 2>/dev/null | grep -vE '^\?\? ' | wc -l | tr -d ' '); UNT=$(git status --porcelain 2>/dev/null | grep -cE '^\?\? ' | tr -d ' ')
+[ "$GS" = "0" ] && ok "APP_DIR-də izlənən fayl dəyişməyib (izlənməyən runtime faylı: $UNT)" || warn "APP_DIR-də $GS izlənən fayl dəyişib (deploy rsync-i ilə üst-üstə düşmür?)"
 for f in docker/nginx/certs/origin.key; do [ -f "$f" ] && { p=$(stat -c %a "$f"); [ "$p" = "600" ] || [ "$p" = "640" ] && ok "$f icazəsi $p" || warn "$f icazəsi $p"; }; done
 
 section "5. nginx + HTTP başlıqları (https://127.0.0.1, Host: $HOST)"
@@ -82,6 +92,7 @@ echo "$H" | grep -i "^set-cookie: csrftoken" | grep -qi "samesite" && ok "csrfto
 code() { curl -sk -o /dev/null -w '%{http_code}' --max-time 15 -H "Host: $HOST" "https://127.0.0.1$1" 2>/dev/null; }
 echo "| Yol | Status |"; echo "|---|---|"
 for p in /ping/ /health/ "/$ADMIN_PREFIX" /metrics/ /accounts/login/ /static/css/design-tokens.css /.env /admin/ /.git/config; do echo "| \`$p\` | $(code "$p") |"; done
+echo "- ℹ️ \`/metrics/\` və \`/health/\` 127.0.0.1-dən 200 gözləniləndir (allow-list daxili şəbəkə); kənar IP-dən 403 olmalıdır — bu zond onu yoxlaya bilmir."
 [ "$(code /.env)" = "404" ] || [ "$(code /.env)" = "403" ] || bad "/.env açıqdır!"
 [ "$(code /.git/config)" = "404" ] || [ "$(code /.git/config)" = "403" ] || bad "/.git/config açıqdır!"
 HTTP80=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 10 -H "Host: $HOST" "http://127.0.0.1/accounts/login/" 2>/dev/null); echo "$HTTP80" | grep -q "^30[12] https" && ok "HTTP→HTTPS yönləndirmə ($HTTP80)" || warn "HTTP→HTTPS yönləndirmə yoxdur ($HTTP80)"
