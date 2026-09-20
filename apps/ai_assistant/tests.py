@@ -307,3 +307,52 @@ class AIContextTenantIsolationTests(TestCase):
         # ...and must NEVER see ORG B's data.
         self.assertNotIn("ORG-B-SECRET-COURSE", context)
         self.assertNotIn("ORG-B-SECRET-EXAM", context)
+
+
+class AssistantHardeningTests(TestCase):
+    """2026-09-20 sərtləşdirmə: açar, gövdə limiti, yol təmizləmə, no-store."""
+
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+
+        self.user = get_user_model().objects.create_user("ai_hard", "ai_hard@example.com", "pw")
+        self.client.force_login(self.user)
+
+    def test_quota_exposes_flags_and_no_store(self):
+        from django.test import override_settings
+
+        with override_settings(AI_ASSISTANT_ENABLED=False, GEMINI_API_KEY=""):
+            response = self.client.get(reverse("ai_assistant:quota"))
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload["enabled"])
+        self.assertFalse(payload["configured"])
+        self.assertEqual(response["Cache-Control"], "no-store")
+
+    def test_chat_is_503_when_disabled(self):
+        from django.test import override_settings
+
+        with override_settings(AI_ASSISTANT_ENABLED=False):
+            response = self.client.post(
+                reverse("ai_assistant:chat"), data='{"message": "salam"}', content_type="application/json"
+            )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["error"], "assistant_disabled")
+
+    def test_oversized_body_is_rejected(self):
+        body = '{"message": "' + ("a" * 20000) + '"}'
+        response = self.client.post(reverse("ai_assistant:chat"), data=body, content_type="application/json")
+        self.assertEqual(response.status_code, 413)
+
+    def test_non_object_body_is_rejected(self):
+        response = self.client.post(reverse("ai_assistant:chat"), data="[1,2]", content_type="application/json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_page_path_strips_host_query_and_fragment(self):
+        from .views import _page_path
+
+        self.assertEqual(_page_path("https://evil.example/jurnal/?token=x#frag"), "/jurnal/")
+        self.assertEqual(_page_path("/accounts/profile/?section=x"), "/accounts/profile/")
+        self.assertEqual(_page_path("javascript:alert(1)"), "")
+        self.assertEqual(_page_path("//evil.example/x"), "/x")
+        self.assertEqual(_page_path(""), "")

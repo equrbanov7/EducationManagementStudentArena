@@ -16,6 +16,9 @@ idarə olunur (asılılıqlar: bax base.py).
 # Set via GEMINI_API_KEY environment variable.  When empty, the AI summary
 # feature degrades gracefully (shows a "not configured" message).
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+# Sahib açarı (2026-09-20): vidcet görünür, amma çat söndürülüb («tezliklə»).
+# Açar verilməyibsə vidcet onsuz da «hələ qoşulmayıb» vəziyyətini göstərir.
+AI_ASSISTANT_ENABLED = os.getenv("AI_ASSISTANT_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
 
 # 2026-09-14 (audit F-08, §27 «AI PII/retention»): AI köməkçisi jurnalı
 # (`AIAssistantLog`) istifadəçi prompt-unu saxlayır. Saxlanan mətn

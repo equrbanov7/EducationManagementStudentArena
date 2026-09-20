@@ -34,11 +34,17 @@ from apps.syllabus.public import (
     MIN_GOAL_CHARS,
     MIN_OUTCOMES,
     RULE_SECTIONS,
-    SELFWORK_TOTAL_SCORE,
     WEEK_ROWS,
     SectionKey,
     SyllabusStatus,
+    activity_kinds_for_syllabus,
+    activity_label,
+    activity_note,
+    assessment_weights,
     build_syllabus_editor_context,
+    formula_rows,
+    formula_text,
+    set_plan_hours,
 )
 
 from . import editor_panels as panels_builder
@@ -53,7 +59,10 @@ NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı və ya artıq mövcud deyi
 #: Qiymətləndirmə siyasəti — universitet səviyyəsində KİLİDLİ çəkilər (dizayn §3.2).
 #: Müəllim yalnız `flex` (30 bal) hissəsini aralıq imtahan ↔ semestr layihəsi
 #: arasında bölür; cəm HƏMİŞƏ 100 qalır.
-ASSESSMENT_POLICY = {"attendance": 10, "selfwork": SELFWORK_TOTAL_SCORE, "final": 50, "flex": 30}
+# Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — tək mənbə
+# apps.syllabus.policy (davamiyyət 10 · kollokvium 20 · sərbəst iş 10 ·
+# seminar/lab ədədi ortası 10 · yekun 50); müəllim heç nə bölmür.
+ASSESSMENT_POLICY = assessment_weights(None)
 
 #: Sol naviqasiyanın QISA etiketi + bölmə başlığı + izah mətni (dizayn `SEC`).
 SECTION_META = {
@@ -103,8 +112,8 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Qiymətləndirmə strukturu"),
         pgettext_lazy(
             _CTX,
-            "Davamiyyət, sərbəst iş və yekun imtahanın çəkisi universitet siyasəti ilə təyin edilib. Qalan 30 bal "
-            "aralıq imtahan və semestr layihəsi arasında bölünür.",
+            "Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst iş 10, seminar/laboratoriya "
+            "ədədi ortası 10 (semestr 50) və yekun imtahan 50 — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir.",
         ),
     ),
     SectionKey.SELF.value: (
@@ -181,17 +190,19 @@ def _selfwork(data):
     return panels_builder.selfwork(data, SELFWORK_NOTES)
 
 
-def _assessment(data):
-    midterm = _int(data.get("midterm"))
-    flex = ASSESSMENT_POLICY["flex"]
-    midterm = max(0, min(midterm, flex))
+def _assessment(data, syllabus=None):
+    """Standart düstur (müəllim seçmir) + fəaliyyət növü (seminar/lab) dərs yükündən."""
+    kinds = activity_kinds_for_syllabus(syllabus) if syllabus is not None else ("seminar",)
+    rows = formula_rows(kinds)
+    semester = sum(row["score"] for row in rows if row["key"] != "final")
     return {
-        "attendance": ASSESSMENT_POLICY["attendance"],
-        "selfwork": ASSESSMENT_POLICY["selfwork"],
-        "final": ASSESSMENT_POLICY["final"],
-        "flex": flex,
-        "midterm": midterm,
-        "project": flex - midterm,
+        "rows": rows,
+        "semester": semester,
+        "total": sum(row["score"] for row in rows),
+        "activity_label": activity_label(kinds),
+        "activity_note": activity_note(kinds),
+        "activity_kinds": list(kinds),
+        "formula": formula_text(kinds),
         "note": (data.get("note") or "").strip(),
     }
 
@@ -215,6 +226,25 @@ _LOCKED_SOURCES = {
     "split": pgettext_lazy(_CTX, "Tədris planı"),
     "group": pgettext_lazy(_CTX, "Qruplar"),
 }
+
+
+def _ensure_plan_hours(syllabus, context) -> dict:
+    """Plan saatı boşdursa (köçürülmüş/yükdən açılan açılış) tədris yükündən doldur.
+
+    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür».
+    Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır (``set_plan_hours`` qapısı); tapılmasa
+    müəllim saatı özü yazır (bax ``syllabus_action`` → ``plan_hours``).
+    """
+    plan_hours = dict(context.get("plan_hours") or {})
+    if plan_hours or context.get("view_state") != "normal":
+        return plan_hours
+    from apps.registrar.public import plan_hours_for_offering
+
+    found = plan_hours_for_offering(getattr(syllabus, "offering", None))
+    if found:
+        set_plan_hours(context["version"], found)
+        return dict(found)
+    return plan_hours
 
 
 def _locked_rows(syllabus, hours):
@@ -403,8 +433,11 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     if SectionKey.OUT.value in panels:
         panels[SectionKey.OUT.value]["rows"] = panels_builder.outcome_rows(out_data)
     week_rows = _week_rows(section_map.get(SectionKey.WEEK.value, {}), tags)
-    hours = _hour_totals(week_rows, context["plan_hours"])
+    plan_hours = _ensure_plan_hours(syllabus, context)
+    hours = _hour_totals(week_rows, plan_hours)
+    hours["has_plan"] = bool(plan_hours)
     selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {}))
+    assessment_view = _assessment(section_map.get(SectionKey.ASSESS.value, {}), syllabus)
     readonly = context["view_state"] != "normal"
     version_row = context["version"]
 
@@ -461,7 +494,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "week_extra_count": sum(1 for row in week_rows if row["is_extra"]),
             "hours": hours,
             "selfwork": selfwork_view,
-            "assessment": _assessment(section_map.get(SectionKey.ASSESS.value, {})),
+            "assessment": assessment_view,
             # `catalog` + `custom`: kataloqda olmayan (köçürülmüş) metodlar da
             # render olunur, yoxsa toplayıcı onları ilk autosave-də silərdi.
             "methods": panels_builder.methods(
