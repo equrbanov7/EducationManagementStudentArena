@@ -1,0 +1,48 @@
+{% load i18n %}
+{% comment %}Ana qrupu alt qruplara bölmə — `_form_dialog.html` gövdəsi (sahib 2026-09-20).
+
+Axın (JS: teaching_office_group_split.js):
+  1. sətirdəki «Alt qruplara böl» düyməsi `data-students-url`-dan tələbələri gətirir;
+  2. alt qrup sayı (2–6) seçilir, adlar «<ana>-1», «<ana>-2» … kimi doldurulur
+     (dəyişdirilə bilər); tələbələr əlifba sırası ilə BƏRABƏR bölünür;
+  3. hər sütunda tələbə seçilib istənilən başqa sütuna keçirilir (ana qrupda
+     qalanlar daxil); sütun başlığında say göstərilir;
+  4. «Alt qrupları yarat» → bölgü gizli `subgroups` JSON sahəsinə yazılır və
+     `action=split_group` ilə göndərilir (server: organizations/group_split.py).
+Bütün mətnlər data-atributdadır; inline script/style YOX (CSP).{% endcomment %}
+<div class="tof-subsplit" data-tof-split
+     data-t-loading="{% trans 'Tələbələr yüklənir…' context 'accounts.groups' %}"
+     data-t-empty="{% trans 'Bu qrupda aktiv tələbə yoxdur.' context 'accounts.groups' %}"
+     data-t-parent="{% trans 'Ana qrupda qalır' context 'accounts.groups' %}"
+     data-t-students="{% trans 'tələbə' context 'accounts.groups' %}"
+     data-t-move-here="{% trans 'Seçilmişləri bura keçir' context 'accounts.groups' %}"
+     data-t-select-all="{% trans 'Hamısını seç' context 'accounts.groups' %}"
+     data-t-clear="{% trans 'Seçimi ləğv et' context 'accounts.groups' %}"
+     data-t-name-label="{% trans 'Alt qrupun adı' context 'accounts.groups' %}"
+     data-t-load-failed="{% trans 'Tələbə siyahısı yüklənmədi — yenidən cəhd edin.' context 'accounts.groups' %}"
+     data-t-need-two="{% trans 'Ən azı iki alt qrupda tələbə olmalıdır.' context 'accounts.groups' %}"
+     data-t-need-name="{% trans 'Hər alt qrupun adı olmalıdır.' context 'accounts.groups' %}">
+    <div class="tof-subsplit__top">
+        <div class="ems-field tof-subsplit__count">
+            <label class="ems-field__label" for="tof-subsplit-count">{% trans "Alt qrup sayı" context "accounts.groups" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="tof-subsplit-count" data-tof-subsplit-count data-bootstrap-select>
+                    {% for number in "23456" %}<option value="{{ number }}"{% if number == "2" %} selected{% endif %}>{{ number }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="tof-subsplit__summary" data-tof-split-summary aria-live="polite"></div>
+        <button type="button" class="ems-btn" data-tof-split-auto>
+            <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> {% trans "Bərabər böl" context "accounts.groups" %}
+        </button>
+    </div>
+    <p class="ems-field__hint">{% trans "Sütunlarda tələbəni işarələyib başqa sütunun «Seçilmişləri bura keçir» düyməsi ilə keçirin. Ana qrupda qalan tələbələr köçürülmür." context "accounts.groups" %}</p>
+    <div class="tof-subsplit__board" data-tof-split-board role="group" aria-label="{% trans 'Alt qrup bölgüsü' context 'accounts.groups' %}"></div>
+    <div class="ems-field tof-subsplit__reason">
+        <label class="ems-field__label" for="tof-split-reason">{% trans "Səbəb" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="tof-split-reason" name="reason" maxlength="500" required autocomplete="off"
+               placeholder="{% trans 'Məs.: laboratoriya dərsləri üçün alt qruplara bölünür' context 'accounts.groups' %}">
+        <p class="ems-field__hint">{% trans "Səbəb hər tələbənin köçürmə qeydinə və audit jurnalına yazılır." context "accounts.groups" %}</p>
+    </div>
+    <p class="tof-subsplit__error" data-tof-split-error role="alert" hidden></p>
+</div>

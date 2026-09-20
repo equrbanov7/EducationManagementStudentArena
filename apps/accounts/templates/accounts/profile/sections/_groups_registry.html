@@ -41,6 +41,9 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 {% trans "Tələbənin qrupunu dəyiş" context "accounts.groups" as gr_move_title %}
 {% trans "Tələbə seçilmiş qrupa köçürülür; köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Səbəb audit jurnalına yazılır." context "accounts.groups" as gr_move_sub %}
 {% trans "Qrupu dəyiş" context "accounts.groups" as gr_move_btn %}
+{% trans "Ana qrupu alt qruplara böl" context "accounts.groups" as gr_split_title %}
+{% trans "Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi xidmətlə yazılır — tarixçə silinmir." context "accounts.groups" as gr_split_sub %}
+{% trans "Alt qrupları yarat" context "accounts.groups" as gr_split_btn %}
 <section class="profile-section-panel profile-section--tof {% if active_section == 'groups-registry' %}is-active{% endif %}"
          data-profile-section-panel="groups-registry"
          data-source-url="{{ profile_base_url }}?section=groups-registry">
@@ -104,6 +107,7 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
         {% comment %}Səbəbsiz əlavə (sahib, 2026-09-08) — adi form dialoqu; hədəf qrup
         `data-tof-prefill` ilə, seçilmiş qeyd id-ləri gizli `record_ids` ilə gedir.{% endcomment %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupAddStudentsDialog" form_dialog_title=gr_add_title form_dialog_subtitle=gr_add_sub form_dialog_submit_label=gr_add_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_add_students_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.add_students_hidden form_dialog_data=groups_registry_section.form_data %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupSplitDialog" form_dialog_title=gr_split_title form_dialog_subtitle=gr_split_sub form_dialog_submit_label=gr_split_btn form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_group_split_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.split_hidden form_dialog_data=groups_registry_section.form_data %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupMoveDialog" form_dialog_title=gr_move_title form_dialog_subtitle=gr_move_sub form_dialog_submit_label=gr_move_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_move_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.move_hidden form_dialog_data=groups_registry_section.form_data %}
     {% endif %}
 </div>

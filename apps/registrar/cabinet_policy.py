@@ -140,16 +140,18 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
 
 
 def assessment_weights_view(organization) -> dict:
-    """Qiymətləndirmə çəkiləri (10/10/30/50) — ekran 10-un «struktur» zolağı."""
-    from apps.syllabus.public import assessment_weights
+    """Qiymətləndirmə çəkiləri (10/10/30/50; cari = 20 kollokvium + 10 seminar/lab) — ekran 10-un «struktur» zolağı."""
+    from apps.syllabus.public import assessment_weights, standard_midterm, standard_project
 
     weights = assessment_weights(organization)
+    # «Cari» = kollokvium (20) + seminar/lab ədədi ortası (10) + qalıq flex (standartda 0).
+    current = standard_midterm(weights) + standard_project(weights) + weights["flex"]
     return {
         "attendance": weights["attendance"],
         "selfwork": weights["selfwork"],
-        "current": weights["flex"],
+        "current": current,
         "final": weights["final"],
-        "total": weights["attendance"] + weights["selfwork"] + weights["flex"] + weights["final"],
+        "total": weights["attendance"] + weights["selfwork"] + current + weights["final"],
     }
 
 

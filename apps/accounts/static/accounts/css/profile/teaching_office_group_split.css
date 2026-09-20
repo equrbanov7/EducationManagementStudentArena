@@ -1,0 +1,61 @@
+/* Qrup reyestri — ana qrupu alt qruplara bölmə dialoqu (sahib 2026-09-20).
+   Markup: teaching_office/_group_split_fields.html + teaching_office_group_split.js.
+   Yalnız design-tokens; sütunlar responsive grid, uzun siyahılar sütun daxilində
+   sürüşür (dialoq hündürlüyü sabit qalır). */
+
+.tof-subsplit { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.tof-subsplit__top { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.tof-subsplit__count { width: 130px; flex: 0 0 auto; }
+.tof-subsplit__summary { flex: 1 1 auto; font-size: var(--ems-fs-base); color: var(--ems-neutral-600); font-weight: 600; min-height: var(--ems-h-field); display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.tof-subsplit__summary b { color: var(--ems-primary-700); }
+.tof-subsplit__summary-parent { color: var(--ems-neutral-500); }
+
+.tof-subsplit__board {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px;
+    max-height: min(52vh, 520px); overflow: auto; padding: 2px;
+}
+.tof-subsplit__col {
+    display: flex; flex-direction: column; min-height: 200px; border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl); background: var(--ems-bg); box-shadow: var(--ems-sh-card); overflow: hidden;
+}
+.tof-subsplit__col--parent { background: var(--ems-bg-subtle); border-style: dashed; }
+.tof-subsplit__colhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px 6px; }
+.tof-subsplit__coltitle { font-size: var(--ems-fs-base); font-weight: 800; color: var(--ems-neutral-700); display: inline-flex; align-items: center; gap: 6px; }
+.tof-subsplit__coltitle i { color: var(--ems-neutral-400); }
+.tof-subsplit__namefield { flex: 1 1 auto; min-width: 0; }
+.tof-subsplit__name-input { min-height: var(--ems-h-xs); padding: 6px 10px; font-weight: 700; font-size: var(--ems-fs-base); }
+.tof-subsplit__count-badge {
+    flex: 0 0 auto; padding: 3px 9px; border-radius: var(--ems-r-pill); background: var(--ems-primary-50);
+    color: var(--ems-primary-700); font-size: var(--ems-fs-xs); font-weight: 800; white-space: nowrap;
+}
+.tof-subsplit__col--parent .tof-subsplit__count-badge { background: var(--ems-neutral-100); color: var(--ems-neutral-600); }
+.tof-subsplit__tools { display: flex; gap: 6px; padding: 0 10px 8px; }
+.tof-subsplit__tools .ems-btn { min-height: 30px; padding: 0 10px; font-size: var(--ems-fs-sm); flex: 1 1 auto; justify-content: center; white-space: nowrap; }
+.tof-subsplit__tools .tof-subsplit__selectall { flex: 0 0 auto; width: 34px; padding: 0; }
+.tof-subsplit__list { list-style: none; margin: 0; padding: 0 6px 8px; display: flex; flex-direction: column; gap: 4px; overflow: auto; flex: 1 1 auto; }
+.tof-subsplit__student { margin: 0; }
+.tof-subsplit__pick {
+    display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--ems-r-lg);
+    cursor: pointer; border: 1px solid transparent; transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.tof-subsplit__pick:hover { background: var(--ems-primary-50); }
+.tof-subsplit__pick:has(input:checked) { background: var(--ems-primary-50); border-color: var(--ems-primary-200); }
+.tof-subsplit__pick input { width: 16px; height: 16px; margin: 0; accent-color: var(--ems-primary-600); flex: 0 0 auto; }
+.tof-subsplit__avatar {
+    width: 26px; height: 26px; border-radius: 8px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-600); font-size: var(--ems-fs-2xs); font-weight: 800;
+}
+.tof-subsplit__name { display: flex; flex-direction: column; min-width: 0; font-size: var(--ems-fs-base); font-weight: 600; color: var(--ems-text); line-height: 1.2; }
+.tof-subsplit__name small { font-size: var(--ems-fs-2xs); color: var(--ems-neutral-400); font-weight: 500; }
+.tof-subsplit__empty { margin: 0; padding: 14px; text-align: center; color: var(--ems-neutral-400); font-weight: 600; }
+.tof-subsplit__loading { margin: 0; padding: 20px; text-align: center; color: var(--ems-text-muted); font-weight: 600; grid-column: 1 / -1; }
+.tof-subsplit__loading i { color: var(--ems-primary-600); }
+.tof-subsplit__error-inline { margin: 0; padding: 14px; color: var(--ems-danger-700); font-weight: 600; grid-column: 1 / -1; }
+.tof-subsplit__reason { margin-top: 4px; }
+.tof-subsplit__error { margin: 0; padding: 8px 12px; border-radius: var(--ems-r-lg); background: var(--ems-danger-100); color: var(--ems-danger-700); font-size: var(--ems-fs-base); font-weight: 600; }
+.tof-subsplit__error[hidden] { display: none; }
+.tof-row-split { color: var(--ems-primary-700); }
+
+@media (max-width: 640px) {
+    .tof-subsplit__board { grid-template-columns: 1fr; max-height: none; }
+}
