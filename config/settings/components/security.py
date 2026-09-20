@@ -1,3 +1,5 @@
+import os
+
 """EMS Arena base settings — security komponenti.
 
 Bu fayl `config/settings/base.py` tərəfindən paylaşılan namespace-də
@@ -151,3 +153,13 @@ AUTHENTICATION_BACKENDS = [
 
 # Password reset token expiry defaults to the same short-lived OTP window.
 PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", str(AUTH_OTP_EXPIRY_SECONDS)))
+
+# ── Şəbəkə zonası (publik domen çıxışı, sahib 2026-09-21) — bax apps/accounts/network_zone.py
+# INTERNAL_NETWORKS: universitet daxili CIDR-lər; NETWORK_ZONE_ENFORCED açılanda
+# /jurnal/ və inzibati hesablar yalnız bu şəbəkələrdən işləyir.
+INTERNAL_NETWORKS = [
+    item.strip() for item in os.getenv("INTERNAL_NETWORKS", "10.0.0.0/8,127.0.0.0/8,::1/128").split(",") if item.strip()
+]
+NETWORK_ZONE_ENFORCED = os.getenv("NETWORK_ZONE_ENFORCED", "False").strip().lower() in ("1", "true", "yes")
+# nginx-in qoyduğu X-EMS-Zone başlığına inanılsın? Yalnız nginx müştəri başlığını əzəndə (prod).
+NETWORK_ZONE_TRUST_HEADER = os.getenv("NETWORK_ZONE_TRUST_HEADER", "False").strip().lower() in ("1", "true", "yes")
