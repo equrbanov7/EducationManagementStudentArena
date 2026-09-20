@@ -344,11 +344,26 @@ def teacher_exam_detail(request, slug):
         )
         active_live_new_url = f"{reverse('liveExam:create_session_slug', kwargs={'slug': exam.slug})}?force_new=1"
 
+    # «Sual əlavə et» / «Redaktə» ayrıca səhifə deyil: `?question_modal=create|edit`
+    # ilə gələndə modal avtomatik açılır (crud.add/edit_exam_question yönləndirir).
+    auto_modal_mode = (request.GET.get("question_modal") or "").strip()
+    auto_modal_url = ""
+    if auto_modal_mode == "create":
+        auto_modal_url = reverse("exams:add_exam_question", kwargs={"slug": exam.slug})
+    elif auto_modal_mode == "edit" and (request.GET.get("question") or "").isdigit():
+        question_id = int(request.GET.get("question"))
+        if exam.questions.filter(pk=question_id).exists():
+            auto_modal_url = reverse("exams:edit_exam_question", kwargs={"slug": exam.slug, "question_id": question_id})
+    if auto_modal_url and nav_query:
+        auto_modal_url = f"{auto_modal_url}?{nav_query}"
+
     return render(
         request,
         "exams/teacher/teacher_exam_detail.html",
         {
             "exam": exam,
+            "question_modal_autoopen_url": auto_modal_url,
+            "question_modal_autoopen_mode": auto_modal_mode if auto_modal_url else "",
             "questions": question_page["questions"],
             "questions_has_more": question_page["has_more"],
             "questions_next_offset": question_page["next_offset"],
