@@ -231,7 +231,8 @@ def _apply_rls(apps, schema_editor):
             -- Rol klaster səviyyəsindədir: paralel test DB-ləri (pytest-xdist,
             -- hər worker öz DB-sini eyni anda miqrasiya edir) IF NOT EXISTS
             -- yoxlamasından sonra yarışa bilər — «already exists» zərərsizdir.
-            WHEN duplicate_object THEN NULL;
+            -- pg_authid unikal indeksi də eyni yarışda `unique_violation` verə bilər (CI shard-ları, 2026-09-21).
+            WHEN duplicate_object OR unique_violation THEN NULL;
         END
         $$
         """)
