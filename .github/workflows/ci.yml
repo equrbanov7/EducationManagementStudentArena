@@ -268,7 +268,10 @@ jobs:
   # address is irrelevant. Only fires on a push to `main`, after ci-success.
   deploy-production:
     needs: ci-success
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # ⚠️ `always()` + açıq nəticə yoxlaması ŞƏRTDİR: `unit-tests-311` push-larda
+    # «skipped» olduğundan GitHub bu «skip»-i `ci-success`-dən (always()) keçib
+    # buraya da ötürürdü — 2026-09-20 axşamından 6 main push deploy OLUNMAMIŞDI.
+    if: always() && needs.ci-success.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted]
     environment: production
     concurrency:
