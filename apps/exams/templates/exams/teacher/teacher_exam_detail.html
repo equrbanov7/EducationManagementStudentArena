@@ -9,10 +9,15 @@
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260914-2">
     <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
+    {# Token teması (sahib 2026-09-21): rənglər/kartlar/düymələr design-tokens üzərindən. #}
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail_theme.css' %}?v=20260921-theme">
 {% endblock %}
 
 {% block content %}
-<div class="exam-detail-page-wrapper">
+<div class="exam-detail-page-wrapper"
+     data-exam-detail-root
+     data-question-modal-autoopen-url="{{ question_modal_autoopen_url }}"
+     data-question-modal-autoopen-mode="{{ question_modal_autoopen_mode }}">
     <div class="exam-detail-card">
         <div class="card-header">
             <div class="exam-header-actions">

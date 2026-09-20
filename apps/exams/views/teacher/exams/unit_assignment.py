@@ -142,10 +142,24 @@ def selected_units_for_form(request, organization, form, exam, *, permission="ex
             return []
         candidates = exam_unit_candidates(request, organization, permission=permission)
         by_id = {str(unit.pk): unit for unit in candidates.filter(pk__in=ids)}
-        return [by_id[value] for value in ids if value in by_id]
+        return _with_subgroups(organization, [by_id[value] for value in ids if value in by_id])
     if exam is not None and exam.pk:
-        return list(exam.allowed_units.select_related("parent").order_by("name"))
+        return _with_subgroups(organization, list(exam.allowed_units.select_related("parent").order_by("name")))
     return []
+
+
+def _with_subgroups(organization, units):
+    """Hər seçili qrupa `subgroups_json` (alt qrupların id/ad siyahısı) yapışdırır —
+    sehrbaz ana qrupu yenidən seçəndə alt qrupları avtomatik seçir (sahib 2026-09-21)."""
+    import json
+
+    from apps.registrar.public import subgroup_rollup
+
+    mapping = subgroup_rollup.subgroup_map(organization, units) if organization is not None and units else {}
+    for unit in units:
+        subs = mapping.get(unit.pk, [])
+        unit.subgroups_json = json.dumps([{"id": str(sub.pk), "text": unit_display_label(sub)} for sub in subs])
+    return units
 
 
 def apply_allowed_units(request, organization, exam, units, *, permission="exam.edit") -> None:

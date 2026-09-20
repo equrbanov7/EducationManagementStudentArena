@@ -1,0 +1,153 @@
+/* Müəllim imtahan detalı — TOKEN TEMASI (sahib 2026-09-21).
+   teacher_exam_detail/_part1.css + _part2.css-in üstündən yüklənir; markup
+   dəyişmir (class adları eynidir), yalnız görünüş design-tokens-ə keçir:
+   yumşaq kart səthi, aydın status çipləri, ikon-kart şəbəkəsi, tək tonlu
+   idarəetmə düymələri, sual siyahısı. Bütün rənglər --ems-* tokenləridir. */
+
+.exam-detail-page-wrapper { max-width: var(--ems-w-page, 1180px); margin: 0 auto; padding: var(--ems-sp-5, 20px) var(--ems-sp-4, 16px) var(--ems-sp-8, 48px); }
+.exam-detail-page-wrapper .exam-detail-card {
+    background: var(--ems-bg); border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-card); overflow: hidden;
+}
+.exam-detail-page-wrapper .card-header {
+    background: linear-gradient(135deg, var(--ems-primary-50) 0%, var(--ems-bg) 60%);
+    border-bottom: 1px solid var(--ems-border); padding: var(--ems-sp-6, 24px) var(--ems-sp-6, 24px) var(--ems-sp-5, 20px);
+    text-align: left;
+}
+.exam-detail-page-wrapper .exam-header-actions { margin-bottom: var(--ems-sp-3, 12px); }
+.exam-detail-page-wrapper .exam-back-btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-xs, 32px); padding: 0 12px;
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-pill); background: var(--ems-bg);
+    color: var(--ems-neutral-700); font-size: var(--ems-fs-sm); font-weight: 700; text-decoration: none;
+    transition: background-color .12s ease, border-color .12s ease;
+}
+.exam-detail-page-wrapper .exam-back-btn:hover { background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700); }
+.exam-detail-page-wrapper .exam-detail-title {
+    margin: 0; font-size: var(--ems-fs-3xl); line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; color: var(--ems-text);
+}
+.exam-detail-page-wrapper .exam-detail-description { margin: 6px 0 0; color: var(--ems-text-muted); font-size: var(--ems-fs-base); max-width: var(--ems-w-text, 72ch); }
+.exam-detail-page-wrapper .exam-detail-description:empty { display: none; }
+.exam-detail-page-wrapper .card-body { padding: var(--ems-sp-6, 24px); }
+
+/* Məlumat kartları */
+.exam-detail-page-wrapper .exam-info-section {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--ems-sp-3, 12px); margin: 0 0 var(--ems-sp-5, 20px);
+}
+.exam-detail-page-wrapper .info-card {
+    display: flex; flex-direction: column; gap: 6px; align-items: flex-start; padding: 14px 16px;
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle); box-shadow: none; min-height: 0;
+}
+.exam-detail-page-wrapper .info-label {
+    display: inline-flex; align-items: center; gap: 6px; font-size: var(--ems-fs-2xs); letter-spacing: .06em; text-transform: uppercase;
+    font-weight: 800; color: var(--ems-neutral-500); margin: 0;
+}
+.exam-detail-page-wrapper .info-label i { color: var(--ems-primary-600); font-size: var(--ems-fs-sm); }
+.exam-detail-page-wrapper .info-value { font-size: var(--ems-fs-lg); font-weight: 800; color: var(--ems-text); margin: 0; }
+.exam-detail-page-wrapper .status-badge {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip, 26px); padding: 2px 10px;
+    border-radius: var(--ems-r-pill); font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+}
+.exam-detail-page-wrapper .status-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.exam-detail-page-wrapper .status-badge.active { background: var(--ems-success-100); color: var(--ems-success-700); }
+.exam-detail-page-wrapper .status-badge.passive { background: var(--ems-danger-100); color: var(--ems-danger-700); }
+.exam-detail-page-wrapper .exam-activate-note {
+    margin-top: 4px; padding: 8px 10px; border-radius: var(--ems-r-lg); background: var(--ems-warning-100); color: var(--ems-warning-800);
+    border: 1px solid var(--ems-warning-bd); font-size: var(--ems-fs-sm); font-weight: 600; display: flex; gap: 8px; align-items: flex-start;
+}
+.exam-detail-page-wrapper .exam-activate-note i { color: var(--ems-warning-600); margin-top: 2px; }
+
+/* Canlı başlat */
+.exam-detail-page-wrapper .live-start-section { margin: 0 0 var(--ems-sp-5, 20px); }
+.exam-detail-page-wrapper .live-start-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px; min-height: var(--ems-h-action, 44px);
+    border-radius: var(--ems-r-xl); background: var(--ems-primary-600); color: var(--ems-neutral-0); font-weight: 800;
+    font-size: var(--ems-fs-md); text-decoration: none; box-shadow: var(--ems-sh-raised); border: 0;
+    transition: background-color .12s ease, transform .12s ease;
+}
+.exam-detail-page-wrapper .live-start-btn:hover { background: var(--ems-primary-700); transform: translateY(-1px); color: var(--ems-neutral-0); }
+.exam-detail-page-wrapper .live-start-btn-disabled { background: var(--ems-neutral-200); color: var(--ems-neutral-500); box-shadow: none; cursor: not-allowed; }
+.exam-detail-page-wrapper .live-start-btn-disabled:hover { background: var(--ems-neutral-200); color: var(--ems-neutral-500); transform: none; }
+
+/* İkon-kart şəbəkəsi */
+.exam-detail-page-wrapper .action-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--ems-sp-3, 12px); }
+.exam-detail-page-wrapper .action-card {
+    display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl);
+    background: var(--ems-bg); color: var(--ems-text); text-decoration: none; box-shadow: none;
+    transition: border-color .12s ease, box-shadow .12s ease, transform .12s ease;
+}
+.exam-detail-page-wrapper .action-card:hover { border-color: var(--ems-primary-200); box-shadow: var(--ems-sh-card); transform: translateY(-1px); color: var(--ems-text); }
+.exam-detail-page-wrapper .action-card__icon {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: var(--ems-r-lg); display: inline-flex; align-items: center; justify-content: center;
+    font-size: var(--ems-fs-lg); background: var(--ems-primary-50); color: var(--ems-primary-700);
+}
+.exam-detail-page-wrapper .action-card--green .action-card__icon { background: var(--ems-emerald-50); color: var(--ems-emerald-600); }
+.exam-detail-page-wrapper .action-card--slate .action-card__icon { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+.exam-detail-page-wrapper .action-card__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.exam-detail-page-wrapper .action-card__title { font-weight: 800; font-size: var(--ems-fs-base); color: var(--ems-text); }
+.exam-detail-page-wrapper .action-card__desc { font-size: var(--ems-fs-sm); color: var(--ems-text-muted); line-height: 1.35; }
+.exam-detail-page-wrapper .action-card__arrow { color: var(--ems-neutral-400); font-size: var(--ems-fs-sm); transition: transform .12s ease, color .12s ease; }
+.exam-detail-page-wrapper .action-card:hover .action-card__arrow { transform: translateX(3px); color: var(--ems-primary-600); }
+
+/* İdarəetmə düymələri — tək ton, mənaya görə rəng */
+.exam-detail-page-wrapper .exam-control-row {
+    display: flex; flex-wrap: wrap; gap: 10px; margin: var(--ems-sp-5, 20px) 0 0; padding-top: var(--ems-sp-5, 20px);
+    border-top: 1px solid var(--ems-border);
+}
+.exam-detail-page-wrapper .inline-action-form { margin: 0; }
+.exam-detail-page-wrapper .action-btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 14px;
+    border-radius: var(--ems-r-lg); border: 1px solid var(--ems-border); background: var(--ems-bg); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base); font-weight: 700; text-decoration: none; cursor: pointer; box-shadow: none;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+}
+.exam-detail-page-wrapper .action-btn:hover { background: var(--ems-bg-subtle); border-color: var(--ems-neutral-300); color: var(--ems-text); transform: none; }
+.exam-detail-page-wrapper .action-btn.success-btn { background: var(--ems-success-600); border-color: var(--ems-success-600); color: var(--ems-neutral-0); }
+.exam-detail-page-wrapper .action-btn.success-btn:hover { background: var(--ems-success-700); border-color: var(--ems-success-700); color: var(--ems-neutral-0); }
+.exam-detail-page-wrapper .action-btn.warning-btn { background: var(--ems-warning-100); border-color: var(--ems-warning-bd); color: var(--ems-warning-800); }
+.exam-detail-page-wrapper .action-btn.warning-btn:hover { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.exam-detail-page-wrapper .action-btn.visibility-hide-btn,
+.exam-detail-page-wrapper .action-btn.visibility-show-btn { background: var(--ems-bg); color: var(--ems-neutral-700); }
+.exam-detail-page-wrapper .action-btn.danger-btn { background: var(--ems-bg); border-color: var(--ems-danger-200); color: var(--ems-danger-700); margin-left: auto; }
+.exam-detail-page-wrapper .action-btn.danger-btn:hover { background: var(--ems-danger-100); border-color: var(--ems-danger-500); color: var(--ems-danger-700); }
+.exam-detail-page-wrapper .action-btn.outline-btn { background: var(--ems-bg); }
+
+/* Suallar */
+.exam-detail-page-wrapper .questions-section { margin-top: var(--ems-sp-6, 24px); }
+.exam-detail-page-wrapper .section-title {
+    display: flex; align-items: center; gap: 10px; margin: 0 0 var(--ems-sp-3, 12px); padding: 0; border: 0;
+    font-size: var(--ems-fs-xl); font-weight: 800; color: var(--ems-text); letter-spacing: -0.01em;
+}
+.exam-detail-page-wrapper .section-title::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--ems-border); }
+.exam-detail-page-wrapper .question-item {
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg); box-shadow: none; padding: 14px 16px;
+    transition: border-color .12s ease, box-shadow .12s ease;
+}
+.exam-detail-page-wrapper .question-item:hover { border-color: var(--ems-primary-200); box-shadow: var(--ems-sh-card); transform: none; }
+.exam-detail-page-wrapper .question-order {
+    background: var(--ems-primary-50); color: var(--ems-primary-700); border-radius: var(--ems-r-lg); font-weight: 800;
+}
+.exam-detail-page-wrapper .option-item.correct .option-indicator i,
+.exam-detail-page-wrapper .option-item.correct .option-text { color: var(--ems-success-700); }
+.exam-detail-page-wrapper .question-lazy-button {
+    min-height: var(--ems-h-field, 40px); padding: 0 16px; border-radius: var(--ems-r-pill); border: 1px solid var(--ems-border);
+    background: var(--ems-bg); color: var(--ems-primary-700); font-weight: 700;
+}
+.exam-detail-page-wrapper .question-lazy-button:hover { background: var(--ems-primary-50); border-color: var(--ems-primary-200); }
+.exam-detail-page-wrapper .empty-state-questions {
+    border: 1px dashed var(--ems-neutral-300); border-radius: var(--ems-r-2xl); background: var(--ems-bg-subtle); padding: var(--ems-sp-7, 32px);
+    text-align: center; color: var(--ems-text-muted);
+}
+.exam-detail-page-wrapper .empty-state-questions .empty-icon { color: var(--ems-primary-400); font-size: 2rem; margin-bottom: 8px; }
+.exam-detail-page-wrapper .empty-state-questions .primary-btn-sm {
+    display: inline-flex; align-items: center; gap: 8px; min-height: var(--ems-h-field, 40px); padding: 0 16px; margin-top: 10px;
+    border-radius: var(--ems-r-lg); background: var(--ems-primary-600); color: var(--ems-neutral-0); font-weight: 800; text-decoration: none; border: 0;
+}
+.exam-detail-page-wrapper .empty-state-questions .primary-btn-sm:hover { background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+
+@media (max-width: 640px) {
+    .exam-detail-page-wrapper { padding: var(--ems-sp-3, 12px) var(--ems-sp-3, 12px) var(--ems-sp-6, 24px); }
+    .exam-detail-page-wrapper .card-header, .exam-detail-page-wrapper .card-body { padding: var(--ems-sp-4, 16px); }
+    .exam-detail-page-wrapper .exam-detail-title { font-size: var(--ems-fs-2xl); }
+    .exam-detail-page-wrapper .action-btn { flex: 1 1 auto; justify-content: center; }
+    .exam-detail-page-wrapper .action-btn.danger-btn { margin-left: 0; }
+}

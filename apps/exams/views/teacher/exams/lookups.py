@@ -135,12 +135,16 @@ def _unit_member_ids(request, organization, unit_ids):
     if not unit_ids:
         return set()
     from apps.exams.domain.unit_assignment import unit_student_record_filter
+    from apps.registrar.public import subgroup_rollup
 
-    units = _units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids)
+    units = list(_units.exam_unit_candidates(request, organization).filter(pk__in=unit_ids))
+    # SAHİB (2026-09-21): ana qrup seçiləndə alt qrupların (234 K-1/-2) tələbələri də
+    # «qrupla daxildir» kimi işarələnir.
+    group_ids = {unit.pk for unit in units} | {u.pk for u in subgroup_rollup.subgroup_units(organization, units)}
     record_path = "academic_records__"
     return set(
         User.objects.filter(
-            **{f"{record_path}group__in": units.values("pk")},
+            **{f"{record_path}group__in": list(group_ids)},
             **unit_student_record_filter(record_path),
         ).values_list("id", flat=True)
     )
@@ -162,16 +166,30 @@ def group_search(request):
 
     query = (request.GET.get("q") or "").strip()
     if (request.GET.get("kind") or "").strip() == "units":
+        from apps.registrar.public import subgroup_rollup
+        from core.search_text import tolerant_regex
+
         unit_qs = _units.exam_unit_candidates(request, organization)
         if query:
-            unit_qs = unit_qs.filter(Q(name__icontains=query) | Q(code__icontains=query))
+            # «234k» → «234 K», «233KE» → «233 KE»: boşluğa/diakritikaya dözümlü (sahib 2026-09-21).
+            loose = tolerant_regex(query, loose_spaces=True)
+            unit_qs = unit_qs.filter(Q(name__iregex=loose) | Q(code__iregex=loose))
         offset, limit = _page_bounds(request)
-        results, has_more = _paginate(
-            unit_qs,
-            offset,
-            limit,
-            lambda u: {"id": str(u.pk), "text": _units.unit_display_label(u)},
-        )
+        page_units = list(unit_qs[offset : offset + limit + 1])
+        has_more = len(page_units) > limit
+        page_units = page_units[:limit]
+        sub_map = subgroup_rollup.subgroup_map(organization, page_units)
+        results = [
+            {
+                "id": str(u.pk),
+                "text": _units.unit_display_label(u),
+                # Ana qrupun alt qrupları — seçəndə avtomatik seçilir (klient).
+                "subgroups": [
+                    {"id": str(sub.pk), "text": _units.unit_display_label(sub)} for sub in sub_map.get(u.pk, [])
+                ],
+            }
+            for u in page_units
+        ]
         return JsonResponse({"results": results, "has_more": has_more})
 
     qs = StudentGroup.objects.filter(organization=organization)
