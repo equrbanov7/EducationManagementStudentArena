@@ -20,36 +20,9 @@ Yalnız Q obyekti qurur — hansı sahələrə tətbiq olunacağını çağıran
 
 from __future__ import annotations
 
-import re
-
 from django.db.models import Q
 
-MAX_TOKENS = 4
-MAX_QUERY_LENGTH = 120
-
-#: Bir-birinin əvəzinə yazılan hərf qrupları (hər iki registr açıq yazılır ki,
-#: nəticə DB-nin lokal case-folding qaydasından asılı olmasın).
-_EQUIVALENTS = (
-    "iıİI",
-    "eəEƏ",
-    "sşSŞ",
-    "cçCÇ",
-    "gğGĞ",
-    "oöOÖ",
-    "uüUÜ",
-)
-_CLASS_FOR_CHAR = {ch: f"[{group}]" for group in _EQUIVALENTS for ch in group}
-
-
-def tokens_of(query: str) -> list[str]:
-    """Boşluqla bölünmüş, boş olmayan tokenlər (ən çoxu ``MAX_TOKENS``)."""
-    text = str(query or "").strip()[:MAX_QUERY_LENGTH]
-    return [token for token in text.split() if token][:MAX_TOKENS]
-
-
-def tolerant_regex(token: str) -> str:
-    """«ismayil» → ``[iıİI][sşSŞ]m a y [iıİI] l`` (mətn, ``re`` qaçırılmış)."""
-    return "".join(_CLASS_FOR_CHAR.get(ch, re.escape(ch)) for ch in token)
+from core.search_text import MAX_QUERY_LENGTH, MAX_TOKENS, tokens_of, tolerant_regex  # noqa: F401
 
 
 def person_q(query: str, fields: tuple[str, ...] | list[str]) -> Q | None:

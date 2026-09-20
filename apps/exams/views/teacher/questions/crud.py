@@ -31,6 +31,16 @@ from ._shared import (
 logger = logging.getLogger(__name__)
 
 
+def _detail_url_with_question_modal(exam, navigation_query, mode, question_id=None):
+    """Detal səhifəsi + `?question_modal=create|edit[&question=<id>]` — JS modalı açır."""
+    url = _append_navigation_query(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}), navigation_query)
+    joiner = "&" if "?" in url else "?"
+    url = f"{url}{joiner}question_modal={mode}"
+    if question_id is not None:
+        url = f"{url}&question={question_id}"
+    return url
+
+
 @login_required
 def add_exam_question(request, slug):
     """
@@ -133,6 +143,10 @@ def add_exam_question(request, slug):
                 status=400,
             )
     else:
+        if not is_modal_request:
+            # SAHİB (2026-09-21): ayrıca «sual əlavə et» səhifəsi yoxdur — detal
+            # səhifəsi açılır və modal avtomatik göstərilir (teacher_exam_detail.js).
+            return redirect(_detail_url_with_question_modal(exam, navigation_query, "create"))
         form = ExamQuestionCreateForm(exam_type=exam.exam_type, subject_blocks=blocks, exam=exam)
 
     if is_modal_request:
@@ -239,6 +253,9 @@ def edit_exam_question(request, slug, question_id):
                 status=400,
             )
     else:
+        if not is_modal_request:
+            # SAHİB (2026-09-21): redaktə də modalda — ayrıca səhifə açılmır.
+            return redirect(_detail_url_with_question_modal(exam, navigation_query, "edit", question.pk))
         form = ExamQuestionCreateForm(
             instance=question,
             exam_type=exam.exam_type,

@@ -84,6 +84,72 @@ def is_subgroup_of(combined_name: str, candidate_name: str) -> bool:
     return sector == group_sector(combined_name)
 
 
+def _sibling_groups(organization, parent_ids):
+    """Verilmiş ata vahidlərin altındakı aktiv qruplar (bir sorğu)."""
+    from django.apps import apps as django_apps
+
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    return list(
+        OrgUnit.objects.filter(
+            organization=organization, parent_id__in=parent_ids, is_active=True, unit_type="group"
+        ).only("id", "name", "parent_id", "settings")
+    )
+
+
+def _trail_parent(unit) -> str:
+    raw = unit.settings if isinstance(unit.settings, dict) else {}
+    return str(raw.get("parent_group") or "")
+
+
+def subgroup_map(organization, parents) -> dict:
+    """``{ana_qrup_pk: [alt qruplar]}`` — reyestr bölməsinin ``settings.parent_group``
+    izi VƏ YA ad şablonu (`is_subgroup_of`) ilə, eyni ata (ixtisas) altında.
+    İmtahan təyinatı: «234 K az» seçiləndə 234 K-1 / 234 K-2 də düşür."""
+    parents = [p for p in parents if getattr(p, "parent_id", None)]
+    if not parents:
+        return {}
+    siblings = _sibling_groups(organization, {p.parent_id for p in parents})
+    out: dict = {}
+    for parent in parents:
+        found = []
+        for sibling in siblings:
+            if sibling.pk == parent.pk or sibling.parent_id != parent.parent_id:
+                continue
+            if _trail_parent(sibling) == str(parent.pk) or is_subgroup_of(parent.name, sibling.name):
+                found.append(sibling)
+        if found:
+            out[parent.pk] = sorted(found, key=lambda u: _norm(u.name))
+    return out
+
+
+def subgroup_units(organization, parents) -> list:
+    """Verilmiş qrupların bütün alt qrupları (təkrarsız siyahı)."""
+    seen: set = set()
+    out: list = []
+    for units in subgroup_map(organization, parents).values():
+        for unit in units:
+            if unit.pk not in seen:
+                seen.add(unit.pk)
+                out.append(unit)
+    return out
+
+
+def parent_group_candidates(organization, group) -> list:
+    """Alt qrupun ANA qrup namizədləri (eyni ata altında): ``settings.parent_group``
+    izi və ya ad şablonu — «234 K-1» → [«234 K az»]. Tələbənin imtahan görünürlüyü
+    üçün: ana qrupa təyin olunmuş imtahan alt qrupun tələbəsinə də açıqdır."""
+    if group is None or not getattr(group, "parent_id", None):
+        return []
+    trail = _trail_parent(group)
+    out = []
+    for sibling in _sibling_groups(organization, {group.parent_id}):
+        if sibling.pk == group.pk:
+            continue
+        if trail == str(sibling.pk) or is_subgroup_of(sibling.name, group.name):
+            out.append(sibling)
+    return out
+
+
 @dataclass
 class Candidate:
     offering: CourseOffering
