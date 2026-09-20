@@ -1,7 +1,8 @@
 {% load i18n %}
 {% comment %}Hüceyrə dialoqunun sahələri — «xanaya klik → dərs qoy/redaktə et».
 
-Sahibin tələbi: müəllim seçilsin, fənn seçilsin, mühazirə/məşğələ seçilsin,
+Sahibin tələbi: əvvəl müəllim, sonra fənn seçilsin (fənn siyahısı seçilmiş
+müəllimin dərs yükünə görə yenilənir — `action=options`), mühazirə/məşğələ seçilsin,
 üst/alt həftə seçilsin, opsional otaq seçilsin. Gün + dərs saatı da buradadır:
 sürüklə-buraxın KLAVİATURA ilə əlçatan qarşılığı məhz bu iki sahədir.
 
@@ -13,21 +14,6 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
 <input type="hidden" name="force" value="" data-sedit-field="force">
 
 <div class="sedit-form">
-  <div class="ems-field ems-field--wide">
-    <label class="ems-field__label" for="sedit-subject">{% trans "Fənn" context "accounts.schedule_manage" %}</label>
-    <div class="bootstrap-single-select bootstrap-single-select--ems">
-      <select class="ems-select bootstrap-single-select__native" id="sedit-subject" name="subject_id"
-              data-sedit-field="subject_id" data-bootstrap-select data-live-search="true"
-              data-live-search-placeholder="{% trans 'Fənn axtar…' context 'accounts.schedule_manage' %}"
-              data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'accounts.schedule_manage' %}" required>
-        {% for row in sec.subjects %}
-        <option value="{{ row.id }}">{{ row.code }} — {{ row.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <p class="ems-field__hint">{% trans "Siyahı qrupun tədris planı və açıq fənn açılışları ilə məhduddur." context "accounts.schedule_manage" %}</p>
-  </div>
-
   <div class="ems-field ems-field--wide">
     <label class="ems-field__label" for="sedit-teacher">{% trans "Müəllim" context "accounts.schedule_manage" %}</label>
     <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -42,6 +28,21 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
       </select>
     </div>
     <p class="ems-field__hint">{% trans "Fənn artıq başqa müəllimə bağlıdırsa müəllim burada dəyişmir — «Fənn təhvili» bölməsindən istifadə edin." context "accounts.schedule_manage" %}</p>
+  </div>
+
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-subject">{% trans "Fənn" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-subject" name="subject_id"
+              data-sedit-field="subject_id" data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Fənn axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Uyğun fənn yoxdur' context 'accounts.schedule_manage' %}" required>
+        {% for row in sec.subjects %}
+        <option value="{{ row.id }}">{{ row.code }} — {{ row.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Müəllim seçiləndə siyahı onun dərs yükü və açılışları ilə, seçilməyəndə qrupun tədris planı və açıq fənn açılışları ilə məhduddur." context "accounts.schedule_manage" %}</p>
   </div>
 
   <div class="ems-field">

@@ -135,13 +135,25 @@ def _check(request, organization, data):
     return JsonResponse(verdict)
 
 
+def _instructor(data):
+    """Seçilmiş müəllim (``instructor_id``) — tapılmasa ``None``."""
+    from django.contrib.auth import get_user_model
+
+    instructor_id = str(data.get("instructor_id") or "").strip()
+    return get_user_model().objects.filter(pk=instructor_id).first() if instructor_id else None
+
+
 def _options(request, organization, data):
     group = _group(request, organization, data)
     period = _period(organization, data)
     return JsonResponse(
         {
             "ok": True,
-            "subjects": schedule_editor.allowed_subjects(organization=organization, group=group, period=period),
+            # Müəllim seçilibsə fənn siyahısı onun dərs yükünə görə daralır
+            # (sahib 2026-09-21); JS müəllim dəyişəndə bu sorğunu göndərir.
+            "subjects": schedule_editor.allowed_subjects(
+                organization=organization, group=group, period=period, instructor=_instructor(data)
+            ),
             "teachers": schedule_editor.teacher_choices(organization),
         }
     )
