@@ -48,6 +48,9 @@ from apps.syllabus.public import (
     SELFWORK_OPTIONS,
     SELFWORK_TOTAL_SCORE,
     WEEK_ROWS,
+    expected_week_rows,
+    hour_choices,
+    visible_hour_kinds,
 )
 
 from .labels import HOUR_KIND_LABELS
@@ -65,11 +68,12 @@ CARRIED_LABELS = {
 #: olunan mətn deyil — göndərilən JS-dəki `BLANK_TAG` ilə eynidir.
 BLANK_OUTCOME_TAG = "\u2014"
 
-#: Həftəlik cədvəldəki saat seçimləri (dizayn: «—», 1 s … 4 s).
+#: Həftəlik cədvəldəki saat seçimləri — «—», 1 (qalıq), 2 (bir dərs = cüt).
+#: Sahib 2026-09-21: 3/4 seçilə bilməz (bax `apps.syllabus.week_plan`).
 #: ⚠️ Mənbədə bundan BÖYÜK saat ola bilər; belə sətirdə seçim siyahısına həmin
 #: dəyər ƏLAVƏ olunur, yoxsa `<select>` heç birini seçməz, brauzer birinci
 #: variantı (0) göstərər və ilk autosave saatı sıfırlayardı.
-HOUR_CHOICES = (0, 1, 2, 3, 4)
+HOUR_CHOICES = hour_choices()
 
 #: Həftə sətrində redaktorun İDARƏ ETDİYİ açarlar (qalanı `data-extra`-ya gedir).
 WEEK_ROW_KEYS = frozenset({"topic", "outcome", *LESSON_HOUR_KINDS})
@@ -195,66 +199,89 @@ def outcome_tags(data) -> list:
     return [row["tag"] for row in outcome_rows(data) if row["tag"] != BLANK_OUTCOME_TAG]
 
 
-def week_rows(data, tags=()) -> list:
-    """``week`` sətirləri — ƏN AZI 16, mənbə daha uzundursa MƏNBƏ QƏDƏR.
+def week_rows(data, tags=(), plan_hours=None) -> list:
+    """``week`` sətirləri — sayı PLANDAN çıxarılır, mənbə daha uzundursa MƏNBƏ QƏDƏR.
+
+    Sahib 2026-09-21: sətir sayı ``expected_week_rows`` ilə özü tənzimlənir
+    (15 saat → 8 sətir); plan yoxdursa köhnə 16.  Planda saatı olmayan dərs
+    növünün sütunu (``cells``) verilmir — boş sütun doluluq yaratmasın.
 
     Əvvəllər burada ``range(WEEK_ROWS)`` vardı: 23 sətirlik köçürülmüş cədvəl
     16-ya kəsilir, toplayıcı isə 16 sətir geri göndərib qalan 7-ni silirdi.
     İndi artıq sətirlər `is_extra` damğası ilə göstərilir — müəllim onları
-    ŞÜURLU boşaldır, redaktor səssizcə atmır.
+    ŞÜURLU boşaldır (və ya «+» ilə özü açır), redaktor səssizcə atmır.
     """
     # Quyruqdakı TAM boş sətirlər render siyahısına düşmür — yoxsa müəllimin
     # «boşaldın» göstərişini icra etməsi heç nəyi dəyişməzdi (banner əbədi).
     raw = without_blank_tail([row for row in (data.get("rows") or []) if isinstance(row, dict)])
+    limit = expected_week_rows(plan_hours) or WEEK_ROWS
+    kinds = visible_hour_kinds(plan_hours, raw)
     tag_list = list(tags)
     rows = []
-    for index in range(max(WEEK_ROWS, len(raw))):
+    for index in range(max(limit, len(raw))):
         source = raw[index] if index < len(raw) else {}
-        outcome = str(source.get("outcome") or "")
-        row = {
-            "index": index + 1,
-            "topic": str(source.get("topic") or "").strip(),
-            "outcome": outcome,
-            "is_extra": index >= WEEK_ROWS,
-            # Sətrin `practical` / `note` (və gələcək) açarları — toplayıcı
-            # onları OLDUĞU KİMİ geri göndərsin deyə.
-            "extra": carry_over(source, WEEK_ROW_KEYS),
-            # Həmin açarların GÖRÜNƏN qarşılığı (input yoxdur, ən azı bilinsin).
-            "extra_note": carried_note(source, WEEK_ROW_KEYS),
-        }
-        for kind in LESSON_HOUR_KINDS:
-            row[kind] = to_int(source.get(kind))
-        # Şablon xüsusi filtr yazmadan dövr edə bilsin deyə saat xanaları hazır
-        # siyahı kimi verilir (`{{ row|dictkey:… }}` kimi tələ qalmır).
-        row["cells"] = [
-            {
-                "key": kind,
-                "label": HOUR_KIND_LABELS[kind],
-                "value": row[kind],
-                "choices": sorted(set(HOUR_CHOICES) | {row[kind]}),
-            }
-            for kind in LESSON_HOUR_KINDS
-        ]
-        # Mənbədəki TN etiketi cari siyahıda yoxdursa da seçim kimi qalır —
-        # əks halda `<select>` onu itirər və autosave "" yazardı.
-        row["outcome_choices"] = tag_list if (not outcome or outcome in tag_list) else [*tag_list, outcome]
-        rows.append(row)
+        rows.append(_week_row(index + 1, source, tag_list, kinds, is_extra=index >= limit))
     return rows
 
 
+def _week_row(index, source, tag_list, kinds, *, is_extra=False) -> dict:
+    outcome = str(source.get("outcome") or "")
+    row = {
+        "index": index,
+        "topic": str(source.get("topic") or "").strip(),
+        "outcome": outcome,
+        "is_extra": is_extra,
+        # Sətrin `practical` / `note` (və gələcək) açarları — toplayıcı
+        # onları OLDUĞU KİMİ geri göndərsin deyə.
+        "extra": carry_over(source, WEEK_ROW_KEYS),
+        # Həmin açarların GÖRÜNƏN qarşılığı (input yoxdur, ən azı bilinsin).
+        "extra_note": carried_note(source, WEEK_ROW_KEYS),
+    }
+    for kind in LESSON_HOUR_KINDS:
+        row[kind] = to_int(source.get(kind))
+    # Şablon xüsusi filtr yazmadan dövr edə bilsin deyə saat xanaları hazır
+    # siyahı kimi verilir (`{{ row|dictkey:… }}` kimi tələ qalmır).
+    row["cells"] = [
+        {
+            "key": kind,
+            "label": HOUR_KIND_LABELS[kind],
+            "value": row[kind],
+            "choices": sorted(set(HOUR_CHOICES) | {row[kind]}),
+        }
+        for kind in kinds
+    ]
+    # Mənbədəki TN etiketi cari siyahıda yoxdursa da seçim kimi qalır —
+    # əks halda `<select>` onu itirər və autosave "" yazardı.
+    row["outcome_choices"] = tag_list if (not outcome or outcome in tag_list) else [*tag_list, outcome]
+    return row
+
+
+def blank_week_row(tags=(), plan_hours=None, rows=()) -> dict:
+    """«+ Sətir əlavə et» üçün boş sətir şablonu — nömrə yerində ``__N__``."""
+    kinds = visible_hour_kinds(plan_hours, [{k: row.get(k, 0) for k in LESSON_HOUR_KINDS} for row in rows])
+    row = _week_row("__N__", {}, list(tags), kinds, is_extra=True)
+    row["is_template"] = True
+    return row
+
+
 def hour_totals(rows, plan_hours) -> dict:
+    """Növ üzrə cəm/plan — çiplər yalnız GÖRÜNƏN növlər üçün (plan 0 → çip yox)."""
     totals = {kind: sum(row[kind] for row in rows) for kind in LESSON_HOUR_KINDS}
     planned = {kind: to_int((plan_hours or {}).get(kind)) for kind in LESSON_HOUR_KINDS}
+    kinds = visible_hour_kinds(plan_hours, rows)
     return {
         "rows": [
             {
                 "kind": kind,
+                "label": HOUR_KIND_LABELS[kind],
                 "have": totals[kind],
                 "planned": planned[kind],
                 "ok": totals[kind] == planned[kind],
             }
-            for kind in LESSON_HOUR_KINDS
+            for kind in kinds
         ],
+        "kinds": kinds,
+        "expected_rows": expected_week_rows(plan_hours),
         "have": sum(totals.values()),
         "planned": sum(planned.values()),
         "ok": totals == planned,
@@ -388,5 +415,6 @@ __all__ = [
     "selfwork",
     "to_int",
     "week_rows",
+    "blank_week_row",
     "without_blank_tail",
 ]

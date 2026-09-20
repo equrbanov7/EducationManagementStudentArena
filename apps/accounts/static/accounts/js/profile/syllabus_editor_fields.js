@@ -418,6 +418,35 @@
 
        Mətn BURADA YAZILMIR: yer tutucu qutunun `data-t-placeholder`-indən,
        etiket/aria isə `retagOutcomes`-dan gəlir (dörd dil pozulmur). */
+    /* «+ Sətir əlavə et»: server-rendered `<template>` klonlanır, `__N__`
+       növbəti nömrə ilə əvəz olunur, seçicilər gücləndirilir.  Autosave
+       BAŞLAMIR — boş sətir quyruqda onsuz da saxlanılmır; müəllim yazanda
+       `input`/`change` delegasiyası işə düşür. */
+    function addWeekRow(el, button) {
+        var body = el ? el.querySelector("[data-syl-weeks]") : null;
+        var tpl = el ? el.querySelector("[data-syl-week-template]") : null;
+        if (!body || !tpl || (button && button.disabled)) {
+            return;
+        }
+        var index = body.querySelectorAll("[data-syl-week-row]").length + 1;
+        var holder = document.createElement("tbody");
+        holder.innerHTML = tpl.innerHTML.split("__N__").join(String(index));
+        var tr = holder.querySelector("[data-syl-week-row-template]");
+        if (!tr) {
+            return;
+        }
+        tr.removeAttribute("data-syl-week-row-template");
+        tr.setAttribute("data-syl-week-row", String(index));
+        body.appendChild(tr);
+        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.init === "function") {
+            window.EMSBootstrapSelect.init(tr);
+        }
+        var topic = tr.querySelector("[data-week='topic']");
+        if (topic) {
+            topic.focus();
+        }
+    }
+
     function makeOutcomeRow(box) {
         var doc = box.ownerDocument;
         var row = doc.createElement("div");
@@ -550,6 +579,7 @@
 
     window.EMSSyllabusFields = {
         HOUR_KINDS: HOUR_KINDS,
+        addWeekRow: addWeekRow,
         collect: collect,
         i18n: i18n,
         makeOutcomeRow: makeOutcomeRow,
