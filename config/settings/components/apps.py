@@ -70,6 +70,8 @@ MIDDLEWARE = [
     "apps.accounts.middleware.ViewAsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
     "apps.accounts.middleware.SuspendedOrganizationMiddleware",
+    # Şəbəkə zonası (publik domen): jurnal + inzibati hesablar yalnız daxili şəbəkədən.
+    "apps.accounts.network_zone.NetworkZoneMiddleware",
     # First-login lock: provisioned users must set their own password + verify
     # email before using the system. Runs last (after auth/org/suspend checks) so
     # request.user and tenant context are resolved and a suspended org still logs
