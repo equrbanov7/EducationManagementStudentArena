@@ -277,7 +277,8 @@ class WizardViewUnitTests(_UnitFixture):
         response = client.get(reverse("exams:edit_exam", kwargs={"slug": exam.slug}) + "?modal=1")
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
-        self.assertIn(f'<option value="{self.group.pk}" selected>634 ing — Dizayn</option>', html)
+        # `data-subgroups` — alt qrup siyahısı (bu qrupun alt qrupu yoxdur → boş).
+        self.assertIn(f'<option value="{self.group.pk}" selected data-subgroups="[]">634 ing — Dizayn</option>', html)
         self.assertIn('name="allowed_units"', html)
         self.assertNotIn('name="allowed_groups"', html)
 
