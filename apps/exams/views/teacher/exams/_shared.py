@@ -88,15 +88,17 @@ def _resolve_profile_navigation(request, *, default_section="my-exams"):
         requested_profile_section = default_section
 
     fallback_profile_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
+    # SAHİB (2026-09-21): «Geri» DETERMİNİK — yalnız açıq `return_to`/`next` (imtahan
+    # səhifəsi olmayan) və ya kabinet bölməsi. Referer İŞLƏDİLMİR: «Aktiv et» kimi
+    # POST→redirect-dən sonra referer səhifənin özü olurdu və «Geri» ilişirdi.
     explicit_return_url = _safe_same_origin_redirect_path(
         request,
         request.GET.get("return_to") or request.GET.get("next"),
     )
-    referer_return_url = _safe_same_origin_redirect_path(request, request.META.get("HTTP_REFERER"))
-    if _is_internal_exam_management_path(referer_return_url):
-        referer_return_url = ""
+    if _is_internal_exam_management_path(explicit_return_url):
+        explicit_return_url = ""
 
-    profile_return_url = explicit_return_url or referer_return_url or fallback_profile_return_url
+    profile_return_url = explicit_return_url or fallback_profile_return_url
     nav_params = {"from_section": requested_profile_section}
     if profile_return_url:
         nav_params["return_to"] = profile_return_url
