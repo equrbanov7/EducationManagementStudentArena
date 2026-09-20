@@ -44,6 +44,7 @@ from apps.syllabus.public import (
     build_syllabus_editor_context,
     formula_rows,
     formula_text,
+    seed_week_hours,
     set_plan_hours,
 )
 
@@ -310,7 +311,7 @@ def _summary(*, syllabus, version, panels, completion, hours, selfwork_view, sec
         },
         {
             "label": _SUMMARY_LABELS["weeks"],
-            "value": str(_UNIT_WEEKS) % {"have": len(weeks), "total": WEEK_ROWS},
+            "value": str(_UNIT_WEEKS) % {"have": len(weeks), "total": hours.get("expected_rows") or WEEK_ROWS},
             "tone": "default",
         },
         {
@@ -383,6 +384,12 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
         }
 
     syllabus = context["syllabus"]
+    plan_hours = _ensure_plan_hours(syllabus, context)
+    # Sahib 2026-09-21: təzə qaralamada saat bölgüsü plandan ÖZÜ düzülür
+    # (2-2-…-qalıq).  Yazıldısa context yenidən qurulur ki, revision/tamamlanma
+    # şablona təzə getsin (optimistik kilid köhnə revision ilə qalmasın).
+    if plan_hours and context.get("view_state") == "normal" and seed_week_hours(context["version"], plan_hours):
+        context = build_syllabus_editor_context(request, organization=organization, version=version)
     completion = context["completion"]
     section_map = {row["id"]: (row["data"] or {}) for row in context["sections"]}
 
@@ -432,8 +439,8 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     # (bax `editor_panels.outcome_rows`).  Şablon `forloop.counter` işlətməməlidir.
     if SectionKey.OUT.value in panels:
         panels[SectionKey.OUT.value]["rows"] = panels_builder.outcome_rows(out_data)
-    week_rows = _week_rows(section_map.get(SectionKey.WEEK.value, {}), tags)
-    plan_hours = _ensure_plan_hours(syllabus, context)
+    week_data = section_map.get(SectionKey.WEEK.value, {})
+    week_rows = _week_rows(week_data, tags, plan_hours)
     hours = _hour_totals(week_rows, plan_hours)
     hours["has_plan"] = bool(plan_hours)
     selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {}))
@@ -490,6 +497,8 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "locked": _locked_rows(syllabus, hours),
             "outcome_tags": tags,
             "week_rows": week_rows,
+            # «+ Sətir əlavə et» üçün boş sətir şablonu (nömrə `__N__`, JS əvəz edir).
+            "week_blank_row": panels_builder.blank_week_row(tags, plan_hours, week_rows),
             # Plandan ARTIQ sətir sayı — şablon xəbərdarlıq qutusunu bununla açır.
             "week_extra_count": sum(1 for row in week_rows if row["is_extra"]),
             "hours": hours,
@@ -504,7 +513,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
                 "description": MIN_DESCRIPTION_CHARS,
                 "goal": MIN_GOAL_CHARS,
                 "outcomes": MIN_OUTCOMES,
-                "weeks": WEEK_ROWS,
+                "weeks": hours["expected_rows"] or WEEK_ROWS,
             },
             "can_submit": (not readonly) and completion["percent"] >= 100,
             "actions": list(context["actions"]),

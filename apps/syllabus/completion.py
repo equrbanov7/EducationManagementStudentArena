@@ -32,6 +32,7 @@ from .constants import (
     SELFWORK_OPTIONS,
     SectionKey,
 )
+from .week_plan import expected_week_rows
 
 
 @dataclass(frozen=True)
@@ -148,11 +149,12 @@ def _check_week(data, plan_hours, issues) -> bool:
     unlinked = [row for row in filled if not _text(row.get("outcome"))]
 
     ok = True
-    if len(filled) < MIN_FILLED_WEEKS:
+    # Plan varsa minimum PLANDAN çıxarılan sətir sayıdır (15 saat → 8 mövzu);
+    # plan yoxdursa köhnə sabit (14) qalır.
+    minimum = expected_week_rows(plan_hours) or MIN_FILLED_WEEKS
+    if len(filled) < minimum:
         ok = False
-        issues.append(
-            Issue(SectionKey.WEEK.value, "week.too_few_topics", {"min": MIN_FILLED_WEEKS, "have": len(filled)})
-        )
+        issues.append(Issue(SectionKey.WEEK.value, "week.too_few_topics", {"min": minimum, "have": len(filled)}))
     # Saat balansı YALNIZ tədris planı saat bölgüsü verəndə yoxlanılır.
     #
     # `plan_hours` boş olanda («{}») əvvəllər hər növ üçün `expected = 0`

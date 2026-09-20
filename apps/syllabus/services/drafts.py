@@ -28,6 +28,7 @@ from ..constants import (
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..policy import assessment_weights, standard_midterm, standard_project
 from ..state_machine import TransitionDenied
+from ..week_plan import seed_missing_hours
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .scoping import is_author
 from .section_shape import normalize_section_data
@@ -441,6 +442,33 @@ def set_plan_hours(version, hours: dict | None):
     version.plan_hours = cleaned
     recompute_completion(version)
     return version
+
+
+def seed_week_hours(version, plan_hours=None) -> bool:
+    """Həftəlik cədvəlin saatını PLANDAN standart bölgü ilə doldurur (bir dəfə).
+
+    Sahib 2026-09-21: sətir sayı və saat özü tənzimlənsin.  Yalnız cəmi 0 olan
+    dərs növünə yazılır (təzə qaralama); müəllimin yazdığı bölgüyə toxunulmur.
+    Redaktəyə açıq olmayan versiya dəyişmir.  Qayıdış: nəsə yazıldısa ``True``.
+    """
+    if version.status not in EDITABLE_STATUSES:
+        return False
+    hours = plan_hours if plan_hours is not None else (version.plan_hours or {})
+    if not hours:
+        return False
+    row = SyllabusSection.objects.filter(version=version, section_id=SectionKey.WEEK.value).first()
+    if row is None:
+        return False
+    data = dict(row.data or {})
+    rows, changed = seed_missing_hours(data.get("rows") or [], hours)
+    if not changed:
+        return False
+    data["rows"] = rows
+    row.data = data
+    row.revision += 1
+    row.save(update_fields=["data", "revision", "updated_at"])
+    recompute_completion(version)
+    return True
 
 
 #: Köçürmə borusunun yaza bildiyi YEGANƏ statuslar (bax migrasiya spesifikasiyası:

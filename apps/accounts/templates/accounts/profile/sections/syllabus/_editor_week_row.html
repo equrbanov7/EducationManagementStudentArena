@@ -1,0 +1,70 @@
+{% load i18n %}
+{% comment %}
+Həftəlik cədvəlin BİR sətri (`_editor_plan.html`-dən). İki yerdə işlənir:
+sətirlər dövrü və `<template data-syl-week-template>` (nömrə `__N__`, JS
+«+ Sətir əlavə et» klikində əvəz edir). Saat xanaları yalnız GÖRÜNƏN dərs
+növləri üçündür (`row.cells`) — planda saatı olmayan növün sütunu yoxdur.
+{% endcomment %}
+{% comment %}`<template>` içindəki nüsxə `data-syl-week-row` DAŞIMIR — toplayıcı
+(`collectWeek`) və test DOM-u onu sətir kimi saymasın; JS klonlayanda
+atributu özü qoyur.{% endcomment %}
+<tr {% if row.is_template %}data-syl-week-row-template{% else %}data-syl-week-row="{{ row.index }}"{% endif %}{% if row.extra %} data-extra="{{ row.extra }}"{% endif %}
+    class="{% if row.is_extra %}syl-weeks__row--extra{% endif %}">
+  <th scope="row">
+    {{ row.index }}
+    {% if row.is_extra %}<span class="syl-tagx">{% if se.hours.has_plan %}{% trans "əlavə" context "accounts.syllabus" %}{% else %}{% trans "plandan artıq" context "accounts.syllabus" %}{% endif %}</span>{% endif %}
+  </th>
+  <td>
+    {% comment %}Mövzu TƏK SƏTİRDİR: köçürmə burada `clean_text` işlədir
+    (mənbədə 131,056 sətrin heç birində sətir sonu yoxdur), ona görə
+    `<input>` heç nə itirmir.  Bu fakt qapı ilə bağlanıb — render olunan
+    hər `<input>` dəyəri sətir ayırıcısına qarşı yoxlanılır
+    (`test_editor_shipped_js.test_no_single_line_control_carries_a_line_break`).{% endcomment %}
+    <input type="text" class="syl-input syl-input--sm" data-week="topic" value="{{ row.topic }}"
+           {% if se.readonly %}disabled{% endif %}
+           aria-label="{{ row.index }}. {% trans 'həftənin mövzusu' context 'accounts.syllabus' %}"
+           placeholder="{% trans 'Həftənin mövzusu' context 'accounts.syllabus' %}">
+    {% if row.extra_note %}
+    {% comment %}Sətrin redaktorda İNPUTU OLMAYAN, amma SAXLANILAN açarları
+    (`practical`, `qeyd`, gələcək sahələr).  Əvvəllər onlar tamamilə
+    görünməz idi: müəllim sətri boşaldıb «sildim» sanırdı, halbuki dəyər
+    `data-extra` ilə geri yazılırdı.  İndi ən azı GÖRÜNÜR.{% endcomment %}
+    <p class="syl-carrynote">
+      <i class="fas fa-lock" aria-hidden="true"></i>
+      <span>{% trans "Köhnə sistemdən saxlanılır:" context "accounts.syllabus" %} {{ row.extra_note }}</span>
+    </p>
+    {% endif %}
+  </td>
+  {% comment %}Seçicilər `bootstrap-single-select` ilə verilir (layihə qaydası:
+  xam native `<select>` göndərilmir). Native element `data-week` açarını və
+  dəyəri OLDUĞU KİMİ saxlayır — toplayıcı (`syllabus_editor_fields.js`) onu
+  `tr.querySelector("[data-week='…']").value` ilə oxuyur, `change` isə
+  delegasiya ilə tutulur (enhancer `bubbles: true` göndərir).{% endcomment %}
+  {% for cell in row.cells %}
+  <td class="syl-weeks__cell">
+    <div class="bootstrap-single-select bootstrap-single-select--ems syl-cellselect">
+      <select class="syl-select syl-select--xs bootstrap-single-select__native"
+              data-bootstrap-select data-week="{{ cell.key }}" {% if se.readonly %}disabled{% endif %}
+              aria-label="{{ row.index }}. {% trans 'həftə' context 'accounts.syllabus' %} — {{ cell.label }}">
+        {% comment %}Seçimlər SƏTİR-SƏTİR gəlir: mənbədəki saat 4-dən böyük
+        ola bilər, siyahıda olmasa `<select>` onu itirər və autosave 0 yazardı.{% endcomment %}
+        {% for value in cell.choices %}
+        <option value="{{ value }}" {% if value == cell.value %}selected{% endif %}>{% if value %}{{ value }}{% else %}—{% endif %}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </td>
+  {% endfor %}
+  <td>
+    <div class="bootstrap-single-select bootstrap-single-select--ems syl-outcomeselect">
+      <select class="syl-select syl-select--sm bootstrap-single-select__native"
+              data-bootstrap-select data-week="outcome" {% if se.readonly %}disabled{% endif %}
+              aria-label="{{ row.index }}. {% trans 'həftənin təlim nəticəsi' context 'accounts.syllabus' %}">
+        <option value="">{% trans "Seçilməyib" context "accounts.syllabus" %}</option>
+        {% for tag in row.outcome_choices %}
+        <option value="{{ tag }}" {% if tag == row.outcome %}selected{% endif %}>{{ tag }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </td>
+</tr>

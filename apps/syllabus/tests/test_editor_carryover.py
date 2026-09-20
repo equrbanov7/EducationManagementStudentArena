@@ -58,6 +58,7 @@ from apps.syllabus.models import ChangeKind
 from apps.syllabus.state_machine import TransitionDenied
 from apps.syllabus.tests.editor_dom import HOUR_KINDS, collect, render_editor_dom
 from apps.syllabus.tests.factories import PLAN_HOURS, activate_member, make_academic_stack, make_offering, make_org
+from apps.syllabus.week_plan import expected_week_rows
 
 User = get_user_model()
 pytestmark = pytest.mark.django_db
@@ -126,6 +127,9 @@ def _migrated_week_rows(count: int) -> list:
         for index in range(count)
     ]
 
+
+#: Plandan çıxarılan sətir sayı (30/16/14 → 15) — sahib 2026-09-21 qaydası.
+PLAN_ROWS = expected_week_rows(PLAN_HOURS)
 
 #: Boş `self` bölməsi — struktur seçilməmiş köçürülmüş sillabus.
 BLANK_SELF = {"option": "", "topics": [], "archived": []}
@@ -273,11 +277,15 @@ def test_migrated_week_rows_and_row_keys_survive_first_autosave(world):
     assert [row["note"] for row in after["rows"]] == [row["note"] for row in source_rows]
 
 
-def test_short_week_table_is_still_padded_to_sixteen_rows(world):
-    """Qısa cədvəl üçün davranış DƏYİŞMİR: plan 16 həftədir, boş sətirlər qalır."""
+def test_short_week_table_is_still_padded_to_the_plan_rows(world):
+    """Qısa cədvəl plandan çıxarılan sətir sayına qədər boş sətirlə tamamlanır.
+
+    Sahib 2026-09-21: sətir sayı = ``ceil(ən böyük növ saatı / 2)`` (30/16/14 →
+    15); əvvəllər sabit 16 idi.
+    """
     actor, version = _migrated_draft(world, {SectionKey.WEEK.value: {"rows": _migrated_week_rows(4)}})
     payload, after = _autosave(world, version, actor, SectionKey.WEEK.value)
-    assert len(payload["rows"]) == 16
+    assert len(payload["rows"]) == PLAN_ROWS
     assert len([row for row in after["rows"] if row["topic"]]) == 4
 
 
@@ -425,7 +433,7 @@ def test_emptied_extra_week_rows_leave_the_table_on_the_next_render(world):
     _root, before = render_editor_dom(
         user=world["teacher"], organization=world["org"], version=version, step=SectionKey.WEEK.value
     )
-    assert before["week_extra_count"] == 7
+    assert before["week_extra_count"] == 23 - PLAN_ROWS
     assert len(before["week_rows"]) == 23
 
     root, _se = render_editor_dom(
@@ -441,9 +449,9 @@ def test_emptied_extra_week_rows_leave_the_table_on_the_next_render(world):
         user=world["teacher"], organization=world["org"], version=version, step=SectionKey.WEEK.value
     )
     assert after["week_extra_count"] == 0, "banner müəllimin əməlindən sonra da qalır"
-    assert len(after["week_rows"]) == 16
-    # İlk 16 həftənin mövzusu TOXUNULMAZ qalır.
-    assert after["week_rows"][15]["topic"] == "16. mövzu"
+    assert len(after["week_rows"]) == PLAN_ROWS
+    # Plan daxilindəki həftələrin mövzusu TOXUNULMAZ qalır.
+    assert after["week_rows"][PLAN_ROWS - 1]["topic"] == f"{PLAN_ROWS}. mövzu"
 
 
 def test_a_blank_week_row_in_the_middle_keeps_its_position(world):

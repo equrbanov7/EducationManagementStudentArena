@@ -194,6 +194,19 @@
     text-align: center;
 }
 
+/* «+ Sətir əlavə et» + izah (sətir sayı plandan özü hesablanır). */
+.syl-weeks__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 14px;
+    margin-top: 10px;
+}
+
+.syl-weeks__foot .syl-meta {
+    flex: 1 1 260px;
+}
+
 /* ── `method`: metod çipləri ──────────────────────────────────────────── */
 .syl-methods {
     display: flex;
