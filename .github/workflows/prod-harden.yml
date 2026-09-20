@@ -80,6 +80,9 @@ jobs:
             exit 0
           fi
           docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements"
+          # Tətbiq DB istifadəçisi sorğu mətnlərini görsün (audit zondu «insufficient privilege» yazırdı).
+          APPU=$(dotenv APP_DATABASE_USER); APPU="${APPU:-$U}"
+          docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -c "GRANT pg_read_all_stats TO \"$APPU\"" || echo "::warning::pg_read_all_stats verilmədi ($APPU)"
           docker compose -f docker-compose.prod.yml exec -T postgres psql -U "$U" -d "$DB" -tAc "SELECT count(*) FROM pg_stat_statements" | sed 's/^/pg_stat_statements sətir: /'
 
       - name: ✅ Yoxlama
