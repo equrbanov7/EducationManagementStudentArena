@@ -52,7 +52,13 @@ def _explicit_return_url(request):
     from ._helpers import _safe_same_origin_redirect_path
 
     candidate = _safe_same_origin_redirect_path(request, request.GET.get("return_to") or request.GET.get("next"))
-    return "" if _is_internal_exam_management_path(candidate) else candidate
+    if not candidate or _is_internal_exam_management_path(candidate):
+        return ""
+    # Kabinet URL-i axının BAŞLANĞICIDIR (detal səhifəsinin «Geri»si) — alt səhifədə
+    # «Geri» onu yox, əvvəlki krambı (detalı) göstərməlidir.
+    if candidate.startswith(reverse("accounts:profile")):
+        return ""
+    return candidate
 
 
 @login_required
