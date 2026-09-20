@@ -132,6 +132,26 @@ jobs:
       # (`test_db`) özü yaradıb miqrasiya edir; bu addım eyni işi CI bazasında bir də
       # görürdü (~94 s / shard). Miqrasiya yoxlaması `build` job-undadır.
 
+      - name: 🔐 RLS rolunu bir dəfə yarat (paralel test DB-ləri yarışmasın)
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          # `rls_app_role` klaster səviyyəsindədir; xdist worker-ləri öz test DB-lərini eyni anda
+          # miqrasiya edəndə CREATE ROLE yarışırdı. Burada bir dəfə yaradılır (idempotent).
+          python - <<'PY'
+          import django, os
+          django.setup()
+          from django.db import connection
+          with connection.cursor() as cur:
+              cur.execute("""DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='rls_app_role') THEN
+                             CREATE ROLE rls_app_role NOSUPERUSER NOLOGIN; END IF;
+                             EXCEPTION WHEN duplicate_object OR unique_violation THEN NULL; END $$;""")
+          print("rls_app_role hazırdır")
+          PY
       - name: 🧪 Run tests with coverage
         env:
           DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
