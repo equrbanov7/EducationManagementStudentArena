@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _
 
 from core.program_codes import program_code_search_q
 
+from ..services.person_search import person_q
 from ._helpers import _role_capabilities
 
 MAX_PER_GROUP = 6
@@ -144,10 +145,9 @@ def _student_group(organization, query):
     qs = (
         Record.objects.filter(organization=organization)
         .filter(
-            Q(student__first_name__icontains=query)
-            | Q(student__last_name__icontains=query)
-            | Q(student__username__icontains=query)
-            | Q(student__email__icontains=query)
+            # Ad/soyad/istifadəçi adı: tokenləşmiş + diakritikaya dözümlü
+            # («Ad Soyad», ı↔i, ə↔e …) — bax services/person_search.py.
+            person_q(query, ("student__first_name", "student__last_name", "student__username", "student__email"))
             | Q(program__name__icontains=query)
             | program_code_search_q(query, prefix="program__")
         )
