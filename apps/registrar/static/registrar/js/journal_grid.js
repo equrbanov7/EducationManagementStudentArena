@@ -615,7 +615,6 @@
         }
         refreshParityBadge();
         setStep(3); // stepper: Yeni dərs addımı
-        modalDirty = false;
         modal.hidden = false;
         lockPageScroll();
     }
@@ -635,29 +634,16 @@
 
     function closeModal() {
         modal.hidden = true;
-        modalDirty = false;
+        delete modal.dataset.dirty;
         unlockPageScroll();
         var mapped = stepOfActiveTab();
         if (mapped) setStep(mapped); // modal bağlandı → aktiv tabın addımına qayıt
     }
 
-    // Yadda saxlanılmamış dəyişiklik qoruyucusu (sahib 2026-09-20): modal açılandan
-    // sonra hər hansı sahə dəyişibsə ✕ / İmtina / fon / Escape əvvəlcə soruşur.
-    // Bayraq açılışda sıfırlanır; kaskad/paritet kimi PROQRAM dəyişiklikləri
-    // `input` hadisəsi yaratmadığı üçün saxta «dirty» olmur.
-    var modalDirty = false;
-    var unsavedHint = modal.querySelector("[data-jd-modal-unsaved]");
-    if (form) {
-        form.addEventListener("input", function () { modalDirty = true; });
-        form.addEventListener("change", function (ev) {
-            if (ev.isTrusted) modalDirty = true;
-        });
-    }
+    // Yadda saxlanılmamış dəyişiklik varsa (bayraq: journal_lesson_modal_guard.js) əvvəl soruş.
     function requestClose() {
-        if (modalDirty && unsavedHint) {
-            showJdConfirm(unsavedHint, closeModal);
-            return;
-        }
+        var hint = modal.querySelector("[data-jd-modal-unsaved]");
+        if (modal.dataset.dirty === "1" && hint) { showJdConfirm(hint, closeModal); return; }
         closeModal();
     }
 
