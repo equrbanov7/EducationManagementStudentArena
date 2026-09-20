@@ -7822,7 +7822,7 @@ msgstr "Администраторы"
 #: apps/accounts/templates/accounts/profile/_view_as_panel.html:71
 msgctxt "accounts.view_as"
 msgid "role_filter_staff"
-msgstr "Сотрудники"
+msgstr "Сотрудники / административные должности"
 
 #: apps/accounts/templates/accounts/profile/sections/_academic_items_manage.html:19
 msgctxt "profile.academic_items"
