@@ -11,6 +11,7 @@
 
 {% block content %}
 <div class="sd-page">
+    {% include "exams/partials/_exam_crumbs.html" %}
     <a href="{{ results_url }}" class="sd-back">
         <i class="fas fa-arrow-left"></i> {% trans "back_to_results" context "exams.template.exam_statistics" %}
     </a>

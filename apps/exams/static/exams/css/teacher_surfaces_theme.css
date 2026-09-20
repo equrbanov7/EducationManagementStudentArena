@@ -166,3 +166,32 @@
     .qb-page .qb-header h1, .ter-page .ter-title, .sd-page .sd-header__left h1, .lr-page .lr-header h1 { font-size: var(--ems-fs-2xl); }
     .qb-page .qb-header-actions .qb-btn, .ter-page .ter-header-actions .ter-action-btn { flex: 1 1 auto; }
 }
+
+/* ───────────────── nəticələr: filtr şəbəkəsi + qrupa ikinci şans (sahib 2026-09-21) ───────────────── */
+.ter-page .ter-filter-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; align-items: end; }
+.ter-page .ter-filter-field { grid-column: span 3; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ter-page .ter-filter-field--search { grid-column: span 6; }
+.ter-page .ter-filter-actions { grid-column: span 3; display: flex; justify-content: flex-end; align-items: end; }
+.ter-page .ter-filter-card .form-control, .ter-page .ter-filter-card .form-select, .ter-page .ter-filter-card .bootstrap-single-select__toggle {
+    min-height: var(--ems-h-field, 40px); border-radius: var(--ems-r-lg); border: 1px solid var(--ems-border); font-size: var(--ems-fs-base); font-weight: 600; box-shadow: none;
+}
+.ter-page .ter-filter-card .form-control:focus { border-color: var(--ems-primary-400); box-shadow: var(--ems-sh-focus); }
+.ter-page .ter-filter-label { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
+.ter-page .ter-filter-label i { color: var(--ems-primary-600); }
+.ter-page .ter-grant-card { margin: 12px 0 16px; padding: 12px 16px; border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-bg); }
+.ter-page .ter-group-grant-form { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.ter-page .ter-grant-card__copy { display: flex; flex-direction: column; gap: 2px; flex: 1 1 260px; min-width: 0; }
+.ter-page .ter-grant-card__hint { font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
+.ter-page .ter-grant-card__select { flex: 0 1 260px; min-width: 200px; }
+.ter-page .ter-grant-card__btn { flex: 0 0 auto; white-space: nowrap; }
+.exam-crumbs { margin: 0 0 10px; }
+.exam-crumbs .ems-crumbs { margin: 0; }
+@media (max-width: 900px) {
+    .ter-page .ter-filter-field, .ter-page .ter-filter-field--search, .ter-page .ter-filter-actions { grid-column: span 6; }
+}
+@media (max-width: 640px) {
+    .ter-page .ter-filter-field, .ter-page .ter-filter-field--search, .ter-page .ter-filter-actions { grid-column: span 12; }
+}
+/* Skeleton — filtr dəyişəndə nəticə kartı sürüşən sətirlərlə dolur (results_filter_ui.js) */
+.ems-results-skeleton { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.ems-results-skeleton .ems-skelrow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; align-items: center; }
