@@ -14,15 +14,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-        <i class="fas fa-circle-notch fa-spin"></i>
-        <p>{% trans "loading" context "exams.template.teacher_exam_results" %}</p>
-    </div>
-</div>
 
 <div class="ter-page">
     <div class="ter-header-card">
+        {% include "exams/partials/_exam_crumbs.html" %}
         <div class="ter-header-top">
             <a href="{{ profile_return_url }}" class="ter-back-btn">
                 <i class="fas fa-arrow-left"></i>
@@ -100,6 +95,7 @@
         </div>
     </div>
 
+    {# Filtrlər — hər dəyişiklik dərhal tətbiq olunur (js-auto-filter); «Tətbiq et» yoxdur (sahib 2026-09-21). #}
     <div class="ter-filter-card results-filter-card">
         <form method="get" id="resultsFiltersForm" class="ter-filter-grid js-results-filters-form" novalidate>
             {% if request.GET.from_section %}
@@ -108,8 +104,7 @@
             {% if request.GET.return_to %}
                 <input type="hidden" name="return_to" value="{{ request.GET.return_to }}">
             {% endif %}
-
-            <div class="ter-filter-field ter-filter-field--wide">
+            <div class="ter-filter-field ter-filter-field--search">
                 <label class="ter-filter-label" for="resultsFilterSearchInput">
                     <i class="fas fa-search"></i> {% trans "search_placeholder" context "exams.template.teacher_exam_results" %}
                 </label>
@@ -121,7 +116,6 @@
                        autocomplete="off"
                        placeholder="{% trans "search_placeholder" context "exams.template.teacher_exam_results" %}">
             </div>
-
             {% if available_groups %}
             <div class="ter-filter-field">
                 <label class="ter-filter-label" for="resultsFilterGroupSelect">
@@ -140,31 +134,7 @@
                     </select>
                 </div>
             </div>
-
-            {# Bütöv qrupa ikinci şans (əlavə cəhd) — seçilmiş qrupun hər üzvünə grant yazır #}
-            <div class="ter-filter-field ter-group-grant-field">
-                <label class="ter-filter-label" for="resultsGroupGrantSelect">
-                    <i class="fas fa-users"></i> {% trans "Qrupa ikinci şans" context "exams.template.teacher_exam_results" %}
-                </label>
-                <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="ter-group-grant-form d-flex gap-2">
-                    {% csrf_token %}
-                    <div class="bootstrap-single-select flex-grow-1">
-                        <select name="group_id" id="resultsGroupGrantSelect"
-                                class="form-select bootstrap-single-select__native" data-bootstrap-select required>
-                            <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
-                            {% for grp in available_groups %}
-                                <option value="{{ grp.id }}">{{ grp.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="ter-btn ter-btn--sm ter-btn--ghost" style="white-space:nowrap;"
-                            title="{% trans 'Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir.' context 'exams.template.teacher_exam_results' %}">
-                        <i class="fas fa-rotate-right"></i> {% trans "Əlavə cəhd ver" context "exams.template.teacher_exam_results" %}
-                    </button>
-                </form>
-            </div>
             {% endif %}
-
             <div class="ter-filter-field">
                 <label class="ter-filter-label" for="resultsFilterStatusSelect">
                     <i class="fas fa-tasks"></i> {% trans "filter_status_label" context "exams.template.teacher_exam_results" %}
@@ -193,7 +163,6 @@
                 </select>
                 </div>
             </div>
-
             <div class="ter-filter-field">
                 <label class="ter-filter-label" for="resultsFilterCheckedSelect">
                     <i class="fas fa-check-double"></i> {% trans "filter_checked_label" context "exams.template.teacher_exam_results" %}
@@ -216,7 +185,6 @@
                 </select>
                 </div>
             </div>
-
             <div class="ter-filter-field">
                 <label class="ter-filter-label" for="resultsFilterDateFromInput">
                     <i class="fas fa-calendar-alt"></i> {% trans "filter_date_from" context "exams.template.teacher_exam_results" %}
@@ -227,7 +195,6 @@
                        value="{{ date_from }}"
                        class="form-control js-auto-filter js-filter-resettable">
             </div>
-
             <div class="ter-filter-field">
                 <label class="ter-filter-label" for="resultsFilterDateToInput">
                     <i class="fas fa-calendar-check"></i> {% trans "filter_date_to" context "exams.template.teacher_exam_results" %}
@@ -238,18 +205,37 @@
                        value="{{ date_to }}"
                        class="form-control js-auto-filter js-filter-resettable">
             </div>
-
             <div class="ter-filter-actions">
-                <button type="submit" class="ter-btn ter-btn--primary">
-                    <i class="fas fa-filter"></i> {% trans "action_apply_filter" context "exams.template.teacher_exam_results" %}
-                </button>
                 <button type="button" id="resultsClearFiltersBtn" class="ter-btn ter-btn--ghost js-clear-results-filters">
                     <i class="fas fa-eraser"></i> {% trans "action_reset_filter" context "exams.template.teacher_exam_results" %}
                 </button>
             </div>
         </form>
     </div>
-
+    {% if available_groups %}
+    {# Bütöv qrupa ikinci şans (əlavə cəhd) — filtr formasından AYRI form (iç-içə form HTML-də etibarsızdır). #}
+    <div class="ter-grant-card">
+        <form method="post" action="{% url 'exams:grant_extra_attempt_group' slug=exam.slug %}" class="ter-group-grant-form">
+            {% csrf_token %}
+            <div class="ter-grant-card__copy">
+                <span class="ter-filter-label"><i class="fas fa-users"></i> {% trans "Qrupa ikinci şans" context "exams.template.teacher_exam_results" %}</span>
+                <span class="ter-grant-card__hint">{% trans 'Seçilmiş qrupun bütün tələbələrinə bu imtahan üçün əlavə cəhd verir.' context 'exams.template.teacher_exam_results' %}</span>
+            </div>
+            <div class="bootstrap-single-select ter-grant-card__select">
+                <select name="group_id" id="resultsGroupGrantSelect"
+                        class="form-select bootstrap-single-select__native" data-bootstrap-select required>
+                    <option value="">{% trans 'Qrup seçin…' context 'exams.template.teacher_exam_results' %}</option>
+                    {% for grp in available_groups %}
+                        <option value="{{ grp.id }}">{{ grp.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="ter-btn ter-btn--primary ter-grant-card__btn">
+                <i class="fas fa-rotate-right"></i> {% trans "Əlavə cəhd ver" context "exams.template.teacher_exam_results" %}
+            </button>
+        </form>
+    </div>
+    {% endif %}
     {% if can_delete_attempts %}
         <div class="ter-toolbar">
             <span class="ter-selected-counter">
@@ -271,7 +257,7 @@
         </div>
     {% endif %}
 
-    <div class="ter-results-card">
+    <div class="ter-results-card" data-results-skeleton-target>
         <div class="ter-results-card-head">
             <h2 class="ter-results-title">
                 <i class="fas fa-users"></i>

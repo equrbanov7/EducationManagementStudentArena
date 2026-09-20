@@ -50,6 +50,7 @@ STRINGS = {
         "Шаблон банка тестовых вопросов",
         "Test soru bankası şablonu",
     ),
+    ("exams.crumbs", "Naviqasiya yolu"): ("Breadcrumb navigation", "Навигационная цепочка", "Gezinti yolu"),
     ("exams.template.question_bank_detail", "Yazılı sual bankı şablonu"): (
         "Written question bank template",
         "Шаблон банка письменных вопросов",

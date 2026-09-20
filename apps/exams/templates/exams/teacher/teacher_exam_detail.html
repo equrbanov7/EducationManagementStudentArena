@@ -20,6 +20,7 @@
      data-question-modal-autoopen-mode="{{ question_modal_autoopen_mode }}">
     <div class="exam-detail-card">
         <div class="card-header">
+            {% include "exams/partials/_exam_crumbs.html" %}
             <div class="exam-header-actions">
                 <a href="{{ profile_return_url }}" class="exam-back-btn">
                     <i class="fas fa-arrow-left"></i> {{ exam_back_label }}
@@ -336,7 +337,7 @@
 {% include "exams/teacher/partials/_create_edit_exam_bs_modal.html" %}
 {% include "exams/teacher/partials/_question_form_bs_modal.html" %}
 
-<div class="modal fade" id="examDetailDeleteConfirmModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade exam-detail-modal exam-detail-modal--danger" id="examDetailDeleteConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
@@ -367,7 +368,7 @@
 {% comment %}
     Sual yüklənmədən "Sınaq keç" — 404 əvəzinə izah + sual əlavə etmə yolu.
 {% endcomment %}
-<div class="modal fade" id="examDetailTrialRunBlockedModal" tabindex="-1" aria-hidden="true"
+<div class="modal fade exam-detail-modal" id="examDetailTrialRunBlockedModal" tabindex="-1" aria-hidden="true"
      aria-labelledby="examDetailTrialRunBlockedTitle">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

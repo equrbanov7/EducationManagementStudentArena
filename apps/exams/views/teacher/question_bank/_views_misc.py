@@ -150,7 +150,7 @@ def test_question_bank(request, slug):
     # Seçilmiş dil — bu suallar həmin dil variantına bağlanacaq (çoxdilli imtahan).
     selected_language = _normalize_exam_language(request.POST.get("language") or request.GET.get("language"), exam)
 
-    wb_ctx = _test_workbench_context(exam, navigation_query, selected_language=selected_language)
+    wb_ctx = _test_workbench_context(exam, navigation_query, selected_language=selected_language, request=request)
 
     # GET
     if request.method != "POST":
