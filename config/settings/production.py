@@ -22,6 +22,9 @@ except ModuleNotFoundError:  # pragma: no cover - optional in non-prod test envs
 from .base import (
     ADMIN_2FA_REQUIRED,
     ADMIN_ALLOWED_IPS,
+    INTERNAL_NETWORKS,
+    NETWORK_ZONE_ENFORCED,
+    NETWORK_ZONE_TRUST_HEADER,
     ADMIN_LOGIN_RATE_LIMIT,
     ADMIN_OTP_RESEND_RATE_LIMIT,
     ADMIN_OTP_VERIFY_RATE_LIMIT,
