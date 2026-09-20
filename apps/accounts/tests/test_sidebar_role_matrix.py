@@ -172,6 +172,10 @@ class SidebarRoleMatrixTest(TestCase):
         sızmır (tələbə də daxil).
         """
         for role in ROLE_LEVELS:
+            if role == "ikt_rehber":
+                # SAHİB 2026-09-21: RİM rəhbəri bölmə görünürlüyündə sahib/superadmin
+                # kimi privileged-dir (`rbac_sections._is_rim_head`) — bu qayda ona aid deyil.
+                continue
             with self.subTest(role=role):
                 sections = self._sections(role)
                 self.assertNotIn("my-workload", sections)
