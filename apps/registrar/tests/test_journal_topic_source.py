@@ -30,6 +30,7 @@ from apps.syllabus.tests.factories import (
     make_offering,
     make_org,
 )
+from apps.syllabus.week_plan import expected_week_rows
 from core.constants import OrgUnitType, RoleScopeType
 
 User = get_user_model()
@@ -117,8 +118,8 @@ def test_the_approved_weekly_plan_becomes_the_journal_topic_list(bridge):
     titles = journal_topics.lesson_topic_choices(bridge["offering"])
 
     assert titles[:3] == ["Mövzu 1", "Mövzu 2", "Mövzu 3"]
-    # 14 dolu həftə — boş sətirlər mövzu siyahısına düşmür.
-    assert len(titles) == 14
+    # Plandan çıxarılan dolu sətirlər (30/16/14 → 15) — boş sətirlər mövzu siyahısına düşmür.
+    assert len(titles) == expected_week_rows(PLAN_HOURS)
 
 
 def test_each_topic_carries_the_lesson_kinds_it_has_hours_for(bridge):
