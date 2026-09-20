@@ -102,7 +102,7 @@ from .constants import (
     SyllabusStatus,
 )
 from .document import build_document  # noqa: F401
-from .policy import assessment_weights  # noqa: F401
+from .policy import assessment_weights, standard_midterm, standard_project  # noqa: F401
 from .services import set_plan_hours  # noqa: F401
 from .services import (
     GROUP_CHAIR,
@@ -302,6 +302,8 @@ def build_review_queue_context(
 __all__ = [
     "build_document",
     "assessment_weights",
+    "standard_midterm",
+    "standard_project",
     "set_plan_hours",
     "activity_kinds_for_syllabus",
     "activity_label",
