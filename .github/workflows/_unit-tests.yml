@@ -15,10 +15,25 @@ on:
         description: "Python version to use"
         type: string
         default: "3.11"
+      # Sahib 2026-09-21: 9400+ test tək job-da 30–38 dəq çəkirdi. `shards`>1 olanda
+      # dəst pytest-split ilə hissələrə bölünür (hər shard öz Postgres/Redis-i ilə
+      # paralel job-dur); `coverage=false` push-larda coverage yükünü atır.
+      shard:
+        description: "Bu job-un shard nömrəsi (1..shards)"
+        type: string
+        default: "1"
+      shards:
+        description: "Shard sayı (1 = bölmə yoxdur)"
+        type: string
+        default: "1"
+      coverage:
+        description: "Coverage hesabatı yığılsın (yalnız bölünməmiş dəstdə mənalıdır)"
+        type: boolean
+        default: true
 
 jobs:
   unit-tests:
-    name: 🧪 Tests (Python ${{ inputs.python-version }})
+    name: 🧪 Tests (Python ${{ inputs.python-version }}${{ inputs.shards != '1' && format(' · shard {0}/{1}', inputs.shard, inputs.shards) || '' }})
     runs-on: ubuntu-latest
 
     env:
@@ -132,39 +147,32 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci-only-not-production
           DEBUG: "False"
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          SHARD: ${{ inputs.shard }}
+          SHARDS: ${{ inputs.shards }}
+          COVERAGE: ${{ inputs.coverage }}
         run: |
-          echo "::group::🧪 Running Tests"
-          # Faza 7 (audit 2026-07-02): coverage yalnız MƏHSUL kodunu ölçür
-          # (scripts/ birdəfəlik alətləri faizi süni aşağı salırdı) və gate
-          # 60→68-ə qaldırıldı (yerli sqlite dövrəsi 71% verir; CI postgres
-          # testləri ilə bir qədər yuxarıdır). Aşağı düşmə = reqressiya.
-          #
-          # Paralelləşdirmə (2026-09-03): pytest-xdist `-n 4` (ubuntu-latest =
-          # 4 vCPU), `--dist loadfile` — eyni modulun testləri eyni worker-də
-          # ardıcıl qalır (TestCase sinifləri / modul-səviyyə fixture-lar
-          # bölünmür). pytest-django hər worker üçün ayrıca DB yaradır
-          # (test_test_db_gw0..gw3; `test_user` POSTGRES_USER = superuser →
-          # CREATEDB var). pytest-cov worker məlumatını özü birləşdirir —
-          # `--cov-fail-under` birləşmiş nəticəyə tətbiq olunur.
+          echo "::group::🧪 Running Tests (shard $SHARD/$SHARDS, coverage=$COVERAGE)"
+          extra=()
+          if [ "$SHARDS" != "1" ]; then
+            # .test_durations varsa least_duration ilə balanslı, yoxdursa sayca bərabər bölgü.
+            extra+=(--splits "$SHARDS" --group "$SHARD" --splitting-algorithm least_duration)
+          fi
+          if [ "$COVERAGE" = "true" ]; then
+            extra+=(--cov=apps --cov=core --cov=config --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing --cov-fail-under=68)
+          fi
           pytest \
             -n 4 --dist loadfile \
             --ds=config.settings.test \
             --ignore=tests/e2e \
-            --cov=apps \
-            --cov=core \
-            --cov=config \
-            --cov-report=xml:coverage.xml \
-            --cov-report=html:htmlcov \
-            --cov-report=term-missing \
-            --cov-fail-under=68 \
-            -v \
+            "${extra[@]}" \
+            -q \
             --tb=short \
             --timeout=300
           echo "::endgroup::"
 
       - name: 📊 Upload coverage report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && inputs.coverage
         with:
           name: coverage-report-${{ inputs.python-version }}
           path: |
