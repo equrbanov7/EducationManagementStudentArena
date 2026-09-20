@@ -75372,3 +75372,132 @@ msgstr "Uyarılı soru"
 msgctxt "exams.template.test_question_bank"
 msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
 msgstr "Zorunlu alanları doldurun — eksik alan vurgulandı."
+
+msgctxt "accounts.groups"
+msgid "Alt qruplara böl"
+msgstr "Alt gruplara böl"
+
+msgctxt "accounts.groups"
+msgid "%(name)s qrupunu alt qruplara böl"
+msgstr "%(name)s grubunu alt gruplara böl"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupu alt qruplara böl"
+msgstr "Ana grubu alt gruplara böl"
+
+msgctxt "accounts.groups"
+msgid ""
+"Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları "
+"adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi "
+"xidmətlə yazılır — tarixçə silinmir."
+msgstr ""
+"Öğrenciler önce eşit bölünür; listeler arasında taşıyabilir ve alt grupları "
+"adlandırabilirsiniz. Seçilmeyenler ana grupta kalır. Her taşıma resmi "
+"hizmetle yazılır — geçmiş silinmez."
+
+msgctxt "accounts.groups"
+msgid "Alt qrupları yarat"
+msgstr "Alt grupları oluştur"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupda qalır"
+msgstr "Ana grupta kalır"
+
+msgctxt "accounts.groups"
+msgid "tələbə"
+msgstr "öğrenci"
+
+msgctxt "accounts.groups"
+msgid "Seçilmişləri bura keçir"
+msgstr "Seçilenleri buraya taşı"
+
+msgctxt "accounts.groups"
+msgid "Hamısını seç"
+msgstr "Tümünü seç"
+
+msgctxt "accounts.groups"
+msgid "Seçimi ləğv et"
+msgstr "Seçimi temizle"
+
+msgctxt "accounts.groups"
+msgid "Alt qrupun adı"
+msgstr "Alt grup adı"
+
+msgctxt "accounts.groups"
+msgid "Tələbə siyahısı yüklənmədi — yenidən cəhd edin."
+msgstr "Öğrenci listesi yüklenemedi — tekrar deneyin."
+
+msgctxt "accounts.groups"
+msgid "Ən azı iki alt qrupda tələbə olmalıdır."
+msgstr "En az iki alt grupta öğrenci olmalıdır."
+
+msgctxt "accounts.groups"
+msgid "Hər alt qrupun adı olmalıdır."
+msgstr "Her alt grubun adı olmalıdır."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup sayı"
+msgstr "Alt grup sayısı"
+
+msgctxt "accounts.groups"
+msgid "Bərabər böl"
+msgstr "Eşit böl"
+
+msgctxt "accounts.groups"
+msgid ""
+"Sütunlarda tələbəni işarələyib başqa sütunun «Seçilmişləri bura keçir» "
+"düyməsi ilə keçirin. Ana qrupda qalan tələbələr köçürülmür."
+msgstr ""
+"Bir sütunda öğrencileri işaretleyip başka sütunun «Seçilenleri buraya taşı» "
+"düğmesiyle taşıyın. Ana grupta kalanlar taşınmaz."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü"
+msgstr "Alt grup dağılımı"
+
+msgctxt "accounts.groups"
+msgid "Məs.: laboratoriya dərsləri üçün alt qruplara bölünür"
+msgstr "örn.: laboratuvar dersleri için alt gruplara bölünür"
+
+msgctxt "accounts.groups"
+msgid "Səbəb hər tələbənin köçürmə qeydinə və audit jurnalına yazılır."
+msgstr "Neden, her öğrencinin taşıma kaydına ve denetim günlüğüne yazılır."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü oxunmadı — səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Alt grup dağılımı okunamadı — sayfayı yenileyip tekrar deneyin."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup adları bir-birindən fərqli olmalıdır."
+msgstr "Alt grup adları birbirinden farklı olmalıdır."
+
+msgctxt "accounts.groups"
+msgid "Bir tələbə yalnız bir alt qrupda ola bilər."
+msgstr "Bir öğrenci yalnızca bir alt grupta olabilir."
+
+msgctxt "accounts.groups"
+msgid "Ən azı 2 alt qrup olmalıdır."
+msgstr "En az 2 alt grup olmalıdır."
+
+msgctxt "accounts.groups"
+msgid "Ən çoxu 6 alt qrup yaratmaq olar."
+msgstr "En fazla 6 alt grup oluşturulabilir."
+
+msgctxt "accounts.groups"
+msgid "Arxivlənmiş qrup bölünmür."
+msgstr "Arşivlenmiş grup bölünemez."
+
+msgctxt "accounts.groups"
+msgid "«%(name)s» adlı qrup artıq var — başqa ad seçin."
+msgstr "«%(name)s» adlı grup zaten var — başka bir ad seçin."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə alt qrupa yerləşdirilməyib."
+msgstr "Hiçbir öğrenci alt gruba yerleştirilmedi."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələrdən bəziləri bu qrupun aktiv tələbəsi deyil — siyahını "
+"yeniləyin."
+msgstr ""
+"Seçilen bazı öğrenciler bu grubun aktif öğrencisi değil — listeyi yenileyin."

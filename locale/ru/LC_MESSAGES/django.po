@@ -75953,3 +75953,135 @@ msgstr "Вопросов с предупреждениями"
 msgctxt "exams.template.test_question_bank"
 msgid "Məcburi sahələri doldurun — çatışmayan sahə vurğulandı."
 msgstr "Заполните обязательные поля — незаполненное поле выделено."
+
+msgctxt "accounts.groups"
+msgid "Alt qruplara böl"
+msgstr "Разделить на подгруппы"
+
+msgctxt "accounts.groups"
+msgid "%(name)s qrupunu alt qruplara böl"
+msgstr "Разделить группу %(name)s на подгруппы"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupu alt qruplara böl"
+msgstr "Разделить основную группу на подгруппы"
+
+msgctxt "accounts.groups"
+msgid ""
+"Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları "
+"adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi "
+"xidmətlə yazılır — tarixçə silinmir."
+msgstr ""
+"Сначала студенты делятся поровну; их можно перемещать между списками и "
+"называть подгруппы. Невыбранные остаются в основной группе. Каждый перевод "
+"выполняется официальной службой — история сохраняется."
+
+msgctxt "accounts.groups"
+msgid "Alt qrupları yarat"
+msgstr "Создать подгруппы"
+
+msgctxt "accounts.groups"
+msgid "Ana qrupda qalır"
+msgstr "Остаётся в основной группе"
+
+msgctxt "accounts.groups"
+msgid "tələbə"
+msgstr "студ."
+
+msgctxt "accounts.groups"
+msgid "Seçilmişləri bura keçir"
+msgstr "Переместить выбранных сюда"
+
+msgctxt "accounts.groups"
+msgid "Hamısını seç"
+msgstr "Выбрать всех"
+
+msgctxt "accounts.groups"
+msgid "Seçimi ləğv et"
+msgstr "Снять выбор"
+
+msgctxt "accounts.groups"
+msgid "Alt qrupun adı"
+msgstr "Название подгруппы"
+
+msgctxt "accounts.groups"
+msgid "Tələbə siyahısı yüklənmədi — yenidən cəhd edin."
+msgstr "Список студентов не загрузился — попробуйте ещё раз."
+
+msgctxt "accounts.groups"
+msgid "Ən azı iki alt qrupda tələbə olmalıdır."
+msgstr "Минимум две подгруппы должны содержать студентов."
+
+msgctxt "accounts.groups"
+msgid "Hər alt qrupun adı olmalıdır."
+msgstr "У каждой подгруппы должно быть название."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup sayı"
+msgstr "Количество подгрупп"
+
+msgctxt "accounts.groups"
+msgid "Bərabər böl"
+msgstr "Разделить поровну"
+
+msgctxt "accounts.groups"
+msgid ""
+"Sütunlarda tələbəni işarələyib başqa sütunun «Seçilmişləri bura keçir» "
+"düyməsi ilə keçirin. Ana qrupda qalan tələbələr köçürülmür."
+msgstr ""
+"Отметьте студентов в столбце и переместите их кнопкой «Переместить выбранных"
+" сюда» другого столбца. Оставшиеся в основной группе не переводятся."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü"
+msgstr "Разбиение на подгруппы"
+
+msgctxt "accounts.groups"
+msgid "Məs.: laboratoriya dərsləri üçün alt qruplara bölünür"
+msgstr "напр.: разделение на подгруппы для лабораторных"
+
+msgctxt "accounts.groups"
+msgid "Səbəb hər tələbənin köçürmə qeydinə və audit jurnalına yazılır."
+msgstr ""
+"Причина записывается в запись перевода каждого студента и в журнал аудита."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup bölgüsü oxunmadı — səhifəni yeniləyib yenidən cəhd edin."
+msgstr ""
+"Не удалось прочитать разбиение — обновите страницу и попробуйте снова."
+
+msgctxt "accounts.groups"
+msgid "Alt qrup adları bir-birindən fərqli olmalıdır."
+msgstr "Названия подгрупп должны отличаться."
+
+msgctxt "accounts.groups"
+msgid "Bir tələbə yalnız bir alt qrupda ola bilər."
+msgstr "Студент может быть только в одной подгруппе."
+
+msgctxt "accounts.groups"
+msgid "Ən azı 2 alt qrup olmalıdır."
+msgstr "Нужно минимум 2 подгруппы."
+
+msgctxt "accounts.groups"
+msgid "Ən çoxu 6 alt qrup yaratmaq olar."
+msgstr "Можно создать не более 6 подгрупп."
+
+msgctxt "accounts.groups"
+msgid "Arxivlənmiş qrup bölünmür."
+msgstr "Архивную группу нельзя разделить."
+
+msgctxt "accounts.groups"
+msgid "«%(name)s» adlı qrup artıq var — başqa ad seçin."
+msgstr "Группа «%(name)s» уже существует — выберите другое название."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə alt qrupa yerləşdirilməyib."
+msgstr "Ни один студент не помещён в подгруппу."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələrdən bəziləri bu qrupun aktiv tələbəsi deyil — siyahını "
+"yeniləyin."
+msgstr ""
+"Некоторые выбранные студенты не являются активными студентами этой группы — "
+"обновите список."
