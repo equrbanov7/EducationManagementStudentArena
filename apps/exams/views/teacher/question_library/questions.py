@@ -173,6 +173,11 @@ def question_bank_bulk_add(request, bank_id):
         "wb_show_report": False,
         "wb_templates": [
             {
+                "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=docx",
+                "label": "Word (.docx)",
+                "kind": "docx",
+            },
+            {
                 "url": reverse("exams:question_bank_template_download", kwargs={"bank_id": bank.id}) + "?format=txt",
                 "label": "TXT",
                 "kind": "txt",

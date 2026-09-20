@@ -38,8 +38,8 @@ from ._reports import (
 @login_required
 def test_question_bank_template_download(request, slug):
     """
-    Müəllimə hazır sual bankı şablonu endirir (yalnız TXT).
-    DOCX importu söndürüldüyü üçün DOCX şablonu da verilmir.
+    Müəllimə hazır sual bankı şablonu endirir: TXT (susmaya görə) və ya
+    ``?format=docx`` — Word-də açıb nümunəyə baxmaq üçün (sahib 2026-09-21).
     """
     _ensure_teacher(request.user)
     # Slug yoxlaması — tenant izolyasiyası
@@ -47,7 +47,16 @@ def test_question_bank_template_download(request, slug):
 
     from django.http import HttpResponse
 
-    response = HttpResponse(_question_bank_template_txt(), content_type="text/plain; charset=utf-8")
+    template_text = _question_bank_template_txt()
+    if (request.GET.get("format") or "").strip().lower() == "docx":
+        # SAHİB (2026-09-21): Word-də açıb nümunəyə baxmaq üçün .docx variantı.
+        from apps.exams.services.question_template_docx import DOCX_CONTENT_TYPE, build_template_docx
+
+        title = pgettext("exams.template.test_question_bank", "Test sual bankı şablonu")
+        response = HttpResponse(build_template_docx(template_text, title=title), content_type=DOCX_CONTENT_TYPE)
+        response["Content-Disposition"] = 'attachment; filename="sual_sablonu.docx"'
+        return response
+    response = HttpResponse(template_text, content_type="text/plain; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="sual_sablonu.txt"'
     return response
 

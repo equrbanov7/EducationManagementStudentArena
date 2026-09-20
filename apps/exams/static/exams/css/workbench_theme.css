@@ -164,3 +164,13 @@
 .bulk-page-wrapper .bootstrap-single-select__toggle.is-invalid,
 .qsubm-input-wrap input.is-invalid,
 .qsubm-input-wrap textarea.is-invalid { border-color: var(--ems-danger) !important; box-shadow: 0 0 0 3px var(--ems-danger-100) !important; }
+
+/* ── Başlıq keçidləri — izahlı (sahib 2026-09-21: «nə üçündür, nə iş görəcək» aydın olsun) ── */
+.bulk-page-wrapper .page-header-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.bulk-page-wrapper .page-header-link--hinted { align-items: flex-start; min-height: 0; padding: 8px 12px; text-align: left; gap: 10px; max-width: 360px; }
+.bulk-page-wrapper .page-header-link--hinted > i { margin-top: 3px; color: var(--ems-primary-600); }
+.bulk-page-wrapper .page-header-link__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bulk-page-wrapper .page-header-link__label { font-weight: 800; line-height: 1.2; }
+.bulk-page-wrapper .page-header-link__hint { font-size: var(--ems-fs-xs); font-weight: 500; color: var(--ems-text-muted); line-height: 1.3; white-space: normal; }
+.bulk-page-wrapper .template-download__btn--docx { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.bulk-page-wrapper .template-download__btn--docx:hover { background: var(--ems-primary-700); color: var(--ems-neutral-0); }
