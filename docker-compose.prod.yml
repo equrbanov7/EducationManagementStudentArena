@@ -851,7 +851,8 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
       - /dev/disk:/dev/disk:ro
     command:
-      - --housekeeping_interval=15s
+      # 2026-09-21 auditi: 15s-də cadvisor 27% CPU + 82% yaddaş (256M) yeyirdi.
+      - --housekeeping_interval=30s
       - --docker_only=true
       - --store_container_labels=false
     restart: unless-stopped
@@ -860,7 +861,7 @@ services:
       resources:
         limits:
           cpus: "${CADVISOR_CPU_LIMIT:-0.4}"
-          memory: ${CADVISOR_MEM_LIMIT:-256M}
+          memory: ${CADVISOR_MEM_LIMIT:-384M}
     networks:
       - emsarena-network
 
