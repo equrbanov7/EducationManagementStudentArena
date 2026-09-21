@@ -23,16 +23,16 @@ Həm imtahan test-bankı, həm yazılı imtahan redaktoru bu shell-i include edi
         <div class="bankpicker-dialog__body" data-bank-picker-body>
             <div class="bankpicker-skeleton" aria-hidden="true">
                 <div class="bankpicker-toolbar">
-                    <span class="skeleton skeleton-block" style="height:44px;flex:2 1 220px"></span>
-                    <span class="skeleton skeleton-block" style="height:44px;flex:2 1 200px"></span>
-                    <span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>
-                    <span class="skeleton skeleton-block" style="height:44px;flex:1 1 140px"></span>
+                    <span class="skeleton skeleton-block skeleton-field skeleton-field--wide"></span>
+                    <span class="skeleton skeleton-block skeleton-field skeleton-field--mid"></span>
+                    <span class="skeleton skeleton-block skeleton-field skeleton-field--narrow"></span>
+                    <span class="skeleton skeleton-block skeleton-field skeleton-field--narrow"></span>
                 </div>
                 {% for _ in "1234"|make_list %}
                 <div class="bankpicker-item">
-                    <div style="display:flex;flex-direction:column;gap:.4rem;width:100%">
-                        <span class="skeleton skeleton-line" style="width:80%"></span>
-                        <span class="skeleton skeleton-line skeleton-line--sm" style="width:40%"></span>
+                    <div class="skeleton-stack">
+                        <span class="skeleton skeleton-line skeleton-line--w80"></span>
+                        <span class="skeleton skeleton-line skeleton-line--sm skeleton-line--w40"></span>
                     </div>
                 </div>
                 {% endfor %}

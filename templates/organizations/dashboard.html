@@ -97,7 +97,7 @@
         <div class="section">
             <div class="section-title">{% trans "your_roles" context "organizations.dashboard" %}</div>
             {% if user_memberships %}
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div class="dash-actions-row">
                     {% for membership in user_memberships %}
                     <span class="dashboard-2">
                         {{ membership.role|role_badge_label }}

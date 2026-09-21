@@ -52,7 +52,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter box-mark">{{ opt.label }}</span>
-                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                 </label>
             {% endfor %}
         </div>
@@ -66,7 +66,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter circle-mark">{{ opt.label }}</span>
-                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                    <span class="opt-text">{% if not opt.image_replaces_text or not opt.image_url %}{{ opt.text }}{% endif %}{% if opt.image_url %}<img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                 </label>
             {% endfor %}
         </div>
