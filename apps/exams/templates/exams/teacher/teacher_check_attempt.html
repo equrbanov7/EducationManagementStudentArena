@@ -303,7 +303,7 @@
                 <button type="button" class="btn-ai-grade" id="aiGradeBtn">
                     <span class="btn-ai-grade__icon"><i class="fas fa-robot"></i></span>
                     <span class="btn-ai-grade__text">{% trans "action_ai_grade" context "exams.template.teacher_check_attempt" %}</span>
-                    <span class="btn-ai-grade__loader" style="display:none;"><i class="fas fa-circle-notch fa-spin"></i></span>
+                    <span class="btn-ai-grade__loader u-hidden"><i class="fas fa-circle-notch fa-spin"></i></span>
                 </button>
                 <span class="ai-grade-status" id="aiGradeStatus"></span>
             </div>
@@ -341,7 +341,7 @@
     </div>
 </div> 
 
-<div class="custom-alert-overlay" id="warningModal" style="display: none;">
+<div class="custom-alert-overlay u-hidden" id="warningModal">
     <div class="custom-alert-box">
         <div class="alert-icon">
             <i class="fas fa-exclamation-triangle"></i>
