@@ -242,7 +242,7 @@
                                                data-question-id="{{ q.id }}"
                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                         <span class="option-letter circle-mark">{{ opt.label }}</span>
-                                        <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                                        <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                                     </label>
                                 {% endfor %}
                             </div>
@@ -257,7 +257,7 @@
                                                 data-question-id="{{ q.id }}"
                                                 {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                             <span class="option-letter box-mark">{{ opt.label }}</span>
-                                            <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" style="display:block;max-width:100%;height:auto;margin-top:4px">{% endif %}</span>
+                                            <span class="opt-text">{% if not opt.image_replaces_text or not opt.image %}{{ opt.text }}{% endif %}{% if opt.image %}<img src="{{ opt.image }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="opt-text__img">{% endif %}</span>
                                         </label>
                                     {% endfor %}
                                 </div>
@@ -330,7 +330,7 @@
                     </button>
 
                     {# HƏMIŞƏ göstər - test və yazılı hər ikisi üçün #}
-                    <button style="display:none" type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary">
+                    <button type="button" id="save-draft-btn" class="nav-btn btn-outline-secondary u-hidden">
                         <i class="fas fa-save"></i> {% trans "action_save_as_draft" context "exams.template.take_exam" %}
                     </button>
                 </div>
@@ -398,57 +398,57 @@
     <script src="{% static 'exams/js/paint_answer.js' %}"></script>
     {% if exam_supervision_enabled %}
     {{ supervision.config|json_script:"supervision-config-data" }}
-    <script nonce="{{ request.csp_nonce }}">
-    window.SUPERVISION_ACK_I18N = {
-        title: "{% filter escapejs %}{% trans 'supervision_ack_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        desc: "{% filter escapejs %}{% trans 'supervision_ack_desc' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleFullscreen: "{% filter escapejs %}{% trans 'supervision_ack_rule_fullscreen' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleFullscreenUnavailable: "{% filter escapejs %}{% trans 'supervision_ack_rule_fullscreen_unavailable' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleTab: "{% filter escapejs %}{% trans 'supervision_ack_rule_tab' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleCopy: "{% filter escapejs %}{% trans 'supervision_ack_rule_copy' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleRightClick: "{% filter escapejs %}{% trans 'supervision_ack_rule_right_click' context 'exams.template.take_exam' %}{% endfilter %}",
-        ruleKeyboard: "{% filter escapejs %}{% trans 'supervision_ack_rule_keyboard' context 'exams.template.take_exam' %}{% endfilter %}",
-        maxViolation: "{% filter escapejs %}{% trans 'supervision_ack_max_violation' context 'exams.template.take_exam' %}{% endfilter %}",
-        btnText: "{% filter escapejs %}{% trans 'supervision_ack_btn' context 'exams.template.take_exam' %}{% endfilter %}",
-        badgeActive: "{% filter escapejs %}{% trans 'supervision_badge_active' context 'exams.template.take_exam' %}{% endfilter %}",
-        warningTitle: "{% filter escapejs %}{% trans 'supervision_warning_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        warningMsg: "{% filter escapejs %}{% trans 'supervision_warning_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        warningTimeout: "{% filter escapejs %}{% trans 'supervision_warning_timeout' context 'exams.template.take_exam' %}{% endfilter %}",
-        warningViolation: "{% filter escapejs %}{% trans 'supervision_warning_violation' context 'exams.template.take_exam' %}{% endfilter %}",
-        warningReturn: "{% filter escapejs %}{% trans 'supervision_warning_return' context 'exams.template.take_exam' %}{% endfilter %}",
-        lockedTitle: "{% filter escapejs %}{% trans 'supervision_locked_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        lockedMsg: "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        lockedWait: "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
-        lockedWaiting: "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
-        teacherLockTitle: "{% filter escapejs %}{% trans 'Müəllim tərəfindən müvəqqəti bloklandınız' %}{% endfilter %}",
-        teacherLockMsg: "{% filter escapejs %}{% trans 'Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.' %}{% endfilter %}",
-        teacherLockWaiting: "{% filter escapejs %}{% trans 'Müəllim imtahanı bərpa edənə qədər gözləyin.' %}{% endfilter %}",
-        trialViolationTitle: "{% filter escapejs %}{% trans 'supervision_trial_violation_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        trialViolationMsg: "{% filter escapejs %}{% trans 'supervision_trial_violation_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        thresholdTitle: "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        thresholdMsg: "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        resumeTitle: "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
-        resumeMsg: "{% filter escapejs %}{% trans 'supervision_resume_msg' context 'exams.template.take_exam' %}{% endfilter %}",
-        resumeBtn: "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}",
-        resumeCountdownLabel: "{% filter escapejs %}{% trans 'Bərpa etməyə qalan vaxt' %}{% endfilter %}",
-        lockedCountdownLabel: "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
-    };
-    </script>
-    <script nonce="{{ request.csp_nonce }}">
-    // Where to send the student when a teacher stops / auto-finishes the attempt.
-    window.SUPERVISION_RESULT_URL = "{% url 'exams:exam_result' exam.slug attempt.id %}";
-    window.EXAM_SUPERVISION_INIT_CONFIG = {
-        config: JSON.parse(document.getElementById("supervision-config-data").textContent),
-        supervised: {{ supervision.supervised|yesno:"true,false" }},
-        attemptId: {{ attempt.id }},
-        csrfToken: "{{ csrf_token }}",
-        logEndpoint: "{% url 'exams:supervision_log_incident' attempt.id %}",
-        statusEndpoint: "{% url 'exams:supervision_status_api' attempt.id %}",
-        violationCount: {{ supervision.violation_count|default:"0" }},
-        maxViolations: {{ supervision.max_violations|default:"3" }},
-        supervisionStatus: "{{ supervision.supervision_status|default:'active' }}"
-    };
-    </script>
+    {% comment %}Nəzarət (supervision) konfiqi/i18n-i inline nonce skriptdən xarici
+    fayla çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır): i18n JSON data-adası
+    (#supervision-ack-i18n) + skalyar/URL dəyərlər #supervision-bootstrap data-* atributlarında;
+    `take_exam_supervision_bootstrap.js` KLASSİK skriptdir — deferred modul oxumazdan
+    əvvəl eyni qloballları (SUPERVISION_ACK_I18N, SUPERVISION_RESULT_URL,
+    EXAM_SUPERVISION_INIT_CONFIG) qurur.{% endcomment %}
+    <script id="supervision-ack-i18n" type="application/json">{
+        "title": "{% filter escapejs %}{% trans 'supervision_ack_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "desc": "{% filter escapejs %}{% trans 'supervision_ack_desc' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleFullscreen": "{% filter escapejs %}{% trans 'supervision_ack_rule_fullscreen' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleFullscreenUnavailable": "{% filter escapejs %}{% trans 'supervision_ack_rule_fullscreen_unavailable' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleTab": "{% filter escapejs %}{% trans 'supervision_ack_rule_tab' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleCopy": "{% filter escapejs %}{% trans 'supervision_ack_rule_copy' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleRightClick": "{% filter escapejs %}{% trans 'supervision_ack_rule_right_click' context 'exams.template.take_exam' %}{% endfilter %}",
+        "ruleKeyboard": "{% filter escapejs %}{% trans 'supervision_ack_rule_keyboard' context 'exams.template.take_exam' %}{% endfilter %}",
+        "maxViolation": "{% filter escapejs %}{% trans 'supervision_ack_max_violation' context 'exams.template.take_exam' %}{% endfilter %}",
+        "btnText": "{% filter escapejs %}{% trans 'supervision_ack_btn' context 'exams.template.take_exam' %}{% endfilter %}",
+        "badgeActive": "{% filter escapejs %}{% trans 'supervision_badge_active' context 'exams.template.take_exam' %}{% endfilter %}",
+        "warningTitle": "{% filter escapejs %}{% trans 'supervision_warning_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "warningMsg": "{% filter escapejs %}{% trans 'supervision_warning_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        "warningTimeout": "{% filter escapejs %}{% trans 'supervision_warning_timeout' context 'exams.template.take_exam' %}{% endfilter %}",
+        "warningViolation": "{% filter escapejs %}{% trans 'supervision_warning_violation' context 'exams.template.take_exam' %}{% endfilter %}",
+        "warningReturn": "{% filter escapejs %}{% trans 'supervision_warning_return' context 'exams.template.take_exam' %}{% endfilter %}",
+        "lockedTitle": "{% filter escapejs %}{% trans 'supervision_locked_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "lockedMsg": "{% filter escapejs %}{% trans 'supervision_locked_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        "lockedWait": "{% filter escapejs %}{% trans 'supervision_locked_wait' context 'exams.template.take_exam' %}{% endfilter %}",
+        "lockedWaiting": "{% filter escapejs %}{% trans 'supervision_locked_waiting' context 'exams.template.take_exam' %}{% endfilter %}",
+        "teacherLockTitle": "{% filter escapejs %}{% trans 'Müəllim tərəfindən müvəqqəti bloklandınız' %}{% endfilter %}",
+        "teacherLockMsg": "{% filter escapejs %}{% trans 'Müəllim imtahanınızı müvəqqəti blokladı. Ekranınız kilidlənib.' %}{% endfilter %}",
+        "teacherLockWaiting": "{% filter escapejs %}{% trans 'Müəllim imtahanı bərpa edənə qədər gözləyin.' %}{% endfilter %}",
+        "trialViolationTitle": "{% filter escapejs %}{% trans 'supervision_trial_violation_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "trialViolationMsg": "{% filter escapejs %}{% trans 'supervision_trial_violation_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        "thresholdTitle": "{% filter escapejs %}{% trans 'supervision_threshold_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "thresholdMsg": "{% filter escapejs %}{% trans 'supervision_threshold_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        "resumeTitle": "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
+        "resumeMsg": "{% filter escapejs %}{% trans 'supervision_resume_msg' context 'exams.template.take_exam' %}{% endfilter %}",
+        "resumeBtn": "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}",
+        "resumeCountdownLabel": "{% filter escapejs %}{% trans 'Bərpa etməyə qalan vaxt' %}{% endfilter %}",
+        "lockedCountdownLabel": "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
+    }</script>
+    <div id="supervision-bootstrap" hidden
+         data-result-url="{% url 'exams:exam_result' exam.slug attempt.id %}"
+         data-supervised="{{ supervision.supervised|yesno:'1,0' }}"
+         data-attempt-id="{{ attempt.id }}"
+         data-csrf-token="{{ csrf_token }}"
+         data-log-endpoint="{% url 'exams:supervision_log_incident' attempt.id %}"
+         data-status-endpoint="{% url 'exams:supervision_status_api' attempt.id %}"
+         data-violation-count="{{ supervision.violation_count|default:'0' }}"
+         data-max-violations="{{ supervision.max_violations|default:'3' }}"
+         data-supervision-status="{{ supervision.supervision_status|default:'active' }}"></div>
+    <script src="{% static 'exams/js/exam_supervision/take_exam_supervision_bootstrap.js' %}?v=20260921-1"></script>
     <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20260914-w4r3"></script>
     {% endif %}
 {% endblock %}

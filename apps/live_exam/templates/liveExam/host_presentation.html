@@ -137,96 +137,74 @@
     </div>
 
     {{ session_settings|json_script:"hostPresentationSessionSettings" }}
-    <script nonce="{{ request.csp_nonce }}">
-    const CONFIG = {
-        pin: "{{ session.pin }}",
-        csrf: "{{ csrf_token }}",
-        maxQuestions: {{ exam_total_questions }},
-        examTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
-        entryUrl: "{{ entry_url|escapejs }}",
-        qrUrl: "{{ qr_url|escapejs }}",
-        sessionSettings: JSON.parse(document.getElementById("hostPresentationSessionSettings").textContent),
-        sessionLocked: {{ session_locked|yesno:"true,false" }},
-        maxParticipantsCap: {{ max_participants_cap }},
-        languageCode: "{{ LANGUAGE_CODE|default:'az'|slice:':2'|lower }}",
-        presentationOnly: true,
-        controlsEnabled: {{ presentation_controls|yesno:"true,false" }},
-        autoFullscreen: {{ auto_fullscreen|default:"0" }},
-        urls: {
-            start: "{% url 'liveExam:start_game' session.pin %}",
-            state: "{% url 'liveExam:state_json' session.pin %}",
-            reveal: "{% url 'liveExam:host_reveal' session.pin %}",
-            next: "{% url 'liveExam:next_question' session.pin %}",
-            skipIntro: "{% url 'liveExam:host_skip_question_intro' session.pin %}",
-            finish: "{% url 'liveExam:finish_game' session.pin %}",
-            present: "{% url 'liveExam:host_presentation' session.pin %}",
-            lock: "{% url 'liveExam:host_toggle_lock' session.pin %}",
-            settings: "{% url 'liveExam:host_update_settings' session.pin %}",
-            removePlayer: "{% url 'liveExam:host_remove_player' session.pin %}"
+    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `host_lobby_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    <script id="hostConfig" type="application/json">{
+        "pin": "{{ session.pin|escapejs }}",
+        "csrf": "{{ csrf_token }}",
+        "maxQuestions": {{ exam_total_questions }},
+        "examTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        "entryUrl": "{{ entry_url|escapejs }}",
+        "qrUrl": "{{ qr_url|escapejs }}",
+        "sessionSettingsId": "hostPresentationSessionSettings",
+        "sessionLocked": {{ session_locked|yesno:"true,false" }},
+        "maxParticipantsCap": {{ max_participants_cap }},
+        "languageCode": "{{ LANGUAGE_CODE|default:'az'|slice:':2'|lower }}",
+        "presentationOnly": true,
+        "controlsEnabled": {{ presentation_controls|yesno:"true,false" }},
+        "autoFullscreen": {{ auto_fullscreen|default:"0" }},
+        "urls": {
+            "start": "{% url 'liveExam:start_game' session.pin %}",
+            "state": "{% url 'liveExam:state_json' session.pin %}",
+            "reveal": "{% url 'liveExam:host_reveal' session.pin %}",
+            "next": "{% url 'liveExam:next_question' session.pin %}",
+            "skipIntro": "{% url 'liveExam:host_skip_question_intro' session.pin %}",
+            "finish": "{% url 'liveExam:finish_game' session.pin %}",
+            "present": "{% url 'liveExam:host_presentation' session.pin %}",
+            "lock": "{% url 'liveExam:host_toggle_lock' session.pin %}",
+            "settings": "{% url 'liveExam:host_update_settings' session.pin %}",
+            "removePlayer": "{% url 'liveExam:host_remove_player' session.pin %}"
         }
-    };
-    window.LIVE_EXAM_HOST_I18N = {
-        debugLabel: "{% trans 'debug_label' context 'live_exam.host_lobby.js' %}",
-        stateLobby: "{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}",
-        stateQuestion: "{% trans 'state_question' context 'live_exam.host_lobby.js' %}",
-        stateReveal: "{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}",
-        stateFinished: "{% trans 'state_finished' context 'live_exam.host_lobby.js' %}",
-        stateLog: "{% trans 'state_log' context 'live_exam.host_lobby.js' %}",
-        questionMeta: "{% trans 'question_meta' context 'live_exam.host_lobby.js' %}",
-        noAnswersYet: "{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}",
-        pointsSuffix: "{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}",
-        hostReady: "{% trans 'host_ready' context 'live_exam.host_lobby.js' %}",
-        wsLobbyOpen: "{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}",
-        wsLobbyClosed: "{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}",
-        wsPlayOpen: "{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}",
-        wsPlayClosed: "{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}",
-        allAnsweredAutoReveal: "{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}",
-        lobbyMessageError: "{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}",
-        playMessageError: "{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}",
-        postError: "{% trans 'post_error' context 'live_exam.host_lobby.js' %}",
-        introTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
-        introSubtitle: "Get ready for the next round",
-        countdownLabel: "Starting now",
-        questionStageLabel: "Question",
-        answersLabel: "Answers live",
-        revealLabel: "Answer reveal",
-        scoreboardTitle: "Scoreboard",
-        scoreboardSubtitle: "Top 5 players",
-        correctAnswerLabel: "Correct answer",
-        answersSingular: "Answer",
-        answersPlural: "Answers",
-        playersAnswered: "{answered} answered",
-        secondsLabel: "seconds",
-        countdownNumberLabel: "Round starts in {value}",
-        scoreboardMovedUp: "Moved up {count}",
-        scoreboardNewEntry: "New in top 5",
-        distributionNoAnswers: "No answers were submitted this round.",
-        revealCorrectTag: "Correct",
-        revealWrongTag: "Incorrect"
-    };
-
-    function currentLobbyQrUrl() {
-        const settings = window.LiveHostLobbyController?.getState?.().settings || CONFIG.sessionSettings || {};
-        const mode = settings.two_step_join === false ? "direct" : "pin";
-        return `${CONFIG.qrUrl}${CONFIG.qrUrl.includes("?") ? "&" : "?"}mode=${mode}`;
-    }
-
-    function toggleQR(show) {
-        const modal = document.getElementById("qrModal");
-        const image = document.getElementById("qrModalImage");
-        if (image) {
-            image.src = currentLobbyQrUrl();
-        }
-        modal.style.display = show ? "flex" : "none";
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const qrModal = document.getElementById("qrModal");
-        if (qrModal) {
-            qrModal.addEventListener("click", function () { toggleQR(false); });
-        }
-    });
-    </script>
+    }</script>
+    <script id="hostI18n" type="application/json">{
+        "debugLabel": "{% filter escapejs %}{% trans 'debug_label' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "stateLobby": "{% filter escapejs %}{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "stateQuestion": "{% filter escapejs %}{% trans 'state_question' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "stateReveal": "{% filter escapejs %}{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "stateFinished": "{% filter escapejs %}{% trans 'state_finished' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "stateLog": "{% filter escapejs %}{% trans 'state_log' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "questionMeta": "{% filter escapejs %}{% trans 'question_meta' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "noAnswersYet": "{% filter escapejs %}{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "pointsSuffix": "{% filter escapejs %}{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "hostReady": "{% filter escapejs %}{% trans 'host_ready' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "wsLobbyOpen": "{% filter escapejs %}{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "wsLobbyClosed": "{% filter escapejs %}{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "wsPlayOpen": "{% filter escapejs %}{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "wsPlayClosed": "{% filter escapejs %}{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "allAnsweredAutoReveal": "{% filter escapejs %}{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "lobbyMessageError": "{% filter escapejs %}{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "playMessageError": "{% filter escapejs %}{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "postError": "{% filter escapejs %}{% trans 'post_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
+        "introTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        "introSubtitle": "Get ready for the next round",
+        "countdownLabel": "Starting now",
+        "questionStageLabel": "Question",
+        "answersLabel": "Answers live",
+        "revealLabel": "Answer reveal",
+        "scoreboardTitle": "Scoreboard",
+        "scoreboardSubtitle": "Top 5 players",
+        "correctAnswerLabel": "Correct answer",
+        "answersSingular": "Answer",
+        "answersPlural": "Answers",
+        "playersAnswered": "{answered} answered",
+        "secondsLabel": "seconds",
+        "countdownNumberLabel": "Round starts in {value}",
+        "scoreboardMovedUp": "Moved up {count}",
+        "scoreboardNewEntry": "New in top 5",
+        "distributionNoAnswers": "No answers were submitted this round.",
+        "revealCorrectTag": "Correct",
+        "revealWrongTag": "Incorrect"
+    }</script>
+    <script src="{% static 'js/host_lobby_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-fallback-20260408"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-fallback-20260408"></script>
     <script type="module" src="{% static 'js/host_lobby/host_lobby.entry.js' %}?v=live-option-shapes-20260520"></script>
