@@ -22,7 +22,8 @@ from django.urls import reverse
 
 from core.context_processors import feature_flags
 
-CLARITY_MARKER = "https://www.clarity.ms/tag/"
+# 2026-09-21: yükləyici xarici fayldadır — markup-da teq URL-i yox, skript faylı görünür.
+CLARITY_MARKER = "js/microsoft_clarity.js"
 PROJECT_ID = "codextestclarity"
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
