@@ -9,11 +9,11 @@ Notes:
  - Block names match base.html (title/extraHead/extraCss/content/extraJs) so
    templates can switch between the two bases without changes.
  - Messages render as lightweight alerts and auto-hide after 3 seconds.
- - The inline script below fixes the bfcache stale-CSRF-token problem: when
+ - `static/js/base_auth.js` fixes the bfcache stale-CSRF-token problem: when
    the browser restores the page from back/forward cache, the form still
    holds the OLD csrfmiddlewaretoken while a new CSRF cookie may already be
    set -> POST fails with 403.  Reloading on `pageshow(persisted)` re-renders
-   the form with a fresh token.  CSP: carries the per-request nonce.
+   the form with a fresh token.  CSP: external file (no inline script).
 {% endcomment %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'az' }}">
@@ -46,15 +46,8 @@ Notes:
 
     {% block extraCss %}{% endblock %}
 
-    <script nonce="{{ request.csp_nonce }}">
-        // bfcache fix: re-render the page (and its CSRF token) when restored
-        // from the back/forward cache, otherwise the stale token causes 403.
-        window.addEventListener("pageshow", function (e) {
-            if (e.persisted) {
-                window.location.reload();
-            }
-        });
-    </script>
+    {# bfcache düzəlişi (pageshow → reload) — xarici fayl, eyni mövqe (defer-siz). #}
+    <script src="{% static 'js/base_auth.js' %}?v=20260921-1"></script>
 </head>
 
 <body class="auth-body">

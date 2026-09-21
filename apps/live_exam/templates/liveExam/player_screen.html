@@ -71,70 +71,69 @@
     </div>
 
     {{ session_settings|json_script:"playerSessionSettings" }}
-    <script nonce="{{ request.csp_nonce }}">
-        window.LIVE_EXAM_PLAYER_BOOTSTRAP = {
-            pin: "{{ session.pin }}",
-            csrf: "{{ csrf_token }}",
-            quizTitle: "{{ session.exam.title|default:'Quiz'|escapejs }}",
-            stateUrl: "{% url 'liveExam:state_json' session.pin %}",
-            answerUrl: "{% url 'liveExam:answer_submit' session.pin %}",
-            sessionSettings: JSON.parse(document.getElementById("playerSessionSettings").textContent),
-            waitingMessages: [
-                "Easy does it!",
-                "Nice move!",
-                "Let's see how you did!",
-                "Good call!",
-                "Locked in!"
-            ],
-            player: {
-                id: {{ player.id }},
-                nickname: "{{ player.nickname|escapejs }}",
-                avatar_key: "{{ player.avatar_key|escapejs }}",
-                accessory_key: "{{ player.accessory_key|escapejs }}",
-                score: {{ player.score|default:0 }}
-            }
-        };
-        window.LIVE_EXAM_PLAYER_I18N = {
-            connectionOnline: "Online",
-            connectionOffline: "Offline",
-            connectionConnecting: "Connecting",
-            questionLabel: "Question",
-            waitingForHost: "Waiting for the host to start the next round.",
-            getReadyTitle: "Get ready",
-            getReadyBody: "Loading the first question...",
-            introHint: "Read the question. Answers are about to appear.",
-            introHintMainScreen: "Look at the main screen. Answers unlock soon.",
-            introUnlocking: "Answers unlock in",
-            questionPrompt: "Pick your answer before the timer runs out.",
-            questionHiddenBody: "The question is on the main screen.",
-            optionHiddenBody: "Match this answer on the main screen.",
-            multiPrompt: "Choose up to {max} answers.",
-            submitAnswer: "Submit answer",
-            answerSending: "Locking in your answer...",
-            answerLocked: "Answer locked in",
-            answerTimeout: "Time is up. Waiting for the round to close.",
-            waitingBody: "Hold tight while the rest of the class answers.",
-            waitingProgress: "{answered} of {total} answered",
-            resultCorrect: "Correct",
-            resultIncorrect: "Incorrect",
-            resultNoAnswer: "No answer submitted",
-            resultEarned: "Earned",
-            resultAnswered: "You answered",
-            resultTotal: "Total score",
-            resultNoRank: "No rank",
-            scoreboardTitle: "Leaderboard",
-            scoreboardSubtitle: "Updated totals after this round.",
-            scoreboardTopFive: "Top 5 players",
-            scoreboardMovementUp: "Moved up",
-            scoreboardMovementNew: "New in top 5",
-            scoreboardRank: "Rank",
-            scoreboardScore: "Total",
-            finalTitle: "Final results",
-            finalBody: "The live exam is complete.",
-            leaderboardTitle: "Top players",
-            pointsSuffix: "pts"
-        };
-    </script>
+    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `player_screen_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    <script id="playerBootstrap" type="application/json">{
+        "pin": "{{ session.pin|escapejs }}",
+        "csrf": "{{ csrf_token }}",
+        "quizTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
+        "stateUrl": "{% url 'liveExam:state_json' session.pin %}",
+        "answerUrl": "{% url 'liveExam:answer_submit' session.pin %}",
+        "waitingMessages": [
+            "Easy does it!",
+            "Nice move!",
+            "Let's see how you did!",
+            "Good call!",
+            "Locked in!"
+        ],
+        "player": {
+            "id": {{ player.id }},
+            "nickname": "{{ player.nickname|escapejs }}",
+            "avatar_key": "{{ player.avatar_key|escapejs }}",
+            "accessory_key": "{{ player.accessory_key|escapejs }}",
+            "score": {{ player.score|default:0 }}
+        }
+    }</script>
+    <script id="playerI18n" type="application/json">{
+        "connectionOnline": "Online",
+        "connectionOffline": "Offline",
+        "connectionConnecting": "Connecting",
+        "questionLabel": "Question",
+        "waitingForHost": "Waiting for the host to start the next round.",
+        "getReadyTitle": "Get ready",
+        "getReadyBody": "Loading the first question...",
+        "introHint": "Read the question. Answers are about to appear.",
+        "introHintMainScreen": "Look at the main screen. Answers unlock soon.",
+        "introUnlocking": "Answers unlock in",
+        "questionPrompt": "Pick your answer before the timer runs out.",
+        "questionHiddenBody": "The question is on the main screen.",
+        "optionHiddenBody": "Match this answer on the main screen.",
+        "multiPrompt": "Choose up to {max} answers.",
+        "submitAnswer": "Submit answer",
+        "answerSending": "Locking in your answer...",
+        "answerLocked": "Answer locked in",
+        "answerTimeout": "Time is up. Waiting for the round to close.",
+        "waitingBody": "Hold tight while the rest of the class answers.",
+        "waitingProgress": "{answered} of {total} answered",
+        "resultCorrect": "Correct",
+        "resultIncorrect": "Incorrect",
+        "resultNoAnswer": "No answer submitted",
+        "resultEarned": "Earned",
+        "resultAnswered": "You answered",
+        "resultTotal": "Total score",
+        "resultNoRank": "No rank",
+        "scoreboardTitle": "Leaderboard",
+        "scoreboardSubtitle": "Updated totals after this round.",
+        "scoreboardTopFive": "Top 5 players",
+        "scoreboardMovementUp": "Moved up",
+        "scoreboardMovementNew": "New in top 5",
+        "scoreboardRank": "Rank",
+        "scoreboardScore": "Total",
+        "finalTitle": "Final results",
+        "finalBody": "The live exam is complete.",
+        "leaderboardTitle": "Top players",
+        "pointsSuffix": "pts"
+    }</script>
+    <script src="{% static 'js/player_screen_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
     <script type="module" src="{% static 'js/player/player.entry.js' %}?v=live-score-zero-fix-20260611"></script>
