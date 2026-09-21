@@ -5332,7 +5332,8 @@ class SupervisionTeacherApiTest(TestCase):
         self.assertEqual(response.status_code, 200)
         # Refaktor 2026-07-02: monolit exam_supervision.js → exam_supervision/ paketi.
         self.assertContains(response, "exam_supervision.entry.js")
-        self.assertContains(response, "supervised: false")
+        # 2026-09-21: nəzarət konfiqi inline skriptdən data-atributa keçdi.
+        self.assertContains(response, 'data-supervised="0"')
 
     @override_settings(EXAM_SUPERVISION_ENABLED=False)
     def test_student_exam_omits_supervision_listener_when_feature_disabled(self):
