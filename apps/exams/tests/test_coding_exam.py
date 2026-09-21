@@ -441,8 +441,9 @@ class CodingExamSubmissionApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "examTimeWarningModal")
         self.assertContains(response, "exam_time_warning.js")
-        self.assertContains(response, f'examId: "{self.exam.id}"')
-        self.assertContains(response, f'attemptId: "{self.attempt.id}"')
+        # 2026-09-21: konfiq inline skriptdən `#coding-exam-config` JSON data-adasına keçdi.
+        self.assertContains(response, f'"examId": "{self.exam.id}"')
+        self.assertContains(response, f'"attemptId": "{self.attempt.id}"')
 
     def test_run_uses_active_python_file_and_custom_stdin(self):
         self.coding_question.enable_code_execution = True
