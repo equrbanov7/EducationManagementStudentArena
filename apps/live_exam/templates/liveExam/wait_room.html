@@ -170,38 +170,36 @@
     {{ session_settings|json_script:"waitRoomSessionSettings" }}
 
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}">
-        window.LiveWaitRoomConfig = {
-            csrf: "{{ csrf_token }}",
-            wsPath: `/ws/live/{{ session.pin }}/lobby/`,
-            stateUrl: "{% url 'liveExam:state_json' session.pin %}",
-            profileUrl: "{% url 'liveExam:wait_room_profile' session.pin %}",
-            reactionUrl: "{% url 'liveExam:wait_room_reaction' session.pin %}",
-            playerScreenUrl: "{{ player_screen_url }}",
-            joinPageUrl: "{% url 'liveExam:join_page' session.pin %}",
-            myPlayerId: {{ my_player_id }},
-            myPlayer: JSON.parse(document.getElementById("waitRoomMyPlayer").textContent),
-            sessionSettings: JSON.parse(document.getElementById("waitRoomSessionSettings").textContent)
-        };
-        window.LIVE_EXAM_WAIT_ROOM_I18N = {
-            defaultPlayer: "{% trans 'default_player' context 'live_exam.wait_room.js' %}",
-            waitingForHost: "{% trans 'status_waiting_host' context 'live_exam.wait_room.js' %}",
-            playersEmpty: "{% trans 'players_empty' context 'live_exam.wait_room.js' %}",
-            playersReady: "{% trans 'players_ready' context 'live_exam.wait_room.js' %}",
-            nicknameRequired: "{% trans 'nickname_required' context 'live_exam.wait_room.js' %}",
-            nicknameTooLong: "{% trans 'nickname_too_long' context 'live_exam.wait_room.js' %}",
-            saving: "{% trans 'saving' context 'live_exam.wait_room.js' %}",
-            saved: "{% trans 'saved' context 'live_exam.wait_room.js' %}",
-            saveFailed: "{% trans 'save_failed' context 'live_exam.wait_room.js' %}",
-            reactionFailed: "{% trans 'reaction_failed' context 'live_exam.wait_room.js' %}",
-            wsConnecting: "{% trans 'ws_connecting' context 'live_exam.wait_room.js' %}",
-            wsOnline: "{% trans 'ws_online' context 'live_exam.wait_room.js' %}",
-            wsStarting: "{% trans 'ws_starting' context 'live_exam.wait_room.js' %}",
-            wsDisconnected: "{% trans 'ws_disconnected' context 'live_exam.wait_room.js' %}",
-            wsError: "{% trans 'ws_error' context 'live_exam.wait_room.js' %}",
-            removedFromLobby: "You were removed from the lobby."
-        };
-    </script>
+    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `wait_room_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    <script id="waitRoomConfig" type="application/json">{
+        "csrf": "{{ csrf_token }}",
+        "wsPath": "/ws/live/{{ session.pin|escapejs }}/lobby/",
+        "stateUrl": "{% url 'liveExam:state_json' session.pin %}",
+        "profileUrl": "{% url 'liveExam:wait_room_profile' session.pin %}",
+        "reactionUrl": "{% url 'liveExam:wait_room_reaction' session.pin %}",
+        "playerScreenUrl": "{{ player_screen_url|escapejs }}",
+        "joinPageUrl": "{% url 'liveExam:join_page' session.pin %}",
+        "myPlayerId": {{ my_player_id }}
+    }</script>
+    <script id="waitRoomI18n" type="application/json">{
+        "defaultPlayer": "{% filter escapejs %}{% trans 'default_player' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "waitingForHost": "{% filter escapejs %}{% trans 'status_waiting_host' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "playersEmpty": "{% filter escapejs %}{% trans 'players_empty' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "playersReady": "{% filter escapejs %}{% trans 'players_ready' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "nicknameRequired": "{% filter escapejs %}{% trans 'nickname_required' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "nicknameTooLong": "{% filter escapejs %}{% trans 'nickname_too_long' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "saving": "{% filter escapejs %}{% trans 'saving' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "saved": "{% filter escapejs %}{% trans 'saved' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "saveFailed": "{% filter escapejs %}{% trans 'save_failed' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "reactionFailed": "{% filter escapejs %}{% trans 'reaction_failed' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "wsConnecting": "{% filter escapejs %}{% trans 'ws_connecting' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "wsOnline": "{% filter escapejs %}{% trans 'ws_online' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "wsStarting": "{% filter escapejs %}{% trans 'ws_starting' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "wsDisconnected": "{% filter escapejs %}{% trans 'ws_disconnected' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "wsError": "{% filter escapejs %}{% trans 'ws_error' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "removedFromLobby": "You were removed from the lobby."
+    }</script>
+    <script src="{% static 'js/wait_room_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
     <script src="{% static 'js/wait_room_nickname_editor.js' %}"></script>

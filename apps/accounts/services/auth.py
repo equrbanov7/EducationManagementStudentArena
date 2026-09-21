@@ -13,7 +13,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
 from core.mailing import system_reply_to
@@ -71,43 +72,48 @@ def _normalize_email(email: str) -> str:
     return EmailOTP.normalize_email(email)
 
 
+#: E-poçt mətnləri — hamısı tərcümə kataloqundan (sahib 2026-09-21: «məktub iki
+#: dildə qarışıq gəlir»). Əvvəllər mövzu/başlıq/«… üçün» ifadəsi Python-da sabit
+#: azərbaycanca idi, şablonun qalan sətirləri isə aktiv dilə (EN) tərcümə olunurdu.
+_MAIL_CTX = "accounts.email_otp"
+
+
 def _otp_subject_for_purpose(purpose: str) -> str:
-    # Brand-driven so OTP emails carry the configured institution name
-    # (Qərbi Kaspi Universiteti) instead of a hard-coded product name.
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    template = {
+        EmailOTP.Purpose.SIGNUP: pgettext_lazy(_MAIL_CTX, "%(brand)s email təsdiqi"),
+        EmailOTP.Purpose.LOGIN: pgettext_lazy(_MAIL_CTX, "%(brand)s giriş OTP kodu"),
+        EmailOTP.Purpose.PASSWORD_RESET: pgettext_lazy(_MAIL_CTX, "%(brand)s şifrə sıfırlama OTP kodu"),
+        EmailOTP.Purpose.ADMIN_LOGIN: pgettext_lazy(_MAIL_CTX, "%(brand)s admin giriş OTP kodu"),
+    }.get(purpose, pgettext_lazy(_MAIL_CTX, "%(brand)s OTP kodu"))
+    return str(template) % {"brand": brand}
+
+
+def _otp_headline_for_purpose(purpose: str):
     return {
-        EmailOTP.Purpose.SIGNUP: f"{brand} email təsdiqi",
-        EmailOTP.Purpose.LOGIN: f"{brand} giriş OTP kodu",
-        EmailOTP.Purpose.PASSWORD_RESET: f"{brand} şifrə sıfırlama OTP kodu",
-        EmailOTP.Purpose.ADMIN_LOGIN: f"{brand} admin giriş OTP kodu",
-    }.get(purpose, f"{brand} OTP kodu")
+        EmailOTP.Purpose.SIGNUP: pgettext_lazy(_MAIL_CTX, "Email təsdiqi"),
+        EmailOTP.Purpose.LOGIN: pgettext_lazy(_MAIL_CTX, "Giriş təsdiqi"),
+        EmailOTP.Purpose.PASSWORD_RESET: pgettext_lazy(_MAIL_CTX, "Şifrə sıfırlama təsdiqi"),
+        EmailOTP.Purpose.ADMIN_LOGIN: pgettext_lazy(_MAIL_CTX, "Admin giriş təsdiqi"),
+    }.get(purpose, pgettext_lazy(_MAIL_CTX, "OTP təsdiqi"))
 
 
-def _otp_headline_for_purpose(purpose: str) -> str:
+def _otp_intro_for_purpose(purpose: str):
     return {
-        EmailOTP.Purpose.SIGNUP: "Email təsdiqi",
-        EmailOTP.Purpose.LOGIN: "Giriş təsdiqi",
-        EmailOTP.Purpose.PASSWORD_RESET: "Şifrə sıfırlama təsdiqi",
-        EmailOTP.Purpose.ADMIN_LOGIN: "Admin giriş təsdiqi",
-    }.get(purpose, "OTP təsdiqi")
+        EmailOTP.Purpose.SIGNUP: pgettext_lazy(_MAIL_CTX, "hesabınızı aktivləşdirmək"),
+        EmailOTP.Purpose.LOGIN: pgettext_lazy(_MAIL_CTX, "girişinizi təsdiqləmək"),
+        EmailOTP.Purpose.PASSWORD_RESET: pgettext_lazy(_MAIL_CTX, "şifrəni sıfırlama əməliyyatını təsdiqləmək"),
+        EmailOTP.Purpose.ADMIN_LOGIN: pgettext_lazy(_MAIL_CTX, "admin girişinizi təsdiqləmək"),
+    }.get(purpose, pgettext_lazy(_MAIL_CTX, "əməliyyatı təsdiqləmək"))
 
 
-def _otp_intro_for_purpose(purpose: str) -> str:
+def _otp_cta_label_for_purpose(purpose: str):
     return {
-        EmailOTP.Purpose.SIGNUP: "hesabınızı aktivləşdirmək",
-        EmailOTP.Purpose.LOGIN: "girişinizi təsdiqləmək",
-        EmailOTP.Purpose.PASSWORD_RESET: "şifrəni sıfırlama əməliyyatını təsdiqləmək",
-        EmailOTP.Purpose.ADMIN_LOGIN: "admin girişinizi təsdiqləmək",
-    }.get(purpose, "əməliyyatı təsdiqləmək")
-
-
-def _otp_cta_label_for_purpose(purpose: str) -> str:
-    return {
-        EmailOTP.Purpose.SIGNUP: "Emaili təsdiqlə",
-        EmailOTP.Purpose.LOGIN: "Girişi təsdiqlə",
-        EmailOTP.Purpose.PASSWORD_RESET: "Şifrəni sıfırla",
-        EmailOTP.Purpose.ADMIN_LOGIN: "Admin girişi təsdiqlə",
-    }.get(purpose, "OTP-ni təsdiqlə")
+        EmailOTP.Purpose.SIGNUP: pgettext_lazy(_MAIL_CTX, "Emaili təsdiqlə"),
+        EmailOTP.Purpose.LOGIN: pgettext_lazy(_MAIL_CTX, "Girişi təsdiqlə"),
+        EmailOTP.Purpose.PASSWORD_RESET: pgettext_lazy(_MAIL_CTX, "Şifrəni sıfırla"),
+        EmailOTP.Purpose.ADMIN_LOGIN: pgettext_lazy(_MAIL_CTX, "Admin girişi təsdiqlə"),
+    }.get(purpose, pgettext_lazy(_MAIL_CTX, "OTP-ni təsdiqlə"))
 
 
 def _otp_template_prefix_for_purpose(purpose: str) -> str:
@@ -132,8 +138,6 @@ def _build_email_context(*, user, email: str, purpose: str, code: str, request=N
     if user is not None:
         recipient_name = getattr(user, "get_full_name", lambda: "")().strip() or getattr(user, "username", "")
 
-    from django.conf import settings
-
     return {
         # White-label brand for the email chrome; emails render without the
         # request context processors so it must be passed explicitly.
@@ -149,16 +153,22 @@ def _build_email_context(*, user, email: str, purpose: str, code: str, request=N
         "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
         "expires_at": expires_at,
         "purpose": purpose,
+        # Məktubun dili — sorğunun aktiv dili (bütün məktub BİR dildə render olunur).
+        "language": translation.get_language() or settings.LANGUAGE_CODE,
     }
 
 
 def _send_otp_message(*, email: str, purpose: str, context: dict) -> None:
     template_prefix = _otp_template_prefix_for_purpose(purpose)
-    text_body = render_to_string(f"{template_prefix}.txt", context)
-    html_body = render_to_string(f"{template_prefix}.html", context)
+    # Mövzu, başlıq və gövdə EYNİ dildə: fon ipində/başqa aktiv dildə çağırılsa
+    # belə context-dəki dil qalib gəlir (sahib 2026-09-21).
+    with translation.override(context.get("language") or settings.LANGUAGE_CODE):
+        subject = _otp_subject_for_purpose(purpose)
+        text_body = render_to_string(f"{template_prefix}.txt", context)
+        html_body = render_to_string(f"{template_prefix}.html", context)
 
     message = EmailMultiAlternatives(
-        subject=_otp_subject_for_purpose(purpose),
+        subject=subject,
         body=text_body,
         from_email=context.get("from_email"),
         to=[email],
@@ -251,8 +261,6 @@ def send_otp_email(
         request=request,
         expires_at=expires_at,
     )
-
-    from django.conf import settings
 
     context["from_email"] = settings.DEFAULT_FROM_EMAIL
 

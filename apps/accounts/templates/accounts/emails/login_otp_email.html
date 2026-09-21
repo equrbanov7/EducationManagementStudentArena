@@ -22,7 +22,7 @@
                 <p style="margin:0 0 16px;font-size:16px;line-height:1.7;">{% blocktrans with name=recipient_name action=otp_intro_action %}Salam <strong>{{ name }}</strong>, {{ action }} üçün aşağıdakı 6 rəqəmli OTP kodundan istifadə edin.{% endblocktrans %}</p>
 
                 <div style="margin:0 0 24px;padding:18px 20px;border:1px solid #99f6e4;border-radius:16px;background:#f0fdfa;text-align:center;">
-                  <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0f766e;margin-bottom:8px;">OTP kodu</div>
+                  <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#0f766e;margin-bottom:8px;">{% trans 'OTP kodu' %}</div>
                   <div style="font-size:36px;font-weight:800;letter-spacing:0.32em;color:#0f172a;">{{ code }}</div>
                 </div>
 

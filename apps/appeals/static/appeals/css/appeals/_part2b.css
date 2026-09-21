@@ -1,0 +1,204 @@
+/* [BÖLÜNMÜŞ 2026-09-21] `_part2.css`-dən (607 sətir, sətir 408–607) mexaniki
+   çıxarılıb — 2/2-ci hissə; qaydalar və sıra dəyişdirilməyib (SOFT_CAP 600).
+   YÜKLƏNMƏ SIRASI KASKADA görə saxlanılmalıdır: _part2.css → _part2b.css. */
+
+/* ── Yapışqan əməl paneli (yaratma: fixed; modal: sticky; bölmə: statik) ── */
+.appeal-create-form {
+    padding-bottom: 96px;
+}
+
+.appeal-sticky-actions {
+    position: sticky;
+    bottom: 12px;
+    z-index: 1030;
+    margin-top: var(--ems-sp-6);
+    padding: 10px 14px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--appeal-radius-lg);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.appeal-sticky-actions__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: var(--ems-sp-5);
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.appeal-sticky-actions--final .appeal-sticky-actions__inner {
+    justify-content: flex-end;
+}
+
+.appeal-sticky-actions__status {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-4);
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.appeal-sticky-actions__buttons {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-3);
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+.appeal-create-form > .appeal-sticky-actions {
+    position: fixed;
+    left: 50%;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(960px, calc(100vw - 32px));
+    margin-top: 0;
+}
+
+.appeal-embedded .appeal-sticky-actions {
+    position: static;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    width: auto;
+    margin-top: var(--ems-sp-6);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.appeal-modal .appeal-sticky-actions {
+    position: sticky;
+    left: auto;
+    bottom: 0;
+    transform: none;
+    width: auto;
+    z-index: 2;
+    margin-top: var(--ems-sp-6);
+    padding: 10px 14px;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--appeal-radius);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--ems-sh-card);
+    backdrop-filter: blur(10px);
+}
+
+.appeal-empty-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-warning-800);
+}
+
+.appeal-submit-hint {
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 320px;
+    min-width: min(320px, 100%);
+    max-width: min(640px, 100%);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ems-danger-strong);
+}
+
+.appeal-submit-hint::before {
+    content: "\f06a";
+    margin-right: 6px;
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free", sans-serif;
+    font-weight: 700;
+}
+
+.appeal-create-form [data-appeal-submit][aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.appeal-create-form [data-appeal-submit].is-ready {
+    opacity: 1;
+    cursor: pointer;
+}
+
+/* ── Bootstrap modal qabığı (detal / qərar / yeni müraciət / təsdiq) ─────── */
+.appeal-modal__dialog {
+    max-width: min(1120px, calc(100vw - 24px));
+}
+
+.appeal-modal__content {
+    overflow: hidden;
+    border: 1px solid var(--appeal-border);
+    border-radius: var(--appeal-radius-lg);
+    box-shadow: var(--ems-sh-dialog);
+}
+
+.appeal-modal__header {
+    align-items: flex-start;
+    gap: var(--ems-sp-5);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--appeal-border);
+    background: var(--appeal-surface);
+}
+
+.appeal-modal__header .modal-title {
+    font-size: var(--ems-fs-xl);
+    font-weight: 700;
+    color: var(--appeal-ink);
+}
+
+.appeal-modal__sub {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-base);
+    color: var(--appeal-muted);
+}
+
+.appeal-modal__body {
+    padding: 20px;
+    background: var(--ems-bg-subtle);
+}
+
+.appeal-modal__body--plain {
+    background: var(--appeal-surface);
+}
+
+.appeal-modal__text {
+    margin: 0;
+    line-height: 1.55;
+    color: var(--ems-neutral-700);
+}
+
+.appeal-modal__footer {
+    gap: var(--ems-sp-3);
+    padding: 12px 20px;
+    border-top: 1px solid var(--appeal-border);
+    background: var(--appeal-surface);
+}
+
+/* ── Skeleton (modal gövdəsi yüklənərkən) ─────────────────────────────────── */
+.appeal-skeleton {
+    display: grid;
+    gap: var(--ems-sp-5);
+}
+
+.appeal-skeleton__row {
+    height: 72px;
+    border-radius: var(--appeal-radius);
+    background: linear-gradient(90deg, var(--ems-neutral-100) 25%, var(--ems-neutral-200) 37%, var(--ems-neutral-100) 63%);
+    background-size: 400% 100%;
+    animation: appeal-shimmer 1.4s ease infinite;
+}
+
+@keyframes appeal-shimmer {
+    0% { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+}

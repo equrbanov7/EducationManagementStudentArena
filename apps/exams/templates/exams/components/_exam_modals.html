@@ -104,7 +104,7 @@
   artıq sübut olunmuş qabığını təkrarla (`exam-wizard-modal` + `modal-dialog-centered`
   + `modal-body p-0`, ayrıca modal-header yox — sehrbazın öz rail başlığı/bağlama
   düyməsi kifayətdir). Başlıq elementi JS-in gözlədiyi guard üçün DOM-da qalır
-  (course_exam_dashboard.js:493 `!editorModalTitle` yoxlanışı), sadəcə görünməz.
+  (course_exam_dashboard.js `openEditorModal` → `!editorModalTitle` yoxlanışı), sadəcə görünməz.
 {% endcomment %}
 <div class="modal fade exam-create-edit-modal exam-wizard-modal" id="courseExamEditorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -123,6 +123,8 @@
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
-<script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20260707-wizard2"></script>
+{# 2026-09-21 bölgüsü: forma köməkçiləri ayrı faylda; əsas fayl onları bindEditorForm() anında oxuyur. #}
+<script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20260921-split"></script>
+<script src="{% static 'exams/js/course_exam_dashboard_form.js' %}?v=20260921-split"></script>
 
 {% endif %}

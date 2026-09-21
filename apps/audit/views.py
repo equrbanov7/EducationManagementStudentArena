@@ -18,440 +18,82 @@ qruplaşdırma sorğusudur, seçici siyahıları tavanlıdır (`OPTION_CAP`).
 TARİX ARALIĞI yerli günlərlə (Asia/Baku) hesablanır: preset (bu gün / 7 gün /
 30 gün / bütün vaxtlar) və ya «seçilmiş aralıq» (`al_from` / `al_to`). Tarix
 sahəsi dəyişəndə filtr paneli select-i avtomatik `custom`-a keçirir.
+
+MODUL BÖLGÜSÜ (2026-09-21, modul-ölçü qapısı): sabitlər / əhatə / filtrlər
+``views_filters.py``-da, sətir-detal serializasiyası ``views_serializers.py``-da,
+CSV ixracı ``views_export.py``-dadır. Hamısı buradan yenidən ixrac olunur —
+``urls.py`` və ``from apps.audit.views import …`` yolları dəyişmir.
 """
 
 from __future__ import annotations
 
-import json
-import uuid
-from datetime import date, datetime, time, timedelta
 from urllib.parse import urlencode
 
 from django.apps import apps as django_apps
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import JsonResponse, StreamingHttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
-from core.constants import AuditAction
-from core.export_safety import safe_csv_writer
-from core.permissions import is_superadmin_user, request_has_permission
+from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization
-from core.ui import status_catalog
 
-from .models import AuditLog
+from .views_export import audit_log_export  # noqa: F401 — yenidən ixrac (urls.py)
+from .views_filters import (  # noqa: F401 — yenidən ixrac
+    ACTION_KEYS,
+    ACTOR_NONE,
+    DEFAULT_PAGE_SIZE,
+    DEFAULT_RANGE,
+    EXPORT_CAP,
+    FAILED_ACTIONS,
+    FLAG_ANON,
+    FLAG_FAILED,
+    FLAG_KEYS,
+    FLAG_NOREASON,
+    OPTION_CAP,
+    PAGE_SIZES,
+    PREFIX,
+    RANGE_7D,
+    RANGE_30D,
+    RANGE_ALL,
+    RANGE_CUSTOM,
+    RANGE_KEYS,
+    RANGE_TODAY,
+    REASONED_ACTIONS,
+    SEARCH_MAX,
+    SEARCHABLE_FROM,
+    SORT_NEWEST,
+    SORT_OLDEST,
+    STATUS_FAMILY,
+    _query_params,
+    _run_scoped,
+    _sort_url,
+    apply_filters,
+    can_export_audit,
+    can_view_audit,
+    parse_filters,
+    resolve_range,
+    scoped_queryset,
+)
+from .views_serializers import (  # noqa: F401 — yenidən ixrac
+    _action_tone,
+    _display_name,
+    _humanize_type,
+    _initials,
+    _resource_bits,
+    _row,
+    action_label,
+    build_diff,
+    serialize_entry,
+)
 
 _CTX = "audit.section"
-
-#: Filtr parametrlərinin ad fəzası (`ems_ui/_filter_bar.html` müqaviləsi).
-PREFIX = "al_"
-PAGE_SIZES = (25, 50, 100)
-DEFAULT_PAGE_SIZE = 25
-#: CSV ixracının tavanı — brauzerə və yaddaşa qarşı sığorta.
-EXPORT_CAP = 10_000
-#: Seçici siyahılarının tavanı (icraçı / resurs tipi / təşkilat).
-OPTION_CAP = 300
-SEARCH_MAX = 120
-#: Menyuda daxili axtarış sətri bu qədər seçimdən sonra görünür.
-SEARCHABLE_FROM = 8
-
-RANGE_TODAY = "today"
-RANGE_7D = "7d"
-RANGE_30D = "30d"
-RANGE_ALL = "all"
-RANGE_CUSTOM = "custom"
-DEFAULT_RANGE = RANGE_30D
-RANGE_KEYS = (RANGE_TODAY, RANGE_7D, RANGE_30D, RANGE_ALL, RANGE_CUSTOM)
-
-FLAG_NOREASON = "noreason"
-FLAG_FAILED = "failed"
-FLAG_ANON = "anon"
-FLAG_KEYS = (FLAG_NOREASON, FLAG_FAILED, FLAG_ANON)
-
-SORT_NEWEST = "newest"
-SORT_OLDEST = "oldest"
-
-ACTOR_NONE = "none"
-STATUS_FAMILY = "audit_action"
-
-#: Səbəb tələb edən əməliyyatlar — «səbəbsiz dəyişiklik» KPI-sı bunlara baxır.
-REASONED_ACTIONS = (AuditAction.UPDATE, AuditAction.DELETE)
-#: «Uğursuz» hadisələr — rədd və yoxlama sorğusu.
-FAILED_ACTIONS = (AuditAction.DENY, AuditAction.CHALLENGE)
-ACTION_KEYS = tuple(key for key, _label in AuditAction.CHOICES)
-
-
-# ─── Əhatə ──────────────────────────────────────────────────────────────────
-
-
-def can_view_audit(request) -> bool:
-    """Fail-closed qapı: superadmin · təşkilat sahibi · `audit.view` daşıyıcısı.
-
-    Superadmin ƏVVƏL yoxlanır ki, `request_has_permission`-ın üzvlüksüz
-    superadmin üçün yazdığı «cross-org» audit qeydi hər panel açılışında
-    təkrarlanmasın.
-    """
-    user = getattr(request, "user", None)
-    if user is None or not getattr(user, "is_authenticated", False):
-        return False
-    if is_superadmin_user(user):
-        return True
-    organization = get_request_organization(request)
-    if organization is None:
-        return False
-    if getattr(organization, "owner_id", None) == user.id:
-        return True
-    return request_has_permission(request, "audit.view")
-
-
-def can_export_audit(request) -> bool:
-    """CSV ixracı: baxış qapısı + `audit.export` (audit 2026-09-13 F-06, 2026-09-14; superadmin/sahib azad)."""
-    if not can_view_audit(request):
-        return False
-    user = request.user
-    if is_superadmin_user(user) or getattr(get_request_organization(request), "owner_id", None) == user.id:
-        return True
-    return request_has_permission(request, "audit.export")
-
-
-def scoped_queryset(*, is_superadmin: bool, organization):
-    """Aktorun görə biləcəyi qeydlər — superadmin hamısı, digərləri öz təşkilatı."""
-    queryset = AuditLog.objects.select_related("user", "organization", "content_type")
-    if is_superadmin:
-        return queryset
-    return queryset.none() if organization is None else queryset.filter(organization=organization)
-
-
-def _run_scoped(is_superadmin: bool, func):
-    """Superadmin üçün `bypass_rls()` daxilində, digərləri üçün adi çağırış. Şablon render-i
-    kontekstdən kənarda baş verdiyi üçün nəticələr `func` içində MATERİALLAŞDIRILMALIDIR."""
-    if not is_superadmin:
-        return func()
-    from core.rls import bypass_rls
-
-    with bypass_rls():
-        return func()
-
-
-# ─── Parametrlər ────────────────────────────────────────────────────────────
-
-
-def _param(request, name: str, default: str = "") -> str:
-    return (request.GET.get(PREFIX + name) or default).strip()[:SEARCH_MAX]
-
-
-def _parse_date(raw: str):
-    try:
-        return date.fromisoformat(raw[:10]) if raw else None
-    except ValueError:
-        return None
-
-
-def _pk_or_none(model, raw: str):
-    """Sətri modelin PK tipinə çevirir; yararsız dəyər filtr kimi ATILIR."""
-    if not raw:
-        return None
-    try:
-        return model._meta.pk.to_python(raw)
-    except (TypeError, ValueError, ValidationError):
-        return None
-
-
-def resolve_range(range_key: str, start_raw: str, end_raw: str, *, today=None):
-    """``(key, start_date | None, end_date | None)`` — yerli günlər, hər iki uc daxil.
-
-    Preset seçiləndə tarix sahələri NƏZƏRƏ ALINMIR (URL-də köhnə dəyər qala
-    bilər); `custom` isə ən azı bir tarix tələb edir, əks halda defolta düşür.
-    """
-    today = today or timezone.localdate()
-    key = range_key if range_key in RANGE_KEYS else DEFAULT_RANGE
-    if key == RANGE_CUSTOM:
-        start, end = _parse_date(start_raw), _parse_date(end_raw)
-        if start is None and end is None:
-            key = DEFAULT_RANGE
-        else:
-            if start and end and start > end:
-                start, end = end, start
-            return key, start, end
-    days = {RANGE_TODAY: 0, RANGE_7D: 6, RANGE_30D: 29}.get(key)
-    if days is None:
-        return RANGE_ALL, None, None
-    return key, today - timedelta(days=days), today
-
-
-def _day_start(value: date):
-    return timezone.make_aware(datetime.combine(value, time.min), timezone.get_current_timezone())
-
-
-def parse_filters(request, *, is_superadmin: bool) -> dict:
-    """URL parametrlərini normallaşdırılmış filtr sözlüyünə çevirir."""
-    range_key, start, end = resolve_range(_param(request, "range"), _param(request, "from"), _param(request, "to"))
-    action = _param(request, "action")
-    flag = _param(request, "flag")
-    sort = _param(request, "sort")
-    try:
-        size = int(_param(request, "size") or DEFAULT_PAGE_SIZE)
-    except ValueError:
-        size = DEFAULT_PAGE_SIZE
-    organization_model = django_apps.get_model("organizations", "Organization")
-    return {
-        "q": _param(request, "q"),
-        "range": range_key,
-        "start": start,
-        "end": end,
-        "action": action if action in ACTION_KEYS else "",
-        "resource": _param(request, "resource"),
-        "actor": _param(request, "actor"),
-        "flag": flag if flag in FLAG_KEYS else "",
-        "org": _param(request, "org") if is_superadmin else "",
-        "org_id": _pk_or_none(organization_model, _param(request, "org")) if is_superadmin else None,
-        "sort": SORT_OLDEST if sort == SORT_OLDEST else SORT_NEWEST,
-        "size": size if size in PAGE_SIZES else DEFAULT_PAGE_SIZE,
-    }
-
-
-def _search_q(term: str) -> Q:
-    query = (
-        Q(user__username__icontains=term)
-        | Q(user__first_name__icontains=term)
-        | Q(user__last_name__icontains=term)
-        | Q(resource_repr__icontains=term)
-        | Q(resource_type__icontains=term)
-        | Q(resource_id__icontains=term)
-        | Q(object_id__icontains=term)
-        | Q(reason__icontains=term)
-    )
-    try:
-        as_uuid = uuid.UUID(term)
-    except (ValueError, AttributeError):
-        as_uuid = None
-    if as_uuid is not None:
-        query |= Q(request_id=as_uuid) | Q(id=as_uuid)
-    return query
-
-
-def apply_filters(queryset, filters: dict):
-    """Filtr sözlüyünü queryset-ə tətbiq edir — bölmə və CSV ixracı üçün TƏK mənbə."""
-    if filters["start"] is not None:
-        queryset = queryset.filter(created_at__gte=_day_start(filters["start"]))
-    if filters["end"] is not None:
-        queryset = queryset.filter(created_at__lt=_day_start(filters["end"] + timedelta(days=1)))
-    if filters["action"]:
-        queryset = queryset.filter(action=filters["action"])
-    resource = filters["resource"]
-    if resource:
-        kind, _sep, value = resource.partition(":")
-        if kind == "rt" and value:
-            queryset = queryset.filter(resource_type=value)
-        elif kind == "ct" and value.isdigit():
-            queryset = queryset.filter(resource_type="", content_type_id=int(value))
-    actor = filters["actor"]
-    if actor == ACTOR_NONE:
-        queryset = queryset.filter(user__isnull=True)
-    elif actor:
-        actor_pk = _pk_or_none(get_user_model(), actor)
-        if actor_pk is not None:
-            queryset = queryset.filter(user_id=actor_pk)
-    if filters.get("org_id") is not None:
-        queryset = queryset.filter(organization_id=filters["org_id"])
-    flag = filters["flag"]
-    if flag == FLAG_NOREASON:
-        queryset = queryset.filter(action__in=REASONED_ACTIONS, reason="")
-    elif flag == FLAG_FAILED:
-        queryset = queryset.filter(action__in=FAILED_ACTIONS)
-    elif flag == FLAG_ANON:
-        queryset = queryset.filter(user__isnull=True)
-    if filters["q"]:
-        queryset = queryset.filter(_search_q(filters["q"]))
-    order = ("created_at", "id") if filters["sort"] == SORT_OLDEST else ("-created_at", "-id")
-    return queryset.order_by(*order)
-
-
-# ─── Sətir / detal serializasiyası ──────────────────────────────────────────
-
-
-def _initials(name: str) -> str:
-    parts = [part for part in (name or "").split() if part]
-    if not parts:
-        return "—"
-    if len(parts) == 1:
-        return parts[0][:2].upper()
-    return (parts[0][0] + parts[-1][0]).upper()
-
-
-def _display_name(user) -> str:
-    return (user.get_full_name() or "").strip() or user.username
-
-
-def _humanize_type(value: str) -> str:
-    return value.replace("_", " ").replace(".", " › ").strip().capitalize() if value else ""
-
-
-def action_label(key: str) -> str:
-    return str(status_catalog.label(STATUS_FAMILY, key))
-
-
-def _action_tone(key: str) -> str:
-    status = status_catalog.get(STATUS_FAMILY, key)
-    return status.tone if status is not None else "neutral"
-
-
-def _resource_bits(log) -> tuple[str, str, str]:
-    """``(tip etiketi, identifikator, göstəriş)`` — GenericFK-ya TOXUNMADAN."""
-    type_key = log.resource_type or (log.content_type.model if log.content_type_id else "")
-    identifier = log.resource_id or log.object_id or ""
-    repr_text = log.resource_repr or ""
-    if not repr_text and type_key and identifier:
-        repr_text = f"{_humanize_type(type_key)} #{identifier}"
-    return _humanize_type(type_key), identifier, repr_text
-
-
-def _row(log, *, profile_url_name="accounts:public_profile") -> dict:
-    user = log.user if log.user_id else None
-    name = _display_name(user) if user is not None else ""
-    type_label, identifier, repr_text = _resource_bits(log)
-    return {
-        "id": str(log.id),
-        "created_at": log.created_at,
-        "actor_name": name,
-        "actor_username": user.username if user is not None else "",
-        "actor_initials": _initials(name) if name else "",
-        "actor_url": reverse(profile_url_name, kwargs={"username": user.username}) if user is not None else "",
-        "action": log.action,
-        "action_label": action_label(log.action),
-        "resource_type": type_label,
-        "resource_type_key": log.resource_type or "",
-        "resource_id": identifier,
-        # `resource_label` YALNIZ həqiqi `resource_repr`-dir; sintez olunmuş
-        # «Tip #id» forması `resource_display`-dədir (CSV/detal) — xana
-        # tip+id-ni ayrıca göstərdiyi üçün təkrar olmasın.
-        "resource_label": log.resource_repr or "",
-        "resource_display": repr_text,
-        "reason": log.reason or "",
-        "reason_missing": log.action in REASONED_ACTIONS and not (log.reason or "").strip(),
-        "ip": log.ip_address or "",
-        "org_name": log.organization.name if log.organization_id else "",
-        "has_changes": bool(log.changes or log.old_values or log.new_values),
-        "detail_url": reverse("audit:detail", kwargs={"pk": log.id}),
-    }
-
-
-def _diff_state(before, after, *, in_old: bool, in_new: bool) -> str:
-    if not in_old and in_new:
-        return "added"
-    if in_old and not in_new:
-        return "removed"
-    if before is None and after is not None:
-        return "added"
-    if before is not None and after is None:
-        return "removed"
-    return "same" if before == after else "changed"
-
-
-def build_diff(old_values, new_values, changes) -> list[dict]:
-    """Oxunaqlı əvvəl → sonra siyahısı.
-
-    Prioritet `changes`-dədir (`{sahə: {"old": …, "new": …}}` konvensiyası;
-    `[old, new]` cütü və düz dəyər də qəbul olunur). O yoxdursa, `old_values` və
-    `new_values` açar-açar tutuşdurulur; dəyişməyən sahələr `same` kimi qalır
-    (UI onları yığılmış göstərir).
-    """
-    old = old_values if isinstance(old_values, dict) else {}
-    new = new_values if isinstance(new_values, dict) else {}
-    rows: list[dict] = []
-    if isinstance(changes, dict) and changes:
-        for key, value in changes.items():
-            key = str(key)
-            if isinstance(value, dict) and value and set(value) <= {"old", "new"}:
-                before, after = value.get("old"), value.get("new")
-                in_old, in_new = "old" in value, "new" in value
-            elif isinstance(value, (list, tuple)) and len(value) == 2:
-                before, after = value[0], value[1]
-                in_old, in_new = True, True
-            else:
-                before, after = old.get(key), value
-                in_old, in_new = key in old, True
-            rows.append(
-                {
-                    "key": key,
-                    "old": before,
-                    "new": after,
-                    "state": _diff_state(before, after, in_old=in_old, in_new=in_new),
-                }
-            )
-        return rows
-    for key in sorted(set(old) | set(new), key=str):
-        before, after = old.get(key), new.get(key)
-        rows.append(
-            {
-                "key": str(key),
-                "old": before,
-                "new": after,
-                "state": _diff_state(before, after, in_old=key in old, in_new=key in new),
-            }
-        )
-    return rows
-
-
-def serialize_entry(log, *, list_url: str) -> dict:
-    """Çekmecə üçün tam qeyd (JSON)."""
-    row = _row(log)
-    created_local = timezone.localtime(log.created_at)
-    type_label, identifier, repr_text = _resource_bits(log)
-    diff = build_diff(log.old_values, log.new_values, log.changes)
-    filter_links = {}
-    if log.user_id:
-        filter_links["actor"] = (
-            f"{list_url}?{urlencode({'section': 'audit-log', PREFIX + 'actor': log.user_id, PREFIX + 'range': RANGE_ALL})}"
-        )
-    if log.request_id:
-        filter_links["request"] = (
-            f"{list_url}?{urlencode({'section': 'audit-log', PREFIX + 'q': str(log.request_id), PREFIX + 'range': RANGE_ALL})}"
-        )
-    return {
-        "id": row["id"],
-        "created_at": created_local.isoformat(),
-        "created_display": created_local.strftime("%d.%m.%Y %H:%M:%S"),
-        "actor": (
-            {
-                "name": row["actor_name"],
-                "username": row["actor_username"],
-                "initials": row["actor_initials"],
-                "url": row["actor_url"],
-            }
-            if log.user_id
-            else None
-        ),
-        "organization": row["org_name"],
-        "action": log.action,
-        "action_label": row["action_label"],
-        "action_tone": _action_tone(log.action),
-        "resource": {
-            "type": type_label,
-            "type_key": log.resource_type or "",
-            "id": identifier,
-            "repr": repr_text,
-            "content_type": (f"{log.content_type.app_label}.{log.content_type.model}" if log.content_type_id else ""),
-            "object_id": log.object_id or "",
-        },
-        "reason": log.reason or "",
-        "reason_required": log.action in REASONED_ACTIONS,
-        "ip_address": log.ip_address or "",
-        "user_agent": log.user_agent or "",
-        "request_id": str(log.request_id) if log.request_id else "",
-        "diff": diff,
-        "changed_count": sum(1 for item in diff if item["state"] != "same"),
-        "raw": {"old_values": log.old_values, "new_values": log.new_values, "changes": log.changes},
-        "filter_links": filter_links,
-    }
 
 
 # ─── Seçici siyahıları ──────────────────────────────────────────────────────
@@ -859,29 +501,6 @@ def build_audit_log_context(request) -> dict:
     }
 
 
-def _query_params(filters: dict, is_superadmin: bool) -> dict:
-    """Defolt olmayan filtr dəyərləri — səhifələmə linkləri və ixrac URL-i üçün."""
-    params = {
-        PREFIX + "q": filters["q"],
-        PREFIX + "range": filters["range"] if filters["range"] != DEFAULT_RANGE else "",
-        PREFIX + "from": filters["start"].isoformat() if filters["range"] == RANGE_CUSTOM and filters["start"] else "",
-        PREFIX + "to": filters["end"].isoformat() if filters["range"] == RANGE_CUSTOM and filters["end"] else "",
-        PREFIX + "action": filters["action"],
-        PREFIX + "resource": filters["resource"],
-        PREFIX + "actor": filters["actor"],
-        PREFIX + "flag": filters["flag"],
-        PREFIX + "org": filters["org"] if is_superadmin else "",
-        PREFIX + "sort": filters["sort"] if filters["sort"] != SORT_NEWEST else "",
-        PREFIX + "size": str(filters["size"]) if filters["size"] != DEFAULT_PAGE_SIZE else "",
-    }
-    return {key: value for key, value in params.items() if value}
-
-
-def _sort_url(filters: dict, is_superadmin: bool) -> str:
-    flipped = dict(filters, sort=SORT_OLDEST if filters["sort"] == SORT_NEWEST else SORT_NEWEST)
-    return "?" + urlencode({"section": "audit-log", **_query_params(flipped, is_superadmin)})
-
-
 # ─── Görünüşlər ─────────────────────────────────────────────────────────────
 
 
@@ -917,102 +536,3 @@ def audit_log_detail(request, pk):
     if payload is None:
         return JsonResponse({"ok": False, "error": "not_found"}, status=404)
     return JsonResponse({"ok": True, "entry": payload})
-
-
-class _Echo:
-    """CSV yazıcısı üçün olduğu kimi qaytaran bufer; `reason` istifadəçi mətnidir → F-07 (2026-09-13) neytrallaşdırma."""
-
-    def write(self, value):
-        return value
-
-
-def _csv_header() -> list[str]:
-    return [
-        pgettext(_CTX, "Vaxt"),
-        pgettext(_CTX, "İcraçı (istifadəçi adı)"),
-        pgettext(_CTX, "İcraçı (ad)"),
-        pgettext(_CTX, "Əməliyyat"),
-        pgettext(_CTX, "Resurs tipi"),
-        pgettext(_CTX, "Resurs ID"),
-        pgettext(_CTX, "Resurs"),
-        pgettext(_CTX, "Təşkilat"),
-        pgettext(_CTX, "Səbəb"),
-        pgettext(_CTX, "IP ünvanı"),
-        pgettext(_CTX, "Sorğu ID"),
-        pgettext(_CTX, "Dəyişikliklər (JSON)"),
-    ]
-
-
-def _csv_row(log) -> list:
-    user = log.user if log.user_id else None
-    type_label, identifier, repr_text = _resource_bits(log)
-    changes = (
-        log.changes
-        if log.changes
-        else ({"old": log.old_values, "new": log.new_values} if (log.old_values or log.new_values) else None)
-    )
-    return [
-        timezone.localtime(log.created_at).strftime("%Y-%m-%d %H:%M:%S"),
-        user.username if user is not None else "",
-        _display_name(user) if user is not None else "",
-        action_label(log.action),
-        log.resource_type or (log.content_type.model if log.content_type_id else ""),
-        identifier,
-        repr_text,
-        log.organization.name if log.organization_id else "",
-        log.reason or "",
-        log.ip_address or "",
-        str(log.request_id) if log.request_id else "",
-        json.dumps(changes, ensure_ascii=False, default=str) if changes is not None else "",
-    ]
-
-
-@login_required
-@require_GET
-def audit_log_export(request):
-    """Cari filtrin CSV ixracı (UTF-8 BOM, axınla; tavan `EXPORT_CAP`).
-
-    Sətirlər GÖRÜNÜŞ İÇİNDƏ materiallaşdırılır: axın middleware zəncirindən
-    SONRA oxunur və tenant/RLS konteksti o vaxt artıq sıfırlanmış ola bilər.
-    İxracın özü də auditə düşür («auditçini audit et»).
-    """
-    if not can_export_audit(request):
-        return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
-    is_superadmin = is_superadmin_user(request.user)
-    organization = get_request_organization(request)
-    filters = parse_filters(request, is_superadmin=is_superadmin)
-
-    def _materialize():
-        queryset = apply_filters(scoped_queryset(is_superadmin=is_superadmin, organization=organization), filters)
-        rows = [_csv_row(log) for log in queryset[: EXPORT_CAP + 1].iterator(chunk_size=500)]
-        truncated = len(rows) > EXPORT_CAP
-        rows = rows[:EXPORT_CAP]
-        from core.audit import log_action
-
-        log_action(
-            AuditAction.EXPORT,
-            user=request.user,
-            organization=organization,
-            request=request,
-            resource_type="audit_log",
-            resource_repr="CSV",
-            reason=pgettext(_CTX, "Audit jurnalı CSV ixracı: %(n)d sətir") % {"n": len(rows)},
-            new_values={"filters": _query_params(filters, is_superadmin), "rows": len(rows), "truncated": truncated},
-        )
-        return rows, truncated
-
-    rows, truncated = _run_scoped(is_superadmin, _materialize)
-    writer = safe_csv_writer(_Echo())
-
-    def _stream():
-        yield "\ufeff"  # BOM — Excel UTF-8 Azərbaycan hərflərini düzgün oxusun
-        yield writer.writerow(_csv_header())
-        for row in rows:
-            yield writer.writerow(row)
-
-    filename = "audit-jurnali-%s.csv" % timezone.localdate().isoformat()
-    response = StreamingHttpResponse(_stream(), content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = 'attachment; filename="%s"' % filename
-    response["X-Audit-Export-Rows"] = str(len(rows))
-    response["X-Audit-Export-Truncated"] = "1" if truncated else "0"
-    return response

@@ -64,3 +64,8 @@
     ul {
         list-style: none;
     }
+
+/* ── Utility: gizli element (inline `style="display:none"` əvəzi, CSP) ────
+   `!important` YOXDUR — JS `el.style.display = "flex"` ilə aça bilsin
+   (bootstrap `d-none` bunu icazə vermir). */
+.u-hidden { display: none; }

@@ -156,3 +156,15 @@ td > .skeleton-line, th > .skeleton-line { height: 14px; }
     }
     .route-progress { transition: none; }
 }
+
+/* ── Skeleton ölçü utility-ləri (inline `style="width:…"` əvəzi, CSP) ── */
+.skeleton-line--w40 { width: 40%; }
+.skeleton-line--w55 { width: 55%; }
+.skeleton-line--w65 { width: 65%; }
+.skeleton-line--w70 { width: 70%; }
+.skeleton-line--w80 { width: 80%; }
+.skeleton-field { height: 44px; }
+.skeleton-field--wide { flex: 2 1 220px; }
+.skeleton-field--mid { flex: 2 1 200px; }
+.skeleton-field--narrow { flex: 1 1 140px; }
+.skeleton-stack { display: flex; flex-direction: column; gap: 0.4rem; width: 100%; }

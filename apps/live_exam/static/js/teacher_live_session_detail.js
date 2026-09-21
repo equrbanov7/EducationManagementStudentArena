@@ -1,0 +1,448 @@
+/* teacher_live_session_detail.js — müəllimin canlı sessiya detal səhifəsi:
+ * Chart.js qrafikləri (iştirakçı balları, sual dəqiqliyi, düz/səhv, orta cavab
+ * vaxtı, bal paylanması, hər sual üzrə variant paylanması), cədvəl axtarışı +
+ * səhifələmə, AI xülasə.
+ * Mənbə: liveExam/partials/_teacher_live_session_detail_js.html (inline nonce
+ * script, 2026-09-21-də xarici fayla çıxarıldı — CSP `script-src` yalnız SELF+NONCE).
+ *
+ * JSON data-adaları (partial-da, bu fayldan ƏVVƏL):
+ *   #sessionChartData   — chart_data (json_script, dəyişməyib)
+ *   #sessionDetailI18n  — `{% trans %}` mətnləri (açarlar trans açarları ilə eynidir):
+ *     ai_cached, ai_error, ai_quota_info, chart_empty_avg_duration, chart_empty_correct_incorrect, chart_empty_distribution, chart_empty_player_scores, chart_empty_question_accuracy, chart_label_accuracy, chart_label_avg_duration, chart_label_correct, chart_label_incorrect, chart_label_participant_count, chart_label_score, chart_module_error, pagination_next, pagination_prev, pagination_results, tooltip_accuracy_prefix, tooltip_participant_count_prefix, tooltip_question_prefix, tooltip_score_prefix
+ * Klassik skript, DOM hazır olandan sonra (body sonunda) işləyir — inline blokla
+ * eyni mövqe/semantika; Chart.js (vendor) bundan əvvəl yüklənir.
+ */
+(function () {
+    "use strict";
+
+    function readJson(id, fallback) {
+        var el = document.getElementById(id);
+        if (!el) return fallback;
+        try { return JSON.parse(el.textContent); } catch (err) { return fallback; }
+    }
+    var CHART_DATA = readJson("sessionChartData", {});
+    var I18N = readJson("sessionDetailI18n", {});
+    var PAGE_SIZE = 15;
+
+    /* ═══════════ Charts ═══════════ */
+    var fontFamily = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
+    var tooltipStyle = {
+        backgroundColor: "rgba(17,24,39,.92)",
+        titleFont: { family: fontFamily, size: 13, weight: "bold" },
+        bodyFont: { family: fontFamily, size: 12 },
+        cornerRadius: 8,
+        padding: 10
+    };
+    function getArray(name) {
+        return Array.isArray(CHART_DATA[name]) ? CHART_DATA[name] : [];
+    }
+
+    function showChartNotice(canvasId, message) {
+        var canvas = document.getElementById(canvasId);
+        if (!canvas || !canvas.parentElement) return;
+        var wrap = canvas.parentElement;
+        wrap.classList.add("is-empty");
+        wrap.innerHTML = '<div class="sd-chart-empty">' + message + "</div>";
+    }
+
+    function hasItems(values) {
+        return Array.isArray(values) && values.length > 0;
+    }
+
+    function hasPositiveValues(values) {
+        return hasItems(values) && values.some(function (value) { return Number(value) > 0; });
+    }
+
+    function createChart(canvasId, config, hasData, emptyMessage) {
+        if (typeof window.Chart !== "function") {
+            showChartNotice(canvasId, I18N.chart_module_error);
+            return null;
+        }
+        if (!hasData) {
+            showChartNotice(canvasId, emptyMessage);
+            return null;
+        }
+
+        var canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        return new window.Chart(canvas, config);
+    }
+
+    /* Player Scores - horizontal bar */
+    var playerLabels = getArray("player_labels").slice(0, 25);
+    var playerScores = getArray("player_scores").slice(0, 25);
+    createChart("playerScoreChart", {
+        type: "bar",
+        data: {
+            labels: playerLabels,
+            datasets: [{
+                label: I18N.chart_label_score,
+                data: playerScores,
+                backgroundColor: playerScores.map(function (_, i) {
+                    var colors = ["#1a56db", "#0e7490", "#059669", "#0284c7", "#2563eb"];
+                    return colors[i % colors.length];
+                }),
+                borderRadius: 6,
+                borderSkipped: false,
+                barPercentage: 0.7
+            }]
+        },
+        options: {
+            indexAxis: "y",
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: tooltipStyle },
+            scales: {
+                x: { grid: { color: "#f1f5f9" }, ticks: { font: { family: fontFamily, size: 11 } } },
+                y: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
+            }
+        }
+    }, hasItems(playerScores), I18N.chart_empty_player_scores);
+
+    /* Question Accuracy - vertical bar */
+    var questionLabels = getArray("question_labels");
+    var questionAccuracy = getArray("question_accuracy");
+    var qLabels = questionLabels.map(function (_, i) { return "S" + (i + 1); });
+    createChart("questionAccuracyChart", {
+        type: "bar",
+        data: {
+            labels: qLabels,
+            datasets: [{
+                label: I18N.chart_label_accuracy,
+                data: questionAccuracy,
+                backgroundColor: questionAccuracy.map(function (value) {
+                    return value >= 70 ? "#059669" : value >= 40 ? "#0284c7" : "#dc2626";
+                }),
+                borderRadius: 6,
+                borderSkipped: false,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: Object.assign({}, tooltipStyle, {
+                    callbacks: {
+                        title: function (items) {
+                            var idx = items[0].dataIndex;
+                            return questionLabels[idx] || (I18N.tooltip_question_prefix + " " + (idx + 1));
+                        },
+                        label: function (item) { return I18N.tooltip_accuracy_prefix + ": " + item.raw + "%"; }
+                    }
+                })
+            },
+            scales: {
+                y: { max: 100, grid: { color: "#f1f5f9" }, ticks: { callback: function (value) { return value + "%"; }, font: { family: fontFamily, size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
+            }
+        }
+    }, hasItems(questionAccuracy), I18N.chart_empty_question_accuracy);
+
+    /* Correct / Incorrect - doughnut */
+    var questionCorrect = getArray("question_correct");
+    var questionIncorrect = getArray("question_incorrect");
+    var totalCorrect = questionCorrect.reduce(function (a, b) { return a + b; }, 0);
+    var totalIncorrect = questionIncorrect.reduce(function (a, b) { return a + b; }, 0);
+    createChart("correctIncorrectChart", {
+        type: "doughnut",
+        data: {
+            labels: [I18N.chart_label_correct, I18N.chart_label_incorrect],
+            datasets: [{
+                data: [totalCorrect, totalIncorrect],
+                backgroundColor: ["#059669", "#dc2626"],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+                legend: { position: "bottom", labels: { font: { family: fontFamily, size: 12, weight: "bold" }, padding: 16, usePointStyle: true, pointStyleWidth: 12 } },
+                tooltip: tooltipStyle
+            }
+        }
+    }, hasPositiveValues([totalCorrect, totalIncorrect]), I18N.chart_empty_correct_incorrect);
+
+    /* Average Response Time - line */
+    var questionAvgMs = getArray("question_avg_ms");
+    createChart("avgResponseChart", {
+        type: "line",
+        data: {
+            labels: qLabels,
+            datasets: [{
+                label: I18N.chart_label_avg_duration,
+                data: questionAvgMs,
+                borderColor: "#1a56db",
+                backgroundColor: "rgba(26,86,219,.1)",
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: "#1a56db",
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                borderWidth: 2.5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: Object.assign({}, tooltipStyle, {
+                    callbacks: {
+                        title: function (items) {
+                            var idx = items[0].dataIndex;
+                            return questionLabels[idx] || (I18N.tooltip_question_prefix + " " + (idx + 1));
+                        },
+                        label: function (item) { return item.raw + " ms"; }
+                    }
+                })
+            },
+            scales: {
+                y: { grid: { color: "#f1f5f9" }, ticks: { callback: function (value) { return value + "ms"; }, font: { family: fontFamily, size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { family: fontFamily, size: 11, weight: "bold" } } }
+            }
+        }
+    }, hasItems(questionAvgMs), I18N.chart_empty_avg_duration);
+
+    /* Score distribution - grouped bar */
+    var scoreDistributionLabels = getArray("score_distribution_labels");
+    var scoreDistributionCounts = getArray("score_distribution_counts");
+    createChart("scoreDistributionChart", {
+        type: "bar",
+        data: {
+            labels: scoreDistributionLabels,
+            datasets: [{
+                label: I18N.chart_label_participant_count,
+                data: scoreDistributionCounts,
+                backgroundColor: "rgba(14,116,144,.82)",
+                borderColor: "#0e7490",
+                borderWidth: 1.5,
+                borderRadius: 8,
+                borderSkipped: false,
+                maxBarThickness: 48
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: Object.assign({}, tooltipStyle, {
+                    callbacks: {
+                        title: function (items) {
+                            return I18N.tooltip_score_prefix + ": " + (items[0].label || "0");
+                        },
+                        label: function (item) { return I18N.tooltip_participant_count_prefix + ": " + item.raw; }
+                    }
+                })
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: "#f1f5f9" },
+                    ticks: {
+                        precision: 0,
+                        font: { family: fontFamily, size: 11 }
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: fontFamily, size: 11, weight: "bold" } }
+                }
+            }
+        }
+    }, hasItems(scoreDistributionCounts), I18N.chart_empty_distribution);
+
+    /* Per-question option distribution charts */
+    var perQuestionOptionStats = getArray("per_question_option_stats");
+    perQuestionOptionStats.forEach(function (qData, idx) {
+        var canvasId = "perQChart" + idx;
+        if (!qData || !hasItems(qData.labels)) {
+            showChartNotice(canvasId, I18N.chart_empty_question_accuracy);
+            return;
+        }
+        createChart(canvasId, {
+            type: "bar",
+            data: {
+                labels: qData.labels,
+                datasets: [{
+                    label: I18N.chart_label_participant_count,
+                    data: qData.counts,
+                    backgroundColor: qData.colors,
+                    borderRadius: 6,
+                    borderSkipped: false,
+                    barPercentage: 0.65,
+                    maxBarThickness: 48
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: Object.assign({}, tooltipStyle, {
+                        callbacks: {
+                            label: function (item) {
+                                return item.raw + " " + I18N.chart_label_participant_count;
+                            }
+                        }
+                    })
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: "#f1f5f9" },
+                        ticks: { precision: 0, font: { family: fontFamily, size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: fontFamily, size: 12, weight: "bold" } }
+                    }
+                }
+            }
+        }, true, "");
+    });
+
+    /* ═══════════ Search + Pagination ═══════════ */
+    function setupTable(tableId, searchId, paginationId) {
+        var tbody = document.getElementById(tableId);
+        if (!tbody) return;
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll("tr"));
+        var searchInput = document.getElementById(searchId);
+        var paginationEl = document.getElementById(paginationId);
+        var currentPage = 1;
+        var filtered = rows;
+
+        function filterRows() {
+            var q = (searchInput ? searchInput.value : "").toLowerCase().trim();
+            filtered = rows.filter(function (row) {
+                var text = (row.dataset.nickname || row.dataset.question || row.textContent || "").toLowerCase();
+                var match = !q || text.indexOf(q) !== -1;
+                return match;
+            });
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            var totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+            if (currentPage > totalPages) currentPage = totalPages;
+            var start = (currentPage - 1) * PAGE_SIZE;
+            var end = start + PAGE_SIZE;
+
+            rows.forEach(function (r) { r.classList.add("sd-hidden"); });
+            filtered.forEach(function (r, i) {
+                if (i >= start && i < end) r.classList.remove("sd-hidden");
+            });
+
+            renderPagination(paginationEl, currentPage, totalPages, filtered.length);
+        }
+
+        function renderPagination(el, page, total, count) {
+            if (!el) return;
+            el.innerHTML = "";
+            if (total <= 1 && count <= PAGE_SIZE) return;
+
+            var prev = document.createElement("button");
+            prev.textContent = I18N.pagination_prev;
+            prev.disabled = page <= 1;
+            prev.onclick = function () { currentPage--; render(); };
+            el.appendChild(prev);
+
+            var maxButtons = 7;
+            var startPage = Math.max(1, page - Math.floor(maxButtons / 2));
+            var endPage = Math.min(total, startPage + maxButtons - 1);
+            if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+
+            for (var i = startPage; i <= endPage; i++) {
+                var btn = document.createElement("button");
+                btn.textContent = i;
+                if (i === page) btn.className = "is-active";
+                (function (p) { btn.onclick = function () { currentPage = p; render(); }; })(i);
+                el.appendChild(btn);
+            }
+
+            var info = document.createElement("span");
+            info.className = "sd-pagination__info";
+            info.textContent = count + " " + I18N.pagination_results;
+            el.appendChild(info);
+
+            var next = document.createElement("button");
+            next.textContent = I18N.pagination_next;
+            next.disabled = page >= total;
+            next.onclick = function () { currentPage++; render(); };
+            el.appendChild(next);
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("input", filterRows);
+        }
+        filterRows();
+    }
+
+    setupTable("playerTbody", "playerSearch", "playerPagination");
+    setupTable("questionTbody", "questionSearch", "questionPagination");
+
+    /* ═══════════ AI Summary ═══════════ */
+    var aiBtn = document.getElementById("aiSummaryBtn");
+    var aiContent = document.getElementById("aiSummaryContent");
+    if (aiBtn && aiContent) {
+        aiBtn.addEventListener("click", function() {
+            aiBtn.disabled = true;
+            aiBtn.style.opacity = "0.6";
+            aiContent.innerHTML = '<div class="d-flex flex-column gap-2" aria-hidden="true">'
+                + '<span class="skeleton skeleton-line skeleton-line--lg"></span>'
+                + '<span class="skeleton skeleton-line"></span>'
+                + '<span class="skeleton skeleton-line"></span>'
+                + '<span class="skeleton skeleton-line skeleton-line--sm"></span>'
+                + '</div>';
+
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set("ai_summary", "1");
+
+            fetch(currentUrl.toString(), { headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.ok) {
+                        var quotaHtml = "";
+                        if (typeof data.remaining !== "undefined") {
+                            quotaHtml = '<div class="sd-ai-quota">'
+                                + '<i class="fas fa-info-circle"></i> '
+                                + I18N.ai_quota_info + ': '
+                                + '<strong>' + data.remaining + '/' + data.limit + '</strong> (' + data.window + ')'
+                                + (data.cached ? ' &middot; <span class="sd-ai-cached"><i class="fas fa-bolt"></i> ' + I18N.ai_cached + '</span>' : '')
+                                + '</div>';
+                        }
+                        aiContent.innerHTML = formatMd(data.summary) + quotaHtml;
+                    } else {
+                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || I18N.ai_error) + '</div>';
+                    }
+                    aiBtn.disabled = false;
+                    aiBtn.style.opacity = "1";
+                })
+                .catch(function() {
+                    aiContent.innerHTML = '<div class="sd-ai-error--plain"><i class="fas fa-exclamation-triangle"></i> ' + I18N.ai_error + '</div>';
+                    aiBtn.disabled = false;
+                    aiBtn.style.opacity = "1";
+                });
+        });
+    }
+
+    function formatMd(text) {
+        var html = text
+            .replace(/### (.*)/g, '<h3 class="sd-md-h3">$1</h3>')
+            .replace(/## (.*)/g, '<h2 class="sd-md-h2">$1</h2>')
+            .replace(/# (.*)/g, '<h1 class="sd-md-h1">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="sd-md-strong">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^- (.*)/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul class="sd-md-ul">$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+        return '<p>' + html + '</p>';
+    }
+})();
