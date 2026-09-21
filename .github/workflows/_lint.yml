@@ -93,6 +93,9 @@ jobs:
       - name: Public API boundary gate
         run: python scripts/public_api_boundaries.py --check
 
+      - name: 🗺️ Kontekst xəritəsi (jurnal modellərinə birbaşa import ratchet-i)
+        run: python scripts/context_map.py --check
+
       - name: 🌐 i18n catalog gate (tərcümə borcu ratchet-i)
         run: |
           echo "::group::🌐 i18n kataloq vəziyyəti"

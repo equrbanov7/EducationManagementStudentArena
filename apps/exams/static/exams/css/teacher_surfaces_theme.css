@@ -195,3 +195,6 @@
 /* Skeleton — filtr dəyişəndə nəticə kartı sürüşən sətirlərlə dolur (results_filter_ui.js) */
 .ems-results-skeleton { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .ems-results-skeleton .ems-skelrow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; align-items: center; }
+
+/* Nəticələr səhifəsi xəbərdarlığı — inline `border-radius` əvəzi. */
+.ter-alert--rounded { border-radius: 12px; }

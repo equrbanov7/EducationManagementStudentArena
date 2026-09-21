@@ -116,6 +116,8 @@
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260607-workbench-key"></script>
+{# 2026-09-21 bölgüsü: testQuestionBank 2 hissədə — SIRA VACİBDİR. #}
+<script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260921-split"></script>
+<script src="{% static 'exams/js/testQuestionBank_upload.js' %}?v=20260921-split"></script>
 <script src="{% static 'exams/js/questionWorkbench.js' %}?v=20260607-workbench"></script>
 {% endblock %}

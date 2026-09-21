@@ -47,8 +47,14 @@
     </div>
   </div>
 
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260716-3"
+  {% comment %}2026-09-21 bölgüsü (modul ölçü büdcəsi): saf format köməkçiləri
+  ayrı faylda; sıra format → renderers → əsas (hamısı defer, sıra fail-soft:
+  əsas fayl `namespace.format`/`createRenderers` olmadan boot etmir, sonrakı
+  fayl `bootPending()`-i özü çağırır).{% endcomment %}
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_format.js' %}?v=20260921-split"
           nonce="{{ request.csp_nonce }}"></script>
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260716-3"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260921-split"
+          nonce="{{ request.csp_nonce }}"></script>
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260921-split"
           nonce="{{ request.csp_nonce }}"></script>
 </section>

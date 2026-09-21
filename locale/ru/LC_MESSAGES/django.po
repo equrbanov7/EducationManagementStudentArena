@@ -76211,3 +76211,121 @@ msgid ""
 msgstr ""
 "При выбранном преподавателе список ограничен его нагрузкой и открытыми "
 "курсами; иначе — учебным планом группы и открытыми курсами."
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s email təsdiqi"
+msgstr "%(brand)s — подтверждение email"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s giriş OTP kodu"
+msgstr "%(brand)s — OTP-код для входа"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s şifrə sıfırlama OTP kodu"
+msgstr "%(brand)s — OTP-код для сброса пароля"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s admin giriş OTP kodu"
+msgstr "%(brand)s — OTP-код для входа администратора"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s OTP kodu"
+msgstr "%(brand)s — OTP-код"
+
+msgctxt "accounts.email_otp"
+msgid "Email təsdiqi"
+msgstr "Подтверждение email"
+
+msgctxt "accounts.email_otp"
+msgid "Giriş təsdiqi"
+msgstr "Подтверждение входа"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrə sıfırlama təsdiqi"
+msgstr "Подтверждение сброса пароля"
+
+msgctxt "accounts.email_otp"
+msgid "Admin giriş təsdiqi"
+msgstr "Подтверждение входа администратора"
+
+msgctxt "accounts.email_otp"
+msgid "OTP təsdiqi"
+msgstr "Подтверждение OTP"
+
+msgctxt "accounts.email_otp"
+msgid "hesabınızı aktivləşdirmək"
+msgstr "активации вашей учётной записи"
+
+msgctxt "accounts.email_otp"
+msgid "girişinizi təsdiqləmək"
+msgstr "подтверждения входа"
+
+msgctxt "accounts.email_otp"
+msgid "şifrəni sıfırlama əməliyyatını təsdiqləmək"
+msgstr "подтверждения сброса пароля"
+
+msgctxt "accounts.email_otp"
+msgid "admin girişinizi təsdiqləmək"
+msgstr "подтверждения входа администратора"
+
+msgctxt "accounts.email_otp"
+msgid "əməliyyatı təsdiqləmək"
+msgstr "подтверждения действия"
+
+msgctxt "accounts.email_otp"
+msgid "Emaili təsdiqlə"
+msgstr "Подтвердить email"
+
+msgctxt "accounts.email_otp"
+msgid "Girişi təsdiqlə"
+msgstr "Подтвердить вход"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrəni sıfırla"
+msgstr "Сбросить пароль"
+
+msgctxt "accounts.email_otp"
+msgid "Admin girişi təsdiqlə"
+msgstr "Подтвердить вход администратора"
+
+msgctxt "accounts.email_otp"
+msgid "OTP-ni təsdiqlə"
+msgstr "Подтвердить OTP"
+
+msgid "OTP kodu"
+msgstr "OTP-код"
+
+msgid "Salam %(name)s,"
+msgstr "Здравствуйте, %(name)s!"
+
+msgid ""
+"Salam <strong>%(name)s</strong>, hesabınız üçün şifrə yeniləmə sorğusu "
+"alındı."
+msgstr ""
+"Здравствуйте, <strong>%(name)s</strong>! Получен запрос на сброс пароля для "
+"вашей учётной записи."
+
+msgid "Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın."
+msgstr "Если вы не выполняли это действие, проигнорируйте это письмо."
+
+msgid "%(brand)s hesabınızı təsdiqləmək üçün aşağıdakı linki açın:"
+msgstr "Откройте ссылку ниже, чтобы подтвердить учётную запись %(brand)s:"
+
+msgid "Kod və link %(minutes)s dəqiqə etibarlıdır."
+msgstr "Код и ссылка действительны %(minutes)s минут."
+
+msgid "%(brand)s hesabınız üçün şifrə sıfırlama sorğusu alındı."
+msgstr "Получен запрос на сброс пароля для вашей учётной записи %(brand)s."
+
+msgid ""
+"Şifrəni yeniləmək üçün bu linki aça və ya saytda açıq olan şifrə bərpa "
+"səhifəsində OTP kodunu daxil edə bilərsiniz:"
+msgstr ""
+"Чтобы обновить пароль, откройте эту ссылку или введите OTP-код на открытой "
+"на сайте странице восстановления пароля:"
+
+msgid "Link və OTP kodu %(minutes)s dəqiqə etibarlıdır."
+msgstr "Ссылка и OTP-код действительны %(minutes)s минут."
+
+msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
+msgstr "OTP-код ниже — для %(action)s:"

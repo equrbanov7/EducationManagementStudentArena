@@ -1,3 +1,9 @@
+/* system_monitoring.js — Sistem monitorinqi paneli: tab/yükləmə/keş/avto-yeniləmə,
+ * qrafiklər (Chart.js), səhifələmə, insident əməlləri. Saf format köməkçiləri
+ * 2026-09-21-də `system_monitoring_format.js`-ə (namespace.format) çıxarıldı —
+ * modul ölçü büdcəsi; renderers `system_monitoring_renderers.js`-dədir.
+ * Şablon sırası: format → renderers → bu fayl (hamısı defer; sıra fail-soft).
+ */
 (function () {
     "use strict";
 
@@ -11,7 +17,7 @@
     }
 
     namespace.bootPending = function () {
-        if (typeof namespace.createRenderers !== "function") return;
+        if (typeof namespace.createRenderers !== "function" || !namespace.format) return;
         var roots = namespace.pendingRoots.splice(0);
         roots.forEach(function (pendingRoot) {
             if (!pendingRoot.isConnected || pendingRoot.dataset.smxInit) return;
@@ -57,86 +63,13 @@
             return scope.querySelector("#" + id);
         }
 
-        function escapeHtml(value) {
-            var node = document.createElement("div");
-            node.textContent = value == null ? "" : String(value);
-            return node.innerHTML;
-        }
-
-        function selected(value, current) {
-            return String(value) === String(current) ? " selected" : "";
-        }
-
-        function formatBytes(value) {
-            if (value == null || isNaN(value)) return "—";
-            var units = ["B", "KB", "MB", "GB", "TB"];
-            var index = 0;
-            value = Number(value);
-            while (value >= 1024 && index < units.length - 1) {
-                value /= 1024;
-                index += 1;
-            }
-            return value.toFixed(value >= 100 ? 0 : 1) + " " + units[index];
-        }
-
-        function formatDuration(seconds) {
-            if (seconds == null || isNaN(seconds)) return "—";
-            seconds = Math.floor(seconds);
-            var days = Math.floor(seconds / 86400);
-            var hours = Math.floor(seconds % 86400 / 3600);
-            var minutes = Math.floor(seconds % 3600 / 60);
-            if (days > 0) {
-                return interpolate(gettext("%(days)s gün %(hours)s saat"), { days: days, hours: hours }, true);
-            }
-            if (hours > 0) {
-                return interpolate(gettext("%(hours)s saat %(minutes)s dəq"), { hours: hours, minutes: minutes }, true);
-            }
-            return interpolate(gettext("%(minutes)s dəq %(seconds)s san"), { minutes: minutes, seconds: seconds % 60 }, true);
-        }
-
-        function percent(value) {
-            return value == null || isNaN(value) ? "—" : Number(value).toFixed(1) + "%";
-        }
-
-        function number(value, digits) {
-            return value == null || isNaN(value) ? "—" : Number(value).toFixed(digits == null ? 0 : digits);
-        }
-
-        function statusClass(value, warning, critical) {
-            return value == null ? "" : value >= critical ? "crit" : value >= warning ? "warn" : "ok";
-        }
-
-        function card(key, value, klass) {
-            return '<div class="smx-card ' + (klass || "") + '"><div class="k">' +
-                escapeHtml(key) + '</div><div class="v">' + value + "</div></div>";
-        }
-
-        function skeletonCards(count) {
-            var s = '<div class="smx-card"><span class="skeleton skeleton-line skeleton-line--sm"></span>' +
-                '<span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span></div>';
-            return '<div class="smx-cards" aria-hidden="true">' + new Array(count || 8).fill(s).join("") + "</div>";
-        }
-
-        function dot(up) {
-            return '<span class="smx-dot ' + (up == null ? "na" : up ? "ok" : "bad") + '"></span>';
-        }
-
-        function pill(text, klass) {
-            return '<span class="smx-pill ' + escapeHtml(klass) + '">' + escapeHtml(text) + "</span>";
-        }
-
-        function chartPanel(title, id) {
-            return '<div class="smx-panel"><h4>' + escapeHtml(title) + '</h4><div class="smx-chart">' +
-                '<canvas id="' + id + '"></canvas>' +
-                '<div class="smx-chart-empty" hidden>' + escapeHtml(gettext("Məlumat yoxdur")) +
-                "</div></div></div>";
-        }
-
-        function chartGrid(items) {
-            return '<div class="smx-grid2">' + items.map(function (item) {
-                return chartPanel(item[0], item[1]);
-            }).join("") + "</div>";
-        }
+        // Saf format köməkçiləri ayrı fayldadır (system_monitoring_format.js,
+        // 2026-09-21 bölgüsü) — eyni adlarla lokal alias, kod dəyişmir.
+        var F = namespace.format;
+        var escapeHtml = F.escapeHtml, selected = F.selected, formatBytes = F.formatBytes;
+        var formatDuration = F.formatDuration, percent = F.percent, number = F.number;
+        var statusClass = F.statusClass, card = F.card, skeletonCards = F.skeletonCards;
+        var dot = F.dot, pill = F.pill, chartGrid = F.chartGrid, rowsFrom = F.rowsFrom;
 
         function destroyCharts() {
             Object.keys(charts).forEach(function (key) {
@@ -241,10 +174,6 @@
             });
         }
 
-        function rowsFrom(data, legacyKey) {
-            if (Array.isArray(data.items)) return data.items;
-            return Array.isArray(data[legacyKey]) ? data[legacyKey] : [];
-        }
 
         function pagination(data, count) {
             var source = data.pagination || data;

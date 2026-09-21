@@ -41,8 +41,10 @@
         }
     }
 
-    var csrfToken = "";
-    if (window.EMSCore && typeof EMSCore.getCsrfToken === "function") {
+    // 2026-09-21: şablon tokeni `data-csrf-token` ilə verir (inline blokdakı
+    // `{{ csrf_token }}` ilə eyni dəyər); fallback-lar köhnə kimi qalır.
+    var csrfToken = root.dataset.csrfToken || "";
+    if (!csrfToken && window.EMSCore && typeof EMSCore.getCsrfToken === "function") {
         csrfToken = EMSCore.getCsrfToken();
     }
     if (!csrfToken) {

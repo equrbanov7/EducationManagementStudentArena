@@ -75626,3 +75626,121 @@ msgid ""
 msgstr ""
 "Öğretmen seçildiğinde liste onun ders yükü ve açılan dersleriyle, "
 "seçilmediğinde grubun ders planı ve açık derslerle sınırlıdır."
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s email təsdiqi"
+msgstr "%(brand)s e-posta doğrulama"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s giriş OTP kodu"
+msgstr "%(brand)s giriş için OTP kodu"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s şifrə sıfırlama OTP kodu"
+msgstr "%(brand)s şifre sıfırlama OTP kodu"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s admin giriş OTP kodu"
+msgstr "%(brand)s yönetici giriş OTP kodu"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s OTP kodu"
+msgstr "%(brand)s tek kullanımlık kodu"
+
+msgctxt "accounts.email_otp"
+msgid "Email təsdiqi"
+msgstr "E-posta doğrulama"
+
+msgctxt "accounts.email_otp"
+msgid "Giriş təsdiqi"
+msgstr "Giriş onayı"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrə sıfırlama təsdiqi"
+msgstr "Şifre sıfırlama onayı"
+
+msgctxt "accounts.email_otp"
+msgid "Admin giriş təsdiqi"
+msgstr "Yönetici giriş onayı"
+
+msgctxt "accounts.email_otp"
+msgid "OTP təsdiqi"
+msgstr "OTP onayı"
+
+msgctxt "accounts.email_otp"
+msgid "hesabınızı aktivləşdirmək"
+msgstr "hesabınızı etkinleştirmek"
+
+msgctxt "accounts.email_otp"
+msgid "girişinizi təsdiqləmək"
+msgstr "girişinizi onaylamak"
+
+msgctxt "accounts.email_otp"
+msgid "şifrəni sıfırlama əməliyyatını təsdiqləmək"
+msgstr "şifre sıfırlama işlemini onaylamak"
+
+msgctxt "accounts.email_otp"
+msgid "admin girişinizi təsdiqləmək"
+msgstr "yönetici girişinizi onaylamak"
+
+msgctxt "accounts.email_otp"
+msgid "əməliyyatı təsdiqləmək"
+msgstr "işlemi onaylamak"
+
+msgctxt "accounts.email_otp"
+msgid "Emaili təsdiqlə"
+msgstr "E-postayı onayla"
+
+msgctxt "accounts.email_otp"
+msgid "Girişi təsdiqlə"
+msgstr "Girişi onayla"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrəni sıfırla"
+msgstr "Şifreyi sıfırla"
+
+msgctxt "accounts.email_otp"
+msgid "Admin girişi təsdiqlə"
+msgstr "Yönetici girişini onayla"
+
+msgctxt "accounts.email_otp"
+msgid "OTP-ni təsdiqlə"
+msgstr "OTP'yi onayla"
+
+msgid "OTP kodu"
+msgstr "Tek kullanımlık kod (OTP)"
+
+msgid "Salam %(name)s,"
+msgstr "Merhaba %(name)s,"
+
+msgid ""
+"Salam <strong>%(name)s</strong>, hesabınız üçün şifrə yeniləmə sorğusu "
+"alındı."
+msgstr ""
+"Merhaba <strong>%(name)s</strong>, hesabınız için şifre sıfırlama isteği "
+"alındı."
+
+msgid "Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın."
+msgstr "Bu işlemi siz yapmadıysanız bu e-postayı dikkate almayın."
+
+msgid "%(brand)s hesabınızı təsdiqləmək üçün aşağıdakı linki açın:"
+msgstr "%(brand)s hesabınızı onaylamak için aşağıdaki bağlantıyı açın:"
+
+msgid "Kod və link %(minutes)s dəqiqə etibarlıdır."
+msgstr "Kod ve bağlantı %(minutes)s dakika geçerlidir."
+
+msgid "%(brand)s hesabınız üçün şifrə sıfırlama sorğusu alındı."
+msgstr "%(brand)s hesabınız için şifre sıfırlama isteği alındı."
+
+msgid ""
+"Şifrəni yeniləmək üçün bu linki aça və ya saytda açıq olan şifrə bərpa "
+"səhifəsində OTP kodunu daxil edə bilərsiniz:"
+msgstr ""
+"Şifreyi yenilemek için bu bağlantıyı açabilir veya sitede açık olan şifre "
+"kurtarma sayfasına OTP kodunu girebilirsiniz:"
+
+msgid "Link və OTP kodu %(minutes)s dəqiqə etibarlıdır."
+msgstr "Bağlantı ve OTP kodu %(minutes)s dakika geçerlidir."
+
+msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
+msgstr "Aşağıdaki OTP kodu %(action)s içindir:"

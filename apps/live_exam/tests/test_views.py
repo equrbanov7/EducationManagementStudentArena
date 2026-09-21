@@ -541,7 +541,8 @@ class LiveJoinTest(TestCase):
         self.assertIn("copy", response.context)
         self.assertContains(response, f'maxlength="{PIN_LENGTH}"', html=False)
         self.assertEqual(len(list(response.context["pin_slots"])), PIN_LENGTH)
-        self.assertContains(response, f"minPinLength: {MIN_PIN_LENGTH}")
+        # 2026-09-21: konfiq inline skriptdən `#pinEntryI18n` JSON data-adasına keçdi.
+        self.assertContains(response, f'"minPinLength": {MIN_PIN_LENGTH}')
         self.assertContains(response, 'inputmode="text"', html=False)
         self.assertContains(response, "css/pin_entry.css?v=live-pin-layout-20260408")
         self.assertContains(response, "js/pin_entry.js?v=live-pin-layout-20260408")

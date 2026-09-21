@@ -1,8 +1,8 @@
-Salam {{ recipient_name }},
+{% load i18n %}{% blocktrans with name=recipient_name %}Salam {{ name }},{% endblocktrans %}
 
-{{ otp_intro_action|capfirst }} üçün OTP kodunuz:
+{% blocktrans with action=otp_intro_action %}Aşağıdakı OTP kodu {{ action }} üçündür:{% endblocktrans %}
 {{ code }}
 
-Kod {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+{% blocktrans with minutes=otp_expiry_minutes %}Kod {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}
 
-Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.
+{% trans 'Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın.' %}

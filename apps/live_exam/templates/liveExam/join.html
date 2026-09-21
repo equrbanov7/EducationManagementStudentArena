@@ -107,25 +107,23 @@
 
     {{ remembered_player|json_script:"rememberedPlayerData" }}
     {{ session_settings|json_script:"joinSessionSettings" }}
-    <script nonce="{{ request.csp_nonce }}">
-        const CONFIG = {
-            pin: "{{ session.pin }}",
-            joinUrl: "{% url 'liveExam:join_enter' session.pin %}",
-            csrf: "{{ csrf_token }}",
-            resumeUrl: "{{ resume_url }}",
-            generatedNickname: "{{ generated_nickname|escapejs }}",
-            sessionSettings: JSON.parse(document.getElementById("joinSessionSettings").textContent)
-        };
-        CONFIG.rememberedPlayer = JSON.parse(document.getElementById("rememberedPlayerData").textContent);
-        window.LIVE_EXAM_JOIN_I18N = {
-            joinReady: "{% trans 'join_button' context 'live_exam.join' %}",
-            buttonJoining: "{% trans 'button_joining' context 'live_exam.join.js' %}",
-            errorUnknown: "{% trans 'error_unknown' context 'live_exam.join.js' %}",
-            errorConnection: "{% trans 'error_connection' context 'live_exam.join.js' %}",
-            nicknameRequired: "Nickname is required.",
-            nicknameTooLong: "Nickname is too long."
-        };
-    </script>
+    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `join_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    <script id="joinConfig" type="application/json">{
+        "pin": "{{ session.pin|escapejs }}",
+        "joinUrl": "{% url 'liveExam:join_enter' session.pin %}",
+        "csrf": "{{ csrf_token }}",
+        "resumeUrl": "{{ resume_url|escapejs }}",
+        "generatedNickname": "{{ generated_nickname|escapejs }}"
+    }</script>
+    <script id="joinI18n" type="application/json">{
+        "joinReady": "{% filter escapejs %}{% trans 'join_button' context 'live_exam.join' %}{% endfilter %}",
+        "buttonJoining": "{% filter escapejs %}{% trans 'button_joining' context 'live_exam.join.js' %}{% endfilter %}",
+        "errorUnknown": "{% filter escapejs %}{% trans 'error_unknown' context 'live_exam.join.js' %}{% endfilter %}",
+        "errorConnection": "{% filter escapejs %}{% trans 'error_connection' context 'live_exam.join.js' %}{% endfilter %}",
+        "nicknameRequired": "Nickname is required.",
+        "nicknameTooLong": "Nickname is too long."
+    }</script>
+    <script src="{% static 'js/join_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}"></script>

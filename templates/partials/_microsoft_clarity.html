@@ -1,3 +1,4 @@
+{% load static %}
 {% comment %}Microsoft Clarity session-replay.
 2026-09-13 (Codex audit §11): teq YALNIZ `microsoft_clarity_enabled` bayrağı ilə
 yüklənir — anonim səhifələr (və MICROSOFT_CLARITY_AUTHENTICATED=true olduqda
@@ -7,14 +8,6 @@ layihə id-si var VƏ (istifadəçi anonimdir VƏ YA kabinet izləməsi açıqd�
 maskanı açan (unmask) atribut HEÇ YERDƏ işlədilmir. CSP mənbələri dəyişmir
 (`config/settings/components/csp.py`).{% endcomment %}
 {% if microsoft_clarity_enabled %}
-<script nonce="{{ request.csp_nonce }}">
-    (function (c, l, a, r, i, t, y) {
-        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
-        t = l.createElement(r);
-        t.async = 1;
-        t.src = "https://www.clarity.ms/tag/" + i;
-        y = l.getElementsByTagName(r)[0];
-        y.parentNode.insertBefore(t, y);
-    })(window, document, "clarity", "script", "{{ microsoft_clarity_project_id|escapejs }}");
-</script>
+{# Teq yükləyicisi xarici faylda (2026-09-21, CSP unsafe-inline yolu bağlanır); layihə id-si data-atributdan oxunur. #}
+<script src="{% static 'js/microsoft_clarity.js' %}?v=20260921-1" data-clarity-id="{{ microsoft_clarity_project_id }}"></script>
 {% endif %}
