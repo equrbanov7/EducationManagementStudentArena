@@ -28,18 +28,33 @@ class SecurityHeadersSnapshotTests(TestCase):
         self.assertEqual(response.headers.get("Cross-Origin-Opener-Policy"), "same-origin")
         self.assertEqual(response.headers.get("Cross-Origin-Resource-Policy"), "same-origin")
 
-    def test_csp_present_with_nonce_and_no_unsafe_inline_scripts(self):
+    @staticmethod
+    def _inline_executable_scripts(html: str) -> list:
+        """`src`-siz, JSON/LD+JSON olmayan `<script>` teqləri — CSP altında YALNIZ nonce ilə icra olunar."""
+        import re
+
+        return [
+            tag
+            for tag in re.findall(r"<script\b[^>]*>", html)
+            if "src=" not in tag and "application/json" not in tag and "ld+json" not in tag
+        ]
+
+    def test_csp_script_src_has_no_unsafe_inline(self):
         response = self._get_login()
         csp = response.headers.get("Content-Security-Policy", "")
         self.assertIn("script-src", csp)
-        self.assertIn("'nonce-", csp)
         # script-src daxilində 'unsafe-inline' QADAĞANDIR (yalnız style-src-attr
         # keçid dövrü üçün açıqdır) — reqressiyaya qarşı qoruyucu.
         script_src = [d for d in csp.split(";") if d.strip().startswith("script-src")]
         self.assertTrue(script_src)
         self.assertNotIn("'unsafe-inline'", script_src[0])
 
-    def test_csp_nonce_is_actually_used_in_markup(self):
+    def test_csp_nonce_is_used_when_present_and_inline_scripts_carry_it(self):
+        """2026-09-21: bütün skriptlər xarici fayldadır (`src=`), konfiq JSON
+        data-adalarındadır. django-csp nonce-u başlığa yalnız şablon
+        `request.csp_nonce`-a müraciət edəndə yazır — inline skripti olmayan
+        səhifədə nonce OLMAYA BİLƏR. Qayda: başlıqda nonce varsa markup-da
+        işlənməlidir; markup-dakı hər icra olunan inline skript nonce daşımalıdır."""
         response = self._get_login()
         csp = response.headers.get("Content-Security-Policy", "")
         nonce = None
@@ -47,8 +62,13 @@ class SecurityHeadersSnapshotTests(TestCase):
             if part.startswith("'nonce-"):
                 nonce = part[len("'nonce-") :].rstrip("'")
                 break
-        self.assertTrue(nonce, "CSP başlığında nonce tapılmadı")
-        self.assertIn(f'nonce="{nonce}"', response.content.decode("utf-8"))
+        html = response.content.decode("utf-8")
+        inline = self._inline_executable_scripts(html)
+        if nonce:
+            self.assertIn(f'nonce="{nonce}"', html)
+        else:
+            self.assertEqual(inline, [], f"nonce-suz inline skript: {inline}")
+        self.assertEqual([tag for tag in inline if "nonce=" not in tag], [], "nonce daşımayan inline skript var")
 
     def test_request_id_echoed_for_tracing(self):
         response = self._get_login()
