@@ -84,7 +84,12 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260910-1">
     {% endif %}
     {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+    {% comment %}Kataloq üslubu modul ölçüsü qaydasına (SOFT_CAP=600) görə üçə
+    bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: hero/filtr/toplu
+    əməl → cədvəl/boş vəziyyət → dialoq/çekmecə/responsiv, sonra analitika.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory_table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory_dialogs.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
     {% endif %}
     {% if 'people-students' in allowed_sections %}
@@ -139,6 +144,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
+    <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2b.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}

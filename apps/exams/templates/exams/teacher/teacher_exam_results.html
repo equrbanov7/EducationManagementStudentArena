@@ -48,7 +48,7 @@
         </p>
 
         {% if exam_is_deleted %}
-        <div class="alert alert-warning d-flex align-items-center gap-2 mt-2" role="status" style="border-radius:12px;">
+        <div class="alert alert-warning d-flex align-items-center gap-2 mt-2 ter-alert--rounded" role="status">
             <i class="fas fa-trash-can-arrow-up"></i>
             <span>{% trans "deleted_exam_readonly_notice" context "exams.view.results.message" %}
                 <a href="{% url 'exams:deleted_exams_list' %}" class="alert-link">{% trans "back_to_trash" context "exams.view.results.message" %}</a>

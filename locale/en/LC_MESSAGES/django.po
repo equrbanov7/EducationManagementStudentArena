@@ -76063,3 +76063,121 @@ msgid ""
 msgstr ""
 "With a teacher selected the list is limited to their teaching load and "
 "offerings; otherwise to the group's curriculum and open course offerings."
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s email təsdiqi"
+msgstr "%(brand)s email verification"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s giriş OTP kodu"
+msgstr "%(brand)s login OTP code"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s şifrə sıfırlama OTP kodu"
+msgstr "%(brand)s password reset OTP code"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s admin giriş OTP kodu"
+msgstr "%(brand)s admin login OTP code"
+
+msgctxt "accounts.email_otp"
+msgid "%(brand)s OTP kodu"
+msgstr "%(brand)s OTP code"
+
+msgctxt "accounts.email_otp"
+msgid "Email təsdiqi"
+msgstr "Email verification"
+
+msgctxt "accounts.email_otp"
+msgid "Giriş təsdiqi"
+msgstr "Login confirmation"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrə sıfırlama təsdiqi"
+msgstr "Password reset confirmation"
+
+msgctxt "accounts.email_otp"
+msgid "Admin giriş təsdiqi"
+msgstr "Admin login confirmation"
+
+msgctxt "accounts.email_otp"
+msgid "OTP təsdiqi"
+msgstr "OTP confirmation"
+
+msgctxt "accounts.email_otp"
+msgid "hesabınızı aktivləşdirmək"
+msgstr "activating your account"
+
+msgctxt "accounts.email_otp"
+msgid "girişinizi təsdiqləmək"
+msgstr "confirming your login"
+
+msgctxt "accounts.email_otp"
+msgid "şifrəni sıfırlama əməliyyatını təsdiqləmək"
+msgstr "confirming the password reset"
+
+msgctxt "accounts.email_otp"
+msgid "admin girişinizi təsdiqləmək"
+msgstr "confirming your admin login"
+
+msgctxt "accounts.email_otp"
+msgid "əməliyyatı təsdiqləmək"
+msgstr "confirming the action"
+
+msgctxt "accounts.email_otp"
+msgid "Emaili təsdiqlə"
+msgstr "Confirm email"
+
+msgctxt "accounts.email_otp"
+msgid "Girişi təsdiqlə"
+msgstr "Confirm login"
+
+msgctxt "accounts.email_otp"
+msgid "Şifrəni sıfırla"
+msgstr "Reset password"
+
+msgctxt "accounts.email_otp"
+msgid "Admin girişi təsdiqlə"
+msgstr "Confirm admin login"
+
+msgctxt "accounts.email_otp"
+msgid "OTP-ni təsdiqlə"
+msgstr "Confirm OTP"
+
+msgid "OTP kodu"
+msgstr "OTP code"
+
+msgid "Salam %(name)s,"
+msgstr "Hello %(name)s,"
+
+msgid ""
+"Salam <strong>%(name)s</strong>, hesabınız üçün şifrə yeniləmə sorğusu "
+"alındı."
+msgstr ""
+"Hello <strong>%(name)s</strong>, a password reset request was received for "
+"your account."
+
+msgid "Bu əməliyyatı siz etməmisinizsə, bu emaili nəzərə almayın."
+msgstr "If you did not request this, please ignore this email."
+
+msgid "%(brand)s hesabınızı təsdiqləmək üçün aşağıdakı linki açın:"
+msgstr "Open the link below to confirm your %(brand)s account:"
+
+msgid "Kod və link %(minutes)s dəqiqə etibarlıdır."
+msgstr "The code and the link are valid for %(minutes)s minutes."
+
+msgid "%(brand)s hesabınız üçün şifrə sıfırlama sorğusu alındı."
+msgstr "A password reset request was received for your %(brand)s account."
+
+msgid ""
+"Şifrəni yeniləmək üçün bu linki aça və ya saytda açıq olan şifrə bərpa "
+"səhifəsində OTP kodunu daxil edə bilərsiniz:"
+msgstr ""
+"To reset your password, open this link or enter the OTP code on the password"
+" recovery page that is open on the site:"
+
+msgid "Link və OTP kodu %(minutes)s dəqiqə etibarlıdır."
+msgstr "The link and the OTP code are valid for %(minutes)s minutes."
+
+msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
+msgstr "The OTP code below is for %(action)s:"
