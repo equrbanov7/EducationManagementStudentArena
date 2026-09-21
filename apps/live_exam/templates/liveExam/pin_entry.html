@@ -112,14 +112,14 @@
     </div>
 
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script nonce="{{ request.csp_nonce }}">
-        window.LIVE_PIN_ENTRY_I18N = {
-            invalidPin: "{{ copy.invalid_pin|escapejs }}",
-            loading: "{{ copy.loading|escapejs }}",
-            pinLength: {{ pin_length }},
-            minPinLength: {{ min_pin_length|default:6 }}
-        };
-    </script>
+    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `pin_entry_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    <script id="pinEntryI18n" type="application/json">{
+        "invalidPin": "{{ copy.invalid_pin|escapejs }}",
+        "loading": "{{ copy.loading|escapejs }}",
+        "pinLength": {{ pin_length }},
+        "minPinLength": {{ min_pin_length|default:6 }}
+    }</script>
+    <script src="{% static 'js/pin_entry_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'js/pin_entry.js' %}?v=live-pin-layout-20260408"></script>
 </body>
 </html>

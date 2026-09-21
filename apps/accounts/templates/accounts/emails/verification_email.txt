@@ -1,10 +1,10 @@
-Salam {{ recipient_name }},
+{% load i18n %}{% blocktrans with name=recipient_name %}Salam {{ name }},{% endblocktrans %}
 
-{% if verification_link %}{{ brand }} hesabınızı təsdiqləmək üçün aşağıdakı linki açın:
+{% if verification_link %}{% blocktrans %}{{ brand }} hesabınızı təsdiqləmək üçün aşağıdakı linki açın:{% endblocktrans %}
 {{ verification_link }}
 {% endif %}
 
-OTP kodu:
+{% trans 'OTP kodu' %}:
 {{ code }}
 
-Kod və link {{ otp_expiry_minutes }} dəqiqə etibarlıdır.
+{% blocktrans with minutes=otp_expiry_minutes %}Kod və link {{ minutes }} dəqiqə etibarlıdır.{% endblocktrans %}

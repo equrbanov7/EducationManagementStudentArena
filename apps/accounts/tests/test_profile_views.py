@@ -597,14 +597,17 @@ class ProfileViewTest(TestCase):
             html=False,
         )
 
-    def test_profile_language_switcher_inline_script_uses_csp_nonce(self):
+    def test_profile_language_switcher_script_is_external_csp_safe(self):
+        # 2026-09-21: dil seçicinin skripti inline nonce blokundan xarici fayla
+        # (static/js/language_switcher.js) çıxarıldı — səhifədə inline JS gövdəsi
+        # yoxdur, yalnız `<script src>`; `document.currentScript` həmin faylda qalır.
         self.client.login(username="testuser", password="testpass123")
 
         response = self.client.get(reverse("accounts:profile"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '<script nonce="', html=False)
-        self.assertContains(response, "document.currentScript", html=False)
+        self.assertContains(response, "js/language_switcher.js", html=False)
+        self.assertNotContains(response, "document.currentScript", html=False)
 
     def test_profile_organization_access_rows_exclude_pending_owned_orgs(self):
         active_org = Organization.objects.create(

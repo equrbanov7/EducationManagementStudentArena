@@ -1,0 +1,213 @@
+/* [BÖLÜNMÜŞ 2026-09-21] `navbar.css`-dən (983 sətir, sətir 393–601) mexaniki
+   çıxarılıb — 2/3-ci hissə; qaydalar və sıra dəyişdirilməyib (SOFT_CAP 600).
+   YÜKLƏNMƏ SIRASI KASKADA görə saxlanılmalıdır: navbar.css → navbar_mobile.css → navbar_menus.css. */
+
+/* --- MOBİL NAVİGASİYA (Overlay və Panel) Stilləri --- */
+
+/* Mobil Overlay - Bütün ekranı tutan yarı-şəffaf qara fon */
+.mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 998; /* Menyudan bir qədər aşağıda */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-nav-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Mobil Menyu Paneli - Sağdan gələn menyu */
+.mobile-nav-panel { /* Mobil menyu panelinin sinifi */
+    position: fixed;
+    top: 0;
+    right: -300px; /* Başlanğıcda ekranın kənarında gizli */
+    width: 300px;
+    height: 100%;
+    background: var(--card-bg, var(--ems-neutral-0));
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 999; /* Overlaydən yuxarıda */
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    transition: right 0.3s ease;
+    overflow-y: auto; /* Məzmun çox olsa scroll olsun */
+}
+
+.mobile-nav-panel.is-open {
+    right: 0; /* Ekranın sağına gəlsin */
+}
+
+/* Mobil menyu elementləri */
+.mobile-nav-panel .blog-header__nav-item {
+    padding: 8px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.mobile-nav-panel .blog-header__nav-item:last-child {
+    border-bottom: none;
+}
+
+.mobile-nav-panel .blog-header__nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-dark, var(--ems-neutral-800));
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.mobile-nav-panel .blog-header__nav-link:hover {
+    color: var(--primary-color, var(--ems-primary-600));
+    background: rgba(37, 99, 235, 0.06);
+}
+
+.mobile-nav-panel .blog-header__nav-link--exams {
+    color: var(--ems-primary-700);
+    background: rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    font-weight: 700;
+}
+
+.mobile-nav-panel .blog-header__nav-link--exams:hover,
+.mobile-nav-panel .blog-header__nav-link--exams.blog-header__nav-link--active {
+    color: var(--ems-neutral-0);
+    background: var(--primary-color, var(--ems-primary-600));
+    border-color: var(--primary-color, var(--ems-primary-600));
+    box-shadow: none;
+}
+
+.mobile-nav-panel .blog-header__nav-link--primary {
+    background: var(--primary-color, var(--ems-primary-600));
+    color: white !important;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    text-align: center;
+    width: calc(100% - 50px);
+    margin-left: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.mobile-nav-panel .blog-header__nav-link--primary:hover {
+    background-color: var(--ems-primary-800);
+}
+
+.mobile-nav-panel .blog-header__nav-link--active {
+    color: var(--primary-color, var(--ems-primary-600));
+    background: rgba(37, 99, 235, 0.1);
+    box-shadow: inset 3px 0 0 var(--primary-color, var(--ems-primary-600));
+    font-weight: 700;
+}
+
+.mobile-nav-panel .blog-header__nav-link--active::after {
+    display: none;
+}
+
+.mobile-nav-panel .blog-header__nav-link--logout {
+    color: var(--ems-danger-strong);
+    background: #fef2f2;
+    border: 1px solid var(--ems-danger-200);
+}
+
+.mobile-nav-panel .blog-header__nav-link--logout:hover {
+    color: #991b1b;
+    background: var(--ems-danger-100);
+}
+
+.mobile-nav-panel .blog-header__nav-item--language {
+    border-bottom: none;
+    padding-top: 18px;
+    padding-bottom: 8px;
+}
+
+/* --- Responsive Media Queries --- */
+
+/* Tablet breakpoint: 769-1023px — kompakt spacing */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .blog-header__nav-list--desktop .blog-header__nav-item a {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+    .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams {
+        padding: 8px 14px;
+    }
+    .blog-header__user-name { display: none; }
+}
+
+@media (max-width: 768px) {
+    .blog-header__toggle {
+        display: flex; /* Mobil-də burgeri göstər */
+    }
+    .blog-header__nav-list--desktop {
+        display: none;
+    }
+    .blog-header__guest-actions {
+        display: none;
+    }
+    .blog-header__auth > .language-switcher {
+        display: none;
+    }
+    /* Create actions live in the mobile drawer, so hide the desktop dropdown. */
+    .blog-header__create {
+        display: none;
+    }
+    /* Mobil-də uzun istifadəçi adı burgeri ekrandan kənara itələyirdi.
+       Profil/çıxış onsuz da burger menyusunda var; başlıqda yalnız avatar
+       (+ caret) saxlayırıq ki, burger həmişə görünsün. */
+    .blog-header__user-name {
+        display: none;
+    }
+    /* Mobil menyu paneli və overlay JavaScript tərəfindən idarə olunacaq */
+}
+
+@media (min-width: 769px) {
+    .blog-header__toggle {
+        display: none;
+    }
+    .blog-header__nav-list--desktop {
+        display: flex;
+    }
+    .blog-header__create {
+        display: inline-flex;
+    }
+
+    .blog-header__auth {
+        gap: 12px;
+    }
+
+    /* Desktop-da mobil menyu elementlərini tamamilə gizlət */
+    .mobile-nav-overlay,
+    .mobile-nav-panel {
+        display: none;
+    }
+}
+
+/* prefers-reduced-motion: tranzisiyaları söndür */
+@media (prefers-reduced-motion: reduce) {
+    .blog-header,
+    .blog-header__nav-list--desktop .blog-header__nav-item a,
+    .blog-header__nav-list--desktop .blog-header__nav-item .blog-header__nav-link--exams,
+    .blog-header__create-toggle,
+    .blog-header__create-menu,
+    .blog-header__create-item,
+    .blog-header__user-caret,
+    .mobile-nav-panel,
+    .mobile-nav-overlay,
+    .blog-header__nav-link--active::after {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+

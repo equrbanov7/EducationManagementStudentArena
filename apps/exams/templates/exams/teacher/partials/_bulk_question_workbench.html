@@ -449,7 +449,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                     <input type="hidden" name="action" value="download_report"/>
                     {% if navigation_from_section %}<input type="hidden" name="from_section" value="{{ navigation_from_section }}">{% endif %}
                     {% if navigation_return_to %}<input type="hidden" name="return_to" value="{{ navigation_return_to }}">{% endif %}
-                    <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+                    <textarea name="raw_text" class="u-hidden">{{ raw_text|escape }}</textarea>
                     <button type="submit" class="btn-action download-report">
                         <i class="fas fa-file-excel"></i> {% trans "Hesabatı yüklə" context "exams.template.test_question_bank" %}
                     </button>
@@ -529,7 +529,7 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
             {% if wb_show_language %}<input type="hidden" name="language" value="{{ wb_selected_language }}">{% endif %}
             {% if wb_show_format %}<input type="hidden" name="q_format" value="{{ wb_format|default:'test' }}">{% endif %}
 
-            <textarea name="raw_text" style="display:none;">{{ raw_text|escape }}</textarea>
+            <textarea name="raw_text" class="u-hidden">{{ raw_text|escape }}</textarea>
             <input type="hidden" name="selected_indices" id="selectedIndicesInput" value="">
             <input type="hidden" name="points_payload" id="pointsPayloadInput" value="">
             {# Düstur/şəkil yığını token-i: preview-da yaranır, save-də şəkilləri bağlamaq üçün ötürülür #}

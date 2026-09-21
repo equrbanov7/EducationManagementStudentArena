@@ -567,3 +567,6 @@
         padding: 0 16px;
     }
 }
+
+/* Variant şəkli — inline style əvəzi (CSP). */
+.opt-text__img { display: block; max-width: 100%; height: auto; margin-top: 4px; }

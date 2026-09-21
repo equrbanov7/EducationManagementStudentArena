@@ -165,27 +165,33 @@ else:
     # plandan özü tənzimlənir; cədvəl modalının fənn siyahısı müəllimə görə gəlir.
     print()
     print("== Funksional: sillabus həftə cədvəli (plan → sətir/növ/seçim)")
+    # ORM sorğuları RLS altındadır — `manage.py shell`-də təşkilat konteksti
+    # olmadığından sətir qayıtmır (2026-09-21 ilk zond «yoxdur» dedi). Oxu-yalnız
+    # zond üçün RLS keçilir (`core.rls.bypass_rls`), heç nə yazılmır.
+    from core.rls import bypass_rls
+
     try:
         from apps.accounts.views.syllabus import editor_panels
         from apps.syllabus.models import SyllabusVersion
         from apps.syllabus.public import SectionKey, expected_week_rows, section_data_map
 
-        versions = (
-            SyllabusVersion.objects.exclude(plan_hours={})
-            .exclude(plan_hours__isnull=True)
-            .select_related("syllabus__subject")
-            .order_by("-updated_at")[:4]
-        )
-        for version in versions:
-            data = section_data_map(version).get(SectionKey.WEEK.value, {})
-            rows = editor_panels.week_rows(data, (), version.plan_hours)
-            totals = editor_panels.hour_totals(rows, version.plan_hours)
-            choices = rows[0]["cells"][0]["choices"] if rows and rows[0]["cells"] else "-"
-            print(
-                f"   {version.syllabus.subject.code:<10} {version.status:<9} plan={version.plan_hours} → "
-                f"sətir={len(rows)} (gözlənilən {expected_week_rows(version.plan_hours) or 16}) "
-                f"növlər={totals['kinds']} seçim={choices}"
+        with bypass_rls():
+            versions = list(
+                SyllabusVersion.objects.exclude(plan_hours={})
+                .exclude(plan_hours__isnull=True)
+                .select_related("syllabus__subject")
+                .order_by("-updated_at")[:4]
             )
+            for version in versions:
+                data = section_data_map(version).get(SectionKey.WEEK.value, {})
+                rows = editor_panels.week_rows(data, (), version.plan_hours)
+                totals = editor_panels.hour_totals(rows, version.plan_hours)
+                choices = rows[0]["cells"][0]["choices"] if rows and rows[0]["cells"] else "-"
+                print(
+                    f"   {version.syllabus.subject.code:<10} {version.status:<9} plan={version.plan_hours} → "
+                    f"sətir={len(rows)} (gözlənilən {expected_week_rows(version.plan_hours) or 16}) "
+                    f"növlər={totals['kinds']} seçim={choices}"
+                )
         if not versions:
             print("   plan saatı olan sillabus versiyası yoxdur")
     except Exception as exc:  # noqa: BLE001
@@ -196,19 +202,23 @@ else:
         from apps.registrar import schedule_editor
         from apps.registrar.models import CourseOffering
 
-        off = (
-            CourseOffering.objects.filter(is_active=True, period__is_current=True, instructor__isnull=False)
-            .select_related("instructor", "organization", "period", "group")
-            .order_by("-created_at")
-            .first()
-        )
+        with bypass_rls():
+            off = (
+                CourseOffering.objects.filter(is_active=True, period__is_current=True, instructor__isnull=False)
+                .select_related("instructor", "organization", "period", "group")
+                .order_by("-created_at")
+                .first()
+            )
+            if off is not None:
+                base = schedule_editor.allowed_subjects(
+                    organization=off.organization, group=off.group, period=off.period
+                )
+                mine = schedule_editor.allowed_subjects(
+                    organization=off.organization, group=off.group, period=off.period, instructor=off.instructor
+                )
         if off is None:
             print("   müəllimli aktiv açılış yoxdur")
         else:
-            base = schedule_editor.allowed_subjects(organization=off.organization, group=off.group, period=off.period)
-            mine = schedule_editor.allowed_subjects(
-                organization=off.organization, group=off.group, period=off.period, instructor=off.instructor
-            )
             own_present = any(row["id"] == str(off.subject_id) for row in mine)
             print(
                 f"   qrup={off.group} müəllim=#{off.instructor_id} → qrup siyahısı {len(base)} fənn, "
