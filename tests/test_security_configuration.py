@@ -59,9 +59,10 @@ class SecurityConfigurationTest(TestCase):
         response = self.client.get(reverse("subscribe"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'src = "https://www.clarity.ms/tag/" + i;')
-        self.assertContains(response, '"x2xrg3vw2i"')
-        self.assertContains(response, '<script nonce="', html=False)
+        # 2026-09-21: teq yükləyicisi inline nonce blokundan xarici fayla çıxarıldı
+        # (`static/js/microsoft_clarity.js`), layihə id-si `data-clarity-id`-dədir.
+        self.assertContains(response, "js/microsoft_clarity.js", html=False)
+        self.assertContains(response, 'data-clarity-id="x2xrg3vw2i"', html=False)
 
         directives = self._parse_csp(response)
         self.assertIn("https://www.clarity.ms", directives["script-src"])
