@@ -1,4 +1,4 @@
-"""Kollokvium pəncərəsi gating servisi.
+"""Kollokvium / midterm pəncərəsi gating servisi.
 
 Jurnal (müəllim bal yazır) və İmtahan Mərkəzi (pəncərəni idarə edir) bu servisi
 paylaşır. Bir yerdə saxlanır ki, "açıqdır?" qərarı hər iki tərəfdə eyni olsun.
@@ -128,6 +128,8 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
 
     Qaydalar:
 
+    0. **Rejim.** 2026/2027-dən (midterm rejimi, :mod:`apps.registrar.interim_assessment`)
+       dövrdə YALNIZ bir pəncərə var — ``k_index=0`` («Midterm»); keçmiş dövrlərdə K1–K3.
     1. **Keçmiş bağlanış — yalnız YARADILIŞDA qadağan.** Bağlanış tarixi
        bugündən əvvəldirsə və bu YENİ sətirdirsə (``is_new``), rədd et. Artıq
        mövcud (işləyən/bitmiş) pəncərəni UZATMAQ (redaktə) sərbətdir —
@@ -141,7 +143,17 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
 
     ``KollokviumWindowRuleError`` qaldırır (view bunu forma xətasına çevirir).
     """
+    from apps.registrar import interim_assessment
+
     KollokviumWindow = django_apps.get_model("registrar", "KollokviumWindow")
+
+    spec = interim_assessment.spec_for_period(period, organization)
+    if not 0 <= int(k_index) < spec.count:
+        if spec.is_midterm:
+            raise KollokviumWindowRuleError(
+                "Bu dövrdə 3 kollokvium yoxdur — tək Midterm (0–20 bal) pəncərəsi təyin olunur."
+            )
+        raise KollokviumWindowRuleError(f"Kollokvium nömrəsi K1–K{spec.count} aralığında olmalıdır.")
 
     if is_new and closes_on < today:
         raise KollokviumWindowRuleError(

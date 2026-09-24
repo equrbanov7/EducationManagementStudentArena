@@ -285,7 +285,7 @@ def save_component_scores(
             if component.kind == ComponentKind.KOLLOKVIUM and not bypass_edit_window:
                 if require_all:
                     raise ValidationError(
-                        "Kollokvium balı yalnız açıq imtahan pəncərəsindən yazıla bilər.",
+                        "Midterm/kollokvium balı yalnız İmtahan Mərkəzinin açıq pəncərəsindən yazıla bilər.",
                         code="component_score_batch_rejected",
                     )
                 continue
@@ -334,7 +334,7 @@ def save_component_scores(
                 from apps.registrar import journal_notifications as jn
 
                 kind = jn.EVENT_KOLLOKVIUM if component.kind == ComponentKind.KOLLOKVIUM else jn.EVENT_SCORE
-                notify_events.append({"enrollment": enrollment, "kind": kind, "score": score})
+                notify_events.append({"enrollment": enrollment, "kind": kind, "score": score, "label": component.name})
             written += 1
             processed += 1
     if require_all and processed != len(entries):

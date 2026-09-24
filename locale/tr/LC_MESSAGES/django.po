@@ -75744,3 +75744,107 @@ msgstr "Bağlantı ve OTP kodu %(minutes)s dakika geçerlidir."
 
 msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
 msgstr "Aşağıdaki OTP kodu %(action)s içindir:"
+
+msgctxt "registrar.interim"
+msgid "Kollokvium"
+msgstr "Kolokyum"
+
+msgctxt "registrar.interim"
+msgid "Midterm"
+msgstr "Vize"
+
+msgctxt "registrar.interim"
+msgid "3 kollokvium (hər biri 0–10 bal)"
+msgstr "3 kolokyum (her biri 0–10 puan)"
+
+msgctxt "registrar.interim"
+msgid "Midterm — aralıq imtahan (0–20 bal)"
+msgstr "Vize — ara sınav (0–20 puan)"
+
+msgid ""
+"%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
+"aktivləşdirməlidir."
+msgstr ""
+"%(title)s puan giriş penceresi açık değil — Sınav Merkezi aralığı "
+"etkinleştirmelidir."
+
+msgid "Pəncərəsi bağlı olan sütunların balı yazılmadı."
+msgstr "Penceresi kapalı sütunların puanları kaydedilmedi."
+
+msgid "%(title)s balları yadda saxlanıldı (%(n)s xana)."
+msgstr "%(title)s puanları kaydedildi (%(n)s hücre)."
+
+msgctxt "registrar.kollokvium_notify"
+msgid "Kollokvium K%(n)s"
+msgstr "Kolokyum K%(n)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s"
+msgstr "%(name)s puan giriş penceresi açıldı: %(opens)s–%(closes)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi bağlandı"
+msgstr "%(name)s puan giriş penceresi kapandı"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s"
+msgstr ""
+"%(name)s puan giriş penceresinin tarihleri değişti: %(opens)s–%(closes)s"
+
+msgctxt "registrar.notify"
+msgid "Kollokvium"
+msgstr "Kolokyum"
+
+msgctxt "registrar.notify"
+msgid "%(label)s balı yazıldı: %(score)s"
+msgstr "%(label)s puanı girildi: %(score)s"
+
+msgctxt "registrar.journal"
+msgid "Midterm"
+msgstr "Vize"
+
+msgctxt "registrar.journal"
+msgid "MIDTERM"
+msgstr "VİZE"
+
+msgctxt "registrar.journal"
+msgid "şkala 0–20"
+msgstr "ölçek 0–20"
+
+msgctxt "registrar.journal"
+msgid "Köhnə qeyd"
+msgstr "Eski kayıt"
+
+msgctxt "registrar.journal"
+msgid "aralıq imtahan balı"
+msgstr "ara sınav puanı"
+
+msgctxt "registrar.journal"
+msgid "hələ yazılmayıb"
+msgstr "henüz girilmedi"
+
+msgctxt "registrar.journal"
+msgid ""
+"Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi "
+"təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; "
+"bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+msgstr ""
+"Vize ara sınavdır, 0–20 puan. Puan giriş aralığını Sınav Merkezi belirler. "
+"Pencere açıkken puanı serbestçe girebilir/değiştirebilirsiniz; kapandıktan "
+"sonra kilitlenir. Boş bırakılan puan 0 sayılır."
+
+msgctxt "registrar.journal"
+msgid ""
+"Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin "
+"aralığı aktivləşdirməsini gözləyin."
+msgstr ""
+"Şu anda açık vize penceresi yok — puan girmek için Sınav Merkezinin aralığı "
+"etkinleştirmesini bekleyin."
+
+msgctxt "registrar.journal"
+msgid ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm "
+"+ sərbəst iş, tavan"
+msgstr ""
+"Sınav öncesi puan, derginin kanonik giriş puanıdır (ders puanları + vize + "
+"serbest çalışma, tavan"

@@ -1,14 +1,22 @@
 {% load i18n %}
-{% comment %}Yekun qiymət tabı (mockup): Davamiyyət/10 · Kollokvium 1-3 + orta ·
+{% comment %}Yekun qiymət tabı (mockup): Davamiyyət/10 · aralıq qiymətləndirmə ·
 Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qədər bal.
+Aralıq qiymətləndirmə: 2026/2027-dən ayrıca «Midterm /20» sütunu; keçmiş dövrlərdə
+«SEMİNAR» qrupunun içində Kollokvium 1-3 + orta (köhnə forma olduğu kimi).
 İmtahana qədər bal kanonik entry_score-dan gəlir; sütunlar informativdir.{% endcomment %}
+{% with midterm=final_breakdown.interim.is_midterm %}
 <div class="journal-grid-wrap jd2-grid-wrap" data-journal-grid>
     <table class="jd2-table jd2-fbtable">
         <thead>
             <tr>
                 <th rowspan="2" class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                 <th rowspan="2">{% trans "DAVAMİYYƏT" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
+                {% if midterm %}
+                {% for c in final_breakdown.kolls %}<th rowspan="2" class="jd2-fb-midterm">{% if forloop.first %}{% trans "MIDTERM" context "registrar.journal" %}{% else %}{{ c.name }}{% endif %}<div class="jd2-th-sub">/{{ c.max_score }}</div></th>{% endfor %}
+                <th class="jd2-fb-semhead">{% trans "SEMİNAR" context "registrar.journal" %}</th>
+                {% else %}
                 <th colspan="{{ final_breakdown.kolls|length|add:2 }}" class="jd2-fb-semhead">{% trans "SEMİNAR" context "registrar.journal" %}</th>
+                {% endif %}
                 <th rowspan="2">{% trans "SƏRBƏST İŞ" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
                 <th rowspan="2">{% trans "LAB. İŞİ" context "registrar.journal" %}</th>
                 <th rowspan="2">{% trans "KURS İŞİ" context "registrar.journal" %}<div class="jd2-th-sub">/100</div></th>
@@ -16,8 +24,10 @@ Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qəd�
                 <th rowspan="2" class="jd2-fb-qeyd">{% trans "QEYD" context "registrar.journal" %}</th>
             </tr>
             <tr>
+                {% if not midterm %}
                 {% for c in final_breakdown.kolls %}<th class="jd2-fb-sub">{{ c.name }}</th>{% endfor %}
                 <th class="jd2-fb-sub">{% trans "Kollokvium orta balı" context "registrar.journal" %}</th>
+                {% endif %}
                 <th class="jd2-fb-sub">{% trans "Seminarın orta balı" context "registrar.journal" %}</th>
             </tr>
         </thead>
@@ -29,8 +39,12 @@ Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qəd�
                     <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
                 </td>
                 <td class="jd2-fb-num {% if row.dav is None %}jd2-fb-dim{% endif %}">{% if row.dav is not None %}{{ row.dav|floatformat:'-2' }}{% else %}—{% endif %}</td>
+                {% if midterm %}
+                {% for v in row.kvals %}<td class="jd2-fb-num{% if forloop.first %} jd2-fb-accent{% else %} jd2-fb-dim{% endif %}">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
+                {% else %}
                 {% for v in row.kvals %}<td class="jd2-fb-num jd2-fb-dim">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
                 <td class="jd2-fb-num jd2-fb-accent">{% if row.korta is not None %}{{ row.korta|floatformat:'-1' }}{% else %}—{% endif %}</td>
+                {% endif %}
                 <td class="jd2-fb-num">{% if row.sorta is not None %}{{ row.sorta|floatformat:'-1' }}{% else %}—{% endif %}</td>
                 <td class="jd2-fb-num">{{ row.selfwork }}</td>
                 <td class="jd2-fb-num jd2-fb-dim">{% if row.lab_orta is not None %}{{ row.lab_orta|floatformat:'-1' }}{% else %}—{% endif %}</td>
@@ -63,9 +77,10 @@ Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qəd�
     </table>
 </div>
 <div class="jd2-footbar">
-    <span class="jd2-foot-note">{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %} {{ final_breakdown.entry_max }}).</span>
+    <span class="jd2-foot-note">{% if midterm %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm + sərbəst iş, tavan" context "registrar.journal" %}{% else %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %}{% endif %} {{ final_breakdown.entry_max }}).</span>
     <span class="jd2-foot-chips">
         <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Qayıb limitinə yaxın" context "registrar.journal" %}</span>
         <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Kəsilir — imtahana buraxılmır" context "registrar.journal" %}</span>
     </span>
 </div>
+{% endwith %}

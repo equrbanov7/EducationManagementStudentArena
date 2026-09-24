@@ -227,7 +227,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     from apps.registrar import exam_eligibility, gradebook, journal_extras
     from apps.registrar import student_journal_context as _jsc
-    from apps.registrar.models import ComponentKind, ComponentScore, Enrollment, LessonMark
+    from apps.registrar.models import ComponentScore, Enrollment, LessonMark
 
     if organization is None or not getattr(request.user, "is_authenticated", False):
         return None
@@ -320,13 +320,17 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     hidden_today = LessonMark.objects.filter(enrollment=enrollment, lesson__date=today).exists()
 
     kollokviums = []
-    kcomps = list(offering.assessment_components.filter(kind=ComponentKind.KOLLOKVIUM).order_by("order", "name"))
+    # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–20).
+    interim, kcomps = journal_extras.display_components(offering)
     if kcomps:
         score_by = {
             cs.component_id: cs.score
             for cs in ComponentScore.objects.filter(component__in=kcomps, enrollment=enrollment)
         }
-        kollokviums = [{"component": c, "score": score_by.get(c.id), "held_on": c.held_on} for c in kcomps]
+        kollokviums = [
+            {"component": c, "score": score_by.get(c.id), "held_on": c.held_on, "label": interim.label_for(i)}
+            for i, c in enumerate(kcomps)
+        ]
 
     # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
     from apps.registrar import corrections as _corrections
@@ -411,6 +415,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "teacher": getattr(offering, "instructor", None),
         "hidden_today": hidden_today,
         "kollokviums": kollokviums,
+        "interim": interim,
         "koll_avg": koll_avg,
         "dav_score": dav_score,
         "dav_barred": dav_barred,
