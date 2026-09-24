@@ -189,12 +189,12 @@ def apply_coursework_correction(
     return correction
 
 
-# ── Kollokvium / komponent balı ──────────────────────────────────────────────
+# ── Kollokvium / midterm / komponent balı ─────────────────────────────────
 
 
 @transaction.atomic
 def apply_component_correction(*, component, enrollment, new_score, reason, note, document, by_user, request=None):
-    """Komponent balına (Kollokvium K1/K2/K3) sənədli düzəliş — 2 saat + pəncərə keçilir."""
+    """Komponent balına (Kollokvium K1/K2/K3 və ya Midterm) sənədli düzəliş — 2 saat + pəncərə keçilir."""
     note = _validate(reason, note, document)
     from .correction_target_locks import lock_component
 
@@ -260,7 +260,8 @@ def _cm_entry(c, include_document):
     data = {
         "id": str(c.id),
         "date": c.created_at.strftime("%d.%m.%Y %H:%M"),
-        "field_display": str(pgettext("registrar.correction", "Kollokvium")),
+        # Komponentin öz adı («Midterm» / «Kollokvium 2») — ümumi «Kollokvium» sözü midterm dövründə yanlış idi.
+        "field_display": getattr(c.component, "name", "") or str(pgettext("registrar.correction", "Kollokvium")),
         "old": grade_audit.score_repr(c.old_score),
         "new": grade_audit.score_repr(c.new_score),
         "reason": c.get_reason_display(),
@@ -275,10 +276,11 @@ def _cm_entry(c, include_document):
 def component_corrections_map(offering, *, include_document=False):
     """{"<component_id>:<enrollment_id>": [düzəliş qeydləri]} — sarı xana + tarixçə."""
     result: dict[str, list[dict]] = {}
-    qs = ComponentScoreCorrection.objects.filter(
-        component__offering=offering,
-        reversal__isnull=True,
-    ).order_by("created_at")
+    qs = (
+        ComponentScoreCorrection.objects.filter(component__offering=offering, reversal__isnull=True)
+        .select_related("component")
+        .order_by("created_at")
+    )
     for c in qs:
         result.setdefault(f"{c.component_id}:{c.enrollment_id}", []).append(_cm_entry(c, include_document))
     return result

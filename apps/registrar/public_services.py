@@ -7,6 +7,7 @@ from . import grading_scale  # noqa: F401
 from . import handover  # noqa: F401
 from . import handover_actions  # noqa: F401
 from . import handover_query  # noqa: F401
+from . import interim_assessment  # noqa: F401
 from . import journal_close  # noqa: F401
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
@@ -71,6 +72,7 @@ __all__ = [
     "handover",
     "handover_actions",
     "handover_query",
+    "interim_assessment",
     "is_custom",
     "journal_close",
     "journal_scope",

@@ -76181,3 +76181,106 @@ msgstr "The link and the OTP code are valid for %(minutes)s minutes."
 
 msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
 msgstr "The OTP code below is for %(action)s:"
+
+msgctxt "registrar.interim"
+msgid "Kollokvium"
+msgstr "Colloquium"
+
+msgctxt "registrar.interim"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.interim"
+msgid "3 kollokvium (hər biri 0–10 bal)"
+msgstr "3 colloquiums (0–10 points each)"
+
+msgctxt "registrar.interim"
+msgid "Midterm — aralıq imtahan (0–20 bal)"
+msgstr "Midterm — mid-semester exam (0–20 points)"
+
+msgid ""
+"%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
+"aktivləşdirməlidir."
+msgstr ""
+"The %(title)s score-entry window is not open — the Exam Centre has to "
+"activate the interval."
+
+msgid "Pəncərəsi bağlı olan sütunların balı yazılmadı."
+msgstr "Scores in columns whose window is closed were not saved."
+
+msgid "%(title)s balları yadda saxlanıldı (%(n)s xana)."
+msgstr "%(title)s scores saved (%(n)s cells)."
+
+msgctxt "registrar.kollokvium_notify"
+msgid "Kollokvium K%(n)s"
+msgstr "Colloquium K%(n)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s"
+msgstr "%(name)s score-entry window opened: %(opens)s–%(closes)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi bağlandı"
+msgstr "%(name)s score-entry window closed"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s"
+msgstr "%(name)s score-entry window dates changed: %(opens)s–%(closes)s"
+
+msgctxt "registrar.notify"
+msgid "Kollokvium"
+msgstr "Colloquium"
+
+msgctxt "registrar.notify"
+msgid "%(label)s balı yazıldı: %(score)s"
+msgstr "%(label)s score recorded: %(score)s"
+
+msgctxt "registrar.journal"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.journal"
+msgid "MIDTERM"
+msgstr "MIDTERM"
+
+msgctxt "registrar.journal"
+msgid "şkala 0–20"
+msgstr "scale 0–20"
+
+msgctxt "registrar.journal"
+msgid "Köhnə qeyd"
+msgstr "Legacy entry"
+
+msgctxt "registrar.journal"
+msgid "aralıq imtahan balı"
+msgstr "mid-semester exam score"
+
+msgctxt "registrar.journal"
+msgid "hələ yazılmayıb"
+msgstr "not recorded yet"
+
+msgctxt "registrar.journal"
+msgid ""
+"Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi "
+"təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; "
+"bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+msgstr ""
+"The midterm is the mid-semester exam, 0–20 points. The Exam Centre sets the "
+"score-entry interval. While the window is open you can enter or change "
+"scores freely; once it closes they are locked. An empty score counts as 0."
+
+msgctxt "registrar.journal"
+msgid ""
+"Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin "
+"aralığı aktivləşdirməsini gözləyin."
+msgstr ""
+"There is no open midterm window at the moment — to enter scores, wait for "
+"the Exam Centre to activate the interval."
+
+msgctxt "registrar.journal"
+msgid ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm "
+"+ sərbəst iş, tavan"
+msgstr ""
+"Pre-exam score is the journal's canonical entry score (lesson scores + "
+"midterm + independent work, cap"

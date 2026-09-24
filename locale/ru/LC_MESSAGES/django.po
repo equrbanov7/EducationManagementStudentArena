@@ -76329,3 +76329,106 @@ msgstr "Ссылка и OTP-код действительны %(minutes)s мин
 
 msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
 msgstr "OTP-код ниже — для %(action)s:"
+
+msgctxt "registrar.interim"
+msgid "Kollokvium"
+msgstr "Коллоквиум"
+
+msgctxt "registrar.interim"
+msgid "Midterm"
+msgstr "Мидтерм"
+
+msgctxt "registrar.interim"
+msgid "3 kollokvium (hər biri 0–10 bal)"
+msgstr "3 коллоквиума (по 0–10 баллов)"
+
+msgctxt "registrar.interim"
+msgid "Midterm — aralıq imtahan (0–20 bal)"
+msgstr "Мидтерм — промежуточный экзамен (0–20 баллов)"
+
+msgid ""
+"%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
+"aktivləşdirməlidir."
+msgstr ""
+"Окно ввода баллов «%(title)s» не открыто — его должен активировать "
+"Экзаменационный центр."
+
+msgid "Pəncərəsi bağlı olan sütunların balı yazılmadı."
+msgstr "Баллы в столбцах с закрытым окном не сохранены."
+
+msgid "%(title)s balları yadda saxlanıldı (%(n)s xana)."
+msgstr "Баллы «%(title)s» сохранены (ячеек: %(n)s)."
+
+msgctxt "registrar.kollokvium_notify"
+msgid "Kollokvium K%(n)s"
+msgstr "Коллоквиум K%(n)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s"
+msgstr "Окно ввода баллов «%(name)s» открыто: %(opens)s–%(closes)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi bağlandı"
+msgstr "Окно ввода баллов «%(name)s» закрыто"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s"
+msgstr "Даты окна ввода баллов «%(name)s» изменены: %(opens)s–%(closes)s"
+
+msgctxt "registrar.notify"
+msgid "Kollokvium"
+msgstr "Коллоквиум"
+
+msgctxt "registrar.notify"
+msgid "%(label)s balı yazıldı: %(score)s"
+msgstr "Выставлен балл «%(label)s»: %(score)s"
+
+msgctxt "registrar.journal"
+msgid "Midterm"
+msgstr "Мидтерм"
+
+msgctxt "registrar.journal"
+msgid "MIDTERM"
+msgstr "МИДТЕРМ"
+
+msgctxt "registrar.journal"
+msgid "şkala 0–20"
+msgstr "шкала 0–20"
+
+msgctxt "registrar.journal"
+msgid "Köhnə qeyd"
+msgstr "Старая запись"
+
+msgctxt "registrar.journal"
+msgid "aralıq imtahan balı"
+msgstr "балл промежуточного экзамена"
+
+msgctxt "registrar.journal"
+msgid "hələ yazılmayıb"
+msgstr "ещё не выставлен"
+
+msgctxt "registrar.journal"
+msgid ""
+"Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi "
+"təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; "
+"bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+msgstr ""
+"Мидтерм — промежуточный экзамен, 0–20 баллов. Интервал ввода баллов "
+"устанавливает Экзаменационный центр. Пока окно открыто, баллы можно свободно"
+" вводить и менять; после закрытия они блокируются. Пустой балл считается 0."
+
+msgctxt "registrar.journal"
+msgid ""
+"Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin "
+"aralığı aktivləşdirməsini gözləyin."
+msgstr ""
+"Сейчас нет открытого окна мидтерма — чтобы ввести баллы, дождитесь, пока "
+"Экзаменационный центр активирует интервал."
+
+msgctxt "registrar.journal"
+msgid ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm "
+"+ sərbəst iş, tavan"
+msgstr ""
+"Балл до экзамена — канонический входной балл журнала (баллы занятий + "
+"мидтерм + самостоятельная работа, предел"

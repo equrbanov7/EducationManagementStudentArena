@@ -106,6 +106,16 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             </div>
             <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill {% if d.journal.barred %}is-danger{% endif %}" data-sjx-abs="{{ d.journal.absence_hours }}" data-sjx-limit="{{ d.journal.allowed_absence|floatformat:0 }}"></span></div>
         </div>
+        {% if d.interim.is_midterm %}
+        {# 2026/2027-dən: TƏK midterm (0–20) — orta bal yoxdur, balın özü göstərilir. #}
+        {% with mt=d.kollokviums.0 %}
+        <div class="sjx-kpi">
+            <div class="sjx-kpi-label">{% trans "MIDTERM" context "registrar.journal" %}</div>
+            <div class="sjx-kpi-value is-blue">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %} <span class="sjx-kpi-unit">/ {{ d.interim.max_score }}</span></div>
+            <div class="sjx-kpi-sub">{% if mt and mt.score is not None %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
+        </div>
+        {% endwith %}
+        {% else %}
         <div class="sjx-kpi">
             <div class="sjx-kpi-label">{% trans "KOLLOKVİUM ORTA BALI" context "registrar.journal" %}</div>
             <div class="sjx-kpi-value is-blue">{% if d.koll_avg is not None %}{{ d.koll_avg|floatformat:'-1' }}{% else %}—{% endif %}</div>
@@ -113,6 +123,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                 {% for k in d.kollokviums %}{% if k.score is not None %}Kol.{{ forloop.counter }}: {{ k.score|floatformat:'-1' }}{% if not forloop.last %} · {% endif %}{% endif %}{% endfor %}
             </div>
         </div>
+        {% endif %}
         <div class="sjx-kpi">
             <div class="sjx-kpi-label">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}</div>
             <div class="sjx-kpi-value is-blue">{{ d.entry_score|floatformat:0 }} <span class="sjx-kpi-unit">/ {{ d.entry_score_max }}</span></div>
@@ -132,7 +143,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     <div class="sjx-balbox">
         <div class="sjx-balbox-head">
             <span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score|floatformat:0 }}/{{ d.entry_score_max }})</span>
-            <span class="sjx-balbox-formula">{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }} + {% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:0 }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
+            <span class="sjx-balbox-formula">{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }} + {% if d.interim.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %} {{ d.parts.koll_sum|floatformat:0 }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
         </div>
         <div class="sjx-balbar">
             <span class="sjx-balseg sjx-balseg--lessons" data-jd-width="{{ d.parts.lesson_pct }}"></span>
@@ -141,7 +152,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
         </div>
         <div class="sjx-ballegend">
             <span><i class="sjx-dot sjx-dot--lessons"></i>{% trans "Dərs balları" context "registrar.journal" %} {{ d.parts.lesson_sum|floatformat:0 }}</span>
-            <span><i class="sjx-dot sjx-dot--koll"></i>{% trans "Kollokvium" context "registrar.journal" %} {{ d.parts.koll_sum|floatformat:0 }}</span>
+            <span><i class="sjx-dot sjx-dot--koll"></i>{% if d.interim.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %} {{ d.parts.koll_sum|floatformat:0 }}</span>
             <span><i class="sjx-dot sjx-dot--selfwork"></i>{% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
         </div>
     </div>
@@ -183,7 +194,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         data-topic="{{ h.mark.lesson.topic|default:h.kind_display }}"
                         data-room="{{ h.room_label|default:'—' }}"
                         data-att="{% if h.mark.status == 'absent' %}q/b{% elif h.mark.status == 'excused' %}üq{% else %}i/e{% endif %}"
-                        data-score="{% if h.kollokvium and h.kollokvium.score is not None %}Kol.: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
+                        data-score="{% if h.kollokvium and h.kollokvium.score is not None %}{{ h.kollokvium.label }}: {{ h.kollokvium.score|floatformat:0 }}{% elif h.mark.score is not None %}{{ h.mark.score|floatformat:0 }}{% else %}—{% endif %}"
                         data-corrected="{% if h.corrected %}1{% endif %}"
                         data-legacy-excuse="{% if h.legacy_excuse %}1{% endif %}">
                         <td class="sjx-date">{{ h.mark.lesson.date|date:"d.m" }}</td>
@@ -200,7 +211,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
                         <td class="sjx-result-cell">
                             {# Bir sütun: bal varsa bal (davamiyyət avtomatik i/e); yoxdursa q/b · üq · i/e #}
                             {% if h.kollokvium and h.kollokvium.score is not None %}
-                                <b class="sjx-kollscore">Kol.: {{ h.kollokvium.score|floatformat:0 }}</b>
+                                <b class="sjx-kollscore">{{ h.kollokvium.label }}: {{ h.kollokvium.score|floatformat:0 }}</b>
                             {% elif h.mark.score is not None %}
                                 <b class="sjx-att sjx-att--ie">{{ h.mark.score|floatformat:0 }}</b>
                             {% elif h.mark.status == 'absent' %}
