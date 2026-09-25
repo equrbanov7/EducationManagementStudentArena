@@ -5,13 +5,21 @@ Dry-run DEFAULT-dur.  Qərar qaydası və nəyin yazıldığı
 
     manage.py legacy_repair_archive_status --organization myedu-univ
     manage.py legacy_repair_archive_status --organization myedu-univ --apply
+
+Yalnız HAZIRDA OXUYANLAR (sahib 2026-09-25) — siyahı yazılış bərpası planının
+möhürlənmiş başlığından gəlir::
+
+    manage.py legacy_repair_archive_status --organization qku --actor <superadmin> \
+        --current-plan <enroll plan>.jsonl.gz --current-plan-sha256 <sha256> \
+        [--apply --i-know-this-is-production]
 """
 
 from collections import Counter
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from apps.legacy_import.services.repair_archive import TABLE_HEADERS, apply_decision, plan_decisions
+from apps.legacy_import.services.repair_plan_file import RepairPlanError, read_plan_header
 from apps.legacy_import.services.repair_support import (
     add_repair_arguments,
     build_context,
@@ -36,16 +44,33 @@ class Command(BaseCommand):
             action="store_true",
             help="Qəbul ilini ən erkən yazılışın akademik ilindən düzəlt (default: sentinel qalır)",
         )
+        parser.add_argument(
+            "--active-period",
+            action="append",
+            default=[],
+            help='Yalnız bu dövrdə yazılışı olanları bərpa et, məs. "2025/2026 Yaz" (təkrarlana bilər)',
+        )
+        parser.add_argument(
+            "--current-plan",
+            default="",
+            help="Hazırda oxuyanlar siyahısı: legacy_repair_journal_enrollments planı (.jsonl.gz)",
+        )
+        parser.add_argument("--current-plan-sha256", default="", help="--current-plan faylının sha256-sı (MƏCBURİ)")
         parser.add_argument("--show", type=int, default=25, help="Cədvəldə göstəriləcək sətir sayı")
 
     def handle(self, *args, **options):
         # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): bütün DB işi bir
         # worker-atomic sərhədi içindədir. Sətir-səviyyəli fail-open semantikası
         # dəyişmir — servislərdəki daxili ``transaction.atomic()`` savepoint olur.
+        current = self._current_legacy(options)
         with rls_worker_atomic():
             context = build_context(options)
             decisions = plan_decisions(
-                context.organization, limit=context.limit, require_activity=bool(options.get("require_activity"))
+                context.organization,
+                limit=context.limit,
+                require_activity=bool(options.get("require_activity")),
+                active_periods=tuple(options.get("active_period") or ()),
+                current_legacy=current,
             )
             counters = Counter(decision.action for decision in decisions)
             reasons = Counter(decision.reason for decision in decisions)
@@ -75,6 +100,7 @@ class Command(BaseCommand):
                         failed.append((decision.username, type(error).__name__ + ":" + str(error)[:80]))
 
             summary = {
+                **({"hazırda oxuyan (plan siyahısı)": len(current)} if current is not None else {}),
                 "arxivdə olan profil": len(decisions),
                 "bərpa namizədi (restore)": counters.get("restore", 0),
                 "toxunulmur (keep_archived)": counters.get("keep_archived", 0),
@@ -85,3 +111,22 @@ class Command(BaseCommand):
             self.stdout.write(render_summary("legacy_repair_archive_status", context, summary))
             for username, error in failed[:20]:
                 self.stderr.write(f"  ✗ {username}: {error}")
+
+    @staticmethod
+    def _current_legacy(options):
+        """``--current-plan`` → planın möhürlənmiş başlığındakı hazırda oxuyan legacy id-ləri."""
+
+        if not options.get("current_plan"):
+            return None
+        try:
+            header = read_plan_header(
+                options["current_plan"],
+                expected_sha256=options.get("current_plan_sha256") or "",
+                repair="journal_enrollments",
+            )
+        except RepairPlanError as error:
+            raise CommandError(error.code) from None
+        listed = header.get("current_legacy_students")
+        if not isinstance(listed, dict) or not listed:
+            raise CommandError("legacy_repair_current_list_missing")
+        return {str(legacy) for legacy in listed}

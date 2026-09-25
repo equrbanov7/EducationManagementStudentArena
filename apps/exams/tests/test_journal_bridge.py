@@ -103,6 +103,7 @@ class _JournalBridgeSetup(TestCase):
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası FinalGrade-ə yazılır
             exam_type="test",
             is_active=True,
         )
@@ -117,6 +118,7 @@ class _JournalBridgeSetup(TestCase):
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası FinalGrade-ə yazılır
             exam_type="written",
             is_active=True,
         )
@@ -316,6 +318,7 @@ class ManualGradingBridgeTests(_JournalBridgeSetup):
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası FinalGrade-ə yazılır
             exam_type="written",
             is_active=True,
             random_question_count=1,

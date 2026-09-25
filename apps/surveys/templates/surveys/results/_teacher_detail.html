@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}Müəllim kartı — çekməcə fraqmenti VƏ çap səhifəsinin məzmunu (`results_detail`).
+Sual üzrə müəllim · kafedra · universitet ortası, sual üzrə paylanma, fənn/qrup bölgüsü
+(hər sətir ≥ k + tamamlayıcı qayda), dinamika, anonim şərhlər (yalnız dəst ≥ k olanda;
+tarixsiz, identifikatorsuz, təsadüfi sıra). Qrafik məlumatı `svr-detail-data` adasındadır.{% endcomment %}
+<div class="svr-detail" data-svr-detail-root data-print-url="{{ print_url }}" data-title="{{ teacher.name }}" {% include "surveys/results/_i18n.html" %}>
+    <header class="svr-detail__head">
+        <p class="svr-detail__eyebrow">{% trans "Müəllim kartı" context "surveys.results" %}</p>
+        <h3 class="svr-detail__name">{{ teacher.name }}</h3>
+        <p class="svr-detail__meta">{% if teacher.department %}{{ teacher.department }} · {% endif %}{{ period_label }} · {% blocktrans trimmed with n=teacher.n context "surveys.results" %}{{ n }} cavab{% endblocktrans %}</p>
+        {% if narrowed %}<p class="svr-detail__note">{% trans "Fənn/qrup filtri tətbiq olunub — göstəricilər yalnız seçilmiş dəst üzrədir." context "surveys.results" %}</p>{% endif %}
+    </header>
+    {% if teacher.suppressed %}
+    <div class="ems-state svr-state" role="status">
+        <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
+        {% if teacher.secondary %}
+        <p class="ems-state__title">{% trans "Nəticə tamamlayıcı qayda ilə gizlədilib" context "surveys.results" %}</p>
+        <p class="ems-state__body">{% trans "Bu nəticə göstərilsəydi, kafedra və ya universitet ortasından çıxma yolu ilə anonimlik həddindən az cavablı müəllimin nəticəsi hesablana bilərdi." context "surveys.results" %}</p>
+        {% elif teacher.complement_blocked %}
+        <p class="ems-state__title">{% trans "Bu filtr kombinasiyası anonimliyi poza bilər" context "surveys.results" %}</p>
+        {% else %}
+        <p class="ems-state__title">{% blocktrans trimmed with n=teacher.n k=teacher.k context "surveys.results" %}Cavab sayı azdır ({{ n }} &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+    <div class="svr-stats svr-stats--detail" role="list">
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Ümumi bal" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{{ kpis.overall|floatformat:2|default:"—" }}<span class="svr-stat__unit">/ 10</span></span>
+        </div>
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Likert indeksi" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{{ kpis.index|floatformat:2|default:"—" }}<span class="svr-stat__unit">/ 5</span></span>
+            {% if kpis.index_pct is not None %}<span class="svr-stat__note">{{ kpis.index_pct }}%</span>{% endif %}
+        </div>
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Tövsiyə edənlər" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{% if kpis.recommend is not None %}{{ kpis.recommend }}%{% else %}—{% endif %}</span>
+        </div>
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Fərq: kafedra" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{% include "surveys/results/_delta.html" with dv=kpis.delta_department_value %}</span>
+        </div>
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Fərq: universitet" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{% include "surveys/results/_delta.html" with dv=kpis.delta_org_value %}</span>
+        </div>
+        <div class="svr-stat" role="listitem">
+            <span class="svr-stat__label">{% trans "Cavab faizi" context "surveys.results" %}</span>
+            <span class="svr-stat__value">{% if kpis.rate is not None %}{{ kpis.rate }}%{% else %}—{% endif %}</span>
+            <span class="svr-stat__note">{{ kpis.receipts }} / {{ kpis.expected }}</span>
+        </div>
+    </div>
+    {{ chart|json_script:"svr-detail-data" }}
+    <div class="svr-grid svr-grid--detail" data-svr-charts="svr-detail-data">
+        {% if questions %}
+            {% trans "Müəllim" context "surveys.results" as svr_teacher_series %}
+            {% include "surveys/results/_card_questions.html" with q_rows=questions q_show_department=True q_series_label=svr_teacher_series q_scope="d" %}
+        {% endif %}
+        {% if likert %}
+            {% trans "Sual üzrə paylanma" context "surveys.results" as svr_lk_detail %}
+            {% include "surveys/results/_card_likert.html" with lk_rows=likert lk_scale=likert_scale lk_scope="d" lk_title=svr_lk_detail %}
+        {% endif %}
+        {% include "surveys/results/_card_offerings.html" %}
+        {% include "surveys/results/_card_trend.html" with tr=trend tr_scope="d" %}
+        {% include "surveys/results/_card_comments.html" %}
+    </div>
+</div>

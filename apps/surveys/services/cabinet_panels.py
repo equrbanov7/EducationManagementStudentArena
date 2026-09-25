@@ -14,7 +14,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..constants import MIN_GROUP_SIZE_CEIL, MIN_GROUP_SIZE_FLOOR, CampaignStatus
-from ..models import SurveyCampaign
 from .access import can_manage_campaigns, results_scope
 from .config import survey_config
 from .gate_snapshot import active_entries, snapshot_is_stale, sync_gate_snapshot
@@ -87,28 +86,12 @@ def campaigns_panel(context) -> dict:
 
 
 def results_panel(context) -> dict:
-    """«Sorğu nəticələri» — MİNİMAL xülasə (tam analitika UI-ı ayrıca işdə qurulur)."""
-    from ..public import summary
-    from .filters import ResultFilters
+    """«Sorğu nəticələri» — tam analitika paneli (filtrlər, KPI, qrafiklər, müəllim
+    reytinqi, ümumi təkliflər); konteksti ``views.results_panel`` qurur (F2).
 
-    request, organization = _request_org(context)
-    user = getattr(request, "user", None)
-    scope = results_scope(user, organization, request=request) if organization is not None else None
-    if scope is None or not scope.has_structure_access:
-        return {"has_access": False}
-    latest = (
-        SurveyCampaign.objects.filter(organization=organization)
-        .select_related("period")
-        .order_by("-period__start_date", "-created_at")
-        .first()
-    )
-    if latest is None:
-        return {"has_access": True, "campaign": None}
-    data = summary(organization, scope, ResultFilters(campaign_ids=(latest.pk,)))
-    return {
-        "has_access": True,
-        "campaign": latest,
-        "summary": data,
-        "is_org_wide": scope.is_org_wide,
-        "can_manage": can_manage_campaigns(user, organization, request=request),
-    }
+    Gecikmiş import: görünüş qatı ``public`` fasadından istifadə edir, bu modul isə
+    fasadın özünə daxildir — modul yüklənəndə dövr yaranmasın.
+    """
+    from ..views.results_panel import panel_context
+
+    return panel_context(context)

@@ -28,6 +28,23 @@ o kod heç vaxt olmur.
 ``--require-activity`` verilərsə əlavə olaraq ən azı bir ``Enrollment`` tələb
 olunur.  Buraxılmış (``azadedildi=1``) tələbə heç bir halda toxunulmur.
 
+«Hazırda oxuyan» süzgəci (2026-09-25, sahibin göstərişi)
+-------------------------------------------------------
+Ölçüldü: 2 291 namizədin hamısında mənbədə ``azadedildi=0``-dır, amma çoxunun son
+yazılışı 2022/2023–2024/2025-dədir — köhnə sistemin məzun kimi işarələmədiyi
+keçmiş tələbələrdir.  Sahib yalnız HAZIRDA OXUYANLARIN bərpasını istəyir.
+İki süzgəc (hər ikisi verilərsə İKİSİ də ödənməlidir), uyğun gəlməyən
+``not_current`` səbəbi ilə arxivdə qalır:
+
+* ``--current-plan <plan> --current-plan-sha256 <sha>`` — DƏQİQ siyahı: yazılış
+  bərpası planının (``legacy_repair_journal_enrollments``) sha256 ilə möhürlənmiş
+  başlığındakı ``current_legacy_students`` (mənbədən lokalda hesablanır: E1/E2/E3
+  qaydası, ``repair_enrollments_select``).  Tövsiyə olunan yol — qəbul ili bilinməyən
+  (E3) tələbənin son semestr fəaliyyəti bəzən YALNIZ nəticəsiz fake jurnalda və ya
+  siyahıdan kənar xanadadır, hədəfdə isə heç bir yazılışı yoxdur;
+* ``--active-period "2025/2026 Yaz"`` (təkrarlana bilər) — hədəf-tərəf sübut: həmin
+  dövr(lər)də ən azı bir yazılışı olan tələbə.
+
 Nə YAZILIR
 ----------
 * ``apps.accounts.public.restore_archived_account`` → profil ``archived→active``,
@@ -150,21 +167,28 @@ def _student_map(organization) -> dict[str, str]:
     return {str(target_pk): str(legacy_pk) for target_pk, legacy_pk in rows}
 
 
+def period_label(academic_year, name) -> str:
+    """Dövrün operator etiketi: ``"2025/2026 Yaz"`` (``--active-period`` ilə eyni forma)."""
+
+    return f"{str(academic_year or '').strip()} {str(name or '').strip()}".strip()
+
+
 def _enrollment_evidence(organization, user_pks):
-    """Hər tələbə üçün yazılış sayı + ən erkən/son akademik il (tək sorğu)."""
+    """Hər tələbə üçün yazılış sayı + ən erkən/son akademik il + dövr etiketləri (tək sorğu)."""
 
     enrollment = django_apps.get_model("registrar", "Enrollment")
     evidence: dict[int, list] = {}
     rows = enrollment.objects.filter(organization=organization, student_id__in=list(user_pks)).values_list(
-        "student_id", "offering__period__academic_year"
+        "student_id", "offering__period__academic_year", "offering__period__name"
     )
-    for student_id, academic_year in rows:
-        bucket = evidence.setdefault(int(student_id), [0, "", ""])
+    for student_id, academic_year, period_name in rows:
+        bucket = evidence.setdefault(int(student_id), [0, "", "", set()])
         bucket[0] += 1
         year = str(academic_year or "")
         if year:
             bucket[1] = year if not bucket[1] else min(bucket[1], year)
             bucket[2] = year if not bucket[2] else max(bucket[2], year)
+        bucket[3].add(period_label(academic_year, period_name))
     return evidence
 
 
@@ -180,8 +204,17 @@ def archived_profiles(organization, limit: int):
     return list(queryset[:limit] if limit else queryset)
 
 
-def plan_decisions(organization, *, limit: int = 0, require_activity: bool = False):
-    """Qərar cədvəlini qur — HEÇ NƏ YAZMADAN (dry-run ilə apply eyni planı görür)."""
+def plan_decisions(
+    organization, *, limit: int = 0, require_activity: bool = False, active_periods=(), current_legacy=None
+):
+    """Qərar cədvəlini qur — HEÇ NƏ YAZMADAN (dry-run ilə apply eyni planı görür).
+
+    ``active_periods`` boş deyilsə yalnız həmin dövrlərdən birində yazılışı olan
+    tələbə, ``current_legacy`` (legacy id çoxluğu) verilərsə yalnız siyahıdakı
+    tələbə bərpa olunur («hazırda oxuyan» süzgəcləri, modul qeydinə bax).
+    """
+
+    wanted_periods = {str(label).strip() for label in active_periods if str(label).strip()}
 
     profiles = archived_profiles(organization, limit)
     student_map = _student_map(organization)
@@ -199,7 +232,7 @@ def plan_decisions(organization, *, limit: int = 0, require_activity: bool = Fal
     for profile in profiles:
         legacy_pk = student_map.get(str(profile.user_id), "")
         codes = issues.get(legacy_pk, set()) if legacy_pk else set()
-        count, earliest, latest = evidence.get(int(profile.user_id), [0, "", ""])
+        count, earliest, latest, labels = evidence.get(int(profile.user_id), [0, "", "", set()])
         departed = DEPARTED_RULE in codes
         if not legacy_pk:
             action, reason = "keep_archived", "ledger_map_missing"
@@ -212,6 +245,10 @@ def plan_decisions(organization, *, limit: int = 0, require_activity: bool = Fal
             reason = "source_azadedildi" if ARCHIVED_STUDENT_RULE in codes else "archive_reason_unknown"
         elif require_activity and count == 0:
             action, reason = "keep_archived", "no_enrolment_evidence"
+        elif wanted_periods and not (labels & wanted_periods):
+            action, reason = "keep_archived", "not_current"
+        elif current_legacy is not None and legacy_pk not in current_legacy:
+            action, reason = "keep_archived", "not_current"
         else:
             action, reason = "restore", "no_admission_year_only"
         decisions.append(
@@ -300,6 +337,7 @@ __all__ = [
     "archived_profiles",
     "derived_admission_year",
     "evidence_digest",
+    "period_label",
     "plan_decisions",
     "student_role",
 ]

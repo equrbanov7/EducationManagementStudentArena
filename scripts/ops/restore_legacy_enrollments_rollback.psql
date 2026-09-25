@@ -1,0 +1,104 @@
+-- restore_legacy_enrollments_rollback.psql — hazırda oxuyanların yazılış bərpasının HƏDƏFLİ geri qaytarılması
+-- ============================================================================================================
+--
+-- Yalnız `legacy_repair_journal_enrollments --apply`-ın bu plan (:plan_sha) ilə yaratdıqlarını
+-- geri alır; mənbə audit izidir (audit_auditlog, reason 'legacy_repair:journal_enrollments: <model>',
+-- action 'create', new_values.plan_sha256 = :plan_sha):
+--   1. bərpa yazılışlarının uşaqları (xana, komponent balı, yekun, təkrar imtahan, sərbəst iş);
+--   2. sübut faktları — `-v drop_facts=1` ilə (yalnız superuser: append-only trigger-i
+--      session_replication_role ilə keçilir). Faktı olan yazılış faktsız SİLİNMİR: skript
+--      dayanır və səbəbi deyir;
+--   3. bərpa yazılışlarının özü;
+--   4. bu planın yaratdığı dərslər / komponentlər / mövzular — üzərində başqa sətir QALMAYIBSA;
+--   5. bu planın yaratdığı açılışlar (sxemi ilə) — üzərində başqa yazılış və ya plandan kənar
+--      dərs QALMAYIBSA.
+-- Sonradan bu sətirlərə düzəliş bağlanıbsa FK (NO ACTION) silməni dayandırır — sənədli
+-- düzəliş səssizcə silinmir. Hamısı BİR tranzaksiyadadır: xəta olarsa heç nə silinmir.
+--
+-- İstifadə (DB owner / superuser ilə):
+--   docker exec -i <postgres konteyneri> psql -U <owner> -d emsarena_db \
+--       -v plan_sha=<sha256> -v drop_facts=1 -f - < scripts/ops/restore_legacy_enrollments_rollback.psql
+\set ON_ERROR_STOP on
+\if :{?drop_facts}
+\else
+\set drop_facts 0
+\endif
+
+BEGIN;
+SET LOCAL app.bypass_rls = 'on';
+SELECT set_config('j12e_rollback.plan_sha', :'plan_sha', true);
+SELECT set_config('j12e_rollback.drop_facts', :'drop_facts', true);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM audit_auditlog
+        WHERE reason = 'legacy_repair:journal_enrollments: xülasə'
+          AND resource_id = current_setting('j12e_rollback.plan_sha')
+    ) THEN
+        RAISE EXCEPTION 'DAYAN: bu plan sha256-sı ilə tətbiq izi (xülasə audit sətri) tapılmadı';
+    END IF;
+END
+$$;
+
+CREATE TEMP TABLE rb_created ON COMMIT DROP AS
+SELECT substring(reason from 'journal_enrollments: (.*)$') AS model, object_id
+FROM audit_auditlog
+WHERE reason LIKE 'legacy_repair:journal_enrollments: %'
+  AND action = 'create'
+  AND new_values ->> 'plan_sha256' = :'plan_sha';
+CREATE TEMP TABLE rb_enrollments ON COMMIT DROP AS
+SELECT e.id FROM registrar_enrollment e WHERE e.id::text IN (SELECT object_id FROM rb_created WHERE model = 'enrollment');
+
+DO $$
+BEGIN
+    IF current_setting('j12e_rollback.drop_facts') <> '1' AND EXISTS (
+        SELECT 1 FROM registrar_legacygradefact f WHERE f.enrollment_id IN (SELECT id FROM rb_enrollments)
+    ) THEN
+        RAISE EXCEPTION 'DAYAN: bərpa yazılışlarının sübut faktları var — -v drop_facts=1 ilə (superuser) işlədin';
+    END IF;
+END
+$$;
+
+DELETE FROM registrar_lessonmark WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+DELETE FROM registrar_componentscore WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+DELETE FROM registrar_finalgrade WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+DELETE FROM registrar_resitrecord WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+DELETE FROM registrar_selfworkmark WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+\if :drop_facts
+SET LOCAL session_replication_role = replica;
+DELETE FROM registrar_legacygradefact WHERE id::text IN (SELECT object_id FROM rb_created WHERE model = 'legacygradefact');
+DELETE FROM registrar_legacygradefact WHERE enrollment_id IN (SELECT id FROM rb_enrollments);
+SET LOCAL session_replication_role = origin;
+\endif
+DELETE FROM registrar_enrollment WHERE id IN (SELECT id FROM rb_enrollments);
+
+-- Bu planın yaratdığı, üzərində başqa sətir QALMAYAN dərs / komponent / mövzu.
+DELETE FROM registrar_lesson l
+WHERE l.id::text IN (SELECT object_id FROM rb_created WHERE model = 'lesson')
+  AND NOT EXISTS (SELECT 1 FROM registrar_lessonmark m WHERE m.lesson_id = l.id);
+DELETE FROM registrar_assessmentcomponent c
+WHERE c.id::text IN (SELECT object_id FROM rb_created WHERE model = 'assessmentcomponent')
+  AND NOT EXISTS (SELECT 1 FROM registrar_componentscore s WHERE s.component_id = c.id);
+DELETE FROM registrar_selfworktopic t
+WHERE t.id::text IN (SELECT object_id FROM rb_created WHERE model = 'selfworktopic')
+  AND NOT EXISTS (SELECT 1 FROM registrar_selfworkmark m WHERE m.topic_id = t.id);
+
+-- Bu planın yaratdığı açılış: üzərində yazılış və plandan kənar dərs QALMAYIBSA sxemi ilə birgə.
+CREATE TEMP TABLE rb_offerings ON COMMIT DROP AS
+SELECT o.id FROM registrar_courseoffering o
+WHERE o.id::text IN (SELECT object_id FROM rb_created WHERE model = 'courseoffering')
+  AND NOT EXISTS (SELECT 1 FROM registrar_enrollment e WHERE e.offering_id = o.id)
+  AND NOT EXISTS (SELECT 1 FROM registrar_lesson l WHERE l.offering_id = o.id)
+  AND NOT EXISTS (SELECT 1 FROM registrar_assessmentcomponent c WHERE c.offering_id = o.id)
+  AND NOT EXISTS (SELECT 1 FROM registrar_selfworktopic t WHERE t.offering_id = o.id);
+DELETE FROM registrar_assessmentscheme s
+WHERE s.id::text IN (SELECT object_id FROM rb_created WHERE model = 'assessmentscheme')
+  AND (s.offering_id IN (SELECT id FROM rb_offerings)
+       OR NOT EXISTS (SELECT 1 FROM registrar_assessmentcomponent c WHERE c.offering_id = s.offering_id));
+DELETE FROM registrar_courseoffering WHERE id IN (SELECT id FROM rb_offerings);
+
+SELECT (SELECT count(*) FROM rb_enrollments) AS enrollments_rolled_back,
+       (SELECT count(*) FROM rb_offerings) AS offerings_rolled_back,
+       (SELECT count(*) FROM rb_created WHERE model = 'courseoffering') - (SELECT count(*) FROM rb_offerings)
+           AS offerings_kept_in_use;
+COMMIT;

@@ -27,6 +27,7 @@ from . import schedule_grid  # noqa: F401
 from . import schedule_manage  # noqa: F401
 from . import schedule_manage_actions  # noqa: F401
 from . import schedule_publish  # noqa: F401
+from . import selfwork_points  # noqa: F401
 from . import services  # noqa: F401
 from . import status  # noqa: F401
 from . import subgroup_rollup  # noqa: F401
@@ -102,6 +103,7 @@ __all__ = [
     "schedule_manage_actions",
     "schedule_publish",
     "season_label",
+    "selfwork_points",
     "services",
     "status",
     "subgroup_rollup",
