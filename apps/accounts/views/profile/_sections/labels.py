@@ -166,4 +166,8 @@ def build_section_titles() -> dict:
         "semester-opening": pgettext_lazy("profile.sidebar", "Semestr açılışı"),
         "student-admission": pgettext_lazy("profile.sidebar", "Tələbə qəbulu"),
         "student-registry": pgettext_lazy("profile.sidebar", "Tələbə reyestri"),
+        # Anonim müəllim qiymətləndirmə sorğusu (apps.surveys) — sidebar bəndləri ilə eyni mətnlər.
+        "evaluation-survey": pgettext_lazy("profile.sidebar", "Anonim sorğu"),
+        "evaluation-results": pgettext_lazy("profile.sidebar", "Sorğu nəticələri"),
+        "evaluation-campaigns": pgettext_lazy("profile.sidebar", "Sorğu kampaniyaları"),
     }

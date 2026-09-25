@@ -1,0 +1,36 @@
+{% load i18n %}
+{% comment %}Anonimlik bəyanatı — NƏ saxlanılır, NƏ saxlanılmır (dürüst, texniki dəqiq).
+Parametr: `compact` — forma səhifəsində qısa variant.{% endcomment %}
+{% if compact %}
+<p class="svy-privacy svy-privacy--compact">
+    <i class="fas fa-user-shield" aria-hidden="true"></i>
+    {% trans "Cavablarınız adınızdan ayrı saxlanılır. Nəticələr yalnız ən azı bir neçə tələbə cavab verdikdə, ümumiləşdirilmiş şəkildə göstərilir." context "surveys.student" %}
+</p>
+{% else %}
+<section class="svy-privacy" aria-labelledby="svy-privacy-title">
+    <h2 id="svy-privacy-title" class="svy-privacy__title">
+        <i class="fas fa-user-shield" aria-hidden="true"></i>
+        {% trans "Sorğu anonimdir — bu, necə təmin olunur" context "surveys.student" %}
+    </h2>
+    <div class="svy-privacy__grid">
+        <div class="svy-privacy__col">
+            <h3 class="svy-privacy__sub svy-privacy__sub--kept">{% trans "Nə qeydə alınır" context "surveys.student" %}</h3>
+            <ul class="svy-privacy__list">
+                <li>{% trans "Cavablarınızın özü — adınız, tələbə nömrəniz və göndərmə vaxtı OLMADAN." context "surveys.student" %}</li>
+                <li>{% trans "Ayrıca, cavabla əlaqəsi olmayan bir qeyd: «bu tələbə bu müəllim üçün sorğunu doldurub» — yalnız təkrar doldurmanın qarşısını almaq və kabineti açmaq üçün." context "surveys.student" %}</li>
+            </ul>
+        </div>
+        <div class="svy-privacy__col">
+            <h3 class="svy-privacy__sub svy-privacy__sub--hidden">{% trans "Kim nə görür" context "surveys.student" %}</h3>
+            <ul class="svy-privacy__list">
+                <li>{% trans "Kafedra müdiri, tədris şöbəsi, keyfiyyətə nəzarət şöbəsi və universitet rəhbərliyi yalnız ümumiləşdirilmiş nəticələri görür: orta ballar və paylanmalar." context "surveys.student" %}</li>
+                <li>{% trans "Cavab sayı azdırsa (məsələn, 3-dən az), nəticə ümumiyyətlə göstərilmir — kiçik qrupda kimin nə yazdığını tapmaq olmasın." context "surveys.student" %}</li>
+                <li>{% trans "Sərbəst mətnlər də adsız və qarışıq sırada göstərilir. Mətndə adınızı və ya sizi tanıda biləcək məlumat yazmayın." context "surveys.student" %}</li>
+            </ul>
+        </div>
+    </div>
+    <p class="svy-privacy__foot">
+        {% trans "Dürüst olun: sorğu jurnallar bağlandıqdan sonra açılır, rəyiniz yalnız tədrisin keyfiyyətini yaxşılaşdırmaq üçün istifadə olunur və qiymətlərinizə heç bir təsir göstərmir." context "surveys.student" %}
+    </p>
+</section>
+{% endif %}

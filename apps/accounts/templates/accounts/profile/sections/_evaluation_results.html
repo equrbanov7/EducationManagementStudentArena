@@ -1,0 +1,10 @@
+{% if 'evaluation-results' in allowed_sections %}
+{% comment %}«Sorğu nəticələri» (survey.results.view) — MİNİMAL yer tutucu: son kampaniyanın
+k-anonim xülasəsi. Tam analitika UI-ı (filtrlər, qrafiklər, müəllim kartı) ayrıca işdə bu
+partial-ı əvəz edir; data `apps.surveys.public` API-sindən gəlir.{% endcomment %}
+<section class="profile-section-panel profile-section--evaluation-results {% if active_section == 'evaluation-results' %}is-active{% endif %}"
+         data-profile-section-panel="evaluation-results"
+         data-source-url="{{ profile_base_url }}?section=evaluation-results">
+    {% include "surveys/cabinet/_results_panel.html" %}
+</section>
+{% endif %}
