@@ -492,39 +492,6 @@ option.jd-topic-covered { color: #15803d; }
 .jd2-th-koll.jd2-kwin--closed .jd2-kwin-deadline { color: #b91c1c; }
 .jd2-th-koll.jd2-kwin--open { background: #f0fdf4; }
 .jd2-kselect { width: 54px; }
-/* Midterm (0–20) / kollokvium (0–10) bal menyusu — sahib 2026-09-26: «ballar 0-20 olmalıdır,
-   səhv görünür». Dar sütunlu siyahıda «10», «11» iki sətrə bölünürdü və 22 bənd scroll
-   istəyirdi. İndi RƏQƏM ŞƏBƏKƏSİDİR: 4 sütun, bütün ballar scroll-suz görünür; seçilmiş
-   bal rəngi ilə seçilir (✓ işarəsi şəbəkədə gizlidir). JS menyuya inline `width` = düymə
-   eni verir — `min-width` onu üstələyir; `margin-left` menyunu düymənin altında mərkəzləyir. */
-.jd2-kselect .dropdown-menu.bootstrap-single-select__menu {
-    display: none;
-    min-width: 188px;
-    margin-left: -67px;
-    max-height: none;
-    overflow: visible;
-    padding: 6px;
-}
-.jd2-kselect .dropdown-menu.bootstrap-single-select__menu.show {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-}
-.jd2-kselect .dropdown-menu .bootstrap-single-select__option {
-    justify-content: center;
-    padding: 5px 0;
-    border-radius: 6px;
-    font-size: 12.5px;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    gap: 0;
-}
-.jd2-kselect .dropdown-menu .bootstrap-single-select__option-label { white-space: nowrap; }
-.jd2-kselect .dropdown-menu .bootstrap-single-select__option-check { display: none; }
-.jd2-kselect .dropdown-menu .bootstrap-single-select__option.is-selected {
-    background: var(--ems-primary-600, #2563eb);
-    color: var(--ems-neutral-0, #fff);
-}
 .jd2-kwin-note {
     display: flex; align-items: center; gap: 8px; margin-top: 12px;
     background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
