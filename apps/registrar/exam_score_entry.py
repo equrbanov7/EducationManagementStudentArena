@@ -39,11 +39,12 @@ ola bilər (``kind``). Oxu köməkçiləri (siyahı, tarixçə sətri, filtrlər
 ``exam_score_roster``-dədir və buradan re-eksport olunur.
 
 2026-09-26 (sahib: «köhnə ilin balını dəyişmək olmamalıdır, ancaq RİM rəhbəri
-tərəfindən təqdimat əsasında»): BİTMİŞ dövrün açılışına toplu yazı
+tərəfindən təqdimat əsasında»; «İM də edə bilsin, lakin nəticə çox köhnənindirsə
+köçürüləndə sənədlə olsun»): BİTMİŞ dövrün açılışına toplu yazı
 (``save_roster_scores`` — əl ilə forma və fayl idxalı ikisi də buradan keçir)
-``exam_score_period_lock.assert_write_allowed`` qapısından keçir: yalnız RİM
-rəhbəri / superadmin, yalnız düzəliş rejimində (``correction_mode``) və HƏR
-sətir (ilk daxiletmə də) təqdimatlıdır (``require_submission``).
+``exam_score_period_lock.write_policy`` ilə qurulan qaydaya tabedir: ilk
+daxiletmə açıqdır (60 gündən köhnə dövrdə sənədlə), yazılmış balın
+dəyişdirilməsi isə yalnız RİM rəhbəri / superadmin düzəliş rejimində (təqdimatla).
 """
 
 from __future__ import annotations
@@ -273,7 +274,7 @@ def record_exam_score(
     question_scores=None,
     kind="",
     entry_score=None,
-    require_submission=False,
+    period_policy=None,
 ):
     """Bir tələbənin imtahan balını yaz (ilkin daxiletmə və ya sənədli düzəliş / apellyasiya).
 
@@ -294,9 +295,11 @@ def record_exam_score(
     * ``entry_score`` — giriş balı (toplu yazıda çağıran batch ilə verir);
       giriş + imtahan ≤ 100 AÇIQ yoxlanır.
 
-    2026-09-26: ``require_submission=True`` (bitmiş dövrün düzəliş rejimi —
-    qapı ``save_roster_scores``-dadır) İLK daxiletməni də təqdimatlı edir:
-    səbəb + qeyd + sənəd məcburidir, sətir dəyişiklik növü ilə yazılır.
+    2026-09-26: ``period_policy`` (``exam_score_period_lock.PeriodWritePolicy``,
+    qapı ``save_roster_scores``-dadır) — bitmiş dövrdə yazılmış balın rejimsiz
+    dəyişdirilməsi sətir xətasıdır; düzəliş rejimində HƏR yazı təqdimatlıdır və
+    düzəliş növü ilə yazılır; «çox köhnə» dövrdə ilk daxiletmə də təqdimatlıdır.
+    ``None`` = cari dövr qaydası (birbaşa çağıranlar, məs. köhnə nəticə baxışı).
     """
     # Lock the durable parent even when no FinalGrade exists yet. Concurrent
     # first writes must re-read the score and require correction evidence.
@@ -336,9 +339,16 @@ def record_exam_score(
         ):
             return None  # eyni bal → nə dublikat sətir, nə audit
 
-    is_correction = old_score is not None or require_submission
+    policy = period_policy or period_lock.CURRENT_PERIOD
+    if old_score is not None and policy.changes_blocked:
+        raise period_lock.change_blocked_error()
+    is_correction = old_score is not None or policy.correction_mode
     if is_correction:
         _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
+    elif policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
+        period_lock.require_submission(
+            reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
+        )
 
     entry = ExamScoreEntry(
         organization=enrollment.organization,
@@ -370,7 +380,7 @@ def record_exam_score(
         user=by_user,
         organization=enrollment.organization,
         obj=entry,
-        reason=f"exam score entry: {entry.kind}" + (" · past-period correction" if require_submission else ""),
+        reason=f"exam score entry: {entry.kind}" + _period_audit_suffix(policy),
         request=request,
         resource_type="registrar.exam_score_entry",
         resource_id=str(entry.pk),
@@ -390,6 +400,14 @@ def record_exam_score(
     return entry
 
 
+def _period_audit_suffix(policy) -> str:
+    if policy.correction_mode:
+        return " · past-period correction"
+    if policy.every_write_needs_submission:
+        return " · past-period first entry (document)"
+    return " · past-period first entry" if policy.locked else ""
+
+
 def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, correction_mode=False):
     """Formadan gələn sətirləri toplu yaz.
 
@@ -407,10 +425,10 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     tələbənin xətası qarışmasın deyə, fayl idxalı üçün).
 
     2026-09-26: bitmiş dövrdə yazı ``PermissionDenied`` ilə DAYANIR, əgər aktor
-    RİM rəhbəri / superadmin deyilsə və ya ``correction_mode`` aktiv deyilsə;
-    aktivdirsə hər sətir təqdimatlıdır (``require_submission``).
+    RİM rəhbəri / superadmin deyilsə və ``correction_mode`` göndərilibsə; qalan
+    qaydalar (dəyişiklik bağlıdır / təqdimat) sətir-sətir ``period_policy`` ilə.
     """
-    locked = period_lock.assert_write_allowed(user=by_user, offering=offering, correction_mode=correction_mode)
+    policy = period_lock.write_policy(user=by_user, offering=offering, correction_mode=correction_mode)
     # Yad partiya = bütün toplu yazı DAYANIR (sətir-sətir N eyni xəta əvəzinə
     # bir aydın xəta; heç bir savepoint açılmır) — P2-09, 2026-09-13.
     assert_sheet_matches(sheet, organization_id=offering.organization_id, offering_id=offering.pk)
@@ -455,7 +473,7 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
                     question_scores=row.get("question_scores"),
                     kind=row.get("kind") or "",
                     entry_score=entry_scores.get(enrollment_id),
-                    require_submission=locked,
+                    period_policy=policy,
                 )
         except ValidationError as exc:
             message = " ".join(exc.messages)

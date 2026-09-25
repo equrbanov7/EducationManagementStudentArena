@@ -56,3 +56,8 @@
         width: 100%;
     }
 }
+
+/* Bitmiş dövrdə yazılmış bal olan sətir (rejimsiz) — yalnız oxunur. */
+.ese-row.is-locked th[scope="row"] .ese-student {
+    color: var(--ems-text-muted);
+}

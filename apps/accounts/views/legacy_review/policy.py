@@ -13,6 +13,13 @@
 Ona görə qapı iki bayraq qaytarır: ``can_view`` və ``can_review``. Yalnız
 ``journal.correct`` daşıyan aktor növbəni oxu rejimində görür və səth ona
 «qərar səlahiyyətiniz yoxdur» qeydini AÇIQ göstərir — səssiz 403 yoxdur.
+
+SAHİBİN QƏRARI (2026-09-26): «Köçürülmüş nəticələr» YALNIZ RİM rəhbəri
+(``ikt_rehber`` üzvlüyü) və superadmin üçündür. Yuxarıdakı açarlar İNDİ ƏLAVƏ
+şərtdir: aktor əvvəlcə RİM rəhbəri / superadmin olmalıdır, sonra model qapısı
+(``final_score.entry``) qərar hüququnu verir. Başqa hər kəs (İmtahan Mərkəzi,
+``*`` daşıyan rektor/sahib) nə oxuya (boş JSON), nə yaza (403) bilir; menyu
+qapısı ``_helpers/rbac_sections.py``-dadır.
 """
 
 from __future__ import annotations
@@ -66,6 +73,11 @@ def resolve_actor(request) -> LegacyReviewActor:
             user=user, organization=None, can_review=False, can_observe=False, is_superadmin=_is_superadmin(user)
         )
 
+    is_superadmin = _is_superadmin(user)
+    if not (is_superadmin or _is_rim_head(user, organization)):
+        return LegacyReviewActor(
+            user=user, organization=organization, can_review=False, can_observe=False, is_superadmin=False
+        )
     can_review = review_read.can_review(user, organization)
     # Qərar səlahiyyəti onsuz da oxunu əhatə edir; ayrıca sorğu atmırıq.
     can_observe = can_review or _has_correct_permission(user, organization)
@@ -74,8 +86,15 @@ def resolve_actor(request) -> LegacyReviewActor:
         organization=organization,
         can_review=can_review,
         can_observe=can_observe,
-        is_superadmin=_is_superadmin(user),
+        is_superadmin=is_superadmin,
     )
+
+
+def _is_rim_head(user, organization) -> bool:
+    """Aktiv təşkilatda AKTİV ``ikt_rehber`` üzvlüyü (menyu qapısı ilə EYNİ köməkçi)."""
+    from apps.accounts.views._helpers.rbac_sections import _is_rim_head as is_rim_head
+
+    return is_rim_head(user, organization)
 
 
 __all__ = ["LegacyReviewActor", "resolve_actor"]

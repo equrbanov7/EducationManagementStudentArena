@@ -18,6 +18,7 @@ sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə g
          data-offering-id="{{ s.offering.id }}"
          data-org-id="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
          data-correction-mode="{% if s.correction_mode %}1{% endif %}"
+         data-submission-required="{% if s.submission_required %}1{% endif %}"
          data-correction-field="{{ s.correction_mode_field }}">
   <div class="ems-card__head">
     <div>
@@ -83,7 +84,9 @@ sorğu parametri kimi daşıyır — endirilən fayl kartdakı şəbəkə ilə g
         <div class="ese-just ese-import__just" data-esi-just hidden>
           <p class="ems-msg ems-msg--warning ese-just__note">
             <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
-            {% if s.correction_mode %}
+            {% if s.first_entry_needs_document and not s.correction_mode %}
+            <span>{% blocktrans context "registrar.exam_score_entry" with days=s.document_after_days %}Bu dövr {{ days }} gündən çox əvvəl bağlanıb — köhnə nəticənin köçürülməsi təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir.{% endblocktrans %}</span>
+            {% elif s.correction_mode %}
             <span>{% trans "Bitmiş dövrün düzəliş rejimi — hər yazı (ilk daxiletmə də) təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
             {% else %}
             <span>{% trans "Faylda artıq yazılmış balı dəyişən sətirlər var — səbəb, qeyd və skan (vərəq məlumatlarında) tələb olunur." context "registrar.exam_score_entry" %}</span>
