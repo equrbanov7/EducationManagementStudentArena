@@ -246,9 +246,11 @@
     font-size: 0.8rem;
     color: var(--ems-neutral-500);
     line-height: 1.3;
-    white-space: nowrap;
+    /* Rol adı uzun ola bilər («Rəqəmsal İnkişaf Mərkəzi (RİM) rəhbəri») — 2 sətrə qədər. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
     max-width: 100%;
 }
 
@@ -256,6 +258,16 @@
     height: 1px;
     background: rgba(15, 23, 42, 0.08);
     margin: 4px 4px;
+}
+
+/* «Hesab» — sidebar-dan köçən hesab əməllərinin kiçik başlığı (2026-09-25). */
+.blog-header__user-menu-label {
+    padding: 6px 12px 2px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
 }
 
 .blog-header__user-menu-item {
@@ -302,11 +314,11 @@
 }
 
 .blog-header__user-menu-item--danger {
-    color: var(--ems-danger);
+    color: var(--ems-danger-600);
 }
 
 .blog-header__user-menu-item--danger .blog-header__user-menu-icon {
-    color: var(--ems-danger);
+    color: var(--ems-danger-500);
 }
 
 .blog-header__user-menu-item--danger:hover {

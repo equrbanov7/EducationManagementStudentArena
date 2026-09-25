@@ -103,8 +103,8 @@ SIDEBAR_LAYOUT_NEUTRAL_SECTIONS = frozenset(
         "syllabus-editor",  # «Sillabuslar» bəndindən açılır, onu aktiv saxlayır
         "org-structure",  # köhnə açar — menyu bəndi yoxdur
         "groups",  # köhnə imtahan-kohortu bölməsi (2026-09-08 çıxarılıb)
-        "edit-profile",  # alt hesab bloku (hər iki düzüm)
-        "change-password",  # alt hesab bloku (hər iki düzüm)
+        "edit-profile",  # header istifadəçi menyusu (2026-09-25)
+        "change-password",  # header istifadəçi menyusu (2026-09-25)
     }
 )
 
