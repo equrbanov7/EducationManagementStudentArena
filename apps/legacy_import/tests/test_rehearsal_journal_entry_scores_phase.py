@@ -363,7 +363,10 @@ def test_an_offering_outside_the_run_keeps_the_lesson_total(actor):
     fresh = _fresh_offering(org, actor)
 
     assert not django_apps.get_model("registrar", "AssessmentComponent").objects.filter(offering=fresh.offering)
-    assert entry_score_for(fresh, CAP) == Decimal("7")
+    # 2026/2027 = Midterm rejimi → giriş balı standartı (registrar.entry_standard):
+    # davamiyyət 10 (qayıb yoxdur) + aktivlik 7 (tək seminar balının ortası) = 17.
+    # Legacy fazası bu açılışa toxunmur — arxiv komponenti yoxdur.
+    assert entry_score_for(fresh, CAP) == Decimal("17")
 
 
 # ── determinizm / idempotentlik ──────────────────────────────────────────────
