@@ -11,10 +11,15 @@ DİZAYN QAYDALARI (dəyişdirməzdən əvvəl oxu)
    YALNIZ istifadəçinin ``allowed_sections``-ında olan bölmənin rəqəmini
    göstərir.  Aça bilmədiyi bölmənin sayğacı görünmür (sızma yoxdur).
 2. **Ucuz.**  Ağır context qurucuları (jurnal xülasəsi, analitika, sillabus
-   əhatə hesabatı) çağırılmır; hər vidjet bir neçə count/aggregate/`[:5]`
-   sorğusu ilə kifayətlənir.  Ümumi hədd testdə kilidlidir.
+   əhatə hesabatı) çağırılmır; tələbənin fənn-fənn rəqəmləri
+   ``dashboard_data.student_subjects``-dən TOPLU gəlir — fənn sayı artanda
+   sorğu sayı artmır.  Ümumi hədd testdə kilidlidir.
 3. **JS-siz.**  Panel tam server-render-lidir; SPA keçidlərini shell-in öz
    `js-profile-section-link` deleqasiyası tutur.
+4. **Bir dövr.**  Bütün vidjetlər EYNİ, tarixə əsaslanan dövrü alır
+   (``dashboard_data.current_period``: bu günə düşən → yaxın gələcək →
+   bayraqlı → ən son).  Əvvəl yalnız ``is_current`` bayrağına baxılırdı və
+   2026-09-25-də başlıqda «2025/2026 · Yaz semestri» görünürdü.
 
 ──────────────────────────────────────────────────────────────────────────────
 CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
@@ -23,8 +28,10 @@ CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
 
     has_access   bool   — aktiv təşkilat konteksti var
     greeting     str    — «Salam, <ad>»
-    role_label   str    — aktiv üzvlüyün ən yüksək rolunun adı
+    role_label   str    — aktiv üzvlüyün ən yüksək rolunun LOKALLAŞDIRILMIŞ adı
     period_label str    — cari tədris ili + semestr (varsa)
+    today_label  str    — «Cümə axşamı, 25.09.2026»
+    week_label   str    — «üst həftə» / «alt həftə» (dövr bu günü əhatə edirsə)
     widgets      list   — bax ``dashboard_widgets.widget()`` müqaviləsi
     empty_text   str    — heç bir vidjet yığılmayanda göstərilən mətn
     kpi_tiles    list   — hero zolağının 2–4 kartı (``dashboard_layout``)
@@ -34,11 +41,15 @@ CONTEXT MÜQAVİLƏSİ (şablon buna söykənir — açar adları dəyişməz)
 
 from __future__ import annotations
 
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from . import dashboard_layout as layout
 from . import dashboard_staff_widgets as staff
+from . import dashboard_student as student
+from . import dashboard_teacher as teacher
 from . import dashboard_widgets as personal
+from .dashboard_lessons import parity_label
 
 _CTX = "accounts.dashboard"
 
@@ -46,18 +57,6 @@ _CTX = "accounts.dashboard"
 #: (SECTION_PARTIALS + AJAX_SAFE_SECTIONS), ``labels.build_section_titles``,
 #: ``profile.html`` (`data-ajax-sections` + dispatch) və ``rbac``.
 PROFILE_SECTION = "dashboard"
-
-
-def _current_period(organization):
-    """Cari semestr (yoxdursa ən son başlayan) — bir sorğu."""
-    from apps.organizations.models import AcademicPeriod
-
-    if organization is None:
-        return None
-    return (
-        AcademicPeriod.objects.filter(organization=organization, is_current=True).first()
-        or AcademicPeriod.objects.filter(organization=organization).order_by("-start_date").first()
-    )
 
 
 def _period_label(period) -> str:
@@ -68,23 +67,12 @@ def _period_label(period) -> str:
     return " · ".join(part for part in (str(period.year_display or ""), str(_season_label(period) or "")) if part)
 
 
-def _student_record(organization, user):
-    """Tələbənin aktiv akademik qeydi (yoxdursa ``None``) — bir sorğu."""
-    from apps.registrar.models import StudentAcademicRecord
-
-    if organization is None:
-        return None
-    return (
-        StudentAcademicRecord.objects.filter(organization=organization, student=user, is_active=True)
-        .select_related("program", "group")
-        .first()
-    )
-
-
 def _role_label(user, organization) -> str:
+    """Ən yüksək aktiv rolun adı — seed-dən İngiliscə qalmış ad («Student») lokallaşdırılır."""
     if organization is None:
         return ""
     from apps.organizations.public import get_active_memberships
+    from core.roles import resolve_seeded_role_label
 
     membership = (
         get_active_memberships(user, organization)
@@ -95,12 +83,29 @@ def _role_label(user, organization) -> str:
     )
     if membership is None:
         return ""
-    return str(getattr(membership.role, "display_name", "") or "")
+    role = membership.role
+    return str(resolve_seeded_role_label(getattr(role, "name", ""), getattr(role, "display_name", "")) or "")
 
 
 def _greeting(user) -> str:
-    name = (getattr(user, "get_full_name", lambda: "")() or "").strip() or str(getattr(user, "username", "") or "")
+    """«Salam, <ad>» — ad yoxdursa tam ad, o da yoxdursa istifadəçi adı."""
+    name = (
+        str(getattr(user, "first_name", "") or "").strip()
+        or (getattr(user, "get_full_name", lambda: "")() or "").strip()
+        or str(getattr(user, "username", "") or "")
+    )
     return pgettext(_CTX, "Salam, %(name)s") % {"name": name}
+
+
+def _set_header(section, *, user, organization, period, today) -> None:
+    from apps.registrar.public import dashboard_data
+
+    section["role_label"] = _role_label(user, organization)
+    section["period_label"] = _period_label(period)
+    section["today_label"] = "%s, %s" % (personal.weekday_label(today), personal.fmt_date(today))
+    section["week_label"] = (
+        parity_label(dashboard_data.week_parity(period, today)) if dashboard_data.period_contains(period, today) else ""
+    )
 
 
 def build_dashboard_section(
@@ -131,69 +136,88 @@ def build_dashboard_section(
         section["has_access"] = False
         return section
 
-    section["has_access"] = True
-    section["role_label"] = _role_label(user, active_organization)
-    period = _current_period(active_organization)
-    section["period_label"] = _period_label(period)
+    from apps.registrar.public import dashboard_data
 
-    record = _student_record(active_organization, user) if capabilities.get("is_student") else None
+    section["has_access"] = True
+    today = timezone.localdate()
+    now = timezone.localtime().time()
+    period = dashboard_data.current_period(active_organization, today=today)
+    _set_header(section, user=user, organization=active_organization, period=period, today=today)
 
     is_student = bool(capabilities.get("is_student"))
     is_teacher = bool(capabilities.get("is_teacher"))
+    record = dashboard_data.student_record(active_organization, user) if is_student else None
+    # Fənn-fənn rəqəmlər BİR DƏFƏ hesablanır — «Davamiyyət» və «Cari ballar» paylaşır.
+    subjects = None
+    if is_student and record is not None and period is not None and "my-journal" in allowed_sections:
+        subjects = dashboard_data.student_subjects(organization=active_organization, record=record, period=period)
+    offerings = None
+    if is_teacher and period is not None and "my-journal" in allowed_sections:
+        offerings = dashboard_data.teacher_offerings(
+            organization=active_organization, teacher=user, period=period, today=today
+        )
+    # Aralıq qiymətləndirmə pəncərəsi — müəllim kartı və İmtahan Mərkəzi kartı paylaşır (TƏK sorğu).
+    windows = None
+    if period is not None and ((offerings and offerings.get("total")) or "kollokvium-windows" in allowed_sections):
+        windows = dashboard_data.interim_windows(organization=active_organization, period=period, today=today)
     # «Sillabus işlərim» ŞƏXSİ kartdır: təsdiq səthi olan aktor (kafedra müdiri,
     # RİM, rektor) onun əvəzinə «Sillabus təsdiqi» vidjetini alır — əks halda
     # eyni domen iki dəfə, üstəlik yanlış nöqteyi-nəzərdən görünərdi.
     shows_own_syllabus = bool(capabilities.get("can_edit_syllabus")) and not capabilities.get("can_review_syllabus")
+    own_applications = None
+    is_handler = False
+    if "applications" in allowed_sections:
+        from apps.accounts.views._dashboard_helpers.cheap_counts import (
+            count_own_applications,
+            is_applications_handler,
+        )
 
+        own_applications = count_own_applications(user, active_organization)
+        # Tələbə emalçı ola bilməz — şöbə kataloqu sorğusu ona sərf olunmur.
+        is_handler = not (is_student and not is_teacher) and is_applications_handler(user, active_organization)
+
+    student_kwargs = {"record": record, "period": period, "subjects": subjects, "allowed_sections": allowed_sections}
     widgets = [
         # ── Tələbə ────────────────────────────────────────────────────────
         (
-            personal.student_today(
+            student.student_today(
                 organization=active_organization,
                 record=record,
                 period=period,
                 allowed_sections=allowed_sections,
+                today=today,
+                now=now,
             )
             if is_student
             else None
         ),
-        (
-            personal.student_attendance(
-                organization=active_organization,
-                user=user,
-                record=record,
-                period=period,
-                allowed_sections=allowed_sections,
-            )
-            if is_student
-            else None
-        ),
-        (
-            personal.student_grades(
-                organization=active_organization,
-                user=user,
-                allowed_sections=allowed_sections,
-            )
-            if is_student
-            else None
-        ),
+        student.student_attendance(**student_kwargs) if is_student else None,
+        student.student_scores(**student_kwargs) if is_student else None,
         # ── Müəllim ───────────────────────────────────────────────────────
         (
-            personal.teacher_today(
+            teacher.teacher_today(
                 organization=active_organization,
                 user=user,
                 period=period,
                 allowed_sections=allowed_sections,
+                today=today,
+                now=now,
             )
             if is_teacher
             else None
         ),
         (
-            personal.teacher_offerings(
-                organization=active_organization,
-                user=user,
+            teacher.teacher_offerings(data=offerings, period=period, allowed_sections=allowed_sections)
+            if is_teacher
+            else None
+        ),
+        (
+            teacher.teacher_midterm(
+                windows=windows,
+                has_offerings=bool(offerings and offerings.get("total")),
                 period=period,
                 allowed_sections=allowed_sections,
+                today=today,
             )
             if is_teacher
             else None
@@ -214,13 +238,20 @@ def build_dashboard_section(
             is_teacher=is_teacher,
         ),
         # ── İdarəetmə ─────────────────────────────────────────────────────
-        staff.applications(allowed_sections=allowed_sections, pending_count=applications_pending_count),
+        staff.applications(
+            allowed_sections=allowed_sections,
+            pending_count=applications_pending_count,
+            own=own_applications,
+            is_handler=is_handler,
+        ),
         staff.syllabus_review(request=request, organization=active_organization, allowed_sections=allowed_sections),
         staff.workload_distribution(
             request=request, organization=active_organization, allowed_sections=allowed_sections
         ),
         staff.schedule_scope(request=request, organization=active_organization, allowed_sections=allowed_sections),
-        staff.kollokvium_windows(organization=active_organization, period=period, allowed_sections=allowed_sections),
+        staff.kollokvium_windows(
+            organization=active_organization, period=period, allowed_sections=allowed_sections, windows=windows
+        ),
         staff.upcoming_exams(organization=active_organization, allowed_sections=allowed_sections),
         staff.appeals(capabilities=capabilities, pending_count=pending_appeals_count),
         staff.corrections(organization=active_organization, capabilities=capabilities),

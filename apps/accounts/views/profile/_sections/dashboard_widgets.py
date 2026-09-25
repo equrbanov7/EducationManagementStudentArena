@@ -1,21 +1,33 @@
-"""«Ana səhifə» (dashboard) vidjet qurucuları — rol-agnostik, İCAZƏ-qapılı.
+"""«Ana səhifə» (dashboard) vidjet müqaviləsi + ortaq köməkçilər + şəxsi iş kartları.
 
-Hər funksiya BİR vidjet qaytarır (və ya ``None`` — vidjet ümumiyyətlə
+Hər qurucu funksiya BİR vidjet qaytarır (və ya ``None`` — vidjet ümumiyyətlə
 göstərilmir).  Qapı həmişə ``allowed_sections`` / ``capabilities`` üzərindədir:
 istifadəçinin AÇA BİLMƏDİYİ bölmənin rəqəmi kabinet ana səhifəsində də
 GÖRÜNMÜR (sayğac sızması yoxdur).
 
-BÜDCƏ: hər vidjet bir neçə UCUZ sorğu ilə məhdudlaşır (count/aggregate,
-``select_related``, ``[:5]`` dilim).  Ağır context qurucuları (jurnal xülasəsi,
-analitika, sillabus əhatə hesabatı) QƏSDƏN çağırılmır — ana səhifə bölmələrin
-ƏVƏZİ deyil, onlara YÖNLƏNDİRİCİDİR.  Ümumi hədd testdə
-``CaptureQueriesContext`` ilə kilidlənib (``test_dashboard_section.py``).
+Modullar (2026-09-25 bölgüsü — hər fayl 600 sətir limitindədir):
+
+* bu fayl — ``widget()`` müqaviləsi, keçid/format köməkçiləri, «Sillabus
+  işlərim», «Dərs yüküm»;
+* ``dashboard_student`` — tələbənin fənn-fənn davamiyyəti, cari balları, dərsləri;
+* ``dashboard_teacher`` — müəllimin dərsləri, jurnalları, Midterm pəncərəsi;
+* ``dashboard_lessons`` — «bu gün / növbəti dərs günü» kartının ortaq qurucusu;
+* ``dashboard_staff_widgets`` — idarəetmə vidjetləri.
+
+BÜDCƏ: hər vidjet bir neçə UCUZ sorğu ilə məhdudlaşır; fənn/açılış sayı artanda
+sorğu sayı ARTMIR (toplu oxuma ``apps.registrar.public.dashboard_data``-dadır).
+Ümumi hədd testdə ``CaptureQueriesContext`` ilə kilidlənib
+(``test_dashboard_section.py``, ``test_dashboard_student_teacher.py``).
 """
 
 from __future__ import annotations
 
-from django.db.models import Count, Sum
+import datetime
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from urllib.parse import urlencode
+
 from django.urls import reverse
+from django.utils import formats
 from django.utils.translation import pgettext
 
 _CTX = "accounts.dashboard"
@@ -23,36 +35,109 @@ _CTX = "accounts.dashboard"
 #: Vidjet siyahılarının maksimum sətir sayı (dizayn: ana səhifə = xülasə).
 ROW_LIMIT = 5
 
+#: Fənn-fənn kartlarında (davamiyyət, cari ballar) sətir həddi — tələbənin
+#: semestrdə adətən 6–9 fənni olur və hamısı görünməlidir.
+SUBJECT_ROW_LIMIT = 10
+
+#: «Rəqəm yoxdur» sayılan dəyərlər (``dashboard_layout._BLANK_VALUES`` ilə eyni dil).
+_BLANK = ("", "0", "0%")
+
 
 # --------------------------------------------------------------------------- #
-# Kiçik köməkçilər
+# Keçidlər
 # --------------------------------------------------------------------------- #
 
 
-def section_link(section: str, label) -> dict:
+def section_link(section: str, label, *, params=None) -> dict:
     """SPA-nın tutduğu `?section=` keçidi (sidebar linkləri ilə eyni müqavilə).
 
-    ``title`` sonradan ``dashboard.build_dashboard_section`` tərəfindən hədəf
-    bölmənin RƏSMİ adı ilə doldurulur (SPA panel başlığını `data-title`-dan
-    oxuyur; «Cədvələ keç» kimi əməl mətni başlıq olmamalıdır).
+    ``params`` — əlavə sorğu parametrləri (məs. fənnin jurnalına dərin keçid:
+    ``period`` + ``subject``); SPA onları fraqment sorğusuna olduğu kimi ötürür.
+    ``title`` sonradan ``dashboard._finalise_links`` tərəfindən hədəf bölmənin
+    RƏSMİ adı ilə doldurulur (SPA panel başlığını `data-title`-dan oxuyur).
     """
+    query = {"section": section}
+    query.update({key: str(value) for key, value in (params or {}).items() if value not in (None, "")})
     return {
         "section": section,
         "label": label,
         "title": "",
-        "url": "%s?section=%s" % (reverse("accounts:profile"), section),
+        "url": "%s?%s" % (reverse("accounts:profile"), urlencode(query)),
+        "external": False,
     }
 
 
-def widget(key: str, title, icon: str, *, tone: str = "", stats=None, rows=None, link=None, empty="") -> dict:
+def external_link(section: str, label, url: str) -> dict:
+    """Kabinet qabığından KƏNAR səhifə (müəllim jurnalı `/jurnal/` — sidebar kimi yeni tabda).
+
+    ``section`` yalnız QAPI üçündür (``_finalise_links`` bölmə icazəsizdirsə
+    linki silir); şablon belə linkə `data-section` YAZMIR — əks halda panelin
+    SPA deleqasiyası onu tutub bölmə kimi yükləməyə çalışardı.
+    """
+    return {"section": section, "label": label, "title": "", "url": url, "external": True}
+
+
+def journal_link(period, label=None) -> dict:
+    """Tələbənin «Elektron jurnal» bölməsi — ana səhifənin dövrü ilə."""
+    return section_link(
+        "my-journal",
+        label or pgettext(_CTX, "Jurnala keç"),
+        params={"period": getattr(period, "pk", None)},
+    )
+
+
+def subject_journal_url(period, enrollment_id) -> str:
+    """Fənnin jurnal detalına dərin keçid (`_journal_student_content.html` ilə eyni forma)."""
+    params = {"period": getattr(period, "pk", None), "subject": enrollment_id}
+    return section_link("my-journal", "", params=params)["url"]
+
+
+# --------------------------------------------------------------------------- #
+# Vidjet müqaviləsi
+# --------------------------------------------------------------------------- #
+
+
+def widget(
+    key: str,
+    title,
+    icon: str,
+    *,
+    tone: str = "",
+    stats=None,
+    rows=None,
+    link=None,
+    empty="",
+    body: str = "",
+    subtitle="",
+    notice="",
+    caption="",
+    total=None,
+    wide: bool = False,
+    empty_without_rows: bool = False,
+) -> dict:
     """Vahid vidjet müqaviləsi — şablon YALNIZ bu açarları oxuyur.
 
+    Əsas açarlar (dəyişməz): ``key``, ``title``, ``icon``, ``tone``, ``stats``,
+    ``rows``, ``link``, ``empty``, ``is_empty``.  2026-09-25 əlavələri:
+
+    * ``body``     — sətirlərin forması: "" (başlıq + meta), "attendance",
+                     "scores", "lessons", "offerings" (hər biri ayrı partial);
+    * ``subtitle`` — başlığın altındakı bir cümləlik izah (məs. limit qaydası);
+    * ``notice``   — kartın sonundakı əlavə qeyd;
+    * ``caption``  — siyahının başlığı («Bu gün · Cümə axşamı, 25.09»);
+    * ``total``    — siyahının TAM sayı («+N daha» üçün; verilməyibsə birinci rəqəm);
+    * ``wide``     — geniş ekranda iki sütun tutan kart (fənn-fənn siyahılar).
+
     ``is_empty`` BURADA hesablanır: sətir yoxdursa VƏ bütün rəqəmlər sıfırdırsa
-    vidjet «boşdur» sayılır və şablon dost boş-hal mətnini göstərir.  Qərarı
-    şablonda saxlasaydıq hər vidjet üçün ayrı şərt yazmaq lazım gələrdi.
+    vidjet «boşdur».  ``empty_without_rows`` — rəqəmlərindən asılı olmayaraq
+    sətirsiz kart boşdur (məs. dərs kartında «Növbəti: yoxdur» mətni rəqəm deyil).
     """
     stats = list(stats or ())
     rows = list(rows or ())
+    if empty_without_rows:
+        is_empty = not rows
+    else:
+        is_empty = not rows and all(str(item.get("value", "")).strip() in _BLANK for item in stats)
     return {
         "key": key,
         "title": title,
@@ -62,7 +147,13 @@ def widget(key: str, title, icon: str, *, tone: str = "", stats=None, rows=None,
         "rows": rows,
         "link": link,
         "empty": empty,
-        "is_empty": not rows and all(str(item.get("value", "")).strip() in ("", "0", "0%") for item in stats),
+        "is_empty": is_empty,
+        "body": body,
+        "subtitle": subtitle,
+        "notice": notice,
+        "caption": caption,
+        "total": total,
+        "wide": bool(wide),
     }
 
 
@@ -70,7 +161,69 @@ def stat(label, value, note="") -> dict:
     return {"label": label, "value": value, "note": note}
 
 
-def _time_label(slot) -> str:
+def take(queryset, limit: int = ROW_LIMIT):
+    """``(ilk limit sətir, TAM say)`` — say yalnız siyahı DOLANDA ayrıca sorğulanır.
+
+    Əvvəlki kartlar ``[:6]`` dilimini sayıb «Növbədə: 6» yazırdı (real say 40
+    olsa da).  Bir sətir artıq oxunur: həddə sığırsa uzunluq TAM saydır (əlavə
+    sorğu yoxdur), sığmırsa ``count()`` gedir.
+    """
+    rows = list(queryset[: limit + 1])
+    if len(rows) <= limit:
+        return rows, len(rows)
+    return rows[:limit], queryset.count()
+
+
+# --------------------------------------------------------------------------- #
+# Format köməkçiləri
+# --------------------------------------------------------------------------- #
+
+
+def _decimal(value) -> Decimal:
+    try:
+        return Decimal(str(value if value is not None else 0))
+    except (InvalidOperation, TypeError, ValueError):
+        return Decimal("0")
+
+
+def fmt_number(value) -> str:
+    """Saat/bal — ən çox bir onluq, dilə görə ayırıcı: 7.50 → «7,5», 15.00 → «15».
+
+    İcazəli qayıb çox vaxt kəsrlidir (30 saatın 25%-i = 7,5); onu «8»-ə
+    yuvarlaqlaşdırmaq YALANDIR — 8 saat qayıb artıq limit keçməkdir.
+    """
+    number = _decimal(value).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+    if number == number.to_integral_value():
+        return formats.number_format(int(number))
+    return formats.number_format(number, 1)
+
+
+def plain_number(value) -> str:
+    """`<progress value/max>` üçün NÖQTƏLİ ədəd (lokallaşdırılmır — HTML atributudur)."""
+    number = _decimal(value)
+    return format(number.normalize(), "f") if number else "0"
+
+
+def fmt_date(day) -> str:
+    return day.strftime("%d.%m.%Y") if day else ""
+
+
+def weekday_label(day) -> str:
+    """Həftə gününün adı — registrar cədvəli ilə eyni tərcümə (`registrar.weekday`)."""
+    from apps.registrar.public import schedule as schedule_service
+
+    labels = dict(schedule_service.WEEKDAYS)
+    return str(labels.get(day.isoweekday(), "")) if day else ""
+
+
+def day_label(day) -> str:
+    """«Bazar ertəsi, 29.09» — kartlarda qısa tarix."""
+    if not day:
+        return ""
+    return "%s, %s" % (weekday_label(day), day.strftime("%d.%m"))
+
+
+def time_range(slot) -> str:
     start = getattr(slot, "start_time", None)
     end = getattr(slot, "end_time", None)
     if start is None:
@@ -78,270 +231,46 @@ def _time_label(slot) -> str:
     return "%s–%s" % (start.strftime("%H:%M"), end.strftime("%H:%M") if end else "")
 
 
-def todays_slots(slots, week_context) -> list:
-    """Bu günün slotları — həftə günü + üst/alt həftə paritetinə görə süzülmüş."""
-    from apps.registrar.models import WeekType
-
-    if not slots or not week_context:
-        return []
-    weekday = week_context["today"].isoweekday()
-    parity = week_context.get("parity")
-    picked = []
-    for slot in slots:
-        if slot.weekday != weekday:
-            continue
-        # `all` hər həftə keçir; `odd`/`even` yalnız öz paritetində.
-        if slot.week_type in (WeekType.ODD, WeekType.EVEN) and slot.week_type != parity:
-            continue
-        picked.append(slot)
-    return sorted(picked, key=lambda item: item.start_time)
-
-
-def upcoming_slots(slots, week_context):
-    """Bu gündən SONRAKI ilk dərsli gün → ``(gün adı, slotlar)``.
-
-    Cari həftənin qalan günlərinə baxır (pariteti nəzərə alır); tapılmasa boş
-    qaytarır.  ƏLAVƏ SORĞU ETMİR — çağıran onsuz da yüklədiyi slot siyahısını
-    ötürür (ana səhifə sorğu büdcəsi).
-    """
-    from apps.registrar.models import WeekType
-
-    if not slots or not week_context:
-        return "", []
-    weekday = week_context["today"].isoweekday()
-    parity = week_context.get("parity")
-    ahead = {}
-    for slot in slots:
-        if slot.weekday <= weekday:
-            continue
-        if slot.week_type in (WeekType.ODD, WeekType.EVEN) and slot.week_type != parity:
-            continue
-        ahead.setdefault(slot.weekday, []).append(slot)
-    if not ahead:
-        return "", []
-    day = min(ahead)
-    from apps.registrar.public import schedule as schedule_service
-
-    labels = {index: label for index, label in schedule_service.WEEKDAYS}
-    return str(labels.get(day, "")), sorted(ahead[day], key=lambda item: item.start_time)
-
-
-def _slot_rows(slots) -> list:
-    rows = []
-    for slot in slots[:ROW_LIMIT]:
-        offering = slot.offering
-        subject = getattr(offering, "subject", None)
-        meta = [_time_label(slot)]
-        if slot.room:
-            meta.append(slot.room)
-        group = getattr(offering, "group", None)
-        if group is not None:
-            meta.append(group.name)
-        rows.append({"title": getattr(subject, "name", "") or "—", "meta": " · ".join(part for part in meta if part)})
-    return rows
+def days_until(day, today) -> int | None:
+    if not isinstance(day, datetime.date):
+        return None
+    return (day - today).days
 
 
 # --------------------------------------------------------------------------- #
-# Tələbə vidjetləri
+# Şəxsi iş kartları (rol-agnostik)
 # --------------------------------------------------------------------------- #
-
-
-def student_today(*, organization, record, period, allowed_sections) -> dict | None:
-    """«Bu gün dərslər» — SAR qrupunun cədvəli, bu günə + həftə paritetinə görə.
-
-    Akademik qeydi (SAR) və ya cari semestri OLMAYAN tələbədə vidjet YOX OLMUR
-    — boş vəziyyət göstərir.  Səbəb: köçürülmüş bazada qeydsiz hesablar var və
-    «heç nə görünmür» onlar üçün nasazlıqdan fərqlənmir.
-    """
-    if "my-schedule" not in allowed_sections:
-        return None
-    from apps.registrar.public import schedule as schedule_service
-
-    group = getattr(record, "group", None) if record is not None else None
-    if period is None or group is None:
-        return widget(
-            "student-today",
-            pgettext(_CTX, "Bu gün dərslər"),
-            "fa-calendar-day",
-            link=section_link("my-schedule", pgettext(_CTX, "Cədvələ keç")),
-            empty=pgettext(_CTX, "Cari semestr üçün qrup cədvəliniz tapılmadı."),
-        )
-    slots = schedule_service.get_group_schedule(organization=organization, group=group, period=period)
-    week_context = schedule_service.build_week_context(period)
-    today = todays_slots(slots, week_context)
-    # Ekran 10: kart «bu gün / növbəti dərslər»dir.  Bu gün dərs yoxdursa
-    # bomboş qalmır — həftənin NÖVBƏTİ dərsli günü göstərilir (eyni slot
-    # siyahısından, ƏLAVƏ SORĞU YOXDUR).
-    upcoming_day, upcoming = ("", [])
-    if not today:
-        upcoming_day, upcoming = upcoming_slots(slots, week_context)
-    shown = today or upcoming
-    next_label = _time_label(shown[0]) if shown else pgettext(_CTX, "yoxdur")
-    return widget(
-        "student-today",
-        pgettext(_CTX, "Bu gün / növbəti dərslər"),
-        "fa-calendar-day",
-        tone="primary",
-        stats=[
-            stat(pgettext(_CTX, "Bu gün"), len(today), pgettext(_CTX, "dərs")),
-            stat(
-                pgettext(_CTX, "Növbəti"),
-                next_label,
-                upcoming_day if not today else "",
-            ),
-        ],
-        rows=_slot_rows(shown),
-        link=section_link("my-schedule", pgettext(_CTX, "Cədvələ keç")),
-        empty=pgettext(_CTX, "Bu gün üçün cədvəldə dərs yoxdur."),
-    )
-
-
-def student_grades(*, organization, user, allowed_sections) -> dict | None:
-    """«Son qiymətlər» — sonuncu 5 komponent balı (kollokvium/seminar/SDF…)."""
-    if "my-journal" not in allowed_sections:
-        return None
-    from apps.registrar.models import ComponentScore
-
-    scores = list(
-        ComponentScore.objects.filter(organization=organization, enrollment__student=user)
-        .select_related("component", "enrollment__offering__subject")
-        .order_by("-created_at")[:ROW_LIMIT]
-    )
-    rows = [
-        {
-            "title": getattr(row.enrollment.offering.subject, "name", "") or "—",
-            "meta": "%s · %s" % (row.component.name, row.score),
-        }
-        for row in scores
-    ]
-    return widget(
-        "student-grades",
-        pgettext(_CTX, "Son qiymətlər"),
-        "fa-star",
-        stats=[stat(pgettext(_CTX, "Yazılan bal"), len(rows), pgettext(_CTX, "sonuncu"))],
-        rows=rows,
-        link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
-        empty=pgettext(_CTX, "Hələ heç bir bal yazılmayıb."),
-    )
-
-
-def student_attendance(*, organization, user, record, period, allowed_sections) -> dict | None:
-    """«Davamiyyət» — cari dövrün qayıb saatları və proqramın buraxılış limiti."""
-    if "my-journal" not in allowed_sections:
-        return None
-    if record is None or period is None:
-        return widget(
-            "student-attendance",
-            pgettext(_CTX, "Davamiyyət"),
-            "fa-user-check",
-            link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
-            empty=pgettext(_CTX, "Akademik qeydiniz tapılmadı — RİM-ə müraciət edin."),
-        )
-    from apps.registrar.models import Enrollment
-
-    summary = Enrollment.objects.filter(organization=organization, student=user, offering__period=period).aggregate(
-        absence=Sum("absence_hours"), subjects=Count("id")
-    )
-    absence = int(summary.get("absence") or 0)
-    limit_percent = int(getattr(getattr(record, "program", None), "absence_limit_percent", 0) or 0)
-    return widget(
-        "student-attendance",
-        pgettext(_CTX, "Davamiyyət"),
-        "fa-user-check",
-        tone="warning" if absence else "",
-        stats=[
-            stat(pgettext(_CTX, "Qayıb"), absence, pgettext(_CTX, "saat")),
-            stat(pgettext(_CTX, "Fənn"), int(summary.get("subjects") or 0), pgettext(_CTX, "cari dövr")),
-            stat(pgettext(_CTX, "Limit"), "%s%%" % limit_percent, pgettext(_CTX, "proqram üzrə")),
-        ],
-        link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
-        empty=pgettext(_CTX, "Cari dövrdə qeydiyyat yoxdur."),
-    )
-
-
-# --------------------------------------------------------------------------- #
-# Müəllim vidjetləri
-# --------------------------------------------------------------------------- #
-
-
-def teacher_today(*, organization, user, period, allowed_sections) -> dict | None:
-    if "my-schedule" not in allowed_sections or period is None:
-        return None
-    from apps.registrar.public import schedule as schedule_service
-
-    slots = schedule_service.get_teacher_schedule(organization=organization, teacher=user, period=period)
-    week_context = schedule_service.build_week_context(period)
-    today = todays_slots(slots, week_context)
-    return widget(
-        "teacher-today",
-        pgettext(_CTX, "Bu gün dərslərim"),
-        "fa-chalkboard-teacher",
-        tone="primary",
-        stats=[
-            stat(pgettext(_CTX, "Bu gün"), len(today), pgettext(_CTX, "dərs")),
-            stat(pgettext(_CTX, "Həftədə"), len(slots), pgettext(_CTX, "slot")),
-        ],
-        rows=_slot_rows(today),
-        link=section_link("my-schedule", pgettext(_CTX, "Cədvələ keç")),
-        empty=pgettext(_CTX, "Bu gün üçün cədvəldə dərsiniz yoxdur."),
-    )
-
-
-def teacher_offerings(*, organization, user, period, allowed_sections) -> dict | None:
-    """«Fənlərim» — cari dövrdə apardığı açılışların sayı + jurnal keçidi."""
-    if "my-journal" not in allowed_sections or period is None:
-        return None
-    from apps.registrar.models import CourseOffering
-
-    offerings = list(
-        CourseOffering.objects.filter(
-            organization=organization, instructor=user, period=period, is_active=True
-        ).select_related("subject", "group")[: ROW_LIMIT + 1]
-    )
-    rows = [
-        {
-            "title": getattr(row.subject, "name", "") or "—",
-            "meta": getattr(getattr(row, "group", None), "name", "") or "",
-        }
-        for row in offerings[:ROW_LIMIT]
-    ]
-    return widget(
-        "teacher-offerings",
-        pgettext(_CTX, "Fənlərim"),
-        "fa-book-open",
-        stats=[stat(pgettext(_CTX, "Cari dövr"), len(offerings), pgettext(_CTX, "açılış"))],
-        rows=rows,
-        link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
-        empty=pgettext(_CTX, "Cari dövrdə sizə fənn təyin olunmayıb."),
-    )
 
 
 def teacher_syllabus(*, request, organization, allowed_sections) -> dict | None:
-    """«Sillabus işlərim» — qaralama + düzəliş tələb olunan versiyaların sayı."""
+    """«Sillabus işlərim» — qaralama + düzəliş tələb olunan versiyaların TAM sayı."""
     if "syllabus-list" not in allowed_sections:
         return None
     from apps.syllabus.public import SyllabusStatus, list_syllabi, resolve_actor
 
     actor = resolve_actor(request.user, organization, request=request)
-    pending = list_syllabi(
-        organization=organization,
-        actor=actor,
-        statuses=[SyllabusStatus.DRAFT, SyllabusStatus.REVISION],
+    pending, total = take(
+        list_syllabi(
+            organization=organization,
+            actor=actor,
+            statuses=[SyllabusStatus.DRAFT, SyllabusStatus.REVISION],
+        )
     )
     rows = [
         {
             "title": getattr(row.subject, "name", "") or "—",
             "meta": str(getattr(getattr(row, "current_version", None), "get_status_display", lambda: "")() or ""),
         }
-        for row in pending[:ROW_LIMIT]
+        for row in pending
     ]
     return widget(
         "teacher-syllabus",
         pgettext(_CTX, "Sillabus işlərim"),
         "fa-file-signature",
         tone="warning" if rows else "",
-        stats=[stat(pgettext(_CTX, "Gözləyən"), len(rows), pgettext(_CTX, "sillabus"))],
+        stats=[stat(pgettext(_CTX, "Gözləyən"), total, pgettext(_CTX, "sillabus"))],
         rows=rows,
+        total=total,
         link=section_link("syllabus-list", pgettext(_CTX, "Sillabuslara keç")),
         empty=pgettext(_CTX, "Qaralama və ya düzəliş gözləyən sillabus yoxdur."),
     )
@@ -379,16 +308,21 @@ def my_workload(*, organization, user, allowed_sections, is_teacher: bool = Fals
 
 __all__ = [
     "ROW_LIMIT",
+    "SUBJECT_ROW_LIMIT",
+    "day_label",
+    "days_until",
+    "external_link",
+    "fmt_date",
+    "fmt_number",
+    "journal_link",
     "my_workload",
+    "plain_number",
     "section_link",
     "stat",
-    "student_attendance",
-    "student_grades",
-    "student_today",
-    "teacher_offerings",
+    "subject_journal_url",
+    "take",
     "teacher_syllabus",
-    "teacher_today",
-    "todays_slots",
-    "upcoming_slots",
+    "time_range",
+    "weekday_label",
     "widget",
 ]

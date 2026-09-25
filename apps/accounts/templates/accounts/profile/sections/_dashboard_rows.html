@@ -1,0 +1,98 @@
+{% load i18n %}
+{% comment %}
+«Ana səhifə» kartının SƏTİRLƏRİ — forma `w.body`-dən (bax `dashboard_widgets.widget`):
+
+  attendance — fənn · «qayıb X / icazə Y saat» · limit zolağı · status çipi
+  scores     — fənn · giriş balı X / 50 + zolaq · Midterm (və ya K1–K3) çipləri
+  lessons    — vaxt · fənn · növ/auditoriya (keçənlər solğun, gedən «indi»)
+  offerings  — fənn · qrup/tələbə · keçirilmiş / plan saatı (jurnal yeni tabda)
+  ""         — köhnə forma: başlıq + meta
+
+Zolaqlar `<progress>` elementidir: dinamik en inline üslub atributu tələb etmir (CSP), dəyərlər
+Python-da nöqtəli ədəd kimi hazırlanır (`plain_number`).  Fənn sətirləri həmin
+fənnin jurnal detalına SPA dərin keçididir (`?section=my-journal&period=…&subject=…`).
+{% endcomment %}
+{% if w.body == "attendance" %}
+<ul class="dash-subjects" aria-label="{{ w.title }}">
+  {% for row in w.rows %}
+  <li class="dash-subj dash-subj--{{ row.status }}">
+    <a class="dash-subj__link js-profile-section-link" href="{{ row.url }}"
+       data-section="my-journal" data-title="{{ w.link.title }}" data-source-url="{{ profile_base_url }}">
+      <span class="dash-subj__head">
+        <span class="dash-subj__title">{{ row.title }}</span>
+        <span class="ems-badge ems-badge--wrap ems-badge--{{ row.tone }} dash-subj__chip" title="{{ row.status_hint }}">{{ row.status_label }}</span>
+      </span>
+      <span class="dash-subj__value">{{ row.value }}</span>
+      {% if row.bar %}
+      <progress class="dash-bar dash-bar--{{ row.status }}" value="{{ row.bar.value }}" max="{{ row.bar.max }}"
+                aria-label="{% trans 'Qayıb saatı / icazə verilən limit' context 'accounts.dashboard' %}"></progress>
+      {% endif %}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% elif w.body == "scores" %}
+<ul class="dash-subjects" aria-label="{{ w.title }}">
+  {% for row in w.rows %}
+  <li class="dash-subj">
+    <a class="dash-subj__link js-profile-section-link" href="{{ row.url }}"
+       data-section="my-journal" data-title="{{ w.link.title }}" data-source-url="{{ profile_base_url }}">
+      <span class="dash-subj__head">
+        <span class="dash-subj__title">{{ row.title }}</span>
+        <span class="dash-subj__score">{% trans "giriş balı" context "accounts.dashboard" %} <strong>{{ row.entry }}</strong> / {{ row.entry_max }}</span>
+      </span>
+      {% if row.bar %}
+      <progress class="dash-bar dash-bar--score" value="{{ row.bar.value }}" max="{{ row.bar.max }}"
+                aria-label="{% trans 'Giriş balı' context 'accounts.dashboard' %}"></progress>
+      {% endif %}
+      <span class="dash-subj__chips">
+        {% for item in row.interim %}
+        <span class="dash-chip{% if not item.written %} dash-chip--empty{% endif %}">{{ item.label }}: {% if item.written %}<strong>{{ item.text }}</strong>{% else %}{{ item.text }}{% endif %}</span>
+        {% endfor %}
+      </span>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% elif w.body == "lessons" %}
+<ol class="dash-lessons">
+  {% for row in w.rows %}
+  <li class="dash-lesson{% if row.is_past %} is-past{% endif %}{% if row.is_now %} is-now{% endif %}">
+    <span class="dash-lesson__time">{{ row.time }}</span>
+    <span class="dash-lesson__body">
+      <span class="dash-lesson__title">{{ row.title }}</span>
+      {% if row.meta %}<span class="dash-lesson__meta">{{ row.meta }}</span>{% endif %}
+    </span>
+    {% if row.is_now %}<span class="ems-badge ems-badge--success dash-lesson__now">{% trans "indi" context "accounts.dashboard" %}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% elif w.body == "offerings" %}
+<ul class="dash-subjects" aria-label="{{ w.title }}">
+  {% for row in w.rows %}
+  <li class="dash-subj">
+    <a class="dash-subj__link" href="{{ row.url }}" target="_blank" rel="noopener" data-force-navigation="true">
+      <span class="dash-subj__head">
+        <span class="dash-subj__title">{{ row.title }}</span>
+        <i class="fas fa-arrow-up-right-from-square dash-subj__ext" aria-hidden="true"></i>
+      </span>
+      {% if row.meta %}<span class="dash-subj__meta">{{ row.meta }}</span>{% endif %}
+      <span class="dash-subj__value">{{ row.value }}</span>
+      {% if row.bar %}
+      <progress class="dash-bar dash-bar--score" value="{{ row.bar.value }}" max="{{ row.bar.max }}"
+                aria-label="{% trans 'Keçirilmiş saat / plan saatı' context 'accounts.dashboard' %}"></progress>
+      {% endif %}
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<ul class="dash-card__rows">
+  {% for row in w.rows %}
+  <li class="dash-row">
+    <span class="dash-row__title">{{ row.title }}</span>
+    {% if row.meta %}<span class="dash-row__meta">{{ row.meta }}</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}

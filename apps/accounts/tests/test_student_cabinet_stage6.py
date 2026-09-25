@@ -12,12 +12,11 @@ Nəyi qoruyur
    baxışdakı versiya kartda YOXDUR.
 3. **Qiymətləndirmə çəkiləri (§8/4)** kabinetdə görünür və kodda hardcode
    deyil — org siyasətindən oxunur (10 / 10 / 30 / 50, cəm 100).
-4. **«Bu gün / növbəti dərslər»** kartı bu gün dərs olmayanda boş qalmır.
+4. **«Bu gün / növbəti dərslər»** kartı bu gün dərs olmayanda boş qalmır —
+   növbəti dərs günü həftə sonunu da keçir (cümə → bazar ertəsi).
 """
 
 from __future__ import annotations
-
-from unittest import mock
 
 from django.test import RequestFactory, TestCase, override_settings
 
@@ -69,31 +68,52 @@ class ApprovedSyllabusBatchTest(TestCase):
 
 @override_settings(UNIVERSITY_MODE=True)
 class UpcomingSlotsTest(TestCase):
-    """«Bu gün / növbəti dərslər» — bu gün boş olanda növbəti günü göstərir."""
+    """«Bu gün / növbəti dərslər» — bu gün boş olanda REAL növbəti dərs gününü göstərir.
+
+    2026-09-25 (sahib): köhnə ``upcoming_slots`` yalnız CARİ həftənin qalan
+    günlərinə baxırdı — cümə günü «yoxdur» yazırdı, halbuki bazar ertəsi dərs
+    var.  Tarix hesabı indi ``apps.registrar.public.dashboard_data``-dadır
+    (``next_lesson_day``: həftə keçidi + üst/alt pariteti + dövr sərhədi).
+    """
+
+    class Slot:
+        def __init__(self, weekday, hour):
+            import datetime as dt
+
+            from apps.registrar.models import WeekType
+
+            self.weekday = weekday
+            self.week_type = WeekType.ALL
+            self.start_time = dt.time(hour, 0)
+            self.end_time = dt.time(hour + 1, 30)
 
     def test_upcoming_slots_picks_the_next_teaching_day(self):
         import datetime as dt
 
-        from apps.accounts.views.profile._sections.dashboard_widgets import upcoming_slots
-        from apps.registrar.models import WeekType
+        from apps.registrar.public import dashboard_data
 
-        class Slot:
-            def __init__(self, weekday, hour):
-                self.weekday = weekday
-                self.week_type = WeekType.ALL
-                self.start_time = dt.time(hour, 0)
-
-        slots = [Slot(5, 9), Slot(3, 12), Slot(3, 9)]
-        week_context = {"today": mock.Mock(isoweekday=lambda: 2), "parity": WeekType.ODD}
-        day, picked = upcoming_slots(slots, week_context)
-        self.assertTrue(day)
+        tuesday = dt.date(2026, 9, 22)
+        slots = [self.Slot(5, 9), self.Slot(3, 12), self.Slot(3, 9)]
+        day, picked = dashboard_data.next_lesson_day(slots, period=None, today=tuesday)
+        self.assertEqual(day, dt.date(2026, 9, 23))  # çərşənbə — sıralanmış
         self.assertEqual([slot.start_time.hour for slot in picked], [9, 12])
 
-    def test_upcoming_slots_is_empty_when_nothing_is_left_this_week(self):
-        from apps.accounts.views.profile._sections.dashboard_widgets import upcoming_slots
+    def test_upcoming_slots_wraps_into_next_week(self):
+        import datetime as dt
 
-        day, picked = upcoming_slots([], {"today": mock.Mock(isoweekday=lambda: 5), "parity": None})
-        self.assertEqual((day, picked), ("", []))
+        from apps.registrar.public import dashboard_data
+
+        friday = dt.date(2026, 9, 25)
+        day, picked = dashboard_data.next_lesson_day([self.Slot(1, 9)], period=None, today=friday)
+        self.assertEqual(day, dt.date(2026, 9, 28))  # əvvəl «yoxdur» idi
+        self.assertEqual(len(picked), 1)
+
+    def test_upcoming_slots_is_empty_without_slots(self):
+        import datetime as dt
+
+        from apps.registrar.public import dashboard_data
+
+        self.assertEqual(dashboard_data.next_lesson_day([], period=None, today=dt.date(2026, 9, 25)), (None, []))
 
 
 class TranscriptTemplateContractTest(TestCase):

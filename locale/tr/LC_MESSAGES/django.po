@@ -76030,3 +76030,315 @@ msgid ""
 msgstr ""
 "Öğretmenlerin defterinde kayan şeritte görünür — Sınav Merkezinin vize "
 "bildirimi gibi."
+
+msgctxt "accounts.dashboard"
+msgid "üst həftə"
+msgstr "üst hafta"
+
+msgctxt "accounts.dashboard"
+msgid "alt həftə"
+msgstr "alt hafta"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslərim"
+msgstr "Derslerim — bugün / sıradaki"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün · %(day)s"
+msgstr "Bugün · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti dərs günü · %(day)s"
+msgstr "Sonraki ders günü · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "bu gün"
+msgstr "bugün"
+
+msgctxt "accounts.dashboard"
+msgid "indi gedir"
+msgstr "şu an sürüyor"
+
+msgctxt "accounts.dashboard"
+msgid "indi"
+msgstr "şimdi"
+
+msgctxt "accounts.dashboard"
+msgid "aud. %(room)s"
+msgstr "derslik %(room)s"
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bu dönemde kalan ders yok."
+
+msgctxt "accounts.dashboard"
+msgid "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bugünün dersleri bitti ve bu dönemde kalan ders yok."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+msgstr ""
+"Grubunuzun bu dönemki ders programı henüz hazırlanmadı — yayımlandığında "
+"burada görünecek."
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+msgstr "Bu dönem ders programında dersiniz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət — fənlər üzrə"
+msgstr "Derslere göre devam"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+msgstr ""
+"Sınır her ders için ayrı hesaplanır: dersin saatlerinin %%%(percent)s'i."
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s / icazə %(allowed)s saat"
+msgstr "devamsızlık %(absent)s / izin %(allowed)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+msgstr "devamsızlık %(absent)s saat · dersin saati tanımlanmamış"
+
+msgctxt "accounts.dashboard"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "accounts.dashboard"
+msgid "Limitə yaxın"
+msgstr "Sınıra yakın"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib — imtahana buraxılmır"
+msgstr "Sınır aşıldı — sınava alınmaz"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib"
+msgstr "Sınır aşıldı"
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən"
+msgstr "Eski sistemden"
+
+msgctxt "accounts.dashboard"
+msgid "Məlumat yoxdur"
+msgstr "Veri yok"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb icazə verilən həddin altındadır."
+msgstr "Devamsızlık izin verilen sınırın altında."
+
+msgctxt "accounts.dashboard"
+msgid "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+msgstr "İzin verilen devamsızlığın %75'i aşıldı — devamınıza dikkat edin."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+msgstr "Devamsızlık sınırı aşıldı — bu dersin final sınavına alınmıyorsunuz."
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+msgstr "Eski sistemden aktarılmış kapalı dönem — durum yeniden hesaplanmaz."
+
+msgctxt "accounts.dashboard"
+msgid "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+msgstr "Dersin saati tanımlanmamış — sınır hesaplanamıyor."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb saatı / icazə verilən limit"
+msgstr "Devamsızlık saati / izin verilen sınır"
+
+msgctxt "accounts.dashboard"
+msgid "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+msgstr "Sporcu istisnası: sınır aşılsa da sınava alınırsınız."
+
+msgctxt "accounts.dashboard"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Güncel eğitim dönemi belirlenmemiş."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+msgstr "Bu dönem ders kaydınız yok — sorunuz varsa dekanlığa başvurun."
+
+msgctxt "accounts.dashboard"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "accounts.dashboard"
+msgid "fənn"
+msgstr "ders"
+
+msgctxt "accounts.dashboard"
+msgid "Cari ballar — fənlər üzrə"
+msgstr "Derslere göre güncel puanlar"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+msgstr "Giriş puanı — sınava kadar toplanan puan (en çok %(max)s)."
+
+msgctxt "accounts.dashboard"
+msgid "Orta giriş balı"
+msgstr "Ortalama giriş puanı"
+
+msgctxt "accounts.dashboard"
+msgid "fənlər üzrə"
+msgstr "dersler genelinde"
+
+msgctxt "accounts.dashboard"
+msgid "fəndə yazılıb"
+msgstr "derste girildi"
+
+msgctxt "accounts.dashboard"
+msgid "giriş balı"
+msgstr "giriş puanı"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı"
+msgstr "Giriş puanı"
+
+msgctxt "accounts.dashboard"
+msgid "hələ yazılmayıb"
+msgstr "henüz girilmedi"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestrdə bal yazılan fənniniz yoxdur."
+msgstr "Bu dönem not girilen dersiniz yok."
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallarım"
+msgstr "Yoklama defterlerim"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallara keç"
+msgstr "Yoklama defterlerine git"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr"
+msgstr "Güncel dönem"
+
+msgctxt "accounts.dashboard"
+msgid "jurnal"
+msgstr "defter"
+
+msgctxt "accounts.dashboard"
+msgid "cəmi"
+msgstr "toplam"
+
+msgctxt "accounts.dashboard"
+msgid "%(count)s tələbə"
+msgstr "%(count)s öğrenci"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s / %(plan)s saat"
+msgstr "yapıldı %(held)s / %(plan)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s saat"
+msgstr "yapıldı %(held)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "Keçirilmiş saat / plan saatı"
+msgstr "Yapılan saat / planlanan saat"
+
+msgctxt "accounts.dashboard"
+msgid "%(title)s — bal yazma"
+msgstr "%(title)s — not girişi"
+
+msgctxt "accounts.dashboard"
+msgid "Midterm pəncərəsi"
+msgstr "Ara sınav penceresi"
+
+msgctxt "accounts.dashboard"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "accounts.dashboard"
+msgid "Son tarix"
+msgstr "Son tarih"
+
+msgctxt "accounts.dashboard"
+msgid "Açılır"
+msgstr "Açılış"
+
+msgctxt "accounts.dashboard"
+msgid "Açıqdır"
+msgstr "Açık"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlanıb"
+msgstr "Kapandı"
+
+msgctxt "accounts.dashboard"
+msgid "Deaktivdir"
+msgstr "Pasif"
+
+msgctxt "accounts.dashboard"
+msgid "Təyin olunmayıb"
+msgstr "Belirlenmedi"
+
+msgctxt "accounts.dashboard"
+msgid "Bal yazmaq açıqdır — son tarix %(date)s."
+msgstr "Not girişi açık — son tarih %(date)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+msgstr "Pencere %(opens)s tarihinde açılır, son tarih %(closes)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(date)s tarixində bağlanıb."
+msgstr "Pencere %(date)s tarihinde kapandı."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+msgstr "Pencere oluşturuldu, ancak Sınav Merkezi henüz etkinleştirmedi."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+msgstr "Sınav Merkezi not giriş penceresini henüz belirlemedi."
+
+msgctxt "accounts.dashboard"
+msgid "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+msgstr "Bazı birimler için süre uzatıldı — kesin tarih yoklama defterinde."
+
+msgctxt "accounts.dashboard"
+msgid "açıqdır · son tarix %(date)s"
+msgstr "açık · son tarih %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "%(date)s-də açılır"
+msgstr "%(date)s tarihinde açılır"
+
+msgctxt "accounts.dashboard"
+msgid "bağlanıb · %(date)s"
+msgstr "kapandı · %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "Cavabınızı gözləyən"
+msgstr "Yanıtınızı bekleyen"
+
+msgctxt "accounts.dashboard"
+msgid "müraciətiniz"
+msgstr "başvurunuz"
+
+msgctxt "accounts.dashboard"
+msgid "Sizə gələn"
+msgstr "Size gelen"
+
+msgctxt "accounts.dashboard"
+msgid "açıq müraciət"
+msgstr "açık başvuru"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."
+msgstr ""
+"Açık başvurunuz yok — yenisini «Başvurular» bölümünden gönderebilirsiniz."

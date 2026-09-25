@@ -2,6 +2,7 @@
 
 from . import analytics  # noqa: F401
 from . import catalog_console  # noqa: F401
+from . import dashboard_data  # noqa: F401
 from . import gradebook  # noqa: F401
 from . import grading_scale  # noqa: F401
 from . import handover  # noqa: F401
@@ -66,6 +67,7 @@ __all__ = [
     "build_semester_opening",
     "build_subject_catalog",
     "catalog_console",
+    "dashboard_data",
     "eligibility_rules",
     "gradebook",
     "grading_scale",
