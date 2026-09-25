@@ -141,8 +141,17 @@ def _is_open_path(path: str) -> bool:
     return path.startswith("/accounts/login/") or path.startswith("/accounts/logout")
 
 
+#: `/jurnal/` altında olan, amma elektron jurnal OLMAYAN şəxsi səhifələr — tələbə/müəllim
+#: öz dərs cədvəlini, təqvimini və transkriptini kənardan da görür (sahib 2026-09-25:
+#: «kənardan elektron jurnala girmək olmasın, başqa şeylərə olar»). Yalnız DƏQİQ yol;
+#: nginx `docker/nginx/nginx.conf`-da eyni siyahı saxlanır.
+JOURNAL_EXTERNAL_OPEN_PATHS = frozenset(
+    {"/jurnal/cedvel/", "/jurnal/cedvel/export.ics", "/jurnal/teqvim/", "/jurnal/transkript.pdf"}
+)
+
+
 def _journal_path(path: str) -> bool:
-    return path.startswith("/jurnal/")
+    return path.startswith("/jurnal/") and path not in JOURNAL_EXTERNAL_OPEN_PATHS
 
 
 class NetworkZoneMiddleware:

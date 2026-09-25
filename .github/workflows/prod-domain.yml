@@ -1,0 +1,197 @@
+name: 🌐 Prod domen (ems.wcu.edu.az) — yoxlama / tətbiq
+
+# Sahib 2026-09-25: «daxildən domenə gələn sorğuda elektron jurnal aktiv olsun; publik IP
+# üzərindən gələndə jurnala girmək olmasın, başqa şeylərə olar; IP heç yerdə görünməsin».
+#
+#   mode=check  — YALNIZ OXUYUR: .env-in domen/zona açarları, DNS (daxili + publik), NAT/hairpin,
+#                 sertifikat, son 400 (DisallowedHost) sorğularının zonası. Publik IP loglarda
+#                 maskalanır; tam dəyər RESTORE_PLAN_KEY ilə şifrələnmiş artefaktdadır.
+#   mode=apply  — .env ehtiyat nüsxəsi → ALLOWED_HOSTS/CSRF_TRUSTED_ORIGINS-ə domen əlavə olunur,
+#                 SITE_URL=https://<domen>, NETWORK_ZONE_TRUST_HEADER=True, (istəyə görə)
+#                 NETWORK_ZONE_ENFORCED=True; app/celery yenidən yaradılır; yoxlama sorğuları.
+#                 confirm=APPLY tələb olunur. Geri qaytarma: .env.bak-<tarix> → .env, eyni recreate.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "check (yalnız oxu) / apply (.env yaz)"
+        required: true
+        type: choice
+        options: [check, apply]
+        default: check
+      domain:
+        description: "Publik domen"
+        required: true
+        type: string
+        default: ems.wcu.edu.az
+      enforce_zone:
+        description: "NETWORK_ZONE_ENFORCED=True (kənardan jurnal + inzibati hesablar bağlı)"
+        required: false
+        type: boolean
+        default: true
+      confirm:
+        description: "apply üçün APPLY yazın"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  domain:
+    name: 🌐 prod-domain (${{ inputs.mode }})
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      MODE: ${{ inputs.mode }}
+      DOMAIN: ${{ inputs.domain }}
+      ENFORCE: ${{ inputs.enforce_zone && 'True' || 'False' }}
+      CONFIRM: ${{ inputs.confirm }}
+    steps:
+      - name: 🔎 Giriş dəyərləri
+        run: |
+          set -euo pipefail
+          if ! [[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$ ]]; then
+            echo "::error::domen formatı yanlışdır"; exit 1
+          fi
+          if [ "$MODE" = "apply" ] && [ "$CONFIRM" != "APPLY" ]; then
+            echo "::error::apply üçün confirm=APPLY lazımdır"; exit 1
+          fi
+
+      - name: 🧭 Diaqnostika (yalnız oxu)
+        env:
+          PLAN_KEY: ${{ secrets.RESTORE_PLAN_KEY }}
+        run: |
+          set -uo pipefail
+          cd "$APP_DIR"
+          dotenv() { grep -E "^$1=" .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"; }
+          classify() {  # IP → private/public (dəyər maskalanıbsa belə sinfi görünür)
+            case "$1" in
+              10.*|192.168.*|127.*|172.1[6-9].*|172.2[0-9].*|172.3[0-1].*) echo "private" ;;
+              "") echo "yoxdur" ;;
+              *) echo "public" ;;
+            esac
+          }
+          pub=$(curl -fsS -m 8 https://api.ipify.org 2>/dev/null || true)
+          [ -n "$pub" ] && echo "::add-mask::$pub"
+          echo "## .env (domen/zona açarları)"
+          for k in ALLOWED_HOSTS CSRF_TRUSTED_ORIGINS SITE_URL HEALTHCHECK_HOST EDGE_PROXY_MODE \
+                   TLS_ALLOW_SELF_SIGNED_LOCAL INTERNAL_NETWORKS NETWORK_ZONE_ENFORCED \
+                   NETWORK_ZONE_TRUST_HEADER ADMIN_ALLOWED_IPS LIVE_EXAM_PUBLIC_HOST; do
+            echo "  $k=$(dotenv "$k")"
+          done
+          echo "## Server"
+          echo "  LAN IP-ləri: $(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^(10|192\.168|172)\.' | tr '\n' ' ')"
+          echo "  publik çıxış IP-si: $( [ -n "$pub" ] && echo 'tapıldı (maskalı)' || echo 'tapılmadı')"
+          echo "## DNS"
+          internal=$(getent ahostsv4 "$DOMAIN" 2>/dev/null | awk '{print $1}' | sort -u | tr '\n' ' ')
+          echo "  serverin resolveri (daxili DNS): ${internal:-CAVAB YOXDUR}"
+          for ip in $internal; do echo "    $ip → $(classify "$ip")$( [ "$ip" = "$pub" ] && echo ' (= publik IP)')"; done
+          public_dns=$(curl -fsS -m 8 "https://dns.google/resolve?name=${DOMAIN}&type=A" 2>/dev/null \
+            | python3 -c 'import json,sys; print(" ".join(a["data"] for a in json.load(sys.stdin).get("Answer",[]) if a.get("type")==1))' 2>/dev/null || true)
+          echo "  publik DNS (dns.google): ${public_dns:-A QEYDİ YOXDUR}"
+          for ip in $public_dns; do echo "    $ip → $(classify "$ip")$( [ "$ip" = "$pub" ] && echo ' (= serverin publik IP-si)')"; done
+          echo "## NAT / hairpin (serverdən öz publik IP-sinə)"
+          if [ -n "$pub" ]; then
+            for port in 80 443; do
+              code=$(curl -sk -m 6 -o /dev/null -w '%{http_code}' --resolve "$DOMAIN:$port:$pub" \
+                "$([ $port = 443 ] && echo https || echo http)://$DOMAIN/health/" 2>/dev/null || true)
+              echo "  $port → HTTP ${code:-000} (000 = port-forward/hairpin yoxdur)"
+            done
+          fi
+          echo "## Sertifikat (docker/nginx/certs/origin.crt)"
+          openssl x509 -in docker/nginx/certs/origin.crt -noout -subject -issuer -enddate 2>/dev/null | sed 's/^/  /'
+          openssl x509 -in docker/nginx/certs/origin.crt -noout -ext subjectAltName 2>/dev/null | sed 's/^/  /' || true
+          echo "## Son 6 saatda Django DisallowedHost (Host başlıqları)"
+          docker compose -f docker-compose.prod.yml logs --no-log-prefix --since 6h app 2>/dev/null \
+            | grep -o "Invalid HTTP_HOST header: '[^']*'" | sort | uniq -c | sed 's/^/  /' | head -10
+          echo "## Son 6 saatda nginx 400 cavabları — müştəri IP sinfi"
+          docker compose -f docker-compose.prod.yml logs --no-log-prefix --since 6h nginx 2>/dev/null \
+            | awk '$0 ~ /" 400 / {print $1}' | sort | uniq -c | while read -r n ip; do
+                c=$(classify "$ip"); [ "$c" = "private" ] && shown="$ip" || shown="<publik>"
+                echo "  $n × $shown ($c)"; done | head -15
+          if [ -n "$pub" ] && [ -n "${PLAN_KEY:-}" ]; then
+            mkdir -p "$RUNNER_TEMP/diag"
+            printf '%s\n' "$pub" | openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt \
+              -pass env:PLAN_KEY -out "$RUNNER_TEMP/diag/public_ip.enc"
+          fi
+          exit 0
+
+      - name: 📦 Şifrəli diaqnostika artefaktı
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-domain-diag
+          path: ${{ runner.temp }}/diag/
+          if-no-files-found: ignore
+          retention-days: 3
+
+      - name: ✍️ .env yaz (apply)
+        if: inputs.mode == 'apply'
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          dotenv() { grep -E "^$1=" .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"; }
+          setkv() {
+            local k="$1" v="$2"
+            if grep -qE "^$k=" .env; then
+              KV="$v" python3 - "$k" <<'PY'
+          import os, re, sys
+          key, value = sys.argv[1], os.environ["KV"]
+          lines = open(".env", encoding="utf-8").read().splitlines(keepends=True)
+          out = [f"{key}={value}\n" if re.match(rf"^{re.escape(key)}=", ln) else ln for ln in lines]
+          open(".env", "w", encoding="utf-8").writelines(out)
+          PY
+            else
+              printf '\n%s=%s\n' "$k" "$v" >> .env
+            fi
+            echo "  $k=$v"
+          }
+          addcsv() {  # vergüllü siyahıya dəyəri (yoxdursa) əlavə et
+            local cur="$1" item="$2"
+            if printf '%s' ",$cur," | grep -qF ",$item,"; then printf '%s' "$cur"; else printf '%s' "${cur:+$cur,}$item"; fi
+          }
+          cp -p .env ".env.bak-domain-$(date +%Y%m%d-%H%M%S)"
+          setkv ALLOWED_HOSTS "$(addcsv "$(dotenv ALLOWED_HOSTS)" "$DOMAIN")"
+          setkv CSRF_TRUSTED_ORIGINS "$(addcsv "$(dotenv CSRF_TRUSTED_ORIGINS)" "https://$DOMAIN")"
+          setkv SITE_URL "https://$DOMAIN"
+          setkv NETWORK_ZONE_TRUST_HEADER True
+          setkv NETWORK_ZONE_ENFORCED "$ENFORCE"
+          chmod 600 .env
+
+      - name: 🔁 app/celery yenidən yarat (.env oxunsun)
+        if: inputs.mode == 'apply'
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate app celery_worker celery_worker_heavy celery_beat
+          for _ in $(seq 1 40); do
+            n=$(docker compose -f docker-compose.prod.yml ps app --format '{{.Health}}' | grep -c healthy || true)
+            [ "$n" -ge 1 ] && break; sleep 5
+          done
+          docker compose -f docker-compose.prod.yml ps app --format 'table {{.Name}}\t{{.Status}}'
+
+      - name: ✅ Yoxlama (daxili zona)
+        if: inputs.mode == 'apply'
+        run: |
+          set -uo pipefail
+          cd "$APP_DIR"
+          fail=0
+          probe() {  # $1 yol, $2 gözlənilən kodlar (regex)
+            code=$(curl -sk -m 10 -o /dev/null -w '%{http_code}' --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN$1")
+            if [[ "$code" =~ ^($2)$ ]]; then echo "  OK   $1 → $code"; else echo "  FAIL $1 → $code (gözlənilən $2)"; fail=1; fi
+          }
+          probe / "200|302"
+          probe /accounts/login/ "200"
+          probe /jurnal/ "302"
+          probe /health/ "200"
+          docker compose -f docker-compose.prod.yml exec -T --index 1 app python manage.py shell -c \
+            "from django.conf import settings as s; print('ALLOWED_HOSTS', s.ALLOWED_HOSTS); print('ZONE', s.NETWORK_ZONE_ENFORCED, s.NETWORK_ZONE_TRUST_HEADER); print('SITE_URL', s.SITE_URL)"
+          exit $fail

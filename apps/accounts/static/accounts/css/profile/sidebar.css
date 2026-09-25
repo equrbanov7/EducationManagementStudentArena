@@ -22,10 +22,10 @@
      yığcam (ikon-rels) rejim `sidebar_rail.css`.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url("sidebar_groups.css?v=20260925-1");
-@import url("sidebar_filter.css?v=20260925-1");
-@import url("sidebar_footer.css?v=20260925-3");
-@import url("sidebar_rail.css?v=20260925-2");
+@import url("sidebar_groups.css");
+@import url("sidebar_filter.css");
+@import url("sidebar_footer.css");
+@import url("sidebar_rail.css");
 
 .profile-sidebar {
     --sb-gutter: 12px;
