@@ -21,6 +21,7 @@ from __future__ import annotations
 
 from django.conf import settings as django_settings
 from django.core.management.base import BaseCommand, CommandError
+from django.db import DatabaseError
 
 from apps.legacy_import.services import repair_enrollments_apply as applier
 from apps.legacy_import.services.preflight import LegacySourcePreflightError, inspect_legacy_source
@@ -214,9 +215,18 @@ class Command(BaseCommand):
         with scoped_atomic(context):
             decided = applier.decide(context.organization, plan, limit=context.limit)
         self.stdout.write(render_table(applier.TABLE_HEADERS, decided.rows(), max_rows=int(options["show"])))
+        for kind, pks in decided.missing_external.items():
+            self.stdout.write(f"canlıda yoxdur · {kind}: {len(pks)} (ilk 10: {', '.join(pks[:10])})")
         written = {}
         if context.apply:
-            written = applier.apply_decided(context, decided, plan=plan, plan_sha256=plan.sha256)
+            try:
+                written = applier.apply_decided(context, decided, plan=plan, plan_sha256=plan.sha256)
+            except DatabaseError as error:
+                # Tətbiq BİR tranzaksiyadır: xəta olarsa heç nə yazılmayıb (yarımçıq vəziyyət qalmır).
+                first = str(error).strip().splitlines()[0] if str(error).strip() else ""
+                raise CommandError(
+                    f"legacy_repair_apply_rolled_back: {type(error).__name__}: {first} — heç nə yazılmadı"
+                ) from None
         restored = [d for d in decided.decisions if d.kind == "registrar.enrollment" and d.action == "create"]
         summary = {
             "plan sha256": plan.sha256,

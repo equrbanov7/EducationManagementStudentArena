@@ -2,8 +2,8 @@
 -- ============================================================================================================
 --
 -- Yalnız `legacy_repair_journal_enrollments --apply`-ın bu plan (:plan_sha) ilə yaratdıqlarını
--- geri alır; mənbə audit izidir (audit_auditlog, reason 'legacy_repair:journal_enrollments: <model>',
--- action 'create', new_values.plan_sha256 = :plan_sha):
+-- geri alır — TAM və ya YARIMÇIQ tətbiqdən sonra; mənbə audit izidir (audit_auditlog, reason
+-- 'legacy_repair:journal_enrollments: <model>', action 'create', new_values.plan_sha256 = :plan_sha):
 --   1. bərpa yazılışlarının uşaqları (xana, komponent balı, yekun, təkrar imtahan, sərbəst iş);
 --   2. sübut faktları — `-v drop_facts=1` ilə (yalnız superuser: append-only trigger-i
 --      session_replication_role ilə keçilir). Yazılışa BAĞLI faktı olan yazılış faktsız
@@ -31,12 +31,19 @@ SELECT set_config('j12e_rollback.plan_sha', :'plan_sha', true);
 SELECT set_config('j12e_rollback.drop_facts', :'drop_facts', true);
 DO $$
 BEGIN
+    -- Tam tətbiq xülasə sətri yazır; YARIMÇIQ tətbiq (2026-09-25: yalnız açılış/sxem/komponent/mövzu
+    -- commit olunub) xülasəsizdir, amma hər yaratdığı sətrin «create» auditi var — ikisindən biri kifayətdir.
     IF NOT EXISTS (
         SELECT 1 FROM audit_auditlog
         WHERE reason = 'legacy_repair:journal_enrollments: xülasə'
           AND resource_id = current_setting('j12e_rollback.plan_sha')
+    ) AND NOT EXISTS (
+        SELECT 1 FROM audit_auditlog
+        WHERE reason LIKE 'legacy_repair:journal_enrollments: %'
+          AND action = 'create'
+          AND new_values ->> 'plan_sha256' = current_setting('j12e_rollback.plan_sha')
     ) THEN
-        RAISE EXCEPTION 'DAYAN: bu plan sha256-sı ilə tətbiq izi (xülasə audit sətri) tapılmadı';
+        RAISE EXCEPTION 'DAYAN: bu plan sha256-sı ilə tətbiq izi (xülasə və ya create audit sətri) tapılmadı';
     END IF;
 END
 $$;
