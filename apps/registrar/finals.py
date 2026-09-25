@@ -10,12 +10,22 @@ zəncirində edilir və həmin tranzaksiyada auditə yazılır.
 
 from __future__ import annotations
 
+import dataclasses
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 
-from apps.registrar import absence_limit, grade_audit, gradebook, grading_scale, services
+from apps.registrar import (
+    absence_limit,
+    entry_standard,
+    exam_eligibility,
+    grade_audit,
+    gradebook,
+    gradebook_components,
+    grading_scale,
+    services,
+)
 from apps.registrar.exam_eligibility import fail_reason_code as eligibility_reason
 from apps.registrar.exam_eligibility import status_code as eligibility_status
 from apps.registrar.exam_eligibility import status_label as eligibility_label
@@ -110,16 +120,42 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
     if organization is None:
         organization = scheme.organization
 
-    entry_score = gradebook.entry_score_for(
-        enrollment, scheme.entry_score_max, **(batch.entry_kwargs(enrollment) if batch is not None else {})
-    )
+    limit_percent = None
+    if batch is None:
+        # Midterm rejimi (2026/2027-dən): giriş balının davamiyyəti buraxılış qərarının EYNİ
+        # girişlərindən — onlar burada BİR dəfə oxunur və aşağıda resolver-ə də ötürülür.
+        entry_kwargs = {"rule": entry_standard.rule_for(enrollment, organization=organization)}
+        if entry_kwargs["rule"].midterm:
+            limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
+            exempt = athlete_exemption(enrollment) if exempt is None else bool(exempt)
+            if hours_map is None and not (enrollment.offering.lesson_hours or 0) > 0:
+                hours_map = exam_eligibility.lesson_hours_map([enrollment.offering_id])
+            entry_kwargs["rule"] = entry_standard.EntryRule(
+                midterm=True,
+                lesson_hours=exam_eligibility.lesson_hours_for(enrollment.offering, hours_map=hours_map),
+                limit_percent=limit_percent,
+                exempt=exempt,
+            )
+    else:
+        entry_kwargs = batch.entry_kwargs(enrollment)
+        rule = entry_kwargs["rule"]
+        if rule.midterm and exempt is not None and bool(exempt) != rule.exempt:
+            # Çağıranın ötürdüyü istisna buraxılış qərarına da gedir — davamiyyət hissəsi onunla eyni.
+            entry_kwargs["rule"] = dataclasses.replace(rule, exempt=bool(exempt))
+    # Midterm rejimində dörd hissə (UI bölgüsü), keçmiş dövrdə ``None`` — cəm HƏR İKİ halda kanonikdir.
+    entry_parts = gradebook_components.entry_parts_for(enrollment, scheme.entry_score_max, **entry_kwargs)
+    if entry_parts is not None:
+        entry_score = entry_parts.total
+    else:
+        entry_score = gradebook.entry_score_for(enrollment, scheme.entry_score_max, **entry_kwargs)
     frozen = None
     if batch is None:
         # Query fresh (avoid a stale cached reverse-O2O after an update in the same request).
         final_grade = FinalGrade.objects.filter(enrollment=enrollment).first()
         resit = ResitRecord.objects.filter(enrollment=enrollment).first()
         # F-06 (2026-09-14): hədd TƏLƏBƏNİN ÖZ proqramından — kabinet/imtahan qapısı ilə eyni mənbə.
-        limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
+        if limit_percent is None:
+            limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
     else:
         final_grade = batch.final_grade_for(enrollment)
         resit = batch.resit_for(enrollment)
@@ -165,6 +201,8 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
 
     return {
         "entry_score": entry_score,
+        # Midterm rejimi (2026/2027-dən): davamiyyət/aktivlik/midterm/sərbəst iş; keçmiş dövrdə None.
+        "entry_parts": entry_parts,
         "exam_score": exam_score,
         "effective_exam": effective_exam,
         "total": total,

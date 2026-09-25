@@ -160,7 +160,7 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
         selfwork_slots.update(slots)
         return totals
 
-    batch = finals_batch.build(enrollments, selfwork_loader=_selfwork_loader)
+    batch = finals_batch.build(enrollments, selfwork_loader=_selfwork_loader, organization=organization, period=period)
     approved_ids = approved_syllabus_offerings(organization, offerings)
     attempts_by_subject = exam_attempt_history.attempt_rows_by_subject(
         student=record.student,

@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
-from apps.registrar import grade_audit
+from apps.registrar import entry_standard, grade_audit
 from apps.registrar import selfwork_points as selfwork_points_rules
 from apps.registrar.models import (
     AssessmentComponent,
@@ -53,8 +53,16 @@ def entry_score_for(
     component_scores=None,
     selfwork_points=None,
     selfwork_done=None,
+    rule=None,
 ):
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
+
+    MIDTERM REJİMİ (2026/2027-dən, sahibin qərarı 2026-09-25): giriş balı sillabus
+    standartıdır — davamiyyət 10 + aktivlik 10 + midterm 20 + sərbəst iş 10 (TƏK düstur
+    :mod:`apps.registrar.entry_standard`).  ``rule`` (:class:`entry_standard.EntryRule`) rejimi
+    və davamiyyət girişlərini daşıyır; verilməsə rejim açılışın dövründən həll olunur (dövr +
+    təşkilat keşdədirsə sorğusuz).  Aşağıdakı qayda YALNIZ keçmiş (kollokvium) dövrlərə aiddir
+    və DƏYİŞMƏYİB.
 
     Qayda (analytics._evaluate ilə GÜZGÜ saxlanmalıdır):
     * GENERIC komponentlər varsa → onların cəmi lesson-cəmi ƏVƏZ edir
@@ -82,6 +90,18 @@ def entry_score_for(
     cap = Decimal(cap)
     if components is None:
         components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
+    if rule is None:
+        rule = entry_standard.rule_for(enrollment)
+    if rule.midterm:
+        return entry_parts_for(
+            enrollment,
+            cap,
+            rule=rule,
+            components=components,
+            marks=marks,
+            component_scores=component_scores,
+            selfwork_points=selfwork_points if selfwork_points is not None else selfwork_done,
+        ).total
     generic = [c for c in components if c.kind == ComponentKind.GENERIC]
     kollokvium = [c for c in components if c.kind == ComponentKind.KOLLOKVIUM]
     selfwork = [c for c in components if c.kind == ComponentKind.SELF_WORK]
@@ -129,6 +149,37 @@ def entry_score_for(
         for comp in selfwork:
             total += min(points, Decimal(comp.max_score))
     return round_score(min(total, cap))
+
+
+def entry_parts_for(
+    enrollment,
+    cap,
+    *,
+    marks=None,
+    components=None,
+    component_scores=None,
+    selfwork_points=None,
+    selfwork_done=None,
+    rule=None,
+):
+    """Midterm rejimində giriş balının dörd hissəsi (:class:`entry_standard.EntryParts`);
+    keçmiş (kollokvium) dövrdə ``None``.  Arqumentlər :func:`entry_score_for` ilə eynidir və
+    ``parts.total == entry_score_for(...)`` — UI bölgüsü ilə kanonik bal ayrıla bilməz."""
+    if rule is None:
+        rule = entry_standard.rule_for(enrollment)
+    if not rule.midterm:
+        return None
+    if components is None:
+        components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
+    return entry_standard.parts_for(
+        enrollment,
+        Decimal(cap),
+        rule=rule,
+        components=components,
+        marks=marks,
+        component_scores=component_scores,
+        selfwork_points=selfwork_points if selfwork_points is not None else selfwork_done,
+    )
 
 
 def get_components(offering):
