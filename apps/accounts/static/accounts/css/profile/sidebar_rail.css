@@ -28,8 +28,7 @@
 
     .profile-sidebar.collapsed .sidebar-title,
     .profile-sidebar.collapsed .sidebar-menu-text,
-    .profile-sidebar.collapsed .sidebar-section-label,
-    .profile-sidebar.collapsed .sidebar-account__meta {
+    .profile-sidebar.collapsed .sidebar-section-label {
         position: absolute;
         width: 1px;
         height: 1px;
@@ -113,15 +112,5 @@
 
     .profile-sidebar.collapsed .sidebar-menu-link .sidebar-menu-badge--warning {
         background: var(--ems-warning-500);
-    }
-
-    .profile-sidebar.collapsed .sidebar-footer {
-        padding-left: 8px;
-        padding-right: 8px;
-    }
-
-    .profile-sidebar.collapsed .sidebar-account {
-        justify-content: center;
-        padding: 2px 0 6px;
     }
 }

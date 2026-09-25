@@ -33,11 +33,6 @@
         max-width: calc(100vw - 40px);
     }
 
-    /* Təhlükəsiz sahə (iPhone ev zolağı) yapışan alt blokun içində. */
-    .sidebar-footer {
-        padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    }
-
     .profile-sidebar-backdrop {
         display: block;
         position: fixed;

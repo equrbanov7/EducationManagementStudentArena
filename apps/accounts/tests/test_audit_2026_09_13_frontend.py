@@ -202,8 +202,8 @@ class TextContrastTokenTest(SimpleTestCase):
 
     def test_status_text_tokens_use_dark_variants(self):
         expectations = {
-            "apps/accounts/static/accounts/css/profile/sidebar.css": (
-                ".sidebar-menu-link--logout {",
+            "static/css/navbar_menus.css": (
+                ".blog-header__user-menu-item--danger {",
                 "--ems-danger-600",
             ),
             "apps/accounts/static/accounts/css/profile/sections/overall_academic.css": (

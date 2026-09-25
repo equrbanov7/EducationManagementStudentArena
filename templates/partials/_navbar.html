@@ -216,7 +216,9 @@
                                 {% endwith %}
                                 <span class="blog-header__user-head-text">
                                     <span class="blog-header__user-head-name">{{ request.user.get_full_name|default:request.user.username }}</span>
-                                    {% if current_organization %}
+                                    {% if primary_user_role_label %}
+                                        <span class="blog-header__user-head-org">{{ primary_user_role_label }}</span>
+                                    {% elif current_organization %}
                                         <span class="blog-header__user-head-org">{{ current_organization.name }}</span>
                                     {% endif %}
                                 </span>
@@ -237,6 +239,20 @@
                                 {% if notif_count %}
                                     <span class="blog-header__user-menu-badge">{{ notif_count }}</span>
                                 {% endif %}
+                            </a>
+
+                            {# 2026-09-25 (sahib): hesab əməlləri sidebar-ın alt blokundan BURAYA köçdü. #}
+                            <div class="blog-header__user-menu-sep" role="presentation"></div>
+                            <div class="blog-header__user-menu-label">{% trans "group_account" context "profile.sidebar" %}</div>
+                            <a href="{% url 'accounts:profile' %}?section=edit-profile"
+                               class="blog-header__user-menu-item {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'edit-profile' %}blog-header__user-menu-item--active{% endif %}">
+                                <i class="fas fa-user-pen blog-header__user-menu-icon" aria-hidden="true"></i>
+                                <span>{% trans "edit_profile" context "profile.sidebar" %}</span>
+                            </a>
+                            <a href="{% url 'accounts:profile' %}?section=change-password"
+                               class="blog-header__user-menu-item {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'change-password' %}blog-header__user-menu-item--active{% endif %}">
+                                <i class="fas fa-lock blog-header__user-menu-icon" aria-hidden="true"></i>
+                                <span>{% trans 'Şifrəni dəyiş' %}</span>
                             </a>
 
                             <div class="blog-header__user-menu-sep" role="presentation"></div>
@@ -407,6 +423,20 @@
                 <span>{% trans "notifications" context "nav" %}</span>
                 {% user_unread_notification_count request.user as notif_count %}
                 {% if notif_count %}<span class="blog-header__user-menu-badge">{{ notif_count }}</span>{% endif %}
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'accounts:profile' %}?section=edit-profile"
+               class="blog-header__nav-link {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'edit-profile' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-user-pen" aria-hidden="true"></i>
+                <span>{% trans "edit_profile" context "profile.sidebar" %}</span>
+            </a>
+        </li>
+        <li class="blog-header__nav-item">
+            <a href="{% url 'accounts:profile' %}?section=change-password"
+               class="blog-header__nav-link {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'change-password' %}blog-header__nav-link--active{% endif %}">
+                <i class="fas fa-lock" aria-hidden="true"></i>
+                <span>{% trans 'Şifrəni dəyiş' %}</span>
             </a>
         </li>
         <li class="blog-header__nav-item">
