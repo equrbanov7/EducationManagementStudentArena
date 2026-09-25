@@ -115,10 +115,10 @@ def _lesson_key(offering_id, date, start_time):
     )
 
 
-def validate_header(organization, header: dict) -> LegacyMigrationRun:
+def validate_header(organization, header: dict, *, repair: str = REPAIR_KEY) -> LegacyMigrationRun:
     """Plan MƏHZ bu bazanın (bu tenant + bu import run-u) nüsxəsindən qurulubmu?"""
 
-    if header.get("repair") != REPAIR_KEY:
+    if header.get("repair") != repair:
         raise RepairPlanError("legacy_repair_plan_repair_mismatch")
     if str(header.get("organization_id")) != str(organization.pk):
         raise RepairPlanError("legacy_repair_plan_organization_mismatch")
@@ -475,7 +475,7 @@ def _write_units(context, units, *, plan_sha256) -> Counter:
     return written
 
 
-def recompute_and_audit_absence(context, enrollment_ids, *, plan_sha256) -> int:
+def recompute_and_audit_absence(context, enrollment_ids, *, plan_sha256, reason: str = AUDIT_REASON) -> int:
     """Plana düşən qeydiyyatların ``absence_hours``-u — J4/J12-nin öz toplu funksiyası."""
 
     from core.audit import log_action
@@ -498,7 +498,7 @@ def recompute_and_audit_absence(context, enrollment_ids, *, plan_sha256) -> int:
                     organization=context.organization,
                     resource_type="registrar.Enrollment",
                     resource_id=str(pk),
-                    reason=f"{AUDIT_REASON}: absence_hours yenidən hesablandı",
+                    reason=f"{reason}: absence_hours yenidən hesablandı",
                     old_values={"absence_hours": before.get(pk)},
                     new_values={"absence_hours": hours, "plan_sha256": plan_sha256},
                 )

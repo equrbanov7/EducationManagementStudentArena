@@ -63,7 +63,16 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
     {% if row.components %}
     <ul class="msx-chips" aria-label="{% trans 'Qiymətləndirmə komponentləri' context 'profile.subjects' %}">
         {% for comp in row.components %}
-        <li class="msx-chip">{{ comp.name }}: <strong>{% if comp.score is not None %}{{ comp.score|floatformat:"-2" }}{% else %}—{% endif %}</strong>/{{ comp.max }}</li>
+        <li class="msx-chip">{{ comp.name }}: <strong>{% if comp.score is not None %}{{ comp.score|floatformat:"-2" }}{% else %}—{% endif %}</strong>/{{ comp.max }}
+            {% if comp.slots %}
+            {% comment %}Sərbəst iş slot-slot: «1: 4/5» (bal strukturu) və ya «1 ✓» (çeklist) — başlıq tooltip-də.{% endcomment %}
+            <span class="msx-chip__slots">
+                {% for slot in comp.slots %}
+                <span class="msx-slot{% if slot.points is not None %} is-on{% endif %}{% if slot.from_folder %} is-folder{% endif %}" title="{{ slot.title }}">{{ slot.index }}{% if slot.max_points > 1 %}: {% if slot.points is not None %}{{ slot.points|floatformat:"-1" }}{% else %}—{% endif %}/{{ slot.max_points }}{% elif slot.points is not None %} ✓{% endif %}</span>
+                {% endfor %}
+            </span>
+            {% endif %}
+        </li>
         {% endfor %}
     </ul>
     {% endif %}

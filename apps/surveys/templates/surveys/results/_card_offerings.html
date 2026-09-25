@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Müəllimin fənn × qrup bölgüsü — hər sətir ≥ k, daraldıcı filtrdə tamamlayıcı qayda,
+üstəlik ikinci dərəcəli gizlətmə (görünən cəm − sətirlər qalığı 0 və ya ≥ k).
+«1 müəllim üzrə tələbədən 1» (f5b4441c): bir neçə fənn deyən müəllimin cavabı əsas fənnə düşür.{% endcomment %}
+<section class="svr-card svr-card--wide" aria-labelledby="svr-of-title">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-of-title">{% trans "Fənn və qrup üzrə" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% trans "Müəllim eyni tələbəyə bir neçə fənn deyirsə, tələbə onu bir dəfə qiymətləndirir — bu cavab müəllimin əsas (ilk) fənninə aid edilir, yəni fənlər birləşmiş görünə bilər." context "surveys.results" %}</p>
+        </div>
+    </header>
+    <div class="svr-table__scroll">
+        <table class="ems-table svr-mini-table">
+            <thead><tr>
+                <th scope="col">{% trans "Fənn" context "surveys.results" %}</th>
+                <th scope="col">{% trans "Qrup" context "surveys.results" %}</th>
+                <th scope="col" class="ems-table__num">{% trans "Ümumi bal" context "surveys.results" %}</th>
+                <th scope="col" class="ems-table__num">{% trans "Likert indeksi" context "surveys.results" %}</th>
+                <th scope="col" class="ems-table__num">{% trans "Tövsiyə" context "surveys.results" %}</th>
+                <th scope="col" class="ems-table__num">n</th>
+            </tr></thead>
+            <tbody>
+            {% for row in offerings %}
+                <tr>
+                    <th scope="row">{{ row.subject }}</th>
+                    <td>{{ row.group }}</td>
+                    {% if row.suppressed %}
+                    <td colspan="3">{% include "surveys/results/_hidden_badge.html" with hb_secondary=row.secondary %}</td>
+                    {% else %}
+                    <td class="ems-table__num">{{ row.avg_overall|floatformat:2|default:"—" }}</td>
+                    <td class="ems-table__num">{{ row.likert_index|floatformat:2|default:"—" }}</td>
+                    <td class="ems-table__num">{% if row.recommend is not None %}{{ row.recommend }}%{% else %}—{% endif %}</td>
+                    {% endif %}
+                    <td class="ems-table__num">{{ row.n }}</td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>

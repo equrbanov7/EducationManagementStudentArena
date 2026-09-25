@@ -73,6 +73,24 @@
         "cd /Users/elvin/Developer/EMSArena && set -a && . .claude/prodcopy.env && set +a && EMS_DB_ROLE_ENFORCE=warn USE_REDIS=False exec venv/bin/python manage.py runserver 8014 --noreload"
       ],
       "port": 8014
+    },
+    {
+      "name": "emsarena-mt-ui",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/elvin/Developer/EMSArena && set -a && . .claude/prodcopy.env && set +a && export DATABASE_URL=\"${DATABASE_URL%/*}/ems_mt_ui\" && EMS_DB_ROLE_ENFORCE=warn USE_REDIS=False exec venv/bin/python manage.py runserver 8015 --noreload"
+      ],
+      "port": 8015
+    },
+    {
+      "name": "emsarena-qa-head",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /private/tmp/claude-501/-Users-elvin-Developer-EMSArena/11213c40-d338-402c-9e02-346f13047072/scratchpad/wt_head && set -a && . ../prodcopy.env && set +a && export DATABASE_URL=\"${DATABASE_URL%/*}/ems_mt_ui\" && EMS_DB_ROLE_ENFORCE=warn USE_REDIS=False exec /Users/elvin/Developer/EMSArena/venv/bin/python manage.py runserver 8016 --noreload"
+      ],
+      "port": 8016
     }
   ]
 }

@@ -396,68 +396,22 @@ class CriterionScore(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedMod
         return f"{self.component_id} · {self.criterion_id} · {self.enrollment_id} = {self.points}"
 
 
-# ── Sərbəst iş (çeklist) + Kurs işi ──────────────────────────────────────────
+# ── Sərbəst iş (sillabus strukturu: 1×10 / 2×5 / 10×1) + Kurs işi ─────────────
 #
-# Sərbəst iş: müəllim mövzu siyahısı qurur (≤10), hər tələbəyə mövzu-mövzu
-# "təhvil verilib/verilməyib" işarəsi qoyulur; cəm avtomatik kind=SELF_WORK
-# komponent balına yazılır. Kurs işi giriş balına DAXİL DEYİL — ayrıca 0-100
-# qiymətdir (yekun cədvəldə öz sütunu).
+# Sərbəst iş: mövzular sillabusun strukturundan (və ya köhnə çeklist kimi əl ilə,
+# ≤10) qurulur; hər tələbəyə mövzu-mövzu təhvil işarəsi və ya BAL yazılır, cəm
+# (≤10) giriş balına ÜSTƏGƏL olunur — kanonik qayda ``apps.registrar.selfwork_points``.
+# Kurs işi giriş balına DAXİL DEYİL — ayrıca 0-100 qiymətdir (yekun cədvəldə öz sütunu).
 
 
-class SelfWorkTopic(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel, OrderedModel):
-    """Sərbəst iş mövzusu (offering üzrə sıralı siyahı, adətən 10 ədəd)."""
-
-    organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="self_work_topics"
-    )
-    offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="self_work_topics")
-    title = models.CharField(max_length=255)
-
-    objects = models.Manager()
-
-    class Meta:
-        ordering = ["offering", "order", "created_at"]
-        verbose_name = pgettext_lazy("registrar.model.selfwork_topic.meta", "independent work topic")
-        verbose_name_plural = pgettext_lazy("registrar.model.selfwork_topic.meta", "independent work topics")
-        indexes = [models.Index(fields=["organization", "offering"])]
-
-    def __str__(self):
-        return f"{self.offering_id} · {self.title[:40]}"
-
-
-class SelfWorkMark(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
-    """Bir tələbənin bir sərbəst iş mövzusu üzrə təhvil işarəsi (1/0)."""
-
-    organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="self_work_marks"
-    )
-    topic = models.ForeignKey(SelfWorkTopic, on_delete=models.CASCADE, related_name="marks")
-    enrollment = models.ForeignKey(Enrollment, on_delete=models.CASCADE, related_name="self_work_marks")
-    done = models.BooleanField(default=False)
-    entered_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
-    )
-
-    objects = models.Manager()
-
-    class Meta:
-        verbose_name = pgettext_lazy("registrar.model.selfwork_mark.meta", "independent work mark")
-        verbose_name_plural = pgettext_lazy("registrar.model.selfwork_mark.meta", "independent work marks")
-        constraints = [
-            models.UniqueConstraint(fields=["topic", "enrollment"], name="uniq_selfwork_topic_enrollment"),
-        ]
-        indexes = [
-            models.Index(fields=["organization", "enrollment"]),
-            # «Təhvil verilmiş sərbəst iş sayı» aqreqatı (akademik-qeyd icmalı,
-            # ``accounts.academic_records``) ``WHERE done AND enrollment_id IN (…)
-            # GROUP BY enrollment_id`` şəklindədir — org-səviyyəli çağırışda
-            # (7 700 tələbə) mövcud indekslərin heç biri onu ÖRTMÜRDÜ
-            # (2026-09-02 performans auditi, F3).
-            models.Index(fields=["enrollment", "done"], name="selfwork_enrollment_done"),
-        ]
-
-    def __str__(self):
-        return f"{self.topic_id} · {self.enrollment_id} = {int(self.done)}"
+# Sərbəst iş modelləri (mövzu + işarə/bal) modul-ölçü büdcəsinə görə ayrıca
+# moduldadır; adlar buradan da re-eksport olunur (sxem dəyişmir).
+from .selfwork import (  # noqa: E402,F401
+    SELFWORK_TOTAL_POINTS,
+    SelfWorkMark,
+    SelfWorkSource,
+    SelfWorkTopic,
+)
 
 
 class CourseWork(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):

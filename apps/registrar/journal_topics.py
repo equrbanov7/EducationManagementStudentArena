@@ -15,6 +15,8 @@ Asılılıq istiqaməti: ``registrar → syllabus`` (bu istiqamət artıq mövcu
 
 from __future__ import annotations
 
+from django.db.models import prefetch_related_objects
+
 #: Sillabusun həftəlik cədvəlindəki saat növləri — jurnal ``LessonKind`` açarları
 #: ilə EYNİ sətirlərdir (``apps.syllabus.constants.LESSON_HOUR_KINDS``).
 SYLLABUS_HOUR_KINDS = ("lecture", "seminar", "lab")
@@ -38,6 +40,10 @@ def syllabus_topic_rows(offering):
     version = syllabus_services.approved_version_for(syllabus)
     if version is None:
         return []
+    # Jurnal səhifəsi bunu bir neçə dəfə çağırır (mövzu seçimləri, mövzu meta…): bölmələr memo-lanmış
+    # versiya obyektinə BİR dəfə prefetch olunur, sonrakı çağırışlar keşdən oxuyur (artıq prefetch
+    # olunubsa — məs. ``selfwork_structure`` — sorğu yoxdur).
+    prefetch_related_objects([version], "sections")
     week = next((row.data or {} for row in version.sections.all() if row.section_id == "week"), {})
     rows = []
     seen = set()

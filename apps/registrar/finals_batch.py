@@ -23,9 +23,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
-from django.db.models import Count
-
-from apps.registrar import exam_eligibility
+from apps.registrar import exam_eligibility, selfwork_points
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
@@ -33,7 +31,6 @@ from apps.registrar.models import (
     FinalGrade,
     LessonMark,
     ResitRecord,
-    SelfWorkMark,
     StudentAcademicRecord,
 )
 
@@ -71,7 +68,8 @@ class FinalsBatch:
     """Bir roster (yazılış siyahısı) üçün əvvəlcədən oxunmuş xəritələr.
 
     :meth:`entry_kwargs` → ``gradebook.entry_score_for``-un ``components`` /
-    ``component_scores`` / ``selfwork_done`` / ``marks`` arqumentləri;
+    ``component_scores`` / ``selfwork_points`` (sərbəst iş BALI — kanonik
+    :mod:`apps.registrar.selfwork_points` qaydası) / ``marks`` arqumentləri;
     qalan metodlar ``finals.compute_final_result``-un sətir-sətir sorğularını
     əvəz edir.  ``with_finals=False`` olduqda yalnız giriş balı hissəsi yüklənir
     (jurnal qridi və «Yekun» tab-ı onsuz da donma/istisna dəstini özü qurur).
@@ -80,7 +78,7 @@ class FinalsBatch:
     __slots__ = (
         "components_by_offering",
         "scores_by_enrollment",
-        "selfwork_done",
+        "selfwork_points",
         "marks_by_enrollment",
         "final_grades",
         "resits",
@@ -104,7 +102,7 @@ class FinalsBatch:
         kwargs = {
             "components": self.components_by_offering.get(offering_id, []),
             "component_scores": self.scores_by_enrollment.get(enrollment.id, []),
-            "selfwork_done": self.selfwork_done.get((enrollment.id, offering_id), 0),
+            "selfwork_points": self.selfwork_points.get((enrollment.id, offering_id), 0),
         }
         if self.marks_by_enrollment is not None:
             kwargs["marks"] = self.marks_by_enrollment.get(enrollment.id, [])
@@ -134,11 +132,15 @@ class FinalsBatch:
         return self.limit_percent_by_student.get(enrollment.student_id, DEFAULT_ABSENCE_LIMIT)
 
 
-def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsBatch:
+def build(enrollments, *, marks_by_enrollment=None, with_finals=True, selfwork_loader=None) -> FinalsBatch:
     """Yazılış siyahısı üçün toplu dəsti qur — sabit sayda sorğu.
 
     ``marks_by_enrollment`` — çağıran ``LessonMark``-ları ONSUZ DA oxuyubsa
-    (jurnal qridi) təkrar sorğu edilmir.  Əks halda dərs balları YALNIZ GENERIC
+    (jurnal qridi) təkrar sorğu edilmir. ``selfwork_loader(enrollment_ids,
+    offering_ids) -> {(enrollment_id, offering_id): bal}`` — sərbəst iş cəmini
+    oxuyan TƏK sorğu çağıranın öz sorğusu ilə əvəz olunur (məs. «Fənlərim» slot-slot
+    göstərişi üçün mövzuları da oxuyur; qayda eynidir — :mod:`apps.registrar.selfwork_points`).
+    Yalnız SELF_WORK komponentli açılış varsa çağırılır — sorğu sayı dəyişmir.  Əks halda dərs balları YALNIZ GENERIC
     komponenti OLMAYAN açılışlar üçün oxunur (komponent varsa onlar dərs
     cəmini əvəz edir — bax ``gradebook_components.entry_score_for``).
     """
@@ -162,17 +164,13 @@ def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsB
         for score in ComponentScore.objects.filter(component_id__in=component_ids, enrollment_id__in=enr_ids):
             scores_by_enrollment[score.enrollment_id].append(score)
 
-    selfwork_done: dict = {}
+    selfwork_totals: dict = {}
     selfwork_offerings = [
         oid for oid, comps in components_by_offering.items() if any(c.kind == ComponentKind.SELF_WORK for c in comps)
     ]
     if selfwork_offerings and enr_ids:
-        rows = (
-            SelfWorkMark.objects.filter(enrollment_id__in=enr_ids, topic__offering_id__in=selfwork_offerings, done=True)
-            .values("enrollment_id", "topic__offering_id")
-            .annotate(total=Count("id"))
-        )
-        selfwork_done = {(r["enrollment_id"], r["topic__offering_id"]): r["total"] for r in rows}
+        loader = selfwork_loader or selfwork_points.selfwork_totals_by_offering
+        selfwork_totals = loader(enr_ids, selfwork_offerings)
 
     if marks_by_enrollment is None:
         lesson_sum_offerings = [
@@ -190,7 +188,7 @@ def build(enrollments, *, marks_by_enrollment=None, with_finals=True) -> FinalsB
     data = {
         "components_by_offering": components_by_offering,
         "scores_by_enrollment": scores_by_enrollment,
-        "selfwork_done": selfwork_done,
+        "selfwork_points": selfwork_totals,
         "marks_by_enrollment": marks_by_enrollment,
         "with_finals": with_finals,
         "final_grades": {},

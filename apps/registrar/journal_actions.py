@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from core.http_ids import parse_uuid
@@ -297,7 +298,13 @@ def kollokvium_save(request, offering_id):
 @login_required
 @require_POST
 def selfwork_action(request, offering_id):
-    """Sərbəst iş tabı: mövzu əlavə/sil və işarə (1/0) dəyişiklikləri."""
+    """Sərbəst iş tabı: struktur tətbiqi, mövzu əlavə/sil və işarə (1/0) / bal dəyişiklikləri.
+
+    Xana sahələri: ``sw__<topic>__<enrollment>`` = 0|1 (çeklist mövzusu) və
+    ``swp__<topic>__<enrollment>`` = «» | 1…max (bal strukturlu mövzu; lövhə TAM bal
+    təklif edir — kəsr yalnız fənn qovluğundan / sənədli düzəlişdən gəlir)."""
+    from apps.registrar import selfwork_marks, selfwork_structure
+
     offering = _offering_or_404(request, offering_id)
     blocked = _corrector_direct_write_blocked(request, offering, "serbest")
     if blocked:
@@ -307,6 +314,24 @@ def selfwork_action(request, offering_id):
     # vardı — yəni RİM/İKT rəhbəri (və superuser) 2 saatlıq geri-alma pəncərəsini
     # SƏNƏDSİZ keçirdi. Artıq keçmir: pəncərə bağlananda dəyişiklik yalnız
     # «Jurnal düzəlişi» rejimindən (``correction_apply`` → PDF + audit) keçir.
+
+    if action == "ensure_structure":
+        plan = selfwork_structure.ensure_structure(offering)
+        if plan.applied:
+            messages.success(
+                request,
+                pgettext("registrar.selfwork", "Sərbəst iş strukturu sillabusdan quruldu: %(label)s bal.")
+                % {"label": plan.structure.label},
+            )
+        elif plan.state == selfwork_structure.STATE_MISMATCH:
+            messages.error(request, selfwork_structure.mismatch_message(plan))
+        elif plan.state == selfwork_structure.STATE_NONE:
+            messages.error(
+                request, pgettext("registrar.selfwork", "Təsdiqlənmiş sillabusda sərbəst iş strukturu yoxdur.")
+            )
+        else:
+            messages.info(request, pgettext("registrar.selfwork", "Sərbəst iş strukturu artıq qurulub."))
+        return _back(offering, "serbest")
 
     if action == "add_topic":
         topic = journal_extras.add_selfwork_topic(offering=offering, title=request.POST.get("topic_title"))
@@ -319,35 +344,51 @@ def selfwork_action(request, offering_id):
     if action == "delete_topic":
         # F-01 (2026-09-14): pozuq UUID → 404 (əvvəl `ValidationError` → 500).
         topic = get_object_or_404(SelfWorkTopic, pk=parse_uuid(request.POST.get("topic_id")), offering=offering)
-        if journal_extras.delete_selfwork_topic(topic=topic, by_user=request.user):
+        if selfwork_marks.topic_delete_block_reason(topic):
+            messages.error(
+                request,
+                pgettext(
+                    "registrar.selfwork",
+                    "Mövzu silinmədi — ona «Fənn qovluğu»ndan bal yazılıb (dəyişiklik yalnız sənədli düzəlişlə).",
+                ),
+            )
+        elif journal_extras.delete_selfwork_topic(topic=topic, by_user=request.user):
             messages.success(request, _("Mövzu (və üzrə balları) silindi."))
         else:
             messages.error(request, _("Mövzu silinmədi — jurnal bağlıdır."))
         return _back(offering, "serbest")
 
-    # İşarə dəyişiklikləri: sw__<topic_id>__<enrollment_id> = 0|1
+    # İşarə / bal dəyişiklikləri: sw__<topic_id>__<enrollment_id> = 0|1, swp__… = «»|1…max
     changed = 0
     skipped = 0
     for key, raw in request.POST.items():
-        if not key.startswith("sw__"):
-            continue
         parts = key.split("__", 2)
-        if len(parts) != 3:
+        if len(parts) != 3 or parts[0] not in ("sw", "swp"):
             continue
+        # Lövhə yalnız TAM bal təklif edir (+ cari kəsr bal dəyişməz qalsın deyə);
+        # dəyər servis qatında yoxlanır (0 < bal ≤ max, ən çoxu bir onluq).
+        extra = {"points": (raw or "").strip()} if parts[0] == "swp" else {}
         ok = journal_extras.set_selfwork_mark(
             offering=offering,
             topic_id=parts[1],
             enrollment_id=parts[2],
-            done=raw == "1",
+            done=raw == "1" if parts[0] == "sw" else bool((raw or "").strip()),
             by_user=request.user,
             allow_locked=False,  # pəncərə bitibsə → sənədli düzəliş rejimi
+            **extra,
         )
         if ok:
             changed += 1
         else:
             skipped += 1
     if skipped:
-        messages.warning(request, _("Bəzi işarələr dəyişilmədi — geri alma pəncərəsi bitib."))
+        messages.warning(
+            request,
+            pgettext(
+                "registrar.selfwork",
+                "Bəzi xanalar dəyişilmədi — geri alma pəncərəsi bitib, bal fənn qovluğundandır və ya bal etibarsızdır.",
+            ),
+        )
     else:
         messages.success(request, _("Sərbəst iş işarələri yadda saxlanıldı."))
     return _back(offering, "serbest")

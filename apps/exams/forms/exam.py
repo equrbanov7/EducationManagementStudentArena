@@ -548,6 +548,16 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
                 "subject",
                 pgettext_lazy("exams.form.exam.error", "subject_required_for_final_midterm"),
             )
+        # H-1 (2026-09-25): jurnala YALNIZ «Final» yazılır — fənnə bağlanan imtahanda kateqoriya
+        # məcburidir ki, unudulmuş kateqoriya balı səssizcə itirməsin (və əvvəlki kimi əzməsin).
+        if cleaned_data.get("subject") and not exam_type_extended:
+            self.add_error(
+                "exam_type_extended",
+                pgettext_lazy(
+                    "exams.form.exam.error",
+                    "Fənnə bağlanan imtahan üçün kateqoriya seçin — jurnala yalnız «Final» imtahanının balı yazılır.",
+                ),
+            )
 
         # 2026-09-14 (W5 `w5left`, tapşırıq 2): istisna yalnız kohort üzvləri ilə
         # süzülürdü → reyestr qrupu (`allowed_units`) tələbəsi istisna edilə bilmirdi.
