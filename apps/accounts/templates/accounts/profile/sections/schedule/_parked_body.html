@@ -3,7 +3,7 @@
 yerindən çıxarılmış (parklanmış) dərslər. Sahibin tələbi: «digər qrupdan
 müəllimin dərsi donsun, ya da haradasa qalsın ki onu başqa yerə dəyişmək mümkün
 olsun». Sətir SİLİNMİR: bazada qalır, cədvəldə görünmür, buradan bir kliklə
-yeni xanaya qoyulur.{% endcomment %}
+yeni xanaya qoyulur. Müəllim = slotun EFFEKTİV müəllimi (`row.teacher`, 2026-09-25).{% endcomment %}
 {% with sec=schedule_manage_section %}
 {% if not sec.parked %}
   {% trans "Yenidən yerləşdiriləcək dərs yoxdur" context "accounts.schedule_manage" as parked_empty_title %}
@@ -18,7 +18,7 @@ yeni xanaya qoyulur.{% endcomment %}
       <span class="ems-badge ems-badge--warning">{% trans "Yerləşdirilməyib" context "accounts.schedule_manage" %}</span>
     </div>
     <p class="sedit-parked__meta">
-      {{ row.group }}{% if row.instructor %} · {{ row.instructor }}{% endif %} ·
+      {{ row.group }}{% if row.teacher %} · {{ row.teacher }}{% endif %} ·
       {{ row.weekday_label }} {{ row.start_time }}–{{ row.end_time }}{% if row.room %} · {{ row.room }}{% endif %}
     </p>
     {% if row.park_reason %}<p class="sedit-parked__reason">{{ row.park_reason }}</p>{% endif %}

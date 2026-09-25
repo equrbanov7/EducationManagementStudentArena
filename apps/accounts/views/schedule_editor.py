@@ -9,7 +9,9 @@ burada YALNIZ redaktorun interaktiv əməlləri var:
 * ``place``    — parklanmış slotun yenidən yerləşdirilməsi;
 * ``delete``   — YUMŞAQ silmə (sətir bazada qalır);
 * ``suggest``  — «hara boşdur» tövsiyələri (səhər/günorta növbəsi);
-* ``options``  — seçilmiş qrupun fənn + müəllim seçiciləri.
+* ``options``  — seçilmiş qrupun fənn + müəllim seçiciləri;
+* ``slot_teachers`` — «Dərsi aparan müəllim» seçicisi (seçilmiş fənn + qrup açılışını apara
+  bilənlər; bölünmüş tədris, 2026-09-25). Seçimin özü ``check``/``save``-də SERVERDƏ yoxlanır.
 
 Domen məntiqi registrar-dadır (``apps.registrar.schedule_editor*``); bu fayl
 yalnız tenant/icazə qapısı + JSON çevirmədir. Hamısı FAIL-CLOSED: icazəsi
@@ -33,7 +35,7 @@ from apps.registrar.public import schedule_manage_actions as base
 
 _CTX = "accounts.schedule_editor"
 
-ALLOWED_ACTIONS = frozenset({"check", "save", "move", "place", "delete", "suggest", "options"})
+ALLOWED_ACTIONS = frozenset({"check", "save", "move", "place", "delete", "suggest", "options", "slot_teachers"})
 
 
 def _organization(request):
@@ -124,6 +126,8 @@ def _check(request, organization, data):
             instructor=instructor,
             create=False,
         )
+        # «Dərsi aparan müəllim» — ixtiyari müəllim 400; toqquşma bu müəllimlə ölçülür.
+        slot_teacher = schedule_editor.resolve_slot_instructor(offering=offering, data=data)
     except schedule_editor.CellError as exc:
         return _error(exc)
     verdict = schedule_editor.check_cell(
@@ -131,6 +135,7 @@ def _check(request, organization, data):
         offering=offering,
         cleaned=cleaned,
         exclude_id=str(data.get("slot_id") or "").strip() or None,
+        slot_instructor_id=getattr(slot_teacher, "pk", None),
     )
     return JsonResponse(verdict)
 
@@ -155,6 +160,22 @@ def _options(request, organization, data):
                 organization=organization, group=group, period=period, instructor=_instructor(data)
             ),
             "teachers": schedule_editor.teacher_choices(organization),
+        }
+    )
+
+
+def _slot_teachers(request, organization, data):
+    """«Dərsi aparan müəllim» seçicisi — qrup YALNIZ aktorun əhatəsindən (fail-closed)."""
+    return JsonResponse(
+        {
+            "ok": True,
+            **schedule_editor.slot_teacher_options(
+                organization=organization,
+                group=_group(request, organization, data),
+                period=_period(organization, data),
+                subject_id=data.get("subject_id"),
+                instructor_id=data.get("instructor_id"),
+            ),
         }
     )
 
@@ -228,6 +249,8 @@ def schedule_editor_action(request):
             return _check(request, organization, data)
         if action == "options":
             return _options(request, organization, data)
+        if action == "slot_teachers":
+            return _slot_teachers(request, organization, data)
         if action == "suggest":
             return _suggest(request, organization, data)
         return _write(request, organization, action, data)

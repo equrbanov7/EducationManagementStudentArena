@@ -4,6 +4,13 @@ Həftəlik təkrarlanan ``ScheduleSlot``-lar. Yeni slot yaradılanda konflikt
 yoxlanır: eyni gün + vaxt üst-üstə düşməsi + (eyni qrup VƏ YA eyni müəllim VƏ YA
 eyni auditoriya) → rədd. Üst/alt həftə (odd/even) bir-biri ilə konflikt etmir.
 Görünüş rol-aware: tələbə öz qrupunun, müəllim öz slotlarının cədvəlini görür.
+
+EFFEKTİV MÜƏLLİM (2026-09-25, bölünmüş tədris): slotu aparan müəllim
+``ScheduleSlot.instructor``-dır, boşdursa jurnal sahibi (``offering.instructor``).
+Müəllim cədvəli, müəllim toqquşması, cədvəl etiketləri, dərc və «Dərsi aktivləşdir»
+bu TƏK qaydanı işlədir: :func:`effective_instructor_id` / :func:`effective_instructor`
+(Python), :func:`effective_instructor_expr` (``Coalesce`` annotasiyası) və
+:func:`taught_by_q` (süzgəc).
 """
 
 from __future__ import annotations
@@ -13,10 +20,43 @@ import datetime
 from django.apps import apps as django_apps
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
+
+
+def effective_instructor_id(slot):
+    """Slotu FAKTİKİ aparan müəllimin id-si: slotun öz müəllimi, yoxdursa jurnal sahibi."""
+    return slot.instructor_id or getattr(slot.offering, "instructor_id", None)
+
+
+def effective_instructor(slot):
+    """:func:`effective_instructor_id`-in obyekt forması (``select_related("instructor")`` ilə sorğusuz)."""
+    if slot.instructor_id:
+        return slot.instructor
+    return getattr(slot.offering, "instructor", None)
+
+
+def effective_instructor_expr():
+    """Sorğu ifadəsi: ``Coalesce(slot.instructor_id, offering.instructor_id)`` (annotate / values)."""
+    return Coalesce("instructor_id", "offering__instructor_id")
+
+
+def taught_by_q(teacher):
+    """Effektiv müəllimi ``teacher`` olan slotlar — ``Coalesce(...) = teacher``-in indeks-dostu forması."""
+    return Q(instructor=teacher) | Q(instructor__isnull=True, offering__instructor=teacher)
+
+
+def stored_instructor_id(offering, teacher_id):
+    """``ScheduleSlot.instructor_id``-ə yazılacaq dəyər: jurnal sahibi ilə EYNİDİRSƏ NULL.
+
+    NULL saxlamaq vacibdir — jurnal sahibi sonradan dəyişəndə (fənn təhvili) slot yeni sahibi izləsin."""
+    if not teacher_id or str(teacher_id) == str(getattr(offering, "instructor_id", None) or ""):
+        return None
+    return teacher_id
+
 
 # Axşam təhsili bandı: bu saatdan gec başlayan slotlar ayrıca bölmədə göstərilir
 # (magistratura axşam qrupları). Grid sətirləri mövcud slotların (start,end)
@@ -88,9 +128,13 @@ def create_slot(
     week_type=WeekType.ALL,
     kind=SlotKind.LECTURE,
     created_by=None,
+    instructor=None,
 ):
-    """Create a timetable slot, rejecting group/instructor/room clashes."""
+    """Create a timetable slot, rejecting group/instructor/room clashes.
+
+    ``instructor`` — slotu aparan müəllim (bölünmüş tədris); jurnal sahibi ilə eynidirsə NULL yazılır."""
     room = (room or "").strip()
+    instructor_id = stored_instructor_id(offering, getattr(instructor, "pk", None))
     conflict = find_conflict(
         organization=offering.organization,
         offering=offering,
@@ -100,6 +144,7 @@ def create_slot(
         week_type=week_type,
         room=room,
         kind=kind,
+        instructor_id=instructor_id,
     )
     if conflict is not None:
         raise ScheduleConflict(conflict)
@@ -113,11 +158,22 @@ def create_slot(
         week_type=week_type,
         kind=kind,
         created_by=created_by,
+        instructor_id=instructor_id,
     )
 
 
 def find_conflict(
-    *, organization, offering, weekday, start_time, end_time, week_type, room, exclude_id=None, kind=None
+    *,
+    organization,
+    offering,
+    weekday,
+    start_time,
+    end_time,
+    week_type,
+    room,
+    exclude_id=None,
+    kind=None,
+    instructor_id=None,
 ):
     """Return the first clashing slot (same group / instructor / room), or None.
 
@@ -131,7 +187,10 @@ def find_conflict(
     (2) birləşmiş mühazirə (axın): eyni müəllim, eyni fənn, hər ikisi mühazirə, eyni otaq (və ya
     otaq boş) — müəllim eyni anda iki yerdə deyil, qruplar birlikdə oturur; bu, toqquşma deyil
     (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü). Qrup toqquşması
-    həmişə toqquşmadır."""
+    həmişə toqquşmadır.
+    (3) müəllim = EFFEKTİV müəllim (hər iki tərəfdə): mövcud slotda :func:`effective_instructor_id`,
+    yoxlanan slotda ``instructor_id`` (slotun öz müəllimi), verilməyibsə açılışın müəllimi."""
+    teacher_id = instructor_id or offering.instructor_id
     room_norm = (room or "").strip().lower()
     candidates = ScheduleSlot.objects.filter(organization=organization, weekday=weekday, is_parked=False)
     if offering.period_id:
@@ -143,23 +202,27 @@ def find_conflict(
         if not _week_types_overlap(week_type, slot.week_type):
             continue
         same_group = offering.group_id and slot.offering.group_id == offering.group_id
-        same_instructor = offering.instructor_id and slot.offering.instructor_id == offering.instructor_id
+        same_instructor = _same_person(teacher_id, effective_instructor_id(slot))
         slot_room = (slot.room or "").strip().lower()
         same_room = room_norm and room_norm == slot_room
-        if not same_group and _is_joint_lecture(offering, kind, room_norm, slot, slot_room):
+        if not same_group and _is_joint_lecture(offering, teacher_id, kind, room_norm, slot, slot_room):
             continue
         if same_group or same_instructor or same_room:
             return slot
     return None
 
 
-def _is_joint_lecture(offering, kind, room_norm, slot, slot_room) -> bool:
-    """Axın: eyni müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq."""
+def _same_person(left, right) -> bool:
+    """İki istifadəçi id-si eyni şəxsdirmi (``int`` / ``str`` fərqi nəzərə alınmır; boş = yox)."""
+    return bool(left) and bool(right) and str(left) == str(right)
+
+
+def _is_joint_lecture(offering, teacher_id, kind, room_norm, slot, slot_room) -> bool:
+    """Axın: eyni (effektiv) müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq."""
     return bool(
         kind == SlotKind.LECTURE
         and slot.kind == SlotKind.LECTURE
-        and offering.instructor_id
-        and slot.offering.instructor_id == offering.instructor_id
+        and _same_person(teacher_id, effective_instructor_id(slot))
         and offering.subject_id
         and slot.offering.subject_id == offering.subject_id
         and (not room_norm or not slot_room or room_norm == slot_room)
@@ -167,10 +230,12 @@ def _is_joint_lecture(offering, kind, room_norm, slot, slot_room) -> bool:
 
 
 def _slots_for(queryset):
-    """Cədvəldə DURAN slotlar — parklanmışlar (yenidən yerləşdirilməli) xaric."""
+    """Cədvəldə DURAN slotlar — parklanmışlar (yenidən yerləşdirilməli) xaric.
+
+    ``instructor`` (slotun öz müəllimi) LEFT JOIN ilə gəlir — etiket əlavə sorğu etmir."""
     return list(
         queryset.filter(is_parked=False)
-        .select_related("offering", "offering__subject", "offering__group", "offering__instructor")
+        .select_related("offering", "offering__subject", "offering__group", "offering__instructor", "instructor")
         .order_by("weekday", "start_time")
     )
 
@@ -183,9 +248,12 @@ def get_group_schedule(*, organization, group, period):
 
 
 def get_teacher_schedule(*, organization, teacher, period):
-    """All slots the teacher teaches in a period (teacher view)."""
+    """All slots the teacher teaches in a period (teacher view).
+
+    EFFEKTİV müəllimə görə (2026-09-25): öz açılışlarının override-sız slotları + başqa
+    açılışların ona təyin olunmuş slotları; öz açılışının BAŞQASINA verilmiş slotu isə yox."""
     return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__instructor=teacher, offering__period=period)
+        ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(taught_by_q(teacher))
     )
 
 
