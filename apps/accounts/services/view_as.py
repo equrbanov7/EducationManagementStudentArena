@@ -31,10 +31,10 @@ from django.contrib.auth import get_user_model
 from django.db.models import Max, Q
 
 from core.rls import bypass_rls
+from core.search_text import tolerant_q
 
 from ..identity import request_user_login_blocked, user_access_is_login_blocked
 from ..models import ProfileRole
-from .person_search import person_q
 
 # Siyasət datası ayrıca moduldadır (ölçü büdcəsi + oxunaqlıq: siyahılar tez-tez
 # dəyişir və servis məntiqini oxumağı çətinləşdirirdi).
@@ -361,12 +361,14 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     if mode == MODE_LIMITED:
         users = users.exclude(pk__in=_admin_equivalent_user_ids(organization))
 
-    # Tokenləşmiş + diakritikaya dözümlü («Ad Soyad», «Huseynov»→«Hüseynov»);
-    # bax `services/person_search.py`. Qrup nömrəsi tam sətirlə ayrıca yoxlanır.
+    # Tokenləşmiş + az/ing dözümlü («Ad Soyad», «Aliyev»→«Əliyev»); qrup nömrəsi
+    # kod rejimində («234king» → «234 K ing»); bax `core/search_text.py`.
     q = (q or "").strip()[:120]
-    if q:
-        name_q = person_q(q, ("username", "first_name", "last_name", "email"))
-        users = users.filter(name_q | Q(profile__student_group_number__icontains=q))
+    search = tolerant_q(
+        q, ("username", "first_name", "last_name", "email"), compact_fields=("profile__student_group_number",)
+    )
+    if search is not None:
+        users = users.filter(search)
 
     role_filter = (role_filter or "").strip()
     role_names = ROLE_FILTER_MAP.get(role_filter)

@@ -276,7 +276,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function applyFilter(filterKey, searchTerm) {
       if (!questionList) return;
       const key = filterKey || "all";
-      const term = (searchTerm || "").trim().toLowerCase();
+      const term = (searchTerm || "").trim();
+      // Tolerant axtarış (EMSSearch: az↔en hərfləri); U+0307 — «İ».toLowerCase() qalığı.
+      const rawMatch = window.EMSSearch ? window.EMSSearch.matcher(term) : null;
+      const low = term.toLowerCase();
+      const match = (text) => {
+        const t = String(text || "").replace(/\u0307/g, "");
+        return rawMatch ? rawMatch(t) : !low || t.toLowerCase().includes(low);
+      };
       const cards = questionList.querySelectorAll(".q-card");
 
       let visible = 0;
@@ -289,11 +296,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let matchesSearch = true;
         if (term) {
-          const text = (card.querySelector(".q-text")?.textContent || "").toLowerCase();
+          const text = card.querySelector(".q-text")?.textContent || "";
           const optsText = Array.from(card.querySelectorAll(".opt-text"))
-            .map(n => n.textContent.toLowerCase())
+            .map(n => n.textContent)
             .join(" ");
-          matchesSearch = text.includes(term) || optsText.includes(term);
+          matchesSearch = match(text) || match(optsText);
         }
 
         if (matchesFilter && matchesSearch) {

@@ -18,6 +18,7 @@ from django.utils.http import urlencode
 from django.utils.translation import gettext, pgettext
 
 from apps.accounts.views._helpers.formatting import _append_query_params, _query_string
+from core.search_text import tolerant_q
 
 from . import question_bank_ui as ui
 
@@ -124,17 +125,20 @@ def _read_params(request, *, is_center, exam_kind_choices, language_values, form
 
 
 def _apply_filters(qs, params):
-    search = params["search"]
-    if search:
-        qs = qs.filter(
-            Q(name__icontains=search)
-            | Q(subject__icontains=search)
-            | Q(subject_ref__name__icontains=search)
-            | Q(subject_ref__code__icontains=search)
-            | Q(source_teacher__first_name__icontains=search)
-            | Q(source_teacher__last_name__icontains=search)
-            | Q(source_teacher__username__icontains=search)
-        )
+    search_q = tolerant_q(
+        params["search"],
+        (
+            "name",
+            "subject",
+            "subject_ref__name",
+            "source_teacher__first_name",
+            "source_teacher__last_name",
+            "source_teacher__username",
+        ),
+        compact_fields=("subject_ref__code",),
+    )
+    if search_q is not None:
+        qs = qs.filter(search_q)
     if params["kind"] == "general":
         qs = qs.filter(exam_kind="")
     elif params["kind"]:

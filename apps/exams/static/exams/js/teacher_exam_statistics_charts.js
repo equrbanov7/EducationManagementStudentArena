@@ -12,6 +12,18 @@
 (function () {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function readIsland(id) {
         var el = document.getElementById(id);
         if (!el) { return {}; }
@@ -129,8 +141,9 @@
         var page = 1, filtered = rows;
 
         function doFilter() {
-            var q = (searchEl ? searchEl.value : "").toLowerCase().trim();
-            filtered = rows.filter(function(r){ return !q || (r.dataset.question||r.textContent||"").toLowerCase().indexOf(q)!==-1; });
+            var q = (searchEl ? searchEl.value : "").trim();
+            var match = searchMatcher(q);
+            filtered = rows.filter(function(r){ return !q || match(r.dataset.question||r.textContent||""); });
             page = 1; render();
         }
         function render() {

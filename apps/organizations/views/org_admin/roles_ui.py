@@ -30,6 +30,8 @@ from __future__ import annotations
 from django.db.models import Count
 from django.utils.translation import pgettext
 
+from core.search_text import tolerant_match
+
 from ...models import Membership
 from ...permissions import (
     PERMISSION_CATEGORIES,
@@ -124,12 +126,10 @@ def _matches(role, entry, query, scope, kind, category):
     if category and category not in {group["key"] for group in entry["groups"]}:
         return False
     if query:
-        haystack = " ".join(
-            [role.display_name or "", role.name or "", role.description or ""]
-            + [item["label"] for group in entry["groups"] for item in group["items"]]
-            + list(role.permissions or [])
-        ).casefold()
-        if query.casefold() not in haystack:
+        texts = [role.display_name or "", role.name or "", role.description or ""]
+        texts += [item["label"] for group in entry["groups"] for item in group["items"]]
+        texts += [str(permission) for permission in role.permissions or []]
+        if not tolerant_match(query, *texts):
             return False
     return True
 

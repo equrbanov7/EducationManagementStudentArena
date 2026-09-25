@@ -25,6 +25,7 @@ from apps.exams.services.ai_summary import generate_exam_statistics_summary
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.helpers import _safe_same_origin_redirect_path
+from core.search_text import tolerant_q
 
 
 def _parse_int(raw, default=None):
@@ -115,12 +116,9 @@ def teacher_exam_statistics(request, slug):
         if selected_group:
             attempts = attempts.filter(user__in=selected_group.students.all())
 
-    if student_q:
-        attempts = attempts.filter(
-            Q(user__username__icontains=student_q)
-            | Q(user__first_name__icontains=student_q)
-            | Q(user__last_name__icontains=student_q)
-        )
+    student_filter = tolerant_q(student_q, ("user__username", "user__first_name", "user__last_name"))
+    if student_filter is not None:
+        attempts = attempts.filter(student_filter)
 
     if date_from:
         attempts = attempts.filter(started_at__date__gte=date_from)

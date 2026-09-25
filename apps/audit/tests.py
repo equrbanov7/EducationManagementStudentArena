@@ -488,3 +488,34 @@ class AuditLogAppendOnlyTest(TestCase):
         with self.assertRaises(ValidationError):
             entry.delete()
         self.assertTrue(AuditLog.objects.filter(pk=entry.pk).exists())
+
+
+class AuditSearchTolerantTest(TestCase):
+    """Dözümlü axtarış (sahib 2026-09-26): «Aliyev» → «Əliyev», «234king» → «234 K ing»."""
+
+    def setUp(self):
+        self.user = User.objects.create_user("audit_tol", "audit_tol@example.com", "TestPass123!")
+        self.user.first_name, self.user.last_name = "Şahzad", "Əliyev"
+        self.user.save(update_fields=["first_name", "last_name"])
+        self.by_user = AuditLog.objects.create(user=self.user, action=AuditAction.VIEW, resource_type="probe")
+        self.by_group = AuditLog.objects.create(
+            action=AuditAction.UPDATE, resource_type="organizations.orgunit", resource_repr="234 K ing"
+        )
+
+    def _found(self, term):
+        from .views_filters import _search_q
+
+        return set(AuditLog.objects.filter(_search_q(term)).values_list("pk", flat=True))
+
+    def test_person_name_folds_azerbaijani_letters(self):
+        for term in ("Aliyev", "Sahzad", "shahzad eliyev"):
+            with self.subTest(term=term):
+                self.assertEqual(self._found(term), {self.by_user.pk})
+
+    def test_resource_repr_is_compact(self):
+        for term in ("234king", "234-K-ing", "234 k ing"):
+            with self.subTest(term=term):
+                self.assertEqual(self._found(term), {self.by_group.pk})
+
+    def test_exact_uuid_still_matches_the_entry_id(self):
+        self.assertEqual(self._found(str(self.by_group.pk)), {self.by_group.pk})

@@ -25,6 +25,7 @@ from apps.exams.services.question_invariants import (
 )
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
+from core.search_text import tolerant_q
 
 from ._shared import (
     _append_navigation_query,
@@ -188,16 +189,10 @@ def teacher_questions_bank(request, slug):
 
     questions = exam.questions.select_related("block").prefetch_related("options")
 
-    if search_query:
-        matched_ids = (
-            exam.questions.filter(
-                Q(text__icontains=search_query)
-                | Q(block__name__icontains=search_query)
-                | Q(options__text__icontains=search_query)
-            )
-            .values_list("id", flat=True)
-            .distinct()
-        )
+    # Sual/blok/variant mətni — az/ing hərfə dözümlü, tokenli (sahib 2026-09-26).
+    search_q = tolerant_q(search_query, ("text", "block__name", "options__text"))
+    if search_q is not None:
+        matched_ids = exam.questions.filter(search_q).values_list("id", flat=True).distinct()
         questions = questions.filter(id__in=matched_ids)
 
     if status_filter == "active":

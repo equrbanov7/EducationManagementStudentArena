@@ -18,6 +18,8 @@ from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from core.search_text import tolerant_q
+
 from . import guest_merge, guest_roster
 from .journal_access import offering_or_404
 from .models import AcademicStatus, Enrollment
@@ -91,8 +93,9 @@ def guest_group_search(request, offering_id):
     groups = guest_roster.scoped_group_queryset(request.user, offering.organization)
     if offering.group_id is not None:
         groups = groups.exclude(pk=offering.group_id)
-    if query:
-        groups = groups.filter(name__icontains=query)
+    search_q = tolerant_q(query, ("name", "code"), compact=True)
+    if search_q is not None:
+        groups = groups.filter(search_q)
     groups = groups.order_by("name")
     offset, limit = _bounds(request)
     results, has_more = _page(groups, offset, limit, lambda unit: {"id": str(unit.id), "text": unit.name})
@@ -113,14 +116,9 @@ def guest_student_search(request, offering_id):
 
     records = guest_roster.candidate_records(offering=offering, group=group)
     query = (request.GET.get("q") or "").strip()
-    if query:
-        from django.db.models import Q
-
-        records = records.filter(
-            Q(student__first_name__icontains=query)
-            | Q(student__last_name__icontains=query)
-            | Q(student__username__icontains=query)
-        )
+    search_q = tolerant_q(query, ("student__first_name", "student__last_name", "student__username"))
+    if search_q is not None:
+        records = records.filter(search_q)
     # Artıq jurnalda olanlar siyahıdan ÇIXARILMIR — görünür, amma `disabled`
     # bayrağı ilə seçilə bilmir və səbəbi yazılır (bax guest_roster.py izahı).
     already = guest_roster.enrolled_student_ids(offering)

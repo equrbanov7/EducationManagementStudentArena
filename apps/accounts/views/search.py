@@ -16,19 +16,22 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import gettext as _
 
-from core.program_codes import program_code_search_q
+from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
+from core.search_text import tolerant_match, tolerant_q
 
-from ..services.person_search import person_q
 from ._helpers import _role_capabilities
 
 MAX_PER_GROUP = 6
 MIN_ENTITY_QUERY = 2
+#: Tələbə nəticəsinin kod sahələri: ixtisas şifrləri (hər iki nəsil) + alt sətirdə görünən qrup adı
+#: («234king» → «234 K ing»). Qısa hərf tokeni («PA») kod sahəsində də bitişik axtarılır
+#: (``core.search_text.code_regex``), ona görə «Qrup A1-1»ə uyğun gəlmir (proqram-şifr invariantı).
+_STUDENT_CODE_FIELDS = tuple(f"program__{field}" for field in PROGRAM_CODE_SEARCH_FIELDS) + ("group__name",)
 
 
 def _nav_targets(caps):
@@ -75,10 +78,10 @@ def _nav_targets(caps):
 
 
 def _nav_group(caps, query):
-    ql = query.lower()
     items = []
     for title, icon, url, keywords in _nav_targets(caps):
-        if not ql or ql in f"{title} {keywords}".lower():
+        # Az/ing dözümlü («jurnal», «cedvel» → «cədvəl»); boş sorğu → hamısı.
+        if tolerant_match(query, f"{title} {keywords}"):
             items.append({"title": str(title), "subtitle": "", "icon": icon, "url": url})
     return items[:MAX_PER_GROUP]
 
@@ -88,9 +91,11 @@ def _journal_group(user, organization, query):
     qs = Offering.objects.filter(instructor=user, is_active=True)
     if organization is not None:
         qs = qs.filter(organization=organization)
-    qs = qs.filter(Q(subject__code__icontains=query) | Q(subject__name__icontains=query)).select_related(
-        "subject", "group"
-    )[:MAX_PER_GROUP]
+    # Fənn adı mətn, fənn kodu və qrup adı (alt sətirdə görünür) kod rejimində.
+    search = tolerant_q(query, ("subject__name",), compact_fields=("subject__code", "group__name"))
+    if search is not None:
+        qs = qs.filter(search)
+    qs = qs.select_related("subject", "group")[:MAX_PER_GROUP]
     return [
         {
             "title": f"{o.subject.code} — {o.subject.name}",
@@ -114,9 +119,11 @@ def _section_url(section, params=None):
 
 def _subject_group(organization, query):
     Subject = django_apps.get_model("registrar", "Subject")
-    qs = Subject.objects.filter(organization=organization).filter(Q(code__icontains=query) | Q(name__icontains=query))[
-        :MAX_PER_GROUP
-    ]
+    qs = Subject.objects.filter(organization=organization)
+    search = tolerant_q(query, ("name",), compact_fields=("code",))
+    if search is not None:
+        qs = qs.filter(search)
+    qs = qs[:MAX_PER_GROUP]
     return [
         {
             "title": f"{s.code} — {s.name}",
@@ -134,7 +141,7 @@ def _student_group(organization, query):
     AXTARIŞ İNVARİANTI: alt sətir ``program.display_label`` çap edir («Dünya
     iqtisadiyyatı · 050401»), ona görə süzgəc yalnız ad/username üzrə qala
     bilməz — istifadəçi eyni qutuda GÖRDÜYÜ şifri yazanda sıfır nəticə alırdı.
-    ``program_code_search_q`` HƏR İKİ nəsil şifri əhatə edir; ``display_code``
+    ``PROGRAM_CODE_SEARCH_FIELDS`` HƏR İKİ nəsil şifri əhatə edir; ``display_code``
     köhnə şifrə geri çəkildiyi üçün tək ``official_code`` kifayət etmir.
 
     Performans: ``program``/``group`` onsuz da ``select_related``-dədir, ona
@@ -142,17 +149,17 @@ def _student_group(organization, query):
     join-unu təkrar istifadə edir) və sətir sayı ``MAX_PER_GROUP`` ilə kəsilir.
     """
     Record = django_apps.get_model("registrar", "StudentAcademicRecord")
-    qs = (
-        Record.objects.filter(organization=organization)
-        .filter(
-            # Ad/soyad/istifadəçi adı: tokenləşmiş + diakritikaya dözümlü
-            # («Ad Soyad», ı↔i, ə↔e …) — bax services/person_search.py.
-            person_q(query, ("student__first_name", "student__last_name", "student__username", "student__email"))
-            | Q(program__name__icontains=query)
-            | program_code_search_q(query, prefix="program__")
-        )
-        .select_related("student", "program", "group")[:MAX_PER_GROUP]
+    qs = Record.objects.filter(organization=organization)
+    # Tokenləşmiş + az/ing dözümlü («Ad Soyad», «Aliyev» → «Əliyev», «Shahzad» →
+    # «Şahzad»); şifrlər kod rejimində — bax core/search_text.py.
+    search = tolerant_q(
+        query,
+        ("student__first_name", "student__last_name", "student__username", "student__email", "program__name"),
+        compact_fields=_STUDENT_CODE_FIELDS,
     )
+    if search is not None:
+        qs = qs.filter(search)
+    qs = qs.select_related("student", "program", "group")[:MAX_PER_GROUP]
     items = []
     for r in qs:
         name = r.student.get_full_name() or r.student.username

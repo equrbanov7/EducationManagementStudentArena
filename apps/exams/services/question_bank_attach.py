@@ -28,6 +28,7 @@ from apps.exams.models import (
 )
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.services.question_bank import normalize_question_text
+from core.search_text import tolerant_q
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +83,10 @@ def bank_questions_queryset(
         qs = qs.filter(difficulty=difficulty)
     if question_type:
         qs = qs.filter(question_type=question_type)
-    if search:
-        qs = qs.filter(text__icontains=search)
+    # Sual mətni — az/ing hərfə dözümlü, tokenli (sahib 2026-09-26).
+    search_q = tolerant_q(search, ("text",))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     if tags:
         for tag in tags:
             qs = qs.filter(tags__contains=tag)

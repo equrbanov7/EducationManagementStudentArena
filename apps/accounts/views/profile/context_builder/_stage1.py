@@ -9,6 +9,7 @@ from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam, StudentGroup
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
+from core.search_text import tolerant_q
 
 from ....forms import CustomPasswordChangeForm, OTPPasswordResetConfirmForm
 from ....services.profile_actions import validate_profile_avatar_upload
@@ -359,11 +360,9 @@ class _Stage1Mixin:
             if self.active_section == "assigned-courses":
                 self.assigned_courses_search_query = (self.request.GET.get("assigned_course_search", "") or "").strip()
                 self.assigned_courses_qs = self.enrolled_courses_qs
-                if self.assigned_courses_search_query:
-                    self.assigned_courses_qs = self.assigned_courses_qs.filter(
-                        Q(title__icontains=self.assigned_courses_search_query)
-                        | Q(description__icontains=self.assigned_courses_search_query)
-                    )
+                courses_q = tolerant_q(self.assigned_courses_search_query, ("title", "description"))
+                if courses_q is not None:
+                    self.assigned_courses_qs = self.assigned_courses_qs.filter(courses_q)
                 self.assigned_courses = list(self.assigned_courses_qs[:20])
             if self.active_section == "my-results":
                 self.my_results_year = (self.request.GET.get("results_year", "") or "").strip()

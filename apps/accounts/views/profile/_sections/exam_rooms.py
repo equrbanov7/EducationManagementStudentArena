@@ -23,6 +23,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.accounts.views._helpers.formatting import _append_query_params
+from core.search_text import tolerant_q
 
 _CTX = "accounts.superadmin_exam_rooms"
 _SECTION = "superadmin-exam-rooms"
@@ -112,8 +113,9 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
 
     # ── Siyahı: filtr → sıralama → səhifə ─────────────────────────────────
     queryset = org_rooms.annotate(computer_registered=Count("computers", distinct=True))
-    if filters["q"]:
-        queryset = queryset.filter(Q(name__icontains=filters["q"]) | Q(code__icontains=filters["q"]))
+    rooms_q = tolerant_q(filters["q"], ("name", "code"), compact=True)
+    if rooms_q is not None:
+        queryset = queryset.filter(rooms_q)
     if filters["status"]:
         queryset = queryset.filter(is_active=(filters["status"] == "active"))
     if filters["building"]:

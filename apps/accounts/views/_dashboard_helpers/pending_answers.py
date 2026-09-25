@@ -10,6 +10,7 @@ from apps.assignments.models import Submission
 from apps.exams.models import ExamAttempt
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
+from core.search_text import tolerant_match
 
 from .._helpers import (
     _append_query_params,
@@ -46,15 +47,10 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
         "labs": 0,
         "independent": 0,
     }
-    search_token = search_query.lower()
 
     def matches_search(*values):
-        if not search_token:
-            return True
-        for value in values:
-            if search_token in (value or "").lower():
-                return True
-        return False
+        # Dözümlü (az/ing hərfləri, tokenlər VƏ) — boş sorğu → True.
+        return tolerant_match(search_query, *values)
 
     def add_item(
         *,

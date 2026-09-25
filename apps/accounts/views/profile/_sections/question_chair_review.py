@@ -93,6 +93,7 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
 
     from apps.exams.models import QuestionSubmission
     from apps.exams.public import QUESTION_EXAM_KIND_CHOICES, QUESTION_EXAM_KIND_VALUES, chair_queue_queryset
+    from core.search_text import tolerant_q
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
@@ -131,15 +132,13 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
         filtered = filtered.filter(exam_kind=filters["kind"])
     if filters["teacher"].isdigit():
         filtered = filtered.filter(teacher_id=int(filters["teacher"]))
-    if filters["q"]:
-        filtered = filtered.filter(
-            Q(title__icontains=filters["q"])
-            | Q(subject__icontains=filters["q"])
-            | Q(group_label__icontains=filters["q"])
-            | Q(teacher__first_name__icontains=filters["q"])
-            | Q(teacher__last_name__icontains=filters["q"])
-            | Q(teacher__username__icontains=filters["q"])
-        )
+    search_q = tolerant_q(
+        filters["q"],
+        ("title", "subject", "teacher__first_name", "teacher__last_name", "teacher__username"),
+        compact_fields=("group_label",),
+    )
+    if search_q is not None:
+        filtered = filtered.filter(search_q)
 
     filtered = (
         filtered.select_related("teacher", "chair_unit", "chair_reviewer").distinct().order_by("-created_at", "-id")

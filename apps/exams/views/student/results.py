@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q, Sum
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -21,6 +21,7 @@ from apps.exams.services.result_calculation import attach_test_result_summaries,
 from apps.exams.services.result_release import exam_answers_release_locked
 from apps.exams.services.supervision import attach_attempt_interventions, get_attempt_intervention
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from core.search_text import tolerant_q
 
 from ._helpers import (
     annotate_attempt_result_visibility,
@@ -411,8 +412,9 @@ def student_exam_history(request):
         exam = get_object_or_404(active_tenant_exams, slug=exam_slug)
         attempts = attempts.filter(exam=exam)
 
-    if search_query:
-        attempts = attempts.filter(Q(exam__title__icontains=search_query))
+    title_q = tolerant_q(search_query, ("exam__title",))
+    if title_q is not None:
+        attempts = attempts.filter(title_q)
 
     total_attempt_count = attempts.count()
 

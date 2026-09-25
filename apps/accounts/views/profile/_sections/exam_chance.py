@@ -45,24 +45,35 @@ def _search_students(organization, query):
 
     from apps.exams.public import unit_student_record_filter
     from apps.organizations.public import organization_user_queryset
+    from core.search_text import code_regex, fold_regex, tokens_of
 
     User = get_user_model()
     # 2026-09-14 (W5 `w5left`, tapşırıq 1): qrup adı ilə axtarış reyestr qrupunu da
     # tapır (cari aktiv `StudentAcademicRecord.group` — `unit_assignment` ilə eyni şərt).
-    condition = (
-        Q(username__icontains=query)
-        | Q(first_name__icontains=query)
-        | Q(last_name__icontains=query)
-        | Q(
-            student_groups_as_student__organization=organization,
-            student_groups_as_student__name__icontains=query,
+    # 2026-09-26 (sahib): dözümlü axtarış — tokenlər VƏ, hər token sahələr arasında
+    # VƏ YA; adlar az/ing hərf qatlaması, qrup adı kod rejimi («234king» → «234 K ing»).
+    # Qrup şərtləri öz təşkilat/aktiv-qeyd şərti ilə EYNİ `Q`-dadır (tək JOIN dəsti).
+    tokens = tokens_of(query)
+    if not tokens:
+        return []
+    condition = Q()
+    for token in tokens:
+        name_rx = fold_regex(token)
+        code_rx = code_regex(token)
+        condition &= (
+            Q(username__iregex=name_rx)
+            | Q(first_name__iregex=name_rx)
+            | Q(last_name__iregex=name_rx)
+            | Q(
+                student_groups_as_student__organization=organization,
+                student_groups_as_student__name__iregex=code_rx,
+            )
+            | Q(
+                academic_records__organization=organization,
+                academic_records__group__name__iregex=code_rx,
+                **unit_student_record_filter("academic_records__"),
+            )
         )
-        | Q(
-            academic_records__organization=organization,
-            academic_records__group__name__icontains=query,
-            **unit_student_record_filter("academic_records__"),
-        )
-    )
     return list(
         organization_user_queryset(organization, queryset=User.objects.filter(condition))
         .distinct()
@@ -81,6 +92,7 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
     from apps.organizations.models import AcademicPeriod, OrgUnit
     from apps.organizations.public import KAFEDRA_UNIT_TYPES
     from core.constants import OrgUnitType
+    from core.search_text import tolerant_q
 
     organization = active_organization
     section["selected_org"] = organization
@@ -121,8 +133,9 @@ def build_exam_chance_section(request, section, *, active_organization, allowed_
         is_deleted=False,
         is_archived=False,
     )
-    if filters["exam_q"]:
-        exams_qs = exams_qs.filter(title__icontains=filters["exam_q"])
+    exam_title_q = tolerant_q(filters["exam_q"], ("title",))
+    if exam_title_q is not None:
+        exams_qs = exams_qs.filter(exam_title_q)
     unit = kafedra or faculty
     if unit is not None:
         # 2026-09-14 (W5 `w5left`, tapşırıq 1): reyestr qrupuna (`allowed_units`,

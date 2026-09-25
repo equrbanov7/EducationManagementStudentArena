@@ -1,6 +1,6 @@
 /* =========================================================================
    results_text.js — anonim şərhlər / ümumi təkliflər: dözümlü axtarış
-   (ı/i, ə/e, ş/s, ç/c, ğ/g, ö/o, ü/u; bütün sözlər VƏ ilə), açar söz çipləri,
+   (EMSSearch: ı/i, ə/e/a, ş/s/sh, ç/c/ch, ğ/g, ö/o, ü/u; bütün sözlər VƏ ilə), açar söz çipləri,
    «Daha çox göstər» səhifələməsi və uyğunluğun vurğulanması.
 
    TƏHLÜKƏSİZLİK: mətnlər istifadəçi girişidir — vurğu YALNIZ mətn düyünləri və
@@ -39,7 +39,7 @@
         return { folded: folded, map: map };
     }
 
-    function tokens(query) {
+    function foldedTokens(query) {
         return fold(query)
             .split(/\s+/)
             .filter(function (token) {
@@ -48,26 +48,71 @@
             .slice(0, 4);
     }
 
-    function paint(item, words) {
+    /* Sorğu → axtarıcı. EMSSearch varsa onun regex-ləri (az↔en hərfləri, ə↔a,
+       «sh»↔ş…; sərbəst mətn olduğu üçün compact YOX — vurğu sözlər arası
+       boşluğa yayılmasın), yoxdursa köhnə `fold` + indeks xəritəsi. */
+    function finder(query) {
+        var api = window.EMSSearch;
+        if (api) {
+            var words = api.tokens(query);
+            var sources = words.map(function (word) {
+                return api.pattern(word, { compact: false });
+            });
+            var tests = sources.map(function (src) { return new RegExp(src, "i"); });
+            var globals = sources.map(function (src) { return new RegExp(src, "gi"); });
+            return {
+                words: words,
+                test: function (text) {
+                    return tests.every(function (rx) { return rx.test(text); });
+                },
+                ranges: function (text) {
+                    var out = [];
+                    globals.forEach(function (rx) {
+                        rx.lastIndex = 0;
+                        var m = rx.exec(text);
+                        while (m) {
+                            if (m[0].length) {
+                                out.push([m.index, m.index + m[0].length]);
+                            } else {
+                                rx.lastIndex += 1;
+                            }
+                            m = rx.exec(text);
+                        }
+                    });
+                    return out;
+                }
+            };
+        }
+        var folded = foldedTokens(query);
+        return {
+            words: folded,
+            test: function (text) {
+                var hay = fold(text);
+                return folded.every(function (word) { return hay.indexOf(word) !== -1; });
+            },
+            ranges: function (text) {
+                var index = foldWithMap(text);
+                var out = [];
+                folded.forEach(function (word) {
+                    var at = index.folded.indexOf(word);
+                    while (at !== -1) {
+                        out.push([index.map[at], index.map[at + word.length - 1] + 1]);
+                        at = index.folded.indexOf(word, at + word.length);
+                    }
+                });
+                return out;
+            }
+        };
+    }
+
+    function paint(item, find) {
         var original = item._svrText;
         item.textContent = "";
-        if (!words.length) {
+        if (!find.words.length) {
             item.textContent = original;
             return;
         }
-        var index = foldWithMap(original);
-        var ranges = [];
-        words.forEach(function (word) {
-            var from = 0;
-            var at = index.folded.indexOf(word, from);
-            while (at !== -1) {
-                var start = index.map[at];
-                var end = index.map[at + word.length - 1] + 1;
-                ranges.push([start, end]);
-                from = at + word.length;
-                at = index.folded.indexOf(word, from);
-            }
-        });
+        var ranges = find.ranges(original);
         ranges.sort(function (a, b) {
             return a[0] - b[0];
         });
@@ -95,13 +140,12 @@
         if (!state) {
             return;
         }
-        var words = tokens(state.query);
+        var find = finder(state.query);
+        var words = find.words;
         var total = 0;
         state.lists.forEach(function (entry) {
             var matched = entry.items.filter(function (item) {
-                return words.every(function (word) {
-                    return item._svrFolded.indexOf(word) !== -1;
-                });
+                return !words.length || find.test(item._svrText);
             });
             total += matched.length;
             var limit = entry.page * entry.size;
@@ -110,7 +154,7 @@
                 var visible = shown.has(item);
                 item.hidden = !visible;
                 if (visible) {
-                    paint(item, words);
+                    paint(item, find);
                 }
             });
             if (entry.more) {
@@ -122,7 +166,7 @@
             state.count.textContent = words.length ? total + " " + (t.i18nMatches || "") : "";
         }
         container.querySelectorAll("[data-svr-word]").forEach(function (chip) {
-            var active = words.length === 1 && fold(chip.getAttribute("data-svr-word")) === words[0];
+            var active = words.length === 1 && fold(chip.getAttribute("data-svr-word")) === fold(words[0]);
             chip.setAttribute("aria-pressed", active ? "true" : "false");
         });
     }
@@ -138,7 +182,6 @@
                 var items = Array.prototype.slice.call(list.querySelectorAll("[data-svr-text-item]"));
                 items.forEach(function (item) {
                     item._svrText = item.textContent;
-                    item._svrFolded = fold(item._svrText);
                 });
                 var next = list.nextElementSibling;
                 lists.push({

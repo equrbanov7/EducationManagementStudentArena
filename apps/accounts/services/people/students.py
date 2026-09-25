@@ -21,7 +21,8 @@ from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef, Q, Subquery, UUIDField, Value
 from django.db.models.functions import Coalesce, NullIf
 
-from core.program_codes import program_code_search_q, program_display_label
+from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS, program_display_label
+from core.search_text import tolerant_q
 
 from . import filters as people_filters
 from .constants import DEFAULT_PAGE_SIZE, STUDENT_SORT_OPTIONS
@@ -121,6 +122,10 @@ def visible_students_qs(actor, *, request=None, filters=None, records=_UNSET):
     )
 
 
+#: İxtisas şifrləri (hər iki nəsil) — kod rejimində axtarılır.
+_PROGRAM_CODE_FIELDS = tuple(f"program__{field}" for field in PROGRAM_CODE_SEARCH_FIELDS)
+
+
 def _program_search_matcher(records):
     """Token → «bu tələbənin qeydlərindən biri həmin ixtisasa uyğundur?».
 
@@ -135,7 +140,7 @@ def _program_search_matcher(records):
     def matcher(token):
         return Exists(
             records.filter(student=OuterRef("pk")).filter(
-                Q(program__name__icontains=token) | program_code_search_q(token, prefix="program__")
+                tolerant_q(token, ("program__name",), compact_fields=_PROGRAM_CODE_FIELDS) or Q()
             )
         )
 

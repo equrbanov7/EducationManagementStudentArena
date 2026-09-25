@@ -13,6 +13,7 @@ from apps.exams.models import ExamAttempt
 from apps.exams.public import attach_attempt_interventions, calculate_test_attempt_result
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
+from core.search_text import tolerant_match
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -289,13 +290,10 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
 
     search_query = (search or "").strip()
     if search_query:
-        search_lower = search_query.lower()
         items = [
             item
             for item in items
-            if search_lower in (item.get("title") or "").lower()
-            or search_lower in (item.get("kind") or "").lower()
-            or search_lower in (item.get("type_label") or "").lower()
+            if tolerant_match(search_query, item.get("title"), item.get("kind"), item.get("type_label"))
         ]
 
     # Tab sayğacları HƏMİŞƏ tam (süzgəcsiz) rəqəmi göstərməlidir ki, istifadəçi
