@@ -104,7 +104,7 @@
 .jd2-modal-close,
 .jd2 .jd2-modal-close {
     position: static; flex: 0 0 auto; width: 32px; height: 32px; border-radius: var(--ems-r-md);
-    background: var(--ems-neutral-100); color: var(--ems-neutral-600); font-size: var(--ems-fs-md);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); font-size: var(--ems-fs-md);
 }
 .jd2-modal-close:hover { background: var(--ems-danger-100); color: var(--ems-danger-700); }
 
