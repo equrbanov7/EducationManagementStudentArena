@@ -1,0 +1,118 @@
+/* «Bu günün cədvəl dərsləri» zolağı + «Aktivləşdir» (UNEC müqayisəsi P1-1, 2026-09-25).
+ *
+ * Yalnız `--ems-*` tokenləri; jurnal səhifəsinin qalanı kimi tək (işıqlı) tema.
+ * Növ rəngləri jurnalın «keçirilmiş saat» çipləri ilə EYNİDİR: mühazirə — göy,
+ * seminar — yaşıl, laboratoriya — narıncı. Kart vəziyyəti: indi gedən (vurğulu),
+ * aktivləşdirilib (yaşıl), vaxtı keçib amma açılmayıb (sarı xəbərdarlıq).
+ */
+
+/* ── Zolaq ─────────────────────────────────────────────────────────────── */
+.jd2-today {
+    margin: 0 0 12px; padding: 12px 14px 14px; border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl); background: var(--ems-bg-subtle);
+}
+.jd2-today__head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; margin-bottom: 10px; }
+.jd2-today__icon {
+    display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px;
+    border-radius: var(--ems-r-lg); background: var(--ems-primary-100); color: var(--ems-primary-700);
+}
+.jd2-today__headtext { display: flex; flex-direction: column; min-width: 0; }
+.jd2-today__title { margin: 0; font-size: 0.92rem; font-weight: 800; color: var(--ems-text); }
+.jd2-today__sub { font-size: 0.74rem; font-weight: 700; color: var(--ems-text-muted); }
+.jd2-today__hint { margin-left: auto; font-size: 0.74rem; color: var(--ems-text-muted); max-width: 420px; }
+.jd2-today__list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px;
+    margin: 0; padding: 0; list-style: none;
+}
+.jd2-today__empty,
+.jd2-today__extra { margin: 0; font-size: 0.8rem; color: var(--ems-text-muted); }
+.jd2-today__empty i { margin-right: 6px; color: var(--ems-neutral-400); }
+.jd2-today__extra { margin-top: 10px; color: var(--ems-warning-800); }
+.jd2-today__extra i { margin-right: 6px; }
+.jd2-today__extra a { color: var(--ems-warning-800); font-weight: 700; }
+
+/* ── Slot kartı ────────────────────────────────────────────────────────── */
+.jd2-slot {
+    display: flex; align-items: stretch; gap: 12px; padding: 10px 12px;
+    border: 1px solid var(--ems-border); border-left: 4px solid var(--ems-primary-500);
+    border-radius: var(--ems-r-lg); background: var(--ems-neutral-0); box-shadow: var(--ems-sh-card);
+}
+.jd2-slot--seminar { border-left-color: var(--ems-success-600); }
+.jd2-slot--lab { border-left-color: var(--ems-warning-600); }
+.jd2-slot.is-now { box-shadow: 0 0 0 2px var(--ems-primary-200), var(--ems-sh-card); }
+.jd2-slot.is-done { background: var(--ems-success-bg); border-color: var(--ems-success-bd); }
+.jd2-slot.is-past { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); }
+
+.jd2-slot__time {
+    flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 1px; min-width: 54px;
+    font-family: var(--ems-ff-mono, ui-monospace, monospace);
+}
+.jd2-slot__time b { font-size: 1rem; font-weight: 800; color: var(--ems-text); }
+.jd2-slot__time span { font-size: 0.74rem; font-weight: 700; color: var(--ems-text-muted); }
+.jd2-slot__time .jd2-slot__now {
+    margin-top: 4px; padding: 1px 7px; border-radius: var(--ems-r-pill); font-family: inherit;
+    background: var(--ems-primary-600); color: var(--ems-neutral-0); font-size: 0.64rem;
+    font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.jd2-slot__body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.jd2-slot__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 0.76rem; color: var(--ems-neutral-700); }
+.jd2-slot__kind {
+    display: inline-flex; align-items: center; min-height: 20px; padding: 0 8px; border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50); color: var(--ems-primary-700); font-size: 0.68rem; font-weight: 800;
+}
+.jd2-slot--seminar .jd2-slot__kind { background: var(--ems-emerald-50); color: var(--ems-success-700); }
+.jd2-slot--lab .jd2-slot__kind { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.jd2-slot__fact i { margin-right: 3px; color: var(--ems-neutral-400); }
+.jd2-slot__topic { font-size: 0.8rem; color: var(--ems-text); line-height: 1.35; overflow-wrap: anywhere; }
+.jd2-slot__topic-label { font-weight: 800; color: var(--ems-text-muted); }
+.jd2-slot__topic-none { font-size: 0.74rem; color: var(--ems-text-muted); font-style: italic; }
+
+.jd2-slot__action { flex: 0 0 auto; display: flex; align-items: center; }
+.jd2-slot__action form { margin: 0; }
+.jd2-slot__btn {
+    display: inline-flex; align-items: center; gap: 7px; min-height: var(--ems-h-field, 38px); padding: 0 14px;
+    border: 0; border-radius: var(--ems-r-lg); background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    font-family: inherit; font-size: 0.8rem; font-weight: 800; cursor: pointer; white-space: nowrap;
+}
+.jd2-slot__btn:hover { background: var(--ems-primary-700); }
+.jd2-slot__btn:focus-visible,
+.jd2-slot__done:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+.jd2-slot__btn.is-busy { opacity: 0.65; cursor: progress; }
+.jd2-slot__done {
+    display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px;
+    border-radius: var(--ems-r-pill); background: var(--ems-neutral-0); border: 1px solid var(--ems-success-bd);
+    color: var(--ems-success-700); font-size: 0.76rem; font-weight: 800; text-decoration: none; white-space: nowrap;
+}
+.jd2-slot__done:hover { background: var(--ems-success-100); color: var(--ems-success-700); }
+.jd2-slot__pending {
+    display: inline-flex; align-items: center; min-height: 28px; padding: 0 10px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-600); font-size: 0.72rem; font-weight: 700;
+}
+
+/* ── Grid: cədvəldən kənar dərs + sütuna keçid ─────────────────────────── */
+.jd2 .jd2-table thead th.jd2-th-lesson.is-offsched { box-shadow: inset 0 -3px 0 var(--ems-warning-500); }
+.jd2-th-offsched {
+    margin-top: 2px; font-size: 0.58rem; font-weight: 800; letter-spacing: 0.02em;
+    text-transform: uppercase; color: var(--ems-warning-800); white-space: nowrap;
+}
+.jd2 .jd2-table thead th.jd2-th-lesson:target {
+    background: var(--ems-primary-100); color: var(--ems-primary-800);
+    box-shadow: inset 0 0 0 2px var(--ems-primary-400);
+}
+
+/* ── Dərs modalı: «cədvəldən kənar dərs — səbəb» ───────────────────────── */
+.jd2-offsched {
+    padding: 10px 12px; border: 1px solid var(--ems-warning-bd); border-radius: var(--ems-r-lg);
+    background: var(--ems-warning-bg);
+}
+.jd2-offsched[hidden] { display: none; }
+.jd2-offsched .jd2-field-label { color: var(--ems-warning-800); }
+.jd2-offsched textarea { width: 100%; resize: vertical; background: var(--ems-neutral-0); }
+
+@media (max-width: 640px) {
+    .jd2-today__hint { margin-left: 0; max-width: none; }
+    .jd2-today__list { grid-template-columns: 1fr; }
+    .jd2-slot { flex-wrap: wrap; }
+    .jd2-slot__action { width: 100%; }
+    .jd2-slot__btn { width: 100%; justify-content: center; }
+}

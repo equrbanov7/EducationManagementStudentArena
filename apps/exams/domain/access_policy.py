@@ -164,8 +164,8 @@ class ExamAccessPolicyMixin:
         1. **Eyni vaxtda bir imtahan** — tələbənin BAŞQA imtahanda aktiv (draft/
            in_progress) cəhdi varsa, yeni imtahan başlada bilməz (fiziki olaraq
            bir anda bir imtahan). Bu imtahanın öz davamı yuxarıda icazəlidir.
-        2. **Eyni gündə bir rəsmi imtahan** — bu imtahan final/kollokviumdursa
-           və tələbə həmin gün BAŞQA final/kollokvium verib(sə), yenisi bloklanır.
+        2. **Eyni gündə bir rəsmi imtahan** — bu imtahan final/midtermdirsə
+           və tələbə həmin gün BAŞQA final/midterm verib(sə), yenisi bloklanır.
            İSTİSNA: imtahan mərkəzi bu imtahan üçün retake (əlavə cəhd) veribsə
            (``StudentExamAttemptGrant``), gün qaydası tətbiq olunmur.
 

@@ -1,8 +1,10 @@
-"""Elektron jurnal əlavə bölmələri: Kollokvium (3 ədəd) + Sərbəst iş + Kurs işi.
+"""Elektron jurnal əlavə bölmələri: aralıq qiymətləndirmə + Sərbəst iş + Kurs işi.
 
-Kollokvium mövcud komponent mexanizmi üzərində işləyir (``AssessmentComponent``
-kind=KOLLOKVIUM + ``held_on`` tarixi; ballar ``ComponentScore``-da — 2 saat
-pəncərəsi və DB trigger oraya da şamildir). Sərbəst iş mövzu-çeklistdir
+Aralıq qiymətləndirmə keçmiş dövrlərdə 3 kollokvium, 2026/2027-dən isə TƏK 20 ballıq
+midterm-dir (rejim :mod:`apps.registrar.interim_assessment`, komponentlər və tab grid-i
+:mod:`apps.registrar.interim_components`). Hər ikisi mövcud komponent mexanizmi üzərində
+işləyir (``AssessmentComponent`` kind=KOLLOKVIUM; ballar ``ComponentScore``-da — bal yazma
+İmtahan Mərkəzinin pəncərəsi ilə idarə olunur). Sərbəst iş mövzu-çeklistdir
 (``SelfWorkTopic``/``SelfWorkMark``): bal yazılmır, təhvil sayı avtomatik giriş
 balına çevrilir (bax ``gradebook.entry_score_for``); lövhənin özü —
 köçürülmüş "arxiv" balı da daxil — ``selfwork_board`` modulundadır. Kurs işi
@@ -24,6 +26,21 @@ from django.utils.translation import gettext as _
 
 from apps.registrar import absence_limit, exam_eligibility, grade_audit
 from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
+
+# Keçmiş dövrlərin kollokvium sabitləri (geriyə uyğunluq) — rejim qərarı ``interim_assessment``-dədir.
+from apps.registrar.interim_assessment import KOLLOKVIUM_COUNT, KOLLOKVIUM_MAX  # noqa: F401
+
+# Aralıq qiymətləndirmə (kollokvium K1-K3 / midterm): rejimə görə komponent qurulması və
+# müəllim tabının grid-i modul-ölçü büdcəsinə görə ``interim_components``-dədir; adlar
+# buradan re-eksport olunur — çağıranlar üçün API dəyişməyib.
+from apps.registrar.interim_components import (  # noqa: F401
+    display_components,
+    ensure_kollokviums,
+    get_kollokvium_grid,
+    interim_score_options,
+    kollokvium_columns_only,
+    set_kollokvium_date,
+)
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
@@ -41,8 +58,6 @@ from apps.registrar.selfwork_board import (  # noqa: F401
     get_selfwork_board,
 )
 
-KOLLOKVIUM_COUNT = 3
-KOLLOKVIUM_MAX = 10
 COURSE_WORK_MAX = Decimal("100")
 
 
@@ -51,108 +66,6 @@ def _to_decimal(raw):
         return Decimal(str(raw))
     except (InvalidOperation, TypeError, ValueError):
         return None
-
-
-# ── Kollokvium (K1-K3) ───────────────────────────────────────────────────────
-
-
-@transaction.atomic
-def ensure_kollokviums(offering):
-    """3 kollokvium komponentini idempotent yarat (K1, K2, K3 · max 10).
-
-    Köhnə məlumat uyğunluğu: "Kollokvium N" ADLI generic komponent artıq varsa
-    (kind sahəsi yeni olduğundan köhnə sətirlər generic-dir), onu yenidən
-    yaratmaq əvəzinə MƏNİMSƏYİRİK — kind=KOLLOKVIUM-a normalizə olunur
-    (unique (offering, name) toqquşması da bununla aradan qalxır)."""
-    all_components = list(AssessmentComponent.objects.filter(offering=offering))
-    by_name = {c.name: c for c in all_components}
-    result = []
-    base_order = len(all_components)
-    for i in range(1, KOLLOKVIUM_COUNT + 1):
-        name = f"Kollokvium {i}"
-        component = by_name.get(name)
-        if component is not None:
-            if component.kind != ComponentKind.KOLLOKVIUM:
-                component.kind = ComponentKind.KOLLOKVIUM
-                component.save(update_fields=["kind"])
-            result.append(component)
-            continue
-        result.append(
-            AssessmentComponent.objects.create(
-                organization=offering.organization,
-                offering=offering,
-                name=name,
-                kind=ComponentKind.KOLLOKVIUM,
-                max_score=KOLLOKVIUM_MAX,
-                order=base_order + i,
-            )
-        )
-    return result
-
-
-def set_kollokvium_date(*, component, held_on) -> bool:
-    """Kollokviumun keçirilmə tarixini yaz (tələbə tarixçəsində göstərilir)."""
-    if component.kind != ComponentKind.KOLLOKVIUM or journal_is_locked(component.offering):
-        return False
-    component.held_on = held_on or None
-    component.save(update_fields=["held_on"])
-    return True
-
-
-def get_kollokvium_grid(offering):
-    """Kollokvium tabı: 3 komponent × tələbələr + ballar.
-
-    Redaktə edilə bilirlik İmtahan Mərkəzi PƏNCƏRƏSİNDƏN gəlir — kollokvium üçün
-    2 saat kilidi YOXDUR (pəncərə onu əvəz edir). Hər sütun (K1/K2/K3) üçün
-    vəziyyət ``kollokvium_windows.entry_state`` ilə hesablanır.
-    """
-    from apps.registrar import kollokvium_windows as kw
-
-    components = ensure_kollokviums(offering)
-    today = timezone.localdate()
-    states = [kw.entry_state(offering, idx, today) for idx in range(len(components))]
-    columns = [
-        {
-            "component": c,
-            "k_index": idx,
-            "status": states[idx]["status"],
-            "opens_on": states[idx].get("opens_on"),
-            "deadline": states[idx].get("deadline"),
-            "open": states[idx]["status"] == "open",
-        }
-        for idx, c in enumerate(components)
-    ]
-    open_by_comp = {c.id: columns[idx]["open"] for idx, c in enumerate(components)}
-
-    enrollments = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
-        .order_by("student__last_name", "student__username")
-    )
-    score_map = {}
-    for cs in ComponentScore.objects.filter(component__in=components, enrollment__offering=offering):
-        score_map[(cs.enrollment_id, cs.component_id)] = cs.score
-    rows = [
-        {
-            "enrollment": e,
-            "student": e.student,
-            "cells": [
-                {
-                    "component": c,
-                    "score": score_map.get((e.id, c.id)),
-                    "editable": open_by_comp[c.id],
-                }
-                for c in components
-            ],
-        }
-        for e in enrollments
-    ]
-    return {
-        "components": components,
-        "columns": columns,
-        "rows": rows,
-        "any_open": any(col["open"] for col in columns),
-    }
 
 
 # ── Sərbəst iş (mövzu çeklisti) ──────────────────────────────────────────────
@@ -338,8 +251,14 @@ def get_course_work_rows(offering):
 
 
 def get_final_breakdown(offering):
-    """ "Yekun qiymət" tabı: mockup sütunları — Davamiyyət/10, K1-K3 + orta,
-    Seminar orta, Sərbəst iş/10, Lab orta, Kurs işi/100, İmtahana qədər bal.
+    """ "Yekun qiymət" tabı: mockup sütunları — Davamiyyət/10, K1-K3 + orta (keçmiş dövrlər)
+    və ya Midterm/20 (2026/2027-dən), Seminar orta, Sərbəst iş/10, Lab orta, Kurs işi/100,
+    İmtahana qədər bal.
+
+    UNEC «Yekun qiymət» kimi audit sütunları (2026-09-25): Auditoriya saatı (plan =
+    buraxılış qərarının KANONİK məxrəci ``exam_eligibility.lesson_hours_for``, keçirilib =
+    bu günə qədərki dərslərin saatı), Buraxılan saat (``Enrollment.absence_hours``) və
+    Qayıb % (buraxılan ÷ plan, 1 onluq) — hamısı artıq oxunmuş datadan, ƏLAVƏ SORĞU YOXDUR.
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
@@ -347,9 +266,7 @@ def get_final_breakdown(offering):
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    kolls = list(
-        AssessmentComponent.objects.filter(offering=offering, kind=ComponentKind.KOLLOKVIUM).order_by("order", "name")
-    )
+    interim, kolls = display_components(offering)
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
         .select_related("student")
@@ -376,6 +293,8 @@ def get_final_breakdown(offering):
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
     # səviyyəli, SƏTİR qərarı isə TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — tək toplu sorğu.
     allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
+    today = timezone.localdate()
+    held_hours = sum(int(lesson.hours or 0) for lesson in lessons_all if lesson.date is None or lesson.date <= today)
     allowed_absence = absence_limit.allowed_absence_hours(offering, lessons_all)
     org_id = offering.organization_id
     row_limits = absence_limit.row_limits(organization_id=org_id, enrollments=enrollments, total_hours=allowed)
@@ -388,6 +307,10 @@ def get_final_breakdown(offering):
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
+
+    def _pct(hours):
+        # Qayıb % — buraxılış qaydası ilə EYNİ məxrəc; məxrəc yoxdursa «—» (0% yalan olardı).
+        return (Decimal(hours) * 100 / allowed).quantize(Decimal("0.1")) if allowed > 0 else None
 
     rows = []
     for e in enrollments:
@@ -430,14 +353,18 @@ def get_final_breakdown(offering):
                 "eligibility": eligibility,
                 "warning": warning,
                 "absence_hours": e.absence_hours,
+                "absence_pct": _pct(absence_hours),
                 "allowed_absence": row_limit.allowed_hours,  # tələbənin ÖZ həddi (F-06)
             }
         )
     return {
+        "interim": interim,
         "kolls": kolls,
         "rows": rows,
         "entry_max": scheme.entry_score_max,
         "allowed_absence": allowed_absence,
+        "lesson_hours": allowed,  # Auditoriya saatı — plan (buraxılışın kanonik məxrəci)
+        "held_hours": held_hours,  # Auditoriya saatı — bu günə qədər keçirilib
     }
 
 
@@ -588,12 +515,3 @@ def lesson_teacher_choices(offering):
         ids.add(offering.instructor_id)
     users = get_user_model().objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
     return [{"id": str(u.id), "name": (u.get_full_name() or "").strip() or u.username} for u in users]
-
-
-def kollokvium_columns_only(offering):
-    """Kollokvium XƏBƏRDARLIQ lenti üçün yalnız sütun meta (sətirsiz).
-
-    Lent hər tabda görünür, amma 555 sətirlik grid yalnız öz tabında lazımdır.
-    """
-    grid = get_kollokvium_grid(offering)
-    return {**grid, "rows": []} if isinstance(grid, dict) else grid

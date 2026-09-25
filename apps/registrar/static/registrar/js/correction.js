@@ -127,7 +127,10 @@
       cwWrap.querySelector("[data-corr-cw-topic]").value = cell.dataset.cwTopic || "";
       cwWrap.querySelector("[data-corr-cw-date]").value = cell.dataset.cwDate || "";
     } else if (isCm) {
-      cmWrap.querySelector("[data-corr-cm-score]").value = cell.dataset.cmScore || "";
+      var cmInput = cmWrap.querySelector("[data-corr-cm-score]");
+      cmInput.value = cell.dataset.cmScore || "";
+      // Tavan xananın öz komponentindən: kollokvium 10, midterm (2026/2027-dən) 20.
+      cmInput.max = cell.dataset.cmMax || "10";
     }
     if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.sync(form.querySelector("[name='reason']"));
     open(modal);

@@ -217,7 +217,7 @@ class JournalLessonRecoveryPhase:
         probe_cancellation(context)
 
         run = LegacyMigrationRun.objects.only("snapshot_sha256", "transform_version").get(pk=context.run_id)
-        resolution = build_resolution(context)
+        resolution = self._resolution(context)
         years = journal_year_index(context)
         recorded = {
             seal_key[_MARK_PREFIX_LENGTH:]: value
@@ -267,6 +267,11 @@ class JournalLessonRecoveryPhase:
             resolution=resolution,
             absence_updated=absence_updated,
         )
+
+    def _resolution(self, context):
+        """J4-ün həll indeksləri; təmir əmri onu ORİJİNAL import run-una bağlayır."""
+
+        return build_resolution(context)
 
     # ── A keçidi: hansı slotlar çatışmır ────────────────────────────────────
 

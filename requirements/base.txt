@@ -58,7 +58,7 @@ celery==5.5.2
 
 # Channels/Daphne Dependencies (WebSocket Support)
 attrs==25.4.0
-autobahn==24.4.2
+autobahn==26.7.1  # security: CVE-2026-77528 (permessage-deflate ölçü həddi bypass-ı); 26.x cbor2+ujson tələb edir
 Automat==25.4.16
 cffi==2.0.0
 constantly==23.10.4
@@ -71,7 +71,7 @@ pycparser==2.23
 pyOpenSSL==26.4.0
 service-identity==24.2.0
 Twisted==26.4.0
-txaio==25.9.2
+txaio==26.6.1  # autobahn 26.7.1 → txaio>=25.12.2
 zope.interface==8.1.1
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -126,6 +126,9 @@ packaging==25.0
 # istifadə olunmayan WAMP extras-ları idi (Faza 3, audit 2026-07-02).
 # ═══════════════════════════════════════════════════════════════════════════
 msgpack==1.2.1
+# autobahn 26.x-in MƏCBURİ asılılıqları (WAMP serializer-ləri; biz istifadə etmirik, amma import zamanı tələb olunur)
+cbor2==6.1.4
+ujson==6.0.0
 
 # ═══════════════════════════════════════════════════════════════════════════
 # MONITORING & METRICS

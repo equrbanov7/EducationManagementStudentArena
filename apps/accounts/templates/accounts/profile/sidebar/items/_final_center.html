@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}«İmtahan Nəzarət Sistemi» — zallar/oturumlar + canlı otaq nəzarəti. Kabinet bölməsi
+DEYİL, ayrıca səhifədir (sidebar-sız öz ekranı; ↗ nişanı bunu bildirir). Bölmə açarı YOXDUR, qapı
+bayraqdır: imtahan mərkəzi HƏMİŞƏ, müəllim-nəzarətçi yalnız təyin olunmuş oturumu olduqda
+(`role_capabilities.can_access_final_center`). Bu bayraq sidebar düzümü seçimində də nəzərə alınır
+(`profile_shell.resolve_sidebar_layout`).{% endcomment %}
+{% if role_capabilities.can_access_final_center %}
+<li class="sidebar-menu-item">
+    <a href="{% url 'exams:exam_center_room_list' %}"
+       class="sidebar-menu-link">
+        <i class="fas fa-tower-observation sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
+        <i class="fas fa-arrow-up-right-from-square sidebar-menu-ext" aria-hidden="true"></i>
+    </a>
+</li>
+{% endif %}

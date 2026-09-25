@@ -50,7 +50,9 @@
    iki kart ekranın yarısını tutub «zolaq» kimi oxunmurdu — trek yuxarıdan
    məhdudlaşdırılır, artıq yer sağda qalır. */
 .dash-kpis .ems-kpis {
-    grid-template-columns: repeat(auto-fit, minmax(190px, 270px));
+    /* 248px: 1440 px ekranda (sidebar 272px) DÖRD plitə bir sətrə sığsın — 270px ilə
+       4 × 270 + 3 boşluq panelin enini (~1088px) aşırdı və 4-cü plitə alta düşürdü. */
+    grid-template-columns: repeat(auto-fit, minmax(190px, 248px));
     justify-content: start;
 }
 
@@ -93,6 +95,9 @@
     /* `minmax(0, …)` şərtdir: `1fr` özü `minmax(auto, 1fr)` deməkdir və uzun
        sətir trek-i partladır (375 px-də ölçülüb). */
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* `dense`: 2 sütunluq geniş kart («Jurnallarım», fənlər üzrə kartlar) növbəti
+       sətrə keçəndə yuxarıda qalan boş xananı sonrakı dar kart doldurur. */
+    grid-auto-flow: row dense;
     gap: var(--ems-sp-6);
     align-items: stretch;
 }
@@ -143,7 +148,7 @@
 
 .dash-card__head {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--ems-sp-4);
     min-width: 0;
 }
@@ -248,9 +253,10 @@
 
 .dash-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
     justify-content: space-between;
-    gap: var(--ems-sp-4);
+    gap: var(--ems-sp-1) var(--ems-sp-4);
     min-width: 0;
     padding: var(--ems-sp-2) 0;
 }
@@ -270,14 +276,16 @@
     white-space: nowrap;
 }
 
+/* Meta KƏSİLMİR (2026-09-25): əvvəl «Davamiyyət və sərbəst iş (arx…» kimi
+   yarımçıq qalırdı — açar rəqəm/tarix ellipsis altında itirdi.  Sığmayanda
+   ikinci sətrə keçir. */
 .dash-row__meta {
-    flex: none;
-    max-width: 55%;
+    flex: 0 1 auto;
+    max-width: 100%;
     font-size: var(--ems-fs-sm);
     color: var(--ems-text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    text-align: right;
+    overflow-wrap: anywhere;
 }
 
 .dash-card__more {
@@ -348,11 +356,13 @@
     color: var(--ems-primary-800);
 }
 
-/* Fokus: layihə boyu NAZİK kontur — qalın göy halqa yoxdur (sahib, 2026-09-09). */
+/* Fokus: layihə boyu NAZİK neytral kontur + yumşaq kölgə — qalın göy halqa
+   yoxdur (sahib, 2026-09-09). */
 .dash-card__link:focus-visible,
 a.dash-link:focus-visible {
-    outline: 2px solid var(--ems-primary-500);
+    outline: 1px solid var(--ems-neutral-400);
     outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
 }
 
 /* ── 5. Keçid kartları (rəqəmsiz vidjetlər) ─────────────────────────────── */
@@ -462,9 +472,5 @@ a.dash-link:hover .dash-link__go {
 
     .dash-stat__value {
         font-size: var(--ems-fs-xl);
-    }
-
-    .dash-row__meta {
-        max-width: 50%;
     }
 }

@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}«Elektron jurnal» — İKİ variant, bir bənd:
+• tələbə: jurnal xülasəsi profil shell-inin sağ panelində açılır (sidebar qalır);
+• müəllim/admin: jurnal iş sahəsi ayrıca URL-də YENİ TABDA açılır (sidebar yoxdur).
+⚠️ Müəllim linkində `href="/jurnal/" target="_blank"` qonşuluğu testlə kilidlidir
+(`test_registrar_sections.test_sidebar_links_per_role`).{% endcomment %}
+{% if "my-journal" in allowed_sections %}
+<li class="sidebar-menu-item">
+    {% if role_capabilities.is_student %}
+    <a href="{{ profile_base_url }}?section=my-journal"
+       data-section="my-journal"
+       data-title="{% trans 'Elektron jurnal' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-journal' %}active{% endif %}">
+        <i class="fas fa-book-open sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Elektron jurnal" context "profile.sidebar" %}</span>
+    </a>
+    {% else %}
+    <a href="{% url 'registrar:journal_list' %}" target="_blank" rel="noopener"
+       class="sidebar-menu-link">
+        <i class="fas fa-book-open sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Elektron jurnal" context "profile.sidebar" %}</span>
+        <i class="fas fa-arrow-up-right-from-square sidebar-menu-ext" aria-hidden="true"></i>
+    </a>
+    {% endif %}
+</li>
+{% endif %}

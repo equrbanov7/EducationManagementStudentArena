@@ -1,0 +1,15 @@
+{% load i18n %}
+{# «Nəticələrim» — qapı `can_view_student_assignments` (bölmə açarı məzunda da var, amma menyu bəndi YOX — mövcud davranış). #}
+{% if can_view_student_assignments %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-results"
+       data-section="my-results"
+       data-title="{% trans 'my_results' context 'profile.section' %}"
+       data-source-url="{% url 'accounts:my_results' %}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-results' %}active{% endif %}">
+        <i class="fas fa-clipboard-check sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "my_results" context "profile.sidebar" %}</span>
+        {% if my_results_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_results_count">{{ my_results_count }}</span>{% endif %}
+    </a>
+</li>
+{% endif %}

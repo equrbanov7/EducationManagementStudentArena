@@ -1,0 +1,69 @@
+{% load i18n %}
+{% comment %}MÜƏLLİMİN DÜZ MENYUSU (2026-09-25). Qaydalar tələbə ağacı ilə eynidir
+(bax `compact/_student.html`): akkordeon yoxdur, bölmə adı sakit etiketdir,
+sıra iş tezliyinə görədir — gündəlik tədris (jurnal ↗, cədvəl, keçilmiş
+dərslər) → sillabus və suallar → imtahan və qiymətləndirmə → ünsiyyət → profil.
+
+YALNIZ `profile_shell.resolve_sidebar_layout` «teacher» qaytaranda seçilir:
+müəllimin əlavə (heyət) səlahiyyəti varsa — məs. dekan müavini, tyutor,
+tələbə idarəetməsi həvaləsi — ağac onu əhatə etmir və tam akkordeon
+göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəllimdə
+(`can_access_final_center`) görünür; o, bölmə açarı deyil, bayraqdır.{% endcomment %}
+{% include "accounts/profile/sidebar/_home_menu_item.html" %}
+
+{% if "my-journal" in allowed_sections or "my-schedule" in allowed_sections or "lessons-log" in allowed_sections or "my-workload" in allowed_sections or "academic-calendar" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="teaching">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionTeaching"><span class="sidebar-menu-group-title">{% trans "group_teaching" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionTeaching">
+        {% include "accounts/profile/sidebar/items/_my_journal.html" %}
+        {% include "accounts/profile/sidebar/items/_my_schedule.html" %}
+        {% include "accounts/profile/sidebar/items/_lessons_log.html" %}
+        {% include "accounts/profile/sidebar/items/_my_workload.html" %}
+        {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{% if "syllabus-list" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="syllabus">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionSyllabus"><span class="sidebar-menu-group-title">{% trans "Sillabus və sual" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionSyllabus">
+        {% include "accounts/profile/sidebar/items/_syllabus_list.html" %}
+        {% include "accounts/profile/sidebar/items/_question_bank.html" %}
+        {% include "accounts/profile/sidebar/items/_question_submissions.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{% if "my-exams" in allowed_sections or "my-courses" in allowed_sections or "pending-review" in allowed_sections or "review-results" in allowed_sections or role_capabilities.can_access_final_center %}
+<li class="sidebar-section" data-sidebar-section="assessment">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionAssessment"><span class="sidebar-menu-group-title">{% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionAssessment">
+        {% include "accounts/profile/sidebar/items/_my_exams.html" %}
+        {% include "accounts/profile/sidebar/items/_my_courses.html" %}
+        {% include "accounts/profile/sidebar/items/_pending_review.html" %}
+        {% include "accounts/profile/sidebar/items/_review_results.html" %}
+        {% include "accounts/profile/sidebar/items/_final_center.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{% if "notifications" in allowed_sections or "publish-notification" in allowed_sections or "applications" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="communication">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionCommunication"><span class="sidebar-menu-group-title">{% trans "Ünsiyyət" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionCommunication">
+        {% include "accounts/profile/sidebar/items/_notifications.html" %}
+        {% include "accounts/profile/sidebar/items/_publish_notification.html" %}
+        {% include "accounts/profile/sidebar/items/_applications.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{# «Profil məlumatları» şərtsizdir — bölmə həmişə göstərilir. #}
+<li class="sidebar-section" data-sidebar-section="profile">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionProfile"><span class="sidebar-menu-group-title">{% trans "title" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionProfile">
+        {% include "accounts/profile/sidebar/items/_profile_info.html" %}
+        {% include "accounts/profile/sidebar/items/_statistics.html" %}
+    </ul>
+</li>

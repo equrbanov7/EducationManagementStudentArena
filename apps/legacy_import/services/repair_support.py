@@ -25,15 +25,25 @@ Hər təmir əmrinin qapıları (hamısı bu moduldadır)
 * dəyişən hər sətir üçün ``core.audit.log_action`` yazılır;
 * HEÇ NƏ SİLİNMİR və mövcud legacy dəyər üzərinə yazılmır;
 * idempotentdir: ikinci icra 0 dəyişiklik göstərməlidir.
+
+RLS (2026-09-25)
+----------------
+Production-da tətbiq rolu ``NOSUPERUSER NOBYPASSRLS``-dir və registrar/ledger
+cədvəlləri ``FORCE ROW LEVEL SECURITY`` daşıyır; ``manage.py``-da isə
+middleware yoxdur, yəni tenant konteksti də yoxdur — ORM sorğuları SƏSSİZCƏ
+boş qayıdır (``scripts/ops/prod_perf_probe.py`` ilk icrada məhz bunu gördü).
+Ona görə ``build_context`` tenant + aktor GUC-larını özü qurur
+(:func:`establish_rls_scope`); superuser/test bazasında bu, davranışı dəyişmir.
 """
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 from django.apps import apps as django_apps
 from django.core.management.base import CommandError
-from django.db import connection
+from django.db import connection, transaction
 
 #: ``rehearsal_target_guard`` ilə eyni marker — atılabilən repetisiya bazası.
 REPAIR_TARGET_GUC = "emsarena.rehearsal_target"
@@ -146,12 +156,56 @@ def build_context(options) -> RepairContext:
     limit = int(options.get("limit") or 0)
     if limit < 0:
         raise CommandError("legacy_repair_limit_invalid")
-    return RepairContext(
+    context = RepairContext(
         organization=organization,
         actor=resolve_actor(organization, options.get("actor")),
         apply=apply_writes,
         limit=limit,
     )
+    establish_rls_scope(context)
+    return context
+
+
+def establish_rls_scope(context: RepairContext) -> None:
+    """Tenant + aktor RLS kontekstini qur (bypass YOX — yalnız bu tenant).
+
+    Atomic blok içində ``SET LOCAL`` (tranzaksiya sərhədi), xaricində sessiya
+    səviyyəsi olur — ``core.rls`` qaydası, ``rls_worker_atomic`` ilə eyni.
+    ``app.current_user_id`` aktorun özüdür: aktor-yoxlayan trigger-lər
+    (məs. ``registrar_guard_legacy_grade_fact_insert``) onu oxuyur.
+    """
+
+    if connection.vendor != "postgresql":
+        return
+    from core.rls import apply_rls_request_context
+
+    apply_rls_request_context(user_id=context.actor.pk, org_id=context.organization.pk)
+
+
+def disable_parallel_query(*, local: bool) -> None:
+    """Bu sessiya/tranzaksiya üçün paralel sorğunu söndür.
+
+    Ölçülüb (2026-09-25): Postgres konteynerlərinin ``/dev/shm``-i Docker defoltu
+    64 MB-dır (compose-da ``shm_size`` yoxdur); ``recompute_absence_hours``-un
+    toplu ``SUM`` sorğusu paralel planda «could not resize shared memory
+    segment … No space left on device» ilə yıxıldı.  Seriya plan indekslə eyni
+    sürətdədir, digər sessiyalara təsir etmir.
+    """
+
+    if connection.vendor != "postgresql":
+        return
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT set_config('max_parallel_workers_per_gather', '0', %s)", [bool(local)])
+
+
+@contextmanager
+def scoped_atomic(context: RepairContext):
+    """Bir yazı vahidi: öz tranzaksiyası + həmin tranzaksiyada lokal RLS konteksti."""
+
+    with transaction.atomic():
+        establish_rls_scope(context)
+        disable_parallel_query(local=True)
+        yield
 
 
 def render_table(headers, rows, *, max_rows: int = 40) -> str:
@@ -198,8 +252,11 @@ __all__ = [
     "assert_writable_target",
     "build_context",
     "database_is_disposable_target",
+    "disable_parallel_query",
+    "establish_rls_scope",
     "render_summary",
     "render_table",
     "resolve_actor",
     "resolve_organization",
+    "scoped_atomic",
 ]

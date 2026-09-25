@@ -13,7 +13,7 @@ Ayrıca fayldadır ki, `_sidebar.html` 600 sətirlik modul-ölçü qapısını k
        data-title="{% trans 'Ana səhifə' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'dashboard' %}active{% endif %}">
-        <i class="fas fa-house sidebar-menu-icon"></i>
+        <i class="fas fa-house sidebar-menu-icon" aria-hidden="true"></i>
         <span class="sidebar-menu-text">{% trans "Ana səhifə" context "profile.sidebar" %}</span>
     </a>
 </li>

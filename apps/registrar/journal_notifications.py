@@ -1,7 +1,7 @@
 """Jurnal hadisələri üçün tələbə bildirişləri.
 
 Müəllim jurnala yazanda tələbəyə in-app bildiriş gedir: q/b qeydi, seminar/lab
-balı, kollokvium balı, kurs işi balı, qayıb limitinə yaxınlaşma və kəsilmə.
+balı, kollokvium/midterm balı, kurs işi balı, qayıb limitinə yaxınlaşma və kəsilmə.
 Göndəriş ``transaction.on_commit`` ilə çağırılır (yazı uğurla commit olandan
 sonra) və eyni save daxilində tələbə-başına TƏK toplu bildiriş yaradılır —
 spam yoxdur. Asılılıq istiqaməti: registrar → notifications (dövr yaratmır;
@@ -16,7 +16,7 @@ from django.utils.translation import pgettext
 # Hadisə növləri (send_journal_events payload-ları).
 EVENT_ABSENT = "absent"  # q/b yazıldı
 EVENT_SCORE = "score"  # seminar/lab balı
-EVENT_KOLLOKVIUM = "kollokvium"  # kollokvium balı
+EVENT_KOLLOKVIUM = "kollokvium"  # kollokvium / midterm balı
 EVENT_COURSEWORK = "coursework"  # kurs işi balı
 EVENT_LIMIT_WARNING = "limit_warning"  # limitin 75%-inə çatdı
 EVENT_BARRED = "barred"  # limit keçildi — imtahana buraxılmır
@@ -30,7 +30,12 @@ def _line_for(event) -> str:
     if kind == EVENT_SCORE:
         return pgettext("registrar.notify", "Dərs balı yazıldı: %(score)s") % {"score": event.get("score", "")}
     if kind == EVENT_KOLLOKVIUM:
-        return pgettext("registrar.notify", "Kollokvium balı yazıldı: %(score)s") % {"score": event.get("score", "")}
+        # Komponentin adı: «Midterm» (2026/2027-dən) və ya «Kollokvium 2» (keçmiş dövrlər).
+        label = event.get("label") or pgettext("registrar.notify", "Kollokvium")
+        return pgettext("registrar.notify", "%(label)s balı yazıldı: %(score)s") % {
+            "label": label,
+            "score": event.get("score", ""),
+        }
     if kind == EVENT_COURSEWORK:
         return pgettext("registrar.notify", "Kurs işi balı yazıldı: %(score)s") % {"score": event.get("score", "")}
     if kind == EVENT_LIMIT_WARNING:

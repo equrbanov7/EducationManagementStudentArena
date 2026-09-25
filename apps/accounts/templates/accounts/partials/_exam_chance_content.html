@@ -17,7 +17,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
 
 <link rel="stylesheet" href="{% static 'accounts/css/exam_chance.css' %}?v=20260910-1">
 
-{% trans "Seçilmiş final/kollokvium imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür." context "accounts.exam_chance" as exch_subtitle %}
+{% trans "Seçilmiş final/midterm imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında yenidən görünür." context "accounts.exam_chance" as exch_subtitle %}
 
 <div class="exch">
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=exch_subtitle %}
@@ -115,7 +115,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
   </form>
 
   {% if not s.exams %}
-    {% trans "Bu şərtlərə uyğun final/kollokvium imtahanı tapılmadı." context "accounts.exam_chance" as exch_no_exam %}
+    {% trans "Bu şərtlərə uyğun final/midterm imtahanı tapılmadı." context "accounts.exam_chance" as exch_no_exam %}
     {% trans "Süzgəcləri genişləndirin — tədris ilini, semestri və ya fakültəni dəyişin." context "accounts.exam_chance" as exch_no_exam_body %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=exch_no_exam state_body=exch_no_exam_body %}
   {% else %}
@@ -138,7 +138,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
             <option value="">{% trans "İmtahanı seçin…" context "accounts.exam_chance" %}</option>
             {% for exam in s.exams %}
             <option value="{{ exam.pk }}" {% if s.selected_exam_id == exam.pk|stringformat:'s' %}selected{% endif %}>
-              {{ exam.title }} — {% if exam.exam_type_extended == 'final' %}{% trans "Final" context "accounts.exam_chance" %}{% else %}{% trans "Kollokvium" context "accounts.exam_chance" %}{% endif %}{% if exam.start_datetime %} · {{ exam.start_datetime|date:"d.m.Y H:i" }}{% endif %}
+              {{ exam.title }} — {% if exam.exam_type_extended == 'final' %}{% trans "Final" context "accounts.exam_chance" %}{% else %}{% trans "Midterm" context "accounts.exam_chance" %}{% endif %}{% if exam.start_datetime %} · {{ exam.start_datetime|date:"d.m.Y H:i" }}{% endif %}
             </option>
             {% endfor %}
           </select>
@@ -188,7 +188,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
       <div class="exch-field--full">
         <div class="ems-msg ems-msg--info exch-note">
           <i class="fas fa-circle-info ems-msg__icon" aria-hidden="true"></i>
-          <div>{% trans "Şans veriləndə: cəhd limiti seçilən qədər artır, final/kollokvium üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır." context "accounts.exam_chance" %}</div>
+          <div>{% trans "Şans veriləndə: cəhd limiti seçilən qədər artır, final/midterm üçün YENİ fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün əməliyyat audit jurnalına yazılır." context "accounts.exam_chance" %}</div>
         </div>
         <div class="exch-actions">
           <button type="submit" class="ems-btn ems-btn--primary"><i class="fas fa-rotate-right" aria-hidden="true"></i> {% trans "Şans ver" context "accounts.exam_chance" %}</button>
@@ -226,7 +226,7 @@ boş vəziyyət `ems-state`. CSP: inline yoxdur.
             <td>
               {{ grant.exam.title|truncatechars:44 }}
               {% if grant.exam.exam_type_extended == 'final' %}<span class="ems-badge ems-badge--danger">{% trans "Final" context "accounts.exam_chance" %}</span>
-              {% elif grant.exam.exam_type_extended == 'midterm' %}<span class="ems-badge ems-badge--warning">{% trans "Kollokvium" context "accounts.exam_chance" %}</span>{% endif %}
+              {% elif grant.exam.exam_type_extended == 'midterm' %}<span class="ems-badge ems-badge--warning">{% trans "Midterm" context "accounts.exam_chance" %}</span>{% endif %}
             </td>
             <td class="ems-table__num"><span class="ems-badge ems-badge--success">+{{ grant.extra_attempts }}</span></td>
             <td>{{ grant.granted_by.get_full_name|default:grant.granted_by.username|default:"—" }}</td>

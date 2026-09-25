@@ -19,11 +19,8 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
 {% if "student-admission" in allowed_sections or "student-registry" in allowed_sections or "people-students" in allowed_sections or "people-teachers" in allowed_sections or "academic-records" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="people">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|student-admission|student-registry|people-students|people-teachers|academic-records|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Tələbə və heyət" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Tələbə və heyət" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-users" %}
         <ul class="sidebar-menu-group-items">
             {% if "student-admission" in allowed_sections %}
             <li class="sidebar-menu-item">
@@ -32,7 +29,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbə qəbulu' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-admission' %}active{% endif %}">
-                    <i class="fas fa-user-plus sidebar-menu-icon"></i>
+                    <i class="fas fa-user-plus sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbə qəbulu" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -44,7 +41,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-registry' %}active{% endif %}">
-                    <i class="fas fa-address-book sidebar-menu-icon"></i>
+                    <i class="fas fa-address-book sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbə reyestri" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -56,7 +53,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbələr' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-students' %}active{% endif %}">
-                    <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+                    <i class="fas fa-user-graduate sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbələr" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -68,7 +65,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Müəllimlər' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-teachers' %}active{% endif %}">
-                    <i class="fas fa-chalkboard-user sidebar-menu-icon"></i>
+                    <i class="fas fa-chalkboard-user sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Müəllimlər" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -80,7 +77,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Akademik qeydlər' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
-                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <i class="fas fa-graduation-cap sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
                 </a>
             </li>

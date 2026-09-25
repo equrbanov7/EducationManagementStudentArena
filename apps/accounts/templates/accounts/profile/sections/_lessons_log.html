@@ -19,7 +19,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
 <section class="profile-section-panel profile-section--lessons-log {% if active_section == 'lessons-log' %}is-active{% endif %}"
          data-profile-section-panel="lessons-log"
          data-source-url="{{ profile_base_url }}?section=lessons-log">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log.css' %}?v=20260908-filters">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log.css' %}?v=20260925-unrec">
 
     {% if not sec.has_access %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=sec.state_title state_body=sec.state_body state_icon="fa-circle-info" %}
@@ -33,6 +33,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
     {% include "partials/ems_ui/_filter_bar.html" with filter_section="lessons-log" filter_prefix=sec.prefix filter_fields=sec.filters.fields filter_applied=sec.filters.applied filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
 
     <div class="llog-body" data-ems-filter-target>
+    {% include "accounts/profile/sections/_lessons_log_unrecorded.html" with un=sec.unrecorded is_supervisor=sec.is_supervisor %}
     {% if not sec.days %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_title=sec.state_title state_body=sec.state_body state_icon="fa-calendar-xmark" %}
     {% else %}
@@ -73,7 +74,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
                                 {% if row.has_topic %}{{ row.topic }}
                                 {% else %}<span class="llog-notopic">{% trans "Mövzu yazılmayıb" context "accounts.lessons_log" %}</span>{% endif %}
                             </td>
-                            <td>{{ row.kind_label }}</td>
+                            <td>{{ row.kind_label }}{% if row.off_schedule %} <span class="ems-badge ems-badge--warning llog-offsched" title="{{ row.off_schedule_reason }}"><i class="fas fa-flag" aria-hidden="true"></i> {% trans "cədvəldən kənar" context "accounts.lessons_log" %}</span>{% endif %}</td>
                             <td class="ems-table__num">{{ row.attendance_label }}{% if row.excused %} <span class="llog-excused" title="{% trans 'Üzrlü qayıb' context 'accounts.lessons_log' %}">+{{ row.excused }}</span>{% endif %}</td>
                             <td class="ems-table__num">{{ row.hours }}</td>
                             <td>{% ems_status_badge "journal_note" row.note %}</td>

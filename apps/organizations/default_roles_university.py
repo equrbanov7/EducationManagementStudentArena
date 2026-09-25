@@ -4,6 +4,7 @@ modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyiş
 from core.constants import RoleScopeType
 
 from .default_roles_oversight import OVERSIGHT_ROLES
+from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
 from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
 from .default_roles_stage2 import apply_stage2_grants
@@ -536,7 +537,8 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
 
 # 2026-09-06 əlavələri — izahlar öz modullarındadır (rim / vice_dean / oversight).
-UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES)
+# 2026-09-25: Keyfiyyətə nəzarət şöbəsi (anonim sorğu) — bax `default_roles_quality`.
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES + QUALITY_CONTROL_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 
@@ -547,3 +549,7 @@ apply_stage2_grants(UNIVERSITY_ROLES)
 
 # Mərhələ 4: mövcud rollara `workload.*` zəncirinin qalan halqaları (ayrı xəritə).
 apply_stage4_grants(UNIVERSITY_ROLES)
+
+# Anonim sorğu (2026-09-25): mövcud rollara `survey.results.view` (kafedra müdiri,
+# tədris şöbəsi, prorektor). Mövcud tenantlar: miqrasiya 0054.
+apply_quality_control_grants(UNIVERSITY_ROLES)

@@ -1,0 +1,33 @@
+{% load i18n static survey_cabinet %}
+{% comment %}Tələbənin «Anonim sorğu» kabinet bölməsi — status + /sorgu/ keçidi (sıfır sorğu:
+vəziyyət qapı middleware-indən gəlir).{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260925-1">
+{% survey_student_panel as sp %}
+<div class="svc">
+    {% if sp.available %}
+    <div class="svc-card{% if sp.pending %} svc-card--pending{% else %} svc-card--done{% endif %}">
+        <div class="svc-card__icon" aria-hidden="true">
+            <i class="fas {% if sp.pending %}fa-clipboard-question{% else %}fa-circle-check{% endif %}"></i>
+        </div>
+        <div class="svc-card__body">
+            {% if sp.pending %}
+            <h2 class="svc-card__title">{% blocktrans trimmed with counter=sp.pending context "surveys.cabinet" %}Gözləyən qiymətləndirmə: {{ counter }}{% endblocktrans %}</h2>
+            <p class="svc-card__text">{% trans "Semestr sonu anonim sorğusu: müəllimlərinizi qiymətləndirin və tədrisin yaxşılaşması üçün təklif yazın." context "surveys.cabinet" %}</p>
+            {% else %}
+            <h2 class="svc-card__title">{% trans "Sorğunu tam doldurmusunuz" context "surveys.cabinet" %}</h2>
+            <p class="svc-card__text">{% trans "Təşəkkür edirik! Cavablarınız anonim şəkildə qeydə alınıb." context "surveys.cabinet" %}</p>
+            {% endif %}
+            <p class="svc-card__meta">
+                {% blocktrans trimmed with done=sp.done total=sp.total context "surveys.cabinet" %}{{ done }} / {{ total }} tamamlanıb{% endblocktrans %}
+                {% if sp.closes_on %} · {% blocktrans trimmed with day=sp.closes_on|date:"d.m.Y" context "surveys.cabinet" %}son tarix {{ day }}{% endblocktrans %}{% endif %}
+            </p>
+            <progress class="svc-meter" value="{{ sp.done }}" max="{{ sp.total }}">{{ sp.done }} / {{ sp.total }}</progress>
+        </div>
+        {% if sp.pending %}
+        <a class="svc-btn svc-btn--primary" href="{{ sp.survey_url }}">{% trans "Sorğunu doldur" context "surveys.cabinet" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="svc-empty">{% trans "Hazırda sizin üçün açıq sorğu yoxdur." context "surveys.cabinet" %}</p>
+    {% endif %}
+</div>
