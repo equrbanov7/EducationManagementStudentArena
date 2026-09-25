@@ -64,7 +64,11 @@ class PublishableTeachersTest(SimpleTestCase):
         rows = [_row(1, 9), _row(2, 4), _row(3, 1, department="B")]
         self.assertEqual(_publishable(rows, 3), {1})
         # Müəllimsiz cavablar təşkilat qalığıdır.
-        rows = [_row(1, 9, department="A", faculty="F"), _row(2, 7, department="B", faculty="G"), _row(None, 1, None, None)]
+        rows = [
+            _row(1, 9, department="A", faculty="F"),
+            _row(2, 7, department="B", faculty="G"),
+            _row(None, 1, None, None),
+        ]
         self.assertEqual(_publishable(rows, 3), {1})
 
     def test_clean_org_publishes_every_candidate(self):
@@ -122,11 +126,19 @@ class PeriodTest(SimpleTestCase):
     def test_options_and_labels(self):
         values = [option["value"] for option in period_options(self.rows)]
         self.assertEqual(values[:3], ["", "all", "y:2025/2026"])
-        self.assertEqual(campaign_label({"period_name": "2026/2027 Payız", "academic_year": "2026/2027"}), "2026/2027 Payız")
+        self.assertEqual(
+            campaign_label({"period_name": "2026/2027 Payız", "academic_year": "2026/2027"}), "2026/2027 Payız"
+        )
 
     def test_parse_query_validates_values(self):
         query = parse_query(
-            {"er_department": "not-a-uuid", "er_teacher": "12", "er_tab": "nope", "er_sort": "-bogus", "er_q": "x" * 500},
+            {
+                "er_department": "not-a-uuid",
+                "er_teacher": "12",
+                "er_tab": "nope",
+                "er_sort": "-bogus",
+                "er_q": "x" * 500,
+            },
             self.rows,
         )
         self.assertIsNone(query.filters.department_id)
