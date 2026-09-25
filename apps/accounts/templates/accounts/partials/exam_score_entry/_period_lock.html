@@ -1,0 +1,36 @@
+{% load i18n %}
+{% comment %}Bitmiş dövr kilidi (2026-09-26, sahib: «köhnə ilin balını dəyişmək olmamalıdır,
+ancaq RİM rəhbəri tərəfindən təqdimat əsasında … jurnalda necə «düzəliş aktivləşdir»
+düyməsi var, burada da elə olsun»).
+
+· kilidli + rejim aktiv deyil → xəbərdarlıq; RİM rəhbəri / superadmin üçün
+  «Düzəliş rejimini aktivləşdir» (jurnalın `?correct=1` güzgüsü: `?ese_correct=1`);
+· rejim aktiv → banner + «Düzəliş rejimindən çıx (kilidlə)».
+Server qapısı `apps/registrar/exam_score_period_lock.py`-dadır — bu yalnız UX-dir.{% endcomment %}
+{% if s.period_locked %}
+<div class="ems-msg {% if s.correction_mode %}ems-msg--warning{% else %}ems-msg--info{% endif %} ese-msg ese-lock{% if s.correction_mode %} is-correcting{% endif %}" data-ese-period-lock role="status">
+  <i class="fas {% if s.correction_mode %}fa-lock-open{% else %}fa-lock{% endif %} ems-msg__icon" aria-hidden="true"></i>
+  <div class="ese-lock__text">
+    {% if s.correction_mode %}
+      <b>{% trans "Düzəliş rejimi aktivdir" context "registrar.exam_score_entry" %}</b>
+      <span>{% trans "Bitmiş dövrün balları yalnız təqdimat əsasında yazılır — hər yazı üçün səbəb, qeyd və skan edilmiş sənəd məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
+    {% else %}
+      <b>{% trans "Bitmiş dövr — ballar kilidlidir" context "registrar.exam_score_entry" %}</b>
+      <span>{% trans "Bu semestr başa çatıb: ilk daxiletmə, dəyişiklik və fayldan yükləmə bağlıdır. Düzəliş yalnız RİM rəhbəri tərəfindən təqdimat əsasında mümkündür." context "registrar.exam_score_entry" %}</span>
+    {% endif %}
+  </div>
+  {% if s.can_unlock_period %}
+  <div class="ese-lock__actions">
+    {% if s.correction_mode %}
+    <a class="ems-btn ems-btn--sm" href="{{ s.correction_off_url }}" data-ese-nav data-ese-correction-off>
+      <i class="fas fa-lock" aria-hidden="true"></i> {% trans "Düzəliş rejimindən çıx (kilidlə)" context "registrar.exam_score_entry" %}
+    </a>
+    {% else %}
+    <a class="ems-btn ems-btn--sm ems-btn--primary" href="{{ s.correction_on_url }}" data-ese-nav data-ese-correction-on>
+      <i class="fas fa-lock-open" aria-hidden="true"></i> {% trans "Düzəliş rejimini aktivləşdir" context "registrar.exam_score_entry" %}
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endif %}
