@@ -29,6 +29,11 @@ on:
         required: false
         type: boolean
         default: true
+      live_exam_domain:
+        description: "LIVE_EXAM_PUBLIC_HOST=<domen> (canlı imtahan QR/linkində IP görünməsin)"
+        required: false
+        type: boolean
+        default: true
       confirm:
         description: "apply üçün APPLY yazın"
         required: false
@@ -54,6 +59,7 @@ jobs:
       DOMAIN: ${{ inputs.domain }}
       ENFORCE: ${{ inputs.enforce_zone && 'True' || 'False' }}
       CONFIRM: ${{ inputs.confirm }}
+      LIVE_DOMAIN: ${{ inputs.live_exam_domain && 'yes' || 'no' }}
     steps:
       - name: 🔎 Giriş dəyərləri
         run: |
@@ -164,6 +170,7 @@ jobs:
           setkv SITE_URL "https://$DOMAIN"
           setkv NETWORK_ZONE_TRUST_HEADER True
           setkv NETWORK_ZONE_ENFORCED "$ENFORCE"
+          if [ "$LIVE_DOMAIN" = "yes" ]; then setkv LIVE_EXAM_PUBLIC_HOST "$DOMAIN"; fi
           chmod 600 .env
 
       - name: 🔁 app/celery yenidən yarat (.env oxunsun)
@@ -193,5 +200,5 @@ jobs:
           probe /jurnal/ "302"
           probe /health/ "200"
           docker compose -f docker-compose.prod.yml exec -T --index 1 app python manage.py shell -c \
-            "from django.conf import settings as s; print('ALLOWED_HOSTS', s.ALLOWED_HOSTS); print('ZONE', s.NETWORK_ZONE_ENFORCED, s.NETWORK_ZONE_TRUST_HEADER); print('SITE_URL', s.SITE_URL)"
+            "from django.conf import settings as s; print('ALLOWED_HOSTS', s.ALLOWED_HOSTS); print('ZONE', s.NETWORK_ZONE_ENFORCED, s.NETWORK_ZONE_TRUST_HEADER); print('SITE_URL', s.SITE_URL, 'LIVE', s.LIVE_EXAM_PUBLIC_HOST)"
           exit $fail
