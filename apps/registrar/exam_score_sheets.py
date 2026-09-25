@@ -382,8 +382,11 @@ def latest_sheet_defaults(sheets) -> dict:
         "invigilator_id": last.get("invigilator_id", ""),
         "invigilator_name": last["invigilator_name"],
         "protocol_number": last["protocol_number"],
-        "question_count": last.get("question_count", grid["question_count"]),
-        "question_max": last.get("question_max", grid["question_max"]),
+        # Sahib 2026-09-26: «sual sayı default olaraq 5 olmalıdır, balda 10». Sonuncu vərəqin
+        # şəbəkəsi yalnız DOLUDURSA miras qalır — «0 — yalnız yekun bal» (köhnə vərəq) və ya
+        # boş dəyər növbəti köçürmənin defaultunu sıfırlamasın.
+        "question_count": last.get("question_count") or grid["question_count"],
+        "question_max": last.get("question_max") or grid["question_max"],
     }
 
 
