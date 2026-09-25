@@ -2,8 +2,10 @@
 
 Qərar keçidi (dry-run ilə apply EYNİ yolu gedir) plan sətirlərini
 ``repair_enrollments_specs.ORDER`` sırasında təsnif edir və plan pk → canlı pk
-xəritəsini qurur; yazı keçidi yalnız ``create`` qərarlarını dəstə-dəstə,
-hər dəstə öz tranzaksiyasında və RLS kontekstində əlavə edir.
+xəritəsini qurur; yazı keçidi yalnız ``create`` qərarlarını dəstə-dəstə əlavə edir —
+**BÜTÜN tətbiq BİR tranzaksiyadır** (RLS konteksti bir dəfə; dəstələr savepoint-dir):
+hər hansı xəta olarsa HEÇ NƏ qalmır (2026-09-25 insidenti: dəstə-dəstə commit yarımçıq
+vəziyyət qoymuşdu).
 
 Canlı qapılar (plan nüsxədən qurulub, canlı data dəyişmiş ola bilər):
 
@@ -17,6 +19,11 @@ Canlı qapılar (plan nüsxədən qurulub, canlı data dəyişmiş ola bilər):
   (tələbə, açılış) üçün BAŞQA yazılış varsa sətir və uşaqları atlanır;
 * dərs — tarix kəsimdən əvvəl; müəllim ``grade.input``-lu deyilsə boş;
 * plandan kənar FK hədəfi (mövcud dərs/komponent/açılış) canlıda olmalıdır;
+* HƏR FK-ya bənzər sahə (qrup, fənn, dövr, mənbə qrup, müəllim, tələbə …) canlıda
+  eyni təşkilatda yoxlanılır — açıq ``skip_*``/``null_*`` qərarı, DB xətası YOX
+  (``repair_enrollments_refs``);
+* təkrar icra: bu planın ÖZ açılışları (planın pk-sı + bu sha256-lı ``create`` auditi)
+  ledger-siz də «legacy» sayılır — yarımçıq vəziyyətin üzərinə tətbiq tamamlanır;
 * xana — dərs və yazılış EYNİ açılışdadır (PG ``lesson_mark_coherence``);
 * xana/bal/yekun/fakt — mövcuddursa ÜSTÜNDƏN YAZILMIR (``skip_live_conflict``).
 
@@ -34,11 +41,13 @@ from collections import Counter
 from dataclasses import dataclass, field
 
 from django.apps import apps as django_apps
+from django.db import transaction
 
 from apps.legacy_import.models import LegacyEntityMap
 
 from .rehearsal_journal_offerings_targets import COURSE_OFFERING_ENTITY_TYPE
 from .repair_enrollments_plan import SUMMARY_RESOURCE_TYPE, summary_reason
+from .repair_enrollments_refs import LiveReferences, plan_own_offerings
 from .repair_enrollments_replay import AUDIT_REASON, REPAIR_KEY
 from .repair_enrollments_specs import (
     ACTOR_FIELDS,
@@ -52,7 +61,7 @@ from .repair_enrollments_specs import (
     natural_key,
     same_values,
 )
-from .repair_lesson_recovery_apply import LEGACY_CUTOFF, grade_input_users, recompute_and_audit_absence, validate_header
+from .repair_lesson_recovery_apply import LEGACY_CUTOFF, recompute_and_audit_absence, validate_header
 from .repair_plan_file import RepairPlanError
 from .repair_support import scoped_atomic
 
@@ -85,6 +94,8 @@ class Decision:
 class Decided:
     decisions: list = field(default_factory=list)
     counters: Counter = field(default_factory=Counter)
+    #: plandan kənar, canlıda (eyni təşkilatda) TAPILMAYAN FK hədəfləri: növ → pk-lar (diaqnostika)
+    missing_external: dict = field(default_factory=dict)
 
     def rows(self):
         grouped = Counter((decision.kind.split(".")[-1], decision.action) for decision in self.decisions)
@@ -98,12 +109,14 @@ def _chunks(values, size=_CHUNK):
 
 
 class OfferingIndex:
-    """Canlı açılış → legacy-dirmi; bu planın YENİ açılışları ledger tələb etmir."""
+    """Canlı açılış → legacy-dirmi; bu planın YENİ və ÖZ (əvvəlki icrada yazılmış) açılışları ledger tələb etmir."""
 
-    def __init__(self, organization) -> None:
+    def __init__(self, organization, *, plan_own=()) -> None:
+        self.organization = organization
         self._organization = organization
         self._cache: dict[str, bool] = {}
         self.planned_new: set[str] = set()
+        self.plan_own: set[str] = {str(pk) for pk in plan_own}
 
     def is_legacy(self, offering_pk: str) -> bool:
         offering_pk = str(offering_pk)
@@ -120,11 +133,15 @@ class OfferingIndex:
                 target_pk=offering_pk,
             ).exists()
             self._cache[offering_pk] = end_date is not None and end_date < LEGACY_CUTOFF and migrated
-        return self._cache[offering_pk] or offering_pk in self.planned_new
+        return self._cache[offering_pk] or offering_pk in self.planned_new or offering_pk in self.plan_own
 
 
-def _period_is_legacy(period_pk) -> bool:
-    period = django_apps.get_model("organizations", "AcademicPeriod").objects.filter(pk=period_pk).first()
+def _period_is_legacy(organization, period_pk) -> bool:
+    period = (
+        django_apps.get_model("organizations", "AcademicPeriod")
+        .objects.filter(organization=organization, pk=period_pk)
+        .first()
+    )
     return period is not None and period.end_date < LEGACY_CUTOFF
 
 
@@ -168,6 +185,7 @@ class _Resolver:
         self.organization = organization
         self.pk_map: dict[tuple[str, str], str | None] = {}
         self.offering_of: dict[tuple[str, str], str] = {}
+        self.missing: dict[str, set] = {}
 
     def resolve(self, kind, pk):
         return self.pk_map.get((kind, str(pk)), "__external__")
@@ -179,7 +197,9 @@ class _Resolver:
             if "offering_id" in row:
                 self.offering_of[(kind, pk)] = str(row["offering_id"])
         for pk in missing:
-            self.pk_map.setdefault((kind, str(pk)), None)
+            if (kind, str(pk)) not in self.pk_map:
+                self.pk_map[(kind, str(pk))] = None
+                self.missing.setdefault(kind, set()).add(str(pk))
 
 
 def check_prerequisites(organization, header: dict) -> None:
@@ -219,21 +239,14 @@ def decide(organization, plan, *, limit: int = 0) -> Decided:
     check_fields(plan)
     decided = Decided()
     resolver = _Resolver(organization)
-    offerings = OfferingIndex(organization)
+    offerings = OfferingIndex(
+        organization,
+        plan_own=plan_own_offerings(organization, plan.sha256, reason=f"{AUDIT_REASON}: courseoffering"),
+    )
+    references = LiveReferences(organization, plan)
     included = sorted(record["pk"] for record in plan.of(ENR))
     included = set(included[:limit] if limit else included)
     needed_offerings = {record["fields"]["offering_id"] for record in plan.of(ENR) if record["pk"] in included}
-    students = set(
-        django_apps.get_model("organizations", "Membership")
-        .objects.filter(
-            organization=organization,
-            user_id__in=sorted({record["fields"]["student_id"] for record in plan.of(ENR)}),
-            is_active=True,
-            role__is_active=True,
-            user__is_active=True,
-        )
-        .values_list("user_id", flat=True)
-    )
     for kind in ORDER:
         spec = SPECS[kind]
         records = plan.of(kind)
@@ -280,9 +293,16 @@ def decide(organization, plan, *, limit: int = 0) -> Decided:
                 included=included,
                 needed_offerings=needed_offerings,
                 offerings=offerings,
-                students=students,
+                students=references.students,
                 resolver=resolver,
             )
+            if action == "create":
+                missing, nulls = references.check(kind, values)
+                if missing:
+                    action, live_pk = missing, ""
+                for name in nulls if not missing else ():
+                    values[name] = None
+                    decided.counters[f"{kind.split('.')[-1]}:null_{name}"] += 1
             resolver.pk_map[(kind, record["pk"])] = live_pk or None
             if live_pk and values.get("offering_id"):
                 resolver.offering_of[(kind, live_pk)] = str(values["offering_id"])
@@ -290,6 +310,7 @@ def decide(organization, plan, *, limit: int = 0) -> Decided:
                 offerings.planned_new.add(record["pk"])
             decided.decisions.append(Decision(kind=kind, record=record, values=values, action=action, live_pk=live_pk))
             decided.counters[f"{kind.split('.')[-1]}:{action}"] += 1
+    decided.missing_external = {kind: sorted(pks) for kind, pks in sorted(resolver.missing.items())}
     return decided
 
 
@@ -318,7 +339,8 @@ def _classify(
             return "skip_enrollment_exists", ""
         return ("already_present", str(live["id"])) if same_values(spec, live, values) else ("skip_live_conflict", "")
     if kind == CO:
-        return ("create", record["pk"]) if _period_is_legacy(values["period_id"]) else ("skip_offering_not_legacy", "")
+        legacy = _period_is_legacy(offerings.organization, values["period_id"])
+        return ("create", record["pk"]) if legacy else ("skip_offering_not_legacy", "")
     if kind in (ENR, LESSON) and not offerings.is_legacy(values["offering_id"]):
         return "skip_offering_not_legacy", ""
     if kind == ENR and values["student_id"] not in students:
@@ -335,7 +357,9 @@ def _classify(
     return "create", record["pk"]
 
 
-def _row(kind, decision, *, organization, actor, instructors):
+def _row(kind, decision, *, organization, actor):
+    """Qərar dəyərləri (NULL-lar ``decide``-da verilib) → model sətri; aktor/istifadəçi sahələri."""
+
     spec = SPECS[kind]
     values = coerce(spec.model, decision.values)
     for name in list(values):
@@ -343,47 +367,60 @@ def _row(kind, decision, *, organization, actor, instructors):
             values[name] = actor.pk if values[name] is not None else None
         elif name in NULL_USER_FIELDS:
             values[name] = None
-        elif name == "instructor_id" and values[name] is not None and values[name] not in instructors:
-            values[name] = None
     return spec.model(pk=decision.record["pk"], organization=organization, **values)
 
 
-def apply_decided(context, decided: Decided, *, plan, plan_sha256: str) -> Counter:
+def _write_kind(context, kind, batch, *, plan_sha256: str) -> int:
+    """Bir modelin ``create`` qərarları — dəstə-dəstə (hər dəstə SAVEPOINT, commit yox)."""
+
     from core.audit import log_action
     from core.constants import AuditAction
 
     organization, actor = context.organization, context.actor
-    instructors = grade_input_users(
-        organization, [d.values.get("instructor_id") for d in decided.decisions if d.values.get("instructor_id")]
-    )
+    for chunk in _chunks(batch, _BATCH):
+        with transaction.atomic():
+            rows = [_row(kind, d, organization=organization, actor=actor) for d in chunk]
+            SPECS[kind].model.objects.bulk_create(rows)
+            if kind not in AUDITED:
+                continue
+            for decision, row in zip(chunk, rows):
+                log_action(
+                    action=AuditAction.CREATE,
+                    user=actor,
+                    organization=organization,
+                    obj=row,
+                    reason=f"{AUDIT_REASON}: {kind.split('.')[-1]}",
+                    new_values={
+                        "plan_sha256": plan_sha256,
+                        "restore_key": decision.record.get("restore_key", ""),
+                        **(
+                            {"restore_keys": decision.record["restore_keys"]}
+                            if len(decision.record.get("restore_keys") or ()) > 1
+                            else {}
+                        ),
+                        **{k: v for k, v in decision.values.items() if k.endswith("_id") or k == "date"},
+                    },
+                )
+    return len(batch)
+
+
+def apply_decided(context, decided: Decided, *, plan, plan_sha256: str) -> Counter:
+    """HƏR ŞEY və ya HEÇ NƏ: bir xarici tranzaksiya (RLS bir dəfə), dəstələr savepoint."""
+
+    with scoped_atomic(context):
+        return _apply_all(context, decided, plan=plan, plan_sha256=plan_sha256)
+
+
+def _apply_all(context, decided: Decided, *, plan, plan_sha256: str) -> Counter:
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    organization, actor = context.organization, context.actor
     written: Counter = Counter()
     created_enrollments: list[str] = []
     for kind in ORDER:
         batch = [d for d in decided.decisions if d.kind == kind and d.action == "create"]
-        for chunk in _chunks(batch, _BATCH):
-            with scoped_atomic(context):
-                rows = [_row(kind, d, organization=organization, actor=actor, instructors=instructors) for d in chunk]
-                SPECS[kind].model.objects.bulk_create(rows)
-                if kind in AUDITED:
-                    for decision, row in zip(chunk, rows):
-                        log_action(
-                            action=AuditAction.CREATE,
-                            user=actor,
-                            organization=organization,
-                            obj=row,
-                            reason=f"{AUDIT_REASON}: {kind.split('.')[-1]}",
-                            new_values={
-                                "plan_sha256": plan_sha256,
-                                "restore_key": decision.record.get("restore_key", ""),
-                                **(
-                                    {"restore_keys": decision.record["restore_keys"]}
-                                    if len(decision.record.get("restore_keys") or ()) > 1
-                                    else {}
-                                ),
-                                **{k: v for k, v in decision.values.items() if k.endswith("_id") or k == "date"},
-                            },
-                        )
-            written[kind.split(".")[-1]] += len(chunk)
+        written[kind.split(".")[-1]] += _write_kind(context, kind, batch, plan_sha256=plan_sha256)
         if kind == ENR:
             created_enrollments = [d.record["pk"] for d in batch]
     written["absence_hours"] = recompute_and_audit_absence(
@@ -391,7 +428,7 @@ def apply_decided(context, decided: Decided, *, plan, plan_sha256: str) -> Count
     )
     if not any(written.values()):
         return written
-    with scoped_atomic(context):
+    with transaction.atomic():
         log_action(
             action=AuditAction.UPDATE,
             user=actor,
