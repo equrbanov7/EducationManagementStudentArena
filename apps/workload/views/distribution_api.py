@@ -12,6 +12,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from core.http_ids import parse_uuid
+from core.search_text import tolerant_q
 from core.write_rate_limit import score_write_rate_limited
 
 from ..constants import TaskStatus
@@ -191,8 +192,9 @@ def options(request) -> JsonResponse:
     )
     search = (request.GET.get("q") or "").strip()
     subjects = Subject.objects.filter(organization=organization, is_active=True)
-    if search:
-        subjects = subjects.filter(name__icontains=search)
+    search_q = tolerant_q(search, ("name",))
+    if search_q is not None:
+        subjects = subjects.filter(search_q)
     return JsonResponse(
         {
             "ok": True,

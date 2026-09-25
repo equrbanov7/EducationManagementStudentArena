@@ -12,11 +12,12 @@ from __future__ import annotations
 from collections import defaultdict
 
 from django.apps import apps as django_apps
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 
 from ..models import OrgUnit
 from ..views import _can_manage_organization, _has_org_permission, _visible_units_queryset
@@ -177,8 +178,9 @@ def _apply_common_filters(queryset, *, search, head, with_head_ids=None):
     rəhbər dəsti ilə tətbiq olunur (`_role_heads`): rəhbər rol üzvlüyü ilə də
     verilə bilər, FK isə boş qalır — əks halda süzgəc KPI ilə ziddiyyət yaradır.
     """
-    if search:
-        queryset = queryset.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    search_q = tolerant_q(search, ("name",), compact_fields=("code",))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     if with_head_ids is None:
         return queryset
     if head == "with":

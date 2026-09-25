@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -22,6 +21,7 @@ from django.views.decorators.http import require_POST
 from apps.courses.models import CourseMembership
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW, _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
+from core.search_text import tolerant_q
 
 from ...lab_access import can_teacher_access_lab, resolve_identity_window, resolve_recheck_window
 from ...lab_grading_service import format_decimal_input, grade_lab_answer, grade_lab_submission, parse_decimal_input
@@ -75,15 +75,19 @@ def lab_submissions(request, pk):
 
     # Filters
     search_query = (request.GET.get("q") or "").strip()
-    if search_query:
-        submissions = submissions.filter(
-            Q(assignment__student__username__icontains=search_query)
-            | Q(assignment__student__first_name__icontains=search_query)
-            | Q(assignment__student__last_name__icontains=search_query)
-            | Q(assignment__student__email__icontains=search_query)
-            | Q(submission_text__icontains=search_query)
-            | Q(submission_link__icontains=search_query)
-        )
+    search_q = tolerant_q(
+        search_query,
+        (
+            "assignment__student__username",
+            "assignment__student__first_name",
+            "assignment__student__last_name",
+            "assignment__student__email",
+            "submission_text",
+            "submission_link",
+        ),
+    )
+    if search_q is not None:
+        submissions = submissions.filter(search_q)
 
     status_filter = (request.GET.get("status") or "all").strip().lower()
     allowed_status_filters = {"all", "submitted", "late", "graded", "returned"}

@@ -31,6 +31,8 @@ from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.accounts.services.rim.policy import RimAccessError
 from core.export_safety import safe_csv_writer
+from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
+from core.search_text import tolerant_q
 from core.write_rate_limit import score_write_rate_limited
 
 _CTX = "accounts.student_registry"
@@ -125,11 +127,12 @@ def student_registry_programs(request):
     from apps.registrar.models import Program
 
     programs = Program.objects.filter(organization=actor.organization, is_active=True)
-    query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]
-    if query:
-        from core.program_codes import program_code_search_q
-
-        programs = programs.filter(program_code_search_q(query) | _name_contains(query))
+    # Ad az/ing dözümlü, şifrlər (hər iki nəsil) kod rejimində.
+    search = tolerant_q(
+        (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH], ("name",), compact_fields=PROGRAM_CODE_SEARCH_FIELDS
+    )
+    if search is not None:
+        programs = programs.filter(search)
     try:
         offset = max(0, int(request.GET.get("offset") or 0))
     except (TypeError, ValueError):
@@ -144,12 +147,6 @@ def student_registry_programs(request):
             "has_more": len(window) > PROGRAM_PAGE_SIZE,
         }
     )
-
-
-def _name_contains(query: str):
-    from django.db.models import Q
-
-    return Q(name__icontains=query)
 
 
 @never_cache

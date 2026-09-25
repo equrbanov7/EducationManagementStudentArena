@@ -10,6 +10,18 @@
 (function (ns, document, window) {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function debounce(fn, wait) {
         var timer = null;
         return function () {
@@ -47,7 +59,8 @@
         }
 
         function applyFilters() {
-            var query = (searchInput && searchInput.value || "").trim().toLowerCase();
+            var query = (searchInput && searchInput.value || "").trim();
+            var match = searchMatcher(query);
             var year = yearSelect ? yearSelect.value : "";
             var season = seasonSelect ? seasonSelect.value : "";
             var letter = letterSelect ? letterSelect.value : "";
@@ -67,7 +80,7 @@
 
                     if (matches && query) {
                         var haystack = row.getAttribute("data-oa-search") || "";
-                        matches = haystack.indexOf(query) !== -1;
+                        matches = match(haystack);
                     }
                     if (matches && letter) {
                         matches = (row.getAttribute("data-oa-letter") || "") === letter;

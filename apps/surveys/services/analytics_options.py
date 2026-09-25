@@ -15,7 +15,9 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from django.db.models import Count, Q
+from django.db.models import Count
+
+from core.search_text import tolerant_q
 
 from . import filters as flt
 
@@ -137,12 +139,9 @@ def teacher_choices(organization, scope, filters, campaign_ids, *, query="", lim
     limit = max(1, min(int(limit or 20), 50))
     offset = max(0, int(offset or 0))
     base = _teacher_base(organization, scope, filters, campaign_ids)
-    for pattern in flt.text_regex(query):
-        base = base.filter(
-            Q(teacher__first_name__iregex=pattern)
-            | Q(teacher__last_name__iregex=pattern)
-            | Q(teacher__username__iregex=pattern)
-        )
+    name_q = tolerant_q(query, ("teacher__first_name", "teacher__last_name", "teacher__username"))
+    if name_q is not None:
+        base = base.filter(name_q)
     rows = list(
         base.values("teacher_id", "teacher__first_name", "teacher__last_name", "teacher__username")
         .annotate(n=Count("id"))

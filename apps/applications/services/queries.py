@@ -5,6 +5,8 @@ from __future__ import annotations
 from django.db.models import Q
 from django.utils import timezone
 
+from core.search_text import tolerant_q
+
 from ..constants import CLOSED_STATUSES, OPEN_STATUSES, ApplicationStatus
 from ..models import Application
 from ..sla import working_days_between
@@ -42,16 +44,13 @@ def _stat_q(stat: str) -> Q:
 
 
 def search_q(text: str) -> Q:
-    cleaned = (text or "").strip()
-    if not cleaned:
-        return Q()
-    return (
-        Q(subject__icontains=cleaned)
-        | Q(number__icontains=cleaned)
-        | Q(created_by__first_name__icontains=cleaned)
-        | Q(created_by__last_name__icontains=cleaned)
-        | Q(created_by__username__icontains=cleaned)
+    """Dözümlü axtarış (``core.search_text``): mövzu/ad az/ing hərfinə, nömrə ayırıcıya dözümlü; boş → ``Q()``."""
+    query = tolerant_q(
+        text,
+        ("subject", "created_by__first_name", "created_by__last_name", "created_by__username"),
+        compact_fields=("number",),
     )
+    return Q() if query is None else query
 
 
 def date_q(date_from=None, date_to=None) -> Q:

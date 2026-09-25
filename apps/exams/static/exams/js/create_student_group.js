@@ -17,6 +17,18 @@
 (function () {
   "use strict";
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   var form = document.getElementById("createGroupForm");
   if (!form) return;
 
@@ -108,10 +120,10 @@
 
     if (searchInput) {
       searchInput.addEventListener("input", function () {
-        var filter = (this.value || "").toLowerCase();
+        var match = searchMatcher(this.value);
         container.querySelectorAll(".list-item-row").forEach(function (row) {
           var text = row.getAttribute("data-search") || "";
-          row.hidden = !text.includes(filter); // bootstrap reboot: [hidden]{display:none!important}
+          row.hidden = !match(text); // bootstrap reboot: [hidden]{display:none!important}
         });
       });
     }
@@ -172,10 +184,10 @@
   var teacherSelect = searchInput ? document.getElementById(searchInput.dataset.teacherSelectId || "") : null;
   if (searchInput && teacherSelect) {
     searchInput.addEventListener("input", function () {
-      var filter = (this.value || "").toLowerCase();
+      var match = searchMatcher(this.value);
       var options = Array.from(teacherSelect.options);
       options.forEach(function (option) {
-        option.hidden = !(option.text || "").toLowerCase().includes(filter);
+        option.hidden = !match(option.text || "");
       });
       var selectedVisible = options.find(function (option) {
         return option.selected && !option.hidden;

@@ -147,12 +147,12 @@
 <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260914-a11y"></script>
 <script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260914-1"></script>
 {% if 'my-exams' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260709-access-fix"></script>
+<script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260926-search"></script>
 <script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
 {% endif %}
 <script src="{% static 'accounts/js/profile/ajax.js' %}?v=20260912-viewas"></script>
 {% if 'overall-academic' in allowed_sections %}
-<script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260720-3"></script>
+<script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260926-search"></script>
 {% endif %}
 {% if 'academic-records' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/academic_records.js' %}?v=20260910-1"></script>
@@ -255,7 +255,7 @@ kitabxana iki dəfə düşərdi.{% endcomment %}
 <script src="{% static 'accounts/js/statistics/utils.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/filters.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/charts.js' %}?v=20260613-1"></script>
-<script src="{% static 'accounts/js/statistics/tables.js' %}?v=20260613-1"></script>
+<script src="{% static 'accounts/js/statistics/tables.js' %}?v=20260926-search"></script>
 <script src="{% static 'accounts/js/statistics/ai_summary.js' %}?v=20260613-1"></script>
 <script src="{% static 'accounts/js/statistics/entry.js' %}?v=20260613-1"></script>
 {% endif %}
@@ -322,7 +322,7 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 <script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260914-2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
 <script src="{% static 'exams/js/exam_wizard.js' %}?v=20260914-2"></script>
-<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260914-1"></script>
+<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260926-search"></script>
 {% endif %}
 {% if 'question-bank' in allowed_sections %}
 {% comment %}«Sual Bankı» bölməsinin dialoqları — əvvəl SƏHVƏN `my-exams`
@@ -335,7 +335,7 @@ yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
 <script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
 {% endif %}
 {% if 'org-faculties' in allowed_sections or 'org-kafedras' in allowed_sections %}
-<script src="{% static 'js/org_structure.js' %}?v=20260612-1"></script>
+<script src="{% static 'js/org_structure.js' %}?v=20260926-search"></script>
 {% endif %}
 {% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
 seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
@@ -366,7 +366,7 @@ gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% 
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
 `data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260908-move2"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260926-search"></script>
 <script src="{% static 'accounts/js/profile/teaching_office_group_split.js' %}?v=20260920-split"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq

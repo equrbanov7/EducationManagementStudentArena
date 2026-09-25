@@ -313,6 +313,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
 
     from apps.exams.models import QuestionSubmission
     from apps.exams.public import EXAM_LANGUAGE_CHOICES, is_exam_center_user
+    from core.search_text import tolerant_q
     from core.tenancy import get_request_organization
 
     organization = get_request_organization(request)
@@ -347,18 +348,11 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     filtered = scoped
     if filters["status"]:
         filtered = filtered.filter(status__in=_STATUS_GROUPS[filters["status"]])
-    if filters["q"]:
-        condition = (
-            Q(title__icontains=filters["q"])
-            | Q(subject__icontains=filters["q"])
-            | Q(group_label__icontains=filters["q"])
-        )
-        if is_reviewer:
-            condition |= (
-                Q(teacher__first_name__icontains=filters["q"])
-                | Q(teacher__last_name__icontains=filters["q"])
-                | Q(teacher__username__icontains=filters["q"])
-            )
+    search_fields = ("title", "subject")
+    if is_reviewer:
+        search_fields += ("teacher__first_name", "teacher__last_name", "teacher__username")
+    condition = tolerant_q(filters["q"], search_fields, compact_fields=("group_label",))
+    if condition is not None:
         filtered = filtered.filter(condition)
     if is_reviewer:
         selected = sources["selected"]

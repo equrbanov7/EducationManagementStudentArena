@@ -13,7 +13,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -30,6 +29,7 @@ from core.constants import AuditAction
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.rls import bypass_rls
 from core.roles import ProfileRole, get_user_role_level, is_superadmin_user
+from core.search_text import tolerant_q
 from core.utils import get_client_ip
 
 logger = logging.getLogger(__name__)
@@ -95,14 +95,11 @@ def superadmin_post_management(request):
             "category",
         ).order_by("-created_at")
 
-        if search:
-            posts_qs = posts_qs.filter(
-                Q(title__icontains=search)
-                | Q(content__icontains=search)
-                | Q(author__username__icontains=search)
-                | Q(author__first_name__icontains=search)
-                | Q(author__last_name__icontains=search)
-            )
+        search_q = tolerant_q(
+            search, ("title", "content", "author__username", "author__first_name", "author__last_name")
+        )
+        if search_q is not None:
+            posts_qs = posts_qs.filter(search_q)
 
         if org_filter:
             member_user_ids = Membership.objects.filter(organization_id=org_filter, is_active=True).values_list(
@@ -305,14 +302,11 @@ def org_post_management(request):
             .order_by("-created_at")
         )
 
-        if search:
-            posts_qs = posts_qs.filter(
-                Q(title__icontains=search)
-                | Q(content__icontains=search)
-                | Q(author__username__icontains=search)
-                | Q(author__first_name__icontains=search)
-                | Q(author__last_name__icontains=search)
-            )
+        search_q = tolerant_q(
+            search, ("title", "content", "author__username", "author__first_name", "author__last_name")
+        )
+        if search_q is not None:
+            posts_qs = posts_qs.filter(search_q)
 
         if role_filter:
             role_user_ids = UserProfile.objects.filter(role=role_filter).values_list("user_id", flat=True)

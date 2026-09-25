@@ -1,5 +1,17 @@
 /* Step 3: institution lookup and explicit join-flow choice handling. */
 
+// Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+// «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+function registerSearchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+        var t = String(text || "").replace(/\u0307/g, "");
+        return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+}
+
 function hideOrganizationSearchList() {
     if (organizationSearchList) organizationSearchList.hidden = true;
     if (organizationSearchInput) organizationSearchInput.setAttribute("aria-expanded", "false");
@@ -93,12 +105,13 @@ function organizationOptionLabel(organization) {
 function filteredOrganizations(searchText) {
     var selectedCountry = (countrySelect ? countrySelect.value : "").toUpperCase();
     var selection = currentSelection();
-    var search = (searchText || "").toLowerCase().trim();
+    var search = (searchText || "").trim();
+    var match = registerSearchMatcher(search);
 
     return organizations.filter(function (organization) {
         if (organization.org_type !== selection.orgType) return false;
         if (selectedCountry && organization.country_code && organization.country_code !== selectedCountry) return false;
-        if (search && !organization.name.toLowerCase().includes(search)) return false;
+        if (search && !match(organization.name)) return false;
         return true;
     });
 }

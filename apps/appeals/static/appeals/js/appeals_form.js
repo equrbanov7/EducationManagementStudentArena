@@ -15,6 +15,18 @@
 (function () {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function clamp(n, min, max) {
         return Math.max(min, Math.min(max, n));
     }
@@ -331,10 +343,10 @@
         var searchInput = searchScope.querySelector("[data-appeal-search]");
         if (searchInput) {
             searchInput.addEventListener("input", function () {
-                var q = searchInput.value.trim().toLowerCase();
+                var q = searchInput.value.trim();
+                var match = searchMatcher(q);
                 cards.forEach(function (card) {
-                    var text = (card.getAttribute("data-appeal-text") || "").toLowerCase();
-                    card.hidden = q !== "" && text.indexOf(q) === -1;
+                    card.hidden = q !== "" && !match(card.getAttribute("data-appeal-text") || "");
                 });
             });
         }

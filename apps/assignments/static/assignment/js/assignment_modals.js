@@ -9,6 +9,18 @@
     if (window._ASN_MODAL_V2) return;
     window._ASN_MODAL_V2 = true;
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     const cfgEl = document.getElementById("assignmentModalsConfig");
     if (!cfgEl) return;
     const ds = cfgEl.dataset;
@@ -219,15 +231,15 @@
 
     ['add','edit'].forEach(mode => {
         $(mode+'AsnGroupSearch')?.addEventListener('input', e => {
-            const t = e.target.value.toLowerCase();
+            const match = searchMatcher(e.target.value);
             document.querySelectorAll(`#${mode}AsnGroupList .asn-chk-row`).forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
         $(mode+'AsnStudentSearch')?.addEventListener('input', e => {
-            const t = e.target.value.toLowerCase();
+            const match = searchMatcher(e.target.value);
             document.querySelectorAll(`#${mode}AsnStudentList .asn-chk-row`).forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
     });

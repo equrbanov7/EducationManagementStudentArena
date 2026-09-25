@@ -10,7 +10,7 @@ from __future__ import annotations
 from django.db.models import Avg, Count, F, Func, IntegerField, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
 
-from core.search_text import tokens_of, tolerant_regex
+from core.search_text import tolerant_q  # kanonik API; burada geri-uyğun re-export (``__all__``)
 
 from ..constants import FINAL_STATUSES, FolderStatus, SubmissionStatus, TaskKind
 from ..errors import FolderError
@@ -35,21 +35,6 @@ _ORDERINGS = {
     "-similarity": ("-similarity_max", "-submitted_at"),
     "task": ("task__kind", "task__slot_index", "task__order", "-submitted_at"),
 }
-
-
-def tolerant_q(query: str, fields) -> Q | None:
-    """Tokenləşmiş, diakritikaya dözümlü axtarış (``core.search_text``) — hər token hər hansı sahədə."""
-    tokens = tokens_of(query)
-    if not tokens:
-        return None
-    combined = Q()
-    for token in tokens:
-        pattern = tolerant_regex(token)
-        any_field = Q()
-        for field in fields:
-            any_field |= Q(**{f"{field}__iregex": pattern})
-        combined &= any_field
-    return combined
 
 
 def _count_rows(queryset):
@@ -81,7 +66,7 @@ def list_folders(*, organization, actor, period=None, subject=None, statuses=Non
         folders = folders.filter(subject=subject)
     if statuses:
         folders = folders.filter(status__in=list(statuses))
-    clause = tolerant_q(search, ("title", "subject__name", "subject__code"))
+    clause = tolerant_q(search, ("title", "subject__name"), compact_fields=("subject__code",))
     if clause is not None:
         folders = folders.filter(clause)
     pending = Submission.objects.filter(

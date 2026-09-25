@@ -13,6 +13,7 @@ from apps.courses.models import Course
 from apps.exams.models import Exam, ExamAttempt
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
+from core.search_text import tolerant_q
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -78,14 +79,12 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             # sorğu (N+1) deməkdir.
             .prefetch_related("answers__question__options", "answers__selected_options")
         )
-        if search_query:
-            attempts = attempts.filter(
-                Q(user__username__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
-                | Q(user__last_name__icontains=search_query)
-                | Q(exam__title__icontains=search_query)
-                | Q(exam__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(
+            search_query,
+            ("user__username", "user__first_name", "user__last_name", "exam__title", "exam__course__title"),
+        )
+        if search_q is not None:
+            attempts = attempts.filter(search_q)
         from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
         from apps.exams.public import calculate_test_attempt_result
 
@@ -149,14 +148,12 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
             .select_related("assignment", "assignment__course", "user", "graded_by")
         )
-        if search_query:
-            submissions = submissions.filter(
-                Q(user__username__icontains=search_query)
-                | Q(user__first_name__icontains=search_query)
-                | Q(user__last_name__icontains=search_query)
-                | Q(assignment__title__icontains=search_query)
-                | Q(assignment__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(
+            search_query,
+            ("user__username", "user__first_name", "user__last_name", "assignment__title", "assignment__course__title"),
+        )
+        if search_q is not None:
+            submissions = submissions.filter(search_q)
         for submission in submissions:
             course = submission.assignment.course
             items.append(
@@ -190,14 +187,18 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
             .filter(Q(graded_at__isnull=True) | Q(graded_at__lte=review_cutoff))
             .select_related("project", "project__course", "student", "graded_by")
         )
-        if search_query:
-            project_submissions = project_submissions.filter(
-                Q(student__username__icontains=search_query)
-                | Q(student__first_name__icontains=search_query)
-                | Q(student__last_name__icontains=search_query)
-                | Q(project__title__icontains=search_query)
-                | Q(project__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(
+            search_query,
+            (
+                "student__username",
+                "student__first_name",
+                "student__last_name",
+                "project__title",
+                "project__course__title",
+            ),
+        )
+        if search_q is not None:
+            project_submissions = project_submissions.filter(search_q)
         for submission in project_submissions:
             course = submission.project.course
             items.append(
@@ -237,14 +238,18 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 "graded_by",
             )
         )
-        if search_query:
-            lab_submissions = lab_submissions.filter(
-                Q(assignment__student__username__icontains=search_query)
-                | Q(assignment__student__first_name__icontains=search_query)
-                | Q(assignment__student__last_name__icontains=search_query)
-                | Q(assignment__lab__title__icontains=search_query)
-                | Q(assignment__lab__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(
+            search_query,
+            (
+                "assignment__student__username",
+                "assignment__student__first_name",
+                "assignment__student__last_name",
+                "assignment__lab__title",
+                "assignment__lab__course__title",
+            ),
+        )
+        if search_q is not None:
+            lab_submissions = lab_submissions.filter(search_q)
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course

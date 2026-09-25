@@ -12,6 +12,8 @@ from dataclasses import replace
 
 from django.db.models import Avg, Count, Q
 
+from core.search_text import tolerant_q
+
 from ..constants import QuestionKind, Section
 from ..models import SurveyAnswer, SurveyCampaign
 from . import filters as flt
@@ -35,8 +37,9 @@ def _comments(queryset, codes, query="", *, limit=MAX_COMMENTS, offset=0) -> lis
     answers = SurveyAnswer.objects.filter(
         response__in=queryset.values("pk"), question__code__in=codes, question__kind=QuestionKind.TEXT
     ).exclude(text="")
-    for pattern in flt.text_regex(query):
-        answers = answers.filter(text__iregex=pattern)
+    text_q = tolerant_q(query, ("text",))
+    if text_q is not None:
+        answers = answers.filter(text_q)
     rows = answers.order_by("pk").values_list("question__code", "text")[offset : offset + limit]
     return [{"question_code": code, "text": text} for code, text in rows]
 
@@ -238,18 +241,11 @@ def filter_options(organization, scope, campaign_ids=None) -> dict:
 
 def search_teachers(organization, scope, query, campaign_ids=None, *, limit=20) -> list:
     """Əhatədəki (cavabı olan) müəllimlər arasında dözümlü ad axtarışı."""
-    patterns = flt.text_regex(query)
-    if not patterns:
+    name_q = tolerant_q(query, ("teacher__first_name", "teacher__last_name", "teacher__username"))
+    if name_q is None:
         return []
     campaign_ids = list(campaign_ids or flt.campaign_ids_for(organization, flt.ResultFilters()))
     base = flt.responses(organization, scope, flt.ResultFilters(), campaign_ids).exclude(teacher__isnull=True)
-    name_q = Q()
-    for pattern in patterns:
-        name_q &= (
-            Q(teacher__first_name__iregex=pattern)
-            | Q(teacher__last_name__iregex=pattern)
-            | Q(teacher__username__iregex=pattern)
-        )
     rows = list(base.filter(name_q).values("teacher_id").annotate(n=Count("id")).order_by("-n")[:limit])
     names = _names(row["teacher_id"] for row in rows)
     return [{"id": row["teacher_id"], "label": names.get(row["teacher_id"], ""), "n": row["n"]} for row in rows]

@@ -19,6 +19,7 @@ from django.db.models import Count, Q
 from django.urls import reverse
 
 from apps.accounts.views._helpers import _append_query_params
+from core.search_text import tolerant_q
 
 
 def build_superadmin_organizations_view(
@@ -35,15 +36,14 @@ def build_superadmin_organizations_view(
     organization_records = OrganizationModel.objects.select_related("owner").annotate(
         active_member_count=Count("memberships", filter=Q(memberships__is_active=True))
     )
-    if organization_search:
-        organization_records = organization_records.filter(
-            Q(name__icontains=organization_search)
-            | Q(slug__icontains=organization_search)
-            | Q(organization_identifier__icontains=organization_search)
-            | Q(license_identifier__icontains=organization_search)
-            | Q(owner__username__icontains=organization_search)
-            | Q(owner__email__icontains=organization_search)
-        )
+    # Az/ing dözümlü, tokenləşmiş; slug/identifikatorlar kod rejimində.
+    organization_q = tolerant_q(
+        organization_search,
+        ("name", "owner__username", "owner__email"),
+        compact_fields=("slug", "organization_identifier", "license_identifier"),
+    )
+    if organization_q is not None:
+        organization_records = organization_records.filter(organization_q)
     if organization_type_filter:
         organization_records = organization_records.filter(org_type=organization_type_filter)
     if organization_status_filter == "active":

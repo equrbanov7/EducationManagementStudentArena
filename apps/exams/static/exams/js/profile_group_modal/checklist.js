@@ -2,6 +2,18 @@
 (function (ns, document) {
   "use strict";
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function initChecklist(ctx, root) {
     // Sahənin ÖZ select-i (`name` daşıyır); ixtisas süzgəci select-i `name`-sizdir.
     var hiddenSelect = root.querySelector("select[name]");
@@ -80,12 +92,10 @@
       syncSpecialtyControl(true);
     }
 
-    function normalize(text) {
-      return String(text || "").toLowerCase();
-    }
-
+    // Süzgəc bir dəfə qurulur ({q, match}), hər variantda yalnız yoxlanır.
     function currentFilterValue() {
-      return normalize(searchInput ? searchInput.value : "");
+      var q = String(searchInput ? searchInput.value : "").trim();
+      return { q: q, match: searchMatcher(q) };
     }
 
     function optionGroupLabels(option) {
@@ -109,10 +119,10 @@
       if (specialty && (option.getAttribute("data-specialty") || "") !== specialty) {
         return false;
       }
-      if (!filterValue) {
+      if (!filterValue || !filterValue.q) {
         return true;
       }
-      return normalize(optionSearchText(option)).indexOf(filterValue) !== -1;
+      return filterValue.match(optionSearchText(option));
     }
 
     function updateCounter() {

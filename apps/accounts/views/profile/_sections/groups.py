@@ -12,6 +12,7 @@ from django.db.models import Q
 from apps.accounts.models import ProfileRole
 from apps.exams.models import StudentGroup
 from apps.exams.public import StudentGroupForm
+from core.search_text import tolerant_q
 
 
 def build_groups_context(
@@ -60,16 +61,22 @@ def build_groups_context(
     teacher_groups_count = visible_teacher_groups_qs.count()
 
     if teacher_groups_search_query:
-        visible_teacher_groups_qs = visible_teacher_groups_qs.filter(
-            Q(name__icontains=teacher_groups_search_query)
-            | Q(teacher__username__icontains=teacher_groups_search_query)
-            | Q(teacher__first_name__icontains=teacher_groups_search_query)
-            | Q(teacher__last_name__icontains=teacher_groups_search_query)
-            | Q(students__username__icontains=teacher_groups_search_query)
-            | Q(students__first_name__icontains=teacher_groups_search_query)
-            | Q(students__last_name__icontains=teacher_groups_search_query)
-            | Q(students__profile__student_group_number__icontains=teacher_groups_search_query)
-        ).distinct()
+        # Dözümlü axtarış (sahib 2026-09-26): «234king» / «234k ing» → «234 K ing»;
+        # qrup adı və tələbə qrup nömrəsi kod rejimində, adlar az/ing hərf qatlaması ilə.
+        groups_q = tolerant_q(
+            teacher_groups_search_query,
+            (
+                "teacher__username",
+                "teacher__first_name",
+                "teacher__last_name",
+                "students__username",
+                "students__first_name",
+                "students__last_name",
+            ),
+            compact_fields=("name", "students__profile__student_group_number"),
+        )
+        if groups_q is not None:
+            visible_teacher_groups_qs = visible_teacher_groups_qs.filter(groups_q).distinct()
 
     teacher_groups_filtered_count = visible_teacher_groups_qs.count()
     teacher_groups_page = Paginator(visible_teacher_groups_qs, 8).get_page(request.GET.get("groups_page"))
@@ -102,14 +109,13 @@ def build_groups_context(
             "first_name", "last_name", "username", "id"
         )
         selected_group_students_count = students_qs.count()
-        if group_students_search_query:
-            students_qs = students_qs.filter(
-                Q(username__icontains=group_students_search_query)
-                | Q(first_name__icontains=group_students_search_query)
-                | Q(last_name__icontains=group_students_search_query)
-                | Q(email__icontains=group_students_search_query)
-                | Q(profile__student_group_number__icontains=group_students_search_query)
-            )
+        students_q = tolerant_q(
+            group_students_search_query,
+            ("username", "first_name", "last_name", "email"),
+            compact_fields=("profile__student_group_number",),
+        )
+        if students_q is not None:
+            students_qs = students_qs.filter(students_q)
         selected_group_students_filtered_count = students_qs.count()
         selected_group_students_page = Paginator(students_qs, 12).get_page(request.GET.get("students_page"))
         group_students_pagination_query = urlencode(
