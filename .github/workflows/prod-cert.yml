@@ -1,0 +1,172 @@
+name: 🔐 Prod TLS sertifikatı (Let's Encrypt, certbot DNS-01)
+
+# Sahib 2026-09-25: «ssl sertifikatı yarat certbot ilə». Publik A qeydi və 80-ci port hələ yoxdur,
+# ona görə yalnız DNS-01 mümkündür (HostGator-da API yoxdur → TXT qeydini sahib əl ilə əlavə edir).
+#
+#   mode=issue   — certbot (docker) serverdə işləyir; TXT dəyəri bu logda «HostGator TXT qeydi»
+#                  kimi görünür və certbot qeyd bütün authoritative NS-lərdə görünənə qədər (≤45 dəq)
+#                  GÖZLƏYİR. Heç bir xidmətə toxunmur. Hesab e-poçtsuz qeydiyyatdan keçir (PII yox).
+#                  Məlumat serverdə /home/wcu/letsencrypt-də (APP_DIR-dən kənar, rsync silmir).
+#   mode=install — sertifikat validate_direct_tls.sh ilə yoxlanır → docker/nginx/certs/origin.{crt,key}
+#                  (köhnələri .bak-<tarix>), .env HEALTHCHECK_HOST=<domen> (deploy TLS yoxlaması domeni
+#                  yoxlayır), nginx -t + reload, blackbox yenidən; yoxlama zəncir doğrulaması ilə (-k YOX).
+#                  confirm=INSTALL. Geri qaytarma: .bak faylları → origin.*, .env.bak-cert-* → .env, reload.
+# Yeniləmə (90 gün): 80-ci port NAT açılandan sonra HTTP-01 avtomatik yeniləməyə keçmək tövsiyə olunur;
+# o vaxta qədər mode=issue təkrar (yeni TXT dəyəri) + mode=install.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "issue (sertifikat al) / install (nginx-ə qoy)"
+        required: true
+        type: choice
+        options: [issue, install]
+        default: issue
+      domain:
+        description: "Domen"
+        required: true
+        type: string
+        default: ems.wcu.edu.az
+      confirm:
+        description: "install üçün INSTALL yazın"
+        required: false
+        type: string
+        default: ""
+
+concurrency:
+  # issue uzun gözləyir — deploy növbəsini tutmasın; install isə deploy ilə eyni növbədə.
+  group: ${{ inputs.mode == 'install' && 'production-deploy' || 'prod-cert-issue' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cert:
+    name: 🔐 prod-cert (${{ inputs.mode }})
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 60
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      LE_DIR: /home/wcu/letsencrypt
+      MODE: ${{ inputs.mode }}
+      DOMAIN: ${{ inputs.domain }}
+      CONFIRM: ${{ inputs.confirm }}
+      CERTBOT_IMAGE: certbot/certbot:v2.11.0
+    steps:
+      - name: 🔎 Giriş dəyərləri
+        run: |
+          set -euo pipefail
+          if ! [[ "$DOMAIN" =~ ^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$ ]]; then
+            echo "::error::domen formatı yanlışdır"; exit 1
+          fi
+          if [ "$MODE" = "install" ] && [ "$CONFIRM" != "INSTALL" ]; then
+            echo "::error::install üçün confirm=INSTALL lazımdır"; exit 1
+          fi
+
+      - name: 📜 certbot certonly (DNS-01, TXT gözlənilir)
+        if: inputs.mode == 'issue'
+        run: |
+          set -euo pipefail
+          mkdir -p "$LE_DIR"/config "$LE_DIR"/work "$LE_DIR"/logs "$LE_DIR"/hooks
+          chmod 700 "$LE_DIR"
+          rm -f "$LE_DIR/hooks/challenge.txt"
+          cat > "$LE_DIR/hooks/auth.sh" <<'HOOK'
+          #!/bin/sh
+          # certbot manual-auth-hook: TXT dəyərini fayla yazır (workflow onu loga çıxarır) və qeyd
+          # domenin BÜTÜN authoritative NS-lərində görünənə qədər gözləyir.
+          set -eu
+          apk add --no-cache bind-tools >/dev/null 2>&1 || true
+          NAME="_acme-challenge.${CERTBOT_DOMAIN}"
+          printf '%s %s\n' "$NAME" "$CERTBOT_VALIDATION" > /hooks/challenge.txt
+          ZONE="${CERTBOT_DOMAIN#*.}"
+          deadline=$(( $(date +%s) + ${WAIT_SECONDS:-2700} ))
+          while :; do
+            NS=$(dig +short NS "$ZONE" @8.8.8.8 | sed 's/\.$//')
+            ok=1; [ -n "$NS" ] || ok=0
+            for ns in $NS; do
+              dig +short TXT "$NAME" @"$ns" | tr -d '"' | grep -qx "$CERTBOT_VALIDATION" || ok=0
+            done
+            if [ "$ok" = 1 ]; then echo "TXT bütün NS-lərdə görünür: $NS"; sleep 30; exit 0; fi
+            if [ "$(date +%s)" -ge "$deadline" ]; then echo "TXT vaxtında görünmədi" >&2; exit 1; fi
+            sleep 20
+          done
+          HOOK
+          chmod 755 "$LE_DIR/hooks/auth.sh"
+          docker rm -f ems-certbot >/dev/null 2>&1 || true
+          docker run -d --name ems-certbot -e WAIT_SECONDS=2700 \
+            -v "$LE_DIR/config:/etc/letsencrypt" -v "$LE_DIR/work:/var/lib/letsencrypt" \
+            -v "$LE_DIR/logs:/var/log/letsencrypt" -v "$LE_DIR/hooks:/hooks" \
+            "$CERTBOT_IMAGE" certonly --manual --preferred-challenges dns \
+            --manual-auth-hook /hooks/auth.sh -d "$DOMAIN" \
+            --agree-tos --register-unsafely-without-email --non-interactive \
+            --key-type ecdsa --keep-until-expiring >/dev/null
+          shown=0
+          while [ "$(docker inspect -f '{{.State.Running}}' ems-certbot)" = "true" ]; do
+            if [ "$shown" = 0 ] && [ -s "$LE_DIR/hooks/challenge.txt" ]; then
+              read -r name value < "$LE_DIR/hooks/challenge.txt"
+              host="${name%.wcu.edu.az}"
+              echo "::notice title=HostGator TXT qeydi::Host/Name: ${host}  |  Type: TXT  |  Value: ${value}  |  TTL: 300"
+              echo "================ HostGator → DNS Zone Editor → wcu.edu.az → Add Record ================"
+              echo "  Type : TXT"
+              echo "  Name : ${host}        (tam ad: ${name})"
+              echo "  Value: ${value}"
+              echo "  TTL  : 300 (və ya ən kiçik icazə verilən)"
+              echo "======================================================================================="
+              shown=1
+            fi
+            sleep 10
+          done
+          code=$(docker inspect -f '{{.State.ExitCode}}' ems-certbot)
+          docker logs ems-certbot 2>&1 | grep -vi "account\|key" | tail -25
+          docker rm ems-certbot >/dev/null
+          # Fayllar root-a məxsus yaranıb — runner istifadəçisinə qaytar.
+          docker run --rm -v "$LE_DIR:/le" alpine:3.20 chown -R "$(id -u):$(id -g)" /le
+          if [ "$code" != 0 ]; then echo "::error::certbot uğursuz (exit $code) — loglar $LE_DIR/logs"; exit 1; fi
+          openssl x509 -in "$LE_DIR/config/live/$DOMAIN/fullchain.pem" -noout -subject -issuer -enddate -ext subjectAltName
+
+      - name: 🧩 Sertifikatı nginx-ə qoy (install)
+        if: inputs.mode == 'install'
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          src="$LE_DIR/config/live/$DOMAIN"
+          [ -s "$src/fullchain.pem" ] && [ -s "$src/privkey.pem" ] || { echo "::error::sertifikat yoxdur — əvvəl mode=issue"; exit 1; }
+          bash scripts/deploy/validate_direct_tls.sh "$src/fullchain.pem" "$src/privkey.pem" "$DOMAIN" 604800 false "" lan
+          ts=$(date +%Y%m%d-%H%M%S)
+          cp -p docker/nginx/certs/origin.crt "docker/nginx/certs/origin.crt.bak-$ts"
+          cp -p docker/nginx/certs/origin.key "docker/nginx/certs/origin.key.bak-$ts"
+          chmod 600 "docker/nginx/certs/origin.key.bak-$ts"
+          cp -L "$src/fullchain.pem" docker/nginx/certs/origin.crt.new
+          cp -L "$src/privkey.pem" docker/nginx/certs/origin.key.new
+          chmod 644 docker/nginx/certs/origin.crt.new; chmod 600 docker/nginx/certs/origin.key.new
+          mv -f docker/nginx/certs/origin.crt.new docker/nginx/certs/origin.crt
+          mv -f docker/nginx/certs/origin.key.new docker/nginx/certs/origin.key
+          if ! docker compose -f docker-compose.prod.yml exec -T nginx nginx -t; then
+            echo "::error::nginx -t uğursuz — köhnə sertifikat qaytarılır"
+            cp -p "docker/nginx/certs/origin.crt.bak-$ts" docker/nginx/certs/origin.crt
+            cp -p "docker/nginx/certs/origin.key.bak-$ts" docker/nginx/certs/origin.key
+            exit 1
+          fi
+          docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
+          cp -p .env ".env.bak-cert-$ts"
+          for kv in "HEALTHCHECK_HOST=$DOMAIN" "TLS_ALLOW_SELF_SIGNED_LOCAL=false"; do
+            k="${kv%%=*}"
+            if grep -qE "^$k=" .env; then sed -i "s#^$k=.*#$kv#" .env; else printf '\n%s\n' "$kv" >> .env; fi
+            echo "  $kv"
+          done
+          chmod 600 .env
+          docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate blackbox_exporter
+
+      - name: ✅ Yoxlama (zəncir doğrulaması, -k olmadan)
+        if: inputs.mode == 'install'
+        run: |
+          set +e -uo pipefail
+          fail=0
+          for path in /health/ /accounts/login/; do
+            code=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN$path")
+            echo "  https://$DOMAIN$path → $code"; [[ "$code" =~ ^(200|302)$ ]] || fail=1
+          done
+          echo | openssl s_client -connect 127.0.0.1:443 -servername "$DOMAIN" 2>/dev/null | openssl x509 -noout -subject -issuer -enddate
+          exit $fail
