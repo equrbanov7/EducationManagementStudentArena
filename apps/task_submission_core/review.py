@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import urlencode
 
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+from core.search_text import tolerant_q
 
 SUBMISSION_REVIEW_VISIBILITY_FEATURES = {
     "submission": "assignment",
@@ -119,13 +119,17 @@ def format_input_number(value):
 
 def apply_submission_filters(submissions, params, *, student_lookup_prefix, allowed_status_filters):
     search_query = (params.get("q") or "").strip()
-    if search_query:
-        submissions = submissions.filter(
-            Q(**{f"{student_lookup_prefix}__username__icontains": search_query})
-            | Q(**{f"{student_lookup_prefix}__first_name__icontains": search_query})
-            | Q(**{f"{student_lookup_prefix}__last_name__icontains": search_query})
-            | Q(content__icontains=search_query)
-        )
+    search_q = tolerant_q(
+        search_query,
+        (
+            f"{student_lookup_prefix}__username",
+            f"{student_lookup_prefix}__first_name",
+            f"{student_lookup_prefix}__last_name",
+            "content",
+        ),
+    )
+    if search_q is not None:
+        submissions = submissions.filter(search_q)
 
     status_filter = (params.get("status") or "all").strip().lower()
     if status_filter not in allowed_status_filters:

@@ -14,6 +14,8 @@ Qayda:
 * uyğunluq ``__iregex`` ilə gedir (PostgreSQL ``~*``); regex metasimvolları
   qaçırılır, ona görə istifadəçi girişi şablonu poza bilmir.
 
+Qatlama qaydaları: ``core.search_text`` (ə↔a, ş↔sh, ç↔ch, ğ↔gh, x↔kh da).
+
 Yalnız Q obyekti qurur — hansı sahələrə tətbiq olunacağını çağıran verir
 (``view_as``, qlobal axtarış, tələbə reyestri…).
 """
@@ -22,23 +24,13 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from core.search_text import MAX_QUERY_LENGTH, MAX_TOKENS, tokens_of, tolerant_regex  # noqa: F401
+from core.search_text import MAX_QUERY_LENGTH, MAX_TOKENS, tokens_of, tolerant_q, tolerant_regex  # noqa: F401
 
 
 def person_q(query: str, fields: tuple[str, ...] | list[str]) -> Q | None:
     """Tokenləşmiş, diakritikaya dözümlü Q; sorğu boşdursa ``None``.
 
     ``fields`` — ``first_name``, ``student__last_name`` kimi lookup prefiksləri
-    (hər birinə ``__iregex`` əlavə olunur).
+    (hər birinə ``__iregex`` əlavə olunur). Kanonik ``core.search_text.tolerant_q``-ya ötürür.
     """
-    tokens = tokens_of(query)
-    if not tokens or not fields:
-        return None
-    combined = Q()
-    for token in tokens:
-        pattern = tolerant_regex(token)
-        any_field = Q()
-        for field in fields:
-            any_field |= Q(**{f"{field}__iregex": pattern})
-        combined &= any_field
-    return combined
+    return tolerant_q(query, fields)

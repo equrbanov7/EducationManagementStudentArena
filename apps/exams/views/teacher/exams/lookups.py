@@ -16,6 +16,7 @@ from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
+from core.search_text import tolerant_q
 
 from . import unit_assignment as _units
 from ._shared import _resolve_required_organization
@@ -63,8 +64,10 @@ def subject_search(request):
 
     query = (request.GET.get("q") or "").strip()
     qs = Subject.objects.filter(organization=organization)
-    if query:
-        qs = qs.filter(Q(code__icontains=query) | Q(name__icontains=query))
+    # Ad — az/ing hərfə dözümlü; kod — ayırıcıya da dözümlü (sahib 2026-09-26).
+    search_q = tolerant_q(query, ("name",), compact_fields=("code",))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     qs = qs.order_by("code")
 
     offset, limit = _page_bounds(request)
@@ -91,8 +94,9 @@ def bank_teacher_search(request):
         {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
         queryset=User.objects.filter(is_active=True),
     )
-    if query:
-        qs = qs.filter(Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query))
+    search_q = tolerant_q(query, ("username", "first_name", "last_name"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     qs = qs.distinct().order_by("first_name", "last_name", "username")
 
     offset, limit = _page_bounds(request)
@@ -167,13 +171,13 @@ def group_search(request):
     query = (request.GET.get("q") or "").strip()[:120]
     if (request.GET.get("kind") or "").strip() == "units":
         from apps.registrar.public import subgroup_rollup
-        from core.search_text import tolerant_regex
 
         unit_qs = _units.exam_unit_candidates(request, organization)
-        if query:
-            # «234k» → «234 K», «233KE» → «233 KE»: boşluğa/diakritikaya dözümlü (sahib 2026-09-21).
-            loose = tolerant_regex(query, loose_spaces=True)
-            unit_qs = unit_qs.filter(Q(name__iregex=loose) | Q(code__iregex=loose))
+        # «234king»/«234k ing» → «234 K ing», «233KE» → «233 KE»: ayırıcıya/diakritikaya dözümlü
+        # (sahib 2026-09-21, 2026-09-26).
+        unit_q = tolerant_q(query, ("name", "code"), compact=True)
+        if unit_q is not None:
+            unit_qs = unit_qs.filter(unit_q)
         offset, limit = _page_bounds(request)
         page_units = list(unit_qs[offset : offset + limit + 1])
         has_more = len(page_units) > limit
@@ -193,8 +197,9 @@ def group_search(request):
         return JsonResponse({"results": results, "has_more": has_more})
 
     qs = StudentGroup.objects.filter(organization=organization)
-    if query:
-        qs = qs.filter(name__icontains=query)
+    group_q = tolerant_q(query, ("name",), compact=True)
+    if group_q is not None:
+        qs = qs.filter(group_q)
     qs = qs.order_by("name")
 
     offset, limit = _page_bounds(request)
@@ -229,13 +234,9 @@ def user_search(request):
     # kimi işarələnir — müəllim onları ayrı-ayrı istisna edə bilsin.
     group_member_ids |= _unit_member_ids(request, organization, _unit_ids_param(request))
 
-    if query:
-        qs = qs.filter(
-            Q(username__icontains=query)
-            | Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(email__icontains=query)
-        )
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     qs = qs.distinct()
     if group_member_ids:
         qs = qs.annotate(
@@ -295,13 +296,9 @@ def invigilator_search(request):
     qs = center_staff_queryset(organization).annotate(kafedra=Subquery(kafedra_sq))
 
     query = (request.GET.get("q") or "").strip()
-    if query:
-        qs = qs.filter(
-            Q(username__icontains=query)
-            | Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(email__icontains=query)
-        )
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
 
     offset, limit = _page_bounds(request)
     results, has_more = _paginate(

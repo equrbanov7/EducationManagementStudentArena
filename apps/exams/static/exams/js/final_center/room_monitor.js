@@ -9,6 +9,28 @@
 (function () {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+    // Hər sətir üçün yenidən qurulmasın — sorğu dəyişəndə bir dəfə.
+    var lastQuery = null;
+    var lastMatch = null;
+    function currentMatch(text) {
+        if (text !== lastQuery) {
+            lastQuery = text;
+            lastMatch = searchMatcher(text);
+        }
+        return lastMatch;
+    }
+
     var root = document.getElementById("fxc-monitor-root");
     if (!root) return;
 
@@ -119,12 +141,12 @@
     }
 
     function rowMatchesFilters(student) {
-        var text = (filterInput && filterInput.value || "").trim().toLowerCase();
+        var text = (filterInput && filterInput.value || "").trim();
         var status = statusFilter && statusFilter.value;
         if (status && student.status !== status) return false;
         if (text) {
-            var hay = (student.name + " " + student.username).toLowerCase();
-            if (hay.indexOf(text) === -1) return false;
+            var hay = student.name + " " + student.username;
+            if (!currentMatch(text)(hay)) return false;
         }
         return true;
     }

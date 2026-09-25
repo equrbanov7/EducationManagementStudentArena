@@ -3,6 +3,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (window.ASSIGNMENT_JS_LOADED) return;
     window.ASSIGNMENT_JS_LOADED = true;
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     const qs = (sel, root = document) => root.querySelector(sel);
     const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -58,13 +70,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // search inputs
       modal.querySelectorAll(".js-search-input").forEach((input) => {
         input.addEventListener("input", (e) => {
-          const term = e.target.value.toLowerCase();
+          const match = searchMatcher(e.target.value);
           const listContainer = e.target.closest(".tab-pane")?.querySelector(".js-source-list");
           if (!listContainer) return;
 
           listContainer.querySelectorAll("label").forEach((lbl) => {
-            const text = (lbl.textContent || "").toLowerCase();
-            lbl.style.display = text.includes(term) ? "" : "none";
+            lbl.style.display = match(lbl.textContent) ? "" : "none";
           });
         });
       });

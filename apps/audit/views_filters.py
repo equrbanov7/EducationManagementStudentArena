@@ -20,6 +20,7 @@ from django.utils import timezone
 
 from core.constants import AuditAction
 from core.permissions import is_superadmin_user, request_has_permission
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
 from .models import AuditLog
@@ -192,16 +193,15 @@ def parse_filters(request, *, is_superadmin: bool) -> dict:
 
 
 def _search_q(term: str) -> Q:
-    query = (
-        Q(user__username__icontains=term)
-        | Q(user__first_name__icontains=term)
-        | Q(user__last_name__icontains=term)
-        | Q(resource_repr__icontains=term)
-        | Q(resource_type__icontains=term)
-        | Q(resource_id__icontains=term)
-        | Q(object_id__icontains=term)
-        | Q(reason__icontains=term)
+    # Dözümlü (sahib 2026-09-26): adlar/səbəb az/ing hərfinə; obyekt təsviri (qrup adı ola bilər) və
+    # identifikatorlar kod rejimində. Tam UUID əlavə olaraq dəqiq uyğunluqla yoxlanır.
+    query = tolerant_q(
+        term,
+        ("user__username", "user__first_name", "user__last_name", "resource_type", "reason"),
+        compact_fields=("resource_repr", "resource_id", "object_id"),
     )
+    if query is None:
+        return Q()
     try:
         as_uuid = uuid.UUID(term)
     except (ValueError, AttributeError):

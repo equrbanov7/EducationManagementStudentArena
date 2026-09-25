@@ -6,6 +6,8 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.urls import reverse
 
+from core.search_text import tolerant_q
+
 from ..models import OrgUnit
 from ..scoping import get_permission_scope
 from ..views import _can_view_structure
@@ -59,8 +61,9 @@ def build_organization_faculties_context(request, organization, *, form_errors=N
         )
     )
     total_count = faculties.count()
-    if search:
-        faculties = faculties.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    search_q = tolerant_q(search, ("name",), compact_fields=("code",))
+    if search_q is not None:
+        faculties = faculties.filter(search_q)
     faculties = faculties.order_by(*_SORT_OPTIONS[sort])
 
     page_obj = Paginator(faculties, FACULTY_PAGE_SIZE).get_page(request.GET.get("faculty_page"))
@@ -150,8 +153,9 @@ def build_organization_kafedras_context(request, organization, *, form_errors=No
 
     kafedras = _visible_kafedras_qs(organization, scope).select_related("parent", "head")
     total_count = kafedras.count()
-    if search:
-        kafedras = kafedras.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    search_q = tolerant_q(search, ("name",), compact_fields=("code",))
+    if search_q is not None:
+        kafedras = kafedras.filter(search_q)
     if faculty_filter:
         kafedras = kafedras.filter(parent_id=faculty_filter)
     kafedras = kafedras.order_by(*_SORT_OPTIONS[sort])

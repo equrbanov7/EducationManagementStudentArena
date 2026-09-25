@@ -33,6 +33,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 from core.constants import OrgUnitType
+from core.search_text import tokens_of, tolerant_match
 
 from . import status as academic_status
 from .forms import CurriculumForm, OfferingForm, ProgramForm, StudentRecordForm, SubjectForm
@@ -135,8 +136,15 @@ def counts(organization, period=None) -> dict:
     }
 
 
-def _text(*parts) -> str:
-    return " ".join(str(part) for part in parts if part).casefold()
+def _hit(query, *texts, codes=()) -> bool:
+    """Dözümlü uyğunluq (``core.search_text``, ``tolerant_q`` + ``compact_fields`` ilə eyni qayda).
+
+    Hər token ya adlarda (az/ing hərf qatlanması), ya da ``codes``-da (kod rejimi — ayırıcıya dözümlü) olmalıdır.
+    """
+    for token in tokens_of(query):
+        if not (tolerant_match(token, *texts) or (codes and tolerant_match(token, *codes, compact=True))):
+            return False
+    return True
 
 
 def _person(user) -> str:
@@ -152,7 +160,7 @@ def _program_rows(organization, query, status):
             continue
         if status == "inactive" and item.is_active:
             continue
-        if query and query not in _text(item.name, item.code, item.official_code, item.legacy_official_code):
+        if query and not _hit(query, item.name, codes=(item.code, item.official_code, item.legacy_official_code)):
             continue
         rows.append(
             {
@@ -177,7 +185,7 @@ def _subject_rows(organization, query, status):
             continue
         if status == "inactive" and item.is_active:
             continue
-        if query and query not in _text(item.name, item.code):
+        if query and not _hit(query, item.name, codes=(item.code,)):
             continue
         rows.append(
             {
@@ -200,7 +208,7 @@ def _curriculum_rows(organization, query, status, program):
             continue
         if program and str(item.program_id) != program:
             continue
-        if query and query not in _text(item.name, item.program.name, item.admission_year):
+        if query and not _hit(query, item.name, item.program.name, codes=(item.admission_year,)):
             continue
         rows.append(
             {
@@ -222,8 +230,11 @@ def _offering_rows(organization, period, query, flag):
             continue
         if flag == "with_instructor" and not item.instructor_id:
             continue
-        if query and query not in _text(
-            item.subject.name, item.subject.code, item.group and item.group.name, _person(item.instructor)
+        if query and not _hit(
+            query,
+            item.subject.name,
+            _person(item.instructor),
+            codes=(item.subject.code, item.group.name if item.group else ""),
         ):
             continue
         rows.append(
@@ -247,7 +258,7 @@ def _rubric_rows(organization, query, status):
             continue
         if status == "inactive" and item.is_active:
             continue
-        if query and query not in _text(item.name, item.description):
+        if query and not _hit(query, item.name, item.description):
             continue
         rows.append(
             {
@@ -269,7 +280,7 @@ def _student_rows(organization, query, status, program):
             continue
         if program and str(item.program_id) != program:
             continue
-        if query and query not in _text(_person(item.student), item.student.username, item.program.name):
+        if query and not _hit(query, _person(item.student), item.student.username, item.program.name):
             continue
         rows.append(
             {
@@ -289,7 +300,7 @@ def _student_rows(organization, query, status, program):
 
 def rows(organization, *, tab, period=None, query="", status="", program="", flag=""):
     """Seçilmiş tabın sətirləri (süzgəc SERVERDƏ tətbiq olunur)."""
-    query = (query or "").strip().casefold()
+    query = (query or "").strip()
     if tab == "programs":
         return _program_rows(organization, query, status)
     if tab == "subjects":

@@ -24,6 +24,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
 from django.views.decorators.http import require_GET
 
+from core.search_text import tolerant_match
+
 from . import journal_extras, lesson_rooms
 from .journal_access import can_edit_journal, can_observe_journal, offering_or_404
 
@@ -78,9 +80,9 @@ def lesson_teacher_search(request, offering_id):
         results = [{"id": match["id"], "text": match["name"]}] if match else []
         return JsonResponse({"results": results, "has_more": False})
 
-    query = (request.GET.get("q") or "").strip().lower()
+    query = (request.GET.get("q") or "").strip()
     if query:
-        candidates = [c for c in candidates if query in c["name"].lower()]
+        candidates = [c for c in candidates if tolerant_match(query, c["name"])]
     offset, limit = _bounds(request)
     window = candidates[offset : offset + limit + 1]
     results = [{"id": c["id"], "text": c["name"]} for c in window[:limit]]

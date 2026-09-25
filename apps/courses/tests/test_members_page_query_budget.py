@@ -121,7 +121,7 @@ class MembersPageQueryBudgetTest(_MembersFixtureMixin, TestCase):
             self.assertNotIn(user.username, html)
         available_url = reverse("courses:available_students", kwargs={"course_id": self.course.id})
         self.assertIn(f'data-available-url="{available_url}"', html)
-        self.assertIn('courses/js/_member_form_modal.js?v=20260912-1" defer', html)
+        self.assertIn('courses/js/_member_form_modal.js?v=20260926-search" defer', html)
         self.assertIn('id="student_selected_chips"', html)
 
     def test_members_page_has_no_per_member_user_select(self):

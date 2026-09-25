@@ -24,8 +24,9 @@ from apps.organizations.models import OrgUnit
 from apps.organizations.public import ORG_WIDE_SCOPE, get_permission_scope, scope_org_units
 from apps.registrar.models import Program, StudentAcademicRecord
 from apps.registrar.public import transcript
-from core.program_codes import program_code_search_q
+from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.roles import user_has_any_role
+from core.search_text import tolerant_q
 
 _FILTER_KEYS = ("faculty", "department", "program", "group", "student", "year", "season")
 _PAGE_DEFAULT = 10
@@ -258,6 +259,12 @@ def records_student_detail(request):
 # ── Axtarışlı seçici (lookup) endpoint-ləri ──────────────────────────────────
 
 
+def _search(queryset, request, fields, *, compact_fields=()):
+    """``?q=`` süzgəci — tokenləşmiş, az/ing dözümlü (``core.search_text``); boş sorğu → süzgəc yoxdur."""
+    search = tolerant_q(request.GET.get("q") or "", fields, compact_fields=compact_fields)
+    return queryset.filter(search) if search is not None else queryset
+
+
 def _subtree_filter(organization, unit_id, path_field):
     """Verilmiş OrgUnit-in alt-ağacı üçün Q (özü + törəmələri). Tapılmasa None."""
     unit = OrgUnit.objects.filter(organization=organization, pk=unit_id).only("id", "path").first()
@@ -278,9 +285,7 @@ def faculty_search(request):
         return JsonResponse({"results": [], "has_more": False})
     qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("faculty", "deanery"))
     qs = scope_org_units(qs, scope)
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        qs = qs.filter(name__icontains=query)
+    qs = _search(qs, request, ("name",))
     return _page(qs.order_by("name"), request, lambda u: {"id": str(u.id), "text": u.name})
 
 
@@ -296,9 +301,7 @@ def department_search(request):
     faculty = (request.GET.get("faculty") or "").strip()
     if faculty:
         qs = qs.filter(parent_id=faculty)
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        qs = qs.filter(name__icontains=query)
+    qs = _search(qs, request, ("name",))
     return _page(qs.order_by("name"), request, lambda u: {"id": str(u.id), "text": u.name})
 
 
@@ -314,13 +317,11 @@ def program_search(request):
     department = (request.GET.get("department") or "").strip()
     if department:
         qs = qs.filter(specialty_unit__parent_id=department)
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        # AXTARIŞ İNVARİANTI: seçicidə ``display_label`` göstərilir, o isə cari
-        # şifr yoxdursa KÖHNƏ şifrə geri çəkilir. Ona görə axtarış HƏR İKİ nəsil
-        # şifri əhatə etməlidir — əks halda istifadəçi ekranda gördüyü şifri
-        # (məs. «050401») yazanda sıfır nəticə alırdı.
-        qs = qs.filter(Q(name__icontains=query) | program_code_search_q(query))
+    # AXTARIŞ İNVARİANTI: seçicidə ``display_label`` göstərilir, o isə cari
+    # şifr yoxdursa KÖHNƏ şifrə geri çəkilir. Ona görə axtarış HƏR İKİ nəsil
+    # şifri əhatə etməlidir — əks halda istifadəçi ekranda gördüyü şifri
+    # (məs. «050401») yazanda sıfır nəticə alırdı.
+    qs = _search(qs, request, ("name",), compact_fields=PROGRAM_CODE_SEARCH_FIELDS)
     # Seçicidə YALNIZ rəsmi dövlət ixtisas kodu görünür (``display_label``);
     # daxili ``Program.code`` (``MYEDU-*``) nə axtarılır, nə göstərilir.
     return _page(qs.order_by("name"), request, lambda p: {"id": str(p.id), "text": p.display_label})
@@ -341,9 +342,8 @@ def group_search(request):
             sub = _subtree_filter(organization, value, "path")
             qs = qs.filter(sub) if sub is not None else qs.none()
             break
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        qs = qs.filter(name__icontains=query)
+    # Qrup adı kod kimidir: «234king», «234k ing» → «234 K ing».
+    qs = _search(qs, request, (), compact_fields=("name",))
     return _page(qs.order_by("name"), request, lambda u: {"id": str(u.id), "text": u.name})
 
 
@@ -362,13 +362,7 @@ def student_search(request):
     program = (request.GET.get("program") or "").strip()
     if program:
         records = records.filter(program_id=program)
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        records = records.filter(
-            Q(student__first_name__icontains=query)
-            | Q(student__last_name__icontains=query)
-            | Q(student__username__icontains=query)
-        )
+    records = _search(records, request, ("student__first_name", "student__last_name", "student__username"))
     records = records.order_by("student__last_name", "student__first_name", "student__username")
 
     offset, limit = _bounds(request)
@@ -406,11 +400,7 @@ def journal_teacher_search(request):
         return JsonResponse({"results": [], "has_more": False})
 
     users = get_user_model().objects.filter(pk__in=teacher_ids)
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        users = users.filter(
-            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(username__icontains=query)
-        )
+    users = _search(users, request, ("first_name", "last_name", "username"))
     users = users.order_by("last_name", "first_name", "username")
     return _page(
         users,

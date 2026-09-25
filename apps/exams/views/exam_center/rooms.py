@@ -14,6 +14,7 @@ from django.shortcuts import render
 from apps.exams.models import ExamAttempt, ExamRoom, ExamRoomSession, FinalExamTicket
 from apps.exams.services.access_policy import can_manage_exam_rooms
 from apps.exams.services.final_center import can_manage_final_center, sessions_visible_to
+from core.search_text import tolerant_q
 
 from ._shared import supervisor_org_or_403
 
@@ -116,8 +117,10 @@ def exam_center_room_list(request):
         rooms = rooms.filter(pk__in=visible_room_ids)
 
     query = (request.GET.get("q") or "").strip()
-    if query:
-        rooms = rooms.filter(Q(name__icontains=query) | Q(code__icontains=query) | Q(building__icontains=query))
+    # Otaq adı/kodu — ayırıcıya dözümlü («101a» → «101-A»), korpus — adi (sahib 2026-09-26).
+    room_q = tolerant_q(query, ("building",), compact_fields=("name", "code"))
+    if room_q is not None:
+        rooms = rooms.filter(room_q)
 
     # Status filtri: canlı (giriş açıq/aktiv oturumu var) / boş / deaktiv.
     status = (request.GET.get("status") or "").strip()

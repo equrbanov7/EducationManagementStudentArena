@@ -16,13 +16,13 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from apps.registrar.public import handover as handover_read
 from apps.registrar.public import handover_query
+from core.search_text import tolerant_q
 
 from . import filters
 from .labels import REVERT, blocker_labels
@@ -140,14 +140,9 @@ def _source_teachers(actor, search):
         .distinct()
     )
     queryset = get_user_model().objects.filter(pk__in=list(instructor_ids))
-    term = (search or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(first_name__icontains=term)
-            | Q(last_name__icontains=term)
-            | Q(username__icontains=term)
-            | Q(email__icontains=term)
-        )
+    term = tolerant_q(search or "", ("first_name", "last_name", "username", "email"))
+    if term is not None:
+        queryset = queryset.filter(term)
     return queryset.order_by("last_name", "first_name", "username")
 
 

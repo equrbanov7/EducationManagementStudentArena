@@ -12,6 +12,18 @@
 (function () {
   var namespace = (window.EMSCourseExamDashboard = window.EMSCourseExamDashboard || {});
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function getHiddenSelect(form, selectName) {
     return form.querySelector('select[name="' + selectName + '"]');
   }
@@ -114,10 +126,10 @@
     }
 
     function filterList(query) {
-      var normalizedQuery = (query || "").toLowerCase();
+      var match = searchMatcher(query);
       listContainer.querySelectorAll(".create-exam-list-item").forEach(function (row) {
         var haystack = row.getAttribute("data-search") || "";
-        row.style.display = haystack.indexOf(normalizedQuery) !== -1 ? "flex" : "none";
+        row.style.display = match(haystack) ? "flex" : "none";
       });
     }
 

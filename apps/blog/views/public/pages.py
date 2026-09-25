@@ -4,11 +4,12 @@ from urllib.parse import urlencode
 
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
+
+from core.search_text import tolerant_q
 
 from ...models import Category, Post
 from ...selectors import (
@@ -64,10 +65,9 @@ def home(request):
         )
         post_list = filter_posts_by_category_scope(post_list, selected_category)
 
-    if query:
-        post_list = post_list.filter(
-            Q(title__icontains=query) | Q(excerpt__icontains=query) | Q(content__icontains=query)
-        ).distinct()
+    search_q = tolerant_q(query, ("title", "excerpt", "content"))
+    if search_q is not None:
+        post_list = post_list.filter(search_q).distinct()
 
     raw_page_number = request.GET.get("page")
     page_number = _parse_home_page_number(raw_page_number)

@@ -14,7 +14,6 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
@@ -22,6 +21,7 @@ from django.views.decorators.http import require_GET
 from apps.registrar.public import legacy_grade_review as review_read
 from apps.registrar.public import legacy_grade_review_counts as counts_read
 from apps.registrar.public import legacy_grade_review_rows as rows_read
+from core.search_text import tolerant_q
 
 from .policy import resolve_actor
 
@@ -231,9 +231,7 @@ def legacy_review_units(request, kind):
     parent_id = (request.GET.get(depend_param) or "").strip() if depend_param else ""
     if parent_id:
         queryset = queryset.filter(pk__in=review_read.unit_subtree_ids(actor.organization, parent_id))
-    term = (request.GET.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(name__icontains=term)
+    queryset = _search(queryset, request, ("name",))
     return _lookup_payload(
         queryset.order_by("name"),
         request,
@@ -268,14 +266,19 @@ def legacy_review_groups(request):
         if parent_id:
             queryset = queryset.filter(pk__in=review_read.unit_subtree_ids(actor.organization, parent_id))
             break
-    term = (request.GET.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(name__icontains=term)
+    # Qrup adı kod kimidir: «234king», «234k ing» → «234 K ing».
+    queryset = _search(queryset, request, (), compact_fields=("name",))
     return _lookup_payload(
         queryset.order_by("name"),
         request,
         lambda unit: {"id": str(unit.pk), "text": unit.name},
     )
+
+
+def _search(queryset, request, fields, *, compact_fields=()):
+    """``?q=`` — tokenləşmiş, az/ing dözümlü süzgəc (``core.search_text``); boş sorğu → süzgəcsiz."""
+    search = tolerant_q(request.GET.get("q") or "", fields, compact_fields=compact_fields)
+    return queryset.filter(search) if search is not None else queryset
 
 
 def _scope_units(queryset, actor):
@@ -307,9 +310,7 @@ def legacy_review_subjects(request):
         .values("enrollment__offering__subject_id")
     )
     queryset = Subject.objects.filter(organization=actor.organization, pk__in=subject_ids)
-    term = (request.GET.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(Q(name__icontains=term) | Q(code__icontains=term))
+    queryset = _search(queryset, request, ("name",), compact_fields=("code",))
     return _lookup_payload(
         queryset.order_by("code", "name"),
         request,
@@ -334,11 +335,7 @@ def legacy_review_teachers(request):
         .values("enrollment__offering__instructor_id")
     )
     queryset = get_user_model().objects.filter(pk__in=teacher_ids)
-    term = (request.GET.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(username__icontains=term)
-        )
+    queryset = _search(queryset, request, ("first_name", "last_name", "username"))
     return _lookup_payload(
         queryset.order_by("last_name", "first_name", "username"),
         request,

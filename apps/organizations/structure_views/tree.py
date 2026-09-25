@@ -23,6 +23,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_match
 
 from ..scoping import get_permission_scope
 from ..unit_types import UNIT_TYPES_BY_ORG
@@ -199,10 +200,8 @@ def build_structure_tree_context(request, organization) -> dict:
                 node = by_id.get(str(node.parent_id))
         units = [unit for unit in units if str(unit.id) in keep]
     if search:
-        needle = search.casefold()
-        keep = {
-            str(unit.id) for unit in units if needle in unit.name.casefold() or needle in (unit.code or "").casefold()
-        }
+        # Ağacda qruplar da var → ad + kod kod rejimində («234king» → «234 K ing»), az/ing hərfinə dözümlü.
+        keep = {str(unit.id) for unit in units if tolerant_match(search, unit.name, unit.code, compact=True)}
         by_id = {str(unit.id): unit for unit in units}
         for unit_id in list(keep):
             node = by_id.get(unit_id)

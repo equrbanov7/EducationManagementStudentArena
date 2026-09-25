@@ -6,6 +6,18 @@
  * #labModalsConfig data-*; CSRF from EMSCore. escapeHtml from utils/escape.js.
  */
 (function () {
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     const cfgEl = document.getElementById("labModalsConfig");
     if (!cfgEl) return;
     const ds = cfgEl.dataset;
@@ -409,9 +421,9 @@
     var addGSearch = $('addLabGroupSearch');
     if (addGSearch) {
         addGSearch.addEventListener('input', function(e) {
-            var t = e.target.value.toLowerCase();
+            var match = searchMatcher(e.target.value);
             document.querySelectorAll('#addLabGroupList .lab-chk-row').forEach(function(row) {
-                row.style.display = row.textContent.toLowerCase().indexOf(t) > -1 ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
     }
@@ -419,9 +431,9 @@
     var editGSearch = $('editLabGroupSearch');
     if (editGSearch) {
         editGSearch.addEventListener('input', function(e) {
-            var t = e.target.value.toLowerCase();
+            var match = searchMatcher(e.target.value);
             document.querySelectorAll('#editLabGroupList .lab-chk-row').forEach(function(row) {
-                row.style.display = row.textContent.toLowerCase().indexOf(t) > -1 ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
     }

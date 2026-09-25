@@ -2,6 +2,18 @@
 (function (ns, document, window) {
   "use strict";
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function shouldBridgeWheelFromTarget(target) {
     if (!target || !target.closest) {
       return false;
@@ -244,9 +256,10 @@
         return;
       }
 
-      var filter = String(ctx.primaryTeacherSearchInput.value || "").toLowerCase();
+      var filter = String(ctx.primaryTeacherSearchInput.value || "").trim();
+      var match = searchMatcher(filter);
       Array.from(ctx.primaryTeacherSelect.options || []).forEach(function (option) {
-        option.hidden = filter && String(option.textContent || "").toLowerCase().indexOf(filter) === -1;
+        option.hidden = Boolean(filter) && !match(option.textContent || "");
       });
     }
 

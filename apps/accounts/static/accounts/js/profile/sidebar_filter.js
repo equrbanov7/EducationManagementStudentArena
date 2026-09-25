@@ -6,8 +6,9 @@
  *
  * Davranış
  * • Yazdıqca bəndlər adına (və qrupun adına) görə süzülür; hər söz ayrıca
- *   axtarılır, azərbaycan hərfləri yumşaq tutuşdurulur («sagird» → «şagird»,
- *   «imtahan» → «İmtahan»).
+ *   axtarılır (bəndin və ya qrupun adında), az/ing hərfləri yumşaq tutuşdurulur
+ *   («sagird» → «şagird», «imtahan» → «İmtahan», «shagird» → «şagird») —
+ *   kanonik `EMSSearch` (static/js/search_fold.js, 2026-09-26).
  * • Uyğun bəndi olan qrup AÇILIR, olmayan qrup gizlənir; süzgəc təmizlənəndə
  *   qrupların əvvəlki açıq/bağlı vəziyyəti bərpa olunur. İstifadəçinin
  *   yadda saxlanan seçimi (`profileSidebarGroups`, ui.js) DƏYİŞMİR — ui.js
@@ -23,25 +24,27 @@
 (function () {
     "use strict";
 
-    var LETTER_FOLD = { "ə": "e", "ı": "i" };
+    /* Uyğunluq kanonik `EMSSearch`-dədir (static/js/search_fold.js, base.html <head>):
+       az/ing hərfləri (ı/i, ə/e/a, ş/s/sh, ç/c/ch, ğ/g/gh, ö/o, ü/u, x/kh) və kod rejimi.
+       Kitabxana yoxdursa sadə registrsiz «contains»-ə düşür. */
+    function tokensOf(query) {
+        if (window.EMSSearch) {
+            return window.EMSSearch.tokens(query);
+        }
+        return String(query || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+    }
 
-    function fold(text) {
-        var value = String(text || "");
-        try {
-            value = value.toLocaleLowerCase("az");
-        } catch (e) {
-            value = value.toLowerCase();
+    function matcherFor(query) {
+        if (window.EMSSearch) {
+            return window.EMSSearch.matcher(query);
         }
-        if (typeof value.normalize === "function") {
-            // NFD: «ö», «ü», «ş», «ç», «ğ», «i̇» → əsas hərf + birləşən işarə → işarə silinir.
-            value = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        }
-        return value
-            .replace(/[əı]/g, function (letter) {
-                return LETTER_FOLD[letter];
-            })
-            .replace(/\s+/g, " ")
-            .trim();
+        var tokens = tokensOf(query);
+        return function (text) {
+            var hay = String(text || "").toLowerCase();
+            return tokens.every(function (token) {
+                return hay.indexOf(token) !== -1;
+            });
+        };
     }
 
     function textOf(node) {
@@ -72,7 +75,8 @@
             return {
                 item: item,
                 link: item.querySelector(".sidebar-menu-link"),
-                haystack: fold(textOf(item.querySelector(".sidebar-menu-text")) + " " + textOf(groupLabel)),
+                label: textOf(item.querySelector(".sidebar-menu-text")),
+                groupLabel: textOf(groupLabel),
             };
         });
         var containers = Array.prototype.slice.call(nav.querySelectorAll(".sidebar-menu-group, .sidebar-section"));
@@ -86,15 +90,13 @@
         }
 
         function apply() {
-            var tokens = fold(input.value).split(" ").filter(Boolean);
-            var filtering = tokens.length > 0;
+            var filtering = tokensOf(input.value).length > 0;
+            var hitTest = matcherFor(input.value);
             var matches = 0;
             sidebar.classList.toggle("is-filtering", filtering);
 
             entries.forEach(function (entry) {
-                var hit = !filtering || tokens.every(function (token) {
-                    return entry.haystack.indexOf(token) !== -1;
-                });
+                var hit = !filtering || hitTest(entry.label, entry.groupLabel);
                 entry.item.hidden = !hit;
                 if (hit && filtering) {
                     matches += 1;

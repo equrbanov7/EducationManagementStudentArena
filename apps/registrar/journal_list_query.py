@@ -15,6 +15,8 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from core.search_text import tolerant_q
+
 #: `schedule.season_label` ilə EYNİ ay-bölgüsü (SQL tərəfə güzgülənir).
 SEASON_MONTHS: dict[str, tuple[int, ...]] = {
     "Payız semestri": (8, 9, 10, 11, 12),
@@ -94,7 +96,7 @@ def apply_kind_filter(qs, kind: str):
 def apply_text_query(qs, query: str):
     """``q`` axtarışı — fənn kodu/adı + müəllim adı üzərində, KÖHNƏ Python
     davranışının (bitişik mətndə alt-sətir axtarışı) DB tərəfə eyni-eyni
-    köçürülməsi: "CODE NAME MÜƏLLİM" birləşməsi üzərində ``icontains``.
+    köçürülməsi: "CODE NAME MÜƏLLİM" birləşməsi üzərində ``core.search_text.tolerant_q``.
 
     Sərhəd keçən sorğular da (məs. kodun sonu + adın əvvəli) EYNİ nəticəni
     verir — ``Concat`` NULL-ları avtomatik boş mətnə çevirir (Django sənədi)."""
@@ -111,7 +113,11 @@ def apply_text_query(qs, query: str):
         output_field=CharField(),
     )
     haystack = Concat("subject__code", Value(" "), "subject__name", Value(" "), full_name, output_field=CharField())
-    return qs.annotate(_jl_search_haystack=haystack).filter(_jl_search_haystack__icontains=query)
+    # Dözümlü (sahib 2026-09-26): tokenlər VƏ; az/ing hərfləri qatlanır; fənn kodu kod rejimində.
+    search_q = tolerant_q(query, ("_jl_search_haystack",), compact_fields=("subject__code",))
+    if search_q is None:
+        return qs
+    return qs.annotate(_jl_search_haystack=haystack).filter(search_q)
 
 
 def teacher_choices_for(base_qs) -> list[dict]:

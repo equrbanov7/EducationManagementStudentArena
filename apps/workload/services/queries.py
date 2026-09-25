@@ -5,6 +5,8 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.db.models import Q, Sum
 
+from core.search_text import tolerant_q
+
 from ..constants import (
     DEFAULT_ANNUAL_NORM_HOURS,
     Activity,
@@ -27,13 +29,9 @@ def task_rows(task, *, season: str = "", search: str = ""):
     )
     if season:
         queryset = queryset.filter(season=season)
-    if search:
-        queryset = queryset.filter(
-            Q(subject__name__icontains=search)
-            | Q(subject__code__icontains=search)
-            | Q(subject_text__icontains=search)
-            | Q(groups_text__icontains=search)
-        )
+    search_q = tolerant_q(search, ("subject__name", "subject_text"), compact_fields=("subject__code", "groups_text"))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     return queryset
 
 

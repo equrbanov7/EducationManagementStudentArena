@@ -51,6 +51,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType, RoleScopeType
+from core.search_text import tolerant_q
 
 from .constants import KAFEDRA_UNIT_TYPES
 from .members_base import (  # noqa: F401 — yenidən ixrac
@@ -207,14 +208,9 @@ def build_members_section(request, organization) -> dict:
 
     # ── Filtr + səhifə
     queryset = base.select_related("user", "role", "scope_unit")
-    if search:
-        queryset = queryset.filter(
-            Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-            | Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(title__icontains=search)
-        )
+    search_q = tolerant_q(search, ("user__first_name", "user__last_name", "user__username", "user__email", "title"))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     if role:
         queryset = queryset.filter(role__name=role)
     unit = access.units.filter(pk=unit_id).only("id", "path").first() if unit_id else None

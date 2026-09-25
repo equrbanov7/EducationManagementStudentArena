@@ -13,6 +13,18 @@
 (function (window, document) {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     var DRAWER_ID = "tofGroupStudentsDrawer";
     var ADD_DIALOG_ID = "tofGroupAddStudentsDialog";
     var MOVE_DIALOG_ID = "tofGroupMoveDialog";
@@ -83,10 +95,11 @@
         var r = root();
         if (!r) { return; }
         var search = r.querySelector("[data-tof-students-search]");
-        var needle = search ? String(search.value || "").trim().toLowerCase() : "";
+        var needle = search ? String(search.value || "").trim() : "";
+        var match = searchMatcher(needle);
         var visible = 0;
         Array.prototype.forEach.call(r.querySelectorAll("[data-tof-student-row]"), function (li) {
-            var ok = (!needle || li.getAttribute("data-search").indexOf(needle) !== -1) &&
+            var ok = (!needle || match(li.getAttribute("data-search") || "")) &&
                 (!state.status || li.getAttribute("data-status") === state.status);
             li.hidden = !ok;
             if (ok) { visible += 1; }

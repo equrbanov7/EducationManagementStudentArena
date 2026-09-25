@@ -15,6 +15,7 @@ from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
 from apps.task_submission_core.public import resolve_identity_window as resolve_submission_identity_window
 from apps.task_submission_core.public import resolve_recheck_window as resolve_submission_recheck_window
+from core.search_text import tolerant_q
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -85,10 +86,9 @@ def _collect_pending_review_items(
             .exclude(exam__exam_type="test")
             .select_related("exam", "user", "exam__author", "exam__course")
         )
-        if search_query:
-            attempts = attempts.filter(
-                Q(exam__title__icontains=search_query) | Q(exam__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(search_query, ("exam__title", "exam__course__title"))
+        if search_q is not None:
+            attempts = attempts.filter(search_q)
         for attempt in attempts:
             course = attempt.exam.course
             can_view_student_identity, identity_window_seconds_left = resolve_exam_attempt_name_visibility(
@@ -157,10 +157,9 @@ def _collect_pending_review_items(
             .filter(Q(status="submitted") | Q(status="graded", graded_at__gte=review_cutoff))
             .select_related("assignment", "user", "assignment__course", "assignment__course__organization")
         )
-        if search_query:
-            submissions = submissions.filter(
-                Q(assignment__title__icontains=search_query) | Q(assignment__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(search_query, ("assignment__title", "assignment__course__title"))
+        if search_q is not None:
+            submissions = submissions.filter(search_q)
         for submission in submissions:
             course = submission.assignment.course
             is_recheck, review_window_seconds_left = resolve_submission_recheck_window(
@@ -220,10 +219,9 @@ def _collect_pending_review_items(
             .filter(Q(status="pending") | Q(status="graded", graded_at__gte=review_cutoff))
             .select_related("project", "project__course", "project__course__organization", "student")
         )
-        if search_query:
-            project_submissions = project_submissions.filter(
-                Q(project__title__icontains=search_query) | Q(project__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(search_query, ("project__title", "project__course__title"))
+        if search_q is not None:
+            project_submissions = project_submissions.filter(search_q)
         for submission in project_submissions:
             course = submission.project.course
             is_recheck, review_window_seconds_left = resolve_submission_recheck_window(
@@ -289,11 +287,9 @@ def _collect_pending_review_items(
                 "assignment__student",
             )
         )
-        if search_query:
-            lab_submissions = lab_submissions.filter(
-                Q(assignment__lab__title__icontains=search_query)
-                | Q(assignment__lab__course__title__icontains=search_query)
-            )
+        search_q = tolerant_q(search_query, ("assignment__lab__title", "assignment__lab__course__title"))
+        if search_q is not None:
+            lab_submissions = lab_submissions.filter(search_q)
         for submission in lab_submissions:
             student = submission.assignment.student
             course = submission.assignment.lab.course
