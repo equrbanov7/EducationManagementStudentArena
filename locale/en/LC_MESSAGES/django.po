@@ -79621,3 +79621,613 @@ msgstr "Select a scope (faculty, programme or at least one group)."
 msgctxt "timetable.run"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "The action failed."
+
+msgctxt "subject_folder.choice"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "subject_folder.choice"
+msgid "Arxivlənib"
+msgstr "Archived"
+
+msgctxt "subject_folder.choice"
+msgid "Digər"
+msgstr "Other"
+
+msgctxt "subject_folder.choice"
+msgid "Digər səbəb"
+msgstr "Other reason"
+
+msgctxt "subject_folder.choice"
+msgid "Ev tapşırığı"
+msgstr "Homework"
+
+msgctxt "subject_folder.choice"
+msgid "Eyni məzmun"
+msgstr "Identical content"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl"
+msgstr "File"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl silindi"
+msgstr "File removed"
+
+msgctxt "subject_folder.choice"
+msgid "Gecikmə ilə qəbul edilir"
+msgstr "Late work accepted"
+
+msgctxt "subject_folder.choice"
+msgid "Göndərildi"
+msgstr "Submitted"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnal qəbul etmədi"
+msgstr "Gradebook refused"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşdü"
+msgstr "Sent to the gradebook"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşüb"
+msgstr "Recorded in the gradebook"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülmə gözləyir"
+msgstr "Gradebook transfer pending"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülməsi gözlənilir"
+msgstr "Waiting for gradebook transfer"
+
+msgctxt "subject_folder.choice"
+msgid "Keçid"
+msgstr "Link"
+
+msgctxt "subject_folder.choice"
+msgid "Kod nümunəsi"
+msgstr "Code sample"
+
+msgctxt "subject_folder.choice"
+msgid "Mövzuya uyğun deyil"
+msgstr "Off topic"
+
+msgctxt "subject_folder.choice"
+msgid "Müəllimin mövzusu"
+msgstr "Teacher's topic"
+
+msgctxt "subject_folder.choice"
+msgid "Mətn oxşarlığı"
+msgstr "Text similarity"
+
+msgctxt "subject_folder.choice"
+msgid "Oxşarlıq aşkarlandı"
+msgstr "Similarity detected"
+
+msgctxt "subject_folder.choice"
+msgid "Plagiat / köçürülmüş iş"
+msgstr "Plagiarism / copied work"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama saxlanıldı"
+msgstr "Draft saved"
+
+msgctxt "subject_folder.choice"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edildi"
+msgstr "Accepted"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edilib"
+msgstr "Accepted"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edildi"
+msgstr "Rejected"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edilib"
+msgstr "Rejected"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd ləğv edildi"
+msgstr "Rejection withdrawn"
+
+msgctxt "subject_folder.choice"
+msgid "Rəylə qaytarıldı"
+msgstr "Returned with feedback"
+
+msgctxt "subject_folder.choice"
+msgid "Sillabusdan"
+msgstr "From the syllabus"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Submitted after the deadline"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra qəbul edilmir"
+msgstr "Not accepted after the deadline"
+
+msgctxt "subject_folder.choice"
+msgid "Sərbəst iş"
+msgstr "Independent work"
+
+msgctxt "subject_folder.choice"
+msgid "Tətbiq olunmur"
+msgstr "Not applicable"
+
+msgctxt "subject_folder.choice"
+msgid "Video keçidi"
+msgstr "Video link"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən göndərildi"
+msgstr "Resubmitted"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən işləməyə qaytarılıb"
+msgstr "Returned for revision"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama alınmadı"
+msgstr "Check failed"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama gözlənilir"
+msgstr "Check pending"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıla bilən mətn yoxdur"
+msgstr "No checkable text"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıldı"
+msgstr "Checked"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılıb"
+msgstr "Check complete"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılır"
+msgstr "Under review"
+
+msgctxt "subject_folder.choice"
+msgid "Şəkil"
+msgstr "Image"
+
+msgctxt "subject_folder.error"
+msgid "Arxivlənmiş qovluq dəyişdirilə bilməz."
+msgstr "An archived folder cannot be changed."
+
+msgctxt "subject_folder.error"
+msgid "Açılma vaxtı son tarixdən əvvəl olmalıdır."
+msgstr "The opening time must be before the deadline."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın fənni qovluğun fənninə uyğun deyil."
+msgstr "The course offering's subject does not match the folder's subject."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın semestri qovluğun semestrinə uyğun deyil."
+msgstr "The course offering's semester does not match the folder's semester."
+
+msgctxt "subject_folder.error"
+msgid "Bal 0-dan böyük olmalı və %(max)s-dən çox olmamalıdır."
+msgstr "Points must be greater than 0 and no more than %(max)s."
+
+msgctxt "subject_folder.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "The title cannot be empty."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışında aktiv qeydiyyatınız yoxdur."
+msgstr "You have no active enrollment in this course offering."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışını (qrupu) siz tədris etmirsiniz."
+msgstr "You do not teach this course offering (group)."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənni tədris etmədiyiniz üçün onun qovluğunu yarada bilməzsiniz."
+msgstr "You cannot create a folder for a subject you do not teach."
+
+msgctxt "subject_folder.error"
+msgid "Bu göndəriş baxış növbəsində deyil."
+msgstr "This submission is not in the review queue."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrup üçün qovluq aktiv deyil."
+msgstr "The folder is not active for this group."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun göndərişlərini yalnız fənnin müəllimi yoxlaya bilər."
+msgstr "Only the subject's teacher can review this group's submissions."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Bu qrupun sillabusundakı sərbəst iş strukturu (%(offering_option)s) "
+"qovluğunkundan (%(folder_option)s) fərqlidir — sərbəst iş bu qrupda "
+"qovluqdan qəbul edilməyəcək."
+msgstr ""
+"The independent work structure in this group's syllabus "
+"(%(offering_option)s) differs from the folder's (%(folder_option)s) — "
+"independent work will not be accepted from the folder for this group."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun sərbəst işləri başqa fənn qovluğundan qiymətləndirilir."
+msgstr "This group's independent work is graded from another subject folder."
+
+msgctxt "subject_folder.error"
+msgid "Bu sərbəst iş üçün bal artıq verilib — ikinci dəfə bal verilmir."
+msgstr ""
+"Points have already been awarded for this independent work — they cannot be "
+"awarded twice."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq arxivlənib."
+msgstr "This task has been archived."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq fayl qəbul etmir — cavabı mətn kimi yazın."
+msgstr "This task does not accept files — write your answer as text."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq mətn cavabı qəbul etmir — fayl yükləyin."
+msgstr "This task does not accept text answers — upload a file."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq üzrə iş artıq yekunlaşıb."
+msgstr "Work on this task has already been finalized."
+
+msgctxt "subject_folder.error"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "You do not have permission for this action."
+
+msgctxt "subject_folder.error"
+msgid "Cavab mətni yazın və ya ən azı bir fayl əlavə edin."
+msgstr "Write an answer or attach at least one file."
+
+msgctxt "subject_folder.error"
+msgid "Dəstəklənməyən fayl tipi: %(ext)s"
+msgstr "Unsupported file type: %(ext)s"
+
+msgctxt "subject_folder.error"
+msgid "Ev tapşırığına bal verilmir — yalnız «Yoxlanıldı» qeyd edin."
+msgstr "Homework is not graded — just mark it as “Checked”."
+
+msgctxt "subject_folder.error"
+msgid "Eyni anda ikinci göndəriş alındı — səhifəni yeniləyib yoxlayın."
+msgstr ""
+"A second submission arrived at the same time — refresh the page and check."
+
+msgctxt "subject_folder.error"
+msgid "Fayl qəbul edilmədi."
+msgstr "The file was not accepted."
+
+msgctxt "subject_folder.error"
+msgid "Fayl sayı 1–%(max_files)s, ölçü 1–%(max_mb)s MB aralığında olmalıdır."
+msgstr ""
+"The number of files must be 1–%(max_files)s and the size 1–%(max_mb)s MB."
+
+msgctxt "subject_folder.error"
+msgid "Fayl seçilməyib."
+msgstr "No file selected."
+
+msgctxt "subject_folder.error"
+msgid "Göndərişiniz yoxlanılır — müəllimin cavabını gözləyin."
+msgstr "Your submission is under review — wait for the teacher's response."
+
+msgctxt "subject_folder.error"
+msgid "Keçid http:// və ya https:// ilə başlayan düzgün ünvan olmalıdır."
+msgstr "The link must be a valid address starting with http:// or https://."
+
+msgctxt "subject_folder.error"
+msgid "Kod mətni boşdur."
+msgstr "The code text is empty."
+
+msgctxt "subject_folder.error"
+msgid "Material bu qovluğa aid deyil."
+msgstr "The material does not belong to this folder."
+
+msgctxt "subject_folder.error"
+msgid "Material növü tanınmır."
+msgstr "Unknown material type."
+
+msgctxt "subject_folder.error"
+msgid "Mövzu bu qovluğa aid deyil."
+msgstr "The topic does not belong to this folder."
+
+msgctxt "subject_folder.error"
+msgid "Mövzuya bağlı material və ya tapşırıq var — əvvəlcə onları köçürün."
+msgstr "Materials or tasks are linked to this topic — move them first."
+
+msgctxt "subject_folder.error"
+msgid "Mətn çox uzundur (ən çox %(max)s simvol)."
+msgstr "The text is too long (at most %(max)s characters)."
+
+msgctxt "subject_folder.error"
+msgid "Qeyd mətni boşdur."
+msgstr "The note text is empty."
+
+msgctxt "subject_folder.error"
+msgid "Qovluq hələ aktiv deyil."
+msgstr "The folder is not active yet."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğu yalnız onun sahibi olan müəllim redaktə edə bilər."
+msgstr "Only the teacher who owns the folder can edit it."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğun statusu yanlışdır."
+msgstr "Invalid folder status."
+
+msgctxt "subject_folder.error"
+msgid "Rədd səbəbi seçilməyib."
+msgstr "No rejection reason selected."
+
+msgctxt "subject_folder.error"
+msgid "Rəy yazın (ən azı %(min)s simvol)."
+msgstr "Write feedback (at least %(min)s characters)."
+
+msgctxt "subject_folder.error"
+msgid "Seçilən obyektlər eyni təşkilata aid olmalıdır."
+msgstr "The selected objects must belong to the same organization."
+
+msgctxt "subject_folder.error"
+msgid "Sillabus mövzusu silinmir — onu gizlədə və ya adını dəyişə bilərsiniz."
+msgstr "A syllabus topic cannot be deleted — you can hide or rename it."
+
+msgctxt "subject_folder.error"
+msgid "Son tarix keçib — bu tapşırıq gecikmə ilə qəbul edilmir."
+msgstr "The deadline has passed — this task does not accept late work."
+
+msgctxt "subject_folder.error"
+msgid "Sərbəst iş bal ilə qəbul edilir."
+msgstr "Independent work is accepted with points."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş balı cəmi %(max_total)s-i keçə bilməz: tələbənin artıq "
+"%(already)s balı var, ən çox %(remaining)s əlavə etmək olar."
+msgstr ""
+"Independent work points cannot exceed %(max_total)s in total: the student "
+"already has %(already)s, at most %(remaining)s can be added."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş tapşırıqları sillabusun strukturundan yaranır — əlavə sərbəst iş "
+"yaratmaq olmaz."
+msgstr ""
+"Independent work tasks come from the syllabus structure — extra independent "
+"work cannot be created."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq bu qovluğa aid deyil."
+msgstr "The task does not belong to this folder."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ açılmayıb."
+msgstr "The task is not open yet."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ dərc edilməyib."
+msgstr "The task has not been published yet."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq növü tanınmır."
+msgstr "Unknown task type."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq nə mətn, nə də fayl qəbul edir."
+msgstr "The task accepts neither text nor files."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa göndəriş var — silmək olmaz, yalnız arxivləmək olar."
+msgstr "The task has submissions — it cannot be deleted, only archived."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa ən çox %(max)s qoşma əlavə etmək olar."
+msgstr "At most %(max)s attachments can be added to a task."
+
+msgctxt "subject_folder.error"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "The assignment does not belong to this folder."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız qaralamadakı fayl silinə bilər."
+msgstr "Only files in a draft can be removed."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."
+msgstr "Only a rejected submission can be reopened."
+
+msgctxt "subject_folder.error"
+msgid "Ən çox %(max)s fayl əlavə etmək olar."
+msgstr "At most %(max)s files can be attached."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal balı qəbul etmədi."
+msgstr "The gradebook did not accept the points."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal inteqrasiyası hələ aktiv deyil — bal növbədədir."
+msgstr "Gradebook integration is not active yet — the points are queued."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnala ötürmə alınmadı, yenidən cəhd ediləcək: %(error)s"
+msgstr "Transfer to the gradebook failed and will be retried: %(error)s"
+
+msgctxt "subject_folder.journal"
+msgid "Sərbəst iş %(n)s"
+msgstr "Independent work %(n)s"
+
+msgctxt "subject_folder.sync"
+msgid "Sərbəst iş %(n)s"
+msgstr "Independent work %(n)s"
+
+msgctxt "subject_folder.review"
+msgid ""
+"Bu bal jurnala düşəcək: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"These points will go to the gradebook: %(slot)s · %(points)s/%(max)s (total "
+"%(total)s/%(max_total)s)"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluqları"
+msgstr "subject folders"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluğu"
+msgstr "subject folder"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş"
+msgstr "submission"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izi"
+msgstr "submission fingerprint"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izləri"
+msgstr "submission fingerprints"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylları"
+msgstr "submission files"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylı"
+msgstr "submission file"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisələri"
+msgstr "submission events"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisəsi"
+msgstr "submission event"
+
+msgctxt "subject_folder.model"
+msgid "göndərişlər"
+msgstr "submissions"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluqları"
+msgstr "similarity matches"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluğu"
+msgstr "similarity match"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzuları"
+msgstr "folder topics"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzusu"
+msgstr "folder topic"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatları"
+msgstr "folder assignments"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatı"
+msgstr "folder assignment"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq"
+msgstr "task"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşmaları"
+msgstr "task attachments"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşması"
+msgstr "task attachment"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixi"
+msgstr "task deadline"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixləri"
+msgstr "task deadlines"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıqlar"
+msgstr "tasks"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialları"
+msgstr "teaching materials"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialı"
+msgstr "teaching material"
+
+msgctxt "subject_folder.notify"
+msgid "Bal jurnala köçürülür."
+msgstr "The points are being transferred to the gradebook."
+
+msgctxt "subject_folder.notify"
+msgid "Bal: %(points)s / %(max)s — jurnala köçürülür."
+msgstr "Points: %(points)s / %(max)s — being transferred to the gradebook."
+
+msgctxt "subject_folder.notify"
+msgid "Ev tapşırığı yoxlanıldı: %(task)s"
+msgstr "Homework checked: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Müəllimin rəyini oxuyun və işi yenidən göndərin."
+msgstr "Read the teacher's feedback and resubmit your work."
+
+msgctxt "subject_folder.notify"
+msgid "Səbəb və rəy tapşırıq səhifəsindədir."
+msgstr "The reason and feedback are on the task page."
+
+msgctxt "subject_folder.notify"
+msgid "Sərbəst iş qəbul edildi: %(task)s"
+msgstr "Independent work accepted: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni ev tapşırığı: %(title)s"
+msgstr "New homework: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni fənn qovluğu: %(subject)s"
+msgstr "New subject folder: %(subject)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni sərbəst iş: %(title)s"
+msgstr "New independent work: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yoxlanılmalı yeni işlər: %(count)s"
+msgstr "New work to review: %(count)s"
+
+msgctxt "subject_folder.notify"
+msgid "«%(folder)s» — tədris materialları və tapşırıqlar sizin üçün açıqdır."
+msgstr "“%(folder)s” — teaching materials and tasks are now available to you."
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz rədd edildi: %(task)s"
+msgstr "Your work was rejected: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz yenidən işləməyə qaytarıldı: %(task)s"
+msgstr "Your work was returned for revision: %(task)s"

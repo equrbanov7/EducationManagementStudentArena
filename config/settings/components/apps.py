@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "apps.surveys.apps.SurveysConfig",
     # Avtomatik dərs cədvəli generatoru (2026-09-25) — bax apps/timetable/public.py.
     "apps.timetable.apps.TimetableConfig",
+    # Fənn qovluğu — materiallar, sərbəst iş, ev tapşırığı (2026-09-25) — bax apps/subject_folder/public.py.
+    "apps.subject_folder.apps.SubjectFolderConfig",
     "apps.trial_exams.apps.TrialExamsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",

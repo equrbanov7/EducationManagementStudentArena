@@ -79161,3 +79161,615 @@ msgstr "Bir kapsam seçin (fakülte, bölüm veya en az bir grup)."
 msgctxt "timetable.run"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "İşlem gerçekleştirilemedi."
+
+msgctxt "subject_folder.choice"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "subject_folder.choice"
+msgid "Arxivlənib"
+msgstr "Arşivlendi"
+
+msgctxt "subject_folder.choice"
+msgid "Digər"
+msgstr "Diğer"
+
+msgctxt "subject_folder.choice"
+msgid "Digər səbəb"
+msgstr "Diğer neden"
+
+msgctxt "subject_folder.choice"
+msgid "Ev tapşırığı"
+msgstr "Ödev"
+
+msgctxt "subject_folder.choice"
+msgid "Eyni məzmun"
+msgstr "Aynı içerik"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl"
+msgstr "Dosya"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl silindi"
+msgstr "Dosya silindi"
+
+msgctxt "subject_folder.choice"
+msgid "Gecikmə ilə qəbul edilir"
+msgstr "Gecikmeli kabul edilir"
+
+msgctxt "subject_folder.choice"
+msgid "Göndərildi"
+msgstr "Gönderildi"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnal qəbul etmədi"
+msgstr "Not defteri kabul etmedi"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşdü"
+msgstr "Not defterine aktarıldı"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşüb"
+msgstr "Not defterine işlendi"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülmə gözləyir"
+msgstr "Not defterine aktarım bekliyor"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülməsi gözlənilir"
+msgstr "Not defterine aktarılması bekleniyor"
+
+msgctxt "subject_folder.choice"
+msgid "Keçid"
+msgstr "Bağlantı"
+
+msgctxt "subject_folder.choice"
+msgid "Kod nümunəsi"
+msgstr "Kod örneği"
+
+msgctxt "subject_folder.choice"
+msgid "Mövzuya uyğun deyil"
+msgstr "Konu dışı"
+
+msgctxt "subject_folder.choice"
+msgid "Müəllimin mövzusu"
+msgstr "Öğretmenin konusu"
+
+msgctxt "subject_folder.choice"
+msgid "Mətn oxşarlığı"
+msgstr "Metin benzerliği"
+
+msgctxt "subject_folder.choice"
+msgid "Oxşarlıq aşkarlandı"
+msgstr "Benzerlik tespit edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Plagiat / köçürülmüş iş"
+msgstr "İntihal / kopya çalışma"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama"
+msgstr "Taslak"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama saxlanıldı"
+msgstr "Taslak kaydedildi"
+
+msgctxt "subject_folder.choice"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edildi"
+msgstr "Kabul edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edilib"
+msgstr "Kabul edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edildi"
+msgstr "Reddedildi"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edilib"
+msgstr "Reddedildi"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd ləğv edildi"
+msgstr "Ret geri alındı"
+
+msgctxt "subject_folder.choice"
+msgid "Rəylə qaytarıldı"
+msgstr "Geri bildirimle iade edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Sillabusdan"
+msgstr "Ders izlencesinden"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Son tarihten sonra gönderildi"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra qəbul edilmir"
+msgstr "Son tarihten sonra kabul edilmez"
+
+msgctxt "subject_folder.choice"
+msgid "Sərbəst iş"
+msgstr "Bağımsız çalışma"
+
+msgctxt "subject_folder.choice"
+msgid "Tətbiq olunmur"
+msgstr "Uygulanmaz"
+
+msgctxt "subject_folder.choice"
+msgid "Video keçidi"
+msgstr "Video bağlantısı"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən göndərildi"
+msgstr "Yeniden gönderildi"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən işləməyə qaytarılıb"
+msgstr "Düzeltme için iade edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama alınmadı"
+msgstr "Kontrol başarısız"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama gözlənilir"
+msgstr "Kontrol bekleniyor"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıla bilən mətn yoxdur"
+msgstr "Kontrol edilecek metin yok"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıldı"
+msgstr "Kontrol edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılıb"
+msgstr "Kontrol tamamlandı"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılır"
+msgstr "İnceleniyor"
+
+msgctxt "subject_folder.choice"
+msgid "Şəkil"
+msgstr "Görsel"
+
+msgctxt "subject_folder.error"
+msgid "Arxivlənmiş qovluq dəyişdirilə bilməz."
+msgstr "Arşivlenmiş klasör değiştirilemez."
+
+msgctxt "subject_folder.error"
+msgid "Açılma vaxtı son tarixdən əvvəl olmalıdır."
+msgstr "Açılış zamanı son tarihten önce olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın fənni qovluğun fənninə uyğun deyil."
+msgstr "Ders açılışının dersi klasörün dersiyle eşleşmiyor."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın semestri qovluğun semestrinə uyğun deyil."
+msgstr "Ders açılışının dönemi klasörün dönemiyle eşleşmiyor."
+
+msgctxt "subject_folder.error"
+msgid "Bal 0-dan böyük olmalı və %(max)s-dən çox olmamalıdır."
+msgstr "Puan 0'dan büyük ve en fazla %(max)s olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "Başlık boş olamaz."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışında aktiv qeydiyyatınız yoxdur."
+msgstr "Bu ders açılışında aktif kaydınız yok."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışını (qrupu) siz tədris etmirsiniz."
+msgstr "Bu ders açılışını (grubu) siz vermiyorsunuz."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənni tədris etmədiyiniz üçün onun qovluğunu yarada bilməzsiniz."
+msgstr "Vermediğiniz bir ders için klasör oluşturamazsınız."
+
+msgctxt "subject_folder.error"
+msgid "Bu göndəriş baxış növbəsində deyil."
+msgstr "Bu teslim inceleme kuyruğunda değil."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrup üçün qovluq aktiv deyil."
+msgstr "Klasör bu grup için etkin değil."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun göndərişlərini yalnız fənnin müəllimi yoxlaya bilər."
+msgstr "Bu grubun teslimlerini yalnızca dersin öğretmeni inceleyebilir."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Bu qrupun sillabusundakı sərbəst iş strukturu (%(offering_option)s) "
+"qovluğunkundan (%(folder_option)s) fərqlidir — sərbəst iş bu qrupda "
+"qovluqdan qəbul edilməyəcək."
+msgstr ""
+"Bu grubun ders izlencesindeki bağımsız çalışma yapısı (%(offering_option)s) "
+"klasörünkinden (%(folder_option)s) farklı — bu grupta bağımsız çalışmalar "
+"klasörden kabul edilmeyecek."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun sərbəst işləri başqa fənn qovluğundan qiymətləndirilir."
+msgstr ""
+"Bu grubun bağımsız çalışmaları başka bir ders klasöründen değerlendiriliyor."
+
+msgctxt "subject_folder.error"
+msgid "Bu sərbəst iş üçün bal artıq verilib — ikinci dəfə bal verilmir."
+msgstr "Bu bağımsız çalışma için puan zaten verildi — ikinci kez verilmez."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq arxivlənib."
+msgstr "Bu görev arşivlendi."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq fayl qəbul etmir — cavabı mətn kimi yazın."
+msgstr "Bu görev dosya kabul etmiyor — cevabınızı metin olarak yazın."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq mətn cavabı qəbul etmir — fayl yükləyin."
+msgstr "Bu görev metin cevabı kabul etmiyor — dosya yükleyin."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq üzrə iş artıq yekunlaşıb."
+msgstr "Bu görevdeki çalışma zaten sonuçlandı."
+
+msgctxt "subject_folder.error"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "Bu işlem için yetkiniz yok."
+
+msgctxt "subject_folder.error"
+msgid "Cavab mətni yazın və ya ən azı bir fayl əlavə edin."
+msgstr "Bir cevap yazın veya en az bir dosya ekleyin."
+
+msgctxt "subject_folder.error"
+msgid "Dəstəklənməyən fayl tipi: %(ext)s"
+msgstr "Desteklenmeyen dosya türü: %(ext)s"
+
+msgctxt "subject_folder.error"
+msgid "Ev tapşırığına bal verilmir — yalnız «Yoxlanıldı» qeyd edin."
+msgstr "Ödeve puan verilmez — yalnızca «Kontrol edildi» olarak işaretleyin."
+
+msgctxt "subject_folder.error"
+msgid "Eyni anda ikinci göndəriş alındı — səhifəni yeniləyib yoxlayın."
+msgstr ""
+"Aynı anda ikinci bir gönderim alındı — sayfayı yenileyip kontrol edin."
+
+msgctxt "subject_folder.error"
+msgid "Fayl qəbul edilmədi."
+msgstr "Dosya kabul edilmedi."
+
+msgctxt "subject_folder.error"
+msgid "Fayl sayı 1–%(max_files)s, ölçü 1–%(max_mb)s MB aralığında olmalıdır."
+msgstr ""
+"Dosya sayısı 1–%(max_files)s, boyut 1–%(max_mb)s MB aralığında olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Fayl seçilməyib."
+msgstr "Dosya seçilmedi."
+
+msgctxt "subject_folder.error"
+msgid "Göndərişiniz yoxlanılır — müəllimin cavabını gözləyin."
+msgstr "Teslimiz inceleniyor — öğretmenin yanıtını bekleyin."
+
+msgctxt "subject_folder.error"
+msgid "Keçid http:// və ya https:// ilə başlayan düzgün ünvan olmalıdır."
+msgstr ""
+"Bağlantı http:// veya https:// ile başlayan geçerli bir adres olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Kod mətni boşdur."
+msgstr "Kod metni boş."
+
+msgctxt "subject_folder.error"
+msgid "Material bu qovluğa aid deyil."
+msgstr "Materyal bu klasöre ait değil."
+
+msgctxt "subject_folder.error"
+msgid "Material növü tanınmır."
+msgstr "Bilinmeyen materyal türü."
+
+msgctxt "subject_folder.error"
+msgid "Mövzu bu qovluğa aid deyil."
+msgstr "Konu bu klasöre ait değil."
+
+msgctxt "subject_folder.error"
+msgid "Mövzuya bağlı material və ya tapşırıq var — əvvəlcə onları köçürün."
+msgstr "Bu konuya bağlı materyal veya görev var — önce onları taşıyın."
+
+msgctxt "subject_folder.error"
+msgid "Mətn çox uzundur (ən çox %(max)s simvol)."
+msgstr "Metin çok uzun (en fazla %(max)s karakter)."
+
+msgctxt "subject_folder.error"
+msgid "Qeyd mətni boşdur."
+msgstr "Not metni boş."
+
+msgctxt "subject_folder.error"
+msgid "Qovluq hələ aktiv deyil."
+msgstr "Klasör henüz etkin değil."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğu yalnız onun sahibi olan müəllim redaktə edə bilər."
+msgstr "Klasörü yalnızca sahibi olan öğretmen düzenleyebilir."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğun statusu yanlışdır."
+msgstr "Geçersiz klasör durumu."
+
+msgctxt "subject_folder.error"
+msgid "Rədd səbəbi seçilməyib."
+msgstr "Ret nedeni seçilmedi."
+
+msgctxt "subject_folder.error"
+msgid "Rəy yazın (ən azı %(min)s simvol)."
+msgstr "Geri bildirim yazın (en az %(min)s karakter)."
+
+msgctxt "subject_folder.error"
+msgid "Seçilən obyektlər eyni təşkilata aid olmalıdır."
+msgstr "Seçilen nesneler aynı kuruma ait olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Sillabus mövzusu silinmir — onu gizlədə və ya adını dəyişə bilərsiniz."
+msgstr ""
+"Ders izlencesi konusu silinemez — gizleyebilir veya yeniden "
+"adlandırabilirsiniz."
+
+msgctxt "subject_folder.error"
+msgid "Son tarix keçib — bu tapşırıq gecikmə ilə qəbul edilmir."
+msgstr "Son tarih geçti — bu görev gecikmeli teslim kabul etmiyor."
+
+msgctxt "subject_folder.error"
+msgid "Sərbəst iş bal ilə qəbul edilir."
+msgstr "Bağımsız çalışma puanla kabul edilir."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş balı cəmi %(max_total)s-i keçə bilməz: tələbənin artıq "
+"%(already)s balı var, ən çox %(remaining)s əlavə etmək olar."
+msgstr ""
+"Bağımsız çalışma puanı toplamda %(max_total)s değerini geçemez: öğrencinin "
+"zaten %(already)s puanı var, en fazla %(remaining)s eklenebilir."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş tapşırıqları sillabusun strukturundan yaranır — əlavə sərbəst iş "
+"yaratmaq olmaz."
+msgstr ""
+"Bağımsız çalışma görevleri ders izlencesinin yapısından oluşur — ek bağımsız"
+" çalışma oluşturulamaz."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq bu qovluğa aid deyil."
+msgstr "Görev bu klasöre ait değil."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ açılmayıb."
+msgstr "Görev henüz açılmadı."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ dərc edilməyib."
+msgstr "Görev henüz yayımlanmadı."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq növü tanınmır."
+msgstr "Bilinmeyen görev türü."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq nə mətn, nə də fayl qəbul edir."
+msgstr "Görev ne metin ne de dosya kabul ediyor."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa göndəriş var — silmək olmaz, yalnız arxivləmək olar."
+msgstr "Görevin teslimleri var — silinemez, yalnızca arşivlenebilir."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa ən çox %(max)s qoşma əlavə etmək olar."
+msgstr "Bir göreve en fazla %(max)s ek eklenebilir."
+
+msgctxt "subject_folder.error"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "Atama bu klasöre ait değil."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız qaralamadakı fayl silinə bilər."
+msgstr "Yalnızca taslaktaki dosyalar silinebilir."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."
+msgstr "Yalnızca reddedilmiş bir teslim yeniden açılabilir."
+
+msgctxt "subject_folder.error"
+msgid "Ən çox %(max)s fayl əlavə etmək olar."
+msgstr "En fazla %(max)s dosya eklenebilir."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal balı qəbul etmədi."
+msgstr "Not defteri puanı kabul etmedi."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal inteqrasiyası hələ aktiv deyil — bal növbədədir."
+msgstr "Not defteri entegrasyonu henüz etkin değil — puan kuyrukta."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnala ötürmə alınmadı, yenidən cəhd ediləcək: %(error)s"
+msgstr "Not defterine aktarım başarısız, yeniden denenecek: %(error)s"
+
+msgctxt "subject_folder.journal"
+msgid "Sərbəst iş %(n)s"
+msgstr "Bağımsız çalışma %(n)s"
+
+msgctxt "subject_folder.sync"
+msgid "Sərbəst iş %(n)s"
+msgstr "Bağımsız çalışma %(n)s"
+
+msgctxt "subject_folder.review"
+msgid ""
+"Bu bal jurnala düşəcək: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"Bu puan not defterine işlenecek: %(slot)s · %(points)s/%(max)s (toplam "
+"%(total)s/%(max_total)s)"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluqları"
+msgstr "ders klasörleri"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluğu"
+msgstr "ders klasörü"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş"
+msgstr "teslim"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izi"
+msgstr "teslim parmak izi"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izləri"
+msgstr "teslim parmak izleri"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylları"
+msgstr "teslim dosyaları"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylı"
+msgstr "teslim dosyası"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisələri"
+msgstr "teslim olayları"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisəsi"
+msgstr "teslim olayı"
+
+msgctxt "subject_folder.model"
+msgid "göndərişlər"
+msgstr "teslimler"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluqları"
+msgstr "benzerlik eşleşmeleri"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluğu"
+msgstr "benzerlik eşleşmesi"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzuları"
+msgstr "klasör konuları"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzusu"
+msgstr "klasör konusu"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatları"
+msgstr "klasör atamaları"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatı"
+msgstr "klasör ataması"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq"
+msgstr "görev"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşmaları"
+msgstr "görev ekleri"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşması"
+msgstr "görev eki"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixi"
+msgstr "görev son tarihi"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixləri"
+msgstr "görev son tarihleri"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıqlar"
+msgstr "görevler"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialları"
+msgstr "ders materyalleri"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialı"
+msgstr "ders materyali"
+
+msgctxt "subject_folder.notify"
+msgid "Bal jurnala köçürülür."
+msgstr "Puan not defterine aktarılıyor."
+
+msgctxt "subject_folder.notify"
+msgid "Bal: %(points)s / %(max)s — jurnala köçürülür."
+msgstr "Puan: %(points)s / %(max)s — not defterine aktarılıyor."
+
+msgctxt "subject_folder.notify"
+msgid "Ev tapşırığı yoxlanıldı: %(task)s"
+msgstr "Ödev kontrol edildi: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Müəllimin rəyini oxuyun və işi yenidən göndərin."
+msgstr "Öğretmenin geri bildirimini okuyun ve çalışmayı yeniden gönderin."
+
+msgctxt "subject_folder.notify"
+msgid "Səbəb və rəy tapşırıq səhifəsindədir."
+msgstr "Neden ve geri bildirim görev sayfasındadır."
+
+msgctxt "subject_folder.notify"
+msgid "Sərbəst iş qəbul edildi: %(task)s"
+msgstr "Bağımsız çalışma kabul edildi: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni ev tapşırığı: %(title)s"
+msgstr "Yeni ödev: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni fənn qovluğu: %(subject)s"
+msgstr "Yeni ders klasörü: %(subject)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni sərbəst iş: %(title)s"
+msgstr "Yeni bağımsız çalışma: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yoxlanılmalı yeni işlər: %(count)s"
+msgstr "İncelenecek yeni çalışmalar: %(count)s"
+
+msgctxt "subject_folder.notify"
+msgid "«%(folder)s» — tədris materialları və tapşırıqlar sizin üçün açıqdır."
+msgstr "«%(folder)s» — ders materyalleri ve görevler artık size açık."
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz rədd edildi: %(task)s"
+msgstr "Çalışmanız reddedildi: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz yenidən işləməyə qaytarıldı: %(task)s"
+msgstr "Çalışmanız düzeltme için iade edildi: %(task)s"
