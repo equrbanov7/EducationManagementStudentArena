@@ -23,7 +23,7 @@ jobs:
       APP_DIR: /home/wcu/EducationManagementStudentArena
     steps:
       - name: 📥 Checkout (skript mənbəyi)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 🔎 Audit
         run: |
