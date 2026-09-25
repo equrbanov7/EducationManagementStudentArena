@@ -241,7 +241,9 @@ class HookContractTest(SelfWorkLegacyFixture, TestCase):
         params.update(kwargs)
         with bypass_rls(), CaptureQueriesContext(connection) as ctx:
             result = hook.preview(**params)
-        writes = [q["sql"] for q in ctx.captured_queries if q["sql"].split()[0].upper() in {"INSERT", "UPDATE", "DELETE"}]
+        writes = [
+            q["sql"] for q in ctx.captured_queries if q["sql"].split()[0].upper() in {"INSERT", "UPDATE", "DELETE"}
+        ]
         self.assertEqual(writes, [], "önbaxış YAZMIR")
         self.assertLessEqual(len(ctx.captured_queries), 3, [q["sql"][:120] for q in ctx.captured_queries])
         return result
