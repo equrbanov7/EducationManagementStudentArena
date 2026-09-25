@@ -331,7 +331,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
     from apps.registrar import finals_batch
 
-    entry_batch = finals_batch.entry_batch(enrollments)
+    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=finals_batch.group_marks(mark_map.values()))
     # «Alt qrup» çipi CARİ iddiadır: rəsmi köçürmədən sonra tələbə artıq bu qrupun
     # üzvüdürsə provenans qalsa da çip yalan danışmamalıdır (bax guest_roster).
     from apps.registrar import guest_merge, guest_roster
@@ -371,6 +371,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     row_limits = absence_limit.row_limits(
         organization_id=offering.organization_id, enrollments=enrollments, total_hours=total_hours
     )
+    entry_batch.provide_attendance(hours_map={offering.id: total_hours}, limits=row_limits, exempt_ids=exempt_ids)
 
     # Per-lesson özət (sütun başlığındakı gün özəti) — `journal_window`-dadır.
     total_students = len(enrollments)
@@ -524,14 +525,13 @@ def get_student_journal_summary(*, record, period, semester_number):
     marks_by_enr: dict = defaultdict(list)
     for m in LessonMark.objects.filter(enrollment_id__in=enr_ids).select_related("lesson"):
         marks_by_enr[m.enrollment_id].append(m)
-    # Giriş balı üçün komponent + komponent balı + sərbəst iş sayı BİR dəfə (əvvəl hər fənn
-    # üçün ``entry_score_for`` 1–3 sorğu edirdi — «Ana səhifə» fənn kartlarında N+1).
     from apps.registrar import finals_batch
 
-    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=marks_by_enr)
+    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    # Giriş balı oxumaları BİR dəfə (fənn başına 1–3 sorğu idi); Midterm davamiyyəti eyni saat/hədd ilə.
+    entry_batch = finals_batch.student_entry_batch(enrollments, record, period, marks_by_enr, hours_map)
     # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu).
     frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
-    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     lesson_counts = {
         row["offering_id"]: row["c"]
         for row in Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(c=Count("id"))

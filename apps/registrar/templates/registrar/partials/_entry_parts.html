@@ -1,0 +1,7 @@
+{% load i18n %}
+<div class="d-flex flex-wrap gap-2" data-entry-standard>
+    <span class="ems-badge ems-badge--neutral">{% trans "Davamiyyət" context "registrar.journal" %}: <strong>{{ parts.attendance|floatformat:"-2" }}</strong>/10</span>
+    <span class="ems-badge ems-badge--neutral" title="{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/10</span>
+    <span class="ems-badge ems-badge--neutral">{% trans "Midterm" context "registrar.journal" %}: <strong>{{ parts.midterm|floatformat:"-2" }}</strong>/20</span>
+    <span class="ems-badge ems-badge--neutral">{% trans "Sərbəst iş" context "registrar.journal" %}: <strong>{{ parts.selfwork|floatformat:"-2" }}</strong>/10</span>
+</div>

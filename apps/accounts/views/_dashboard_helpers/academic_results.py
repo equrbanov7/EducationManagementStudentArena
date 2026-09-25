@@ -212,6 +212,7 @@ def _build_item(row, *, period_label, sort_at) -> dict:
             "credit": row.get("credit") or 0,
             "teacher_name": teacher_name,
             "entry_score": result.get("entry_score"),
+            "entry_parts": result.get("entry_parts"),
             "exit_score": result.get("effective_exam") if result.get("graded") else None,
             "total": result.get("total") if is_definite else None,
             "letter": result.get("letter") if row.get("in_gpa") else "",
