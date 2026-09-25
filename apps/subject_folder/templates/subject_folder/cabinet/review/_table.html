@@ -1,0 +1,80 @@
+{% load i18n %}
+<form class="sfc-bulk" data-sf-form="1" data-sf-bulk novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="action" value="review_bulk">
+    {% if rp.can_bulk %}
+    <div class="sfc-bulkbar" data-sf-bulkbar hidden>
+        <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+        <span class="sfc-bulkbar__count" data-sf-bulk-count aria-live="polite"></span>
+        <div class="ems-field">
+            <label class="ems-field__label" for="sfBulkAction">{% trans "Toplu əməl" context "subject_folder.ui" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="sfBulkAction" name="bulk_action" data-sf-bulk-action data-bootstrap-select>
+                    <option value="check">{% trans "Yoxlanıldı (ev tapşırığı)" context "subject_folder.ui" %}</option>
+                    <option value="accept">{% trans "Qəbul et — eyni bal (sərbəst iş)" context "subject_folder.ui" %}</option>
+                    <option value="return">{% trans "Rəylə qaytar" context "subject_folder.ui" %}</option>
+                    <option value="reject">{% trans "Rədd et" context "subject_folder.ui" %}</option>
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-sf-bulk-show="accept" hidden>
+            <label class="ems-field__label" for="sfBulkPoints">{% trans "Bal" context "subject_folder.ui" %}</label>
+            <input class="ems-input sfc-input--short" type="text" id="sfBulkPoints" name="points" inputmode="decimal" placeholder="5">
+        </div>
+        <div class="ems-field" data-sf-bulk-show="reject" hidden>
+            <label class="ems-field__label" for="sfBulkReason">{% trans "Səbəb" context "subject_folder.ui" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="sfBulkReason" name="reason" data-bootstrap-select>
+                    {% for option in rp.reject_reasons %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="sfBulkFeedback">{% trans "Rəy" context "subject_folder.ui" %}</label>
+            <input class="ems-input" type="text" id="sfBulkFeedback" name="feedback" maxlength="5000"
+                   placeholder="{% trans 'Qaytarma və rədd üçün məcburidir (ən azı 5 simvol)' context 'subject_folder.ui' %}">
+        </div>
+        <button type="submit" class="ems-btn ems-btn--primary">{% trans "Tətbiq et" context "subject_folder.ui" %}</button>
+    </div>
+    {% endif %}
+    <div class="ems-tablewrap">
+        <table class="ems-table ems-table--zebra ems-table--sticky sfc-review-table">
+            <thead>
+                <tr>
+                    {% if rp.can_bulk %}<th scope="col" class="sfc-col-check"><label class="sfc-check sfc-check--bare"><input type="checkbox" data-sf-check-all aria-label="{% trans 'Hamısını seç' context 'subject_folder.ui' %}"></label></th>{% endif %}
+                    <th scope="col">{% trans "Tələbə" context "subject_folder.ui" %}</th>
+                    <th scope="col">{% trans "Tapşırıq" context "subject_folder.ui" %}</th>
+                    <th scope="col">{% trans "Qrup" context "subject_folder.ui" %}</th>
+                    <th scope="col">{% trans "Göndərilib" context "subject_folder.ui" %}</th>
+                    <th scope="col">{% trans "Status" context "subject_folder.ui" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Oxşarlıq" context "subject_folder.ui" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Bal" context "subject_folder.ui" %}</th>
+                    <th scope="col"><span class="visually-hidden">{% trans "Əməllər" context "subject_folder.ui" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in rp.items %}
+                <tr{% if item.submission.plagiarism_flagged %} class="sfc-row--flagged"{% endif %}>
+                    {% if rp.can_bulk %}
+                    <td class="sfc-col-check">{% if item.can_bulk %}<label class="sfc-check sfc-check--bare"><input type="checkbox" name="submission" value="{{ item.submission.pk }}" data-sf-check aria-label="{% blocktrans trimmed with name=item.student_name context 'subject_folder.ui' %}{{ name }} — seç{% endblocktrans %}"></label>{% endif %}</td>
+                    {% endif %}
+                    <th scope="row">{{ item.student_name }}</th>
+                    <td>
+                        <span class="sfc-cell-title">{{ item.task_title }}</span>
+                        <span class="sfc-cell-sub">{{ item.kind_label }} · {{ item.folder_title }}{% if item.submission.attempt_no > 1 %} · {% blocktrans trimmed with n=item.submission.attempt_no context "subject_folder.ui" %}Cəhd {{ n }}{% endblocktrans %}{% endif %}</span>
+                    </td>
+                    <td>{{ item.group|default:"—" }}</td>
+                    <td class="ems-table__nowrap">{{ item.submission.submitted_at|date:"d.m.Y H:i" }}{% if item.submission.is_late %} <span class="ems-badge ems-badge--warning">{% trans "gecikib" context "subject_folder.ui" %}</span>{% endif %}</td>
+                    <td>
+                        <span class="ems-badge ems-badge--{{ item.chip.tone }}">{{ item.chip.label }}</span>
+                        {% if item.sync %}<span class="ems-badge ems-badge--{{ item.sync.tone }} sfc-sync">{{ item.sync.label }}</span>{% endif %}
+                    </td>
+                    <td class="ems-table__num">{% if item.similarity is not None %}{% if item.submission.plagiarism_flagged %}<strong class="sfc-danger">{{ item.similarity }}%</strong>{% else %}{{ item.similarity }}%{% endif %}{% else %}—{% endif %}</td>
+                    <td class="ems-table__num">{% if item.points %}{{ item.points }} / {{ item.points_max }}{% else %}—{% endif %}</td>
+                    <td class="ems-table__nowrap"><button type="button" class="ems-btn ems-btn--sm" data-sf-review="{{ item.submission.pk }}">{% trans "Bax" context "subject_folder.ui" %}</button></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>

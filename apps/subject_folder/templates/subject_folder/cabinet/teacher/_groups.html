@@ -1,0 +1,108 @@
+{% load i18n %}
+{% comment %}«Qruplar və son tarixlər»: təyinat (aktorun tədris etdiyi açılışlar), hər qrup üzrə tapşırıq
+pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğacları.{% endcomment %}
+<section class="ems-card sfc-block" aria-labelledby="sfAssignTitle">
+    <div class="ems-card__head">
+        <div>
+            <h3 class="ems-card__title" id="sfAssignTitle">{% trans "Qrupa təyinat" context "subject_folder.ui" %}</h3>
+            <p class="ems-card__sub">{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir." context "subject_folder.ui" %}</p>
+        </div>
+    </div>
+    <div class="ems-card__body">
+    {% if sp.offerings %}
+        <form class="sfc-assign" data-sf-form="1" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="assign">
+            <input type="hidden" name="folder" value="{{ sp.folder.pk }}">
+            <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+            <ul class="sfc-offerings" role="list">
+                {% for row in sp.offerings %}
+                <li class="sfc-offering{% if row.is_active %} sfc-offering--active{% endif %}">
+                    {% if row.is_active %}
+                        <span class="sfc-offering__label"><i class="fas fa-circle-check sfc-ok" aria-hidden="true"></i> {{ row.label }}</span>
+                        {% if row.grades_selfwork %}<span class="ems-badge ems-badge--primary">{% trans "sərbəst iş buradan" context "subject_folder.ui" %}</span>
+                        {% elif row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}
+                        {% if sp.can_manage and not sp.is_archived %}
+                            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-sf-post="unassign" data-sf-field-assignment="{{ row.assignment.pk }}" data-sf-danger="1"
+                                    data-sf-confirm="{% trans 'Bu qrupun təyinatı ləğv edilsin? Tələbələr qovluğu görməyəcək; göndərişlər saxlanılır.' context 'subject_folder.ui' %}">{% trans "Ləğv et" context "subject_folder.ui" %}</button>
+                        {% endif %}
+                    {% else %}
+                        <label class="sfc-check">
+                            <input type="checkbox" name="offering" value="{{ row.value }}"{% if not sp.can_manage or sp.is_archived %} disabled{% endif %}>
+                            <span>{{ row.label }}</span>
+                        </label>
+                        {% if row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% if sp.can_manage and not sp.is_archived %}
+                <button type="submit" class="ems-btn ems-btn--primary ems-btn--sm"><i class="fas fa-share-nodes" aria-hidden="true"></i> {% trans "Seçilən qruplara təyin et" context "subject_folder.ui" %}</button>
+            {% endif %}
+        </form>
+    {% else %}
+        <p class="sfc-muted">{% trans "Bu fənn və semestr üçün tədris etdiyiniz qrup tapılmadı." context "subject_folder.ui" %}</p>
+    {% endif %}
+    </div>
+</section>
+
+{% if sp.groups %}
+    {% if sp.can_manage and not sp.is_archived and sp.deadline_tasks %}
+    <div class="sfc-toolbar">
+        <button type="button" class="ems-btn ems-btn--sm" data-sf-open="sfDeadline" data-sf-fill-assignment=""
+                data-sf-dialog-title="{% trans 'Bütün qruplar üçün son tarix' context 'subject_folder.ui' %}">
+            <i class="fas fa-calendar-plus" aria-hidden="true"></i> {% trans "Bütün qruplara son tarix qoy" context "subject_folder.ui" %}
+        </button>
+    </div>
+    {% endif %}
+    {% for group in sp.groups %}
+    <section class="ems-card sfc-block" aria-label="{{ group.offering.group.name|default:group.offering }}">
+        <div class="ems-card__head">
+            <h3 class="ems-card__title">{{ group.offering.group.name|default:group.offering }}</h3>
+        </div>
+        <div class="ems-tablewrap">
+            <table class="ems-table ems-table--zebra sfc-deadlines">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Tapşırıq" context "subject_folder.ui" %}</th>
+                        <th scope="col">{% trans "Pəncərə" context "subject_folder.ui" %}</th>
+                        <th scope="col">{% trans "Açılır" context "subject_folder.ui" %}</th>
+                        <th scope="col">{% trans "Son tarix" context "subject_folder.ui" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Göndərib" context "subject_folder.ui" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Yoxlanılır" context "subject_folder.ui" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Yekun" context "subject_folder.ui" %}</th>
+                        {% if sp.can_manage and not sp.is_archived %}<th scope="col"><span class="visually-hidden">{% trans "Əməllər" context "subject_folder.ui" %}</span></th>{% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in group.rows %}
+                    <tr>
+                        <th scope="row">{{ row.task.title }}{% if not row.task.is_published %} <span class="ems-badge ems-badge--neutral">{% trans "Qaralama" context "subject_folder.ui" %}</span>{% endif %}</th>
+                        <td><span class="ems-badge ems-badge--{{ row.window.tone }}">{{ row.window.label }}</span></td>
+                        <td class="ems-table__nowrap">{% if row.deadline.opens_at %}{{ row.deadline.opens_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
+                        <td class="ems-table__nowrap">{% if row.deadline.due_at %}{{ row.deadline.due_at|date:"d.m.Y H:i" }}{% if row.deadline.late_policy == "allow" %} <span class="sfc-muted">({% trans "gecikmə ilə" context "subject_folder.ui" %})</span>{% endif %}{% else %}—{% endif %}</td>
+                        <td class="ems-table__num">{{ row.stats.sent }} / {{ row.stats.audience }}</td>
+                        <td class="ems-table__num">{% if row.stats.waiting %}<strong>{{ row.stats.waiting }}</strong>{% else %}0{% endif %}</td>
+                        <td class="ems-table__num">{{ row.stats.done }}</td>
+                        {% if sp.can_manage and not sp.is_archived %}
+                        <td class="ems-table__nowrap">
+                            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-sf-open="sfDeadline"
+                                    data-sf-dialog-title="{% blocktrans trimmed with group=group.offering.group.name|default:group.offering context 'subject_folder.ui' %}Son tarix — {{ group }}{% endblocktrans %}"
+                                    data-sf-fill-assignment="{{ group.assignment.pk }}" data-sf-fill-task="{{ row.task.pk }}"
+                                    data-sf-fill-opens_at="{% if row.deadline.opens_at %}{{ row.deadline.opens_at|date:'Y-m-d\TH:i' }}{% endif %}"
+                                    data-sf-fill-due_at="{% if row.deadline.due_at %}{{ row.deadline.due_at|date:'Y-m-d\TH:i' }}{% endif %}"
+                                    data-sf-fill-late_policy="{{ row.deadline.late_policy|default:'none' }}">
+                                <i class="fas fa-calendar-day" aria-hidden="true"></i> {% trans "Son tarix" context "subject_folder.ui" %}
+                            </button>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="sfc-muted">{% trans "Qovluqda tapşırıq yoxdur." context "subject_folder.ui" %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endfor %}
+{% endif %}
