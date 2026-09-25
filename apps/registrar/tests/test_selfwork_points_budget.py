@@ -121,7 +121,13 @@ class SelfWorkQueryBudgetTest(SelfWorkLegacyFixture, TestCase):
                 self.assertLessEqual(value, limit, f"{state}/{key}: {value} > {limit}")
 
     def test_structured_board_reads_no_syllabus(self):
-        """Qurulmuş (2 × 5) strukturda lövhə sillabusa baxmır — köhnə 4 sorğu."""
+        """Qurulmuş (2 × 5) strukturda lövhə sillabusa baxmır — köhnə 4 sorğu.
+
+        Tab səviyyəsində: struktur SELF_WORK komponentini yaradır və ``finals_batch`` o
+        komponent olan HƏR jurnalda (köhnə kodda da — ``add_selfwork_topic`` onu yaradırdı)
+        TƏK sərbəst iş aqreqatını oxuyur (+1); jurnalın mövzu mənbəyi (``journal_topics``,
+        #147) sillabus bölmələrini versiya obyektinə BİR dəfə prefetch edir (köhnə 3 oxunuş
+        əvəzinə 1). Nəticə köhnə «mövzusuz» baseline-dən (67) çox deyil."""
         from apps.registrar import selfwork_structure
 
         offering, _enrollments = self._fresh_offering()
@@ -129,4 +135,16 @@ class SelfWorkQueryBudgetTest(SelfWorkLegacyFixture, TestCase):
             self.assertTrue(selfwork_structure.ensure_structure(offering).applied)
             count = self._count(lambda: journal_extras.get_selfwork_board(offering))
         self.assertEqual(count, BASELINE["fresh_syllabus"]["board"])
-        self.assertLessEqual(self._tab(offering, "serbest"), BASELINE["fresh_syllabus"]["journal_selfwork_tab"])
+        client = self._client(self.teacher)
+        url = reverse("registrar:journal_detail", args=[offering.id]) + "?jt=serbest"
+        client.get(url)
+        with CaptureQueriesContext(connection) as ctx:
+            self.assertEqual(client.get(url).status_code, 200)
+        sqls = [q["sql"] for q in ctx.captured_queries]
+        aggregates = [sql for sql in sqls if 'FROM "registrar_selfworkmark"' in sql and "SUM(COALESCE" in sql]
+        sections = [sql for sql in sqls if 'FROM "syllabus_syllabussection"' in sql]
+        syllabi = [sql for sql in sqls if 'FROM "syllabus_syllabus"' in sql]
+        self.assertEqual(len(aggregates), 1, "finals_batch: TƏK sərbəst iş aqreqatı (N+1 yoxdur)")
+        self.assertEqual(len(sections), 1, "bölmələr bir dəfə (journal_topics prefetch) — lövhə oxumur")
+        self.assertEqual(len(syllabi), 1, "sillabus dosyesi — yalnız səhifənin öz memo sorğusu (journal_read_memo)")
+        self.assertLessEqual(len(sqls), BASELINE["fresh_syllabus"]["journal_selfwork_tab"])
