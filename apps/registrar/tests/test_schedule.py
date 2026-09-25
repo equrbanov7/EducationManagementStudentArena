@@ -7,7 +7,7 @@ from django.test import TestCase
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import schedule, services
-from apps.registrar.models import ScheduleSlot, Subject, WeekType
+from apps.registrar.models import ScheduleSlot, SlotKind, Subject, WeekType
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -106,6 +106,48 @@ class ScheduleServiceTest(TestCase):
             off2 = self._off(self.phys, self.group2, self.teacher2)  # different group + teacher
             with self.assertRaises(schedule.ScheduleConflict):
                 schedule.create_slot(offering=off2, weekday=3, start_time=T10, end_time=T1130, room="305")
+
+    def test_previous_semester_slot_does_not_block(self):
+        """2026-09-25: keçən semestrin (silinməmiş) slotu yeni semestrin eyni saatını bloklamır."""
+        with bypass_rls():
+            schedule.create_slot(offering=self.off1, weekday=4, start_time=T9, end_time=T1030, room="101")
+            spring = AcademicPeriod.objects.create(
+                organization=self.org,
+                name="P2",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2024/2025",
+                start_date="2025-02-01",
+                end_date="2025-06-30",
+            )
+            nxt = services.get_or_create_offering(
+                organization=self.org, subject=self.phys, period=spring, group=self.group
+            )
+            nxt.instructor = self.teacher
+            nxt.save(update_fields=["instructor"])
+            # Eyni qrup + müəllim + otaq, AMMA başqa semestr → toqquşma deyil.
+            schedule.create_slot(offering=nxt, weekday=4, start_time=T9, end_time=T1030, room="101")
+            self.assertEqual(ScheduleSlot.objects.filter(weekday=4).count(), 2)
+
+    def test_joint_lecture_same_teacher_subject_room_is_not_a_clash(self):
+        """Axın: eyni müəllim, eyni fənn, iki qrup, hər ikisi mühazirə, eyni otaq — birlikdə oturur."""
+        with bypass_rls():
+            schedule.create_slot(offering=self.off1, weekday=5, start_time=T9, end_time=T1030, room="A-1")
+            stream = self._off(self.math, self.group2, self.teacher)
+            schedule.create_slot(offering=stream, weekday=5, start_time=T9, end_time=T1030, room="A-1")
+            self.assertEqual(ScheduleSlot.objects.filter(weekday=5).count(), 2)
+            # Seminar axın deyil — müəllim toqquşmasıdır.
+            other = self._off(
+                self.math,
+                OrgUnit.objects.create(organization=self.org, name="G3", slug="sc-g3", unit_type=OrgUnitType.GROUP),
+                self.teacher,
+            )
+            with self.assertRaises(schedule.ScheduleConflict):
+                schedule.create_slot(
+                    offering=other, weekday=5, start_time=T9, end_time=T1030, room="A-1", kind=SlotKind.SEMINAR
+                )
+            # Başqa otaq — müəllim eyni anda iki yerdə ola bilməz.
+            with self.assertRaises(schedule.ScheduleConflict):
+                schedule.create_slot(offering=other, weekday=5, start_time=T9, end_time=T1030, room="B-2")
 
     def test_no_conflict_different_day_or_time_or_weektype(self):
         with bypass_rls():

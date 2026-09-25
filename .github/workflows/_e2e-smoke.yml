@@ -53,6 +53,12 @@ jobs:
       # təhlükəsizlik qapısı). Bu yığın CI-də DÜZ HTTP üzərindədir, ona görə
       # istisna AÇIQ bildirilir — prod hostda belə bir sətir olmamalıdır.
       INSECURE_TRANSPORT_OK: "1"
+      # 2026-09-25: repo private → GitHub runner-ləri 2 vCPU-dur; docker `cpus` host nüvəsindən çox
+      # ola bilməz («range of CPUs is from 0.01 to 2.00»). Prod default-ları (nginx 4.0, redis/piston
+      # 2.0) YALNIZ CI yığınında endirilir — prod host-da compose default-ları qüvvədə qalır.
+      NGINX_CPU_LIMIT: "1.0"
+      REDIS_CPU_LIMIT: "1.0"
+      PISTON_CPU_LIMIT: "1.0"
 
     steps:
       - name: 📥 Checkout code

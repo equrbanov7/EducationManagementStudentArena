@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Hadisə dialoqu — detallar (JS doldurur, textContent) + köçürmə sahələri.{% endcomment %}
+<dl class="tt-dl" data-tt-event-details>
+  <dt>{% trans "Fənn" context "timetable.review" %}</dt><dd data-tt-f="subject"></dd>
+  <dt>{% trans "Növ" context "timetable.review" %}</dt><dd data-tt-f="kind"></dd>
+  <dt>{% trans "Qruplar" context "timetable.review" %}</dt><dd data-tt-f="groups"></dd>
+  <dt>{% trans "Müəllim" context "timetable.review" %}</dt><dd data-tt-f="teacher"></dd>
+  <dt>{% trans "Otaq (təklif)" context "timetable.review" %}</dt><dd data-tt-f="room"></dd>
+  <dt>{% trans "Həftə" context "timetable.review" %}</dt><dd data-tt-f="week"></dd>
+  <dt>{% trans "Qeyd" context "timetable.review" %}</dt><dd data-tt-f="reason"></dd>
+</dl>
+{% if can_edit %}
+<fieldset class="tt-move" data-tt-move>
+  <legend class="ems-field__label">{% trans "Köçür" context "timetable.review" %}</legend>
+  <div class="tt-fields">
+    {% trans "Gün" context "timetable.review" as day_label %}
+    {% include "partials/_bootstrap_select_field.html" with field_id="tt-move-day" field_name="weekday" field_label=day_label field_placeholder=day_label field_options=weekday_choices field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs="data-tt-move-day" %}
+    {% trans "Dərs saatı" context "timetable.review" as pair_label %}
+    {% include "partials/_bootstrap_select_field.html" with field_id="tt-move-pair" field_name="pair" field_label=pair_label field_placeholder=pair_label field_options=pair_choices field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs="data-tt-move-pair" %}
+    <div class="ems-field" data-tt-move-week-wrap>
+      <span class="ems-field__label">{% trans "Həftə" context "timetable.review" %}</span>
+      <label class="tt-check"><input type="radio" name="tt-move-week" value="odd" data-tt-move-week> <span>{% trans "Üst həftə" context "timetable.review" %}</span></label>
+      <label class="tt-check"><input type="radio" name="tt-move-week" value="even" data-tt-move-week> <span>{% trans "Alt həftə" context "timetable.review" %}</span></label>
+    </div>
+  </div>
+  <p class="tt-hint">{% trans "Server sərt qaydaları yoxlayır: müəllim/qrup toqquşması, qrupda boşluq, növbə və «gələ bilmir» saatı." context "timetable.review" %}</p>
+  <ul class="tt-conflicts" data-tt-conflicts role="alert"></ul>
+</fieldset>
+{% endif %}

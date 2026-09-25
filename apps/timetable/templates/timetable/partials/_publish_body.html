@@ -1,0 +1,10 @@
+{% load i18n %}
+<p>{% trans "Qaralama canlı cədvələ yazılacaq: işləmədəki açılışların köhnə slotları yumşaq silinir və yerləşdirilmiş dərslər əlavə olunur. Müəllimlərə və qrupların tələbələrinə bir bildiriş göndərilir." context "timetable.review" %}</p>
+{% if unplaced %}
+  <p class="tt-unplaced__reason">{% blocktrans with total=unplaced|length context "timetable.review" %}Diqqət: {{ total }} dərs yerləşdirilməyib — dərcdən sonra canlı cədvəldə olmayacaq.{% endblocktrans %}</p>
+{% endif %}
+<div class="ems-field">
+  <label class="ems-field__label" for="tt-publish-reason">{% trans "Səbəb / qeyd (auditə düşür)" context "timetable.review" %}</label>
+  <textarea class="ems-textarea" id="tt-publish-reason" rows="2" maxlength="500" data-tt-publish-reason></textarea>
+</div>
+<ul class="tt-conflicts" data-tt-publish-conflicts role="alert"></ul>
