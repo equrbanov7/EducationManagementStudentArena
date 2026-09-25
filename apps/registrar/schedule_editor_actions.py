@@ -68,6 +68,7 @@ def _slot_queryset(organization):
         "offering__group",
         "offering__period",
         "offering__instructor",
+        "instructor",
     )
 
 
@@ -154,10 +155,16 @@ def _apply(slot, cleaned):
     slot.room = cleaned["room"]
 
 
-def _guarded_check(*, organization, offering, cleaned, exclude_id, force, actor, reason, request):
-    """Konflikt yoxlaması + (force olduqda) toqquşanların parklanması."""
+def _guarded_check(
+    *, organization, offering, cleaned, exclude_id, force, actor, reason, request, slot_instructor_id=None
+):
+    """Konflikt yoxlaması (slotun EFFEKTİV müəllimi ilə) + (force olduqda) toqquşanların parklanması."""
     verdict = schedule_editor.check_cell(
-        organization=organization, offering=offering, cleaned=cleaned, exclude_id=exclude_id
+        organization=organization,
+        offering=offering,
+        cleaned=cleaned,
+        exclude_id=exclude_id,
+        slot_instructor_id=slot_instructor_id,
     )
     if verdict["errors"]:
         raise schedule_editor.CellError(
@@ -192,6 +199,9 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
     ``slot_id`` verilibsə redaktədir (fənn/müəllim/növ/həftə/otaq dəyişə bilər),
     verilməyibsə yeni slotdur. Hər iki halda açılış
     ``schedule_editor.resolve_offering`` ilə tapılır/yaradılır.
+
+    ``slot_instructor_id`` — «Dərsi aparan müəllim» (boş = jurnal sahibi); server
+    ``schedule_editor.resolve_slot_instructor`` ilə yoxlayır, toqquşma bu müəllimlə ölçülür.
     """
     from django.contrib.auth import get_user_model
 
@@ -215,9 +225,14 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
     subject = Subject.objects.filter(organization=organization, pk=str(data.get("subject_id") or "").strip()).first()
     instructor_id = str(data.get("instructor_id") or "").strip()
     instructor = get_user_model().objects.filter(pk=instructor_id).first() if instructor_id else None
-    offering, _created, _assigned = schedule_editor.resolve_offering(
-        actor=actor, organization=organization, group=group, period=period, subject=subject, instructor=instructor
-    )
+    lookup = {"actor": actor, "organization": organization, "group": group, "period": period, "subject": subject}
+    slot_teacher = None
+    if str(data.get("slot_instructor_id") or "").strip():
+        # «Dərsi aparan müəllim» açılış YARADILMAZDAN ƏVVƏL yoxlanır (yalnız-oxu nüsxə ilə) —
+        # yararsız seçim boş `CourseOffering` doğurmasın.
+        probe, _c, _a = schedule_editor.resolve_offering(**lookup, instructor=instructor, create=False)
+        slot_teacher = schedule_editor.resolve_slot_instructor(offering=probe, data=data)
+    offering, _created, _assigned = schedule_editor.resolve_offering(**lookup, instructor=instructor)
     if not schedule_manage.can_manage_offering(actor, organization, offering):
         raise schedule_editor.CellError(
             "permission_denied", pgettext(_CTX, "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."), status=403
@@ -234,9 +249,12 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
             actor=actor,
             reason=data.get("reason"),
             request=request,
+            slot_instructor_id=getattr(slot_teacher, "pk", None),
         )
+        old = None
         if slot is None:
             slot = ScheduleSlot(organization=organization, offering=offering, created_by=actor)
+            slot.instructor = slot_teacher
             _apply(slot, cleaned)
             slot.save()
             row = base.slot_row(slot)
@@ -244,6 +262,7 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
         else:
             old = base.slot_row(slot)
             slot.offering = offering
+            slot.instructor = slot_teacher
             _apply(slot, cleaned)
             slot.is_parked = False
             slot.parked_at = None
@@ -251,16 +270,17 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
             slot.save()
             row = base.slot_row(slot)
             _audit("update", actor=actor, organization=organization, slot=slot, request=request, old=old, new=row)
-        base.notify_schedule_change(offering=offering, row=row, removed=False)
+        base.notify_schedule_change(offering=offering, row=row, removed=False, old_row=old)
     return {"slot": row, "parked": parked}
 
 
 def move_slot(*, actor, organization, slot, data, request=None) -> dict:
-    """Sürüklə-burax köçürməsi — yalnız YER dəyişir (fənn/müəllim toxunulmur)."""
+    """Sürüklə-burax köçürməsi — yalnız YER dəyişir (fənn/müəllim/slotun müəllimi toxunulmur)."""
     payload = {
         "slot_id": str(slot.pk),
         "subject_id": str(slot.offering.subject_id),
         "instructor_id": str(slot.offering.instructor_id or ""),
+        "slot_instructor_id": str(slot.instructor_id or ""),
         "weekday": data.get("weekday"),
         "time_slot": data.get("time_slot"),
         "week_type": data.get("week_type") or slot.week_type,
@@ -286,15 +306,31 @@ def place_parked(*, actor, organization, slot, data, request=None) -> dict:
     return move_slot(actor=actor, organization=organization, slot=slot, data=data, request=request)
 
 
-def suggestions_for(*, organization, slot=None, group=None, instructor_id=None, shift="", week_type=None, limit=8):
-    """Boş hüceyrə tövsiyələri — həm slot üçün, həm də sərbəst sorğu üçün."""
+def suggestions_for(
+    *,
+    organization,
+    slot=None,
+    group=None,
+    instructor_id=None,
+    shift="",
+    week_type=None,
+    limit=8,
+    period=None,
+    subject_id=None,
+    kind=None,
+):
+    """Boş hüceyrə tövsiyələri — həm slot üçün (EFFEKTİV müəllimi, semestri, fənni və növü ilə),
+    həm də sərbəst sorğu üçün (``period`` / ``subject_id`` / ``kind`` dialoqdan; verilməyibsə köhnə davranış)."""
+    from apps.registrar import schedule as schedule_service
     from apps.registrar.models import WeekType
 
+    period_id = getattr(period, "pk", None)
     if slot is not None:
         group_id = slot.offering.group_id
-        instructor_id = slot.offering.instructor_id
+        instructor_id = schedule_service.effective_instructor_id(slot)
         week_type = week_type or slot.week_type
         exclude = (str(slot.pk),)
+        period_id, subject_id, kind = slot.offering.period_id, slot.offering.subject_id, slot.kind
     else:
         group_id = getattr(group, "pk", None)
         exclude = ()
@@ -306,6 +342,9 @@ def suggestions_for(*, organization, slot=None, group=None, instructor_id=None, 
         shift=shift,
         exclude_ids=exclude,
         limit=limit,
+        period_id=period_id,
+        subject_id=subject_id or None,
+        kind=kind or None,
     )
 
 

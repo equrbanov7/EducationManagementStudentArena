@@ -6,6 +6,10 @@ müəllimin dərs yükünə görə yenilənir — `action=options`), mühazirə/
 üst/alt həftə seçilsin, opsional otaq seçilsin. Gün + dərs saatı da buradadır:
 sürüklə-buraxın KLAVİATURA ilə əlçatan qarşılığı məhz bu iki sahədir.
 
+«Dərsi aparan müəllim» (2026-09-25, bölünmüş tədris): default «Jurnal sahibi» (boş dəyər);
+siyahı seçilmiş fənn + qrup açılışını APARA BİLƏNLƏRDƏN serverdən gəlir (`action=slot_teachers`,
+`accounts/js/schedule_editor_subjects.js`), seçimin özü `check`/`save`-də serverdə yoxlanır.
+
 ⚠️ Layihə qaydası: xam `<select>` YAZILMIR — hər biri
 `bootstrap-single-select--ems` sarğısındadır; uzun siyahılarda `data-live-search`.
 Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağırılır.{% endcomment %}
@@ -15,7 +19,7 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
 
 <div class="sedit-form">
   <div class="ems-field ems-field--wide">
-    <label class="ems-field__label" for="sedit-teacher">{% trans "Müəllim" context "accounts.schedule_manage" %}</label>
+    <label class="ems-field__label" for="sedit-teacher">{% trans "Müəllim (jurnal sahibi)" context "accounts.schedule_manage" %}</label>
     <div class="bootstrap-single-select bootstrap-single-select--ems">
       <select class="ems-select bootstrap-single-select__native" id="sedit-teacher" name="instructor_id"
               data-sedit-field="instructor_id" data-bootstrap-select data-live-search="true"
@@ -43,6 +47,20 @@ Seçimlər JS ilə yenilənəndə `EMSBootstrapSelect.refresh(select)` çağır�
       </select>
     </div>
     <p class="ems-field__hint">{% trans "Müəllim seçiləndə siyahı onun dərs yükü və açılışları ilə, seçilməyəndə qrupun tədris planı və açıq fənn açılışları ilə məhduddur." context "accounts.schedule_manage" %}</p>
+  </div>
+
+  <div class="ems-field ems-field--wide">
+    <label class="ems-field__label" for="sedit-slot-teacher">{% trans "Dərsi aparan müəllim" context "accounts.schedule_manage" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="ems-select bootstrap-single-select__native" id="sedit-slot-teacher" name="slot_instructor_id"
+              data-sedit-field="slot_instructor_id" data-sedit-slot-teacher data-bootstrap-select data-live-search="true"
+              data-live-search-placeholder="{% trans 'Müəllim axtar…' context 'accounts.schedule_manage' %}"
+              data-live-search-empty="{% trans 'Uyğun müəllim yoxdur' context 'accounts.schedule_manage' %}"
+              data-owner-label="{% trans 'Jurnal sahibi' context 'accounts.schedule_manage' %}">
+        <option value="">{% trans "Jurnal sahibi" context "accounts.schedule_manage" %}</option>
+      </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Seminarı və ya laboratoriyanı jurnal sahibindən başqa müəllim aparırsa seçin — dərs onun cədvəlinə düşür və toqquşma onun üçün yoxlanır. Siyahı fənnin dərs yükü bölgüsündən və jurnalında dərs aparmış müəllimlərdən gəlir." context "accounts.schedule_manage" %}</p>
   </div>
 
   <div class="ems-field">

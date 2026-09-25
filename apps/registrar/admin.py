@@ -126,7 +126,7 @@ class ScheduleSlotAdmin(admin.ModelAdmin):
     list_display = ("offering", "weekday", "start_time", "end_time", "room", "week_type", "organization")
     list_filter = ("weekday", "week_type")
     search_fields = ("offering__subject__code", "room")
-    raw_id_fields = ("offering", "created_by")
+    raw_id_fields = ("offering", "created_by", "instructor")
 
 
 @admin.register(FinalGrade)

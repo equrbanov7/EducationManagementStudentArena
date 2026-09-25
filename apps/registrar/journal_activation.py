@@ -8,7 +8,9 @@ Bu modul:
   cədvəl dərsləri» zolağı: açılışın BU GÜNKÜ slotları (həftə günü + üst/alt paritet +
   dövr sərhədi — ``dashboard_data.lessons_on`` ilə EYNİ qayda; parklanmış və silinmiş
   slotlar xaric), saat · növ · otaq · müəllim və sillabusdakı NÖVBƏTİ keçilməmiş mövzu.
-  Artıq açılmış slot «Aktivləşdirilib ✓» + sütuna keçid göstərir.
+  Artıq açılmış slot «Aktivləşdirilib ✓» + sütuna keçid göstərir. Müəllim (2026-09-25):
+  slotun ÖZ müəllimi (``ScheduleSlot.instructor``) → bu növün son müəllimi → jurnal sahibi
+  (:func:`slot_teacher`); aktivləşdirmə dərsə məhz onu yazır.
 * :func:`activate_slot` (POST) — dərsi ``gradebook_lessons.create_lesson(slot=…)`` ilə
   yaradır; MÖVCUD qaydaların hamısı qüvvədədir: tarix = bu gün, fənnin saat həddi,
   sillabus qapısı, dublikat (eyni gün + eyni saat), jurnal kilidi / yekunlaşma.
@@ -54,14 +56,28 @@ MAX_SLOT_HOURS = 4
 
 
 def offering_slots(offering) -> list:
-    """Açılışın cədvəldə DURAN slotları (parklanmış/silinmiş xaric) — offering üzrə memo, TƏK sorğu."""
+    """Açılışın cədvəldə DURAN slotları (parklanmış/silinmiş xaric) — offering üzrə memo, TƏK sorğu.
+
+    Slotun öz müəllimi (``instructor``, bölünmüş tədris) eyni sorğuda LEFT JOIN ilə gəlir."""
     cached = getattr(offering, _SLOTS_ATTR, None)
     if cached is None:
         from .models import ScheduleSlot
 
-        cached = list(ScheduleSlot.objects.filter(offering=offering, is_parked=False).order_by("weekday", "start_time"))
+        cached = list(
+            ScheduleSlot.objects.filter(offering=offering, is_parked=False)
+            .select_related("instructor")
+            .order_by("weekday", "start_time")
+        )
         setattr(offering, _SLOTS_ATTR, cached)
     return cached
+
+
+def slot_teacher(offering, slot, last_instructor):
+    """Dərsin müəllimi: slotun ÖZ müəllimi (cədvəldə təyin olunubsa), sonra bu növün son müəllimi,
+    sonra jurnal sahibi (2026-09-25 — bölünmüş tədrisdə seminarı aparan assistent)."""
+    if slot.instructor_id:
+        return slot.instructor
+    return last_instructor.get(slot.kind) or offering.instructor
 
 
 def slots_on(offering, day) -> list:
@@ -188,8 +204,9 @@ def slot_lesson_fields(offering, slot, day, *, last_instructor=None) -> dict:
         "end_time": slot.end_time,
         "hours": slot_hours(slot),
         "room": resolve_slot_room(offering, slot),
-        # Fənn iki müəllim arasında bölünübsə (mühazirə/seminar) — bu növün son müəllimi.
-        "instructor": last_instructor.get(kind) or offering.instructor,
+        # Fənn iki müəllim arasında bölünübsə (mühazirə/seminar): slotun öz müəllimi (cədvəldə
+        # təyin olunubsa), yoxdursa bu növün son müəllimi, o da yoxdursa jurnal sahibi.
+        "instructor": slot.instructor if slot.instructor_id else (last_instructor.get(kind) or offering.instructor),
     }
 
 
@@ -272,7 +289,7 @@ def strip_context(offering, context) -> dict:
         lesson = by_start.get(slot.start_time)
         if lesson is not None:
             matched.add(lesson.pk)
-        teacher = last_instructor.get(slot.kind) or offering.instructor
+        teacher = slot_teacher(offering, slot, last_instructor)
         items.append(
             {
                 "slot_id": str(slot.pk),
@@ -324,7 +341,9 @@ def activate_slot(request, offering_id, slot_id):
         raise Http404
     from .models import ScheduleSlot
 
-    slot = ScheduleSlot.objects.filter(pk=slot_id, offering=offering, is_parked=False).first()
+    slot = (
+        ScheduleSlot.objects.filter(pk=slot_id, offering=offering, is_parked=False).select_related("instructor").first()
+    )
     if slot is None:
         raise Http404
     back = reverse("registrar:journal_detail", args=[offering.pk])
@@ -359,7 +378,7 @@ def activate_slot(request, offering_id, slot_id):
             slot=slot,
             topic=topic,
             created_by=request.user,
-            instructor=last_instructor.get(slot.kind) or offering.instructor,
+            instructor=slot_teacher(offering, slot, last_instructor),
         )
     except gradebook.LessonRuleError as exc:
         messages.error(request, str(exc))
@@ -389,6 +408,7 @@ __all__ = [
     "slot_lesson_fields",
     "slot_matches",
     "slot_pattern",
+    "slot_teacher",
     "slots_on",
     "strip_context",
 ]

@@ -15,6 +15,13 @@ saxlayır; «Dərc et» anında bu modul çağırılır və:
 5. **bildiriş** — ``on_commit``-də HƏR ALICIYA BİR bildiriş (müəllimlər + qrupların
    aktiv tələbələri), slot başına yox.
 
+SLOTUN MÜƏLLİMİ (2026-09-25, bölünmüş tədris): generator hər sətir üçün dərsi aparan
+müəllimi (``teacher_id``) bilir. O, açılışın jurnal sahibindən FƏRQLİDİRSƏ
+``ScheduleSlot.instructor``-a yazılır, EYNİDİRSƏ NULL qalır (jurnal sahibi dəyişəndə slot
+onu izləsin). Toqquşma yoxlaması hər iki tərəfdə EFFEKTİV müəllimlə aparılır
+(``schedule.effective_instructor_id``); yazılan müəllim AKTİV ``grade.input`` üzvü
+olmalıdır (PostgreSQL qoruyucusu 0082 ilə eyni qayda — əks halda 400, heç nə yazılmır).
+
 ``group_buildings`` isə generatorun otaq təklifi üçün qrupun korpus defoltunu
 (``campus``) oxuyur — registrar-ın daxili modulu kənara açılmasın deyə buradan verilir.
 """
@@ -29,8 +36,9 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.registrar import campus, schedule_conflicts, schedule_manage
+from apps.registrar import campus, schedule_conflicts, schedule_manage, schedule_slot_teachers
 from apps.registrar.models import AcademicStatus, ScheduleSlot, SlotKind, StudentAcademicRecord, WeekType
+from apps.registrar.schedule import effective_instructor_id, stored_instructor_id
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +90,8 @@ def _clean(slot) -> dict | None:
         "week_type": week_type,
         "kind": kind,
         "room": str(slot.get("room") or "").strip()[:64],
-        "teacher_id": slot.get("teacher_id"),
+        # «12» / 12 / None → pk (müqayisə və yazı eyni tipdə getsin); yararsız dəyər → None (jurnal sahibi).
+        "teacher_id": schedule_slot_teachers.user_pk(slot.get("teacher_id")),
         "stream": str(slot.get("stream") or ""),
     }
 
@@ -126,7 +135,7 @@ def find_conflicts(*, organization, period, rows, offerings, replaced_ids) -> li
             "end_time": slot.end_time,
             "week_type": slot.week_type,
             "room": (slot.room or "").strip().lower(),
-            "teacher_id": slot.offering.instructor_id,
+            "teacher_id": effective_instructor_id(slot),
             "group_id": slot.offering.group_id,
             "stream": "",
         }
@@ -241,7 +250,18 @@ def publish_slots(
         row = _clean(raw)
         if row is None or row["offering_id"] not in offerings:
             raise PublishError("invalid", pgettext(_CTX, "Qaralamada yararsız slot var — yenidən yaradın."))
+        row["instructor_id"] = stored_instructor_id(offerings[row["offering_id"]], row["teacher_id"])
         rows.append(row)
+    overrides = {row["instructor_id"] for row in rows if row["instructor_id"]}
+    if overrides - schedule_slot_teachers.authorized_teacher_ids(organization, overrides):
+        raise PublishError(
+            "invalid",
+            pgettext(
+                _CTX,
+                "Qaralamadakı bəzi müəllimlərin bu təşkilatda aktiv müəllim üzvlüyü yoxdur — "
+                "dərs yükünü yoxlayıb qaralamanı yenidən yaradın.",
+            ),
+        )
     conflicts = find_conflicts(
         organization=organization, period=period, rows=rows, offerings=offerings, replaced_ids=ids
     )
@@ -269,6 +289,7 @@ def publish_slots(
                     week_type=row["week_type"],
                     kind=row["kind"],
                     created_by=actor if getattr(actor, "pk", None) else None,
+                    instructor_id=row["instructor_id"],
                 )
                 for row in rows
             ]
@@ -281,6 +302,7 @@ def publish_slots(
             "removed": len(removed_ids),
             "created_ids": [str(slot.pk) for slot in created],
             "removed_ids": removed_ids,
+            "instructor_overrides": sum(1 for row in rows if row["instructor_id"]),
         }
         log_action(
             AuditAction.UPDATE,

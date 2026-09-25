@@ -11,6 +11,10 @@ Həftəlik slotlar təkrarlanan hadisələrə çevrilir:
 Vaxtlar "floating local time" kimi yazılır (TZID yox): universitet bir şəhərdə
 yerləşir və Google/Apple Calendar float vaxtı istifadəçinin yerli vaxtında
 göstərir — DST cədvəl sürüşmələrindən qaçırıq.
+
+Təsvirdəki müəllim slotun EFFEKTİV müəllimidir (2026-09-25, bölünmüş tədris):
+seminarı assistent aparırsa onun adı, yoxdursa jurnal sahibi
+(``schedule.effective_instructor``; slotlar ``select_related("instructor")`` ilə gəlir).
 """
 
 from __future__ import annotations
@@ -20,7 +24,7 @@ import datetime
 from django.conf import settings
 
 from apps.registrar.models import WeekType
-from apps.registrar.schedule import week_parity
+from apps.registrar.schedule import effective_instructor, week_parity
 
 
 def _escape(text: str) -> str:
@@ -76,7 +80,7 @@ def _slot_event(slot, period, stamp: str) -> list[str]:
     offering = slot.offering
     subject = getattr(offering, "subject", None)
     summary = f"{subject.code} — {subject.name}" if subject else str(offering)
-    instructor = getattr(offering, "instructor", None)
+    instructor = effective_instructor(slot)
     group = getattr(offering, "group", None)
     desc_bits = []
     if group is not None:
