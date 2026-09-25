@@ -306,16 +306,31 @@ def place_parked(*, actor, organization, slot, data, request=None) -> dict:
     return move_slot(actor=actor, organization=organization, slot=slot, data=data, request=request)
 
 
-def suggestions_for(*, organization, slot=None, group=None, instructor_id=None, shift="", week_type=None, limit=8):
-    """Boş hüceyrə tövsiyələri — həm slot üçün (EFFEKTİV müəllimi ilə), həm də sərbəst sorğu üçün."""
+def suggestions_for(
+    *,
+    organization,
+    slot=None,
+    group=None,
+    instructor_id=None,
+    shift="",
+    week_type=None,
+    limit=8,
+    period=None,
+    subject_id=None,
+    kind=None,
+):
+    """Boş hüceyrə tövsiyələri — həm slot üçün (EFFEKTİV müəllimi, semestri, fənni və növü ilə),
+    həm də sərbəst sorğu üçün (``period`` / ``subject_id`` / ``kind`` dialoqdan; verilməyibsə köhnə davranış)."""
     from apps.registrar import schedule as schedule_service
     from apps.registrar.models import WeekType
 
+    period_id = getattr(period, "pk", None)
     if slot is not None:
         group_id = slot.offering.group_id
         instructor_id = schedule_service.effective_instructor_id(slot)
         week_type = week_type or slot.week_type
         exclude = (str(slot.pk),)
+        period_id, subject_id, kind = slot.offering.period_id, slot.offering.subject_id, slot.kind
     else:
         group_id = getattr(group, "pk", None)
         exclude = ()
@@ -327,6 +342,9 @@ def suggestions_for(*, organization, slot=None, group=None, instructor_id=None, 
         shift=shift,
         exclude_ids=exclude,
         limit=limit,
+        period_id=period_id,
+        subject_id=subject_id or None,
+        kind=kind or None,
     )
 
 

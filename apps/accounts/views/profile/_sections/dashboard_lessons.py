@@ -36,7 +36,25 @@ def parity_label(parity) -> str:
     return ""
 
 
-def _lesson_row(slot, *, with_group: bool, now=None, journal_link: bool = False) -> dict:
+def _journal_url(slot, viewer_id=None) -> str:
+    """«Jurnalı aç» ünvanı; BAŞQASININ jurnalındakı slotu aparan müəllimə boş (sorğusuz).
+
+    Bölünmüş tədris (2026-09-25): seminarı jurnal sahibindən başqa müəllim aparırsa
+    (``ScheduleSlot.instructor``) jurnal yenə sahibinindir — giriş qaydası dəyişmir, ona görə
+    baxan jurnal sahibi deyilsə keçid verilmir. ``viewer_id`` verilməyibsə siyahı baxanın ÖZ
+    cədvəlidir (``schedule.get_teacher_schedule``) — baxan slotun effektiv müəllimidir."""
+    offering_id = getattr(slot, "offering_id", None)
+    if not offering_id:
+        return ""
+    override = getattr(slot, "instructor_id", None)
+    if override:
+        viewer = override if viewer_id is None else viewer_id
+        if str(getattr(slot.offering, "instructor_id", None)) != str(viewer):
+            return ""
+    return reverse("registrar:journal_detail", args=[offering_id])
+
+
+def _lesson_row(slot, *, with_group: bool, now=None, journal_link: bool = False, viewer_id=None) -> dict:
     offering = slot.offering
     subject = getattr(offering, "subject", None)
     meta = [str(slot.get_kind_display() or "")]
@@ -55,17 +73,18 @@ def _lesson_row(slot, *, with_group: bool, now=None, journal_link: bool = False)
     }
     # «Jurnalı aç» (UNEC müqayisəsi P1-1, 2026-09-25) — müəllim sətrindən həmin açılışın
     # jurnalına; jurnalın üstündə bu günün slotu «Aktivləşdir» ilə açılır. Sorğu YOXDUR.
-    if journal_link and getattr(slot, "offering_id", None):
-        row["url"] = reverse("registrar:journal_detail", args=[slot.offering_id])
+    url = _journal_url(slot, viewer_id) if journal_link else ""
+    if url:
+        row["url"] = url
     return row
 
 
-def build(slots, *, period, today, now, with_group: bool, journal_links: bool = False) -> dict:
+def build(slots, *, period, today, now, with_group: bool, journal_links: bool = False, viewer_id=None) -> dict:
     """Kartın rəqəmləri + sətirləri.
 
     Qaytarır: ``stats`` (bu gün / növbəti / bu həftə), ``rows``, ``caption``
     («Bu gün · …» və ya «Növbəti dərs günü · …»), ``empty`` (sətir yoxdursa
-    səbəbi izah edən mətn).
+    səbəbi izah edən mətn). ``viewer_id`` — «Jurnalı aç» keçidi üçün baxan (bax :func:`_journal_url`).
     """
     from apps.registrar.public import dashboard_data
 
@@ -77,7 +96,7 @@ def build(slots, *, period, today, now, with_group: bool, journal_links: bool = 
     if remaining:
         shown, caption = today_slots, pgettext(_CTX, "Bu gün · %(day)s") % {"day": day_label(today)}
         rows = [
-            _lesson_row(slot, with_group=with_group, now=now, journal_link=journal_links)
+            _lesson_row(slot, with_group=with_group, now=now, journal_link=journal_links, viewer_id=viewer_id)
             for slot in shown[:LESSON_ROW_LIMIT]
         ]
         upcoming = remaining[0]
@@ -87,7 +106,7 @@ def build(slots, *, period, today, now, with_group: bool, journal_links: bool = 
     elif next_slots:
         caption = pgettext(_CTX, "Növbəti dərs günü · %(day)s") % {"day": day_label(next_day)}
         rows = [
-            _lesson_row(slot, with_group=with_group, journal_link=journal_links)
+            _lesson_row(slot, with_group=with_group, journal_link=journal_links, viewer_id=viewer_id)
             for slot in next_slots[:LESSON_ROW_LIMIT]
         ]
         next_value = time_range(next_slots[0]).split("–")[0]

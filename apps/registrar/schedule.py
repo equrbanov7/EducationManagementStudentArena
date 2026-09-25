@@ -202,29 +202,35 @@ def find_conflict(
         if not _week_types_overlap(week_type, slot.week_type):
             continue
         same_group = offering.group_id and slot.offering.group_id == offering.group_id
-        same_instructor = _same_person(teacher_id, effective_instructor_id(slot))
+        same_instructor = same_id(teacher_id, effective_instructor_id(slot))
         slot_room = (slot.room or "").strip().lower()
         same_room = room_norm and room_norm == slot_room
-        if not same_group and _is_joint_lecture(offering, teacher_id, kind, room_norm, slot, slot_room):
+        if not same_group and is_joint_lecture(
+            kind=kind, subject_id=offering.subject_id, teacher_id=teacher_id, room=room_norm, slot=slot
+        ):
             continue
         if same_group or same_instructor or same_room:
             return slot
     return None
 
 
-def _same_person(left, right) -> bool:
-    """İki istifadəçi id-si eyni şəxsdirmi (``int`` / ``str`` fərqi nəzərə alınmır; boş = yox)."""
+def same_id(left, right) -> bool:
+    """İki id eynidirmi (``int`` / ``str`` / ``UUID`` fərqi nəzərə alınmır; boş = yox)."""
     return bool(left) and bool(right) and str(left) == str(right)
 
 
-def _is_joint_lecture(offering, teacher_id, kind, room_norm, slot, slot_room) -> bool:
-    """Axın: eyni (effektiv) müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq."""
+def is_joint_lecture(*, kind, subject_id, teacher_id, room, slot) -> bool:
+    """Axın: eyni (effektiv) müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq.
+
+    TƏK qayda — ``find_conflict`` və redaktorun ``schedule_conflicts.detect``-i bunu işlədir.
+    Qrup toqquşması bundan ƏVVƏL ayrıca yoxlanır: eyni qrup HƏMİŞƏ toqquşmadır."""
+    room_norm = (room or "").strip().lower()
+    slot_room = (slot.room or "").strip().lower()
     return bool(
         kind == SlotKind.LECTURE
         and slot.kind == SlotKind.LECTURE
-        and _same_person(teacher_id, effective_instructor_id(slot))
-        and offering.subject_id
-        and slot.offering.subject_id == offering.subject_id
+        and same_id(teacher_id, effective_instructor_id(slot))
+        and same_id(subject_id, slot.offering.subject_id)
         and (not room_norm or not slot_room or room_norm == slot_room)
     )
 
