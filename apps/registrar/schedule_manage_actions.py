@@ -58,10 +58,20 @@ def _weekday_label(weekday) -> str:
     return str(weekday)
 
 
+def _person_name(user) -> str:
+    if user is None:
+        return ""
+    return (getattr(user, "get_full_name", lambda: "")() or "").strip() or str(getattr(user, "username", "") or "")
+
+
 def slot_row(slot) -> dict:
-    """Slotun UI/audit müqaviləsi (JSON) — açar adları dəyişməz (yalnız artır)."""
+    """Slotun UI/audit müqaviləsi (JSON) — açar adları dəyişməz (yalnız artır).
+
+    ``instructor_id``/``instructor`` — jurnal sahibi (açılış); ``slot_instructor_id`` — slotun öz
+    müəllimi (boş = jurnal sahibi); ``teacher_id``/``teacher`` — EFFEKTİV müəllim (göstəriş üçün)."""
     offering = slot.offering
     instructor = getattr(offering, "instructor", None)
+    teacher = schedule_service.effective_instructor(slot)
     return {
         "id": str(slot.pk),
         "offering_id": str(slot.offering_id),
@@ -71,8 +81,10 @@ def slot_row(slot) -> dict:
         "group": getattr(offering.group, "name", "") or "",
         "group_id": str(offering.group_id or ""),
         "instructor_id": str(offering.instructor_id or ""),
-        "instructor": (getattr(instructor, "get_full_name", lambda: "")() or "").strip()
-        or str(getattr(instructor, "username", "") or ""),
+        "instructor": _person_name(instructor),
+        "slot_instructor_id": str(slot.instructor_id or ""),
+        "teacher_id": str(schedule_service.effective_instructor_id(slot) or ""),
+        "teacher": _person_name(teacher),
         "weekday": slot.weekday,
         "weekday_label": _weekday_label(slot.weekday),
         "start_time": slot.start_time.strftime("%H:%M"),
@@ -89,11 +101,19 @@ def slot_row(slot) -> dict:
 # ── Bildiriş ─────────────────────────────────────────────────────────────────
 
 
-def _recipients(offering):
-    """Açılışın müəllimi + qrupun AKTİV (qeydiyyatlı) tələbələri."""
+def _recipients(offering, teacher_ids=()):
+    """Açılışın müəllimi + slotu aparan müəllim(lər) + qrupun AKTİV (qeydiyyatlı) tələbələri.
+
+    ``teacher_ids`` — slotun öz müəllimi (bölünmüş tədris; köhnə və yeni dəyər) — onun da həftəsi
+    dəyişir. Boşdursa əlavə sorğu yoxdur (köhnə davranış)."""
     people = []
     if offering.instructor_id:
         people.append(offering.instructor)
+    extra = {str(pk) for pk in teacher_ids if pk and str(pk) != str(offering.instructor_id or "")}
+    if extra:
+        from django.contrib.auth import get_user_model
+
+        people.extend(get_user_model().objects.filter(pk__in=sorted(extra)))
     if offering.group_id:
         records = (
             StudentAcademicRecord.objects.filter(
@@ -113,11 +133,14 @@ def _recipients(offering):
     return unique
 
 
-def notify_schedule_change(*, offering, row, removed=False) -> int:
-    """Cədvəl dəyişikliyi barədə in-app bildiriş (toplu, tək insert)."""
+def notify_schedule_change(*, offering, row, removed=False, old_row=None) -> int:
+    """Cədvəl dəyişikliyi barədə in-app bildiriş (toplu, tək insert).
+
+    Slotu aparan müəllim (``row``/``old_row`` → ``slot_instructor_id``) də alıcıdır."""
     from apps.notifications.public import create_notification_for_users
 
-    recipients = _recipients(offering)
+    teacher_ids = [(item or {}).get("slot_instructor_id") for item in (row, old_row)]
+    recipients = _recipients(offering, teacher_ids)
     if not recipients:
         return 0
     subject = row["subject_name"] or row["subject_code"]

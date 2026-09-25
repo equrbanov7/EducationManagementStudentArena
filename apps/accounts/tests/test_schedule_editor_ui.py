@@ -253,12 +253,15 @@ class EditorActionTest(ScheduleEditorUIBase):
 
     def test_move_reports_the_teacher_conflict_before_writing(self):
         with bypass_rls():
+            # Müəllimin həmin saatda 231B ilə SEMİNARI (eyni fənnin iki qrupa mühazirəsi isə axındır —
+            # 2026-09-25-dən toqquşma sayılmır, bax `schedule.is_joint_lecture`).
             ScheduleSlot.objects.create(
                 organization=self.org,
                 offering=self.offering_b,
                 weekday=3,
                 start_time=datetime.time(13, 35),
                 end_time=datetime.time(15, 5),
+                kind="seminar",
             )
         created = self._act(self.coordinator, self._cell()).json()["slot"]
         response = self._act(
@@ -287,6 +290,7 @@ class EditorActionTest(ScheduleEditorUIBase):
                 weekday=3,
                 start_time=datetime.time(13, 35),
                 end_time=datetime.time(15, 5),
+                kind="seminar",  # həqiqi müəllim toqquşması (mühazirə olsaydı axın olardı)
             )
         created = self._act(self.coordinator, self._cell()).json()["slot"]
         response = self._act(

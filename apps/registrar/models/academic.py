@@ -524,6 +524,16 @@ class ScheduleSlot(ReferenceIdentityValidationMixin, SoftDeleteModel, UUIDModel,
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    # 2026-09-25: bölünmüş tədris — seminarı/laboratoriyanı jurnal sahibindən BAŞQA müəllim aparır.
+    # NULL = jurnal sahibi (offering.instructor; bütün köhnə sətirlər). Qayda: schedule.effective_instructor_id.
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Slotu aparan müəllim (boş = jurnal sahibi).",
+    )
     is_parked = models.BooleanField(
         default=False,
         db_index=True,
