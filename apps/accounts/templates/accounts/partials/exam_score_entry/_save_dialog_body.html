@@ -37,7 +37,9 @@ siyahı formasının İÇİNDƏ render olunur, yalnız «Təsdiq et» POST edir.
 <div class="ese-just" data-ese-just hidden>
   <p class="ems-msg ems-msg--warning ese-just__note">
     <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
-    {% if s.correction_mode %}
+    {% if s.first_entry_needs_document and not s.correction_mode %}
+    <span>{% blocktrans context "registrar.exam_score_entry" with days=s.document_after_days %}Bu dövr {{ days }} gündən çox əvvəl bağlanıb — köhnə nəticənin köçürülməsi təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir.{% endblocktrans %}</span>
+    {% elif s.correction_mode %}
     <span>{% trans "Bitmiş dövrün düzəliş rejimi — hər yazı (ilk daxiletmə də) təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
     {% else %}
     <span>{% trans "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur." context "registrar.exam_score_entry" %}</span>

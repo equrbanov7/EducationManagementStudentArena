@@ -187,7 +187,6 @@
     function applyQuestionGrid(host) {
         var count = questionCount(host);
         var max = questionMax(host);
-        var readOnly = host.getAttribute("data-read-only") === "1"; // bitmiş dövr (2026-09-26)
         host.querySelectorAll("[data-ese-qcol]").forEach(function (th) {
             th.hidden = Number(th.getAttribute("data-ese-qcol")) > count;
         });
@@ -199,7 +198,8 @@
             td.hidden = off;
             var select = td.querySelector("[data-ese-q]");
             if (select) {
-                select.disabled = off || readOnly;
+                // Bitmiş dövrdə yazılmış bal olan sətir (2026-09-26) — `data-locked`.
+                select.disabled = off || td.parentNode.getAttribute("data-locked") === "1";
                 if (String(select.getAttribute("data-max") || "") !== String(max)) {
                     rebuildOptions(select, max);
                 }

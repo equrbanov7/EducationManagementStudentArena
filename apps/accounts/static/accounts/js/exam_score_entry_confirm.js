@@ -11,8 +11,8 @@
  *   · K>0 dəyişiklik → növ + səbəb + qeyd + skan tələb olunur; skan DİALOQUN
  *     öz fayl sahəsində (`data-ese-just-file`, 2026-09-26) və ya vərəq kartında
  *     seçilir — server eyni qaydanı yenidən tətbiq edir, bu yalnız erkən UX;
- *   · bitmiş dövrün düzəliş rejimi (`data-correction-mode="1"`, RİM rəhbəri) —
- *     HƏR yazı (ilk daxiletmə də) eyni təqdimatı tələb edir;
+ *   · `data-submission-required="1"` (RİM düzəliş rejimi və ya 60 gündən köhnə
+ *     bitmiş dövr) — HƏR yazı (ilk daxiletmə də) eyni təqdimatı tələb edir;
  *   · YALNIZ dialoqun «Təsdiq et» düyməsi POST edir (Enter / kənar submit bloklanır).
  *
  * CSP: inline yoxdur; i18n `#eseI18n`. AJAX-safe: `EMSDelegate` (açarlar
@@ -49,13 +49,14 @@
         return !!(fileOf(host, "[data-ese-just-file]") || fileOf(host, "[data-ese-meta-file]"));
     }
 
-    /* Bitmiş dövrün düzəliş rejimi — HƏR yazı təqdimatlıdır (server də belə tələb edir). */
-    function correctionMode(host) {
-        return host.getAttribute("data-correction-mode") === "1";
+    /* HƏR yazı təqdimatlıdır — RİM düzəliş rejimi və ya 60 gündən köhnə bitmiş
+       dövrə ilk köçürmə (server `data-submission-required`-i eyni qaydadan qurur). */
+    function submissionRequired(host) {
+        return host.getAttribute("data-submission-required") === "1";
     }
 
     function needsJustification(host, summary) {
-        return !!(summary.changes || (correctionMode(host) && summary.writes));
+        return !!(summary.changes || (submissionRequired(host) && summary.writes));
     }
 
     function syncScanStatus(host) {
@@ -290,7 +291,7 @@
         }
         if (needsJustification(host, summary) && !justificationComplete(host)) {
             event.preventDefault();
-            showDialogError(host, t(correctionMode(host) ? "need-submission" : "need-justification"));
+            showDialogError(host, t(submissionRequired(host) ? "need-submission" : "need-justification"));
             syncScanStatus(host);
             var reason = host.querySelector("[data-ese-reason]");
             if (reason && !reason.value) {
