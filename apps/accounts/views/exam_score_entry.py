@@ -19,6 +19,11 @@ render edir (``journal_close`` / ``kollokvium_windows`` pattern-i). Fayl idxalı
 Sətir-sətir yazı servis qatındadır — orada ilk daxiletmə sərbəst, SONRAKI
 dəyişiklik isə səbəb + qeyd + sənəd tələb edir.
 
+2026-09-26 (sahib): BİTMİŞ dövrün balları kilidlidir — yazı yalnız RİM rəhbəri /
+superadmin, yalnız «Düzəliş rejimi»ndə (``correction_mode=1``) və tam təqdimatla
+(səbəb + qeyd + skan; skan təsdiq dialoqunun fayl sahəsindən və ya vərəq
+kartından). Qayda ``apps/registrar/exam_score_period_lock.py``-dadır.
+
 2026-09-14 (W2 `w2paper`): sətirdə sual-sual ballar ``q__<enr>__<n>``
 (n = 1..sual sayı) — hər hansı biri doludursa imtahan balı onların CƏMİDİR
 (server hesablayır, ``score__<enr>`` nəzərə alınmır); vərəqin sual şəbəkəsi
@@ -199,6 +204,9 @@ def _handle_save(request, organization, next_url):
     if not _is_superadmin_user(request.user):
         service.assert_offering_in_actor_scope(request.user, organization, offering)
 
+    # 2026-09-26: bitmiş dövr kilidi — partiya (və skan faylı) yaranmazdan ƏVVƏL
+    # yoxlanır; servis (`save_roster_scores`) eyni qapını yenidən tətbiq edir.
+    correction_mode = _past_period_precheck(request, organization, offering)
     metadata = sheets_service.sheet_metadata_from_post(request.POST, request.FILES, offering=offering)
     with transaction.atomic():
         sheet = sheets_service.create_sheet(
@@ -214,6 +222,7 @@ def _handle_save(request, organization, next_url):
             by_user=request.user,
             request=request,
             sheet=sheet,
+            correction_mode=correction_mode,
         )
         sheet = sheets_service.finalize_sheet(sheet, result, by_user=request.user, request=request)
 
@@ -230,6 +239,25 @@ def _handle_save(request, organization, next_url):
         ese_offering="" if f"ese_offering={offering.pk}" in next_url else str(offering.pk),
         ese_saved="1" if result["written"] else "",
     )
+
+
+def _past_period_precheck(request, organization, offering) -> bool:
+    """Bitmiş dövr: RİM rəhbəri / superadmin + aktiv düzəliş rejimi + tam təqdimat; əks halda xəta.
+
+    Nəticə — servisə ötürülən ``correction_mode`` bayrağı. Cari dövrdə heç nə
+    dəyişmir (``False``, əlavə sorğu yoxdur).
+    """
+    lock = service.exam_score_period_lock
+    correction_mode = lock.correction_mode_requested(request.POST)
+    if lock.assert_write_allowed(
+        user=request.user, organization=organization, offering=offering, correction_mode=correction_mode
+    ):
+        lock.require_submission(
+            reason=(request.POST.get("reason") or "").strip(),
+            note=(request.POST.get("note") or "").strip(),
+            evidence=lock.submission_evidence(request.FILES),
+        )
+    return correction_mode
 
 
 def _written_message(written, skipped):
