@@ -3,7 +3,8 @@
 sətir-sətir — ad soyad, giriş balı, imtahan balı, yekun, hərf qiyməti (təşkilatın
 şkalası `ese-confirm-config` json_script-dən; kəsilən F qırmızı, sayı başlıqda);
 imtahan növü + vərəq tarixi + yoxlayan başlıqda. Dəyişən sətirlər üçün növ / səbəb /
-qeyd burada, skan vərəq kartındadır (`sheet_evidence`). `_dialog.html` gövdəsi —
+qeyd burada; skan (2026-09-26) DİALOQUN öz fayl sahəsində (`justification_evidence`)
+və ya vərəq kartında (`sheet_evidence`) seçilir. `_dialog.html` gövdəsi —
 siyahı formasının İÇİNDƏ render olunur, yalnız «Təsdiq et» POST edir.{% endcomment %}
 <p class="ems-msg ems-msg--error" data-ese-dialog-error role="alert" hidden></p>
 
@@ -36,7 +37,11 @@ siyahı formasının İÇİNDƏ render olunur, yalnız «Təsdiq et» POST edir.
 <div class="ese-just" data-ese-just hidden>
   <p class="ems-msg ems-msg--warning ese-just__note">
     <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
+    {% if s.correction_mode %}
+    <span>{% trans "Bitmiş dövrün düzəliş rejimi — hər yazı (ilk daxiletmə də) təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
+    {% else %}
     <span>{% trans "Artıq yazılmış balı dəyişirsiniz — sahibin qaydası ilə səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir. Hər dəyişən sətir eyni səbəb və qeydlə audit olunur." context "registrar.exam_score_entry" %}</span>
+    {% endif %}
   </p>
   <div class="ese-just__grid">
     <div class="ems-field">
@@ -64,6 +69,18 @@ siyahı formasının İÇİNDƏ render olunur, yalnız «Təsdiq et» POST edir.
   <div class="ems-field">
     <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
     <textarea id="ese-note" name="note" class="ems-textarea" rows="3" maxlength="500" data-ese-note></textarea>
+  </div>
+  {# 2026-09-26 (sahib: «file yükləmə yeri də olsun, məcburi»): skan DİALOQUN İÇİNDƏ seçilir; #}
+  {# vərəq kartında seçilmiş fayl da qəbul olunur (server: dialoq faylı üstündür). #}
+  <div class="ems-field">
+    <span class="ems-field__label" id="ese-just-file-label">{% trans "Skan edilmiş sənəd (təqdimat)" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></span>
+    <label class="ese-drop ese-drop--compact" data-ese-just-drop>
+      <input type="file" class="ese-drop__input" name="{{ s.justification_file_field }}"
+             accept="{{ s.evidence_accept }}" aria-labelledby="ese-just-file-label" data-ese-just-file>
+      <i class="fas fa-file-arrow-up ese-drop__icon" aria-hidden="true"></i>
+      <span class="ese-drop__title" data-ese-just-file-name data-empty="{% trans 'Faylı seçmək üçün klikləyin və ya bura sürüşdürün' context 'registrar.exam_score_entry' %}">{% trans "Faylı seçmək üçün klikləyin və ya bura sürüşdürün" context "registrar.exam_score_entry" %}</span>
+      <span class="ese-drop__hint">{{ s.evidence_accept }} · {% blocktrans context "registrar.exam_score_entry" with size=s.evidence_max_mb %}ən çox {{ size }} MB{% endblocktrans %}</span>
+    </label>
   </div>
   <p class="ese-just__scan" data-ese-scan-status></p>
 </div>

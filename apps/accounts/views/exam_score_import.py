@@ -20,6 +20,10 @@ keçir («gördüyün nəticə = alacağın nəticə»); fayl serverdə saxlanı
   dəyərləri — vərəq məlumatları kartının göstərdiyi ilə eyni);
 * quru icra da tətbiqlə EYNİ POST şəbəkəsini alır — ön baxışda 3 sual seçilibsə
   S4 dəyəri tətbiqdəki kimi rədd olunur (əvvəl ön baxış defolt şəbəkə ilə gedirdi).
+
+2026-09-26: bitmiş dövrdə tətbiq YALNIZ RİM rəhbəri / superadmin + düzəliş rejimi
+(``correction_mode=1``) + tam təqdimatla keçir (``exam_score_period_lock``);
+quru icra heç nə yazmadığı üçün açıq qalır.
 """
 
 from __future__ import annotations
@@ -200,19 +204,30 @@ def exam_score_import_preview(request):
     return JsonResponse(_payload(plan, roster))
 
 
-def _justification_error(plan, request):
+def _justification_error(plan, request, *, locked=False):
     """Dəyişən sətir varsa səbəb + qeyd + skan (partiya sənədi) BİRLİKDƏ tələb olunur.
 
     Servis onsuz da hər sətri ayrıca rədd edərdi; burada ƏVVƏLCƏDƏN yoxlanır ki,
     yarımçıq partiya (yeni ballar yazılıb, dəyişikliklər rədd olunub) yaranmasın —
     operator quru icrada K dəyişikliyi görüb, dialoqda üçünü də verir.
+
+    2026-09-26: bitmiş dövrün düzəliş rejimində (``locked``) HƏR yazı təqdimatlıdır;
+    skan paneldəki fayl sahəsindən (``justification_evidence``) və ya vərəq kartından.
     """
-    if not importer.needs_justification(plan):
+    if not locked and not importer.needs_justification(plan):
         return None
     reason = (request.POST.get("reason") or "").strip()
     note = (request.POST.get("note") or "").strip()
-    evidence = request.FILES.get("sheet_evidence")
+    evidence = service.exam_score_period_lock.submission_evidence(request.FILES)
     if reason not in CorrectionReason.values or not note or evidence is None:
+        if locked:
+            return _bad(
+                "submission_required",
+                pgettext(
+                    _CTX,
+                    "Bitmiş dövrdə hər yazı təqdimat tələb edir — səbəb, qeyd və skan edilmiş sənəd məcburidir.",
+                ),
+            )
         return _bad(
             "justification_required",
             pgettext(_CTX, "Yazılmış balı dəyişən sətirlər var — səbəb, qeyd və skan edilmiş sənəd tələb olunur."),
@@ -229,10 +244,19 @@ def exam_score_import_apply(request):
     _organization, offering, error = _gate(request)
     if error is not None:
         return error
+    lock = service.exam_score_period_lock
+    correction_mode = lock.correction_mode_requested(request.POST)
+    try:
+        # Bitmiş dövr kilidi (2026-09-26) — fayl oxunmazdan və partiya yaranmazdan ƏVVƏL.
+        locked = lock.assert_write_allowed(
+            user=request.user, organization=_organization, offering=offering, correction_mode=correction_mode
+        )
+    except PermissionDenied as exc:
+        return _denied(str(exc))
     roster, plan, error = _plan_from_request(request, offering)
     if error is not None:
         return error
-    error = _justification_error(plan, request)
+    error = _justification_error(plan, request, locked=locked)
     if error is not None:
         return error
     upload = request.FILES.get("file")
@@ -255,10 +279,13 @@ def exam_score_import_apply(request):
                 sheet=sheet,
                 reason=(request.POST.get("reason") or "").strip(),
                 note=(request.POST.get("note") or "").strip(),
+                correction_mode=correction_mode,
             )
             sheet = sheets_service.finalize_sheet(sheet, result, by_user=request.user, request=request)
     except ValidationError as exc:
         return _bad("validation_error", " ".join(exc.messages))
+    except PermissionDenied as exc:
+        return _denied(str(exc))
     return JsonResponse(_payload(plan, roster, applied=True, result=result, sheet=sheet))
 
 

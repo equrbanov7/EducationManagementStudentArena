@@ -30,6 +30,7 @@ from django.utils.translation import pgettext
 
 from apps.accounts.views._helpers.formatting import _append_query_params
 
+from .exam_score_entry_lock import fill_period_lock
 from .exam_score_entry_offering import _fill_offering, _steps
 from .kollokvium_windows import _current_semester, _season_label
 
@@ -310,6 +311,11 @@ def build_exam_score_entry_section(
 
     sheet_kind = _resolve_exam_kind(request, "ese_sheet_kind")
     _fill_offering(section, offering, period, service, sheets_service, selected_org, is_superadmin, sheet_kind)
+    fill_period_lock(  # bitmiş dövr kilidi + RİM düzəliş rejimi (2026-09-26)
+        request, section, period=period, organization=selected_org, service=service, is_superadmin=is_superadmin
+    )
+    if section["correction_mode"]:  # çiplər / süzgəc keçidləri rejimi saxlasın
+        roster_params[service.exam_score_period_lock.CORRECTION_MODE_QUERY] = "1"
     _apply_roster_filters(request, section, filter_fields, service, roster_params)
     section["sheet_kind_chips"] = _exam_kind_chips(
         service,

@@ -1,0 +1,58 @@
+/*
+ * exam_score_entry_lock.css — İmtahan balının daxil edilməsi: BİTMİŞ DÖVR KİLİDİ
+ * bannerı + RİM düzəliş rejimi + təsdiq dialoqunun fayl sahəsi (2026-09-26).
+ * Yalnız dizayn tokenləri (`--ems-*`) — qaranlıq rejim tokenlərdən gəlir.
+ */
+
+/* ── Kilid / düzəliş rejimi bannerı ─────────────────────────────────────── */
+.ese-lock {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--ems-sp-3) var(--ems-sp-4);
+}
+
+.ese-lock__text {
+    display: flex;
+    flex: 1 1 320px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ese-lock__text span {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.ese-lock__actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+}
+
+.ese-lock.is-correcting {
+    border-inline-start: 3px solid var(--ems-warning-500, var(--ems-warning));
+}
+
+/* ── Dialoqdakı yığcam fayl sahəsi (import panelinin `ese-drop` naxışı) ── */
+.ese-drop--compact {
+    position: relative;
+    padding: var(--ems-sp-4);
+}
+
+.ese-drop--compact .ese-drop__icon {
+    font-size: 20px;
+}
+
+.ese-drop--compact .ese-drop__title {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 576px) {
+    .ese-lock__actions,
+    .ese-lock__actions .ems-btn {
+        width: 100%;
+    }
+}
