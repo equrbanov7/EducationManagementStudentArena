@@ -1,0 +1,44 @@
+{% load i18n %}
+<nav class="ems-crumbs sfc-crumbs" aria-label="{% trans 'Naviqasiya' context 'subject_folder.ui' %}">
+    <a class="ems-crumbs__link" href="{{ sp.urls.list }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Fənn qovluqlarım" context "subject_folder.ui" %}</a>
+</nav>
+<header class="sfc-head">
+    <div class="sfc-head__main">
+        <p class="sfc-eyebrow">{{ sp.folder.subject.name }}</p>
+        <h2 class="sfc-head__title">{{ sp.folder.title }}</h2>
+        <p class="sfc-head__meta"><span>{{ sp.teacher }}</span>{% if sp.group %}<span>{{ sp.group }}</span>{% endif %}</p>
+        {% if sp.folder.description %}<p class="sfc-head__desc">{{ sp.folder.description|linebreaksbr }}</p>{% endif %}
+    </div>
+    {% if sp.has_selfwork %}
+    <div class="sfc-head__score">
+        <span class="sfc-head__score-label">{% trans "Sərbəst iş balı" context "subject_folder.ui" %}</span>
+        <span class="sfc-head__score-value">{{ sp.selfwork_earned|default:"0" }} <span class="sfc-muted">/ 10</span></span>
+    </div>
+    {% endif %}
+</header>
+
+{% if not sp.topics and not sp.general.materials and not sp.general.tasks %}
+    {% trans "Qovluqda hələ dərc edilmiş məzmun yoxdur" context "subject_folder.ui" as st_title %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-folder-open" %}
+{% endif %}
+
+<ol class="sfc-topics" role="list">
+    {% for row in sp.topics %}
+    <li class="sfc-topic">
+        <div class="sfc-topic__head">
+            <div class="sfc-topic__title">
+                {% if row.topic.week_no %}<span class="sfc-topic__week">{% blocktrans trimmed with n=row.topic.week_no context "subject_folder.ui" %}Həftə {{ n }}{% endblocktrans %}</span>{% endif %}
+                <h3 class="sfc-topic__name">{{ row.topic.title }}</h3>
+            </div>
+        </div>
+        {% if row.topic.description %}<p class="sfc-topic__desc">{{ row.topic.description|linebreaksbr }}</p>{% endif %}
+        {% include "subject_folder/cabinet/student/_items.html" with materials=row.materials tasks=row.tasks %}
+    </li>
+    {% endfor %}
+    {% if sp.general.materials or sp.general.tasks %}
+    <li class="sfc-topic sfc-topic--general">
+        <div class="sfc-topic__head"><div class="sfc-topic__title"><h3 class="sfc-topic__name">{% trans "Ümumi" context "subject_folder.ui" %}</h3></div></div>
+        {% include "subject_folder/cabinet/student/_items.html" with materials=sp.general.materials tasks=sp.general.tasks %}
+    </li>
+    {% endif %}
+</ol>

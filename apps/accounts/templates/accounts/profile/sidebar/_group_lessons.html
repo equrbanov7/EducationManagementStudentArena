@@ -9,9 +9,9 @@ o, üç məntiqli qrupa ayrıldı — bu (gündəlik dərs), «Dərs yükü» (y
 2026-09-25: tələbə/müəllimin də gördüyü bəndlər (cədvəl, təqvim, jurnal,
 keçilmiş dərslər, dərs yüküm) `sidebar/items/`-dədir; yalnız heyətə aid
 olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.{% endcomment %}
-{% if "my-schedule" in allowed_sections or "schedule-manage" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "lessons-log" in allowed_sections or "journal-close" in allowed_sections or "teaching-handover" in allowed_sections or "my-workload" in allowed_sections %}
+{% if "my-schedule" in allowed_sections or "schedule-manage" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "lessons-log" in allowed_sections or "subject-folders" in allowed_sections or "journal-close" in allowed_sections or "teaching-handover" in allowed_sections or "my-workload" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="lessons">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-schedule|schedule-manage|academic-calendar|my-journal|lessons-log|journal-close|teaching-handover|my-workload|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-schedule|schedule-manage|academic-calendar|my-journal|lessons-log|subject-folders|journal-close|teaching-handover|my-workload|" %} open{% endif %}>
         {% trans "Dərs və cədvəl" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-calendar-week" %}
         <ul class="sidebar-menu-group-items">
@@ -34,6 +34,7 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
             {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
             {% include "accounts/profile/sidebar/items/_my_journal.html" %}
             {% include "accounts/profile/sidebar/items/_lessons_log.html" %}
+            {% include "accounts/profile/sidebar/items/_subject_folders.html" %}
             {% comment %}RİM: semestr sonu jurnal bağlama. Form-heavy bölmədir (kollokvium
             pəncərələri kimi) — AJAX swap YOX, tam səhifə naviqasiyası.{% endcomment %}
             {% if "journal-close" in allowed_sections %}

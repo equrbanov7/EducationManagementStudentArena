@@ -1,0 +1,25 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfCreateSubject">{% trans "Fənn və semestr" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="sfCreateSubject" name="subject_period" required
+                data-bootstrap-select data-live-search="true"
+                data-live-search-placeholder="{% trans 'Fənn adı ilə axtar…' context 'subject_folder.ui' %}"
+                data-live-search-empty="{% trans 'Uyğun fənn tapılmadı' context 'subject_folder.ui' %}">
+            <option value="">{% trans "Seçin" context "subject_folder.ui" %}</option>
+            {% for option in sp.create_options %}
+                <option value="{{ option.value }}">{{ option.label }}{% if option.has_folder %} — {% trans "qovluq var" context "subject_folder.ui" %}{% endif %}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Siyahıda yalnız sizin tədris etdiyiniz fənn açılışları var." context "subject_folder.ui" %}</p>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfCreateTitle">{% trans "Qovluğun adı" context "subject_folder.ui" %}</label>
+    <input class="ems-input" type="text" id="sfCreateTitle" name="title" maxlength="255"
+           placeholder="{% trans 'Boş saxlasanız fənnin adı yazılır' context 'subject_folder.ui' %}">
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfCreateDesc">{% trans "Təsvir" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea" id="sfCreateDesc" name="description" rows="3"></textarea>
+</div>

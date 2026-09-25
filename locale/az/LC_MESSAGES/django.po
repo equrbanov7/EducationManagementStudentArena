@@ -81127,3 +81127,1415 @@ msgstr "Sərbəst iş üçün düzgün bal daxil edin."
 msgctxt "registrar.selfwork"
 msgid "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır."
 msgstr "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır."
+
+msgctxt "profile.sidebar"
+msgid "Fənn qovluqları"
+msgstr "Fənn qovluqları"
+
+msgctxt "profile.sidebar"
+msgid "Fənn qovluqlarım"
+msgstr "Fənn qovluqlarım"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq yoxlaması"
+msgstr "Tapşırıq yoxlaması"
+
+msgctxt "subject_folder.ui"
+msgid "%(done)s göndəriş işləndi, %(failed)s göndəriş alınmadı."
+msgstr "%(done)s göndəriş işləndi, %(failed)s göndəriş alınmadı."
+
+msgctxt "subject_folder.ui"
+msgid "%(done)s göndəriş işləndi."
+msgstr "%(done)s göndəriş işləndi."
+
+msgctxt "subject_folder.ui"
+msgid "%(name)s — seç"
+msgstr "%(name)s — seç"
+
+msgctxt "subject_folder.ui"
+msgid "AKTİV"
+msgstr "AKTİV"
+
+msgctxt "subject_folder.ui"
+msgid "Ad, soyad və ya istifadəçi adı…"
+msgstr "Ad, soyad və ya istifadəçi adı…"
+
+msgctxt "subject_folder.ui"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Aktiv təşkilat konteksti yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid "Aktiv təşkilat seçilməyib"
+msgstr "Aktiv təşkilat seçilməyib"
+
+msgctxt "subject_folder.ui"
+msgid "Aktivləşdir"
+msgstr "Aktivləşdir"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivdədir"
+msgstr "Arxivdədir"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivdən çıxar"
+msgstr "Arxivdən çıxar"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivlə"
+msgstr "Arxivlə"
+
+msgctxt "subject_folder.ui"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "subject_folder.ui"
+msgid "AÇIQ TAPŞIRIQ"
+msgstr "AÇIQ TAPŞIRIQ"
+
+msgctxt "subject_folder.ui"
+msgid "Aç"
+msgstr "Aç"
+
+msgctxt "subject_folder.ui"
+msgid "Açılma vaxtı"
+msgstr "Açılma vaxtı"
+
+msgctxt "subject_folder.ui"
+msgid "Açılır"
+msgstr "Açılır"
+
+msgctxt "subject_folder.ui"
+msgid "Açılır:"
+msgstr "Açılır:"
+
+msgctxt "subject_folder.ui"
+msgid "Açıq tapşırıq: %(n)s"
+msgstr "Açıq tapşırıq: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Açıqdır"
+msgstr "Açıqdır"
+
+msgctxt "subject_folder.ui"
+msgid "Bal"
+msgstr "Bal"
+
+msgctxt "subject_folder.ui"
+msgid "Bal (maks. %(max)s)"
+msgstr "Bal (maks. %(max)s)"
+
+msgctxt "subject_folder.ui"
+msgid "Bal yazılmır — tələbə işi düzəldib yenidən göndərir."
+msgstr "Bal yazılmır — tələbə işi düzəldib yenidən göndərir."
+
+msgctxt "subject_folder.ui"
+msgid "Bax"
+msgstr "Bax"
+
+msgctxt "subject_folder.ui"
+msgid "Bağlanıb"
+msgstr "Bağlanıb"
+
+msgctxt "subject_folder.ui"
+msgid "Başlanmayıb"
+msgstr "Başlanmayıb"
+
+msgctxt "subject_folder.ui"
+msgid "Başlıq"
+msgstr "Başlıq"
+
+msgctxt "subject_folder.ui"
+msgid "Başqa semestrə köçür"
+msgstr "Başqa semestrə köçür"
+
+msgctxt "subject_folder.ui"
+msgid "Bir dəfəyə ən çox %(max)s göndəriş seçmək olar."
+msgstr "Bir dəfəyə ən çox %(max)s göndəriş seçmək olar."
+
+msgctxt "subject_folder.ui"
+msgid "Boş saxlasanız fənnin adı yazılır"
+msgstr "Boş saxlasanız fənnin adı yazılır"
+
+msgctxt "subject_folder.ui"
+msgid "Bu fənn və semestr üçün qovluğunuz artıq var — o açılır."
+msgstr "Bu fənn və semestr üçün qovluğunuz artıq var — o açılır."
+
+msgctxt "subject_folder.ui"
+msgid "Bu fənn və semestr üçün tədris etdiyiniz qrup tapılmadı."
+msgstr "Bu fənn və semestr üçün tədris etdiyiniz qrup tapılmadı."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuda hələ material və tapşırıq yoxdur."
+msgstr "Bu mövzuda hələ material və tapşırıq yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuda hələ məzmun yoxdur."
+msgstr "Bu mövzuda hələ məzmun yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuya material əlavə et"
+msgstr "Bu mövzuya material əlavə et"
+
+msgctxt "subject_folder.ui"
+msgid "Bu oxşarlıq plagiat deyil kimi qeyd olunsun?"
+msgstr "Bu oxşarlıq plagiat deyil kimi qeyd olunsun?"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Bu qrupun təyinatı ləğv edilsin? Tələbələr qovluğu görməyəcək; göndərişlər "
+"saxlanılır."
+msgstr ""
+"Bu qrupun təyinatı ləğv edilsin? Tələbələr qovluğu görməyəcək; göndərişlər "
+"saxlanılır."
+
+msgctxt "subject_folder.ui"
+msgid "Bütün qruplar üçün son tarix"
+msgstr "Bütün qruplar üçün son tarix"
+
+msgctxt "subject_folder.ui"
+msgid "Bütün qruplara son tarix qoy"
+msgstr "Bütün qruplara son tarix qoy"
+
+msgctxt "subject_folder.ui"
+msgid "Bəli, davam et"
+msgstr "Bəli, davam et"
+
+msgctxt "subject_folder.ui"
+msgid "Bərpa et"
+msgstr "Bərpa et"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab"
+msgstr "Cavab"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab boşdur."
+msgstr "Cavab boşdur."
+
+msgctxt "subject_folder.ui"
+msgid "Cavab forması"
+msgstr "Cavab forması"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab ver"
+msgstr "Cavab ver"
+
+msgctxt "subject_folder.ui"
+msgid "Cavabınız"
+msgstr "Cavabınız"
+
+msgctxt "subject_folder.ui"
+msgid "Cəhd %(n)s"
+msgstr "Cəhd %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Düzəldilmiş cavab"
+msgstr "Düzəldilmiş cavab"
+
+msgctxt "subject_folder.ui"
+msgid "Düzəlt və göndər"
+msgstr "Düzəlt və göndər"
+
+msgctxt "subject_folder.ui"
+msgid "Dərc edilib"
+msgstr "Dərc edilib"
+
+msgctxt "subject_folder.ui"
+msgid "Dərc et"
+msgstr "Dərc et"
+
+msgctxt "subject_folder.ui"
+msgid "Dərhal dərc et (tələbələr görsün)"
+msgstr "Dərhal dərc et (tələbələr görsün)"
+
+msgctxt "subject_folder.ui"
+msgid "Dərhal dərc et (təyin olunmuş qruplara bildiriş gedir)"
+msgstr "Dərhal dərc et (təyin olunmuş qruplara bildiriş gedir)"
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı"
+msgstr "Ev tapşırığı"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Ev tapşırığı silinsin? Göndərişi olan tapşırıq silinmir — onu arxivləyin."
+msgstr ""
+"Ev tapşırığı silinsin? Göndərişi olan tapşırıq silinmir — onu arxivləyin."
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı «yoxlanıldı» kimi qeyd olundu."
+msgstr "Ev tapşırığı «yoxlanıldı» kimi qeyd olundu."
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı əlavə et"
+msgstr "Ev tapşırığı əlavə et"
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı əlavə olundu."
+msgstr "Ev tapşırığı əlavə olundu."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Ev tapşırığına bal verilmir — müəllim işi «yoxlanıldı» qeyd edir və ya rəylə"
+" qaytarır."
+msgstr ""
+"Ev tapşırığına bal verilmir — müəllim işi «yoxlanıldı» qeyd edir və ya rəylə"
+" qaytarır."
+
+msgctxt "subject_folder.ui"
+msgid "Fayl"
+msgstr "Fayl"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl qaralamadan silindi."
+msgstr "Fayl qaralamadan silindi."
+
+msgctxt "subject_folder.ui"
+msgid "Fayl sayı"
+msgstr "Fayl sayı"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl yükləmə"
+msgstr "Fayl yükləmə"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl ölçüsü (MB)"
+msgstr "Fayl ölçüsü (MB)"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fayl, şəkil, keçid, video keçidi, kod nümunəsi və ya qeyd. Dərc edilməyən "
+"material tələbələrə görünmür."
+msgstr ""
+"Fayl, şəkil, keçid, video keçidi, kod nümunəsi və ya qeyd. Dərc edilməyən "
+"material tələbələrə görünmür."
+
+msgctxt "subject_folder.ui"
+msgid "Fayllar"
+msgstr "Fayllar"
+
+msgctxt "subject_folder.ui"
+msgid "Faylı sil"
+msgstr "Faylı sil"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn adı ilə axtar…"
+msgstr "Fənn adı ilə axtar…"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn qovluqları"
+msgstr "Fənn qovluqları"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənn qovluqları təşkilat kontekstində açılır — yuxarıdan təşkilatınızı "
+"seçin."
+msgstr ""
+"Fənn qovluqları təşkilat kontekstində açılır — yuxarıdan təşkilatınızı "
+"seçin."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn qovluqlarım"
+msgstr "Fənn qovluqlarım"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal "
+"ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə "
+"qaytarılır — 0 yazılmır."
+msgstr ""
+"Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal "
+"ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə "
+"qaytarılır — 0 yazılmır."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn seçilməyib."
+msgstr "Fənn seçilməyib."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn və semestr"
+msgstr "Fənn və semestr"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn və ya qovluq adı…"
+msgstr "Fənn və ya qovluq adı…"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənni və semestri seçin. Qovluq qaralama kimi yaranır; qruplara təyin edəndə"
+" aktivləşir."
+msgstr ""
+"Fənni və semestri seçin. Qovluq qaralama kimi yaranır; qruplara təyin edəndə"
+" aktivləşir."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənnin təsdiqlənmiş sillabusu yoxdursa mövzular gəlmir — mövzuları özünüz "
+"əlavə edə və ya sillabus təsdiqlənəndən sonra «Sillabusla uzlaşdır» "
+"düyməsini basa bilərsiniz."
+msgstr ""
+"Fənnin təsdiqlənmiş sillabusu yoxdursa mövzular gəlmir — mövzuları özünüz "
+"əlavə edə və ya sillabus təsdiqlənəndən sonra «Sillabusla uzlaşdır» "
+"düyməsini basa bilərsiniz."
+
+msgctxt "subject_folder.ui"
+msgid "Gecikmə"
+msgstr "Gecikmə"
+
+msgctxt "subject_folder.ui"
+msgid "Gecikmə ilə açıqdır"
+msgstr "Gecikmə ilə açıqdır"
+
+msgctxt "subject_folder.ui"
+msgid "Gizlidir"
+msgstr "Gizlidir"
+
+msgctxt "subject_folder.ui"
+msgid "Göndər"
+msgstr "Göndər"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərib"
+msgstr "Göndərib"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərilib"
+msgstr "Göndərilib"
+
+msgctxt "subject_folder.ui"
+msgid "Göndəriş"
+msgstr "Göndəriş"
+
+msgctxt "subject_folder.ui"
+msgid "Göndəriş rədd edildi."
+msgstr "Göndəriş rədd edildi."
+
+msgctxt "subject_folder.ui"
+msgid "Göndərişlər"
+msgstr "Göndərişlər"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərişlərim"
+msgstr "Göndərişlərim"
+
+msgctxt "subject_folder.ui"
+msgid "Göstərilməyib"
+msgstr "Göstərilməyib"
+
+msgctxt "subject_folder.ui"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "subject_folder.ui"
+msgid "Hamısını seç"
+msgstr "Hamısını seç"
+
+msgctxt "subject_folder.ui"
+msgid "Heç bir göndəriş seçilməyib."
+msgstr "Heç bir göndəriş seçilməyib."
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestr"
+msgstr "Hədəf semestr"
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestrdə qovluq artıq var — o açılır."
+msgstr "Hədəf semestrdə qovluq artıq var — o açılır."
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestri seçin."
+msgstr "Hədəf semestri seçin."
+
+msgctxt "subject_folder.ui"
+msgid "Həftə"
+msgstr "Həftə"
+
+msgctxt "subject_folder.ui"
+msgid "Həftə %(n)s"
+msgstr "Həftə %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ açılmayıb"
+msgstr "Hələ açılmayıb"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ fənn qovluğu yoxdur"
+msgstr "Hələ fənn qovluğu yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ fənn qovluğunuz yoxdur"
+msgstr "Hələ fənn qovluğunuz yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir "
+"qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir."
+msgstr ""
+"Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir "
+"qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir."
+
+msgctxt "subject_folder.ui"
+msgid "Hər iki sahəni boş saxlasanız tapşırıq həmişə açıq qalır."
+msgstr "Hər iki sahəni boş saxlasanız tapşırıq həmişə açıq qalır."
+
+msgctxt "subject_folder.ui"
+msgid "Keçid (https://…)"
+msgstr "Keçid (https://…)"
+
+msgctxt "subject_folder.ui"
+msgid "Kod"
+msgstr "Kod"
+
+msgctxt "subject_folder.ui"
+msgid "Kod yalnız mətn kimi göstərilir — heç vaxt icra olunmur."
+msgstr "Kod yalnız mətn kimi göstərilir — heç vaxt icra olunmur."
+
+msgctxt "subject_folder.ui"
+msgid "Kodu göstər"
+msgstr "Kodu göstər"
+
+msgctxt "subject_folder.ui"
+msgid "Köçür"
+msgstr "Köçür"
+
+msgctxt "subject_folder.ui"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "subject_folder.ui"
+msgid "Material"
+msgstr "Material"
+
+msgctxt "subject_folder.ui"
+msgid "Material dərc edildi."
+msgstr "Material dərc edildi."
+
+msgctxt "subject_folder.ui"
+msgid "Material gizlədildi."
+msgstr "Material gizlədildi."
+
+msgctxt "subject_folder.ui"
+msgid "Material qaralama kimi əlavə olundu — dərc edəndə tələbələr görəcək."
+msgstr "Material qaralama kimi əlavə olundu — dərc edəndə tələbələr görəcək."
+
+msgctxt "subject_folder.ui"
+msgid "Material silindi."
+msgstr "Material silindi."
+
+msgctxt "subject_folder.ui"
+msgid "Material silinsin? Tələbələr onu artıq görməyəcək."
+msgstr "Material silinsin? Tələbələr onu artıq görməyəcək."
+
+msgctxt "subject_folder.ui"
+msgid "Material yeniləndi."
+msgstr "Material yeniləndi."
+
+msgctxt "subject_folder.ui"
+msgid "Material əlavə et"
+msgstr "Material əlavə et"
+
+msgctxt "subject_folder.ui"
+msgid "Material əlavə olundu və tələbələrə görünür."
+msgstr "Material əlavə olundu və tələbələrə görünür."
+
+msgctxt "subject_folder.ui"
+msgid "Materialı redaktə et"
+msgstr "Materialı redaktə et"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Mövzu adı ilə axtar…"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu gizlədildi."
+msgstr "Mövzu gizlədildi."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu silindi."
+msgstr "Mövzu silindi."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu silinsin?"
+msgstr "Mövzu silinsin?"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu yenidən görünür."
+msgstr "Mövzu yenidən görünür."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu yeniləndi."
+msgstr "Mövzu yeniləndi."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu əlavə et"
+msgstr "Mövzu əlavə et"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu əlavə olundu."
+msgstr "Mövzu əlavə olundu."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? "
+"Göndərişi olan heç nə silinmir."
+msgstr ""
+"Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? "
+"Göndərişi olan heç nə silinmir."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Mövzular, materiallar və ev tapşırıqları yeni semestrin qovluğuna köçürülür."
+" Təyinatlar, son tarixlər və göndərişlər köçürülmür."
+msgstr ""
+"Mövzular, materiallar və ev tapşırıqları yeni semestrin qovluğuna köçürülür."
+" Təyinatlar, son tarixlər və göndərişlər köçürülmür."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu gizlət"
+msgstr "Mövzunu gizlət"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu göstər"
+msgstr "Mövzunu göstər"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu redaktə et"
+msgstr "Mövzunu redaktə et"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu sil"
+msgstr "Mövzunu sil"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunun adı"
+msgstr "Mövzunun adı"
+
+msgctxt "subject_folder.ui"
+msgid "Müəllim onu gizlədib və ya bu fənndə qeydiyyatınız yoxdur."
+msgstr "Müəllim onu gizlədib və ya bu fənndə qeydiyyatınız yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Müəllim qovluğu qrupunuza təyin edəndə burada görünəcək və bildiriş "
+"alacaqsınız."
+msgstr ""
+"Müəllim qovluğu qrupunuza təyin edəndə burada görünəcək və bildiriş "
+"alacaqsınız."
+
+msgctxt "subject_folder.ui"
+msgid "Müəllimin rəyi"
+msgstr "Müəllimin rəyi"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev "
+"tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür."
+msgstr ""
+"Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev "
+"tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür."
+
+msgctxt "subject_folder.ui"
+msgid "Mətn cavabı"
+msgstr "Mətn cavabı"
+
+msgctxt "subject_folder.ui"
+msgid "Məzmun"
+msgstr "Məzmun"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Məzmunu hazırlayın və «Qruplar və son tarixlər» tabından qruplara təyin "
+"edin: ilk təyinatda qovluq avtomatik aktivləşir."
+msgstr ""
+"Məzmunu hazırlayın və «Qruplar və son tarixlər» tabından qruplara təyin "
+"edin: ilk təyinatda qovluq avtomatik aktivləşir."
+
+msgctxt "subject_folder.ui"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "subject_folder.ui"
+msgid "Naviqasiya"
+msgstr "Naviqasiya"
+
+msgctxt "subject_folder.ui"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "subject_folder.ui"
+msgid "Nəticə: %(count)d göndəriş"
+msgstr "Nəticə: %(count)d göndəriş"
+
+msgctxt "subject_folder.ui"
+msgid "Nəticə: %(count)d qovluq"
+msgstr "Nəticə: %(count)d qovluq"
+
+msgctxt "subject_folder.ui"
+msgid "Nəyi düzəltməlidir?"
+msgstr "Nəyi düzəltməlidir?"
+
+msgctxt "subject_folder.ui"
+msgid "Obyekt tapılmadı və ya artıq mövcud deyil."
+msgstr "Obyekt tapılmadı və ya artıq mövcud deyil."
+
+msgctxt "subject_folder.ui"
+msgid "Oxşar göndərişlər"
+msgstr "Oxşar göndərişlər"
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq"
+msgstr "Oxşarlıq"
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq qərarı geri alındı."
+msgstr "Oxşarlıq qərarı geri alındı."
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq «plagiat deyil» kimi qeyd olundu."
+msgstr "Oxşarlıq «plagiat deyil» kimi qeyd olundu."
+
+msgctxt "subject_folder.ui"
+msgid "Plagiat deyil"
+msgstr "Plagiat deyil"
+
+msgctxt "subject_folder.ui"
+msgid "Proqramlaşdırma dili"
+msgstr "Proqramlaşdırma dili"
+
+msgctxt "subject_folder.ui"
+msgid "Pəncərə"
+msgstr "Pəncərə"
+
+msgctxt "subject_folder.ui"
+msgid "QARALAMA"
+msgstr "QARALAMA"
+
+msgctxt "subject_folder.ui"
+msgid "QAYTARILIB"
+msgstr "QAYTARILIB"
+
+msgctxt "subject_folder.ui"
+msgid "QOVLUQLAR"
+msgstr "QOVLUQLAR"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama kimi saxla"
+msgstr "Qaralama kimi saxla"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama saxlanıldı — müəllim hələ görmür."
+msgstr "Qaralama saxlanıldı — müəllim hələ görmür."
+
+msgctxt "subject_folder.ui"
+msgid "Qaralamadakı fayllar"
+msgstr "Qaralamadakı fayllar"
+
+msgctxt "subject_folder.ui"
+msgid "Qaytar"
+msgstr "Qaytar"
+
+msgctxt "subject_folder.ui"
+msgid "Qaytarma və rədd üçün məcburidir (ən azı 5 simvol)"
+msgstr "Qaytarma və rədd üçün məcburidir (ən azı 5 simvol)"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qaytarılmış işin yenidən göndərilməsi son tarixdən asılı olmayaraq açıqdır."
+msgstr ""
+"Qaytarılmış işin yenidən göndərilməsi son tarixdən asılı olmayaraq açıqdır."
+
+msgctxt "subject_folder.ui"
+msgid "Qaytarılıb: %(n)s"
+msgstr "Qaytarılıb: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq"
+msgstr "Qovluq"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq aktivdir — təyin olunmuş qruplar onu görür."
+msgstr "Qovluq aktivdir — təyin olunmuş qruplar onu görür."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq arxivdədir — yalnız oxu rejimi."
+msgstr "Qovluq arxivdədir — yalnız oxu rejimi."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq arxivləndi — yalnız oxu rejimindədir."
+msgstr "Qovluq arxivləndi — yalnız oxu rejimindədir."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluq arxivlənsin? Tələbələr onu görməyəcək, məzmun yalnız oxu rejimində "
+"qalacaq."
+msgstr ""
+"Qovluq arxivlənsin? Tələbələr onu görməyəcək, məzmun yalnız oxu rejimində "
+"qalacaq."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq boşdur"
+msgstr "Qovluq boşdur"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq bölmələri"
+msgstr "Qovluq bölmələri"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq qaralamadır — tələbələr onu görmür."
+msgstr "Qovluq qaralamadır — tələbələr onu görmür."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq qaralamaya qaytarıldı."
+msgstr "Qovluq qaralamaya qaytarıldı."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq seçilən qruplara təyin olundu."
+msgstr "Qovluq seçilən qruplara təyin olundu."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq silinib və ya ona baxmaq hüququnuz yoxdur."
+msgstr "Qovluq silinib və ya ona baxmaq hüququnuz yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq sillabusla uzlaşdırıldı."
+msgstr "Qovluq sillabusla uzlaşdırıldı."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq tapılmadı"
+msgstr "Qovluq tapılmadı"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq və ya tapşırıq tapılmadı"
+msgstr "Qovluq və ya tapşırıq tapılmadı"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluq yaradıldı — mövzular və sərbəst iş slotları sillabusdan çəkildi."
+msgstr ""
+"Qovluq yaradıldı — mövzular və sərbəst iş slotları sillabusdan çəkildi."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yaratmaq üçün sizə fənn açılışı (qrup) təyin olunmalıdır."
+msgstr "Qovluq yaratmaq üçün sizə fənn açılışı (qrup) təyin olunmalıdır."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yeni semestrə köçürüldü."
+msgstr "Qovluq yeni semestrə köçürüldü."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yeniləndi."
+msgstr "Qovluq yeniləndi."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş məzmun yoxdur"
+msgstr "Qovluqda hələ dərc edilmiş məzmun yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda tapşırıq yoxdur."
+msgstr "Qovluqda tapşırıq yoxdur."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqlara qayıt"
+msgstr "Qovluqlara qayıt"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqlarıma qayıt"
+msgstr "Qovluqlarıma qayıt"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluğu redaktə et"
+msgstr "Qovluğu redaktə et"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin "
+"olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir."
+msgstr ""
+"Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin "
+"olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluğun adı"
+msgstr "Qovluğun adı"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma silindi."
+msgstr "Qoşma silindi."
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma silinsin?"
+msgstr "Qoşma silinsin?"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma əlavə et"
+msgstr "Qoşma əlavə et"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşmanı sil"
+msgstr "Qoşmanı sil"
+
+msgctxt "subject_folder.ui"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "subject_folder.ui"
+msgid "Qrupa təyinat"
+msgstr "Qrupa təyinat"
+
+msgctxt "subject_folder.ui"
+msgid "Qruplar və son tarixlər"
+msgstr "Qruplar və son tarixlər"
+
+msgctxt "subject_folder.ui"
+msgid "Qrupun təyinatı ləğv edildi — göndərişlər saxlanılır."
+msgstr "Qrupun təyinatı ləğv edildi — göndərişlər saxlanılır."
+
+msgctxt "subject_folder.ui"
+msgid "QƏBUL / YOXLANILIB"
+msgstr "QƏBUL / YOXLANILIB"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi — bal jurnala düşdü."
+msgstr "Qəbul edildi — bal jurnala düşdü."
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi — bal jurnala ötürülmək üçün növbədədir."
+msgstr "Qəbul edildi — bal jurnala ötürülmək üçün növbədədir."
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi, amma jurnal balı qəbul etmədi: %(reason)s"
+msgstr "Qəbul edildi, amma jurnal balı qəbul etmədi: %(reason)s"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul et və jurnala yaz"
+msgstr "Qəbul et və jurnala yaz"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul et — eyni bal (sərbəst iş)"
+msgstr "Qəbul et — eyni bal (sərbəst iş)"
+
+msgctxt "subject_folder.ui"
+msgid "Qərar"
+msgstr "Qərar"
+
+msgctxt "subject_folder.ui"
+msgid "Qərarı geri al"
+msgstr "Qərarı geri al"
+
+msgctxt "subject_folder.ui"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Redaktədə yeni fayl seçməsəniz köhnə fayl qalır. Sənəd, təqdimat, arxiv, kod"
+" faylı və ya şəkil; icra olunan fayllar qəbul edilmir."
+msgstr ""
+"Redaktədə yeni fayl seçməsəniz köhnə fayl qalır. Sənəd, təqdimat, arxiv, kod"
+" faylı və ya şəkil; icra olunan fayllar qəbul edilmir."
+
+msgctxt "subject_folder.ui"
+msgid "RƏDD EDİLİB"
+msgstr "RƏDD EDİLİB"
+
+msgctxt "subject_folder.ui"
+msgid "Rədd et"
+msgstr "Rədd et"
+
+msgctxt "subject_folder.ui"
+msgid "Rədd ləğv edildi — tələbə yenidən göndərə bilər."
+msgstr "Rədd ləğv edildi — tələbə yenidən göndərə bilər."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Rədd yekundur — tələbə yenidən göndərə bilməz (rəddi sonra ləğv etmək olar)."
+msgstr ""
+"Rədd yekundur — tələbə yenidən göndərə bilməz (rəddi sonra ləğv etmək olar)."
+
+msgctxt "subject_folder.ui"
+msgid "Rəddi ləğv et"
+msgstr "Rəddi ləğv et"
+
+msgctxt "subject_folder.ui"
+msgid "Rəqəm düzgün yazılmayıb."
+msgstr "Rəqəm düzgün yazılmayıb."
+
+msgctxt "subject_folder.ui"
+msgid "Rəy"
+msgstr "Rəy"
+
+msgctxt "subject_folder.ui"
+msgid "Rəy (istəyə görə)"
+msgstr "Rəy (istəyə görə)"
+
+msgctxt "subject_folder.ui"
+msgid "Rəylə qaytar"
+msgstr "Rəylə qaytar"
+
+msgctxt "subject_folder.ui"
+msgid "Sahibi:"
+msgstr "Sahibi:"
+
+msgctxt "subject_folder.ui"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "subject_folder.ui"
+msgid "Semestr tapılmadı."
+msgstr "Semestr tapılmadı."
+
+msgctxt "subject_folder.ui"
+msgid "Semestrsiz"
+msgstr "Semestrsiz"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilib"
+msgstr "Seçilib"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilən qruplara təyin et"
+msgstr "Seçilən qruplara təyin et"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilən qruplardan bəzisini siz tədris etmirsiniz."
+msgstr "Seçilən qruplardan bəzisini siz tədris etmirsiniz."
+
+msgctxt "subject_folder.ui"
+msgid "Seçin"
+msgstr "Seçin"
+
+msgctxt "subject_folder.ui"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusdan"
+msgstr "Sillabusdan"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusla uzlaşdır"
+msgstr "Sillabusla uzlaşdır"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusla uzlaşdırılıb:"
+msgstr "Sillabusla uzlaşdırılıb:"
+
+msgctxt "subject_folder.ui"
+msgid "Siyahıda yalnız sizin tədris etdiyiniz fənn açılışları var."
+msgstr "Siyahıda yalnız sizin tədris etdiyiniz fənn açılışları var."
+
+msgctxt "subject_folder.ui"
+msgid "Slot %(n)s · maks. %(points)s bal"
+msgstr "Slot %(n)s · maks. %(points)s bal"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix"
+msgstr "Son tarix"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix götürüldü — tapşırıq həmişə açıqdır."
+msgstr "Son tarix götürüldü — tapşırıq həmişə açıqdır."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix keçib — göndərsəniz gecikmə qeyd olunacaq."
+msgstr "Son tarix keçib — göndərsəniz gecikmə qeyd olunacaq."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix saxlanıldı."
+msgstr "Son tarix saxlanıldı."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix yoxdur"
+msgstr "Son tarix yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix — %(group)s"
+msgstr "Son tarix — %(group)s"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix:"
+msgstr "Son tarix:"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarixdən sonra"
+msgstr "Son tarixdən sonra"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Son tarixdən sonra göndərilib"
+
+msgctxt "subject_folder.ui"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın."
+msgstr "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın."
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcləri dəyişin və ya bütün statusları seçin."
+msgstr "Süzgəcləri dəyişin və ya bütün statusları seçin."
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcə uyğun göndəriş yoxdur"
+msgstr "Süzgəcə uyğun göndəriş yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcə uyğun qovluq yoxdur"
+msgstr "Süzgəcə uyğun qovluq yoxdur"
+
+msgctxt "subject_folder.ui"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "subject_folder.ui"
+msgid "Səbəb:"
+msgstr "Səbəb:"
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş"
+msgstr "Sərbəst iş"
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş balı"
+msgstr "Sərbəst iş balı"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Sərbəst iş strukturu %(option)s (cəmi %(total)s bal) sillabusdan gəlir — "
+"əlavə sərbəst iş yaradılmır."
+msgstr ""
+"Sərbəst iş strukturu %(option)s (cəmi %(total)s bal) sillabusdan gəlir — "
+"əlavə sərbəst iş yaradılmır."
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş: %(option)s"
+msgstr "Sərbəst iş: %(option)s"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq"
+msgstr "Tapşırıq"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq arxivləndi."
+msgstr "Tapşırıq arxivləndi."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırıq arxivlənsin? Göndərişlər saxlanılır, tələbələr tapşırığı "
+"görməyəcək."
+msgstr ""
+"Tapşırıq arxivlənsin? Göndərişlər saxlanılır, tələbələr tapşırığı "
+"görməyəcək."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq bərpa olundu."
+msgstr "Tapşırıq bərpa olundu."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq dərc edildi — tələbələrə bildiriş göndərildi."
+msgstr "Tapşırıq dərc edildi — tələbələrə bildiriş göndərildi."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırıq dərc edilsin? Təyin olunmuş qrupların tələbələrinə bildiriş "
+"gedəcək."
+msgstr ""
+"Tapşırıq dərc edilsin? Təyin olunmuş qrupların tələbələrinə bildiriş "
+"gedəcək."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq gizlədildi."
+msgstr "Tapşırıq gizlədildi."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq silindi."
+msgstr "Tapşırıq silindi."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq yeniləndi."
+msgstr "Tapşırıq yeniləndi."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırığa şablon, nümunə və ya məlumat faylı əlavə edə bilərsiniz (ən çox "
+"10)."
+msgstr ""
+"Tapşırığa şablon, nümunə və ya məlumat faylı əlavə edə bilərsiniz (ən çox "
+"10)."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırığı redaktə et"
+msgstr "Tapşırığı redaktə et"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırığın şərti"
+msgstr "Tapşırığın şərti"
+
+msgctxt "subject_folder.ui"
+msgid "Tarix və saat düzgün seçilməyib."
+msgstr "Tarix və saat düzgün seçilməyib."
+
+msgctxt "subject_folder.ui"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "subject_folder.ui"
+msgid "Toplu əməl"
+msgstr "Toplu əməl"
+
+msgctxt "subject_folder.ui"
+msgid "Toplu əməl seçilməyib."
+msgstr "Toplu əməl seçilməyib."
+
+msgctxt "subject_folder.ui"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "subject_folder.ui"
+msgid "Tələbələrdən gizlət"
+msgstr "Tələbələrdən gizlət"
+
+msgctxt "subject_folder.ui"
+msgid "Tələbənin qalan sərbəst iş limiti: %(remaining)s / %(max_total)s"
+msgstr "Tələbənin qalan sərbəst iş limiti: %(remaining)s / %(max_total)s"
+
+msgctxt "subject_folder.ui"
+msgid "Təsdiq edirsiniz?"
+msgstr "Təsdiq edirsiniz?"
+
+msgctxt "subject_folder.ui"
+msgid "Təsdiqlənmiş sillabus tapılmadı — struktur dəyişmədi."
+msgstr "Təsdiqlənmiş sillabus tapılmadı — struktur dəyişmədi."
+
+msgctxt "subject_folder.ui"
+msgid "Təsvir"
+msgstr "Təsvir"
+
+msgctxt "subject_folder.ui"
+msgid "Təsvir / qeyd"
+msgstr "Təsvir / qeyd"
+
+msgctxt "subject_folder.ui"
+msgid "Tətbiq et"
+msgstr "Tətbiq et"
+
+msgctxt "subject_folder.ui"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "Təyinat bu qovluğa aid deyil."
+
+msgctxt "subject_folder.ui"
+msgid "Uyğun fənn tapılmadı"
+msgstr "Uyğun fənn tapılmadı"
+
+msgctxt "subject_folder.ui"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "Uyğun mövzu tapılmadı"
+
+msgctxt "subject_folder.ui"
+msgid "Uzantıları boş saxlasanız sənəd, kod və şəkil faylları qəbul olunur."
+msgstr "Uzantıları boş saxlasanız sənəd, kod və şəkil faylları qəbul olunur."
+
+msgctxt "subject_folder.ui"
+msgid "YEKUNLAŞIB"
+msgstr "YEKUNLAŞIB"
+
+msgctxt "subject_folder.ui"
+msgid "YOXLAMA GÖZLƏYİR"
+msgstr "YOXLAMA GÖZLƏYİR"
+
+msgctxt "subject_folder.ui"
+msgid "YOXLANILIR"
+msgstr "YOXLANILIR"
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız bayraqlananlar"
+msgstr "Yalnız bayraqlananlar"
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız gecikənlər"
+msgstr "Yalnız gecikənlər"
+
+msgctxt "subject_folder.ui"
+msgid "Yarat"
+msgstr "Yarat"
+
+msgctxt "subject_folder.ui"
+msgid "Yekun"
+msgstr "Yekun"
+
+msgctxt "subject_folder.ui"
+msgid "Yekunlaşıb"
+msgstr "Yekunlaşıb"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni ev tapşırığı"
+msgstr "Yeni ev tapşırığı"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni fənn qovluğu"
+msgstr "Yeni fənn qovluğu"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni material"
+msgstr "Yeni material"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni mövzu"
+msgstr "Yeni mövzu"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni qovluq"
+msgstr "Yeni qovluq"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlama gözləyir: %(n)s"
+msgstr "Yoxlama gözləyir: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlama növbəsi boşdur"
+msgstr "Yoxlama növbəsi boşdur"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanıldı"
+msgstr "Yoxlanıldı"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanıldı (ev tapşırığı)"
+msgstr "Yoxlanıldı (ev tapşırığı)"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanılır"
+msgstr "Yoxlanılır"
+
+msgctxt "subject_folder.ui"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "subject_folder.ui"
+msgid "Yüksək oxşarlıq"
+msgstr "Yüksək oxşarlıq"
+
+msgctxt "subject_folder.ui"
+msgid "baxış gözləyən iş"
+msgstr "baxış gözləyən iş"
+
+msgctxt "subject_folder.ui"
+msgid "gecikib"
+msgstr "gecikib"
+
+msgctxt "subject_folder.ui"
+msgid "gecikmə ilə"
+msgstr "gecikmə ilə"
+
+msgctxt "subject_folder.ui"
+msgid "göndərilmiş, baxılmamış iş"
+msgstr "göndərilmiş, baxılmamış iş"
+
+msgctxt "subject_folder.ui"
+msgid "göndərilməyi gözləyir"
+msgstr "göndərilməyi gözləyir"
+
+msgctxt "subject_folder.ui"
+msgid "maks. %(points)s bal"
+msgstr "maks. %(points)s bal"
+
+msgctxt "subject_folder.ui"
+msgid "qovluq var"
+msgstr "qovluq var"
+
+msgctxt "subject_folder.ui"
+msgid "rəyə görə yenidən işləyin"
+msgstr "rəyə görə yenidən işləyin"
+
+msgctxt "subject_folder.ui"
+msgid "sərbəst iş başqa qovluqdan"
+msgstr "sərbəst iş başqa qovluqdan"
+
+msgctxt "subject_folder.ui"
+msgid "sərbəst iş buradan"
+msgstr "sərbəst iş buradan"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və "
+"sərbəst iş slotları sillabusdan avtomatik çəkiləcək."
+msgstr ""
+"«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və "
+"sərbəst iş slotları sillabusdan avtomatik çəkiləcək."
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi (mövzusuz)"
+msgstr "Ümumi (mövzusuz)"
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi (mövzuya bağlı olmayan)"
+msgstr "Ümumi (mövzuya bağlı olmayan)"
+
+msgctxt "subject_folder.ui"
+msgid "İcazəli uzantılar"
+msgstr "İcazəli uzantılar"
+
+msgctxt "subject_folder.ui"
+msgid "İcazəli: %(ext)s"
+msgstr "İcazəli: %(ext)s"
+
+msgctxt "subject_folder.ui"
+msgid "İzah"
+msgstr "İzah"
+
+msgctxt "subject_folder.ui"
+msgid "İş göndərildi (son tarixdən sonra — gecikmə qeyd olundu)."
+msgstr "İş göndərildi (son tarixdən sonra — gecikmə qeyd olundu)."
+
+msgctxt "subject_folder.ui"
+msgid "İş göndərildi — müəllim yoxlayandan sonra nəticəni görəcəksiniz."
+msgstr "İş göndərildi — müəllim yoxlayandan sonra nəticəni görəcəksiniz."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"İş müəllimə göndərilsin? Göndərdikdən sonra müəllim yoxlayana qədər dəyişə "
+"bilməzsiniz."
+msgstr ""
+"İş müəllimə göndərilsin? Göndərdikdən sonra müəllim yoxlayana qədər dəyişə "
+"bilməzsiniz."
+
+msgctxt "subject_folder.ui"
+msgid "İş rəylə qaytarıldı — tələbə yenidən göndərə bilər."
+msgstr "İş rəylə qaytarıldı — tələbə yenidən göndərə bilər."
+
+msgctxt "subject_folder.ui"
+msgid "Əlavə şərt yazılmayıb."
+msgstr "Əlavə şərt yazılmayıb."
+
+msgctxt "subject_folder.ui"
+msgid "Əməl alınmadı — bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "Əməl alınmadı — bağlantını yoxlayıb yenidən cəhd edin."
+
+msgctxt "subject_folder.ui"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "subject_folder.ui"
+msgid "Ən azı bir qrup seçin."
+msgstr "Ən azı bir qrup seçin."
+
+msgctxt "subject_folder.ui"
+msgid "Ən çox %(count)s fayl, hər biri %(size)s MB-a qədər."
+msgstr "Ən çox %(count)s fayl, hər biri %(size)s MB-a qədər."
+
+msgctxt "subject_folder.ui"
+msgid "Əvvəlki cəhdlər"
+msgstr "Əvvəlki cəhdlər"

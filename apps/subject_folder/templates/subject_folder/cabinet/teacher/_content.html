@@ -1,0 +1,74 @@
+{% load i18n %}
+{% if sp.can_manage and not sp.is_archived %}
+<div class="sfc-toolbar">
+    <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-sf-open="sfMaterial" data-sf-mode="create"
+            data-sf-dialog-title="{% trans 'Yeni material' context 'subject_folder.ui' %}"
+            data-sf-fill-material="" data-sf-fill-topic="" data-sf-fill-kind="file">
+        <i class="fas fa-file-circle-plus" aria-hidden="true"></i> {% trans "Material əlavə et" context "subject_folder.ui" %}
+    </button>
+    <button type="button" class="ems-btn ems-btn--sm" data-sf-open="sfHomework" data-sf-fill-topic="">
+        <i class="fas fa-clipboard-list" aria-hidden="true"></i> {% trans "Ev tapşırığı əlavə et" context "subject_folder.ui" %}
+    </button>
+    <button type="button" class="ems-btn ems-btn--sm" data-sf-open="sfTopic" data-sf-mode="create"
+            data-sf-dialog-title="{% trans 'Yeni mövzu' context 'subject_folder.ui' %}" data-sf-fill-topic="">
+        <i class="fas fa-list-ol" aria-hidden="true"></i> {% trans "Mövzu əlavə et" context "subject_folder.ui" %}
+    </button>
+    {% if sp.selfwork_option %}
+        <span class="sfc-toolbar__note"><i class="fas fa-circle-info" aria-hidden="true"></i> {% blocktrans trimmed with option=sp.selfwork_option total=sp.selfwork_total context "subject_folder.ui" %}Sərbəst iş strukturu {{ option }} (cəmi {{ total }} bal) sillabusdan gəlir — əlavə sərbəst iş yaradılmır.{% endblocktrans %}</span>
+    {% endif %}
+</div>
+{% endif %}
+
+{% if not sp.topics and not sp.general.materials and not sp.general.tasks %}
+    {% trans "Qovluq boşdur" context "subject_folder.ui" as st_title %}
+    {% trans "Fənnin təsdiqlənmiş sillabusu yoxdursa mövzular gəlmir — mövzuları özünüz əlavə edə və ya sillabus təsdiqlənəndən sonra «Sillabusla uzlaşdır» düyməsini basa bilərsiniz." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-open" %}
+{% endif %}
+
+<ol class="sfc-topics" role="list">
+    {% for row in sp.topics %}
+    <li class="sfc-topic{% if row.topic.is_archived %} sfc-topic--hidden{% endif %}">
+        <div class="sfc-topic__head">
+            <div class="sfc-topic__title">
+                {% if row.topic.week_no %}<span class="sfc-topic__week">{% blocktrans trimmed with n=row.topic.week_no context "subject_folder.ui" %}Həftə {{ n }}{% endblocktrans %}</span>{% endif %}
+                <h3 class="sfc-topic__name">{{ row.topic.title }}</h3>
+                {% if row.topic.source == "syllabus" %}<span class="ems-badge ems-badge--muted">{% trans "Sillabusdan" context "subject_folder.ui" %}</span>{% endif %}
+                {% if row.topic.is_archived %}<span class="ems-badge ems-badge--neutral">{% trans "Gizlidir" context "subject_folder.ui" %}</span>{% endif %}
+            </div>
+            {% if sp.can_manage and not sp.is_archived %}
+            <div class="ems-rowactions">
+                <button type="button" class="ems-iconbtn" data-sf-open="sfMaterial" data-sf-mode="create"
+                        data-sf-dialog-title="{% trans 'Yeni material' context 'subject_folder.ui' %}"
+                        data-sf-fill-material="" data-sf-fill-topic="{{ row.topic.pk }}" data-sf-fill-kind="file"
+                        aria-label="{% trans 'Bu mövzuya material əlavə et' context 'subject_folder.ui' %}" title="{% trans 'Bu mövzuya material əlavə et' context 'subject_folder.ui' %}"><i class="fas fa-plus" aria-hidden="true"></i></button>
+                <button type="button" class="ems-iconbtn" data-sf-open="sfTopic" data-sf-mode="edit"
+                        data-sf-dialog-title="{% trans 'Mövzunu redaktə et' context 'subject_folder.ui' %}"
+                        data-sf-fill-topic="{{ row.topic.pk }}" data-sf-fill-title="{{ row.topic.title }}"
+                        data-sf-fill-week_no="{{ row.topic.week_no|default_if_none:'' }}" data-sf-fill-description="{{ row.topic.description }}"
+                        aria-label="{% trans 'Mövzunu redaktə et' context 'subject_folder.ui' %}" title="{% trans 'Mövzunu redaktə et' context 'subject_folder.ui' %}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+                {% if row.topic.is_archived %}
+                    <button type="button" class="ems-iconbtn" data-sf-post="topic_hide" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-topic="{{ row.topic.pk }}" data-sf-field-hidden="0"
+                            aria-label="{% trans 'Mövzunu göstər' context 'subject_folder.ui' %}" title="{% trans 'Mövzunu göstər' context 'subject_folder.ui' %}"><i class="fas fa-eye" aria-hidden="true"></i></button>
+                {% else %}
+                    <button type="button" class="ems-iconbtn" data-sf-post="topic_hide" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-topic="{{ row.topic.pk }}" data-sf-field-hidden="1"
+                            aria-label="{% trans 'Mövzunu gizlət' context 'subject_folder.ui' %}" title="{% trans 'Mövzunu gizlət' context 'subject_folder.ui' %}"><i class="fas fa-eye-slash" aria-hidden="true"></i></button>
+                {% endif %}
+                {% if row.topic.source != "syllabus" and not row.materials and not row.tasks %}
+                    <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-sf-post="topic_delete" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-topic="{{ row.topic.pk }}" data-sf-danger="1"
+                            data-sf-confirm="{% trans 'Mövzu silinsin?' context 'subject_folder.ui' %}"
+                            aria-label="{% trans 'Mövzunu sil' context 'subject_folder.ui' %}" title="{% trans 'Mövzunu sil' context 'subject_folder.ui' %}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% if row.topic.description %}<p class="sfc-topic__desc">{{ row.topic.description|linebreaksbr }}</p>{% endif %}
+        {% include "subject_folder/cabinet/teacher/_items.html" with materials=row.materials tasks=row.tasks %}
+    </li>
+    {% endfor %}
+    {% if sp.general.materials or sp.general.tasks %}
+    <li class="sfc-topic sfc-topic--general">
+        <div class="sfc-topic__head"><div class="sfc-topic__title"><h3 class="sfc-topic__name">{% trans "Ümumi (mövzuya bağlı olmayan)" context "subject_folder.ui" %}</h3></div></div>
+        {% include "subject_folder/cabinet/teacher/_items.html" with materials=sp.general.materials tasks=sp.general.tasks %}
+    </li>
+    {% endif %}
+</ol>

@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Qovluq redaktorunun dialoqları (yalnız idarə edən aktor). Sahələr `data-sf-open` düyməsinin
+`data-sf-fill-<ad>` atributları ilə doldurulur (`cabinet.js`); forma `subject_folder:action`-a FormData
+(multipart) kimi gedir. Atribut adları yalnız serverdən (`sp.forms`).{% endcomment %}
+{% trans "Qovluğu redaktə et" context "subject_folder.ui" as t_edit %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfFolderEdit" form_dialog_title=t_edit form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_folder_edit.html" form_dialog_data=sp.forms.folder_update.data form_dialog_hidden=sp.forms.folder_update.hidden %}
+{% if sp.tab != "groups" %}
+{% trans "Mövzu" context "subject_folder.ui" as t_topic %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfTopic" form_dialog_title=t_topic form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_topic.html" form_dialog_data=sp.forms.topic.data form_dialog_hidden=sp.forms.topic.hidden %}
+{% trans "Material" context "subject_folder.ui" as t_material %}
+{% trans "Fayl, şəkil, keçid, video keçidi, kod nümunəsi və ya qeyd. Dərc edilməyən material tələbələrə görünmür." context "subject_folder.ui" as t_material_sub %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfMaterial" form_dialog_title=t_material form_dialog_subtitle=t_material_sub form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_material.html" form_dialog_data=sp.forms.material.data form_dialog_hidden=sp.forms.material.hidden form_dialog_wide=True %}
+{% trans "Yeni ev tapşırığı" context "subject_folder.ui" as t_homework %}
+{% trans "Ev tapşırığına bal verilmir — müəllim işi «yoxlanıldı» qeyd edir və ya rəylə qaytarır." context "subject_folder.ui" as t_homework_sub %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfHomework" form_dialog_title=t_homework form_dialog_subtitle=t_homework_sub form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_homework.html" form_dialog_data=sp.forms.homework.data form_dialog_hidden=sp.forms.homework.hidden form_dialog_wide=True %}
+{% trans "Tapşırıq" context "subject_folder.ui" as t_task %}
+{% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfTask" form_dialog_title=t_task form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_task.html" form_dialog_data=sp.forms.task.data form_dialog_hidden=sp.forms.task.hidden form_dialog_wide=True %}
+{% endif %}
+{% if sp.clone_periods %}
+    {% trans "Başqa semestrə köçür" context "subject_folder.ui" as t_clone %}
+    {% trans "Mövzular, materiallar və ev tapşırıqları yeni semestrin qovluğuna köçürülür. Təyinatlar, son tarixlər və göndərişlər köçürülmür." context "subject_folder.ui" as t_clone_sub %}
+    {% trans "Köçür" context "subject_folder.ui" as t_clone_btn %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfFolderClone" form_dialog_title=t_clone form_dialog_subtitle=t_clone_sub form_dialog_submit_label=t_clone_btn form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_clone.html" form_dialog_data=sp.forms.clone.data form_dialog_hidden=sp.forms.clone.hidden %}
+{% endif %}
+{% if sp.tab == "groups" %}
+    {% trans "Son tarix" context "subject_folder.ui" as t_deadline %}
+    {% trans "Hər iki sahəni boş saxlasanız tapşırıq həmişə açıq qalır." context "subject_folder.ui" as t_deadline_sub %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfDeadline" form_dialog_title=t_deadline form_dialog_subtitle=t_deadline_sub form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_deadline.html" form_dialog_data=sp.forms.deadline.data form_dialog_hidden=sp.forms.deadline.hidden %}
+{% endif %}
