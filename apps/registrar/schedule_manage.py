@@ -212,27 +212,36 @@ def duplicate_slot(*, offering, weekday, start_time, end_time, week_type, room, 
     return None
 
 
-def conflict_reason(*, offering, conflict) -> str:
-    """Konfliktin SƏBƏBİ (qrup / müəllim / otaq) — istifadəçiyə açıq mətn."""
+def conflict_reason(*, offering, conflict, instructor_id=None) -> str:
+    """Konfliktin SƏBƏBİ (qrup / müəllim / otaq) — istifadəçiyə açıq mətn.
+
+    Müəllim hər iki tərəfdə EFFEKTİVDİR: ``instructor_id`` yoxlanan slotun öz müəllimi (yoxdursa
+    açılışınkı), toqquşan slot üçün ``schedule.effective_instructor_id``."""
     other = conflict.offering
     if offering.group_id and other.group_id == offering.group_id:
         return pgettext(_CTX, "qrup")
-    if offering.instructor_id and other.instructor_id == offering.instructor_id:
+    teacher_id = instructor_id or offering.instructor_id
+    if teacher_id and str(schedule.effective_instructor_id(conflict)) == str(teacher_id):
         return pgettext(_CTX, "müəllim")
     return pgettext(_CTX, "auditoriya")
 
 
-def describe_conflict(conflict, *, offering=None) -> dict:
+def describe_conflict(conflict, *, offering=None, instructor_id=None) -> dict:
     """Konflikt slotunun UI müqaviləsi (JSON) — açar adları dəyişməz."""
     other = conflict.offering
+    teacher = schedule.effective_instructor(conflict)
     return {
         "id": str(conflict.pk),
-        "reason": conflict_reason(offering=offering, conflict=conflict) if offering is not None else "",
+        "reason": (
+            conflict_reason(offering=offering, conflict=conflict, instructor_id=instructor_id)
+            if offering is not None
+            else ""
+        ),
         "subject_code": getattr(other.subject, "code", "") or "",
         "subject_name": getattr(other.subject, "name", "") or "",
         "group": getattr(other.group, "name", "") or "",
-        "instructor": (getattr(other.instructor, "get_full_name", lambda: "")() or "").strip()
-        or str(getattr(other.instructor, "username", "") or ""),
+        "instructor": (getattr(teacher, "get_full_name", lambda: "")() or "").strip()
+        or str(getattr(teacher, "username", "") or ""),
         "room": conflict.room or "",
         "weekday": conflict.weekday,
         "start_time": conflict.start_time.strftime("%H:%M"),
@@ -268,6 +277,7 @@ def check_slot(*, offering, cleaned, exclude_id=None) -> dict:
         errors["time_slot"] = pgettext(_CTX, "Bu slot artıq cədvəldədir.")
         return errors
 
+    instructor_id = cleaned.get("instructor_id")
     conflict = schedule.find_conflict(
         organization=offering.organization,
         offering=offering,
@@ -278,14 +288,37 @@ def check_slot(*, offering, cleaned, exclude_id=None) -> dict:
         room=cleaned["room"],
         exclude_id=exclude_id,
         kind=cleaned.get("kind"),
+        instructor_id=instructor_id,
     )
     if conflict is not None:
         errors["conflict"] = pgettext(_CTX, "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s).") % {
             "subject": getattr(conflict.offering.subject, "code", "") or "",
-            "reason": conflict_reason(offering=offering, conflict=conflict),
+            "reason": conflict_reason(offering=offering, conflict=conflict, instructor_id=instructor_id),
         }
-        errors["_conflict"] = describe_conflict(conflict, offering=offering)
+        errors["_conflict"] = describe_conflict(conflict, offering=offering, instructor_id=instructor_id)
     return errors
+
+
+def scoped_teacher_rows(offerings) -> list[dict]:
+    """«Müəllim cədvəli» seçicisi: açılışların jurnal sahibləri + slotlarını aparan müəllimlər (TƏK sorğu).
+
+    ``offerings`` — aktorun əhatəsindəki açılış queryset-i (``scoped_offerings``). Bölünmüş tədrisdə
+    seminarı aparan assistentin öz açılışı olmaya bilər; o da siyahıda olmalıdır ki, koordinator onun
+    həftəsini görsün (``get_teacher_schedule`` effektiv müəllimə görə süzür)."""
+    from django.contrib.auth import get_user_model
+    from django.db.models import Q
+
+    slot_teachers = ScheduleSlot.objects.filter(
+        offering__in=offerings.values("pk"), instructor__isnull=False, is_parked=False
+    ).values("instructor_id")
+    users = get_user_model().objects.filter(
+        Q(pk__in=offerings.exclude(instructor__isnull=True).values("instructor_id")) | Q(pk__in=slot_teachers)
+    )
+    rows = {}
+    for user in users:
+        full = (user.get_full_name() or "").strip()
+        rows[str(user.pk)] = full or user.username
+    return [{"id": key, "name": name} for key, name in sorted(rows.items(), key=lambda item: item[1])]
 
 
 __all__ = [
@@ -302,4 +335,5 @@ __all__ = [
     "period_window_error",
     "scoped_groups",
     "scoped_offerings",
+    "scoped_teacher_rows",
 ]

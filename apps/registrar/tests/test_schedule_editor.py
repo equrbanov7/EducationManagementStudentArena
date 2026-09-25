@@ -35,6 +35,7 @@ from apps.registrar.models import (
     CurriculumSubject,
     Program,
     ScheduleSlot,
+    SlotKind,
     Subject,
     WeekType,
 )
@@ -146,7 +147,9 @@ class ScheduleEditorBase(TestCase):
             data=self._payload(**overrides),
         )
 
-    def _slot(self, *, offering, weekday=1, start="10:10", end="11:40", week_type=WeekType.ALL, room=""):
+    def _slot(
+        self, *, offering, weekday=1, start="10:10", end="11:40", week_type=WeekType.ALL, room="", kind=SlotKind.LECTURE
+    ):
         return ScheduleSlot.objects.create(
             organization=self.org,
             offering=offering,
@@ -155,7 +158,16 @@ class ScheduleEditorBase(TestCase):
             end_time=datetime.time.fromisoformat(end),
             week_type=week_type,
             room=room,
+            kind=kind,
         )
+
+    def _teacher_blocker(self, offering=None):
+        """Müəllimin HƏMİN saatda başqa qrupla SEMİNARI — həqiqi müəllim toqquşması.
+
+        2026-09-25: eyni müəllim + eyni fənn + hər ikisi MÜHAZİRƏ + boş otaq, qruplar fərqli =
+        birləşmiş mühazirə (axın) — toqquşma deyil (``schedule.is_joint_lecture``). Bu testlərin
+        məqsədi müəllim toqquşmasıdır, ona görə maneə seminardır."""
+        return self._slot(offering=offering or self.offering_b, kind=SlotKind.SEMINAR)
 
 
 class AlwaysVisibleGridTest(ScheduleEditorBase):
@@ -364,7 +376,7 @@ class ConflictEngineTest(ScheduleEditorBase):
 
     def test_save_without_force_is_refused_and_carries_the_payload(self):
         with bypass_rls():
-            self._slot(offering=self.offering_b)
+            self._teacher_blocker()
             with self.assertRaises(schedule_editor.CellError) as ctx:
                 self._save()
         self.assertEqual(ctx.exception.code, "conflict")
@@ -378,7 +390,7 @@ class ForcedMoveParkingTest(ScheduleEditorBase):
 
     def test_forced_save_parks_the_other_slot_instead_of_deleting_it(self):
         with bypass_rls():
-            other = self._slot(offering=self.offering_b)
+            other = self._teacher_blocker()
             result = self._save(force=True, reason="Auditoriya təmiri səbəbindən məcburi köçürmə")
             other.refresh_from_db()
             parked = editor.parked_rows(organization=self.org, period=self.period)
@@ -406,14 +418,14 @@ class ForcedMoveParkingTest(ScheduleEditorBase):
 
     def test_forced_save_requires_a_reason(self):
         with bypass_rls():
-            self._slot(offering=self.offering_b)
+            self._teacher_blocker()
             with self.assertRaises(schedule_editor.CellError) as ctx:
                 self._save(force=True, reason="qısa")
         self.assertEqual(ctx.exception.code, "reason_required")
 
     def test_parked_slot_can_be_placed_again(self):
         with bypass_rls():
-            other = self._slot(offering=self.offering_b)
+            other = self._teacher_blocker()
             self._save(force=True, reason="Məcburi dəyişiklik — dekanlığın sərəncamı")
             other.refresh_from_db()
             editor.place_parked(
@@ -437,7 +449,7 @@ class ForcedMoveParkingTest(ScheduleEditorBase):
             )
             outside.instructor = self.teacher
             outside.save(update_fields=["instructor"])
-            blocker = self._slot(offering=outside)
+            blocker = self._teacher_blocker(outside)
             with self.assertRaises(schedule_editor.CellError) as ctx:
                 self._save(force=True, reason="Səlahiyyətdən kənar məcburi dəyişiklik cəhdi")
             blocker.refresh_from_db()

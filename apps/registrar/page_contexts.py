@@ -466,7 +466,7 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
     schedule_grid.attach_slot_extras(
         matrix,
         stats_map=_student_offering_stats(request.user, organization, record, period) if role == "student" else None,
-        counts_map=_offering_student_counts(teacher_offerings) if role == "teacher" else None,
+        counts_map=_offering_student_counts({slot.offering for slot in slots}) if role == "teacher" else None,
     )
 
     from apps.registrar.models import SlotKind
