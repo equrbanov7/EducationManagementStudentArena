@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}«Ümumi baxış» — suallar (orta + müqayisə), Likert paylanması (diverging),
+histoqram, dinamika, fakültə/kafedra müqayisəsi. Qrafik məlumatı `svr-overview-data`
+JSON adasındadır (`results_panel.js` oxuyur); hər kartın cədvəl qarşılığı serverdədir.
+Dəst gizlidirsə (n < k / tamamlayıcı qayda) yalnız izah + dinamika qalır.{% endcomment %}
+{{ rp.overview_chart|json_script:"svr-overview-data" }}
+{% with ov=rp.overview %}
+<div class="svr-grid" data-svr-charts="svr-overview-data">
+    {% if ov.visible %}
+        {% trans "Seçim" context "surveys.results" as svr_series %}
+        {% include "surveys/results/_card_questions.html" with q_rows=ov.questions q_show_department=ov.show_department_ref q_series_label=svr_series q_scope="p" %}
+        {% trans "Cavabların paylanması (Likert 1–5)" context "surveys.results" as svr_lk_title %}
+        {% include "surveys/results/_card_likert.html" with lk_rows=ov.likert lk_scale=ov.likert_scale lk_scope="p" lk_title=svr_lk_title %}
+        {% if ov.histogram %}{% include "surveys/results/_card_histogram.html" with hg=ov.histogram %}{% endif %}
+    {% else %}
+        <div class="svr-card svr-card--wide">
+            {% include "surveys/results/_suppressed.html" with sup_n=rp.summary.n sup_blocked=rp.summary.complement_blocked sup_secondary=rp.summary.secondary %}
+        </div>
+    {% endif %}
+    {% include "surveys/results/_card_trend.html" with tr=ov.trend tr_scope="p" %}
+    {% if ov.visible %}{% include "surveys/results/_card_breakdown.html" %}{% endif %}
+</div>
+{% endwith %}

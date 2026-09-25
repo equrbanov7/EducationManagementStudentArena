@@ -1,0 +1,161 @@
+/* =========================================================================
+   «Sorğu nəticələri» — müəllim kartı (çekməcə + müstəqil çap səhifəsi).
+   Tokenlər və qrafik palitrası `results.css`-dədir (`.svr-detail`, `.svr-print`).
+   Çap: naviqasiya/alətlər gizlənir, kartlar səhifə arasında bölünmür, cədvəl
+   qarşılıqları açılır (`results_print.js` `beforeprint`-də <details>-i açır).
+   ========================================================================= */
+
+.svr-drawer {
+    width: min(940px, 100%);
+}
+
+.svr-drawer__body {
+    background: var(--ems-bg-subtle);
+}
+
+.svr-drawer__body > .svr-state {
+    min-height: 240px;
+}
+
+.svr-drawer__loading {
+    display: grid;
+    gap: var(--ems-sp-5);
+}
+
+.svr-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+.svr-detail__head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.svr-detail__eyebrow {
+    margin: 0;
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svr-detail__name {
+    margin: 0;
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.svr-detail__meta {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-600);
+}
+
+.svr-detail__note {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-warning-800);
+}
+
+.svr-stats--detail {
+    padding: 14px 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+}
+
+/* Çekməcənin eni (≤ 940px) iki sütuna yetmir — kartlar bir sütunda. */
+.svr-grid--detail {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* ── Müstəqil çap səhifəsi ─────────────────────────────────────────────── */
+.svr-print {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.svr-print__bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.svr-print__confidential {
+    margin: 0 0 var(--ems-sp-5);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svr-print .svr-grid--detail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+    .svr-print .svr-grid--detail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media print {
+    @page {
+        margin: 14mm 12mm;
+    }
+
+    .blog-header,
+    .route-progress,
+    .toast-container,
+    .svr-print__bar,
+    .svr-toggle,
+    .svr-text__toolbar,
+    .svr-text__more,
+    .svr-words__list,
+    .svr-table > summary {
+        display: none;
+    }
+
+    .svr-print {
+        max-width: none;
+        padding: 0;
+    }
+
+    .svr-print .svr-grid--detail {
+        display: block;
+    }
+
+    .svr-print .svr-card {
+        margin-bottom: 10px;
+        break-inside: avoid;
+        box-shadow: none;
+        border-color: var(--ems-neutral-300);
+    }
+
+    .svr-print .svr-quote {
+        break-inside: avoid;
+        background: none;
+    }
+
+    .svr-print .svr-quote[hidden] {
+        display: list-item;
+    }
+
+    .svr-print .svr-canvas canvas {
+        max-width: 100%;
+    }
+
+    .svr-print a[href]::after {
+        content: none;
+    }
+}

@@ -79,10 +79,8 @@ class SimilarityMatch(UUIDModel, TimeStampedModel):
             models.CheckConstraint(condition=Q(submission_a__lt=F("submission_b")), name="sf_match_canonical_pair"),
             models.CheckConstraint(condition=Q(score__gte=0) & Q(score__lte=1), name="sf_match_score_range"),
         ]
-        indexes = [
-            models.Index(fields=["organization", "is_flagged"], name="sf_match_org_flagged"),
-            models.Index(fields=["submission_b"], name="sf_match_sub_b"),
-        ]
+        # ``submission_b`` üzrə axtarışı FK-nın öz indeksi örtür (ayrıca indeks dublikat idi — 0004).
+        indexes = [models.Index(fields=["organization", "is_flagged"], name="sf_match_org_flagged")]
 
     def __str__(self):
         return f"{self.submission_a_id} ~ {self.submission_b_id} ({self.score})"

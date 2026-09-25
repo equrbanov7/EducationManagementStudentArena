@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}KPI zolağı — `ems-kpi` kartları. Dəyişmə (əvvəlki dövrlə) ikon + işarə + mətnlə
+verilir, heç vaxt yalnız rənglə deyil. Gizli dəyər «—» + «n < k» qeydi ilə.{% endcomment %}
+<div class="ems-kpis svr-kpis" role="list" aria-label="{% trans 'Əsas göstəricilər' context 'surveys.results' %}">
+    {% for tile in rp.kpis %}
+    <div class="ems-kpi svr-kpi" role="listitem">
+        <div class="ems-kpi__label">{{ tile.label }}</div>
+        <div class="ems-kpi__value">
+            {% if tile.value is None %}<span class="svr-muted">—</span>{% elif tile.key == "overall" or tile.key == "index" %}{{ tile.value|floatformat:2 }}{% else %}{{ tile.value }}{% endif %}{% if tile.unit and tile.value is not None %}<span class="ems-kpi__unit">{{ tile.unit }}</span>{% endif %}
+        </div>
+        {% if tile.delta %}
+        <div class="svr-delta svr-delta--{{ tile.delta.direction }}">
+            {% if tile.delta.direction == "up" %}<i class="fas fa-arrow-trend-up" aria-hidden="true"></i> +{{ tile.delta.abs|floatformat:2 }}{% elif tile.delta.direction == "down" %}<i class="fas fa-arrow-trend-down" aria-hidden="true"></i> −{{ tile.delta.abs|floatformat:2 }}{% else %}<i class="fas fa-arrow-right-long" aria-hidden="true"></i> {% trans "dəyişməyib" context "surveys.results" %}{% endif %}
+            <span class="svr-delta__vs">{% blocktrans trimmed with label=rp.previous_label context "surveys.results" %}{{ label }} ilə müqayisədə{% endblocktrans %}</span>
+        </div>
+        {% endif %}
+        {% if tile.suppressed and tile.value is None %}
+        <div class="ems-kpi__note"><i class="fas fa-lock" aria-hidden="true"></i> {% if tile.secondary %}{% trans "gizli — tamamlayıcı qayda" context "surveys.results" %}{% else %}{% trans "gizli" context "surveys.results" %} — n &lt; {{ rp.k }}{% endif %}</div>
+        {% elif tile.note %}
+        <div class="ems-kpi__note">{{ tile.note }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>

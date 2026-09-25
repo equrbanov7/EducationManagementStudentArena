@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% comment %}Müəllim kartının çapa hazır müstəqil səhifəsi — çekməcədəki məzmunun eynisi
+(`_teacher_detail.html`). Çapda naviqasiya, alətlər zolağı və qrafik açarları gizlənir,
+kartlar səhifə arasında bölünmür, cədvəl qarşılıqları açıq çap olunur (results_detail.css).
+Stil/skript XARİCİ fayllardadır (CSP).{% endcomment %}
+
+{% block title %}{% if teacher %}{{ teacher.name }} — {% endif %}{% trans "Sorğu nəticələri" context "surveys.results" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+<link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+<link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+<link rel="stylesheet" href="{% static 'surveys/css/results.css' %}?v=20260925-f2">
+<link rel="stylesheet" href="{% static 'surveys/css/results_lists.css' %}?v=20260925-f2">
+<link rel="stylesheet" href="{% static 'surveys/css/results_detail.css' %}?v=20260925-f2">
+{% endblock %}
+
+{% block global_search %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="svr-print" data-svr-root data-chartjs-src="{% static 'vendor/chartjs/chart.umd.min.js' %}">
+    <div class="svr-print__bar">
+        <a class="ems-btn" href="{{ section_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Sorğu nəticələrinə qayıt" context "surveys.results" %}</a>
+        {% if not error %}
+        <button type="button" class="ems-btn ems-btn--primary" data-svr-print><i class="fas fa-print" aria-hidden="true"></i> {% trans "Çap et" context "surveys.results" %}</button>
+        {% endif %}
+    </div>
+    {% if error %}
+        <div class="ems-state svr-state" role="status">
+            <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% if status == 403 %}{% trans "Bu məlumata baxmaq üçün icazəniz yoxdur." context "surveys.results" %}{% else %}{% trans "Seçilmiş filtrlərdə bu müəllim üçün cavab yoxdur və ya o, sizin əhatənizdə deyil." context "surveys.results" %}{% endif %}</p>
+        </div>
+    {% else %}
+        <p class="svr-print__confidential">{% trans "Məxfi — anonim sorğunun aqreqat nəticələri; yalnız xidməti istifadə üçün." context "surveys.results" %}</p>
+        {% include "surveys/results/_teacher_detail.html" %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+{% if not error %}
+<script src="{% static 'surveys/js/results_core.js' %}?v=20260925-f2" defer></script>
+<script src="{% static 'surveys/js/results_charts.js' %}?v=20260925-f2" defer></script>
+<script src="{% static 'surveys/js/results_text.js' %}?v=20260925-f2" defer></script>
+<script src="{% static 'surveys/js/results_print.js' %}?v=20260925-f2" defer></script>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 /* Jurnal iş sahəsi (mockup dizaynı): üç-vəziyyətli davamiyyət çipləri, sütun
-   üzrə toplu i/e-q/b, sərbəst iş 1/0 çipləri, yeni-dərs / dərs-redaktə modalı
+   üzrə toplu i/e-q/b, sərbəst iş 1/0 çipləri + bal seçimləri, yeni-dərs / dərs-redaktə modalı
    (cədvəl slotundan saat seçimi + həftə pariteti), stepper↔tab sinxronu,
    kurs işi formu və qrup-siyahısı sətir kliki. Server qaydaları (bu-gün,
    2 saat pəncərəsi, tavanlar) hər halda yenidən yoxlanır — bu fayl yalnız UX-dir.
@@ -246,8 +246,10 @@
         bar.style.width = bar.getAttribute("data-jd-width") + "%";
     });
 
-    // ── Sərbəst iş CƏMİ (canlı — 1/0 çipləri) ─────────────────────────────
-    // Çeklist boşdursa CƏMİ köçürülmüş "arxiv" balını göstərir — selfwork_board.effective_total güzgüsü.
+    // ── Sərbəst iş CƏMİ (canlı — 1/0 çipləri + bal seçimləri) ──────────────
+    // Çeklist boşdursa CƏMİ köçürülmüş "arxiv" balını göstərir — selfwork_board.effective_total
+    // güzgüsü; cəm 10 ilə kəsilir (selfwork_points.cap_total). Bal: [data-jd-swp] seçimi /
+    // [data-jd-swp-ro] oxu-only (fənn qovluğu, kilidli xana).
     function recomputeSelfworkTotal(row) {
         if (!row) return;
         var total = 0;
@@ -255,6 +257,12 @@
             var v = el.value !== undefined ? el.value : el.getAttribute("data-jd-sw-ro");
             if (v === "1") total += 1;
         });
+        row.querySelectorAll("[data-jd-swp], [data-jd-swp-ro]").forEach(function (el) {
+            var raw = el.hasAttribute("data-jd-swp-ro") ? el.getAttribute("data-jd-swp-ro") : el.value;
+            var num = parseFloat(String(raw || "").replace(",", "."));
+            if (!isNaN(num)) total += num;
+        });
+        total = Math.min(10, Math.round(total * 10) / 10);
         var out = row.querySelector("[data-jd-sw-total]");
         var archive = row.getAttribute("data-jd-sw-archive");
         if (out) out.textContent = total === 0 && archive !== null ? archive : String(total);
@@ -375,6 +383,9 @@
             chip.classList.toggle("sw-chip--on", input.value === "1");
             chip.classList.toggle("sw-chip--off", input.value !== "1");
         });
+        document.querySelectorAll("[data-jd-swp]").forEach(function (sel) {
+            setSelectValue(sel, sel.value); // bərpa olunmuş bal vidcetdə də görünsün
+        });
         document.querySelectorAll("[data-jd-sw-row]").forEach(recomputeSelfworkTotal);
         refreshKollokviumSums();
     }
@@ -395,6 +406,11 @@
         var ksel = event.target.closest && event.target.closest("[data-jd-kscore]");
         if (ksel) {
             refreshKollokviumSums();
+            markDirty();
+        }
+        var swp = event.target.closest && event.target.closest("[data-jd-swp]");
+        if (swp) {
+            recomputeSelfworkTotal(swp.closest("[data-jd-sw-row]"));
             markDirty();
         }
     });

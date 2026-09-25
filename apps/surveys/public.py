@@ -100,6 +100,41 @@ KABİNET (accounts) ÜÇÜN
 * ``student_section_visible(user)`` / ``pending_badge(user)`` — «Anonim sorğu»
   bölməsi və ``evaluation_survey`` sayğacı üçün (sıfır sorğu).
 * ``can_view_results`` / ``can_manage_campaigns`` / ``PERM_RESULTS_VIEW`` / ``PERM_MANAGE``.
+
+══════════════════════════════════════════════════════════════════════════════
+F2 ƏLAVƏLƏRİ — «Sorğu nəticələri» UI-ı (``services/analytics_extra|options|text``)
+══════════════════════════════════════════════════════════════════════════════
+Eyni k-qaydası + tamamlayıcı qayda; üstəlik bölgü cədvəllərində İKİNCİ DƏRƏCƏLİ
+gizlətmə: görünən cəm − görünən sətirlər qalığı həmişə ``0`` və ya ``≥ k``.
+
+* ``results_summary(org, scope, filters, with_participation=True)`` → ``summary``
+  açarları + ``complement_blocked``, ``teachers`` / ``teachers_visible`` (``n ≥ k``),
+  ``general_suppressed``; ``participation`` fakültə filtrini qəbzlərə də tətbiq edir.
+* ``set_metrics(org, scope, filters, campaign_ids)`` → ``{"k", **metrics}``.
+* ``question_distributions(org, scope, filters, section=…)`` → ``{"k", "n",
+  "suppressed", "questions": [{"code", "kind", "text", "n", "buckets", "avg",
+  "top2", "bottom2"}]}`` (bütün ballı suallar, TƏK qruplaşdırılmış sorğu).
+* ``question_benchmarks(org, scope, campaign_ids, department_id=None)`` →
+  ``{"k", "org": {code: orta}, "department": {code: orta}}`` (kafedra — əhatə ilə).
+* ``teacher_question_scores(org, scope, filters, code)`` → ``{teacher_id: {"avg", "n"}}``.
+* ``safe_breakdown(org, scope, filters, by=…, section=…, total_n=None)`` → ``breakdown``
+  + sətir tamamlayıcı qaydası + ikinci dərəcəli gizlətmə (``secondary=True``).
+* ``secondary_suppress(rows, k=…, total_n=…)`` — eyni qayda istənilən bölgü üçün;
+  ``hide_row(row, secondary=False)`` — sətri gizli edir (say qalır).
+* ``participation_rows(org, scope, filters, campaign_ids, per_teacher=True)`` →
+  ``{"receipts", "expected", "rate", "approximate", "teachers": {id: {...}}}``.
+* ``campaign_choices(org)`` → yüngül kampaniya siyahısı (1 sorğu, saylarsız).
+* ``filter_choices(org, scope, filters, campaign_ids)`` → kaskadlı seçimlər +
+  ``effective`` (uyğunsuz seçim atılmış ``ResultFilters``).
+* ``teacher_choices(org, scope, filters, campaign_ids, query, limit, offset)`` →
+  ``{"results": [{"id", "text", "n"}], "has_more"}``; ``teacher_label(...)``.
+* ``publishable_teachers(org, campaign_ids)`` / ``publishable_by_campaign(org, ids)`` —
+  görünüşlər arası çıxmaya qarşı VAHİD qayda: kafedra/fakültə/təşkilat cəmindən dərc
+  olunan müəllimlər çıxılanda qalıq 0 və ya ≥ k (bax ``services/analytics_publish``);
+  dərc olunmayan müəllimin göstəriciləri heç bir görünüşdə verilmir (``withhold``).
+* ``suggestion_digest(org, scope, filters, query="", limit=200)`` → ümumi təkliflər
+  (KAMPANİYA BAŞINA k) + ``keywords`` (sənəd tezliyi, AZ stop-sözlər);
+  ``keyword_frequency(texts)`` — eyni analiz istənilən mətn dəsti üçün.
 """
 
 from __future__ import annotations
@@ -119,6 +154,21 @@ from .services.analytics_detail import (
     teacher_detail,
     trend,
 )
+from .services.analytics_extra import (
+    hide_row,
+    participation_rows,
+    question_benchmarks,
+    question_distributions,
+    results_summary,
+    safe_breakdown,
+    secondary_suppress,
+    set_metrics,
+    teacher_question_scores,
+    withhold,
+)
+from .services.analytics_options import campaign_choices, filter_choices, teacher_choices, teacher_label
+from .services.analytics_publish import publishable_by_campaign, publishable_teachers
+from .services.analytics_text import keyword_frequency, suggestion_digest
 from .services.filters import ResultFilters
 from .services.participation import daily_timeline, participation
 
@@ -223,4 +273,23 @@ __all__ = [
     "teacher_detail",
     "teacher_table",
     "trend",
+    # F2 — «Sorğu nəticələri» UI-ının əlavə aqreqatları
+    "campaign_choices",
+    "filter_choices",
+    "hide_row",
+    "keyword_frequency",
+    "participation_rows",
+    "publishable_by_campaign",
+    "publishable_teachers",
+    "question_benchmarks",
+    "question_distributions",
+    "results_summary",
+    "safe_breakdown",
+    "secondary_suppress",
+    "set_metrics",
+    "suggestion_digest",
+    "teacher_choices",
+    "teacher_label",
+    "teacher_question_scores",
+    "withhold",
 ]

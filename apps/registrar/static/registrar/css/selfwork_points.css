@@ -1,0 +1,146 @@
+/* ═══ Sərbəst iş — BAL strukturu (1 × 10 / 2 × 5 / 10 × 1) + «Fənn qovluğu» nişanı ═══
+   _jd_selfwork.html partial-ının öz stili (partial <link>-i ilə yüklənir).
+   Yalnız işıqlı tema — jurnal səhifəsi kimi (jd2.css --j-* tokenləri +
+   design-tokens --ems-* dəyişənləri, hər birinin fallback-i ilə). */
+
+/* ── Başlıq zolağı: struktur etiketi + cəmi tavan + mənbə legendi ───────────── */
+.jd-swp-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin: 0 2px 12px;
+    font-size: 12.5px;
+    color: var(--j-muted, #5b72a0);
+    font-weight: 600;
+}
+
+.jd-swp-struct {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--j-ink, #12274e);
+}
+
+.jd-swp-struct b { font-weight: 800; }
+.jd-swp-src { color: var(--j-muted, #5b72a0); font-weight: 600; }
+
+.jd-swp-cap {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-weight: 700;
+}
+
+.jd-swp-legend { display: inline-flex; align-items: center; gap: 6px; }
+
+/* «Fənn qovluğu» nişanı — mətnli (legend) və ikonlu (xana) variant. */
+.jd-swp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border: 1px solid var(--ems-emerald-200, #a7f3d0);
+    border-radius: 999px;
+    background: var(--ems-emerald-50, #ecfdf5);
+    color: var(--ems-success-strong, #0f766e);
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.jd-swp-badge--cell {
+    margin-left: 3px;
+    padding: 1px 5px;
+    font-size: 9.5px;
+    vertical-align: middle;
+    cursor: help;
+}
+
+/* Fənn qovluğu balı olan xana — oxu-only çip, yaşıl çərçivə. */
+.sw-chip.jd-swp-folder {
+    box-shadow: inset 0 0 0 1px var(--ems-emerald-200, #a7f3d0);
+    cursor: help;
+}
+
+/* ── Zolaqlar: struktur tətbiq olunmayıb (info) / uyğunsuzluq (xəbərdarlıq) ─── */
+.jd-swp-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.jd-swp-banner > span { flex: 1 1 320px; }
+
+.jd-swp-banner--info {
+    border: 1px solid var(--ems-primary-200, #bfdbfe);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-800, #1e40af);
+}
+
+.jd-swp-banner--warn {
+    border: 1px solid var(--ems-warning-500, #f59e0b);
+    background: var(--ems-warning-100, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+}
+
+.jd-swp-banner-form { margin: 0; }
+
+.jd-swp-banner-btn {
+    border: none;
+    border-radius: 9px;
+    padding: 7px 14px;
+    background: var(--j-navy, #0f2a5c);
+    color: var(--ems-neutral-0, #fff);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.jd-swp-banner-btn:hover { background: var(--ems-primary-700, #1d4ed8); }
+
+.jd-swp-banner-btn:focus-visible {
+    outline: 1px solid var(--ems-neutral-400, #94a3b8);
+    outline-offset: 2px;
+    box-shadow: var(--ems-sh-focus, 0 0 0 3px rgba(37, 99, 235, 0.18));
+}
+
+/* ── Mövzu siyahısı + grid başlığı: slotun maksimum balı ─────────────────────── */
+.jd-swp-max {
+    flex: 0 0 auto;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 10.5px;
+    font-weight: 800;
+}
+
+.jd-swp-th-max {
+    margin-left: 1px;
+    color: var(--j-soft, #8aa0c8);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* Bal strukturunda sütun az olur (2 × 5 → 2, 1 × 10 → 1) — cədvəl dar qalmasın. */
+.jd-swp-table { min-width: 480px; }
+.jd-swp-table .jd-sw2-th-col { min-width: 72px; }
+.jd-swp-select { width: 60px; }
+
+/* Düzəliş modalında sərbəst iş BAL sahəsinin izahı (bal düzəlişi bu tabdan açılır). */
+.jd-swp-hint {
+    display: block;
+    margin-top: 4px;
+    color: var(--j-muted, #5b72a0);
+    font-size: 11.5px;
+    font-weight: 600;
+}

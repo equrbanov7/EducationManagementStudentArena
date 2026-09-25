@@ -1,0 +1,436 @@
+/* =========================================================================
+   «Sorğu nəticələri» (apps/surveys F2) — kabinet paneli, qrafik kartları,
+   müəllim reytinqi, ümumi təkliflər. Yalnız `--ems-*` tokenləri, yalnız açıq
+   tema (kabinet açıq temalıdır). Qrafik palitrası `--svr-*` kimi burada elan
+   olunur; JS rəngi `getComputedStyle` ilə oxuyur (JS-də sabit rəng YOXDUR).
+
+   Palitra (dataviz yoxlayıcısı ilə yoxlanılıb, ağ fon):
+   • kateqorial: mavi primary-600 · narıncı warning-600 · bənövşəyi violet-600
+     (qonşu CVD ΔE ≥ 25, normal ≥ 34 — hamısı keçir);
+   • Likert (diverging): 1 warning-700 · 2 warning-600 · 3 neutral-300 (neytral
+     mərkəz) · 4 primary-400 · 5 primary-600 — narıncı↔mavi, rəng korluğuna
+     davamlı; açıq addımlar üçün cədvəl + əfsanə «relief» kanalıdır.
+   ========================================================================= */
+
+.svr,
+.svr-detail,
+.svr-print {
+    --svr-c1: var(--ems-primary-600);
+    --svr-c2: var(--ems-warning-600);
+    --svr-c3: var(--ems-violet-600);
+    --svr-ref: var(--ems-neutral-700);
+    --svr-ctx: var(--ems-neutral-400);
+    --svr-l1: var(--ems-warning-700);
+    --svr-l2: var(--ems-warning-600);
+    --svr-l3: var(--ems-neutral-300);
+    --svr-l4: var(--ems-primary-400);
+    --svr-l5: var(--ems-primary-600);
+    --svr-grid: var(--ems-neutral-200);
+    --svr-axis: var(--ems-neutral-500);
+    --svr-ink: var(--ems-text);
+    --svr-surface: var(--ems-bg);
+}
+
+.svr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+.svr [hidden],
+.svr-detail [hidden] {
+    display: none;
+}
+
+.svr .ems-btn[hidden],
+.svr-detail .ems-btn[hidden] {
+    display: none;
+}
+
+.svr-muted {
+    color: var(--ems-text-muted);
+}
+
+/* ── Başlıq əməlləri / ixrac menyusu ──────────────────────────────────── */
+.svr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+.svr-export__menu {
+    min-width: 280px;
+    padding: var(--ems-sp-2) 0;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    box-shadow: var(--ems-sh-raised);
+    font-size: var(--ems-fs-base);
+}
+
+.svr-export__menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 7px 14px;
+    color: var(--ems-text);
+}
+
+.svr-export__menu .dropdown-item i {
+    width: 16px;
+    color: var(--ems-neutral-500);
+}
+
+.svr-export__note {
+    display: block;
+    max-width: 260px;
+    padding: 4px 14px;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+    white-space: normal;
+    color: var(--ems-text-muted);
+}
+
+/* ── Anonimlik / əhatə qeydi ───────────────────────────────────────────── */
+.svr-note {
+    display: flex;
+    gap: var(--ems-sp-5);
+    padding: 12px 16px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    color: var(--ems-neutral-700);
+}
+
+.svr-note__icon {
+    flex: none;
+    margin-top: 2px;
+    font-size: 18px;
+    color: var(--ems-primary-600);
+}
+
+.svr-note__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    min-width: 0;
+}
+
+.svr-note__line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2) var(--ems-sp-6);
+    margin: 0;
+    font-size: var(--ems-fs-md);
+}
+
+.svr-note__text {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+}
+
+/* ── Filtr paneli: server axtarışlı müəllim seçicisi ──────────────────── */
+.svr-filters .svr-picker,
+.svr-filters .svr-picker .ems-ss {
+    width: 100%;
+}
+
+/* ── KPI zolağı ────────────────────────────────────────────────────────── */
+.svr-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+    margin-bottom: 0;
+}
+
+.svr-kpi .ems-kpi__value {
+    font-size: 23px;
+}
+
+.svr-delta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px var(--ems-sp-2);
+    margin-top: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
+.svr-delta--up {
+    color: var(--ems-success-700);
+}
+
+.svr-delta--down {
+    color: var(--ems-danger-700);
+}
+
+.svr-delta__vs {
+    flex-basis: 100%;
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+/* ── Tab-lar (server linkləri, `ems-tabs` görünüşü) ───────────────────── */
+.svr-tabs {
+    margin-bottom: 0;
+}
+
+.svr-tabs a.ems-tabs__btn {
+    text-decoration: none;
+}
+
+.svr-tabs a.ems-tabs__btn:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* ── Kart qəfəsi ───────────────────────────────────────────────────────── */
+.svr-body {
+    min-height: 240px;
+}
+
+.svr-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-6);
+    align-items: start;
+}
+
+.svr-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+    padding: 16px 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svr-card--wide {
+    grid-column: 1 / -1;
+}
+
+.svr-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+}
+
+.svr-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.svr-card__sub {
+    max-width: 78ch;
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.svr-card__foot {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.svr-toggle {
+    flex: none;
+}
+
+/* ── Əfsanə (HTML — rəng heç vaxt tək identifikator deyil) ────────────── */
+.svr-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.svr-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.svr-key__swatch {
+    display: inline-block;
+    flex: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    background: var(--svr-c1);
+}
+
+.svr-key__swatch--s2 { background: var(--svr-c2); }
+.svr-key__swatch--s3 { background: var(--svr-c3); }
+.svr-key__swatch--l1 { background: var(--svr-l1); }
+.svr-key__swatch--l2 { background: var(--svr-l2); }
+.svr-key__swatch--l3 { background: var(--svr-l3); }
+.svr-key__swatch--l4 { background: var(--svr-l4); }
+.svr-key__swatch--l5 { background: var(--svr-l5); }
+
+.svr-key__swatch--tick-ref,
+.svr-key__swatch--tick-dept {
+    width: 3px;
+    height: 14px;
+    border-radius: 1px;
+    background: var(--svr-ref);
+}
+
+.svr-key__swatch--tick-dept { background: var(--svr-c2); }
+
+.svr-key__swatch--line-selection,
+.svr-key__swatch--line-department,
+.svr-key__swatch--line-org {
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.svr-key__swatch--line-department { background: var(--svr-c2); }
+.svr-key__swatch--line-org { background: var(--svr-ctx); }
+
+/* ── Qrafik sahəsi (hündürlüyü üfüqi qrafiklərdə sətir sayına görə JS verir) ── */
+.svr-canvas {
+    position: relative;
+    height: 280px;
+    min-width: 0;
+}
+
+.svr-canvas--column,
+.svr-canvas--line {
+    height: 250px;
+}
+
+/* ── Cədvəl qarşılığı (a11y) ──────────────────────────────────────────── */
+.svr-table > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: 24px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-link);
+    cursor: pointer;
+}
+
+.svr-table > summary:focus-visible,
+.svr-word:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 2px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.svr-table__scroll {
+    margin-top: var(--ems-sp-3);
+    overflow-x: auto;
+}
+
+.svr-table__caption {
+    caption-side: top;
+    padding: 4px 0 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    text-align: left;
+    color: var(--ems-text);
+}
+
+.svr-table__note {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.svr-mini-table {
+    font-size: var(--ems-fs-sm);
+}
+
+.svr-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svr-sub {
+    display: block;
+    margin-top: 1px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+.svr-sub--inline {
+    display: inline;
+}
+
+.svr-hidden {
+    white-space: nowrap;
+}
+
+.svr-state {
+    padding: 28px 16px;
+}
+
+/* ── Uyğunlaşma ────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+    .svr-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .svr-card {
+        padding: 14px;
+    }
+
+    .svr-note {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .svr-word {
+        transition: none;
+    }
+}
+
+/* Kabinet səhifəsini birbaşa çap edəndə: idarə elementləri kağıza düşmür. */
+@media print {
+    .svr-filters,
+    .svr-actions,
+    .svr-tabs,
+    .svr-toggle,
+    .svr-rank__toolbar,
+    .svr-pager,
+    .svr-text__toolbar,
+    .svr-text__more,
+    .svr-rowactions,
+    .svr-rank__table .ems-rowactions {
+        display: none;
+    }
+
+    .svr-card {
+        break-inside: avoid;
+        box-shadow: none;
+    }
+
+    .svr-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

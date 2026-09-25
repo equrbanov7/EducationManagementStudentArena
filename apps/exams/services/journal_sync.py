@@ -56,15 +56,17 @@ SKIP_WRITE_FAILED = "write_failed"
 SKIP_MIDTERM_CATEGORY = "midterm_category"
 #: Final olmayan digər kateqoriyalar (quiz / placement / practice) — eyni səbəbdən yazılmır.
 SKIP_NON_FINAL_CATEGORY = "non_final_category"
+#: Kateqoriyasız / tanınmayan kateqoriyalı imtahan — ``FinalGrade``-ə yazılmır (H-1).
+SKIP_UNCATEGORIZED = "uncategorized_category"
 
 #: ``Exam.exam_type_extended`` → ``FinalGrade``-ə yazılırmı (tək təsnifat mənbəyi):
 #:
-#: * ``"final"`` → YAZILIR;
-#: * boş / ``None`` (köhnə, kateqoriyasız imtahan) → YAZILIR — bugünkü davranış:
-#:   kateqoriya sahəsi opsionaldır və fənnə bağlı kateqoriyasız imtahan tarixən
-#:   yekun imtahan kimi işləyib;
-#: * tanınmayan dəyər → YAZILIR (bugünkü davranış; yeni kateqoriya əlavə olunanda
-#:   ``test_journal_sync_midterm_guard`` onu bu təsnifata AÇIQ salmağa məcbur edir);
+#: * ``"final"`` → YAZILIR — YALNIZ bu (final kateqoriyasını yalnız İmtahan Mərkəzi seçə bilər);
+#: * boş / ``None`` / tanınmayan dəyər → ATLANIR (``SKIP_UNCATEGORIZED``). Təhlükəsizlik
+#:   (2026-09-25, H-1): əvvəl kateqoriyasız imtahan da yazılırdı — istənilən müəllim boş
+#:   kateqoriyalı testi istənilən fənnə bağlayıb tələbənin RƏSMİ yekun imtahan balını
+#:   (kilidli jurnalda belə) əzə bilirdi; unudulmuş kateqoriya da eyni zərəri verirdi.
+#:   Fənnə bağlanan imtahanda kateqoriya formada məcburidir (``ExamForm.clean``);
 #: * ``"midterm"`` → ATLANIR (``SKIP_MIDTERM_CATEGORY``);
 #: * ``"quiz"`` / ``"placement"`` / ``"practice"`` → ATLANIR (``SKIP_NON_FINAL_CATEGORY``).
 #:
@@ -77,12 +79,16 @@ NON_FINAL_EXAM_CATEGORIES = frozenset({MIDTERM_EXAM_CATEGORY, "quiz", "placement
 
 def final_grade_skip_reason(exam):
     """Kateqoriya cəhdin ``FinalGrade``-ə yazılmasına mane olursa skip kodu, yoxsa ``None``."""
+    from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+
     category = str(getattr(exam, "exam_type_extended", None) or "").strip()
+    if category == FINAL_EXAM_CATEGORY:
+        return None
     if category == MIDTERM_EXAM_CATEGORY:
         return SKIP_MIDTERM_CATEGORY
     if category in NON_FINAL_EXAM_CATEGORIES:
         return SKIP_NON_FINAL_CATEGORY
-    return None
+    return SKIP_UNCATEGORIZED
 
 
 def _skip(reason, attempt, *, level=logging.WARNING):
@@ -185,8 +191,8 @@ def sync_attempt_to_journal(attempt, *, actor=None):
     """Bitmiş imtahan cəhdinin nəticəsini registrar ``FinalGrade``-ə yaz.
 
     İmtahan bir jurnal fənninə bağlı deyilsə (``exam.subject`` null) no-op.
-    Kateqoriyası final OLMAYAN imtahan (midterm, quiz, …) YAZILMIR — görünən skip
-    kodu ilə atlanır (bax ``final_grade_skip_reason``); qovulma da daxil, yəni
+    Kateqoriyası final OLMAYAN imtahan (midterm, quiz, kateqoriyasız, …) YAZILMIR — görünən
+    skip kodu ilə atlanır (bax ``final_grade_skip_reason``); qovulma da daxil, yəni
     midtermdən qovulma yekun imtahan balını 0-a endirmir.
     Proctordan qovulan (``supervision_status == "removed"``) → 0 = avtomatik F.
     ``actor`` — yazını edən müəllim/reviewer; verilmirsə cəhdin ``graded_by``-ı,
