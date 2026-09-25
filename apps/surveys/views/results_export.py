@@ -4,7 +4,8 @@
 AQREQATLARI (bax ``results_datasets``); xam cavab/şərh YOXDUR. Hər ixrac audit
 jurnalına yazılır (``AuditAction.EXPORT``, ``resource_type="surveys.results"``,
 filtrlər və sətir sayı ilə). Mətn xanaları formula-neytrallaşdırılır
-(``core.export_safety``). İcazə FAIL-CLOSED — əhatəsiz istifadəçi 403 alır.
+(``core.export_safety``). İcazə FAIL-CLOSED — əhatəsiz istifadəçi 403 alır; davam edən
+kampaniya 409 (canlı nəticə yoxdur, M-1). Saylar ekranda olduğu kimi səbətlədir.
 """
 
 from __future__ import annotations
@@ -105,8 +106,11 @@ def export(request, fmt):
     resolved = resolve(request, with_choices=True)
     if resolved is None:
         return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
-    if not resolved.campaigns:
+    if not resolved.campaign_ids:
         raise Http404
+    if resolved.live:
+        # M-1: davam edən kampaniyanın nəticəsi (o cümlədən ixracı) yoxdur.
+        return JsonResponse({"ok": False, "error": "campaign_open"}, status=409)
     label = scope_label(resolved.scope)
     if fmt == "csv":
         dataset = request.GET.get("dataset") or "teachers"

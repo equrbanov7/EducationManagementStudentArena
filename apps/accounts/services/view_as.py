@@ -102,10 +102,9 @@ ROLE_MODE_MAP = {
     "student_services": MODE_READONLY,
     "program_coordinator": MODE_READONLY,
     "trustee": MODE_READONLY,
-    # Keyfiyyətə nəzarət şöbəsi (2026-09-25, anonim sorğu) — digər inzibati bölmələr kimi
-    # YALNIZ baxış; rəhbər də READONLY (sorğu səhifələri view-as altında onsuz da bağlıdır).
-    "quality_control_head": MODE_READONLY,
-    "quality_control_staff": MODE_READONLY,
+    # Keyfiyyətə nəzarət şöbəsi (2026-09-25, anonim sorğu) view-as AKTORU DEYİL — təhlükəsizlik
+    # yoxlaması L-2: işi yalnız ümumiləşdirilmiş sorğu nəticələridir; org-wide «başqasının gözü ilə
+    # bax» onlara hər tələbənin qiymətlərini/şəxsi datasını açırdı. Hədəf kimi (staff süzgəci) qalır.
     ProfileRole.RIM_STAFF: MODE_READONLY,
     ProfileRole.HR: MODE_READONLY,
 }

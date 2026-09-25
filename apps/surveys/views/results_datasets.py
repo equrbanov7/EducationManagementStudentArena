@@ -2,8 +2,10 @@
 məlumatı YOXDUR; bax ``apps.surveys.public`` — «F2 UI xam sətir ixracı ETMƏMƏLİDİR»).
 
 Cədvəllər UI tablarının EYNİ qurucularından gəlir (``overview_tab``, ``teachers_tab``,
-``general_tab``) — ekranda gizli olan sətir ixracda da gizlidir (göstəricilər boş,
-«Status» sütununda səbəb). Hər cədvəl ``{"key", "title", "header", "rows"}``.
+``general_tab``) — ekranda gizli olan sətir ixracda da gizlidir (göstəricilər VƏ say
+boş, «Vəziyyət» sütununda səbəb). Açıqlama nəzarəti ekranla eynidir: say yalnız səbətlə
+(«<5», «5+», «10+»…), iştirak faizi 5-ə yuvarlaq, paylanma yalnız faizlə; davam edən
+kampaniyanın ixracı yoxdur (M-1). Hər cədvəl ``{"key", "title", "header", "rows"}``.
 """
 
 from __future__ import annotations
@@ -12,6 +14,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from .. import public
+from ..services import analytics_guard as guard
 
 CTX = "surveys.results"
 
@@ -50,17 +53,18 @@ def filter_description(resolved, filters) -> str:
 
 
 def _summary_table(resolved, filters, summary, participation, scope_label) -> dict:
-    rate = participation.get("rate") if participation and not participation.get("approximate") else None
+    participation = participation or {}
+    rate = participation.get("rate") if not participation.get("approximate") else None
     rows = [
         (pgettext(CTX, "Dövr"), resolved.query.period.label),
         (pgettext(CTX, "Əhatə"), scope_label),
         (pgettext(CTX, "Filtrlər"), filter_description(resolved, filters)),
         (pgettext(CTX, "Anonimlik həddi (k)"), summary["k"]),
-        (pgettext(CTX, "Cavab sayı"), summary["n"]),
-        (pgettext(CTX, "Ümumi bölmə cavabları"), summary["general_n"]),
-        (pgettext(CTX, "Doldurulmuş hədəf"), participation.get("receipts", 0) if participation else 0),
-        (pgettext(CTX, "Gözlənilən hədəf"), participation.get("expected", 0) if participation else 0),
-        (pgettext(CTX, "Cavab faizi (%)"), round(rate * 100, 1) if rate is not None else ""),
+        (pgettext(CTX, "Cavab sayı"), guard.count_bucket(summary["n"])),
+        (pgettext(CTX, "Ümumi bölmə cavabları"), guard.count_bucket(summary["general_n"])),
+        (pgettext(CTX, "Doldurulmuş hədəf"), guard.count_bucket(participation.get("receipts"))),
+        (pgettext(CTX, "Gözlənilən hədəf"), guard.count_bucket(participation.get("expected"))),
+        (pgettext(CTX, "Cavab faizi (%)"), guard.round5(rate) if rate is not None else ""),
         (pgettext(CTX, "Orta ümumi bal (1–10)"), summary["avg_overall"]),
         (pgettext(CTX, "Likert indeksi (1–5)"), summary["likert_index"]),
         (
@@ -81,36 +85,27 @@ def _summary_table(resolved, filters, summary, participation, scope_label) -> di
 
 
 def _questions_table(overview) -> dict:
+    """Sual ortası + paylanma PAYLARI (%) — xam say ixrac olunmur (bax ``analytics_guard``)."""
     header = [
         pgettext(CTX, "Kod"),
         pgettext(CTX, "Qısa ad"),
         pgettext(CTX, "Sual"),
-        pgettext(CTX, "Cavab sayı"),
         pgettext(CTX, "Orta"),
         pgettext(CTX, "«Razı» payı (%)"),
         pgettext(CTX, "Universitet ortası"),
-        *[str(score) for score in range(1, 6)],
+        *[f"{score} (%)" for score in range(1, 6)],
     ]
     likert = {row["code"]: row for row in overview.get("likert", [])}
     rows = []
     for row in overview.get("questions", []):
-        counts = likert.get(row["code"], {}).get("counts") or [""] * 5
-        rows.append([row["code"], row["label"], row["text"], row["n"], row["avg"], row["top2"], row["org"], *counts])
+        shares = likert.get(row["code"], {}).get("pct") or [""] * 5
+        rows.append([row["code"], row["label"], row["text"], row["avg"], row["top2"], row["org"], *shares])
     histogram = overview.get("histogram")
     if histogram:
         rows.append(
-            [
-                histogram["code"],
-                histogram["label"],
-                histogram["text"],
-                histogram["n"],
-                histogram["avg"],
-                "",
-                "",
-                *histogram["counts"],
-            ]
+            [histogram["code"], histogram["label"], histogram["text"], histogram["avg"], "", "", *histogram["pct"]]
         )
-        header.extend(str(score) for score in range(6, 11))
+        header.extend(f"{score} (%)" for score in range(6, 11))
     return {"key": "questions", "title": pgettext(CTX, "Suallar"), "header": header, "rows": rows}
 
 
@@ -120,8 +115,6 @@ def _teachers_table(teachers) -> dict:
         pgettext(CTX, "Müəllim"),
         pgettext(CTX, "Kafedra"),
         pgettext(CTX, "Cavab sayı"),
-        pgettext(CTX, "Doldurulmuş hədəf"),
-        pgettext(CTX, "Gözlənilən hədəf"),
         pgettext(CTX, "Cavab faizi (%)"),
         pgettext(CTX, "Orta ümumi bal (1–10)"),
         pgettext(CTX, "Likert indeksi (1–5)"),
@@ -140,9 +133,7 @@ def _teachers_table(teachers) -> dict:
                 row["rank"] or "",
                 row["name"],
                 row["department"],
-                row["n"],
-                row["receipts"],
-                row["expected"],
+                row["n"] or "",
                 "" if row["rate"] is None else row["rate"],
                 row["overall"],
                 row["index"],
@@ -160,7 +151,9 @@ def _departments_table(overview) -> dict:
     rows = []
     for level, label in (("faculties", pgettext(CTX, "Fakültə")), ("departments", pgettext(CTX, "Kafedra"))):
         for row in overview.get(level, []):
-            rows.append([label, row["label"], row["n"], row["overall"], row["index"], row["recommend"], _status(row)])
+            rows.append(
+                [label, row["label"], row["n"] or "", row["overall"], row["index"], row["recommend"], _status(row)]
+            )
     return {
         "key": "departments",
         "title": pgettext(CTX, "Kafedralar"),
@@ -182,7 +175,7 @@ def _trend_table(trend) -> dict:
     rows = []
     for row in trend.get("rows", []):
         for item, cell in zip(series, row["cells"]):
-            rows.append([row["label"], item["label"], cell["n"], cell["overall"], cell["index"], _status(cell)])
+            rows.append([row["label"], item["label"], cell["n"] or "", cell["overall"], cell["index"], _status(cell)])
     return {
         "key": "trend",
         "title": pgettext(CTX, "Dinamika"),
@@ -201,7 +194,9 @@ def _trend_table(trend) -> dict:
 def _general_table(general) -> dict:
     rows = []
     for row in general.get("likert", []):
-        rows.append([pgettext(CTX, "Sual"), row["label"], row["n"], row["avg"], "", row["top2"], _status(row)])
+        rows.append(
+            [pgettext(CTX, "Sual"), row["label"], general.get("n") or "", row["avg"], "", row["top2"], _status(row)]
+        )
     names = {
         "faculty": pgettext(CTX, "Fakültə"),
         "program": pgettext(CTX, "İxtisas"),
@@ -213,7 +208,7 @@ def _general_table(general) -> dict:
                 [
                     names.get(level, level),
                     row["label"],
-                    row["n"],
+                    row["n"] or "",
                     row["satisfaction"],
                     row["facilities"],
                     "",
@@ -253,19 +248,25 @@ def build_tables(resolved, filters, wanted, *, scope_label="") -> list:
     from .results_panel import apply_publishing
     from .results_teachers import teachers_tab
 
-    organization, scope, query = resolved.organization, resolved.scope, resolved.query
+    organization, scope, query, family = resolved.organization, resolved.scope, resolved.query, resolved.family
     wanted = [key for key in DATASETS if key in set(wanted)]
-    summary = public.results_summary(organization, scope, filters, with_participation="summary" in wanted)
+    summary = public.results_summary(
+        organization, scope, filters, with_participation="summary" in wanted, family=family
+    )
     published = public.publishable_teachers(organization, resolved.campaign_ids)
     apply_publishing(summary, filters, published)
     overview = teachers = general = {}
     if {"questions", "departments", "trend"} & set(wanted):
-        overview = overview_tab(organization, scope, filters, summary, query)["overview"]
+        overview = overview_tab(
+            organization, scope, filters, summary, query, family=family, campaigns=resolved.campaigns
+        )
+        overview = overview["overview"]
     if "teachers" in wanted:
         urls = {"detail_base": "", "detail_qs": ""}
-        teachers = teachers_tab(organization, scope, filters, summary, query, urls, published)["teachers"]
+        teachers = teachers_tab(organization, scope, filters, summary, query, urls, published, family=family)
+        teachers = teachers["teachers"]
     if {"general", "keywords"} & set(wanted):
-        general = general_tab(organization, scope, filters, summary)["general"]
+        general = general_tab(organization, scope, filters, summary, family=family)["general"]
     builders = {
         "summary": lambda: _summary_table(resolved, filters, summary, summary["participation"], scope_label),
         "questions": lambda: _questions_table(overview),

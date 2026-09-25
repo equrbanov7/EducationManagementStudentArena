@@ -5,8 +5,12 @@
 * Filtrlər eyni ``er_*`` parametrləridir (bölmənin cari URL-i ötürülür).
 * İcazə FAIL-CLOSED: əhatəsiz → 403; müəllim əhatədə deyil / cavabı yoxdur → 404
   (F1 ``teacher_detail`` ``found=False`` qaytarır — başqa kafedranın müəllimi üçün
-  heç bir rəqəm, hətta cavab sayı da verilmir).
-* Şərhlər yalnız dəst ``k``-nı keçəndə, identifikatorsuz və tarixsiz göstərilir.
+  heç bir rəqəm verilmir); davam edən kampaniya → 409 (M-1: canlı nəticə yoxdur).
+* Açıqlama nəzarəti (``analytics_guard``): müəllim dəsti dərc qaydası və iç-içə dövr
+  dəstləri qaydasından keçir; fənn × qrup xanaları F1 tamamlayıcı qaydası + iç-içə
+  dövr qaydası + qardaş xanalar (≥ 2 gizli xana, gizli cəm ≥ k) ilə qorunur; gizli
+  xananın heç bir rəqəmi (``n`` də) verilmir; say səbətlə, paylanma yalnız faizlə.
+* Şərhlər yalnız dəst göstərilə bilən olanda, identifikatorsuz və tarixsiz.
 """
 
 from __future__ import annotations
@@ -23,12 +27,16 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from .. import public
+from ..services import analytics_guard as guard
 from ..services.analytics_extra import buckets_for
 from .results_filters import query_string, resolve
 from .results_labels import likert_labels, short_label
 from .results_overview import likert_row, trend_block
+from .results_teachers import guard_deltas
 
 CTX = "surveys.results"
+
+_OFFERING_KEY = ("subject_id", "group_id")
 
 
 def _pct(value):
@@ -51,24 +59,28 @@ def _comments(items):
     ]
 
 
-def _offerings(detail):
+def _offerings(detail, nested_hidden):
     rows = [
         {
-            "label": " · ".join(part for part in (row["subject_name"], row["group_name"]) if part) or "—",
+            "key": (row["subject_id"], row["group_id"]),
             "subject": row["subject_name"] or "—",
             "group": row["group_name"] or "—",
             "n": row["n"],
-            "suppressed": row["suppressed"],
-            "secondary": row.get("secondary", False),
+            "suppressed": row["suppressed"] or detail["suppressed"],
+            "secondary": bool(row.get("secondary")) or bool(detail.get("secondary")),
             "avg_overall": row["avg_overall"],
             "likert_index": row["likert_index"],
             "recommend_top2": row["recommend_top2"],
         }
         for row in detail["offerings"]
     ]
-    public.secondary_suppress(rows, k=detail["k"], total_n=None if detail["suppressed"] else detail["n"])
+    for row in rows:
+        if not row["suppressed"] and row["key"] in nested_hidden:
+            row.update(suppressed=True, secondary=True)
+    guard.finalize(rows, k=detail["k"], total_n=None if detail["suppressed"] else detail["n"], label_key="subject")
     for row in rows:
         row["recommend"] = _pct(row["recommend_top2"])
+        row["n"] = guard.count_bucket(row["n"]) if not row["suppressed"] else None
     return rows
 
 
@@ -82,7 +94,6 @@ def _questions(detail, benchmarks):
                 "code": row["code"],
                 "label": short_label(row["code"], row["text"]),
                 "text": row["text"],
-                "n": row["n"],
                 "avg": row["avg"],
                 "top2": _pct(row["top2"]),
                 "department": benchmarks["department"].get(row["code"]),
@@ -103,37 +114,58 @@ def _likert(detail, questions):
 
 
 def _withhold_detail(detail):
-    """Dərc olunmayan müəllim (analytics_publish): yalnız say qalır, heç bir göstərici/şərh yox."""
+    """Dərc olunmayan / iç-içə dövr qaydasından keçməyən müəllim: heç bir göstərici və şərh."""
     public.hide_row(detail, secondary=True)
     detail.update(distributions={}, comments=[])
     detail["questions"] = [{**row, "avg": None, "top2": None} for row in detail.get("questions", [])]
-    for row in detail.get("offerings", []):
-        public.hide_row(row, secondary=True)
+
+
+def _guarded_detail(resolved, teacher_id, filters):
+    organization, scope = resolved.organization, resolved.scope
+    campaign_ids, family = resolved.campaign_ids, resolved.family
+    detail = public.teacher_detail(organization, scope, teacher_id, filters)
+    if not detail.get("found"):
+        return None, set()
+    k = detail["k"]
+    teacher_filters = replace(filters, teacher_id=teacher_id)
+    if not detail["suppressed"] and (
+        teacher_id not in public.publishable_teachers(organization, campaign_ids)
+        or not guard.nested_set_ok(organization, scope, teacher_filters, campaign_ids, family, k)
+    ):
+        _withhold_detail(detail)
+    nested_hidden = guard.nested_hidden_keys(
+        organization, scope, teacher_filters, campaign_ids, family, k, key=_OFFERING_KEY
+    )
+    if not detail["suppressed"]:
+        guard_deltas(organization, campaign_ids, family, k, [detail])
+    return detail, nested_hidden
 
 
 def detail_context(request, teacher_id):
-    """``(context, status)`` — ``context`` ``None``-dursa ``status`` 403/404-dür."""
+    """``(context, status)`` — ``context`` ``None``-dursa ``status`` 403/404/409-dur."""
     resolved = resolve(request)
     if resolved is None:
         return None, 403
-    if not resolved.campaigns:
+    if not resolved.campaign_ids:
         return None, 404
+    if resolved.live:
+        return None, 409
     organization, scope, query = resolved.organization, resolved.scope, resolved.query
     filters = replace(resolved.filters, teacher_id=None)
-    detail = public.teacher_detail(organization, scope, teacher_id, filters)
-    if not detail.get("found"):
+    detail, nested_hidden = _guarded_detail(resolved, teacher_id, filters)
+    if detail is None:
         return None, 404
     campaign_ids = resolved.campaign_ids
-    if not detail["suppressed"] and teacher_id not in public.publishable_teachers(organization, campaign_ids):
-        _withhold_detail(detail)
     visible = not detail["suppressed"]
-    benchmarks = public.question_benchmarks(organization, scope, campaign_ids, department_id=detail["department_id"])
+    benchmarks = public.question_benchmarks(
+        organization, scope, campaign_ids, department_id=detail["department_id"], family=resolved.family
+    )
     questions = _questions(detail, benchmarks) if visible else []
     likert = _likert(detail, questions) if visible else []
     teacher_filters = replace(filters, teacher_id=teacher_id, department_id=detail["department_id"])
-    trend = trend_block(organization, scope, teacher_filters)
+    trend = trend_block(organization, scope, teacher_filters, resolved.campaigns)
     participation = public.participation_rows(organization, scope, teacher_filters, campaign_ids, per_teacher=False)
-    rate = None if participation.get("approximate") else participation.get("rate")
+    rate = None if participation.get("approximate") or not visible else participation.get("rate")
     qs = query_string(query, filters, state=False)
     chart = {
         "questions": {
@@ -141,11 +173,9 @@ def detail_context(request, teacher_id):
             "values": [row["avg"] for row in questions],
             "department": [row["department"] for row in questions],
             "org": [row["org"] for row in questions],
-            "n": [row["n"] for row in questions],
         },
         "likert": {
             "labels": [row["label"] for row in likert],
-            "counts": [row["counts"] for row in likert],
             "pct": [row["pct"] for row in likert],
             "scale": [label for _score, label in likert_labels()],
         },
@@ -156,7 +186,7 @@ def detail_context(request, teacher_id):
             "id": teacher_id,
             "name": detail["teacher_name"] or "—",
             "department": detail["department_name"] or "",
-            "n": detail["n"],
+            "n": guard.count_bucket(detail["n"]) if visible else None,
             "k": detail["k"],
             "suppressed": detail["suppressed"],
             "complement_blocked": detail["n"] >= detail["k"] and detail["suppressed"],
@@ -171,17 +201,15 @@ def detail_context(request, teacher_id):
             "recommend": _pct(detail["recommend_top2"]),
             "delta_department_value": detail["delta_department_overall"],
             "delta_org_value": detail["delta_org_overall"],
-            "rate": _pct(rate),
-            "receipts": participation.get("receipts", 0),
-            "expected": participation.get("expected", 0),
+            "rate": guard.round5(rate),
         },
         "questions": questions,
         "likert": likert,
         "likert_scale": likert_labels(),
-        "offerings": _offerings(detail),
+        "offerings": _offerings(detail, nested_hidden),
         "trend": trend,
         "comments": _comments(detail["comments"]) if visible else [],
-        "comment_count": len(detail["comments"]) if visible else 0,
+        "comment_count": guard.count_bucket(len(detail["comments"])) if visible else None,
         "chart": chart,
         "print_url": f"{reverse('surveys:results_teacher_print', args=[teacher_id])}?{qs}",
         "section_url": f"{reverse('accounts:profile')}?section=evaluation-results&{qs}",
@@ -189,13 +217,16 @@ def detail_context(request, teacher_id):
     return context, 200
 
 
+def _error_message(status):
+    if status == 403:
+        return pgettext(CTX, "Bu məlumata baxmaq üçün icazəniz yoxdur.")
+    if status == 409:
+        return pgettext(CTX, "Kampaniya davam edir — nəticələr kampaniya bağlandıqdan sonra görünəcək.")
+    return pgettext(CTX, "Seçilmiş filtrlərdə bu müəllim üçün cavab yoxdur və ya o, sizin əhatənizdə deyil.")
+
+
 def _error_fragment(request, status):
-    message = (
-        pgettext(CTX, "Bu məlumata baxmaq üçün icazəniz yoxdur.")
-        if status == 403
-        else pgettext(CTX, "Seçilmiş filtrlərdə bu müəllim üçün cavab yoxdur və ya o, sizin əhatənizdə deyil.")
-    )
-    html = render_to_string("surveys/results/_detail_error.html", {"message": message}, request=request)
+    html = render_to_string("surveys/results/_detail_error.html", {"message": _error_message(status)}, request=request)
     return HttpResponse(html, status=status)
 
 
@@ -221,6 +252,7 @@ def teacher_print(request, teacher_id):
             {
                 "error": True,
                 "status": status,
+                "message": _error_message(status),
                 "section_url": f"{reverse('accounts:profile')}?section=evaluation-results",
             },
             status=status,

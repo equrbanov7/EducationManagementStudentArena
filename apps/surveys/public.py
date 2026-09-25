@@ -107,13 +107,14 @@ F2 ƏLAVƏLƏRİ — «Sorğu nəticələri» UI-ı (``services/analytics_extra|
 Eyni k-qaydası + tamamlayıcı qayda; üstəlik bölgü cədvəllərində İKİNCİ DƏRƏCƏLİ
 gizlətmə: görünən cəm − görünən sətirlər qalığı həmişə ``0`` və ya ``≥ k``.
 
-* ``results_summary(org, scope, filters, with_participation=True)`` → ``summary``
+* ``results_summary(org, scope, filters, with_participation=True, family=None)`` → ``summary``
   açarları + ``complement_blocked``, ``teachers`` / ``teachers_visible`` (``n ≥ k``),
   ``general_suppressed``; ``participation`` fakültə filtrini qəbzlərə də tətbiq edir.
 * ``set_metrics(org, scope, filters, campaign_ids)`` → ``{"k", **metrics}``.
-* ``question_distributions(org, scope, filters, section=…)`` → ``{"k", "n",
-  "suppressed", "questions": [{"code", "kind", "text", "n", "buckets", "avg",
-  "top2", "bottom2"}]}`` (bütün ballı suallar, TƏK qruplaşdırılmış sorğu).
+* ``question_distributions(org, scope, filters, section=…, visible=None)`` → ``{"k",
+  "suppressed", "questions": [{"code", "kind", "text", "n", "buckets", "avg", "top2",
+  "bottom2"}]}`` (bütün ballı suallar, TƏK qruplaşdırılmış sorğu; ``visible`` — eyni dəst
+  üçün artıq hesablanmış görünürlük). ``n``/``buckets`` xam saydır — UI yalnız faiz göstərir.
 * ``question_benchmarks(org, scope, campaign_ids, department_id=None)`` →
   ``{"k", "org": {code: orta}, "department": {code: orta}}`` (kafedra — əhatə ilə).
 * ``teacher_question_scores(org, scope, filters, code)`` → ``{teacher_id: {"avg", "n"}}``.
@@ -135,6 +136,20 @@ gizlətmə: görünən cəm − görünən sətirlər qalığı həmişə ``0`` 
 * ``suggestion_digest(org, scope, filters, query="", limit=200)`` → ümumi təkliflər
   (KAMPANİYA BAŞINA k) + ``keywords`` (sənəd tezliyi, AZ stop-sözlər);
   ``keyword_frequency(texts)`` — eyni analiz istənilən mətn dəsti üçün.
+
+AÇIQLAMA NƏZARƏTİ (təhlükəsizlik rəyi M-1/M-2, ``services/analytics_guard``) — F2 UI-ı
+və ixracı YALNIZ bu qatdan keçir; yuxarıdakı F1 funksiyaları xam tikinti bloklarıdır
+(dəqiq ``n`` qaytarırlar, gizli sətrin ``n``-i qalır) və UI-da birbaşa göstərilməməlidir:
+* M-1: nəticə yalnız BAĞLI kampaniyalardan (``published_campaigns``); davam edən
+  kampaniyada yalnız iştirak — ``round5`` (faiz 5-ə yuvarlaq) və ``count_bucket``.
+* M-2: say heç yerdə dəqiq deyil (``count_bucket`` / ``count_floor``); gizli sətrin
+  aqreqatı və ``n``-i silinir (``finalize`` → ``sibling_suppress`` + ``redact``: gizli
+  xana ≥ 2 və gizli cəm ≥ k olmalıdır); kampaniya seçimi də daraldıcıdır — iç-içə dövr
+  dəstləri (``campaign_family``) arasında kiçik fərq və ya tək gizli kampaniya varsa
+  böyük dəst gizlədilir (``nested_set_ok`` / ``nested_hidden_keys``); ümumi bölmədə
+  hər filtr daraldıcıdır (``general_filtered``). Aqreqat funksiyaları ``family=…``
+  parametri ilə bu qaydanı tətbiq edir (``results_summary``, ``set_metrics``,
+  ``question_benchmarks``, ``safe_breakdown``).
 """
 
 from __future__ import annotations
@@ -165,6 +180,20 @@ from .services.analytics_extra import (
     set_metrics,
     teacher_question_scores,
     withhold,
+)
+from .services.analytics_guard import (
+    campaign_family,
+    count_bucket,
+    count_floor,
+    finalize,
+    general_filtered,
+    live_campaigns,
+    nested_hidden_keys,
+    nested_set_ok,
+    published_campaigns,
+    redact,
+    round5,
+    sibling_suppress,
 )
 from .services.analytics_options import campaign_choices, filter_choices, teacher_choices, teacher_label
 from .services.analytics_publish import publishable_by_campaign, publishable_teachers
@@ -292,4 +321,17 @@ __all__ = [
     "teacher_label",
     "teacher_question_scores",
     "withhold",
+    # F2 — açıqlama nəzarəti (M-1 / M-2)
+    "campaign_family",
+    "count_bucket",
+    "count_floor",
+    "finalize",
+    "general_filtered",
+    "live_campaigns",
+    "nested_hidden_keys",
+    "nested_set_ok",
+    "published_campaigns",
+    "redact",
+    "round5",
+    "sibling_suppress",
 ]
