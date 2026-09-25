@@ -367,7 +367,8 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             _seen_kinds.add(m.lesson.kind)
             section_kinds.append({"value": m.lesson.kind, "label": m.lesson.get_kind_display()})
 
-    selfwork = journal_extras.get_selfwork_board(offering)
+    # Tələbə görünüşü sillabusu OXUMUR (struktur yalnız qurulmuş mövzulardan) — sorğu büdcəsi sabit.
+    selfwork = journal_extras.get_selfwork_board(offering, with_structure=False)
     own_selfwork = next((r for r in selfwork["rows"] if r["enrollment"].id == enrollment.id), None)
 
     scheme = getattr(offering, "assessment_scheme", None)

@@ -194,6 +194,32 @@
     color: var(--ems-text);
 }
 
+/* Sərbəst iş çipi: slot-slot bal («1: 4/5»); fənn qovluğundan gələn bal yaşıl çərçivəli. */
+.msx-chip__slots {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-left: var(--ems-sp-1);
+}
+
+.msx-slot {
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-500);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.msx-slot.is-on {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.msx-slot.is-folder {
+    box-shadow: inset 0 0 0 1px var(--ems-success-bd);
+}
+
 /* Çox cəhd: rəsmi sonuncu (yaşıl), əvvəlkilər ləğv olunub (üstündən xətt). */
 .msx-chip--official {
     border-color: var(--ems-success-bd);

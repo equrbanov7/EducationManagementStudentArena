@@ -6,8 +6,9 @@ imtahanı tələbənin YEKUN imtahan balını ƏZİRDİ (qovulma isə onu 0-a en
 
 Qayda (``journal_sync.final_grade_skip_reason``):
 
-* ``final`` → yazılır; boş/``None`` (köhnə, kateqoriyasız) və tanınmayan dəyər →
-  bugünkü davranış (yazılır);
+* YALNIZ ``final`` → yazılır; boş/``None`` və tanınmayan dəyər → ``SKIP_UNCATEGORIZED``
+  (təhlükəsizlik H-1, 2026-09-25: istənilən müəllim kateqoriyasız testi istənilən fənnə
+  bağlayıb rəsmi yekun imtahan balını əzə bilirdi);
 * ``midterm`` → ``SKIP_MIDTERM_CATEGORY``; ``quiz``/``placement``/``practice`` →
   ``SKIP_NON_FINAL_CATEGORY`` — sayğac + INFO log, ``FinalGrade``-ə toxunulmur.
 
@@ -48,10 +49,10 @@ class CategoryClassificationTests(SimpleTestCase):
 
         cases = {
             "final": None,
-            None: None,
-            "": None,
-            "   ": None,
-            "legacy_unknown": None,
+            None: journal_sync.SKIP_UNCATEGORIZED,
+            "": journal_sync.SKIP_UNCATEGORIZED,
+            "   ": journal_sync.SKIP_UNCATEGORIZED,
+            "legacy_unknown": journal_sync.SKIP_UNCATEGORIZED,
             "midterm": journal_sync.SKIP_MIDTERM_CATEGORY,
             "quiz": journal_sync.SKIP_NON_FINAL_CATEGORY,
             "placement": journal_sync.SKIP_NON_FINAL_CATEGORY,
@@ -61,8 +62,8 @@ class CategoryClassificationTests(SimpleTestCase):
             with self.subTest(category=category):
                 exam = SimpleNamespace(exam_type_extended=category)
                 self.assertEqual(journal_sync.final_grade_skip_reason(exam), expected)
-        # Atributu olmayan (köhnə/sintetik) obyekt — bugünkü davranış.
-        self.assertIsNone(journal_sync.final_grade_skip_reason(SimpleNamespace()))
+        # Atributu olmayan (köhnə/sintetik) obyekt — kateqoriyasız sayılır, yazılmır.
+        self.assertEqual(journal_sync.final_grade_skip_reason(SimpleNamespace()), journal_sync.SKIP_UNCATEGORIZED)
 
 
 class MidtermGuardBridgeTests(_JournalBridgeSetup):
@@ -141,12 +142,22 @@ class MidtermGuardBridgeTests(_JournalBridgeSetup):
     def test_final_category_still_syncs(self):
         self._write_final_score()
 
-    def test_uncategorized_exam_keeps_todays_behaviour(self):
-        exam, question, correct, _wrong = self._category_exam(None)
-        self._finish(exam, question, correct)
-        final_grade = self._final_grade()
-        self.assertIsNotNone(final_grade)
+    def test_uncategorized_exam_never_touches_the_final_exam_score(self):
+        """H-1 (2026-09-25): müəllimin kateqoriyasız testi rəsmi yekun balı əzmir (0% cavab da)."""
+        final_grade = self._write_final_score()
+        exam, question, _correct, wrong = self._category_exam(None, title="JB rogue quiz")
+        before = _counter(journal_sync.SKIP_UNCATEGORIZED)
+
+        self._finish(exam, question, wrong)
+
+        final_grade.refresh_from_db()
         self.assertEqual(final_grade.exam_score, Decimal("50"))
+        self.assertEqual(_counter(journal_sync.SKIP_UNCATEGORIZED), before + 1)
+
+    def test_uncategorized_exam_alone_creates_no_final_grade(self):
+        exam, question, correct, _wrong = self._category_exam("")
+        self._finish(exam, question, correct)
+        self.assertIsNone(self._final_grade())
 
     def test_unknown_category_keeps_todays_behaviour(self):
         exam, question, correct, _wrong = self._category_exam("legacy_unknown")

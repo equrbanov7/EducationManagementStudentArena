@@ -106,6 +106,14 @@
     background: #f1f5f9; color: var(--s-soft); flex-shrink: 0;
 }
 .sjx-sw-dot.is-on { background: #dcfce7; color: #059669; }
+/* Bal strukturu (2 × 5 / 1 × 10): slot-slot «4/5»; fənn qovluğundan gələn bal nişanı. */
+.sjx-sw-title { flex: 1 1 auto; min-width: 0; }
+.sjx-sw-pts { flex-shrink: 0; color: var(--ems-primary-700, #1d4ed8); font-weight: 800; }
+.sjx-sw-src {
+    flex-shrink: 0; padding: 1px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 800;
+    background: var(--ems-emerald-50, #ecfdf5); color: var(--ems-success-strong, #0f766e);
+    border: 1px solid var(--ems-emerald-200, #a7f3d0);
+}
 .sjx-cw {
     display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
     background: #fff; border: 1px solid var(--s-line); border-radius: 14px;

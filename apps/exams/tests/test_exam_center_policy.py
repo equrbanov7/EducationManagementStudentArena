@@ -293,6 +293,17 @@ class ExamFormFinalCategoryTests(_Base):
         data.update(overrides)
         return data
 
+    def test_subject_bound_exam_requires_a_category(self):
+        """H-1 (2026-09-25): fənnə bağlı kateqoriyasız imtahan qəbul olunmur (jurnala yalnız final yazılır)."""
+        form = ExamForm(self._form_data(exam_type_extended=""), user=self.teacher, organization=self.org)
+        self.assertFalse(form.is_valid())
+        self.assertIn("exam_type_extended", form.errors)
+
+    def test_teacher_quiz_bound_to_subject_is_valid_category_wise(self):
+        form = ExamForm(self._form_data(exam_type_extended="quiz"), user=self.teacher, organization=self.org)
+        form.is_valid()
+        self.assertNotIn("exam_type_extended", form.errors)
+
     def test_teacher_cannot_select_final_category(self):
         form = ExamForm(self._form_data(), user=self.teacher, organization=self.org)
         self.assertFalse(form.is_valid())

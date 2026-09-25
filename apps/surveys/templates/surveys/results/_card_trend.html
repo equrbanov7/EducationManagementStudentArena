@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}Dövrlər üzrə dinamika — xətt qrafiki (seçim · kafedra · universitet konteksti).
+Göstərici açarı (ümumi bal / Likert indeksi) BİR ox saxlayır — iki şkala eyni qrafikdə
+göstərilmir. Kontekst: `tr` (trend_block), `tr_scope`. Hər dövr öz k-sı ilə gizlədilir.{% endcomment %}
+<section class="svr-card" aria-labelledby="svr-tr-title-{{ tr_scope }}">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-tr-title-{{ tr_scope }}">{% trans "Dövrlər üzrə dinamika" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% trans "Hər dövr öz anonimlik həddi ilə; gizli nöqtələr xətdə boşluq kimi görünür. Fənn/qrup filtri dinamikaya tətbiq olunmur." context "surveys.results" %}</p>
+        </div>
+        <div class="ems-viewtoggle svr-toggle" role="group" aria-label="{% trans 'Göstərici' context 'surveys.results' %}">
+            <button type="button" class="ems-viewtoggle__btn" data-svr-trend-metric="overall" aria-pressed="true">{% trans "Ümumi bal" context "surveys.results" %}</button>
+            <button type="button" class="ems-viewtoggle__btn" data-svr-trend-metric="index" aria-pressed="false">{% trans "Likert indeksi" context "surveys.results" %}</button>
+        </div>
+    </header>
+    {% if tr.series|length > 1 %}
+    <ul class="svr-legend">
+        {% for item in tr.series %}
+        <li class="svr-key"><span class="svr-key__swatch svr-key__swatch--line-{{ item.key }}" aria-hidden="true"></span>{{ item.label }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="svr-canvas svr-canvas--line" data-svr-chart="trend">
+        <canvas role="img" aria-label="{% trans 'Dövrlər üzrə dinamika qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir.' context 'surveys.results' %}"></canvas>
+    </div>
+    <details class="svr-table">
+        <summary>{% trans "Cədvəl kimi göstər" context "surveys.results" %}</summary>
+        <div class="svr-table__scroll">
+            <table class="ems-table svr-mini-table">
+                <thead><tr>
+                    <th scope="col">{% trans "Dövr" context "surveys.results" %}</th>
+                    {% for item in tr.series %}<th scope="col" class="ems-table__num">{{ item.label }}</th>{% endfor %}
+                </tr></thead>
+                <tbody>
+                {% for row in tr.rows %}
+                    <tr>
+                        <th scope="row">{{ row.label }}</th>
+                        {% for cell in row.cells %}
+                        <td class="ems-table__num">{% if cell.suppressed %}<span class="svr-muted">{% trans "gizli" context "surveys.results" %} (n={{ cell.n }})</span>{% else %}{{ cell.overall|floatformat:2|default:"—" }} · {{ cell.index|floatformat:2|default:"—" }} <span class="svr-sub svr-sub--inline">n={{ cell.n }}</span>{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="{{ tr.series|length|add:1 }}" class="svr-muted">{% trans "Dinamika üçün hələ kampaniya yoxdur." context "surveys.results" %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <p class="svr-table__note">{% trans "Xanada: ümumi bal (1–10) · Likert indeksi (1–5)." context "surveys.results" %}</p>
+        </div>
+    </details>
+</section>

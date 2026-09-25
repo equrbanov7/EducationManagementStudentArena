@@ -1,9 +1,47 @@
-{% load i18n %}
-{% comment %}Sərbəst iş tabı (mockup): solda nömrəli MÖVZULAR (10 slot, CARİ badge),
-altında "Yeni mövzu daxil edin" input; sağda HƏMİŞƏ 10 sütunlu 1/0 grid + canlı
-CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
+{% load i18n static %}
+{% comment %}Sərbəst iş tabı: solda nömrəli MÖVZULAR (slotlar, CARİ badge), altında "Yeni mövzu
+daxil edin" input; sağda slot sütunlu grid + canlı CƏMİ /10. Struktur sillabusdan gəlir
+(apps/registrar/selfwork_structure.py): 2 × 5 / 1 × 10 — xanada bal seçimi (1…max, «—»),
+10 × 1 və köhnə çeklist — 1/0 çipi. «Fənn qovluğu»ndan gələn bal oxu-only nişanla
+göstərilir (dəyişiklik yalnız sənədli düzəlişlə). Mövzu əlavə olunmamış sütun deaktivdir.{% endcomment %}
+<link rel="stylesheet" href="{% static 'registrar/css/selfwork_points.css' %}?v=20260925-swp1">
+{% with sw=selfwork_board.structure %}
+<div class="jd-swp-head">
+    <span class="jd-swp-struct">
+        <i class="fas fa-layer-group" aria-hidden="true"></i>
+        {% if sw.is_structured %}
+        <b>{% blocktrans with label=sw.label context "registrar.selfwork" %}{{ label }} bal{% endblocktrans %}</b>
+        <span class="jd-swp-src">({% if sw.source == "syllabus" %}{% trans "sillabus" context "registrar.selfwork" %}{% else %}{% trans "jurnal" context "registrar.selfwork" %}{% endif %})</span>
+        {% else %}
+        <b>{% trans "Çeklist: hər mövzu 1 bal" context "registrar.selfwork" %}</b>
+        {% endif %}
+    </span>
+    <span class="jd-swp-cap">{% blocktrans with max=selfwork_board.total_max context "registrar.selfwork" %}Cəmi maksimum {{ max }} bal{% endblocktrans %}</span>
+    {% if selfwork_board.has_folder_marks %}
+    <span class="jd-swp-legend"><span class="jd-swp-badge">{% trans "Fənn qovluğu" context "registrar.selfwork" %}</span> {% trans "— bal fənn qovluğundan yazılıb, burada yalnız baxış" context "registrar.selfwork" %}</span>
+    {% endif %}
+</div>
+{% if sw.state == "pending" %}
+<div class="jd-swp-banner jd-swp-banner--info" role="status">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <span>{% blocktrans with label=sw.label context "registrar.selfwork" %}Təsdiqlənmiş sillabus sərbəst işi {{ label }} bal kimi müəyyən edir — struktur hələ jurnala tətbiq olunmayıb.{% endblocktrans %}</span>
+    {% if can_edit %}
+    <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-swp-banner-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="ensure_structure">
+        <button type="submit" class="jd-swp-banner-btn">{% trans "Strukturu tətbiq et" context "registrar.selfwork" %}</button>
+    </form>
+    {% endif %}
+</div>
+{% elif sw.state == "structure_mismatch" %}
+<div class="jd-swp-banner jd-swp-banner--warn" role="alert">
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    <span>{{ sw.message }}</span>
+</div>
+{% endif %}
+{% endwith %}
 <div class="jd-sw2-layout">
-    {# ── Sol: sərbəst iş mövzuları (10 slot) ─────────────────────────────── #}
+    {# ── Sol: sərbəst iş mövzuları (slotlar) ───────────────────────────────── #}
     <aside class="jd-sw2-topics">
         <div class="jd-sw2-topics-head">
             {% trans "SƏRBƏST İŞ MÖVZULARI" context "registrar.journal" %} ({{ selfwork_board.topics|length }})
@@ -14,10 +52,11 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                 <span class="jd-sw2-topic-no">{{ slot.index }}</span>
                 {% if slot.topic %}
                 <span class="jd-sw2-topic-title">{{ slot.topic.title }}</span>
+                {% if slot.max_points > 1 %}<span class="jd-swp-max">{% blocktrans with n=slot.max_points context "registrar.selfwork" %}{{ n }} bal{% endblocktrans %}</span>{% endif %}
                 {% if forloop.last or slot.index == selfwork_board.topics|length %}
                 <span class="jd-sw2-cari">{% trans "CARİ" context "registrar.journal" %}</span>
                 {% endif %}
-                {% if can_edit %}
+                {% if can_edit and not slot.has_folder_marks %}
                 <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-del"
                       data-jd-sw-del data-topic-title="{{ slot.topic.title }}">
                     {% csrf_token %}
@@ -26,13 +65,16 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                     <button type="submit" aria-label="{% trans 'Sil' context 'registrar.journal' %}"><i class="fas fa-times"></i></button>
                 </form>
                 {% endif %}
+                {% elif slot.virtual %}
+                <span class="jd-sw2-topic-title jd-sw2-topic-placeholder">{% blocktrans with n=slot.index context "registrar.selfwork" %}Sərbəst iş {{ n }}{% endblocktrans %}</span>
+                {% if slot.max_points > 1 %}<span class="jd-swp-max">{% blocktrans with n=slot.max_points context "registrar.selfwork" %}{{ n }} bal{% endblocktrans %}</span>{% endif %}
                 {% else %}
                 <span class="jd-sw2-topic-title jd-sw2-topic-placeholder">{% trans "— boş —" context "registrar.journal" %}</span>
                 {% endif %}
             </li>
             {% endfor %}
         </ol>
-        {% if can_edit and selfwork_board.topics|length < selfwork_board.max_topics %}
+        {% if can_edit and selfwork_board.can_add_topic %}
         <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-add">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_topic">
@@ -43,22 +85,22 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
         {% endif %}
     </aside>
 
-    {# ── Sağ: 10 sütunlu 1/0 grid + canlı CƏMİ ───────────────────────────── #}
+    {# ── Sağ: slot sütunlu grid + canlı CƏMİ ─────────────────────────────── #}
     <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-gridcol" data-jd-draft="selfwork">
         {% csrf_token %}
         <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
-            <table class="jd2-table jd-sw2-table">
+            <table class="jd2-table jd-sw2-table{% if selfwork_board.points_mode %} jd-swp-table{% endif %}">
                 <thead>
                     <tr>
                         <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
-                        {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %}>{{ slot.index }}</th>{% endfor %}
+                        {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %}>{{ slot.index }}{% if slot.max_points > 1 %}<span class="jd-swp-th-max">/{{ slot.max_points }}</span>{% endif %}</th>{% endfor %}
                         {% if selfwork_board.has_archive %}<th class="jd-sw2-th-arch" title="{% trans 'Köhnə sistemdən köçürülmüş sərbəst iş balı — oxu-only' context 'registrar.journal' %}">{% trans "ARXİV" context "registrar.journal" %}</th>{% endif %}
-                        <th class="jd-sw2-th-sum">{% trans "CƏMİ" context "registrar.journal" %} /{{ selfwork_board.max_topics }}</th>
+                        <th class="jd-sw2-th-sum">{% trans "CƏMİ" context "registrar.journal" %} /{{ selfwork_board.total_max }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% comment %}data-jd-sw-archive: köçürülmüş "si" balı — journal_grid.js CƏMİ-ni
-                    canlı hesablayanda çeklist boş qalarsa bu dəyəri geri qaytarır (server qərarının
+                    canlı hesablayanda canlı cəm boş qalarsa bu dəyəri geri qaytarır (server qərarının
                     güzgüsü). Bal AYRICA ARXİV sütununda oxu-only göstərilir və heç bir mövzu
                     "təhvil verilmiş" işarələnmir.{% endcomment %}
                     {% for row in selfwork_board.rows %}
@@ -67,24 +109,48 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
                         {% for cell in row.cells %}
                         <td class="jd-sw2-cell">
                             {% if not cell.topic %}
-                            <span class="sw-chip sw-chip--disabled" title="{% trans 'Mövzu hələ əlavə olunmayıb' context 'registrar.journal' %}">–</span>
+                            <span class="sw-chip sw-chip--disabled" title="{% if cell.virtual %}{% trans 'Struktur hələ jurnala tətbiq olunmayıb' context 'registrar.selfwork' %}{% else %}{% trans 'Mövzu hələ əlavə olunmayıb' context 'registrar.journal' %}{% endif %}">–</span>
                             {% elif correction_mode %}
-                            {# Düzəliş rejimi: xana → sənədli düzəliş düyməsi (correction.js). #}
-                            <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}"
+                            {# Düzəliş rejimi: xana → sənədli düzəliş düyməsi (correction.js); bal mövzusunda bal seçimi. #}
+                            <button type="button" class="sw-chip {% if cell.points is not None %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.from_folder %} jd-swp-folder{% endif %}{% if cell.corrected %} corr-fixed{% endif %}"
                                     data-corr-cell data-corr-target="selfwork"
                                     data-topic-id="{{ cell.topic.id }}" data-enrollment-id="{{ row.enrollment.id }}"
                                     data-student="{{ row.student.get_full_name|default:row.student.username }}"
                                     data-date="{{ cell.topic.title }}" data-kind="{% trans 'Sərbəst iş' context 'registrar.journal' %}"
                                     data-done="{% if cell.done %}1{% else %}0{% endif %}"
+                                    data-sw-max="{{ cell.max_points }}" data-sw-points="{{ cell.points_value }}"
+                                    data-sw-points-mode="{% if cell.points_mode or cell.from_folder %}1{% else %}0{% endif %}"
                                     {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
-                                {% if cell.done %}1{% else %}0{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
+                                {% if cell.points_mode or cell.from_folder %}{{ cell.points_value|default:"—" }}{% elif cell.done %}1{% else %}0{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
                             </button>
+                            {% elif cell.from_folder %}
+                            {# «Fənn qovluğu» balı — lövhədə OXU-ONLY; dəyişiklik yalnız sənədli düzəlişlə. #}
+                            <span class="sw-chip sw-chip--ro sw-chip--on jd-swp-folder{% if cell.corrected %} corr-fixed{% endif %}"
+                                  {% if cell.points_mode %}data-jd-swp-ro="{{ cell.points_value }}"{% else %}data-jd-sw-ro="1"{% endif %}
+                                  title="{% blocktrans with at=cell.graded_at|date:'d.m.Y H:i' by=cell.graded_by|default:'—' context 'registrar.selfwork' %}Fənn qovluğundan yazılıb: {{ at }} · {{ by }}. Dəyişiklik yalnız sənədli düzəlişlə.{% endblocktrans %}">{{ cell.points_value }}</span>
+                            <span class="jd-swp-badge jd-swp-badge--cell" title="{% trans 'Fənn qovluğu' context 'registrar.selfwork' %}"><i class="fas fa-folder-open" aria-hidden="true"></i><span class="sr-only">{% trans "Fənn qovluğu" context "registrar.selfwork" %}</span></span>
+                            {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="selfwork" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                             {% elif can_edit and not cell.locked %}
+                            {% if cell.points_mode %}
+                            <div class="bootstrap-single-select jd2-semselect jd-swp-select">
+                                <select class="bootstrap-single-select__native jd2-semnative" data-bootstrap-select data-jd-swp
+                                        name="swp__{{ cell.topic.id }}__{{ row.enrollment.id }}"
+                                        aria-label="{% blocktrans with n=cell.index max=cell.max_points context 'registrar.selfwork' %}Sərbəst iş {{ n }} — bal (maksimum {{ max }}){% endblocktrans %}">
+                                    <option value="" {% if cell.points is None %}selected{% endif %}>—</option>
+                                    {% for opt in cell.options %}<option value="{{ opt }}" {% if opt == cell.points_value %}selected{% endif %}>{{ opt }}</option>{% endfor %}
+                                </select>
+                            </div>
+                            {% else %}
                             <input type="hidden" name="sw__{{ cell.topic.id }}__{{ row.enrollment.id }}" value="{% if cell.done %}1{% else %}0{% endif %}" data-jd-sw>
                             <button type="button" class="sw-chip {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}" data-jd-sw-chip>{% if cell.done %}1{% else %}0{% endif %}</button>
+                            {% endif %}
                             {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="selfwork" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% endif %}
                             {% else %}
+                            {% if cell.points_mode %}
+                            <span class="sw-chip sw-chip--ro {% if cell.points is not None %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}" data-jd-swp-ro="{{ cell.points_value }}">{{ cell.points_value|default:"—" }}</span>
+                            {% else %}
                             <span class="sw-chip sw-chip--ro {% if cell.done %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.corrected %} corr-fixed{% endif %}" data-jd-sw-ro="{% if cell.done %}1{% else %}0{% endif %}">{% if cell.done %}1{% else %}0{% endif %}</span>
+                            {% endif %}
                             {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.corr_key }}" data-corr-type="selfwork" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif cell.locked %}<i class="fas fa-lock jcell-lock" title="{% trans 'Geri alma pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>{% endif %}
                             {% endif %}
                         </td>
@@ -111,11 +177,17 @@ CƏMİ /10. Mövzu əlavə olunmamış sütun boş/deaktivdir.{% endcomment %}
         {% endif %}
     </form>
 </div>
+{% if selfwork_board.points_mode %}
+<p class="jd-sw2-foot">
+    {% blocktrans with label=selfwork_board.structure.label max=selfwork_board.total_max context "registrar.selfwork" %}Bal strukturu {{ label }}: hər sərbəst iş öz maksimum balı ilə qiymətləndirilir, cəmi maksimum {{ max }} bal. «—» — bal yazılmayıb (0 yazılmır: iş bəyənilmirsə fənn qovluğunda rəy yazılıb geri qaytarılır).{% endblocktrans %}
+</p>
+{% else %}
 <p class="jd-sw2-foot">
     {% trans "Hər sərbəst iş 1 balla qiymətləndirilir — cəmi maksimum 10 bal." context "registrar.journal" %}
     <b class="jd2-ie">1</b> {% trans "təhvil verilib" context "registrar.journal" %},
     <b class="jd2-qb">0</b> {% trans "verilməyib" context "registrar.journal" %}.
 </p>
+{% endif %}
 {% if selfwork_board.has_archive %}
 <p class="jd-sw2-foot jd-sw2-foot-arch">
     <i class="fas fa-archive"></i>

@@ -258,9 +258,16 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     <div class="sjx-swbox">
         <div class="jd2-panel-label">{% trans "SƏRBƏST İŞ" context "registrar.journal" %} <span class="sjx-h3-badge">{{ d.selfwork_row.total }} / 10</span></div>
         <ol class="sjx-sw-list">
-            {% for cell in d.selfwork_row.cells %}
-            <li><span class="sjx-sw-dot {% if cell.done %}is-on{% endif %}">{% if cell.done %}✓{% else %}·{% endif %}</span>{{ cell.topic.title }}</li>
-            {% endfor %}
+            {% for cell in d.selfwork_row.cells %}{% if cell.topic %}
+            {% comment %}Bal strukturunda (2 × 5 / 1 × 10) slot-slot bal: «Sərbəst iş 1: 4/5»;
+            çeklistdə (10 × 1 / köhnə) ✓ / ·. Fənn qovluğundan gələn bal nişanlanır.{% endcomment %}
+            <li>
+                <span class="sjx-sw-dot {% if cell.points is not None %}is-on{% endif %}">{% if cell.points is not None %}✓{% else %}·{% endif %}</span>
+                <span class="sjx-sw-title">{{ cell.topic.title }}</span>
+                {% if cell.points_mode %}<b class="sjx-sw-pts">{{ cell.points_value|default:"—" }}/{{ cell.max_points }}</b>{% endif %}
+                {% if cell.from_folder %}<span class="sjx-sw-src" title="{% trans 'Bal fənn qovluğunda müəllimin qiymətləndirməsindən jurnala yazılıb' context 'registrar.selfwork' %}">{% trans "Fənn qovluğu" context "registrar.selfwork" %}</span>{% endif %}
+            </li>
+            {% endif %}{% endfor %}
         </ol>
     </div>
     {% endif %}

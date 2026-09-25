@@ -4,15 +4,16 @@ Aralıq qiymətləndirmə keçmiş dövrlərdə 3 kollokvium, 2026/2027-dən is�
 midterm-dir (rejim :mod:`apps.registrar.interim_assessment`, komponentlər və tab grid-i
 :mod:`apps.registrar.interim_components`). Hər ikisi mövcud komponent mexanizmi üzərində
 işləyir (``AssessmentComponent`` kind=KOLLOKVIUM; ballar ``ComponentScore``-da — bal yazma
-İmtahan Mərkəzinin pəncərəsi ilə idarə olunur). Sərbəst iş mövzu-çeklistdir
-(``SelfWorkTopic``/``SelfWorkMark``): bal yazılmır, təhvil sayı avtomatik giriş
-balına çevrilir (bax ``gradebook.entry_score_for``); lövhənin özü —
-köçürülmüş "arxiv" balı da daxil — ``selfwork_board`` modulundadır. Kurs işi
+İmtahan Mərkəzinin pəncərəsi ilə idarə olunur). Sərbəst iş sillabusun strukturunu
+izləyir (1 × 10 / 2 × 5 / 10 × 1; köhnə jurnallarda mövzu-çeklisti): cəm (≤10)
+avtomatik giriş balına ÜSTƏGƏL olunur — kanonik qayda ``selfwork_points``; lövhə —
+köçürülmüş "arxiv" balı da daxil — ``selfwork_board``, yazı servisləri
+``selfwork_marks``, struktur ``selfwork_structure`` modulundadır. Kurs işi
 giriş balından kənar ayrıca 0-100 qiymətdir.
 
 Kilid qaydaları: jurnal kilidli (təsdiqdə/yekunlaşıb) → heç nə yazılmır; sərbəst
-işdə "verilib" işarəsi hər zaman qoyulur, GERİ ALMA yalnız 2 saat içində (bal
-silmə saxtakarlığına qarşı); kurs işi yazılışdan 2 saat sonra dondurulur.
+işdə boş xanaya təhvil/bal hər zaman yazılır, GERİ ALMA/DƏYİŞMƏ yalnız 2 saat içində
+(bal silmə saxtakarlığına qarşı); kurs işi yazılışdan 2 saat sonra dondurulur.
 """
 
 from __future__ import annotations
@@ -20,7 +21,6 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
-from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
@@ -41,22 +41,20 @@ from apps.registrar.interim_components import (  # noqa: F401
     kollokvium_columns_only,
     set_kollokvium_date,
 )
-from apps.registrar.models import (
-    AssessmentComponent,
-    ComponentKind,
-    ComponentScore,
-    CourseWork,
-    Enrollment,
-    SelfWorkMark,
-    SelfWorkTopic,
-)
+from apps.registrar.models import ComponentScore, CourseWork, Enrollment
 
-# Sərbəst iş lövhəsi modul-ölçü büdcəsinə görə ayrıca moduldadır; adlar
-# buradan re-eksport olunur — çağıranlar üçün API dəyişməyib.
+# Sərbəst iş lövhəsi + yazı servisləri modul-ölçü büdcəsinə görə ayrıca
+# modullardadır; adlar buradan re-eksport olunur — çağıranlar üçün API dəyişməyib.
 from apps.registrar.selfwork_board import (  # noqa: F401
     SELF_WORK_MAX_TOPICS,
     get_selfwork_board,
 )
+from apps.registrar.selfwork_marks import (  # noqa: F401
+    add_selfwork_topic,
+    delete_selfwork_topic,
+    set_selfwork_mark,
+)
+from apps.registrar.selfwork_structure import ensure_selfwork_component  # noqa: F401
 
 COURSE_WORK_MAX = Decimal("100")
 
@@ -68,107 +66,11 @@ def _to_decimal(raw):
         return None
 
 
-# ── Sərbəst iş (mövzu çeklisti) ──────────────────────────────────────────────
-
-
-@transaction.atomic
-def ensure_selfwork_component(offering):
-    """Sərbəst iş komponentini idempotent yarat (kind=SELF_WORK, max 10).
-
-    Yeni jurnalda bura bal YAZILMIR — ``entry_score_for`` çeklist cəmindən
-    oxuyur. Tək istisna: köçürmə köhnə ``si`` balını bu komponentə
-    ``ComponentScore`` kimi yazır; o bal YALNIZ lövhədə "arxiv" sütunu kimi
-    göstərilir və giriş balına əlavə OLUNMUR (bax ``selfwork_board``)."""
-    component = AssessmentComponent.objects.filter(offering=offering, kind=ComponentKind.SELF_WORK).first()
-    if component is None:
-        component = AssessmentComponent.objects.create(
-            organization=offering.organization,
-            offering=offering,
-            name="Sərbəst iş",
-            kind=ComponentKind.SELF_WORK,
-            max_score=SELF_WORK_MAX_TOPICS,
-            order=AssessmentComponent.objects.filter(offering=offering).count() + 1,
-        )
-    return component
-
-
-@transaction.atomic
-def add_selfwork_topic(*, offering, title) -> SelfWorkTopic | None:
-    """Yeni sərbəst iş mövzusu (ən çoxu 10)."""
-    title = (title or "").strip()
-    if not title or journal_is_locked(offering):
-        return None
-    if SelfWorkTopic.objects.filter(offering=offering).count() >= SELF_WORK_MAX_TOPICS:
-        return None
-    ensure_selfwork_component(offering)
-    return SelfWorkTopic.objects.create(
-        organization=offering.organization,
-        offering=offering,
-        title=title[:255],
-        order=SelfWorkTopic.objects.filter(offering=offering).count() + 1,
-    )
-
-
-@transaction.atomic
-def delete_selfwork_topic(*, topic, by_user=None) -> bool:
-    """Mövzunu sil. İşarələr də silinir (CASCADE) → giriş balı düşür, yəni akademik
-    nəticə dəyişir; itən təhvillər audit izinə yazılır (2026-08 auditi)."""
-    if journal_is_locked(topic.offering):
-        return False
-    offering, title = topic.offering, topic.title
-    losing = list(SelfWorkMark.objects.filter(topic=topic, done=True).select_related("enrollment__student"))
-    try:
-        topic.delete()  # Correction evidence varsa PROTECT akademik tarixi saxlayır.
-    except ProtectedError:
-        return False
-    grade_audit.log_selfwork_topic_removal(offering=offering, topic_title=title, marks=losing, by_user=by_user)
-    return True
-
-
-@transaction.atomic
-def set_selfwork_mark(*, offering, topic_id, enrollment_id, done, by_user=None, allow_locked=False) -> bool:
-    """Təhvil işarəsi: 1 hər zaman qoyulur; 1→0 geri alma yalnız 2 saat içində.
-    ``allow_locked`` İKT/superuser üçün 2 saat pəncərəsini keçir."""
-    if journal_is_locked(offering):
-        return False
-    topic = SelfWorkTopic.objects.filter(pk=topic_id, offering=offering).first()
-    # Codex audit §14 (2026-09-13): «oxu → yaz» — iki paralel toggle eyni tələbə
-    # üçün `uniq_selfwork_topic_enrollment`-ə çırpılırdı; qeydiyyat sətri
-    # kilidlənir (sıra: açılış → qeydiyyat → işarə).
-    enrollment = (
-        offering.enrollments.filter(pk=enrollment_id, status=Enrollment.Status.ENROLLED).select_for_update().first()
-    )
-    if topic is None or enrollment is None:
-        return False
-    mark = SelfWorkMark.objects.filter(topic=topic, enrollment=enrollment).first()
-    if mark is None:
-        if not done:
-            return True  # onsuz da yoxdur
-        SelfWorkMark.objects.create(
-            organization=offering.organization, topic=topic, enrollment=enrollment, done=True, entered_by=by_user
-        )
-    else:
-        if mark.done == bool(done):
-            return True
-        if mark.done and not done and not allow_locked and (timezone.now() - mark.updated_at) > MARK_EDIT_WINDOW:
-            return False  # verilmiş işi 2 saatdan sonra geri almaq olmaz (İKT keçir)
-        mark.done = bool(done)
-        mark.entered_by = by_user
-        mark.save(update_fields=["done", "entered_by", "updated_at"])
-    grade_audit.log_grade_changes(
-        offering=offering,
-        by_user=by_user,
-        kind="component",
-        changes=[
-            {
-                "student": grade_audit.student_label(enrollment),
-                "item": f"Sərbəst iş · {topic.title[:60]}",
-                "old": "0" if done else "1",
-                "new": "1" if done else "0",
-            }
-        ],
-    )
-    return True
+# ── Sərbəst iş (sillabus strukturu / çeklist) ────────────────────────────────
+#
+# Yazı servisləri (mövzu əlavə/sil, işarə/bal) modul-ölçü büdcəsinə görə
+# ``selfwork_marks``-dadır, struktur + SELF_WORK komponenti ``selfwork_structure``-da;
+# adlar yuxarıda re-eksport olunur — çağıranlar üçün API dəyişməyib.
 
 
 # ── Kurs işi (0-100, giriş balından kənar) ───────────────────────────────────
@@ -287,7 +189,10 @@ def get_final_breakdown(offering):
                 agg["sem"].append(m.score)
             elif m.lesson.kind == LessonKind.LAB:
                 agg["lab"].append(m.score)
-    selfwork_totals = {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering)["rows"]}
+    # Sərbəst iş sütunu lövhənin CƏMİ-dir (arxiv qaydası daxil) — struktur/sillabus oxunmur.
+    selfwork_totals = {
+        r["enrollment"].id: r["total"] for r in get_selfwork_board(offering, with_structure=False)["rows"]
+    }
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     lessons_all = list(offering.lessons.all())
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-

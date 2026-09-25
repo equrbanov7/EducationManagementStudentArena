@@ -174,9 +174,10 @@ SECTION_PARTIALS: dict[str, str] = {
     "lessons-log": "accounts/profile/sections/_lessons_log.html",
     "student-admission": "accounts/profile/sections/_student_admission.html",
     "student-registry": "accounts/profile/sections/_student_registry.html",
-    # Anonim müəllim qiymətləndirmə sorğusu (apps.surveys, 2026-09-25). Hər üçü TAM
-    # SƏHİFƏ bölmədir (AJAX_SAFE_SECTIONS-da deyil): panel məzmunu `survey_cabinet`
-    # template tag-ı ilə qurulur, formalar `surveys:manage`-ə POST edib qayıdır.
+    # Anonim müəllim qiymətləndirmə sorğusu (apps.surveys, 2026-09-25): panel məzmunu
+    # `survey_cabinet` template tag-ı ilə qurulur. «Anonim sorğu» və «Sorğu kampaniyaları»
+    # TAM SƏHİFƏ bölmədir (formalar `surveys:manage`-ə POST edib qayıdır); «Sorğu
+    # nəticələri» isə AJAX-safe-dir (aşağıya bax).
     "evaluation-survey": "accounts/profile/sections/_evaluation_survey.html",
     "evaluation-results": "accounts/profile/sections/_evaluation_results.html",
     "evaluation-campaigns": "accounts/profile/sections/_evaluation_campaigns.html",
@@ -309,6 +310,11 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # olmadan avto filtr paneli (qrup → fənn, müəllim, axtarış), vəziyyət /
         # növ çipləri, görünüş açarı və səhifələmə brauzerdə SƏSSİZ işləmirdi.
         "exam-score-entry",
+        # «Sorğu nəticələri» (apps.surveys F2, 2026-09-25) — tam OXU-ONLY analitika
+        # paneli (mutasiya yoxdur; ixrac/müəllim kartı ayrıca GET uclarıdır). Avto
+        # filtr paneli və tab linkləri paneli yerində yeniləyir → AJAX-safe OLMALIDIR
+        # (`test_section_registry_consistency` fraqment-naviqasiya skaneri).
+        "evaluation-results",
     }
 )
 

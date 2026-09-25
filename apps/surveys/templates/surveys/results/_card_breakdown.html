@@ -1,0 +1,54 @@
+{% load i18n %}
+{% comment %}Fakültə / kafedra müqayisəsi — üfüqi zolaq (orta ümumi bal), azalan sıra; şaquli
+xətt universitet ortasıdır. Gizli qruplar (n < k, tamamlayıcı və ikinci dərəcəli qayda)
+qrafikdə yoxdur, cədvəldə yalnız cavab sayı ilə görünür. Kontekst: `ov`.{% endcomment %}
+<section class="svr-card svr-card--wide" aria-labelledby="svr-bd-title" data-svr-breakdown data-default="{{ ov.breakdown_default }}">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-bd-title">{% trans "Fakültə və kafedra müqayisəsi" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% trans "Orta ümumi bal (1–10), yuxarıdan aşağı azalan sıra." context "surveys.results" %}</p>
+        </div>
+        <div class="ems-viewtoggle svr-toggle" role="group" aria-label="{% trans 'Səviyyə' context 'surveys.results' %}">
+            <button type="button" class="ems-viewtoggle__btn" data-svr-level="faculty" aria-pressed="{% if ov.breakdown_default == 'faculty' %}true{% else %}false{% endif %}">{% trans "Fakültələr" context "surveys.results" %}</button>
+            <button type="button" class="ems-viewtoggle__btn" data-svr-level="department" aria-pressed="{% if ov.breakdown_default == 'department' %}true{% else %}false{% endif %}">{% trans "Kafedralar" context "surveys.results" %}</button>
+        </div>
+    </header>
+    <div class="svr-canvas" data-svr-chart="breakdown">
+        <canvas role="img" aria-label="{% trans 'Fakültə və kafedra müqayisəsi qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir.' context 'surveys.results' %}"></canvas>
+    </div>
+    <p class="svr-card__foot" data-svr-breakdown-hidden hidden></p>
+    <details class="svr-table">
+        <summary>{% trans "Cədvəl kimi göstər" context "surveys.results" %}</summary>
+        {% for level, rows in ov.breakdown_levels %}
+        <div class="svr-table__scroll" data-svr-level-table="{{ level }}">
+            <table class="ems-table svr-mini-table">
+                <caption class="svr-table__caption">{% if level == "faculty" %}{% trans "Fakültələr" context "surveys.results" %}{% else %}{% trans "Kafedralar" context "surveys.results" %}{% endif %}</caption>
+                <thead><tr>
+                    <th scope="col">{% trans "Ad" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Ümumi bal" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Likert indeksi" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Tövsiyə" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">n</th>
+                </tr></thead>
+                <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <th scope="row">{{ row.label }}</th>
+                        {% if row.suppressed %}
+                        <td colspan="3">{% include "surveys/results/_hidden_badge.html" with hb_secondary=row.secondary %}</td>
+                        {% else %}
+                        <td class="ems-table__num">{{ row.overall|floatformat:2|default:"—" }}</td>
+                        <td class="ems-table__num">{{ row.index|floatformat:2|default:"—" }}</td>
+                        <td class="ems-table__num">{% if row.recommend is not None %}{{ row.recommend }}%{% else %}—{% endif %}</td>
+                        {% endif %}
+                        <td class="ems-table__num">{{ row.n }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </details>
+</section>
