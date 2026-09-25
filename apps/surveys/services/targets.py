@@ -1,9 +1,12 @@
 """Tələbənin qiymətləndirəcəyi hədəflər — kampaniya dövrünün BAĞLI jurnalları üzrə.
 
 Qayda: dövrün hər (DROPPED olmayan) qeydiyyatı üçün jurnalı bağlıdırsa, açılışı
-TƏDRİS EDƏN hər müəllim bir hədəfdir — ``(açılış, müəllim)`` cütü; üstəlik
-kampaniya başına BİR «ümumi» bölmə (yalnız ən azı bir müəllim hədəfi olan
-tələbəyə). Tamamlanma ``SurveyReceipt``-dən oxunur — cavabın özü oxunmur.
+TƏDRİS EDƏN hər müəllim hədəfdir. Sahib (2026-09-25): «1 müəllim üzrə tələbədən 1» —
+müəllim eyni tələbəyə bir neçə fənn deyirsə də forma BİR dəfədir: hədəf müəllimə görə
+birləşir, fənlər birlikdə göstərilir, «əsas» açılış = ən kiçik id (etiketli və etiketsiz
+çağırışda eyni). Üstəlik kampaniya başına BİR «ümumi» bölmə (yalnız ən azı bir müəllim
+hədəfi olan tələbəyə). Tamamlanma ``SurveyReceipt``-dən oxunur — cavabın özü oxunmur;
+müəllim üçün HƏR HANSI qəbz hədəfi bağlayır (DB: ``surveys_receipt_teacher_once``).
 
 Sorğu sayı sabitdir (sətir sayından asılı deyil): qeydiyyatlar 1 + müəllimlər 2
 + qəbzlər 1 (+ etiketlər 2, yalnız ``with_labels``).
@@ -59,40 +62,40 @@ def student_targets(campaign, student, *, with_labels: bool = False) -> list:
         .distinct()
     )
     teachers = bridge.offering_teachers(offering_ids) if offering_ids else {}
-    pairs = sorted(
-        ((offering_id, teacher_id) for offering_id, ids in teachers.items() for teacher_id in ids),
-        key=lambda pair: (str(pair[0]), pair[1]),
-    )
-    pairs = [(offering_id, teacher_id) for offering_id, teacher_id in pairs if teacher_id != student.pk]
-    if not pairs:
+    by_teacher: dict = {}
+    for offering_id, ids in teachers.items():
+        for teacher_id in ids:
+            if teacher_id != student.pk:
+                by_teacher.setdefault(teacher_id, []).append(offering_id)
+    if not by_teacher:
         return []
-    receipts = set(
-        SurveyReceipt.objects.filter(campaign=campaign, student=student).values_list(
-            "scope", "offering_id", "teacher_id"
-        )
-    )
+    for offerings in by_teacher.values():
+        offerings.sort(key=str)
+    receipts = list(SurveyReceipt.objects.filter(campaign=campaign, student=student).values_list("scope", "teacher_id"))
+    done_teachers = {teacher_id for scope, teacher_id in receipts if scope == Section.TEACHER}
     labels, names = {}, {}
     if with_labels:
-        labels = bridge.offering_labels([offering_id for offering_id, _teacher in pairs])
-        names = _teacher_names([teacher_id for _offering, teacher_id in pairs])
+        labels = bridge.offering_labels([offering_id for ids in by_teacher.values() for offering_id in ids])
+        names = _teacher_names(by_teacher)
     targets = []
-    for offering_id, teacher_id in pairs:
-        label = labels.get(offering_id, {})
+    for teacher_id, offerings in sorted(by_teacher.items(), key=lambda item: (str(item[1][0]), item[0])):
+        primary = offerings[0]
+        rows = [labels.get(offering_id, {}) for offering_id in offerings]
         targets.append(
             Target(
                 scope=Section.TEACHER,
-                offering_id=offering_id,
+                offering_id=primary,
                 teacher_id=teacher_id,
-                done=(Section.TEACHER, offering_id, teacher_id) in receipts,
-                subject=label.get("subject", ""),
-                subject_code=label.get("subject_code", ""),
-                group=label.get("group", ""),
+                done=teacher_id in done_teachers,
+                subject=", ".join(dict.fromkeys(row["subject"] for row in rows if row.get("subject"))),
+                subject_code=labels.get(primary, {}).get("subject_code", ""),
+                group=", ".join(dict.fromkeys(row["group"] for row in rows if row.get("group"))),
                 teacher_name=names.get(teacher_id, ""),
             )
         )
     if with_labels:
-        targets.sort(key=lambda t: (t.done, t.subject.lower(), t.teacher_name.lower()))
-    general_done = any(scope == Section.GENERAL for scope, _offering, _teacher in receipts)
+        targets.sort(key=lambda t: (t.done, t.teacher_name.lower(), t.subject.lower()))
+    general_done = any(scope == Section.GENERAL for scope, _teacher in receipts)
     targets.append(Target(scope=Section.GENERAL, done=general_done))
     return targets
 

@@ -65,8 +65,9 @@ class SurveyReceipt(models.Model):
         verbose_name = pgettext_lazy(_CTX, "sorğu qəbzi")
         verbose_name_plural = pgettext_lazy(_CTX, "sorğu qəbzləri")
         constraints = [
+            # «1 müəllim üzrə tələbədən 1» (sahib, 2026-09-25): müəllim bir neçə fənn desə də bir qəbz.
             models.UniqueConstraint(
-                fields=["campaign", "student", "offering", "teacher"],
+                fields=["campaign", "student", "teacher"],
                 condition=models.Q(scope=Section.TEACHER),
                 name="surveys_receipt_teacher_once",
             ),
