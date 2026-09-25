@@ -19,6 +19,7 @@ from ..constants import (
 )
 from ..models import TeachingTask, TeachingTaskRow
 from .people import resolve_chair
+from .plan_calendar import season_from_period as _season_from_period
 from .scoping import WorkloadDenied, ensure_can_manage
 
 #: Sətirdə birbaşa yazıla bilən skalyar sahələr (view qatı bunları filtrləyir).
@@ -226,27 +227,6 @@ def resolve_specialty_and_faculty(organization, specialty_id):
     return specialty, faculty
 
 
-def _season_from_period(period) -> str:
-    """AcademicPeriod başlanğıc ayından fəsil (Payız/Yaz/Yay).
-
-    QA 2026-09-05 (P3-20 / WORKLOAD-SCHEDULE-07): sətrin ``season`` sahəsi
-    ``period_id`` ilə heç UYĞUNLAŞDIRILMIRDI — «Yay · 2025/2026» dövrü seçilib
-    ayrıca ``season`` göndərilməyəndə sətir modelin defolt «fall» (Payız)
-    dəyərində qalırdı. Qayda ``accounts`` bölməsindəki ``_season_label``
-    (ay-əsaslı) ilə EYNİDİR: avqust–dekabr → Payız, yanvar–may → Yaz,
-    iyun–iyul → Yay.
-    """
-    start_date = getattr(period, "start_date", None)
-    if start_date is None:
-        return Season.FALL
-    month = start_date.month
-    if month >= 8 or month == 12:
-        return Season.FALL
-    if month <= 5:
-        return Season.SPRING
-    return Season.SUMMER
-
-
 def _ensure_editable(task: TeachingTask) -> None:
     if task.status not in EDITABLE_STATUSES:
         raise WorkloadDenied(
@@ -276,6 +256,20 @@ def _duplicate_row_exists(row: TeachingTaskRow) -> bool:
         if set(other.groups.values_list("id", flat=True)) == wanted:
             return True
     return False
+
+
+def _sync_row_offerings(row, *, task, actor, request) -> dict:
+    """Plan kafedraya çatmış sənəddə sətir dəyişəndə (yeni qrup/fənn/semestr) açılışlar DƏRHAL.
+
+    Qaralama/qaytarılmış sənəddə heç nə yaranmır — plan hələ rəsmi deyil. Sinxron
+    xətası sətrin yazısını geri qaytarmır (``offering_sync.run_safely``).
+    """
+    from .offering_sync import compact, plan_reached_chair, run_safely, sync_row_offerings
+
+    if not plan_reached_chair(task):
+        return {}
+    row.task = task
+    return compact(run_safely(sync_row_offerings, row, actor=actor, request=request, create=True))
 
 
 @transaction.atomic
@@ -317,7 +311,9 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
             if "season" not in data:
                 # Əl ilə `season` göndərilməyibsə dövrün ÖZÜNDƏN törədilir —
                 # əks halda sətir modelin defolt «fall» dəyərində donub qalırdı
-                # (QA 2026-09-05 P3-20). Açıq göndərilmiş `season` DƏYİŞMİR.
+                # (QA 2026-09-05 P3-20 / WORKLOAD-SCHEDULE-07; ay qaydası
+                # `plan_calendar.season_from_period`-dədir, `accounts` bölməsinin
+                # `_season_label`-i ilə EYNİDİR). Açıq göndərilmiş `season` DƏYİŞMİR.
                 row.season = _season_from_period(period)
         else:
             row.period = None
@@ -357,13 +353,14 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
             "Eyni fənn, ixtisas, semestr və qrup dəsti ilə sətir artıq var — mövcud sətri redaktə edin.",
         )
 
+    offerings = _sync_row_offerings(row, task=task, actor=actor, request=request)
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,
         user=getattr(actor, "user", None),
         organization=task.organization,
         obj=row,
         old_values=old_values,
-        new_values={"total_hours": row.total_hours, "subject": row.subject_label},
+        new_values={"total_hours": row.total_hours, "subject": row.subject_label, "offerings": offerings},
         reason="workload.row_saved",
         request=request,
         resource_type="workload.TeachingTaskRow",

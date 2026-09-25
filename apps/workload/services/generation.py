@@ -18,10 +18,20 @@ QAYDALAR
   təkrarlanmır; mövcud sətrin saatları ƏZİLMİR (tədris şöbəsi əl ilə
   düzəldibsə itmir).
 * Qruplar ixtisasın alt-ağacından, kursa görə seçilir
-  (``kurs = ceil(semestr / 2)``, qrup metadatası ``OrgUnit.settings``-dədir).
-  Kursu uyğun gələn qrup yoxdursa sətir YENƏ yaranır — qruplar sonra əl ilə
-  bağlanır (``groups_text`` boş qalır).
+  (``kurs = ceil(semestr / 2)``). Kurs ``registrar.services.group_course_year``
+  ilə hesablanır (2026-09-25): reyestrin ``settings.course_year``-ı, yoxdursa
+  köçürülmüş qrupların ``settings.admission_year``-ı — əvvəl yalnız
+  ``course_year`` oxunurdu, real bazada (824 qrupdan 2-si) heç bir qrup
+  tapılmırdı. Kursu uyğun gələn qrup yoxdursa sətir YENƏ yaranır — qruplar
+  sonra əl ilə bağlanır (``groups_text`` boş qalır).
 * Fəsil semestr nömrəsinin paritetindən: tək → Payız, cüt → Yaz.
+* SEMESTR (``period``) tapşırığın tədris ili + fəsildən törədilir
+  (:mod:`.plan_calendar`, 2026-09-25) — əvvəl HEÇ VAXT yazılmırdı və təsdiqdən
+  sonra fənn qruplara düşmürdü. Eyni çağırış sənədin əvvəl dövrsüz yaradılmış
+  sətirlərini də bağlayır.
+* Seçmə blokun sətirləri YENƏ yaranır (kafedranın yükü onları da planlaşdırır),
+  amma qrup açılışı onlar üçün yaradılmır — seçim qrup səviyyəsindədir
+  (:mod:`.offering_sync`, ``registrar.services.choose_group_elective``).
 """
 
 from __future__ import annotations
@@ -43,6 +53,7 @@ from ..constants import (
 )
 from ..models import TeachingTaskRow
 from .curriculum_import import chair_specialty_ids
+from .plan_calendar import PeriodResolver, ensure_row_periods
 from .scoping import WorkloadDenied, ensure_can_manage
 from .tasks import resolve_specialty_and_faculty
 
@@ -69,25 +80,22 @@ def _plan_rows_for(organization, program_ids):
     return rows, latest
 
 
-def _groups_by_specialty(organization, specialty_ids) -> dict:
-    """ixtisas id → [(qrup, kurs)] — kursa görə süzmək üçün."""
+def _groups_by_specialty(organization, specialty_ids, academic_year: str) -> dict:
+    """ixtisas id → [(qrup, kurs)] — kurs HƏMİN tədris ili üçün (registrar qaydası)."""
+    from apps.registrar.public import services as registrar_services
+
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
     specialties = {
         unit.pk: unit for unit in OrgUnit.objects.filter(organization=organization, pk__in=list(specialty_ids))
     }
     result: dict = {pk: [] for pk in specialties}
     for unit in OrgUnit.objects.filter(organization=organization, unit_type=OrgUnitType.GROUP, is_active=True).only(
-        "id", "name", "path", "settings"
+        "id", "name", "path", "parent_id", "settings"
     ):
         path = unit.path or ""
         for pk, specialty in specialties.items():
             if specialty.path and path.startswith(f"{specialty.path}/"):
-                settings = unit.settings if isinstance(unit.settings, dict) else {}
-                try:
-                    course = int(settings.get("course_year") or 0)
-                except (TypeError, ValueError):
-                    course = 0
-                result[pk].append((unit, course))
+                result[pk].append((unit, registrar_services.group_course_year(unit, academic_year)))
                 break
     return result
 
@@ -142,11 +150,12 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
 
     plan_rows, latest = _plan_rows_for(organization, [program.pk for program in programs])
     blocked = sorted({program.name for program in programs if program.pk not in latest})
+    resolver = PeriodResolver(organization)
     if not plan_rows:
-        return {"created": 0, "existing": 0, "blocked": blocked}
+        return {"created": 0, "existing": 0, "blocked": blocked, **_fix_periods(task, resolver)}
 
     program_by_id = {program.pk: program for program in programs}
-    group_map = _groups_by_specialty(organization, specialty_ids)
+    group_map = _groups_by_specialty(organization, specialty_ids, task.academic_year)
     # İdempotentlik açarı: (fənn, ixtisas, fəsil, semestr). `order` sahəsi
     # QƏSDƏN semestr nömrəsini daşıyır (aşağıda `order=semester`), ona görə
     # mövcud sətirlər eyni açarla oxunur.
@@ -178,6 +187,7 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
             organization=organization,
             task=task,
             season=season,
+            period=resolver.resolve(task.academic_year, season),
             subject=plan_row.subject,
             subject_text=plan_row.subject.name,
             row_kind=RowKind.TEACHING,
@@ -206,19 +216,27 @@ def generate_rows_from_plan(*, task, actor, program_ids=None, request=None) -> d
         existing.add(key)
         created += 1
 
+    periods = _fix_periods(task, resolver)
     log_action(
         AuditAction.CREATE,
         user=getattr(actor, "user", None),
         organization=organization,
         obj=task,
-        new_values={"created": created, "existing": skipped, "blocked": blocked},
+        new_values={"created": created, "existing": skipped, "blocked": blocked, **periods},
         reason="workload.rows_generated_from_plan",
         request=request,
         resource_type="workload.TeachingTask",
         resource_id=str(task.pk),
         resource_repr=f"{task.chair_id} · {task.academic_year}",
     )
-    return {"created": created, "existing": skipped, "blocked": blocked}
+    return {"created": created, "existing": skipped, "blocked": blocked, **periods}
+
+
+def _fix_periods(task, resolver) -> dict:
+    """Sənədin dövrsüz sətirləri (yeni + əvvəlki çağırışlardan qalan) — il + fəsil üzrə bağlanır."""
+    rows = list(TeachingTaskRow.objects.filter(task=task, period__isnull=True).only("id", "season", "period_id"))
+    report = ensure_row_periods(rows, task=task, resolver=resolver)
+    return {"period_set": report["period_set"], "period_missing": report["period_missing"]}
 
 
 __all__ = ["generate_rows_from_plan", "plan_preview"]
