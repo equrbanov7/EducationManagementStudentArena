@@ -33,6 +33,12 @@
     font-weight: 600;
 }
 
+/* `.ems-table th[scope="col"]` başlığı sola düzləyir (seçici daha güclüdür) —
+   rəqəm sütununun başlığı dəyərləri ilə eyni tərəfdə olsun (bax academic_records.css). */
+.sfc-deadlines th[scope="col"].ems-table__num {
+    text-align: right;
+}
+
 .sfc-check {
     display: inline-flex;
     align-items: center;
