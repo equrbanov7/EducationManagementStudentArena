@@ -124,11 +124,10 @@
     function cellPayload(action) {
         var payload = basePayload();
         payload.action = action;
-        ["slot_id", "subject_id", "instructor_id", "slot_kind", "week_type", "weekday", "time_slot", "room"].forEach(
-            function (name) {
-                payload[name] = getField(name);
-            }
-        );
+        ["slot_id", "subject_id", "instructor_id", "slot_instructor_id", "slot_kind", "week_type", "weekday",
+            "time_slot", "room"].forEach(function (name) {
+            payload[name] = getField(name);
+        });
         return payload;
     }
 
@@ -530,7 +529,8 @@
         var payload = basePayload();
         payload.action = "suggest";
         payload.slot_id = getField("slot_id");
-        payload.instructor_id = getField("instructor_id");
+        /* Slotu aparan müəllim seçilibsə boş xana ONUN üçün axtarılır (bölünmüş tədris). */
+        payload.instructor_id = getField("slot_instructor_id") || getField("instructor_id");
         payload.week_type = getField("week_type");
         post(payload).then(function (result) {
             var suggest = dialog() && dialog().querySelector("[data-sedit-suggest]");

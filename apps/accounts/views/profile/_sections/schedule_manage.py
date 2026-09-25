@@ -113,11 +113,11 @@ def _rooms(organization):
 
 
 def _teachers_in_scope(offerings_qs):
-    """Əhatədəki açılışların müəllimləri (müəllim görünüşü seçicisi üçün)."""
-    rows = {}
-    for offering in offerings_qs.select_related("instructor").exclude(instructor__isnull=True):
-        rows.setdefault(str(offering.instructor_id), _person_name(offering.instructor))
-    return [{"id": key, "name": name} for key, name in sorted(rows.items(), key=lambda item: item[1])]
+    """Əhatədəki açılışların müəllimləri + slotlarını aparan müəllimlər (müəllim görünüşü seçicisi).
+
+    2026-09-25 (bölünmüş tədris): seminarı aparan assistentin öz açılışı olmaya bilər — o da
+    siyahıdadır; hesab registrar-dadır (TƏK sorğu, əvvəlki kimi)."""
+    return schedule_manage.scoped_teacher_rows(offerings_qs)
 
 
 def _filter_fields(section, *, groups, teachers, view_mode, group, teacher):

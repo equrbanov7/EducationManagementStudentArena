@@ -21,6 +21,11 @@ xassəsidir, slotun yox. Buradan üç qayda çıxır:
    (``apps.registrar.handover``). Ona görə burada AYDIN xəta qaytarılır.
 
 Beləliklə cədvəl redaktoru heç vaxt jurnal sahibliyini gizli dəyişmir.
+
+SLOTU APARAN MÜƏLLİM (2026-09-25, bölünmüş tədris): jurnal sahibliyinə TOXUNMADAN
+slotun özünə müəllim yazıla bilər («Dərsi aparan müəllim», default «Jurnal sahibi»).
+Seçim yalnız bu açılışı apara bilən müəllimlərdəndir — server yoxlayır
+(:func:`resolve_slot_instructor`, qayda :mod:`apps.registrar.schedule_slot_teachers`).
 """
 
 from __future__ import annotations
@@ -29,7 +34,7 @@ from django.apps import apps as django_apps
 from django.utils.translation import pgettext
 
 from apps.registrar import schedule as schedule_service
-from apps.registrar import schedule_conflicts, schedule_grid, schedule_manage
+from apps.registrar import schedule_conflicts, schedule_grid, schedule_manage, schedule_slot_teachers
 from apps.registrar.models import CourseOffering, SlotKind, Subject, WeekType
 
 _CTX = "registrar.schedule_editor"
@@ -291,11 +296,80 @@ def resolve_offering(*, actor, organization, group, period, subject, instructor,
     return offering, created, assigned
 
 
+# ── Slotu aparan müəllim ─────────────────────────────────────────────────────
+
+
+def _slot_teacher_error() -> CellError:
+    message = pgettext(
+        _CTX,
+        "Bu müəllim bu fənnin dərsini apara bilməz — yalnız jurnal sahibi, fənnin dərs yükü bölgüsündəki "
+        "və ya jurnalında dərs aparmış aktiv müəllim seçilə bilər.",
+    )
+    return CellError("invalid", message, errors={"slot_instructor_id": message})
+
+
+def resolve_slot_instructor(*, offering, data):
+    """Dialoqun «Dərsi aparan müəllim» seçimi → istifadəçi və ya ``None`` (= jurnal sahibi).
+
+    SERVER yoxlaması (klientə etibar yoxdur): boş və ya jurnal sahibinin özü → ``None`` (NULL
+    saxlanır ki, sahib dəyişəndə slot onu izləsin); başqa müəllim yalnız
+    ``schedule_slot_teachers.allowed_teacher_ids`` daxilindədirsə qəbul olunur — ixtiyari müəllim
+    400 (``errors.slot_instructor_id``). Aktiv üzvlüyü itmiş köhnə seçim də rədd olunur (PostgreSQL
+    qoruyucusu onsuz da yazmağa icazə verməzdi) — «Jurnal sahibi» seçilməlidir."""
+    raw = str(data.get("slot_instructor_id") or "").strip()
+    if not raw:
+        return None
+    pk = schedule_slot_teachers.user_pk(raw)
+    if pk is not None and str(pk) == str(offering.instructor_id or ""):
+        return None
+    if pk is None or pk not in schedule_slot_teachers.allowed_teacher_ids(offering):
+        raise _slot_teacher_error()
+    from django.contrib.auth import get_user_model
+
+    return get_user_model().objects.filter(pk=pk).first()
+
+
+def slot_teacher_options(*, organization, group, period, subject_id, instructor_id="") -> dict:
+    """«Dərsi aparan müəllim» seçicisi: seçilmiş fənn + qrup + semestr açılışını APARA BİLƏNLƏR.
+
+    Açılış hələ yoxdursa (yeni hüceyrə) yaddaşdakı nüsxə ilə hesablanır — bazaya heç nə yazılmır;
+    ``owner`` — jurnal sahibi (seçicinin «Jurnal sahibi» sətri), ``teachers`` — qalan müəllimlər."""
+    from django.contrib.auth import get_user_model
+
+    from core.http_ids import parse_uuid
+
+    subject_pk = parse_uuid(subject_id)
+    if organization is None or group is None or period is None or subject_pk is None:
+        return {"owner": None, "teachers": []}
+    offering = (
+        CourseOffering.objects.filter(organization=organization, subject_id=subject_pk, period=period, group=group)
+        .select_related("instructor")
+        .first()
+    )
+    chosen_pk = schedule_slot_teachers.user_pk(instructor_id)
+    chosen = get_user_model().objects.filter(pk=chosen_pk).first() if chosen_pk is not None else None
+    if offering is None:
+        offering = CourseOffering(
+            organization=organization, subject_id=subject_pk, period=period, group=group, instructor=chosen
+        )
+    elif offering.instructor_id is None and chosen is not None:
+        offering.instructor = chosen  # yalnız yaddaşda — `resolve_offering` qayda 2 ilə eyni
+    owner = offering.instructor
+    return {
+        "owner": {"id": str(owner.pk), "name": _person_name(owner)} if owner is not None else None,
+        "teachers": schedule_slot_teachers.choices(offering),
+    }
+
+
 # ── Yoxlama (heç nə yazmır) ──────────────────────────────────────────────────
 
 
-def check_cell(*, organization, offering, cleaned, exclude_id=None) -> dict:
-    """Saxlama-öncəsi tam yoxlama: dövr pəncərəsi + konfliktlər + tövsiyələr."""
+def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instructor_id=None) -> dict:
+    """Saxlama-öncəsi tam yoxlama: dövr pəncərəsi + konfliktlər + tövsiyələr.
+
+    Müəllim toqquşması slotun EFFEKTİV müəllimi ilə yoxlanır: ``slot_instructor_id`` (dialoqda
+    seçilmiş «Dərsi aparan müəllim»), verilməyibsə açılışın müəllimi."""
+    teacher_id = slot_instructor_id or offering.instructor_id
     errors: dict = {}
     window = schedule_manage.period_window_error(offering)
     if window:
@@ -330,7 +404,7 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None) -> dict:
         week_type=cleaned["week_type"],
         room=cleaned["room"],
         group_id=offering.group_id,
-        instructor_id=offering.instructor_id,
+        instructor_id=teacher_id,
         exclude_ids=(exclude_id,) if exclude_id else (),
     )
     suggestions = []
@@ -338,7 +412,7 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None) -> dict:
         suggestions = schedule_conflicts.suggest(
             organization=organization,
             group_id=offering.group_id,
-            instructor_id=offering.instructor_id,
+            instructor_id=teacher_id,
             week_type=cleaned["week_type"],
             room=cleaned["room"],
             shift=schedule_grid.shift_of(cleaned["start_time"]),
@@ -355,5 +429,7 @@ __all__ = [
     "check_cell",
     "parse_cell",
     "resolve_offering",
+    "resolve_slot_instructor",
+    "slot_teacher_options",
     "teacher_choices",
 ]

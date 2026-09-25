@@ -21,7 +21,11 @@ QAYDALAR
 * PARKLANMIŞ (``is_parked``) və yumşaq silinmiş slotlar heç bir hesabatda
   iştirak etmir — onlar cədvəldə deyil;
 * müəllim/otaq yoxlaması TENANT genişliyindədir (başqa fakültənin dərsi də
-  müəllimi tutur), qrup yoxlaması isə təbii olaraq qrupun özündədir.
+  müəllimi tutur), qrup yoxlaması isə təbii olaraq qrupun özündədir;
+* müəllim = slotun EFFEKTİV müəllimi (2026-09-25): ``ScheduleSlot.instructor``,
+  boşdursa jurnal sahibi — seminarı aparan assistentin toqquşması da tutulur
+  (``schedule.effective_instructor_id``); id-lər mətn kimi müqayisə olunur
+  (JSON-dan gələn ``"12"`` ilə bazadakı ``12`` eyni müəllimdir).
 """
 
 from __future__ import annotations
@@ -29,6 +33,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from apps.registrar.models import ScheduleSlot, WeekType
+from apps.registrar.schedule import effective_instructor, effective_instructor_id
 
 _CTX = "registrar.schedule_conflicts"
 
@@ -73,6 +78,10 @@ def _person_name(user) -> str:
     return full or str(getattr(user, "username", "") or "")
 
 
+def _same_person(left, right) -> bool:
+    return bool(left) and bool(right) and str(left) == str(right)
+
+
 def _message(kind, slot) -> str:
     """İstifadəçiyə göstərilən açıq cümlə (sahibin nümunəsi ilə eyni forma)."""
     offering = slot.offering
@@ -81,7 +90,7 @@ def _message(kind, slot) -> str:
         "time": slot.start_time.strftime("%H:%M"),
         "group": getattr(offering.group, "name", "") or pgettext(_CTX, "təyin edilməmiş qrup"),
         "subject": getattr(offering.subject, "code", "") or getattr(offering.subject, "name", "") or "",
-        "teacher": _person_name(offering.instructor) or pgettext(_CTX, "müəllim təyin edilməyib"),
+        "teacher": _person_name(effective_instructor(slot)) or pgettext(_CTX, "müəllim təyin edilməyib"),
         "room": slot.room or "",
     }
     if kind == KIND_TEACHER:
@@ -111,7 +120,7 @@ def describe(slot, kind) -> dict:
         "subject_code": getattr(offering.subject, "code", "") or "",
         "subject_name": getattr(offering.subject, "name", "") or "",
         "group": getattr(offering.group, "name", "") or "",
-        "instructor": _person_name(offering.instructor),
+        "instructor": _person_name(effective_instructor(slot)),
         "room": slot.room or "",
         "weekday": slot.weekday,
         "weekday_label": _weekday_label(slot.weekday),
@@ -127,7 +136,9 @@ def live_slots(organization, *, weekday=None):
     queryset = ScheduleSlot.objects.filter(organization=organization, is_parked=False)
     if weekday is not None:
         queryset = queryset.filter(weekday=weekday)
-    return queryset.select_related("offering", "offering__subject", "offering__group", "offering__instructor")
+    return queryset.select_related(
+        "offering", "offering__subject", "offering__group", "offering__instructor", "instructor"
+    )
 
 
 def detect(
@@ -161,7 +172,7 @@ def detect(
         if not week_types_overlap(week_type, slot.week_type):
             continue
         offering = slot.offering
-        if instructor_id and offering.instructor_id == instructor_id:
+        if _same_person(instructor_id, effective_instructor_id(slot)):
             found.setdefault(KIND_TEACHER, slot)
         if group_id and offering.group_id == group_id:
             found.setdefault(KIND_GROUP, slot)
@@ -180,7 +191,7 @@ def _day_load(rows, weekday, group_id, instructor_id):
         if slot.weekday != weekday:
             continue
         offering = slot.offering
-        if (group_id and offering.group_id == group_id) or (instructor_id and offering.instructor_id == instructor_id):
+        if (group_id and offering.group_id == group_id) or _same_person(instructor_id, effective_instructor_id(slot)):
             total += 1
     return total
 
