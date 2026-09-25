@@ -1,0 +1,531 @@
+/* ═══ Avtomatik dərs cədvəli — səhifə qabığı, kartlar, formalar, siyahılar ═══════
+   Rənglər YALNIZ `--ems-*` tokenlərindəndir (design-tokens.css); tətbiq işıqlıdır.
+   Şəbəkələr (əlçatanlıq + baxış) ayrıca faylda: timetable_grid.css.
+   Fokus: nazik neytral kontur + `--ems-sh-focus` (qalın göy daxili halqa YOX). */
+
+.tt-page {
+    max-width: var(--ems-w-page, 1320px);
+}
+
+/* ── Başlıq + naviqasiya ───────────────────────────────────────────────── */
+.tt-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-5);
+}
+
+.tt-top__h1 {
+    margin: 0;
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.tt-top__h1 .fas {
+    color: var(--ems-primary-600);
+}
+
+.tt-top__sub {
+    margin: 4px 0 0;
+    max-width: 760px;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    text-wrap: pretty;
+}
+
+.tt-top__period {
+    min-width: 240px;
+}
+
+.tt-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-6);
+    padding: 6px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.tt-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-xs);
+    padding: 0 14px;
+    border-radius: var(--ems-r-lg);
+    color: var(--ems-neutral-700);
+    font-weight: 700;
+    font-size: var(--ems-fs-sm);
+    text-decoration: none;
+}
+
+.tt-nav__link:hover {
+    background: var(--ems-bg);
+    color: var(--ems-text);
+}
+
+.tt-nav__link.is-active {
+    background: var(--ems-bg);
+    color: var(--ems-primary-700);
+    box-shadow: var(--ems-sh-card);
+}
+
+.tt-nav__link--aside {
+    margin-left: auto;
+    color: var(--ems-text-muted);
+}
+
+.tt-nav__link:focus-visible,
+.tt-link:focus-visible,
+.tt-teacher:focus-visible,
+.tt-viewtabs__link:focus-visible {
+    outline: 1px solid var(--ems-neutral-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* ── Kart, cədvəl, köməkçilər ──────────────────────────────────────────── */
+.tt-card {
+    margin-bottom: var(--ems-sp-6);
+}
+
+.tt-count {
+    display: inline-flex;
+    min-width: 24px;
+    justify-content: center;
+    padding: 1px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+}
+
+.tt-muted {
+    display: block;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.tt-hint {
+    margin: var(--ems-sp-3) 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    text-wrap: pretty;
+}
+
+.tt-ok {
+    margin: 0;
+    color: var(--ems-success-700);
+    font-weight: 700;
+}
+
+.tt-link {
+    color: var(--ems-link);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tt-link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.tt-table-wrap {
+    overflow-x: auto;
+}
+
+.tt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ems-fs-sm);
+}
+
+.tt-table th {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tt-table td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--ems-border);
+    vertical-align: middle;
+}
+
+.tt-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.tt-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.tt-subtitle {
+    margin: var(--ems-sp-7) 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+}
+
+/* ── İş axını addımları (ana səhifə) ───────────────────────────────────── */
+.tt-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: var(--ems-sp-4);
+    margin: 0 0 var(--ems-sp-6);
+    padding: 0;
+    list-style: none;
+}
+
+.tt-steps__item {
+    display: flex;
+    gap: var(--ems-sp-4);
+    padding: var(--ems-sp-5);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.tt-steps__no {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-weight: 800;
+}
+
+.tt-steps__title {
+    color: var(--ems-text);
+    font-weight: 800;
+    text-decoration: none;
+}
+
+a.tt-steps__title:hover {
+    color: var(--ems-primary-700);
+}
+
+.tt-steps__text {
+    margin: 4px 0 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    text-wrap: pretty;
+}
+
+/* ── İki sütunlu düzülüş (müəllim siyahısı + redaktor) ─────────────────── */
+.tt-split {
+    display: grid;
+    grid-template-columns: minmax(250px, 320px) minmax(0, 1fr);
+    gap: var(--ems-sp-6);
+    align-items: start;
+}
+
+@media (max-width: 900px) {
+    .tt-split {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.tt-search {
+    display: flex;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-4);
+}
+
+.tt-teacher-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 70vh;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.tt-teacher {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 8px 10px;
+    border-radius: var(--ems-r-lg);
+    color: var(--ems-text);
+    text-decoration: none;
+}
+
+.tt-teacher:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.tt-teacher.is-active {
+    background: var(--ems-primary-50);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
+}
+
+.tt-teacher__name {
+    font-weight: 700;
+}
+
+.tt-teacher__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.tt-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 7px;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-2xs);
+    font-weight: 800;
+    line-height: 18px;
+}
+
+.tt-chip--u {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+.tt-chip--d {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.tt-chip--prio {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+/* ── Formalar ──────────────────────────────────────────────────────────── */
+.tt-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--ems-sp-5);
+    margin-top: var(--ems-sp-6);
+}
+
+.tt-fields__wide {
+    grid-column: 1 / -1;
+}
+
+.tt-inline-field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+}
+
+.tt-input-xs {
+    width: 76px;
+    min-height: var(--ems-h-xs);
+    padding: 4px 8px;
+}
+
+.tt-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-right: var(--ems-sp-5);
+    font-size: var(--ems-fs-sm);
+    cursor: pointer;
+}
+
+.tt-check input {
+    accent-color: var(--ems-primary-600);
+}
+
+.tt-check--chip {
+    padding: 4px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+}
+
+.tt-check--chip:has(input:checked) {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.tt-weekdays {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-6) 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.tt-weekdays legend {
+    width: 100%;
+    margin-bottom: var(--ems-sp-2);
+}
+
+.tt-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin-top: var(--ems-sp-6);
+}
+
+.tt-weights {
+    margin-top: var(--ems-sp-6);
+}
+
+.tt-weights summary {
+    cursor: pointer;
+    color: var(--ems-primary-700);
+    font-weight: 700;
+}
+
+.tt-select-sm {
+    min-width: 110px;
+}
+
+/* Segment (əhatə növü) — radio düymələr çip kimi. */
+.tt-segment {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: var(--ems-sp-5);
+    padding: 4px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.tt-segment__item {
+    position: relative;
+    cursor: pointer;
+}
+
+.tt-segment__item input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tt-segment__item span {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--ems-h-xs);
+    padding: 0 14px;
+    border-radius: var(--ems-r-md);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.tt-segment__item input:checked + span {
+    background: var(--ems-bg);
+    color: var(--ems-primary-700);
+    box-shadow: var(--ems-sh-card);
+}
+
+.tt-segment__item input:focus-visible + span {
+    outline: 1px solid var(--ems-neutral-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.tt-group-filter {
+    max-width: 360px;
+    margin-bottom: var(--ems-sp-3);
+}
+
+.tt-checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 4px var(--ems-sp-4);
+    max-height: 320px;
+    overflow-y: auto;
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.tt-checklist__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    cursor: pointer;
+}
+
+/* ── Əməliyyat zolağı + yoxlama hesabatı ───────────────────────────────── */
+.tt-actions-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.tt-status {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.tt-report {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tt-report__item {
+    padding: var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.tt-report__item.is-error {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+}
+
+.tt-report__item.is-warning {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.tt-report__count {
+    color: var(--ems-text-muted);
+    font-weight: 700;
+}
+
+.tt-report__detail {
+    margin: 4px 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.tt-report__rows {
+    margin: 0;
+    padding-left: 18px;
+    font-size: var(--ems-fs-sm);
+}
+
+.tt-report-verdict {
+    margin: var(--ems-sp-4) 0 0;
+    font-weight: 700;
+}

@@ -1,0 +1,208 @@
+{% extends "timetable/_layout.html" %}
+{% load static i18n %}
+{% comment %}Yeni işləmə — əhatə, parametrlər, müəllim prioriteti, «Məlumatı yoxla» və «İşlət».
+
+Yoxlama nəticəsi JS ilə `<template>` şablonlarından qurulur (textContent — HTML
+inyeksiyası yoxdur). Müəllim sırası sürüklə-burax + klaviatura düymələri (↑ ↓ ✕).
+Bütün dinamik dəyərlər data-* atributlarındadır (run_new.js).{% endcomment %}
+
+{% block tt_title %}{% trans "Yeni işləmə" context "timetable.run" %}{% endblock %}
+
+{% block tt_content %}
+<div class="tt-new" data-tt-new
+     data-precheck-url="{{ precheck_url }}" data-start-url="{{ start_url }}"
+     data-period="{{ tt_period_id }}" data-source-run="{% if source_run %}{{ source_run.pk }}{% endif %}"
+     data-msg-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'timetable.run' %}"
+     data-msg-checking="{% trans 'Yoxlanılır…' context 'timetable.run' %}"
+     data-msg-starting="{% trans 'Növbəyə qoyulur…' context 'timetable.run' %}"
+     data-msg-no-scope="{% trans 'Əhatə seçin (fakültə, ixtisas və ya ən azı bir qrup).' context 'timetable.run' %}"
+     data-msg-ok="{% trans 'Kritik problem tapılmadı — işlədə bilərsiniz.' context 'timetable.run' %}"
+     data-msg-has-errors="{% trans 'Kritik problemlər var — işləmə yenə mümkündür, amma bəzi dərslər yerləşməyəcək.' context 'timetable.run' %}">
+
+  {% if source_run %}
+    {% trans "Mənbə işləmənin kilidli dərsləri yerində saxlanılacaq" context "timetable.run" as src_title %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="info" banner_title=src_title banner_body=source_run.title %}
+  {% endif %}
+
+  <section class="ems-card tt-card" aria-labelledby="tt-scope-title">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title" id="tt-scope-title">1. {% trans "Əhatə" context "timetable.run" %}</h2>
+        <p class="ems-card__sub">{% trans "Tövsiyə: fakültə-fakültə qurun — başqa fakültənin dərc olunmuş dərsləri müəllim üçün sabit məşğulluq sayılır." context "timetable.run" %}</p>
+      </div>
+    </div>
+    <div class="ems-card__body">
+      <div class="tt-segment" role="radiogroup" aria-label="{% trans 'Əhatə növü' context 'timetable.run' %}">
+        {% for kind in scope_kinds %}
+          <label class="tt-segment__item">
+            <input type="radio" name="tt-scope-kind" value="{{ kind.value }}" data-tt-scope-kind {% if scope.kind == kind.value %}checked{% endif %}>
+            <span>{{ kind.label }}</span>
+          </label>
+        {% endfor %}
+      </div>
+      <div class="tt-scope-panel" data-tt-scope-panel="faculty" {% if scope.kind != "faculty" %}hidden{% endif %}>
+        {% trans "Fakültə" context "timetable.run" as fac_label %}
+        {% trans "Fakültə seçin" context "timetable.run" as fac_placeholder %}
+        {% include "partials/_bootstrap_select_field.html" with field_id="tt-scope-faculty" field_name="faculty" field_label=fac_label field_placeholder=fac_placeholder field_options=faculty_options field_value=scope_unit field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs='data-tt-scope-unit="faculty" data-live-search="true"' %}
+      </div>
+      <div class="tt-scope-panel" data-tt-scope-panel="program" {% if scope.kind != "program" %}hidden{% endif %}>
+        {% trans "İxtisas" context "timetable.run" as prog_label %}
+        {% trans "İxtisas seçin" context "timetable.run" as prog_placeholder %}
+        {% include "partials/_bootstrap_select_field.html" with field_id="tt-scope-program" field_name="program" field_label=prog_label field_placeholder=prog_placeholder field_options=program_options field_value=scope_unit field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs='data-tt-scope-unit="program" data-live-search="true"' %}
+      </div>
+      <div class="tt-scope-panel" data-tt-scope-panel="groups" {% if scope.kind != "groups" %}hidden{% endif %}>
+        <label class="visually-hidden" for="tt-group-filter">{% trans "Qrupları süz" context "timetable.run" %}</label>
+        <input class="ems-input tt-group-filter" id="tt-group-filter" type="search" data-tt-group-filter placeholder="{% trans 'Qrup adı ilə süz…' context 'timetable.run' %}">
+        <div class="tt-checklist" data-tt-group-list>
+          {% for group in group_choices %}
+            <label class="tt-checklist__item" data-tt-group-item data-name="{{ group.label|lower }}">
+              <input type="checkbox" value="{{ group.value }}" data-tt-group {% if group.value in scope.group_ids %}checked{% endif %}>
+              <span>{{ group.label }}</span>
+            </label>
+          {% empty %}
+            <p class="tt-muted">{% trans "Bu semestrdə açılışı olan qrup yoxdur." context "timetable.run" %}</p>
+          {% endfor %}
+        </div>
+        <p class="tt-hint">{% trans "Alt qrup ailəsi (birləşik qrup + alt qruplar) avtomatik birlikdə götürülür." context "timetable.run" %}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="ems-card tt-card" aria-labelledby="tt-params-title">
+    <div class="ems-card__head">
+      <h2 class="ems-card__title" id="tt-params-title">2. {% trans "Parametrlər" context "timetable.run" %}</h2>
+    </div>
+    <div class="ems-card__body">
+      <div class="tt-fields">
+        <div class="ems-field">
+          <label class="ems-field__label" for="tt-time">{% trans "Vaxt limiti (saniyə)" context "timetable.run" %}</label>
+          <input class="ems-input" id="tt-time" type="number" min="5" max="240" value="{{ params.time_limit }}" data-tt-param="time_limit">
+          <span class="ems-field__hint">{% trans "Uzun limit daha az «boş pəncərə» verir; 30–60 san. adətən kifayətdir." context "timetable.run" %}</span>
+        </div>
+        <div class="ems-field">
+          <label class="ems-field__label" for="tt-seed">{% trans "Toxum (seed)" context "timetable.run" %}</label>
+          <input class="ems-input" id="tt-seed" type="number" min="1" max="999999" value="{{ seed }}" data-tt-seed>
+          <span class="ems-field__hint">{% trans "Eyni toxum + eyni məlumat → eyni başlanğıc; fərqli toxum alternativ variant verir." context "timetable.run" %}</span>
+        </div>
+        <div class="ems-field">
+          <label class="ems-field__label" for="tt-weeks">{% trans "Effektiv tədris həftəsi" context "timetable.run" %}</label>
+          <input class="ems-input" id="tt-weeks" type="number" min="8" max="20" value="{{ params.weeks }}" data-tt-param="weeks">
+          <span class="ems-field__hint">{% trans "30 saat = hər həftə 1 cüt; 15 saat = iki həftədən bir (üst və ya alt)." context "timetable.run" %}</span>
+        </div>
+        <div class="ems-field">
+          {% trans "Mühazirə axınları" context "timetable.run" as stream_label %}
+          {% include "partials/_bootstrap_select_field.html" with field_id="tt-stream" field_name="stream_policy" field_label=stream_label field_label_class="ems-field__label" field_placeholder=stream_label field_options=stream_choices field_value=params.stream_policy field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs='data-tt-param="stream_policy"' %}
+        </div>
+      </div>
+      <fieldset class="tt-weekdays">
+        <legend class="ems-field__label">{% trans "Tədris günləri" context "timetable.run" %}</legend>
+        {% for day in weekday_choices %}
+          <label class="tt-check tt-check--chip">
+            <input type="checkbox" value="{{ day.value }}" data-tt-weekday {% if day.checked %}checked{% endif %}>
+            <span>{{ day.label }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+      <div class="tt-toggles">
+        <label class="tt-check"><input type="checkbox" data-tt-param="keep_published" {% if params.keep_published %}checked{% endif %}> <span>{% trans "Dərc olunmuş cədvəli mümkün qədər saxla (minimal dəyişiklik)" context "timetable.run" %}</span></label>
+        <label class="tt-check"><input type="checkbox" data-tt-param="include_vacant" {% if params.include_vacant %}checked{% endif %}> <span>{% trans "Müəllimi təyin edilməmiş (vakant) dərsləri də yerləşdir" context "timetable.run" %}</span></label>
+      </div>
+      <details class="tt-weights">
+        <summary>{% trans "Cərimə çəkiləri (ətraflı)" context "timetable.run" %}</summary>
+        <p class="tt-hint">{% trans "Sərt qaydalar (toqquşma, qrupda boşluq, magistr — yalnız axşam, «gələ bilmir» saatı) çəki ilə dəyişmir — HƏMİŞƏ qorunur." context "timetable.run" %}</p>
+        <div class="tt-fields">
+          {% for weight in weights %}
+          <div class="ems-field">
+            <label class="ems-field__label" for="tt-w-{{ weight.key }}">{{ weight.label }}</label>
+            <input class="ems-input" id="tt-w-{{ weight.key }}" type="number" min="0" max="1000" value="{{ weight.value }}" data-tt-weight="{{ weight.key }}">
+          </div>
+          {% endfor %}
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="ems-card tt-card" aria-labelledby="tt-prio-title">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title" id="tt-prio-title">3. {% trans "Müəllim prioriteti" context "timetable.run" %}</h2>
+        <p class="ems-card__sub">{% trans "Siyahıdakı müəllimlər əvvəl yerləşdirilir və onların istəkləri daha güclü çəki alır (yuxarıdakı — ən vacib)." context "timetable.run" %}</p>
+      </div>
+    </div>
+    <div class="ems-card__body">
+      <ol class="tt-prio" data-tt-prio-list aria-label="{% trans 'Prioritet sırası' context 'timetable.run' %}">
+        {% for teacher in priorities %}
+          <li class="tt-prio__item" draggable="true" data-tt-prio-item data-id="{{ teacher.id }}">
+            <span class="tt-prio__grip" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
+            <span class="tt-prio__name">{{ teacher.name }}</span>
+            <button type="button" class="ems-iconbtn" data-tt-prio-up aria-label="{% trans 'Yuxarı' context 'timetable.run' %}"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+            <button type="button" class="ems-iconbtn" data-tt-prio-down aria-label="{% trans 'Aşağı' context 'timetable.run' %}"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
+            <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-tt-prio-remove aria-label="{% trans 'Siyahıdan çıxar' context 'timetable.run' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+          </li>
+        {% endfor %}
+      </ol>
+      <p class="tt-hint" data-tt-prio-empty {% if priorities %}hidden{% endif %}>{% trans "Siyahı boşdur — bütün müəllimlər bərabər prioritetlidir. «Məlumatı yoxla»dan sonra müəllimləri əlavə edə bilərsiniz." context "timetable.run" %}</p>
+      <div class="tt-prio-add" data-tt-prio-add hidden>
+        {% trans "Müəllim əlavə et" context "timetable.run" as add_label %}
+        {% trans "Müəllim seçin" context "timetable.run" as add_placeholder %}
+        {% trans "Axtar…" context "timetable.run" as search_placeholder %}
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <label for="tt-prio-select">{{ add_label }}</label>
+          <select id="tt-prio-select" class="form-select bootstrap-single-select__native js-bootstrap-single-select ems-select" data-bootstrap-select data-live-search="true" data-live-search-placeholder="{{ search_placeholder }}" data-tt-prio-select>
+            <option value="">{{ add_placeholder }}</option>
+          </select>
+        </div>
+      </div>
+      <template data-tt-prio-template>
+        <li class="tt-prio__item" draggable="true" data-tt-prio-item data-id="">
+          <span class="tt-prio__grip" aria-hidden="true"><i class="fas fa-grip-vertical"></i></span>
+          <span class="tt-prio__name"></span>
+          <button type="button" class="ems-iconbtn" data-tt-prio-up aria-label="{% trans 'Yuxarı' context 'timetable.run' %}"><i class="fas fa-arrow-up" aria-hidden="true"></i></button>
+          <button type="button" class="ems-iconbtn" data-tt-prio-down aria-label="{% trans 'Aşağı' context 'timetable.run' %}"><i class="fas fa-arrow-down" aria-hidden="true"></i></button>
+          <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-tt-prio-remove aria-label="{% trans 'Siyahıdan çıxar' context 'timetable.run' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </li>
+      </template>
+    </div>
+  </section>
+
+  <div class="tt-actions-bar">
+    <button type="button" class="ems-btn" data-tt-precheck><i class="fas fa-clipboard-check" aria-hidden="true"></i> {% trans "Məlumatı yoxla" context "timetable.run" %}</button>
+    <button type="button" class="ems-btn ems-btn--primary" data-tt-start><i class="fas fa-play" aria-hidden="true"></i> {% trans "İşlət" context "timetable.run" %}</button>
+    <span class="tt-status" data-tt-status role="status" aria-live="polite"></span>
+  </div>
+
+  <section class="ems-card tt-card" data-tt-report hidden aria-labelledby="tt-report-title">
+    <div class="ems-card__head">
+      <h2 class="ems-card__title" id="tt-report-title">{% trans "Yoxlama nəticəsi" context "timetable.run" %}</h2>
+    </div>
+    <div class="ems-card__body">
+      <div class="ems-kpis ems-kpis--5" data-tt-report-summary></div>
+      <p class="tt-report-verdict" data-tt-report-verdict></p>
+      <ul class="tt-report" data-tt-report-items></ul>
+    </div>
+  </section>
+  <template data-tt-kpi-template>
+    <div class="ems-kpi"><div class="ems-kpi__label"></div><div class="ems-kpi__value"></div></div>
+  </template>
+  <template data-tt-item-template>
+    <li class="tt-report__item">
+      <div class="tt-report__head"><span class="ems-badge"></span> <strong class="tt-report__title"></strong> <span class="tt-report__count"></span></div>
+      <p class="tt-report__detail"></p>
+      <ul class="tt-report__rows"></ul>
+    </li>
+  </template>
+  <div hidden data-tt-summary-labels
+       data-groups="{% trans 'Qrup' context 'timetable.run' %}"
+       data-events="{% trans 'Dərs (hadisə)' context 'timetable.run' %}"
+       data-weekly_pairs="{% trans 'Həftəlik cüt' context 'timetable.run' %}"
+       data-teachers="{% trans 'Müəllim' context 'timetable.run' %}"
+       data-streams="{% trans 'Axın' context 'timetable.run' %}"
+       data-level-error="{% trans 'Xəta' context 'timetable.run' %}"
+       data-level-warning="{% trans 'Xəbərdarlıq' context 'timetable.run' %}"
+       data-level-info="{% trans 'Məlumat' context 'timetable.run' %}"></div>
+</div>
+{% endblock %}
+
+{% block tt_js %}
+    <script src="{% static 'timetable/js/run_new.js' %}?v=20260925-1"></script>
+{% endblock %}

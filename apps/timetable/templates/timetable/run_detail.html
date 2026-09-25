@@ -1,0 +1,108 @@
+{% extends "timetable/_layout.html" %}
+{% load static i18n %}
+{% comment %}İşləmənin baxışı — status/irəliləyiş, KPI, qrup/müəllim/otaq şəbəkəsi, yerləşməyənlər,
+kilid/köçürmə dialoqu və «Dərc et». Hadisə detalları `json_script` adasındadır
+(`tt-events`); bütün əməllər `timetable:api_run_action`-a JSON ilə gedir (run_review.js).{% endcomment %}
+
+{% block tt_title %}{{ run_info.title }}{% endblock %}
+
+{% block tt_content %}
+<div class="tt-review" data-tt-review
+     data-action-url="{{ action_url }}" data-status-url="{{ status_url }}"
+     data-active="{{ is_active|yesno:'1,0' }}" data-can-edit="{{ can_edit|yesno:'1,0' }}"
+     data-msg-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'timetable.review' %}"
+     data-msg-discard="{% trans 'Bu qaralama ləğv edilsin? Canlı cədvəl dəyişməyəcək.' context 'timetable.review' %}"
+     data-label-odd="{% trans 'Üst həftə' context 'timetable.review' %}"
+     data-label-even="{% trans 'Alt həftə' context 'timetable.review' %}"
+     data-label-all="{% trans 'Hər həftə' context 'timetable.review' %}">
+
+  <section class="ems-card tt-card tt-runhead">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title">{{ run_info.title }} <span class="ems-badge ems-badge--{{ run_info.tone }}" data-tt-status-badge>{{ run_info.status_label }}</span></h2>
+        <p class="ems-card__sub">
+          {{ run_info.scope_label }} · {{ run.period.name }} {{ run.period.year_display }} ·
+          {% trans "yaradıb:" context "timetable.review" %} {{ run_info.created_by }} {{ run_info.created_at|date:"d.m.Y H:i" }} ·
+          seed {{ run_info.seed }}{% if run_info.elapsed %} · {{ run_info.elapsed }} {% trans "san." context "timetable.review" %}{% endif %}
+        </p>
+      </div>
+      <div class="tt-runhead__actions">
+        <a class="ems-btn" href="{{ rerun_url }}"><i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Yenidən işlət (kilidlər qalır)" context "timetable.review" %}</a>
+        {% if can_edit %}
+        <button type="button" class="ems-btn ems-btn--success" data-ems-overlay-open="ttPublish"><i class="fas fa-upload" aria-hidden="true"></i> {% trans "Dərc et" context "timetable.review" %}</button>
+        {% endif %}
+        {% if run.status != "published" and run.status != "discarded" %}
+        <button type="button" class="ems-btn ems-btn--ghost" data-tt-discard><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Ləğv et" context "timetable.review" %}</button>
+        {% endif %}
+      </div>
+    </div>
+    {% if is_active %}
+    <div class="ems-card__body tt-progress" data-tt-progress>
+      <div class="ems-bar"><div class="ems-bar__fill" data-tt-progress-bar></div></div>
+      <p class="tt-muted" data-tt-progress-text role="status" aria-live="polite">{% trans "Mühərrik işləyir — səhifə hazır olanda avtomatik yenilənəcək." context "timetable.review" %}</p>
+      <button type="button" class="ems-btn ems-btn--sm" data-tt-sync hidden>{% trans "Worker cavab vermir — brauzerdə işlət (qısa limit)" context "timetable.review" %}</button>
+    </div>
+    {% endif %}
+    {% if run.status == "failed" %}
+    <div class="ems-card__body">
+      {% trans "İşləmə uğursuz oldu" context "timetable.review" as failed_title %}
+      {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=failed_title banner_body=run.error %}
+    </div>
+    {% endif %}
+    {% if run.status == "published" %}
+    <div class="ems-card__body">
+      {% trans "Bu qaralama canlı cədvələ dərc edilib" context "timetable.review" as pub_title %}
+      {% include "partials/ems_ui/_banner.html" with banner_kind="success" banner_title=pub_title banner_body=run.published_at|date:"d.m.Y H:i" %}
+    </div>
+    {% endif %}
+  </section>
+
+  {% if kpi_tiles %}
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=kpi_tiles kpi_variant=5 %}
+  {% endif %}
+
+  {% if not is_active and run.status != "failed" %}
+  <section class="ems-card tt-card" aria-labelledby="tt-grid-title">
+    <div class="ems-card__head">
+      <h2 class="ems-card__title" id="tt-grid-title">{% trans "Həftəlik şəbəkə" context "timetable.review" %}</h2>
+      <form class="tt-viewbar" method="get" action="" data-tt-autosubmit>
+        <input type="hidden" name="view" value="{{ view }}">
+        <nav class="tt-viewtabs" aria-label="{% trans 'Baxış' context 'timetable.review' %}">
+          <a class="tt-viewtabs__link{% if view == 'group' %} is-active{% endif %}" href="?view=group"{% if view == 'group' %} aria-current="page"{% endif %}>{% trans "Qrup" context "timetable.review" %}</a>
+          <a class="tt-viewtabs__link{% if view == 'teacher' %} is-active{% endif %}" href="?view=teacher"{% if view == 'teacher' %} aria-current="page"{% endif %}>{% trans "Müəllim" context "timetable.review" %}</a>
+          <a class="tt-viewtabs__link{% if view == 'room' %} is-active{% endif %}" href="?view=room"{% if view == 'room' %} aria-current="page"{% endif %}>{% trans "Otaq" context "timetable.review" %}</a>
+        </nav>
+        {% if view_choices %}
+          {% trans "Seçim" context "timetable.review" as view_label %}
+          {% trans "Axtar…" context "timetable.review" as view_search %}
+          {% include "partials/_bootstrap_select_field.html" with field_id="tt-view-key" field_name="key" field_aria_label=view_label field_placeholder=view_label field_options=view_choices field_value=view_key field_wrapper_class="bootstrap-single-select--ems tt-viewbar__select" field_select_class="ems-select" field_extra_attrs='data-live-search="true"' %}
+        {% endif %}
+      </form>
+    </div>
+    <div class="ems-card__body">
+      {% include "timetable/partials/_review_grid.html" %}
+      <div class="tt-legend">
+        <span class="tt-legend__item"><span class="tt-swatch tt-kind--lecture" aria-hidden="true"></span> {% trans "Mühazirə" context "timetable.review" %}</span>
+        <span class="tt-legend__item"><span class="tt-swatch tt-kind--seminar" aria-hidden="true"></span> {% trans "Məşğələ" context "timetable.review" %}</span>
+        <span class="tt-legend__item"><span class="tt-swatch tt-kind--lab" aria-hidden="true"></span> {% trans "Laboratoriya" context "timetable.review" %}</span>
+        <span class="tt-legend__item"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Kilidli" context "timetable.review" %}</span>
+        <span class="tt-legend__item"><i class="fas fa-hand" aria-hidden="true"></i> {% trans "Əl ilə köçürülüb" context "timetable.review" %}</span>
+      </div>
+    </div>
+  </section>
+
+  {% include "timetable/partials/_review_lists.html" %}
+  {% endif %}
+
+  {{ events_json|json_script:"tt-events" }}
+
+  {% trans "Dərs" context "timetable.review" as event_title %}
+  {% include "partials/ems_ui/_dialog.html" with dialog_id="ttEvent" dialog_title=event_title dialog_body_include="timetable/partials/_event_dialog_body.html" dialog_foot_include="timetable/partials/_event_dialog_foot.html" %}
+  {% trans "Cədvəli dərc et" context "timetable.review" as publish_title %}
+  {% include "partials/ems_ui/_dialog.html" with dialog_id="ttPublish" dialog_title=publish_title dialog_static=True dialog_body_include="timetable/partials/_publish_body.html" dialog_foot_include="timetable/partials/_publish_foot.html" %}
+</div>
+{% endblock %}
+
+{% block tt_js %}
+    <script src="{% static 'timetable/js/run_review.js' %}?v=20260925-1"></script>
+{% endblock %}

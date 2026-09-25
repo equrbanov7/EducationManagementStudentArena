@@ -77804,3 +77804,2070 @@ msgstr ""
 "alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç "
 "nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
 "planı» bölməsində planı təsdiqləyin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Avtomatik cədvəl"
+msgstr "Avtomatik cədvəl"
+
+msgctxt "registrar.schedule_publish"
+msgid "Bu semestr bitib — cədvəl dərc edilə bilməz."
+msgstr "Bu semestr bitib — cədvəl dərc edilə bilməz."
+
+msgctxt "registrar.schedule_publish"
+msgid ""
+"Bəzi açılışlar sizin səlahiyyət sahənizdən kənardadır — cədvəl dərc "
+"edilmədi."
+msgstr ""
+"Bəzi açılışlar sizin səlahiyyət sahənizdən kənardadır — cədvəl dərc "
+"edilmədi."
+
+msgctxt "registrar.schedule_publish"
+msgid "Cədvəlin toplu dərci"
+msgstr "Cədvəlin toplu dərci"
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var."
+msgstr "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var."
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərs cədvəli dərc edildi: %(period)s"
+msgstr "Dərs cədvəli dərc edildi: %(period)s"
+
+msgctxt "registrar.schedule_publish"
+msgid "Qaralamada yararsız slot var — yenidən yaradın."
+msgstr "Qaralamada yararsız slot var — yenidən yaradın."
+
+msgctxt "registrar.schedule_publish"
+msgid "Qrupunuzun yeni həftəlik dərs cədvəli dərc olundu."
+msgstr "Qrupunuzun yeni həftəlik dərs cədvəli dərc olundu."
+
+msgctxt "registrar.schedule_publish"
+msgid "Yeni həftəlik cədvəliniz hazırdır — dərslərinizi yoxlayın."
+msgstr "Yeni həftəlik cədvəliniz hazırdır — dərslərinizi yoxlayın."
+
+msgctxt "timetable.api"
+msgid "Bu işləmə növbədə deyil."
+msgstr "Bu işləmə növbədə deyil."
+
+msgctxt "timetable.api"
+msgid ""
+"Cədvəl dərc edildi: %(created)s dərs yazıldı, %(removed)s köhnə slot əvəz "
+"olundu."
+msgstr ""
+"Cədvəl dərc edildi: %(created)s dərs yazıldı, %(removed)s köhnə slot əvəz "
+"olundu."
+
+msgctxt "timetable.api"
+msgid "Dərs köçürüldü."
+msgstr "Dərs köçürüldü."
+
+msgctxt "timetable.api"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "timetable.api"
+msgid "Növbə siyasəti yadda saxlanıldı."
+msgstr "Növbə siyasəti yadda saxlanıldı."
+
+msgctxt "timetable.api"
+msgid "Seçilmiş əhatədə sizin idarə etdiyiniz qrup yoxdur."
+msgstr "Seçilmiş əhatədə sizin idarə etdiyiniz qrup yoxdur."
+
+msgctxt "timetable.api"
+msgid "Sizin artıq işləyən cədvəl işləmələriniz var — bitməsini gözləyin."
+msgstr "Sizin artıq işləyən cədvəl işləmələriniz var — bitməsini gözləyin."
+
+msgctxt "timetable.api"
+msgid "Yalnız hazır qaralama redaktə edilə bilər."
+msgstr "Yalnız hazır qaralama redaktə edilə bilər."
+
+msgctxt "timetable.api"
+msgid "İşləmə ləğv edildi."
+msgstr "İşləmə ləğv edildi."
+
+msgctxt "timetable.api"
+msgid "Əlçatanlıq yadda saxlanıldı."
+msgstr "Əlçatanlıq yadda saxlanıldı."
+
+msgctxt "timetable.availability"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Ad və ya istifadəçi adı…"
+
+msgctxt "timetable.availability"
+msgid "Adi"
+msgstr "Adi"
+
+msgctxt "timetable.availability"
+msgid "Axtar"
+msgstr "Axtar"
+
+msgctxt "timetable.availability"
+msgid "Bu müəllimin əhatənizdə fənni tapılmadı."
+msgstr "Bu müəllimin əhatənizdə fənni tapılmadı."
+
+msgctxt "timetable.availability"
+msgid "Bu semestrdə sizin əhatənizdəki açılışlara müəllim təyin edilməyib."
+msgstr "Bu semestrdə sizin əhatənizdəki açılışlara müəllim təyin edilməyib."
+
+msgctxt "timetable.availability"
+msgid "Dövr et"
+msgstr "Dövr et"
+
+msgctxt "timetable.availability"
+msgid "Dəyişdirilə bilən saatlar"
+msgstr "Dəyişdirilə bilən saatlar"
+
+msgctxt "timetable.availability"
+msgid "Dəyər %(low)s–%(high)s aralığında olmalıdır."
+msgstr "Dəyər %(low)s–%(high)s aralığında olmalıdır."
+
+msgctxt "timetable.availability"
+msgid "Fırça (səviyyə seçimi)"
+msgstr "Fırça (səviyyə seçimi)"
+
+msgctxt "timetable.availability"
+msgid "Fırça:"
+msgstr "Fırça:"
+
+msgctxt "timetable.availability"
+msgid "Fənləri (bu semestr)"
+msgstr "Fənləri (bu semestr)"
+
+msgctxt "timetable.availability"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "timetable.availability"
+msgid "Fənn prioriteti"
+msgstr "Fənn prioriteti"
+
+msgctxt "timetable.availability"
+msgid "Gündə maksimum cüt"
+msgstr "Gündə maksimum cüt"
+
+msgctxt "timetable.availability"
+msgid "Gələ bilmədiyi xanalar"
+msgstr "Gələ bilmədiyi xanalar"
+
+msgctxt "timetable.availability"
+msgid "Həftədə maksimum iş günü"
+msgstr "Həftədə maksimum iş günü"
+
+msgctxt "timetable.availability"
+msgid "Həftəlik şəbəkə: hər xana bir dərs saatıdır (cüt = 2 saat)."
+msgstr "Həftəlik şəbəkə: hər xana bir dərs saatıdır (cüt = 2 saat)."
+
+msgctxt "timetable.availability"
+msgid ""
+"Klik — səviyyə dəyişir. Klaviatura: oxlarla gəzin, Boşluq — dövr, 1–4 — "
+"səviyyəni birbaşa seçin. Gün başlığı — bütün günü «gələ bilmir» ⇄ «neytral»."
+msgstr ""
+"Klik — səviyyə dəyişir. Klaviatura: oxlarla gəzin, Boşluq — dövr, 1–4 — "
+"səviyyəni birbaşa seçin. Gün başlığı — bütün günü «gələ bilmir» ⇄ «neytral»."
+
+msgctxt "timetable.availability"
+msgid "Müəllim axtar"
+msgstr "Müəllim axtar"
+
+msgctxt "timetable.availability"
+msgid "Müəllim seçin"
+msgstr "Müəllim seçin"
+
+msgctxt "timetable.availability"
+msgid "Müəllim tapılmadı"
+msgstr "Müəllim tapılmadı"
+
+msgctxt "timetable.availability"
+msgid "Müəllim əlçatanlığı"
+msgstr "Müəllim əlçatanlığı"
+
+msgctxt "timetable.availability"
+msgid "Müəllimlər"
+msgstr "Müəllimlər"
+
+msgctxt "timetable.availability"
+msgid "Növ (tapşırıq saatı)"
+msgstr "Növ (tapşırıq saatı)"
+
+msgctxt "timetable.availability"
+msgid "Prioritet (1 — adi, 5 — ən yüksək)"
+msgstr "Prioritet (1 — adi, 5 — ən yüksək)"
+
+msgctxt "timetable.availability"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "timetable.availability"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "timetable.availability"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "timetable.availability"
+msgid ""
+"Soldakı siyahıdan müəllimi seçin — gələ bilmədiyi günləri, olmayan və "
+"dəyişdirilə bilən saatları qeyd edin."
+msgstr ""
+"Soldakı siyahıdan müəllimi seçin — gələ bilmədiyi günləri, olmayan və "
+"dəyişdirilə bilən saatları qeyd edin."
+
+msgctxt "timetable.availability"
+msgid "Son dəyişiklik:"
+msgstr "Son dəyişiklik:"
+
+msgctxt "timetable.availability"
+msgid "Tam ədəd daxil edin."
+msgstr "Tam ədəd daxil edin."
+
+msgctxt "timetable.availability"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "timetable.availability"
+msgid "Yadda saxlanılmadı — yenidən cəhd edin."
+msgstr "Yadda saxlanılmadı — yenidən cəhd edin."
+
+msgctxt "timetable.availability"
+msgid "boş"
+msgstr "boş"
+
+msgctxt "timetable.availability"
+msgid "doldurulub"
+msgstr "doldurulub"
+
+msgctxt "timetable.availability"
+msgid "laboratoriya"
+msgstr "laboratoriya"
+
+msgctxt "timetable.availability"
+msgid "mühazirə"
+msgstr "mühazirə"
+
+msgctxt "timetable.availability"
+msgid "seminar"
+msgstr "seminar"
+
+msgctxt "timetable.availability"
+msgid "Şəbəkədə naməlum səviyyə var."
+msgstr "Şəbəkədə naməlum səviyyə var."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq yadda saxlanılmadı — xanaları yoxlayın."
+msgstr "Əlçatanlıq yadda saxlanılmadı — xanaları yoxlayın."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq şəbəkəsi"
+msgstr "Əlçatanlıq şəbəkəsi"
+
+msgctxt "timetable.edit"
+msgid "%(building)s korpusunda həmin vaxt boş otaq qalmır (%(week)s)."
+msgstr "%(building)s korpusunda həmin vaxt boş otaq qalmır (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid ""
+"%(group)s qrupunun günündə boş cüt yaranır (%(week)s) — qrupda boşluq "
+"qadağandır."
+msgstr ""
+"%(group)s qrupunun günündə boş cüt yaranır (%(week)s) — qrupda boşluq "
+"qadağandır."
+
+msgctxt "timetable.edit"
+msgid "%(group)s qrupunun həmin vaxt dərsi var: %(subjects)s (%(week)s)."
+msgstr "%(group)s qrupunun həmin vaxt dərsi var: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Bu saat %(group)s qrupunun növbəsinə daxil deyil."
+msgstr "Bu saat %(group)s qrupunun növbəsinə daxil deyil."
+
+msgctxt "timetable.edit"
+msgid "Dərs kilidlidir — əvvəlcə kilidi açın."
+msgstr "Dərs kilidlidir — əvvəlcə kilidi açın."
+
+msgctxt "timetable.edit"
+msgid "Dərs qaralamada tapılmadı."
+msgstr "Dərs qaralamada tapılmadı."
+
+msgctxt "timetable.edit"
+msgid "Gün və dərs saatı düzgün seçilməlidir."
+msgstr "Gün və dərs saatı düzgün seçilməlidir."
+
+msgctxt "timetable.edit"
+msgid "Müəllim %(teacher)s həmin vaxt məşğuldur: %(subjects)s (%(week)s)."
+msgstr "Müəllim %(teacher)s həmin vaxt məşğuldur: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Müəllim bu saatda gələ bilmir (əlçatanlıq)."
+msgstr "Müəllim bu saatda gələ bilmir (əlçatanlıq)."
+
+msgctxt "timetable.edit"
+msgid "Qaralama köhnəlib (açılışlar dəyişib) — yenidən işlədin."
+msgstr "Qaralama köhnəlib (açılışlar dəyişib) — yenidən işlədin."
+
+msgctxt "timetable.edit"
+msgid "alt həftə"
+msgstr "alt həftə"
+
+msgctxt "timetable.edit"
+msgid "başqa fakültənin dərc olunmuş dərsi"
+msgstr "başqa fakültənin dərc olunmuş dərsi"
+
+msgctxt "timetable.edit"
+msgid "üst həftə"
+msgstr "üst həftə"
+
+msgctxt "timetable.home"
+msgid "Aç"
+msgstr "Aç"
+
+msgctxt "timetable.home"
+msgid ""
+"Bakalavr — səhər və günorta, magistr — yalnız axşam; istənilən qrup üçün "
+"istisna."
+msgstr ""
+"Bakalavr — səhər və günorta, magistr — yalnız axşam; istənilən qrup üçün "
+"istisna."
+
+msgctxt "timetable.home"
+msgid "Bax, düzəlt, dərc et"
+msgstr "Bax, düzəlt, dərc et"
+
+msgctxt "timetable.home"
+msgid "Bu semestr üçün hələ işləmə yoxdur"
+msgstr "Bu semestr üçün hələ işləmə yoxdur"
+
+msgctxt "timetable.home"
+msgid ""
+"Gələ bilmədiyi günlər, olmayan və dəyişdirilə bilən saatlar, gündəlik limit,"
+" prioritet."
+msgstr ""
+"Gələ bilmədiyi günlər, olmayan və dəyişdirilə bilən saatlar, gündəlik limit,"
+" prioritet."
+
+msgctxt "timetable.home"
+msgid ""
+"Hər işləmə ayrıca qaralamadır — canlı cədvələ yalnız «Dərc et» ilə keçir."
+msgstr ""
+"Hər işləmə ayrıca qaralamadır — canlı cədvələ yalnız «Dərc et» ilə keçir."
+
+msgctxt "timetable.home"
+msgid "Müəllim boş cütü"
+msgstr "Müəllim boş cütü"
+
+msgctxt "timetable.home"
+msgid "Müəllim əlçatanlığı"
+msgstr "Müəllim əlçatanlığı"
+
+msgctxt "timetable.home"
+msgid ""
+"Qrup / müəllim / otaq şəbəkəsi, kilid və köçürmə; «Dərc et» canlı cədvəli "
+"bir dəfəyə yazır."
+msgstr ""
+"Qrup / müəllim / otaq şəbəkəsi, kilid və köçürmə; «Dərc et» canlı cədvəli "
+"bir dəfəyə yazır."
+
+msgctxt "timetable.home"
+msgid "Qrup növbələri"
+msgstr "Qrup növbələri"
+
+msgctxt "timetable.home"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "timetable.home"
+msgid "Sərt pozuntu"
+msgstr "Sərt pozuntu"
+
+msgctxt "timetable.home"
+msgid "Yaradan"
+msgstr "Yaradan"
+
+msgctxt "timetable.home"
+msgid "Yeni işləmə"
+msgstr "Yeni işləmə"
+
+msgctxt "timetable.home"
+msgid "Yerləşdirilib"
+msgstr "Yerləşdirilib"
+
+msgctxt "timetable.home"
+msgid "Yoxla və işlət"
+msgstr "Yoxla və işlət"
+
+msgctxt "timetable.home"
+msgid ""
+"«Məlumatı yoxla» tələb ilə tutumu müqayisə edir; sonra mühərrik cədvəli "
+"qurur."
+msgstr ""
+"«Məlumatı yoxla» tələb ilə tutumu müqayisə edir; sonra mühərrik cədvəli "
+"qurur."
+
+msgctxt "timetable.home"
+msgid "İş axını"
+msgstr "İş axını"
+
+msgctxt "timetable.home"
+msgid "İşləmələr"
+msgstr "İşləmələr"
+
+msgctxt "timetable.home"
+msgid "Əhatə"
+msgstr "Əhatə"
+
+msgctxt "timetable.home"
+msgid "Əməliyyat"
+msgstr "Əməliyyat"
+
+msgctxt "timetable.home"
+msgid ""
+"Əvvəlcə müəllim əlçatanlığını və qrup növbələrini yoxlayın, sonra «Yeni "
+"işləmə» ilə cədvəl qurun."
+msgstr ""
+"Əvvəlcə müəllim əlçatanlığını və qrup növbələrini yoxlayın, sonra «Yeni "
+"işləmə» ilə cədvəl qurun."
+
+msgctxt "timetable.model"
+msgid "Axın yoxdur (hər qrup ayrıca)"
+msgstr "Axın yoxdur (hər qrup ayrıca)"
+
+msgctxt "timetable.model"
+msgid "Axşam"
+msgstr "Axşam"
+
+msgctxt "timetable.model"
+msgid "Bakalavr"
+msgstr "Bakalavr"
+
+msgctxt "timetable.model"
+msgid "Doktorantura"
+msgstr "Doktorantura"
+
+msgctxt "timetable.model"
+msgid "Dərc edilib"
+msgstr "Dərc edilib"
+
+msgctxt "timetable.model"
+msgid "Dəyişdirilə bilən saat"
+msgstr "Dəyişdirilə bilən saat"
+
+msgctxt "timetable.model"
+msgid "Eyni fənn + eyni müəllim + eyni dil"
+msgstr "Eyni fənn + eyni müəllim + eyni dil"
+
+msgctxt "timetable.model"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "timetable.model"
+msgid "Günorta"
+msgstr "Günorta"
+
+msgctxt "timetable.model"
+msgid "Gələ bilmir"
+msgstr "Gələ bilmir"
+
+msgctxt "timetable.model"
+msgid "Hazırdır"
+msgstr "Hazırdır"
+
+msgctxt "timetable.model"
+msgid "Ləğv edilib"
+msgstr "Ləğv edilib"
+
+msgctxt "timetable.model"
+msgid "Magistr"
+msgstr "Magistr"
+
+msgctxt "timetable.model"
+msgid "Neytral"
+msgstr "Neytral"
+
+msgctxt "timetable.model"
+msgid "Növbədə"
+msgstr "Növbədə"
+
+msgctxt "timetable.model"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "timetable.model"
+msgid "Qiyabi (bütün pillələr)"
+msgstr "Qiyabi (bütün pillələr)"
+
+msgctxt "timetable.model"
+msgid "Seçilmiş qruplar"
+msgstr "Seçilmiş qruplar"
+
+msgctxt "timetable.model"
+msgid "Səhər"
+msgstr "Səhər"
+
+msgctxt "timetable.model"
+msgid "Tədris tapşırığındakı birləşmələr + alt qruplar"
+msgstr "Tədris tapşırığındakı birləşmələr + alt qruplar"
+
+msgctxt "timetable.model"
+msgid "Uğursuz"
+msgstr "Uğursuz"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləmələri"
+msgstr "cədvəl işləmələri"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləməsi"
+msgstr "cədvəl işləməsi"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlıqları"
+msgstr "müəllim əlçatanlıqları"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlığı"
+msgstr "müəllim əlçatanlığı"
+
+msgctxt "timetable.model"
+msgid "qaralama slot"
+msgstr "qaralama slot"
+
+msgctxt "timetable.model"
+msgid "qaralama slotlar"
+msgstr "qaralama slotlar"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasəti"
+msgstr "qrup növbə siyasəti"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasətləri"
+msgstr "qrup növbə siyasətləri"
+
+msgctxt "timetable.model"
+msgid "Üstünlük verilir"
+msgstr "Üstünlük verilir"
+
+msgctxt "timetable.model"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "timetable.model"
+msgid "İşləyir"
+msgstr "İşləyir"
+
+msgctxt "timetable.nav"
+msgid "Avtomatik cədvəl bölmələri"
+msgstr "Avtomatik cədvəl bölmələri"
+
+msgctxt "timetable.nav"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+msgstr "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+
+msgctxt "timetable.nav"
+msgid "Müəllim əlçatanlığı"
+msgstr "Müəllim əlçatanlığı"
+
+msgctxt "timetable.nav"
+msgid "Növbələr"
+msgstr "Növbələr"
+
+msgctxt "timetable.nav"
+msgid "Yeni işləmə"
+msgstr "Yeni işləmə"
+
+msgctxt "timetable.nav"
+msgid "İşləmələr"
+msgstr "İşləmələr"
+
+msgctxt "timetable.nav"
+msgid "Əl ilə redaktor"
+msgstr "Əl ilə redaktor"
+
+msgctxt "timetable.page"
+msgid "Avtomatik dərs cədvəli"
+msgstr "Avtomatik dərs cədvəli"
+
+msgctxt "timetable.page"
+msgid ""
+"Müəllim əlçatanlığı və qrup növbələri əsasında qrupda boşluqsuz həftəlik "
+"cədvəl qurulur; qaralama yoxlanıldıqdan sonra dərc edilir."
+msgstr ""
+"Müəllim əlçatanlığı və qrup növbələri əsasında qrupda boşluqsuz həftəlik "
+"cədvəl qurulur; qaralama yoxlanıldıqdan sonra dərc edilir."
+
+msgctxt "timetable.page"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "timetable.page"
+msgid "Semestr seçin"
+msgstr "Semestr seçin"
+
+msgctxt "timetable.policy"
+msgid "Axtar"
+msgstr "Axtar"
+
+msgctxt "timetable.policy"
+msgid ""
+"Bu semestr açılışı olan qruplar. İstisna yalnız həmin qrupa aiddir (məs. "
+"1-ci kurs yalnız səhər)."
+msgstr ""
+"Bu semestr açılışı olan qruplar. İstisna yalnız həmin qrupa aiddir (məs. "
+"1-ci kurs yalnız səhər)."
+
+msgctxt "timetable.policy"
+msgid "Bu semestrdə sizin əhatənizdə açılışı olan qrup tapılmadı."
+msgstr "Bu semestrdə sizin əhatənizdə açılışı olan qrup tapılmadı."
+
+msgctxt "timetable.policy"
+msgid "Cədvələ daxil etmə"
+msgstr "Cədvələ daxil etmə"
+
+msgctxt "timetable.policy"
+msgid "Daxil etmə"
+msgstr "Daxil etmə"
+
+msgctxt "timetable.policy"
+msgid "Defolta qaytar"
+msgstr "Defolta qaytar"
+
+msgctxt "timetable.policy"
+msgid "Gündə maks."
+msgstr "Gündə maks."
+
+msgctxt "timetable.policy"
+msgid "Gündə maks. cüt"
+msgstr "Gündə maks. cüt"
+
+msgctxt "timetable.policy"
+msgid "Gündə maksimum cüt"
+msgstr "Gündə maksimum cüt"
+
+msgctxt "timetable.policy"
+msgid "Gündəlik limit 1–%(max)s aralığında olmalıdır."
+msgstr "Gündəlik limit 1–%(max)s aralığında olmalıdır."
+
+msgctxt "timetable.policy"
+msgid "Naməlum pillə."
+msgstr "Naməlum pillə."
+
+msgctxt "timetable.policy"
+msgid "Növbələr"
+msgstr "Növbələr"
+
+msgctxt "timetable.policy"
+msgid "Pillə / forma"
+msgstr "Pillə / forma"
+
+msgctxt "timetable.policy"
+msgid "Pillə defoltları"
+msgstr "Pillə defoltları"
+
+msgctxt "timetable.policy"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "timetable.policy"
+msgid "Qrup adı…"
+msgstr "Qrup adı…"
+
+msgctxt "timetable.policy"
+msgid "Qrup axtar"
+msgstr "Qrup axtar"
+
+msgctxt "timetable.policy"
+msgid "Qrup növbələri"
+msgstr "Qrup növbələri"
+
+msgctxt "timetable.policy"
+msgid "Qrup yoxdur"
+msgstr "Qrup yoxdur"
+
+msgctxt "timetable.policy"
+msgid ""
+"Qrup üçün ayrıca istisna yoxdursa bu qayda işləyir. Magistr dərsi susmaya "
+"görə yalnız axşam qoyulur."
+msgstr ""
+"Qrup üçün ayrıca istisna yoxdursa bu qayda işləyir. Magistr dərsi susmaya "
+"görə yalnız axşam qoyulur."
+
+msgctxt "timetable.policy"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "timetable.policy"
+msgid "Siyasət yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "Siyasət yadda saxlanılmadı — sahələri yoxlayın."
+
+msgctxt "timetable.policy"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "Yadda saxlanılmadı — sahələri yoxlayın."
+
+msgctxt "timetable.policy"
+msgid "alt qrup:"
+msgstr "alt qrup:"
+
+msgctxt "timetable.policy"
+msgid "dəyişdirilib"
+msgstr "dəyişdirilib"
+
+msgctxt "timetable.policy"
+msgid "istisna"
+msgstr "istisna"
+
+msgctxt "timetable.policy"
+msgid "qiyabi"
+msgstr "qiyabi"
+
+msgctxt "timetable.policy"
+msgid "susmaya görə"
+msgstr "susmaya görə"
+
+msgctxt "timetable.policy"
+msgid "İcazəli növbələr"
+msgstr "İcazəli növbələr"
+
+msgctxt "timetable.policy"
+msgid "Əməliyyat"
+msgstr "Əməliyyat"
+
+msgctxt "timetable.policy"
+msgid "Ən azı bir növbə seçilməlidir."
+msgstr "Ən azı bir növbə seçilməlidir."
+
+msgctxt "timetable.policy"
+msgid "əyani"
+msgstr "əyani"
+
+msgctxt "timetable.precheck"
+msgid "Bu dərslər yerləşdirilməyəcək — səbəbi sətirdə göstərilib."
+msgstr "Bu dərslər yerləşdirilməyəcək — səbəbi sətirdə göstərilib."
+
+msgctxt "timetable.precheck"
+msgid "Bəzi dərslər üçün heç bir mümkün vaxt yoxdur"
+msgstr "Bəzi dərslər üçün heç bir mümkün vaxt yoxdur"
+
+msgctxt "timetable.precheck"
+msgid "Cədvələ daxil edilməyən qruplar (qiyabi və ya siyasətdə istisna)"
+msgstr "Cədvələ daxil edilməyən qruplar (qiyabi və ya siyasətdə istisna)"
+
+msgctxt "timetable.precheck"
+msgid "Kilidli dərs indiki növbə/əlçatanlıqdan kənardadır"
+msgstr "Kilidli dərs indiki növbə/əlçatanlıqdan kənardadır"
+
+msgctxt "timetable.precheck"
+msgid "Korpusda eyni anda lazım olan otaq sayı mövcud otaqlardan çoxdur"
+msgstr "Korpusda eyni anda lazım olan otaq sayı mövcud otaqlardan çoxdur"
+
+msgctxt "timetable.precheck"
+msgid "Lazım olan / mövcud otaq."
+msgstr "Lazım olan / mövcud otaq."
+
+msgctxt "timetable.precheck"
+msgid "Magistr qruplarının dərsi axşam xanalarına sığmır"
+msgstr "Magistr qruplarının dərsi axşam xanalarına sığmır"
+
+msgctxt "timetable.precheck"
+msgid "Mühazirə axınları (bir neçə qrup birlikdə)"
+msgstr "Mühazirə axınları (bir neçə qrup birlikdə)"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimi təyin edilməmiş dərslər (vakant) — yalnız qrupa görə yerləşir"
+msgstr ""
+"Müəllimi təyin edilməmiş dərslər (vakant) — yalnız qrupa görə yerləşir"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin həftəlik dərsi uyğun boş xanalardan çoxdur"
+msgstr "Müəllimin həftəlik dərsi uyğun boş xanalardan çoxdur"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin vaxtı çox sıxdır (80%-dən çox dolu)"
+msgstr "Müəllimin vaxtı çox sıxdır (80%-dən çox dolu)"
+
+msgctxt "timetable.precheck"
+msgid "Qrupun həftəlik dərsi icazəli xanalara sığmır"
+msgstr "Qrupun həftəlik dərsi icazəli xanalara sığmır"
+
+msgctxt "timetable.precheck"
+msgid "Saat bölgüsü tapılmayan açılışlar (plan/tapşırıqda saat yoxdur)"
+msgstr "Saat bölgüsü tapılmayan açılışlar (plan/tapşırıqda saat yoxdur)"
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / axşam tutumu. Növbə siyasətində magistr üçün günortanı açmaq olar."
+msgstr ""
+"Tələb / axşam tutumu. Növbə siyasətində magistr üçün günortanı açmaq olar."
+
+msgctxt "timetable.precheck"
+msgid "Tələb / tutum (cüt/həftə) — boşluqsuz cədvəl çətinləşə bilər."
+msgstr "Tələb / tutum (cüt/həftə) — boşluqsuz cədvəl çətinləşə bilər."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Növbəni genişləndirin və ya gündəlik limiti "
+"artırın."
+msgstr ""
+"Tələb / tutum (cüt/həftə). Növbəni genişləndirin və ya gündəlik limiti "
+"artırın."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Əlçatanlığı genişləndirin və ya dərsi başqasına "
+"verin."
+msgstr ""
+"Tələb / tutum (cüt/həftə). Əlçatanlığı genişləndirin və ya dərsi başqasına "
+"verin."
+
+msgctxt "timetable.precheck"
+msgid "axının qruplarının ortaq növbəsi yoxdur"
+msgstr "axının qruplarının ortaq növbəsi yoxdur"
+
+msgctxt "timetable.precheck"
+msgid "müəllim qrupun növbəsində heç gələ bilmir"
+msgstr "müəllim qrupun növbəsində heç gələ bilmir"
+
+msgctxt "timetable.precheck"
+msgid "qrup üçün icazəli xana yoxdur"
+msgstr "qrup üçün icazəli xana yoxdur"
+
+msgctxt "timetable.publish"
+msgid "Avtomatik cədvəl generatoru ilə dərc"
+msgstr "Avtomatik cədvəl generatoru ilə dərc"
+
+msgctxt "timetable.publish"
+msgid "Qaralamada yerləşdirilmiş dərs yoxdur."
+msgstr "Qaralamada yerləşdirilmiş dərs yoxdur."
+
+msgctxt "timetable.publish"
+msgid "Yalnız hazır (tamamlanmış) qaralama dərc edilə bilər."
+msgstr "Yalnız hazır (tamamlanmış) qaralama dərc edilə bilər."
+
+msgctxt "timetable.review"
+msgid "ALT"
+msgstr "ALT"
+
+msgctxt "timetable.review"
+msgid "Alt həftə"
+msgstr "Alt həftə"
+
+msgctxt "timetable.review"
+msgid "Arzuolunmaz saat"
+msgstr "Arzuolunmaz saat"
+
+msgctxt "timetable.review"
+msgid "Axtar…"
+msgstr "Axtar…"
+
+msgctxt "timetable.review"
+msgid "Baxış"
+msgstr "Baxış"
+
+msgctxt "timetable.review"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "timetable.review"
+msgid ""
+"Bu dərslərin müəllimi (dərs yükü bölgüsündən) açılışın jurnal sahibindən "
+"fərqlidir. Canlı cədvəldə slotun ayrıca müəllim sahəsi olmadığı üçün jurnal "
+"sahibi göstəriləcək."
+msgstr ""
+"Bu dərslərin müəllimi (dərs yükü bölgüsündən) açılışın jurnal sahibindən "
+"fərqlidir. Canlı cədvəldə slotun ayrıca müəllim sahəsi olmadığı üçün jurnal "
+"sahibi göstəriləcək."
+
+msgctxt "timetable.review"
+msgid "Bu qaralama canlı cədvələ dərc edilib"
+msgstr "Bu qaralama canlı cədvələ dərc edilib"
+
+msgctxt "timetable.review"
+msgid "Bu qaralama ləğv edilsin? Canlı cədvəl dəyişməyəcək."
+msgstr "Bu qaralama ləğv edilsin? Canlı cədvəl dəyişməyəcək."
+
+msgctxt "timetable.review"
+msgid "Bölünmüş tədris"
+msgstr "Bölünmüş tədris"
+
+msgctxt "timetable.review"
+msgid "Bütün dərslər yerləşdirilib."
+msgstr "Bütün dərslər yerləşdirilib."
+
+msgctxt "timetable.review"
+msgid "Cədvəli dərc et"
+msgstr "Cədvəli dərc et"
+
+msgctxt "timetable.review"
+msgid ""
+"Diqqət: %(total)s dərs yerləşdirilməyib — dərcdən sonra canlı cədvəldə "
+"olmayacaq."
+msgstr ""
+"Diqqət: %(total)s dərs yerləşdirilməyib — dərcdən sonra canlı cədvəldə "
+"olmayacaq."
+
+msgctxt "timetable.review"
+msgid "Dərc et"
+msgstr "Dərc et"
+
+msgctxt "timetable.review"
+msgid "Dərc olunmuşdan fərq"
+msgstr "Dərc olunmuşdan fərq"
+
+msgctxt "timetable.review"
+msgid "Dərs"
+msgstr "Dərs"
+
+msgctxt "timetable.review"
+msgid "Dərs saatı"
+msgstr "Dərs saatı"
+
+msgctxt "timetable.review"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "timetable.review"
+msgid "Gün"
+msgstr "Gün"
+
+msgctxt "timetable.review"
+msgid "Həftə"
+msgstr "Həftə"
+
+msgctxt "timetable.review"
+msgid "Həftəlik cədvəl şəbəkəsi"
+msgstr "Həftəlik cədvəl şəbəkəsi"
+
+msgctxt "timetable.review"
+msgid "Həftəlik şəbəkə"
+msgstr "Həftəlik şəbəkə"
+
+msgctxt "timetable.review"
+msgid "Hər həftə"
+msgstr "Hər həftə"
+
+msgctxt "timetable.review"
+msgid "Kilidli"
+msgstr "Kilidli"
+
+msgctxt "timetable.review"
+msgid "Kilidlə / kilidi aç"
+msgstr "Kilidlə / kilidi aç"
+
+msgctxt "timetable.review"
+msgid "Köçür"
+msgstr "Köçür"
+
+msgctxt "timetable.review"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "timetable.review"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "timetable.review"
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+msgctxt "timetable.review"
+msgid "Mühərrik işləyir — səhifə hazır olanda avtomatik yenilənəcək."
+msgstr "Mühərrik işləyir — səhifə hazır olanda avtomatik yenilənəcək."
+
+msgctxt "timetable.review"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "timetable.review"
+msgid "Müəllim boş cütü"
+msgstr "Müəllim boş cütü"
+
+msgctxt "timetable.review"
+msgid "Məşğələ"
+msgstr "Məşğələ"
+
+msgctxt "timetable.review"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "timetable.review"
+msgid "Otaq"
+msgstr "Otaq"
+
+msgctxt "timetable.review"
+msgid "Otaq (təklif)"
+msgstr "Otaq (təklif)"
+
+msgctxt "timetable.review"
+msgid ""
+"Qaralama canlı cədvələ yazılacaq: işləmədəki açılışların köhnə slotları "
+"yumşaq silinir və yerləşdirilmiş dərslər əlavə olunur. Müəllimlərə və "
+"qrupların tələbələrinə bir bildiriş göndərilir."
+msgstr ""
+"Qaralama canlı cədvələ yazılacaq: işləmədəki açılışların köhnə slotları "
+"yumşaq silinir və yerləşdirilmiş dərslər əlavə olunur. Müəllimlərə və "
+"qrupların tələbələrinə bir bildiriş göndərilir."
+
+msgctxt "timetable.review"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "timetable.review"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "timetable.review"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "timetable.review"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "timetable.review"
+msgid ""
+"Server sərt qaydaları yoxlayır: müəllim/qrup toqquşması, qrupda boşluq, "
+"növbə və «gələ bilmir» saatı."
+msgstr ""
+"Server sərt qaydaları yoxlayır: müəllim/qrup toqquşması, qrupda boşluq, "
+"növbə və «gələ bilmir» saatı."
+
+msgctxt "timetable.review"
+msgid "Seçim"
+msgstr "Seçim"
+
+msgctxt "timetable.review"
+msgid "Səbəb / qeyd (auditə düşür)"
+msgstr "Səbəb / qeyd (auditə düşür)"
+
+msgctxt "timetable.review"
+msgid "Sərt pozuntu"
+msgstr "Sərt pozuntu"
+
+msgctxt "timetable.review"
+msgid ""
+"Sərt qaydalar pozulmadan yer tapılmayan dərslər. Səbəbə baxın, lazım olsa əl"
+" ilə yerləşdirin və ya giriş məlumatını dəyişib yenidən işlədin."
+msgstr ""
+"Sərt qaydalar pozulmadan yer tapılmayan dərslər. Səbəbə baxın, lazım olsa əl"
+" ilə yerləşdirin və ya giriş məlumatını dəyişib yenidən işlədin."
+
+msgctxt "timetable.review"
+msgid "Tək cütlük gün"
+msgstr "Tək cütlük gün"
+
+msgctxt "timetable.review"
+msgid "Worker cavab vermir — brauzerdə işlət (qısa limit)"
+msgstr "Worker cavab vermir — brauzerdə işlət (qısa limit)"
+
+msgctxt "timetable.review"
+msgid "Yenidən işlət (kilidlər qalır)"
+msgstr "Yenidən işlət (kilidlər qalır)"
+
+msgctxt "timetable.review"
+msgid "Yerləşdir"
+msgstr "Yerləşdir"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilib"
+msgstr "Yerləşdirilib"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilməyən dərslər"
+msgstr "Yerləşdirilməyən dərslər"
+
+msgctxt "timetable.review"
+msgid "həftədə orta (üst/alt)"
+msgstr "həftədə orta (üst/alt)"
+
+msgctxt "timetable.review"
+msgid "qrup bir dərs üçün gəlir"
+msgstr "qrup bir dərs üçün gəlir"
+
+msgctxt "timetable.review"
+msgid "san."
+msgstr "san."
+
+msgctxt "timetable.review"
+msgid "toqquşma + qrupda boşluq"
+msgstr "toqquşma + qrupda boşluq"
+
+msgctxt "timetable.review"
+msgid "yaradıb:"
+msgstr "yaradıb:"
+
+msgctxt "timetable.review"
+msgid "«dəyişdirilə bilən» xanalar"
+msgstr "«dəyişdirilə bilən» xanalar"
+
+msgctxt "timetable.review"
+msgid "ÜST"
+msgstr "ÜST"
+
+msgctxt "timetable.review"
+msgid "Üst həftə"
+msgstr "Üst həftə"
+
+msgctxt "timetable.review"
+msgid "İmtina"
+msgstr "İmtina"
+
+msgctxt "timetable.review"
+msgid "İşləmə uğursuz oldu"
+msgstr "İşləmə uğursuz oldu"
+
+msgctxt "timetable.review"
+msgid "Əl ilə köçürülüb"
+msgstr "Əl ilə köçürülüb"
+
+msgctxt "timetable.review"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "timetable.run"
+msgid "30 saat = hər həftə 1 cüt; 15 saat = iki həftədən bir (üst və ya alt)."
+msgstr ""
+"30 saat = hər həftə 1 cüt; 15 saat = iki həftədən bir (üst və ya alt)."
+
+msgctxt "timetable.run"
+msgid ""
+"Alt qrup ailəsi (birləşik qrup + alt qruplar) avtomatik birlikdə götürülür."
+msgstr ""
+"Alt qrup ailəsi (birləşik qrup + alt qruplar) avtomatik birlikdə götürülür."
+
+msgctxt "timetable.run"
+msgid "Axtar…"
+msgstr "Axtar…"
+
+msgctxt "timetable.run"
+msgid "Axın"
+msgstr "Axın"
+
+msgctxt "timetable.run"
+msgid "Axının qruplarının ortaq növbəsi yoxdur."
+msgstr "Axının qruplarının ortaq növbəsi yoxdur."
+
+msgctxt "timetable.run"
+msgid "Aşağı"
+msgstr "Aşağı"
+
+msgctxt "timetable.run"
+msgid "Bu semestrdə açılışı olan qrup yoxdur."
+msgstr "Bu semestrdə açılışı olan qrup yoxdur."
+
+msgctxt "timetable.run"
+msgid "Cərimə çəkiləri (ətraflı)"
+msgstr "Cərimə çəkiləri (ətraflı)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəldən fərq (sabitlik)"
+msgstr "Dərc olunmuş cədvəldən fərq (sabitlik)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəli mümkün qədər saxla (minimal dəyişiklik)"
+msgstr "Dərc olunmuş cədvəli mümkün qədər saxla (minimal dəyişiklik)"
+
+msgctxt "timetable.run"
+msgid "Dərs (hadisə)"
+msgstr "Dərs (hadisə)"
+
+msgctxt "timetable.run"
+msgid "Effektiv tədris həftəsi"
+msgstr "Effektiv tədris həftəsi"
+
+msgctxt "timetable.run"
+msgid "Eyni fənn eyni gün (mühazirə + məşğələ)"
+msgstr "Eyni fənn eyni gün (mühazirə + məşğələ)"
+
+msgctxt "timetable.run"
+msgid ""
+"Eyni toxum + eyni məlumat → eyni başlanğıc; fərqli toxum alternativ variant "
+"verir."
+msgstr ""
+"Eyni toxum + eyni məlumat → eyni başlanğıc; fərqli toxum alternativ variant "
+"verir."
+
+msgctxt "timetable.run"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "timetable.run"
+msgid "Fakültə seçin"
+msgstr "Fakültə seçin"
+
+msgctxt "timetable.run"
+msgid "Həftəlik cüt"
+msgstr "Həftəlik cüt"
+
+msgctxt "timetable.run"
+msgid "Korpusda eyni anda boş otaq qalmayıb."
+msgstr "Korpusda eyni anda boş otaq qalmayıb."
+
+msgctxt "timetable.run"
+msgid "Kritik problem tapılmadı — işlədə bilərsiniz."
+msgstr "Kritik problem tapılmadı — işlədə bilərsiniz."
+
+msgctxt "timetable.run"
+msgid ""
+"Kritik problemlər var — işləmə yenə mümkündür, amma bəzi dərslər "
+"yerləşməyəcək."
+msgstr ""
+"Kritik problemlər var — işləmə yenə mümkündür, amma bəzi dərslər "
+"yerləşməyəcək."
+
+msgctxt "timetable.run"
+msgid "Mühazirə axınları"
+msgstr "Mühazirə axınları"
+
+msgctxt "timetable.run"
+msgid "Mümkün vaxt yoxdur."
+msgstr "Mümkün vaxt yoxdur."
+
+msgctxt "timetable.run"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "timetable.run"
+msgid "Müəllim bütün uyğun xanalarda başqa dərsdədir."
+msgstr "Müəllim bütün uyğun xanalarda başqa dərsdədir."
+
+msgctxt "timetable.run"
+msgid "Müəllim prioriteti"
+msgstr "Müəllim prioriteti"
+
+msgctxt "timetable.run"
+msgid "Müəllim qrupun növbəsində heç gələ bilmir."
+msgstr "Müəllim qrupun növbəsində heç gələ bilmir."
+
+msgctxt "timetable.run"
+msgid "Müəllim seçin"
+msgstr "Müəllim seçin"
+
+msgctxt "timetable.run"
+msgid "Müəllim uyğun xanalarda başqa fakültənin dərc olunmuş dərsindədir."
+msgstr "Müəllim uyğun xanalarda başqa fakültənin dərc olunmuş dərsindədir."
+
+msgctxt "timetable.run"
+msgid "Müəllim əlavə et"
+msgstr "Müəllim əlavə et"
+
+msgctxt "timetable.run"
+msgid "Müəllimi təyin edilməmiş (vakant) dərsləri də yerləşdir"
+msgstr "Müəllimi təyin edilməmiş (vakant) dərsləri də yerləşdir"
+
+msgctxt "timetable.run"
+msgid "Müəllimin boş cütü (pəncərə)"
+msgstr "Müəllimin boş cütü (pəncərə)"
+
+msgctxt "timetable.run"
+msgid "Müəllimin gündəlik limiti aşması"
+msgstr "Müəllimin gündəlik limiti aşması"
+
+msgctxt "timetable.run"
+msgid "Məlumat"
+msgstr "Məlumat"
+
+msgctxt "timetable.run"
+msgid "Məlumatı yoxla"
+msgstr "Məlumatı yoxla"
+
+msgctxt "timetable.run"
+msgid "Mənbə işləmənin kilidli dərsləri yerində saxlanılacaq"
+msgstr "Mənbə işləmənin kilidli dərsləri yerində saxlanılacaq"
+
+msgctxt "timetable.run"
+msgid "Növbəyə qoyulur…"
+msgstr "Növbəyə qoyulur…"
+
+msgctxt "timetable.run"
+msgid "Parametrlər"
+msgstr "Parametrlər"
+
+msgctxt "timetable.run"
+msgid "Prioritet sırası"
+msgstr "Prioritet sırası"
+
+msgctxt "timetable.run"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "timetable.run"
+msgid "Qrup adı ilə süz…"
+msgstr "Qrup adı ilə süz…"
+
+msgctxt "timetable.run"
+msgid "Qrup üçün icazəli xana yoxdur (növbə siyasəti)."
+msgstr "Qrup üçün icazəli xana yoxdur (növbə siyasəti)."
+
+msgctxt "timetable.run"
+msgid "Qrupları süz"
+msgstr "Qrupları süz"
+
+msgctxt "timetable.run"
+msgid "Qrupun bir dərs üçün gəldiyi gün"
+msgstr "Qrupun bir dərs üçün gəldiyi gün"
+
+msgctxt "timetable.run"
+msgid "Qrupun gündəlik limiti aşması"
+msgstr "Qrupun gündəlik limiti aşması"
+
+msgctxt "timetable.run"
+msgid "Qrupun gününü boşluqsuz saxlamaq mümkün olmadı."
+msgstr "Qrupun gününü boşluqsuz saxlamaq mümkün olmadı."
+
+msgctxt "timetable.run"
+msgid "Qrupun uyğun xanaları başqa dərslərlə doludur."
+msgstr "Qrupun uyğun xanaları başqa dərslərlə doludur."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahı boşdur — bütün müəllimlər bərabər prioritetlidir. «Məlumatı yoxla»dan"
+" sonra müəllimləri əlavə edə bilərsiniz."
+msgstr ""
+"Siyahı boşdur — bütün müəllimlər bərabər prioritetlidir. «Məlumatı yoxla»dan"
+" sonra müəllimləri əlavə edə bilərsiniz."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahıdakı müəllimlər əvvəl yerləşdirilir və onların istəkləri daha güclü "
+"çəki alır (yuxarıdakı — ən vacib)."
+msgstr ""
+"Siyahıdakı müəllimlər əvvəl yerləşdirilir və onların istəkləri daha güclü "
+"çəki alır (yuxarıdakı — ən vacib)."
+
+msgctxt "timetable.run"
+msgid "Siyahıdan çıxar"
+msgstr "Siyahıdan çıxar"
+
+msgctxt "timetable.run"
+msgid ""
+"Sərt qaydalar (toqquşma, qrupda boşluq, magistr — yalnız axşam, «gələ "
+"bilmir» saatı) çəki ilə dəyişmir — HƏMİŞƏ qorunur."
+msgstr ""
+"Sərt qaydalar (toqquşma, qrupda boşluq, magistr — yalnız axşam, «gələ "
+"bilmir» saatı) çəki ilə dəyişmir — HƏMİŞƏ qorunur."
+
+msgctxt "timetable.run"
+msgid "Sərt qaydaları pozmadan yer tapılmadı."
+msgstr "Sərt qaydaları pozmadan yer tapılmadı."
+
+msgctxt "timetable.run"
+msgid "Toxum (seed)"
+msgstr "Toxum (seed)"
+
+msgctxt "timetable.run"
+msgid ""
+"Tövsiyə: fakültə-fakültə qurun — başqa fakültənin dərc olunmuş dərsləri "
+"müəllim üçün sabit məşğulluq sayılır."
+msgstr ""
+"Tövsiyə: fakültə-fakültə qurun — başqa fakültənin dərc olunmuş dərsləri "
+"müəllim üçün sabit məşğulluq sayılır."
+
+msgctxt "timetable.run"
+msgid "Tədris günləri"
+msgstr "Tədris günləri"
+
+msgctxt "timetable.run"
+msgid "Uzun limit daha az «boş pəncərə» verir; 30–60 san. adətən kifayətdir."
+msgstr "Uzun limit daha az «boş pəncərə» verir; 30–60 san. adətən kifayətdir."
+
+msgctxt "timetable.run"
+msgid "Vaxt limiti (saniyə)"
+msgstr "Vaxt limiti (saniyə)"
+
+msgctxt "timetable.run"
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgctxt "timetable.run"
+msgid "Xəta"
+msgstr "Xəta"
+
+msgctxt "timetable.run"
+msgid "Yeni işləmə"
+msgstr "Yeni işləmə"
+
+msgctxt "timetable.run"
+msgid "Yoxlama nəticəsi"
+msgstr "Yoxlama nəticəsi"
+
+msgctxt "timetable.run"
+msgid "Yoxlanılır…"
+msgstr "Yoxlanılır…"
+
+msgctxt "timetable.run"
+msgid "Yuxarı"
+msgstr "Yuxarı"
+
+msgctxt "timetable.run"
+msgid "boşluq yaranır"
+msgstr "boşluq yaranır"
+
+msgctxt "timetable.run"
+msgid "digər"
+msgstr "digər"
+
+msgctxt "timetable.run"
+msgid "müəllim məşğul"
+msgstr "müəllim məşğul"
+
+msgctxt "timetable.run"
+msgid "müəllimin kənar dərsi"
+msgstr "müəllimin kənar dərsi"
+
+msgctxt "timetable.run"
+msgid "otaq yoxdur"
+msgstr "otaq yoxdur"
+
+msgctxt "timetable.run"
+msgid "qrup məşğul"
+msgstr "qrup məşğul"
+
+msgctxt "timetable.run"
+msgid "«Dəyişdirilə bilən» saatın istifadəsi"
+msgstr "«Dəyişdirilə bilən» saatın istifadəsi"
+
+msgctxt "timetable.run"
+msgid "İxtisas"
+msgstr "İxtisas"
+
+msgctxt "timetable.run"
+msgid "İxtisas seçin"
+msgstr "İxtisas seçin"
+
+msgctxt "timetable.run"
+msgid "İşləməni yaradan istifadəçi tapılmadı."
+msgstr "İşləməni yaradan istifadəçi tapılmadı."
+
+msgctxt "timetable.run"
+msgid "İşlət"
+msgstr "İşlət"
+
+msgctxt "timetable.run"
+msgid "Əhatə"
+msgstr "Əhatə"
+
+msgctxt "timetable.run"
+msgid "Əhatə növü"
+msgstr "Əhatə növü"
+
+msgctxt "timetable.run"
+msgid "Əhatə seçin (fakültə, ixtisas və ya ən azı bir qrup)."
+msgstr "Əhatə seçin (fakültə, ixtisas və ya ən azı bir qrup)."
+
+msgctxt "timetable.run"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "subject_folder.choice"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "subject_folder.choice"
+msgid "Arxivlənib"
+msgstr "Arxivlənib"
+
+msgctxt "subject_folder.choice"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "subject_folder.choice"
+msgid "Digər səbəb"
+msgstr "Digər səbəb"
+
+msgctxt "subject_folder.choice"
+msgid "Ev tapşırığı"
+msgstr "Ev tapşırığı"
+
+msgctxt "subject_folder.choice"
+msgid "Eyni məzmun"
+msgstr "Eyni məzmun"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl"
+msgstr "Fayl"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl silindi"
+msgstr "Fayl silindi"
+
+msgctxt "subject_folder.choice"
+msgid "Gecikmə ilə qəbul edilir"
+msgstr "Gecikmə ilə qəbul edilir"
+
+msgctxt "subject_folder.choice"
+msgid "Göndərildi"
+msgstr "Göndərildi"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnal qəbul etmədi"
+msgstr "Jurnal qəbul etmədi"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşdü"
+msgstr "Jurnala düşdü"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşüb"
+msgstr "Jurnala düşüb"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülmə gözləyir"
+msgstr "Jurnala ötürülmə gözləyir"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülməsi gözlənilir"
+msgstr "Jurnala ötürülməsi gözlənilir"
+
+msgctxt "subject_folder.choice"
+msgid "Keçid"
+msgstr "Keçid"
+
+msgctxt "subject_folder.choice"
+msgid "Kod nümunəsi"
+msgstr "Kod nümunəsi"
+
+msgctxt "subject_folder.choice"
+msgid "Mövzuya uyğun deyil"
+msgstr "Mövzuya uyğun deyil"
+
+msgctxt "subject_folder.choice"
+msgid "Müəllimin mövzusu"
+msgstr "Müəllimin mövzusu"
+
+msgctxt "subject_folder.choice"
+msgid "Mətn oxşarlığı"
+msgstr "Mətn oxşarlığı"
+
+msgctxt "subject_folder.choice"
+msgid "Oxşarlıq aşkarlandı"
+msgstr "Oxşarlıq aşkarlandı"
+
+msgctxt "subject_folder.choice"
+msgid "Plagiat / köçürülmüş iş"
+msgstr "Plagiat / köçürülmüş iş"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama saxlanıldı"
+msgstr "Qaralama saxlanıldı"
+
+msgctxt "subject_folder.choice"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edildi"
+msgstr "Qəbul edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edilib"
+msgstr "Qəbul edilib"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edildi"
+msgstr "Rədd edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edilib"
+msgstr "Rədd edilib"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd ləğv edildi"
+msgstr "Rədd ləğv edildi"
+
+msgctxt "subject_folder.choice"
+msgid "Rəylə qaytarıldı"
+msgstr "Rəylə qaytarıldı"
+
+msgctxt "subject_folder.choice"
+msgid "Sillabusdan"
+msgstr "Sillabusdan"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Son tarixdən sonra göndərilib"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra qəbul edilmir"
+msgstr "Son tarixdən sonra qəbul edilmir"
+
+msgctxt "subject_folder.choice"
+msgid "Sərbəst iş"
+msgstr "Sərbəst iş"
+
+msgctxt "subject_folder.choice"
+msgid "Tətbiq olunmur"
+msgstr "Tətbiq olunmur"
+
+msgctxt "subject_folder.choice"
+msgid "Video keçidi"
+msgstr "Video keçidi"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən göndərildi"
+msgstr "Yenidən göndərildi"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən işləməyə qaytarılıb"
+msgstr "Yenidən işləməyə qaytarılıb"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama alınmadı"
+msgstr "Yoxlama alınmadı"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama gözlənilir"
+msgstr "Yoxlama gözlənilir"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıla bilən mətn yoxdur"
+msgstr "Yoxlanıla bilən mətn yoxdur"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıldı"
+msgstr "Yoxlanıldı"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılıb"
+msgstr "Yoxlanılıb"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılır"
+msgstr "Yoxlanılır"
+
+msgctxt "subject_folder.choice"
+msgid "Şəkil"
+msgstr "Şəkil"
+
+msgctxt "subject_folder.error"
+msgid "Arxivlənmiş qovluq dəyişdirilə bilməz."
+msgstr "Arxivlənmiş qovluq dəyişdirilə bilməz."
+
+msgctxt "subject_folder.error"
+msgid "Açılma vaxtı son tarixdən əvvəl olmalıdır."
+msgstr "Açılma vaxtı son tarixdən əvvəl olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın fənni qovluğun fənninə uyğun deyil."
+msgstr "Açılışın fənni qovluğun fənninə uyğun deyil."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın semestri qovluğun semestrinə uyğun deyil."
+msgstr "Açılışın semestri qovluğun semestrinə uyğun deyil."
+
+msgctxt "subject_folder.error"
+msgid "Bal 0-dan böyük olmalı və %(max)s-dən çox olmamalıdır."
+msgstr "Bal 0-dan böyük olmalı və %(max)s-dən çox olmamalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "Başlıq boş ola bilməz."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışında aktiv qeydiyyatınız yoxdur."
+msgstr "Bu fənn açılışında aktiv qeydiyyatınız yoxdur."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışını (qrupu) siz tədris etmirsiniz."
+msgstr "Bu fənn açılışını (qrupu) siz tədris etmirsiniz."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənni tədris etmədiyiniz üçün onun qovluğunu yarada bilməzsiniz."
+msgstr "Bu fənni tədris etmədiyiniz üçün onun qovluğunu yarada bilməzsiniz."
+
+msgctxt "subject_folder.error"
+msgid "Bu göndəriş baxış növbəsində deyil."
+msgstr "Bu göndəriş baxış növbəsində deyil."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrup üçün qovluq aktiv deyil."
+msgstr "Bu qrup üçün qovluq aktiv deyil."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun göndərişlərini yalnız fənnin müəllimi yoxlaya bilər."
+msgstr "Bu qrupun göndərişlərini yalnız fənnin müəllimi yoxlaya bilər."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Bu qrupun sillabusundakı sərbəst iş strukturu (%(offering_option)s) "
+"qovluğunkundan (%(folder_option)s) fərqlidir — sərbəst iş bu qrupda "
+"qovluqdan qəbul edilməyəcək."
+msgstr ""
+"Bu qrupun sillabusundakı sərbəst iş strukturu (%(offering_option)s) "
+"qovluğunkundan (%(folder_option)s) fərqlidir — sərbəst iş bu qrupda "
+"qovluqdan qəbul edilməyəcək."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun sərbəst işləri başqa fənn qovluğundan qiymətləndirilir."
+msgstr "Bu qrupun sərbəst işləri başqa fənn qovluğundan qiymətləndirilir."
+
+msgctxt "subject_folder.error"
+msgid "Bu sərbəst iş üçün bal artıq verilib — ikinci dəfə bal verilmir."
+msgstr "Bu sərbəst iş üçün bal artıq verilib — ikinci dəfə bal verilmir."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq arxivlənib."
+msgstr "Bu tapşırıq arxivlənib."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq fayl qəbul etmir — cavabı mətn kimi yazın."
+msgstr "Bu tapşırıq fayl qəbul etmir — cavabı mətn kimi yazın."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq mətn cavabı qəbul etmir — fayl yükləyin."
+msgstr "Bu tapşırıq mətn cavabı qəbul etmir — fayl yükləyin."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq üzrə iş artıq yekunlaşıb."
+msgstr "Bu tapşırıq üzrə iş artıq yekunlaşıb."
+
+msgctxt "subject_folder.error"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+
+msgctxt "subject_folder.error"
+msgid "Cavab mətni yazın və ya ən azı bir fayl əlavə edin."
+msgstr "Cavab mətni yazın və ya ən azı bir fayl əlavə edin."
+
+msgctxt "subject_folder.error"
+msgid "Dəstəklənməyən fayl tipi: %(ext)s"
+msgstr "Dəstəklənməyən fayl tipi: %(ext)s"
+
+msgctxt "subject_folder.error"
+msgid "Ev tapşırığına bal verilmir — yalnız «Yoxlanıldı» qeyd edin."
+msgstr "Ev tapşırığına bal verilmir — yalnız «Yoxlanıldı» qeyd edin."
+
+msgctxt "subject_folder.error"
+msgid "Eyni anda ikinci göndəriş alındı — səhifəni yeniləyib yoxlayın."
+msgstr "Eyni anda ikinci göndəriş alındı — səhifəni yeniləyib yoxlayın."
+
+msgctxt "subject_folder.error"
+msgid "Fayl qəbul edilmədi."
+msgstr "Fayl qəbul edilmədi."
+
+msgctxt "subject_folder.error"
+msgid "Fayl sayı 1–%(max_files)s, ölçü 1–%(max_mb)s MB aralığında olmalıdır."
+msgstr "Fayl sayı 1–%(max_files)s, ölçü 1–%(max_mb)s MB aralığında olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Fayl seçilməyib."
+msgstr "Fayl seçilməyib."
+
+msgctxt "subject_folder.error"
+msgid "Göndərişiniz yoxlanılır — müəllimin cavabını gözləyin."
+msgstr "Göndərişiniz yoxlanılır — müəllimin cavabını gözləyin."
+
+msgctxt "subject_folder.error"
+msgid "Keçid http:// və ya https:// ilə başlayan düzgün ünvan olmalıdır."
+msgstr "Keçid http:// və ya https:// ilə başlayan düzgün ünvan olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Kod mətni boşdur."
+msgstr "Kod mətni boşdur."
+
+msgctxt "subject_folder.error"
+msgid "Material bu qovluğa aid deyil."
+msgstr "Material bu qovluğa aid deyil."
+
+msgctxt "subject_folder.error"
+msgid "Material növü tanınmır."
+msgstr "Material növü tanınmır."
+
+msgctxt "subject_folder.error"
+msgid "Mövzu bu qovluğa aid deyil."
+msgstr "Mövzu bu qovluğa aid deyil."
+
+msgctxt "subject_folder.error"
+msgid "Mövzuya bağlı material və ya tapşırıq var — əvvəlcə onları köçürün."
+msgstr "Mövzuya bağlı material və ya tapşırıq var — əvvəlcə onları köçürün."
+
+msgctxt "subject_folder.error"
+msgid "Mətn çox uzundur (ən çox %(max)s simvol)."
+msgstr "Mətn çox uzundur (ən çox %(max)s simvol)."
+
+msgctxt "subject_folder.error"
+msgid "Qeyd mətni boşdur."
+msgstr "Qeyd mətni boşdur."
+
+msgctxt "subject_folder.error"
+msgid "Qovluq hələ aktiv deyil."
+msgstr "Qovluq hələ aktiv deyil."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğu yalnız onun sahibi olan müəllim redaktə edə bilər."
+msgstr "Qovluğu yalnız onun sahibi olan müəllim redaktə edə bilər."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğun statusu yanlışdır."
+msgstr "Qovluğun statusu yanlışdır."
+
+msgctxt "subject_folder.error"
+msgid "Rədd səbəbi seçilməyib."
+msgstr "Rədd səbəbi seçilməyib."
+
+msgctxt "subject_folder.error"
+msgid "Rəy yazın (ən azı %(min)s simvol)."
+msgstr "Rəy yazın (ən azı %(min)s simvol)."
+
+msgctxt "subject_folder.error"
+msgid "Seçilən obyektlər eyni təşkilata aid olmalıdır."
+msgstr "Seçilən obyektlər eyni təşkilata aid olmalıdır."
+
+msgctxt "subject_folder.error"
+msgid "Sillabus mövzusu silinmir — onu gizlədə və ya adını dəyişə bilərsiniz."
+msgstr ""
+"Sillabus mövzusu silinmir — onu gizlədə və ya adını dəyişə bilərsiniz."
+
+msgctxt "subject_folder.error"
+msgid "Son tarix keçib — bu tapşırıq gecikmə ilə qəbul edilmir."
+msgstr "Son tarix keçib — bu tapşırıq gecikmə ilə qəbul edilmir."
+
+msgctxt "subject_folder.error"
+msgid "Sərbəst iş bal ilə qəbul edilir."
+msgstr "Sərbəst iş bal ilə qəbul edilir."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş balı cəmi %(max_total)s-i keçə bilməz: tələbənin artıq "
+"%(already)s balı var, ən çox %(remaining)s əlavə etmək olar."
+msgstr ""
+"Sərbəst iş balı cəmi %(max_total)s-i keçə bilməz: tələbənin artıq "
+"%(already)s balı var, ən çox %(remaining)s əlavə etmək olar."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş tapşırıqları sillabusun strukturundan yaranır — əlavə sərbəst iş "
+"yaratmaq olmaz."
+msgstr ""
+"Sərbəst iş tapşırıqları sillabusun strukturundan yaranır — əlavə sərbəst iş "
+"yaratmaq olmaz."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq bu qovluğa aid deyil."
+msgstr "Tapşırıq bu qovluğa aid deyil."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ açılmayıb."
+msgstr "Tapşırıq hələ açılmayıb."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ dərc edilməyib."
+msgstr "Tapşırıq hələ dərc edilməyib."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq növü tanınmır."
+msgstr "Tapşırıq növü tanınmır."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq nə mətn, nə də fayl qəbul edir."
+msgstr "Tapşırıq nə mətn, nə də fayl qəbul edir."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa göndəriş var — silmək olmaz, yalnız arxivləmək olar."
+msgstr "Tapşırığa göndəriş var — silmək olmaz, yalnız arxivləmək olar."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa ən çox %(max)s qoşma əlavə etmək olar."
+msgstr "Tapşırığa ən çox %(max)s qoşma əlavə etmək olar."
+
+msgctxt "subject_folder.error"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "Təyinat bu qovluğa aid deyil."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız qaralamadakı fayl silinə bilər."
+msgstr "Yalnız qaralamadakı fayl silinə bilər."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."
+msgstr "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."
+
+msgctxt "subject_folder.error"
+msgid "Ən çox %(max)s fayl əlavə etmək olar."
+msgstr "Ən çox %(max)s fayl əlavə etmək olar."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal balı qəbul etmədi."
+msgstr "Jurnal balı qəbul etmədi."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal inteqrasiyası hələ aktiv deyil — bal növbədədir."
+msgstr "Jurnal inteqrasiyası hələ aktiv deyil — bal növbədədir."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnala ötürmə alınmadı, yenidən cəhd ediləcək: %(error)s"
+msgstr "Jurnala ötürmə alınmadı, yenidən cəhd ediləcək: %(error)s"
+
+msgctxt "subject_folder.journal"
+msgid "Sərbəst iş %(n)s"
+msgstr "Sərbəst iş %(n)s"
+
+msgctxt "subject_folder.sync"
+msgid "Sərbəst iş %(n)s"
+msgstr "Sərbəst iş %(n)s"
+
+msgctxt "subject_folder.review"
+msgid ""
+"Bu bal jurnala düşəcək: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"Bu bal jurnala düşəcək: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluqları"
+msgstr "fənn qovluqları"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluğu"
+msgstr "fənn qovluğu"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş"
+msgstr "göndəriş"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izi"
+msgstr "göndəriş barmaq izi"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izləri"
+msgstr "göndəriş barmaq izləri"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylları"
+msgstr "göndəriş faylları"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylı"
+msgstr "göndəriş faylı"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisələri"
+msgstr "göndəriş hadisələri"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisəsi"
+msgstr "göndəriş hadisəsi"
+
+msgctxt "subject_folder.model"
+msgid "göndərişlər"
+msgstr "göndərişlər"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluqları"
+msgstr "oxşarlıq uyğunluqları"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluğu"
+msgstr "oxşarlıq uyğunluğu"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzuları"
+msgstr "qovluq mövzuları"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzusu"
+msgstr "qovluq mövzusu"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatları"
+msgstr "qovluq təyinatları"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatı"
+msgstr "qovluq təyinatı"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq"
+msgstr "tapşırıq"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşmaları"
+msgstr "tapşırıq qoşmaları"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşması"
+msgstr "tapşırıq qoşması"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixi"
+msgstr "tapşırıq son tarixi"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixləri"
+msgstr "tapşırıq son tarixləri"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıqlar"
+msgstr "tapşırıqlar"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialları"
+msgstr "tədris materialları"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialı"
+msgstr "tədris materialı"
+
+msgctxt "subject_folder.notify"
+msgid "Bal jurnala köçürülür."
+msgstr "Bal jurnala köçürülür."
+
+msgctxt "subject_folder.notify"
+msgid "Bal: %(points)s / %(max)s — jurnala köçürülür."
+msgstr "Bal: %(points)s / %(max)s — jurnala köçürülür."
+
+msgctxt "subject_folder.notify"
+msgid "Ev tapşırığı yoxlanıldı: %(task)s"
+msgstr "Ev tapşırığı yoxlanıldı: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Müəllimin rəyini oxuyun və işi yenidən göndərin."
+msgstr "Müəllimin rəyini oxuyun və işi yenidən göndərin."
+
+msgctxt "subject_folder.notify"
+msgid "Səbəb və rəy tapşırıq səhifəsindədir."
+msgstr "Səbəb və rəy tapşırıq səhifəsindədir."
+
+msgctxt "subject_folder.notify"
+msgid "Sərbəst iş qəbul edildi: %(task)s"
+msgstr "Sərbəst iş qəbul edildi: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni ev tapşırığı: %(title)s"
+msgstr "Yeni ev tapşırığı: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni fənn qovluğu: %(subject)s"
+msgstr "Yeni fənn qovluğu: %(subject)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni sərbəst iş: %(title)s"
+msgstr "Yeni sərbəst iş: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yoxlanılmalı yeni işlər: %(count)s"
+msgstr "Yoxlanılmalı yeni işlər: %(count)s"
+
+msgctxt "subject_folder.notify"
+msgid "«%(folder)s» — tədris materialları və tapşırıqlar sizin üçün açıqdır."
+msgstr "«%(folder)s» — tədris materialları və tapşırıqlar sizin üçün açıqdır."
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz rədd edildi: %(task)s"
+msgstr "İşiniz rədd edildi: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz yenidən işləməyə qaytarıldı: %(task)s"
+msgstr "İşiniz yenidən işləməyə qaytarıldı: %(task)s"

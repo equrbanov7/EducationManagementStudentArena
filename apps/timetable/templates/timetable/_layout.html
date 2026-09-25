@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}Avtomatik dərs cədvəlinin ORTAQ səhifə qabığı (kabinetdən kənar, müstəqil).
+
+CSP: inline stil/skript blokları YOXDUR — ems_ui komponent qatı + modulun öz CSS/JS
+faylları xaricidir; dinamik dəyərlər data-* atributları və json_script adaları ilə
+ötürülür. Səhifələr `tt_content` / `tt_css` / `tt_js` bloklarını doldurur.{% endcomment %}
+
+{% block title %}{% block tt_title %}{% trans "Avtomatik dərs cədvəli" context "timetable.page" %}{% endblock %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'timetable/css/timetable.css' %}?v=20260925-1">
+    <link rel="stylesheet" href="{% static 'timetable/css/timetable_grid.css' %}?v=20260925-1">
+    {% block tt_css %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 tt-page">
+  {% include "accounts/profile/_messages.html" %}
+  {% include "timetable/partials/_nav.html" %}
+  {% block tt_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'timetable/js/timetable_common.js' %}?v=20260925-1"></script>
+    {% block tt_js %}{% endblock %}
+{% endblock %}

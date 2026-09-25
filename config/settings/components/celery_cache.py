@@ -132,4 +132,14 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.auto_close_daily_room_sessions",
         "schedule": crontab(hour=22, minute=0),
     },
+    # Fənn qovluğu (2026-09-25): jurnala düşməmiş (pending) sərbəst iş ballarının təkrar sinxronu
+    # və müəllimlərə yeni təhvil digest-i (hər təhvil üçün ayrıca bildiriş əvəzinə).
+    "subject-folder-sync-journal": {
+        "task": "subject_folder.sync_journal_pending",
+        "schedule": crontab(minute="*/10"),
+    },
+    "subject-folder-digests": {
+        "task": "subject_folder.send_submission_digests",
+        "schedule": crontab(minute="*/15"),
+    },
 }

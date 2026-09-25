@@ -1,0 +1,116 @@
+{% extends "timetable/_layout.html" %}
+{% load static i18n %}
+{% comment %}Qrup növbə siyasəti — pillə defoltları (bakalavr/magistr/doktorantura/qiyabi) və
+qrup istisnaları. Növbə çipləri `aria-pressed` düymələridir; «Yadda saxla» sətrin
+dəyərlərini JSON ilə `timetable:api_policy`-ə göndərir (policy_editor.js).{% endcomment %}
+
+{% block tt_title %}{% trans "Qrup növbələri" context "timetable.policy" %}{% endblock %}
+
+{% block tt_content %}
+<div class="tt-policy" data-tt-policy-root data-save-url="{{ save_url }}"
+     data-msg-error="{% trans 'Yadda saxlanılmadı — sahələri yoxlayın.' context 'timetable.policy' %}">
+
+  <section class="ems-card tt-card" aria-labelledby="tt-levels-title">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title" id="tt-levels-title">{% trans "Pillə defoltları" context "timetable.policy" %}</h2>
+        <p class="ems-card__sub">{% trans "Qrup üçün ayrıca istisna yoxdursa bu qayda işləyir. Magistr dərsi susmaya görə yalnız axşam qoyulur." context "timetable.policy" %}</p>
+      </div>
+    </div>
+    <div class="ems-card__body tt-levels">
+      {% for level in levels %}
+      <div class="tt-level" data-tt-policy data-level="{{ level.level }}">
+        <div class="tt-level__head">
+          <h3 class="tt-level__title">{{ level.label }}</h3>
+          {% if level.is_custom %}<span class="ems-badge ems-badge--primary">{% trans "dəyişdirilib" context "timetable.policy" %}</span>{% else %}<span class="ems-badge ems-badge--neutral">{% trans "susmaya görə" context "timetable.policy" %}</span>{% endif %}
+        </div>
+        <div class="tt-bands" role="group" aria-label="{% trans 'İcazəli növbələr' context 'timetable.policy' %}">
+          {% for band in band_choices %}
+            <button type="button" class="ems-chip tt-band tt-band--{{ band.code }}" data-tt-band="{{ band.code }}" aria-pressed="{% if band.code in level.bands %}true{% else %}false{% endif %}">{{ band.label }}</button>
+          {% endfor %}
+        </div>
+        <div class="tt-level__row">
+          <label class="tt-inline-field">
+            <span>{% trans "Gündə maks. cüt" context "timetable.policy" %}</span>
+            <input class="ems-input tt-input-xs" type="number" min="1" max="8" data-tt-max value="{{ level.max_pairs_per_day|default:'' }}">
+          </label>
+          <label class="tt-check">
+            <input type="checkbox" data-tt-excluded {% if level.is_excluded %}checked{% endif %}>
+            <span>{% trans "Cədvələ daxil etmə" context "timetable.policy" %}</span>
+          </label>
+        </div>
+        <button type="button" class="ems-btn ems-btn--sm" data-tt-policy-save>{% trans "Yadda saxla" context "timetable.policy" %}</button>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="ems-card tt-card" aria-labelledby="tt-groups-title">
+    <div class="ems-card__head">
+      <div>
+        <h2 class="ems-card__title" id="tt-groups-title">{% trans "Qruplar" context "timetable.policy" %} <span class="tt-count">{{ groups_total }}</span></h2>
+        <p class="ems-card__sub">{% trans "Bu semestr açılışı olan qruplar. İstisna yalnız həmin qrupa aiddir (məs. 1-ci kurs yalnız səhər)." context "timetable.policy" %}</p>
+      </div>
+      <form class="tt-search" method="get" action="">
+        <input type="hidden" name="period" value="{{ tt_period_id }}">
+        <label class="visually-hidden" for="tt-group-q">{% trans "Qrup axtar" context "timetable.policy" %}</label>
+        <input class="ems-input" id="tt-group-q" type="search" name="q" value="{{ query }}" placeholder="{% trans 'Qrup adı…' context 'timetable.policy' %}">
+        <button class="ems-btn ems-btn--sm" type="submit">{% trans "Axtar" context "timetable.policy" %}</button>
+      </form>
+    </div>
+    <div class="ems-card__body">
+      {% if groups %}
+      <div class="tt-table-wrap">
+        <table class="tt-table">
+          <thead>
+            <tr>
+              <th scope="col">{% trans "Qrup" context "timetable.policy" %}</th>
+              <th scope="col">{% trans "Pillə / forma" context "timetable.policy" %}</th>
+              <th scope="col" class="tt-num">{% trans "Tələbə" context "timetable.policy" %}</th>
+              <th scope="col">{% trans "Növbələr" context "timetable.policy" %}</th>
+              <th scope="col">{% trans "Gündə maks." context "timetable.policy" %}</th>
+              <th scope="col">{% trans "Daxil etmə" context "timetable.policy" %}</th>
+              <th scope="col"><span class="visually-hidden">{% trans "Əməliyyat" context "timetable.policy" %}</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in groups %}
+            <tr data-tt-policy data-group="{{ row.id }}">
+              <td>
+                <strong>{{ row.name }}</strong>
+                {% if row.parent %}<span class="tt-muted">{% trans "alt qrup:" context "timetable.policy" %} {{ row.parent }}</span>{% endif %}
+                {% if row.is_custom %}<span class="ems-badge ems-badge--primary">{% trans "istisna" context "timetable.policy" %}</span>{% endif %}
+              </td>
+              <td>{{ row.degree }} / {{ row.form }}</td>
+              <td class="tt-num">{{ row.students }}</td>
+              <td>
+                <div class="tt-bands" role="group" aria-label="{% trans 'İcazəli növbələr' context 'timetable.policy' %}">
+                  {% for band in band_choices %}
+                    <button type="button" class="ems-chip tt-band tt-band--{{ band.code }}" data-tt-band="{{ band.code }}" aria-pressed="{% if band.code in row.bands %}true{% else %}false{% endif %}">{{ band.label }}</button>
+                  {% endfor %}
+                </div>
+              </td>
+              <td><input class="ems-input tt-input-xs" type="number" min="1" max="8" data-tt-max value="{{ row.max_pairs_per_day|default:'' }}" aria-label="{% trans 'Gündə maksimum cüt' context 'timetable.policy' %}"></td>
+              <td><input type="checkbox" data-tt-excluded {% if row.is_excluded %}checked{% endif %} aria-label="{% trans 'Cədvələ daxil etmə' context 'timetable.policy' %}"></td>
+              <td class="tt-actions">
+                <button type="button" class="ems-btn ems-btn--sm" data-tt-policy-save>{% trans "Yadda saxla" context "timetable.policy" %}</button>
+                {% if row.is_custom %}<button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-tt-policy-reset>{% trans "Defolta qaytar" context "timetable.policy" %}</button>{% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        {% trans "Qrup yoxdur" context "timetable.policy" as empty_title %}
+        {% trans "Bu semestrdə sizin əhatənizdə açılışı olan qrup tapılmadı." context "timetable.policy" as empty_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-users-slash" state_title=empty_title state_body=empty_body %}
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block tt_js %}
+    <script src="{% static 'timetable/js/policy_editor.js' %}?v=20260925-1"></script>
+{% endblock %}
