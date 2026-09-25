@@ -75,7 +75,7 @@ jobs:
         env:
           PLAN_KEY: ${{ secrets.RESTORE_PLAN_KEY }}
         run: |
-          set -uo pipefail
+          set +e -uo pipefail  # diaqnostika: boş grep nəticəsi addımı dayandırmasın
           cd "$APP_DIR"
           dotenv() { grep -E "^$1=" .env | head -1 | cut -d= -f2- | tr -d '"' | tr -d "'"; }
           classify() {  # IP → private/public (dəyər maskalanıbsa belə sinfi görünür)
@@ -197,7 +197,7 @@ jobs:
       - name: ✅ Yoxlama (daxili zona)
         if: inputs.mode == 'apply'
         run: |
-          set -uo pipefail
+          set +e -uo pipefail  # diaqnostika: boş grep nəticəsi addımı dayandırmasın
           cd "$APP_DIR"
           fail=0
           probe() {  # $1 yol, $2 gözlənilən kodlar (regex)
