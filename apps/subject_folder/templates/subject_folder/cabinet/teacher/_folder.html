@@ -1,0 +1,74 @@
+{% load i18n %}
+<nav class="ems-crumbs sfc-crumbs" aria-label="{% trans 'Naviqasiya' context 'subject_folder.ui' %}">
+    <a class="ems-crumbs__link" href="{{ sp.urls.list }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Fənn qovluqları" context "subject_folder.ui" %}</a>
+</nav>
+<header class="sfc-head">
+    <div class="sfc-head__main">
+        <p class="sfc-eyebrow">{{ sp.folder.subject.name }} · {{ sp.period_label }}</p>
+        <h2 class="sfc-head__title">{{ sp.folder.title }}</h2>
+        {% if sp.folder.description %}<p class="sfc-head__desc">{{ sp.folder.description|linebreaksbr }}</p>{% endif %}
+        <p class="sfc-head__meta">
+            <span class="ems-badge ems-badge--{{ sp.chip.tone }}">{{ sp.chip.label }}</span>
+            {% if sp.folder.selfwork_option %}<span class="ems-badge ems-badge--info">{% blocktrans trimmed with option=sp.folder.selfwork_option context "subject_folder.ui" %}Sərbəst iş: {{ option }}{% endblocktrans %}</span>{% endif %}
+            {% if sp.folder.synced_at %}<span class="sfc-muted">{% trans "Sillabusla uzlaşdırılıb:" context "subject_folder.ui" %} {{ sp.folder.synced_at|date:"d.m.Y H:i" }}</span>{% endif %}
+            {% if not sp.can_manage %}<span class="sfc-muted">{% trans "Sahibi:" context "subject_folder.ui" %} {{ sp.owner_name }}</span>{% endif %}
+        </p>
+    </div>
+    <div class="sfc-head__actions">
+        <a class="ems-btn ems-btn--sm" href="{{ sp.review_url }}"><i class="fas fa-inbox" aria-hidden="true"></i> {% trans "Göndərişlər" context "subject_folder.ui" %}</a>
+        {% if sp.can_manage %}
+            {% if not sp.is_archived %}
+                <button type="button" class="ems-btn ems-btn--sm" data-sf-open="sfFolderEdit"
+                        data-sf-fill-title="{{ sp.folder.title }}" data-sf-fill-description="{{ sp.folder.description }}">
+                    <i class="fas fa-pen" aria-hidden="true"></i> {% trans "Redaktə et" context "subject_folder.ui" %}
+                </button>
+                <button type="button" class="ems-btn ems-btn--sm" data-sf-post="folder_resync" data-sf-field-folder="{{ sp.folder.pk }}"
+                        data-sf-confirm="{% trans 'Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? Göndərişi olan heç nə silinmir.' context 'subject_folder.ui' %}">
+                    <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Sillabusla uzlaşdır" context "subject_folder.ui" %}
+                </button>
+            {% endif %}
+            {% if sp.clone_periods %}
+                <button type="button" class="ems-btn ems-btn--sm" data-ems-overlay-open="sfFolderClone">
+                    <i class="fas fa-copy" aria-hidden="true"></i> {% trans "Başqa semestrə köçür" context "subject_folder.ui" %}
+                </button>
+            {% endif %}
+            {% if sp.folder.status == "draft" %}
+                <button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-sf-post="folder_status" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-status="active">
+                    <i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Aktivləşdir" context "subject_folder.ui" %}
+                </button>
+            {% elif sp.folder.status == "active" %}
+                <button type="button" class="ems-btn ems-btn--sm" data-sf-post="folder_status" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-status="archived" data-sf-danger="1"
+                        data-sf-confirm="{% trans 'Qovluq arxivlənsin? Tələbələr onu görməyəcək, məzmun yalnız oxu rejimində qalacaq.' context 'subject_folder.ui' %}">
+                    <i class="fas fa-box-archive" aria-hidden="true"></i> {% trans "Arxivlə" context "subject_folder.ui" %}
+                </button>
+            {% else %}
+                <button type="button" class="ems-btn ems-btn--sm" data-sf-post="folder_status" data-sf-field-folder="{{ sp.folder.pk }}" data-sf-field-status="active">
+                    <i class="fas fa-box-open" aria-hidden="true"></i> {% trans "Arxivdən çıxar" context "subject_folder.ui" %}
+                </button>
+            {% endif %}
+        {% endif %}
+    </div>
+</header>
+{% if sp.folder.status == "draft" %}
+    {% trans "Qovluq qaralamadır — tələbələr onu görmür." context "subject_folder.ui" as bn_title %}
+    {% trans "Məzmunu hazırlayın və «Qruplar və son tarixlər» tabından qruplara təyin edin: ilk təyinatda qovluq avtomatik aktivləşir." context "subject_folder.ui" as bn_body %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="info" banner_title=bn_title banner_body=bn_body %}
+{% elif sp.is_archived %}
+    {% trans "Qovluq arxivdədir — yalnız oxu rejimi." context "subject_folder.ui" as bn_title %}
+    {% include "partials/ems_ui/_banner.html" with banner_kind="warning" banner_title=bn_title %}
+{% endif %}
+<nav class="ems-tabs sfc-tabs" aria-label="{% trans 'Qovluq bölmələri' context 'subject_folder.ui' %}">
+    {% for tab in sp.tabs %}
+        <a class="ems-tabs__btn" href="{{ tab.url }}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+    {% endfor %}
+</nav>
+<div class="sfc-body">
+    {% if sp.tab == "groups" %}
+        {% include "subject_folder/cabinet/teacher/_groups.html" %}
+    {% else %}
+        {% include "subject_folder/cabinet/teacher/_content.html" %}
+    {% endif %}
+</div>
+{% if sp.can_manage %}
+    {% include "subject_folder/cabinet/teacher/_dialogs.html" %}
+{% endif %}

@@ -1,0 +1,9 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfEditTitle">{% trans "Qovluğun adı" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="text" id="sfEditTitle" name="title" maxlength="255" required>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfEditDesc">{% trans "Təsvir" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea" id="sfEditDesc" name="description" rows="4"></textarea>
+</div>

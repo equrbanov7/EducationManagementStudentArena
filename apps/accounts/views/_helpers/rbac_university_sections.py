@@ -62,6 +62,13 @@ def university_role_sections(
             sections.add("analytics")
         if is_superadmin or is_org_admin or is_unit_manager:
             sections.add("academic-records")
+        # «Fənn qovluğu» (apps.subject_folder): müəllimin qovluq redaktoru + tapşırıq
+        # yoxlaması; tələbənin «Fənn qovluqlarım». Faktiki qapı servisdədir (sahib /
+        # qrupun canlı müəllimi / auditoriya) — burada yalnız menyu görünürlüyü.
+        if is_teacher or is_org_admin or is_superadmin:
+            sections.update({"subject-folders", "subject-folder-review"})
+        if is_student:
+            sections.add("my-subject-folders")
 
     # Universitet strukturu (fakültə/kafedra) idarəetmə linkləri:
     # - rektor/prorektor/org admin → bütün təşkilat

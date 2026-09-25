@@ -181,6 +181,12 @@ SECTION_PARTIALS: dict[str, str] = {
     "evaluation-survey": "accounts/profile/sections/_evaluation_survey.html",
     "evaluation-results": "accounts/profile/sections/_evaluation_results.html",
     "evaluation-campaigns": "accounts/profile/sections/_evaluation_campaigns.html",
+    # «Fənn qovluğu» (apps.subject_folder, 2026-09-25): müəllimin qovluqları + tapşırıq
+    # yoxlaması, tələbənin «Fənn qovluqlarım». Panel məzmunu `subject_folder_cabinet`
+    # tag-ı ilə qurulur; yazı `subject_folder:action` JSON endpoint-inə gedir.
+    "subject-folders": "accounts/profile/sections/_subject_folders.html",
+    "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
+    "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -315,6 +321,12 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # filtr paneli və tab linkləri paneli yerində yeniləyir → AJAX-safe OLMALIDIR
         # (`test_section_registry_consistency` fraqment-naviqasiya skaneri).
         "evaluation-results",
+        # «Fənn qovluğu» (2026-09-25) — üç bölmə də server-render panelidir; filtr paneli,
+        # qovluq/tapşırıq linkləri (`sf_*`) və tab-lar paneli yerində yeniləyir, bütün
+        # mutasiyalar `subject_folder:action` JSON-una gedir → AJAX swap təhlükəsizdir.
+        "subject-folders",
+        "subject-folder-review",
+        "my-subject-folders",
     }
 )
 

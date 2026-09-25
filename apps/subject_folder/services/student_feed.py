@@ -72,7 +72,7 @@ def student_folders(*, organization, student, period=None) -> list[dict]:
             is_active=True,
             folder__status=FolderStatus.ACTIVE,
         )
-        .select_related("folder", "folder__subject", "folder__owner", "offering", "offering__period")
+        .select_related("folder", "folder__subject", "folder__owner", "offering", "offering__period", "offering__group")
         .order_by("folder__subject__name", "assigned_at")
     )
     if not assignments:

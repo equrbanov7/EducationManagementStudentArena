@@ -1,0 +1,35 @@
+{% load i18n static subject_folder_cabinet %}
+{% comment %}«Tapşırıq yoxlaması» (müəllim) — fənn qovluqlarına göndərilən işlər. Kontekst `sf_review_panel`
+tag-ından (`apps/subject_folder/cabinet/review.py`). Sətrin «Bax» düyməsi çekməcəni `subject_folder:review_detail`
+HTML fraqmenti ilə doldurur (`review.js`); qərarlar `subject_folder:action`-a gedir. CSP: inline kod yoxdur.{% endcomment %}
+{% sf_review_panel as rp %}
+<link rel="stylesheet" href="{% static 'subject_folder/css/cabinet.css' %}?v=20260925-1">
+<link rel="stylesheet" href="{% static 'subject_folder/css/forms.css' %}?v=20260925-1">
+<link rel="stylesheet" href="{% static 'subject_folder/css/review.css' %}?v=20260925-1">
+<div class="sfc" data-sf-root data-sf-section="subject-folder-review" data-sf-action-url="{{ rp.urls.action }}"
+     data-sf-detail-url="{{ rp.urls.review_detail }}" data-sf-preview-url="{{ rp.urls.review_preview }}"
+     {% include "subject_folder/cabinet/_i18n.html" %}>
+{% if rp.state == "no_org" %}
+    {% trans "Aktiv təşkilat seçilməyib" context "subject_folder.ui" as st_title %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-building" %}
+{% else %}
+    {% csrf_token %}
+    {% trans "Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə qaytarılır — 0 yazılmır." context "subject_folder.ui" as rv_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rv_subtitle %}
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=rp.kpi_tiles kpi_variant="4" %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-folder-review" filter_prefix="sf_" filter_fields=rp.filter_fields filter_count_label=rp.filter_count_label filter_auto=True filter_bootstrap=True %}
+    <div class="sfc-listwrap" data-ems-filter-target>
+    {% if rp.items %}
+        {% include "subject_folder/cabinet/review/_table.html" %}
+        {% include "partials/_pagination.html" with page_obj=rp.page_obj page_param="sf_page" extra_query=rp.pagination_query %}
+    {% else %}
+        {% trans "Süzgəcləri dəyişin və ya bütün statusları seçin." context "subject_folder.ui" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=rp.empty_title state_body=st_body state_icon="fa-inbox" %}
+    {% endif %}
+    </div>
+    {% trans "Göndəriş" context "subject_folder.ui" as dr_title %}
+    {% include "partials/ems_ui/_drawer.html" with drawer_id="sfReviewDrawer" drawer_title=dr_title drawer_xl=True drawer_body_include="subject_folder/cabinet/review/_drawer_body.html" %}
+{% endif %}
+</div>
+<script defer src="{% static 'subject_folder/js/cabinet.js' %}?v=20260925-1"></script>
+<script defer src="{% static 'subject_folder/js/review.js' %}?v=20260925-1"></script>

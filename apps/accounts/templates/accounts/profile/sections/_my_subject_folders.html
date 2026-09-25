@@ -1,0 +1,9 @@
+{% if 'my-subject-folders' in allowed_sections %}
+{% comment %}«Fənn qovluqlarım» — tələbənin təyin olunmuş qovluqları, materiallar, tapşırıqlar və
+göndərişlər. AJAX-SAFE: qovluq/tapşırıq linkləri (`sf_folder`, `sf_task`) paneli yerində yeniləyir.{% endcomment %}
+<section class="profile-section-panel profile-section--my-subject-folders {% if active_section == 'my-subject-folders' %}is-active{% endif %}"
+         data-profile-section-panel="my-subject-folders"
+         data-source-url="{{ profile_base_url }}?section=my-subject-folders">
+    {% include "subject_folder/cabinet/student/_panel.html" %}
+</section>
+{% endif %}

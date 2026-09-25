@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="{{ topic_select_id }}">{% trans "Mövzu" context "subject_folder.ui" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ topic_select_id }}" name="topic" data-bootstrap-select{% if sp.topic_options|length > 8 %} data-live-search="true" data-live-search-placeholder="{% trans 'Mövzu adı ilə axtar…' context 'subject_folder.ui' %}" data-live-search-empty="{% trans 'Uyğun mövzu tapılmadı' context 'subject_folder.ui' %}"{% endif %}>
+            <option value="">{% trans "Ümumi (mövzusuz)" context "subject_folder.ui" %}</option>
+            {% for option in sp.topic_options %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+        </select>
+    </div>
+</div>
