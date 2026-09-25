@@ -60,7 +60,7 @@ body.jhist-open { overflow: hidden; }
 .jhist__search {
     display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 12px;
     border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg); background: var(--ems-bg);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
 }
 .jhist__search:focus-within { border-color: var(--ems-neutral-500); box-shadow: var(--ems-sh-focus); }
 .jhist__search input {
