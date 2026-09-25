@@ -86,7 +86,7 @@
     font-size: 16px;
     line-height: 1;
     text-align: center;
-    color: var(--sb-muted);
+    color: var(--sb-icon, var(--sb-muted));
     transition: color 0.14s ease;
 }
 
@@ -140,7 +140,7 @@
 }
 
 .sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-icon {
-    color: var(--sb-fg);
+    color: var(--sb-icon, var(--sb-fg));
 }
 
 .sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-caret {

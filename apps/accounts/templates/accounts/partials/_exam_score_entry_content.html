@@ -22,12 +22,13 @@ kimi render edir. CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur); dinamik
 dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel İÇİNDƏ və
 `defer` ilədir (AJAX swap qaydası).
 
-2026-09-26 (sahib): BİTMİŞ dövr kilidi — `_period_lock.html` bannerı; yalnız-oxu
-rejimdə (`s.read_only`) idxal paneli və yadda saxlama yoxdur; RİM rəhbəri
+2026-09-26 (sahib): BİTMİŞ dövr — `_period_lock.html` bannerı; rejimsiz
+(`s.changes_locked`) yazılmış bal olan sətirlər yalnız oxunur, boş bal yazılır
+(60 gündən köhnə dövrdə sənədlə — kök `data-submission-required`); RİM rəhbəri
 «Düzəliş rejimini aktivləşdir» ilə (`?ese_correct=1`) açır — kök `data-correction-mode`.{% endcomment %}
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-3">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260914-4">
-<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_lock.css' %}?v=20260926-1">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_lock.css' %}?v=20260926-2">
 
 {% trans "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin." context "registrar.exam_score_entry" as ese_subtitle %}
 {% trans "Köçürmə addımları" context "registrar.exam_score_entry" as ese_steps_label %}
@@ -39,8 +40,9 @@ rejimdə (`s.read_only`) idxal paneli və yadda saxlama yoxdur; RİM rəhbəri
      data-max-score="{{ s.exam_score_max }}"
      data-question-count="{{ s.question_count|default:0 }}"
      data-question-max="{{ s.question_max|default:10 }}"
-     data-read-only="{% if s.read_only %}1{% else %}0{% endif %}"
-     data-correction-mode="{% if s.correction_mode %}1{% else %}0{% endif %}">
+     data-changes-locked="{% if s.changes_locked %}1{% else %}0{% endif %}"
+     data-correction-mode="{% if s.correction_mode %}1{% else %}0{% endif %}"
+     data-submission-required="{% if s.submission_required %}1{% else %}0{% endif %}">
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=ese_subtitle %}
 
   {% if s.steps %}{% include "partials/ems_ui/_stepper.html" with steps=s.steps steps_label=ese_steps_label %}{% endif %}
@@ -113,11 +115,9 @@ rejimdə (`s.read_only`) idxal paneli və yadda saxlama yoxdur; RİM rəhbəri
     <div data-ems-tabpanel="manual">
       {% include "accounts/partials/exam_score_entry/_roster.html" %}
     </div>
-    {% if not s.read_only %}
     <div data-ems-tabpanel="import" hidden>
       {% include "accounts/partials/exam_score_entry/_import.html" %}
     </div>
-    {% endif %}
 
     {% include "accounts/partials/exam_score_entry/_sheets.html" %}
 
@@ -163,7 +163,7 @@ rejimdə (`s.read_only`) idxal paneli və yadda saxlama yoxdur; RİM rəhbəri
      data-question-invalid="{% trans 'Xətalı sual balı var — hər sual 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"
      data-dialog-title="{% trans 'Balları sistemə yaz' context 'registrar.exam_score_entry' %}"
      data-question-sum="{% trans 'Sualların cəmi imtahan balının tavanını aşa bilməz.' context 'registrar.exam_score_entry' %}"></div>
-<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260926-1"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20260926-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20260926-2"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20260926-2"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20260914-3"></script>
-<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260926-1"></script>
+<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260926-2"></script>

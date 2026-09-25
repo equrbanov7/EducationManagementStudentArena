@@ -136,38 +136,119 @@ class PastPeriodLockTest(TestCase):
             # `*` daşıyan rektor da AÇA BİLMİR — sahib: «ancaq RİM rəhbəri».
             self.assertFalse(lock.can_unlock_past_period(self.rector, self.org))
 
-    # ── İmtahan Mərkəzi: bitmiş dövrdə heç bir yazı ─────────────────────────
-    def test_center_page_is_read_only(self):
+    def test_first_entry_document_threshold(self):
+        """«Çox köhnə» = bağlanmadan 60 gündən ÇOX keçib; bağlanma = max(end_date, exam_session_end)."""
+        today = timezone.localdate()
+        days = lock.PAST_FIRST_ENTRY_DOCUMENT_AFTER_DAYS
+        period = AcademicPeriod(start_date=today - datetime.timedelta(days=400), is_current=False)
+        period.end_date = today - datetime.timedelta(days=days)
+        self.assertTrue(lock.period_is_locked(period, today))
+        self.assertFalse(lock.first_entry_needs_document(period, today))  # düz 60 gün — sərbəst
+        period.end_date = today - datetime.timedelta(days=days + 1)
+        self.assertTrue(lock.first_entry_needs_document(period, today))
+        period.exam_session_end = today - datetime.timedelta(days=30)  # sessiya sonra bağlanıb
+        self.assertFalse(lock.first_entry_needs_document(period, today))
+
+    # ── İmtahan Mərkəzi: bitmiş dövrdə ilk daxiletmə açıq, dəyişiklik bağlı ──
+    def _recent_past_period(self):
+        """Dövr 30 gün əvvəl bağlanıb — bitib, amma «çox köhnə» deyil."""
+        today = timezone.localdate()
+        with bypass_rls():
+            AcademicPeriod.objects.filter(pk=self.period.pk).update(
+                start_date=today - datetime.timedelta(days=150), end_date=today - datetime.timedelta(days=30)
+            )
+
+    def _first_entry_submission(self, **extra):
+        submission = self._full_submission(**extra)
+        submission.pop("correction_mode")
+        return submission
+
+    def test_center_page_locks_recorded_rows_only(self):
+        self._seed_score("45")
         resp = self._page(self.center)
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "data-ese-period-lock")
-        self.assertContains(resp, 'data-read-only="1"')
-        self.assertNotContains(resp, "data-ese-save")
-        self.assertNotContains(resp, "data-esi-apply")
+        self.assertContains(resp, 'data-changes-locked="1"')
+        self.assertContains(resp, 'data-submission-required="1"')  # fixture dövrü > 60 gün köhnədir
+        self.assertContains(resp, 'data-locked="1"')  # yazılmış bal olan sətir
+        self.assertContains(resp, "data-ese-save")  # boş sətirlər üçün yadda saxlama qalır
+        self.assertContains(resp, "data-esi-apply")
         self.assertNotContains(resp, "data-ese-correction-on")
 
-    def test_center_cannot_write_first_entry(self):
-        resp = self._post(self.center)
-        self.assertEqual(resp.status_code, 302)
-        self.assertIsNone(self._score())
-        self.assertEqual(self._sheet_count(), 0)
+    def test_center_first_entry_in_recent_past_period_is_free(self):
+        self._recent_past_period()
+        resp = self._page(self.center)
+        self.assertContains(resp, 'data-submission-required="0"')
+        self._post(self.center)
+        self.assertEqual(self._score(), Decimal("45"))
+        (entry,) = self._entries()
+        self.assertEqual(entry.kind, ExamScoreEntryKind.INITIAL)
 
-    def test_center_cannot_write_even_with_forged_correction_mode(self):
+    def test_center_first_entry_in_old_period_requires_document(self):
+        self._post(self.center)
+        self.assertIsNone(self._score())
+        self.assertEqual(self._sheet_count(), 0)  # təqdimat partiyadan ƏVVƏL yoxlanır
+        for missing in ("reason", "note", "justification_evidence"):
+            with self.subTest(missing=missing):
+                submission = self._first_entry_submission()
+                submission.pop(missing)
+                self._post(self.center, **submission)
+                self.assertIsNone(self._score())
+
+    def test_center_first_entry_in_old_period_with_document_is_written(self):
+        from apps.audit.models import AuditLog
+
+        self._post(self.center, **self._first_entry_submission())
+        self.assertEqual(self._score(), Decimal("45"))
+        (entry,) = self._entries()
+        self.assertEqual(entry.kind, ExamScoreEntryKind.INITIAL)
+        self.assertEqual(entry.reason, CorrectionReason.APPEAL)
+        with bypass_rls():
+            self.assertTrue(entry.sheet.evidence)
+            self.assertTrue(
+                AuditLog.objects.filter(
+                    resource_id=str(entry.pk), reason__contains="past-period first entry (document)"
+                ).exists()
+            )
+
+    def test_center_cannot_write_with_forged_correction_mode(self):
         self._post(self.center, **self._full_submission())
         self.assertIsNone(self._score())
         self.assertEqual(self._sheet_count(), 0)
 
     def test_center_cannot_change_existing_score(self):
         self._seed_score("45")
-        self._post(self.center, **self._full_submission(**{f"score__{self.enrollment.id}": "30"}))
+        change = self._first_entry_submission(**{f"score__{self.enrollment.id}": "30"})
+        self._post(self.center, **change)  # çox köhnə dövr, tam təqdimatla belə
         self.assertEqual(self._score(), Decimal("45"))
+        self._recent_past_period()
+        self._post(self.center, **self._first_entry_submission(**{f"score__{self.enrollment.id}": "30"}))
+        self.assertEqual(self._score(), Decimal("45"))  # yeni bitmiş dövrdə də
         self.assertEqual(len(self._entries()), 1)
 
-    def test_center_import_apply_is_forbidden(self):
+    def test_center_import_follows_row_rules(self):
+        # Forged rejim → bütün sorğu 403.
         resp = self._import(self.center, **self._full_submission())
         self.assertEqual(resp.status_code, 403)
+        # Çox köhnə dövr: ilk daxiletmə sənədsiz → 400; sənədlə → yazılır.
+        resp = self._import(self.center)
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json()["error"], "submission_required")
         self.assertIsNone(self._score())
-        self.assertEqual(self._sheet_count(), 0)
+        resp = self._import(self.center, **self._first_entry_submission())
+        self.assertEqual(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.json()["result"]["written"], 1)
+        self.assertEqual(self._score(), Decimal("40"))
+        # Yazılmış balı dəyişən sətir → xəta (ön baxışda da), bal toxunulmur.
+        csv = SimpleUploadedFile("ballar.csv", f"username,Bal\n{self.student.username},20\n".encode())
+        preview = self._client(self.center).post(
+            reverse("accounts:exam_score_import_preview"),
+            {"file": csv, "offering_id": str(self.offering.id), "question_count": "0"},
+        )
+        self.assertEqual(preview.json()["rows"][0]["status"], "error")
+        self.assertEqual(preview.json()["summary"]["writes"], 0)
+        with bypass_rls():
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.enrollment).exam_score, Decimal("40"))
 
     def test_service_rejects_center_even_in_correction_mode(self):
         with bypass_rls(), self.assertRaises(PermissionDenied):
@@ -183,11 +264,13 @@ class PastPeriodLockTest(TestCase):
         resp = self._page(self.rim)
         self.assertContains(resp, "data-ese-correction-on")
         self.assertContains(resp, "ese_correct=1")
-        self.assertNotContains(resp, "data-ese-save")
 
     def test_rim_head_correction_mode_renders_form_and_file_input(self):
+        self._seed_score("45")
         resp = self._page(self.rim, ese_correct="1")
         self.assertContains(resp, 'data-correction-mode="1"')
+        self.assertContains(resp, 'data-changes-locked="0"')
+        self.assertNotContains(resp, 'data-locked="1"')
         self.assertContains(resp, 'name="correction_mode" value="1"')
         self.assertContains(resp, "data-ese-correction-off")
         self.assertContains(resp, "data-ese-save")
@@ -199,28 +282,28 @@ class PastPeriodLockTest(TestCase):
 
     def test_forged_ese_correct_does_not_unlock_for_center(self):
         resp = self._page(self.center, ese_correct="1")
-        self.assertContains(resp, 'data-read-only="1"')
+        self.assertContains(resp, 'data-changes-locked="1"')
         self.assertNotContains(resp, 'name="correction_mode"')
 
-    def test_rim_head_without_correction_mode_is_rejected(self):
-        submission = self._full_submission()
-        submission.pop("correction_mode")
-        self._post(self.rim, **submission)
-        self.assertIsNone(self._score())
-        self.assertEqual(self._sheet_count(), 0)
-        with bypass_rls(), self.assertRaises(PermissionDenied):
-            service.save_roster_scores(
+    def test_rim_head_without_correction_mode_cannot_change(self):
+        self._seed_score("45")
+        self._post(self.rim, **self._first_entry_submission(**{f"score__{self.enrollment.id}": "30"}))
+        self.assertEqual(self._score(), Decimal("45"))
+        with bypass_rls():
+            result = service.save_roster_scores(
                 offering=self.offering,
-                rows=[{"enrollment_id": str(self.enrollment.id), "score": "40"}],
+                rows=[{"enrollment_id": str(self.enrollment.id), "score": "30"}],
                 by_user=self.rim,
             )
+        self.assertEqual(result["written"], 0)
+        self.assertEqual(result["failed"], 1)
 
-    def test_rim_head_import_without_correction_mode_is_forbidden(self):
-        submission = self._full_submission()
-        submission.pop("correction_mode")
-        resp = self._import(self.rim, **submission)
-        self.assertEqual(resp.status_code, 403)
-        self.assertIsNone(self._score())
+    def test_rim_head_import_change_without_correction_mode_is_refused(self):
+        self._seed_score("45")
+        resp = self._import(self.rim, **self._first_entry_submission())
+        self.assertEqual(resp.status_code, 200, resp.content)
+        self.assertEqual(resp.json()["result"]["written"], 0)
+        self.assertEqual(self._score(), Decimal("45"))
 
     def test_rim_head_correction_mode_requires_each_part_of_submission(self):
         for missing in ("reason", "note", "justification_evidence"):
@@ -281,7 +364,7 @@ class PastPeriodLockTest(TestCase):
         self._unlock_period()
         resp = self._page(self.center)
         self.assertNotContains(resp, "data-ese-period-lock")
-        self.assertContains(resp, 'data-read-only="0"')
+        self.assertContains(resp, 'data-changes-locked="0"')
         self.assertContains(resp, 'name="justification_evidence"')  # dialoqun fayl sahəsi
         self._post(self.center)
         self.assertEqual(self._score(), Decimal("45"))

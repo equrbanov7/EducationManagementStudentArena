@@ -82,7 +82,8 @@
             });
             rows.appendChild(row);
         });
-        root.querySelector("[data-esi-just]").hidden = !(data.needs_justification || correctionMode(root)) || data.applied;
+        // Server `needs_justification`-ı bitmiş dövr qaydası ilə hesablayır (2026-09-26).
+        root.querySelector("[data-esi-just]").hidden = !data.needs_justification || data.applied;
         root.querySelector("[data-esi-apply]").hidden = data.applied || !summary.writes;
         root.querySelector("[data-esi-reload]").hidden = !data.applied;
     }
@@ -94,7 +95,7 @@
         var form = payload(root, file);
         if (apply && !root.querySelector("[data-esi-just]").hidden &&
                 (!form.get("reason") || !form.get("note").trim() || !hasScan(form))) {
-            return error(root, t(correctionMode(root) ? "need-submission" : "need-justification"));
+            return error(root, t(root.dataset.submissionRequired === "1" ? "need-submission" : "need-justification"));
         }
         var csrf = window.EMSCore && window.EMSCore.getCookie("csrftoken");
         var token = document.querySelector('[name="csrfmiddlewaretoken"]');
