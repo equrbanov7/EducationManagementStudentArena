@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   kollokvium_windows.css — İmtahan Mərkəzi: kollokvium bal-yazma pəncərələri
-   (2026-09-10 sakit redizayn).
+   kollokvium_windows.css — İmtahan Mərkəzi: midterm/kollokvium bal-yazma
+   pəncərələri (2026-09-10 sakit redizayn; 2026-09-25 midterm: tək geniş kart,
+   mətn KPI-ları, köhnə K2/K3 pəncərələri siyahısı).
 
    Baza ems_ui-dandır (`ems-header`, `ems-kpis`, `ems-filters`, `ems-card`,
    `ems-badge`, `ems-btn`, `ems-iconbtn`, `ems-msg`, `ems-banner`, `ems-state`).
@@ -38,11 +39,66 @@
     margin-bottom: var(--ems-sp-5);
 }
 
-/* ── K1/K2/K3 kartları ────────────────────────────────────────────────────── */
+/* ── Midterm KPI: rəqəm əvəzinə mətn (vəziyyət / tarix aralığı) ───────────── */
+.kw-kpi__text {
+    font-size: var(--ems-fs-2xl);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+
+/* ── Rejim izahı (keçmiş dövr) + köhnə pəncərələr (midterm semestri) ──────── */
+.kw-modebanner {
+    margin-bottom: var(--ems-sp-5);
+}
+
+.kw-stale {
+    margin-bottom: var(--ems-sp-5);
+}
+
+.kw-stale__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.kw-stale__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.kw-stale__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+}
+
+.kw-stale__item form {
+    margin: 0;
+}
+
+/* ── Pəncərə kartları (K1/K2/K3 və ya tək Midterm) ────────────────────────── */
 .kw-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
     gap: var(--ems-sp-5);
+}
+
+/* Midterm: tək kart — üçdə bir en əvəzinə oxunaqlı geniş kart. */
+.kw-grid--single {
+    grid-template-columns: minmax(0, 640px);
+}
+
+.kw-card__lead {
+    margin: 0 0 var(--ems-sp-5);
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
 }
 
 .kw-card {

@@ -61,7 +61,7 @@ NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı və ya artıq mövcud deyi
 #: Müəllim yalnız `flex` (30 bal) hissəsini aralıq imtahan ↔ semestr layihəsi
 #: arasında bölür; cəm HƏMİŞƏ 100 qalır.
 # Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — tək mənbə
-# apps.syllabus.policy (davamiyyət 10 · kollokvium 20 · sərbəst iş 10 ·
+# apps.syllabus.policy (davamiyyət 10 · midterm 20 · sərbəst iş 10 ·
 # seminar/lab ədədi ortası 10 · yekun 50); müəllim heç nə bölmür.
 ASSESSMENT_POLICY = assessment_weights(None)
 
@@ -113,7 +113,7 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Qiymətləndirmə strukturu"),
         pgettext_lazy(
             _CTX,
-            "Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst iş 10, seminar/laboratoriya "
+            "Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 20, sərbəst iş 10, seminar/laboratoriya "
             "ədədi ortası 10 (semestr 50) və yekun imtahan 50 — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir.",
         ),
     ),

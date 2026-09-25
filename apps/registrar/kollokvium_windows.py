@@ -161,15 +161,20 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
             "(artıq mövcud pəncərəni uzatmaq üçün onun tarixini redaktə edin)."
         )
 
-    siblings = KollokviumWindow.objects.filter(organization=organization, period=period).exclude(k_index=k_index)
+    # Rejimdən kənar köhnə pəncərələr (midterm dövründə qalmış K2/K3) sıra qaydasına qatılmır —
+    # əks halda qalıq K2 tək Midterm pəncərəsinin saxlanmasını «K1 … K2» mesajı ilə bloklayırdı.
+    siblings = KollokviumWindow.objects.filter(
+        organization=organization, period=period, k_index__lt=spec.count
+    ).exclude(k_index=k_index)
+    this_label = spec.label_for(int(k_index))
     for sibling in siblings:
+        other_label = spec.label_for(sibling.k_index)
         if sibling.k_index < k_index and opens_on < sibling.closes_on:
             raise KollokviumWindowRuleError(
-                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} bitmədən "
+                f"{this_label} pəncərəsi {other_label} bitmədən "
                 f"({sibling.closes_on:%d.%m.%Y}) əvvəl başlaya bilməz."
             )
         if sibling.k_index > k_index and closes_on > sibling.opens_on:
             raise KollokviumWindowRuleError(
-                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} başlamazdan "
-                f"({sibling.opens_on:%d.%m.%Y}) əvvəl bitməlidir."
+                f"{this_label} pəncərəsi {other_label} başlamazdan " f"({sibling.opens_on:%d.%m.%Y}) əvvəl bitməlidir."
             )
