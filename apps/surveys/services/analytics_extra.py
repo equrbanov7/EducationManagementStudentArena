@@ -118,32 +118,16 @@ def _empty_summary(k=0, campaign_ids=()):
     }
 
 
-def _general_filtered(filters) -> bool:
-    """Ümumi bölmədə HƏR filtr daraldıcıdır (cavab tələbənin qrupu/ixtisası/fakültəsi ilə)."""
-    return any(
-        value is not None
-        for value in (
-            filters.faculty_id,
-            filters.department_id,
-            filters.teacher_id,
-            filters.subject_id,
-            filters.group_id,
-            filters.program_id,
-            filters.course_year,
-        )
-    )
-
-
-def results_summary(organization, scope, filters=None, *, with_participation=True, all_campaign_ids=None) -> dict:
+def results_summary(organization, scope, filters=None, *, with_participation=True, family=None) -> dict:
     """KPI zolağı üçün xülasə (F1 ``summary`` + müəllim sayı + düzgün iştirak).
 
     Əlavə açarlar: ``complement_blocked`` (``n ≥ k``, amma tamamlayıcı qayda
     gizlədib), ``teachers`` / ``teachers_visible`` (``n ≥ k`` olan müəllimlər),
     ``general_suppressed``. ``participation`` — :func:`participation_rows` cəmi.
-    ``all_campaign_ids`` — BÜTÜN bağlı kampaniyalar: seçim onların alt-dəstidirsə,
-    kampaniya seçimi də daraldıcı sayılır (``analytics_guard``).
+    ``family`` — seçilə bilən dövr dəstləri (``analytics_guard.campaign_family``):
+    iç-içə dəstlər arasındakı kiçik fərqdə böyük dəst gizlədilir.
     """
-    from .analytics_guard import campaign_counts, campaign_narrowed, complement_ok
+    from .analytics_guard import general_filtered, nested_set_ok
 
     filters = filters or flt.ResultFilters()
     campaign_ids = flt.campaign_ids_for(organization, filters)
@@ -158,18 +142,14 @@ def results_summary(organization, scope, filters=None, *, with_participation=Tru
     baseline = general_baseline = None
     if filters.is_narrowed:
         baseline = flt.responses(organization, scope, filters.without_narrowing(), campaign_ids).count()
-    if _general_filtered(filters):
+    if general_filtered(filters):
         general_baseline = flt.responses(
             organization, scope, flt.ResultFilters(), campaign_ids, section=Section.GENERAL
         ).count()
-    visible = is_visible(n, k, baseline)
-    general_visible = is_visible(general_n, k, general_baseline)
-    if campaign_narrowed(campaign_ids, all_campaign_ids):
-        wide_ids = list(all_campaign_ids)
-        visible = visible and complement_ok(n, k, campaign_counts(organization, scope, filters, wide_ids))
-        general_visible = general_visible and complement_ok(
-            general_n, k, campaign_counts(organization, scope, filters, wide_ids, section=Section.GENERAL)
-        )
+    visible = is_visible(n, k, baseline) and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
+    general_visible = is_visible(general_n, k, general_baseline) and nested_set_ok(
+        organization, scope, filters, campaign_ids, family, k, section=Section.GENERAL
+    )
     teacher_counts = dict(
         base.exclude(teacher__isnull=True).values("teacher_id").annotate(c=Count("id")).values_list("teacher_id", "c")
     )
@@ -208,10 +188,10 @@ def withhold(summary) -> dict:
     return summary
 
 
-def set_metrics(organization, scope, filters, campaign_ids, *, all_campaign_ids=None) -> dict:
+def set_metrics(organization, scope, filters, campaign_ids, *, family=None) -> dict:
     """Verilmiş kampaniya dəstinin göstəriciləri (əvvəlki dövrlə müqayisə üçün) — k,
-    daraldıcı filtr və kampaniya seçimi üzrə tamamlayıcı qayda ilə."""
-    from .analytics_guard import campaign_counts, campaign_narrowed, complement_ok
+    daraldıcı filtr və iç-içə dövr dəstləri üzrə tamamlayıcı qayda ilə."""
+    from .analytics_guard import nested_set_ok
 
     campaign_ids = list(campaign_ids or [])
     if not campaign_ids or not scope.has_structure_access:
@@ -222,9 +202,7 @@ def set_metrics(organization, scope, filters, campaign_ids, *, all_campaign_ids=
     baseline = None
     if filters.is_narrowed:
         baseline = flt.responses(organization, scope, filters.without_narrowing(), campaign_ids).count()
-    visible = is_visible(n, k, baseline)
-    if visible and campaign_narrowed(campaign_ids, all_campaign_ids):
-        visible = complement_ok(n, k, campaign_counts(organization, scope, filters, list(all_campaign_ids)))
+    visible = is_visible(n, k, baseline) and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
     return {"k": k, **_metrics(row, visible)}
 
 
@@ -311,7 +289,7 @@ def _question_avgs(queryset, k) -> dict:
 
 
 def question_benchmarks(
-    organization, scope, campaign_ids, *, department_id=None, section=Section.TEACHER, all_campaign_ids=None
+    organization, scope, campaign_ids, *, department_id=None, section=Section.TEACHER, family=None
 ) -> dict:
     """``{"k", "org": {code: orta}, "department": {code: orta}}`` — hər biri ≥ k cavabla.
 
@@ -324,17 +302,13 @@ def question_benchmarks(
     campaign_ids = list(campaign_ids or [])
     if not campaign_ids or not scope.has_structure_access:
         return {"k": 0, "org": {}, "department": {}}
-    from .analytics_guard import campaign_counts, campaign_narrowed, complement_ok
+    from .analytics_guard import nested_set_ok
 
     k = flt.k_threshold(campaign_ids)
-    narrowed = campaign_narrowed(campaign_ids, all_campaign_ids)
 
     def safe(scope_, filters_):
-        # Kampaniya alt-dəsti: bütün bağlı kampaniyalardan fərq 0 < d < k olarsa müqayisə nöqtəsi YOX.
-        if not narrowed:
-            return True
-        n = campaign_counts(organization, scope_, filters_, campaign_ids, section=section)
-        return complement_ok(n, k, campaign_counts(organization, scope_, filters_, all_campaign_ids, section=section))
+        # İç-içə dövr dəstləri arasında kiçik fərq varsa müqayisə nöqtəsi də verilmir.
+        return nested_set_ok(organization, scope_, filters_, campaign_ids, family, k, section=section)
 
     org_filters = flt.ResultFilters()
     org_base = flt.responses(organization, ORG_WIDE_SCOPE, org_filters, campaign_ids, section=section)
@@ -366,13 +340,13 @@ def teacher_question_scores(organization, scope, filters, question_code) -> dict
 
 
 def safe_breakdown(
-    organization, scope, filters=None, *, by="faculty", section=Section.TEACHER, total_n=None, all_campaign_ids=None
+    organization, scope, filters=None, *, by="faculty", section=Section.TEACHER, total_n=None, family=None
 ) -> dict:
-    """F1 ``breakdown`` + sətir səviyyəsində tamamlayıcı qayda (daraldıcı filtr VƏ kampaniya
-    seçimi üzrə; ümumi bölmədə hər filtr daraldıcıdır) + qardaş xanalar + gizli sətrin
-    aqreqatlarının (``n`` daxil) silinməsi (``analytics_guard.finalize``)."""
+    """F1 ``breakdown`` + sətir səviyyəsində tamamlayıcı qayda (daraldıcı filtr və iç-içə
+    dövr dəstləri üzrə; ümumi bölmədə hər filtr daraldıcıdır) + qardaş xanalar + gizli
+    sətrin aqreqatlarının (``n`` daxil) silinməsi (``analytics_guard.finalize``)."""
     from .analytics_detail import breakdown
-    from .analytics_guard import campaign_counts, campaign_narrowed, complement_ok, finalize
+    from .analytics_guard import complement_ok, finalize, general_filtered, nested_hidden_keys, per_campaign_counts
 
     if by not in BREAKDOWN_KEYS:
         raise ValueError(f"naməlum qruplaşma: {by}")
@@ -382,19 +356,21 @@ def safe_breakdown(
     key = BREAKDOWN_KEYS[by]
     campaign_ids = flt.campaign_ids_for(organization, filters)
     wide_filters = None
-    if section == Section.GENERAL and _general_filtered(filters):
+    if section == Section.GENERAL and general_filtered(filters):
         wide_filters = flt.ResultFilters()
     elif filters.is_narrowed:
         wide_filters = filters.without_narrowing()
-    baselines = []
+    wide = {}
     if rows and wide_filters is not None:
-        baselines.append(campaign_counts(organization, scope, wide_filters, campaign_ids, key=key, section=section))
-    if rows and campaign_narrowed(campaign_ids, all_campaign_ids):
-        baselines.append(
-            campaign_counts(organization, scope, filters, list(all_campaign_ids), key=key, section=section)
-        )
+        per = per_campaign_counts(organization, scope, wide_filters, campaign_ids, key=key, section=section)
+        wide = {group: sum(counts.values()) for group, counts in per.items()}
+    nested = set()
+    if rows:
+        nested = nested_hidden_keys(organization, scope, filters, campaign_ids, family, k, key=key, section=section)
     for row in rows:
-        if not row["suppressed"] and not all(complement_ok(row["n"], k, base.get(row["key"])) for base in baselines):
+        if row["suppressed"]:
+            continue
+        if row["key"] in nested or (wide_filters is not None and not complement_ok(row["n"], k, wide.get(row["key"]))):
             hide_row(row)
     finalize(rows, k=k, total_n=total_n)
     return data

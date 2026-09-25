@@ -5,9 +5,14 @@
         <p class="svr-note__line">
             <span class="svr-note__item">{% trans "Əhatə" context "surveys.results" %}: <strong>{{ rp.scope_label }}</strong></span>
             <span class="svr-note__item">{% trans "Dövr" context "surveys.results" %}: <strong>{{ rp.period.label }}</strong></span>
-            {% if rp.period.is_open %}<span class="ems-badge ems-badge--warning">{% trans "kampaniya davam edir" context "surveys.results" %}</span>{% endif %}
+            {% if rp.period.live %}<span class="ems-badge ems-badge--warning">{% trans "kampaniya davam edir" context "surveys.results" %}</span>{% endif %}
         </p>
+        {% if rp.period.live %}
+        <p class="svr-note__text">{% trans "Anonimlik: davam edən kampaniyanın nəticələri göstərilmir — iki baxış arasındakı fərqdən təzə göndərilmiş bir cavab hesablana bilərdi. Nəticələr kampaniya bağlandıqdan sonra açılır; indi yalnız təxmini iştirak görünür." context "surveys.results" %}</p>
+        {% else %}
         <p class="svr-note__text">{% blocktrans trimmed with k=rp.k context "surveys.results" %}Anonimlik: nəticə yalnız ən azı {{ k }} cavabı olan qrup üçün göstərilir; kiçik qrupu çıxma yolu ilə aça biləcək sətirlər də gizlədilir. Şərhlər tarixsiz, identifikatorsuz və təsadüfi sıradadır.{% endblocktrans %}</p>
+        <p class="svr-note__text">{% trans "Nəticələr yalnız bağlanmış kampaniyalar üzrədir; cavab sayları dəqiq deyil, aralıqla göstərilir (məs. «10+»)." context "surveys.results" %}</p>
+        {% endif %}
         {% if rp.subject_note %}
         <p class="svr-note__text">{% trans "Fənn/qrup filtri: müəllim eyni tələbəyə bir neçə fənn deyirsə, tələbə onu bir dəfə qiymətləndirir və cavab müəllimin əsas (ilk) fənninə aid edilir." context "surveys.results" %}</p>
         {% endif %}

@@ -138,12 +138,16 @@ def keyword_frequency(texts, *, top=KEYWORD_TOP, min_docs=KEYWORD_MIN_DOCS) -> l
 
 
 def _visible_campaigns(organization, scope, filters, campaign_ids):
+    from .analytics_guard import general_filtered
+
     base = flt.responses(organization, scope, filters, campaign_ids, section=Section.GENERAL)
     counts = dict(base.values("campaign_id").annotate(c=Count("id")).values_list("campaign_id", "c"))
+    narrowed = general_filtered(filters)
     wide = {}
-    if filters.is_narrowed and counts:
+    if narrowed and counts:
+        # Ümumi bölmədə hər filtr daraldıcıdır — baza: eyni kampaniyanın süzülməmiş ümumi cavabları.
         wide = dict(
-            flt.responses(organization, scope, filters.without_narrowing(), campaign_ids, section=Section.GENERAL)
+            flt.responses(organization, scope, flt.ResultFilters(), campaign_ids, section=Section.GENERAL)
             .values("campaign_id")
             .annotate(c=Count("id"))
             .values_list("campaign_id", "c")
@@ -154,7 +158,7 @@ def _visible_campaigns(organization, scope, filters, campaign_ids):
     visible = []
     for campaign_id, count in counts.items():
         k = max(int(thresholds.get(campaign_id) or DEFAULT_MIN_GROUP_SIZE), DEFAULT_MIN_GROUP_SIZE)
-        if is_visible(count, k, wide.get(campaign_id) if filters.is_narrowed else None):
+        if is_visible(count, k, wide.get(campaign_id) if narrowed else None):
             visible.append(campaign_id)
     return base, counts, visible
 

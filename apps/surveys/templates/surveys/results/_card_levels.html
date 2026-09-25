@@ -42,7 +42,7 @@ və tədris şəraiti (1–5). Gizli sətirlər qrafikdə yoxdur, cədvəldə s�
                         <td class="ems-table__num">{{ row.satisfaction|floatformat:2|default:"—" }}</td>
                         <td class="ems-table__num">{{ row.facilities|floatformat:2|default:"—" }}</td>
                         {% endif %}
-                        <td class="ems-table__num">{{ row.n }}</td>
+                        <td class="ems-table__num">{% if row.suppressed %}<span class="svr-muted">—</span>{% else %}{{ row.n }}{% endif %}</td>
                     </tr>
                 {% empty %}
                     <tr><td colspan="4" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>

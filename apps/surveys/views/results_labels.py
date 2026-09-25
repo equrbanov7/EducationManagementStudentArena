@@ -61,7 +61,7 @@ SORT_KEYS = (
 DEFAULT_SORT = "-avg_overall"
 
 #: «Minimum cavab» süzgəcinin seçimləri (0 — hamısı).
-MIN_N_CHOICES = (0, 5, 10, 20, 30, 50)
+MIN_N_CHOICES = (0, 5, 10, 20, 50, 100)
 
 #: Müəllim cədvəlinin səhifə ölçüsü (kliyent səhifələməsi).
 PAGE_SIZE = 25

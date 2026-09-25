@@ -6,8 +6,10 @@ paneli ``EMSProfileLoadSection`` ilə yerində yeniləyir; bütün vəziyyət UR
 sorğu sayı tabdan asılı sabitdir (cavab/müəllim sayından asılı deyil).
 
 İcazə FAIL-CLOSED: ``results_scope`` əhatəsizdirsə heç bir aqreqat çağırılmır.
-Anonimlik qaydaları ``apps.surveys.public`` sənədindədir; bu modul yalnız həmin
-funksiyaların nəticələrini göstərir, xam cavab sətri oxumur.
+Açıqlama nəzarəti (``services/analytics_guard``): nəticə yalnız BAĞLI kampaniyalardan
+(M-1 — davam edən kampaniyada yalnız iştirak, səbət/5%-lə); say heç yerdə dəqiq
+göstərilmir; gizli sətrin aqreqatı verilmir; qardaş xanalar və iç-içə dövr dəstləri
+çıxmaya qarşı qorunur (M-2). Bu modul xam cavab sətri oxumur.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from .. import public
+from ..services import analytics_guard as guard
 from .results_filters import effective_params, period_options, query_string, resolve
 from .results_labels import TAB_GENERAL, TAB_LABELS, TAB_OVERVIEW, TAB_TEACHERS, TABS, short_label
 
@@ -40,13 +43,24 @@ def delta_info(current, previous, *, digits=2) -> dict | None:
     return {"value": value, "abs": abs(value), "direction": direction}
 
 
-def _options(items, *, all_label, with_count=True) -> list:
-    options = [{"value": "", "label": all_label}]
-    for item in items:
-        label = item["label"] or "—"
-        count = item.get("n")
-        options.append({"value": str(item["id"]), "label": f"{label} ({count})" if with_count and count else label})
-    return options
+def participation_view(participation) -> dict:
+    """İştirakın GÖSTƏRİLƏN forması: faiz 5-ə yuvarlaq, saylar səbətlə (M-1/M-2)."""
+    participation = participation or {}
+    approximate = bool(participation.get("approximate"))
+    return {
+        "rate": None if approximate else guard.round5(participation.get("rate")),
+        "receipts": guard.count_bucket(participation.get("receipts")) if participation else "—",
+        "expected": guard.count_bucket(participation.get("expected")) if participation else "—",
+        "has_expected": bool(participation.get("expected")),
+        "approximate": approximate,
+    }
+
+
+def _options(items, *, all_label) -> list:
+    """Seçim siyahısı — cavab SAYI göstərilmir (canlı/dəqiq say sızmasın)."""
+    return [{"value": "", "label": all_label}] + [
+        {"value": str(item["id"]), "label": item["label"] or "—"} for item in items
+    ]
 
 
 def _question_options(catalog) -> list:
@@ -81,11 +95,14 @@ def _select(name, label, options, value, *, wide=False) -> dict:
 
 
 def _filter_fields(resolved, filters, question_options, urls) -> list:
+    period = _select(
+        "period", pgettext(CTX, "Dövr"), period_options(resolved.campaigns), resolved.query.period.value, wide=True
+    )
+    if resolved.live or resolved.choices is None:
+        return [period]
     choices, all_label = resolved.choices, pgettext(CTX, "Hamısı")
     fields = [
-        _select(
-            "period", pgettext(CTX, "Dövr"), period_options(resolved.campaigns), resolved.query.period.value, wide=True
-        ),
+        period,
         _select(
             "faculty", pgettext(CTX, "Fakültə"), _options(choices["faculties"], all_label=all_label), filters.faculty_id
         ),
@@ -113,7 +130,7 @@ def _filter_fields(resolved, filters, question_options, urls) -> list:
         options = _options(choices["programs"], all_label=all_label)
         fields.append(_select("program", pgettext(CTX, "İxtisas"), options, filters.program_id))
     if choices["course_years"]:
-        options = _options(choices["course_years"], all_label=all_label, with_count=False)
+        options = _options(choices["course_years"], all_label=all_label)
         fields.append(_select("course_year", pgettext(CTX, "Kurs"), options, filters.course_year))
     fields.append(_select("question", pgettext(CTX, "Sual"), question_options, filters.question_code))
     fields.append(
@@ -128,29 +145,29 @@ def _filter_fields(resolved, filters, question_options, urls) -> list:
     return fields
 
 
+def _rate_tile(view) -> dict:
+    return {
+        "key": "rate",
+        "label": pgettext(CTX, "Cavab faizi"),
+        "value": f"≈ {view['rate']}%" if view["rate"] is not None else "—",
+        "note": (
+            pgettext(CTX, "%(done)s / %(expected)s hədəf") % {"done": view["receipts"], "expected": view["expected"]}
+            if not view["approximate"]
+            else pgettext(CTX, "ixtisas/kurs filtrində hesablanmır")
+        ),
+    }
+
+
 def _kpis(summary, participation, previous) -> list:
-    shows_rate = bool(participation) and not participation.get("approximate")
-    rate = participation.get("rate") if shows_rate else None
-    hidden = summary["suppressed"]
-    secondary = bool(summary.get("secondary"))
+    hidden, secondary = summary["suppressed"], bool(summary.get("secondary"))
     return [
         {
             "key": "n",
             "label": pgettext(CTX, "Cavab sayı"),
-            "value": summary["n"],
-            "note": pgettext(CTX, "ümumi bölmə: %(n)s") % {"n": summary["general_n"]},
+            "value": guard.count_bucket(summary["n"]),
+            "note": pgettext(CTX, "ümumi bölmə: %(n)s") % {"n": guard.count_bucket(summary["general_n"])},
         },
-        {
-            "key": "rate",
-            "label": pgettext(CTX, "Cavab faizi"),
-            "value": f"{_pct(rate)}%" if rate is not None else "—",
-            "note": (
-                pgettext(CTX, "%(done)s / %(expected)s hədəf")
-                % {"done": participation.get("receipts", 0), "expected": participation.get("expected", 0)}
-                if shows_rate
-                else pgettext(CTX, "ixtisas/kurs filtrində hesablanmır")
-            ),
-        },
+        _rate_tile(participation_view(participation)),
         {
             "key": "overall",
             "label": pgettext(CTX, "Orta ümumi bal"),
@@ -248,21 +265,60 @@ def apply_publishing(summary, filters, published) -> dict:
     return summary
 
 
+def _base(resolved, request, base_url, filters, urls) -> dict:
+    scope = resolved.scope
+    return {
+        "is_org_wide": scope.is_org_wide,
+        "scope_label": scope_label(scope),
+        "can_manage": public.can_manage_campaigns(request.user, resolved.organization, request=request),
+        "period": resolved.query.period,
+        "filters": filters,
+        "base_url": base_url,
+        "urls": urls,
+        "section": SECTION,
+    }
+
+
+def _live_context(resolved, request, base_url) -> dict:
+    """M-1: davam edən kampaniya — YALNIZ iştirak (5%-lik faiz, səbətli saylar)."""
+    # Canlı rejimdə yalnız dövr seçilir — URL-də qalmış digər filtrlər iştiraka da tətbiq olunmur.
+    filters = public.ResultFilters(campaign_ids=tuple(resolved.campaign_ids))
+    urls = _urls(resolved.query, filters, base_url)
+    participation = public.participation_rows(
+        resolved.organization, resolved.scope, filters, resolved.campaign_ids, per_teacher=False
+    )
+    view = participation_view(participation)
+    return {
+        **_base(resolved, request, base_url, filters, urls),
+        "state": "live",
+        "k": 0,
+        "tabs": [],
+        "filter_fields": _filter_fields(resolved, filters, [], urls),
+        "participation": view,
+        "kpis": [
+            _rate_tile(view),
+            {"key": "receipts", "label": pgettext(CTX, "Doldurulmuş hədəf"), "value": view["receipts"]},
+            {"key": "expected", "label": pgettext(CTX, "Gözlənilən hədəf"), "value": view["expected"]},
+        ],
+    }
+
+
 def panel_context(context) -> dict:
     request = context.get("request")
     resolved = resolve(request, with_choices=True) if request is not None else None
     if resolved is None:
         return {"state": "forbidden"}
     organization, scope, query = resolved.organization, resolved.scope, resolved.query
-    can_manage = public.can_manage_campaigns(request.user, organization, request=request)
     base_url = context.get("profile_base_url") or reverse("accounts:profile")
-    if not resolved.campaigns:
+    if not resolved.campaigns or not resolved.campaign_ids:
         return {
             "state": "no_campaign",
-            "can_manage": can_manage,
+            "can_manage": public.can_manage_campaigns(request.user, organization, request=request),
             "campaigns_url": f"{base_url}?section=evaluation-campaigns",
         }
-    filters = resolved.filters
+    if resolved.live:
+        return _live_context(resolved, request, base_url)
+    filters, family = resolved.filters, resolved.family
     latest = _latest_campaign(organization, resolved.campaign_ids)
     question_options = _question_options(public.question_catalog(latest) if latest is not None else [])
     if filters.question_code not in {option["value"] for option in question_options}:
@@ -270,49 +326,41 @@ def panel_context(context) -> dict:
     urls = _urls(query, filters, base_url)
 
     teacher_tab = query.tab == TAB_TEACHERS
-    summary = public.results_summary(organization, scope, filters, with_participation=not teacher_tab)
+    summary = public.results_summary(organization, scope, filters, with_participation=not teacher_tab, family=family)
     published = public.publishable_teachers(organization, resolved.campaign_ids)
     apply_publishing(summary, filters, published)
     participation, extra = summary["participation"], {}
     if teacher_tab:
         from .results_teachers import teachers_tab
 
-        extra = teachers_tab(organization, scope, filters, summary, query, urls, published)
+        extra = teachers_tab(organization, scope, filters, summary, query, urls, published, family=family)
         participation = extra["participation"]
     elif query.tab == TAB_OVERVIEW:
         from .results_overview import overview_tab
 
-        extra = overview_tab(organization, scope, filters, summary, query)
+        extra = overview_tab(organization, scope, filters, summary, query, family=family, campaigns=resolved.campaigns)
     elif query.tab == TAB_GENERAL:
         from .results_general import general_tab
 
-        extra = general_tab(organization, scope, filters, summary)
+        extra = general_tab(organization, scope, filters, summary, family=family)
     previous = {}
     if query.period.previous_ids and not summary["suppressed"]:
         previous_ids = list(query.period.previous_ids)
-        previous = public.set_metrics(
-            organization, scope, replace(filters, campaign_ids=tuple(previous_ids)), previous_ids
-        )
+        previous_filters = replace(filters, campaign_ids=tuple(previous_ids))
+        previous = public.set_metrics(organization, scope, previous_filters, previous_ids, family=family)
     params = effective_params(query, filters)
     return {
+        **_base(resolved, request, base_url, filters, urls),
         "state": "ready",
         "tab": query.tab,
         "tabs": _tabs(query, filters, base_url),
-        "is_org_wide": scope.is_org_wide,
-        "scope_label": scope_label(scope),
-        "can_manage": can_manage,
         "k": summary["k"],
-        "period": query.period,
         "previous_label": query.period.previous_label if previous and not previous.get("suppressed") else "",
-        "filters": filters,
         "filter_fields": _filter_fields(resolved, filters, question_options, urls),
         "is_filtered": bool(set(params) - {"er_period"}),
         "subject_note": filters.subject_id is not None or filters.group_id is not None,
-        "base_url": base_url,
         "summary": summary,
-        "participation": participation,
+        "participation": participation_view(participation),
         "kpis": _kpis(summary, participation, previous),
-        "urls": urls,
-        "section": SECTION,
         **extra,
     }

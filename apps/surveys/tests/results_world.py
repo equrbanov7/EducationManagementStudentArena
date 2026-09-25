@@ -4,7 +4,8 @@ və BİRBAŞA yaradılmış anonim cavablar (analitika yalnız cavab snapshot-un
 Struktur (``build_world`` üstündən):
 * fakültə F → kafedra A (müəllim A, C, E), kafedra B (müəllim B); fakültə F2 →
   kafedra D (müəllim D); qruplar G (A altında), G2 (B altında).
-* Cari kampaniya (açıq, k = 3) və əvvəlki dövrün kampaniyası (bağlı).
+* Cari kampaniya (k = 3; defolt BAĞLI — nəticə yalnız bağlı kampaniyada görünür, M-1;
+  ``live=True`` ilə açıq qalır) və əvvəlki dövrün kampaniyası (bağlı).
 
 Cari kampaniyanın cavabları (müəllim bölməsi):
 * A — 6 (riyaziyyat · G), şərhlərlə; C — 3 (riyaziyyat · G); E — 2 (< k, gizli);
@@ -111,6 +112,14 @@ def add_general(world, campaign, *, group, faculty, count, score=4, texts=()):
             SurveyAnswer.objects.bulk_create(answers)
 
 
+def close_campaign(campaign):
+    """Kampaniyanı bağlayır — nəticələr yalnız bağlı kampaniyada göstərilir (M-1)."""
+    with bypass_rls():
+        campaign.status = CampaignStatus.CLOSED
+        campaign.save(update_fields=["status"])
+    return campaign
+
+
 def add_receipts(world, campaign, offering, teacher, department, students):
     with bypass_rls():
         for student in students:
@@ -136,7 +145,7 @@ SUGGESTIONS = (
 )
 
 
-def build_results_world(slug: str) -> dict:
+def build_results_world(slug: str, *, live: bool = False) -> dict:
     world = build_world(slug, students=4)
     org = world["org"]
     with bypass_rls():
@@ -261,6 +270,8 @@ def build_results_world(slug: str) -> dict:
     )
     add_receipts(world, campaign, world["off_math"], world["teacher_a"], chair_a, world["students"][:3])
     add_receipts(world, campaign, world["off_phys"], world["teacher_b"], chair_b, world["students"][:2])
+    if not live:
+        close_campaign(campaign)
     with bypass_rls():
         world.update(
             faculty2=faculty2,
