@@ -172,10 +172,68 @@ def build_plan(
     return manifest, header, summarise(records)
 
 
-def reextract_plan(*, organization, planning_run_id: str, out_path: str, base_header=None, current=None):
+def _drop_excluded(records, report, header, *, excluded, reason):
+    """İstisna olunan cütlərin izi: seçim sayları azaldılır, YALNIZ onlar üçün yaranan sətirlər atılır.
+
+    * yazılışı qalmayan yeni açılış (J1 onu yalnız istisna cütləri üçün qurub) — sxemi,
+      komponentləri, mövzuları və dərsləri ilə;
+    * balı qalmayan plan komponenti — J5 komponenti yalnız BAL olduqda yaradır (planın
+      hər komponentinin ən azı bir balı var), yenidən qurulmuş planda da olmazdı.
+    """
+
+    used = {r["fields"]["offering_id"] for r in records if r["kind"] == "registrar.enrollment"}
+    orphaned = {r["pk"] for r in records if r["kind"] == "registrar.courseoffering" and r["pk"] not in used}
+    scored = {r["fields"]["component_id"] for r in records if r["kind"] == "registrar.componentscore"}
+
+    def keep(record) -> bool:
+        if record["kind"] == "registrar.courseoffering":
+            return record["pk"] not in orphaned
+        if record["fields"].get("offering_id") in orphaned:
+            return False  # yalnız istisna cütləri üçün qurulmuş açılışın sxemi/komponenti/mövzusu/dərsi
+        return record["kind"] != "registrar.assessmentcomponent" or record["pk"] in scored
+
+    kept = [record for record in records if keep(record)]
+    dropped_by_kind = summarise(records) - summarise(kept)
+    for name in report:
+        gone = dropped_by_kind.get(f"registrar.{name.lower()}", 0)
+        if gone:
+            report[name] = {
+                **report[name],
+                "plan": report[name]["plan"] - gone,
+                "foreign_new": report[name]["foreign_new"] + gone,
+            }
+    pairs = header.get("restored_pairs") or {}
+    gone = [pairs.get(key, {}) for key in excluded]
+    categories = Counter(item.get("category", "?") for item in gone)
+    header["restored_pairs"] = {key: value for key, value in pairs.items() if key not in set(excluded)}
+    header["selected_pairs"] = dict(sorted((Counter(header.get("selected_pairs") or {}) - categories).items()))
+    header["slice_rules"] = dict(
+        sorted(
+            (
+                Counter(header.get("slice_rules") or {})
+                - Counter(f"{item.get('category', '?')}:{item.get('slice_rule', '?')}" for item in gone)
+            ).items()
+        )
+    )
+    header["skipped"] = dict(
+        sorted(
+            (Counter(header.get("skipped") or {}) + Counter(f"{cat}:{reason}" for cat in categories.elements())).items()
+        )
+    )
+    header["excluded_after_replay"] = {
+        "reason": reason,
+        "pairs": len(excluded),
+        **{f"dropped_{kind.split('.')[-1]}": count for kind, count in sorted(dropped_by_kind.items())},
+    }
+    return kept, report
+
+
+def reextract_plan(*, organization, planning_run_id: str, out_path: str, base_header=None, current=None, rosters=None):
     """Bitmiş plan run-undan planı YENİDƏN çıxar (klon toxunulmaz qalıb; mənbə lazım deyil).
 
     ``current`` (``Selection.current``) verilərsə başlığa hazırda oxuyanların siyahısı yazılır.
+    ``rosters`` (``uniqid`` → jurnal siyahısı) verilərsə siyahıda OLMAYAN tələbənin bərpa
+    cütü planı daxil edilmir (seçim qaydası sonradan sərtləşibsə, klonu yenidən qurmadan).
     """
 
     from apps.legacy_import.models import LegacyMigrationRun
@@ -191,8 +249,17 @@ def reextract_plan(*, organization, planning_run_id: str, out_path: str, base_he
         raise RepairPlanError("legacy_repair_plan_run_not_finished")
     source_run = resolve_source_run(organization)
     since, restored, new_offerings = restored_from_run(organization, run)
+    excluded = []
+    if rosters is not None:
+        for key in sorted(restored):
+            uniqid, _sep, student = key.rpartition(":")
+            if not student.isdigit() or int(student) not in rosters.get(uniqid, ()):
+                excluded.append(key)
+        restored = {key: pk for key, pk in restored.items() if key not in set(excluded)}
     records, report = extract(organization, since=since, restored=restored, new_offerings=new_offerings)
     header = dict(base_header or {})
+    if excluded:
+        records, report = _drop_excluded(records, report, header, excluded=excluded, reason="not_in_roster")
     header.update(
         {
             "repair": REPAIR_KEY,

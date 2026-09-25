@@ -61,6 +61,11 @@ class Command(BaseCommand):
             action="store_true",
             help="--reextract-run: hazırda oxuyanlar siyahısını mənbədən yenidən hesabla (MariaDB lazımdır)",
         )
+        parser.add_argument(
+            "--exclude-not-in-roster",
+            action="store_true",
+            help="--reextract-run: jurnal siyahısında olmayan tələbənin cütünü plana salma (MariaDB lazımdır)",
+        )
         parser.add_argument("--plan-sha256", default="", help="Planın manifestdəki sha256-sı (MƏCBURİ)")
         parser.add_argument("--source-run", default="", help="Hədəfi quran import run-u (default: yeganə)")
         parser.add_argument("--source-dump", default="", help="Mənbə dump faylı — sha256/ölçü preflight-ı")
@@ -143,18 +148,21 @@ class Command(BaseCommand):
         from apps.legacy_import.services.repair_enrollments_plan import reextract_plan
 
         current = self._current_students(context) if options["with_current"] else None
+        rosters = self._rosters(context) if options["exclude_not_in_roster"] else None
         manifest, header, counts = reextract_plan(
             organization=context.organization,
             planning_run_id=options["reextract_run"],
             out_path=options["out"],
             base_header=base,
             current=current,
+            rosters=rosters,
         )
         summary = {
             "plan faylı": manifest.path,
             "sha256": manifest.sha256,
             "ölçü (bayt)": manifest.size_bytes,
             "hazırda oxuyan (başlıqda)": len(header.get("current_legacy_students") or {}),
+            **{f"istisna · {key}": value for key, value in (header.get("excluded_after_replay") or {}).items()},
             **{f"sətir · {kind}": count for kind, count in sorted(counts.items())},
             **{
                 f"klonda yad/yenilənən · {name}": f"{row['foreign_new']}/{row['updated_existing']}"
@@ -166,17 +174,14 @@ class Command(BaseCommand):
         self.stdout.write(f"\nServerdə verin: --plan-sha256 {manifest.sha256}")
 
     @staticmethod
-    def _current_students(context):
-        """Seçimin YALNIZ hazırda oxuyan hissəsi üçün mənbə + klon oxunuşu (yazı yoxdur)."""
-
+    def _read_context(context):
         from apps.legacy_import.services.rehearsal_authorizer import build_rehearsal_authorizer
         from apps.legacy_import.services.rehearsal_phase_a import default_source_factory
         from apps.legacy_import.services.repair_enrollments_replay import _context, replay_policy
-        from apps.legacy_import.services.repair_enrollments_select import select_pairs
         from apps.legacy_import.services.table_plan import load_legacy_table_plan
 
         source_run = resolve_source_run(context.organization, "")
-        read_context = _context(
+        return source_run, _context(
             run_id=source_run.pk,
             organization=context.organization,
             actor=context.actor,
@@ -186,6 +191,22 @@ class Command(BaseCommand):
             source_factory=default_source_factory(django_settings),
             note=lambda _text: None,
         )
+
+    def _rosters(self, context):
+        """Mənbə jurnallarının ``students_id`` siyahısı (yalnız ``journals`` oxunur)."""
+
+        from apps.legacy_import.services.repair_enrollments_select import _source_journals
+
+        _run, read_context = self._read_context(context)
+        return {uniqid: info["roster"] for uniqid, info in _source_journals(read_context).items()}
+
+    @staticmethod
+    def _current_students(context):
+        """Seçimin YALNIZ hazırda oxuyan hissəsi üçün mənbə + klon oxunuşu (yazı yoxdur)."""
+
+        from apps.legacy_import.services.repair_enrollments_select import select_pairs
+
+        source_run, read_context = Command._read_context(context)
         return select_pairs(read_context, source_run=source_run).current
 
     def _verify_and_apply(self, context, options):

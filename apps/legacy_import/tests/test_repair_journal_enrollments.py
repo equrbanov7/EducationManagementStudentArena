@@ -355,6 +355,81 @@ def test_an_incompatible_plan_is_refused_before_anything_is_written(actor):
     assert not _model("CourseOffering").objects.filter(group=target.other_group).exists()
 
 
+def test_excluding_pairs_after_the_replay_drops_only_their_own_rows():
+    from apps.legacy_import.services.repair_enrollments_plan import _drop_excluded
+
+    records = [
+        {"kind": "registrar.courseoffering", "pk": "o-kept", "fields": {}},
+        {"kind": "registrar.courseoffering", "pk": "o-orphan", "fields": {}},
+        {"kind": "registrar.assessmentscheme", "pk": "sc-orphan", "fields": {"offering_id": "o-orphan"}},
+        {"kind": "registrar.assessmentcomponent", "pk": "c-kept", "fields": {"offering_id": "o-kept"}},
+        {"kind": "registrar.assessmentcomponent", "pk": "c-only-excluded", "fields": {"offering_id": "o-kept"}},
+        {"kind": "registrar.enrollment", "pk": "e1", "fields": {"offering_id": "o-kept"}},
+        {"kind": "registrar.componentscore", "pk": "s1", "fields": {"component_id": "c-kept"}},
+    ]
+    report = {
+        "AssessmentComponent": {"plan": 2, "foreign_new": 0, "updated_existing": 0},
+        "CourseOffering": {"plan": 2, "foreign_new": 0, "updated_existing": 0},
+        "AssessmentScheme": {"plan": 1, "foreign_new": 0, "updated_existing": 0},
+    }
+    header = {
+        "restored_pairs": {
+            "uq:1": {"category": "fake", "slice_rule": "own_group"},
+            "uq:2": {"category": "deleted", "slice_rule": "same_period_group"},
+        },
+        "selected_pairs": {"fake": 1, "deleted": 1},
+        "slice_rules": {"fake:own_group": 1, "deleted:same_period_group": 1},
+        "skipped": {},
+    }
+    kept, report = _drop_excluded(records, report, header, excluded=["uq:2"], reason="not_in_roster")
+    assert [r["pk"] for r in kept] == ["o-kept", "c-kept", "e1", "s1"]
+    assert report["AssessmentComponent"] == {"plan": 1, "foreign_new": 1, "updated_existing": 0}
+    assert report["CourseOffering"]["plan"] == 1 and report["AssessmentScheme"]["plan"] == 0
+    assert set(header["restored_pairs"]) == {"uq:1"} and header["selected_pairs"] == {"fake": 1}
+    assert header["slice_rules"] == {"fake:own_group": 1} and header["skipped"] == {"deleted:not_in_roster": 1}
+    assert header["excluded_after_replay"] == {
+        "reason": "not_in_roster",
+        "pairs": 1,
+        "dropped_assessmentcomponent": 1,
+        "dropped_assessmentscheme": 1,
+        "dropped_courseoffering": 1,
+    }
+
+
+def test_a_second_journal_of_the_same_offering_joins_the_restored_enrollment(actor):
+    from dataclasses import replace
+
+    from apps.legacy_import.models import LegacyEntityMap
+    from apps.legacy_import.services.repair_enrollments_replay import _create_enrollments
+    from apps.legacy_import.services.repair_enrollments_select import RestorePair, Selection
+
+    target = Target(actor, "enroll-merge")
+    context = harness.context(rows_by_table=harness.tables(), run=target.run, organization=target.org, actor=actor)
+    lecture = RestorePair(
+        category="k9",
+        uniqid="LECTUREJRN",
+        legacy_student=77,
+        user_id=target.student.pk,
+        group_ref="2",
+        group_unit=str(target.own_group.pk),
+        offering_pk=str(target.offering.pk),
+        guest_unit="",
+        slice_rule="primary_slice",
+        period_pk=str(target.offering.period_id),
+        subject_pk=str(target.offering.subject_id),
+    )
+    seminar = replace(lecture, uniqid="SEMINARJRN")
+    restored, skipped = _create_enrollments(context, selection=Selection(pairs=[lecture, seminar]), fake_slices={})
+
+    assert restored["LECTUREJRN:77"] == restored["SEMINARJRN:77"]
+    assert skipped == {"merged:k9": 1}
+    assert _model("Enrollment").objects.filter(student=target.student, offering=target.offering).count() == 1
+    sealed = LegacyEntityMap.objects.filter(
+        created_run=target.run, entity_type="journal_enrollment", legacy_pk__in=["LECTUREJRN:77", "SEMINARJRN:77"]
+    )
+    assert {row.target_pk for row in sealed} == {restored["LECTUREJRN:77"]} and sealed.count() == 2
+
+
 def test_the_plan_refuses_to_run_before_its_prerequisite_j12_plan(actor):
     from apps.legacy_import.services.repair_enrollments_plan import applied_prerequisites
     from apps.legacy_import.services.repair_plan_file import RepairPlanError
