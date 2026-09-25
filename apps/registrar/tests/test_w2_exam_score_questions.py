@@ -283,6 +283,11 @@ class QuestionScoreServiceTest(fixtures.ExamScoreEntryServiceTest):
         with bypass_rls():
             defaults = sheets.latest_sheet_defaults(sheets.sheets_for_offering(offering=self.offering_a))
         self.assertEqual((defaults["question_count"], defaults["question_max"]), (4, 9))
+        # Sahib 2026-09-26: «yalnız yekun bal» (0) vərəqi növbəti defaultu sıfırlamır — 5 × 10.
+        zero = {**sheets.latest_sheet_defaults([]), "question_count": 0, "question_max": 0}
+        zero.update(exam_date_iso="", examiner_name="", invigilator_name="", protocol_number="")
+        defaults = sheets.latest_sheet_defaults([zero])
+        self.assertEqual((defaults["question_count"], defaults["question_max"]), (5, 10))
 
     # ── idxal ────────────────────────────────────────────────────────────────
     def _roster(self):

@@ -59,13 +59,20 @@
 .jgs-card { width: min(680px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
 .jgs-head { display: flex; align-items: flex-start; gap: 12px; }
 .jgs-head-main { flex: 1; min-width: 0; }
-/* Başlıq navy fondadır (`jd2-modal-head`) — alt mətn AĞ tokenlə + şəffaflıqla
-   yazılır ki, kontrast AA-dan aşağı düşməsin (yeni rəng icad EDİLMİR). */
+/* 2026-09-26 (sahib: «x button görünüşü solğundur»): başlıq artıq AĞ fondadır
+   (`jd2_theme.css` → `.jd2-modal-head`), əvvəlki navy fon üçün yazılmış AĞ mətn/×
+   ağ fonda görünmürdü. Alt mətn və × neytral tünd tokenlərlə (AA kontrast). */
 .jgs-head-sub {
     margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.45;
-    color: var(--ems-neutral-0); opacity: 0.82;
+    color: var(--ems-neutral-600);
 }
-.jgs-head .jd-modal-close { color: var(--ems-neutral-0); }
+.jgs-head .jd-modal-close.jd2-modal-close {
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    border: 1px solid var(--ems-neutral-200); opacity: 1;
+}
+.jgs-head .jd-modal-close.jd2-modal-close:hover {
+    background: var(--ems-danger-100); color: var(--ems-danger-700); border-color: var(--ems-danger-200, var(--ems-neutral-200));
+}
 .jgs-body { overflow-y: auto; }
 .jgs-foot { display: flex; gap: 10px; }
 .jgs-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
