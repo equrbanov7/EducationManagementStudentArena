@@ -1,42 +1,49 @@
 {% load i18n static %}
 {% comment %}
-«Ana səhifə» — kabinetin default bölməsi (2026-09-09 yenidən qurulub).
+«Ana səhifə» — kabinetin default bölməsi (2026-09-09 yenidən qurulub, 2026-09-25
+tələbə/müəllim kartları fənn-fənn aydınlaşdırılıb).
 
 DÜZÜM (rola görə özü uyğunlaşır, sərt rol cədvəli YOXDUR):
   1. Qabıq başlığı «Ana səhifə» + alt sətir = salamlama.  ⚠️ `<h1>` BURADA
      YAZILMIR — qabıq (`accounts/profile/_header.html`) onu artıq
      `#profileSectionTitle` kimi verir; ikinci h1 olmamalıdır.
-  2. Meta zolağı — rol nişanı + cari tədris dövrü.
+  2. Meta zolağı — rol nişanı + tarixə əsaslanan cari tədris dövrü + bu gün
+     (+ üst/alt həftə).
   3. Hero KPI zolağı — rolun ƏN VACİB 2–4 rəqəmi (`ems_ui/_kpi_row.html`).
-  4. Məlumat kartları — rəqəm/siyahı daşıyan vidjetlər (hərəkət gözləyənlər
-     əvvəldə).
-  5. «Bölmələrə keçid» — rəqəmi olmayan vidjetlər yığcam keçid kartı kimi
-     (əvvəl onlar da böyük boş kart idi: RİM-də 12 ədəd «sıfırlar divarı»).
+  4. Məlumat kartları (`_dashboard_card.html`) — hərəkət gözləyənlər əvvəldə;
+     fənn-fənn siyahılar geniş (iki sütunluq) kartdadır.
+  5. «Bölmələrə keçid» — rəqəmi olmayan vidjetlər yığcam keçid kartı kimi.
 
 Panel TAM SERVER-RENDER-lidir və JS TƏLƏB ETMİR: keçidlər sidebar linkləri ilə
-eyni `js-profile-section-link` müqaviləsini daşıyır, ona görə SPA deleqasiyası
-onları özü tutur (səhifə yenilənmir).  Vidjet siyahısı
-`apps/accounts/views/profile/_sections/dashboard.py`-dan, sıralama və hero
-zolağı `dashboard_layout.py`-dan gəlir; şablon YALNIZ `widget()` müqaviləsinin
-açarlarını oxuyur — yeni vidjet üçün BU FAYL DƏYİŞMİR.
+eyni `js-profile-section-link` müqaviləsini daşıyır, SPA deleqasiyası onları özü
+tutur.  Müəllim jurnalı (`/jurnal/`) sidebar kimi YENİ TABDA açılır.  Vidjet
+siyahısı `apps/accounts/views/profile/_sections/dashboard.py`-dan gəlir; şablon
+YALNIZ `widget()` müqaviləsinin açarlarını oxuyur.
 
-CSS xarici fayldadır (`accounts/css/profile/dashboard.css`, `_section_assets`-dən
-yüklənir) — inline üslub/skript YOXDUR (CLAUDE.md / CSP).
+CSS xarici fayllardadır: `dashboard.css` (`_section_assets`-dən, qlobal) +
+`dashboard_cards.css` (fənn/dərs sətirləri — PANELİN İÇİNDƏ yüklənir ki, AJAX
+swap-da da gəlsin).  Inline üslub/skript YOXDUR (CLAUDE.md / CSP).
 {% endcomment %}
 {% if 'dashboard' in allowed_sections %}
 {% with sec=dashboard_section %}
 <section class="profile-section-panel profile-section--dashboard {% if active_section == 'dashboard' %}is-active{% endif %}"
          data-profile-section-panel="dashboard"
          data-source-url="{{ profile_base_url }}?section=dashboard">
+  <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard_cards.css' %}?v=20260925-1">
 
   <div class="dash-top">
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=sec.greeting %}
-    {% if sec.role_label or sec.period_label %}
+    {% if sec.role_label or sec.period_label or sec.today_label %}
     <p class="dash-meta">
       {% if sec.role_label %}<span class="ems-badge ems-badge--info">{{ sec.role_label }}</span>{% endif %}
       {% if sec.period_label %}
       <span class="dash-meta__period">
-        <i class="fas fa-calendar-days" aria-hidden="true"></i>{{ sec.period_label }}
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i>{{ sec.period_label }}
+      </span>
+      {% endif %}
+      {% if sec.today_label %}
+      <span class="dash-meta__period">
+        <i class="fas fa-calendar-days" aria-hidden="true"></i>{{ sec.today_label }}{% if sec.week_label %} · {{ sec.week_label }}{% endif %}
       </span>
       {% endif %}
     </p>
@@ -54,54 +61,7 @@ yüklənir) — inline üslub/skript YOXDUR (CLAUDE.md / CSP).
   {% if sec.data_count %}
   <div class="dash-grid">
     {% for w in sec.widgets %}{% if w.variant == 'data' %}
-    <article class="dash-card{% if w.tone %} dash-card--{{ w.tone }}{% endif %}{% if w.is_empty %} dash-card--quiet{% endif %}"
-             data-dash-widget="{{ w.key }}">
-      <div class="dash-card__head">
-        <span class="dash-card__icon" aria-hidden="true"><i class="fas {{ w.icon }}"></i></span>
-        <h3 class="dash-card__title">{{ w.title }}</h3>
-      </div>
-
-      {% if w.stats %}
-      <div class="dash-card__stats">
-        {% for s in w.stats %}
-        <div class="dash-stat">
-          <span class="dash-stat__label">{{ s.label }}</span>
-          <span class="dash-stat__value">{{ s.value }}</span>
-          {% if s.note %}<span class="dash-stat__note">{{ s.note }}</span>{% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-
-      {% if w.rows %}
-      <ul class="dash-card__rows">
-        {% for row in w.rows %}
-        <li class="dash-row">
-          <span class="dash-row__title">{{ row.title }}</span>
-          {% if row.meta %}<span class="dash-row__meta">{{ row.meta }}</span>{% endif %}
-        </li>
-        {% endfor %}
-      </ul>
-      {% if w.more_count %}
-      <p class="dash-card__more">{% blocktrans context "accounts.dashboard" with count=w.more_count %}+{{ count }} daha{% endblocktrans %}</p>
-      {% endif %}
-      {% elif w.is_empty and w.empty %}
-      <p class="dash-card__empty">
-        <i class="fas fa-circle-check" aria-hidden="true"></i><span>{{ w.empty }}</span>
-      </p>
-      {% endif %}
-
-      {% if w.link %}
-      <a class="dash-card__link js-profile-section-link"
-         href="{{ w.link.url }}"
-         data-section="{{ w.link.section }}"
-         data-title="{{ w.link.title }}"
-         data-source-url="{{ profile_base_url }}">
-        <span>{{ w.link.label }}</span>
-        <i class="fas fa-arrow-right" aria-hidden="true"></i>
-      </a>
-      {% endif %}
-    </article>
+    {% include "accounts/profile/sections/_dashboard_card.html" %}
     {% endif %}{% endfor %}
   </div>
   {% endif %}

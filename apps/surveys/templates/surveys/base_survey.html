@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}Anonim sorğunun müstəqil səhifələri (kabinet qabığından KƏNAR). Diqqət rejimi:
+AI köməkçi vidceti gizlədilir. Stil/skript XARİCİ fayllardadır (CSP: inline yoxdur).{% endcomment %}
+
+{% block title %}{% trans "Anonim sorğu" context "surveys.student" %} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey.css' %}?v=20260925-1">
+{% endblock %}
+
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block content %}
+<div class="svy">
+    {% block survey_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'surveys/js/survey_form.js' %}?v=20260925-1" defer></script>
+{% endblock %}

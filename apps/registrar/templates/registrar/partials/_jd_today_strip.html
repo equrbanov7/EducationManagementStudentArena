@@ -1,0 +1,82 @@
+{% load i18n %}
+{% comment %}«Bu günün cədvəl dərsləri» — grid tabının üstündəki zolaq (UNEC müqayisəsi P1-1, 2026-09-25).
+
+Kontekst: `today_strip` (apps/registrar/journal_activation.py::strip_context). Açılışın BU GÜNKÜ
+cədvəl slotları (həftə günü + üst/alt paritet + dövr; parklanmış slot xaric): saat · növ · otaq ·
+müəllim və sillabusdakı NÖVBƏTİ keçilməmiş mövzu. «Aktivləşdir» dərsi slotdan açır (POST,
+tək klik); artıq açılmış slot «Aktivləşdirilib ✓» və həmin sütuna keçid göstərir. Formlar
+grid formasından KƏNARDADIR (iç-içə form olmasın). CSP: inline yoxdur — ikiqat göndəriş
+qapısı journal_activation.js-dədir.{% endcomment %}
+{% with strip=today_strip %}
+<section class="jd2-today" aria-labelledby="jd2-today-title">
+    <header class="jd2-today__head">
+        <span class="jd2-today__icon" aria-hidden="true"><i class="fas fa-calendar-day"></i></span>
+        <div class="jd2-today__headtext">
+            <h3 class="jd2-today__title" id="jd2-today-title">{% trans "Bu günün cədvəl dərsləri" context "registrar.journal_activation" %}</h3>
+            <span class="jd2-today__sub">{{ strip.date|date:"d.m.Y" }} · {{ strip.date|date:"l" }} · {% if strip.parity == 'odd' %}{% trans "ÜST həftə" context "registrar.journal" %}{% else %}{% trans "ALT həftə" context "registrar.journal" %}{% endif %}</span>
+        </div>
+        {% if strip.can_activate and strip.items %}
+        <span class="jd2-today__hint">{% trans "Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və sillabusdan götürülür." context "registrar.journal_activation" %}</span>
+        {% endif %}
+    </header>
+    {% if strip.items %}
+    <ol class="jd2-today__list">
+        {% for item in strip.items %}
+        <li class="jd2-slot jd2-slot--{{ item.kind }} is-{{ item.state }}">
+            <div class="jd2-slot__time">
+                <b>{{ item.start|time:"H:i" }}</b>
+                <span>{{ item.end|time:"H:i" }}</span>
+                {% if item.state == "now" %}<span class="jd2-slot__now">{% trans "indi" context "registrar.journal_activation" %}</span>{% endif %}
+            </div>
+            <div class="jd2-slot__body">
+                <div class="jd2-slot__meta">
+                    <span class="jd2-slot__kind">{{ item.kind_label }}</span>
+                    {% if item.room %}<span class="jd2-slot__fact"><i class="fas fa-door-open" aria-hidden="true"></i> {{ item.room }}</span>{% endif %}
+                    {% if item.teacher %}<span class="jd2-slot__fact"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {{ item.teacher }}</span>{% endif %}
+                </div>
+                <div class="jd2-slot__topic">
+                    {% if item.lesson_id %}
+                    <span class="jd2-slot__topic-label">{% trans "Mövzu" context "registrar.journal_activation" %}:</span> {{ item.lesson_topic|default:"—" }}
+                    {% elif item.topic %}
+                    <span class="jd2-slot__topic-label">{% trans "Növbəti mövzu" context "registrar.journal_activation" %}:</span> «{{ item.topic }}»
+                    {% else %}
+                    <span class="jd2-slot__topic-none">{% trans "Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə edərək yaza bilərsiniz." context "registrar.journal_activation" %}</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="jd2-slot__action">
+                {% if item.lesson_id %}
+                <a class="jd2-slot__done" href="?jt=grid#jd-lesson-{{ item.lesson_id }}"
+                   title="{% trans 'Jurnalda bu dərsin sütununa keç' context 'registrar.journal_activation' %}">
+                    <i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Aktivləşdirilib" context "registrar.journal_activation" %}
+                </a>
+                {% elif strip.can_activate %}
+                <form method="post" action="{{ item.activate_url }}" data-jd-activate-form>
+                    {% csrf_token %}
+                    <button type="submit" class="jd2-slot__btn">
+                        <i class="fas fa-play" aria-hidden="true"></i> {% trans "Aktivləşdir" context "registrar.journal_activation" %}
+                    </button>
+                </form>
+                {% else %}
+                <span class="jd2-slot__pending">{% trans "Aktivləşdirilməyib" context "registrar.journal_activation" %}</span>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="jd2-today__empty">
+        <i class="fas fa-mug-hot" aria-hidden="true"></i>
+        {% trans "Bu gün cədvəldə bu fənnin dərsi yoxdur." context "registrar.journal_activation" %}
+        {% if strip.next_day %}{% trans "Növbəti dərs" context "registrar.journal_activation" %}: <b>{{ strip.next_day|date:"d.m.Y" }}</b> ({{ strip.next_day|date:"l" }}) · {{ strip.next_times }}{% endif %}
+    </p>
+    {% endif %}
+    {% if strip.extra_lessons %}
+    <p class="jd2-today__extra">
+        <i class="fas fa-flag" aria-hidden="true"></i>
+        {% trans "Bu gün cədvəldən kənar açılmış dərs" context "registrar.journal_activation" %}:
+        {% for lesson in strip.extra_lessons %}<a href="?jt=grid#jd-lesson-{{ lesson.id }}">{% if lesson.start %}{{ lesson.start|time:"H:i" }} · {% endif %}{{ lesson.kind_label }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+</section>
+{% endwith %}

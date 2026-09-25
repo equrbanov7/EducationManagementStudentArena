@@ -1,0 +1,14 @@
+{% load i18n %}
+{# «Dərs yüküm» — hər müəllim ÖZ yükünü görür (`workload.view`); bölgü/təsdiq zənciri «Dərs yükü» qrupundadır. #}
+{% if "my-workload" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-workload"
+       data-section="my-workload"
+       data-title="{% trans 'Dərs yüküm' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-workload' %}active{% endif %}">
+        <i class="fas fa-clipboard-list sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Dərs yüküm" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

@@ -8,12 +8,14 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260920-theme">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260906-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260925-audit">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     <link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260831-guest2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20260925-hist2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20260906-ux">
@@ -115,7 +117,7 @@
                 {% trans "Qiymətləndirmə" context "registrar.journal" %}
             </button>
             <button type="button" class="jd2-tab{% if active_tab == "kollokvium" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kollokvium" %}true{% else %}false{% endif %}" data-jt-url="?jt=kollokvium" data-jtab="kollokvium" id="jd-tab-kollokvium" aria-controls="jd-panel-kollokvium">
-                {% trans "Kollokvium" context "registrar.journal" %}
+                {% if kollokvium_grid.spec.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %}
             </button>
             <button type="button" class="jd2-tab{% if active_tab == "kurs-isi" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kurs-isi" %}true{% else %}false{% endif %}" data-jt-url="?jt=kurs-isi" data-jtab="kurs-isi" data-jd-step-of="4" id="jd-tab-kurs-isi" aria-controls="jd-panel-kurs-isi">
                 {% trans "Kurs işi" context "registrar.journal" %}
@@ -148,6 +150,12 @@
                    title="{% trans 'Jurnalı Excel (xlsx) olaraq yüklə' context 'registrar.journal' %}">
                     <i class="fas fa-file-excel"></i> {% trans "Export" context "registrar.journal" %}
                 </a>
+                {% comment %}«Dəyişiklik tarixçəsi» (UNEC P1-3): kim, nə vaxt, köhnə → yeni. Panel
+                açılanda JSON-dan oxunur — səhifə yüklənəndə audit sorğusu YOXDUR.{% endcomment %}
+                <button type="button" class="jd2-export-btn jd2-history-btn" data-jhist-open aria-haspopup="dialog"
+                        title="{% trans 'Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi' context 'registrar.journal_history' %}">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Tarixçə" context "registrar.journal_history" %}
+                </button>
                 {% if syllabus_notice.can_open %}
                 {% comment %}Oxu-rejimli panel — jurnaldan çıxmadan sillabusa baxış.{% endcomment %}
                 <button type="button" class="sylv-open-btn"
@@ -172,11 +180,11 @@
         </div>
         {% endif %}
 
-        {# ── Kollokvium son-tarix xəbərdarlıq lenti — HƏR tabda görünür (açıq pəncərə varsa) ── #}
+        {# ── Kollokvium / midterm son-tarix xəbərdarlıq lenti — HƏR tabda görünür (açıq pəncərə varsa) ── #}
         {% if kollokvium_grid.any_open %}
         <div class="jd2-kmarquee" role="status" aria-live="polite">
             <div class="jd2-kmarquee__track">
-                {% for half in "ab" %}{% for rep in "12345678" %}{% for col in kollokvium_grid.columns %}{% if col.open %}<span class="jd2-kmarquee__item"><i class="fas fa-triangle-exclamation"></i> {% trans "Diqqət" context "registrar.journal" %} · {% trans "Kollokvium" context "registrar.journal" %} {{ col.k_index|add:1 }} {% trans "balını" context "registrar.journal" %} <b>{{ col.deadline|date:"d.m.Y" }}</b> {% trans "tarixinə kimi yazın" context "registrar.journal" %}</span>{% endif %}{% endfor %}{% endfor %}{% endfor %}
+                {% for half in "ab" %}{% for rep in "12345678" %}{% for col in kollokvium_grid.columns %}{% if col.open %}<span class="jd2-kmarquee__item"><i class="fas fa-triangle-exclamation"></i> {% trans "Diqqət" context "registrar.journal" %} · {% if kollokvium_grid.spec.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %} {{ col.k_index|add:1 }}{% endif %} {% trans "balını" context "registrar.journal" %} <b>{{ col.deadline|date:"d.m.Y" }}</b> {% trans "tarixinə kimi yazın" context "registrar.journal" %}</span>{% endif %}{% endfor %}{% endfor %}{% endfor %}
             </div>
         </div>
         {% endif %}
@@ -187,11 +195,13 @@
         (journal_detail.js panel yoxdursa naviqasiya edir).{% endcomment %}
         {% if active_tab == "grid" %}
         <section class="jd-panel is-active" data-jtab-panel="grid" id="jd-panel-grid" role="tabpanel" aria-labelledby="jd-tab-grid">
+            {# «Bu günün cədvəl dərsləri» + «Aktivləşdir» (UNEC P1-1) — grid formasından KƏNAR (iç-içə form yox). #}
+            {% if today_strip %}{% include "registrar/partials/_jd_today_strip.html" %}{% endif %}
             {% include "registrar/partials/_jd_grid.html" %}
         </section>
         {% endif %}
 
-        {# ═══ Kollokvium (3 ədəd, tarix + bal — dizayna əlavə tələb) ═════════ #}
+        {# ═══ Aralıq qiymətləndirmə: Midterm (2026/2027-dən) və ya Kollokvium K1–K3 ═══ #}
         {% if active_tab == "kollokvium" %}
         <section class="jd-panel is-active" data-jtab-panel="kollokvium" id="jd-panel-kollokvium" role="tabpanel" aria-labelledby="jd-tab-kollokvium">
             {% include "registrar/partials/_jd_kollokvium.html" %}
@@ -282,9 +292,13 @@
                     <div class="jd-day-stat jd-day-stat--full"><b data-jd-day-marked></b>/<b data-jd-day-total></b> <span>{% trans "qeyd edilib" context "registrar.journal" %}</span></div>
                 </div>
                 <p class="jd-day-note">{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
+                <button type="button" class="jd-day-history" data-jhist-open data-jd-day-history data-jhist-date="">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Bu dərsin tarixçəsi" context "registrar.journal_history" %}
+                </button>
             </div>
         </div>
     </div>
+    {% include "registrar/partials/_jd_history_drawer.html" %}
 </div>
 {% if syllabus_notice.can_open %}{% include "registrar/partials/_syllabus_drawer.html" %}{% endif %}
 {% endblock %}
@@ -301,11 +315,14 @@
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
-    <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260719-daysum" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260925-hist" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/journal_history.js' %}?v=20260925-hist"></script>
+    {# «Aktivləşdir» ikiqat göndəriş qapısı + modalda «cədvəldən kənar dərs — səbəb» sahəsi (UNEC P1-1). #}
+    <script src="{% static 'registrar/js/journal_activation.js' %}?v=20260925-act"></script>
     {% if can_manage_roster %}
     <script src="{% static 'registrar/js/journal_guest.js' %}?v=20260831-guest2"></script>
     {% endif %}
     {% if correction_mode %}
-    <script src="{% static 'registrar/js/correction.js' %}?v=CORR4-excuse" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/correction.js' %}?v=CORR5-midterm" nonce="{{ request.csp_nonce }}"></script>
     {% endif %}
 {% endblock %}

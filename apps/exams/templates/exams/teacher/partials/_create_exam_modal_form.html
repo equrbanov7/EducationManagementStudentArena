@@ -161,7 +161,7 @@
                             <div class="bootstrap-single-select">
                                 {{ form.exam_type_extended }}
                             </div>
-                            <small class="form-text">{% trans "exam_type_extended_help" context "exams.template.create_exam_modal_form" %}</small>
+                            <small class="form-text">{% trans "Yalnız lazım olduqda seç: Sınaq, Midterm və ya Final." context "exams.template.create_exam_modal_form" %}</small>
                             {% if form.exam_type_extended.errors %}<div class="field-error">{{ form.exam_type_extended.errors.0 }}</div>{% endif %}
                         </div>
 

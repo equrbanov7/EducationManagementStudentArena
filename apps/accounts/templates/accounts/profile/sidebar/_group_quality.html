@@ -1,0 +1,45 @@
+{% load i18n %}
+{% comment %}«Keyfiyyətə nəzarət» qrupu (2026-09-25) — müəllimlərin ANONİM qiymətləndirmə
+sorğusunun heyət tərəfi: kampaniyaların idarəsi və nəticələrin baxışı.
+
+Bölmələr başqa işdə qurulur; bəndlər YALNIZ öz açarı `allowed_sections`-da olanda
+görünür (o vaxta qədər qrup render olunmur — boş başlıq qalmır). Görünürlük
+qapısı rbac-dadır, burada yalnız təqdimatdır. Müəllimin düz menyusu bu bəndləri
+TANIMIR: müəllimdə bu açarlardan biri olsa, `resolve_sidebar_layout` onu tam
+akkordeona keçirir (bənd itmir).
+
+Sıra: nəticələr (dekan/kafedra tez-tez baxır) → kampaniyalar (semestrdə bir-iki dəfə).{% endcomment %}
+{% if "evaluation-results" in allowed_sections or "evaluation-campaigns" in allowed_sections %}
+<li class="sidebar-menu-group" data-sidebar-group="quality">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|evaluation-results|evaluation-campaigns|" %} open{% endif %}>
+        {% trans "Keyfiyyətə nəzarət" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-clipboard-check" %}
+        <ul class="sidebar-menu-group-items">
+            {% if "evaluation-results" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=evaluation-results"
+                   data-section="evaluation-results"
+                   data-title="{% trans 'Sorğu nəticələri' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'evaluation-results' %}active{% endif %}">
+                    <i class="fas fa-chart-column sidebar-menu-icon" aria-hidden="true"></i>
+                    <span class="sidebar-menu-text">{% trans "Sorğu nəticələri" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if "evaluation-campaigns" in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=evaluation-campaigns"
+                   data-section="evaluation-campaigns"
+                   data-title="{% trans 'Sorğu kampaniyaları' context 'profile.sidebar' %}"
+                   data-source-url="{{ profile_base_url }}"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'evaluation-campaigns' %}active{% endif %}">
+                    <i class="fas fa-bullhorn sidebar-menu-icon" aria-hidden="true"></i>
+                    <span class="sidebar-menu-text">{% trans "Sorğu kampaniyaları" context "profile.sidebar" %}</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </details>
+</li>
+{% endif %}

@@ -64,6 +64,16 @@ def lessons_log_csv(request):
     lessons = lessons.filter(date__gte=window["start"], date__lte=window["end"])
     if selection["apply_period_filter"]:
         lessons = lessons.filter(offering__period__in=selection["periods"])
+    # Fakültə / Kafedra — bölmə ilə EYNİ həll və kaskad (`lessons_log_units.filter_state`), siyahısız.
+    units = service.unit_filter_state(
+        request.user,
+        organization,
+        lessons,
+        supervisor=supervisor,
+        faculty_raw=_param(request, "faculty"),
+        kafedra_raw=_param(request, "kafedra"),
+        with_options=False,
+    )
     lessons = service.apply_filters(
         lessons,
         q=_param(request, "q"),
@@ -73,7 +83,11 @@ def lessons_log_csv(request):
         teacher=teacher_id,
         form=_param(request, "form"),
         supervisor=supervisor,
+        faculty_unit=units["faculty"],
+        kafedra_unit=units["kafedra"],
     )
+    if units["invalid"]:
+        lessons = lessons.filter(pk__isnull=True)  # bölmə ilə eyni: seçilmiş bölmə tapılmadı
 
     rows = service.build_rows(lessons, limit=EXPORT_CAP)
     if _param(request, "flagged") == "1":

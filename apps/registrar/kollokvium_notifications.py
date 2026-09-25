@@ -1,4 +1,7 @@
-"""Kollokvium bal-yazma pəncərəsi dəyişikliyi — offering müəllimlərinə bildiriş.
+"""Kollokvium / midterm bal-yazma pəncərəsi dəyişikliyi — offering müəllimlərinə bildiriş.
+
+Pəncərənin adı dövrün rejimindən gəlir (:mod:`apps.registrar.interim_assessment`):
+2026/2027-dən «Midterm», keçmiş dövrlərdə «Kollokvium K1/K2/K3».
 
 Pəncərə aktivləşəndə/bağlananda, ya da aktiv ikən tarixləri dəyişəndə (əlavə
 gün YOX, birbaşa tarix redaktəsi) həmin dövrün açılışlarının
@@ -72,10 +75,20 @@ def _dispatch(event: str, window, title: str) -> None:
     transaction.on_commit(_send)
 
 
+def _window_name(window) -> str:
+    """«Midterm» (2026/2027-dən) və ya «Kollokvium K2» (keçmiş dövrlər)."""
+    from apps.registrar import interim_assessment
+
+    spec = interim_assessment.spec_for_period(window.period, window.organization)
+    if spec.is_midterm:
+        return spec.title
+    return pgettext(_CTX, "Kollokvium K%(n)s") % {"n": window.k_index + 1}
+
+
 def notify_window_opened(window) -> None:
     """Pəncərə aktivləşdi (yeni yaradılıb aktivləşib və ya toggle ilə açılıb)."""
-    title = pgettext(_CTX, "Kollokvium K%(n)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s") % {
-        "n": window.k_index + 1,
+    title = pgettext(_CTX, "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s") % {
+        "name": _window_name(window),
         "opens": window.opens_on,
         "closes": window.closes_on,
     }
@@ -84,14 +97,14 @@ def notify_window_opened(window) -> None:
 
 def notify_window_closed(window) -> None:
     """Pəncərə deaktivləşdirildi (toggle ilə bağlanıb)."""
-    title = pgettext(_CTX, "Kollokvium K%(n)s bal-yazma pəncərəsi bağlandı") % {"n": window.k_index + 1}
+    title = pgettext(_CTX, "%(name)s bal-yazma pəncərəsi bağlandı") % {"name": _window_name(window)}
     _dispatch(EVENT_CLOSED, window, title)
 
 
 def notify_window_extended(window) -> None:
     """Aktiv pəncərənin tarixləri dəyişdi (uzadıldı/qısaldıldı)."""
-    title = pgettext(_CTX, "Kollokvium K%(n)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s") % {
-        "n": window.k_index + 1,
+    title = pgettext(_CTX, "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s") % {
+        "name": _window_name(window),
         "opens": window.opens_on,
         "closes": window.closes_on,
     }

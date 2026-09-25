@@ -1,0 +1,361 @@
+/* =========================================================================
+   Anonim sorğu — kabinet bölmələri (tələbə statusu, nəticə xülasəsi,
+   kampaniyalar). Rənglər --ems-* tokenlərindən; yalnız açıq tema.
+   ========================================================================= */
+
+.svc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6, 16px);
+}
+
+.svc-intro,
+.svc-note,
+.svc-empty {
+    margin: 0;
+    font-size: var(--ems-fs-md, 14px);
+    line-height: 1.55;
+    color: var(--ems-neutral-600);
+}
+
+.svc-note {
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-neutral-500);
+}
+
+/* ── Tələbə kartı ─────────────────────────────────────────────────────── */
+.svc-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-6, 16px);
+    padding: var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svc-card--pending {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.svc-card--done {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.svc-card__icon {
+    font-size: 30px;
+    color: var(--ems-warning-700);
+}
+
+.svc-card--done .svc-card__icon {
+    color: var(--ems-success-700);
+}
+
+.svc-card__body {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.svc-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl, 16px);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svc-card__text,
+.svc-card__meta {
+    margin: var(--ems-sp-2, 6px) 0 0;
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-neutral-700);
+}
+
+.svc-meter {
+    appearance: none;
+    width: 100%;
+    max-width: 320px;
+    height: 8px;
+    margin-top: var(--ems-sp-3, 8px);
+    border: 0;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-neutral-0);
+    overflow: hidden;
+}
+
+.svc-meter::-webkit-progress-bar {
+    background: var(--ems-neutral-0);
+    border-radius: var(--ems-r-pill, 999px);
+}
+
+.svc-meter::-webkit-progress-value {
+    background: var(--ems-success);
+}
+
+.svc-meter::-moz-progress-bar {
+    background: var(--ems-success);
+}
+
+/* ── Düymələr / sahələr ───────────────────────────────────────────────── */
+.svc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-2, 6px);
+    min-height: var(--ems-h-field, 40px);
+    padding: 0 14px;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-lg, 9px);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.svc-btn--primary {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.svc-btn--primary:hover {
+    background: var(--ems-primary-700);
+    color: var(--ems-neutral-0);
+}
+
+.svc-btn--ghost {
+    background: var(--ems-bg);
+    border-color: var(--ems-neutral-300);
+    color: var(--ems-neutral-700);
+}
+
+.svc-btn--ghost:hover {
+    background: var(--ems-neutral-50);
+}
+
+.svc-btn--danger {
+    background: var(--ems-bg);
+    border-color: var(--ems-danger-bd);
+    color: var(--ems-danger-strong);
+}
+
+.svc-btn--danger:hover {
+    background: var(--ems-danger-bg);
+}
+
+.svc-btn:focus-visible,
+.svc-input:focus-visible,
+.svc-check input:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.svc-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1, 4px);
+    min-width: 170px;
+    flex: 1 1 170px;
+}
+
+.svc-field--narrow {
+    flex: 0 1 130px;
+    min-width: 110px;
+}
+
+.svc-field label {
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svc-input {
+    min-height: var(--ems-h-field, 40px);
+    padding: 0 10px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg, 9px);
+    background: var(--ems-bg);
+    font: inherit;
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-text);
+}
+
+.svc-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+    min-height: var(--ems-h-field, 40px);
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-neutral-700);
+}
+
+.svc-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ── Kampaniyalar ─────────────────────────────────────────────────────── */
+.svc-new,
+.svc-edit,
+.svc-reopen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ems-sp-4, 10px);
+    margin: 0;
+}
+
+.svc-new {
+    padding: var(--ems-sp-5, 12px) var(--ems-sp-6, 16px);
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl, 12px);
+    background: var(--ems-bg-subtle);
+}
+
+.svc-camp {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 12px);
+    padding: var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svc-camp__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.svc-camp__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svc-camp__year {
+    font-weight: 500;
+    color: var(--ems-neutral-500);
+}
+
+.svc-camp__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.svc-camp__actions form {
+    margin: 0;
+}
+
+.svc-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--ems-h-chip, 24px);
+    padding: 0 10px;
+    border-radius: var(--ems-r-pill, 999px);
+    font-size: var(--ems-fs-sm, 12px);
+    font-weight: 600;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.svc-chip--open {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.svc-chip--scheduled,
+.svc-chip--draft {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.svc-chip--warn {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.svc-chip--muted {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-500);
+}
+
+.svc-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-3, 8px) var(--ems-sp-6, 16px);
+    margin: 0;
+}
+
+.svc-stats dt {
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svc-stats dd {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Nəticə KPI-ları ──────────────────────────────────────────────────── */
+.svc-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-4, 10px);
+}
+
+.svc-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1, 4px);
+    padding: var(--ems-pad-card, 14px 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl, 12px);
+    background: var(--ems-bg);
+}
+
+.svc-kpi__label {
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svc-kpi__value {
+    font-size: var(--ems-fs-3xl, 25px);
+    font-weight: 700;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 720px) {
+    .svc-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .svc-kpis {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

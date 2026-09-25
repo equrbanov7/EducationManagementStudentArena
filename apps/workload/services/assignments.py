@@ -1,6 +1,15 @@
-"""Bölgü: müəllim təyinatı, saat balansı və qalıq hesabı (spec §4.3)."""
+"""Bölgü: müəllim təyinatı, saat balansı və qalıq hesabı (spec §4.3).
+
+2026-09-25: təyinat/ləğv açılışın müəllimini DƏRHAL yeniləyir (əvvəl yalnız
+``confirm_distribution``-da). Provenans üçün dəyişiklikdən ƏVVƏLKİ yük sahibi
+(``offering_sync.owner_snapshot``) ötürülür: açılışda məhz o müəllim varsa yenisi
+yazılır, «Fənn təhvili»/cədvəl redaktorunun qoyduğu fərqli müəllim əzilmir
+(:mod:`.offering_rules` §4). Sinxron xətası təyinatı geri qaytarmır.
+"""
 
 from __future__ import annotations
+
+import logging
 
 from django.db import transaction
 from django.db.models import Sum
@@ -16,10 +25,29 @@ from ..constants import (
     TaskStatus,
 )
 from ..models import TeacherAssignment, TeachingTaskRow
+from .offering_rules import UNKNOWN, plan_reached_chair
+from .offering_sync import compact, owner_snapshot, run_safely, sync_row_offerings
 from .people import ensure_assignable_teacher
 from .scoping import WorkloadDenied, ensure_can_distribute
 
+logger = logging.getLogger(__name__)
+
 _ACTIVITY_VALUES = {value for value, _ in Activity.choices}
+
+
+def _owner_snapshot(row):
+    """Dəyişiklikdən ƏVVƏLKİ yük sahibi; oxu alınmasa ``UNKNOWN`` (heç nə əzilmir)."""
+    try:
+        with transaction.atomic():
+            return owner_snapshot(row)
+    except Exception:  # noqa: BLE001 — təyinat dayanmamalıdır
+        logger.exception("workload: owner snapshot failed for row %s", row.pk)
+        return UNKNOWN
+
+
+def _sync_row(row, *, actor, request, previous, create) -> dict:
+    """Sətrin qrup açılışları DƏRHAL — plan çatıbsa yaradılır, əks halda yalnız mövcudlar."""
+    return compact(run_safely(sync_row_offerings, row, actor=actor, request=request, previous=previous, create=create))
 
 
 def _assigned_map(row_ids) -> dict:
@@ -115,6 +143,9 @@ def assign_teacher(
 
     # Sətri kilidləyirik: paralel iki bölgü eyni qalığı «xərcləyə» bilməsin.
     locked = TeachingTaskRow.objects.select_for_update(of=("self",)).get(pk=row.pk)
+    locked.task = task
+    # Plan kafedraya çatıbmı — status (approved → distributing) dəyişməzdən ƏVVƏL.
+    create_offerings = plan_reached_chair(task)
     available = remaining_hours(locked, activity, exclude_assignment_id=getattr(assignment, "pk", None))
     if hours > available:
         raise WorkloadDenied(
@@ -141,6 +172,7 @@ def assign_teacher(
         if assignment.pk
         else None
     )
+    before = _owner_snapshot(locked)
     assignment.activity = activity
     assignment.hours = hours
     assignment.teacher = teacher
@@ -154,13 +186,20 @@ def assign_teacher(
         task.status = TaskStatus.DISTRIBUTING
         task.save(update_fields=["status", "updated_at"])
 
+    # Jurnal sahibi DƏRHAL — hesabat çağırana (`assignment.offering_sync`) və audit-ə düşür.
+    assignment.offering_sync = _sync_row(locked, actor=actor, request=request, previous=before, create=create_offerings)
     log_action(
         AuditAction.UPDATE if old_values else AuditAction.CREATE,
         user=getattr(actor, "user", None),
         organization=task.organization,
         obj=assignment,
         old_values=old_values,
-        new_values={"activity": activity, "hours": hours, "teacher": str(teacher.pk) if teacher else ""},
+        new_values={
+            "activity": activity,
+            "hours": hours,
+            "teacher": str(teacher.pk) if teacher else "",
+            "offerings": assignment.offering_sync,
+        },
         reason="workload.assigned",
         request=request,
         resource_type="workload.TeacherAssignment",
@@ -171,8 +210,14 @@ def assign_teacher(
 
 
 @transaction.atomic
-def unassign(*, assignment: TeacherAssignment, actor, request=None) -> None:
-    task = assignment.row.task
+def unassign(*, assignment: TeacherAssignment, actor, request=None) -> dict:
+    """Bölgü sətrini silir; sətrin açılışlarının jurnal sahibi DƏRHAL yenilənir.
+
+    Qaytarır: açılış sinxronunun hesabatı (``offering_sync.compact`` — ``assign_teacher``-in
+    ``assignment.offering_sync``-i ilə eyni forma).
+    """
+    row = assignment.row
+    task = row.task
     ensure_can_distribute(actor, task.chair_id)
     _ensure_assignable(task)
     payload = {
@@ -181,19 +226,25 @@ def unassign(*, assignment: TeacherAssignment, actor, request=None) -> None:
         "teacher": str(assignment.teacher_id or ""),
     }
     assignment_id = str(assignment.pk)
-    label = f"{assignment.row.subject_label} · {assignment.activity}"
+    label = f"{row.subject_label} · {assignment.activity}"
+    create_offerings = plan_reached_chair(task)
+    before = _owner_snapshot(row)
     assignment.delete()
+    # Mühazirəçi silinibsə jurnal növbəti yük sahibinə və ya BOŞ qalır (vakant).
+    offerings = _sync_row(row, actor=actor, request=request, previous=before, create=create_offerings)
     log_action(
         AuditAction.DELETE,
         user=getattr(actor, "user", None),
         organization=task.organization,
         old_values=payload,
+        new_values={"offerings": offerings},
         reason="workload.unassigned",
         request=request,
         resource_type="workload.TeacherAssignment",
         resource_id=assignment_id,
         resource_repr=label,
     )
+    return offerings
 
 
 __all__ = ["assign_teacher", "balance_for_rows", "remaining_hours", "unassign"]

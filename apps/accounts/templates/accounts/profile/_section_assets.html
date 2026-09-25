@@ -21,9 +21,9 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
         superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
         yükləyirdi (2026-07-31 auditi).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260914-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260925-shrink">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260909-hero">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     {% if 'statistics' in allowed_sections %}
@@ -130,7 +130,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% endif %}
     {% if 'syllabus-list' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260830-3">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260925-hours">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
     {% comment %}Köçürülmüş məzmunun səthi (kataloqdankənar metod çipləri, plandan
     artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda

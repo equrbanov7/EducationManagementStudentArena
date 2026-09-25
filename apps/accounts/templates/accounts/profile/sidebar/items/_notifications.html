@@ -1,0 +1,17 @@
+{% load i18n %}
+{# «Bildirişlər» — oxunmamış sayğacı badge-dədir (section_loader.refreshBadges yeniləyir). #}
+{% if 'notifications' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=notifications"
+       data-section="notifications"
+       data-title="{% trans 'notifications' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'notifications' %}active{% endif %}">
+        <i class="fas fa-bell sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "notifications" context "profile.section" %}</span>
+        {% if notifications_unread_count > 0 %}
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="notifications_unread_count">{{ notifications_unread_count }}</span>
+        {% endif %}
+    </a>
+</li>
+{% endif %}

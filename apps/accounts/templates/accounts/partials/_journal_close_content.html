@@ -155,7 +155,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
     <div class="jc-card__head">
       <h3 class="jc-card__title"><i class="fas fa-bullhorn"></i> {% trans "Bağlanma xəbərdarlığı" context "registrar.journal_close" %}</h3>
     </div>
-    <p class="jc-sub">{% trans "Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin kollokvium bildirişi kimi." context "registrar.journal_close" %}</p>
+    <p class="jc-sub">{% trans "Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin midterm bildirişi kimi." context "registrar.journal_close" %}</p>
 
     <form method="post" action="{% url 'accounts:journal_close' %}" class="jc-noticeform">
       {% csrf_token %}

@@ -25,6 +25,9 @@
     set("[data-jd-day-scored]", btn.getAttribute("data-scored"));
     set("[data-jd-day-marked]", btn.getAttribute("data-marked"));
     set("[data-jd-day-total]", btn.getAttribute("data-total"));
+    // «Bu dərsin tarixçəsi» — tarixçə panelini bu dərs tarixi ilə süzülmüş açır (journal_history.js).
+    var historyBtn = modal.querySelector("[data-jd-day-history]");
+    if (historyBtn) historyBtn.setAttribute("data-jhist-date", btn.getAttribute("data-iso") || "");
     modal.hidden = false;
     document.body.style.overflow = "hidden";
   });

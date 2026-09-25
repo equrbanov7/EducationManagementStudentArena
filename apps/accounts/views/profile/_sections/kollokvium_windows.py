@@ -2,9 +2,16 @@
 
 ``section`` dict-ini YERİNDƏ mutasiya edir (exam_rooms pattern-i ilə eyni).
 Superadmin cross-org (org seçici); İmtahan Mərkəzi istifadəçisi yalnız aktiv
-təşkilatı. Tədris ili + semestr AYRICA seçilir (jurnal kimi); K1/K2/K3 üçün
-pəncərə sətirləri + əlavə gün grant-ları göstərilir. Fakültə/kafedra siyahıları
-əlavə gün modalı üçündür.
+təşkilatı. Tədris ili + semestr AYRICA seçilir (jurnal kimi); pəncərə sətirləri
++ əlavə gün grant-ları göstərilir. Fakültə/kafedra siyahıları əlavə gün modalı
+üçündür.
+
+REJİM (sahib 2026-09-25): sətirlərin sayı/adı seçilmiş semestrin aralıq
+qiymətləndirmə rejimindən gəlir — ``registrar.interim_assessment`` (tək mənbə):
+2026/2027-dən TƏK «Midterm» pəncərəsi (``k_index=0``, 0–20 bal), keçmiş
+dövrlərdə əvvəlki kimi K1/K2/K3 (hər biri 0–10). Midterm semestrində köhnə
+qaydadan qalmış ``k_index>0`` pəncərələri ayrıca «köhnə pəncərələr» siyahısında
+göstərilir (yalnız silmək olar — müəllim jurnalında onsuz da istifadə olunmur).
 """
 
 from datetime import timedelta
@@ -13,8 +20,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.views._helpers.formatting import _append_query_params
-
-_K_LABELS = [(0, "K1"), (1, "K2"), (2, "K3")]
 
 
 def _base_status(window, today):
@@ -68,6 +73,56 @@ def _current_semester(periods, today):
     return matching[0] if matching else periods[0]
 
 
+def _window_grants(window):
+    """Pəncərənin əlavə gün grant-ları (kart siyahısı + redaktə modalının öncədən dolması üçün)."""
+    if window is None:
+        return []
+    return [
+        {
+            "id": g.id,
+            "extra_days": g.extra_days,
+            "scope": g.scope,  # xam dəyər — redaktə modalında öncədən doldurmaq üçün
+            "scope_display": g.get_scope_display(),
+            "org_unit_id": str(g.org_unit_id) if g.org_unit_id else "",
+            "unit_name": g.org_unit.name if g.org_unit_id else "",
+            # Effektiv son tarix bu grant üzrə = bağlanış + əlavə gün.
+            "deadline": (window.closes_on + timedelta(days=g.extra_days)) if window.closes_on else None,
+        }
+        for g in window.extra_grants.all()
+    ]
+
+
+def _build_k_rows(windows, spec, today):
+    """Rejimin pəncərə kartları: midterm → [Midterm], kollokvium → [K1, K2, K3]."""
+    rows = []
+    for k_index in range(spec.count):
+        window = windows.get(k_index)
+        rows.append(
+            {
+                "k_index": k_index,
+                "label": spec.label_for(k_index),
+                "window": window,
+                "status": _base_status(window, today),
+                "grants": _window_grants(window),
+                # Sıra qaydası YALNIZ kollokvium rejimində: K{n} yalnız K{n-1}
+                # təyin olunduqdan sonra qoyula bilər (midtermdə tək pəncərədir).
+                "can_set": spec.is_midterm or k_index == 0 or windows.get(k_index - 1) is not None,
+            }
+        )
+    return rows
+
+
+def _stale_rows(windows, spec, today):
+    """Midterm semestrində köhnə qaydadan qalmış ``k_index>0`` pəncərələri (yalnız silinə bilər)."""
+    if not spec.is_midterm:
+        return []
+    return [
+        {"k_index": k_index, "label": spec.label_for(k_index), "window": window, "status": _base_status(window, today)}
+        for k_index, window in sorted(windows.items())
+        if k_index >= spec.count
+    ]
+
+
 def build_kollokvium_windows_section(
     request, section, *, is_superadmin, active_organization, allowed_sections, active_section
 ):
@@ -76,6 +131,7 @@ def build_kollokvium_windows_section(
 
     from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
     from apps.registrar.models import KollokviumWindow
+    from apps.registrar.public import interim_assessment
     from core.constants import OrgUnitType
 
     kafedra_types = [OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT]
@@ -107,7 +163,9 @@ def build_kollokvium_windows_section(
         section["selected_year"] = None
         section["periods"] = []
         section["period"] = None
+        section["interim"] = interim_assessment.spec_for_period(None)
         section["k_rows"] = []
+        section["stale_rows"] = []
         section["faculties"] = []
         section["departments"] = []
         section["post_next_url"] = _append_query_params(reverse("accounts:profile"), section="kollokvium-windows")
@@ -200,7 +258,13 @@ def build_kollokvium_windows_section(
         **({"period": str(period.id)} if period else {}),
     )
 
-    # ── K1/K2/K3 pəncərə sətirləri (+ əlavə gün grant-ları) ────────────────
+    # ── Rejim (midterm / kollokvium) — seçilmiş semestrin tədris ilindən ────
+    spec = interim_assessment.spec_for_period(period, selected_org)
+    from_year = interim_assessment.midterm_from_year(selected_org)
+    section["interim"] = spec
+    section["midterm_from_label"] = f"{from_year}/{from_year + 1}"
+
+    # ── Pəncərə sətirləri (+ əlavə gün grant-ları) ─────────────────────────
     windows = {}
     if period is not None:
         for w in KollokviumWindow.objects.filter(organization=selected_org, period=period).prefetch_related(
@@ -208,37 +272,12 @@ def build_kollokvium_windows_section(
         ):
             windows[w.k_index] = w
 
-    k_rows = []
-    for k_index, label in _K_LABELS:
-        window = windows.get(k_index)
-        grants = []
-        if window is not None:
-            for g in window.extra_grants.all():
-                grants.append(
-                    {
-                        "id": g.id,
-                        "extra_days": g.extra_days,
-                        "scope": g.scope,  # xam dəyər — redaktə modalında öncədən doldurmaq üçün
-                        "scope_display": g.get_scope_display(),
-                        "org_unit_id": str(g.org_unit_id) if g.org_unit_id else "",
-                        "unit_name": g.org_unit.name if g.org_unit_id else "",
-                        # Effektiv son tarix bu grant üzrə = bağlanış + əlavə gün.
-                        "deadline": (window.closes_on + timedelta(days=g.extra_days)) if window.closes_on else None,
-                    }
-                )
-        k_rows.append(
-            {
-                "k_index": k_index,
-                "label": label,
-                "window": window,
-                "status": _base_status(window, today),
-                "grants": grants,
-                # Sıra: K{n} yalnız K{n-1} təyin olunduqdan sonra qoyula bilər.
-                "can_set": k_index == 0 or windows.get(k_index - 1) is not None,
-            }
-        )
+    k_rows = _build_k_rows(windows, spec, today)
     section["k_rows"] = k_rows
+    section["midterm_row"] = k_rows[0] if spec.is_midterm and k_rows else None
+    section["stale_rows"] = _stale_rows(windows, spec, today)
     # KPI — bölmə başındakı rəqəmlər (siyahı yaddaşdadır, əlavə sorğu yoxdur).
+    # Midterm rejimində (tək pəncərə) şablon say əvəzinə vəziyyət/aralıq/şkala göstərir.
     section["kpi_open"] = sum(1 for row in k_rows if row["status"] == "open")
     section["kpi_closed"] = sum(1 for row in k_rows if row["status"] == "closed")
     section["kpi_not_set"] = sum(1 for row in k_rows if row["window"] is None)

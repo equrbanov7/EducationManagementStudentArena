@@ -174,6 +174,15 @@ DATABASES = {
     )
 }
 
+# CI (2026-09-25): repo private olandan sonra GitHub runner-ləri 2 vCPU-dur — 4 xdist worker-in
+# hər biri bütün miqrasiyaları AYRICA işlədəndə test DB qurulumu 300 s-lik pytest-timeout-u
+# keçirdi. CI job-u miqrasiyanı BİR dəfə şablon bazaya işlədir və `EMS_TEST_DB_TEMPLATE`-i
+# verir; worker-lərin test bazaları `CREATE DATABASE … TEMPLATE` ilə klonlanır (sonrakı
+# `migrate` boş plandır). Dəyişən boşdursa (lokal) davranış dəyişmir.
+_TEST_DB_TEMPLATE = os.getenv("EMS_TEST_DB_TEMPLATE", "").strip()
+if _TEST_DB_TEMPLATE:
+    DATABASES["default"]["TEST"] = {**DATABASES["default"].get("TEST", {}), "TEMPLATE": _TEST_DB_TEMPLATE}
+
 # Use in-memory channel layer for tests
 CHANNEL_LAYERS = {
     "default": {

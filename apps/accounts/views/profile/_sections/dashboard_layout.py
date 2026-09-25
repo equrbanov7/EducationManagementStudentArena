@@ -59,18 +59,24 @@ def _is_blank(value) -> bool:
     return str(value or "").strip() in _BLANK_VALUES
 
 
-def _more_count(stats, rows) -> int:
+def _more_count(stats, rows, total=None) -> int:
     """Siyahıdan kənarda qalan sətir sayı — «+N daha».
 
-    Vidjetin BİRİNCİ rəqəmi konvensiya olaraq həmin siyahının TAM sayıdır
+    ``total`` verilibsə (vidjetin ``total`` açarı — fənn-fənn kartlarında birinci
+    rəqəm «limitə yaxın» sayıdır, siyahının uzunluğu DEYİL) o götürülür.  Əks
+    halda vidjetin BİRİNCİ rəqəmi konvensiya olaraq həmin siyahının TAM sayıdır
     (növbədə N sillabus, planlanmış N imtahan, əhatədə N qrup…), sətirlər isə
     ``ROW_LIMIT``-ə kəsilir.  Rəqəm tam ədəd deyilsə (status mətni, saat) fərq
     hesablanmır — yanlış «+N» göstərməkdənsə heç nə göstərmək yaxşıdır.
     """
-    if not rows or not stats:
+    if not rows:
         return 0
+    if total is None:
+        if not stats:
+            return 0
+        total = stats[0].get("value", "")
     try:
-        total = int(str(stats[0].get("value", "")).strip())
+        total = int(str(total).strip())
     except (AttributeError, TypeError, ValueError):
         return 0
     return max(0, total - len(rows))
@@ -98,7 +104,7 @@ def decorate(widgets: list) -> list:
         rows = item.get("rows") or []
         item["variant"] = "data" if (stats or rows) else "link"
         item["attention"] = bool(item.get("tone") in ("warning", "danger") and not item.get("is_empty"))
-        item["more_count"] = _more_count(stats, rows)
+        item["more_count"] = _more_count(stats, rows, item.get("total"))
     return sorted(widgets, key=_rank)
 
 

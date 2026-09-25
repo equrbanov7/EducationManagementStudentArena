@@ -126,6 +126,12 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_student_admission.html" %}
             {% elif active_section == "student-registry" and 'student-registry' in allowed_sections %}
                 {% include "accounts/profile/sections/_student_registry.html" %}
+            {% elif active_section == "evaluation-survey" and 'evaluation-survey' in allowed_sections %}
+                {% include "accounts/profile/sections/_evaluation_survey.html" %}
+            {% elif active_section == "evaluation-results" and 'evaluation-results' in allowed_sections %}
+                {% include "accounts/profile/sections/_evaluation_results.html" %}
+            {% elif active_section == "evaluation-campaigns" and 'evaluation-campaigns' in allowed_sections %}
+                {% include "accounts/profile/sections/_evaluation_campaigns.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}

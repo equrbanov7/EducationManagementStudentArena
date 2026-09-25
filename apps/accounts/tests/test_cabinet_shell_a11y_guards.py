@@ -35,7 +35,9 @@ FOCUSABLE_RE = re.compile(r"<(a|button|input|select|textarea)\b[^>]*>", re.IGNOR
 
 def _shell_template_paths():
     paths = [REPO_ROOT / rel for rel in SHELL_TEMPLATES]
-    paths.extend(sorted((REPO_ROOT / "apps/accounts/templates/accounts/profile/sidebar").glob("*.html")))
+    # 2026-09-25: sidebar bəndləri `sidebar/items/`, düz menyu `sidebar/compact/`
+    # alt qovluqlarındadır — onlar da yoxlanılır (rglob).
+    paths.extend(sorted((REPO_ROOT / "apps/accounts/templates/accounts/profile/sidebar").rglob("*.html")))
     return paths
 
 

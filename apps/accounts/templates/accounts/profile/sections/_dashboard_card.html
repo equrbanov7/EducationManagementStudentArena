@@ -1,0 +1,64 @@
+{% load i18n %}
+{% comment %}
+«Ana səhifə» — BİR məlumat kartı (kontekst: `w` — `dashboard_widgets.widget()`).
+
+Oxu sırası: başlıq (+ bir cümləlik izah) → rəqəmlər → siyahı başlığı → sətirlər
+(`_dashboard_rows.html`, forma `w.body`-dən) → «+N daha» / boş-hal izahı → qeyd →
+kartın YEGANƏ əməli (bölmə keçidi və ya — müəllim jurnalı — yeni tab).
+{% endcomment %}
+<article class="dash-card{% if w.tone %} dash-card--{{ w.tone }}{% endif %}{% if w.is_empty %} dash-card--quiet{% endif %}{% if w.wide %} dash-card--wide{% endif %}"
+         data-dash-widget="{{ w.key }}">
+  <div class="dash-card__head">
+    <span class="dash-card__icon" aria-hidden="true"><i class="fas {{ w.icon }}"></i></span>
+    <div class="dash-card__heading">
+      <h3 class="dash-card__title">{{ w.title }}</h3>
+      {% if w.subtitle %}<p class="dash-card__subtitle">{{ w.subtitle }}</p>{% endif %}
+    </div>
+  </div>
+
+  {% if w.stats %}
+  <div class="dash-card__stats">
+    {% for s in w.stats %}
+    <div class="dash-stat">
+      <span class="dash-stat__label">{{ s.label }}</span>
+      <span class="dash-stat__value">{{ s.value }}</span>
+      {% if s.note %}<span class="dash-stat__note">{{ s.note }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if w.rows %}
+  {% if w.caption %}<p class="dash-card__caption">{{ w.caption }}</p>{% endif %}
+  {% include "accounts/profile/sections/_dashboard_rows.html" %}
+  {% if w.more_count %}
+  <p class="dash-card__more">{% blocktrans context "accounts.dashboard" with count=w.more_count %}+{{ count }} daha{% endblocktrans %}</p>
+  {% endif %}
+  {% elif w.is_empty and w.empty %}
+  <p class="dash-card__empty">
+    <i class="fas fa-circle-info" aria-hidden="true"></i><span>{{ w.empty }}</span>
+  </p>
+  {% endif %}
+
+  {% if w.notice %}
+  <p class="dash-card__notice"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{{ w.notice }}</span></p>
+  {% endif %}
+
+  {% if w.link %}
+  {% if w.link.external %}
+  <a class="dash-card__link" href="{{ w.link.url }}" target="_blank" rel="noopener" data-force-navigation="true">
+    <span>{{ w.link.label }}</span>
+    <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+  </a>
+  {% else %}
+  <a class="dash-card__link js-profile-section-link"
+     href="{{ w.link.url }}"
+     data-section="{{ w.link.section }}"
+     data-title="{{ w.link.title }}"
+     data-source-url="{{ profile_base_url }}">
+    <span>{{ w.link.label }}</span>
+    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+  </a>
+  {% endif %}
+  {% endif %}
+</article>

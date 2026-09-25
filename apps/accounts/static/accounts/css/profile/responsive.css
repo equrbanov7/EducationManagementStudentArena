@@ -13,6 +13,10 @@
         flex-direction: column;
     }
 
+    /* Mobil: sidebar off-canvas şkafdır. `.collapsed` burada «ekrandan kənarda»
+       deməkdir — ikon-rels qaydaları (`sidebar_rail.css`) yalnız masaüstündədir,
+       ona görə şkaf bağlanarkən də TAM düzümdə sürüşür. Ən dar ekranda da
+       arxa fonun bir zolağı görünür qalsın (toxunub bağlamaq üçün). */
     .profile-sidebar {
         position: fixed;
         top: 0;
@@ -26,12 +30,12 @@
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-right: none;
         width: var(--sidebar-width);
-        padding-bottom: env(safe-area-inset-bottom);
+        max-width: calc(100vw - 40px);
     }
 
-    .sidebar-menu {
-        min-height: auto;
-        padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    /* Təhlükəsiz sahə (iPhone ev zolağı) yapışan alt blokun içində. */
+    .sidebar-footer {
+        padding-bottom: calc(12px + env(safe-area-inset-bottom));
     }
 
     .profile-sidebar-backdrop {
@@ -54,12 +58,6 @@
         transform: translateX(-100%);
     }
 
-    .collapsed .sidebar-title,
-    .collapsed .sidebar-menu-text {
-        opacity: 1;
-        width: auto;
-    }
-
     .profile-main {
         margin-left: 0;
         width: 100%;
@@ -77,5 +75,11 @@
 
     .profile-title {
         font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    .profile-sidebar {
+        transition: none;
     }
 }

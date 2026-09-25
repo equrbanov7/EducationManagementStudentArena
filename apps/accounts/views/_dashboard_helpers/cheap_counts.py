@@ -302,6 +302,45 @@ def count_applications_pending(request, user) -> int:
     return pending_badge_count(user, organization)
 
 
+def count_own_applications(user, organization) -> dict:
+    """«Ana səhifə» Müraciətlər kartı — istifadəçinin ÖZ müraciətləri, TƏK aqreqat sorğu.
+
+    ``open``    — bağlanmamış (həll/rədd/bağlı/ləğv OLMAYAN) müraciətlər;
+    ``waiting`` — emalçının MƏLUMAT gözlədiyi («cavabınızı gözləyən») müraciətlər
+                  — göndərənin sidebar badge-i ilə eyni tərif
+                  (``applications.services.queries.sender_kpis``).
+
+    Bağlı statuslar ``applications.constants.CLOSED_STATUSES``-in güzgüsüdür:
+    həmin sabit public fasadda yoxdur (modul sərhədi), ``ApplicationStatus``
+    isə var — status əlavə olunsa hər iki yer yenilənməlidir.
+    """
+    if organization is None or not getattr(user, "is_authenticated", False):
+        return {"open": 0, "waiting": 0}
+    from apps.applications.models import Application
+    from apps.applications.public import ApplicationStatus
+
+    closed = (
+        ApplicationStatus.RESOLVED,
+        ApplicationStatus.REJECTED,
+        ApplicationStatus.CLOSED,
+        ApplicationStatus.CANCELLED,
+    )
+    totals = Application.objects.filter(organization=organization, created_by=user).aggregate(
+        open=Count("id", filter=~Q(status__in=closed)),
+        waiting=Count("id", filter=Q(status=ApplicationStatus.WAITING_INFO)),
+    )
+    return {"open": int(totals.get("open") or 0), "waiting": int(totals.get("waiting") or 0)}
+
+
+def is_applications_handler(user, organization) -> bool:
+    """İstifadəçi hansısa müraciət şöbəsinin EMALÇISIDIRMI (public fasad; üzvlük/şöbə keşlidir)."""
+    if organization is None:
+        return False
+    from apps.applications.public import handled_unit_names
+
+    return bool(handled_unit_names(user, organization))
+
+
 def count_question_chair_pending(request, user) -> int:
     """«Sual təsdiqi» badge-i — kafedra müdirinin gözləyən sual dəstləri.
 
@@ -427,6 +466,8 @@ def compute_profile_badge_counts(request, user, *, capabilities, my_exams_qs, te
 __all__ = [
     "compute_profile_badge_counts",
     "count_applications_pending",
+    "count_own_applications",
+    "is_applications_handler",
     "compute_review_badge_counts",
     "count_assigned_tasks",
     "count_my_results",

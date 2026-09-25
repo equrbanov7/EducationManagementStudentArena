@@ -377,6 +377,10 @@ def recompute_task_status(task, *, actor=None, request=None) -> dict:
     """Bütün dilimlər təsdiqlənibsə sənədi ``approved`` edir (spec §4.2/5).
 
     ⚠️ ``approved`` HEÇ VAXT əl ilə qoyulmur — aşağıdan yuxarı törəyir.
+
+    2026-09-25: bu an planın KAFEDRAYA ÇATDIĞI andır — sənədin hər sətri üçün
+    (fənn × semestr × qrup) açılış müəllimsiz yaranır və qrupun tələbələri yazılır
+    (:mod:`.offering_sync`); sinxron xətası təsdiqi geri qaytarmır.
     """
     progress = slice_progress(task)
     if not progress["total"] or progress["approved"] != progress["total"]:
@@ -390,20 +394,23 @@ def recompute_task_status(task, *, actor=None, request=None) -> dict:
     sm.ensure_transition(task.status, target)
     task.status = TaskStatus.APPROVED
     task.save(update_fields=["status", "updated_at"])
-    _notify_chair(task)
+    from .offering_sync import compact, run_safely, sync_task_offerings
+
+    offerings = compact(run_safely(sync_task_offerings, task, actor=actor, request=request, create=True))
+    _notify_chair(task, offerings)
     log_action(
         AuditAction.UPDATE,
         user=getattr(actor, "user", None),
         organization=task.organization,
         obj=task,
-        new_values={"status": task.status, "slices": progress["total"]},
+        new_values={"status": task.status, "slices": progress["total"], "offerings": offerings},
         reason="workload.task_approved",
         request=request,
         resource_type="workload.TeachingTask",
         resource_id=str(task.pk),
         resource_repr=f"{task.chair_id} · {task.academic_year}",
     )
-    return {"task_status": task.status, **progress}
+    return {"task_status": task.status, **progress, "offerings": offerings}
 
 
 # ── Bildirişlər (uğursuzluq axını DAYANDIRMIR) ──────────────────────────────
@@ -507,7 +514,8 @@ def _notify_office(task, *, title, body) -> int:
     )
 
 
-def _notify_chair(task) -> int:
+def _notify_chair(task, offerings=None) -> int:
+    """Kafedraya BİR (toplu) bildiriş: təsdiq + neçə fənn açılışı qruplara düşdü."""
     from django.apps import apps as django_apps
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
@@ -515,14 +523,21 @@ def _notify_chair(task) -> int:
     unique = {u.pk: u for u in [getattr(chair, "head", None)] if u is not None}
     for user in _unit_role_users(task.organization, [chair], CHAIR_ACTOR_ROLES):
         unique.setdefault(user.pk, user)
+    created = int((offerings or {}).get("created") or 0)
+    body = "Bütün fakültə dilimləri təsdiqləndi — yükü müəllimlərə bölə bilərsiniz."
+    if created:
+        body = (
+            f"Bütün fakültə dilimləri təsdiqləndi — {created} fənn açılışı qruplara düşdü. "
+            "Yükü müəllimlərə bölün: təyin etdiyiniz mühazirəçi jurnala dərhal keçir."
+        )
     return send_notification(
         task.organization,
         list(unique.values()),
         title=f"Tədris tapşırığı təsdiqləndi: {task.academic_year}",
-        body="Bütün fakültə dilimləri təsdiqləndi — yükü müəllimlərə bölə bilərsiniz.",
+        body=body,
         link=_SECTION_LINKS["distribution"],
         event="workload_task_approved",
-        metadata={"task_id": str(task.pk)},
+        metadata={"task_id": str(task.pk), "offerings_created": created},
     )
 
 

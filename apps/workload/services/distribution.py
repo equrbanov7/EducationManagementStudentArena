@@ -2,22 +2,25 @@
 
 Spec §4.3 və §7.1. Təsdiq İDEMPOTENTDİR: təkrar çağırış yeni offering yaratmır,
 mövcud olanları yeniləyir və HEÇ NƏ SİLMİR (jurnal tarixi toxunulmazdır).
+
+2026-09-25: açılış yazısı :mod:`.offering_sync`-ə köçdü — plan təsdiqi, müəllim
+təyinatı və bu təsdiq EYNİ yolu işlədir (qaydalar :mod:`.offering_rules`-da).
 """
 
 from __future__ import annotations
 
 import logging
 
-from django.apps import apps as django_apps
 from django.db import transaction
-from django.db.models import Prefetch, Sum
+from django.db.models import Sum
 from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
 
-from ..constants import CONTACT_TOTAL_FIELDS, Activity, TaskStatus
+from ..constants import TaskStatus
 from ..models import TeacherAssignment
+from . import offering_sync
 from .assignments import balance_for_rows
 from .scoping import WorkloadDenied, ensure_can_distribute
 
@@ -72,144 +75,22 @@ def _syncable_rows(rows) -> list:
     return result
 
 
-def _assignments_prefetch() -> Prefetch:
-    """``sync_offerings`` üçün təyinat prefetch-i — müəllim ``select_related``, sıra sabit.
-
-    P1-7: ``_instructor_for_row`` əvvəl ``row.assignments.select_related(...).order_by(...)``
-    ilə TƏZƏ queryset qurub prefetch keşini keçirdi (sətir başına 1 SELECT). Sıra
-    (fəaliyyət, yaradılma) burada — prefetch sorğusunda — verilir; sətir isə
-    ``row.assignments.all()`` ilə keşdən oxuyur.
-    """
-    return Prefetch(
-        "assignments",
-        queryset=TeacherAssignment.objects.select_related("teacher").order_by("activity", "created_at"),
-    )
-
-
-def _instructor_for_row(row):
-    """Jurnal sahibi: MÜHAZİRƏÇİ, yoxdursa ilk (vakant olmayan) təyinat (spec §11.3).
-
-    Sətir :func:`_assignments_prefetch` ilə yüklənməlidir — onda burada sorğu yoxdur.
-    """
-    assignments = list(row.assignments.all())
-    lecture = [a for a in assignments if a.activity == Activity.LECTURE and a.teacher_id]
-    if lecture:
-        return lecture[0].teacher
-    others = [a for a in assignments if a.teacher_id]
-    return others[0].teacher if others else None
-
-
-def _write_offering(CourseOffering, *, organization, row, group, instructor, lesson_hours):
-    """Bir açılışı yaradır/yeniləyir; müəllim DB qapısından keçmirsə ONSUZ yazır.
-
-    ⚠️ REGİSTRAR QAPISI: ``registrar_guard_active_member`` trigger-i
-    (`registrar/0041`) ``CourseOffering.instructor`` üçün həmin istifadəçinin
-    aktiv üzvlükdə ``grade.input`` (və ya ``grade.*`` / ``*``) daşımasını TƏLƏB
-    EDİR. Köçürülmüş tenantlarda müəllim rolu bəzən bu açarı daşımır — belə halda
-    BÜTÜN bölgü təsdiqi geri qayıtmamalıdır: açılış MÜƏLLİMSİZ yaradılır və
-    hesabatda ``instructor_blocked`` kimi görünür (jurnal sahibi sonradan
-    «Fənn təhvili» ilə təyin edilir).
-
-    Qaytarır: ``(outcome, offering, instructor_blocked)``.
-    """
-    from django.db import IntegrityError, transaction
-
-    lookup = {
-        "organization": organization,
-        "subject_id": row.subject_id,
-        "period_id": row.period_id,
-        "group": group,
-    }
-    existing = CourseOffering.objects.filter(**lookup).first()
-
-    if existing is None:
-        for candidate in (instructor, None):
-            try:
-                with transaction.atomic():
-                    offering = CourseOffering.objects.create(
-                        **lookup,
-                        instructor=candidate,
-                        lesson_hours=lesson_hours,
-                        is_active=True,
-                    )
-                return "created", offering, bool(candidate is None and instructor is not None)
-            except IntegrityError:
-                if candidate is None:
-                    raise
-                logger.warning(
-                    "workload: instructor %s rejected by registrar guard (subject=%s)",
-                    getattr(instructor, "pk", None),
-                    row.subject_id,
-                )
-        return "skipped", None, True
-
-    changed = []
-    if instructor is not None and existing.instructor_id != getattr(instructor, "pk", None):
-        existing.instructor = instructor
-        changed.append("instructor")
-    if lesson_hours and existing.lesson_hours != lesson_hours:
-        existing.lesson_hours = lesson_hours
-        changed.append("lesson_hours")
-    if not changed:
-        return "skipped", existing, False
-    try:
-        with transaction.atomic():
-            existing.save(update_fields=changed + ["updated_at"])
-        return "updated", existing, False
-    except IntegrityError:
-        if "instructor" not in changed:
-            raise
-        existing.refresh_from_db()
-        rest = [field for field in changed if field != "instructor"]
-        if not rest:
-            return "skipped", existing, True
-        with transaction.atomic():
-            existing.save(update_fields=rest + ["updated_at"])
-        return "updated", existing, True
-
-
 def sync_offerings(task, *, actor=None, request=None) -> dict:
     """Sətir × qrup → ``registrar.CourseOffering`` (yaradılır/yenilənir, SİLİNMİR).
 
-    Şərtlər (spec §7.1): ``row.subject`` + ``row.period`` + qrup dolu olmalıdır;
-    xüsusi sətirlər (Təcrübə, Buraxılış işi, fənnsiz) ``skipped`` sayılır.
-    Jurnal sahibi: MÜHAZİRƏÇİ, yoxdursa ilk vakant-olmayan təyinat (spec §11.3).
-    """
-    CourseOffering = django_apps.get_model("registrar", "CourseOffering")
-    from apps.registrar.public import eligible_instructor_user_ids
+    Şərtlər (spec §7.1): ``row.subject`` + ``row.period`` + qrup dolu olmalıdır
+    (boş ``period`` tədris ili + fəsildən törədilir); xüsusi/fənnsiz sətirlər
+    ``skipped`` sayılır. Jurnal sahibi MÜHAZİRƏÇİdir (spec §11.3), amma «Fənn
+    təhvili» və ya cədvəl redaktoru ilə qoyulmuş FƏRQLİ müəllim ƏZİLMİR; saat qrup
+    başınadır; yeni/boş açılışa qrupun aktiv tələbələri yazılır — bax
+    :mod:`.offering_rules` / :mod:`.offering_sync`.
 
-    eligible_ids = eligible_instructor_user_ids(organization=task.organization)
-    counters = {"created": 0, "updated": 0, "skipped": 0, "instructor_blocked": 0}
-    offering_ids: list[str] = []
-    rows = list(task.rows.all().prefetch_related("groups", _assignments_prefetch()))
-    for row in rows:
-        if not (row.subject_id and row.period_id):
-            counters["skipped"] += 1
-            continue
-        groups = list(row.groups.all())
-        if not groups:
-            counters["skipped"] += 1
-            continue
-        instructor = _instructor_for_row(row)
-        rejected_instructor = instructor is not None and instructor.pk not in eligible_ids
-        if rejected_instructor:
-            instructor = None
-        lesson_hours = sum(int(getattr(row, field, 0) or 0) for field in CONTACT_TOTAL_FIELDS)
-        for group in groups:
-            outcome, offering, blocked = _write_offering(
-                CourseOffering,
-                organization=task.organization,
-                row=row,
-                group=group,
-                instructor=instructor,
-                lesson_hours=lesson_hours,
-            )
-            counters[outcome] += 1
-            if blocked or rejected_instructor:
-                counters["instructor_blocked"] += 1
-            if offering is not None:
-                offering_ids.append(str(offering.pk))
-    return {**counters, "offering_ids": offering_ids}
+    Köhnə hesabat açarları saxlanılır (``created/updated/skipped/instructor_blocked/
+    offering_ids``); ``skipped`` = dəyişməyən açılış + sinxrona düşməyən sətir.
+    """
+    report = offering_sync.sync_task_offerings(task, actor=actor, request=request, create=True)
+    report["skipped"] += report["rows_skipped"]
+    return report
 
 
 def _notify_teachers(task) -> int:
@@ -308,6 +189,7 @@ def confirm_distribution(*, task, actor, allow_vacant: bool = True, request=None
             "status": TaskStatus.DISTRIBUTED.value,
             "offerings_created": sync["created"],
             "offerings_updated": sync["updated"],
+            "offerings": offering_sync.compact(sync),
             "notified_teachers": notified,
             "vacant_hours": readiness["vacant_hours"],
         },

@@ -16031,9 +16031,8 @@ msgstr ""
 msgctxt "exams.model.access"
 msgid "already_examined_today"
 msgstr ""
-"Bu gün artıq bir rəsmi imtahan vermisiniz. Eyni gündə ikinci "
-"final/kollokvium yalnız imtahan mərkəzi təkrar imtahan (retake) icazəsi "
-"veribsə mümkündür."
+"Bu gün artıq bir rəsmi imtahan vermisiniz. Eyni gündə ikinci final/midterm "
+"yalnız imtahan mərkəzi təkrar imtahan (retake) icazəsi veribsə mümkündür."
 
 #: apps/accounts/views/_dashboard_helpers/evaluated_review.py:139
 msgctxt "profile.pending_review.action"
@@ -24375,7 +24374,7 @@ msgstr "Sınaq"
 #: apps/exams/domain/exam_definition.py:30
 msgctxt "exams.model.exam.choice.exam_type_extended"
 msgid "midterm"
-msgstr "Kollekvium"
+msgstr "Midterm"
 
 #: apps/exams/domain/exam_definition.py:31
 msgctxt "exams.model.exam.choice.exam_type_extended"
@@ -35881,7 +35880,7 @@ msgstr "Final"
 #: apps/exams/views/student/lists.py:204
 msgctxt "exams.type.label"
 msgid "midterm"
-msgstr "Kollekvium"
+msgstr "Midterm"
 
 #: apps/exams/views/student/lists.py:205
 msgctxt "exams.type.label"
@@ -75847,3 +75846,1961 @@ msgstr "Link və OTP kodu %(minutes)s dəqiqə etibarlıdır."
 
 msgid "Aşağıdakı OTP kodu %(action)s üçündür:"
 msgstr "Aşağıdakı OTP kodu %(action)s üçündür:"
+
+msgctxt "registrar.interim"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.interim"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.interim"
+msgid "3 kollokvium (hər biri 0–10 bal)"
+msgstr "3 kollokvium (hər biri 0–10 bal)"
+
+msgctxt "registrar.interim"
+msgid "Midterm — aralıq imtahan (0–20 bal)"
+msgstr "Midterm — aralıq imtahan (0–20 bal)"
+
+msgid ""
+"%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
+"aktivləşdirməlidir."
+msgstr ""
+"%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı "
+"aktivləşdirməlidir."
+
+msgid "Pəncərəsi bağlı olan sütunların balı yazılmadı."
+msgstr "Pəncərəsi bağlı olan sütunların balı yazılmadı."
+
+msgid "%(title)s balları yadda saxlanıldı (%(n)s xana)."
+msgstr "%(title)s balları yadda saxlanıldı (%(n)s xana)."
+
+msgctxt "registrar.kollokvium_notify"
+msgid "Kollokvium K%(n)s"
+msgstr "Kollokvium K%(n)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s"
+msgstr "%(name)s bal-yazma pəncərəsi açıldı: %(opens)s–%(closes)s"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsi bağlandı"
+msgstr "%(name)s bal-yazma pəncərəsi bağlandı"
+
+msgctxt "registrar.kollokvium_notify"
+msgid "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s"
+msgstr "%(name)s bal-yazma pəncərəsinin tarixi dəyişdi: %(opens)s–%(closes)s"
+
+msgctxt "registrar.notify"
+msgid "Kollokvium"
+msgstr "Kollokvium"
+
+msgctxt "registrar.notify"
+msgid "%(label)s balı yazıldı: %(score)s"
+msgstr "%(label)s balı yazıldı: %(score)s"
+
+msgctxt "registrar.journal"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "registrar.journal"
+msgid "MIDTERM"
+msgstr "MIDTERM"
+
+msgctxt "registrar.journal"
+msgid "şkala 0–20"
+msgstr "şkala 0–20"
+
+msgctxt "registrar.journal"
+msgid "Köhnə qeyd"
+msgstr "Köhnə qeyd"
+
+msgctxt "registrar.journal"
+msgid "aralıq imtahan balı"
+msgstr "aralıq imtahan balı"
+
+msgctxt "registrar.journal"
+msgid "hələ yazılmayıb"
+msgstr "hələ yazılmayıb"
+
+msgctxt "registrar.journal"
+msgid ""
+"Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi "
+"təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; "
+"bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+msgstr ""
+"Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi "
+"təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; "
+"bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+
+msgctxt "registrar.journal"
+msgid ""
+"Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin "
+"aralığı aktivləşdirməsini gözləyin."
+msgstr ""
+"Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin "
+"aralığı aktivləşdirməsini gözləyin."
+
+msgctxt "registrar.journal"
+msgid ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm "
+"+ sərbəst iş, tavan"
+msgstr ""
+"İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm "
+"+ sərbəst iş, tavan"
+
+msgctxt "profile.section"
+msgid "Midterm pəncərələri"
+msgstr "Midterm pəncərələri"
+
+msgctxt "accounts.kollokvium_windows"
+msgid ""
+"Bu pəncərə köhnə kollokvium qaydasından qalıb — midterm semestrində onu "
+"yalnız silmək olar."
+msgstr ""
+"Bu pəncərə köhnə kollokvium qaydasından qalıb — midterm semestrində onu "
+"yalnız silmək olar."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu semestr midterm rejimindədir: K1/K2/K3 kollokviumları əvəzinə yalnız bir "
+"«Midterm» pəncərəsi təyin olunur."
+msgstr ""
+"Bu semestr midterm rejimindədir: K1/K2/K3 kollokviumları əvəzinə yalnız bir "
+"«Midterm» pəncərəsi təyin olunur."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Midterm üçün müəllimlərin %(scale)s bal yaza biləcəyi tarix aralığını təyin "
+"edin və aktivləşdirin. Rəhbər əlavə gün verə bilər."
+msgstr ""
+"Midterm üçün müəllimlərin %(scale)s bal yaza biləcəyi tarix aralığını təyin "
+"edin və aktivləşdirin. Rəhbər əlavə gün verə bilər."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "registrar.kollokvium_window"
+msgid "açılış gününü gözləyir"
+msgstr "açılış gününü gözləyir"
+
+msgctxt "registrar.kollokvium_window"
+msgid "aktivləşdirmə gözləyir"
+msgstr "aktivləşdirmə gözləyir"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bal yazma aralığı"
+msgstr "Bal yazma aralığı"
+
+msgctxt "registrar.kollokvium_window"
+msgid "açılış – bağlanış"
+msgstr "açılış – bağlanış"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bal şkalası"
+msgstr "Bal şkalası"
+
+msgctxt "registrar.kollokvium_window"
+msgid "müəllim jurnalda yazır"
+msgstr "müəllim jurnalda yazır"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Köhnə qayda: %(rule)s. Tək midterm %(year)s tədris ilindən tətbiq olunur."
+msgstr ""
+"Köhnə qayda: %(rule)s. Tək midterm %(year)s tədris ilindən tətbiq olunur."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Köhnə qaydadan qalmış kollokvium pəncərələri"
+msgstr "Köhnə qaydadan qalmış kollokvium pəncərələri"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu semestr midterm rejimindədir — aşağıdakı pəncərələr müəllim jurnalında "
+"istifadə olunmur. Qarışıqlıq olmasın deyə onları silin."
+msgstr ""
+"Bu semestr midterm rejimindədir — aşağıdakı pəncərələr müəllim jurnalında "
+"istifadə olunmur. Qarışıqlıq olmasın deyə onları silin."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Köhnə pəncərəni sil"
+msgstr "Köhnə pəncərəni sil"
+
+msgctxt "registrar.kollokvium_window"
+msgid "Bu köhnə kollokvium pəncərəsi (əlavə günləri ilə birlikdə) silinsin?"
+msgstr "Bu köhnə kollokvium pəncərəsi (əlavə günləri ilə birlikdə) silinsin?"
+
+msgctxt "registrar.kollokvium_window"
+msgid "%(label)s — bal yazma pəncərəsi (%(scale)s bal)"
+msgstr "%(label)s — bal yazma pəncərəsi (%(scale)s bal)"
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu semestrdə 3 kollokvium əvəzinə TƏK midterm keçirilir. Bal yazma vaxtını "
+"İmtahan Mərkəzi təyin edir: pəncərə aktiv və açıq olduqda müəllimlər "
+"elektron jurnalda hər tələbəyə %(scale)s bal yazır. Bağlanış tarixindən "
+"sonra (verilmiş əlavə günlər daxil) bal yazmaq kilidlənir."
+msgstr ""
+"Bu semestrdə 3 kollokvium əvəzinə TƏK midterm keçirilir. Bal yazma vaxtını "
+"İmtahan Mərkəzi təyin edir: pəncərə aktiv və açıq olduqda müəllimlər "
+"elektron jurnalda hər tələbəyə %(scale)s bal yazır. Bağlanış tarixindən "
+"sonra (verilmiş əlavə günlər daxil) bal yazmaq kilidlənir."
+
+msgctxt "registrar.kollokvium_window"
+msgid ""
+"Bu pəncərəni deaktiv etsəniz, müəllimlər midterm üzrə bal yaza bilməyəcək. "
+"Davam edilsin?"
+msgstr ""
+"Bu pəncərəni deaktiv etsəniz, müəllimlər midterm üzrə bal yaza bilməyəcək. "
+"Davam edilsin?"
+
+msgctxt "syllabus.assessment"
+msgid "Midterm (aralıq imtahan)"
+msgstr "Midterm (aralıq imtahan)"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 20, sərbəst iş "
+"10, seminar/laboratoriya ədədi ortası 10 (semestr 50) və yekun imtahan 50 — "
+"müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+msgstr ""
+"Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 20, sərbəst iş "
+"10, seminar/laboratoriya ədədi ortası 10 (semestr 50) və yekun imtahan 50 — "
+"müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Semestr balı %(semester)s (davamiyyət + midterm + sərbəst iş + "
+"seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi %(total)s bal. "
+"Bölgü universitet standartıdır və dəyişdirilmir."
+msgstr ""
+"Semestr balı %(semester)s (davamiyyət + midterm + sərbəst iş + "
+"seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi %(total)s bal. "
+"Bölgü universitet standartıdır və dəyişdirilmir."
+
+msgctxt "exams.form.exam.label"
+msgid "Kateqoriya (Final / Midterm / Sınaq)"
+msgstr "Kateqoriya (Final / Midterm / Sınaq)"
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "Yalnız lazım olduqda seç: Sınaq, Midterm və ya Final."
+msgstr "Yalnız lazım olduqda seç: Sınaq, Midterm və ya Final."
+
+msgctxt "exams.form.exam.error"
+msgid "Final və midterm imtahanlarını yalnız imtahan mərkəzi yarada bilər."
+msgstr "Final və midterm imtahanlarını yalnız imtahan mərkəzi yarada bilər."
+
+msgctxt "accounts.exam_chance"
+msgid "Midterm"
+msgstr "Midterm"
+
+msgctxt "accounts.exam_chance"
+msgid ""
+"Seçilmiş final/midterm imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd"
+" hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə "
+"girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında "
+"yenidən görünür."
+msgstr ""
+"Seçilmiş final/midterm imtahanı üzrə tələbəyə və ya bütöv qrupa yenidən cəhd"
+" hüququ verin. Sistem avtomatik yeni giriş PIN-i yaradır, finalın köhnə "
+"girişini yenidən açır və imtahan tələbənin təyin olunmuş tapşırıqlarında "
+"yenidən görünür."
+
+msgctxt "accounts.exam_chance"
+msgid "Bu şərtlərə uyğun final/midterm imtahanı tapılmadı."
+msgstr "Bu şərtlərə uyğun final/midterm imtahanı tapılmadı."
+
+msgctxt "accounts.exam_chance"
+msgid ""
+"Şans veriləndə: cəhd limiti seçilən qədər artır, final/midterm üçün YENİ "
+"fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti "
+"sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün "
+"əməliyyat audit jurnalına yazılır."
+msgstr ""
+"Şans veriləndə: cəhd limiti seçilən qədər artır, final/midterm üçün YENİ "
+"fərdi PIN yaradılır (kabinetdə dərhal görünür), finalın köhnə giriş bileti "
+"sıfırlanır və imtahan «Təyin olunmuş tapşırıqlar»da yenidən görünür. Bütün "
+"əməliyyat audit jurnalına yazılır."
+
+msgctxt "registrar.journal_close"
+msgid ""
+"Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin midterm"
+" bildirişi kimi."
+msgstr ""
+"Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin midterm"
+" bildirişi kimi."
+
+msgctxt "accounts.dashboard"
+msgid "üst həftə"
+msgstr "üst həftə"
+
+msgctxt "accounts.dashboard"
+msgid "alt həftə"
+msgstr "alt həftə"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslərim"
+msgstr "Bu gün / növbəti dərslərim"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün · %(day)s"
+msgstr "Bu gün · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti dərs günü · %(day)s"
+msgstr "Növbəti dərs günü · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "bu gün"
+msgstr "bu gün"
+
+msgctxt "accounts.dashboard"
+msgid "indi gedir"
+msgstr "indi gedir"
+
+msgctxt "accounts.dashboard"
+msgid "indi"
+msgstr "indi"
+
+msgctxt "accounts.dashboard"
+msgid "aud. %(room)s"
+msgstr "aud. %(room)s"
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bu semestrdə qarşıda dərs qalmayıb."
+
+msgctxt "accounts.dashboard"
+msgid "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+msgstr ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+msgstr "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət — fənlər üzrə"
+msgstr "Davamiyyət — fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+msgstr ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s / icazə %(allowed)s saat"
+msgstr "qayıb %(absent)s / icazə %(allowed)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+msgstr "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "accounts.dashboard"
+msgid "Limitə yaxın"
+msgstr "Limitə yaxın"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib — imtahana buraxılmır"
+msgstr "Limit keçib — imtahana buraxılmır"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib"
+msgstr "Limit keçib"
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən"
+msgstr "Köhnə sistemdən"
+
+msgctxt "accounts.dashboard"
+msgid "Məlumat yoxdur"
+msgstr "Məlumat yoxdur"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb icazə verilən həddin altındadır."
+msgstr "Qayıb icazə verilən həddin altındadır."
+
+msgctxt "accounts.dashboard"
+msgid "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+msgstr "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+msgstr "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+msgstr ""
+"Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+
+msgctxt "accounts.dashboard"
+msgid "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+msgstr "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb saatı / icazə verilən limit"
+msgstr "Qayıb saatı / icazə verilən limit"
+
+msgctxt "accounts.dashboard"
+msgid "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+msgstr "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+
+msgctxt "accounts.dashboard"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Cari tədris dövrü müəyyən edilməyib."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+msgstr ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+
+msgctxt "accounts.dashboard"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "accounts.dashboard"
+msgid "fənn"
+msgstr "fənn"
+
+msgctxt "accounts.dashboard"
+msgid "Cari ballar — fənlər üzrə"
+msgstr "Cari ballar — fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+msgstr "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+
+msgctxt "accounts.dashboard"
+msgid "Orta giriş balı"
+msgstr "Orta giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "fənlər üzrə"
+msgstr "fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid "fəndə yazılıb"
+msgstr "fəndə yazılıb"
+
+msgctxt "accounts.dashboard"
+msgid "giriş balı"
+msgstr "giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı"
+msgstr "Giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "hələ yazılmayıb"
+msgstr "hələ yazılmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestrdə bal yazılan fənniniz yoxdur."
+msgstr "Cari semestrdə bal yazılan fənniniz yoxdur."
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallarım"
+msgstr "Jurnallarım"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallara keç"
+msgstr "Jurnallara keç"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr"
+msgstr "Cari semestr"
+
+msgctxt "accounts.dashboard"
+msgid "jurnal"
+msgstr "jurnal"
+
+msgctxt "accounts.dashboard"
+msgid "cəmi"
+msgstr "cəmi"
+
+msgctxt "accounts.dashboard"
+msgid "%(count)s tələbə"
+msgstr "%(count)s tələbə"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s / %(plan)s saat"
+msgstr "keçirilib %(held)s / %(plan)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s saat"
+msgstr "keçirilib %(held)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "Keçirilmiş saat / plan saatı"
+msgstr "Keçirilmiş saat / plan saatı"
+
+msgctxt "accounts.dashboard"
+msgid "%(title)s — bal yazma"
+msgstr "%(title)s — bal yazma"
+
+msgctxt "accounts.dashboard"
+msgid "Midterm pəncərəsi"
+msgstr "Midterm pəncərəsi"
+
+msgctxt "accounts.dashboard"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.dashboard"
+msgid "Son tarix"
+msgstr "Son tarix"
+
+msgctxt "accounts.dashboard"
+msgid "Açılır"
+msgstr "Açılır"
+
+msgctxt "accounts.dashboard"
+msgid "Açıqdır"
+msgstr "Açıqdır"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlanıb"
+msgstr "Bağlanıb"
+
+msgctxt "accounts.dashboard"
+msgid "Deaktivdir"
+msgstr "Deaktivdir"
+
+msgctxt "accounts.dashboard"
+msgid "Təyin olunmayıb"
+msgstr "Təyin olunmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Bal yazmaq açıqdır — son tarix %(date)s."
+msgstr "Bal yazmaq açıqdır — son tarix %(date)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+msgstr "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(date)s tarixində bağlanıb."
+msgstr "Pəncərə %(date)s tarixində bağlanıb."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+msgstr "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+msgstr "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+
+msgctxt "accounts.dashboard"
+msgid "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+msgstr "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+
+msgctxt "accounts.dashboard"
+msgid "açıqdır · son tarix %(date)s"
+msgstr "açıqdır · son tarix %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "%(date)s-də açılır"
+msgstr "%(date)s-də açılır"
+
+msgctxt "accounts.dashboard"
+msgid "bağlanıb · %(date)s"
+msgstr "bağlanıb · %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "Cavabınızı gözləyən"
+msgstr "Cavabınızı gözləyən"
+
+msgctxt "accounts.dashboard"
+msgid "müraciətiniz"
+msgstr "müraciətiniz"
+
+msgctxt "accounts.dashboard"
+msgid "Sizə gələn"
+msgstr "Sizə gələn"
+
+msgctxt "accounts.dashboard"
+msgid "açıq müraciət"
+msgstr "açıq müraciət"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."
+msgstr ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."
+
+msgctxt "profile.sidebar"
+msgid "Tələbə kabineti"
+msgstr "Tələbə kabineti"
+
+msgctxt "profile.sidebar"
+msgid "Müəllim kabineti"
+msgstr "Müəllim kabineti"
+
+msgctxt "profile.sidebar"
+msgid "Şəxsi kabinet"
+msgstr "Şəxsi kabinet"
+
+msgctxt "profile.sidebar"
+msgid "Kabinet menyusu"
+msgstr "Kabinet menyusu"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq və imtahanlar"
+msgstr "Tapşırıq və imtahanlar"
+
+msgctxt "profile.sidebar"
+msgid "Ünsiyyət"
+msgstr "Ünsiyyət"
+
+msgctxt "profile.sidebar"
+msgid "Menyuda axtar"
+msgstr "Menyuda axtar"
+
+msgctxt "profile.sidebar"
+msgid "Heç nə tapılmadı"
+msgstr "Heç nə tapılmadı"
+
+msgctxt "profile.sidebar"
+msgid "Anonim sorğu"
+msgstr "Anonim sorğu"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu nəticələri"
+msgstr "Sorğu nəticələri"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu kampaniyaları"
+msgstr "Sorğu kampaniyaları"
+
+msgctxt "profile.sidebar"
+msgid "Keyfiyyətə nəzarət"
+msgstr "Keyfiyyətə nəzarət"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə seçin:"
+msgstr ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə seçin:"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv "
+"seçilibsə dəyişin və yenidən yadda saxlayın:"
+msgstr ""
+"Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv "
+"seçilibsə dəyişin və yenidən yadda saxlayın:"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı bir dərs növü üçün saat seçin."
+msgstr "Ən azı bir dərs növü üçün saat seçin."
+
+msgctxt "accounts.syllabus"
+msgid "Saatı yenilə"
+msgstr "Saatı yenilə"
+
+msgctxt "accounts.syllabus"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "surveys.question"
+msgid "Müəllim dərsə hazırlıqlı gəlir, dərsi planlı və ardıcıl aparır."
+msgstr "Müəllim dərsə hazırlıqlı gəlir, dərsi planlı və ardıcıl aparır."
+
+msgctxt "surveys.question"
+msgid "Mövzuları aydın və başa düşülən şəkildə izah edir."
+msgstr "Mövzuları aydın və başa düşülən şəkildə izah edir."
+
+msgctxt "surveys.question"
+msgid ""
+"Sillabusda göstərilən mövzulara, tələblərə və qiymətləndirmə qaydasına əməl "
+"edir."
+msgstr ""
+"Sillabusda göstərilən mövzulara, tələblərə və qiymətləndirmə qaydasına əməl "
+"edir."
+
+msgctxt "surveys.question"
+msgid "Dərsləri vaxtında başlayır və dərs vaxtından səmərəli istifadə edir."
+msgstr "Dərsləri vaxtında başlayır və dərs vaxtından səmərəli istifadə edir."
+
+msgctxt "surveys.question"
+msgid "Suallar verməyə, müzakirəyə və fəal iştiraka həvəsləndirir."
+msgstr "Suallar verməyə, müzakirəyə və fəal iştiraka həvəsləndirir."
+
+msgctxt "surveys.question"
+msgid "Tələbələrə hörmətlə, ədalətli və qərəzsiz yanaşır."
+msgstr "Tələbələrə hörmətlə, ədalətli və qərəzsiz yanaşır."
+
+msgctxt "surveys.question"
+msgid ""
+"Qiymətləndirmə meyarları əvvəlcədən aydın idi və ballar bu meyarlara uyğun "
+"verilirdi."
+msgstr ""
+"Qiymətləndirmə meyarları əvvəlcədən aydın idi və ballar bu meyarlara uyğun "
+"verilirdi."
+
+msgctxt "surveys.question"
+msgid ""
+"Tapşırıq, sərbəst iş və midterm nəticələri üzrə vaxtında və faydalı rəy "
+"(izah) verir."
+msgstr ""
+"Tapşırıq, sərbəst iş və midterm nəticələri üzrə vaxtında və faydalı rəy "
+"(izah) verir."
+
+msgctxt "surveys.question"
+msgid ""
+"Dərsdən kənar (məsləhət saatı, e-poçt və s.) suallara cavab vermək üçün "
+"əlçatandır."
+msgstr ""
+"Dərsdən kənar (məsləhət saatı, e-poçt və s.) suallara cavab vermək üçün "
+"əlçatandır."
+
+msgctxt "surveys.question"
+msgid "Nəzəri bilikləri praktiki nümunələr və real həyatla əlaqələndirir."
+msgstr "Nəzəri bilikləri praktiki nümunələr və real həyatla əlaqələndirir."
+
+msgctxt "surveys.question"
+msgid ""
+"Dərs materialları (təqdimat, ədəbiyyat, tapşırıqlar) faydalı və müasirdir."
+msgstr ""
+"Dərs materialları (təqdimat, ədəbiyyat, tapşırıqlar) faydalı və müasirdir."
+
+msgctxt "surveys.question"
+msgid "Bu fənn üzrə bilik və bacarıqlarım nəzərəçarpacaq dərəcədə artdı."
+msgstr "Bu fənn üzrə bilik və bacarıqlarım nəzərəçarpacaq dərəcədə artdı."
+
+msgctxt "surveys.question"
+msgid "Fənnin iş yükü (tapşırıq, hazırlıq) onun kreditinə uyğun idi."
+msgstr "Fənnin iş yükü (tapşırıq, hazırlıq) onun kreditinə uyğun idi."
+
+msgctxt "surveys.question"
+msgid ""
+"Razılıq iş yükünün uyğun olduğunu bildirir — çox və ya az olması "
+"uyğunsuzluqdur."
+msgstr ""
+"Razılıq iş yükünün uyğun olduğunu bildirir — çox və ya az olması "
+"uyğunsuzluqdur."
+
+msgctxt "surveys.question"
+msgid ""
+"Bu müəllimin bu fəndəki tədrisini ümumilikdə 1–10 bal şkalası ilə "
+"qiymətləndirin."
+msgstr ""
+"Bu müəllimin bu fəndəki tədrisini ümumilikdə 1–10 bal şkalası ilə "
+"qiymətləndirin."
+
+msgctxt "surveys.question"
+msgid "1 — çox zəif, 10 — əla."
+msgstr "1 — çox zəif, 10 — əla."
+
+msgctxt "surveys.question"
+msgid "Bu müəllimin dərsini digər tələbələrə tövsiyə edərdim."
+msgstr "Bu müəllimin dərsini digər tələbələrə tövsiyə edərdim."
+
+msgctxt "surveys.question"
+msgid "Bu müəllimin tədrisində ən çox nəyi bəyəndiniz?"
+msgstr "Bu müəllimin tədrisində ən çox nəyi bəyəndiniz?"
+
+msgctxt "surveys.question"
+msgid "Dərsin daha yaxşı olması üçün nə təklif edərdiniz?"
+msgstr "Dərsin daha yaxşı olması üçün nə təklif edərdiniz?"
+
+msgctxt "surveys.question"
+msgid "Bu semestr tədris prosesindən ümumilikdə məmnunam."
+msgstr "Bu semestr tədris prosesindən ümumilikdə məmnunam."
+
+msgctxt "surveys.question"
+msgid ""
+"Tədris şəraiti (auditoriya, texniki təchizat, kitabxana, elektron resurslar)"
+" təhsilim üçün yetərli idi."
+msgstr ""
+"Tədris şəraiti (auditoriya, texniki təchizat, kitabxana, elektron resurslar)"
+" təhsilim üçün yetərli idi."
+
+msgctxt "surveys.question"
+msgid ""
+"Universitetdə tədrisi və tələbə xidmətlərini daha da yaxşılaşdırmaq üçün nə "
+"təklif edərdiniz?"
+msgstr ""
+"Universitetdə tədrisi və tələbə xidmətlərini daha da yaxşılaşdırmaq üçün nə "
+"təklif edərdiniz?"
+
+msgctxt "surveys.question"
+msgid ""
+"Ad, qrup və ya sizi tanıda biləcək məlumat yazmayın — cavabınız anonim "
+"qalsın."
+msgstr ""
+"Ad, qrup və ya sizi tanıda biləcək məlumat yazmayın — cavabınız anonim "
+"qalsın."
+
+msgctxt "surveys.scale"
+msgid "Tamamilə razı deyiləm"
+msgstr "Tamamilə razı deyiləm"
+
+msgctxt "surveys.scale"
+msgid "Razı deyiləm"
+msgstr "Razı deyiləm"
+
+msgctxt "surveys.scale"
+msgid "Qismən razıyam"
+msgstr "Qismən razıyam"
+
+msgctxt "surveys.scale"
+msgid "Razıyam"
+msgstr "Razıyam"
+
+msgctxt "surveys.scale"
+msgid "Tamamilə razıyam"
+msgstr "Tamamilə razıyam"
+
+msgctxt "surveys.scale"
+msgid "Çox zəif"
+msgstr "Çox zəif"
+
+msgctxt "surveys.scale"
+msgid "Əla"
+msgstr "Əla"
+
+msgctxt "surveys.choice"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "surveys.choice"
+msgid "Ümumi"
+msgstr "Ümumi"
+
+msgctxt "surveys.choice"
+msgid "Razılıq şkalası (1–5)"
+msgstr "Razılıq şkalası (1–5)"
+
+msgctxt "surveys.choice"
+msgid "Bal şkalası (1–10)"
+msgstr "Bal şkalası (1–10)"
+
+msgctxt "surveys.choice"
+msgid "Sərbəst mətn"
+msgstr "Sərbəst mətn"
+
+msgctxt "surveys.choice"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "surveys.choice"
+msgid "Açıq"
+msgstr "Açıq"
+
+msgctxt "surveys.choice"
+msgid "Bağlı"
+msgstr "Bağlı"
+
+msgctxt "surveys.choice"
+msgid "Jurnal bağlanması"
+msgstr "Jurnal bağlanması"
+
+msgctxt "surveys.choice"
+msgid "Əl ilə"
+msgstr "Əl ilə"
+
+msgctxt "surveys.model"
+msgid "sorğu şablonu"
+msgstr "sorğu şablonu"
+
+msgctxt "surveys.model"
+msgid "sorğu şablonları"
+msgstr "sorğu şablonları"
+
+msgctxt "surveys.model"
+msgid "sorğu sualı"
+msgstr "sorğu sualı"
+
+msgctxt "surveys.model"
+msgid "sorğu sualları"
+msgstr "sorğu sualları"
+
+msgctxt "surveys.model"
+msgid "sorğu kampaniyası"
+msgstr "sorğu kampaniyası"
+
+msgctxt "surveys.model"
+msgid "sorğu kampaniyaları"
+msgstr "sorğu kampaniyaları"
+
+msgctxt "surveys.model"
+msgid "sorğu qəbzi"
+msgstr "sorğu qəbzi"
+
+msgctxt "surveys.model"
+msgid "sorğu qəbzləri"
+msgstr "sorğu qəbzləri"
+
+msgctxt "surveys.model"
+msgid "anonim cavab"
+msgstr "anonim cavab"
+
+msgctxt "surveys.model"
+msgid "anonim cavablar"
+msgstr "anonim cavablar"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabı"
+msgstr "sorğu cavabı"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabları"
+msgstr "sorğu cavabları"
+
+msgctxt "organizations.permission.label"
+msgid "Anonim sorğu nəticələrinə baxış"
+msgstr "Anonim sorğu nəticələrinə baxış"
+
+msgctxt "organizations.permission.label"
+msgid "Sorğu kampaniyalarını idarə etmək"
+msgstr "Sorğu kampaniyalarını idarə etmək"
+
+msgctxt "surveys.form"
+msgid "Bu sual məcburidir."
+msgstr "Bu sual məcburidir."
+
+msgctxt "surveys.form"
+msgid "Bir cavab seçin."
+msgstr "Bir cavab seçin."
+
+msgctxt "surveys.form"
+msgid "Mətn %(limit)s simvoldan uzun ola bilməz."
+msgstr "Mətn %(limit)s simvoldan uzun ola bilməz."
+
+msgctxt "surveys.form"
+msgid "Cavab %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Cavab %(low)s ilə %(high)s arasında olmalıdır."
+
+msgctxt "surveys.submit"
+msgid "Sorğu artıq qəbul edilmir."
+msgstr "Sorğu artıq qəbul edilmir."
+
+msgctxt "surveys.submit"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Bu sorğunu artıq doldurmusunuz."
+
+msgctxt "surveys.campaigns"
+msgid "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+
+msgctxt "surveys.campaigns"
+msgid "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+msgstr "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+
+msgctxt "surveys.campaigns"
+msgid "Kampaniya %(days)s gündən uzun ola bilməz."
+msgstr "Kampaniya %(days)s gündən uzun ola bilməz."
+
+msgctxt "surveys.campaigns"
+msgid "«Sonra doldur» müddəti açılış tarixindən əvvəl bitə bilməz."
+msgstr "«Sonra doldur» müddəti açılış tarixindən əvvəl bitə bilməz."
+
+msgctxt "surveys.campaigns"
+msgid "«Sonra doldur» müddəti bağlanma tarixindən sonra ola bilməz."
+msgstr "«Sonra doldur» müddəti bağlanma tarixindən sonra ola bilməz."
+
+msgctxt "surveys.campaigns"
+msgid "Yalnız qaralama kampaniyası açıla bilər."
+msgstr "Yalnız qaralama kampaniyası açıla bilər."
+
+msgctxt "surveys.campaigns"
+msgid "Yalnız bağlı kampaniya yenidən açıla bilər."
+msgstr "Yalnız bağlı kampaniya yenidən açıla bilər."
+
+msgctxt "surveys.campaigns"
+msgid "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+msgstr "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+
+msgctxt "surveys.manage"
+msgid "Bu əməliyyat üçün icazəniz yoxdur."
+msgstr "Bu əməliyyat üçün icazəniz yoxdur."
+
+msgctxt "surveys.manage"
+msgid "Tarix düzgün formatda deyil."
+msgstr "Tarix düzgün formatda deyil."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya tapılmadı."
+msgstr "Kampaniya tapılmadı."
+
+msgctxt "surveys.manage"
+msgid "Semestr seçilməlidir."
+msgstr "Semestr seçilməlidir."
+
+msgctxt "surveys.manage"
+msgid "Bu semestrin kampaniyası artıq var — onu cədvəldən idarə edin."
+msgstr "Bu semestrin kampaniyası artıq var — onu cədvəldən idarə edin."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya açıldı."
+msgstr "Kampaniya açıldı."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya bağlandı."
+msgstr "Kampaniya bağlandı."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya yenidən açıldı."
+msgstr "Kampaniya yenidən açıldı."
+
+msgctxt "surveys.manage"
+msgid "Minimum qrup ölçüsü tam ədəd olmalıdır."
+msgstr "Minimum qrup ölçüsü tam ədəd olmalıdır."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya yeniləndi."
+msgstr "Kampaniya yeniləndi."
+
+msgctxt "surveys.manage"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "surveys.notify"
+msgid "Müəllim qiymətləndirmə sorğusu açıldı"
+msgstr "Müəllim qiymətləndirmə sorğusu açıldı"
+
+msgctxt "surveys.notify"
+msgid ""
+"Semestr sonu anonim sorğusunu doldurun: müəllimlərinizi qiymətləndirin və "
+"tədrisin yaxşılaşması üçün təklif yazın. Cavablarınız anonimdir."
+msgstr ""
+"Semestr sonu anonim sorğusunu doldurun: müəllimlərinizi qiymətləndirin və "
+"tədrisin yaxşılaşması üçün təklif yazın. Cavablarınız anonimdir."
+
+msgctxt "surveys.student"
+msgid "Anonim sorğu"
+msgstr "Anonim sorğu"
+
+msgctxt "surveys.student"
+msgid "Semestr sonu sorğusu"
+msgstr "Semestr sonu sorğusu"
+
+msgctxt "surveys.student"
+msgid "Müəllimlərinizi anonim qiymətləndirin"
+msgstr "Müəllimlərinizi anonim qiymətləndirin"
+
+msgctxt "surveys.student"
+msgid ""
+"Hər müəllim üçün qısa bir forma — təxminən 2 dəqiqə. Sonda universitetdə "
+"nəyi yaxşılaşdırmaq olar sualı var."
+msgstr ""
+"Hər müəllim üçün qısa bir forma — təxminən 2 dəqiqə. Sonda universitetdə "
+"nəyi yaxşılaşdırmaq olar sualı var."
+
+msgctxt "surveys.student"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "%(done)s / %(total)s tamamlanıb"
+
+msgctxt "surveys.student"
+msgid "Son tarix: %(day)s"
+msgstr "Son tarix: %(day)s"
+
+msgctxt "surveys.student"
+msgid "Doldurulmayınca kabinet açılmır."
+msgstr "Doldurulmayınca kabinet açılmır."
+
+msgctxt "surveys.student"
+msgid "Dolduruldu"
+msgstr "Dolduruldu"
+
+msgctxt "surveys.student"
+msgid "Qiymətləndir"
+msgstr "Qiymətləndir"
+
+msgctxt "surveys.student"
+msgid "Ümumi suallar"
+msgstr "Ümumi suallar"
+
+msgctxt "surveys.student"
+msgid "Tədris prosesi, şərait və təklifləriniz"
+msgstr "Tədris prosesi, şərait və təklifləriniz"
+
+msgctxt "surveys.student"
+msgid "Müəllimlərdən sonra"
+msgstr "Müəllimlərdən sonra"
+
+msgctxt "surveys.student"
+msgid "Doldur"
+msgstr "Doldur"
+
+msgctxt "surveys.student"
+msgid "Davam et"
+msgstr "Davam et"
+
+msgctxt "surveys.student"
+msgid "Başla"
+msgstr "Başla"
+
+msgctxt "surveys.student"
+msgid "Sonra doldur"
+msgstr "Sonra doldur"
+
+msgctxt "surveys.student"
+msgid "Möhlət %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+msgstr "Möhlət %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+
+msgctxt "surveys.student"
+msgid "Bu semestrin sorğusunu tam doldurmusunuz. Təşəkkür edirik!"
+msgstr "Bu semestrin sorğusunu tam doldurmusunuz. Təşəkkür edirik!"
+
+msgctxt "surveys.student"
+msgid "Kabinetə keç"
+msgstr "Kabinetə keç"
+
+msgctxt "surveys.student"
+msgid "Hazırda sizin üçün açıq sorğu yoxdur."
+msgstr "Hazırda sizin üçün açıq sorğu yoxdur."
+
+msgctxt "surveys.student"
+msgid ""
+"Cavablarınız adınızdan ayrı saxlanılır. Nəticələr yalnız ən azı bir neçə "
+"tələbə cavab verdikdə, ümumiləşdirilmiş şəkildə göstərilir."
+msgstr ""
+"Cavablarınız adınızdan ayrı saxlanılır. Nəticələr yalnız ən azı bir neçə "
+"tələbə cavab verdikdə, ümumiləşdirilmiş şəkildə göstərilir."
+
+msgctxt "surveys.student"
+msgid "Sorğu anonimdir — bu, necə təmin olunur"
+msgstr "Sorğu anonimdir — bu, necə təmin olunur"
+
+msgctxt "surveys.student"
+msgid "Nə qeydə alınır"
+msgstr "Nə qeydə alınır"
+
+msgctxt "surveys.student"
+msgid ""
+"Cavablarınızın özü — adınız, tələbə nömrəniz və göndərmə vaxtı OLMADAN."
+msgstr ""
+"Cavablarınızın özü — adınız, tələbə nömrəniz və göndərmə vaxtı OLMADAN."
+
+msgctxt "surveys.student"
+msgid ""
+"Ayrıca, cavabla əlaqəsi olmayan bir qeyd: «bu tələbə bu müəllim üçün sorğunu"
+" doldurub» — yalnız təkrar doldurmanın qarşısını almaq və kabineti açmaq "
+"üçün."
+msgstr ""
+"Ayrıca, cavabla əlaqəsi olmayan bir qeyd: «bu tələbə bu müəllim üçün sorğunu"
+" doldurub» — yalnız təkrar doldurmanın qarşısını almaq və kabineti açmaq "
+"üçün."
+
+msgctxt "surveys.student"
+msgid "Kim nə görür"
+msgstr "Kim nə görür"
+
+msgctxt "surveys.student"
+msgid ""
+"Kafedra müdiri, tədris şöbəsi, keyfiyyətə nəzarət şöbəsi və universitet "
+"rəhbərliyi yalnız ümumiləşdirilmiş nəticələri görür: orta ballar və "
+"paylanmalar."
+msgstr ""
+"Kafedra müdiri, tədris şöbəsi, keyfiyyətə nəzarət şöbəsi və universitet "
+"rəhbərliyi yalnız ümumiləşdirilmiş nəticələri görür: orta ballar və "
+"paylanmalar."
+
+msgctxt "surveys.student"
+msgid ""
+"Cavab sayı azdırsa (məsələn, 3-dən az), nəticə ümumiyyətlə göstərilmir — "
+"kiçik qrupda kimin nə yazdığını tapmaq olmasın."
+msgstr ""
+"Cavab sayı azdırsa (məsələn, 3-dən az), nəticə ümumiyyətlə göstərilmir — "
+"kiçik qrupda kimin nə yazdığını tapmaq olmasın."
+
+msgctxt "surveys.student"
+msgid ""
+"Sərbəst mətnlər də adsız və qarışıq sırada göstərilir. Mətndə adınızı və ya "
+"sizi tanıda biləcək məlumat yazmayın."
+msgstr ""
+"Sərbəst mətnlər də adsız və qarışıq sırada göstərilir. Mətndə adınızı və ya "
+"sizi tanıda biləcək məlumat yazmayın."
+
+msgctxt "surveys.student"
+msgid ""
+"Dürüst olun: sorğu jurnallar bağlandıqdan sonra açılır, rəyiniz yalnız "
+"tədrisin keyfiyyətini yaxşılaşdırmaq üçün istifadə olunur və qiymətlərinizə "
+"heç bir təsir göstərmir."
+msgstr ""
+"Dürüst olun: sorğu jurnallar bağlandıqdan sonra açılır, rəyiniz yalnız "
+"tədrisin keyfiyyətini yaxşılaşdırmaq üçün istifadə olunur və qiymətlərinizə "
+"heç bir təsir göstərmir."
+
+msgctxt "surveys.student"
+msgid "Sorğu naviqasiyası"
+msgstr "Sorğu naviqasiyası"
+
+msgctxt "surveys.student"
+msgid "Siyahıya qayıt"
+msgstr "Siyahıya qayıt"
+
+msgctxt "surveys.student"
+msgid "Tədris prosesi və təklifləriniz"
+msgstr "Tədris prosesi və təklifləriniz"
+
+msgctxt "surveys.student"
+msgid ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+msgstr ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+
+msgctxt "surveys.student"
+msgid "Anonim göndər"
+msgstr "Anonim göndər"
+
+msgctxt "surveys.student"
+msgid "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+msgstr "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+
+msgctxt "surveys.student"
+msgid "Təşəkkür edirik!"
+msgstr "Təşəkkür edirik!"
+
+msgctxt "surveys.student"
+msgid ""
+"Bütün sorğuları doldurdunuz. Cavablarınız anonim şəkildə qeydə alındı və "
+"tədrisin yaxşılaşdırılması üçün ümumiləşdirilmiş şəkildə istifadə olunacaq."
+msgstr ""
+"Bütün sorğuları doldurdunuz. Cavablarınız anonim şəkildə qeydə alındı və "
+"tədrisin yaxşılaşdırılması üçün ümumiləşdirilmiş şəkildə istifadə olunacaq."
+
+msgctxt "surveys.student"
+msgid ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğu səhifəsi açılmır — "
+"anonim sorğunu yalnız tələbənin özü doldura bilər."
+msgstr ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğu səhifəsi açılmır — "
+"anonim sorğunu yalnız tələbənin özü doldura bilər."
+
+msgctxt "surveys.student"
+msgid "Bu səhifə yalnız tələbələr üçündür."
+msgstr "Bu səhifə yalnız tələbələr üçündür."
+
+msgctxt "surveys.student"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Təşkilat konteksti tapılmadı."
+
+msgctxt "surveys.student"
+msgid "Bu forma sizin üçün açıq deyil."
+msgstr "Bu forma sizin üçün açıq deyil."
+
+msgctxt "surveys.student"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Bu sorğunu artıq doldurmusunuz."
+
+msgctxt "surveys.student"
+msgid "Cavabınız anonim şəkildə qeydə alındı."
+msgstr "Cavabınız anonim şəkildə qeydə alındı."
+
+msgctxt "surveys.student"
+msgid "Bu sorğu hazırda qəbul edilmir."
+msgstr "Bu sorğu hazırda qəbul edilmir."
+
+msgctxt "surveys.student"
+msgid "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+msgstr "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+
+msgctxt "surveys.student"
+msgid "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+msgstr "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+
+msgctxt "surveys.cabinet"
+msgid "Gözləyən qiymətləndirmə: %(counter)s"
+msgstr "Gözləyən qiymətləndirmə: %(counter)s"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Semestr sonu anonim sorğusu: müəllimlərinizi qiymətləndirin və tədrisin "
+"yaxşılaşması üçün təklif yazın."
+msgstr ""
+"Semestr sonu anonim sorğusu: müəllimlərinizi qiymətləndirin və tədrisin "
+"yaxşılaşması üçün təklif yazın."
+
+msgctxt "surveys.cabinet"
+msgid "Sorğunu tam doldurmusunuz"
+msgstr "Sorğunu tam doldurmusunuz"
+
+msgctxt "surveys.cabinet"
+msgid "Təşəkkür edirik! Cavablarınız anonim şəkildə qeydə alınıb."
+msgstr "Təşəkkür edirik! Cavablarınız anonim şəkildə qeydə alınıb."
+
+msgctxt "surveys.cabinet"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "%(done)s / %(total)s tamamlanıb"
+
+msgctxt "surveys.cabinet"
+msgid "son tarix %(day)s"
+msgstr "son tarix %(day)s"
+
+msgctxt "surveys.cabinet"
+msgid "Sorğunu doldur"
+msgstr "Sorğunu doldur"
+
+msgctxt "surveys.cabinet"
+msgid "Hazırda sizin üçün açıq sorğu yoxdur."
+msgstr "Hazırda sizin üçün açıq sorğu yoxdur."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Sorğu nəticələrinə baxmaq üçün icazəniz və ya struktur əhatəniz yoxdur."
+msgstr ""
+"Sorğu nəticələrinə baxmaq üçün icazəniz və ya struktur əhatəniz yoxdur."
+
+msgctxt "surveys.cabinet"
+msgid "Hələ heç bir sorğu kampaniyası keçirilməyib."
+msgstr "Hələ heç bir sorğu kampaniyası keçirilməyib."
+
+msgctxt "surveys.cabinet"
+msgid "yalnız sizin struktur əhatəniz"
+msgstr "yalnız sizin struktur əhatəniz"
+
+msgctxt "surveys.cabinet"
+msgid "Cavablar"
+msgstr "Cavablar"
+
+msgctxt "surveys.cabinet"
+msgid "İştirak"
+msgstr "İştirak"
+
+msgctxt "surveys.cabinet"
+msgid "Ümumi bal (1–10)"
+msgstr "Ümumi bal (1–10)"
+
+msgctxt "surveys.cabinet"
+msgid "Likert indeksi (1–5)"
+msgstr "Likert indeksi (1–5)"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Anonimliyi qorumaq üçün nəticələr ən azı %(k)s cavab toplandıqdan sonra "
+"göstərilir."
+msgstr ""
+"Anonimliyi qorumaq üçün nəticələr ən azı %(k)s cavab toplandıqdan sonra "
+"göstərilir."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Müəllim, kafedra və sual üzrə ətraflı analitika, filtrlər və qrafiklər bu "
+"bölməyə əlavə olunur."
+msgstr ""
+"Müəllim, kafedra və sual üzrə ətraflı analitika, filtrlər və qrafiklər bu "
+"bölməyə əlavə olunur."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Kampaniyaları idarə etmək üçün təşkilat səviyyəsində «survey.manage» icazəsi"
+" lazımdır."
+msgstr ""
+"Kampaniyaları idarə etmək üçün təşkilat səviyyəsində «survey.manage» icazəsi"
+" lazımdır."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"RİM semestr jurnallarını bağlayanda həmin dövrün sorğusu özü açılır: "
+"%(days)s gün açıq qalır, ilk %(grace)s gün tələbə «Sonra doldur» deyə bilər,"
+" sonra kabinet sorğu doldurulmayınca açılmır. Burada kampaniyanı əl ilə də "
+"aça, bağlaya və uzada bilərsiniz."
+msgstr ""
+"RİM semestr jurnallarını bağlayanda həmin dövrün sorğusu özü açılır: "
+"%(days)s gün açıq qalır, ilk %(grace)s gün tələbə «Sonra doldur» deyə bilər,"
+" sonra kabinet sorğu doldurulmayınca açılmır. Burada kampaniyanı əl ilə də "
+"aça, bağlaya və uzada bilərsiniz."
+
+msgctxt "surveys.cabinet"
+msgid "Yeni kampaniya — semestr"
+msgstr "Yeni kampaniya — semestr"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Seçilmiş semestr üçün sorğu kampaniyası açılsın? Tələbələrə bildiriş "
+"göndəriləcək."
+msgstr ""
+"Seçilmiş semestr üçün sorğu kampaniyası açılsın? Tələbələrə bildiriş "
+"göndəriləcək."
+
+msgctxt "surveys.cabinet"
+msgid "Kampaniyanı aç"
+msgstr "Kampaniyanı aç"
+
+msgctxt "surveys.cabinet"
+msgid "Açıq"
+msgstr "Açıq"
+
+msgctxt "surveys.cabinet"
+msgid "Planlaşdırılıb"
+msgstr "Planlaşdırılıb"
+
+msgctxt "surveys.cabinet"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlı"
+msgstr "Bağlı"
+
+msgctxt "surveys.cabinet"
+msgid "Jurnal bağlanması ilə"
+msgstr "Jurnal bağlanması ilə"
+
+msgctxt "surveys.cabinet"
+msgid "Əl ilə"
+msgstr "Əl ilə"
+
+msgctxt "surveys.cabinet"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "surveys.cabinet"
+msgid "Doldurulmuş hədəf"
+msgstr "Doldurulmuş hədəf"
+
+msgctxt "surveys.cabinet"
+msgid "Gözlənilən"
+msgstr "Gözlənilən"
+
+msgctxt "surveys.cabinet"
+msgid "Açılış"
+msgstr "Açılış"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlanma"
+msgstr "Bağlanma"
+
+msgctxt "surveys.cabinet"
+msgid "«Sonra» möhləti"
+msgstr "«Sonra» möhləti"
+
+msgctxt "surveys.cabinet"
+msgid "Minimum qrup (k)"
+msgstr "Minimum qrup (k)"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlanma tarixi"
+msgstr "Bağlanma tarixi"
+
+msgctxt "surveys.cabinet"
+msgid "«Sonra doldur» son günü"
+msgstr "«Sonra doldur» son günü"
+
+msgctxt "surveys.cabinet"
+msgid "Məcburi (kabineti bağlayır)"
+msgstr "Məcburi (kabineti bağlayır)"
+
+msgctxt "surveys.cabinet"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "surveys.cabinet"
+msgid "Aç"
+msgstr "Aç"
+
+msgctxt "surveys.cabinet"
+msgid "Yeni bağlanma tarixi"
+msgstr "Yeni bağlanma tarixi"
+
+msgctxt "surveys.cabinet"
+msgid "Yenidən aç"
+msgstr "Yenidən aç"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Kampaniya bağlansın? Tələbələr artıq cavab göndərə bilməyəcək və kabinet "
+"qapısı açılacaq."
+msgstr ""
+"Kampaniya bağlansın? Tələbələr artıq cavab göndərə bilməyəcək və kabinet "
+"qapısı açılacaq."
+
+msgctxt "surveys.cabinet"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Hələ heç bir sorğu kampaniyası yoxdur. İlk kampaniya RİM jurnalları "
+"bağlayanda özü yaranır və ya yuxarıdan əl ilə açılır."
+msgstr ""
+"Hələ heç bir sorğu kampaniyası yoxdur. İlk kampaniya RİM jurnalları "
+"bağlayanda özü yaranır və ya yuxarıdan əl ilə açılır."
+
+msgctxt "registrar.journal_history"
+msgid "Davamiyyət / bal"
+msgstr "Davamiyyət / bal"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent balı"
+msgstr "Komponent balı"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun imtahan"
+msgstr "Yekun imtahan"
+
+msgctxt "registrar.journal_history"
+msgid "Təkrar imtahan"
+msgstr "Təkrar imtahan"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — bal / davamiyyət"
+msgstr "Sənədli düzəliş — bal / davamiyyət"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs"
+msgstr "Sənədli düzəliş — dərs"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs silindi"
+msgstr "Sənədli düzəliş — dərs silindi"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — sərbəst iş"
+msgstr "Sənədli düzəliş — sərbəst iş"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — kurs işi"
+msgstr "Sənədli düzəliş — kurs işi"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — komponent"
+msgstr "Sənədli düzəliş — komponent"
+
+msgctxt "registrar.journal_history"
+msgid "Düzəlişin geri alınması"
+msgstr "Düzəlişin geri alınması"
+
+msgctxt "registrar.journal_history"
+msgid "Sistem"
+msgstr "Sistem"
+
+msgctxt "registrar.journal_history"
+msgid "Akademik qeyd"
+msgstr "Akademik qeyd"
+
+msgctxt "registrar.journal_history"
+msgid "Bu gün"
+msgstr "Bu gün"
+
+msgctxt "registrar.journal_history"
+msgid "Dünən"
+msgstr "Dünən"
+
+msgctxt "registrar.journal_history"
+msgid "dəyişiklik"
+msgstr "dəyişiklik"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs sütunu"
+msgstr "Dərs sütunu"
+
+msgctxt "registrar.journal_history"
+msgid "başqasının adından · əsl aktor"
+msgstr "başqasının adından · əsl aktor"
+
+msgctxt "registrar.journal_history"
+msgid "sətir daha göstər"
+msgstr "sətir daha göstər"
+
+msgctxt "registrar.journal_history"
+msgid "Yığ"
+msgstr "Yığ"
+
+msgctxt "registrar.journal_history"
+msgid "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+msgstr "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd göstərilir"
+msgstr "qeyd göstərilir"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd"
+msgstr "qeyd"
+
+msgctxt "registrar.journal_history"
+msgid "Dəyişiklik tarixçəsi"
+msgstr "Dəyişiklik tarixçəsi"
+
+msgctxt "registrar.journal_history"
+msgid "Paneli bağla"
+msgstr "Paneli bağla"
+
+msgctxt "registrar.journal_history"
+msgid "DƏRS TARİXİ"
+msgstr "DƏRS TARİXİ"
+
+msgctxt "registrar.journal_history"
+msgid "Tarix axtar…"
+msgstr "Tarix axtar…"
+
+msgctxt "registrar.journal_history"
+msgid "Uyğun tarix yoxdur"
+msgstr "Uyğun tarix yoxdur"
+
+msgctxt "registrar.journal_history"
+msgid "Bütün tarixlər"
+msgstr "Bütün tarixlər"
+
+msgctxt "registrar.journal_history"
+msgid "TƏLƏBƏ"
+msgstr "TƏLƏBƏ"
+
+msgctxt "registrar.journal_history"
+msgid "Ad və ya soyad…"
+msgstr "Ad və ya soyad…"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd növü"
+msgstr "Qeyd növü"
+
+msgctxt "registrar.journal_history"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent"
+msgstr "Komponent"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun"
+msgstr "Yekun"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəlişlər"
+msgstr "Sənədli düzəlişlər"
+
+msgctxt "registrar.journal_history"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "registrar.journal_history"
+msgid "Hələ dəyişiklik qeydə alınmayıb"
+msgstr "Hələ dəyişiklik qeydə alınmayıb"
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+msgstr ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəcə uyğun qeyd yoxdur"
+msgstr "Süzgəcə uyğun qeyd yoxdur"
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+msgstr "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+msgstr ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+
+msgctxt "registrar.journal_history"
+msgid "Daha çox"
+msgstr "Daha çox"
+
+msgctxt "registrar.journal_history"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.journal_history"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "registrar.journal_history"
+msgid "Nə dəyişdi"
+msgstr "Nə dəyişdi"
+
+msgctxt "registrar.journal_history"
+msgid "Köhnə → yeni"
+msgstr "Köhnə → yeni"
+
+msgctxt "registrar.journal_history"
+msgid "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+msgstr "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "registrar.journal_history"
+msgid "Bu dərsin tarixçəsi"
+msgstr "Bu dərsin tarixçəsi"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu fənnə aid deyil."
+msgstr "Bu cədvəl dərsi bu fənnə aid deyil."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+msgstr ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+msgstr "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+
+msgctxt "registrar.journal_activation"
+msgid "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+msgstr "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu günün cədvəl dərsləri"
+msgstr "Bu günün cədvəl dərsləri"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+msgstr ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+
+msgctxt "registrar.journal_activation"
+msgid "indi"
+msgstr "indi"
+
+msgctxt "registrar.journal_activation"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti mövzu"
+msgstr "Növbəti mövzu"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+msgstr ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+
+msgctxt "registrar.journal_activation"
+msgid "Jurnalda bu dərsin sütununa keç"
+msgstr "Jurnalda bu dərsin sütununa keç"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilib"
+msgstr "Aktivləşdirilib"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdir"
+msgstr "Aktivləşdir"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilməyib"
+msgstr "Aktivləşdirilməyib"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+msgstr "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti dərs"
+msgstr "Növbəti dərs"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldən kənar açılmış dərs"
+msgstr "Bu gün cədvəldən kənar açılmış dərs"
+
+msgctxt "registrar.journal_activation"
+msgid "cədvəldən kənar"
+msgstr "cədvəldən kənar"
+
+msgctxt "registrar.journal_activation"
+msgid "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+msgstr "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+
+msgctxt "registrar.journal_activation"
+msgid "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+msgstr "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+
+msgctxt "registrar.journal_activation"
+msgid "Cədvəldən kənar dərsin səbəbi"
+msgstr "Cədvəldən kənar dərsin səbəbi"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+msgstr ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnalı aç"
+msgstr "Jurnalı aç"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəldə var, qeydə alınmayıb"
+msgstr "Cədvəldə var, qeydə alınmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+msgstr ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid "Siyahı"
+msgstr "Siyahı"
+
+msgctxt "accounts.lessons_log"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal"
+msgstr "Jurnal"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+msgstr ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+msgstr ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+msgstr "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldən kənar"
+msgstr "cədvəldən kənar"
+
+msgctxt "registrar.lessons_log"
+msgid "Cədvəldən kənar (səbəb)"
+msgstr "Cədvəldən kənar (səbəb)"
+
+msgctxt "accounts.lessons_log"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fakültələr"
+msgstr "Bütün fakültələr"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün kafedralar"
+msgstr "Bütün kafedralar"
+
+msgctxt "registrar.journal"
+msgid "AUDİTORİYA SAATI"
+msgstr "AUDİTORİYA SAATI"
+
+msgctxt "registrar.journal"
+msgid "keçirilib / plan"
+msgstr "keçirilib / plan"
+
+msgctxt "registrar.journal"
+msgid "BURAXILAN SAAT"
+msgstr "BURAXILAN SAAT"
+
+msgctxt "registrar.journal"
+msgid "üzrsüz q/b"
+msgstr "üzrsüz q/b"
+
+msgctxt "registrar.journal"
+msgid "QAYIB %%"
+msgstr "QAYIB %%"
+
+msgctxt "registrar.journal"
+msgid "buraxılan ÷ plan"
+msgstr "buraxılan ÷ plan"
+
+msgctxt "registrar.journal"
+msgid "Buraxılış həddi"
+msgstr "Buraxılış həddi"
+
+msgctxt "registrar.journal"
+msgid "icazəli"
+msgstr "icazəli"
+
+msgctxt "registrar.journal"
+msgid ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."
+msgstr ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."
+
+msgctxt "accounts.semester"
+msgid ""
+"Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri "
+"oxuyan (kursu uyğun) qruplar üçün təsdiqlənmiş tədris planının məcburi "
+"fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata "
+"alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç "
+"nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
+"planı» bölməsində planı təsdiqləyin."
+msgstr ""
+"Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri "
+"oxuyan (kursu uyğun) qruplar üçün təsdiqlənmiş tədris planının məcburi "
+"fənlərindən açılış yaradır və qrupun aktiv tələbələrini dərhal qeydiyyata "
+"alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir təkrarlanmır, heç "
+"nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
+"planı» bölməsində planı təsdiqləyin."
