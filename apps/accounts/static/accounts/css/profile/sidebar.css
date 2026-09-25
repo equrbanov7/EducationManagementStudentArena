@@ -1,48 +1,62 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Kabinet sol menyusu — 2026-09-10 redizaynı.
+   Kabinet sol menyusu — 2026-09-25 redizaynı (əvvəlki: 2026-09-10).
 
    Əsas qərarlar
    -------------
-   • SIXLIQ: bənd hündürlüyü ~44px → ~36px, aralıq 0.6rem → 2px. 60 bəndlik
-     menyu (RİM/rektor) artıq divar kimi görünmür.
-   • QRUPLAR nativ `<details>`-dir (şablonda server-render). Bu fayl yalnız
-     görünüşü verir; açıq/bağlı vəziyyəti brauzer saxlayır.
-   • Açıq qrupun SOL RAYI var (border-left) — hansı blokun içində olduğun
-     bir baxışda görünür; bağlı qrup sadəcə sətirdir, qutu deyil.
-   • UZUN AD kəsilmir, 2 sətrə keçir (`-webkit-line-clamp`) — «İmtahan balının
-     daxil edilməsi» kimi adlar «…» ilə oxunmaz olurdu.
-   • YIĞCAM (collapsed) rejim: başlıqlar gizlənir, bəndlər yalnız nişandır,
-     qruplar arasında incə ayırıcı qalır, sayğac isə nöqtəyə çevrilir.
-   • Alt blok (Dil + Hesab) sidebar-ın altına YAPIŞIR — «Çıxış» 60 bəndin
-     altında itmir.
+   • İKİ DÜZÜM, BİR GÖRÜNÜŞ DİLİ. Tələbə/müəllim düz menyu alır (bölmə adı
+     sakit etiketdir — `.sidebar-section-label`), heyət isə nativ `<details>`
+     akkordeonu (`.sidebar-group`). Bəndin özü (`.sidebar-menu-link`) hər iki
+     düzümdə eynidir.
+   • AKTİV bənd: dolu mavi «həb» DEYİL — `--ems-primary-50` fonu,
+     `--ems-primary-700` mətn və 3px sol vurğu. Hover — neytral-100.
+   • RİTM: 38px sətir, 8px radius, 16px ikon SABİT sütunda (20px), 12px kənar
+     boşluğu; badge kiçik, sağa düzülmüş, yumşaq tonlu (AA kontrast).
+   • FOKUS: nazik neytral kontur + `--ems-sh-focus` halqası (qalın mavi yox).
+   • ÜFÜQİ SÜRÜŞMƏ YOXDUR: `overflow-x: hidden` + hər flex uşağında
+     `min-width: 0`. Əvvəl `overflow-y: auto` üfüqi oxu da `auto` edirdi;
+     trackpad jesti/fokus sidebar-ı yana sürüşdürəndə sol kənar kəsilirdi
+     («rofil», «MUMİ»). Qoruyucu JS də var (`js/profile/sidebar_nav.js`).
+   • Alt hesab bloku `sidebar_footer.css`-də, yığcam (ikon-rels) rejim
+     `sidebar_rail.css`-dədir — hər ikisi aşağıda import olunur.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+@import url("sidebar_footer.css?v=20260925-1");
+@import url("sidebar_rail.css?v=20260925-1");
+
 .profile-sidebar {
-    --sidebar-gutter: 0.6rem;
-    --sidebar-item-radius: 10px;
-    --sidebar-rail: rgba(37, 99, 235, 0.35);
+    --sb-gutter: 12px;
+    --sb-pad-x: 12px;
+    --sb-row-h: 38px;
+    --sb-radius: var(--ems-r-md, 8px);
+    --sb-icon-col: 20px;
+    --sb-gap: 10px;
+    --sb-fg: var(--ems-neutral-700);
+    --sb-fg-strong: var(--ems-neutral-900);
+    --sb-muted: var(--ems-neutral-500);
+    --sb-hover: var(--ems-neutral-100);
+    --sb-active-bg: var(--ems-primary-50);
+    --sb-active-fg: var(--ems-primary-700);
+    --sb-accent: var(--ems-primary-600);
 
     width: var(--sidebar-width);
+    min-width: 0;
     background: var(--card-bg);
     border-right: 1px solid var(--border-color);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ems-neutral-300) transparent;
 }
 
-.profile-sidebar.collapsed {
-    width: var(--sidebar-collapsed-width);
-}
-
-/* Masaüstü: sidebar ÖZ sürüşmə sahəsidir. Əvvəllər o, səhifə boyu uzanırdı —
-   sağdakı panel uzun olanda (RİM/rektor ana səhifəsi) menyunun alt bloku
-   («Çıxış») ekranın çox altına düşürdü. İndi hündürlük ekranla məhdudlaşır,
-   uzun menyu içəridə sürüşür, alt blok isə aşağıya yapışır.
+/* Masaüstü: sidebar ÖZ sürüşmə sahəsidir — hündürlük ekranla məhdudlaşır,
+   uzun menyu içəridə sürüşür, alt blok aşağıya yapışır.
    72px = `static/css/navbar.css` → `.blog-header__nav` hündürlüyü (sticky). */
 @media (min-width: 769px) {
     .profile-sidebar {
@@ -56,151 +70,170 @@
 /* ── Başlıq ──────────────────────────────────────────────────────────────── */
 
 .sidebar-header {
-    padding: 1.1rem 1rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0.5rem;
     position: sticky;
     top: 0;
     z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 56px;
+    padding: 10px var(--sb-gutter) 10px calc(var(--sb-gutter) + var(--sb-pad-x));
     background: var(--card-bg);
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
 }
 
+/* Başlıq SIXILA bilir (min-width: 0 + ellipsis): yığcam ↔ geniş keçidində
+   mətn sidebar-dan enli olub onu üfüqi sürüşdürməsin. */
 .sidebar-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text-main);
+    flex: 1 1 auto;
+    min-width: 0;
     margin: 0;
-    transition: opacity 0.2s;
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-main);
     white-space: nowrap;
-}
-
-.collapsed .sidebar-title {
-    opacity: 0;
-    width: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sidebar-toggle {
-    background: var(--light-blue);
-    color: var(--ems-primary-700);
-    border: none;
+    flex: 0 0 auto;
     width: 32px;
     height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--sb-radius);
+    background: transparent;
+    color: var(--sb-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-toggle:hover {
-    background: var(--ems-primary-600);
-    transform: scale(1.05);
-    color: #fff;
+    background: var(--sb-hover);
+    border-color: var(--border-color);
+    color: var(--sb-fg-strong);
 }
 
 /* ── Menyu gövdəsi ───────────────────────────────────────────────────────── */
 
+.sidebar-nav {
+    flex: 1 0 auto;
+    min-width: 0;
+}
+
 .sidebar-menu {
     list-style: none;
-    padding: 0.5rem var(--sidebar-gutter) 0;
     margin: 0;
+    padding: 8px var(--sb-gutter) 12px;
     display: flex;
     flex-direction: column;
-    flex: 1 1 auto;
     gap: 2px;
+    min-width: 0;
 }
 
 .sidebar-menu-item {
     position: relative;
-    width: 100%;
-    flex-shrink: 0;
+    min-width: 0;
     list-style: none;
 }
 
 .sidebar-menu-link {
+    position: relative;
     display: flex;
     align-items: center;
-    /* 2026-09-11 (sahib): «aşağı-yuxarı edəndə bir az böyütmək lazımdır» —
-       36px → ~40px hədəf, şrift 0.875 → 0.92rem; sıxlıq qalır, oxunaqlıq artır. */
-    padding: 0.56rem 0.7rem;
-    min-height: 40px;
-    color: var(--ems-neutral-600);
-    text-decoration: none;
-    background: none;
-    border: 0;
+    gap: var(--sb-gap);
     width: 100%;
-    text-align: left;
-    font-size: 0.92rem;
-    line-height: 1.3;
+    min-width: 0;
+    min-height: var(--sb-row-h);
+    box-sizing: border-box;
+    padding: 7px var(--sb-pad-x);
+    border: 0;
+    border-radius: var(--sb-radius);
+    background: transparent;
+    color: var(--sb-fg);
+    font: inherit;
+    font-size: 0.9rem;
     font-weight: 500;
-    gap: 0.65rem;
-    border-radius: var(--sidebar-item-radius);
-    transition: background 0.14s ease, color 0.14s ease;
+    line-height: 1.3;
+    text-align: left;
+    text-decoration: none;
     cursor: pointer;
+    transition: background-color 0.14s ease, color 0.14s ease;
 }
 
 .sidebar-menu-link:hover {
-    background: var(--ems-neutral-100);
-    color: var(--ems-primary-700);
+    background: var(--sb-hover);
+    color: var(--sb-fg-strong);
 }
 
-/* QA 2026-09-05 UX-01: ağ mətn #3b82f6 üzərində 3.68:1 idi (AA 4.5 tələb edir) → 5.17:1. */
 .sidebar-menu-link.active {
-    background: var(--ems-primary-600);
-    color: #fff;
+    background: var(--sb-active-bg);
+    color: var(--sb-active-fg);
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.22);
 }
 
-.sidebar-menu-link.active .sidebar-menu-icon {
-    color: #fff;
+/* Sol vurğu — rəng tək siqnal deyil: fon + qalın mətn + zolaq birlikdə. */
+.sidebar-menu-link.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--sb-accent);
 }
 
-/* Klaviatura ilə naviqasiya — siçan kliki halqa çəkmir (`:focus-visible`). */
 .sidebar-menu-link:focus-visible,
 .sidebar-menu-group-toggle:focus-visible,
 .sidebar-toggle:focus-visible {
-    outline: 2px solid var(--ems-primary-600);
-    outline-offset: 2px;
+    outline: 1px solid var(--ems-neutral-500);
+    outline-offset: 0;
+    box-shadow: var(--ems-sh-focus);
 }
 
 .sidebar-menu-icon {
-    font-size: 1rem;
-    width: 20px;
+    flex: 0 0 var(--sb-icon-col);
+    width: var(--sb-icon-col);
+    font-size: 16px;
+    line-height: 1;
     text-align: center;
-    flex-shrink: 0;
-    color: var(--ems-neutral-400);
+    color: var(--sb-muted);
+    transition: color 0.14s ease;
 }
 
 .sidebar-menu-link:hover .sidebar-menu-icon {
-    color: inherit;
+    color: var(--sb-fg-strong);
 }
 
-.sidebar-menu-icon--danger {
+.sidebar-menu-link.active .sidebar-menu-icon {
+    color: var(--sb-accent);
+}
+
+/* İmtahan mərkəzi qrupunun «qırmızı» ikonları hover-də də öz tonunda qalır. */
+.sidebar-menu-icon--danger,
+.sidebar-menu-link:hover .sidebar-menu-icon--danger {
     color: var(--ems-danger);
 }
 
-/* Yeni tabda açılan link (elektron jurnal, imtahan nəzarət sistemi). */
+/* Yeni tabda / ayrıca səhifədə açılan link (elektron jurnal, nəzarət sistemi). */
 .sidebar-menu-ext {
-    font-size: 0.62rem;
-    color: var(--ems-neutral-500);
-    flex-shrink: 0;
-    margin-left: 0.15rem;
+    flex: 0 0 auto;
+    font-size: 0.65rem;
+    color: var(--sb-muted);
 }
 
-.sidebar-menu-link.active .sidebar-menu-ext {
-    color: rgba(255, 255, 255, 0.75);
-}
-
-/* Uzun ad KƏSİLMİR — iki sətrə keçir. */
+/* Uzun ad KƏSİLMİR — iki sətrə keçir («İmtahan balının daxil edilməsi»). */
 .sidebar-menu-text {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -209,96 +242,119 @@
     overflow-wrap: anywhere;
 }
 
-.collapsed .sidebar-menu-text {
-    opacity: 0;
-    width: 0;
-    flex: none;
-    overflow: hidden;
-}
-
 /* ── Nişanlar (badge) ────────────────────────────────────────────────────── */
+/* Yumşaq ton: köhnə dolu yaşıl/narıncı fon üzərində ağ rəqəm AA-dan keçmirdi
+   (2.5:1 / 3.2:1). İndi neytral-100/700 (məlumat) və warning-100/800 (gözləyən). */
 
 .sidebar-menu-badge {
-    background: var(--primary-green);
-    color: #fff;
-    font-size: 0.7rem;
-    line-height: 1.5;
-    min-width: 1.35rem;
-    padding: 0 0.4rem;
-    border-radius: 999px;
+    flex: 0 0 auto;
     margin-left: auto;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: 0.7rem;
     font-weight: 700;
+    line-height: 20px;
     text-align: center;
-    flex-shrink: 0;
     font-variant-numeric: tabular-nums;
 }
 
 /* Boş badge GÖRÜNMÜR: server sayğacı 0 olanda mətnsiz render edir, badge
-   borusu (section_loader.refreshBadges) sonradan rəqəmi yazanda özü görünür.
-   Əks halda 0 olan bənd üçün DOM-da düyün olmazdı və AJAX yeniləməsi onu
-   heç vaxt tapa bilməzdi. */
+   borusu (section_loader.refreshBadges) sonradan rəqəmi yazanda özü görünür. */
 .sidebar-menu-badge:empty {
     display: none;
 }
 
 .sidebar-menu-badge--warning {
-    background: var(--ems-warning-600);
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
 }
 
+/* Diqqət halqası yalnız ilk 3 dövr — sonsuz nəbz menyunu «səs-küylü» edirdi. */
 .sidebar-menu-badge--pulse {
-    animation: sidebarBadgePulse 1.8s ease-in-out infinite;
+    animation: sidebarBadgePulse 1.8s ease-in-out 3;
 }
 
 .sidebar-menu-link.active .sidebar-menu-badge {
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--ems-primary-700);
+    background: var(--ems-neutral-0);
 }
 
 @keyframes sidebarBadgePulse {
     0%,
     100% {
-        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.5);
+        box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.45);
     }
     70% {
-        box-shadow: 0 0 0 7px rgba(217, 119, 6, 0);
+        box-shadow: 0 0 0 6px rgba(217, 119, 6, 0);
     }
 }
 
-/* ── Qrup (nativ <details>) ──────────────────────────────────────────────── */
+/* ── Düz menyu bölmələri (tələbə / müəllim) ──────────────────────────────── */
+
+.sidebar-section {
+    list-style: none;
+    min-width: 0;
+}
+
+.sidebar-section-label {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 14px var(--sb-pad-x) 6px;
+    color: var(--sb-muted);
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.sidebar-section-items,
+.sidebar-menu-group-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* ── Akkordeon qruplar (heyət; nativ <details>) ──────────────────────────── */
 
 .sidebar-menu-group {
     list-style: none;
-    flex-shrink: 0;
+    min-width: 0;
 }
 
-.sidebar-group {
-    border-radius: 12px;
-    transition: background 0.16s ease;
-}
-
-.sidebar-group[open] {
-    background: var(--ems-neutral-50);
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.2rem;
+.sidebar-menu-group + .sidebar-menu-group {
+    margin-top: 4px;
 }
 
 .sidebar-menu-group-toggle {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 6px;
     width: 100%;
+    min-width: 0;
+    min-height: 32px;
     box-sizing: border-box;
-    padding: 0.5rem 0.6rem;
-    border-radius: 10px;
-    color: var(--ems-neutral-500);
-    font-size: 0.68rem;
-    font-weight: 800;
+    padding: 6px var(--sb-pad-x);
+    border-radius: var(--sb-radius);
+    color: var(--sb-muted);
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
     cursor: pointer;
     list-style: none;
     user-select: none;
-    transition: background 0.14s ease, color 0.14s ease;
+    transition: background-color 0.14s ease, color 0.14s ease;
 }
 
 /* Nativ üçbucaq işarəsini götürürük — öz «chevron»umuz var. */
@@ -311,24 +367,24 @@
 }
 
 .sidebar-menu-group-toggle:hover {
-    background: var(--ems-neutral-100);
-    color: var(--ems-neutral-700);
+    background: var(--sb-hover);
+    color: var(--sb-fg);
 }
 
 .sidebar-menu-group-title {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-/* Sayğac/nöqtə — `ui.js` doldurur (dekorativdir, JS-siz sadəcə boş qalır). */
+/* Sayğac/nöqtə — `ui.js` doldurur (bağlı qrupda bənd sayı + gözləyən nişan). */
 .sidebar-menu-group-meta {
     flex-shrink: 0;
     font-size: 0.66rem;
     font-weight: 700;
-    color: var(--ems-neutral-500);
+    color: var(--sb-muted);
     font-variant-numeric: tabular-nums;
 }
 
@@ -336,7 +392,6 @@
     display: none;
 }
 
-/* Bağlı qrupun içində gözləyən nişan varsa — xəbərdarlıq nöqtəsi. */
 .sidebar-menu-group-meta--alert {
     color: var(--ems-warning-700);
 }
@@ -360,29 +415,21 @@
 }
 
 .sidebar-group[open] > .sidebar-menu-group-toggle {
-    color: var(--ems-neutral-700);
+    color: var(--sb-fg);
 }
 
 .sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-caret {
     transform: rotate(180deg);
 }
 
-/* Aktiv bölmə BAĞLI qrupun içindədirsə (SPA keçidindən sonra ola bilər) —
-   başlıq brend rəngi ilə işarələnir ki, harada olduğun itməsin. */
+/* Aktiv bölmə BAĞLI qrupun içindədirsə — başlıq brend tonu ilə işarələnir. */
 .sidebar-menu-group.has-active > .sidebar-group:not([open]) > .sidebar-menu-group-toggle {
-    color: var(--ems-primary-700);
-    background: var(--light-blue);
-}
-
-.sidebar-menu-group-items {
-    list-style: none;
-    margin: 0;
-    padding: 0 0.25rem 0 0.55rem;
-    border-left: 2px solid var(--sidebar-rail);
-    margin-left: 0.85rem;
+    background: var(--sb-active-bg);
+    color: var(--sb-active-fg);
 }
 
 .sidebar-group[open] > .sidebar-menu-group-items {
+    padding: 2px 0 6px;
     animation: sidebarGroupIn 0.18s ease;
 }
 
@@ -397,50 +444,9 @@
     }
 }
 
-/* ── Alt blok: Dil + Hesab (aşağıya yapışır) ─────────────────────────────── */
-
-.sidebar-menu-footer {
-    list-style: none;
-    margin-top: auto;
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-    background: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-    padding-top: 0.35rem;
-    padding-bottom: 0.5rem;
-}
-
-.sidebar-menu-footer-items {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar-menu-group-label {
-    list-style: none;
-    flex-shrink: 0;
-}
-
-.sidebar-menu-group-label--inline {
-    padding: 0.5rem 0.6rem 0.2rem;
-    font-size: 0.66rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--ems-neutral-500);
-}
-
-.collapsed .sidebar-menu-group-label--inline {
-    visibility: hidden;
-    height: 0;
-    padding: 0;
-    overflow: hidden;
-}
-
-.sidebar-language {
-    padding: 0 0.2rem 0.2rem;
-}
+/* ── Çıxış (təhlükə tonu) ────────────────────────────────────────────────── */
+/* ⚠️ Bu blok bu faylda qalmalıdır: `test_audit_2026_09_13_frontend` mətn
+   rənginin `--ems-danger-600` olduğunu məhz burada yoxlayır. */
 
 .sidebar-logout-form {
     margin: 0;
@@ -464,85 +470,18 @@
     color: var(--ems-danger-strong);
 }
 
-/* ── YIĞCAM (collapsed) rejim ────────────────────────────────────────────── */
-/* `ui.js` yığcam rejimə keçəndə BÜTÜN `<details>`-ləri açır (nativ element
-   bağlı ikən məzmununu CSS-lə göstərmək mümkün deyil), geri qayıdanda əvvəlki
-   vəziyyəti bərpa edir. Burada yalnız görünüş yığılır. */
-
-.profile-sidebar.collapsed .sidebar-menu {
-    padding-left: 0.4rem;
-    padding-right: 0.4rem;
-}
-
-.profile-sidebar.collapsed .sidebar-menu-group-toggle {
-    display: none;
-}
-
-.profile-sidebar.collapsed .sidebar-group,
-.profile-sidebar.collapsed .sidebar-group[open] {
-    background: transparent;
-    padding-bottom: 0;
-    margin-bottom: 0;
-}
-
-.profile-sidebar.collapsed .sidebar-menu-group-items {
-    border-left: 0;
-    margin-left: 0;
-    padding: 0;
-    animation: none;
-}
-
-/* Qruplar arasında incə ayırıcı — nişan-siyahı yapışıq görünməsin. */
-.profile-sidebar.collapsed .sidebar-menu-group + .sidebar-menu-group {
-    border-top: 1px solid var(--border-color);
-    margin-top: 4px;
-    padding-top: 4px;
-}
-
-.profile-sidebar.collapsed .sidebar-menu-link {
-    justify-content: center;
-    padding: 0.5rem 0;
-    gap: 0;
-}
-
-.profile-sidebar.collapsed .sidebar-menu-ext {
-    display: none;
-}
-
-/* Yığcam rejimdə rəqəm sığmır — nişan nöqtəyə çevrilir (siqnal itmir). */
-.profile-sidebar.collapsed .sidebar-menu-badge {
-    position: absolute;
-    top: 2px;
-    right: 8px;
-    min-width: 0;
-    width: 8px;
-    height: 8px;
-    padding: 0;
-    font-size: 0;
-    line-height: 0;
-    overflow: hidden;
-    box-shadow: 0 0 0 2px var(--card-bg);
-}
-
-.profile-sidebar.collapsed .sidebar-menu-footer {
-    padding-left: 0;
-    padding-right: 0;
-}
-
 /* ── Hərəkət azaldılması ─────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
     .profile-sidebar,
     .sidebar-menu-link,
+    .sidebar-menu-icon,
     .sidebar-menu-group-caret,
     .sidebar-toggle {
         transition: none;
     }
 
-    .sidebar-group[open] > .sidebar-menu-group-items {
-        animation: none;
-    }
-
+    .sidebar-group[open] > .sidebar-menu-group-items,
     .sidebar-menu-badge--pulse {
         animation: none;
     }

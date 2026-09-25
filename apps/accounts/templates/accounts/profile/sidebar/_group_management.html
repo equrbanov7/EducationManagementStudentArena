@@ -24,7 +24,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'role_assignment' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}?section=role-assignment"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'role-assignment' %}active{% endif %}">
-                    <i class="fas fa-user-shield sidebar-menu-icon"></i>
+                    <i class="fas fa-user-shield sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "role_assignment" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -37,7 +37,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'RİM mərkəzi' context 'profile.rim' %}"
                    data-source-url="{{ profile_base_url }}?section=rim-center"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'rim-center' %}active{% endif %}">
-                    <i class="fas fa-id-card-alt sidebar-menu-icon"></i>
+                    <i class="fas fa-id-card-alt sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "RİM mərkəzi" context "profile.rim" %}</span>
                 </a>
             </li>
@@ -60,7 +60,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'Müəllim əlavəsi (toplu)' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}?section=teacher-intake"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'teacher-intake' %}active{% endif %}">
-                    <i class="fas fa-file-import sidebar-menu-icon"></i>
+                    <i class="fas fa-file-import sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Müəllim əlavəsi (toplu)" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -73,7 +73,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% if role_capabilities.teacher_can_manage_students %}{% trans 'student_management' context 'profile.section' %}{% else %}{% trans 'staff_management' context 'profile.section' %}{% endif %}"
                    data-source-url="{% url 'accounts:student_organization_management' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
-                    <i class="fas fa-users-cog sidebar-menu-icon"></i>
+                    <i class="fas fa-users-cog sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% if role_capabilities.teacher_can_manage_students %}{% trans "student_management" context "profile.sidebar" %}{% else %}{% trans "staff_management" context "profile.sidebar" %}{% endif %}</span>
                 </a>
             </li>
@@ -86,7 +86,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'permissions' context 'profile.section' %}"
                    data-source-url="{% url 'accounts:permission_editor' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'permission-editor' %}active{% endif %}">
-                    <i class="fas fa-key sidebar-menu-icon"></i>
+                    <i class="fas fa-key sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "permissions" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -99,7 +99,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'manage_roles' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-roles' %}active{% endif %}">
-                    <i class="fas fa-user-cog sidebar-menu-icon"></i>
+                    <i class="fas fa-user-cog sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "manage_roles" context "profile.sidebar" %}</span>
                 </a>
             </li>

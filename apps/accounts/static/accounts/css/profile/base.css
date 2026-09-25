@@ -10,7 +10,9 @@
     --text-muted: var(--ems-neutral-500);
     --border-color: var(--ems-neutral-200);
 
-    --sidebar-width: 300px;
+    /* 2026-09-25: 300 → 272px (sidebar redizaynı — 264–280px aralığı; düz
+       menyuda 38px sətir + 12px kənar boşluğu bu enə hesablanıb). */
+    --sidebar-width: 272px;
     --sidebar-collapsed-width: 80px;
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;

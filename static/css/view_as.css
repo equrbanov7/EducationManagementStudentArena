@@ -539,3 +539,16 @@
     }
     .view-as-pill__name { max-width: 110px; }
 }
+
+/* --- Kabinet sidebar-ı çərçivənin altında qalmasın (2026-09-25) -----------
+   Sahibin view-as ekran şəklində sidebar-ın sol kənarı kəsilirdi («rofil»,
+   «MUMİ»). Əsas səbəb sidebar-ın özündə idi: `overflow-y: auto` üfüqi oxu da
+   `auto` edir və sidebar yana sürüşə bilirdi — bu, `profile/sidebar.css`
+   (`overflow-x: hidden` + `min-width: 0`) və `js/profile/sidebar_nav.js`
+   (scrollLeft qoruyucusu) ilə bağlandı. Burada qalan hissə: çərçivə
+   `position: fixed` üst qatdır (z-index 2000) və viewport-un sol 4px-ini
+   örtür, sidebar isə x=0-dan başlayır — çərçivə qalınlığında şəffaf haşiyə
+   sidebar mətnini/aktiv vurğunu onun altından çıxarır (mobil şkafda da). */
+body:has(> .view-as-frame) .profile-sidebar {
+    border-left: 4px solid transparent;
+}
