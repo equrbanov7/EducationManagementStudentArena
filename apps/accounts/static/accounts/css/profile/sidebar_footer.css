@@ -21,6 +21,7 @@
     position: sticky;
     bottom: 0;
     z-index: 2;
+    flex-shrink: 0; /* başlıq kimi: uzun menyuda sıxılıb məzmunun üstünə düşməsin */
     margin-top: auto;
     min-width: 0;
     padding: 10px var(--sb-gutter, 12px) 12px;
@@ -118,4 +119,14 @@
 .sidebar-footer .sidebar-account__action.active::before {
     top: 7px;
     bottom: 7px;
+}
+
+/* Qısa ekranda (≤ 720px hündürlük — 1366×768 noutbukda brauzer pəncərəsi) alt
+   blok YAPIŞMIR: yapışan başlıq + süzgəc + hesab kartı birlikdə menyunun yarıdan
+   çoxunu yeyirdi. Blok siyahının sonunda qalır; qısa menyuda `margin-top: auto`
+   onu yenə aşağı itələyir. «Çıxış» navbar-ın istifadəçi menyusunda da var. */
+@media (max-height: 720px) {
+    .sidebar-footer {
+        position: static;
+    }
 }

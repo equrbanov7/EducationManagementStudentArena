@@ -32,7 +32,9 @@ birləşməsidir — boş başlıq qalmır.{% endcomment %}
 </li>
 {% endif %}
 
-{% if can_view_student_assignments %}
+{% comment %}«Anonim sorğu» (müəllim qiymətləndirməsi) də tələbənin TAPŞIRIĞIDIR —
+semestr sonu doldurulur, gözləyən sorğu badge ilə görünür; ona görə bu bölmədədir.{% endcomment %}
+{% if can_view_student_assignments or "evaluation-survey" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="tasks">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionTasks"><span class="sidebar-menu-group-title">{% trans "Tapşırıq və imtahanlar" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionTasks">
@@ -40,6 +42,7 @@ birləşməsidir — boş başlıq qalmır.{% endcomment %}
         {% include "accounts/profile/sidebar/items/_assigned_courses.html" %}
         {% include "accounts/profile/sidebar/items/_pending_answers.html" %}
         {% include "accounts/profile/sidebar/items/_my_appeals.html" %}
+        {% include "accounts/profile/sidebar/items/_evaluation_survey.html" %}
     </ul>
 </li>
 {% endif %}

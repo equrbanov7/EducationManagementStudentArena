@@ -11,11 +11,8 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
 {% if 'role-assignment' in allowed_sections or 'rim-center' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-organization-management' in allowed_sections or 'permission-editor' in allowed_sections or 'manage-roles' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="management">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|role-assignment|rim-center|teacher-intake|student-organization-management|permission-editor|manage-roles|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "group_management" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "group_management" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-user-shield" %}
         <ul class="sidebar-menu-group-items">
             {% if 'role-assignment' in allowed_sections %}
             <li class="sidebar-menu-item">

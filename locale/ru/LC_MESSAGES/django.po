@@ -76966,3 +76966,55 @@ msgstr "Задания и экзамены"
 msgctxt "profile.sidebar"
 msgid "Ünsiyyət"
 msgstr "Общение"
+
+msgctxt "profile.sidebar"
+msgid "Menyuda axtar"
+msgstr "Поиск по меню"
+
+msgctxt "profile.sidebar"
+msgid "Heç nə tapılmadı"
+msgstr "Ничего не найдено"
+
+msgctxt "profile.sidebar"
+msgid "Anonim sorğu"
+msgstr "Анонимный опрос"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu nəticələri"
+msgstr "Результаты опроса"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu kampaniyaları"
+msgstr "Кампании опросов"
+
+msgctxt "profile.sidebar"
+msgid "Keyfiyyətə nəzarət"
+msgstr "Контроль качества"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə seçin:"
+msgstr ""
+"Для этого предмета не найдены часы учебного плана / нагрузки. Выберите "
+"семестровые часы по видам занятий:"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv "
+"seçilibsə dəyişin və yenidən yadda saxlayın:"
+msgstr ""
+"Часы выбраны вручную, так как в учебном плане нет часов для этого предмета. "
+"Если они неверны, измените их и сохраните снова:"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı bir dərs növü üçün saat seçin."
+msgstr "Выберите часы хотя бы для одного вида занятий."
+
+msgctxt "accounts.syllabus"
+msgid "Saatı yenilə"
+msgstr "Обновить часы"
+
+msgctxt "accounts.syllabus"
+msgid "saat"
+msgstr "ч"

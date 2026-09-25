@@ -1,33 +1,23 @@
 {% load i18n %}
-{% comment %}«Ümumi» qrupu — HƏR rolda görünən şəxsi səth: ana səhifə, profil,
-bildirişlər (oxumaq + göndərmək), müraciətlər, statistika.
+{% comment %}«Ümumi» — heyət düzümünün ÜST BLOKU (2026-09-25 redizaynı).
 
-«Bildiriş göndər» 2026-09-10-da bura köçürüldü: əvvəllər heç bir qrupun içində
-deyildi və akkordeon onu təsadüfən qonşu qrupa (müəllimdə «Tədris işi»)
-salırdı. İndi «Bildirişlər»in yanındadır — eyni ailə, eyni yer.
+Əvvəl bu bəndlər «Ümumi» adlı akkordeon qrupunda idi və sahibin ekranında
+«sadəcə daha bir qrup» kimi görünürdü. İndi başlıqsız, HƏMİŞƏ görünən üst
+sətirlərdir (tələbə/müəllimin düz menyusundakı kimi) — onların altında
+bölmə qrupları (akkordeon) gəlir; aradakı incə xətti CSS çəkir.
 
-2026-09-25: bəndlərin markup-ı və görünürlük şərtləri `sidebar/items/`-ə
-köçdü (tələbə/müəllimin düz menyusu eyni faylları işlədir). "Təşkilata qoşul"
-(student-organization-request) bəndi GİZLİDİR (istifadəçilər yalnız admin
-tərəfindən əlavə olunur); bölmə/route birbaşa URL ilə qalır.{% endcomment %}
-<li class="sidebar-menu-group" data-sidebar-group="general">
-    {% comment %}«Ümumi» HƏMİŞƏ açıqdır — «Ana səhifə», «Bildirişlər» və
-    «Müraciətlərim» hər rolda ən çox işlənən girişlərdir; onları hər dəfə
-    açmaq lazım gəlməsin. İstifadəçi özü bağlasa, seçim yadda qalır
-    (`ui.js` → `profileSidebarGroups`).{% endcomment %}
-    <details class="sidebar-group" open>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "group_general" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
-        <ul class="sidebar-menu-group-items">
-            {% include "accounts/profile/sidebar/_home_menu_item.html" %}
-            {% include "accounts/profile/sidebar/items/_profile_info.html" %}
-            {% include "accounts/profile/sidebar/items/_notifications.html" %}
-            {% include "accounts/profile/sidebar/items/_publish_notification.html" %}
-            {% include "accounts/profile/sidebar/items/_applications.html" %}
-            {% include "accounts/profile/sidebar/items/_statistics.html" %}
-        </ul>
-    </details>
-</li>
+Sıra heyətin GÜNDƏLİK iş tezliyinə görədir: ana səhifə → bildirişlər →
+müraciətlər (emalçılar üçün iş növbəsidir) → bildiriş göndərmək → statistika
+→ öz profil kartı. Bəndlərin markup-ı və görünürlük şərti `sidebar/items/`-
+dədir (düz menyu ilə ORTAQ). "Təşkilata qoşul" (student-organization-request)
+bəndi GİZLİDİR (istifadəçilər yalnız admin tərəfindən əlavə olunur); bölmə
+birbaşa URL ilə qalır.
+
+Fayl adı (`_group_general`) tarixi səbəbdən qalıb — `_sidebar.html` onu
+qrupların önündə daxil edir.{% endcomment %}
+{% include "accounts/profile/sidebar/_home_menu_item.html" %}
+{% include "accounts/profile/sidebar/items/_notifications.html" %}
+{% include "accounts/profile/sidebar/items/_applications.html" %}
+{% include "accounts/profile/sidebar/items/_publish_notification.html" %}
+{% include "accounts/profile/sidebar/items/_statistics.html" %}
+{% include "accounts/profile/sidebar/items/_profile_info.html" %}

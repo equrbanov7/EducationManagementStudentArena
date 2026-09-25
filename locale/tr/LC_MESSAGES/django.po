@@ -76366,3 +76366,55 @@ msgstr "Görevler ve sınavlar"
 msgctxt "profile.sidebar"
 msgid "Ünsiyyət"
 msgstr "İletişim"
+
+msgctxt "profile.sidebar"
+msgid "Menyuda axtar"
+msgstr "Menüde ara"
+
+msgctxt "profile.sidebar"
+msgid "Heç nə tapılmadı"
+msgstr "Hiçbir şey bulunamadı"
+
+msgctxt "profile.sidebar"
+msgid "Anonim sorğu"
+msgstr "Anonim anket"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu nəticələri"
+msgstr "Anket sonuçları"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu kampaniyaları"
+msgstr "Anket kampanyaları"
+
+msgctxt "profile.sidebar"
+msgid "Keyfiyyətə nəzarət"
+msgstr "Kalite güvencesi"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə seçin:"
+msgstr ""
+"Bu ders için öğretim planı / ders yükü saati bulunamadı. Dönem saatini ders "
+"türüne göre seçin:"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv "
+"seçilibsə dəyişin və yenidən yadda saxlayın:"
+msgstr ""
+"Öğretim planında bu dersin saati bulunmadığı için saat elle seçildi. "
+"Yanlışsa değiştirip yeniden kaydedin:"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı bir dərs növü üçün saat seçin."
+msgstr "En az bir ders türü için saat seçin."
+
+msgctxt "accounts.syllabus"
+msgid "Saatı yenilə"
+msgstr "Saati güncelle"
+
+msgctxt "accounts.syllabus"
+msgid "saat"
+msgstr "saat"

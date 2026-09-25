@@ -17,11 +17,8 @@ açılır, SOL SIDEBAR QALIR (sahibin tələbi).
 {% if "org-structure-tree" in allowed_sections or "chair-profile" in allowed_sections or "programs-registry" in allowed_sections or "subject-catalog" in allowed_sections or "curriculum-editor" in allowed_sections or "groups-registry" in allowed_sections or "semester-opening" in allowed_sections or "registrar-catalog" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="teaching-office">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|org-structure-tree|chair-profile|programs-registry|subject-catalog|curriculum-editor|groups-registry|semester-opening|registrar-catalog|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Tədris şöbəsi" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Tədris şöbəsi" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-building-columns" %}
         <ul class="sidebar-menu-group-items">
             {% if "org-structure-tree" in allowed_sections %}
             <li class="sidebar-menu-item">

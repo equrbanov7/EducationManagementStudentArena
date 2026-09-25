@@ -329,7 +329,11 @@ class SidebarLayoutRenderTest(TestCase):
         aside = _aside(response.content.decode())
         self.assertIn('data-sidebar-layout="full"', aside)
         self.assertIn('<details class="sidebar-group"', aside)
-        self.assertIn('data-sidebar-group="general"', aside)
+        # 2026-09-25 heyət redizaynı: «Ümumi» artıq akkordeon qrupu deyil — başlıqsız
+        # üst blokdur (ətraflı: test_sidebar_staff.py).
+        self.assertNotIn('data-sidebar-group="general"', aside)
+        self.assertLess(aside.index('data-section="notifications"'), aside.index("<details"))
+        self._assert_nothing_lost(response, aside)
 
     def test_teacher_with_a_staff_role_falls_back_without_losing_items(self):
         response = self._get(self.mixed)

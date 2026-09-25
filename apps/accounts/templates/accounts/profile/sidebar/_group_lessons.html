@@ -12,11 +12,8 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
 {% if "my-schedule" in allowed_sections or "schedule-manage" in allowed_sections or "academic-calendar" in allowed_sections or "my-journal" in allowed_sections or "lessons-log" in allowed_sections or "journal-close" in allowed_sections or "teaching-handover" in allowed_sections or "my-workload" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="lessons">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-schedule|schedule-manage|academic-calendar|my-journal|lessons-log|journal-close|teaching-handover|my-workload|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Dərs və cədvəl" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Dərs və cədvəl" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-calendar-week" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_my_schedule.html" %}
             {% comment %}Cədvəl idarəetməsi — `schedule.manage` (proqram koordinatoru, RİM,
