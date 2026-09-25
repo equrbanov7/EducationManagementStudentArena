@@ -21,9 +21,10 @@ keçir («gördüyün nəticə = alacağın nəticə»); fayl serverdə saxlanı
 * quru icra da tətbiqlə EYNİ POST şəbəkəsini alır — ön baxışda 3 sual seçilibsə
   S4 dəyəri tətbiqdəki kimi rədd olunur (əvvəl ön baxış defolt şəbəkə ilə gedirdi).
 
-2026-09-26: bitmiş dövrdə tətbiq YALNIZ RİM rəhbəri / superadmin + düzəliş rejimi
-(``correction_mode=1``) + tam təqdimatla keçir (``exam_score_period_lock``);
-quru icra heç nə yazmadığı üçün açıq qalır.
+2026-09-26: bitmiş dövrdə ilk daxiletmə sətirləri İmtahan Mərkəzinə açıqdır (60
+gündən köhnə dövrdə təqdimatla); yazılmış balı DƏYİŞƏN sətirlər rejimsiz xətadır —
+yalnız RİM rəhbəri / superadmin düzəliş rejimində (``correction_mode=1``) + tam
+təqdimatla (``exam_score_period_lock``). Ön baxış eyni qaydanı göstərir.
 """
 
 from __future__ import annotations
@@ -190,37 +191,82 @@ def _payload(plan, roster, *, applied=False, result=None, sheet=None):
     return data
 
 
+def _period_policy(request, organization, offering):
+    """``(policy, error_response)`` — bitmiş dövr qaydası (icazəsiz aktorun ``correction_mode``-u 403)."""
+    lock = service.exam_score_period_lock
+    try:
+        policy = lock.write_policy(
+            user=request.user,
+            organization=organization,
+            offering=offering,
+            correction_mode=lock.correction_mode_requested(request.POST),
+        )
+    except PermissionDenied as exc:
+        return None, _denied(str(exc))
+    return policy, None
+
+
+def _apply_period_rules(plan, policy):
+    """Bitmiş dövrdə (rejimsiz) yazılmış balı DƏYİŞƏN sətirlər xəta olur — ön baxış = tətbiq.
+
+    Sahib (2026-09-26): «İM də edə bilsin» — ilk daxiletmə sətirləri qalır;
+    dəyişiklik isə yalnız RİM rəhbərinin düzəliş rejimindədir.
+    """
+    if not policy.changes_blocked:
+        return plan
+    message = " ".join(service.exam_score_period_lock.change_blocked_error().messages)
+    for item in plan:
+        if item["status"] == importer.STATUS_CHANGE:
+            item["status"] = importer.STATUS_ERROR
+            item["message"] = message
+    return plan
+
+
+def _needs_submission(plan, policy) -> bool:
+    """Tətbiq təqdimat (səbəb + qeyd + skan) tələb edirmi — JS paneli və server eyni qaydadan."""
+    if policy.every_write_needs_submission:
+        return any(item["status"] in (importer.STATUS_NEW, importer.STATUS_CHANGE) for item in plan)
+    return importer.needs_justification(plan)
+
+
 @never_cache
 @login_required
 @require_POST
 def exam_score_import_preview(request):
     """Quru icra — nə yazılacaq, nə ötürüləcək, harada xəta var."""
-    _organization, offering, error = _gate(request)
+    organization, offering, error = _gate(request)
+    if error is not None:
+        return error
+    policy, error = _period_policy(request, organization, offering)
     if error is not None:
         return error
     roster, plan, error = _plan_from_request(request, offering)
     if error is not None:
         return error
-    return JsonResponse(_payload(plan, roster))
+    plan = _apply_period_rules(plan, policy)
+    data = _payload(plan, roster)
+    data["needs_justification"] = _needs_submission(plan, policy)
+    return JsonResponse(data)
 
 
-def _justification_error(plan, request, *, locked=False):
-    """Dəyişən sətir varsa səbəb + qeyd + skan (partiya sənədi) BİRLİKDƏ tələb olunur.
+def _justification_error(plan, request, policy):
+    """Təqdimat lazımdırsa səbəb + qeyd + skan (partiya sənədi) BİRLİKDƏ tələb olunur.
 
     Servis onsuz da hər sətri ayrıca rədd edərdi; burada ƏVVƏLCƏDƏN yoxlanır ki,
     yarımçıq partiya (yeni ballar yazılıb, dəyişikliklər rədd olunub) yaranmasın —
     operator quru icrada K dəyişikliyi görüb, dialoqda üçünü də verir.
 
-    2026-09-26: bitmiş dövrün düzəliş rejimində (``locked``) HƏR yazı təqdimatlıdır;
-    skan paneldəki fayl sahəsindən (``justification_evidence``) və ya vərəq kartından.
+    2026-09-26: düzəliş rejimində və 60 gündən köhnə bitmiş dövrdə HƏR yazı
+    təqdimatlıdır; skan paneldəki fayl sahəsindən (``justification_evidence``)
+    və ya vərəq kartından.
     """
-    if not locked and not importer.needs_justification(plan):
+    if not _needs_submission(plan, policy):
         return None
     reason = (request.POST.get("reason") or "").strip()
     note = (request.POST.get("note") or "").strip()
     evidence = service.exam_score_period_lock.submission_evidence(request.FILES)
     if reason not in CorrectionReason.values or not note or evidence is None:
-        if locked:
+        if policy.every_write_needs_submission:
             return _bad(
                 "submission_required",
                 pgettext(
@@ -241,22 +287,18 @@ def _justification_error(plan, request, *, locked=False):
 @score_write_rate_limited("exam_score_import_apply")  # F-15 (2026-09-14)
 def exam_score_import_apply(request):
     """Tətbiq — partiya + sətir başına savepoint; bir pis sətir faylı dayandırmır."""
-    _organization, offering, error = _gate(request)
+    organization, offering, error = _gate(request)
     if error is not None:
         return error
-    lock = service.exam_score_period_lock
-    correction_mode = lock.correction_mode_requested(request.POST)
-    try:
-        # Bitmiş dövr kilidi (2026-09-26) — fayl oxunmazdan və partiya yaranmazdan ƏVVƏL.
-        locked = lock.assert_write_allowed(
-            user=request.user, organization=_organization, offering=offering, correction_mode=correction_mode
-        )
-    except PermissionDenied as exc:
-        return _denied(str(exc))
+    # Bitmiş dövr qaydası (2026-09-26) — fayl oxunmazdan və partiya yaranmazdan ƏVVƏL.
+    policy, error = _period_policy(request, organization, offering)
+    if error is not None:
+        return error
     roster, plan, error = _plan_from_request(request, offering)
     if error is not None:
         return error
-    error = _justification_error(plan, request, locked=locked)
+    plan = _apply_period_rules(plan, policy)
+    error = _justification_error(plan, request, policy)
     if error is not None:
         return error
     upload = request.FILES.get("file")
@@ -279,14 +321,16 @@ def exam_score_import_apply(request):
                 sheet=sheet,
                 reason=(request.POST.get("reason") or "").strip(),
                 note=(request.POST.get("note") or "").strip(),
-                correction_mode=correction_mode,
+                correction_mode=policy.correction_mode,
             )
             sheet = sheets_service.finalize_sheet(sheet, result, by_user=request.user, request=request)
     except ValidationError as exc:
         return _bad("validation_error", " ".join(exc.messages))
     except PermissionDenied as exc:
         return _denied(str(exc))
-    return JsonResponse(_payload(plan, roster, applied=True, result=result, sheet=sheet))
+    data = _payload(plan, roster, applied=True, result=result, sheet=sheet)
+    data["needs_justification"] = _needs_submission(plan, policy)
+    return JsonResponse(data)
 
 
 __all__ = ["exam_score_import_apply", "exam_score_import_preview", "exam_score_import_template"]
