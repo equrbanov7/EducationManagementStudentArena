@@ -19,10 +19,11 @@ render edir (``journal_close`` / ``kollokvium_windows`` pattern-i). Fayl idxalı
 Sətir-sətir yazı servis qatındadır — orada ilk daxiletmə sərbəst, SONRAKI
 dəyişiklik isə səbəb + qeyd + sənəd tələb edir.
 
-2026-09-26 (sahib): BİTMİŞ dövrün balları kilidlidir — yazı yalnız RİM rəhbəri /
-superadmin, yalnız «Düzəliş rejimi»ndə (``correction_mode=1``) və tam təqdimatla
-(səbəb + qeyd + skan; skan təsdiq dialoqunun fayl sahəsindən və ya vərəq
-kartından). Qayda ``apps/registrar/exam_score_period_lock.py``-dadır.
+2026-09-26 (sahib): BİTMİŞ dövrdə boş bal yazıla bilər (60 gündən köhnə dövrdə
+sənədlə); yazılmış balı dəyişmək yalnız RİM rəhbəri / superadmin, yalnız «Düzəliş
+rejimi»ndə (``correction_mode=1``) və tam təqdimatla (səbəb + qeyd + skan; skan
+təsdiq dialoqunun fayl sahəsindən və ya vərəq kartından). Qayda
+``apps/registrar/exam_score_period_lock.py``-dadır.
 
 2026-09-14 (W2 `w2paper`): sətirdə sual-sual ballar ``q__<enr>__<n>``
 (n = 1..sual sayı) — hər hansı biri doludursa imtahan balı onların CƏMİDİR
@@ -242,16 +243,20 @@ def _handle_save(request, organization, next_url):
 
 
 def _past_period_precheck(request, organization, offering) -> bool:
-    """Bitmiş dövr: RİM rəhbəri / superadmin + aktiv düzəliş rejimi + tam təqdimat; əks halda xəta.
+    """Bitmiş dövr qaydası — partiya yaranmazdan ƏVVƏL.
 
-    Nəticə — servisə ötürülən ``correction_mode`` bayrağı. Cari dövrdə heç nə
-    dəyişmir (``False``, əlavə sorğu yoxdur).
+    İcazəsiz aktorun ``correction_mode``-u ``PermissionDenied``; hər yazının
+    təqdimatlı olduğu halda (düzəliş rejimi və ya 60 gündən köhnə dövr) səbəb +
+    qeyd + skan ƏVVƏLCƏDƏN tələb olunur (yarımçıq partiya yaranmasın). Yazılmış
+    balın rejimsiz dəyişdirilməsi sətir-sətir servisdə rədd olunur. Nəticə —
+    servisə ötürülən ``correction_mode`` bayrağı; cari dövrdə əlavə sorğu yoxdur.
     """
     lock = service.exam_score_period_lock
     correction_mode = lock.correction_mode_requested(request.POST)
-    if lock.assert_write_allowed(
+    policy = lock.write_policy(
         user=request.user, organization=organization, offering=offering, correction_mode=correction_mode
-    ):
+    )
+    if policy.every_write_needs_submission:
         lock.require_submission(
             reason=(request.POST.get("reason") or "").strip(),
             note=(request.POST.get("note") or "").strip(),

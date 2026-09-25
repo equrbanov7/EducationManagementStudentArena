@@ -81,7 +81,8 @@ def apply_permission_section_gates(
     # sahib/superadmin kimi privileged sayılır. Rolun DB icazə siyahısı
     # tenantda əl ilə daralsa belə («Qruplar» bölməsi itmişdi) menyu itmir;
     # faktiki əməllər hər modulun öz servis qatında yenidən yoxlanılır.
-    privileged = bool(is_superadmin or is_owner or _is_rim_head(user, organization))
+    is_rim_head = _is_rim_head(user, organization)
+    privileged = bool(is_superadmin or is_owner or is_rim_head)
 
     # Təşkilat konteksti yoxdursa icazə həll oluna bilmir — yalnız superadmin/sahib.
     permissions: list = []
@@ -159,20 +160,14 @@ def apply_permission_section_gates(
         has_permission(permissions, key) for key in ("application.create", "application.handle", "application.manage")
     )
 
-    # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — İKİ AÇAR, QƏSDƏN FƏRQLİ ROLDA:
-    #
-    #   `final_score.entry`  → növbəni görür VƏ qərar/düzəliş yaza bilir. Bu,
-    #     ``LegacyGradeReview`` modelinin ÖZ qapısıdır (LEGACY_GRADE_REVIEW_PERMISSION)
-    #     və ``exam_score_entry``-nin də qapısıdır. Başqa açar seçsəydik düymə
-    #     görünər, əməl isə modeldə səssizcə 403 alardı.
-    #   `journal.correct`    → yalnız OXU. İKT rəhbəri düzəliş mədəniyyətinin
-    #     sahibidir və növbəni izləməlidir, amma köhnə RƏSMİ balın qərarını
-    #     imtahan mərkəzi verir. Səth ona «oxu rejimi» qeydini AÇIQ göstərir.
-    #
-    # Yazı qapısı burada DEYİL — `views/legacy_review/actions.py` ayrıca
-    # `can_review`-a baxır və model qatı üçüncü dəfə fail-closed yoxlayır.
-    can_review_legacy_grades = privileged or has_permission(permissions, "final_score.entry")
-    can_watch_legacy_grades = can_review_legacy_grades or has_permission(permissions, "journal.correct")
+    # «Köçürülmüş nəticələrin dəqiqləşdirilməsi» — SAHİBİN QƏRARI (2026-09-26):
+    # YALNIZ RİM rəhbəri (`ikt_rehber` üzvlüyü) və superadmin. Əvvəlki açar qapısı
+    # (`final_score.entry` → qərar, `journal.correct` → oxu) İmtahan Mərkəzini,
+    # `*` daşıyan rektor/sahibi də içəri buraxırdı — indi menyu onlarda görünmür.
+    # Aktor qapısı eyni qaydanı `views/legacy_review/policy.py`-da təkrarlayır
+    # (hər oxu/yazı endpoint-i), model qatı isə `final_score.entry`-ni üçüncü dəfə yoxlayır.
+    can_review_legacy_grades = bool(is_superadmin or is_rim_head)
+    can_watch_legacy_grades = can_review_legacy_grades
 
     # «Yük bölgüsü» + «Dərs yüküm» — İKİ AYRI SƏTH, iki fərqli qapı:
     #
