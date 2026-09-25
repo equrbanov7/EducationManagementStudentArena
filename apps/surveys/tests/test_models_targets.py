@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import datetime
+
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 
@@ -56,11 +58,14 @@ class ReceiptConstraintTest(TestCase):
         data.update(extra)
         return SurveyReceipt.objects.create(**data)
 
-    def test_one_receipt_per_student_offering_teacher(self):
+    def test_one_receipt_per_student_teacher(self):
         with bypass_rls():
             self._receipt()
             with self.assertRaises(IntegrityError), transaction.atomic():
                 self._receipt()
+            # «1 müəllim üzrə tələbədən 1»: eyni müəllim BAŞQA açılışda da ikinci qəbz ala bilməz.
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                self._receipt(offering=self.w["off_phys"])
             # Eyni açılışın BAŞQA müəllimi — ayrıca hədəfdir.
             self._receipt(teacher=self.w["teacher_c"])
 
@@ -139,6 +144,38 @@ class TargetComputationTest(TestCase):
             targets = student_targets(self.campaign, self.w["students"][0])
         math_teachers = {t.teacher_id for t in targets if t.offering_id == self.w["off_math"].pk}
         self.assertEqual(math_teachers, {self.w["teacher_c"].pk})
+
+    def test_teacher_with_two_offerings_is_one_target(self):
+        """Sahib (2026-09-25): «1 müəllim üzrə tələbədən 1» — iki fənn, bir forma, fənlər birlikdə."""
+        close_all(self.w)
+        student = self.w["students"][0]
+        with bypass_rls():
+            Lesson.objects.create(
+                organization=self.w["org"],
+                offering=self.w["off_phys"],
+                date=datetime.date(2026, 9, 11),
+                instructor=self.w["teacher_a"],
+            )
+            targets = student_targets(self.campaign, student, with_labels=True)
+            plain = student_targets(self.campaign, student)
+        teacher_a = [t for t in targets if t.teacher_id == self.w["teacher_a"].pk]
+        self.assertEqual(len(teacher_a), 1)
+        self.assertEqual(set(teacher_a[0].subject.split(", ")), {"Riyaziyyat", "Fizika"})
+        # Etiketli və etiketsiz çağırış EYNİ «əsas» açılışı seçir (forma URL-i sabit qalır).
+        primary = next(t.offering_id for t in plain if t.teacher_id == self.w["teacher_a"].pk)
+        self.assertEqual(teacher_a[0].offering_id, primary)
+        with bypass_rls():
+            SurveyReceipt.objects.create(
+                organization=self.w["org"],
+                campaign=self.campaign,
+                student=student,
+                scope=Section.TEACHER,
+                offering_id=primary,
+                teacher=self.w["teacher_a"],
+                completed_on="2026-09-25",
+            )
+            after = student_targets(self.campaign, student)
+        self.assertTrue(next(t for t in after if t.teacher_id == self.w["teacher_a"].pk).done)
 
     def test_receipts_mark_targets_done(self):
         close_all(self.w)
