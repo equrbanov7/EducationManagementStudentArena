@@ -11,3 +11,13 @@ html.ems-modal-open body {
 html.ems-modal-open .modal {
     overflow-y: auto;
 }
+
+/* Modal içində sona çatan scroll ARXA səhifəyə ötürülməsin (scroll chaining) —
+   bütün modal növləri: Bootstrap, ems-overlay, native dialog, aria-modal kartları
+   (jurnalın `jd-modal-card`-ı daxil). */
+.modal,
+dialog,
+[aria-modal="true"],
+.ems-overlay {
+    overscroll-behavior: contain;
+}
