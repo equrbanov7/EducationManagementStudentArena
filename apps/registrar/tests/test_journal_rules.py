@@ -261,7 +261,9 @@ class SelfWorkTest(TestCase):
                 journal_extras.set_selfwork_mark(
                     offering=self.offering, topic_id=t.id, enrollment_id=self.enrollment.id, done=True
                 )
-            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("4"))
+            # 2026/2027 (Midterm rejimi, sillabus standartı — entry_standard): davamiyyət 10
+            # (qayıb yoxdur) + sərbəst iş 4 (çeklistdə 4 təhvil = 4 bal).
+            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("14"))
 
     def test_revoke_blocked_after_window(self):
         with bypass_rls():

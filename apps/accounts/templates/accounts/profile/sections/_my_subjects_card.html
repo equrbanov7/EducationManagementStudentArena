@@ -60,6 +60,9 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
     </div>
     {% endwith %}
 
+    {% if row.final.entry_parts %}
+    {% include "registrar/partials/_entry_parts.html" with parts=row.final.entry_parts %}
+    {% endif %}
     {% if row.components %}
     <ul class="msx-chips" aria-label="{% trans 'Qiymətləndirmə komponentləri' context 'profile.subjects' %}">
         {% for comp in row.components %}

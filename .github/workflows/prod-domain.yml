@@ -123,6 +123,15 @@ jobs:
             | awk '$0 ~ /" 400 / {print $1}' | sort | uniq -c | while read -r n ip; do
                 c=$(classify "$ip"); [ "$c" = "private" ] && shown="$ip" || shown="<publik>"
                 echo "  $n × $shown ($c)"; done | head -15
+          echo "## Tətbiqin gördüyü parametrlər (konteyner)"
+          docker compose -f docker-compose.prod.yml exec -T --index 1 app python manage.py shell -c \
+            "from django.conf import settings as s; print('  ZONE_ENFORCED', s.NETWORK_ZONE_ENFORCED, 'TRUST_HEADER', s.NETWORK_ZONE_TRUST_HEADER); print('  INTERNAL_NETWORKS', s.INTERNAL_NETWORKS); print('  SITE_URL', s.SITE_URL)" 2>/dev/null || true
+          echo "## Daxili yoxlama (domen, 127.0.0.1 üzərindən)"
+          for path in / /accounts/login/ /jurnal/ /jurnal/cedvel/; do
+            echo "  $path → $(curl -sk -m 8 -o /dev/null -w '%{http_code}' --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN$path")"
+          done
+          docker compose -f docker-compose.prod.yml exec -T --index 1 app python manage.py shell -c \
+            "import re; from django.contrib.staticfiles.storage import staticfiles_storage as st; n=st.stored_name('accounts/css/profile.css'); refs=re.findall(r'url\(\"([^\"]+)', st.open(n).read().decode()); bad=[r for r in refs if not st.exists('accounts/css/'+r.split('?')[0])]; print('  profile.css importları:', len(refs), 'qırıq:', bad or 'yoxdur')" 2>/dev/null || true
           if [ -n "$pub" ] && [ -n "${PLAN_KEY:-}" ]; then
             mkdir -p "$RUNNER_TEMP/diag"
             printf '%s\n' "$pub" | openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt \

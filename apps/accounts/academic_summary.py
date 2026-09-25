@@ -43,7 +43,7 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db.models import DecimalField, F, Q, Sum, TextField
+from django.db.models import Count, DecimalField, F, Q, Sum, TextField
 from django.db.models.functions import Cast, Least
 
 from apps.registrar.models import (
@@ -58,7 +58,7 @@ from apps.registrar.models import (
 )
 from apps.registrar.public import analytics
 from apps.registrar.public import eligibility_rules as exam_eligibility
-from apps.registrar.public import selfwork_points
+from apps.registrar.public import entry_standard, selfwork_points
 
 _ZERO = Decimal("0")
 _ONE = Decimal("1")
@@ -78,6 +78,7 @@ _DEFAULT_ABSENCE_LIMIT = analytics._DEFAULT_ABSENCE_LIMIT
 #: kollokvium = həmişə ÜSTƏGƏL) — ``analytics.build_evaluation_maps_for`` güzgüsü.
 _GENERIC_KIND = "generic"
 _KOLLOKVIUM_KIND = "kollokvium"
+_SELF_WORK_KIND = "self_work"
 _ENTRY_KINDS = (_GENERIC_KIND, _KOLLOKVIUM_KIND)
 
 
@@ -88,12 +89,6 @@ def _text(field: str):
     çevirmədən keçdiyi üçün daxilən uyğundur.  ``str(uuid)`` ilə müqayisə
     ETMƏYİN — o, sqlite-da fərqli sətir verir."""
     return Cast(field, _TEXT)
-
-
-def _keyed_sum(qs, expr) -> dict:
-    """``enrollment_id`` (mətn) → aqreqat — tək sorğu, UUID obyekti yaranmır."""
-    rows = qs.annotate(key_text=_text("enrollment_id")).values_list("key_text").annotate(total=expr)
-    return {key: total or _ZERO for key, total in rows}
 
 
 # ── Yazılış-səviyyəli map-lar (``analytics.build_evaluation_maps_for`` güzgüsü) ──
@@ -138,8 +133,9 @@ def _selfwork_map(enrollment_ids) -> dict:
     return selfwork_points.selfwork_totals(enrollment_ids, key=_text("enrollment_id"))
 
 
-def _lesson_sum_map(enrollment_ids, offering_ids) -> dict:
-    """Dərs balı cəmi — YALNIZ generic komponenti OLMAYAN açılışlar üçün.
+def _lesson_sum_map(enrollment_ids, offering_ids) -> tuple[dict, dict]:
+    """Dərs balı ``(cəm, say)`` — YALNIZ generic komponenti OLMAYAN açılışlar (və Midterm
+    rejimli açılışların HAMISI — aktivlik ortası üçün say lazımdır) üçün, TƏK sorğu.
 
     ``analytics`` bunu bütün yazılışlar üçün hesablayır, amma nəticə yalnız
     ``use_components`` yanlış olan açılışlarda oxunur — komponentli açılışın
@@ -147,11 +143,21 @@ def _lesson_sum_map(enrollment_ids, offering_ids) -> dict:
     223 837 ``LessonMark`` sətrinin 216 453-ü (97 %) məhz belə «boş yerə»
     aqreqasiya olunurdu.  Süzgəc rəqəmləri dəyişmir, yalnız işi atır."""
     if not offering_ids:
-        return {}
-    qs = LessonMark.objects.filter(
-        enrollment_id__in=enrollment_ids, score__isnull=False, enrollment__offering_id__in=offering_ids
+        return {}, {}
+    rows = (
+        LessonMark.objects.filter(
+            enrollment_id__in=enrollment_ids, score__isnull=False, enrollment__offering_id__in=offering_ids
+        )
+        .annotate(key_text=_text("enrollment_id"))
+        .values_list("key_text")
+        .annotate(total=Sum("score"), scored=Count("score"))
     )
-    return _keyed_sum(qs, Sum("score"))
+    sums: dict = {}
+    counts: dict = {}
+    for key, total, scored in rows:
+        sums[key] = total or _ZERO
+        counts[key] = scored or 0
+    return sums, counts
 
 
 def _exam_map(enrollment_ids) -> dict:
@@ -194,7 +200,9 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
     """``offering_id`` (mətn) → açılışın bütün sabitləri, tək demət halında.
 
     Demət: ``(entry_max, pass_threshold, min_exam, komponentlidir?,
-    auditoriya_saatı, kredit, donmuşdur?)``.
+    auditoriya_saatı, kredit, donmuşdur?, midterm_rejimi?, sərbəst_iş_komponenti_var?)``.
+    Rejim (:mod:`apps.registrar.entry_standard`) açılış sətrinin ÖZÜNDƏN — dövr sahələri və
+    təşkilatın ``midterm_from_year`` açarı eyni sorğuda JOIN-lə oxunur (əlavə sorğu yoxdur).
 
     ``analytics._evaluate`` bunların hamısını HƏR yazılış üçün yenidən açırdı
     (sxem axtarışı, dəst üzvlüyü, ``lesson_hours_for``, ``ects`` çevirmə);
@@ -208,11 +216,15 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
         .annotate(key_text=_text("offering_id"))
         .values_list("key_text", "entry_score_max", "pass_threshold", "min_final_exam_score")
     }
-    with_components = set(
-        AssessmentComponent.objects.filter(offering_id__in=offering_ids, kind=_GENERIC_KIND)
+    # GENERIC (dərs cəmini əvəz edir) + SELF_WORK (Midterm-də sərbəst iş hissəsi) — TƏK sorğu.
+    kinds = set(
+        AssessmentComponent.objects.filter(offering_id__in=offering_ids, kind__in=(_GENERIC_KIND, _SELF_WORK_KIND))
         .annotate(key_text=_text("offering_id"))
-        .values_list("key_text", flat=True)
+        .values_list("key_text", "kind")
+        .distinct()
     )
+    with_components = {key for key, kind in kinds if kind == _GENERIC_KIND}
+    with_selfwork = {key for key, kind in kinds if kind == _SELF_WORK_KIND}
     # ⚠️ Bu iki köməkçi UUID ilə açarlanır (mətn açar bilmir), ona görə açılış
     # sətirlərində həm UUID, həm mətn açar oxunur və körpü BURADA qurulur —
     # 11 124 UUID obyekti (yazılış səviyyəsində 969 162 idi).
@@ -224,9 +236,17 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
     rows = (
         CourseOffering.objects.filter(id__in=offering_ids)
         .annotate(key_text=_text("id"))
-        .values_list("id", "key_text", "lesson_hours", "subject__ects")
+        .values_list(
+            "id",
+            "key_text",
+            "lesson_hours",
+            "subject__ects",
+            "period__academic_year",
+            "period__start_date",
+            "organization__settings__registrar__midterm_from_year",
+        )
     )
-    for offering_id, key, lesson_hours, ects in rows:
+    for offering_id, key, lesson_hours, ects, academic_year, start_date, from_year_raw in rows:
         entry_max, pass_threshold, min_exam = schemes.get(key, _DEFAULT_SCHEME)
         # ``exam_eligibility.lesson_hours_for`` güzgüsü: kanonik saat 0/None
         # olduqda açılışın bütün dərslərinin saat cəmi işlədilir.
@@ -234,7 +254,8 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
         if hours <= 0:
             hours = Decimal(hours_fallback.get(offering_id, 0) or 0)
         use_components = key in with_components
-        if not use_components:
+        midterm = entry_standard.is_midterm_fields(academic_year, start_date, from_year_raw=from_year_raw)
+        if midterm or not use_components:
             lesson_source_ids.append(offering_id)
         info[key] = (
             Decimal(entry_max),
@@ -244,6 +265,8 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
             hours,
             int(ects or 0),
             offering_id in frozen,
+            midterm,
+            key in with_selfwork,
         )
     return info, lesson_source_ids
 
@@ -267,7 +290,7 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
         return
     component_sums, kollokvium_sums = _component_sum_maps(enrollment_ids)
     selfwork_sums = _selfwork_map(enrollment_ids)
-    lesson_sums = _lesson_sum_map(enrollment_ids, lesson_source_ids)
+    lesson_sums, lesson_counts = _lesson_sum_map(enrollment_ids, lesson_source_ids)
     exams = _exam_map(enrollment_ids)
     resits = _resit_map(enrollment_ids)
     records = _record_map(organization, flat.values("student_id"))
@@ -288,19 +311,45 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
         # ``offering`` FK NOT NULL-dur və ``info`` məhz bu queryset-in
         # açılışlarından qurulub — açar həmişə var (``.get`` ilə səssizcə
         # ötürmək sətri rəqəmlərdən ITIRƏRDİ).
-        entry_max, pass_threshold, min_exam, use_components, lesson_hours, credit, frozen = info[offering_key]
+        (
+            entry_max,
+            pass_threshold,
+            min_exam,
+            use_components,
+            lesson_hours,
+            credit,
+            frozen,
+            midterm,
+            has_selfwork,
+        ) = info[offering_key]
+        limit, exempt = records.get(student_key, (_DEFAULT_ABSENCE_LIMIT, False))
 
         # ── Giriş balı (gradebook.entry_score_for güzgüsü) ────────────────────
-        source = component_sums if use_components else lesson_sums
-        raw_entry = source.get(enrollment_key, _ZERO)
-        kollokvium = kollokvium_sums.get(enrollment_key)
-        if kollokvium is not None:
-            raw_entry += kollokvium
-        selfwork = selfwork_sums.get(enrollment_key)
-        if selfwork is not None:
-            raw_entry += selfwork
-        entry = raw_entry if raw_entry < entry_max else entry_max
-        entry = entry.quantize(_ONE, rounding=ROUND_HALF_UP)  # gradebook.round_score
+        if midterm:
+            # Sillabus standartı (2026/2027-dən) — TƏK düstur ``entry_standard``-da.
+            entry = entry_standard.compose_from_totals(
+                cap=entry_max,
+                lesson_hours=lesson_hours,
+                absence_hours=absence_hours,
+                limit_percent=limit,
+                exempt=exempt,
+                score_sum=lesson_sums.get(enrollment_key, _ZERO),
+                score_count=lesson_counts.get(enrollment_key, 0),
+                interim_total=kollokvium_sums.get(enrollment_key, _ZERO),
+                selfwork_points=selfwork_sums.get(enrollment_key, _ZERO),
+                selfwork_counted=has_selfwork,
+            ).total
+        else:
+            source = component_sums if use_components else lesson_sums
+            raw_entry = source.get(enrollment_key, _ZERO)
+            kollokvium = kollokvium_sums.get(enrollment_key)
+            if kollokvium is not None:
+                raw_entry += kollokvium
+            selfwork = selfwork_sums.get(enrollment_key)
+            if selfwork is not None:
+                raw_entry += selfwork
+            entry = raw_entry if raw_entry < entry_max else entry_max
+            entry = entry.quantize(_ONE, rounding=ROUND_HALF_UP)  # gradebook.round_score
 
         # ── İmtahan / təkrar imtahan ─────────────────────────────────────────
         exam, bonus = exams.get(enrollment_key, (None, _ZERO))
@@ -326,7 +375,6 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
             # faktiki nəticəsi göstərilir) — ``resolve(frozen=True)`` güzgüsü.
             barred = False
         else:
-            limit, exempt = records.get(student_key, (_DEFAULT_ABSENCE_LIMIT, False))
             if limit is None:
                 limit = exam_eligibility.DEFAULT_LIMIT_PERCENT
             memo_key = (offering_key, limit)

@@ -1,0 +1,1112 @@
+{
+  "numbers": {
+    "academic_summary": {
+      "new": [
+        "15",
+        "0",
+        "0",
+        "15",
+        "0",
+        "1000",
+        "5"
+      ],
+      "old": [
+        "15",
+        "2",
+        "2",
+        "25",
+        "0",
+        "1645",
+        "3"
+      ]
+    },
+    "analytics_eval": {
+      "K1/esd_s0": [
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "analytics_eval_for": {
+      "K1/esd_s0": [
+        "90",
+        true
+      ],
+      "K1/esd_s1": [
+        "80",
+        true
+      ],
+      "K1/esd_s2": [
+        "5",
+        false
+      ],
+      "K1/esd_s3": [
+        "26",
+        false
+      ],
+      "K2/esd_s0": [
+        "80",
+        true
+      ],
+      "K2/esd_s1": [
+        "53",
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        false
+      ],
+      "M1/esd_s0": [
+        "80",
+        true
+      ],
+      "M1/esd_s1": [
+        "65",
+        true
+      ],
+      "M1/esd_s2": [
+        "15",
+        false
+      ],
+      "M1/esd_s3": [
+        "55",
+        true
+      ],
+      "M2/esd_s0": [
+        "30",
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        false
+      ]
+    },
+    "credit_totals": {
+      "esd_s0": [
+        15,
+        5
+      ],
+      "esd_s1": [
+        10,
+        5
+      ],
+      "esd_s2": [
+        0,
+        10
+      ],
+      "esd_s3": [
+        5,
+        5
+      ]
+    },
+    "dashboard": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "entry_batch": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "entry_single": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "exam_result_summary": {
+      "K1/esd_s0": [
+        "50",
+        "90"
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80"
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5"
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26"
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80"
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53"
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12"
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8"
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80"
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65"
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15"
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55"
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30"
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0"
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17"
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0"
+      ]
+    },
+    "final_batch": {
+      "K1/esd_s0": [
+        "50",
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "final_breakdown": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "final_single": {
+      "K1/esd_s0": [
+        "50",
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "journal_grid": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "offering_results": {
+      "K1/esd_s0": [
+        "50",
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "period_analytics": {
+      "new": [
+        "3",
+        "3",
+        "0",
+        "0",
+        "66.67",
+        "66.67"
+      ],
+      "old": [
+        "5",
+        "3",
+        "2",
+        "0",
+        "65.80",
+        "65.80"
+      ]
+    },
+    "schedule_stats": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "student_journal_detail": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "student_journal_summary": {
+      "K1/esd_s0": "50",
+      "K1/esd_s1": "50",
+      "K1/esd_s2": "5",
+      "K1/esd_s3": "6",
+      "K2/esd_s0": "35",
+      "K2/esd_s1": "43",
+      "K2/esd_s2": "12",
+      "K2/esd_s3": "8",
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "student_subjects_final": {
+      "K1/esd_s0": [
+        "50",
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "student_subjects_journal": {
+      "K1/esd_s0": null,
+      "K1/esd_s1": null,
+      "K1/esd_s2": null,
+      "K1/esd_s3": null,
+      "K2/esd_s0": null,
+      "K2/esd_s1": null,
+      "K2/esd_s2": null,
+      "K2/esd_s3": null,
+      "M1/esd_s0": "50",
+      "M1/esd_s1": "40",
+      "M1/esd_s2": "15",
+      "M1/esd_s3": "37",
+      "M2/esd_s0": "30",
+      "M2/esd_s1": "0",
+      "M2/esd_s2": "17",
+      "M2/esd_s3": "0"
+    },
+    "transcript": {
+      "K1/esd_s0": [
+        "50",
+        "90",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s1": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K1/esd_s2": [
+        "5",
+        "5",
+        false,
+        false,
+        false
+      ],
+      "K1/esd_s3": [
+        "6",
+        "26",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s0": [
+        "35",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "K2/esd_s1": [
+        "43",
+        "53",
+        false,
+        true,
+        false
+      ],
+      "K2/esd_s2": [
+        "12",
+        "12",
+        false,
+        false,
+        false
+      ],
+      "K2/esd_s3": [
+        "8",
+        "8",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s0": [
+        "50",
+        "80",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s1": [
+        "40",
+        "65",
+        true,
+        false,
+        false
+      ],
+      "M1/esd_s2": [
+        "15",
+        "15",
+        false,
+        false,
+        false
+      ],
+      "M1/esd_s3": [
+        "37",
+        "55",
+        true,
+        false,
+        false
+      ],
+      "M2/esd_s0": [
+        "30",
+        "30",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s1": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s2": [
+        "17",
+        "17",
+        false,
+        false,
+        false
+      ],
+      "M2/esd_s3": [
+        "0",
+        "0",
+        false,
+        false,
+        false
+      ]
+    },
+    "transcript_gpa": {
+      "esd_s0": [
+        "83.33",
+        "1250.00"
+      ],
+      "esd_s1": [
+        "66.00",
+        "990.00"
+      ],
+      "esd_s2": [
+        null,
+        "0.00"
+      ],
+      "esd_s3": [
+        "40.50",
+        "405.00"
+      ]
+    }
+  },
+  "queries": {
+    "academic_summary/new": 12,
+    "academic_summary/old": 12,
+    "credit_totals/esd_s0": 12,
+    "credit_totals/esd_s1": 12,
+    "credit_totals/esd_s2": 12,
+    "credit_totals/esd_s3": 12,
+    "dashboard/new/esd_s0": 8,
+    "dashboard/new/esd_s1": 8,
+    "dashboard/new/esd_s2": 8,
+    "dashboard/new/esd_s3": 8,
+    "dashboard/old/esd_s0": 7,
+    "dashboard/old/esd_s1": 7,
+    "dashboard/old/esd_s2": 7,
+    "dashboard/old/esd_s3": 7,
+    "evaluation_maps": 11,
+    "evaluation_maps_for": 11,
+    "final_breakdown/K1": 23,
+    "final_breakdown/K2": 22,
+    "final_breakdown/M1": 24,
+    "final_breakdown/M2": 22,
+    "journal_grid/K1": 17,
+    "journal_grid/K2": 16,
+    "journal_grid/M1": 17,
+    "journal_grid/M2": 15,
+    "offering_results/K1": 16,
+    "offering_results/K2": 15,
+    "offering_results/M1": 16,
+    "offering_results/M2": 15,
+    "period_analytics/new": 12,
+    "period_analytics/old": 12,
+    "schedule_stats/new/esd_s0": 12,
+    "schedule_stats/new/esd_s1": 12,
+    "schedule_stats/new/esd_s2": 12,
+    "schedule_stats/new/esd_s3": 12,
+    "schedule_stats/old/esd_s0": 12,
+    "schedule_stats/old/esd_s1": 12,
+    "schedule_stats/old/esd_s2": 12,
+    "schedule_stats/old/esd_s3": 12,
+    "student_journal_detail/K1/esd_s0": 37,
+    "student_journal_detail/K1/esd_s1": 37,
+    "student_journal_detail/K1/esd_s2": 37,
+    "student_journal_detail/K1/esd_s3": 37,
+    "student_journal_detail/K2/esd_s0": 37,
+    "student_journal_detail/K2/esd_s1": 37,
+    "student_journal_detail/K2/esd_s2": 37,
+    "student_journal_detail/K2/esd_s3": 37,
+    "student_journal_detail/M1/esd_s0": 38,
+    "student_journal_detail/M1/esd_s1": 38,
+    "student_journal_detail/M1/esd_s2": 38,
+    "student_journal_detail/M1/esd_s3": 38,
+    "student_journal_detail/M2/esd_s0": 38,
+    "student_journal_detail/M2/esd_s1": 38,
+    "student_journal_detail/M2/esd_s2": 38,
+    "student_journal_detail/M2/esd_s3": 38,
+    "student_journal_summary/new/esd_s0": 15,
+    "student_journal_summary/new/esd_s1": 15,
+    "student_journal_summary/new/esd_s2": 15,
+    "student_journal_summary/new/esd_s3": 15,
+    "student_journal_summary/old/esd_s0": 15,
+    "student_journal_summary/old/esd_s1": 15,
+    "student_journal_summary/old/esd_s2": 15,
+    "student_journal_summary/old/esd_s3": 15,
+    "student_subjects/esd_s0": 48,
+    "student_subjects/esd_s1": 48,
+    "student_subjects/esd_s2": 48,
+    "student_subjects/esd_s3": 48,
+    "transcript/esd_s0": 14,
+    "transcript/esd_s1": 14,
+    "transcript/esd_s2": 14,
+    "transcript/esd_s3": 14
+  }
+}

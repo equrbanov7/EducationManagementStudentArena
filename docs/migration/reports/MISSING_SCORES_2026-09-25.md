@@ -109,7 +109,7 @@ Hamısı yekun repetisiya klonunda production rolu ilə, test klienti + `force_l
 | **T8** | E2 | K9 + K6 | 2 K9 cütü (eyni açılış — bir yazılış) | 41 → 42 · 72,66 → 72,15; K9 əkizləri və K6 qalır |
 | **T9** | E2 | K9 + K6 (8 xana) | 4 K9 cütü (2-si əkiz — toxunulmur) | 48 → **52** · 93,65 → 92,06; K6 qalır |
 | **T10** | E2 | 3 fake cütü — əkiz | toxunulmur (əkiz) | 30 → 30; §8.1 |
-| **T11** | E2 | 9 fake cütü imtahansız | toxunulmur (nəticəsiz) | 24 → 24; §8.2 |
+| **T11** | E2 | 9 fake cütü imtahansız | toxunulmur (nəticəsiz) | 24 → 24; §8.3 |
 | **T12** | E2 | 21 cüt — siyahıdan kənar (yalnız davamiyyət) | toxunulmur (qəsdən) | 15 → 15; ÜOMG əvvəl də hesablanmırdı |
 | **T13** | E3 | hesabı yoxdur (`legacy_account_email_invalid`) — 35 cüt, 18 imtahan, 3 `yekun` | — | §5.4 |
 
@@ -331,18 +331,39 @@ Tələbə görünüşü: serverdə staff «view-as» ilə 2-3 tələbəyə baxma
 server skripti üç əmri eyni `check/dry-run/apply` interfeysi ilə işlədir; `archive_status` üçün asset
 yazılış planının özüdür (eyni sha256).
 
-## 8. Açıq qərarlar (sahib)
+## 8. Sahibin qərarından sonra (2026-09-25, «tövsiyə etdiyin kimi») — nəticələr
 
-1. **Əkiz jurnalda qalan imtahan (ən vacib).** 417 fənn sətrində (301 hazırda oxuyan, 430 imtahan xanası;
-   əsasən 2024/2025 və 2025/2026) tələbənin köçmüş yazılışı var, amma **imtahanı yoxdur** («köhnə sistemdə
-   nəticə yoxdur» göstərir), imtahan balı isə bərpa olunmayan ikinci jurnaldadır (308 fake, 109 K9).
-   Təklif: yalnız imtahan/yekun köçürən ayrıca plan (J6-nın öz kodu, hədəf = mövcud yazılış, yalnız BOŞ
-   `exam_score` doldurulur, audit ilə); gündəlik xanalar qarışdırılmır. Qərar: hansı jurnal rəsmidir?
-2. **Nəticəsiz fake jurnallar** (595 sətir: yalnız gündəlik bal/komponent, imtahan yox) — DATA_VERIFICATION §4.2.
-3. **Qrup sübutu olmayan silinmiş-qrup jurnalları** (344 sətir, 76 tələbə, ~320 imtahan): tələbənin o
-   semestrdə başqa yazılışı yoxdur — qrupu yalnız cari qrupla «təxmin» etmək olar; təklif etmirik.
-4. **K6** xarici dil komponentləri (259 sətir) — model qərarı. 5. **Hesabı olmayan 1 tələbə** — §5.4.
-6. **Hazırda oxumayanlar** (P0-1-in qalan 2 217 arxivi, onların K9/fake cütləri) — ayrıca qərar.
+1. **Əkiz jurnal imtahanı — «yalnız boş `exam_score`» planı TƏTBİQ EDİLMƏMƏLİDİR (yoxlanıldı, geri çəkildi).**
+   Alət (J6-nın öz kodu, möhürlü plan, ön-şərtlər, bir tranzaksiya, geri qaytarma) quruldu və 2-ci mərhələ
+   klonunda repetisiya olundu: 303 tələbənin 416 yekun + 16 təkrar imtahan balı, ikinci icra 0, geri qaytarma
+   izi eyni. Amma nəticə **zərərlidir**: köçmüş yazılışın jurnalı 416 halın **397-sində boş qabıqdır**
+   (kollokvium, sərbəst iş, imtahan yoxdur — hamısı əkiz jurnaldadır), 407 halda əkiz jurnal həmin yazılışın
+   ÖZ açılışına düşür (eyni fənn, semestr, qrup; 269-u eyni qrupun dublikat «fake» jurnalıdır). Yalnız
+   imtahan köçəndə yekun = qabığın giriş balı (≈10/50, kollokviumsuz) + imtahan olur: 419 sətirdən **310-u
+   «nəticə yoxdur»dan «KƏSİLİB»ə** keçir, 300 tələbənin ÜOMG-si düşür (median −1,4, ən çox −9,6). Köhnə
+   düsturla (kollokvium cəmi + sərbəst iş + imtahan, davamiyyət 0-da belə) bu 310-dan **ən azı 185-i köhnə
+   sistemdə KEÇİB**. Ona görə plan production-a verilmir; alət repodan çıxarıldı (heç nə commit olunmayıb).
+   **Düzgün yol (sahibin ayrıca icazəsi lazımdır):** yazılışın bütün legacy nəticəsini hər iki jurnaldan J4–J6
+   ilə yenidən hesablamaq — kollokvium/sərbəst iş/imtahan BOŞ olduğu üçün sadəcə doldurulur, amma qabığın
+   arxiv giriş komponentini (`Davamiyyət və sərbəst iş (arxiv)`) ƏVƏZ etmək lazımdır, bu isə «üstündən yazma
+   yoxdur» qaydasının yeganə istisnası olardı (köhnə dəyər auditlə, geri qaytarıla bilən). Hər yazılış yalnız
+   yeni cəm köhnə düsturla (±1) üst-üstə düşəndə tətbiq olunmalıdır.
+2. **Qrup sübutu olmayan silinmiş-qrup jurnalları (344 sətir, 76 tələbə-semestr, ~320 imtahan) — TOXUNULMUR.**
+   Müdafiə oluna bilən deterministik qayda tapılmadı: onlayn imtahan seansları (`exam_students_start`)
+   385 cütdə yoxdur, 7 cütdə məhz silinmiş qrupu göstərir; tələbənin həmin semestrdəki başqa jurnalları
+   51 halda yalnız ÇOXQRUPLU jurnallardır (qrup seçilmir), 25 halda heç yoxdur; `yekun.group_id` bu
+   semestrlərdə (2021/2022 Yaz, 2023/2024, 2024/2025) yoxdur. Qalan yeganə yol tələbənin BUGÜNKÜ qrupunu
+   o vaxtın qrupu saymaqdır — bu, sübut deyil, təxmindir.
+3. **Nəticəsiz fake jurnallar (595 sətir)** — toxunulmur (göstəriləcək nəticə yoxdur).
+4. **Tövsiyələr (avtomatik heç nə edilmir):** *K6 xarici dil komponentləri* (259 sətir, 466 xana:
+   `pa/wr/ss/ww/ll/rr/ga`) — modelə «xarici dil bacarıqları» komponent növü (və ya jurnalda yalnız oxunan
+   «köhnə sistemin əlavə sütunları» bloku) əlavə edilsin, sonra J6-nın karantindəki xanaları ayrıca plan ilə
+   köçür. *Hesabı olmayan 1 tələbə* (T13 — E3, 35 cüt, 18 imtahan) — reyestr hesabı adi qaydada (`ad.soyad`)
+   yaratsın; sonra legacy id → hesab bağlantısı (P0-2 yolu) ilə eyni bərpa alətləri onun tarixçəsini gətirir.
+5. **Hazırda oxumayan 2 217 arxiv** — toxunulmur.
+6. Müşahidə: 1 215 (tələbə, fənn, semestr) üçün köçmüş İKİ yazılış artıq production-dadır (orijinal import,
+   C6 olmayan paralel jurnallar); bərpa bunu 51 halda eyni qayda ilə təkrarlayır (iki fərqli jurnal → iki
+   açılış). Transkript hər ikisini ayrıca sətir kimi göstərir — bu, bərpadan asılı olmayan mövcud davranışdır.
 
 ## 9. Fayllar
 
@@ -386,3 +407,15 @@ davamiyyət balıdır — giriş/yekun/hərf/keçid **dəyişmir**. J12 dövrlə
 158 264 xana; qalan dövrlər cəmi 276 dərs. Geri qaytarma:
 `psql -v plan_sha=$SHA -v drop_facts=1 -f - < scripts/ops/restore_legacy_scores_rollback.psql`
 (audit izindən `absence_hours`-u köhnə dəyərə qaytarır, planın dərslərini/xanalarını silir).
+
+## 10. Codex davamı — production təsdiqi (2026-09-25)
+
+- Yazılış bərpası: [run 36145602660](https://github.com/equrbanov7/EducationManagementStudentArena/actions/runs/36145602660)
+  uğurludur. İkinci icra: yazılış 3 326, dərs 9 736, xana 109 063, yekun 1 924,
+  komponent balı 14 446 `already_present`; bütün FAKTİKİ saylar 0.
+- P0-1 əvvəl yalnız dry-run idi (run 36146279597): namizəd 74, 2 217 hazırda oxumayan və
+  199 buraxılmış profil dəyişmir. Codex davamında ehtiyat nüsxə ilə
+  [run 36149412505](https://github.com/equrbanov7/EducationManagementStudentArena/actions/runs/36149412505)
+  tətbiq edildi: **74 bərpa, 0 uğursuz**. Avtomatik ikinci icra: **0 namizəd, 0 yazı, 0 uğursuz**.
+- §8-dəki yalnız-imtahan əkiz-jurnal planı geri çəkilmiş olaraq qalır; tətbiq edilməyib.
+  Tam nəticənin yenidən hesablanması üçün hazır və yoxlanılmış yeni plan yoxdur.

@@ -204,6 +204,7 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                             <dd>{% if item.academic.letter %}<span class="result-letter result-letter--{{ item.academic.letter }}">{{ item.academic.letter }}</span>{% else %}—{% endif %}</dd>
                         </div>
                     </dl>
+                    {% if item.academic.entry_parts %}{% include "registrar/partials/_entry_parts.html" with parts=item.academic.entry_parts %}{% endif %}
                     {% comment %}
                       Köçürülmüş nəticənin qeydi BALLARIN ALTINDA, açılan «xam mənbə»
                       panelinin ÜSTÜNDƏDİR: tələbə rəqəmi görən kimi onun necə
