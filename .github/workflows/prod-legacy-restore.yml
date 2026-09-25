@@ -1,0 +1,102 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# 🩹 Prod köhnə bal bərpası (J12 dərs bərpası) — self-hosted runner (serverdə)
+#
+# Sahib (2026-09-25): «bəzi tələbələrin balları görünmür, köhnə datadan gəlməyib —
+# bərpa et, bu mənim real datamda serverdə dəyişməlidir».
+#
+# Plan LOKALDA qurulur (scripts/ops/restore_legacy_scores_build_plan.sh), şifrələnib
+# (openssl aes-256-cbc -md sha256 -pbkdf2 -iter 200000) müvəqqəti draft release asset-i kimi yüklənir — eyni
+# nümunə `seed-database.yml`-dədir. Şifrə açarı `production` mühitinin
+# RESTORE_PLAN_KEY sirridir. Plan faylı git-ə DÜŞMÜR; iş bitəndən sonra release silinir.
+#
+# Rejimlər: check (sha256 + konteynerə köçürmə) → dry-run (canlı bazaya qarşı tam
+# qərar cədvəli, yazı YOXDUR) → apply (əvvəl backup.sh, sonra tətbiq, sonra İKİNCİ icra —
+# 0 dəyişiklik gözlənilir). Loglarda yalnız say/UUID/tarix var, şəxsi məlumat yoxdur.
+# ═══════════════════════════════════════════════════════════════════════════
+name: 🩹 Prod Legacy Score Restore
+
+on:
+  workflow_dispatch:
+    inputs:
+      asset_id:
+        description: "Release asset id (şifrələnmiş plan .jsonl.gz.enc)"
+        required: true
+      plan_sha256:
+        description: "Planın manifestdəki sha256-sı (şifrəsiz .jsonl.gz faylının)"
+        required: true
+      mode:
+        description: "check | dry-run | apply"
+        required: true
+        type: choice
+        default: dry-run
+        options:
+          - check
+          - dry-run
+          - apply
+      confirm:
+        description: "apply üçün RESTORE yazın (digər rejimlərdə boş qala bilər)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    if: github.event.inputs.mode != 'apply' || github.event.inputs.confirm == 'RESTORE'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 45
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      MODE: ${{ github.event.inputs.mode }}
+      PLAN_SHA256: ${{ github.event.inputs.plan_sha256 }}
+      ASSET_ID: ${{ github.event.inputs.asset_id }}
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔽 Download + decrypt plan
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESTORE_PLAN_KEY: ${{ secrets.RESTORE_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$RESTORE_PLAN_KEY" || { echo "RESTORE_PLAN_KEY sirri yoxdur" >&2; exit 1; }
+          case "$ASSET_ID" in (*[!0-9]*|'') echo "asset_id rəqəm olmalıdır" >&2; exit 1;; esac
+          case "$PLAN_SHA256" in (*[!0-9a-f]*|'') echo "plan_sha256 hex olmalıdır" >&2; exit 1;; esac
+          umask 077
+          mkdir -p "$RUNNER_TEMP/restore"
+          curl -sSfL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/${ASSET_ID}" \
+            -o "$RUNNER_TEMP/restore/plan.jsonl.gz.enc"
+          openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:RESTORE_PLAN_KEY \
+            -in "$RUNNER_TEMP/restore/plan.jsonl.gz.enc" -out "$RUNNER_TEMP/restore/plan.jsonl.gz"
+          rm -f "$RUNNER_TEMP/restore/plan.jsonl.gz.enc"
+          echo "$PLAN_SHA256  $RUNNER_TEMP/restore/plan.jsonl.gz" | sha256sum -c -
+          ls -la "$RUNNER_TEMP/restore/plan.jsonl.gz"
+
+      - name: 🩹 Restore (${{ github.event.inputs.mode }})
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          # Skriptin ən son versiyası checkout-dan (APP_DIR deploy ilə sinxrondur, zəmanət üçün).
+          cp "$GITHUB_WORKSPACE/scripts/ops/restore_legacy_scores_server.sh" scripts/ops/restore_legacy_scores_server.sh
+          bash scripts/ops/restore_legacy_scores_server.sh "$MODE" "$RUNNER_TEMP/restore/plan.jsonl.gz" \
+            "$PLAN_SHA256" superadmin 2>&1 | tee "$RUNNER_TEMP/restore/out.log"
+          {
+            echo "## 🩹 Legacy restore — ${MODE}"
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/restore/out.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: |
+          rm -rf "$RUNNER_TEMP/restore"
+          docker exec educationmanagementstudentarena-app-1 sh -c 'rm -f /tmp/plan.jsonl.gz' || true

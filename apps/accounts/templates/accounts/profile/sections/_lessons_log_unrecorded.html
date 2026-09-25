@@ -1,0 +1,71 @@
+{% load i18n %}
+{% comment %}«Keçilmiş dərslər» → «Cədvəldə var, qeydə alınmayıb» kartı (UNEC müqayisəsi P1-1, 2026-09-25).
+
+Kontekst: `un` (apps/registrar/lessons_log_unrecorded.py::unrecorded_slots) və `is_supervisor`.
+Kart bölmənin filtrləri ilə birlikdə yenilənir (`data-ems-filter-target` gövdəsinin içindədir).
+Siyahı native <details> ilə açılır — JS yoxdur (CSP). Əhatədə heç bir cədvəl slotu yoxdursa
+kart ümumiyyətlə göstərilmir: müqayisə ediləcək cədvəl olmadan «hamısı qeydə alınıb» yalan olardı.{% endcomment %}
+{% if un and un.slots %}
+{% if un.count %}
+<details class="llog-unrec is-alert">
+    <summary class="llog-unrec__summary">
+        <span class="llog-unrec__icon" aria-hidden="true"><i class="fas fa-calendar-xmark"></i></span>
+        <span class="llog-unrec__text">
+            <span class="llog-unrec__title">{% trans "Cədvəldə var, qeydə alınmayıb" context "accounts.lessons_log" %}</span>
+            <span class="llog-unrec__note">{{ un.start|date:"d.m.Y" }} — {{ un.end|date:"d.m.Y" }} · {% trans "cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu açılmayıb" context "accounts.lessons_log" %}</span>
+        </span>
+        <b class="llog-unrec__count">{{ un.count }}</b>
+        <span class="llog-unrec__toggle">{% trans "Siyahı" context "accounts.lessons_log" %} <i class="fas fa-chevron-down" aria-hidden="true"></i></span>
+    </summary>
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra llog-unrec__table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Tarix" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                    {% if is_supervisor %}<th scope="col">{% trans "Müəllim" context "accounts.lessons_log" %}</th>{% endif %}
+                    <th scope="col">{% trans "Fənn və qrup" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Dərsin tipi" context "accounts.lessons_log" %}</th>
+                    <th scope="col"><span class="visually-hidden">{% trans "Jurnal" context "accounts.lessons_log" %}</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in un.items %}
+                <tr>
+                    <th scope="row" class="llog-unrec__date">{{ item.date|date:"d.m.Y" }} <span class="llog-unrec__weekday">{{ item.date|date:"D" }}</span></th>
+                    <td class="llog-time"><span class="llog-time__main">{{ item.start|time:"H:i" }} – {{ item.end|time:"H:i" }}</span></td>
+                    {% if is_supervisor %}<td>{{ item.teacher|default:"—" }}</td>{% endif %}
+                    <td>
+                        <span class="llog-subject">{{ item.subject }}</span>
+                        <span class="llog-submeta">{{ item.group }}{% if item.room %} · {{ item.room }}{% endif %}</span>
+                    </td>
+                    <td>{{ item.kind_label }}</td>
+                    <td class="llog-unrec__action">
+                        <a class="ems-btn ems-btn--sm" href="{{ item.journal_url }}" target="_blank" rel="noopener" data-force-navigation="true">
+                            <i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Jurnalı aç" context "accounts.lessons_log" %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if un.count > un.items|length %}
+    <p class="llog-unrec__more">{% blocktrans context "accounts.lessons_log" with shown=un.items|length total=un.count %}Ən yeni {{ shown }} slot göstərilir — cəmi {{ total }}. Daha dar dövr seçin.{% endblocktrans %}</p>
+    {% endif %}
+    <p class="llog-unrec__hint">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% trans "Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada sayıla bilər." context "accounts.lessons_log" %}
+    </p>
+</details>
+{% else %}
+<div class="llog-unrec is-clear" role="status">
+    <span class="llog-unrec__icon" aria-hidden="true"><i class="fas fa-calendar-check"></i></span>
+    <span class="llog-unrec__text">
+        <span class="llog-unrec__title">{% trans "Cədvəldə var, qeydə alınmayıb" context "accounts.lessons_log" %}</span>
+        <span class="llog-unrec__note">{{ un.start|date:"d.m.Y" }} — {{ un.end|date:"d.m.Y" }} · {% trans "cədvəldəki bütün keçmiş dərslər jurnalda açılıb" context "accounts.lessons_log" %}</span>
+    </span>
+    <b class="llog-unrec__count">0</b>
+</div>
+{% endif %}
+{% endif %}

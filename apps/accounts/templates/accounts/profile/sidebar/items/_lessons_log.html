@@ -1,0 +1,14 @@
+{% load i18n %}
+{# Ekran 21 «Keçilmiş dərslər» — müəllimin öz dərs izi (OXU-ONLY). Tələbədə YOXDUR; nəzarətçi `journal.roster` ilə alır. #}
+{% if "lessons-log" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=lessons-log"
+       data-section="lessons-log"
+       data-title="{% trans 'Keçilmiş dərslər' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'lessons-log' %}active{% endif %}">
+        <i class="fas fa-clock-rotate-left sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Keçilmiş dərslər" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

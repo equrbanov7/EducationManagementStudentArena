@@ -196,11 +196,19 @@ class MarkRulesTest(TestCase):
             self.assertEqual(mark.score, Decimal("9"))
 
 
+def _use_past_kollokvium_period(cls):
+    """Keçmiş (2025/2026) dövr — 3 kollokvium forması (2026/2027-dən isə tək Midterm)."""
+    cls.period.academic_year = "2025/2026"
+    cls.period.save(update_fields=["academic_year"])
+    cls.offering.period = cls.period  # keşdəki köhnə dövr obyektini yenilə
+
+
 class KollokviumTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         with bypass_rls():
             _setup_offering(cls, "jrk")
+            _use_past_kollokvium_period(cls)
 
     def test_ensure_three_kollokviums_idempotent(self):
         with bypass_rls():
@@ -461,6 +469,7 @@ class KollokviumAdoptTest(TestCase):
     def setUpTestData(cls):
         with bypass_rls():
             _setup_offering(cls, "jra")
+            _use_past_kollokvium_period(cls)
 
     def test_existing_generic_kollokvium_adopted(self):
         from apps.registrar.models import AssessmentComponent

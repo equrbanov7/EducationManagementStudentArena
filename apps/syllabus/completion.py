@@ -237,7 +237,7 @@ def _check_assess(data, weights, issues) -> bool:
     if midterm < 0 or project < 0:
         issues.append(Issue(SectionKey.ASSESS.value, "assess.negative_weight", {}))
         return False
-    # Sahib 2026-09-20: bölgü STANDARTDIR (kollokvium 20 + seminar/lab orta 10);
+    # Sahib 2026-09-20: bölgü STANDARTDIR (midterm 20 + seminar/lab orta 10);
     # saxlanan dəyər standarta bərabər deyilsə bölmə tamamlanmamış sayılır
     # (növbəti autosave-də `save_section` onu standarta gətirir).
     need_midterm, need_project = standard_midterm(weights), standard_project(weights)

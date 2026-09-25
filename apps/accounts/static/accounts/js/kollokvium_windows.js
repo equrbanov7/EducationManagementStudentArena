@@ -2,7 +2,8 @@
  * kollokvium_windows.js
  * Source: extracted verbatim from the inline <script> in
  * _kollokvium_windows_content.html (CSP inline-removal, 2026-07).
- * Confirm modal + extra-days (grant) modal for kollokvium score windows.
+ * Confirm modal + extra-days (grant) modal for midterm/kollokvium score windows
+ * (the window label — «Midterm» or «K1..K3» — comes from data-* attributes).
  * Kept as a plain IIFE (matches the original): it runs once on initial load and
  * once per profile AJAX swap when the section loader re-executes the tag, so the
  * fresh panel elements are each bound exactly once. i18n strings are bridged via
@@ -66,12 +67,15 @@
         var kl = form.getAttribute("data-confirm-klabel") || "";
         var od = opens && opens.value ? fmtDate(addDays(opens.value, 0)) : "—";
         var cd = closes && closes.value ? fmtDate(addDays(closes.value, 0)) : "—";
+        // CSP: inline `style=` yoxdur — boşluğu `.kw-modal__note`-un öz margin-top-u verir.
         body = kwT("data-confirm-dates") + "<br><br>" +
                "<b>" + kl + "</b>: " + od + " – " + cd +
-               "<div class='kw-modal__note' style='margin-top:.7rem'><i class='fas fa-circle-info'></i> <span>" + kwT("data-save-note") + "</span></div>";
+               "<div class='kw-modal__note'><i class='fas fa-circle-info'></i> <span>" + kwT("data-save-note") + "</span></div>";
       }
       confirmBody.innerHTML = body;
-      confirmOk.className = "kw-btn " + (form.getAttribute("data-confirm-variant") === "danger" ? "kw-btn--danger" : "kw-btn--primary");
+      // 2026-09-25: redizayndan qalan `kw-btn*` sinifləri CSS-də YOXDUR — düymə ilk
+      // açılışdan sonra üslubsuz qalırdı; ems-btn variantına qaytarılır.
+      confirmOk.className = "ems-btn " + (form.getAttribute("data-confirm-variant") === "danger" ? "ems-btn--danger" : "ems-btn--primary");
       openModal(confirmModal);
     });
   });

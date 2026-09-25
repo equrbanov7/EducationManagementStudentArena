@@ -13,15 +13,30 @@ ZƏMANƏTLƏR
 * **HEÇ NƏ SİLİNMİR** — mövcud açılışın müəllimi, saatı və jurnalı toxunulmur;
   yalnız ÇATIŞMAYAN sətirlər əlavə olunur (handoff §8 qayda 5).
 * **Müəllim OPSİONALDIR** — təyinat sonra dərs yükü modulundan gəlir
-  (``apps.workload.services.distribution.sync_offerings``); açılış «Müəllim
-  gözləyir» statusunda yaranır.
+  (``apps.workload.services.offering_sync``); açılış «Müəllim gözləyir»
+  statusunda yaranır.
 * **«Plan yoxdur» = BLOKLAYICI** (§6.1) — təsdiqlənmiş planı olmayan ixtisas
   üçün açılış YARADILMIR və səbəb istifadəçiyə ADLA göstərilir.
+* **Yalnız həmin semestri oxuyan qruplar** (2026-09-25) — semestr ``N`` kursu
+  ``ceil(N/2)`` olan qruplara düşür (``services.group_course_year``); əvvəl
+  ixtisasın BÜTÜN qruplarına (4-cü kursa da 1-ci semestr fənni) yazılırdı.
+* **Seçmə fənlər açılmır** — seçmə blokun fənni qrupun seçimi ilə
+  (``services.choose_group_elective``) açılır və qeydiyyatı o edir.
+* **Tələbələr dərhal qeydiyyata düşür** — yeni (və ya hələ boş) açılışa qrupun
+  aktiv tələbələri ``services.enroll_group_students`` ilə yazılır ki,
+  «Fənlərim» fənni dərhal göstərsin.
+
+KANONİK YOL: plan kafedraya dərs yükü zəncirinin təsdiqi ilə çatır
+(``apps.workload`` — təsdiq anında sətirlərin qrup açılışları yaranır). Bu
+ekran eyni qaydaları (kurs süzgəci, seçmə istisnası, qeydiyyat) ``services``
+qatından işlədir — iki axın eyni açılışı yaradır, bir-birini təkrarlamır.
 
 MODUL SƏRHƏDİ: ``apps.organizations`` STATİK import EDİLMİR.
 """
 
 from __future__ import annotations
+
+import math
 
 from django.apps import apps as django_apps
 from django.core.paginator import Paginator
@@ -31,6 +46,7 @@ from django.utils.translation import pgettext
 
 from core.permissions import has_permission
 
+from . import services
 from .curriculum_registry import programs_without_approved_plan
 from .models import CourseOffering, Curriculum, CurriculumSubject, Program, StudentAcademicRecord
 from .models.curriculum_meta import PlanStatus
@@ -86,6 +102,16 @@ def groups_for_program(organization, program):
     ).order_by("name")
 
 
+def groups_for_semester(organization, program, *, semester_number, academic_year) -> list:
+    """Semestr ``N``-i OXUYAN qruplar — kursu ``ceil(N/2)`` olanlar (bilinməyən kurs düşmür)."""
+    course = max(math.ceil(int(semester_number or 0) / 2), 1)
+    return [
+        group
+        for group in groups_for_program(organization, program)
+        if services.group_course_year(group, academic_year) == course
+    ]
+
+
 def approved_plan_for(organization, program):
     """İxtisasın ƏN SON təsdiqlənmiş planı (yoxdursa None → bloklayıcı)."""
     return (
@@ -102,11 +128,13 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
     """Təsdiqlənmiş plandan açılış yaradır — İDEMPOTENT, heç nə silmir.
 
     Qaytarır: ``{"created", "existing", "skipped_no_plan", "skipped_no_group",
-    "blocked_programs", "offering_ids"}``.
+    "skipped_electives", "enrolled", "blocked_programs", "offering_ids"}``.
+    ``skipped_no_group`` — ixtisasda bu semestri oxuyan (kursu uyğun) qrup yoxdur.
     """
-    counters = {"created": 0, "existing": 0, "skipped_no_plan": 0, "skipped_no_group": 0}
+    counters = {"created": 0, "existing": 0, "skipped_no_plan": 0, "skipped_no_group": 0, "skipped_electives": 0}
     blocked: list = []
     offering_ids: list = []
+    to_enroll: list = []
 
     for program in programs:
         plan = approved_plan_for(organization, program)
@@ -115,14 +143,16 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
             blocked.append({"id": str(program.id), "label": program.display_label})
             continue
 
-        groups = list(groups_for_program(organization, program))
+        groups = groups_for_semester(
+            organization, program, semester_number=semester_number, academic_year=period.academic_year
+        )
         if not groups:
             counters["skipped_no_group"] += 1
             continue
 
-        rows = list(
-            CurriculumSubject.objects.filter(curriculum=plan, semester_number=semester_number).select_related("subject")
-        )
+        plan_rows = CurriculumSubject.objects.filter(curriculum=plan, semester_number=semester_number)
+        counters["skipped_electives"] += plan_rows.filter(is_elective=True).count()
+        rows = list(plan_rows.filter(is_elective=False).select_related("subject"))
         for row in rows:
             lesson_hours = row.lecture_hours + row.seminar_hours + row.lab_hours
             for group in groups:
@@ -136,6 +166,7 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
                     defaults={"lesson_hours": lesson_hours},
                 )
                 offering_ids.append(str(offering.pk))
+                to_enroll.append((offering, created))
                 if created:
                     counters["created"] += 1
                 else:
@@ -146,7 +177,32 @@ def generate_offerings(*, organization, period, programs, semester_number, actor
                         offering.lesson_hours = lesson_hours
                         offering.save(update_fields=["lesson_hours", "updated_at"])
 
+    counters["enrolled"] = _enroll_new_offerings(to_enroll, actor=actor)
     return {**counters, "blocked_programs": blocked, "offering_ids": offering_ids}
+
+
+def _enroll_new_offerings(pairs, *, actor) -> int:
+    """Yeni və ya hələ BOŞ (aktiv qeydiyyatı olmayan) açılışlara qrupu yaz.
+
+    Aktiv tələbəsi olan açılışa toxunulmur — siyahısı başqa axınla (köçürmə,
+    alt qrup birləşməsi) formalaşıb; tarixçə qaydaları ``services``-dədir.
+    """
+    from .models import Enrollment
+
+    existing_ids = [offering.pk for offering, created in pairs if not created]
+    populated = set(
+        Enrollment.objects.filter(offering_id__in=existing_ids, status=Enrollment.Status.ENROLLED)
+        .values_list("offering_id", flat=True)
+        .distinct()
+    )
+    fresh = [offering for offering, created in pairs if created or offering.pk not in populated]
+    if not fresh:
+        return 0
+    by_user = actor if getattr(actor, "pk", None) else None
+    report = services.enroll_group_students(
+        offerings=fresh, by_user=by_user, reason="Semestr açılışı: plandan açılış — qrupun tələbələri"
+    )
+    return int(report["created"]) + int(report["guest_added"])
 
 
 def semester_howto(steps: list) -> list:
@@ -161,9 +217,11 @@ def semester_howto(steps: list) -> list:
             "title": pgettext(_CTX, "Tədris dövrünü seçin və plandan açılış yaradın"),
             "text": pgettext(
                 _CTX,
-                "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» hər qrup üçün təsdiqlənmiş "
-                "tədris planından fənn sətirləri yaradır; mövcud sətir təkrarlanmır, heç nə silinmir. "
-                "«Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris planı» bölməsində planı təsdiqləyin.",
+                "Yuxarıdakı süzgəcdən semestri seçin. «Plandan açılış yarat» həmin semestri oxuyan (kursu uyğun) "
+                "qruplar üçün təsdiqlənmiş tədris planının məcburi fənlərindən açılış yaradır və qrupun aktiv "
+                "tələbələrini dərhal qeydiyyata alır; seçmə fənlər qrupun seçimi ilə açılır. Mövcud sətir "
+                "təkrarlanmır, heç nə silinmir. «Plan yoxdur» ixtisaslar üçün sətir yaranmır — əvvəlcə «Tədris "
+                "planı» bölməsində planı təsdiqləyin.",
             ),
             "button": pgettext(_CTX, "Plandan açılış yarat"),
             "who": pgettext(_CTX, "Tədris şöbəsi"),
@@ -495,6 +553,7 @@ __all__ = [
     "coverage",
     "generate_offerings",
     "groups_for_program",
+    "groups_for_semester",
     "offering_counts_by_chair",
     "offering_status_key",
     "semester_howto",

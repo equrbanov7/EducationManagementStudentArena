@@ -1,23 +1,42 @@
-"""Kollokvium bal-yazma pəncərəsi + əlavə gün formaları (İmtahan Mərkəzi kabineti).
+"""Midterm/kollokvium bal-yazma pəncərəsi + əlavə gün formaları (İmtahan Mərkəzi kabineti).
 
 ``organization`` hər iki formaya __init__ kwarg kimi ötürülür (model sahəsi
 DEYİL) — view yadda saxlamadan əvvəl ``organization``/``created_by`` təyin edir
 (``superadmin_exam_rooms`` pattern-i ilə eyni).
+
+``KollokviumWindowForm.k_index`` seçimləri GÖNDƏRİLƏN semestrin aralıq
+qiymətləndirmə rejimindən gəlir (``registrar.interim_assessment`` — tək mənbə):
+midterm (2026/2027-dən) → yalnız ``0`` «Midterm»; kollokvium (keçmiş dövrlər) →
+``0/1/2`` «K1/K2/K3». Midterm semestrinə göndərilən (crafted) ``k_index>0``
+server-side rədd edilir — həm seçim validasiyası, həm ``clean()`` invariantı ilə.
 """
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext_lazy
 
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
+from apps.registrar.public import interim_assessment
+
+_CTX = "registrar.kollokvium_window"
+
+#: Semestr hələ məlum deyilsə (boş/yanlış ``period``) — ən geniş (köhnə) seçim dəsti;
+#: belə formada ``period`` xətası onsuz da birinci göstərilir.
+_ALL_K_CHOICES = [(index, f"K{index + 1}") for index in range(interim_assessment.KOLLOKVIUM_COUNT)]
+
+MIDTERM_ONLY_MESSAGE = pgettext_lazy(
+    _CTX,
+    "Bu semestr midterm rejimindədir: K1/K2/K3 kollokviumları əvəzinə yalnız bir «Midterm» pəncərəsi təyin olunur.",
+)
 
 
 class KollokviumWindowForm(forms.ModelForm):
-    """K1/K2/K3 üçün bal-yazma aralığı (org + period başına)."""
+    """Semestrin rejiminə görə Midterm və ya K1/K2/K3 bal-yazma aralığı (org + period başına)."""
 
     k_index = forms.TypedChoiceField(
-        choices=[(0, "K1"), (1, "K2"), (2, "K3")],
+        choices=_ALL_K_CHOICES,
         coerce=int,
-        label=pgettext_lazy("registrar.kollokvium_window", "Kollokvium"),
+        label=pgettext_lazy(_CTX, "Kollokvium"),
     )
 
     class Meta:
@@ -36,6 +55,32 @@ class KollokviumWindowForm(forms.ModelForm):
         self.fields["period"].queryset = AcademicPeriod.objects.filter(organization=organization).order_by(
             "-start_date"
         )
+        #: Semestrin rejim təsviri (``InterimSpec``); ``clean()`` onu validasiya
+        #: olunmuş semestrdən yenidən təyin edir — view K-sıra qaydasını buna görə tətbiq edir.
+        self.interim_spec = None
+        period = self._submitted_period()
+        if period is not None:
+            self._apply_mode(interim_assessment.spec_for_period(period, organization))
+
+    def _submitted_period(self):
+        """Göndərilən (və ya ilkin) ``period`` — yalnız bu təşkilatın dövrləri arasında; tapılmasa None."""
+        raw = self.data.get(self.add_prefix("period")) if self.is_bound else self.initial.get("period")
+        raw = getattr(raw, "pk", raw)
+        if not raw:
+            return None
+        try:
+            return self.fields["period"].queryset.filter(pk=raw).first()
+        except (ValidationError, ValueError, TypeError):  # UUID olmayan dəyər → sahə xətası validasiyada
+            return None
+
+    def _apply_mode(self, spec):
+        """``k_index`` seçimlərini rejimə uyğunlaşdır: midterm → [0 «Midterm»], kollokvium → K1/K2/K3."""
+        self.interim_spec = spec
+        field = self.fields["k_index"]
+        field.choices = [(index, spec.label_for(index)) for index in range(spec.count)]
+        field.label = spec.title
+        if spec.is_midterm:
+            field.error_messages["invalid_choice"] = MIDTERM_ONLY_MESSAGE
 
     def clean(self):
         cleaned = super().clean()
@@ -43,8 +88,14 @@ class KollokviumWindowForm(forms.ModelForm):
         if opens and closes and closes < opens:
             self.add_error(
                 "closes_on",
-                pgettext_lazy("registrar.kollokvium_window", "Bağlanış tarixi açılışdan sonra olmalıdır."),
+                pgettext_lazy(_CTX, "Bağlanış tarixi açılışdan sonra olmalıdır."),
             )
+        period, k_index = cleaned.get("period"), cleaned.get("k_index")
+        if period is not None:
+            self.interim_spec = interim_assessment.spec_for_period(period, self.organization)
+            # İnvariant (seçim validasiyasından asılı olmadan): midterm semestrində tək pəncərə.
+            if self.interim_spec.is_midterm and k_index is not None and k_index >= self.interim_spec.count:
+                self.add_error("k_index", MIDTERM_ONLY_MESSAGE)
         return cleaned
 
 

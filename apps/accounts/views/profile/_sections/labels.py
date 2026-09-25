@@ -120,7 +120,8 @@ def build_section_titles() -> dict:
         "superadmin-exam-rooms": pgettext_lazy("profile.section", "İmtahan zalları"),
         "exam-center-pins": pgettext_lazy("profile.section", "PIN axtarışı"),
         "exam-center-stats": pgettext_lazy("profile.section", "İmtahan statistikaları"),
-        "kollokvium-windows": pgettext_lazy("profile.section", "Kollokvium pəncərələri"),
+        # Sahib 2026-09-25: 3 kollokvium → TƏK midterm (bölmə keçmiş dövrlər üçün K1–K3-ü də göstərir).
+        "kollokvium-windows": pgettext_lazy("profile.section", "Midterm pəncərələri"),
         "exam-score-entry": pgettext_lazy("profile.section", "İmtahan balının daxil edilməsi"),
         "legacy-grade-review": pgettext_lazy("profile.section", "Köçürülmüş nəticələrin dəqiqləşdirilməsi"),
         "exam-chance": pgettext_lazy("profile.section", "İmtahan şansı ver"),
@@ -165,4 +166,8 @@ def build_section_titles() -> dict:
         "semester-opening": pgettext_lazy("profile.sidebar", "Semestr açılışı"),
         "student-admission": pgettext_lazy("profile.sidebar", "Tələbə qəbulu"),
         "student-registry": pgettext_lazy("profile.sidebar", "Tələbə reyestri"),
+        # Anonim müəllim qiymətləndirmə sorğusu (apps.surveys) — sidebar bəndləri ilə eyni mətnlər.
+        "evaluation-survey": pgettext_lazy("profile.sidebar", "Anonim sorğu"),
+        "evaluation-results": pgettext_lazy("profile.sidebar", "Sorğu nəticələri"),
+        "evaluation-campaigns": pgettext_lazy("profile.sidebar", "Sorğu kampaniyaları"),
     }

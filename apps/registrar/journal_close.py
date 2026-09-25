@@ -33,6 +33,9 @@ from django.db import transaction
 from apps.registrar import journal_scope
 from apps.registrar.models import ApprovalStatus, AssessmentScheme, CourseOffering
 
+# Domen hadisəsi — `apps.registrar.public.journal_close.journal_closed` kimi abunə olunur.
+from .signals import journal_closed  # noqa: F401
+
 #: Toplu əməliyyatın audit resurs tipi (audit axtarışında süzgəc açarı).
 AUDIT_RESOURCE_TYPE = "registrar.journal_close"
 
@@ -186,7 +189,9 @@ def close_journals(*, organization, period, by_user, unit=None, reason="", reque
     # Bildiriş ÜÇÜN: HƏQİQƏTƏN dəyişəcək sxemlərin müəllimləri — UPDATE-dən
     # ƏVVƏL tutulur (sonra WHERE artıq heç nəyə uyğun gəlməz).
     to_close = schemes.exclude(is_published=True, approval_status=ApprovalStatus.APPROVED)
-    affected_instructor_ids = list(to_close.values_list("offering__instructor_id", flat=True).distinct())
+    # Eyni tək sorğu həm müəllimləri (bildiriş), həm açılışları (`journal_closed` siqnalı) verir.
+    to_close_rows = list(to_close.values_list("offering_id", "offering__instructor_id"))
+    affected_instructor_ids = list(dict.fromkeys(instructor_id for _offering_id, instructor_id in to_close_rows))
     # Tək UPDATE — qismən bağlanma mümkün deyil; artıq bağlı sətirlərə toxunmur.
     changed = to_close.update(
         is_published=True,
@@ -208,6 +213,13 @@ def close_journals(*, organization, period, by_user, unit=None, reason="", reque
 
         journal_close_notifications.notify_closed(
             organization=organization, period=period, unit=unit, instructor_ids=affected_instructor_ids
+        )
+        _emit_journal_closed(
+            organization=organization,
+            period=period,
+            unit=unit,
+            offering_ids=[offering_id for offering_id, _instructor_id in to_close_rows],
+            by_user=by_user,
         )
     return {
         "closed": changed,
@@ -267,6 +279,22 @@ def reopen_journals(*, organization, period, by_user, unit=None, reason, request
         "total": total,
         "scope_label": scope_label(unit),
     }
+
+
+def _emit_journal_closed(*, organization, period, unit, offering_ids, by_user):
+    """``journal_closed`` siqnalı — YALNIZ commit-dən sonra; abunəçi xətası bağlamanı pozmur."""
+
+    def _send():
+        journal_closed.send(
+            sender=AssessmentScheme,
+            organization=organization,
+            period=period,
+            unit=unit,
+            offering_ids=list(offering_ids),
+            by_user=by_user,
+        )
+
+    transaction.on_commit(_send, robust=True)
 
 
 def assert_unit_in_actor_scope(user, organization, unit):

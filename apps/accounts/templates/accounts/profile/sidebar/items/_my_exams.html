@@ -1,0 +1,16 @@
+{% load i18n %}
+{% comment %}«İmtahanlarım». Köhnə «İmtahan Nəzarəti» (supervision_monitor) linki gizlədilib —
+yeni «İmtahan Nəzarət Sistemi» (final imtahan mərkəzi, `_final_center.html`) onu əvəz edir.{% endcomment %}
+{% if 'my-exams' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=my-exams"
+       data-section="my-exams"
+       data-title="{% trans 'my_exams' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-exams' %}active{% endif %}">
+        <i class="fas fa-file-alt sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "my_exams" context "profile.sidebar" %}</span>
+        {% if my_exams_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="my_exams_count">{{ my_exams_count }}</span>{% endif %}
+    </a>
+</li>
+{% endif %}

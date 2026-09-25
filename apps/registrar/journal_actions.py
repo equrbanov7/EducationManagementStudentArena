@@ -244,14 +244,18 @@ def lesson_action(request, offering_id, lesson_id):
 @login_required
 @require_POST
 def kollokvium_save(request, offering_id):
-    """Kollokvium balları — YALNIZ İmtahan Mərkəzi pəncərəsi AÇIQ olan K-lar üçün.
+    """Kollokvium / midterm balları — YALNIZ İmtahan Mərkəzi pəncərəsi AÇIQ olan sütunlar üçün.
 
     Tarix xanaları yoxdur (aralığı İmtahan Mərkəzi təyin edir). Açıq pəncərədə
-    2 saat kilidi bypass olunur — müəllim aralıq boyu balı dəyişə bilər.
+    2 saat kilidi bypass olunur — müəllim aralıq boyu balı dəyişə bilər. Midterm
+    rejimində (2026/2027-dən) tək sütun var (0–20); tavanı komponentin ``max_score``-u qoruyur.
     """
+    from apps.registrar import interim_assessment
     from apps.registrar import kollokvium_windows as kw
 
     offering = _offering_or_404(request, offering_id)
+    spec = interim_assessment.spec_for_offering(offering)
+    title = spec.title
     blocked = _corrector_direct_write_blocked(request, offering, "kollokvium")
     if blocked:
         return blocked
@@ -267,7 +271,8 @@ def kollokvium_save(request, offering_id):
         parts = key.split("__", 2)
         if len(parts) != 3 or parts[1] not in idx_by_id:
             continue
-        if not kw.is_open(offering, idx_by_id[parts[1]], today):
+        # Midterm dövründə yalnız əsas sütun (k_index=0) yazılır; balı olan köhnə qalıq oxu-rejimlidir.
+        if idx_by_id[parts[1]] >= spec.count or not kw.is_open(offering, idx_by_id[parts[1]], today):
             blocked = True
             continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
@@ -275,7 +280,8 @@ def kollokvium_save(request, offering_id):
     if not entries:
         messages.error(
             request,
-            _("Kollokvium bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı aktivləşdirməlidir."),
+            _("%(title)s bal-yazma pəncərəsi açıq deyil — İmtahan Mərkəzi aralığı aktivləşdirməlidir.")
+            % {"title": title},
         )
         return _back(offering, "kollokvium")
 
@@ -283,8 +289,8 @@ def kollokvium_save(request, offering_id):
         offering=offering, entries=entries, by_user=request.user, bypass_edit_window=True
     )
     if blocked:
-        messages.warning(request, _("Bəzi kollokviumların pəncərəsi bağlı olduğu üçün yazılmadı."))
-    messages.success(request, _("Kollokvium balları yadda saxlanıldı (%(n)s xana).") % {"n": written})
+        messages.warning(request, _("Pəncərəsi bağlı olan sütunların balı yazılmadı."))
+    messages.success(request, _("%(title)s balları yadda saxlanıldı (%(n)s xana).") % {"title": title, "n": written})
     return _back(offering, "kollokvium")
 
 

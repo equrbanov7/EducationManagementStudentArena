@@ -1,0 +1,83 @@
+-- restore_legacy_scores_rollback.psql — J12 bərpasının HƏDƏFLİ geri qaytarılması (2026-09-25)
+-- ==========================================================================================
+--
+-- Yalnız `legacy_repair_lesson_recovery --apply`-ın bu plan (:plan_sha) ilə yazdıqlarını
+-- geri alır — mənbə audit izidir (audit_auditlog, reason 'legacy_repair:lesson_recovery:%'):
+--   1. Enrollment.absence_hours → audit-dəki ƏN ERKƏN köhnə dəyər (dəqiq bərpa);
+--   2. bərpa dərslərinin xanaları, sonra dərslərin özü (is_legacy_synthesised + audit);
+--   3. (opsional, yalnız superuser) sübut faktları — append-only trigger-i
+--      session_replication_role=replica ilə keçir: `-v drop_facts=1`.
+-- Bərpa dərsinə sonradan düzəliş (registrar_lessoncorrection) bağlanıbsa FK (NO ACTION)
+-- silməni DAYANDIRIR — sənədli düzəliş səssizcə silinmir; o halda əl ilə baxılır.
+-- «mövcud dərsə xana» audit sətri varsa skript DAYANIR (o xanalar ayrıca baxış tələb edir).
+--
+-- İstifadə (DB owner / superuser ilə, bir tranzaksiyada):
+--   docker exec -i <postgres konteyneri> psql -U <owner> -d emsarena_db \
+--       -v plan_sha=<sha256> [-v drop_facts=1] -f - < scripts/ops/restore_legacy_scores_rollback.psql
+\set ON_ERROR_STOP on
+\if :{?drop_facts}
+\else
+\set drop_facts 0
+\endif
+
+BEGIN;
+SET LOCAL app.bypass_rls = 'on';
+
+SELECT set_config('j12_rollback.plan_sha', :'plan_sha', true);
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM audit_auditlog
+        WHERE reason = 'legacy_repair:lesson_recovery: mövcud dərsə xana'
+          AND new_values ->> 'plan_sha256' = current_setting('j12_rollback.plan_sha')
+    ) THEN
+        RAISE EXCEPTION 'DAYAN: mövcud (bərpa olmayan) dərslərə yazılmış xana var — əl ilə baxın';
+    END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM audit_auditlog
+        WHERE reason = 'legacy_repair:lesson_recovery: xülasə'
+          AND resource_id = current_setting('j12_rollback.plan_sha')
+    ) THEN
+        RAISE EXCEPTION 'DAYAN: bu plan sha256-sı ilə tətbiq izi (xülasə audit sətri) tapılmadı';
+    END IF;
+END
+$$;
+
+CREATE TEMP TABLE j12_rollback_lessons ON COMMIT DROP AS
+SELECT l.id
+FROM registrar_lesson l
+JOIN audit_auditlog a
+  ON a.resource_type = 'registrar.Lesson'
+ AND a.resource_id = l.id::text
+ AND a.reason = 'legacy_repair:lesson_recovery: bərpa dərsi'
+ AND a.new_values ->> 'plan_sha256' = :'plan_sha'
+WHERE l.is_legacy_synthesised;
+
+UPDATE registrar_enrollment e
+SET absence_hours = first_seen.old_hours
+FROM (
+    SELECT DISTINCT ON (resource_id) resource_id, (old_values ->> 'absence_hours')::int AS old_hours
+    FROM audit_auditlog
+    WHERE reason = 'legacy_repair:lesson_recovery: absence_hours yenidən hesablandı'
+      AND new_values ->> 'plan_sha256' = :'plan_sha'
+    ORDER BY resource_id, created_at
+) AS first_seen
+WHERE e.id::text = first_seen.resource_id;
+
+DELETE FROM registrar_lessonmark WHERE lesson_id IN (SELECT id FROM j12_rollback_lessons);
+DELETE FROM registrar_lesson WHERE id IN (SELECT id FROM j12_rollback_lessons);
+
+\if :drop_facts
+SET LOCAL session_replication_role = replica;
+DELETE FROM registrar_legacygradefact f
+USING audit_auditlog a
+WHERE a.reason LIKE 'legacy_repair:lesson_recovery: sübut faktı%'
+  AND a.new_values ->> 'plan_sha256' = :'plan_sha'
+  AND a.object_id = f.id::text
+  AND f.transform_version LIKE 'legacy-repair-j12-v1.%';
+SET LOCAL session_replication_role = origin;
+\endif
+
+SELECT (SELECT count(*) FROM registrar_lesson WHERE is_legacy_synthesised) AS synthesised_lessons_left,
+       (SELECT count(*) FROM registrar_legacygradefact WHERE transform_version LIKE 'legacy-repair-j12-v1.%') AS repair_facts_left;
+COMMIT;

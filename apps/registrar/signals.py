@@ -21,4 +21,12 @@ from django.dispatch import Signal
 #: (OrgUnit | None), ``new_group`` (OrgUnit), ``organization``.
 student_group_changed = Signal()
 
-__all__ = ["student_group_changed"]
+#: RİM-in toplu bağlaması (``journal_close.close_journals``) HƏQİQƏTƏN jurnal
+#: bağladı. Tranzaksiya commit olunduqdan SONRA (``on_commit``, robust) göndərilir.
+#: kwargs: ``organization``, ``period``, ``unit`` (OrgUnit | None — əhatə),
+#: ``offering_ids`` (YENİ bağlanan açılışlar), ``by_user``.
+#: Abunəçi: ``apps.surveys`` (dövrün anonim sorğu kampaniyasını açır). Abunə
+#: ``apps.registrar.public.journal_close.journal_closed`` ilə (public səth).
+journal_closed = Signal()
+
+__all__ = ["journal_closed", "student_group_changed"]

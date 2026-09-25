@@ -174,6 +174,12 @@ SECTION_PARTIALS: dict[str, str] = {
     "lessons-log": "accounts/profile/sections/_lessons_log.html",
     "student-admission": "accounts/profile/sections/_student_admission.html",
     "student-registry": "accounts/profile/sections/_student_registry.html",
+    # Anonim müəllim qiymətləndirmə sorğusu (apps.surveys, 2026-09-25). Hər üçü TAM
+    # SƏHİFƏ bölmədir (AJAX_SAFE_SECTIONS-da deyil): panel məzmunu `survey_cabinet`
+    # template tag-ı ilə qurulur, formalar `surveys:manage`-ə POST edib qayıdır.
+    "evaluation-survey": "accounts/profile/sections/_evaluation_survey.html",
+    "evaluation-results": "accounts/profile/sections/_evaluation_results.html",
+    "evaluation-campaigns": "accounts/profile/sections/_evaluation_campaigns.html",
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -507,6 +513,12 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     # (``question_chair_review._invalidate_badges``) invalidasiya edir.
     if "question-chair-review" in capabilities.get("allowed_sections", set()):
         payload["question_chair_pending_count"] = shared_badges.get("question_chair_pending", 0)
+    # «Anonim sorğu» — gözləyən qiymətləndirmə sayı qapı middleware-inin bu sorğuda
+    # hesabladığı vəziyyətdən gəlir (sıfır sorğu; view-as altında vəziyyət yoxdur).
+    if "evaluation-survey" in capabilities.get("allowed_sections", set()):
+        from apps.surveys.public import pending_badge
+
+        payload["evaluation_survey"] = pending_badge(request.user)
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

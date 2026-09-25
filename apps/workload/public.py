@@ -38,6 +38,15 @@ DÖRD yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "objections": [{"id", "subject", "reason_label", "text", "status", …}],
 }``
 
+3. AÇILIŞIN MÜƏLLİMLƏRİ — ``teachers_for_offering(offering)`` /
+   ``teachers_for_offerings(offerings)`` (cədvəl generatoru, 2026-09-25)
+``{"lecture": User|None, "seminar": [User], "lab": [User], "workload_lecture": User|None,
+   "hours": {"lecture", "seminar", "lab"}, "vacant": [str], "row_ids": [str]}`` — mənbə
+açılışı əhatə edən tapşırıq sətirləri və onların bölgüsü (``TeacherAssignment``);
+``lecture`` = jurnal sahibi, yoxdursa yükün mühazirəçisi; saat QRUP başınadır.
+Toplu forma açılış sayından asılı olmayan sorğu sayı ilə işləyir. Detal:
+``services/offering_teachers.py``.
+
 XƏTA KODLARI (``WorkloadDenied.code``) — UI mətni bu kodlara görə yazılır:
 ``workload.manage_denied``, ``workload.distribute_denied``, ``workload.view_denied``,
 ``workload.chair_not_found``, ``workload.teacher_not_in_chair``,
@@ -76,6 +85,7 @@ from .services import (
     teacher_workload_summary,
     teacher_years,
 )
+from .services.offering_teachers import teachers_for_offering, teachers_for_offerings
 
 STATUS_LABELS = {str(value): str(label) for value, label in TaskStatus.choices}
 
@@ -347,6 +357,8 @@ __all__ = [
     "build_distribution_context",
     "build_my_workload_context",
     "chair_staff_load",
+    "teachers_for_offering",
+    "teachers_for_offerings",
 ]
 
 

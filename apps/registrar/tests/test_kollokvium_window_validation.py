@@ -47,6 +47,11 @@ class KollokviumWindowValidationBase(TestCase):
     Semestr aralığı real "bugün"dən asılı olmayaraq HƏMİŞƏ cari sayılsın deyə
     geniş götürülüb (``is_past`` yalnız ``end_date < bugün`` yoxlayır) — testlər
     ``_reject_if_period_past`` maneəsinə ilişməsin.
+
+    Bu fayl K1/K2/K3 SIRA qaydalarını yoxlayır, ona görə təşkilat açıq şəkildə
+    KOLLOKVIUM rejimindədir (``settings.registrar.midterm_from_year = 2100`` →
+    «2099/2100» dövrü hələ midterm deyil). Midterm rejimi (tək pəncərə) üçün bax
+    ``test_midterm_mode.py``.
     """
 
     @classmethod
@@ -61,6 +66,7 @@ class KollokviumWindowValidationBase(TestCase):
                 owner=cls.owner,
                 status="active",
                 is_active=True,
+                settings={"registrar": {"midterm_from_year": 2100}},
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,

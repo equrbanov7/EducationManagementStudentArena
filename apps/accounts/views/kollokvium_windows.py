@@ -1,12 +1,19 @@
-"""İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri (profil SPA bölməsi).
+"""İmtahan Mərkəzi — midterm/kollokvium bal-yazma pəncərələri (profil SPA bölməsi).
 
-İmtahan Mərkəzi hər semestr (AcademicPeriod) üçün K1/K2/K3 üzrə bal-yazma
-aralığı təyin edib aktivləşdirir; RƏHBƏR əlavə gün verə bilər (org/fakültə/
-kafedra əhatəsində). Müəllim tərəfi bunu ``registrar.kollokvium_windows``
-servisi ilə oxuyur — bu view yalnız pəncərə/grant sətirlərini mutasiya edir.
+İmtahan Mərkəzi hər semestr (AcademicPeriod) üçün bal-yazma aralığı təyin edib
+aktivləşdirir; RƏHBƏR əlavə gün verə bilər (org/fakültə/kafedra əhatəsində).
+Müəllim tərəfi bunu ``registrar.kollokvium_windows`` servisi ilə oxuyur — bu
+view yalnız pəncərə/grant sətirlərini mutasiya edir.
+
+REJİM (sahib 2026-09-25, ``registrar.interim_assessment``): 2026/2027-dən
+semestrdə TƏK «Midterm» pəncərəsi var (``k_index=0``, 0–20 bal) — ``k_index>0``
+forma səviyyəsində rədd edilir, K-sıra qaydası tətbiq olunmur; köhnə qaydadan
+qalmış ``k_index>0`` pəncərəsi yalnız SİLİNƏ bilər (aktivləşdirmə/əlavə gün
+müəllimlərə yanlış «K2 açıldı» bildirişi göndərərdi). Keçmiş dövrlər əvvəlki
+kimi K1/K2/K3 (hər biri 0–10).
 
 POST action-lar bölməyə redirect edir; GET ``_render_profile_section`` ilə
-profil "Kollokvium pəncərələri" bölməsini render edir. (``superadmin_exam_rooms``
+profil «Midterm pəncərələri» bölməsini render edir. (``superadmin_exam_rooms``
 pattern-i.)
 """
 
@@ -24,7 +31,7 @@ from django.utils.translation import pgettext
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
 from apps.exams.public import is_exam_center_user
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
-from apps.registrar.public import kollokvium_notifications
+from apps.registrar.public import interim_assessment, kollokvium_notifications
 from apps.registrar.public import kollokvium_windows as kollokvium_window_rules
 from core.audit import log_action
 from core.constants import AuditAction
@@ -81,6 +88,23 @@ def _reject_if_period_past(period, user=None):
         )
 
 
+def _reject_if_outside_mode(window, organization):
+    """Semestrin rejimində OLMAYAN pəncərəni (midtermdə ``k_index>0``) yalnız silməyə icazə ver.
+
+    Midterm rejimli semestrdə köhnə qaydadan qalmış K2/K3 pəncərəsini aktivləşdirmək
+    və ya ona əlavə gün vermək müəllimlərə mənasız «K2 açıldı» bildirişi göndərər —
+    jurnal həmin pəncərəni onsuz da istifadə etmir. Silmək (təmizlik) sərbəstdir.
+    """
+    spec = interim_assessment.spec_for_period(window.period, organization)
+    if window.k_index >= spec.count:
+        raise KollokviumAdminError(
+            pgettext(
+                "accounts.kollokvium_windows",
+                "Bu pəncərə köhnə kollokvium qaydasından qalıb — midterm semestrində onu yalnız silmək olar.",
+            )
+        )
+
+
 def _can_manage(user):
     """İmtahan Mərkəzi (head OR staff) və ya superadmin pəncərələri idarə edə bilər."""
     if not getattr(user, "is_authenticated", False):
@@ -109,7 +133,7 @@ def _resolve_target_org(request):
 
 @login_required
 def kollokvium_windows(request):
-    """Kollokvium bal-yazma pəncərələrinin idarəetməsi (profil SPA bölməsi)."""
+    """Midterm/kollokvium bal-yazma pəncərələrinin idarəetməsi (profil SPA bölməsi)."""
     if not _can_manage(request.user):
         return HttpResponseForbidden(
             pgettext("accounts.kollokvium_windows", "Bu bölmə yalnız İmtahan Mərkəzi üçündür.")
@@ -146,10 +170,12 @@ def _dispatch_action(request, action, organization):
         k_index = form.cleaned_data["k_index"]
         period = form.cleaned_data["period"]
         _reject_if_period_past(period, user)  # köhnə il/semestr üçün yazma qadağan (İKT Rəhbəri istisna)
-        # Sıra qaydası: K{n} yalnız K{n-1} təyin olunduqdan sonra (İmtahan Mərkəzi
-        # tələbi — K1 qoyulmamış K2/K3 təyin edilə bilməz).
+        # Sıra qaydası YALNIZ kollokvium rejimində: K{n} yalnız K{n-1} təyin
+        # olunduqdan sonra (İmtahan Mərkəzi tələbi — K1 qoyulmamış K2/K3 təyin
+        # edilə bilməz). Midterm rejimində forma artıq yalnız k_index=0 qəbul edir.
         if (
-            k_index > 0
+            not form.interim_spec.is_midterm
+            and k_index > 0
             and not KollokviumWindow.objects.filter(
                 organization=organization, period=period, k_index=k_index - 1
             ).exists()
@@ -210,6 +236,7 @@ def _dispatch_action(request, action, organization):
             KollokviumWindow, pk=_uuid_or_404(request.POST.get("window_id")), organization=organization
         )
         _reject_if_period_past(window.period, user)
+        _reject_if_outside_mode(window, organization)
         window.is_active = not window.is_active
         window.save(update_fields=["is_active", "updated_at"])
         if window.is_active:
@@ -247,6 +274,7 @@ def _dispatch_action(request, action, organization):
             KollokviumWindow, pk=_uuid_or_404(request.POST.get("window_id")), organization=organization
         )
         _reject_if_period_past(window.period, user)
+        _reject_if_outside_mode(window, organization)
         form = KollokviumExtraGrantForm(request.POST, organization=organization, window=window)
         if not form.is_valid():
             raise KollokviumAdminError(_first_form_error(form))
@@ -285,6 +313,7 @@ def _dispatch_action(request, action, organization):
             organization=organization,
         )
         _reject_if_period_past(grant.window.period, user)
+        _reject_if_outside_mode(grant.window, organization)
         # Redaktədə mövcud bölmə artıq deaktivdirsə də (soft-delete) qəbul et.
         form = KollokviumExtraGrantForm(
             request.POST, organization=organization, window=grant.window, include_unit_id=grant.org_unit_id

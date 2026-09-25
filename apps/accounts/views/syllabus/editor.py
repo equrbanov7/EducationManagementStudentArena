@@ -49,7 +49,7 @@ from apps.syllabus.public import (
 )
 
 from . import editor_panels as panels_builder
-from .labels import STATUS_TONES, issue_text
+from .labels import HOUR_KIND_LABELS, STATUS_TONES, issue_text
 from .preview import build_preview_blocks
 
 _CTX = "accounts.syllabus"
@@ -61,7 +61,7 @@ NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı və ya artıq mövcud deyi
 #: Müəllim yalnız `flex` (30 bal) hissəsini aralıq imtahan ↔ semestr layihəsi
 #: arasında bölür; cəm HƏMİŞƏ 100 qalır.
 # Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — tək mənbə
-# apps.syllabus.policy (davamiyyət 10 · kollokvium 20 · sərbəst iş 10 ·
+# apps.syllabus.policy (davamiyyət 10 · midterm 20 · sərbəst iş 10 ·
 # seminar/lab ədədi ortası 10 · yekun 50); müəllim heç nə bölmür.
 ASSESSMENT_POLICY = assessment_weights(None)
 
@@ -113,7 +113,7 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Qiymətləndirmə strukturu"),
         pgettext_lazy(
             _CTX,
-            "Bal bölgüsü universitet standartıdır: davamiyyət 10, kollokvium 20, sərbəst iş 10, seminar/laboratoriya "
+            "Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 20, sərbəst iş 10, seminar/laboratoriya "
             "ədədi ortası 10 (semestr 50) və yekun imtahan 50 — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir.",
         ),
     ),
@@ -229,23 +229,33 @@ _LOCKED_SOURCES = {
 }
 
 
-def _ensure_plan_hours(syllabus, context) -> dict:
-    """Plan saatı boşdursa (köçürülmüş/yükdən açılan açılış) tədris yükündən doldur.
+#: Əl ilə semestr saatı seçimləri (sahib 2026-09-25: «dropdown olsun, əl ilə yazılmasın»).
+#: Real tədris yükü sətirlərində rast gələn dəyərlər: 0, 5, 10, 15, 20, 30, 45, 60.
+PLAN_HOUR_OPTIONS = tuple(range(0, 61, 5)) + (75, 90, 105, 120)
 
-    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür».
-    Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır (``set_plan_hours`` qapısı); tapılmasa
-    müəllim saatı özü yazır (bax ``syllabus_action`` → ``plan_hours``).
+
+def _ensure_plan_hours(syllabus, context) -> tuple[dict, bool]:
+    """Plan saatı + «müəllim əl ilə dəyişə bilərmi» bayrağı.
+
+    Sahib 2026-09-20: «tədrisdən gələn yük saatı sillabuslarda görünmür» — plan saatı boşdursa
+    (köçürülmüş/yükdən açılan açılış) tədris yükündən doldurulur. Rəsmi plan TAPILMAYANDA
+    müəllim saatı özü seçir (``syllabus_action`` → ``plan_hours``) və sahib 2026-09-25: «bir dəfə
+    yazandan sonra edit etmək olmur, səhv yazılsa itdi getdi» — ona görə əl ilə daxil edilmiş
+    saat redaktəyə açıq versiyada HƏMİŞƏ yenidən seçilə bilir. Rəsmi plandan gələn saat
+    dəyişdirilmir (bölgünün mənbəyi tədris planıdır). Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır.
     """
     plan_hours = dict(context.get("plan_hours") or {})
-    if plan_hours or context.get("view_state") != "normal":
-        return plan_hours
+    if context.get("view_state") != "normal":
+        return plan_hours, False
     from apps.registrar.public import plan_hours_for_offering
 
     found = plan_hours_for_offering(getattr(syllabus, "offering", None))
     if found:
-        set_plan_hours(context["version"], found)
-        return dict(found)
-    return plan_hours
+        if not plan_hours:
+            set_plan_hours(context["version"], found)
+            return dict(found), False
+        return plan_hours, False
+    return plan_hours, True
 
 
 def _locked_rows(syllabus, hours):
@@ -384,7 +394,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
         }
 
     syllabus = context["syllabus"]
-    plan_hours = _ensure_plan_hours(syllabus, context)
+    plan_hours, plan_manual = _ensure_plan_hours(syllabus, context)
     # Sahib 2026-09-21: təzə qaralamada saat bölgüsü plandan ÖZÜ düzülür
     # (2-2-…-qalıq).  Yazıldısa context yenidən qurulur ki, revision/tamamlanma
     # şablona təzə getsin (optimistik kilid köhnə revision ilə qalmasın).
@@ -443,6 +453,13 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     week_rows = _week_rows(week_data, tags, plan_hours)
     hours = _hour_totals(week_rows, plan_hours)
     hours["has_plan"] = bool(plan_hours)
+    # Əl ilə daxil edilən saat: forma həmişə görünür (seçilmiş dəyərlərlə) — sonradan düzəltmək olur.
+    hours["manual"] = plan_manual and context["view_state"] == "normal"
+    hours["options"] = PLAN_HOUR_OPTIONS
+    hours["manual_fields"] = [
+        {"kind": kind, "label": HOUR_KIND_LABELS[kind], "value": int((plan_hours or {}).get(kind) or 0)}
+        for kind in ("lecture", "seminar", "lab")
+    ]
     selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {}))
     assessment_view = _assessment(section_map.get(SectionKey.ASSESS.value, {}), syllabus)
     readonly = context["view_state"] != "normal"

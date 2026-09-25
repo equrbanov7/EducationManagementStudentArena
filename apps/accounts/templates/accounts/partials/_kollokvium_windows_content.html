@@ -1,5 +1,5 @@
 {% load i18n static %}
-{% comment %}İmtahan Mərkəzi — kollokvium bal-yazma pəncərələri (kabinet).
+{% comment %}İmtahan Mərkəzi — midterm/kollokvium bal-yazma pəncərələri (kabinet).
 Full-page-nav bölmə (exam-rooms pattern-i) → stil/skript xarici fayllara
 köçürülüb (CSP: no inline). Formlar accounts:kollokvium_windows-a POST edir, action +
 next ilə; view redirect edir.
@@ -8,28 +8,65 @@ next ilə; view redirect edir.
 ⚠️ Başlıq BURADA yazılmır — kabinet qabığı bölmə adını `#profileSectionTitle`
 kimi render edir. Alt yazı `ems_ui/_content_header`-dədir; KPI `ems-kpis`,
 seçicilər `ems-filters` (hər seçici ÖZ GET forması olaraq qalır — kaskad
-semantikası dəyişmir, `display:contents` ilə tək sıraya düzülür), K-kartları
+semantikası dəyişmir, `display:contents` ilə tək sıraya düzülür), kartlar
 `ems-card`, status nişanları `ems-badge`, düymələr `ems-btn`, boş vəziyyət
 `ems-state`. Modal sinifləri (`kw-modal*`) SAXLANILIR — `kollokvium_windows.js`
 onları `id`/`class` ilə tapır; yalnız görünüş `ems-*` tokenlərinə bağlandı.
 Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
-{% endcomment %}
-<link rel="stylesheet" href="{% static 'accounts/css/kollokvium_windows.css' %}?v=20260910-1">
 
+2026-09-25 midterm (sahib qərarı): kartların sayı/adı `s.interim`-dən
+(registrar.interim_assessment) gəlir — midterm semestrində TƏK «Midterm» kartı
+(0–20 bal, izah mətni, uyğunlaşdırılmış KPI, K-sıra qaydası yoxdur) + köhnə
+qaydadan qalmış K2/K3 pəncərələri üçün «sil» siyahısı; keçmiş (kollokvium)
+dövrlərdə K1/K2/K3 əvvəlki kimi.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/kollokvium_windows.css' %}?v=20260925-1">
+
+{% if s.interim.is_midterm %}
+{% blocktrans with scale=s.interim.scale_label context "registrar.kollokvium_window" asvar kw_subtitle %}Midterm üçün müəllimlərin {{ scale }} bal yaza biləcəyi tarix aralığını təyin edin və aktivləşdirin. Rəhbər əlavə gün verə bilər.{% endblocktrans %}
+{% else %}
 {% trans "K1/K2/K3 üçün müəllimlərin bal yaza biləcəyi tarix aralığını təyin edin və aktivləşdirin. Rəhbər əlavə gün verə bilər." context "registrar.kollokvium_window" as kw_subtitle %}
+{% endif %}
 
 {% if s.is_head %}
   {{ s.faculties|json_script:"kw-faculties-data" }}
   {{ s.departments|json_script:"kw-departments-data" }}
 {% endif %}
 
-<div class="kw"
+<div class="kw{% if s.interim.is_midterm %} kw--midterm{% endif %}"
      data-org="{% if s.is_superadmin and s.selected_org %}{{ s.selected_org.id }}{% endif %}"
-     data-superadmin="{% if s.is_superadmin %}1{% else %}0{% endif %}">
+     data-superadmin="{% if s.is_superadmin %}1{% else %}0{% endif %}"
+     data-interim-mode="{{ s.interim.mode }}">
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=kw_subtitle %}
 
-  {% if s.period %}
-  {# ── KPI: semestrin pəncərə mənzərəsi ─────────────────────────────────── #}
+  {% if s.period and s.midterm_row %}
+  {# ── KPI (midterm): tək pəncərənin vəziyyəti / aralığı / şkalası / əlavə günü ── #}
+  {% with mr=s.midterm_row %}
+  <div class="ems-kpis ems-kpis--4">
+    <div class="ems-kpi{% if mr.status == 'open' %} ems-kpi--accent-success{% elif mr.status == 'not-set' %} ems-kpi--accent-warning{% endif %}">
+      <div class="ems-kpi__label">{% trans "Vəziyyət" context "registrar.kollokvium_window" %}</div>
+      <div class="ems-kpi__value kw-kpi__text">{% if mr.status == 'open' %}{% trans "Açıq" context "registrar.journal" %}{% elif mr.status == 'closed' %}{% trans "Bağlanıb" context "registrar.journal" %}{% elif mr.status == 'scheduled' %}{% trans "Açılır" context "registrar.journal" %}{% elif mr.status == 'inactive' %}{% trans "Aktiv deyil" context "registrar.journal" %}{% else %}{% trans "Təyin olunmayıb" context "registrar.journal" %}{% endif %}</div>
+      <div class="ems-kpi__note">{% if mr.status == 'open' %}{% trans "müəllim bal yaza bilir" context "registrar.kollokvium_window" %}{% elif mr.status == 'closed' %}{% trans "aralıq bitib" context "registrar.kollokvium_window" %}{% elif mr.status == 'scheduled' %}{% trans "açılış gününü gözləyir" context "registrar.kollokvium_window" %}{% elif mr.status == 'inactive' %}{% trans "aktivləşdirmə gözləyir" context "registrar.kollokvium_window" %}{% else %}{% trans "tarix gözləyir" context "registrar.kollokvium_window" %}{% endif %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Bal yazma aralığı" context "registrar.kollokvium_window" %}</div>
+      <div class="ems-kpi__value kw-kpi__text">{% if mr.window %}{{ mr.window.opens_on|date:"d.m" }} – {{ mr.window.closes_on|date:"d.m.Y" }}{% else %}—{% endif %}</div>
+      <div class="ems-kpi__note">{% if mr.window %}{% trans "açılış – bağlanış" context "registrar.kollokvium_window" %}{% else %}{% trans "tarix gözləyir" context "registrar.kollokvium_window" %}{% endif %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Bal şkalası" context "registrar.kollokvium_window" %}</div>
+      <div class="ems-kpi__value">{{ s.interim.scale_label }}</div>
+      <div class="ems-kpi__note">{% trans "müəllim jurnalda yazır" context "registrar.kollokvium_window" %}</div>
+    </div>
+    <div class="ems-kpi">
+      <div class="ems-kpi__label">{% trans "Əlavə gün" context "registrar.kollokvium_window" %}</div>
+      <div class="ems-kpi__value">{{ s.kpi_extra_days }}</div>
+      <div class="ems-kpi__note">{% trans "cəmi verilib" context "registrar.kollokvium_window" %}</div>
+    </div>
+  </div>
+  {% endwith %}
+  {% elif s.period %}
+  {# ── KPI (kollokvium): semestrin K1/K2/K3 pəncərə mənzərəsi ───────────── #}
   <div class="ems-kpis ems-kpis--4">
     <div class="ems-kpi">
       <div class="ems-kpi__label">{% trans "Açıq" context "registrar.journal" %}</div>
@@ -125,17 +162,61 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
   </div>
   {% endif %}
 
-  <div class="kw-grid">
+  {% if not s.interim.is_midterm %}
+  {# Keçmiş dövr: niyə «Midterm pəncərələri» başlığı altında K1–K3 göründüyünü izah et. #}
+  <div class="ems-banner kw-modebanner"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+    <span>{% blocktrans with rule=s.interim.description year=s.midterm_from_label context "registrar.kollokvium_window" %}Köhnə qayda: {{ rule }}. Tək midterm {{ year }} tədris ilindən tətbiq olunur.{% endblocktrans %}</span>
+  </div>
+  {% endif %}
+
+  {% if s.stale_rows %}
+  {# Midterm semestrində köhnə qaydadan qalmış K2/K3 pəncərələri — jurnal onları istifadə etmir. #}
+  <div class="ems-banner ems-banner--warning kw-stale"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+    <div class="kw-stale__main">
+      <div class="ems-banner__title">{% trans "Köhnə qaydadan qalmış kollokvium pəncərələri" context "registrar.kollokvium_window" %}</div>
+      <div class="ems-banner__body">{% trans "Bu semestr midterm rejimindədir — aşağıdakı pəncərələr müəllim jurnalında istifadə olunmur. Qarışıqlıq olmasın deyə onları silin." context "registrar.kollokvium_window" %}</div>
+      <ul class="kw-stale__list">
+        {% for sr in s.stale_rows %}
+        <li class="kw-stale__item">
+          <span><b>{{ sr.label }}</b> · {{ sr.window.opens_on|date:"d.m.Y" }} – {{ sr.window.closes_on|date:"d.m.Y" }}</span>
+          {% if not s.period_is_past %}
+          <form method="post" action="{% url 'accounts:kollokvium_windows' %}{% if s.is_superadmin and s.selected_org %}?win_org={{ s.selected_org.id }}{% endif %}"
+                data-confirm data-confirm-variant="danger"
+                data-confirm-title="{% trans 'Köhnə pəncərəni sil' context 'registrar.kollokvium_window' %}"
+                data-confirm-body="{% trans 'Bu köhnə kollokvium pəncərəsi (əlavə günləri ilə birlikdə) silinsin?' context 'registrar.kollokvium_window' %}">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_window">
+            <input type="hidden" name="next" value="{{ s.post_next_url }}">
+            <input type="hidden" name="window_id" value="{{ sr.window.id }}">
+            <button type="submit" class="ems-btn ems-btn--sm ems-btn--danger"><i class="fas fa-trash" aria-hidden="true"></i> {% trans "Sil" context "registrar.kollokvium_window" %}</button>
+          </form>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="kw-grid{% if s.interim.is_midterm %} kw-grid--single{% endif %}">
     {% for kr in s.k_rows %}
-    <div class="ems-card kw-card">
+    <div class="ems-card kw-card" data-k-index="{{ kr.k_index }}">
       <div class="kw-card__top">
+        {% if s.interim.is_midterm %}
+        <h2 class="kw-card__k">{% blocktrans with label=kr.label scale=s.interim.scale_label context "registrar.kollokvium_window" %}{{ label }} — bal yazma pəncərəsi ({{ scale }} bal){% endblocktrans %}</h2>
+        {% else %}
         <h2 class="kw-card__k">{{ kr.label }}</h2>
+        {% endif %}
         {% if kr.status == 'open' %}<span class="ems-badge ems-badge--success"><i class="fas fa-unlock" aria-hidden="true"></i> {% trans "Açıq" context "registrar.journal" %}</span>
         {% elif kr.status == 'closed' %}<span class="ems-badge ems-badge--danger"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Bağlanıb" context "registrar.journal" %}</span>
         {% elif kr.status == 'scheduled' %}<span class="ems-badge ems-badge--primary"><i class="fas fa-clock" aria-hidden="true"></i> {% trans "Açılır" context "registrar.journal" %}</span>
         {% elif kr.status == 'inactive' %}<span class="ems-badge ems-badge--muted"><i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Aktiv deyil" context "registrar.journal" %}</span>
         {% else %}<span class="ems-badge ems-badge--neutral kw-chip--not-set">{% trans "Təyin olunmayıb" context "registrar.journal" %}</span>{% endif %}
       </div>
+
+      {% if s.interim.is_midterm %}
+      <p class="kw-card__lead">{% blocktrans with scale=s.interim.scale_label context "registrar.kollokvium_window" %}Bu semestrdə 3 kollokvium əvəzinə TƏK midterm keçirilir. Bal yazma vaxtını İmtahan Mərkəzi təyin edir: pəncərə aktiv və açıq olduqda müəllimlər elektron jurnalda hər tələbəyə {{ scale }} bal yazır. Bağlanış tarixindən sonra (verilmiş əlavə günlər daxil) bal yazmaq kilidlənir.{% endblocktrans %}</p>
+      {% endif %}
 
       {% if kr.can_set %}
       {# ── Tarix formu (tam en) — düymələr aşağıda yan-yana (form= atributu) ── #}
@@ -165,7 +246,7 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
       <form id="kw-toggle-{{ kr.k_index }}" method="post" action="{% url 'accounts:kollokvium_windows' %}{% if s.is_superadmin and s.selected_org %}?win_org={{ s.selected_org.id }}{% endif %}"
             data-confirm
             data-confirm-title="{% if kr.window.is_active %}{% trans 'Pəncərəni deaktiv et' context 'registrar.kollokvium_window' %}{% else %}{% trans 'Pəncərəni aktivləşdir' context 'registrar.kollokvium_window' %}{% endif %}"
-            data-confirm-body="{% if kr.window.is_active %}{% trans 'Bu pəncərəni deaktiv etsəniz, müəllimlər bu kollokvium üzrə bal yaza bilməyəcək. Davam edilsin?' context 'registrar.kollokvium_window' %}{% else %}{% trans 'Bu pəncərəni aktivləşdirsəniz, aralıq açıq olduqda müəllimlər bal yaza biləcək. Davam edilsin?' context 'registrar.kollokvium_window' %}{% endif %}">
+            data-confirm-body="{% if kr.window.is_active %}{% if s.interim.is_midterm %}{% trans 'Bu pəncərəni deaktiv etsəniz, müəllimlər midterm üzrə bal yaza bilməyəcək. Davam edilsin?' context 'registrar.kollokvium_window' %}{% else %}{% trans 'Bu pəncərəni deaktiv etsəniz, müəllimlər bu kollokvium üzrə bal yaza bilməyəcək. Davam edilsin?' context 'registrar.kollokvium_window' %}{% endif %}{% else %}{% trans 'Bu pəncərəni aktivləşdirsəniz, aralıq açıq olduqda müəllimlər bal yaza biləcək. Davam edilsin?' context 'registrar.kollokvium_window' %}{% endif %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="toggle_window_active">
         <input type="hidden" name="next" value="{{ s.post_next_url }}">
@@ -320,4 +401,4 @@ Select-lər bootstrap-single-select (global static/js/bootstrap_select.js).
      data-edit-submit="{% trans 'Dəyişikliyi yadda saxla' context 'registrar.kollokvium_window' %}"
      data-faculty="{% trans 'Fakültə' context 'registrar.kollokvium_window' %}"
      data-department="{% trans 'Kafedra' context 'registrar.kollokvium_window' %}"></div>
-<script defer src="{% static 'accounts/js/kollokvium_windows.js' %}?v=20260910-1"></script>
+<script defer src="{% static 'accounts/js/kollokvium_windows.js' %}?v=20260925-1"></script>

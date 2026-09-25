@@ -1,0 +1,341 @@
+/*
+ * «Ana səhifə» — fənn-fənn / dərs / jurnal SƏTİRLƏRİ (2026-09-25).
+ *
+ * `dashboard.css` (kart şəbəkəsi, başlıq, rəqəmlər) qlobal `_section_assets`-dən
+ * gəlir; bu fayl isə panelin İÇİNDƏ `<link>` ilə yüklənir ki, AJAX swap-da da
+ * gəlsin və qlobal fayldan SONRA kaskadlansın.
+ *
+ * Yalnız `--ems-*` tokenləri (layihə AÇIQ temalıdır — `prefers-color-scheme`
+ * qolu QƏSDƏN yoxdur).  Zolaqlar `<progress>` elementidir: dinamik en üçün
+ * inline `style` lazım deyil (CSP — `style-src` `unsafe-inline` vermir).
+ *
+ * Responsiv: geniş kart (`--wide`) ≥641 px-də iki sütun tutur; ≤640 px-də tək
+ * sütun, 375 px-də üfüqi sürüşmə YOXDUR (hər trek `minmax(0, 1fr)`).
+ */
+
+/* ── 1. Kart başlığı + izah + qeyd ──────────────────────────────────────── */
+.dash-card__heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-top: 4px;
+}
+
+.dash-card__subtitle {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.dash-card__caption {
+    margin: 0 0 calc(-1 * var(--ems-sp-2));
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.dash-card__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+    text-wrap: pretty;
+}
+
+.dash-card__notice i {
+    flex: none;
+    margin-top: 3px;
+    color: var(--ems-primary-400);
+}
+
+/* Geniş kart — fənn-fənn siyahılar (davamiyyət, cari ballar, jurnallar). */
+.dash-card--wide {
+    grid-column: span 2;
+}
+
+/* ── 2. Fənn sətirləri ──────────────────────────────────────────────────── */
+.dash-subjects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: var(--ems-sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.dash-subj {
+    min-width: 0;
+}
+
+.dash-subj__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    height: 100%;
+    min-width: 0;
+    padding: var(--ems-sp-4) var(--ems-sp-5);
+    border: 1px solid var(--ems-border);
+    border-left: 3px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    text-decoration: none;
+}
+
+.dash-subj--ok .dash-subj__link {
+    border-left-color: var(--ems-success);
+}
+
+.dash-subj--near .dash-subj__link {
+    border-left-color: var(--ems-warning-500);
+}
+
+.dash-subj--barred .dash-subj__link {
+    border-left-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+.dash-subj__link:hover {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-text);
+}
+
+/* Hover konturu status rəngini silməsin — sol xətt həmişə statusu daşıyır. */
+.dash-subj--ok .dash-subj__link:hover {
+    border-left-color: var(--ems-success);
+}
+
+.dash-subj--near .dash-subj__link:hover {
+    border-left-color: var(--ems-warning-500);
+}
+
+.dash-subj--barred .dash-subj__link:hover {
+    border-left-color: var(--ems-danger);
+}
+
+/* Fokus: layihə boyu NAZİK neytral kontur + yumşaq kölgə (qalın göy halqa yoxdur). */
+.dash-subj__link:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.dash-subj__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-2) var(--ems-sp-3);
+    min-width: 0;
+}
+
+.dash-subj__title {
+    flex: 1 1 12rem;
+    min-width: 0;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+}
+
+.dash-subj__chip {
+    flex: none;
+    max-width: 100%;
+}
+
+.dash-subj__ext {
+    flex: none;
+    margin-top: 3px;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-400);
+}
+
+.dash-subj__meta,
+.dash-subj__value {
+    font-size: var(--ems-fs-sm);
+    line-height: 1.4;
+    color: var(--ems-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.dash-subj__value {
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.dash-subj__score {
+    flex: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    white-space: nowrap;
+}
+
+.dash-subj__score strong {
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.dash-subj__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.dash-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 2px var(--ems-sp-3);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-primary-800);
+}
+
+.dash-chip strong {
+    font-weight: 800;
+}
+
+.dash-chip--empty {
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+/* ── 3. Zolaq (`<progress>`) ────────────────────────────────────────────── */
+.dash-bar {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 6px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200); /* Gecko: trek */
+    overflow: hidden;
+    color: var(--ems-primary-600); /* köhnə mühərriklər: dolğu */
+}
+
+.dash-bar::-webkit-progress-bar {
+    background: var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill);
+}
+
+.dash-bar::-webkit-progress-value {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+.dash-bar::-moz-progress-bar {
+    background: var(--ems-primary-600);
+    border-radius: var(--ems-r-pill);
+}
+
+/* Qayıb zolağı — ton buraxılış statusundan (ok / near / barred / frozen / unknown). */
+.dash-bar--ok::-webkit-progress-value { background: var(--ems-success); }
+.dash-bar--ok::-moz-progress-bar { background: var(--ems-success); }
+.dash-bar--near::-webkit-progress-value { background: var(--ems-warning-500); }
+.dash-bar--near::-moz-progress-bar { background: var(--ems-warning-500); }
+.dash-bar--barred::-webkit-progress-value { background: var(--ems-danger); }
+.dash-bar--barred::-moz-progress-bar { background: var(--ems-danger); }
+.dash-bar--frozen::-webkit-progress-value,
+.dash-bar--unknown::-webkit-progress-value { background: var(--ems-neutral-400); }
+.dash-bar--frozen::-moz-progress-bar,
+.dash-bar--unknown::-moz-progress-bar { background: var(--ems-neutral-400); }
+
+/* ── 4. Dərslər (bu gün / növbəti dərs günü) ────────────────────────────── */
+.dash-lessons {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: var(--ems-sp-2) 0 0;
+    border-top: 1px solid var(--ems-border);
+    list-style: none;
+}
+
+.dash-lesson {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--ems-sp-4);
+    padding: var(--ems-sp-3) 0;
+}
+
+.dash-lesson + .dash-lesson {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.dash-lesson__time {
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    white-space: nowrap;
+}
+
+.dash-lesson__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.dash-lesson__title {
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+.dash-lesson__meta {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.dash-lesson.is-past .dash-lesson__time,
+.dash-lesson.is-past .dash-lesson__title {
+    color: var(--ems-neutral-500);
+}
+
+.dash-lesson.is-now .dash-lesson__title {
+    color: var(--ems-text);
+}
+
+.dash-lesson__now {
+    align-self: center;
+}
+
+/* ── 5. Responsiv ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    /* Tək sütunda `span 2` gizli ikinci trek yaradıb üfüqi sürüşmə verərdi. */
+    .dash-card--wide {
+        grid-column: auto;
+    }
+
+    .dash-lesson {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .dash-lesson__time {
+        grid-column: 1 / -1;
+    }
+
+    .dash-subj__score {
+        white-space: normal;
+    }
+}

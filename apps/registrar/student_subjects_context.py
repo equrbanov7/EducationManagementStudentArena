@@ -31,13 +31,13 @@ from decimal import Decimal
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar import exam_attempt_history, finals, finals_batch, gradebook, services
+from apps.registrar import exam_attempt_history, finals, finals_batch, gradebook, interim_assessment, services
 from apps.registrar.cabinet_policy import (
     approved_syllabus_offerings,
     assessment_weights_view,
     other_period_subject_rows,
 )
-from apps.registrar.models import AssessmentScheme
+from apps.registrar.models import AssessmentScheme, ComponentKind
 
 #: «Limitə yaxın» həddi — icazəli qayıbın 75%-i.  Jurnalın xəbərdarlıq siyahısı
 #: (:func:`apps.registrar.student_journal_context.warnings_for`) ilə EYNİ hədd:
@@ -92,16 +92,38 @@ def _scheme_map(offerings) -> dict:
     return found
 
 
-def _component_breakdown(batch, enrollment) -> list:
-    """``gradebook.get_component_breakdown``-un toplu güzgüsü (eyni forma, sorğusuz)."""
+def _component_breakdown(batch, enrollment, *, midterm=False) -> list:
+    """``gradebook.get_component_breakdown``-un toplu güzgüsü (eyni forma, sorğusuz).
+
+    ``midterm`` (2026/2027-dən): köhnə kodun bu dövrdə yaratdığı BALSIZ «Kollokvium N»
+    qalıqları çip kimi göstərilmir — tələbə yalnız «Midterm …/20» görür."""
     components = sorted(batch.components_by_offering.get(enrollment.offering_id, []), key=lambda c: (c.order, c.name))
     if not components:
         return []
     score_by = {cs.component_id: cs.score for cs in batch.scores_by_enrollment.get(enrollment.id, [])}
+    if midterm:
+        keep = interim_assessment.MIDTERM_COMPONENT_NAME.lower()
+        components = [
+            c
+            for c in components
+            if c.kind != ComponentKind.KOLLOKVIUM or c.name.strip().lower() == keep or score_by.get(c.id) is not None
+        ]
     return [{"name": c.name, "score": score_by.get(c.id), "max": c.max_score} for c in components]
 
 
-def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment) -> None:
+def _is_midterm_row(enrollment, period, organization) -> bool:
+    """Sətrin dövrü midterm rejimindədirmi — əlavə sorğusuz (dövr ya keşdədir, ya bölmənin dövrüdür;
+    təşkilat çağırandan gəlir — ``offering.organization`` FK-sı sətir başına sorğu edərdi)."""
+    offering = enrollment.offering
+    cached = offering._state.fields_cache.get("period")
+    if cached is None and period is not None and offering.period_id == period.id:
+        cached = period
+    if cached is None:
+        return False  # bilinməyən dövr üçün sorğu etmirik — köhnə forma (bütün komponentlər) qalır
+    return interim_assessment.mode_for_period(cached, organization=organization) == interim_assessment.MODE_MIDTERM
+
+
+def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, period=None) -> None:
     """Hər fənn sətrinə jurnal xülasəsi, yekun nəticə, komponentlər, cəhdlər,
     sillabus keçidləri və görünüş açarlarını (``ui``) əlavə edir — yerində."""
     enrollments = [row["enrollment"] for row in rows]
@@ -128,7 +150,9 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment) ->
         row["final"] = finals.compute_final_result(
             enrollment=enrollment, scheme=schemes.get(offering.id), organization=organization, batch=batch
         )
-        row["components"] = _component_breakdown(batch, enrollment)
+        row["components"] = _component_breakdown(
+            batch, enrollment, midterm=_is_midterm_row(enrollment, period, organization)
+        )
         row["attempts"] = attempts_by_subject.get(offering.subject_id, [])
         row["ui"] = {"status": eligibility_status(row.get("eligibility"))}
 
@@ -262,7 +286,11 @@ def build_section(*, request, organization, record, period, semester_number) -> 
     )
     journal_by_enrollment = {row["enrollment"].id: row["journal"] for row in journal_summary["subjects"]}
     enrich_subject_rows(
-        organization=organization, record=record, rows=data["subjects"], journal_by_enrollment=journal_by_enrollment
+        organization=organization,
+        record=record,
+        rows=data["subjects"],
+        journal_by_enrollment=journal_by_enrollment,
+        period=period,
     )
 
     group_decisions = data["group_decisions"]

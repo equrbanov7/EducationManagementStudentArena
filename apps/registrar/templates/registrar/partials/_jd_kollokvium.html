@@ -1,13 +1,20 @@
 {% load i18n %}
-{% comment %}Kollokvium tabı — İmtahan Mərkəzi PƏNCƏRƏSİ ilə idarə olunur.
-Tarixi/aralığı İmtahan Mərkəzi təyin edir (müəllim tarix yazmır). Müəllim yalnız
-pəncərə AÇIQ olanda 0–10 tam bal seçə/dəyişə bilər (bootstrap-select); boş = 0
-sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi YOXDUR.
+{% comment %}Aralıq qiymətləndirmə tabı — İmtahan Mərkəzi PƏNCƏRƏSİ ilə idarə olunur.
+Rejim açılışın dövründən gəlir (apps/registrar/interim_assessment.py): 2026/2027-dən TƏK
+«Midterm» sütunu (0–20 bal), keçmiş dövrlərdə K1–K3 (hər biri 0–10). Tarixi/aralığı
+İmtahan Mərkəzi təyin edir (müəllim tarix yazmır). Müəllim yalnız pəncərə AÇIQ olanda
+tam bal seçə/dəyişə bilər (bootstrap-select); boş = 0 sayılır. Pəncərə bağlananda tam
+kilidlənir — burada 2 saat kilidi YOXDUR. Midterm dövründə balı olan köhnə «Kollokvium N»
+qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
 {% endcomment %}
 <form method="post" action="{% url 'registrar:journal_kollokvium_save' offering.id %}" class="jd-kollokvium-form" data-jd-draft="kollokvium">
     {% csrf_token %}
     <p class="jd2-panel-hint">
+        {% if kollokvium_grid.spec.is_midterm %}
+        {% trans "Midterm — aralıq imtahandır, 0–20 bal. Bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır." context "registrar.journal" %}
+        {% else %}
         {% trans "Kollokvium bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır." context "registrar.journal" %}
+        {% endif %}
     </p>
 
     <div class="journal-grid-wrap jd2-grid-wrap" data-journal-grid>
@@ -16,8 +23,8 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                 <tr>
                     <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                     {% for col in kollokvium_grid.columns %}
-                    <th class="jd2-th-koll jd2-kwin--{{ col.status }}">
-                        <span class="jd2-kwin-k">K{{ forloop.counter }}</span><span class="jd2-th-sub">/{{ col.component.max_score }}</span>
+                    <th class="jd2-th-koll jd2-kwin--{{ col.status }}{% if kollokvium_grid.spec.is_midterm and col.is_primary %} jd2-th-koll--midterm{% endif %}">
+                        <span class="jd2-kwin-k">{{ col.label }}</span><span class="jd2-th-sub">/{{ col.component.max_score }}</span>{% if kollokvium_grid.spec.is_midterm and col.is_primary %}<span class="jd2-kwin-scale">{% trans "şkala 0–20" context "registrar.journal" %}</span>{% endif %}
                         <div class="jd2-kwin-state">
                             {% if col.status == 'open' %}
                             <span class="jd2-kwin-chip is-open"><i class="fas fa-unlock"></i> {% trans "Açıq" context "registrar.journal" %}</span>
@@ -30,13 +37,15 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                             <span class="jd2-kwin-deadline">{{ col.opens_on|date:"d.m.Y" }}</span>
                             {% elif col.status == 'inactive' %}
                             <span class="jd2-kwin-chip is-off"><i class="fas fa-hourglass-half"></i> {% trans "Aktiv deyil" context "registrar.journal" %}</span>
+                            {% elif col.status == 'archived' %}
+                            <span class="jd2-kwin-chip is-off"><i class="fas fa-box-archive"></i> {% trans "Köhnə qeyd" context "registrar.journal" %}</span>
                             {% else %}
                             <span class="jd2-kwin-chip is-off"><i class="fas fa-ban"></i> {% trans "Təyin olunmayıb" context "registrar.journal" %}</span>
                             {% endif %}
                         </div>
                     </th>
                     {% endfor %}
-                    <th class="jd2-th-koll is-total">{% trans "CƏMİ" context "registrar.journal" %}<div class="jd2-th-sub">/30</div></th>
+                    {% if kollokvium_grid.show_total %}<th class="jd2-th-koll is-total">{% trans "CƏMİ" context "registrar.journal" %}<div class="jd2-th-sub">/{{ kollokvium_grid.total_max }}</div></th>{% endif %}
                 </tr>
             </thead>
             <tbody>
@@ -54,7 +63,7 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                                 data-corr-cell data-corr-target="component"
                                 data-component-id="{{ cell.component.id }}" data-enrollment-id="{{ row.enrollment.id }}"
                                 data-student="{{ row.student.get_full_name|default:row.student.username }}"
-                                data-kind="{% trans 'Kollokvium' context 'registrar.journal' %}"
+                                data-kind="{{ cell.component.name }}" data-cm-max="{{ cell.component.max_score }}"
                                 data-cm-score="{% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% endif %}"
                                 {% if cell.corrected %}data-history="{{ cell.corr_key }}"{% endif %}>
                             {% if cell.score is not None %}{{ cell.score|floatformat:'-2' }}{% else %}—{% endif %}{% if cell.corrected %}<span class="corr-fixed-badge">✎</span>{% endif %}
@@ -74,7 +83,7 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
                         {% endif %}
                     </td>
                     {% endfor %}
-                    <td class="jd2-cell is-total"><span class="jd2-ksum" data-jd-ksum>—</span></td>
+                    {% if kollokvium_grid.show_total %}<td class="jd2-cell is-total"><span class="jd2-ksum" data-jd-ksum>—</span></td>{% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
@@ -88,7 +97,11 @@ sayılır. Pəncərə bağlananda tam kilidlənir — kollokviumda 2 saat kilidi
     {% elif can_edit %}
     <p class="jd2-panel-hint jd2-kwin-note">
         <i class="fas fa-circle-info"></i>
+        {% if kollokvium_grid.spec.is_midterm %}
+        {% trans "Hazırda açıq Midterm pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin aralığı aktivləşdirməsini gözləyin." context "registrar.journal" %}
+        {% else %}
         {% trans "Hazırda açıq kollokvium pəncərəsi yoxdur — bal yazmaq üçün İmtahan Mərkəzinin aralığı aktivləşdirməsini gözləyin." context "registrar.journal" %}
+        {% endif %}
     </p>
     {% endif %}
 </form>

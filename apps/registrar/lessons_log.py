@@ -34,6 +34,7 @@ from django.db.models import Count, Min, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.registrar import lessons_log_units
 from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun re-export
     ALL,
     RANGE_CUSTOM,
@@ -61,6 +62,8 @@ from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re
     range_totals,
     totals_cache_key,
 )
+from apps.registrar.lessons_log_units import filter_state as unit_filter_state  # noqa: F401 — Fakültə/Kafedra
+from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
 from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
 
@@ -143,11 +146,25 @@ def education_form_options() -> list:
     return [{"value": str(value), "label": str(label)} for value, label in EducationForm.choices]
 
 
-def apply_filters(lessons, *, q="", offering="", kind="", group="", teacher="", form="", supervisor=False):
+def apply_filters(
+    lessons,
+    *,
+    q="",
+    offering="",
+    kind="",
+    group="",
+    teacher="",
+    form="",
+    supervisor=False,
+    faculty_unit=None,
+    kafedra_unit=None,
+):
     """Bölmə VƏ CSV üçün EYNİ süzgəc zənciri (tək mənbə).
 
     ``teacher`` yalnız nəzarətçidə tətbiq olunur — adi müəllimin sorğusunda
     parametr SƏSSİZ keçilir (panel), CSV isə onu ayrıca 403 ilə rədd edir.
+    ``faculty_unit`` / ``kafedra_unit`` — həll olunmuş bölmələr (tərif və kaskad:
+    :mod:`apps.registrar.lessons_log_units`).
     """
     if q:
         lessons = lessons.filter(
@@ -167,6 +184,10 @@ def apply_filters(lessons, *, q="", offering="", kind="", group="", teacher="", 
         lessons = lessons.filter(offering__group__settings__education_form=form)
     if teacher and supervisor:
         lessons = lessons.filter(Q(instructor_id=teacher) | Q(instructor__isnull=True, offering__instructor=teacher))
+    if faculty_unit is not None:
+        lessons = lessons.filter(lessons_log_units.faculty_q(faculty_unit))
+    if kafedra_unit is not None:
+        lessons = lessons.filter(lessons_log_units.kafedra_lesson_q(kafedra_unit))
     return lessons
 
 
@@ -328,6 +349,9 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
                     first_mark=bucket.get("first_mark"),
                 ),
                 "is_legacy": bool(lesson.is_legacy_synthesised),
+                # «Cədvəldən kənar» (UNEC P1-1): dərs cədvəl slotuna uyğun gəlmədən, səbəblə açılıb.
+                "off_schedule": bool(lesson.off_schedule_reason),
+                "off_schedule_reason": lesson.off_schedule_reason,
             }
         )
     return rows
@@ -351,6 +375,7 @@ def csv_rows(rows) -> list:
         pgettext(_CTX, "Qiymətləndirilib"),
         pgettext(_CTX, "Akademik saat"),
         pgettext(_CTX, "Jurnal qeydi"),
+        pgettext(_CTX, "Cədvəldən kənar (səbəb)"),
     ]
     note_labels = {
         NOTE_ON_TIME: pgettext(_CTX, "Vaxtında yazılıb"),
@@ -376,6 +401,7 @@ def csv_rows(rows) -> list:
                 row["graded"],
                 row["hours"],
                 note_labels.get(row["note"], row["note"]),
+                row.get("off_schedule_reason", ""),
             ]
         )
     return out
@@ -423,6 +449,8 @@ __all__ = [
     "scoped_lessons",
     "season_of",
     "select_periods",
+    "unit_filter_state",
+    "unrecorded_slots",
     "window_for_periods",
     "year_options",
 ]

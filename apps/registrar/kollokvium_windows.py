@@ -1,4 +1,4 @@
-"""Kollokvium pəncərəsi gating servisi.
+"""Kollokvium / midterm pəncərəsi gating servisi.
 
 Jurnal (müəllim bal yazır) və İmtahan Mərkəzi (pəncərəni idarə edir) bu servisi
 paylaşır. Bir yerdə saxlanır ki, "açıqdır?" qərarı hər iki tərəfdə eyni olsun.
@@ -128,6 +128,8 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
 
     Qaydalar:
 
+    0. **Rejim.** 2026/2027-dən (midterm rejimi, :mod:`apps.registrar.interim_assessment`)
+       dövrdə YALNIZ bir pəncərə var — ``k_index=0`` («Midterm»); keçmiş dövrlərdə K1–K3.
     1. **Keçmiş bağlanış — yalnız YARADILIŞDA qadağan.** Bağlanış tarixi
        bugündən əvvəldirsə və bu YENİ sətirdirsə (``is_new``), rədd et. Artıq
        mövcud (işləyən/bitmiş) pəncərəni UZATMAQ (redaktə) sərbətdir —
@@ -141,7 +143,17 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
 
     ``KollokviumWindowRuleError`` qaldırır (view bunu forma xətasına çevirir).
     """
+    from apps.registrar import interim_assessment
+
     KollokviumWindow = django_apps.get_model("registrar", "KollokviumWindow")
+
+    spec = interim_assessment.spec_for_period(period, organization)
+    if not 0 <= int(k_index) < spec.count:
+        if spec.is_midterm:
+            raise KollokviumWindowRuleError(
+                "Bu dövrdə 3 kollokvium yoxdur — tək Midterm (0–20 bal) pəncərəsi təyin olunur."
+            )
+        raise KollokviumWindowRuleError(f"Kollokvium nömrəsi K1–K{spec.count} aralığında olmalıdır.")
 
     if is_new and closes_on < today:
         raise KollokviumWindowRuleError(
@@ -149,15 +161,20 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
             "(artıq mövcud pəncərəni uzatmaq üçün onun tarixini redaktə edin)."
         )
 
-    siblings = KollokviumWindow.objects.filter(organization=organization, period=period).exclude(k_index=k_index)
+    # Rejimdən kənar köhnə pəncərələr (midterm dövründə qalmış K2/K3) sıra qaydasına qatılmır —
+    # əks halda qalıq K2 tək Midterm pəncərəsinin saxlanmasını «K1 … K2» mesajı ilə bloklayırdı.
+    siblings = KollokviumWindow.objects.filter(
+        organization=organization, period=period, k_index__lt=spec.count
+    ).exclude(k_index=k_index)
+    this_label = spec.label_for(int(k_index))
     for sibling in siblings:
+        other_label = spec.label_for(sibling.k_index)
         if sibling.k_index < k_index and opens_on < sibling.closes_on:
             raise KollokviumWindowRuleError(
-                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} bitmədən "
+                f"{this_label} pəncərəsi {other_label} bitmədən "
                 f"({sibling.closes_on:%d.%m.%Y}) əvvəl başlaya bilməz."
             )
         if sibling.k_index > k_index and closes_on > sibling.opens_on:
             raise KollokviumWindowRuleError(
-                f"K{k_index + 1} pəncərəsi K{sibling.k_index + 1} başlamazdan "
-                f"({sibling.opens_on:%d.%m.%Y}) əvvəl bitməlidir."
+                f"{this_label} pəncərəsi {other_label} başlamazdan " f"({sibling.opens_on:%d.%m.%Y}) əvvəl bitməlidir."
             )

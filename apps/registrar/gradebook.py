@@ -524,11 +524,11 @@ def get_student_journal_summary(*, record, period, semester_number):
     marks_by_enr: dict = defaultdict(list)
     for m in LessonMark.objects.filter(enrollment_id__in=enr_ids).select_related("lesson"):
         marks_by_enr[m.enrollment_id].append(m)
-    from apps.registrar.models import AssessmentComponent
+    # Giriş balı üçün komponent + komponent balı + sərbəst iş sayı BİR dəfə (əvvəl hər fənn
+    # üçün ``entry_score_for`` 1–3 sorğu edirdi — «Ana səhifə» fənn kartlarında N+1).
+    from apps.registrar import finals_batch
 
-    comps_by_off: dict = defaultdict(list)
-    for c in AssessmentComponent.objects.filter(offering_id__in=offering_ids):
-        comps_by_off[c.offering_id].append(c)
+    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=marks_by_enr)
     # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu).
     frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
     hours_map = exam_eligibility.lesson_hours_map(offering_ids)
@@ -540,12 +540,11 @@ def get_student_journal_summary(*, record, period, semester_number):
     subjects = []
     for enrollment in enrollments:
         offering = enrollment.offering
-        marks = marks_by_enr.get(enrollment.id, [])
         # TƏK MƏNBƏ: birləşmə ilə köçürülən saat da buradadır (bax yuxarıdakı şərh).
         absence_hours = enrollment.absence_hours or 0
         scheme = getattr(offering, "assessment_scheme", None)
         cap = scheme.entry_score_max if scheme else 50
-        entry_score = entry_score_for(enrollment, cap, marks=marks, components=comps_by_off.get(offering.id, []))
+        entry_score = entry_score_for(enrollment, cap, **entry_batch.entry_kwargs(enrollment))
         lessons_held = lesson_counts.get(offering.id, 0)
         total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
         allowed = Decimal(total_hours) * Decimal(limit_percent) / Decimal(100)

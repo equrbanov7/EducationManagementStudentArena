@@ -559,7 +559,9 @@
 .syl-planhours__text { margin: 0 0 10px; font-size: var(--ems-fs-base); font-weight: 600; color: var(--ems-neutral-700); }
 .syl-planhours__fields { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
 .syl-planhours__field { display: flex; flex-direction: column; gap: 4px; width: 120px; font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ems-neutral-500); }
-.syl-planhours__field .ems-input { width: 100%; }
+.syl-planhours__field .ems-input,
+.syl-planhours__field .bootstrap-single-select { width: 100%; text-transform: none; letter-spacing: normal; font-weight: 600; }
+.syl-planhours__field { width: 140px; }
 .syl-planhours__msg { margin: 8px 0 0; font-size: var(--ems-fs-sm); font-weight: 600; color: var(--ems-danger-700); }
 .syl-planhours__msg[hidden] { display: none; }
 .syl-weights--standard .syl-weight--final { border-top: 1px solid var(--ems-border); margin-top: 4px; padding-top: 8px; }

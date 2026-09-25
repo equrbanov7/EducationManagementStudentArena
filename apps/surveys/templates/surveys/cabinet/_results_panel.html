@@ -1,0 +1,42 @@
+{% load i18n static survey_cabinet %}
+{% comment %}«Sorğu nəticələri» — MİNİMAL xülasə (son kampaniya, k-anonim). Tam analitika
+(filtrlər, qrafiklər, müəllim kartı) ayrıca işdə bu partial-ı əvəz edəcək; data mənbəyi
+`apps.surveys.public` API-sidir.{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260925-1">
+{% survey_results_panel as rp %}
+<div class="svc">
+    {% if not rp.has_access %}
+    <p class="svc-empty">{% trans "Sorğu nəticələrinə baxmaq üçün icazəniz və ya struktur əhatəniz yoxdur." context "surveys.cabinet" %}</p>
+    {% elif not rp.campaign %}
+    <p class="svc-empty">{% trans "Hələ heç bir sorğu kampaniyası keçirilməyib." context "surveys.cabinet" %}</p>
+    {% else %}
+    {% with s=rp.summary %}
+    <p class="svc-intro">
+        {{ rp.campaign.period.name }} · {{ rp.campaign.period.academic_year }}
+        {% if not rp.is_org_wide %} · {% trans "yalnız sizin struktur əhatəniz" context "surveys.cabinet" %}{% endif %}
+    </p>
+    <div class="svc-kpis">
+        <div class="svc-kpi">
+            <span class="svc-kpi__label">{% trans "Cavablar" context "surveys.cabinet" %}</span>
+            <span class="svc-kpi__value">{{ s.n }}</span>
+        </div>
+        <div class="svc-kpi">
+            <span class="svc-kpi__label">{% trans "İştirak" context "surveys.cabinet" %}</span>
+            <span class="svc-kpi__value">{% if s.participation.rate is not None %}{% widthratio s.participation.rate 1 100 %}%{% else %}—{% endif %}</span>
+        </div>
+        <div class="svc-kpi">
+            <span class="svc-kpi__label">{% trans "Ümumi bal (1–10)" context "surveys.cabinet" %}</span>
+            <span class="svc-kpi__value">{% if s.avg_overall is not None %}{{ s.avg_overall|floatformat:2 }}{% else %}—{% endif %}</span>
+        </div>
+        <div class="svc-kpi">
+            <span class="svc-kpi__label">{% trans "Likert indeksi (1–5)" context "surveys.cabinet" %}</span>
+            <span class="svc-kpi__value">{% if s.likert_index is not None %}{{ s.likert_index|floatformat:2 }}{% else %}—{% endif %}</span>
+        </div>
+    </div>
+    {% if s.suppressed %}
+    <p class="svc-note">{% blocktrans trimmed with k=s.k context "surveys.cabinet" %}Anonimliyi qorumaq üçün nəticələr ən azı {{ k }} cavab toplandıqdan sonra göstərilir.{% endblocktrans %}</p>
+    {% endif %}
+    <p class="svc-note">{% trans "Müəllim, kafedra və sual üzrə ətraflı analitika, filtrlər və qrafiklər bu bölməyə əlavə olunur." context "surveys.cabinet" %}</p>
+    {% endwith %}
+    {% endif %}
+</div>

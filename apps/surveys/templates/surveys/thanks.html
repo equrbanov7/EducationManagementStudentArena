@@ -1,0 +1,11 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+
+{% block survey_content %}
+<section class="svy-block svy-block--thanks">
+    <p class="svy-thanks__icon" aria-hidden="true"><i class="fas fa-circle-check"></i></p>
+    <h1 class="svy-title">{% trans "Təşəkkür edirik!" context "surveys.student" %}</h1>
+    <p class="svy-lead">{% trans "Bütün sorğuları doldurdunuz. Cavablarınız anonim şəkildə qeydə alındı və tədrisin yaxşılaşdırılması üçün ümumiləşdirilmiş şəkildə istifadə olunacaq." context "surveys.student" %}</p>
+    <a class="svy-btn svy-btn--primary" href="{{ cabinet_url }}">{% trans "Kabinetə keç" context "surveys.student" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+</section>
+{% endblock %}

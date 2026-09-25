@@ -2,11 +2,13 @@
 
 from . import analytics  # noqa: F401
 from . import catalog_console  # noqa: F401
+from . import dashboard_data  # noqa: F401
 from . import gradebook  # noqa: F401
 from . import grading_scale  # noqa: F401
 from . import handover  # noqa: F401
 from . import handover_actions  # noqa: F401
 from . import handover_query  # noqa: F401
+from . import interim_assessment  # noqa: F401
 from . import journal_close  # noqa: F401
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
@@ -65,12 +67,14 @@ __all__ = [
     "build_semester_opening",
     "build_subject_catalog",
     "catalog_console",
+    "dashboard_data",
     "eligibility_rules",
     "gradebook",
     "grading_scale",
     "handover",
     "handover_actions",
     "handover_query",
+    "interim_assessment",
     "is_custom",
     "journal_close",
     "journal_scope",

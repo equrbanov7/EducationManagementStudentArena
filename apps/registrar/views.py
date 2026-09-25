@@ -121,7 +121,7 @@ def journal_detail(request, offering_id):
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
-    from apps.registrar import journal_close_notices, journal_extras, journal_policy
+    from apps.registrar import journal_activation, journal_close_notices, journal_extras, journal_policy
     from apps.registrar import journal_window as _jw
     from apps.registrar import syllabus_notice
 
@@ -208,7 +208,6 @@ def journal_detail(request, offering_id):
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.
         "syllabus_gate": syllabus_gate,
-        "grade_history": grade_audit.get_grade_history(offering=offering) if active_tab in {"grid", "yekun"} else [],
         "lesson_kinds": LessonKind.choices,
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
         "topic_choices": journal_extras.lesson_topic_choices(offering),
@@ -216,7 +215,7 @@ def journal_detail(request, offering_id):
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "seminar_score_options": list(range(0, 11)),
-        "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
+        "kollokvium_score_options": journal_extras.interim_score_options(offering),  # 0–10 / midterm 0–20
         "today_parity": today_parity,
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
@@ -252,6 +251,7 @@ def journal_detail(request, offering_id):
         from apps.registrar import item_corrections
 
         context.update(item_corrections.annotate_normal_view(offering, context))
+    context.update(journal_activation.strip_context(offering, context))  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
     return render(request, "registrar/journal_detail.html", context)
 
 
@@ -432,7 +432,7 @@ def _handle_add_lesson(request, offering):
     """Create a new lesson column (date + type + topic + standart dərs saatı)."""
     # README §8/2 — siyasət açıqdırsa təsdiqlənmiş sillabussuz dərs açılmır:
     # 403 + SƏBƏB KODU (mesaj/redirect deyil, çünki qayda acceptance şərtidir).
-    from apps.registrar import journal_policy
+    from apps.registrar import journal_activation, journal_policy
 
     gate = journal_policy.syllabus_gate(offering)
     if gate["locked"]:
@@ -473,14 +473,12 @@ def _handle_add_lesson(request, offering):
         messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
-    # #6 — fənnin tam saat həddi: keçirilmiş + yeni saat toplamı keçməsin (60→62 olmaz).
-    summary = _je.journal_teaching_summary(offering)
-    if summary["total"] and summary["scheduled_total"] + (hours or gradebook.DEFAULT_LESSON_HOURS) > summary["total"]:
-        messages.error(
-            request,
-            _("Fənnin dərs saatı həddi (%(t)s saat) keçilir — keçirilmiş %(h)s saat, qalan yalnız %(r)s saat.")
-            % {"t": summary["total"], "h": summary["scheduled_total"], "r": summary["remaining"]},
-        )
+    # #6 saat həddi + cədvəldən kənar dərsin SƏBƏBİ (UNEC P1-1) — «Aktivləşdir» yolu ilə ORTAQ qayda.
+    off_reason, rule_error = journal_activation.check_manual_lesson(
+        offering, date=date, start_time=start_time, hours=hours, raw_reason=request.POST.get("off_schedule_reason")
+    )
+    if rule_error:
+        messages.error(request, rule_error)
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     # #9 — bu dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); boşdursa açılışınkı.
@@ -518,6 +516,7 @@ def _handle_add_lesson(request, offering):
             instructor=instructor,
             room=room,
             allow_past=allow_past,
+            off_schedule_reason=off_reason,
         )
         if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)
             grade_audit.log_backdated_lesson(offering=offering, lesson=lesson, by_user=request.user)

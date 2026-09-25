@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     "apps.exams",
     "apps.appeals.apps.AppealsConfig",
     "apps.applications.apps.ApplicationsConfig",
+    # Anonim müəllim qiymətləndirmə sorğusu (2026-09-25) — bax apps/surveys/public.py.
+    "apps.surveys.apps.SurveysConfig",
     "apps.trial_exams.apps.TrialExamsConfig",
     "core.admin_apps.SecureAdminConfig",
     "django.contrib.auth",
@@ -77,6 +79,10 @@ MIDDLEWARE = [
     # request.user and tenant context are resolved and a suspended org still logs
     # out first. Exempts the set-password view, logout, static, admin (see mw).
     "apps.accounts.middleware.FirstLoginPasswordMiddleware",
+    # Anonim sorğu qapısı (2026-09-25): məcburi kampaniya doldurulmayınca tələbə
+    # kabineti /sorgu/-ya yönlənir. İlk-giriş axınından SONRA (o, üstündür); view-as,
+    # heyət və kabinetdən kənar yollar üçün sıfır sorğu. Bax apps/surveys/middleware.py.
+    "apps.surveys.middleware.SurveyGateMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
