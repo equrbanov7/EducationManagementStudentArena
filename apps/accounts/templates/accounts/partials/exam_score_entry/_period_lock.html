@@ -3,7 +3,8 @@
 ancaq RİM rəhbəri tərəfindən təqdimat əsasında … jurnalda necə «düzəliş aktivləşdir»
 düyməsi var, burada da elə olsun»).
 
-· kilidli + rejim aktiv deyil → xəbərdarlıq; RİM rəhbəri / superadmin üçün
+· bitmiş + rejim aktiv deyil → xəbərdarlıq (boş bal yazılır — N gündən köhnə dövrdə
+  sənədlə; yazılmış bal dəyişmir); RİM rəhbəri / superadmin üçün
   «Düzəliş rejimini aktivləşdir» (jurnalın `?correct=1` güzgüsü: `?ese_correct=1`);
 · rejim aktiv → banner + «Düzəliş rejimindən çıx (kilidlə)».
 Server qapısı `apps/registrar/exam_score_period_lock.py`-dadır — bu yalnız UX-dir.{% endcomment %}
@@ -15,8 +16,12 @@ Server qapısı `apps/registrar/exam_score_period_lock.py`-dadır — bu yalnız
       <b>{% trans "Düzəliş rejimi aktivdir" context "registrar.exam_score_entry" %}</b>
       <span>{% trans "Bitmiş dövrün balları yalnız təqdimat əsasında yazılır — hər yazı üçün səbəb, qeyd və skan edilmiş sənəd məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
     {% else %}
-      <b>{% trans "Bitmiş dövr — ballar kilidlidir" context "registrar.exam_score_entry" %}</b>
-      <span>{% trans "Bu semestr başa çatıb: ilk daxiletmə, dəyişiklik və fayldan yükləmə bağlıdır. Düzəliş yalnız RİM rəhbəri tərəfindən təqdimat əsasında mümkündür." context "registrar.exam_score_entry" %}</span>
+      <b>{% trans "Bitmiş dövr — yazılmış ballar kilidlidir" context "registrar.exam_score_entry" %}</b>
+      {% if s.first_entry_needs_document %}
+      <span>{% blocktrans context "registrar.exam_score_entry" with days=s.document_after_days %}Bu dövr {{ days }} gündən çox əvvəl bağlanıb: boş balı yalnız təqdimat əsasında (səbəb, qeyd, skan) yazmaq olar. Yazılmış balı dəyişmək yalnız RİM rəhbəri tərəfindən düzəliş rejimində mümkündür.{% endblocktrans %}</span>
+      {% else %}
+      <span>{% blocktrans context "registrar.exam_score_entry" with days=s.document_after_days %}Boş balı yazmaq olar ({{ days }} gündən köhnə dövrdə sənəd məcburidir); yazılmış balı dəyişmək yalnız RİM rəhbəri tərəfindən düzəliş rejimində mümkündür.{% endblocktrans %}</span>
+      {% endif %}
     {% endif %}
   </div>
   {% if s.can_unlock_period %}

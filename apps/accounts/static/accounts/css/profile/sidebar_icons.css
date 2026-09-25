@@ -1,0 +1,125 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Kabinet sol menyusu — RƏNGLİ İKONLAR (sahib 2026-09-26: «sidebarda iconlara
+   rəng qat, çox solğundur»).
+
+   Qayda: ikon rəngi bəndin/qrupun MƏNASINDAN gəlir və hər yerdə eynidir —
+   dərs/cədvəl göy, sillabus/sual bənövşəyi, imtahan qırmızı-çəhrayı, nəticə
+   yaşıl, yük/bildiriş kəhrəba, müraciət/sorğu səma mavisi. Yalnız dizayn
+   tokenlərinin 600 tonları (ikon mətn deyil — WCAG 1.4.11 qeyri-mətn kontrastı
+   3:1 ağ fonda ödənir). Rəng `--sb-icon` dəyişəni ilə ötürülür; aktiv bənd
+   əvvəlki kimi `--sb-accent`-dir (sidebar.css). Heyət akkordeonunda bənd
+   ikonları gizlidir — orada QRUP başlığının ikonu rənglənir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar-menu-icon,
+.sidebar-menu-group-icon {
+    color: var(--sb-icon, var(--sb-muted));
+}
+
+.sidebar-menu-link:hover .sidebar-menu-icon,
+.sidebar-menu-group:hover .sidebar-menu-group-icon {
+    color: var(--sb-icon, var(--sb-fg-strong));
+}
+
+/* ── Bəndlər (düz menyu: tələbə/müəllim; heyətin başlıqsız əsas bloku) ─────── */
+.sidebar-menu-link[data-section="dashboard"],
+.sidebar-menu-link[data-section="my-subjects"],
+.sidebar-menu-link[data-section="my-schedule"],
+.sidebar-menu-link[data-section="lessons-log"],
+.sidebar-menu-link[data-section="academic-calendar"],
+.sidebar-menu-link[data-section="my-courses"],
+.sidebar-menu-link[data-section="assigned-courses"],
+.sidebar-menu-link[href="/jurnal/"] {
+    --sb-icon: var(--ems-primary-600);
+}
+
+.sidebar-menu-link[data-section="syllabus-list"],
+.sidebar-menu-link[data-section="question-bank"],
+.sidebar-menu-link[data-section="question-submissions"],
+.sidebar-menu-link[data-section="my-subject-folders"],
+.sidebar-menu-link[data-section="subject-folders"],
+.sidebar-menu-link[data-section="subject-folder-review"] {
+    --sb-icon: var(--ems-violet-600);
+}
+
+.sidebar-menu-link[data-section="assigned-exams"],
+.sidebar-menu-link[data-section="my-exams"],
+.sidebar-menu-link[data-section="pending-answers"],
+.sidebar-menu-link[data-section="pending-review"],
+.sidebar-menu-link[data-section="review-results"],
+.sidebar-menu-link[data-section="final-center"] {
+    --sb-icon: var(--ems-rose-600);
+}
+
+.sidebar-menu-link[data-section="my-results"],
+.sidebar-menu-link[data-section="my-transcript"],
+.sidebar-menu-link[data-section="overall-academic"] {
+    --sb-icon: var(--ems-success-600);
+}
+
+.sidebar-menu-link[data-section="notifications"],
+.sidebar-menu-link[data-section="my-workload"],
+.sidebar-menu-link[data-section="my-appeals"] {
+    --sb-icon: var(--ems-warning-600);
+}
+
+.sidebar-menu-link[data-section="applications"],
+.sidebar-menu-link[data-section="publish-notification"],
+.sidebar-menu-link[data-section="evaluation-survey"] {
+    --sb-icon: var(--ems-sky-600);
+}
+
+.sidebar-menu-link[data-section="statistics"] {
+    --sb-icon: var(--ems-emerald-600);
+}
+
+.sidebar-menu-link[data-section="profile-info"] {
+    --sb-icon: var(--ems-neutral-600);
+}
+
+/* ── Heyət akkordeonu: qrup başlıqları ─────────────────────────────────────── */
+[data-sidebar-group="lessons"],
+[data-sidebar-group="my-studies"] {
+    --sb-icon: var(--ems-primary-600);
+}
+
+[data-sidebar-group="workload"] {
+    --sb-icon: var(--ems-warning-600);
+}
+
+[data-sidebar-group="syllabus"] {
+    --sb-icon: var(--ems-violet-600);
+}
+
+[data-sidebar-group="assessment"] {
+    --sb-icon: var(--ems-rose-600);
+}
+
+[data-sidebar-group="exam-center"] {
+    --sb-icon: var(--ems-danger-600);
+}
+
+[data-sidebar-group="teaching-office"],
+[data-sidebar-group="university-admin"] {
+    --sb-icon: var(--ems-sky-600);
+}
+
+[data-sidebar-group="people"] {
+    --sb-icon: var(--ems-success-600);
+}
+
+[data-sidebar-group="quality"] {
+    --sb-icon: var(--ems-emerald-600);
+}
+
+[data-sidebar-group="management"] {
+    --sb-icon: var(--ems-warning-700);
+}
+
+[data-sidebar-group="system"] {
+    --sb-icon: var(--ems-neutral-600);
+}
+
+[data-sidebar-group="content"] {
+    --sb-icon: var(--ems-violet-600);
+}
