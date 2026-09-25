@@ -5,7 +5,7 @@
 # bərpa et, bu mənim real datamda serverdə dəyişməlidir».
 #
 # Plan LOKALDA qurulur (scripts/ops/restore_legacy_scores_build_plan.sh), şifrələnib
-# (openssl aes-256-cbc -pbkdf2) müvəqqəti draft release asset-i kimi yüklənir — eyni
+# (openssl aes-256-cbc -md sha256 -pbkdf2 -iter 200000) müvəqqəti draft release asset-i kimi yüklənir — eyni
 # nümunə `seed-database.yml`-dədir. Şifrə açarı `production` mühitinin
 # RESTORE_PLAN_KEY sirridir. Plan faylı git-ə DÜŞMÜR; iş bitəndən sonra release silinir.
 #
@@ -74,7 +74,7 @@ jobs:
           curl -sSfL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/${ASSET_ID}" \
             -o "$RUNNER_TEMP/restore/plan.jsonl.gz.enc"
-          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass env:RESTORE_PLAN_KEY \
+          openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:RESTORE_PLAN_KEY \
             -in "$RUNNER_TEMP/restore/plan.jsonl.gz.enc" -out "$RUNNER_TEMP/restore/plan.jsonl.gz"
           rm -f "$RUNNER_TEMP/restore/plan.jsonl.gz.enc"
           echo "$PLAN_SHA256  $RUNNER_TEMP/restore/plan.jsonl.gz" | sha256sum -c -
