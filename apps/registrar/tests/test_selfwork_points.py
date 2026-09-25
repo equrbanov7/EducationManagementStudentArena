@@ -286,3 +286,36 @@ class DatabaseGuardTest(SelfWorkLegacyFixture, TestCase):
         self.assertEqual(rows["registrar_selfworktopic"], (True, True))
         self.assertEqual(rows["registrar_selfworkmark"], (True, True))
         self.assertEqual(policies, {"registrar_selfworktopic", "registrar_selfworkmark"})
+
+
+class StudentSubjectsChipTest(SelfWorkLegacyFixture, TestCase):
+    """«Fənlərim»: SƏRBƏST İŞ çipi giriş balına DÜŞƏN balı göstərir (+ slot-slot), sorğusuz."""
+
+    def _chips(self, username):
+        from django.test import RequestFactory
+
+        from apps.registrar.public import build_student_subjects_context
+
+        request = RequestFactory().get("/")
+        request.user = self.records[username].student
+        with bypass_rls():
+            ctx = build_student_subjects_context(request, organization=self.org)
+        rows = {row["enrollment"].offering_id: row for row in ctx["student_subjects_section"]["subjects"]}
+        return {
+            offering_id: next(c for c in row["components"] if c["name"] == "Sərbəst iş")
+            for offering_id, row in rows.items()
+            if any(c["name"] == "Sərbəst iş" for c in row["components"])
+        }
+
+    def test_checklist_chip_shows_live_total_and_slots(self):
+        chips = self._chips("swp_s0")
+        chip = chips[self.o1.id]
+        self.assertEqual((chip["score"], chip["max"]), (Decimal("7"), 10))
+        self.assertEqual(len(chip["slots"]), 10)
+        self.assertEqual([slot["points"] is not None for slot in chip["slots"]], [True] * 7 + [False] * 3)
+        # O2: SELF_WORK tavanı 5 (qeyri-standart) → giriş balına düşən 5 (entry_score_for güzgüsü).
+        self.assertEqual(chips[self.o2.id]["score"], Decimal("5"))
+
+    def test_archive_score_is_shown_when_checklist_is_empty(self):
+        chip = self._chips("swp_s3")[self.o2.id]
+        self.assertEqual(chip["score"], Decimal("7.00"), "köçürülmüş «si» balı (görünüş) — köhnə davranış")
