@@ -7,6 +7,11 @@ iki hissəyə bölünür:
   və dərcdə ƏVƏZ olunur;
 * qalanları (başqa fakültə/ixtisas) — SABİT kənar məşğulluq: müəllimi, otağı
   və (əhatədəki qrupun işləməyə düşməyən dərsidirsə) qrupu tutur.
+
+Müəllim = slotun EFFEKTİV müəllimi (2026-09-25, bölünmüş tədris): slotun öz müəllimi
+(``ScheduleSlot.instructor`` — seminarı aparan assistent), yoxdursa jurnal sahibi
+(``registrar.schedule.effective_instructor_id`` ilə eyni qayda) — override olunmuş slot
+ASSİSTENTİN vaxtını tutur, jurnal sahibi həmin saatda boşdur.
 """
 
 from __future__ import annotations
@@ -35,6 +40,7 @@ def live_slots(organization, period) -> list:
             "offering_id",
             "offering__group_id",
             "offering__instructor_id",
+            "instructor_id",
             "weekday",
             "start_time",
             "end_time",
@@ -81,7 +87,8 @@ def split_slots(slots, run_offering_ids, scope_group_ids, *, periods, weekdays) 
             if len(cells) == 1:
                 hints.setdefault(offering, []).append((slot["kind"], cells[0], week))
             continue
-        teacher = slot["offering__instructor_id"]
+        # Effektiv müəllim: slotun öz müəllimi (assistent), yoxdursa jurnal sahibi.
+        teacher = slot.get("instructor_id") or slot["offering__instructor_id"]
         group = str(slot["offering__group_id"] or "")
         for t in cells:
             for wk in WEEKS_OF[week]:

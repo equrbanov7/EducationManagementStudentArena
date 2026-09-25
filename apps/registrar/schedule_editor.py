@@ -314,15 +314,17 @@ def resolve_slot_instructor(*, offering, data):
     SERVER yoxlaması (klientə etibar yoxdur): boş və ya jurnal sahibinin özü → ``None`` (NULL
     saxlanır ki, sahib dəyişəndə slot onu izləsin); başqa müəllim yalnız
     ``schedule_slot_teachers.allowed_teacher_ids`` daxilindədirsə qəbul olunur — ixtiyari müəllim
-    400 (``errors.slot_instructor_id``). Aktiv üzvlüyü itmiş köhnə seçim də rədd olunur (PostgreSQL
-    qoruyucusu onsuz da yazmağa icazə verməzdi) — «Jurnal sahibi» seçilməlidir."""
+    400 (``errors.slot_instructor_id``). Redaktə olunan slotun DƏYİŞMƏYƏN müəllimi (məs. generatorun
+    dərc etdiyi axın mühazirəçisi) siyahıda olmasa da saxlanır — yalnız hələ aktiv ``grade.input``
+    üzvüdürsə (PostgreSQL qoruyucusu onsuz da başqasını yazmağa icazə verməzdi)."""
     raw = str(data.get("slot_instructor_id") or "").strip()
     if not raw:
         return None
     pk = schedule_slot_teachers.user_pk(raw)
     if pk is not None and str(pk) == str(offering.instructor_id or ""):
         return None
-    if pk is None or pk not in schedule_slot_teachers.allowed_teacher_ids(offering):
+    allowed = pk is not None and pk in schedule_slot_teachers.allowed_teacher_ids(offering)
+    if not allowed and not schedule_slot_teachers.is_current_override(offering, data.get("slot_id"), pk):
         raise _slot_teacher_error()
     from django.contrib.auth import get_user_model
 
@@ -368,8 +370,11 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
     """Saxlama-öncəsi tam yoxlama: dövr pəncərəsi + konfliktlər + tövsiyələr.
 
     Müəllim toqquşması slotun EFFEKTİV müəllimi ilə yoxlanır: ``slot_instructor_id`` (dialoqda
-    seçilmiş «Dərsi aparan müəllim»), verilməyibsə açılışın müəllimi."""
+    seçilmiş «Dərsi aparan müəllim»), verilməyibsə açılışın müəllimi. Yalnız açılışın SEMESTRİNİN
+    slotları sayılır və birləşmiş mühazirə (axın) toqquşma deyil — ``schedule.find_conflict`` ilə
+    eyni qaydalar (bax ``schedule_conflicts`` modul başlığı)."""
     teacher_id = slot_instructor_id or offering.instructor_id
+    rules = {"period_id": offering.period_id, "subject_id": offering.subject_id, "kind": cleaned["kind"]}
     errors: dict = {}
     window = schedule_manage.period_window_error(offering)
     if window:
@@ -406,6 +411,7 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
         group_id=offering.group_id,
         instructor_id=teacher_id,
         exclude_ids=(exclude_id,) if exclude_id else (),
+        **rules,
     )
     suggestions = []
     if conflicts:
@@ -418,6 +424,7 @@ def check_cell(*, organization, offering, cleaned, exclude_id=None, slot_instruc
             shift=schedule_grid.shift_of(cleaned["start_time"]),
             exclude_ids=(exclude_id,) if exclude_id else (),
             limit=6,
+            **rules,
         )
     return {"ok": not conflicts, "errors": errors, "conflicts": conflicts, "suggestions": suggestions}
 

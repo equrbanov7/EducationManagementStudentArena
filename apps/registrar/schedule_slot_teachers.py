@@ -129,4 +129,30 @@ def is_allowed(offering, teacher_id) -> bool:
     return pk is not None and pk in allowed_teacher_ids(offering)
 
 
-__all__ = ["allowed_teacher_ids", "authorized_teacher_ids", "choices", "is_allowed", "user_pk"]
+def is_current_override(offering, slot_id, teacher_id) -> bool:
+    """Redaktə olunan slotun DƏYİŞMƏYƏN müəllimidirmi (hələ də aktiv ``grade.input`` üzvü olmaq şərtilə).
+
+    Generatorun dərc etdiyi axın mühazirəsi (məs. başqa qrupun jurnalına yazılmış mühazirəçi) seçici
+    mənbələrində olmaya bilər — onu köçürmək / redaktə etmək bloklanmamalıdır. YENİ seçim isə yalnız
+    :func:`allowed_teacher_ids`-dəndir. Sorğu: slot 1 + üzvlük 1 (yalnız siyahıda olmayan seçimdə)."""
+    from core.http_ids import parse_uuid
+
+    from .models import ScheduleSlot
+
+    slot_pk, pk = parse_uuid(slot_id), user_pk(teacher_id)
+    if offering is None or offering._state.adding or slot_pk is None or pk is None:
+        return False
+    current = (
+        ScheduleSlot.objects.filter(pk=slot_pk, offering_id=offering.pk).values_list("instructor_id", flat=True).first()
+    )
+    return current == pk and pk in authorized_teacher_ids(offering.organization_id, {pk})
+
+
+__all__ = [
+    "allowed_teacher_ids",
+    "authorized_teacher_ids",
+    "choices",
+    "is_allowed",
+    "is_current_override",
+    "user_pk",
+]

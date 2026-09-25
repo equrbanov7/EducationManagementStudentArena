@@ -529,8 +529,11 @@
         var payload = basePayload();
         payload.action = "suggest";
         payload.slot_id = getField("slot_id");
-        /* Slotu aparan müəllim seçilibsə boş xana ONUN üçün axtarılır (bölünmüş tədris). */
+        /* Slotu aparan müəllim seçilibsə boş xana ONUN üçün axtarılır (bölünmüş tədris);
+           fənn + növ axın qaydası üçündür (serverin `check`-i ilə eyni). */
         payload.instructor_id = getField("slot_instructor_id") || getField("instructor_id");
+        payload.subject_id = getField("subject_id");
+        payload.slot_kind = getField("slot_kind");
         payload.week_type = getField("week_type");
         post(payload).then(function (result) {
             var suggest = dialog() && dialog().querySelector("[data-sedit-suggest]");

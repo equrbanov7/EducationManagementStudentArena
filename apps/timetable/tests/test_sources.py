@@ -98,6 +98,38 @@ class ProblemBuildTest(TestCase):
         teacher = problem.instance.teachers[history.teacher]
         self.assertEqual(teacher.levels[pairs : pairs + 2], "dd")
 
+    def test_overridden_live_slot_occupies_the_assistant_not_the_owner(self):
+        """Canlı slotun öz müəllimi (assistent, 2026-09-25) varsa kənar məşğulluq ONUN vaxtıdır.
+
+        B-101 (əhatədən kənar) «Alqoritmlər» jurnalı t1-dədir, seminarını isə t3 aparır:
+        mühərrik həmin xananı t3 üçün tutur, t1 üçün isə boş saxlayır."""
+        from apps.registrar.models import ScheduleSlot
+        from apps.registrar.public import schedule_grid
+        from apps.timetable.sources import context
+
+        t1, _t2, t3 = self.w["teachers"]
+        with bypass_rls():
+            first = schedule_grid.lesson_periods(self.w["org"])[0]
+            ScheduleSlot.objects.create(
+                organization=self.w["org"],
+                offering=self.w["offerings"][("B-101", "ALQ")],
+                weekday=2,
+                start_time=first["start"],
+                end_time=first["end"],
+                kind="seminar",
+                instructor=t3,
+            )
+            rows = context.live_slots(self.w["org"], self.w["period"])
+        problem = self._problem()
+        split = context.split_slots(rows, set(), set(), periods=problem.periods, weekdays=problem.weekdays)
+        cell = problem.weekdays.index(2) * len(problem.periods)  # çərşənbə axşamı, 1-ci cüt
+        self.assertEqual(split["teacher_busy"].get(t3.pk), {(0, cell), (1, cell)})
+        self.assertNotIn(t1.pk, split["teacher_busy"])
+        index = {teacher_id: position for position, teacher_id in enumerate(problem.teacher_ids)}
+        busy = set(problem.instance.teacher_busy)
+        self.assertTrue({(index[t3.pk], 0, cell), (index[t3.pk], 1, cell)} <= busy)
+        self.assertFalse(any(teacher == index[t1.pk] for teacher, _week, _t in busy))
+
     def test_groups_without_offerings_are_pruned(self):
         with bypass_rls():
             from apps.organizations.models import OrgUnit

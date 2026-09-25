@@ -32,6 +32,7 @@ from apps.registrar.public import schedule_editor
 from apps.registrar.public import schedule_editor_actions as editor
 from apps.registrar.public import schedule_manage
 from apps.registrar.public import schedule_manage_actions as base
+from core.http_ids import parse_uuid
 
 _CTX = "accounts.schedule_editor"
 
@@ -72,9 +73,9 @@ def _error(exc):
 
 
 def _group(request, organization, data):
-    """Seçilmiş qrup — YALNIZ aktorun əhatəsindən (fail-closed)."""
-    group_id = str(data.get("group_id") or "").strip()
-    if not group_id:
+    """Seçilmiş qrup — YALNIZ aktorun əhatəsindən (fail-closed); pozuq id = seçilməyib (500 yox)."""
+    group_id = parse_uuid(data.get("group_id"))
+    if group_id is None:
         return None
     return schedule_manage.scoped_groups(request.user, organization).filter(pk=group_id).first()
 
@@ -82,8 +83,8 @@ def _group(request, organization, data):
 def _period(organization, data):
     from apps.organizations.models import AcademicPeriod
 
-    period_id = str(data.get("period_id") or "").strip()
-    if not period_id:
+    period_id = parse_uuid(data.get("period_id"))
+    if period_id is None:
         return None
     return AcademicPeriod.objects.filter(organization=organization, pk=period_id).first()
 
@@ -186,6 +187,7 @@ def _suggest(request, organization, data):
     return JsonResponse(
         {
             "ok": True,
+            # Semestr süzgəci + axın qaydası (``check`` ilə eyni): dövr, fənn və növ dialoqdan gəlir.
             "suggestions": editor.suggestions_for(
                 organization=organization,
                 slot=slot,
@@ -193,6 +195,9 @@ def _suggest(request, organization, data):
                 instructor_id=str(data.get("instructor_id") or "").strip() or None,
                 shift=str(data.get("shift") or "").strip(),
                 week_type=str(data.get("week_type") or "").strip() or None,
+                period=_period(organization, data),
+                subject_id=str(data.get("subject_id") or "").strip() or None,
+                kind=str(data.get("slot_kind") or "").strip() or None,
             ),
         }
     )

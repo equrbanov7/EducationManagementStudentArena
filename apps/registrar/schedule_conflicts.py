@@ -25,7 +25,14 @@ QAYDALAR
 * müəllim = slotun EFFEKTİV müəllimi (2026-09-25): ``ScheduleSlot.instructor``,
   boşdursa jurnal sahibi — seminarı aparan assistentin toqquşması da tutulur
   (``schedule.effective_instructor_id``); id-lər mətn kimi müqayisə olunur
-  (JSON-dan gələn ``"12"`` ilə bazadakı ``12`` eyni müəllimdir).
+  (JSON-dan gələn ``"12"`` ilə bazadakı ``12`` eyni müəllimdir);
+* ``schedule.find_conflict`` ilə EYNİ iki qayda (2026-09-25, 4e0b986d-nin redaktora
+  çatmayan hissəsi): (1) ``period_id`` verilibsə yalnız EYNİ semestrin slotları —
+  keçən semestrin silinməmiş cədvəli bu semestrin saatını bloklamır (dövr yoxdursa
+  köhnə davranış); (2) birləşmiş mühazirə (axın): eyni effektiv müəllim + eyni fənn +
+  hər ikisi mühazirə + eyni (və ya boş) otaq, qruplar FƏRQLİ → toqquşma deyil
+  (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü);
+  qrup toqquşması HƏMİŞƏ toqquşmadır (``schedule.is_joint_lecture``).
 """
 
 from __future__ import annotations
@@ -33,7 +40,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from apps.registrar.models import ScheduleSlot, WeekType
-from apps.registrar.schedule import effective_instructor, effective_instructor_id
+from apps.registrar.schedule import effective_instructor, effective_instructor_id, is_joint_lecture, same_id
 
 _CTX = "registrar.schedule_conflicts"
 
@@ -76,10 +83,6 @@ def _person_name(user) -> str:
         return ""
     full = (getattr(user, "get_full_name", lambda: "")() or "").strip()
     return full or str(getattr(user, "username", "") or "")
-
-
-def _same_person(left, right) -> bool:
-    return bool(left) and bool(right) and str(left) == str(right)
 
 
 def _message(kind, slot) -> str:
@@ -131,11 +134,13 @@ def describe(slot, kind) -> dict:
     }
 
 
-def live_slots(organization, *, weekday=None):
-    """Cədvəldə HƏQİQƏTƏN duran slotlar (silinməmiş + parklanmamış)."""
+def live_slots(organization, *, weekday=None, period_id=None):
+    """Cədvəldə HƏQİQƏTƏN duran slotlar (silinməmiş + parklanmamış); ``period_id`` — yalnız o semestr."""
     queryset = ScheduleSlot.objects.filter(organization=organization, is_parked=False)
     if weekday is not None:
         queryset = queryset.filter(weekday=weekday)
+    if period_id:
+        queryset = queryset.filter(offering__period_id=period_id)
     return queryset.select_related(
         "offering", "offering__subject", "offering__group", "offering__instructor", "instructor"
     )
@@ -153,28 +158,41 @@ def detect(
     instructor_id=None,
     exclude_ids=(),
     candidates=None,
+    period_id=None,
+    subject_id=None,
+    kind=None,
 ) -> list[dict]:
     """Bu yerləşdirmənin BÜTÜN toqquşmaları — növ + açıq mətn ilə.
 
     ``candidates`` verilsə baza sorğusu təkrarlanmır (tövsiyə mühərriki eyni
     slot dəstini onlarla hüceyrə üçün yenidən istifadə edir).
+
+    ``period_id`` — yerləşdirilən açılışın semestri (yalnız o semestrin slotları; boşdursa
+    köhnə davranış); ``subject_id`` + ``kind`` — axın qaydası üçün (verilməyibsə qayda
+    işləmir, köhnə davranış). Bax modul başlığı.
     """
     excluded = {str(value) for value in (exclude_ids or ()) if value}
     room_norm = (room or "").strip().lower()
-    rows = candidates if candidates is not None else live_slots(organization, weekday=weekday)
+    rows = candidates if candidates is not None else live_slots(organization, weekday=weekday, period_id=period_id)
 
     found: dict = {}
     for slot in rows:
         if slot.weekday != weekday or str(slot.pk) in excluded:
             continue
+        if period_id and not same_id(period_id, slot.offering.period_id):
+            continue
         if not time_ranges_overlap(start_time, end_time, slot.start_time, slot.end_time):
             continue
         if not week_types_overlap(week_type, slot.week_type):
             continue
-        offering = slot.offering
-        if _same_person(instructor_id, effective_instructor_id(slot)):
+        same_group = same_id(group_id, slot.offering.group_id)
+        if not same_group and is_joint_lecture(
+            kind=kind, subject_id=subject_id, teacher_id=instructor_id, room=room_norm, slot=slot
+        ):
+            continue
+        if same_id(instructor_id, effective_instructor_id(slot)):
             found.setdefault(KIND_TEACHER, slot)
-        if group_id and offering.group_id == group_id:
+        if same_group:
             found.setdefault(KIND_GROUP, slot)
         if room_norm and room_norm == (slot.room or "").strip().lower():
             found.setdefault(KIND_ROOM, slot)
@@ -190,8 +208,7 @@ def _day_load(rows, weekday, group_id, instructor_id):
     for slot in rows:
         if slot.weekday != weekday:
             continue
-        offering = slot.offering
-        if (group_id and offering.group_id == group_id) or _same_person(instructor_id, effective_instructor_id(slot)):
+        if same_id(group_id, slot.offering.group_id) or same_id(instructor_id, effective_instructor_id(slot)):
             total += 1
     return total
 
@@ -207,12 +224,16 @@ def suggest(
     exclude_ids=(),
     weekdays=None,
     limit=8,
+    period_id=None,
+    subject_id=None,
+    kind=None,
 ) -> list[dict]:
     """Həm müəllimin, həm qrupun BOŞ olduğu hüceyrələr — sıralanmış.
 
     Sahibin tələbi: «proqram tövsiyə versin ki səhər yaxud günorta növbəsinə
     uyğun hara boşdursa orada ola bilər». ``shift`` verilibsə yalnız həmin
-    növbənin saatlarına baxılır.
+    növbənin saatlarına baxılır. ``period_id`` / ``subject_id`` / ``kind`` —
+    :func:`detect` ilə eyni (semestr süzgəci + axın qaydası).
 
     Sıralama (kiçik bal = yaxşı): əvvəlcə HƏMİN GÜN artıq dərsi olan günlər
     (tələbə üçün «bir dərs üçün gəlmək» pisdir), sonra günün erkən saatları.
@@ -220,7 +241,7 @@ def suggest(
     from apps.registrar import schedule_grid
 
     weekdays = weekdays or schedule_grid.TEACHING_WEEKDAYS
-    rows = list(live_slots(organization))
+    rows = list(live_slots(organization, period_id=period_id))
     periods = [row for row in schedule_grid.lesson_periods(organization) if not shift or row["shift"] == shift]
 
     out = []
@@ -238,6 +259,9 @@ def suggest(
                 instructor_id=instructor_id,
                 exclude_ids=exclude_ids,
                 candidates=rows,
+                period_id=period_id,
+                subject_id=subject_id,
+                kind=kind,
             )
             if clashes:
                 continue
