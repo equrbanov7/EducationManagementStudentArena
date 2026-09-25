@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -23,6 +22,7 @@ from apps.exams.services.bank_analysis import analyze_bank_questions
 from apps.exams.services.question_bank_attach import accessible_banks
 from core.audit import log_action
 from core.constants import AuditAction
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
 from ._shared import (
@@ -357,12 +357,10 @@ def question_bank_detail(request, bank_id):
             messages.error(request, str(exc))
 
     questions = bank.library_questions.prefetch_related("options")
-    if search_query:
-        matched_ids = (
-            bank.library_questions.filter(Q(text__icontains=search_query) | Q(options__text__icontains=search_query))
-            .values_list("id", flat=True)
-            .distinct()
-        )
+    # Sual/variant mətni — az/ing hərfə dözümlü, tokenli (sahib 2026-09-26).
+    search_q = tolerant_q(search_query, ("text", "options__text"))
+    if search_q is not None:
+        matched_ids = bank.library_questions.filter(search_q).values_list("id", flat=True).distinct()
         questions = questions.filter(id__in=matched_ids)
     if status_filter == "active":
         questions = questions.filter(is_active=True)

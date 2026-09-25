@@ -40,6 +40,7 @@ from apps.accounts.services.role_catalog import (
 )
 from apps.accounts.views._helpers.formatting import _append_query_params
 from apps.accounts.views._helpers.tenant import _bind_active_role_context, _get_active_organization
+from core.search_text import tolerant_q
 
 User = get_user_model()
 
@@ -223,13 +224,9 @@ def build_manage_roles_section(request, section, *, capabilities):
 
     members = _members_queryset(organization)
     filtered_members = members
-    if search:
-        filtered_members = filtered_members.filter(
-            Q(username__icontains=search)
-            | Q(email__icontains=search)
-            | Q(first_name__icontains=search)
-            | Q(last_name__icontains=search)
-        )
+    search_q = tolerant_q(search, ("username", "email", "first_name", "last_name"))
+    if search_q is not None:
+        filtered_members = filtered_members.filter(search_q)
     if role_filter:
         filtered_members = filtered_members.filter(pk__in=_members_with(organization, role_id=role_filter))
     if unit_filter:

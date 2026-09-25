@@ -13,6 +13,7 @@ from apps.organizations.models import Membership, Organization
 from core.constants import ROLE_LEVEL_TEACHER, OrganizationType
 from core.rls import bypass_rls
 from core.roles import ProfileRole, get_user_role_level, is_superadmin_user, user_has_any_role
+from core.search_text import tolerant_q
 
 from .models import Category, Post
 
@@ -298,15 +299,12 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
     if normalized_status != "all":
         posts_qs = posts_qs.filter(approval_status=normalized_status)
 
-    if normalized_search:
-        posts_qs = posts_qs.filter(
-            Q(title__icontains=normalized_search)
-            | Q(excerpt__icontains=normalized_search)
-            | Q(content__icontains=normalized_search)
-            | Q(author__username__icontains=normalized_search)
-            | Q(author__first_name__icontains=normalized_search)
-            | Q(author__last_name__icontains=normalized_search)
-        )
+    search_q = tolerant_q(
+        normalized_search,
+        ("title", "excerpt", "content", "author__username", "author__first_name", "author__last_name"),
+    )
+    if search_q is not None:
+        posts_qs = posts_qs.filter(search_q)
 
     if superadmin:
         if selected_organization == PERSONAL_APPROVAL_ORG_FILTER:

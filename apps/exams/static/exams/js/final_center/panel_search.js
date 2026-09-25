@@ -19,6 +19,18 @@
 
     var DEBOUNCE_MS = 180;
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function bind(box) {
         if (box.dataset.panelSearchBound === "1") return; // idempotent (AJAX swap)
 
@@ -38,13 +50,14 @@
         function apply() {
             // Elementlər hər dəfə yenidən oxunur: canlı yenilənmə DOM-u əvəz edə bilir.
             var items = scope.querySelectorAll("[data-search]");
-            var needle = (input.value || "").trim().toLowerCase();
+            var needle = (input.value || "").trim();
+            var matcher = searchMatcher(needle);
             var shown = 0;
 
             for (var i = 0; i < items.length; i++) {
                 var item = items[i];
                 var hay = item.getAttribute("data-search") || "";
-                var match = !needle || hay.indexOf(needle) !== -1;
+                var match = !needle || matcher(hay);
                 item.hidden = !match;
                 if (match) shown++;
             }

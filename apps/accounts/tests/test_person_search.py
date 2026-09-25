@@ -17,8 +17,9 @@ class PersonSearchUnitTest(ViewAsTestBase):
     def test_tokens_and_regex(self):
         self.assertEqual(tokens_of("  Aydan   Alyarova "), ["Aydan", "Alyarova"])
         self.assertEqual(tokens_of("a b c d e f"), ["a", "b", "c", "d"])
-        self.assertEqual(tolerant_regex("is"), "[iıİI][sşSŞ]")
-        self.assertEqual(tolerant_regex("a.b"), "a\\.b")  # metasimvol qaçırılır
+        self.assertEqual(tolerant_regex("is"), "[iıİI][sSşŞ]")
+        # metasimvol qaçırılır; «a» 2026-09-26-dan «ə» ilə bir sinifdədir (core.search_text)
+        self.assertEqual(tolerant_regex("a.b"), "[aAəƏ]\\.[bB]")
         self.assertIsNone(person_q("   ", ("first_name",)))
 
     def test_person_q_matches_name_order_and_diacritics(self):

@@ -10,6 +10,8 @@ from __future__ import annotations
 
 from django.core.paginator import Paginator
 
+from core.search_text import tolerant_q
+
 from .constants import APPEAL_STATUS_VALUES
 from .models import Appeal
 
@@ -36,9 +38,10 @@ def filter_student_appeals(queryset, *, status="", exam_slug="", search=""):
     if exam_slug:
         queryset = queryset.filter(exam__slug=exam_slug)
 
-    search = (search or "").strip()
-    if search:
-        queryset = queryset.filter(exam__title__icontains=search)
+    # İmtahan adı — az/ing hərfə dözümlü, tokenli (sahib 2026-09-26).
+    search_q = tolerant_q(search, ("exam__title",))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
 
     return queryset
 

@@ -39,6 +39,7 @@ from apps.accounts.services.role_catalog import (
 from apps.accounts.views._helpers.formatting import _append_query_params
 from apps.accounts.views._helpers.membership import _pending_student_request_queryset
 from apps.notifications.models import StudentOrganizationRequestStatus
+from core.search_text import tolerant_q
 
 _CTX = "accounts.role_assignment"
 _CELLS = "accounts/profile/sections/roles/"
@@ -179,13 +180,9 @@ def _unassigned_queryset(request, organization, *, is_superadmin, search):
                 requested_organization_name__iexact=organization.name,
             )
         )
-    if search:
-        queryset = queryset.filter(
-            Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
+    search_q = tolerant_q(search, ("user__username", "user__email", "user__first_name", "user__last_name"))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     return queryset.order_by("user__username")
 
 
@@ -247,13 +244,9 @@ def build_role_assignment_section(
         management_org, actor_level=actor_level, is_superadmin=is_superadmin, catalogue=catalogue
     )
     filtered = members
-    if search:
-        filtered = filtered.filter(
-            Q(username__icontains=search)
-            | Q(email__icontains=search)
-            | Q(first_name__icontains=search)
-            | Q(last_name__icontains=search)
-        )
+    search_q = tolerant_q(search, ("username", "email", "first_name", "last_name"))
+    if search_q is not None:
+        filtered = filtered.filter(search_q)
     if role_filter:
         from apps.organizations.models import Membership
 

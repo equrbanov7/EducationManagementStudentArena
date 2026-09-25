@@ -27,6 +27,7 @@ from apps.exams.views.shared.tenant import (
     tenant_scoped_exams,
 )
 from core.permissions import request_has_permission
+from core.search_text import tolerant_match
 
 from ._helpers import (
     _answer_max_points,
@@ -166,15 +167,15 @@ def teacher_view_attempt(request, slug, attempt_id):
 
     search_query = (request.GET.get("q") or "").strip()
     if search_query:
-        search_token = search_query.lower()
+        # Az/ing hərfə dözümlü, tokenli (sahib 2026-09-26) — ``tolerant_q``-nun yaddaş əkizi.
         filtered = []
         for item in qa_list:
             question = item["question"]
             answer = item["answer"]
-            question_text = (question.text or "").lower()
-            answer_text = (getattr(answer, "text_answer", "") or "").lower()
-            options_text = " ".join(opt.text for opt in question.options.all()).lower()
-            if search_token in question_text or search_token in answer_text or search_token in options_text:
+            question_text = question.text or ""
+            answer_text = getattr(answer, "text_answer", "") or ""
+            options_text = " ".join(opt.text for opt in question.options.all())
+            if tolerant_match(search_query, question_text, answer_text, options_text):
                 filtered.append(item)
         qa_list = filtered
 

@@ -37,6 +37,8 @@ from django.db.models import F, FilteredRelation, Q, Subquery, Window
 from django.db.models.functions import RowNumber
 from django.utils.translation import pgettext_lazy
 
+from core.search_text import tolerant_q
+
 from .grading_scale import bands_for
 from .models import (
     LegacyGradeFact,
@@ -468,15 +470,11 @@ def apply_filters(queryset, *, organization, filters):
         queryset = queryset.filter(condition)
     queryset = _apply_status_filter(queryset, str(filters.get("status") or "").strip(), organization)
     term = str(filters.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(enrollment__student__first_name__icontains=term)
-            | Q(enrollment__student__last_name__icontains=term)
-            | Q(enrollment__student__username__icontains=term)
-            | Q(enrollment__offering__subject__name__icontains=term)
-            | Q(enrollment__offering__subject__code__icontains=term)
-            | Q(source_student_ref=term)
-        )
+    names = ("first_name", "last_name", "username")
+    fields = (*(f"enrollment__student__{name}" for name in names), "enrollment__offering__subject__name")
+    search_q = tolerant_q(term, fields, compact_fields=("enrollment__offering__subject__code",))
+    if search_q is not None:
+        queryset = queryset.filter(search_q | Q(source_student_ref=term))
     return queryset
 
 

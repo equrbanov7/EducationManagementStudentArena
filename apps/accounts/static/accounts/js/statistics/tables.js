@@ -3,6 +3,18 @@
 
   var ns = window.EMSStatistics || (window.EMSStatistics = {});
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function initSorting() {
     document.querySelectorAll(".stats-sortable-table").forEach(function (table) {
       var headers = table.querySelectorAll("th.stats-sortable");
@@ -46,9 +58,9 @@
     }
 
     input.addEventListener("input", function () {
-      var query = input.value.toLowerCase().trim();
+      var match = searchMatcher(input.value);
       table.querySelectorAll("tbody tr").forEach(function (row) {
-        row.style.display = row.textContent.toLowerCase().indexOf(query) !== -1 ? "" : "none";
+        row.style.display = match(row.textContent) ? "" : "none";
       });
     });
   }

@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 
 from apps.accounts.views._helpers.formatting import _query_string
 from apps.accounts.views._helpers.tenant import _get_active_organization
+from core.search_text import tolerant_q
 
 
 def _defaults() -> dict:
@@ -57,12 +58,9 @@ def build_unit_exams_context(request, *, allowed_sections, active_section) -> di
         .order_by("-created_at")
     )
     search_query = (request.GET.get("unit_exam_q") or "").strip()[:120]
-    if search_query:
-        qs = qs.filter(
-            Q(title__icontains=search_query)
-            | Q(author__username__icontains=search_query)
-            | Q(course__title__icontains=search_query)
-        )
+    search_q = tolerant_q(search_query, ("title", "author__username", "course__title"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     return {
         "unit_exams_total_count": qs.count(),
         "unit_exams_page_obj": Paginator(qs, 10).get_page(request.GET.get("unit_exam_page")),

@@ -5,12 +5,12 @@ Student-facing dashboard and assigned-items / results views.
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Assignment, Submission
+from core.search_text import tolerant_q
 from core.tenancy import restore_request_organization_from_profile
 
 from .._dashboard_helpers import _collect_my_results, academic_filter_options
@@ -86,8 +86,9 @@ def assigned_exams(request):
     exams = _assigned_exams_queryset(request, request.user, active_only=True).order_by("-start_datetime", "-created_at")
 
     search = request.GET.get("search", "")
-    if search:
-        exams = exams.filter(Q(title__icontains=search) | Q(description__icontains=search))
+    search_q = tolerant_q(search, ("title", "description"))
+    if search_q is not None:
+        exams = exams.filter(search_q)
 
     exam_items = []
     for exam in exams:
@@ -119,8 +120,9 @@ def assigned_courses(request):
     courses = _assigned_courses_queryset(request, request.user).order_by("-created_at")
 
     search = request.GET.get("search", "")
-    if search:
-        courses = courses.filter(Q(title__icontains=search) | Q(description__icontains=search))
+    search_q = tolerant_q(search, ("title", "description"))
+    if search_q is not None:
+        courses = courses.filter(search_q)
 
     context = {
         "courses": courses,

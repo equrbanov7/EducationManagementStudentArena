@@ -27,6 +27,7 @@ from django.db.models import Count, Q
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.search_text import tolerant_q
 
 from .. import state_machine as sm
 from ..constants import PERM_REVIEW, RowReviewStatus, TaskStatus
@@ -77,10 +78,9 @@ def review_queue(*, actor, academic_year: str = "", season: str = "", state: str
         queryset = queryset.filter(season=season)
     if state:
         queryset = queryset.filter(review_status=state)
-    if search:
-        queryset = queryset.filter(
-            Q(subject__name__icontains=search) | Q(subject_text__icontains=search) | Q(groups_text__icontains=search)
-        )
+    search_q = tolerant_q(search, ("subject__name", "subject_text"), compact_fields=("groups_text",))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     return queryset
 
 

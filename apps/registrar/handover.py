@@ -58,6 +58,7 @@ import datetime
 from apps.registrar import journal_scope
 from apps.registrar.exam_eligibility import _LOCKED_STATUSES
 from apps.registrar.models import AssessmentScheme, CourseOffering, TeachingHandover
+from core.search_text import tolerant_q
 
 #: Fənni başqa müəllimə təhvil vermək icazəsi (kataloq: organizations.permissions).
 HANDOVER_PERMISSION = "journal.reassign"
@@ -268,19 +269,13 @@ def target_queryset(organization, *, search="", exclude_ids=()):
     Səhifələmə çağıran tərəfdədir (endpoint ``page``/``page_size`` ilə kəsir).
     """
     from django.contrib.auth import get_user_model
-    from django.db.models import Q
 
     queryset = get_user_model().objects.filter(pk__in=eligible_target_ids(organization), is_active=True)
     if exclude_ids:
         queryset = queryset.exclude(pk__in=[pk for pk in exclude_ids if pk])
-    term = (search or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(first_name__icontains=term)
-            | Q(last_name__icontains=term)
-            | Q(username__icontains=term)
-            | Q(email__icontains=term)
-        )
+    search_q = tolerant_q(search, ("first_name", "last_name", "username", "email"))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     return queryset.order_by("last_name", "first_name", "username")
 
 

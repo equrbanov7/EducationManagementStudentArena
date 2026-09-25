@@ -10,6 +10,18 @@
   }
   window._COURSE_EXAM_DASHBOARD_INIT = true;
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function init() {
     var configElement = document.getElementById("courseExamDashboardConfig");
     if (!configElement || !window.bootstrap) {
@@ -285,9 +297,9 @@
 
     if (searchInput) {
       searchInput.addEventListener("input", function () {
-        var query = (searchInput.value || "").toLowerCase();
+        var match = searchMatcher(searchInput.value);
         document.querySelectorAll(".exam-search-item").forEach(function (item) {
-          item.style.display = item.textContent.toLowerCase().indexOf(query) !== -1 ? "" : "none";
+          item.style.display = match(item.textContent) ? "" : "none";
         });
       });
     }

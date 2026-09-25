@@ -66,6 +66,7 @@ from apps.registrar.lessons_log_units import filter_state as unit_filter_state  
 from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
 from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
+from core.search_text import tolerant_q
 
 _CTX = "registrar.lessons_log"
 
@@ -166,13 +167,13 @@ def apply_filters(
     ``faculty_unit`` / ``kafedra_unit`` — həll olunmuş bölmələr (tərif və kaskad:
     :mod:`apps.registrar.lessons_log_units`).
     """
-    if q:
-        lessons = lessons.filter(
-            Q(topic__icontains=q)
-            | Q(offering__subject__name__icontains=q)
-            | Q(offering__subject__code__icontains=q)
-            | Q(offering__group__name__icontains=q)
-        )
+    search_q = tolerant_q(
+        q,
+        ("topic", "offering__subject__name"),
+        compact_fields=("offering__subject__code", "offering__group__name"),
+    )
+    if search_q is not None:
+        lessons = lessons.filter(search_q)
     if offering:
         lessons = lessons.filter(offering_id=offering)
     if kind:

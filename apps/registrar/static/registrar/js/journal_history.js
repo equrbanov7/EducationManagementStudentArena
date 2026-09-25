@@ -42,13 +42,16 @@
         return (root && root.getAttribute("data-t-" + key)) || "";
     }
 
-    function fold(text) {
-        return String(text || "")
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[̀-ͯ]/g, "")
-            .replace(/ə/g, "e")
-            .replace(/ı/g, "i");
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
     }
 
     function fmtDate(iso) {
@@ -99,11 +102,11 @@
         return active ? active.getAttribute("data-jhist-kind") || "" : "";
     }
 
-    function rowMatches(row, needle, date) {
+    function rowMatches(row, needle, match, date) {
         if (date && row.date !== date && String(row.old).indexOf(date) !== 0 && String(row.new).indexOf(date) !== 0) {
             return false;
         }
-        if (needle && (row.lesson_level || fold(row.student).indexOf(needle) === -1)) {
+        if (needle && (row.lesson_level || !match(row.student))) {
             return false;
         }
         return true;
@@ -200,7 +203,8 @@
         var list = part(root, "list");
         list.textContent = "";
         var qInput = part(root, "q");
-        var needle = fold(qInput ? qInput.value.trim() : "");
+        var needle = qInput ? qInput.value.trim() : "";
+        var match = searchMatcher(needle);
         var kind = currentKind(root);
         var visible = 0;
         var lastDay = "";
@@ -209,7 +213,7 @@
                 return;
             }
             var rows = (entry.rows || []).filter(function (row) {
-                return rowMatches(row, needle, state.date);
+                return rowMatches(row, needle, match, state.date);
             });
             if ((needle || state.date) && !rows.length) {
                 return;

@@ -22,7 +22,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import pgettext, pgettext_lazy
@@ -33,6 +32,7 @@ from apps.courses.models import CourseMembership
 from apps.exams.models import Exam, StudentGroup
 from apps.exams.public import without_disabled_practical_exams
 from core.permissions import request_has_permission
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization, scoped_by_organization
 
 from ..shared._helpers import _get_owner_course_or_404, _owner_courses_queryset, _student_users_queryset
@@ -110,7 +110,6 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
 AVAILABLE_STUDENTS_DEFAULT_LIMIT = 20
 AVAILABLE_STUDENTS_MAX_LIMIT = 50
 AVAILABLE_STUDENTS_MAX_PAGE = 500
-AVAILABLE_STUDENTS_MAX_TERMS = 5
 
 
 def _clamp_int(raw, *, default, low, high):
@@ -142,7 +141,8 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     GET parametrləri (hamısı istəyə bağlı — köhnə çağırış forması işləyir):
     - ``q``     — axtarış; boşluqla ayrılmış hər söz username / ad / soyad
-                  sahələrinin BİRİNDƏ olmalıdır (``icontains``).
+                  sahələrinin BİRİNDƏ olmalıdır (``tolerant_q`` — az/ing hərfə
+                  dözümlü, ən çoxu 4 söz; sahib 2026-09-26).
     - ``limit`` — səhifə ölçüsü, susmaya görə 20, tavan 50.
     - ``page``  — 1-dən başlayan səhifə nömrəsi.
 
@@ -177,8 +177,9 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
         page = _clamp_int(request.GET.get("page"), default=1, low=1, high=AVAILABLE_STUDENTS_MAX_PAGE)
 
         qs = _available_students_queryset(request, course)
-        for term in q.split()[:AVAILABLE_STUDENTS_MAX_TERMS]:
-            qs = qs.filter(Q(username__icontains=term) | Q(first_name__icontains=term) | Q(last_name__icontains=term))
+        search_q = tolerant_q(q, ("username", "first_name", "last_name"))
+        if search_q is not None:
+            qs = qs.filter(search_q)
 
         offset = (page - 1) * limit
         rows = list(qs.only("id", "username", "first_name", "last_name")[offset : offset + limit + 1])

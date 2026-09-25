@@ -26,6 +26,7 @@ from apps.organizations.public import organization_role_user_queryset
 from core.audit import log_action
 from core.constants import AuditAction
 from core.roles import ProfileRole
+from core.search_text import tolerant_q
 
 from ._shared import center_org_or_403
 
@@ -101,13 +102,9 @@ def exam_center_pin_search(request):
     limit = max(1, min(limit, _SEARCH_LIMIT_MAX))
 
     qs = _pin_holder_student_queryset(organization).annotate(kafedra=Subquery(_kafedra_subquery(organization)))
-    if query:
-        qs = qs.filter(
-            Q(username__icontains=query)
-            | Q(first_name__icontains=query)
-            | Q(last_name__icontains=query)
-            | Q(email__icontains=query)
-        )
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
     window = list(qs.order_by("first_name", "last_name", "username")[offset : offset + limit + 1])
     has_more = len(window) > limit
     students = window[:limit]

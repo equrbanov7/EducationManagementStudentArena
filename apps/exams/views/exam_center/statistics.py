@@ -30,6 +30,7 @@ from apps.exams.services.access_policy import is_exam_center_user
 from apps.exams.services.result_calculation import attach_test_result_summaries
 from apps.exams.services.supervision import attach_attempt_interventions
 from core.export_safety import sheet_cell
+from core.search_text import tolerant_q
 
 from ._shared import supervisor_org_or_403
 
@@ -135,10 +136,9 @@ def _filtered_attempts(request, organization):
     )
 
     q = (request.GET.get("q") or "").strip()
-    if q:
-        qs = qs.filter(
-            Q(user__first_name__icontains=q) | Q(user__last_name__icontains=q) | Q(user__username__icontains=q)
-        )
+    student_q = tolerant_q(q, ("user__first_name", "user__last_name", "user__username"))
+    if student_q is not None:
+        qs = qs.filter(student_q)
 
     subject_ids = _csv_uuids(request.GET.get("subjects"))
     if subject_ids:
@@ -429,8 +429,9 @@ def stats_faculty_search(request):
 
     query = (request.GET.get("q") or "").strip()
     qs = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=("faculty", "deanery"))
-    if query:
-        qs = qs.filter(name__icontains=query)
+    name_q = tolerant_q(query, ("name",))
+    if name_q is not None:
+        qs = qs.filter(name_q)
     qs = qs.order_by("name")
 
     offset, limit = _lookup_bounds(request)
@@ -450,8 +451,9 @@ def stats_department_search(request):
     faculty_ids = _csv_uuids(request.GET.get("faculty"))
     if faculty_ids:
         qs = qs.filter(parent_id__in=faculty_ids)
-    if query:
-        qs = qs.filter(name__icontains=query)
+    name_q = tolerant_q(query, ("name",))
+    if name_q is not None:
+        qs = qs.filter(name_q)
     qs = qs.order_by("name")
 
     offset, limit = _lookup_bounds(request)
@@ -468,12 +470,9 @@ def stats_teacher_search(request):
 
     query = (request.GET.get("q") or "").strip()
     rows = Exam.objects.filter(organization=organization, author__isnull=False)
-    if query:
-        rows = rows.filter(
-            Q(author__first_name__icontains=query)
-            | Q(author__last_name__icontains=query)
-            | Q(author__username__icontains=query)
-        )
+    author_q = tolerant_q(query, ("author__first_name", "author__last_name", "author__username"))
+    if author_q is not None:
+        rows = rows.filter(author_q)
     rows = (
         rows.values("author_id", "author__first_name", "author__last_name", "author__username")
         .distinct()

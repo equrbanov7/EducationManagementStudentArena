@@ -19,6 +19,18 @@
 (function () {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     var ROOT_SEL = "[data-pn-root]";
     var MAX_IMAGE_BYTES = 5 * 1024 * 1024;
     var MAX_TEXTAREA_PX = 360;
@@ -256,12 +268,12 @@
     }
 
     function filterTargets(root, query) {
-        var q = (query || "").toLowerCase().trim();
+        var q = (query || "").trim();
+        var match = searchMatcher(q);
         var visible = 0;
         var perCat = {};
         root.querySelectorAll(".pn-target-item").forEach(function (item) {
-            var label = (item.getAttribute("data-label") || "").toLowerCase();
-            var show = q === "" || label.indexOf(q) !== -1;
+            var show = q === "" || match(item.getAttribute("data-label") || "");
             item.hidden = !show;
             if (show) {
                 visible++;

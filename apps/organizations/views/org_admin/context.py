@@ -7,12 +7,12 @@ from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 
 from ...models import OrgUnit
 from ..shared._helpers import (
@@ -231,13 +231,9 @@ def build_organization_members_context(request, organization):
         members = members.filter(role__name=role_filter)
 
     search = (request.GET.get("search") or "").strip()[:120]
-    if search:
-        members = members.filter(
-            Q(user__username__icontains=search)
-            | Q(user__email__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
+    search_q = tolerant_q(search, ("user__username", "user__email", "user__first_name", "user__last_name"))
+    if search_q is not None:
+        members = members.filter(search_q)
 
     members = members.order_by("-role__level", "user__username")
     members_page = Paginator(members, 25).get_page(request.GET.get("members_page"))
