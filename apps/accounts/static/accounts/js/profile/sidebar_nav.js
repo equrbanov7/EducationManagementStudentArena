@@ -72,9 +72,8 @@
             }
             var frame = sidebar.getBoundingClientRect();
             var header = sidebar.querySelector(".sidebar-header");
-            var footer = sidebar.querySelector(".sidebar-footer");
             var top = frame.top + (header ? header.offsetHeight : 0);
-            var bottom = frame.bottom - (footer ? footer.offsetHeight : 0);
+            var bottom = frame.bottom;
             var box = active.getBoundingClientRect();
             if (box.height === 0 || (box.top >= top && box.bottom <= bottom)) {
                 return;
