@@ -19,7 +19,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.registrar import grade_audit
-from apps.registrar.models import Lesson, LessonKind, LessonMark
+from apps.registrar.models import CourseOffering, Lesson, LessonKind, LessonMark
 
 from .gradebook import (  # noqa: F401
     DEFAULT_LESSON_HOURS,
@@ -157,6 +157,10 @@ def create_lesson(
         instructor = instructor or fields["instructor"]
         hours = hours or fields["hours"]
     new_hours = hours or DEFAULT_LESSON_HOURS
+    # L-3 (2026-09-25): «yoxla → yarat» yarışı — iki redaktor (müəllim + İKT) eyni slotu eyni anda
+    # aktivləşdirəndə dublikat sütun yaranırdı. Açılış sətri kilidlənir: EYNİ açılışa dərs yaratma
+    # seriyalaşır, dublikat yoxlaması kilid altında gedir (başqa açılışlar gözləmir).
+    CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)

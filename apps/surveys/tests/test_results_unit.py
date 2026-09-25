@@ -107,18 +107,28 @@ class PeriodTest(SimpleTestCase):
             {"id": uuid.uuid4(), "period_name": "Payız", "academic_year": "2025/2026", "effective_status": "closed"},
         ]
 
-    def test_latest_campaign_is_default_with_previous(self):
+    def test_default_is_latest_closed_campaign_with_previous(self):
+        # M-1: açıq kampaniya (rows[0]) nəticə dəstinə düşmür — defolt son BAĞLI kampaniyadır.
         period = resolve_period("", self.rows)
-        self.assertEqual(period.campaign_ids, (self.rows[0]["id"],))
-        self.assertEqual(period.previous_ids, (self.rows[1]["id"],))
-        self.assertTrue(period.is_open)
+        self.assertEqual(period.campaign_ids, (self.rows[1]["id"],))
+        self.assertEqual(period.previous_ids, (self.rows[2]["id"],))
+        self.assertFalse(period.live)
         self.assertEqual(period.value, "")
+
+    def test_open_campaign_is_participation_only(self):
+        live = resolve_period(str(self.rows[0]["id"]), self.rows)
+        self.assertTrue(live.live)
+        self.assertEqual(live.campaign_ids, (self.rows[0]["id"],))
+        only_open = resolve_period("", self.rows[:1])
+        self.assertTrue(only_open.live)
+        self.assertEqual(resolve_period("", []).campaign_ids, ())
 
     def test_year_all_and_explicit_campaign(self):
         year = resolve_period("y:2025/2026", self.rows)
         self.assertEqual(set(year.campaign_ids), {self.rows[1]["id"], self.rows[2]["id"]})
         self.assertEqual(year.previous_ids, ())
-        self.assertEqual(len(resolve_period("all", self.rows).campaign_ids), 3)
+        union = resolve_period("all", self.rows)
+        self.assertEqual(set(union.campaign_ids), {self.rows[1]["id"], self.rows[2]["id"]})  # açıq kampaniya YOX
         explicit = resolve_period(str(self.rows[1]["id"]), self.rows)
         self.assertEqual((explicit.mode, explicit.previous_ids), ("campaign", (self.rows[2]["id"],)))
         self.assertEqual(resolve_period("garbage", self.rows).mode, "latest")
@@ -126,6 +136,7 @@ class PeriodTest(SimpleTestCase):
     def test_options_and_labels(self):
         values = [option["value"] for option in period_options(self.rows)]
         self.assertEqual(values[:3], ["", "all", "y:2025/2026"])
+        self.assertEqual(values[-1], str(self.rows[0]["id"]))  # davam edən kampaniya sonda, «yalnız iştirak»
         self.assertEqual(
             campaign_label({"period_name": "2026/2027 Payız", "academic_year": "2026/2027"}), "2026/2027 Payız"
         )
@@ -165,3 +176,56 @@ class HelpersTest(SimpleTestCase):
         self.assertEqual(delta_info(8.0, 8.02)["direction"], "flat")
         self.assertIsNone(delta_info(None, 8.0))
         self.assertTrue(datetime.date.today())
+
+
+class DisclosureGuardTest(SimpleTestCase):
+    """M-1/M-2 köməkçiləri: səbətlər, 5%-lik faiz, qardaş xanalar, iç-içə dövr dəstləri."""
+
+    def test_count_buckets_and_rates(self):
+        from apps.surveys.services.analytics_guard import count_bucket, count_floor, round5
+
+        self.assertEqual(
+            [count_bucket(n) for n in (0, 4, 5, 9, 10, 19, 20, 99, 100, 149, 150)],
+            ["<5", "<5", "5+", "5+", "10+", "10+", "20+", "50+", "100+", "100+", "150+"],
+        )
+        self.assertEqual((count_floor(None), count_bucket(None)), (None, "—"))
+        self.assertEqual((round5(0.43), round5(0.476), round5(None)), (45, 50, None))
+
+    def test_sibling_rule_needs_two_hidden_cells_and_k_hidden_responses(self):
+        from apps.surveys.services.analytics_guard import finalize
+
+        # PoC: 4 / 4 / 1 — tək gizli xana → daha bir xana gizlənir; gizli xanada n də yoxdur.
+        rows = [{"label": "a", "n": 4}, {"label": "b", "n": 4}, {"label": "c", "n": 1, "suppressed": True}]
+        finalize(rows, k=3, total_n=9)
+        self.assertEqual([row.get("suppressed", False) for row in rows], [True, False, True])
+        self.assertEqual([row["n"] for row in rows], [None, 4, None])
+        # İki gizli xana, amma cəmi < k → üçüncü də gizlənir.
+        rows = [
+            {"label": "a", "n": 9},
+            {"label": "b", "n": 5},
+            {"label": "c", "n": 1, "suppressed": True},
+            {"label": "d", "n": 1, "suppressed": True},
+        ]
+        finalize(rows, k=3, total_n=16)
+        self.assertEqual([row.get("suppressed", False) for row in rows], [False, True, True, True])
+
+    def test_nested_campaign_sets(self):
+        import uuid as _uuid
+
+        from apps.surveys.services.analytics_guard import campaign_family, nested_ok
+
+        c1, c2, c3 = (_uuid.uuid4() for _ in range(3))
+        rows = [
+            {"id": c1, "academic_year": "2026/2027", "effective_status": "closed", "min_group_size": 3},
+            {"id": c2, "academic_year": "2026/2027", "effective_status": "closed", "min_group_size": 3},
+            {"id": c3, "academic_year": "2025/2026", "effective_status": "closed", "min_group_size": 3},
+            {"id": _uuid.uuid4(), "academic_year": "2026/2027", "effective_status": "open", "min_group_size": 3},
+        ]
+        family = campaign_family(rows)
+        self.assertEqual(len(family.sets), 5)  # 3 tək + 1 il + hamısı (açıq kampaniya yox)
+        everything = (c1, c2, c3)
+        self.assertTrue(nested_ok((c1,), {c1: 5}, family, 3))  # tək kampaniyanın öz alt-dəsti yoxdur
+        self.assertTrue(nested_ok(everything, {c1: 10, c2: 10, c3: 5}, family, 3))
+        self.assertFalse(nested_ok(everything, {c1: 10, c2: 10, c3: 1}, family, 3))  # tək gizli kampaniya
+        self.assertFalse(nested_ok((c1, c2), {c1: 10, c2: 2}, family, 3))  # il − c1 = 2 < k
+        self.assertFalse(nested_ok(everything, {c1: 10, c2: 1, c3: 2}, family, 3))  # hamısı − il = 2 < k

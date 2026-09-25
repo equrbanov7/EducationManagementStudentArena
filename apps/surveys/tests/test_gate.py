@@ -56,6 +56,30 @@ class GateRedirectTest(TestCase):
         response = self.client.get(PROFILE + "?section=change-password")
         self.assertEqual(response.status_code, 200)
 
+    def test_change_password_query_does_not_unlock_other_fragments(self):
+        """L-1 (2026-09-25): fraqment API-si bölməni YOLDAN oxuyur — ?section=change-password qapını açmır."""
+        url = reverse("accounts:profile_section_fragment", args=["dashboard"]) + "?section=change-password"
+        response = self.client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", HTTP_ACCEPT="application/json")
+        self.assertEqual(response.status_code, 409)
+
+    def test_change_password_form_post_does_not_unlock_other_paths(self):
+        url = reverse("accounts:profile_section_fragment", args=["dashboard"])
+        response = self.client.post(
+            url,
+            {"profile_form": "change-password"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+
+    def test_change_password_fragment_itself_is_exempt(self):
+        response = self.client.get(
+            reverse("accounts:profile_section_fragment", args=["change-password"]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            HTTP_ACCEPT="application/json",
+        )
+        self.assertNotEqual(response.status_code, 409)
+
     def test_survey_pages_are_not_gated(self):
         self.assertEqual(self.client.get(reverse("surveys:home")).status_code, 200)
 

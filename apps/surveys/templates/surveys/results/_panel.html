@@ -1,6 +1,6 @@
 {% load i18n static %}
 {% comment %}«Sorğu nəticələri» paneli. Vəziyyətlər: forbidden (əhatə yoxdur) · no_campaign ·
-ready. Hazır vəziyyətdə: başlıq + ixrac, anonimlik/əhatə qeydi, avto filtr paneli
+live (davam edən kampaniya — YALNIZ iştirak, M-1) · ready. Hazır vəziyyətdə: başlıq + ixrac, anonimlik/əhatə qeydi, avto filtr paneli
 (`filter_bar.js` müqaviləsi, URL-də `er_*`), KPI zolağı, server tab-ları (link — hər tab
 yalnız öz məlumatını hesablayır) və müəllim kartı çekməcəsi. Skriptlər panelin İÇİNDƏDİR
 (AJAX swap) və idempotentdir (`EMSReady`/`EMSDelegate`).{% endcomment %}
@@ -21,6 +21,15 @@ yalnız öz məlumatını hesablayır) və müəllim kartı çekməcəsi. Skript
     {% else %}
         {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-clipboard-list" %}
     {% endif %}
+{% elif rp.state == "live" %}
+    {% trans "Anonim müəllim qiymətləndirmə sorğusunun nəticələri — süzün, müqayisə edin, müəllim kartına baxın və aqreqatları ixrac edin." context "surveys.results" as svr_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=svr_subtitle %}
+    {% include "surveys/results/_notice.html" %}
+    {% include "surveys/results/_filters.html" %}
+    {% include "surveys/results/_live.html" %}
+    <script defer src="{% static 'surveys/js/results_core.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_charts.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_panel.js' %}?v=20260925-f2"></script>
 {% else %}
     {% trans "Anonim müəllim qiymətləndirmə sorğusunun nəticələri — süzün, müqayisə edin, müəllim kartına baxın və aqreqatları ixrac edin." context "surveys.results" as svr_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=svr_subtitle header_actions_include="surveys/results/_header_actions.html" %}

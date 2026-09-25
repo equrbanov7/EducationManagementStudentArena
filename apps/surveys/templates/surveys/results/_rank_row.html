@@ -1,8 +1,8 @@
 {% load i18n %}<tr data-svr-row="{{ forloop.counter0 }}"{% if row.suppressed %} class="svr-rank__row--hidden"{% endif %}>
     <td class="svr-rank__pos">{{ row.rank|default_if_none:"—" }}</td>
     <th scope="row"><span class="svr-name">{{ row.name }}</span>{% if row.department %}<span class="svr-sub">{{ row.department }}</span>{% endif %}</th>
-    <td class="ems-table__num">{{ row.n }}</td>
-    <td class="ems-table__num">{% if row.rate is not None %}{{ row.rate }}%<span class="svr-sub">{{ row.receipts }} / {{ row.expected }}</span>{% else %}—{% endif %}</td>
+    <td class="ems-table__num">{% if row.suppressed %}<span class="svr-muted">—</span>{% else %}{{ row.n }}{% endif %}</td>
+    <td class="ems-table__num">{% if row.rate is not None %}≈ {{ row.rate }}%{% else %}—{% endif %}</td>
     {% if row.suppressed %}
     <td colspan="{% if tb.question %}6{% else %}5{% endif %}">{% include "surveys/results/_hidden_badge.html" with hb_secondary=row.secondary %}</td>
     {% else %}

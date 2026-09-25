@@ -34,6 +34,9 @@ _CTX = "accounts.syllabus"
 _NO_ORG = pgettext_lazy(_CTX, "Aktiv təşkilat seçilməyib.")
 _NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı.")
 _BAD_REQUEST = pgettext_lazy(_CTX, "Sorğu düzgün deyil.")
+_OFFICIAL_HOURS = pgettext_lazy(
+    _CTX, "Saat bölgüsü rəsmi tədris planından gəlir — dəyişiklik üçün kafedraya müraciət edin."
+)
 _REASON_REQUIRED = pgettext_lazy(_CTX, "Səbəb ən azı %(min)s simvol olmalıdır.")
 _SAVED = pgettext_lazy(_CTX, "Saxlanıldı")
 _DRAFT_CREATED = pgettext_lazy(_CTX, "Qaralama yaradıldı — məzmunu doldurub təsdiqə göndərin.")
@@ -258,6 +261,12 @@ def syllabus_action(request):
                 return _fail(_NOT_FOUND, status=404)
             if not services.is_author(actor, version.syllabus):
                 return _fail(transition_text("transition.author_only"), status=403)
+            # Təhlükəsizlik yoxlaması (2026-09-25): UI rəsmi plan saatı olanda formanı gizlədir, API
+            # isə müəllifin RƏSMİ plan saatını üstələməsinə icazə verirdi — bölgünün mənbəyi tədris planıdır.
+            from apps.registrar.public import plan_hours_for_offering
+
+            if plan_hours_for_offering(getattr(version.syllabus, "offering", None)):
+                return _fail(_OFFICIAL_HOURS, status=409, code="plan_hours.official")
             hours = {}
             for kind in ("lecture", "seminar", "lab"):
                 try:

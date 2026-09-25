@@ -1,31 +1,40 @@
 """Açıqlama nəzarəti (disclosure control) — «Sorğu nəticələri» UI-ının BÜTÜN görünüşləri
 və ixracı bu qaydalardan keçir (təhlükəsizlik rəyi M-1 / M-2, 2026-09-25).
 
-M-1 — CANLI NƏTİCƏ YOXDUR. Açıq (və ya planlaşdırılmış) kampaniyanın heç bir ortası,
-paylanması, şərhi göstərilmir: iki yükləmə arasında «n₂·orta₂ − n₁·orta₁» çıxması bir
-tələbənin cavabını açardı. Nəticə YALNIZ effektiv statusu ``closed`` olan (bağlanma
-tarixi keçmiş və ya bağlanmış) kampaniyalardan hesablanır (:func:`published_campaigns`).
-Açıq kampaniya üçün yalnız iştirak — qəbz sayı səbətlə (:func:`count_bucket`), faiz
-5-ə yuvarlaqlaşdırılmış (:func:`round5`).
+M-1 — CANLI NƏTİCƏ YOXDUR. Açıq/planlaşdırılmış kampaniyanın heç bir ortası, paylanması,
+şərhi göstərilmir: iki yükləmə arasında «n₂·orta₂ − n₁·orta₁» çıxması bir tələbənin
+cavabını açardı. Nəticə YALNIZ effektiv statusu ``closed`` olan kampaniyalardan
+hesablanır (:func:`published_campaigns`); davam edən kampaniya üçün yalnız iştirak —
+say səbətlə (:func:`count_bucket`), faiz 5-ə yuvarlaqlaşdırılmış (:func:`round5`).
 
 M-2 — KİÇİK QRUP ÇIXMA İLƏ AÇILMIR:
-* SAY HEÇ YERDƏ DƏQİQ GÖSTƏRİLMİR — səbət: «<5», «5+», «10+», «20+», «50+», «100+»…
-  (``count_bucket``); kliyent sıralaması/süzgəci səbətin alt həddi ilə (``count_floor``).
-  Paylanma yalnız tam faizlə (xam say yoxdur).
-* Qardaş xanalar (:func:`sibling_suppress`): görünən cəmin altındakı sətirlərdən gizli
-  qalan varsa, gizli xana sayı ≥ 2 VƏ gizli cəm ≥ k olana qədər ən kiçik görünən
-  sətirlər də gizlədilir (tək gizli xana cəmdən çıxılaraq heç vaxt bərpa olunmur).
-* Kampaniya seçimi DARALDICI filtrdir (:func:`campaign_counts`): seçilmiş kampaniya
-  alt-dəstinin sayı bütün bağlı kampaniyalardakı eyni dəstin sayından ``0 < fərq < k``
-  qədər fərqlənirsə, dəst/sətir gizlədilir (tamamlayıcı qayda).
-* Gizli sətrin heç bir aqreqatı qaytarılmır (:func:`redact`): ``n`` də daxil.
+* Say HEÇ YERDƏ dəqiq göstərilmir: «<5», «5+», «10+», «20+», «50+», «100+», sonra 50-lik
+  addım (:func:`count_bucket`); kliyent sıralaması səbətin alt həddi ilə (:func:`count_floor`).
+  Paylanmalar yalnız tam faizlə verilir (xam say yoxdur).
+* Qardaş xanalar (:func:`sibling_suppress`): görünən cəmin altında gizli xana varsa,
+  gizli xana sayı ≥ 2 VƏ gizli cəm ≥ k olana qədər ən kiçik görünən sətirlər də
+  gizlədilir — tək gizli xana heç vaxt «cəm − görünənlər» ilə bərpa olunmur.
+* Gizli sətrin heç bir aqreqatı qaytarılmır, ``n`` də daxil (:func:`redact`).
+* KAMPANİYA SEÇİMİ də daraldıcı ölçüdür. Seçilə bilən dövr dəstləri — hər bağlı
+  kampaniya, ≥ 2 kampaniyalı tədris ili, «bütün dövrlər» (:func:`campaign_family`).
+  İki iç-içə dəst (A ⊂ B) eyni filtrlərlə ``0 < n(B) − n(A) < k`` qədər fərqlənirsə və ya
+  B-nin tək-tək gizli kampaniyaları bir xana / cəmi < k olarsa, BÖYÜK dəst (B) gizlədilir
+  (:func:`nested_ok`, :func:`nested_hidden_keys`). Tək kampaniya görünüşü (defolt) və
+  dinamika nöqtələri buna görə heç vaxt itmir; dəstlər arasındakı kiçik qalıq isə heç
+  bir görünən dəstlər fərqi kimi çıxmır.
+
+Bütün kombinasiyaların (filtr × dövr × görünüş) tam qəfəsi yoxlanmır — bu, F1-in
+sənədləşdirdiyi qalıq riskdir; UI xam sətir ixrac etmir və dəqiq say vermir.
 """
 
 from __future__ import annotations
 
+from collections import defaultdict
+from dataclasses import dataclass, field
+
 from django.db.models import Count
 
-from ..constants import Section
+from ..constants import DEFAULT_MIN_GROUP_SIZE, Section
 from . import filters as flt
 
 #: Göstərilən saylar üçün səbət sərhədləri (aşağı həd → etiket «X+»).
@@ -35,6 +44,7 @@ REDACT_KEYS = (
     "n",
     "avg",
     "top2",
+    "bottom2",
     "avg_overall",
     "likert_index",
     "likert_index_pct",
@@ -47,6 +57,7 @@ REDACT_KEYS = (
     "facilities",
     "question_avg",
     "receipts",
+    "expected",
     "rate",
 )
 
@@ -90,7 +101,7 @@ def count_bucket(n) -> str:
 
 
 def round5(rate):
-    """Faiz (0–1) → 5-ə yuvarlaqlaşdırılmış tam faiz (0–100); ``None`` → ``None``."""
+    """Pay (0–1) → 5-ə yuvarlaqlaşdırılmış tam faiz (0–100); ``None`` → ``None``."""
     if rate is None:
         return None
     return int(5 * round(float(rate) * 100 / 5))
@@ -107,18 +118,12 @@ def redact(row) -> dict:
     return row
 
 
-def _hide(row, reason="secondary"):
-    row["suppressed"] = True
-    row["secondary"] = row.get("secondary") or reason == "secondary"
-    return row
-
-
 def sibling_suppress(rows, *, k, total_n, label_key="label") -> list:
     """Görünən cəmin qardaş sətirlərini çıxmaya qarşı qoruyur (bax modul sənədi).
 
     ``total_n`` — ekranda (başqa yerdə) görünən cəmin DƏQİQ sayı; cəm gizlidirsə ``None``.
     Siyahıya düşməyən qalıq (``total_n − Σ n``) da gizli xana sayılır. Sətirlərin ``n``-i
-    burada hələ dəqiq olmalıdır (``redact`` bundan SONRA çağırılır).
+    burada hələ dəqiq olmalıdır (:func:`redact` bundan SONRA çağırılır).
     """
     if not rows or total_n is None or not k:
         return rows
@@ -137,7 +142,8 @@ def sibling_suppress(rows, *, k, total_n, label_key="label") -> list:
 
     while visible and exposed():
         row = visible.pop(0)
-        _hide(row)
+        row["suppressed"] = True
+        row["secondary"] = True
         hidden.append(row)
     return rows
 
@@ -151,22 +157,6 @@ def finalize(rows, *, k, total_n, label_key="label") -> list:
     return rows
 
 
-# ── Kampaniya seçimi daraldıcı filtrdir ────────────────────────────────────
-
-
-def campaign_counts(organization, scope, filters, campaign_ids, *, key=None, section=Section.TEACHER):
-    """Eyni filtrlərlə verilmiş kampaniyalar üzrə say: ``key`` yoxdursa tam ədəd, varsa
-    ``{açar: say}`` (tamamlayıcı qaydanın «bütün bağlı kampaniyalar» bazası; 1 sorğu)."""
-    queryset = flt.responses(organization, scope, filters, list(campaign_ids), section=section)
-    if key is None:
-        return queryset.count()
-    return dict(queryset.values(key).annotate(c=Count("id")).values_list(key, "c"))
-
-
-def campaign_narrowed(selected_ids, all_ids) -> bool:
-    return bool(all_ids) and set(selected_ids) != set(all_ids)
-
-
 def complement_ok(n, k, baseline) -> bool:
     """``n ≥ k`` və bazadan fərq 0 və ya ≥ k (F1 ``is_visible`` ilə eyni qayda)."""
     if n is None or n < k:
@@ -175,3 +165,107 @@ def complement_ok(n, k, baseline) -> bool:
         return True
     gap = int(baseline) - int(n)
     return gap <= 0 or gap >= k
+
+
+def general_filtered(filters) -> bool:
+    """Ümumi bölmədə HƏR filtr daraldıcıdır: cavab tələbənin öz qrupu/ixtisası/fakültəsi
+    ilə saxlanılır, ona görə fakültə (və s.) seçimi də kiçik qrup yarada bilər."""
+    return any(
+        value is not None
+        for value in (
+            filters.faculty_id,
+            filters.department_id,
+            filters.teacher_id,
+            filters.subject_id,
+            filters.group_id,
+            filters.program_id,
+            filters.course_year,
+        )
+    )
+
+
+# ── Kampaniya ölçüsü: iç-içə seçilə bilən dövr dəstləri ────────────────────
+
+
+@dataclass(frozen=True)
+class CampaignFamily:
+    """Seçilə bilən bağlı dövr dəstləri (``sets``) və hər kampaniyanın öz k-sı (``thresholds``)."""
+
+    sets: tuple = ()
+    thresholds: dict = field(default_factory=dict)
+
+
+def campaign_family(campaigns) -> CampaignFamily:
+    """Hər tək bağlı kampaniya, ≥ 2 kampaniyalı tədris ili və «bütün dövrlər» (təkrarsız)."""
+    rows = published_campaigns(campaigns)
+    sets = [frozenset([row["id"]]) for row in rows]
+    years: dict = defaultdict(list)
+    for row in rows:
+        if row.get("academic_year"):
+            years[row["academic_year"]].append(row["id"])
+    sets.extend(frozenset(ids) for ids in years.values() if len(ids) > 1)
+    if len(rows) > 1:
+        sets.append(frozenset(row["id"] for row in rows))
+    unique = []
+    for item in sets:
+        if item not in unique:
+            unique.append(item)
+    thresholds = {
+        row["id"]: max(int(row.get("min_group_size") or DEFAULT_MIN_GROUP_SIZE), DEFAULT_MIN_GROUP_SIZE) for row in rows
+    }
+    return CampaignFamily(sets=tuple(unique), thresholds=thresholds)
+
+
+def _multi(campaign_ids, family) -> bool:
+    return family is not None and len(set(campaign_ids or ())) > 1
+
+
+def per_campaign_counts(organization, scope, filters, campaign_ids, *, key=None, section=Section.TEACHER):
+    """``{campaign_id: n}`` və ya (``key`` — sahə adı / adlar kortejı) ``{açar: {campaign_id: n}}``."""
+    queryset = flt.responses(organization, scope, filters, list(campaign_ids), section=section)
+    if key is None:
+        return dict(queryset.values("campaign_id").annotate(c=Count("id")).values_list("campaign_id", "c"))
+    fields = (key,) if isinstance(key, str) else tuple(key)
+    result: dict = defaultdict(dict)
+    for row in queryset.values(*fields, "campaign_id").annotate(c=Count("id")):
+        group = row[fields[0]] if len(fields) == 1 else tuple(row[field] for field in fields)
+        result[group][row["campaign_id"]] = row["c"]
+    return result
+
+
+def nested_ok(selected_ids, counts, family, k) -> bool:
+    """Çox kampaniyalı dəst göstərilə bilərmi (eyni filtrlərlə, ``counts`` — kampaniya üzrə say):
+
+    1. ailədəki hər ÖZ alt-dəstlə fərq 0 və ya ≥ k;
+    2. dəstin tək-tək GİZLİ kampaniyaları (öz k-sından az, > 0) bir xana deyil və cəmi ≥ k —
+       əks halda «dəst − görünən kampaniyalar» (dinamika nöqtələri) gizli kampaniyanı açardı.
+    """
+    selected = frozenset(selected_ids or ())
+    total = sum(counts.get(campaign_id, 0) for campaign_id in selected)
+    for subset in family.sets:
+        if subset < selected:
+            gap = total - sum(counts.get(campaign_id, 0) for campaign_id in subset)
+            if 0 < gap < k:
+                return False
+    hidden = [
+        counts.get(campaign_id, 0)
+        for campaign_id in selected
+        if 0 < counts.get(campaign_id, 0) < family.thresholds.get(campaign_id, k)
+    ]
+    return not hidden or (len(hidden) > 1 and sum(hidden) >= k)
+
+
+def nested_set_ok(organization, scope, filters, campaign_ids, family, k, *, section=Section.TEACHER) -> bool:
+    """Dəst səviyyəsində kampaniya qaydası (tək kampaniyada sorğu yoxdur, həmişə keçir)."""
+    if not _multi(campaign_ids, family):
+        return True
+    counts = per_campaign_counts(organization, scope, filters, campaign_ids, section=section)
+    return nested_ok(campaign_ids, counts, family, k)
+
+
+def nested_hidden_keys(organization, scope, filters, campaign_ids, family, k, *, key, section=Section.TEACHER) -> set:
+    """Sətir səviyyəsində kampaniya qaydası: gizlədilməli açarlar (tək kampaniyada boş, sorğusuz)."""
+    if not _multi(campaign_ids, family):
+        return set()
+    counts = per_campaign_counts(organization, scope, filters, campaign_ids, key=key, section=section)
+    return {group for group, per in counts.items() if not nested_ok(campaign_ids, per, family, k)}

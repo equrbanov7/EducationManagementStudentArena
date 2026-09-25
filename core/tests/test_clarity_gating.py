@@ -81,6 +81,13 @@ class ClarityGatingTests(TestCase):
         bare = RequestFactory().get("/")
         self.assertTrue(feature_flags(bare)["microsoft_clarity_enabled"])
 
+    def test_never_on_anonymous_survey_pages(self):
+        """2026-09-25: /sorgu/ — session-replay anonim formanı tələbə kimliyi ilə yazmasın (hətta opt-in-də)."""
+        request = RequestFactory().get("/sorgu/")
+        request.user = self.user
+        with override_settings(MICROSOFT_CLARITY_AUTHENTICATED=True):
+            self.assertFalse(feature_flags(request)["microsoft_clarity_enabled"])
+
     def test_csp_sources_are_unchanged(self):
         directives = settings.CONTENT_SECURITY_POLICY["DIRECTIVES"]
         self.assertIn("https://www.clarity.ms", directives["script-src"])

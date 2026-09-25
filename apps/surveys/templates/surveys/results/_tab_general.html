@@ -25,7 +25,7 @@ mətnləri (KAMPANİYA BAŞINA k-həddi), açar söz tezliyi. Qrafik məlumatı
         {% include "surveys/results/_card_levels.html" %}
     {% else %}
         <div class="svr-card svr-card--wide">
-            {% include "surveys/results/_suppressed.html" with sup_n=gn.n sup_blocked=gn.complement_blocked %}
+            {% include "surveys/results/_suppressed.html" with sup_n=gn.has_n sup_blocked=gn.complement_blocked %}
         </div>
     {% endif %}
     {% include "surveys/results/_card_suggestions.html" with dg=gn.digest %}

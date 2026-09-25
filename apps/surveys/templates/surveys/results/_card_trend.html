@@ -36,7 +36,7 @@ göstərilmir. Kontekst: `tr` (trend_block), `tr_scope`. Hər dövr öz k-sı il
                     <tr>
                         <th scope="row">{{ row.label }}</th>
                         {% for cell in row.cells %}
-                        <td class="ems-table__num">{% if cell.suppressed %}<span class="svr-muted">{% trans "gizli" context "surveys.results" %} (n={{ cell.n }})</span>{% else %}{{ cell.overall|floatformat:2|default:"—" }} · {{ cell.index|floatformat:2|default:"—" }} <span class="svr-sub svr-sub--inline">n={{ cell.n }}</span>{% endif %}</td>
+                        <td class="ems-table__num">{% if cell.suppressed %}<span class="svr-muted">{% trans "gizli" context "surveys.results" %}</span>{% else %}{{ cell.overall|floatformat:2|default:"—" }} · {{ cell.index|floatformat:2|default:"—" }} <span class="svr-sub svr-sub--inline">n: {{ cell.n }}</span>{% endif %}</td>
                         {% endfor %}
                     </tr>
                 {% empty %}
