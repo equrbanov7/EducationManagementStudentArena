@@ -6,14 +6,15 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260716-jbatch8">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
-    <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260920-theme">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260926-kgrid">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
+    <link rel="stylesheet" href="{% static 'registrar/css/jd2_kselect.css' %}?v=20260926-1">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260925-audit">
     <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     <link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260831-guest2">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20260925-hist2">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
@@ -316,7 +317,7 @@
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260925-hist" nonce="{{ request.csp_nonce }}"></script>
-    <script src="{% static 'registrar/js/journal_history.js' %}?v=20260925-hist"></script>
+    <script src="{% static 'registrar/js/journal_history.js' %}?v=20260926-search"></script>
     {# «Aktivləşdir» ikiqat göndəriş qapısı + modalda «cədvəldən kənar dərs — səbəb» sahəsi (UNEC P1-1). #}
     <script src="{% static 'registrar/js/journal_activation.js' %}?v=20260925-act"></script>
     {% if can_manage_roster %}
