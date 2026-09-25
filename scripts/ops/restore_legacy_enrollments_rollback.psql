@@ -6,8 +6,9 @@
 -- action 'create', new_values.plan_sha256 = :plan_sha):
 --   1. bərpa yazılışlarının uşaqları (xana, komponent balı, yekun, təkrar imtahan, sərbəst iş);
 --   2. sübut faktları — `-v drop_facts=1` ilə (yalnız superuser: append-only trigger-i
---      session_replication_role ilə keçilir). Faktı olan yazılış faktsız SİLİNMİR: skript
---      dayanır və səbəbi deyir;
+--      session_replication_role ilə keçilir). Yazılışa BAĞLI faktı olan yazılış faktsız
+--      SİLİNMİR: skript dayanır və səbəbi deyir; yazılışa bağlı olmayan («unresolved»)
+--      sübut faktı drop_facts=0 ilə yerində qalır (sonda say göstərilir);
 --   3. bərpa yazılışlarının özü;
 --   4. bu planın yaratdığı dərslər / komponentlər / mövzular — üzərində başqa sətir QALMAYIBSA;
 --   5. bu planın yaratdığı açılışlar (sxemi ilə) — üzərində başqa yazılış və ya plandan kənar
@@ -99,6 +100,8 @@ DELETE FROM registrar_courseoffering WHERE id IN (SELECT id FROM rb_offerings);
 
 SELECT (SELECT count(*) FROM rb_enrollments) AS enrollments_rolled_back,
        (SELECT count(*) FROM rb_offerings) AS offerings_rolled_back,
-       (SELECT count(*) FROM rb_created WHERE model = 'courseoffering') - (SELECT count(*) FROM rb_offerings)
-           AS offerings_kept_in_use;
+       (SELECT count(*) FROM registrar_courseoffering
+         WHERE id::text IN (SELECT object_id FROM rb_created WHERE model = 'courseoffering')) AS plan_offerings_still_present,
+       (SELECT count(*) FROM registrar_legacygradefact
+         WHERE id::text IN (SELECT object_id FROM rb_created WHERE model = 'legacygradefact')) AS plan_facts_still_present;
 COMMIT;
