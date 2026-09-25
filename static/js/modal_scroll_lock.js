@@ -33,11 +33,18 @@
         '[aria-modal="true"]',
     ].join(",");
 
+    // «Görünən» = render olunur VƏ gizlədilməyib. Bağlı modallar tez-tez DOM-da qalır və
+    // `visibility:hidden` + `aria-hidden="true"` ilə gizlənir (məs. kurs yaratma modalı) —
+    // bunlar kilid SAYILMAMALIDIR, əks halda səhifə scroll-u həmişəlik bağlanır (2026-09-26
+    // baq). Opaklıq yoxlanmır: açılış animasiyası 0-dan başlayır, kilid gecikməsin.
     function isVisible(el) {
-        if (typeof el.checkVisibility === "function") {
-            return el.checkVisibility();
+        if (el.closest('[aria-hidden="true"], [inert]')) {
+            return false;
         }
-        return el.getClientRects().length > 0;
+        if (typeof el.checkVisibility === "function") {
+            return el.checkVisibility({ checkVisibilityCSS: true });
+        }
+        return el.getClientRects().length > 0 && window.getComputedStyle(el).visibility !== "hidden";
     }
 
     function syncLock() {
@@ -63,10 +70,11 @@
             return;
         }
         scheduled = true;
-        window.requestAnimationFrame(function () {
+        // rAF fon tabında dayanır — setTimeout hər halda işləyir (bir dövrədə bir hesab).
+        window.setTimeout(function () {
             scheduled = false;
             syncLock();
-        });
+        }, 16);
     }
 
     document.addEventListener("shown.bs.modal", syncLock);
@@ -74,6 +82,11 @@
     // SPA fraqment swap-ı açıq modalı hidden hadisəsi olmadan DOM-dan çıxara
     // bilər — kilid asılı qalmasın deyə swap-dan sonra yenidən hesabla.
     document.addEventListener("profile:section:loaded", syncLock);
+
+    // Bağlanış animasiyası bitəndə (visibility keçidi transition sonunda dəyişir) atribut
+    // mutasiyası olmur — kilid asılı qalmasın deyə transition/animation sonunda da hesabla.
+    document.addEventListener("transitionend", scheduleSync, true);
+    document.addEventListener("animationend", scheduleSync, true);
 
     function observe() {
         if (!document.body || typeof MutationObserver === "undefined") {
