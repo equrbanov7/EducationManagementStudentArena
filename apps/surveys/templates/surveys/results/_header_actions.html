@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}Başlıq əməlləri: aqreqat ixracı (XLSX — bütün cədvəllər, CSV — bir cədvəl; cari
+filtrlərlə, audit-ə yazılır) və kampaniyaların idarəsinə keçid. İxrac linkləri
+`data-force-navigation` daşıyır — kabinet SPA yükləyicisi onları tutmur.{% endcomment %}
+<div class="svr-actions">
+    {% if rp.can_manage %}
+    <a class="ems-btn" href="{{ rp.urls.campaigns }}"><i class="fas fa-sliders" aria-hidden="true"></i> {% trans "Kampaniyalar" context "surveys.results" %}</a>
+    {% endif %}
+    <div class="dropdown svr-export">
+        <button type="button" class="ems-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-file-arrow-down" aria-hidden="true"></i> {% trans "İxrac" context "surveys.results" %}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end svr-export__menu">
+            <li><a class="dropdown-item" href="{{ rp.urls.export_xlsx }}" download data-force-navigation="true"><i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel — bütün cədvəllər" context "surveys.results" %}</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><span class="dropdown-header">{% trans "CSV — bir cədvəl" context "surveys.results" %}</span></li>
+            {% for item in rp.urls.export_csv %}
+            <li><a class="dropdown-item" href="{{ item.url }}" download data-force-navigation="true"><i class="fas fa-file-csv" aria-hidden="true"></i> {{ item.label }}</a></li>
+            {% endfor %}
+            <li><hr class="dropdown-divider"></li>
+            <li><span class="dropdown-item-text svr-export__note">{% trans "Yalnız aqreqatlar — şərh mətni və fərdi cavab ixrac olunmur." context "surveys.results" %}</span></li>
+        </ul>
+    </div>
+</div>

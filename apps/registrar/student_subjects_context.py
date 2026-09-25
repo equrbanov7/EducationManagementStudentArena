@@ -31,7 +31,15 @@ from decimal import Decimal
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar import exam_attempt_history, finals, finals_batch, gradebook, interim_assessment, services
+from apps.registrar import (
+    exam_attempt_history,
+    finals,
+    finals_batch,
+    gradebook,
+    interim_assessment,
+    selfwork_points,
+    services,
+)
 from apps.registrar.cabinet_policy import (
     approved_syllabus_offerings,
     assessment_weights_view,
@@ -92,11 +100,16 @@ def _scheme_map(offerings) -> dict:
     return found
 
 
-def _component_breakdown(batch, enrollment, *, midterm=False) -> list:
+def _component_breakdown(batch, enrollment, *, midterm=False, selfwork_slots=None) -> list:
     """``gradebook.get_component_breakdown``-un toplu güzgüsü (eyni forma, sorğusuz).
 
     ``midterm`` (2026/2027-dən): köhnə kodun bu dövrdə yaratdığı BALSIZ «Kollokvium N»
-    qalıqları çip kimi göstərilmir — tələbə yalnız «Midterm …/20» görür."""
+    qalıqları çip kimi göstərilmir — tələbə yalnız «Midterm …/20» görür.
+
+    SƏRBƏST İŞ çipi (2026-09-25): giriş balına DÜŞƏN bal (``selfwork_points`` cəmi,
+    komponent tavanı ilə — ``entry_score_for`` güzgüsü); canlı bal yoxdursa köçürülmüş
+    «arxiv» balı (``selfwork_board.effective_total`` qaydası). ``slots`` — slot-slot
+    bal («Sərbəst iş 1: 4/5»), ``selfwork_slots`` batch-in eyni sorğusundan gəlir."""
     components = sorted(batch.components_by_offering.get(enrollment.offering_id, []), key=lambda c: (c.order, c.name))
     if not components:
         return []
@@ -108,7 +121,15 @@ def _component_breakdown(batch, enrollment, *, midterm=False) -> list:
             for c in components
             if c.kind != ComponentKind.KOLLOKVIUM or c.name.strip().lower() == keep or score_by.get(c.id) is not None
         ]
-    return [{"name": c.name, "score": score_by.get(c.id), "max": c.max_score} for c in components]
+    chips = []
+    for c in components:
+        chip = {"name": c.name, "score": score_by.get(c.id), "max": c.max_score}
+        if c.kind == ComponentKind.SELF_WORK:
+            live = min(Decimal(batch.selfwork_points.get((enrollment.id, enrollment.offering_id), 0)), Decimal(c.max_score))
+            chip["score"] = live if live else score_by.get(c.id)
+            chip["slots"] = (selfwork_slots or {}).get(enrollment.id, [])
+        chips.append(chip)
+    return chips
 
 
 def _is_midterm_row(enrollment, period, organization) -> bool:
@@ -129,7 +150,15 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
     enrollments = [row["enrollment"] for row in rows]
     offerings = [row["enrollment"].offering for row in rows]
     schemes = _scheme_map(offerings)
-    batch = finals_batch.build(enrollments)
+    # Sərbəst iş cəmi + slot-slot bal TƏK sorğuda (batch-in öz aqreqatını ƏVƏZ edir — sorğu sayı dəyişmir).
+    selfwork_slots: dict = {}
+
+    def _selfwork_loader(enrollment_ids, offering_ids):
+        slots, totals = selfwork_points.selfwork_slots(enrollments, offering_ids)
+        selfwork_slots.update(slots)
+        return totals
+
+    batch = finals_batch.build(enrollments, selfwork_loader=_selfwork_loader)
     approved_ids = approved_syllabus_offerings(organization, offerings)
     attempts_by_subject = exam_attempt_history.attempt_rows_by_subject(
         student=record.student,
@@ -151,7 +180,10 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
             enrollment=enrollment, scheme=schemes.get(offering.id), organization=organization, batch=batch
         )
         row["components"] = _component_breakdown(
-            batch, enrollment, midterm=_is_midterm_row(enrollment, period, organization)
+            batch,
+            enrollment,
+            midterm=_is_midterm_row(enrollment, period, organization),
+            selfwork_slots=selfwork_slots,
         )
         row["attempts"] = attempts_by_subject.get(offering.subject_id, [])
         row["ui"] = {"status": eligibility_status(row.get("eligibility"))}

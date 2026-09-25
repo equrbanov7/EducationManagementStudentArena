@@ -1,0 +1,55 @@
+{% load i18n %}
+{% comment %}Ümumi bölmənin bölgüsü (fakültə · ixtisas · kurs): iki seriya — ümumi məmnunluq
+və tədris şəraiti (1–5). Gizli sətirlər qrafikdə yoxdur, cədvəldə səbəbi ilə. Kontekst: `gn`.{% endcomment %}
+<section class="svr-card svr-card--wide" aria-labelledby="svr-lv-title" data-svr-levels data-default="{{ gn.level_default }}">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-lv-title">{% trans "Bölgü: məmnunluq və tədris şəraiti" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% trans "Orta bal (1–5); ən yüksək məmnunluq yuxarıda." context "surveys.results" %}</p>
+        </div>
+        <div class="ems-viewtoggle svr-toggle" role="group" aria-label="{% trans 'Səviyyə' context 'surveys.results' %}">
+            {% for level, rows in gn.levels.items %}
+            <button type="button" class="ems-viewtoggle__btn" data-svr-level="{{ level }}" aria-pressed="{% if level == gn.level_default %}true{% else %}false{% endif %}">{% if level == "faculty" %}{% trans "Fakültələr" context "surveys.results" %}{% elif level == "program" %}{% trans "İxtisaslar" context "surveys.results" %}{% else %}{% trans "Kurslar" context "surveys.results" %}{% endif %}</button>
+            {% endfor %}
+        </div>
+    </header>
+    <ul class="svr-legend">
+        <li class="svr-key"><span class="svr-key__swatch svr-key__swatch--s1" aria-hidden="true"></span>{% trans "Ümumi məmnunluq" context "surveys.results" %}</li>
+        <li class="svr-key"><span class="svr-key__swatch svr-key__swatch--s2" aria-hidden="true"></span>{% trans "Tədris şəraiti" context "surveys.results" %}</li>
+    </ul>
+    <div class="svr-canvas" data-svr-chart="levels">
+        <canvas role="img" aria-label="{% trans 'Ümumi bölmənin bölgü qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir.' context 'surveys.results' %}"></canvas>
+    </div>
+    <p class="svr-card__foot" data-svr-levels-hidden hidden></p>
+    <details class="svr-table">
+        <summary>{% trans "Cədvəl kimi göstər" context "surveys.results" %}</summary>
+        {% for level, rows in gn.levels.items %}
+        <div class="svr-table__scroll" data-svr-level-table="{{ level }}">
+            <table class="ems-table svr-mini-table">
+                <thead><tr>
+                    <th scope="col">{% if level == "faculty" %}{% trans "Fakültə" context "surveys.results" %}{% elif level == "program" %}{% trans "İxtisas" context "surveys.results" %}{% else %}{% trans "Kurs" context "surveys.results" %}{% endif %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Ümumi məmnunluq" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Tədris şəraiti" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">n</th>
+                </tr></thead>
+                <tbody>
+                {% for row in rows %}
+                    <tr>
+                        <th scope="row">{{ row.label }}</th>
+                        {% if row.suppressed %}
+                        <td colspan="2">{% include "surveys/results/_hidden_badge.html" with hb_secondary=row.secondary %}</td>
+                        {% else %}
+                        <td class="ems-table__num">{{ row.satisfaction|floatformat:2|default:"—" }}</td>
+                        <td class="ems-table__num">{{ row.facilities|floatformat:2|default:"—" }}</td>
+                        {% endif %}
+                        <td class="ems-table__num">{{ row.n }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </details>
+</section>

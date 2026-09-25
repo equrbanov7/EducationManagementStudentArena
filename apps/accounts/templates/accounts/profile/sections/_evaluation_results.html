@@ -1,7 +1,9 @@
 {% if 'evaluation-results' in allowed_sections %}
-{% comment %}«Sorğu nəticələri» (survey.results.view) — MİNİMAL yer tutucu: son kampaniyanın
-k-anonim xülasəsi. Tam analitika UI-ı (filtrlər, qrafiklər, müəllim kartı) ayrıca işdə bu
-partial-ı əvəz edir; data `apps.surveys.public` API-sindən gəlir.{% endcomment %}
+{% comment %}«Sorğu nəticələri» (survey.results.view) — anonim müəllim qiymətləndirmə sorğusunun
+analitikası: filtrlər (URL-də, serverdə), KPI, qrafiklər + cədvəl qarşılıqları, müəllim
+reytinqi və kartı (çekməcə), ümumi təkliflər, aqreqat ixracı. AJAX-SAFE bölmədir: filtr
+paneli və tab-lar paneli yerində yeniləyir; skriptlər panelin İÇİNDƏDİR. Məzmun `apps/surveys`
+partial-ındadır (`survey_cabinet` tag-ı → `apps/surveys/views/results_panel.py`).{% endcomment %}
 <section class="profile-section-panel profile-section--evaluation-results {% if active_section == 'evaluation-results' %}is-active{% endif %}"
          data-profile-section-panel="evaluation-results"
          data-source-url="{{ profile_base_url }}?section=evaluation-results">

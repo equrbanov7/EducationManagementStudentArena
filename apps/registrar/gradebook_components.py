@@ -16,13 +16,13 @@ from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from apps.registrar import grade_audit
+from apps.registrar import selfwork_points as selfwork_points_rules
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
     ComponentScore,
     CriterionScore,
     LessonMark,
-    SelfWorkMark,
 )
 
 from .gradebook import MARK_EDIT_WINDOW, _to_decimal, journal_is_locked  # noqa: F401
@@ -44,7 +44,16 @@ def round_score(value) -> Decimal:
 # ── Çəkili qiymətləndirmə komponentləri (U7.1) ───────────────────────────────
 
 
-def entry_score_for(enrollment, cap, *, marks=None, components=None, component_scores=None, selfwork_done=None):
+def entry_score_for(
+    enrollment,
+    cap,
+    *,
+    marks=None,
+    components=None,
+    component_scores=None,
+    selfwork_points=None,
+    selfwork_done=None,
+):
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
 
     Qayda (analytics._evaluate ilə GÜZGÜ saxlanmalıdır):
@@ -52,7 +61,8 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None, component_s
       (köhnə çəkili-komponent davranışı); yoxdursa seminar/lab dərs ballarının
       cəmi işlədilir;
     * KOLLOKVIUM komponent balları həmişə ÜSTƏGƏLdir;
-    * SƏRBƏST İŞ çeklist cəmi (təhvil sayı) həmişə ÜSTƏGƏLdir;
+    * SƏRBƏST İŞ BALI (≤10, :mod:`apps.registrar.selfwork_points`) həmişə
+      ÜSTƏGƏLdir — hər SELF_WORK komponenti üçün onun ``max_score``-u ilə kəsilir;
     * yekun ``cap`` ilə clamp olunur və TAM ƏDƏDƏ yuvarlaqlaşdırılır
       (:func:`round_score` — yarım-yuxarı; legacy kəsirli arxiv qalıqları
       görünüşdə tam ədəd olmalıdır).
@@ -60,10 +70,15 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None, component_s
     Performans: ``marks`` (bu enrollment-in LessonMark-ları), ``components``
     (offering-in AssessmentComponent-ləri), ``component_scores`` (bu
     enrollment-in ComponentScore sətirləri — həm GENERIC, həm KOLLOKVIUM) və
-    ``selfwork_done`` (təhvil verilmiş sərbəst iş SAYI) əvvəlcədən verilə
-    bilər — toplu (batch) çağırışlarda sətir başına 4 sorğunu SIFIRA endirir
-    (:mod:`apps.registrar.finals_batch` hamısını bir dəfə oxuyur). Verilməsə
-    əvvəlki kimi ayrıca sorğulanır (geriyə-uyğun)."""
+    ``selfwork_points`` (sərbəst iş CƏMİ — BAL, ``selfwork_points`` qaydası ilə)
+    əvvəlcədən verilə bilər — toplu (batch) çağırışlarda sətir başına 4 sorğunu
+    SIFIRA endirir (:mod:`apps.registrar.finals_batch` hamısını bir dəfə oxuyur).
+    Verilməsə əvvəlki kimi ayrıca sorğulanır (geriyə-uyğun).
+
+    ``selfwork_done`` — KÖHNƏ ad (2026-09-25-ə qədər «təhvil SAYI» idi), geriyə
+    uyğunluq üçün saxlanılır və ``selfwork_points`` kimi (BAL) qəbul olunur:
+    köhnə çeklist datasında say == bal olduğu üçün köhnə çağıranların rəqəmi
+    dəyişmir. Yeni kod ``selfwork_points`` işlətməlidir."""
     cap = Decimal(cap)
     if components is None:
         components = list(AssessmentComponent.objects.filter(offering=enrollment.offering))
@@ -94,10 +109,12 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None, component_s
             Decimal("0"),
         )
     if selfwork:
-        # ⚠️ SƏRBƏST İŞ BURADA YALNIZ ÇEKLİST SAYIDIR — SELF_WORK komponentinin
-        # ``ComponentScore`` BALINI BURAYA ƏLAVƏ ETMƏYİN. Köçürülmüş (legacy)
-        # datada həmin bal köhnə "si" xanasıdır və o, ARTIQ giriş balının
-        # içindədir: J5b fazası köhnə ``girish``-i
+        # ⚠️ SƏRBƏST İŞ BURADA YALNIZ ``SelfWorkMark`` İŞARƏLƏRİNİN BALIDIR
+        # (:mod:`apps.registrar.selfwork_points` — effektiv bal = ``points``, yoxdursa
+        # təhvil × mövzunun ``max_points``-u; köhnə çeklistdə bu, TƏHVİL SAYIDIR).
+        # SELF_WORK komponentinin ``ComponentScore`` BALINI BURAYA ƏLAVƏ ETMƏYİN.
+        # Köçürülmüş (legacy) datada həmin bal köhnə "si" xanasıdır və o, ARTIQ
+        # giriş balının içindədir: J5b fazası köhnə ``girish``-i
         # ``residual = clamp(girish − Σkollokvium − çeklist, 0, cap)`` düsturu
         # ilə GENERIC komponent kimi yazır, çeklist isə 0-dır. Yəni bura
         # GENERIC(residual) + kollokvium + 0 = girish çıxır və DÜZGÜNDÜR.
@@ -105,13 +122,12 @@ def entry_score_for(enrollment, cap, *, marks=None, components=None, component_s
         # hər tələbənin balı şişər. "Məntiqli görünür" tələsi budur.
         # Arxiv balı YALNIZ görünmə üçündür: bax ``selfwork_board`` modulu.
         # Eyni qayda güzgü hesablamaya da (``analytics._selfwork_map``) aiddir.
-        done = (
-            SelfWorkMark.objects.filter(enrollment=enrollment, topic__offering=enrollment.offering, done=True).count()
-            if selfwork_done is None
-            else int(selfwork_done)
-        )
+        points = selfwork_points if selfwork_points is not None else selfwork_done
+        if points is None:
+            points = selfwork_points_rules.selfwork_total_for(enrollment)
+        points = Decimal(points)
         for comp in selfwork:
-            total += min(Decimal(done), Decimal(comp.max_score))
+            total += min(points, Decimal(comp.max_score))
     return round_score(min(total, cap))
 
 

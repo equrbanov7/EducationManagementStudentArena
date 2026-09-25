@@ -32,6 +32,7 @@
   var enrIdInput = form.querySelector("[data-corr-enrollment-id]");
   var fieldWrap = form.querySelector("[data-corr-field-wrap]");
   var swWrap = form.querySelector("[data-corr-sw-wrap]");
+  var swpWrap = form.querySelector("[data-corr-swp-wrap]"); // sərbəst iş BAL xanası (2 × 5 / 1 × 10 / fənn qovluğu)
   var cwWrap = form.querySelector("[data-corr-cw-wrap]");
   var cmWrap = form.querySelector("[data-corr-cm-wrap]");
   var histCtx = { type: "grade" }; // tarixçə modalında "Düzəlişi geri al" üçün kontekst
@@ -93,10 +94,12 @@
     var isSw = target === "selfwork";
     var isCw = target === "coursework";
     var isCm = target === "component";
+    var swPoints = isSw && cell.dataset.swPointsMode === "1";
     if (fieldWrap) fieldWrap.hidden = !isGrade;
     attWrap.hidden = !isGrade;
     scoreWrap.hidden = true;
-    if (swWrap) swWrap.hidden = !isSw;
+    if (swWrap) swWrap.hidden = !isSw || swPoints;
+    if (swpWrap) swpWrap.hidden = !swPoints;
     if (cwWrap) cwWrap.hidden = !isCw;
     if (cmWrap) cmWrap.hidden = !isCm;
     // Gizli grade sahələri HTML5 validasiyanı bloklamasın — required təmizlə.
@@ -117,6 +120,11 @@
         window.EMSBootstrapSelect.sync(scoreSel);
       }
       syncFieldMode();
+    } else if (isSw && swPoints && swpWrap) {
+      // Sərbəst iş BALI: cari bal gəlir, tavan xananın slotundan (5 / 10 / 1).
+      var swpInput = swpWrap.querySelector("[data-corr-swp-points]");
+      swpInput.value = cell.dataset.swPoints || "";
+      swpInput.max = cell.dataset.swMax || "10";
     } else if (isSw) {
       // Sərbəst iş: təhvili əks çevir (0↔1) — korrektor dəyişikliyi görsün.
       var swSel = swWrap.querySelector("select");

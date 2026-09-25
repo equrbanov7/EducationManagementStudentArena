@@ -230,6 +230,10 @@ class SelfWorkCorrection(ImmutableCorrectionEvidence):
     )
     old_done = models.BooleanField(default=False)
     new_done = models.BooleanField(default=False)
+    # Bal strukturlu mövzu (max_points > 1) və ya fənn qovluğu balı: köhnə/yeni
+    # EFFEKTİV bal (NULL = qiymət yox). Çeklist düzəlişində boş qalır.
+    old_points = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
+    new_points = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
     reason = models.CharField(max_length=12, choices=CorrectionReason.choices)
     note = models.TextField(help_text="Düzəlişin izahı (məcburi).")
     document = models.FileField(
@@ -251,6 +255,13 @@ class SelfWorkCorrection(ImmutableCorrectionEvidence):
         indexes = [
             models.Index(fields=["organization", "topic", "enrollment"]),
             models.Index(fields=["organization", "-created_at"]),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=(models.Q(old_points__isnull=True) | models.Q(old_points__gt=0, old_points__lte=10))
+                & (models.Q(new_points__isnull=True) | models.Q(new_points__gt=0, new_points__lte=10)),
+                name="selfwork_correction_points_range",
+            ),
         ]
 
     def __str__(self):

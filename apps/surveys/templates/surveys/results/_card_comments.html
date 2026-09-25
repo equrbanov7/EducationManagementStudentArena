@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Anonim şərhlər («güclü cəhətlər», «təkliflər») — yalnız dəst ≥ k olanda (F1
+`teacher_detail`), tarixsiz/identifikatorsuz, təsadüfi sırada. Axtarış və vurğu kliyentdədir
+(`results_text.js`, mətn DOM düyünləri ilə). Açar sözlər — hər sütunun sənəd tezliyi.{% endcomment %}
+<section class="svr-card svr-card--wide svr-text" data-svr-text aria-labelledby="svr-cm-title">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-cm-title">{% trans "Anonim şərhlər" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% if comments %}{% blocktrans trimmed with n=comment_count context "surveys.results" %}{{ n }} şərh — tarixsiz, identifikatorsuz, təsadüfi sırada.{% endblocktrans %}{% elif teacher.suppressed %}{% trans "Şərhlər yalnız cavab sayı anonimlik həddini keçəndə göstərilir." context "surveys.results" %}{% else %}{% trans "Bu seçim üzrə şərh yazılmayıb." context "surveys.results" %}{% endif %}</p>
+        </div>
+    </header>
+    {% if comments %}
+    <div class="svr-text__toolbar">
+        <label class="sr-only" for="svr-cm-search">{% trans "Şərhlərdə axtar" context "surveys.results" %}</label>
+        <input class="ems-input" type="search" id="svr-cm-search" data-svr-text-search autocomplete="off" maxlength="80" placeholder="{% trans 'şərhlərdə axtar…' context 'surveys.results' %}">
+        <span class="svr-text__count" data-svr-text-count aria-live="polite"></span>
+    </div>
+    <div class="svr-comments">
+        {% for group in comments %}
+        <div class="svr-comments__col">
+            <h4 class="svr-comments__title">{{ group.label }} <span class="svr-word__count">{{ group.items|length }}</span></h4>
+            {% if group.keywords %}
+            <div class="svr-words__list" role="group" aria-label="{% trans 'Ən çox işlənən sözlər' context 'surveys.results' %}">
+                {% for item in group.keywords %}<button type="button" class="svr-word" data-svr-word="{{ item.stem|default:item.word }}" aria-pressed="false">{{ item.word }} <span class="svr-word__count">{{ item.count }}</span></button>{% endfor %}
+            </div>
+            {% endif %}
+            <ul class="svr-quotes" data-svr-text-list data-page="15">
+                {% for text in group.items %}<li class="svr-quote" data-svr-text-item>{{ text }}</li>{% endfor %}
+            </ul>
+            <button type="button" class="ems-btn ems-btn--sm svr-text__more" data-svr-text-more hidden>{% trans "Daha çox göstər" context "surveys.results" %}</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>

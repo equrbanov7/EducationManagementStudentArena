@@ -1,0 +1,46 @@
+{% load i18n %}
+{% comment %}Universitet üçün təkliflər — mətnlər identifikatorsuz, tarixsiz, təsadüfi sırada;
+kampaniya başına k-həddi (`suggestion_digest`). Açar sözlər — sənəd tezliyi (≥ 2 təklif),
+AZ stop-sözlər çıxılıb. Süzgəc/vurğu kliyentdədir (`results_text.js`, mətn DOM düyünləri
+ilə — `innerHTML` YOX); filtr panelindəki «Şərhlərdə axtar» bütün təkliflərdə serverdə axtarır.
+Kontekst: `dg`.{% endcomment %}
+<section class="svr-card svr-card--wide svr-text" data-svr-text aria-labelledby="svr-sg-title">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-sg-title">{% trans "Universiteti necə yaxşılaşdırmaq olar — tələbə təklifləri" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">
+                {% if not dg.suppressed %}{% blocktrans trimmed with total=dg.total context "surveys.results" %}{{ total }} təklif (identifikatorsuz, təsadüfi sırada).{% endblocktrans %}{% endif %}
+                {% if dg.hidden_campaigns %}{% blocktrans trimmed with n=dg.hidden_campaigns context "surveys.results" %}Anonimlik həddinə çatmayan kampaniyalar: {{ n }} — onların təklifləri göstərilmir.{% endblocktrans %}{% endif %}
+            </p>
+        </div>
+    </header>
+    {% if dg.suppressed %}
+        <div class="ems-state svr-state" role="status">
+            <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
+            <p class="ems-state__title">{% if not dg.n %}{% trans "Hələ təklif yoxdur" context "surveys.results" %}{% elif dg.n < dg.k %}{% blocktrans trimmed with n=dg.n k=dg.k context "surveys.results" %}Cavab sayı azdır ({{ n }} &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}{% else %}{% trans "Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər göstərilmir." context "surveys.results" %}{% endif %}</p>
+        </div>
+    {% else %}
+        {% if dg.keywords %}
+        <div class="svr-words">
+            <p class="svr-words__title" id="svr-words-title">{% trans "Ən çox işlənən sözlər (neçə təklifdə keçir)" context "surveys.results" %}</p>
+            <div class="svr-words__list" role="group" aria-labelledby="svr-words-title">
+                {% for item in dg.keywords %}
+                <button type="button" class="svr-word" data-svr-word="{{ item.stem|default:item.word }}" aria-pressed="false">{{ item.word }} <span class="svr-word__count">{{ item.count }}</span></button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="svr-text__toolbar">
+            <label class="sr-only" for="svr-sg-search">{% trans "Göstərilən təkliflərdə axtar" context "surveys.results" %}</label>
+            <input class="ems-input" type="search" id="svr-sg-search" data-svr-text-search autocomplete="off" maxlength="80" placeholder="{% trans 'göstərilən təkliflərdə axtar…' context 'surveys.results' %}">
+            <span class="svr-text__count" data-svr-text-count aria-live="polite"></span>
+        </div>
+        <ol class="svr-quotes" data-svr-text-list data-page="30">
+            {% for text in dg.items %}<li class="svr-quote" data-svr-text-item>{{ text }}</li>{% empty %}<li class="svr-muted">{% trans "Axtarışa uyğun təklif yoxdur." context "surveys.results" %}</li>{% endfor %}
+        </ol>
+        <button type="button" class="ems-btn svr-text__more" data-svr-text-more hidden>{% trans "Daha çox göstər" context "surveys.results" %}</button>
+        {% if dg.total > dg.items|length %}
+        <p class="svr-card__foot">{% blocktrans trimmed with shown=dg.items|length total=dg.total context "surveys.results" %}İlk {{ shown }} təklif göstərilir (cəmi {{ total }}) — filtr panelindəki «Şərhlərdə axtar» ilə daraldın.{% endblocktrans %}</p>
+        {% endif %}
+    {% endif %}
+</section>
