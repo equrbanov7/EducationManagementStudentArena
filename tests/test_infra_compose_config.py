@@ -410,3 +410,19 @@ def test_daphne_parses_proxy_headers_and_nginx_overwrites_them():
     nginx = (ROOT / "docker/nginx/nginx.conf").read_text(encoding="utf-8")
     assert "$proxy_add_x_forwarded_for" not in nginx
     assert nginx.count("proxy_set_header X-Forwarded-For   $remote_addr;") >= 2
+
+
+# ── Publik domen (2026-09-25) — şəbəkə zonası açarları konteynerə çatmalıdır ──
+
+
+@pytest.mark.parametrize("service", ["app", "celery_worker", "celery_worker_heavy", "celery_beat"])
+def test_network_zone_settings_reach_app_containers(service):
+    env = _compose()["services"][service]["environment"]
+    for key in ("INTERNAL_NETWORKS", "NETWORK_ZONE_ENFORCED", "NETWORK_ZONE_TRUST_HEADER"):
+        assert key in env, f"{service}: {key} ötürülmür — .env dəyəri tətbiqə çatmır"
+    assert _interpolation_default(env["NETWORK_ZONE_ENFORCED"]) == "False"
+    assert _interpolation_default(env["NETWORK_ZONE_TRUST_HEADER"]) == "False"
+    nginx = (ROOT / "docker/nginx/nginx.conf").read_text(encoding="utf-8")
+    geo = re.search(r"geo \$ems_zone \{(.*?)\}", nginx, re.S).group(1)
+    geo_internal = set(re.findall(r"^\s*([0-9a-f.:/]+)\s+internal;", geo, re.M))
+    assert geo_internal <= set(_interpolation_default(env["INTERNAL_NETWORKS"]).split(","))
