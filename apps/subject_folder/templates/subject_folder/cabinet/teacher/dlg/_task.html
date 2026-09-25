@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTaskTitle">{% trans "Başlıq" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="text" id="sfTaskTitle" name="title" maxlength="255" required>
+</div>
+{% include "subject_folder/cabinet/teacher/dlg/_topic_select.html" with topic_select_id="sfTaskTopic" %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTaskText">{% trans "Tapşırığın şərti" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea" id="sfTaskText" name="instructions" rows="6"></textarea>
+</div>
+{% include "subject_folder/cabinet/teacher/dlg/_limits.html" with limits_prefix="sfTask" %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTaskFiles">{% trans "Qoşma əlavə et" context "subject_folder.ui" %}</label>
+    <input class="ems-input" type="file" id="sfTaskFiles" name="attachments" multiple>
+    <p class="ems-field__hint">{% trans "Tapşırığa şablon, nümunə və ya məlumat faylı əlavə edə bilərsiniz (ən çox 10)." context "subject_folder.ui" %}</p>
+</div>

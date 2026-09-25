@@ -1,0 +1,28 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfDeadlineTask">{% trans "Tapşırıq" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="sfDeadlineTask" name="task" required data-bootstrap-select>
+            {% for option in sp.deadline_tasks %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+        </select>
+    </div>
+</div>
+<div class="sfc-row2">
+    <div class="ems-field">
+        <label class="ems-field__label" for="sfDeadlineOpens">{% trans "Açılma vaxtı" context "subject_folder.ui" %}</label>
+        <input class="ems-input" type="datetime-local" id="sfDeadlineOpens" name="opens_at">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sfDeadlineDue">{% trans "Son tarix" context "subject_folder.ui" %}</label>
+        <input class="ems-input" type="datetime-local" id="sfDeadlineDue" name="due_at">
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfDeadlineLate">{% trans "Son tarixdən sonra" context "subject_folder.ui" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="sfDeadlineLate" name="late_policy" data-bootstrap-select>
+            {% for option in sp.late_policies %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Qaytarılmış işin yenidən göndərilməsi son tarixdən asılı olmayaraq açıqdır." context "subject_folder.ui" %}</p>
+</div>

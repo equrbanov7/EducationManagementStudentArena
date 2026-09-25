@@ -1,0 +1,117 @@
+{% load i18n %}
+{% comment %}Bir mövzunun materialları və tapşırıqları (müəllim görünüşü). Kontekst: `materials`, `tasks`
+(`cabinet.teacher._material_row` / `_task_row`), `sp`.{% endcomment %}
+{% if materials or tasks %}
+<ul class="sfc-items" role="list">
+    {% for item in materials %}
+    <li class="sfc-item{% if not item.material.is_published %} sfc-item--draft{% endif %}">
+        <span class="sfc-item__icon sfc-item__icon--{{ item.material.kind }}" aria-hidden="true"><i class="fas {% if item.material.kind == 'image' %}fa-image{% elif item.material.kind == 'code' %}fa-code{% elif item.material.kind == 'link' %}fa-link{% elif item.material.kind == 'video_link' %}fa-circle-play{% elif item.material.kind == 'note' %}fa-note-sticky{% else %}fa-file-lines{% endif %}"></i></span>
+        <div class="sfc-item__main">
+            <p class="sfc-item__title">
+                {% if item.download_url %}<a href="{{ item.download_url }}" data-force-navigation="true">{{ item.material.title }}</a>
+                {% elif item.material.url %}<a href="{{ item.material.url }}" target="_blank" rel="noopener noreferrer" data-force-navigation="true">{{ item.material.title }} <i class="fas fa-arrow-up-right-from-square sfc-ext" aria-hidden="true"></i></a>
+                {% else %}{{ item.material.title }}{% endif %}
+            </p>
+            <p class="sfc-item__meta">
+                <span>{{ item.kind_label }}</span>
+                {% if item.size %}<span>{{ item.size }}</span>{% endif %}
+                {% if item.material.original_name %}<span class="sfc-mono">{{ item.material.original_name }}</span>{% endif %}
+                {% if item.material.is_published %}<span class="ems-badge ems-badge--success">{% trans "Dərc edilib" context "subject_folder.ui" %}</span>{% else %}<span class="ems-badge ems-badge--neutral">{% trans "Qaralama" context "subject_folder.ui" %}</span>{% endif %}
+            </p>
+            {% if item.material.kind == "code" and item.material.code_text %}
+                <details class="sfc-code"><summary>{% trans "Kodu göstər" context "subject_folder.ui" %}{% if item.material.code_language %} · {{ item.material.get_code_language_display }}{% endif %}</summary><pre><code>{{ item.material.code_text }}</code></pre></details>
+            {% elif item.material.description %}
+                <p class="sfc-item__desc">{{ item.material.description|linebreaksbr }}</p>
+            {% endif %}
+        </div>
+        {% if sp.can_manage and not sp.is_archived %}
+        <div class="ems-rowactions">
+            {% if item.material.is_published %}
+                <button type="button" class="ems-iconbtn" data-sf-post="material_publish" data-sf-field-material="{{ item.material.pk }}" data-sf-field-published="0"
+                        aria-label="{% trans 'Tələbələrdən gizlət' context 'subject_folder.ui' %}" title="{% trans 'Tələbələrdən gizlət' context 'subject_folder.ui' %}"><i class="fas fa-eye-slash" aria-hidden="true"></i></button>
+            {% else %}
+                <button type="button" class="ems-iconbtn" data-sf-post="material_publish" data-sf-field-material="{{ item.material.pk }}" data-sf-field-published="1"
+                        aria-label="{% trans 'Dərc et' context 'subject_folder.ui' %}" title="{% trans 'Dərc et' context 'subject_folder.ui' %}"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
+            {% endif %}
+            <button type="button" class="ems-iconbtn" data-sf-open="sfMaterial" data-sf-mode="edit"
+                    data-sf-dialog-title="{% trans 'Materialı redaktə et' context 'subject_folder.ui' %}"
+                    data-sf-fill-material="{{ item.material.pk }}" data-sf-fill-kind="{{ item.material.kind }}"
+                    data-sf-fill-title="{{ item.material.title }}" data-sf-fill-topic="{{ item.material.topic_id|default_if_none:'' }}"
+                    data-sf-fill-description="{{ item.material.description }}" data-sf-fill-url="{{ item.material.url }}"
+                    data-sf-fill-code_text="{{ item.material.code_text }}" data-sf-fill-code_language="{{ item.material.code_language }}"
+                    aria-label="{% trans 'Redaktə et' context 'subject_folder.ui' %}" title="{% trans 'Redaktə et' context 'subject_folder.ui' %}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+            <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-sf-post="material_archive" data-sf-field-material="{{ item.material.pk }}" data-sf-danger="1"
+                    data-sf-confirm="{% trans 'Material silinsin? Tələbələr onu artıq görməyəcək.' context 'subject_folder.ui' %}"
+                    aria-label="{% trans 'Sil' context 'subject_folder.ui' %}" title="{% trans 'Sil' context 'subject_folder.ui' %}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+        </div>
+        {% endif %}
+    </li>
+    {% endfor %}
+    {% for item in tasks %}
+    <li class="sfc-item sfc-item--task{% if not item.task.is_published %} sfc-item--draft{% endif %}{% if item.task.is_archived %} sfc-item--archived{% endif %}">
+        <span class="sfc-item__icon sfc-item__icon--{{ item.task.kind }}" aria-hidden="true"><i class="fas {% if item.task.kind == 'selfwork' %}fa-star{% else %}fa-clipboard-list{% endif %}"></i></span>
+        <div class="sfc-item__main">
+            <p class="sfc-item__title">{{ item.task.title }}</p>
+            <p class="sfc-item__meta">
+                <span class="ems-badge ems-badge--{% if item.task.kind == 'selfwork' %}primary{% else %}info{% endif %}">{{ item.kind_label }}</span>
+                {% if item.task.kind == "selfwork" %}<span>{% blocktrans trimmed with n=item.task.slot_index points=item.max_points context "subject_folder.ui" %}Slot {{ n }} · maks. {{ points }} bal{% endblocktrans %}</span>{% endif %}
+                {% if item.extensions %}<span class="sfc-mono">{{ item.extensions }}</span>{% endif %}
+                {% if item.task.is_archived %}<span class="ems-badge ems-badge--neutral">{% trans "Arxivdədir" context "subject_folder.ui" %}</span>
+                {% elif item.task.is_published %}<span class="ems-badge ems-badge--success">{% trans "Dərc edilib" context "subject_folder.ui" %}</span>
+                {% else %}<span class="ems-badge ems-badge--neutral">{% trans "Qaralama" context "subject_folder.ui" %}</span>{% endif %}
+            </p>
+            {% if item.task.instructions %}<p class="sfc-item__desc">{{ item.task.instructions|linebreaksbr|truncatewords_html:60 }}</p>{% endif %}
+            {% if item.attachments %}
+            <ul class="sfc-files" role="list">
+                {% for att in item.attachments %}
+                <li class="sfc-file">
+                    <a href="{{ att.url }}" data-force-navigation="true"><i class="fas fa-paperclip" aria-hidden="true"></i> {{ att.attachment.original_name }}</a> <span class="sfc-muted">{{ att.size }}</span>
+                    {% if sp.can_manage and not sp.is_archived %}
+                        <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-sf-post="attachment_remove" data-sf-field-attachment="{{ att.attachment.pk }}" data-sf-danger="1"
+                                data-sf-confirm="{% trans 'Qoşma silinsin?' context 'subject_folder.ui' %}"
+                                aria-label="{% trans 'Qoşmanı sil' context 'subject_folder.ui' %}" title="{% trans 'Qoşmanı sil' context 'subject_folder.ui' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% if sp.can_manage and not sp.is_archived %}
+        <div class="ems-rowactions">
+            {% if not item.task.is_archived %}
+                {% if item.task.is_published %}
+                    <button type="button" class="ems-iconbtn" data-sf-post="task_publish" data-sf-field-task="{{ item.task.pk }}" data-sf-field-published="0"
+                            aria-label="{% trans 'Tələbələrdən gizlət' context 'subject_folder.ui' %}" title="{% trans 'Tələbələrdən gizlət' context 'subject_folder.ui' %}"><i class="fas fa-eye-slash" aria-hidden="true"></i></button>
+                {% else %}
+                    <button type="button" class="ems-iconbtn" data-sf-post="task_publish" data-sf-field-task="{{ item.task.pk }}" data-sf-field-published="1"
+                            data-sf-confirm="{% trans 'Tapşırıq dərc edilsin? Təyin olunmuş qrupların tələbələrinə bildiriş gedəcək.' context 'subject_folder.ui' %}"
+                            aria-label="{% trans 'Dərc et' context 'subject_folder.ui' %}" title="{% trans 'Dərc et' context 'subject_folder.ui' %}"><i class="fas fa-paper-plane" aria-hidden="true"></i></button>
+                {% endif %}
+                <button type="button" class="ems-iconbtn" data-sf-open="sfTask"
+                        data-sf-dialog-title="{% trans 'Tapşırığı redaktə et' context 'subject_folder.ui' %}"
+                        data-sf-mode="{{ item.task.kind }}"
+                        data-sf-fill-task="{{ item.task.pk }}" data-sf-fill-title="{{ item.task.title }}"
+                        data-sf-fill-instructions="{{ item.task.instructions }}" data-sf-fill-topic="{{ item.task.topic_id|default_if_none:'' }}"
+                        data-sf-fill-allow_text_answer="{{ item.task.allow_text_answer|yesno:'1,0' }}" data-sf-fill-allow_files="{{ item.task.allow_files|yesno:'1,0' }}"
+                        data-sf-fill-allowed_extensions="{{ item.extensions }}" data-sf-fill-max_file_mb="{{ item.task.max_file_mb }}" data-sf-fill-max_files="{{ item.task.max_files }}"
+                        aria-label="{% trans 'Redaktə et' context 'subject_folder.ui' %}" title="{% trans 'Redaktə et' context 'subject_folder.ui' %}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+                <button type="button" class="ems-iconbtn" data-sf-post="task_archive" data-sf-field-task="{{ item.task.pk }}"
+                        data-sf-confirm="{% trans 'Tapşırıq arxivlənsin? Göndərişlər saxlanılır, tələbələr tapşırığı görməyəcək.' context 'subject_folder.ui' %}"
+                        aria-label="{% trans 'Arxivlə' context 'subject_folder.ui' %}" title="{% trans 'Arxivlə' context 'subject_folder.ui' %}"><i class="fas fa-box-archive" aria-hidden="true"></i></button>
+                {% if item.task.kind == "homework" %}
+                    <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-sf-post="task_delete" data-sf-field-task="{{ item.task.pk }}" data-sf-danger="1"
+                            data-sf-confirm="{% trans 'Ev tapşırığı silinsin? Göndərişi olan tapşırıq silinmir — onu arxivləyin.' context 'subject_folder.ui' %}"
+                            aria-label="{% trans 'Sil' context 'subject_folder.ui' %}" title="{% trans 'Sil' context 'subject_folder.ui' %}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                {% endif %}
+            {% else %}
+                <button type="button" class="ems-iconbtn" data-sf-post="task_archive" data-sf-field-task="{{ item.task.pk }}" data-sf-field-restore="1"
+                        aria-label="{% trans 'Bərpa et' context 'subject_folder.ui' %}" title="{% trans 'Bərpa et' context 'subject_folder.ui' %}"><i class="fas fa-box-open" aria-hidden="true"></i></button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p class="sfc-muted sfc-topic__empty">{% trans "Bu mövzuda hələ material və tapşırıq yoxdur." context "subject_folder.ui" %}</p>
+{% endif %}

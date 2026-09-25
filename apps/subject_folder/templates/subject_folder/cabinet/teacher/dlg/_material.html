@@ -1,0 +1,47 @@
+{% load i18n %}
+<div class="sfc-row2">
+    <div class="ems-field" data-sf-only="create">
+        <label class="ems-field__label" for="sfMatKind">{% trans "Növ" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="sfMatKind" name="kind" data-sf-kind data-bootstrap-select>
+                {% for option in sp.material_kinds %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sfMatTitle">{% trans "Başlıq" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="text" id="sfMatTitle" name="title" maxlength="255" required>
+    </div>
+</div>
+{% include "subject_folder/cabinet/teacher/dlg/_topic_select.html" with topic_select_id="sfMatTopic" %}
+<div class="ems-field" data-sf-kind-show="file image">
+    <label class="ems-field__label" for="sfMatFile">{% trans "Fayl" context "subject_folder.ui" %}</label>
+    <input class="ems-input" type="file" id="sfMatFile" name="file">
+    <p class="ems-field__hint">{% trans "Redaktədə yeni fayl seçməsəniz köhnə fayl qalır. Sənəd, təqdimat, arxiv, kod faylı və ya şəkil; icra olunan fayllar qəbul edilmir." context "subject_folder.ui" %}</p>
+</div>
+<div class="ems-field" data-sf-kind-show="link video_link" hidden>
+    <label class="ems-field__label" for="sfMatUrl">{% trans "Keçid (https://…)" context "subject_folder.ui" %}</label>
+    <input class="ems-input" type="url" id="sfMatUrl" name="url" maxlength="1000" placeholder="https://">
+</div>
+<div class="ems-field" data-sf-kind-show="code" hidden>
+    <label class="ems-field__label" for="sfMatLang">{% trans "Proqramlaşdırma dili" context "subject_folder.ui" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="sfMatLang" name="code_language" data-bootstrap-select>
+            <option value="">{% trans "Göstərilməyib" context "subject_folder.ui" %}</option>
+            {% for option in sp.code_languages %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+        </select>
+    </div>
+</div>
+<div class="ems-field" data-sf-kind-show="code" hidden>
+    <label class="ems-field__label" for="sfMatCode">{% trans "Kod" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea sfc-mono" id="sfMatCode" name="code_text" rows="10" spellcheck="false"></textarea>
+    <p class="ems-field__hint">{% trans "Kod yalnız mətn kimi göstərilir — heç vaxt icra olunmur." context "subject_folder.ui" %}</p>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfMatDesc">{% trans "Təsvir / qeyd" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea" id="sfMatDesc" name="description" rows="3"></textarea>
+</div>
+<label class="sfc-check" data-sf-only="create">
+    <input type="checkbox" name="is_published" value="1">
+    <span>{% trans "Dərhal dərc et (tələbələr görsün)" context "subject_folder.ui" %}</span>
+</label>

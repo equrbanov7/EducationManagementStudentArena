@@ -1,0 +1,35 @@
+{% load i18n %}
+{% trans "Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür." context "subject_folder.ui" as sf_subtitle %}
+{% include "partials/ems_ui/_content_header.html" with header_subtitle=sf_subtitle %}
+{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sp.kpi_tiles kpi_variant="4" %}
+{% if sp.cards %}
+<ul class="sfc-grid" role="list">
+    {% for card in sp.cards %}
+    <li class="ems-card sfc-card">
+        <div class="ems-card__head sfc-card__head">
+            <div class="sfc-card__titles">
+                <p class="sfc-eyebrow">{{ card.subject }}</p>
+                <h2 class="ems-card__title sfc-card__title"><a href="{{ card.url }}">{{ card.title }}</a></h2>
+                <p class="ems-card__sub">{{ card.teacher }}{% if card.group %} · {{ card.group }}{% endif %}{% if card.period %} · {{ card.period }}{% endif %}</p>
+            </div>
+        </div>
+        <div class="ems-card__body">
+            <dl class="sfc-stats">
+                <div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ card.counts.selfwork }}</dd></div>
+                <div class="sfc-stats__item"><dt>{% trans "Ev tapşırığı" context "subject_folder.ui" %}</dt><dd>{{ card.counts.homework }}</dd></div>
+                <div class="sfc-stats__item"><dt>{% trans "Yekunlaşıb" context "subject_folder.ui" %}</dt><dd>{{ card.counts.done }}</dd></div>
+            </dl>
+            <div class="sfc-card__foot">
+                {% if card.counts.returned %}<span class="ems-badge ems-badge--warning">{% blocktrans trimmed with n=card.counts.returned context "subject_folder.ui" %}Qaytarılıb: {{ n }}{% endblocktrans %}</span>{% endif %}
+                {% if card.counts.open %}<span class="ems-badge ems-badge--primary">{% blocktrans trimmed with n=card.counts.open context "subject_folder.ui" %}Açıq tapşırıq: {{ n }}{% endblocktrans %}</span>{% endif %}
+                <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ card.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+    {% trans "Hələ fənn qovluğu yoxdur" context "subject_folder.ui" as st_title %}
+    {% trans "Müəllim qovluğu qrupunuza təyin edəndə burada görünəcək və bildiriş alacaqsınız." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-open" %}
+{% endif %}

@@ -51,6 +51,10 @@ PROFILE_SECTIONS_REQUIRING_ORG_CONTEXT = {
     "audit-log",
     "publish-notification",
     "statistics",
+    # «Fənn qovluğu» bildiriş keçidləri (`?section=…&sf_folder=…`) bu bölmələrə düşür.
+    "subject-folders",
+    "subject-folder-review",
+    "my-subject-folders",
 }
 
 # Sections where a multi-org profile may fall back to the profile organization.

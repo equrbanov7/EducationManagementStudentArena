@@ -1,0 +1,10 @@
+{% if 'subject-folders' in allowed_sections %}
+{% comment %}«Fənn qovluqları» — müəllimin fənn qovluqları (materiallar, sərbəst iş, ev tapşırığı, qrupa
+təyinat, son tarix). AJAX-SAFE: süzgəc, qovluq/tab linkləri paneli yerində yeniləyir; skriptlər
+panelin İÇİNDƏDİR. Məzmun `apps/subject_folder` partial-ındadır (`subject_folder_cabinet` tag-ı).{% endcomment %}
+<section class="profile-section-panel profile-section--subject-folders {% if active_section == 'subject-folders' %}is-active{% endif %}"
+         data-profile-section-panel="subject-folders"
+         data-source-url="{{ profile_base_url }}?section=subject-folders">
+    {% include "subject_folder/cabinet/teacher/_panel.html" %}
+</section>
+{% endif %}

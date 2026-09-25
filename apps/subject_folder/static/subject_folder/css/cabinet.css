@@ -1,0 +1,515 @@
+/* =========================================================================
+   «Fənn qovluğu» kabinet bölmələri (müəllim qovluqları, yoxlama, tələbə).
+   Yalnız layout və məzmun blokları — düymə, badge, sahə, dialoq, cədvəl
+   ORTAQ `ems_ui` komponentlərindədir. Rəng yalnız `--ems-*` token-dir.
+   Mətn rəngi üçün `--ems-neutral-400` işlədilmir (AA kontrastı keçmir).
+   ========================================================================= */
+
+.sfc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.sfc-muted {
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm);
+}
+
+.sfc-mono {
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs);
+}
+
+.sfc-danger {
+    color: var(--ems-danger-strong);
+}
+
+.sfc-warn {
+    color: var(--ems-warning-800);
+}
+
+.sfc-ok {
+    color: var(--ems-success-600);
+}
+
+.sfc-ext {
+    font-size: 0.75em;
+    color: var(--ems-neutral-500);
+}
+
+.sfc-eyebrow {
+    margin: 0;
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ems-primary-700);
+}
+
+/* ---- Kart şəbəkəsi (qovluq siyahısı) --------------------------------- */
+
+.sfc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ems-sp-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sfc-card__head {
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+}
+
+.sfc-card__titles {
+    min-width: 0;
+}
+
+.sfc-card__title {
+    overflow-wrap: anywhere;
+}
+
+.sfc-card__title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.sfc-card__title a:hover,
+.sfc-card__title a:focus-visible {
+    color: var(--ems-primary-700);
+    text-decoration: underline;
+}
+
+.sfc-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-top: var(--ems-sp-3);
+}
+
+.sfc-card__open {
+    margin-left: auto;
+}
+
+.sfc-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--ems-sp-2);
+    margin: 0;
+}
+
+.sfc-stats__item {
+    padding: var(--ems-sp-2);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-50);
+    text-align: center;
+}
+
+.sfc-stats__item dt {
+    font-size: var(--ems-fs-2xs);
+    font-weight: 500;
+    color: var(--ems-neutral-600);
+}
+
+.sfc-stats__item dd {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+/* ---- Qovluq başlığı ---------------------------------------------------- */
+
+.sfc-crumbs {
+    margin-bottom: calc(-1 * var(--ems-sp-2));
+}
+
+.sfc-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: var(--ems-pad-card);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-card);
+}
+
+.sfc-head__main {
+    min-width: 0;
+    flex: 1 1 360px;
+}
+
+.sfc-head__title {
+    margin: var(--ems-sp-1) 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.sfc-head__desc {
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-neutral-700);
+}
+
+.sfc-head__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm);
+}
+
+.sfc-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--ems-sp-2);
+}
+
+.sfc-head__score {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+}
+
+.sfc-head__score-label {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-primary-800);
+}
+
+.sfc-head__score-value {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 700;
+    color: var(--ems-primary-800);
+}
+
+.sfc-tabs {
+    margin-top: calc(-1 * var(--ems-sp-1));
+}
+
+.sfc-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.sfc-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.sfc-toolbar__note {
+    flex: 1 1 280px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.sfc-block {
+    min-width: 0;
+}
+
+/* ---- Mövzular və elementlər ------------------------------------------- */
+
+.sfc-topics {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-topic {
+    padding: var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-0);
+}
+
+.sfc-topic--hidden {
+    border-style: dashed;
+    background: var(--ems-neutral-50);
+}
+
+.sfc-topic--general {
+    background: var(--ems-bg-subtle);
+}
+
+.sfc-topic__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+}
+
+.sfc-topic__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.sfc-topic__week {
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-primary-700);
+}
+
+.sfc-topic__name {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.sfc-topic__desc {
+    margin: var(--ems-sp-2) 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
+}
+
+.sfc-topic__empty {
+    margin: var(--ems-sp-2) 0 0;
+}
+
+.sfc-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-3) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-0);
+}
+
+.sfc-item--draft {
+    border-style: dashed;
+}
+
+.sfc-item--archived {
+    opacity: 0.72;
+}
+
+.sfc-item--todo {
+    border-color: var(--ems-primary-300);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
+}
+
+.sfc-item__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.sfc-item__icon--selfwork {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.sfc-item__icon--homework {
+    background: var(--ems-sky-100);
+    color: var(--ems-sky-800);
+}
+
+.sfc-item__icon--code {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+}
+
+.sfc-item__icon--video_link,
+.sfc-item__icon--link {
+    background: var(--ems-emerald-50);
+    color: var(--ems-emerald-600);
+}
+
+.sfc-item__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sfc-item__title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+    overflow-wrap: anywhere;
+}
+
+.sfc-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-1) 0 0;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-600);
+}
+
+.sfc-item__desc {
+    margin: var(--ems-sp-2) 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-700);
+}
+
+.sfc-points {
+    font-weight: 700;
+    color: var(--ems-success-700);
+}
+
+.sfc-code {
+    margin-top: var(--ems-sp-2);
+}
+
+.sfc-code summary {
+    cursor: pointer;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-link);
+}
+
+.sfc-code pre {
+    max-height: 420px;
+    margin: var(--ems-sp-2) 0 0;
+    padding: var(--ems-sp-3);
+    overflow: auto;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-900);
+    color: var(--ems-neutral-50);
+    font-family: var(--ems-ff-mono);
+    font-size: var(--ems-fs-xs);
+    white-space: pre;
+}
+
+.sfc-files {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    margin: var(--ems-sp-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-file {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    overflow-wrap: anywhere;
+}
+
+/* ---- Cavab, rəy və cəhdlər (tələbə və yoxlama) --------------------- */
+
+.sfc-answer {
+    padding: var(--ems-sp-3);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-900);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.sfc-answer--compact {
+    font-size: var(--ems-fs-sm);
+}
+
+.sfc-feedback {
+    padding: var(--ems-sp-3);
+    border-left: 3px solid var(--ems-primary-600);
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-primary-50);
+}
+
+.sfc-feedback p {
+    margin: 0;
+}
+
+.sfc-feedback__who {
+    margin-bottom: var(--ems-sp-1);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-primary-800);
+}
+
+.sfc-attempts {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0 var(--ems-pad-card) var(--ems-pad-card);
+    list-style: none;
+}
+
+.sfc-detail .sfc-attempts {
+    padding: 0;
+}
+
+.sfc-attempt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    padding-bottom: var(--ems-sp-3);
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.sfc-attempt:last-child {
+    border-bottom: 0;
+}
+
+.sfc-attempt__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+}
+
+@media (max-width: 640px) {
+    .sfc-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sfc-head__score {
+        align-items: flex-start;
+    }
+
+    .sfc-item {
+        flex-wrap: wrap;
+    }
+}

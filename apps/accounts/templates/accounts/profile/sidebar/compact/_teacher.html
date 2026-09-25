@@ -11,13 +11,14 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 (`can_access_final_center`) görünür; o, bölmə açarı deyil, bayraqdır.{% endcomment %}
 {% include "accounts/profile/sidebar/_home_menu_item.html" %}
 
-{% if "my-journal" in allowed_sections or "my-schedule" in allowed_sections or "lessons-log" in allowed_sections or "my-workload" in allowed_sections or "academic-calendar" in allowed_sections %}
+{% if "my-journal" in allowed_sections or "my-schedule" in allowed_sections or "lessons-log" in allowed_sections or "subject-folders" in allowed_sections or "my-workload" in allowed_sections or "academic-calendar" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="teaching">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionTeaching"><span class="sidebar-menu-group-title">{% trans "group_teaching" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionTeaching">
         {% include "accounts/profile/sidebar/items/_my_journal.html" %}
         {% include "accounts/profile/sidebar/items/_my_schedule.html" %}
         {% include "accounts/profile/sidebar/items/_lessons_log.html" %}
+        {% include "accounts/profile/sidebar/items/_subject_folders.html" %}
         {% include "accounts/profile/sidebar/items/_my_workload.html" %}
         {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
     </ul>
@@ -35,13 +36,14 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 </li>
 {% endif %}
 
-{% if "my-exams" in allowed_sections or "my-courses" in allowed_sections or "pending-review" in allowed_sections or "review-results" in allowed_sections or role_capabilities.can_access_final_center %}
+{% if "my-exams" in allowed_sections or "my-courses" in allowed_sections or "pending-review" in allowed_sections or "subject-folder-review" in allowed_sections or "review-results" in allowed_sections or role_capabilities.can_access_final_center %}
 <li class="sidebar-section" data-sidebar-section="assessment">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionAssessment"><span class="sidebar-menu-group-title">{% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionAssessment">
         {% include "accounts/profile/sidebar/items/_my_exams.html" %}
         {% include "accounts/profile/sidebar/items/_my_courses.html" %}
         {% include "accounts/profile/sidebar/items/_pending_review.html" %}
+        {% include "accounts/profile/sidebar/items/_subject_folder_review.html" %}
         {% include "accounts/profile/sidebar/items/_review_results.html" %}
         {% include "accounts/profile/sidebar/items/_final_center.html" %}
     </ul>

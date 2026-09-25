@@ -1,0 +1,114 @@
+{% load i18n %}
+<nav class="ems-crumbs sfc-crumbs" aria-label="{% trans 'Naviqasiya' context 'subject_folder.ui' %}">
+    <a class="ems-crumbs__link" href="{{ sp.urls.list }}">{% trans "Fənn qovluqlarım" context "subject_folder.ui" %}</a>
+    <span class="ems-crumbs__sep" aria-hidden="true">/</span>
+    <a class="ems-crumbs__link" href="{{ sp.folder_url }}">{{ sp.folder.title }}</a>
+</nav>
+<header class="sfc-head">
+    <div class="sfc-head__main">
+        <p class="sfc-eyebrow">{{ sp.folder.subject.name }}</p>
+        <h2 class="sfc-head__title">{{ sp.task.title }}</h2>
+        <p class="sfc-head__meta">
+            <span class="ems-badge ems-badge--{% if sp.task.kind == 'selfwork' %}primary{% else %}info{% endif %}">{{ sp.kind_label }}{% if sp.max_points %} · {% blocktrans trimmed with points=sp.max_points context "subject_folder.ui" %}maks. {{ points }} bal{% endblocktrans %}{% endif %}</span>
+            <span class="ems-badge ems-badge--{{ sp.chip.tone }}">{{ sp.chip.label }}</span>
+            <span class="ems-badge ems-badge--{{ sp.window.tone }}">{{ sp.window.label }}</span>
+            {% if sp.opens_at %}<span class="sfc-muted">{% trans "Açılır:" context "subject_folder.ui" %} {{ sp.opens_at|date:"d.m.Y H:i" }}</span>{% endif %}
+            {% if sp.due_at %}<span class="sfc-muted"><i class="far fa-clock" aria-hidden="true"></i> {% trans "Son tarix:" context "subject_folder.ui" %} {{ sp.due_at|date:"d.m.Y H:i" }}</span>{% endif %}
+        </p>
+    </div>
+</header>
+
+<section class="ems-card sfc-block" aria-labelledby="sfTaskBrief">
+    <div class="ems-card__head"><h3 class="ems-card__title" id="sfTaskBrief">{% trans "Tapşırığın şərti" context "subject_folder.ui" %}</h3></div>
+    <div class="ems-card__body">
+        {% if sp.task.instructions %}<div class="sfc-answer">{{ sp.task.instructions|linebreaksbr }}</div>{% else %}<p class="sfc-muted">{% trans "Əlavə şərt yazılmayıb." context "subject_folder.ui" %}</p>{% endif %}
+        {% if sp.attachments %}
+        <ul class="sfc-files" role="list">
+            {% for att in sp.attachments %}<li class="sfc-file"><a href="{{ att.url }}" data-force-navigation="true"><i class="fas fa-paperclip" aria-hidden="true"></i> {{ att.attachment.original_name }}</a> <span class="sfc-muted">{{ att.size }}</span></li>{% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</section>
+
+{% if sp.can_submit %}
+<section class="ems-card sfc-block" aria-labelledby="sfTaskAnswer">
+    <div class="ems-card__head">
+        <div>
+            <h3 class="ems-card__title" id="sfTaskAnswer">{% if sp.chip.key == "returned" %}{% trans "Düzəldilmiş cavab" context "subject_folder.ui" %}{% else %}{% trans "Cavabınız" context "subject_folder.ui" %}{% endif %}</h3>
+            {% if sp.is_late_window %}<p class="ems-card__sub sfc-warn">{% trans "Son tarix keçib — göndərsəniz gecikmə qeyd olunacaq." context "subject_folder.ui" %}</p>{% endif %}
+        </div>
+    </div>
+    <div class="ems-card__body">
+        <form class="sfc-answerform" data-sf-form="1" data-sf-answer novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="action" value="submit" data-sf-answer-action>
+            <input type="hidden" name="task" value="{{ sp.task.pk }}">
+            <input type="hidden" name="assignment" value="{{ sp.assignment.pk }}">
+            <p class="ems-msg ems-msg--error" data-ems-form-error role="alert" hidden></p>
+            {% if sp.task.allow_text_answer %}
+            <div class="ems-field">
+                <label class="ems-field__label" for="sfAnswerText">{% trans "Mətn cavabı" context "subject_folder.ui" %}</label>
+                <textarea class="ems-textarea" id="sfAnswerText" name="text" rows="8" maxlength="50000">{% if sp.draft %}{{ sp.draft.text_answer }}{% endif %}</textarea>
+            </div>
+            {% endif %}
+            {% if sp.task.allow_files %}
+                {% if sp.draft_files %}
+                <ul class="sfc-files" role="list" aria-label="{% trans 'Qaralamadakı fayllar' context 'subject_folder.ui' %}">
+                    {% for f in sp.draft_files %}
+                    <li class="sfc-file"><i class="fas fa-paperclip" aria-hidden="true"></i> {{ f.file.original_name }} <span class="sfc-muted">{{ f.size }}</span>
+                        <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-sf-post="draft_file_remove" data-sf-field-file="{{ f.file.pk }}"
+                                aria-label="{% trans 'Faylı sil' context 'subject_folder.ui' %}" title="{% trans 'Faylı sil' context 'subject_folder.ui' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% if sp.remaining_files %}
+                <div class="ems-field">
+                    <label class="ems-field__label" for="sfAnswerFiles">{% trans "Fayllar" context "subject_folder.ui" %}</label>
+                    <input class="ems-input" type="file" id="sfAnswerFiles" name="files" multiple{% if sp.accept %} accept="{{ sp.accept }}"{% endif %}>
+                    <p class="ems-field__hint">{% blocktrans trimmed with count=sp.remaining_files size=sp.task.max_file_mb context "subject_folder.ui" %}Ən çox {{ count }} fayl, hər biri {{ size }} MB-a qədər.{% endblocktrans %}{% if sp.extensions_label %} {% blocktrans trimmed with ext=sp.extensions_label context "subject_folder.ui" %}İcazəli: {{ ext }}{% endblocktrans %}{% endif %}</p>
+                </div>
+                {% endif %}
+            {% endif %}
+            <div class="sfc-answerform__actions">
+                <button type="submit" class="ems-btn" data-sf-answer-mode="draft_save"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Qaralama kimi saxla" context "subject_folder.ui" %}</button>
+                <button type="submit" class="ems-btn ems-btn--primary" data-sf-answer-mode="submit"
+                        data-sf-confirm="{% trans 'İş müəllimə göndərilsin? Göndərdikdən sonra müəllim yoxlayana qədər dəyişə bilməzsiniz.' context 'subject_folder.ui' %}"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Göndər" context "subject_folder.ui" %}</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% elif sp.blocked_text %}
+    <p class="ems-msg ems-msg--{% if sp.is_final %}success{% else %}info{% endif %}"><i class="fas {% if sp.is_final %}fa-circle-check{% else %}fa-circle-info{% endif %} ems-msg__icon" aria-hidden="true"></i> {{ sp.blocked_text }}</p>
+{% endif %}
+
+{% if sp.attempts %}
+<section class="ems-card sfc-block" aria-labelledby="sfTaskAttempts">
+    <div class="ems-card__head"><h3 class="ems-card__title" id="sfTaskAttempts">{% trans "Göndərişlərim" context "subject_folder.ui" %}</h3></div>
+    <ol class="sfc-attempts" role="list">
+        {% for row in sp.attempts %}
+        <li class="sfc-attempt">
+            <p class="sfc-attempt__head">
+                <span class="ems-badge ems-badge--{{ row.chip.tone }}">{{ row.chip.label }}</span>
+                {% blocktrans trimmed with n=row.attempt.attempt_no context "subject_folder.ui" %}Cəhd {{ n }}{% endblocktrans %}{% if row.attempt.submitted_at %} · {{ row.attempt.submitted_at|date:"d.m.Y H:i" }}{% endif %}
+                {% if row.attempt.is_late %}<span class="ems-badge ems-badge--warning">{% trans "gecikib" context "subject_folder.ui" %}</span>{% endif %}
+                {% if row.points %}<strong class="sfc-points">{{ row.points }} / {{ sp.max_points }}</strong>{% endif %}
+            </p>
+            {% if row.attempt.text_answer %}<div class="sfc-answer sfc-answer--compact">{{ row.attempt.text_answer|linebreaksbr }}</div>{% endif %}
+            {% if row.files %}
+            <ul class="sfc-files" role="list">
+                {% for f in row.files %}<li class="sfc-file"><a href="{{ f.url }}" data-force-navigation="true"><i class="fas fa-paperclip" aria-hidden="true"></i> {{ f.file.original_name }}</a> <span class="sfc-muted">{{ f.size }}</span></li>{% endfor %}
+            </ul>
+            {% endif %}
+            {% if row.attempt.feedback %}
+            <div class="sfc-feedback">
+                <p class="sfc-feedback__who">{% trans "Müəllimin rəyi" context "subject_folder.ui" %}{% if row.attempt.reviewer_name %} · {{ row.attempt.reviewer_name }}{% endif %}{% if row.attempt.reviewed_at %} · {{ row.attempt.reviewed_at|date:"d.m.Y H:i" }}{% endif %}</p>
+                <p>{{ row.attempt.feedback|linebreaksbr }}</p>
+                {% if row.attempt.status == "rejected" and row.attempt.reject_reason %}<p class="sfc-muted">{% trans "Səbəb:" context "subject_folder.ui" %} {{ row.attempt.get_reject_reason_display }}</p>{% endif %}
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</section>
+{% endif %}
