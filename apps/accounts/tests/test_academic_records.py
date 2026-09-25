@@ -284,7 +284,7 @@ class RecordsAggregationTest(_RecordsBase):
                 payload = records_overview.build_records_summary(
                     organization=self.org, scope=ORG_WIDE_SCOPE, filters={"year": "2024/2025", "season": "Payız"}
                 )
-        period_reads = [q for q in ctx.captured_queries if "organizations_academicperiod" in q["sql"]]
+        period_reads = [q for q in ctx.captured_queries if 'FROM "organizations_academicperiod"' in q["sql"]]
         self.assertEqual(len(period_reads), 1)
         self.assertEqual(payload["year_options"], ["2024/2025"])
 

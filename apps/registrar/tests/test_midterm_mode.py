@@ -123,7 +123,9 @@ class MidtermComponentsTest(TestCase):
             score = ComponentScore.objects.get(component=midterm, enrollment=self.enrollment).score
             entry = gradebook.entry_score_for(self.enrollment, 50)
         self.assertEqual(score, Decimal("20"))
-        self.assertEqual(entry, Decimal("20"))  # midterm giriş balına cəm kimi düşür
+        # Midterm giriş balına düşür (0–20 hissə).  2026-09-25 sillabus standartı (entry_standard):
+        # bu dövrdə giriş balı = davamiyyət 10 (qayıb yoxdur) + aktivlik 0 + midterm 20 + sərbəst iş 0.
+        self.assertEqual(entry, Decimal("30"))
 
     def test_score_options_and_grid_spec(self):
         with bypass_rls():

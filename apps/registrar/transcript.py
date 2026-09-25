@@ -211,7 +211,7 @@ def build_student_transcript(*, student, organization, program=None):
     # Sətir-sətir oxumalar (komponent balları, sərbəst iş sayğacı,
     # ``FinalGrade``/``ResitRecord``, donma dəsti, qayıb həddi, məxrəc fallback-ı)
     # BİR dəfə: 59 fənnli real tələbədə ~690 sorğu idi (2026-09-02 ölçməsi).
-    batch = finals_batch.build(enrollments)
+    batch = finals_batch.build(enrollments, organization=organization)
     # ⚠️ 2026-09-10: ``hours_map`` ayrıca OXUNMUR. ``finals_batch.build`` eyni
     # açılış id-ləri üçün onsuz da ``lesson_hours_map``-i qurur və
     # ``compute_final_result`` ``hours_map=None`` olduqda ``batch.hours_map``-a

@@ -225,7 +225,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
 
     from django.utils import timezone as _tz
 
-    from apps.registrar import exam_eligibility, gradebook, journal_extras
+    from apps.registrar import entry_standard, exam_eligibility, gradebook, gradebook_components, journal_extras
     from apps.registrar import student_journal_context as _jsc
     from apps.registrar.models import ComponentScore, Enrollment, LessonMark
 
@@ -375,8 +375,6 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     cap = scheme.entry_score_max if scheme else 50
     journal_row = next((s for s in summary["subjects"] if s["enrollment"].id == enrollment.id), None)
 
-    # KPI + bal bölgüsü (real kompozisiya): dərs balları + kollokvium + sərbəst iş.
-    entry = gradebook.entry_score_for(enrollment, cap)
     # TƏK MƏNBƏ: davamiyyət balı DA, buraxılış qərarı DA resolver-dən gəlir.
     # ⚠️ Məxrəc açılışın BÜTÜN dərslərindən götürülür — tələbənin öz
     # işarələrindən yığmaq (əvvəlki ``sum(m.lesson.hours for m in marks)``)
@@ -386,6 +384,14 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # F-06 (2026-09-13): hədd tələbənin ÖZ qeydindən (``record`` artıq əldədir,
     # əlavə sorğu yoxdur) — imtahan qapısı ilə EYNİ mənbə (``absence_limit``).
     dav_limit_percent = absence_limit.limit_percent_for_record(record)
+    # KPI + bal bölgüsü (real kompozisiya).  Midterm rejimində (2026/2027-dən) giriş balı
+    # sillabus standartıdır — dörd hissə yuxarıdakı EYNİ davamiyyət girişləri ilə (sorğusuz).
+    entry_rule = entry_standard.rule_for(enrollment, organization=organization)
+    if entry_rule.midterm:
+        exempt = bool(record.national_athlete_exemption)
+        entry_rule = entry_standard.EntryRule(True, dav_lesson_hours, dav_limit_percent, exempt)
+    standard = gradebook_components.entry_parts_for(enrollment, cap, rule=entry_rule)
+    entry = standard.total if standard is not None else gradebook.entry_score_for(enrollment, cap, rule=entry_rule)
     dav_eligibility = exam_eligibility.resolve(
         absence_hours=enrollment.absence_hours,
         lesson_hours=dav_lesson_hours,
@@ -426,6 +432,9 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "entry_score": entry,
         "entry_score_max": cap,
         "entry_pct": _pct(entry),
+        # Midterm rejimi: standartın dörd hissəsi (davamiyyət/aktivlik/midterm/sərbəst iş) — şablon
+        # «bal bölgüsü»nü bunlardan qurur; keçmiş dövrlərdə None (köhnə ``parts`` bölgüsü).
+        "standard": standard,
         "parts": {
             "lesson_sum": lesson_sum,
             "lesson_pct": _pct(lesson_sum),
