@@ -232,7 +232,9 @@
 <script src="{% static 'accounts/js/register_wizard/ui.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/register_wizard/step1.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/register_wizard/step2.js' %}?v=20260621-csrf-retry"></script>
-<script src="{% static 'accounts/js/register_wizard/step3.js' %}?v=20260621-csrf-retry"></script>
+{# base_auth.html search_fold.js yükləmir — step3 təşkilat axtarışı EMSSearch işlədir #}
+<script src="{% static 'js/search_fold.js' %}?v=20260926-1"></script>
+<script src="{% static 'accounts/js/register_wizard/step3.js' %}?v=20260926-search"></script>
 <script src="{% static 'accounts/js/register_wizard/draft.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/register_wizard/submit.js' %}?v=20260621-csrf-retry"></script>
 <script src="{% static 'accounts/js/register_wizard/register_wizard.entry.js' %}?v=20260621-csrf-retry"></script>

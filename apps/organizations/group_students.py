@@ -134,7 +134,8 @@ def group_student_candidates(request, slug, unit_id):
 
     from django.db.models import Case, IntegerField, Q, Value, When
 
-    from core.program_codes import program_code_search_q
+    from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
+    from core.search_text import tolerant_q
 
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     records = (
@@ -143,15 +144,14 @@ def group_student_candidates(request, slug, unit_id):
         .select_related("student", "program", "group")
     )
     query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]
-    if query:
-        for token in query.split()[:4]:
-            records = records.filter(
-                Q(student__first_name__icontains=token)
-                | Q(student__last_name__icontains=token)
-                | Q(student__username__icontains=token)
-                | Q(program__name__icontains=token)
-                | program_code_search_q(token, prefix="program__")
-            )
+    # Dözümlü axtarış (sahib 2026-09-26): ad/ixtisas adı az/ing hərfinə, şifr ayırıcıya dözümlü.
+    search_q = tolerant_q(
+        query,
+        ("student__first_name", "student__last_name", "student__username", "program__name"),
+        compact_fields=tuple(f"program__{field}" for field in PROGRAM_CODE_SEARCH_FIELDS),
+    )
+    if search_q is not None:
+        records = records.filter(search_q)
     records = records.annotate(
         _same=Case(
             When(program__specialty_unit_id=unit.parent_id, then=Value(0)),

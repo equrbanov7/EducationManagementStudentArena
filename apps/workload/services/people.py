@@ -24,6 +24,8 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.db.models import Q
 
+from core.search_text import tolerant_q
+
 from ..constants import TEACHER_ROLE_NAMES
 from .scoping import WorkloadDenied
 
@@ -59,12 +61,9 @@ def chair_teacher_memberships(organization, chair, *, include_unscoped: bool = T
 def teacher_pool(organization, chair, *, search: str = "", limit: int = 50) -> list[dict]:
     """Bölgü modalının müəllim siyahısı — ad, istifadəçi adı, bağlantı bayrağı."""
     memberships = chair_teacher_memberships(organization, chair)
-    if search:
-        memberships = memberships.filter(
-            Q(user__username__icontains=search)
-            | Q(user__first_name__icontains=search)
-            | Q(user__last_name__icontains=search)
-        )
+    search_q = tolerant_q(search, ("user__username", "user__first_name", "user__last_name"))
+    if search_q is not None:
+        memberships = memberships.filter(search_q)
     seen: dict = {}
     for membership in memberships[: max(limit * 3, limit)]:
         user = membership.user

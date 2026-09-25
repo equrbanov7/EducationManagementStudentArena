@@ -18,6 +18,8 @@ from collections import Counter
 
 from django.db.models import Count
 
+from core.search_text import tolerant_q
+
 from ..constants import DEFAULT_MIN_GROUP_SIZE, QuestionKind, Section
 from ..models import SurveyAnswer, SurveyCampaign
 from . import filters as flt
@@ -98,7 +100,7 @@ def stem(word) -> str:
 def group_key(root) -> str:
     """Qruplaşdırma açarı — «ı» ≈ «i». Böyük «I»-nin iki oxunuşu var (az «ı», ing «i»):
     «WI-FI» → «wı-fı», «Wi-Fi» → «wi-fi»; bunlar bir söz sayılmalıdır. Açar çipin axtarış
-    dəyəridir və axtarış da ı/i-yə dözümlüdür (``results_text.js`` ``fold``, ``tolerant_regex``)."""
+    dəyəridir və axtarış da ı/i-yə dözümlüdür (``results_text.js`` ``fold``, ``core.search_text.tolerant_q``)."""
     return root.replace("ı", "i")
 
 
@@ -194,8 +196,9 @@ def suggestion_digest(organization, scope, filters=None, *, query="", limit=SUGG
     answers = SurveyAnswer.objects.filter(
         response__in=base.filter(campaign_id__in=visible).values("pk"), question__kind=QuestionKind.TEXT
     ).exclude(text="")
-    for pattern in flt.text_regex(query or filters.text_query):
-        answers = answers.filter(text__iregex=pattern)
+    text_q = tolerant_q(query or filters.text_query, ("text",))
+    if text_q is not None:
+        answers = answers.filter(text_q)
     texts = list(answers.order_by("pk").values_list("text", flat=True)[: KEYWORD_CAP + 1])
     truncated = len(texts) > KEYWORD_CAP
     texts = texts[:KEYWORD_CAP]

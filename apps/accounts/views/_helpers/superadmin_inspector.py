@@ -16,7 +16,7 @@ middleware request sonunda RLS kontekstini sıfırlayır.
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count
 
 INSPECT_TABS = ("exams", "results", "banks", "courses")
 PAGE_SIZE = 12
@@ -40,6 +40,7 @@ def build_superadmin_org_inspector_section(request, *, is_superadmin):
         return section
 
     from core.rls import bypass_rls
+    from core.search_text import tolerant_q
 
     org_search = (request.GET.get("inspect_org_search") or "").strip()[:120]
     selected_org_id = (request.GET.get("inspect_org") or "").strip()
@@ -52,8 +53,9 @@ def build_superadmin_org_inspector_section(request, *, is_superadmin):
 
     with bypass_rls():
         org_qs = Organization.objects.filter(is_active=True).order_by("name")
-        if org_search:
-            org_qs = org_qs.filter(Q(name__icontains=org_search) | Q(slug__icontains=org_search))
+        org_q = tolerant_q(org_search, ("name",), compact_fields=("slug",))
+        if org_q is not None:
+            org_qs = org_qs.filter(org_q)
         # Select üçün yüngül siyahı — yalnız lazım olan sütunlar.
         section["organizations"] = list(org_qs.values("id", "name", "org_type")[:200])
 

@@ -16,6 +16,7 @@ from __future__ import annotations
 from django.db.models import Q
 
 from apps.registrar.public import handover_query
+from core.search_text import tolerant_q
 
 #: «Vəziyyət» süzgəcinin dəyərləri.
 STATE_ALL = ""
@@ -63,11 +64,10 @@ def apply_filters(queryset, values, *, organization, actor, today=None):
         if unit_id:
             queryset = queryset.filter(group__in=unit_subtree_ids(organization, unit_id))
 
-    term = (values.get("q") or "").strip()
-    if term:
-        queryset = queryset.filter(
-            Q(subject__name__icontains=term) | Q(subject__code__icontains=term) | Q(group__name__icontains=term)
-        )
+    # Az/ing dözümlü; fənn kodu və qrup adı kod rejimində («234king» → «234 K ing»).
+    search = tolerant_q(values.get("q") or "", ("subject__name",), compact_fields=("subject__code", "group__name"))
+    if search is not None:
+        queryset = queryset.filter(search)
 
     state = (values.get("state") or "").strip()
     if state in (STATE_OPEN, STATE_BLOCKED):

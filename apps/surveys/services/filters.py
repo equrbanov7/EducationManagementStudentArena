@@ -11,8 +11,6 @@ from dataclasses import dataclass, replace
 
 from django.db.models import Max
 
-from core.search_text import tokens_of, tolerant_regex
-
 from ..constants import DEFAULT_MIN_GROUP_SIZE, Section
 from ..models import SurveyCampaign, SurveyResponse
 from .access import response_scope_q
@@ -107,8 +105,3 @@ def responses(organization, scope, filters, campaign_ids, *, section=Section.TEA
         if value is not None:
             queryset = queryset.filter(**{field: value})
     return queryset.filter(response_scope_q(scope))
-
-
-def text_regex(query) -> list:
-    """Dözümlü (az/ing klaviatura) regex tokenləri — ``text__iregex`` üçün."""
-    return [tolerant_regex(token) for token in tokens_of(query)]

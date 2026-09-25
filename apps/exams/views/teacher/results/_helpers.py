@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from urllib.parse import urlencode, urlsplit
 
-from django.db.models import F, Q
+from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
@@ -13,6 +13,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAnswer
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.manual_grading import answer_max_points as _answer_max_points
+from core.search_text import tolerant_q
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
 
@@ -380,12 +381,9 @@ def _apply_results_filters_from_params(exam, params):
     )
 
     search_query = (params.get("q") or "").strip()
-    if search_query:
-        attempts = attempts.filter(
-            Q(user__username__icontains=search_query)
-            | Q(user__first_name__icontains=search_query)
-            | Q(user__last_name__icontains=search_query)
-        )
+    student_q = tolerant_q(search_query, ("user__username", "user__first_name", "user__last_name"))
+    if student_q is not None:
+        attempts = attempts.filter(student_q)
 
     status_filter = (params.get("status") or "all").strip().lower()
     allowed_status_filters = {"all", "draft", "in_progress", "submitted", "expired"}

@@ -29,6 +29,8 @@ from django.core.paginator import Paginator
 from django.db.models import Avg, Count, Exists, OuterRef, Q
 from django.utils.translation import pgettext
 
+from core.search_text import tolerant_q
+
 from .exam_score_roster import file_url
 from .models import ExamScoreEntry, ExamScoreEntryKind
 from .models.exam_score_entry import ExamScoreSheetKind
@@ -132,15 +134,22 @@ def changes_queryset(
         queryset = queryset.filter(created_at__date__gte=date_from)
     if date_to is not None:
         queryset = queryset.filter(created_at__date__lte=date_to)
-    needle = (search or "").strip()
-    if needle:
-        queryset = queryset.filter(
-            Q(enrollment__student__first_name__icontains=needle)
-            | Q(enrollment__student__last_name__icontains=needle)
-            | Q(enrollment__student__username__icontains=needle)
-            | Q(enrollment__student__profile__fin__icontains=needle)
-            | Q(enrollment__student__profile__institutional_identifier__icontains=needle)
-        )
+    # Dözümlü axtarış (core.search_text): az/ing hərfləri, «Aliyev» ↔ «Əliyev»; FİN və tələbə №
+    # kod rejimində (boşluq/tire nəzərə alınmır).
+    search_q = tolerant_q(
+        search,
+        (
+            "enrollment__student__first_name",
+            "enrollment__student__last_name",
+            "enrollment__student__username",
+        ),
+        compact_fields=(
+            "enrollment__student__profile__fin",
+            "enrollment__student__profile__institutional_identifier",
+        ),
+    )
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     return queryset.select_related(
         "enrollment",
         "enrollment__student",

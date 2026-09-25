@@ -19,9 +19,8 @@ icazəyə bağlayardı.
 
 from __future__ import annotations
 
-from django.db.models import Q
-
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 
 from .create import require_create
 from .create_form import CHAIR_UNIT_TYPES
@@ -110,8 +109,12 @@ def search_catalog(actor, *, catalog: str, query: str = "", limit=DEFAULT_LIMIT,
 
     text = str(query or "").strip()[:MAX_QUERY_LENGTH]
     queryset = _base_queryset(actor, catalog, request=request)
-    if text:
-        queryset = queryset.filter(Q(name__icontains=text) | Q(code__icontains=text))
+    # Az/ing dözümlü; qrup adı kod kimidir («234king» → «234 K ing»), kafedra/bölmə adı mətn.
+    name_fields = () if catalog == CATALOG_GROUP else ("name",)
+    code_fields = ("name", "code") if catalog == CATALOG_GROUP else ("code",)
+    search = tolerant_q(text, name_fields, compact_fields=code_fields)
+    if search is not None:
+        queryset = queryset.filter(search)
 
     limit, offset = _bounds(limit, offset)
     # +1 sətir: «daha var» bayrağını ayrıca COUNT sorğusu olmadan hesablayır.

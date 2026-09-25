@@ -20,6 +20,8 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext
 
+from core.search_text import tokens_of, tolerant_match
+
 from . import exam_attempt_history, finals, gradebook
 from .models import CourseOffering, Enrollment, ExamScoreEntry, ExamScoreEntryKind
 from .models.exam_score_entry import ExamScoreSheetKind
@@ -260,15 +262,14 @@ def roster_for_offering(*, offering):
 
 
 def _row_matches_search(row, needle: str) -> bool:
+    """Dözümlü (core.search_text): hər söz ad/istifadəçi adında VƏ YA FİN/tələbə №-də (kod rejimi)."""
     student = row["student"]
     profile = getattr(student, "profile", None)
-    haystack = [
-        student.get_full_name() or "",
-        student.username or "",
-        getattr(profile, "fin", "") or "",
-        getattr(profile, "institutional_identifier", "") or "",
-    ]
-    return any(needle in str(value).lower() for value in haystack)
+    names = (student.get_full_name() or "", student.username or "")
+    codes = (getattr(profile, "fin", "") or "", getattr(profile, "institutional_identifier", "") or "")
+    return all(
+        tolerant_match(token, *names) or tolerant_match(token, *codes, compact=True) for token in tokens_of(needle)
+    )
 
 
 def _row_matches_status(row, status: str) -> bool:
@@ -287,7 +288,7 @@ def filter_roster_rows(rows, *, search="", status=STATUS_ALL) -> list:
     ``search`` — ad / istifadəçi adı / FİN / tələbə № (kiçik hərf, alt-sətir);
     ``status`` — :data:`STATUS_CHOICES`; naməlum → hamısı.
     """
-    needle = (search or "").strip().lower()
+    needle = (search or "").strip()
     status = status if status in STATUS_CHOICES else STATUS_ALL
     return [
         row for row in rows if (not needle or _row_matches_search(row, needle)) and _row_matches_status(row, status)

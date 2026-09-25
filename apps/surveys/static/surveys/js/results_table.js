@@ -1,6 +1,6 @@
 /* =========================================================================
    results_table.js — müəllim reytinqi: sıralama, «ən yüksək/ən aşağı N»,
-   minimum cavab sayı, dözümlü axtarış (ı/i, ə/e, ş/s, ç/c, ğ/g, ö/o, ü/u),
+   minimum cavab sayı, dözümlü axtarış (EMSSearch: ı/i, ə/e/a, ş/s/sh, ç/c/ch…),
    səhifələmə. Bütün sətirlər serverdədir; bu modul yalnız onları düzür/gizlədir.
    Vəziyyət URL-ə yazılır (`er_sort`, `er_view`, `er_min`, `er_tq`, `er_page`) —
    link paylaşıla bilir və filtr paneli bu açarlara toxunmur.
@@ -26,13 +26,16 @@
         question_avg: true
     };
 
-    function fold(text) {
-        return String(text || "")
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/ə/g, "e")
-            .replace(/ı/g, "i");
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
     }
 
     function params() {
@@ -85,12 +88,13 @@
     }
 
     function select(root, state) {
-        var needle = fold(state.q.trim());
+        var needle = state.q.trim();
+        var match = searchMatcher(needle);
         var items = state.items.filter(function (item) {
             if (state.min && item.data.n < state.min) {
                 return false;
             }
-            return !needle || item.search.indexOf(needle) !== -1;
+            return !needle || match(item.search);
         });
         if (state.view === "top" || state.view === "bottom") {
             var ranked = items.filter(function (item) {
@@ -210,7 +214,7 @@
                         index: index,
                         data: entry,
                         row: rows[String(index)],
-                        search: fold((entry.name || "") + " " + (entry.department || ""))
+                        search: (entry.name || "") + " " + (entry.department || "")
                     };
                 })
                 .filter(function (item) {

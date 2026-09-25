@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from core.constants import OrgUnitType
+from core.search_text import MAX_TOKENS
 
 #: Kataloqun «müəllim» saydığı rol adları.
 #:
@@ -30,7 +31,8 @@ GROUP_UNIT_TYPES = (OrgUnitType.GROUP,)
 DEFAULT_PAGE_SIZE = 25
 MAX_PAGE_SIZE = 100
 
-MAX_QUERY_TOKENS = 6
+#: Axtarış sözü həddi — kanonik ``core.search_text.MAX_TOKENS`` (``filters.search_q`` onu işlədir).
+MAX_QUERY_TOKENS = MAX_TOKENS
 MAX_QUERY_LENGTH = 120
 
 #: `sort` açarı → ORDER BY sahələri. Allowlist-dir: ixtiyari sətir qəbul edilmir.

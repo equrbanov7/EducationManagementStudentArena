@@ -20,6 +20,18 @@
 
     var VIEW_STORAGE_KEY = "emsMyExamsView";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function i18n(key, fallback) {
         var dict = window.MY_EXAMS_I18N || {};
         return dict[key] || fallback;
@@ -38,7 +50,8 @@
     function updateCategoryCounts(root) {
         var status = root.dataset.txStatus || "";
         var type = root.dataset.txType || "all";
-        var query = (root.dataset.txSearch || "").trim().toLowerCase();
+        var query = (root.dataset.txSearch || "").trim();
+        var match = searchMatcher(query);
         var counts = { all: 0 };
 
         root.querySelectorAll("[data-tx-catfilter] [data-cat]").forEach(function (chip) {
@@ -55,7 +68,7 @@
             if (type !== "all" && card.getAttribute("data-type") !== type) {
                 return;
             }
-            if (query && (card.getAttribute("data-name") || "").indexOf(query) === -1) {
+            if (query && !match(card.getAttribute("data-name") || "")) {
                 return;
             }
 
@@ -109,7 +122,8 @@
         var status = root.dataset.txStatus || "";
         var type = root.dataset.txType || "all";
         var category = root.dataset.txCat || "all";
-        var query = (root.dataset.txSearch || "").trim().toLowerCase();
+        var query = (root.dataset.txSearch || "").trim();
+        var match = searchMatcher(query);
         var anyVisible = false;
 
         updateCategoryCounts(root);
@@ -125,7 +139,7 @@
             if (ok && category !== "all" && card.getAttribute("data-category") !== category) {
                 ok = false;
             }
-            if (ok && query && (card.getAttribute("data-name") || "").indexOf(query) === -1) {
+            if (ok && query && !match(card.getAttribute("data-name") || "")) {
                 ok = false;
             }
             card.classList.toggle("is-hidden", !ok);

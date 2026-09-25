@@ -28,6 +28,7 @@ from django.db.models import Count, Q
 from django.utils.translation import pgettext
 
 from core.permissions import has_permission
+from core.search_text import tolerant_q
 
 from .models import Curriculum, CurriculumSubject, Program, Subject
 from .models.academic import DegreeLevel
@@ -165,10 +166,9 @@ def build_programs_registry(request, organization) -> dict:
     total_count = queryset.count()
     queryset = queryset.filter(is_archived=show_archived) if show_archived else queryset.filter(is_archived=False)
 
-    if search:
-        queryset = queryset.filter(
-            Q(name__icontains=search) | Q(official_code__icontains=search) | Q(legacy_official_code__icontains=search)
-        )
+    search_q = tolerant_q(search, ("name",), compact_fields=("official_code", "legacy_official_code"))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     if degree in dict(DegreeLevel.choices):
         queryset = queryset.filter(degree_level=degree)
     if form in dict(EducationForm.choices):
@@ -330,8 +330,10 @@ def build_subject_catalog(request, organization) -> dict:
     total_count = queryset.count()
     queryset = queryset.filter(is_archived=show_archived) if show_archived else queryset.filter(is_archived=False)
 
-    if search:
-        queryset = queryset.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    # Dözümlü (sahib 2026-09-26): «Verilenler» → «Verilənlər»; kod ayırıcıya dözümlü.
+    search_q = tolerant_q(search, ("name",), compact_fields=("code",))
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     if chair:
         queryset = queryset.filter(chair_unit_id=chair)
     if kind in dict(SubjectKind.choices):

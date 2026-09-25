@@ -41,6 +41,7 @@ from apps.syllabus.public import (
     build_syllabus_list_context,
     sla_days,
 )
+from core.search_text import tolerant_q
 
 from .labels import STATUS_TONES
 from .rows import build_missing_row, build_row
@@ -103,8 +104,9 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
         queryset = queryset.filter(period__academic_year=academic_year)
     if semester:
         queryset = queryset.filter(period__name=semester)
-    if search:
-        queryset = queryset.filter(Q(subject__name__icontains=search) | Q(subject__code__icontains=search))
+    subject_q = tolerant_q(search, ("subject__name",), compact_fields=("subject__code",))
+    if subject_q is not None:
+        queryset = queryset.filter(subject_q)
     offerings = list(queryset)
     if not offerings:
         return []

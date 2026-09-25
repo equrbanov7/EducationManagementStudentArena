@@ -30,8 +30,11 @@
     }
 
     /* ── Sorğuya uyğun hissənin vurğulanması ────────────────────────────────
-       `toLowerCase()` bəzi hərfləri (məs. «İ») İKİ simvola açır və indekslər
-       sürüşür. Ona görə simvol-simvol qatlayırıq: uzunluq həmişə eyni qalır. */
+       Server nəticəni az/ing hərflərinə dözümlü tapır («Aliyev» → «Əliyev»,
+       «234king» → «234 K ing»), ona görə vurğu da eyni kanonik şablonla
+       (static/js/search_fold.js, EMSSearch.pattern) axtarılır: hər tokenin ilk
+       uyğunluğu `<mark>` olur. Kitabxana yoxdursa — simvol-simvol qatlanmış
+       sadə «indexOf» (uzunluq sabit qalır: «İ».toLowerCase() iki simvoldur). */
     function fold(text) {
         var out = "";
         for (var i = 0; i < text.length; i++) {
@@ -42,26 +45,56 @@
         return out;
     }
 
-    /** Mətni `<span>`-a yazır; sorğuya uyğun hissəni `<mark>` ilə vurğulayır. */
+    function matchSpans(value, needle) {
+        var spans = [];
+        if (window.EMSSearch) {
+            window.EMSSearch.tokens(needle).forEach(function (token) {
+                var found = new RegExp(window.EMSSearch.codePattern(token), "i").exec(value);
+                if (found && found[0]) {
+                    spans.push([found.index, found.index + found[0].length]);
+                }
+            });
+        } else {
+            var at = fold(value).indexOf(fold(needle));
+            if (at >= 0) {
+                spans.push([at, at + needle.length]);
+            }
+        }
+        spans.sort(function (a, b) {
+            return a[0] - b[0];
+        });
+        var merged = [];
+        spans.forEach(function (span) {
+            var last = merged[merged.length - 1];
+            if (last && span[0] <= last[1]) {
+                last[1] = Math.max(last[1], span[1]);
+            } else {
+                merged.push(span.slice());
+            }
+        });
+        return merged;
+    }
+
+    /** Mətni `<span>`-a yazır; sorğuya uyğun hissə(lər)i `<mark>` ilə vurğulayır. */
     function fillHighlighted(el, text, query) {
         var value = text || "";
         var needle = (query || "").trim();
-        if (!needle) {
-            el.textContent = value;
-            return;
-        }
-        var at = fold(value).indexOf(fold(needle));
-        if (at < 0) {
-            el.textContent = value;
-            return;
-        }
+        var spans = needle ? matchSpans(value, needle) : [];
         el.textContent = "";
-        el.appendChild(document.createTextNode(value.slice(0, at)));
-        var hit = document.createElement("mark");
-        hit.className = "gsearch__mark";
-        hit.textContent = value.slice(at, at + needle.length);
-        el.appendChild(hit);
-        el.appendChild(document.createTextNode(value.slice(at + needle.length)));
+        if (!spans.length) {
+            el.textContent = value;
+            return;
+        }
+        var cursor = 0;
+        spans.forEach(function (span) {
+            el.appendChild(document.createTextNode(value.slice(cursor, span[0])));
+            var hit = document.createElement("mark");
+            hit.className = "gsearch__mark";
+            hit.textContent = value.slice(span[0], span[1]);
+            el.appendChild(hit);
+            cursor = span[1];
+        });
+        el.appendChild(document.createTextNode(value.slice(cursor)));
     }
 
     function safeIcon(icon) {

@@ -13,6 +13,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
+from core.search_text import tolerant_match
+
 from ..constants import (
     DEFAULT_PARAMS,
     KIND_LAB,
@@ -118,10 +120,11 @@ def _kinds_text(kinds) -> str:
 def policies_page(request):
     organization = access.organization_for(request)
     period = _period(organization, request)
-    query = str(request.GET.get("q") or "").strip().casefold()[:80]
+    query = str(request.GET.get("q") or "").strip()[:80]
     rows = policy.group_rows(request.user, organization, period, access.scoped_groups(request.user, organization))
     if query:
-        rows = [row for row in rows if query in row["name"].casefold()]
+        # Qrup adı kod rejimində: «234king» → «234 K ing» (sahib 2026-09-26).
+        rows = [row for row in rows if tolerant_match(query, row["name"], compact=True)]
     context = base_context(request, organization, period, "policies")
     context.update(
         {

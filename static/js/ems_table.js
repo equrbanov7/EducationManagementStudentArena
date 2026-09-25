@@ -11,6 +11,18 @@
 
   var FILTER_PLACEHOLDER = (window.gettext ? window.gettext("Axtar…") : "Axtar…");
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   function textOf(cell) {
     return (cell.textContent || "").trim().toLowerCase();
   }
@@ -67,11 +79,12 @@
     wrap.appendChild(input);
     table.parentNode.insertBefore(wrap, table);
     input.addEventListener("input", function () {
-      var q = input.value.trim().toLowerCase();
+      var q = input.value.trim();
+      var match = searchMatcher(q);
       var tbody = table.tBodies[0];
       if (!tbody) return;
       Array.prototype.forEach.call(tbody.rows, function (row) {
-        row.hidden = q !== "" && row.textContent.toLowerCase().indexOf(q) === -1;
+        row.hidden = q !== "" && !match(row.textContent);
       });
     });
   }

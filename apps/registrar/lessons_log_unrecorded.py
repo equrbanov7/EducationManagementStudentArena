@@ -34,6 +34,7 @@ from django.utils import timezone
 from apps.registrar import schedule
 from apps.registrar.models import Lesson, ScheduleSlot, WeekType
 from apps.registrar.models.catalog_meta import EducationForm
+from core.search_text import tolerant_q
 
 #: Geriyə baxış tavanı (gün) — təxminən bir semestr.
 LOOKBACK_DAYS = 150
@@ -63,13 +64,13 @@ def _scope_q(user, organization, *, supervisor):
 def apply_slot_filters(slots, filters, *, supervisor):
     """Bölmə filtrlərinin slot qarşılığı (``lessons_log.apply_filters`` ilə eyni məna)."""
     filters = filters or {}
-    q = (filters.get("q") or "").strip()
-    if q:
-        slots = slots.filter(
-            Q(offering__subject__name__icontains=q)
-            | Q(offering__subject__code__icontains=q)
-            | Q(offering__group__name__icontains=q)
-        )
+    search_q = tolerant_q(
+        filters.get("q") or "",
+        ("offering__subject__name",),
+        compact_fields=("offering__subject__code", "offering__group__name"),
+    )
+    if search_q is not None:
+        slots = slots.filter(search_q)
     if filters.get("offering"):
         slots = slots.filter(offering_id=filters["offering"])
     if filters.get("kind"):

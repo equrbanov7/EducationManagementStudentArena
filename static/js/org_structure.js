@@ -12,6 +12,18 @@
         return;
     }
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function setField(root, fieldName, value) {
         var field = root.querySelector('[data-org-field="' + fieldName + '"]');
         if (!field) {
@@ -148,11 +160,12 @@
         if (!list) {
             return;
         }
-        var query = input.value.trim().toLowerCase();
+        var query = input.value.trim();
+        var match = searchMatcher(query);
         var rows = list.querySelectorAll(".org-unit-detail__teacher-row");
         var visibleCount = 0;
         rows.forEach(function (row) {
-            var matches = !query || (row.getAttribute("data-teacher-name") || "").indexOf(query) !== -1;
+            var matches = !query || match(row.getAttribute("data-teacher-name") || "");
             row.hidden = !matches;
             if (matches) {
                 visibleCount += 1;

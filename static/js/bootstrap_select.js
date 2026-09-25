@@ -135,11 +135,18 @@
             if (!searchInput) {
                 return;
             }
-            var needle = String(searchInput.value || "").trim().toLowerCase();
+            var needle = String(searchInput.value || "").trim();
+            // Kanonik az/ing qatlama + kod rejimi («234king» → «234 K ing», «Aliyev» → «Əliyev»):
+            // static/js/search_fold.js (EMSSearch); yoxdursa sadə registrsiz «contains».
+            var lowered = needle.toLowerCase();
+            var hitTest = window.EMSSearch
+                ? window.EMSSearch.matcher(needle)
+                : function (text) {
+                      return String(text || "").toLowerCase().indexOf(lowered) !== -1;
+                  };
             var visible = 0;
             menu.querySelectorAll(".bootstrap-single-select__option").forEach(function (button) {
-                var text = String(button.textContent || "").toLowerCase();
-                var match = !needle || text.indexOf(needle) !== -1;
+                var match = !needle || hitTest(button.textContent || "");
                 button.hidden = !match;
                 if (match) {
                     visible += 1;

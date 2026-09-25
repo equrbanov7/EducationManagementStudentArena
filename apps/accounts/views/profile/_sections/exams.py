@@ -7,6 +7,8 @@ from django.db.models import Case, Count, IntegerField, OuterRef, Prefetch, Subq
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
+from core.search_text import tolerant_q
+
 #: Bir səhifədə göstərilən imtahan sayı.
 MY_EXAMS_PAGE_SIZE = 12
 
@@ -76,8 +78,9 @@ def build_my_exams_context(request, *, my_exams_qs, active_section) -> dict:
 
     # --- Search ---
     search_query = (request.GET.get("exam_q", "") or "").strip()
-    if search_query:
-        my_exams_qs = my_exams_qs.filter(title__icontains=search_query)
+    exams_q = tolerant_q(search_query, ("title",))
+    if exams_q is not None:
+        my_exams_qs = my_exams_qs.filter(exams_q)
 
     # --- Filter by exam type ---
     filter_type = (request.GET.get("exam_type", "") or "").strip()

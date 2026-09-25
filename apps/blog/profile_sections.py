@@ -33,6 +33,7 @@ from apps.blog.services import (
     collect_reviewable_posts,
     count_pending_reviewable_posts,
 )
+from core.search_text import tolerant_match, tolerant_q
 
 # ─────────────────────────── köməkçilər ───────────────────────────
 
@@ -131,7 +132,7 @@ def category_management_section(request, *, edit_form, edit_item, page_param) ->
         request.GET.get("category_search"),
         max_length=100,
     )
-    normalized_search = search_query.casefold()
+    normalized_search = search_query.strip()
     managed_categories_queryset = Category.objects.annotate(direct_post_count=Count("posts")).order_by(
         "sort_order",
         "name_en",
@@ -151,7 +152,8 @@ def category_management_section(request, *, edit_form, edit_item, page_param) ->
             category.name_tr,
             category.slug,
         )
-        return any(normalized_search in (value or "").casefold() for value in searchable_values)
+        # Az/ing hərfə dözümlü, tokenli (sahib 2026-09-26).
+        return tolerant_match(normalized_search, *searchable_values)
 
     for root_category in category_tree:
         root_children = list(getattr(root_category, "child_categories", []))
@@ -293,9 +295,7 @@ def public_posts_context(request, profile_user) -> dict:
     if invalid_search_query and not search_query:
         user_posts_list = user_posts_list.none()
     elif search_query:
-        user_posts_list = user_posts_list.filter(
-            Q(title__icontains=search_query) | Q(excerpt__icontains=search_query) | Q(content__icontains=search_query)
-        )
+        user_posts_list = user_posts_list.filter(tolerant_q(search_query, ("title", "excerpt", "content")) or Q())
 
     if invalid_category:
         user_posts_list = user_posts_list.none()

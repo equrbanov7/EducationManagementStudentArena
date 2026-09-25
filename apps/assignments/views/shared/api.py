@@ -17,6 +17,7 @@ from django.http import JsonResponse
 
 from apps.courses.models import CourseMembership
 from apps.task_submission_core.public import can_user_access_course_roster
+from core.search_text import tolerant_q
 
 from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
 
@@ -47,16 +48,12 @@ def search_students(request):
     if not can_user_access_course_roster(request.user, course):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
-    # Kursda olan tələbələri axtar
-    student_memberships = (
-        course.memberships.filter(role="student")
-        .filter(
-            Q(user__username__icontains=query)
-            | Q(user__first_name__icontains=query)
-            | Q(user__last_name__icontains=query)
-        )
-        .select_related("user")[:10]
-    )
+    # Kursda olan tələbələri axtar (az/ing hərfə dözümlü, tokenli — sahib 2026-09-26)
+    student_memberships = course.memberships.filter(role="student")
+    student_q = tolerant_q(query, ("user__username", "user__first_name", "user__last_name"))
+    if student_q is not None:
+        student_memberships = student_memberships.filter(student_q)
+    student_memberships = student_memberships.select_related("user")[:10]
 
     results = [
         {
@@ -98,8 +95,11 @@ def search_groups(request):
         raise PermissionDenied("You do not have permission to access this course roster.")
 
     # Unique qrup adlarını tap
+    # «234king» → «234 K ing»: qrup adı kod rejimində (sahib 2026-09-26)
+    group_q = tolerant_q(query, ("group_name",), compact=True)
     group_names = (
-        CourseMembership.objects.filter(course=course, group_name__icontains=query)
+        CourseMembership.objects.filter(course=course)
+        .filter(group_q if group_q is not None else Q())
         .exclude(group_name="")
         .values_list("group_name", flat=True)
         .distinct()[:10]

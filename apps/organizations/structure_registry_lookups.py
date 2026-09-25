@@ -16,6 +16,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
 from .models import Membership, Organization, OrgUnit
@@ -189,12 +190,9 @@ def structure_role_candidates(request, slug):
 
     if kind == "teacher":
         queryset = _teacher_memberships_qs(organization)
-        if term:
-            queryset = queryset.filter(
-                Q(user__first_name__icontains=term)
-                | Q(user__last_name__icontains=term)
-                | Q(user__username__icontains=term)
-            )
+        term_q = tolerant_q(term, ("user__first_name", "user__last_name", "user__username"))
+        if term_q is not None:
+            queryset = queryset.filter(term_q)
         unit_id = (request.GET.get("unit") or "").strip()
         if unit_id:
             queryset = queryset.exclude(scope_unit_id=unit_id)

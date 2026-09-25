@@ -2,6 +2,8 @@
 
 from django.shortcuts import render
 
+from core.search_text import tolerant_q
+
 from ...models import Post
 
 
@@ -20,8 +22,9 @@ def search_posts(request):
     query = request.GET.get("q", "").strip()
     posts = Post.objects.all()
 
-    if query:
-        posts = posts.filter(title__icontains=query) | posts.filter(excerpt__icontains=query)
+    search_q = tolerant_q(query, ("title", "excerpt"))
+    if search_q is not None:
+        posts = posts.filter(search_q)
 
     posts = posts.order_by("-created_at")
 

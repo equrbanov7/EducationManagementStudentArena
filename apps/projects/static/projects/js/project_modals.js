@@ -9,6 +9,18 @@
     if (window._PROJ_MODAL_V4) return;
     window._PROJ_MODAL_V4 = true;
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     const cfgEl = document.getElementById('project-modals-config');
     if (!cfgEl) return;
     const cfg = cfgEl.dataset;
@@ -215,15 +227,15 @@
 
     ['add','edit'].forEach(mode => {
         $(mode+'GroupSearch')?.addEventListener('input', e => {
-            const t = e.target.value.toLowerCase();
+            const match = searchMatcher(e.target.value);
             document.querySelectorAll(`#${mode}GroupList .chk-row`).forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
         $(mode+'StudentSearch')?.addEventListener('input', e => {
-            const t = e.target.value.toLowerCase();
+            const match = searchMatcher(e.target.value);
             document.querySelectorAll(`#${mode}StudentList .chk-row`).forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(t) ? '' : 'none';
+                row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
     });

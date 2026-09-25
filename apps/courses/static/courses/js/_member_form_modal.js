@@ -35,6 +35,18 @@
 
     var SEARCH_DEBOUNCE_MS = 250;
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function cfg() {
         var el = document.getElementById("memberFormModalConfig");
         return el ? el.dataset : {};
@@ -419,9 +431,10 @@
         if (!container) {
             return;
         }
+        var q = String(term || "").trim();
+        var match = searchMatcher(q);
         Array.prototype.forEach.call(container.querySelectorAll(".list-item-row"), function (row) {
-            var haystack = row.getAttribute("data-search") || "";
-            row.classList.toggle("is-hidden", term !== "" && haystack.indexOf(term) === -1);
+            row.classList.toggle("is-hidden", q !== "" && !match(row.getAttribute("data-search") || ""));
         });
     }
 
@@ -431,7 +444,7 @@
     });
 
     window.EMSDelegate.on("input", "#group_search_input", function (event, input) {
-        filterGroupRows((input.value || "").toLowerCase());
+        filterGroupRows(input.value || "");
     });
 
     window.EMSDelegate.on("change", "#group_list_container .custom-item-checkbox", function () {

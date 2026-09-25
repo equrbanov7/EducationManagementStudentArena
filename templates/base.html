@@ -91,6 +91,8 @@
       skriptləri content içində, ems_ajax_init.js isə body sonunda yüklənir; stub
       olmasa tam-səhifə açılışda `EMSReady is not a function` (QA 2026-09-05 P1-1).{% endcomment %}
     <script src="{% static 'js/ems_early.js' %}?v=20260905-1"></script>
+    {# search_fold.js — EMSSearch (az/ing hərf qatlama + kod rejimi): bütün klient süzgəcləri ondan istifadə edir. #}
+    <script src="{% static 'js/search_fold.js' %}?v=20260926-1"></script>
     <script src="{% static 'js/searchable_select_keys.js' %}?v=20260831-1"></script>
     <script src="{% static 'js/searchable_select.js' %}?v=20260831-2"></script>
 </head>
@@ -181,15 +183,15 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <script defer src="{% static 'js/pagination.js' %}?v=20260909-spa"></script>
     <script src="{% static 'js/debounced_search_forms.js' %}?v=20260604-ajaxhook"></script>
     <script src="{% static 'js/search_controls.js' %}"></script>
-    <script src="{% static 'js/ems_table.js' %}?v=20260705-1"></script>
-    <script src="{% static 'js/bootstrap_select.js' %}?v=20260908-1"></script>
+    <script src="{% static 'js/ems_table.js' %}?v=20260926-search"></script>
+    <script src="{% static 'js/bootstrap_select.js' %}?v=20260926-1"></script>
     <script src="{% static 'js/search_field.js' %}?v=20260708-1"></script>
     <script src="{% static 'js/csp_event_handlers.js' %}?v=20260914-a11y"></script>
     <script src="{% static 'js/footer_year.js' %}"></script>
     <script src="{% static 'js/route_loading.js' %}?v=20260713-spa-progress"></script>
     {% block global_search_js %}
         {% if request.user.is_authenticated %}
-        <script src="{% static 'js/global_search.js' %}?v=20260911-1"></script>
+        <script src="{% static 'js/global_search.js' %}?v=20260926-1"></script>
         {% endif %}
     {% endblock %}
     {% if view_as.can_use and not view_as.active %}

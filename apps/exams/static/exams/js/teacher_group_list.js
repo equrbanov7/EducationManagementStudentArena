@@ -16,6 +16,18 @@
 (function () {
   "use strict";
 
+  // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+  // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+  function searchMatcher(query) {
+    var q = String(query || "").trim();
+    var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+    var low = q.toLowerCase();
+    return function (text) {
+      var t = String(text || "").replace(/\u0307/g, "");
+      return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+    };
+  }
+
   var i18nEl = document.getElementById("tgl-i18n");
   var I18N_TEACHER_GROUP_LIST = i18nEl ? JSON.parse(i18nEl.textContent) : {};
 
@@ -149,10 +161,10 @@
 
     if (searchInput) {
       searchInput.addEventListener("input", function () {
-        const filter = (this.value || "").toLowerCase();
+        const match = searchMatcher(this.value);
         container.querySelectorAll(".student-item-row").forEach((row) => {
           const text = row.getAttribute("data-search") || "";
-          row.style.display = text.includes(filter) ? "flex" : "none";
+          row.style.display = match(text) ? "flex" : "none";
         });
       });
     }
@@ -163,9 +175,9 @@
   function applyPrimaryTeacherSearch() {
     if (!primaryTeacherSearchInput || !primaryTeacherSelect) return;
     primaryTeacherSearchInput.addEventListener("input", function () {
-      const filter = (this.value || "").toLowerCase();
+      const match = searchMatcher(this.value);
       Array.from(primaryTeacherSelect.options).forEach((option) => {
-        option.hidden = !(option.text || "").toLowerCase().includes(filter);
+        option.hidden = !match(option.text || "");
       });
     });
   }
@@ -312,14 +324,14 @@
 
   if (groupSearchInput) {
     groupSearchInput.addEventListener("input", function (e) {
-      const filter = (e.target.value || "").toLowerCase();
+      const match = searchMatcher(e.target.value);
       let hasVisible = false;
 
       document.querySelectorAll(".group-card").forEach((card) => {
         const titleEl = card.querySelector(".group-name");
-        const name = (titleEl ? titleEl.innerText : "").toLowerCase();
+        const name = titleEl ? titleEl.innerText : "";
 
-        if (name.includes(filter)) {
+        if (match(name)) {
           card.style.display = "block";
           hasVisible = true;
         } else {
