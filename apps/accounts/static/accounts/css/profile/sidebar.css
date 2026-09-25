@@ -16,12 +16,16 @@
      `min-width: 0`. Əvvəl `overflow-y: auto` üfüqi oxu da `auto` edirdi;
      trackpad jesti/fokus sidebar-ı yana sürüşdürəndə sol kənar kəsilirdi
      («rofil», «MUMİ»). Qoruyucu JS də var (`js/profile/sidebar_nav.js`).
-   • Alt hesab bloku `sidebar_footer.css`-də, yığcam (ikon-rels) rejim
-     `sidebar_rail.css`-dədir — hər ikisi aşağıda import olunur.
+   • Fayllar (aşağıda import olunur; kaskad sırası: qruplar → süzgəc → alt blok →
+     rels, sonra bu faylın öz qaydaları): heyət akkordeonu `sidebar_groups.css`,
+     «Menyuda axtar» `sidebar_filter.css`, hesab bloku `sidebar_footer.css`,
+     yığcam (ikon-rels) rejim `sidebar_rail.css`.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-@import url("sidebar_footer.css?v=20260925-1");
-@import url("sidebar_rail.css?v=20260925-1");
+@import url("sidebar_groups.css?v=20260925-1");
+@import url("sidebar_filter.css?v=20260925-1");
+@import url("sidebar_footer.css?v=20260925-3");
+@import url("sidebar_rail.css?v=20260925-2");
 
 .profile-sidebar {
     --sb-gutter: 12px;
@@ -73,6 +77,9 @@
     position: sticky;
     top: 0;
     z-index: 3;
+    /* Sidebar sütunlu flex-dir: `min-height` açıq verildiyi üçün uzun menyuda başlıq 56px-ə
+       SIXILIRDI və ikinci sətir («Menyuda axtar») qutudan çıxıb ilk bəndin üstünə düşürdü. */
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -314,8 +321,7 @@
     user-select: none;
 }
 
-.sidebar-section-items,
-.sidebar-menu-group-items {
+.sidebar-section-items {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -323,125 +329,6 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-}
-
-/* ── Akkordeon qruplar (heyət; nativ <details>) ──────────────────────────── */
-
-.sidebar-menu-group {
-    list-style: none;
-    min-width: 0;
-}
-
-.sidebar-menu-group + .sidebar-menu-group {
-    margin-top: 4px;
-}
-
-.sidebar-menu-group-toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    min-width: 0;
-    min-height: 32px;
-    box-sizing: border-box;
-    padding: 6px var(--sb-pad-x);
-    border-radius: var(--sb-radius);
-    color: var(--sb-muted);
-    font-size: var(--ems-fs-xs, 11px);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-    transition: background-color 0.14s ease, color 0.14s ease;
-}
-
-/* Nativ üçbucaq işarəsini götürürük — öz «chevron»umuz var. */
-.sidebar-menu-group-toggle::-webkit-details-marker {
-    display: none;
-}
-
-.sidebar-menu-group-toggle::marker {
-    content: "";
-}
-
-.sidebar-menu-group-toggle:hover {
-    background: var(--sb-hover);
-    color: var(--sb-fg);
-}
-
-.sidebar-menu-group-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* Sayğac/nöqtə — `ui.js` doldurur (bağlı qrupda bənd sayı + gözləyən nişan). */
-.sidebar-menu-group-meta {
-    flex-shrink: 0;
-    font-size: 0.66rem;
-    font-weight: 700;
-    color: var(--sb-muted);
-    font-variant-numeric: tabular-nums;
-}
-
-.sidebar-menu-group-meta:empty {
-    display: none;
-}
-
-.sidebar-menu-group-meta--alert {
-    color: var(--ems-warning-700);
-}
-
-.sidebar-menu-group-meta--alert::after {
-    content: "";
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    margin-left: 0.3rem;
-    border-radius: 50%;
-    background: var(--ems-warning-500);
-    vertical-align: middle;
-}
-
-.sidebar-menu-group-caret {
-    flex-shrink: 0;
-    font-size: 0.6rem;
-    color: var(--ems-neutral-400);
-    transition: transform 0.18s ease;
-}
-
-.sidebar-group[open] > .sidebar-menu-group-toggle {
-    color: var(--sb-fg);
-}
-
-.sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-caret {
-    transform: rotate(180deg);
-}
-
-/* Aktiv bölmə BAĞLI qrupun içindədirsə — başlıq brend tonu ilə işarələnir. */
-.sidebar-menu-group.has-active > .sidebar-group:not([open]) > .sidebar-menu-group-toggle {
-    background: var(--sb-active-bg);
-    color: var(--sb-active-fg);
-}
-
-.sidebar-group[open] > .sidebar-menu-group-items {
-    padding: 2px 0 6px;
-    animation: sidebarGroupIn 0.18s ease;
-}
-
-@keyframes sidebarGroupIn {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
-        opacity: 1;
-        transform: none;
-    }
 }
 
 /* ── Çıxış (təhlükə tonu) ────────────────────────────────────────────────── */

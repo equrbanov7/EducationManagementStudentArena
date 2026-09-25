@@ -43,16 +43,34 @@ heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
     {% endfor %}
   </div>
 
-  {% if not se.hours.has_plan and not se.readonly %}
-  {% comment %}Sahib 2026-09-20: plan/yük sətri tapılmayanda müəllim fənnin saatını
-  özü yazır (syllabus_action → plan_hours). Tapılanda bu blok görünmür.{% endcomment %}
-  <form class="syl-planhours" data-syl-planhours data-action-url="{% url 'accounts:syllabus_action' %}" data-version="{{ se.version_id }}">
-    <p class="syl-planhours__text">{% trans "Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr saatını növ üzrə yazın:" context "accounts.syllabus" %}</p>
+  {% if se.hours.manual %}
+  {% comment %}Sahib 2026-09-20: plan/yük sətri tapılmayanda müəllim fənnin saatını özü seçir
+  (syllabus_action → plan_hours). Sahib 2026-09-25: «bir dəfə yazandan sonra edit etmək olmur»
+  → forma əl ilə daxil edilmiş saatla HƏMİŞƏ görünür və dəyişdirilə bilir; «dropdown olsun, əl
+  ilə yazılmasın» → layihənin select komponenti. Rəsmi plandan gələn saatda forma görünmür.{% endcomment %}
+  <form class="syl-planhours" data-syl-planhours data-action-url="{% url 'accounts:syllabus_action' %}" data-version="{{ se.version_id }}"
+        data-empty-message="{% trans 'Ən azı bir dərs növü üçün saat seçin.' context 'accounts.syllabus' %}">
+    <p class="syl-planhours__text">
+      {% if se.hours.has_plan %}
+      {% trans "Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv seçilibsə dəyişin və yenidən yadda saxlayın:" context "accounts.syllabus" %}
+      {% else %}
+      {% trans "Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr saatını növ üzrə seçin:" context "accounts.syllabus" %}
+      {% endif %}
+    </p>
     <div class="syl-planhours__fields">
-      <label class="syl-planhours__field"><span>{% trans "Mühazirə" context "accounts.syllabus" %}</span><input type="number" name="lecture" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
-      <label class="syl-planhours__field"><span>{% trans "Seminar" context "accounts.syllabus" %}</span><input type="number" name="seminar" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
-      <label class="syl-planhours__field"><span>{% trans "Laboratoriya" context "accounts.syllabus" %}</span><input type="number" name="lab" min="0" max="300" step="1" inputmode="numeric" value="" class="ems-input"></label>
-      <button type="submit" class="ems-btn ems-btn--primary">{% trans "Saatı yadda saxla" context "accounts.syllabus" %}</button>
+      {% for field in se.hours.manual_fields %}
+      <label class="syl-planhours__field"><span>{{ field.label }}</span>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select name="{{ field.kind }}" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+            {% for option in se.hours.options %}
+            <option value="{{ option }}"{% if option == field.value %} selected{% endif %}>{{ option }} {% trans "saat" context "accounts.syllabus" %}</option>
+            {% endfor %}
+            {% if field.value and field.value not in se.hours.options %}<option value="{{ field.value }}" selected>{{ field.value }} {% trans "saat" context "accounts.syllabus" %}</option>{% endif %}
+          </select>
+        </div>
+      </label>
+      {% endfor %}
+      <button type="submit" class="ems-btn ems-btn--primary">{% if se.hours.has_plan %}{% trans "Saatı yenilə" context "accounts.syllabus" %}{% else %}{% trans "Saatı yadda saxla" context "accounts.syllabus" %}{% endif %}</button>
     </div>
     <p class="syl-planhours__msg" data-syl-planhours-msg role="status" hidden></p>
   </form>

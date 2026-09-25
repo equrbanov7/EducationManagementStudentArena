@@ -9,11 +9,8 @@ DƏYİŞMƏYİB. 2026-09-25: müəllimin də gördüyü üç bənd `sidebar/item
 {% if "syllabus-list" in allowed_sections or "syllabus-review" in allowed_sections or "question-bank" in allowed_sections or "question-submissions" in allowed_sections or "question-chair-review" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="syllabus">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|syllabus-list|syllabus-editor|syllabus-review|question-bank|question-submissions|question-chair-review|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Sillabus və sual" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Sillabus və sual" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-file-lines" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_syllabus_list.html" %}
             {% comment %}Sillabus təsdiqi — AYRI icazə açarı (`syllabus.review`): kafedra

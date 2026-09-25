@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Kabinet sol menyusu — HEYƏT AKKORDEONU (2026-09-25 redizaynı).
+   Markup: `sidebar/_group_general.html` (üst blok), `sidebar/_group_*.html`
+   (qruplar), başlıq `sidebar/_group_summary.html`.
+
+   Sahib: «dropdown olsa da səliqəli olsun». Əvvəl 11 bağlı, BÖYÜK HƏRFLİ,
+   sayğaclı başlıq «mətn divarı» kimi oxunurdu, uzun adlar «…» ilə kəsilirdi
+   («İMTAHAN VƏ QİYMƏTLƏNDİ…»), «Ümumi» isə adi qrup kimi görünürdü.
+   Fluent 2 / GitLab naviqasiyası nümunəsi:
+   • ÜST BLOK (ana səhifə, bildirişlər, müraciətlər …) başlıqsızdır, həmişə
+     görünür; qruplardan incə xətlə ayrılır.
+   • QRUP BAŞLIĞI: 16px ikon (bəndlərlə eyni ikon sütunu) + cümlə-registrli,
+     KƏSİLMƏYƏN ad (iki sətrə keçə bilər) + sağda ox. Sayğac yalnız bağlı
+     qrupda, sakit tonda (`ui.js`).
+   • QRUPUN BƏNDLƏRİ ikonsuzdur və mətni başlıq adı ilə EYNİ sütundan başlayır
+     — iyerarxiya girinti ilə oxunur, 60 bəndlik menyuda təkrarlanan ikon
+     səs-küyü yoxdur. İkonlar DOM-dadır: yığcam relsdə yenə görünür
+     (`sidebar_rail.css`).
+   • Aktiv bənd, hover, fokus — düz menyu ilə eyni (`sidebar.css`).
+
+   `sidebar.css`-in başında İLK import olunur: baza bənd qaydaları (`.sidebar-
+   menu-link`, 0-1-0) bu faylın iki sinifli selektorlarına (0-2-0) uduzur;
+   rels faylı isə sonra gəlir və buranı `.profile-sidebar.collapsed …` ilə üstələyir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Üst blok → qruplar ayırıcısı ───────────────────────────────────────── */
+
+.sidebar-menu > .sidebar-menu-item + .sidebar-menu-group {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.sidebar-menu-group {
+    list-style: none;
+    min-width: 0;
+}
+
+/* ── Qrup başlığı (nativ <summary>) ─────────────────────────────────────── */
+
+.sidebar-menu-group-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--sb-row-h, 38px);
+    box-sizing: border-box;
+    padding: 8px var(--sb-pad-x, 12px);
+    border-radius: var(--sb-radius, 8px);
+    color: var(--sb-fg);
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+/* Nativ üçbucaq işarəsini götürürük — öz oxumuz sağdadır. */
+.sidebar-menu-group-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.sidebar-menu-group-toggle::marker {
+    content: "";
+}
+
+.sidebar-menu-group-toggle:hover {
+    background: var(--sb-hover);
+    color: var(--sb-fg-strong);
+}
+
+.sidebar-menu-group-title {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: var(--sb-gap, 10px);
+    min-width: 0;
+}
+
+.sidebar-menu-group-icon {
+    flex: 0 0 var(--sb-icon-col, 20px);
+    width: var(--sb-icon-col, 20px);
+    font-size: 16px;
+    line-height: 1;
+    text-align: center;
+    color: var(--sb-muted);
+    transition: color 0.14s ease;
+}
+
+/* Ad KƏSİLMİR: `nowrap`/`ellipsis` yoxdur — dar sidebar-da iki sətrə keçir. */
+.sidebar-menu-group-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+/* Sayğac/nöqtə — `ui.js` doldurur: yalnız BAĞLI qrupda bənd sayı + gözləyən nişan. */
+.sidebar-menu-group-meta {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--sb-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.sidebar-menu-group-meta:empty {
+    display: none;
+}
+
+.sidebar-menu-group-meta--alert {
+    color: var(--ems-warning-700);
+}
+
+.sidebar-menu-group-meta--alert::after {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-left: 0.3rem;
+    border-radius: 50%;
+    background: var(--ems-warning-500);
+    vertical-align: middle;
+}
+
+.sidebar-menu-group-caret {
+    flex: 0 0 16px;
+    width: 16px;
+    font-size: 0.7rem;
+    text-align: center;
+    color: var(--ems-neutral-400);
+    transition: transform 0.18s ease;
+}
+
+/* Açıq qrup: ox yuxarı, başlıq tündləşir — vəziyyət rəngə yox, oxa və tona bağlıdır. */
+.sidebar-group[open] > .sidebar-menu-group-toggle {
+    color: var(--sb-fg-strong);
+}
+
+.sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-icon {
+    color: var(--sb-fg);
+}
+
+.sidebar-group[open] > .sidebar-menu-group-toggle .sidebar-menu-group-caret {
+    transform: rotate(180deg);
+}
+
+/* Aktiv bölmənin qrupu (`ui.js` → `.has-active`): ikon brend tonunda; qrup
+   BAĞLIDIRSA başlıq da yüngül tint alır ki, «harada olduğun» itməsin. */
+.sidebar-menu-group.has-active .sidebar-menu-group-icon {
+    color: var(--sb-accent);
+}
+
+.sidebar-menu-group.has-active > .sidebar-group:not([open]) > .sidebar-menu-group-toggle {
+    background: var(--sb-active-bg);
+    color: var(--sb-active-fg);
+}
+
+/* ── Qrupun bəndləri ─────────────────────────────────────────────────────── */
+
+.sidebar-menu-group-items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sidebar-group[open] > .sidebar-menu-group-items {
+    padding: 2px 0 6px;
+    animation: sidebarGroupIn 0.18s ease;
+}
+
+/* Mətn başlıq adı ilə eyni sütundan başlayır: kənar + ikon sütunu + aralıq. */
+.sidebar-menu-group-items .sidebar-menu-link {
+    padding-left: calc(var(--sb-pad-x, 12px) + var(--sb-icon-col, 20px) + var(--sb-gap, 10px));
+    color: var(--ems-neutral-600);
+}
+
+.sidebar-menu-group-items .sidebar-menu-link:hover {
+    color: var(--sb-fg-strong);
+}
+
+.sidebar-menu-group-items .sidebar-menu-link.active {
+    color: var(--sb-active-fg);
+}
+
+.sidebar-menu-group-items .sidebar-menu-icon {
+    display: none;
+}
+
+@keyframes sidebarGroupIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}

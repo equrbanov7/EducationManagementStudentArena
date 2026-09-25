@@ -17,11 +17,8 @@ alt-ağacını görür (unit scoping BACKEND-də tətbiq olunur — burada yaln�
 {% if 'analytics' in allowed_sections or current_organization and 'org-faculties' in allowed_sections or current_organization and 'org-kafedras' in allowed_sections or current_organization and 'org-members' in allowed_sections or current_organization and 'org-roles' in allowed_sections or current_organization and 'unit-exams' in allowed_sections or current_organization and 'audit-log' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="university-admin">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|analytics|org-faculties|org-kafedras|org-members|unit-exams|org-roles|audit-log|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "group_university_management" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "group_university_management" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-sitemap" %}
         <ul class="sidebar-menu-group-items">
             {% if 'analytics' in allowed_sections %}
             <li class="sidebar-menu-item">

@@ -9,11 +9,8 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
 {% if 'my-exams' in allowed_sections or 'my-courses' in allowed_sections or 'pending-review' in allowed_sections or 'review-results' in allowed_sections or role_capabilities.can_manage_appeals or 'courses' in allowed_sections and not university_mode %}
 <li class="sidebar-menu-group" data-sidebar-group="assessment">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-exams|my-courses|courses|pending-review|review-results|manage-appeals|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-list-check" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_my_exams.html" %}
             {% include "accounts/profile/sidebar/items/_my_courses.html" %}

@@ -14,11 +14,8 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
 {% if 'posts' in allowed_sections and not university_mode or 'posts' in allowed_sections and not role_capabilities.is_student or 'create-post' in allowed_sections and not university_mode or 'create-post' in allowed_sections and not role_capabilities.is_student or 'create-category' in allowed_sections or 'category-management' in allowed_sections or 'pending-post-approvals' in allowed_sections or 'superadmin-contact-messages' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="content">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|posts|create-post|create-category|category-management|pending-post-approvals|superadmin-contact-messages|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "group_blog" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "group_blog" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-newspaper" %}
         <ul class="sidebar-menu-group-items">
             {% if 'superadmin-contact-messages' in allowed_sections %}
             <li class="sidebar-menu-item">

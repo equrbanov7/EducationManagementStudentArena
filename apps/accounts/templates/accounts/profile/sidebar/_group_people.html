@@ -19,11 +19,8 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
 {% if "student-admission" in allowed_sections or "student-registry" in allowed_sections or "people-students" in allowed_sections or "people-teachers" in allowed_sections or "academic-records" in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="people">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|student-admission|student-registry|people-students|people-teachers|academic-records|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Tələbə və heyət" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Tələbə və heyət" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-users" %}
         <ul class="sidebar-menu-group-items">
             {% if "student-admission" in allowed_sections %}
             <li class="sidebar-menu-item">

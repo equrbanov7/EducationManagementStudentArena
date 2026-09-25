@@ -76817,3 +76817,55 @@ msgstr "Tasks & exams"
 msgctxt "profile.sidebar"
 msgid "Ünsiyyət"
 msgstr "Communication"
+
+msgctxt "profile.sidebar"
+msgid "Menyuda axtar"
+msgstr "Search menu"
+
+msgctxt "profile.sidebar"
+msgid "Heç nə tapılmadı"
+msgstr "Nothing found"
+
+msgctxt "profile.sidebar"
+msgid "Anonim sorğu"
+msgstr "Anonymous survey"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu nəticələri"
+msgstr "Survey results"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu kampaniyaları"
+msgstr "Survey campaigns"
+
+msgctxt "profile.sidebar"
+msgid "Keyfiyyətə nəzarət"
+msgstr "Quality assurance"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu fənn üçün tədris planı / dərs yükü saatı tapılmadı. Fənnin semestr "
+"saatını növ üzrə seçin:"
+msgstr ""
+"No curriculum / teaching-load hours were found for this subject. Choose the "
+"semester hours per lesson type:"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Tədris planında bu fənnin saatı tapılmadığı üçün saat əl ilə seçilib. Səhv "
+"seçilibsə dəyişin və yenidən yadda saxlayın:"
+msgstr ""
+"The hours were chosen manually because the curriculum has no hours for this "
+"subject. If they are wrong, change them and save again:"
+
+msgctxt "accounts.syllabus"
+msgid "Ən azı bir dərs növü üçün saat seçin."
+msgstr "Choose hours for at least one lesson type."
+
+msgctxt "accounts.syllabus"
+msgid "Saatı yenilə"
+msgstr "Update hours"
+
+msgctxt "accounts.syllabus"
+msgid "saat"
+msgstr "h"

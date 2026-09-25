@@ -1,0 +1,20 @@
+{% comment %}Akkordeon qrupunun BAŞLIĞI (2026-09-25 heyət redizaynı) — hər `_group_*.html`
+əvvəlcə qrup adını `trans … as group_label` ilə tərcümə edir, sonra bu faylı
+`with group_icon="fa-…"` ilə daxil edir.
+
+• 16px qrup ikonu bəndlərlə EYNİ ikon sütunundadır; ad böyük hərflə DEYİL (cümlə
+  registri) və KƏSİLMİR — lazım olsa iki sətrə keçir (`sidebar_groups.css`).
+• Sayğac (`-meta`) yalnız BAĞLI qrupda görünür və sakitdir; içəridə gözləyən
+  badge varsa kəhrəba nöqtə əlavə olunur — ikisini də `ui.js` doldurur.
+• Ox sağdadır, açıq qrupda yuxarı çevrilir; açıq/bağlı vəziyyəti nativ
+  `<details>` ekran oxuyucuya özü bildirir.
+
+⚠️ Markup müqaviləsi: `sidebar-menu-group-label"` sinfi atributun SONUNDA və
+dərhal ardınca `<span …>` gəlməlidir — QA süpürgəsi (`scripts/qa_live/
+http_session.py` → `_GROUP_RE`) qrup adını buradan oxuyur (ikon span-ın İÇİNDƏ,
+teqlər süzülür). `.sidebar-menu-group-meta` / `-caret` sinifləri `ui.js`-dədir.{% endcomment %}
+<summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
+    <span class="sidebar-menu-group-title"><i class="fas {{ group_icon }} sidebar-menu-group-icon" aria-hidden="true"></i><span class="sidebar-menu-group-text">{{ group_label }}</span></span>
+    <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
+    <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
+</summary>

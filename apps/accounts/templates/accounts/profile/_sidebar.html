@@ -1,6 +1,6 @@
 {% load i18n static profile_shell %}
 {% comment %}
-Kabinet sol menyusu — İKİ DÜZÜM (2026-09-25 redizaynı; əvvəlki: 2026-09-10).
+Kabinet sol menyusu — İKİ DÜZÜM, BİR GÖRÜNÜŞ DİLİ (2026-09-25 redizaynı).
 
 NİYƏ BELƏDİR
 ------------
@@ -14,14 +14,23 @@ NİYƏ BELƏDİR
    tələbə + müəllim, tələbə idarəetməsi həvaləsi) → «full», yəni aşağıdakı tam
    akkordeon: heç bir bənd itmir.
 
-2. AKKORDEON — heyət rolları (dekan, kafedra, RİM, rektor, imtahan mərkəzi…).
-   Qruplar SERVER tərəfdə nativ `<details>`-dir (JS-siz açılır, klaviatura və
-   ekran oxuyucu dəstəyi nativdir). `sidebar_menu_size` (= `allowed_sections`
-   sayı) < 32 olan AZ BƏNDLİ heyətdə (tyutor, koordinator, tələbə xidmətləri…)
-   bütün qruplar AÇIQ gəlir; ÇOX BƏNDLİ rolda yalnız AKTİV bölmənin qrupu.
-   HƏDD hər qrup faylında təkrarlanır (Django şablonunda mənimsətmə yoxdur).
-   `sidebar_active_key` — `|bölmə|` formatlı açar; sərhəd simvolları qismən
-   uyğunluğun qarşısını alır (`|posts|` ⊄ `|pending-post-approvals|`).
+2. AKKORDEON — heyət rolları (dekan, kafedra, RİM, rektor, imtahan mərkəzi…);
+   sahib: «dropdown olsa da səliqəli olsun». Fluent/GitLab tipli naviqasiya:
+   • ÜST BLOK başlıqsızdır və həmişə görünür (ana səhifə, bildirişlər,
+     müraciətlər …; `sidebar/_group_general.html`);
+   • altında qruplar — nativ `<details>` (JS-siz açılır, klaviatura və ekran
+     oxuyucu dəstəyi nativdir); başlıq 16px ikon + KƏSİLMƏYƏN cümlə-registrli
+     ad + sağda ox (`sidebar/_group_summary.html`); qrupun bəndləri ikonsuz,
+     başlıq adı ilə eyni sütunda;
+   • `sidebar_menu_size` (= `allowed_sections` sayı) < 32 olan AZ BƏNDLİ
+     heyətdə bütün qruplar AÇIQ gəlir, ÇOX BƏNDLİ rolda yalnız AKTİV bölmənin
+     qrupu; istifadəçinin açıb-bağladığını `ui.js` yadda saxlayır
+     (`profileSidebarGroups`). HƏDD hər qrup faylında təkrarlanır.
+     `sidebar_active_key` — `|bölmə|` formatlı açar; sərhəd simvolları qismən
+     uyğunluğun qarşısını alır (`|posts|` ⊄ `|pending-post-approvals|`).
+   • > 20 bəndli menyuda başlığın altında «Menyuda axtar» süzgəci
+     (`js/profile/sidebar_filter.js`; `/` fokuslayır, Esc təmizləyir) —
+     yalnız brauzerdə süzür, sorğu yoxdur.
 
 3. BƏND TƏK YERDƏDİR — tələbə/müəllimin gördüyü hər bənd `sidebar/items/`-də
    ayrıca faylda (markup + görünürlük şərti); həm akkordeon qrupları, həm düz
@@ -34,13 +43,15 @@ NİYƏ BELƏDİR
 
 ⚠️ `<aside class="profile-sidebar"` açılışı OLDUĞU KİMİ qalmalıdır (testlər
 bu mətnlə sidebar-ı kəsib götürür) — düzüm `data-sidebar-layout`-dadır.
+`#sidebarToggle` başlıqdakı İLK düymə qalmalıdır (a11y qoruyucu testi).
 
 GÖRÜNÜRLÜK MƏNTİQİ BURADA DEYİL — `views/_helpers/rbac.py` → `allowed_sections`.
 Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada durur.
 {% endcomment %}
 {% profile_sidebar_layout as sidebar_layout %}
+{% profile_sidebar_filter_enabled as sidebar_filter %}
 <aside class="profile-sidebar" id="profileSidebar" data-sidebar-layout="{{ sidebar_layout }}">
-    <div class="sidebar-header">
+    <div class="sidebar-header{% if sidebar_filter %} sidebar-header--search{% endif %}">
         <h2 class="sidebar-title">{% if sidebar_layout == "student" %}{% trans "Tələbə kabineti" context "profile.sidebar" %}{% elif sidebar_layout == "teacher" %}{% trans "Müəllim kabineti" context "profile.sidebar" %}{% else %}{% trans "Şəxsi kabinet" context "profile.sidebar" %}{% endif %}</h2>
         {# A11y (Codex §19, 2026-09-13): ikon-düymə — ad + vəziyyət ekran oxuyucuya; JS (ui.js) sinxron saxlayır #}
         <button type="button"
@@ -54,6 +65,25 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
                 data-title-collapse="{% trans 'toggle_close' context 'profile.sidebar' %}">
             <i class="fas fa-chevron-left" aria-hidden="true"></i>
         </button>
+        {% if sidebar_filter %}
+        {% comment %}Süzgəc YAPIŞAN başlığın ikinci sətridir — uzun menyuda da əl altında qalır.
+        Forma deyil (göndərilən heç nə yoxdur); `type="search"` + görünməz `<label>`.{% endcomment %}
+        <div class="sidebar-search" role="search">
+            <label class="sidebar-search__label" for="sidebarFilter">{% trans "Menyuda axtar" context "profile.sidebar" %}</label>
+            <i class="fas fa-magnifying-glass sidebar-search__icon" aria-hidden="true"></i>
+            <input type="search"
+                   class="sidebar-search__input"
+                   id="sidebarFilter"
+                   placeholder="{% trans 'Menyuda axtar' context 'profile.sidebar' %}"
+                   autocomplete="off"
+                   spellcheck="false"
+                   enterkeyhint="go"
+                   aria-controls="profileSidebarNav"
+                   aria-keyshortcuts="/"
+                   data-sidebar-filter>
+            <kbd class="sidebar-search__kbd" aria-hidden="true">/</kbd>
+        </div>
+        {% endif %}
     </div>
 
     {% comment %}`default_if_none` vacibdir: `active_section` None olsa `add` filtri
@@ -61,7 +91,7 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
     düşür, yəni menyu həmişə tam açıq qalardı.{% endcomment %}
     {% with sidebar_section=active_section|default_if_none:"" %}
     {% with sidebar_menu_size=allowed_sections|length sidebar_active_key="|"|add:sidebar_section|add:"|" %}
-    <nav class="sidebar-nav" aria-label="{% trans 'Kabinet menyusu' context 'profile.sidebar' %}">
+    <nav class="sidebar-nav" id="profileSidebarNav" aria-label="{% trans 'Kabinet menyusu' context 'profile.sidebar' %}">
         <ul class="sidebar-menu">
             {% if sidebar_layout == "student" %}
             {% include "accounts/profile/sidebar/compact/_student.html" %}
@@ -77,12 +107,17 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
             {% include "accounts/profile/sidebar/_group_exam_center.html" %}
             {% include "accounts/profile/sidebar/_group_teaching_office.html" %}
             {% include "accounts/profile/sidebar/_group_people.html" %}
+            {% include "accounts/profile/sidebar/_group_quality.html" %}
             {% include "accounts/profile/sidebar/_group_university_admin.html" %}
             {% include "accounts/profile/sidebar/_group_management.html" %}
             {% include "accounts/profile/sidebar/_group_system.html" %}
             {% include "accounts/profile/sidebar/_group_content.html" %}
             {% endif %}
         </ul>
+        {% if sidebar_filter %}
+        {# Süzgəcin nəticəsi ekran oxuyucuya: boşdursa görünmür, heç nə tapılmayanda JS mətni yazır. #}
+        <p class="sidebar-search__status" role="status" data-sidebar-filter-status data-empty-text="{% trans 'Heç nə tapılmadı' context 'profile.sidebar' %}"></p>
+        {% endif %}
     </nav>
     {% endwith %}
     {% endwith %}
@@ -91,5 +126,9 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
 {% comment %}Rels rejiminin tooltip-ləri, üfüqi sürüşmə qoruyucusu və düz menyuda aktiv bəndin
 görünən sahəyə gətirilməsi — sidebar həm SPA qabığında, həm embed səhifələrdə
 (`profile_sidebar` teqi) bu partial ilə gəlir, ona görə skript də burada yüklənir
-(`defer`; EMSReady / EMSReady.once — AJAX-safe, idempotent).{% endcomment %}
+(`defer`; EMSReady / EMSReady.once — AJAX-safe, idempotent). Süzgəc skripti yalnız
+süzgəc render olunanda gəlir.{% endcomment %}
 <script src="{% static 'accounts/js/profile/sidebar_nav.js' %}?v=20260925-1" defer></script>
+{% if sidebar_filter %}
+<script src="{% static 'accounts/js/profile/sidebar_filter.js' %}?v=20260925-1" defer></script>
+{% endif %}

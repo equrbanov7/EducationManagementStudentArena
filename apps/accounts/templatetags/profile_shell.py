@@ -8,6 +8,8 @@
   tələbə/müəllim üçün düz menyu, qalan hər kəs üçün akkordeon. Qərar saf
   hesablamadır (``resolve_sidebar_layout``) — DB-yə getmir, sorğu büdcəsinə
   təsir etmir.
+* ``profile_sidebar_filter_enabled`` — «Menyuda axtar» süzgəci yalnız uzun
+  menyuda (> 20 bənd) göstərilir; say da eyni saf hesablamadandır.
 """
 
 from django import template
@@ -49,6 +51,7 @@ COMPACT_SIDEBAR_TREES = {
             "assigned-courses",
             "pending-answers",
             "my-appeals",
+            "evaluation-survey",
             "notifications",
             "applications",
             "profile-info",
@@ -103,6 +106,37 @@ SIDEBAR_LAYOUT_NEUTRAL_SECTIONS = frozenset(
 )
 
 
+#: «Menyuda axtar» süzgəci bu saydan başlayaraq göstərilir (sahib/orkestrator
+#: 2026-09-25: «> 20 bənd» — qısa menyuda axtarış yalnız səs-küydür).
+SIDEBAR_FILTER_MIN_ITEMS = 21
+
+
+def _menu_sections(allowed_sections, capabilities, *, university_mode=True):
+    """Menyuda AYRICA bənd kimi görünə bilən bölmə açarları (saf hesablama).
+
+    Universitet rejimində tam menyu də bunları göstərmir: LMS kurs vitrini
+    (`courses`) heç kimdə, bloq (`posts`, `create-post`) isə tələbədə gizlidir.
+    """
+    caps = capabilities or {}
+    visible = set(allowed_sections or ()) - SIDEBAR_LAYOUT_NEUTRAL_SECTIONS
+    if university_mode:
+        visible.discard("courses")
+        if caps.get("is_student"):
+            visible -= {"posts", "create-post"}
+    return visible
+
+
+def sidebar_menu_item_count(allowed_sections, capabilities, *, university_mode=True):
+    """Menyudakı bənd sayının (üst blok + qruplar) təxmini — süzgəc həddi üçün.
+
+    Bölmə açarları + bayraqla görünən bəndlər («İmtahan Nəzarət Sistemi»).
+    Alt hesab bloku sayılmır (onun bəndləri süzgəcə düşmür).
+    """
+    caps = capabilities or {}
+    flags = sum(1 for flag in COMPACT_SIDEBAR_FLAG_ITEMS if caps.get(flag))
+    return len(_menu_sections(allowed_sections, caps, university_mode=university_mode)) + flags
+
+
 def resolve_sidebar_layout(allowed_sections, capabilities, *, university_mode=True):
     """Sidebar düzümü: ``"student"`` | ``"teacher"`` | ``"full"``.
 
@@ -113,13 +147,7 @@ def resolve_sidebar_layout(allowed_sections, capabilities, *, university_mode=Tr
     şablonundadır, burada yalnız təqdimat seçilir.
     """
     caps = capabilities or {}
-    visible = set(allowed_sections or ()) - SIDEBAR_LAYOUT_NEUTRAL_SECTIONS
-    if university_mode:
-        # Tam menyu də bunları göstərmir: universitet rejimində LMS kurs
-        # vitrini (`courses`) heç kimdə, bloq isə tələbədə gizlidir.
-        visible.discard("courses")
-        if caps.get("is_student"):
-            visible -= {"posts", "create-post"}
+    visible = _menu_sections(allowed_sections, caps, university_mode=university_mode)
     active_flags = {flag for flag in COMPACT_SIDEBAR_FLAG_ITEMS if caps.get(flag)}
 
     candidates = []
@@ -143,6 +171,17 @@ def profile_sidebar_layout(context):
         context.get("role_capabilities") or {},
         university_mode=bool(context.get("university_mode", True)),
     )
+
+
+@register.simple_tag(takes_context=True)
+def profile_sidebar_filter_enabled(context):
+    """«Menyuda axtar» süzgəci göstərilsinmi (menyuda > 20 bənd)."""
+    count = sidebar_menu_item_count(
+        context.get("allowed_sections") or (),
+        context.get("role_capabilities") or {},
+        university_mode=bool(context.get("university_mode", True)),
+    )
+    return count >= SIDEBAR_FILTER_MIN_ITEMS
 
 
 @register.inclusion_tag("accounts/profile/_sidebar.html", takes_context=True)

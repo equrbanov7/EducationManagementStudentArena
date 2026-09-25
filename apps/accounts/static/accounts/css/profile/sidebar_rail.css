@@ -46,12 +46,24 @@
         padding-right: 8px;
     }
 
-    .profile-sidebar.collapsed .sidebar-menu-link {
+    .profile-sidebar.collapsed .sidebar-menu-link,
+    .profile-sidebar.collapsed .sidebar-menu-group-items .sidebar-menu-link {
         justify-content: center;
         padding-left: 0;
         padding-right: 0;
         gap: 0;
         min-height: 40px;
+    }
+
+    /* Geniş rejimdə qrup bəndləri ikonsuzdur (`sidebar_groups.css`) — relsdə
+       ikon yeganə işarədir, geri qayıdır. Süzgəc relsdə yoxdur. */
+    .profile-sidebar.collapsed .sidebar-menu-group-items .sidebar-menu-icon {
+        display: inline-block;
+    }
+
+    .profile-sidebar.collapsed .sidebar-search,
+    .profile-sidebar.collapsed .sidebar-search__status {
+        display: none;
     }
 
     .profile-sidebar.collapsed .sidebar-menu-ext {
@@ -63,9 +75,11 @@
         bottom: 10px;
     }
 
-    /* Bölmə/qrup başlıqları əvəzinə incə ayırıcı — ikon siyahısı yapışıq görünməsin. */
+    /* Bölmə/qrup başlıqları əvəzinə incə ayırıcı — ikon siyahısı yapışıq görünməsin
+       (heyətdə üst blokdan sonrakı İLK qrup da daxil). */
     .profile-sidebar.collapsed .sidebar-section,
-    .profile-sidebar.collapsed .sidebar-menu-group + .sidebar-menu-group {
+    .profile-sidebar.collapsed .sidebar-menu-group + .sidebar-menu-group,
+    .profile-sidebar.collapsed .sidebar-menu > .sidebar-menu-item + .sidebar-menu-group {
         margin-top: 6px;
         padding-top: 6px;
         border-top: 1px solid var(--border-color);

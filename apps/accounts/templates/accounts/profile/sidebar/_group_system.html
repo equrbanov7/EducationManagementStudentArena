@@ -14,11 +14,8 @@ görünürlük eynidir, yalnız başlıq başqadır. Faktiki qapı server-sidedi
 {% if 'superadmin-org-inspector' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'superadmin-organizations' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="system">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|superadmin-org-inspector|superadmin-exam-rooms|superadmin-org-features|superadmin-organizations|superadmin-users|superadmin-ai|system-monitoring|" %} open{% endif %}>
-        <summary class="sidebar-menu-group-toggle sidebar-menu-group-label">
-            <span class="sidebar-menu-group-title">{% trans "Sistem idarəetməsi" context "profile.sidebar" %}</span>
-            <span class="sidebar-menu-group-meta" aria-hidden="true"></span>
-            <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
-        </summary>
+        {% trans "Sistem idarəetməsi" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-gears" %}
         <ul class="sidebar-menu-group-items">
             {% if 'superadmin-org-inspector' in allowed_sections %}
             <li class="sidebar-menu-item">
