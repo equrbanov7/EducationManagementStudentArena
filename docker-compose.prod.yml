@@ -82,6 +82,12 @@ x-app-env: &app-env
   SECRET_KEY: ${SECRET_KEY}
   ALLOWED_HOSTS: ${ALLOWED_HOSTS}
   SITE_URL: ${SITE_URL}
+  # Şəbəkə zonası (publik domen, 2026-09-25): əvvəl bu açarlar konteynerə ÖTÜRÜLMÜRDÜ —
+  # .env-də NETWORK_ZONE_ENFORCED=True yazılsa belə qapı sönük qalırdı. CIDR-lər nginx
+  # `geo $ems_zone` ilə eynidir; TRUST_HEADER yalnız app portu publish olunmadığı üçün etibarlıdır.
+  INTERNAL_NETWORKS: ${INTERNAL_NETWORKS:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.0/8,::1/128}
+  NETWORK_ZONE_ENFORCED: ${NETWORK_ZONE_ENFORCED:-False}
+  NETWORK_ZONE_TRUST_HEADER: ${NETWORK_ZONE_TRUST_HEADER:-False}
   EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
   EMAIL_PORT: ${EMAIL_PORT:-587}
   EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
