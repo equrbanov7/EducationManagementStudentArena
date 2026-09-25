@@ -18,7 +18,9 @@ Yadda saxlama: düymə TƏSDİQ dialoqunu açır (`_save_dialog_body.html`): yaz
 hər tələbə — ad, giriş, imtahan, yekun, hərf (F qırmızı, sayı başlıqda); K>0
 dəyişiklik varsa səbəb + növ + qeyd dialoqda, skan vərəq kartında. Dialoq
 formanın İÇİNDƏDİR — yalnız dialoqun «Təsdiq et» düyməsi POST edir.
-Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST-a düşmür.{% endcomment %}
+Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST-a düşmür.
+2026-09-26: bitmiş dövr (`s.read_only`) — sahələr `disabled`, yadda saxlama və
+dialoq YOXDUR; düzəliş rejimində forma `correction_mode=1` daşıyır.{% endcomment %}
 <section class="ems-card ese-card ese-roster">
   <div class="ems-card__head">
     <div>
@@ -49,6 +51,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
     <input type="hidden" name="next" value="{{ s.post_next_url }}">
     {% if s.is_superadmin %}<input type="hidden" name="organization_id" value="{{ s.selected_org.id }}">{% endif %}
     <input type="hidden" name="offering_id" value="{{ s.offering.id }}">
+    {% if s.correction_mode %}<input type="hidden" name="{{ s.correction_mode_field }}" value="1">{% endif %}
     {{ s.confirm_config|json_script:"ese-confirm-config" }}
 
     <div class="ems-tablewrap ese-tablewrap">
@@ -86,7 +89,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
                 <div class="bootstrap-single-select bootstrap-single-select--ems bootstrap-single-select--compact ese-qsel" data-ese-qwrap>
                   <select class="ems-select bootstrap-single-select__native is-enhanced" data-bootstrap-select-lazy name="q__{{ row.enrollment.id }}__{{ cell.index }}"
                           aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}"
-                          {% if cell.index > s.question_count %}disabled{% endif %}
+                          {% if cell.index > s.question_count or s.read_only %}disabled{% endif %}
                           data-ese-q="{{ cell.index }}" data-initial="{{ cell.value }}" data-max="{{ s.question_max }}" tabindex="-1">
                     <option value=""{% if not cell.value %} selected{% endif %}>—</option>
                     {% for option in s.question_score_options %}
@@ -94,7 +97,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
                     {% endfor %}
                   </select>
                   <button type="button" class="btn btn-outline-secondary dropdown-toggle bootstrap-single-select__toggle{% if not cell.value %} is-placeholder{% endif %}"
-                          data-ese-qtoggle aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}" aria-haspopup="listbox">
+                          data-ese-qtoggle{% if s.read_only %} disabled{% endif %} aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}" aria-haspopup="listbox">
                     <span class="bootstrap-single-select__label-text">{{ cell.value|default:"—" }}</span>
                     <span class="bootstrap-single-select__caret"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
                   </button>
@@ -105,7 +108,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
                 <input type="number" class="ems-input ese-score ese-total{% if s.question_count %} is-readonly{% endif %}" name="score__{{ row.enrollment.id }}"
                        aria-label="{% trans 'İmtahan balı' context 'registrar.exam_score_entry' %} — {{ row.student.get_full_name|default:row.student.username }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
-                       {% if s.question_count %}readonly tabindex="-1"{% endif %}
+                       {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if s.read_only %} disabled{% endif %}
                        value="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}"
                        data-ese-score data-initial="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}">
               </td>
@@ -136,6 +139,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
       </div>
     </div>
 
+    {% if not s.read_only %}
     <div class="ese-actions">
       <p class="ese-actions__summary" data-ese-summary aria-live="polite"></p>
       <div class="ese-actions__btns">
@@ -151,6 +155,7 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
     {% trans "Balları sistemə yaz" context "registrar.exam_score_entry" as ese_dialog_title %}
     {% trans "Yazılacaq balların icmalı. Dəyişdirilən ballar səbəb, qeyd və skan ilə audit olunur." context "registrar.exam_score_entry" as ese_dialog_sub %}
     {% include "partials/ems_ui/_dialog.html" with dialog_id="eseSaveDialog" dialog_title=ese_dialog_title dialog_subtitle=ese_dialog_sub dialog_static=True dialog_wide=True dialog_body_include="accounts/partials/exam_score_entry/_save_dialog_body.html" dialog_foot_include="accounts/partials/exam_score_entry/_save_dialog_foot.html" %}
+    {% endif %}
   </form>
   {% endif %}
 </section>

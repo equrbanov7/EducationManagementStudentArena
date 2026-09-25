@@ -58,15 +58,23 @@
     scrollbar-color: var(--ems-neutral-300) transparent;
 }
 
-/* Masaüstü: sidebar ÖZ sürüşmə sahəsidir — hündürlük ekranla məhdudlaşır,
-   uzun menyu içəridə sürüşür, alt blok aşağıya yapışır.
-   72px = `static/css/navbar.css` → `.blog-header__nav` hündürlüyü (sticky). */
+/* Masaüstü (sahib 2026-09-26: «sidebar öz daxilində scrolla getməsin»): sidebar
+   ÖZ sürüşmə sahəsi DEYİL — hündürlüyü menyunun özü qədərdir, səhifə ilə birlikdə
+   sürüşür (ikinci, iç scrollbar yoxdur). Sütun məzmun qədər uzanır (flex stretch),
+   sağ haşiyə səhifənin sonuna qədər gedir. Mobil off-canvas şkaf `responsive.css`-də
+   öz sürüşməsini saxlayır (orada ekrandan uzun menyu başqa cür açılmır). */
 @media (min-width: 769px) {
     .profile-sidebar {
-        position: sticky;
+        /* `clip` (hidden deyil) — sidebar sürüşmə konteyneri OLMUR, üfüqi qoruma qalır. */
+        overflow-x: clip;
+        overflow-y: visible;
+        overscroll-behavior: auto;
+        min-height: calc(100vh - 72px);
+    }
+
+    /* Başlıq («Menyuda axtar») navbar-ın altında görünən qalır — 72px navbar hündürlüyü. */
+    .profile-sidebar .sidebar-header {
         top: 72px;
-        align-self: flex-start;
-        height: calc(100vh - 72px);
     }
 }
 
