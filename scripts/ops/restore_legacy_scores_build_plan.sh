@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# restore_legacy_scores_build_plan.sh — LOKAL addım: J12 bərpa planını qur (2026-09-25)
+# restore_legacy_scores_build_plan.sh — LOKAL addım: bərpa planlarını qur (2026-09-25)
 # ==================================================================================
 #
 # Nə edir (heç nəyi production-a YAZMIR):
@@ -10,7 +10,10 @@
 #   2. production-un TƏZƏ pg_dump-unu (serverdən gətirilmiş, -Fc) lokal agent
 #      Postgres-də ATILABİLƏN bazaya bərpa edir və ona
 #      emsarena.rehearsal_target='disposable' markeri qoyur;
-#   3. `legacy_repair_lesson_recovery --build-plan` işlədir → plan + manifest.
+#   3. `legacy_repair_lesson_recovery --build-plan` işlədir → J12 planı + manifest;
+#   4. (ENROLLMENTS=1, default) J12 planını HƏMİN klona tətbiq edir (serverdəki sıra) və
+#      `legacy_repair_journal_enrollments --build-plan` işlədir → hazırda oxuyanların
+#      yazılış planı + manifest + bərpa olunmayan cütlərin CSV-si (~60 dəq).
 #
 # İstifadə:
 #   scripts/ops/restore_legacy_scores_build_plan.sh <prod.dump> <çıxış qovluğu> [actor]
@@ -19,7 +22,7 @@
 #   LEGACY_DUMP=~/Downloads/myedudb.sql      MARIADB_CONTAINER=ems-legacy-mariadb-restore
 #   MARIADB_PORT=50310                        AGENT_PG=emsarena-agent-postgres
 #   AGENT_PG_URL=postgres://emsarena_agent:emsarena_agent_password@127.0.0.1:55432
-#   PLAN_DB=ems_restore_plan_<tarix>         ORG=qku
+#   PLAN_DB=ems_restore_plan_<tarix>         ORG=qku   ENROLLMENTS=1
 #
 # ⚠️ Plan faylı şəxsi akademik məlumat daşıyır — repoya/buluda/mesajlaşmaya QOYMAYIN.
 set -euo pipefail
@@ -36,6 +39,7 @@ AGENT_PG="${AGENT_PG:-emsarena-agent-postgres}"
 AGENT_PG_URL="${AGENT_PG_URL:-postgres://emsarena_agent:emsarena_agent_password@127.0.0.1:55432}"
 PLAN_DB="${PLAN_DB:-ems_restore_plan_$(date -u +%Y%m%d%H%M)}"
 ORG="${ORG:-qku}"
+ENROLLMENTS="${ENROLLMENTS:-1}"
 STAMP="$(date -u +%Y%m%dT%H%MZ)"
 
 mkdir -p "$OUT_DIR" && chmod 700 "$OUT_DIR"
@@ -93,3 +97,15 @@ caffeinate -dimsu venv/bin/python manage.py legacy_repair_lesson_recovery \
     --build-plan "$OUT_DIR/j12_plan_${STAMP}.jsonl.gz" --source-dump "$LEGACY_DUMP"
 ( cd "$OUT_DIR" && shasum -a 256 "j12_plan_${STAMP}.jsonl.gz" >"j12_plan_${STAMP}.jsonl.gz.sha256" )
 echo "Hazırdır: $OUT_DIR/j12_plan_${STAMP}.jsonl.gz (+ .manifest.json, .sha256). Klon: $PLAN_DB (atılabilən)."
+[ "$ENROLLMENTS" = "1" ] || exit 0
+
+echo "== 4/4 yazılış planı: J12 planı klona tətbiq → legacy_repair_journal_enrollments --build-plan"
+J12_SHA="$(cut -d' ' -f1 "$OUT_DIR/j12_plan_${STAMP}.jsonl.gz.sha256")"
+venv/bin/python manage.py legacy_repair_lesson_recovery --organization "$ORG" --actor "$ACTOR" \
+    --plan "$OUT_DIR/j12_plan_${STAMP}.jsonl.gz" --plan-sha256 "$J12_SHA" --apply --show 0
+caffeinate -dimsu venv/bin/python manage.py legacy_repair_journal_enrollments \
+    --organization "$ORG" --actor "$ACTOR" --show 0 \
+    --build-plan "$OUT_DIR/enroll_plan_${STAMP}.jsonl.gz" --source-dump "$LEGACY_DUMP" \
+    --skipped-csv "$OUT_DIR/enroll_plan_${STAMP}.skipped.csv"
+( cd "$OUT_DIR" && shasum -a 256 "enroll_plan_${STAMP}.jsonl.gz" >"enroll_plan_${STAMP}.jsonl.gz.sha256" )
+echo "Hazırdır: $OUT_DIR/enroll_plan_${STAMP}.jsonl.gz (+ .manifest.json, .sha256, .skipped.csv)."

@@ -41,6 +41,9 @@ Dilim qaydası (hər iki kateqoriya)
 Cari qrupdan fərqli dilimə yazılış **qonaq** (``source_group`` = tələbənin öz
 qrupu) kimi yaradılır — ``guest_roster`` ilə eyni təmsil, jurnalda «alt qrup» çipi.
 
+Yalnız jurnalın ``students_id`` SİYAHISINDAKI tələbə bərpa olunur (J2 qaydası):
+siyahıdan kənar xana köhnə sistemdə də jurnalda görünmürdü.
+
 Təhlükəsizlik: həmin fənn+semestr üzrə tələbənin hədəfdə ARTIQ yazılışı varsa
 («əkiz») cüt BƏRPA OLUNMUR — fənn transkriptdə/ÜOMG-də iki dəfə sayılmasın; cüt
 hesabata düşür.  Heç bir xanası olmayan K9 siyahı cütü də bərpa olunmur (boş
@@ -259,6 +262,20 @@ def _choose_slice(slices, *, sar_unit, same_period_units):
     return group_ref, unit, "primary_slice"
 
 
+def _outside_roster(selection, category, info, uniqid, student) -> bool:
+    """Jurnalın ``students_id`` siyahısında OLMAYAN tələbə bərpa olunmur (J2 ilə eyni qayda).
+
+    Siyahıdan kənar xana köhnə sistemin özündə də jurnalda görünmürdü (tələbə
+    siyahıdan çıxarılıb) — onun «nəticəsi» rəsmi deyil; cüt hesabata düşür.
+    """
+
+    if student in info["roster"]:
+        return False
+    selection.skipped[f"{category}:not_in_roster"] += 1
+    selection.skipped_rows.append((category, student, uniqid, "not_in_roster"))
+    return True
+
+
 def _evidence_slice(evidence, unit_refs):
     """Qrupu silinmiş jurnal üçün dilim: tələbənin HƏMİN dövrdəki yazılışlarının TƏK qrupu.
 
@@ -324,7 +341,7 @@ def select_pairs(context, *, source_run) -> Selection:
         if not info["fake"]:
             continue
         for student in sorted(set(info["roster"]) | cell_students.get(uniqid, set())):
-            if student not in selection.current:
+            if student not in selection.current or _outside_roster(selection, "fake", info, uniqid, student):
                 continue
             carries = cells.get((uniqid, student), [False, False])[1] or (info["id"], student) in yekun
             if carries:
@@ -340,7 +357,7 @@ def select_pairs(context, *, source_run) -> Selection:
         if any(group_ref in units or f"{uniqid}:{group_ref}" in offerings for group_ref in info["groups"]):
             continue
         for student in sorted(set(info["roster"]) | cell_students.get(uniqid, set())):
-            if student not in selection.current:
+            if student not in selection.current or _outside_roster(selection, "deleted", info, uniqid, student):
                 continue
             if (uniqid, student) not in cells:
                 selection.skipped["deleted:no_cells"] += 1
