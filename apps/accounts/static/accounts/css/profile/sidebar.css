@@ -25,6 +25,7 @@
 @import url("sidebar_groups.css");
 @import url("sidebar_filter.css");
 @import url("sidebar_rail.css");
+@import url("sidebar_icons.css");
 
 .profile-sidebar {
     --sb-gutter: 12px;
@@ -220,12 +221,13 @@
     font-size: 16px;
     line-height: 1;
     text-align: center;
-    color: var(--sb-muted);
+    /* Rəng bəndin mənasından gəlir (`sidebar_icons.css` → `--sb-icon`). */
+    color: var(--sb-icon, var(--sb-muted));
     transition: color 0.14s ease;
 }
 
 .sidebar-menu-link:hover .sidebar-menu-icon {
-    color: var(--sb-fg-strong);
+    color: var(--sb-icon, var(--sb-fg-strong));
 }
 
 .sidebar-menu-link.active .sidebar-menu-icon {
