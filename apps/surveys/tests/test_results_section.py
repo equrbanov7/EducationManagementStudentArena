@@ -87,17 +87,77 @@ class ResultsScopeTest(TestCase):
         rows = self._rank_rows(self.w["rector"])
         departments = {row["department"] for row in rows}
         self.assertLessEqual({self.w["chair_a"].name, self.w["chair_b"].name, self.w["chair_d"].name}, departments)
-        small = [row for row in rows if row["n"] < 3]  # müəllim E — 2 cavab < k
-        self.assertTrue(small)
-        for row in small:
-            self.assertFalse(row["visible"])
-            self.assertIsNone(row["avg_overall"])
+        by_name = {row["name"]: row for row in rows}
+        small = by_name[self.w["teacher_e"].username]  # müəllim E — 2 cavab < k
+        self.assertFalse(small["visible"])
+        self.assertIsNone(small["avg_overall"])
+        self.assertIsNone(small["n"])  # gizli sətirdə say da yoxdur (M-2)
+        # Görünən sətirdə say dəqiq deyil — səbətin alt həddi (6 cavab → 5).
+        self.assertEqual(by_name[self.w["teacher_a"].username]["n"], 5)
 
     def test_organization_without_campaign_shows_empty_state(self):
         response = client_for(self.empty["org"], self.empty_rector).get(SECTION)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Hələ heç bir sorğu kampaniyası keçirilməyib")
         self.assertNotContains(response, "svr-overview-data")
+
+
+class ResultsViewsTest(TestCase):
+    """Filtrlər URL-də (serverdə tətbiq), icazəsiz uclar, ümumi təkliflər, gizli müəllim kartı."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.w = build_results_world("svrv")
+
+    def _client(self, user=None):
+        return client_for(self.w["org"], user or self.w["rector"])
+
+    def test_filters_in_query_string_are_applied_server_side(self):
+        response = self._client().get(SECTION + f"&er_tab=teachers&er_department={self.w['chair_b'].pk}")
+        rows = _island(response, "svr-rank-data")
+        self.assertEqual({row["department"] for row in rows}, {self.w["chair_b"].name})
+        self.assertContains(response, f'<option value="{self.w["chair_b"].pk}" selected>')
+        broken = self._client().get(SECTION + "&er_faculty=nope&er_teacher=abc&er_tab=teachers")
+        self.assertEqual(broken.status_code, 200)  # yanlış dəyər səssizcə atılır
+        self.assertEqual(len(_island(broken, "svr-rank-data")), 5)
+
+    def test_endpoints_refuse_users_without_results_scope(self):
+        for user in (self.w["dean"], self.w["teacher_a"]):
+            client = self._client(user)
+            drawer = client.get(reverse("surveys:results_teacher", args=[self.w["teacher_a"].pk]))
+            search = client.get(reverse("surveys:results_teachers") + "?q=a")
+            self.assertEqual((drawer.status_code, search.status_code), (403, 403), user.username)
+            self.assertNotContains(drawer, "svr-detail-data", status_code=403)
+
+    def test_chair_head_cannot_open_other_department_teacher(self):
+        client = self._client(self.w["chair_head"])
+        response = client.get(reverse("surveys:results_teacher", args=[self.w["teacher_b"].pk]))
+        self.assertEqual(response.status_code, 404)
+        self.assertNotContains(response, "svr-detail-data", status_code=404)
+
+    def test_general_tab_lists_suggestions_keywords_and_protects_small_groups(self):
+        response = self._client().get(SECTION + "&er_tab=general")
+        self.assertContains(response, 'data-svr-word="kitabxana"')
+        self.assertContains(response, "Kitabxana həftə sonu da açıq olsun")
+        self.assertContains(response, "svr-general-data")
+        narrowed = self._client().get(SECTION + f"&er_tab=general&er_group={self.w['group2'].pk}")
+        self.assertNotContains(narrowed, "Laboratoriya avadanlığı")  # G-202 — 1 ümumi cavab < k
+        self.assertNotContains(narrowed, "HYPERLINK")
+
+    def test_withheld_teacher_card_shows_no_numbers_or_comments(self):
+        # Müəllim C: 3 cavab ≥ k, amma kafedra A qalığı (E — 2) üzündən dərc olunmur.
+        html = self._client().get(reverse("surveys:results_teacher", args=[self.w["teacher_c"].pk])).content.decode()
+        self.assertIn("Nəticə tamamlayıcı qayda ilə gizlədilib", html)
+        self.assertEqual(
+            json.loads(re.search(r'id="svr-detail-data" type="application/json">(.*?)</script>', html, re.S).group(1))[
+                "questions"
+            ]["values"],
+            [],
+        )
+        self.assertIn("Şərhlər yalnız cavab sayı anonimlik həddini keçəndə göstərilir.", html)
+        visible = self._client().get(reverse("surveys:results_teacher", args=[self.w["teacher_a"].pk]))
+        self.assertContains(visible, "Mövzuları aydın izah edir")  # görünən müəllimdə şərhlər var
+        self.assertContains(visible, "5+ cavab")
 
 
 def _panel(html):

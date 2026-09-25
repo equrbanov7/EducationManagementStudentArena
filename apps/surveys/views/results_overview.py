@@ -2,6 +2,10 @@
 
 Hər qrafikin cədvəl qarşılığı SERVERDƏ render olunur (JS olmadan da oxunur, ekran
 oxuyucusu üçün əsas mənbə); JS yalnız eyni rəqəmləri Chart.js ilə çəkir.
+
+Açıqlama nəzarəti (``analytics_guard``): paylanmalar YALNIZ tam faizlə (xam say yox),
+saylar səbətlə, gizli sətirdə heç bir aqreqat; dinamika yalnız BAĞLI kampaniyaları
+göstərir (M-1); bölgülər qardaş xana və iç-içə dövr dəsti qaydasından keçir (M-2).
 """
 
 from __future__ import annotations
@@ -9,6 +13,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from .. import public
+from ..services import analytics_guard as guard
 from .results_filters import campaign_label
 from .results_labels import likert_labels, short_label
 
@@ -16,11 +21,10 @@ CTX = "surveys.results"
 
 
 def _pct_list(buckets, total):
-    return [round(count * 100 / total, 1) if total else 0 for count in buckets]
+    return [round(count * 100 / total) if total else 0 for count in buckets]
 
 
-def _question_rows(summary, distributions, benchmarks):
-    dist = {row["code"]: row for row in distributions}
+def _question_rows(summary, benchmarks):
     rows = []
     for row in summary["questions"]:
         if row["section"] != public.Section.TEACHER or row["kind"] != "likert5":
@@ -30,14 +34,8 @@ def _question_rows(summary, distributions, benchmarks):
                 "code": row["code"],
                 "label": short_label(row["code"], row["text"]),
                 "text": row["text"],
-                "n": row["n"],
                 "avg": row["avg"],
                 "top2": round(row["top2"] * 100) if row["top2"] is not None else None,
-                "bottom2": (
-                    round(dist[row["code"]]["bottom2"] * 100)
-                    if dist.get(row["code"], {}).get("bottom2") is not None
-                    else None
-                ),
                 "org": benchmarks["org"].get(row["code"]),
                 "department": benchmarks["department"].get(row["code"]),
             }
@@ -46,18 +44,9 @@ def _question_rows(summary, distributions, benchmarks):
 
 
 def likert_row(code, text, buckets, total, **extra) -> dict:
-    """Diverging Likert sətri: saylar, faizlər və cədvəl xanaları (``cells``)."""
+    """Diverging Likert sətri — YALNIZ tam faizlər (xam say sızmasın; bax analytics_guard)."""
     pct = _pct_list(buckets, total)
-    return {
-        "code": code,
-        "label": short_label(code, text),
-        "text": text,
-        "n": total,
-        "counts": list(buckets),
-        "pct": pct,
-        "cells": [{"count": count, "pct": share} for count, share in zip(buckets, pct)],
-        **extra,
-    }
+    return {"code": code, "label": short_label(code, text), "text": text, "pct": pct, **extra}
 
 
 def _likert_rows(distributions):
@@ -75,26 +64,35 @@ def _histogram(distributions, code):
     if row is None:
         return None
     high = len(row["buckets"])
+    pct = _pct_list(row["buckets"], row["n"])
     return {
         "code": row["code"],
         "label": short_label(row["code"], row["text"]),
         "text": row["text"],
-        "n": row["n"],
         "avg": row["avg"],
         "scores": list(range(1, high + 1)),
-        "counts": row["buckets"],
-        "pct": _pct_list(row["buckets"], row["n"]),
-        "rows": [
-            {"score": score, "count": count, "pct": pct}
-            for score, count, pct in zip(range(1, high + 1), row["buckets"], _pct_list(row["buckets"], row["n"]))
-        ],
+        "pct": pct,
+        "rows": [{"score": score, "pct": share} for score, share in zip(range(1, high + 1), pct)],
     }
 
 
-def trend_block(organization, scope, filters):
+def _published_points(points, published_ids):
+    """Dinamika nöqtələri: yalnız bağlı kampaniyalar; gizli nöqtədə ``n`` də yoxdur."""
+    result = []
+    for point in points:
+        if point["campaign_id"] not in published_ids:
+            continue
+        if point.get("suppressed"):
+            guard.redact(point)
+        result.append(point)
+    return result
+
+
+def trend_block(organization, scope, filters, campaigns):
     """Dövrlər üzrə dinamika: seçim (+ kafedra) + universitet (kontekst) xətləri."""
     from apps.organizations.public import ORG_WIDE_SCOPE
 
+    published_ids = {row["id"] for row in guard.published_campaigns(campaigns)}
     selection = public.trend(
         organization,
         scope,
@@ -117,16 +115,19 @@ def trend_block(organization, scope, filters):
         series.append(
             {"key": "org", "label": pgettext(CTX, "Universitet"), "points": public.trend(organization, ORG_WIDE_SCOPE)}
         )
-    labels = [campaign_label(point) for point in selection]
+    for item in series:
+        item["points"] = _published_points(item["points"], published_ids)
+    labels = [campaign_label(point) for point in series[0]["points"]]
     rows = []
     for index, label in enumerate(labels):
         cells = []
         for item in series:
-            point = item["points"][index] if index < len(item["points"]) else {"n": 0, "suppressed": True}
+            point = item["points"][index] if index < len(item["points"]) else {"suppressed": True}
             cells.append(
                 {
-                    "n": point.get("n", 0),
+                    "n": guard.count_bucket(point.get("n")) if not point.get("suppressed") else None,
                     "suppressed": point.get("suppressed", True),
+                    "secondary": bool(point.get("secondary")),
                     "overall": point.get("avg_overall"),
                     "index": point.get("likert_index"),
                 }
@@ -140,7 +141,7 @@ def trend_block(organization, scope, filters):
                 "label": item["label"],
                 "overall": [point.get("avg_overall") for point in item["points"]],
                 "index": [point.get("likert_index") for point in item["points"]],
-                "n": [point.get("n", 0) for point in item["points"]],
+                "n": [guard.count_bucket(point.get("n")) for point in item["points"]],
             }
             for item in series
         ],
@@ -155,7 +156,7 @@ def _breakdown_rows(data):
             {
                 "key": str(row["key"]) if row["key"] is not None else "",
                 "label": row["label"] or pgettext(CTX, "Təyin olunmayıb"),
-                "n": row["n"],
+                "n": guard.count_bucket(row["n"]) if not row["suppressed"] else None,
                 "suppressed": row["suppressed"],
                 "secondary": row.get("secondary", False),
                 "overall": row["avg_overall"],
@@ -164,7 +165,7 @@ def _breakdown_rows(data):
             }
         )
     visible = sorted((row for row in rows if not row["suppressed"]), key=lambda r: -(r["overall"] or 0))
-    hidden = [row for row in rows if row["suppressed"]]
+    hidden = sorted((row for row in rows if row["suppressed"]), key=lambda r: r["label"])
     return visible + hidden
 
 
@@ -178,25 +179,27 @@ def _breakdown_chart(rows):
     }
 
 
-def overview_tab(organization, scope, filters, summary, query) -> dict:
+def overview_tab(organization, scope, filters, summary, query, *, family=None, campaigns=()) -> dict:
     """``{"overview": {...}, "overview_chart": {...}}`` — gizli dəstdə yalnız dinamika qalır."""
-    trend = trend_block(organization, scope, filters)
+    trend = trend_block(organization, scope, filters, campaigns)
     if summary["suppressed"]:
         return {"overview": {"visible": False, "trend": trend}, "overview_chart": {"trend": trend["chart"]}}
     total_n = summary["n"]
-    distributions = public.question_distributions(organization, scope, filters)["questions"]
+    distributions = public.question_distributions(organization, scope, filters, visible=True)["questions"]
     narrower = filters.teacher_id is not None or filters.is_narrowed
     benchmarks = public.question_benchmarks(
         organization,
         scope,
         summary["campaign_ids"],
         department_id=filters.department_id if narrower else None,
+        family=family,
     )
-    questions = _question_rows(summary, distributions, benchmarks)
+    questions = _question_rows(summary, benchmarks)
     likert = _likert_rows(distributions)
     histogram = _histogram(distributions, filters.question_code or "overall")
-    faculties = _breakdown_rows(public.safe_breakdown(organization, scope, filters, by="faculty", total_n=total_n))
-    departments = _breakdown_rows(public.safe_breakdown(organization, scope, filters, by="department", total_n=total_n))
+    breakdown = {"total_n": total_n, "family": family}
+    faculties = _breakdown_rows(public.safe_breakdown(organization, scope, filters, by="faculty", **breakdown))
+    departments = _breakdown_rows(public.safe_breakdown(organization, scope, filters, by="department", **breakdown))
     default_level = "department" if filters.faculty_id or len(faculties) <= 1 else "faculty"
     org_avg = None
     if not scope.is_org_wide or filters.faculty_id or filters.department_id or filters.teacher_id:
@@ -207,11 +210,9 @@ def overview_tab(organization, scope, filters, summary, query) -> dict:
             "values": [row["avg"] for row in questions],
             "org": [row["org"] for row in questions],
             "department": [row["department"] for row in questions] if narrower and filters.department_id else [],
-            "n": [row["n"] for row in questions],
         },
         "likert": {
             "labels": [row["label"] for row in likert],
-            "counts": [row["counts"] for row in likert],
             "pct": [row["pct"] for row in likert],
             "scale": [label for _score, label in likert_labels()],
         },

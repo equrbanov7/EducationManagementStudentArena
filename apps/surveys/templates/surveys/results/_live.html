@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}Davam edən kampaniya (M-1): heç bir orta, paylanma və ya şərh YOXDUR — yalnız
+təxmini iştirak (faiz 5-ə yuvarlaq, saylar səbətlə). Nəticələr kampaniya bağlandıqdan sonra.{% endcomment %}
+<div class="ems-kpis svr-kpis" role="list" aria-label="{% trans 'İştirak' context 'surveys.results' %}">
+    {% for tile in rp.kpis %}
+    <div class="ems-kpi svr-kpi" role="listitem">
+        <div class="ems-kpi__label">{{ tile.label }}</div>
+        <div class="ems-kpi__value">{{ tile.value }}</div>
+        {% if tile.note %}<div class="ems-kpi__note">{{ tile.note }}</div>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+<div class="svr-card svr-card--wide">
+    <div class="ems-state svr-state" role="status">
+        <i class="fas fa-hourglass-half ems-state__icon" aria-hidden="true"></i>
+        <p class="ems-state__title">{% trans "Kampaniya davam edir — nəticələr kampaniya bağlandıqdan sonra görünəcək." context "surveys.results" %}</p>
+        <p class="ems-state__body">{% trans "Bu, anonimliyin tələbidir: canlı ortalar iki baxış arasında dəyişsəydi, yeni göndərilmiş bir cavab hesablana bilərdi. Əvvəlki kampaniyaların nəticələrinə «Dövr» seçimi ilə baxa bilərsiniz." context "surveys.results" %}</p>
+    </div>
+</div>

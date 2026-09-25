@@ -2,8 +2,9 @@
 
 Ümumi bölmə cavabı tələbənin öz qrupu/ixtisası/fakültəsi ilə saxlanılır (müəllim
 bölməsindən fərqli olaraq), ona görə k-həddi burada xüsusilə vacibdir: bölgü
-sətirləri ``safe_breakdown`` (k + tamamlayıcı + ikinci dərəcəli), təkliflər isə
-``suggestion_digest`` (KAMPANİYA BAŞINA k) ilə açılır.
+sətirləri ``safe_breakdown`` (k + tamamlayıcı — burada HƏR filtr daraldıcıdır — +
+qardaş xanalar + iç-içə dövr dəstləri), təkliflər isə ``suggestion_digest`` (KAMPANİYA
+BAŞINA k) ilə açılır. Saylar səbətlə, paylanma yalnız faizlə (``analytics_guard``).
 """
 
 from __future__ import annotations
@@ -11,6 +12,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from .. import public
+from ..services import analytics_guard as guard
 from .results_labels import likert_labels
 from .results_overview import likert_row
 
@@ -28,7 +30,7 @@ def _level_rows(data, level):
         rows.append(
             {
                 "label": str(label) if label not in (None, "") else pgettext(CTX, "Təyin olunmayıb"),
-                "n": row["n"],
+                "n": guard.count_bucket(row["n"]) if not row["suppressed"] else None,
                 "suppressed": row["suppressed"],
                 "secondary": row.get("secondary", False),
                 "satisfaction": row["satisfaction"],
@@ -51,12 +53,14 @@ def _level_chart(rows):
     }
 
 
-def general_tab(organization, scope, filters, summary) -> dict:
+def general_tab(organization, scope, filters, summary, *, family=None) -> dict:
     visible = not summary["general_suppressed"]
     digest = public.suggestion_digest(organization, scope, filters, query=filters.text_query)
+    digest["total_label"] = guard.count_bucket(digest["total"]) if not digest["suppressed"] else None
     block = {
         "visible": visible,
-        "n": summary["general_n"],
+        "n": guard.count_bucket(summary["general_n"]),
+        "has_n": bool(summary["general_n"]),
         "complement_blocked": summary["general_complement_blocked"],
         "questions": [],
         "likert": [],
@@ -65,10 +69,12 @@ def general_tab(organization, scope, filters, summary) -> dict:
         "digest": digest,
         "likert_scale": likert_labels(),
     }
-    chart = {"likert": {"labels": [], "counts": [], "pct": [], "scale": [label for _s, label in likert_labels()]}}
+    chart = {"likert": {"labels": [], "pct": [], "scale": [label for _s, label in likert_labels()]}}
     if visible:
         total_n = summary["general_n"]
-        distributions = public.question_distributions(organization, scope, filters, section=public.Section.GENERAL)
+        distributions = public.question_distributions(
+            organization, scope, filters, section=public.Section.GENERAL, visible=True
+        )
         likert = [
             likert_row(
                 row["code"],
@@ -84,7 +90,7 @@ def general_tab(organization, scope, filters, summary) -> dict:
         levels = {}
         for level in LEVELS:
             data = public.safe_breakdown(
-                organization, scope, filters, by=level, section=public.Section.GENERAL, total_n=total_n
+                organization, scope, filters, by=level, section=public.Section.GENERAL, total_n=total_n, family=family
             )
             levels[level] = _level_rows(data, level)
         block.update(
@@ -92,11 +98,7 @@ def general_tab(organization, scope, filters, summary) -> dict:
             levels=levels,
             level_default=next((level for level in LEVELS if len(levels[level]) > 1), "faculty"),
         )
-        chart["likert"].update(
-            labels=[row["label"] for row in likert],
-            counts=[row["counts"] for row in likert],
-            pct=[row["pct"] for row in likert],
-        )
+        chart["likert"].update(labels=[row["label"] for row in likert], pct=[row["pct"] for row in likert])
         chart["levels"] = {level: _level_chart(rows) for level, rows in levels.items()}
         chart["level_default"] = block["level_default"]
     return {"general": block, "general_chart": chart}

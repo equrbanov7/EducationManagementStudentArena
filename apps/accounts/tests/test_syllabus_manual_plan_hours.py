@@ -17,7 +17,7 @@ from apps.syllabus.tests.factories import activate_member, make_academic_stack, 
 User = get_user_model()
 
 
-class ManualPlanHoursTest(TestCase):
+class _ManualPlanHoursBase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.org = make_org("syl-manual-hours")
@@ -44,6 +44,8 @@ class ManualPlanHoursTest(TestCase):
             plan_hours={},
         )
 
+
+class ManualPlanHoursTest(_ManualPlanHoursBase):
     def _html(self) -> str:
         client = Client()
         client.force_login(self.teacher)
@@ -84,3 +86,33 @@ class ManualPlanHoursTest(TestCase):
     @mock.patch("apps.registrar.public.plan_hours_for_offering", return_value={"lecture": 30, "seminar": 15})
     def test_official_plan_hides_the_form(self, _plan):
         self.assertEqual(self._form(self._html()), "")
+
+
+class PlanHoursApiGuardTest(_ManualPlanHoursBase):
+    """Təhlükəsizlik yoxlaması (2026-09-25): rəsmi plan saatı API ilə də üstələnmir."""
+
+    def _post(self, **hours):
+        import json
+
+        client = Client()
+        client.force_login(self.teacher)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        payload = {"action": "plan_hours", "version": str(self.version.pk), **hours}
+        return client.post(reverse("accounts:syllabus_action"), json.dumps(payload), content_type="application/json")
+
+    @mock.patch("apps.registrar.public.plan_hours_for_offering", return_value={"lecture": 30, "seminar": 15})
+    def test_official_plan_hours_cannot_be_overwritten_via_api(self, _plan):
+        response = self._post(lecture=90, seminar=90)
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json().get("code"), "plan_hours.official")
+        self.version.refresh_from_db()
+        self.assertNotEqual((self.version.plan_hours or {}).get("lecture"), 90)
+
+    @mock.patch("apps.registrar.public.plan_hours_for_offering", return_value={})
+    def test_manual_hours_are_saved_when_no_official_plan(self, _plan):
+        response = self._post(lecture=30, seminar=15)
+        self.assertEqual(response.status_code, 200)
+        self.version.refresh_from_db()
+        self.assertEqual(self.version.plan_hours.get("lecture"), 30)

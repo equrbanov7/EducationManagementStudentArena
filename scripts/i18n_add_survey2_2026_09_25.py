@@ -9,6 +9,9 @@ DİQQƏT: ``{% trans %}`` mətnindəki «%» şablonda «%%» kimi saxlanılır 
 Tərcümələr AZ mənbə ilə EYNİ olmamalıdır (identity borcu) — məs. tr «Seçim» əvəzinə
 «Seçili küme», «İş yükü» əvəzinə «Ders yükü».
 İstifadə:  python scripts/i18n_add_survey2_2026_09_25.py
+
+2026-09-25 (sonra): təhlükəsizlik rəyi M-1/M-2 düzəlişlərinin 10 yeni mətni əlavə olundu —
+skript idempotentdir, əvvəlki 226 giriş artıq kataloqdadırsa yenidən yazılmır.
 """
 
 import os
@@ -611,6 +614,67 @@ STRINGS = {
     (C, "Əsas göstəricilər"): ("Key indicators", "Ключевые показатели", "Temel göstergeler"),
     (C, "Ətraflı"): ("Details", "Подробнее", "Ayrıntılar"),
     (C, "Əvvəlki"): ("Previous", "Назад", "Önceki"),
+    # ── Təhlükəsizlik rəyi M-1 / M-2 (canlı nəticə yoxdur, səbətli saylar) ──────────────
+    (C, "%(label)s — davam edir (yalnız iştirak)"): (
+        "%(label)s — in progress (participation only)",
+        "%(label)s — идёт (только участие)",
+        "%(label)s — devam ediyor (yalnızca katılım)",
+    ),
+    (
+        C,
+        "Anonimlik: davam edən kampaniyanın nəticələri göstərilmir — iki baxış arasındakı fərqdən təzə göndərilmiş bir "
+        "cavab hesablana bilərdi. Nəticələr kampaniya bağlandıqdan sonra açılır; indi yalnız təxmini iştirak görünür.",
+    ): (
+        "Anonymity: results of an ongoing campaign are not shown — the difference between two views could reveal a "
+        "newly submitted response. Results open after the campaign closes; only approximate participation is shown now.",
+        "Анонимность: результаты идущей кампании не показываются — по разнице двух просмотров можно было бы вычислить "
+        "только что отправленный ответ. Результаты откроются после закрытия кампании; сейчас видно только примерное "
+        "участие.",
+        "Anonimlik: devam eden kampanyanın sonuçları gösterilmez — iki görüntüleme arasındaki farktan yeni gönderilmiş "
+        "bir yanıt hesaplanabilirdi. Sonuçlar kampanya kapandıktan sonra açılır; şimdi yalnızca yaklaşık katılım görünür.",
+    ),
+    (
+        C,
+        "Bu, anonimliyin tələbidir: canlı ortalar iki baxış arasında dəyişsəydi, yeni göndərilmiş bir cavab hesablana "
+        "bilərdi. Əvvəlki kampaniyaların nəticələrinə «Dövr» seçimi ilə baxa bilərsiniz.",
+    ): (
+        "This protects anonymity: if live averages changed between two views, a newly submitted response could be "
+        "calculated. You can view the results of earlier campaigns with the “Period” selector.",
+        "Это требование анонимности: если бы средние менялись между двумя просмотрами, можно было бы вычислить только что "
+        "отправленный ответ. Результаты прошлых кампаний доступны через выбор «Период».",
+        "Bu, anonimliğin gereğidir: canlı ortalamalar iki görüntüleme arasında değişseydi, yeni gönderilmiş bir yanıt "
+        "hesaplanabilirdi. Önceki kampanyaların sonuçlarına «Dönem» seçimiyle bakabilirsiniz.",
+    ),
+    (C, "Bütün bağlı dövrlər"): ("All closed periods", "Все закрытые периоды", "Tüm kapanmış dönemler"),
+    (C, "Cavab sayı azdır (n &lt; %(k)s) — anonimliyi qorumaq üçün nəticə göstərilmir."): (
+        "Too few responses (n &lt; %(k)s) — results are hidden to protect anonymity.",
+        "Слишком мало ответов (n &lt; %(k)s) — результаты скрыты для защиты анонимности.",
+        "Yanıt sayısı az (n &lt; %(k)s) — anonimliği korumak için sonuç gösterilmiyor.",
+    ),
+    (C, "Kampaniya davam edir — nəticələr kampaniya bağlandıqdan sonra görünəcək."): (
+        "The campaign is in progress — results will appear after it closes.",
+        "Кампания идёт — результаты появятся после её закрытия.",
+        "Kampanya devam ediyor — sonuçlar kampanya kapandıktan sonra görünecek.",
+    ),
+    (
+        C,
+        "Nəticələr yalnız bağlanmış kampaniyalar üzrədir; cavab sayları dəqiq deyil, aralıqla göstərilir (məs. «10+»).",
+    ): (
+        "Results cover closed campaigns only; response counts are shown as ranges (e.g. “10+”), never exactly.",
+        "Результаты — только по закрытым кампаниям; число ответов показывается диапазоном (напр. «10+»), не точно.",
+        "Sonuçlar yalnızca kapanmış kampanyaları kapsar; yanıt sayıları kesin değil, aralıkla gösterilir (ör. «10+»).",
+    ),
+    (C, "Orta: %(avg)s · paylar tam faizlədir"): (
+        "Mean: %(avg)s · shares in whole percent",
+        "Среднее: %(avg)s · доли в целых процентах",
+        "Ortalama: %(avg)s · paylar tam yüzde olarak",
+    ),
+    (C, "Son bağlı kampaniya — %(label)s"): (
+        "Latest closed campaign — %(label)s",
+        "Последняя закрытая кампания — %(label)s",
+        "Son kapanmış kampanya — %(label)s",
+    ),
+    (C, "İştirak"): ("Participation", "Участие", "Katılım"),
 }
 
 
