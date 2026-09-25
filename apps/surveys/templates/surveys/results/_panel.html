@@ -1,0 +1,52 @@
+{% load i18n static %}
+{% comment %}«Sorğu nəticələri» paneli. Vəziyyətlər: forbidden (əhatə yoxdur) · no_campaign ·
+ready. Hazır vəziyyətdə: başlıq + ixrac, anonimlik/əhatə qeydi, avto filtr paneli
+(`filter_bar.js` müqaviləsi, URL-də `er_*`), KPI zolağı, server tab-ları (link — hər tab
+yalnız öz məlumatını hesablayır) və müəllim kartı çekməcəsi. Skriptlər panelin İÇİNDƏDİR
+(AJAX swap) və idempotentdir (`EMSReady`/`EMSDelegate`).{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/results.css' %}?v=20260925-f2">
+<link rel="stylesheet" href="{% static 'surveys/css/results_lists.css' %}?v=20260925-f2">
+<link rel="stylesheet" href="{% static 'surveys/css/results_detail.css' %}?v=20260925-f2">
+<div class="svr" data-svr-root data-chartjs-src="{{ rp.urls.chartjs }}" {% include "surveys/results/_i18n.html" %}>
+{% if rp.state == "forbidden" %}
+    {% trans "Sorğu nəticələrinə baxmaq üçün icazəniz yoxdur" context "surveys.results" as st_title %}
+    {% trans "Nəticələri kafedra müdiri (öz kafedrası), tədris şöbəsi, keyfiyyətə nəzarət, prorektor, rektor və RİM rəhbəri görür." context "surveys.results" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-lock" %}
+{% elif rp.state == "no_campaign" %}
+    {% trans "Hələ heç bir sorğu kampaniyası keçirilməyib" context "surveys.results" as st_title %}
+    {% trans "Kampaniya RİM semestr jurnallarını bağlayanda özü açılır; cavablar toplandıqca nəticələr burada görünəcək." context "surveys.results" as st_body %}
+    {% trans "Sorğu kampaniyaları" context "surveys.results" as st_action %}
+    {% if rp.can_manage %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-clipboard-list" state_action_label=st_action state_action_url=rp.campaigns_url %}
+    {% else %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-clipboard-list" %}
+    {% endif %}
+{% else %}
+    {% trans "Anonim müəllim qiymətləndirmə sorğusunun nəticələri — süzün, müqayisə edin, müəllim kartına baxın və aqreqatları ixrac edin." context "surveys.results" as svr_subtitle %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=svr_subtitle header_actions_include="surveys/results/_header_actions.html" %}
+    {% include "surveys/results/_notice.html" %}
+    {% include "surveys/results/_filters.html" %}
+    {% include "surveys/results/_kpis.html" %}
+    <nav class="ems-tabs svr-tabs" aria-label="{% trans 'Nəticə bölmələri' context 'surveys.results' %}">
+        {% for tab in rp.tabs %}
+        <a class="ems-tabs__btn" href="{{ tab.url }}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+        {% endfor %}
+    </nav>
+    <div class="svr-body" data-ems-filter-target>
+        {% if rp.tab == "teachers" %}
+            {% include "surveys/results/_tab_teachers.html" %}
+        {% elif rp.tab == "general" %}
+            {% include "surveys/results/_tab_general.html" %}
+        {% else %}
+            {% include "surveys/results/_tab_overview.html" %}
+        {% endif %}
+    </div>
+    {% include "surveys/results/_drawer.html" %}
+    <script defer src="{% static 'surveys/js/results_core.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_charts.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_panel.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_table.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_text.js' %}?v=20260925-f2"></script>
+    <script defer src="{% static 'surveys/js/results_drawer.js' %}?v=20260925-f2"></script>
+{% endif %}
+</div>

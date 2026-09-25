@@ -44,7 +44,7 @@ correction_reasons.
                 <input type="number" name="new_score_cm" min="0" max="10" step="1" class="corr-input" data-corr-cm-score>
             </label>
 
-            {# Sərbəst iş: təhvil 0/1. #}
+            {# Sərbəst iş: təhvil 0/1 (çeklist xanası). #}
             <label class="corr-field" data-corr-sw-wrap hidden>
                 <span class="corr-field-label">{% trans "Təhvil (sərbəst iş)" context "registrar.correction" %}</span>
                 <div class="bootstrap-single-select">
@@ -53,6 +53,14 @@ correction_reasons.
                         <option value="0">{% trans "Verilməyib (0)" context "registrar.correction" %}</option>
                     </select>
                 </div>
+            </label>
+
+            {# Sərbəst iş: BAL (2 × 5 / 1 × 10 və ya fənn qovluğu balı) — boş = «—», qiymət silinir; tavan xanadan JS ilə. #}
+            <label class="corr-field" data-corr-swp-wrap hidden>
+                <span class="corr-field-label">{% trans "Yeni bal (sərbəst iş)" context "registrar.selfwork" %}</span>
+                <input type="number" name="new_points" min="0.1" max="10" step="0.1" class="corr-input" data-corr-swp-points
+                       placeholder="—" aria-describedby="corrSwpHint">
+                <small class="jd-swp-hint" id="corrSwpHint">{% trans "Boş saxlasanız bal silinir («—»). 0 yazılmır." context "registrar.selfwork" %}</small>
             </label>
 
             {# Kurs işi: bal (0-100) + mövzu + tarix. #}

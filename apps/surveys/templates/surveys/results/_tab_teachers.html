@@ -1,0 +1,80 @@
+{% load i18n %}
+{% comment %}Müəllim reytinqi — bütün sətirlər serverdə render olunur (ilkin sıra `er_sort`);
+`results_table.js` eyni sətirləri JSON adasına (`svr-rank-data`, sıra indeksi ilə) görə
+sıralayır, süzür (top/bottom 10, minimum n, dözümlü ad axtarışı) və səhifələyir; vəziyyət
+URL-ə yazılır (`er_sort`, `er_view`, `er_min`, `er_tq`, `er_page`). Gizli sətir yalnız
+cavab sayını göstərir. «Ətraflı» müəllim kartını çekməcədə açır.{% endcomment %}
+{% with tb=rp.teachers %}
+{% if rp.summary.suppressed %}
+<div class="svr-card svr-card--wide">
+    {% include "surveys/results/_suppressed.html" with sup_n=rp.summary.n sup_blocked=rp.summary.complement_blocked sup_secondary=rp.summary.secondary %}
+</div>
+{% endif %}
+{% if tb.rows %}
+{{ tb.data|json_script:"svr-rank-data" }}
+<section class="svr-card svr-card--wide svr-rank" data-svr-rank data-page-size="{{ tb.page_size }}" data-top="{{ tb.top_n }}" data-sort="{{ tb.sort }}" aria-labelledby="svr-rank-title">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-rank-title">{% trans "Müəllim reytinqi" context "surveys.results" %}</h3>
+            <p class="svr-card__sub">{% blocktrans trimmed with visible=tb.visible hidden=tb.hidden k=tb.k context "surveys.results" %}{{ visible }} müəllimin nəticəsi görünür, {{ hidden }} müəllim gizlidir (n &lt; {{ k }} və ya tamamlayıcı qayda). Fərq — müəllimin ümumi balı ilə kafedra/universitet ortası arasındakı fərqdir.{% endblocktrans %}</p>
+        </div>
+    </header>
+    <div class="svr-rank__toolbar">
+        <div class="ems-field svr-rank__search">
+            <label class="ems-field__label" for="svr-rank-q">{% trans "Müəllim və ya kafedra" context "surveys.results" %}</label>
+            <input class="ems-input" type="search" id="svr-rank-q" data-svr-rank-search autocomplete="off" maxlength="80" placeholder="{% trans 'ad, soyad, kafedra…' context 'surveys.results' %}">
+        </div>
+        <div class="ems-field">
+            <span class="ems-field__label" id="svr-rank-view-label">{% trans "Göstər" context "surveys.results" %}</span>
+            <div class="ems-viewtoggle svr-toggle" role="group" aria-labelledby="svr-rank-view-label">
+                <button type="button" class="ems-viewtoggle__btn" data-svr-rank-view="all" aria-pressed="true">{% trans "Hamısı" context "surveys.results" %}</button>
+                <button type="button" class="ems-viewtoggle__btn" data-svr-rank-view="top" aria-pressed="false">{% blocktrans trimmed with n=tb.top_n context "surveys.results" %}Ən yüksək {{ n }}{% endblocktrans %}</button>
+                <button type="button" class="ems-viewtoggle__btn" data-svr-rank-view="bottom" aria-pressed="false">{% blocktrans trimmed with n=tb.top_n context "surveys.results" %}Ən aşağı {{ n }}{% endblocktrans %}</button>
+            </div>
+        </div>
+        <div class="ems-field svr-rank__min">
+            <label class="ems-field__label" for="svr-rank-min">{% trans "Minimum cavab" context "surveys.results" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="svr-rank-min" data-svr-rank-min data-bootstrap-select>
+                    {% for value in tb.min_choices %}<option value="{{ value }}">{% if value %}n ≥ {{ value }}{% else %}{% trans "Hamısı" context "surveys.results" %}{% endif %}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <p class="svr-rank__count" data-svr-rank-count aria-live="polite"></p>
+    <div class="ems-tablewrap">
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra svr-rank__table">
+                <caption class="sr-only">{% trans "Müəllim reytinqi — sütun başlığı sıralayır" context "surveys.results" %}</caption>
+                <thead><tr>
+                    <th scope="col" class="svr-rank__pos">#</th>
+                    {% include "surveys/results/_rank_th.html" with key="teacher_name" %}
+                    {% include "surveys/results/_rank_th.html" with key="n" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="rate" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="avg_overall" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="likert_index" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="recommend_top2" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="delta_department_overall" num=True %}
+                    {% include "surveys/results/_rank_th.html" with key="delta_org_overall" num=True %}
+                    {% if tb.question %}{% include "surveys/results/_rank_th.html" with key="question_avg" num=True %}{% endif %}
+                    <th scope="col"><span class="sr-only">{% trans "Müəllim kartı" context "surveys.results" %}</span></th>
+                </tr></thead>
+                <tbody>
+                {% for row in tb.rows %}
+                    {% include "surveys/results/_rank_row.html" %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="ems-tablefoot">
+            <div>{% if tb.truncated %}{% trans "Siyahı ilk 500 müəllimlə məhdudlaşır — filtrlə daraldın." context "surveys.results" %}{% endif %}</div>
+            <nav class="svr-pager" data-svr-rank-pager aria-label="{% trans 'Səhifələr' context 'surveys.results' %}"></nav>
+        </div>
+    </div>
+</section>
+{% elif not rp.summary.suppressed %}
+<div class="svr-card svr-card--wide">
+    {% include "surveys/results/_suppressed.html" with sup_n=0 sup_blocked=False %}
+</div>
+{% endif %}
+{% endwith %}

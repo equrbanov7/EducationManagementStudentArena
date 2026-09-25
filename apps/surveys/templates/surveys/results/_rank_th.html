@@ -1,0 +1,6 @@
+{% load i18n %}{% with desc="-"|add:key %}<th scope="col" class="svr-rank__th{% if num %} ems-table__num{% endif %}" data-svr-sort="{{ key }}" aria-sort="{% if tb.sort == key %}ascending{% elif tb.sort == desc %}descending{% else %}none{% endif %}">
+    <button type="button" class="ems-sort" data-svr-sort-btn="{{ key }}">
+        {% if key == "teacher_name" %}{% trans "Müəllim" context "surveys.results" %}{% elif key == "n" %}{% trans "Cavab" context "surveys.results" %}{% elif key == "rate" %}{% trans "Cavab faizi" context "surveys.results" %}{% elif key == "avg_overall" %}{% trans "Ümumi bal" context "surveys.results" %}{% elif key == "likert_index" %}{% trans "Likert indeksi" context "surveys.results" %}{% elif key == "recommend_top2" %}{% trans "Tövsiyə" context "surveys.results" %}{% elif key == "delta_department_overall" %}{% trans "Fərq: kafedra" context "surveys.results" %}{% elif key == "delta_org_overall" %}{% trans "Fərq: universitet" context "surveys.results" %}{% else %}{{ tb.question_label }}{% endif %}
+        <span class="ems-sort__arrow" aria-hidden="true">{% if tb.sort == key %}▲{% elif tb.sort == desc %}▼{% else %}↕{% endif %}</span>
+    </button>
+</th>{% endwith %}

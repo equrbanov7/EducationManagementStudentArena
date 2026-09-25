@@ -19,13 +19,18 @@ from .factories import build_world, client_for, close_all, member, open_campaign
 
 PROFILE = "/accounts/profile/"
 _KEYS = ("evaluation-survey", "evaluation-results", "evaluation-campaigns")
+#: Formaları `surveys:manage`-ə POST edib qayıdan bölmələr TAM SƏHİFƏDİR; «Sorğu nəticələri»
+#: (F2) oxu-only paneldir və filtr/tab-lar onu yerində yeniləyir — AJAX-safe.
+_FULL_PAGE_KEYS = ("evaluation-survey", "evaluation-campaigns")
 
 
 class SectionRegistryTest(TestCase):
-    def test_sections_are_registered_as_full_page(self):
+    def test_sections_are_registered(self):
         for key in _KEYS:
             self.assertIn(key, SECTION_PARTIALS)
+        for key in _FULL_PAGE_KEYS:
             self.assertNotIn(key, AJAX_SAFE_SECTIONS)
+        self.assertIn("evaluation-results", AJAX_SAFE_SECTIONS)
 
 
 class VisibilityTest(TestCase):
@@ -150,13 +155,13 @@ class CampaignsSectionTest(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(SurveyCampaign.objects.exists())
 
-    def test_results_placeholder_shows_kpis_or_threshold_notice(self):
+    def test_results_panel_shows_kpis_and_empty_state_before_answers(self):
         open_campaign(self.w)
         response = client_for(self.w["org"], self.qc_staff).get(PROFILE + "?section=evaluation-results")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'data-profile-section-panel="evaluation-results"')
-        self.assertContains(response, "svc-kpi")
-        self.assertContains(response, "Anonimliyi qorumaq")  # 0 cavab < k
+        self.assertContains(response, "svr-kpi")
+        self.assertContains(response, "Bu dövr üçün hələ cavab yoxdur")  # 0 cavab — nəticə göstərilmir
 
 
 class SnapshotSelfHealTest(TestCase):

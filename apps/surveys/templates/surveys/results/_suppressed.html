@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Boş / gizli vəziyyət: 0 cavab · n < k · tamamlayıcı qayda. Kontekst: `sup_n`,
+`sup_blocked`, `sup_secondary` (+ `rp`). Açıq kampaniyada iştirak irəliləyişi də göstərilir (yalnız SAY).{% endcomment %}
+<div class="ems-state svr-state" role="status">
+    <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
+    {% if not sup_n %}
+        <p class="ems-state__title">{% if rp.is_filtered %}{% trans "Seçilmiş filtrlərə uyğun cavab yoxdur" context "surveys.results" %}{% else %}{% trans "Bu dövr üçün hələ cavab yoxdur" context "surveys.results" %}{% endif %}</p>
+    {% elif sup_secondary %}
+        <p class="ems-state__title">{% trans "Nəticə tamamlayıcı qayda ilə gizlədilib" context "surveys.results" %}</p>
+        <p class="ems-state__body">{% trans "Bu nəticə göstərilsəydi, kafedra və ya universitet ortasından çıxma yolu ilə anonimlik həddindən az cavablı müəllimin nəticəsi hesablana bilərdi." context "surveys.results" %}</p>
+    {% elif sup_blocked %}
+        <p class="ems-state__title">{% trans "Bu filtr kombinasiyası anonimliyi poza bilər" context "surveys.results" %}</p>
+        <p class="ems-state__body">{% blocktrans trimmed with k=rp.k context "surveys.results" %}Daraldılmış dəst ilə daraldılmamış dəst arasındakı fərq {{ k }} cavabdan azdır — çıxma yolu ilə bir neçə tələbənin cavabı açıla bilərdi. Filtri genişləndirin.{% endblocktrans %}</p>
+    {% else %}
+        <p class="ems-state__title">{% blocktrans trimmed with n=sup_n k=rp.k context "surveys.results" %}Cavab sayı azdır ({{ n }} &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}</p>
+    {% endif %}
+    {% if rp.period.is_open and rp.participation.expected %}
+        <p class="ems-state__body">{% blocktrans trimmed with done=rp.participation.receipts expected=rp.participation.expected context "surveys.results" %}Kampaniya davam edir: {{ done }} / {{ expected }} hədəf doldurulub. Cavablar toplandıqca nəticələr görünəcək.{% endblocktrans %}</p>
+    {% endif %}
+</div>

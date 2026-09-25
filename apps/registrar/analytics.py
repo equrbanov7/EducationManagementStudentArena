@@ -91,22 +91,18 @@ def _kollokvium_sum_map(enrollment_ids):
 
 
 def _selfwork_map(enrollment_ids):
-    """enrollment_id → təhvil verilmiş sərbəst iş sayı (hər biri 1 bal, ≤10).
+    """enrollment_id → sərbəst iş BALI (≤10) — kanonik qayda :mod:`apps.registrar.selfwork_points`.
+
+    Köhnə çeklist datasında bu, təhvil verilmiş iş SAYIDIR (hər biri 1 bal);
+    bal strukturlu mövzuda (2 × 5 / 1 × 10) real bal. TƏK aqreqat sorğu.
 
     ⚠️ SELF_WORK komponentinin ``ComponentScore`` balını (köçürülmüş köhnə "si")
     BURAYA ƏLAVƏ ETMƏYİN — o, giriş balının içində artıq var; üstəgəl etmək
     ikiqat sayma olar. Bax ``gradebook_components.entry_score_for`` və
     ``selfwork_board`` modulu."""
-    from django.db.models import Count
+    from apps.registrar import selfwork_points
 
-    from apps.registrar.models import SelfWorkMark
-
-    rows = (
-        SelfWorkMark.objects.filter(enrollment_id__in=enrollment_ids, done=True)
-        .values("enrollment_id")
-        .annotate(total=Count("id"))
-    )
-    return {r["enrollment_id"]: min(Decimal(r["total"]), Decimal(10)) for r in rows}
+    return selfwork_points.selfwork_totals(enrollment_ids)
 
 
 def _lesson_sum_map(enrollment_ids):

@@ -128,6 +128,21 @@ def _records(path: str) -> Iterator[dict]:
             yield payload
 
 
+def _verified_sha256(path: str, expected_sha256: str) -> str:
+    """Faylın sha256-sı operatorun verdiyi (manifestdəki) dəyərlə EYNİdirmi?"""
+
+    expected = str(expected_sha256 or "").strip().lower()
+    if len(expected) != 64 or any(ch not in "0123456789abcdef" for ch in expected):
+        raise RepairPlanError("legacy_repair_plan_sha256_required")
+    try:
+        actual = file_sha256(path)
+    except OSError:
+        raise RepairPlanError("legacy_repair_plan_unreadable") from None
+    if actual != expected:
+        raise RepairPlanError("legacy_repair_plan_sha256_mismatch")
+    return actual
+
+
 @dataclass(frozen=True)
 class LoadedPlan:
     header: dict
@@ -141,15 +156,7 @@ class LoadedPlan:
 def read_plan(path: str, *, expected_sha256: str, repair: str) -> LoadedPlan:
     """Planı oxu: ƏVVƏL sha256, sonra format/versiya/təmir növü, sonda footer sayları."""
 
-    expected = str(expected_sha256 or "").strip().lower()
-    if len(expected) != 64 or any(ch not in "0123456789abcdef" for ch in expected):
-        raise RepairPlanError("legacy_repair_plan_sha256_required")
-    try:
-        actual = file_sha256(path)
-    except OSError:
-        raise RepairPlanError("legacy_repair_plan_unreadable") from None
-    if actual != expected:
-        raise RepairPlanError("legacy_repair_plan_sha256_mismatch")
+    actual = _verified_sha256(path, expected_sha256)
     header = None
     footer = None
     grouped: dict[str, list] = {}
@@ -181,6 +188,27 @@ def read_plan(path: str, *, expected_sha256: str, repair: str) -> LoadedPlan:
     return LoadedPlan(header=header, records=grouped, sha256=actual)
 
 
+def read_plan_header(path: str, *, expected_sha256: str, repair: str) -> dict:
+    """Yalnız BAŞLIQ — sha256 bütün fayl üzrə yoxlanılır (bütövlük), sətirlər yüklənmir.
+
+    Başqa təmirin planın möhürlənmiş başlığındakı siyahıya (məs. hazırda oxuyanlar)
+    istinad etməsi üçün.
+    """
+
+    _verified_sha256(path, expected_sha256)
+    try:
+        header = next(iter(_records(path)), None)
+    except (OSError, EOFError, gzip.BadGzipFile):
+        raise RepairPlanError("legacy_repair_plan_unreadable") from None
+    if header is None or header.get("kind") != _HEADER:
+        raise RepairPlanError("legacy_repair_plan_header_missing")
+    if header.get("format") != PLAN_FORMAT or header.get("format_version") != PLAN_FORMAT_VERSION:
+        raise RepairPlanError("legacy_repair_plan_format_unsupported")
+    if header.get("repair") != repair:
+        raise RepairPlanError("legacy_repair_plan_repair_mismatch")
+    return header
+
+
 __all__ = [
     "PLAN_FORMAT",
     "PLAN_FORMAT_VERSION",
@@ -189,5 +217,6 @@ __all__ = [
     "RepairPlanError",
     "file_sha256",
     "read_plan",
+    "read_plan_header",
     "write_plan",
 ]
