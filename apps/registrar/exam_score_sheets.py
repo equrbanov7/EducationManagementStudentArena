@@ -31,6 +31,7 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import exam_score_period_lock
 from . import exam_score_questions as questions
 from .corrections import correction_author_name
 from .models import CourseOffering, ExamScoreSheet, ExamScoreSheetSource
@@ -150,7 +151,9 @@ def sheet_metadata_from_post(post, files, *, offering):
         "invigilator_name": _person_label(invigilator) or (post.get("invigilator_name") or "").strip()[:200],
         "protocol_number": (post.get("protocol_number") or "").strip()[:64],
         "note": (post.get("sheet_note") or "").strip(),
-        "evidence": files.get("sheet_evidence") if files is not None else None,
+        # 2026-09-26: təsdiq dialoqunun öz fayl sahəsi (``justification_evidence``)
+        # üstündür; yoxdursa vərəq kartındakı ``sheet_evidence`` (bax period_lock).
+        "evidence": exam_score_period_lock.submission_evidence(files),
     }
 
 

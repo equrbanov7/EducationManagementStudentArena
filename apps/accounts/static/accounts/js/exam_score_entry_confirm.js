@@ -8,8 +8,11 @@
  *   · «Balları yadda saxla» → dialoq: növ + tarix + yoxlayan başlıqda, yazılacaq
  *     hər tələbə (ad, giriş, imtahan, yekun, hərf — server şkalası; F qırmızı,
  *     kəsilən sayı başlıqda); xətalı sətir varsa dialoq açılmır;
- *   · K>0 dəyişiklik → növ + səbəb + qeyd (dialoqda) + skan (vərəq kartında)
- *     tələb olunur — server eyni qaydanı yenidən tətbiq edir, bu yalnız erkən UX;
+ *   · K>0 dəyişiklik → növ + səbəb + qeyd + skan tələb olunur; skan DİALOQUN
+ *     öz fayl sahəsində (`data-ese-just-file`, 2026-09-26) və ya vərəq kartında
+ *     seçilir — server eyni qaydanı yenidən tətbiq edir, bu yalnız erkən UX;
+ *   · bitmiş dövrün düzəliş rejimi (`data-correction-mode="1"`, RİM rəhbəri) —
+ *     HƏR yazı (ilk daxiletmə də) eyni təqdimatı tələb edir;
  *   · YALNIZ dialoqun «Təsdiq et» düyməsi POST edir (Enter / kənar submit bloklanır).
  *
  * CSP: inline yoxdur; i18n `#eseI18n`. AJAX-safe: `EMSDelegate` (açarlar
@@ -36,18 +39,46 @@
         return el ? el.getAttribute("data-" + key) || "" : "";
     }
 
+    function fileOf(host, selector) {
+        var input = host.querySelector(selector);
+        return input && input.files && input.files.length ? input.files[0] : null;
+    }
+
+    /* Skan: dialoqun öz fayl sahəsi (2026-09-26) VƏ YA vərəq kartındakı fayl. */
     function scanSelected(host) {
-        var file = host.querySelector("[data-ese-meta-file]");
-        return !!(file && file.files && file.files.length);
+        return !!(fileOf(host, "[data-ese-just-file]") || fileOf(host, "[data-ese-meta-file]"));
+    }
+
+    /* Bitmiş dövrün düzəliş rejimi — HƏR yazı təqdimatlıdır (server də belə tələb edir). */
+    function correctionMode(host) {
+        return host.getAttribute("data-correction-mode") === "1";
+    }
+
+    function needsJustification(host, summary) {
+        return !!(summary.changes || (correctionMode(host) && summary.writes));
     }
 
     function syncScanStatus(host) {
         var status = host.querySelector("[data-ese-scan-status]");
+        var own = fileOf(host, "[data-ese-just-file]");
+        var meta = fileOf(host, "[data-ese-meta-file]");
+        var name = host.querySelector("[data-ese-just-file-name]");
+        if (name) {
+            name.textContent = own ? own.name : name.getAttribute("data-empty") || "";
+        }
+        var drop = host.querySelector("[data-ese-just-drop]");
+        if (drop) {
+            drop.classList.toggle("is-filled", !!own);
+        }
         if (!status) {
             return;
         }
-        var ok = scanSelected(host);
-        status.textContent = ok ? "✓ " + t("scan-ok") : "✗ " + t("scan-missing");
+        var ok = !!(own || meta);
+        var text = ok ? "✓ " + t("scan-ok") : "✗ " + t("scan-missing");
+        if (!own && meta) {
+            text += " — " + meta.name + " (" + t("scan-from-meta") + ")";
+        }
+        status.textContent = text;
         status.classList.toggle("is-ok", ok);
         status.classList.toggle("is-missing", !ok);
     }
@@ -199,7 +230,7 @@
         fillConfirm(host, summary);
         var just = host.querySelector("[data-ese-just]");
         if (just) {
-            just.hidden = !summary.changes;
+            just.hidden = !needsJustification(host, summary);
         }
         showDialogError(host, "");
         syncScanStatus(host);
@@ -212,10 +243,32 @@
         }
     });
 
-    DELEGATE.on("change", "[data-ese-meta-file]", function () {
+    DELEGATE.on("change", "[data-ese-meta-file], [data-ese-just-file]", function () {
         var host = root();
         if (host) {
             syncScanStatus(host);
+            showDialogError(host, "");
+        }
+    });
+
+    DELEGATE.on("dragover", "[data-ese-just-drop]", function (event, drop) {
+        event.preventDefault();
+        drop.classList.add("is-over");
+    });
+
+    DELEGATE.on("dragleave", "[data-ese-just-drop]", function (event, drop) {
+        if (!drop.contains(event.relatedTarget)) {
+            drop.classList.remove("is-over");
+        }
+    });
+
+    DELEGATE.on("drop", "[data-ese-just-drop]", function (event, drop) {
+        event.preventDefault();
+        drop.classList.remove("is-over");
+        var input = drop.querySelector("[data-ese-just-file]");
+        if (input && event.dataTransfer && event.dataTransfer.files.length) {
+            input.files = event.dataTransfer.files;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
         }
     });
 
@@ -235,9 +288,9 @@
             showDialogError(host, t("invalid"));
             return;
         }
-        if (summary.changes && !justificationComplete(host)) {
+        if (needsJustification(host, summary) && !justificationComplete(host)) {
             event.preventDefault();
-            showDialogError(host, t("need-justification"));
+            showDialogError(host, t(correctionMode(host) ? "need-submission" : "need-justification"));
             syncScanStatus(host);
             var reason = host.querySelector("[data-ese-reason]");
             if (reason && !reason.value) {
