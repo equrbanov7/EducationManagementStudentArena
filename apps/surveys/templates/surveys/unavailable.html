@@ -1,0 +1,17 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+
+{% block survey_content %}
+<section class="svy-block svy-block--empty">
+    <p class="svy-empty">
+        {% if reason == "view_as" %}
+            {% trans "Baxış rejimində (başqa istifadəçinin profili) sorğu səhifəsi açılmır — anonim sorğunu yalnız tələbənin özü doldura bilər." context "surveys.student" %}
+        {% elif reason == "not_student" %}
+            {% trans "Bu səhifə yalnız tələbələr üçündür." context "surveys.student" %}
+        {% else %}
+            {% trans "Təşkilat konteksti tapılmadı." context "surveys.student" %}
+        {% endif %}
+    </p>
+    <a class="svy-btn svy-btn--ghost" href="{% url 'accounts:profile' %}">{% trans "Kabinetə keç" context "surveys.student" %}</a>
+</section>
+{% endblock %}

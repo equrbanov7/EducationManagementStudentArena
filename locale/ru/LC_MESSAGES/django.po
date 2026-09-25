@@ -77018,3 +77018,824 @@ msgstr "Обновить часы"
 msgctxt "accounts.syllabus"
 msgid "saat"
 msgstr "ч"
+
+msgctxt "surveys.question"
+msgid "Müəllim dərsə hazırlıqlı gəlir, dərsi planlı və ardıcıl aparır."
+msgstr ""
+"Преподаватель приходит на занятие подготовленным и ведёт его планомерно и "
+"последовательно."
+
+msgctxt "surveys.question"
+msgid "Mövzuları aydın və başa düşülən şəkildə izah edir."
+msgstr "Объясняет темы ясно и понятно."
+
+msgctxt "surveys.question"
+msgid ""
+"Sillabusda göstərilən mövzulara, tələblərə və qiymətləndirmə qaydasına əməl "
+"edir."
+msgstr ""
+"Соблюдает темы, требования и порядок оценивания, указанные в силлабусе."
+
+msgctxt "surveys.question"
+msgid "Dərsləri vaxtında başlayır və dərs vaxtından səmərəli istifadə edir."
+msgstr "Начинает занятия вовремя и эффективно использует учебное время."
+
+msgctxt "surveys.question"
+msgid "Suallar verməyə, müzakirəyə və fəal iştiraka həvəsləndirir."
+msgstr "Поощряет вопросы, обсуждение и активное участие."
+
+msgctxt "surveys.question"
+msgid "Tələbələrə hörmətlə, ədalətli və qərəzsiz yanaşır."
+msgstr "Относится к студентам с уважением, справедливо и беспристрастно."
+
+msgctxt "surveys.question"
+msgid ""
+"Qiymətləndirmə meyarları əvvəlcədən aydın idi və ballar bu meyarlara uyğun "
+"verilirdi."
+msgstr ""
+"Критерии оценивания были заранее понятны, и баллы выставлялись в "
+"соответствии с ними."
+
+msgctxt "surveys.question"
+msgid ""
+"Tapşırıq, sərbəst iş və midterm nəticələri üzrə vaxtında və faydalı rəy "
+"(izah) verir."
+msgstr ""
+"Своевременно даёт полезную обратную связь (пояснения) по заданиям, "
+"самостоятельной работе и результатам мидтерма."
+
+msgctxt "surveys.question"
+msgid ""
+"Dərsdən kənar (məsləhət saatı, e-poçt və s.) suallara cavab vermək üçün "
+"əlçatandır."
+msgstr ""
+"Доступен вне занятий (консультации, электронная почта и т. п.), чтобы "
+"отвечать на вопросы."
+
+msgctxt "surveys.question"
+msgid "Nəzəri bilikləri praktiki nümunələr və real həyatla əlaqələndirir."
+msgstr "Связывает теорию с практическими примерами и реальной жизнью."
+
+msgctxt "surveys.question"
+msgid ""
+"Dərs materialları (təqdimat, ədəbiyyat, tapşırıqlar) faydalı və müasirdir."
+msgstr ""
+"Учебные материалы (презентации, литература, задания) полезны и современны."
+
+msgctxt "surveys.question"
+msgid "Bu fənn üzrə bilik və bacarıqlarım nəzərəçarpacaq dərəcədə artdı."
+msgstr "Мои знания и навыки по этому предмету заметно выросли."
+
+msgctxt "surveys.question"
+msgid "Fənnin iş yükü (tapşırıq, hazırlıq) onun kreditinə uyğun idi."
+msgstr ""
+"Нагрузка по предмету (задания, подготовка) соответствовала его кредитам."
+
+msgctxt "surveys.question"
+msgid ""
+"Razılıq iş yükünün uyğun olduğunu bildirir — çox və ya az olması "
+"uyğunsuzluqdur."
+msgstr ""
+"Согласие означает, что нагрузка была уместной; слишком большая или слишком "
+"малая — несоответствие."
+
+msgctxt "surveys.question"
+msgid ""
+"Bu müəllimin bu fəndəki tədrisini ümumilikdə 1–10 bal şkalası ilə "
+"qiymətləndirin."
+msgstr ""
+"Оцените в целом преподавание этого преподавателя по данному предмету по "
+"шкале от 1 до 10."
+
+msgctxt "surveys.question"
+msgid "1 — çox zəif, 10 — əla."
+msgstr "1 — очень плохо, 10 — отлично."
+
+msgctxt "surveys.question"
+msgid "Bu müəllimin dərsini digər tələbələrə tövsiyə edərdim."
+msgstr "Я бы рекомендовал(а) занятия этого преподавателя другим студентам."
+
+msgctxt "surveys.question"
+msgid "Bu müəllimin tədrisində ən çox nəyi bəyəndiniz?"
+msgstr "Что вам больше всего понравилось в преподавании этого преподавателя?"
+
+msgctxt "surveys.question"
+msgid "Dərsin daha yaxşı olması üçün nə təklif edərdiniz?"
+msgstr "Что бы вы предложили, чтобы занятия стали лучше?"
+
+msgctxt "surveys.question"
+msgid "Bu semestr tədris prosesindən ümumilikdə məmnunam."
+msgstr "В целом я доволен(на) учебным процессом в этом семестре."
+
+msgctxt "surveys.question"
+msgid ""
+"Tədris şəraiti (auditoriya, texniki təchizat, kitabxana, elektron resurslar)"
+" təhsilim üçün yetərli idi."
+msgstr ""
+"Условия обучения (аудитории, техническое оснащение, библиотека, электронные "
+"ресурсы) были достаточными для моей учёбы."
+
+msgctxt "surveys.question"
+msgid ""
+"Universitetdə tədrisi və tələbə xidmətlərini daha da yaxşılaşdırmaq üçün nə "
+"təklif edərdiniz?"
+msgstr ""
+"Что бы вы предложили для дальнейшего улучшения преподавания и студенческих "
+"сервисов в университете?"
+
+msgctxt "surveys.question"
+msgid ""
+"Ad, qrup və ya sizi tanıda biləcək məlumat yazmayın — cavabınız anonim "
+"qalsın."
+msgstr ""
+"Не указывайте имя, группу или сведения, по которым вас можно узнать, — пусть"
+" ответ останется анонимным."
+
+msgctxt "surveys.scale"
+msgid "Tamamilə razı deyiləm"
+msgstr "Совершенно не согласен"
+
+msgctxt "surveys.scale"
+msgid "Razı deyiləm"
+msgstr "Не согласен"
+
+msgctxt "surveys.scale"
+msgid "Qismən razıyam"
+msgstr "Частично согласен"
+
+msgctxt "surveys.scale"
+msgid "Razıyam"
+msgstr "Согласен"
+
+msgctxt "surveys.scale"
+msgid "Tamamilə razıyam"
+msgstr "Полностью согласен"
+
+msgctxt "surveys.scale"
+msgid "Çox zəif"
+msgstr "Очень плохо"
+
+msgctxt "surveys.scale"
+msgid "Əla"
+msgstr "Отлично"
+
+msgctxt "surveys.choice"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "surveys.choice"
+msgid "Ümumi"
+msgstr "Общий"
+
+msgctxt "surveys.choice"
+msgid "Razılıq şkalası (1–5)"
+msgstr "Шкала согласия (1–5)"
+
+msgctxt "surveys.choice"
+msgid "Bal şkalası (1–10)"
+msgstr "Шкала оценки (1–10)"
+
+msgctxt "surveys.choice"
+msgid "Sərbəst mətn"
+msgstr "Свободный текст"
+
+msgctxt "surveys.choice"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "surveys.choice"
+msgid "Açıq"
+msgstr "Открыта"
+
+msgctxt "surveys.choice"
+msgid "Bağlı"
+msgstr "Закрыта"
+
+msgctxt "surveys.choice"
+msgid "Jurnal bağlanması"
+msgstr "Закрытие журнала"
+
+msgctxt "surveys.choice"
+msgid "Əl ilə"
+msgstr "Вручную"
+
+msgctxt "surveys.model"
+msgid "sorğu şablonu"
+msgstr "шаблон опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu şablonları"
+msgstr "шаблоны опросов"
+
+msgctxt "surveys.model"
+msgid "sorğu sualı"
+msgstr "вопрос опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu sualları"
+msgstr "вопросы опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu kampaniyası"
+msgstr "кампания опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu kampaniyaları"
+msgstr "кампании опросов"
+
+msgctxt "surveys.model"
+msgid "sorğu qəbzi"
+msgstr "квитанция опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu qəbzləri"
+msgstr "квитанции опроса"
+
+msgctxt "surveys.model"
+msgid "anonim cavab"
+msgstr "анонимный ответ"
+
+msgctxt "surveys.model"
+msgid "anonim cavablar"
+msgstr "анонимные ответы"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabı"
+msgstr "ответ на вопрос"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabları"
+msgstr "ответы на вопросы"
+
+msgctxt "organizations.permission.label"
+msgid "Anonim sorğu nəticələrinə baxış"
+msgstr "Просмотр результатов анонимного опроса"
+
+msgctxt "organizations.permission.label"
+msgid "Sorğu kampaniyalarını idarə etmək"
+msgstr "Управление кампаниями опросов"
+
+msgctxt "surveys.form"
+msgid "Bu sual məcburidir."
+msgstr "Это обязательный вопрос."
+
+msgctxt "surveys.form"
+msgid "Bir cavab seçin."
+msgstr "Выберите ответ."
+
+msgctxt "surveys.form"
+msgid "Mətn %(limit)s simvoldan uzun ola bilməz."
+msgstr "Текст не может быть длиннее %(limit)s символов."
+
+msgctxt "surveys.form"
+msgid "Cavab %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Ответ должен быть от %(low)s до %(high)s."
+
+msgctxt "surveys.submit"
+msgid "Sorğu artıq qəbul edilmir."
+msgstr "Опрос больше не принимает ответы."
+
+msgctxt "surveys.submit"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Вы уже заполнили этот опрос."
+
+msgctxt "surveys.campaigns"
+msgid "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Минимальный размер группы должен быть от %(low)s до %(high)s."
+
+msgctxt "surveys.campaigns"
+msgid "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+msgstr "Дата закрытия не может быть раньше даты открытия."
+
+msgctxt "surveys.campaigns"
+msgid "Kampaniya %(days)s gündən uzun ola bilməz."
+msgstr "Кампания не может длиться дольше %(days)s дней."
+
+msgctxt "surveys.campaigns"
+msgid "«Sonra doldur» müddəti açılış tarixindən əvvəl bitə bilməz."
+msgstr "Срок «Заполнить позже» не может закончиться раньше даты открытия."
+
+msgctxt "surveys.campaigns"
+msgid "«Sonra doldur» müddəti bağlanma tarixindən sonra ola bilməz."
+msgstr "Срок «Заполнить позже» не может быть позже даты закрытия."
+
+msgctxt "surveys.campaigns"
+msgid "Yalnız qaralama kampaniyası açıla bilər."
+msgstr "Открыть можно только черновик кампании."
+
+msgctxt "surveys.campaigns"
+msgid "Yalnız bağlı kampaniya yenidən açıla bilər."
+msgstr "Повторно открыть можно только закрытую кампанию."
+
+msgctxt "surveys.campaigns"
+msgid "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+msgstr "Чтобы открыть повторно, выберите будущую дату закрытия."
+
+msgctxt "surveys.manage"
+msgid "Bu əməliyyat üçün icazəniz yoxdur."
+msgstr "У вас нет прав на это действие."
+
+msgctxt "surveys.manage"
+msgid "Tarix düzgün formatda deyil."
+msgstr "Дата указана в неверном формате."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya tapılmadı."
+msgstr "Кампания не найдена."
+
+msgctxt "surveys.manage"
+msgid "Semestr seçilməlidir."
+msgstr "Нужно выбрать семестр."
+
+msgctxt "surveys.manage"
+msgid "Bu semestrin kampaniyası artıq var — onu cədvəldən idarə edin."
+msgstr "Для этого семестра кампания уже есть — управляйте ею из списка."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya açıldı."
+msgstr "Кампания открыта."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya bağlandı."
+msgstr "Кампания закрыта."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya yenidən açıldı."
+msgstr "Кампания открыта повторно."
+
+msgctxt "surveys.manage"
+msgid "Minimum qrup ölçüsü tam ədəd olmalıdır."
+msgstr "Минимальный размер группы должен быть целым числом."
+
+msgctxt "surveys.manage"
+msgid "Kampaniya yeniləndi."
+msgstr "Кампания обновлена."
+
+msgctxt "surveys.manage"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "surveys.notify"
+msgid "Müəllim qiymətləndirmə sorğusu açıldı"
+msgstr "Открыт опрос по оценке преподавателей"
+
+msgctxt "surveys.notify"
+msgid ""
+"Semestr sonu anonim sorğusunu doldurun: müəllimlərinizi qiymətləndirin və "
+"tədrisin yaxşılaşması üçün təklif yazın. Cavablarınız anonimdir."
+msgstr ""
+"Заполните анонимный опрос в конце семестра: оцените преподавателей и "
+"предложите, как улучшить обучение. Ваши ответы анонимны."
+
+msgctxt "surveys.student"
+msgid "Anonim sorğu"
+msgstr "Анонимный опрос"
+
+msgctxt "surveys.student"
+msgid "Semestr sonu sorğusu"
+msgstr "Опрос в конце семестра"
+
+msgctxt "surveys.student"
+msgid "Müəllimlərinizi anonim qiymətləndirin"
+msgstr "Оцените своих преподавателей анонимно"
+
+msgctxt "surveys.student"
+msgid ""
+"Hər müəllim üçün qısa bir forma — təxminən 2 dəqiqə. Sonda universitetdə "
+"nəyi yaxşılaşdırmaq olar sualı var."
+msgstr ""
+"Короткая форма для каждого преподавателя — около 2 минут. В конце — вопрос о"
+" том, что можно улучшить в университете."
+
+msgctxt "surveys.student"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "Выполнено %(done)s / %(total)s"
+
+msgctxt "surveys.student"
+msgid "Son tarix: %(day)s"
+msgstr "Крайний срок: %(day)s"
+
+msgctxt "surveys.student"
+msgid "Doldurulmayınca kabinet açılmır."
+msgstr "Личный кабинет не откроется, пока опрос не заполнен."
+
+msgctxt "surveys.student"
+msgid "Dolduruldu"
+msgstr "Заполнено"
+
+msgctxt "surveys.student"
+msgid "Qiymətləndir"
+msgstr "Оценить"
+
+msgctxt "surveys.student"
+msgid "Ümumi suallar"
+msgstr "Общие вопросы"
+
+msgctxt "surveys.student"
+msgid "Tədris prosesi, şərait və təklifləriniz"
+msgstr "Учебный процесс, условия и ваши предложения"
+
+msgctxt "surveys.student"
+msgid "Müəllimlərdən sonra"
+msgstr "После преподавателей"
+
+msgctxt "surveys.student"
+msgid "Doldur"
+msgstr "Заполнить"
+
+msgctxt "surveys.student"
+msgid "Davam et"
+msgstr "Продолжить"
+
+msgctxt "surveys.student"
+msgid "Başla"
+msgstr "Начать"
+
+msgctxt "surveys.student"
+msgid "Sonra doldur"
+msgstr "Заполнить позже"
+
+msgctxt "surveys.student"
+msgid "Möhlət %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+msgstr "Отсрочка возможна до %(day)s (каждый раз на 24 часа)."
+
+msgctxt "surveys.student"
+msgid "Bu semestrin sorğusunu tam doldurmusunuz. Təşəkkür edirik!"
+msgstr "Вы полностью заполнили опрос этого семестра. Спасибо!"
+
+msgctxt "surveys.student"
+msgid "Kabinetə keç"
+msgstr "Перейти в кабинет"
+
+msgctxt "surveys.student"
+msgid "Hazırda sizin üçün açıq sorğu yoxdur."
+msgstr "Сейчас для вас нет открытых опросов."
+
+msgctxt "surveys.student"
+msgid ""
+"Cavablarınız adınızdan ayrı saxlanılır. Nəticələr yalnız ən azı bir neçə "
+"tələbə cavab verdikdə, ümumiləşdirilmiş şəkildə göstərilir."
+msgstr ""
+"Ваши ответы хранятся отдельно от вашего имени. Результаты показываются "
+"только в обобщённом виде и лишь когда ответили несколько студентов."
+
+msgctxt "surveys.student"
+msgid "Sorğu anonimdir — bu, necə təmin olunur"
+msgstr "Опрос анонимный — вот как это обеспечивается"
+
+msgctxt "surveys.student"
+msgid "Nə qeydə alınır"
+msgstr "Что сохраняется"
+
+msgctxt "surveys.student"
+msgid ""
+"Cavablarınızın özü — adınız, tələbə nömrəniz və göndərmə vaxtı OLMADAN."
+msgstr ""
+"Сами ваши ответы — БЕЗ имени, студенческого номера и времени отправки."
+
+msgctxt "surveys.student"
+msgid ""
+"Ayrıca, cavabla əlaqəsi olmayan bir qeyd: «bu tələbə bu müəllim üçün sorğunu"
+" doldurub» — yalnız təkrar doldurmanın qarşısını almaq və kabineti açmaq "
+"üçün."
+msgstr ""
+"Отдельно — запись, не связанная с ответами: «этот студент заполнил опрос по "
+"этому преподавателю» — только чтобы исключить повторы и открыть кабинет."
+
+msgctxt "surveys.student"
+msgid "Kim nə görür"
+msgstr "Кто что видит"
+
+msgctxt "surveys.student"
+msgid ""
+"Kafedra müdiri, tədris şöbəsi, keyfiyyətə nəzarət şöbəsi və universitet "
+"rəhbərliyi yalnız ümumiləşdirilmiş nəticələri görür: orta ballar və "
+"paylanmalar."
+msgstr ""
+"Заведующие кафедрами, учебный отдел, отдел контроля качества и руководство "
+"университета видят только обобщённые результаты: средние баллы и "
+"распределения."
+
+msgctxt "surveys.student"
+msgid ""
+"Cavab sayı azdırsa (məsələn, 3-dən az), nəticə ümumiyyətlə göstərilmir — "
+"kiçik qrupda kimin nə yazdığını tapmaq olmasın."
+msgstr ""
+"Если ответов слишком мало (например, меньше 3), результат не показывается "
+"вовсе, чтобы в маленькой группе нельзя было понять, кто что написал."
+
+msgctxt "surveys.student"
+msgid ""
+"Sərbəst mətnlər də adsız və qarışıq sırada göstərilir. Mətndə adınızı və ya "
+"sizi tanıda biləcək məlumat yazmayın."
+msgstr ""
+"Свободные ответы тоже показываются без имён и в перемешанном порядке. Не "
+"пишите своё имя или сведения, по которым вас можно узнать."
+
+msgctxt "surveys.student"
+msgid ""
+"Dürüst olun: sorğu jurnallar bağlandıqdan sonra açılır, rəyiniz yalnız "
+"tədrisin keyfiyyətini yaxşılaşdırmaq üçün istifadə olunur və qiymətlərinizə "
+"heç bir təsir göstərmir."
+msgstr ""
+"Будьте честны: опрос открывается только после закрытия журналов, ваш отзыв "
+"используется только для улучшения качества преподавания и никак не влияет на"
+" ваши оценки."
+
+msgctxt "surveys.student"
+msgid "Sorğu naviqasiyası"
+msgstr "Навигация по опросу"
+
+msgctxt "surveys.student"
+msgid "Siyahıya qayıt"
+msgstr "Назад к списку"
+
+msgctxt "surveys.student"
+msgid "Tədris prosesi və təklifləriniz"
+msgstr "Учебный процесс и ваши предложения"
+
+msgctxt "surveys.student"
+msgid ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+msgstr ""
+"Некоторые вопросы остались без ответа или заполнены неверно — проверьте "
+"вопросы, отмеченные красным."
+
+msgctxt "surveys.student"
+msgid "Anonim göndər"
+msgstr "Отправить анонимно"
+
+msgctxt "surveys.student"
+msgid "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+msgstr "После отправки изменить ответы нельзя."
+
+msgctxt "surveys.student"
+msgid "Təşəkkür edirik!"
+msgstr "Спасибо!"
+
+msgctxt "surveys.student"
+msgid ""
+"Bütün sorğuları doldurdunuz. Cavablarınız anonim şəkildə qeydə alındı və "
+"tədrisin yaxşılaşdırılması üçün ümumiləşdirilmiş şəkildə istifadə olunacaq."
+msgstr ""
+"Вы заполнили все опросы. Ваши ответы сохранены анонимно и будут использованы"
+" в обобщённом виде для улучшения обучения."
+
+msgctxt "surveys.student"
+msgid ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğu səhifəsi açılmır — "
+"anonim sorğunu yalnız tələbənin özü doldura bilər."
+msgstr ""
+"В режиме просмотра (профиль другого пользователя) страница опроса не "
+"открывается — анонимный опрос может заполнить только сам студент."
+
+msgctxt "surveys.student"
+msgid "Bu səhifə yalnız tələbələr üçündür."
+msgstr "Эта страница только для студентов."
+
+msgctxt "surveys.student"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Контекст организации не найден."
+
+msgctxt "surveys.student"
+msgid "Bu forma sizin üçün açıq deyil."
+msgstr "Эта форма вам недоступна."
+
+msgctxt "surveys.student"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Вы уже заполнили этот опрос."
+
+msgctxt "surveys.student"
+msgid "Cavabınız anonim şəkildə qeydə alındı."
+msgstr "Ваш ответ сохранён анонимно."
+
+msgctxt "surveys.student"
+msgid "Bu sorğu hazırda qəbul edilmir."
+msgstr "Этот опрос сейчас не принимает ответы."
+
+msgctxt "surveys.student"
+msgid "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+msgstr "Срок отсрочки истёк — заполнение опроса обязательно."
+
+msgctxt "surveys.student"
+msgid "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+msgstr "Не забудьте заполнить опрос в течение 24 часов."
+
+msgctxt "surveys.cabinet"
+msgid "Gözləyən qiymətləndirmə: %(counter)s"
+msgstr "Ожидают оценки: %(counter)s"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Semestr sonu anonim sorğusu: müəllimlərinizi qiymətləndirin və tədrisin "
+"yaxşılaşması üçün təklif yazın."
+msgstr ""
+"Анонимный опрос в конце семестра: оцените преподавателей и предложите, как "
+"улучшить обучение."
+
+msgctxt "surveys.cabinet"
+msgid "Sorğunu tam doldurmusunuz"
+msgstr "Вы полностью заполнили опрос"
+
+msgctxt "surveys.cabinet"
+msgid "Təşəkkür edirik! Cavablarınız anonim şəkildə qeydə alınıb."
+msgstr "Спасибо! Ваши ответы сохранены анонимно."
+
+msgctxt "surveys.cabinet"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "Выполнено %(done)s / %(total)s"
+
+msgctxt "surveys.cabinet"
+msgid "son tarix %(day)s"
+msgstr "крайний срок %(day)s"
+
+msgctxt "surveys.cabinet"
+msgid "Sorğunu doldur"
+msgstr "Заполнить опрос"
+
+msgctxt "surveys.cabinet"
+msgid "Hazırda sizin üçün açıq sorğu yoxdur."
+msgstr "Сейчас для вас нет открытых опросов."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Sorğu nəticələrinə baxmaq üçün icazəniz və ya struktur əhatəniz yoxdur."
+msgstr ""
+"У вас нет прав или структурного охвата для просмотра результатов опроса."
+
+msgctxt "surveys.cabinet"
+msgid "Hələ heç bir sorğu kampaniyası keçirilməyib."
+msgstr "Кампании опросов ещё не проводились."
+
+msgctxt "surveys.cabinet"
+msgid "yalnız sizin struktur əhatəniz"
+msgstr "только ваш структурный охват"
+
+msgctxt "surveys.cabinet"
+msgid "Cavablar"
+msgstr "Ответы"
+
+msgctxt "surveys.cabinet"
+msgid "İştirak"
+msgstr "Участие"
+
+msgctxt "surveys.cabinet"
+msgid "Ümumi bal (1–10)"
+msgstr "Общая оценка (1–10)"
+
+msgctxt "surveys.cabinet"
+msgid "Likert indeksi (1–5)"
+msgstr "Индекс Лайкерта (1–5)"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Anonimliyi qorumaq üçün nəticələr ən azı %(k)s cavab toplandıqdan sonra "
+"göstərilir."
+msgstr ""
+"Для защиты анонимности результаты показываются только после сбора не менее "
+"%(k)s ответов."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Müəllim, kafedra və sual üzrə ətraflı analitika, filtrlər və qrafiklər bu "
+"bölməyə əlavə olunur."
+msgstr ""
+"В этот раздел добавляется подробная аналитика, фильтры и графики по "
+"преподавателям, кафедрам и вопросам."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Kampaniyaları idarə etmək üçün təşkilat səviyyəsində «survey.manage» icazəsi"
+" lazımdır."
+msgstr ""
+"Для управления кампаниями нужно право «survey.manage» на уровне организации."
+
+msgctxt "surveys.cabinet"
+msgid ""
+"RİM semestr jurnallarını bağlayanda həmin dövrün sorğusu özü açılır: "
+"%(days)s gün açıq qalır, ilk %(grace)s gün tələbə «Sonra doldur» deyə bilər,"
+" sonra kabinet sorğu doldurulmayınca açılmır. Burada kampaniyanı əl ilə də "
+"aça, bağlaya və uzada bilərsiniz."
+msgstr ""
+"Когда Центр цифрового развития закрывает журналы семестра, опрос за этот "
+"период открывается автоматически: он открыт %(days)s дней, первые %(grace)s "
+"дней студент может выбрать «Заполнить позже», затем кабинет не открывается, "
+"пока опрос не заполнен. Здесь кампанию можно также открыть, закрыть и "
+"продлить вручную."
+
+msgctxt "surveys.cabinet"
+msgid "Yeni kampaniya — semestr"
+msgstr "Новая кампания — семестр"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Seçilmiş semestr üçün sorğu kampaniyası açılsın? Tələbələrə bildiriş "
+"göndəriləcək."
+msgstr ""
+"Открыть кампанию опроса для выбранного семестра? Студенты получат "
+"уведомление."
+
+msgctxt "surveys.cabinet"
+msgid "Kampaniyanı aç"
+msgstr "Открыть кампанию"
+
+msgctxt "surveys.cabinet"
+msgid "Açıq"
+msgstr "Открыта"
+
+msgctxt "surveys.cabinet"
+msgid "Planlaşdırılıb"
+msgstr "Запланирована"
+
+msgctxt "surveys.cabinet"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlı"
+msgstr "Закрыта"
+
+msgctxt "surveys.cabinet"
+msgid "Jurnal bağlanması ilə"
+msgstr "По закрытию журнала"
+
+msgctxt "surveys.cabinet"
+msgid "Əl ilə"
+msgstr "Вручную"
+
+msgctxt "surveys.cabinet"
+msgid "Məcburi"
+msgstr "Обязательная"
+
+msgctxt "surveys.cabinet"
+msgid "Doldurulmuş hədəf"
+msgstr "Заполненные цели"
+
+msgctxt "surveys.cabinet"
+msgid "Gözlənilən"
+msgstr "Ожидается"
+
+msgctxt "surveys.cabinet"
+msgid "Açılış"
+msgstr "Открытие"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlanma"
+msgstr "Закрытие"
+
+msgctxt "surveys.cabinet"
+msgid "«Sonra» möhləti"
+msgstr "Отсрочка «Позже»"
+
+msgctxt "surveys.cabinet"
+msgid "Minimum qrup (k)"
+msgstr "Минимальная группа (k)"
+
+msgctxt "surveys.cabinet"
+msgid "Bağlanma tarixi"
+msgstr "Дата закрытия"
+
+msgctxt "surveys.cabinet"
+msgid "«Sonra doldur» son günü"
+msgstr "Последний день «Заполнить позже»"
+
+msgctxt "surveys.cabinet"
+msgid "Məcburi (kabineti bağlayır)"
+msgstr "Обязательная (блокирует кабинет)"
+
+msgctxt "surveys.cabinet"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "surveys.cabinet"
+msgid "Aç"
+msgstr "Открыть"
+
+msgctxt "surveys.cabinet"
+msgid "Yeni bağlanma tarixi"
+msgstr "Новая дата закрытия"
+
+msgctxt "surveys.cabinet"
+msgid "Yenidən aç"
+msgstr "Открыть снова"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Kampaniya bağlansın? Tələbələr artıq cavab göndərə bilməyəcək və kabinet "
+"qapısı açılacaq."
+msgstr ""
+"Закрыть кампанию? Студенты больше не смогут отправлять ответы, а блокировка "
+"кабинета будет снята."
+
+msgctxt "surveys.cabinet"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Hələ heç bir sorğu kampaniyası yoxdur. İlk kampaniya RİM jurnalları "
+"bağlayanda özü yaranır və ya yuxarıdan əl ilə açılır."
+msgstr ""
+"Кампаний опросов пока нет. Первая создаётся автоматически, когда Центр "
+"цифрового развития закрывает журналы, или её можно открыть вручную выше."

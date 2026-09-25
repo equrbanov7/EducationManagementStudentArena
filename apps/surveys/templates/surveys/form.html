@@ -1,0 +1,88 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+{% comment %}Bir hədəfin (müəllim × fənn və ya ümumi bölmə) bir səhifəlik forması.
+Likert 1–5 — iri radio «həb»-lər, 1–10 — seqmentli şkala; ikisi də doğma radio
+qrupudur (ox düymələri ilə klaviatura idarəsi, ekran oxuyucusu üçün fieldset/legend).
+Yoxlama SERVERDƏDİR; JS yalnız simvol sayğacı və ikiqat göndərişə qarşı düymə kilidi verir.{% endcomment %}
+
+{% block survey_content %}
+<nav class="svy-crumbs" aria-label="{% trans 'Sorğu naviqasiyası' context 'surveys.student' %}">
+    <a class="svy-link" href="{% url 'surveys:home' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Siyahıya qayıt" context "surveys.student" %}</a>
+    <div class="svy-meter svy-meter--inline">
+        <span class="svy-meter__label">{{ position }} / {{ total }}</span>
+        <progress class="svy-meter__bar" value="{{ done }}" max="{{ total }}">{{ done }} / {{ total }}</progress>
+    </div>
+</nav>
+
+<header class="svy-subject">
+    {% if target.is_general %}
+    <p class="svy-kicker">{% trans "Ümumi suallar" context "surveys.student" %}</p>
+    <h1 class="svy-title">{% trans "Tədris prosesi və təklifləriniz" context "surveys.student" %}</h1>
+    {% else %}
+    <p class="svy-kicker">{{ target.subject }}{% if target.group %} · {{ target.group }}{% endif %}</p>
+    <h1 class="svy-title">{{ target.teacher_name|default:"—" }}</h1>
+    {% endif %}
+</header>
+
+{% include "surveys/_anonymity.html" with compact=True %}
+
+{% if errors %}
+<div class="svy-alert" role="alert">
+    <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+    {% trans "Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş sualları yoxlayın." context "surveys.student" %}
+</div>
+{% endif %}
+
+<form method="post" class="svy-form" data-svy-form novalidate>
+    {% csrf_token %}
+    {% for row in rows %}
+    <fieldset class="svy-q{% if row.error %} is-invalid{% endif %}" id="{{ row.name }}-set"{% if row.error %} aria-describedby="{{ row.name }}-error"{% endif %}>
+        <legend class="svy-q__text">
+            <span class="svy-q__num">{{ forloop.counter }}.</span> {{ row.text }}{% if row.question.required %} <span class="svy-q__req" aria-hidden="true">*</span>{% endif %}
+        </legend>
+        {% if row.help %}<p class="svy-q__help">{{ row.help }}</p>{% endif %}
+
+        {% if row.question.kind == "likert5" %}
+        <div class="svy-likert">
+            {% for score, label in row.choices %}
+            <label class="svy-pill">
+                <input class="svy-pill__input" type="radio" name="{{ row.name }}" value="{{ score }}"{% if row.value == score|stringformat:"s" %} checked{% endif %}{% if row.question.required %} required{% endif %}>
+                <span class="svy-pill__face">
+                    <span class="svy-pill__score">{{ score }}</span>
+                    <span class="svy-pill__label">{{ label }}</span>
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+        {% elif row.question.kind == "scale10" %}
+        <div class="svy-scale">
+            {% for score in row.choices %}
+            <label class="svy-seg">
+                <input class="svy-seg__input" type="radio" name="{{ row.name }}" value="{{ score }}"{% if row.value == score|stringformat:"s" %} checked{% endif %}{% if row.question.required %} required{% endif %}>
+                <span class="svy-seg__face">{{ score }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        <div class="svy-scale__anchors" aria-hidden="true"><span>1 — {{ scale_low }}</span><span>10 — {{ scale_high }}</span></div>
+        {% else %}
+        <textarea class="svy-text" id="{{ row.name }}" name="{{ row.name }}" rows="4" maxlength="1500"
+                  data-svy-counter="{{ row.name }}-count"
+                  aria-describedby="{{ row.name }}-hint">{{ row.value }}</textarea>
+        <div class="svy-text__foot">
+            <span class="svy-text__hint" id="{{ row.name }}-hint">{{ privacy_hint }}</span>
+            <span class="svy-text__count" id="{{ row.name }}-count" aria-live="polite">{{ row.value|length }} / 1500</span>
+        </div>
+        {% endif %}
+
+        {% if row.error %}<p class="svy-q__error" id="{{ row.name }}-error">{{ row.error }}</p>{% endif %}
+    </fieldset>
+    {% endfor %}
+
+    <div class="svy-actions svy-actions--form">
+        <button type="submit" class="svy-btn svy-btn--primary" data-svy-submit>
+            <i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Anonim göndər" context "surveys.student" %}
+        </button>
+        <span class="svy-actions__note">{% trans "Göndərdikdən sonra cavabı dəyişmək mümkün deyil." context "surveys.student" %}</span>
+    </div>
+</form>
+{% endblock %}
