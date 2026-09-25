@@ -3,10 +3,11 @@ name: 🔐 Prod TLS sertifikatı (Let's Encrypt, certbot DNS-01)
 # Sahib 2026-09-25: «ssl sertifikatı yarat certbot ilə». Publik A qeydi və 80-ci port hələ yoxdur,
 # ona görə yalnız DNS-01 mümkündür (HostGator-da API yoxdur → TXT qeydini sahib əl ilə əlavə edir).
 #
-#   mode=issue   — certbot (docker) serverdə işləyir; TXT dəyəri bu logda «HostGator TXT qeydi»
-#                  kimi görünür və certbot qeyd bütün authoritative NS-lərdə görünənə qədər (≤45 dəq)
-#                  GÖZLƏYİR. Heç bir xidmətə toxunmur. Hesab e-poçtsuz qeydiyyatdan keçir (PII yox).
-#                  Məlumat serverdə /home/wcu/letsencrypt-də (APP_DIR-dən kənar, rsync silmir).
+#   mode=issue   — certbot (docker, fonda `ems-certbot`) başlayır; TXT dəyəri bu run-ın logunda
+#                  «HostGator TXT qeydi» kimi çıxır və run bitir (runner-i tutmur). Konteyner qeyd bütün
+#                  authoritative NS-lərdə görünənə qədər (≤45 dəq) gözləyir. Heç bir xidmətə toxunmur.
+#   mode=finish  — fondakı certbot bitənə qədər gözləyir, nəticəni və sertifikatı göstərir.
+#                  Hesab e-poçtsuz qeydiyyatdan keçir (PII yox). Məlumat serverdə /home/wcu/letsencrypt-də (APP_DIR-dən kənar, rsync silmir).
 #   mode=install — sertifikat validate_direct_tls.sh ilə yoxlanır → docker/nginx/certs/origin.{crt,key}
 #                  (köhnələri .bak-<tarix>), .env HEALTHCHECK_HOST=<domen> (deploy TLS yoxlaması domeni
 #                  yoxlayır), nginx -t + reload, blackbox yenidən; yoxlama zəncir doğrulaması ilə (-k YOX).
@@ -17,10 +18,10 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "issue (sertifikat al) / install (nginx-ə qoy)"
+        description: "issue (certbot başlat, TXT göstər) / finish (nəticəni götür) / install (nginx-ə qoy)"
         required: true
         type: choice
-        options: [issue, install]
+        options: [issue, finish, install]
         default: issue
       domain:
         description: "Domen"
@@ -35,7 +36,7 @@ on:
 
 concurrency:
   # issue uzun gözləyir — deploy növbəsini tutmasın; install isə deploy ilə eyni növbədə.
-  group: ${{ inputs.mode == 'install' && 'production-deploy' || 'prod-cert-issue' }}
+  group: ${{ inputs.mode == 'install' && 'production-deploy' || 'prod-cert' }}
   cancel-in-progress: false
 
 permissions:
@@ -102,25 +103,39 @@ jobs:
             --manual-auth-hook /hooks/auth.sh -d "$DOMAIN" \
             --agree-tos --register-unsafely-without-email --non-interactive \
             --key-type ecdsa --keep-until-expiring >/dev/null
-          shown=0
-          while [ "$(docker inspect -f '{{.State.Running}}' ems-certbot)" = "true" ]; do
-            if [ "$shown" = 0 ] && [ -s "$LE_DIR/hooks/challenge.txt" ]; then
-              read -r name value < "$LE_DIR/hooks/challenge.txt"
-              host="${name%.wcu.edu.az}"
-              echo "::notice title=HostGator TXT qeydi::Host/Name: ${host}  |  Type: TXT  |  Value: ${value}  |  TTL: 300"
-              echo "================ HostGator → DNS Zone Editor → wcu.edu.az → Add Record ================"
-              echo "  Type : TXT"
-              echo "  Name : ${host}        (tam ad: ${name})"
-              echo "  Value: ${value}"
-              echo "  TTL  : 300 (və ya ən kiçik icazə verilən)"
-              echo "======================================================================================="
-              shown=1
-            fi
-            sleep 10
-          done
-          code=$(docker inspect -f '{{.State.ExitCode}}' ems-certbot)
-          docker logs ems-certbot 2>&1 | grep -vi "account\|key" | tail -25
-          docker rm ems-certbot >/dev/null
+          for _ in $(seq 1 36); do [ -s "$LE_DIR/hooks/challenge.txt" ] && break; sleep 5; done
+          if [ ! -s "$LE_DIR/hooks/challenge.txt" ]; then
+            docker logs ems-certbot 2>&1 | tail -20
+            echo "::error::certbot TXT dəyərini vermədi"; exit 1
+          fi
+          read -r name value < "$LE_DIR/hooks/challenge.txt"
+          host="${name%.wcu.edu.az}"
+          echo "::notice title=HostGator TXT qeydi::Host/Name: ${host}  |  Type: TXT  |  Value: ${value}  |  TTL: 300"
+          echo "================ HostGator → DNS Zone Editor → wcu.edu.az → Add Record ================"
+          echo "  Type : TXT"
+          echo "  Name : ${host}        (tam ad: ${name})"
+          echo "  Value: ${value}"
+          echo "  TTL  : 300 (və ya ən kiçik icazə verilən)"
+          echo "======================================================================================="
+          echo "certbot fonda gözləyir (≤45 dəq). Qeyd əlavə olunandan sonra: mode=finish"
+
+      - name: ⏳ certbot nəticəsi (finish)
+        if: inputs.mode == 'finish'
+        run: |
+          set -euo pipefail
+          if docker inspect ems-certbot >/dev/null 2>&1; then
+            for _ in $(seq 1 330); do
+              [ "$(docker inspect -f '{{.State.Running}}' ems-certbot)" = "true" ] || break
+              sleep 10
+            done
+            code=$(docker inspect -f '{{.State.ExitCode}}' ems-certbot)
+            running=$(docker inspect -f '{{.State.Running}}' ems-certbot)
+            [ "$running" = "true" ] && { echo "::error::certbot hələ gözləyir (TXT görünmür)"; exit 1; }
+            docker logs ems-certbot 2>&1 | grep -vi "account\|private" | tail -25
+            docker rm ems-certbot >/dev/null
+          else
+            code=0; echo "fonda certbot konteyneri yoxdur — mövcud sertifikat yoxlanır"
+          fi
           # Fayllar root-a məxsus yaranıb — runner istifadəçisinə qaytar.
           docker run --rm -v "$LE_DIR:/le" alpine:3.20 chown -R "$(id -u):$(id -g)" /le
           if [ "$code" != 0 ]; then echo "::error::certbot uğursuz (exit $code) — loglar $LE_DIR/logs"; exit 1; fi
