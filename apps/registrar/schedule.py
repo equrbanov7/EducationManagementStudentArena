@@ -99,6 +99,7 @@ def create_slot(
         end_time=end_time,
         week_type=week_type,
         room=room,
+        kind=kind,
     )
     if conflict is not None:
         raise ScheduleConflict(conflict)
@@ -115,19 +116,27 @@ def create_slot(
     )
 
 
-def find_conflict(*, organization, offering, weekday, start_time, end_time, week_type, room, exclude_id=None):
+def find_conflict(
+    *, organization, offering, weekday, start_time, end_time, week_type, room, exclude_id=None, kind=None
+):
     """Return the first clashing slot (same group / instructor / room), or None.
 
     PARKLANMIŞ slotlar (``is_parked``) cədvəldə DEYİL — onlar məcburi
     dəyişiklikdə yerindən çıxarılıb yenidən yerləşdirilməyi gözləyir, ona görə
     heç kimin vaxtını tutmurlar. Yumşaq silinmişlər onsuz da default menecerdən
-    kənardadır (``SoftDeleteModel``)."""
+    kənardadır (``SoftDeleteModel``).
+
+    2026-09-25: (1) yalnız EYNİ semestrin slotları — keçən semestrin silinməmiş cədvəli yeni
+    semestrin eyni saatını bloklayırdı (açılışın dövrü yoxdursa köhnə davranış);
+    (2) birləşmiş mühazirə (axın): eyni müəllim, eyni fənn, hər ikisi mühazirə, eyni otaq (və ya
+    otaq boş) — müəllim eyni anda iki yerdə deyil, qruplar birlikdə oturur; bu, toqquşma deyil
+    (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü). Qrup toqquşması
+    həmişə toqquşmadır."""
     room_norm = (room or "").strip().lower()
-    candidates = (
-        ScheduleSlot.objects.filter(organization=organization, weekday=weekday, is_parked=False)
-        .exclude(pk=exclude_id)
-        .select_related("offering")
-    )
+    candidates = ScheduleSlot.objects.filter(organization=organization, weekday=weekday, is_parked=False)
+    if offering.period_id:
+        candidates = candidates.filter(offering__period_id=offering.period_id)
+    candidates = candidates.exclude(pk=exclude_id).select_related("offering")
     for slot in candidates:
         if not _time_ranges_overlap(start_time, end_time, slot.start_time, slot.end_time):
             continue
@@ -135,10 +144,26 @@ def find_conflict(*, organization, offering, weekday, start_time, end_time, week
             continue
         same_group = offering.group_id and slot.offering.group_id == offering.group_id
         same_instructor = offering.instructor_id and slot.offering.instructor_id == offering.instructor_id
-        same_room = room_norm and room_norm == (slot.room or "").strip().lower()
+        slot_room = (slot.room or "").strip().lower()
+        same_room = room_norm and room_norm == slot_room
+        if not same_group and _is_joint_lecture(offering, kind, room_norm, slot, slot_room):
+            continue
         if same_group or same_instructor or same_room:
             return slot
     return None
+
+
+def _is_joint_lecture(offering, kind, room_norm, slot, slot_room) -> bool:
+    """Axın: eyni müəllim + eyni fənn + hər ikisi mühazirə + eyni (və ya boş) otaq."""
+    return bool(
+        kind == SlotKind.LECTURE
+        and slot.kind == SlotKind.LECTURE
+        and offering.instructor_id
+        and slot.offering.instructor_id == offering.instructor_id
+        and offering.subject_id
+        and slot.offering.subject_id == offering.subject_id
+        and (not room_norm or not slot_room or room_norm == slot_room)
+    )
 
 
 def _slots_for(queryset):

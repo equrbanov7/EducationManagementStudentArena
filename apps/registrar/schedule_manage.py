@@ -277,6 +277,7 @@ def check_slot(*, offering, cleaned, exclude_id=None) -> dict:
         week_type=cleaned["week_type"],
         room=cleaned["room"],
         exclude_id=exclude_id,
+        kind=cleaned.get("kind"),
     )
     if conflict is not None:
         errors["conflict"] = pgettext(_CTX, "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s).") % {

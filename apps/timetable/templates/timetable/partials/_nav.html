@@ -1,0 +1,24 @@
+{% load i18n %}
+<header class="tt-top">
+  <div class="tt-top__title">
+    <h1 class="tt-top__h1"><i class="fas fa-calendar-days" aria-hidden="true"></i> {% trans "Avtomatik dərs cədvəli" context "timetable.page" %}</h1>
+    <p class="tt-top__sub">{% trans "Müəllim əlçatanlığı və qrup növbələri əsasında qrupda boşluqsuz həftəlik cədvəl qurulur; qaralama yoxlanıldıqdan sonra dərc edilir." context "timetable.page" %}</p>
+  </div>
+  {% if tt_period_choices %}
+  <form class="tt-top__period" method="get" action="" data-tt-autosubmit>
+    {% trans "Semestr" context "timetable.page" as tt_period_label %}
+    {% trans "Semestr seçin" context "timetable.page" as tt_period_placeholder %}
+    {% include "partials/_bootstrap_select_field.html" with field_id="tt-period" field_name="period" field_label=tt_period_label field_placeholder=tt_period_placeholder field_options=tt_period_choices field_value=tt_period_id field_wrapper_class="bootstrap-single-select--ems tt-top__select" field_select_class="ems-select" %}
+  </form>
+  {% endif %}
+</header>
+<nav class="tt-nav" aria-label="{% trans 'Avtomatik cədvəl bölmələri' context 'timetable.nav' %}">
+  {% for item in tt_nav %}
+    <a class="tt-nav__link{% if item.is_active %} is-active{% endif %}" href="{{ item.url }}"{% if item.is_active %} aria-current="page"{% endif %}>
+      <i class="fas {{ item.icon }}" aria-hidden="true"></i> {{ item.label }}
+    </a>
+  {% endfor %}
+  <a class="tt-nav__link tt-nav__link--aside" href="{{ tt_editor_url }}">
+    <i class="fas fa-pen-ruler" aria-hidden="true"></i> {% trans "Əl ilə redaktor" context "timetable.nav" %}
+  </a>
+</nav>

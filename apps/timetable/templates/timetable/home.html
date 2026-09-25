@@ -1,0 +1,87 @@
+{% extends "timetable/_layout.html" %}
+{% load i18n %}
+{% comment %}Ana səhifə — iş axını (4 addım) + semestrin işləmələri.{% endcomment %}
+
+{% block tt_content %}
+<ol class="tt-steps" aria-label="{% trans 'İş axını' context 'timetable.home' %}">
+  <li class="tt-steps__item">
+    <span class="tt-steps__no">1</span>
+    <div>
+      <a class="tt-steps__title" href="{% url 'timetable:availability' %}?period={{ tt_period_id }}">{% trans "Müəllim əlçatanlığı" context "timetable.home" %}</a>
+      <p class="tt-steps__text">{% trans "Gələ bilmədiyi günlər, olmayan və dəyişdirilə bilən saatlar, gündəlik limit, prioritet." context "timetable.home" %}</p>
+    </div>
+  </li>
+  <li class="tt-steps__item">
+    <span class="tt-steps__no">2</span>
+    <div>
+      <a class="tt-steps__title" href="{% url 'timetable:policies' %}?period={{ tt_period_id }}">{% trans "Qrup növbələri" context "timetable.home" %}</a>
+      <p class="tt-steps__text">{% trans "Bakalavr — səhər və günorta, magistr — yalnız axşam; istənilən qrup üçün istisna." context "timetable.home" %}</p>
+    </div>
+  </li>
+  <li class="tt-steps__item">
+    <span class="tt-steps__no">3</span>
+    <div>
+      <a class="tt-steps__title" href="{% url 'timetable:new_run' %}?period={{ tt_period_id }}">{% trans "Yoxla və işlət" context "timetable.home" %}</a>
+      <p class="tt-steps__text">{% trans "«Məlumatı yoxla» tələb ilə tutumu müqayisə edir; sonra mühərrik cədvəli qurur." context "timetable.home" %}</p>
+    </div>
+  </li>
+  <li class="tt-steps__item">
+    <span class="tt-steps__no">4</span>
+    <div>
+      <span class="tt-steps__title">{% trans "Bax, düzəlt, dərc et" context "timetable.home" %}</span>
+      <p class="tt-steps__text">{% trans "Qrup / müəllim / otaq şəbəkəsi, kilid və köçürmə; «Dərc et» canlı cədvəli bir dəfəyə yazır." context "timetable.home" %}</p>
+    </div>
+  </li>
+</ol>
+
+<section class="ems-card tt-card" aria-labelledby="tt-runs-title">
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title" id="tt-runs-title">{% trans "İşləmələr" context "timetable.home" %}</h2>
+      <p class="ems-card__sub">{% trans "Hər işləmə ayrıca qaralamadır — canlı cədvələ yalnız «Dərc et» ilə keçir." context "timetable.home" %}</p>
+    </div>
+    <a class="ems-btn ems-btn--primary" href="{% url 'timetable:new_run' %}?period={{ tt_period_id }}">
+      <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> {% trans "Yeni işləmə" context "timetable.home" %}
+    </a>
+  </div>
+  <div class="ems-card__body">
+    {% if runs %}
+    <div class="tt-table-wrap">
+      <table class="tt-table">
+        <thead>
+          <tr>
+            <th scope="col">{% trans "Əhatə" context "timetable.home" %}</th>
+            <th scope="col">{% trans "Status" context "timetable.home" %}</th>
+            <th scope="col" class="tt-num">{% trans "Yerləşdirilib" context "timetable.home" %}</th>
+            <th scope="col" class="tt-num">{% trans "Sərt pozuntu" context "timetable.home" %}</th>
+            <th scope="col" class="tt-num">{% trans "Müəllim boş cütü" context "timetable.home" %}</th>
+            <th scope="col">{% trans "Yaradan" context "timetable.home" %}</th>
+            <th scope="col"><span class="visually-hidden">{% trans "Əməliyyat" context "timetable.home" %}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for run in runs %}
+          <tr>
+            <td>
+              <a class="tt-link" href="{{ run.url }}">{{ run.title }}</a>
+              <span class="tt-muted">{{ run.scope_label }} · seed {{ run.seed }}</span>
+            </td>
+            <td><span class="ems-badge ems-badge--{{ run.tone }}">{{ run.status_label }}</span></td>
+            <td class="tt-num">{% if run.events is not None %}{{ run.placed }}/{{ run.events }}{% else %}—{% endif %}</td>
+            <td class="tt-num">{% if run.hard is not None %}{{ run.hard }}{% else %}—{% endif %}</td>
+            <td class="tt-num">{% if run.idle is not None %}{{ run.idle }}{% else %}—{% endif %}</td>
+            <td>{{ run.created_by }}<span class="tt-muted">{{ run.created_at|date:"d.m.Y H:i" }}</span></td>
+            <td class="tt-actions"><a class="ems-btn ems-btn--sm" href="{{ run.url }}">{% trans "Aç" context "timetable.home" %}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      {% trans "Bu semestr üçün hələ işləmə yoxdur" context "timetable.home" as empty_title %}
+      {% trans "Əvvəlcə müəllim əlçatanlığını və qrup növbələrini yoxlayın, sonra «Yeni işləmə» ilə cədvəl qurun." context "timetable.home" as empty_body %}
+      {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-calendar-plus" state_title=empty_title state_body=empty_body %}
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
