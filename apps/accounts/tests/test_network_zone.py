@@ -63,6 +63,19 @@ class ZoneMiddlewareTest(ViewAsTestBase):
         self.assertNotEqual(self._get(self.teacher, "/jurnal/", self.INT).status_code, 403)
 
     @override_settings(**ZONE)
+    def test_own_schedule_calendar_transcript_stay_open_outside(self):
+        for path in ("/jurnal/cedvel/", "/jurnal/teqvim/", "/jurnal/transkript.pdf", "/jurnal/cedvel/export.ics"):
+            response = self._get(self.student, path, self.EXT)
+            self.assertNotEqual(response.status_code, 403, path)
+        for path in (
+            "/jurnal/cedvel/slot/00000000-0000-0000-0000-000000000001/sil/",
+            "/jurnal/00000000-0000-0000-0000-000000000001/",
+            "/jurnal/cedvel/../",
+            "/jurnal/analitika/",
+        ):
+            self.assertEqual(self._get(self.teacher, path, self.EXT).status_code, 403, path)
+
+    @override_settings(**ZONE)
     def test_staff_is_blocked_outside_except_logout_and_allowed_inside(self):
         profile = reverse("accounts:profile")
         response = self._get(self.admin, profile, self.EXT)
