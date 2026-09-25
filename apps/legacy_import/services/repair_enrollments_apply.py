@@ -375,6 +375,11 @@ def apply_decided(context, decided: Decided, *, plan, plan_sha256: str) -> Count
                             new_values={
                                 "plan_sha256": plan_sha256,
                                 "restore_key": decision.record.get("restore_key", ""),
+                                **(
+                                    {"restore_keys": decision.record["restore_keys"]}
+                                    if len(decision.record.get("restore_keys") or ()) > 1
+                                    else {}
+                                ),
                                 **{k: v for k, v in decision.values.items() if k.endswith("_id") or k == "date"},
                             },
                         )
