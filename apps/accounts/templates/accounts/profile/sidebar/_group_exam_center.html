@@ -16,21 +16,8 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
             <i class="fas fa-chevron-down sidebar-menu-group-caret" aria-hidden="true"></i>
         </summary>
         <ul class="sidebar-menu-group-items">
-            {% comment %}
-            İmtahan Nəzarət Sistemi — zallar/oturumlar + canlı otaq nəzarəti.
-            İmtahan mərkəzi HƏMİŞƏ, müəllim-nəzarətçi yalnız təyin olunmuş oturumu
-            olduqda görür (bax role_capabilities.can_access_final_center).
-            {% endcomment %}
-            {% if role_capabilities.can_access_final_center %}
-            <li class="sidebar-menu-item">
-                <a href="{% url 'exams:exam_center_room_list' %}"
-                   class="sidebar-menu-link">
-                    <i class="fas fa-tower-observation sidebar-menu-icon sidebar-menu-icon--danger"></i>
-                    <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
-                    <i class="fas fa-arrow-up-right-from-square sidebar-menu-ext"></i>
-                </a>
-            </li>
-            {% endif %}
+            {# İmtahan Nəzarət Sistemi — müəllim-nəzarətçinin düz menyusu da eyni bəndi işlədir. #}
+            {% include "accounts/profile/sidebar/items/_final_center.html" %}
             {% if 'exam-center-pins' in allowed_sections %}
             <li class="sidebar-menu-item">
                 <a href="{{ profile_base_url }}?section=exam-center-pins"
@@ -38,7 +25,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'PIN axtarışı' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-pins' %}active{% endif %}">
-                    <i class="fas fa-key sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-key sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'PIN axtarışı' %}</span>
                 </a>
             </li>
@@ -50,7 +37,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'İmtahan statistikaları' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-center-stats' %}active{% endif %}">
-                    <i class="fas fa-chart-line sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-chart-line sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'İmtahan statistikaları' %}</span>
                 </a>
             </li>
@@ -62,7 +49,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'Apellyasiya statistikası' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'appeal-stats' %}active{% endif %}">
-                    <i class="fas fa-gavel sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-gavel sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'Apellyasiya statistikası' %}</span>
                 </a>
             </li>
@@ -74,7 +61,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'İmtahan şansı ver' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-chance' %}active{% endif %}">
-                    <i class="fas fa-rotate-right sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-rotate-right sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'İmtahan şansı ver' context 'profile.section' %}</span>
                 </a>
             </li>
@@ -86,7 +73,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'İmtahan balının daxil edilməsi' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'exam-score-entry' %}active{% endif %}">
-                    <i class="fas fa-pen-to-square sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-pen-to-square sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'İmtahan balının daxil edilməsi' %}</span>
                 </a>
             </li>
@@ -98,7 +85,7 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
                    data-title="{% trans 'Köçürülmüş nəticələrin dəqiqləşdirilməsi' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'legacy-grade-review' %}active{% endif %}">
-                    <i class="fas fa-clock-rotate-left sidebar-menu-icon sidebar-menu-icon--danger"></i>
+                    <i class="fas fa-clock-rotate-left sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans 'Köçürülmüş nəticələr' context 'profile.section' %}</span>
                 </a>
             </li>
@@ -107,11 +94,11 @@ akkordeon onları qonşu qrupa salırdı.{% endcomment %}
             <li class="sidebar-menu-item">
                 <a href="{{ profile_base_url }}?section=kollokvium-windows"
                    data-section="kollokvium-windows"
-                   data-title="{% trans 'Kollokvium pəncərələri' context 'profile.section' %}"
+                   data-title="{% trans 'Midterm pəncərələri' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'kollokvium-windows' %}active{% endif %}">
-                    <i class="fas fa-calendar-check sidebar-menu-icon sidebar-menu-icon--danger"></i>
-                    <span class="sidebar-menu-text">{% trans 'Kollokvium pəncərələri' %}</span>
+                    <i class="fas fa-calendar-check sidebar-menu-icon sidebar-menu-icon--danger" aria-hidden="true"></i>
+                    <span class="sidebar-menu-text">{% trans 'Midterm pəncərələri' context 'profile.section' %}</span>
                 </a>
             </li>
             {% endif %}

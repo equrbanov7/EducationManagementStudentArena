@@ -76448,3 +76448,27 @@ msgid ""
 msgstr ""
 "Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
 "bilərsiniz."
+
+msgctxt "profile.sidebar"
+msgid "Tələbə kabineti"
+msgstr "Tələbə kabineti"
+
+msgctxt "profile.sidebar"
+msgid "Müəllim kabineti"
+msgstr "Müəllim kabineti"
+
+msgctxt "profile.sidebar"
+msgid "Şəxsi kabinet"
+msgstr "Şəxsi kabinet"
+
+msgctxt "profile.sidebar"
+msgid "Kabinet menyusu"
+msgstr "Kabinet menyusu"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq və imtahanlar"
+msgstr "Tapşırıq və imtahanlar"
+
+msgctxt "profile.sidebar"
+msgid "Ünsiyyət"
+msgstr "Ünsiyyət"

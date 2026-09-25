@@ -1,49 +1,47 @@
-{% load i18n %}
+{% load i18n static profile_shell %}
 {% comment %}
-Kabinet sol menyusu — QRUP-ƏSASLI quruluş (2026-09-10 redizaynı).
+Kabinet sol menyusu — İKİ DÜZÜM (2026-09-25 redizaynı; əvvəlki: 2026-09-10).
 
 NİYƏ BELƏDİR
 ------------
-1. Qruplar SERVER tərəfdə nativ `<details>` kimi render olunur. Əvvəllər
-   `ui.js` düz siyahını yükləndikdən SONRA akkordeona çevirirdi:
-   • yüklənəndə «hamısı açıq» sıçrayışı görünürdü,
-   • JS işləməyəndə (və ya `initSidebarAccordionMenu` çağırılmayanda) menyu
-     düz siyahı kimi qalırdı,
-   • qrup başlığından SONRA gələn, amma heç bir qrupa aid olmayan bəndlər
-     (məs. «Bildiriş göndər») təsadüfən qonşu qrupun içinə düşürdü.
-   `<details>` bunların hamısını həll edir: JS-siz açılır-bağlanır, klaviatura
-   və ekran oxuyucu dəstəyi nativdir.
+1. DÜZ MENYU — tələbə və müəllim (sahib 2026-09-25: «bölmə azdır, açılan
+   menyulara ehtiyac yoxdur, hər şey görünsün»). Canvas / Google Classroom /
+   GitHub tipli naviqasiya: akkordeon, ox, sayğac yoxdur; bölmə adı sakit
+   etiketdir, bəndlər iş tezliyinə görə düzülüb (`sidebar/compact/*.html`).
+   Düzümü `{% profile_sidebar_layout %}` seçir (`templatetags/profile_shell.py`):
+   «student» / «teacher» YALNIZ o halda qayıdır ki, istifadəçinin HƏR icazəli
+   bölməsi həmin ağacda olsun. Qarışıq rol (məs. müəllim + dekan müavini,
+   tələbə + müəllim, tələbə idarəetməsi həvaləsi) → «full», yəni aşağıdakı tam
+   akkordeon: heç bir bənd itmir.
 
-2. `sidebar_menu_size` — menyunun «çəkisi». AZ BƏNDLİ rolda (tələbə, müəllim,
-   tyutor, məzun) bütün qruplar AÇIQ gəlir ki, menyu boş/yarımçıq görünməsin;
-   ÇOX BƏNDLİ rolda (dekan, kafedra müdiri, RİM, rektor) yalnız AKTİV bölmənin
-   qrupu açıq olur ki, 60 bəndlik divar yaranmasın.
-   Ölçü `allowed_sections` sayından götürülür — o, render olunan bənd sayı ilə
-   ±3 fərqlə üst-üstə düşür (tələbə 20/18, müəllim 24/21, dekan 48/45,
-   RİM 65/62), ona görə şablonda ayrıca saymağa ehtiyac yoxdur.
-   HƏDD: `sidebar_menu_size < 32` (hər qrup faylında təkrarlanır — Django
-   şablonunda dəyişənə mənimsətmə yoxdur). Bu həddə görə tələbə, məzun, tyutor,
-   müəllim, tələbə xidmətləri, tədris şöbəsi və koordinator menyusu TAM AÇIQ,
-   imtahan mərkəzi/dekan/kafedra/prorektor/rektor/RİM menyusu isə AKKORDEON
-   olur.
+2. AKKORDEON — heyət rolları (dekan, kafedra, RİM, rektor, imtahan mərkəzi…).
+   Qruplar SERVER tərəfdə nativ `<details>`-dir (JS-siz açılır, klaviatura və
+   ekran oxuyucu dəstəyi nativdir). `sidebar_menu_size` (= `allowed_sections`
+   sayı) < 32 olan AZ BƏNDLİ heyətdə (tyutor, koordinator, tələbə xidmətləri…)
+   bütün qruplar AÇIQ gəlir; ÇOX BƏNDLİ rolda yalnız AKTİV bölmənin qrupu.
+   HƏDD hər qrup faylında təkrarlanır (Django şablonunda mənimsətmə yoxdur).
+   `sidebar_active_key` — `|bölmə|` formatlı açar; sərhəd simvolları qismən
+   uyğunluğun qarşısını alır (`|posts|` ⊄ `|pending-post-approvals|`).
 
-3. `sidebar_active_key` — qrupun «içimdə aktiv bölmə var?» yoxlaması üçün
-   `|bölmə|` formatlı açar. Sərhəd simvolları qismən uyğunluğun qarşısını alır
-   (`|posts|` açarı `|pending-post-approvals|` sətrinə düşmür).
+3. BƏND TƏK YERDƏDİR — tələbə/müəllimin gördüyü hər bənd `sidebar/items/`-də
+   ayrıca faylda (markup + görünürlük şərti); həm akkordeon qrupları, həm düz
+   ağaclar onu daxil edir. `data-section` / `href` / `data-source-url` /
+   `data-badge-key` iki düzümdə eynidir.
+
+4. ALT BLOK — hesab kartı (`sidebar/_group_account.html`): inisiallar, ad,
+   rol, «Profili redaktə et» · «Şifrəni dəyiş» · «Çıxış». Dil seçimi navbar-da
+   (masaüstü + mobil) olduğu üçün sidebar-dan çıxarılıb.
+
+⚠️ `<aside class="profile-sidebar"` açılışı OLDUĞU KİMİ qalmalıdır (testlər
+bu mətnlə sidebar-ı kəsib götürür) — düzüm `data-sidebar-layout`-dadır.
 
 GÖRÜNÜRLÜK MƏNTİQİ BURADA DEYİL — `views/_helpers/rbac.py` → `allowed_sections`.
 Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada durur.
-
-Qruplar (hər biri ayrı fayl — modul ölçü büdcəsi + məsuliyyət ayrımı):
-  Ümumi · Tədrisim · Dərs və cədvəl · Dərs yükü · Sillabus və sual ·
-  İmtahan və qiymətləndirmə · İmtahan mərkəzi · Tədris şöbəsi ·
-  Tələbə və heyət · Universitet idarəetməsi · İdarəetmə · Sistem ·
-  Bloq və məzmun · (alt blok) Dil + Hesab
 {% endcomment %}
-
-<aside class="profile-sidebar" id="profileSidebar">
+{% profile_sidebar_layout as sidebar_layout %}
+<aside class="profile-sidebar" id="profileSidebar" data-sidebar-layout="{{ sidebar_layout }}">
     <div class="sidebar-header">
-        <h2 class="sidebar-title">{% trans "title" context "profile.sidebar" %}</h2>
+        <h2 class="sidebar-title">{% if sidebar_layout == "student" %}{% trans "Tələbə kabineti" context "profile.sidebar" %}{% elif sidebar_layout == "teacher" %}{% trans "Müəllim kabineti" context "profile.sidebar" %}{% else %}{% trans "Şəxsi kabinet" context "profile.sidebar" %}{% endif %}</h2>
         {# A11y (Codex §19, 2026-09-13): ikon-düymə — ad + vəziyyət ekran oxuyucuya; JS (ui.js) sinxron saxlayır #}
         <button type="button"
                 class="sidebar-toggle"
@@ -63,22 +61,35 @@ Qruplar (hər biri ayrı fayl — modul ölçü büdcəsi + məsuliyyət ayrım�
     düşür, yəni menyu həmişə tam açıq qalardı.{% endcomment %}
     {% with sidebar_section=active_section|default_if_none:"" %}
     {% with sidebar_menu_size=allowed_sections|length sidebar_active_key="|"|add:sidebar_section|add:"|" %}
-    <ul class="sidebar-menu">
-        {% include "accounts/profile/sidebar/_group_general.html" %}
-        {% include "accounts/profile/sidebar/_group_my_studies.html" %}
-        {% include "accounts/profile/sidebar/_group_lessons.html" %}
-        {% include "accounts/profile/sidebar/_group_workload.html" %}
-        {% include "accounts/profile/sidebar/_group_syllabus.html" %}
-        {% include "accounts/profile/sidebar/_group_assessment.html" %}
-        {% include "accounts/profile/sidebar/_group_exam_center.html" %}
-        {% include "accounts/profile/sidebar/_group_teaching_office.html" %}
-        {% include "accounts/profile/sidebar/_group_people.html" %}
-        {% include "accounts/profile/sidebar/_group_university_admin.html" %}
-        {% include "accounts/profile/sidebar/_group_management.html" %}
-        {% include "accounts/profile/sidebar/_group_system.html" %}
-        {% include "accounts/profile/sidebar/_group_content.html" %}
-        {% include "accounts/profile/sidebar/_group_account.html" %}
-    </ul>
+    <nav class="sidebar-nav" aria-label="{% trans 'Kabinet menyusu' context 'profile.sidebar' %}">
+        <ul class="sidebar-menu">
+            {% if sidebar_layout == "student" %}
+            {% include "accounts/profile/sidebar/compact/_student.html" %}
+            {% elif sidebar_layout == "teacher" %}
+            {% include "accounts/profile/sidebar/compact/_teacher.html" %}
+            {% else %}
+            {% include "accounts/profile/sidebar/_group_general.html" %}
+            {% include "accounts/profile/sidebar/_group_my_studies.html" %}
+            {% include "accounts/profile/sidebar/_group_lessons.html" %}
+            {% include "accounts/profile/sidebar/_group_workload.html" %}
+            {% include "accounts/profile/sidebar/_group_syllabus.html" %}
+            {% include "accounts/profile/sidebar/_group_assessment.html" %}
+            {% include "accounts/profile/sidebar/_group_exam_center.html" %}
+            {% include "accounts/profile/sidebar/_group_teaching_office.html" %}
+            {% include "accounts/profile/sidebar/_group_people.html" %}
+            {% include "accounts/profile/sidebar/_group_university_admin.html" %}
+            {% include "accounts/profile/sidebar/_group_management.html" %}
+            {% include "accounts/profile/sidebar/_group_system.html" %}
+            {% include "accounts/profile/sidebar/_group_content.html" %}
+            {% endif %}
+        </ul>
+    </nav>
     {% endwith %}
     {% endwith %}
+    {% include "accounts/profile/sidebar/_group_account.html" %}
 </aside>
+{% comment %}Rels rejiminin tooltip-ləri, üfüqi sürüşmə qoruyucusu və düz menyuda aktiv bəndin
+görünən sahəyə gətirilməsi — sidebar həm SPA qabığında, həm embed səhifələrdə
+(`profile_sidebar` teqi) bu partial ilə gəlir, ona görə skript də burada yüklənir
+(`defer`; EMSReady / EMSReady.once — AJAX-safe, idempotent).{% endcomment %}
+<script src="{% static 'accounts/js/profile/sidebar_nav.js' %}?v=20260925-1" defer></script>

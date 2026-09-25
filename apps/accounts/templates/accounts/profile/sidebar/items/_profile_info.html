@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}«Profil məlumatları» — HƏR rolda görünür (şərtsiz).
+
+`sidebar/items/` qovluğu (2026-09-25): hər fayl BİR menyu bəndidir və həm
+heyətin akkordeon qrupları (`sidebar/_group_*.html`), həm tələbə/müəllimin
+düz menyusu (`sidebar/compact/*.html`) EYNİ faylı daxil edir. Markup
+(`href` → `data-section` → … → `class` sırası — QA süpürgəsinin regex-i buna
+söykənir), badge açarı və GÖRÜNÜRLÜK ŞƏRTİ yalnız burada yazılır; iki düzüm
+bir-birindən ayrıla bilmir.{% endcomment %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=profile-info"
+       data-section="profile-info"
+       data-title="{% trans 'profile_info' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'profile-info' %}active{% endif %}">
+        <i class="fas fa-user sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "profile_info" context "profile.sidebar" %}</span>
+    </a>
+</li>

@@ -76942,3 +76942,27 @@ msgid ""
 "bilərsiniz."
 msgstr ""
 "У вас нет открытых обращений — новое можно отправить в разделе «Обращения»."
+
+msgctxt "profile.sidebar"
+msgid "Tələbə kabineti"
+msgstr "Кабинет студента"
+
+msgctxt "profile.sidebar"
+msgid "Müəllim kabineti"
+msgstr "Кабинет преподавателя"
+
+msgctxt "profile.sidebar"
+msgid "Şəxsi kabinet"
+msgstr "Личный кабинет"
+
+msgctxt "profile.sidebar"
+msgid "Kabinet menyusu"
+msgstr "Меню кабинета"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq və imtahanlar"
+msgstr "Задания и экзамены"
+
+msgctxt "profile.sidebar"
+msgid "Ünsiyyət"
+msgstr "Общение"

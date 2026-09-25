@@ -28,7 +28,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-force-navigation="true"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'superadmin-contact-messages' %}active{% endif %}">
-                    <i class="fas fa-inbox sidebar-menu-icon"></i>
+                    <i class="fas fa-inbox sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Contact Messages" %}</span>
                     {% if contact_unhandled_count and contact_unhandled_count > 0 %}
                     <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="contact_unhandled_count">{{ contact_unhandled_count }}</span>
@@ -44,7 +44,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-title="{% trans 'posts' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'posts' %}active{% endif %}">
-                    <i class="fas fa-newspaper sidebar-menu-icon"></i>
+                    <i class="fas fa-newspaper sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "posts" context "profile.sidebar" %}</span>
                     {% if posts_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="posts_count">{{ posts_count }}</span>{% endif %}
                 </a>
@@ -58,7 +58,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-title="{% trans 'create_post' context 'profile.section' %}"
                    data-source-url="{% url 'create_post' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-post' %}active{% endif %}">
-                    <i class="fas fa-plus-circle sidebar-menu-icon"></i>
+                    <i class="fas fa-plus-circle sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "create_post" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -71,7 +71,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-title="{% trans 'Create category' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'create-category' %}active{% endif %}">
-                    <i class="fas fa-folder-plus sidebar-menu-icon"></i>
+                    <i class="fas fa-folder-plus sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Create category" %}</span>
                 </a>
             </li>
@@ -84,7 +84,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-title="{% trans 'Categories' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'category-management' %}active{% endif %}">
-                    <i class="fas fa-sitemap sidebar-menu-icon"></i>
+                    <i class="fas fa-sitemap sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Categories" %}</span>
                 </a>
             </li>
@@ -97,7 +97,7 @@ xəbər/post lenti ana səhifədədir, kabinet akademikdir.{% endcomment %}
                    data-title="{% trans 'post_management' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-post-approvals' %}active{% endif %}">
-                    <i class="fas fa-user-check sidebar-menu-icon"></i>
+                    <i class="fas fa-user-check sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "post_management" context "profile.sidebar" %}</span>
                     {% if pending_post_approval_count > 0 %}
                     <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_post_approval_count">{{ pending_post_approval_count }}</span>

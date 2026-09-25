@@ -1,0 +1,14 @@
+{% load i18n %}
+{# «Sillabuslar» — redaktor (`syllabus-editor`) siyahıdan açılır və bu bəndi aktiv saxlayır (ayrıca menyu sətri yoxdur). #}
+{% if "syllabus-list" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=syllabus-list"
+       data-section="syllabus-list"
+       data-title="{% trans 'Sillabuslar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-list' or active_section == 'syllabus-editor' %}active{% endif %}">
+        <i class="fas fa-file-lines sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Sillabuslar" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

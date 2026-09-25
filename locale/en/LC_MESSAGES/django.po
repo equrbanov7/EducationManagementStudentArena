@@ -76793,3 +76793,27 @@ msgid ""
 msgstr ""
 "You have no open applications — you can submit a new one in the "
 "“Applications” section."
+
+msgctxt "profile.sidebar"
+msgid "Tələbə kabineti"
+msgstr "Student portal"
+
+msgctxt "profile.sidebar"
+msgid "Müəllim kabineti"
+msgstr "Teacher portal"
+
+msgctxt "profile.sidebar"
+msgid "Şəxsi kabinet"
+msgstr "My portal"
+
+msgctxt "profile.sidebar"
+msgid "Kabinet menyusu"
+msgstr "Portal menu"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq və imtahanlar"
+msgstr "Tasks & exams"
+
+msgctxt "profile.sidebar"
+msgid "Ünsiyyət"
+msgstr "Communication"

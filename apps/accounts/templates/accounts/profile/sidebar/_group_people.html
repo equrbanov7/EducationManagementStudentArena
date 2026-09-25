@@ -32,7 +32,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbə qəbulu' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-admission' %}active{% endif %}">
-                    <i class="fas fa-user-plus sidebar-menu-icon"></i>
+                    <i class="fas fa-user-plus sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbə qəbulu" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -44,7 +44,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbə reyestri' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-registry' %}active{% endif %}">
-                    <i class="fas fa-address-book sidebar-menu-icon"></i>
+                    <i class="fas fa-address-book sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbə reyestri" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -56,7 +56,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Tələbələr' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-students' %}active{% endif %}">
-                    <i class="fas fa-user-graduate sidebar-menu-icon"></i>
+                    <i class="fas fa-user-graduate sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Tələbələr" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -68,7 +68,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Müəllimlər' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'people-teachers' %}active{% endif %}">
-                    <i class="fas fa-chalkboard-user sidebar-menu-icon"></i>
+                    <i class="fas fa-chalkboard-user sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Müəllimlər" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -80,7 +80,7 @@ Hamısı AJAX-safe SPA bölmələridir: panel sağda açılır, SOL SIDEBAR QALI
                    data-title="{% trans 'Akademik qeydlər' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'academic-records' %}active{% endif %}">
-                    <i class="fas fa-graduation-cap sidebar-menu-icon"></i>
+                    <i class="fas fa-graduation-cap sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "Akademik qeydlər" context "profile.sidebar" %}</span>
                 </a>
             </li>

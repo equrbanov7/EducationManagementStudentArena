@@ -76342,3 +76342,27 @@ msgid ""
 "bilərsiniz."
 msgstr ""
 "Açık başvurunuz yok — yenisini «Başvurular» bölümünden gönderebilirsiniz."
+
+msgctxt "profile.sidebar"
+msgid "Tələbə kabineti"
+msgstr "Öğrenci paneli"
+
+msgctxt "profile.sidebar"
+msgid "Müəllim kabineti"
+msgstr "Öğretmen paneli"
+
+msgctxt "profile.sidebar"
+msgid "Şəxsi kabinet"
+msgstr "Kişisel panel"
+
+msgctxt "profile.sidebar"
+msgid "Kabinet menyusu"
+msgstr "Panel menüsü"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq və imtahanlar"
+msgstr "Görevler ve sınavlar"
+
+msgctxt "profile.sidebar"
+msgid "Ünsiyyət"
+msgstr "İletişim"
