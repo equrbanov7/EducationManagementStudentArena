@@ -1,0 +1,10 @@
+{% if 'evaluation-campaigns' in allowed_sections %}
+{% comment %}«Sorğu kampaniyaları» (survey.manage) — dövr üzrə kampaniyalar, iştirak faizi,
+açmaq/bağlamaq/uzatmaq/möhlət/k-həddi/məcburilik. Formalar `surveys:manage`-ə POST edir və
+`next` ilə bu bölməyə qayıdır. Tam səhifə bölmədir (AJAX-safe siyahısında deyil).{% endcomment %}
+<section class="profile-section-panel profile-section--evaluation-campaigns {% if active_section == 'evaluation-campaigns' %}is-active{% endif %}"
+         data-profile-section-panel="evaluation-campaigns"
+         data-source-url="{{ profile_base_url }}?section=evaluation-campaigns">
+    {% include "surveys/cabinet/_campaigns_panel.html" %}
+</section>
+{% endif %}

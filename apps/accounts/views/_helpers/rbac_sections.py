@@ -262,6 +262,16 @@ def apply_permission_section_gates(
         or has_permission(permissions, "journal.lessons_unit")
     )
 
+    # «Anonim sorğu» (apps.surveys, 2026-09-25) — nəticələr `survey.results.view`
+    # (əhatə servisdə `get_permission_scope` ilə FAIL-CLOSED daralır: kafedra müdiri
+    # yalnız öz kafedrasını görür), kampaniyalar `survey.manage`. Tələbə bölməsi
+    # icazəyə yox, qapı middleware-inin bu sorğuda hesabladığı vəziyyətə bağlıdır
+    # (açıq kampaniyada hədəfi olan tələbə) — sıfır sorğu; view-as altında yoxdur.
+    from apps.surveys.public import student_section_visible
+
+    can_view_survey_results = privileged or has_permission(permissions, "survey.results.view")
+    can_manage_surveys = privileged or has_permission(permissions, "survey.manage")
+
     for enabled, section in (
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
@@ -298,6 +308,9 @@ def apply_permission_section_gates(
         (can_import_students, "student-admission"),
         (can_view_student_registry, "student-registry"),
         (can_supervise_lessons, "lessons-log"),
+        (can_view_survey_results, "evaluation-results"),
+        (can_manage_surveys, "evaluation-campaigns"),
+        (student_section_visible(user), "evaluation-survey"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -335,6 +348,8 @@ def apply_permission_section_gates(
         "can_view_semester": can_view_semester,
         "can_open_semester": can_open_semester,
         "can_supervise_lessons": can_supervise_lessons,
+        "can_view_survey_results": can_view_survey_results,
+        "can_manage_surveys": can_manage_surveys,
     }
 
 

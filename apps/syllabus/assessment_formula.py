@@ -1,7 +1,7 @@
 """Qiymətləndirmə strukturu — UNİVERSİTET STANDARTI (sahib qərarı 2026-09-20).
 
-«Balı müəllim tənzimləmir, standartdır»: davamiyyət 10 · kollokvium (aralıq)
-20 · sərbəst iş 10 · seminar/laboratoriya ədədi ortası 10 → semestr 50; yekun
+«Balı müəllim tənzimləmir, standartdır»: davamiyyət 10 · midterm (aralıq
+imtahan) 20 · sərbəst iş 10 · seminar/laboratoriya ədədi ortası 10 → semestr 50; yekun
 imtahan 50; cəmi 100.  Müəllim heç nə seçmir — YALNIZ fəaliyyət növü (seminar,
 laboratoriya və ya hər ikisi) tədris yükündən (TAPŞIRIQ sətri) gəlir və
 düsturda göstərilir:
@@ -32,7 +32,8 @@ LAB = "lab"
 
 LABELS = {
     "attendance": pgettext_lazy(_CTX, "Davamiyyət"),
-    "midterm": pgettext_lazy(_CTX, "Kollokvium (aralıq qiymətləndirmə)"),
+    # Sahib 2026-09-25: 3 kollokvium → TƏK midterm (20 bal) — ad hər yerdə «Midterm».
+    "midterm": pgettext_lazy(_CTX, "Midterm (aralıq imtahan)"),
     "selfwork": pgettext_lazy(_CTX, "Sərbəst iş"),
     "final": pgettext_lazy(_CTX, "Yekun imtahan"),
 }

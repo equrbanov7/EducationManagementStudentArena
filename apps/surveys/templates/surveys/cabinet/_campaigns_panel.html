@@ -1,0 +1,122 @@
+{% load i18n static survey_cabinet %}
+{% comment %}«Sorğu kampaniyaları» (survey.manage) — dövr başına kampaniya: status, iştirak,
+tarixlər, k-həddi, məcburilik. Formalar `surveys:manage`-ə POST edir və `next` ilə bu
+bölməyə qayıdır (tam səhifə bölmə — panel içi fraqment naviqasiyası YOXDUR).
+Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260925-1">
+{% survey_campaigns_panel as cp %}
+<div class="svc">
+    {% if not cp.has_access %}
+    <p class="svc-empty">{% trans "Kampaniyaları idarə etmək üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır." context "surveys.cabinet" %}</p>
+    {% else %}
+    <p class="svc-intro">{% blocktrans trimmed with days=cp.config.close_after_days grace=cp.config.grace_days context "surveys.cabinet" %}RİM semestr jurnallarını bağlayanda həmin dövrün sorğusu özü açılır: {{ days }} gün açıq qalır, ilk {{ grace }} gün tələbə «Sonra doldur» deyə bilər, sonra kabinet sorğu doldurulmayınca açılmır. Burada kampaniyanı əl ilə də aça, bağlaya və uzada bilərsiniz.{% endblocktrans %}</p>
+
+    {% if cp.periods %}
+    <form method="post" action="{{ cp.post_url }}" class="svc-new">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="create_open">
+        <input type="hidden" name="next" value="{{ cp.next_url }}">
+        <div class="svc-field">
+            <label for="svc-new-period">{% trans "Yeni kampaniya — semestr" context "surveys.cabinet" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="svc-new-period" name="period" class="bootstrap-single-select__native" data-bootstrap-select required>
+                    {% for period in cp.periods %}
+                    <option value="{{ period.id }}">{{ period.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="svc-btn svc-btn--primary" data-ems-confirm="{% trans 'Seçilmiş semestr üçün sorğu kampaniyası açılsın? Tələbələrə bildiriş göndəriləcək.' context 'surveys.cabinet' %}" data-ems-confirm-danger="false">
+            <i class="fas fa-play" aria-hidden="true"></i> {% trans "Kampaniyanı aç" context "surveys.cabinet" %}
+        </button>
+    </form>
+    {% endif %}
+
+    {% for row in cp.rows %}
+    <article class="svc-camp svc-camp--{{ row.effective_status }}" aria-labelledby="svc-camp-{{ forloop.counter }}">
+        <header class="svc-camp__head">
+            <h3 id="svc-camp-{{ forloop.counter }}" class="svc-camp__title">{{ row.period_name }} <span class="svc-camp__year">{{ row.academic_year }}</span></h3>
+            <span class="svc-chip svc-chip--{{ row.effective_status }}">
+                {% if row.effective_status == "open" %}{% trans "Açıq" context "surveys.cabinet" %}
+                {% elif row.effective_status == "scheduled" %}{% trans "Planlaşdırılıb" context "surveys.cabinet" %}
+                {% elif row.effective_status == "draft" %}{% trans "Qaralama" context "surveys.cabinet" %}
+                {% else %}{% trans "Bağlı" context "surveys.cabinet" %}{% endif %}
+            </span>
+            <span class="svc-chip svc-chip--muted">{% if row.opened_via == "journal_close" %}{% trans "Jurnal bağlanması ilə" context "surveys.cabinet" %}{% else %}{% trans "Əl ilə" context "surveys.cabinet" %}{% endif %}</span>
+            {% if row.mandatory %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.cabinet" %}</span>{% endif %}
+        </header>
+
+        <dl class="svc-stats">
+            <div><dt>{% trans "Cavablar" context "surveys.cabinet" %}</dt><dd>{{ row.responses }}</dd></div>
+            <div><dt>{% trans "Doldurulmuş hədəf" context "surveys.cabinet" %}</dt><dd>{{ row.receipts }}</dd></div>
+            {% if row.participation %}
+            <div><dt>{% trans "Gözlənilən" context "surveys.cabinet" %}</dt><dd>{{ row.participation.expected }}</dd></div>
+            <div><dt>{% trans "İştirak" context "surveys.cabinet" %}</dt><dd>{% if row.participation.rate is not None %}{% widthratio row.participation.rate 1 100 %}%{% else %}—{% endif %}</dd></div>
+            {% endif %}
+            <div><dt>{% trans "Açılış" context "surveys.cabinet" %}</dt><dd>{{ row.opens_on|date:"d.m.Y"|default:"—" }}</dd></div>
+            <div><dt>{% trans "Bağlanma" context "surveys.cabinet" %}</dt><dd>{{ row.closes_on|date:"d.m.Y"|default:"—" }}</dd></div>
+            <div><dt>{% trans "«Sonra» möhləti" context "surveys.cabinet" %}</dt><dd>{{ row.grace_until|date:"d.m.Y"|default:"—" }}</dd></div>
+            <div><dt>{% trans "Minimum qrup (k)" context "surveys.cabinet" %}</dt><dd>{{ row.min_group_size }}</dd></div>
+        </dl>
+
+        <form method="post" action="{{ cp.post_url }}" class="svc-edit">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="campaign" value="{{ row.id }}">
+            <input type="hidden" name="next" value="{{ cp.next_url }}">
+            <div class="svc-field">
+                <label for="svc-close-{{ forloop.counter }}">{% trans "Bağlanma tarixi" context "surveys.cabinet" %}</label>
+                <input id="svc-close-{{ forloop.counter }}" class="svc-input" type="date" name="closes_on" value="{{ row.closes_on|date:'Y-m-d' }}">
+            </div>
+            <div class="svc-field">
+                <label for="svc-grace-{{ forloop.counter }}">{% trans "«Sonra doldur» son günü" context "surveys.cabinet" %}</label>
+                <input id="svc-grace-{{ forloop.counter }}" class="svc-input" type="date" name="grace_until" value="{{ row.grace_until|date:'Y-m-d' }}">
+            </div>
+            <div class="svc-field svc-field--narrow">
+                <label for="svc-k-{{ forloop.counter }}">{% trans "Minimum qrup (k)" context "surveys.cabinet" %}</label>
+                <input id="svc-k-{{ forloop.counter }}" class="svc-input" type="number" name="min_group_size" min="{{ cp.k_floor }}" max="{{ cp.k_ceil }}" value="{{ row.min_group_size }}">
+            </div>
+            <label class="svc-check">
+                <input type="checkbox" name="mandatory" value="1"{% if row.mandatory %} checked{% endif %}>
+                <span>{% trans "Məcburi (kabineti bağlayır)" context "surveys.cabinet" %}</span>
+            </label>
+            <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "surveys.cabinet" %}</button>
+        </form>
+
+        <div class="svc-camp__actions">
+            {% if row.is_draft %}
+            <form method="post" action="{{ cp.post_url }}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="open">
+                <input type="hidden" name="campaign" value="{{ row.id }}">
+                <input type="hidden" name="next" value="{{ cp.next_url }}">
+                <button type="submit" class="svc-btn svc-btn--primary"><i class="fas fa-play" aria-hidden="true"></i> {% trans "Aç" context "surveys.cabinet" %}</button>
+            </form>
+            {% elif row.is_closed %}
+            <form method="post" action="{{ cp.post_url }}" class="svc-reopen">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="reopen">
+                <input type="hidden" name="campaign" value="{{ row.id }}">
+                <input type="hidden" name="next" value="{{ cp.next_url }}">
+                <label class="svc-sr" for="svc-reopen-{{ forloop.counter }}">{% trans "Yeni bağlanma tarixi" context "surveys.cabinet" %}</label>
+                <input id="svc-reopen-{{ forloop.counter }}" class="svc-input" type="date" name="closes_on" min="{{ cp.today|date:'Y-m-d' }}" required>
+                <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən aç" context "surveys.cabinet" %}</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ cp.post_url }}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="close">
+                <input type="hidden" name="campaign" value="{{ row.id }}">
+                <input type="hidden" name="next" value="{{ cp.next_url }}">
+                <button type="submit" class="svc-btn svc-btn--danger" data-ems-confirm="{% trans 'Kampaniya bağlansın? Tələbələr artıq cavab göndərə bilməyəcək və kabinet qapısı açılacaq.' context 'surveys.cabinet' %}">
+                    <i class="fas fa-lock" aria-hidden="true"></i> {% trans "Bağla" context "surveys.cabinet" %}
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </article>
+    {% empty %}
+    <p class="svc-empty">{% trans "Hələ heç bir sorğu kampaniyası yoxdur. İlk kampaniya RİM jurnalları bağlayanda özü yaranır və ya yuxarıdan əl ilə açılır." context "surveys.cabinet" %}</p>
+    {% endfor %}
+    {% endif %}
+</div>

@@ -14,6 +14,8 @@ from . import (
     guest_roster_views,
     individual_plan_views,
     journal_actions,
+    journal_activation,
+    journal_history,
     journal_lesson_lookup,
     lessons_log_views,
     pdf_views,
@@ -103,6 +105,14 @@ urlpatterns = [
         "<uuid:offering_id>/ders-otaqlari/",
         journal_lesson_lookup.lesson_room_data,
         name="journal_lesson_rooms",
+    ),
+    # «Dəyişiklik tarixçəsi» paneli (UNEC P1-3) — JSON səhifələri, uuid catch-all-dan ƏVVƏL.
+    path("<uuid:offering_id>/tarixce/", journal_history.history_json, name="journal_history"),
+    # «Dərsi aktivləşdir» — bu günün cədvəl slotundan tək kliklə dərs sütunu (UNEC P1-1), POST.
+    path(
+        "<uuid:offering_id>/cedvel-dersi/<uuid:slot_id>/aktivlesdir/",
+        journal_activation.activate_slot,
+        name="journal_activate_slot",
     ),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),

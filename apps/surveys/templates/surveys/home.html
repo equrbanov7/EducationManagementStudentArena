@@ -1,0 +1,97 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+{% comment %}Tələbənin sorğu siyahısı: müəllim kartları + ümumi bölmə + irəliləyiş.
+`<progress>` elementi — inline `style` olmadan dinamik zolaq (CSP).{% endcomment %}
+
+{% block survey_content %}
+<header class="svy-hero">
+    <p class="svy-kicker"><i class="fas fa-clipboard-question" aria-hidden="true"></i> {% trans "Semestr sonu sorğusu" context "surveys.student" %}</p>
+    <h1 class="svy-title">{% trans "Müəllimlərinizi anonim qiymətləndirin" context "surveys.student" %}</h1>
+    <p class="svy-lead">{% trans "Hər müəllim üçün qısa bir forma — təxminən 2 dəqiqə. Sonda universitetdə nəyi yaxşılaşdırmaq olar sualı var." context "surveys.student" %}</p>
+</header>
+
+{% for block in blocks %}
+<section class="svy-block" aria-labelledby="svy-block-{{ forloop.counter }}">
+    <div class="svy-block__head">
+        <h2 id="svy-block-{{ forloop.counter }}" class="svy-block__title">{{ block.campaign.period.name }}</h2>
+        <div class="svy-meter">
+            <span class="svy-meter__label">{% blocktrans trimmed with done=block.done total=block.total context "surveys.student" %}{{ done }} / {{ total }} tamamlanıb{% endblocktrans %}</span>
+            <progress class="svy-meter__bar" value="{{ block.done }}" max="{{ block.total }}">{{ block.done }} / {{ block.total }}</progress>
+        </div>
+    </div>
+
+    {% if block.campaign.closes_on %}
+    <p class="svy-deadline">
+        <i class="fas fa-calendar-day" aria-hidden="true"></i>
+        {% blocktrans trimmed with day=block.campaign.closes_on|date:"d.m.Y" context "surveys.student" %}Son tarix: {{ day }}{% endblocktrans %}
+        {% if block.pending and block.campaign.mandatory %}
+            · {% trans "Doldurulmayınca kabinet açılmır." context "surveys.student" %}
+        {% endif %}
+    </p>
+    {% endif %}
+
+    <ul class="svy-targets">
+        {% for target in block.targets %}
+        <li class="svy-target{% if target.done %} is-done{% endif %}">
+            <div class="svy-target__body">
+                <p class="svy-target__teacher">{{ target.teacher_name|default:"—" }}</p>
+                <p class="svy-target__meta">{{ target.subject }}{% if target.group %} · {{ target.group }}{% endif %}</p>
+            </div>
+            {% if target.done %}
+            <span class="svy-status svy-status--done"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Dolduruldu" context "surveys.student" %}</span>
+            {% else %}
+            <a class="svy-btn svy-btn--primary svy-btn--sm" href="{% url 'surveys:teacher' block.campaign.pk target.offering_id target.teacher_id %}">
+                {% trans "Qiymətləndir" context "surveys.student" %}
+            </a>
+            {% endif %}
+        </li>
+        {% endfor %}
+        {% if block.general %}
+        <li class="svy-target svy-target--general{% if block.general.done %} is-done{% endif %}">
+            <div class="svy-target__body">
+                <p class="svy-target__teacher">{% trans "Ümumi suallar" context "surveys.student" %}</p>
+                <p class="svy-target__meta">{% trans "Tədris prosesi, şərait və təklifləriniz" context "surveys.student" %}</p>
+            </div>
+            {% if block.general.done %}
+            <span class="svy-status svy-status--done"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Dolduruldu" context "surveys.student" %}</span>
+            {% elif block.teachers_left %}
+            <span class="svy-status">{% trans "Müəllimlərdən sonra" context "surveys.student" %}</span>
+            {% else %}
+            <a class="svy-btn svy-btn--primary svy-btn--sm" href="{% url 'surveys:general' block.campaign.pk %}">{% trans "Doldur" context "surveys.student" %}</a>
+            {% endif %}
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="svy-actions">
+        {% if block.next %}
+            {% if block.next.is_general %}
+            <a class="svy-btn svy-btn--primary" href="{% url 'surveys:general' block.campaign.pk %}">{% trans "Davam et" context "surveys.student" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            {% else %}
+            <a class="svy-btn svy-btn--primary" href="{% url 'surveys:teacher' block.campaign.pk block.next.offering_id block.next.teacher_id %}">{% if block.done %}{% trans "Davam et" context "surveys.student" %}{% else %}{% trans "Başla" context "surveys.student" %}{% endif %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            {% endif %}
+            {% if block.can_defer %}
+            <form method="post" action="{% url 'surveys:defer' %}" class="svy-defer">
+                {% csrf_token %}
+                <input type="hidden" name="campaign" value="{{ block.campaign.pk }}">
+                <button type="submit" class="svy-btn svy-btn--ghost">{% trans "Sonra doldur" context "surveys.student" %}</button>
+                {% if block.campaign.grace_until %}
+                <span class="svy-defer__hint">{% blocktrans trimmed with day=block.campaign.grace_until|date:"d.m.Y" context "surveys.student" %}Möhlət {{ day }} tarixinə qədərdir (hər dəfə 24 saat).{% endblocktrans %}</span>
+                {% endif %}
+            </form>
+            {% endif %}
+        {% else %}
+            <p class="svy-complete"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Bu semestrin sorğusunu tam doldurmusunuz. Təşəkkür edirik!" context "surveys.student" %}</p>
+            <a class="svy-btn svy-btn--ghost" href="{% url 'accounts:profile' %}">{% trans "Kabinetə keç" context "surveys.student" %}</a>
+        {% endif %}
+    </div>
+</section>
+{% empty %}
+<section class="svy-block svy-block--empty">
+    <p class="svy-empty">{% trans "Hazırda sizin üçün açıq sorğu yoxdur." context "surveys.student" %}</p>
+    <a class="svy-btn svy-btn--ghost" href="{% url 'accounts:profile' %}">{% trans "Kabinetə keç" context "surveys.student" %}</a>
+</section>
+{% endfor %}
+
+{% include "surveys/_anonymity.html" %}
+{% endblock %}

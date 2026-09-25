@@ -1,0 +1,10 @@
+{% if 'evaluation-survey' in allowed_sections %}
+{% comment %}«Anonim sorğu» (tələbə) — müəllim qiymətləndirmə sorğusunun statusu və /sorgu/ keçidi.
+Məzmun `apps/surveys` partial-ındadır (template tag ilə, sıfır əlavə sorğu); stil xarici faylda.
+Tam səhifə bölmədir (AJAX-safe siyahısında deyil).{% endcomment %}
+<section class="profile-section-panel profile-section--evaluation-survey {% if active_section == 'evaluation-survey' %}is-active{% endif %}"
+         data-profile-section-panel="evaluation-survey"
+         data-source-url="{{ profile_base_url }}?section=evaluation-survey">
+    {% include "surveys/cabinet/_student_panel.html" %}
+</section>
+{% endif %}

@@ -375,3 +375,206 @@ def sync_offering_course_members(*, offering):
         )
         created += int(was_created)
     return created
+
+
+# ── Plan → qruplar: qrupun kursu + qrupun açılışa TOPLU qeydiyyatı (2026-09-25) ──
+#
+# Sahib 2026-09-25: «tədris planı kafedralara göndəriləndə fənn avtomatik qruplara
+# düşsün». Eyni yazını İKİ axın edir: dərs yükü zəncirinin təsdiqi
+# (``apps.workload.services.offering_sync``, ``registrar.public.services`` ilə) və
+# «Semestr açılışı» (``semester_open.generate_offerings``). Qaydalar ikisi üçün də
+# BURADADIR ki, sürüşməsinlər: hansı qrup hansı semestri oxuyur və açılış
+# yarananda kim qeydiyyata düşür.
+
+#: Kurs nömrəsinin yuxarı sərhədi — qrup reyestrinin ``MAX_COURSE_YEAR``-ı ilə eyni.
+MAX_GROUP_COURSE_YEAR = 6
+#: :func:`enroll_group_students` hesabatının açarları (hamısı tam ədəd).
+ENROLL_REPORT_KEYS = (
+    "created",
+    "existing",
+    "conflict",
+    "not_member",
+    "guest_added",
+    "guest_present",
+    "guest_deferred",
+    "guest_failed",
+)
+
+
+def _int_or_zero(value) -> int:
+    try:
+        return int(str(value).strip() or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def group_course_year(group, academic_year) -> int:
+    """Qrupun verilmiş tədris ilindəki KURSU; bilinmirsə ``0`` (heç bir semestrə düşmür).
+
+    Üstünlük ``individual_plan._course_year`` ilə eynidir: (1) reyestrin açıq
+    ``settings.course_year``-ı («Kursa keçir» hər il +1 edir); (2) köçürülmüş
+    qrupların ``settings.admission_year``-ı: ``ilin başlanğıcı − qəbul ili + 1``.
+    Sərhəddən kənar dəyər (2017 qəbullu qrup → 10-cu «kurs») ``0`` qaytarır.
+    """
+    import re
+
+    blob = group.settings if isinstance(getattr(group, "settings", None), dict) else {}
+    course = _int_or_zero(blob.get("course_year"))
+    if course <= 0:
+        admission = _int_or_zero(blob.get("admission_year"))
+        match = re.search(r"(\d{4})", str(academic_year or ""))
+        course = int(match.group(1)) - admission + 1 if (admission and match) else 0
+    return course if 1 <= course <= MAX_GROUP_COURSE_YEAR else 0
+
+
+def _insert_enrollments(rows, report) -> None:
+    """Toplu INSERT; bir sətir DB qapısına dəysə — sətir-sətir (savepoint ilə)."""
+    from django.db import IntegrityError
+
+    try:
+        with transaction.atomic():
+            Enrollment.objects.bulk_create(rows, batch_size=500)
+        report["created"] += len(rows)
+        return
+    except IntegrityError:
+        pass
+    for row in rows:
+        try:
+            with transaction.atomic():
+                _, created = Enrollment.objects.get_or_create(
+                    organization_id=row.organization_id,
+                    student_id=row.student_id,
+                    offering=row.offering,
+                    defaults={"kind": row.kind},
+                )
+            report["created" if created else "existing"] += 1
+        except IntegrityError:
+            report["not_member"] += 1
+
+
+def _enroll_own_students(org_id, offerings, records_by_group, kind, report) -> None:
+    from django.apps import apps as django_apps
+
+    own = [(offering, record) for offering in offerings for record in records_by_group.get(offering.group_id, ())]
+    if not own:
+        return
+    student_ids = {record.student_id for _, record in own}
+    existing = set(
+        Enrollment.objects.filter(
+            organization_id=org_id, offering_id__in=[o.pk for o in offerings], student_id__in=student_ids
+        ).values_list("offering_id", "student_id")
+    )
+    # Eyni fənn + dövr üzrə BAŞQA açılışda AKTİV qeydiyyat = alt qrup birləşməsi
+    # (``guest_roster``) və ya rəsmi köçürmə — tələbə iki jurnala düşməsin.
+    elsewhere: dict = {}
+    for student_id, offering_id, subject_id, period_id in Enrollment.objects.filter(
+        organization_id=org_id,
+        student_id__in=student_ids,
+        status=Enrollment.Status.ENROLLED,
+        offering__subject_id__in={o.subject_id for o in offerings},
+        offering__period_id__in={o.period_id for o in offerings},
+    ).values_list("student_id", "offering_id", "offering__subject_id", "offering__period_id"):
+        elsewhere.setdefault((student_id, subject_id, period_id), set()).add(offering_id)
+    # ``registrar_guard_active_member`` (0041) güzgüsü: aktiv üzvlük + aktiv eyni-tenant rolu.
+    members = set(
+        django_apps.get_model("organizations", "Membership")
+        .objects.filter(
+            organization_id=org_id,
+            user_id__in=student_ids,
+            is_active=True,
+            role__is_active=True,
+            role__organization_id=org_id,
+        )
+        .values_list("user_id", flat=True)
+    )
+    pending = []
+    for offering, record in own:
+        key = (offering.pk, record.student_id)
+        if key in existing:
+            report["existing"] += 1
+        elif elsewhere.get((record.student_id, offering.subject_id, offering.period_id), set()) - {offering.pk}:
+            report["conflict"] += 1
+        elif record.student_id not in members:
+            report["not_member"] += 1
+        else:
+            existing.add(key)
+            pending.append(
+                Enrollment(organization_id=org_id, student_id=record.student_id, offering=offering, kind=kind)
+            )
+    if pending:
+        _insert_enrollments(pending, report)
+
+
+def _rollup_combined_groups(org_id, offerings, *, by_user, reason, report) -> None:
+    """Öz tələbəsi olmayan BİRLƏŞİK qrupun açılışı → alt qrup tələbələri «alt qrupdan əlavə».
+
+    Sahib qərarı 2026-09-20 (:mod:`subgroup_rollup`): tələbələr öz alt qruplarında
+    qalır, birləşik açılışa RƏSMİ yolla (:func:`guest_roster.add_guest_student` —
+    provenans + audit) düşür. Dövr siyahıya bağlıdırsa (cari aktiv deyil) və ya
+    icraçı yoxdursa əlavə TƏXİRƏ salınır (``guest_deferred``).
+    """
+    from django.apps import apps as django_apps
+    from django.core.exceptions import ValidationError
+    from django.db import IntegrityError
+
+    from . import guest_roster, subgroup_rollup
+
+    groups = django_apps.get_model("organizations", "OrgUnit").objects.filter(
+        organization_id=org_id, pk__in={o.group_id for o in offerings}
+    )
+    submap = subgroup_rollup.subgroup_map(org_id, list(groups.only("id", "name", "parent_id", "settings")))
+    records: dict = {}
+    for record in StudentAcademicRecord.objects.filter(
+        organization_id=org_id,
+        group_id__in={unit.pk for units in submap.values() for unit in units},
+        is_active=True,
+        status="enrolled",
+    ).select_related("student", "group"):
+        records.setdefault(record.group_id, []).append(record)
+    for offering in offerings:
+        candidates = [r for unit in submap.get(offering.group_id, ()) for r in records.get(unit.pk, ())]
+        if candidates and (by_user is None or not guest_roster.period_allows_roster(offering.period)):
+            report["guest_deferred"] += len(candidates)
+            continue
+        present = guest_roster.enrolled_student_ids(offering) if candidates else set()
+        for record in candidates:
+            if record.student_id in present:
+                report["guest_present"] += 1
+                continue
+            try:
+                guest_roster.add_guest_student(
+                    offering=offering, student=record.student, by_user=by_user, source_group=record.group, reason=reason
+                )
+                present.add(record.student_id)
+                report["guest_added"] += 1
+            except (ValidationError, IntegrityError):
+                report["guest_failed"] += 1
+
+
+def enroll_group_students(*, offerings, kind=EnrollmentKind.MANDATORY, by_user=None, reason="") -> dict:
+    """Açılış(lar)ın QRUPUNUN aktiv tələbələrini qeydiyyata alır — toplu, idempotent.
+
+    :func:`enroll_student_in_subject`-in qrup səviyyəli forması; tarixçə qorunur:
+    yalnız AKTİV + ``enrolled`` akademik qeyd; bu açılışda sətri olan tələbə
+    (hətta ``dropped``/köçürmə tarixçəsi) TOXUNULMUR; eyni fənn+dövr üzrə başqa
+    açılışda aktiv olan (birləşmə/köçürmə) ötürülür; aktiv üzvlüyü olmayan DB
+    qapısına dəymədən ötürülür; öz tələbəsi olmayan birləşik qrupa alt qrup
+    tələbələri :func:`_rollup_combined_groups` ilə düşür. Sorğu sayı açılış
+    sayından asılı deyil. Qaytarır: ``created/existing/conflict/not_member/guest_*``.
+    """
+    report = dict.fromkeys(ENROLL_REPORT_KEYS, 0)
+    by_org: dict = {}
+    for offering in offerings:
+        if offering is not None and offering.group_id and offering.is_active:
+            by_org.setdefault(offering.organization_id, []).append(offering)
+    for org_id, items in by_org.items():
+        records_by_group: dict = {}
+        for record in StudentAcademicRecord.objects.filter(
+            organization_id=org_id, group_id__in={o.group_id for o in items}, is_active=True, status="enrolled"
+        ).only("id", "student_id", "group_id"):
+            records_by_group.setdefault(record.group_id, []).append(record)
+        _enroll_own_students(org_id, items, records_by_group, kind, report)
+        combined = [o for o in items if not records_by_group.get(o.group_id)]
+        if combined:
+            _rollup_combined_groups(org_id, combined, by_user=by_user, reason=reason, report=report)
+    return report

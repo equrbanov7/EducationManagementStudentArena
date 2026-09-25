@@ -82,6 +82,8 @@ urlpatterns = [
     # Trial-exam ("sınaq imtahanı") request — login-required student form.
     # Registered before the catch-all blog urls so /trial-exam/ resolves first.
     path("", include(("apps.trial_exams.urls", "trial_exams"), namespace="trial_exams")),
+    # Anonim müəllim qiymətləndirmə sorğusu (tələbə səthi + kampaniya idarəsi POST-u).
+    path("sorgu/", include(("apps.surveys.urls", "surveys"), namespace="surveys")),
     path("", include("apps.blog.urls")),
     path("", include("apps.live_exam.urls")),
     path("courses/", include("apps.courses.urls")),

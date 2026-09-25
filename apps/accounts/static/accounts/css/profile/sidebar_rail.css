@@ -1,0 +1,127 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Kabinet sol menyusu — YIĞCAM (ikon-rels) rejim, YALNIZ masaüstü (2026-09-25).
+
+   `.profile-sidebar.collapsed` iki mənada işlənir: masaüstündə 80px-lik
+   ikon relsi, ≤768px-də isə ekrandan kənara çəkilmiş off-canvas (bax
+   `responsive.css`). Əvvəl rels qaydaları mobildə də tətbiq olunurdu və
+   `responsive.css` onları geri qaytarmalı olurdu; indi media sorğusu ilə
+   ayrılıb — mobil şkaf bağlanarkən də tam düzümdə qalır.
+
+   Mətnlər `display: none` ilə DEYİL, vizual gizlədilir: ekran oxuyucu bəndin
+   adını itirmir (ikonlar `aria-hidden`-dir). Göz üçün ad — `title`
+   tooltip-i, onu `js/profile/sidebar_nav.js` rels rejimində yazır.
+
+   `sidebar.css`-in başında @import olunur (kaskadda ondan ƏVVƏL) — ona görə
+   hər qayda `.profile-sidebar.collapsed …` ilə baza qaydasından güclüdür.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 769px) {
+    .profile-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+    }
+
+    .profile-sidebar.collapsed .sidebar-header {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .profile-sidebar.collapsed .sidebar-title,
+    .profile-sidebar.collapsed .sidebar-menu-text,
+    .profile-sidebar.collapsed .sidebar-section-label,
+    .profile-sidebar.collapsed .sidebar-account__meta {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu-link,
+    .profile-sidebar.collapsed .sidebar-menu-group-items .sidebar-menu-link {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+        gap: 0;
+        min-height: 40px;
+    }
+
+    /* Geniş rejimdə qrup bəndləri ikonsuzdur (`sidebar_groups.css`) — relsdə
+       ikon yeganə işarədir, geri qayıdır. Süzgəc relsdə yoxdur. */
+    .profile-sidebar.collapsed .sidebar-menu-group-items .sidebar-menu-icon {
+        display: inline-block;
+    }
+
+    .profile-sidebar.collapsed .sidebar-search,
+    .profile-sidebar.collapsed .sidebar-search__status {
+        display: none;
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu-ext {
+        display: none;
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu-link.active::before {
+        top: 10px;
+        bottom: 10px;
+    }
+
+    /* Bölmə/qrup başlıqları əvəzinə incə ayırıcı — ikon siyahısı yapışıq görünməsin
+       (heyətdə üst blokdan sonrakı İLK qrup da daxil). */
+    .profile-sidebar.collapsed .sidebar-section,
+    .profile-sidebar.collapsed .sidebar-menu-group + .sidebar-menu-group,
+    .profile-sidebar.collapsed .sidebar-menu > .sidebar-menu-item + .sidebar-menu-group {
+        margin-top: 6px;
+        padding-top: 6px;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu-group-toggle {
+        display: none;
+    }
+
+    .profile-sidebar.collapsed .sidebar-group[open] > .sidebar-menu-group-items {
+        padding: 0;
+        animation: none;
+    }
+
+    /* Rəqəm sığmır — nişan nöqtəyə çevrilir (siqnal itmir). Selektor bəndlə
+       gücləndirilib ki, aktiv bəndin ağ badge fonu (`sidebar.css`) nöqtəni silməsin. */
+    .profile-sidebar.collapsed .sidebar-menu-link .sidebar-menu-badge {
+        position: absolute;
+        top: 6px;
+        right: 14px;
+        width: 8px;
+        min-width: 0;
+        height: 8px;
+        padding: 0;
+        font-size: 0;
+        line-height: 0;
+        overflow: hidden;
+        background: var(--ems-primary-500);
+        box-shadow: 0 0 0 2px var(--card-bg);
+    }
+
+    .profile-sidebar.collapsed .sidebar-menu-link .sidebar-menu-badge--warning {
+        background: var(--ems-warning-500);
+    }
+
+    .profile-sidebar.collapsed .sidebar-footer {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .profile-sidebar.collapsed .sidebar-account {
+        justify-content: center;
+        padding: 2px 0 6px;
+    }
+}

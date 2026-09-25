@@ -30,7 +30,7 @@ from __future__ import annotations
 from .constants import SELFWORK_TOTAL_SCORE
 
 #: Qiymətləndirmə çəkiləri — universitet STANDARTI (sahib qərarı 2026-09-20):
-#: davamiyyət 10 · kollokvium 20 · sərbəst iş 10 · seminar/lab ədədi ortası
+#: davamiyyət 10 · midterm 20 · sərbəst iş 10 · seminar/lab ədədi ortası
 #: (``activity``) 10 → semestr 50; yekun imtahan 50. Müəllim HEÇ NƏ bölmür —
 #: ``flex`` (100 − kilidli cəm) hesablanır və standartda 0-dır; saxlanır ki,
 #: siyasət sonradan yumşaldılsa köhnə «sərbəst pay» yolu işləsin.
@@ -78,7 +78,7 @@ def assessment_weights(organization=None) -> dict:
 
     ``flex`` SAXLANILMIR, hər dəfə ``100 − kilidli cəm`` kimi hesablanır ki,
     siyasət dəyişəndə iki mənbə bir-birindən ayrılmasın.  ``assess`` bölməsinin
-    saxlanan açarları köhnə adlarla qalır: ``midterm`` = kollokvium payı,
+    saxlanan açarları köhnə adlarla qalır: ``midterm`` = midterm (aralıq imtahan) payı,
     ``project`` = seminar/lab ədədi ortası payı (``activity``).
     """
     override = _raw(organization).get("assessment")
@@ -96,7 +96,7 @@ def assessment_weights(organization=None) -> dict:
 
 
 def standard_midterm(weights) -> int:
-    """Kollokvium payı — standart 20 (siyasət ``midterm``); köhnə siyasətdə flex-in yarısı."""
+    """Midterm (aralıq imtahan) payı — standart 20 (siyasət ``midterm``); köhnə siyasətdə flex-in yarısı."""
     if "midterm" in weights:
         return int(weights["midterm"])
     return int(weights.get("flex", 0)) // 2

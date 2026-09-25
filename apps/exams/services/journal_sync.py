@@ -19,6 +19,14 @@ düşürdü. İndi:
 İDEMPOTENTLİK: ``registrar.finals.set_exam_score`` ``FinalGrade``-i
 ``get_or_create`` ilə tapır və audit izini yalnız bal DƏYİŞƏNDƏ yazır — eyni
 cəhdin təkrar sinxronizasiyası nə dublikat sətir, nə dublikat audit yaradır.
+
+KATEQORİYA QAYDASI (2026-09-25, M2): ``FinalGrade.exam_score`` YALNIZ yekun
+imtahanın balıdır. Əvvəl fənnə bağlı HƏR bitmiş cəhd ora yazılırdı — onlayn
+«midterm» (və ya müəllimin fənnə bağladığı quiz) tələbənin YEKUN imtahan balını
+əzirdi. İndi kateqoriyası açıq-aşkar final OLMAYAN cəhd (bax
+``final_grade_skip_reason``) görünən skip kodu + sayğac + log ilə atlanır.
+Midterm balını jurnala avtomatik yazmırıq: sahibin qərarı ilə onu müəllim
+İmtahan Mərkəzinin pəncərəsində (0–20) özü yazır.
 """
 
 from __future__ import annotations
@@ -44,6 +52,37 @@ journal_sync_skips_total = Counter(
 SKIP_NO_ORGANIZATION = "no_organization"
 SKIP_PERCENT_UNAVAILABLE = "percent_unavailable"
 SKIP_WRITE_FAILED = "write_failed"
+#: Midterm (aralıq imtahan) cəhdi yekun imtahan balına (``FinalGrade.exam_score``) yazılmır.
+SKIP_MIDTERM_CATEGORY = "midterm_category"
+#: Final olmayan digər kateqoriyalar (quiz / placement / practice) — eyni səbəbdən yazılmır.
+SKIP_NON_FINAL_CATEGORY = "non_final_category"
+
+#: ``Exam.exam_type_extended`` → ``FinalGrade``-ə yazılırmı (tək təsnifat mənbəyi):
+#:
+#: * ``"final"`` → YAZILIR;
+#: * boş / ``None`` (köhnə, kateqoriyasız imtahan) → YAZILIR — bugünkü davranış:
+#:   kateqoriya sahəsi opsionaldır və fənnə bağlı kateqoriyasız imtahan tarixən
+#:   yekun imtahan kimi işləyib;
+#: * tanınmayan dəyər → YAZILIR (bugünkü davranış; yeni kateqoriya əlavə olunanda
+#:   ``test_journal_sync_midterm_guard`` onu bu təsnifata AÇIQ salmağa məcbur edir);
+#: * ``"midterm"`` → ATLANIR (``SKIP_MIDTERM_CATEGORY``);
+#: * ``"quiz"`` / ``"placement"`` / ``"practice"`` → ATLANIR (``SKIP_NON_FINAL_CATEGORY``).
+#:
+#: ``exam_type`` (test / written / coding) imtahanın FORMATIDIR, kateqoriyası deyil —
+#: qərara təsir etmir (praktiki kodlaşdırma da final ola bilər). Final dəyəri:
+#: ``services.access_policy.FINAL_EXAM_CATEGORY``.
+MIDTERM_EXAM_CATEGORY = "midterm"
+NON_FINAL_EXAM_CATEGORIES = frozenset({MIDTERM_EXAM_CATEGORY, "quiz", "placement", "practice"})
+
+
+def final_grade_skip_reason(exam):
+    """Kateqoriya cəhdin ``FinalGrade``-ə yazılmasına mane olursa skip kodu, yoxsa ``None``."""
+    category = str(getattr(exam, "exam_type_extended", None) or "").strip()
+    if category == MIDTERM_EXAM_CATEGORY:
+        return SKIP_MIDTERM_CATEGORY
+    if category in NON_FINAL_EXAM_CATEGORIES:
+        return SKIP_NON_FINAL_CATEGORY
+    return None
 
 
 def _skip(reason, attempt, *, level=logging.WARNING):
@@ -146,6 +185,9 @@ def sync_attempt_to_journal(attempt, *, actor=None):
     """Bitmiş imtahan cəhdinin nəticəsini registrar ``FinalGrade``-ə yaz.
 
     İmtahan bir jurnal fənninə bağlı deyilsə (``exam.subject`` null) no-op.
+    Kateqoriyası final OLMAYAN imtahan (midterm, quiz, …) YAZILMIR — görünən skip
+    kodu ilə atlanır (bax ``final_grade_skip_reason``); qovulma da daxil, yəni
+    midtermdən qovulma yekun imtahan balını 0-a endirmir.
     Proctordan qovulan (``supervision_status == "removed"``) → 0 = avtomatik F.
     ``actor`` — yazını edən müəllim/reviewer; verilmirsə cəhdin ``graded_by``-ı,
     o da yoxdursa sistem (``None``) aktor kimi yazılır (bax modul docstring-i).
@@ -156,6 +198,10 @@ def sync_attempt_to_journal(attempt, *, actor=None):
         return None  # jurnal fənninə bağlı deyil — gözlənilən no-op, sayılmır
     if getattr(attempt, "is_trial", False):
         return None  # müəllimin "Sınaq keç" cəhdi nəticələrə sayılmır
+    category_skip = final_grade_skip_reason(exam)
+    if category_skip is not None:
+        # Gözlənilən hal (xəta deyil) → INFO; sayğac etiketi monitorinqdə görünür.
+        return _skip(category_skip, attempt, level=logging.INFO)
     organization = getattr(exam, "organization", None)
     if organization is None:
         return _skip(SKIP_NO_ORGANIZATION, attempt)

@@ -9,36 +9,12 @@ yalnız mövcud bölmələrə yönləndirir.
 
 from __future__ import annotations
 
-import datetime
-
-from django.db.models import Count, Q
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
-from .dashboard_widgets import ROW_LIMIT, section_link, stat, widget
+from .dashboard_widgets import ROW_LIMIT, section_link, stat, take, widget
 
 _CTX = "accounts.dashboard"
-
-#: Kollokvium pəncərəsinin vəziyyət etiketləri (registrar servisi ilə eyni açarlar).
-_WINDOW_LABELS = {
-    "not_configured": pgettext_lazy(_CTX, "qurulmayıb"),
-    "inactive": pgettext_lazy(_CTX, "deaktiv"),
-    "scheduled": pgettext_lazy(_CTX, "planlanıb"),
-    "open": pgettext_lazy(_CTX, "açıq"),
-    "closed": pgettext_lazy(_CTX, "bağlı"),
-}
-
-
-def _window_status(window, today) -> str:
-    if window is None:
-        return "not_configured"
-    if not window.is_active:
-        return "inactive"
-    if today < window.opens_on:
-        return "scheduled"
-    if today > window.closes_on:
-        return "closed"
-    return "open"
 
 
 # --------------------------------------------------------------------------- #
@@ -46,19 +22,34 @@ def _window_status(window, today) -> str:
 # --------------------------------------------------------------------------- #
 
 
-def applications(*, allowed_sections, pending_count: int) -> dict | None:
-    """«Müraciətlər» — sayğac PROFİLİN KEŞLƏNMİŞ badge dəstindən gəlir (0 sorğu)."""
+def applications(*, allowed_sections, pending_count: int, own=None, is_handler: bool = False) -> dict | None:
+    """«Müraciətlər» — ÖZ açıq müraciətləri + «cavabınızı gözləyən» (+ emalçıya gələnlər).
+
+    Əvvəl kart yalnız badge rəqəmini («Gözləyən») göstərirdi — tələbə açıq
+    müraciətinin olub-olmadığını görmürdü.  ``own`` — ``cheap_counts.count_own_applications``
+    (tək sorğu); ``pending_count`` — profilin KEŞLƏNMİŞ badge dəsti (emalçıda
+    «mənə gələn açıqlar», 0 sorğu).
+    """
     if "applications" not in allowed_sections:
         return None
-    count = int(pending_count or 0)
+    own = own or {}
+    open_count = int(own.get("open") or 0)
+    waiting = int(own.get("waiting") or 0)
+    stats = [
+        stat(pgettext(_CTX, "Açıq"), open_count, pgettext(_CTX, "müraciətiniz")),
+        stat(pgettext(_CTX, "Cavabınızı gözləyən"), waiting, pgettext(_CTX, "müraciət")),
+    ]
+    inbox = int(pending_count or 0) if is_handler else 0
+    if is_handler:
+        stats.insert(0, stat(pgettext(_CTX, "Sizə gələn"), inbox, pgettext(_CTX, "açıq müraciət")))
     return widget(
         "applications",
         pgettext(_CTX, "Müraciətlər"),
         "fa-comment-dots",
-        tone="warning" if count else "",
-        stats=[stat(pgettext(_CTX, "Gözləyən"), count, pgettext(_CTX, "müraciət"))],
+        tone="warning" if (waiting or inbox) else "",
+        stats=stats,
         link=section_link("applications", pgettext(_CTX, "Müraciətlərə keç")),
-        empty=pgettext(_CTX, "Hərəkət gözləyən müraciət yoxdur."),
+        empty=pgettext(_CTX, "Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə bilərsiniz."),
     )
 
 
@@ -82,7 +73,8 @@ def syllabus_review(*, request, organization, allowed_sections) -> dict | None:
             link=section_link("syllabus-review", pgettext(_CTX, "Növbəyə keç")),
             empty=pgettext(_CTX, "Struktur əhatəniz təyin edilməyib — növbə boşdur."),
         )
-    queue = list(review_queue(organization=organization, actor=actor)[: ROW_LIMIT + 1])
+    # TAM say: əvvəl `[:6]` dilimi sayılırdı («Növbədə: 6», real 40 olsa da).
+    queue, total = take(review_queue(organization=organization, actor=actor))
     # `Syllabus.__str__` UUID cütü qaytarır — sətirdə FƏNNİN ADI göstərilir.
     # `review_queue` `syllabus__subject`-i onsuz da `select_related` edir, yəni
     # bu zəncir ƏLAVƏ sorğu yaratmır.
@@ -91,15 +83,16 @@ def syllabus_review(*, request, organization, allowed_sections) -> dict | None:
             "title": str(getattr(getattr(row.syllabus, "subject", None), "name", "") or "—"),
             "meta": str(getattr(row, "get_status_display", lambda: "")() or ""),
         }
-        for row in queue[:ROW_LIMIT]
+        for row in queue
     ]
     return widget(
         "syllabus-review",
         pgettext(_CTX, "Sillabus təsdiqi"),
         "fa-clipboard-check",
         tone="warning" if rows else "",
-        stats=[stat(pgettext(_CTX, "Növbədə"), len(queue), pgettext(_CTX, "sillabus"))],
+        stats=[stat(pgettext(_CTX, "Növbədə"), total, pgettext(_CTX, "sillabus"))],
         rows=rows,
+        total=total,
         link=section_link("syllabus-review", pgettext(_CTX, "Növbəyə keç")),
         empty=pgettext(_CTX, "Təsdiq gözləyən sillabus yoxdur."),
     )
@@ -146,13 +139,15 @@ def schedule_scope(*, request, organization, allowed_sections) -> dict | None:
         return None
     from apps.registrar.public import schedule_manage
 
-    groups = list(schedule_manage.scoped_groups(request.user, organization).values_list("name", flat=True)[:50])
+    # TAM say: əvvəl ilk 50 ad yüklənib sayılırdı.
+    groups, total = take(schedule_manage.scoped_groups(request.user, organization).values_list("name", flat=True))
     return widget(
         "schedule-scope",
         pgettext(_CTX, "Cədvəl idarəetməsi"),
         "fa-table-list",
-        stats=[stat(pgettext(_CTX, "Qrup"), len(groups), pgettext(_CTX, "səlahiyyət sahənizdə"))],
-        rows=[{"title": name, "meta": ""} for name in groups[:ROW_LIMIT]],
+        stats=[stat(pgettext(_CTX, "Qrup"), total, pgettext(_CTX, "səlahiyyət sahənizdə"))],
+        rows=[{"title": name, "meta": ""} for name in groups],
+        total=total,
         link=section_link("schedule-manage", pgettext(_CTX, "Cədvələ keç")),
         empty=pgettext(_CTX, "Səlahiyyət sahənizdə qrup yoxdur."),
     )
@@ -167,21 +162,16 @@ def corrections(*, organization, capabilities) -> dict | None:
     """«Jurnal düzəlişləri» — bu gün / bu həftə edilmiş auditli düzəlişlər."""
     if not capabilities.get("can_watch_legacy_grades"):
         return None
-    from apps.registrar.models import JournalCorrection
+    from apps.registrar.public import dashboard_data
 
-    today = timezone.localdate()
-    week_start = today - datetime.timedelta(days=today.weekday())
-    totals = JournalCorrection.objects.filter(organization=organization).aggregate(
-        today_count=Count("id", filter=Q(created_at__date=today)),
-        week_count=Count("id", filter=Q(created_at__date__gte=week_start)),
-    )
+    totals = dashboard_data.correction_counts(organization)
     return widget(
         "corrections",
         pgettext(_CTX, "Jurnal düzəlişləri"),
         "fa-pen-to-square",
         stats=[
-            stat(pgettext(_CTX, "Bu gün"), int(totals.get("today_count") or 0), pgettext(_CTX, "düzəliş")),
-            stat(pgettext(_CTX, "Bu həftə"), int(totals.get("week_count") or 0), pgettext(_CTX, "düzəliş")),
+            stat(pgettext(_CTX, "Bu gün"), totals["today"], pgettext(_CTX, "düzəliş")),
+            stat(pgettext(_CTX, "Bu həftə"), totals["week"], pgettext(_CTX, "düzəliş")),
         ],
         link=section_link("my-journal", pgettext(_CTX, "Jurnala keç")),
         empty=pgettext(_CTX, "Bu həftə düzəliş edilməyib."),
@@ -192,17 +182,16 @@ def journal_close(*, organization, allowed_sections) -> dict | None:
     """«Jurnal bağlama» — aktiv bağlanma bildirişləri."""
     if "journal-close" not in allowed_sections:
         return None
-    from apps.registrar.models import JournalCloseNotice
+    from apps.registrar.public import dashboard_data
 
-    notices = list(
-        JournalCloseNotice.objects.filter(organization=organization, is_active=True).order_by("closes_on")[:ROW_LIMIT]
-    )
+    notices, total = take(dashboard_data.active_close_notices(organization))
     return widget(
         "journal-close",
         pgettext(_CTX, "Jurnal bağlama"),
         "fa-lock",
-        stats=[stat(pgettext(_CTX, "Aktiv"), len(notices), pgettext(_CTX, "bildiriş"))],
-        rows=[{"title": str(row.closes_on), "meta": row.message or ""} for row in notices],
+        stats=[stat(pgettext(_CTX, "Aktiv"), total, pgettext(_CTX, "bildiriş"))],
+        rows=[{"title": row.closes_on.strftime("%d.%m.%Y"), "meta": row.message or ""} for row in notices],
+        total=total,
         link=section_link("journal-close", pgettext(_CTX, "Bağlamaya keç")),
         empty=pgettext(_CTX, "Aktiv jurnal bağlama bildirişi yoxdur."),
     )
@@ -339,28 +328,32 @@ def design_link_cards(*, allowed_sections) -> list[dict]:
 # --------------------------------------------------------------------------- #
 
 
-def kollokvium_windows(*, organization, period, allowed_sections) -> dict | None:
-    """«Kollokvium pəncərələri» — K1/K2/K3-ün cari vəziyyəti."""
+def kollokvium_windows(*, organization, period, allowed_sections, windows=None) -> dict | None:
+    """Aralıq qiymətləndirmə pəncərələri — dövrün REJİMİNƏ görə (2026-09-25).
+
+    2026/2027-dən TƏK «Midterm» sətri (``interim_assessment``), köhnə dövrlərdə
+    K1/K2/K3.  ``windows`` — ``dashboard_data.interim_windows`` nəticəsi (müəllim
+    kartı ilə paylaşılır; verilməyibsə burada TƏK sorğu ilə oxunur).
+    """
     if "kollokvium-windows" not in allowed_sections or period is None:
         return None
-    from apps.registrar.models import KOLLOKVIUM_WINDOW_COUNT, KollokviumWindow
+    from apps.registrar.public import dashboard_data
 
-    today = timezone.localdate()
-    windows = {row.k_index: row for row in KollokviumWindow.objects.filter(organization=organization, period=period)}
-    rows = []
-    open_count = 0
-    for index in range(KOLLOKVIUM_WINDOW_COUNT):
-        status = _window_status(windows.get(index), today)
-        if status == "open":
-            open_count += 1
-        rows.append({"title": "K%s" % (index + 1), "meta": _WINDOW_LABELS[status]})
+    from .dashboard_teacher import window_short_text
+
+    if windows is None:
+        windows = dashboard_data.interim_windows(organization=organization, period=period)
+    spec = windows["spec"]
+    open_count = int(windows.get("open_count") or 0)
+    title = pgettext(_CTX, "Midterm pəncərəsi") if spec.is_midterm else pgettext(_CTX, "Kollokvium pəncərələri")
     return widget(
         "kollokvium-windows",
-        pgettext(_CTX, "Kollokvium pəncərələri"),
+        title,
         "fa-door-open",
         tone="success" if open_count else "",
         stats=[stat(pgettext(_CTX, "Açıq"), open_count, pgettext(_CTX, "pəncərə"))],
-        rows=rows,
+        rows=[{"title": item["label"], "meta": window_short_text(item)} for item in windows.get("windows") or []],
+        subtitle=spec.description,
         link=section_link("kollokvium-windows", pgettext(_CTX, "Pəncərələrə keç")),
         empty=pgettext(_CTX, "Cari dövr üçün pəncərə qurulmayıb."),
     )
@@ -373,20 +366,21 @@ def upcoming_exams(*, organization, allowed_sections) -> dict | None:
     from apps.exams.models import Exam
 
     now = timezone.now()
-    exams = list(
+    exams, total = take(
         Exam.objects.filter(organization=organization, is_deleted=False, start_datetime__gte=now)
         .order_by("start_datetime")
-        .values_list("title", "start_datetime")[: ROW_LIMIT + 1]
+        .values_list("title", "start_datetime")
     )
     return widget(
         "upcoming-exams",
         pgettext(_CTX, "Yaxın imtahanlar"),
         "fa-file-pen",
-        stats=[stat(pgettext(_CTX, "Planlanıb"), len(exams), pgettext(_CTX, "imtahan"))],
+        stats=[stat(pgettext(_CTX, "Planlanıb"), total, pgettext(_CTX, "imtahan"))],
         rows=[
             {"title": title or "—", "meta": timezone.localtime(starts).strftime("%d.%m.%Y %H:%M") if starts else ""}
-            for title, starts in exams[:ROW_LIMIT]
+            for title, starts in exams
         ],
+        total=total,
         link=section_link("exam-center-stats", pgettext(_CTX, "Statistikaya keç")),
         empty=pgettext(_CTX, "Planlanmış imtahan yoxdur."),
     )
@@ -439,12 +433,12 @@ def org_kpis(*, request, organization, allowed_sections) -> dict | None:
 
     stats = []
     if students_wide and "people-students" in allowed_sections:
-        from apps.registrar.models import StudentAcademicRecord
+        from apps.registrar.public import dashboard_data
 
         stats.append(
             stat(
                 pgettext(_CTX, "Tələbə"),
-                StudentAcademicRecord.objects.filter(organization=organization, is_active=True).count(),
+                dashboard_data.active_student_count(organization),
                 pgettext(_CTX, "aktiv"),
             )
         )

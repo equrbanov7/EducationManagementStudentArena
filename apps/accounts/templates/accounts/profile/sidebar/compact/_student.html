@@ -1,0 +1,67 @@
+{% load i18n %}
+{% comment %}TƏLƏBƏNİN DÜZ MENYUSU (2026-09-25, sahib: «tələbə və müəllimdə bölmə azdır —
+açılan menyulara ehtiyac yoxdur, hər şey görünsün»).
+
+Akkordeon, ox (caret), sayğac YOXDUR: bölmə adları yalnız sakit etiketdir.
+Sıra İŞ TEZLİYİNƏ görədir — gündəlik (fənn, cədvəl, jurnal, nəticə) yuxarıda,
+tapşırıq axını ortada, ünsiyyət və profil aşağıda.
+
+Bu şablon YALNIZ `profile_shell.resolve_sidebar_layout` «student» qaytaranda
+seçilir, yəni istifadəçinin HƏR icazəli bölməsi aşağıdakı bəndlərdən birinə
+düşür (əks halda tam akkordeon göstərilir — heç bir bənd itmir). Yeni bənd
+əlavə edəndə `profile_shell.COMPACT_SIDEBAR_TREES["student"]` də yenilənməlidir
+(`test_sidebar_compact.py` ikisini tutuşdurur).
+
+Bəndlərin markup-ı və görünürlük şərti `sidebar/items/`-dədir (heyət
+akkordeonu ilə ORTAQ). Bölmə etiketinin şərti içindəki bəndlərin şərtlərinin
+birləşməsidir — boş başlıq qalmır.{% endcomment %}
+{% include "accounts/profile/sidebar/_home_menu_item.html" %}
+
+{% if "my-subjects" in allowed_sections or "my-schedule" in allowed_sections or "my-journal" in allowed_sections or can_view_student_assignments or "my-transcript" in allowed_sections or "overall-academic" in allowed_sections or "academic-calendar" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="education">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionEducation"><span class="sidebar-menu-group-title">{% trans "group_education" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionEducation">
+        {% include "accounts/profile/sidebar/items/_my_subjects.html" %}
+        {% include "accounts/profile/sidebar/items/_my_schedule.html" %}
+        {% include "accounts/profile/sidebar/items/_my_journal.html" %}
+        {% include "accounts/profile/sidebar/items/_my_results.html" %}
+        {% include "accounts/profile/sidebar/items/_my_transcript.html" %}
+        {% include "accounts/profile/sidebar/items/_overall_academic.html" %}
+        {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{% comment %}«Anonim sorğu» (müəllim qiymətləndirməsi) də tələbənin TAPŞIRIĞIDIR —
+semestr sonu doldurulur, gözləyən sorğu badge ilə görünür; ona görə bu bölmədədir.{% endcomment %}
+{% if can_view_student_assignments or "evaluation-survey" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="tasks">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionTasks"><span class="sidebar-menu-group-title">{% trans "Tapşırıq və imtahanlar" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionTasks">
+        {% include "accounts/profile/sidebar/items/_assigned_exams.html" %}
+        {% include "accounts/profile/sidebar/items/_assigned_courses.html" %}
+        {% include "accounts/profile/sidebar/items/_pending_answers.html" %}
+        {% include "accounts/profile/sidebar/items/_my_appeals.html" %}
+        {% include "accounts/profile/sidebar/items/_evaluation_survey.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{% if "notifications" in allowed_sections or "applications" in allowed_sections %}
+<li class="sidebar-section" data-sidebar-section="communication">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionCommunication"><span class="sidebar-menu-group-title">{% trans "Ünsiyyət" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionCommunication">
+        {% include "accounts/profile/sidebar/items/_notifications.html" %}
+        {% include "accounts/profile/sidebar/items/_applications.html" %}
+    </ul>
+</li>
+{% endif %}
+
+{# «Profil məlumatları» şərtsizdir — bölmə həmişə göstərilir. #}
+<li class="sidebar-section" data-sidebar-section="profile">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionProfile"><span class="sidebar-menu-group-title">{% trans "title" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionProfile">
+        {% include "accounts/profile/sidebar/items/_profile_info.html" %}
+        {% include "accounts/profile/sidebar/items/_statistics.html" %}
+    </ul>
+</li>

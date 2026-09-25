@@ -118,6 +118,29 @@ jobs:
                              EXCEPTION WHEN duplicate_object OR unique_violation THEN NULL; END $$;""")
           print("rls_app_role hazırdır")
           PY
+      - name: 🧱 Şablon test bazası — miqrasiya BİR dəfə (worker-lər klonlayır)
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/ems_test_template
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+        run: |
+          # 2 vCPU runner-də 4 worker-in hər biri miqrasiyanı ayrıca işlədəndə DB qurulumu 300 s-lik
+          # timeout-u keçirdi. İndi miqrasiya burada bir dəfə gedir; config/settings/test.py
+          # EMS_TEST_DB_TEMPLATE-i görüb worker bazalarını `CREATE DATABASE … TEMPLATE` ilə yaradır.
+          python - <<'PY'
+          import psycopg2
+          conn = psycopg2.connect("postgresql://test_user:test_password@localhost:5432/test_db")
+          conn.autocommit = True
+          with conn.cursor() as cur:
+              cur.execute("DROP DATABASE IF EXISTS ems_test_template")
+              cur.execute("CREATE DATABASE ems_test_template")
+          conn.close()
+          PY
+          python manage.py migrate --noinput
+          echo "EMS_TEST_DB_TEMPLATE=ems_test_template" >> "$GITHUB_ENV"
+
       - name: 🛡️ Run RLS + postgres tests under RLS_TRANSACTION_SCOPED=True
         env:
           DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db

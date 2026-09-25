@@ -1,0 +1,100 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# 🧰 Prod məlumat əməliyyatları — AĞ SİYAHILI management əmrləri (serverdəki runner)
+#
+# Prod LAN-dadır; kənardan SSH yoxdur. Bu workflow deploy olunmuş app konteynerində
+# YALNIZ aşağıdakı, review olunmuş, idempotent, DEFOLT DRY-RUN əmrləri işlədir:
+#
+#   normalize_interim_components — Midterm dövrlərində (2026/2027-dən) cari jurnalların boş
+#       K1–K3 komponentlərini tək «Midterm» (0–20) komponentinə gətirir (bal olan jurnala toxunmur).
+#   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
+#       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
+#
+# TƏHLÜKƏSİZLİK:
+#   * Açıq shell / ixtiyari əmr YOXDUR — əmr adı `choice` ilə, arqumentlər sabit şablonla.
+#   * Girişlər `env:` ilə ötürülür, `run:` bloğuna interpolasiya yoxdur (script injection yox).
+#   * `apply` üçün `confirm` = APPLY; apply-dan əvvəl postgres-backup sidecar-ı ilə dump alınır.
+#   * Deploy ilə eyni concurrency qrupu — canlı deploy-la toqquşmur.
+# ═══════════════════════════════════════════════════════════════════════════
+name: 🧰 Prod Data Ops
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "Əmr (ağ siyahı)"
+        required: true
+        type: choice
+        default: normalize_interim_components
+        options:
+          - normalize_interim_components
+          - sync_plan_offerings
+      apply:
+        description: "Faktiki yaz (işarələnməsə dry-run)"
+        required: false
+        type: boolean
+        default: false
+      confirm:
+        description: "apply üçün APPLY yazın"
+        required: false
+        default: ""
+      year:
+        description: "sync_plan_offerings: tədris ili (məs. 2026/2027)"
+        required: false
+        default: "2026/2027"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  run:
+    if: github.event.inputs.apply != 'true' || github.event.inputs.confirm == 'APPLY'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 30
+    env:
+      APP_CONTAINER: educationmanagementstudentarena-app-1
+      BACKUP_CONTAINER: emsarena-postgres-backup
+      ORG: qku
+      COMMAND: ${{ github.event.inputs.command }}
+      APPLY: ${{ github.event.inputs.apply }}
+      YEAR: ${{ github.event.inputs.year }}
+    steps:
+      - name: 🧰 Run
+        run: |
+          set -euo pipefail
+          case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
+          args=()
+          case "$COMMAND" in
+            normalize_interim_components)
+              args=(--organization "$ORG")
+              ;;
+            sync_plan_offerings)
+              actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+                "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+              test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              args=(--org "$ORG" --year "$YEAR" --actor "$actor")
+              ;;
+            *)
+              echo "icazəsiz əmr: $COMMAND" >&2; exit 2
+              ;;
+          esac
+          if [ "$APPLY" = "true" ]; then
+            echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
+            docker exec "$BACKUP_CONTAINER" /backup.sh
+            echo "::endgroup::"
+            args+=(--apply)
+          fi
+          echo "::group::▶ $COMMAND ${args[*]}"
+          docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/out.log"
+          echo "::endgroup::"
+          {
+            echo "## 🧰 ${COMMAND} — $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo '```'
+            tail -n 80 "$RUNNER_TEMP/out.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          rm -f "$RUNNER_TEMP/out.log"
