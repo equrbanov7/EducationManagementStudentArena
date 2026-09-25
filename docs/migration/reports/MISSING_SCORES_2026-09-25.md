@@ -1,281 +1,328 @@
 # Köhnə sistemdən gəlməyən ballar — kim, niyə, necə bərpa olunur (2026-09-25)
 
 **Kimə:** sahib (Elvin) və serverdə tətbiq edəcək orkestrator
-**Vəziyyət:** J12 bərpası üçün alət HAZIRDIR və production-un nüsxəsində tam repetisiya
-olunub (plan → dry-run → tətbiq → təkrar icra = 0 → geri qaytarma → yenidən tətbiq).
-**Production-a HƏLƏ HEÇ NƏ YAZILMAYIB** — tətbiq §6-dakı runbook ilə serverdə edilir.
-**Sübut bazası:** `ems_prodcopy` (production-un ~2026-09-19/20 nüsxəsi, yalnız oxu) +
-köhnə MyEdu dump-u (`myedudb.sql`, 2 142 912 818 bayt, sha256 `177ef226…68fe0`) —
-lokal, `@@GLOBAL.read_only=1` MariaDB konteynerində, yalnız SELECT icazəli istifadəçi ilə.
+**Vəziyyət — 2-ci mərhələ (sahibin göstərişi, 2026-09-25):** «Ballar çox vacibdir, yenidən görünməlidir —
+əsas diqqət **indi oxuyanlara**». Hazırda oxuyan **3 649** tələbənin hər biri semestr × fənn səviyyəsində
+köhnə sistemlə tutuşduruldu; üç bərpa addımı (J12 → atılmış yazılışlar → P0-1) production-un nüsxəsində
+**birlikdə və production kimi** repetisiya olundu (markersiz klon, `NOSUPERUSER NOBYPASSRLS` rol,
+`--i-know-this-is-production`): ikinci icra = 0, geri qaytarma bayt-bəbayt, 2026/2027-yə toxunulmayıb.
+**Production-a HƏLƏ HEÇ NƏ YAZILMAYIB** (J12 workflow-u hazırdır; qalan iki addım §7-dədir).
+**Sübut bazası:** `ems_prodcopy` (production-un ~2026-09-19/20 nüsxəsi, yalnız oxu) + köhnə MyEdu dump-u
+(`myedudb.sql`, 2 142 912 818 bayt, sha256 `177ef226…68fe0`) — lokal, `@@GLOBAL.read_only=1` MariaDB-də.
+1-ci mərhələnin (bütün tələbələr) tapıntıları **Əlavə A**-dadır.
 
 ---
 
-## 1. Qısa cavab
+## 1. Qısa cavab (hazırda oxuyanlar)
 
-Production **2026-08-27 repetisiyasından** qurulub (run `fa9516a9`, `rehearsal-identity-v1`,
-17 faza). Ondan sonra yazılmış düzəlişlərin **heç biri production-a tətbiq olunmayıb**:
-`audit_auditlog`-da bir dənə də `legacy_repair:*` sətri yoxdur, `is_legacy_synthesised`
-dərsi 0-dır, 2 490 legacy tələbə hələ də `archived`-dir.
+* **Hazırda oxuyan — 3 649 tələbə** (§2; 3 648-nin hesabı var). Köhnə sistemdə onların **70 364
+  «semestr × fənn» sətri** var (130-unda heç bir bal/xana yoxdur).
+* **Əvvəl** 10 793 sətir görünmürdü və ya natamam idi: **3 053** — tələbə sistemə ümumiyyətlə girə
+  bilmir (P0-1, 74 tələbə); **5 410** — fənn kabinetdə YOXDUR; **2 330** — fənn var, xanaların bir
+  hissəsi yoxdur. Ən azı bir belə sətri olan tələbə: **2 138** (58,6 %).
+* **Üç addımdan sonra:** **5 459 sətir tam görünür** oldu, 372 sətir qismən düzəldi, bloklanan tələbə
+  qalmadı (74 → 0). **3 326 fənn yazılışı** qayıtdı — içində **1 924 yekun/imtahan nəticəsi**,
+  109 063 gündəlik xana, 14 533 kollokvium/sərbəst iş balı; J12 isə 100 tələbənin 222 fənninə 3 802
+  xana qaytarır. Kabinetdə (transkript qurucusu ilə ölçüldü) qəti nəticəli fənn sətri 54 316 → 56 245,
+  qazanılmış kredit 232 199 → 240 919; 819 tələbənin ÜOMG-si dəyişir (əsasən ±2,5 bal — bərpa olunan
+  nəticələr həm yuxarı, həm aşağı ola bilər, çünki realdır).
+* **Qalan 5 334 sətir** (2 702-si tam yox, 2 632-si qismən) — hər birinin səbəbi CSV-dədir, heç biri
+  deterministik bərpa olunmur: jurnal siyahısında olmayan tələbənin xanası (qəsdən, 3 199) · eyni fənnin
+  başqa yazılışı artıq var — «əkiz» (876; bunların **417-sində imtahan balı yalnız bərpa olunmayan
+  jurnaldadır — §8.1, ən vacib açıq qərar**) · nəticəsiz fake jurnal (595) · qrupu silinmiş, qrup
+  sübutu olmayan jurnal (344) · xarici dil komponentləri K6 (259) · hesabı olmayan 1 tələbə (35) ·
+  mənbədə olmayan jurnal (20) · digər (6).
 
-«Bal görünmür» şikayəti bir səbəbdən yox, **doqquz ayrı səbəbdən** gəlir. Onlardan:
+## 2. «Hazırda oxuyan» — tərif və saylar
 
-* **biri tam avtomatik bərpa olunur** (J12, dərs slotu olmayan xanalar) — alət bu işdə quruldu;
-* **biri mövcud alətlə açılır** (səhv arxivlənmiş hesablar — tələbə ümumiyyətlə GİRƏ bilmir),
-  alətin production-da işləməsinə mane olan RLS qüsuru bu işdə düzəldildi;
-* **dördü sahibin qərarını gözləyir** (fake jurnallar, qrup uyğunsuzluğu, hesabı olmayan
-  tələbələr, xarici dil komponentləri);
-* **üçü mənbənin öz boşluğudur** (silinmiş qrup, jurnal siyahısında olmayan tələbə,
-  jurnal/semestri olmayan imtahan cəhdi) — deterministik bərpası yoxdur, sübut saxlanılıb.
+Kod: `repair_enrollments_select._current_students` (SQL ilə müstəqil təkrarlandı — fərq yalnız hesabı
+olmayan 1 tələbədir). Tələbə **hazırda oxuyandır**, əgər mənbədə `students.azadedildi = 0` VƏ:
 
-## 2. Tapıntılar — kateqoriyalar
+| Sübut | Qayda | Tələbə |
+|---|---|---:|
+| **E1** | EMS Arena-da **2026/2027** dövrünün açılışına artıq yazılıb | **823** |
+| **E2 bakalavr** | qrupun qəbul ili 2023–2026 VƏ 2025/2026-da jurnalda (siyahıda və ya xanası) var | **2 603** |
+| **E2 magistr** | qəbul ili 2025–2026 VƏ 2025/2026-da jurnalda var | **148** |
+| **E3** | qəbul ili mənbədə yoxdur (`groups.start_year='0000'`) VƏ son tam semestrdə (**2025/2026 Yaz**) jurnalda var | **75** (74-ü arxivdə, 1-nin hesabı yoxdur) |
+| **Cəmi** | | **3 649** |
 
-«Tələbə» — fərqli köhnə tələbə id-si; «fənn sətri» — (jurnal, tələbə) cütü; xana sayları
-mənbədəndir (`journals_dates_points` + arxiv, J-V7 kəsimi ilə).
+Hazırda oxumayan 4 167 tələbəyə toxunulmur: qəbul ili bilinməyən, son semestrdə fəaliyyəti olmayan
+2 303 · 2025/2026-da heç bir fəaliyyəti olmayan 772 · 2022 bakalavr kohortu (2026-da bitirib) 718 ·
+`azadedildi=1` 200 · 2024 magistr kohortu (2026-da bitirib) 154 · daha köhnə kohort 20.
 
-| # | Kateqoriya | Tələbə | Görünməyən | Kök səbəb | Nə edilir |
-|---|---|---:|---|---|---|
-| 1 | **Dərs cədvəli sətri yoxdur** (K10/K10b) — qeydiyyat VAR, həmin günün dərsi yoxdur | **1 974** (305 aktiv · 1 669 arxivdə) | 7 991 qeydiyyatda **161 775 xana**: 12 208 bal · 18 794 qayıb · 12 üzrlü · 130 761 iştirak; +1 817 sübut faktı | J12 fazası 08-27 run-unda yox idi | ✅ **BƏRPA** — `legacy_repair_lesson_recovery` (§4) |
-| 2 | **Səhv arxiv** (P0-1) — tələbə sistemə girə bilmir | **2 291** (199-u həqiqətən buraxılıb, toxunulmur) | bütün öz balları (data yerindədir, giriş bağlıdır) | qəbul ili tapılmayan (`groups.start_year='0000'`) tələbə arxivə salınıb | ⚠️ mövcud `legacy_repair_archive_status` — RLS qüsuru düzəldildi; **əhatə sahibin qərarıdır** (§7) |
-| 3 | **Fake jurnallar** (`fake=1`, J-V6) — fənn tamamilə yoxdur | **2 648** | 8 219 fənn sətri · **6 523 imtahan** · 29 678 komponent · 9 131 gündəlik bal · **1 059 rəsmi `yekun` nəticəsi** (699 tələbə); 679 tələbə-semestr TAMAMİLƏ görünmür | J1 `fake=1` jurnalı atır (`rehearsal_journal_offerings_phase.py:207`) | ⏳ sahibin qərarı (DATA_VERIFICATION §4.2 — açıq) |
-| 4 | **Qrup uyğunsuzluğu** (K9) — çoxqruplu jurnalda tələbənin qrupu yoxdur | **1 402** | 3 449 fənn sətri · 1 389 imtahan · 9 621 komponent · 344 `yekun` (120 tələbə) | `JournalSlices.resolve_student` → `GROUP_MISMATCH` (`rehearsal_journal_slices.py:173`) | ⏳ sahibin qərarı (dilim qaydası) |
-| 5 | **Hesabı yoxdur** (K4 · P0-2) | **171** köhnə id (94-ü mənbədə var: 84 skipped + 10 quarantined; 77-si mənbədə silinib) | 2 782 fənn sətri · 1 788 imtahan · 576 `yekun` (118 tələbə) | e-poçt kimlik açarı kimi işlədilib (`account_cutover.py:185/380`) | ⏳ hesab + tarixçə zənciri (§7) |
-| 6 | **Silinmiş qrupun jurnalı** (176 karantin dilim) | 256 | 1 706 fənn sətri · 913 imtahan | jurnalın qrupu mənbənin `groups`-unda YOXDUR | ❌ deterministik deyil |
-| 7 | **Jurnal siyahısında olmayan tələbə** (`students_id`-də yox, xanası var) | 2 686 | əsasən davamiyyət: 46 567 qayıb · 28 468 iştirak · 939 bal · 10 imtahan | J4 «qeydiyyat həll olunmur» (`rehearsal_journal_marks_phase.py:307`) | ❌ qəsdən — köhnə sistemin öz siyahısı |
-| 8 | **İmtahan cəhdi jurnala bağlanmır** (`imthngrscxsblr`, K13) | 2 031 | 6 513 giriş/çıxış cəhdi | mənbə cədvəlində jurnal/semestr sütunu yoxdur | ❌ deterministik deyil (fakt sübutda saxlanılıb) |
-| 9 | **Xarici dil komponentləri** (K6: `pa`/`wr`/`ss`/`ww`/`ll`/`rr`/`ga`) | 712 | 3 535 xana | hədəf modelində belə komponent növü yoxdur | ⏳ məhsul/model qərarı |
+## 3. Hər tələbə üzrə təhlil (tələbə × semestr × fənn)
 
-Kiçik qalıqlar: jurnal siyahısı pozuq 11 · tələbə aktiv deyil 5 · mənbədə olmayan jurnal 64 sətir.
+**Üsul.** Hər hazırda oxuyanın köhnə sistemdəki hər (jurnal, tələbə) cütü götürüldü (`journals_dates_points`
++ arxiv, J-V7 kəsimi): gündəlik bal / qayıb / iştirak, kollokvium + sərbəst iş (`k1`–`k3`, `si`), imtahan
+(`im`, `im2`), rəsmi `yekun` sətri, tanınmayan sütunlar (K6). Cütlər (semestr, fənn) üzrə birləşdirildi və
+EMS Arena ilə tutuşduruldu: yazılış varmı, neçə xana / komponent balı / imtahan balı var, kabinet nə
+göstərir. «Fənlərim» (kredit qutusu), «Nəticələrim» və «Ümumi tədris məlumatı» (transkript + ÜOMG) EYNİ
+çoxluqdan — tələbənin `dropped` olmayan yazılışlarından — qurulur (`transcript.student_record_enrollments`),
+ona görə **görünür = giriş açıqdır + yazılış var + xanalar yazılışa bağlanıb**. Nəticə sütunları kabinetin
+öz qurucusundan (`transcript.build_student_transcript`) götürüldü. Adlı tam cədvəl (70 364 sətir: mənbə /
+əvvəl / sonra / kök səbəb / görülən iş / bərpa olunmama səbəbi) yalnız lokaldadır:
+`backups/restore_2026_09_25/current_students_by_subject_2026-09-25.csv` (0600, gitignore).
 
-**Cəmi:** 4 747 tələbənin ən azı bir fənn sətri hədəfə düşməyib; 3 635 tələbənin ən azı bir
-fənni **tamamilə** yoxdur (kateqoriya 3–6), onlardan 2 709-unun imtahan balı itib (10 613 xana).
+### 3.1 Kök səbəb üzrə cəm (hazırda oxuyanlar; xanalar mənbədəndir)
 
-> Anonim nümunələr (tam siyahı adlarla yalnız lokal `backups/restore_2026_09_25/`-dədir, repoya düşmür):
-> * **Tələbə A** (hazırda aktiv), 2021/2022 Yaz, bir fənn: köhnə sistemdə 21 seminar balı və 2 qayıb
->   yazılıb, həmin günlərin dərs sətri yoxdur → EMS Arena-da 0 görünürdü. Bərpadan sonra 21 bal
->   görünür; **giriş balı 31 dəyişmir** (köhnə `girish` arxiv komponentindən gəlir).
-> * **Tələbə B**, 2025/2026 Payız: **8 fənni** yalnız `fake=1` jurnallardadır (7-sində imtahan balı
->   var) və kabinetdə YOXDUR; həmin semestrdən yalnız 3 fənni görünür. DATA_VERIFICATION §3.2-dəki
->   nümunə də eyni sinifdir (3 fənn: k1–k3, sərbəst iş və imtahan balları ilə). Bütün fənləri
->   yalnız fake jurnalda olan (semestri TAMAMİLƏ boş görünən) tələbə-semestr sayı: **679**.
+| Kök səbəb | Tələbə | Sətir | Görünməyən: bal · qayıb · komponent · imtahan · `yekun` | Bərpa olunan (tələbə · sətir · bal · imtahan · komponent) | Qalan niyə |
+|---|---:|---:|---|---|---|
+| **P0-1** — səhv arxiv, giriş bağlı | 74 | 3 080 (hamısı) | tələbənin bütün məlumatı | **74 · 3 080** — giriş açılır | — |
+| **fake=1** jurnal (J-V6 atıb) | 944 | 2 223 | 2 366 · 6 475 · 8 208 · 1 787 · 16 | **682 · 1 439 · 1 726 · 1 457 · 5 729** | nəticəsiz (imtahan/`yekun` yox) 809 cüt; əkiz 319; siyahıdan kənar 148 |
+| **K9** — qrup uyğunsuzluğu | 893 | 1 849 | 3 216 · 10 670 · 6 042 · 689 · 49 | **790 · 1 458 · 3 157 · 519 · 5 490** | əkiz 502 cüt; xanasız siyahı cütü 249 |
+| **Qrupu silinmiş jurnal** | 136 | 1 013 | 2 036 · 2 351 · 3 375 · 741 · 0 | **76 · 395 · 825 · 421 · 1 551** | əkiz 453; qrup sübutu yoxdur 392; siyahıdan kənar 72 |
+| **J12** — dərs slotu yox | 100 | 222 | 358 · 793 · — · — · — (+2 651 iştirak) | **100 · 222 · 358 · — · —** | — |
+| Jurnal siyahısında yox (qəsdən) | 1 279 | 3 267 | 503 · 14 743 · 1 185 · 1 · 0 | — | köhnə sistem də göstərmirdi |
+| **K6** — xarici dil komponentləri | 150 | 220 | 466 xana | — | model qərarı |
+| Mənbədə olmayan jurnal | 20 | 20 | 5 qayıb | — | jurnal cədvəldə yoxdur |
+| Hesabı yoxdur | 1 | 33 | 4 · 131 · 128 · 18 · 3 | — | §5.4 |
 
-### 2.1 J12 bərpası dövrlər üzrə
+### 3.2 Sətir vəziyyəti: əvvəl → sonra
 
-| Dövr | Bərpa dərsi | Xana | Bal | Qayıb | Qeydiyyat |
-|---|---:|---:|---:|---:|---:|
-| 2021/2022 Payız | 257 | 3 265 | 44 | 33 | 137 |
-| **2021/2022 Yaz** | **11 331** | **158 264** | **12 137** | **18 745** | **7 654** |
-| 2022/2023 Payız | 3 | 39 | 10 | 2 | 39 |
-| 2022/2023 Yaz | 12 | 171 | 3 | 12 | 125 |
-| 2024/2025 Payız | 2 | 14 | 0 | 0 | 14 |
-| 2025/2026 Payız | 1 | 3 | 0 | 0 | 3 |
-| 2025/2026 Yaz | 1 | 19 | 14 | 2 | 19 |
-| **Cəmi** | **11 607** | **161 775** | **12 208** | **18 794** | **7 991** |
+| Əvvəl \ Sonra | görünür | qismən | yoxdur | Cəmi |
+|---|---:|---:|---:|---:|
+| görünür | 59 441 | — | — | 59 441 |
+| qismən | 70 | 2 260 | — | 2 330 |
+| yoxdur | 2 687 | 245 | 2 478 | 5 410 |
+| bloklu (P0-1) | 2 702 | 127 | 224 | 3 053 |
+| **Cəmi** | **64 900** | **2 632** | **2 702** | 70 234 (+130 boş) |
 
-Səbəb mənbədədir: 2021/2022 Yaz-ın 925 real jurnalından **498-nin dərs cədvəli
-(`journals_dates_added_by_teacher`) ümumiyyətlə boşdur**, bal cədvəli isə doludur.
-2026/2027 datasına **toxunulmur** (§5 yoxlaması).
+Tam görünən tələbə: **1 511 → 1 953**. Əvvəl problemli sətirlərin semestr bölgüsü: 2025/2026 Yaz 1 510 ·
+2025/2026 Payız 1 894 · 2024/2025 Yaz 1 424 · 2024/2025 Payız 1 648 · 2023/2024 Yaz 1 129 · 2023/2024
+Payız 1 700 · 2022/2023 — 1 164 · 2021/2022 — 205 · Yay dövrləri 99 · jurnalsız 20.
 
-## 3. Kök səbəblər (kod istinadları)
+## 4. Nümunə tələbələr (anonimləşdirilib — T1…T13; legacy id/inisial və tam siyahı yalnız lokal, git-dən kənar `backups/restore_2026_09_25/`-dədir)
 
-1. **J12 production-da heç vaxt işləməyib.** J4 xananı yalnız MÖVCUD dərsə bağlayır
-   (`rehearsal_journal_marks_phase.py:310-313` → `lesson` pilləsi); J12
-   (`rehearsal_lesson_recovery_phase.py`) 08-30/31-də yazılıb, production isə 08-27 run-undandır.
-   HANDOFF §8.5 P1-1 «təmir əmri yazılmadı, tam repetisiya lazımdır» deyirdi; cutover A namizədi
-   (J12 daxil) hazırlanmışdı, amma serverə **B yolu** (08-27 bazası, təmirsiz) getdi.
-2. **Mövcud təmir əmrləri production-da KORDUR (yeni tapıntı).** Production rolu
-   `NOSUPERUSER NOBYPASSRLS`-dir, registrar/ledger cədvəlləri `FORCE ROW LEVEL SECURITY`
-   daşıyır, `manage.py`-da isə tenant konteksti yoxdur. Ölçüldü: production-a bənzər rol ilə
-   kontekstsiz `registrar_lesson`/`registrar_enrollment`/ledger = **0 sətir**, profil cədvəli
-   (RLS-siz) isə 2 490 arxiv göstərir → `legacy_repair_archive_status` **2 490-ın hamısını
-   `keep_archived` sayır, heç kimi bərpa etmirdi**. Düzəliş: `repair_support.build_context`
-   indi tenant + aktor RLS kontekstini qurur (bypass YOX); eyni rol ilə nəticə 2 291 bərpa.
-3. **Paralel sorğu Docker `/dev/shm`-ə sığmır (yeni tapıntı).** Postgres konteynerlərinin
-   `/dev/shm`-i 64 MB-dır (compose-da `shm_size` yoxdur); J12-nin `recompute_absence_hours`
-   sorğusu ilk icrada «could not resize shared memory segment … No space left on device» ilə
-   yıxıldı. Təmir tranzaksiyaları indi paralel sorğunu lokal söndürür (production-da da eyni risk var).
-4. **Fake jurnallar** — J-V6 qaydası (`fake=1` və ya `sonra_sil=1` → SKIPPED
-   `legacy_journal_discarded_source`). Bu jurnalların 1 059 sətri köhnə sistemin RƏSMİ `yekun`
-   nəticəsidir, yəni köhnə sistem onları real sayıb. Qərar DATA_VERIFICATION §4.2-də açıq qalıb.
-5. **K9** — çoxqruplu jurnalda seçim tələbənin BUGÜNKÜ qrupu ilə edilir, köhnə qrup tarixçəsi
-   mənbədə yoxdur. `yekun.group_id` yalnız 76 cütdə (43 tələbə) jurnalın qruplarından birini
-   göstərir; 3 105 cütdə `yekun` sətri ümumiyyətlə yoxdur.
-6. **P0-1 arxiv** — `rehearsal_sar_phase._decide` (08-27 kodu) qəbul ili tapılmayanı arxivə
-   salırdı; faza sonradan düzəldilib, production datası köhnədir. 2 291-in hamısında mənbədə
-   `azadedildi=0`, amma yalnız **184**-ünün 2025/2026 yazılışı var (son il: 2022/2023 — 825,
-   2023/2024 — 561, 2024/2025 — 563) — çoxu, ehtimal ki, köhnə sistemin işarələmədiyi məzundur.
+Hamısı yekun repetisiya klonunda production rolu ilə, test klienti + `force_login`: «Fənlərim»,
+«Nəticələrim», «Ümumi tədris məlumatı» — **36 render-in hamısı 200**, xəta yoxdur; səhifədəki sətir sayı və
+ÜOMG kabinet qurucusunun rəqəmi ilə eynidir.
 
-## 4. Qurulan alət: `legacy_repair_lesson_recovery`
+| Tələbə | Sübut | Əvvəl | Görülən iş | Sonra (transkript sətri · ÜOMG · kredit) |
+|---|---|---|---|---|
+| **T1** | E3 | arxivdə — girə bilmir; 62 sətrin hamısı bloklu; 17 fənni yalnız fake jurnaldadır | P0-1 + 17 fake + 2 K9 yazılışı | 38 → **56** · 54,69 → **58,20** · 45 → **129**; qalan 17 sətir: nəticəsiz fake, K6, siyahıdan kənar |
+| **T2** | E3 | arxivdə; 2023/2024 Payız və 2024/2025 Payız semestrləri YALNIZ fake jurnalda | P0-1 + 15 fake yazılışı | 17 → **32** · 43,50 → **52,22** · 10 → **74** |
+| **T3** | E2 mag | DATA_VERIFICATION §3.2 nümunəsi: 2025/2026 Payızda 3 fənn (k1–k3, sərbəst iş, imtahan) yalnız fake jurnalda | 3 fake yazılışı (yeganə nəticə) | 7 → **10** · 86,14 → **88,20** · 35 → **49**; **tam görünür** |
+| **T4** | E1 | 3 fənn K9 ilə atılıb (4 imtahan) | 2 qonaq yazılışı (dilim: eyni dövrün qrupu) | 14 → **16** · 63,33 → **66,77**; 1 sətir əkiz qalır |
+| **T5** | E2 | fake + K9 + K6; 9 imtahan görünmür | 3 fake + 5 K9 cütü | 27 → **34** · 85,40 → **82,54** (bərpa olunan nəticələr orta balı azaldır — realdır) |
+| **T6** | E2 | 6 fənnində J12 slotu yox + fake | J12 + 6 fake yazılışı | 23 → **29** · 49,63 → **48,68**; +10 bal, +6 imtahan |
+| **T7** | E1 | silinmiş qrup (9 cüt, 16 imtahan) + fake + K9 | 12 cüt: 5 silinmiş qrup (sübutla) + 4 fake + 3 K9 | 23 → **34** · 66,14 → **68,50**; 8 sətir: qrup sübutu yox / əkiz |
+| **T8** | E2 | K9 + K6 | 2 K9 cütü (eyni açılış — bir yazılış) | 41 → 42 · 72,66 → 72,15; K9 əkizləri və K6 qalır |
+| **T9** | E2 | K9 + K6 (8 xana) | 4 K9 cütü (2-si əkiz — toxunulmur) | 48 → **52** · 93,65 → 92,06; K6 qalır |
+| **T10** | E2 | 3 fake cütü — əkiz | toxunulmur (əkiz) | 30 → 30; §8.1 |
+| **T11** | E2 | 9 fake cütü imtahansız | toxunulmur (nəticəsiz) | 24 → 24; §8.2 |
+| **T12** | E2 | 21 cüt — siyahıdan kənar (yalnız davamiyyət) | toxunulmur (qəsdən) | 15 → 15; ÜOMG əvvəl də hesablanmırdı |
+| **T13** | E3 | hesabı yoxdur (`legacy_account_email_invalid`) — 35 cüt, 18 imtahan, 3 `yekun` | — | §5.4 |
 
-**Dizayn — ağır iş lokalda, serverə yalnız yığcam plan gedir.** Serverdə köhnə mənbə yoxdur;
-production settings `LEGACY_MARIADB_SOURCE_LOCAL_DISPOSABLE=False` saxlayır, yəni orada mənbə
-yalnız TLS-sertifikatlı MariaDB ilə mümkün olardı (P0-2 də belə nəzərdə tutulmuşdu —
-HANDOFF §8.6 addım 2 — və heç vaxt qurulmadı). Ona görə:
+## 5. Bərpa qaydaları və alətlər
 
-1. **Plan (lokal)** — `--build-plan`: production nüsxəsinin ATILABİLƏN klonunda (marker
-   MƏCBURİ, `--i-know-this-is-production` bu rejimdə QƏBUL EDİLMİR) J12-nin **öz kodu
-   dəyişmədən** işləyir. Yeganə fərq: J4-ün həll indeksləri hədəfi quran orijinal import
-   run-una bağlanır (`_resolution` hook-u, `rehearsal_lesson_recovery_phase.py`); möhürlər yeni
-   «plan run»-una (`legacy-repair-j12-v1`) yazılır. Klonda YENİ yaranan sətirlər deterministik
-   `.jsonl.gz` plan faylına çıxarılır (0600, sha256 manifesti ilə).
-2. **Tətbiq (server)** — `--plan … --plan-sha256 …`: sha256 yoxlanılır; başlıq CANLI bazada
-   eyni təşkilat + eyni import run-u tələb edir; hər sətir canlı dataya qarşı yenidən təsnif
-   olunur: açılış ledger-də MIGRATED və dövrü 2026-09-01-dən əvvəl bitməlidir; eyni slotda
-   canlı dərs varsa yeni dərs yaradılmır (`reuse_existing`); mövcud xana **heç vaxt** üstündən
-   yazılmır (`live_conflict`); müəllimin `grade.input`-lu aktiv üzvlüyü yoxdursa sahə boş qalır.
+### 5.1 J12 — `legacy_repair_lesson_recovery` (1-ci mərhələ, dəyişməyib)
+Dərs slotu olmayan xanalar; plan `j12_plan_a7d1.jsonl.gz`, sha256 `ab777837…701538`, 4 766 078 bayt.
+Dizayn və 1-ci mərhələ repetisiyası — Əlavə B.
 
-Qapılar repair konvensiyasının eynisidir: dry-run DEFAULT, `--apply`, markersiz bazada
-`--i-know-this-is-production`, `--organization`, `--limit`, `--actor`; qərar cədvəli həmişə
-çap olunur; heç nə silinmir; ikinci icra 0 dəyişiklik (audit izi də yoxdur).
-**Audit:** hər bərpa dərsi (xana siyahısı ilə), dəyişən hər `absence_hours` (köhnə/yeni dəyər)
-və hər sübut faktı üçün `core.audit.log_action` (`legacy_repair:lesson_recovery`), sonda plan
-sha256-lı xülasə sətri. **Sübut:** uduzan dəyərlər `LegacyGradeFact`-a (append-only, İmtahan
-Mərkəzi baxışı məcburi), dərslər `is_legacy_synthesised=True`. Production ledger-inə yeni run
-yazılmır (digər təmir əmrləri kimi) — ledger sübutu plan run-unda və plan faylındadır.
+### 5.2 Yeni: `legacy_repair_journal_enrollments` — atılmış yazılışlar (yalnız hazırda oxuyanlar)
 
-## 5. Repetisiya nəticələri
+**Nə bərpa olunur** (`services/repair_enrollments_select.py`, hər qayda testli):
 
-**Plan qurulması** (klon `ems_restore_a7d1`, marker ilə): 24,5 dəq; slot 11 607 → dərs 11 607,
-xana 161 775, `absence_hours` dəyişən 5 400, toqquşma sübutu 1 730 (1 445 təqvim + 285
-komponent) + həll olunmayan 87 = 1 817 fakt. Rəqəmlər BAL_PROBLEMLERI §2.1-də ölçülmüş J12
-nəticəsi ilə **eynidir** (+11 607 dərs, +161 775 xana). Plan: 4,8 MB,
-sha256 **`ab777837e4f517e401d16ada68b362edb625b289df30b6641c598ba8af701538`**.
+* **K9 (qrup uyğunsuzluğu):** tələbə çoxqruplu jurnalın siyahısındadır, amma cari qrupu dilimlərdən
+  heç biri deyil → J2 yazılışı atıb. **Dilim qaydası:** (1) cari qrup dilimdirsə — o; (2) yoxdursa
+  tələbənin HƏMİN dövrdəki köçmüş yazılışlarının qrupu dilimlərdən birinə düşürsə — o (bir neçəsidirsə
+  jurnal sırasında birincisi); (3) yoxdursa jurnalın ilk dilimi (`primary_offering` qaydası).
+  Nəticə: eyni dövr qrupu 789 · birinci-uyğun 115 · ilk dilim 744. Cari qrupdan fərqli dilimə yazılış
+  **qonaq** kimi yaranır (`source_group` = tələbənin öz qrupu, `added_by`, `added_at`) — `guest_roster` /
+  `subgroup_rollup`-un EYNİ təmsili (jurnalda «alt qrupdan əlavə» çipi), sadəcə bağlı dövr üçün
+  `add_guest_student` işləmədiyindən birbaşa yazılır; sənəd əvəzinə sübut: plan faylı + audit.
+* **fake=1:** J-V6 jurnalı atıb, amma tələbənin həmin fənn+semestr üzrə **nəticəsini YALNIZ bu jurnal
+  daşıyır** — imtahan xanası (`im`/`im2`, rəqəm) və ya rəsmi `yekun` sətri, VƏ tələbənin həmin
+  fənn+semestrdə başqa yazılışı yoxdur. Sübut: köhnə sistem bu nəticəni rəsmi saymışdı (`yekun` yalnız
+  2022/2023 Payız üçün doludur; qalan semestrlərdə nəticənin daşıyıcısı jurnalın imtahan xanasıdır;
+  DATA_VERIFICATION §3.2: 6 341 fake cütündən yalnız 268-inin normal jurnalda qarşılığı var). Açılış J1-in
+  öz kodu ilə qurulur və ya mövcud (fənn, dövr, qrup) açılışına birləşdirilir (C6); dövr bitdiyi üçün
+  sxem J7 kimi kilidlənir. Müəllimin `grade.input`-lu aktiv üzvlüyü yoxdursa açılış müəllimsiz qalır.
+* **Qrupu silinmiş jurnal (yeni kateqoriya):** real jurnal, amma bütün qrupları mənbənin `groups`
+  cədvəlində yoxdur (J1: `legacy_journal_group_unresolved`). Qrup yalnız **sübutla** seçilir: tələbənin
+  həmin dövrdəki köçmüş yazılışlarının hamısı TƏK qrupdadırsa — o qrup; sübut yoxdursa və ya bir neçə
+  qrupdursa cüt bərpa olunmur (təxmin edilmir).
 
-**Production kimi tətbiq** (ayrı klon `ems_restore_a7d1p`, **markersiz**, production-un öz
-`provision-app-db-role.sh` SQL-i ilə qurulmuş `NOSUPERUSER NOBYPASSRLS` rol, `--i-know-this-is-production`):
+**Hamısı üçün təhlükəsizlik qaydaları:** yalnız jurnalın `students_id` siyahısındakı tələbə (J2 qaydası —
+siyahıdan kənar xana köhnə sistemdə də görünmürdü); tələbənin həmin fənn+semestrdə ARTIQ yazılışı varsa
+(«əkiz») bərpa olunmur — fənn transkriptdə/ÜOMG-də iki dəfə sayılmasın; xanası olmayan siyahı cütü bərpa
+olunmur; eyni açılışa düşən ikinci jurnal (məs. mühazirə + seminar) J2 kimi **eyni yazılışa** bağlanır
+(177 cüt) — onun xanaları da yazılır.
+
+**Plan (lokal, atılabilən klonda).** J12 planı tətbiq olunmuş klonda J1/J3/J4/J12/J5/J5b/J6/J9 **öz
+kodu ilə** ayrı ledger ad-sahəsində (`myedu-repair`) işləyir (J12 yalnız bərpa yazılışlarının xanalarını
+emal edir — qalanını J12 planı artıq edib); klonda YALNIZ bərpa sətirləri plana çıxarılır, qalan hər
+dəyişiklik sayılır (bu planda mövcud sətirlərin yenilənməsi **0**). Başlıqda: seçim sayları, hazırda
+oxuyanların siyahısı (P0-1 üçün), ön-şərt planı (J12 sha256), sxem vəziyyəti.
+**Tətbiq (server, mənbəsiz):** sha256 → başlıq (tenant, snapshot, import run) → ön-şərt (J12 planının
+xülasə audit sətri canlıda VARMI — yoxdursa heç nə edilmir) → plan sahələri canlı modeldə varmı (yoxdursa
+heç nə edilmir) → sətir-sətir canlı yoxlama: açılışın dövrü 2026-09-01-dən əvvəl bitməlidir, mövcud açılış
+ledger-də MIGRATED olmalıdır; tələbənin aktiv üzvlüyü olmalıdır; başqasının (tələbə, açılış) yazılışı varsa
+sətir və uşaqları atlanır; xana/bal/yekun heç vaxt üstündən yazılmır; dərs–yazılış eyni açılışda olmalıdır.
+Qapılar: dry-run DEFAULT, `--apply`, markersiz bazada `--i-know-this-is-production`, `--limit`, `--actor`.
+**Audit:** hər açılış/sxem/komponent/mövzu/yazılış/dərs/fakt üçün `legacy_repair:journal_enrollments: …`
+(yazılışda `restore_key(s)` = legacy jurnal:tələbə açarı), sonda plan sha256-lı xülasə; boş təkrar icra iz
+qoymur. **Geri qaytarma:** `scripts/ops/restore_legacy_enrollments_rollback.psql` (audit izindən).
+
+### 5.3 P0-1 yalnız hazırda oxuyanlar — `legacy_repair_archive_status --current-plan`
+Tam əhatə 2 291 idi (çoxu keçmiş tələbə). İndi siyahı yazılış planının **möhürlənmiş başlığından**
+gəlir (`--current-plan <yazılış planı> --current-plan-sha256 <sha>`): yalnız hazırda oxuyan (E3) 74
+tələbə açılır, qalan 2 217 `not_current` səbəbi ilə arxivdə qalır, 199 buraxılmış toxunulmur. Hədəf-tərəf
+alternativi `--active-period "2025/2026 Yaz"` da var, amma 8 E3 tələbəni buraxır (onların son semestr
+fəaliyyəti yalnız nəticəsiz fake jurnalda və ya siyahıdan kənar xanadadır) — ona görə siyahı tövsiyə olunur.
+
+### 5.4 Hesabı olmayan hazırda oxuyan (d)
+Yalnız **1 tələbə** (**T13**, E3): hesab kəsimində `legacy_account_email_invalid` ilə
+atlanıb; 35 cüt, 18 imtahan, 3 `yekun`. **Avtomatik yaradılmadı:** hesab yaratmaq kimlik qərarıdır (e-poçt
+etibarsızdır), `ad.soyad` toqquşma qaydası və tələbə nömrəsi reyestrin işidir, tarixçə üçün isə legacy id →
+hesab bağlantısı (P0-2 yolu) lazımdır. Tövsiyə: reyestr hesabı adi qaydada yaratsın (`ad.soyad`), sonra
+P0-2 bağlantısı ilə bu alət yenidən qurulsun — 35 cüt eyni qaydalarla gələcək.
+
+## 6. Repetisiya (production kimi, üç addım birlikdə)
+
+Klon: production nüsxəsi + cari miqrasiyalar, **markersiz**, production-un öz `provision-app-db-role.sh`
+SQL-i ilə qurulmuş `NOSUPERUSER NOBYPASSRLS` rol, hər yazı `--i-know-this-is-production` ilə.
 
 | Addım | Nəticə |
 |---|---|
-| `--apply` bayraqsız / səhv sha256 | rədd: `legacy_repair_target_not_disposable` / `legacy_repair_plan_sha256_mismatch` |
-| dry-run | `lesson:create 11607 · mark:create 161775 · fact:create 1817` · 7 991 qeydiyyat · müəllim düşümü 0 |
-| **apply** (51 san) | FAKTİKİ: dərs **11 607** · xana **161 775** · fakt **1 817** · `absence_hours` **5 400** |
-| ikinci apply | hamısı `already_present`, FAKTİKİ **0**, audit izi yoxdur |
-| J12-nin öz nəticəsi ilə müqayisə | dərs/xana/fakt/bütün 151 271 qeydiyyatın `absence_hours`-u — checksum **bayt-bəbayt eyni** |
-| 2026/2027 | toxunulmayıb (bərpa dərsi kəsimdən sonra 0; 2026/2027 xana sayı 9 → 9) |
-| audit | 11 607 dərs + 5 400 qeydiyyat + 1 817 fakt + 1 xülasə sətri |
-| geri qaytarma (§6.3) → yenidən apply | prod nüsxəsi ilə checksum eyni → yenidən apply yenə bayt-bəbayt eyni |
+| J12 dry-run → apply → təkrar | `lesson 11 607 · mark 161 775 · fact 1 817` · 7 991 qeydiyyat; apply 1,5 dəq; təkrar 0 |
+| Yazılış planı: qapılar | markersiz → `legacy_repair_target_not_disposable`; səhv sha → `legacy_repair_plan_sha256_mismatch` |
+| dry-run | hamısı `create`: açılış 365 · sxem 365 · komponent 1 846 · mövzu 1 667 · **yazılış 3 326 (1 315 tələbə)** · dərs 9 736 · xana 109 063 · komponent balı 14 533 · **yekun 1 924** · təkrar imtahan 51 · fakt 83; atlanan/konflikt **0** |
+| apply | 59 san; FAKTİKİ eyni; mövcud sətirlərin yenilənməsi **0**; 2026/2027 dövrünə düşən açılış/dərs **0** |
+| ikinci apply | hamısı `already_present`, FAKTİKİ **0**, audit yoxdur |
+| plan = baza | 144 963 sətrin hamısı eyni pk və dəyərlə bazadadır |
+| geri qaytarma | `drop_facts` olmadan **rədd** (bağlı sübut faktı var), heç nə dəyişmir; `drop_facts=1` ilə 20 cədvəlin hamısı tətbiqdən əvvəlki izə **eyni**; yenidən apply → ilk tətbiqlə **eyni** |
+| P0-1 (plan siyahısı) | arxiv 2 490 → **restore 74** · not_current 2 217 · buraxılmış 199; apply 74 / 0 uğursuz; təkrar 0 |
+| 2026/2027 | yazılış 3 251, dərs 1, xana 9 — tam təmiz nüsxə ilə hash **eyni** |
+| audit | J12 18 825 · yazılış planı 17 389 · P0-1 74 |
+| tələbə görünüşü | §4 — 36 render, hamısı 200 |
 
-**Nəticəyə təsir** (plana düşən 7 991 qeydiyyatın hamısı, `finals.compute_final_result`):
-yalnız `absence_hours` (5 400) və göstərilən davamiyyət balı (6 411) dəyişir; **giriş balı,
-yekun, hərf, keçib/kəsilib və status: 0 dəyişiklik** — köhnə sistemin hesabladığı nəticə olduğu
-kimi qalır, ÜOMG dəyişmir. 7 202 qeydiyyat (90 %) köhnə sistemdə nəticəsizdir
-(`legacy_no_result`, əsasən 2021/2022 Yaz) — J12 onların gündəlik jurnalını tamamlayır.
+## 7. Production runbook
 
-**Tələbə görünüşü** (test klienti, `force_login`, bərpa alan 12 aktiv tələbə, tətbiqdən əvvəl
-və sonra): «Fənlərim» / «Nəticələrim» / «Ümumi tədris məlumatı» — 72 render-in hamısı **200**,
-xəta yoxdur; ÜOMG 11 tələbədə hesablanır (1-də qəti nəticəli fənn yoxdur → «hesablana bilmir»,
-dizayn üzrə). Yekun vəziyyətdə (J12 + P0-1, geri qaytarma → yenidən tətbiqdən sonra) daha 12
-tələbə yoxlandı — 8-i P0-1 ilə yenidən aktivləşən, hər biri +23…+26 bərpa balı ilə: 36 render-in
-hamısı **200**, ÜOMG 10 tələbədə hesablanır (2-də qəti nəticə yoxdur); nəticəsiz legacy fənni saxta hərf yox, «Köhnə sistemdə bal var, nəticə keçməyib»
-+ «İmtahan Mərkəzi ilə dəqiqləşdirilsin» göstərir. ÜOMG/transkript render-ində legacy data üçün
-qüsur tapılmadı. Qeyd: köçürülmüş hesablar ilk girişdə `/accounts/set-password/`-ə yönləndirilir
-(`password_change_required`) — klon testində seçilən tələbələr üçün bu bayraq əvvəlcədən söndürüldü.
+> Hər addımdan əvvəl dry-run rəqəmlərini bu cədvəllə tutuşdurun; fərq varsa **dayanın**. Konteyner
+> `educationmanagementstudentarena-app-1`, təşkilat `qku`, aktor `superadmin`, APP_DIR
+> `/home/wcu/EducationManagementStudentArena`. Sıra dəyişməzdir: **J12 → yazılışlar → P0-1**.
 
-**P0-1 (arxiv) — production yolu ilə** (eyni klon, eyni rol): dry-run 2 291 bərpa / 199 toxunulmur
-(`--require-activity` ilə 2 219 / 271); apply 15 san, 2 291 bərpa, 0 uğursuz; ikinci icra 0.
-Hər iki bərpadan sonra J12 xanası alan 1 974 tələbədən **1 948-i** giriş edib görə bilir
-(1 626-sı bərpa olunmuş balla); arxivdə qalan 26 nəfər həqiqətən buraxılıb.
+### 7.0 Hazırlıq
+1. **Kod deploy** (yeni miqrasiya yoxdur; production `registrar ≥ 0081_selfwork_points`-da olmalıdır —
+   plan bu sxemlə qurulub, uyğunsuz sahə olarsa tətbiq heç nə etmədən rədd edir):
+   `docker exec educationmanagementstudentarena-app-1 python manage.py showmigrations registrar | tail -3`
+2. **Plan faylları** (`backups/restore_2026_09_25/`, 0600, repoya düşmür):
 
-## 6. Production runbook
+| Fayl | sha256 | Ölçü |
+|---|---|---:|
+| `j12_plan_a7d1.jsonl.gz` | `ab777837e4f517e401d16ada68b362edb625b289df30b6641c598ba8af701538` | 4 766 078 |
+| `enroll_plan_v7.jsonl.gz` | `9ef7443ac3d786496e9d6620e4de5011b56c1c2088ab2fa438ac46fa265195ec` | 9 408 396 |
 
-> Hər addımdan əvvəl dry-run rəqəmlərini bu cədvəllə tutuşdurun; fərq varsa **dayanın**.
-> APP_DIR `/home/wcu/EducationManagementStudentArena`, konteyner `educationmanagementstudentarena-app-1`,
-> təşkilat `qku`, aktor `superadmin` (grade-fact trigger-i superuser/owner aktor tələb edir).
+### 7.1 J12 (workflow hazırdır)
+`COMMAND=legacy_repair_lesson_recovery` (default) — gözlənilən dry-run: `lesson:create 11607 ·
+mark:create 161775 · fact:create 1817` · yeni xana alan qeydiyyat 7 991. Apply sonrası:
+`select count(*) from registrar_lesson where is_legacy_synthesised;` → 11 607.
 
-### 6.1 Hazırlıq
-
-1. **Kod deploy** (miqrasiya YOXDUR): yeni əmr `legacy_repair_lesson_recovery`, `repair_support`
-   RLS + paralel-sorğu düzəlişi. Yoxlama:
-   `docker exec educationmanagementstudentarena-app-1 python manage.py help legacy_repair_lesson_recovery | head -3`
-2. **Plan faylı** — hazırdır: `backups/restore_2026_09_25/j12_plan_a7d1.jsonl.gz` (+ `.manifest.json`,
-   `.sha256`), sha256 yuxarıdadır. Serverə şəxsi kanalla (AnyDesk fayl ötürmə / scp) köçürün,
-   `sha256sum -c j12_plan_a7d1.jsonl.gz.sha256`. İstəsəniz təzə production dump-undan yenidən
-   qurun: `scripts/ops/restore_legacy_scores_build_plan.sh <prod dump> <qovluq> superadmin`
-   (yeni sha256 alınır; tətbiq addımı eyni qalır). Plan 2026-09-19/20 nüsxəsindən qurulub, amma
-   tətbiq hər sətri canlı bazaya qarşı yenidən yoxlayır.
-
-### 6.2 J12 bərpası
-
+### 7.2 Hazırda oxuyanların yazılışları — J12-dən SONRA
 ```bash
-cd /home/wcu/EducationManagementStudentArena
-PLAN=/home/wcu/restore/j12_plan_a7d1.jsonl.gz
-SHA=ab777837e4f517e401d16ada68b362edb625b289df30b6641c598ba8af701538
-
-scripts/ops/restore_legacy_scores_server.sh check   "$PLAN" "$SHA" superadmin
-scripts/ops/restore_legacy_scores_server.sh dry-run "$PLAN" "$SHA" superadmin
-#   gözlənilən: lesson:create 11607 · mark:create 161775 · fact:create 1817
-#               yeni xana: present(bal) 12208 · absent 18794 · excused 12 · present 130761
-#               yeni xana alan qeydiyyat 7991 · reuse/live_conflict/skip YOXDUR
-scripts/ops/restore_legacy_scores_server.sh apply   "$PLAN" "$SHA" superadmin
-#   əvvəl `docker exec emsarena-postgres-backup /backup.sh`, sonra apply (~1 dəq):
-#   FAKTİKİ dərs 11607 · xana 161775 · fakt 1817 · absence_hours 5400
-#   sonra İKİNCİ icra: hamısı already_present, FAKTİKİ 0
+PLAN=/home/wcu/restore/enroll_plan_v7.jsonl.gz
+SHA=9ef7443ac3d786496e9d6620e4de5011b56c1c2088ab2fa438ac46fa265195ec
+COMMAND=legacy_repair_journal_enrollments scripts/ops/restore_legacy_scores_server.sh check   "$PLAN" "$SHA" superadmin
+COMMAND=legacy_repair_journal_enrollments scripts/ops/restore_legacy_scores_server.sh dry-run "$PLAN" "$SHA" superadmin
+#   gözlənilən (HAMISI create, skip/konflikt YOX):
+#   courseoffering 365 · assessmentscheme 365 · assessmentcomponent 1846 · selfworktopic 1667
+#   enrollment 3326 (tələbə 1315) · lesson 9736 · lessonmark 109063 · componentscore 14533
+#   finalgrade 1924 · resitrecord 51 · legacygradefact 83
+#   J12 tətbiq olunmayıbsa: legacy_repair_plan_prerequisite_missing:lesson_recovery:ab777837e4f5 (dayanın)
+COMMAND=legacy_repair_journal_enrollments scripts/ops/restore_legacy_scores_server.sh apply   "$PLAN" "$SHA" superadmin
+#   backup.sh → apply (~1 dəq, FAKTİKİ yuxarıdakı rəqəmlər) → ikinci icra: hamısı already_present, FAKTİKİ 0
 ```
-
-Skriptsiz ekvivalent: `docker cp` + `docker exec -u 0 … chown appuser:appgroup` (konteyner
-`appuser` kimi işləyir, plan 0600-dür), sonra
-`docker exec -i educationmanagementstudentarena-app-1 python manage.py legacy_repair_lesson_recovery --organization qku --actor superadmin --plan /tmp/j12_plan_a7d1.jsonl.gz --plan-sha256 $SHA [--apply --i-know-this-is-production]`.
-Mərhələli tətbiq üçün `--limit N` (ilk N vahid) işləyir; tam icra sonra qalanı əlavə edir.
-
-**Yoxlama (serverdə, oxu):**
+Canlı data plan qurulandan sonra dəyişibsə dry-run bəzi sətirləri `skip_enrollment_exists` /
+`skip_live_conflict` / `skip_student_inactive` göstərə bilər — bu, qoruyucunun işidir (üstündən yazılmır);
+sayı kiçikdirsə davam etmək olar, böyükdürsə planı təzə dump-dan yenidən qurun
+(`scripts/ops/restore_legacy_scores_build_plan.sh <prod dump> <qovluq>` hər iki planı qurur, ~1,5 saat).
+**Yoxlama (oxu):**
 ```sql
-select count(*) from registrar_lesson where is_legacy_synthesised;        -- 11607
-select count(*) from registrar_legacygradefact where transform_version like 'legacy-repair-j12-v1.%';  -- 1817
+select count(*) from audit_auditlog where reason = 'legacy_repair:journal_enrollments: enrollment';  -- 3326
+select count(*) from registrar_enrollment e join audit_auditlog a on a.object_id = e.id::text
+ where a.reason = 'legacy_repair:journal_enrollments: enrollment' and e.source_group_id is not null;  -- qonaq
 ```
-Tələbə görünüşü üçün `scripts/ops/restore_legacy_scores_verify.py` YALNIZ klonda işlədilir
-(giriş sessiyası yazır); serverdə staff «view-as» ilə 2-3 tələbəyə baxmaq kifayətdir.
 
-### 6.3 Geri qaytarma
-
-Tətbiq yalnız ƏLAVƏ edir, ona görə hədəfli geri qaytarma mümkündür və repetisiyada sınanıb
-(nəticə prod nüsxəsi ilə checksum eyni):
+### 7.3 P0-1 — yalnız hazırda oxuyanlar (yazılış planından SONRA)
 ```bash
-docker exec -i <postgres konteyneri> psql -U <owner> -d emsarena_db \
-  -v plan_sha=$SHA -v drop_facts=1 -f - < scripts/ops/restore_legacy_scores_rollback.psql
+COMMAND=legacy_repair_archive_status scripts/ops/restore_legacy_scores_server.sh dry-run "$PLAN" "$SHA" superadmin
+#   gözlənilən: hazırda oxuyan (plan siyahısı) 3648 · arxivdə olan profil 2490
+#               bərpa namizədi 74 · not_current 2217 · source_azadedildi 199
+COMMAND=legacy_repair_archive_status scripts/ops/restore_legacy_scores_server.sh apply   "$PLAN" "$SHA" superadmin
+#   FAKTİKİ bərpa olunan 74, uğursuz 0; ikinci icra 0
 ```
-Skript audit izindən işləyir: `absence_hours`-u audit-dəki ən erkən köhnə dəyərə qaytarır, bu
-planın dərslərini və onların xanalarını silir, `drop_facts=1` ilə (yalnız superuser) sübut
-faktlarını da. Bərpa dərsinə sonradan düzəliş bağlanıbsa FK silməni dayandırır (sənədli düzəliş
-səssizcə silinmir). Son çarə — addım 6.2-dəki `backup.sh` nüsxəsinin bərpası (sonrakı canlı
-yazılar itər).
+(Plan faylı burada yalnız möhürlənmiş siyahı mənbəyidir: `--current-plan/--current-plan-sha256`.)
+Tələbə görünüşü: serverdə staff «view-as» ilə 2-3 tələbəyə baxmaq kifayətdir;
+`scripts/ops/restore_current_students_verify.py` YALNIZ klonda (giriş sessiyası yazır).
 
-### 6.4 P0-1 (arxiv) — yalnız sahib qərar verəndən sonra
+### 7.4 Geri qaytarma
+* Yazılış planı (DB owner / superuser): `docker exec -i <postgres> psql -U <owner> -d emsarena_db
+  -v plan_sha=$SHA -v drop_facts=1 -f - < scripts/ops/restore_legacy_enrollments_rollback.psql` —
+  bağlı faktlar varsa `drop_facts=1`-siz dayanır; sonradan bu sətirlərə düzəliş bağlanıbsa FK silməni
+  dayandırır. Repetisiyada nəticə tətbiqdən əvvəlki vəziyyətlə eynidir.
+* J12: `scripts/ops/restore_legacy_scores_rollback.psql` (Əlavə B). P0-1 geri qaytarması skriptlənməyib
+  (74 hesabı yenidən arxivləmək lazım olsa — audit `legacy_repair:archive_status` siyahısı ilə).
+* Son çarə — addımdan əvvəlki `backup.sh` nüsxəsi.
 
-```bash
-docker exec -i educationmanagementstudentarena-app-1 python manage.py legacy_repair_archive_status \
-    --organization qku --actor superadmin [--require-activity]          # dry-run: 2291 (və ya 2219)
-docker exec -i educationmanagementstudentarena-app-1 python manage.py legacy_repair_archive_status \
-    --organization qku --actor superadmin [--require-activity] --apply --i-know-this-is-production
-```
-⚠️ Bu əmr yalnız bu dəyişiklik deploy olunandan SONRA işləyir (RLS düzəlişi); köhnə kodda dry-run
-«bərpa 0» göstərir — bu, «iş yoxdur» demək DEYİL.
+### 7.5 Workflow-a əlavə (koordinator üçün)
+`prod-legacy-restore.yml`-ə `repair` girişi (choice: `lesson_recovery` | `journal_enrollments` |
+`archive_status`) və addım env-i `COMMAND: legacy_repair_${{ github.event.inputs.repair }}` kifayətdir —
+server skripti üç əmri eyni `check/dry-run/apply` interfeysi ilə işlədir; `archive_status` üçün asset
+yazılış planının özüdür (eyni sha256).
 
-## 7. Açıq qərarlar (sahib)
+## 8. Açıq qərarlar (sahib)
 
-1. **P0-1 əhatəsi.** Hamısı (2 291), yazılışı olanlar (`--require-activity`, 2 219), yoxsa yalnız
-   yaxın dövrdə oxuyanlar (2025/2026 yazılışı olan 184 — bu süzgəc əmrdə YOXDUR, lazım olsa əlavə
-   edilməlidir)? Bərpa olunmayan arxiv tələbəsi J12-nin qaytardığı balları görə bilməyəcək.
-2. **Fake jurnallar (§2 #3).** 1 059 rəsmi nəticə + 6 523 imtahan balı. Qərar «köçsün» olarsa iş
-   iki qatdır: J-V6 qaydası fazada dəyişir və ayrıca təmir alətı yazılır (açılış + yazılış +
-   xanalar; J12 kimi plan/tətbiq dizaynı ilə). J1/J2/J4–J6 fazaları hədəfdə təkrar işlədilə
-   bilmir (ledger kimlik konflikti), ona görə bu, ayrıca iş paketidir.
-3. **K9 dilim qaydası.** Seçim: (a) `yekun.group_id` sübutu olan 76 cütü bərpa et, qalanı saxla;
-   (b) tələbəni jurnalın ilk diliminə «qonaq» (`source_group`) kimi yaz; (c) toxunma.
-4. **Hesabı olmayan 94 tələbə (P0-2).** `legacy_repair_missing_accounts` mənbə tələb edir (serverdə
-   yoxdur) və `myedu.student.N` adı yaradır (sahib qaydası: «myedu» görünməsin). Tövsiyə: hesab +
-   tarixçə üçün J12 kimi plan/tətbiq aləti; tarixçə (yazılış, xana, yekun) yenə J2–J6 məntiqi tələb edir.
-5. **Xarici dil komponentləri (K6)** — model qərarı (yeni komponent növləri və ya «digər» sütunu).
+1. **Əkiz jurnalda qalan imtahan (ən vacib).** 417 fənn sətrində (301 hazırda oxuyan, 430 imtahan xanası;
+   əsasən 2024/2025 və 2025/2026) tələbənin köçmüş yazılışı var, amma **imtahanı yoxdur** («köhnə sistemdə
+   nəticə yoxdur» göstərir), imtahan balı isə bərpa olunmayan ikinci jurnaldadır (308 fake, 109 K9).
+   Təklif: yalnız imtahan/yekun köçürən ayrıca plan (J6-nın öz kodu, hədəf = mövcud yazılış, yalnız BOŞ
+   `exam_score` doldurulur, audit ilə); gündəlik xanalar qarışdırılmır. Qərar: hansı jurnal rəsmidir?
+2. **Nəticəsiz fake jurnallar** (595 sətir: yalnız gündəlik bal/komponent, imtahan yox) — DATA_VERIFICATION §4.2.
+3. **Qrup sübutu olmayan silinmiş-qrup jurnalları** (344 sətir, 76 tələbə, ~320 imtahan): tələbənin o
+   semestrdə başqa yazılışı yoxdur — qrupu yalnız cari qrupla «təxmin» etmək olar; təklif etmirik.
+4. **K6** xarici dil komponentləri (259 sətir) — model qərarı. 5. **Hesabı olmayan 1 tələbə** — §5.4.
+6. **Hazırda oxumayanlar** (P0-1-in qalan 2 217 arxivi, onların K9/fake cütləri) — ayrıca qərar.
 
-## 8. Fayllar
+## 9. Fayllar
 
 | Fayl | Nədir |
 |---|---|
-| `apps/legacy_import/management/commands/legacy_repair_lesson_recovery.py` | əmr (plan / tətbiq) |
-| `apps/legacy_import/services/repair_lesson_recovery.py` | plan qatı (J12 klonda + delta) |
-| `apps/legacy_import/services/repair_lesson_recovery_apply.py` | tətbiq qatı (canlı yoxlama + yazı + audit) |
-| `apps/legacy_import/services/repair_plan_file.py` | plan faylı formatı (sha256, manifest) |
-| `apps/legacy_import/services/repair_support.py` | + RLS konteksti, `scoped_atomic`, paralel sorğu |
-| `apps/legacy_import/services/rehearsal_lesson_recovery_phase.py` | + `_resolution` hook-u (davranış eyni) |
-| `apps/legacy_import/tests/test_repair_lesson_recovery.py` | 17 test (PostgreSQL) |
-| `scripts/ops/restore_legacy_scores_build_plan.sh` · `…_server.sh` · `…_rollback.psql` | lokal plan · server · geri qaytarma |
-| `scripts/ops/restore_legacy_scores_verify.py` · `…_impact.py` | tələbə görünüşü · nəticəyə təsir (klonda) |
-| `backups/restore_2026_09_25/` (gitignore) | plan + manifest + adlı tələbə siyahısı (33 990 sətir) |
+| `apps/legacy_import/management/commands/legacy_repair_journal_enrollments.py` | yeni əmr: plan / tətbiq / yenidən çıxarış |
+| `apps/legacy_import/services/repair_enrollments_{select,replay,extract,plan,apply,specs}.py` | seçim qaydaları · klonda təkrar · çıxarış · plan · canlı tətbiq · model spesifikasiyası |
+| `apps/legacy_import/services/repair_archive.py` · `…/commands/legacy_repair_archive_status.py` | P0-1: `--current-plan`, `--active-period` |
+| `apps/legacy_import/services/repair_plan_file.py` | + `read_plan_header` |
+| `apps/legacy_import/tests/test_repair_journal_enrollments.py` · `test_repair_archive_current.py` | 22 + 10 test (PostgreSQL) |
+| `scripts/ops/restore_legacy_scores_server.sh` · `…_build_plan.sh` | server (3 əmr) · lokal plan (hər iki plan) |
+| `scripts/ops/restore_legacy_enrollments_rollback.psql` · `restore_current_students_verify.py` | geri qaytarma · tələbə görünüşü (klonda) |
+| `backups/restore_2026_09_25/` (gitignore, 0600) | planlar + manifest + sha256, bərpa olunmayan cütlər, adlı tələbə × fənn cədvəli |
+
+---
+
+## Əlavə A — 1-ci mərhələ: bütün tələbələr üzrə kateqoriyalar
+
+| Kateqoriya | Tələbə | Görünməyən | Kök səbəb | Vəziyyət |
+|---|---:|---|---|---|
+| Dərs slotu yoxdur (K10/K10b) | 1 974 | 7 991 qeydiyyatda 161 775 xana (12 208 bal, 18 794 qayıb) | J12 production-da işləməyib | ✅ J12 planı |
+| Səhv arxiv (P0-1) | 2 291 | bütün balları (giriş bağlı) | qəbul ili tapılmayan tələbə arxivə salınıb | ✅ hazırda oxuyan 74 (§5.3) |
+| Fake jurnallar (J-V6) | 2 648 | 8 219 fənn sətri, 6 523 imtahan, 1 059 `yekun` | J1 `fake=1`-i atır | ✅ hazırda oxuyanlarda yeganə nəticə daşıyıcısı |
+| Qrup uyğunsuzluğu (K9) | 1 402 | 3 449 fənn sətri, 1 389 imtahan | J2 cari qrupla seçir | ✅ hazırda oxuyanlar (qonaq) |
+| Hesabı yoxdur (P0-2) | 171 | 2 782 fənn sətri | e-poçt kimlik açarı | ⏳ |
+| Silinmiş qrupun jurnalı | 256 | 1 706 fənn sətri, 913 imtahan | qrup mənbədə yoxdur | ✅ sübutla (hazırda oxuyanlar) |
+| Siyahıda olmayan tələbə | 2 686 | əsasən davamiyyət | köhnə sistemin öz siyahısı | ❌ qəsdən |
+| İmtahan cəhdi jurnala bağlanmır (K13) | 2 031 | 6 513 cəhd | mənbədə jurnal sütunu yoxdur | ❌ (fakt sübutda) |
+| Xarici dil komponentləri (K6) | 712 | 3 535 xana | modeldə növ yoxdur | ⏳ |
+
+## Əlavə B — J12 (1-ci mərhələ): alət, repetisiya, geri qaytarma
+
+Production 2026-08-27 repetisiyasından qurulub (run `fa9516a9`), J12 fazası ondan sonra yazılıb; mövcud
+təmir əmrləri production-un `NOSUPERUSER NOBYPASSRLS` rolu altında RLS-kor idi (düzəldildi:
+`repair_support.build_context` tenant + aktor kontekstini qurur); Docker `/dev/shm` 64 MB olduğundan təmir
+tranzaksiyaları paralel sorğunu söndürür. Plan: J12-nin öz kodu klonda, orijinal import run-una bağlı
+həll indeksləri ilə; tətbiq hər sətri canlıya qarşı yoxlayır, mövcud xana üstündən yazılmır.
+Repetisiya (production kimi): dry-run `lesson 11 607 · mark 161 775 · fact 1 817`; apply 51–90 san; təkrar
+0; J12-nin öz nəticəsi ilə checksum bayt-bəbayt eyni; nəticəyə təsir yalnız `absence_hours` (5 400) və
+davamiyyət balıdır — giriş/yekun/hərf/keçid **dəyişmir**. J12 dövrlər üzrə: 2021/2022 Yaz 11 331 dərs /
+158 264 xana; qalan dövrlər cəmi 276 dərs. Geri qaytarma:
+`psql -v plan_sha=$SHA -v drop_facts=1 -f - < scripts/ops/restore_legacy_scores_rollback.psql`
+(audit izindən `absence_hours`-u köhnə dəyərə qaytarır, planın dərslərini/xanalarını silir).

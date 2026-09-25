@@ -300,6 +300,16 @@ def _fake_offerings(context, *, selection, source_run, note):
     return slices, created
 
 
+def _seal_request(pair, enrollment_pk: str) -> SealRequest:
+    return SealRequest(
+        legacy_pk=pair.ledger_key,
+        source_row_hash=_restore_digest(pair, enrollment_pk),
+        state=_MIGRATED,
+        target_model_label=ENROLLMENT_MODEL_LABEL,
+        target_pk=str(enrollment_pk),
+    )
+
+
 def _create_enrollments(context, *, selection, fake_slices):
     enrollment_model = django_apps.get_model("registrar", "Enrollment")
     existing = {
@@ -309,11 +319,20 @@ def _create_enrollments(context, *, selection, fake_slices):
         .iterator(10_000)
     }
     restored, skipped, requests = {}, defaultdict(int), []
+    created_here: dict[tuple[int, str], str] = {}
     now = timezone.now()
     for pair in selection.pairs:
         offering_pk = pair.offering_pk or fake_slices.get(f"{pair.uniqid}:{pair.group_ref}", "")
         if not offering_pk:
             skipped[f"{pair.category}:offering_unresolved"] += 1
+            continue
+        same = created_here.get((pair.user_id, str(offering_pk)))
+        if same is not None:
+            # Eyni açılışa İKİNCİ jurnal (C6: məs. mühazirə + seminar jurnalı) — J2 kimi EYNİ
+            # yazılışa bağlanır ki, bu jurnalın xanaları da J4–J9-da həmin yazılışa yazılsın.
+            restored[pair.ledger_key] = same
+            skipped[f"merged:{pair.category}"] += 1
+            requests.append(_seal_request(pair, same))
             continue
         if (pair.user_id, str(offering_pk)) in existing:
             skipped[f"{pair.category}:already_enrolled"] += 1
@@ -329,16 +348,9 @@ def _create_enrollments(context, *, selection, fake_slices):
             added_at=now if pair.guest_unit else None,
         )
         existing.add((pair.user_id, str(row.offering_id)))
+        created_here[(pair.user_id, str(row.offering_id))] = str(row.pk)
         restored[pair.ledger_key] = str(row.pk)
-        requests.append(
-            SealRequest(
-                legacy_pk=pair.ledger_key,
-                source_row_hash=_restore_digest(pair, row.pk),
-                state=_MIGRATED,
-                target_model_label=ENROLLMENT_MODEL_LABEL,
-                target_pk=str(row.pk),
-            )
-        )
+        requests.append(_seal_request(pair, str(row.pk)))
     seal_entity_maps(
         run_id=context.run_id,
         actor=context.actor,
