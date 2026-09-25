@@ -83067,3 +83067,11 @@ msgstr "Не более %(count)s файлов, каждый до %(size)s МБ.
 msgctxt "subject_folder.ui"
 msgid "Əvvəlki cəhdlər"
 msgstr "Предыдущие попытки"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Saat bölgüsü rəsmi tədris planından gəlir — dəyişiklik üçün kafedraya "
+"müraciət edin."
+msgstr ""
+"Распределение часов берётся из официального учебного плана — для изменения "
+"обратитесь на кафедру."

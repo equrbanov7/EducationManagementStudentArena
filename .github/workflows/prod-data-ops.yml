@@ -76,6 +76,8 @@ jobs:
               actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
                 "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
               test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              # İstifadəçi adı loglarda görünməsin (təhlükəsizlik yoxlaması, info).
+              echo "::add-mask::$actor"
               args=(--org "$ORG" --year "$YEAR" --actor "$actor")
               ;;
             *)

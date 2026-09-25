@@ -31,6 +31,7 @@ class SurveyGateMiddleware:
     CABINET_PREFIX = "/accounts/profile/"
     EXEMPT_PREFIXES = ("/accounts/profile/api/badges/", "/accounts/profile/api/password-otp/")
     EXEMPT_SECTIONS = frozenset({"change-password"})
+    SECTION_API_PREFIX = "/accounts/profile/api/sections/"
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -60,13 +61,23 @@ class SurveyGateMiddleware:
         return self._gate_response(request)
 
     def _is_exempt(self, request, path) -> bool:
+        """Parol dəyişmə HƏMİŞƏ açıqdır — amma YALNIZ həqiqətən o bölmədirsə.
+
+        Təhlükəsizlik (L-1, 2026-09-25): əvvəl istənilən kabinet yoluna ``?section=change-password``
+        (və ya POST ``profile_form=change-password``) əlavə etmək qapını keçirdi — fraqment API-si
+        bölməni YOLDAN oxuyur, ona görə ``/api/sections/dashboard/?section=change-password``
+        ana səhifəni qaytarırdı. İndi istisna yalnız: kabinet səhifəsinin özü (``/accounts/profile/``)
+        həmin parametrlə, və ya fraqment API-sinin yolu məhz ``…/api/sections/change-password/``."""
         if path.startswith(self.EXEMPT_PREFIXES):
             return True
-        if request.GET.get("section") in self.EXEMPT_SECTIONS:
-            return True
-        if request.method == "POST" and request.POST.get("profile_form") in self.EXEMPT_SECTIONS:
-            return True
-        return False
+        if path.startswith(self.SECTION_API_PREFIX):
+            section = path[len(self.SECTION_API_PREFIX) :].strip("/")
+            return section in self.EXEMPT_SECTIONS
+        if path != self.CABINET_PREFIX:
+            return False
+        if request.method == "POST":
+            return request.POST.get("profile_form") in self.EXEMPT_SECTIONS
+        return request.GET.get("section") in self.EXEMPT_SECTIONS
 
     @staticmethod
     def _wants_json(request) -> bool:
