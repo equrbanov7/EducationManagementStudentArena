@@ -81512,3 +81512,1418 @@ msgstr "Enter a valid self-work score."
 msgctxt "registrar.selfwork"
 msgid "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır."
 msgstr "The score must be above 0 and at most %(max)s."
+
+msgctxt "profile.sidebar"
+msgid "Fənn qovluqları"
+msgstr "Subject folders"
+
+msgctxt "profile.sidebar"
+msgid "Fənn qovluqlarım"
+msgstr "My subject folders"
+
+msgctxt "profile.sidebar"
+msgid "Tapşırıq yoxlaması"
+msgstr "Assignment review"
+
+msgctxt "subject_folder.ui"
+msgid "%(done)s göndəriş işləndi, %(failed)s göndəriş alınmadı."
+msgstr "%(done)s submissions processed, %(failed)s failed."
+
+msgctxt "subject_folder.ui"
+msgid "%(done)s göndəriş işləndi."
+msgstr "%(done)s submissions processed."
+
+msgctxt "subject_folder.ui"
+msgid "%(name)s — seç"
+msgstr "Select %(name)s"
+
+msgctxt "subject_folder.ui"
+msgid "AKTİV"
+msgstr "ACTIVE"
+
+msgctxt "subject_folder.ui"
+msgid "Ad, soyad və ya istifadəçi adı…"
+msgstr "Name, surname or username…"
+
+msgctxt "subject_folder.ui"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "There is no active organization context."
+
+msgctxt "subject_folder.ui"
+msgid "Aktiv təşkilat seçilməyib"
+msgstr "No active organization selected"
+
+msgctxt "subject_folder.ui"
+msgid "Aktivləşdir"
+msgstr "Activate"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivdədir"
+msgstr "Archived"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivdən çıxar"
+msgstr "Restore from archive"
+
+msgctxt "subject_folder.ui"
+msgid "Arxivlə"
+msgstr "Archive"
+
+msgctxt "subject_folder.ui"
+msgid "Axtarış"
+msgstr "Search"
+
+msgctxt "subject_folder.ui"
+msgid "AÇIQ TAPŞIRIQ"
+msgstr "OPEN TASKS"
+
+msgctxt "subject_folder.ui"
+msgid "Aç"
+msgstr "Open"
+
+msgctxt "subject_folder.ui"
+msgid "Açılma vaxtı"
+msgstr "Opens at"
+
+msgctxt "subject_folder.ui"
+msgid "Açılır"
+msgstr "Opens"
+
+msgctxt "subject_folder.ui"
+msgid "Açılır:"
+msgstr "Opens:"
+
+msgctxt "subject_folder.ui"
+msgid "Açıq tapşırıq: %(n)s"
+msgstr "Open tasks: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Açıqdır"
+msgstr "Open"
+
+msgctxt "subject_folder.ui"
+msgid "Bal"
+msgstr "Points"
+
+msgctxt "subject_folder.ui"
+msgid "Bal (maks. %(max)s)"
+msgstr "Points (max. %(max)s)"
+
+msgctxt "subject_folder.ui"
+msgid "Bal yazılmır — tələbə işi düzəldib yenidən göndərir."
+msgstr "No points are recorded — the student revises the work and resubmits."
+
+msgctxt "subject_folder.ui"
+msgid "Bax"
+msgstr "View"
+
+msgctxt "subject_folder.ui"
+msgid "Bağlanıb"
+msgstr "Closed"
+
+msgctxt "subject_folder.ui"
+msgid "Başlanmayıb"
+msgstr "Not started"
+
+msgctxt "subject_folder.ui"
+msgid "Başlıq"
+msgstr "Title"
+
+msgctxt "subject_folder.ui"
+msgid "Başqa semestrə köçür"
+msgstr "Copy to another semester"
+
+msgctxt "subject_folder.ui"
+msgid "Bir dəfəyə ən çox %(max)s göndəriş seçmək olar."
+msgstr "You can select at most %(max)s submissions at once."
+
+msgctxt "subject_folder.ui"
+msgid "Boş saxlasanız fənnin adı yazılır"
+msgstr "If left empty, the subject name is used"
+
+msgctxt "subject_folder.ui"
+msgid "Bu fənn və semestr üçün qovluğunuz artıq var — o açılır."
+msgstr "You already have a folder for this subject and semester — opening it."
+
+msgctxt "subject_folder.ui"
+msgid "Bu fənn və semestr üçün tədris etdiyiniz qrup tapılmadı."
+msgstr "No groups you teach were found for this subject and semester."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuda hələ material və tapşırıq yoxdur."
+msgstr "This topic has no materials or tasks yet."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuda hələ məzmun yoxdur."
+msgstr "This topic has no content yet."
+
+msgctxt "subject_folder.ui"
+msgid "Bu mövzuya material əlavə et"
+msgstr "Add material to this topic"
+
+msgctxt "subject_folder.ui"
+msgid "Bu oxşarlıq plagiat deyil kimi qeyd olunsun?"
+msgstr "Mark this similarity as not plagiarism?"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Bu qrupun təyinatı ləğv edilsin? Tələbələr qovluğu görməyəcək; göndərişlər "
+"saxlanılır."
+msgstr ""
+"Cancel this group's assignment? Students will no longer see the folder; "
+"submissions are kept."
+
+msgctxt "subject_folder.ui"
+msgid "Bütün qruplar üçün son tarix"
+msgstr "Deadline for all groups"
+
+msgctxt "subject_folder.ui"
+msgid "Bütün qruplara son tarix qoy"
+msgstr "Set a deadline for all groups"
+
+msgctxt "subject_folder.ui"
+msgid "Bəli, davam et"
+msgstr "Yes, continue"
+
+msgctxt "subject_folder.ui"
+msgid "Bərpa et"
+msgstr "Restore"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab"
+msgstr "Answer"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab boşdur."
+msgstr "The answer is empty."
+
+msgctxt "subject_folder.ui"
+msgid "Cavab forması"
+msgstr "Answer format"
+
+msgctxt "subject_folder.ui"
+msgid "Cavab ver"
+msgstr "Answer"
+
+msgctxt "subject_folder.ui"
+msgid "Cavabınız"
+msgstr "Your answer"
+
+msgctxt "subject_folder.ui"
+msgid "Cəhd %(n)s"
+msgstr "Attempt %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Düzəldilmiş cavab"
+msgstr "Revised answer"
+
+msgctxt "subject_folder.ui"
+msgid "Düzəlt və göndər"
+msgstr "Revise and resubmit"
+
+msgctxt "subject_folder.ui"
+msgid "Dərc edilib"
+msgstr "Published"
+
+msgctxt "subject_folder.ui"
+msgid "Dərc et"
+msgstr "Publish"
+
+msgctxt "subject_folder.ui"
+msgid "Dərhal dərc et (tələbələr görsün)"
+msgstr "Publish now (visible to students)"
+
+msgctxt "subject_folder.ui"
+msgid "Dərhal dərc et (təyin olunmuş qruplara bildiriş gedir)"
+msgstr "Publish now (assigned groups are notified)"
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı"
+msgstr "Homework"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Ev tapşırığı silinsin? Göndərişi olan tapşırıq silinmir — onu arxivləyin."
+msgstr ""
+"Delete this homework? Homework with submissions cannot be deleted — archive "
+"it instead."
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı «yoxlanıldı» kimi qeyd olundu."
+msgstr "Homework marked as “checked”."
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı əlavə et"
+msgstr "Add homework"
+
+msgctxt "subject_folder.ui"
+msgid "Ev tapşırığı əlavə olundu."
+msgstr "Homework added."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Ev tapşırığına bal verilmir — müəllim işi «yoxlanıldı» qeyd edir və ya rəylə"
+" qaytarır."
+msgstr ""
+"Homework is not graded — the teacher marks it as “checked” or returns it "
+"with feedback."
+
+msgctxt "subject_folder.ui"
+msgid "Fayl"
+msgstr "File"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl qaralamadan silindi."
+msgstr "File removed from the draft."
+
+msgctxt "subject_folder.ui"
+msgid "Fayl sayı"
+msgstr "Number of files"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl yükləmə"
+msgstr "File upload"
+
+msgctxt "subject_folder.ui"
+msgid "Fayl ölçüsü (MB)"
+msgstr "File size (MB)"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fayl, şəkil, keçid, video keçidi, kod nümunəsi və ya qeyd. Dərc edilməyən "
+"material tələbələrə görünmür."
+msgstr ""
+"A file, image, link, video link, code sample or note. Unpublished materials "
+"are not visible to students."
+
+msgctxt "subject_folder.ui"
+msgid "Fayllar"
+msgstr "Files"
+
+msgctxt "subject_folder.ui"
+msgid "Faylı sil"
+msgstr "Remove file"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn adı ilə axtar…"
+msgstr "Search by subject name…"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn qovluqları"
+msgstr "Subject folders"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənn qovluqları təşkilat kontekstində açılır — yuxarıdan təşkilatınızı "
+"seçin."
+msgstr ""
+"Subject folders open within an organization — select your organization at "
+"the top."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn qovluqlarım"
+msgstr "My subject folders"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal "
+"ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə "
+"qaytarılır — 0 yazılmır."
+msgstr ""
+"Independent work and homework submitted to subject folders. Independent work"
+" is accepted with points that go to the journal automatically; "
+"unsatisfactory work is returned with feedback — no zero is recorded."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn seçilməyib."
+msgstr "No subject selected."
+
+msgctxt "subject_folder.ui"
+msgid "Fənn və semestr"
+msgstr "Subject and semester"
+
+msgctxt "subject_folder.ui"
+msgid "Fənn və ya qovluq adı…"
+msgstr "Subject or folder name…"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənni və semestri seçin. Qovluq qaralama kimi yaranır; qruplara təyin edəndə"
+" aktivləşir."
+msgstr ""
+"Choose the subject and semester. The folder is created as a draft and "
+"becomes active when assigned to groups."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənnin təsdiqlənmiş sillabusu yoxdursa mövzular gəlmir — mövzuları özünüz "
+"əlavə edə və ya sillabus təsdiqlənəndən sonra «Sillabusla uzlaşdır» "
+"düyməsini basa bilərsiniz."
+msgstr ""
+"Topics are not imported if the subject has no approved syllabus — add topics"
+" yourself, or press “Sync with syllabus” once the syllabus is approved."
+
+msgctxt "subject_folder.ui"
+msgid "Gecikmə"
+msgstr "Late"
+
+msgctxt "subject_folder.ui"
+msgid "Gecikmə ilə açıqdır"
+msgstr "Open with late submission"
+
+msgctxt "subject_folder.ui"
+msgid "Gizlidir"
+msgstr "Hidden"
+
+msgctxt "subject_folder.ui"
+msgid "Göndər"
+msgstr "Submit"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərib"
+msgstr "Submitted"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərilib"
+msgstr "Submitted"
+
+msgctxt "subject_folder.ui"
+msgid "Göndəriş"
+msgstr "Submission"
+
+msgctxt "subject_folder.ui"
+msgid "Göndəriş rədd edildi."
+msgstr "Submission rejected."
+
+msgctxt "subject_folder.ui"
+msgid "Göndərişlər"
+msgstr "Submissions"
+
+msgctxt "subject_folder.ui"
+msgid "Göndərişlərim"
+msgstr "My submissions"
+
+msgctxt "subject_folder.ui"
+msgid "Göstərilməyib"
+msgstr "Not specified"
+
+msgctxt "subject_folder.ui"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "subject_folder.ui"
+msgid "Hamısını seç"
+msgstr "Select all"
+
+msgctxt "subject_folder.ui"
+msgid "Heç bir göndəriş seçilməyib."
+msgstr "No submissions selected."
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestr"
+msgstr "Target semester"
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestrdə qovluq artıq var — o açılır."
+msgstr "A folder already exists in the target semester — opening it."
+
+msgctxt "subject_folder.ui"
+msgid "Hədəf semestri seçin."
+msgstr "Choose the target semester."
+
+msgctxt "subject_folder.ui"
+msgid "Həftə"
+msgstr "Week"
+
+msgctxt "subject_folder.ui"
+msgid "Həftə %(n)s"
+msgstr "Week %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ açılmayıb"
+msgstr "Not open yet"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ fənn qovluğu yoxdur"
+msgstr "No subject folders yet"
+
+msgctxt "subject_folder.ui"
+msgid "Hələ fənn qovluğunuz yoxdur"
+msgstr "You have no subject folders yet"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir "
+"qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir."
+msgstr ""
+"Teaching materials, independent work and homework for each subject in one "
+"folder. Topics and independent work slots come from the approved syllabus."
+
+msgctxt "subject_folder.ui"
+msgid "Hər iki sahəni boş saxlasanız tapşırıq həmişə açıq qalır."
+msgstr "If both fields are empty, the task stays open at all times."
+
+msgctxt "subject_folder.ui"
+msgid "Keçid (https://…)"
+msgstr "Link (https://…)"
+
+msgctxt "subject_folder.ui"
+msgid "Kod"
+msgstr "Code"
+
+msgctxt "subject_folder.ui"
+msgid "Kod yalnız mətn kimi göstərilir — heç vaxt icra olunmur."
+msgstr "Code is shown as text only — it is never executed."
+
+msgctxt "subject_folder.ui"
+msgid "Kodu göstər"
+msgstr "Show code"
+
+msgctxt "subject_folder.ui"
+msgid "Köçür"
+msgstr "Copy"
+
+msgctxt "subject_folder.ui"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "subject_folder.ui"
+msgid "Material"
+msgstr "Material"
+
+msgctxt "subject_folder.ui"
+msgid "Material dərc edildi."
+msgstr "Material published."
+
+msgctxt "subject_folder.ui"
+msgid "Material gizlədildi."
+msgstr "Material hidden."
+
+msgctxt "subject_folder.ui"
+msgid "Material qaralama kimi əlavə olundu — dərc edəndə tələbələr görəcək."
+msgstr "Material added as a draft — students will see it once you publish it."
+
+msgctxt "subject_folder.ui"
+msgid "Material silindi."
+msgstr "Material deleted."
+
+msgctxt "subject_folder.ui"
+msgid "Material silinsin? Tələbələr onu artıq görməyəcək."
+msgstr "Delete this material? Students will no longer see it."
+
+msgctxt "subject_folder.ui"
+msgid "Material yeniləndi."
+msgstr "Material updated."
+
+msgctxt "subject_folder.ui"
+msgid "Material əlavə et"
+msgstr "Add material"
+
+msgctxt "subject_folder.ui"
+msgid "Material əlavə olundu və tələbələrə görünür."
+msgstr "Material added and visible to students."
+
+msgctxt "subject_folder.ui"
+msgid "Materialı redaktə et"
+msgstr "Edit material"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu"
+msgstr "Topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu adı ilə axtar…"
+msgstr "Search by topic name…"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu gizlədildi."
+msgstr "Topic hidden."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu silindi."
+msgstr "Topic deleted."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu silinsin?"
+msgstr "Delete this topic?"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu yenidən görünür."
+msgstr "Topic is visible again."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu yeniləndi."
+msgstr "Topic updated."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu əlavə et"
+msgstr "Add topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzu əlavə olundu."
+msgstr "Topic added."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? "
+"Göndərişi olan heç nə silinmir."
+msgstr ""
+"Sync topics and independent work slots with the approved syllabus? Nothing "
+"with submissions is deleted."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Mövzular, materiallar və ev tapşırıqları yeni semestrin qovluğuna köçürülür."
+" Təyinatlar, son tarixlər və göndərişlər köçürülmür."
+msgstr ""
+"Topics, materials and homework are copied to the new semester's folder. "
+"Assignments, deadlines and submissions are not copied."
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu gizlət"
+msgstr "Hide topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu göstər"
+msgstr "Show topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu redaktə et"
+msgstr "Edit topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunu sil"
+msgstr "Delete topic"
+
+msgctxt "subject_folder.ui"
+msgid "Mövzunun adı"
+msgstr "Topic title"
+
+msgctxt "subject_folder.ui"
+msgid "Müəllim onu gizlədib və ya bu fənndə qeydiyyatınız yoxdur."
+msgstr "The teacher has hidden it, or you are not enrolled in this subject."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Müəllim qovluğu qrupunuza təyin edəndə burada görünəcək və bildiriş "
+"alacaqsınız."
+msgstr ""
+"It will appear here, and you will be notified, once a teacher assigns a "
+"folder to your group."
+
+msgctxt "subject_folder.ui"
+msgid "Müəllimin rəyi"
+msgstr "Teacher's feedback"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev "
+"tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür."
+msgstr ""
+"Teaching materials, independent work and homework shared by your teachers. "
+"When independent work is accepted, the points go to the journal "
+"automatically."
+
+msgctxt "subject_folder.ui"
+msgid "Mətn cavabı"
+msgstr "Text answer"
+
+msgctxt "subject_folder.ui"
+msgid "Məzmun"
+msgstr "Content"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Məzmunu hazırlayın və «Qruplar və son tarixlər» tabından qruplara təyin "
+"edin: ilk təyinatda qovluq avtomatik aktivləşir."
+msgstr ""
+"Prepare the content and assign it to groups on the “Groups and deadlines” "
+"tab: the folder becomes active automatically on the first assignment."
+
+msgctxt "subject_folder.ui"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "subject_folder.ui"
+msgid "Naviqasiya"
+msgstr "Navigation"
+
+msgctxt "subject_folder.ui"
+msgid "Növ"
+msgstr "Type"
+
+msgctxt "subject_folder.ui"
+msgid "Nəticə: %(count)d göndəriş"
+msgstr "Results: %(count)d submissions"
+
+msgctxt "subject_folder.ui"
+msgid "Nəticə: %(count)d qovluq"
+msgstr "Results: %(count)d folders"
+
+msgctxt "subject_folder.ui"
+msgid "Nəyi düzəltməlidir?"
+msgstr "What should be fixed?"
+
+msgctxt "subject_folder.ui"
+msgid "Obyekt tapılmadı və ya artıq mövcud deyil."
+msgstr "The item was not found or no longer exists."
+
+msgctxt "subject_folder.ui"
+msgid "Oxşar göndərişlər"
+msgstr "Similar submissions"
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq"
+msgstr "Similarity"
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq qərarı geri alındı."
+msgstr "The similarity decision was reverted."
+
+msgctxt "subject_folder.ui"
+msgid "Oxşarlıq «plagiat deyil» kimi qeyd olundu."
+msgstr "The similarity was marked as “not plagiarism”."
+
+msgctxt "subject_folder.ui"
+msgid "Plagiat deyil"
+msgstr "Not plagiarism"
+
+msgctxt "subject_folder.ui"
+msgid "Proqramlaşdırma dili"
+msgstr "Programming language"
+
+msgctxt "subject_folder.ui"
+msgid "Pəncərə"
+msgstr "Window"
+
+msgctxt "subject_folder.ui"
+msgid "QARALAMA"
+msgstr "DRAFT"
+
+msgctxt "subject_folder.ui"
+msgid "QAYTARILIB"
+msgstr "RETURNED"
+
+msgctxt "subject_folder.ui"
+msgid "QOVLUQLAR"
+msgstr "FOLDERS"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama kimi saxla"
+msgstr "Save as draft"
+
+msgctxt "subject_folder.ui"
+msgid "Qaralama saxlanıldı — müəllim hələ görmür."
+msgstr "Draft saved — the teacher cannot see it yet."
+
+msgctxt "subject_folder.ui"
+msgid "Qaralamadakı fayllar"
+msgstr "Files in the draft"
+
+msgctxt "subject_folder.ui"
+msgid "Qaytar"
+msgstr "Return"
+
+msgctxt "subject_folder.ui"
+msgid "Qaytarma və rədd üçün məcburidir (ən azı 5 simvol)"
+msgstr "Required for returning and rejecting (at least 5 characters)"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qaytarılmış işin yenidən göndərilməsi son tarixdən asılı olmayaraq açıqdır."
+msgstr "Returned work can be resubmitted regardless of the deadline."
+
+msgctxt "subject_folder.ui"
+msgid "Qaytarılıb: %(n)s"
+msgstr "Returned: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq"
+msgstr "Folder"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq aktivdir — təyin olunmuş qruplar onu görür."
+msgstr "The folder is active — assigned groups can see it."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq arxivdədir — yalnız oxu rejimi."
+msgstr "The folder is archived — read-only mode."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq arxivləndi — yalnız oxu rejimindədir."
+msgstr "The folder has been archived — it is now read-only."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluq arxivlənsin? Tələbələr onu görməyəcək, məzmun yalnız oxu rejimində "
+"qalacaq."
+msgstr ""
+"Archive the folder? Students will no longer see it and the content will "
+"become read-only."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq boşdur"
+msgstr "The folder is empty"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq bölmələri"
+msgstr "Folder sections"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq qaralamadır — tələbələr onu görmür."
+msgstr "The folder is a draft — students cannot see it."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq qaralamaya qaytarıldı."
+msgstr "The folder was moved back to draft."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq seçilən qruplara təyin olundu."
+msgstr "The folder was assigned to the selected groups."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq silinib və ya ona baxmaq hüququnuz yoxdur."
+msgstr "The folder was deleted or you do not have access to it."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq sillabusla uzlaşdırıldı."
+msgstr "The folder was synced with the syllabus."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq tapılmadı"
+msgstr "Folder not found"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq və ya tapşırıq tapılmadı"
+msgstr "Folder or task not found"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluq yaradıldı — mövzular və sərbəst iş slotları sillabusdan çəkildi."
+msgstr ""
+"Folder created — topics and independent work slots were imported from the "
+"syllabus."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yaratmaq üçün sizə fənn açılışı (qrup) təyin olunmalıdır."
+msgstr "To create a folder, you must be assigned a course offering (group)."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yeni semestrə köçürüldü."
+msgstr "The folder was copied to the new semester."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluq yeniləndi."
+msgstr "Folder updated."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda hələ dərc edilmiş məzmun yoxdur"
+msgstr "The folder has no published content yet"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqda tapşırıq yoxdur."
+msgstr "The folder has no tasks."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqlara qayıt"
+msgstr "Back to folders"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluqlarıma qayıt"
+msgstr "Back to my folders"
+
+msgctxt "subject_folder.ui"
+msgid "Qovluğu redaktə et"
+msgstr "Edit folder"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin "
+"olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir."
+msgstr ""
+"Assign the folder to the groups you teach — students only see assigned "
+"folders. Independent work points are accepted from one folder only."
+
+msgctxt "subject_folder.ui"
+msgid "Qovluğun adı"
+msgstr "Folder name"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma silindi."
+msgstr "Attachment removed."
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma silinsin?"
+msgstr "Remove this attachment?"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşma əlavə et"
+msgstr "Add attachment"
+
+msgctxt "subject_folder.ui"
+msgid "Qoşmanı sil"
+msgstr "Remove attachment"
+
+msgctxt "subject_folder.ui"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "subject_folder.ui"
+msgid "Qrupa təyinat"
+msgstr "Group assignment"
+
+msgctxt "subject_folder.ui"
+msgid "Qruplar və son tarixlər"
+msgstr "Groups and deadlines"
+
+msgctxt "subject_folder.ui"
+msgid "Qrupun təyinatı ləğv edildi — göndərişlər saxlanılır."
+msgstr "The group assignment was cancelled — submissions are kept."
+
+msgctxt "subject_folder.ui"
+msgid "QƏBUL / YOXLANILIB"
+msgstr "ACCEPTED / CHECKED"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi — bal jurnala düşdü."
+msgstr "Accepted — the points were recorded in the journal."
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi — bal jurnala ötürülmək üçün növbədədir."
+msgstr "Accepted — the points are queued for the journal."
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul edildi, amma jurnal balı qəbul etmədi: %(reason)s"
+msgstr "Accepted, but the journal did not accept the points: %(reason)s"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul et və jurnala yaz"
+msgstr "Accept and record in journal"
+
+msgctxt "subject_folder.ui"
+msgid "Qəbul et — eyni bal (sərbəst iş)"
+msgstr "Accept — same points (independent work)"
+
+msgctxt "subject_folder.ui"
+msgid "Qərar"
+msgstr "Decision"
+
+msgctxt "subject_folder.ui"
+msgid "Qərarı geri al"
+msgstr "Revert decision"
+
+msgctxt "subject_folder.ui"
+msgid "Redaktə et"
+msgstr "Edit"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Redaktədə yeni fayl seçməsəniz köhnə fayl qalır. Sənəd, təqdimat, arxiv, kod"
+" faylı və ya şəkil; icra olunan fayllar qəbul edilmir."
+msgstr ""
+"When editing, the old file is kept unless you choose a new one. Documents, "
+"presentations, archives, code files or images; executable files are not "
+"accepted."
+
+msgctxt "subject_folder.ui"
+msgid "RƏDD EDİLİB"
+msgstr "REJECTED"
+
+msgctxt "subject_folder.ui"
+msgid "Rədd et"
+msgstr "Reject"
+
+msgctxt "subject_folder.ui"
+msgid "Rədd ləğv edildi — tələbə yenidən göndərə bilər."
+msgstr "Rejection cancelled — the student can resubmit."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Rədd yekundur — tələbə yenidən göndərə bilməz (rəddi sonra ləğv etmək olar)."
+msgstr ""
+"Rejection is final — the student cannot resubmit (the rejection can be "
+"cancelled later)."
+
+msgctxt "subject_folder.ui"
+msgid "Rəddi ləğv et"
+msgstr "Cancel rejection"
+
+msgctxt "subject_folder.ui"
+msgid "Rəqəm düzgün yazılmayıb."
+msgstr "The number is not valid."
+
+msgctxt "subject_folder.ui"
+msgid "Rəy"
+msgstr "Feedback"
+
+msgctxt "subject_folder.ui"
+msgid "Rəy (istəyə görə)"
+msgstr "Feedback (optional)"
+
+msgctxt "subject_folder.ui"
+msgid "Rəylə qaytar"
+msgstr "Return with feedback"
+
+msgctxt "subject_folder.ui"
+msgid "Sahibi:"
+msgstr "Owner:"
+
+msgctxt "subject_folder.ui"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "subject_folder.ui"
+msgid "Semestr tapılmadı."
+msgstr "Semester not found."
+
+msgctxt "subject_folder.ui"
+msgid "Semestrsiz"
+msgstr "No semester"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilib"
+msgstr "Selected"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilən qruplara təyin et"
+msgstr "Assign to selected groups"
+
+msgctxt "subject_folder.ui"
+msgid "Seçilən qruplardan bəzisini siz tədris etmirsiniz."
+msgstr "You do not teach some of the selected groups."
+
+msgctxt "subject_folder.ui"
+msgid "Seçin"
+msgstr "Select"
+
+msgctxt "subject_folder.ui"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusdan"
+msgstr "From syllabus"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusla uzlaşdır"
+msgstr "Sync with syllabus"
+
+msgctxt "subject_folder.ui"
+msgid "Sillabusla uzlaşdırılıb:"
+msgstr "Synced with syllabus:"
+
+msgctxt "subject_folder.ui"
+msgid "Siyahıda yalnız sizin tədris etdiyiniz fənn açılışları var."
+msgstr "Only course offerings you teach are listed."
+
+msgctxt "subject_folder.ui"
+msgid "Slot %(n)s · maks. %(points)s bal"
+msgstr "Slot %(n)s · max. %(points)s points"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix"
+msgstr "Deadline"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix götürüldü — tapşırıq həmişə açıqdır."
+msgstr "Deadline removed — the task is always open."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix keçib — göndərsəniz gecikmə qeyd olunacaq."
+msgstr "The deadline has passed — if you submit, it will be marked as late."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix saxlanıldı."
+msgstr "Deadline saved."
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix yoxdur"
+msgstr "No deadline"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix — %(group)s"
+msgstr "Deadline — %(group)s"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarix:"
+msgstr "Deadline:"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarixdən sonra"
+msgstr "After the deadline"
+
+msgctxt "subject_folder.ui"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Submitted after the deadline"
+
+msgctxt "subject_folder.ui"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın."
+msgstr "Change the filters or shorten the search term."
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcləri dəyişin və ya bütün statusları seçin."
+msgstr "Change the filters or select all statuses."
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcə uyğun göndəriş yoxdur"
+msgstr "No submissions match the filters"
+
+msgctxt "subject_folder.ui"
+msgid "Süzgəcə uyğun qovluq yoxdur"
+msgstr "No folders match the filters"
+
+msgctxt "subject_folder.ui"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "subject_folder.ui"
+msgid "Səbəb:"
+msgstr "Reason:"
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş"
+msgstr "Independent work"
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş balı"
+msgstr "Independent work points"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Sərbəst iş strukturu %(option)s (cəmi %(total)s bal) sillabusdan gəlir — "
+"əlavə sərbəst iş yaradılmır."
+msgstr ""
+"The independent work structure %(option)s (%(total)s points in total) comes "
+"from the syllabus — no extra independent work can be created."
+
+msgctxt "subject_folder.ui"
+msgid "Sərbəst iş: %(option)s"
+msgstr "Independent work: %(option)s"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq"
+msgstr "Task"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq arxivləndi."
+msgstr "Task archived."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırıq arxivlənsin? Göndərişlər saxlanılır, tələbələr tapşırığı "
+"görməyəcək."
+msgstr ""
+"Archive this task? Submissions are kept; students will no longer see the "
+"task."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq bərpa olundu."
+msgstr "Task restored."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq dərc edildi — tələbələrə bildiriş göndərildi."
+msgstr "Task published — students have been notified."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırıq dərc edilsin? Təyin olunmuş qrupların tələbələrinə bildiriş "
+"gedəcək."
+msgstr "Publish this task? Students in the assigned groups will be notified."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq gizlədildi."
+msgstr "Task hidden."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq silindi."
+msgstr "Task deleted."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırıq yeniləndi."
+msgstr "Task updated."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Tapşırığa şablon, nümunə və ya məlumat faylı əlavə edə bilərsiniz (ən çox "
+"10)."
+msgstr ""
+"You can attach a template, a sample or a data file to the task (up to 10)."
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırığı redaktə et"
+msgstr "Edit task"
+
+msgctxt "subject_folder.ui"
+msgid "Tapşırığın şərti"
+msgstr "Task instructions"
+
+msgctxt "subject_folder.ui"
+msgid "Tarix və saat düzgün seçilməyib."
+msgstr "The date and time are not valid."
+
+msgctxt "subject_folder.ui"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "subject_folder.ui"
+msgid "Toplu əməl"
+msgstr "Bulk action"
+
+msgctxt "subject_folder.ui"
+msgid "Toplu əməl seçilməyib."
+msgstr "No bulk action selected."
+
+msgctxt "subject_folder.ui"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "subject_folder.ui"
+msgid "Tələbələrdən gizlət"
+msgstr "Hide from students"
+
+msgctxt "subject_folder.ui"
+msgid "Tələbənin qalan sərbəst iş limiti: %(remaining)s / %(max_total)s"
+msgstr ""
+"Student's remaining independent work limit: %(remaining)s / %(max_total)s"
+
+msgctxt "subject_folder.ui"
+msgid "Təsdiq edirsiniz?"
+msgstr "Are you sure?"
+
+msgctxt "subject_folder.ui"
+msgid "Təsdiqlənmiş sillabus tapılmadı — struktur dəyişmədi."
+msgstr "No approved syllabus was found — the structure was not changed."
+
+msgctxt "subject_folder.ui"
+msgid "Təsvir"
+msgstr "Description"
+
+msgctxt "subject_folder.ui"
+msgid "Təsvir / qeyd"
+msgstr "Description / note"
+
+msgctxt "subject_folder.ui"
+msgid "Tətbiq et"
+msgstr "Apply"
+
+msgctxt "subject_folder.ui"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "The assignment does not belong to this folder."
+
+msgctxt "subject_folder.ui"
+msgid "Uyğun fənn tapılmadı"
+msgstr "No matching subject found"
+
+msgctxt "subject_folder.ui"
+msgid "Uyğun mövzu tapılmadı"
+msgstr "No matching topic found"
+
+msgctxt "subject_folder.ui"
+msgid "Uzantıları boş saxlasanız sənəd, kod və şəkil faylları qəbul olunur."
+msgstr ""
+"If extensions are left empty, document, code and image files are accepted."
+
+msgctxt "subject_folder.ui"
+msgid "YEKUNLAŞIB"
+msgstr "COMPLETED"
+
+msgctxt "subject_folder.ui"
+msgid "YOXLAMA GÖZLƏYİR"
+msgstr "AWAITING REVIEW"
+
+msgctxt "subject_folder.ui"
+msgid "YOXLANILIR"
+msgstr "UNDER REVIEW"
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız bayraqlananlar"
+msgstr "Flagged only"
+
+msgctxt "subject_folder.ui"
+msgid "Yalnız gecikənlər"
+msgstr "Late only"
+
+msgctxt "subject_folder.ui"
+msgid "Yarat"
+msgstr "Create"
+
+msgctxt "subject_folder.ui"
+msgid "Yekun"
+msgstr "Completed"
+
+msgctxt "subject_folder.ui"
+msgid "Yekunlaşıb"
+msgstr "Completed"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni ev tapşırığı"
+msgstr "New homework"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni fənn qovluğu"
+msgstr "New subject folder"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni material"
+msgstr "New material"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni mövzu"
+msgstr "New topic"
+
+msgctxt "subject_folder.ui"
+msgid "Yeni qovluq"
+msgstr "New folder"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlama gözləyir: %(n)s"
+msgstr "Awaiting review: %(n)s"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlama növbəsi boşdur"
+msgstr "The review queue is empty"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanıldı"
+msgstr "Checked"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanıldı (ev tapşırığı)"
+msgstr "Checked (homework)"
+
+msgctxt "subject_folder.ui"
+msgid "Yoxlanılır"
+msgstr "Under review"
+
+msgctxt "subject_folder.ui"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "subject_folder.ui"
+msgid "Yüksək oxşarlıq"
+msgstr "High similarity"
+
+msgctxt "subject_folder.ui"
+msgid "baxış gözləyən iş"
+msgstr "work awaiting review"
+
+msgctxt "subject_folder.ui"
+msgid "gecikib"
+msgstr "late"
+
+msgctxt "subject_folder.ui"
+msgid "gecikmə ilə"
+msgstr "late allowed"
+
+msgctxt "subject_folder.ui"
+msgid "göndərilmiş, baxılmamış iş"
+msgstr "submitted, not yet reviewed"
+
+msgctxt "subject_folder.ui"
+msgid "göndərilməyi gözləyir"
+msgstr "waiting to be submitted"
+
+msgctxt "subject_folder.ui"
+msgid "maks. %(points)s bal"
+msgstr "max. %(points)s points"
+
+msgctxt "subject_folder.ui"
+msgid "qovluq var"
+msgstr "folder exists"
+
+msgctxt "subject_folder.ui"
+msgid "rəyə görə yenidən işləyin"
+msgstr "revise based on the feedback"
+
+msgctxt "subject_folder.ui"
+msgid "sərbəst iş başqa qovluqdan"
+msgstr "independent work from another folder"
+
+msgctxt "subject_folder.ui"
+msgid "sərbəst iş buradan"
+msgstr "independent work from this folder"
+
+msgctxt "subject_folder.ui"
+msgid ""
+"«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və "
+"sərbəst iş slotları sillabusdan avtomatik çəkiləcək."
+msgstr ""
+"Use “New folder” to create a folder for a subject you teach — topics and "
+"independent work slots will be imported from the syllabus automatically."
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi"
+msgstr "General"
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi (mövzusuz)"
+msgstr "General (no topic)"
+
+msgctxt "subject_folder.ui"
+msgid "Ümumi (mövzuya bağlı olmayan)"
+msgstr "General (not linked to a topic)"
+
+msgctxt "subject_folder.ui"
+msgid "İcazəli uzantılar"
+msgstr "Allowed extensions"
+
+msgctxt "subject_folder.ui"
+msgid "İcazəli: %(ext)s"
+msgstr "Allowed: %(ext)s"
+
+msgctxt "subject_folder.ui"
+msgid "İzah"
+msgstr "Explanation"
+
+msgctxt "subject_folder.ui"
+msgid "İş göndərildi (son tarixdən sonra — gecikmə qeyd olundu)."
+msgstr "Work submitted (after the deadline — marked as late)."
+
+msgctxt "subject_folder.ui"
+msgid "İş göndərildi — müəllim yoxlayandan sonra nəticəni görəcəksiniz."
+msgstr ""
+"Work submitted — you will see the result after the teacher reviews it."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"İş müəllimə göndərilsin? Göndərdikdən sonra müəllim yoxlayana qədər dəyişə "
+"bilməzsiniz."
+msgstr ""
+"Submit the work to the teacher? After submitting you cannot change it until "
+"the teacher reviews it."
+
+msgctxt "subject_folder.ui"
+msgid "İş rəylə qaytarıldı — tələbə yenidən göndərə bilər."
+msgstr "The work was returned with feedback — the student can resubmit."
+
+msgctxt "subject_folder.ui"
+msgid "Əlavə şərt yazılmayıb."
+msgstr "No additional instructions."
+
+msgctxt "subject_folder.ui"
+msgid "Əməl alınmadı — bağlantını yoxlayıb yenidən cəhd edin."
+msgstr "The action failed — check your connection and try again."
+
+msgctxt "subject_folder.ui"
+msgid "Əməllər"
+msgstr "Actions"
+
+msgctxt "subject_folder.ui"
+msgid "Ən azı bir qrup seçin."
+msgstr "Select at least one group."
+
+msgctxt "subject_folder.ui"
+msgid "Ən çox %(count)s fayl, hər biri %(size)s MB-a qədər."
+msgstr "Up to %(count)s files, each up to %(size)s MB."
+
+msgctxt "subject_folder.ui"
+msgid "Əvvəlki cəhdlər"
+msgstr "Previous attempts"

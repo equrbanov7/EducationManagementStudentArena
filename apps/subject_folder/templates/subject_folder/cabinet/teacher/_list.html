@@ -1,0 +1,55 @@
+{% load i18n %}
+{% trans "Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir." context "subject_folder.ui" as sf_subtitle %}
+{% include "partials/ems_ui/_content_header.html" with header_subtitle=sf_subtitle header_actions_include="subject_folder/cabinet/teacher/_list_actions.html" %}
+{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sp.kpi_tiles kpi_variant="4" %}
+{% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-folders" filter_prefix="sf_" filter_fields=sp.filter_fields filter_count_label=sp.filter_count_label filter_auto=True filter_bootstrap=True %}
+<div class="sfc-listwrap" data-ems-filter-target>
+{% if sp.folders %}
+    <ul class="sfc-grid" role="list">
+        {% for row in sp.folders %}
+        <li class="ems-card sfc-card">
+            <div class="ems-card__head sfc-card__head">
+                <div class="sfc-card__titles">
+                    <p class="sfc-eyebrow">{{ row.folder.subject.name }}</p>
+                    <h2 class="ems-card__title sfc-card__title"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
+                    <p class="ems-card__sub">{{ row.period_label }}</p>
+                </div>
+                <span class="ems-badge ems-badge--{{ row.chip.tone }}">{{ row.chip.label }}</span>
+            </div>
+            <div class="ems-card__body">
+                <dl class="sfc-stats">
+                    <div class="sfc-stats__item"><dt>{% trans "Mövzu" context "subject_folder.ui" %}</dt><dd>{{ row.counts.topics }}</dd></div>
+                    <div class="sfc-stats__item"><dt>{% trans "Material" context "subject_folder.ui" %}</dt><dd>{{ row.counts.materials }}</dd></div>
+                    <div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ row.counts.selfwork }}</dd></div>
+                    <div class="sfc-stats__item"><dt>{% trans "Ev tapşırığı" context "subject_folder.ui" %}</dt><dd>{{ row.counts.homework }}</dd></div>
+                </dl>
+                <div class="sfc-card__foot">
+                    {% if row.counts.pending %}
+                        <span class="ems-badge ems-badge--warning"><i class="fas fa-inbox" aria-hidden="true"></i> {% blocktrans trimmed with n=row.counts.pending context "subject_folder.ui" %}Yoxlama gözləyir: {{ n }}{% endblocktrans %}</span>
+                    {% endif %}
+                    <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+{% elif sp.is_filtered %}
+    {% trans "Süzgəcə uyğun qovluq yoxdur" context "subject_folder.ui" as st_title %}
+    {% trans "Süzgəcləri dəyişin və ya axtarış sözünü qısaldın." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-magnifying-glass" %}
+{% else %}
+    {% trans "Hələ fənn qovluğunuz yoxdur" context "subject_folder.ui" as st_title %}
+    {% if sp.create_options %}
+        {% trans "«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və sərbəst iş slotları sillabusdan avtomatik çəkiləcək." context "subject_folder.ui" as st_body %}
+    {% else %}
+        {% trans "Qovluq yaratmaq üçün sizə fənn açılışı (qrup) təyin olunmalıdır." context "subject_folder.ui" as st_body %}
+    {% endif %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-plus" %}
+{% endif %}
+</div>
+{% if sp.create_options %}
+    {% trans "Yeni fənn qovluğu" context "subject_folder.ui" as dlg_title %}
+    {% trans "Fənni və semestri seçin. Qovluq qaralama kimi yaranır; qruplara təyin edəndə aktivləşir." context "subject_folder.ui" as dlg_sub %}
+    {% trans "Yarat" context "subject_folder.ui" as dlg_submit %}
+    {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfFolderCreate" form_dialog_title=dlg_title form_dialog_subtitle=dlg_sub form_dialog_submit_label=dlg_submit form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_folder_create.html" form_dialog_data=sp.forms.folder_create.data form_dialog_hidden=sp.forms.folder_create.hidden %}
+{% endif %}

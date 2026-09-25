@@ -1,0 +1,26 @@
+{% load i18n static subject_folder_cabinet %}
+{% comment %}«Fənn qovluqları» (müəllim) — siyahı və qovluq redaktoru. Kontekst `sf_teacher_panel`
+tag-ından (`apps/subject_folder/cabinet/teacher.py`); vəziyyət URL-dədir (`sf_folder`, `sf_tab`,
+süzgəclər). Yazı əməlləri `subject_folder:action` JSON endpoint-inə gedir (`cabinet.js`).
+CSP: inline stil/skript YOXDUR — CSS/JS xarici fayldır, panelin İÇİNDƏ yüklənir (AJAX swap).{% endcomment %}
+{% sf_teacher_panel as sp %}
+<link rel="stylesheet" href="{% static 'subject_folder/css/cabinet.css' %}?v=20260925-1">
+<link rel="stylesheet" href="{% static 'subject_folder/css/forms.css' %}?v=20260925-1">
+<div class="sfc" data-sf-root data-sf-section="subject-folders" data-sf-action-url="{{ sp.urls.action }}" {% include "subject_folder/cabinet/_i18n.html" %}>
+{% csrf_token %}
+{% if sp.state == "no_org" %}
+    {% trans "Aktiv təşkilat seçilməyib" context "subject_folder.ui" as st_title %}
+    {% trans "Fənn qovluqları təşkilat kontekstində açılır — yuxarıdan təşkilatınızı seçin." context "subject_folder.ui" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-building" %}
+{% elif sp.state == "missing" %}
+    {% trans "Qovluq tapılmadı" context "subject_folder.ui" as st_title %}
+    {% trans "Qovluq silinib və ya ona baxmaq hüququnuz yoxdur." context "subject_folder.ui" as st_body %}
+    {% trans "Qovluqlara qayıt" context "subject_folder.ui" as st_action %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-minus" state_action_label=st_action state_action_url=sp.urls.list %}
+{% elif sp.state == "folder" %}
+    {% include "subject_folder/cabinet/teacher/_folder.html" %}
+{% else %}
+    {% include "subject_folder/cabinet/teacher/_list.html" %}
+{% endif %}
+</div>
+<script defer src="{% static 'subject_folder/js/cabinet.js' %}?v=20260925-1"></script>

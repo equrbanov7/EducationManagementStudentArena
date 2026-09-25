@@ -1,0 +1,9 @@
+{% if 'subject-folder-review' in allowed_sections %}
+{% comment %}«Tapşırıq yoxlaması» — fənn qovluqlarına göndərilən işlərin yoxlanması (bal → jurnal,
+qaytarma, rədd, oxşarlıq). AJAX-SAFE; çekməcə `subject_folder:review_detail` fraqmentidir.{% endcomment %}
+<section class="profile-section-panel profile-section--subject-folder-review {% if active_section == 'subject-folder-review' %}is-active{% endif %}"
+         data-profile-section-panel="subject-folder-review"
+         data-source-url="{{ profile_base_url }}?section=subject-folder-review">
+    {% include "subject_folder/cabinet/review/_panel.html" %}
+</section>
+{% endif %}
