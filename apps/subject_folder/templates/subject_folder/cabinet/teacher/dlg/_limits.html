@@ -1,0 +1,23 @@
+{% load i18n %}
+<fieldset class="sfc-fieldset">
+    <legend>{% trans "Cavab forması" context "subject_folder.ui" %}</legend>
+    <input type="hidden" name="allow_text_answer__present" value="1">
+    <input type="hidden" name="allow_files__present" value="1">
+    <label class="sfc-check"><input type="checkbox" name="allow_text_answer" value="1" checked> <span>{% trans "Mətn cavabı" context "subject_folder.ui" %}</span></label>
+    <label class="sfc-check"><input type="checkbox" name="allow_files" value="1" checked> <span>{% trans "Fayl yükləmə" context "subject_folder.ui" %}</span></label>
+    <div class="sfc-row3">
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ limits_prefix }}Ext">{% trans "İcazəli uzantılar" context "subject_folder.ui" %}</label>
+            <input class="ems-input" type="text" id="{{ limits_prefix }}Ext" name="allowed_extensions" placeholder=".pdf, .docx, .py">
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ limits_prefix }}Mb">{% trans "Fayl ölçüsü (MB)" context "subject_folder.ui" %}</label>
+            <input class="ems-input" type="number" id="{{ limits_prefix }}Mb" name="max_file_mb" min="1" max="50" inputmode="numeric" placeholder="20">
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="{{ limits_prefix }}Count">{% trans "Fayl sayı" context "subject_folder.ui" %}</label>
+            <input class="ems-input" type="number" id="{{ limits_prefix }}Count" name="max_files" min="1" max="10" inputmode="numeric" placeholder="5">
+        </div>
+    </div>
+    <p class="ems-field__hint">{% trans "Uzantıları boş saxlasanız sənəd, kod və şəkil faylları qəbul olunur." context "subject_folder.ui" %}</p>
+</fieldset>

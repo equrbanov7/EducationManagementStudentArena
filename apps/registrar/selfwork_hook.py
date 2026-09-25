@@ -358,15 +358,19 @@ def preview(*, offering, enrollment, slot_index, points) -> dict:
     current = target.value() if target is not None and target.graded else None
     result.update(topic_title=title, max_points=max_points, current_points=current)
     try:
-        value = rules.parse_points(points)
+        value, malformed = rules.parse_points(points), False
     except ValueError:
-        value = None
+        value, malformed = None, True
     if locked:
         reason = _msg_locked()
     elif enrollment.offering_id != offering.pk or enrollment.status != Enrollment.Status.ENROLLED:
         reason = _msg_not_enrolled()
     elif current is not None:
         reason = _msg_second_award(label, current, max_points)
+    elif value is None and not malformed:
+        # Bal hələ daxil edilməyib (çekməcə yenicə açılıb) — yalnız kilid/qeydiyyat/slot
+        # vəziyyəti bildirilir; «etibarsız bal» deyil.
+        return {**result, "total_after": rules.cap_total(others)}
     elif value is None or value <= 0 or value > max_points:
         reason = _msg_invalid(max_points)
     elif others + value > rules.TOTAL_MAX:

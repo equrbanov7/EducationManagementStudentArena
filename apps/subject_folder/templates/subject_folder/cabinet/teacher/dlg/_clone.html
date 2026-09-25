@@ -1,0 +1,10 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfClonePeriod">{% trans "Hədəf semestr" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="sfClonePeriod" name="period" required data-bootstrap-select>
+            <option value="">{% trans "Seçin" context "subject_folder.ui" %}</option>
+            {% for option in sp.clone_periods %}<option value="{{ option.value }}">{{ option.label }}</option>{% endfor %}
+        </select>
+    </div>
+</div>

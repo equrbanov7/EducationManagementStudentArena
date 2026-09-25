@@ -1,0 +1,105 @@
+/* =========================================================================
+   «Fənn qovluğu» — forma köməkçiləri: qrup təyinatı, checkbox, sahə qrupları,
+   tələbənin cavab forması. Ortaq layout `cabinet.css`-dədir.
+   ========================================================================= */
+
+/* ---- Qruplar və təyinat ------------------------------------------------ */
+
+.sfc-offerings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0 0 var(--ems-sp-3);
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-offering {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+}
+
+.sfc-offering--active {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.sfc-offering__label {
+    font-weight: 600;
+}
+
+/* `.ems-table th[scope="col"]` başlığı sola düzləyir (seçici daha güclüdür) —
+   rəqəm sütununun başlığı dəyərləri ilə eyni tərəfdə olsun (bax academic_records.css). */
+.sfc-deadlines th[scope="col"].ems-table__num {
+    text-align: right;
+}
+
+.sfc-check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    cursor: pointer;
+}
+
+.sfc-check--bare {
+    justify-content: center;
+}
+
+.sfc-check input {
+    width: 16px;
+    height: 16px;
+}
+
+.sfc-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+}
+
+.sfc-fieldset legend {
+    padding: 0 var(--ems-sp-1);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.sfc-row2,
+.sfc-row3 {
+    display: grid;
+    gap: var(--ems-sp-3);
+}
+
+.sfc-row2 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.sfc-row3 {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.sfc-input--short {
+    max-width: 140px;
+}
+
+/* ---- Tələbə cavab forması --------------------------------------------- */
+
+.sfc-answerform {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.sfc-answerform__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+}

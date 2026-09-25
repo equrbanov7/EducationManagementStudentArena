@@ -265,6 +265,17 @@ class HookContractTest(SelfWorkLegacyFixture, TestCase):
         self.assertEqual(graded["current_points"], Decimal("3"))
         self.assertIn("artıq yazılıb", graded["reason"])
 
+    def test_preview_without_points_reports_only_journal_state(self):
+        """Çekməcə açılanda bal hələ yoxdur — bu «etibarsız bal» deyil; kilid isə yenə görünür."""
+        for empty in (None, "", "  "):
+            result = self._preview(points=empty)
+            self.assertFalse(result["blocked"], result["reason"])
+            self.assertEqual((result["max_points"], result["total_after"]), (5, Decimal("0")))
+        self.assertTrue(self._preview(points="4,55")["blocked"], "etibarsız yazılış yenə bloklanır")
+        with bypass_rls():
+            _lock(self.org, self.offering)
+        self.assertTrue(self._preview(points=None)["reason"].startswith("Jurnal kilidlidir"))
+
     def test_preview_reports_lock_and_invalid_points(self):
         self.assertTrue(self._preview(points=Decimal("6"))["blocked"])
         with bypass_rls():

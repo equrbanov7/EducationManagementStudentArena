@@ -170,4 +170,8 @@ def build_section_titles() -> dict:
         "evaluation-survey": pgettext_lazy("profile.sidebar", "Anonim sorğu"),
         "evaluation-results": pgettext_lazy("profile.sidebar", "Sorğu nəticələri"),
         "evaluation-campaigns": pgettext_lazy("profile.sidebar", "Sorğu kampaniyaları"),
+        # «Fənn qovluğu» (apps.subject_folder) — sidebar bəndləri ilə eyni mətnlər.
+        "subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqları"),
+        "subject-folder-review": pgettext_lazy("profile.sidebar", "Tapşırıq yoxlaması"),
+        "my-subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqlarım"),
     }

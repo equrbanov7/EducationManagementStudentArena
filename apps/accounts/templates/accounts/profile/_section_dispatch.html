@@ -132,6 +132,12 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_evaluation_results.html" %}
             {% elif active_section == "evaluation-campaigns" and 'evaluation-campaigns' in allowed_sections %}
                 {% include "accounts/profile/sections/_evaluation_campaigns.html" %}
+            {% elif active_section == "subject-folders" and 'subject-folders' in allowed_sections %}
+                {% include "accounts/profile/sections/_subject_folders.html" %}
+            {% elif active_section == "subject-folder-review" and 'subject-folder-review' in allowed_sections %}
+                {% include "accounts/profile/sections/_subject_folder_review.html" %}
+            {% elif active_section == "my-subject-folders" and 'my-subject-folders' in allowed_sections %}
+                {% include "accounts/profile/sections/_my_subject_folders.html" %}
             {% elif active_section == "my-appeals" %}
                 {% include "accounts/profile/sections/_my_appeals.html" %}
             {% elif active_section == "manage-appeals" %}
