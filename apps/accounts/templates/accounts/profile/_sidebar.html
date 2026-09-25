@@ -37,9 +37,10 @@ NİYƏ BELƏDİR
    ağaclar onu daxil edir. `data-section` / `href` / `data-source-url` /
    `data-badge-key` iki düzümdə eynidir.
 
-4. ALT BLOK — hesab kartı (`sidebar/_group_account.html`): inisiallar, ad,
-   rol, «Profili redaktə et» · «Şifrəni dəyiş» · «Çıxış». Dil seçimi navbar-da
-   (masaüstü + mobil) olduğu üçün sidebar-dan çıxarılıb.
+4. ALT BLOK YOXDUR (sahib 2026-09-25) — hesab kartı (ad, rol, «Profili redaktə
+   et» · «Şifrəni dəyiş» · «Çıxış») header-in istifadəçi menyusuna köçdü
+   (`templates/partials/_navbar.html`, masaüstü açılan menyu + mobil şkaf).
+   Dil seçimi də navbar-dadır.
 
 ⚠️ `<aside class="profile-sidebar"` açılışı OLDUĞU KİMİ qalmalıdır (testlər
 bu mətnlə sidebar-ı kəsib götürür) — düzüm `data-sidebar-layout`-dadır.
@@ -121,14 +122,13 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
     </nav>
     {% endwith %}
     {% endwith %}
-    {% include "accounts/profile/sidebar/_group_account.html" %}
 </aside>
 {% comment %}Rels rejiminin tooltip-ləri, üfüqi sürüşmə qoruyucusu və düz menyuda aktiv bəndin
 görünən sahəyə gətirilməsi — sidebar həm SPA qabığında, həm embed səhifələrdə
 (`profile_sidebar` teqi) bu partial ilə gəlir, ona görə skript də burada yüklənir
 (`defer`; EMSReady / EMSReady.once — AJAX-safe, idempotent). Süzgəc skripti yalnız
 süzgəc render olunanda gəlir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/sidebar_nav.js' %}?v=20260925-1" defer></script>
+<script src="{% static 'accounts/js/profile/sidebar_nav.js' %}?v=20260926-1" defer></script>
 {% if sidebar_filter %}
 <script src="{% static 'accounts/js/profile/sidebar_filter.js' %}?v=20260925-1" defer></script>
 {% endif %}

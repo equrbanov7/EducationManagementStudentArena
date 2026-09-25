@@ -50,7 +50,7 @@ DETAILS_RE = re.compile(r"<details\b.*?</details>", re.S)
 
 #: Başlıqlı akkordeon qrupları — üst blok (`_group_general`), alt hesab bloku və ortaq
 #: başlıq partialı (`_group_summary`) xaric.
-NOT_ACCORDION_GROUPS = {"_group_general.html", "_group_account.html", "_group_summary.html"}
+NOT_ACCORDION_GROUPS = {"_group_general.html", "_group_summary.html"}
 ACCORDION_GROUPS = sorted(
     path.name for path in SIDEBAR_DIR.glob("_group_*.html") if path.name not in NOT_ACCORDION_GROUPS
 )

@@ -18,13 +18,12 @@
      («rofil», «MUMİ»). Qoruyucu JS də var (`js/profile/sidebar_nav.js`).
    • Fayllar (aşağıda import olunur; kaskad sırası: qruplar → süzgəc → alt blok →
      rels, sonra bu faylın öz qaydaları): heyət akkordeonu `sidebar_groups.css`,
-     «Menyuda axtar» `sidebar_filter.css`, hesab bloku `sidebar_footer.css`,
-     yığcam (ikon-rels) rejim `sidebar_rail.css`.
+     «Menyuda axtar» `sidebar_filter.css`, yığcam (ikon-rels) rejim
+     `sidebar_rail.css`. Hesab bloku 2026-09-25-dən header menyusundadır.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @import url("sidebar_groups.css");
 @import url("sidebar_filter.css");
-@import url("sidebar_footer.css");
 @import url("sidebar_rail.css");
 
 .profile-sidebar {
@@ -329,32 +328,6 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-}
-
-/* ── Çıxış (təhlükə tonu) ────────────────────────────────────────────────── */
-/* ⚠️ Bu blok bu faylda qalmalıdır: `test_audit_2026_09_13_frontend` mətn
-   rənginin `--ems-danger-600` olduğunu məhz burada yoxlayır. */
-
-.sidebar-logout-form {
-    margin: 0;
-    padding: 0;
-}
-
-.sidebar-menu-link--logout {
-    color: var(--ems-danger-600);
-}
-
-.sidebar-menu-link--logout .sidebar-menu-icon {
-    color: var(--ems-danger-500);
-}
-
-.sidebar-menu-link--logout:hover {
-    background: var(--ems-danger-100);
-    color: var(--ems-danger-strong);
-}
-
-.sidebar-menu-link--logout:hover .sidebar-menu-icon {
-    color: var(--ems-danger-strong);
 }
 
 /* ── Hərəkət azaldılması ─────────────────────────────────────────────────── */
