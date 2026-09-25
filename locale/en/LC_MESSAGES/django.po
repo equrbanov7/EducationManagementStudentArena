@@ -78151,3 +78151,1473 @@ msgstr ""
 "makes its choice. Existing rows are not duplicated and nothing is deleted. "
 "No rows are created for “no plan” specialties — approve the plan in "
 "“Curriculum” first."
+
+msgctxt "accounts.schedule_manage"
+msgid "Avtomatik cədvəl"
+msgstr "Automatic timetable"
+
+msgctxt "registrar.schedule_publish"
+msgid "Bu semestr bitib — cədvəl dərc edilə bilməz."
+msgstr "This semester has ended — the timetable cannot be published."
+
+msgctxt "registrar.schedule_publish"
+msgid ""
+"Bəzi açılışlar sizin səlahiyyət sahənizdən kənardadır — cədvəl dərc "
+"edilmədi."
+msgstr ""
+"Some course offerings are outside your scope — the timetable was not "
+"published."
+
+msgctxt "registrar.schedule_publish"
+msgid "Cədvəlin toplu dərci"
+msgstr "Bulk timetable publication"
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var."
+msgstr "Not published: %(count)s conflicts with the live timetable."
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərs cədvəli dərc edildi: %(period)s"
+msgstr "Timetable published: %(period)s"
+
+msgctxt "registrar.schedule_publish"
+msgid "Qaralamada yararsız slot var — yenidən yaradın."
+msgstr "The draft contains an invalid slot — regenerate it."
+
+msgctxt "registrar.schedule_publish"
+msgid "Qrupunuzun yeni həftəlik dərs cədvəli dərc olundu."
+msgstr "Your group's new weekly timetable has been published."
+
+msgctxt "registrar.schedule_publish"
+msgid "Yeni həftəlik cədvəliniz hazırdır — dərslərinizi yoxlayın."
+msgstr "Your new weekly timetable is ready — please review your classes."
+
+msgctxt "timetable.api"
+msgid "Bu işləmə növbədə deyil."
+msgstr "This run is not queued."
+
+msgctxt "timetable.api"
+msgid ""
+"Cədvəl dərc edildi: %(created)s dərs yazıldı, %(removed)s köhnə slot əvəz "
+"olundu."
+msgstr ""
+"Timetable published: %(created)s classes written, %(removed)s old slots "
+"replaced."
+
+msgctxt "timetable.api"
+msgid "Dərs köçürüldü."
+msgstr "Class moved."
+
+msgctxt "timetable.api"
+msgid "Naməlum əməliyyat."
+msgstr "Unknown action."
+
+msgctxt "timetable.api"
+msgid "Növbə siyasəti yadda saxlanıldı."
+msgstr "Shift policy saved."
+
+msgctxt "timetable.api"
+msgid "Seçilmiş əhatədə sizin idarə etdiyiniz qrup yoxdur."
+msgstr "The selected scope contains no groups you manage."
+
+msgctxt "timetable.api"
+msgid "Sizin artıq işləyən cədvəl işləmələriniz var — bitməsini gözləyin."
+msgstr ""
+"You already have timetable runs in progress — wait for them to finish."
+
+msgctxt "timetable.api"
+msgid "Yalnız hazır qaralama redaktə edilə bilər."
+msgstr "Only a finished draft can be edited."
+
+msgctxt "timetable.api"
+msgid "İşləmə ləğv edildi."
+msgstr "Run discarded."
+
+msgctxt "timetable.api"
+msgid "Əlçatanlıq yadda saxlanıldı."
+msgstr "Availability saved."
+
+msgctxt "timetable.availability"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Name or username…"
+
+msgctxt "timetable.availability"
+msgid "Adi"
+msgstr "Normal"
+
+msgctxt "timetable.availability"
+msgid "Axtar"
+msgstr "Search"
+
+msgctxt "timetable.availability"
+msgid "Bu müəllimin əhatənizdə fənni tapılmadı."
+msgstr "No subjects of this teacher were found in your scope."
+
+msgctxt "timetable.availability"
+msgid "Bu semestrdə sizin əhatənizdəki açılışlara müəllim təyin edilməyib."
+msgstr ""
+"No teachers are assigned to course offerings in your scope this semester."
+
+msgctxt "timetable.availability"
+msgid "Dövr et"
+msgstr "Cycle"
+
+msgctxt "timetable.availability"
+msgid "Dəyişdirilə bilən saatlar"
+msgstr "Flexible hours"
+
+msgctxt "timetable.availability"
+msgid "Dəyər %(low)s–%(high)s aralığında olmalıdır."
+msgstr "The value must be between %(low)s and %(high)s."
+
+msgctxt "timetable.availability"
+msgid "Fırça (səviyyə seçimi)"
+msgstr "Brush (level selection)"
+
+msgctxt "timetable.availability"
+msgid "Fırça:"
+msgstr "Brush:"
+
+msgctxt "timetable.availability"
+msgid "Fənləri (bu semestr)"
+msgstr "Subjects (this semester)"
+
+msgctxt "timetable.availability"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "timetable.availability"
+msgid "Fənn prioriteti"
+msgstr "Subject priority"
+
+msgctxt "timetable.availability"
+msgid "Gündə maksimum cüt"
+msgstr "Max. pairs per day"
+
+msgctxt "timetable.availability"
+msgid "Gələ bilmədiyi xanalar"
+msgstr "Unavailable slots"
+
+msgctxt "timetable.availability"
+msgid "Həftədə maksimum iş günü"
+msgstr "Max. working days per week"
+
+msgctxt "timetable.availability"
+msgid "Həftəlik şəbəkə: hər xana bir dərs saatıdır (cüt = 2 saat)."
+msgstr "Weekly grid: each cell is one class period (a pair = 2 hours)."
+
+msgctxt "timetable.availability"
+msgid ""
+"Klik — səviyyə dəyişir. Klaviatura: oxlarla gəzin, Boşluq — dövr, 1–4 — "
+"səviyyəni birbaşa seçin. Gün başlığı — bütün günü «gələ bilmir» ⇄ «neytral»."
+msgstr ""
+"Click changes the level. Keyboard: move with arrows, Space cycles, 1–4 picks"
+" a level directly. Day header toggles the whole day «unavailable» ⇄ "
+"«neutral»."
+
+msgctxt "timetable.availability"
+msgid "Müəllim axtar"
+msgstr "Search teacher"
+
+msgctxt "timetable.availability"
+msgid "Müəllim seçin"
+msgstr "Select a teacher"
+
+msgctxt "timetable.availability"
+msgid "Müəllim tapılmadı"
+msgstr "No teacher found"
+
+msgctxt "timetable.availability"
+msgid "Müəllim əlçatanlığı"
+msgstr "Teacher availability"
+
+msgctxt "timetable.availability"
+msgid "Müəllimlər"
+msgstr "Teachers"
+
+msgctxt "timetable.availability"
+msgid "Növ (tapşırıq saatı)"
+msgstr "Type (workload hours)"
+
+msgctxt "timetable.availability"
+msgid "Prioritet (1 — adi, 5 — ən yüksək)"
+msgstr "Priority (1 — normal, 5 — highest)"
+
+msgctxt "timetable.availability"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "timetable.availability"
+msgid "Qruplar"
+msgstr "Groups"
+
+msgctxt "timetable.availability"
+msgid "Saat"
+msgstr "Time"
+
+msgctxt "timetable.availability"
+msgid ""
+"Soldakı siyahıdan müəllimi seçin — gələ bilmədiyi günləri, olmayan və "
+"dəyişdirilə bilən saatları qeyd edin."
+msgstr ""
+"Pick a teacher from the list on the left and mark the days they cannot come,"
+" unavailable and flexible hours."
+
+msgctxt "timetable.availability"
+msgid "Son dəyişiklik:"
+msgstr "Last change:"
+
+msgctxt "timetable.availability"
+msgid "Tam ədəd daxil edin."
+msgstr "Enter a whole number."
+
+msgctxt "timetable.availability"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "timetable.availability"
+msgid "Yadda saxlanılmadı — yenidən cəhd edin."
+msgstr "Not saved — please try again."
+
+msgctxt "timetable.availability"
+msgid "boş"
+msgstr "empty"
+
+msgctxt "timetable.availability"
+msgid "doldurulub"
+msgstr "filled in"
+
+msgctxt "timetable.availability"
+msgid "laboratoriya"
+msgstr "laboratory"
+
+msgctxt "timetable.availability"
+msgid "mühazirə"
+msgstr "lecture"
+
+msgctxt "timetable.availability"
+msgid "seminar"
+msgstr "seminar"
+
+msgctxt "timetable.availability"
+msgid "Şəbəkədə naməlum səviyyə var."
+msgstr "The grid contains an unknown level."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq yadda saxlanılmadı — xanaları yoxlayın."
+msgstr "Availability was not saved — check the fields."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq şəbəkəsi"
+msgstr "Availability grid"
+
+msgctxt "timetable.edit"
+msgid "%(building)s korpusunda həmin vaxt boş otaq qalmır (%(week)s)."
+msgstr ""
+"No free room is left in building %(building)s at that time (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid ""
+"%(group)s qrupunun günündə boş cüt yaranır (%(week)s) — qrupda boşluq "
+"qadağandır."
+msgstr ""
+"An idle pair appears in group %(group)s's day (%(week)s) — gaps are not "
+"allowed for groups."
+
+msgctxt "timetable.edit"
+msgid "%(group)s qrupunun həmin vaxt dərsi var: %(subjects)s (%(week)s)."
+msgstr ""
+"Group %(group)s already has a class at that time: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Bu saat %(group)s qrupunun növbəsinə daxil deyil."
+msgstr "This time is outside group %(group)s's shift."
+
+msgctxt "timetable.edit"
+msgid "Dərs kilidlidir — əvvəlcə kilidi açın."
+msgstr "The class is locked — unlock it first."
+
+msgctxt "timetable.edit"
+msgid "Dərs qaralamada tapılmadı."
+msgstr "Class not found in the draft."
+
+msgctxt "timetable.edit"
+msgid "Gün və dərs saatı düzgün seçilməlidir."
+msgstr "Select a valid day and class period."
+
+msgctxt "timetable.edit"
+msgid "Müəllim %(teacher)s həmin vaxt məşğuldur: %(subjects)s (%(week)s)."
+msgstr "Teacher %(teacher)s is busy at that time: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Müəllim bu saatda gələ bilmir (əlçatanlıq)."
+msgstr "The teacher cannot come at this time (availability)."
+
+msgctxt "timetable.edit"
+msgid "Qaralama köhnəlib (açılışlar dəyişib) — yenidən işlədin."
+msgstr "The draft is outdated (course offerings changed) — run it again."
+
+msgctxt "timetable.edit"
+msgid "alt həftə"
+msgstr "even week"
+
+msgctxt "timetable.edit"
+msgid "başqa fakültənin dərc olunmuş dərsi"
+msgstr "a published class of another faculty"
+
+msgctxt "timetable.edit"
+msgid "üst həftə"
+msgstr "odd week"
+
+msgctxt "timetable.home"
+msgid "Aç"
+msgstr "Open"
+
+msgctxt "timetable.home"
+msgid ""
+"Bakalavr — səhər və günorta, magistr — yalnız axşam; istənilən qrup üçün "
+"istisna."
+msgstr ""
+"Bachelor — morning and afternoon, master — evening only; exceptions for any "
+"group."
+
+msgctxt "timetable.home"
+msgid "Bax, düzəlt, dərc et"
+msgstr "Review, adjust, publish"
+
+msgctxt "timetable.home"
+msgid "Bu semestr üçün hələ işləmə yoxdur"
+msgstr "No runs for this semester yet"
+
+msgctxt "timetable.home"
+msgid ""
+"Gələ bilmədiyi günlər, olmayan və dəyişdirilə bilən saatlar, gündəlik limit,"
+" prioritet."
+msgstr "Days off, unavailable and flexible hours, daily limit, priority."
+
+msgctxt "timetable.home"
+msgid ""
+"Hər işləmə ayrıca qaralamadır — canlı cədvələ yalnız «Dərc et» ilə keçir."
+msgstr ""
+"Each run is a separate draft — it reaches the live timetable only via "
+"«Publish»."
+
+msgctxt "timetable.home"
+msgid "Müəllim boş cütü"
+msgstr "Teacher idle pairs"
+
+msgctxt "timetable.home"
+msgid "Müəllim əlçatanlığı"
+msgstr "Teacher availability"
+
+msgctxt "timetable.home"
+msgid ""
+"Qrup / müəllim / otaq şəbəkəsi, kilid və köçürmə; «Dərc et» canlı cədvəli "
+"bir dəfəyə yazır."
+msgstr ""
+"Group / teacher / room grids, locking and moving; «Publish» writes the live "
+"timetable in one step."
+
+msgctxt "timetable.home"
+msgid "Qrup növbələri"
+msgstr "Group shifts"
+
+msgctxt "timetable.home"
+msgid "Status"
+msgstr "Status"
+
+msgctxt "timetable.home"
+msgid "Sərt pozuntu"
+msgstr "Hard violations"
+
+msgctxt "timetable.home"
+msgid "Yaradan"
+msgstr "Created by"
+
+msgctxt "timetable.home"
+msgid "Yeni işləmə"
+msgstr "New run"
+
+msgctxt "timetable.home"
+msgid "Yerləşdirilib"
+msgstr "Placed"
+
+msgctxt "timetable.home"
+msgid "Yoxla və işlət"
+msgstr "Check and run"
+
+msgctxt "timetable.home"
+msgid ""
+"«Məlumatı yoxla» tələb ilə tutumu müqayisə edir; sonra mühərrik cədvəli "
+"qurur."
+msgstr ""
+"«Check data» compares demand with capacity; then the engine builds the "
+"timetable."
+
+msgctxt "timetable.home"
+msgid "İş axını"
+msgstr "Workflow"
+
+msgctxt "timetable.home"
+msgid "İşləmələr"
+msgstr "Runs"
+
+msgctxt "timetable.home"
+msgid "Əhatə"
+msgstr "Scope"
+
+msgctxt "timetable.home"
+msgid "Əməliyyat"
+msgstr "Action"
+
+msgctxt "timetable.home"
+msgid ""
+"Əvvəlcə müəllim əlçatanlığını və qrup növbələrini yoxlayın, sonra «Yeni "
+"işləmə» ilə cədvəl qurun."
+msgstr ""
+"First check teacher availability and group shifts, then build a timetable "
+"with «New run»."
+
+msgctxt "timetable.model"
+msgid "Axın yoxdur (hər qrup ayrıca)"
+msgstr "No streams (each group separately)"
+
+msgctxt "timetable.model"
+msgid "Axşam"
+msgstr "Evening"
+
+msgctxt "timetable.model"
+msgid "Bakalavr"
+msgstr "Bachelor"
+
+msgctxt "timetable.model"
+msgid "Doktorantura"
+msgstr "Doctoral"
+
+msgctxt "timetable.model"
+msgid "Dərc edilib"
+msgstr "Published"
+
+msgctxt "timetable.model"
+msgid "Dəyişdirilə bilən saat"
+msgstr "Flexible hour"
+
+msgctxt "timetable.model"
+msgid "Eyni fənn + eyni müəllim + eyni dil"
+msgstr "Same subject + same teacher + same language"
+
+msgctxt "timetable.model"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "timetable.model"
+msgid "Günorta"
+msgstr "Afternoon"
+
+msgctxt "timetable.model"
+msgid "Gələ bilmir"
+msgstr "Unavailable"
+
+msgctxt "timetable.model"
+msgid "Hazırdır"
+msgstr "Ready"
+
+msgctxt "timetable.model"
+msgid "Ləğv edilib"
+msgstr "Discarded"
+
+msgctxt "timetable.model"
+msgid "Magistr"
+msgstr "Master"
+
+msgctxt "timetable.model"
+msgid "Neytral"
+msgstr "Neutral"
+
+msgctxt "timetable.model"
+msgid "Növbədə"
+msgstr "Queued"
+
+msgctxt "timetable.model"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "timetable.model"
+msgid "Qiyabi (bütün pillələr)"
+msgstr "Part-time (all levels)"
+
+msgctxt "timetable.model"
+msgid "Seçilmiş qruplar"
+msgstr "Selected groups"
+
+msgctxt "timetable.model"
+msgid "Səhər"
+msgstr "Morning"
+
+msgctxt "timetable.model"
+msgid "Tədris tapşırığındakı birləşmələr + alt qruplar"
+msgstr "Unions in the teaching task + subgroups"
+
+msgctxt "timetable.model"
+msgid "Uğursuz"
+msgstr "Failed"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləmələri"
+msgstr "timetable runs"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləməsi"
+msgstr "timetable run"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlıqları"
+msgstr "teacher availabilities"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlığı"
+msgstr "teacher availability"
+
+msgctxt "timetable.model"
+msgid "qaralama slot"
+msgstr "draft slot"
+
+msgctxt "timetable.model"
+msgid "qaralama slotlar"
+msgstr "draft slots"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasəti"
+msgstr "group shift policy"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasətləri"
+msgstr "group shift policies"
+
+msgctxt "timetable.model"
+msgid "Üstünlük verilir"
+msgstr "Preferred"
+
+msgctxt "timetable.model"
+msgid "İxtisas"
+msgstr "Programme"
+
+msgctxt "timetable.model"
+msgid "İşləyir"
+msgstr "Running"
+
+msgctxt "timetable.nav"
+msgid "Avtomatik cədvəl bölmələri"
+msgstr "Automatic timetable sections"
+
+msgctxt "timetable.nav"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+msgstr "You do not have permission to manage the timetable."
+
+msgctxt "timetable.nav"
+msgid "Müəllim əlçatanlığı"
+msgstr "Teacher availability"
+
+msgctxt "timetable.nav"
+msgid "Növbələr"
+msgstr "Shifts"
+
+msgctxt "timetable.nav"
+msgid "Yeni işləmə"
+msgstr "New run"
+
+msgctxt "timetable.nav"
+msgid "İşləmələr"
+msgstr "Runs"
+
+msgctxt "timetable.nav"
+msgid "Əl ilə redaktor"
+msgstr "Manual editor"
+
+msgctxt "timetable.page"
+msgid "Avtomatik dərs cədvəli"
+msgstr "Automatic timetable"
+
+msgctxt "timetable.page"
+msgid ""
+"Müəllim əlçatanlığı və qrup növbələri əsasında qrupda boşluqsuz həftəlik "
+"cədvəl qurulur; qaralama yoxlanıldıqdan sonra dərc edilir."
+msgstr ""
+"A gap-free weekly timetable is built from teacher availability and group "
+"shifts; the draft is published after review."
+
+msgctxt "timetable.page"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "timetable.page"
+msgid "Semestr seçin"
+msgstr "Select a semester"
+
+msgctxt "timetable.policy"
+msgid "Axtar"
+msgstr "Search"
+
+msgctxt "timetable.policy"
+msgid ""
+"Bu semestr açılışı olan qruplar. İstisna yalnız həmin qrupa aiddir (məs. "
+"1-ci kurs yalnız səhər)."
+msgstr ""
+"Groups with course offerings this semester. An exception applies to that "
+"group only (e.g. 1st year mornings only)."
+
+msgctxt "timetable.policy"
+msgid "Bu semestrdə sizin əhatənizdə açılışı olan qrup tapılmadı."
+msgstr ""
+"No groups with course offerings were found in your scope this semester."
+
+msgctxt "timetable.policy"
+msgid "Cədvələ daxil etmə"
+msgstr "Exclude from timetable"
+
+msgctxt "timetable.policy"
+msgid "Daxil etmə"
+msgstr "Exclude"
+
+msgctxt "timetable.policy"
+msgid "Defolta qaytar"
+msgstr "Reset to default"
+
+msgctxt "timetable.policy"
+msgid "Gündə maks."
+msgstr "Max./day"
+
+msgctxt "timetable.policy"
+msgid "Gündə maks. cüt"
+msgstr "Max. pairs/day"
+
+msgctxt "timetable.policy"
+msgid "Gündə maksimum cüt"
+msgstr "Max. pairs per day"
+
+msgctxt "timetable.policy"
+msgid "Gündəlik limit 1–%(max)s aralığında olmalıdır."
+msgstr "The daily limit must be between 1 and %(max)s."
+
+msgctxt "timetable.policy"
+msgid "Naməlum pillə."
+msgstr "Unknown level."
+
+msgctxt "timetable.policy"
+msgid "Növbələr"
+msgstr "Shifts"
+
+msgctxt "timetable.policy"
+msgid "Pillə / forma"
+msgstr "Level / form"
+
+msgctxt "timetable.policy"
+msgid "Pillə defoltları"
+msgstr "Level defaults"
+
+msgctxt "timetable.policy"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "timetable.policy"
+msgid "Qrup adı…"
+msgstr "Group name…"
+
+msgctxt "timetable.policy"
+msgid "Qrup axtar"
+msgstr "Search group"
+
+msgctxt "timetable.policy"
+msgid "Qrup növbələri"
+msgstr "Group shifts"
+
+msgctxt "timetable.policy"
+msgid "Qrup yoxdur"
+msgstr "No groups"
+
+msgctxt "timetable.policy"
+msgid ""
+"Qrup üçün ayrıca istisna yoxdursa bu qayda işləyir. Magistr dərsi susmaya "
+"görə yalnız axşam qoyulur."
+msgstr ""
+"This rule applies when a group has no own exception. Master's classes are "
+"evening-only by default."
+
+msgctxt "timetable.policy"
+msgid "Qruplar"
+msgstr "Groups"
+
+msgctxt "timetable.policy"
+msgid "Siyasət yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "The policy was not saved — check the fields."
+
+msgctxt "timetable.policy"
+msgid "Tələbə"
+msgstr "Students"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "Not saved — check the fields."
+
+msgctxt "timetable.policy"
+msgid "alt qrup:"
+msgstr "subgroup of:"
+
+msgctxt "timetable.policy"
+msgid "dəyişdirilib"
+msgstr "customised"
+
+msgctxt "timetable.policy"
+msgid "istisna"
+msgstr "exception"
+
+msgctxt "timetable.policy"
+msgid "qiyabi"
+msgstr "part-time"
+
+msgctxt "timetable.policy"
+msgid "susmaya görə"
+msgstr "default"
+
+msgctxt "timetable.policy"
+msgid "İcazəli növbələr"
+msgstr "Allowed shifts"
+
+msgctxt "timetable.policy"
+msgid "Əməliyyat"
+msgstr "Action"
+
+msgctxt "timetable.policy"
+msgid "Ən azı bir növbə seçilməlidir."
+msgstr "Select at least one shift."
+
+msgctxt "timetable.policy"
+msgid "əyani"
+msgstr "full-time"
+
+msgctxt "timetable.precheck"
+msgid "Bu dərslər yerləşdirilməyəcək — səbəbi sətirdə göstərilib."
+msgstr "These classes will not be placed — the reason is shown on each line."
+
+msgctxt "timetable.precheck"
+msgid "Bəzi dərslər üçün heç bir mümkün vaxt yoxdur"
+msgstr "Some classes have no possible time at all"
+
+msgctxt "timetable.precheck"
+msgid "Cədvələ daxil edilməyən qruplar (qiyabi və ya siyasətdə istisna)"
+msgstr "Groups excluded from the timetable (part-time or policy exception)"
+
+msgctxt "timetable.precheck"
+msgid "Kilidli dərs indiki növbə/əlçatanlıqdan kənardadır"
+msgstr "A locked class is outside the current shift/availability"
+
+msgctxt "timetable.precheck"
+msgid "Korpusda eyni anda lazım olan otaq sayı mövcud otaqlardan çoxdur"
+msgstr "A building needs more simultaneous rooms than it has"
+
+msgctxt "timetable.precheck"
+msgid "Lazım olan / mövcud otaq."
+msgstr "Needed / available rooms."
+
+msgctxt "timetable.precheck"
+msgid "Magistr qruplarının dərsi axşam xanalarına sığmır"
+msgstr "Master's group classes do not fit into the evening slots"
+
+msgctxt "timetable.precheck"
+msgid "Mühazirə axınları (bir neçə qrup birlikdə)"
+msgstr "Lecture streams (several groups together)"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimi təyin edilməmiş dərslər (vakant) — yalnız qrupa görə yerləşir"
+msgstr ""
+"Classes without an assigned teacher (vacant) — placed by group constraints "
+"only"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin həftəlik dərsi uyğun boş xanalardan çoxdur"
+msgstr "A teacher's weekly classes exceed the suitable free slots"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin vaxtı çox sıxdır (80%-dən çox dolu)"
+msgstr "A teacher's time is very tight (over 80% full)"
+
+msgctxt "timetable.precheck"
+msgid "Qrupun həftəlik dərsi icazəli xanalara sığmır"
+msgstr "A group's weekly classes do not fit into its allowed slots"
+
+msgctxt "timetable.precheck"
+msgid "Saat bölgüsü tapılmayan açılışlar (plan/tapşırıqda saat yoxdur)"
+msgstr "Course offerings without an hour breakdown (no hours in plan/task)"
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / axşam tutumu. Növbə siyasətində magistr üçün günortanı açmaq olar."
+msgstr ""
+"Demand / evening capacity. You can allow afternoons for master's groups in "
+"the shift policy."
+
+msgctxt "timetable.precheck"
+msgid "Tələb / tutum (cüt/həftə) — boşluqsuz cədvəl çətinləşə bilər."
+msgstr "Demand / capacity (pairs/week) — a gap-free timetable may be hard."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Növbəni genişləndirin və ya gündəlik limiti "
+"artırın."
+msgstr ""
+"Demand / capacity (pairs/week). Widen the shift or raise the daily limit."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Əlçatanlığı genişləndirin və ya dərsi başqasına "
+"verin."
+msgstr ""
+"Demand / capacity (pairs/week). Widen the availability or reassign the "
+"class."
+
+msgctxt "timetable.precheck"
+msgid "axının qruplarının ortaq növbəsi yoxdur"
+msgstr "the stream's groups have no common shift"
+
+msgctxt "timetable.precheck"
+msgid "müəllim qrupun növbəsində heç gələ bilmir"
+msgstr "the teacher can never come during the group's shift"
+
+msgctxt "timetable.precheck"
+msgid "qrup üçün icazəli xana yoxdur"
+msgstr "the group has no allowed slots"
+
+msgctxt "timetable.publish"
+msgid "Avtomatik cədvəl generatoru ilə dərc"
+msgstr "Published with the automatic timetable generator"
+
+msgctxt "timetable.publish"
+msgid "Qaralamada yerləşdirilmiş dərs yoxdur."
+msgstr "The draft has no placed classes."
+
+msgctxt "timetable.publish"
+msgid "Yalnız hazır (tamamlanmış) qaralama dərc edilə bilər."
+msgstr "Only a ready (finished) draft can be published."
+
+msgctxt "timetable.review"
+msgid "ALT"
+msgstr "EVEN"
+
+msgctxt "timetable.review"
+msgid "Alt həftə"
+msgstr "Even week"
+
+msgctxt "timetable.review"
+msgid "Arzuolunmaz saat"
+msgstr "Discouraged hours"
+
+msgctxt "timetable.review"
+msgid "Axtar…"
+msgstr "Search…"
+
+msgctxt "timetable.review"
+msgid "Baxış"
+msgstr "View"
+
+msgctxt "timetable.review"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "timetable.review"
+msgid ""
+"Bu dərslərin müəllimi (dərs yükü bölgüsündən) açılışın jurnal sahibindən "
+"fərqlidir. Canlı cədvəldə slotun ayrıca müəllim sahəsi olmadığı üçün jurnal "
+"sahibi göstəriləcək."
+msgstr ""
+"These classes' teacher (from the workload split) differs from the offering's"
+" journal owner. The live timetable has no per-slot teacher field, so the "
+"journal owner will be shown."
+
+msgctxt "timetable.review"
+msgid "Bu qaralama canlı cədvələ dərc edilib"
+msgstr "This draft has been published to the live timetable"
+
+msgctxt "timetable.review"
+msgid "Bu qaralama ləğv edilsin? Canlı cədvəl dəyişməyəcək."
+msgstr "Discard this draft? The live timetable will not change."
+
+msgctxt "timetable.review"
+msgid "Bölünmüş tədris"
+msgstr "Split teaching"
+
+msgctxt "timetable.review"
+msgid "Bütün dərslər yerləşdirilib."
+msgstr "All classes are placed."
+
+msgctxt "timetable.review"
+msgid "Cədvəli dərc et"
+msgstr "Publish timetable"
+
+msgctxt "timetable.review"
+msgid ""
+"Diqqət: %(total)s dərs yerləşdirilməyib — dərcdən sonra canlı cədvəldə "
+"olmayacaq."
+msgstr ""
+"Warning: %(total)s class(es) are not placed — they will not be in the live "
+"timetable after publishing."
+
+msgctxt "timetable.review"
+msgid "Dərc et"
+msgstr "Publish"
+
+msgctxt "timetable.review"
+msgid "Dərc olunmuşdan fərq"
+msgstr "Changes vs published"
+
+msgctxt "timetable.review"
+msgid "Dərs"
+msgstr "Class"
+
+msgctxt "timetable.review"
+msgid "Dərs saatı"
+msgstr "Class period"
+
+msgctxt "timetable.review"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "timetable.review"
+msgid "Gün"
+msgstr "Day"
+
+msgctxt "timetable.review"
+msgid "Həftə"
+msgstr "Week"
+
+msgctxt "timetable.review"
+msgid "Həftəlik cədvəl şəbəkəsi"
+msgstr "Weekly timetable grid"
+
+msgctxt "timetable.review"
+msgid "Həftəlik şəbəkə"
+msgstr "Weekly grid"
+
+msgctxt "timetable.review"
+msgid "Hər həftə"
+msgstr "Every week"
+
+msgctxt "timetable.review"
+msgid "Kilidli"
+msgstr "Locked"
+
+msgctxt "timetable.review"
+msgid "Kilidlə / kilidi aç"
+msgstr "Lock / unlock"
+
+msgctxt "timetable.review"
+msgid "Köçür"
+msgstr "Move"
+
+msgctxt "timetable.review"
+msgid "Laboratoriya"
+msgstr "Laboratory"
+
+msgctxt "timetable.review"
+msgid "Ləğv et"
+msgstr "Discard"
+
+msgctxt "timetable.review"
+msgid "Mühazirə"
+msgstr "Lecture"
+
+msgctxt "timetable.review"
+msgid "Mühərrik işləyir — səhifə hazır olanda avtomatik yenilənəcək."
+msgstr ""
+"The engine is running — the page will refresh automatically when ready."
+
+msgctxt "timetable.review"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "timetable.review"
+msgid "Müəllim boş cütü"
+msgstr "Teacher idle pairs"
+
+msgctxt "timetable.review"
+msgid "Məşğələ"
+msgstr "Seminar"
+
+msgctxt "timetable.review"
+msgid "Növ"
+msgstr "Type"
+
+msgctxt "timetable.review"
+msgid "Otaq"
+msgstr "Room"
+
+msgctxt "timetable.review"
+msgid "Otaq (təklif)"
+msgstr "Room (suggested)"
+
+msgctxt "timetable.review"
+msgid ""
+"Qaralama canlı cədvələ yazılacaq: işləmədəki açılışların köhnə slotları "
+"yumşaq silinir və yerləşdirilmiş dərslər əlavə olunur. Müəllimlərə və "
+"qrupların tələbələrinə bir bildiriş göndərilir."
+msgstr ""
+"The draft will be written to the live timetable: the run's old slots are "
+"soft-deleted and the placed classes are added. Teachers and the groups' "
+"students receive one notification."
+
+msgctxt "timetable.review"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "timetable.review"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "timetable.review"
+msgid "Qruplar"
+msgstr "Groups"
+
+msgctxt "timetable.review"
+msgid "Saat"
+msgstr "Time"
+
+msgctxt "timetable.review"
+msgid ""
+"Server sərt qaydaları yoxlayır: müəllim/qrup toqquşması, qrupda boşluq, "
+"növbə və «gələ bilmir» saatı."
+msgstr ""
+"The server checks hard rules: teacher/group clashes, group gaps, shifts and "
+"«unavailable» hours."
+
+msgctxt "timetable.review"
+msgid "Seçim"
+msgstr "Selection"
+
+msgctxt "timetable.review"
+msgid "Səbəb / qeyd (auditə düşür)"
+msgstr "Reason / note (recorded in the audit log)"
+
+msgctxt "timetable.review"
+msgid "Sərt pozuntu"
+msgstr "Hard violations"
+
+msgctxt "timetable.review"
+msgid ""
+"Sərt qaydalar pozulmadan yer tapılmayan dərslər. Səbəbə baxın, lazım olsa əl"
+" ilə yerləşdirin və ya giriş məlumatını dəyişib yenidən işlədin."
+msgstr ""
+"Classes that could not be placed without breaking hard rules. Check the "
+"reason, place them manually if needed, or change the input data and run "
+"again."
+
+msgctxt "timetable.review"
+msgid "Tək cütlük gün"
+msgstr "Single-class days"
+
+msgctxt "timetable.review"
+msgid "Worker cavab vermir — brauzerdə işlət (qısa limit)"
+msgstr "Worker not responding — run in the browser (short limit)"
+
+msgctxt "timetable.review"
+msgid "Yenidən işlət (kilidlər qalır)"
+msgstr "Run again (locks kept)"
+
+msgctxt "timetable.review"
+msgid "Yerləşdir"
+msgstr "Place"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilib"
+msgstr "Placed"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilməyən dərslər"
+msgstr "Unplaced classes"
+
+msgctxt "timetable.review"
+msgid "həftədə orta (üst/alt)"
+msgstr "weekly average (odd/even)"
+
+msgctxt "timetable.review"
+msgid "qrup bir dərs üçün gəlir"
+msgstr "group comes for a single class"
+
+msgctxt "timetable.review"
+msgid "san."
+msgstr "s"
+
+msgctxt "timetable.review"
+msgid "toqquşma + qrupda boşluq"
+msgstr "clashes + group gaps"
+
+msgctxt "timetable.review"
+msgid "yaradıb:"
+msgstr "created by:"
+
+msgctxt "timetable.review"
+msgid "«dəyişdirilə bilən» xanalar"
+msgstr "«flexible» slots"
+
+msgctxt "timetable.review"
+msgid "ÜST"
+msgstr "ODD"
+
+msgctxt "timetable.review"
+msgid "Üst həftə"
+msgstr "Odd week"
+
+msgctxt "timetable.review"
+msgid "İmtina"
+msgstr "Cancel"
+
+msgctxt "timetable.review"
+msgid "İşləmə uğursuz oldu"
+msgstr "The run failed"
+
+msgctxt "timetable.review"
+msgid "Əl ilə köçürülüb"
+msgstr "Moved manually"
+
+msgctxt "timetable.review"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "The action failed."
+
+msgctxt "timetable.run"
+msgid "30 saat = hər həftə 1 cüt; 15 saat = iki həftədən bir (üst və ya alt)."
+msgstr ""
+"30 hours = 1 pair every week; 15 hours = every other week (odd or even)."
+
+msgctxt "timetable.run"
+msgid ""
+"Alt qrup ailəsi (birləşik qrup + alt qruplar) avtomatik birlikdə götürülür."
+msgstr ""
+"A subgroup family (combined group + subgroups) is included together "
+"automatically."
+
+msgctxt "timetable.run"
+msgid "Axtar…"
+msgstr "Search…"
+
+msgctxt "timetable.run"
+msgid "Axın"
+msgstr "Streams"
+
+msgctxt "timetable.run"
+msgid "Axının qruplarının ortaq növbəsi yoxdur."
+msgstr "The stream's groups have no common shift."
+
+msgctxt "timetable.run"
+msgid "Aşağı"
+msgstr "Down"
+
+msgctxt "timetable.run"
+msgid "Bu semestrdə açılışı olan qrup yoxdur."
+msgstr "No groups have course offerings this semester."
+
+msgctxt "timetable.run"
+msgid "Cərimə çəkiləri (ətraflı)"
+msgstr "Penalty weights (advanced)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəldən fərq (sabitlik)"
+msgstr "Change vs published timetable (stability)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəli mümkün qədər saxla (minimal dəyişiklik)"
+msgstr "Keep the published timetable as much as possible (minimal change)"
+
+msgctxt "timetable.run"
+msgid "Dərs (hadisə)"
+msgstr "Classes (events)"
+
+msgctxt "timetable.run"
+msgid "Effektiv tədris həftəsi"
+msgstr "Effective teaching weeks"
+
+msgctxt "timetable.run"
+msgid "Eyni fənn eyni gün (mühazirə + məşğələ)"
+msgstr "Same subject on the same day (lecture + seminar)"
+
+msgctxt "timetable.run"
+msgid ""
+"Eyni toxum + eyni məlumat → eyni başlanğıc; fərqli toxum alternativ variant "
+"verir."
+msgstr ""
+"Same seed + same data → same start; a different seed gives an alternative "
+"variant."
+
+msgctxt "timetable.run"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "timetable.run"
+msgid "Fakültə seçin"
+msgstr "Select a faculty"
+
+msgctxt "timetable.run"
+msgid "Həftəlik cüt"
+msgstr "Weekly pairs"
+
+msgctxt "timetable.run"
+msgid "Korpusda eyni anda boş otaq qalmayıb."
+msgstr "No free room is left in the building at the same time."
+
+msgctxt "timetable.run"
+msgid "Kritik problem tapılmadı — işlədə bilərsiniz."
+msgstr "No critical problems found — you can run."
+
+msgctxt "timetable.run"
+msgid ""
+"Kritik problemlər var — işləmə yenə mümkündür, amma bəzi dərslər "
+"yerləşməyəcək."
+msgstr ""
+"There are critical problems — you can still run, but some classes will not "
+"be placed."
+
+msgctxt "timetable.run"
+msgid "Mühazirə axınları"
+msgstr "Lecture streams"
+
+msgctxt "timetable.run"
+msgid "Mümkün vaxt yoxdur."
+msgstr "There is no possible time."
+
+msgctxt "timetable.run"
+msgid "Müəllim"
+msgstr "Teachers"
+
+msgctxt "timetable.run"
+msgid "Müəllim bütün uyğun xanalarda başqa dərsdədir."
+msgstr "The teacher has another class in every suitable slot."
+
+msgctxt "timetable.run"
+msgid "Müəllim prioriteti"
+msgstr "Teacher priority"
+
+msgctxt "timetable.run"
+msgid "Müəllim qrupun növbəsində heç gələ bilmir."
+msgstr "The teacher can never come during the group's shift."
+
+msgctxt "timetable.run"
+msgid "Müəllim seçin"
+msgstr "Select a teacher"
+
+msgctxt "timetable.run"
+msgid "Müəllim uyğun xanalarda başqa fakültənin dərc olunmuş dərsindədir."
+msgstr ""
+"In the suitable slots the teacher has published classes of another faculty."
+
+msgctxt "timetable.run"
+msgid "Müəllim əlavə et"
+msgstr "Add teacher"
+
+msgctxt "timetable.run"
+msgid "Müəllimi təyin edilməmiş (vakant) dərsləri də yerləşdir"
+msgstr "Also place classes without an assigned teacher (vacant)"
+
+msgctxt "timetable.run"
+msgid "Müəllimin boş cütü (pəncərə)"
+msgstr "Teacher idle pair (gap)"
+
+msgctxt "timetable.run"
+msgid "Müəllimin gündəlik limiti aşması"
+msgstr "Teacher exceeds daily limit"
+
+msgctxt "timetable.run"
+msgid "Məlumat"
+msgstr "Info"
+
+msgctxt "timetable.run"
+msgid "Məlumatı yoxla"
+msgstr "Check data"
+
+msgctxt "timetable.run"
+msgid "Mənbə işləmənin kilidli dərsləri yerində saxlanılacaq"
+msgstr "Locked classes of the source run will be kept in place"
+
+msgctxt "timetable.run"
+msgid "Növbəyə qoyulur…"
+msgstr "Queueing…"
+
+msgctxt "timetable.run"
+msgid "Parametrlər"
+msgstr "Parameters"
+
+msgctxt "timetable.run"
+msgid "Prioritet sırası"
+msgstr "Priority order"
+
+msgctxt "timetable.run"
+msgid "Qrup"
+msgstr "Groups"
+
+msgctxt "timetable.run"
+msgid "Qrup adı ilə süz…"
+msgstr "Filter by group name…"
+
+msgctxt "timetable.run"
+msgid "Qrup üçün icazəli xana yoxdur (növbə siyasəti)."
+msgstr "The group has no allowed slots (shift policy)."
+
+msgctxt "timetable.run"
+msgid "Qrupları süz"
+msgstr "Filter groups"
+
+msgctxt "timetable.run"
+msgid "Qrupun bir dərs üçün gəldiyi gün"
+msgstr "A group comes for a single class"
+
+msgctxt "timetable.run"
+msgid "Qrupun gündəlik limiti aşması"
+msgstr "Group exceeds daily limit"
+
+msgctxt "timetable.run"
+msgid "Qrupun gününü boşluqsuz saxlamaq mümkün olmadı."
+msgstr "The group's day could not be kept gap-free."
+
+msgctxt "timetable.run"
+msgid "Qrupun uyğun xanaları başqa dərslərlə doludur."
+msgstr "The group's suitable slots are taken by other classes."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahı boşdur — bütün müəllimlər bərabər prioritetlidir. «Məlumatı yoxla»dan"
+" sonra müəllimləri əlavə edə bilərsiniz."
+msgstr ""
+"The list is empty — all teachers have equal priority. You can add teachers "
+"after «Check data»."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahıdakı müəllimlər əvvəl yerləşdirilir və onların istəkləri daha güclü "
+"çəki alır (yuxarıdakı — ən vacib)."
+msgstr ""
+"Teachers in the list are placed first and their wishes weigh more (top — "
+"most important)."
+
+msgctxt "timetable.run"
+msgid "Siyahıdan çıxar"
+msgstr "Remove from list"
+
+msgctxt "timetable.run"
+msgid ""
+"Sərt qaydalar (toqquşma, qrupda boşluq, magistr — yalnız axşam, «gələ "
+"bilmir» saatı) çəki ilə dəyişmir — HƏMİŞƏ qorunur."
+msgstr ""
+"Hard rules (clashes, group gaps, master's — evening only, «unavailable» "
+"hours) are not weighted — they are ALWAYS enforced."
+
+msgctxt "timetable.run"
+msgid "Sərt qaydaları pozmadan yer tapılmadı."
+msgstr "No place was found without breaking hard rules."
+
+msgctxt "timetable.run"
+msgid "Toxum (seed)"
+msgstr "Seed"
+
+msgctxt "timetable.run"
+msgid ""
+"Tövsiyə: fakültə-fakültə qurun — başqa fakültənin dərc olunmuş dərsləri "
+"müəllim üçün sabit məşğulluq sayılır."
+msgstr ""
+"Tip: build faculty by faculty — another faculty's published classes count as"
+" fixed teacher occupancy."
+
+msgctxt "timetable.run"
+msgid "Tədris günləri"
+msgstr "Teaching days"
+
+msgctxt "timetable.run"
+msgid "Uzun limit daha az «boş pəncərə» verir; 30–60 san. adətən kifayətdir."
+msgstr "A longer limit gives fewer idle gaps; 30–60 s is usually enough."
+
+msgctxt "timetable.run"
+msgid "Vaxt limiti (saniyə)"
+msgstr "Time limit (seconds)"
+
+msgctxt "timetable.run"
+msgid "Xəbərdarlıq"
+msgstr "Warning"
+
+msgctxt "timetable.run"
+msgid "Xəta"
+msgstr "Error"
+
+msgctxt "timetable.run"
+msgid "Yeni işləmə"
+msgstr "New run"
+
+msgctxt "timetable.run"
+msgid "Yoxlama nəticəsi"
+msgstr "Check result"
+
+msgctxt "timetable.run"
+msgid "Yoxlanılır…"
+msgstr "Checking…"
+
+msgctxt "timetable.run"
+msgid "Yuxarı"
+msgstr "Up"
+
+msgctxt "timetable.run"
+msgid "boşluq yaranır"
+msgstr "creates a gap"
+
+msgctxt "timetable.run"
+msgid "digər"
+msgstr "other"
+
+msgctxt "timetable.run"
+msgid "müəllim məşğul"
+msgstr "teacher busy"
+
+msgctxt "timetable.run"
+msgid "müəllimin kənar dərsi"
+msgstr "teacher's external class"
+
+msgctxt "timetable.run"
+msgid "otaq yoxdur"
+msgstr "no room"
+
+msgctxt "timetable.run"
+msgid "qrup məşğul"
+msgstr "group busy"
+
+msgctxt "timetable.run"
+msgid "«Dəyişdirilə bilən» saatın istifadəsi"
+msgstr "Use of a «flexible» hour"
+
+msgctxt "timetable.run"
+msgid "İxtisas"
+msgstr "Programme"
+
+msgctxt "timetable.run"
+msgid "İxtisas seçin"
+msgstr "Select a programme"
+
+msgctxt "timetable.run"
+msgid "İşləməni yaradan istifadəçi tapılmadı."
+msgstr "The user who created the run was not found."
+
+msgctxt "timetable.run"
+msgid "İşlət"
+msgstr "Run"
+
+msgctxt "timetable.run"
+msgid "Əhatə"
+msgstr "Scope"
+
+msgctxt "timetable.run"
+msgid "Əhatə növü"
+msgstr "Scope type"
+
+msgctxt "timetable.run"
+msgid "Əhatə seçin (fakültə, ixtisas və ya ən azı bir qrup)."
+msgstr "Select a scope (faculty, programme or at least one group)."
+
+msgctxt "timetable.run"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "The action failed."
