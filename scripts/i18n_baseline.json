@@ -7,16 +7,16 @@
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "source_missing": 0,
-   "total": 13718,
+   "total": 14736,
    "untranslated": 0
   },
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 23,
-   "identity": 68,
+   "identity": 73,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13741,
+   "total": 14759,
    "untranslated": 0
   },
   "ru": {
@@ -25,16 +25,16 @@
    "identity": 18,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13741,
+   "total": 14759,
    "untranslated": 0
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 1,
-   "identity": 223,
+   "identity": 225,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 13719,
+   "total": 14737,
    "untranslated": 0
   }
  },
@@ -46,7 +46,7 @@
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "source_missing": 0,
-   "total": 774,
+   "total": 797,
    "untranslated": 0
   },
   "en": {
@@ -55,7 +55,7 @@
    "identity": 4,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 774,
+   "total": 797,
    "untranslated": 0
   },
   "ru": {
@@ -64,7 +64,7 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 774,
+   "total": 797,
    "untranslated": 0
   },
   "tr": {
@@ -73,7 +73,7 @@
    "identity": 15,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 774,
+   "total": 797,
    "untranslated": 0
   }
  }
