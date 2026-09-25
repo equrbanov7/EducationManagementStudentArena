@@ -244,6 +244,66 @@ select count(*) from registrar_enrollment e join audit_auditlog a on a.object_id
  where a.reason = 'legacy_repair:journal_enrollments: enrollment' and e.source_group_id is not null;  -- qonaq
 ```
 
+### 7.2a İnsident (2026-09-25 13:21 UTC, run 36140119817) və davam — YARIMÇIQ vəziyyətdən
+
+**Nə oldu.** Canlı dry-run repetisiya ilə eyni idi (fərq: `componentscore:skip_parent 87`). APPLY
+backup-dan sonra yazılış INSERT-ində yıxıldı: `CheckViolation: registrar target parent must belong to
+the same organization: guest source group`. Köhnə tətbiq hər 500 sətirlik dəstəni AYRICA commit edirdi
+(xarici tranzaksiya yox idi, `RLS_TRANSACTION_SCOPED` sönülüdür) — ona görə canlıda yalnız 4 valideyn
+növü qaldı: açılış 365, sxem 365, komponent 1 846, mövzu 1 667 (+ audit), yazılış 0, xülasə sətri yox.
+
+**Kök səbəb.** `registrar_same_org_source_group_guard` → `registrar_guard_same_org_fk('source_group_id',
+'organizations_orgunit', …)`: hədəf qrup sətri YOXDURSA (DISTINCT NULL) və ya başqa təşkilatdadırsa eyni
+xəta. Planın 155 qonaq mənbə qrupunun hamısı plan nüsxəsində (09-19/20) mövcud və aktiv idi; qrupun
+təşkilatı dəyişə bilmir (`registrar_guard_organization_immutable`), deməli canlıda o vaxtdan ən azı bir
+qonaq qrupu **silinib** (tələbələri başqa qrupa keçirildikdən sonra). Köhnə `decide()` bu sahəni ümumiyyətlə
+yoxlamırdı. İkinci qüsur: təkrar icrada planın özünün yaratdığı 365 açılış ledger-də MIGRATED olmadığı üçün
+«legacy deyil» sayılırdı → 1 794 yazılış və 9 660 dərs səssizcə atlanardı.
+
+**Düzəliş** (`repair_enrollments_refs.py` yeni, `repair_enrollments_apply.py`):
+1. HƏR modelin HƏR FK-sı təsnif olunub (plan daxili · istinad · tələbə · müəllim · aktor · istifadəçi);
+   təsnif olunmayan FK tətbiqi dayandırır (test bunu bütün modellər üçün yoxlayır). İstinadlar canlıda
+   EYNİ təşkilatda yoxlanılır — qaydalar PG qoruyucularının güzgüsüdür, nəticə həmişə AÇIQ qərardır:
+   `Enrollment.source_group` yoxdursa **NULL** (`enrollment:null_source_group_id`) — modelin öz
+   `on_delete=SET_NULL` semantikası: qrup silinəndə mövcud qonaq yazılış da məhz bu vəziyyətə düşür;
+   yazılış, xanalar, yekun və ÜOMG qalır, yalnız «alt qrupdan əlavə» çipi görünmür (atlamaq balı
+   gizlədərdi). Açılışın fənni/dövrü/qrupu yoxdursa `skip_missing_<sahə>` (uşaqları `skip_parent`);
+   `grade.input`-suz müəllim `null_instructor_id`; otaq `null_room_id`; plandan kənar hədəf yoxdursa
+   `skip_parent` + dry-run-da «canlıda yoxdur · <model>: N (ilk 10 pk)» diaqnostikası.
+2. **Tətbiq HƏR ŞEY və ya HEÇ NƏ-dir**: bir xarici `transaction.atomic` (RLS konteksti bir dəfə), dəstələr
+   savepoint; DB xətası → `legacy_repair_apply_rolled_back: … — heç nə yazılmadı`.
+3. **Təkrar icra yarımçıq vəziyyəti tamamlayır**: planın pk-sı ilə mövcud VƏ bu plan sha256-ı ilə `create`
+   auditi olan açılış «planın özü» sayılır (auditi olmayan eyni pk-lı açılışa etibar edilmir).
+4. Geri qaytarma skripti yarımçıq tətbiqi də tanıyır (xülasə sətri yoxdursa `create` auditi kifayətdir).
+
+**Repetisiya (insident klonda təkrarlandı).** Klonda 2 qonaq qrupu silindi (6 qonaq yazılış), deploy olunmuş
+kod (7fe06f06) ilə apply eyni xəta ilə yıxıldı və EYNİ yarımçıq vəziyyəti qoydu; köhnə kodun sonrakı
+dry-run-ı production-dakı ilə eynidir (yazılış 1 532 + `skip_offering_not_legacy` 1 794, dərs 76 + 9 660,
+xana 71 406 + `skip_parent` 37 657, yekun 501 + 1 423 …; komponent balında fərq məhz canlıya məxsus 87-dir).
+Yeni kodla həmin yarımçıq vəziyyətdə: dry-run → aşağıdakı rəqəmlər; apply 51 san; ikinci icra 0; nəticə təmiz
+tam tətbiqlə eyni (yalnız 6 yazılışda `source_group` NULL); plan = baza. Yarımçıq vəziyyətin geri qaytarılması
+da sınandı: 4 valideyn növü silinir, 20 cədvəlin izi baza ilə eyni.
+
+**Serverdə (canlı yarımçıq vəziyyət üzərinə, deploy-dan sonra; plan və sha dəyişmir):**
+```bash
+# workflow: -f repair=journal_enrollments -f asset_id=<enroll_plan_v7 asset> -f plan_sha256=$SHA -f mode=dry-run
+COMMAND=legacy_repair_journal_enrollments scripts/ops/restore_legacy_scores_server.sh dry-run "$PLAN" "$SHA" superadmin
+#   gözlənilən (yarımçıq vəziyyətdə):
+#   courseoffering already_present 365 · assessmentscheme already_present 365
+#   assessmentcomponent already_present 1846 · selfworktopic already_present 1667
+#   enrollment create 3326 (+ enrollment:null_source_group_id N — silinmiş qonaq qrupları; N ≥ 1)
+#   lesson create 9736 · lessonmark create 109063 · finalgrade create 1924 · resitrecord create 51
+#   legacygradefact create 83 · componentscore create 14446 + skip_parent 87
+#   «canlıda yoxdur · registrar.assessmentcomponent: …» — 87 balın komponentləri (pk siyahısı ilə)
+#   skip_offering_not_legacy OLMAMALIDIR; yazılış/dərsdə başqa skip varsa — dayanın, göndərin
+COMMAND=legacy_repair_journal_enrollments scripts/ops/restore_legacy_scores_server.sh apply   "$PLAN" "$SHA" superadmin
+#   backup.sh → apply (hamısı bir tranzaksiya) → ikinci icra: hamısı already_present, FAKTİKİ 0
+```
+**Alternativ (əvvəl təmizləmək):** `psql -v plan_sha=$SHA -f - < scripts/ops/restore_legacy_enrollments_rollback.psql`
+(yarımçıq vəziyyətdə fakt yoxdur, `drop_facts` lazım deyil) → nəticə sətri `0 | 365 | 0 | 0`; sonra adi
+dry-run (hamısı `create`, açılış 365 …) və apply. 87 komponentin niyə silindiyini canlı auditdə yoxlamaq
+üçün: `select reason, resource_type, created_at from audit_auditlog where object_id in (<pk-lar>) or resource_id in (<pk-lar>);`
+
 ### 7.3 P0-1 — yalnız hazırda oxuyanlar (yazılış planından SONRA)
 ```bash
 COMMAND=legacy_repair_archive_status scripts/ops/restore_legacy_scores_server.sh dry-run "$PLAN" "$SHA" superadmin
@@ -289,10 +349,10 @@ yazılış planının özüdür (eyni sha256).
 | Fayl | Nədir |
 |---|---|
 | `apps/legacy_import/management/commands/legacy_repair_journal_enrollments.py` | yeni əmr: plan / tətbiq / yenidən çıxarış |
-| `apps/legacy_import/services/repair_enrollments_{select,replay,extract,plan,apply,specs}.py` | seçim qaydaları · klonda təkrar · çıxarış · plan · canlı tətbiq · model spesifikasiyası |
+| `apps/legacy_import/services/repair_enrollments_{select,replay,extract,plan,apply,specs,refs}.py` | seçim qaydaları · klonda təkrar · çıxarış · plan · canlı tətbiq (bir tranzaksiya) · model spesifikasiyası · FK-ların canlı yoxlaması |
 | `apps/legacy_import/services/repair_archive.py` · `…/commands/legacy_repair_archive_status.py` | P0-1: `--current-plan`, `--active-period` |
 | `apps/legacy_import/services/repair_plan_file.py` | + `read_plan_header` |
-| `apps/legacy_import/tests/test_repair_journal_enrollments.py` · `test_repair_archive_current.py` | 22 + 10 test (PostgreSQL) |
+| `apps/legacy_import/tests/test_repair_journal_enrollments.py` · `test_repair_enrollments_live.py` · `test_repair_archive_current.py` | 22 + 9 + 10 test (PostgreSQL) |
 | `scripts/ops/restore_legacy_scores_server.sh` · `…_build_plan.sh` | server (3 əmr) · lokal plan (hər iki plan) |
 | `scripts/ops/restore_legacy_enrollments_rollback.psql` · `restore_current_students_verify.py` | geri qaytarma · tələbə görünüşü (klonda) |
 | `backups/restore_2026_09_25/` (gitignore, 0600) | planlar + manifest + sha256, bərpa olunmayan cütlər, adlı tələbə × fənn cədvəli |
