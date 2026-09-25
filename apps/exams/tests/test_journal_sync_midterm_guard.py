@@ -159,7 +159,10 @@ class MidtermGuardBridgeTests(_JournalBridgeSetup):
         self._finish(exam, question, correct)
         self.assertIsNone(self._final_grade())
 
-    def test_unknown_category_keeps_todays_behaviour(self):
+    def test_unknown_category_is_skipped_like_uncategorized(self):
+        """H-1: tanınmayan kateqoriya da kateqoriyasız sayılır — ``FinalGrade`` yaranmır."""
         exam, question, correct, _wrong = self._category_exam("legacy_unknown")
+        before = _counter(journal_sync.SKIP_UNCATEGORIZED)
         self._finish(exam, question, correct)
-        self.assertIsNotNone(self._final_grade())
+        self.assertIsNone(self._final_grade())
+        self.assertEqual(_counter(journal_sync.SKIP_UNCATEGORIZED), before + 1)

@@ -32,7 +32,7 @@ def _syllabus():
 def topic_uid(title: str) -> str:
     """Sillabus mövzusunun SABİT açarı — normallaşdırılmış başlığın sha1-i (16 hex)."""
     normalized = _SPACE_RE.sub(" ", str(title or "").strip().casefold())
-    return hashlib.sha1(normalized.encode("utf-8")).hexdigest()[:16]  # noqa: S324 — açar, kriptoqrafiya deyil
+    return hashlib.sha1(normalized.encode("utf-8"), usedforsecurity=False).hexdigest()[:16]
 
 
 def approved_version_for_offering(offering):

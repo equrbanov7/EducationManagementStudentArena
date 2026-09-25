@@ -232,7 +232,9 @@ def get_selfwork_board(offering, *, with_structure=True):
             }
         )
     next_slot = structure.next_topic_slot(plan, topics) if plan.state != structure.STATE_PENDING else None
-    folder_topics = {t for (_e, t), m in mark_map.items() if m.source == rules.SOURCE_SUBJECT_FOLDER and rules.is_graded(m)}
+    folder_topics = {
+        t for (_e, t), m in mark_map.items() if m.source == rules.SOURCE_SUBJECT_FOLDER and rules.is_graded(m)
+    }
     for slot in slots:
         slot["has_folder_marks"] = bool(slot["topic"] and slot["topic"].id in folder_topics)
     return {

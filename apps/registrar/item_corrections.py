@@ -82,7 +82,7 @@ def _requested_points(new_points, request):
     try:
         return selfwork_points.parse_points(new_points)
     except ValueError:
-        raise ValidationError(pgettext("registrar.selfwork", "Enter a valid self-work score.")) from None
+        raise ValidationError(pgettext("registrar.selfwork", "Sərbəst iş üçün düzgün bal daxil edin.")) from None
 
 
 @transaction.atomic
@@ -107,7 +107,8 @@ def apply_selfwork_correction(
         new_value = _requested_points(new_points, request)
         if new_value is not None and not (0 < new_value <= topic.max_points):
             raise ValidationError(
-                pgettext("registrar.selfwork", "The score must be above 0 and at most %(max)s.") % {"max": topic.max_points}
+                pgettext("registrar.selfwork", "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır.")
+                % {"max": topic.max_points}
             )
         new_done = new_value is not None
         changed = old_points != new_value

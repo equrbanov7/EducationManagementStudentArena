@@ -177,9 +177,7 @@ class SelfWorkLegacyParityTest(SelfWorkLegacyFixture, TestCase):
             batch = finals_batch.build(self._all_enrollments())
             for username, e1, e2 in self._pairs():
                 single = tuple(_dec(finals.compute_final_result(enrollment=e)["total"]) for e in (e1, e2))
-                batched = tuple(
-                    _dec(finals.compute_final_result(enrollment=e, batch=batch)["total"]) for e in (e1, e2)
-                )
+                batched = tuple(_dec(finals.compute_final_result(enrollment=e, batch=batch)["total"]) for e in (e1, e2))
                 self.assertEqual(single, EXPECTED["final_total"][username], username)
                 self.assertEqual(batched, single, username)
             rows = {r["student"].username: r["result"] for r in finals.get_offering_results(offering=self.o2)["rows"]}
@@ -220,7 +218,9 @@ class SelfWorkLegacyParityTest(SelfWorkLegacyFixture, TestCase):
             summary = gradebook.get_student_journal_summary(
                 record=self.records["swp_s0"], period=self.period, semester_number=1
             )
-            cabinet = {row["enrollment"].offering_id: _dec(row["journal"]["entry_score"]) for row in summary["subjects"]}
+            cabinet = {
+                row["enrollment"].offering_id: _dec(row["journal"]["entry_score"]) for row in summary["subjects"]
+            }
             data = transcript_service.build_student_transcript(
                 student=self.records["swp_s1"].student, organization=self.org
             )

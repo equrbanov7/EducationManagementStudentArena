@@ -78,9 +78,9 @@ def _msg_not_enrolled() -> str:
 
 
 def _msg_invalid(max_points) -> str:
-    return pgettext(
-        _CTX, "Bal 0-dan böyük və %(max)s-dən çox olmamalıdır (ən çoxu bir onluq) — bal yazılmadı."
-    ) % {"max": rules.display(max_points) if max_points is not None else "—"}
+    return pgettext(_CTX, "Bal 0-dan böyük və %(max)s-dən çox olmamalıdır (ən çoxu bir onluq) — bal yazılmadı.") % {
+        "max": rules.display(max_points) if max_points is not None else "—"
+    }
 
 
 def _msg_wrong_max(label, journal_max, folder_max) -> str:
@@ -107,9 +107,10 @@ def _msg_corrected(label) -> str:
 
 
 def _msg_total(total) -> str:
-    return pgettext(
-        _CTX, "Sərbəst iş cəmi %(max_total)s baldan çox ola bilməz (jurnalda artıq %(total)s bal var)."
-    ) % {"max_total": rules.display(rules.TOTAL_MAX), "total": rules.display(total)}
+    return pgettext(_CTX, "Sərbəst iş cəmi %(max_total)s baldan çox ola bilməz (jurnalda artıq %(total)s bal var).") % {
+        "max_total": rules.display(rules.TOTAL_MAX),
+        "total": rules.display(total),
+    }
 
 
 def _msg_no_slot(plan, slot) -> str:
@@ -206,7 +207,12 @@ def record_points(*, offering, enrollment, slot_index, slot_title, max_points, p
             if same_award:
                 return True, _msg_already(label, value, topic.max_points, rules.cap_total(others + current))
             return False, _msg_second_award(label, current, topic.max_points)
-        if mark is not None and mark.source == rules.SOURCE_SUBJECT_FOLDER and source_ref and mark.source_ref == source_ref:
+        if (
+            mark is not None
+            and mark.source == rules.SOURCE_SUBJECT_FOLDER
+            and source_ref
+            and mark.source_ref == source_ref
+        ):
             return False, _msg_corrected(label)
         if others + value > rules.TOTAL_MAX:
             return False, _msg_total(others)
@@ -228,7 +234,9 @@ def _write(offering, topic, enrollment, mark, value, source_ref, by_user, slot_t
         "entered_by": by_user if getattr(by_user, "pk", None) else None,
     }
     if mark is None:
-        mark = SelfWorkMark.objects.create(organization=offering.organization, topic=topic, enrollment=enrollment, **fields)
+        mark = SelfWorkMark.objects.create(
+            organization=offering.organization, topic=topic, enrollment=enrollment, **fields
+        )
     else:
         for name, field_value in fields.items():
             setattr(mark, name, field_value)

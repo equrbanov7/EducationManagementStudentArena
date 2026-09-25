@@ -244,9 +244,7 @@ SYLLABUS_NEVER = "never"  # rəqəm səthləri: struktur yalnız mövzulardan
 def load_plan(offering, *, topics=None, graded=None, structure=None, syllabus=SYLLABUS_AUTO) -> Plan:
     """Canlı plan: mövzular (+ lazım olsa sillabus və qiymətli mövzular) oxunur."""
     topics = offering_topics(offering) if topics is None else list(topics)
-    if structure is None and (
-        syllabus == SYLLABUS_ALWAYS or (syllabus == SYLLABUS_AUTO and needs_syllabus(topics))
-    ):
+    if structure is None and (syllabus == SYLLABUS_ALWAYS or (syllabus == SYLLABUS_AUTO and needs_syllabus(topics))):
         structure = syllabus_structure(offering)
     if structure is not None and topics and graded is None:
         graded = graded_topic_ids(offering)

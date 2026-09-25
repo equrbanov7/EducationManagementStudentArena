@@ -112,22 +112,25 @@ STRINGS = {
     ): (
         "Some cells were not changed — the undo window has passed, the score comes from the subject folder, or the "
         "score is invalid.",
-        "Некоторые ячейки не изменены — окно отмены истекло, балл получен из «Папки предмета» или балл "
-        "недопустим.",
+        "Некоторые ячейки не изменены — окно отмены истекло, балл получен из «Папки предмета» или балл " "недопустим.",
         "Bazı hücreler değiştirilmedi — geri alma süresi doldu, puan ders klasöründen geliyor ya da puan geçersiz.",
     ),
     # ── Sənədli düzəliş (item_corrections) ────────────────────────────────────
-    (_SW, "Enter a valid self-work score."): (
+    (_SW, "Sərbəst iş üçün düzgün bal daxil edin."): (
         "Enter a valid self-work score.",
         "Введите допустимый балл за самостоятельную работу.",
         "Geçerli bir bağımsız çalışma puanı girin.",
     ),
-    (_SW, "The score must be above 0 and at most %(max)s."): (
+    (_SW, "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır."): (
         "The score must be above 0 and at most %(max)s.",
         "Балл должен быть больше 0 и не больше %(max)s.",
         "Puan 0'dan büyük ve en fazla %(max)s olmalıdır.",
     ),
-    (_SW, "Yeni bal (sərbəst iş)"): ("New score (independent work)", "Новый балл (сам. работа)", "Yeni puan (bağımsız çalışma)"),
+    (_SW, "Yeni bal (sərbəst iş)"): (
+        "New score (independent work)",
+        "Новый балл (сам. работа)",
+        "Yeni puan (bağımsız çalışma)",
+    ),
     (_SW, "Boş saxlasanız bal silinir («—»). 0 yazılmır."): (
         "Leave it empty to remove the score (“—”). A 0 is never recorded.",
         "Оставьте пустым, чтобы удалить балл («—»). Ноль не записывается.",
@@ -142,7 +145,11 @@ STRINGS = {
         "Чек-лист: 1 балл за тему",
         "Kontrol listesi: konu başına 1 puan",
     ),
-    (_SW, "Cəmi maksimum %(max)s bal"): ("Maximum %(max)s points in total", "Всего максимум %(max)s баллов", "Toplam en fazla %(max)s puan"),
+    (_SW, "Cəmi maksimum %(max)s bal"): (
+        "Maximum %(max)s points in total",
+        "Всего максимум %(max)s баллов",
+        "Toplam en fazla %(max)s puan",
+    ),
     (_SW, "— bal fənn qovluğundan yazılıb, burada yalnız baxış"): (
         "— score recorded from the subject folder, read-only here",
         "— балл записан из «Папки предмета», здесь только просмотр",
