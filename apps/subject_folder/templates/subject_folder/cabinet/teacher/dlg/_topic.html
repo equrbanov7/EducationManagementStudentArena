@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTopicTitle">{% trans "Mövzunun adı" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <input class="ems-input" type="text" id="sfTopicTitle" name="title" maxlength="255" required>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTopicWeek">{% trans "Həftə" context "subject_folder.ui" %}</label>
+    <input class="ems-input sfc-input--short" type="number" id="sfTopicWeek" name="week_no" min="1" max="30" inputmode="numeric">
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="sfTopicDesc">{% trans "Təsvir" context "subject_folder.ui" %}</label>
+    <textarea class="ems-textarea" id="sfTopicDesc" name="description" rows="3"></textarea>
+</div>

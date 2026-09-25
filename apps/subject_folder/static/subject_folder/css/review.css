@@ -1,0 +1,154 @@
+/* =========================================================================
+   «Tapşırıq yoxlaması» — toplu əməl paneli, cədvəl vurğuları və çekməcə
+   (cavab, oxşarlıq, qərar formaları, jurnal önizləməsi). Ortaq bloklar
+   `cabinet.css`-dədir. Rəng yalnız `--ems-*` token-dir.
+   ========================================================================= */
+
+.sfc-bulkbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-3);
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+}
+
+.sfc-bulkbar .ems-msg {
+    flex-basis: 100%;
+}
+
+.sfc-bulkbar__count {
+    align-self: center;
+    font-weight: 600;
+    color: var(--ems-primary-800);
+}
+
+.sfc-col-check {
+    width: 44px;
+}
+
+.sfc-row--flagged th,
+
+.sfc-row--flagged td {
+    background: var(--ems-danger-bg);
+}
+
+.sfc-cell-title {
+    display: block;
+    font-weight: 600;
+}
+
+.sfc-cell-sub {
+    display: block;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-600);
+}
+
+.sfc-sync {
+    margin-top: var(--ems-sp-1);
+}
+
+.sfc-detail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.sfc-detail__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.sfc-detail__block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+}
+
+.sfc-detail__h {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    color: var(--ems-neutral-900);
+}
+
+.sfc-events summary {
+    cursor: pointer;
+}
+
+.sfc-matches {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sfc-match {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: var(--ems-sp-2) var(--ems-sp-3);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-md);
+}
+
+.sfc-match--dismissed {
+    opacity: 0.7;
+}
+
+.sfc-match__score {
+    min-width: 48px;
+    font-weight: 700;
+}
+
+.sfc-match__who {
+    flex: 1 1 auto;
+}
+
+.sfc-decide {
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.sfc-decide__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+}
+
+.sfc-decide__more summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ems-link);
+}
+
+.sfc-decide__more[open] summary {
+    margin-bottom: var(--ems-sp-2);
+}
+
+.sfc-preview {
+    align-self: end;
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-success-700);
+}
+
+.sfc-preview--error {
+    color: var(--ems-danger-strong);
+}
+
+.sfc-timeline {
+    margin: var(--ems-sp-2) 0 0;
+    padding-left: var(--ems-sp-5);
+    font-size: var(--ems-fs-sm);
+}

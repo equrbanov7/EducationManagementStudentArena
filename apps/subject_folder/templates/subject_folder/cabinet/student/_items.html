@@ -1,0 +1,41 @@
+{% load i18n %}
+{% if materials or tasks %}
+<ul class="sfc-items" role="list">
+    {% for item in materials %}
+    <li class="sfc-item">
+        <span class="sfc-item__icon sfc-item__icon--{{ item.material.kind }}" aria-hidden="true"><i class="fas {% if item.material.kind == 'image' %}fa-image{% elif item.material.kind == 'code' %}fa-code{% elif item.material.kind == 'link' %}fa-link{% elif item.material.kind == 'video_link' %}fa-circle-play{% elif item.material.kind == 'note' %}fa-note-sticky{% else %}fa-file-lines{% endif %}"></i></span>
+        <div class="sfc-item__main">
+            <p class="sfc-item__title">
+                {% if item.download_url %}<a href="{{ item.download_url }}" data-force-navigation="true">{{ item.material.title }}</a>
+                {% elif item.material.url %}<a href="{{ item.material.url }}" target="_blank" rel="noopener noreferrer" data-force-navigation="true">{{ item.material.title }} <i class="fas fa-arrow-up-right-from-square sfc-ext" aria-hidden="true"></i></a>
+                {% else %}{{ item.material.title }}{% endif %}
+            </p>
+            <p class="sfc-item__meta"><span>{{ item.kind_label }}</span>{% if item.size %}<span>{{ item.size }}</span>{% endif %}</p>
+            {% if item.material.kind == "code" and item.material.code_text %}
+                <details class="sfc-code"><summary>{% trans "Kodu göstər" context "subject_folder.ui" %}{% if item.material.code_language %} · {{ item.material.get_code_language_display }}{% endif %}</summary><pre><code>{{ item.material.code_text }}</code></pre></details>
+            {% elif item.material.description %}
+                <p class="sfc-item__desc">{{ item.material.description|linebreaksbr }}</p>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+    {% for item in tasks %}
+    <li class="sfc-item sfc-item--task{% if item.needs_action or item.returned %} sfc-item--todo{% endif %}">
+        <span class="sfc-item__icon sfc-item__icon--{{ item.task.kind }}" aria-hidden="true"><i class="fas {% if item.task.kind == 'selfwork' %}fa-star{% else %}fa-clipboard-list{% endif %}"></i></span>
+        <div class="sfc-item__main">
+            <p class="sfc-item__title"><a href="{{ item.url }}">{{ item.task.title }}</a></p>
+            <p class="sfc-item__meta">
+                <span class="ems-badge ems-badge--{% if item.task.kind == 'selfwork' %}primary{% else %}info{% endif %}">{{ item.kind_label }}{% if item.max_points %} · {% blocktrans trimmed with points=item.max_points context "subject_folder.ui" %}maks. {{ points }} bal{% endblocktrans %}{% endif %}</span>
+                <span class="ems-badge ems-badge--{{ item.chip.tone }}">{{ item.chip.label }}</span>
+                {% if item.points %}<span class="sfc-points">{{ item.points }} / {{ item.max_points }}</span>{% endif %}
+                {% if item.due_at %}<span class="sfc-muted"><i class="far fa-clock" aria-hidden="true"></i> {{ item.due_at|date:"d.m.Y H:i" }}</span>{% endif %}
+                {% if item.window.key != "open" %}<span class="ems-badge ems-badge--{{ item.window.tone }}">{{ item.window.label }}</span>{% endif %}
+            </p>
+        </div>
+        <a class="ems-btn ems-btn--sm{% if item.needs_action or item.returned %} ems-btn--primary{% endif %}" href="{{ item.url }}">{% if item.returned %}{% trans "Düzəlt və göndər" context "subject_folder.ui" %}{% elif item.needs_action %}{% trans "Cavab ver" context "subject_folder.ui" %}{% else %}{% trans "Bax" context "subject_folder.ui" %}{% endif %}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+    <p class="sfc-muted sfc-topic__empty">{% trans "Bu mövzuda hələ məzmun yoxdur." context "subject_folder.ui" %}</p>
+{% endif %}

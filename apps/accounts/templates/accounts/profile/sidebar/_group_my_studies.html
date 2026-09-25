@@ -10,13 +10,14 @@ bloku bəndlərin ÖZ şərtinə köçdü (təyinatlar, kurslar, nəticələr,
 apellyasiyalar, gözləyən cavablar) — nəticə eynidir: məzun onları GÖRMÜR.
 Sıra dəyişməyib. «Anonim sorğu» (tələbənin müəllim qiymətləndirməsi) da burada
 durur ki, akkordeona düşən tələbə onu itirməsin.{% endcomment %}
-{% if can_view_student_assignments or 'my-subjects' in allowed_sections or 'my-transcript' in allowed_sections or 'overall-academic' in allowed_sections or 'evaluation-survey' in allowed_sections %}
+{% if can_view_student_assignments or 'my-subjects' in allowed_sections or 'my-subject-folders' in allowed_sections or 'my-transcript' in allowed_sections or 'overall-academic' in allowed_sections or 'evaluation-survey' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="my-studies">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-subjects|my-transcript|overall-academic|assigned-exams|assigned-courses|my-results|my-appeals|pending-answers|evaluation-survey|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-subjects|my-subject-folders|my-transcript|overall-academic|assigned-exams|assigned-courses|my-results|my-appeals|pending-answers|evaluation-survey|" %} open{% endif %}>
         {% trans "group_my_studies" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-graduation-cap" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_my_subjects.html" %}
+            {% include "accounts/profile/sidebar/items/_my_subject_folders.html" %}
             {% include "accounts/profile/sidebar/items/_overall_academic.html" %}
             {% include "accounts/profile/sidebar/items/_my_transcript.html" %}
             {% include "accounts/profile/sidebar/items/_assigned_exams.html" %}
