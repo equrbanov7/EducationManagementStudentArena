@@ -12,6 +12,13 @@
 # Rejimlər: check (sha256 + konteynerə köçürmə) → dry-run (canlı bazaya qarşı tam
 # qərar cədvəli, yazı YOXDUR) → apply (əvvəl backup.sh, sonra tətbiq, sonra İKİNCİ icra —
 # 0 dəyişiklik gözlənilir). Loglarda yalnız say/UUID/tarix var, şəxsi məlumat yoxdur.
+#
+# Addımlar (`repair`, sıra dəyişməz, hər biri əvvəlkinin TƏTBİQİNDƏN sonra):
+#   lesson_recovery     — J12 dərs/bal xanaları (2026-09-25 tətbiq olunub)
+#   journal_enrollments — hazırda oxuyanların atılmış yazılışları (J12-ni ön-şərt kimi yoxlayır)
+#   archive_status      — P0-1: arxivdə qalmış hazırda oxuyanlar (asset = yazılış planının ÖZÜ)
+# Asset DRAFT deyil, PRERELEASE kimi yüklənməlidir: `contents: read` token-i draft asset-ini
+# görmür (403). Asset AES-256 ilə şifrəlidir; iş bitəndə release silinir.
 # ═══════════════════════════════════════════════════════════════════════════
 name: 🩹 Prod Legacy Score Restore
 
@@ -24,6 +31,15 @@ on:
       plan_sha256:
         description: "Planın manifestdəki sha256-sı (şifrəsiz .jsonl.gz faylının)"
         required: true
+      repair:
+        description: "Bərpa addımı (sıra: lesson_recovery → journal_enrollments → archive_status)"
+        required: true
+        type: choice
+        default: lesson_recovery
+        options:
+          - lesson_recovery
+          - journal_enrollments
+          - archive_status
       mode:
         description: "check | dry-run | apply"
         required: true
@@ -54,6 +70,8 @@ jobs:
     env:
       APP_DIR: /home/wcu/EducationManagementStudentArena
       MODE: ${{ github.event.inputs.mode }}
+      # choice girişi — yalnız üç ağ siyahı dəyəri; server skripti də öz ağ siyahısı ilə yoxlayır.
+      COMMAND: legacy_repair_${{ github.event.inputs.repair }}
       PLAN_SHA256: ${{ github.event.inputs.plan_sha256 }}
       ASSET_ID: ${{ github.event.inputs.asset_id }}
     steps:
@@ -80,7 +98,7 @@ jobs:
           echo "$PLAN_SHA256  $RUNNER_TEMP/restore/plan.jsonl.gz" | sha256sum -c -
           ls -la "$RUNNER_TEMP/restore/plan.jsonl.gz"
 
-      - name: 🩹 Restore (${{ github.event.inputs.mode }})
+      - name: 🩹 Restore (${{ github.event.inputs.repair }} · ${{ github.event.inputs.mode }})
         run: |
           set -euo pipefail
           cd "$APP_DIR"
@@ -89,7 +107,7 @@ jobs:
           bash scripts/ops/restore_legacy_scores_server.sh "$MODE" "$RUNNER_TEMP/restore/plan.jsonl.gz" \
             "$PLAN_SHA256" superadmin 2>&1 | tee "$RUNNER_TEMP/restore/out.log"
           {
-            echo "## 🩹 Legacy restore — ${MODE}"
+            echo "## 🩹 Legacy restore — ${COMMAND} — ${MODE}"
             echo '```'
             tail -n 80 "$RUNNER_TEMP/restore/out.log"
             echo '```'

@@ -132,12 +132,15 @@ def extract(organization, *, since, restored: dict, new_offerings: set):
             "updated_existing": updated,
         }
 
-    inverse = {str(pk): key for key, pk in restored.items()}
+    inverse: dict[str, list] = {}
+    for key, pk in sorted(restored.items()):
+        inverse.setdefault(str(pk), []).append(key)
     records = [record_of(row) for _app, name in MODEL_ORDER for row in sorted(picked[name], key=lambda r: str(r.pk))]
     for record in records:
         if record["kind"] == "registrar.enrollment":
-            # Modelə yazılmır — audit/hesabat üçün legacy açarıdır.
-            record["restore_key"] = inverse[record["pk"]]
+            # Modelə yazılmır — audit/hesabat üçün legacy açarları (C6: bir yazılış, bir neçə jurnal).
+            record["restore_key"] = inverse[record["pk"]][0]
+            record["restore_keys"] = inverse[record["pk"]]
     return records, report
 
 
