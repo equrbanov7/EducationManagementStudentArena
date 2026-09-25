@@ -9,7 +9,9 @@ burada YALNIZ redaktorun interaktiv əməlləri var:
 * ``place``    — parklanmış slotun yenidən yerləşdirilməsi;
 * ``delete``   — YUMŞAQ silmə (sətir bazada qalır);
 * ``suggest``  — «hara boşdur» tövsiyələri (səhər/günorta növbəsi);
-* ``options``  — seçilmiş qrupun fənn + müəllim seçiciləri.
+* ``options``  — seçilmiş qrupun fənn + müəllim seçiciləri;
+* ``slot_teachers`` — «Dərsi aparan müəllim» seçicisi (seçilmiş fənn + qrup açılışını apara
+  bilənlər; bölünmüş tədris, 2026-09-25). Seçimin özü ``check``/``save``-də SERVERDƏ yoxlanır.
 
 Domen məntiqi registrar-dadır (``apps.registrar.schedule_editor*``); bu fayl
 yalnız tenant/icazə qapısı + JSON çevirmədir. Hamısı FAIL-CLOSED: icazəsi
@@ -30,10 +32,11 @@ from apps.registrar.public import schedule_editor
 from apps.registrar.public import schedule_editor_actions as editor
 from apps.registrar.public import schedule_manage
 from apps.registrar.public import schedule_manage_actions as base
+from core.http_ids import parse_uuid
 
 _CTX = "accounts.schedule_editor"
 
-ALLOWED_ACTIONS = frozenset({"check", "save", "move", "place", "delete", "suggest", "options"})
+ALLOWED_ACTIONS = frozenset({"check", "save", "move", "place", "delete", "suggest", "options", "slot_teachers"})
 
 
 def _organization(request):
@@ -70,9 +73,9 @@ def _error(exc):
 
 
 def _group(request, organization, data):
-    """Seçilmiş qrup — YALNIZ aktorun əhatəsindən (fail-closed)."""
-    group_id = str(data.get("group_id") or "").strip()
-    if not group_id:
+    """Seçilmiş qrup — YALNIZ aktorun əhatəsindən (fail-closed); pozuq id = seçilməyib (500 yox)."""
+    group_id = parse_uuid(data.get("group_id"))
+    if group_id is None:
         return None
     return schedule_manage.scoped_groups(request.user, organization).filter(pk=group_id).first()
 
@@ -80,8 +83,8 @@ def _group(request, organization, data):
 def _period(organization, data):
     from apps.organizations.models import AcademicPeriod
 
-    period_id = str(data.get("period_id") or "").strip()
-    if not period_id:
+    period_id = parse_uuid(data.get("period_id"))
+    if period_id is None:
         return None
     return AcademicPeriod.objects.filter(organization=organization, pk=period_id).first()
 
@@ -124,6 +127,8 @@ def _check(request, organization, data):
             instructor=instructor,
             create=False,
         )
+        # «Dərsi aparan müəllim» — ixtiyari müəllim 400; toqquşma bu müəllimlə ölçülür.
+        slot_teacher = schedule_editor.resolve_slot_instructor(offering=offering, data=data)
     except schedule_editor.CellError as exc:
         return _error(exc)
     verdict = schedule_editor.check_cell(
@@ -131,6 +136,7 @@ def _check(request, organization, data):
         offering=offering,
         cleaned=cleaned,
         exclude_id=str(data.get("slot_id") or "").strip() or None,
+        slot_instructor_id=getattr(slot_teacher, "pk", None),
     )
     return JsonResponse(verdict)
 
@@ -159,12 +165,29 @@ def _options(request, organization, data):
     )
 
 
+def _slot_teachers(request, organization, data):
+    """«Dərsi aparan müəllim» seçicisi — qrup YALNIZ aktorun əhatəsindən (fail-closed)."""
+    return JsonResponse(
+        {
+            "ok": True,
+            **schedule_editor.slot_teacher_options(
+                organization=organization,
+                group=_group(request, organization, data),
+                period=_period(organization, data),
+                subject_id=data.get("subject_id"),
+                instructor_id=data.get("instructor_id"),
+            ),
+        }
+    )
+
+
 def _suggest(request, organization, data):
     slot = _slot(request, organization, data) if data.get("slot_id") else None
     group = _group(request, organization, data)
     return JsonResponse(
         {
             "ok": True,
+            # Semestr süzgəci + axın qaydası (``check`` ilə eyni): dövr, fənn və növ dialoqdan gəlir.
             "suggestions": editor.suggestions_for(
                 organization=organization,
                 slot=slot,
@@ -172,6 +195,9 @@ def _suggest(request, organization, data):
                 instructor_id=str(data.get("instructor_id") or "").strip() or None,
                 shift=str(data.get("shift") or "").strip(),
                 week_type=str(data.get("week_type") or "").strip() or None,
+                period=_period(organization, data),
+                subject_id=str(data.get("subject_id") or "").strip() or None,
+                kind=str(data.get("slot_kind") or "").strip() or None,
             ),
         }
     )
@@ -228,6 +254,8 @@ def schedule_editor_action(request):
             return _check(request, organization, data)
         if action == "options":
             return _options(request, organization, data)
+        if action == "slot_teachers":
+            return _slot_teachers(request, organization, data)
         if action == "suggest":
             return _suggest(request, organization, data)
         return _write(request, organization, action, data)
