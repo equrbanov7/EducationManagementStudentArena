@@ -57,10 +57,11 @@ class TemplateTest(SimpleTestCase):
         self.assertEqual({spec["name"] for spec in _MIGRATION.ROLE_SPECS}, {r["name"] for r in QUALITY_CONTROL_ROLES})
 
     def test_view_as_modes_and_network_zone(self):
-        from apps.accounts.services.view_as import MODE_READONLY, ROLE_FILTER_MAP, ROLE_MODE_MAP
+        from apps.accounts.services.view_as import ROLE_FILTER_MAP, ROLE_MODE_MAP
 
         for name in _QC:
-            self.assertEqual(ROLE_MODE_MAP[name], MODE_READONLY)
+            # L-2 (2026-09-25): view-as AKTORU deyil, amma «Əməkdaşlar» süzgəcində HƏDƏF kimi görünür.
+            self.assertNotIn(name, ROLE_MODE_MAP)
             self.assertIn(name, ROLE_FILTER_MAP["staff"])
 
 
@@ -120,3 +121,23 @@ class ExistingTenantMigrationTest(TestCase):
             request.organization = self.w["org"]
             request.org_memberships = list(Membership.objects.filter(user=user).select_related("role"))
         self.assertEqual(account_kind(request), "staff")
+
+
+class QualityRolesAreNotViewAsActorsTest(TestCase):
+    """L-2 (2026-09-25): keyfiyyətə nəzarət rolları «başqasının gözü ilə bax» (view-as) ala bilməz."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.w = build_world("svqcva", students=1)
+        with bypass_rls():
+            cls.head = member(cls.w["org"], "svqcva_head", "quality_control_head")
+            cls.staff = member(cls.w["org"], "svqcva_staff", "quality_control_staff")
+
+    def test_quality_roles_get_no_view_as_mode(self):
+        from apps.accounts.services.view_as import resolve_actor_access
+
+        with bypass_rls():
+            for user in (self.head, self.staff):
+                with self.subTest(user=user.username):
+                    mode, _level, _memberships = resolve_actor_access(user, self.w["org"])
+                    self.assertIsNone(mode)

@@ -2,8 +2,9 @@
 
 ``GET /sorgu/neticeler/muellimler/?q=…&limit=…&offset=…&er_*`` →
 ``{"results": [{"id", "text"}], "has_more"}`` (``EMSSearchableSelect`` müqaviləsi).
-Yalnız istifadəçinin ƏHATƏSİNDƏ cavabı olan müəllimlər; fakültə/kafedra filtrinə
-tabedir; axtarış az/ing klaviaturaya dözümlüdür. Cavab sayı qaytarılmır.
+Yalnız istifadəçinin ƏHATƏSİNDƏ, BAĞLI kampaniyalarda cavabı olan müəllimlər (davam edən
+kampaniyada boş siyahı — M-1); fakültə/kafedra filtrinə tabedir; axtarış az/ing klaviaturaya
+dözümlüdür. Cavab sayı qaytarılmır.
 """
 
 from __future__ import annotations
@@ -31,6 +32,9 @@ def teacher_search(request):
     resolved = resolve(request)
     if resolved is None:
         return JsonResponse({"results": [], "has_more": False, "error": "forbidden"}, status=403)
+    if resolved.live or not resolved.campaign_ids:
+        # M-1: davam edən kampaniyada kimin cavab aldığı da (canlı iştirak) göstərilmir.
+        return JsonResponse({"results": [], "has_more": False})
     data = public.teacher_choices(
         resolved.organization,
         resolved.scope,

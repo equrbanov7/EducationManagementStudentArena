@@ -105,6 +105,16 @@ class JournalServiceTest(TestCase):
             created_by=self.teacher,
         )
 
+    def test_create_lesson_locks_the_offering_row(self):
+        """L-3 (2026-09-25): dublikat yoxlaması açılış kilidi altında — paralel «yarat» seriyalaşır."""
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with bypass_rls(), CaptureQueriesContext(connection) as ctx:
+            self._lesson(day=3)
+        locking = [q["sql"] for q in ctx.captured_queries if "FOR UPDATE" in q["sql"] and "courseoffering" in q["sql"]]
+        self.assertTrue(locking, "create_lesson açılış sətrini kilidləmir")
+
     # ── scheme + lesson types ────────────────────────────────────────────────
     def test_scheme_default_entry_max(self):
         with bypass_rls():

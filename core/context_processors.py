@@ -173,7 +173,10 @@ def feature_flags(request):
         # 2026-09-13 (Codex audit §11): session-replay YALNIZ anonim səhifələrdə;
         # kabinet (PII/qiymət/sənəd) yalnız MICROSOFT_CLARITY_AUTHENTICATED=true
         # ilə izlənir. Şablon (`partials/_microsoft_clarity.html`) bu bayrağa baxır.
+        # 2026-09-25: anonim sorğu səhifələrində (/sorgu/) HEÇ VAXT — session-replay anonim formanı
+        # daxil olmuş tələbənin kimliyi ilə yan-yana yazardı (təhlükəsizlik yoxlaması, info).
         "microsoft_clarity_enabled": bool(getattr(settings, "MICROSOFT_CLARITY_PROJECT_ID", ""))
+        and not (getattr(request, "path", "") or "").startswith("/sorgu/")
         and (
             not getattr(getattr(request, "user", None), "is_authenticated", False)
             or bool(getattr(settings, "MICROSOFT_CLARITY_AUTHENTICATED", False))

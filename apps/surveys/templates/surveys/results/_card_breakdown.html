@@ -41,7 +41,7 @@ qrafikdə yoxdur, cədvəldə yalnız cavab sayı ilə görünür. Kontekst: `ov
                         <td class="ems-table__num">{{ row.index|floatformat:2|default:"—" }}</td>
                         <td class="ems-table__num">{% if row.recommend is not None %}{{ row.recommend }}%{% else %}—{% endif %}</td>
                         {% endif %}
-                        <td class="ems-table__num">{{ row.n }}</td>
+                        <td class="ems-table__num">{% if row.suppressed %}<span class="svr-muted">—</span>{% else %}{{ row.n }}{% endif %}</td>
                     </tr>
                 {% empty %}
                     <tr><td colspan="5" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>

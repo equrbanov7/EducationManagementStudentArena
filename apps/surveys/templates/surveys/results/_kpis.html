@@ -1,6 +1,7 @@
 {% load i18n %}
 {% comment %}KPI zolağı — `ems-kpi` kartları. Dəyişmə (əvvəlki dövrlə) ikon + işarə + mətnlə
-verilir, heç vaxt yalnız rənglə deyil. Gizli dəyər «—» + «n < k» qeydi ilə.{% endcomment %}
+verilir, heç vaxt yalnız rənglə deyil. Gizli dəyər «—» + səbəb qeydi ilə. Saylar səbətlə
+(«<5», «5+», «10+»…), iştirak faizi 5-ə yuvarlaq gəlir (`analytics_guard`).{% endcomment %}
 <div class="ems-kpis svr-kpis" role="list" aria-label="{% trans 'Əsas göstəricilər' context 'surveys.results' %}">
     {% for tile in rp.kpis %}
     <div class="ems-kpi svr-kpi" role="listitem">

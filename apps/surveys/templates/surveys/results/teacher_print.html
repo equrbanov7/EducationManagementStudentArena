@@ -32,7 +32,7 @@ Stil/skript XARİCİ fayllardadır (CSP).{% endcomment %}
     {% if error %}
         <div class="ems-state svr-state" role="status">
             <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
-            <p class="ems-state__title">{% if status == 403 %}{% trans "Bu məlumata baxmaq üçün icazəniz yoxdur." context "surveys.results" %}{% else %}{% trans "Seçilmiş filtrlərdə bu müəllim üçün cavab yoxdur və ya o, sizin əhatənizdə deyil." context "surveys.results" %}{% endif %}</p>
+            <p class="ems-state__title">{{ message }}</p>
         </div>
     {% else %}
         <p class="svr-print__confidential">{% trans "Məxfi — anonim sorğunun aqreqat nəticələri; yalnız xidməti istifadə üçün." context "surveys.results" %}</p>

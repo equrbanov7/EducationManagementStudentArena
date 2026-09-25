@@ -76,10 +76,6 @@
                         callbacks: {
                             label: function (ctx) {
                                 return ctx.dataset.label + ": " + C.fmt(ctx.parsed.x);
-                            },
-                            afterBody: function (items) {
-                                var n = block.n ? block.n[items[0].dataIndex] : null;
-                                return n ? t.i18nN + ": " + n : "";
                             }
                         }
                     }
@@ -92,8 +88,8 @@
         if (!block || !block.labels || !block.labels.length) {
             return;
         }
+        // Yalnız tam faizlər gəlir (xam say sızmasın — analytics_guard).
         var rows = block.pct || [];
-        var counts = block.counts || [];
         var scale = block.scale || ["1", "2", "3", "4", "5"];
         function share(index) {
             return rows.map(function (row) {
@@ -186,8 +182,7 @@
                             label: function (ctx) {
                                 var score = ctx.dataset.svrScore;
                                 var pct = (rows[ctx.dataIndex] || [])[score - 1] || 0;
-                                var count = (counts[ctx.dataIndex] || [])[score - 1] || 0;
-                                return score + " — " + ctx.dataset.label + ": " + C.fmt(pct, 0) + "% (" + count + ")";
+                                return score + " — " + ctx.dataset.label + ": " + C.fmt(pct, 0) + "%";
                             }
                         }
                     }
@@ -206,8 +201,8 @@
                 labels: block.scores.map(String),
                 datasets: [
                     {
-                        label: t.i18nN,
-                        data: block.counts,
+                        label: t.i18nShare,
+                        data: block.pct,
                         backgroundColor: pal.c1,
                         hoverBackgroundColor: pal.c1,
                         borderRadius: 4,
@@ -219,7 +214,15 @@
             options: C.base(pal, {
                 scales: {
                     x: C.axis(pal, { grid: { display: false }, title: { display: true, text: t.i18nScore, color: pal.axis } }),
-                    y: C.axis(pal, { beginAtZero: true, ticks: { precision: 0 } })
+                    y: C.axis(pal, {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            callback: function (value) {
+                                return value + "%";
+                            }
+                        }
+                    })
                 },
                 plugins: {
                     tooltip: {
@@ -228,7 +231,7 @@
                                 return t.i18nScore + ": " + items[0].label;
                             },
                             label: function (ctx) {
-                                return t.i18nN + ": " + ctx.parsed.y + " (" + C.fmt((block.pct || [])[ctx.dataIndex], 1) + "%)";
+                                return t.i18nShare + ": " + C.fmt(ctx.parsed.y, 0) + "%";
                             }
                         }
                     }
@@ -273,8 +276,11 @@
                         callbacks: {
                             label: function (ctx) {
                                 var value = ctx.parsed.y;
-                                var n = ctx.dataset.svrN[ctx.dataIndex] || 0;
-                                return ctx.dataset.label + ": " + (C.isNum(value) ? C.fmt(value) : t.i18nHidden) + " (n=" + n + ")";
+                                var n = ctx.dataset.svrN[ctx.dataIndex];
+                                if (!C.isNum(value)) {
+                                    return ctx.dataset.label + ": " + t.i18nHidden;
+                                }
+                                return ctx.dataset.label + ": " + C.fmt(value) + (n ? " (n: " + n + ")" : "");
                             }
                         }
                     }

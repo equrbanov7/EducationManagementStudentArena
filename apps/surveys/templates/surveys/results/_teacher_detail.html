@@ -7,7 +7,7 @@ tarixsiz, identifikatorsuz, təsadüfi sıra). Qrafik məlumatı `svr-detail-dat
     <header class="svr-detail__head">
         <p class="svr-detail__eyebrow">{% trans "Müəllim kartı" context "surveys.results" %}</p>
         <h3 class="svr-detail__name">{{ teacher.name }}</h3>
-        <p class="svr-detail__meta">{% if teacher.department %}{{ teacher.department }} · {% endif %}{{ period_label }} · {% blocktrans trimmed with n=teacher.n context "surveys.results" %}{{ n }} cavab{% endblocktrans %}</p>
+        <p class="svr-detail__meta">{% if teacher.department %}{{ teacher.department }} · {% endif %}{{ period_label }}{% if teacher.n %} · {% blocktrans trimmed with n=teacher.n context "surveys.results" %}{{ n }} cavab{% endblocktrans %}{% endif %}</p>
         {% if narrowed %}<p class="svr-detail__note">{% trans "Fənn/qrup filtri tətbiq olunub — göstəricilər yalnız seçilmiş dəst üzrədir." context "surveys.results" %}</p>{% endif %}
     </header>
     {% if teacher.suppressed %}
@@ -19,7 +19,7 @@ tarixsiz, identifikatorsuz, təsadüfi sıra). Qrafik məlumatı `svr-detail-dat
         {% elif teacher.complement_blocked %}
         <p class="ems-state__title">{% trans "Bu filtr kombinasiyası anonimliyi poza bilər" context "surveys.results" %}</p>
         {% else %}
-        <p class="ems-state__title">{% blocktrans trimmed with n=teacher.n k=teacher.k context "surveys.results" %}Cavab sayı azdır ({{ n }} &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}</p>
+        <p class="ems-state__title">{% blocktrans trimmed with k=teacher.k context "surveys.results" %}Cavab sayı azdır (n &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}</p>
         {% endif %}
     </div>
     {% endif %}
@@ -47,8 +47,7 @@ tarixsiz, identifikatorsuz, təsadüfi sıra). Qrafik məlumatı `svr-detail-dat
         </div>
         <div class="svr-stat" role="listitem">
             <span class="svr-stat__label">{% trans "Cavab faizi" context "surveys.results" %}</span>
-            <span class="svr-stat__value">{% if kpis.rate is not None %}{{ kpis.rate }}%{% else %}—{% endif %}</span>
-            <span class="svr-stat__note">{{ kpis.receipts }} / {{ kpis.expected }}</span>
+            <span class="svr-stat__value">{% if kpis.rate is not None %}≈ {{ kpis.rate }}%{% else %}—{% endif %}</span>
         </div>
     </div>
     {{ chart|json_script:"svr-detail-data" }}
