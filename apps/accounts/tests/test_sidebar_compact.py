@@ -222,7 +222,7 @@ class CompactTreeTemplateContractTest(SimpleTestCase):
 
     def test_item_links_keep_the_qa_crawler_attribute_order(self):
         """`scripts/qa_live/http_session.py`: `<a href=…` İLK atribut, `data-section` `class`-dan əvvəl."""
-        for path in sorted((SIDEBAR_DIR / "items").glob("*.html")) + [SIDEBAR_DIR / "_group_account.html"]:
+        for path in sorted((SIDEBAR_DIR / "items").glob("*.html")):
             source = _source(path.relative_to(SIDEBAR_DIR).as_posix())
             for tag in re.findall(r"<a\b[^>]*>", source, re.S):
                 with self.subTest(item=path.name, tag=tag[:60]):
@@ -347,32 +347,35 @@ class SidebarLayoutRenderTest(TestCase):
             self.assertIn(marker, aside)
         self._assert_nothing_lost(response, aside)
 
-    def test_footer_has_the_account_block_and_no_language_dropdown(self):
-        for user, initials, name in (
-            (self.student, "AM", "Aysel Məmmədova"),
-            (self.teacher, "EQ", "Elvin Qurbanov"),
-        ):
+    def test_account_actions_live_in_the_header_menu_not_the_sidebar(self):
+        """Sahib 2026-09-25: hesab bloku sidebar-dan header-in istifadəçi menyusuna köçdü."""
+        for user in (self.student, self.teacher):
             with self.subTest(user=user.username):
                 html = self._get(user).content.decode()
                 aside = _aside(html)
-                self.assertIn('class="sidebar-footer"', aside)
-                self.assertRegex(aside, rf'sidebar-account__avatar" aria-hidden="true">{initials}<')
-                self.assertIn(f'<span class="sidebar-account__name">{name}</span>', aside)
-                self.assertRegex(aside, r'<span class="sidebar-account__role">[^<\s][^<]*</span>')
+                self.assertNotIn("sidebar-footer", aside)
+                self.assertNotIn("sidebar-account", aside)
                 self.assertNotIn("language-switcher", aside)
-                # Dil seçicisi navbar-da qalır — masaüstü VƏ mobil şkaf.
                 self.assertIn("language-switcher--navbar", html)
                 self.assertIn("language-switcher--mobile", html)
+                menu = html[html.index('<div class="blog-header__user-menu">') :]
+                menu = menu[: menu.index("</form>")]
                 for section in ("edit-profile", "change-password"):
-                    self.assertIn(f'data-section="{section}"', aside)
+                    self.assertNotIn(f'data-section="{section}"', aside)
+                    self.assertIn(f'href="{reverse("accounts:profile")}?section={section}"', menu)
+                    # mobil şkafda da var
+                    self.assertEqual(html.count(f'?section={section}"'), 2)
 
     def test_logout_is_a_post_form_with_csrf(self):
-        aside = _aside(self._get(self.student).content.decode())
-        match = re.search(r'<form method="post" action="([^"]+)" class="sidebar-logout-form">(.*?)</form>', aside, re.S)
+        html = self._get(self.student).content.decode()
+        menu = html[html.index('<div class="blog-header__user-menu">') :]
+        match = re.search(
+            r'<form method="post" action="([^"]+)" class="blog-header__user-menu-form">(.*?)</form>', menu, re.S
+        )
         self.assertIsNotNone(match)
         self.assertEqual(match.group(1), reverse("accounts:logout"))
         self.assertIn('name="csrfmiddlewaretoken"', match.group(2))
-        self.assertRegex(match.group(2), r'<button type="submit" class="[^"]*\bsidebar-menu-link--logout\b')
+        self.assertIn("blog-header__user-menu-item--danger", match.group(2))
 
     def test_active_item_is_marked_in_the_flat_nav(self):
         aside = _aside(self._get(self.student, section="notifications").content.decode())
@@ -391,6 +394,5 @@ class SidebarLayoutRenderTest(TestCase):
         aside = _aside(response.content.decode())
         self._assert_flat(aside, "teacher")
         self.assertRegex(aside, r'data-section="question-submissions"[^>]*class="[^"]*\bactive\b')
-        self.assertIn('<span class="sidebar-account__name">Elvin Qurbanov</span>', aside)
-        self.assertRegex(aside, r'<span class="sidebar-account__role">[^<\s][^<]*</span>')
+        self.assertNotIn("sidebar-account", aside)
         self.assertIn("accounts/js/profile/sidebar_nav.js", response.content.decode())
