@@ -25,6 +25,7 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts.services import people
 from apps.accounts.services.rim.policy import RimAccessError
+from core.search_text import tolerant_q
 
 logger = logging.getLogger(__name__)
 
@@ -65,9 +66,10 @@ def people_academic_groups(request):
     actor = people.resolve_actor(request)
     groups = people.scoped_groups_qs(actor, request=request)
 
-    query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]
-    if query:
-        groups = groups.filter(name__icontains=query)
+    # Qrup adı kod kimidir: «234king», «234k ing», «234-K-ing» → «234 K ing».
+    search = tolerant_q((request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH], ("name",), compact=True)
+    if search is not None:
+        groups = groups.filter(search)
     exclude = (request.GET.get("exclude") or "").strip()
     if exclude:
         groups = groups.exclude(pk=exclude)

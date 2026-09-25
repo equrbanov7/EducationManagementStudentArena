@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 
 from apps.registrar.public import schedule_grid, schedule_manage
+from core.search_text import tolerant_match
 
 from . import access, availability
 
@@ -20,7 +21,6 @@ def teacher_rows(actor, organization, period, *, query="") -> list:
     """Müəllim siyahısı: ad, açılış sayı, əlçatanlıq xülasəsi (sorğu sayı sabitdir)."""
     ids = access.scoped_teacher_ids(actor, organization, period)
     users = get_user_model().objects.filter(pk__in=ids).order_by("first_name", "last_name", "username")
-    words = [word for word in str(query or "").casefold().split() if word]
     offerings = schedule_manage.scoped_offerings(actor, organization, period=period)
     counts = dict(
         offerings.filter(instructor_id__in=ids)
@@ -36,7 +36,7 @@ def teacher_rows(actor, organization, period, *, query="") -> list:
     out = []
     for user in users:
         name = _name(user)
-        if words and not all(word in f"{name} {user.username}".casefold() for word in words):
+        if not tolerant_match(query, name, user.username):
             continue
         out.append(
             {

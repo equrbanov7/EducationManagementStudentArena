@@ -15,6 +15,7 @@ from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.exams.public import ATTEMPT_FINISHED_STATUSES, student_final_exam_context
 from apps.labs.models import Lab
 from apps.projects.models import Project
+from core.search_text import tolerant_match
 
 from .._helpers import (
     REVIEW_EDIT_WINDOW,
@@ -38,7 +39,6 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     selected_filter = filter_type if filter_type is not None else request.GET.get("assigned_type")
     filter_type = _normalize_assigned_tasks_filter(selected_filter)
     search_query = (search if search is not None else request.GET.get("assigned_search", "")).strip()
-    search_token = search_query.lower()
     now = timezone.now()
 
     assigned_courses_qs = _assigned_courses_queryset(request, user).select_related("owner").order_by("-created_at")
@@ -60,12 +60,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     counts = {"exams": 0, "courses": 0, "assignments": 0, "labs": 0, "independent": 0}
 
     def matches_search(*values):
-        if not search_token:
-            return True
-        for value in values:
-            if search_token in (value or "").lower():
-                return True
-        return False
+        # Dözümlü (az/ing hərfləri, tokenlər VƏ) — boş sorğu → True.
+        return tolerant_match(search_query, *values)
 
     def append_item(
         *,

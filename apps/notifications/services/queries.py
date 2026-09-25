@@ -2,9 +2,8 @@
 Notification query helpers.
 """
 
-from django.db.models import Q
-
 from apps.notifications.models import InAppNotification
+from core.search_text import tolerant_q
 
 
 def get_user_notifications(*, user, filter_by: str = "all", notification_type: str = "", search_query: str = ""):
@@ -37,8 +36,8 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
     if notification_type:
         qs = qs.filter(notification_type=notification_type)
 
-    normalized_search_query = " ".join(str(search_query or "").split()).strip()
-    if normalized_search_query:
-        qs = qs.filter(Q(title__icontains=normalized_search_query) | Q(message__icontains=normalized_search_query))
+    search_q = tolerant_q(search_query, ("title", "message"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
 
     return qs

@@ -33,6 +33,7 @@ from django.utils import timezone
 
 from apps.organizations.models import Membership, OrgUnit
 from core.rls import bypass_rls
+from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
 from ....models import ProfileRole, UserProfile
@@ -506,14 +507,9 @@ def build_members_registry(
 
         matching_ids = member_index.matching_user_ids(kind=kind, role=role, unit_ids=unit_ids)
         users = User.objects.filter(id__in=matching_ids).select_related("profile")
-        if search:
-            users = users.filter(
-                Q(first_name__icontains=search)
-                | Q(last_name__icontains=search)
-                | Q(username__icontains=search)
-                | Q(email__icontains=search)
-                | Q(profile__staff_position__icontains=search)
-            )
+        search_q = tolerant_q(search, ("first_name", "last_name", "username", "email", "profile__staff_position"))
+        if search_q is not None:
+            users = users.filter(search_q)
         users = users.annotate(
             joined_at=Max(
                 "memberships__created_at",

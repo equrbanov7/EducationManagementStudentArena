@@ -16,8 +16,10 @@ from datetime import date
 
 from django.db.models import Q
 
+from core.search_text import tokens_of, tolerant_q
+
 from ...models import UserProfile
-from .constants import AGE_UNKNOWN, GENDER_BUCKETS, MAX_PAGE_SIZE, MAX_QUERY_LENGTH, MAX_QUERY_TOKENS
+from .constants import AGE_UNKNOWN, GENDER_BUCKETS, MAX_PAGE_SIZE, MAX_QUERY_LENGTH
 
 STATUS_ALL = "all"
 STATUS_ACTIVE = "active"
@@ -38,6 +40,9 @@ SEARCH_FIELDS = (
     "profile__patronymic",
     "profile__fin",
 )
+
+#: Kod kimi sahələr (FİN) — ``compact`` rejimdə yoxlanır (ayırıcı/boşluğa dözümlü).
+CODE_SEARCH_FIELDS = ("profile__fin",)
 
 MAX_AGE = 120
 
@@ -215,7 +220,10 @@ def parse_filters(params, *, sort_options, default_page_size) -> PeopleFilters:
 
 
 def search_q(query: str, prefix: str, *, extra=None) -> Q:
-    """AND-of-ORs axtarış filtri (RİM `search.py` ilə eyni semantika).
+    """AND-of-ORs axtarış filtri (RİM `search.py` ilə eyni semantika) — az/ing hərflərinə dözümlü.
+
+    Uyğunluq ``core.search_text.tolerant_q`` ilə gedir: «Aliyev» «Əliyev»i,
+    «Shahzad» «Şahzad»ı tapır; FİN kod rejimindədir (``CODE_SEARCH_FIELDS``).
 
     «Əliyev Elvin» → hər söz ad/soyad/ata adı/username/email/FİN sahələrindən
     HƏR HANSI BİRİNƏ uyğun gəlməlidir; söz sırası əhəmiyyətsizdir.
@@ -227,12 +235,12 @@ def search_q(query: str, prefix: str, *, extra=None) -> Q:
     ``SEARCH_FIELDS``-ə yazıla bilməz. Token-başına OR olur ki, «Aysel 050401»
     kimi qarışıq sorğu da işləsin.
     """
-    tokens = [token for token in _clean_text(query, MAX_QUERY_LENGTH).split(" ") if token][:MAX_QUERY_TOKENS]
+    plain = tuple(f"{prefix}{field}" for field in SEARCH_FIELDS if field not in CODE_SEARCH_FIELDS)
+    coded = tuple(f"{prefix}{field}" for field in CODE_SEARCH_FIELDS)
     combined = Q()
-    for token in tokens:
-        token_filter = Q()
-        for field_name in SEARCH_FIELDS:
-            token_filter |= Q(**{f"{prefix}{field_name}__icontains": token})
+    # Hər token AYRICA: ``extra`` token-başına OR-lanır (qarışıq «Aysel 050401» sorğusu).
+    for token in tokens_of(_clean_text(query, MAX_QUERY_LENGTH)):
+        token_filter = tolerant_q(token, plain, compact_fields=coded) or Q()
         if extra is not None:
             token_filter |= extra(token)
         combined &= token_filter
@@ -312,6 +320,7 @@ def account_status_of(user) -> str:
 
 __all__ = [
     "ALLOWED_STATUSES",
+    "CODE_SEARCH_FIELDS",
     "MAX_AGE",
     "SEARCH_FIELDS",
     "STATUS_ACTIVE",

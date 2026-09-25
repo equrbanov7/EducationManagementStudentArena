@@ -101,7 +101,7 @@ class GroupPagesLazyCandidatesTest(TestCase):
         self.assertContains(response, reverse("exams:teacher_update_group", args=[0]))
         self.assertContains(response, reverse("exams:teacher_delete_group", args=[self.group.id]))
         self.assertContains(response, reverse("exams:create_student_group"))
-        self.assertContains(response, "exams/js/teacher_group_list.js?v=20260914-1")
+        self.assertContains(response, "exams/js/teacher_group_list.js?v=20260926-search")
 
     def test_create_page_html_and_queries_independent_of_student_count(self):
         response = self._assert_page_independent_of_student_count("exams:create_student_group")
@@ -110,7 +110,7 @@ class GroupPagesLazyCandidatesTest(TestCase):
         self.assertContains(response, "data-csg-checklist")
         # Sayğaclar COUNT sorğusundan gəlir — 150 tələbə göstərilir.
         self.assertContains(response, "<strong>150</strong>")
-        self.assertContains(response, "exams/js/create_student_group.js?v=20260914-1")
+        self.assertContains(response, "exams/js/create_student_group.js?v=20260926-search")
 
     def test_candidates_endpoint_still_returns_every_student_option(self):
         """Lazy endpoint məzmunu dəyişmir: bütün tələbə/müəllim `<option>`-ları oradadır."""

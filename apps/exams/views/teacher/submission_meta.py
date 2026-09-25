@@ -10,6 +10,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import EXAM_LANGUAGE_VALUES, QUESTION_EXAM_KIND_VALUES
 from apps.exams.models import StudentGroup
 from apps.exams.services.question_submission import analyze_submission_text
+from core.search_text import tolerant_match
 
 
 def _normalize_language(raw_value):
@@ -167,8 +168,9 @@ def snapshot_flag_counts(questions):
 
 def filter_snapshot_questions(questions, *, flag="", query=""):
     """Snapshot suallarını bayraq (error/warning/clean) və mətn axtarışı ilə
-    süz. Axtarış sual mətnində və variantlarda böyük/kiçik hərfsiz işləyir."""
-    query = (query or "").strip().lower()
+    süz. Axtarış sual mətnində və variantlarda böyük/kiçik hərfsiz, az/ing hərfə
+    dözümlü və tokenli işləyir (``tolerant_match``, sahib 2026-09-26)."""
+    query = (query or "").strip()
     result = []
     for question in questions or []:
         if flag == "error" and not question.get("has_error"):
@@ -178,11 +180,9 @@ def filter_snapshot_questions(questions, *, flag="", query=""):
         if flag == "clean" and (question.get("has_error") or question.get("has_warning")):
             continue
         if query:
-            haystack = str(question.get("text") or "").lower()
             options = question.get("options") or {}
-            if isinstance(options, dict):
-                haystack += " " + " ".join(str(value).lower() for value in options.values())
-            if query not in haystack:
+            option_texts = [str(value) for value in options.values()] if isinstance(options, dict) else []
+            if not tolerant_match(query, str(question.get("text") or ""), *option_texts):
                 continue
         result.append(question)
     return result

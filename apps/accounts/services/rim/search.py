@@ -17,6 +17,8 @@ from __future__ import annotations
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+from core.search_text import MAX_TOKENS, tolerant_q
+
 from ...models import UserProfile
 from .policy import PERM_SEARCH, RimActor, manageable_users_queryset, require_permission
 
@@ -31,9 +33,11 @@ _SEARCH_FIELDS = (
     "profile__patronymic",
     "profile__fin",
 )
+#: Kod kimi sahələr — ayırıcı/boşluğa dözümlü (kod rejimi).
+_CODE_FIELDS = ("profile__fin",)
 
-#: Bir sorğuda nəzərə alınan maksimum söz (DoS qoruması — hər söz ayrı JOIN şərtidir).
-MAX_QUERY_TOKENS = 6
+#: Bir sorğuda nəzərə alınan maksimum söz (DoS qoruması) — kanonik ``core.search_text.MAX_TOKENS``.
+MAX_QUERY_TOKENS = MAX_TOKENS
 MAX_QUERY_LENGTH = 120
 DEFAULT_PAGE_SIZE = 20
 MAX_PAGE_SIZE = 50
@@ -55,15 +59,13 @@ def normalize_query(raw_query) -> str:
 
 
 def build_search_filter(query: str) -> Q:
-    """Sorğu sözlərindən AND-of-ORs filtri qurur. Boş sorğu → boş Q (filtrsiz)."""
-    tokens = [token for token in normalize_query(query).split(" ") if token][:MAX_QUERY_TOKENS]
-    combined = Q()
-    for token in tokens:
-        token_filter = Q()
-        for field_name in _SEARCH_FIELDS:
-            token_filter |= Q(**{f"{field_name}__icontains": token})
-        combined &= token_filter
-    return combined
+    """Sorğu sözlərindən AND-of-ORs filtri qurur. Boş sorğu → boş Q (filtrsiz).
+
+    Az/ing hərflərinə dözümlü (``core.search_text.tolerant_q``): «Aliyev» «Əliyev»i,
+    «Sahzad» «Şahzad»ı tapır; FİN kod rejimindədir. Söz həddi kanonik ``MAX_TOKENS``-dir.
+    """
+    plain = tuple(field for field in _SEARCH_FIELDS if field not in _CODE_FIELDS)
+    return tolerant_q(normalize_query(query), plain, compact_fields=_CODE_FIELDS) or Q()
 
 
 def apply_status_filter(queryset, status: str):

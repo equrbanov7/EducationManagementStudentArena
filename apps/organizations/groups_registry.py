@@ -26,12 +26,13 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 
 from .models import OrgUnit
 from .scoping import get_permission_scope, scope_org_units
@@ -210,8 +211,10 @@ def build_groups_registry(request, organization) -> dict:
     queryset = queryset.filter(unit_type="group").select_related("parent", "parent__parent", "parent__parent__parent")
 
     total_count = queryset.count()
-    if search:
-        queryset = queryset.filter(Q(name__icontains=search) | Q(code__icontains=search))
+    # Dözümlü kod axtarışı (sahib 2026-09-26): «234king», «234k ing», «234-K-ing» → «234 K ing».
+    search_q = tolerant_q(search, ("name", "code"), compact=True)
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
     if specialty:
         queryset = queryset.filter(parent_id=specialty)
     if faculty:

@@ -16,6 +16,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from core.search_text import tolerant_q
 from core.staff_position import resolve_position_label
 
 from ..models import ProfileRole
@@ -173,16 +174,14 @@ def build_superadmin_user_management_context(request, *, base_url=None, include_
 
     users_qs = User.objects.select_related("profile", "profile__organization").all()
 
-    if search_query:
-        users_qs = users_qs.filter(
-            Q(username__icontains=search_query)
-            | Q(email__icontains=search_query)
-            | Q(first_name__icontains=search_query)
-            | Q(last_name__icontains=search_query)
-            | Q(profile__organization__name__icontains=search_query)
-            | Q(profile__department__icontains=search_query)
-            | Q(profile__student_group_number__icontains=search_query)
-        )
+    # Az/ing dözümlü, tokenləşmiş axtarış; qrup nömrəsi kod rejimində («234king» → «234 K ing»).
+    user_search = tolerant_q(
+        search_query,
+        ("username", "email", "first_name", "last_name", "profile__organization__name", "profile__department"),
+        compact_fields=("profile__student_group_number",),
+    )
+    if user_search is not None:
+        users_qs = users_qs.filter(user_search)
 
     if status_filter == USER_STATUS_ACTIVE:
         users_qs = users_qs.filter(is_active=True)
@@ -202,11 +201,13 @@ def build_superadmin_user_management_context(request, *, base_url=None, include_
     elif organization_filter:
         users_qs = users_qs.filter(profile__organization_id=organization_filter)
 
-    if group_filter:
-        users_qs = users_qs.filter(profile__student_group_number__icontains=group_filter)
+    group_q = tolerant_q(group_filter, ("profile__student_group_number",), compact=True)
+    if group_q is not None:
+        users_qs = users_qs.filter(group_q)
 
-    if department_filter:
-        users_qs = users_qs.filter(profile__department__icontains=department_filter)
+    department_q = tolerant_q(department_filter, ("profile__department",))
+    if department_q is not None:
+        users_qs = users_qs.filter(department_q)
 
     if sort_filter == USER_SORT_OLDEST:
         users_qs = users_qs.order_by("date_joined", "username")

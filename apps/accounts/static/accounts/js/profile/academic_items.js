@@ -8,6 +8,18 @@
 (function () {
     "use strict";
 
+    // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
+    // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
+    function searchMatcher(query) {
+        var q = String(query || "").trim();
+        var m = window.EMSSearch ? window.EMSSearch.matcher(q) : null;
+        var low = q.toLowerCase();
+        return function (text) {
+            var t = String(text || "").replace(/\u0307/g, "");
+            return m ? m(t) : !low || t.toLowerCase().indexOf(low) !== -1;
+        };
+    }
+
     function getManager() {
         return document.getElementById("academicItemsManager");
     }
@@ -78,8 +90,8 @@
         return document.getElementById("academicItemsManagerList");
     }
 
-    function itemMatches(item, query) {
-        return !query || item.textContent.toLowerCase().indexOf(query) !== -1;
+    function itemMatches(item, match) {
+        return match(item.textContent);
     }
 
     function refreshListView() {
@@ -88,13 +100,14 @@
             return;
         }
         var searchInput = document.getElementById("academicItemsSearch");
-        var query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+        var query = searchInput ? searchInput.value.trim() : "";
+        var match = searchMatcher(query);
         var limit = parseInt(host.dataset.collapseLimit || "5", 10);
 
         host.querySelectorAll(".academic-items-group").forEach(function (group) {
             var items = Array.prototype.slice.call(group.querySelectorAll(".academic-item"));
             var matched = items.filter(function (item) {
-                var isMatch = itemMatches(item, query);
+                var isMatch = itemMatches(item, match);
                 item.hidden = !isMatch;
                 return isMatch;
             });

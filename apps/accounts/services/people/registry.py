@@ -28,6 +28,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 
 from core.program_codes import program_display_label
+from core.search_text import tolerant_q
 
 from . import filters as people_filters
 from .academic import STATUS_LABELS, STATUS_TONES, _course_label, _current_period
@@ -49,6 +50,14 @@ REGISTRY_SORT_OPTIONS = {
     "status": ("status", "student__last_name"),
     "-status": ("-status", "student__last_name"),
 }
+
+#: Reyestr axtarışının KOD sahələri (sətirdə göstərilən qrup adı da daxil).
+_REGISTRY_CODE_FIELDS = (
+    "student__profile__institutional_identifier",
+    "atis_id",
+    "student__profile__id_document_number",
+    "group__name",
+)
 
 #: «Xüsusi statuslu» = qeydiyyatlıdan FƏRQLİ hər status.
 SPECIAL_STATUSES = ("academic_leave", "expelled", "graduated")
@@ -115,14 +124,15 @@ def parse_registry_filters(request) -> dict:
 
 
 def _apply_filters(records, values, *, organization):
-    search = people_filters.search_q(values["search"], prefix="student__")
+    # Token-başına: ad/soyad/… (az/ing dözümlü) VƏ YA kod sahələri (tələbə nömrəsi,
+    # ATİS id, vəsiqə nömrəsi, qrup adı — kod rejimində: «234king» → «234 K ing»).
+    search = people_filters.search_q(
+        values["search"],
+        prefix="student__",
+        extra=lambda token: tolerant_q(token, (), compact_fields=_REGISTRY_CODE_FIELDS) or Q(),
+    )
     if search:
-        records = records.filter(
-            search
-            | Q(student__profile__institutional_identifier__icontains=values["search"])
-            | Q(atis_id__icontains=values["search"])
-            | Q(student__profile__id_document_number__icontains=values["search"])
-        )
+        records = records.filter(search)
     if values["program"]:
         records = records.filter(program_id=values["program"])
     if values["group"]:

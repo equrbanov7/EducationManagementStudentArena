@@ -3,7 +3,6 @@
 from django.apps import apps as django_apps
 from django.contrib import messages
 from django.db import IntegrityError, transaction
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -11,6 +10,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
+from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
 from ..models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -125,11 +125,9 @@ def head_candidate_memberships(organization, *, search: str = ""):
         .select_related("user", "role")
         .order_by("-role__level", "user__first_name", "user__username")
     )
-    term = (search or "").strip()
-    if term:
-        memberships = memberships.filter(
-            Q(user__first_name__icontains=term) | Q(user__last_name__icontains=term) | Q(user__username__icontains=term)
-        )
+    term_q = tolerant_q(search, ("user__first_name", "user__last_name", "user__username"))
+    if term_q is not None:
+        memberships = memberships.filter(term_q)
     return memberships
 
 

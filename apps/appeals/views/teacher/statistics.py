@@ -31,6 +31,7 @@ from apps.exams.public import (
     supervisor_org_or_403,
     unit_row_labels,
 )
+from core.search_text import tolerant_q
 
 from ...constants import APPEAL_STATUS_CHOICES, APPEAL_STATUS_VALUES
 from ...models import Appeal
@@ -114,13 +115,9 @@ def _filtered_appeals(request, organization):
     )
 
     q = (request.GET.get("q") or "").strip()
-    if q:
-        qs = qs.filter(
-            Q(student__first_name__icontains=q)
-            | Q(student__last_name__icontains=q)
-            | Q(student__username__icontains=q)
-            | Q(exam__title__icontains=q)
-        )
+    search_q = tolerant_q(q, ("student__first_name", "student__last_name", "student__username", "exam__title"))
+    if search_q is not None:
+        qs = qs.filter(search_q)
 
     subject_ids = _csv_uuids(request.GET.get("subjects"))
     if subject_ids:

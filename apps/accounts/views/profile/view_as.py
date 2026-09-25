@@ -7,7 +7,6 @@ Bütün icazə məntiqi ``services.view_as``-dadır; burada yalnız HTTP qatı v
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -15,6 +14,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
 from core.rls import bypass_rls
+from core.search_text import tolerant_q
 
 from ...models import ProfileRole
 from ...services.view_as import (
@@ -129,8 +129,9 @@ def view_as_search(request):
 
         with bypass_rls():
             org_qs = Organization.objects.filter(is_active=True, status="active")
-            if q:
-                org_qs = org_qs.filter(Q(name__icontains=q) | Q(slug__icontains=q))
+            org_q = tolerant_q(q, ("name",), compact_fields=("slug",))
+            if org_q is not None:
+                org_qs = org_qs.filter(org_q)
             orgs = list(org_qs.order_by("name").values("id", "name", "org_type")[:30])
         return JsonResponse({"results": orgs})
 

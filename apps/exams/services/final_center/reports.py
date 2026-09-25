@@ -8,6 +8,7 @@ qatında paginator-a verilir (yaddaşa tam yüklənmir).
 from django.db.models import Q
 
 from apps.exams.models import ExamRoomSession, FinalExamTicket
+from core.search_text import tolerant_q
 
 from .monitor import session_list_annotations
 
@@ -38,8 +39,9 @@ def filter_sessions(organization, params):
     if date_to:
         qs = qs.filter(scheduled_start__date__lte=date_to)
     query = (params.get("q") or "").strip()
-    if query:
-        qs = qs.filter(Q(room__name__icontains=query) | Q(room__code__icontains=query))
+    room_q = tolerant_q(query, ("room__name", "room__code"), compact=True)
+    if room_q is not None:
+        qs = qs.filter(room_q)
     return session_list_annotations(qs)
 
 
@@ -98,15 +100,14 @@ def filter_tickets(organization, params):
             | Q(entry_validated_at__isnull=True, session__scheduled_start__date__lte=date_to)
         )
     query = (params.get("q") or "").strip()
-    if query:
-        qs = qs.filter(
-            Q(student__username__icontains=query)
-            | Q(student__first_name__icontains=query)
-            | Q(student__last_name__icontains=query)
-            | Q(exam__title__icontains=query)
-            | Q(session__room__name__icontains=query)
-            | Q(session__room__code__icontains=query)
-        )
+    # Ad/imtahan — az/ing hərfə dözümlü; zal adı/kodu — ayırıcıya da dözümlü (sahib 2026-09-26).
+    search_q = tolerant_q(
+        query,
+        ("student__username", "student__first_name", "student__last_name", "exam__title"),
+        compact_fields=("session__room__name", "session__room__code"),
+    )
+    if search_q is not None:
+        qs = qs.filter(search_q)
     return qs
 
 

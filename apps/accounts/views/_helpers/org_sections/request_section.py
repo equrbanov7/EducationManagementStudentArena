@@ -1,12 +1,12 @@
 """student-org request section builder."""
 
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.urls import reverse
 
 from apps.notifications.models import StudentOrganizationRequest, StudentOrganizationRequestStatus
 from core.constants import OrganizationType
 from core.rls import bypass_rls
+from core.search_text import tolerant_q
 
 from ....models import ProfileRole
 from ..constants import STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH, STUDENT_PENDING_INVITE_TITLE
@@ -128,14 +128,13 @@ def _build_student_org_request_section(*, request, profile):
     )
     if org_type_filter:
         organizations = organizations.filter(org_type=org_type_filter)
-    if search_query:
-        organizations = organizations.filter(
-            Q(name__icontains=search_query)
-            | Q(country__icontains=search_query)
-            | Q(slug__icontains=search_query)
-            | Q(organization_identifier__icontains=search_query)
-            | Q(license_identifier__icontains=search_query)
-        )
+    organizations_q = tolerant_q(
+        search_query,
+        ("name", "country"),
+        compact_fields=("slug", "organization_identifier", "license_identifier"),
+    )
+    if organizations_q is not None:
+        organizations = organizations.filter(organizations_q)
     organizations = organizations.order_by("name")
 
     page_param = "student_org_request_page"

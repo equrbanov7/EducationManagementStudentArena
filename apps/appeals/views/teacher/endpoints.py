@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -15,6 +15,7 @@ from django.utils.translation import pgettext
 from apps.exams.public import is_exam_center_user
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.permissions import is_superadmin_user
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
 from ...constants import (
@@ -124,14 +125,12 @@ def build_manage_appeals_context(request, *, list_action, section=""):
         appeals = appeals.filter(items__appeal_type=type_filter).distinct()
 
     search_query = (request.GET.get("q") or "").strip()
-    if search_query:
-        appeals = appeals.filter(
-            Q(exam__title__icontains=search_query)
-            | Q(student__username__icontains=search_query)
-            | Q(student__email__icontains=search_query)
-            | Q(student__first_name__icontains=search_query)
-            | Q(student__last_name__icontains=search_query)
-        )
+    search_q = tolerant_q(
+        search_query,
+        ("exam__title", "student__username", "student__email", "student__first_name", "student__last_name"),
+    )
+    if search_q is not None:
+        appeals = appeals.filter(search_q)
 
     date_from = parse_date((request.GET.get("date_from") or "").strip())
     if date_from:

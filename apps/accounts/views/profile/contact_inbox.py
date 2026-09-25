@@ -12,7 +12,6 @@ import logging
 
 from django.conf import settings
 from django.contrib import messages as django_messages
-from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -22,6 +21,7 @@ from apps.contact.models import ContactMessage
 from apps.contact.public import send_reply_to_contact
 from apps.trial_exams.models import TrialExamRequest
 from apps.trial_exams.public import send_reply_to_trial_request
+from core.search_text import tolerant_q
 
 logger = logging.getLogger(__name__)
 
@@ -129,20 +129,14 @@ def build_contact_inbox_context(
     contact_qs = ContactMessage.objects.all().select_related("reply_sent_by")
     trial_qs = TrialExamRequest.objects.all().select_related("reply_sent_by", "user")
     search_query = (request.GET.get("q") or "").strip()[:200]
-    if search_query:
-        contact_qs = contact_qs.filter(
-            Q(name__icontains=search_query)
-            | Q(email__icontains=search_query)
-            | Q(message__icontains=search_query)
-            | Q(reply_body__icontains=search_query)
-        )
+    contact_q = tolerant_q(search_query, ("name", "email", "message", "reply_body"))
+    if contact_q is not None:
+        contact_qs = contact_qs.filter(contact_q)
         trial_qs = trial_qs.filter(
-            Q(full_name__icontains=search_query)
-            | Q(email__icontains=search_query)
-            | Q(subject_name__icontains=search_query)
-            | Q(note__icontains=search_query)
-            | Q(original_filename__icontains=search_query)
-            | Q(reply_body__icontains=search_query)
+            tolerant_q(
+                search_query,
+                ("full_name", "email", "subject_name", "note", "original_filename", "reply_body"),
+            )
         )
 
     contact_items = [_contact_item(item) for item in contact_qs.order_by("-created_at")[:CONTACT_LIST_LIMIT]]

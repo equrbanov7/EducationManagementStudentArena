@@ -16,6 +16,7 @@ from apps.exams.domain.unit_assignment import unit_assigned_exams_q
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
 from ._helpers import build_exam_history_url, ensure_student_exam_tenant_context
@@ -367,8 +368,9 @@ def _render_exam_list(
 
     # --- SEARCH (axtarış: başlıq və ya müəllim) ---
     search_query = (request.GET.get("q") or "").strip()
-    if search_query:
-        exams_qs = exams_qs.filter(Q(title__icontains=search_query) | Q(author__username__icontains=search_query))
+    search_q = tolerant_q(search_query, ("title", "author__username"))
+    if search_q is not None:
+        exams_qs = exams_qs.filter(search_q)
 
     # Real görünürlük filtrləri saylardan ƏVVƏL tətbiq olunur ki, tab sayı
     # kliklənəndə boş səhifəyə aparmasın (məs. cəhd limiti bitmiş imtahan).
