@@ -205,7 +205,7 @@ def roster_for_offering(*, offering):
     # tələbə üçün ayrıca — 58 tələbə ≈ 170 sorğu; QA 2026-09-05 P2-5).
     from . import finals_batch
 
-    batch = finals_batch.build(enrollments)
+    batch = finals_batch.build(enrollments, organization=offering.organization)
 
     # Cəhd tarixçəsi də TOPLU oxunur: əvvəl hər sətir üçün ayrıca
     # `attempt_rows_for_enrollment` çağırılırdı (29 tələbəli açılışda ≈ 70 əlavə

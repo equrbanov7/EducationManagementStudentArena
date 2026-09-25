@@ -163,8 +163,14 @@ def get_final_breakdown(offering):
     Qayıb % (buraxılan ÷ plan, 1 onluq) — hamısı artıq oxunmuş datadan, ƏLAVƏ SORĞU YOXDUR.
 
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
-    sütunlar informativdir, cəm mənbəyi dəyişmir."""
-    from apps.registrar import finals_batch, gradebook
+    sütunlar informativdir, cəm mənbəyi dəyişmir.
+
+    MIDTERM REJİMİ (2026/2027-dən, ``standard=True``): sütunlar sillabus standartının DÖRD
+    hissəsidir — Davamiyyət /10 · Aktivlik /10 · Midterm /20 · Sərbəst iş /10 (sətirdə ``parts``,
+    :mod:`apps.registrar.entry_standard`) və «İmtahana qədər bal» = onların cəmi (tavan ilə).
+    Hissələr giriş balının ÖZÜNDƏN gəlir (``entry_parts_for`` — eyni toplu dəst, eyni
+    davamiyyət girişləri), yəni cəm ilə bölgü ayrıla bilməz; keçmiş dövrlər köhnə sütunlarla."""
+    from apps.registrar import finals_batch, gradebook, gradebook_components
     from apps.registrar.models import LessonKind, LessonMark
 
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
@@ -180,7 +186,9 @@ def get_final_breakdown(offering):
             kscore_map[(cs.enrollment_id, cs.component_id)] = cs.score
     marks = LessonMark.objects.filter(enrollment__offering=offering).select_related("lesson")
     per_student: dict = {}
+    entry_marks: dict = {}
     for m in marks:
+        entry_marks.setdefault(m.enrollment_id, []).append(m)
         agg = per_student.setdefault(m.enrollment_id, {"absent": 0, "sem": [], "lab": []})
         if m.status == "absent":
             agg["absent"] += 1
@@ -207,8 +215,11 @@ def get_final_breakdown(offering):
     frozen = exam_eligibility.is_frozen(offering)
     exempt_ids = exam_eligibility.exempt_student_ids(offering.organization, [e.student_id for e in enrollments])
     # Giriş balı üçün komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
-    # 4 sorğu idi — bax :mod:`apps.registrar.finals_batch`).
-    entry_batch = finals_batch.entry_batch(enrollments)
+    # 4 sorğu idi — bax :mod:`apps.registrar.finals_batch`).  Midterm davamiyyəti buraxılış
+    # qərarının EYNİ məxrəci/həddi/istisnası ilə (sorğusuz).
+    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=entry_marks)
+    entry_batch.provide_attendance(hours_map={offering.id: allowed}, limits=row_limits, exempt_ids=exempt_ids)
+    standard = entry_batch.is_midterm(offering)
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
@@ -234,7 +245,11 @@ def get_final_breakdown(offering):
         )
         barred = eligibility["barred"]
         warning = absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
-        entry = gradebook.entry_score_for(e, scheme.entry_score_max, **entry_batch.entry_kwargs(e))
+        entry_kwargs = entry_batch.entry_kwargs(e)
+        parts = gradebook_components.entry_parts_for(e, scheme.entry_score_max, **entry_kwargs) if standard else None
+        entry = (
+            parts.total if parts is not None else gradebook.entry_score_for(e, scheme.entry_score_max, **entry_kwargs)
+        )
         rows.append(
             {
                 "enrollment": e,
@@ -251,6 +266,8 @@ def get_final_breakdown(offering):
                 "selfwork": selfwork_totals.get(e.id, 0),
                 "coursework": works.get(e.id),
                 "entry": entry,
+                # Midterm rejimi: standartın dörd hissəsi (keçmiş dövrdə None).
+                "parts": parts,
                 "entry_pct": (
                     min(100, int(entry / Decimal(scheme.entry_score_max) * 100)) if scheme.entry_score_max else 0
                 ),
@@ -266,6 +283,8 @@ def get_final_breakdown(offering):
         "interim": interim,
         "kolls": kolls,
         "rows": rows,
+        # Giriş balı sillabus standartı ilədir (Midterm rejimi) — şablon dörd hissəli sütunları seçir.
+        "standard": standard,
         "entry_max": scheme.entry_score_max,
         "allowed_absence": allowed_absence,
         "lesson_hours": allowed,  # Auditoriya saatı — plan (buraxılışın kanonik məxrəci)

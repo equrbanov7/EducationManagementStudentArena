@@ -310,7 +310,7 @@ class StudentDashboardContentTest(DashboardContentBase):
         card = self.widget(response, "student-grades")
         by_title = {row["title"]: row for row in card["rows"]}
         self.assertEqual(by_title["Fənn 0"]["interim"], [{"label": "Midterm", "text": "15 / 20", "written": True}])
-        self.assertEqual(by_title["Fənn 0"]["entry"], "15")  # midterm giriş balına cəm kimi düşür
+        self.assertEqual(by_title["Fənn 0"]["entry"], "25")  # davamiyyət 10 + midterm 15
         self.assertEqual(by_title["Fənn 3"]["interim"][0]["text"], "hələ yazılmayıb")
         self.assertEqual(card["stats"][1]["value"], "1 / 5")
         html = self.panel_html("student_many")

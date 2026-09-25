@@ -140,6 +140,12 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     </div>
 
     {# ── Bal bölgüsü (real kompozisiya) ────────────────────────────────────── #}
+    {% if d.standard %}
+    <div class="sjx-balbox">
+        <div class="sjx-balbox-head"><span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score }}/{{ d.entry_score_max }})</span></div>
+        {% include "registrar/partials/_entry_parts.html" with parts=d.standard %}
+    </div>
+    {% else %}
     <div class="sjx-balbox">
         <div class="sjx-balbox-head">
             <span class="sjx-kpi-label">{% trans "BAL BÖLGÜSÜ — İMTAHANA QƏDƏR" context "registrar.journal" %} ({{ d.entry_score|floatformat:0 }}/{{ d.entry_score_max }})</span>
@@ -156,6 +162,8 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <span><i class="sjx-dot sjx-dot--selfwork"></i>{% trans "Sərbəst iş" context "registrar.journal" %} {{ d.parts.selfwork }}</span>
         </div>
     </div>
+
+    {% endif %}
 
     {# ── Dərs tarixçəsi ────────────────────────────────────────────────────── #}
     <div class="sjx-historybox">

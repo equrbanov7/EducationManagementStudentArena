@@ -17,10 +17,10 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db.models import DecimalField, F, Sum
+from django.db.models import Count, DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import exam_eligibility, finals, gradebook
+from apps.registrar import entry_standard, exam_eligibility, finals, gradebook
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -61,14 +61,18 @@ def _scheme_map(offering_ids):
     }
 
 
-def _component_offerings(offering_ids) -> set:
-    """Yalnız GENERIC komponentli offering-lər lesson-cəmi əvəz edir
-    (kollokvium/sərbəst iş ÜSTƏGƏLdir — gradebook.entry_score_for güzgüsü)."""
-    return set(
-        AssessmentComponent.objects.filter(offering_id__in=offering_ids, kind="generic").values_list(
-            "offering_id", flat=True
-        )
-    )
+def _component_offerings(offering_ids) -> tuple[set, set]:
+    """``(GENERIC-li, SELF_WORK-lu)`` offering dəstləri — TƏK sorğu.
+
+    Yalnız GENERIC komponentli offering-lər lesson-cəmi əvəz edir (kollokvium/sərbəst iş
+    ÜSTƏGƏLdir — gradebook.entry_score_for güzgüsü); SELF_WORK komponenti isə Midterm
+    rejimində sərbəst iş hissəsinin sayılıb-sayılmadığını həll edir (``entry_standard``)."""
+    generic: set = set()
+    selfwork: set = set()
+    rows = AssessmentComponent.objects.filter(offering_id__in=offering_ids, kind__in=("generic", "self_work"))
+    for offering_id, kind in rows.values_list("offering_id", "kind").distinct():
+        (generic if kind == "generic" else selfwork).add(offering_id)
+    return generic, selfwork
 
 
 def _capped_component_sum(enrollment_ids, *, kinds):
@@ -90,6 +94,22 @@ def _kollokvium_sum_map(enrollment_ids):
     return _capped_component_sum(enrollment_ids, kinds=["kollokvium"])
 
 
+def _entry_sum_maps(enrollment_ids):
+    """Generic və Midterm cəmləri bir sorğuda; hər bal öz komponent tavanı ilə."""
+    field = DecimalField(max_digits=8, decimal_places=2)
+    capped = Least(F("score"), Cast(F("component__max_score"), field), output_field=field)
+    rows = (
+        ComponentScore.objects.filter(enrollment_id__in=enrollment_ids, component__kind__in=("generic", "kollokvium"))
+        .values("enrollment_id", "component__kind")
+        .annotate(total=Sum(capped))
+    )
+    generic, interim = {}, {}
+    for row in rows:
+        target = generic if row["component__kind"] == "generic" else interim
+        target[row["enrollment_id"]] = row["total"] or Decimal("0")
+    return generic, interim
+
+
 def _selfwork_map(enrollment_ids):
     """enrollment_id → sərbəst iş BALI (≤10) — kanonik qayda :mod:`apps.registrar.selfwork_points`.
 
@@ -105,13 +125,19 @@ def _selfwork_map(enrollment_ids):
     return selfwork_points.selfwork_totals(enrollment_ids)
 
 
-def _lesson_sum_map(enrollment_ids):
+def _lesson_sum_map(enrollment_ids) -> tuple[dict, dict]:
+    """``(cəm, say)`` — balı olan dərs işarələri üzrə, TƏK sorğu (say Midterm aktivlik ortası üçündür)."""
     rows = (
         LessonMark.objects.filter(enrollment_id__in=enrollment_ids, score__isnull=False)
         .values("enrollment_id")
-        .annotate(total=Sum("score"))
+        .annotate(total=Sum("score"), scored=Count("score"))
     )
-    return {r["enrollment_id"]: r["total"] or Decimal("0") for r in rows}
+    sums: dict = {}
+    counts: dict = {}
+    for r in rows:
+        sums[r["enrollment_id"]] = r["total"] or Decimal("0")
+        counts[r["enrollment_id"]] = r["scored"] or 0
+    return sums, counts
 
 
 def _exam_map(enrollment_ids):
@@ -152,26 +178,42 @@ def _evaluate(enrollment, maps):
     pass_threshold = scheme.pass_threshold if scheme else _DEFAULT_PASS
     min_exam = scheme.min_final_exam_score if scheme else _DEFAULT_MIN_EXAM
 
-    if offering.id in maps["component_offerings"]:
-        raw_entry = maps["component_sums"].get(enrollment.id, Decimal("0"))
-    else:
-        raw_entry = maps["lesson_sums"].get(enrollment.id, Decimal("0"))
-    # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
-    raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
-    raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
-    # Giriş balı tam ədəddir (gradebook.entry_score_for güzgüsü — round_score).
-    entry = gradebook.round_score(min(raw_entry, Decimal(entry_max)))
-
-    exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
-    resit = maps["resits"].get(enrollment.id)
-    resit_done = resit is not None
-    effective = resit if resit_done else exam
-
     record = maps["records"].get(enrollment.student_id)
     limit = record.program.absence_limit_percent if record and record.program_id else _DEFAULT_ABSENCE_LIMIT
     # Məxrəc TƏK tərifdən (bax exam_eligibility.lesson_hours_for) — xam sahəyə
     # baxmaq jurnal qridindən ayrılmaq demək idi.  Toplu map → əlavə sorğu yox.
     lesson_hours = exam_eligibility.lesson_hours_for(offering, hours_map=maps.get("lesson_hours", {}))
+
+    if offering.id in maps.get("midterm_offerings", ()):
+        # Midterm rejimi (2026/2027-dən): sillabus standartı — TƏK düstur ``entry_standard``-da,
+        # davamiyyət bu güzgünün öz buraxılış girişləri ilə (saat, hədd, istisna).
+        entry = entry_standard.compose_from_totals(
+            cap=entry_max,
+            lesson_hours=lesson_hours,
+            absence_hours=enrollment.absence_hours,
+            limit_percent=limit,
+            exempt=bool(record and record.national_athlete_exemption),
+            score_sum=maps["lesson_sums"].get(enrollment.id, Decimal("0")),
+            score_count=maps["lesson_counts"].get(enrollment.id, 0),
+            interim_total=maps["kollokvium_sums"].get(enrollment.id, Decimal("0")),
+            selfwork_points=maps["selfwork_sums"].get(enrollment.id, Decimal("0")),
+            selfwork_counted=offering.id in maps["selfwork_offerings"],
+        ).total
+    else:
+        if offering.id in maps["component_offerings"]:
+            raw_entry = maps["component_sums"].get(enrollment.id, Decimal("0"))
+        else:
+            raw_entry = maps["lesson_sums"].get(enrollment.id, Decimal("0"))
+        # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
+        raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
+        raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
+        # Giriş balı tam ədəddir (gradebook.entry_score_for güzgüsü — round_score).
+        entry = gradebook.round_score(min(raw_entry, Decimal(entry_max)))
+
+    exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
+    resit = maps["resits"].get(enrollment.id)
+    resit_done = resit is not None
+    effective = resit if resit_done else exam
     # TƏK MƏNBƏ: buraxılış qərarı burada TƏKRARLANMIR (2026-08-31 auditi —
     # eyni müqayisə doqquz yerdə dublikat idi). Tarixi/köçürülmüş semestrdə
     # ``barred`` heç vaxt qalxmır, köhnə sistemin faktiki nəticəsi (aşağıdakı
@@ -206,6 +248,7 @@ def _evaluate(enrollment, maps):
 
     return {
         "graded": graded,
+        "entry_score": entry,
         "total": total,
         "gpa": gpa,
         "passed": passed,
@@ -340,10 +383,12 @@ def build_evaluation_maps(organization, enrollments) -> dict:
         enrollment_ids=[e.id for e in enrollments],
         offering_ids=list({e.offering_id for e in enrollments}),
         student_ids=list({e.student_id for e in enrollments}),
+        # Rejim (Midterm/kollokvium) — açılış obyektlərinin keşlənmiş dövründən, əlavə sorğusuz.
+        offerings=[e.offering for e in enrollments],
     )
 
 
-def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, student_ids) -> dict:
+def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, student_ids, offerings=None) -> dict:
     """:func:`build_evaluation_maps`-in id-kolleksiyalı variantı — EYNİ map-lar.
 
     Fərq yalnız girişdədir: id-lər hazır siyahı ƏVƏZİNƏ **queryset** (məs.
@@ -352,7 +397,19 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
     yaranmır — böyük miqyasda (universitet üzrə icmal) həm sorğu hazırlığı, həm
     də PostgreSQL planlaması qat-qat ucuzlaşır. Riyaziyyat dəyişmir; map-ları
     quran köməkçilər eynidir.
+
+    ``offerings`` — açılış OBYEKTLƏRİ əldədirsə (dövr keşlənib) rejim onlardan sorğusuz həll
+    olunur; yalnız id-lər verilibsə açılışların dövr sahələri TƏK sorğu ilə oxunur
+    (:func:`entry_standard.midterm_offering_ids`).
     """
+    generic_offerings, selfwork_offerings = _component_offerings(offering_ids)
+    component_sums, kollokvium_sums = _entry_sum_maps(enrollment_ids)
+    lesson_sums, lesson_counts = _lesson_sum_map(enrollment_ids)
+    if offerings is not None:
+        flags = entry_standard.midterm_flags(offerings, organization=organization)
+        midterm_offerings = frozenset(oid for oid, flag in flags.items() if flag)
+    else:
+        midterm_offerings = entry_standard.midterm_offering_ids(offering_ids)
     return {
         "schemes": _scheme_map(offering_ids),
         # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
@@ -361,11 +418,14 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
         "frozen_offerings": exam_eligibility.frozen_offering_ids(offering_ids),
         # Məxrəc fallback-ı (``lesson_hours=0`` olan açılışlar üçün) — tək sorğu.
         "lesson_hours": exam_eligibility.lesson_hours_map(offering_ids),
-        "component_offerings": _component_offerings(offering_ids),
-        "component_sums": _component_sum_map(enrollment_ids),
-        "kollokvium_sums": _kollokvium_sum_map(enrollment_ids),
+        "component_offerings": generic_offerings,
+        "selfwork_offerings": selfwork_offerings,
+        "midterm_offerings": midterm_offerings,
+        "component_sums": component_sums,
+        "kollokvium_sums": kollokvium_sums,
         "selfwork_sums": _selfwork_map(enrollment_ids),
-        "lesson_sums": _lesson_sum_map(enrollment_ids),
+        "lesson_sums": lesson_sums,
+        "lesson_counts": lesson_counts,
         "exams": _exam_map(enrollment_ids),
         "resits": _resit_map(enrollment_ids),
         "records": _record_map(organization, student_ids),
