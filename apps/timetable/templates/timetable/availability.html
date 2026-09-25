@@ -1,0 +1,176 @@
+{% extends "timetable/_layout.html" %}
+{% load static i18n %}
+{% comment %}Müəllim əlçatanlığı — solda əhatədəki müəllimlər, sağda seçilmişin həftəlik şəbəkəsi.
+
+Şəbəkə düymələri: klik səviyyəni dövr etdirir (neytral → üstünlük → dəyişdirilə
+bilən → gələ bilmir); fırça seçilibsə klik fırçanı tətbiq edir. Klaviatura: oxlar
+(hərəkət), Boşluq/Enter (dövr), 1–4 (səviyyə birbaşa). Yadda saxlama JSON ilə
+`timetable:api_availability`-ə gedir (xarici JS — availability_grid.js).{% endcomment %}
+
+{% block tt_title %}{% trans "Müəllim əlçatanlığı" context "timetable.availability" %}{% endblock %}
+
+{% block tt_content %}
+<div class="tt-split">
+  <aside class="ems-card tt-card tt-split__side" aria-labelledby="tt-teachers-title">
+    <div class="ems-card__head">
+      <h2 class="ems-card__title" id="tt-teachers-title">{% trans "Müəllimlər" context "timetable.availability" %} <span class="tt-count">{{ teachers|length }}</span></h2>
+    </div>
+    <div class="ems-card__body">
+      <form class="tt-search" method="get" action="">
+        <input type="hidden" name="period" value="{{ tt_period_id }}">
+        <label class="visually-hidden" for="tt-teacher-q">{% trans "Müəllim axtar" context "timetable.availability" %}</label>
+        <input class="ems-input" id="tt-teacher-q" type="search" name="q" value="{{ query }}" placeholder="{% trans 'Ad və ya istifadəçi adı…' context 'timetable.availability' %}">
+        <button class="ems-btn ems-btn--sm" type="submit">{% trans "Axtar" context "timetable.availability" %}</button>
+      </form>
+      {% if teachers %}
+      <ul class="tt-teacher-list">
+        {% for teacher in teachers %}
+        <li>
+          <a class="tt-teacher{% if selected and selected.id == teacher.id %} is-active{% endif %}" href="?period={{ tt_period_id }}&teacher={{ teacher.id }}{% if query %}&q={{ query|urlencode }}{% endif %}"{% if selected and selected.id == teacher.id %} aria-current="true"{% endif %}>
+            <span class="tt-teacher__name">{{ teacher.name }}</span>
+            <span class="tt-teacher__meta">
+              {% if teacher.availability.saved %}
+                <span class="ems-badge ems-badge--success">{% trans "doldurulub" context "timetable.availability" %}</span>
+              {% else %}
+                <span class="ems-badge ems-badge--neutral">{% trans "boş" context "timetable.availability" %}</span>
+              {% endif %}
+              {% if teacher.availability.unavailable %}<span class="tt-chip tt-chip--u" title="{% trans 'Gələ bilmədiyi xanalar' context 'timetable.availability' %}">{{ teacher.availability.unavailable }}</span>{% endif %}
+              {% if teacher.availability.discouraged %}<span class="tt-chip tt-chip--d" title="{% trans 'Dəyişdirilə bilən saatlar' context 'timetable.availability' %}">{{ teacher.availability.discouraged }}</span>{% endif %}
+              {% if teacher.availability.priority > 1 %}<span class="tt-chip tt-chip--prio">P{{ teacher.availability.priority }}</span>{% endif %}
+            </span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        {% trans "Müəllim tapılmadı" context "timetable.availability" as no_teacher %}
+        {% trans "Bu semestrdə sizin əhatənizdəki açılışlara müəllim təyin edilməyib." context "timetable.availability" as no_teacher_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-slash" state_title=no_teacher state_body=no_teacher_body %}
+      {% endif %}
+    </div>
+  </aside>
+
+  <section class="tt-split__main">
+    {% if selected %}
+    <div class="ems-card tt-card" data-tt-avail
+         data-save-url="{{ save_url }}"
+         data-period="{{ tt_period_id }}"
+         data-teacher="{{ selected.id }}"
+         data-msg-error="{% trans 'Yadda saxlanılmadı — yenidən cəhd edin.' context 'timetable.availability' %}"
+         {% for level in matrix.levels %}data-label-{{ level.code }}="{{ level.label }}" {% endfor %}>
+      <div class="ems-card__head">
+        <div>
+          <h2 class="ems-card__title">{{ selected.name }}</h2>
+          <p class="ems-card__sub">{% trans "Həftəlik şəbəkə: hər xana bir dərs saatıdır (cüt = 2 saat)." context "timetable.availability" %}{% if selected.updated_at %} {% trans "Son dəyişiklik:" context "timetable.availability" %} {{ selected.updated_at|date:"d.m.Y H:i" }}{% endif %}</p>
+        </div>
+        <button type="button" class="ems-btn ems-btn--primary" data-tt-avail-save>
+          <i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "timetable.availability" %}
+        </button>
+      </div>
+      <div class="ems-card__body">
+        <div class="tt-brushes" role="toolbar" aria-label="{% trans 'Fırça (səviyyə seçimi)' context 'timetable.availability' %}">
+          <span class="tt-brushes__label">{% trans "Fırça:" context "timetable.availability" %}</span>
+          <button type="button" class="ems-chip" data-tt-brush="" aria-pressed="true">{% trans "Dövr et" context "timetable.availability" %}</button>
+          {% for level in matrix.levels %}
+            <button type="button" class="ems-chip tt-brush tt-brush--{{ level.code }}" data-tt-brush="{{ level.code }}" aria-pressed="false">
+              <span class="tt-swatch tt-lvl--{{ level.code }}" aria-hidden="true"></span> {{ forloop.counter }} · {{ level.label }}
+            </button>
+          {% endfor %}
+        </div>
+        <p class="tt-hint">{% trans "Klik — səviyyə dəyişir. Klaviatura: oxlarla gəzin, Boşluq — dövr, 1–4 — səviyyəni birbaşa seçin. Gün başlığı — bütün günü «gələ bilmir» ⇄ «neytral»." context "timetable.availability" %}</p>
+        <div class="tt-avail-scroll" tabindex="0" aria-label="{% trans 'Əlçatanlıq şəbəkəsi' context 'timetable.availability' %}">
+          <table class="tt-avail" role="grid" data-tt-avail-grid>
+            <thead>
+              <tr>
+                <th scope="col" class="tt-avail__corner">{% trans "Saat" context "timetable.availability" %}</th>
+                {% for day in matrix.days %}
+                <th scope="col"><button type="button" class="tt-avail__day" data-tt-day="{{ day.weekday }}">{{ day.label }}</button></th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in matrix.rows %}
+              <tr>
+                <th scope="row" class="tt-avail__time tt-shift--{{ row.shift }}">
+                  <span class="tt-avail__no">{{ row.roman }}</span>
+                  <span class="tt-avail__hours">{{ row.start }}–{{ row.end }}</span>
+                </th>
+                {% for cell in row.cells %}
+                <td role="gridcell">
+                  <button type="button" class="tt-lvl tt-lvl--{{ cell.level }}" data-tt-cell
+                          data-weekday="{{ cell.weekday }}" data-pair="{{ row.no }}" data-level="{{ cell.level }}"
+                          data-day-label="{{ cell.label }}"
+                          tabindex="{% if forloop.first and forloop.parentloop.first %}0{% else %}-1{% endif %}"
+                          aria-label="{{ cell.label }}, {{ row.no }}: {{ cell.level_label }}"></button>
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="tt-fields">
+          <div class="ems-field">
+            <label class="ems-field__label" for="tt-max-day">{% trans "Gündə maksimum cüt" context "timetable.availability" %}</label>
+            <input class="ems-input" id="tt-max-day" type="number" min="1" max="{{ matrix.rows|length }}" name="max_pairs_per_day" value="{{ selected.max_pairs_per_day }}" data-tt-field>
+          </div>
+          <div class="ems-field">
+            <label class="ems-field__label" for="tt-max-days">{% trans "Həftədə maksimum iş günü" context "timetable.availability" %}</label>
+            <input class="ems-input" id="tt-max-days" type="number" min="1" max="7" name="max_days_per_week" value="{{ selected.max_days_per_week }}" data-tt-field>
+          </div>
+          <div class="ems-field">
+            {% trans "Prioritet (1 — adi, 5 — ən yüksək)" context "timetable.availability" as prio_label %}
+            {% trans "Adi" context "timetable.availability" as prio_placeholder %}
+            {% include "partials/_bootstrap_select_field.html" with field_id="tt-priority" field_name="priority" field_label=prio_label field_label_class="ems-field__label" field_placeholder=prio_placeholder field_options=priority_choices field_value=selected.priority field_wrapper_class="bootstrap-single-select--ems" field_select_class="ems-select" field_extra_attrs="data-tt-field" %}
+          </div>
+          <div class="ems-field tt-fields__wide">
+            <label class="ems-field__label" for="tt-note">{% trans "Qeyd" context "timetable.availability" %}</label>
+            <textarea class="ems-textarea" id="tt-note" name="note" rows="2" maxlength="2000" data-tt-field>{{ selected.note }}</textarea>
+          </div>
+        </div>
+
+        <h3 class="tt-subtitle">{% trans "Fənləri (bu semestr)" context "timetable.availability" %}</h3>
+        {% if subjects %}
+        <div class="tt-table-wrap">
+          <table class="tt-table">
+            <thead>
+              <tr>
+                <th scope="col">{% trans "Fənn" context "timetable.availability" %}</th>
+                <th scope="col">{% trans "Qruplar" context "timetable.availability" %}</th>
+                <th scope="col">{% trans "Növ (tapşırıq saatı)" context "timetable.availability" %}</th>
+                <th scope="col">{% trans "Fənn prioriteti" context "timetable.availability" %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for subject in subjects %}
+              <tr data-tt-subject="{{ subject.subject_id }}">
+                <td><span class="ems-mono">{{ subject.code }}</span> {{ subject.name }}</td>
+                <td>{{ subject.groups|join:", " }}</td>
+                <td>{{ subject.kinds_text|default:"—" }}</td>
+                <td>
+                  {% trans "Fənn prioriteti" context "timetable.availability" as subject_prio_label %}
+                  {% include "partials/_bootstrap_select_field.html" with field_id="tt-sp-"|add:subject.subject_id field_name="subject_priority" field_aria_label=subject_prio_label field_placeholder=prio_placeholder field_options=priority_choices field_value=subject.priority field_wrapper_class="bootstrap-single-select--ems tt-select-sm" field_select_class="ems-select" field_extra_attrs="data-tt-subject-select" %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <p class="tt-muted">{% trans "Bu müəllimin əhatənizdə fənni tapılmadı." context "timetable.availability" %}</p>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+      {% trans "Müəllim seçin" context "timetable.availability" as pick_title %}
+      {% trans "Soldakı siyahıdan müəllimi seçin — gələ bilmədiyi günləri, olmayan və dəyişdirilə bilən saatları qeyd edin." context "timetable.availability" as pick_body %}
+      {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-hand-pointer" state_title=pick_title state_body=pick_body %}
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+
+{% block tt_js %}
+    <script src="{% static 'timetable/js/availability_grid.js' %}?v=20260925-1"></script>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% load i18n %}
+<button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "timetable.review" %}</button>
+{% if can_edit %}
+<button type="button" class="ems-btn" data-tt-lock>{% trans "Kilidlə / kilidi aç" context "timetable.review" %}</button>
+<button type="button" class="ems-btn ems-btn--primary" data-tt-move-submit>{% trans "Köçür" context "timetable.review" %}</button>
+{% endif %}

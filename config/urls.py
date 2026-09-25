@@ -100,6 +100,8 @@ urlpatterns = [
     path("exams/", include(("apps.exams.urls", "exams"), namespace="exams")),
     # dərs yükü (tədris tapşırığı) — profil bölmələrinin JSON səthi
     path("ders-yuku/", include(("apps.workload.urls", "workload"), namespace="workload")),
+    # avtomatik dərs cədvəli generatoru (schedule.manage) — müstəqil səhifələr + JSON
+    path("cedvel-generatoru/", include(("apps.timetable.urls", "timetable"), namespace="timetable")),
     # appeals (imtahan apellyasiyaları)
     path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),
     # müraciətlər (Müraciətlər paneli — JSON/fayl endpoint-ləri; ekran profil bölməsidir)

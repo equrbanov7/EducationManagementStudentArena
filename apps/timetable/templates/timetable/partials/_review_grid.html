@@ -1,0 +1,39 @@
+{% load i18n %}
+{% comment %}Həftəlik şəbəkə (gün × dərs saatı). Hər element düymədir → hadisə dialoqu.
+Üst/alt həftə dərsləri eyni xanada iki yarım kimi (week badge ilə) görünür.{% endcomment %}
+<div class="tt-grid-scroll" tabindex="0" aria-label="{% trans 'Həftəlik cədvəl şəbəkəsi' context 'timetable.review' %}">
+  <table class="tt-grid">
+    <thead>
+      <tr>
+        <th scope="col" class="tt-grid__corner">{% trans "Saat" context "timetable.review" %}</th>
+        {% for day in grid.days %}<th scope="col" class="tt-grid__day">{{ day.label }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in grid.rows %}
+      <tr class="tt-shift--{{ row.shift }}">
+        <th scope="row" class="tt-grid__time">
+          <span class="tt-avail__no">{{ row.roman }}</span>
+          <span class="tt-avail__hours">{{ row.start_text }}–{{ row.end_text }}</span>
+        </th>
+        {% for cell in row.cells %}
+        <td class="tt-grid__cell{% if cell.is_empty %} is-empty{% endif %}" data-weekday="{{ cell.weekday }}" data-pair="{{ cell.pair }}">
+          {% for item in cell.items %}
+            <button type="button" class="tt-item tt-kind--{{ item.kind }}{% if item.week_type != 'all' %} tt-item--half{% endif %}" data-tt-event="{{ item.key }}">
+              <span class="tt-item__top">
+                {% if item.week_type == "odd" %}<span class="tt-week">{% trans "ÜST" context "timetable.review" %}</span>{% elif item.week_type == "even" %}<span class="tt-week tt-week--even">{% trans "ALT" context "timetable.review" %}</span>{% endif %}
+                {% if item.locked %}<i class="fas fa-lock" aria-label="{% trans 'Kilidli' context 'timetable.review' %}"></i>{% endif %}
+                {% if item.is_manual %}<i class="fas fa-hand" aria-label="{% trans 'Əl ilə köçürülüb' context 'timetable.review' %}"></i>{% endif %}
+              </span>
+              <span class="tt-item__subject">{{ item.subject }}</span>
+              <span class="tt-item__meta">{{ item.groups|join:", " }}</span>
+              <span class="tt-item__meta">{{ item.teacher|default:"—" }}{% if item.room %} · {{ item.room }}{% endif %}</span>
+            </button>
+          {% endfor %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
