@@ -214,7 +214,7 @@ def _send_to_chairs(request, organization):
 
     period.opening_status = "sent"
     period.save(update_fields=["opening_status", "updated_at"])
-    _notify_chairs(organization, period, actor=request.user)
+    notified = _notify_chairs(organization, period, actor=request.user)
     log_action(
         action=AuditAction.UPDATE,
         user=request.user,
@@ -222,9 +222,9 @@ def _send_to_chairs(request, organization):
         obj=period,
         request=request,
         reason="semester: offerings sent to chairs for instructor assignment",
-        new_values={"opening_status": "sent"},
+        new_values={"opening_status": "sent", "notified": notified},
     )
-    return JsonResponse({"ok": True, "opening_status": "sent"})
+    return JsonResponse({"ok": True, "opening_status": "sent", "notified": notified})
 
 
 def _cancel_offering(request, organization):
@@ -328,35 +328,69 @@ def _unlock(request, organization):
     return JsonResponse({"ok": True, "locked": False})
 
 
-def _notify_chairs(organization, period, *, actor=None) -> None:
-    """Kafedra rəhbərlərinə «müəllim təyinatı gözlənilir» bildirişi."""
+#: Kafedra adından müəllim təyin edən rollar (dərs yükü zəncirinin ``CHAIR_ACTOR_ROLES``-u ilə eyni).
+_CHAIR_ROLES = ("chair_head", "department_head", "section_head")
+
+
+def _chair_recipients(organization, unit, *, actor_id) -> list:
+    """Kafedranın rəhbəri + kafedra rollu üzvlər (klonda kafedraların çoxu rəhbərsizdir)."""
+    from apps.organizations.public import members_covering_unit
+
+    users = {unit.head_id: unit.head} if unit.head_id else {}
+    for membership in members_covering_unit(organization, unit, role_names=_CHAIR_ROLES):
+        users.setdefault(membership.user_id, membership.user)
+    return [user for user_id, user in users.items() if user is not None and user_id != actor_id]
+
+
+def _notify_chairs(organization, period, *, actor=None) -> int:
+    """Kafedralara «müəllim təyinatı gözlənilir» — kafedra başına BİR (toplu) bildiriş.
+
+    2026-09-25: alıcılar yalnız bu dövrdə açılışı olan kafedralardır (fənnin
+    ``chair_unit``-i; heç bir fənndə kafedra yazılmayıbsa əvvəlki kimi bütün
+    kafedralar); rəhbərlə yanaşı kafedra rolları da alır; keçid kafedranın
+    müəllim təyin etdiyi «Dərs yükü → Yük bölgüsü»nədir (kafedra müdiri «Semestr
+    açılışı» bölməsini görmür — əvvəlki keçid ona 403 verirdi).
+    """
     try:
         from apps.notifications.models import NotificationType
-        from apps.notifications.public import create_notification
+        from apps.notifications.public import create_notification_for_users
     except Exception:  # pragma: no cover
-        return
+        return 0
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
-    heads = (
-        OrgUnit.objects.filter(
-            organization=organization, is_active=True, unit_type__in=("chair", "department"), head__isnull=False
-        )
-        .select_related("head")
-        .exclude(head_id=getattr(actor, "id", None))
+    chairs = OrgUnit.objects.filter(
+        organization=organization, is_active=True, unit_type__in=("chair", "department")
+    ).select_related("head")
+    owned = set(
+        CourseOffering.objects.filter(
+            organization=organization, period=period, is_active=True, subject__chair_unit__isnull=False
+        ).values_list("subject__chair_unit_id", flat=True)
     )
-    for unit in heads:
-        try:
-            create_notification(
-                recipient=unit.head,
-                title=f"Semestr açılışı: {period.year_display} · {period.name}"[:255],
-                message="Kafedranızın açılışlarına müəllim təyin edilməlidir.",
-                link="/accounts/profile/?section=semester-opening&sm_period=%s" % period.id,
-                notification_type=NotificationType.SYSTEM,
-                organization=organization,
-                metadata={"event": "semester_opening_sent", "period_id": str(period.id)},
-            )
-        except Exception:  # pragma: no cover
+    if owned:
+        chairs = chairs.filter(pk__in=owned)
+    sent = 0
+    for unit in chairs:
+        recipients = _chair_recipients(organization, unit, actor_id=getattr(actor, "id", None))
+        if not recipients:
             continue
+        try:
+            sent += len(
+                create_notification_for_users(
+                    recipients=recipients,
+                    title=f"Semestr açılışı: {period.year_display} · {period.name}"[:255],
+                    message=(
+                        f"«{unit.name}» kafedrasının açılışlarına müəllim təyin edilməlidir — "
+                        "«Dərs yükü → Yük bölgüsü» bölməsində təyin etdiyiniz müəllim jurnala dərhal düşür."
+                    ),
+                    link="/accounts/profile/?section=workload-distribution",
+                    notification_type=NotificationType.SYSTEM,
+                    organization=organization,
+                    metadata={"event": "semester_opening_sent", "period_id": str(period.id), "chair_id": str(unit.pk)},
+                )
+            )
+        except Exception:  # pragma: no cover — bildiriş əməli dayandırmır
+            continue
+    return sent
 
 
 _HANDLERS = {

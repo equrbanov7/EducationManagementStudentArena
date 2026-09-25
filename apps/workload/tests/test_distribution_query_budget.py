@@ -8,6 +8,10 @@ ilə TƏZƏ queryset qurub prefetch keşini keçirdi — sətir başına əlavə
 (1 sətir: 6 → 5 sətir: 14 sorğu; təyinat cədvəli 2 → 6 dəfə oxunurdu). Bu
 testlər sətir sayını 1-dən 5-ə çoxaldıb sorğu sayının sətirdən asılı
 olmadığını (hazırlıq) və təyinatın BİR dəfə oxunduğunu (sinxron) qıfıllayır.
+
+2026-09-25 (plan → qruplar): sinxron ``offering_sync``-ə köçdü və açılışları da
+TOPLU oxuyur — sətir başına qalan son SELECT (açılış axtarışı) də getdi, ona
+görə idempotent keçid 1 və 5 sətirdə EYNİ sorğu sayıdır (əvvəl +1/sətir).
 """
 
 from django.contrib.auth import get_user_model
@@ -125,9 +129,9 @@ class DistributionQueryBudgetTest(TestCase):
         # Təyinatlar hər iki halda BİR sorğu ilə (prefetch) oxunur — sətir başına yox.
         self.assertEqual(_assignment_selects(one), 1)
         self.assertEqual(_assignment_selects(five), 1)
-        # Sətir başına yalnız açılışın özünün axtarışı (CourseOffering SELECT) qalır.
+        # Açılışlar da toplu oxunur (2026-09-25) — sorğu sayı sətir sayından ASILI DEYİL.
         self.assertEqual(
-            len(five.captured_queries) - len(one.captured_queries),
-            4,
+            len(five.captured_queries),
+            len(one.captured_queries),
             f"1 sətir: {len(one.captured_queries)} sorğu, 5 sətir: {len(five.captured_queries)} sorğu",
         )

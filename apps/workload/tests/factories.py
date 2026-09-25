@@ -19,7 +19,7 @@ YEAR = "2026/2027"
 #:
 #: ⚠️ `grade.input` MƏCBURİDİR: `registrar_guard_active_member` trigger-i
 #: (`registrar/0041`) `CourseOffering.instructor` üçün məhz bu açarı tələb edir.
-#: Onsuz offering sinxronu müəllimi yazmır (bax `distribution._write_offering`).
+#: Onsuz offering sinxronu müəllimi yazmır (bax `offering_sync._create` / `eligible_instructor_ids`).
 TEACHER_PERMS = ["workload.view", "grade.view", "grade.input", "course.view"]
 
 

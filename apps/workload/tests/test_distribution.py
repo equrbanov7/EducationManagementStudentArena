@@ -148,7 +148,7 @@ class DistributionConfirmTest(TestCase):
 
         Köçürülmüş tenantlarda müəllim rolu bəzən `grade.input` daşımır; belə
         halda açılış MÜƏLLİMSİZ yaradılır və `instructor_blocked` sayılır —
-        bütün təsdiq geri qayıtmır (bax `distribution._write_offering`).
+        bütün təsdiq geri qayıtmır (bax `offering_sync._create`).
         """
         weak = User.objects.create_user("wlc_weak", "wlc_weak@x.test", "pw")
         activate_member(
