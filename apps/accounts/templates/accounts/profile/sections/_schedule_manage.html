@@ -62,6 +62,10 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
     </div>
     <div class="sedit__bar-right">
       <span class="sedit__owner">{{ sec.owner_label }}</span>
+      <a class="ems-btn" href="{% url 'timetable:home' %}{% if sec.period %}?period={{ sec.period.id }}{% endif %}">
+        <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+        {% trans "Avtomatik cədvəl" context "accounts.schedule_manage" %}
+      </a>
       <button type="button" class="ems-btn {% if sec.parked %}ems-btn--warning{% endif %}" data-ems-overlay-open="seditParked">
         <i class="fas fa-inbox" aria-hidden="true"></i>
         {% trans "Yenidən yerləşdirilməli" context "accounts.schedule_manage" %} ({{ sec.parked|length }})

@@ -1,0 +1,46 @@
+{% load i18n %}
+{% comment %}Yerləşdirilməyən dərslər (səbəbi ilə) + bölünmüş tədris xəbərdarlığı.{% endcomment %}
+<section class="ems-card tt-card" aria-labelledby="tt-unplaced-title">
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title" id="tt-unplaced-title">{% trans "Yerləşdirilməyən dərslər" context "timetable.review" %} <span class="tt-count">{{ unplaced|length }}</span></h2>
+      <p class="ems-card__sub">{% trans "Sərt qaydalar pozulmadan yer tapılmayan dərslər. Səbəbə baxın, lazım olsa əl ilə yerləşdirin və ya giriş məlumatını dəyişib yenidən işlədin." context "timetable.review" %}</p>
+    </div>
+  </div>
+  <div class="ems-card__body">
+    {% if unplaced %}
+    <ul class="tt-unplaced">
+      {% for item in unplaced %}
+      <li class="tt-unplaced__item">
+        <div>
+          <strong>{{ item.subject }}</strong> <span class="tt-muted">({{ item.kind_label }})</span>
+          <span class="tt-unplaced__groups">{{ item.groups|join:", " }} · {{ item.teacher|default:"—" }}</span>
+          <p class="tt-unplaced__reason">{{ item.reason }}</p>
+        </div>
+        {% if can_edit %}<button type="button" class="ems-btn ems-btn--sm" data-tt-event="{{ item.key }}">{% trans "Yerləşdir" context "timetable.review" %}</button>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p class="tt-ok"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Bütün dərslər yerləşdirilib." context "timetable.review" %}</p>
+    {% endif %}
+  </div>
+</section>
+
+{% if split_teachers %}
+<section class="ems-card tt-card" aria-labelledby="tt-split-title">
+  <div class="ems-card__head">
+    <div>
+      <h2 class="ems-card__title" id="tt-split-title">{% trans "Bölünmüş tədris" context "timetable.review" %} <span class="tt-count">{{ split_teachers|length }}</span></h2>
+      <p class="ems-card__sub">{% trans "Bu dərslərin müəllimi (dərs yükü bölgüsündən) açılışın jurnal sahibindən fərqlidir. Canlı cədvəldə slotun ayrıca müəllim sahəsi olmadığı üçün jurnal sahibi göstəriləcək." context "timetable.review" %}</p>
+    </div>
+  </div>
+  <div class="ems-card__body">
+    <ul class="tt-unplaced">
+      {% for item in split_teachers %}
+        <li class="tt-unplaced__item"><div><strong>{{ item.subject }}</strong> <span class="tt-muted">({{ item.kind_label }})</span> <span class="tt-unplaced__groups">{{ item.groups|join:", " }} · {{ item.teacher }}</span></div></li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+{% endif %}

@@ -78301,3 +78301,2087 @@ msgstr ""
 "Существующие строки не дублируются, ничего не удаляется. Для специальностей "
 "без плана строки не создаются — сначала утвердите план в разделе «Учебный "
 "план»."
+
+msgctxt "accounts.schedule_manage"
+msgid "Avtomatik cədvəl"
+msgstr "Автоматическое расписание"
+
+msgctxt "registrar.schedule_publish"
+msgid "Bu semestr bitib — cədvəl dərc edilə bilməz."
+msgstr "Семестр завершён — расписание нельзя опубликовать."
+
+msgctxt "registrar.schedule_publish"
+msgid ""
+"Bəzi açılışlar sizin səlahiyyət sahənizdən kənardadır — cədvəl dərc "
+"edilmədi."
+msgstr ""
+"Некоторые курсы вне вашей зоны полномочий — расписание не опубликовано."
+
+msgctxt "registrar.schedule_publish"
+msgid "Cədvəlin toplu dərci"
+msgstr "Пакетная публикация расписания"
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var."
+msgstr "Не опубликовано: %(count)s конфликтов с действующим расписанием."
+
+msgctxt "registrar.schedule_publish"
+msgid "Dərs cədvəli dərc edildi: %(period)s"
+msgstr "Расписание опубликовано: %(period)s"
+
+msgctxt "registrar.schedule_publish"
+msgid "Qaralamada yararsız slot var — yenidən yaradın."
+msgstr "В черновике есть недопустимый слот — создайте заново."
+
+msgctxt "registrar.schedule_publish"
+msgid "Qrupunuzun yeni həftəlik dərs cədvəli dərc olundu."
+msgstr "Опубликовано новое недельное расписание вашей группы."
+
+msgctxt "registrar.schedule_publish"
+msgid "Yeni həftəlik cədvəliniz hazırdır — dərslərinizi yoxlayın."
+msgstr "Ваше новое недельное расписание готово — проверьте занятия."
+
+msgctxt "timetable.api"
+msgid "Bu işləmə növbədə deyil."
+msgstr "Этот запуск не в очереди."
+
+msgctxt "timetable.api"
+msgid ""
+"Cədvəl dərc edildi: %(created)s dərs yazıldı, %(removed)s köhnə slot əvəz "
+"olundu."
+msgstr ""
+"Расписание опубликовано: записано занятий — %(created)s, заменено старых "
+"слотов — %(removed)s."
+
+msgctxt "timetable.api"
+msgid "Dərs köçürüldü."
+msgstr "Занятие перенесено."
+
+msgctxt "timetable.api"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "timetable.api"
+msgid "Növbə siyasəti yadda saxlanıldı."
+msgstr "Политика смен сохранена."
+
+msgctxt "timetable.api"
+msgid "Seçilmiş əhatədə sizin idarə etdiyiniz qrup yoxdur."
+msgstr "В выбранной области нет групп, которыми вы управляете."
+
+msgctxt "timetable.api"
+msgid "Sizin artıq işləyən cədvəl işləmələriniz var — bitməsini gözləyin."
+msgstr "У вас уже выполняются запуски расписания — дождитесь их завершения."
+
+msgctxt "timetable.api"
+msgid "Yalnız hazır qaralama redaktə edilə bilər."
+msgstr "Редактировать можно только готовый черновик."
+
+msgctxt "timetable.api"
+msgid "İşləmə ləğv edildi."
+msgstr "Запуск отменён."
+
+msgctxt "timetable.api"
+msgid "Əlçatanlıq yadda saxlanıldı."
+msgstr "Доступность сохранена."
+
+msgctxt "timetable.availability"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Имя или логин…"
+
+msgctxt "timetable.availability"
+msgid "Adi"
+msgstr "Обычный"
+
+msgctxt "timetable.availability"
+msgid "Axtar"
+msgstr "Найти"
+
+msgctxt "timetable.availability"
+msgid "Bu müəllimin əhatənizdə fənni tapılmadı."
+msgstr "В вашей области не найдено предметов этого преподавателя."
+
+msgctxt "timetable.availability"
+msgid "Bu semestrdə sizin əhatənizdəki açılışlara müəllim təyin edilməyib."
+msgstr "В этом семестре преподаватели не назначены на курсы вашей области."
+
+msgctxt "timetable.availability"
+msgid "Dövr et"
+msgstr "По кругу"
+
+msgctxt "timetable.availability"
+msgid "Dəyişdirilə bilən saatlar"
+msgstr "Гибкие часы"
+
+msgctxt "timetable.availability"
+msgid "Dəyər %(low)s–%(high)s aralığında olmalıdır."
+msgstr "Значение должно быть в диапазоне %(low)s–%(high)s."
+
+msgctxt "timetable.availability"
+msgid "Fırça (səviyyə seçimi)"
+msgstr "Кисть (выбор уровня)"
+
+msgctxt "timetable.availability"
+msgid "Fırça:"
+msgstr "Кисть:"
+
+msgctxt "timetable.availability"
+msgid "Fənləri (bu semestr)"
+msgstr "Предметы (этот семестр)"
+
+msgctxt "timetable.availability"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "timetable.availability"
+msgid "Fənn prioriteti"
+msgstr "Приоритет предмета"
+
+msgctxt "timetable.availability"
+msgid "Gündə maksimum cüt"
+msgstr "Макс. пар в день"
+
+msgctxt "timetable.availability"
+msgid "Gələ bilmədiyi xanalar"
+msgstr "Недоступные ячейки"
+
+msgctxt "timetable.availability"
+msgid "Həftədə maksimum iş günü"
+msgstr "Макс. рабочих дней в неделю"
+
+msgctxt "timetable.availability"
+msgid "Həftəlik şəbəkə: hər xana bir dərs saatıdır (cüt = 2 saat)."
+msgstr "Недельная сетка: каждая ячейка — одна пара (пара = 2 часа)."
+
+msgctxt "timetable.availability"
+msgid ""
+"Klik — səviyyə dəyişir. Klaviatura: oxlarla gəzin, Boşluq — dövr, 1–4 — "
+"səviyyəni birbaşa seçin. Gün başlığı — bütün günü «gələ bilmir» ⇄ «neytral»."
+msgstr ""
+"Клик меняет уровень. Клавиатура: стрелки — перемещение, Пробел — по кругу, "
+"1–4 — выбрать уровень. Заголовок дня — весь день «недоступен» ⇄ "
+"«нейтрально»."
+
+msgctxt "timetable.availability"
+msgid "Müəllim axtar"
+msgstr "Поиск преподавателя"
+
+msgctxt "timetable.availability"
+msgid "Müəllim seçin"
+msgstr "Выберите преподавателя"
+
+msgctxt "timetable.availability"
+msgid "Müəllim tapılmadı"
+msgstr "Преподаватель не найден"
+
+msgctxt "timetable.availability"
+msgid "Müəllim əlçatanlığı"
+msgstr "Доступность преподавателя"
+
+msgctxt "timetable.availability"
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+msgctxt "timetable.availability"
+msgid "Növ (tapşırıq saatı)"
+msgstr "Вид (часы нагрузки)"
+
+msgctxt "timetable.availability"
+msgid "Prioritet (1 — adi, 5 — ən yüksək)"
+msgstr "Приоритет (1 — обычный, 5 — наивысший)"
+
+msgctxt "timetable.availability"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "timetable.availability"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "timetable.availability"
+msgid "Saat"
+msgstr "Время"
+
+msgctxt "timetable.availability"
+msgid ""
+"Soldakı siyahıdan müəllimi seçin — gələ bilmədiyi günləri, olmayan və "
+"dəyişdirilə bilən saatları qeyd edin."
+msgstr ""
+"Выберите преподавателя в списке слева и отметьте дни, когда он не может "
+"прийти, недоступные и гибкие часы."
+
+msgctxt "timetable.availability"
+msgid "Son dəyişiklik:"
+msgstr "Последнее изменение:"
+
+msgctxt "timetable.availability"
+msgid "Tam ədəd daxil edin."
+msgstr "Введите целое число."
+
+msgctxt "timetable.availability"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "timetable.availability"
+msgid "Yadda saxlanılmadı — yenidən cəhd edin."
+msgstr "Не сохранено — попробуйте снова."
+
+msgctxt "timetable.availability"
+msgid "boş"
+msgstr "пусто"
+
+msgctxt "timetable.availability"
+msgid "doldurulub"
+msgstr "заполнено"
+
+msgctxt "timetable.availability"
+msgid "laboratoriya"
+msgstr "лабораторная"
+
+msgctxt "timetable.availability"
+msgid "mühazirə"
+msgstr "лекция"
+
+msgctxt "timetable.availability"
+msgid "seminar"
+msgstr "семинар"
+
+msgctxt "timetable.availability"
+msgid "Şəbəkədə naməlum səviyyə var."
+msgstr "В сетке есть неизвестный уровень."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq yadda saxlanılmadı — xanaları yoxlayın."
+msgstr "Доступность не сохранена — проверьте поля."
+
+msgctxt "timetable.availability"
+msgid "Əlçatanlıq şəbəkəsi"
+msgstr "Сетка доступности"
+
+msgctxt "timetable.edit"
+msgid "%(building)s korpusunda həmin vaxt boş otaq qalmır (%(week)s)."
+msgstr ""
+"В корпусе %(building)s в это время нет свободных аудиторий (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid ""
+"%(group)s qrupunun günündə boş cüt yaranır (%(week)s) — qrupda boşluq "
+"qadağandır."
+msgstr ""
+"В дне группы %(group)s появляется «окно» (%(week)s) — окна у групп "
+"запрещены."
+
+msgctxt "timetable.edit"
+msgid "%(group)s qrupunun həmin vaxt dərsi var: %(subjects)s (%(week)s)."
+msgstr "У группы %(group)s в это время занятие: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Bu saat %(group)s qrupunun növbəsinə daxil deyil."
+msgstr "Это время не входит в смену группы %(group)s."
+
+msgctxt "timetable.edit"
+msgid "Dərs kilidlidir — əvvəlcə kilidi açın."
+msgstr "Занятие заблокировано — сначала разблокируйте."
+
+msgctxt "timetable.edit"
+msgid "Dərs qaralamada tapılmadı."
+msgstr "Занятие не найдено в черновике."
+
+msgctxt "timetable.edit"
+msgid "Gün və dərs saatı düzgün seçilməlidir."
+msgstr "Выберите корректные день и пару."
+
+msgctxt "timetable.edit"
+msgid "Müəllim %(teacher)s həmin vaxt məşğuldur: %(subjects)s (%(week)s)."
+msgstr "Преподаватель %(teacher)s в это время занят: %(subjects)s (%(week)s)."
+
+msgctxt "timetable.edit"
+msgid "Müəllim bu saatda gələ bilmir (əlçatanlıq)."
+msgstr "Преподаватель не может в это время (доступность)."
+
+msgctxt "timetable.edit"
+msgid "Qaralama köhnəlib (açılışlar dəyişib) — yenidən işlədin."
+msgstr "Черновик устарел (курсы изменились) — запустите заново."
+
+msgctxt "timetable.edit"
+msgid "alt həftə"
+msgstr "нижняя неделя"
+
+msgctxt "timetable.edit"
+msgid "başqa fakültənin dərc olunmuş dərsi"
+msgstr "опубликованное занятие другого факультета"
+
+msgctxt "timetable.edit"
+msgid "üst həftə"
+msgstr "верхняя неделя"
+
+msgctxt "timetable.home"
+msgid "Aç"
+msgstr "Открыть"
+
+msgctxt "timetable.home"
+msgid ""
+"Bakalavr — səhər və günorta, magistr — yalnız axşam; istənilən qrup üçün "
+"istisna."
+msgstr ""
+"Бакалавриат — утро и день, магистратура — только вечер; исключения для любой"
+" группы."
+
+msgctxt "timetable.home"
+msgid "Bax, düzəlt, dərc et"
+msgstr "Просмотр, правка, публикация"
+
+msgctxt "timetable.home"
+msgid "Bu semestr üçün hələ işləmə yoxdur"
+msgstr "Для этого семестра ещё нет запусков"
+
+msgctxt "timetable.home"
+msgid ""
+"Gələ bilmədiyi günlər, olmayan və dəyişdirilə bilən saatlar, gündəlik limit,"
+" prioritet."
+msgstr "Недоступные дни, недоступные и гибкие часы, дневной лимит, приоритет."
+
+msgctxt "timetable.home"
+msgid ""
+"Hər işləmə ayrıca qaralamadır — canlı cədvələ yalnız «Dərc et» ilə keçir."
+msgstr ""
+"Каждый запуск — отдельный черновик; в действующее расписание он попадает "
+"только через «Опубликовать»."
+
+msgctxt "timetable.home"
+msgid "Müəllim boş cütü"
+msgstr "«Окна» преподавателей"
+
+msgctxt "timetable.home"
+msgid "Müəllim əlçatanlığı"
+msgstr "Доступность преподавателей"
+
+msgctxt "timetable.home"
+msgid ""
+"Qrup / müəllim / otaq şəbəkəsi, kilid və köçürmə; «Dərc et» canlı cədvəli "
+"bir dəfəyə yazır."
+msgstr ""
+"Сетки по группам / преподавателям / аудиториям, блокировка и перенос; "
+"«Опубликовать» записывает расписание за один шаг."
+
+msgctxt "timetable.home"
+msgid "Qrup növbələri"
+msgstr "Смены групп"
+
+msgctxt "timetable.home"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "timetable.home"
+msgid "Sərt pozuntu"
+msgstr "Жёсткие нарушения"
+
+msgctxt "timetable.home"
+msgid "Yaradan"
+msgstr "Создал"
+
+msgctxt "timetable.home"
+msgid "Yeni işləmə"
+msgstr "Новый запуск"
+
+msgctxt "timetable.home"
+msgid "Yerləşdirilib"
+msgstr "Размещено"
+
+msgctxt "timetable.home"
+msgid "Yoxla və işlət"
+msgstr "Проверка и запуск"
+
+msgctxt "timetable.home"
+msgid ""
+"«Məlumatı yoxla» tələb ilə tutumu müqayisə edir; sonra mühərrik cədvəli "
+"qurur."
+msgstr ""
+"«Проверить данные» сравнивает потребность с ёмкостью; затем движок строит "
+"расписание."
+
+msgctxt "timetable.home"
+msgid "İş axını"
+msgstr "Порядок работы"
+
+msgctxt "timetable.home"
+msgid "İşləmələr"
+msgstr "Запуски"
+
+msgctxt "timetable.home"
+msgid "Əhatə"
+msgstr "Охват"
+
+msgctxt "timetable.home"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "timetable.home"
+msgid ""
+"Əvvəlcə müəllim əlçatanlığını və qrup növbələrini yoxlayın, sonra «Yeni "
+"işləmə» ilə cədvəl qurun."
+msgstr ""
+"Сначала проверьте доступность преподавателей и смены групп, затем постройте "
+"расписание через «Новый запуск»."
+
+msgctxt "timetable.model"
+msgid "Axın yoxdur (hər qrup ayrıca)"
+msgstr "Без потоков (каждая группа отдельно)"
+
+msgctxt "timetable.model"
+msgid "Axşam"
+msgstr "Вечер"
+
+msgctxt "timetable.model"
+msgid "Bakalavr"
+msgstr "Бакалавриат"
+
+msgctxt "timetable.model"
+msgid "Doktorantura"
+msgstr "Докторантура"
+
+msgctxt "timetable.model"
+msgid "Dərc edilib"
+msgstr "Опубликовано"
+
+msgctxt "timetable.model"
+msgid "Dəyişdirilə bilən saat"
+msgstr "Гибкий час"
+
+msgctxt "timetable.model"
+msgid "Eyni fənn + eyni müəllim + eyni dil"
+msgstr "Тот же предмет + преподаватель + язык"
+
+msgctxt "timetable.model"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "timetable.model"
+msgid "Günorta"
+msgstr "День"
+
+msgctxt "timetable.model"
+msgid "Gələ bilmir"
+msgstr "Недоступен"
+
+msgctxt "timetable.model"
+msgid "Hazırdır"
+msgstr "Готово"
+
+msgctxt "timetable.model"
+msgid "Ləğv edilib"
+msgstr "Отменено"
+
+msgctxt "timetable.model"
+msgid "Magistr"
+msgstr "Магистратура"
+
+msgctxt "timetable.model"
+msgid "Neytral"
+msgstr "Нейтрально"
+
+msgctxt "timetable.model"
+msgid "Növbədə"
+msgstr "В очереди"
+
+msgctxt "timetable.model"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "timetable.model"
+msgid "Qiyabi (bütün pillələr)"
+msgstr "Заочное (все уровни)"
+
+msgctxt "timetable.model"
+msgid "Seçilmiş qruplar"
+msgstr "Выбранные группы"
+
+msgctxt "timetable.model"
+msgid "Səhər"
+msgstr "Утро"
+
+msgctxt "timetable.model"
+msgid "Tədris tapşırığındakı birləşmələr + alt qruplar"
+msgstr "Объединения в учебном поручении + подгруппы"
+
+msgctxt "timetable.model"
+msgid "Uğursuz"
+msgstr "Ошибка"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləmələri"
+msgstr "запуски расписания"
+
+msgctxt "timetable.model"
+msgid "cədvəl işləməsi"
+msgstr "запуск расписания"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlıqları"
+msgstr "доступность преподавателей"
+
+msgctxt "timetable.model"
+msgid "müəllim əlçatanlığı"
+msgstr "доступность преподавателя"
+
+msgctxt "timetable.model"
+msgid "qaralama slot"
+msgstr "слот черновика"
+
+msgctxt "timetable.model"
+msgid "qaralama slotlar"
+msgstr "слоты черновика"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasəti"
+msgstr "политика смен группы"
+
+msgctxt "timetable.model"
+msgid "qrup növbə siyasətləri"
+msgstr "политики смен групп"
+
+msgctxt "timetable.model"
+msgid "Üstünlük verilir"
+msgstr "Предпочтительно"
+
+msgctxt "timetable.model"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "timetable.model"
+msgid "İşləyir"
+msgstr "Выполняется"
+
+msgctxt "timetable.nav"
+msgid "Avtomatik cədvəl bölmələri"
+msgstr "Разделы автоматического расписания"
+
+msgctxt "timetable.nav"
+msgid "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur."
+msgstr "У вас нет права управлять расписанием."
+
+msgctxt "timetable.nav"
+msgid "Müəllim əlçatanlığı"
+msgstr "Доступность преподавателей"
+
+msgctxt "timetable.nav"
+msgid "Növbələr"
+msgstr "Смены"
+
+msgctxt "timetable.nav"
+msgid "Yeni işləmə"
+msgstr "Новый запуск"
+
+msgctxt "timetable.nav"
+msgid "İşləmələr"
+msgstr "Запуски"
+
+msgctxt "timetable.nav"
+msgid "Əl ilə redaktor"
+msgstr "Ручной редактор"
+
+msgctxt "timetable.page"
+msgid "Avtomatik dərs cədvəli"
+msgstr "Автоматическое расписание"
+
+msgctxt "timetable.page"
+msgid ""
+"Müəllim əlçatanlığı və qrup növbələri əsasında qrupda boşluqsuz həftəlik "
+"cədvəl qurulur; qaralama yoxlanıldıqdan sonra dərc edilir."
+msgstr ""
+"Недельное расписание без «окон» у групп строится по доступности "
+"преподавателей и сменам групп; черновик публикуется после проверки."
+
+msgctxt "timetable.page"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "timetable.page"
+msgid "Semestr seçin"
+msgstr "Выберите семестр"
+
+msgctxt "timetable.policy"
+msgid "Axtar"
+msgstr "Найти"
+
+msgctxt "timetable.policy"
+msgid ""
+"Bu semestr açılışı olan qruplar. İstisna yalnız həmin qrupa aiddir (məs. "
+"1-ci kurs yalnız səhər)."
+msgstr ""
+"Группы с курсами в этом семестре. Исключение относится только к этой группе "
+"(напр., 1-й курс только утром)."
+
+msgctxt "timetable.policy"
+msgid "Bu semestrdə sizin əhatənizdə açılışı olan qrup tapılmadı."
+msgstr "В этом семестре в вашей области нет групп с курсами."
+
+msgctxt "timetable.policy"
+msgid "Cədvələ daxil etmə"
+msgstr "Не включать в расписание"
+
+msgctxt "timetable.policy"
+msgid "Daxil etmə"
+msgstr "Исключить"
+
+msgctxt "timetable.policy"
+msgid "Defolta qaytar"
+msgstr "Сбросить к умолчанию"
+
+msgctxt "timetable.policy"
+msgid "Gündə maks."
+msgstr "Макс./день"
+
+msgctxt "timetable.policy"
+msgid "Gündə maks. cüt"
+msgstr "Макс. пар/день"
+
+msgctxt "timetable.policy"
+msgid "Gündə maksimum cüt"
+msgstr "Макс. пар в день"
+
+msgctxt "timetable.policy"
+msgid "Gündəlik limit 1–%(max)s aralığında olmalıdır."
+msgstr "Дневной лимит должен быть от 1 до %(max)s."
+
+msgctxt "timetable.policy"
+msgid "Naməlum pillə."
+msgstr "Неизвестный уровень."
+
+msgctxt "timetable.policy"
+msgid "Növbələr"
+msgstr "Смены"
+
+msgctxt "timetable.policy"
+msgid "Pillə / forma"
+msgstr "Уровень / форма"
+
+msgctxt "timetable.policy"
+msgid "Pillə defoltları"
+msgstr "Значения по уровням"
+
+msgctxt "timetable.policy"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "timetable.policy"
+msgid "Qrup adı…"
+msgstr "Название группы…"
+
+msgctxt "timetable.policy"
+msgid "Qrup axtar"
+msgstr "Поиск группы"
+
+msgctxt "timetable.policy"
+msgid "Qrup növbələri"
+msgstr "Смены групп"
+
+msgctxt "timetable.policy"
+msgid "Qrup yoxdur"
+msgstr "Нет групп"
+
+msgctxt "timetable.policy"
+msgid ""
+"Qrup üçün ayrıca istisna yoxdursa bu qayda işləyir. Magistr dərsi susmaya "
+"görə yalnız axşam qoyulur."
+msgstr ""
+"Правило действует, если у группы нет своего исключения. Занятия магистратуры"
+" по умолчанию только вечером."
+
+msgctxt "timetable.policy"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "timetable.policy"
+msgid "Siyasət yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "Политика не сохранена — проверьте поля."
+
+msgctxt "timetable.policy"
+msgid "Tələbə"
+msgstr "Студенты"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "timetable.policy"
+msgid "Yadda saxlanılmadı — sahələri yoxlayın."
+msgstr "Не сохранено — проверьте поля."
+
+msgctxt "timetable.policy"
+msgid "alt qrup:"
+msgstr "подгруппа:"
+
+msgctxt "timetable.policy"
+msgid "dəyişdirilib"
+msgstr "изменено"
+
+msgctxt "timetable.policy"
+msgid "istisna"
+msgstr "исключение"
+
+msgctxt "timetable.policy"
+msgid "qiyabi"
+msgstr "заочная"
+
+msgctxt "timetable.policy"
+msgid "susmaya görə"
+msgstr "по умолчанию"
+
+msgctxt "timetable.policy"
+msgid "İcazəli növbələr"
+msgstr "Разрешённые смены"
+
+msgctxt "timetable.policy"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "timetable.policy"
+msgid "Ən azı bir növbə seçilməlidir."
+msgstr "Выберите хотя бы одну смену."
+
+msgctxt "timetable.policy"
+msgid "əyani"
+msgstr "очная"
+
+msgctxt "timetable.precheck"
+msgid "Bu dərslər yerləşdirilməyəcək — səbəbi sətirdə göstərilib."
+msgstr "Эти занятия не будут размещены — причина указана в строке."
+
+msgctxt "timetable.precheck"
+msgid "Bəzi dərslər üçün heç bir mümkün vaxt yoxdur"
+msgstr "Для некоторых занятий нет ни одного возможного времени"
+
+msgctxt "timetable.precheck"
+msgid "Cədvələ daxil edilməyən qruplar (qiyabi və ya siyasətdə istisna)"
+msgstr ""
+"Группы, не включённые в расписание (заочные или исключение в политике)"
+
+msgctxt "timetable.precheck"
+msgid "Kilidli dərs indiki növbə/əlçatanlıqdan kənardadır"
+msgstr "Заблокированное занятие вне текущей смены/доступности"
+
+msgctxt "timetable.precheck"
+msgid "Korpusda eyni anda lazım olan otaq sayı mövcud otaqlardan çoxdur"
+msgstr "Корпусу одновременно нужно больше аудиторий, чем есть"
+
+msgctxt "timetable.precheck"
+msgid "Lazım olan / mövcud otaq."
+msgstr "Нужно / имеется аудиторий."
+
+msgctxt "timetable.precheck"
+msgid "Magistr qruplarının dərsi axşam xanalarına sığmır"
+msgstr "Занятия магистрантов не помещаются в вечерние пары"
+
+msgctxt "timetable.precheck"
+msgid "Mühazirə axınları (bir neçə qrup birlikdə)"
+msgstr "Лекционные потоки (несколько групп вместе)"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimi təyin edilməmiş dərslər (vakant) — yalnız qrupa görə yerləşir"
+msgstr ""
+"Занятия без назначенного преподавателя (вакансия) — размещаются только по "
+"группе"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin həftəlik dərsi uyğun boş xanalardan çoxdur"
+msgstr ""
+"Недельная нагрузка преподавателя превышает подходящие свободные ячейки"
+
+msgctxt "timetable.precheck"
+msgid "Müəllimin vaxtı çox sıxdır (80%-dən çox dolu)"
+msgstr "Время преподавателя очень плотное (заполнено более 80%)"
+
+msgctxt "timetable.precheck"
+msgid "Qrupun həftəlik dərsi icazəli xanalara sığmır"
+msgstr "Недельная нагрузка группы не помещается в разрешённые ячейки"
+
+msgctxt "timetable.precheck"
+msgid "Saat bölgüsü tapılmayan açılışlar (plan/tapşırıqda saat yoxdur)"
+msgstr "Курсы без распределения часов (нет часов в плане/поручении)"
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / axşam tutumu. Növbə siyasətində magistr üçün günortanı açmaq olar."
+msgstr ""
+"Потребность / вечерняя ёмкость. В политике смен можно разрешить магистрам "
+"дневные пары."
+
+msgctxt "timetable.precheck"
+msgid "Tələb / tutum (cüt/həftə) — boşluqsuz cədvəl çətinləşə bilər."
+msgstr ""
+"Потребность / ёмкость (пар/неделя) — расписание без «окон» может быть "
+"затруднено."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Növbəni genişləndirin və ya gündəlik limiti "
+"artırın."
+msgstr ""
+"Потребность / ёмкость (пар/неделя). Расширьте смену или увеличьте дневной "
+"лимит."
+
+msgctxt "timetable.precheck"
+msgid ""
+"Tələb / tutum (cüt/həftə). Əlçatanlığı genişləndirin və ya dərsi başqasına "
+"verin."
+msgstr ""
+"Потребность / ёмкость (пар/неделя). Расширьте доступность или передайте "
+"занятие другому."
+
+msgctxt "timetable.precheck"
+msgid "axının qruplarının ortaq növbəsi yoxdur"
+msgstr "у групп потока нет общей смены"
+
+msgctxt "timetable.precheck"
+msgid "müəllim qrupun növbəsində heç gələ bilmir"
+msgstr "преподаватель не может прийти ни в одну пару смены группы"
+
+msgctxt "timetable.precheck"
+msgid "qrup üçün icazəli xana yoxdur"
+msgstr "у группы нет разрешённых ячеек"
+
+msgctxt "timetable.publish"
+msgid "Avtomatik cədvəl generatoru ilə dərc"
+msgstr "Опубликовано генератором расписания"
+
+msgctxt "timetable.publish"
+msgid "Qaralamada yerləşdirilmiş dərs yoxdur."
+msgstr "В черновике нет размещённых занятий."
+
+msgctxt "timetable.publish"
+msgid "Yalnız hazır (tamamlanmış) qaralama dərc edilə bilər."
+msgstr "Опубликовать можно только готовый черновик."
+
+msgctxt "timetable.review"
+msgid "ALT"
+msgstr "НИЖН"
+
+msgctxt "timetable.review"
+msgid "Alt həftə"
+msgstr "Нижняя неделя"
+
+msgctxt "timetable.review"
+msgid "Arzuolunmaz saat"
+msgstr "Нежелательные часы"
+
+msgctxt "timetable.review"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "timetable.review"
+msgid "Baxış"
+msgstr "Вид"
+
+msgctxt "timetable.review"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "timetable.review"
+msgid ""
+"Bu dərslərin müəllimi (dərs yükü bölgüsündən) açılışın jurnal sahibindən "
+"fərqlidir. Canlı cədvəldə slotun ayrıca müəllim sahəsi olmadığı üçün jurnal "
+"sahibi göstəriləcək."
+msgstr ""
+"Преподаватель этих занятий (по распределению нагрузки) отличается от "
+"владельца журнала курса. В действующем расписании нет поля преподавателя "
+"слота, поэтому будет показан владелец журнала."
+
+msgctxt "timetable.review"
+msgid "Bu qaralama canlı cədvələ dərc edilib"
+msgstr "Этот черновик опубликован в действующем расписании"
+
+msgctxt "timetable.review"
+msgid "Bu qaralama ləğv edilsin? Canlı cədvəl dəyişməyəcək."
+msgstr "Отменить этот черновик? Действующее расписание не изменится."
+
+msgctxt "timetable.review"
+msgid "Bölünmüş tədris"
+msgstr "Разделённое преподавание"
+
+msgctxt "timetable.review"
+msgid "Bütün dərslər yerləşdirilib."
+msgstr "Все занятия размещены."
+
+msgctxt "timetable.review"
+msgid "Cədvəli dərc et"
+msgstr "Опубликовать расписание"
+
+msgctxt "timetable.review"
+msgid ""
+"Diqqət: %(total)s dərs yerləşdirilməyib — dərcdən sonra canlı cədvəldə "
+"olmayacaq."
+msgstr ""
+"Внимание: не размещено занятий — %(total)s; после публикации их не будет в "
+"расписании."
+
+msgctxt "timetable.review"
+msgid "Dərc et"
+msgstr "Опубликовать"
+
+msgctxt "timetable.review"
+msgid "Dərc olunmuşdan fərq"
+msgstr "Отличия от опубликованного"
+
+msgctxt "timetable.review"
+msgid "Dərs"
+msgstr "Занятие"
+
+msgctxt "timetable.review"
+msgid "Dərs saatı"
+msgstr "Пара"
+
+msgctxt "timetable.review"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "timetable.review"
+msgid "Gün"
+msgstr "День"
+
+msgctxt "timetable.review"
+msgid "Həftə"
+msgstr "Неделя"
+
+msgctxt "timetable.review"
+msgid "Həftəlik cədvəl şəbəkəsi"
+msgstr "Сетка недельного расписания"
+
+msgctxt "timetable.review"
+msgid "Həftəlik şəbəkə"
+msgstr "Недельная сетка"
+
+msgctxt "timetable.review"
+msgid "Hər həftə"
+msgstr "Каждую неделю"
+
+msgctxt "timetable.review"
+msgid "Kilidli"
+msgstr "Заблокировано"
+
+msgctxt "timetable.review"
+msgid "Kilidlə / kilidi aç"
+msgstr "Заблокировать / разблокировать"
+
+msgctxt "timetable.review"
+msgid "Köçür"
+msgstr "Перенести"
+
+msgctxt "timetable.review"
+msgid "Laboratoriya"
+msgstr "Лабораторная"
+
+msgctxt "timetable.review"
+msgid "Ləğv et"
+msgstr "Отменить"
+
+msgctxt "timetable.review"
+msgid "Mühazirə"
+msgstr "Лекция"
+
+msgctxt "timetable.review"
+msgid "Mühərrik işləyir — səhifə hazır olanda avtomatik yenilənəcək."
+msgstr "Движок работает — страница обновится автоматически по готовности."
+
+msgctxt "timetable.review"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "timetable.review"
+msgid "Müəllim boş cütü"
+msgstr "«Окна» преподавателей"
+
+msgctxt "timetable.review"
+msgid "Məşğələ"
+msgstr "Практика"
+
+msgctxt "timetable.review"
+msgid "Növ"
+msgstr "Вид"
+
+msgctxt "timetable.review"
+msgid "Otaq"
+msgstr "Аудитория"
+
+msgctxt "timetable.review"
+msgid "Otaq (təklif)"
+msgstr "Аудитория (предложение)"
+
+msgctxt "timetable.review"
+msgid ""
+"Qaralama canlı cədvələ yazılacaq: işləmədəki açılışların köhnə slotları "
+"yumşaq silinir və yerləşdirilmiş dərslər əlavə olunur. Müəllimlərə və "
+"qrupların tələbələrinə bir bildiriş göndərilir."
+msgstr ""
+"Черновик будет записан в действующее расписание: старые слоты курсов запуска"
+" мягко удаляются, размещённые занятия добавляются. Преподаватели и студенты "
+"групп получат одно уведомление."
+
+msgctxt "timetable.review"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "timetable.review"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "timetable.review"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "timetable.review"
+msgid "Saat"
+msgstr "Время"
+
+msgctxt "timetable.review"
+msgid ""
+"Server sərt qaydaları yoxlayır: müəllim/qrup toqquşması, qrupda boşluq, "
+"növbə və «gələ bilmir» saatı."
+msgstr ""
+"Сервер проверяет жёсткие правила: конфликты преподавателя/группы, «окна» "
+"групп, смену и часы «недоступен»."
+
+msgctxt "timetable.review"
+msgid "Seçim"
+msgstr "Выбор"
+
+msgctxt "timetable.review"
+msgid "Səbəb / qeyd (auditə düşür)"
+msgstr "Причина / примечание (в журнал аудита)"
+
+msgctxt "timetable.review"
+msgid "Sərt pozuntu"
+msgstr "Жёсткие нарушения"
+
+msgctxt "timetable.review"
+msgid ""
+"Sərt qaydalar pozulmadan yer tapılmayan dərslər. Səbəbə baxın, lazım olsa əl"
+" ilə yerləşdirin və ya giriş məlumatını dəyişib yenidən işlədin."
+msgstr ""
+"Занятия, для которых не нашлось места без нарушения жёстких правил. "
+"Посмотрите причину, при необходимости разместите вручную или измените данные"
+" и запустите снова."
+
+msgctxt "timetable.review"
+msgid "Tək cütlük gün"
+msgstr "Дни с одной парой"
+
+msgctxt "timetable.review"
+msgid "Worker cavab vermir — brauzerdə işlət (qısa limit)"
+msgstr "Воркер не отвечает — запустить в браузере (короткий лимит)"
+
+msgctxt "timetable.review"
+msgid "Yenidən işlət (kilidlər qalır)"
+msgstr "Запустить снова (блокировки сохраняются)"
+
+msgctxt "timetable.review"
+msgid "Yerləşdir"
+msgstr "Разместить"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilib"
+msgstr "Размещено"
+
+msgctxt "timetable.review"
+msgid "Yerləşdirilməyən dərslər"
+msgstr "Неразмещённые занятия"
+
+msgctxt "timetable.review"
+msgid "həftədə orta (üst/alt)"
+msgstr "среднее в неделю (верх./нижн.)"
+
+msgctxt "timetable.review"
+msgid "qrup bir dərs üçün gəlir"
+msgstr "группа приходит на одну пару"
+
+msgctxt "timetable.review"
+msgid "san."
+msgstr "с"
+
+msgctxt "timetable.review"
+msgid "toqquşma + qrupda boşluq"
+msgstr "конфликты + «окна» групп"
+
+msgctxt "timetable.review"
+msgid "yaradıb:"
+msgstr "создал:"
+
+msgctxt "timetable.review"
+msgid "«dəyişdirilə bilən» xanalar"
+msgstr "«гибкие» ячейки"
+
+msgctxt "timetable.review"
+msgid "ÜST"
+msgstr "ВЕРХ"
+
+msgctxt "timetable.review"
+msgid "Üst həftə"
+msgstr "Верхняя неделя"
+
+msgctxt "timetable.review"
+msgid "İmtina"
+msgstr "Отмена"
+
+msgctxt "timetable.review"
+msgid "İşləmə uğursuz oldu"
+msgstr "Запуск завершился ошибкой"
+
+msgctxt "timetable.review"
+msgid "Əl ilə köçürülüb"
+msgstr "Перенесено вручную"
+
+msgctxt "timetable.review"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Действие не выполнено."
+
+msgctxt "timetable.run"
+msgid "30 saat = hər həftə 1 cüt; 15 saat = iki həftədən bir (üst və ya alt)."
+msgstr ""
+"30 часов = 1 пара каждую неделю; 15 часов = раз в две недели (верхняя или "
+"нижняя)."
+
+msgctxt "timetable.run"
+msgid ""
+"Alt qrup ailəsi (birləşik qrup + alt qruplar) avtomatik birlikdə götürülür."
+msgstr ""
+"Семейство подгрупп (объединённая группа + подгруппы) включается "
+"автоматически."
+
+msgctxt "timetable.run"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "timetable.run"
+msgid "Axın"
+msgstr "Потоки"
+
+msgctxt "timetable.run"
+msgid "Axının qruplarının ortaq növbəsi yoxdur."
+msgstr "У групп потока нет общей смены."
+
+msgctxt "timetable.run"
+msgid "Aşağı"
+msgstr "Вниз"
+
+msgctxt "timetable.run"
+msgid "Bu semestrdə açılışı olan qrup yoxdur."
+msgstr "В этом семестре нет групп с курсами."
+
+msgctxt "timetable.run"
+msgid "Cərimə çəkiləri (ətraflı)"
+msgstr "Веса штрафов (подробно)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəldən fərq (sabitlik)"
+msgstr "Отличие от опубликованного (стабильность)"
+
+msgctxt "timetable.run"
+msgid "Dərc olunmuş cədvəli mümkün qədər saxla (minimal dəyişiklik)"
+msgstr ""
+"Максимально сохранить опубликованное расписание (минимальные изменения)"
+
+msgctxt "timetable.run"
+msgid "Dərs (hadisə)"
+msgstr "Занятия (события)"
+
+msgctxt "timetable.run"
+msgid "Effektiv tədris həftəsi"
+msgstr "Эффективных учебных недель"
+
+msgctxt "timetable.run"
+msgid "Eyni fənn eyni gün (mühazirə + məşğələ)"
+msgstr "Один предмет в один день (лекция + практика)"
+
+msgctxt "timetable.run"
+msgid ""
+"Eyni toxum + eyni məlumat → eyni başlanğıc; fərqli toxum alternativ variant "
+"verir."
+msgstr ""
+"Одинаковое зерно + данные → одинаковый старт; другое зерно даёт "
+"альтернативный вариант."
+
+msgctxt "timetable.run"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "timetable.run"
+msgid "Fakültə seçin"
+msgstr "Выберите факультет"
+
+msgctxt "timetable.run"
+msgid "Həftəlik cüt"
+msgstr "Пар в неделю"
+
+msgctxt "timetable.run"
+msgid "Korpusda eyni anda boş otaq qalmayıb."
+msgstr "В корпусе одновременно не осталось свободных аудиторий."
+
+msgctxt "timetable.run"
+msgid "Kritik problem tapılmadı — işlədə bilərsiniz."
+msgstr "Критических проблем нет — можно запускать."
+
+msgctxt "timetable.run"
+msgid ""
+"Kritik problemlər var — işləmə yenə mümkündür, amma bəzi dərslər "
+"yerləşməyəcək."
+msgstr ""
+"Есть критические проблемы — запуск возможен, но часть занятий не будет "
+"размещена."
+
+msgctxt "timetable.run"
+msgid "Mühazirə axınları"
+msgstr "Лекционные потоки"
+
+msgctxt "timetable.run"
+msgid "Mümkün vaxt yoxdur."
+msgstr "Нет возможного времени."
+
+msgctxt "timetable.run"
+msgid "Müəllim"
+msgstr "Преподаватели"
+
+msgctxt "timetable.run"
+msgid "Müəllim bütün uyğun xanalarda başqa dərsdədir."
+msgstr "Во всех подходящих ячейках у преподавателя другое занятие."
+
+msgctxt "timetable.run"
+msgid "Müəllim prioriteti"
+msgstr "Приоритет преподавателей"
+
+msgctxt "timetable.run"
+msgid "Müəllim qrupun növbəsində heç gələ bilmir."
+msgstr "Преподаватель не может прийти ни в одну пару смены группы."
+
+msgctxt "timetable.run"
+msgid "Müəllim seçin"
+msgstr "Выберите преподавателя"
+
+msgctxt "timetable.run"
+msgid "Müəllim uyğun xanalarda başqa fakültənin dərc olunmuş dərsindədir."
+msgstr ""
+"В подходящих ячейках у преподавателя опубликованные занятия другого "
+"факультета."
+
+msgctxt "timetable.run"
+msgid "Müəllim əlavə et"
+msgstr "Добавить преподавателя"
+
+msgctxt "timetable.run"
+msgid "Müəllimi təyin edilməmiş (vakant) dərsləri də yerləşdir"
+msgstr "Размещать и занятия без назначенного преподавателя (вакансия)"
+
+msgctxt "timetable.run"
+msgid "Müəllimin boş cütü (pəncərə)"
+msgstr "«Окно» преподавателя"
+
+msgctxt "timetable.run"
+msgid "Müəllimin gündəlik limiti aşması"
+msgstr "Превышение дневного лимита преподавателя"
+
+msgctxt "timetable.run"
+msgid "Məlumat"
+msgstr "Информация"
+
+msgctxt "timetable.run"
+msgid "Məlumatı yoxla"
+msgstr "Проверить данные"
+
+msgctxt "timetable.run"
+msgid "Mənbə işləmənin kilidli dərsləri yerində saxlanılacaq"
+msgstr "Заблокированные занятия исходного запуска останутся на месте"
+
+msgctxt "timetable.run"
+msgid "Növbəyə qoyulur…"
+msgstr "Постановка в очередь…"
+
+msgctxt "timetable.run"
+msgid "Parametrlər"
+msgstr "Параметры"
+
+msgctxt "timetable.run"
+msgid "Prioritet sırası"
+msgstr "Порядок приоритета"
+
+msgctxt "timetable.run"
+msgid "Qrup"
+msgstr "Группы"
+
+msgctxt "timetable.run"
+msgid "Qrup adı ilə süz…"
+msgstr "Фильтр по названию группы…"
+
+msgctxt "timetable.run"
+msgid "Qrup üçün icazəli xana yoxdur (növbə siyasəti)."
+msgstr "У группы нет разрешённых ячеек (политика смен)."
+
+msgctxt "timetable.run"
+msgid "Qrupları süz"
+msgstr "Фильтр групп"
+
+msgctxt "timetable.run"
+msgid "Qrupun bir dərs üçün gəldiyi gün"
+msgstr "Группа приходит на одну пару"
+
+msgctxt "timetable.run"
+msgid "Qrupun gündəlik limiti aşması"
+msgstr "Превышение дневного лимита группы"
+
+msgctxt "timetable.run"
+msgid "Qrupun gününü boşluqsuz saxlamaq mümkün olmadı."
+msgstr "Не удалось сохранить день группы без «окон»."
+
+msgctxt "timetable.run"
+msgid "Qrupun uyğun xanaları başqa dərslərlə doludur."
+msgstr "Подходящие ячейки группы заняты другими занятиями."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahı boşdur — bütün müəllimlər bərabər prioritetlidir. «Məlumatı yoxla»dan"
+" sonra müəllimləri əlavə edə bilərsiniz."
+msgstr ""
+"Список пуст — у всех преподавателей равный приоритет. Добавить "
+"преподавателей можно после «Проверить данные»."
+
+msgctxt "timetable.run"
+msgid ""
+"Siyahıdakı müəllimlər əvvəl yerləşdirilir və onların istəkləri daha güclü "
+"çəki alır (yuxarıdakı — ən vacib)."
+msgstr ""
+"Преподаватели из списка размещаются первыми, их пожелания весят больше "
+"(сверху — самый важный)."
+
+msgctxt "timetable.run"
+msgid "Siyahıdan çıxar"
+msgstr "Убрать из списка"
+
+msgctxt "timetable.run"
+msgid ""
+"Sərt qaydalar (toqquşma, qrupda boşluq, magistr — yalnız axşam, «gələ "
+"bilmir» saatı) çəki ilə dəyişmir — HƏMİŞƏ qorunur."
+msgstr ""
+"Жёсткие правила (конфликты, «окна» групп, магистратура — только вечер, часы "
+"«недоступен») не зависят от весов — соблюдаются ВСЕГДА."
+
+msgctxt "timetable.run"
+msgid "Sərt qaydaları pozmadan yer tapılmadı."
+msgstr "Не найдено места без нарушения жёстких правил."
+
+msgctxt "timetable.run"
+msgid "Toxum (seed)"
+msgstr "Зерно (seed)"
+
+msgctxt "timetable.run"
+msgid ""
+"Tövsiyə: fakültə-fakültə qurun — başqa fakültənin dərc olunmuş dərsləri "
+"müəllim üçün sabit məşğulluq sayılır."
+msgstr ""
+"Совет: стройте по факультетам — опубликованные занятия другого факультета "
+"считаются фиксированной занятостью преподавателя."
+
+msgctxt "timetable.run"
+msgid "Tədris günləri"
+msgstr "Учебные дни"
+
+msgctxt "timetable.run"
+msgid "Uzun limit daha az «boş pəncərə» verir; 30–60 san. adətən kifayətdir."
+msgstr "Больший лимит даёт меньше «окон»; обычно достаточно 30–60 с."
+
+msgctxt "timetable.run"
+msgid "Vaxt limiti (saniyə)"
+msgstr "Лимит времени (секунды)"
+
+msgctxt "timetable.run"
+msgid "Xəbərdarlıq"
+msgstr "Предупреждение"
+
+msgctxt "timetable.run"
+msgid "Xəta"
+msgstr "Ошибка"
+
+msgctxt "timetable.run"
+msgid "Yeni işləmə"
+msgstr "Новый запуск"
+
+msgctxt "timetable.run"
+msgid "Yoxlama nəticəsi"
+msgstr "Результат проверки"
+
+msgctxt "timetable.run"
+msgid "Yoxlanılır…"
+msgstr "Проверка…"
+
+msgctxt "timetable.run"
+msgid "Yuxarı"
+msgstr "Вверх"
+
+msgctxt "timetable.run"
+msgid "boşluq yaranır"
+msgstr "появляется «окно»"
+
+msgctxt "timetable.run"
+msgid "digər"
+msgstr "другое"
+
+msgctxt "timetable.run"
+msgid "müəllim məşğul"
+msgstr "преподаватель занят"
+
+msgctxt "timetable.run"
+msgid "müəllimin kənar dərsi"
+msgstr "внешнее занятие преподавателя"
+
+msgctxt "timetable.run"
+msgid "otaq yoxdur"
+msgstr "нет аудитории"
+
+msgctxt "timetable.run"
+msgid "qrup məşğul"
+msgstr "группа занята"
+
+msgctxt "timetable.run"
+msgid "«Dəyişdirilə bilən» saatın istifadəsi"
+msgstr "Использование «гибкого» часа"
+
+msgctxt "timetable.run"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "timetable.run"
+msgid "İxtisas seçin"
+msgstr "Выберите специальность"
+
+msgctxt "timetable.run"
+msgid "İşləməni yaradan istifadəçi tapılmadı."
+msgstr "Пользователь, создавший запуск, не найден."
+
+msgctxt "timetable.run"
+msgid "İşlət"
+msgstr "Запустить"
+
+msgctxt "timetable.run"
+msgid "Əhatə"
+msgstr "Охват"
+
+msgctxt "timetable.run"
+msgid "Əhatə növü"
+msgstr "Тип охвата"
+
+msgctxt "timetable.run"
+msgid "Əhatə seçin (fakültə, ixtisas və ya ən azı bir qrup)."
+msgstr "Выберите охват (факультет, специальность или хотя бы одну группу)."
+
+msgctxt "timetable.run"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Действие не выполнено."
+
+msgctxt "subject_folder.choice"
+msgid "Aktiv"
+msgstr "Активна"
+
+msgctxt "subject_folder.choice"
+msgid "Arxivlənib"
+msgstr "В архиве"
+
+msgctxt "subject_folder.choice"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "subject_folder.choice"
+msgid "Digər səbəb"
+msgstr "Другая причина"
+
+msgctxt "subject_folder.choice"
+msgid "Ev tapşırığı"
+msgstr "Домашнее задание"
+
+msgctxt "subject_folder.choice"
+msgid "Eyni məzmun"
+msgstr "Идентичное содержимое"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl"
+msgstr "Файл"
+
+msgctxt "subject_folder.choice"
+msgid "Fayl silindi"
+msgstr "Файл удалён"
+
+msgctxt "subject_folder.choice"
+msgid "Gecikmə ilə qəbul edilir"
+msgstr "Принимается с опозданием"
+
+msgctxt "subject_folder.choice"
+msgid "Göndərildi"
+msgstr "Отправлено"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnal qəbul etmədi"
+msgstr "Журнал не принял"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşdü"
+msgstr "Передано в журнал"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala düşüb"
+msgstr "Внесено в журнал"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülmə gözləyir"
+msgstr "Ожидает передачи в журнал"
+
+msgctxt "subject_folder.choice"
+msgid "Jurnala ötürülməsi gözlənilir"
+msgstr "Ожидается передача в журнал"
+
+msgctxt "subject_folder.choice"
+msgid "Keçid"
+msgstr "Ссылка"
+
+msgctxt "subject_folder.choice"
+msgid "Kod nümunəsi"
+msgstr "Пример кода"
+
+msgctxt "subject_folder.choice"
+msgid "Mövzuya uyğun deyil"
+msgstr "Не по теме"
+
+msgctxt "subject_folder.choice"
+msgid "Müəllimin mövzusu"
+msgstr "Тема преподавателя"
+
+msgctxt "subject_folder.choice"
+msgid "Mətn oxşarlığı"
+msgstr "Сходство текста"
+
+msgctxt "subject_folder.choice"
+msgid "Oxşarlıq aşkarlandı"
+msgstr "Обнаружено сходство"
+
+msgctxt "subject_folder.choice"
+msgid "Plagiat / köçürülmüş iş"
+msgstr "Плагиат / списанная работа"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "subject_folder.choice"
+msgid "Qaralama saxlanıldı"
+msgstr "Черновик сохранён"
+
+msgctxt "subject_folder.choice"
+msgid "Qeyd"
+msgstr "Заметка"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edildi"
+msgstr "Принято"
+
+msgctxt "subject_folder.choice"
+msgid "Qəbul edilib"
+msgstr "Принята"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edildi"
+msgstr "Отклонено"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd edilib"
+msgstr "Отклонена"
+
+msgctxt "subject_folder.choice"
+msgid "Rədd ləğv edildi"
+msgstr "Отклонение отменено"
+
+msgctxt "subject_folder.choice"
+msgid "Rəylə qaytarıldı"
+msgstr "Возвращено с отзывом"
+
+msgctxt "subject_folder.choice"
+msgid "Sillabusdan"
+msgstr "Из силлабуса"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra göndərilib"
+msgstr "Отправлено после срока"
+
+msgctxt "subject_folder.choice"
+msgid "Son tarixdən sonra qəbul edilmir"
+msgstr "Не принимается после срока"
+
+msgctxt "subject_folder.choice"
+msgid "Sərbəst iş"
+msgstr "Самостоятельная работа"
+
+msgctxt "subject_folder.choice"
+msgid "Tətbiq olunmur"
+msgstr "Не применяется"
+
+msgctxt "subject_folder.choice"
+msgid "Video keçidi"
+msgstr "Ссылка на видео"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən göndərildi"
+msgstr "Отправлено повторно"
+
+msgctxt "subject_folder.choice"
+msgid "Yenidən işləməyə qaytarılıb"
+msgstr "Возвращена на доработку"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama alınmadı"
+msgstr "Проверка не удалась"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlama gözlənilir"
+msgstr "Ожидает проверки"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıla bilən mətn yoxdur"
+msgstr "Нет текста для проверки"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanıldı"
+msgstr "Проверено"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılıb"
+msgstr "Проверка завершена"
+
+msgctxt "subject_folder.choice"
+msgid "Yoxlanılır"
+msgstr "На проверке"
+
+msgctxt "subject_folder.choice"
+msgid "Şəkil"
+msgstr "Изображение"
+
+msgctxt "subject_folder.error"
+msgid "Arxivlənmiş qovluq dəyişdirilə bilməz."
+msgstr "Архивную папку нельзя изменить."
+
+msgctxt "subject_folder.error"
+msgid "Açılma vaxtı son tarixdən əvvəl olmalıdır."
+msgstr "Время открытия должно быть раньше срока сдачи."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın fənni qovluğun fənninə uyğun deyil."
+msgstr "Дисциплина курса не совпадает с дисциплиной папки."
+
+msgctxt "subject_folder.error"
+msgid "Açılışın semestri qovluğun semestrinə uyğun deyil."
+msgstr "Семестр курса не совпадает с семестром папки."
+
+msgctxt "subject_folder.error"
+msgid "Bal 0-dan böyük olmalı və %(max)s-dən çox olmamalıdır."
+msgstr "Балл должен быть больше 0 и не больше %(max)s."
+
+msgctxt "subject_folder.error"
+msgid "Başlıq boş ola bilməz."
+msgstr "Заголовок не может быть пустым."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışında aktiv qeydiyyatınız yoxdur."
+msgstr "У вас нет активной записи на этот курс."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənn açılışını (qrupu) siz tədris etmirsiniz."
+msgstr "Вы не ведёте этот курс (группу)."
+
+msgctxt "subject_folder.error"
+msgid "Bu fənni tədris etmədiyiniz üçün onun qovluğunu yarada bilməzsiniz."
+msgstr "Нельзя создать папку для дисциплины, которую вы не ведёте."
+
+msgctxt "subject_folder.error"
+msgid "Bu göndəriş baxış növbəsində deyil."
+msgstr "Эта работа не находится в очереди на проверку."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrup üçün qovluq aktiv deyil."
+msgstr "Папка не активна для этой группы."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun göndərişlərini yalnız fənnin müəllimi yoxlaya bilər."
+msgstr "Работы этой группы может проверять только преподаватель дисциплины."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Bu qrupun sillabusundakı sərbəst iş strukturu (%(offering_option)s) "
+"qovluğunkundan (%(folder_option)s) fərqlidir — sərbəst iş bu qrupda "
+"qovluqdan qəbul edilməyəcək."
+msgstr ""
+"Структура самостоятельной работы в силлабусе этой группы "
+"(%(offering_option)s) отличается от структуры папки (%(folder_option)s) — "
+"самостоятельные работы этой группы через папку приниматься не будут."
+
+msgctxt "subject_folder.error"
+msgid "Bu qrupun sərbəst işləri başqa fənn qovluğundan qiymətləndirilir."
+msgstr ""
+"Самостоятельные работы этой группы оцениваются из другой папки дисциплины."
+
+msgctxt "subject_folder.error"
+msgid "Bu sərbəst iş üçün bal artıq verilib — ikinci dəfə bal verilmir."
+msgstr ""
+"Балл за эту самостоятельную работу уже выставлен — повторно он не "
+"выставляется."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq arxivlənib."
+msgstr "Это задание в архиве."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq fayl qəbul etmir — cavabı mətn kimi yazın."
+msgstr "Это задание не принимает файлы — напишите ответ текстом."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq mətn cavabı qəbul etmir — fayl yükləyin."
+msgstr "Это задание не принимает текстовые ответы — загрузите файл."
+
+msgctxt "subject_folder.error"
+msgid "Bu tapşırıq üzrə iş artıq yekunlaşıb."
+msgstr "Работа по этому заданию уже завершена."
+
+msgctxt "subject_folder.error"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на это действие."
+
+msgctxt "subject_folder.error"
+msgid "Cavab mətni yazın və ya ən azı bir fayl əlavə edin."
+msgstr "Напишите ответ или прикрепите хотя бы один файл."
+
+msgctxt "subject_folder.error"
+msgid "Dəstəklənməyən fayl tipi: %(ext)s"
+msgstr "Неподдерживаемый тип файла: %(ext)s"
+
+msgctxt "subject_folder.error"
+msgid "Ev tapşırığına bal verilmir — yalnız «Yoxlanıldı» qeyd edin."
+msgstr "За домашнее задание баллы не ставятся — отметьте только «Проверено»."
+
+msgctxt "subject_folder.error"
+msgid "Eyni anda ikinci göndəriş alındı — səhifəni yeniləyib yoxlayın."
+msgstr ""
+"Одновременно получена вторая отправка — обновите страницу и проверьте."
+
+msgctxt "subject_folder.error"
+msgid "Fayl qəbul edilmədi."
+msgstr "Файл не принят."
+
+msgctxt "subject_folder.error"
+msgid "Fayl sayı 1–%(max_files)s, ölçü 1–%(max_mb)s MB aralığında olmalıdır."
+msgstr ""
+"Количество файлов — от 1 до %(max_files)s, размер — от 1 до %(max_mb)s МБ."
+
+msgctxt "subject_folder.error"
+msgid "Fayl seçilməyib."
+msgstr "Файл не выбран."
+
+msgctxt "subject_folder.error"
+msgid "Göndərişiniz yoxlanılır — müəllimin cavabını gözləyin."
+msgstr "Ваша работа на проверке — дождитесь ответа преподавателя."
+
+msgctxt "subject_folder.error"
+msgid "Keçid http:// və ya https:// ilə başlayan düzgün ünvan olmalıdır."
+msgstr ""
+"Ссылка должна быть корректным адресом, начинающимся с http:// или https://."
+
+msgctxt "subject_folder.error"
+msgid "Kod mətni boşdur."
+msgstr "Текст кода пуст."
+
+msgctxt "subject_folder.error"
+msgid "Material bu qovluğa aid deyil."
+msgstr "Материал не относится к этой папке."
+
+msgctxt "subject_folder.error"
+msgid "Material növü tanınmır."
+msgstr "Неизвестный тип материала."
+
+msgctxt "subject_folder.error"
+msgid "Mövzu bu qovluğa aid deyil."
+msgstr "Тема не относится к этой папке."
+
+msgctxt "subject_folder.error"
+msgid "Mövzuya bağlı material və ya tapşırıq var — əvvəlcə onları köçürün."
+msgstr "К теме привязаны материалы или задания — сначала перенесите их."
+
+msgctxt "subject_folder.error"
+msgid "Mətn çox uzundur (ən çox %(max)s simvol)."
+msgstr "Текст слишком длинный (не более %(max)s символов)."
+
+msgctxt "subject_folder.error"
+msgid "Qeyd mətni boşdur."
+msgstr "Текст заметки пуст."
+
+msgctxt "subject_folder.error"
+msgid "Qovluq hələ aktiv deyil."
+msgstr "Папка ещё не активна."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğu yalnız onun sahibi olan müəllim redaktə edə bilər."
+msgstr "Редактировать папку может только её владелец-преподаватель."
+
+msgctxt "subject_folder.error"
+msgid "Qovluğun statusu yanlışdır."
+msgstr "Недопустимый статус папки."
+
+msgctxt "subject_folder.error"
+msgid "Rədd səbəbi seçilməyib."
+msgstr "Не выбрана причина отклонения."
+
+msgctxt "subject_folder.error"
+msgid "Rəy yazın (ən azı %(min)s simvol)."
+msgstr "Напишите отзыв (не менее %(min)s символов)."
+
+msgctxt "subject_folder.error"
+msgid "Seçilən obyektlər eyni təşkilata aid olmalıdır."
+msgstr "Выбранные объекты должны принадлежать одной организации."
+
+msgctxt "subject_folder.error"
+msgid "Sillabus mövzusu silinmir — onu gizlədə və ya adını dəyişə bilərsiniz."
+msgstr "Тему силлабуса нельзя удалить — её можно скрыть или переименовать."
+
+msgctxt "subject_folder.error"
+msgid "Son tarix keçib — bu tapşırıq gecikmə ilə qəbul edilmir."
+msgstr "Срок истёк — это задание не принимает работы с опозданием."
+
+msgctxt "subject_folder.error"
+msgid "Sərbəst iş bal ilə qəbul edilir."
+msgstr "Самостоятельная работа принимается с баллом."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş balı cəmi %(max_total)s-i keçə bilməz: tələbənin artıq "
+"%(already)s balı var, ən çox %(remaining)s əlavə etmək olar."
+msgstr ""
+"Сумма баллов за самостоятельную работу не может превышать %(max_total)s: у "
+"студента уже %(already)s, можно добавить не более %(remaining)s."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Sərbəst iş tapşırıqları sillabusun strukturundan yaranır — əlavə sərbəst iş "
+"yaratmaq olmaz."
+msgstr ""
+"Задания самостоятельной работы создаются по структуре силлабуса — "
+"дополнительные создать нельзя."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq bu qovluğa aid deyil."
+msgstr "Задание не относится к этой папке."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ açılmayıb."
+msgstr "Задание ещё не открыто."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq hələ dərc edilməyib."
+msgstr "Задание ещё не опубликовано."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq növü tanınmır."
+msgstr "Неизвестный тип задания."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırıq nə mətn, nə də fayl qəbul edir."
+msgstr "Задание не принимает ни текст, ни файлы."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa göndəriş var — silmək olmaz, yalnız arxivləmək olar."
+msgstr "У задания есть работы — его нельзя удалить, только архивировать."
+
+msgctxt "subject_folder.error"
+msgid "Tapşırığa ən çox %(max)s qoşma əlavə etmək olar."
+msgstr "К заданию можно прикрепить не более %(max)s вложений."
+
+msgctxt "subject_folder.error"
+msgid "Təyinat bu qovluğa aid deyil."
+msgstr "Назначение не относится к этой папке."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız qaralamadakı fayl silinə bilər."
+msgstr "Удалять можно только файлы черновика."
+
+msgctxt "subject_folder.error"
+msgid "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."
+msgstr "Повторно открыть можно только отклонённую работу."
+
+msgctxt "subject_folder.error"
+msgid "Ən çox %(max)s fayl əlavə etmək olar."
+msgstr "Можно прикрепить не более %(max)s файлов."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal balı qəbul etmədi."
+msgstr "Журнал не принял балл."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnal inteqrasiyası hələ aktiv deyil — bal növbədədir."
+msgstr "Интеграция с журналом ещё не активна — балл в очереди."
+
+msgctxt "subject_folder.journal"
+msgid "Jurnala ötürmə alınmadı, yenidən cəhd ediləcək: %(error)s"
+msgstr "Не удалось передать в журнал, будет повторная попытка: %(error)s"
+
+msgctxt "subject_folder.journal"
+msgid "Sərbəst iş %(n)s"
+msgstr "Самостоятельная работа %(n)s"
+
+msgctxt "subject_folder.sync"
+msgid "Sərbəst iş %(n)s"
+msgstr "Самостоятельная работа %(n)s"
+
+msgctxt "subject_folder.review"
+msgid ""
+"Bu bal jurnala düşəcək: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"Этот балл попадёт в журнал: %(slot)s · %(points)s/%(max)s (всего "
+"%(total)s/%(max_total)s)"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluqları"
+msgstr "папки дисциплин"
+
+msgctxt "subject_folder.model"
+msgid "fənn qovluğu"
+msgstr "папка дисциплины"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş"
+msgstr "сданная работа"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izi"
+msgstr "отпечаток работы"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş barmaq izləri"
+msgstr "отпечатки работ"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylları"
+msgstr "файлы работ"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş faylı"
+msgstr "файл работы"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisələri"
+msgstr "события работ"
+
+msgctxt "subject_folder.model"
+msgid "göndəriş hadisəsi"
+msgstr "событие работы"
+
+msgctxt "subject_folder.model"
+msgid "göndərişlər"
+msgstr "сданные работы"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluqları"
+msgstr "совпадения по сходству"
+
+msgctxt "subject_folder.model"
+msgid "oxşarlıq uyğunluğu"
+msgstr "совпадение по сходству"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzuları"
+msgstr "темы папки"
+
+msgctxt "subject_folder.model"
+msgid "qovluq mövzusu"
+msgstr "тема папки"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatları"
+msgstr "назначения папок"
+
+msgctxt "subject_folder.model"
+msgid "qovluq təyinatı"
+msgstr "назначение папки"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq"
+msgstr "задание"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşmaları"
+msgstr "вложения заданий"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq qoşması"
+msgstr "вложение задания"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixi"
+msgstr "срок задания"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıq son tarixləri"
+msgstr "сроки заданий"
+
+msgctxt "subject_folder.model"
+msgid "tapşırıqlar"
+msgstr "задания"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialları"
+msgstr "учебные материалы"
+
+msgctxt "subject_folder.model"
+msgid "tədris materialı"
+msgstr "учебный материал"
+
+msgctxt "subject_folder.notify"
+msgid "Bal jurnala köçürülür."
+msgstr "Балл переносится в журнал."
+
+msgctxt "subject_folder.notify"
+msgid "Bal: %(points)s / %(max)s — jurnala köçürülür."
+msgstr "Балл: %(points)s / %(max)s — переносится в журнал."
+
+msgctxt "subject_folder.notify"
+msgid "Ev tapşırığı yoxlanıldı: %(task)s"
+msgstr "Домашнее задание проверено: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Müəllimin rəyini oxuyun və işi yenidən göndərin."
+msgstr "Прочитайте отзыв преподавателя и отправьте работу повторно."
+
+msgctxt "subject_folder.notify"
+msgid "Səbəb və rəy tapşırıq səhifəsindədir."
+msgstr "Причина и отзыв — на странице задания."
+
+msgctxt "subject_folder.notify"
+msgid "Sərbəst iş qəbul edildi: %(task)s"
+msgstr "Самостоятельная работа принята: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni ev tapşırığı: %(title)s"
+msgstr "Новое домашнее задание: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni fənn qovluğu: %(subject)s"
+msgstr "Новая папка дисциплины: %(subject)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yeni sərbəst iş: %(title)s"
+msgstr "Новая самостоятельная работа: %(title)s"
+
+msgctxt "subject_folder.notify"
+msgid "Yoxlanılmalı yeni işlər: %(count)s"
+msgstr "Новые работы на проверку: %(count)s"
+
+msgctxt "subject_folder.notify"
+msgid "«%(folder)s» — tədris materialları və tapşırıqlar sizin üçün açıqdır."
+msgstr "«%(folder)s» — учебные материалы и задания теперь доступны вам."
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz rədd edildi: %(task)s"
+msgstr "Ваша работа отклонена: %(task)s"
+
+msgctxt "subject_folder.notify"
+msgid "İşiniz yenidən işləməyə qaytarıldı: %(task)s"
+msgstr "Ваша работа возвращена на доработку: %(task)s"
