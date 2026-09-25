@@ -63,6 +63,43 @@ class ResultsSectionTest(TestCase):
         self.assertEqual(data["histogram"]["code"], "overall")
 
 
+class ResultsScopeTest(TestCase):
+    """Əhatə (kafedra müdiri yalnız öz kafedrası), anonimlik həddi və kampaniyasız vəziyyət."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.w = build_results_world("svrsc")
+        cls.empty = build_world("svrs0", students=1)
+        with bypass_rls():
+            cls.empty_rector = member(cls.empty["org"], "svrs0_rector", "rector")
+
+    def _rank_rows(self, user):
+        response = client_for(self.w["org"], user).get(SECTION + "&er_tab=teachers")
+        self.assertEqual(response.status_code, 200)
+        return _island(response, "svr-rank-data")
+
+    def test_chair_head_sees_only_own_department(self):
+        rows = self._rank_rows(self.w["chair_head"])
+        self.assertTrue(rows)
+        self.assertEqual({row["department"] for row in rows}, {self.w["chair_a"].name})
+
+    def test_rector_sees_all_departments_and_small_groups_stay_hidden(self):
+        rows = self._rank_rows(self.w["rector"])
+        departments = {row["department"] for row in rows}
+        self.assertLessEqual({self.w["chair_a"].name, self.w["chair_b"].name, self.w["chair_d"].name}, departments)
+        small = [row for row in rows if row["n"] < 3]  # müəllim E — 2 cavab < k
+        self.assertTrue(small)
+        for row in small:
+            self.assertFalse(row["visible"])
+            self.assertIsNone(row["avg_overall"])
+
+    def test_organization_without_campaign_shows_empty_state(self):
+        response = client_for(self.empty["org"], self.empty_rector).get(SECTION)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Hələ heç bir sorğu kampaniyası keçirilməyib")
+        self.assertNotContains(response, "svr-overview-data")
+
+
 def _panel(html):
     start = html.index('data-profile-section-panel="evaluation-results"')
     end = html.index("</section>", html.index("data-svr-drawer"))

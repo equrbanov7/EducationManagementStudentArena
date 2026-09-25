@@ -326,7 +326,9 @@ def selfwork_action(request, offering_id):
         elif plan.state == selfwork_structure.STATE_MISMATCH:
             messages.error(request, selfwork_structure.mismatch_message(plan))
         elif plan.state == selfwork_structure.STATE_NONE:
-            messages.error(request, pgettext("registrar.selfwork", "Təsdiqlənmiş sillabusda sərbəst iş strukturu yoxdur."))
+            messages.error(
+                request, pgettext("registrar.selfwork", "Təsdiqlənmiş sillabusda sərbəst iş strukturu yoxdur.")
+            )
         else:
             messages.info(request, pgettext("registrar.selfwork", "Sərbəst iş strukturu artıq qurulub."))
         return _back(offering, "serbest")

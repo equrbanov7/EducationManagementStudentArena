@@ -83,7 +83,8 @@ class SelfWorkTopic(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedMode
                 name="selfwork_topic_max_points_range",
             ),
             models.CheckConstraint(
-                condition=Q(slot_index__isnull=True) | (Q(slot_index__gte=1) & Q(slot_index__lte=SELFWORK_TOTAL_POINTS)),
+                condition=Q(slot_index__isnull=True)
+                | (Q(slot_index__gte=1) & Q(slot_index__lte=SELFWORK_TOTAL_POINTS)),
                 name="selfwork_topic_slot_index_range",
             ),
             # Slot → mövzu xəritəsi SABİTDİR: fənn qovluğu «Sərbəst iş 2»-ni həmişə

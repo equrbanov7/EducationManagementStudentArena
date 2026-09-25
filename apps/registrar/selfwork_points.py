@@ -227,7 +227,9 @@ def selfwork_slots(enrollments, offering_ids) -> tuple[dict, dict]:
         structured = all(meta[0] is not None for _topic_id, meta in items)
         visible = items if structured else items[:10]
         for enrollment_id in owners.get(offering_id, ()):
-            graded = [marks[(enrollment_id, topic_id)][0] for topic_id, _meta in items if (enrollment_id, topic_id) in marks]
+            graded = [
+                marks[(enrollment_id, topic_id)][0] for topic_id, _meta in items if (enrollment_id, topic_id) in marks
+            ]
             if graded:
                 totals[(enrollment_id, offering_id)] = cap_total(sum(graded, _ZERO))
             slots[enrollment_id] = [

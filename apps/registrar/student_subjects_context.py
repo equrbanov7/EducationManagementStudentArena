@@ -125,7 +125,9 @@ def _component_breakdown(batch, enrollment, *, midterm=False, selfwork_slots=Non
     for c in components:
         chip = {"name": c.name, "score": score_by.get(c.id), "max": c.max_score}
         if c.kind == ComponentKind.SELF_WORK:
-            live = min(Decimal(batch.selfwork_points.get((enrollment.id, enrollment.offering_id), 0)), Decimal(c.max_score))
+            live = min(
+                Decimal(batch.selfwork_points.get((enrollment.id, enrollment.offering_id), 0)), Decimal(c.max_score)
+            )
             chip["score"] = live if live else score_by.get(c.id)
             chip["slots"] = (selfwork_slots or {}).get(enrollment.id, [])
         chips.append(chip)

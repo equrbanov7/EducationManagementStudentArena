@@ -16,12 +16,13 @@ bir hissəsi J12-nin yaratdığı dərslərə (plan pk-ları ilə) bağlanır.
 
 from __future__ import annotations
 
-import csv
 import os
 from collections import Counter
 
 from django.apps import apps as django_apps
 from django.utils import timezone
+
+from core.export_safety import safe_csv_writer
 
 from .rehearsal_contracts import SOURCE_SYSTEM
 from .repair_enrollments_extract import extract, restored_from_run, summarise
@@ -78,7 +79,7 @@ def write_skipped_csv(path: str, selection) -> None:
 
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(descriptor, "w", newline="", encoding="utf-8") as handle:
-        writer = csv.writer(handle)
+        writer = safe_csv_writer(handle)
         writer.writerow(("category", "legacy_student_id", "journal_uniqid", "reason"))
         writer.writerows(sorted(selection.skipped_rows))
 

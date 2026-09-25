@@ -245,7 +245,13 @@ class JournalSyncFailureVisibilityTest(SimpleTestCase):
         return journal_sync.journal_sync_skips_total.labels(reason=reason)._value.get()
 
     def test_test_percent_failure_is_logged_and_counted(self):
-        exam = SimpleNamespace(exam_type="test", subject_id=1, organization=SimpleNamespace(pk=1), questions=None)
+        exam = SimpleNamespace(
+            exam_type="test",
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası jurnala yazılır
+            subject_id=1,
+            organization=SimpleNamespace(pk=1),
+            questions=None,
+        )
         attempt = _BrokenTestAttempt(exam)
         before = self._counter_value(journal_sync.SKIP_PERCENT_UNAVAILABLE)
         with self.assertLogs("apps.exams.services.journal_sync", level=logging.WARNING) as captured:
@@ -257,7 +263,11 @@ class JournalSyncFailureVisibilityTest(SimpleTestCase):
 
     def test_written_attempt_with_broken_max_score_is_logged_and_counted(self):
         exam = SimpleNamespace(
-            exam_type="written", subject_id=1, organization=SimpleNamespace(pk=1), questions=_BrokenQuestions()
+            exam_type="written",
+            exam_type_extended="final",
+            subject_id=1,
+            organization=SimpleNamespace(pk=1),
+            questions=_BrokenQuestions(),
         )
         attempt = SimpleNamespace(
             id=778,
@@ -279,7 +289,13 @@ class JournalSyncFailureVisibilityTest(SimpleTestCase):
         self.assertIn("has no max score", joined)
 
     def test_ungraded_written_attempt_is_a_silent_wait_not_a_failure(self):
-        exam = SimpleNamespace(exam_type="written", subject_id=1, organization=SimpleNamespace(pk=1), questions=None)
+        exam = SimpleNamespace(
+            exam_type="written",
+            exam_type_extended="final",
+            subject_id=1,
+            organization=SimpleNamespace(pk=1),
+            questions=None,
+        )
         attempt = SimpleNamespace(
             id=779, user_id=1, exam=exam, is_trial=False, supervision_status="active", teacher_score=None
         )

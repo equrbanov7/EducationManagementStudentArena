@@ -114,6 +114,7 @@ class _AppealJournalSetup(TestCase):
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası FinalGrade-ə yazılır
             exam_type="test",
             is_active=True,
         )
@@ -183,6 +184,7 @@ class AcceptedAppealReachesJournalTests(_AppealJournalSetup):
             author=self.teacher,
             organization=self.org,
             subject=self.subject,
+            exam_type_extended="final",  # H-1: yalnız final kateqoriyası FinalGrade-ə yazılır
             exam_type="written",
             is_active=True,
         )

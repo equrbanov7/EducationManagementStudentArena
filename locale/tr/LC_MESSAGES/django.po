@@ -79781,3 +79781,1256 @@ msgid ""
 msgstr ""
 "Bir derse bağlı sınav için kategori seçin — deftere yalnızca «Final» "
 "sınavının puanı yazılır."
+
+msgctxt "registrar.selfwork"
+msgid "Jurnal"
+msgstr "Yoklama defteri"
+
+msgctxt "registrar.selfwork"
+msgid "Fənn qovluğu"
+msgstr "Ders klasörü"
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Sillabus sərbəst işi %(label)s bal kimi tələb edir, jurnalda isə %(topics)s "
+"köhnə çeklist mövzusu var və onların bəzisinə artıq bal yazılıb. Qiymət "
+"yazılmış mövzular avtomatik çevrilmir — tələbələrin balı dəyişərdi. "
+"Strukturu dəyişmək üçün RİM ilə sənədli düzəliş edin."
+msgstr ""
+"İzlence bağımsız çalışmayı %(label)s puan olarak tanımlıyor, ancak defterde "
+"%(topics)s eski kontrol listesi konusu var ve bazıları zaten puanlanmış. "
+"Puanlanmış konular otomatik dönüştürülmez — öğrencilerin puanı değişirdi. "
+"Yapıyı değiştirmek için öğrenci işleri ile belgeli düzeltme yapın."
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Sillabus sərbəst işi %(label)s bal kimi tələb edir, jurnalda isə %(topics)s "
+"mövzu var. Mövzular silinmir — artıq (qiymətsiz) mövzuları özünüz silin, "
+"struktur sonra tətbiq olunacaq."
+msgstr ""
+"İzlence bağımsız çalışmayı %(label)s puan olarak tanımlıyor, ancak defterde "
+"%(topics)s konu var. Konular otomatik silinmez — fazla (puanlanmamış) "
+"konuları kendiniz silin, yapı ardından uygulanacaktır."
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Jurnaldakı sərbəst iş strukturu sillabusdakından (%(label)s) fərqlidir. "
+"Qiymət yazılmış slotlar avtomatik dəyişdirilmir və mövzular silinmir — artıq"
+" (qiymətsiz) mövzuları silin, struktur sonra tətbiq olunacaq."
+msgstr ""
+"Defterdeki bağımsız çalışma yapısı izlencedekinden (%(label)s) farklı. "
+"Puanlanmış bölümler otomatik değiştirilmez ve konular silinmez — fazla "
+"(puanlanmamış) konuları silin, yapı ardından uygulanacaktır."
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Jurnaldakı sərbəst iş mövzuları sillabusun strukturu ilə uyğun deyil (köhnə "
+"və strukturlu mövzular qarışıqdır). Qiymət yazılmış mövzular avtomatik "
+"dəyişdirilmir."
+msgstr ""
+"Defterdeki bağımsız çalışma konuları izlencenin yapısıyla uyumlu değil (eski"
+" ve yapılandırılmış konular karışık). Puanlanmış konular otomatik "
+"değiştirilmez."
+
+msgctxt "registrar.selfwork"
+msgid "Sərbəst iş strukturu sillabusdan quruldu: %(label)s bal."
+msgstr "Bağımsız çalışma yapısı izlenceden oluşturuldu: %(label)s puan."
+
+msgctxt "registrar.selfwork"
+msgid "Təsdiqlənmiş sillabusda sərbəst iş strukturu yoxdur."
+msgstr "Onaylı izlencede bağımsız çalışma yapısı yok."
+
+msgctxt "registrar.selfwork"
+msgid "Sərbəst iş strukturu artıq qurulub."
+msgstr "Bağımsız çalışma yapısı zaten kurulu."
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Mövzu silinmədi — ona «Fənn qovluğu»ndan bal yazılıb (dəyişiklik yalnız "
+"sənədli düzəlişlə)."
+msgstr ""
+"Konu silinmedi — ders klasöründen gelen puanlar var (yalnızca belgeli "
+"düzeltme ile değiştirilebilir)."
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Bəzi xanalar dəyişilmədi — geri alma pəncərəsi bitib, bal fənn "
+"qovluğundandır və ya bal etibarsızdır."
+msgstr ""
+"Bazı hücreler değiştirilmedi — geri alma süresi doldu, puan ders klasöründen"
+" geliyor ya da puan geçersiz."
+
+msgctxt "registrar.selfwork"
+msgid "Yeni bal (sərbəst iş)"
+msgstr "Yeni puan (bağımsız çalışma)"
+
+msgctxt "registrar.selfwork"
+msgid "Boş saxlasanız bal silinir («—»). 0 yazılmır."
+msgstr "Boş bırakırsanız puan silinir (“—”). 0 yazılmaz."
+
+msgctxt "registrar.selfwork"
+msgid "%(label)s bal"
+msgstr "%(label)s puan"
+
+msgctxt "registrar.selfwork"
+msgid "sillabus"
+msgstr "izlence"
+
+msgctxt "registrar.selfwork"
+msgid "jurnal"
+msgstr "defter"
+
+msgctxt "registrar.selfwork"
+msgid "Çeklist: hər mövzu 1 bal"
+msgstr "Kontrol listesi: konu başına 1 puan"
+
+msgctxt "registrar.selfwork"
+msgid "Cəmi maksimum %(max)s bal"
+msgstr "Toplam en fazla %(max)s puan"
+
+msgctxt "registrar.selfwork"
+msgid "— bal fənn qovluğundan yazılıb, burada yalnız baxış"
+msgstr "— puan ders klasöründen yazıldı, burada yalnızca görüntüleme"
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Təsdiqlənmiş sillabus sərbəst işi %(label)s bal kimi müəyyən edir — struktur"
+" hələ jurnala tətbiq olunmayıb."
+msgstr ""
+"Onaylı izlence bağımsız çalışmayı %(label)s puan olarak tanımlıyor — yapı "
+"henüz deftere uygulanmadı."
+
+msgctxt "registrar.selfwork"
+msgid "Strukturu tətbiq et"
+msgstr "Yapıyı uygula"
+
+msgctxt "registrar.selfwork"
+msgid "%(n)s bal"
+msgstr "%(n)s puan"
+
+msgctxt "registrar.selfwork"
+msgid "Sərbəst iş %(n)s"
+msgstr "Bağımsız çalışma %(n)s"
+
+msgctxt "registrar.selfwork"
+msgid "Struktur hələ jurnala tətbiq olunmayıb"
+msgstr "Yapı henüz deftere uygulanmadı"
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Fənn qovluğundan yazılıb: %(at)s · %(by)s. Dəyişiklik yalnız sənədli "
+"düzəlişlə."
+msgstr ""
+"Ders klasöründen yazıldı: %(at)s · %(by)s. Yalnızca belgeli düzeltme ile "
+"değiştirilebilir."
+
+msgctxt "registrar.selfwork"
+msgid "Sərbəst iş %(n)s — bal (maksimum %(max)s)"
+msgstr "Bağımsız çalışma %(n)s — puan (en fazla %(max)s)"
+
+msgctxt "registrar.selfwork"
+msgid ""
+"Bal strukturu %(label)s: hər sərbəst iş öz maksimum balı ilə "
+"qiymətləndirilir, cəmi maksimum %(max)s bal. «—» — bal yazılmayıb (0 "
+"yazılmır: iş bəyənilmirsə fənn qovluğunda rəy yazılıb geri qaytarılır)."
+msgstr ""
+"Puan yapısı %(label)s: her bağımsız çalışma kendi en yüksek puanıyla "
+"değerlendirilir, toplam en fazla %(max)s puan. “—” — puan yazılmadı (0 "
+"yazılmaz: beğenilmeyen çalışma ders klasöründe geri bildirimle iade edilir)."
+
+msgctxt "registrar.selfwork"
+msgid "Bal fənn qovluğunda müəllimin qiymətləndirməsindən jurnala yazılıb"
+msgstr "Puan, ders klasöründeki öğretmen değerlendirmesinden deftere yazıldı"
+
+msgctxt "registrar.selfwork_hook"
+msgid "Sərbəst iş %(n)s"
+msgstr "Bağımsız çalışma %(n)s"
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Jurnala yazıldı: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"Deftere yazıldı: %(slot)s · %(points)s/%(max)s (toplam "
+"%(total)s/%(max_total)s)"
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Jurnalda artıq yazılıb: %(slot)s · %(points)s/%(max)s (cəmi "
+"%(total)s/%(max_total)s)"
+msgstr ""
+"Defterde zaten yazılı: %(slot)s · %(points)s/%(max)s (toplam "
+"%(total)s/%(max_total)s)"
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Jurnal kilidlidir — bal yazılmadı. Dəyişiklik yalnız sənədli düzəlişlə "
+"mümkündür."
+msgstr ""
+"Defter kilitli — puan yazılmadı. Değişiklik yalnızca belgeli düzeltme ile "
+"mümkündür."
+
+msgctxt "registrar.selfwork_hook"
+msgid "Tələbə bu jurnalda aktiv qeydiyyatda deyil — bal yazılmadı."
+msgstr "Öğrenci bu defterde aktif kayıtlı değil — puan yazılmadı."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Bal 0-dan böyük və %(max)s-dən çox olmamalıdır (ən çoxu bir onluq) — bal "
+"yazılmadı."
+msgstr ""
+"Puan 0'dan büyük ve %(max)s'den fazla olmamalı (en fazla bir ondalık) — puan"
+" yazılmadı."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Bal şkalası uyğun gəlmir: jurnalda %(slot)s maksimum %(journal)s baldır, "
+"fənn qovluğunda isə %(folder)s. Sillabusun sərbəst iş strukturunu yoxlayın."
+msgstr ""
+"Puan ölçeği uyuşmuyor: defterde %(slot)s en fazla %(journal)s puan, ders "
+"klasöründe ise %(folder)s. İzlencenin bağımsız çalışma yapısını kontrol "
+"edin."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Bu sərbəst iş üçün bal artıq yazılıb (%(slot)s · %(current)s/%(max)s) — "
+"ikinci dəfə bal verilmir. Dəyişiklik yalnız jurnalda sənədli düzəlişlə "
+"mümkündür."
+msgstr ""
+"Bu bağımsız çalışma için puan zaten yazılmış (%(slot)s · "
+"%(current)s/%(max)s) — ikinci kez puan verilmez. Değişiklik yalnızca "
+"defterde belgeli düzeltme ile mümkündür."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"%(slot)s üzrə bu bal jurnalda sənədli düzəlişlə dəyişdirilib — yenidən "
+"yazılmır."
+msgstr ""
+"%(slot)s için bu puan defterde belgeli düzeltme ile değiştirildi — yeniden "
+"yazılmaz."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Sərbəst iş cəmi %(max_total)s baldan çox ola bilməz (jurnalda artıq "
+"%(total)s bal var)."
+msgstr ""
+"Bağımsız çalışma toplamı %(max_total)s puanı aşamaz (defterde zaten "
+"%(total)s puan var)."
+
+msgctxt "registrar.selfwork_hook"
+msgid "Jurnalın sərbəst iş strukturunda «%(slot)s» yoxdur (%(label)s)."
+msgstr "Defterin bağımsız çalışma yapısında “%(slot)s” yok (%(label)s)."
+
+msgctxt "registrar.selfwork_hook"
+msgid ""
+"Jurnalda sərbəst iş strukturu yoxdur: bu açılışın təsdiqlənmiş sillabusunda "
+"sərbəst iş strukturu (1 × 10 / 2 × 5 / 10 × 1) tapılmadı."
+msgstr ""
+"Defterde bağımsız çalışma yapısı yok: bu dersin onaylı izlencesinde yapı (1 "
+"× 10 / 2 × 5 / 10 × 1) bulunamadı."
+
+msgctxt "surveys.results"
+msgid "%%s seçimini götür"
+msgstr "%%s seçimini kaldır"
+
+msgctxt "surveys.results"
+msgid "%(done)s / %(expected)s hədəf"
+msgstr "%(done)s / %(expected)s hedef"
+
+msgctxt "surveys.results"
+msgid "%(label)s ilə müqayisədə"
+msgstr "%(label)s ile karşılaştırıldığında"
+
+msgctxt "surveys.results"
+msgid "%(n)s cavab"
+msgstr "%(n)s yanıt"
+
+msgctxt "surveys.results"
+msgid "%(n)s şərh — tarixsiz, identifikatorsuz, təsadüfi sırada."
+msgstr "%(n)s yorum — tarihsiz, kimliksiz, rastgele sırada."
+
+msgctxt "surveys.results"
+msgid "%(pct)s%% razıdır"
+msgstr "%(pct)s%% katılıyor"
+
+msgctxt "surveys.results"
+msgid "%(total)s təklif (identifikatorsuz, təsadüfi sırada)."
+msgstr "%(total)s öneri (kimliksiz, rastgele sırada)."
+
+msgctxt "surveys.results"
+msgid ""
+"%(visible)s müəllimin nəticəsi görünür, %(hidden)s müəllim gizlidir (n &lt; "
+"%(k)s və ya tamamlayıcı qayda). Fərq — müəllimin ümumi balı ilə "
+"kafedra/universitet ortası arasındakı fərqdir."
+msgstr ""
+"%(visible)s öğretim üyesinin sonucu görünüyor, %(hidden)s öğretim üyesi "
+"gizli (n &lt; %(k)s veya tamamlayıcı kural). Fark — öğretim üyesinin genel "
+"puanı ile bölüm/üniversite ortalaması arasındaki farktır."
+
+msgctxt "surveys.results"
+msgid "%(year)s — bütün il"
+msgstr "%(year)s — tüm yıl"
+
+msgctxt "surveys.results"
+msgid "Ad"
+msgstr "Adı"
+
+msgctxt "surveys.results"
+msgid ""
+"Anonim müəllim qiymətləndirmə sorğusunun nəticələri — süzün, müqayisə edin, "
+"müəllim kartına baxın və aqreqatları ixrac edin."
+msgstr ""
+"Anonim öğretim üyesi değerlendirme anketinin sonuçları — filtreleyin, "
+"karşılaştırın, öğretim üyesi kartına bakın ve toplu verileri dışa aktarın."
+
+msgctxt "surveys.results"
+msgid "Anonim şərhlər"
+msgstr "Anonim yorumlar"
+
+msgctxt "surveys.results"
+msgid "Anonimlik həddi (k)"
+msgstr "Anonimlik eşiği (k)"
+
+msgctxt "surveys.results"
+msgid ""
+"Anonimlik həddinə çatmayan kampaniyalar: %(n)s — onların təklifləri "
+"göstərilmir."
+msgstr ""
+"Anonimlik eşiğine ulaşmayan kampanyalar: %(n)s — önerileri gösterilmez."
+
+msgctxt "surveys.results"
+msgid ""
+"Anonimlik: nəticə yalnız ən azı %(k)s cavabı olan qrup üçün göstərilir; "
+"kiçik qrupu çıxma yolu ilə aça biləcək sətirlər də gizlədilir. Şərhlər "
+"tarixsiz, identifikatorsuz və təsadüfi sıradadır."
+msgstr ""
+"Anonimlik: sonuçlar yalnızca en az %(k)s yanıtı olan gruplar için "
+"gösterilir; çıkarma yoluyla küçük bir grubu açığa çıkarabilecek satırlar da "
+"gizlenir. Yorumlar tarihsiz, kimliksiz ve rastgele sıradadır."
+
+msgctxt "surveys.results"
+msgid "Axtarışa uyğun nəticə yoxdur."
+msgstr "Aramayla eşleşen sonuç yok."
+
+msgctxt "surveys.results"
+msgid "Axtarışa uyğun təklif yoxdur."
+msgstr "Aramayla eşleşen öneri yok."
+
+msgctxt "surveys.results"
+msgid "Aydın izah"
+msgstr "Anlaşılır anlatım"
+
+msgctxt "surveys.results"
+msgid "Açar sözlər"
+msgstr "Anahtar kelimeler"
+
+msgctxt "surveys.results"
+msgid "Bal"
+msgstr "Puan"
+
+msgctxt "surveys.results"
+msgid "Bal paylanması qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr "Puan dağılımı grafiği; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Bu dövr üçün hələ cavab yoxdur"
+msgstr "Bu dönem için henüz yanıt yok"
+
+msgctxt "surveys.results"
+msgid "Bu filtr kombinasiyası anonimliyi poza bilər"
+msgstr "Bu filtre kombinasyonu anonimliği bozabilir"
+
+msgctxt "surveys.results"
+msgid "Bu məlumata baxmaq üçün icazəniz yoxdur."
+msgstr "Bu bilgiyi görüntüleme izniniz yok."
+
+msgctxt "surveys.results"
+msgid ""
+"Bu nəticə göstərilsəydi, kafedra və ya universitet ortasından çıxma yolu ilə"
+" anonimlik həddindən az cavablı müəllimin nəticəsi hesablana bilərdi."
+msgstr ""
+"Bu sonuç gösterilseydi, bölüm veya üniversite ortalamasından çıkarma yoluyla"
+" anonimlik eşiğinin altında yanıtı olan bir öğretim üyesinin sonucu "
+"hesaplanabilirdi."
+
+msgctxt "surveys.results"
+msgid "Bu seçim üzrə şərh yazılmayıb."
+msgstr "Bu seçim için yorum yazılmamış."
+
+msgctxt "surveys.results"
+msgid "Bölgü: məmnunluq və tədris şəraiti"
+msgstr "Dağılım: memnuniyet ve öğrenim koşulları"
+
+msgctxt "surveys.results"
+msgid "Bütün dövrlər"
+msgstr "Tüm dönemler"
+
+msgctxt "surveys.results"
+msgid "Bütün universitet"
+msgstr "Tüm üniversite"
+
+msgctxt "surveys.results"
+msgid "CSV — bir cədvəl"
+msgstr "CSV — tek tablo"
+
+msgctxt "surveys.results"
+msgid "Cavab"
+msgstr "Yanıt"
+
+msgctxt "surveys.results"
+msgid "Cavab faizi"
+msgstr "Yanıt oranı"
+
+msgctxt "surveys.results"
+msgid "Cavab faizi (%)"
+msgstr "Yanıt oranı (%)"
+
+msgctxt "surveys.results"
+msgid "Cavab sayı"
+msgstr "Yanıt sayısı"
+
+msgctxt "surveys.results"
+msgid "Cavab sayı anonimlik həddindən azdır."
+msgstr "Yanıt sayısı anonimlik eşiğinin altında."
+
+msgctxt "surveys.results"
+msgid ""
+"Cavab sayı azdır (%(n)s &lt; %(k)s) — anonimliyi qorumaq üçün nəticə "
+"göstərilmir."
+msgstr ""
+"Yanıt sayısı az (%(n)s &lt; %(k)s) — anonimliği korumak için sonuç "
+"gösterilmiyor."
+
+msgctxt "surveys.results"
+msgid "Cavabların Likert paylanması; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr "Yanıtların Likert dağılımı; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Cavabların paylanması (Likert 1–5)"
+msgstr "Yanıt dağılımı (Likert 1–5)"
+
+msgctxt "surveys.results"
+msgid "Cədvəl kimi göstər"
+msgstr "Tablo olarak göster"
+
+msgctxt "surveys.results"
+msgid "Daha çox göstər"
+msgstr "Daha fazla göster"
+
+msgctxt "surveys.results"
+msgid ""
+"Daraldılmış dəst ilə daraldılmamış dəst arasındakı fərq %(k)s cavabdan azdır"
+" — çıxma yolu ilə bir neçə tələbənin cavabı açıla bilərdi. Filtri "
+"genişləndirin."
+msgstr ""
+"Daraltılmış küme ile tam küme arasındaki fark %(k)s yanıttan az — çıkarma "
+"yoluyla birkaç öğrencinin yanıtı açığa çıkabilirdi. Filtreyi genişletin."
+
+msgctxt "surveys.results"
+msgid "Digər şərhlər"
+msgstr "Diğer yorumlar"
+
+msgctxt "surveys.results"
+msgid "Dinamika"
+msgstr "Değişim"
+
+msgctxt "surveys.results"
+msgid "Dinamika üçün hələ kampaniya yoxdur."
+msgstr "Değişim için henüz kampanya yok."
+
+msgctxt "surveys.results"
+msgid "Doldurulmuş hədəf"
+msgstr "Doldurulan hedef"
+
+msgctxt "surveys.results"
+msgid "Dövr"
+msgstr "Dönem"
+
+msgctxt "surveys.results"
+msgid "Dövrlər üzrə dinamika"
+msgstr "Dönemlere göre değişim"
+
+msgctxt "surveys.results"
+msgid "Dövrlər üzrə dinamika qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr "Dönemlere göre değişim grafiği; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Dərs materialları"
+msgstr "Ders materyalleri"
+
+msgctxt "surveys.results"
+msgid "Dəyər"
+msgstr "Değer"
+
+msgctxt "surveys.results"
+msgid "Excel — bütün cədvəllər"
+msgstr "Excel — tüm tablolar"
+
+msgctxt "surveys.results"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "surveys.results"
+msgid "Fakültə və kafedra müqayisəsi"
+msgstr "Fakülte ve bölüm karşılaştırması"
+
+msgctxt "surveys.results"
+msgid ""
+"Fakültə və kafedra müqayisəsi qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr ""
+"Fakülte ve bölüm karşılaştırma grafiği; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Fakültə və kafedralar"
+msgstr "Fakülteler ve bölümler"
+
+msgctxt "surveys.results"
+msgid "Fakültələr"
+msgstr "Fakülteler"
+
+msgctxt "surveys.results"
+msgid "Filtrlər"
+msgstr "Filtreler"
+
+msgctxt "surveys.results"
+msgid "Fəal iştirak"
+msgstr "Aktif katılım"
+
+msgctxt "surveys.results"
+msgid "Fənn"
+msgstr "Ders"
+
+msgctxt "surveys.results"
+msgid "Fənn və qrup üzrə"
+msgstr "Ders ve gruba göre"
+
+msgctxt "surveys.results"
+msgid ""
+"Fənn/qrup filtri tətbiq olunub — göstəricilər yalnız seçilmiş dəst üzrədir."
+msgstr ""
+"Ders/grup filtresi uygulandı — göstergeler yalnızca seçilen küme içindir."
+
+msgctxt "surveys.results"
+msgid ""
+"Fənn/qrup filtri: müəllim eyni tələbəyə bir neçə fənn deyirsə, tələbə onu "
+"bir dəfə qiymətləndirir və cavab müəllimin əsas (ilk) fənninə aid edilir."
+msgstr ""
+"Ders/grup filtresi: öğretim üyesi aynı öğrenciye birden fazla ders veriyorsa"
+" öğrenci onu bir kez değerlendirir ve yanıt ana (ilk) derse atfedilir."
+
+msgctxt "surveys.results"
+msgid "Fərq: kafedra"
+msgstr "Fark: bölüm"
+
+msgctxt "surveys.results"
+msgid "Fərq: universitet"
+msgstr "Fark: üniversite"
+
+msgctxt "surveys.results"
+msgid ""
+"Görünən cəmdən çıxma yolu ilə kiçik qrupu hesablamağın qarşısını almaq üçün "
+"gizlədilib."
+msgstr ""
+"Görünen toplamdan çıkarma yoluyla küçük bir grubun hesaplanmasını önlemek "
+"için gizlendi."
+
+msgctxt "surveys.results"
+msgid "Göstər"
+msgstr "Göster"
+
+msgctxt "surveys.results"
+msgid "Göstərici"
+msgstr "Gösterge"
+
+msgctxt "surveys.results"
+msgid "Göstərilir"
+msgstr "Gösterilen"
+
+msgctxt "surveys.results"
+msgid "Göstərilən təkliflərdə axtar"
+msgstr "Gösterilen önerilerde ara"
+
+msgctxt "surveys.results"
+msgid "Gözlənilən hədəf"
+msgstr "Beklenen hedef"
+
+msgctxt "surveys.results"
+msgid "Güclü cəhətlər"
+msgstr "Güçlü yönler"
+
+msgctxt "surveys.results"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "surveys.results"
+msgid "Hazırlıq və plan"
+msgstr "Hazırlık ve plan"
+
+msgctxt "surveys.results"
+msgid "Hörmət və ədalət"
+msgstr "Saygı ve adalet"
+
+msgctxt "surveys.results"
+msgid "Hələ heç bir sorğu kampaniyası keçirilməyib"
+msgstr "Henüz hiç anket kampanyası yapılmadı"
+
+msgctxt "surveys.results"
+msgid "Hələ təklif yoxdur"
+msgstr "Henüz öneri yok"
+
+msgctxt "surveys.results"
+msgid ""
+"Hər dövr öz anonimlik həddi ilə; gizli nöqtələr xətdə boşluq kimi görünür. "
+"Fənn/qrup filtri dinamikaya tətbiq olunmur."
+msgstr ""
+"Her dönem kendi anonimlik eşiğiyle; gizli noktalar çizgide boşluk olarak "
+"görünür. Ders/grup filtresi değişime uygulanmaz."
+
+msgctxt "surveys.results"
+msgid ""
+"Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər "
+"göstərilmir."
+msgstr ""
+"Her kampanyada yanıt sayısı anonimlik eşiğinin altında — öneriler "
+"gösterilmiyor."
+
+msgctxt "surveys.results"
+msgid ""
+"Hər sətir 100%%-dir: solda «razı deyiləm» cavabları, mərkəzdə «qismən», "
+"sağda «razıyam». Kənardakı rəqəmlər cəm paylardır."
+msgstr ""
+"Her satır %%100: solda «katılmıyorum», ortada «kısmen», sağda «katılıyorum» "
+"yanıtları. Uçlardaki rakamlar toplam paylardır."
+
+msgctxt "surveys.results"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "surveys.results"
+msgid "Kafedra ortası"
+msgstr "Bölüm ortalaması"
+
+msgctxt "surveys.results"
+msgid "Kafedralar"
+msgstr "Bölümler"
+
+msgctxt "surveys.results"
+msgid ""
+"Kampaniya RİM semestr jurnallarını bağlayanda özü açılır; cavablar "
+"toplandıqca nəticələr burada görünəcək."
+msgstr ""
+"Kampanya, RİM dönem defterlerini kapattığında otomatik açılır; yanıtlar "
+"geldikçe sonuçlar burada görünecek."
+
+msgctxt "surveys.results"
+msgid ""
+"Kampaniya davam edir: %(done)s / %(expected)s hədəf doldurulub. Cavablar "
+"toplandıqca nəticələr görünəcək."
+msgstr ""
+"Kampanya devam ediyor: %(done)s / %(expected)s hedef dolduruldu. Yanıtlar "
+"geldikçe sonuçlar görünecek."
+
+msgctxt "surveys.results"
+msgid "Kampaniyalar"
+msgstr "Kampanyalar"
+
+msgctxt "surveys.results"
+msgid "Kod"
+msgstr "Soru kodu"
+
+msgctxt "surveys.results"
+msgid "Kurs"
+msgstr "Sınıf"
+
+msgctxt "surveys.results"
+msgid "Kurs %(year)s"
+msgstr "%(year)s. sınıf"
+
+msgctxt "surveys.results"
+msgid "Kurslar"
+msgstr "Sınıflar"
+
+msgctxt "surveys.results"
+msgid "Likert indeksi"
+msgstr "Likert endeksi"
+
+msgctxt "surveys.results"
+msgid "Likert indeksi (1–5)"
+msgstr "Likert endeksi (1–5)"
+
+msgctxt "surveys.results"
+msgid ""
+"Likert şkalası 1–5 (5 — tamamilə razıyam). İşarələr müqayisə nöqtələridir."
+msgstr ""
+"Likert ölçeği 1–5 (5 — kesinlikle katılıyorum). İşaretler karşılaştırma "
+"noktalarıdır."
+
+msgctxt "surveys.results"
+msgid "Minimum cavab"
+msgstr "Asgari yanıt"
+
+msgctxt "surveys.results"
+msgid "Müəllim"
+msgstr "Öğretim üyesi"
+
+msgctxt "surveys.results"
+msgid ""
+"Müəllim eyni tələbəyə bir neçə fənn deyirsə, tələbə onu bir dəfə "
+"qiymətləndirir — bu cavab müəllimin əsas (ilk) fənninə aid edilir, yəni "
+"fənlər birləşmiş görünə bilər."
+msgstr ""
+"Öğretim üyesi aynı öğrenciye birden fazla ders veriyorsa öğrenci onu bir kez"
+" değerlendirir — yanıt ana (ilk) derse atfedilir, bu yüzden dersler "
+"birleşmiş görünebilir."
+
+msgctxt "surveys.results"
+msgid "Müəllim kartı"
+msgstr "Öğretim üyesi kartı"
+
+msgctxt "surveys.results"
+msgid "Müəllim reytinqi"
+msgstr "Öğretim üyesi sıralaması"
+
+msgctxt "surveys.results"
+msgid "Müəllim reytinqi — sütun başlığı sıralayır"
+msgstr "Öğretim üyesi sıralaması — sütun başlığı sıralar"
+
+msgctxt "surveys.results"
+msgid "Müəllim tapılmadı"
+msgstr "Öğretim üyesi bulunamadı"
+
+msgctxt "surveys.results"
+msgid "Müəllim və ya kafedra"
+msgstr "Öğretim üyesi veya bölüm"
+
+msgctxt "surveys.results"
+msgid "Müəllimlər"
+msgstr "Öğretim üyeleri"
+
+msgctxt "surveys.results"
+msgid "Müəllimlər (cəmi)"
+msgstr "Öğretim üyeleri (toplam)"
+
+msgctxt "surveys.results"
+msgid "Məlumat yoxdur."
+msgstr "Veri yok."
+
+msgctxt "surveys.results"
+msgid "Məmnunluq və tədris şəraiti (Likert 1–5)"
+msgstr "Memnuniyet ve öğrenim koşulları (Likert 1–5)"
+
+msgctxt "surveys.results"
+msgid ""
+"Məxfi — anonim sorğunun aqreqat nəticələri; yalnız xidməti istifadə üçün."
+msgstr ""
+"Gizli — anonim anketin toplu sonuçları; yalnızca kurum içi kullanım içindir."
+
+msgctxt "surveys.results"
+msgid "Neçə təklifdə keçir"
+msgstr "Kaç öneride geçiyor"
+
+msgctxt "surveys.results"
+msgid "Nəticə bölmələri"
+msgstr "Sonuç bölümleri"
+
+msgctxt "surveys.results"
+msgid "Nəticə filtrləri"
+msgstr "Sonuç filtreleri"
+
+msgctxt "surveys.results"
+msgid "Nəticə gizlidir"
+msgstr "Sonuç gizli"
+
+msgctxt "surveys.results"
+msgid "Nəticə tamamlayıcı qayda ilə gizlədilib"
+msgstr "Sonuç tamamlayıcı kuralla gizlendi"
+
+msgctxt "surveys.results"
+msgid ""
+"Nəticələri kafedra müdiri (öz kafedrası), tədris şöbəsi, keyfiyyətə nəzarət,"
+" prorektor, rektor və RİM rəhbəri görür."
+msgstr ""
+"Sonuçları bölüm başkanları (kendi bölümleri), öğrenci işleri, kalite "
+"kontrol, rektör yardımcıları, rektör ve RİM başkanı görür."
+
+msgctxt "surveys.results"
+msgid "Nəticəsi görünən müəllimlər"
+msgstr "Sonucu görünen öğretim üyeleri"
+
+msgctxt "surveys.results"
+msgid "Orta"
+msgstr "Ortalama"
+
+msgctxt "surveys.results"
+msgid "Orta bal (1–5); ən yüksək məmnunluq yuxarıda."
+msgstr "Ortalama puan (1–5); en yüksek memnuniyet üstte."
+
+msgctxt "surveys.results"
+msgid "Orta ümumi bal"
+msgstr "Ortalama genel puan"
+
+msgctxt "surveys.results"
+msgid "Orta ümumi bal (1–10)"
+msgstr "Ortalama genel puan (1–10)"
+
+msgctxt "surveys.results"
+msgid "Orta ümumi bal (1–10), yuxarıdan aşağı azalan sıra."
+msgstr "Ortalama genel puan (1–10), azalan sırada."
+
+msgctxt "surveys.results"
+msgid "Orta: %(avg)s · %(n)s cavab"
+msgstr "Ortalama: %(avg)s · %(n)s yanıt"
+
+msgctxt "surveys.results"
+msgid "Pay"
+msgstr "Oran"
+
+msgctxt "surveys.results"
+msgid "Paylanma: %(label)s"
+msgstr "Dağılım: %(label)s"
+
+msgctxt "surveys.results"
+msgid "Praktika ilə əlaqə"
+msgstr "Uygulamayla bağlantı"
+
+msgctxt "surveys.results"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "surveys.results"
+msgid "Qısa ad"
+msgstr "Kısa ad"
+
+msgctxt "surveys.results"
+msgid "Razı (4–5)"
+msgstr "Katılıyor (4–5)"
+
+msgctxt "surveys.results"
+msgid "Razı deyil (1–2)"
+msgstr "Katılmıyor (1–2)"
+
+msgctxt "surveys.results"
+msgid "Say"
+msgstr "Sayı"
+
+msgctxt "surveys.results"
+msgid "Seriya"
+msgstr "Seri"
+
+msgctxt "surveys.results"
+msgid ""
+"Seçilmiş filtrlərdə bu müəllim üçün cavab yoxdur və ya o, sizin əhatənizdə "
+"deyil."
+msgstr ""
+"Seçilen filtrelerde bu öğretim üyesi için yanıt yok veya sizin kapsamınızda "
+"değil."
+
+msgctxt "surveys.results"
+msgid "Seçilmiş filtrlərə uyğun cavab yoxdur"
+msgstr "Seçilen filtrelere uyan yanıt yok"
+
+msgctxt "surveys.results"
+msgid "Seçim"
+msgstr "Seçili küme"
+
+msgctxt "surveys.results"
+msgid "Sillabusa əməl"
+msgstr "Ders izlencesine uyum"
+
+msgctxt "surveys.results"
+msgid "Siyahı ilk 500 müəllimlə məhdudlaşır — filtrlə daraldın."
+msgstr "Liste ilk 500 öğretim üyesiyle sınırlı — filtreyle daraltın."
+
+msgctxt "surveys.results"
+msgid "Son kampaniya — %(label)s"
+msgstr "Son kampanya — %(label)s"
+
+msgctxt "surveys.results"
+msgid "Sonrakı"
+msgstr "Sonraki"
+
+msgctxt "surveys.results"
+msgid "Sorğu kampaniyaları"
+msgstr "Anket kampanyaları"
+
+msgctxt "surveys.results"
+msgid "Sorğu nəticələri"
+msgstr "Anket sonuçları"
+
+msgctxt "surveys.results"
+msgid "Sorğu nəticələrinin ixracı (aqreqatlar)"
+msgstr "Anket sonuçlarının dışa aktarımı (toplu veriler)"
+
+msgctxt "surveys.results"
+msgid "Sorğu nəticələrinə baxmaq üçün icazəniz yoxdur"
+msgstr "Anket sonuçlarını görüntüleme izniniz yok"
+
+msgctxt "surveys.results"
+msgid "Sorğu nəticələrinə qayıt"
+msgstr "Anket sonuçlarına dön"
+
+msgctxt "surveys.results"
+msgid "Struktur əhatəniz"
+msgstr "Yapısal kapsamınız"
+
+msgctxt "surveys.results"
+msgid "Sual"
+msgstr "Soru"
+
+msgctxt "surveys.results"
+msgid "Sual üzrə paylanma"
+msgstr "Soruya göre dağılım"
+
+msgctxt "surveys.results"
+msgid "Suallar"
+msgstr "Sorular"
+
+msgctxt "surveys.results"
+msgid "Suallar və paylanma"
+msgstr "Sorular ve dağılım"
+
+msgctxt "surveys.results"
+msgid "Suallar üzrə orta bal"
+msgstr "Soruya göre ortalama puan"
+
+msgctxt "surveys.results"
+msgid "Suallar üzrə orta bal qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr ""
+"Soruya göre ortalama puan grafiği; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Söz"
+msgstr "Kelime"
+
+msgctxt "surveys.results"
+msgid "Səhifə"
+msgstr "Sayfa"
+
+msgctxt "surveys.results"
+msgid "Səhifələr"
+msgstr "Sayfalar"
+
+msgctxt "surveys.results"
+msgid "Səviyyə"
+msgstr "Düzey"
+
+msgctxt "surveys.results"
+msgid "Tövsiyə"
+msgstr "Tavsiye"
+
+msgctxt "surveys.results"
+msgid "Tövsiyə edənlər"
+msgstr "Tavsiye edenler"
+
+msgctxt "surveys.results"
+msgid "Tövsiyə edənlər (%)"
+msgstr "Tavsiye edenler (%)"
+
+msgctxt "surveys.results"
+msgid "Tədris şəraiti"
+msgstr "Öğrenim koşulları"
+
+msgctxt "surveys.results"
+msgid "Tədris şəraiti (1–5)"
+msgstr "Öğrenim koşulları (1–5)"
+
+msgctxt "surveys.results"
+msgid "Təkliflər"
+msgstr "Öneriler"
+
+msgctxt "surveys.results"
+msgid "Təyin olunmayıb"
+msgstr "Belirtilmemiş"
+
+msgctxt "surveys.results"
+msgid "Universitet"
+msgstr "Üniversite"
+
+msgctxt "surveys.results"
+msgid "Universitet ortası"
+msgstr "Üniversite ortalaması"
+
+msgctxt "surveys.results"
+msgid "Universitet üçün təkliflər"
+msgstr "Üniversite için öneriler"
+
+msgctxt "surveys.results"
+msgid "Universiteti necə yaxşılaşdırmaq olar — tələbə təklifləri"
+msgstr "Üniversite nasıl iyileştirilebilir — öğrenci önerileri"
+
+msgctxt "surveys.results"
+msgid "Vaxtında başlama"
+msgstr "Dakiklik"
+
+msgctxt "surveys.results"
+msgid "Vaxtında rəy"
+msgstr "Zamanında geri bildirim"
+
+msgctxt "surveys.results"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "surveys.results"
+msgid "Xanada: ümumi bal (1–10) · Likert indeksi (1–5)."
+msgstr "Hücrede: genel puan (1–10) · Likert endeksi (1–5)."
+
+msgctxt "surveys.results"
+msgid "Xülasə"
+msgstr "Özet"
+
+msgctxt "surveys.results"
+msgid "Yalnız aqreqatlar — şərh mətni və fərdi cavab ixrac olunmur."
+msgstr ""
+"Yalnızca toplu veriler — yorum metinleri ve bireysel yanıtlar dışa "
+"aktarılmaz."
+
+msgctxt "surveys.results"
+msgid "Yaradılıb"
+msgstr "Oluşturuldu"
+
+msgctxt "surveys.results"
+msgid "Yer"
+msgstr "Sıra"
+
+msgctxt "surveys.results"
+msgid "Yüklənir…"
+msgstr "Yükleniyor…"
+
+msgctxt "surveys.results"
+msgid "Yüklənmə alınmadı, yenidən cəhd edin."
+msgstr "Yüklenemedi, lütfen tekrar deneyin."
+
+msgctxt "surveys.results"
+msgid "ad, soyad, kafedra…"
+msgstr "ad, soyad, bölüm…"
+
+msgctxt "surveys.results"
+msgid "aşağı"
+msgstr "düşük"
+
+msgctxt "surveys.results"
+msgid "bəli"
+msgstr "evet"
+
+msgctxt "surveys.results"
+msgid "cəmi"
+msgstr "toplam"
+
+msgctxt "surveys.results"
+msgid "cəmi %(n)s müəllim"
+msgstr "toplam %(n)s öğretim üyesi"
+
+msgctxt "surveys.results"
+msgid "dəyişməyib"
+msgstr "değişmedi"
+
+msgctxt "surveys.results"
+msgid "gizli"
+msgstr "gizlendi"
+
+msgctxt "surveys.results"
+msgid "gizli — n < k"
+msgstr "gizlendi — n < k"
+
+msgctxt "surveys.results"
+msgid "gizli — tamamlayıcı qayda"
+msgstr "gizlendi — tamamlayıcı kural"
+
+msgctxt "surveys.results"
+msgid "görünür"
+msgstr "görünüyor"
+
+msgctxt "surveys.results"
+msgid "göstərilən təkliflərdə axtar…"
+msgstr "gösterilen önerilerde ara…"
+
+msgctxt "surveys.results"
+msgid "ixtisas/kurs filtrində hesablanmır"
+msgstr "program/sınıf filtresinde hesaplanmaz"
+
+msgctxt "surveys.results"
+msgid "kampaniya davam edir"
+msgstr "kampanya devam ediyor"
+
+msgctxt "surveys.results"
+msgid "müəllim axtar…"
+msgstr "öğretim üyesi ara…"
+
+msgctxt "surveys.results"
+msgid ""
+"qrup gizlidir (n &lt; k və ya tamamlayıcı qayda) — qrafikdə göstərilmir."
+msgstr ""
+"grup gizli (n &lt; k veya tamamlayıcı kural) — grafikte gösterilmiyor."
+
+msgctxt "surveys.results"
+msgid "söz və ya ifadə…"
+msgstr "kelime veya ifade…"
+
+msgctxt "surveys.results"
+msgid "uyğun"
+msgstr "eşleşme"
+
+msgctxt "surveys.results"
+msgid "xeyr"
+msgstr "hayır"
+
+msgctxt "surveys.results"
+msgid "yoxdur"
+msgstr "yok"
+
+msgctxt "surveys.results"
+msgid "yüksək"
+msgstr "yüksek"
+
+msgctxt "surveys.results"
+msgid "«Razı» payı"
+msgstr "«Katılıyorum» oranı"
+
+msgctxt "surveys.results"
+msgid "«Razı» payı (%)"
+msgstr "«Katılıyorum» oranı (%)"
+
+msgctxt "surveys.results"
+msgid "«razıyam» və «tamamilə razıyam»"
+msgstr "«katılıyorum» ve «kesinlikle katılıyorum»"
+
+msgctxt "surveys.results"
+msgid "Çap et"
+msgstr "Yazdır"
+
+msgctxt "surveys.results"
+msgid "Çap versiyası"
+msgstr "Yazdırma sürümü"
+
+msgctxt "surveys.results"
+msgid "Öyrənmə nəticəsi"
+msgstr "Öğrenme çıktısı"
+
+msgctxt "surveys.results"
+msgid "Ümumi bal"
+msgstr "Genel puan"
+
+msgctxt "surveys.results"
+msgid "Ümumi bal (1–10)"
+msgstr "Genel puan (1–10)"
+
+msgctxt "surveys.results"
+msgid "Ümumi baxış"
+msgstr "Genel bakış"
+
+msgctxt "surveys.results"
+msgid "Ümumi bölmə"
+msgstr "Genel bölüm"
+
+msgctxt "surveys.results"
+msgid "Ümumi bölmə cavabları"
+msgstr "Genel bölüm yanıtları"
+
+msgctxt "surveys.results"
+msgid "Ümumi bölmə göstəriciləri"
+msgstr "Genel bölüm göstergeleri"
+
+msgctxt "surveys.results"
+msgid "Ümumi bölmənin bölgü qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir."
+msgstr "Genel bölüm dağılım grafiği; aynı rakamlar aşağıdaki tablodadır."
+
+msgctxt "surveys.results"
+msgid "Ümumi məmnunluq"
+msgstr "Genel memnuniyet"
+
+msgctxt "surveys.results"
+msgid "Ümumi məmnunluq (1–5)"
+msgstr "Genel memnuniyet (1–5)"
+
+msgctxt "surveys.results"
+msgid "Ümumi təkliflər"
+msgstr "Genel öneriler"
+
+msgctxt "surveys.results"
+msgid "ümumi bölmə: %(n)s"
+msgstr "genel bölüm: %(n)s"
+
+msgctxt "surveys.results"
+msgid ""
+"İlk %(shown)s təklif göstərilir (cəmi %(total)s) — filtr panelindəki "
+"«Şərhlərdə axtar» ilə daraldın."
+msgstr ""
+"İlk %(shown)s öneri gösteriliyor (toplam %(total)s) — filtre panelindeki "
+"«Yorumlarda ara» ile daraltın."
+
+msgctxt "surveys.results"
+msgid "İxrac"
+msgstr "Dışa aktar"
+
+msgctxt "surveys.results"
+msgid "İxtisas"
+msgstr "Program"
+
+msgctxt "surveys.results"
+msgid "İxtisaslar"
+msgstr "Programlar"
+
+msgctxt "surveys.results"
+msgid "İş yükü"
+msgstr "Ders yükü"
+
+msgctxt "surveys.results"
+msgid "Şərhlər yalnız cavab sayı anonimlik həddini keçəndə göstərilir."
+msgstr ""
+"Yorumlar yalnızca yanıt sayısı anonimlik eşiğine ulaştığında gösterilir."
+
+msgctxt "surveys.results"
+msgid "Şərhlərdə axtar"
+msgstr "Yorumlarda ara"
+
+msgctxt "surveys.results"
+msgid "şərhlərdə axtar…"
+msgstr "yorumlarda ara…"
+
+msgctxt "surveys.results"
+msgid "Ədalətli qiymətləndirmə"
+msgstr "Adil değerlendirme"
+
+msgctxt "surveys.results"
+msgid "Əhatə"
+msgstr "Kapsam"
+
+msgctxt "surveys.results"
+msgid "Əlçatanlıq"
+msgstr "Ulaşılabilirlik"
+
+msgctxt "surveys.results"
+msgid "Ən aşağı %(n)s"
+msgstr "En düşük %(n)s"
+
+msgctxt "surveys.results"
+msgid "Ən yüksək %(n)s"
+msgstr "En yüksek %(n)s"
+
+msgctxt "surveys.results"
+msgid "Ən çox işlənən sözlər"
+msgstr "En sık geçen kelimeler"
+
+msgctxt "surveys.results"
+msgid "Ən çox işlənən sözlər (neçə təklifdə keçir)"
+msgstr "En sık geçen kelimeler (kaç öneride geçtiği)"
+
+msgctxt "surveys.results"
+msgid "Əsas göstəricilər"
+msgstr "Temel göstergeler"
+
+msgctxt "surveys.results"
+msgid "Ətraflı"
+msgstr "Ayrıntılar"
+
+msgctxt "surveys.results"
+msgid "Əvvəlki"
+msgstr "Önceki"
+
+msgctxt "registrar.selfwork"
+msgid "Sərbəst iş üçün düzgün bal daxil edin."
+msgstr "Geçerli bir bağımsız çalışma puanı girin."
+
+msgctxt "registrar.selfwork"
+msgid "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır."
+msgstr "Puan 0'dan büyük ve en fazla %(max)s olmalıdır."

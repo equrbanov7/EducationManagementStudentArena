@@ -95,22 +95,30 @@ def stem(word) -> str:
     return word
 
 
+def group_key(root) -> str:
+    """Qruplaşdırma açarı — «ı» ≈ «i». Böyük «I»-nin iki oxunuşu var (az «ı», ing «i»):
+    «WI-FI» → «wı-fı», «Wi-Fi» → «wi-fi»; bunlar bir söz sayılmalıdır. Açar çipin axtarış
+    dəyəridir və axtarış da ı/i-yə dözümlüdür (``results_text.js`` ``fold``, ``tolerant_regex``)."""
+    return root.replace("ı", "i")
+
+
 def keywords_of(text) -> dict:
-    """``{kök: səth forması}`` — mətndəki analizə daxil sözlər (stop-sözlər çıxılıb)."""
+    """``{açar: səth forması}`` — mətndəki analizə daxil sözlər (stop-sözlər çıxılıb)."""
     found = {}
     for word in _TOKEN_RE.findall(normalize(text)):
         if len(word) < _MIN_TOKEN or word in STOPWORDS_AZ:
             continue
         root = stem(word)
         if root not in STOPWORDS_AZ:
-            found.setdefault(root, word)
+            found.setdefault(group_key(root), word)
     return found
 
 
 def keyword_frequency(texts, *, top=KEYWORD_TOP, min_docs=KEYWORD_MIN_DOCS) -> list:
     """``[{"word", "stem", "count"}]`` — söz (kök) neçə mətndə keçir (sənəd tezliyi),
-    azalan sıra. ``word`` — kök özü mətndə işlənibsə kök, əks halda ən çox işlənən forma;
-    axtarış ``stem`` ilə aparılır (bütün şəkilçili formaları tutur)."""
+    azalan sıra. ``stem`` — :func:`group_key` (ı/i-yə dözümlü kök); ``word`` — açar özü
+    mətndə işlənibsə açar, əks halda ən çox işlənən forma; axtarış ``stem`` ilə aparılır
+    (bütün şəkilçili formaları tutur)."""
     counter: Counter = Counter()
     surfaces: dict = {}
     for text in texts:
