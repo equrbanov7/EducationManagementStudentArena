@@ -24,6 +24,7 @@ from django.utils.translation import pgettext
 
 from .. import public
 from ..public import ResultFilters
+from ..services import analytics_guard as guard
 from .results_labels import DEFAULT_SORT, SORT_KEYS, TAB_OVERVIEW, TABS
 
 CTX = "surveys.results"
@@ -43,6 +44,8 @@ class PeriodChoice:
     is_open: bool = False
     previous_ids: tuple = ()
     previous_label: str = ""
+    #: Davam edən kampaniya — nəticə YOX, yalnız iştirak (M-1).
+    live: bool = False
 
 
 @dataclass(frozen=True)
@@ -65,77 +68,97 @@ def campaign_label(row) -> str:
 
 
 def period_options(campaigns) -> list:
-    """Dövr select-inin seçimləri: son kampaniya, bütün dövrlər, tədris illəri, kampaniyalar."""
-    if not campaigns:
-        return []
-    latest = campaign_label(campaigns[0])
-    options = [
-        {"value": "", "label": pgettext(CTX, "Son kampaniya — %(label)s") % {"label": latest}},
-        {"value": "all", "label": pgettext(CTX, "Bütün dövrlər")},
-    ]
-    years: dict = {}
-    for row in campaigns:
-        years.setdefault(row.get("academic_year") or "", []).append(row)
-    for year, rows in years.items():
-        if year and len(rows) > 1:
-            options.append({"value": f"y:{year}", "label": pgettext(CTX, "%(year)s — bütün il") % {"year": year}})
-    options.extend({"value": str(row["id"]), "label": campaign_label(row)} for row in campaigns)
+    """Dövr select-i: son BAĞLI kampaniya (defolt), bütün bağlı dövrlər, tədris illəri,
+    bağlı kampaniyalar və — ayrıca — davam edən kampaniyalar («yalnız iştirak»)."""
+    published, live = guard.published_campaigns(campaigns), guard.live_campaigns(campaigns)
+    options = []
+    if published:
+        latest = campaign_label(published[0])
+        options.append({"value": "", "label": pgettext(CTX, "Son bağlı kampaniya — %(label)s") % {"label": latest}})
+        if len(published) > 1:
+            options.append({"value": "all", "label": pgettext(CTX, "Bütün bağlı dövrlər")})
+        years: dict = {}
+        for row in published:
+            years.setdefault(row.get("academic_year") or "", []).append(row)
+        for year, rows in years.items():
+            if year and len(rows) > 1:
+                options.append({"value": f"y:{year}", "label": pgettext(CTX, "%(year)s — bütün il") % {"year": year}})
+        options.extend({"value": str(row["id"]), "label": campaign_label(row)} for row in published)
+    for row in live:
+        options.append(
+            {
+                "value": str(row["id"]) if published else "",
+                "label": pgettext(CTX, "%(label)s — davam edir (yalnız iştirak)") % {"label": campaign_label(row)},
+            }
+        )
     return options
 
 
-def _is_open(rows) -> bool:
-    return any(row.get("effective_status") == "open" for row in rows)
+def _live_choice(row, value) -> PeriodChoice:
+    return PeriodChoice(
+        mode="live", value=value, campaign_ids=(row["id"],), label=campaign_label(row), is_open=True, live=True
+    )
 
 
-def resolve_period(raw, campaigns) -> PeriodChoice:
-    """``er_period`` dəyərini kampaniya dəstinə çevirir (+ müqayisə üçün əvvəlki dəst)."""
-    raw = str(raw or "").strip()
-    if not campaigns:
-        return PeriodChoice(mode="latest", value="", campaign_ids=(), label="")
-    if raw == "all":
-        return PeriodChoice(
-            mode="all",
-            value="all",
-            campaign_ids=tuple(row["id"] for row in campaigns),
-            label=pgettext(CTX, "Bütün dövrlər"),
-            is_open=_is_open(campaigns),
-        )
-    if raw.startswith("y:"):
-        year = raw[2:]
-        rows = [row for row in campaigns if row.get("academic_year") == year]
-        if rows:
-            older = [row.get("academic_year") for row in campaigns[campaigns.index(rows[-1]) + 1 :]]
-            previous_year = next((value for value in older if value and value != year), None)
-            previous = [row for row in campaigns if previous_year and row.get("academic_year") == previous_year]
-            return PeriodChoice(
-                mode="year",
-                value=raw,
-                campaign_ids=tuple(row["id"] for row in rows),
-                label=pgettext(CTX, "%(year)s — bütün il") % {"year": year},
-                is_open=_is_open(rows),
-                previous_ids=tuple(row["id"] for row in previous),
-                previous_label=previous_year or "",
-            )
-    index, mode = 0, "latest"
-    try:
-        wanted = uuid.UUID(raw) if raw and not raw.startswith("y:") else None
-    except ValueError:
-        wanted = None
-    if wanted is not None:
-        found = next((position for position, row in enumerate(campaigns) if row["id"] == wanted), None)
-        if found is not None:
-            index, mode = found, "campaign"
-    row = campaigns[index]
-    previous = campaigns[index + 1] if index + 1 < len(campaigns) else None
+def _single(published, index, mode) -> PeriodChoice:
+    row = published[index]
+    previous = published[index + 1] if index + 1 < len(published) else None
     return PeriodChoice(
         mode=mode,
         value=str(row["id"]) if mode == "campaign" else "",
         campaign_ids=(row["id"],),
         label=campaign_label(row),
-        is_open=_is_open([row]),
         previous_ids=(previous["id"],) if previous else (),
         previous_label=campaign_label(previous) if previous else "",
     )
+
+
+def resolve_period(raw, campaigns) -> PeriodChoice:
+    """``er_period`` → kampaniya dəsti (+ müqayisə üçün əvvəlki dəst).
+
+    M-1: nəticə dəstinə YALNIZ bağlı kampaniyalar düşür; davam edən kampaniya seçiləndə
+    (və ya hələ bağlı kampaniya yoxdursa) ``live=True`` — yalnız iştirak göstərilir.
+    """
+    raw = str(raw or "").strip()
+    published, live = guard.published_campaigns(campaigns), guard.live_campaigns(campaigns)
+    if not published:
+        if live:
+            return _live_choice(live[0], "")
+        return PeriodChoice(mode="latest", value="", campaign_ids=(), label="")
+    if raw == "all" and len(published) > 1:
+        return PeriodChoice(
+            mode="all",
+            value="all",
+            campaign_ids=tuple(row["id"] for row in published),
+            label=pgettext(CTX, "Bütün bağlı dövrlər"),
+        )
+    if raw.startswith("y:"):
+        year = raw[2:]
+        rows = [row for row in published if row.get("academic_year") == year]
+        if len(rows) > 1:
+            older = [row.get("academic_year") for row in published[published.index(rows[-1]) + 1 :]]
+            previous_year = next((value for value in older if value and value != year), None)
+            previous = [row for row in published if previous_year and row.get("academic_year") == previous_year]
+            return PeriodChoice(
+                mode="year",
+                value=raw,
+                campaign_ids=tuple(row["id"] for row in rows),
+                label=pgettext(CTX, "%(year)s — bütün il") % {"year": year},
+                previous_ids=tuple(row["id"] for row in previous),
+                previous_label=previous_year or "",
+            )
+    try:
+        wanted = uuid.UUID(raw) if raw and not raw.startswith("y:") else None
+    except ValueError:
+        wanted = None
+    if wanted is not None:
+        found = next((index for index, row in enumerate(published) if row["id"] == wanted), None)
+        if found is not None:
+            return _single(published, found, "campaign")
+        running = next((row for row in live if row["id"] == wanted), None)
+        if running is not None:
+            return _live_choice(running, str(running["id"]))
+    return _single(published, 0, "latest")
 
 
 def raw_params(params) -> dict:
@@ -176,6 +199,15 @@ class Resolved:
     def campaign_ids(self) -> list:
         return list(self.query.period.campaign_ids)
 
+    @property
+    def live(self) -> bool:
+        return self.query.period.live
+
+    @property
+    def family(self) -> tuple:
+        """Seçilə bilən bağlı dövr dəstləri — iç-içə dəstlər qaydası üçün (``analytics_guard``)."""
+        return guard.campaign_family(self.campaigns)
+
 
 def resolve(request, *, with_choices=False):
     """İcazə (FAIL-CLOSED) + ``er_*`` parametrləri → ``Resolved`` və ya ``None`` (əhatə yoxdur).
@@ -195,12 +227,13 @@ def resolve(request, *, with_choices=False):
     filters = query.filters
     campaign_ids = list(query.period.campaign_ids)
     teacher_name = ""
-    if campaigns and filters.teacher_id is not None:
+    results = bool(campaign_ids) and not query.period.live
+    if results and filters.teacher_id is not None:
         teacher_name = public.teacher_label(organization, scope, filters, campaign_ids, filters.teacher_id)
         if not teacher_name:
             filters = replace(filters, teacher_id=None)
     choices = None
-    if campaigns and with_choices:
+    if results and with_choices:
         choices = public.filter_choices(organization, scope, filters, campaign_ids)
         filters = choices["effective"]
     return Resolved(organization, scope, campaigns, query, filters, choices, teacher_name)

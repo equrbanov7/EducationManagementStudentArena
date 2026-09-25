@@ -27,7 +27,6 @@ Qrafik JSON adasının `questions` açarından çəkilir; cədvəl eyni rəqəml
                     <th scope="col" class="ems-table__num">{% trans "«Razı» payı" context "surveys.results" %}</th>
                     {% if q_show_department %}<th scope="col" class="ems-table__num">{% trans "Kafedra" context "surveys.results" %}</th>{% endif %}
                     <th scope="col" class="ems-table__num">{% trans "Universitet" context "surveys.results" %}</th>
-                    <th scope="col" class="ems-table__num">n</th>
                 </tr></thead>
                 <tbody>
                 {% for row in q_rows %}
@@ -37,7 +36,6 @@ Qrafik JSON adasının `questions` açarından çəkilir; cədvəl eyni rəqəml
                         <td class="ems-table__num">{% if row.top2 is not None %}{{ row.top2 }}%{% else %}—{% endif %}</td>
                         {% if q_show_department %}<td class="ems-table__num">{{ row.department|floatformat:2|default:"—" }}</td>{% endif %}
                         <td class="ems-table__num">{{ row.org|floatformat:2|default:"—" }}</td>
-                        <td class="ems-table__num">{{ row.n }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

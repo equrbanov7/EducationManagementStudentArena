@@ -1,7 +1,8 @@
 {% load i18n %}
 {% comment %}Likert paylanması — DIVERGING 100% zolaq (neytral «3» mərkəzdə, razı deyil solda,
 razı sağda; rəng korluğuna davamlı narıncı↔mavi şkala, token-lərdən). Kontekst: `lk_rows`
-([{label, text, n, counts[5], pct[5]}]), `lk_scale` ([(bal, etiket)]), `lk_scope`, `lk_title`.
+([{label, text, pct[5]}] — YALNIZ tam faizlər, xam say yoxdur), `lk_scale` ([(bal, etiket)]),
+`lk_scope`, `lk_title`.
 JSON adasının `likert` açarından çəkilir.{% endcomment %}
 <section class="svr-card svr-card--wide" aria-labelledby="svr-lk-title-{{ lk_scope }}">
     <header class="svr-card__head">
@@ -25,14 +26,12 @@ JSON adasının `likert` açarından çəkilir.{% endcomment %}
                 <thead><tr>
                     <th scope="col">{% trans "Sual" context "surveys.results" %}</th>
                     {% for score, label in lk_scale %}<th scope="col" class="ems-table__num" title="{{ label }}">{{ score }}</th>{% endfor %}
-                    <th scope="col" class="ems-table__num">n</th>
                 </tr></thead>
                 <tbody>
                 {% for row in lk_rows %}
                     <tr>
                         <th scope="row"><span class="svr-name">{{ row.label }}</span><span class="svr-sub">{{ row.text }}</span></th>
-                        {% for cell in row.cells %}<td class="ems-table__num">{{ cell.count }} <span class="svr-sub svr-sub--inline">({{ cell.pct|floatformat:0 }}%)</span></td>{% endfor %}
-                        <td class="ems-table__num">{{ row.n }}</td>
+                        {% for share in row.pct %}<td class="ems-table__num">{{ share }}%</td>{% endfor %}
                     </tr>
                 {% endfor %}
                 </tbody>

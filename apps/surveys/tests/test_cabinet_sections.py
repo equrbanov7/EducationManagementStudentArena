@@ -155,13 +155,15 @@ class CampaignsSectionTest(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(SurveyCampaign.objects.exists())
 
-    def test_results_panel_shows_kpis_and_empty_state_before_answers(self):
+    def test_results_panel_shows_only_participation_while_campaign_is_open(self):
         open_campaign(self.w)
         response = client_for(self.w["org"], self.qc_staff).get(PROFILE + "?section=evaluation-results")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'data-profile-section-panel="evaluation-results"')
         self.assertContains(response, "svr-kpi")
-        self.assertContains(response, "Bu dövr üçün hələ cavab yoxdur")  # 0 cavab — nəticə göstərilmir
+        # M-1 (təhlükəsizlik rəyi): açıq kampaniyada nəticə yoxdur — yalnız təxmini iştirak.
+        self.assertContains(response, "Kampaniya davam edir — nəticələr kampaniya bağlandıqdan sonra görünəcək.")
+        self.assertNotContains(response, "svr-overview-data")
 
 
 class SnapshotSelfHealTest(TestCase):

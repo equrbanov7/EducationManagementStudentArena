@@ -5,7 +5,7 @@ Tək seriya → əfsanə yoxdur, başlıq nəyin çəkildiyini deyir. Kontekst: 
     <header class="svr-card__head">
         <div>
             <h3 class="svr-card__title" id="svr-hg-title">{% blocktrans trimmed with label=hg.label context "surveys.results" %}Paylanma: {{ label }}{% endblocktrans %}</h3>
-            <p class="svr-card__sub">{% blocktrans trimmed with avg=hg.avg|floatformat:2 n=hg.n context "surveys.results" %}Orta: {{ avg }} · {{ n }} cavab{% endblocktrans %}</p>
+            <p class="svr-card__sub">{% blocktrans trimmed with avg=hg.avg|floatformat:2 context "surveys.results" %}Orta: {{ avg }} · paylar tam faizlədir{% endblocktrans %}</p>
         </div>
     </header>
     <div class="svr-canvas svr-canvas--column" data-svr-chart="histogram">
@@ -17,12 +17,11 @@ Tək seriya → əfsanə yoxdur, başlıq nəyin çəkildiyini deyir. Kontekst: 
             <table class="ems-table svr-mini-table">
                 <thead><tr>
                     <th scope="col">{% trans "Bal" context "surveys.results" %}</th>
-                    <th scope="col" class="ems-table__num">{% trans "Say" context "surveys.results" %}</th>
                     <th scope="col" class="ems-table__num">{% trans "Pay" context "surveys.results" %}</th>
                 </tr></thead>
                 <tbody>
                 {% for row in hg.rows %}
-                    <tr><th scope="row">{{ row.score }}</th><td class="ems-table__num">{{ row.count }}</td><td class="ems-table__num">{{ row.pct|floatformat:1 }}%</td></tr>
+                    <tr><th scope="row">{{ row.score }}</th><td class="ems-table__num">{{ row.pct }}%</td></tr>
                 {% endfor %}
                 </tbody>
             </table>

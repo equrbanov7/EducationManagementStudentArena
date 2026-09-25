@@ -31,7 +31,7 @@
                     <td class="ems-table__num">{{ row.likert_index|floatformat:2|default:"—" }}</td>
                     <td class="ems-table__num">{% if row.recommend is not None %}{{ row.recommend }}%{% else %}—{% endif %}</td>
                     {% endif %}
-                    <td class="ems-table__num">{{ row.n }}</td>
+                    <td class="ems-table__num">{% if row.suppressed %}<span class="svr-muted">—</span>{% else %}{{ row.n }}{% endif %}</td>
                 </tr>
             {% empty %}
                 <tr><td colspan="6" class="svr-muted">{% trans "Məlumat yoxdur." context "surveys.results" %}</td></tr>

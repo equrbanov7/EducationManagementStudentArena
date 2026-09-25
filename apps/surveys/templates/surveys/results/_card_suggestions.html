@@ -9,7 +9,7 @@ Kontekst: `dg`.{% endcomment %}
         <div>
             <h3 class="svr-card__title" id="svr-sg-title">{% trans "Universiteti necə yaxşılaşdırmaq olar — tələbə təklifləri" context "surveys.results" %}</h3>
             <p class="svr-card__sub">
-                {% if not dg.suppressed %}{% blocktrans trimmed with total=dg.total context "surveys.results" %}{{ total }} təklif (identifikatorsuz, təsadüfi sırada).{% endblocktrans %}{% endif %}
+                {% if not dg.suppressed %}{% blocktrans trimmed with total=dg.total_label context "surveys.results" %}{{ total }} təklif (identifikatorsuz, təsadüfi sırada).{% endblocktrans %}{% endif %}
                 {% if dg.hidden_campaigns %}{% blocktrans trimmed with n=dg.hidden_campaigns context "surveys.results" %}Anonimlik həddinə çatmayan kampaniyalar: {{ n }} — onların təklifləri göstərilmir.{% endblocktrans %}{% endif %}
             </p>
         </div>
@@ -17,7 +17,7 @@ Kontekst: `dg`.{% endcomment %}
     {% if dg.suppressed %}
         <div class="ems-state svr-state" role="status">
             <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
-            <p class="ems-state__title">{% if not dg.n %}{% trans "Hələ təklif yoxdur" context "surveys.results" %}{% elif dg.n < dg.k %}{% blocktrans trimmed with n=dg.n k=dg.k context "surveys.results" %}Cavab sayı azdır ({{ n }} &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}{% else %}{% trans "Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər göstərilmir." context "surveys.results" %}{% endif %}</p>
+            <p class="ems-state__title">{% if not dg.n %}{% trans "Hələ təklif yoxdur" context "surveys.results" %}{% elif dg.n < dg.k %}{% blocktrans trimmed with k=dg.k context "surveys.results" %}Cavab sayı azdır (n &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}{% else %}{% trans "Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər göstərilmir." context "surveys.results" %}{% endif %}</p>
         </div>
     {% else %}
         {% if dg.keywords %}
@@ -40,7 +40,7 @@ Kontekst: `dg`.{% endcomment %}
         </ol>
         <button type="button" class="ems-btn svr-text__more" data-svr-text-more hidden>{% trans "Daha çox göstər" context "surveys.results" %}</button>
         {% if dg.total > dg.items|length %}
-        <p class="svr-card__foot">{% blocktrans trimmed with shown=dg.items|length total=dg.total context "surveys.results" %}İlk {{ shown }} təklif göstərilir (cəmi {{ total }}) — filtr panelindəki «Şərhlərdə axtar» ilə daraldın.{% endblocktrans %}</p>
+        <p class="svr-card__foot">{% blocktrans trimmed with shown=dg.items|length total=dg.total_label context "surveys.results" %}İlk {{ shown }} təklif göstərilir (cəmi {{ total }}) — filtr panelindəki «Şərhlərdə axtar» ilə daraldın.{% endblocktrans %}</p>
         {% endif %}
     {% endif %}
 </section>
