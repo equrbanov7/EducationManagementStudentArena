@@ -186,7 +186,8 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             "title": pgettext_lazy("exams.form.exam.label", "title"),
             "description": pgettext_lazy("exams.form.exam.label", "description"),
             "exam_type": pgettext_lazy("exams.form.exam.label", "exam_type"),
-            "exam_type_extended": pgettext_lazy("exams.form.exam.label", "exam_type_extended"),
+            # 2026-09-25: açar-msgid-in AZ mətni «Kollekvium» (yazı səhvi) deyirdi → AZ-mətnli msgid.
+            "exam_type_extended": pgettext_lazy("exams.form.exam.label", "Kateqoriya (Final / Midterm / Sınaq)"),
             "subject": pgettext_lazy("exams.form.exam.label", "subject"),
             "is_active": pgettext_lazy("exams.form.exam.label", "is_active"),
             "start_datetime": pgettext_lazy("exams.form.exam.label", "start_datetime"),
@@ -241,14 +242,14 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         if not self.practical_exams_enabled and submitted_exam_type != PRACTICAL_EXAM_TYPE:
             self.fields["exam_type"].choices = selectable_exam_type_choices(self.fields["exam_type"].choices)
 
-        # İmtahan kateqoriyası (Final/Kollekvium/Sınaq) — opsionaldır. Boş seçim
+        # İmtahan kateqoriyası (Final/Midterm/Sınaq) — opsionaldır. Boş seçim
         # üçün oxunaqlı etiket veririk ki, həm create, həm də edit-də düzgün
         # önseçilsin (model sahəsi blank=True/null=True olduğu üçün required deyil).
         if "exam_type_extended" in self.fields:
             self.fields["exam_type_extended"].required = False
             common_category_values = {"quiz", "midterm", "final"}
 
-            # FINAL və MIDTERM (kollokvium) kateqoriyaları yalnız imtahan
+            # FINAL və MIDTERM (aralıq imtahan) kateqoriyaları yalnız imtahan
             # mərkəzinə aiddir: müəllim bu kateqoriyalarda imtahan yarada/çevirə
             # bilməz (mövcud instans redaktədə seçim kimi qalır ki, forma
             # partlamasın — clean() yenə qoruyur).
@@ -464,7 +465,9 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
             current_value = getattr(getattr(self, "instance", None), "exam_type_extended", None)
             if current_value != value:
                 raise forms.ValidationError(
-                    pgettext_lazy("exams.form.exam.error", "secure_exam_category_exam_center_only")
+                    pgettext_lazy(
+                        "exams.form.exam.error", "Final və midterm imtahanlarını yalnız imtahan mərkəzi yarada bilər."
+                    )
                 )
         return value
 

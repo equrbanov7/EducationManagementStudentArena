@@ -311,3 +311,32 @@ class NormalizeInterimCommandTest(TestCase):
         again = StringIO()
         call_command("normalize_interim_components", "--organization", self.org.slug, "--apply", stdout=again)
         self.assertIn("dəyişən 0", again.getvalue())
+
+
+class MidtermLeftoverWindowTest(TestCase):
+    """Midterm dövründə qalmış köhnə K2 pəncərəsi Midterm pəncərəsinin saxlanmasını bloklamır."""
+
+    @classmethod
+    def setUpTestData(cls):
+        with bypass_rls():
+            _setup_offering(cls, "mtl")
+
+    def test_leftover_k2_window_does_not_block_midterm(self):
+        today = timezone.localdate()
+        with bypass_rls():
+            KollokviumWindow.objects.create(
+                organization=self.org,
+                period=self.period,
+                k_index=1,
+                opens_on=today,
+                closes_on=today + datetime.timedelta(days=3),
+            )
+            kw.validate_window_save(
+                organization=self.org,
+                period=self.period,
+                k_index=0,
+                opens_on=today + datetime.timedelta(days=1),
+                closes_on=today + datetime.timedelta(days=9),
+                is_new=True,
+                today=today,
+            )
