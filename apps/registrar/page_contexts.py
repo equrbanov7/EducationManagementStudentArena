@@ -523,16 +523,17 @@ def _course_number(record, period) -> str:
 def _student_offering_stats(user, organization, record, period) -> dict:
     """Tələbənin fənn-fənn jurnal xülasəsi (cədvəl modalı üçün, yüngül).
 
-    Qayıb saatı denormalizə olunmuş ``Enrollment.absence_hours``-dan gəlir;
-    giriş balı kanonik :func:`gradebook.entry_score_for` ilə hesablanır."""
+    Qayıb saatı ``Enrollment.absence_hours``-dan; giriş balı kanonik ``gradebook.entry_score_for``
+    (Midterm rejimində davamiyyət hissəsi aşağıdakı buraxılış girişləri ilə — ``entry_standard``)."""
     from decimal import Decimal
 
-    from apps.registrar import exam_eligibility, gradebook
+    from apps.registrar import entry_standard, exam_eligibility, gradebook
     from apps.registrar.models import Enrollment
 
     if record is None or period is None:
         return {}
     limit_percent = record.program.absence_limit_percent if record.program else exam_eligibility.DEFAULT_LIMIT_PERCENT
+    midterm = entry_standard.period_is_midterm(period, organization)  # bütün sətirlər bu dövrdədir
     stats: dict = {}
     enrollments = list(
         Enrollment.objects.filter(
@@ -542,8 +543,7 @@ def _student_offering_stats(user, organization, record, period) -> dict:
             status=Enrollment.Status.ENROLLED,
         ).select_related("offering", "offering__assessment_scheme")
     )
-    # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu),
-    # cədvəl modalı hər sətir üçün ayrı sorğu ETMİR.
+    # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu), sətir başına sorğu YOX.
     offering_ids = [e.offering_id for e in enrollments]
     frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
     hours_map = exam_eligibility.lesson_hours_map(offering_ids)
@@ -563,10 +563,11 @@ def _student_offering_stats(user, organization, record, period) -> dict:
             exempt=bool(record.national_athlete_exemption),
             frozen=offering.id in frozen_ids,
         )
+        rule = entry_standard.EntryRule(True, total_hours, limit_percent, bool(record.national_athlete_exemption))
         stats[offering.id] = {
             "absence_hours": enrollment.absence_hours,
             "allowed_absence": allowed,
-            "entry_score": gradebook.entry_score_for(enrollment, cap),
+            "entry_score": gradebook.entry_score_for(enrollment, cap, rule=rule if midterm else entry_standard.LEGACY),
             "entry_score_max": cap,
             "barred": eligibility["barred"],
             "attendance_score": eligibility["attendance_score"],

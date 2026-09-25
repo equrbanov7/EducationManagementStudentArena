@@ -37,6 +37,20 @@ Faydalı variantlar:
 LAN-dan (telefon, başqa kompüter) görünsün: `HOST=0.0.0.0 ./scripts/dev-daphne.sh`
 Başqa port: `PORT=8010 ./scripts/dev-daphne.sh`
 
+### Yeni səhifələrdə 500 və tətbiq olunmamış miqrasiyalar
+
+`ddaphne` serveri başlatmazdan əvvəl **seçilmiş bazanın** miqrasiyalarını yoxlayır.
+Sxem köhnədirsə dayanır və düzəliş əmrini göstərir. Defolt klon üçün:
+
+```bash
+STAGING_POSTGRES_DB=emsarena_rehearsal_a0d170000901 scripts/staging_inspect.sh migrate
+ddaphne
+```
+
+`CLONE_DB` ilə başqa klon seçilibsə, `STAGING_POSTGRES_DB` də həmin ad olmalıdır.
+Sadəcə `python manage.py migrate` işlətmək `.env` bazasını yeniləyə bilər və
+`ddaphne`-nin istifadə etdiyi klondakı çatışmayan cədvəlləri düzəltməz.
+
 ## «`ddaphne` yazıram, işləmir» — niyə
 
 `ddaphne` **alias**-dır (`~/.zshrc`-in ilk sətri). Alias yalnız o faylı oxumuş

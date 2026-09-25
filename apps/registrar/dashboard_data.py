@@ -197,11 +197,12 @@ def student_subjects(*, organization, record, period) -> dict:
     if not enrollments:
         return result
     offerings = {e.offering_id: e.offering for e in enrollments}
-    batch = finals_batch.entry_batch(enrollments)
-    frozen = exam_eligibility.frozen_offering_ids(list(offerings))
     # Məxrəc fallback-i (dərs saatlarının cəmi) YALNIZ `lesson_hours` təyin olunmayan açılışlar üçün.
     missing = [oid for oid, o in offerings.items() if not (o.lesson_hours or 0) > 0]
     hours_map = exam_eligibility.lesson_hours_map(missing) if missing else {}
+    # Giriş balı (Midterm rejimində sillabus standartı) — davamiyyəti buraxılışla EYNİ saat/hədd.
+    batch = finals_batch.student_entry_batch(enrollments, record, period, None, hours_map, organization)
+    frozen = exam_eligibility.frozen_offering_ids(list(offerings))
     rows = []
     for enrollment in enrollments:
         offering = enrollment.offering

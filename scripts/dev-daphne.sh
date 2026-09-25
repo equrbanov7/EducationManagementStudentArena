@@ -113,6 +113,18 @@ else
     DB_LABEL="KLON: $CLONE_DB@127.0.0.1:$CLONE_PORT (real data TOXUNULMUR)"
 fi
 
+# Yeni modulların cədvəlləri olmadan server qalxsa, kabinet səhifələri 500 verir.
+# Yoxlama məhz yuxarıda seçilmiş bazada, tətbiqin öz rolu ilə aparılır.
+if ! "$PY_BIN/python" manage.py migrate --check; then
+    echo "✗ Baza sxemi hazır deyil: $DB_LABEL" >&2
+    if [ "${REAL:-}" = "1" ]; then
+        echo "  Həll: eyni DATABASE_URL ilə venv/bin/python manage.py migrate" >&2
+    else
+        echo "  Həll: STAGING_POSTGRES_DB=$CLONE_DB scripts/staging_inspect.sh migrate" >&2
+    fi
+    exit 1
+fi
+
 echo "→ Daphne: http://$HOST:$PORT  (settings: $DJANGO_SETTINGS_MODULE)"
 echo "  Baza: $DB_LABEL"
 echo "  Dayandırmaq: Ctrl+C"
