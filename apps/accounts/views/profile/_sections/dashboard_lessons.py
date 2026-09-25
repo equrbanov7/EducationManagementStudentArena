@@ -16,6 +16,7 @@ dərsləri göstərilir.  ƏLAVƏ SORĞU YOXDUR — çağıran slot siyahısın�
 
 from __future__ import annotations
 
+from django.urls import reverse
 from django.utils.translation import pgettext
 
 from .dashboard_widgets import day_label, stat, time_range
@@ -35,7 +36,7 @@ def parity_label(parity) -> str:
     return ""
 
 
-def _lesson_row(slot, *, with_group: bool, now=None) -> dict:
+def _lesson_row(slot, *, with_group: bool, now=None, journal_link: bool = False) -> dict:
     offering = slot.offering
     subject = getattr(offering, "subject", None)
     meta = [str(slot.get_kind_display() or "")]
@@ -45,16 +46,21 @@ def _lesson_row(slot, *, with_group: bool, now=None) -> dict:
     if group is not None:
         meta.append(group.name)
     is_now = now is not None and slot.start_time <= now < slot.end_time
-    return {
+    row = {
         "time": time_range(slot),
         "title": getattr(subject, "name", "") or "—",
         "meta": " · ".join(part for part in meta if part),
         "is_past": now is not None and slot.end_time <= now,
         "is_now": is_now,
     }
+    # «Jurnalı aç» (UNEC müqayisəsi P1-1, 2026-09-25) — müəllim sətrindən həmin açılışın
+    # jurnalına; jurnalın üstündə bu günün slotu «Aktivləşdir» ilə açılır. Sorğu YOXDUR.
+    if journal_link and getattr(slot, "offering_id", None):
+        row["url"] = reverse("registrar:journal_detail", args=[slot.offering_id])
+    return row
 
 
-def build(slots, *, period, today, now, with_group: bool) -> dict:
+def build(slots, *, period, today, now, with_group: bool, journal_links: bool = False) -> dict:
     """Kartın rəqəmləri + sətirləri.
 
     Qaytarır: ``stats`` (bu gün / növbəti / bu həftə), ``rows``, ``caption``
@@ -70,14 +76,20 @@ def build(slots, *, period, today, now, with_group: bool) -> dict:
 
     if remaining:
         shown, caption = today_slots, pgettext(_CTX, "Bu gün · %(day)s") % {"day": day_label(today)}
-        rows = [_lesson_row(slot, with_group=with_group, now=now) for slot in shown[:LESSON_ROW_LIMIT]]
+        rows = [
+            _lesson_row(slot, with_group=with_group, now=now, journal_link=journal_links)
+            for slot in shown[:LESSON_ROW_LIMIT]
+        ]
         upcoming = remaining[0]
         next_value = time_range(upcoming).split("–")[0]
         ongoing = now is not None and upcoming.start_time <= now
         next_note = pgettext(_CTX, "indi gedir") if ongoing else pgettext(_CTX, "bu gün")
     elif next_slots:
         caption = pgettext(_CTX, "Növbəti dərs günü · %(day)s") % {"day": day_label(next_day)}
-        rows = [_lesson_row(slot, with_group=with_group) for slot in next_slots[:LESSON_ROW_LIMIT]]
+        rows = [
+            _lesson_row(slot, with_group=with_group, journal_link=journal_links)
+            for slot in next_slots[:LESSON_ROW_LIMIT]
+        ]
         next_value = time_range(next_slots[0]).split("–")[0]
         next_note = day_label(next_day)
     else:

@@ -137,3 +137,153 @@
         width: 100%;
     }
 }
+
+/* ── «Cədvəldə var, qeydə alınmayıb» (UNEC müqayisəsi P1-1, 2026-09-25) ─── */
+
+.llog-unrec {
+    margin: 0 0 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg, 14px);
+    background: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-card, 0 1px 2px rgba(15, 23, 42, 0.04));
+    overflow: hidden;
+}
+
+.llog-unrec.is-alert {
+    border-color: var(--ems-warning-bd);
+    border-left: 4px solid var(--ems-warning-500);
+}
+
+.llog-unrec.is-clear {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 15px;
+    border-left: 4px solid var(--ems-success-600);
+}
+
+.llog-unrec__summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 15px;
+    cursor: pointer;
+    list-style: none;
+    background: var(--ems-warning-bg);
+}
+
+.llog-unrec__summary::-webkit-details-marker {
+    display: none;
+}
+
+.llog-unrec__summary:focus-visible {
+    outline: 2px solid var(--ems-primary-300);
+    outline-offset: -2px;
+}
+
+.llog-unrec__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--ems-r-md, 10px);
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.llog-unrec.is-clear .llog-unrec__icon {
+    background: var(--ems-success-100);
+    color: var(--ems-success-700);
+}
+
+.llog-unrec__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.llog-unrec__title {
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.llog-unrec__note {
+    font-size: var(--ems-fs-sm, 0.8rem);
+    color: var(--ems-text-muted);
+}
+
+.llog-unrec__count {
+    flex: 0 0 auto;
+    min-width: 42px;
+    text-align: center;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--ems-warning-800);
+}
+
+.llog-unrec.is-clear .llog-unrec__count {
+    color: var(--ems-success-700);
+}
+
+.llog-unrec__toggle {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-sm, 0.8rem);
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.llog-unrec__toggle i {
+    transition: transform 0.15s ease;
+}
+
+.llog-unrec[open] .llog-unrec__toggle i {
+    transform: rotate(180deg);
+}
+
+.llog-unrec__table {
+    margin: 0;
+}
+
+.llog-unrec__weekday {
+    margin-left: 4px;
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.llog-unrec__action {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.llog-unrec__more,
+.llog-unrec__hint {
+    margin: 0;
+    padding: 9px 15px;
+    font-size: var(--ems-fs-sm, 0.8rem);
+    color: var(--ems-text-muted);
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.llog-unrec__hint i {
+    margin-right: 6px;
+    color: var(--ems-neutral-400);
+}
+
+/* Cədvəldən kənar açılmış dərs — «Dərsin tipi» xanasında nişan (səbəb tooltip-dədir). */
+.llog-offsched {
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .llog-unrec__summary {
+        flex-wrap: wrap;
+    }
+}

@@ -5,6 +5,7 @@ sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
 kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
 varsa dərs tipi kilidlidir.{% endcomment %}
 <div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
+     data-period-end="{% if offering.period %}{{ offering.period.end_date|date:'Y-m-d' }}{% endif %}"
      data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
      data-default-building="{{ lesson_default_building }}" hidden>
     <div class="jd-modal-backdrop" data-jd-modal-close></div>
@@ -137,6 +138,19 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <small class="jd-field-hint" data-jd-room-hint>{% trans "Təşkilat üçün hələ otaq qeyd olunmayıb — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "registrar.journal" %}</small>
                     {% endif %}
                 </div>
+                {% if lesson_slot_pattern %}
+                {% comment %}Cədvəldən KƏNAR dərs (UNEC P1-1): açılışın cədvəli var, amma seçilmiş tarix + saat heç
+                bir slota uyğun deyil → səbəb MƏCBURİDİR (server də yoxlayır — views._handle_add_lesson).
+                Sahə yalnız YENİ dərsdə və uyğunsuzluq olanda açılır (journal_activation.js, naxış aşağıda).{% endcomment %}
+                <div class="jd2-field jd2-offsched" data-jd-offsched hidden>
+                    <span class="jd2-field-label">{% trans "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB" context "registrar.journal_activation" %}</span>
+                    <textarea name="off_schedule_reason" rows="2" maxlength="255" data-jd-offsched-reason
+                              placeholder="{% trans 'Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…' context 'registrar.journal_activation' %}"
+                              aria-label="{% trans 'Cədvəldən kənar dərsin səbəbi' context 'registrar.journal_activation' %}"></textarea>
+                    <small class="jd-field-hint">{% trans "Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın üstündəki «Aktivləşdir» düyməsini işlədin." context "registrar.journal_activation" %}</small>
+                </div>
+                {{ lesson_slot_pattern|json_script:"jdSlotPattern" }}
+                {% endif %}
                 {% if lesson_teacher_choices %}
                 {% comment %}QA 2026-09-05 P3-13: əvvəllər təşkilatın BÜTÜN namizədləri
                 (554-ə qədər) <option> kimi bura bişirilirdi. İndi axtarışlı/lazy seçici

@@ -77690,3 +77690,447 @@ msgstr ""
 "There are no survey campaigns yet. The first one is created automatically "
 "when the Digital Development Centre closes the journals, or you can open one"
 " manually above."
+
+msgctxt "registrar.journal_history"
+msgid "Davamiyyət / bal"
+msgstr "Attendance / score"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent balı"
+msgstr "Component score"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun imtahan"
+msgstr "Final exam"
+
+msgctxt "registrar.journal_history"
+msgid "Təkrar imtahan"
+msgstr "Resit exam"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — bal / davamiyyət"
+msgstr "Documented correction — score / attendance"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs"
+msgstr "Documented correction — lesson"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs silindi"
+msgstr "Documented correction — lesson deleted"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — sərbəst iş"
+msgstr "Documented correction — independent work"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — kurs işi"
+msgstr "Documented correction — course work"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — komponent"
+msgstr "Documented correction — component"
+
+msgctxt "registrar.journal_history"
+msgid "Düzəlişin geri alınması"
+msgstr "Correction reverted"
+
+msgctxt "registrar.journal_history"
+msgid "Sistem"
+msgstr "System"
+
+msgctxt "registrar.journal_history"
+msgid "Akademik qeyd"
+msgstr "Academic record"
+
+msgctxt "registrar.journal_history"
+msgid "Bu gün"
+msgstr "Today"
+
+msgctxt "registrar.journal_history"
+msgid "Dünən"
+msgstr "Yesterday"
+
+msgctxt "registrar.journal_history"
+msgid "dəyişiklik"
+msgstr "changes"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs sütunu"
+msgstr "Lesson column"
+
+msgctxt "registrar.journal_history"
+msgid "başqasının adından · əsl aktor"
+msgstr "on behalf of another user · actual actor"
+
+msgctxt "registrar.journal_history"
+msgid "sətir daha göstər"
+msgstr "more rows"
+
+msgctxt "registrar.journal_history"
+msgid "Yığ"
+msgstr "Collapse"
+
+msgctxt "registrar.journal_history"
+msgid "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+msgstr "rows are not shown in the panel — this save is very large"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd göstərilir"
+msgstr "entries shown"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd"
+msgstr "entries"
+
+msgctxt "registrar.journal_history"
+msgid "Dəyişiklik tarixçəsi"
+msgstr "Change history"
+
+msgctxt "registrar.journal_history"
+msgid "Paneli bağla"
+msgstr "Close panel"
+
+msgctxt "registrar.journal_history"
+msgid "DƏRS TARİXİ"
+msgstr "LESSON DATE"
+
+msgctxt "registrar.journal_history"
+msgid "Tarix axtar…"
+msgstr "Search date…"
+
+msgctxt "registrar.journal_history"
+msgid "Uyğun tarix yoxdur"
+msgstr "No matching date"
+
+msgctxt "registrar.journal_history"
+msgid "Bütün tarixlər"
+msgstr "All dates"
+
+msgctxt "registrar.journal_history"
+msgid "TƏLƏBƏ"
+msgstr "STUDENT"
+
+msgctxt "registrar.journal_history"
+msgid "Ad və ya soyad…"
+msgstr "First or last name…"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd növü"
+msgstr "Entry type"
+
+msgctxt "registrar.journal_history"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent"
+msgstr "Component"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun"
+msgstr "Final"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəlişlər"
+msgstr "Documented corrections"
+
+msgctxt "registrar.journal_history"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "The history could not be loaded. Refresh the page and try again."
+
+msgctxt "registrar.journal_history"
+msgid "Hələ dəyişiklik qeydə alınmayıb"
+msgstr "No changes recorded yet"
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+msgstr ""
+"Scores, attendance, components and corrections appear here as soon as they "
+"are saved."
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəcə uyğun qeyd yoxdur"
+msgstr "No entries match the filter"
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+msgstr "Change the filter or load older entries below."
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+msgstr ""
+"The student and type filters apply to loaded entries — press “More” for "
+"older ones."
+
+msgctxt "registrar.journal_history"
+msgid "Daha çox"
+msgstr "More"
+
+msgctxt "registrar.journal_history"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "registrar.journal_history"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "registrar.journal_history"
+msgid "Nə dəyişdi"
+msgstr "What changed"
+
+msgctxt "registrar.journal_history"
+msgid "Köhnə → yeni"
+msgstr "Old → new"
+
+msgctxt "registrar.journal_history"
+msgid "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+msgstr "Who changed what and when — the journal change history"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "registrar.journal_history"
+msgid "Bu dərsin tarixçəsi"
+msgstr "This lesson's history"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu fənnə aid deyil."
+msgstr "This timetable slot does not belong to this course."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+msgstr ""
+"This timetable slot is not held on %(date)s (weekday or odd/even week does "
+"not match)."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"The timetable has no class of this course at this date and time — enter a "
+"reason for an off-timetable lesson (e.g. substitution, make-up class). For a"
+" timetabled class use the “Activate” button above the journal."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+msgstr "This timetable class has already been activated today."
+
+msgctxt "registrar.journal_activation"
+msgid "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+msgstr "Lesson activated: %(time)s · %(kind)s%(topic)s."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu günün cədvəl dərsləri"
+msgstr "Today's timetable"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+msgstr ""
+"Open the lesson in one click — time, type, room and the next topic come from"
+" the timetable and the syllabus."
+
+msgctxt "registrar.journal_activation"
+msgid "indi"
+msgstr "now"
+
+msgctxt "registrar.journal_activation"
+msgid "Mövzu"
+msgstr "Topic"
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti mövzu"
+msgstr "Next topic"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+msgstr ""
+"The syllabus has no uncovered topic for this type — you can add the topic "
+"later by editing the lesson."
+
+msgctxt "registrar.journal_activation"
+msgid "Jurnalda bu dərsin sütununa keç"
+msgstr "Go to this lesson's column in the journal"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilib"
+msgstr "Activated"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdir"
+msgstr "Activate"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilməyib"
+msgstr "Not activated"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+msgstr "There is no class of this course in today's timetable."
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti dərs"
+msgstr "Next class"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldən kənar açılmış dərs"
+msgstr "Off-timetable lesson opened today"
+
+msgctxt "registrar.journal_activation"
+msgid "cədvəldən kənar"
+msgstr "off-timetable"
+
+msgctxt "registrar.journal_activation"
+msgid "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+msgstr "OFF-TIMETABLE LESSON — REASON"
+
+msgctxt "registrar.journal_activation"
+msgid "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+msgstr "E.g. substitution, make-up class, timetable change…"
+
+msgctxt "registrar.journal_activation"
+msgid "Cədvəldən kənar dərsin səbəbi"
+msgstr "Reason for the off-timetable lesson"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"The timetable has no class at this date and time — a reason is required and "
+"the lesson is flagged “off-timetable” in “Lessons held”. For a timetabled "
+"class use the “Activate” button above the journal."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+msgstr "Open this course's journal — activate today's class from there"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnalı aç"
+msgstr "Open journal"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəldə var, qeydə alınmayıb"
+msgstr "In the timetable, not recorded"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+msgstr ""
+"the timetable slot falls on a past date, but no lesson column was opened in "
+"the journal that day"
+
+msgctxt "accounts.lessons_log"
+msgid "Siyahı"
+msgstr "List"
+
+msgctxt "accounts.lessons_log"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal"
+msgstr "Journal"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+msgstr ""
+"The newest %(shown)s slots are shown — %(total)s in total. Choose a narrower"
+" period."
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+msgstr ""
+"Only the RİM head can open a lesson column for a past date (it is audited). "
+"Holidays are not marked in the timetable, so they may be counted here."
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+msgstr "every past timetabled class has a lesson column in the journal"
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldən kənar"
+msgstr "off-timetable"
+
+msgctxt "registrar.lessons_log"
+msgid "Cədvəldən kənar (səbəb)"
+msgstr "Off-timetable (reason)"
+
+msgctxt "accounts.lessons_log"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fakültələr"
+msgstr "All faculties"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün kafedralar"
+msgstr "All departments"
+
+msgctxt "registrar.journal"
+msgid "AUDİTORİYA SAATI"
+msgstr "CLASS HOURS"
+
+msgctxt "registrar.journal"
+msgid "keçirilib / plan"
+msgstr "held / planned"
+
+msgctxt "registrar.journal"
+msgid "BURAXILAN SAAT"
+msgstr "MISSED HOURS"
+
+msgctxt "registrar.journal"
+msgid "üzrsüz q/b"
+msgstr "unexcused absences"
+
+msgctxt "registrar.journal"
+msgid "QAYIB %%"
+msgstr "ABSENCE %%"
+
+msgctxt "registrar.journal"
+msgid "buraxılan ÷ plan"
+msgstr "missed ÷ planned"
+
+msgctxt "registrar.journal"
+msgid "Buraxılış həddi"
+msgstr "Admission limit"
+
+msgctxt "registrar.journal"
+msgid "icazəli"
+msgstr "allowed"
+
+msgctxt "registrar.journal"
+msgid ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."
+msgstr ""
+"Absence %% = missed hours ÷ class hours (planned) — the same denominator as "
+"the exam admission decision."

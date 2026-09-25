@@ -60,7 +60,7 @@ def teacher_today(*, organization, user, period, allowed_sections, today, now) -
     from apps.registrar.public import schedule as schedule_service
 
     slots = schedule_service.get_teacher_schedule(organization=organization, teacher=user, period=period)
-    card = lessons.build(slots, period=period, today=today, now=now, with_group=True)
+    card = lessons.build(slots, period=period, today=today, now=now, with_group=True, journal_links=True)
     return widget(
         "teacher-today",
         pgettext(_CTX, "Bu gün / növbəti dərslərim"),

@@ -1,0 +1,145 @@
+{% load i18n %}
+{% comment %}«Dəyişiklik tarixçəsi» — sağdan açılan OXU-REJİMLİ panel (UNEC müqayisəsi P1-3, 2026-09-25).
+
+Məzmun `registrar:journal_history` JSON endpoint-indən 20-lik səhifələrlə gəlir
+(bax apps/registrar/journal_history.py): kim, nə vaxt, nə (dərs tarixi / element),
+köhnə → yeni; yenidən köhnəyə, günlərə bölünmüş. Səhifə yüklənəndə HEÇ BİR audit
+sorğusu getmir — panel ilk dəfə açılanda oxunur.
+
+Süzgəclər: dərs tarixi (serverdə — köhnə dərsin tarixçəsi də tam gəlir), tələbə adı
+və qeyd növü (müştəri tərəfində, yüklənmiş qeydlər üzərində).
+
+CSP: inline JS/CSS yoxdur. Kart/sətir markup-ı aşağıdakı <template>-lərdədir
+(tərcümə olunmuş başlıqlar burada qalır), journal_history.js onları klonlayıb
+YALNIZ textContent ilə doldurur (XSS qapısı). Panel yalnız jurnal səhifəsini aça
+bilənlərə render olunur; tələbə bu səhifəyə ümumiyyətlə düşmür.{% endcomment %}
+<div class="jhist" data-jhist hidden
+     data-url="{% url 'registrar:journal_history' offering.id %}"
+     data-today="{% now 'Y-m-d' %}"
+     data-t-today="{% trans 'Bu gün' context 'registrar.journal_history' %}"
+     data-t-yesterday="{% trans 'Dünən' context 'registrar.journal_history' %}"
+     data-t-changes="{% trans 'dəyişiklik' context 'registrar.journal_history' %}"
+     data-t-lesson="{% trans 'Dərs sütunu' context 'registrar.journal_history' %}"
+     data-t-imp="{% trans 'başqasının adından · əsl aktor' context 'registrar.journal_history' %}"
+     data-t-expand="{% trans 'sətir daha göstər' context 'registrar.journal_history' %}"
+     data-t-collapse="{% trans 'Yığ' context 'registrar.journal_history' %}"
+     data-t-capped="{% trans 'sətir paneldə göstərilmir — bu saxlama çox böyükdür' context 'registrar.journal_history' %}"
+     data-t-shown="{% trans 'qeyd göstərilir' context 'registrar.journal_history' %}"
+     data-t-total="{% trans 'qeyd' context 'registrar.journal_history' %}">
+    <div class="jhist__backdrop" data-jhist-close></div>
+    <div class="jhist__panel" role="dialog" aria-modal="true" aria-labelledby="jhist-title" tabindex="-1">
+        <header class="jhist__head">
+            <span class="jhist__icon" aria-hidden="true"><i class="fas fa-clock-rotate-left"></i></span>
+            <div class="jhist__headtext">
+                <h3 class="jhist__title" id="jhist-title">{% trans "Dəyişiklik tarixçəsi" context "registrar.journal_history" %}</h3>
+                <p class="jhist__sub">{{ offering.subject.name }}{% if offering.group %} · {{ offering.group.name }}{% endif %}<span class="jhist__sub-total" data-jhist-total></span></p>
+            </div>
+            <button type="button" class="jhist__x" data-jhist-close
+                    aria-label="{% trans 'Paneli bağla' context 'registrar.journal_history' %}"><i class="fas fa-xmark" aria-hidden="true"></i></button>
+        </header>
+
+        <div class="jhist__filters">
+            <div class="jhist__field">
+                <label class="jhist__label" for="jhist-date">{% trans "DƏRS TARİXİ" context "registrar.journal_history" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select id="jhist-date" class="ems-select bootstrap-single-select__native" data-jhist-date data-bootstrap-select
+                            data-live-search="true"
+                            data-live-search-placeholder="{% trans 'Tarix axtar…' context 'registrar.journal_history' %}"
+                            data-live-search-empty="{% trans 'Uyğun tarix yoxdur' context 'registrar.journal_history' %}">
+                        <option value="">{% trans "Bütün tarixlər" context "registrar.journal_history" %}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="jhist__field jhist__field--grow">
+                <label class="jhist__label" for="jhist-q">{% trans "TƏLƏBƏ" context "registrar.journal_history" %}</label>
+                <span class="jhist__search">
+                    <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                    <input id="jhist-q" type="search" data-jhist-q autocomplete="off" maxlength="80"
+                           placeholder="{% trans 'Ad və ya soyad…' context 'registrar.journal_history' %}">
+                </span>
+            </div>
+            <div class="jhist__chips" role="group" aria-label="{% trans 'Qeyd növü' context 'registrar.journal_history' %}">
+                <button type="button" class="jhist__chip is-active" data-jhist-kind="" aria-pressed="true">{% trans "Hamısı" context "registrar.journal_history" %}</button>
+                <button type="button" class="jhist__chip" data-jhist-kind="mark" aria-pressed="false">{% trans "Davamiyyət / bal" context "registrar.journal_history" %}</button>
+                <button type="button" class="jhist__chip" data-jhist-kind="component" aria-pressed="false">{% trans "Komponent" context "registrar.journal_history" %}</button>
+                <button type="button" class="jhist__chip" data-jhist-kind="final" aria-pressed="false">{% trans "Yekun" context "registrar.journal_history" %}</button>
+                <button type="button" class="jhist__chip" data-jhist-kind="correction" aria-pressed="false">{% trans "Sənədli düzəlişlər" context "registrar.journal_history" %}</button>
+            </div>
+        </div>
+
+        <div class="jhist__body" data-jhist-body>
+            <p class="jhist__state" data-jhist-loading><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {% trans "Yüklənir…" context "registrar.journal_history" %}</p>
+            <p class="jhist__state jhist__state--error" data-jhist-error hidden>
+                {% trans "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin." context "registrar.journal_history" %}
+            </p>
+            <div class="jhist__empty" data-jhist-empty hidden>
+                <i class="fas fa-inbox" aria-hidden="true"></i>
+                <b>{% trans "Hələ dəyişiklik qeydə alınmayıb" context "registrar.journal_history" %}</b>
+                <span>{% trans "Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək." context "registrar.journal_history" %}</span>
+            </div>
+            <div class="jhist__empty" data-jhist-nomatch hidden>
+                <i class="fas fa-filter-circle-xmark" aria-hidden="true"></i>
+                <b>{% trans "Süzgəcə uyğun qeyd yoxdur" context "registrar.journal_history" %}</b>
+                <span>{% trans "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin." context "registrar.journal_history" %}</span>
+            </div>
+            <div class="jhist__list" data-jhist-list aria-live="polite"></div>
+            <p class="jhist__hint" data-jhist-partial hidden>
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                {% trans "Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün «Daha çox» basın." context "registrar.journal_history" %}
+            </p>
+        </div>
+
+        <footer class="jhist__foot">
+            <span class="jhist__count" data-jhist-count></span>
+            <button type="button" class="jhist__more" data-jhist-more hidden>
+                <i class="fas fa-angles-down" aria-hidden="true"></i> {% trans "Daha çox" context "registrar.journal_history" %}
+            </button>
+            <button type="button" class="jhist__close-btn" data-jhist-close>{% trans "Bağla" context "registrar.journal_history" %}</button>
+        </footer>
+    </div>
+
+    <template data-jhist-tpl="day">
+        <h4 class="jhist-day"><span data-f="label"></span></h4>
+    </template>
+    <template data-jhist-tpl="entry">
+        <article class="jhist-entry">
+            <header class="jhist-entry__head">
+                <span class="jhist-entry__avatar" data-f="initials" aria-hidden="true"></span>
+                <span class="jhist-entry__who">
+                    <span class="jhist-entry__user" data-f="user"></span>
+                    <span class="jhist-entry__imp" data-f="imp" hidden><i class="fas fa-user-shield" aria-hidden="true"></i> <span data-f="imp-text"></span></span>
+                </span>
+                <span class="jhist-entry__meta">
+                    <span class="jhist-entry__kind" data-f="kind"></span>
+                    <span class="jhist-entry__count" data-f="count"></span>
+                </span>
+                <time class="jhist-entry__time" data-f="time"></time>
+            </header>
+            <div class="jhist-entry__scroll">
+                <table class="jhist-rows">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Tələbə" context "registrar.journal_history" %}</th>
+                            <th scope="col">{% trans "Nə dəyişdi" context "registrar.journal_history" %}</th>
+                            <th scope="col">{% trans "Köhnə → yeni" context "registrar.journal_history" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody data-f="rows"></tbody>
+                </table>
+            </div>
+            <p class="jhist-entry__capped" data-f="capped" hidden></p>
+            <button type="button" class="jhist-entry__more" data-jhist-expand hidden></button>
+        </article>
+    </template>
+    <template data-jhist-tpl="row">
+        <tr>
+            <td class="jhist-rows__student" data-f="student"></td>
+            <td class="jhist-rows__item"><span class="jhist-rows__date" data-f="date"></span><span data-f="item"></span></td>
+            <td class="jhist-rows__change">
+                <span class="jhist-old" data-f="old"></span>
+                <i class="fas fa-arrow-right-long jhist-arrow" aria-hidden="true"></i>
+                <span class="jhist-new" data-f="new"></span>
+            </td>
+        </tr>
+    </template>
+</div>

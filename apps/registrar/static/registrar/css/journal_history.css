@@ -1,0 +1,209 @@
+/* Jurnal «Dəyişiklik tarixçəsi» paneli (UNEC müqayisəsi P1-3, 2026-09-25).
+ *
+ * «Sillabusa bax» paneli (syllabus_view.css) ilə EYNİ vizual dil: sağdan açılan
+ * panel, yapışqan başlıq + süzgəc zolağı + alt panel, yalnız gövdə sürüşür.
+ * Yalnız `--ems-*` tokenləri; tək tema (jurnal səhifəsinin qalanı kimi işıqlı).
+ * Qeyd növləri sol vurğu rəngi ilə ayrılır: davamiyyət/bal — göy, komponent —
+ * səma, yekun — bənövşəyi, sənədli düzəliş — sarı (düzəliş xanalarının rəngi).
+ */
+
+/* ── Alət zolağındakı düymə (Export düyməsinin görünüşünü miras alır) ───── */
+.jd2-history-btn { cursor: pointer; font-family: inherit; }
+.jd2-history-btn .fa-clock-rotate-left { color: var(--ems-primary-600); }
+
+/* ── Panel ─────────────────────────────────────────────────────────────── */
+.jhist[hidden] { display: none; }
+.jhist { position: fixed; inset: 0; z-index: 1200; }
+.jhist__backdrop { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.42); }
+.jhist__panel {
+    position: absolute; top: 0; right: 0; bottom: 0; width: min(780px, 100%);
+    display: flex; flex-direction: column; background: var(--ems-neutral-0);
+    border-left: 1px solid var(--ems-border); box-shadow: -18px 0 44px rgba(15, 23, 42, 0.16);
+    outline: none;
+}
+body.jhist-open { overflow: hidden; }
+
+.jhist__head {
+    display: flex; align-items: flex-start; gap: 12px; flex: 0 0 auto;
+    padding: 18px 20px 14px 22px; border-bottom: 1px solid var(--ems-border); background: var(--ems-bg-subtle);
+}
+.jhist__icon {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-100); color: var(--ems-primary-700); font-size: 16px;
+}
+.jhist__headtext { flex: 1 1 auto; min-width: 0; }
+.jhist__title { margin: 0 0 3px; font-size: 1.05rem; font-weight: 800; color: var(--ems-text); }
+.jhist__sub { margin: 0; font-size: 0.76rem; font-weight: 600; color: var(--ems-text-muted); }
+.jhist__x {
+    flex: 0 0 auto; width: 34px; height: 34px; border: 1px solid var(--ems-border); border-radius: 9px;
+    background: var(--ems-neutral-0); color: var(--ems-text-muted); font-size: 16px; cursor: pointer;
+}
+.jhist__x:hover { color: var(--ems-danger-700); background: var(--ems-danger-100); }
+
+/* ── Süzgəc zolağı ─────────────────────────────────────────────────────── */
+.jhist__filters {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 12px; flex: 0 0 auto;
+    padding: 12px 20px 12px 22px; border-bottom: 1px solid var(--ems-border); background: var(--ems-neutral-0);
+}
+.jhist__field { display: flex; flex-direction: column; gap: 4px; min-width: 200px; }
+.jhist__field--grow { flex: 1 1 200px; }
+.jhist__label { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; color: var(--ems-neutral-500); margin: 0; }
+.jhist__field .bootstrap-single-select__toggle {
+    min-height: 38px; padding: 6px 12px; border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg);
+    background: var(--ems-bg); color: var(--ems-text); font-weight: 600; font-size: 0.83rem; box-shadow: none;
+}
+.jhist__field .bootstrap-single-select__toggle:focus,
+.jhist__field .bootstrap-single-select__toggle[aria-expanded="true"] {
+    border-color: var(--ems-neutral-500); box-shadow: var(--ems-sh-focus); outline: none;
+}
+.jhist__search {
+    display: flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-lg); background: var(--ems-bg);
+    color: var(--ems-neutral-400);
+}
+.jhist__search:focus-within { border-color: var(--ems-neutral-500); box-shadow: var(--ems-sh-focus); }
+.jhist__search input {
+    flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent;
+    color: var(--ems-text); font-size: 0.83rem; font-weight: 600;
+}
+.jhist__chips { display: flex; flex-wrap: wrap; gap: 6px; flex-basis: 100%; }
+.jhist__chip {
+    display: inline-flex; align-items: center; min-height: 30px; padding: 0 12px;
+    border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-pill); background: var(--ems-neutral-0);
+    color: var(--ems-neutral-700); font-family: inherit; font-size: 0.76rem; font-weight: 700; cursor: pointer;
+}
+.jhist__chip:hover { border-color: var(--ems-primary-300); color: var(--ems-primary-700); }
+.jhist__chip.is-active { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.jhist__chip:focus-visible,
+.jhist__more:focus-visible,
+.jhist__close-btn:focus-visible,
+.jhist-entry__more:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+
+/* ── Gövdə ─────────────────────────────────────────────────────────────── */
+.jhist__body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px 20px 24px 22px; background: var(--ems-bg-subtle); }
+.jhist__state { margin: 0; padding: 26px 0; text-align: center; font-size: 0.83rem; color: var(--ems-text-muted); }
+.jhist__state--error { color: var(--ems-danger-strong); }
+.jhist__state[hidden],
+.jhist__empty[hidden],
+.jhist__hint[hidden] { display: none; }
+.jhist__empty {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 40px 16px;
+    text-align: center; color: var(--ems-text-muted); font-size: 0.8rem;
+}
+.jhist__empty i { font-size: 26px; color: var(--ems-neutral-300); }
+.jhist__empty b { font-size: 0.9rem; color: var(--ems-text); }
+.jhist__hint {
+    display: flex; align-items: center; gap: 8px; margin: 12px 0 0; padding: 9px 12px;
+    border: 1px solid var(--ems-primary-200); border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50); color: var(--ems-primary-800); font-size: 0.76rem;
+}
+
+.jhist-day {
+    position: sticky; top: -8px; z-index: 1; margin: 10px 0 8px; padding: 8px 0 6px;
+    background: var(--ems-bg-subtle); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--ems-neutral-500);
+}
+
+/* ── Qeyd kartı ────────────────────────────────────────────────────────── */
+.jhist-entry {
+    margin: 0 0 10px; border: 1px solid var(--ems-border); border-left: 4px solid var(--ems-primary-500);
+    border-radius: var(--ems-r-xl); background: var(--ems-neutral-0); box-shadow: var(--ems-sh-card); overflow: hidden;
+}
+.jhist-entry--component { border-left-color: var(--ems-sky-500); }
+.jhist-entry--final { border-left-color: var(--ems-violet-600); }
+.jhist-entry--correction { border-left-color: var(--ems-warning-500); }
+.jhist-entry__head {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--ems-border);
+}
+.jhist-entry__avatar {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50); color: var(--ems-primary-700); font-size: 0.72rem; font-weight: 800;
+}
+.jhist-entry__who { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
+.jhist-entry__user { font-size: 0.85rem; font-weight: 800; color: var(--ems-text); overflow-wrap: anywhere; }
+.jhist-entry__imp { font-size: 0.7rem; font-weight: 700; color: var(--ems-warning-800); }
+.jhist-entry__imp[hidden] { display: none; }
+.jhist-entry__meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.jhist-entry__kind,
+.jhist-entry__count {
+    display: inline-flex; align-items: center; min-height: 22px; padding: 0 9px; border-radius: var(--ems-r-pill);
+    font-size: 0.68rem; font-weight: 800; white-space: nowrap;
+}
+.jhist-entry__kind { background: var(--ems-primary-100); color: var(--ems-primary-800); }
+.jhist-entry--component .jhist-entry__kind { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+.jhist-entry--final .jhist-entry__kind { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+.jhist-entry--correction .jhist-entry__kind { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.jhist-entry__count { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+.jhist-entry__time {
+    flex: 0 0 auto; font-family: var(--ems-ff-mono, ui-monospace, monospace); font-size: 0.76rem;
+    font-weight: 700; color: var(--ems-text-muted);
+}
+.jhist-entry__scroll { overflow-x: auto; }
+
+.jhist-rows { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.jhist-rows th {
+    padding: 6px 14px; text-align: left; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--ems-neutral-500); background: var(--ems-bg-subtle);
+}
+.jhist-rows td { padding: 6px 14px; border-top: 1px solid var(--ems-border); color: var(--ems-text); vertical-align: top; }
+.jhist-rows tr[hidden] { display: none; }
+.jhist-rows__student { font-weight: 700; min-width: 160px; }
+.jhist-rows__student.is-lesson { color: var(--ems-text-muted); font-weight: 600; font-style: italic; }
+.jhist-rows__item { color: var(--ems-neutral-700); }
+.jhist-rows__date {
+    display: inline-flex; align-items: center; margin-right: 6px; padding: 0 7px; min-height: 20px;
+    border-radius: var(--ems-r-sm); background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    font-size: 0.7rem; font-weight: 800;
+}
+.jhist-rows__date[hidden] { display: none; }
+.jhist-rows__change { white-space: nowrap; }
+.jhist-old { color: var(--ems-text-muted); text-decoration: line-through; text-decoration-color: var(--ems-neutral-300); }
+.jhist-arrow { margin: 0 6px; font-size: 0.7rem; color: var(--ems-neutral-400); }
+.jhist-new { font-weight: 800; color: var(--ems-text); }
+.jhist-entry__capped { margin: 0; padding: 6px 14px 8px; font-size: 0.72rem; color: var(--ems-text-muted); }
+.jhist-entry__capped[hidden] { display: none; }
+.jhist-entry__more {
+    display: block; width: 100%; padding: 7px 14px; border: 0; border-top: 1px dashed var(--ems-border);
+    background: var(--ems-neutral-0); color: var(--ems-primary-700); font-family: inherit; font-size: 0.76rem;
+    font-weight: 800; text-align: left; cursor: pointer;
+}
+.jhist-entry__more:hover { background: var(--ems-primary-50); }
+.jhist-entry__more[hidden] { display: none; }
+
+/* ── Alt panel ─────────────────────────────────────────────────────────── */
+.jhist__foot {
+    display: flex; align-items: center; gap: 10px; flex: 0 0 auto; padding: 12px 20px 14px 22px;
+    border-top: 1px solid var(--ems-border); background: var(--ems-neutral-0);
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.05);
+}
+.jhist__count { font-size: 0.76rem; font-weight: 700; color: var(--ems-text-muted); }
+.jhist__more,
+.jhist__close-btn {
+    display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 16px;
+    border-radius: 9px; font-family: inherit; font-size: 0.83rem; font-weight: 700; cursor: pointer;
+}
+.jhist__more { margin-left: auto; border: 0; background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.jhist__more:hover { background: var(--ems-primary-700); }
+.jhist__more[disabled] { opacity: 0.6; cursor: progress; }
+.jhist__more[hidden] { display: none; }
+.jhist__close-btn { border: 1px solid var(--ems-border); background: var(--ems-neutral-0); color: var(--ems-text-muted); }
+.jhist__more[hidden] + .jhist__close-btn { margin-left: auto; }
+.jhist__close-btn:hover { color: var(--ems-text); background: var(--ems-bg-subtle); }
+
+/* Gün özəti modalındakı «Bu dərsin tarixçəsi» keçidi */
+.jd-day-history {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 10px; padding: 0 12px; min-height: 34px;
+    border: 1px solid var(--ems-primary-200); border-radius: 9px; background: var(--ems-primary-50);
+    color: var(--ems-primary-700); font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+}
+.jd-day-history:hover { background: var(--ems-primary-100); }
+
+@media (max-width: 640px) {
+    .jhist__panel { width: 100%; }
+    .jhist__field { min-width: 0; flex: 1 1 100%; }
+    .jhist-entry__head { flex-wrap: wrap; }
+    .jhist-entry__meta { justify-content: flex-start; }
+    .jhist-rows__student { min-width: 120px; }
+}

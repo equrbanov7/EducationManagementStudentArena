@@ -77839,3 +77839,448 @@ msgid ""
 msgstr ""
 "Кампаний опросов пока нет. Первая создаётся автоматически, когда Центр "
 "цифрового развития закрывает журналы, или её можно открыть вручную выше."
+
+msgctxt "registrar.journal_history"
+msgid "Davamiyyət / bal"
+msgstr "Посещаемость / балл"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent balı"
+msgstr "Балл компонента"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun imtahan"
+msgstr "Итоговый экзамен"
+
+msgctxt "registrar.journal_history"
+msgid "Təkrar imtahan"
+msgstr "Пересдача"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — bal / davamiyyət"
+msgstr "Документированное исправление — балл / посещаемость"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs"
+msgstr "Документированное исправление — занятие"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs silindi"
+msgstr "Документированное исправление — занятие удалено"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — sərbəst iş"
+msgstr "Документированное исправление — самостоятельная работа"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — kurs işi"
+msgstr "Документированное исправление — курсовая работа"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — komponent"
+msgstr "Документированное исправление — компонент"
+
+msgctxt "registrar.journal_history"
+msgid "Düzəlişin geri alınması"
+msgstr "Отмена исправления"
+
+msgctxt "registrar.journal_history"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "registrar.journal_history"
+msgid "Akademik qeyd"
+msgstr "Академическая запись"
+
+msgctxt "registrar.journal_history"
+msgid "Bu gün"
+msgstr "Сегодня"
+
+msgctxt "registrar.journal_history"
+msgid "Dünən"
+msgstr "Вчера"
+
+msgctxt "registrar.journal_history"
+msgid "dəyişiklik"
+msgstr "изменений"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs sütunu"
+msgstr "Столбец занятия"
+
+msgctxt "registrar.journal_history"
+msgid "başqasının adından · əsl aktor"
+msgstr "от имени другого пользователя · фактический автор"
+
+msgctxt "registrar.journal_history"
+msgid "sətir daha göstər"
+msgstr "ещё строк"
+
+msgctxt "registrar.journal_history"
+msgid "Yığ"
+msgstr "Свернуть"
+
+msgctxt "registrar.journal_history"
+msgid "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+msgstr "строк не показано в панели — это сохранение слишком большое"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd göstərilir"
+msgstr "записей показано"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd"
+msgstr "записей"
+
+msgctxt "registrar.journal_history"
+msgid "Dəyişiklik tarixçəsi"
+msgstr "История изменений"
+
+msgctxt "registrar.journal_history"
+msgid "Paneli bağla"
+msgstr "Закрыть панель"
+
+msgctxt "registrar.journal_history"
+msgid "DƏRS TARİXİ"
+msgstr "ДАТА ЗАНЯТИЯ"
+
+msgctxt "registrar.journal_history"
+msgid "Tarix axtar…"
+msgstr "Поиск даты…"
+
+msgctxt "registrar.journal_history"
+msgid "Uyğun tarix yoxdur"
+msgstr "Нет подходящей даты"
+
+msgctxt "registrar.journal_history"
+msgid "Bütün tarixlər"
+msgstr "Все даты"
+
+msgctxt "registrar.journal_history"
+msgid "TƏLƏBƏ"
+msgstr "СТУДЕНТ"
+
+msgctxt "registrar.journal_history"
+msgid "Ad və ya soyad…"
+msgstr "Имя или фамилия…"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd növü"
+msgstr "Тип записи"
+
+msgctxt "registrar.journal_history"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent"
+msgstr "Компонент"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun"
+msgstr "Итог"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəlişlər"
+msgstr "Документированные исправления"
+
+msgctxt "registrar.journal_history"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Не удалось загрузить историю. Обновите страницу и попробуйте снова."
+
+msgctxt "registrar.journal_history"
+msgid "Hələ dəyişiklik qeydə alınmayıb"
+msgstr "Изменений пока нет"
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+msgstr ""
+"Баллы, посещаемость, компоненты и исправления появятся здесь сразу после "
+"сохранения."
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəcə uyğun qeyd yoxdur"
+msgstr "Нет записей по фильтру"
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+msgstr "Измените фильтр или загрузите более старые записи ниже."
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+msgstr ""
+"Фильтры по студенту и типу работают по загруженным записям — для старых "
+"нажмите «Ещё»."
+
+msgctxt "registrar.journal_history"
+msgid "Daha çox"
+msgstr "Ещё"
+
+msgctxt "registrar.journal_history"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "registrar.journal_history"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.journal_history"
+msgid "Nə dəyişdi"
+msgstr "Что изменилось"
+
+msgctxt "registrar.journal_history"
+msgid "Köhnə → yeni"
+msgstr "Было → стало"
+
+msgctxt "registrar.journal_history"
+msgid "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+msgstr "Кто, когда и что изменил — история изменений журнала"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "registrar.journal_history"
+msgid "Bu dərsin tarixçəsi"
+msgstr "История этого занятия"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu fənnə aid deyil."
+msgstr "Это занятие расписания не относится к этому предмету."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+msgstr ""
+"Это занятие расписания не проводится %(date)s (не совпадает день недели или "
+"верхняя/нижняя неделя)."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"В расписании нет занятия по этому предмету в эту дату и время — укажите "
+"причину занятия вне расписания (напр. замена, компенсационное занятие). Для "
+"занятия по расписанию используйте кнопку «Активировать» над журналом."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+msgstr "Это занятие расписания сегодня уже активировано."
+
+msgctxt "registrar.journal_activation"
+msgid "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+msgstr "Занятие активировано: %(time)s · %(kind)s%(topic)s."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu günün cədvəl dərsləri"
+msgstr "Занятия по расписанию на сегодня"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+msgstr ""
+"Откройте занятие одним щелчком — время, тип, аудитория и следующая тема "
+"берутся из расписания и силлабуса."
+
+msgctxt "registrar.journal_activation"
+msgid "indi"
+msgstr "сейчас"
+
+msgctxt "registrar.journal_activation"
+msgid "Mövzu"
+msgstr "Тема"
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti mövzu"
+msgstr "Следующая тема"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+msgstr ""
+"В силлабусе нет непройденной темы для этого типа — тему можно указать позже,"
+" отредактировав занятие."
+
+msgctxt "registrar.journal_activation"
+msgid "Jurnalda bu dərsin sütununa keç"
+msgstr "Перейти к столбцу этого занятия в журнале"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilib"
+msgstr "Активировано"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdir"
+msgstr "Активировать"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilməyib"
+msgstr "Не активировано"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+msgstr "Сегодня в расписании нет занятия по этому предмету."
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti dərs"
+msgstr "Следующее занятие"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldən kənar açılmış dərs"
+msgstr "Занятие вне расписания, открытое сегодня"
+
+msgctxt "registrar.journal_activation"
+msgid "cədvəldən kənar"
+msgstr "вне расписания"
+
+msgctxt "registrar.journal_activation"
+msgid "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+msgstr "ЗАНЯТИЕ ВНЕ РАСПИСАНИЯ — ПРИЧИНА"
+
+msgctxt "registrar.journal_activation"
+msgid "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+msgstr "Напр.: замена, компенсационное занятие, изменение расписания…"
+
+msgctxt "registrar.journal_activation"
+msgid "Cədvəldən kənar dərsin səbəbi"
+msgstr "Причина занятия вне расписания"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"В расписании нет занятия в эту дату и время — причина обязательна, а занятие"
+" помечается «вне расписания» в «Проведённых занятиях». Для занятия по "
+"расписанию используйте кнопку «Активировать» над журналом."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+msgstr "Открыть журнал предмета — активируйте сегодняшнее занятие оттуда"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnalı aç"
+msgstr "Открыть журнал"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəldə var, qeydə alınmayıb"
+msgstr "В расписании есть, не отмечено"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+msgstr ""
+"занятие расписания пришлось на прошедшую дату, но в журнале в этот день "
+"столбец не открыт"
+
+msgctxt "accounts.lessons_log"
+msgid "Siyahı"
+msgstr "Список"
+
+msgctxt "accounts.lessons_log"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal"
+msgstr "Журнал"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+msgstr ""
+"Показаны последние %(shown)s занятий — всего %(total)s. Выберите более узкий"
+" период."
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+msgstr ""
+"Открыть столбец занятия за прошедшую дату может только руководитель РИМ "
+"(попадает в аудит). Праздники в расписании отдельно не отмечены, поэтому "
+"могут учитываться здесь."
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+msgstr "для всех прошедших занятий по расписанию в журнале открыты столбцы"
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldən kənar"
+msgstr "вне расписания"
+
+msgctxt "registrar.lessons_log"
+msgid "Cədvəldən kənar (səbəb)"
+msgstr "Вне расписания (причина)"
+
+msgctxt "accounts.lessons_log"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fakültələr"
+msgstr "Все факультеты"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün kafedralar"
+msgstr "Все кафедры"
+
+msgctxt "registrar.journal"
+msgid "AUDİTORİYA SAATI"
+msgstr "АУДИТОРНЫЕ ЧАСЫ"
+
+msgctxt "registrar.journal"
+msgid "keçirilib / plan"
+msgstr "проведено / план"
+
+msgctxt "registrar.journal"
+msgid "BURAXILAN SAAT"
+msgstr "ПРОПУЩЕНО ЧАСОВ"
+
+msgctxt "registrar.journal"
+msgid "üzrsüz q/b"
+msgstr "без уважительной причины"
+
+msgctxt "registrar.journal"
+msgid "QAYIB %%"
+msgstr "ПРОПУСКИ %%"
+
+msgctxt "registrar.journal"
+msgid "buraxılan ÷ plan"
+msgstr "пропущено ÷ план"
+
+msgctxt "registrar.journal"
+msgid "Buraxılış həddi"
+msgstr "Порог допуска"
+
+msgctxt "registrar.journal"
+msgid "icazəli"
+msgstr "допустимо"
+
+msgctxt "registrar.journal"
+msgid ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."
+msgstr ""
+"Пропуски %% = пропущенные часы ÷ аудиторные часы (план) — тот же "
+"знаменатель, что и в решении о допуске."

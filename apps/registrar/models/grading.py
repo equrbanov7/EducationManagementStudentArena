@@ -165,6 +165,11 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
             "xanalarının (ay, gün, saat) açarından bərpa olunub. Xananın dəyəri mənbədəndir."
         ),
     )
+    #: Cədvəldən KƏNAR açılmış dərsin səbəbi (UNEC P1-1, 2026-09-25): açılışın cədvəli var, amma bu
+    #: tarix/saatda slot yoxdur (əvəzetmə, kompensasiya…). Boş = cədvəl üzrə və ya cədvəl ümumiyyətlə yoxdur.
+    off_schedule_reason = models.CharField(
+        max_length=255, blank=True, default="", help_text="Cədvəldən kənar dərsin səbəbi (boş = cədvəl üzrə)."
+    )
 
     objects = models.Manager()
 
