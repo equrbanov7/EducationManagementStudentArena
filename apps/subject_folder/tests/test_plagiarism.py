@@ -63,9 +63,11 @@ def _check(*rows):
 
 
 def _zip_bytes(name="data.txt", content=b"layihe fayli"):
+    """Deterministik ZIP: ``writestr(<str>, …)`` elementə CARİ vaxtı (2 s dəqiqlik) yazır —
+    eyni məzmunlu iki arxiv 2 s sərhədinin iki tərəfində fərqli bayt verirdi (CI-da ara-sıra düşürdü)."""
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as archive:
-        archive.writestr(name, content)
+        archive.writestr(zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0)), content)
     return buffer.getvalue()
 
 
