@@ -59,10 +59,10 @@ from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db.models import Count, DecimalField, F, Q, Sum, TextField
+from django.db.models import DecimalField, F, Q, Sum, TextField
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import analytics, exam_eligibility
+from apps.registrar import analytics, exam_eligibility, selfwork_points
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -72,7 +72,6 @@ from apps.registrar.models import (
     FinalGrade,
     LessonMark,
     ResitRecord,
-    SelfWorkMark,
     StudentAcademicRecord,
 )
 from core.program_codes import program_display_code
@@ -80,7 +79,6 @@ from core.program_codes import program_display_code
 _ZERO = Decimal("0")
 _ONE = Decimal("1")
 _HUNDRED = Decimal("100")
-_TEN = Decimal("10")
 _TEXT = TextField()
 
 #: Sxem yoxdursa işləyən hədlər — ``analytics``-dən oxunur ki, iki yol arasında
@@ -151,9 +149,11 @@ def _component_sum_maps(enrollment_ids) -> tuple[dict, dict]:
 
 
 def _selfwork_map(enrollment_ids) -> dict:
-    """``analytics._selfwork_map`` güzgüsü — təhvil verilmiş iş sayı, ≤10 bal."""
-    qs = SelfWorkMark.objects.filter(enrollment_id__in=enrollment_ids, done=True)
-    return {key: min(Decimal(total), _TEN) for key, total in _keyed_sum(qs, Count("id")).items()}
+    """``analytics._selfwork_map`` güzgüsü — sərbəst iş BALI (≤10), mətn açarı ilə.
+
+    Qayda TƏK yerdədir (:func:`apps.registrar.selfwork_points.selfwork_totals`);
+    burada yalnız açar ``_text`` çevirməsi ilə verilir (UUID obyekti yaranmır)."""
+    return selfwork_points.selfwork_totals(enrollment_ids, key=_text("enrollment_id"))
 
 
 def _lesson_sum_map(enrollment_ids, offering_ids) -> dict:

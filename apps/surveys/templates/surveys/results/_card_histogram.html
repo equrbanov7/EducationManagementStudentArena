@@ -1,0 +1,31 @@
+{% load i18n %}
+{% comment %}Bal paylanması (histoqram) — seçilmiş sual (filtr «Sual»; defolt ümumi bal 1–10).
+Tək seriya → əfsanə yoxdur, başlıq nəyin çəkildiyini deyir. Kontekst: `hg`.{% endcomment %}
+<section class="svr-card" aria-labelledby="svr-hg-title">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-hg-title">{% blocktrans trimmed with label=hg.label context "surveys.results" %}Paylanma: {{ label }}{% endblocktrans %}</h3>
+            <p class="svr-card__sub">{% blocktrans trimmed with avg=hg.avg|floatformat:2 n=hg.n context "surveys.results" %}Orta: {{ avg }} · {{ n }} cavab{% endblocktrans %}</p>
+        </div>
+    </header>
+    <div class="svr-canvas svr-canvas--column" data-svr-chart="histogram">
+        <canvas role="img" aria-label="{% trans 'Bal paylanması qrafiki; eyni rəqəmlər aşağıdakı cədvəldədir.' context 'surveys.results' %}"></canvas>
+    </div>
+    <details class="svr-table">
+        <summary>{% trans "Cədvəl kimi göstər" context "surveys.results" %}</summary>
+        <div class="svr-table__scroll">
+            <table class="ems-table svr-mini-table">
+                <thead><tr>
+                    <th scope="col">{% trans "Bal" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Say" context "surveys.results" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Pay" context "surveys.results" %}</th>
+                </tr></thead>
+                <tbody>
+                {% for row in hg.rows %}
+                    <tr><th scope="row">{{ row.score }}</th><td class="ems-table__num">{{ row.count }}</td><td class="ems-table__num">{{ row.pct|floatformat:1 }}%</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+</section>

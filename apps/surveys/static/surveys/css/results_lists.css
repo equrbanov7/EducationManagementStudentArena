@@ -1,0 +1,228 @@
+/* =========================================================================
+   «Sorğu nəticələri» — siyahılar: müəllim reytinqi, kiçik göstəricilər, açar
+   sözlər, anonim şərhlər / təkliflər və vurğu. `results.css`-dən sonra yüklənir
+   (tokenlər və `--svr-*` palitrası orada). Yalnız açıq tema.
+   ========================================================================= */
+
+/* ── Müəllim reytinqi ──────────────────────────────────────────────────── */
+.svr-rank__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ems-sp-5);
+}
+
+.svr-rank__search {
+    flex: 1 1 240px;
+}
+
+.svr-rank__min {
+    min-width: 140px;
+}
+
+.svr-rank__count {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.svr-rank__pos {
+    width: 3.5ch;
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.svr-rank__row--hidden th,
+.svr-rank__row--hidden td {
+    color: var(--ems-text-muted);
+}
+
+.svr-rank__table td,
+.svr-rank__table th {
+    vertical-align: middle;
+}
+
+.svr-dv {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.svr-dv--up { color: var(--ems-success-700); }
+.svr-dv--down { color: var(--ems-danger-700); }
+
+.svr-pager {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+}
+
+/* ── Kiçik göstəricilər (ümumi bölmə, müəllim kartı) ──────────────────── */
+.svr-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.svr-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.svr-stat__label {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.svr-stat__value {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.svr-stat__unit {
+    margin-inline-start: 0.25rem;
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.svr-stat__note {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+/* ── Mətnlər: açar sözlər, sitatlar, vurğu ────────────────────────────── */
+.svr-words {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+}
+
+.svr-words__title {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.svr-words__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.svr-word {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 2px 6px 2px 11px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.svr-word:hover {
+    border-color: var(--ems-neutral-300);
+}
+
+.svr-word[aria-pressed="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.svr-word__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+}
+
+.svr-text__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-5);
+}
+
+.svr-text__toolbar .ems-input {
+    flex: 0 1 360px;
+}
+
+.svr-text__count {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.svr-quotes {
+    display: grid;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.svr-quote {
+    padding: 10px 14px;
+    border-left: 3px solid var(--ems-neutral-200);
+    border-radius: 0 var(--ems-r-md) var(--ems-r-md) 0;
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-neutral-800);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.svr-mark {
+    padding: 0 2px;
+    border-radius: 3px;
+    background: var(--ems-warning-100);
+    color: inherit;
+}
+
+.svr-text__more {
+    align-self: flex-start;
+}
+
+.svr-comments {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.svr-comments__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    min-width: 0;
+}
+
+.svr-comments__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-text);
+}

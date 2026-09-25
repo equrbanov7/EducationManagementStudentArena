@@ -1,0 +1,20 @@
+{% load i18n %}
+{% comment %}Müəllim kartı çekməcəsi — `ems_ui/_drawer.html` markup müqaviləsi (role=dialog,
+aria-modal, fokus tələsi/Escape/fokusun qayıtması `ems_ui/overlay.js`-dədir). Gövdə
+`results_drawer.js` ilə `surveys:results_teacher` fraqmentindən doldurulur.{% endcomment %}
+<div class="ems-overlay ems-overlay--drawer svr-overlay" id="svr-drawer" hidden data-svr-drawer>
+    <div class="ems-drawer ems-drawer--xl svr-drawer" role="dialog" aria-modal="true" aria-labelledby="svr-drawer-title">
+        <div class="ems-drawer__head">
+            <div>
+                <h2 class="ems-drawer__title" id="svr-drawer-title" tabindex="-1" data-svr-drawer-title>{% trans "Müəllim kartı" context "surveys.results" %}</h2>
+                <p class="ems-drawer__sub">{{ rp.period.label }}</p>
+            </div>
+            <button type="button" class="ems-drawer__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-drawer__body svr-drawer__body" data-svr-drawer-body></div>
+        <div class="ems-drawer__foot">
+            <a class="ems-btn" href="#" target="_blank" rel="noopener" data-force-navigation="true" data-svr-drawer-print hidden><i class="fas fa-print" aria-hidden="true"></i> {% trans "Çap versiyası" context "surveys.results" %}</a>
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>
+        </div>
+    </div>
+</div>

@@ -21,11 +21,10 @@ from core.audit import log_action
 from core.constants import AuditAction
 from core.rls import journal_unlock
 
-from . import grade_audit, journal_extras
+from . import grade_audit, journal_extras, selfwork_points
 from .correction_reversals import (  # noqa: F401 — public compatibility facade
     revert_last_component_correction,
     revert_last_coursework_correction,
-    revert_last_selfwork_correction,
 )
 from .corrections import correction_author_name
 from .models import (
@@ -72,16 +71,51 @@ def _audit(offering, by_user, kind, changes, correction, request):
 # ── Sərbəst iş ───────────────────────────────────────────────────────────────
 
 
+#: ``apply_selfwork_correction(new_points=...)`` verilmədikdə — bal ``request.POST["new_points"]``-dən
+#: oxunur (``correction_views`` yalnız ``new_done`` ötürür; bal mövzusunda modal ``new_points`` göndərir).
+_FROM_REQUEST = object()
+
+
+def _requested_points(new_points, request):
+    if new_points is _FROM_REQUEST:
+        new_points = request.POST.get("new_points") if request is not None else None
+    try:
+        return selfwork_points.parse_points(new_points)
+    except ValueError:
+        raise ValidationError(pgettext("registrar.selfwork", "Sərbəst iş üçün düzgün bal daxil edin.")) from None
+
+
 @transaction.atomic
-def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, note, document, by_user, request=None):
-    """Sərbəst iş xanasına (topic × tələbə) sənədli düzəliş: təhvil 0↔1."""
+def apply_selfwork_correction(
+    *, offering, topic, enrollment, new_done, reason, note, document, by_user, request=None, new_points=_FROM_REQUEST
+):
+    """Sərbəst iş xanasına (topic × tələbə) sənədli düzəliş.
+
+    * çeklist xanası (``max_points=1``, real bal yoxdur): təhvil 0↔1 (əvvəlki müqavilə);
+    * bal xanası (``max_points>1`` və ya fənn qovluğu balı): YENİ EFFEKTİV bal
+      (``new_points``; boş = «—», qiymət silinir) — 2 saat pəncərəsi və fənn qovluğu
+      balının oxu-only qorumasını YALNIZ bu sənədli yol keçir."""
     note = _validate(reason, note, document)
     from .correction_target_locks import lock_selfwork
 
     topic, enrollment, mark = lock_selfwork(topic, enrollment)
+    points_mode = topic.max_points > 1 or (mark is not None and mark.points is not None)
     old_done = bool(mark and mark.done)
-    new_done = bool(new_done)
-    if old_done == new_done:
+    old_points = new_value = None
+    if points_mode:
+        old_points = selfwork_points.effective_points(mark, topic) if selfwork_points.is_graded(mark) else None
+        new_value = _requested_points(new_points, request)
+        if new_value is not None and not (0 < new_value <= topic.max_points):
+            raise ValidationError(
+                pgettext("registrar.selfwork", "Bal 0-dan böyük və ən çoxu %(max)s olmalıdır.")
+                % {"max": topic.max_points}
+            )
+        new_done = new_value is not None
+        changed = old_points != new_value
+    else:
+        new_done = bool(new_done)
+        changed = old_done != new_done
+    if not changed:
         raise ValidationError(pgettext("registrar.correction", "Nothing changed — adjust a field before saving."))
     ok = journal_extras.set_selfwork_mark(
         offering=offering,
@@ -90,6 +124,7 @@ def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, 
         done=new_done,
         by_user=by_user,
         allow_locked=True,
+        **({"points": selfwork_points.display(new_value) if new_done else ""} if points_mode else {}),
     )
     if not ok:
         raise ValidationError(pgettext("registrar.correction", "The journal is published — it can't be changed."))
@@ -99,6 +134,8 @@ def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, 
         enrollment=enrollment,
         old_done=old_done,
         new_done=new_done,
+        old_points=old_points,
+        new_points=new_value,
         reason=reason,
         note=note,
         document=document,
@@ -115,14 +152,74 @@ def apply_selfwork_correction(*, offering, topic, enrollment, new_done, reason, 
             {
                 "student": grade_audit.student_label(enrollment),
                 "item": f"{str(pgettext('registrar.correction', 'Self-work'))} · {topic.title[:60]}",
-                "old": "1" if old_done else "0",
-                "new": "1" if new_done else "0",
+                "old": _sw_value(old_done, old_points, points_mode),
+                "new": _sw_value(new_done, new_value, points_mode),
             }
         ],
         correction,
         request,
     )
     return correction
+
+
+def _sw_value(done, points, points_mode) -> str:
+    """Düzəliş izində xananın dəyəri: çeklist «1»/«0», bal «4»/«4.5»/«—»."""
+    if points_mode:
+        return selfwork_points.display(points)
+    return "1" if done else "0"
+
+
+@transaction.atomic
+def revert_last_selfwork_correction(*, topic, enrollment, by_user, request=None, correction_id=None) -> bool:
+    """Son sərbəst iş düzəlişini geri al — çeklist düzəlişi əvvəlki yolla, BAL düzəlişi köhnə bala.
+
+    Çeklist (``old_points``/``new_points`` boş) → :func:`correction_reversals.revert_last_selfwork_correction`
+    (dəyişməyib). Bal düzəlişi eyni fail-closed müqavilə ilə: aktiv son düzəliş seçilir,
+    xana cari balı ``new_points`` deyilsə (araya yazı düşüb) → köhnəlmiş xəta."""
+    from . import correction_reversals as reversals
+    from .correction_target_locks import lock_selfwork
+
+    correction, already_reversed = reversals._select_active(
+        SelfWorkCorrection, "selfwork_correction", {"topic": topic, "enrollment": enrollment}, correction_id
+    )
+    if correction is None:
+        return False
+    if already_reversed:
+        return True
+    if correction.old_points is None and correction.new_points is None:
+        return reversals.revert_last_selfwork_correction(
+            topic=topic, enrollment=enrollment, by_user=by_user, request=request, correction_id=correction.pk
+        )
+    topic, enrollment, mark = lock_selfwork(topic, enrollment)
+    current = selfwork_points.effective_points(mark, topic) if selfwork_points.is_graded(mark) else None
+    if current != correction.new_points:
+        raise reversals._stale_error()
+    actor = reversals._real_actor(by_user, request)
+    reversal = reversals._create_reversal(correction=correction, target_field="selfwork_correction", actor=actor)
+    old_points = correction.old_points
+    ok = journal_extras.set_selfwork_mark(
+        offering=topic.offering,
+        topic_id=topic.id,
+        enrollment_id=enrollment.id,
+        done=old_points is not None,
+        by_user=actor,
+        allow_locked=True,
+        points=selfwork_points.display(old_points) if old_points is not None else "",
+    )
+    if not ok:
+        raise ValidationError(pgettext("registrar.correction", "The published journal cannot be changed."))
+    reversals._write_audit(
+        offering=topic.offering,
+        actor=actor,
+        request=request,
+        reversal=reversal,
+        kind="selfwork-correction-revert",
+        item="self-work",
+        old=selfwork_points.display(correction.new_points),
+        new=selfwork_points.display(old_points),
+        enrollment_id=enrollment.pk,
+    )
+    return True
 
 
 # ── Kurs işi ─────────────────────────────────────────────────────────────────
@@ -302,12 +399,13 @@ def annotate_kollokvium_grid(grid, cmap):
 
 
 def _sw_entry(c, include_document):
+    points_mode = c.old_points is not None or c.new_points is not None
     data = {
         "id": str(c.id),
         "date": c.created_at.strftime("%d.%m.%Y %H:%M"),
         "field_display": str(pgettext("registrar.correction", "Self-work")),
-        "old": "1" if c.old_done else "0",
-        "new": "1" if c.new_done else "0",
+        "old": _sw_value(c.old_done, c.old_points, points_mode),
+        "new": _sw_value(c.new_done, c.new_points, points_mode),
         "reason": c.get_reason_display(),
         "note": c.note,
         "by": c.corrected_by_name,

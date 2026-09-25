@@ -1,0 +1,17 @@
+{% load i18n %}<tr data-svr-row="{{ forloop.counter0 }}"{% if row.suppressed %} class="svr-rank__row--hidden"{% endif %}>
+    <td class="svr-rank__pos">{{ row.rank|default_if_none:"—" }}</td>
+    <th scope="row"><span class="svr-name">{{ row.name }}</span>{% if row.department %}<span class="svr-sub">{{ row.department }}</span>{% endif %}</th>
+    <td class="ems-table__num">{{ row.n }}</td>
+    <td class="ems-table__num">{% if row.rate is not None %}{{ row.rate }}%<span class="svr-sub">{{ row.receipts }} / {{ row.expected }}</span>{% else %}—{% endif %}</td>
+    {% if row.suppressed %}
+    <td colspan="{% if tb.question %}6{% else %}5{% endif %}">{% include "surveys/results/_hidden_badge.html" with hb_secondary=row.secondary %}</td>
+    {% else %}
+    <td class="ems-table__num"><strong>{{ row.overall|floatformat:2|default:"—" }}</strong></td>
+    <td class="ems-table__num">{{ row.index|floatformat:2|default:"—" }}</td>
+    <td class="ems-table__num">{% if row.recommend is not None %}{{ row.recommend }}%{% else %}—{% endif %}</td>
+    <td class="ems-table__num">{% include "surveys/results/_delta.html" with dv=row.delta_department %}</td>
+    <td class="ems-table__num">{% include "surveys/results/_delta.html" with dv=row.delta_org %}</td>
+    {% if tb.question %}<td class="ems-table__num">{{ row.question_avg|floatformat:2|default:"—" }}</td>{% endif %}
+    {% endif %}
+    <td><div class="ems-rowactions"><button type="button" class="ems-btn ems-btn--sm" data-svr-detail="{{ row.detail_url }}" data-svr-detail-title="{{ row.name }}" aria-haspopup="dialog">{% trans "Ətraflı" context "surveys.results" %}<span class="sr-only">: {{ row.name }}</span></button></div></td>
+</tr>

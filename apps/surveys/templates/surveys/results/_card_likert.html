@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Likert paylanması — DIVERGING 100% zolaq (neytral «3» mərkəzdə, razı deyil solda,
+razı sağda; rəng korluğuna davamlı narıncı↔mavi şkala, token-lərdən). Kontekst: `lk_rows`
+([{label, text, n, counts[5], pct[5]}]), `lk_scale` ([(bal, etiket)]), `lk_scope`, `lk_title`.
+JSON adasının `likert` açarından çəkilir.{% endcomment %}
+<section class="svr-card svr-card--wide" aria-labelledby="svr-lk-title-{{ lk_scope }}">
+    <header class="svr-card__head">
+        <div>
+            <h3 class="svr-card__title" id="svr-lk-title-{{ lk_scope }}">{{ lk_title }}</h3>
+            <p class="svr-card__sub">{% trans "Hər sətir 100%-dir: solda «razı deyiləm» cavabları, mərkəzdə «qismən», sağda «razıyam». Kənardakı rəqəmlər cəm paylardır." context "surveys.results" %}</p>
+        </div>
+        <ul class="svr-legend">
+            {% for score, label in lk_scale %}
+            <li class="svr-key"><span class="svr-key__swatch svr-key__swatch--l{{ score }}" aria-hidden="true"></span>{{ score }} — {{ label }}</li>
+            {% endfor %}
+        </ul>
+    </header>
+    <div class="svr-canvas" data-svr-chart="likert" data-rows="{{ lk_rows|length }}">
+        <canvas role="img" aria-label="{% trans 'Cavabların Likert paylanması; eyni rəqəmlər aşağıdakı cədvəldədir.' context 'surveys.results' %}"></canvas>
+    </div>
+    <details class="svr-table">
+        <summary>{% trans "Cədvəl kimi göstər" context "surveys.results" %}</summary>
+        <div class="svr-table__scroll">
+            <table class="ems-table svr-mini-table">
+                <thead><tr>
+                    <th scope="col">{% trans "Sual" context "surveys.results" %}</th>
+                    {% for score, label in lk_scale %}<th scope="col" class="ems-table__num" title="{{ label }}">{{ score }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">n</th>
+                </tr></thead>
+                <tbody>
+                {% for row in lk_rows %}
+                    <tr>
+                        <th scope="row"><span class="svr-name">{{ row.label }}</span><span class="svr-sub">{{ row.text }}</span></th>
+                        {% for cell in row.cells %}<td class="ems-table__num">{{ cell.count }} <span class="svr-sub svr-sub--inline">({{ cell.pct|floatformat:0 }}%)</span></td>{% endfor %}
+                        <td class="ems-table__num">{{ row.n }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </details>
+</section>

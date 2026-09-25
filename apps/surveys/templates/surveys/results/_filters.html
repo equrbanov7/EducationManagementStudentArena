@@ -1,0 +1,45 @@
+{% load i18n %}
+{% comment %}Avto filtr paneli — `ems_ui/_filter_bar.html` MARKUP MÜQAVİLƏSİ (filter_bar.js):
+select dəyişən kimi, axtarış isə debounce ilə bölmə yerində yenidən yüklənir, URL
+sinxrondur (paylaşıla bilən). Komponentin özü include edilmir, çünki müəllim sahəsi
+SERVER axtarışlı seçicidir (`EMSSearchableSelect`, dözümlü ad axtarışı): onun dəyəri
+gizli `data-ems-filter` sahəsinə yazılır və `change` hadisəsi ilə tətbiq olunur.
+Select-lər layihə komponentidir (bootstrap-single-select), native görünüş YOXDUR.
+«Sıfırla» filtrləri server defoltuna qaytarır; tab/sıralama (`er_tab`, `er_sort`) qalır.{% endcomment %}
+{% trans "müəllim axtar…" context "surveys.results" as svr_teacher_ph %}
+<form class="ems-filters ems-filters--auto svr-filters" data-ems-filters data-ems-filters-auto="1"
+      data-section="{{ rp.section }}" data-param-prefix="er_" data-base-url="{{ rp.base_url }}"
+      role="search" aria-label="{% trans 'Nəticə filtrləri' context 'surveys.results' %}">
+    {% for field in rp.filter_fields %}
+        {% if field.kind == "teacher" %}
+        <div class="ems-field ems-field--wide svr-filters__teacher" role="group" aria-labelledby="f-er_teacher-label">
+            <span class="ems-field__label" id="f-er_teacher-label">{{ field.label }}</span>
+            <input type="hidden" name="{{ field.name }}" id="f-er_teacher" value="{{ field.value }}" data-ems-filter>
+            <div class="svr-picker" data-svr-teacher-picker data-url="{{ field.search_url }}"
+                 data-value="{{ field.value }}" data-text="{{ field.text }}">
+                {% include "accounts/profile/sections/_searchable_picker.html" with prefix="svr" hook="svr-teacher" placeholder=svr_teacher_ph %}
+            </div>
+        </div>
+        {% elif field.kind == "select" %}
+        <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
+            <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select class="ems-select bootstrap-single-select__native" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}>
+                    {% for option in field.options %}
+                    <option value="{{ option.value }}"{% if option.value == field.value %} selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% else %}
+        <div class="ems-field">
+            <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+            <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}" value="{{ field.value }}"
+                   placeholder="{{ field.placeholder }}" autocomplete="off" maxlength="120" data-ems-filter data-ems-filter-search>
+        </div>
+        {% endif %}
+    {% endfor %}
+    <div class="ems-filters__actions">
+        <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
+    </div>
+</form>

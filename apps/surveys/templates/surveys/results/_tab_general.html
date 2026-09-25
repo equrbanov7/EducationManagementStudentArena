@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}«Ümumi təkliflər» — ümumi bölmə (tələbə bir dəfə doldurur): məmnunluq və tədris
+şəraiti (Likert), fakültə/ixtisas/kurs bölgüsü, «universiteti necə yaxşılaşdırmaq olar»
+mətnləri (KAMPANİYA BAŞINA k-həddi), açar söz tezliyi. Qrafik məlumatı
+`svr-general-data` adasındadır.{% endcomment %}
+{{ rp.general_chart|json_script:"svr-general-data" }}
+{% with gn=rp.general %}
+<div class="svr-grid" data-svr-charts="svr-general-data">
+    {% if gn.visible %}
+        <div class="svr-card svr-card--wide svr-stats" role="list" aria-label="{% trans 'Ümumi bölmə göstəriciləri' context 'surveys.results' %}">
+            <div class="svr-stat" role="listitem">
+                <span class="svr-stat__label">{% trans "Ümumi bölmə cavabları" context "surveys.results" %}</span>
+                <span class="svr-stat__value">{{ gn.n }}</span>
+            </div>
+            {% for row in gn.likert %}
+            <div class="svr-stat" role="listitem">
+                <span class="svr-stat__label">{{ row.label }}</span>
+                <span class="svr-stat__value">{{ row.avg|floatformat:2|default:"—" }}<span class="svr-stat__unit">/ 5</span></span>
+                <span class="svr-stat__note">{% if row.top2 is not None %}{% blocktrans trimmed with pct=row.top2 context "surveys.results" %}{{ pct }}% razıdır{% endblocktrans %}{% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% trans "Məmnunluq və tədris şəraiti (Likert 1–5)" context "surveys.results" as svr_lk_general %}
+        {% include "surveys/results/_card_likert.html" with lk_rows=gn.likert lk_scale=gn.likert_scale lk_scope="g" lk_title=svr_lk_general %}
+        {% include "surveys/results/_card_levels.html" %}
+    {% else %}
+        <div class="svr-card svr-card--wide">
+            {% include "surveys/results/_suppressed.html" with sup_n=gn.n sup_blocked=gn.complement_blocked %}
+        </div>
+    {% endif %}
+    {% include "surveys/results/_card_suggestions.html" with dg=gn.digest %}
+</div>
+{% endwith %}
