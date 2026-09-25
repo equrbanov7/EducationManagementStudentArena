@@ -447,8 +447,11 @@ def rows_for_service(plan, *, reason="", note="") -> list:
     ]
 
 
-def apply_plan(*, offering, plan, by_user, request=None, sheet=None, reason="", note=""):
+def apply_plan(*, offering, plan, by_user, request=None, sheet=None, reason="", note="", correction_mode=False):
     """Planı tətbiq et — yazı YALNIZ servis qatından keçir (``save_roster_scores``).
+
+    ``correction_mode`` — bitmiş dövrün RİM düzəliş rejimi (2026-09-26); qapı
+    və təqdimat tələbi ``save_roster_scores``-dadır (``exam_score_period_lock``).
 
     Nəticə: ``save_roster_scores`` lüğəti + hər plan sətrinin son vəziyyəti
     (``written`` / ``failed`` işarəsi ilə).
@@ -459,6 +462,7 @@ def apply_plan(*, offering, plan, by_user, request=None, sheet=None, reason="", 
         by_user=by_user,
         request=request,
         sheet=sheet,
+        correction_mode=correction_mode,
     )
     failed = result.get("failed_by_enrollment") or {}
     for item in plan:

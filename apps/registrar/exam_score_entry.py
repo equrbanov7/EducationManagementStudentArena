@@ -37,6 +37,13 @@ validasiya ``exam_score_questions``-dadır, cəm imtahan balı olur; giriş +
 imtahan ≤ 100 açıq yoxlanır; dəyişiklik növü ``correction`` və ya ``appeal``
 ola bilər (``kind``). Oxu köməkçiləri (siyahı, tarixçə sətri, filtrlər)
 ``exam_score_roster``-dədir və buradan re-eksport olunur.
+
+2026-09-26 (sahib: «köhnə ilin balını dəyişmək olmamalıdır, ancaq RİM rəhbəri
+tərəfindən təqdimat əsasında»): BİTMİŞ dövrün açılışına toplu yazı
+(``save_roster_scores`` — əl ilə forma və fayl idxalı ikisi də buradan keçir)
+``exam_score_period_lock.assert_write_allowed`` qapısından keçir: yalnız RİM
+rəhbəri / superadmin, yalnız düzəliş rejimində (``correction_mode``) və HƏR
+sətir (ilk daxiletmə də) təqdimatlıdır (``require_submission``).
 """
 
 from __future__ import annotations
@@ -51,6 +58,8 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import exam_score_changes  # noqa: F401 — public fasad (`registrar.public`) üzərindən çatım
+from . import exam_score_period_lock  # noqa: F401 — eyni səbəb (accounts `service.exam_score_period_lock.*`)
+from . import exam_score_period_lock as period_lock
 from . import exam_score_questions  # noqa: F401 — eyni səbəb (accounts `service.exam_score_questions.*`)
 from . import exam_score_questions as questions
 from . import finals, gradebook
@@ -264,6 +273,7 @@ def record_exam_score(
     question_scores=None,
     kind="",
     entry_score=None,
+    require_submission=False,
 ):
     """Bir tələbənin imtahan balını yaz (ilkin daxiletmə və ya sənədli düzəliş / apellyasiya).
 
@@ -283,6 +293,10 @@ def record_exam_score(
       ``appeal`` (apellyasiya nəticəsi); ilkin daxiletmədə həmişə ``initial``;
     * ``entry_score`` — giriş balı (toplu yazıda çağıran batch ilə verir);
       giriş + imtahan ≤ 100 AÇIQ yoxlanır.
+
+    2026-09-26: ``require_submission=True`` (bitmiş dövrün düzəliş rejimi —
+    qapı ``save_roster_scores``-dadır) İLK daxiletməni də təqdimatlı edir:
+    səbəb + qeyd + sənəd məcburidir, sətir dəyişiklik növü ilə yazılır.
     """
     # Lock the durable parent even when no FinalGrade exists yet. Concurrent
     # first writes must re-read the score and require correction evidence.
@@ -322,7 +336,7 @@ def record_exam_score(
         ):
             return None  # eyni bal → nə dublikat sətir, nə audit
 
-    is_correction = old_score is not None
+    is_correction = old_score is not None or require_submission
     if is_correction:
         _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
 
@@ -356,7 +370,7 @@ def record_exam_score(
         user=by_user,
         organization=enrollment.organization,
         obj=entry,
-        reason=f"exam score entry: {entry.kind}",
+        reason=f"exam score entry: {entry.kind}" + (" · past-period correction" if require_submission else ""),
         request=request,
         resource_type="registrar.exam_score_entry",
         resource_id=str(entry.pk),
@@ -376,7 +390,7 @@ def record_exam_score(
     return entry
 
 
-def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None):
+def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, correction_mode=False):
     """Formadan gələn sətirləri toplu yaz.
 
     ``rows`` — ``{"enrollment_id", "score", "reason", "note", "evidence",
@@ -391,7 +405,12 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None):
     Nəticə: ``{"written", "skipped", "failed", "total", "errors": [(ad, mesaj), …],
     "failed_by_enrollment": {enrollment_id: mesaj}}`` (sonuncu — eyni adlı iki
     tələbənin xətası qarışmasın deyə, fayl idxalı üçün).
+
+    2026-09-26: bitmiş dövrdə yazı ``PermissionDenied`` ilə DAYANIR, əgər aktor
+    RİM rəhbəri / superadmin deyilsə və ya ``correction_mode`` aktiv deyilsə;
+    aktivdirsə hər sətir təqdimatlıdır (``require_submission``).
     """
+    locked = period_lock.assert_write_allowed(user=by_user, offering=offering, correction_mode=correction_mode)
     # Yad partiya = bütün toplu yazı DAYANIR (sətir-sətir N eyni xəta əvəzinə
     # bir aydın xəta; heç bir savepoint açılmır) — P2-09, 2026-09-13.
     assert_sheet_matches(sheet, organization_id=offering.organization_id, offering_id=offering.pk)
@@ -436,6 +455,7 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None):
                     question_scores=row.get("question_scores"),
                     kind=row.get("kind") or "",
                     entry_score=entry_scores.get(enrollment_id),
+                    require_submission=locked,
                 )
         except ValidationError as exc:
             message = " ".join(exc.messages)

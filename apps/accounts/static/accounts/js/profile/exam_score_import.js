@@ -49,7 +49,17 @@
         });
         data.set("reason", root.querySelector("[data-esi-reason]").value);
         data.set("note", root.querySelector("[data-esi-note]").value);
+        // 2026-09-26: panelin öz təqdimat skanı + bitmiş dövrün düzəliş rejimi bayrağı.
+        var evidence = root.querySelector("[data-esi-evidence]");
+        if (evidence && evidence.files[0]) data.set(evidence.name, evidence.files[0]);
+        if (correctionMode(root)) data.set(root.dataset.correctionField || "correction_mode", "1");
         return data;
+    }
+    function correctionMode(root) {
+        return root.dataset.correctionMode === "1";
+    }
+    function hasScan(form) {
+        return Boolean(form.get("sheet_evidence") || form.get("justification_evidence"));
     }
     function render(root, data) {
         root.querySelector("[data-esi-result]").hidden = false;
@@ -72,7 +82,7 @@
             });
             rows.appendChild(row);
         });
-        root.querySelector("[data-esi-just]").hidden = !data.needs_justification || data.applied;
+        root.querySelector("[data-esi-just]").hidden = !(data.needs_justification || correctionMode(root)) || data.applied;
         root.querySelector("[data-esi-apply]").hidden = data.applied || !summary.writes;
         root.querySelector("[data-esi-reload]").hidden = !data.applied;
     }
@@ -83,8 +93,8 @@
         if (apply && previews.get(root) !== file) return error(root, t("import-preview-title"));
         var form = payload(root, file);
         if (apply && !root.querySelector("[data-esi-just]").hidden &&
-                (!form.get("reason") || !form.get("note").trim() || !form.get("sheet_evidence"))) {
-            return error(root, t("need-justification"));
+                (!form.get("reason") || !form.get("note").trim() || !hasScan(form))) {
+            return error(root, t(correctionMode(root) ? "need-submission" : "need-justification"));
         }
         var csrf = window.EMSCore && window.EMSCore.getCookie("csrftoken");
         var token = document.querySelector('[name="csrfmiddlewaretoken"]');
