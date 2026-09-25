@@ -76467,3 +76467,329 @@ msgid ""
 msgstr ""
 "It appears in the sliding banner of the teachers' journal — like the Exam "
 "Centre's midterm notice."
+
+msgctxt "accounts.dashboard"
+msgid "üst həftə"
+msgstr "upper week"
+
+msgctxt "accounts.dashboard"
+msgid "alt həftə"
+msgstr "lower week"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslərim"
+msgstr "My classes — today / next"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün · %(day)s"
+msgstr "Today · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti dərs günü · %(day)s"
+msgstr "Next class day · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "bu gün"
+msgstr "today"
+
+msgctxt "accounts.dashboard"
+msgid "indi gedir"
+msgstr "in progress"
+
+msgctxt "accounts.dashboard"
+msgid "indi"
+msgstr "now"
+
+msgctxt "accounts.dashboard"
+msgid "aud. %(room)s"
+msgstr "room %(room)s"
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestrdə qarşıda dərs qalmayıb."
+msgstr "No upcoming classes remain this semester."
+
+msgctxt "accounts.dashboard"
+msgid "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Today's classes are over and no classes remain this semester."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+msgstr ""
+"Your group's timetable for this semester has not been set up yet — it will "
+"appear here once published."
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+msgstr "You have no classes in the timetable this semester."
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət — fənlər üzrə"
+msgstr "Attendance by subject"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+msgstr ""
+"The limit is counted separately for each subject: %(percent)s%% of that "
+"subject's class hours."
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s / icazə %(allowed)s saat"
+msgstr "absent %(absent)s / allowed %(allowed)s h"
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+msgstr "absent %(absent)s h · the subject's class hours are not set"
+
+msgctxt "accounts.dashboard"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "accounts.dashboard"
+msgid "Limitə yaxın"
+msgstr "Near the limit"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib — imtahana buraxılmır"
+msgstr "Limit exceeded — not admitted to the exam"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib"
+msgstr "Limit exceeded"
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən"
+msgstr "From the old system"
+
+msgctxt "accounts.dashboard"
+msgid "Məlumat yoxdur"
+msgstr "No data"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb icazə verilən həddin altındadır."
+msgstr "Absences are below the allowed limit."
+
+msgctxt "accounts.dashboard"
+msgid "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+msgstr "Over 75% of the allowed absence is used — watch your attendance."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+msgstr ""
+"The absence limit is exceeded — you are not admitted to this subject's final"
+" exam."
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+msgstr ""
+"A closed semester migrated from the old system — the status is not "
+"recalculated."
+
+msgctxt "accounts.dashboard"
+msgid "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+msgstr ""
+"The subject's class hours are not set — the limit cannot be calculated."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb saatı / icazə verilən limit"
+msgstr "Absence hours / allowed limit"
+
+msgctxt "accounts.dashboard"
+msgid "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+msgstr ""
+"Athlete exemption: you are admitted to the exam even if the limit is "
+"exceeded."
+
+msgctxt "accounts.dashboard"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "The current academic period is not defined."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+msgstr ""
+"You have no subject enrolments this semester — contact the dean's office if "
+"you have questions."
+
+msgctxt "accounts.dashboard"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "accounts.dashboard"
+msgid "fənn"
+msgstr "subjects"
+
+msgctxt "accounts.dashboard"
+msgid "Cari ballar — fənlər üzrə"
+msgstr "Current scores by subject"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+msgstr "Entry score — points collected before the exam (max. %(max)s)."
+
+msgctxt "accounts.dashboard"
+msgid "Orta giriş balı"
+msgstr "Average entry score"
+
+msgctxt "accounts.dashboard"
+msgid "fənlər üzrə"
+msgstr "across subjects"
+
+msgctxt "accounts.dashboard"
+msgid "fəndə yazılıb"
+msgstr "subjects graded"
+
+msgctxt "accounts.dashboard"
+msgid "giriş balı"
+msgstr "entry score"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı"
+msgstr "Entry score"
+
+msgctxt "accounts.dashboard"
+msgid "hələ yazılmayıb"
+msgstr "not graded yet"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestrdə bal yazılan fənniniz yoxdur."
+msgstr "You have no graded subjects this semester."
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallarım"
+msgstr "My journals"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallara keç"
+msgstr "Go to the journals"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr"
+msgstr "Current semester"
+
+msgctxt "accounts.dashboard"
+msgid "jurnal"
+msgstr "journals"
+
+msgctxt "accounts.dashboard"
+msgid "cəmi"
+msgstr "in total"
+
+msgctxt "accounts.dashboard"
+msgid "%(count)s tələbə"
+msgstr "%(count)s students"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s / %(plan)s saat"
+msgstr "held %(held)s / %(plan)s h"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s saat"
+msgstr "held %(held)s h"
+
+msgctxt "accounts.dashboard"
+msgid "Keçirilmiş saat / plan saatı"
+msgstr "Hours held / planned hours"
+
+msgctxt "accounts.dashboard"
+msgid "%(title)s — bal yazma"
+msgstr "%(title)s — grade entry"
+
+msgctxt "accounts.dashboard"
+msgid "Midterm pəncərəsi"
+msgstr "Midterm window"
+
+msgctxt "accounts.dashboard"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "accounts.dashboard"
+msgid "Son tarix"
+msgstr "Deadline"
+
+msgctxt "accounts.dashboard"
+msgid "Açılır"
+msgstr "Opens"
+
+msgctxt "accounts.dashboard"
+msgid "Açıqdır"
+msgstr "Open"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlanıb"
+msgstr "Closed"
+
+msgctxt "accounts.dashboard"
+msgid "Deaktivdir"
+msgstr "Inactive"
+
+msgctxt "accounts.dashboard"
+msgid "Təyin olunmayıb"
+msgstr "Not set"
+
+msgctxt "accounts.dashboard"
+msgid "Bal yazmaq açıqdır — son tarix %(date)s."
+msgstr "Grade entry is open — deadline %(date)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+msgstr "The window opens on %(opens)s, deadline %(closes)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(date)s tarixində bağlanıb."
+msgstr "The window closed on %(date)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+msgstr ""
+"The window has been created but the Exam Centre has not activated it yet."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+msgstr "The Exam Centre has not set the grade entry window yet."
+
+msgctxt "accounts.dashboard"
+msgid "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+msgstr ""
+"The deadline has been extended for some units — see the journal for the "
+"exact date."
+
+msgctxt "accounts.dashboard"
+msgid "açıqdır · son tarix %(date)s"
+msgstr "open · deadline %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "%(date)s-də açılır"
+msgstr "opens on %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "bağlanıb · %(date)s"
+msgstr "closed · %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "Cavabınızı gözləyən"
+msgstr "Awaiting your reply"
+
+msgctxt "accounts.dashboard"
+msgid "müraciətiniz"
+msgstr "your applications"
+
+msgctxt "accounts.dashboard"
+msgid "Sizə gələn"
+msgstr "Assigned to you"
+
+msgctxt "accounts.dashboard"
+msgid "açıq müraciət"
+msgstr "open applications"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."
+msgstr ""
+"You have no open applications — you can submit a new one in the "
+"“Applications” section."

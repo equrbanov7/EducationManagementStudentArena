@@ -37,6 +37,7 @@ WIDGET_SECTION = {
     "student-grades": "my-journal",
     "teacher-today": "my-schedule",
     "teacher-offerings": "my-journal",
+    "teacher-midterm": "my-journal",
     "teacher-syllabus": "syllabus-list",
     "my-workload": "my-workload",
     "applications": "applications",
@@ -79,7 +80,7 @@ STAFF_WIDGETS = {
 #: Vidjet yığımının ÜST HƏDDİ (yalnız bölmənin öz sorğuları — tam səhifə
 #: shell-i daxil deyil).  Məqsəd dəqiq say deyil, «ağır context qurucusu
 #: sızmasın» qapısıdır.
-MAX_DASHBOARD_QUERIES = 28  # cari maksimum: RİM = 25 (13 vidjet)
+MAX_DASHBOARD_QUERIES = 28  # cari maksimum: RİM = 24 (2026-09-25; tələbə 6, müəllim 16)
 
 
 @override_settings(UNIVERSITY_MODE=True)
@@ -409,9 +410,15 @@ class DashboardRenderTest(DashboardSectionBase):
                 self.assertTrue(widgets, role_name)
                 for item in widgets:
                     self.assertIn('data-dash-widget="%s"' % item["key"], html)
-                    if item["link"]:
-                        self.assertIn('data-section="%s"' % item["link"]["section"], html)
-                        self.assertIn("js-profile-section-link", html)
+                    if not item["link"]:
+                        continue
+                    if item["link"].get("external"):
+                        # Müəllim jurnalı (`/jurnal/`) sidebar kimi YENİ TABDA açılır: `data-section`
+                        # yazılmır, əks halda panelin SPA deleqasiyası keçidi bölmə kimi tutardı.
+                        self.assertIn('href="%s" target="_blank"' % item["link"]["url"], html)
+                        continue
+                    self.assertIn('data-section="%s"' % item["link"]["section"], html)
+                    self.assertIn("js-profile-section-link", html)
 
     def test_empty_widget_renders_a_calm_empty_state(self):
         """Rəqəmi sıfır olan vidjet boş qutu deyil — izah mətni görünür."""

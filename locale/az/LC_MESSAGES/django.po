@@ -76131,3 +76131,320 @@ msgid ""
 msgstr ""
 "Müəllimlərin jurnalında sürüşən zolaqda görünür — İmtahan Mərkəzinin midterm"
 " bildirişi kimi."
+
+msgctxt "accounts.dashboard"
+msgid "üst həftə"
+msgstr "üst həftə"
+
+msgctxt "accounts.dashboard"
+msgid "alt həftə"
+msgstr "alt həftə"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün / növbəti dərslərim"
+msgstr "Bu gün / növbəti dərslərim"
+
+msgctxt "accounts.dashboard"
+msgid "Bu gün · %(day)s"
+msgstr "Bu gün · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "Növbəti dərs günü · %(day)s"
+msgstr "Növbəti dərs günü · %(day)s"
+
+msgctxt "accounts.dashboard"
+msgid "bu gün"
+msgstr "bu gün"
+
+msgctxt "accounts.dashboard"
+msgid "indi gedir"
+msgstr "indi gedir"
+
+msgctxt "accounts.dashboard"
+msgid "indi"
+msgstr "indi"
+
+msgctxt "accounts.dashboard"
+msgid "aud. %(room)s"
+msgstr "aud. %(room)s"
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bu semestrdə qarşıda dərs qalmayıb."
+
+msgctxt "accounts.dashboard"
+msgid "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+msgstr "Bu günün dərsləri bitib, bu semestrdə qarşıda dərs qalmayıb."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+msgstr ""
+"Bu semestr üçün qrupunuzun dərs cədvəli hələ qurulmayıb — cədvəl dərc "
+"olunanda burada görünəcək."
+
+msgctxt "accounts.dashboard"
+msgid "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+msgstr "Bu semestr üçün cədvəldə dərsiniz yoxdur."
+
+msgctxt "accounts.dashboard"
+msgid "Davamiyyət — fənlər üzrə"
+msgstr "Davamiyyət — fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+msgstr ""
+"Limit hər fənn üzrə ayrıca hesablanır: fənnin dərs saatlarının "
+"%(percent)s%%-i."
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s / icazə %(allowed)s saat"
+msgstr "qayıb %(absent)s / icazə %(allowed)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+msgstr "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "accounts.dashboard"
+msgid "Limitə yaxın"
+msgstr "Limitə yaxın"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib — imtahana buraxılmır"
+msgstr "Limit keçib — imtahana buraxılmır"
+
+msgctxt "accounts.dashboard"
+msgid "Limit keçib"
+msgstr "Limit keçib"
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən"
+msgstr "Köhnə sistemdən"
+
+msgctxt "accounts.dashboard"
+msgid "Məlumat yoxdur"
+msgstr "Məlumat yoxdur"
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb icazə verilən həddin altındadır."
+msgstr "Qayıb icazə verilən həddin altındadır."
+
+msgctxt "accounts.dashboard"
+msgid "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+msgstr "İcazə verilən qayıbın 75%-i keçilib — davamiyyətə diqqət edin."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+msgstr "Qayıb həddi keçilib — bu fəndən yekun imtahana buraxılmırsınız."
+
+msgctxt "accounts.dashboard"
+msgid "Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+msgstr ""
+"Köhnə sistemdən köçürülmüş bağlı semestr — status yenidən hesablanmır."
+
+msgctxt "accounts.dashboard"
+msgid "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+msgstr "Fənnin dərs saatı təyin olunmayıb — limit hesablana bilmir."
+
+msgctxt "accounts.dashboard"
+msgid "Qayıb saatı / icazə verilən limit"
+msgstr "Qayıb saatı / icazə verilən limit"
+
+msgctxt "accounts.dashboard"
+msgid "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+msgstr "İdmançı istisnası: limit keçilsə də imtahana buraxılırsınız."
+
+msgctxt "accounts.dashboard"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "Cari tədris dövrü müəyyən edilməyib."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+msgstr ""
+"Cari semestrdə fənn qeydiyyatınız yoxdur — sualınız varsa dekanlığa müraciət"
+" edin."
+
+msgctxt "accounts.dashboard"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "accounts.dashboard"
+msgid "fənn"
+msgstr "fənn"
+
+msgctxt "accounts.dashboard"
+msgid "Cari ballar — fənlər üzrə"
+msgstr "Cari ballar — fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+msgstr "Giriş balı — imtahana qədər toplanan bal (maks. %(max)s)."
+
+msgctxt "accounts.dashboard"
+msgid "Orta giriş balı"
+msgstr "Orta giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "fənlər üzrə"
+msgstr "fənlər üzrə"
+
+msgctxt "accounts.dashboard"
+msgid "fəndə yazılıb"
+msgstr "fəndə yazılıb"
+
+msgctxt "accounts.dashboard"
+msgid "giriş balı"
+msgstr "giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "Giriş balı"
+msgstr "Giriş balı"
+
+msgctxt "accounts.dashboard"
+msgid "hələ yazılmayıb"
+msgstr "hələ yazılmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestrdə bal yazılan fənniniz yoxdur."
+msgstr "Cari semestrdə bal yazılan fənniniz yoxdur."
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallarım"
+msgstr "Jurnallarım"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnallara keç"
+msgstr "Jurnallara keç"
+
+msgctxt "accounts.dashboard"
+msgid "Cari semestr"
+msgstr "Cari semestr"
+
+msgctxt "accounts.dashboard"
+msgid "jurnal"
+msgstr "jurnal"
+
+msgctxt "accounts.dashboard"
+msgid "cəmi"
+msgstr "cəmi"
+
+msgctxt "accounts.dashboard"
+msgid "%(count)s tələbə"
+msgstr "%(count)s tələbə"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s / %(plan)s saat"
+msgstr "keçirilib %(held)s / %(plan)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "keçirilib %(held)s saat"
+msgstr "keçirilib %(held)s saat"
+
+msgctxt "accounts.dashboard"
+msgid "Keçirilmiş saat / plan saatı"
+msgstr "Keçirilmiş saat / plan saatı"
+
+msgctxt "accounts.dashboard"
+msgid "%(title)s — bal yazma"
+msgstr "%(title)s — bal yazma"
+
+msgctxt "accounts.dashboard"
+msgid "Midterm pəncərəsi"
+msgstr "Midterm pəncərəsi"
+
+msgctxt "accounts.dashboard"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.dashboard"
+msgid "Son tarix"
+msgstr "Son tarix"
+
+msgctxt "accounts.dashboard"
+msgid "Açılır"
+msgstr "Açılır"
+
+msgctxt "accounts.dashboard"
+msgid "Açıqdır"
+msgstr "Açıqdır"
+
+msgctxt "accounts.dashboard"
+msgid "Bağlanıb"
+msgstr "Bağlanıb"
+
+msgctxt "accounts.dashboard"
+msgid "Deaktivdir"
+msgstr "Deaktivdir"
+
+msgctxt "accounts.dashboard"
+msgid "Təyin olunmayıb"
+msgstr "Təyin olunmayıb"
+
+msgctxt "accounts.dashboard"
+msgid "Bal yazmaq açıqdır — son tarix %(date)s."
+msgstr "Bal yazmaq açıqdır — son tarix %(date)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+msgstr "Pəncərə %(opens)s-də açılır, son tarix %(closes)s."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə %(date)s tarixində bağlanıb."
+msgstr "Pəncərə %(date)s tarixində bağlanıb."
+
+msgctxt "accounts.dashboard"
+msgid "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+msgstr "Pəncərə yaradılıb, amma İmtahan Mərkəzi onu hələ aktivləşdirməyib."
+
+msgctxt "accounts.dashboard"
+msgid "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+msgstr "İmtahan Mərkəzi hələ bal yazma pəncərəsini təyin etməyib."
+
+msgctxt "accounts.dashboard"
+msgid "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+msgstr "Bəzi bölmələr üçün müddət uzadılıb — dəqiq tarix jurnaldadır."
+
+msgctxt "accounts.dashboard"
+msgid "açıqdır · son tarix %(date)s"
+msgstr "açıqdır · son tarix %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "%(date)s-də açılır"
+msgstr "%(date)s-də açılır"
+
+msgctxt "accounts.dashboard"
+msgid "bağlanıb · %(date)s"
+msgstr "bağlanıb · %(date)s"
+
+msgctxt "accounts.dashboard"
+msgid "Cavabınızı gözləyən"
+msgstr "Cavabınızı gözləyən"
+
+msgctxt "accounts.dashboard"
+msgid "müraciətiniz"
+msgstr "müraciətiniz"
+
+msgctxt "accounts.dashboard"
+msgid "Sizə gələn"
+msgstr "Sizə gələn"
+
+msgctxt "accounts.dashboard"
+msgid "açıq müraciət"
+msgstr "açıq müraciət"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."
+msgstr ""
+"Açıq müraciətiniz yoxdur — yenisini «Müraciətlər» bölməsindən göndərə "
+"bilərsiniz."

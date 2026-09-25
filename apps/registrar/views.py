@@ -216,7 +216,7 @@ def journal_detail(request, offering_id):
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "seminar_score_options": list(range(0, 11)),
-        "kollokvium_score_options": list(range(0, journal_extras.KOLLOKVIUM_MAX + 1)),
+        "kollokvium_score_options": journal_extras.interim_score_options(offering),  # 0–10 / midterm 0–20
         "today_parity": today_parity,
         "active_main_nav": "journal",
         "correction_mode": correction_mode,
