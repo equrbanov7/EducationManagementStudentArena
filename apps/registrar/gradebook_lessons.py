@@ -119,10 +119,18 @@ def create_lesson(
     instructor=None,
     room=None,
     allow_past=False,
+    slot=None,
+    off_schedule_reason="",
 ):
     """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
-    ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir."""
+    ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir.
+
+    ``slot`` — cədvəldən «Aktivləşdir» yolu (UNEC P1-1, bax ``journal_activation``): saat və
+    növ HƏMİŞƏ slotdan, otaq / müəllim / akademik saat açıq verilməyibsə slotdan köçürülür;
+    slot bu açılışın olmalı və həmin TARİXDƏ keçirilməlidir. Qalan bütün qaydalar (kilid,
+    sillabus qapısı, keçmiş tarix, dövr sərhədi, dublikat) dəyişmədən tətbiq olunur.
+    ``off_schedule_reason`` — cədvəldən kənar dərsin səbəbi; yazılırsa audit izinə də düşür."""
     if journal_is_locked(offering):
         raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
     # README §8/2 — «jurnal təsdiqlənmiş sillabus olmadan bloklanır».  Qayda
@@ -138,11 +146,21 @@ def create_lesson(
         raise LessonRuleError("Keçmiş tarixə dərs əlavə etmək olmaz.")
     if not allow_past:
         ensure_date_within_period(offering, parsed)
+    if slot is not None:
+        from apps.registrar import journal_activation
+
+        fields = journal_activation.slot_lesson_fields(
+            offering, slot, parsed, last_instructor={} if instructor is not None else None
+        )
+        kind, start_time, end_time = fields["kind"], fields["start_time"], fields["end_time"]
+        room = room if room is not None else fields["room"]
+        instructor = instructor or fields["instructor"]
+        hours = hours or fields["hours"]
     new_hours = hours or DEFAULT_LESSON_HOURS
     if start_time and Lesson.objects.filter(offering=offering, date=parsed, start_time=start_time).exists():
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     ensure_assessment_scheme(offering=offering)
-    return Lesson.objects.create(
+    lesson = Lesson.objects.create(
         organization=offering.organization,
         offering=offering,
         date=parsed,
@@ -154,7 +172,24 @@ def create_lesson(
         created_by=created_by,
         instructor=instructor or offering.instructor,
         room=room,
+        off_schedule_reason=(off_schedule_reason or "").strip()[:255],
     )
+    if lesson.off_schedule_reason:
+        # «Dəyişiklik tarixçəsi» panelində və audit hesabatlarında görünsün (kim, nə vaxt, niyə).
+        grade_audit.log_grade_changes(
+            offering=offering,
+            by_user=created_by,
+            kind="mark",
+            changes=[
+                {
+                    "student": "—",
+                    "item": f"{lesson.date} · {lesson.get_kind_display()}",
+                    "old": "—",
+                    "new": f"cədvəldən kənar dərs açıldı — {lesson.off_schedule_reason}",
+                }
+            ],
+        )
+    return lesson
 
 
 @transaction.atomic

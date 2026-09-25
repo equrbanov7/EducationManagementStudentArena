@@ -1,5 +1,6 @@
 {% load i18n %}
-{% comment %}Yekun qiymət tabı (mockup): Davamiyyət/10 · aralıq qiymətləndirmə ·
+{% comment %}Yekun qiymət tabı (mockup): Auditoriya saatı · Buraxılan saat · Qayıb % (UNEC «Yekun qiymət»
+kimi, 2026-09-25 — kanonik məxrəc/qayıb saatı get_final_breakdown-dan, əlavə sorğu yox) · Davamiyyət/10 · aralıq qiymətləndirmə ·
 Seminar orta · Sərbəst iş/10 · Lab orta · Kurs işi/100 · İmtahana qədər bal.
 Aralıq qiymətləndirmə: 2026/2027-dən ayrıca «Midterm /20» sütunu; keçmiş dövrlərdə
 «SEMİNAR» qrupunun içində Kollokvium 1-3 + orta (köhnə forma olduğu kimi).
@@ -10,6 +11,9 @@ Aralıq qiymətləndirmə: 2026/2027-dən ayrıca «Midterm /20» sütunu; keçm
         <thead>
             <tr>
                 <th rowspan="2" class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
+                <th rowspan="2" class="jd2-fb-aud">{% trans "AUDİTORİYA SAATI" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "keçirilib / plan" context "registrar.journal" %}</div></th>
+                <th rowspan="2" class="jd2-fb-aud">{% trans "BURAXILAN SAAT" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "üzrsüz q/b" context "registrar.journal" %}</div></th>
+                <th rowspan="2" class="jd2-fb-aud">{% trans "QAYIB %" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "buraxılan ÷ plan" context "registrar.journal" %}</div></th>
                 <th rowspan="2">{% trans "DAVAMİYYƏT" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
                 {% if midterm %}
                 {% for c in final_breakdown.kolls %}<th rowspan="2" class="jd2-fb-midterm">{% if forloop.first %}{% trans "MIDTERM" context "registrar.journal" %}{% else %}{{ c.name }}{% endif %}<div class="jd2-th-sub">/{{ c.max_score }}</div></th>{% endfor %}
@@ -38,6 +42,10 @@ Aralıq qiymətləndirmə: 2026/2027-dən ayrıca «Midterm /20» sütunu; keçm
                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
                     <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
                 </td>
+                <td class="jd2-fb-num jd2-fb-dim">{{ final_breakdown.held_hours }} / {{ final_breakdown.lesson_hours|floatformat:'-1' }}</td>
+                <td class="jd2-fb-num{% if row.absence_hours %} jd2-fb-absent{% endif %}">{{ row.absence_hours|floatformat:'-1' }}</td>
+                <td class="jd2-fb-num jd2-fb-pct{% if row.barred %} is-barred{% elif row.warning %} is-warning{% endif %}"
+                    title="{% trans 'Buraxılış həddi' context 'registrar.journal' %}: {{ row.eligibility.limit_percent }}% · {% trans 'icazəli' context 'registrar.journal' %} {{ row.allowed_absence|floatformat:'-1' }} {% trans 'saat' context 'registrar.journal' %}">{% if row.absence_pct is not None %}{{ row.absence_pct|floatformat:1 }}%{% else %}—{% endif %}</td>
                 <td class="jd2-fb-num {% if row.dav is None %}jd2-fb-dim{% endif %}">{% if row.dav is not None %}{{ row.dav|floatformat:'-2' }}{% else %}—{% endif %}</td>
                 {% if midterm %}
                 {% for v in row.kvals %}<td class="jd2-fb-num{% if forloop.first %} jd2-fb-accent{% else %} jd2-fb-dim{% endif %}">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
@@ -78,6 +86,7 @@ Aralıq qiymətləndirmə: 2026/2027-dən ayrıca «Midterm /20» sütunu; keçm
 </div>
 <div class="jd2-footbar">
     <span class="jd2-foot-note">{% if midterm %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + midterm + sərbəst iş, tavan" context "registrar.journal" %}{% else %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %}{% endif %} {{ final_breakdown.entry_max }}).</span>
+    <span class="jd2-foot-note">{% trans "Qayıb % = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə eyni məxrəc." context "registrar.journal" %}</span>
     <span class="jd2-foot-chips">
         <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Qayıb limitinə yaxın" context "registrar.journal" %}</span>
         <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Kəsilir — imtahana buraxılmır" context "registrar.journal" %}</span>

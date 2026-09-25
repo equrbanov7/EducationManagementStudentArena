@@ -4,7 +4,7 @@
 
   attendance — fənn · «qayıb X / icazə Y saat» · limit zolağı · status çipi
   scores     — fənn · giriş balı X / 50 + zolaq · Midterm (və ya K1–K3) çipləri
-  lessons    — vaxt · fənn · növ/auditoriya (keçənlər solğun, gedən «indi»)
+  lessons    — vaxt · fənn · növ/auditoriya (keçənlər solğun, gedən «indi»; müəllimdə «Jurnalı aç»)
   offerings  — fənn · qrup/tələbə · keçirilmiş / plan saatı (jurnal yeni tabda)
   ""         — köhnə forma: başlıq + meta
 
@@ -63,7 +63,17 @@ fənnin jurnal detalına SPA dərin keçididir (`?section=my-journal&period=…&
       <span class="dash-lesson__title">{{ row.title }}</span>
       {% if row.meta %}<span class="dash-lesson__meta">{{ row.meta }}</span>{% endif %}
     </span>
-    {% if row.is_now %}<span class="ems-badge ems-badge--success dash-lesson__now">{% trans "indi" context "accounts.dashboard" %}</span>{% endif %}
+    {% if row.url %}
+    {% comment %}«Jurnalı aç» (müəllim, UNEC P1-1): jurnal tam səhifədir — «Jurnallarım» kartı kimi yeni tabda.
+    Nişan + keçid TƏK xanada qalır ki, 3 sütunlu sətir düzümü pozulmasın.{% endcomment %}
+    <span class="dash-lesson__now">
+      {% if row.is_now %}<span class="ems-badge ems-badge--success">{% trans "indi" context "accounts.dashboard" %}</span>{% endif %}
+      <a class="ems-btn ems-btn--sm" href="{{ row.url }}" target="_blank" rel="noopener" data-force-navigation="true"
+         title="{% trans 'Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın' context 'accounts.dashboard' %}">
+        <i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Jurnalı aç" context "accounts.dashboard" %}
+      </a>
+    </span>
+    {% elif row.is_now %}<span class="ems-badge ems-badge--success dash-lesson__now">{% trans "indi" context "accounts.dashboard" %}</span>{% endif %}
   </li>
   {% endfor %}
 </ol>

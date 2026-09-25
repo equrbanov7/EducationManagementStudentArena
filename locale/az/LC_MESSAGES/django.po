@@ -77344,3 +77344,447 @@ msgid ""
 msgstr ""
 "Hələ heç bir sorğu kampaniyası yoxdur. İlk kampaniya RİM jurnalları "
 "bağlayanda özü yaranır və ya yuxarıdan əl ilə açılır."
+
+msgctxt "registrar.journal_history"
+msgid "Davamiyyət / bal"
+msgstr "Davamiyyət / bal"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent balı"
+msgstr "Komponent balı"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun imtahan"
+msgstr "Yekun imtahan"
+
+msgctxt "registrar.journal_history"
+msgid "Təkrar imtahan"
+msgstr "Təkrar imtahan"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — bal / davamiyyət"
+msgstr "Sənədli düzəliş — bal / davamiyyət"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs"
+msgstr "Sənədli düzəliş — dərs"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — dərs silindi"
+msgstr "Sənədli düzəliş — dərs silindi"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — sərbəst iş"
+msgstr "Sənədli düzəliş — sərbəst iş"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — kurs işi"
+msgstr "Sənədli düzəliş — kurs işi"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəliş — komponent"
+msgstr "Sənədli düzəliş — komponent"
+
+msgctxt "registrar.journal_history"
+msgid "Düzəlişin geri alınması"
+msgstr "Düzəlişin geri alınması"
+
+msgctxt "registrar.journal_history"
+msgid "Sistem"
+msgstr "Sistem"
+
+msgctxt "registrar.journal_history"
+msgid "Akademik qeyd"
+msgstr "Akademik qeyd"
+
+msgctxt "registrar.journal_history"
+msgid "Bu gün"
+msgstr "Bu gün"
+
+msgctxt "registrar.journal_history"
+msgid "Dünən"
+msgstr "Dünən"
+
+msgctxt "registrar.journal_history"
+msgid "dəyişiklik"
+msgstr "dəyişiklik"
+
+msgctxt "registrar.journal_history"
+msgid "Dərs sütunu"
+msgstr "Dərs sütunu"
+
+msgctxt "registrar.journal_history"
+msgid "başqasının adından · əsl aktor"
+msgstr "başqasının adından · əsl aktor"
+
+msgctxt "registrar.journal_history"
+msgid "sətir daha göstər"
+msgstr "sətir daha göstər"
+
+msgctxt "registrar.journal_history"
+msgid "Yığ"
+msgstr "Yığ"
+
+msgctxt "registrar.journal_history"
+msgid "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+msgstr "sətir paneldə göstərilmir — bu saxlama çox böyükdür"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd göstərilir"
+msgstr "qeyd göstərilir"
+
+msgctxt "registrar.journal_history"
+msgid "qeyd"
+msgstr "qeyd"
+
+msgctxt "registrar.journal_history"
+msgid "Dəyişiklik tarixçəsi"
+msgstr "Dəyişiklik tarixçəsi"
+
+msgctxt "registrar.journal_history"
+msgid "Paneli bağla"
+msgstr "Paneli bağla"
+
+msgctxt "registrar.journal_history"
+msgid "DƏRS TARİXİ"
+msgstr "DƏRS TARİXİ"
+
+msgctxt "registrar.journal_history"
+msgid "Tarix axtar…"
+msgstr "Tarix axtar…"
+
+msgctxt "registrar.journal_history"
+msgid "Uyğun tarix yoxdur"
+msgstr "Uyğun tarix yoxdur"
+
+msgctxt "registrar.journal_history"
+msgid "Bütün tarixlər"
+msgstr "Bütün tarixlər"
+
+msgctxt "registrar.journal_history"
+msgid "TƏLƏBƏ"
+msgstr "TƏLƏBƏ"
+
+msgctxt "registrar.journal_history"
+msgid "Ad və ya soyad…"
+msgstr "Ad və ya soyad…"
+
+msgctxt "registrar.journal_history"
+msgid "Qeyd növü"
+msgstr "Qeyd növü"
+
+msgctxt "registrar.journal_history"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.journal_history"
+msgid "Komponent"
+msgstr "Komponent"
+
+msgctxt "registrar.journal_history"
+msgid "Yekun"
+msgstr "Yekun"
+
+msgctxt "registrar.journal_history"
+msgid "Sənədli düzəlişlər"
+msgstr "Sənədli düzəlişlər"
+
+msgctxt "registrar.journal_history"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Tarixçə açıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "registrar.journal_history"
+msgid "Hələ dəyişiklik qeydə alınmayıb"
+msgstr "Hələ dəyişiklik qeydə alınmayıb"
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+msgstr ""
+"Bal, davamiyyət, komponent və düzəlişlər yazılan kimi burada görünəcək."
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəcə uyğun qeyd yoxdur"
+msgstr "Süzgəcə uyğun qeyd yoxdur"
+
+msgctxt "registrar.journal_history"
+msgid "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+msgstr "Süzgəci dəyişin və ya aşağıdan köhnə qeydləri də yükləyin."
+
+msgctxt "registrar.journal_history"
+msgid ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+msgstr ""
+"Tələbə və növ süzgəci yüklənmiş qeydlər üzrə işləyir — köhnə qeydlər üçün "
+"«Daha çox» basın."
+
+msgctxt "registrar.journal_history"
+msgid "Daha çox"
+msgstr "Daha çox"
+
+msgctxt "registrar.journal_history"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "registrar.journal_history"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "registrar.journal_history"
+msgid "Nə dəyişdi"
+msgstr "Nə dəyişdi"
+
+msgctxt "registrar.journal_history"
+msgid "Köhnə → yeni"
+msgstr "Köhnə → yeni"
+
+msgctxt "registrar.journal_history"
+msgid "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+msgstr "Kim, nə vaxt, nəyi dəyişib — jurnalın dəyişiklik tarixçəsi"
+
+msgctxt "registrar.journal_history"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "registrar.journal_history"
+msgid "Bu dərsin tarixçəsi"
+msgstr "Bu dərsin tarixçəsi"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu fənnə aid deyil."
+msgstr "Bu cədvəl dərsi bu fənnə aid deyil."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+msgstr ""
+"Bu cədvəl dərsi %(date)s tarixində keçirilmir (həftə günü və ya üst/alt "
+"həftə uyğun deyil)."
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"jurnalın üstündəki «Aktivləşdir» düyməsini işlədin."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+msgstr "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."
+
+msgctxt "registrar.journal_activation"
+msgid "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+msgstr "Dərs aktivləşdirildi: %(time)s · %(kind)s%(topic)s."
+
+msgctxt "registrar.journal_activation"
+msgid "Bu günün cədvəl dərsləri"
+msgstr "Bu günün cədvəl dərsləri"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+msgstr ""
+"Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və "
+"sillabusdan götürülür."
+
+msgctxt "registrar.journal_activation"
+msgid "indi"
+msgstr "indi"
+
+msgctxt "registrar.journal_activation"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti mövzu"
+msgstr "Növbəti mövzu"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+msgstr ""
+"Sillabusda bu növ üçün keçilməmiş mövzu yoxdur — mövzunu sonra dərsi redaktə"
+" edərək yaza bilərsiniz."
+
+msgctxt "registrar.journal_activation"
+msgid "Jurnalda bu dərsin sütununa keç"
+msgstr "Jurnalda bu dərsin sütununa keç"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilib"
+msgstr "Aktivləşdirilib"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdir"
+msgstr "Aktivləşdir"
+
+msgctxt "registrar.journal_activation"
+msgid "Aktivləşdirilməyib"
+msgstr "Aktivləşdirilməyib"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+msgstr "Bu gün cədvəldə bu fənnin dərsi yoxdur."
+
+msgctxt "registrar.journal_activation"
+msgid "Növbəti dərs"
+msgstr "Növbəti dərs"
+
+msgctxt "registrar.journal_activation"
+msgid "Bu gün cədvəldən kənar açılmış dərs"
+msgstr "Bu gün cədvəldən kənar açılmış dərs"
+
+msgctxt "registrar.journal_activation"
+msgid "cədvəldən kənar"
+msgstr "cədvəldən kənar"
+
+msgctxt "registrar.journal_activation"
+msgid "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+msgstr "CƏDVƏLDƏN KƏNAR DƏRS — SƏBƏB"
+
+msgctxt "registrar.journal_activation"
+msgid "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+msgstr "Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…"
+
+msgctxt "registrar.journal_activation"
+msgid "Cədvəldən kənar dərsin səbəbi"
+msgstr "Cədvəldən kənar dərsin səbəbi"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+msgstr ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın "
+"üstündəki «Aktivləşdir» düyməsini işlədin."
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+msgstr ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın"
+
+msgctxt "accounts.dashboard"
+msgid "Jurnalı aç"
+msgstr "Jurnalı aç"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəldə var, qeydə alınmayıb"
+msgstr "Cədvəldə var, qeydə alınmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+msgstr ""
+"cədvəl slotu keçmiş tarixə düşür, amma jurnalda həmin gün dərs sütunu "
+"açılmayıb"
+
+msgctxt "accounts.lessons_log"
+msgid "Siyahı"
+msgstr "Siyahı"
+
+msgctxt "accounts.lessons_log"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "accounts.lessons_log"
+msgid "Jurnal"
+msgstr "Jurnal"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+msgstr ""
+"Ən yeni %(shown)s slot göstərilir — cəmi %(total)s. Daha dar dövr seçin."
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+msgstr ""
+"Keçmiş tarixə dərs sütununu yalnız RİM rəhbəri aça bilər (audit izinə "
+"düşür). Bayram/tətil günləri cədvəldə ayrıca qeyd olunmadığı üçün burada "
+"sayıla bilər."
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+msgstr "cədvəldəki bütün keçmiş dərslər jurnalda açılıb"
+
+msgctxt "accounts.lessons_log"
+msgid "cədvəldən kənar"
+msgstr "cədvəldən kənar"
+
+msgctxt "registrar.lessons_log"
+msgid "Cədvəldən kənar (səbəb)"
+msgstr "Cədvəldən kənar (səbəb)"
+
+msgctxt "accounts.lessons_log"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "accounts.lessons_log"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün fakültələr"
+msgstr "Bütün fakültələr"
+
+msgctxt "accounts.lessons_log"
+msgid "Bütün kafedralar"
+msgstr "Bütün kafedralar"
+
+msgctxt "registrar.journal"
+msgid "AUDİTORİYA SAATI"
+msgstr "AUDİTORİYA SAATI"
+
+msgctxt "registrar.journal"
+msgid "keçirilib / plan"
+msgstr "keçirilib / plan"
+
+msgctxt "registrar.journal"
+msgid "BURAXILAN SAAT"
+msgstr "BURAXILAN SAAT"
+
+msgctxt "registrar.journal"
+msgid "üzrsüz q/b"
+msgstr "üzrsüz q/b"
+
+msgctxt "registrar.journal"
+msgid "QAYIB %%"
+msgstr "QAYIB %%"
+
+msgctxt "registrar.journal"
+msgid "buraxılan ÷ plan"
+msgstr "buraxılan ÷ plan"
+
+msgctxt "registrar.journal"
+msgid "Buraxılış həddi"
+msgstr "Buraxılış həddi"
+
+msgctxt "registrar.journal"
+msgid "icazəli"
+msgstr "icazəli"
+
+msgctxt "registrar.journal"
+msgid ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."
+msgstr ""
+"Qayıb %% = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə "
+"eyni məxrəc."

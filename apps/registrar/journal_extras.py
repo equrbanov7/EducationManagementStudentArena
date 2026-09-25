@@ -255,6 +255,11 @@ def get_final_breakdown(offering):
     və ya Midterm/20 (2026/2027-dən), Seminar orta, Sərbəst iş/10, Lab orta, Kurs işi/100,
     İmtahana qədər bal.
 
+    UNEC «Yekun qiymət» kimi audit sütunları (2026-09-25): Auditoriya saatı (plan =
+    buraxılış qərarının KANONİK məxrəci ``exam_eligibility.lesson_hours_for``, keçirilib =
+    bu günə qədərki dərslərin saatı), Buraxılan saat (``Enrollment.absence_hours``) və
+    Qayıb % (buraxılan ÷ plan, 1 onluq) — hamısı artıq oxunmuş datadan, ƏLAVƏ SORĞU YOXDUR.
+
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir."""
     from apps.registrar import finals_batch, gradebook
@@ -288,6 +293,8 @@ def get_final_breakdown(offering):
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
     # səviyyəli, SƏTİR qərarı isə TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — tək toplu sorğu.
     allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
+    today = timezone.localdate()
+    held_hours = sum(int(lesson.hours or 0) for lesson in lessons_all if lesson.date is None or lesson.date <= today)
     allowed_absence = absence_limit.allowed_absence_hours(offering, lessons_all)
     org_id = offering.organization_id
     row_limits = absence_limit.row_limits(organization_id=org_id, enrollments=enrollments, total_hours=allowed)
@@ -300,6 +307,10 @@ def get_final_breakdown(offering):
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
+
+    def _pct(hours):
+        # Qayıb % — buraxılış qaydası ilə EYNİ məxrəc; məxrəc yoxdursa «—» (0% yalan olardı).
+        return (Decimal(hours) * 100 / allowed).quantize(Decimal("0.1")) if allowed > 0 else None
 
     rows = []
     for e in enrollments:
@@ -342,6 +353,7 @@ def get_final_breakdown(offering):
                 "eligibility": eligibility,
                 "warning": warning,
                 "absence_hours": e.absence_hours,
+                "absence_pct": _pct(absence_hours),
                 "allowed_absence": row_limit.allowed_hours,  # tələbənin ÖZ həddi (F-06)
             }
         )
@@ -351,6 +363,8 @@ def get_final_breakdown(offering):
         "rows": rows,
         "entry_max": scheme.entry_score_max,
         "allowed_absence": allowed_absence,
+        "lesson_hours": allowed,  # Auditoriya saatı — plan (buraxılışın kanonik məxrəci)
+        "held_hours": held_hours,  # Auditoriya saatı — bu günə qədər keçirilib
     }
 
 

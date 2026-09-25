@@ -102,3 +102,12 @@
     color: var(--ems-primary-700);
     min-width: 88px;
 }
+
+/* ── «Yekun qiymət» — audit sütunları (UNEC müqayisəsi, 2026-09-25) ───────
+   Auditoriya saatı · Buraxılan saat · Qayıb %: qayıb faizi sətrin buraxılış
+   vəziyyəti ilə rənglənir (limitə yaxın — sarı, keçib — qırmızı). */
+.jd2-fb-aud { min-width: 92px; }
+.jd2-fb-absent { font-weight: 800; color: var(--ems-danger-700); }
+.jd2-fb-pct { font-weight: 800; white-space: nowrap; }
+.jd2-fb-pct.is-warning { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.jd2-fb-pct.is-barred { background: var(--ems-danger-bg); color: var(--ems-danger-strong); }

@@ -125,6 +125,21 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         "season": selection["season"],
     }
     only_flagged = _param(request, "flagged") == "1"
+    # Seçici siyahıları SEÇİLMİŞ dövrlərə görə daralır (yoxsa bütün əhatə).
+    option_source = lessons_all
+    if selection["periods"] is not None:
+        option_source = option_source.filter(offering__period__in=selection["periods"])
+    # Fakültə / Kafedra (sahib, 2026-09-25) — tərif, əhatə və kaskad `registrar.lessons_log_units`-dədir.
+    units = service.unit_filter_state(
+        request.user,
+        active_organization,
+        option_source,
+        supervisor=supervisor,
+        faculty_raw=_param(request, "faculty"),
+        kafedra_raw=_param(request, "kafedra"),
+    )
+    values["faculty"], values["kafedra"] = units["faculty_value"], units["kafedra_value"]
+    unit_filters = {"faculty_unit": units["faculty"], "kafedra_unit": units["kafedra"]}
     lessons = service.apply_filters(
         lessons,
         q=values["q"],
@@ -134,10 +149,24 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         teacher=values["teacher"],
         form=values["form"],
         supervisor=supervisor,
+        **unit_filters,
     )
+    if units["invalid"]:
+        # Seçilmiş fakültə/kafedra tapılmadı — «hamısı» göstərilmir. `.none()` YOX: KPI keş açarı
+        # sorğunun SQL mətnindən qurulur (`totals_cache_key`), boş queryset isə SQL vermir.
+        lessons = lessons.filter(pk__isnull=True)
 
     totals = service.range_totals(lessons)
     rows = service.build_rows(lessons)
+    # «Cədvəldə var, qeydə alınmayıb» (UNEC P1-1) — eyni əhatə, dövr və filtrlərlə; sabit 2 sorğu + keş.
+    section["unrecorded"] = service.unrecorded_slots(
+        request.user,
+        active_organization,
+        supervisor=supervisor,
+        window=window,
+        periods=selection["periods"] if selection["apply_period_filter"] else None,
+        filters=dict(values, invalid_unit=units["invalid"], **unit_filters),
+    )
     if only_flagged:
         rows = [row for row in rows if row["note"] != service.NOTE_ON_TIME]
 
@@ -165,21 +194,23 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         }
     )
     section["kpi_tiles"] = _kpi_tiles(totals)
-    # Seçici siyahıları SEÇİLMİŞ dövrlərə görə daralır (yoxsa bütün əhatə).
-    option_source = lessons_all
-    if selection["periods"] is not None:
-        option_source = option_source.filter(offering__period__in=selection["periods"])
     section["filters"] = _filter_fields(
-        option_source,
+        # Kaskad: fənn / qrup / müəllim siyahıları seçilmiş fakültə və kafedraya görə daralır.
+        service.apply_filters(option_source, **unit_filters),
         selection=selection,
         current=current,
         supervisor=supervisor,
         values=values,
+        units=units,
     )
-    section["export_url"] = "%s?%s" % (
-        reverse("registrar:lessons_log_csv"),
-        request.GET.urlencode(),
-    )
+    # İxrac bölmə ilə EYNİ effektiv filtrləri daşıyır (kaskadda atılmış kafedra URL-də qalmasın).
+    export_params = request.GET.copy()
+    for key in ("faculty", "kafedra"):
+        if values[key]:
+            export_params[PREFIX + key] = values[key]
+        else:
+            export_params.pop(PREFIX + key, None)
+    section["export_url"] = "%s?%s" % (reverse("registrar:lessons_log_csv"), export_params.urlencode())
     section["journal_list_url"] = reverse("registrar:journal_list")
     section["header_subtitle"] = (
         pgettext(
@@ -264,7 +295,21 @@ def _kpi_tiles(totals) -> list:
     ]
 
 
-def _filter_fields(option_source, *, selection, current, supervisor, values) -> dict:
+def _unit_field(name, label, all_label, value, options) -> dict:
+    """Fakültə / Kafedra seçicisi — layihə komponenti (bootstrap select + menyuda axtarış)."""
+    return {
+        "name": PREFIX + name,
+        "label": label,
+        "kind": "select",
+        "value": value,
+        "default": "",
+        "searchable": True,
+        "wide": True,
+        "options": [{"value": "", "label": all_label}] + options,
+    }
+
+
+def _filter_fields(option_source, *, selection, current, supervisor, values, units=None) -> dict:
     """`ems_ui/_filter_bar.html` sahələri — seçicilər TƏK aqreqat sorğudan.
 
     Hər select-in `default`-u var: filtr çipinin «×»-i və «Sıfırla» ora qayıdır
@@ -361,6 +406,20 @@ def _filter_fields(option_source, *, selection, current, supervisor, values) -> 
             "default": "",
             "options": [{"value": "", "label": pgettext(_CTX, "Hamısı")}] + form_options,
         },
+        _unit_field(
+            "faculty",
+            pgettext(_CTX, "Fakültə"),
+            pgettext(_CTX, "Bütün fakültələr"),
+            values.get("faculty", ""),
+            (units or {}).get("faculty_options", []),
+        ),
+        _unit_field(
+            "kafedra",
+            pgettext(_CTX, "Kafedra"),
+            pgettext(_CTX, "Bütün kafedralar"),
+            values.get("kafedra", ""),
+            (units or {}).get("kafedra_options", []),
+        ),
         {
             "name": PREFIX + "offering",
             "label": pgettext(_CTX, "Fənn"),
@@ -460,12 +519,19 @@ def _filter_fields(option_source, *, selection, current, supervisor, values) -> 
                 ),
             }
         )
+    unit_labels = {}
+    for key in ("faculty", "kafedra"):
+        resolved = (units or {}).get(key)
+        labels = {o["value"]: o["label"] for o in (units or {}).get(f"{key}_options", [])}
+        unit_labels[key] = labels.get(values.get(key, "")) or (resolved.name if resolved is not None else "")
     for key, label, value_label in (
         (
             "form",
             pgettext(_CTX, "Təhsil forması"),
             {o["value"]: o["label"] for o in form_options}.get(values["form"], ""),
         ),
+        ("faculty", pgettext(_CTX, "Fakültə"), unit_labels["faculty"]),
+        ("kafedra", pgettext(_CTX, "Kafedra"), unit_labels["kafedra"]),
         ("offering", pgettext(_CTX, "Fənn"), offering_labels.get(values["offering"], values["offering"])),
         ("group", pgettext(_CTX, "Qrup"), values["group"]),
         ("kind", pgettext(_CTX, "Dərsin tipi"), kind_labels.get(values["kind"], values["kind"])),
