@@ -97,7 +97,7 @@ jobs:
             -in "$RUNNER_TEMP/roster.xlsx.enc" -out "$RUNNER_TEMP/roster.xlsx"
           # `docker cp` runner UID-sini saxlayır (umask 077 → app istifadəçisi oxuya bilmir) — stdin ilə
           # konteynerin ÖZ istifadəçisi yazır.
-          docker exec -i "$APP_CONTAINER" sh -c 'umask 077; cat > /tmp/staff_roster.xlsx' < "$RUNNER_TEMP/roster.xlsx"
+          docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" < "$RUNNER_TEMP/roster.xlsx"
           rm -f "$RUNNER_TEMP/roster.xlsx" "$RUNNER_TEMP/roster.xlsx.enc"
       - name: 🧰 Run
         run: |
@@ -113,7 +113,7 @@ jobs:
               args=(--org "$ORG" --plan /tmp/org_structure.json)
               ;;
             seed_staff_roster)
-              args=(--org "$ORG" --file /tmp/staff_roster.xlsx)
+              args=(--org "$ORG" --file "/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx")
               ;;
             sync_plan_offerings)
               actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
@@ -133,7 +133,7 @@ jobs:
             echo "::endgroup::"
             args+=(--apply)
             if [ "$COMMAND" = "seed_staff_roster" ]; then
-              args+=(--credentials-out /tmp/staff_creds.csv)
+              args+=(--credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv")
             fi
           fi
           echo "::group::▶ $COMMAND ${args[*]}"
@@ -170,10 +170,10 @@ jobs:
             echo "saved=1" >> "$GITHUB_OUTPUT"
           fi
           rm -f "$RUNNER_TEMP/out.log"
-          if [ "$APPLY" = "true" ] && docker exec "$APP_CONTAINER" test -s /tmp/staff_creds.csv; then
+          if [ "$APPLY" = "true" ] && docker exec "$APP_CONTAINER" test -s "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"; then
             mkdir -p "$HOME/creds" && chmod 700 "$HOME/creds"
             out="$HOME/creds/staff_$(date +%Y%m%d_%H%M%S).csv"
-            docker cp "$APP_CONTAINER:/tmp/staff_creds.csv" "$out" && chmod 600 "$out"
+            docker exec "$APP_CONTAINER" cat "/tmp/staff_creds_${GITHUB_RUN_ID}.csv" > "$out" && chmod 600 "$out"
             enc "$out" "$RUNNER_TEMP/staff-out/staff_creds.csv.enc"
             echo "saved=1" >> "$GITHUB_OUTPUT"
             echo "Parollar serverdə: $out" >> "$GITHUB_STEP_SUMMARY"
@@ -188,5 +188,6 @@ jobs:
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
         if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure')
         run: |
-          docker exec "$APP_CONTAINER" rm -f /tmp/staff_roster.xlsx /tmp/staff_creds.csv /tmp/org_structure.json || true
+          # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
