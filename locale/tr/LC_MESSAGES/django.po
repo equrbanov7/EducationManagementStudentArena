@@ -82712,3 +82712,70 @@ msgid ""
 msgstr ""
 "Bu dönem %(days)s günden daha önce kapandı — eski sonucun aktarımı başvuruya"
 " dayanır: gerekçe, not ve taranmış belgenin üçü de zorunludur."
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar ertəsi"
+msgstr "Pazartesi"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə axşamı"
+msgstr "Salı"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə"
+msgstr "Çarşamba"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə axşamı"
+msgstr "Perşembe"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə"
+msgstr "Cuma"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Şənbə"
+msgstr "Cumartesi"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar"
+msgstr "Pazar"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "İndi"
+msgstr "Şimdi"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bu gün"
+msgstr "Bugün"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Sabah"
+msgstr "Yarın"
+
+msgctxt "registrar.journal"
+msgid "Dərs cədvəlinə görə növbəti dərs"
+msgstr "Ders programına göre sıradaki ders"
+
+msgctxt "registrar.journal"
+msgid ""
+"Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — "
+"dəyişə bilərsiniz."
+msgstr ""
+"Bina ve derslik bu grubun aynı gün ve türdeki önceki dersinden alındı — "
+"değiştirebilirsiniz."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "«%(name)s» %(date)s tarixində «%(target)s» ilə birləşdirilib."
+msgstr "«%(name)s» %(date)s tarihinde «%(target)s» ile birleştirildi."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək: «%(name)s» — «%(parent)s» tərkibində."
+msgstr "%(date)s tarihine kadar: «%(name)s» — «%(parent)s» bünyesinde."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək adı: «%(name)s»."
+msgstr "%(date)s tarihine kadar adı: «%(name)s»."
