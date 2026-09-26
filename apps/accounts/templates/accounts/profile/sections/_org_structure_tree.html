@@ -111,6 +111,14 @@ CSS/JS XARİCİ fayllardadır (CSP: inline yoxdur) — `teaching_office.css` /
                     </div>
                     <span class="ems-badge ems-badge--info">{{ detail.unit_type_label }}</span>
                 </div>
+                {% comment %}Struktur planı (2026-09-27): köhnə ad / köhnə yer — «köhnə dataya baxanda bilinsin
+                ki, əvvəl bu adda idi / buna aid idi» (organizations.structure_plan, settings.history).{% endcomment %}
+                {% for past in unit.settings.history %}{% if not past.created %}
+                <p class="tof-detail__summary">
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                    {% if past.merged_into_name %}{% blocktrans context "accounts.structure_tree" with name=past.name target=past.merged_into_name date=past.date %}«{{ name }}» {{ date }} tarixində «{{ target }}» ilə birləşdirilib.{% endblocktrans %}{% elif past.parent %}{% blocktrans context "accounts.structure_tree" with name=past.name parent=past.parent date=past.date %}{{ date }} tarixinədək: «{{ name }}» — «{{ parent }}» tərkibində.{% endblocktrans %}{% else %}{% blocktrans context "accounts.structure_tree" with name=past.name date=past.date %}{{ date }} tarixinədək adı: «{{ name }}».{% endblocktrans %}{% endif %}
+                </p>
+                {% endif %}{% endfor %}
                 {% if detail.children_summary %}
                 <p class="tof-detail__summary">
                     <i class="fas fa-sitemap" aria-hidden="true"></i>

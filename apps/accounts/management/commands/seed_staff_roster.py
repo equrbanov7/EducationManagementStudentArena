@@ -66,6 +66,12 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Yaz (defolt: yalnız hesabat)")
         parser.add_argument("--credentials-out", default="", help="Yeni hesabların parolu üçün CSV yolu")
         parser.add_argument("--limit", type=int, default=0, help="Yalnız ilk N sətir (sınaq üçün)")
+        parser.add_argument(
+            "--skip-name",
+            action="append",
+            default=[],
+            help="Bu ad-soyadlı sətri ötür (təkrarlana bilər; sahib qərarı gözləyən hallar üçün)",
+        )
 
     def handle(self, *args, **options):
         # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): request-dən kənar
@@ -90,6 +96,12 @@ class Command(BaseCommand):
             raise CommandError(f"Təşkilat tapılmadı: {options['org']}") from exc
 
         people = roster.parse_rows(_read_rows(path))
+        skip_names = {" ".join(name.split()).casefold() for name in options.get("skip_name") or []}
+        if skip_names:
+            skipped_rows = [p for p in people if " ".join(p["name"].split()).casefold() in skip_names]
+            people = [p for p in people if " ".join(p["name"].split()).casefold() not in skip_names]
+            for person in skipped_rows:
+                self.stdout.write(f"   ↷ ötürüldü (--skip-name): {person['name']} — {person['section']}")
         if options["limit"]:
             people = people[: options["limit"]]
         units = list(OrgUnit.objects.filter(organization=organization, is_active=True))
@@ -241,7 +253,7 @@ class Command(BaseCommand):
         from apps.organizations.models import Membership
         from core.roles import ProfileRole
 
-        created, updated, skipped, credentials = 0, 0, 0, []
+        created, updated, skipped, heads, credentials = 0, 0, 0, 0, []
         taken = set()
         for plan in plans:
             role = roles.get(plan["role_name"])
@@ -301,11 +313,23 @@ class Command(BaseCommand):
                 profile = getattr(user, "profile", None)
                 if profile is not None:
                     profile.staff_position = person["position"][:120]
-                    if plan["role_name"] not in _TEACHING_ROLES:
+                    # Profil rolu YALNIZ yeni hesabda endirilir: mövcud hesab (məs. dərs deyən
+                    # mərkəz əməkdaşı) müəllim səthlərini itirməməlidir (2026-09-27).
+                    if plan["existing"] is None and plan["role_name"] not in _TEACHING_ROLES:
                         profile.role = ProfileRole.MEMBER
                     profile.save(update_fields=["staff_position", "role", "updated_at"])
+                unit = plan["unit"]
+                # Rəhbər vəzifəsi (müdir/dekan/sədr) boş rəhbər sahəsinə yazılır — mövcud rəhbər əvəzlənmir.
+                if unit is not None and unit.head_id is None and roster.is_head_title(person["position"]):
+                    unit.head = user
+                    unit.save(update_fields=["head", "updated_at"])
+                    heads += 1
 
-        self.stdout.write(self.style.SUCCESS(f"\n✓ Yaradıldı: {created} · yeniləndi: {updated} · ötürüldü: {skipped}"))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"\n✓ Yaradıldı: {created} · yeniləndi: {updated} · ötürüldü: {skipped} · rəhbər təyini: {heads}"
+            )
+        )
         if credentials and credentials_out:
             out = pathlib.Path(credentials_out).expanduser()
             with out.open("w", encoding="utf-8", newline="") as handle:

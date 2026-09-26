@@ -133,6 +133,11 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 </div>
                 <div class="jd2-field">
                     {% if lesson_rooms %}
+                    {% comment %}Otaq yaddaşı (sahib 2026-09-27): bu qrupun eyni növ + həftə günü dərsində
+                    əvvəl seçilmiş otaq yeni dərsdə avtomatik dolur (lesson_rooms.remembered_rooms →
+                    journal_lesson_room.js); bu halda aşağıdakı ipucu ilə əvəzlənir.{% endcomment %}
+                    <small class="jd-field-hint" data-jd-room-memory-hint hidden><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — dəyişə bilərsiniz." context "registrar.journal" %}</small>
+                    {{ lesson_room_memory|json_script:"jdRoomMemory" }}
                     <small class="jd-field-hint" data-jd-room-hint>{% if lesson_default_building %}{% blocktrans context "registrar.journal" with building=lesson_default_building %}Korpus qrupun ixtisasına görə «{{ building }}» seçilib — dəyişə bilərsiniz; otaqlar korpusa görə süzülür. Otaq məcburi deyil.{% endblocktrans %}{% else %}{% trans "Əvvəlcə korpus seçin — otaqlar həmin korpusa görə süzülür. Otaq məcburi deyil." context "registrar.journal" %}{% endif %}</small>
                     {% else %}
                     <small class="jd-field-hint" data-jd-room-hint>{% trans "Təşkilat üçün hələ otaq qeyd olunmayıb — otaqlar «İmtahan otaqları» bölməsində əlavə olunur." context "registrar.journal" %}</small>

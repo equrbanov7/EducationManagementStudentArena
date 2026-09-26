@@ -228,6 +228,11 @@ def match_unit(section: str, units):
     target = _norm(section)
     if not target:
         return None
+    # Struktur planının açıq ləqəbləri (``settings["aliases"]`` — siyahıdakı başlığın
+    # DƏQİQ yazılışı, bax ``organizations.structure_plan``) təxmindən ÜSTÜNDÜR.
+    for unit in units:
+        if any(_norm(alias) == target for alias in (getattr(unit, "settings", None) or {}).get("aliases") or []):
+            return unit
     by_name = {_norm(unit.name): unit for unit in units}
     if target in by_name:
         return by_name[target]
@@ -307,6 +312,18 @@ def classify_match(
     return "create", ""
 
 
+#: Bölmə RƏHBƏRİ vəzifəsi (vahidin ``head`` sahəsinə yazılır) — müavin/əvəz DEYİL.
+_HEAD_TITLES = ("müdir", "dekan", "sədr", "baş direktor", "baş dirketor")
+
+
+def is_head_title(position: str) -> bool:
+    """«Müdir», «Dekan», «Sədr», «Baş direktor» — müavini/əvəzi xaric."""
+    title = _norm(position)
+    if any(word in title for word in ("müavin", "müvin", "əvəz")):
+        return False
+    return title.startswith(tuple(_norm(prefix) for prefix in _HEAD_TITLES))
+
+
 def split_name(full_name: str) -> tuple[str, str]:
     """«Soyad Ad Ata adı» → (ad, soyad). Siyahı bu sıradadır."""
     tokens = str(full_name or "").split()
@@ -318,13 +335,11 @@ def split_name(full_name: str) -> tuple[str, str]:
 
 
 def username_seed(full_name: str) -> str:
-    """Addan latın hərfli istifadəçi adı özəyi (`n.novruzova`)."""
+    """Addan layihə qaydası ilə istifadəçi adı özəyi: ``ad.soyad`` (``username_repair.name_base``)."""
+    from apps.accounts.services.username_repair import name_base
+
     first, last = split_name(full_name)
-    table = str.maketrans({"ə": "e", "ı": "i", "ö": "o", "ü": "u", "ğ": "g", "ş": "s", "ç": "c"})
-    first = unicodedata.normalize("NFKD", first.lower().translate(table))
-    last = unicodedata.normalize("NFKD", last.lower().translate(table))
-    clean = lambda text: re.sub(r"[^a-z]", "", text.encode("ascii", "ignore").decode())  # noqa: E731
-    return f"{clean(first)[:1]}.{clean(last)}".strip(".") or "isci"
+    return name_base(first, last) or "isci"
 
 
 __all__ = [
@@ -333,6 +348,7 @@ __all__ = [
     "UNIT_HEAD_ROLE_RULES",
     "UNIT_STAFF_ROLE_RULES",
     "classify_match",
+    "is_head_title",
     "looks_like_person",
     "match_unit",
     "parse_rows",

@@ -168,12 +168,20 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                 {% for offering in offerings %}
                 {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
                 2026-09-06).{% endcomment %}
-                <tr class="jl-row" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
+                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
                             <span class="jl-group">{% if offering.group %}{{ offering.group.name }}{% else %}{% trans "Bütün ixtisas" context "registrar.journal" %}{% endif %}</span>
                             <span class="jl-subject">{{ offering.subject.name }}</span>
+                            {% if offering.next_lesson %}{% with nl=offering.next_lesson %}
+                            {% comment %}Cədvəldəki növbəti / hazırda gedən dərs (journal_list_schedule) —
+                            siyahı da bu sıra ilə düzülür (sahib 2026-09-27).{% endcomment %}
+                            <span class="jl-next jl-next--{{ nl.state }}" title="{% trans 'Dərs cədvəlinə görə növbəti dərs' context 'registrar.journal' %}">
+                                {% if nl.state == 'now' %}<span class="jl-next__dot" aria-hidden="true"></span>{% else %}<i class="far fa-clock" aria-hidden="true"></i>{% endif %}
+                                <b>{{ nl.label }}</b> {{ nl.time }} · {{ nl.kind }}{% if nl.room %} · <i class="fas fa-door-open" aria-hidden="true"></i> {{ nl.room }}{% endif %}
+                            </span>
+                            {% endwith %}{% endif %}
                             {% if offering.is_evening %}<span class="jl-badge jl-badge--master">{% trans "MAGİSTRATURA" context "registrar.journal" %}</span>{% endif %}
                         </div>
                         <div class="jl-subject-sub">

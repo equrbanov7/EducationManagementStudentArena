@@ -83342,3 +83342,70 @@ msgstr ""
 "Этот период закрыт более %(days)s дней назад — перенос старого результата "
 "делается на основании представления: причина, примечание и скан документа "
 "обязательны."
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar ertəsi"
+msgstr "Понедельник"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə axşamı"
+msgstr "Вторник"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə"
+msgstr "Среда"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə axşamı"
+msgstr "Четверг"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə"
+msgstr "Пятница"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Şənbə"
+msgstr "Суббота"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar"
+msgstr "Воскресенье"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "İndi"
+msgstr "Сейчас"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bu gün"
+msgstr "Сегодня"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Sabah"
+msgstr "Завтра"
+
+msgctxt "registrar.journal"
+msgid "Dərs cədvəlinə görə növbəti dərs"
+msgstr "Следующее занятие по расписанию"
+
+msgctxt "registrar.journal"
+msgid ""
+"Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — "
+"dəyişə bilərsiniz."
+msgstr ""
+"Корпус и аудитория взяты из предыдущего занятия этой группы в тот же день и "
+"того же типа — их можно изменить."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "«%(name)s» %(date)s tarixində «%(target)s» ilə birləşdirilib."
+msgstr "«%(name)s» объединена с «%(target)s» %(date)s."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək: «%(name)s» — «%(parent)s» tərkibində."
+msgstr "До %(date)s: «%(name)s» — в составе «%(parent)s»."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək adı: «%(name)s»."
+msgstr "Название до %(date)s: «%(name)s»."
