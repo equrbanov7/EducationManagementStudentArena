@@ -161,6 +161,23 @@
 .jl-page .jl-open-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
 .jl-page .jl-badge--master { background: var(--ems-sky-100); color: var(--ems-sky-800); }
 
+/* Cədvəldəki növbəti / hazırda gedən dərs (sahib 2026-09-27) — siyahı da bu sıra ilə düzülür. */
+.jl-page .jl-next {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); padding: 0 10px;
+    border-radius: var(--ems-r-pill); background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm); font-weight: 600; white-space: nowrap;
+}
+.jl-page .jl-next b { font-weight: 800; }
+.jl-page .jl-next--now { background: var(--ems-success-100); color: var(--ems-success-700); }
+.jl-page .jl-next--today { background: var(--ems-primary-50); color: var(--ems-primary-700); }
+.jl-page .jl-next__dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--ems-success);
+    box-shadow: 0 0 0 3px var(--ems-success-100); animation: jl-next-pulse 1.6s ease-in-out infinite;
+}
+@keyframes jl-next-pulse { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .jl-page .jl-next__dot { animation: none; } }
+.jl-page .jl-table tbody tr.jl-row--now { background: var(--ems-emerald-50); box-shadow: inset 3px 0 0 var(--ems-success); }
+
 .jl-page .jd2-list-hint { margin: var(--ems-sp-4) 2px 0; font-size: var(--ems-fs-sm); color: var(--ems-text-muted); font-weight: 600; }
 .jl-page .jd2-pager-count { color: var(--ems-text-muted); }
 .jl-page .journal-empty { padding: 0; }

@@ -38,7 +38,7 @@ from django.utils import timezone
 from django.utils.translation import gettext, pgettext
 from django.views.decorators.http import require_POST
 
-from . import dashboard_data
+from . import dashboard_data, lesson_rooms
 from .journal_access import is_direct_editor, offering_or_404
 
 _CTX = "registrar.journal_activation"
@@ -203,7 +203,8 @@ def slot_lesson_fields(offering, slot, day, *, last_instructor=None) -> dict:
         "start_time": slot.start_time,
         "end_time": slot.end_time,
         "hours": slot_hours(slot),
-        "room": resolve_slot_room(offering, slot),
+        # Slotun otağı reyestrdə tapılmasa — müəllimin bu növ + gün üçün əvvəl seçdiyi otaq.
+        "room": resolve_slot_room(offering, slot) or lesson_rooms.remembered_room(offering, kind, day),
         # Fənn iki müəllim arasında bölünübsə (mühazirə/seminar): slotun öz müəllimi (cədvəldə
         # təyin olunubsa), yoxdursa bu növün son müəllimi, o da yoxdursa jurnal sahibi.
         "instructor": slot.instructor if slot.instructor_id else (last_instructor.get(kind) or offering.instructor),
