@@ -239,6 +239,7 @@ def journal_detail(request, offering_id):
         "lesson_rooms": rooms,
         "lesson_buildings": lesson_rooms.lesson_building_choices(rooms),
         "lesson_default_building": campus.default_building_for_offering(offering),
+        "lesson_room_memory": lesson_rooms.remembered_rooms(offering),  # eyni növ + gün → son otaq
     }
     if correction_mode:
         # Yerində düzəliş rejimi: audited correction editoru üçün kontekst

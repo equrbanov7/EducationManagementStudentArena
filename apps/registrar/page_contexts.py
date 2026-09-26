@@ -82,6 +82,7 @@ def journal_list_context(user, request=None) -> dict:
 
     from apps.registrar import corrections as corrections_service
     from apps.registrar import journal_list_query as jlq
+    from apps.registrar import journal_list_schedule as jls
     from apps.registrar.models import SlotKind
 
     # Korrektorlar (İKT rəhbəri / admin / superadmin — journal.correct icazəsi) BÜTÜN
@@ -213,17 +214,12 @@ def journal_list_context(user, request=None) -> dict:
     if query:
         qs = jlq.apply_text_query(qs, query)
 
-    # `pk` sondan ƏLAVƏ tiebreaker-dir: eyni dövr YARADIŞ TARİXİ + eyni fənn kodlu
-    # (məs. bir fənn bir neçə qrupa açılıb) sətirlər arasında əvvəlki versiyada
-    # SIRA TƏYİN OLUNMAMIŞDI (yalnız iki açar) — Python siyahısını tam yükləyib
-    # sonra dilimləyəndə "təsadüfən" sabit qalırdı, DB-də LIMIT/OFFSET ilə
-    # səhifələnəndə (bu P2-18 düzəlişi) isə sorğu planı dəyişəndə fərqli ola
-    # bilərdi (sətir təkrarı/itməsi riski). `pk` yalnız bu NİZAMSIZ hallarda
-    # işə düşür — elan olunmuş iki açarın (dövr, fənn kodu) sırasını DƏYİŞMİR.
-    # Perf auditi 2026-09-13 F-14: `student_count` annotasiyası paginasiyadan
-    # ƏVVƏL idi (org-geniş: 150k enrollment JOIN + 11 115 GROUP BY, sonra LIMIT 20
-    # — 296 ms; COUNT da eyni JOIN ilə) → indi yalnız səhifənin açılışları üçün.
-    qs = qs.order_by("-period__start_date", "subject__code", "pk")
+    # `pk` — deterministik tiebreaker (LIMIT/OFFSET səhifələmədə sətir təkrarı/itməsi olmasın, P2-18);
+    # `student_count` yalnız səhifə üçün (F-14). Cədvəl sırası (sahib 2026-09-27): hazırda gedən /
+    # ən yaxın dərs ən yuxarıda — kimin cədvəli: seçilmiş müəllim, yoxsa istifadəçi (journal_list_schedule).
+    schedule_ref = jlq.int_or_none(selected_teacher) if selected_teacher else user.pk
+    occurrences = jls.next_occurrences(qs, schedule_ref, kind=selected_kind)
+    qs = jls.order_by_schedule(qs, occurrences, ("-period__start_date", "subject__code", "pk"))
 
     def _sel_label(choices, val, *, kind=""):
         """Seçilmiş dəyərin ADI — əvvəl hazır siyahıdan, tapılmasa BAZADAN.
@@ -268,6 +264,7 @@ def journal_list_context(user, request=None) -> dict:
     # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
     # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
     attach_kind_labels(page_offerings, selected_kind)
+    jls.attach(page_offerings, occurrences)
     querystring = ""
     if request is not None:
         params = request.GET.copy()

@@ -82809,3 +82809,70 @@ msgid ""
 msgstr ""
 "Bu dövr %(days)s gündən çox əvvəl bağlanıb — köhnə nəticənin köçürülməsi "
 "təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir."
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar ertəsi"
+msgstr "Bazar ertəsi"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə axşamı"
+msgstr "Çərşənbə axşamı"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə"
+msgstr "Çərşənbə"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə axşamı"
+msgstr "Cümə axşamı"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə"
+msgstr "Cümə"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Şənbə"
+msgstr "Şənbə"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar"
+msgstr "Bazar"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "İndi"
+msgstr "İndi"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bu gün"
+msgstr "Bu gün"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Sabah"
+msgstr "Sabah"
+
+msgctxt "registrar.journal"
+msgid "Dərs cədvəlinə görə növbəti dərs"
+msgstr "Dərs cədvəlinə görə növbəti dərs"
+
+msgctxt "registrar.journal"
+msgid ""
+"Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — "
+"dəyişə bilərsiniz."
+msgstr ""
+"Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — "
+"dəyişə bilərsiniz."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "«%(name)s» %(date)s tarixində «%(target)s» ilə birləşdirilib."
+msgstr "«%(name)s» %(date)s tarixində «%(target)s» ilə birləşdirilib."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək: «%(name)s» — «%(parent)s» tərkibində."
+msgstr "%(date)s tarixinədək: «%(name)s» — «%(parent)s» tərkibində."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək adı: «%(name)s»."
+msgstr "%(date)s tarixinədək adı: «%(name)s»."

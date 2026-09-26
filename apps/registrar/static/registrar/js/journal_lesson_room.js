@@ -12,6 +12,12 @@
  * keşlənir — kaskadın özü (korpus süzgəci) DƏYİŞMİR, dinamik olan yalnız
  * data mənbəyidir.
  *
+ * OTAQ YADDAŞI (sahib 2026-09-27): YENİ dərsdə bu qrupun EYNİ növ + həftə günü dərsində
+ * əvvəl seçilmiş otaq (yoxdursa eyni növün son otağı) avtomatik dolur — mənbə serverdə
+ * `lesson_rooms.remembered_rooms`, JSON adası `#jdRoomMemory`. Tarix/növ dəyişəndə
+ * yenidən hesablanır, AMMA müəllim korpus/otağı özü seçibsə daha toxunulmur.
+ * Yaddaş yoxdursa əvvəlki qayda: qrupun ixtisasına görə korpus defoltu.
+ *
  * QOŞULMA: journal_grid.js dərs modalını açanda `jd:lesson-modal-open` hadisəsini
  * göndərir (detail = redaktə datası, əlavə rejimində null). Bu modul yalnız ona
  * qulaq asır — yəni jurnal şəbəkəsi otaq məntiqindən xəbərsizdir və modul
@@ -118,11 +124,21 @@
         }
     }
 
+    // Proqram dəyişikliyi gedərkən true — bu vaxt gələn `change` müəllimin seçimi sayılmır
+    // (bootstrap-select vidceti də sintetik `change` göndərir, `isTrusted` fərqləndirmir).
+    var _applying = false;
+
     /** Dəyəri qoy + `data-bootstrap-select` vidcetini sinxronla. */
     function setSelectValue(select, value) {
         if (!select) return;
-        select.value = value || "";
-        select.dispatchEvent(new Event("change", { bubbles: true }));
+        var prev = _applying;
+        _applying = true;
+        try {
+            select.value = value || "";
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+        } finally {
+            _applying = prev;
+        }
     }
 
     function bind(modal) {
@@ -130,8 +146,57 @@
         if (!b || b.dataset.jdRoomBound === "1") return;
         b.dataset.jdRoomBound = "1";
         b.addEventListener("change", function () {
+            if (!_applying) modal.dataset.jdRoomTouched = "1";
             renderOptions(modal, b.value, "", setSelectValue);
         });
+        var r = roomSelect(modal);
+        if (r) {
+            r.addEventListener("change", function () {
+                if (!_applying) modal.dataset.jdRoomTouched = "1";
+            });
+        }
+        // Tarix / dərs tipi dəyişdi → yaddaşdan yenidən doldur (yalnız yeni dərsdə və toxunulmayıbsa).
+        modal.addEventListener("change", function (event) {
+            var t = event.target;
+            if (_applying || !t || !t.matches("[data-jd-lesson-date], [name='lesson_kind']")) return;
+            if (modal.dataset.jdRoomMode !== "add" || modal.dataset.jdRoomTouched === "1") return;
+            apply(modal, "");
+        });
+    }
+
+    function memory() {
+        var node = document.getElementById("jdRoomMemory");
+        if (!node) return {};
+        try {
+            var data = JSON.parse(node.textContent || "{}");
+            return data && typeof data === "object" ? data : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    /** Yeni dərs üçün yaddaşdakı otaq: əvvəl «növ|həftə günü», sonra yalnız «növ». */
+    function rememberedRoom(modal) {
+        var mem = memory();
+        var kindField = modal.querySelector("[name='lesson_kind']");
+        var kind = kindField ? kindField.value : "";
+        var dateField = modal.querySelector("[data-jd-lesson-date]");
+        var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateField ? dateField.value : "");
+        if (!kind) return "";
+        if (m) {
+            var iso = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay() || 7; // 1=B.e. … 7=Bazar
+            var exact = mem[kind + "|" + iso];
+            if (exact && roomById(exact)) return exact;
+        }
+        var byKind = mem[kind];
+        return byKind && roomById(byKind) ? byKind : "";
+    }
+
+    function showMemoryHint(modal, on) {
+        var memHint = modal.querySelector("[data-jd-room-memory-hint]");
+        var hint = modal.querySelector("[data-jd-room-hint]");
+        if (memHint) memHint.hidden = !on;
+        if (hint) hint.hidden = Boolean(on && memHint);
     }
 
     /** Korpus seçimində mövcud olan defolt (yoxdursa boş). */
@@ -149,15 +214,23 @@
      *  Əlavə rejimində (otaq yoxdur): qrupun ixtisasına görə korpus defoltu
      *  (`data-default-building`, sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
     function apply(modal, roomId) {
+        var fromMemory = "";
+        if (!roomId && modal.dataset.jdRoomMode === "add") {
+            fromMemory = rememberedRoom(modal);
+            roomId = fromMemory;
+        }
         var room = roomById(roomId || "");
         var building = room ? room.building : defaultBuilding(modal);
         setSelectValue(buildingSelect(modal), building);
         renderOptions(modal, building, roomId || "", setSelectValue);
+        showMemoryHint(modal, Boolean(fromMemory));
     }
 
     document.addEventListener("jd:lesson-modal-open", function (event) {
         var modal = event.target;
         if (!modal || !roomSelect(modal)) return; // otaq sahəsi yoxdursa heç nə etmə
+        modal.dataset.jdRoomMode = event.detail ? "edit" : "add";
+        delete modal.dataset.jdRoomTouched;
         ensureRooms(modal, function () {
             apply(modal, (event.detail && event.detail.room) || "");
             bind(modal);

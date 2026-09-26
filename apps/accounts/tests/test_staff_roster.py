@@ -104,7 +104,7 @@ class NameHelpersTest(SimpleTestCase):
 
     def test_username_seed_is_ascii(self):
         seed = roster.username_seed("Şəfiyeva Şəlalə Firdovsi")
-        self.assertEqual(seed, "s.sefiyeva")
+        self.assertEqual(seed, "selale.sefiyeva")  # layihə qaydası: ad.soyad (2026-09-27)
         self.assertTrue(seed.replace(".", "").isascii())
 
 

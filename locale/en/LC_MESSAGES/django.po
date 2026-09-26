@@ -83197,3 +83197,70 @@ msgstr ""
 "This period closed more than %(days)s days ago — transferring an old result "
 "requires a submission: a reason, a note and a scanned document are all "
 "mandatory."
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar ertəsi"
+msgstr "Monday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə axşamı"
+msgstr "Tuesday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Çərşənbə"
+msgstr "Wednesday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə axşamı"
+msgstr "Thursday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Cümə"
+msgstr "Friday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Şənbə"
+msgstr "Saturday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bazar"
+msgstr "Sunday"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "İndi"
+msgstr "Now"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Bu gün"
+msgstr "Today"
+
+msgctxt "registrar.journal_list_schedule"
+msgid "Sabah"
+msgstr "Tomorrow"
+
+msgctxt "registrar.journal"
+msgid "Dərs cədvəlinə görə növbəti dərs"
+msgstr "Next class according to the timetable"
+
+msgctxt "registrar.journal"
+msgid ""
+"Korpus və otaq bu qrupun eyni gün və tipdəki əvvəlki dərsindən götürülüb — "
+"dəyişə bilərsiniz."
+msgstr ""
+"Building and room were taken from this group's previous class of the same "
+"day and type — you can change them."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "«%(name)s» %(date)s tarixində «%(target)s» ilə birləşdirilib."
+msgstr "«%(name)s» was merged into «%(target)s» on %(date)s."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək: «%(name)s» — «%(parent)s» tərkibində."
+msgstr "Until %(date)s: «%(name)s» — part of «%(parent)s»."
+
+#, python-format
+msgctxt "accounts.structure_tree"
+msgid "%(date)s tarixinədək adı: «%(name)s»."
+msgstr "Name until %(date)s: «%(name)s»."

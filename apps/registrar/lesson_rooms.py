@@ -68,3 +68,30 @@ def resolve_lesson_room(organization, room_id):
         return organization.exam_rooms.filter(pk=room_id, is_active=True).first()
     except (ValueError, TypeError, ValidationError):  # yararsız UUID mətni
         return None
+
+
+def remembered_rooms(offering) -> dict:
+    """Müəllimin bu açılış üçün əvvəl seçdiyi otaqlar — «Yeni dərs» modalının defoltu (sahib 2026-09-27).
+
+    «Müəllim bir dəfə korpus və otağı seçibsə, bu qrupun eyni dərs günü üçün yadda qalsın,
+    gələn dəfə avtomatik dolu görünsün; istəsə dəyişə bilər.» Ayrıca «yaddaş» cədvəli YOXDUR —
+    mənbə dərslərin özüdür (``Lesson.room``), ona görə yaddaş hər dəyişiklikdə təbii yenilənir.
+
+    Qaytarır ``{"<növ>|<həftə günü 1..7>": room_id, "<növ>": room_id}`` — hər açar üçün ƏN SON
+    dərsin otağı (yalnız hələ aktiv otaqlar). JS əvvəl «növ + gün»ü, tapılmasa «növ»ü götürür."""
+    rows = (
+        offering.lessons.filter(room__isnull=False, room__is_active=True)
+        .order_by("-date", "-created_at")
+        .values_list("kind", "date", "room_id")
+    )
+    memory: dict = {}
+    for kind, day, room_id in rows:
+        memory.setdefault(f"{kind}|{day.isoweekday()}", str(room_id))
+        memory.setdefault(kind, str(room_id))
+    return memory
+
+
+def remembered_room(offering, kind, day):
+    """Cədvəldən «Aktivləşdir» ilə açılan dərs üçün: slotun otağı tapılmayanda eyni növ + gün yaddaşı."""
+    room_id = remembered_rooms(offering).get(f"{kind}|{day.isoweekday()}")
+    return resolve_lesson_room(offering.organization, room_id) if room_id else None
