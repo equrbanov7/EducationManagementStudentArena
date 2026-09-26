@@ -13,6 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.organizations.structure_plan import apply_structure_plan, load_plan
+from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 
@@ -34,7 +35,9 @@ class Command(BaseCommand):
             plan = load_plan(options["plan"])
         except (OSError, ValueError) as exc:
             raise CommandError(f"Plan oxunmadı: {exc}") from exc
-        with rls_worker_atomic():
+        # bypass_rls: app rolu NOBYPASSRLS-dir — tenant konteksti olmadan OrgUnit sətirləri GÖRÜNMÜR
+        # (prod dry-run 2026-09-27: 52 vahidin hamısı «yaradılır» çıxırdı). Digər prod əmrləri ilə eyni.
+        with rls_worker_atomic(), bypass_rls():
             organization = Organization.objects.filter(slug=options["org"]).first()
             if organization is None:
                 raise CommandError(f"Təşkilat tapılmadı: {options['org']}")
