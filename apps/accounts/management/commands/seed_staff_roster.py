@@ -30,6 +30,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.accounts.services import staff_roster as roster
+from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 _KIND_TEACHER = "teacher"
@@ -76,7 +77,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # RLS transaction-pooling təhlükəsizliyi (FAZA 4/Task 1): request-dən kənar
         # bütün DB işi bir worker-atomic sərhədi içindədir.
-        with rls_worker_atomic():
+        # bypass_rls: app rolu NOBYPASSRLS-dir — onsuz üzvlük/vahid sətirləri görünmür və hər kəs
+        # «yeni» sayılıb dublikat hesab yaradılardı (2026-09-27 prod dry-run-da aşkarlandı).
+        with rls_worker_atomic(), bypass_rls():
             self._run(**options)
 
     def _run(self, **options):
