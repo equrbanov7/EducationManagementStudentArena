@@ -88,7 +88,11 @@ jobs:
           set -euo pipefail
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
           case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-…" >&2; exit 1;; esac
-          gh release download "$ROSTER_TAG" --repo "$GITHUB_REPOSITORY" -p roster.xlsx.enc -D "$RUNNER_TEMP" --clobber
+          # Serverdə `gh` YOXDUR — release asset-i birbaşa yüklənir (şifrəlidir; token private repo üçün).
+          umask 077
+          curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/roster.xlsx.enc" \
+            -o "$RUNNER_TEMP/roster.xlsx.enc"
           openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
             -in "$RUNNER_TEMP/roster.xlsx.enc" -out "$RUNNER_TEMP/roster.xlsx"
           docker cp "$RUNNER_TEMP/roster.xlsx" "$APP_CONTAINER:/tmp/staff_roster.xlsx"
