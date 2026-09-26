@@ -95,7 +95,9 @@ jobs:
             -o "$RUNNER_TEMP/roster.xlsx.enc"
           openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
             -in "$RUNNER_TEMP/roster.xlsx.enc" -out "$RUNNER_TEMP/roster.xlsx"
-          docker cp "$RUNNER_TEMP/roster.xlsx" "$APP_CONTAINER:/tmp/staff_roster.xlsx"
+          # `docker cp` runner UID-sini saxlayır (umask 077 → app istifadəçisi oxuya bilmir) — stdin ilə
+          # konteynerin ÖZ istifadəçisi yazır.
+          docker exec -i "$APP_CONTAINER" sh -c 'umask 077; cat > /tmp/staff_roster.xlsx' < "$RUNNER_TEMP/roster.xlsx"
           rm -f "$RUNNER_TEMP/roster.xlsx" "$RUNNER_TEMP/roster.xlsx.enc"
       - name: 🧰 Run
         run: |
