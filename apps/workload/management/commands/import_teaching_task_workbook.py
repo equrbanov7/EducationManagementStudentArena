@@ -10,7 +10,7 @@ qeydiyyatları yaranır ki, müəllim dərhal sillabus yazıb jurnal apara bilsi
 Dry-run DEFOLTDUR; ``--apply`` yazır. İdempotentdir: mövcud sətir/təyinat/açılış
 təkrarlanmır. Hesabat CSV ``--report`` qovluğuna yazılır (sirr yoxdur).
 
-    manage.py import_teaching_task_workbook --file scripts/data/qku_tapsiriq_2026_2027.xlsx \\
+    manage.py import_teaching_task_workbook --file backups/data_private/qku_tapsiriq_2026_2027.xlsx \\
         --org qku --year 2026/2027 --actor superadmin --report /tmp/tapsiriq
     ... --apply
 """
