@@ -211,3 +211,12 @@ docs/audits/*/evidence/coverage*.json
 # QA klon DB parolu (audit 2026-09-13 F-03) — tracked launch.json-dan çıxarıldı
 .claude/dev-clone.env
 .claude/staging.env
+
+# Şəxsi məlumatlı idxal faylları (FİN, pasport, telefon, ad siyahıları) — HEÇ VAXT repoya düşmür
+# (2026-09-27: public repoda ATİS faylı tapıldı, tarixçədən silindi). Lokal nüsxə: backups/data_private/.
+scripts/data/*.xlsx
+scripts/data/*.xls
+scripts/data/*.csv
+!scripts/data/qku_legacy_rooms.csv
+.env
+db.sqlite3
