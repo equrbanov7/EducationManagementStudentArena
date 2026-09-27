@@ -113,6 +113,8 @@ regexes = [
     '''^replace-with-a-strong-password$''',
     '''^password$''',
     '''^emsarena$''',
+    # 2026-09-27 filter-repo əvəzləyiciləri (real parolların yerinə yazılıb).
+    '''^Qku-Redacted-(Secret|Pw)-[0-9]+$''',
 ]
 # 2026-09-27: QA klon parolları və köhnə e-poçt parolu git TARİXÇƏSİNDƏN silindi (filter-repo,
 # repo private edildi) — əvvəlki SHA-ya bağlı `commits` istisnası artıq lazım deyil və tarix yenidən
