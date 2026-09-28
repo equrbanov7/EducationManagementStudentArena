@@ -25,12 +25,8 @@ BASE = Path(settings.BASE_DIR)
 
 _NATIVE_ALERT = re.compile(r"(?<![\w.$])(?:window\.)?alert\(")
 
-# Heç bir şablonun yükləmədiyi (ölü) fayllar — ayrıca silinməlidir, burada toxunulmur.
-ALERT_ALLOWLIST = {
-    "apps/assignments/static/assignment/js/assignment_modal.js": "ölü fayl — heç bir şablon yükləmir",
-    "apps/assignments/static/assignment/js/detail.js": "ölü fayl — heç bir şablon yükləmir",
-    "apps/projects/static/projects/js/review_submissions.js": "ölü fayl — heç bir şablon yükləmir",
-}
+# Allowlist boşdur: əvvəl burada olan 3 ölü fayl (heç bir şablon yükləmirdi) 2026-09-28 silindi.
+ALERT_ALLOWLIST: dict[str, str] = {}
 
 ALERT_SCOPES = (
     "apps/labs/static",

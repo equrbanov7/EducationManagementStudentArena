@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.translation import pgettext
 
 from apps.registrar import integrity, services
 from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
@@ -29,16 +30,20 @@ def _validate_scope(record, new_group, period):
     """Reject cross-tenant references before any academic row is changed."""
     organization_id = record.organization_id
     if getattr(new_group, "organization_id", None) != organization_id:
-        raise ValidationError("Yeni qrup tələbənin təşkilatına aid deyil.")
+        raise ValidationError(pgettext("registrar.transfer", "Yeni qrup tələbənin təşkilatına aid deyil."))
     if getattr(new_group, "unit_type", None) != OrgUnitType.GROUP:
-        raise ValidationError("Yeni struktur vahidi akademik qrup olmalıdır.")
+        raise ValidationError(pgettext("registrar.transfer", "Yeni struktur vahidi akademik qrup olmalıdır."))
     if period is not None and getattr(period, "organization_id", None) != organization_id:
-        raise ValidationError("Akademik dövr tələbənin təşkilatına aid deyil.")
+        raise ValidationError(pgettext("registrar.transfer", "Akademik dövr tələbənin təşkilatına aid deyil."))
     if period is None:
         if record.organization.academic_periods.filter(is_current=True, is_active=True).exists():
-            raise ValidationError("Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir.")
+            raise ValidationError(
+                pgettext("registrar.transfer", "Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir.")
+            )
     elif not getattr(period, "is_current", False) or not getattr(period, "is_active", False):
-        raise ValidationError("Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər.")
+        raise ValidationError(
+            pgettext("registrar.transfer", "Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər.")
+        )
 
 
 def _audit(record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids):
