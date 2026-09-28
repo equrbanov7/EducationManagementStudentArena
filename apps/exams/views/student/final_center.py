@@ -46,6 +46,7 @@ from apps.exams.services.final_center import (
     ERROR_RATE_LIMITED,
     HEARTBEAT_INTERVAL_SECONDS,
     TicketStateError,
+    admission_block_reason,
     begin_attempt_for_ticket,
     claim_student_pin_entry,
     claim_ticket_pin_entry,
@@ -340,8 +341,13 @@ def _handle_student_pin_login(request, username, raw_pin):
     with bypass_rls():
         can_start, reason = exam.can_user_start(student, code=raw_pin)
         has_active_questions = exam.questions.filter(is_active=True).exists()
+        # Audit 2026-09-28 EXA-04: qayıb limiti buraxılış qapısı PIN yolunda da
+        # (login-dən ƏVVƏL, credential-scoped bypass daxilində) — FAIL-CLOSED.
+        admission_reason = admission_block_reason(student, exam) if can_start else None
     if not can_start:
         return _render_login(request, error=reason or _entry_error_message(None), username=(username or "").strip())
+    if admission_reason:
+        return _render_login(request, error=admission_reason, username=(username or "").strip())
 
     # Sual təyin olunmayıbsa imtahanı BAŞLATMA — tələbəni ümumi imtahan
     # siyahısına (exams/available) atmaq olmaz; giriş səhifəsində xəbərdarlıq göstər.

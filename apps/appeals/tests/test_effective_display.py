@@ -55,7 +55,12 @@ class EffectiveDisplayTests(TestCase):
             is_active=True,
         )
         self.exam = Exam.objects.create(
-            title="ED Test", author=self.teacher, organization=self.org, exam_type="test", is_active=True
+            title="ED Test",
+            author=self.teacher,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
+            is_active=True,
         )
         self.q1 = ExamQuestion.objects.create(exam=self.exam, order=1, text="Q1", points=2)
         ExamQuestionOption.objects.create(question=self.q1, label="A", text="a", is_correct=True)

@@ -296,14 +296,48 @@ def apply_bonus_to_test_result(result, bonus):
 # ---------------------------------------------------------------------------
 # Köməkçilər
 # ---------------------------------------------------------------------------
+def delivered_question_points(answer, question=None):
+    """Sualın ÇATDIRILMA anındakı bal tavanı (``question_snapshot``) — TAM ədəd, ≥ 1.
+
+    Audit 2026-09-28 EXA-08: apellyasiya clamp-i canlı ``question.points``-dən
+    oxunurdu — müəllif sonradan sualın balını dəyişsə keçmiş cəhdin tavanı da
+    dəyişirdi. Manual grading (``answer_max_points``) və nəticə hesablanması
+    (``result_calculation``) snapshot-dan oxuyur; apellyasiya da eyni qaydaya
+    tabedir. Snapshot boşdursa (köhnə cəhdlər) canlı suala düşülür."""
+    snapshot = getattr(answer, "question_snapshot", None) if answer is not None else None
+    points = snapshot.get("points") if isinstance(snapshot, dict) else None
+    if points is None:
+        live_question = question if question is not None else getattr(answer, "question", None)
+        points = getattr(live_question, "points", 1)
+    try:
+        return max(1, int(points))
+    except (TypeError, ValueError):
+        return 1
+
+
 def _question_already_correct(answer, question):
-    """Test sualı student üçün artıq düzgün sayılırmı (option-əsaslı)."""
+    """Test sualı student üçün artıq düzgün sayılırmı (option-əsaslı).
+
+    Audit 2026-09-28 EX28-11: yoxlama ÇATDIRILAN açarla aparılır — baza bal
+    (``result_calculation``) snapshot açarından hesablanır, bu yoxlama isə canlı
+    açarı oxuyurdu; açar sonradan dəyişəndə düzgün cavaba ikinci bonus və ya
+    səhv cavaba «artıq düzgündür» (bonus yox) qərarı çıxırdı. Snapshot / donmuş
+    seçim yoxdursa (köhnə cəhdlər) canlı dəyərə düşülür."""
     if answer is None:
         return False
-    selected = {option.id for option in answer.selected_options.all()}
+    frozen_selection = getattr(answer, "selected_option_ids_snapshot", None)
+    if frozen_selection is not None:
+        selected = {int(option_id) for option_id in frozen_selection}
+    else:
+        selected = {option.id for option in answer.selected_options.all()}
     if not selected:
         return False
-    correct = {option.id for option in question.options.all() if option.is_correct}
+    snapshot = getattr(answer, "question_snapshot", None)
+    snapshot_options = snapshot.get("options") if isinstance(snapshot, dict) else None
+    if snapshot_options:
+        correct = {int(opt["id"]) for opt in snapshot_options if opt.get("is_correct")}
+    else:
+        correct = {option.id for option in question.options.all() if option.is_correct}
     return bool(correct and selected == correct)
 
 
@@ -350,6 +384,7 @@ __all__ = [
     "appeal_result_hidden_from_student",
     "appeal_score_state",
     "apply_bonus_to_test_result",
+    "delivered_question_points",
     "effective_test_score",
     "recompute_appeal_status",
     "reject_appeal_item",

@@ -1,0 +1,27 @@
+{% load i18n %}
+{% comment %}
+Yekun imtahan cəhd tarixçəsi + apellyasiya sətirləri (Audit 2026-09-28 EXA-03, sahibin 2026-09-07 memo-su).
+Data: apps/registrar/exam_attempt_history.py (``attempts`` = həmin modulun sətirləri).
+Rəsmi = ən son bitmiş final cəhdi; əvvəlkilər «ləğv olundu», balı isə itmir.
+İstifadə: {% include "registrar/partials/_exam_attempt_history.html" with attempts=row.attempts %}
+{% endcomment %}
+{% if attempts %}
+<span class="jd2-attempts">
+    {% for attempt in attempts %}
+    <span class="jd2-attempt {% if attempt.is_official %}is-official{% else %}is-superseded{% endif %}">
+        {{ attempt.label }} {% trans "cəhd" context "registrar.journal" %}:
+        <b>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</b>
+        · {% if attempt.is_official %}{% trans "rəsmi" context "registrar.journal" %}{% else %}{% trans "ləğv olundu" context "registrar.journal" %}{% endif %}
+        {% if attempt.finished_at %}· {{ attempt.finished_at|date:"d.m.Y H:i" }}{% endif %}
+    </span>
+    {% for appeal in attempt.appeals %}
+    <span class="jd2-attempt is-appeal">
+        {% trans "Apellyasiya" context "registrar.journal" %}: {{ appeal.status_label }}
+        {% if appeal.delta_points %}· {% blocktrans trimmed context "registrar.journal" with delta=appeal.delta_points|floatformat:"-2" %}+{{ delta }} bal{% endblocktrans %}{% endif %}
+        {% if appeal.reviewer_name %}· {{ appeal.reviewer_name }}{% endif %}
+        · {% if appeal.reviewed_at %}{{ appeal.reviewed_at|date:"d.m.Y H:i" }}{% else %}{{ appeal.created_at|date:"d.m.Y H:i" }}{% endif %}
+    </span>
+    {% endfor %}
+    {% endfor %}
+</span>
+{% endif %}

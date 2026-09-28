@@ -14,6 +14,7 @@ asılılıq: decisions → scoring).
 import logging
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -28,9 +29,10 @@ from apps.appeals.constants import (
     APPEAL_STATUS_REJECTED,
     APPEAL_STATUS_UNDER_REVIEW,
 )
-from apps.appeals.models import AppealItem, ScoreAdjustment
+from apps.appeals.models import Appeal, AppealItem, ScoreAdjustment
 
-from .scoring import _accept_bonus_points, _question_already_correct, effective_test_score
+from .scoring import _accept_bonus_points, _question_already_correct, delivered_question_points, effective_test_score
+from .state_machine import assert_transition, can_transition
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +134,34 @@ def _write_grade_event(attempt, *, question, grader, old_score, new_score, max_p
     )
 
 
+def _lock_appeal(appeal_id):
+    """Apellyasiya başlığını ``FOR UPDATE`` ilə kilidlə (Audit 2026-09-28 EXA-06).
+
+    Kilid sırası HƏMİŞƏ ``Appeal`` → ``AppealItem``-dir: eyni apellyasiyaya
+    paralel baxan iki reviewer ardıcıllaşır və başlıq statusu son (commit
+    olunmuş) item statuslarından hesablanır — əks halda başlıq ``under_review``-da
+    ilişib qalır, tələbə bildirişi də getmirdi."""
+    return Appeal.objects.select_for_update(of=("self",)).get(pk=appeal_id)
+
+
+def _ensure_attempt_graded(attempt, exam):
+    """Yazılı/praktiki cəhd yoxlanmayıbsa qərar verilmir (Audit 2026-09-28 EXA-02).
+
+    Yoxlanmamış cəhddə ``answer.teacher_score`` boşdur — qəbul +1-i «0 + 1» kimi
+    yazır, ``attempt.teacher_score`` 1 olur və jurnala yarımçıq (F) nəticə
+    düşürdü. Yaratma qapısı (``window.appeal_window_start``) yeni belə müraciəti
+    bağlayır; bu yoxlama köhnə (qapıdan əvvəl yaranmış) müraciətlər üçündür."""
+    if getattr(exam, "exam_type", None) == "test":
+        return
+    if not getattr(attempt, "checked_by_teacher", False):
+        raise ValidationError(
+            pgettext(
+                "appeals.service.decision.error",
+                "İmtahan hələ yoxlanılmayıb — apellyasiyaya yoxlamadan sonra qərar verilə bilər.",
+            )
+        )
+
+
 def _schedule_journal_sync(attempt, *, actor):
     """Qərardan sonra rəsmi qiyməti (elektron jurnal) yenilə.
 
@@ -160,14 +190,16 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     Eyni item üçün artıq aktiv düzəliş varsa, bal təkrar ARTIRILMIR — yalnız
     status/cavab yenilənir.
     """
+    _lock_appeal(item.appeal_id)
     item = (
-        AppealItem.objects.select_for_update()
+        AppealItem.objects.select_for_update(of=("self",))
         .select_related("appeal", "appeal__attempt", "appeal__attempt__exam", "question")
         .get(pk=item.pk)
     )
     appeal = item.appeal
     attempt = appeal.attempt
     exam = attempt.exam
+    _ensure_attempt_graded(attempt, exam)
     question = item.question
     answer = item.answer or attempt.answers.filter(question=question).first()
 
@@ -185,7 +217,8 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     previous_score = None
     new_score = None
     previous_answer_score = None
-    question_points = Decimal(str(question.points or 1))
+    # Audit 2026-09-28 EXA-08: tavan ÇATDIRILAN snapshot-dan (canlı sual balı yox).
+    question_points = Decimal(delivered_question_points(answer, question))
     bonus = _accept_bonus_points()  # sabit +1 (awarded_points nəzərə alınmır)
 
     # Eyni sual bir attempt üzrə yalnız BİR dəfə kreditlənir. Yaratma
@@ -297,7 +330,8 @@ def reject_appeal_item(item, *, reviewer, response_text="", request=None):
     Bir AppealItem-i rədd edir. Əvvəl qəbul olunub bal verilibsə, həmin düzəliş
     revert olunur (bal geri alınır). Bal dəyişmir (rədd halında).
     """
-    item = AppealItem.objects.select_for_update().select_related("appeal").get(pk=item.pk)
+    _lock_appeal(item.appeal_id)
+    item = AppealItem.objects.select_for_update(of=("self",)).select_related("appeal").get(pk=item.pk)
     revert_item_adjustment(item, reviewer=reviewer, request=request)
     _mark_item_resolved(item, APPEAL_ITEM_STATUS_REJECTED, reviewer, response_text)
     recompute_appeal_status(item.appeal, reviewer=reviewer)
@@ -322,13 +356,16 @@ def revert_item_adjustment(item, *, reviewer=None, request=None):
 
     attempt = adjustment.attempt
     exam = attempt.exam
-    question_points = int(getattr(adjustment.question, "points", 1) or 1) if adjustment.question_id else 1
+    answer = None
+    if adjustment.question_id:
+        answer = item.answer or attempt.answers.filter(question_id=adjustment.question_id).first()
+    # Audit 2026-09-28 EXA-08: ledger tavanı ÇATDIRILAN snapshot-dan.
+    question_points = delivered_question_points(answer, adjustment.question) if adjustment.question_id else 1
     delta = int(adjustment.delta_points or 0)
 
     if getattr(exam, "exam_type", None) != "test" and adjustment.question_id:
         from apps.exams.public import calculate_attempt_score
 
-        answer = item.answer or attempt.answers.filter(question_id=adjustment.question_id).first()
         if answer is not None:
             restore = adjustment.previous_answer_score
             previous_answer_total = answer.teacher_score
@@ -372,8 +409,16 @@ def recompute_appeal_status(appeal, *, reviewer=None):
     - qarışıq (accepted + rejected, pending yox) → partially_accepted
     - hələ pending varsa → under_review (qərar başlayıbsa) / pending
     Hamısı həll olunduqda reviewed_at/reviewed_by qeyd olunur.
+
+    Audit 2026-09-28 EXA-06: başlıq sətri ``FOR UPDATE`` ilə kilidlənir (item
+    statusları kilid ALTINDA oxunur) və keçid ``state_machine`` ilə yoxlanır.
+    Çağıran ``appeal`` obyekti də yeni vəziyyətlə sinxronlaşdırılır.
     """
-    statuses = list(appeal.items.values_list("status", flat=True))
+    if not transaction.get_connection().in_atomic_block:
+        with transaction.atomic():
+            return recompute_appeal_status(appeal, reviewer=reviewer)
+    locked = _lock_appeal(appeal.pk)
+    statuses = list(AppealItem.objects.filter(appeal_id=locked.pk).values_list("status", flat=True))
     if not statuses:
         return appeal
 
@@ -381,7 +426,7 @@ def recompute_appeal_status(appeal, *, reviewer=None):
     has_accepted = any(s == APPEAL_ITEM_STATUS_ACCEPTED for s in statuses)
     has_rejected = any(s == APPEAL_ITEM_STATUS_REJECTED for s in statuses)
 
-    previous_status = appeal.status
+    previous_status = locked.status
     update_fields = ["status", "updated_at"]
     fully_resolved = False
 
@@ -397,22 +442,41 @@ def recompute_appeal_status(appeal, *, reviewer=None):
         new_status = APPEAL_STATUS_REJECTED
         fully_resolved = True
 
-    appeal.status = new_status
+    _assert_derived_transition(previous_status, new_status)
+    locked.status = new_status
     if fully_resolved:
-        appeal.reviewed_at = timezone.now()
+        locked.reviewed_at = timezone.now()
         update_fields.append("reviewed_at")
         if reviewer is not None:
-            appeal.reviewed_by = reviewer
+            locked.reviewed_by = reviewer
             update_fields.append("reviewed_by")
-    appeal.save(update_fields=update_fields)
+    locked.save(update_fields=update_fields)
+    for field in ("status", "reviewed_at", "reviewed_by_id", "updated_at"):
+        setattr(appeal, field, getattr(locked, field))
 
     # Tələbəyə bildiriş — yalnız status İLK DƏFƏ final vəziyyətə keçəndə
     # (pending/under_review → accepted/rejected/partially_accepted). Müəllim
     # 5 dəqiqəlik pəncərədə qərarı redaktə edəndə dublikat bildiriş yaranmır.
     final_statuses = {APPEAL_STATUS_ACCEPTED, APPEAL_STATUS_REJECTED, APPEAL_STATUS_PARTIALLY_ACCEPTED}
     if fully_resolved and previous_status not in final_statuses:
-        _notify_student_appeal_resolved(appeal)
+        _notify_student_appeal_resolved(locked)
     return appeal
+
+
+def _assert_derived_transition(previous_status, new_status):
+    """Törəmə başlıq statusunu ``APPEAL_STATUS_TRANSITIONS`` ilə yoxla (EXA-06).
+
+    Başlıq item-lərdən törədildiyi üçün bir sorğuda ``pending → accepted`` və ya
+    (5 dəqiqəlik redaktədə) ``accepted → partially_accepted`` kimi sıçrayış
+    olur — bu, aradakı gizli ``under_review`` addımı ilə icazəlidir. Cədvəldə
+    heç bir yolu olmayan keçid (məs. yekun → ``pending``) ``InvalidAppealTransition``
+    qaldırır və qərar tranzaksiyası geri qayıdır."""
+    if can_transition(previous_status, new_status):
+        return
+    if can_transition(previous_status, APPEAL_STATUS_UNDER_REVIEW):
+        assert_transition(APPEAL_STATUS_UNDER_REVIEW, new_status)
+        return
+    assert_transition(previous_status, new_status)
 
 
 def _notify_student_appeal_resolved(appeal):

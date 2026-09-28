@@ -34,6 +34,29 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
     {% include "partials/ems_ui/_content_header.html" with header_title=appeal_page_title header_subtitle=exam.title header_actions_include="appeals/partials/_create_header_actions.html" %}
 
     {% if appeal_window_closed %}
+    {% if appeal_block_reason == "not_graded" %}
+    {# Audit 2026-09-28 EXA-02: yazılı/praktiki iş hələ yoxlanmayıb — pəncərə yoxlamadan sonra açılır. #}
+    <div class="ems-banner ems-banner--info appeal-banner" role="status">
+        <i class="fas fa-hourglass-half appeal-banner__icon" aria-hidden="true"></i>
+        <div>
+            <div class="ems-banner__title">{% trans "İmtahanınız hələ yoxlanılmayıb" context "appeals.template" %}</div>
+            <div class="ems-banner__body">
+                {% blocktrans trimmed context "appeals.template" with days=appeal_window_days %}
+                    Apellyasiya işiniz yoxlanıb nəticə açıqlandıqdan sonra {{ days }} gün ərzində göndərilə bilər.
+                {% endblocktrans %}
+            </div>
+        </div>
+    </div>
+    {% elif appeal_block_reason == "category" %}
+    {# Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final imtahanlarına. #}
+    <div class="ems-banner ems-banner--info appeal-banner" role="status">
+        <i class="fas fa-circle-info appeal-banner__icon" aria-hidden="true"></i>
+        <div>
+            <div class="ems-banner__title">{% trans "Bu imtahan növü üzrə apellyasiya verilmir" context "appeals.template" %}</div>
+            <div class="ems-banner__body">{% trans "Apellyasiya yalnız aralıq (midterm) və yekun (final) imtahanları üzrə verilir." context "appeals.template" %}</div>
+        </div>
+    </div>
+    {% else %}
     {# ── Apellyasiya müddəti bitib — read-only baxış (UX) ──────────────── #}
     <div class="ems-banner ems-banner--warning appeal-banner" role="status">
         <i class="fas fa-hourglass-end appeal-banner__icon" aria-hidden="true"></i>
@@ -54,6 +77,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
             </div>
         </div>
     </div>
+    {% endif %}
 
     {% if attempt_appeals %}
     <section class="appeal-closed-appeals">
