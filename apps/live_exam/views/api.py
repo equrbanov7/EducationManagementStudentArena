@@ -36,9 +36,11 @@ from apps.live_exam.transport import (
     broadcast_host,
     broadcast_players,
     build_answer_progress_payload,
+    build_answer_saved_payload,
     build_player_reveal_payload,
     build_reveal_payload,
     parse_answer_submission,
+    public_player_answer,
 )
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
@@ -157,7 +159,11 @@ def live_state_json(request, pin):
         data["answered_count"] = session.answers.filter(question_id=eq.id).values("player_id").distinct().count()
         data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
         if player is not None:
-            data["player_answer"] = serialize_player_question_result(session, eq.id, player.id)
+            # EX28-10: açıq sual ərzində yalnız «cavab saxlanıb» (düzlük reveal-də).
+            data["player_answer"] = public_player_answer(
+                serialize_player_question_result(session, eq.id, player.id),
+                revealed=session.state == LiveSession.STATE_REVEAL,
+            )
 
         data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
         if session.state == LiveSession.STATE_REVEAL:
@@ -230,11 +236,8 @@ def live_answer_submit(request, pin):
 
     with bypass_rls():
         session = get_object_or_404(LiveSession, pin=pin)
-        answer_payload = {
-            "type": "answer_saved",
-            "question_id": question_id,
-            **(result.get("answer") or {}),
-        }
+        # EX28-10: düzlük/bal reveal-ə qədər oyunçuya qaytarılmır.
+        answer_payload = build_answer_saved_payload(result)
 
         progress = result.get("progress") or get_answer_progress(pin=pin, question_id=question_id)
         progress_payload = build_answer_progress_payload(

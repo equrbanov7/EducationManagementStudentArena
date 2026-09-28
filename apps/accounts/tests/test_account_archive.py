@@ -239,19 +239,18 @@ class ArchivedAccountTests(TestCase):
         self.assertNotIn("_auth_user_id", client.session)
 
     def test_the_otp_login_endpoint_never_issues_a_code_for_an_archived_account(self):
-        """OTP GİRİŞ yoludur — parolsuz keçid burada da bağlı olmalıdır."""
+        """OTP GİRİŞ yolu idi — Audit 2026-09-28 SA-02 ilə tam silinib (404, məktub yoxdur)."""
 
         from django.core import mail
 
         archived = self._archived_user()
         mail.outbox = []
         response = Client().post(
-            reverse("accounts:send_otp_api"),
+            "/accounts/send-otp/",
             data={"email": archived.email, "purpose": "login"},
             content_type="application/json",
         )
-        # Səssiz 202 (email sızdırılmır) + HEÇ BİR məktub.
-        self.assertEqual(response.status_code, 202)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(mail.outbox, [])
 
     def test_password_reset_never_reaches_an_archived_account(self):

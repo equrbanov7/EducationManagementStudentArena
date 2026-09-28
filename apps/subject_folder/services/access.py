@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from ..constants import ORG_VIEW_PERMISSIONS, STAFF_VIEW_PERMISSIONS, FolderStatus
+from ..constants import ORG_VIEW_PERMISSIONS, STAFF_VIEW_PERMISSIONS, FolderStatus, SubmissionStatus
 from ..errors import FolderError
 from . import lookups
 
@@ -173,6 +173,10 @@ def can_view_submission(user, submission) -> bool:
         return False
     if submission.student_id == user.pk:
         return True
+    # Audit 2026-09-28 SF-2: qaralama (``draft``) yalnız tələbənin özünündür —
+    # UI qaralamanın gizli olduğunu vəd edir; müəllim/əməkdaş id ilə aça bilməz.
+    if submission.status == SubmissionStatus.DRAFT:
+        return False
     assignment = submission.assignment
     if can_review_assignment(user, assignment):
         return True

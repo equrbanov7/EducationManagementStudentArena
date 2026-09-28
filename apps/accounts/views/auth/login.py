@@ -23,6 +23,7 @@ from ._shared import (
     _get_auth_device_id,
     _ip_rate_limited_and_recorded,
     _login_limit_keys,
+    _note_failed_login_ip,
     _sanitize_auth_redirect_target,
     _superadmin_escape_under_login_limit,
 )
@@ -255,6 +256,7 @@ class CustomLoginView(LoginView):
 
         for rate_spec, scope, *key_parts in limit_keys:
             record_rate_limit_hit(scope, rate_spec, *key_parts)
+        _note_failed_login_ip(request, username)
         return self.form_invalid(form)
 
     def _wrong_portal_message(self):

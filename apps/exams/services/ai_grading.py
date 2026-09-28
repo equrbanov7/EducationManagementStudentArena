@@ -353,13 +353,10 @@ def _gemini_generate_content(*, model_name: str, api_key: str, prompt: str, imag
             }
         )
 
+    # Audit 2026-09-28 SA-06: açar `x-goog-api-key` başlığında, URL-də deyil.
     response = requests.post(
-        (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{quote(model_name, safe='')}:"
-            "generateContent"
-            f"?key={api_key}"
-        ),
+        f"https://generativelanguage.googleapis.com/v1beta/models/{quote(model_name, safe='')}:generateContent",
+        headers={"x-goog-api-key": api_key},
         json={"contents": [{"parts": parts}]},
         timeout=_REQUEST_TIMEOUT_SECONDS,
     )

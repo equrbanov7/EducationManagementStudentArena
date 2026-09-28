@@ -10,6 +10,7 @@ Contains:
 """
 
 import logging
+from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -63,6 +64,38 @@ def _local_input_value(value):
     if not value:
         return ""
     return timezone.localtime(value).strftime("%Y-%m-%dT%H:%M")
+
+
+_MAX_ATTEMPTS_CEILING = 1000
+_MAX_SCORE_CEILING = Decimal("9999.99")  # DecimalField(max_digits=6, decimal_places=2)
+
+
+def _parse_limits(post, *, default_attempts, default_score):
+    """``max_attempts`` / ``max_score`` — təhlükəsiz parse (Audit 2026-09-28 SA-10).
+
+    Əvvəl POST dəyəri xam modelə yazılırdı: rəqəm olmayan dəyər ``save()``-də
+    ``ValueError`` → 500 verirdi. İndi boş dəyər defolta düşür, yararsız dəyər
+    ``ValueError`` qaldırır (view 400 JSON qaytarır).
+    """
+    raw_attempts = str(post.get("max_attempts") or "").strip()
+    raw_score = str(post.get("max_score") or "").strip().replace(",", ".")
+    max_attempts = int(raw_attempts) if raw_attempts else default_attempts
+    try:
+        max_score = Decimal(raw_score) if raw_score else Decimal(str(default_score))
+    except InvalidOperation as exc:
+        raise ValueError("invalid max_score") from exc
+    if not (1 <= max_attempts <= _MAX_ATTEMPTS_CEILING):
+        raise ValueError("max_attempts out of range")
+    if not max_score.is_finite() or not (Decimal("0") < max_score <= _MAX_SCORE_CEILING):
+        raise ValueError("max_score out of range")
+    return max_attempts, max_score.quantize(Decimal("0.01"))
+
+
+def _invalid_limits_response():
+    return JsonResponse(
+        {"success": False, "error": pgettext("assignments.views.message", "invalid_attempts_or_score")},
+        status=400,
+    )
 
 
 def _clean_status(raw_value, fallback):
@@ -124,6 +157,11 @@ def create_assignment(request, course_id):
         )
 
     try:
+        max_attempts, max_score = _parse_limits(request.POST, default_attempts=1, default_score=100)
+    except ValueError:
+        return _invalid_limits_response()
+
+    try:
         # Assignment yarat
         assignment = Assignment.objects.create(
             course=course,
@@ -131,8 +169,8 @@ def create_assignment(request, course_id):
             description=request.POST.get("description", ""),
             start_date=parse_form_datetime(request.POST.get("start_date")),
             deadline=parse_form_datetime(request.POST.get("deadline")),
-            max_attempts=request.POST.get("max_attempts", 1),
-            max_score=request.POST.get("max_score", 100),
+            max_attempts=max_attempts,
+            max_score=max_score,
             status=_clean_status(request.POST.get("status"), "active"),
         )
 
@@ -229,15 +267,22 @@ def edit_assignment(request, pk):
     # POST - Yenilə
     # ─────────────────────────────────────────────────────────────────────────
     try:
+        # Modalda max_score sahəsi yoxdur — göndərilməyibsə mövcud dəyər qalır (əvvəl 100-ə sıfırlanırdı).
+        max_attempts, max_score = _parse_limits(
+            request.POST, default_attempts=assignment.max_attempts, default_score=assignment.max_score
+        )
+    except ValueError:
+        return _invalid_limits_response()
+
+    try:
         previous_status = assignment.status
         previous_recipient_ids = set(assignment.assigned_students.values_list("id", flat=True))
         assignment.title = request.POST.get("title")
         assignment.description = request.POST.get("description", "")
         assignment.start_date = parse_form_datetime(request.POST.get("start_date"))
         assignment.deadline = parse_form_datetime(request.POST.get("deadline"))
-        assignment.max_attempts = request.POST.get("max_attempts") or assignment.max_attempts
-        # Modalda max_score sahəsi yoxdur — göndərilməyibsə mövcud dəyər qalır (əvvəl 100-ə sıfırlanırdı).
-        assignment.max_score = request.POST.get("max_score") or assignment.max_score
+        assignment.max_attempts = max_attempts
+        assignment.max_score = max_score
         assignment.status = _clean_status(request.POST.get("status"), assignment.status)
         assignment.save()
 

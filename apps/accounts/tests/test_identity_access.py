@@ -540,14 +540,11 @@ class StagedAuthenticationFlowTests(TestCase):
         self.assertFalse(verification.success)
         self.assertEqual(verification.reason, "access_denied")
 
-    def test_password_reset_and_login_otp_endpoint_send_nothing(self):
+    def test_password_reset_sends_nothing(self):
+        # JSON OTP login endpoint-i Audit 2026-09-28 SA-01/SA-02 ilə silinib
+        # (bax test_otp_api.py); parol-bərpa forması hələ də heç nə göndərmir.
         reset = self.client.post(reverse("accounts:password_reset"), {"email": self.staged.email})
         self.assertEqual(reset.status_code, 302)
-        response = self.client.post(
-            reverse("accounts:send_otp_api"),
-            {"email": self.staged.email, "purpose": EmailOTP.Purpose.LOGIN},
-        )
-        self.assertEqual(response.status_code, 202)
         self.assertFalse(EmailOTP.objects.filter(user=self.staged).exists())
         self.assertEqual(mail.outbox, [])
 

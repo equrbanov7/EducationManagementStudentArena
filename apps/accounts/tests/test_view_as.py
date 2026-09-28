@@ -371,16 +371,15 @@ class ViewAsAccountTakeoverTests(ViewAsTestBase):
         self.assertFalse(self.teacher.check_password("AttackerPass123!"))
         self.assertTrue(self.teacher.check_password(PASSWORD))
 
-    def test_otp_endpoints_are_blocked_in_full_mode(self):
-        """E-poçt OTP axını da kimlik sübutudur — hər iki rejimdə bloklanır."""
+    def test_otp_endpoints_are_unreachable_in_full_mode(self):
+        """E-poçt OTP JSON endpoint-ləri Audit 2026-09-28 SA-02 ilə silinib — view-as altında da 404."""
         self._login(self.admin)
         self._start(self.teacher)
 
-        for url_name in ("accounts:send_otp_api", "accounts:verify_otp_api", "accounts:resend_otp_api"):
-            with self.subTest(url_name=url_name):
-                response = self.client.post(reverse(url_name), {}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
-                self.assertEqual(response.status_code, 403)
-                self.assertTrue(response.json().get("view_as_blocked"))
+        for path in ("/accounts/send-otp/", "/accounts/verify-otp/", "/accounts/resend-otp/"):
+            with self.subTest(path=path):
+                response = self.client.post(path, {}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+                self.assertEqual(response.status_code, 404)
 
 
 class ViewAsLimitedModeTests(ViewAsTestBase):

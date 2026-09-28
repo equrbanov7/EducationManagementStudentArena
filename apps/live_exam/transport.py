@@ -33,6 +33,34 @@ from apps.live_exam.serializers import (
 )
 from apps.live_exam.session_settings import get_session_settings, session_join_path
 
+#: Audit 2026-09-28 EX28-10: reveal-dən ƏVVƏL oyunçuya gedən cavab sahələri.
+#: ``is_correct`` / ``awarded_points`` / ``score`` / ``answer_rank`` və s.
+#: burada YOXDUR — əks halda atılan (throw-away) oyunçularla variantları
+#: yoxlayıb əsas oyunçu ilə düz cavab vermək olurdu.
+PRE_REVEAL_ANSWER_KEYS = ("player_id", "choice_ids", "message")
+
+
+def public_player_answer(answer: dict | None, *, revealed: bool) -> dict | None:
+    """Oyunçunun öz cavabı — reveal olunmayıbsa yalnız «saxlandı» məlumatı."""
+    if not answer:
+        return answer
+    if revealed:
+        return dict(answer)
+    safe = {key: answer[key] for key in PRE_REVEAL_ANSWER_KEYS if key in answer}
+    safe["saved"] = True
+    return safe
+
+
+def build_answer_saved_payload(result: dict[str, Any]) -> dict[str, Any]:
+    """``answer_saved`` (WS unicast / HTTP cavabı) — reveal-dən əvvəl nəticəsiz.
+
+    Cavab raundu bitirdisə (``reveal_question_id``) reveal onsuz da başlayır —
+    onda tam şəxsi nəticə qaytarılır.
+    """
+    revealed = bool(result.get("reveal_question_id"))
+    answer = public_player_answer(result.get("answer") or {}, revealed=revealed) or {}
+    return {"type": "answer_saved", "saved": True, "question_id": result.get("question_id"), **answer}
+
 
 def get_public_base_url(request) -> str:
     configured = (getattr(settings, "LIVE_EXAM_PUBLIC_HOST", None) or getattr(settings, "LAN_HOST", None) or "").strip()

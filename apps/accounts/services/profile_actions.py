@@ -78,12 +78,15 @@ def validate_profile_avatar_upload(uploaded_avatar) -> str:
 # ── publish-notification action ────────────────────────────────────────────
 
 
-def resolve_notification_recipients(user, capabilities, target: str):
+def resolve_notification_recipients(user, capabilities, target: str, *, organization=None):
     """Resolve a notification *target* string to a queryset of recipient users.
 
     Returns a queryset/list of users, or ``None`` when the target is invalid
     or *user* is not authorised for it. Extracted verbatim from the former
     ``_get_notification_recipients`` helper in ``views.profile``.
+
+    *organization* — sorğunun AKTİV təşkilatı (``org_<id>`` hədəfi üçün
+    qeyri-superadmin yalnız onu və yalnız org admini kimi seçə bilər).
     """
     from apps.exams.models import StudentGroup
     from apps.organizations.models import Membership, Organization
@@ -105,8 +108,14 @@ def resolve_notification_recipients(user, capabilities, target: str):
         except (ValidationError, Organization.DoesNotExist):
             return None
         # Superadmin can target any org; org admin only their own.
+        # Audit 2026-09-28 T-01: əvvəl hədəf org-da İSTƏNİLƏN üzvlük kifayət
+        # edirdi — adi müəllim bütün universitetə, başqa org-da tələbə üzvlüyü
+        # olan admin isə o org-a bildiriş göndərə bilirdi. İndi: hədəf AKTİV
+        # təşkilat olmalı VƏ aktor orada org admini olmalıdır.
         if not is_superadmin:
-            if not Membership.objects.filter(user=user, organization=org, is_active=True).exists():
+            if organization is None or str(org.pk) != str(getattr(organization, "pk", "")):
+                return None
+            if not capabilities.get("is_org_admin"):
                 return None
         member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
         return User.objects.filter(pk__in=member_user_ids, is_active=True)
@@ -276,8 +285,13 @@ def publish_system_notification(*, request, capabilities) -> tuple[bool, str]:
     # Resolve each selected target and collect unique recipients.
     User = get_user_model()
     sent_to_user_ids: set = set()
+    from core.tenancy import get_request_organization
+
+    active_organization = get_request_organization(request)
     for notif_target in notif_targets:
-        recipients = resolve_notification_recipients(request.user, capabilities, notif_target)
+        recipients = resolve_notification_recipients(
+            request.user, capabilities, notif_target, organization=active_organization
+        )
         if recipients is None:
             continue
         qs_ids = list(recipients.values_list("pk", flat=True).exclude(pk__in=sent_to_user_ids))

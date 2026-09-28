@@ -48,12 +48,17 @@ class AdminOTPForm(forms.Form):
 
 
 def admin_2fa_required_for_user(user) -> bool:
+    # Audit 2026-09-28 SA-04: 2FA yalnız ``is_staff`` üçün deyil — profil rolu
+    # ``superadmin`` olan (``is_superuser=False``) hesab da level-999 səlahiyyət
+    # daşıyır. Vahid predikat: ``core.permissions.is_superadmin_user``.
+    from core.permissions import is_superadmin_user
+
     return bool(
         getattr(settings, "ADMIN_2FA_REQUIRED", False)
         and user
         and getattr(user, "is_authenticated", False)
         and getattr(user, "is_active", False)
-        and getattr(user, "is_staff", False)
+        and (getattr(user, "is_staff", False) or is_superadmin_user(user))
     )
 
 
@@ -189,7 +194,7 @@ class AdminOTPGateMiddleware:
     bərpası) ``admin:verify-otp``-dan başqa hər yerdən saxlayır. Yalnız staff +
     ``ADMIN_2FA_REQUIRED`` + təsdiqlənməmiş halda işə düşür — adi istifadəçilərə
     və OTP-si təsdiqlənmiş adminlərə heç bir təsir yoxdur. İstisna: verify-otp/
-    resend-otp, logout (imtina), statik/media. Challenge (OTP email) verify-otp
+    resend-otp, logout (imtina), statik (media YOX — SA-07). Challenge (OTP email) verify-otp
     görünüşündə bootstrap olunur — email göndərmə məntiqi bir yerdə qalır.
 
     QEYD: yalnız ``admin login``-i qorumaq kifayət deyildi — is_staff superadmin
@@ -213,10 +218,12 @@ class AdminOTPGateMiddleware:
                     prefixes.append(reverse(name))
                 except NoReverseMatch:
                     continue
-            for attr in ("STATIC_URL", "MEDIA_URL"):
-                value = getattr(settings, attr, "") or ""
-                if value.startswith("/"):
-                    prefixes.append(value)
+            # Audit 2026-09-28 SA-07: yalnız STATIC_URL istisnadır. ``/media/``
+            # (şəxsi yükləmələr) əvvəl də istisna idi — yalnız parolu olan
+            # superuser OTP-siz istənilən şəxsi faylı yükləyə bilirdi.
+            value = getattr(settings, "STATIC_URL", "") or ""
+            if value.startswith("/"):
+                prefixes.append(value)
             self._exempt_cache = tuple(p for p in prefixes if p)
         return self._exempt_cache
 

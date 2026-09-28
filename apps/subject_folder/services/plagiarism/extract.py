@@ -9,7 +9,8 @@ limiti var, xəta faylı «atlanmış» edir (yoxlama dayanmır):
 * PDF — ``pypdf`` (``strict=False``), ən çox ``MAX_PDF_PAGES`` səhifə;
   şifrəli PDF atlanır;
 * DOCX/PPTX/ODT/ODP — ZIP içindən yalnız mətn XML-i, regex ilə (XML parser
-  YOXDUR → XXE/entity bombası mümkün deyil); üzv ölçüsü və sayı məhduddur;
+  YOXDUR → XXE/entity bombası mümkün deyil); üzv ölçüsü, sayı və CƏMİ
+  açılmış bayt məhduddur (SF-1);
 * şəkil, arxiv, köhnə OLE ofis faylları — mətn çıxarılmır, yalnız SHA-256
   (eyni fayl) yoxlaması işləyir.
 """
@@ -30,7 +31,12 @@ MAX_EXTRACT_BYTES = 10 * 1024 * 1024
 MAX_PDF_PAGES = 60
 MAX_TEXT_CHARS = 300_000
 _MAX_ZIP_MEMBERS = 2_000
-_MAX_XML_BYTES = 20 * 1024 * 1024
+# Audit 2026-09-28 SF-1: dekompressiya bombasına qarşı — üzv başına ~2 MB və
+# bütün üzvlər üzrə cəmi açılmış bayt limiti (əvvəl üzv başına 20 MB × 2000
+# slayd idi: 1.6 MB .pptx → 2.3 GB RSS). Mətn ``MAX_TEXT_CHARS``-a çatanda
+# oxuma dayanır.
+_MAX_MEMBER_BYTES = 2 * 1024 * 1024
+_MAX_TOTAL_XML_BYTES = 16 * 1024 * 1024
 
 TEXT_EXTENSIONS = frozenset(
     {
@@ -129,29 +135,46 @@ def _pdf_text(raw: bytes) -> tuple[str, str | None]:
     return "\n".join(parts), None
 
 
-def _zip_member(archive, name) -> str:
-    info = archive.getinfo(name)
-    if info.file_size > _MAX_XML_BYTES:
-        return ""
-    with archive.open(info) as handle:
-        return handle.read(_MAX_XML_BYTES).decode("utf-8", errors="replace")
+class _ZipBudget:
+    """Bir arxiv üzrə açılmış bayt büdcəsi (SF-1)."""
+
+    def __init__(self, total: int = _MAX_TOTAL_XML_BYTES):
+        self.remaining = total
+
+    def read(self, archive, name) -> str:
+        if self.remaining <= 0:
+            return ""
+        info = archive.getinfo(name)
+        limit = min(_MAX_MEMBER_BYTES, self.remaining)
+        # ``file_size`` başlığı saxtalaşdırıla bilər — həqiqi hədd ``read(limit)``-dir.
+        with archive.open(info) as handle:
+            data = handle.read(limit)
+        self.remaining -= len(data)
+        return data.decode("utf-8", errors="replace")
 
 
 def _office_text(raw: bytes, extension: str) -> tuple[str, str | None]:
+    budget = _ZipBudget()
     with zipfile.ZipFile(io.BytesIO(raw)) as archive:
         names = archive.namelist()
         if len(names) > _MAX_ZIP_MEMBERS:
             return "", SKIP_UNREADABLE
         if extension == ".docx":
-            xml = _zip_member(archive, "word/document.xml") if "word/document.xml" in names else ""
+            xml = budget.read(archive, "word/document.xml") if "word/document.xml" in names else ""
             return html.unescape(" ".join(_DOCX_TEXT.findall(xml))), None
         if extension == ".pptx":
             slides = sorted(
                 (int(match.group(1)), name) for name in names if (match := _SLIDE_NAME.match(name)) is not None
             )
-            parts = [" ".join(_PPTX_TEXT.findall(_zip_member(archive, name))) for _index, name in slides]
+            parts, total_chars = [], 0
+            for _index, name in slides:
+                if total_chars >= MAX_TEXT_CHARS or budget.remaining <= 0:
+                    break
+                text = " ".join(_PPTX_TEXT.findall(budget.read(archive, name)))
+                parts.append(text)
+                total_chars += len(text)
             return html.unescape("\n".join(parts)), None
-        xml = _zip_member(archive, "content.xml") if "content.xml" in names else ""
+        xml = budget.read(archive, "content.xml") if "content.xml" in names else ""
         return html.unescape(_ODF_TAG.sub(" ", xml)), None
 
 

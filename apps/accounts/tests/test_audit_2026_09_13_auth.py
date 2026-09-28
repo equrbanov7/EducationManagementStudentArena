@@ -1,18 +1,17 @@
 """Access auditi (2026-09-13) — autentifikasiya tapıntılarının reqressiya testləri.
 
 F-01  superadmin login qaçış yolu dar vedrəyə bağlıdır, uğursuz cəhdlər sayılır
-F-02  `send/resend/verify-otp` JSON API `password_reset` / `signup` (qeydiyyat
-      sönülü) məqsədlərində hesab mövcudluğunu sızdırmır
+F-02  (JSON OTP API Audit 2026-09-28 SA-01/SA-02 ilə tam silindi — bax
+      `test_otp_api.py`; bu faylın F-02 testləri götürüldü)
 F-08  ilk-giriş axını başqa hesabın e-poçtuna OTP göndərmir; unikal-indeks
       yarışı 500 vermir
-F-09  OTP JSON endpoint-ləri və parol-bərpa formaları üçün İP qapısı
+F-09  parol-bərpa formaları üçün İP qapısı (JSON OTP endpoint-ləri silinib)
 F-11  yeganə təşkilatı dayandırılmış istifadəçi login-dən sonra sərt çıxış alır
 
 Zondlar auditorun `scratchpad/audit/access/probes/test_followup_probes.py`
 faylındakı A3 / A4 / A2-ip-spray / A7 / A11 ssenarilərinə modelləşdirilib.
 """
 
-import json
 import re
 from unittest import mock
 
@@ -22,7 +21,7 @@ from django.db import IntegrityError
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from apps.accounts.models import EmailOTP, UserProfile
+from apps.accounts.models import UserProfile
 from apps.accounts.views.auth.constants import (
     LOGIN_LIMIT_SCOPE_DEVICE,
     LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE,
@@ -81,14 +80,6 @@ class _AuthBase(TestCase):
         return client.post(
             reverse("accounts:staff_login"),
             {"username": username, "password": password},
-            REMOTE_ADDR=ip,
-        )
-
-    def _json(self, client, url_name, ip, **payload):
-        return client.post(
-            reverse(url_name),
-            json.dumps(payload),
-            content_type="application/json",
             REMOTE_ADDR=ip,
         )
 
@@ -166,129 +157,11 @@ class SuperadminEscapeBucketTest(_AuthBase):
 @override_settings(
     CACHES=LOCMEM_CACHE,
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    OTP_SEND_IP_RATE_LIMIT="40/10m",
-    OTP_VERIFY_IP_RATE_LIMIT="100/10m",
-)
-class OtpApiEnumerationTest(_AuthBase):
-    """F-02 — `password_reset` və (qeydiyyat sönülü) `signup` cavabları neytraldır."""
-
-    EXISTING = "fx_teacher@audit.az"
-    UNKNOWN = "nobody_zz@audit.az"
-
-    def _send(self, purpose, email, ip, url_name="accounts:send_otp_api"):
-        return self._json(Client(), url_name, ip, email=email, purpose=purpose)
-
-    def test_password_reset_purpose_is_neutral_on_send_and_resend(self):
-        for url_name in ("accounts:send_otp_api", "accounts:resend_otp_api"):
-            existing = self._send("password_reset", self.EXISTING, "10.13.2.1", url_name)
-            unknown = self._send("password_reset", self.UNKNOWN, "10.13.2.2", url_name)
-            self.assertEqual(existing.status_code, 202, url_name)
-            self.assertEqual(unknown.status_code, 202, url_name)
-            self.assertEqual(existing.json(), unknown.json(), url_name)
-            self.assertNotIn("expires_in", existing.json(), url_name)
-
-    def test_password_reset_purpose_sends_password_reset_otp_to_real_account(self):
-        self._send("password_reset", self.EXISTING, "10.13.2.3")
-
-        self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].to, [self.EXISTING])
-        with bypass_rls():
-            self.assertTrue(
-                EmailOTP.objects.filter(email=self.EXISTING, purpose=EmailOTP.Purpose.PASSWORD_RESET).exists()
-            )
-            # Əvvəl səhvən SIGNUP OTP-si göndərilirdi.
-            self.assertFalse(EmailOTP.objects.filter(email=self.EXISTING, purpose=EmailOTP.Purpose.SIGNUP).exists())
-
-    def test_password_reset_cooldown_is_not_leaked(self):
-        first = self._send("password_reset", self.EXISTING, "10.13.2.4")
-        second = self._send("password_reset", self.EXISTING, "10.13.2.5")
-
-        self.assertEqual(first.status_code, 202)
-        self.assertEqual(second.status_code, 202)
-        self.assertEqual(first.json(), second.json())
-        self.assertEqual(len(mail.outbox), 1)
-
-    @override_settings(PUBLIC_SIGNUP_ENABLED=False)
-    def test_signup_purpose_is_neutral_when_public_signup_disabled(self):
-        existing = self._send("signup", self.EXISTING, "10.13.2.6")
-        unknown = self._send("signup", self.UNKNOWN, "10.13.2.7")
-
-        self.assertEqual(existing.status_code, 202)
-        self.assertEqual(unknown.status_code, 202)
-        self.assertEqual(existing.json(), unknown.json())
-        self.assertEqual(len(mail.outbox), 0)
-
-        verify_existing = self._json(
-            Client(), "accounts:verify_otp_api", "10.13.2.8", email=self.EXISTING, purpose="signup", otp="000000"
-        )
-        verify_unknown = self._json(
-            Client(), "accounts:verify_otp_api", "10.13.2.9", email=self.UNKNOWN, purpose="signup", otp="000000"
-        )
-        self.assertEqual(verify_existing.status_code, 400)
-        self.assertEqual(verify_unknown.status_code, 400)
-        self.assertEqual(verify_existing.json()["detail"], verify_unknown.json()["detail"])
-
-    @override_settings(PUBLIC_SIGNUP_ENABLED=True)
-    def test_signup_purpose_keeps_ui_feedback_when_public_signup_enabled(self):
-        self.assertEqual(self._send("signup", self.EXISTING, "10.13.2.10").status_code, 409)
-        self.assertEqual(self._send("signup", self.UNKNOWN, "10.13.2.11").status_code, 404)
-
-    def test_login_purpose_still_sends_and_stays_neutral_for_unknown(self):
-        existing = self._send("login", self.EXISTING, "10.13.2.12")
-        unknown = self._send("login", self.UNKNOWN, "10.13.2.13")
-
-        self.assertEqual(existing.status_code, 202)
-        self.assertEqual(unknown.status_code, 202)
-        self.assertEqual(len(mail.outbox), 1)
-
-
-@override_settings(
-    CACHES=LOCMEM_CACHE,
-    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     OTP_SEND_IP_RATE_LIMIT="4/10m",
     OTP_VERIFY_IP_RATE_LIMIT="3/10m",
 )
 class OtpIpRateLimitTest(_AuthBase):
-    """F-09 — bir İP-dən fərqli e-poçtlara «spray» İP vedrəsi ilə dayanır."""
-
-    def test_send_otp_ip_spray_is_limited(self):
-        ip = "10.13.3.1"
-        statuses = [
-            self._json(
-                Client(), "accounts:send_otp_api", ip, email=f"victim{i}@example.org", purpose="login"
-            ).status_code
-            for i in range(6)
-        ]
-
-        # Auditor zondu `A2-send-otp-ip-spray`: 12 e-poçt → hamısı 202 idi.
-        self.assertEqual(statuses, [202, 202, 202, 202, 429, 429])
-        response = self._json(Client(), "accounts:send_otp_api", ip, email="victim99@example.org", purpose="login")
-        self.assertEqual(response.status_code, 429)
-        self.assertIn("Retry-After", response.headers)
-
-    def test_send_and_resend_share_the_ip_bucket_but_other_ip_is_unaffected(self):
-        ip = "10.13.3.2"
-        for i in range(2):
-            self._json(Client(), "accounts:send_otp_api", ip, email=f"a{i}@example.org", purpose="login")
-        for i in range(2):
-            self._json(Client(), "accounts:resend_otp_api", ip, email=f"b{i}@example.org", purpose="login")
-
-        blocked = self._json(Client(), "accounts:resend_otp_api", ip, email="c@example.org", purpose="login")
-        other_ip = self._json(Client(), "accounts:send_otp_api", "10.13.3.3", email="c@example.org", purpose="login")
-
-        self.assertEqual(blocked.status_code, 429)
-        self.assertEqual(other_ip.status_code, 202)
-
-    def test_verify_otp_ip_limit(self):
-        ip = "10.13.3.4"
-        statuses = [
-            self._json(
-                Client(), "accounts:verify_otp_api", ip, email=f"v{i}@example.org", purpose="login", otp="000000"
-            ).status_code
-            for i in range(4)
-        ]
-
-        self.assertEqual(statuses, [400, 400, 400, 429])
+    """F-09 — parol-bərpa formalarında bir İP-dən «spray» İP vedrəsi ilə dayanır."""
 
     def test_password_reset_form_ip_limit(self):
         ip = "10.13.3.5"

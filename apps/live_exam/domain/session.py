@@ -238,12 +238,8 @@ def get_option_label(option: Any) -> str:
     return ""
 
 
-def detect_multi(exam_question: ExamQuestion) -> tuple[bool, int, list[int]]:
-    # Use the options relation manager so callers that call prefetch_related("options")
-    # avoid an extra round-trip to the database.
-    correct_ids = [opt.id for opt in exam_question.options.all() if opt.is_correct]
-    correct_count = len(correct_ids)
-
+def selection_limits(exam_question: ExamQuestion, correct_count: int) -> tuple[bool, int]:
+    """``(is_multi, max_select)`` — düzgün variant sayı artıq məlum olanda (əlavə sorğusuz)."""
     flags = [
         bool(getattr(exam_question, "is_multiple", False)),
         bool(getattr(exam_question, "multi_choice", False)),
@@ -258,4 +254,12 @@ def detect_multi(exam_question: ExamQuestion) -> tuple[bool, int, list[int]]:
     else:
         max_select = 1
 
+    return is_multi, max_select
+
+
+def detect_multi(exam_question: ExamQuestion) -> tuple[bool, int, list[int]]:
+    # Use the options relation manager so callers that call prefetch_related("options")
+    # avoid an extra round-trip to the database.
+    correct_ids = [opt.id for opt in exam_question.options.all() if opt.is_correct]
+    is_multi, max_select = selection_limits(exam_question, len(correct_ids))
     return is_multi, max_select, correct_ids

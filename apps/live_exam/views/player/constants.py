@@ -141,6 +141,22 @@ LIVE_JOIN_LIMIT_SCOPE = "live_exam.join"
 LIVE_PIN_LIMIT_SCOPE = "live_exam.pin"
 
 
+# Audit 2026-09-28 EX28-10: cookie-dən ASILI OLMAYAN İP vedrələri. Klient
+# ``live_client_id`` cookie-sini hər sorğuda dəyişməklə dar vedrəni sıfırlaya
+# bilirdi (atılan oyunçularla variant yoxlaması). Həddlər geniş saxlanılır —
+# bir auditoriya adətən eyni NAT İP-si arxasındadır.
+LIVE_JOIN_IP_LIMIT_SCOPE = "live_exam.join.ip"
+
+
+LIVE_PIN_IP_LIMIT_SCOPE = "live_exam.pin.ip"
+
+
+LIVE_JOIN_IP_RATE_LIMIT_DEFAULT = "150/10m"
+
+
+LIVE_PIN_IP_RATE_LIMIT_DEFAULT = "100/10m"
+
+
 LIVE_REACTION_LIMIT_SCOPE = "live_exam.reaction"
 
 

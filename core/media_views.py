@@ -495,9 +495,13 @@ def _check_private_media_access(request, path: str) -> bool:
     # admin-site flag — it carries no tenant scope and provisioning/seed paths
     # hand it to ordinary users. That let any staff-flagged member of tenant A
     # read tenant B's private uploads (journals, answer sheets, appeal files).
+    from core.admin_auth import admin_2fa_verified
     from core.permissions import is_superadmin_user
 
-    if is_superadmin_user(user):
+    # Audit 2026-09-28 SA-07: hamısına-icazə yalnız admin 2FA təsdiqlənibsə
+    # (``ADMIN_2FA_REQUIRED`` sönülüdürsə ``admin_2fa_verified`` True qaytarır).
+    # Əks halda superadmin adi yoxlayıcılardan keçir.
+    if is_superadmin_user(user) and admin_2fa_verified(request):
         return True
 
     clean = path.lstrip("/")

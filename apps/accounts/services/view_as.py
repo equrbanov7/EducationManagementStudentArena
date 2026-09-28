@@ -159,7 +159,20 @@ SEARCH_PAGE_SIZE = 20
 
 
 def _is_superadmin(user) -> bool:
-    return bool(getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False))
+    from core.permissions import is_superadmin_user
+
+    return is_superadmin_user(user)
+
+
+def _exclude_superadmin_targets(queryset):
+    """Audit 2026-09-28 SA-04: HƏR İKİ növ superadmin hədəf ola bilməz.
+
+    ``is_superuser`` bayrağı ilə yanaşı profil rolu ``superadmin`` olan hesab
+    da (``User.is_superadmin`` / ``core.permissions.is_superadmin_user``) bütün
+    tenant-lar üzrə level-999 səlahiyyət daşıyır — onun adından baxış platforma
+    səviyyəli eskalasiya olardı.
+    """
+    return queryset.exclude(Q(is_superuser=True) | Q(profile__role=ProfileRole.SUPERADMIN))
 
 
 def _active_memberships(user, organization):
@@ -317,7 +330,8 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
 
     Qaydalar:
     - yalnız org-un aktiv üzvləri, aktiv hesablar;
-    - superuser hədəf OLA BİLMƏZ, aktor özü siyahıda yoxdur;
+    - superuser / profil-rolu superadmin hədəf OLA BİLMƏZ (SA-04), aktor özü
+      siyahıda yoxdur;
     - ilk-girişini tamamlamamış hesab (``password_change_required``) hədəf OLA
       BİLƏR: parol-təyini axını (set_initial_password + OTP) view-as altında
       ViewAsMiddleware tərəfindən bloklanır, FirstLoginPasswordMiddleware isə
@@ -330,13 +344,14 @@ def build_target_queryset(actor, organization, *, mode, actor_level, memberships
     is_superadmin = actor_level >= 999
 
     users = (
-        User.objects.filter(
-            is_active=True,
-            profile__access_state="active",
-            memberships__organization=organization,
-            memberships__is_active=True,
+        _exclude_superadmin_targets(
+            User.objects.filter(
+                is_active=True,
+                profile__access_state="active",
+                memberships__organization=organization,
+                memberships__is_active=True,
+            )
         )
-        .exclude(is_superuser=True)
         .exclude(pk=getattr(actor, "pk", None))
         .annotate(_max_org_level=Max("memberships__role__level", filter=Q(memberships__organization=organization)))
         .distinct()
@@ -566,15 +581,13 @@ def resolve_view_as_request(request):
         request.session[VIEW_AS_SESSION_KEY] = state
     else:
         with bypass_rls():
-            target = (
+            target = _exclude_superadmin_targets(
                 User.objects.filter(
                     pk=state.get("target_id"),
                     is_active=True,
                     profile__access_state="active",
                 )
-                .exclude(is_superuser=True)
-                .first()
-            )
+            ).first()
         if target is None:
             stop_view_as(request, reason="view_as_target_unavailable")
             return None, None

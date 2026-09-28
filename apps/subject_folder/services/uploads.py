@@ -10,6 +10,7 @@ yalnız ``original_name`` sahəsinə yazılır.
 from __future__ import annotations
 
 import hashlib
+import mimetypes
 import os
 import unicodedata
 
@@ -27,6 +28,8 @@ from ..constants import DEFAULT_MATERIAL_MAX_MB, IMAGE_EXTENSIONS, TEXTUAL_EXTEN
 from ..errors import FolderError
 
 _CHUNK = 1024 * 1024
+#: ZIP konteynerli ofis formatları (OOXML + ODF).
+_ZIP_CONTAINER_EXTENSIONS = frozenset({".docx", ".pptx", ".xlsx", ".odt", ".odp", ".ods"})
 #: Kod/mətn faylları üçün brauzerin adətən göndərdiyi MIME-lar.
 _TEXTUAL_EXTRA_MIME = {
     "application/octet-stream",
@@ -96,6 +99,32 @@ def sha256_of(uploaded) -> str:
     return digest.hexdigest()
 
 
+#: Brauzerdə aktiv məzmun kimi işlənə bilən tiplər — endirmədə ümumi ikili tipə endirilir.
+_ACTIVE_CONTENT_TYPES = frozenset(
+    {
+        "text/html",
+        "application/xhtml+xml",
+        "image/svg+xml",
+        "text/xml",
+        "application/xml",
+        "text/javascript",
+        "application/javascript",
+        "application/x-javascript",
+    }
+)
+
+
+def content_type_for_name(name: str) -> str:
+    """Audit 2026-09-28 SF-3: MIME klientin bəyanından yox, UZANTIDAN çıxarılır.
+
+    Aktiv məzmun (HTML/SVG/XML/JS) və naməlum uzantı → ``application/octet-stream``.
+    """
+    guessed = (mimetypes.guess_type(f"x{extension_of(name or '')}")[0] or "").lower()
+    if not guessed or guessed in _ACTIVE_CONTENT_TYPES:
+        return "application/octet-stream"
+    return guessed[:120]
+
+
 def prepare_upload(uploaded, *, allowed_extensions, max_mb: int, image_only: bool = False) -> dict:
     """Yoxlayır və meta qaytarır; uyğunsuz fayl → ``FolderError('upload.invalid')`` (mətn qapıdan gəlir).
 
@@ -115,7 +144,9 @@ def prepare_upload(uploaded, *, allowed_extensions, max_mb: int, image_only: boo
             allowed_mime_types=_allowed_mimes(extension),
             verify_image=True if (image_only or extension in IMAGE_EXTENSIONS) else None,
         )
-        if extension == ".zip":
+        # Audit 2026-09-28 SF-1: OOXML/ODF də ZIP-dir — zip-bomba yoxlaması
+        # onlara da tətbiq olunur (plagiat ekstraktoru onları açır).
+        if extension == ".zip" or extension in _ZIP_CONTAINER_EXTENSIONS:
             validate_zip_archive(uploaded)
     except ValidationError as exc:
         message = " ".join(str(item) for item in exc.messages) or str(FolderError.of("upload.invalid"))
@@ -123,7 +154,7 @@ def prepare_upload(uploaded, *, allowed_extensions, max_mb: int, image_only: boo
     meta = {
         "original_name": original,
         "size": int(getattr(uploaded, "size", 0) or 0),
-        "content_type": (getattr(uploaded, "content_type", "") or "application/octet-stream")[:120],
+        "content_type": content_type_for_name(original),
         "sha256": sha256_of(uploaded),
         "extension": extension,
     }
@@ -131,4 +162,11 @@ def prepare_upload(uploaded, *, allowed_extensions, max_mb: int, image_only: boo
     return meta
 
 
-__all__ = ["clean_original_name", "extension_of", "material_max_mb", "prepare_upload", "sha256_of"]
+__all__ = [
+    "clean_original_name",
+    "content_type_for_name",
+    "extension_of",
+    "material_max_mb",
+    "prepare_upload",
+    "sha256_of",
+]
