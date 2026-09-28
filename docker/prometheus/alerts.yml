@@ -4,6 +4,9 @@
 # Metrik mənbələri:
 #   http_requests_total / http_request_duration_seconds — core/metrics.py
 #   pg_*   — postgres_exporter        node_* — node_exporter
+#   pgbouncer_* — pgbouncer_exporter
+#   emsarena_offsite_backup_* / emsarena_restore_drill_* — host skriptləri
+#     (scripts/ops/offsite_backup.sh, restore_drill.sh) → node_exporter textfile kollektoru
 # ═══════════════════════════════════════════════════════════════════════════
 groups:
   - name: emsarena-availability
@@ -73,7 +76,9 @@ groups:
           severity: warning
         annotations:
           summary: "PostgreSQL bağlantıları limitə yaxınlaşır"
-          description: "Aktiv bağlantı sayı {{ $value }} (max_connections=200-ün 85%-i keçilib)."
+          # Audit 2026-09-28 DB-08: mətn köhnə idi (max_connections=200). Konfiq 250-dir
+          # (POSTGRES_MAX_CONNECTIONS), PgBouncer backend tavanı 230 (MAX_DB_CONNECTIONS).
+          description: "Bağlantı sayı {{ $value }} — 170 həddi keçilib (max_connections=250, PgBouncer tavanı 230)."
 
       - alert: HostDiskSpaceLow
         expr: |
@@ -364,6 +369,114 @@ groups:
         annotations:
           summary: "PostgreSQL backup 26 saatdan köhnədir"
           description: "postgres-backup servisi yoxlanmalıdır (gündəlik cədvəl pozulub)."
+
+      # Audit 2026-09-28 AD-01: off-site (host xaricində, şifrəli) nüsxə — DB dump-ları
+      # + media_data. Metrik host timer-i (emsarena-offsite-backup.timer →
+      # scripts/ops/offsite_backup.sh) tərəfindən node_exporter textfile qovluğuna
+      # yazılır. Konfiqurasiya olunmayıbsa skript 0 yazır → «heç vaxt» = köhnə.
+      - alert: OffsiteBackupStale
+        expr: time() - emsarena_offsite_backup_last_success_timestamp_seconds > 26 * 3600
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Off-site backup 26 saatdan köhnədir (və ya heç vaxt alınmayıb)"
+          description: "Host xaricindəki şifrəli nüsxə (DB dump + media) yenilənmir — host itkisi = məlumat itkisi. `journalctl -u emsarena-offsite-backup`, /var/log/emsarena-offsite-backup.log və /etc/emsarena/offsite-backup.env-i yoxlayın (deployment.md §12)."
+
+      - alert: OffsiteBackupMetricMissing
+        expr: absent(emsarena_offsite_backup_last_success_timestamp_seconds)
+        for: 2h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Off-site backup metrikası yoxdur (timer qurulmayıb?)"
+          description: "emsarena-offsite-backup.timer serverdə aktiv deyil və ya node_exporter textfile qovluğu (/var/lib/node_exporter/textfile_collector) oxunmur. Quraşdırma: deployment.md §12 «Off-site copy»."
+
+      - alert: OffsiteBackupLastRunFailed
+        expr: emsarena_offsite_backup_last_run_success == 0 and emsarena_offsite_backup_configured == 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Son off-site backup cəhdi uğursuz oldu"
+          description: "restic backup/prune xətası (şəbəkə, kredensial, repo parolu və ya mənbə qovluğu). /var/log/emsarena-offsite-backup.log-a baxın; 26 saat davam etsə OffsiteBackupStale yanacaq."
+
+      - alert: RestoreDrillOverdue
+        expr: time() - emsarena_restore_drill_last_success_timestamp_seconds > 35 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "Aylıq bərpa drill-i 35 gündür icra olunmayıb"
+          description: "scripts/ops/restore_drill.sh --metrics-file … ilə real ölçülü drill aparın və RTO-nu qeyd edin (deployment.md §12)."
+
+      - alert: NodeTextfileCollectorError
+        expr: node_textfile_scrape_error == 1
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "node_exporter textfile kollektoru xəta verir"
+          description: "/var/lib/node_exporter/textfile_collector qovluğu yoxdur və ya *.prom faylı pozulub — off-site backup / drill metrikaları görünmür."
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # Audit 2026-09-28 DB-08: DB qatının kor nöqtələri. Ən ehtimallı doyma rejimi
+  # PgBouncer növbəsidir (DB-03) — latency alertindən ƏVVƏL görünməlidir.
+  # Metriklər mövcud exporter-lərdədir: pgbouncer-exporter v0.10.2 (SHOW POOLS),
+  # postgres-exporter v0.17.1 (stat_database kollektoru + defolt pg_stat_activity
+  # sorğusu: max_tx_duration{state,backend_type}).
+  # ═════════════════════════════════════════════════════════════════════════
+  - name: emsarena-database
+    rules:
+      - alert: PgBouncerClientsWaiting
+        expr: sum(pgbouncer_pools_client_waiting_connections) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PgBouncer-də server bağlantısı gözləyən müştərilər var"
+          description: "{{ $value }} müştəri 2 dəqiqədir pool-da növbədədir — pool doyub (DEFAULT_POOL_SIZE/RESERVE) və ya uzun tranzaksiyalar bağlantıları tutur. QUERY_WAIT_TIMEOUT (15 s) keçiləndə sorğular xəta alır."
+
+      - alert: PgBouncerMaxWaitHigh
+        expr: max(pgbouncer_pools_client_maxwait_seconds) > 5
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PgBouncer növbəsində gözləmə {{ $value }}s"
+          description: "Ən köhnə gözləyən müştəri 5 saniyədən çoxdur növbədədir; 15 s-də (QUERY_WAIT_TIMEOUT) istifadəçilər xəta görəcək."
+
+      - alert: PostgresDeadlocks
+        expr: sum by (datname) (increase(pg_stat_database_deadlocks{datname!~"template0|template1|postgres"}[10m])) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL deadlock ({{ $labels.datname }})"
+          description: "Son 10 dəqiqədə {{ $value | printf \"%.0f\" }} deadlock. PG logunda «deadlock detected» sətirlərinə baxın (kilid sırası pozulub)."
+
+      - alert: PostgresLongTransaction
+        expr: |
+          max by (datname, state) (
+            pg_stat_activity_max_tx_duration{backend_type="client backend",
+              state=~"active|idle in transaction.*"}) > 600
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "10 dəqiqədən uzun tranzaksiya ({{ $labels.datname }}, {{ $labels.state }})"
+          description: "Tranzaksiya {{ $value | humanizeDuration }}dir açıqdır — sətir kilidləri və PgBouncer bağlantısını tutur, vacuum-u bloklayır. pg_stat_activity-də xact_start-a görə tapın."
+
+      - alert: PostgresIdleInTransaction
+        expr: |
+          max by (datname) (
+            pg_stat_activity_max_tx_duration{backend_type="client backend",
+              state=~"idle in transaction.*"}) > 120
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "«idle in transaction» sessiya 2 dəqiqədən çoxdur ({{ $labels.datname }})"
+          description: "Tətbiq tranzaksiyanı açıq qoyub gözləyir — kilidlər buraxılmır. idle_in_transaction_session_timeout rol səviyyəsində təyin olunubmu yoxlayın (DB-02)."
 
   # ═════════════════════════════════════════════════════════════════════════
   # 2026-09-13 infra auditi P1-3 — monitorinqin ÖZ sağlamlığı.

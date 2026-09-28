@@ -211,6 +211,11 @@ docs/audits/*/evidence/coverage*.json
 # QA klon DB parolu (audit 2026-09-13 F-03) — tracked launch.json-dan çıxarıldı
 .claude/dev-clone.env
 .claude/staging.env
+# Agent sandbox Postgres parolu (audit 2026-09-28 AD-03; `.env.*` də əhatə edir — açıq yazılıb)
+.env.agent
+# Off-site backup konfiqurasiyası/parolu (AD-01) — yalnız serverdə /etc/emsarena/ altında saxlanır
+offsite-backup.env
+restic.pass
 
 # Şəxsi məlumatlı idxal faylları (FİN, pasport, telefon, ad siyahıları) — HEÇ VAXT repoya düşmür
 # (2026-09-27: public repoda ATİS faylı tapıldı, tarixçədən silindi). Lokal nüsxə: backups/data_private/.

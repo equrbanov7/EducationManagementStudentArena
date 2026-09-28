@@ -1,0 +1,12 @@
+[Unit]
+Description=Run the EMSArena off-site backup every night
+
+[Timer]
+# 03:30 server time: after the sidecar dump (01:00 Asia/Baku) and db_backup.sh
+# (02:00). Catch up if the machine was off.
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

@@ -50,6 +50,12 @@ x-app-build: &app-build
     # `build.sha` kimi göstərir. remote_deploy.sh bunu GITHUB_SHA / git-dən
     # doldurur; əl ilə build-də boş qalırsa "unknown" yazılır.
     BUILD_GIT_SHA: ${BUILD_GIT_SHA:-unknown}
+    # Audit 2026-09-28 AD-05: Dockerfile.prod-dakı `apt-get upgrade` layer-i bu
+    # ARG-a bağlıdır. Əvvəl compose onu ötürmürdü → ARG həmişə "manual" idi və
+    # serverdə hər build köhnə (cache-lənmiş) apt layer-ini təkrar işlədirdi —
+    # OS təhlükəsizlik yamaları prod-a çatmırdı. Dəyəri dəyişdirmək (məs.
+    # `APT_SECURITY_REFRESH=$(date +%G%V)` — həftəlik) layer-i yenidən qurdurur.
+    APT_SECURITY_REFRESH: ${APT_SECURITY_REFRESH:-manual}
 
 # ─── app + celery_worker + celery_beat üçün ORTAQ mühit dəyişənləri ─────────
 # Servis-spesifik dəyişənlər (Daphne, admin, cookie, Piston client və s.)
@@ -104,6 +110,24 @@ x-app-env: &app-env
   GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
   AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
   AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
+  # Audit 2026-09-28 AD-04: .env.production.example-də sənədləşdirilmiş, amma
+  # konteynerə heç vaxt ÖTÜRÜLMƏYƏN sahib açarları (compose `env_file` işlətmir —
+  # yalnız burada adı çəkilən dəyişən konteynerə düşür). Defoltlar kodun
+  # (config/settings/components/*) defoltları ilə eynidir — .env-də təyin
+  # edilməyibsə davranış dəyişmir. DİQQƏT: production.py-nin `from .base import (…)`
+  # siyahısında olmayan ad env-dən gəlsə belə tətbiq olunmur (AD-04 settings hissəsi).
+  AI_ASSISTANT_ENABLED: ${AI_ASSISTANT_ENABLED:-true}
+  AI_ASSISTANT_LOG_MAX_CHARS: ${AI_ASSISTANT_LOG_MAX_CHARS:-8000}
+  AI_ASSISTANT_LOG_RETENTION_DAYS: ${AI_ASSISTANT_LOG_RETENTION_DAYS:-90}
+  PUBLIC_SIGNUP_ENABLED: ${PUBLIC_SIGNUP_ENABLED:-False}
+  MICROSOFT_CLARITY_AUTHENTICATED: ${MICROSOFT_CLARITY_AUTHENTICATED:-False}
+  FILE_UPLOAD_SECURITY_MAX_SIZE_MB: ${FILE_UPLOAD_SECURITY_MAX_SIZE_MB:-25}
+  FINAL_EXAM_PIN_MAX_FAILURES: ${FINAL_EXAM_PIN_MAX_FAILURES:-5}
+  FINAL_EXAM_PIN_LOCK_MINUTES: ${FINAL_EXAM_PIN_LOCK_MINUTES:-10}
+  FINAL_EXAM_ENTRY_RATE_PER_MINUTE: ${FINAL_EXAM_ENTRY_RATE_PER_MINUTE:-10}
+  LIVE_EXAM_PUBLIC_HOST: ${LIVE_EXAM_PUBLIC_HOST:-}
+  # Kod defoltu AUTH_OTP_EXPIRY_SECONDS-dir (bax app bloku) — iç-içə defolt eyni semantikanı saxlayır.
+  PASSWORD_RESET_TIMEOUT: ${PASSWORD_RESET_TIMEOUT:-${AUTH_OTP_EXPIRY_SECONDS:-300}}
   EXAM_AUTOSAVE_INTERVAL_MS: ${EXAM_AUTOSAVE_INTERVAL_MS:-30000}
   EXAM_AUTOSAVE_JITTER_MS: ${EXAM_AUTOSAVE_JITTER_MS:-10000}
   EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED: ${EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED:-false}
@@ -197,6 +221,19 @@ services:
       - shared_preload_libraries=pg_stat_statements
       - -c
       - pg_stat_statements.track=top
+      # Audit 2026-09-28 DB-02: yavaş sorğu və kilid gözləmələri PG logunda görünsün
+      # (əvvəl yalnız pg_stat_statements var idi). 1 s-dən uzun sorğu mətni loga
+      # düşür (psycopg literal-ları sorğu mətnindədir — log PII saxlaya bilər, Loki
+      # retention-u ilə eyni rejim). deadlock_timeout həm deadlock yoxlamasının,
+      # həm də log_lock_waits həddinin intervalıdır (PG defoltu, açıq yazılıb).
+      # statement_timeout/lock_timeout QƏSDƏN server səviyyəsində deyil — rol
+      # səviyyəsində verilir (miqrasiya/uzun job-lar üçün ayrıca idarə olunur).
+      - -c
+      - log_lock_waits=on
+      - -c
+      - log_min_duration_statement=${POSTGRES_LOG_MIN_DURATION_MS:-1000}
+      - -c
+      - deadlock_timeout=1s
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -229,8 +266,11 @@ services:
 
   # ─────────────────────────────────────────────────────────────────────────
   # Postgres backup — daily pg_dump with local rotation (audit step 5).
-  # Dumps land in ./backups/postgres (mounted on the host).  Off-site copy
-  # (S3/B2/rsync) MUST be configured separately — see docs/operations/deployment.md.
+  # Dumps land in ./backups/postgres (mounted on the host). Off-site encrypted
+  # copy (with media_data): host timer scripts/ops/offsite_backup.sh (restic),
+  # alert OffsiteBackupStale — see docs/operations/deployment.md §12.
+  # Plain dumps WITHOUT --clean: restore only into a NEW database
+  # (scripts/ops/restore_drill.sh, deployment.md §12 «Restore procedure»).
   # ─────────────────────────────────────────────────────────────────────────
   postgres-backup:
     image: prodrigestivill/postgres-backup-local:16-alpine
@@ -296,6 +336,10 @@ services:
       # `POSTGRES_MAX_CONNECTIONS − 20` (superuser_reserved_connections + exporter
       # + psql üçün yer). Dəyişəndə ikisini birlikdə dəyişin.
       MAX_DB_CONNECTIONS: ${PGBOUNCER_MAX_DB_CONNECTIONS:-230}
+      # Audit 2026-09-28 DB-02: server bağlantısı gözləyən müştəri ən çox 15 s
+      # növbədə qalır (pgbouncer defoltu 120 s idi) — doyma zamanı sorğular
+      # dəqiqələrlə asılı qalmaq əvəzinə tez xəta alır (PgBouncerClientsWaiting alerti).
+      QUERY_WAIT_TIMEOUT: ${PGBOUNCER_QUERY_WAIT_TIMEOUT:-15}
       SERVER_IDLE_TIMEOUT: ${PGBOUNCER_SERVER_IDLE_TIMEOUT:-60}
       SERVER_RESET_QUERY: ${PGBOUNCER_SERVER_RESET_QUERY:-DISCARD ALL}
       AUTH_TYPE: ${PGBOUNCER_AUTH_TYPE:-scram-sha-256}
@@ -464,6 +508,17 @@ services:
       AUTH_OTP_RESEND_COOLDOWN_SECONDS: ${AUTH_OTP_RESEND_COOLDOWN_SECONDS:-60}
       AUTH_OTP_MAX_ATTEMPTS: ${AUTH_OTP_MAX_ATTEMPTS:-5}
       AUTH_OTP_MAX_SENDS_PER_HOUR: ${AUTH_OTP_MAX_SENDS_PER_HOUR:-5}
+      # Audit 2026-09-28 AD-04: sənədləşdirilmiş, amma ötürülməyən giriş/OTP/sessiya
+      # açarları (yalnız web sorğu yolunda oxunur). Defoltlar = production/components defoltları.
+      SESSION_COOKIE_AGE: ${SESSION_COOKIE_AGE:-86400}
+      SESSION_INACTIVITY_TIMEOUT: ${SESSION_INACTIVITY_TIMEOUT:-28800}
+      LOGIN_RATE_LIMIT: ${LOGIN_RATE_LIMIT:-5/10m}
+      LOGIN_IP_RATE_LIMIT: ${LOGIN_IP_RATE_LIMIT:-60/10m}
+      LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT: ${LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT:-3/1h}
+      OTP_VERIFY_RATE_LIMIT: ${OTP_VERIFY_RATE_LIMIT:-5/10m}
+      OTP_RESEND_RATE_LIMIT: ${OTP_RESEND_RATE_LIMIT:-3/10m}
+      OTP_SEND_IP_RATE_LIMIT: ${OTP_SEND_IP_RATE_LIMIT:-40/10m}
+      OTP_VERIFY_IP_RATE_LIMIT: ${OTP_VERIFY_IP_RATE_LIMIT:-100/10m}
       MEDIA_ACCEL_REDIRECT_URL: /internal_media
       # Practical/coding exams are disabled in production. Keep the settings
       # here for future controlled re-enable, but do not start Piston by
@@ -691,6 +746,12 @@ services:
     container_name: emsarena-node-exporter
     command:
       - --path.rootfs=/host
+      # Audit 2026-09-28 AD-01: host skriptlərinin (scripts/ops/offsite_backup.sh,
+      # restore_drill.sh --metrics-file) Prometheus textfile metrikləri. Host-un
+      # /var/lib/node_exporter/textfile_collector qovluğu /host mount-u ilə artıq
+      # görünür (ro) — əlavə volume lazım deyil. Qovluq yoxdursa kollektor yalnız
+      # node_textfile_scrape_error=1 verir, qalan metriklər işləyir.
+      - --collector.textfile.directory=/host/var/lib/node_exporter/textfile_collector
     pid: host
     volumes:
       - /:/host:ro

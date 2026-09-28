@@ -649,12 +649,16 @@ The `MEDIA_ACCEL_REDIRECT_URL` environment variable controls the prefix
 # List volumes
 docker volume ls | grep emsarena
 
-# Back up media files
+# One-off local media archive (the volume name carries the compose project
+# prefix — check `docker volume ls | grep media_data`)
 docker run --rm \
-  -v emsarena_media_data:/source:ro \
+  -v <project>_media_data:/source:ro \
   -v $(pwd)/backup:/backup \
   alpine tar czf /backup/media-$(date +%Y%m%d).tar.gz -C /source .
 ```
+
+The scheduled, encrypted **off-site** media backup is
+`scripts/ops/offsite_backup.sh` (§12 «Off-site copy»).
 
 ---
 
@@ -794,19 +798,32 @@ BUILD_GIT_SHA=<good-commit-sha> bash scripts/deploy/remote_deploy.sh
 
 The deploy script already dumps before every migration via the
 `postgres-backup` sidecar (`./backups/postgres/last/`, plus the rotated
-`daily/weekly/monthly` sets — see §12). Manual equivalent and restore:
+`daily/weekly/monthly` sets — see §12). Manual equivalent:
 
 ```bash
 # Manual pre-deploy dump (what remote_deploy.sh runs before release.sh)
 docker compose -f docker-compose.prod.yml exec -T postgres-backup /backup.sh
-
-# Restore the last dump (stops writers first; see §12 "Restore procedure")
-docker compose -f docker-compose.prod.yml stop app celery_worker celery_worker_heavy celery_beat
-gunzip -c backups/postgres/last/<dump-file>.sql.gz | \
-    docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
-APP_IMAGE=emsarena-prod:<previous-sha> RUN_RELEASE_ON_START=false \
-    docker compose -f docker-compose.prod.yml up -d --no-build app celery_worker celery_worker_heavy celery_beat
 ```
+
+> **Never pipe a dump into the live `$POSTGRES_DB`** (audit 2026-09-28 AD-02,
+> reproduced on a sandbox). The sidecar dumps are plain SQL **without**
+> `--clean`: replaying one into the existing database fails half-way
+> (`relation … already exists`), keeps post-backup rows in tables with a PK,
+> **duplicates** rows in tables without one and leaves the newer schema in
+> place — while `psql` without `ON_ERROR_STOP` still "succeeds".
+
+To take the schema back, restore the pre-deploy dump into a **new** database
+and swap names while the writers are stopped — full commands in §12
+«Restore procedure»:
+
+1. `scripts/ops/restore_drill.sh --keep --db emsarena_restore_<ts> backups/postgres/last/<dump>.sql.gz`
+   — production keeps serving while this runs (atomic restore + sanity counts).
+2. Stop `app celery_worker celery_worker_heavy celery_beat postgres-backup
+   pgbouncer_exporter postgres_exporter pgbouncer`.
+3. `ALTER DATABASE … RENAME` swap in one transaction (the old DB is kept as
+   `<db>_pre_restore_<ts>` for rollback), re-run `scripts/provision-app-db-role.sh`.
+4. Start the pooler/exporters, then the **previous** image with
+   `RUN_RELEASE_ON_START=false` (the restored schema matches the old code).
 
 ---
 
@@ -915,33 +932,175 @@ on a schedule and rotates old dumps automatically.
 Dumps are written to `./backups/postgres/` on the host
 (`daily/`, `weekly/`, `monthly/` subfolders, `.sql.gz`).
 
-### Off-site copy (REQUIRED)
+### Off-site copy (REQUIRED — audit 2026-09-28 AD-01)
 
-Local dumps do not survive a disk failure. Copy them off the server daily,
-e.g. with rclone to any S3/B2 bucket (host cron):
+Local dumps (`./backups/postgres`, `/var/backups/emsarena`) and the `media_data`
+volume (exam answer files, uploaded documents, score-correction scans) live on
+the same host: disk failure, ransomware or an accidental `down -v` loses all of
+them at once. `scripts/ops/offsite_backup.sh` copies all three to an **off-host
+restic repository** — encrypted client-side, deduplicated — every night, applies
+retention (`forget --prune`, default 7 daily / 4 weekly / 6 monthly snapshots)
+and writes `emsarena_offsite_backup_last_success_timestamp_seconds` for the
+node_exporter textfile collector. The media volume is mounted **read-only**
+(`docker run --rm -v <media volume>:/backup/media:ro restic/restic:0.18.0 …`).
+
+Alerts (`docker/prometheus/alerts.yml`, group `emsarena-celery-backup`):
+
+| Alert | Fires when |
+|---|---|
+| `OffsiteBackupStale` (critical) | last successful off-site copy > 26 h old, **or never** (an unconfigured script writes 0) |
+| `OffsiteBackupMetricMissing` (critical) | the metric is absent for 2 h — timer not installed / textfile dir not readable |
+| `OffsiteBackupLastRunFailed` (warning) | the last nightly run failed (network, credentials, missing source) |
+| `NodeTextfileCollectorError` (warning) | `/var/lib/node_exporter/textfile_collector` missing or a `.prom` file is broken |
+
+**Owner steps (one-time, on the server):**
+
+1. **Target** — a bucket or NAS that is *not* on this host (ideally another
+   building/provider): S3-compatible (Backblaze B2, AWS, MinIO on the university
+   NAS) or SFTP to a second server. Prefer versioning / object lock on the bucket
+   (ransomware). Create credentials limited to that bucket/path.
+2. **Encryption password** (without it nothing can be restored — keep a second
+   copy OFF the server, e.g. the password manager):
+
+   ```bash
+   sudo install -d -m 700 /etc/emsarena
+   sudo sh -c 'umask 077; openssl rand -base64 48 > /etc/emsarena/restic.pass'
+   ```
+3. **Config** — from the repo checkout:
+
+   ```bash
+   sudo install -m 600 scripts/ops/offsite-backup.env.example /etc/emsarena/offsite-backup.env
+   sudoedit /etc/emsarena/offsite-backup.env   # OFFSITE_RESTIC_REPOSITORY + backend credentials
+   ```
+4. **Install, initialise, schedule:**
+
+   ```bash
+   sudo install -m 0755 scripts/ops/offsite_backup.sh /usr/local/sbin/emsarena-offsite-backup.sh
+   sudo install -d -m 0755 /var/lib/node_exporter/textfile_collector
+   sudo /usr/local/sbin/emsarena-offsite-backup.sh init        # creates the encrypted repository once
+   sudo cp scripts/ops/systemd/emsarena-offsite-backup.service /etc/systemd/system/
+   sudo cp scripts/ops/systemd/emsarena-offsite-backup.timer   /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now emsarena-offsite-backup.timer   # nightly 03:30, catch-up after downtime
+   sudo systemctl start emsarena-offsite-backup.service        # first (full) upload now
+   sudo /usr/local/sbin/emsarena-offsite-backup.sh snapshots   # verify
+   ```
+5. **Verify monitoring** — after the deploy that adds
+   `--collector.textfile.directory` to `node_exporter`, Prometheus must show
+   `emsarena_offsite_backup_last_success_timestamp_seconds` and
+   `OffsiteBackupStale` must be green.
+
+Until step 4 is done the script (if run) logs `NOT CONFIGURED`, writes the
+metric as 0 and exits 3 — the alert keeps firing on purpose.
+
+**Restore from the off-site copy** (host lost, or monthly proof that the copy
+and the password work):
 
 ```bash
-# /etc/cron.d/emsarena-backup-offsite
-30 3 * * * root rclone sync /opt/emsarena/backups/postgres remote:emsarena-db-backups --max-age 48h
+sudo install -d -m 700 /var/tmp/emsarena-offsite-restore
+sudo OFFSITE_RESTORE_DIR=/var/tmp/emsarena-offsite-restore \
+  /usr/local/sbin/emsarena-offsite-backup.sh restic restore latest --host emsarena-prod \
+  --target /restore --include /backup/postgres-sidecar
+sudo scripts/ops/restore_drill.sh /var/tmp/emsarena-offsite-restore/backup/postgres-sidecar/daily
+# media: restore --include /backup/media, then copy into the (empty) volume:
+#   docker run --rm -v <project>_media_data:/media -v /var/tmp/emsarena-offsite-restore/backup/media:/src:ro \
+#     alpine cp -a /src/. /media/
 ```
 
-### Restore procedure (tested!)
+RPO with this setup: DB ≈ 24 h (nightly dump) + upload lag; media ≈ 24 h.
+
+**Optional — point-in-time recovery (documented, NOT enabled):** RPO of minutes
+needs WAL archiving: `wal_level=replica`, `archive_mode=on` and an
+`archive_command` from a wal-g or pgBackRest sidecar pushing WAL + weekly base
+backups to the same off-site bucket. It requires a Postgres restart and a
+tested restore procedure (`restore_command`, `recovery_target_time`) — rehearse
+on staging first; not part of the current stack.
+
+### Restore procedure (restore into a NEW database, then swap)
+
+Audit 2026-09-28 AD-02: the previous procedure piped the dump into the live
+database and used stale service names (`celery-worker`) — it could not
+restore. The procedure below never writes into the live DB until the final,
+atomic rename.
+
+Preconditions: free disk ≥ 2× the database size; the production `.env` loaded
+in the shell (`set -a; . ./.env; set +a`) for `POSTGRES_DB` / `POSTGRES_USER`;
+the image tag whose migrations match the dump (see §8 «Identify the previous
+working image»).
 
 ```bash
-# 1. Stop app writers (keep postgres up)
-docker compose -f docker-compose.prod.yml stop app celery-worker celery-beat
+# 0. Choose the dump (pre-deploy dump: last/; otherwise daily/weekly/monthly)
+DUMP=$(ls -t backups/postgres/last/*.sql.gz | head -n1); echo "$DUMP"
+TS=$(date +%Y%m%d_%H%M)
+NEW_DB="emsarena_restore_${TS}"
 
-# 2. Restore (DROPS and recreates objects; use a scratch DB first if unsure)
-gunzip -c backups/postgres/daily/<dump-file>.sql.gz | \
-  docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+# 1. Restore into a NEW database — production keeps serving meanwhile.
+#    psql -v ON_ERROR_STOP=1 --single-transaction (pg_restore --exit-on-error for -Fc);
+#    sanity counts (auth_user, organizations, lessonmark, finalgrade, attempts,
+#    audit log, django_migrations). Any error → the new DB is dropped, exit ≠ 0.
+scripts/ops/restore_drill.sh --keep --db "$NEW_DB" "$DUMP"
 
-# 3. Restart the app
-docker compose -f docker-compose.prod.yml up -d app celery-worker celery-beat
+# 2. Look before you swap: latest migrations / key counts in the restored DB
+docker exec -i emsarena-postgres psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$NEW_DB" \
+  -c "SELECT app, name, applied FROM django_migrations ORDER BY applied DESC LIMIT 5;" \
+  -c "SELECT (SELECT count(*) FROM auth_user) AS users, (SELECT count(*) FROM registrar_lessonmark) AS marks;"
+
+# 3. Maintenance window: stop everything that holds a connection to $POSTGRES_DB
+#    (writers, pooler, exporters, backup sidecar). Postgres itself stays up.
+docker compose -f docker-compose.prod.yml stop \
+  app celery_worker celery_worker_heavy celery_beat \
+  postgres-backup pgbouncer_exporter postgres_exporter pgbouncer
+
+# 4. Atomic swap (ALTER DATABASE … RENAME is transactional). The old DB is KEPT.
+docker exec -i emsarena-postgres psql -X -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d postgres \
+  -v live="$POSTGRES_DB" -v new="$NEW_DB" -v old="${POSTGRES_DB}_pre_restore_${TS}" <<'SQL'
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+ WHERE datname IN (:'live', :'new') AND pid <> pg_backend_pid();
+BEGIN;
+ALTER DATABASE :"live" RENAME TO :"old";
+ALTER DATABASE :"new" RENAME TO :"live";
+COMMIT;
+SQL
+
+# 5. Database-level grants are not in pg_dump (GRANT CONNECT for the app role) —
+#    re-provision (idempotent). Re-apply any `ALTER ROLE … IN DATABASE` settings too.
+APP_DATABASE_USER=… APP_DATABASE_PASSWORD='…' ./scripts/provision-app-db-role.sh
+
+# 6. Pooler/exporters/sidecar first, then the app from the image matching the restored schema
+docker compose -f docker-compose.prod.yml up -d pgbouncer postgres_exporter pgbouncer_exporter postgres-backup
+APP_IMAGE=emsarena-prod:<sha-matching-the-dump> RUN_RELEASE_ON_START=false \
+  docker compose -f docker-compose.prod.yml up -d --no-build \
+  --scale app="${APP_REPLICAS:-8}" --scale celery_worker="${CELERY_REPLICAS:-2}" \
+  app celery_worker celery_worker_heavy celery_beat
+docker compose -f docker-compose.prod.yml exec -T nginx nginx -s reload
+curl -sk -H "Host: ${HEALTHCHECK_HOST}" https://127.0.0.1/health/
 ```
 
-Run a real restore test against a scratch database after the first deploy
-(acceptance criterion of audit step 5), e.g. restore into `emsarena_restore_test`
-and run `SELECT COUNT(*) FROM exams_examattempt;` to validate.
+Undo the restore (restored data turns out wrong): repeat steps 3–4 with
+`live → ${POSTGRES_DB}_bad_${TS}` and `${POSTGRES_DB}_pre_restore_${TS} → live`.
+When the restored DB is confirmed (a few days), free the disk:
+`docker exec emsarena-postgres dropdb -U "$POSTGRES_USER" "${POSTGRES_DB}_pre_restore_${TS}"`.
+
+### Monthly restore drill (RTO)
+
+An untested backup is not a backup. Once a month, outside exam hours (the
+restore uses CPU/IO and 1× DB size of disk on the production server):
+
+```bash
+scripts/ops/restore_drill.sh \
+  --metrics-file /var/lib/node_exporter/textfile_collector/emsarena_restore_drill.prom \
+  backups/postgres/daily
+# → "RESTORE DRILL OK … restore_seconds=N" ; the scratch DB is dropped automatically
+```
+
+Record the result below. RTO ≈ `restore_seconds` + swap/start (~5 min). The
+`RestoreDrillOverdue` alert fires when the last successful drill (with
+`--metrics-file`) is older than 35 days. Every second month, drill from the
+**off-site** copy instead (see «Restore from the off-site copy»).
+
+| Date | Dump | Size | restore_seconds | Notes |
+|---|---|---|---|---|
+| 2026-09-28 | toy dump (sandbox, script validation only) | 3 KB | 0–1 | plain `.sql.gz` + `-Fc`, DSN and container modes; not a real-size drill |
 
 ---
 
@@ -1000,33 +1159,29 @@ The steps below apply only if production ever moves back to a public domain
 ## Backup RESTORE runbook (Faza 7, audit 2026-07-02)
 
 Backuplar `postgres-backup` servisi ilə gündəlik `./backups/postgres/` altına
-yazılır (`-Z6 --blobs`, custom format deyil — plain `pg_dump | gzip`).
-**Aylıq drill:** aşağıdakı addımları staging-də icra edib nəticəni qeyd edin —
-yoxlanılmamış backup = backup deyil.
+yazılır (`-Z6 --blobs`, custom format deyil — plain `pg_dump | gzip`, `--clean`
+YOXDUR). **Aylıq drill** və istehsal bərpası §12-dədir («Monthly restore drill»,
+«Restore procedure») — audit 2026-09-28 AD-02-dən sonra bərpa HƏMİŞƏ yeni bazaya
+edilir (`scripts/ops/restore_drill.sh`: `ON_ERROR_STOP`, tək tranzaksiya, say
+yoxlaması, müddət/RTO), canlı baza yalnız atomik `ALTER DATABASE … RENAME` ilə
+dəyişdirilir.
 
 ```bash
-# 1) Ən son dump-ı seç
-LATEST=$(ls -t backups/postgres/daily/*.sql.gz | head -1); echo "$LATEST"
-
-# 2) Boş bərpa bazası yarat (mövcud produksiyaya TOXUNMA)
-docker exec -i emsarena-postgres createdb -U "$POSTGRES_USER" emsarena_restore_test
-
-# 3) Bərpa et
-gunzip -c "$LATEST" | docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d emsarena_restore_test
-
-# 4) Doğrulama sorğuları (say məntiqi produksiya ilə eyni miqyasda olmalıdır)
-docker exec -i emsarena-postgres psql -U "$POSTGRES_USER" -d emsarena_restore_test -c \
-  "SELECT (SELECT count(*) FROM exams_examattempt)  AS attempts,
-          (SELECT count(*) FROM exams_examanswer)   AS answers,
-          (SELECT count(*) FROM auth_user)          AS users,
-          (SELECT count(*) FROM organizations_organization) AS orgs;"
-
-# 5) Təmizlik
-docker exec -i emsarena-postgres dropdb -U "$POSTGRES_USER" emsarena_restore_test
+# Drill (canlı bazaya TOXUNMUR, sonda scratch bazanı silir)
+scripts/ops/restore_drill.sh backups/postgres/daily
 ```
 
 Tam fəlakət ssenarisində (host itirilib): yeni hostda repo + `.env` bərpa et →
-`docker compose -f docker-compose.prod.yml up -d postgres` → yuxarıdakı 3-cü
-addımı ƏSAS bazaya (`$POSTGRES_DB`) tətbiq et → sonra qalan stack-i qaldır.
-**Off-site nüsxə hələ konfiqurasiya olunmayıb** (audit K-tapıntısı): `./backups/`
-qovluğunu S3/B2-yə sync edən cron əlavə olunana qədər host itkisi = backup itkisi.
+off-site nüsxədən dump-ları və media-nı qaytar (§12 «Restore from the off-site
+copy») → `docker compose -f docker-compose.prod.yml up -d postgres` (təzə volume —
+`$POSTGRES_DB` BOŞ yaranır) → dump-ı həmin boş bazaya atomik yüklə:
+
+```bash
+gunzip -c <dump>.sql.gz | docker exec -i emsarena-postgres \
+  sh -c 'psql -X -v ON_ERROR_STOP=1 --single-transaction -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+APP_DATABASE_USER=… APP_DATABASE_PASSWORD='…' ./scripts/provision-app-db-role.sh
+```
+
+→ sonra qalan stack-i qaldır. Off-site nüsxə `scripts/ops/offsite_backup.sh`
+(restic, şifrəli; DB dump-ları + `media_data`) ilə alınır — quraşdırılana qədər
+`OffsiteBackupStale` alerti yanır (host itkisi = backup itkisi).
