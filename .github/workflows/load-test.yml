@@ -127,7 +127,7 @@ jobs:
           echo "✓ Giriş yoxlaması keçdi: $USERS VU, ramp $SPAWN/s, $RUN_TIME, hədəf $TARGET"
 
       - name: 📥 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 🐍 Locust mühiti
         run: |

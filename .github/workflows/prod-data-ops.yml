@@ -80,7 +80,7 @@ jobs:
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: 🔐 Şifrəli heyət siyahısı
         if: github.event.inputs.command == 'seed_staff_roster'
         env:
