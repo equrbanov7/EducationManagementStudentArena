@@ -114,8 +114,8 @@ x-app-env: &app-env
   # konteynerə heç vaxt ÖTÜRÜLMƏYƏN sahib açarları (compose `env_file` işlətmir —
   # yalnız burada adı çəkilən dəyişən konteynerə düşür). Defoltlar kodun
   # (config/settings/components/*) defoltları ilə eynidir — .env-də təyin
-  # edilməyibsə davranış dəyişmir. DİQQƏT: production.py-nin `from .base import (…)`
-  # siyahısında olmayan ad env-dən gəlsə belə tətbiq olunmur (AD-04 settings hissəsi).
+  # edilməyibsə davranış dəyişmir. production.py artıq `from .base import *` işlədir
+  # (AD-04 settings hissəsi) — burada ötürülən hər açar tətbiq olunur.
   AI_ASSISTANT_ENABLED: ${AI_ASSISTANT_ENABLED:-true}
   AI_ASSISTANT_LOG_MAX_CHARS: ${AI_ASSISTANT_LOG_MAX_CHARS:-8000}
   AI_ASSISTANT_LOG_RETENTION_DAYS: ${AI_ASSISTANT_LOG_RETENTION_DAYS:-90}
@@ -126,6 +126,16 @@ x-app-env: &app-env
   FINAL_EXAM_PIN_LOCK_MINUTES: ${FINAL_EXAM_PIN_LOCK_MINUTES:-10}
   FINAL_EXAM_ENTRY_RATE_PER_MINUTE: ${FINAL_EXAM_ENTRY_RATE_PER_MINUTE:-10}
   LIVE_EXAM_PUBLIC_HOST: ${LIVE_EXAM_PUBLIC_HOST:-}
+  # Audit 2026-09-28 SA-03 / EX28-10: hesab səviyyəli login limiti və live-quiz IP limitləri.
+  LOGIN_ACCOUNT_RATE_LIMIT: ${LOGIN_ACCOUNT_RATE_LIMIT:-20/1h}
+  LOGIN_ACCOUNT_DISTINCT_IP_ALERT: ${LOGIN_ACCOUNT_DISTINCT_IP_ALERT:-10}
+  LIVE_EXAM_JOIN_IP_RATE_LIMIT: ${LIVE_EXAM_JOIN_IP_RATE_LIMIT:-150/10m}
+  LIVE_PIN_IP_RATE_LIMIT: ${LIVE_PIN_IP_RATE_LIMIT:-100/10m}
+  # Audit 2026-09-28 DB-03: replika başına eyni-anlı sorğu tavanı (sonra 503 + Retry-After).
+  # 8 replika × 24 = 192 ≤ PgBouncer hovuzu 150 + ehtiyat 50.
+  MAX_INFLIGHT_REQUESTS: ${MAX_INFLIGHT_REQUESTS:-24}
+  MAX_INFLIGHT_WAIT_SECONDS: ${MAX_INFLIGHT_WAIT_SECONDS:-2}
+  MAX_INFLIGHT_RETRY_AFTER_SECONDS: ${MAX_INFLIGHT_RETRY_AFTER_SECONDS:-5}
   # Kod defoltu AUTH_OTP_EXPIRY_SECONDS-dir (bax app bloku) — iç-içə defolt eyni semantikanı saxlayır.
   PASSWORD_RESET_TIMEOUT: ${PASSWORD_RESET_TIMEOUT:-${AUTH_OTP_EXPIRY_SECONDS:-300}}
   EXAM_AUTOSAVE_INTERVAL_MS: ${EXAM_AUTOSAVE_INTERVAL_MS:-30000}

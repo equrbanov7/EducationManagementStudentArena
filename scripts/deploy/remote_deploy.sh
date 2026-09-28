@@ -679,6 +679,40 @@ predeploy_database_backup() {
   echo "Pre-deploy database dump completed."
 }
 
+apply_app_role_timeouts() {
+  # Audit 2026-09-28 DB-02: tətbiq roluna (APP_DATABASE_USER) rol səviyyəli
+  # statement/lock/idle-in-transaction timeout-ları hər deploy-da idempotent
+  # tətbiq olunur — `provision-app-db-role.sh` yalnız bir dəfə əl ilə işlədilir,
+  # postgres-init isə yalnız boş volume-da. Parol lazım deyil (yalnız ALTER ROLE
+  # … SET). Owner/superuser roluna (miqrasiyalar) HEÇ VAXT toxunulmur. Uğursuzluq
+  # deploy-u dayandırmır (xəbərdarlıq): timeout-lar qoruyucu qatdır, qapı deyil.
+  local app_user owner stmt lock idle value
+  app_user="$(dotenv_value APP_DATABASE_USER)"
+  owner="$(dotenv_value POSTGRES_USER)"
+  if [ -z "$app_user" ] || [ "$app_user" = "$owner" ]; then
+    echo "APP_DATABASE_USER is empty or equals the owner role; role-level DB timeouts not applied (the owner role is never limited)." >&2
+    return 0
+  fi
+  stmt="$(dotenv_value APP_DB_STATEMENT_TIMEOUT)"; stmt="${stmt:-60s}"
+  lock="$(dotenv_value APP_DB_LOCK_TIMEOUT)"; lock="${lock:-10s}"
+  idle="$(dotenv_value APP_DB_IDLE_IN_TRANSACTION_TIMEOUT)"; idle="${idle:-120s}"
+  for value in "$stmt" "$lock" "$idle"; do
+    if ! [[ "$value" =~ ^[0-9]+(ms|s|min|h)?$ ]]; then
+      echo "APP_DB_*_TIMEOUT value '${value}' is invalid (expected e.g. 60s, 500ms, 2min, 0); role timeouts not applied." >&2
+      return 0
+    fi
+  done
+  if ! [[ "$app_user" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "APP_DATABASE_USER '${app_user}' is not a plain identifier; role timeouts not applied." >&2
+    return 0
+  fi
+  echo "Applying role-level DB timeouts to ${app_user}: statement=${stmt} lock=${lock} idle_in_transaction=${idle}"
+  if ! docker compose -f "$COMPOSE_FILE" exec -T postgres sh -c \
+      "psql -v ON_ERROR_STOP=1 -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"ALTER ROLE \\\"${app_user}\\\" SET statement_timeout = '${stmt}'\" -c \"ALTER ROLE \\\"${app_user}\\\" SET lock_timeout = '${lock}'\" -c \"ALTER ROLE \\\"${app_user}\\\" SET idle_in_transaction_session_timeout = '${idle}'\""; then
+    echo "WARNING: role-level DB timeouts could not be applied (is ${app_user} provisioned? see scripts/provision-app-db-role.sh). Continuing." >&2
+  fi
+}
+
 wait_for_app_and_worker_health() {
   local max_attempts=$((DEPLOY_TIMEOUT_SECONDS / 5))
   local attempt=1
@@ -738,7 +772,9 @@ rollback_to_previous_image() {
   else
     echo "Rollback to ${PREVIOUS_APP_IMAGE} did not become healthy either; manual intervention required." >&2
   fi
-  echo "Database migrations from the failed release were NOT reverted; restore the pre-deploy dump if the schema must go back." >&2
+  # Audit 2026-09-28 AD-05/AD-02: dump-ı CANLI DB-yə psql ilə ötürmək bazanı qarışıq
+  # vəziyyətdə qoyur (PK-lı cədvəllərdə yeni sətirlər qalır, PK-sızlar dublikat olur).
+  echo "Database migrations from the failed release were NOT reverted. If the schema must go back, restore the pre-deploy dump into a NEW database and swap names (docs/operations/deployment.md «Restore procedure»); never pipe it into the live DB." >&2
   echo "=======================================================================" >&2
 }
 
@@ -798,9 +834,15 @@ docker_deploy() {
   # hamısı eyni `emsarena-prod:<sha>` image-i ilə işləyir; `latest` toxunulmur.
   resolve_release_image
   docker compose -f "$COMPOSE_FILE" config >"$COMPOSE_CONFIG"
+  # Audit 2026-09-28 AD-05: Dockerfile.prod `apt-get upgrade` layer-i sabit
+  # `APT_SECURITY_REFRESH=manual` ilə HƏMİŞƏ cache-dən gəlirdi — OS yamaqları
+  # prod-a çatmırdı. ISO il+həftə (məs. 202640) ilə layer həftədə bir yenidən
+  # qurulur; eyni həftədə təkrar deploy cache-i saxlayır. .env/mühitdən override olunur.
+  export APT_SECURITY_REFRESH="${APT_SECURITY_REFRESH:-$(date +%G%V)}"
   docker compose -f "$COMPOSE_FILE" build
   capture_previous_app_image
   docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer postgres-backup
+  apply_app_role_timeouts
   # P1-08: konfiqurasiya xətası miqrasiyadan və restart-dan ƏVVƏL tutulur.
   preflight_django_deploy_check
   # P2-5: miqrasiyadan ƏVVƏL dump — rollback yalnız kodu geri alır.

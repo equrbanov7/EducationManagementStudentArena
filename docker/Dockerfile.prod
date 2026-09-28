@@ -75,9 +75,13 @@ RUN groupadd --system appgroup \
 # image-in gətirdiyi köhnə setuptools (<78.1.1, CVE-2025-47273 / <70.0,
 # CVE-2024-6345) image-də qalmasın; requirements/base.txt-dəki floor onu
 # runtime paketi kimi də sabitləyir.
+# Audit 2026-09-28 AD-06: tam (keçid asılılıqları daxil) və hash-li lock —
+# eyni commit-in iki build-i eyni paketləri qurur; hash uyğunsuzluğu build-i
+# dayandırır. Lock `requirements/production.txt`-dən `scripts/deps/lock.sh` ilə
+# yaradılır (docs/operations/DEPENDENCY_LOCK.md).
 COPY requirements /app/requirements
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir -r /app/requirements/production.txt \
+    && pip install --no-cache-dir --require-hashes -r /app/requirements/production.lock \
     && apt-get purge -y --auto-remove gcc libpq-dev libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 

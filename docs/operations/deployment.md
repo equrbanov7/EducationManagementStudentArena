@@ -15,6 +15,7 @@
 4. [First-Time Deployment](#4-first-time-deployment)
 5. [Update / Re-deploy](#5-update--re-deploy)
    - [5.2 2026-09-14 dəyişikliklər — ilk deploy yoxlama siyahısı](#52-2026-09-14-dəyişikliklər--sahibin-ilk-deploy-u-üçün-yoxlama-siyahısı)
+   - [5.4 2026-09-28 audit (F2) — image patching, dependency lock, DB timeouts, admission control](#54-2026-09-28-audit-f2--image-patching-dependency-lock-db-timeouts-admission-control)
 6. [Static & Private Media Handling](#6-static--private-media-handling)
 7. [Health Check & Smoke Test Verification](#7-health-check--smoke-test-verification)
 8. [Rollback Plan](#8-rollback-plan)
@@ -75,7 +76,7 @@ steady-state sum of the big ones or the kernel OOM-kills the wrong container.
 | Service (env knob) | Default limit | Note |
 |---|---|---|
 | `postgres` (`POSTGRES_MEM_LIMIT`) | 16 GB | `shared_buffers` 2 GB + `effective_cache_size` 6 GB defaults assume ≥ 8 GB really available |
-| `app` × `APP_REPLICAS` (`APP_MEM_LIMIT`) | 2 GB × 8 | Daphne + `ASGI_THREADS`; 2 replicas per vCPU is plenty |
+| `app` × `APP_REPLICAS` (`APP_MEM_LIMIT`) | 2 GB × 8 | Daphne; one OS thread **per in-flight request** (`ASGI_THREADS` does NOT cap sync views), ~1 core of Python per replica (GIL). Concurrency per replica is capped by `MAX_INFLIGHT_REQUESTS` (default 32 → 503 + `Retry-After`); keep `MAX_INFLIGHT_REQUESTS × APP_REPLICAS ≲ PGBOUNCER_DEFAULT_POOL_SIZE + RESERVE` — see §5.4 and `docs/performance/OPTIMIZATION_5000_USERS.md` §4.1 |
 | `piston` (`PISTON_MEM_LIMIT`) | 4 GB | code-runner sandbox; drop to 1 GB if lab tasks are off |
 | `redis` (`REDIS_MEM_LIMIT`) | 4 GB | must stay above `REDIS_MAXMEMORY` (default 3 GB) |
 | `celery_worker_heavy` / `celery_worker` × `CELERY_REPLICAS` | 2 GB / 1 GB × 2 | exports, imports, AI |
@@ -607,6 +608,66 @@ serverdə yaradılan `superadmin` (`createsuperuser`, 2026-09-15).
   (`--force` olmadan); CSV-də parol var — serverdən kənara yalnız şifrəli kanalla.
 
 ---
+
+## 5.4 2026-09-28 audit (F2) — image patching, dependency lock, DB timeouts, admission control
+
+### OS patches reach the server build (AD-05)
+
+`remote_deploy.sh` now exports `APT_SECURITY_REFRESH=$(date +%G%V)` (ISO year +
+week, e.g. `202640`) before `docker compose build`; compose passes it to
+`docker/Dockerfile.prod`, so the `apt-get upgrade` layer is rebuilt once a week
+instead of being a permanent cache hit. Override in the shell/.env (e.g. the git
+SHA) to force a refresh on every deploy.
+
+**Build-once / registry option (owner decision, needs a token):** the image that
+CI scans with Trivy is still not the image that runs — the server rebuilds from
+source. The proper fix is: CI pushes `emsarena-prod:<sha>` to a private GHCR
+repository (`packages: write` on the workflow), the server logs in once with a
+read-only PAT (`docker login ghcr.io`, `read:packages`), and `remote_deploy.sh`
+does `docker pull ghcr.io/<owner>/emsarena-prod@<digest>` + `docker tag … $APP_IMAGE`
+instead of `docker compose build`. Until the token exists, the weekly
+`APT_SECURITY_REFRESH` above plus the hash-locked Python deps below keep the
+server build close to the scanned one.
+
+### Hash-locked Python dependencies (AD-06)
+
+`requirements/*.txt` stay the hand-edited **inputs** (direct `==` pins).
+`requirements/production.lock` (Docker image) and `requirements/test.lock` (CI)
+are generated, fully pinned (transitive deps included) and hashed; everything
+installs with `pip install --require-hashes -r requirements/<x>.lock`. The lint
+job fails when a lock is stale. Regenerate after changing a pin or merging a
+Dependabot PR: `scripts/deps/lock.sh` (details: `DEPENDENCY_LOCK.md`).
+
+### Role-level DB timeouts (DB-02)
+
+The runtime role (`APP_DATABASE_USER`) gets
+`statement_timeout=60s`, `lock_timeout=10s`,
+`idle_in_transaction_session_timeout=120s` (`ALTER ROLE … SET`, idempotent).
+Applied by `docker/postgres-init/10-create-app-role.sh` (fresh volume),
+`scripts/provision-app-db-role.sh` (manual) and on **every deploy** by
+`remote_deploy.sh::apply_app_role_timeouts` (warn-only; skipped when the app role
+is unset or equals the owner). Override with `APP_DB_STATEMENT_TIMEOUT`,
+`APP_DB_LOCK_TIMEOUT`, `APP_DB_IDLE_IN_TRANSACTION_TIMEOUT` in `.env` (`0` = off).
+New values apply to **new** backend sessions; PgBouncer recycles server
+connections within `server_lifetime` (or restart pgbouncer to apply at once).
+The owner role (migrations, `release.sh`) is never limited. Long jobs raise the
+limit only for themselves with `core.db_timeouts.long_statement(seconds)`
+(Celery export job, plagiarism check).
+
+nginx: `location /` now has `proxy_read_timeout 120s` (was 900 s). Explicit
+locations keep longer windows: `/ws/` 900 s, OCR/import paths 900 s, AI and
+large exports 300 s. `/jurnal/` and `/manage/` stay in `location /` (zone gate).
+
+### Admission control (DB-03)
+
+`core.middleware_concurrency.ConcurrencyLimitMiddleware` caps in-flight HTTP
+requests per app process at `MAX_INFLIGHT_REQUESTS` (default 32, `0` disables);
+excess requests wait up to `MAX_INFLIGHT_WAIT_SECONDS` (2 s) and then get
+`503` + `Retry-After: 5`. Health, metrics, static, media and WebSocket paths are
+exempt. Size it as `(PGBOUNCER_DEFAULT_POOL_SIZE + PGBOUNCER_RESERVE_POOL_SIZE) /
+APP_REPLICAS` (≈ 25 for 8 replicas). **Note:** compose does not use `env_file`;
+`MAX_INFLIGHT_REQUESTS` must be added to `x-app-env` in `docker-compose.prod.yml`
+before a `.env` value reaches the containers (until then the default 32 applies).
 
 ## 6. Static & Private Media Handling
 

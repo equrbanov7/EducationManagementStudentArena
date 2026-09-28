@@ -45,6 +45,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements/lint.txt
 
+      # Audit 2026-09-28 AD-06: requirements/*.lock giriş .txt faylları ilə uyğun
+      # olmalıdır (Dependabot və ya əl ilə pin dəyişəndə lock yenilənməyibsə
+      # Docker image KÖHNƏ versiyanı quraşdırardı). Düzəliş: scripts/deps/lock.sh.
+      - name: 🔒 Requirements lock files in sync
+        run: |
+          python -m pip install "uv==0.12.19"
+          bash scripts/deps/lock.sh --check
+
       - name: 🖤 Check code formatting with Black
         run: |
           echo "::group::🖤 Black Format Check"

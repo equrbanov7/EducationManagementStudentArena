@@ -154,7 +154,7 @@ def test_dockerfile_writes_build_info_after_project_copy():
     assert "ARG BUILD_GIT_SHA=unknown" in dockerfile
     assert "/app/docker/build-info.sh /app/build-info.json" in dockerfile
     # SHA dəyişəndə yalnız kiçik lay yenidən qurulsun: ARG pip layından SONRA.
-    assert dockerfile.index("ARG BUILD_GIT_SHA") > dockerfile.index("requirements/production.txt")
+    assert dockerfile.index("ARG BUILD_GIT_SHA") > dockerfile.index("requirements/production.lock")
     assert dockerfile.index("ARG BUILD_GIT_SHA") > dockerfile.index("COPY --chown=appuser:appgroup . /app/")
     assert (ROOT / "docker/build-info.sh").exists()
     assert "build-info" not in (ROOT / ".dockerignore").read_text(encoding="utf-8")
@@ -192,8 +192,11 @@ def test_pytest_config_lives_only_in_pyproject():
 def test_ci_unit_tests_install_pytest_timeout_plugin():
     workflow = (ROOT / ".github/workflows/_unit-tests.yml").read_text(encoding="utf-8")
     requirements = (ROOT / "requirements/test.txt").read_text(encoding="utf-8")
-    assert "pip install -r requirements/test.txt" in workflow
+    # Audit 2026-09-28 AD-06: CI hash-li lock-dan quraşdırır (test.txt = giriş).
+    assert "pip install --require-hashes -r requirements/test.lock" in workflow
     assert re.search(r"^pytest-timeout==", requirements, flags=re.MULTILINE)
+    lock = (ROOT / "requirements/test.lock").read_text(encoding="utf-8")
+    assert re.search(r"^pytest-timeout==", lock, flags=re.MULTILINE)
 
 
 # ── 2026-09-13 infra auditi — P2-3 stop_grace_period ──────────────────────

@@ -83965,3 +83965,8 @@ msgstr "A topic block must be selected for the question."
 msgctxt "accounts.people.action"
 msgid "Naməlum əməliyyat."
 msgstr "Unknown action."
+
+msgctxt "core.middleware.concurrency_limit.message"
+msgid ""
+"Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin."
+msgstr "The server is busy right now. Please try again in a few seconds."

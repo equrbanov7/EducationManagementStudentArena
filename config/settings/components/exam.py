@@ -123,6 +123,26 @@ FINAL_EXAM_REMINDER_DAYS = tuple(
 )
 
 
+# Admission control (Audit 2026-09-28 DB-03): proses (app replikası) başına
+# eyni anda işlənən HTTP sorğusu tavanı — BÜTÜN metodlar. `ASGI_THREADS` bunu
+# etmir (Django hər sorğuya ayrıca thread verir). Dolanda sorğu
+# MAX_INFLIGHT_WAIT_SECONDS gözləyir, sonra 503 + Retry-After alır (sessiya/DB-yə
+# çatmadan). 0 = söndürülüb. Ölçü: MAX_INFLIGHT_REQUESTS × APP_REPLICAS ≤ PgBouncer
+# pool-u (bax docs/performance/OPTIMIZATION_5000_USERS.md). Middleware:
+# core/middleware_concurrency.py.
+MAX_INFLIGHT_REQUESTS = _env_int_setting("MAX_INFLIGHT_REQUESTS", 32, minimum=0)
+MAX_INFLIGHT_WAIT_SECONDS = _env_float_setting("MAX_INFLIGHT_WAIT_SECONDS", 2.0, minimum=0.0)
+MAX_INFLIGHT_RETRY_AFTER_SECONDS = _env_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", 5, minimum=1)
+MAX_INFLIGHT_EXEMPT_PATH_PREFIXES = (
+    "/static/",
+    "/media/",
+    "/internal_media/",
+    "/metrics/",
+    "/ping/",
+    "/health/",
+    "/ws/",
+)
+
 # Request queueing for mutating HTTP calls. This protects every app view from
 # duplicate/bursty writes by serialising unsafe methods per user/session and by
 # limiting concurrent write requests per worker process.
@@ -161,8 +181,9 @@ REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
         (
             "/static/,/media/,/metrics/,/ping/,/health/,"
             "/accounts/login/,/accounts/register/,/accounts/verify-code/,"
-            "/accounts/resend-code/,/accounts/send-otp/,/accounts/verify-otp/,"
-            "/accounts/resend-otp/,/accounts/password-reset/,/accounts/reset/"
+            # Audit 2026-09-28 AD-04: /accounts/{send,verify,resend}-otp/
+            # marşrutları silinib (parolsuz OTP API), siyahıdan çıxarıldı.
+            "/accounts/resend-code/,/accounts/password-reset/,/accounts/reset/"
         ),
     ).split(",")
     if prefix.strip()

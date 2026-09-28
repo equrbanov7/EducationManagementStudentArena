@@ -55,6 +55,10 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Audit 2026-09-28 DB-03: admission control — sessiya/auth/DB işindən ƏVVƏL.
+    # Metrics/RequestId-dən sonra (503-lər ölçülür və req_id daşıyır); statik
+    # fayllar WhiteNoise-da artıq qaytarılıb. Bax core/middleware_concurrency.py.
+    "core.middleware_concurrency.ConcurrencyLimitMiddleware",
     "csp.middleware.CSPMiddleware",
     "core.admin_security.AdminSecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",

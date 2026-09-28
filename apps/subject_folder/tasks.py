@@ -23,12 +23,15 @@ logger = logging.getLogger(__name__)
 @shared_task(name="subject_folder.check_submission_similarity")
 def check_submission_similarity(submission_id: str):
     """Bir göndərişin oxşarlıq (plagiat) yoxlaması."""
+    from core.db_timeouts import long_statement
     from core.rls import bypass_rls
     from core.rls_pooling import rls_worker_atomic
 
     from .services.plagiarism.engine import run_similarity_check
 
-    with rls_worker_atomic(), bypass_rls():
+    # Audit 2026-09-28 DB-02: oxşarlıq hesablanması korpus böyüdükcə tətbiq
+    # rolunun 60 s / 120 s (idle-in-transaction) limitlərini keçə bilər.
+    with rls_worker_atomic(), bypass_rls(), long_statement(600):
         return run_similarity_check(submission_id)
 
 

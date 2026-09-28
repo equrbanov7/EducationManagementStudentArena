@@ -86,7 +86,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.txt') }}
+          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ inputs.python-version }}-
             ${{ runner.os }}-pip-
@@ -94,7 +94,8 @@ jobs:
       - name: 📥 Install dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          pip install -r requirements/test.txt
+          # Audit 2026-09-28 AD-06: tam, hash-li lock (giriş: requirements/test.txt).
+          pip install --require-hashes -r requirements/test.lock
 
       # 2026-09-21: ayrıca `migrate` addımı silindi — pytest-django test bazasını özü qurur.
 

@@ -402,6 +402,7 @@ def run_export_job(job_id):
 
     from apps.exams.export_registry import run_export
     from apps.exams.models import TextExtractionJob
+    from core.db_timeouts import long_statement
     from core.rls import bypass_rls
     from core.rls_pooling import rls_worker_atomic
 
@@ -423,12 +424,16 @@ def run_export_job(job_id):
 
         payload = dict(job.payload or {})
         try:
-            filename, content_type, data = run_export(
-                payload.get("export", ""),
-                user=job.user,
-                organization=job.organization,
-                params=payload.get("params") or {},
-            )
+            # Audit 2026-09-28 DB-02: tətbiq rolunun 60 s statement_timeout-u
+            # böyük export-u kəsməsin — limit yalnız bu blok üçün task-ın
+            # soft_time_limit-inə qədər genişlənir.
+            with long_statement(840):
+                filename, content_type, data = run_export(
+                    payload.get("export", ""),
+                    user=job.user,
+                    organization=job.organization,
+                    params=payload.get("params") or {},
+                )
         except ValueError as exc:
             job.status = TextExtractionJob.STATUS_FAILED
             job.error = str(exc)

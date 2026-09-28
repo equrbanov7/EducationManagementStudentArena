@@ -84108,3 +84108,8 @@ msgstr "Для вопроса необходимо выбрать тематич
 msgctxt "accounts.people.action"
 msgid "Naməlum əməliyyat."
 msgstr "Неизвестное действие."
+
+msgctxt "core.middleware.concurrency_limit.message"
+msgid ""
+"Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin."
+msgstr "Сервер сейчас перегружен. Повторите попытку через несколько секунд."

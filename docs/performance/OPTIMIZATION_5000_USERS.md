@@ -22,7 +22,7 @@ Prod yavaşlığının (sayt/login/exam gec) səbəbi **dəmir yox, Docker resur
 | 200 | 13 → 28.5 | 60s → 15s | 77% → 0% |
 | 500 | 7.4 → 25.2 | 60s → 37s | 67% → 0% |
 
-Bir dəyişikliklə **7× throughput, 40× latency**. Qalan tavan (~25–33 RPS): 4 replika × 8 thread = **32 eyni-anlı sync slot** — 5000 üçün memarlıq genişlənməlidir (aşağı).
+Bir dəyişikliklə **7× throughput, 40× latency**. Qalan tavan (~25–33 RPS): 4 replika (~1 nüvə Python/GIL hər replikada) — **düzəliş (audit 2026-09-28 DB-03): `ASGI_THREADS` slot sayı DEYİL**, bax §4.1 — 5000 üçün memarlıq genişlənməlidir (aşağı).
 
 ## 3. Repo-da edilmiş kalıcı dəyişikliklər (bu commit)
 
@@ -43,7 +43,7 @@ Hamısı `docker-compose.prod.yml` default-larıdır → **deploy edildikdə avt
 `.env` faylı `github-runner`-ə məxsusdur (root/sudo ilə redaktə et). Deploy defaultları da yaxşıdır, amma tam 5000 həcmi üçün:
 
 ```bash
-APP_REPLICAS=12            # 12 × 12 thread = 144 eyni-anlı sync slot
+APP_REPLICAS=12            # 12 replika ≈ 12 nüvə Python; eyni-anlı sorğu tavanı MAX_INFLIGHT_REQUESTS × 12 (bax §4.1)
 APP_CPU_LIMIT=4.0
 ASGI_THREADS=12
 CELERY_REPLICAS=2
@@ -60,6 +60,44 @@ REDIS_CPU_LIMIT=2.0
 REDIS_MEM_LIMIT=4096M
 NGINX_CPU_LIMIT=4.0
 ```
+
+### 4.1 Tutum modeli — düzəliş (Audit 2026-09-28 DB-03)
+
+Əvvəlki «replika × `ASGI_THREADS` = eyni-anlı sync slot» (məs. 12 × 12 = 144)
+hesabı **YANLIŞDIR**. Django ASGI altında hər HTTP sorğusu üçün
+`ThreadSensitiveContext` açır və asgiref ona **ayrıca thread** verir; Daphne-nin
+`ASGI_THREADS`-i yalnız event loop-un default executor-unu ölçür (probe:
+`ASGI_THREADS=12`, 60 paralel sync sorğu → 60 thread, 60-ı eyni anda view-da).
+Yəni:
+
+* **Thread = sorğu.** Yük artanda thread-lər sərhədsiz çoxalırdı; real tavanlar
+  GIL (~1 nüvə Python / replika) və PgBouncer hovuzudur (session rejimi +
+  `CONN_MAX_AGE=0` → hər in-flight sorğu sorğu boyu bir server bağlantısı tutur;
+  default pool 150 + reserve 50).
+* Əvvəl heç bir admission control yox idi (yalnız yazılar üçün
+  `RequestQueueMiddleware`, 8/proses): həddən artıq yük «503» yox, «hamı yavaş» +
+  PgBouncer növbəsində 120 s-ə qədər gözləmə kimi görünürdü (iyul k6 login
+  pilləsi: p95 0.9 s → 16 s, 0 % xəta).
+
+**İndi:** `core/middleware_concurrency.ConcurrencyLimitMiddleware` (sessiya/auth-dan
+ƏVVƏL) proses başına **`MAX_INFLIGHT_REQUESTS`** (default **32**, `0` = söndürülüb)
+sorğu buraxır — BÜTÜN metodlar; yer yoxdursa `MAX_INFLIGHT_WAIT_SECONDS` (2 s)
+gözləyir, sonra **503 + `Retry-After: 5`** (`X-Concurrency-Limited: 1`).
+`/static/ /media/ /metrics/ /ping/ /health/ /ws/` istisnadır.
+
+Ölçü qaydası (session pooling):
+
+```
+MAX_INFLIGHT_REQUESTS × APP_REPLICAS  ≲  PGBOUNCER_DEFAULT_POOL_SIZE + PGBOUNCER_RESERVE_POOL_SIZE
+8 replika:  (150 + 50) / 8  ≈ 25      12 replika: (200 + 50) / 12 ≈ 20
+```
+
+Default 32 × 8 = 256 hovuzdan bir az böyükdür — pik anında bir hissə PgBouncer-də
+qısa gözləyir; sərt uyğunluq üçün `.env`-də `MAX_INFLIGHT_REQUESTS=24` qoyun.
+(Qeyd: compose `env_file` işlətmir — dəyişən `x-app-env`-ə əlavə olunmalıdır.)
+`ASGI_THREADS` qalır, amma tutum düsturunda iştirak etmir. Monitorinq: 503
+sayı `http_requests_total{status_code="503"}` və app log-unda
+`concurrency limit: … rədd edildi`.
 
 **Deploy:** normal CD (main-ə merge) VƏ YA serverdə:
 `cd ~/EducationManagementStudentArena && sudo docker compose -f docker-compose.prod.yml up -d`
@@ -87,7 +125,7 @@ Detallar: `docs/performance/FAZA2_3B_TRANSACTION_POOLING.md`.
 
 ## 7. Deploy-dan SONRA təkrar edilməli testlər (server qayıdanda)
 
-1. `login` ladder (deploy sonrası) — 96–144 slot ilə tavanı təsdiqlə.
+1. `login` ladder (deploy sonrası) — `MAX_INFLIGHT_REQUESTS × APP_REPLICAS` tavanını və 503 payını təsdiqlə (§4.1).
 2. `dashboard` ladder (əvvəlki run şəbəkə qopması ilə pozuldu — təkrar).
 3. `exam-day-5000-test.js` (dedik imtahan yaradılıb `K6_TEST_EXAM_SLUG` verildikdən sonra, `K6_CONFIRM_DESTRUCTIVE_EXAM_FLOW=true`).
 4. `websocket-load-test.js K6_PROFILE=ws-1000` — canlı proctor WS həcmi.
