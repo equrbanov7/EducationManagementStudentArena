@@ -25,6 +25,7 @@ from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAttempt, ExamQuestion, ExamQuestionOption, StudentGroup
+from apps.exams.tests.option_token_utils import option_value
 from apps.exams.tests.test_views import _assign_user_to_org, _login_with_org
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -134,7 +135,7 @@ class FinishAnswerWriteBatchTest(_OrgBase):
         payload = {"submit_action": "finish"}
         for index, q in enumerate(questions):
             option = q.options.get(label="A" if index < correct_first else "B")
-            payload[f"q_{q.id}"] = str(option.id)
+            payload[f"q_{q.id}"] = option_value(attempt, option)
             payload[f"q_present_{q.id}"] = "1"
         with CaptureQueriesContext(connection) as ctx:
             response = client.post(take_url, payload, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
@@ -175,7 +176,7 @@ class FinishAnswerWriteBatchTest(_OrgBase):
                 {
                     "submit_action": "autosave",
                     "changed_questions[]": [str(q0.id)],
-                    f"q_{q0.id}": str(option.id),
+                    f"q_{q0.id}": option_value(attempt, option),
                     "autosave_revision": str(revision),
                 },
                 HTTP_X_REQUESTED_WITH="XMLHttpRequest",

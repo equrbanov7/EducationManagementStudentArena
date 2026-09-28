@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES
 from apps.exams.models import BankQuestion, BankQuestionOption, QuestionBlock
 from apps.exams.services.import_media import attach_import_media_batch
+from apps.exams.services.option_order import relabel_options_by_creation_order, shuffled_option_rows
 from apps.exams.services.question_bank_attach import _question_fingerprint, bank_questions_queryset
 from core.audit import log_action
 from core.constants import AuditAction
@@ -160,18 +161,17 @@ def _save_bank_questions(
         return 0
     with transaction.atomic():
         created = BankQuestion.objects.bulk_create(rows, batch_size=100)
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılır və
+        # A..E yenidən hərflənir; media mənbə etiketi ilə bağlandığı üçün
+        # math_token olanda yenidən hərfləmə media-dan sonra edilir.
         option_rows = []
         for bank_question, payload in zip(created, option_payloads):
             if not payload:
                 continue
             options, correct = payload
-            for label in "ABCDE":
-                if label in options:
-                    option_rows.append(
-                        BankQuestionOption(
-                            question=bank_question, label=label, text=options[label], is_correct=(label in correct)
-                        )
-                    )
+            option_rows.extend(
+                shuffled_option_rows(BankQuestionOption, bank_question, options, correct, relabel=not math_token)
+            )
         if option_rows:
             BankQuestionOption.objects.bulk_create(option_rows, batch_size=500)
 
@@ -183,6 +183,7 @@ def _save_bank_questions(
                 owner_id=media_owner_id or created_by.pk,
                 organization_id=bank.organization_id,
             )
+            relabel_options_by_creation_order(BankQuestionOption, [question.pk for question in created])
     return len(created)
 
 

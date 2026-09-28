@@ -83,6 +83,11 @@ class TestAnswerWriteBatch:
 
 
 def _save_test_answer_if_changed(answer, question, selected_option_ids, current_selected_option_ids, *, batch=None):
+    # Audit 2026-09-28 EX28-01: ``None`` — göndərilən dəyərlərin heç biri
+    # tanınan option tokeni deyil (saxta və ya deploydan əvvəlki köhnə səhifə).
+    # Mövcud seçim silinmir, heç nə yazılmır.
+    if selected_option_ids is None:
+        return
     valid_option_ids = _valid_question_option_ids(question)
     selected_option_ids = selected_option_ids & valid_option_ids
 

@@ -30,6 +30,7 @@ from apps.exams.models import (
     QuestionBlock,
     StudentGroup,
 )
+from apps.exams.tests.option_token_utils import option_value
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -3483,7 +3484,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
                 {
                     "submit_action": "autosave",
                     "changed_questions[]": [str(question.id)],
-                    f"q_{question.id}": str(correct_option.id),
+                    f"q_{question.id}": option_value(attempt, correct_option),
                 },
                 HTTP_X_REQUESTED_WITH="XMLHttpRequest",
             )
@@ -4807,8 +4808,16 @@ Cavab: A
         self.assertEqual(ExamQuestionOption.objects.filter(question__in=imported_questions).count(), 2500)
         self.assertEqual(imported_questions.get(order=31).points, 5)
         first_imported = imported_questions.first()
-        self.assertEqual(first_imported.options.get(label="A").text, "Correct answer 1")
-        self.assertTrue(first_imported.options.get(label="A").is_correct)
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb A..E
+        # yenidən hərflənir — düzgün cavab mətnə bağlıdır, hərfi təsadüfidir.
+        self.assertEqual(first_imported.options.get(is_correct=True).text, "Correct answer 1")
+        self.assertEqual([option.label for option in first_imported.options.order_by("id")], list("ABCDE"))
+        correct_labels = set(
+            ExamQuestionOption.objects.filter(question__in=imported_questions, is_correct=True).values_list(
+                "label", flat=True
+            )
+        )
+        self.assertGreater(len(correct_labels), 1)
         mock_schedule_warmup.assert_called_once()
 
     @patch("apps.exams.services.difficulty.schedule_ai_question_difficulty_warmup")
@@ -4888,8 +4897,9 @@ Cavab: A
         self.assertEqual(imported_questions.count(), 300)
         self.assertEqual(ExamQuestionOption.objects.filter(question__in=imported_questions).count(), 1500)
         self.assertEqual(imported_questions.first().points, 2)
+        # Audit 2026-09-28 EX28-01: hərf təsadüfidir — uzun variant düzgün cavabdır.
         self.assertGreater(
-            len(imported_questions.get(order=35).options.get(label="A").text),
+            len(imported_questions.get(order=35).options.get(is_correct=True).text),
             255,
         )
         mock_schedule_warmup.assert_called_once()

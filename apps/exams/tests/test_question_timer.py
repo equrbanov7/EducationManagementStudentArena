@@ -18,6 +18,7 @@ from django.utils import timezone
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, ExamQuestionOption
 from apps.exams.services.question_timer import mark_question_seen, question_timer_expired
+from apps.exams.tests.option_token_utils import option_value
 from apps.exams.tests.test_views import _assign_user_to_org, _login_with_org
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -208,7 +209,7 @@ class ExpiredQuestionSaveEnforcementTests(QuestionTimerTestBase):
             self._take_url(attempt),
             {
                 "submit_action": "autosave",
-                f"q_{question.id}": str(option.id),
+                f"q_{question.id}": option_value(attempt, option),
                 "changed_questions[]": [str(question.id)],
             },
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
