@@ -46,6 +46,7 @@ jobs:
       - name: 🔎 Host vəziyyəti
         run: |
           set -euo pipefail
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
           host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
           {
             echo "## 🛠 Host: $(host hostname)"
@@ -62,6 +63,7 @@ jobs:
             fi
             echo "--- xidmətlər (autostart)"
             host systemctl is-enabled docker || true
+            # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
             host sh -c 'for u in $(systemctl list-unit-files "actions.runner*" --no-legend | cut -d" " -f1); do printf "%s: " "$u"; systemctl is-enabled "$u"; done'
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
@@ -72,9 +74,11 @@ jobs:
           FORCE: ${{ github.event.inputs.force }}
         run: |
           set -euo pipefail
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
           host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
           # 1) Reboot-dan sonra hər şey özü qalxmalıdır: docker və runner xidmətləri enabled olmalıdır.
           test "$(host systemctl is-enabled docker)" = "enabled" || { echo "docker autostart deyil — reboot ləğv" >&2; exit 1; }
+          # shellcheck disable=SC2016
           runners="$(host sh -c 'systemctl list-unit-files "actions.runner*" --no-legend | cut -d" " -f1')"
           test -n "$runners" || { echo "runner systemd xidməti tapılmadı — reboot-dan sonra uzaq idarə itə bilər, ləğv" >&2; exit 1; }
           for u in $runners; do
