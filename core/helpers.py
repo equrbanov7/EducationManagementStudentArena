@@ -84,6 +84,11 @@ def _safe_same_origin_redirect_path(request, candidate_url):
         return ""
 
     path = parsed.path or "/"
+    # 2026-09-29 (LX-SEC LXS-14): `https://<host>//evil.com` host yoxlamasından keçir, amma
+    # yol `//evil.com` olur — brauzer bunu protokol-nisbi (başqa sayta) yönləndirmə sayır.
+    # Legitim daxili yol heç vaxt `//` və ya `/\` ilə başlamır → rədd.
+    if path.startswith("//") or path.startswith("/\\"):
+        return ""
     query = f"?{parsed.query}" if parsed.query else ""
     fragment = f"#{parsed.fragment}" if parsed.fragment else ""
     return f"{path}{query}{fragment}"
