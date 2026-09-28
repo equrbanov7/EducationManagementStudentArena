@@ -42,9 +42,28 @@
     };
 
     const COURSE_ID = cfg.courseId;
-    const CSRF = (window.EMSCore && EMSCore.getCsrfToken())
-        || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
     const $ = id => document.getElementById(id);
+
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (aria-live, dizayn sistemi);
+    // sorğular EMSCore.fetchJSON ilə — 403/500 və qeyri-JSON cavab `catch`-ə düşür,
+    // serverin `error` mətni göstərilir.
+    function notifyError(message) {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
+            window.EMSToast.show(message, 'error');
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
+    function requestErrorText(err, prefix, fallback) {
+        const payload = err && err.payload;
+        if (payload && typeof payload === 'object') {
+            if (payload.view_as_blocked) return ''; // EMSCore.fetchJSON artıq göstərib
+            if (payload.error) return prefix + payload.error;
+        }
+        return fallback || I18N.serverError;
+    }
 
     function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
         return {
@@ -137,8 +156,7 @@
         const container = $(mode + 'GroupList');
         container.innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
 
-        fetch(`/projects/api/groups/?course_id=${COURSE_ID}`)
-            .then(r => r.json())
+        EMSCore.fetchJSON(`/projects/api/groups/?course_id=${COURSE_ID}`)
             .then(data => {
                 const groups = data.groups || [];
                 if(!groups.length) {
@@ -186,8 +204,7 @@
 
         container.innerHTML = `<div class="d-flex flex-column gap-2 p-2" aria-hidden="true"><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span><span class="skeleton skeleton-line skeleton-line--sm"></span></div>`;
 
-        fetch(`/projects/api/students/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
-            .then(r => r.json())
+        EMSCore.fetchJSON(`/projects/api/students/?course_id=${COURSE_ID}&groups=${encodeURIComponent(groups.join(','))}`)
             .then(data => {
                 const students = data.students || [];
                 syncSelectedStudentsFromGroups(mode, students);
@@ -271,14 +288,12 @@
         btn.disabled = true;
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${I18N.submitting}`;
 
-        fetch(`/projects/create/${COURSE_ID}/`, {
+        EMSCore.fetchJSON(`/projects/create/${COURSE_ID}/`, {
             method: 'POST',
-            body: buildFormData('add', e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+            body: buildFormData('add', e.target)
         })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert(`${I18N.createErrorPrefix}${d.error || I18N.fetchFailed}`))
-        .catch(() => alert(I18N.serverError))
+        .then(d => d && d.success ? location.reload() : notifyError(`${I18N.createErrorPrefix}${(d && d.error) || I18N.fetchFailed}`))
+        .catch(err => notifyError(requestErrorText(err, I18N.createErrorPrefix)))
         .finally(() => {
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-check"></i> ${I18N.add}`;
@@ -298,10 +313,9 @@
 
         bootstrap.Modal.getOrCreateInstance($('editProjectModal')).show();
 
-        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-            .then(r => r.json())
+        EMSCore.fetchJSON(url)
             .then(res => {
-                if(!res.success) return alert(I18N.fetchFailed);
+                if(!res || !res.success) return notifyError(I18N.fetchFailed);
 
                 const d = res.data;
 
@@ -321,7 +335,7 @@
                 );
                 loadGroups('edit', d.group_names || []);
             })
-            .catch(() => alert(I18N.error));
+            .catch(err => notifyError(requestErrorText(err, I18N.updateErrorPrefix, I18N.error)));
     });
 
     $('editProjectForm')?.addEventListener('submit', e => {
@@ -333,14 +347,12 @@
         btn.disabled = true;
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${I18N.submitting}`;
 
-        fetch(`/projects/${projectId}/edit/`, {
+        EMSCore.fetchJSON(`/projects/${projectId}/edit/`, {
             method: 'POST',
-            body: buildFormData('edit', e.target),
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+            body: buildFormData('edit', e.target)
         })
-        .then(r => r.json())
-        .then(d => d.success ? location.reload() : alert(`${I18N.updateErrorPrefix}${d.error || I18N.fetchFailed}`))
-        .catch(() => alert(I18N.serverError))
+        .then(d => d && d.success ? location.reload() : notifyError(`${I18N.updateErrorPrefix}${(d && d.error) || I18N.fetchFailed}`))
+        .catch(err => notifyError(requestErrorText(err, I18N.updateErrorPrefix)))
         .finally(() => {
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-check"></i> ${I18N.save}`;
@@ -352,21 +364,17 @@
         if(!btn) return;
         e.preventDefault();
 
-        const executeDelete = () => fetch(btn.dataset.url, {
-            method: 'POST',
-            headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-        })
-        .then(r => r.json())
+        const executeDelete = () => EMSCore.fetchJSON(btn.dataset.url, {method: 'POST'})
         .then(d => {
-            if (d.success) {
+            if (d && d.success) {
                 location.reload();
                 return true;
             }
-            alert(I18N.error);
+            notifyError((d && d.error) ? `${I18N.updateErrorPrefix}${d.error}` : I18N.error);
             return false;
         })
-        .catch(() => {
-            alert(I18N.serverError);
+        .catch(err => {
+            notifyError(requestErrorText(err, I18N.updateErrorPrefix));
             return false;
         });
 

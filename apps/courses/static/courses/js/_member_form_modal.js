@@ -52,6 +52,18 @@
         return el ? el.dataset : {};
     }
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (aria-live, dizayn sistemi).
+    function toast(message, level) {
+        if (!message) {
+            return;
+        }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, level || "error");
+        } else if (window.console && window.console.error) {
+            window.console.error(message);
+        }
+    }
+
     function byId(id) {
         return document.getElementById(id);
     }
@@ -444,7 +456,7 @@
         var button = form.querySelector('button[type="submit"]');
         var formData = new FormData(form);
         if (formData.getAll(idsField).length === 0) {
-            window.alert(emptyMessage);
+            toast(emptyMessage, "warning");
             return;
         }
         var originalText = button ? button.innerText : "";
@@ -467,18 +479,22 @@
                     window.location.reload();
                     return;
                 }
-                window.alert((d.i18nErrorPrefix || "") + ((data && data.error) || d.i18nUnknownError || ""));
+                toast((d.i18nErrorPrefix || "") + ((data && data.error) || d.i18nUnknownError || ""));
                 restore();
             })
             .catch(function (error) {
                 var payloadError = error && error.payload && error.payload.error;
+                if (error && error.payload && error.payload.view_as_blocked) {
+                    restore(); // EMSCore.fetchJSON səbəbi artıq göstərib
+                    return;
+                }
                 if (payloadError) {
-                    window.alert((d.i18nErrorPrefix || "") + payloadError);
+                    toast((d.i18nErrorPrefix || "") + payloadError);
                 } else {
                     if (window.console && window.console.error) {
                         window.console.error("Error:", error);
                     }
-                    window.alert(d.i18nServerError || "");
+                    toast(d.i18nServerError || "");
                 }
                 restore();
             });
@@ -515,14 +531,20 @@
                         if (data && data.success) {
                             window.location.reload();
                         } else {
-                            window.alert((d.i18nDeleteFailedPrefix || "") + ((data && data.error) || d.i18nError || ""));
+                            toast((d.i18nDeleteFailedPrefix || "") + ((data && data.error) || d.i18nError || ""));
                         }
                     })
                     .catch(function (error) {
                         if (window.console && window.console.error) {
                             window.console.error("Error:", error);
                         }
-                        window.alert(d.i18nServerError || "");
+                        var payload = error && error.payload;
+                        if (payload && payload.view_as_blocked) {
+                            return;
+                        }
+                        toast((payload && payload.error)
+                            ? (d.i18nDeleteFailedPrefix || "") + payload.error
+                            : d.i18nServerError || "");
                     });
             });
         };

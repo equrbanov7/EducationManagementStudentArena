@@ -14,6 +14,34 @@
     const confirmFinishLabBtn = document.getElementById('confirmFinishLabBtn');
     let finishConfirmModal = null;
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; HTTP xətası (403/500,
+    // qeyri-JSON səhifə) JSON parse xətası kimi itmir — server `error`-u göstərilir.
+    function notifyError(message) {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
+            window.EMSToast.show(message, 'error');
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
+    function readJsonResponse(response) {
+        return response.text().then((text) => {
+            let data = null;
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch (e) {
+                data = null;
+            }
+            if (!response.ok || !data) {
+                const err = new Error('HTTP ' + response.status);
+                err.payload = data;
+                throw err;
+            }
+            return data;
+        });
+    }
+
     let labStartTime = localStorage.getItem('lab_' + LAB_ID + '_start');
     if (!labStartTime) {
         labStartTime = new Date().toISOString();
@@ -247,19 +275,22 @@
             body: new FormData(labForm),
             headers: { 'X-CSRFToken': CSRF },
         })
-            .then((r) => r.json())
+            .then(readJsonResponse)
             .then((data) => {
                 if (data.success) {
                     localStorage.removeItem('lab_' + LAB_ID + '_start');
                     window.location.href = data.redirect_url || '/';
                 } else {
-                    alert(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
+                    notifyError(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
                     setSubmitButtonState(false);
                     setConfirmButtonState(false);
                 }
             })
-            .catch(() => {
-                alert(t('errorServer', 'Server error'));
+            .catch((err) => {
+                const payload = err && err.payload;
+                notifyError(payload && payload.error
+                    ? t('errorPrefix', 'Error') + ': ' + payload.error
+                    : t('errorServer', 'Server error'));
                 setSubmitButtonState(false);
                 setConfirmButtonState(false);
             });

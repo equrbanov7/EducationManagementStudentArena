@@ -50,11 +50,39 @@
                 }
             }
 
+            // Audit 2026-09-28 EX28-10: canlı sessiya YARATMAQ yalnız CSRF-qorumalı POST-dur
+            // (GET təsdiq səhifəsi göstərir). Ona görə keçid əvəzinə gizli forma göndərilir.
+            function submitStartForm(targetUrl, forceNew) {
+                if (!targetUrl) {
+                    return;
+                }
+                var form = document.createElement("form");
+                form.method = "post";
+                form.action = targetUrl;
+                form.hidden = true;
+
+                var csrfInput = document.createElement("input");
+                csrfInput.type = "hidden";
+                csrfInput.name = "csrfmiddlewaretoken";
+                // getCsrfToken: kuki (`csrftoken`) → DOM → meta (kuki adı mühitə görə dəyişə bilər).
+                csrfInput.value = (window.EMSCore && window.EMSCore.getCsrfToken && window.EMSCore.getCsrfToken()) || "";
+                form.appendChild(csrfInput);
+
+                if (forceNew) {
+                    var forceInput = document.createElement("input");
+                    forceInput.type = "hidden";
+                    forceInput.name = "force_new";
+                    forceInput.value = "1";
+                    form.appendChild(forceInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+
             function navigateToStart(trigger) {
                 var targetUrl = trigger ? trigger.getAttribute("href") : "";
-                if (targetUrl) {
-                    window.location.href = targetUrl;
-                }
+                submitStartForm(targetUrl, false);
             }
 
             function hydrateTriggerFromPayload(trigger, payload) {
@@ -152,9 +180,7 @@
                     if (!targetUrl && activeTrigger) {
                         targetUrl = activeTrigger.getAttribute("href") || "";
                     }
-                    if (targetUrl) {
-                        window.location.href = targetUrl;
-                    }
+                    submitStartForm(targetUrl, true);
                 });
             }
         })();

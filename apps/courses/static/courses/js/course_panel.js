@@ -208,7 +208,7 @@
         .catch(function (err) {
           btn.disabled = false;
           var msg = (err && err.payload && err.payload.error) || root.dataset.i18nGenericError;
-          if (window.EMSToast && window.EMSToast.show) { window.EMSToast.show(msg, "error"); } else { alert(msg); }
+          if (window.EMSToast && window.EMSToast.show) { window.EMSToast.show(msg, "error"); } else if (window.console) { window.console.error(msg); }
         });
     });
   }

@@ -12,6 +12,16 @@
         return document.getElementById("memberAccordionConfig");
     }
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (aria-live, dizayn sistemi).
+    function toastError(message) {
+        if (!message) { return; }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
     window.EMSReady.once("member-accordion-delete", function () {
         document.addEventListener("click", async function (e) {
             var btn = e.target.closest(".js-delete-member");
@@ -36,18 +46,11 @@
             btn.disabled = true;
 
             try {
-                var resp = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": EMSCore.getCsrfToken(),
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
+                // EMSCore.fetchJSON: 403/500 və qeyri-JSON cavab `catch`-ə düşür (err.payload).
+                var data = await EMSCore.fetchJSON(url, { method: "POST" });
 
-                var data = await resp.json();
-
-                if (!resp.ok || !data.success) {
-                    alert(data.error || cfg.dataset.i18nErrorDeleteFailed);
+                if (!data || !data.success) {
+                    toastError((data && data.error) || cfg.dataset.i18nErrorDeleteFailed);
                     btn.disabled = false;
                     return;
                 }
@@ -77,7 +80,14 @@
 
             } catch (err) {
                 console.error(err);
-                alert(cfg.dataset.i18nErrorNetwork);
+                var payload = err && err.payload;
+                if (!(payload && typeof payload === "object" && payload.view_as_blocked)) {
+                    if (err && err.status) {
+                        toastError((payload && typeof payload === "object" && payload.error) || cfg.dataset.i18nErrorDeleteFailed);
+                    } else {
+                        toastError(cfg.dataset.i18nErrorNetwork);
+                    }
+                }
                 btn.disabled = false;
             }
         });

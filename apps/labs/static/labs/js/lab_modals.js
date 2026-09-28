@@ -27,7 +27,6 @@
     const ds = cfgEl.dataset;
 
     const COURSE_ID = parseInt(ds.courseId, 10);
-    const CSRF = EMSCore.getCsrfToken();
     const $ = id => document.getElementById(id);
 
     const I18N = {
@@ -50,6 +49,26 @@
     };
 
     // escapeHtml is provided by labs/js/utils/escape.js
+
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (aria-live, dizayn sistemi);
+    // sorğular EMSCore.fetchJSON ilə — 403/500 və qeyri-JSON cavab `catch`-ə düşür.
+    function notifyError(message) {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
+            window.EMSToast.show(message, 'error');
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
+    function requestErrorText(err) {
+        var payload = err && err.payload;
+        if (payload && typeof payload === 'object') {
+            if (payload.view_as_blocked) return ''; // EMSCore.fetchJSON artıq göstərib
+            if (payload.error) return I18N.errorPrefix + ': ' + payload.error;
+        }
+        return I18N.errorServer;
+    }
 
     function createSelectionState(initialSelectedIds, initialManuallyDeselectedAutoIds) {
         var normalizedIds = (initialSelectedIds || []).map(function(id) {
@@ -138,7 +157,7 @@
         window.EMSConfirm.open({ body: options.message || I18N.confirmDeleteLab, danger: true }).then(function (ok) {
             if (!ok) return;
             Promise.resolve(options.onConfirm && options.onConfirm()).catch(function() {
-                alert(I18N.errorServer);
+                notifyError(I18N.errorServer);
             });
         });
     }
@@ -146,7 +165,7 @@
     window.openEditLabModal = function(url) {
         const modalEl = $('editLabModal');
         if (!modalEl) {
-            alert(I18N.modalNotFound);
+            notifyError(I18N.modalNotFound);
             return;
         }
 
@@ -157,11 +176,10 @@
         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
         modal.show();
 
-        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-        .then(r => r.json())
+        EMSCore.fetchJSON(url)
         .then(res => {
-            if (!res.success) {
-                alert(I18N.errorDataNotLoaded + ': ' + (res.error || I18N.errorUnknown));
+            if (!res || !res.success) {
+                notifyError(I18N.errorDataNotLoaded + ': ' + ((res && res.error) || I18N.errorUnknown));
                 return;
             }
 
@@ -199,8 +217,12 @@
             );
             loadGroups('edit', d.group_names || []);
         })
-        .catch(function() {
-            alert(I18N.errorGeneric);
+        .catch(function(err) {
+            var payload = err && err.payload;
+            if (payload && typeof payload === 'object' && payload.view_as_blocked) return;
+            notifyError(payload && typeof payload === 'object' && payload.error
+                ? I18N.errorDataNotLoaded + ': ' + payload.error
+                : I18N.errorGeneric);
         });
     };
 
@@ -211,21 +233,17 @@
             confirmLabel: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || I18N.buttonDelete,
             confirmButtonClass: 'btn btn-danger',
             onConfirm: function() {
-                return fetch(url, {
-                    method: 'POST',
-                    headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
-                })
-                .then(function(r) { return r.json(); })
+                return EMSCore.fetchJSON(url, {method: 'POST'})
                 .then(function(d) {
-                    if (d.success) {
+                    if (d && d.success) {
                         location.reload();
                         return true;
                     }
-                    alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
+                    notifyError(I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
                     return false;
                 })
-                .catch(function() {
-                    alert(I18N.errorServer);
+                .catch(function(err) {
+                    notifyError(requestErrorText(err));
                     return false;
                 });
             }
@@ -391,17 +409,15 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-            fetch('/labs/create/' + COURSE_ID + '/', {
+            EMSCore.fetchJSON('/labs/create/' + COURSE_ID + '/', {
                 method: 'POST',
-                body: buildFormData('add', this),
-                headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+                body: buildFormData('add', this)
             })
-            .then(r => r.json())
             .then(function(d) {
-                if (d.success) location.reload();
-                else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
+                if (d && d.success) location.reload();
+                else notifyError(I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
             })
-            .catch(function() { alert(I18N.errorServer); })
+            .catch(function(err) { notifyError(requestErrorText(err)); })
             .finally(function() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check me-1"></i> ' + I18N.buttonCreate;
@@ -420,17 +436,15 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
 
-            fetch('/labs/' + labId + '/edit/', {
+            EMSCore.fetchJSON('/labs/' + labId + '/edit/', {
                 method: 'POST',
-                body: buildFormData('edit', this),
-                headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
+                body: buildFormData('edit', this)
             })
-            .then(r => r.json())
             .then(function(d) {
-                if (d.success) location.reload();
-                else alert(I18N.errorPrefix + ': ' + (d.error || I18N.errorUnknown));
+                if (d && d.success) location.reload();
+                else notifyError(I18N.errorPrefix + ': ' + ((d && d.error) || I18N.errorUnknown));
             })
-            .catch(function() { alert(I18N.errorServer); })
+            .catch(function(err) { notifyError(requestErrorText(err)); })
             .finally(function() {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-save me-1"></i> ' + I18N.buttonSave;

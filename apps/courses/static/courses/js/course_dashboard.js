@@ -91,7 +91,7 @@
             return;
           }
           var msg = (err && err.payload && err.payload.error) || d("i18nGenericError");
-          if (window.EMSToast && window.EMSToast.show) { window.EMSToast.show(msg, "error"); } else { alert(msg); }
+          if (window.EMSToast && window.EMSToast.show) { window.EMSToast.show(msg, "error"); } else if (window.console) { window.console.error(msg); }
         });
     });
   }
@@ -112,13 +112,22 @@
   window.deleteMember = function (memberId, userName) {
     window.EMSConfirm.open({ body: userName + d("i18nMemberDeleteSuffix"), danger: true }).then(function (ok) {
       if (!ok) return;
-      fetch(d("deleteMemberUrlTpl").replace("0", memberId), {
-        method: "POST",
-        headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrf() }
-      })
-        .then(function (r) { return r.json(); })
-        .then(function (data) { return data.success ? location.reload() : alert(data.error); })
-        .catch(function () { alert(d("i18nGenericError")); });
+      // Audit 2026-09-28 FQ-FE-4: alert() → EMSToast; EMSCore.fetchJSON 403/500 və
+      // qeyri-JSON cavabı `catch`-ə salır (əvvəl JSON parse xətası kimi itirdi).
+      var toastError = function (msg) {
+        if (!msg) { return; }
+        if (window.EMSToast && window.EMSToast.show) { window.EMSToast.show(msg, "error"); } else if (window.console) { window.console.error(msg); }
+      };
+      window.EMSCore.fetchJSON(d("deleteMemberUrlTpl").replace("0", memberId), { method: "POST" })
+        .then(function (data) {
+          if (data && data.success) { location.reload(); return; }
+          toastError((data && data.error) || d("i18nGenericError"));
+        })
+        .catch(function (err) {
+          var payload = err && err.payload;
+          if (payload && typeof payload === "object" && payload.view_as_blocked) { return; }
+          toastError((payload && typeof payload === "object" && payload.error) || d("i18nGenericError"));
+        });
     });
   };
 })();
