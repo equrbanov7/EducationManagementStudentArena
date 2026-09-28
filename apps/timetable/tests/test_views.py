@@ -97,8 +97,14 @@ class TimetableViewsTest(TestCase):
 
     # ── Növbə siyasəti ──────────────────────────────────────────────────
     def test_policy_save_for_level_and_group(self):
-        response = self._post(
+        # Audit 2026-09-28 TT-1: pillə defoltu org-wide siyasətdir — fakültə əhatəli
+        # koordinator onu dəyişə BİLMİR (əvvəl bu test məhz bunu edirdi); RİM dəyişir.
+        denied = self._post(
             self.w["coordinator"], "timetable:api_policy", {"level": "master", "bands": ["afternoon", "evening"]}
+        )
+        self.assertEqual(denied.status_code, 403, denied.content)
+        response = self._post(
+            self.w["rim"], "timetable:api_policy", {"level": "master", "bands": ["afternoon", "evening"]}
         )
         self.assertEqual(response.status_code, 200, response.content)
         group = self.w["groups"]["A-101"]
@@ -117,7 +123,7 @@ class TimetableViewsTest(TestCase):
             {"group": str(self.w["groups"]["B-101"].pk), "bands": ["morning"]},
         )
         self.assertEqual(outside.status_code, 404)
-        empty = self._post(self.w["coordinator"], "timetable:api_policy", {"level": "bachelor", "bands": []})
+        empty = self._post(self.w["rim"], "timetable:api_policy", {"level": "bachelor", "bands": []})
         self.assertEqual(empty.status_code, 400)
 
     # ── Yoxlama + işləmə ────────────────────────────────────────────────

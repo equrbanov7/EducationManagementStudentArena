@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.db import transaction
+from django.db.models import Sum
+from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
 from ..constants import (
+    ACTIVITY_TOTAL_FIELD,
     EDITABLE_STATUSES,
     TOTAL_HOUR_FIELDS,
     DegreeLevel,
@@ -17,7 +20,7 @@ from ..constants import (
     Season,
     TaskStatus,
 )
-from ..models import TeachingTask, TeachingTaskRow
+from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from .people import resolve_chair
 from .plan_calendar import season_from_period as _season_from_period
 from .scoping import WorkloadDenied, ensure_can_manage
@@ -272,6 +275,38 @@ def _sync_row_offerings(row, *, task, actor, request) -> dict:
     return compact(run_safely(sync_row_offerings, row, actor=actor, request=request, create=True))
 
 
+#: Audit 2026-09-28 W2 — HTTP qatı bu kodu 409 (vəziyyət toqquşması) kimi qaytarır.
+TOTAL_BELOW_ASSIGNED = "workload.total_below_assigned"
+
+
+def _ensure_totals_cover_assigned(row) -> None:
+    """Fəaliyyət cəmi artıq bölünmüş saatdan AZ ola bilməz (Audit 2026-09-28 W2).
+
+    Əks halda 30 saatı bölünmüş mühazirənin cəmi 10-a endirilir, bölgü isə
+    «tamamlanmış» sayılıb `confirm_distribution`-dan keçirdi.  Əvvəlcə bölgü
+    azaldılmalı, sonra cəm.
+    """
+    if row._state.adding:  # UUID pk yaradılanda da dolu olur — yeni sətirdə bölgü yoxdur
+        return
+    assigned = {
+        item["activity"]: int(item["total"] or 0)
+        for item in TeacherAssignment.objects.filter(row_id=row.pk).values("activity").annotate(total=Sum("hours"))
+    }
+    for activity, field in ACTIVITY_TOTAL_FIELD.items():
+        used = assigned.get(str(activity), 0)
+        total = int(getattr(row, field, 0) or 0)
+        if used > total:
+            raise WorkloadDenied(
+                TOTAL_BELOW_ASSIGNED,
+                pgettext(
+                    "workload",
+                    "Bu fəaliyyət üzrə artıq %(assigned)s saat bölünüb — cəmi %(total)s saata endirmək olmaz. "
+                    "Əvvəlcə bölgünü azaldın.",
+                )
+                % {"assigned": used, "total": total},
+            )
+
+
 @transaction.atomic
 def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -> TeachingTaskRow:
     """Sətir yaradır və ya redaktə edir (draft/distributing statuslarında)."""
@@ -281,6 +316,10 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
     row = row or TeachingTaskRow(organization=task.organization, task=task)
     if row.pk and row.task_id != task.pk:
         raise WorkloadDenied("workload.row_foreign", "Sətir bu tapşırığa aid deyil.")
+    if not row._state.adding:
+        # Audit 2026-09-28 W2: sətir kilidlənir — paralel bölgü (`assign_teacher`
+        # də bu sətri kilidləyir) ilə saat cəmi azaldılması yarışmasın.
+        row = TeachingTaskRow.objects.select_for_update(of=("self",)).get(pk=row.pk)
     old_values = {field: getattr(row, field) for field in TOTAL_HOUR_FIELDS + ("total_hours",)} if row.pk else None
 
     for field in ROW_SCALAR_FIELDS:
@@ -334,6 +373,7 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
     # göstərirdi (istifadəçini çaşdırırdı).
     manual_total = data.get("total_hours")
     row.total_hours = _coerce("total_hours", manual_total) if manual_total else row.computed_total_hours
+    _ensure_totals_cover_assigned(row)
     row.save()
 
     if "group_ids" in data:

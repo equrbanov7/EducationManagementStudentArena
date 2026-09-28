@@ -49,7 +49,9 @@ class AssignmentBalanceTest(TestCase):
             scope_type=RoleScopeType.COURSE,
         )
         self.actor = resolve_actor(self.head, self.org)
-        self.task = make_task(self.org, self.stack["chair"], created_by=self.head)
+        self.task = make_task(
+            self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.head
+        )  # Audit 2026-09-28 W1: göndərilməmiş qaralama bölünmür — zəncirdən keçmiş sənəd
         self.row = make_row(self.task, self.stack, lecture_total=30, seminar_total=30)
 
     def test_assignment_reduces_remaining_hours(self):
@@ -94,7 +96,7 @@ class AssignmentBalanceTest(TestCase):
         self.assertTrue(assignment.is_vacant)
 
     def test_first_assignment_moves_task_to_distributing(self):
-        self.assertEqual(self.task.status, TaskStatus.DRAFT)
+        self.assertEqual(self.task.status, TaskStatus.APPROVED)
         assign_teacher(
             row=self.row,
             actor=self.actor,

@@ -3,9 +3,9 @@
 Əvvəl `ensure_distribution_stage` qaralama istisnasını yalnız `submitted_at`
 ilə yoxlayırdı: tədris şöbəsinin yaratdığı, hələ göndərilməmiş tapşırığı
 kafedra müdiri bölüb «distributed» edir və `sync_offerings` açılış yaradırdı —
-koordinator vizası və dekan təsdiqi tam ötürülürdü. İstisna indi yalnız
-kafedranın ÖZÜ yaratdığı (yaradanın `workload.distribute` əhatəsi olan)
-qaralamalar üçündür; `confirm_distribution` də eyni qapıdan keçir.
+koordinator vizası və dekan təsdiqi tam ötürülürdü. Audit 2026-09-28 W1: kafedranın
+ÖZ qaralaması üçün qalan istisna da ləğv edildi — göndərilməmiş qaralama heç vaxt
+bölünmür; `confirm_distribution` də eyni qapıdan keçir.
 """
 
 from django.contrib.auth import get_user_model
@@ -82,13 +82,26 @@ class DraftDistributionGateTest(TestCase):
             self._assign(row)
 
     def test_chair_own_draft_keeps_the_legacy_exception(self):
+        """Audit 2026-09-28 W1: köhnə istisna LƏĞV edildi (ad tarixçə üçün saxlanılıb).
+
+        Əvvəl kafedra müdirinin ÖZ yaratdığı qaralama bölünüb «distributed»
+        edilir və açılış/qeydiyyat sinxronlaşdırılırdı — koordinator vizası və
+        dekan təsdiqi tam ötürülürdü.  Siyasət: HEÇ VAXT göndərilməmiş tapşırıq
+        açılış/qeydiyyat yarada bilməz, yaradanından asılı olmayaraq.
+        """
+        from apps.registrar.models import CourseOffering
+
         task = make_task(self.org, self.stack["chair"], created_by=self.head)
         row = make_row(task, self.stack, lecture_total=30, seminar_total=0)
-        self._assign(row)
-        result = confirm_distribution(task=task, actor=self.chair_actor)
+        with self.assertRaises(WorkloadDenied) as ctx:
+            self._assign(row)
+        self.assertEqual(ctx.exception.code, "workload.not_approved_yet")
+        with self.assertRaises(WorkloadDenied) as ctx:
+            confirm_distribution(task=task, actor=self.chair_actor)
+        self.assertEqual(ctx.exception.code, "workload.not_approved_yet")
         task.refresh_from_db()
-        self.assertEqual(task.status, TaskStatus.DISTRIBUTED)
-        self.assertEqual(result["sync"]["created"], 1)
+        self.assertEqual(task.status, TaskStatus.DRAFT)
+        self.assertFalse(CourseOffering.objects.filter(organization=self.org).exists())
 
     def test_approved_task_distributes_regardless_of_creator(self):
         task = make_task(self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.office)

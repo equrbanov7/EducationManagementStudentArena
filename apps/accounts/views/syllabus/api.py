@@ -219,7 +219,18 @@ def _do_new_version(request, organization, actor, payload):
     if syllabus is None:
         return None, _NOT_FOUND
     kind = payload.get("kind") if payload.get("kind") in {"minor", "major"} else "minor"
-    return services.create_next_version(syllabus=syllabus, actor=actor, kind=kind, request=request), _VERSION_CREATED
+    from django.db import IntegrityError, transaction
+
+    try:
+        with transaction.atomic():
+            version = services.create_next_version(syllabus=syllabus, actor=actor, kind=kind, request=request)
+    except IntegrityError:
+        # Audit 2026-09-28 SYL-6: ikiqat klik yarışı — 500 əvəzinə artıq açılmış
+        # versiya qaytarılır (servis dosyeni kilidləyir; bu, son müdafiə xəttidir).
+        version = services.open_version_for(syllabus)
+        if version is None:
+            raise
+    return version, _VERSION_CREATED
 
 
 @login_required

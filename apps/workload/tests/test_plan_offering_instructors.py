@@ -3,9 +3,8 @@
 Yoxlanılır: ``assign_teacher`` jurnal sahibini ``confirm_distribution``-u gözləmədən
 yazır; yükün öz yazdığı müəllim dəyişəndə əvəzlənir; «Fənn təhvili» və cədvəl
 redaktorunun qoyduğu FƏRQLİ müəllim əzilmir; vakant → boş; bal yaza bilməyən müəllim
-→ boş + hesabat (çökmə yox); köhnə kafedra qaralaması açılış YARATMIR (yalnız
-mövcudu yeniləyir); yeni qrup əlavəsi öz açılışını alır; birləşik qrupa alt qrup
-tələbələri düşür; ``teachers_for_offering`` API-si; ``sync_plan_offerings`` əmri.
+→ boş + hesabat (çökmə yox); köhnə kafedra qaralaması BÖLÜNMÜR (Audit 2026-09-28 W1);
+yeni qrup əlavəsi öz açılışını alır; birləşik qrupa alt qrup tələbələri düşür; ``teachers_for_offering`` API-si; ``sync_plan_offerings`` əmri.
 """
 
 from __future__ import annotations
@@ -22,7 +21,7 @@ from apps.registrar.models import CourseOffering, Enrollment, TeachingHandover
 from apps.workload.constants import Activity, TaskStatus
 from apps.workload.models import TeachingTask, TeachingTaskRow
 from apps.workload.public import teachers_for_offering
-from apps.workload.services import assign_teacher, confirm_distribution, save_row, unassign
+from apps.workload.services import WorkloadDenied, assign_teacher, confirm_distribution, save_row, unassign
 from core.constants import OrgUnitType, RoleScopeType
 
 from .factories import TEACHER_PERMS, activate_member, make_row, make_task
@@ -174,36 +173,38 @@ class ImmediateInstructorTest(_TeacherBase):
 class LegacyDraftAndRowEditTest(_TeacherBase):
     code = "P2L"
 
-    def test_legacy_chair_draft_creates_offerings_only_at_confirmation(self):
+    def test_legacy_chair_draft_no_longer_distributes(self):
+        """Audit 2026-09-28 W1: kafedranın ÖZ göndərilməmiş qaralaması da bölünmür.
+
+        Əvvəl bu test «köhnə qaralama açılışı yalnız təsdiqdə yaradır» istisnasını
+        kilidləyirdi; istisna koordinator/dekan zəncirini ötürdüyü üçün ləğv edildi.
+        """
         task = make_task(self.org, self.stack["chair"], created_by=self.chair_head)
         row = make_row(task, self.stack, lecture_total=30, seminar_total=0)
         row = TeachingTaskRow.objects.select_related("task").get(pk=row.pk)
-        assignment = self.assign(row, self.teacher_a)
+        with self.assertRaises(WorkloadDenied) as ctx:
+            self.assign(row, self.teacher_a)
+        self.assertEqual(ctx.exception.code, "workload.not_approved_yet")
+        with self.assertRaises(WorkloadDenied):
+            confirm_distribution(task=task, actor=self.actor(self.chair_head))
         self.assertFalse(CourseOffering.objects.filter(organization=self.org).exists())
-        self.assertEqual(assignment.offering_sync["not_created"], 1)
-        task.refresh_from_db()
-        result = confirm_distribution(task=task, actor=self.actor(self.chair_head))
-        self.assertEqual(result["sync"]["created"], 1)
-        self.assertEqual(self.offering().instructor_id, self.teacher_a.pk)
-        self.assertTrue(Enrollment.objects.filter(offering=self.offering(), student=self.student).exists())
 
-    def test_legacy_draft_still_updates_an_existing_offering(self):
+    def test_legacy_draft_does_not_touch_an_existing_offering(self):
         CourseOffering.objects.create(
             organization=self.org, subject=self.stack["subject"], period=self.stack["period"], group=self.stack["group"]
         )
         task = make_task(self.org, self.stack["chair"], created_by=self.chair_head)
         row = make_row(task, self.stack, lecture_total=30, seminar_total=0)
-        self.assign(TeachingTaskRow.objects.select_related("task").get(pk=row.pk), self.teacher_a)
-        self.assertEqual(self.offering().instructor_id, self.teacher_a.pk)
-        self.assertTrue(Enrollment.objects.filter(offering=self.offering(), student=self.student).exists())
+        with self.assertRaises(WorkloadDenied):
+            self.assign(TeachingTaskRow.objects.select_related("task").get(pk=row.pk), self.teacher_a)
+        self.assertIsNone(self.offering().instructor_id)
+        self.assertFalse(Enrollment.objects.filter(offering=self.offering(), student=self.student).exists())
 
     def test_amendment_changes_the_journal_owner_at_once(self):
         from apps.workload.constants import AmendmentReason, AmendmentTarget
         from apps.workload.services import open_amendment
 
-        task = make_task(self.org, self.stack["chair"], created_by=self.chair_head)
-        row = make_row(task, self.stack, lecture_total=30, seminar_total=0)
-        row = TeachingTaskRow.objects.select_related("task").get(pk=row.pk)
+        task, row = self.approved_row(lecture_total=30, seminar_total=0)
         assignment = self.assign(row, self.teacher_a)
         task.refresh_from_db()
         confirm_distribution(task=task, actor=self.actor(self.chair_head))

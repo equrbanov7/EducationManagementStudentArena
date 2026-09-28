@@ -13,6 +13,7 @@ from django.db.models import Q
 
 from apps.registrar.public import schedule_manage, subgroup_rollup
 from core.constants import OrgUnitType
+from core.http_ids import parse_uuid
 
 from ..constants import ScopeKind
 
@@ -54,7 +55,12 @@ def normalize_scope(raw) -> dict:
         value = raw.get(key) or []
         if isinstance(value, str):
             value = [part for part in value.split(",")]
-        return sorted({str(item).strip() for item in value if str(item or "").strip()})
+        # Audit 2026-09-28 TT-3: pozuq UUID `filter(pk__in=…)`-də 500 verirdi —
+        # `parse_uuid` ilə süzülür, pozuq dəyər sadəcə atılır (boş əhatə → 400).
+        if not isinstance(value, (list, tuple)):
+            value = []
+        parsed = (parse_uuid(item) for item in value)
+        return sorted({str(item) for item in parsed if item is not None})
 
     return {
         "kind": kind,

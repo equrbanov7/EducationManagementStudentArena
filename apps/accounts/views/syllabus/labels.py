@@ -84,6 +84,10 @@ TRANSITION_MESSAGES = {
     "transition.permission_denied": pgettext_lazy(_CTX, "Bu əməliyyat üçün icazəniz yoxdur."),
     "transition.out_of_scope": pgettext_lazy(_CTX, "Bu sillabus sizin struktur əhatənizdə deyil."),
     "transition.author_only": pgettext_lazy(_CTX, "Sillabusu yalnız onun müəllimi redaktə edə bilər."),
+    # Audit 2026-09-28 SYL-1: dörd göz — müəllif öz sillabusuna qərar vermir.
+    "transition.author_forbidden": pgettext_lazy(
+        _CTX, "Öz sillabusunuz üzrə qərar verə bilməzsiniz — qərar dekanlıq və ya universitet səviyyəsindədir."
+    ),
     "transition.reason_required": pgettext_lazy(_CTX, "Səbəb göstərilməlidir."),
     "transition.incomplete": pgettext_lazy(_CTX, "Bütün məcburi tələblər ödənilməyib — çatışmayan bəndlərə baxın."),
     "version.approved_locked": pgettext_lazy(

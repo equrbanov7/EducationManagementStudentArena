@@ -58,9 +58,9 @@ OFFICE_EDITABLE = frozenset({DRAFT, RETURNED})
 REVIEWABLE = frozenset({SUBMITTED, PENDING_FINAL_APPROVAL})
 
 #: Kafedra müdiri bölgüyə başlaya bilər (zəncir keçildikdən SONRA).
-#: ``draft`` ona görə buradadır ki, F1-dən ƏVVƏL yaradılmış (heç vaxt
-#: göndərilməmiş) kafedra sənədləri işləməyə davam etsin — göndərilmiş sənəd
-#: üçün ``services.workflow.ensure_distribution_stage`` əlavə şərt qoyur.
+#: ``draft`` tarixi səbəbdən buradadır; Audit 2026-09-28 W1-dən sonra
+#: ``services.workflow.ensure_distribution_stage`` qaralamanı HƏMİŞƏ bağlayır
+#: (göndərilməmiş tapşırıq koordinator/dekan zəncirini ötürə bilməz).
 DISTRIBUTABLE = frozenset({DRAFT, APPROVED, DISTRIBUTING, AMENDED})
 
 

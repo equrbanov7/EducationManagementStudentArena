@@ -22,7 +22,7 @@ from django.db import transaction
 from core.audit import log_action
 from core.constants import AuditAction
 
-from ..constants import SectionKey
+from ..constants import SectionKey, SyllabusStatus
 from ..models import ChangeKind, SyllabusVersion
 
 #: Dəyişməsi avtomatik MAJOR tələb edən bölmələr (jurnal strukturunun mənbəyi).
@@ -37,14 +37,24 @@ ESCALATION_CODE = "version.structural_change_requires_major"
 
 
 def baseline_for(version):
-    """Müqayisə bazası: versiyanın mənbəyi, yoxsa dosyenin təsdiqlənmiş nüsxəsi.
+    """Müqayisə bazası: dosyenin QÜVVƏDƏ OLAN təsdiqlənmiş nüsxəsi, yoxsa mənbə.
 
-    Baza tapılmasa ``None`` — ilk versiyanın müqayisə edəcəyi heç nə yoxdur,
-    yəni təsnifat qaydası ona ŞAMİL EDİLMİR.
+    Audit 2026-09-28 SYL-2: təsdiqlənmiş versiya VARSA müqayisə HƏMİŞƏ onunladır —
+    mənbə rədd edilmiş versiya ola bilər (v1.0 təsdiq → v2.0 rədd → v2.1 kiçik),
+    onunla müqayisə struktur dəyişikliyini gizlədir.  Baza tapılmasa ``None`` —
+    ilk versiyanın müqayisə edəcəyi heç nə yoxdur, qayda ona ŞAMİL EDİLMİR.
     """
+    approved = (
+        SyllabusVersion.objects.filter(syllabus_id=version.syllabus_id, status=SyllabusStatus.APPROVED.value)
+        .exclude(pk=version.pk)
+        .order_by("-major", "-minor")
+        .first()
+    )
+    if approved is not None:
+        return approved
     if version.source_version_id:
         return version.source_version
-    return getattr(version.syllabus, "approved_version", None)
+    return None
 
 
 def structural_changes(version, *, baseline=None) -> tuple:

@@ -22,13 +22,12 @@ from .drafts import (  # noqa: F401
     create_draft,
     create_next_version,
     import_migrated_version,
+    open_version_for,
     recompute_completion,
     refresh_pointers,
     resolve_pointer_versions,
     save_section,
     section_data_map,
-    seed_week_hours,
-    set_plan_hours,
 )
 from .offerings import (  # noqa: F401
     ACTION_STATES,
@@ -45,6 +44,7 @@ from .offerings import (  # noqa: F401
     syllabus_for_offering,
     syllabus_for_offering_obj,
 )
+from .plan_hours import seed_week_hours, set_plan_hours  # noqa: F401
 from .queries import (  # noqa: F401
     QUEUE_SORT_KEYS,
     audit_entries,
@@ -54,7 +54,15 @@ from .queries import (  # noqa: F401
     version_diff,
     version_timeline,
 )
-from .scoping import SyllabusActor, can_view, has_decision_scope, is_author, resolve_actor  # noqa: F401
+from .scoping import (  # noqa: F401
+    SyllabusActor,
+    can_view,
+    has_decision_scope,
+    has_escalated_decision_scope,
+    is_author,
+    is_self_authored_by_decider,
+    resolve_actor,
+)
 from .section_shape import SectionShapeError, normalize_section_data  # noqa: F401
 from .versioning import (  # noqa: F401
     ESCALATION_CODE,
@@ -109,11 +117,14 @@ __all__ = [
     "create_next_version",
     "escalate_if_structural",
     "has_decision_scope",
+    "has_escalated_decision_scope",
     "has_review_scope",
     "import_migrated_version",
     "is_author",
+    "is_self_authored_by_decider",
     "list_syllabi",
     "offering_syllabus_state",
+    "open_version_for",
     "recompute_completion",
     "reject",
     "request_revision",

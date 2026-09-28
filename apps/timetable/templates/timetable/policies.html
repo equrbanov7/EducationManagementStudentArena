@@ -39,9 +39,14 @@ dəyərlərini JSON ilə `timetable:api_policy`-ə göndərir (policy_editor.js)
             <span>{% trans "Cədvələ daxil etmə" context "timetable.policy" %}</span>
           </label>
         </div>
+        {% if can_edit_levels %}
         <button type="button" class="ems-btn ems-btn--sm" data-tt-policy-save>{% trans "Yadda saxla" context "timetable.policy" %}</button>
+        {% endif %}
       </div>
       {% endfor %}
+      {% if not can_edit_levels %}
+      <p class="ems-card__sub">{% trans "Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər. Öz qruplarınız üçün aşağıda istisna yaza bilərsiniz." context "timetable.policy" %}</p>
+      {% endif %}
     </div>
   </section>
 

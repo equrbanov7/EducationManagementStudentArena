@@ -54,7 +54,9 @@ class DistributionConfirmTest(TestCase):
             scope_type=RoleScopeType.COURSE,
         )
         self.actor = resolve_actor(self.head, self.org)
-        self.task = make_task(self.org, self.stack["chair"], created_by=self.head)
+        self.task = make_task(
+            self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.head
+        )  # Audit 2026-09-28 W1: göndərilməmiş qaralama bölünmür — zəncirdən keçmiş sənəd
         self.row = make_row(self.task, self.stack, lecture_total=30, seminar_total=15)
 
     def _fill(self):
@@ -86,7 +88,10 @@ class DistributionConfirmTest(TestCase):
         self.task.refresh_from_db()
 
         self.assertEqual(self.task.status, TaskStatus.DISTRIBUTED)
-        self.assertEqual(result["sync"]["created"], 1)
+        # Audit 2026-09-28 W1: sənəd təsdiqlənmiş gəlir (plan kafedraya çatıb) — açılış
+        # artıq TƏYİNAT anında yaranır, təsdiq onu yalnız təkrar sinxronlaşdırır.
+        self.assertEqual(result["sync"]["created"], 0)
+        self.assertEqual(CourseOffering.objects.filter(organization=self.org).count(), 1)
         offering = CourseOffering.objects.get(
             organization=self.org, subject=self.stack["subject"], period=self.stack["period"]
         )
@@ -170,8 +175,10 @@ class DistributionConfirmTest(TestCase):
         self._fill()
         result = confirm_distribution(task=self.task, actor=self.actor)
 
+        # Audit 2026-09-28 W1: açılışlar təyinat anında yaranıb (təsdiqlənmiş sənəd);
+        # təsdiqin təkrar sinxronu bloklanmış müəllimi yenə hesabata yazır.
         self.assertEqual(result["sync"]["instructor_blocked"], 1)
-        self.assertEqual(result["sync"]["created"], 2)
+        self.assertEqual(CourseOffering.objects.filter(organization=self.org).count(), 2)
         blocked = CourseOffering.objects.get(organization=self.org, subject=other_subject)
         self.assertIsNone(blocked.instructor_id)  # açılış var, jurnal sahibi yoxdur
         self.task.refresh_from_db()
@@ -214,7 +221,9 @@ class AmendmentTest(TestCase):
             scope_type=RoleScopeType.UNIT,
         )
         self.actor = resolve_actor(self.head, self.org)
-        self.task = make_task(self.org, self.stack["chair"], created_by=self.head)
+        self.task = make_task(
+            self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.head
+        )  # Audit 2026-09-28 W1: göndərilməmiş qaralama bölünmür — zəncirdən keçmiş sənəd
         self.row = make_row(self.task, self.stack, lecture_total=10, seminar_total=0)
         assign_teacher(row=self.row, actor=self.actor, activity=Activity.LECTURE, teacher_id=None, hours=10)
         confirm_distribution(task=self.task, actor=self.actor)

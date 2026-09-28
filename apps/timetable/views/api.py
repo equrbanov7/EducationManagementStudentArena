@@ -19,6 +19,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.registrar.public import schedule_grid
+from core.http_ids import parse_uuid
 
 from ..constants import ACTIVE_STATUSES, RunStatus
 from ..services import access, availability, draft_edit, policy, precheck, publish, runs
@@ -29,6 +30,43 @@ _CTX = "timetable.api"
 
 #: Bir istifadəçinin eyni anda aktiv (növbədə/işləyən) işləmə həddi.
 MAX_ACTIVE_RUNS = 2
+
+#: Audit 2026-09-28 TT-5: ağır (heavy növbə / tam nümunə qurulması) endpoint-lərin
+#: istifadəçi başına tezlik həddi — ``core.rate_limit`` formatı («N/pəncərə»).
+RATE_LIMITS = {
+    "timetable.run_start": "6/1m",
+    "timetable.precheck": "20/1m",
+    "timetable.run_action": "60/1m",
+}
+
+
+def _rate_limited(request, scope):
+    """Hədd aşılıbsa 429 JSON cavabı, yoxsa ``None`` (``core.rate_limit`` vedrəsi)."""
+    from django.conf import settings
+
+    from core.rate_limit import record_rate_limit_hit
+
+    rate = getattr(settings, "TIMETABLE_RATE_LIMITS", {}).get(scope, RATE_LIMITS[scope])
+    limited, retry_after = record_rate_limit_hit(scope, rate, getattr(request.user, "pk", None))
+    if not limited:
+        return None
+    response = json_error(
+        "rate_limited",
+        pgettext(_CTX, "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."),
+        status=429,
+        retry_after=retry_after,
+    )
+    if retry_after:
+        response["Retry-After"] = str(retry_after)
+    return response
+
+
+def _counts_toward_cap(run) -> bool:
+    """Audit 2026-09-28 TT-5: növbədəki işləmə «köhnə» olsa da növbəni tutur — sayılır.
+
+    Yalnız ürək döyüntüsü kəsilmiş İŞLƏYƏN (ölü worker) işləmə hədddən çıxır.
+    """
+    return run.status == RunStatus.QUEUED or not runs.is_stale(run)
 
 
 def _period(organization, data):
@@ -73,7 +111,11 @@ def policy_save(request):
     data = payload(request)
     try:
         if data.get("group"):
-            group = access.scoped_groups(request.user, organization).filter(pk=str(data.get("group"))).first()
+            # Audit 2026-09-28 TT-3: pozuq UUID 500 yox, 400.
+            group_pk = parse_uuid(data.get("group"))
+            if group_pk is None:
+                return json_error("invalid", pgettext(_CTX, "Qrup identifikatoru düzgün deyil."))
+            group = access.scoped_groups(request.user, organization).filter(pk=group_pk).first()
             if group is None:
                 raise Http404
             policy.save_group(actor=request.user, organization=organization, group=group, data=data, request=request)
@@ -85,6 +127,8 @@ def policy_save(request):
                 data=data,
                 request=request,
             )
+    except policy.PolicyDenied as exc:
+        return json_error("permission_denied", exc.message, status=403)
     except policy.PolicyError as exc:
         return json_error("invalid", exc.message, errors=exc.errors)
     return JsonResponse({"ok": True, "message": pgettext(_CTX, "Növbə siyasəti yadda saxlanıldı.")})
@@ -97,6 +141,9 @@ def precheck_view(request):
     organization, denied = api_organization(request)
     if denied:
         return denied
+    limited = _rate_limited(request, "timetable.precheck")
+    if limited:
+        return limited
     data = payload(request)
     period = _period(organization, data)
     groups = scope_groups(request.user, organization, data.get("scope") or {})
@@ -124,11 +171,14 @@ def run_start(request):
     organization, denied = api_organization(request)
     if denied:
         return denied
+    limited = _rate_limited(request, "timetable.run_start")
+    if limited:
+        return limited
     data = payload(request)
     period = _period(organization, data)
     Run = django_apps.get_model("timetable", "TimetableRun")
     active = Run.objects.filter(organization=organization, created_by=request.user, status__in=ACTIVE_STATUSES)
-    if sum(1 for run in active if not runs.is_stale(run)) >= MAX_ACTIVE_RUNS:
+    if sum(1 for run in active if _counts_toward_cap(run)) >= MAX_ACTIVE_RUNS:
         return json_error(
             "busy", pgettext(_CTX, "Sizin artıq işləyən cədvəl işləmələriniz var — bitməsini gözləyin."), status=429
         )
@@ -188,7 +238,17 @@ def run_action(request, run_id):
     organization, denied = api_organization(request)
     if denied:
         return denied
+    limited = _rate_limited(request, "timetable.run_action")
+    if limited:
+        return limited
     run = access.run_or_404(request, organization, run_id)
+    if not access.run_mutable(request.user, organization, run):
+        # Audit 2026-09-28 TT-2: ortaq qrup başqasının işləməsini dəyişmək hüququ vermir.
+        return json_error(
+            "permission_denied",
+            pgettext(_CTX, "Bu işləməni yalnız onu yaradan və ya universitet səviyyəli idarəçi dəyişə bilər."),
+            status=403,
+        )
     data = payload(request)
     action = str(data.get("action") or "")
     if action == "sync":

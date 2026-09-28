@@ -21,7 +21,7 @@ from django.test.utils import CaptureQueriesContext
 
 from apps.organizations.models import OrgUnit
 from apps.registrar.models import CourseOffering, Subject
-from apps.workload.constants import Activity
+from apps.workload.constants import Activity, TaskStatus
 from apps.workload.services import assign_teacher, distribution_readiness, resolve_actor, sync_offerings
 from core.constants import OrgUnitType, RoleScopeType
 
@@ -66,7 +66,9 @@ class DistributionQueryBudgetTest(TestCase):
             scope_type=RoleScopeType.COURSE,
         )
         self.actor = resolve_actor(self.head, self.org)
-        self.task = make_task(self.org, self.stack["chair"], created_by=self.head)
+        self.task = make_task(
+            self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.head
+        )  # Audit 2026-09-28 W1: göndərilməmiş qaralama bölünmür — zəncirdən keçmiş sənəd
         self._row_no = 0
 
     def _add_complete_row(self):
