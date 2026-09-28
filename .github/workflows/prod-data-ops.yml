@@ -36,6 +36,8 @@ on:
           - sync_plan_offerings
           - apply_org_structure
           - seed_staff_roster
+          - surveys_shuffle_responses
+          - superadmin_role_count
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -114,6 +116,19 @@ jobs:
               ;;
             seed_staff_roster)
               args=(--org "$ORG" --file "/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx")
+              ;;
+            surveys_shuffle_responses)
+              # Audit 2026-09-28 SV-3: köhnə sorğu cavablarının qəbzlə fiziki sıra əlaqəsini qırır.
+              args=(--org "$ORG")
+              ;;
+            superadmin_role_count)
+              # Audit 2026-09-28 SA-04: YALNIZ OXUMA — profile.role='superadmin' olub is_superuser olmayan hesab sayı.
+              test "$APPLY" != "true" || { echo "superadmin_role_count yalnız oxumadır — apply=false seçin" >&2; exit 2; }
+              count="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+                "from core.rls import bypass_rls; from apps.accounts.models import UserProfile; ctx = bypass_rls(); ctx.__enter__(); print(UserProfile.objects.filter(role='superadmin', user__is_superuser=False).count())" | tail -n1)"
+              echo "profile.role=superadmin AND NOT is_superuser: $count"
+              echo "## 🔎 superadmin_role_count: $count" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
               ;;
             sync_plan_offerings)
               actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \

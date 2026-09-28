@@ -713,6 +713,20 @@ apply_app_role_timeouts() {
   fi
 }
 
+ensure_textfile_collector_dir() {
+  # Audit 2026-09-28 AD-01/DB-08: node_exporter textfile kollektorunun host qovluğu
+  # (offsite_backup.sh / restore_drill.sh metrikləri). Runner istifadəçisinin sudo-su
+  # yoxdur — docker (root) ilə idempotent yaradılır. Uğursuzluq deploy-u dayandırmır.
+  if [ -d /var/lib/node_exporter/textfile_collector ]; then
+    return 0
+  fi
+  echo "Creating /var/lib/node_exporter/textfile_collector for node_exporter textfile metrics"
+  if ! docker run --rm --user 0 --entrypoint sh -v /var/lib:/hostvarlib postgres:16-alpine \
+      -c 'mkdir -p /hostvarlib/node_exporter/textfile_collector && chmod 0755 /hostvarlib/node_exporter /hostvarlib/node_exporter/textfile_collector'; then
+    echo "WARNING: could not create the textfile collector directory; NodeTextfileCollectorError will fire. Continuing." >&2
+  fi
+}
+
 wait_for_app_and_worker_health() {
   local max_attempts=$((DEPLOY_TIMEOUT_SECONDS / 5))
   local attempt=1
@@ -843,6 +857,7 @@ docker_deploy() {
   capture_previous_app_image
   docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer postgres-backup
   apply_app_role_timeouts
+  ensure_textfile_collector_dir
   # P1-08: konfiqurasiya xətası miqrasiyadan və restart-dan ƏVVƏL tutulur.
   preflight_django_deploy_check
   # P2-5: miqrasiyadan ƏVVƏL dump — rollback yalnız kodu geri alır.

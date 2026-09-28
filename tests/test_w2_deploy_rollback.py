@@ -31,6 +31,7 @@ REAL_FUNCTIONS = (
     "capture_previous_app_image",
     "predeploy_database_backup",
     "apply_app_role_timeouts",
+    "ensure_textfile_collector_dir",
     "wait_for_app_and_worker_health",
     "rollback_to_previous_image",
     "promote_release_image",
