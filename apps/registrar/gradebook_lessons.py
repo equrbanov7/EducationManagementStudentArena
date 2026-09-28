@@ -17,6 +17,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.registrar import grade_audit
 from apps.registrar.models import CourseOffering, Lesson, LessonKind, LessonMark
@@ -31,6 +32,8 @@ from .gradebook import (  # noqa: F401
     journal_is_locked,
     recompute_absence_hours,
 )
+
+_CTX = "registrar.journal_lessons"
 
 # ── Lesson (dərs) CRUD ───────────────────────────────────────────────────────
 
@@ -210,11 +213,24 @@ def update_lesson(
     room=UNSET,
     allow_past=False,
     allow_locked=False,
+    by_user=None,
+    audit=True,
 ) -> bool:
     """Səhv açılmış dərsi düzəlt (2 saat içində). ``allow_locked``/``allow_past``
-    pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli."""
+    pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
+
+    Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_SLOT_HOURS``
+    və fənnin saat həddi (``hours_cap_error``), eyni gün + eyni başlanğıc saatında ikinci
+    dərs yoxdur (açılış sətri kilidi altında); tarix/saat/növ dəyişikliyi qiymət audit
+    izinə yazılır (``by_user``; öz auditini yazan sənədli düzəliş yolları ``audit=False``
+    ötürür). Əvvəl ``hours=0`` qayıb saatını silir, dublikat slot
+    yaranır və heç bir iz qalmırdı."""
     if journal_is_locked(lesson.offering) or (not can_edit_lesson(lesson) and not allow_locked):
         return False
+    offering = lesson.offering
+    # «yoxla → yaz» yarışı: create_lesson ilə eyni kilid (açılış sətri) — dublikat yoxlaması seriyalaşır.
+    CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
+    before = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind}
     fields = []
     if date is not None:
         parsed = _coerce_date(date)
@@ -233,7 +249,7 @@ def update_lesson(
         lesson.topic = clean_topic(topic)
         fields.append("topic")
     if hours is not None:
-        lesson.hours = hours
+        lesson.hours = _validated_hours(offering, lesson, hours)
         fields.append("hours")
     if start_time is not None:
         lesson.start_time = start_time or None
@@ -249,9 +265,56 @@ def update_lesson(
     if room is not UNSET:
         lesson.room = room
         fields.append("room")
+    if lesson.start_time and ({"date", "start_time"} & set(fields)):
+        clash = Lesson.objects.filter(offering=offering, date=lesson.date, start_time=lesson.start_time)
+        if clash.exclude(pk=lesson.pk).exists():
+            raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     if fields:
         lesson.save(update_fields=fields)
+        if "hours" in fields and before["hours"] != lesson.hours:
+            # Saat dəyişibsə qayıb saatı (25 % buraxılış həddi) bu dərsin işarələri üzrə yenidən hesablanır.
+            for mark in LessonMark.objects.filter(lesson=lesson).select_related("enrollment"):
+                recompute_absence_hours(enrollment=mark.enrollment)
+        if audit:
+            _audit_lesson_update(offering, lesson, before, by_user)
     return True
+
+
+def _validated_hours(offering, lesson, hours) -> int:
+    """J-02: dərs saatı 1..``MAX_SLOT_HOURS`` tam ədəddir və fənnin saat həddini keçmir."""
+    from apps.registrar.journal_activation import MAX_SLOT_HOURS, hours_cap_error
+
+    try:
+        value = int(hours)
+    except (TypeError, ValueError):
+        raise LessonRuleError(pgettext(_CTX, "Dərs saatı müsbət tam ədəd olmalıdır."))
+    if value == lesson.hours:
+        return value  # dəyişməyib (köhnə dərsin saatı tavandan böyük olsa belə toxunulmur)
+    if value < 1 or value > MAX_SLOT_HOURS:
+        raise LessonRuleError(pgettext(_CTX, "Dərs saatı 1 ilə %(max)s arasında olmalıdır.") % {"max": MAX_SLOT_HOURS})
+    extra = value - int(lesson.hours or 0)
+    if extra > 0:
+        error = hours_cap_error(offering, extra)
+        if error:
+            raise LessonRuleError(error)
+    return value
+
+
+def _audit_lesson_update(offering, lesson, before, by_user):
+    """J-02: tarix / saat / növ dəyişikliyi «Dəyişiklik tarixçəsi»nə düşür (qayıb həddinə təsir edir)."""
+    labels = dict(LessonKind.choices)
+    after = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind}
+    item = f"{lesson.date} · {lesson.get_kind_display()}"
+    changes = []
+    for field, label in (("date", "tarix"), ("hours", "saat"), ("kind", "növ")):
+        old, new = before[field], after[field]
+        if old == new:
+            continue
+        if field == "kind":
+            old, new = labels.get(old, old), labels.get(new, new)
+        changes.append({"student": "—", "item": f"{item} · dərs {label}", "old": str(old), "new": str(new)})
+    if changes:
+        grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=changes)
 
 
 @transaction.atomic

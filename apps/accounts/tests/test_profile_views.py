@@ -3809,7 +3809,8 @@ class AssignedItemsViewTest(TestCase):
         self._login_user()
         response = self.client.get(reverse("accounts:assigned_courses"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No courses assigned yet.")
+        # Audit 2026-09-28 FQ-I18N: Az kataloqda ingiliscə qalmış mətn düzəldildi.
+        self.assertContains(response, "Hələ təyin olunmuş kurs yoxdur.")
 
     def test_assigned_exams_shows_only_assigned_and_links_to_start(self):
         from apps.courses.models import Course, CourseMembership
@@ -4032,7 +4033,7 @@ class MyResultsViewTest(TestCase):
         self.assertContains(response, "Unified Assignment")
         self.assertContains(response, "Unified Lab")
         self.assertContains(response, "Unified Project")
-        self.assertContains(response, "View answer/details")
+        self.assertContains(response, "Cavaba və təfərrüatlara bax")
         exam_item = next(item for item in response.context["items"] if item["title"] == "Unified Exam")
         self.assertIn("from_section=my-results", exam_item["detail_url"])
         self.assertIn("return_to=", exam_item["detail_url"])

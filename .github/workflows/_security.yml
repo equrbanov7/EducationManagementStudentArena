@@ -116,7 +116,8 @@ jobs:
           DATABASE_URL: postgres://security_app:security_app_password@localhost:5432/security_db
           REDIS_URL: redis://localhost:6379/0
         run: |
-          pip install -r requirements/production.txt
+          # Audit 2026-09-28 AD-06: prod image ilə EYNİ hash-li lock.
+          pip install --require-hashes -r requirements/production.lock
           python - <<'PY'
           import os
 

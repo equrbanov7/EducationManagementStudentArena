@@ -487,11 +487,39 @@ class Importer:
             )
         assigned = 0
         if self.apply and task is not None:
+            if rows_to_assign and task.status == TaskStatus.DRAFT:
+                self._approve_official_workbook(task)
             assigned = self._assign_rows(task, rows_to_assign)
-            if assigned and task.status in (TaskStatus.DRAFT, TaskStatus.DISTRIBUTING):
+            if assigned and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING):
                 self._confirm_and_enroll(task)
         self.stdout.write(
             f"  · «{title}» → {chair.name}: {len(records)} sətir, təyinat {assigned or len(rows_to_assign)} sətirdə"
+        )
+
+    def _approve_official_workbook(self, task):
+        """Audit 2026-09-28 W1: göndərilməmiş qaralama artıq bölünmür.
+
+        TAPŞIRIQ kitabçası universitetin TƏSDİQLƏNMİŞ rəsmi sənədidir (sahib
+        2026-09-19) — operator əmri onu AÇIQ şəkildə, audit izi ilə «təsdiqlənmiş»
+        kimi qeyd edir; bölgü yalnız bundan sonra açılır.
+        """
+        from core.audit import log_action
+        from core.constants import AuditAction
+
+        old_status = task.status
+        task.status = TaskStatus.APPROVED
+        task.save(update_fields=["status", "updated_at"])
+        log_action(
+            AuditAction.UPDATE,
+            user=self.actor_user,
+            organization=self.org,
+            obj=task,
+            old_values={"status": old_status},
+            new_values={"status": task.status},
+            reason="workload.task_approved_by_official_workbook_import",
+            resource_type="workload.TeachingTask",
+            resource_id=str(task.pk),
+            resource_repr=f"{task.chair_id} · {task.academic_year}",
         )
 
     def _assign_rows(self, task, rows_to_assign) -> int:

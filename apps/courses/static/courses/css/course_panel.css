@@ -1,0 +1,342 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs paneli (course_dashboard.html) · 2026-09-28 redizayn
+   Qabıq: çörək qırıntısı · hero · yapışqan tab-bar · panel başlığı · boş vəziyyət.
+
+   Dizayn dili KABİNETLƏ EYNİDİR: `design-tokens.css` rəng/ölçü tokenləri,
+   `ems_ui/controls.css` düymələri (`.ems-btn`), `ems_ui/badge.css` statusları.
+   Əvvəlki versiyanın Fraunces serif başlıqları və ayrıca palitrası çıxarıldı —
+   səhifə kabinetin qalan hissəsi ilə eyni şrifti (`--font-main`) işlədir.
+   Hər şey `.ems-cd` altında SCOPE olunub; digər səhifələrə təsir yoxdur.
+   Davam: course_panel_sections.css (bölmə məzmunu), course_panel_overlays.css.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.ems-cd {
+    --cd-accent: var(--ems-primary-600);
+    --cd-accent-soft: var(--ems-primary-50);
+    --cd-accent-ink: var(--ems-primary-800);
+    --cd-card: var(--ems-bg);
+    --cd-line: var(--ems-border);
+    --cd-muted: var(--ems-neutral-500);
+    --cd-radius: var(--ems-r-2xl);
+    --cd-sticky-top: 72px;
+
+    min-height: 100%;
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-800);
+    font-family: var(--font-main, inherit);
+}
+
+.ems-cd *,
+.ems-cd *::before,
+.ems-cd *::after {
+    box-sizing: border-box;
+}
+
+.cd-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px 24px 96px;
+}
+
+.cd-ic {
+    flex: none;
+}
+
+.cd-muted {
+    color: var(--cd-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.cd-truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* ── Çörək qırıntısı ─────────────────────────────────────────────────────── */
+.cd-crumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    margin-bottom: var(--ems-sp-5);
+    font-size: var(--ems-fs-base);
+    color: var(--cd-muted);
+    min-width: 0;
+}
+
+.cd-crumbs__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px 4px 4px;
+    margin-left: -4px;
+    border-radius: var(--ems-r-md);
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.cd-crumbs__link:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.cd-crumbs__sep {
+    color: var(--ems-neutral-300);
+}
+
+.cd-crumbs__cur {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--ems-neutral-700);
+    font-weight: 700;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.cd-hero {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: start;
+    padding: 20px;
+    border: 1px solid var(--cd-line);
+    border-radius: var(--cd-radius);
+    background: var(--cd-card);
+    box-shadow: var(--ems-sh-card);
+}
+
+.cd-hero__cover {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    overflow: hidden;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fff4e5, #ffe2bd);
+    color: var(--ems-warning-700);
+}
+
+.cd-hero__cover.has-img {
+    background: var(--ems-neutral-100);
+}
+
+.cd-hero__cover img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cd-hero__main {
+    min-width: 0;
+}
+
+.cd-hero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-bottom: 8px;
+}
+
+.cd-hero__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+}
+
+.cd-hero__meta .cd-ic {
+    color: var(--ems-neutral-500);
+}
+
+.cd-hero__title {
+    margin: 0;
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+}
+
+.cd-hero__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: var(--ems-w-text);
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-neutral-600);
+}
+
+.cd-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd-stat {
+    display: flex;
+    flex-direction: column;
+    min-width: 84px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.cd-stat b {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.cd-stat span {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ems-neutral-500);
+}
+
+.cd-hero__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 232px;
+}
+
+.cd-publish {
+    margin: 0;
+}
+
+.cd-hero__row {
+    display: flex;
+    gap: 8px;
+}
+
+.cd-btn-block {
+    width: 100%;
+}
+
+.ems-cd .ems-btn {
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.ems-cd .cd-tab:focus {
+    outline: none;
+}
+
+/* tab-bar `overflow-x:auto` xarici halqanı kəsir — tabda halqa İÇƏRİDƏDİR */
+.ems-cd .cd-tab:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: -2px;
+}
+
+.ems-cd .ems-btn:focus-visible,
+.ems-cd .cd-icon-btn:focus-visible,
+.ems-cd .cd-topic__toggle:focus-visible,
+.ems-cd .cd-dashed-btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.cd-btn-ai {
+    flex: 1;
+    border-color: #ddd0fb;
+    background: linear-gradient(135deg, #f6f1ff, #eef3ff);
+    color: var(--ems-violet-800);
+}
+
+.ems-cd .cd-btn-ai:hover:not(:disabled) {
+    border-color: #c4b1f5;
+    background: linear-gradient(135deg, #efe6ff, #e4ecff);
+    color: var(--ems-violet-800);
+}
+
+.cd-btn-ai-soft {
+    border-color: #e4dbfa;
+    background: #f7f3ff;
+    color: var(--ems-violet-800);
+}
+
+.ems-cd .cd-btn-ai-soft:hover:not(:disabled) {
+    background: #efe7ff;
+    color: var(--ems-violet-800);
+}
+
+/* ikon düyməsi (40×40 hero, 34×34 sətir) */
+.cd-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-lg);
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.cd-icon-btn:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.cd-icon-btn--danger:hover {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+.cd-icon-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.ems-cd .ems-btn.cd-icon-btn {
+    width: 40px;
+    min-height: 40px;
+    height: 40px;
+    padding: 0;
+    border-color: var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+}
+
+.ems-cd .ems-btn.cd-icon-btn--danger:hover:not(:disabled) {
+    border-color: var(--ems-danger-200);
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+/* ── Qeyd zolağı (qaralama) ─────────────────────────────────────────────── */
+.cd-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-xl);
+    background: #fffbeb;
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+}

@@ -2,16 +2,19 @@ import logging
 import time
 import uuid
 from contextlib import contextmanager
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import caches
 from django.db import IntegrityError, transaction
+from django.db.models import DateTimeField, ExpressionWrapper, F, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+from apps.exams.domain.attempt_deadline import lazy_expiry_cutoff
 from apps.exams.metrics import record_attempt_started
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.navigation import append_return_to as _append_return_to
@@ -196,7 +199,26 @@ def get_finished_attempts_for_user(exam, user):
     return exam.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).order_by("-started_at")
 
 
-def sweep_overdue_attempts(queryset=None):
+def _narrow_overdue_candidates(queryset, cutoff):
+    """Audit 2026-09-28 EX28-05: SQL-də deadline ön-filtri (``cutoff = now − grace``).
+
+    Əvvəl sweep HƏR açıq cəhdi (vaxtı çatmayanları da) ``FOR UPDATE`` ilə kilidləyib
+    Python-da yoxlayırdı. İndi yalnız ``started_at + müddət < cutoff`` və ya imtahanın
+    ``end_datetime < cutoff`` (EX28-07) olan müddətli cəhdlər namizəddir — dəqiq qərar
+    yenə kilid altında ``expire_if_time_limit_reached`` ilə verilir (bu, üst çoxluqdur)."""
+    return (
+        queryset.filter(status__in=["draft", "in_progress"], is_trial=False, exam__total_duration_minutes__gt=0)
+        .alias(
+            _sweep_deadline=ExpressionWrapper(
+                F("started_at") + F("exam__total_duration_minutes") * timedelta(minutes=1),
+                output_field=DateTimeField(),
+            )
+        )
+        .filter(Q(_sweep_deadline__lt=cutoff) | Q(exam__end_datetime__lt=cutoff))
+    )
+
+
+def sweep_overdue_attempts(queryset=None, *, scope=None):
     """Vaxtı bitmiş (deadline-ı keçmiş) draft/in_progress cəhdləri avtomatik
     bitirir — tələbənin brauzeri bağlı olsa belə imtahan «yarımçıq/gözləmədə»
     qalmasın; nəzarətçi, müəllim və nəticə ekranlarında dərhal bitmiş görünsün.
@@ -217,18 +239,24 @@ def sweep_overdue_attempts(queryset=None):
     sətir kilidi (``skip_locked``) altında yenidən oxunur; qlobal icra
     (``queryset is None``) 55 s overlap kilidi ilə qorunur — bax
     ``apps/exams/services/sweep_guard.py``.
+
+    ``scope`` (EX28-05) — hər DB addımını ayrıca saran kontekst fabriki; qlobal
+    Celery sweep-i ``rls_worker_atomic() + bypass_rls()`` ötürür ki, hər cəhd öz
+    real tranzaksiyasında işlənsin (bax ``finish_attempts_under_row_lock``).
     """
     from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
 
-    def _narrow(qs):
-        return qs.filter(status__in=["draft", "in_progress"], is_trial=False)
+    # Audit 2026-09-28 EX28-04: sweep də grace-i gözləyir (`now − grace`) — deadline-dan
+    # 1–2 s sonra gələn son təhvil/autosave-i sweep «expired» edib itirməsin.
+    cutoff = lazy_expiry_cutoff()
 
     def _run(qs):
         return finish_attempts_under_row_lock(
             qs,
-            narrow=_narrow,
+            narrow=lambda candidates: _narrow_overdue_candidates(candidates, cutoff),
             select_related=("exam", "exam__organization", "user"),
-            action=lambda attempt: attempt.expire_if_time_limit_reached(),
+            action=lambda attempt: attempt.expire_if_time_limit_reached(at_time=cutoff),
+            scope=scope,
         )
 
     if queryset is not None:

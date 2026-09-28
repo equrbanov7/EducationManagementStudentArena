@@ -10,6 +10,17 @@ window.EMSReady(function () {
     cfgEl.dataset.prBound = '1';
 
     const cfg = cfgEl.dataset;
+
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; sorğu EMSCore.fetchJSON ilə —
+    // 403/500 və qeyri-JSON cavab `catch`-ə düşür, serverin `error` mətni göstərilir.
+    const notifyError = (message) => {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
+            window.EMSToast.show(message, 'error');
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    };
     const i18n = {
         noContent: cfg.i18nNoContent,
         download: cfg.i18nDownload,
@@ -28,8 +39,6 @@ window.EMSReady(function () {
     };
     const selectedSubmissionId = cfg.selectedSubmissionId;
     const gradeUrlTemplate = '/projects/submission/__ID__/grade/';
-    const getCsrf = () => (window.EMSCore && EMSCore.getCsrfToken())
-        || document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
 
     function parseIntegerGrade(rawValue) {
         const normalized = (rawValue || '').trim().replace(',', '.');
@@ -174,21 +183,16 @@ window.EMSReady(function () {
 
         const gradeUrl = gradeUrlTemplate.replace('__ID__', submissionId);
 
-        return fetch(gradeUrl, {
+        return EMSCore.fetchJSON(gradeUrl, {
             method: 'POST',
-            headers: {
-                'X-CSRFToken': getCsrf(),
-                'X-Requested-With': 'XMLHttpRequest'
-            },
             body: formData
         })
-            .then(r => r.json())
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     location.reload();
                     return true;
                 } else {
-                    alert(`${i18n.errorPrefix}${data.error || i18n.unknownError}`);
+                    notifyError(`${i18n.errorPrefix}${(data && data.error) || i18n.unknownError}`);
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
                     return false;
@@ -196,7 +200,12 @@ window.EMSReady(function () {
             })
             .catch(err => {
                 console.error(err);
-                alert(i18n.serverError);
+                const payload = err && err.payload;
+                if (!(payload && typeof payload === 'object' && payload.view_as_blocked)) {
+                    notifyError(payload && typeof payload === 'object' && payload.error
+                        ? `${i18n.errorPrefix}${payload.error}`
+                        : i18n.serverError);
+                }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.gradeButton;
                 return false;

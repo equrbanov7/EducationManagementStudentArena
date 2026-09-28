@@ -12,6 +12,22 @@ class ManualGradingWindowClosed(Exception):
     """The attempt became immutable before the grading transaction acquired its lock."""
 
 
+class ManualGradingAttemptNotFinished(Exception):
+    """Audit 2026-09-28 EX28-02: cəhd hələ bitməyib (draft / in_progress) — qiymətləndirilə bilməz.
+
+    Əvvəl müəllim tələbə hələ yazarkən cəhdi yoxlaya bilirdi: qismən bal jurnala
+    sinxronlaşır, 5 dəqiqəlik redaktə pəncərəsi bağlanandan sonra isə tələbənin
+    tam cavabları üçün bal düzəldilə bilmirdi."""
+
+
+def _ensure_gradeable(attempt, *, now):
+    """Kilid altında: bitməmiş cəhd və bağlanmış redaktə pəncərəsi rədd olunur."""
+    if not attempt.is_finished:
+        raise ManualGradingAttemptNotFinished
+    if attempt_review_window_locked(attempt, current_time=now):
+        raise ManualGradingWindowClosed
+
+
 def answer_max_points(answer):
     """Resolve the authoritative grading ceiling from the delivered snapshot."""
     snapshot = getattr(answer, "question_snapshot", None)
@@ -97,8 +113,7 @@ def apply_single_answer_grade(*, answer_id, score, grader=None, feedback=None, c
     attempt_id = ExamAnswer.objects.only("attempt_id").get(pk=answer_id).attempt_id
     attempt = ExamAttempt.objects.select_for_update().get(pk=attempt_id)
     now = current_time or timezone.now()
-    if attempt_review_window_locked(attempt, current_time=now):
-        raise ManualGradingWindowClosed
+    _ensure_gradeable(attempt, now=now)
 
     answer = ExamAnswer.objects.select_for_update().select_related("question").get(pk=answer_id)
     max_points = answer_max_points(answer)
@@ -141,8 +156,7 @@ def apply_attempt_grade(*, attempt_id, score, feedback, grader, max_points=100, 
 
     now = current_time or timezone.now()
     attempt = ExamAttempt.objects.select_for_update().get(pk=attempt_id)
-    if attempt_review_window_locked(attempt, current_time=now):
-        raise ManualGradingWindowClosed
+    _ensure_gradeable(attempt, now=now)
 
     bounded_score = None if score is None else _bounded_integer_score(score, max_points=max_points)
     feedback = (feedback or "").strip()
@@ -188,8 +202,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
 
     now = current_time or timezone.now()
     attempt = ExamAttempt.objects.select_for_update().get(pk=attempt_id)
-    if attempt_review_window_locked(attempt, current_time=now):
-        raise ManualGradingWindowClosed
+    _ensure_gradeable(attempt, now=now)
 
     answers = list(attempt.answers.select_for_update().select_related("question").order_by("id"))
     grade_events = []
@@ -264,6 +277,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
 
 
 __all__ = [
+    "ManualGradingAttemptNotFinished",
     "ManualGradingWindowClosed",
     "answer_max_points",
     "apply_attempt_grade",

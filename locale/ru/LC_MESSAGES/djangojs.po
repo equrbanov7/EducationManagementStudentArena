@@ -839,7 +839,7 @@ msgstr "При удалении произошла ошибка"
 #: apps/assignments/static/assignment/js/assignment_modal.js:234
 #: apps/assignments/static/assignment/js/assignment_modal.js:264
 msgid "Xəta: "
-msgstr "Ошибка:"
+msgstr "Ошибка: "
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:206
 #: apps/assignments/static/assignment/js/assignment_modal.js:243
@@ -1160,7 +1160,7 @@ msgstr "HTML5 — семантическая структура и формы"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:92
 msgid "2–3-cü həftə"
-msgstr "2–3-я неделя"
+msgstr "Недели 2–3"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:93
 msgid "CSS əsasları: seçicilər və qutu modeli"
@@ -1176,7 +1176,7 @@ msgstr "Вёрстка с помощью Flexbox и Grid"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:94
 msgid "5–6-cı həftə"
-msgstr "5–6-я неделя"
+msgstr "Недели 5–6"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:95
 msgid "Responsiv dizayn və media-sorğular"
@@ -1192,7 +1192,7 @@ msgstr "Основы JavaScript"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:96
 msgid "8–10-cu həftə"
-msgstr "8–10-я неделя"
+msgstr "Недели 8–10"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:97
 msgid "DOM manipulyasiyası və hadisələr"
@@ -1200,7 +1200,7 @@ msgstr "Манипуляции с DOM и события"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:97
 msgid "11–12-ci həftə"
-msgstr "11–12-я неделя"
+msgstr "Недели 11–12"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:98
 msgid "Fetch API və əsas backend əlaqəsi"
@@ -1208,7 +1208,7 @@ msgstr "Fetch API и базовое взаимодействие с бэкенд
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:98
 msgid "13–14-cü həftə"
-msgstr "13–14-я неделя"
+msgstr "Недели 13–14"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:100
 msgid "5 resurs təklifi"
@@ -1314,11 +1314,11 @@ msgstr "Заполнить поля с помощью AI"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Kursun sillabusu və həftəlik strukturu"
-msgstr "Силлабус курса и недельная структура"
+msgstr "Программа курса и понедельная структура"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Müfredat ve haftalık yapı"
-msgstr "Силлабус и недельная структура"
+msgstr "Программа и понедельная структура"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:26
 msgid "Mühazirələr, fayllar, video və linklər"
@@ -1330,11 +1330,11 @@ msgstr "Занятия, файлы, видео и ссылки"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Tələbələr üçün tapşırıqlar və təqdimatlar"
-msgstr "Задания и отправки работ для студентов"
+msgstr "Задания и сданные работы студентов"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Öğrenciler için görevler ve teslimler"
-msgstr "Задания и отправки работ для студентов"
+msgstr "Задания и сданные работы студентов"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:28
 msgid "Bloklar və suallarla praktiki laboratoriyalar"
@@ -1350,11 +1350,11 @@ msgstr "Тестовые и письменные экзамены, контро�
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Genişmiqyaslı kurs layihələri"
-msgstr "Масштабные курсовые проекты"
+msgstr "Крупные курсовые работы и проекты"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Büyük ölçekli kurs projeleri"
-msgstr "Масштабные курсовые проекты"
+msgstr "Крупные курсовые работы и проекты"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:31
 msgid "Tələbələr və qruplar"
@@ -2874,8 +2874,12 @@ msgstr "Получатели"
 msgid "Anladım"
 msgstr "Понятно"
 
-msgid "Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"
-msgstr "После открытия апелляции ни один вопрос не может остаться без решения. Вопросы без решения:"
+msgid ""
+"Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar "
+"verilməmiş suallar:"
+msgstr ""
+"После открытия апелляции ни один вопрос не может остаться без решения. "
+"Вопросы без решения:"
 
 msgid "Axtar…"
 msgstr "Поиск…"
@@ -2889,8 +2893,12 @@ msgstr "Укажите время начала."
 msgid "Bitmə vaxtını seçin."
 msgstr "Укажите время окончания."
 
-msgid "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
-msgstr "Используйте этот PIN вместе с именем пользователя на странице входа в экзамен."
+msgid ""
+"Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə "
+"edin."
+msgstr ""
+"Используйте этот PIN вместе с именем пользователя на странице входа в "
+"экзамен."
 
 msgid "Bu dersin atandığı gruplar"
 msgstr "Группы этого предмета"
@@ -2902,7 +2910,8 @@ msgid "Bütün suallara qərar verin"
 msgstr "Примите решение по всем вопросам"
 
 msgid "Cari cavablarınız yadda saxlanılıb. Ətraflı nəticəyə keçə bilərsiniz."
-msgstr "Ваши текущие ответы сохранены. Вы можете перейти к подробному результату."
+msgstr ""
+"Ваши текущие ответы сохранены. Вы можете перейти к подробному результату."
 
 msgid "Deaktiv"
 msgstr "Выключен"
@@ -2943,8 +2952,12 @@ msgstr "Перейти к результату"
 msgid "Nəzarət"
 msgstr "Контроль"
 
-msgid "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
-msgstr "PIN появится только ближе ко времени экзамена, либо его можно получить в экзаменационном центре."
+msgid ""
+"PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə "
+"edilir."
+msgstr ""
+"PIN появится только ближе ко времени экзамена, либо его можно получить в "
+"экзаменационном центре."
 
 msgid "Qruplar"
 msgstr "Группы"
@@ -2985,14 +2998,26 @@ msgstr "Подтвердить и создать"
 msgid "hesablanır…"
 msgstr "подсчёт…"
 
-msgid "{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "Для вопроса {q} нужно написать пояснение не короче {min} символов или выключить переключатель «Подать апелляцию»."
+msgid ""
+"{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et”"
+" düyməsini söndürməlisiniz."
+msgstr ""
+"Для вопроса {q} нужно написать пояснение не короче {min} символов или "
+"выключить переключатель «Подать апелляцию»."
 
-msgid "{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "Для вопроса {q} нужно выбрать тип причины и написать пояснение не короче {min} символов или выключить переключатель «Подать апелляцию»."
+msgid ""
+"{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya "
+"da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr ""
+"Для вопроса {q} нужно выбрать тип причины и написать пояснение не короче "
+"{min} символов или выключить переключатель «Подать апелляцию»."
 
-msgid "{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "Для вопроса {q} нужно выбрать тип причины или выключить переключатель «Подать апелляцию»."
+msgid ""
+"{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini "
+"söndürməlisiniz."
+msgstr ""
+"Для вопроса {q} нужно выбрать тип причины или выключить переключатель "
+"«Подать апелляцию»."
 
 msgid "İmtahan adı"
 msgstr "Название экзамена"
@@ -3033,14 +3058,23 @@ msgstr "Удалить строку?"
 msgid "Bölgü silinsin?"
 msgstr "Удалить распределение?"
 
-msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
-msgstr "Распределение подтверждено. Открытия журнала: новых %(created)s, обновлено %(updated)s. Уведомлено: %(notified)s"
+msgid ""
+"Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. "
+"Bildiriş: %(notified)s"
+msgstr ""
+"Распределение подтверждено. Открытия журнала: новых %(created)s, обновлено "
+"%(updated)s. Уведомлено: %(notified)s"
 
 msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
-msgstr "Для специальностей этой кафедры не найдено активных строк учебного плана."
+msgstr ""
+"Для специальностей этой кафедры не найдено активных строк учебного плана."
 
-msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
-msgstr "В плане найдено предложений: %(count)s; первое подставлено. Часы в учебном плане не хранятся — введите вручную (предложение: %(hours)s ч.)."
+msgid ""
+"Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris "
+"planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr ""
+"В плане найдено предложений: %(count)s; первое подставлено. Часы в учебном "
+"плане не хранятся — введите вручную (предложение: %(hours)s ч.)."
 
 msgid "Qalıq: %(remaining)s / %(total)s saat"
 msgstr "Остаток: %(remaining)s / %(total)s ч."
@@ -3072,8 +3106,12 @@ msgstr "Незавершённых строк"
 msgid "Aç"
 msgstr "Открыть"
 
-msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
-msgstr "Этот тип файла не принимается по соображениям безопасности. Загружайте только .pdf / .docx / .txt / .png / .jpg."
+msgid ""
+"Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / "
+".txt / .png / .jpg yükləyin."
+msgstr ""
+"Этот тип файла не принимается по соображениям безопасности. Загружайте "
+"только .pdf / .docx / .txt / .png / .jpg."
 
 msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
 msgstr "Время окончания должно быть позже времени начала."

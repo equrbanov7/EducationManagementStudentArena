@@ -13,9 +13,10 @@ from __future__ import annotations
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils.translation import pgettext
 
 from apps.registrar import integrity, services
-from apps.registrar.models import Enrollment, StudentAcademicRecord
+from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
 from apps.registrar.reference_identity import (
     begin_authorized_group_transfer,
     finalize_authorized_group_transfer,
@@ -29,16 +30,20 @@ def _validate_scope(record, new_group, period):
     """Reject cross-tenant references before any academic row is changed."""
     organization_id = record.organization_id
     if getattr(new_group, "organization_id", None) != organization_id:
-        raise ValidationError("Yeni qrup tələbənin təşkilatına aid deyil.")
+        raise ValidationError(pgettext("registrar.transfer", "Yeni qrup tələbənin təşkilatına aid deyil."))
     if getattr(new_group, "unit_type", None) != OrgUnitType.GROUP:
-        raise ValidationError("Yeni struktur vahidi akademik qrup olmalıdır.")
+        raise ValidationError(pgettext("registrar.transfer", "Yeni struktur vahidi akademik qrup olmalıdır."))
     if period is not None and getattr(period, "organization_id", None) != organization_id:
-        raise ValidationError("Akademik dövr tələbənin təşkilatına aid deyil.")
+        raise ValidationError(pgettext("registrar.transfer", "Akademik dövr tələbənin təşkilatına aid deyil."))
     if period is None:
         if record.organization.academic_periods.filter(is_current=True, is_active=True).exists():
-            raise ValidationError("Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir.")
+            raise ValidationError(
+                pgettext("registrar.transfer", "Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir.")
+            )
     elif not getattr(period, "is_current", False) or not getattr(period, "is_active", False):
-        raise ValidationError("Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər.")
+        raise ValidationError(
+            pgettext("registrar.transfer", "Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər.")
+        )
 
 
 def _audit(record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids):
@@ -61,6 +66,47 @@ def _audit(record, old_group, new_group, moved, created, by_user, reason, old_id
         or f"Qrup köçürmə: {getattr(old_group, 'name', '—')} → {new_group.name} "
         f"({moved} qeydiyyat tarixçəyə keçirildi)",
     )
+
+
+def _is_subgroup_of(group, parent) -> bool:
+    """Qrup ``parent``-in bölgüsündən yaranmış alt qrupdurmu (``settings.parent_group``)."""
+    if group is None or parent is None:
+        return False
+    settings_blob = group.settings if isinstance(getattr(group, "settings", None), dict) else {}
+    return str(settings_blob.get("parent_group") or "") == str(parent.pk)
+
+
+def _inherit_teaching_config(target, source) -> None:
+    """Audit 2026-09-28 S2: yeni (alt) qrupun açılışı ana açılışın tədris ayarını alır.
+
+    Bölmə / köçürmə zamanı yaranan açılış əvvəl müəllimsiz (``instructor=None``,
+    ``lesson_hours=0``, ``course=None``) qalırdı — köçürülən tələbələr müəllimin
+    jurnalından «sahibsiz» jurnala düşürdü. Yalnız BOŞ sahələr doldurulur: hədəf
+    açılışın öz müəllimi / saatı / LMS kursu varsa, toxunulmur. Yalnız açılış bu
+    köçürmədə YARANIBSA və ya hədəf ana qrupun alt qrupudursa çağırılır — adi
+    köçürmədə mövcud (hələ müəllim təyin olunmamış) qrup açılışına başqa qrupun
+    müəllimi yazılmır. Mənbə müəllimin artıq qiymət-daxiletmə səlahiyyəti
+    yoxdursa (DB qapısı onsuz da rədd edərdi) müəllim köçürülmür, qalan sahələr
+    yenə doldurulur.
+    """
+    if target is None or source is None or target.pk == source.pk:
+        return
+    fields = []
+    if (
+        target.instructor_id is None
+        and source.instructor_id is not None
+        and integrity.is_authorized_instructor(organization=target.organization, instructor=source.instructor)
+    ):
+        target.instructor_id = source.instructor_id
+        fields.append("instructor")
+    if not target.lesson_hours and source.lesson_hours:
+        target.lesson_hours = source.lesson_hours
+        fields.append("lesson_hours")
+    if target.course_id is None and source.course_id is not None:
+        target.course_id = source.course_id
+        fields.append("course")
+    if fields:
+        target.save(update_fields=[*fields, "updated_at"])
 
 
 @transaction.atomic
@@ -103,7 +149,7 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
                 offering__group=old_group,
                 status=Enrollment.Status.ENROLLED,
             )
-            .select_related("offering__subject")
+            .select_related("offering__subject", "offering__instructor")
         )
 
     evidence_id = begin_authorized_group_transfer(
@@ -115,7 +161,14 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
 
     created = 0
     successors = []
+    inherit_from_parent = _is_subgroup_of(new_group, old_group)
     for enrollment in old_enrollments:
+        offering_is_new = not CourseOffering.objects.filter(
+            organization=record.organization,
+            subject_id=enrollment.offering.subject_id,
+            period=period,
+            group=new_group,
+        ).exists()
         successor, was_created = services.enroll_student_in_subject(
             record=record,
             subject=enrollment.offering.subject,
@@ -127,6 +180,8 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
                 "Yeni qrupun açılışında bu tələbəyə aid tarixi qeydiyyat var; "
                 "tarixçəni yenidən aktivləşdirmədən əvvəl inzibati yoxlama tələb olunur."
             )
+        if offering_is_new or inherit_from_parent:
+            _inherit_teaching_config(successor.offering, enrollment.offering)
         enrollment.status = Enrollment.Status.DROPPED
         enrollment.superseded_by = successor
         enrollment.full_clean(validate_unique=False, validate_constraints=False)

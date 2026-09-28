@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}
+«AI ilə kurs qur» çekməcəsinin konfiqurasiyası (course_ai_drawer.js oxuyur).
+URL-lər və bütün mətnlər buradan gəlir — JS-də sərt kodlanmış dil yoxdur.
+{% endcomment %}
+<div id="courseAIConfig" hidden
+     data-plan-url="{% url 'courses:ai_plan' course.id %}"
+     data-apply-url="{% url 'courses:ai_apply' course.id %}"
+     data-t-title="{% trans 'ai_drawer_title' context 'courses.ai' %}"
+     data-t-sub="{% trans 'ai_drawer_sub' context 'courses.ai' %}"
+     data-t-close="{% trans 'Bağla' context 'ui.dialog' %}"
+     data-t-prompt-label="{% trans 'prompt_label' context 'courses.ai' %}"
+     data-t-prompt-placeholder="{% trans 'prompt_placeholder' context 'courses.ai' %}"
+     data-t-examples="{% trans 'examples_label' context 'courses.ai' %}"
+     data-t-ex1="{% trans 'example_1' context 'courses.ai' %}"
+     data-t-ex2="{% trans 'example_2' context 'courses.ai' %}"
+     data-t-ex3="{% trans 'example_3' context 'courses.ai' %}"
+     data-t-note="{% trans 'note_nothing_saved' context 'courses.ai' %}"
+     data-t-generate="{% trans 'action_generate' context 'courses.ai' %}"
+     data-t-generating="{% trans 'generating_title' context 'courses.ai' %}"
+     data-t-generating-sub="{% trans 'generating_sub' context 'courses.ai' %}"
+     data-t-review-title="{% trans 'review_title' context 'courses.ai' %}"
+     data-t-review-sub="{% trans 'review_sub' context 'courses.ai' %}"
+     data-t-select-all="{% trans 'select_all' context 'courses.ai' %}"
+     data-t-resources="{% trans 'resources_label' context 'courses.ai' %}"
+     data-t-apply="{% trans 'action_apply_selected' context 'courses.ai' %}"
+     data-t-applying="{% trans 'applying' context 'courses.ai' %}"
+     data-t-back="{% trans 'action_back' context 'courses.ai' %}"
+     data-t-regenerate="{% trans 'action_regenerate' context 'courses.ai' %}"
+     data-t-done-title="{% trans 'done_title' context 'courses.ai' %}"
+     data-t-done-action="{% trans 'done_action' context 'courses.ai' %}"
+     data-t-error="{% trans 'error_generic' context 'courses.ai' %}"
+     data-t-quota="{% trans 'quota_remaining' context 'courses.ai' %}"></div>

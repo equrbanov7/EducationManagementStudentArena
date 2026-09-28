@@ -1,24 +1,34 @@
 {% load i18n static %}
-
+{% comment %}
+Kurs/tapşırıq səhifələrinin təsdiq dialoqu (`window.openActionConfirmModal`).
+2026-09-28: qlobal EMSConfirm ilə EYNİ görünüş (`.ems-confirm` — static/css/ems_confirm.css):
+ikon plitəsi + başlıq + mətn; qırmızı (destruktiv) düymədə `.is-danger`. ID-lər dəyişməyib.
+{% endcomment %}
 <div
-    class="modal fade"
+    class="modal fade ems-confirm is-danger"
     id="courseActionConfirmModal"
     tabindex="-1"
     aria-hidden="true"
+    aria-labelledby="courseActionConfirmModalTitle"
+    aria-describedby="courseActionConfirmModalMessage"
     data-default-title="{% trans 'Təsdiq edin' %}"
     data-default-confirm-label="{% trans 'action_delete' context 'courses.dashboard' %}"
 >
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header">
-                <h5 class="modal-title" id="courseActionConfirmModalTitle">{% trans 'Təsdiq edin' %}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'action_close' context 'exams.partial.exam_modals' %}"></button>
+        <div class="modal-content">
+            <button type="button" class="btn-close ems-confirm__x" data-bs-dismiss="modal" aria-label="{% trans 'action_close' context 'exams.partial.exam_modals' %}"></button>
+            <div class="modal-body ems-confirm__main">
+                <span class="ems-confirm__icon" aria-hidden="true">
+                    <svg class="ems-confirm__icon-q" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    <svg class="ems-confirm__icon-d" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                </span>
+                <div class="ems-confirm__text">
+                    <h5 class="modal-title ems-confirm__title" id="courseActionConfirmModalTitle">{% trans 'Təsdiq edin' %}</h5>
+                    <p class="ems-confirm__body mb-0" id="courseActionConfirmModalMessage"></p>
+                </div>
             </div>
-            <div class="modal-body">
-                <p class="mb-0 text-muted" id="courseActionConfirmModalMessage"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer ems-confirm__foot">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     {% trans "action_close" context "exams.partial.exam_modals" %}
                 </button>
                 <button type="button" class="btn btn-danger" id="courseActionConfirmModalSubmit">
@@ -29,4 +39,4 @@
     </div>
 </div>
 
-<script src="{% static 'courses/js/action_confirm_modal.js' %}"></script>
+<script src="{% static 'courses/js/action_confirm_modal.js' %}?v=20260928-1" defer></script>

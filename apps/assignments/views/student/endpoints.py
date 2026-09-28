@@ -58,7 +58,11 @@ def assignment_detail(request, pk):
     # İcazə yoxlaması - tələbə yalnız özünə təyin olunmuşlara baxa bilər
     # ─────────────────────────────────────────────────────────────────────────
     if getattr(request.user, "is_student", False):
-        has_access = assignment.assigned_students.filter(id=request.user.id).exists()
+        # Qaralama/arxiv tapşırıq tələbəyə birbaşa linklə də açılmır (2026-09-28).
+        has_access = (
+            assignment.status not in ("draft", "archived")
+            and assignment.assigned_students.filter(id=request.user.id).exists()
+        )
         if not has_access:
             messages.error(request, pgettext("assignments.views.message", "no_assignment_access"))
             return redirect("courses:course_dashboard", course_id=assignment.course.id)

@@ -1,5 +1,4 @@
 import json
-from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
@@ -13,6 +12,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+from apps.exams.domain.attempt_deadline import write_window_closed
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.metrics import record_autosave
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt
@@ -220,9 +220,9 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         # Re-check the deadline while holding the attempt row lock. This keeps
         # final submit, autosave, and timer-expiry paths from racing each other.
-        if exam.total_duration_minutes and attempt.started_at:
-            finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
-            is_time_up = timezone.now() >= finish_time
+        # Audit 2026-09-28 EX28-07: deadline `end_datetime` ilə kəsilir; müddətsiz
+        # imtahanda `end_datetime` keçibsə də vaxt bitmiş sayılır (grace daxilində yazı saxlanır).
+        is_time_up = is_time_up or write_window_closed(attempt, at_time=timezone.now())
 
         autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
         answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
@@ -394,8 +394,14 @@ def take_exam(request, slug, attempt_id):
         # oxunmadan «expired» olurdu. Grace pəncərəsi daxilindəki yazı
         # `_handle_take_exam_post`-a buraxılır — orada kilid altında
         # `is_time_up` hesablanır, cavablar saxlanır, status «expired» olur.
-        grace = timedelta(seconds=settings.EXAM_SUBMIT_GRACE_SECONDS) if request.method == "POST" else timedelta(0)
-        attempt.expire_if_time_limit_reached(at_time=timezone.now() - grace)
+        # Audit 2026-09-28 EX28-04: GET də grace-i gözləyir (ikinci tab / reload
+        # cəhdi grace daxilində bağlayıb son təhvili itirməsin) — hər iki metod
+        # defolt olaraq `now − grace` ilə yoxlayır. EX28-07: POST müddətsiz
+        # imtahanda `end_datetime` + grace keçibsə də rədd olunur.
+        if request.method == "POST":
+            attempt.expire_if_write_window_closed()
+        else:
+            attempt.expire_if_time_limit_reached()
     # If the resume window already lapsed before the student got here, finish now.
     if supervision_feature_enabled:
         attempt.expire_if_resume_window_expired()
@@ -448,16 +454,11 @@ def take_exam(request, slug, attempt_id):
         return redirect(resolve_exam_failure_redirect(request))
 
     # Server tərəfli Vaxt Hesablaması
+    # Audit 2026-09-28 EX28-07: `deadline_at` = min(start + müddət, end_datetime).
     remaining_seconds = None
-    if exam.total_duration_minutes and attempt.started_at:
-        now = timezone.now()
-        finish_time = attempt.started_at + timedelta(minutes=exam.total_duration_minutes)
-        diff = finish_time - now
-        total_seconds = diff.total_seconds()
-        if total_seconds <= 0:
-            remaining_seconds = 0
-        else:
-            remaining_seconds = int(total_seconds)
+    deadline = attempt.deadline_at
+    if deadline is not None:
+        remaining_seconds = max(0, int((deadline - timezone.now()).total_seconds()))
 
     if exam.exam_type == "coding":
         from apps.exams.services.supervision import get_attempt_supervision_status

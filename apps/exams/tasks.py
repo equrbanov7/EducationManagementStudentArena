@@ -10,10 +10,21 @@ auto-finished by the backend so it does not linger in the supervision monitor.
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def _worker_bypass_scope():
+    """Celery sweep addımı: öz tranzaksiyası (flaq açıqdırsa) + RLS bypass (EX28-05)."""
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    with rls_worker_atomic(), bypass_rls():
+        yield
 
 
 @shared_task(name="exams.expire_stale_resumed_attempts")
@@ -29,13 +40,11 @@ def expire_stale_resumed_attempts():
     # Imported lazily so the task module stays import-safe even when the app
     # registry is not fully loaded (e.g. during Celery autodiscovery).
     from apps.exams.services.supervision import sweep_expired_resume_windows
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
     # Global periodic sweep has no org_id argument; it intentionally scans every
     # tenant and each write records the attempt's own organization.
-    with rls_worker_atomic(), bypass_rls():
-        expired = sweep_expired_resume_windows()
+    # Audit 2026-09-28 EX28-05: xarici tranzaksiya yoxdur — hər cəhd öz scope-unda.
+    expired = sweep_expired_resume_windows(scope=_worker_bypass_scope)
     if expired:
         logger.info("expire_stale_resumed_attempts: auto-finished %d attempt(s)", expired)
     return expired
@@ -54,13 +63,14 @@ def expire_overdue_attempts():
     Returns the number of attempts that were auto-finished.
     """
     from apps.exams.services.attempts import sweep_overdue_attempts
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
     # Global periodic sweep has no org_id argument; each finished attempt is
     # written under its own exam.organization, preserving tenant isolation.
-    with rls_worker_atomic(), bypass_rls():
-        expired = sweep_overdue_attempts()
+    # Audit 2026-09-28 EX28-05: bütün sweep-i BİR `rls_worker_atomic`-ə sarmırıq —
+    # `RLS_TRANSACTION_SCOPED` açıq olanda bu, emal olunan bütün cəhdlərin sətir
+    # kilidlərini sweep bitənə qədər saxlayırdı. `scope` hər DB addımını (namizəd
+    # sorğusu və hər cəhd) ayrıca real tranzaksiyaya + `SET LOCAL` bypass-a salır.
+    expired = sweep_overdue_attempts(scope=_worker_bypass_scope)
     if expired:
         logger.info("expire_overdue_attempts: auto-finished %d attempt(s)", expired)
     return expired
@@ -392,6 +402,7 @@ def run_export_job(job_id):
 
     from apps.exams.export_registry import run_export
     from apps.exams.models import TextExtractionJob
+    from core.db_timeouts import long_statement
     from core.rls import bypass_rls
     from core.rls_pooling import rls_worker_atomic
 
@@ -413,12 +424,16 @@ def run_export_job(job_id):
 
         payload = dict(job.payload or {})
         try:
-            filename, content_type, data = run_export(
-                payload.get("export", ""),
-                user=job.user,
-                organization=job.organization,
-                params=payload.get("params") or {},
-            )
+            # Audit 2026-09-28 DB-02: tətbiq rolunun 60 s statement_timeout-u
+            # böyük export-u kəsməsin — limit yalnız bu blok üçün task-ın
+            # soft_time_limit-inə qədər genişlənir.
+            with long_statement(840):
+                filename, content_type, data = run_export(
+                    payload.get("export", ""),
+                    user=job.user,
+                    organization=job.organization,
+                    params=payload.get("params") or {},
+                )
         except ValueError as exc:
             job.status = TextExtractionJob.STATUS_FAILED
             job.error = str(exc)

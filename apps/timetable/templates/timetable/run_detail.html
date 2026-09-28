@@ -31,7 +31,7 @@ kilid/köçürmə dialoqu və «Dərc et». Hadisə detalları `json_script` ada
         {% if can_edit %}
         <button type="button" class="ems-btn ems-btn--success" data-ems-overlay-open="ttPublish"><i class="fas fa-upload" aria-hidden="true"></i> {% trans "Dərc et" context "timetable.review" %}</button>
         {% endif %}
-        {% if run.status != "published" and run.status != "discarded" %}
+        {% if can_mutate and run.status != "published" and run.status != "discarded" %}
         <button type="button" class="ems-btn ems-btn--ghost" data-tt-discard><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Ləğv et" context "timetable.review" %}</button>
         {% endif %}
       </div>
@@ -46,7 +46,7 @@ kilid/köçürmə dialoqu və «Dərc et». Hadisə detalları `json_script` ada
     {% if run.status == "failed" %}
     <div class="ems-card__body">
       {% trans "İşləmə uğursuz oldu" context "timetable.review" as failed_title %}
-      {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=failed_title banner_body=run.error %}
+      {% include "partials/ems_ui/_banner.html" with banner_kind="danger" banner_title=failed_title banner_body=run_info.error %}
     </div>
     {% endif %}
     {% if run.status == "published" %}

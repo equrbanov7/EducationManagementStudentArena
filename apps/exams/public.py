@@ -37,6 +37,7 @@ from apps.exams.services.access_policy import (  # noqa: F401
     is_exam_center_user,
     is_teacher_user,
 )
+from apps.exams.services.ai_json import generate_ai_json  # noqa: F401
 from apps.exams.services.ai_summary import _get_rate_limit as get_ai_rate_limit  # noqa: F401
 from apps.exams.services.ai_summary import generate_exam_statistics_summary  # noqa: F401
 from apps.exams.services.ai_summary import generate_people_analytics_summary  # noqa: F401
@@ -66,6 +67,7 @@ from apps.exams.services.result_calculation import (  # noqa: F401
     calculate_test_attempt_result,
 )
 from apps.exams.services.result_release import (  # noqa: F401
+    attempt_answer_key_hidden,
     exam_answers_release_locked,
 )
 from apps.exams.services.review_visibility import (  # noqa: F401
@@ -101,6 +103,7 @@ __all__ = [
     "can_assign_invigilators",
     "update_computer",
     "get_ai_rate_limit",
+    "generate_ai_json",
     "EXAM_LANGUAGE_CHOICES",
     "accessible_banks",
     "available_language_options",
@@ -112,6 +115,7 @@ __all__ = [
     "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "ensure_can_manage_exam_rooms",
+    "attempt_answer_key_hidden",
     "exam_answers_release_locked",
     "is_exam_center_user",
     "calculate_test_attempt_result",

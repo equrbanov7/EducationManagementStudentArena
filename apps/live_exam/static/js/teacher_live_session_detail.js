@@ -425,13 +425,15 @@
                             quotaHtml = '<div class="sd-ai-quota">'
                                 + '<i class="fas fa-info-circle"></i> '
                                 + I18N.ai_quota_info + ': '
-                                + '<strong>' + data.remaining + '/' + data.limit + '</strong> (' + data.window + ')'
+                                + '<strong>' + escapeHtml(data.remaining) + '/' + escapeHtml(data.limit) + '</strong> (' + escapeHtml(data.window) + ')'
                                 + (data.cached ? ' &middot; <span class="sd-ai-cached"><i class="fas fa-bolt"></i> ' + I18N.ai_cached + '</span>' : '')
                                 + '</div>';
                         }
                         aiContent.innerHTML = formatMd(data.summary) + quotaHtml;
                     } else {
-                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> ' + (data.error || I18N.ai_error) + '</div>';
+                        // Audit 2026-09-28 SA-05: server xəta mətni HTML kimi yox, textContent ilə.
+                        aiContent.innerHTML = '<div class="sd-ai-error"><i class="fas fa-exclamation-triangle"></i> <span data-ai-error-text></span></div>';
+                        aiContent.querySelector("[data-ai-error-text]").textContent = data.error || I18N.ai_error;
                     }
                     aiBtn.disabled = false;
                     aiBtn.style.opacity = "1";
@@ -444,8 +446,20 @@
         });
     }
 
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    // Audit 2026-09-28 SA-05: LLM mətni (oyunçu nickname-ləri prompt-a düşür)
+    // əvvəl ESCAPE olunur, markdown formatı yalnız bundan sonra tətbiq edilir —
+    // digər AI renderləri (teacher_exam_statistics_charts.js və s.) kimi.
     function formatMd(text) {
-        var html = text
+        var html = escapeHtml(text)
             .replace(/### (.*)/g, '<h3 class="sd-md-h3">$1</h3>')
             .replace(/## (.*)/g, '<h2 class="sd-md-h2">$1</h2>')
             .replace(/# (.*)/g, '<h1 class="sd-md-h1">$1</h1>')

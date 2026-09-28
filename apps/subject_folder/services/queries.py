@@ -271,11 +271,11 @@ def submission_detail(submission, *, actor) -> dict:
     if not access.can_view_submission(actor, submission):
         raise FolderError.of("permission.denied")
     staff = submission.student_id != getattr(actor, "pk", None)
-    attempts = list(
-        Submission.objects.filter(task_id=submission.task_id, enrollment_id=submission.enrollment_id)
-        .prefetch_related("files")
-        .order_by("attempt_no")
-    )
+    attempts_qs = Submission.objects.filter(task_id=submission.task_id, enrollment_id=submission.enrollment_id)
+    if staff:
+        # SF-2: zəncirdəki qaralama cəhdi (və faylları) müəllimə göstərilmir.
+        attempts_qs = attempts_qs.exclude(status=SubmissionStatus.DRAFT)
+    attempts = list(attempts_qs.prefetch_related("files").order_by("attempt_no"))
     events = list(submission.events.all().order_by("created_at")) if staff else []
     if not staff:
         events = list(

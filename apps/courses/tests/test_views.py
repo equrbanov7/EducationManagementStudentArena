@@ -220,12 +220,12 @@ class CourseOwnershipTenantFilteringTest(TestCase):
             reverse("courses:course_dashboard", kwargs={"course_id": self.course_a.id}),
         )
 
+        # 2026-09-28 redizayn: yayım idarəsi hero-dadır — status nişanı + tək POST düyməsi.
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "courseVisibilityAccordion")
-        self.assertContains(response, "course-status-toggle")
-        self.assertContains(response, "course-status-switch-form")
-        self.assertContains(response, "Kursun yayımı")
-        self.assertContains(response, "Yayımlandı")
+        self.assertContains(response, 'class="cd-publish"')
+        self.assertContains(response, reverse("courses:update_course_status", args=[self.course_a.id]))
+        self.assertContains(response, "Yayımlanıb")
+        self.assertContains(response, 'name="status" value="draft"')
 
     def test_course_dashboard_uses_unified_view_answers_label_and_resource_title(self):
         expected_answer_labels = {
@@ -412,9 +412,14 @@ class CourseOwnershipTenantFilteringTest(TestCase):
                 missing_name = self.course_a.cover_image.name
                 self.course_a.cover_image.storage.delete(missing_name)
 
-                response = self.client.get(edit_url)
+                # 2026-09-28: redaktə yalnız modaldır — forma gövdəsi AJAX GET ilə gəlir,
+                # adi GET panelə `?edit=1` ilə yönləndirir.
+                response = self.client.get(edit_url, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
                 self.assertEqual(response.status_code, 200)
                 self.assertNotContains(response, missing_name)
+                plain = self.client.get(edit_url)
+                self.assertEqual(plain.status_code, 302)
+                self.assertTrue(plain.url.endswith("?edit=1"))
 
                 response = self.client.post(
                     edit_url,
@@ -550,7 +555,8 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         # (CSP: no inline JS) rather than inline in the response — assert the
         # script that wires the topic edit modal is present on the page.
         self.assertContains(response, "courses/js/topic_edit_modal.js")
-        self.assertContains(response, 'id="sidebar-members-count"')
+        self.assertContains(response, 'data-count="members"')
+        self.assertContains(response, 'data-bs-target="#editCourseModal"')
         # The '.snav-item[data-key="members"] .snav-count' selector now lives in
         # the external member-accordion script (CSP: no inline JS) — assert that
         # script is wired on the page instead of the literal selector text.

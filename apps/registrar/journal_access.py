@@ -131,13 +131,34 @@ def can_observe_journal(user, offering) -> bool:
     return offering_in_actor_scope(user, offering.organization, offering, permission=VIEW_PERMISSION)
 
 
+def offering_accepts_writes(offering) -> bool:
+    """Ləğv edilmiş açılış (``is_active=False``) jurnalına HEÇ BİR yazı getmir.
+
+    Audit 2026-09-28 J-09: semestr idarəsində ləğv olunan açılış siyahılardan
+    gizlənirdi, amma URL ilə dərs/bal/düzəliş yazıla bilirdi. Oxu (jurnalı açmaq,
+    PDF/ixrac) açıq qalır — tarixçə itmir."""
+    return bool(getattr(offering, "is_active", True))
+
+
+def writable_offering_or_404(offering):
+    """Yazı səthləri üçün qapı: ləğv edilmiş açılışda 404 (J-09)."""
+    if not offering_accepts_writes(offering):
+        from django.http import Http404
+
+        raise Http404
+    return offering
+
+
 def is_direct_editor(user, offering) -> bool:
     """Birbaşa (audit-siz) redaktə — müəllim / org sahibi / superuser / RİM rəhbəri.
 
     Sahibin qərarı (2026-09-14): RİM rəhbəri («hər şeyin icazəsi») başqa müəllimin
     jurnalında da birbaşa dərs əlavə edir və bal yazır; əvvəl yalnız korrektor idi.
-    Tenant sərhədi `can_edit_journal`-dakı kimi fetch mərhələsində (`offering_or_404`)."""
+    Tenant sərhədi `can_edit_journal`-dakı kimi fetch mərhələsində (`offering_or_404`).
+    Ləğv edilmiş açılışda heç kim birbaşa redaktor deyil (J-09 — jurnal yalnız-oxu)."""
     if not getattr(user, "is_authenticated", False):
+        return False
+    if not offering_accepts_writes(offering):
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True

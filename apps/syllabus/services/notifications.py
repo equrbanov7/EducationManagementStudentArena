@@ -40,6 +40,14 @@ FALLBACK_NOTE = pgettext_lazy(
     "Təsdiq kafedra müdirinin səlahiyyətindədir — zəhmət olmasa müdir təyin edin.",
 )
 
+#: Audit 2026-09-28 SYL-1: kafedra müdiri sillabusun ÖZ müəllifidir — qərar
+#: növbəti pilləyə (dekanlıq / universitet səviyyəsi) keçir.
+SELF_AUTHORED_NOTE = pgettext_lazy(
+    _CTX,
+    "Bu sillabusun müəllifi kafedra müdirinin özüdür, ona görə öz sillabusunu təsdiqləyə bilməz. "
+    "Qərar dekanlıq və ya universitet səviyyəsində verilməlidir.",
+)
+
 
 def _detail_link(syllabus_id) -> str:
     return reverse("accounts:syllabus_detail", kwargs={"syllabus_id": syllabus_id})
@@ -102,12 +110,20 @@ def notify_submitted(version) -> None:
     QALMIR: heç kim tapılmasa belə hadisə səssizcə itmir, jurnala düşür.
     """
     syllabus = version.syllabus
-    recipients = _chair_head_recipients(syllabus)
+    chair_heads = _chair_head_recipients(syllabus)
+    # Audit 2026-09-28 SYL-1: müəllif öz sillabusuna qərar verə bilmir — kafedra
+    # müdiri müəllifdirsə bildiriş ona yox, növbəti pilləyə (dekanlığa) gedir.
+    authors = {getattr(syllabus, "author_id", None), getattr(version, "submitted_by_id", None)}
+    offering = getattr(syllabus, "offering", None)
+    if offering is not None:
+        authors.add(offering.instructor_id)
+    recipients = [user for user in chair_heads if user.pk not in authors]
     message = version.label
     if not recipients:
         recipients = _dean_recipients(syllabus)
         if recipients:
-            message = "%s — %s" % (version.label, str(FALLBACK_NOTE))
+            note = SELF_AUTHORED_NOTE if chair_heads else FALLBACK_NOTE
+            message = "%s — %s" % (version.label, str(note))
         else:
             logger.warning(
                 "syllabus submitted but no chair head or dean covers chair_unit=%s (syllabus=%s)",

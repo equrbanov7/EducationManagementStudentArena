@@ -1,0 +1,104 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EMS ARENA — Reusable: Shipped JS tests (Node + jsdom)
+# ═══════════════════════════════════════════════════════════════════════════
+# Audit 2026-09-28 FQ-TEST-1: göndərilən brauzer JS-i CI-da heç vaxt İCRA
+# olunmurdu (yalnız Python-da mənbə mətni yoxlanılırdı). Bu job:
+#   1) tests/js — `npm test` (node:test + jsdom): EMSReady / EMSDelegate nüvəsi;
+#   2) tests/test_shipped_js_jsdom.py — redaktorun ƏSL render olunmuş DOM-u
+#      üzərində `syllabus_editor_fields.js` toplayıcısı (tests/js/collect_shipped.js)
+#      + Python güzgüsü ilə paritet. `EMS_REQUIRE_JSDOM=1` ötürülməni xətaya çevirir.
+# Called by ci.yml via workflow_call.
+# ═══════════════════════════════════════════════════════════════════════════
+
+name: 🟨 JS Tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        type: string
+        default: "3.12"
+      node-version:
+        description: "Node.js version to use"
+        type: string
+        default: "20"
+
+jobs:
+  js-tests:
+    name: 🟨 Shipped JS (Node ${{ inputs.node-version }} + jsdom)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      DJANGO_SETTINGS_MODULE: "config.settings.test"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+
+      - name: 🟩 Setup Node ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+          cache-dependency-path: tests/js/package-lock.json
+
+      - name: 📦 Install jsdom harness (npm ci)
+        working-directory: tests/js
+        run: npm ci --no-audit --no-fund
+
+      - name: 🧪 Node unit tests (EMSReady / EMSDelegate)
+        working-directory: tests/js
+        run: npm test
+
+      - name: 🐍 Setup Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ inputs.python-version }}-
+
+      - name: 📥 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          pip install --require-hashes -r requirements/test.lock
+
+      - name: 🧪 Real-DOM syllabus collector (jsdom) vs Python mirror
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          SECRET_KEY: test-secret-key-for-ci-only-not-production
+          DEBUG: "False"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
+          EMS_REQUIRE_JSDOM: "1"
+        run: |
+          pytest tests/test_shipped_js_jsdom.py \
+            --ds=config.settings.test \
+            -p no:cacheprovider \
+            -q \
+            --tb=short \
+            --timeout=900

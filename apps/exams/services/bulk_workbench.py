@@ -35,15 +35,20 @@ _OPTION_LABELS = ("A", "B", "C", "D", "E")
 def fingerprint_parsed(question: dict) -> str:
     """Parse olunmuş sualdan (text + A..E variantları) fingerprint qurur."""
     options = question.get("options") or {}
-    return _norm(question.get("text", "")) + "||" + "||".join(_norm(options.get(label, "")) for label in _OPTION_LABELS)
+    return _fingerprint(question.get("text", ""), (options.get(label, "") for label in _OPTION_LABELS))
 
 
 def fingerprint_from_texts(text: str, option_texts) -> str:
     """Mətn + sıralı variant mətnləri (A..E) siyahısından fingerprint qurur."""
-    option_map = {}
-    for index, opt_text in enumerate(list(option_texts)[:5]):
-        option_map[_OPTION_LABELS[index]] = opt_text
-    return _norm(text) + "||" + "||".join(_norm(option_map.get(label, "")) for label in _OPTION_LABELS)
+    return _fingerprint(text, list(option_texts)[: len(_OPTION_LABELS)])
+
+
+def _fingerprint(text, option_texts) -> str:
+    # Audit 2026-09-28 EX28-01: variantlar yaradılışda təsadüfi sıraya düzülür —
+    # dublikat yoxlaması hərf/mövqedən asılı olmasın deyə mətnlər sıralanır.
+    options = sorted(_norm(option) for option in option_texts)
+    options += [""] * (len(_OPTION_LABELS) - len(options))
+    return _norm(text) + "||" + "||".join(options)
 
 
 def _short_preview(text: str, length: int = 60) -> str:

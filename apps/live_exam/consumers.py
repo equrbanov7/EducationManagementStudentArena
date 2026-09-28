@@ -20,8 +20,10 @@ from apps.live_exam.auth import (
 )
 from apps.live_exam.models import LiveSession
 from apps.live_exam.scoring import get_answer_progress, save_answer_and_score
+from apps.live_exam.serializers import serialize_player_question_result
 from apps.live_exam.transport import (
     build_answer_progress_payload,
+    build_answer_saved_payload,
     build_lobby_state_payload,
     build_player_reveal_payload,
     build_reveal_payload,
@@ -285,7 +287,8 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
             await self.send_json({"type": "error", "message": result})
             return
 
-        await self.send_json({"type": "answer_saved", **result["answer"]})
+        # Audit 2026-09-28 EX28-10: düzlük/bal reveal-ə qədər göndərilmir.
+        await self.send_json(build_answer_saved_payload(result))
 
         # 4) progress -> host group only (players do not need this; host uses it for auto-reveal)
         # Reuse counts computed during scoring when available (saves 3 queries);
@@ -329,7 +332,24 @@ class LivePlayConsumer(LiveSessionSocketAuthMixin, AsyncJsonWebsocketConsumer):
 
     async def play_event(self, event):
         # view -> group_send(... {"type":"play_event","data":{...}})
-        await self.send_json(event.get("data") or {})
+        data = event.get("data") or {}
+        # EX28-10: şəxsi nəticə artıq ``answer_saved``-də gəlmir — reveal anında
+        # hər oyunçuya YALNIZ öz nəticəsi əlavə olunur.
+        if getattr(self, "player_auth", None) and data.get("type") == "reveal" and data.get("question_id"):
+            player_answer = await self._get_own_player_answer(
+                self.pin, data["question_id"], self.player_auth["player_id"]
+            )
+            if player_answer:
+                data = {**data, "player_answer": player_answer}
+        await self.send_json(data)
+
+    @database_sync_to_async
+    def _get_own_player_answer(self, pin: str, question_id: int, player_id: int):
+        with rls_worker_atomic(), bypass_rls():
+            session = LiveSession.objects.filter(pin=pin).first()
+            if session is None:
+                return None
+            return serialize_player_question_result(session, question_id, player_id)
 
     @database_sync_to_async
     def _get_answer_progress(self, pin: str, question_id: int) -> dict:

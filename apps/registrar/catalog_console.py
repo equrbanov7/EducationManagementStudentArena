@@ -28,7 +28,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
@@ -36,6 +36,7 @@ from core.constants import OrgUnitType
 from core.search_text import tokens_of, tolerant_match
 
 from . import status as academic_status
+from .enrollment_suspension import sync_enrollments_for_status
 from .forms import CurriculumForm, OfferingForm, ProgramForm, StudentRecordForm, SubjectForm
 from .models import (
     CourseOffering,
@@ -433,7 +434,11 @@ def save(organization, *, tab, pk, data, actor=None):
     except IntegrityError as exc:
         return None, {"__all__": [str(exc)]}
     if tab == "students":
-        academic_status.audit_status_change(record=obj, previous=previous_status, by_user=actor)
+        with transaction.atomic():
+            academic_status.audit_status_change(record=obj, previous=previous_status, by_user=actor)
+            # Audit 2026-09-28 S1: xaric/məzuniyyət → cari dövr qeydiyyatları dondurulur, bərpada qaytarılır.
+            if previous_status is not None:
+                sync_enrollments_for_status(record=obj, previous=previous_status, to_status=obj.status, actor=actor)
         _auto_enroll(obj, form)
     return obj, {}
 

@@ -1,15 +1,155 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ems_ui/confirm.css — Qlobal təsdiq dialoqu (EMSConfirm)
+   ems_confirm.css — Qlobal təsdiq dialoqu (EMSConfirm)
 
-   Native `window.confirm()` əvəzi. Markup Bootstrap 5 modal-ıdır (layihədə
-   artıq geniş istifadə olunan komponent — bax apps/exams/.../_exam_modals.html
-   və s.); bu fayl yalnız EMSConfirm-ə xas kiçik tənzimləmələri saxlayır.
-   Davranış: static/js/ems_ui/confirm.js. Markup: templates/partials/ems_ui/_confirm_modal.html.
+   Native `window.confirm()` əvəzi. Markup: templates/partials/_ems_confirm_modal.html
+   (Bootstrap 5 modal). Davranış: static/js/ems_confirm.js.
+
+   2026-09-28 redizayn: ikon plitəsi + başlıq + mətn bir blokda; başlıq
+   verilməyəndə (`.is-untitled`) boş başlıq zolağı qalmır; destruktiv əməldə
+   (`.is-danger`) qırmızı vurğu. Rənglər yalnız design-tokens-dən.
    ═══════════════════════════════════════════════════════════════════════════ */
+
+.ems-confirm .modal-dialog {
+    max-width: 440px;
+}
+
+.ems-confirm .modal-content {
+    position: relative;
+    border: 0;
+    border-radius: var(--ems-r-2xl, 16px);
+    box-shadow: var(--ems-sh-dialog, 0 24px 60px rgba(15, 23, 42, 0.24));
+    overflow: hidden;
+}
+
+.ems-confirm__x {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--ems-r-md, 8px);
+    background-size: 12px;
+    opacity: 0.5;
+}
+
+.ems-confirm__x:hover,
+.ems-confirm__x:focus-visible {
+    opacity: 1;
+    background-color: var(--ems-neutral-100);
+}
+
+.ems-confirm__main {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 24px 52px 8px 24px;
+}
+
+.ems-confirm__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.ems-confirm__icon-d,
+.ems-confirm.is-danger .ems-confirm__icon-q {
+    display: none;
+}
+
+.ems-confirm.is-danger .ems-confirm__icon-d {
+    display: block;
+}
+
+.ems-confirm.is-danger .ems-confirm__icon {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+.ems-confirm__text {
+    min-width: 0;
+    padding-top: 2px;
+}
+
+.ems-confirm__title {
+    margin: 0 0 6px;
+    font-size: var(--ems-fs-xl, 16px);
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--ems-text);
+}
+
+.ems-confirm.is-untitled .ems-confirm__text {
+    padding-top: 10px;
+}
 
 /* Çoxsətirli mesajlarda (əvvəlki confirm()-lərdə \n ilə formatlanmış mətnlər)
    sətir sonlarını qoru — Bootstrap modal-body defolt olaraq boşluğu sıxışdırır. */
-#emsConfirmModalBody {
+#emsConfirmModalBody,
+#courseActionConfirmModalMessage {
     white-space: pre-line;
     text-wrap: pretty;
+    font-size: var(--ems-fs-md, 14px);
+    line-height: 1.55;
+    color: var(--ems-neutral-600);
+    overflow-wrap: anywhere;
+}
+
+.ems-confirm.is-untitled #emsConfirmModalBody {
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+.ems-confirm__foot {
+    gap: 8px;
+    padding: 16px 24px 20px;
+    border-top: 0;
+}
+
+.ems-confirm__foot .btn {
+    min-height: var(--ems-h-field, 40px);
+    margin: 0;
+    padding: 0 18px;
+    border-radius: var(--ems-r-lg, 9px);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 700;
+}
+
+.ems-confirm__foot .btn-success {
+    border-color: var(--ems-success-700);
+    background: var(--ems-success-700);
+}
+
+.ems-confirm__foot .btn-secondary {
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+}
+
+.ems-confirm__foot .btn-secondary:hover,
+.ems-confirm__foot .btn-secondary:focus-visible {
+    border-color: var(--ems-neutral-400);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+}
+
+@media (max-width: 480px) {
+    .ems-confirm__main {
+        padding: 22px 48px 6px 18px;
+    }
+
+    .ems-confirm__foot {
+        padding: 14px 18px 18px;
+    }
+
+    .ems-confirm__foot .btn {
+        flex: 1 1 0;
+    }
 }

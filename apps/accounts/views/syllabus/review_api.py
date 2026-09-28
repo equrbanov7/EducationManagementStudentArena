@@ -38,7 +38,21 @@ _CTX = "accounts.syllabus"
 MAX_SECTION_COMMENT = 2000
 
 #: 403 (səlahiyyət) ilə qaytarılan domen kodları — qalanı 409 (vəziyyət).
-_FORBIDDEN_CODES = frozenset({"transition.permission_denied", "transition.out_of_scope", "transition.author_only"})
+_FORBIDDEN_CODES = frozenset(
+    {
+        "transition.permission_denied",
+        "transition.out_of_scope",
+        "transition.author_only",
+        "transition.author_forbidden",
+    }
+)
+
+#: Keçid adı → panelin qərar düyməsinin açarı (``data-syl-decide``).
+_DECISION_KEYS = {
+    Transition.APPROVE: "approve",
+    Transition.REQUEST_REVISION: "revise",
+    Transition.REJECT: "reject",
+}
 
 _NO_ORG = pgettext_lazy(_CTX, "Aktiv təşkilat seçilməyib.")
 _NOT_FOUND = pgettext_lazy(_CTX, "Sillabus versiyası tapılmadı və ya əhatənizdə deyil.")
@@ -138,8 +152,20 @@ def syllabus_review_open(request, version_id):
         if version is None:
             return _fail(_NOT_FOUND, status=404)
 
+    # Audit 2026-09-28 SYL-1: qərar düymələri VERSİYA ÜZRƏ daraldılır — müəllif
+    # öz sillabusunda düymə görmür, fakültə səviyyəli aktor yalnız kafedra
+    # müdirinin öz sillabusunda görür.
+    actions = services.available_actions(version=version, actor=actor)
+    decisions = [key for name, key in _DECISION_KEYS.items() if name in actions]
+    own = services.is_author(actor, version.syllabus)
     return JsonResponse(
-        {"ok": True, "transition": Transition.START_REVIEW, **build_review_payload(version, now=timezone.now())}
+        {
+            "ok": True,
+            "transition": Transition.START_REVIEW,
+            **build_review_payload(version, now=timezone.now()),
+            "decisions": decisions,
+            "own_note": transition_text("transition.author_forbidden") if own else "",
+        }
     )
 
 

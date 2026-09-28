@@ -75,6 +75,10 @@ class TransitionRule:
     requires_complete: bool = False
     #: Keçidi yalnız müəllif/təqdim edən edə bilərmi (kafedra tərəfi deyil).
     author_only: bool = False
+    #: Audit 2026-09-28 SYL-1: müəllif bu keçidi ÖZ sillabusunda edə BİLMƏZ
+    #: (dörd göz prinsipi) — qərar səlahiyyəti olan kafedra müdiri də öz
+    #: sillabusunu təsdiqləyə/qaytara/rədd edə bilmir; qərar növbəti pilləyə keçir.
+    forbid_author: bool = False
 
 
 TRANSITIONS = {
@@ -105,6 +109,7 @@ TRANSITIONS = {
         sources=frozenset({SyllabusStatus.SUBMITTED.value, SyllabusStatus.REVIEW.value}),
         target=SyllabusStatus.APPROVED.value,
         permission=PERM_APPROVE,
+        forbid_author=True,
     ),
     Transition.REQUEST_REVISION: TransitionRule(
         name=Transition.REQUEST_REVISION,
@@ -112,6 +117,7 @@ TRANSITIONS = {
         target=SyllabusStatus.REVISION.value,
         permission=PERM_REVISE,
         reason_required=True,
+        forbid_author=True,
     ),
     Transition.REJECT: TransitionRule(
         name=Transition.REJECT,
@@ -119,6 +125,7 @@ TRANSITIONS = {
         target=SyllabusStatus.REJECTED.value,
         permission=PERM_REJECT,
         reason_required=True,
+        forbid_author=True,
     ),
     Transition.RESUME_EDITING: TransitionRule(
         name=Transition.RESUME_EDITING,
@@ -188,6 +195,9 @@ def check(
 
     if rule.author_only and not is_author:
         raise TransitionDenied("transition.author_only", params={"transition": name})
+
+    if rule.forbid_author and is_author:
+        raise TransitionDenied("transition.author_forbidden", params={"transition": name})
 
     if rule.reason_required and not (reason or "").strip():
         raise TransitionDenied("transition.reason_required", params={"transition": name})

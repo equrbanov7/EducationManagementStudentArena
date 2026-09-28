@@ -249,13 +249,17 @@ def _ensure_plan_hours(syllabus, context) -> tuple[dict, bool]:
         return plan_hours, False
     from apps.registrar.public import plan_hours_for_offering
 
+    # Audit 2026-09-28 SYL-7: müəllif olmayanın (kafedra) GET-i YAZMIR — plan
+    # saatı yalnız göstərilir, əl ilə seçim forması da açılmır.
+    author = bool(context.get("is_author"))
     found = plan_hours_for_offering(getattr(syllabus, "offering", None))
     if found:
         if not plan_hours:
-            set_plan_hours(context["version"], found)
+            if author:
+                set_plan_hours(context["version"], found)
             return dict(found), False
         return plan_hours, False
-    return plan_hours, True
+    return plan_hours, author
 
 
 def _locked_rows(syllabus, hours):
@@ -398,7 +402,12 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     # Sahib 2026-09-21: təzə qaralamada saat bölgüsü plandan ÖZÜ düzülür
     # (2-2-…-qalıq).  Yazıldısa context yenidən qurulur ki, revision/tamamlanma
     # şablona təzə getsin (optimistik kilid köhnə revision ilə qalmasın).
-    if plan_hours and context.get("view_state") == "normal" and seed_week_hours(context["version"], plan_hours):
+    if (
+        plan_hours
+        and context.get("view_state") == "normal"
+        and context.get("is_author")
+        and seed_week_hours(context["version"], plan_hours)
+    ):
         context = build_syllabus_editor_context(request, organization=organization, version=version)
     completion = context["completion"]
     section_map = {row["id"]: (row["data"] or {}) for row in context["sections"]}

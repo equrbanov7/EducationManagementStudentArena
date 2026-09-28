@@ -229,9 +229,11 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
 
     for attempt in range(_MAX_RETRIES + 1):
         try:
+            # Audit 2026-09-28 SA-06: açar URL query-də (`?key=`) deyil, başlıqda —
+            # şəbəkə xətalarının mətni (URL daxil) log-a düşəndə açar sızmır.
             resp = requests.post(
-                f"https://generativelanguage.googleapis.com/v1beta/models/"
-                f"{quote(model, safe='')}:generateContent?key={api_key}",
+                f"https://generativelanguage.googleapis.com/v1beta/models/{quote(model, safe='')}:generateContent",
+                headers={"x-goog-api-key": api_key},
                 json=payload,
                 timeout=_REQUEST_TIMEOUT,
             )

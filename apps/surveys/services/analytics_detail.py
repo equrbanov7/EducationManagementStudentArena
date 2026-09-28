@@ -29,6 +29,7 @@ from .analytics import (
     is_visible,
     question_stats,
 )
+from .analytics_units import has_unit_filter, publishable_units_by_campaign, without_units
 
 MAX_COMMENTS = 200
 
@@ -61,13 +62,18 @@ def teacher_detail(organization, scope, teacher_id, filters=None) -> dict:
     if filters.is_narrowed:
         baseline = flt.responses(organization, scope, filters.without_narrowing(), campaign_ids).count()
     visible = is_visible(n, k, baseline)
+    if has_unit_filter(filters):
+        # Audit 2026-09-28 SV-1: müəllim ∩ vahid görünüşü — müəllimin vahidsiz cəmi ilə fərq 0 və ya ≥ k.
+        visible = visible and is_visible(
+            n, k, flt.responses(organization, scope, without_units(filters), campaign_ids).count()
+        )
     department_id = (
         base.values("teacher_department_id")
         .annotate(c=Count("id"))
         .order_by("-c")
         .values_list("teacher_department_id", flat=True)
     ).first()
-    bench = department_benchmarks(organization, campaign_ids, k)
+    bench = department_benchmarks(organization, campaign_ids, k, scope=scope)
     dept, org = bench.get(department_id, {}), bench["__org__"]
     metrics = _metrics(row, visible)
     offerings = []
@@ -124,9 +130,16 @@ def trend(organization, scope, *, teacher_id=None, department_id=None, faculty_i
     filters = flt.ResultFilters(teacher_id=teacher_id, department_id=department_id, faculty_id=faculty_id)
     base = flt.responses(organization, scope, filters, [c.pk for c in campaigns])
     rows = {row["campaign_id"]: row for row in base.values("campaign_id").annotate(**_metric_annotations())}
+    # Audit 2026-09-28 SV-1: vahid xəttinin nöqtəsi yalnız həmin kampaniyada dərc olunan vahid üçün.
+    units = {}
+    if has_unit_filter(filters) and rows:
+        units = publishable_units_by_campaign(organization, scope, filters, list(rows))
     result = []
     for campaign in reversed(campaigns):
         row = rows.get(campaign.pk, {"n": 0})
+        visible = (row.get("n") or 0) >= campaign.min_group_size
+        if visible and has_unit_filter(filters):
+            visible = campaign.pk in units and units[campaign.pk].allows(filters)
         result.append(
             {
                 "campaign_id": campaign.pk,
@@ -134,7 +147,7 @@ def trend(organization, scope, *, teacher_id=None, department_id=None, faculty_i
                 "period_name": campaign.period.name,
                 "academic_year": campaign.period.academic_year,
                 "k": campaign.min_group_size,
-                **_metrics(row, (row.get("n") or 0) >= campaign.min_group_size),
+                **_metrics(row, visible),
             }
         )
     return result

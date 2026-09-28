@@ -36,6 +36,11 @@
 
             {% if 'my-courses' in allowed_sections %}
                 {% include "courses/partials/_create_course_modal.html" %}
+                {# AJAX bölmə keçidində göstərilən skelet (section_loader.js, 2026-09-28) #}
+{% include "courses/partials/_courses_section_skeleton.html" with skeleton_key="my-courses" %}
+            {% endif %}
+            {% if 'assigned-courses' in allowed_sections %}
+                {% include "courses/partials/_courses_section_skeleton.html" with skeleton_key="assigned-courses" %}
             {% endif %}
 
             {# Create-exam modalı — eyni səbəbdən qlobal saxlanılır. #}
@@ -145,7 +150,7 @@
 <script src="{% static 'accounts/js/profile/modal_i18n.js' %}?v=20260725-csp"></script>
 <script src="{% static 'accounts/js/profile/namespace.js' %}?v=20260612-org-ajax"></script>
 <script src="{% static 'accounts/js/profile/ui.js' %}?v=20260914-a11y"></script>
-<script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260914-1"></script>
+<script src="{% static 'accounts/js/profile/section_loader.js' %}?v=20260928-1"></script>
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'accounts/js/profile/create_exam_selects.js' %}?v=20260926-search"></script>
 <script src="{% static 'accounts/js/profile/create_exam_modal.js' %}?v=20260612-org-ajax"></script>
@@ -312,6 +317,7 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 {% if 'my-courses' in allowed_sections %}
 <script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
 <script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
+<script src="{% static 'courses/js/course_card_nav.js' %}?v=20260928-1"></script>
 {% endif %}
 {% if 'my-exams' in allowed_sections %}
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>

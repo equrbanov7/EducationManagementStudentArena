@@ -15,7 +15,8 @@ from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 def build_course_dashboard_context(*, course, user, membership, can_manage, is_student):
     """Dashboard "Lab işləri" bölməsi: müəllim hamısını, tələbə yalnız özünə
-    (ID və ya qrup filtri ilə) təyin olunmuş publish edilmiş lab-ları görür."""
+    (ID və ya qrup filtri ilə, filtr yoxdursa bütün kurs) təyin olunmuş
+    publish edilmiş lab-ları görür."""
     if can_manage:
         # MÜƏLLİM - bütün lab-lar
         return {"labs": course.labs.all().order_by("-created_at"), "labs_with_user_data": []}
@@ -25,10 +26,10 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
     # TƏLƏBƏ - yalnız özünə təyin olunmuş lab-ları görür
 
-    # Tələbənin qrup adını al
+    # Tələbənin qrup adını al (Lab.can_student_access kimi casefold müqayisə)
     student_group = ""
     if membership and hasattr(membership, "group_name"):
-        student_group = membership.group_name or ""
+        student_group = (membership.group_name or "").strip().casefold()
 
     labs_with_user_data = []
 
@@ -50,39 +51,18 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
     # Published olan lab-ları yoxla
     for lab in published_labs:
-
-        # This lab assigned to the student?
-        is_assigned = False
-
-        # Allowed students - use pre-fetched M2M (no extra query per lab)
+        # ƏSAS MƏNTİQ — `Lab.can_student_access` ilə EYNİ (2026-09-28):
+        # 1. Hər iki filtr boşdursa → bütün kursa açıqdır (əvvəl heç kim görmürdü,
+        #    halbuki detal səhifəsi açılırdı və bildiriş bütün kursa gedirdi)
+        # 2. Tələbə ID siyahısındadırsa → görür
+        # 3. Qrupu (casefold) siyahıdadırsa → görür
         allowed_student_ids = {s.id for s in lab.allowed_students.all()}
+        allowed_group_keys = {g.casefold() for g in lab.get_allowed_groups_list()}
 
-        # Allowed groups - vergüllə ayrılmış qrup adları
-        allowed_group_names = []
-        if lab.allowed_groups and lab.allowed_groups.strip():
-            for g in lab.allowed_groups.split(","):
-                g = g.strip()
-                if g:
-                    allowed_group_names.append(g)
-
-        # ƏSAS MƏNTİQ:
-        # 1. Əgər hər iki filtr boşdursa → HAMIYA AÇIQ DEYİL, heç kim görməsin
-        # 2. Əgər student ID siyahısında varsa → görür
-        # 3. Əgər qrup siyahısında varsa → görür
-
-        has_any_filter = len(allowed_student_ids) > 0 or len(allowed_group_names) > 0
-
-        if not has_any_filter:
-            is_assigned = False
+        if not allowed_student_ids and not allowed_group_keys:
+            is_assigned = True
         else:
-            # Filtr var - yoxla
-            # Student ID ilə yoxla
-            if user.id in allowed_student_ids:
-                is_assigned = True
-
-            # Qrup adı ilə yoxla
-            if not is_assigned and student_group and student_group in allowed_group_names:
-                is_assigned = True
+            is_assigned = user.id in allowed_student_ids or bool(student_group and student_group in allowed_group_keys)
 
         # Əgər təyin olunmayıbsa, skip et
         if not is_assigned:

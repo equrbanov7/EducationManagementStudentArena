@@ -71,6 +71,9 @@
                                 </small>
                             </div>
 
+                            {% comment %}2026-09-28: bax/redaktə/sil view-ları yalnız kurs sahibinə açıqdır,
+                               modallar da yalnız sahibə render olunur — digər müəllimə ölü düymə göstərilmir.{% endcomment %}
+                            {% if is_owner %}
                             <div class="btn-group btn-group-sm gap-2">
                                 <a href="{% url 'assignments:review_assignment_submissions' a.id %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
                                    class="btn btn-sm btn-outline-info">
@@ -85,6 +88,7 @@
                                     <i class="fa-solid fa-trash"></i> {% trans "delete" context "assignment.section" %}
                                 </button>
                             </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -92,9 +96,11 @@
                     <div class="alert alert-light text-center py-4">
                         <i class="fa-solid fa-inbox assignment-section-2"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "assignment.section" %}</p>
+                        {% if is_owner %}
                         <button class="btn btn-warning btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
                             <i class="fa-solid fa-plus-circle"></i> {% trans "add_first" context "assignment.section" %}
                         </button>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -148,7 +154,7 @@
                                 {% if item.user_attempts > 0 %}
                                     <a href="{% url 'assignments:my_submissions' a.id %}?return_to={{ profile_return_url|urlencode }}"
                                        class="btn btn-sm btn-outline-warning">
-                                        <i class="fa-solid fa-list-check"></i> {% trans 'Cavablarım (' %}{{ item.user_attempts }})
+                                        <i class="fa-solid fa-list-check"></i> {% blocktrans trimmed context "assignment.section" with attempts=item.user_attempts %}Cavablarım ({{ attempts }}){% endblocktrans %}
                                     </a>
                                 {% endif %}
 
@@ -165,6 +171,10 @@
                                     {% elif not a.is_open_status %}
                                         <span class="btn btn-sm btn-secondary disabled">
                                             <i class="fa-solid fa-pause"></i> {% trans "status_inactive" context "assignment.section" %}
+                                        </span>
+                                    {% elif not item.has_started %}
+                                        <span class="btn btn-sm btn-secondary disabled">
+                                            <i class="fa-solid fa-lock"></i> {% trans "Hələ başlamayıb" context "assignment.section" %}
                                         </span>
                                     {% endif %}
                                 {% endif %}

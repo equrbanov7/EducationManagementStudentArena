@@ -5,6 +5,18 @@ class AppealsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.appeals"
 
+    def attempt_history_provider(self):
+        """Registrar cəhd tarixçəsinin provayderi (Audit 2026-09-28 EXA-03).
+
+        ``apps.registrar.exam_attempt_history`` bunu app registry üzərindən
+        (``django_apps.get_app_config("appeals")``) çağırır — registrar → appeals
+        STATİK importu yoxdur (dövri modul asılılığı yaranmasın). Qaytarır:
+        ``attempt_percents(attempts)`` və ``appeal_rows_by_attempt(attempt_ids)``
+        funksiyaları olan modul."""
+        from .services import history
+
+        return history
+
     def ready(self):
         # M2 (2026-07-02): exams-ın score-adjustment genişlənmə nöqtəsinə
         # apellyasiya implementasiyalarını qoş (dependency inversion —

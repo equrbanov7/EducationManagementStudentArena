@@ -109,7 +109,12 @@ def account_kind(request) -> str:
     user = getattr(request, "user", None)
     if user is None or not getattr(user, "is_authenticated", False):
         return "anonymous"
-    if getattr(user, "is_superuser", False):
+    # Audit 2026-09-28 SA-04: profil rolu ``superadmin`` olan hesab da staff-dır
+    # (əvvəl yalnız ``is_superuser`` — belə hesab müəllim/tələbə sayılıb kənar
+    # zonadan açıq qalırdı).
+    from core.permissions import is_superadmin_user
+
+    if is_superadmin_user(user):
         return "staff"
     organization = getattr(request, "organization", None)
     if organization is not None and getattr(organization, "owner_id", None) == user.pk:

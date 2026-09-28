@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}
+Audit 2026-09-28 EX28-10: canlı sessiya yaratmaq yalnız POST ilə olur.
+Köhnə GET link-ləri (imtahan detal səhifəsindəki «Canlı başlat» düyməsi) bu
+təsdiq səhifəsinə düşür; forma CSRF-qorumalı POST göndərir.
+{% endcomment %}
+
+{% block title %}{% trans "create_confirm_title" context "live_exam.template.create_session_confirm" %} | {{ exam.title }}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/live_create_session_confirm.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="live-create-confirm">
+    <div class="live-create-confirm__card">
+        <h1 class="live-create-confirm__title">
+            <i class="fas fa-rocket" aria-hidden="true"></i>
+            {% trans "create_confirm_title" context "live_exam.template.create_session_confirm" %}
+        </h1>
+        <p class="live-create-confirm__exam">{{ exam.title }}</p>
+        {% if force_new %}
+        <p class="live-create-confirm__hint">
+            {% trans "create_confirm_force_new_hint" context "live_exam.template.create_session_confirm" %}
+        </p>
+        {% endif %}
+        <form method="post" action="{% url 'liveExam:create_session_slug' slug=exam.slug %}" class="live-create-confirm__actions">
+            {% csrf_token %}
+            {% if force_new %}<input type="hidden" name="force_new" value="1">{% endif %}
+            <a href="{% url 'exams:teacher_exam_detail' slug=exam.slug %}" class="btn btn-outline-secondary">
+                {% trans "create_confirm_cancel" context "live_exam.template.create_session_confirm" %}
+            </a>
+            <button type="submit" class="btn btn-primary">
+                {% trans "create_confirm_submit" context "live_exam.template.create_session_confirm" %}
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

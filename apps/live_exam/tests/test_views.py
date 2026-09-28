@@ -205,7 +205,15 @@ class LiveSessionCreationTest(TestCase):
         self.client.login(username="live_teacher", password="StrongPass123!")
         # Activate the org in the session so the RBAC check succeeds.
         _set_active_org(self.client, self.org)
-        response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug}))
+        url = reverse("liveExam:create_session_slug", kwargs={"slug": self.exam.slug})
+
+        # Audit 2026-09-28 EX28-10: GET yalnız təsdiq səhifəsidir — sessiya yaratmır.
+        confirm = self.client.get(url)
+        self.assertEqual(confirm.status_code, 200)
+        self.assertTemplateUsed(confirm, "liveExam/create_session_confirm.html")
+        self.assertFalse(LiveSession.objects.filter(exam=self.exam, host_user=self.teacher).exists())
+
+        response = self.client.post(url)
 
         # Should redirect to presentation view with controls enabled
         self.assertEqual(response.status_code, 302)
@@ -237,7 +245,7 @@ class LiveSessionCreationTest(TestCase):
 
         self.client.login(username="live_org_admin", password="StrongPass123!")
         _set_active_org(self.client, self.org)
-        response = self.client.get(reverse("liveExam:create_session_slug", kwargs={"slug": admin_exam.slug}))
+        response = self.client.post(reverse("liveExam:create_session_slug", kwargs={"slug": admin_exam.slug}))
 
         self.assertEqual(response.status_code, 302)
         admin_session = LiveSession.objects.filter(exam=admin_exam, host_user=org_admin).first()
@@ -573,15 +581,14 @@ class LiveJoinTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
 
-    def test_pin_entry_resolves_unique_prefix_to_active_session(self):
-        """A uniquely identifying visible PIN prefix should redirect to the full active session PIN."""
+    def test_pin_entry_does_not_resolve_unique_prefix(self):
+        """Audit 2026-09-28 EX28-10: yalnız TAM PIN — prefiks (6 simvol) artıq oyunu tapmır."""
         self.session.pin = "8NJ3KUPQRS"
         self.session.save(update_fields=["pin"])
 
         response = self.client.post(reverse("liveExam:pin_entry"), {"pin": "8NJ3KU"})
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 404)
 
     def test_pin_entry_resolves_ambiguous_glyphs_to_unique_session(self):
         """Human-friendly lookup should forgive 0/O and 1/I/L confusion when the match is unique."""
@@ -605,15 +612,14 @@ class LiveJoinTest(TestCase):
 
         self.assertEqual(response.status_code, 404)
 
-    def test_join_page_redirects_prefix_to_canonical_full_pin(self):
-        """Direct visits to a uniquely identifying partial join URL should canonicalize to the full PIN."""
+    def test_join_page_does_not_resolve_prefix(self):
+        """Audit 2026-09-28 EX28-10: natamam PIN-li join URL-i 404 verir (prefiks axtarışı yoxdur)."""
         self.session.pin = "8NJ3KUPQRS"
         self.session.save(update_fields=["pin"])
 
         response = self.client.get(reverse("liveExam:join_page", kwargs={"pin": "8NJ3KU"}))
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": self.session.pin}))
+        self.assertEqual(response.status_code, 404)
 
     def test_pin_entry_redirects_to_join_page_for_prefilled_valid_pin(self):
         """Test that a QR/link prefilled PIN skips straight to the join page."""

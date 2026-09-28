@@ -13,6 +13,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Avg, Count, Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -86,8 +87,17 @@ def review_submissions(request, pk):
 
     submissions_page = annotate_teacher_review_state(list(page_obj.object_list), student_attr="user")
 
+    # 2026-09-28 redizayn: başlıqdakı xülasə (filtrdən asılı deyil) — bir aqreqat sorğu.
+    review_summary = assignment.submissions.aggregate(
+        total=Count("id"),
+        pending=Count("id", filter=Q(status__in=["submitted", "grading"])),
+        graded=Count("id", filter=Q(status="graded")),
+        average=Avg("grade", filter=Q(status="graded")),
+    )
+
     context = {
         "assignment": assignment,
+        "review_summary": review_summary,
         "submissions": submissions_page,
         "page_obj": page_obj,
         "selected_submission_id": selected_submission_id,

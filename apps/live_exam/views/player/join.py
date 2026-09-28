@@ -43,6 +43,7 @@ from ._shared import (
     _ensure_live_client_cookie,
     _join_resume_copy,
     _live_client_id_key,
+    _live_ip_key,
     _nickname_conflict_message,
     _pin_entry_copy,
     _pin_entry_theme_key,
@@ -51,10 +52,39 @@ from ._shared import (
     _resolve_live_session,
 )
 from .constants import (
+    LIVE_JOIN_IP_LIMIT_SCOPE,
+    LIVE_JOIN_IP_RATE_LIMIT_DEFAULT,
     LIVE_JOIN_LIMIT_SCOPE,
+    LIVE_PIN_IP_LIMIT_SCOPE,
+    LIVE_PIN_IP_RATE_LIMIT_DEFAULT,
     LIVE_PIN_LIMIT_SCOPE,
     LIVE_RATE_LIMIT_MESSAGE,
 )
+
+
+def _pin_ip_rate():
+    return getattr(settings, "LIVE_PIN_IP_RATE_LIMIT", LIVE_PIN_IP_RATE_LIMIT_DEFAULT)
+
+
+def _join_ip_rate():
+    return getattr(settings, "LIVE_EXAM_JOIN_IP_RATE_LIMIT", LIVE_JOIN_IP_RATE_LIMIT_DEFAULT)
+
+
+def _pin_lookup_limited(request):
+    """PIN axtarışı üçün (cookie + İP) vedrələri — ``(limited, retry_after)`` (EX28-10)."""
+    for scope, rate, key in (
+        (LIVE_PIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, _live_client_id_key(request)),
+        (LIVE_PIN_IP_LIMIT_SCOPE, _pin_ip_rate(), _live_ip_key(request)),
+    ):
+        limited, retry_after = is_rate_limited(scope, rate, key)
+        if limited:
+            return True, retry_after
+    return False, None
+
+
+def _record_pin_miss(request):
+    record_rate_limit_hit(LIVE_PIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, _live_client_id_key(request))
+    record_rate_limit_hit(LIVE_PIN_IP_LIMIT_SCOPE, _pin_ip_rate(), _live_ip_key(request))
 
 
 @never_cache
@@ -62,9 +92,13 @@ def live_pin_entry(request):
     from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH
 
     copy = _pin_entry_copy()
-    pin_value, matched_session = _resolve_live_session(
-        request.POST.get("pin") if request.method == "POST" else request.GET.get("pin")
-    )
+    raw_pin = request.POST.get("pin") if request.method == "POST" else request.GET.get("pin")
+    # EX28-10: GET ?pin= də PIN axtarışıdır — əvvəl limitsiz idi.
+    if request.method != "POST" and raw_pin:
+        get_limited, _retry = _pin_lookup_limited(request)
+        if get_limited:
+            raw_pin = ""
+    pin_value, matched_session = _resolve_live_session(raw_pin)
     raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
     theme_key = _pin_entry_theme_key(pin_value, raw_theme)
     error_message = ""
@@ -73,13 +107,11 @@ def live_pin_entry(request):
 
     if request.method != "POST" and session_exists:
         return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
+    if request.method != "POST" and raw_pin and not session_exists:
+        _record_pin_miss(request)
 
     if request.method == "POST":
-        is_limited, retry_after = is_rate_limited(
-            LIVE_PIN_LIMIT_SCOPE,
-            settings.LIVE_EXAM_JOIN_RATE_LIMIT,
-            _live_client_id_key(request),
-        )
+        is_limited, retry_after = _pin_lookup_limited(request)
         if is_limited:
             response = render(
                 request,
@@ -100,19 +132,11 @@ def live_pin_entry(request):
             return _ensure_live_client_cookie(request, response)
 
         if len(pin_value) < MIN_PIN_LENGTH:
-            record_rate_limit_hit(
-                LIVE_PIN_LIMIT_SCOPE,
-                settings.LIVE_EXAM_JOIN_RATE_LIMIT,
-                _live_client_id_key(request),
-            )
+            _record_pin_miss(request)
             error_message = copy["invalid_pin"]
             status_code = 400
         elif not session_exists:
-            record_rate_limit_hit(
-                LIVE_PIN_LIMIT_SCOPE,
-                settings.LIVE_EXAM_JOIN_RATE_LIMIT,
-                _live_client_id_key(request),
-            )
+            _record_pin_miss(request)
             error_message = copy["session_not_found"]
             status_code = 404
         else:
@@ -166,6 +190,15 @@ def live_join_enter(request, pin):
         pin,
         _live_client_id_key(request),
     )
+    # EX28-10: İP + sessiya vedrəsi — cookie dəyişməklə sıfırlanmır.
+    ip_limited, ip_retry_after = record_rate_limit_hit(
+        LIVE_JOIN_IP_LIMIT_SCOPE,
+        _join_ip_rate(),
+        pin,
+        _live_ip_key(request),
+    )
+    if ip_limited and not is_limited:
+        is_limited, retry_after = ip_limited, ip_retry_after
     if is_limited:
         response = JsonResponse(
             {"ok": False, "message": LIVE_RATE_LIMIT_MESSAGE},

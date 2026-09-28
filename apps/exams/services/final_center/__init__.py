@@ -6,6 +6,7 @@ etməlidir (AGENTS §1/§5 pattern-i).
 """
 
 from .cabinet import student_final_exam_context
+from .eligibility import admission_block_reason
 from .entry import (
     ENTRY_SESSION_KEY,
     ERROR_INVALID,
@@ -108,6 +109,7 @@ __all__ = [
     "ERROR_LOCKED",
     "ERROR_NO_ACTIVE_SESSION",
     "ERROR_RATE_LIMITED",
+    "admission_block_reason",
     "attach_ticket_to_room_sitting",
     "claim_student_pin_entry",
     "claim_ticket_pin_entry",

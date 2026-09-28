@@ -292,12 +292,13 @@ class DocxBulkAddFlowTests(TestCase):
             self.assertTrue(question.image, "stem şəkli bağlanmalıdır")
             self.assertFalse(question.image_replaces_text)
             self.assertTrue(question.image.storage.exists(question.image.name))
-            options = {opt.label: opt for opt in question.options.all()}
-            self.assertEqual(set(options), {"A", "B", "C", "D"})
-            self.assertTrue(options["B"].is_correct)
-            self.assertTrue(options["B"].image, "variant B-nin şəkli bağlanmalıdır")
-            self.assertEqual(options["B"].text, f"ikinci {index}")
-            self.assertFalse(options["A"].image)
+            # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb A..E
+            # yenidən hərflənir — media mənbə etiketi ilə bağlanır, yoxlama mətnə görədir.
+            self.assertEqual(sorted(question.options.values_list("label", flat=True)), ["A", "B", "C", "D"])
+            options = {opt.text: opt for opt in question.options.all()}
+            self.assertTrue(options[f"ikinci {index}"].is_correct)
+            self.assertTrue(options[f"ikinci {index}"].image, "variant B-nin şəkli bağlanmalıdır")
+            self.assertFalse(options[f"birinci {index}"].image)
         # Stash save-dən sonra təmizlənir.
         self.assertFalse(import_media.default_storage.exists(f"question_imports/{token}/manifest.json"))
 

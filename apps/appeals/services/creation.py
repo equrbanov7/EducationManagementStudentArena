@@ -97,14 +97,24 @@ def create_appeal(*, attempt, student, items, org_unit=None):
     """
     from django.apps import apps as django_apps
 
-    from apps.appeals.services.window import is_within_appeal_window
+    from apps.appeals.services.permissions import is_appealable_exam
+    from apps.appeals.services.window import attempt_awaiting_grading, is_within_appeal_window
 
     ExamAttempt = django_apps.get_model("exams", "ExamAttempt")
     attempt = ExamAttempt.objects.select_for_update().select_related("exam", "exam__organization").get(pk=attempt.pk)
 
-    # Defense-in-depth: 3-günlük pəncərə view-dən əlavə burada da invariantdır —
-    # kilidlənmiş attempt üzərində yenidən yoxlanır ki, bağlanmış pəncərədə
-    # crafted POST və ya başqa çağırış yolu appeal yarada bilməsin.
+    # Defense-in-depth: kateqoriya (EXA-07), yoxlanma (EXA-02) və 3-günlük pəncərə
+    # view-dən əlavə burada da invariantdır — kilidlənmiş attempt üzərində
+    # yenidən yoxlanır ki, crafted POST və ya başqa çağırış yolu appeal yarada bilməsin.
+    if not is_appealable_exam(attempt.exam):
+        raise ValidationError(pgettext("appeals.service.create.error", "Bu imtahan növü üzrə apellyasiya verilmir."))
+    if attempt_awaiting_grading(attempt):
+        raise ValidationError(
+            pgettext(
+                "appeals.service.create.error",
+                "İmtahanınız hələ yoxlanılmayıb — apellyasiya nəticə açıqlandıqdan sonra verilə bilər.",
+            )
+        )
     if not is_within_appeal_window(attempt):
         raise ValidationError(pgettext("appeals.service.create.error", "Apellyasiya müddəti bitib."))
 

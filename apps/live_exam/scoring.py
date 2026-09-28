@@ -12,7 +12,12 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption
-from apps.live_exam.domain.session import build_question_phase_times, get_active_question, question_points
+from apps.live_exam.domain.session import (
+    build_question_phase_times,
+    get_active_question,
+    question_points,
+    selection_limits,
+)
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_question_result
 from core.rls import bypass_rls
@@ -219,6 +224,12 @@ def _save_answer_and_score_impl(
                 # is a tampered payload (and would otherwise be persisted into
                 # choice_ids and skew the answer distribution).
                 if not option_ids or not set(int(value) for value in option_ids) <= valid_option_ids:
+                    return False, pgettext("live_exam.consumer.error", "bad_payload"), None, False
+
+                # Audit 2026-09-28 EX28-10: ``max_select`` server tərəfdə də tətbiq
+                # olunur — əks halda «hamısını seç» qismən bal toplayırdı.
+                _is_multi, max_select = selection_limits(exam_question, len(correct_ids))
+                if len(set(int(value) for value in option_ids)) > max_select:
                     return False, pgettext("live_exam.consumer.error", "bad_payload"), None, False
 
                 total_ms = int((session.question_ends_at - answer_starts_at).total_seconds() * 1000)

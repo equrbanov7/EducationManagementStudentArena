@@ -2,40 +2,87 @@
 {% if can_view_owned_learning %}
 <section class="profile-section-panel profile-section--my-courses {% if active_section == 'my-courses' %}is-active{% endif %}" data-profile-section-panel="my-courses">
     {% comment %}2026-09-12 (audit P2-1): başlıq qabıqdan (`#profileSectionTitle`)
-    gəlir. Köhnə `.section-title` üstəlik QONŞU bölmənin adını yazırdı — qabıq
-    «Yaratdığım kurslar» deyirdi, kart isə «Kurslarım». Say sol menyunun
-    nişanındadır (`data-badge-key="my_created_courses_count"`); «Yeni kurs»
-    düyməsi başlığın əməl yuvasına köçüb.{% endcomment %}
+    gəlir; say sol menyunun nişanındadır; «Yeni kurs» başlığın əməl yuvasındadır.
+
+    2026-09-28 redizayn: kart = qapaq zolağı (şəkil və ya ikon) + status nişanı +
+    ad + təsvir + göstəricilər (mövzu/tələbə/qrup) + qrup çipləri. Status mətni
+    `get_status_display` deyil, tərcümə açarıdır (model etiketi sərt AZ idi —
+    «Draft (yayımlanmayıb)» sözü kartı iki sətrə bölürdü). Kartın klikində
+    `course_card_nav.js` səhifə gələnə qədər panel skeletini göstərir.{% endcomment %}
     {% include "partials/ems_ui/_content_header.html" with header_actions_include="accounts/profile/sections/_my_courses_header_actions.html" %}
-    <div class="section-card">
-        {% if my_created_courses %}
-        <div class="course-cards-grid">
-            {% for course in my_created_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=my-courses&return_to={{ request.get_full_path|urlencode }}" class="modern-course-card">
-                <div class="course-card-icon">
+
+    {% if my_created_courses %}
+    <div class="mc-grid" data-mc-grid>
+        {% for course in my_created_courses %}
+        {% with cover_image_url=course.cover_image_url %}
+        <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=my-courses&return_to={{ request.get_full_path|urlencode }}"
+           class="mc-card" data-mc-card>
+            <span class="mc-card__cover{% if cover_image_url %} has-img{% endif %}" aria-hidden="true">
+                {% if cover_image_url %}
+                    <img src="{{ cover_image_url }}" alt="" loading="lazy">
+                {% else %}
                     <i class="fas fa-graduation-cap"></i>
-                </div>
-                <div class="course-card-content">
-                    <h4 class="course-card-title">{{ course.title }}</h4>
-                    <div class="course-card-meta">
-                        <span class="meta-item"><i class="far fa-calendar-alt"></i> {{ course.created_at|date:"d.m.Y" }}</span>
-                        <span class="meta-divider">•</span>
-                        <span class="meta-item badge-status">{{ course.get_status_display }}</span>
-                    </div>
-                    {% if course.profile_group_names %}
-                    <div class="course-card-meta course-card-meta--groups">
-                        <span class="meta-item"><i class="fas fa-users"></i> {% trans "Qruplar" %}: {{ course.profile_group_names|join:", " }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="course-card-action">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-            </a>
-            {% endfor %}
+                {% endif %}
+                {% if course.status == 'published' %}
+                    <span class="mc-status mc-status--live">{% trans "status_published" context "courses.dashboard" %}</span>
+                {% elif course.status == 'archived' %}
+                    <span class="mc-status mc-status--archived">{% trans "status_archived" context "courses.dashboard" %}</span>
+                {% else %}
+                    <span class="mc-status mc-status--draft">{% trans "status_draft" context "courses.dashboard" %}</span>
+                {% endif %}
+            </span>
+            <span class="mc-card__body">
+                <span class="mc-card__title">{{ course.title }}</span>
+                {% if course.description %}<span class="mc-card__desc">{{ course.description }}</span>{% endif %}
+                <span class="mc-card__stats">
+                    <span class="mc-stat" title="{% trans 'stat_topics' context 'courses.dashboard' %}">
+                        <i class="fas fa-book-open" aria-hidden="true"></i>
+                        <b>{{ course.profile_topic_count|default:0 }}</b>
+                        <span class="visually-hidden">{% trans "stat_topics" context "courses.dashboard" %}</span>
+                    </span>
+                    <span class="mc-stat" title="{% trans 'stat_students' context 'courses.dashboard' %}">
+                        <i class="fas fa-user-graduate" aria-hidden="true"></i>
+                        <b>{{ course.profile_student_count|default:0 }}</b>
+                        <span class="visually-hidden">{% trans "stat_students" context "courses.dashboard" %}</span>
+                    </span>
+                    <span class="mc-stat" title="{% trans 'stat_groups' context 'courses.dashboard' %}">
+                        <i class="fas fa-users" aria-hidden="true"></i>
+                        <b>{{ course.profile_group_count|default:0 }}</b>
+                        <span class="visually-hidden">{% trans "stat_groups" context "courses.dashboard" %}</span>
+                    </span>
+                    <span class="mc-card__date"><i class="far fa-calendar-alt" aria-hidden="true"></i> {{ course.created_at|date:"d.m.Y" }}</span>
+                </span>
+                {% if course.profile_group_names %}
+                <span class="mc-card__groups">
+                    {% for name in course.profile_group_names|slice:":4" %}<span class="mc-chip">{{ name }}</span>{% endfor %}
+                    {% if course.profile_group_count > 4 %}<span class="mc-chip mc-chip--more">+{{ course.profile_group_count|add:"-4" }}</span>{% endif %}
+                </span>
+                {% endif %}
+            </span>
+        </a>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    {# Kart klikində göstərilən panel skeleti (course_card_nav.js) — ilk boyada gizli. #}
+    <div class="mc-nav-skeleton" data-mc-nav-skeleton hidden aria-hidden="true">
+        <div class="mc-sk-hero">
+            <span class="skeleton mc-sk-cover"></span>
+            <span class="mc-sk-lines">
+                <span class="skeleton skeleton-line skeleton-line--sm"></span>
+                <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                <span class="skeleton skeleton-line"></span>
+            </span>
         </div>
-        
-        {% else %}
+        <div class="skeleton mc-sk-tabs"></div>
+        <div class="mc-sk-panel">
+            <span class="skeleton skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton skeleton-block"></span>
+            <span class="skeleton skeleton-block"></span>
+        </div>
+    </div>
+    {% else %}
+    <div class="section-card">
         <div class="modern-empty-state">
             <div class="empty-icon-wrapper icon-orange-light">
                 <i class="fas fa-book-open"></i>
@@ -49,10 +96,7 @@
                 <i class="fas fa-plus"></i> {% trans "create_first_course" context "profile.my_courses" %}
             </a>
         </div>
-        {% endif %}
-        
     </div>
-
-   
+    {% endif %}
 </section>
 {% endif %}

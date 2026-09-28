@@ -22,6 +22,7 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
@@ -75,7 +76,14 @@ def people_action(request):
 
     action = str(payload.get("action") or "").strip()
     if action not in ALLOWED_ACTIONS:
-        return JsonResponse({"ok": False, "error": "unknown_action", "message": "Naməlum əməliyyat."}, status=400)
+        return JsonResponse(
+            {
+                "ok": False,
+                "error": "unknown_action",
+                "message": pgettext("accounts.people.action", "Naməlum əməliyyat."),
+            },
+            status=400,
+        )
 
     reason = payload.get("reason") or ""
 

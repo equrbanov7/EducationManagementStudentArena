@@ -1,15 +1,33 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
-{% load custom_filters %}
+
+{% comment %}
+Kurs paneli — 2026-09-28 redizayn.
+
+QURULUŞ: çörək qırıntısı → «hero» (qapaq, ad, status, statistika, əsas əməllər)
+→ yapışqan tab-bar (SERVERDƏ render olunur, JS yalnız paneli dəyişir) → panellər.
+Hər panelin başlığı (ad + izah + əməl yuvası) buradadır; bölmə məzmunu öz
+partial-larından gəlir. Başqa tətbiqlərin partial-ları (tapşırıq, lab, imtahan,
+layihə) hələ akkordeon qabığındadır — `course_panel.js` onların ilk sıradakı
+«əlavə et» düymələrini başlığın əməl yuvasına KÖÇÜRÜR (klon deyil — bütün
+handler-lər qalır), CSS isə akkordeon başlığını gizlədir.
+
+CSP: inline stil/skript yoxdur; dinamik dəyərlər data-* atributlarındadır.
+{% endcomment %}
 
 {% block title %}{{ course.title }} - {% trans "page_suffix_dashboard" context "courses.dashboard" %}{% endblock %}
 
 {% block extraCss %}
-    {% include "courses/partials/_courses_assets_css.html" %}
-    <link rel="stylesheet" href="{% static 'courses/css/course_dashboard_redesign.css' %}?v=20260630-2">
-    <link rel="stylesheet" href="{% static 'courses/css/topic_accordion.css' %}">
-    <link rel="stylesheet" href="{% static 'courses/css/member_form_modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_tabs.css' %}?v=20260928-1">
+    {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">{% endif %}
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_sections.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_foreign.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'courses/css/course_panel_overlays.css' %}?v=20260928-1">
+    {% if is_owner %}<link rel="stylesheet" href="{% static 'courses/css/course_panel_ai.css' %}?v=20260928-1">{% endif %}
     {% if is_student %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}">
     {% endif %}
@@ -19,212 +37,220 @@
 {% endblock %}
 
 {% block extraJs %}
-    {% include "courses/partials/_courses_assets_js.html" %}
-    <script src="{% static 'courses/js/course_panel_tabs.js' %}?v=20260630-2" defer></script>
-    <script src="{% static 'courses/js/course_modals_enhance.js' %}?v=20260630-2" defer></script>
-    <script src="{% static 'courses/js/course_ai_drawer.js' %}?v=20260630-2" defer></script>
-    <script src="{% static 'courses/js/course_dashboard.js' %}?v=20260630-2" defer></script>
+    <div id="courses-i18n-data"
+         data-errors-label="{% trans 'errors_label' context 'courses.common.js' %}"
+         data-please-wait="{% trans 'please_wait' context 'courses.common.js' %}"
+         data-retry-error="{% trans 'retry_error' context 'courses.common.js' %}"
+         hidden></div>
+    <script src="{% static 'courses/js/courses_i18n.js' %}"></script>
+    <script src="{% static 'courses/js/modal.js' %}"></script>
+    <script src="{% static 'courses/js/forms.js' %}"></script>
+    <script src="{% static 'courses/js/notifications.js' %}"></script>
+    <script src="{% static 'courses/js/course_panel.js' %}?v=20260928-1" defer></script>
+    <script src="{% static 'courses/js/course_modals_enhance.js' %}?v=20260928-1" defer></script>
+    <script src="{% static 'courses/js/course_dashboard.js' %}?v=20260928-1" defer></script>
+    {% if is_owner %}
+    <script src="{% static 'courses/js/course_ai_drawer.js' %}?v=20260928-1" defer></script>
+    <script src="{% static 'courses/js/course_create_form.js' %}?v=20260928-1" defer></script>
+    {% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="ems-cd">
-  <div class="ems-cd-shell">
+<div class="ems-cd" id="courseDashboardRoot"
+     data-course-id="{{ course.id }}"
+     data-i18n-course-delete="{% trans 'confirm_delete_course' context 'courses.dashboard' %}"
+     data-i18n-course-delete-title="{% trans 'confirm_delete_course_title' context 'courses.dashboard' %}"
+     data-i18n-delete="{% trans 'action_delete' context 'courses.dashboard' %}"
+     data-i18n-member-delete-suffix="{% trans 'confirm_delete_member_suffix' context 'courses.dashboard' %}"
+     data-i18n-generic-error="{% trans 'generic_error' context 'courses.dashboard' %}"
+     data-i18n-group-remove-title="{% trans 'confirm_remove_group_title' context 'courses.dashboard' %}"
+     data-i18n-group-remove-body="{% trans 'confirm_remove_group_body' context 'courses.dashboard' %}"
+     data-i18n-remove="{% trans 'action_remove' context 'courses.dashboard' %}"
+     data-i18n-no-match="{% trans 'members_no_match' context 'courses.dashboard' %}"
+     data-profile-return-url="{{ profile_return_url }}"
+     data-delete-course-url="{% url 'courses:delete_course' course.id %}"
+     data-open-edit="{% if is_owner and request.GET.edit == '1' %}1{% endif %}"
+     {% if is_owner %}data-delete-group-url="{% url 'courses:delete_group_from_course' course.id %}"{% endif %}
+     data-delete-member-url-tpl="{% url 'courses:delete_member' course.id 0 %}">
+  <div class="cd-shell">
 
-    <!-- MAIN -->
-    <div class="ems-cd-main">
+    <nav class="cd-crumbs" aria-label="{% trans 'breadcrumb_label' context 'courses.dashboard' %}">
+      <a href="{{ profile_return_url }}" class="cd-crumbs__link" id="courseDashboardBackLink" data-fallback-url="{{ profile_return_url }}">
+        {% include "courses/partials/_cd_icon.html" with icon="chevl" size=15 %}
+        {% if is_student %}{% trans "assigned_courses" context "profile.section" %}{% else %}{% trans "my_courses" context "profile.section" %}{% endif %}
+      </a>
+      <span class="cd-crumbs__sep" aria-hidden="true">/</span>
+      <span class="cd-crumbs__cur" aria-current="page">{{ course.title }}</span>
+    </nav>
 
-      <div class="ems-cd-head">
-        <div class="ems-cd-crumb">
-          <a href="{{ profile_return_url }}">{% trans "action_back_profile" context "courses.dashboard" %}</a>
-          <span class="sep">/</span>
-          <span class="cur">{{ course.title }}</span>
-        </div>
-        <h1 class="ems-cd-title" data-ems-fallback-title>{{ course.title }}</h1>
+    {# ─────────────────────────── HERO ─────────────────────────── #}
+    <header class="cd-hero">
+      {% with cover_image_url=course.cover_image_url %}
+      <div class="cd-hero__cover{% if cover_image_url %} has-img{% endif %}">
+        {% if cover_image_url %}
+          <img src="{{ cover_image_url }}" alt="" loading="lazy">
+        {% else %}
+          {% include "courses/partials/_cd_icon.html" with icon="cap" size=34 stroke=1.7 %}
+        {% endif %}
       </div>
+      {% endwith %}
 
-      {# Bölmə tab-bar-ı (JS dolduracaq; JS yoxdursa gizli qalır → akkordeon fallback) #}
-      <nav class="snav" id="emsSnav" aria-label="{% trans 'page_suffix_dashboard' context 'courses.dashboard' %}" hidden></nav>
-
-      {# Aktiv bölmə başlığı (JS dolduracaq) #}
-      <header class="chead" id="emsChead" hidden>
-        <div class="chead-tx">
-          <h2 class="chead-h"><span class="chead-dot"></span> <span data-ems-active-label></span></h2>
-          <p class="chead-desc" data-ems-active-hint></p>
-        </div>
-        {% if is_owner %}
-        <div class="chead-actions">
-          <button type="button" class="btn ai-soft" data-ems-ai>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16l-1.8-4.5L5 9.7l5.2-1.8L12 3Z"/></svg>
-            {% trans "ai_generate" context "courses.dashboard" %}
-          </button>
-        </div>
-        {% endif %}
-      </header>
-
-      <div class="accordion" id="courseDashboard">
-
-        <section class="ems-sec" data-key="topics" data-icon="book"
-                 data-color="#2C5BFF" data-soft="#EEF2FF" data-deep="#1E40AF">
-          {% include 'courses/partials/_topic_accordion.html' %}
-        </section>
-
-        <section class="ems-sec" data-key="assignments" data-icon="clip"
-                 data-color="#B45309" data-soft="#FEF3C7" data-deep="#92400E">
-          {% include 'assignments/assignment_section.html' %}
-        </section>
-
-        <section class="ems-sec" data-key="labs" data-icon="flask"
-                 data-color="#7C3AED" data-soft="#F2ECFE" data-deep="#5B21B6">
-          {% include 'labs/lab_section.html' %}
-        </section>
-
-        <section class="ems-sec" data-key="exams" data-icon="doc"
-                 data-color="#0284C7" data-soft="#E0F2FE" data-deep="#075985">
-          {% include 'exams/teacher/exam_section.html' %}
-        </section>
-
-        <section class="ems-sec" data-key="projects" data-icon="flow"
-                 data-color="#BE3455" data-soft="#FCE7EE" data-deep="#9F1239">
-          {% include 'projects/project_section.html' %}
-        </section>
-
-        <section class="ems-sec" data-key="resources" data-icon="folder"
-                 data-color="#0F766E" data-soft="#E6FBF7" data-deep="#0B544E">
-          {% include 'courses/partials/_resource_accordion.html' %}
-        </section>
-
-        {% if can_manage_course %}
-        <section class="ems-sec" data-key="groups" data-icon="users"
-                 data-color="#2563EB" data-soft="#EFF6FF" data-deep="#1D4ED8">
-          {% include 'courses/partials/_course_groups_accordion.html' %}
-        </section>
-        {% endif %}
-
-        {% if can_view_members %}
-        <section class="ems-sec" data-key="members" data-icon="users"
-                 data-color="#16A34A" data-soft="#DCFCE7" data-deep="#15803D">
-          {% include 'courses/partials/_member_accordion.html' %}
-        </section>
-        {% endif %}
-
-      </div>{# /#courseDashboard #}
-
-    </div>{# /.ems-cd-main #}
-
-    <!-- SIDEBAR — kurs kartı -->
-    <aside class="ems-cd-side">
-      <div class="ccard">
-        {% with cover_image_url=course.cover_image_url %}
-        <div class="ccard-cover{% if cover_image_url %} has-img{% endif %}">
-          {% if cover_image_url %}
-            <img src="{{ cover_image_url }}" alt="{{ course.title }}">
+      <div class="cd-hero__main">
+        <div class="cd-hero__eyebrow">
+          {% if course.status == 'published' %}
+            <span class="ems-badge ems-badge--success"><span class="ems-badge__dot"></span>{% trans "status_published" context "courses.dashboard" %}</span>
+          {% elif course.status == 'archived' %}
+            <span class="ems-badge ems-badge--muted"><span class="ems-badge__dot"></span>{% trans "status_archived" context "courses.dashboard" %}</span>
           {% else %}
-            <svg class="ph" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="ems-badge ems-badge--warning"><span class="ems-badge__dot"></span>{% trans "status_draft" context "courses.dashboard" %}</span>
           {% endif %}
+          <span class="cd-hero__meta">
+            {% include "courses/partials/_cd_icon.html" with icon="user" size=14 %}
+            {{ course.owner.get_full_name|default:course.owner.username }}
+          </span>
+          <span class="cd-hero__meta">
+            {% include "courses/partials/_cd_icon.html" with icon="calendar" size=14 %}
+            <span class="visually-hidden">{% trans "label_created" context "courses.dashboard" %}:</span> {{ course.created_at|date:"d.m.Y" }}
+          </span>
         </div>
-        {% endwith %}
 
-        <div class="ccard-body">
-          <h2 class="ccard-title">{{ course.title }}</h2>
+        <h1 class="cd-hero__title">{{ course.title }}</h1>
+        {% if course.description %}
+          <p class="cd-hero__desc">{{ course.description }}</p>
+        {% endif %}
 
-          <div class="ccard-meta">
-            <span class="m">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              {% trans "label_teacher" context "courses.dashboard" %}: <b>{{ course.owner.get_full_name|default:course.owner.username }}</b>
-            </span>
-            <span class="m">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-              {% trans "label_created" context "courses.dashboard" %}: <b>{{ course.created_at|date:"d.m.Y" }}</b>
-            </span>
-          </div>
-
-          {% if course.description %}
-          <p class="ccard-desc">{{ course.description }}</p>
+        <ul class="cd-stats" aria-label="{% trans 'stats_label' context 'courses.dashboard' %}">
+          <li class="cd-stat"><b data-count="topics">{{ tab_counts.topics }}</b><span>{% trans "stat_topics" context "courses.dashboard" %}</span></li>
+          {% if can_view_members %}
+          <li class="cd-stat"><b data-count="students">{{ student_member_count }}</b><span>{% trans "stat_students" context "courses.dashboard" %}</span></li>
+          <li class="cd-stat"><b data-count="groups">{{ course_group_summaries|length }}</b><span>{% trans "stat_groups" context "courses.dashboard" %}</span></li>
           {% endif %}
-
-          {# Görünürlük — Draft / Released segmented (real POST forması) #}
-          <div class="pub" id="courseVisibilityAccordion">
-            {% if is_owner %}
-            <form method="post" action="{% url 'courses:update_course_status' course.id %}" class="course-status-switch-form">
-              {% csrf_token %}
-              <input type="hidden" name="next" value="{{ request.get_full_path }}">
-              <div class="pub-seg" role="group" aria-label="{% trans 'label_course_visibility' context 'courses.dashboard' %}">
-                <button type="submit" name="status" value="draft" class="course-status-toggle draft{% if course.status != 'published' %} on{% endif %}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.9 4.24A9.1 9.1 0 0 1 12 4c7 0 10 8 10 8a18 18 0 0 1-2.16 3.19M6.6 6.6A18 18 0 0 0 2 12s3 8 10 8a9.3 9.3 0 0 0 5.4-1.6"/><path d="M14.1 14.1A3 3 0 1 1 9.9 9.9M2 2l20 20"/></svg>
-                  {% trans "status_draft" context "courses.dashboard" %}
-                </button>
-                <button type="submit" name="status" value="published" class="course-status-toggle live{% if course.status == 'published' %} on{% endif %}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg>
-                  {% trans "status_published" context "courses.dashboard" %}
-                </button>
-              </div>
-            </form>
-            {% endif %}
-
-            {% if course.status == 'published' %}
-              <div class="pub-note live">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                <span>{% trans "message_published_visible_students" context "courses.dashboard" %}</span>
-              </div>
-            {% else %}
-              <div class="pub-note draft">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-                <span>{% trans "message_draft_hidden_students" context "courses.dashboard" %}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          {# Statistika #}
-          <div class="ccard-stats">
-            <div class="cstat"><div class="n">{{ topics|length }}</div><div class="l">{% trans "stat_topics" context "courses.dashboard" %}</div></div>
-            {% if can_view_members %}
-            <div class="cstat"><div class="n" id="sidebar-members-count">{{ members|length }}</div><div class="l">{% trans "stat_members" context "courses.dashboard" %}</div></div>
-            {% endif %}
-            {% if can_manage_course %}
-            <div class="cstat"><div class="n">{{ course_group_summaries|length }}</div><div class="l">{% trans "Qrup" %}</div></div>
-            {% endif %}
-          </div>
-
-          {% if is_owner %}
-          <div class="ccard-foot">
-            <a href="{% url 'courses:edit_course' course.id %}" class="btn ghost">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              {% trans "action_edit" context "courses.dashboard" %}
-            </a>
-            <button type="button" class="btn danger" data-delete-course-id="{{ course.id }}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-              {% trans "action_delete" context "courses.dashboard" %}
-            </button>
-          </div>
-          {% endif %}
-
-          <div class="ccard-back">
-            <a href="{{ profile_return_url }}" class="btn ghost" id="courseDashboardBackLink" data-fallback-url="{{ profile_return_url }}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              {% trans "action_back_profile" context "courses.dashboard" %}
-            </a>
-          </div>
-        </div>
+          <li class="cd-stat"><b>{{ task_total }}</b><span>{% trans "stat_tasks" context "courses.dashboard" %}</span></li>
+          <li class="cd-stat"><b>{{ tab_counts.resources }}</b><span>{% trans "stat_resources" context "courses.dashboard" %}</span></li>
+        </ul>
       </div>
 
       {% if is_owner %}
-      <button type="button" class="ai-entry" data-ems-ai>
-        <div class="ai-entry-top">
-          <span class="ai-entry-ic">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16l-1.8-4.5L5 9.7l5.2-1.8L12 3Z"/></svg>
-          </span>
-          <span class="ai-entry-t">{% trans "ai_build_title" context "courses.dashboard" %}</span>
-          <span class="ai-entry-chev">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
-          </span>
+      <div class="cd-hero__actions">
+        <form method="post" action="{% url 'courses:update_course_status' course.id %}" class="cd-publish">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% if course.status == 'published' %}
+            <button type="submit" name="status" value="draft" class="ems-btn cd-btn-block">
+              {% include "courses/partials/_cd_icon.html" with icon="eyeoff" size=16 %}
+              {% trans "action_unpublish" context "courses.dashboard" %}
+            </button>
+          {% else %}
+            <button type="submit" name="status" value="published" class="ems-btn ems-btn--success cd-btn-block">
+              {% include "courses/partials/_cd_icon.html" with icon="globe" size=16 %}
+              {% trans "action_publish" context "courses.dashboard" %}
+            </button>
+          {% endif %}
+        </form>
+        <div class="cd-hero__row">
+          <button type="button" class="ems-btn cd-btn-ai" data-ems-ai>
+            {% include "courses/partials/_cd_icon.html" with icon="spark" size=16 stroke=1.8 %}
+            {% trans "ai_build_title" context "courses.dashboard" %}
+          </button>
+          <button type="button" class="ems-btn cd-icon-btn" data-bs-toggle="modal" data-bs-target="#editCourseModal" title="{% trans 'action_edit' context 'courses.dashboard' %}" aria-label="{% trans 'action_edit' context 'courses.dashboard' %}">
+            {% include "courses/partials/_cd_icon.html" with icon="edit" size=16 %}
+          </button>
+          <button type="button" class="ems-btn cd-icon-btn cd-icon-btn--danger" data-delete-course-id="{{ course.id }}" title="{% trans 'action_delete' context 'courses.dashboard' %}" aria-label="{% trans 'action_delete' context 'courses.dashboard' %}">
+            {% include "courses/partials/_cd_icon.html" with icon="trash" size=16 %}
+          </button>
         </div>
-        <div class="ai-entry-s">{% trans "ai_build_sub" context "courses.dashboard" %}</div>
-      </button>
+      </div>
       {% endif %}
-    </aside>
+    </header>
 
-  </div>{# /.ems-cd-shell #}
-</div>{# /.ems-cd #}
+    {% if is_owner and course.status != 'published' %}
+    <div class="cd-note cd-note--warning" role="note">
+      {% include "courses/partials/_cd_icon.html" with icon="alert" size=16 %}
+      <span>{% trans "message_draft_hidden_students" context "courses.dashboard" %}</span>
+    </div>
+    {% endif %}
+
+    {# ─────────────────────────── TABS ─────────────────────────── #}
+    <div class="cd-tabs-wrap" data-cd-tabs-wrap>
+      <div class="cd-tabs" role="tablist" aria-label="{% trans 'sections_label' context 'courses.dashboard' %}" data-cd-tabs>
+        {% for tab in dashboard_tabs %}
+        <button type="button" role="tab" class="cd-tab cd-tab--{{ tab.key }}"
+                id="cd-tab-{{ tab.key }}" aria-controls="cd-panel-{{ tab.key }}"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                {% if not forloop.first %}tabindex="-1"{% endif %}
+                data-cd-tab="{{ tab.key }}">
+          <span class="cd-tab__ic">{% include "courses/partials/_cd_icon.html" with icon=tab.icon size=16 %}</span>
+          <span class="cd-tab__label">{{ tab.label }}</span>
+          <span class="cd-tab__count" data-count="{{ tab.key }}">{{ tab.count }}</span>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ─────────────────────────── PANELS ─────────────────────────── #}
+    <div class="cd-panels" id="courseDashboard">
+      {% for tab in dashboard_tabs %}
+      <section class="cd-panel cd-panel--{{ tab.key }} ems-sec" id="cd-panel-{{ tab.key }}"
+               role="tabpanel" aria-labelledby="cd-tab-{{ tab.key }}" tabindex="-1"
+               data-key="{{ tab.key }}" {% if not forloop.first %}hidden{% endif %}>
+        <header class="cd-panel__head">
+          <div class="cd-panel__titles">
+            <h2 class="cd-panel__title">{{ tab.label }}</h2>
+            <p class="cd-panel__hint">{{ tab.hint }}</p>
+          </div>
+          <div class="cd-panel__actions" data-cd-actions>
+            {% if is_owner %}
+              {% if tab.key == "topics" %}
+                <button type="button" class="ems-btn cd-btn-ai-soft" data-ems-ai>
+                  {% include "courses/partials/_cd_icon.html" with icon="spark" size=15 stroke=1.8 %}
+                  {% trans "ai_generate" context "courses.dashboard" %}
+                </button>
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#topicFormModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "action_add_new_topic" context "courses.partial.topic_accordion" %}
+                </button>
+              {% elif tab.key == "resources" %}
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#resourceFormModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "action_add_resource" context "courses.partial.resource_accordion" %}
+                </button>
+              {% elif tab.key == "members" %}
+                <button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="user" size=16 %}
+                  {% trans "action_add_student" context "courses.partial.member_accordion" %}
+                </button>
+                <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+                  {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+                  {% trans "action_add_group" context "courses.partial.member_accordion" %}
+                </button>
+              {% endif %}
+            {% endif %}
+          </div>
+        </header>
+
+        <div class="cd-panel__body">
+          {% if tab.key == "topics" %}
+            {% include 'courses/partials/_topic_accordion.html' %}
+          {% elif tab.key == "assignments" %}
+            {% include 'assignments/assignment_section.html' %}
+          {% elif tab.key == "labs" %}
+            {% include 'labs/lab_section.html' %}
+          {% elif tab.key == "exams" %}
+            {% include 'exams/teacher/exam_section.html' %}
+          {% elif tab.key == "projects" %}
+            {% include 'projects/project_section.html' %}
+          {% elif tab.key == "resources" %}
+            {% include 'courses/partials/_resource_accordion.html' %}
+          {% elif tab.key == "members" %}
+            {% include 'courses/partials/_member_accordion.html' %}
+          {% endif %}
+        </div>
+      </section>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
 
 <!-- MODALS -->
 <div class="ems-cd-modals">
@@ -240,21 +266,16 @@
     {% include "assignments/partials/_assignment_modals.html" %}
     {% include "projects/partials/_project_modals.html" %}
     {% include "labs/partials/_lab_modals.html" %}
+    {% include "courses/partials/_ai_drawer_config.html" %}
+    {% include "courses/partials/_edit_course_modal.html" %}
 {% endif %}
-
-</div>{# /.ems-cd-modals #}
+</div>
 
 {% comment %} İmtahan modalları (pilləli sehrbaz) öz xüsusi dizaynı ilə qalır — generic
    restyle/enhancer-dən kənarda saxlanılır ki, ikiqat başlıq/pozulma olmasın.  {% endcomment %}
-
 {% if is_owner or user_role == 'teacher' %}
+<div class="ems-cd-modals ems-cd-modals--exam">
     {% include "exams/components/_exam_modals.html" %}
+</div>
 {% endif %}
-
-<div id="courseDashboardRoot"
-     data-i18n-course-delete="{% trans 'confirm_delete_course' context 'courses.dashboard' %}"
-     data-i18n-member-delete-suffix="{% trans 'confirm_delete_member_suffix' context 'courses.dashboard' %}"
-     data-i18n-generic-error="{% trans 'generic_error' context 'courses.dashboard' %}"
-     data-profile-return-url="{{ profile_return_url }}"
-     data-delete-member-url-tpl="{% url 'courses:delete_member' course.id 0 %}"></div>
 {% endblock %}

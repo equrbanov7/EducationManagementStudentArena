@@ -71,6 +71,8 @@
       submitButton.textContent = config.confirmLabel || defaultConfirmLabel;
       submitButton.className = config.confirmButtonClass || defaultConfirmClass;
       submitButton.disabled = false;
+      // Destruktiv (qırmızı) əməl → xəbərdarlıq ikonu; digərləri → sual ikonu.
+      modalElement.classList.toggle("is-danger", /btn-danger/.test(submitButton.className));
 
       modal.show();
     };

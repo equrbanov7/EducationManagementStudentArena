@@ -4,6 +4,8 @@ Bütün dəyişdirici əməliyyatlar CSRF-qorumalı POST-lardır; WS yalnız oxu
 kanalıdır. İdempotentlik servis qatındakı şərti UPDATE-lərlə təmin olunur.
 """
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -29,6 +31,8 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ._shared import get_center_session_or_404, get_session_ticket_or_404
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -110,8 +114,17 @@ def exam_center_ticket_resume(request, session_id, ticket_id):
     grant_extra_chance = request.POST.get("grant_extra_chance") == "1"
     try:
         teacher_resume_attempt(ticket.attempt, request.user, grant_extra_chance=grant_extra_chance)
-    except ValueError as exc:
-        return JsonResponse({"success": False, "error": str(exc)}, status=409)
+    except ValueError:
+        # Audit 2026-09-28 SA-10: ümumi ``ValueError`` mətni (daxili detal)
+        # brauzerə qaytarılmır — log + neytral mesaj.
+        logger.warning("exam_center_ticket_resume refused: ticket=%s", ticket.pk, exc_info=True)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": pgettext("exams.final_center.message", "Cəhdi bərpa etmək mümkün olmadı."),
+            },
+            status=409,
+        )
     return JsonResponse({"success": True})
 
 

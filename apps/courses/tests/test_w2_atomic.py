@@ -12,7 +12,6 @@ from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -31,6 +30,26 @@ def _assign(user, organization, profile_role, role_name):
         organization=organization,
         defaults={"role": organization.roles.get(name=role_name), "is_primary": True, "is_active": True},
     )
+
+
+def _make_registry_group(case):
+    """Reyestr qrupu (OrgUnit) + iki tələbənin aktiv akademik qeydi."""
+    from apps.organizations.models import OrgUnit
+    from apps.registrar.models import Curriculum, Program, StudentAcademicRecord
+    from core.constants import OrgUnitType
+
+    case.group = OrgUnit.objects.create(organization=case.org, name="W2-G", slug="w2-g", unit_type=OrgUnitType.GROUP)
+    program = Program.objects.create(organization=case.org, code="W2P", name="W2 Program")
+    curriculum = Curriculum.objects.create(organization=case.org, program=program, admission_year=2025)
+    for student in case.students:
+        StudentAcademicRecord.objects.create(
+            organization=case.org,
+            student=student,
+            program=program,
+            curriculum=curriculum,
+            group=case.group,
+            admission_year=2025,
+        )
 
 
 class _Base(TestCase):
@@ -89,10 +108,11 @@ class AddMemberAtomicTest(_Base):
 
 
 class AddMembersBulkAtomicTest(_Base):
+    """2026-09-28: qrup mənbəyi reyestrdir (OrgUnit + StudentAcademicRecord), köhnə StudentGroup deyil."""
+
     def setUp(self):
         super().setUp()
-        self.group = StudentGroup.objects.create(name="W2-G", teacher=self.teacher, organization=self.org)
-        self.group.students.set(self.students)
+        _make_registry_group(self)
 
     def _post(self):
         return self.client.post(
@@ -118,3 +138,59 @@ class AddMembersBulkAtomicTest(_Base):
         response = self._post()
         self.assertEqual(response.status_code, 200, response.content[:200])
         self.assertEqual(self.memberships().count(), 2)
+
+
+class AvailableGroupsEndpointTest(_Base):
+    """Seçici mənbəyi: axtarışla təşkilatın qrupları, `in_course` işarəsi."""
+
+    def setUp(self):
+        super().setUp()
+        _make_registry_group(self)
+
+    def test_search_returns_registry_group_with_student_count(self):
+        url = reverse("courses:available_groups", kwargs={"course_id": self.course.id})
+        payload = self.client.get(url, {"q": "W2"}).json()
+        self.assertTrue(payload["success"])
+        rows = {row["name"]: row for row in payload["others"]}
+        self.assertIn("W2-G", rows)
+        self.assertEqual(rows["W2-G"]["student_count"], 2)
+        self.assertFalse(rows["W2-G"]["in_course"])
+
+        self.client.post(
+            reverse("courses:add_members_bulk", kwargs={"course_id": self.course.id}),
+            {"group_ids": [str(self.group.pk)]},
+        )
+        payload = self.client.get(url, {"q": "W2"}).json()
+        self.assertTrue({row["name"]: row for row in payload["others"]}["W2-G"]["in_course"])
+        self.assertEqual(
+            set(self.memberships().values_list("group_name", flat=True)),
+            {"W2-G"},
+        )
+
+    def test_foreign_or_malformed_group_ids_are_ignored(self):
+        response = self.client.post(
+            reverse("courses:add_members_bulk", kwargs={"course_id": self.course.id}),
+            {"group_ids": ["not-a-uuid", "00000000-0000-0000-0000-000000000000"]},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(self.memberships().count(), 0)
+
+
+class InactiveStudentsNotAddedTest(_Base):
+    """Audit 2026-09-28 flows P1-3: xaric olunmuş tələbə qrup əlavəsində kursa düşmür."""
+
+    def setUp(self):
+        super().setUp()
+        _make_registry_group(self)
+
+    def test_expelled_student_is_skipped(self):
+        from apps.registrar.models import StudentAcademicRecord
+
+        expelled = self.students[0]
+        StudentAcademicRecord.objects.filter(student=expelled).update(status="expelled")
+        response = self.client.post(
+            reverse("courses:add_members_bulk", kwargs={"course_id": self.course.id}),
+            {"group_ids": [str(self.group.pk)]},
+        )
+        self.assertEqual(response.status_code, 200, response.content[:200])
+        self.assertEqual(list(self.memberships().values_list("user_id", flat=True)), [self.students[1].id])

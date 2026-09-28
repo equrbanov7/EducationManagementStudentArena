@@ -28,7 +28,6 @@ from ..constants import (
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..policy import assessment_weights, standard_midterm, standard_project
 from ..state_machine import TransitionDenied
-from ..week_plan import seed_missing_hours
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .scoping import is_author
 from .section_shape import normalize_section_data
@@ -252,6 +251,11 @@ def create_draft(
     return syllabus, version
 
 
+def open_version_for(syllabus):
+    """Dosyenin açıq (qərar gözləyən / redaktədə olan) versiyası; yoxdursa ``None``."""
+    return syllabus.versions.filter(status__in=sorted(OPEN_STATUSES)).first()
+
+
 @transaction.atomic
 def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, plan_hours=None, request=None):
     """Təsdiqlənmiş/rədd edilmiş dosyedən YENİ qaralama versiyası açır.
@@ -272,20 +276,29 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
     # kafedra müdiri yenə qərar verə bilməzdi (`covers_chair_unit`).
     ensure_chair_unit(syllabus)
 
-    open_version = syllabus.versions.filter(status__in=sorted(OPEN_STATUSES)).first()
+    # Audit 2026-09-28 SYL-6: ikiqat klik — dosye sətri kilidlənir ki, iki
+    # paralel sorğu açıq versiya yoxlamasını eyni anda keçib 500 (IntegrityError)
+    # ilə bitməsin; ikinci sorğu birincinin açdığı versiyanı görür.
+    Syllabus.objects.select_for_update().filter(pk=syllabus.pk).first()
+    open_version = open_version_for(syllabus)
     if open_version is not None:
         raise TransitionDenied("version.open_version_exists", params={"version": open_version.label})
 
-    base = syllabus.versions.order_by("-major", "-minor").first()
+    # Audit 2026-09-28 SYL-2: yeni versiya QÜVVƏDƏ OLAN təsdiqlənmiş nüsxədən
+    # budaqlanır — rədd edilmiş (məs. MAJOR-a qaldırılmış) versiyadan yox; əks
+    # halda struktur dəyişikliyi «kiçik» versiya kimi təsdiqə keçərdi.
+    ordered = syllabus.versions.order_by("-major", "-minor")
+    base = ordered.filter(status=SyllabusStatus.APPROVED.value).first() or ordered.first()
     if base is None:
         raise TransitionDenied("version.base_missing")
 
+    numbers = list(syllabus.versions.values_list("major", "minor"))
+    period = applies_to_period or base.applies_to_period or syllabus.period
     if kind == ChangeKind.MINOR.value:
-        major, minor = base.major, base.minor + 1
-        period = applies_to_period or base.applies_to_period or syllabus.period
+        major = base.major
+        minor = max((row_minor for row_major, row_minor in numbers if row_major == major), default=base.minor) + 1
     else:
-        major, minor = base.major + 1, 0
-        period = applies_to_period or base.applies_to_period or syllabus.period
+        major, minor = max((row_major for row_major, _minor in numbers), default=base.major) + 1, 0
 
     version = SyllabusVersion.objects.create(
         organization=syllabus.organization,
@@ -361,11 +374,17 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     ``note: ""`` göndərirdi — açıq boş dəyər, yəni birləşmə onu haqlı olaraq
     SİLƏRDİ.  Bax ``syllabus_editor_fields.js``.
     """
+    # Audit 2026-09-28 SYL-3: status YADDAŞDAKI (köhnə) obyektdə yox, KİLİDLİ
+    # sətirdə yoxlanılır — «Göndər» ilə yarışan autosave SUBMITTED versiyaya
+    # yaza bilməsin (göndərmə də həmin sətri kilidləyir).
+    caller, syllabus = version, version.syllabus
+    version = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=version.pk)
+    version.syllabus = syllabus
     if version.status not in EDITABLE_STATUSES:
         raise TransitionDenied("version.locked", params={"status": version.status})
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
-    if not is_author(actor, version.syllabus):
+    if not is_author(actor, syllabus):
         raise TransitionDenied("transition.author_only", params={"transition": "save_section"})
     if section_id not in SECTION_ORDER:
         raise TransitionDenied("section.unknown", params={"section": section_id})
@@ -397,6 +416,7 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     row.save(update_fields=["data", "revision", "updated_by", "updated_at"])
 
     report = recompute_completion(version)
+    caller.completion_percent = version.completion_percent
     log_action(
         AuditAction.UPDATE,
         user=actor.user,
@@ -411,64 +431,6 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         changes={"section": section_id, "changed": old_data != row.data},
     )
     return row, report
-
-
-@transaction.atomic
-def set_plan_hours(version, hours: dict | None):
-    """Tədris planından gələn auditoriya saatı bölgüsünü versiyaya yazır.
-
-    README §8/11: «Auditoriya saatlarının cəmi tədris planındakı saatla üst-üstə
-    düşməlidir; uyğunsuzluq təsdiqə göndərməni bloklayır.»  Bölgünün MƏNBƏYİ
-    ``registrar.CurriculumSubject``-in TƏSDİQLƏNMİŞ plan sətridir; onu bu modula
-    gətirən glue accounts/registrar qatındadır (sillabus registrar-ı import
-    etmir).
-
-    Yalnız REDAKTƏYƏ AÇIQ versiyaya yazılır — təsdiqlənmiş versiya immutable-dır
-    (README §8/1), plan sonradan dəyişsə belə tarixi qeyd toxunulmaz qalır.
-    """
-    if version.status not in EDITABLE_STATUSES:
-        return version
-    cleaned = {}
-    for kind in LESSON_HOUR_KINDS:
-        try:
-            value = int((hours or {}).get(kind) or 0)
-        except (TypeError, ValueError):
-            value = 0
-        if value > 0:
-            cleaned[kind] = value
-    if (version.plan_hours or {}) == cleaned:
-        return version
-    SyllabusVersion.objects.filter(pk=version.pk).update(plan_hours=cleaned)
-    version.plan_hours = cleaned
-    recompute_completion(version)
-    return version
-
-
-def seed_week_hours(version, plan_hours=None) -> bool:
-    """Həftəlik cədvəlin saatını PLANDAN standart bölgü ilə doldurur (bir dəfə).
-
-    Sahib 2026-09-21: sətir sayı və saat özü tənzimlənsin.  Yalnız cəmi 0 olan
-    dərs növünə yazılır (təzə qaralama); müəllimin yazdığı bölgüyə toxunulmur.
-    Redaktəyə açıq olmayan versiya dəyişmir.  Qayıdış: nəsə yazıldısa ``True``.
-    """
-    if version.status not in EDITABLE_STATUSES:
-        return False
-    hours = plan_hours if plan_hours is not None else (version.plan_hours or {})
-    if not hours:
-        return False
-    row = SyllabusSection.objects.filter(version=version, section_id=SectionKey.WEEK.value).first()
-    if row is None:
-        return False
-    data = dict(row.data or {})
-    rows, changed = seed_missing_hours(data.get("rows") or [], hours)
-    if not changed:
-        return False
-    data["rows"] = rows
-    row.data = data
-    row.revision += 1
-    row.save(update_fields=["data", "revision", "updated_at"])
-    recompute_completion(version)
-    return True
 
 
 #: Köçürmə borusunun yaza bildiyi YEGANƏ statuslar (bax migrasiya spesifikasiyası:
@@ -567,10 +529,10 @@ __all__ = [
     "create_next_version",
     "default_assess_data",
     "import_migrated_version",
+    "open_version_for",
     "recompute_completion",
     "refresh_pointers",
     "resolve_pointer_versions",
     "save_section",
     "section_data_map",
-    "set_plan_hours",
 ]

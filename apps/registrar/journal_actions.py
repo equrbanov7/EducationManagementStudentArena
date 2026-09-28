@@ -23,6 +23,7 @@ from core.http_ids import parse_uuid
 
 from . import gradebook, journal_extras
 from .journal_access import offering_or_404 as scoped_offering_or_404
+from .journal_access import writable_offering_or_404
 from .models import Lesson, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
 
@@ -32,7 +33,8 @@ def _offering_or_404(request, offering_id):
     offering = scoped_offering_or_404(request, offering_id)
     if not _can_edit_journal(request.user, offering):
         raise Http404
-    return offering
+    # J-09 (audit 2026-09-28): bu moduldakı hər view YAZIDIR — ləğv edilmiş açılışda 404.
+    return writable_offering_or_404(offering)
 
 
 def _back(offering, tab=""):
@@ -171,7 +173,12 @@ def lesson_action(request, offering_id, lesson_id):
         from apps.registrar.journal_extras import locked_lesson_kind as _locked_lesson_kind
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
-        hours = int(request.POST.get("lesson_hours")) if (request.POST.get("lesson_hours") or "").isdigit() else None
+        # J-02 (audit 2026-09-28): «0»/«-5»/«abc» səssizcə qəbul/ignor olunmur — aralıq servisdə yoxlanır.
+        hours_raw = (request.POST.get("lesson_hours") or "").strip()
+        if hours_raw and not hours_raw.isdigit():
+            messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
+            return _back(offering)
+        hours = int(hours_raw) if hours_raw else None
         # Dərs tipi: korrektor (İKT) kilidi keçir (mühazirə↔seminar qarışığını
         # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
         posted_kind = request.POST.get("lesson_kind") or None
@@ -229,6 +236,7 @@ def lesson_action(request, offering_id, lesson_id):
                 allow_past=override,
                 # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil.
                 allow_locked=False,
+                by_user=request.user,
             )
         except gradebook.LessonRuleError as exc:
             messages.error(request, str(exc))
@@ -286,9 +294,13 @@ def kollokvium_save(request, offering_id):
         )
         return _back(offering, "kollokvium")
 
-    written = gradebook.save_component_scores(
-        offering=offering, entries=entries, by_user=request.user, bypass_edit_window=True
+    result = gradebook.save_component_scores(
+        offering=offering, entries=entries, by_user=request.user, bypass_edit_window=True, report=True
     )
+    written = result["written"]
+    from .journal_finals import warn_rejected_scores
+
+    warn_rejected_scores(request, result["rejected"])  # J-03: rəqəm olmayan xana 0-a çevrilmir
     if blocked:
         messages.warning(request, _("Pəncərəsi bağlı olan sütunların balı yazılmadı."))
     messages.success(request, _("%(title)s balları yadda saxlanıldı (%(n)s xana).") % {"title": title, "n": written})

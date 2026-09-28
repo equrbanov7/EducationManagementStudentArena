@@ -58,7 +58,7 @@ msgstr "Üyeler"
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:26
 #: apps/courses/static/courses/js/course_ai_drawer.js:75
 msgid "Sərbəst işlər"
-msgstr "Serbest çalışmalar"
+msgstr "Ödevler"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:27
 msgid "Kurs işləri"
@@ -836,7 +836,7 @@ msgstr "Silme sırasında bir hata oluştu"
 #: apps/assignments/static/assignment/js/assignment_modal.js:234
 #: apps/assignments/static/assignment/js/assignment_modal.js:264
 msgid "Xəta: "
-msgstr "Hata:"
+msgstr "Hata: "
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:206
 #: apps/assignments/static/assignment/js/assignment_modal.js:243
@@ -937,11 +937,11 @@ msgstr "❌ Bir hata oluştu."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:48
 msgid "AI Kurs Köməkçisi"
-msgstr "AI Kurs Asistanı"
+msgstr "AI Ders Asistanı"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:48
 msgid "AI Kurs Asistanı"
-msgstr "AI Kurs Asistanı"
+msgstr "AI Ders Asistanı"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:49
 msgid "Hər addımı siz təsdiqləyirsiniz"
@@ -961,7 +961,7 @@ msgstr "Adım adım"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:52
 msgid "Hansı kursu qurmaq istəyirsiniz?"
-msgstr "Hangi kursu oluşturmak istiyorsunuz?"
+msgstr "Hangi dersi oluşturmak istiyorsunuz?"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:53
 msgid "Məs: “Veb texnologiyaları, 2-ci kurs, 14 həftə. Praktiki yönümlü.”"
@@ -1001,19 +1001,19 @@ msgstr "Oluştur"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:57
 msgid "AI kursu hazırlayır…"
-msgstr "AI kursu hazırlıyor…"
+msgstr "AI dersi hazırlıyor…"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:57
 msgid "AI kursu hazırlıyor…"
-msgstr "AI kursu hazırlıyor…"
+msgstr "AI dersi hazırlıyor…"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:58
 msgid "Sillabus, resurslar və tapşırıqlar planlanır"
-msgstr "Müfredat, kaynaklar ve görevler planlanıyor"
+msgstr "İzlence, kaynaklar ve ödevler planlanıyor"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:58
 msgid "Müfredat, kaynaklar ve görevler planlanıyor"
-msgstr "Müfredat, kaynaklar ve görevler planlanıyor"
+msgstr "İzlence, kaynaklar ve ödevler planlanıyor"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:59
 msgid "Təsdiqlə və davam et"
@@ -1082,12 +1082,12 @@ msgid ""
 "AI təklifləri seçdiniz. İndi bölmələrdən “Əlavə et” ilə onları kursa daxil "
 "edə bilərsiniz."
 msgstr ""
-"AI önerilerini seçtiniz. Şimdi bölümlerden «Ekle» ile kursa "
+"AI önerilerini seçtiniz. Şimdi bölümlerden «Ekle» ile derse "
 "ekleyebilirsiniz."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:68
 msgid "AI önerilerini seçtiniz. Şimdi “Ekle” ile kursa ekleyin."
-msgstr "AI önerilerini seçtiniz. Şimdi «Ekle» ile kursa ekleyin."
+msgstr "AI önerilerini seçtiniz. Şimdi «Ekle» ile derse ekleyin."
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:69
 msgid "bölmə"
@@ -1103,11 +1103,11 @@ msgstr "öğe"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:71
 msgid "Kursa qayıt"
-msgstr "Kursa dön"
+msgstr "Derse dön"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:71
 msgid "Kursa dön"
-msgstr "Kursa dön"
+msgstr "Derse dön"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:73
 msgid "Mövzular"
@@ -1139,7 +1139,7 @@ msgstr "Python · başlangıç"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:90
 msgid "8 mövzu (14 həftəlik sillabus)"
-msgstr "8 konu (14 haftalık müfredat)"
+msgstr "8 konu (14 haftalık izlence)"
 
 #: apps/courses/static/courses/js/course_ai_drawer.js:91
 msgid "Giriş: veb texnologiyalarına baxış"
@@ -1309,11 +1309,11 @@ msgstr "Alanları AI ile doldur"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Kursun sillabusu və həftəlik strukturu"
-msgstr "Kursun müfredatı ve haftalık yapısı"
+msgstr "Dersin izlencesi ve haftalık yapısı"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:25
 msgid "Müfredat ve haftalık yapı"
-msgstr "Müfredat ve haftalık yapı"
+msgstr "İzlence ve haftalık yapı"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:26
 msgid "Mühazirələr, fayllar, video və linklər"
@@ -1325,15 +1325,15 @@ msgstr "Dersler, dosyalar, video ve bağlantılar"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Tələbələr üçün tapşırıqlar və təqdimatlar"
-msgstr "Öğrenciler için görevler ve teslimler"
+msgstr "Öğrenciler için ödevler ve teslimler"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Öğrenciler için görevler ve teslimler"
-msgstr "Öğrenciler için görevler ve teslimler"
+msgstr "Öğrenciler için ödevler ve teslimler"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:28
 msgid "Bloklar və suallarla praktiki laboratoriyalar"
-msgstr "Bloklar ve sorularla pratik laboratuvarlar"
+msgstr "Bloklar ve sorularla uygulamalı laboratuvar çalışmaları"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:29
 msgid "Test və yazılı imtahanlar, nəzarət"
@@ -1345,11 +1345,11 @@ msgstr "Test ve yazılı sınavlar, gözetim"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Genişmiqyaslı kurs layihələri"
-msgstr "Büyük ölçekli kurs projeleri"
+msgstr "Kapsamlı dönem projeleri"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:30
 msgid "Büyük ölçekli kurs projeleri"
-msgstr "Büyük ölçekli kurs projeleri"
+msgstr "Kapsamlı dönem projeleri"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:31
 msgid "Tələbələr və qruplar"
@@ -2126,7 +2126,7 @@ msgstr "Gönderimi onaylayın"
 
 #: apps/projects/static/projects/js/project_detail.js:39
 msgid "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
-msgstr "Bu kurs ödevini göndermek istediğinize emin misiniz?"
+msgstr "Bu dönem projesini göndermek istediğinizden emin misiniz?"
 
 #: apps/projects/static/projects/js/project_detail.js:40
 msgid "Göndər"
@@ -2869,8 +2869,12 @@ msgstr "Atananlar"
 msgid "Anladım"
 msgstr "Tamam"
 
-msgid "Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"
-msgstr "İtiraz açıldıktan sonra hiçbir soru kararsız kalamaz. Karar verilmemiş sorular:"
+msgid ""
+"Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar "
+"verilməmiş suallar:"
+msgstr ""
+"İtiraz açıldıktan sonra hiçbir soru kararsız kalamaz. Karar verilmemiş "
+"sorular:"
 
 msgid "Axtar…"
 msgstr "Ara…"
@@ -2884,7 +2888,9 @@ msgstr "Başlangıç zamanını seçin."
 msgid "Bitmə vaxtını seçin."
 msgstr "Bitiş zamanını seçin."
 
-msgid "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
+msgid ""
+"Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə "
+"edin."
 msgstr "Bu PIN'i sınav giriş sayfasında kullanıcı adınızla birlikte kullanın."
 
 msgid "Bu dersin atandığı gruplar"
@@ -2938,8 +2944,11 @@ msgstr "Sonuca geç"
 msgid "Nəzarət"
 msgstr "Gözetim"
 
-msgid "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
-msgstr "PIN yalnızca sınav saatine yakın görünür veya sınav merkezinden alınır."
+msgid ""
+"PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə "
+"edilir."
+msgstr ""
+"PIN yalnızca sınav saatine yakın görünür veya sınav merkezinden alınır."
 
 msgid "Qruplar"
 msgstr "Gruplar"
@@ -2980,14 +2989,25 @@ msgstr "Onayla ve oluştur"
 msgid "hesablanır…"
 msgstr "hesaplanıyor…"
 
-msgid "{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "{q}. soruda en az {min} karakterlik açıklama yazmalı ya da «İtiraz et» düğmesini kapatmalısınız."
+msgid ""
+"{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et”"
+" düyməsini söndürməlisiniz."
+msgstr ""
+"{q}. soruda en az {min} karakterlik açıklama yazmalı ya da «İtiraz et» "
+"düğmesini kapatmalısınız."
 
-msgid "{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "{q}. soruda neden türünü seçip en az {min} karakterlik açıklama yazmalı ya da «İtiraz et» düğmesini kapatmalısınız."
+msgid ""
+"{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya "
+"da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr ""
+"{q}. soruda neden türünü seçip en az {min} karakterlik açıklama yazmalı ya "
+"da «İtiraz et» düğmesini kapatmalısınız."
 
-msgid "{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "{q}. soruda neden türünü seçmeli ya da «İtiraz et» düğmesini kapatmalısınız."
+msgid ""
+"{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini "
+"söndürməlisiniz."
+msgstr ""
+"{q}. soruda neden türünü seçmeli ya da «İtiraz et» düğmesini kapatmalısınız."
 
 msgid "İmtahan adı"
 msgstr "Sınav adı"
@@ -3028,14 +3048,22 @@ msgstr "Satır silinsin mi?"
 msgid "Bölgü silinsin?"
 msgstr "Dağıtım silinsin mi?"
 
-msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
-msgstr "Dağıtım onaylandı. Defter açılışı: %(created)s yeni, %(updated)s güncellendi. Bildirim: %(notified)s"
+msgid ""
+"Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. "
+"Bildiriş: %(notified)s"
+msgstr ""
+"Dağıtım onaylandı. Defter açılışı: %(created)s yeni, %(updated)s "
+"güncellendi. Bildirim: %(notified)s"
 
 msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
 msgstr "Bu bölümün programları için aktif öğretim planı satırı bulunamadı."
 
-msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
-msgstr "Planda %(count)s öneri bulundu; ilki dolduruldu. Saatler öğretim planında saklanmaz — elle yazın (öneri: %(hours)s saat)."
+msgid ""
+"Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris "
+"planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr ""
+"Planda %(count)s öneri bulundu; ilki dolduruldu. Saatler öğretim planında "
+"saklanmaz — elle yazın (öneri: %(hours)s saat)."
 
 msgid "Qalıq: %(remaining)s / %(total)s saat"
 msgstr "Kalan: %(remaining)s / %(total)s saat"
@@ -3067,8 +3095,12 @@ msgstr "Eksik satır"
 msgid "Aç"
 msgstr "Görüntüle"
 
-msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
-msgstr "Bu dosya türü güvenlik nedeniyle kabul edilmiyor. Yalnızca .pdf / .docx / .txt / .png / .jpg yükleyin."
+msgid ""
+"Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / "
+".txt / .png / .jpg yükləyin."
+msgstr ""
+"Bu dosya türü güvenlik nedeniyle kabul edilmiyor. Yalnızca .pdf / .docx / "
+".txt / .png / .jpg yükleyin."
 
 msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
 msgstr "Bitiş zamanı başlangıç zamanından sonra olmalıdır."

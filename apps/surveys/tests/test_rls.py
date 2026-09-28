@@ -16,11 +16,13 @@ from apps.surveys.forms import validate_answers
 from apps.surveys.models import (
     SurveyAnswer,
     SurveyCampaign,
+    SurveyPendingResponse,
     SurveyQuestion,
     SurveyReceipt,
     SurveyResponse,
     SurveyTemplate,
 )
+from apps.surveys.services.pending import publish_results
 from apps.surveys.services.submit import submit_target
 from apps.surveys.services.targets import student_targets
 from apps.surveys.services.templates import template_questions
@@ -29,7 +31,15 @@ from .factories import build_world, close_all, open_campaign
 
 pytestmark = pytest.mark.postgres
 
-_MODELS = (SurveyTemplate, SurveyQuestion, SurveyCampaign, SurveyReceipt, SurveyResponse, SurveyAnswer)
+_MODELS = (
+    SurveyTemplate,
+    SurveyQuestion,
+    SurveyCampaign,
+    SurveyReceipt,
+    SurveyResponse,
+    SurveyAnswer,
+    SurveyPendingResponse,
+)
 
 
 def _set(name, value):
@@ -59,11 +69,7 @@ def _bypass_for_setup(db):
         _set("app.current_org_id", "")
 
 
-def _seed(slug):
-    world = build_world(slug, students=1)
-    close_all(world)
-    campaign = open_campaign(world)
-    student = world["students"][0]
+def _submit_all(campaign, student):
     for target in student_targets(campaign, student):
         section = Section.GENERAL if target.is_general else Section.TEACHER
         questions = template_questions(campaign.template, section=section)
@@ -71,6 +77,15 @@ def _seed(slug):
         cleaned, errors, _values = validate_answers(questions, data)
         assert not errors
         submit_target(campaign=campaign, student=student, target=target, cleaned_answers=cleaned)
+
+
+def _seed(slug):
+    world = build_world(slug, students=2)
+    close_all(world)
+    campaign = open_campaign(world)
+    _submit_all(campaign, world["students"][0])
+    publish_results(campaign.pk)  # Audit 2026-09-28 SV-3: bufer → anonim cavablar
+    _submit_all(campaign, world["students"][1])  # buferdə qalır (< k)
     return world
 
 

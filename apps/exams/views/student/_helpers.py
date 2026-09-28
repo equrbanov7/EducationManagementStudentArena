@@ -162,6 +162,7 @@ def build_take_exam_question_payload(exam, attempt, questions):
     — ``server_delivery`` işarələnir, variantlar boş buraxılır və məzmun timer
     serverdə başlayandan sonra ``question-seen`` ilə gəlir.
     """
+    from apps.exams.services.option_tokens import option_token
     from apps.exams.services.question_timer import question_timer_start_required
     from apps.exams.services.randomizer import build_shuffled_options
 
@@ -171,25 +172,44 @@ def build_take_exam_question_payload(exam, attempt, questions):
         strict_delivery = exam.exam_type == "test" and question_timer_start_required(attempt, question)
         if not strict_delivery and exam.exam_type == "test" and question.answer_mode in ("single", "multiple"):
             opts = build_shuffled_options(attempt.id, question)
+            # Audit 2026-09-28 EX28-01: input ``value``-su xam id deyil, token.
+            # ``id`` yalnız server tərəfdə ``checked`` müqayisəsi üçün qalır.
+            for opt in opts:
+                opt["token"] = option_token(attempt.id, opt["id"])
         payload.append({"q": question, "opts": opts, "server_delivery": strict_delivery})
     return payload
 
 
-def selected_option_ids_from_request(request, question):
-    """POST-dan bir sual üçün seçilmiş option id-lərini (single/multi) parse et."""
-    if question.answer_mode == "single":
-        raw_option_id = request.POST.get(f"q_{question.id}")
-        if not raw_option_id:
-            return set()
-        try:
-            return {int(raw_option_id)}
-        except (TypeError, ValueError):
-            return set()
+def _request_attempt_id(request, attempt=None):
+    """Token xəritələməsi üçün attempt id-si: açıq ötürülən attempt, yoxsa URL."""
+    if attempt is not None:
+        return getattr(attempt, "pk", attempt)
+    resolver_match = getattr(request, "resolver_match", None)
+    kwargs = getattr(resolver_match, "kwargs", None) or {}
+    return kwargs.get("attempt_id")
 
-    selected_option_ids = set()
-    for raw_option_id in request.POST.getlist(f"q_{question.id}"):
-        try:
-            selected_option_ids.add(int(raw_option_id))
-        except (TypeError, ValueError):
-            continue
-    return selected_option_ids
+
+def selected_option_ids_from_request(request, question, attempt=None):
+    """POST-dan bir sual üçün seçilmiş option id-lərini (single/multi) parse et.
+
+    Audit 2026-09-28 EX28-01: tələbə xam ``option.id`` deyil, attempt-ə bağlı
+    token göndərir (``services/option_tokens.py``); burada sualın öz
+    variantları arasında geri xəritələnir. Qaytarır: ``set[int]`` və ya
+    ``None`` — dəyər göndərilib, amma heç biri tanınmayıb (saxta/köhnə səhifə);
+    ``_save_test_answer_if_changed`` ``None``-u "seçimi dəyişmə" kimi oxuyur.
+    """
+    from apps.exams.services.option_tokens import option_ids_from_tokens
+
+    field_name = f"q_{question.id}"
+    if question.answer_mode == "single":
+        raw_values = [request.POST.get(field_name) or ""]
+    else:
+        raw_values = request.POST.getlist(field_name)
+    if not any(str(value).strip() for value in raw_values):
+        return set()
+
+    attempt_id = _request_attempt_id(request, attempt)
+    if attempt_id is None:
+        return None
+    option_ids = [option.id for option in question.options.all()]
+    return option_ids_from_tokens(attempt_id, option_ids, raw_values)

@@ -24,7 +24,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.registrar import schedule as schedule_service
-from apps.registrar import schedule_manage
+from apps.registrar import schedule_lock, schedule_manage
 from apps.registrar.models import AcademicStatus, ScheduleSlot, StudentAcademicRecord
 
 logger = logging.getLogger(__name__)
@@ -185,6 +185,15 @@ def _guard(actor, organization, offering):
         )
 
 
+def _raise_invalid(errors):
+    conflict = errors.pop("_conflict", None)
+    raise ScheduleManageError(
+        "invalid",
+        pgettext(_CTX, "Slot yadda saxlanılmadı — məlumatları yoxlayın."),
+        errors={**errors, **({"conflict_slot": conflict} if conflict else {})},
+    )
+
+
 def create_slot(*, actor, organization, offering, data, request=None) -> dict:
     """Slot əlavə et — icazə + validasiya + audit + bildiriş."""
     from core.audit import log_action
@@ -192,17 +201,16 @@ def create_slot(*, actor, organization, offering, data, request=None) -> dict:
 
     _guard(actor, organization, offering)
     cleaned, errors = schedule_manage.parse_payload(data)
-    if not errors:
-        errors = schedule_manage.check_slot(offering=offering, cleaned=cleaned)
     if errors:
-        conflict = errors.pop("_conflict", None)
-        raise ScheduleManageError(
-            "invalid",
-            pgettext(_CTX, "Slot yadda saxlanılmadı — məlumatları yoxlayın."),
-            errors={**errors, **({"conflict_slot": conflict} if conflict else {})},
-        )
+        _raise_invalid(errors)
 
     with transaction.atomic():
+        # Audit 2026-09-28 W3: «yoxla → yaz» bir kilid altında — eyni semestrə paralel
+        # yazı toqquşma yoxlamasını köhnə vəziyyətlə keçib üst-üstə düşən slot yarada bilməz.
+        schedule_lock.lock_for_offering(offering)
+        errors = schedule_manage.check_slot(offering=offering, cleaned=cleaned)
+        if errors:
+            _raise_invalid(errors)
         slot = ScheduleSlot.objects.create(
             organization=offering.organization,
             offering=offering,

@@ -120,3 +120,300 @@
     color: var(--course-primary);
     transform: translateX(4px);
 }
+/* ════════════════════════════════════════════════════════════════════════════
+   «Kurslarım» kartları — 2026-09-28 redizayn (`.mc-*`)
+   Qapaq zolağı + status nişanı + ad/təsvir + göstəricilər + qrup çipləri.
+   Köhnə `.modern-course-card` qaydaları yuxarıda qalır («Kurslar» bölməsi işlədir).
+   ════════════════════════════════════════════════════════════════════════════ */
+.mc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.mc-grid[hidden] {
+    display: none;
+}
+
+.mc-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    color: inherit;
+    text-decoration: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.mc-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--course-border-hover);
+    box-shadow: 0 12px 28px rgba(217, 119, 6, 0.12);
+    color: inherit;
+}
+
+.mc-card:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.mc-card__cover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 112px;
+    background: linear-gradient(135deg, #fff4e5, #ffe2bd);
+    color: var(--course-primary);
+    font-size: 34px;
+}
+
+.mc-card__cover.has-img {
+    background: var(--ems-neutral-100);
+}
+
+.mc-card__cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mc-status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: var(--ems-r-pill, 999px);
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 800;
+    line-height: 1.5;
+    white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.mc-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.mc-status--draft { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.mc-status--live { background: var(--ems-success-100); color: var(--ems-success-700); }
+.mc-status--archived { background: var(--ems-neutral-100); color: var(--ems-neutral-600); }
+
+.mc-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px 16px;
+    min-width: 0;
+}
+
+.mc-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.mc-card__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--ems-fs-base, 13px);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+}
+
+.mc-card__stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-600);
+}
+
+.mc-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.mc-stat i,
+.mc-card__date i {
+    color: var(--ems-neutral-500);
+}
+
+.mc-stat b {
+    color: var(--ems-text);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.mc-card__date {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    color: var(--ems-neutral-500);
+}
+
+.mc-card__groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.mc-chip {
+    padding: 2px 9px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.mc-chip--more {
+    color: var(--ems-neutral-500);
+}
+
+/* ── Skelet: bölmə yüklənməsi (section_loader) və kurs panelinə keçid ─────── */
+.mc-skeleton__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.mc-skeleton__head .skeleton-line {
+    max-width: 240px;
+    height: 26px;
+}
+
+.mc-card--skeleton {
+    pointer-events: none;
+}
+
+.mc-card--skeleton .skeleton-line + .skeleton-line,
+.mc-card--skeleton .skeleton-pill {
+    margin-top: 4px;
+}
+
+.mc-sk-card-cover {
+    height: 112px;
+    border-radius: 0;
+}
+
+.mc-nav-skeleton[hidden] {
+    display: none;
+}
+
+.mc-nav-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mc-sk-hero {
+    display: flex;
+    gap: 18px;
+    padding: 20px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+}
+
+.mc-sk-cover {
+    flex: none;
+    width: 104px;
+    height: 104px;
+    border-radius: 14px;
+}
+
+.mc-sk-lines {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+}
+
+.mc-sk-tabs {
+    height: 54px;
+    border-radius: var(--ems-r-2xl, 16px);
+}
+
+.mc-sk-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+}
+
+.mc-sk-panel .skeleton-line--lg {
+    width: 30%;
+}
+
+.mc-sk-panel .skeleton-block {
+    height: 76px;
+}
+
+@media (max-width: 560px) {
+    .mc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mc-card__cover,
+    .mc-sk-card-cover {
+        height: 96px;
+    }
+}
+
+/* tələbə kartı («Təyin olunmuş kurslar») — yaşıl vurğu, CTA */
+.mc-card__cover--student {
+    background: linear-gradient(135deg, #e7f8ef, #c9f0dc);
+    color: var(--ems-success-700);
+}
+
+.mc-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    color: var(--ems-primary-700);
+    font-weight: 800;
+}
+
+.mc-card:hover .mc-card__cta i {
+    transform: translateX(3px);
+}
+
+.mc-card__cta i {
+    transition: transform 0.16s ease;
+}

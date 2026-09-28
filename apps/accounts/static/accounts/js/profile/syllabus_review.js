@@ -136,6 +136,20 @@
         });
     }
 
+    /* Audit 2026-09-28 SYL-1: qərar düymələri VERSİYA ÜZRƏ — müəllif öz
+       sillabusunda düymə görmür (server `decisions` siyahısını qaytarır). */
+    function paintDecisions(node, data) {
+        var allowed = Array.isArray(data && data.decisions) ? data.decisions : null;
+        node.querySelectorAll("[data-syl-decide]").forEach(function (button) {
+            button.hidden = !!allowed && allowed.indexOf(button.getAttribute("data-syl-decide")) === -1;
+        });
+        var own = node.querySelector("[data-syl-rv-own]");
+        if (own) {
+            own.textContent = (data && data.own_note) || "";
+            own.hidden = !(data && data.own_note);
+        }
+    }
+
     function openPanel(el, versionId) {
         var node = el.querySelector("[data-syl-panel]");
         var renderer = panel();
@@ -148,6 +162,7 @@
             .then(function (data) {
                 state = { versionId: versionId, data: data, notes: {} };
                 renderer.render(node, data, texts(), {});
+                paintDecisions(node, data);
                 showTab(node, "sections");
                 var general = node.querySelector("[data-syl-rv-general]");
                 if (general) {

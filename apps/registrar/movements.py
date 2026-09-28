@@ -35,6 +35,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.registrar.enrollment_suspension import sync_enrollments_for_status
 from apps.registrar.models import (
     MOVEMENT_REASON_MIN_LENGTH,
     AcademicStatus,
@@ -242,6 +243,9 @@ def _apply_status(record, *, to_status, actor, reason):
     record.is_active = academic_status.is_active_for(to_status)
     record.save(update_fields=["status", "is_active", "updated_at"])
     academic_status.audit_status_change(record=record, previous=previous, by_user=actor, reason=reason)
+    # Audit 2026-09-28 S1: xaric / məzuniyyət → cari dövr qeydiyyatları dondurulur,
+    # bərpa → geri qaytarılır (eyni tranzaksiyada; qrup köçürməsi bundan SONRA gəlir).
+    sync_enrollments_for_status(record=record, previous=previous, to_status=to_status, actor=actor, reason=reason)
     _sync_access_state(record, to_status=to_status)
     return previous
 
@@ -439,5 +443,6 @@ __all__ = [
     "normalize_order_number",
     "normalize_reason",
     "rule_for",
+    "sync_enrollments_for_status",
     "validate",
 ]

@@ -50,7 +50,7 @@
         toast.innerHTML = `
             <i class="fas ${ICON_CLASS_BY_TYPE[normalizedType] || ICON_CLASS_BY_TYPE.info} me-2"></i>
             ${escapeHtml(message)}
-            <button type="button" class="btn-close" aria-label="Bağla"></button>
+            <button type="button" class="btn-close" aria-label="${escapeHtml(t('actionClose', 'Close'))}"></button>
         `;
 
         const closeButton = toast.querySelector('.btn-close');

@@ -14,11 +14,25 @@ if [ -z "${APP_DATABASE_USER:-}" ] || [ -z "${APP_DATABASE_PASSWORD:-}" ]; then
   exit 0
 fi
 
+# Audit 2026-09-28 DB-02: rol səviyyəli timeout-lar (env ilə dəyişdirilə bilər;
+# `0` = limitsiz). Format: rəqəm + ixtiyari vahid (ms, s, min, h).
+APP_DB_STATEMENT_TIMEOUT="${APP_DB_STATEMENT_TIMEOUT:-60s}"
+APP_DB_LOCK_TIMEOUT="${APP_DB_LOCK_TIMEOUT:-10s}"
+APP_DB_IDLE_IN_TRANSACTION_TIMEOUT="${APP_DB_IDLE_IN_TRANSACTION_TIMEOUT:-120s}"
+for _timeout in "$APP_DB_STATEMENT_TIMEOUT" "$APP_DB_LOCK_TIMEOUT" "$APP_DB_IDLE_IN_TRANSACTION_TIMEOUT"; do
+  if ! printf '%s' "$_timeout" | grep -Eq '^[0-9]+(ms|s|min|h)?$'; then
+    echo "ERROR: yararsız DB timeout dəyəri: '$_timeout' (gözlənilən: 60s, 500ms, 2min, 0)" >&2
+    exit 1
+  fi
+done
+
 echo "Tətbiq DB rolu yaradılır: $APP_DATABASE_USER"
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
   -v app_role="$APP_DATABASE_USER" -v app_password="$APP_DATABASE_PASSWORD" \
-  -v owner_role="$POSTGRES_USER" -v db_name="$POSTGRES_DB" <<'SQL'
+  -v owner_role="$POSTGRES_USER" -v db_name="$POSTGRES_DB" \
+  -v statement_timeout="$APP_DB_STATEMENT_TIMEOUT" -v lock_timeout="$APP_DB_LOCK_TIMEOUT" \
+  -v idle_in_tx_timeout="$APP_DB_IDLE_IN_TRANSACTION_TIMEOUT" <<'SQL'
 BEGIN;
 
 -- Refuse to repurpose an owner, privileged account, or role with memberships.
@@ -45,6 +59,17 @@ WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = :'app_role')
 
 ALTER ROLE :"app_role" WITH LOGIN NOSUPERUSER NOBYPASSRLS NOCREATEDB NOCREATEROLE NOREPLICATION;
 ALTER ROLE :"app_role" WITH PASSWORD :'app_password';
+
+-- Audit 2026-09-28 DB-02: rol səviyyəli timeout-lar (idempotent). İlişən sorğu,
+-- kilid gözləməsi və ya açıq qalmış transaction artıq yazıçıları sonsuz
+-- bloklamır və PgBouncer server bağlantısını tutmur. Uzun işlər limiti yalnız
+-- öz transaction/sessiyası üçün genişləndirir (core/db_timeouts.py
+-- long_statement). Owner (miqrasiya) roluna toxunulmur. Yeni dəyər yalnız YENİ
+-- backend sessiyalarına şamil olunur (PgBouncer hovuzu server_lifetime ərzində
+-- yenilənir).
+ALTER ROLE :"app_role" SET statement_timeout = :'statement_timeout';
+ALTER ROLE :"app_role" SET lock_timeout = :'lock_timeout';
+ALTER ROLE :"app_role" SET idle_in_transaction_session_timeout = :'idle_in_tx_timeout';
 
 GRANT CONNECT ON DATABASE :"db_name" TO :"app_role";
 GRANT USAGE ON SCHEMA public TO :"app_role";

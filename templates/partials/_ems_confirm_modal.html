@@ -1,20 +1,30 @@
 {% load i18n %}
 {% comment %}
-EMSConfirm — qlobal təsdiq dialoqu (UX-15). Bax static/js/ems_ui/confirm.js.
+EMSConfirm — qlobal təsdiq dialoqu (UX-15). Bax static/js/ems_confirm.js.
 Bir dəfə, `base.html`-də render olunur; bütün ekranlar `EMSConfirm.open(...)`
 ilə eyni instansiyanı proqramla idarə edir. Markup Bootstrap 5 modal-ıdır.
+
+2026-09-28: ikon plitəsi + başlıq + mətn bir sırada (əvvəl başlıq verilməyəndə
+boş başlıq zolağı qalırdı). ID-lər dəyişməyib — `workbench_confirm.js` də
+`#emsConfirmModalBody`-ni oxuyur. `danger` rejimi `.is-danger` sinfi ilə gəlir.
 {% endcomment %}
-<div class="modal fade" id="emsConfirmModal" tabindex="-1" aria-hidden="true"
-     aria-labelledby="emsConfirmModalTitle" data-bs-backdrop="static">
+<div class="modal fade ems-confirm" id="emsConfirmModal" tabindex="-1" aria-hidden="true"
+     aria-labelledby="emsConfirmModalTitle" aria-describedby="emsConfirmModalBody" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="emsConfirmModalTitle"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="{% trans 'Bağla' context 'ui.confirm_modal' %}"></button>
+            <button type="button" class="btn-close ems-confirm__x" data-bs-dismiss="modal"
+                    aria-label="{% trans 'Bağla' context 'ui.confirm_modal' %}"></button>
+            <div class="modal-body ems-confirm__main">
+                <span class="ems-confirm__icon" aria-hidden="true">
+                    <svg class="ems-confirm__icon-q" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                    <svg class="ems-confirm__icon-d" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                </span>
+                <div class="ems-confirm__text">
+                    <h5 class="modal-title ems-confirm__title" id="emsConfirmModalTitle"></h5>
+                    <div class="ems-confirm__body" id="emsConfirmModalBody"></div>
+                </div>
             </div>
-            <div class="modal-body" id="emsConfirmModalBody"></div>
-            <div class="modal-footer">
+            <div class="modal-footer ems-confirm__foot">
                 <button type="button" class="btn btn-secondary" id="emsConfirmCancelBtn" data-bs-dismiss="modal">
                     {% trans "Ləğv et" context "ui.confirm_modal" %}
                 </button>

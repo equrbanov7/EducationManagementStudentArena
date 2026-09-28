@@ -33,31 +33,15 @@ email flow.
 - Max sends per email per hour: 5
 - OTP is hashed before storage
 
-## Example Usage
+## OTP flows (server-rendered pages only)
 
-Send login OTP:
-
-```bash
-curl -X POST http://127.0.0.1:8000/send-otp/ \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "email=user@example.com&purpose=login"
-```
-
-Verify login OTP:
-
-```bash
-curl -X POST http://127.0.0.1:8000/verify-otp/ \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "email=user@example.com&otp=123456&purpose=login"
-```
-
-Resend OTP:
-
-```bash
-curl -X POST http://127.0.0.1:8000/resend-otp/ \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "email=user@example.com&purpose=login"
-```
+The standalone JSON endpoints `/send-otp/`, `/verify-otp/` and `/resend-otp/`
+(also under `/accounts/`) were **removed on 2026-09-28** (audit SA-01/02):
+`send-otp` (purpose=login) enumerated registered e-mails and mailed the victim,
+and `verify-otp` (purpose=login) logged any account in with e-mail possession
+only, skipping the password. They now return 404 (see `apps/accounts/tests/test_otp_api.py`).
+OTP is only used inside the regular HTML flows (login second factor, registration
+verification, password reset), which carry CSRF protection and per-flow state.
 
 Signup verification continues to work through the existing registration flow:
 

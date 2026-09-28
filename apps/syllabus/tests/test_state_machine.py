@@ -81,7 +81,10 @@ def test_reason_is_mandatory(name, permission):
             status=SyllabusStatus.REVIEW.value,
             permissions=[permission],
             reason="   ",
-            is_author=True,
+            # Audit 2026-09-28 SYL-1: müəllif qərar keçidlərində `author_forbidden`
+            # alır — səbəb qaydası keçidə UYĞUN aktorla yoxlanılır (geri çağırma
+            # müəllifindir, qaytarma/rədd isə müəllif OLMAYAN qərarvericinin).
+            is_author=name == Transition.WITHDRAW,
         )
     assert excinfo.value.code == "transition.reason_required"
 

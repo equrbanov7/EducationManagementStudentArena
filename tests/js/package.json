@@ -5,9 +5,13 @@
   "description": "CI qapısı: göndərilən brauzer JS-ini ƏSL DOM-da icra edən qoşqu (jsdom).",
   "license": "UNLICENSED",
   "scripts": {
-    "collect": "node collect_shipped.js"
+    "collect": "node collect_shipped.js",
+    "test": "node --test"
   },
   "dependencies": {
     "jsdom": "24.1.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

@@ -48,6 +48,9 @@ urlpatterns = [
         views.update_course_status,
         name="update_course_status",
     ),
+    # AI ilə kurs qur — plan (yazmır) + təsdiqlənənləri tətbiq et
+    path("<int:course_id>/ai/plan/", views.CourseAIPlanView.as_view(), name="ai_plan"),
+    path("<int:course_id>/ai/apply/", views.CourseAIApplyView.as_view(), name="ai_apply"),
     # ════════════════════════════════════════════════════════════════════════
     # Mövzular (Topics)
     # ════════════════════════════════════════════════════════════════════════
@@ -93,6 +96,12 @@ urlpatterns = [
         "<int:course_id>/available-students/",
         views.AvailableStudentsView.as_view(),
         name="available_students",
+    ),
+    # Qrup seçicisinin mənbəyi (reyestr qrupları, JSON)
+    path(
+        "<int:course_id>/available-groups/",
+        views.AvailableGroupsView.as_view(),
+        name="available_groups",
     ),
     # Tələbə əlavə et (AJAX)
     path("<int:course_id>/members/add/", views.AddMemberView.as_view(), name="add_member"),

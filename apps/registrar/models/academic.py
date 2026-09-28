@@ -315,6 +315,10 @@ class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         ENROLLED = "enrolled", pgettext_lazy("registrar.enrollment_status", "Enrolled")
         COMPLETED = "completed", pgettext_lazy("registrar.enrollment_status", "Completed")
         DROPPED = "dropped", pgettext_lazy("registrar.enrollment_status", "Dropped")
+        # Audit 2026-09-28 S1: xaric / akademik məzuniyyət — cari dövrün qeydiyyatı
+        # DONDURULUR (jurnal/imtahan siyahısından çıxır, «dropped» sayılmır);
+        # bərpa əmri onu yenidən `enrolled` edir (bax `enrollment_suspension`).
+        SUSPENDED = "suspended", pgettext_lazy("registrar.enrollment_status", "Suspended")
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="enrollments")
     student = models.ForeignKey(

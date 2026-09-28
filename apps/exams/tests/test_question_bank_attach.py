@@ -50,7 +50,13 @@ class QuestionBankLibraryTests(TestCase):
         self.assertEqual(self.bank.library_questions.count(), 2)
         first = created[0]
         self.assertEqual(first.options.count(), 4)
-        self.assertEqual(set(first.options.filter(is_correct=True).values_list("label", flat=True)), {"B"})
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb A..E
+        # yenidən hərflənir — düzgünlük mətnə bağlı qalır, hərf təsadüfidir.
+        self.assertEqual(set(first.options.filter(is_correct=True).values_list("text", flat=True)), {"b"})
+        self.assertEqual(sorted(first.options.values_list("label", flat=True)), ["A", "B", "C", "D"])
+        self.assertEqual(
+            [option.label for option in first.options.order_by("id")], ["A", "B", "C", "D"], "id sırası = hərf sırası"
+        )
 
     def test_exam_center_user_sees_all_org_banks(self):
         """İmtahan mərkəzi bank hovuzunun idarəçisidir: təşkilatın BÜTÜN aktiv
@@ -142,11 +148,16 @@ class QuestionBankLibraryTests(TestCase):
                 bank_option.save(update_fields=["image", "image_replaces_text"])
 
             exam_question = attach_bank_questions_to_exam(self.exam, [bank_question.id])[0]
-            exam_options = list(exam_question.options.order_by("label"))
+            # Audit 2026-09-28 EX28-01: köçürmə variantları təsadüfi sıra ilə
+            # yaradır və A..E yenidən hərfləyir — cütləşdirmə mətnə görədir.
+            exam_options_by_text = {option.text: option for option in exam_question.options.all()}
 
             self.assertTrue(exam_question.image_replaces_text)
-            self.assertEqual(len(exam_options), len(bank_options))
-            for bank_option, exam_option in zip(bank_options, exam_options):
+            self.assertEqual(len(exam_options_by_text), len(bank_options))
+            for bank_option in bank_options:
+                exam_option = exam_options_by_text[bank_option.text]
+                self.assertEqual(exam_option.is_correct, bank_option.is_correct)
+                self.assertNotIn(f"-{bank_option.label}.", exam_option.image.name)
                 self.assertEqual(exam_option.image_replaces_text, bank_option.image_replaces_text)
                 self.assertTrue(exam_option.image)
                 self.assertNotEqual(exam_option.image.name, bank_option.image.name)

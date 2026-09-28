@@ -129,6 +129,8 @@ def policies_page(request):
     context.update(
         {
             "levels": policy.level_rows(organization),
+            # Audit 2026-09-28 TT-1: pillə defoltu yalnız org-wide aktora redaktə olunur.
+            "can_edit_levels": policy.can_edit_levels(request.user, organization),
             "band_choices": [{"code": code, "label": str(label)} for code, label in Band.choices],
             "groups": rows[:400],
             "groups_total": len(rows),
@@ -172,6 +174,7 @@ def new_run_page(request):
 def run_detail(request, run_id):
     organization = access.organization_for(request)
     run = access.run_or_404(request, organization, run_id)
+    can_mutate = access.run_mutable(request.user, organization, run)
     view = request.GET.get("view") if request.GET.get("view") in ("group", "teacher", "room") else "group"
     events = review.events_of(review.draft_rows(run))
     options = review.options(events)
@@ -195,7 +198,9 @@ def run_detail(request, run_id):
             "grid": grid,
             "unplaced": unplaced,
             "split_teachers": [e for e in events if e["split_teacher"] and e["weekday"] is not None][:40],
-            "can_edit": review.can_edit(run),
+            # Audit 2026-09-28 TT-2: dəyişiklik yalnız yaradana / org-wide aktora.
+            "can_edit": review.can_edit(run) and can_mutate,
+            "can_mutate": can_mutate,
             "is_active": run.status in (RunStatus.QUEUED, RunStatus.RUNNING),
             "events_json": {e["key"]: e for e in selected + unplaced},
             "action_url": reverse("timetable:api_run_action", args=[run.pk]),

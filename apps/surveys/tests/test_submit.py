@@ -6,7 +6,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.surveys.constants import CampaignStatus, Section
-from apps.surveys.models import SurveyAnswer, SurveyCampaign, SurveyReceipt, SurveyResponse
+from apps.surveys.models import SurveyAnswer, SurveyCampaign, SurveyPendingResponse, SurveyReceipt, SurveyResponse
+from apps.surveys.services.pending import publish_results
 from apps.surveys.services.templates import template_questions
 from core.rls import bypass_rls
 
@@ -74,6 +75,10 @@ class SubmitFlowTest(TestCase):
         receipt = SurveyReceipt.objects.get()
         self.assertEqual((receipt.student_id, receipt.teacher_id), (self.student.pk, self.w["teacher_a"].pk))
         self.assertEqual(receipt.teacher_department_id, self.w["chair_a"].pk)
+        # Audit 2026-09-28 SV-3: cavab əvvəl şəxssiz buferə düşür; dərcdə (burada — əl ilə) köçürülür.
+        self.assertFalse(SurveyResponse.objects.exists())
+        self.assertEqual(SurveyPendingResponse.objects.count(), 1)
+        publish_results(self.campaign.pk)
         answer_row = SurveyResponse.objects.get()
         self.assertEqual(answer_row.teacher_id, self.w["teacher_a"].pk)
         self.assertEqual(answer_row.subject_id, self.w["math"].pk)
@@ -92,7 +97,7 @@ class SubmitFlowTest(TestCase):
         self.assertEqual(second.status_code, 302)
         self.assertEqual(second["Location"], reverse("surveys:home"))
         self.assertEqual(SurveyReceipt.objects.count(), 1)
-        self.assertEqual(SurveyResponse.objects.count(), 1)
+        self.assertEqual(SurveyPendingResponse.objects.count(), 1)  # SV-3: bufer
 
     def test_foreign_target_is_refused(self):
         other = member(self.w["org"], "svsub_other_teacher", "teacher")
@@ -114,6 +119,7 @@ class SubmitFlowTest(TestCase):
         )
         self.assertEqual(final["Location"], reverse("surveys:thanks"))
         self.assertEqual(SurveyReceipt.objects.filter(student=self.student).count(), 4)
+        publish_results(self.campaign.pk)  # SV-3: buferdən köçürmə (ilk dərc)
         general = SurveyResponse.objects.get(scope=Section.GENERAL)
         self.assertIsNone(general.teacher_id)
         self.assertEqual(general.group_id, None)  # tələbənin akademik qeydi yoxdur → snapshot boş
@@ -126,6 +132,7 @@ class SubmitFlowTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertFalse(SurveyResponse.objects.exists())
+        self.assertFalse(SurveyPendingResponse.objects.exists())
 
     def test_view_as_cannot_submit_on_behalf_of_student(self):
         client = client_for(self.w["org"], self.rector)
@@ -135,6 +142,7 @@ class SubmitFlowTest(TestCase):
         )
         self.assertIn(response.status_code, (302, 403))
         self.assertFalse(SurveyResponse.objects.exists())
+        self.assertFalse(SurveyPendingResponse.objects.exists())
         self.assertFalse(SurveyReceipt.objects.exists())
 
     def test_staff_cannot_open_student_pages(self):

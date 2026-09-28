@@ -114,7 +114,8 @@ def submit_lab(request, pk):
     if not can_student_access_lab(lab, request.user):
         return _lab_student_access_denied_json()
 
-    if not is_lab_open(lab) and not lab.allow_late_submission:
+    # Qaralama/arxiv lab «gecikməyə icazə» olsa belə göndəriş qəbul etmir (2026-09-28).
+    if lab.status != "published" or (not is_lab_open(lab) and not lab.allow_late_submission):
         return JsonResponse({"success": False, "error": pgettext("labs.view.error", "lab_closed")}, status=409)
 
     try:

@@ -20,6 +20,8 @@ from apps.registrar import services
 from apps.registrar.models import (
     Curriculum,
     CurriculumSubject,
+    ExamScoreEntry,
+    ExamScoreEntryKind,
     FinalGrade,
     Program,
     StudentAcademicRecord,
@@ -162,6 +164,24 @@ class AcceptedAppealReachesJournalTests(_AppealJournalSetup):
         self.assertEqual(events[0].question_id, question.id)
         self.assertEqual(events[0].old_score, 0)
         self.assertEqual(events[0].new_score, 1)
+
+    def test_accepted_appeal_appends_appeal_ledger_row(self):
+        """Audit 2026-09-28 EXA-03: jurnal balını dəyişən rəqəmsal apellyasiya
+        «Dəyişən nəticələr» ledger-ində «apellyasiya» sətri qoyur; təkrar qəbul yenisini yaratmır."""
+        attempt, question, answer = self._submitted_test_attempt()
+        item = self._appeal_item(attempt, question, answer)
+
+        for _ in range(2):
+            with bypass_rls(), self.captureOnCommitCallbacks(execute=True):
+                accept_appeal_item(item, reviewer=self.teacher, response_text="Açar səhv idi")
+
+        with bypass_rls():
+            rows = list(ExamScoreEntry.objects.filter(enrollment=self.enrollment, kind=ExamScoreEntryKind.APPEAL))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].old_score, Decimal("25"))
+        self.assertEqual(rows[0].new_score, Decimal("50"))
+        self.assertEqual(rows[0].entered_by_id, self.teacher.id)
+        self.assertIn(str(item.appeal_id), rows[0].note)
 
     def test_second_accept_is_idempotent(self):
         attempt, question, answer = self._submitted_test_attempt()

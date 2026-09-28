@@ -14,7 +14,6 @@ from django.views.decorators.http import require_http_methods
 
 from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import _ensure_can_view_attempt_results, _ensure_teacher
-from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.retention import delete_retention_safe_attempts
 from apps.exams.services.review_visibility import attempt_review_window_locked as _attempt_review_window_locked
@@ -132,14 +131,6 @@ def teacher_view_attempt(request, slug, attempt_id):
         .order_by("id")
     )
 
-    if not answers_qs.exists() and not attempt.is_finished:
-        generate_random_questions_for_attempt(attempt)
-        answers_qs = (
-            attempt.answers.select_related("question")
-            .prefetch_related("files", "selected_options", "question__options")
-            .order_by("id")
-        )
-
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
     test_result = calculate_test_attempt_result(attempt, answers=list(answers_qs)) if exam.exam_type == "test" else None
 
@@ -225,7 +216,6 @@ def teacher_check_attempt(request, slug, attempt_id):
     exam = get_teacher_exam_or_404(request, slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
-    _sync_coding_answers_from_final_submissions(attempt)
     if navigation_params.get("from_section") == "pending-review":
         results_return_url = profile_return_url
     else:
@@ -237,6 +227,15 @@ def teacher_check_attempt(request, slug, attempt_id):
         reverse("exams:teacher_view_attempt", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
         **navigation_params,
     )
+
+    # Audit 2026-09-28 EX28-02: tələbə hələ yazır (draft / in_progress) — yoxlama
+    # yoxdur, yalnız baxış. Əvvəl qismən bal jurnala düşür, sonra 5 dəqiqəlik
+    # pəncərə bağlanıb tam cavablar üçün düzəliş mümkün olmurdu; GET də tələbənin
+    # açıq cəhdinə sual generasiyası / coding sinxronizasiyası yazırdı.
+    if not attempt.is_finished:
+        messages.info(request, pgettext_lazy("exams.view.results.message", "attempt_not_finished_view_only"))
+        return redirect(view_attempt_url)
+    _sync_coding_answers_from_final_submissions(attempt)
 
     # ✅ 5 dəqiqə keçibsə, yalnız "bax" səhifəsinə yönləndir
     if _attempt_review_window_locked(attempt, current_time=timezone.now()):
@@ -252,14 +251,6 @@ def teacher_check_attempt(request, slug, attempt_id):
         .prefetch_related("files", "selected_options", "question__options")
         .order_by("id")
     )
-
-    if not answers_qs.exists() and not attempt.is_finished:
-        generate_random_questions_for_attempt(attempt)
-        answers_qs = (
-            attempt.answers.select_related("question")
-            .prefetch_related("files", "selected_options", "question__options")
-            .order_by("id")
-        )
 
     qa_list = [_build_answer_review_item(a) for a in answers_qs]
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
@@ -289,7 +280,11 @@ def teacher_check_attempt(request, slug, attempt_id):
             )
             return redirect(view_attempt_url)
 
-        from apps.exams.services.manual_grading import ManualGradingWindowClosed, apply_manual_grading
+        from apps.exams.services.manual_grading import (
+            ManualGradingAttemptNotFinished,
+            ManualGradingWindowClosed,
+            apply_manual_grading,
+        )
         from apps.notifications.public import notify_student_about_feedback
 
         try:
@@ -298,6 +293,9 @@ def teacher_check_attempt(request, slug, attempt_id):
                 grader=request.user,
                 payload=request.POST,
             )
+        except ManualGradingAttemptNotFinished:
+            messages.error(request, pgettext_lazy("exams.view.results.message", "attempt_not_finished_cannot_grade"))
+            return redirect(view_attempt_url)
         except ManualGradingWindowClosed:
             messages.error(
                 request,

@@ -14,6 +14,34 @@
     const confirmFinishLabBtn = document.getElementById('confirmFinishLabBtn');
     let finishConfirmModal = null;
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; HTTP xətası (403/500,
+    // qeyri-JSON səhifə) JSON parse xətası kimi itmir — server `error`-u göstərilir.
+    function notifyError(message) {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === 'function') {
+            window.EMSToast.show(message, 'error');
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
+    function readJsonResponse(response) {
+        return response.text().then((text) => {
+            let data = null;
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch (e) {
+                data = null;
+            }
+            if (!response.ok || !data) {
+                const err = new Error('HTTP ' + response.status);
+                err.payload = data;
+                throw err;
+            }
+            return data;
+        });
+    }
+
     let labStartTime = localStorage.getItem('lab_' + LAB_ID + '_start');
     if (!labStartTime) {
         labStartTime = new Date().toISOString();
@@ -61,6 +89,14 @@
         document.getElementById('preview-' + questionId).classList.add('d-none');
     };
 
+    // Vaxt bitəndə avtomatik göndəriş (2026-09-28). Əvvəl `labForm.submit()` idi —
+    // forma action-suz olduğu üçün POST lab_detail-ə gedirdi (göndəriş yaranmırdı,
+    // səhifə sadəcə yenilənirdi). İndi adi «Bitir» axını (`/submit/`) bir dəfə,
+    // server hələ qəbul edərkən (son 3 saniyə) çağırılır.
+    const AUTO_SUBMIT_LEAD_SECONDS = 3;
+    let autoSubmitRequested = false;
+    let autoSubmitHandler = null;
+
     function updateTimers() {
         const now = new Date();
         const elapsed = Math.floor((now - labStartTime) / 1000);
@@ -71,9 +107,9 @@
         const remainingEl = document.getElementById('remainingTimer');
         if (remainingEl) remainingEl.textContent = formatDuration(remaining);
 
-        if (remaining <= 0) {
-            const form = document.getElementById('labForm');
-            if (form) form.submit();
+        if (remaining <= AUTO_SUBMIT_LEAD_SECONDS && !autoSubmitRequested && document.getElementById('labForm')) {
+            autoSubmitRequested = true;
+            if (autoSubmitHandler) autoSubmitHandler();
         }
     }
 
@@ -239,23 +275,29 @@
             body: new FormData(labForm),
             headers: { 'X-CSRFToken': CSRF },
         })
-            .then((r) => r.json())
+            .then(readJsonResponse)
             .then((data) => {
                 if (data.success) {
                     localStorage.removeItem('lab_' + LAB_ID + '_start');
                     window.location.href = data.redirect_url || '/';
                 } else {
-                    alert(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
+                    notifyError(t('errorPrefix', 'Error') + ': ' + (data.error || t('errorUnknown', 'Unknown error')));
                     setSubmitButtonState(false);
                     setConfirmButtonState(false);
                 }
             })
-            .catch(() => {
-                alert(t('errorServer', 'Server error'));
+            .catch((err) => {
+                const payload = err && err.payload;
+                notifyError(payload && payload.error
+                    ? t('errorPrefix', 'Error') + ': ' + payload.error
+                    : t('errorServer', 'Server error'));
                 setSubmitButtonState(false);
                 setConfirmButtonState(false);
             });
     }
+
+    autoSubmitHandler = submitLabForm;
+    if (autoSubmitRequested) submitLabForm();
 
     if (confirmFinishLabBtn) {
         confirmFinishLabBtn.addEventListener('click', function () {

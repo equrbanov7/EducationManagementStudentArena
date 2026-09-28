@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
+from django.utils.translation import pgettext
 
 from apps.courses.models import CourseMembership
 from apps.task_submission_core.public import can_user_access_course_roster
@@ -96,13 +97,16 @@ def search_groups(request):
 
     # Unique qrup adlarını tap
     # «234king» → «234 K ing»: qrup adı kod rejimində (sahib 2026-09-26)
+    # 2026-09-28: `[:10]` limiti götürüldü — modal `q` göndərmir və kursun
+    # 10-dan çox qrupu olanda qalanları seçmək mümkün deyildi (kurs qrupları azdır).
     group_q = tolerant_q(query, ("group_name",), compact=True)
     group_names = (
-        CourseMembership.objects.filter(course=course)
+        CourseMembership.objects.filter(course=course, role="student")
         .filter(group_q if group_q is not None else Q())
         .exclude(group_name="")
         .values_list("group_name", flat=True)
-        .distinct()[:10]
+        .distinct()
+        .order_by("group_name")
     )
 
     results = [{"id": name, "text": name} for name in group_names]
@@ -187,7 +191,10 @@ def remove_student_from_assignment(request, pk):
     from core.permissions import request_has_permission
 
     if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Method not allowed."}, status=405)
+        return JsonResponse(
+            {"success": False, "error": pgettext("assignments.views.message", "Bu sorğu üsuluna icazə verilmir.")},
+            status=405,
+        )
 
     assignment = _get_tenant_assignment_or_404(request, pk)
 
@@ -208,7 +215,10 @@ def remove_student_from_assignment(request, pk):
 
     student_id = (request.POST.get("student_id") or "").strip()
     if not student_id or not student_id.isdigit():
-        return JsonResponse({"success": False, "error": "A valid student_id is required."}, status=400)
+        return JsonResponse(
+            {"success": False, "error": pgettext("assignments.views.message", "Düzgün tələbə ID-si göndərilməlidir.")},
+            status=400,
+        )
 
     membership = (
         CourseMembership.objects.filter(course=assignment.course, user_id=int(student_id))
@@ -216,7 +226,10 @@ def remove_student_from_assignment(request, pk):
         .first()
     )
     if not membership:
-        return JsonResponse({"success": False, "error": "Student not found."}, status=404)
+        return JsonResponse(
+            {"success": False, "error": pgettext("assignments.views.message", "Tələbə bu kursda tapılmadı.")},
+            status=404,
+        )
 
     student = membership.user
     assignment.assigned_students.remove(student)
@@ -224,6 +237,7 @@ def remove_student_from_assignment(request, pk):
     return JsonResponse(
         {
             "success": True,
-            "message": f"{student.get_full_name() or student.username} tapşırıqdan çıxarıldı.",
+            "message": pgettext("assignments.views.message", "%(name)s sərbəst işdən çıxarıldı.")
+            % {"name": student.get_full_name() or student.username},
         }
     )

@@ -46,6 +46,7 @@ from apps.exams.models import (
 )
 from apps.exams.services.final_center import TicketStateError, begin_attempt_for_ticket
 from apps.exams.services.student_pins import provision_exam_student_pins, student_visible_pin
+from apps.exams.tests.option_token_utils import option_value
 from apps.exams.tests.test_question_submission import _Base
 from apps.exams.tests.test_views import _assign_user_to_org, _login_with_org
 from apps.organizations.models import Organization
@@ -297,11 +298,12 @@ class DeadlineGraceTests(TestCase):
         return attempt, take_url
 
     def _finish(self, client, take_url):
+        attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         return client.post(
             take_url,
             {
                 "submit_action": "finish",
-                f"q_{self.question.id}": str(self.correct.id),
+                f"q_{self.question.id}": option_value(attempt, self.correct),
                 f"q_present_{self.question.id}": "1",
             },
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",

@@ -332,17 +332,20 @@ class ProductionSettingsImportListTest(TestCase):
     qeydə alınmırdı (fail-closed, amma monitorinq kor qalırdı).
     """
 
-    def _production_source(self) -> str:
-        return (ROOT / "config" / "settings" / "production.py").read_text(encoding="utf-8")
+    # Audit 2026-09-28 AD-04: açıq siyahı `from .base import *` ilə əvəzləndi;
+    # mənbə mətnində adı axtarmaq artıq mənasızdır — modulu YÜKLƏYİB atributu
+    # yoxlayırıq (tam paritet: tests/test_settings_parity.py).
+    def _production_module(self):
+        return ProductionAdminAllowlistSettingsTest._load_production_settings(ADMIN_ALLOWED_IPS="")
 
     def test_alertmanager_webhook_token_is_imported(self):
-        self.assertIn("ALERTMANAGER_WEBHOOK_TOKEN", self._production_source())
+        self.assertTrue(hasattr(self._production_module(), "ALERTMANAGER_WEBHOOK_TOKEN"))
 
     def test_webhook_view_reads_a_setting_that_production_actually_defines(self):
-        """View-in oxuduğu ayar adı ilə idxal siyahısı UYĞUN olmalıdır."""
+        """View-in oxuduğu ayar adı production modulunda mövcud olmalıdır."""
         view_source = (ROOT / "apps" / "monitoring" / "views.py").read_text(encoding="utf-8")
         self.assertIn('getattr(settings, "ALERTMANAGER_WEBHOOK_TOKEN"', view_source)
-        self.assertIn("ALERTMANAGER_WEBHOOK_TOKEN", self._production_source())
+        self.assertTrue(hasattr(self._production_module(), "ALERTMANAGER_WEBHOOK_TOKEN"))
 
 
 class ProductionTlsGuardTest(TestCase):

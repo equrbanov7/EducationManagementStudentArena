@@ -31,7 +31,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.registrar import schedule_conflicts, schedule_editor, schedule_manage
+from apps.registrar import schedule_conflicts, schedule_editor, schedule_lock, schedule_manage
 from apps.registrar import schedule_manage_actions as base
 from apps.registrar.models import ScheduleSlot
 
@@ -240,6 +240,8 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
 
     force = bool(data.get("force"))
     with transaction.atomic():
+        # Audit 2026-09-28 W3: toqquşma yoxlaması + yazı (və məcburi parklama) semestr kilidi altında.
+        schedule_lock.lock_for_offering(offering)
         parked = _guarded_check(
             organization=organization,
             offering=offering,

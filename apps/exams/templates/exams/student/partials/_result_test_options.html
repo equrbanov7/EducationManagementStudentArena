@@ -1,0 +1,52 @@
+{% load i18n %}
+{% comment %}
+    Nəticə səhifəsi — test sualının variantları + verdikt nişanı (exam_result.html-dən çıxarılıb).
+    Audit 2026-09-28 EX28-03: tələbənin hələ cəhd haqqı varsa (``answer_key_hidden``)
+    variantların düzgünlüyü (açar) göstərilmir — yalnız öz seçimi və ümumi verdikt.
+    Kontekst: delivered, ans, has_selection, answer_key_hidden.
+{% endcomment %}
+<ul class="option-list">
+    {% for opt in delivered.options %}
+        <li class="option-item
+            {% if not answer_key_hidden %}
+            {% if opt.is_correct %}correct-option{% endif %}
+            {% if ans and opt.is_selected and not opt.is_correct %}wrong-selected{% endif %}
+            {% if ans and opt.is_selected and opt.is_correct %}correct-selected{% endif %}
+            {% endif %}
+        ">
+            <div class="d-flex align-items-center">
+                {% if answer_key_hidden %}
+                    <i class="far fa-circle option-icon"></i>
+                {% elif opt.is_correct %}
+                    <i class="fas fa-check-circle correct-icon"></i>
+                {% elif ans and opt.is_selected and not opt.is_correct %}
+                    <i class="fas fa-times-circle wrong-icon"></i>
+                {% else %}
+                    <i class="far fa-circle option-icon"></i>
+                {% endif %}
+                <span class="option-text">{% if opt.label %}<strong>{{ opt.label }}.</strong>{% endif %}{% if not opt.image_replaces_text or not opt.image_url %} {{ opt.text }}{% endif %}</span>
+                {% if opt.image_url %}
+                    <img src="{{ opt.image_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" loading="lazy" class="img-fluid mt-2">
+                {% endif %}
+            </div>
+
+            {% if ans and opt.is_selected %}
+                <span class="badge bg-light text-dark border">{% trans "your_selection" context "exams.template.student_exam_result" %}</span>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+<div class="feedback-status mt-3 text-end">
+    {% if ans %}
+        {% if not has_selection %}
+            <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
+        {% elif ans.is_correct %}
+            <span class="badge bg-success feedback-badge"><i class="fas fa-check"></i> {% trans "answer_correct" context "exams.template.student_exam_result" %}</span>
+        {% else %}
+            <span class="badge bg-danger feedback-badge"><i class="fas fa-times"></i> {% trans "answer_wrong" context "exams.template.student_exam_result" %}</span>
+        {% endif %}
+    {% else %}
+        <span class="badge bg-warning text-dark feedback-badge">{% trans "answer_not_provided" context "exams.template.student_exam_result" %}</span>
+    {% endif %}
+</div>

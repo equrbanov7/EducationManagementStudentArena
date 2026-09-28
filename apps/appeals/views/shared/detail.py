@@ -19,7 +19,7 @@ from ...constants import (
 from ...models import Appeal
 from ...services import (
     appeal_item_result_visible_to_student,
-    can_review_appeal,
+    can_view_appeal,
     effective_test_score,
     is_within_appeal_window,
     student_visible_effective_test_score,
@@ -97,7 +97,9 @@ def appeal_detail(request, appeal_id):
         return _missing_appeal_redirect(request, section="my-appeals")
 
     is_owner = appeal.student_id == request.user.id
-    if not is_owner and not can_review_appeal(request, appeal):
+    # Audit 2026-09-28 EXA-03: dekan / koordinator (tələbəni əhatə edən
+    # ``student.registry_view``) də YALNIZ-OXU baxa bilir — fraqment qərar formu vermir.
+    if not is_owner and not can_view_appeal(request, appeal):
         raise PermissionDenied
 
     # Standalone detal səhifəsi yoxdur — detal yalnız dashboard modalında

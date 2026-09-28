@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}
+Kursu redaktə et — modal (2026-09-28). Əvvəl ayrıca səhifə idi (edit_course.html,
+silindi). Forma `course_dashboard.js` ilə AJAX göndərilir (multipart — qapaq
+şəkli); xətada server gövdəni yenidən render edib qaytarır. Panel `?edit=1` ilə
+açılanda modal avtomatik açılır (köhnə linklər üçün).
+{% endcomment %}
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true" aria-labelledby="editCourseModalTitle">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header ems-mh">
+                <span class="ems-mh-ic ems-mh-ic--course" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="edit" size=20 %}</span>
+                <div class="ems-mh-tx">
+                    <h5 class="modal-title" id="editCourseModalTitle">{% trans "header_edit_course" context "courses.edit_page" %}</h5>
+                    <div class="ems-mh-sub">{{ course.title }}</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
+            </div>
+            <form id="editCourseForm" class="ems-cc" method="post" enctype="multipart/form-data" novalidate
+                  action="{% url 'courses:edit_course' course.id %}" data-ems-course-form>
+                <div class="modal-body" data-edit-course-body>
+                    {% include "courses/partials/_edit_course_form_body.html" %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "action_cancel" context "courses.partial.create_modal_form" %}</button>
+                    <button type="submit" class="btn btn-primary" data-saving-text="{% trans 'submitting' context 'courses.partial.create_modal' %}">
+                        {% include "courses/partials/_cd_icon.html" with icon="check" size=16 stroke=2.4 %}
+                        {% trans "action_save_changes" context "courses.edit_page" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

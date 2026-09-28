@@ -27,6 +27,23 @@ class PolicyError(Exception):
         self.errors = errors
 
 
+class PolicyDenied(PolicyError):
+    """Audit 2026-09-28 TT-1: pillə defoltu org-wide siyasətdir — 403."""
+
+
+def can_edit_levels(actor, organization) -> bool:
+    """Pillə defoltunu yalnız org-wide ``schedule.manage`` (və ya sahib/superadmin) dəyişir.
+
+    Pillə qaydası BÜTÜN təşkilatın qruplarına təsir edir; bölmə (fakültə/ixtisas)
+    əhatəli koordinator yalnız öz qruplarına istisna yaza bilər (``save_group``).
+    """
+    from apps.registrar.public import schedule_manage
+
+    if getattr(actor, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(actor, "pk", None):
+        return True
+    return bool(schedule_manage.actor_scope(actor, organization).is_org_wide)
+
+
 def _model():
     return django_apps.get_model("timetable", "GroupTimePolicy")
 
@@ -98,6 +115,10 @@ def _snapshot(row):
 def save_level(*, actor, organization, level, data, request=None):
     from core.constants import AuditAction
 
+    if not can_edit_levels(actor, organization):
+        raise PolicyDenied(
+            pgettext(_CTX, "Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər.")
+        )
     if level not in dict(PolicyLevel.choices):
         raise PolicyError(pgettext(_CTX, "Naməlum pillə."))
     cleaned = clean(organization, data)
@@ -223,4 +244,13 @@ def group_rows(actor, organization, period, groups) -> list:
     return out
 
 
-__all__ = ["PolicyError", "clean", "group_rows", "level_rows", "save_group", "save_level"]
+__all__ = [
+    "PolicyDenied",
+    "PolicyError",
+    "can_edit_levels",
+    "clean",
+    "group_rows",
+    "level_rows",
+    "save_group",
+    "save_level",
+]

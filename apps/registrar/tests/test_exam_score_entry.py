@@ -345,7 +345,7 @@ class ExamScoreEntryServiceTest(TestCase):
 
         from django.utils import timezone
 
-        from apps.exams.models import Exam, ExamAttempt
+        from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 
         start = timezone.now() - _dt.timedelta(minutes=minutes)
         exam = Exam.objects.create(
@@ -353,18 +353,22 @@ class ExamScoreEntryServiceTest(TestCase):
             author=self.teacher,
             title="Yazılı imtahan",
             exam_type="written",
+            exam_type_extended="final",  # Audit 2026-09-28 EXA-03: tarixçə yalnız yekun imtahandır
             subject=self.subject,
             start_datetime=start,
             end_datetime=start + _dt.timedelta(hours=1),
             is_active=True,
         )
+        # Yazılı faiz = teacher_score ÷ çatdırılan sualların tavanı (jurnal ilə eyni qayda).
+        question = ExamQuestion.objects.create(exam=exam, order=1, text="Q", points=correct + wrong)
         attempt = ExamAttempt.objects.create(
             user=student,
             exam=exam,
             status="submitted",
-            correct_count=correct,
-            wrong_count=wrong,
+            checked_by_teacher=True,
+            teacher_score=correct,
         )
+        ExamAnswer.objects.create(attempt=attempt, question=question, teacher_score=correct)
         ExamAttempt.objects.filter(pk=attempt.pk).update(started_at=start, finished_at=start)
         return attempt
 

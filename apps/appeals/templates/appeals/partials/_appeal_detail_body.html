@@ -66,7 +66,9 @@
 </div>
 {% endif %}
 
-{% if appeal.reviewer_note and not hidden_owner_decisions %}
+{% comment %}Audit 2026-09-28 EX28-11: «Ümumi qeyd» reviewer formunda DAXİLİ qeyd kimi yazılır —
+tələbəyə (sahibə) göstərilmir; yalnız mərkəz / dekan / koordinator görünüşündədir.{% endcomment %}
+{% if appeal.reviewer_note and not is_owner %}
 <section class="appeal-note">
     <div class="appeal-note__label">{% trans "Baxan şəxsin qeydi" context "appeals.template" %}</div>
     <div class="appeal-note__text">{{ appeal.reviewer_note|linebreaksbr }}</div>

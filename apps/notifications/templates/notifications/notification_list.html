@@ -155,7 +155,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{% url 'notifications:notification_list' %}?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.number }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}"
-                                    onclick="return confirm('{% trans "Delete this notification?" %}')">
+                                    data-ems-confirm="{% trans "Delete this notification?" %}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>

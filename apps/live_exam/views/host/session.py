@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
+from django.views.decorators.http import require_http_methods
 
 from apps.audit.public import log_action
 from apps.exams.models import Exam
@@ -25,6 +26,7 @@ from .constants import (
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def live_create_session_by_slug(request, slug):
     exam = get_object_or_404(Exam.objects.select_related("organization"), slug=slug)
 
@@ -42,8 +44,11 @@ def live_create_session_by_slug(request, slug):
         messages.warning(request, pgettext("live_exam.view.message", "exam_must_be_active_before_live"))
         return redirect(reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}))
 
-    force_new_session = str(request.GET.get("force_new") or "").strip().lower() in {"1", "true", "yes", "on"}
-    probe_only = str(request.GET.get("probe") or "").strip().lower() in {"1", "true", "yes", "on"}
+    truthy = {"1", "true", "yes", "on"}
+    force_new_session = (
+        str(request.POST.get("force_new") or request.GET.get("force_new") or "").strip().lower() in truthy
+    )
+    probe_only = request.method == "GET" and str(request.GET.get("probe") or "").strip().lower() in truthy
     active_sessions = LiveSession.objects.filter(
         exam=exam,
         host_user=request.user,
@@ -69,6 +74,16 @@ def live_create_session_by_slug(request, slug):
     if active_session and not force_new_session:
         presentation_url = reverse("liveExam:host_presentation", kwargs={"pin": active_session.pin})
         return redirect(f"{presentation_url}?controls=1")
+
+    # Audit 2026-09-28 EX28-10: sessiya YARATMAQ (və ``force_new`` ilə köhnələri
+    # bitirmək) vəziyyət dəyişikliyidir — yalnız CSRF-qorumalı POST. GET (köhnə
+    # link / düymə) təsdiq səhifəsi göstərir; oradakı forma POST göndərir.
+    if request.method != "POST":
+        return render(
+            request,
+            "liveExam/create_session_confirm.html",
+            {"exam": exam, "force_new": force_new_session},
+        )
 
     if force_new_session:
         for old_session in active_sessions:

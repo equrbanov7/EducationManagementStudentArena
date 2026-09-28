@@ -31,6 +31,7 @@
         errorUnknown: d.i18nErrorUnknown,
         errorServer: d.i18nErrorServer,
         confirmDeleteBlock: d.i18nConfirmDeleteBlock,
-        confirmDeleteQuestion: d.i18nConfirmDeleteQuestion
+        confirmDeleteQuestion: d.i18nConfirmDeleteQuestion,
+        actionClose: d.i18nActionClose
     };
 })();

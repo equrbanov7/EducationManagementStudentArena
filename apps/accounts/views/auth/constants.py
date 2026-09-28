@@ -33,6 +33,22 @@ LOGIN_LIMIT_SCOPE_DEVICE = "accounts.login.device"
 LOGIN_LIMIT_SCOPE_IDENTITY = "accounts.login.identity"
 
 
+# Audit 2026-09-28 SA-03: yalnız istifadəçi adına bağlı (İP/cihazdan ASILI
+# OLMAYAN) yumşaq vedrə — çox İP-dən paylanmış parol təxmini (spraying)
+# hesab başına məhdudlaşır. Dar cihaz/İP vedrələri olduğu kimi qalır.
+LOGIN_LIMIT_SCOPE_ACCOUNT = "accounts.login.account"
+
+
+LOGIN_ACCOUNT_RATE_LIMIT_DEFAULT = "20/1h"
+
+
+# Bir hesab üçün uğursuz cəhd edən fərqli İP sayı bu həddə çatanda WARNING.
+LOGIN_ACCOUNT_DISTINCT_IP_ALERT_DEFAULT = 10
+
+
+LOGIN_ACCOUNT_IP_TRACK_SECONDS = 60 * 60
+
+
 # Superadmin qaçış yolunun ayrıca vedrəsi (2026-09-13 access auditi, F-01).
 LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE = "accounts.login.superadmin_escape"
 

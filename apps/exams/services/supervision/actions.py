@@ -249,7 +249,7 @@ def mark_student_returned(attempt):
     return True
 
 
-def sweep_expired_resume_windows(queryset=None):
+def sweep_expired_resume_windows(queryset=None, *, scope=None):
     """
     Finish any LOCKED attempts whose teacher-resume window has elapsed without
     the teacher resuming.  The attempt is submitted with the student's current
@@ -285,6 +285,8 @@ def sweep_expired_resume_windows(queryset=None):
             narrow=_narrow,
             select_related=("exam", "exam__organization", "exam__supervision_config", "user"),
             action=lambda attempt: attempt.expire_if_resume_window_expired(),
+            # Audit 2026-09-28 EX28-05: hər cəhd öz tranzaksiyasında (qlobal kilid yoxdur).
+            scope=scope,
         )
 
     if queryset is not None:

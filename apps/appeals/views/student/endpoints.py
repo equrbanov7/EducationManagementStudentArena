@@ -11,6 +11,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAttempt
 from apps.exams.public import (
     append_query_params,
+    attempt_answer_key_hidden,
     current_return_to,
     delivered_question_render,
     ensure_student_exam_tenant_context,
@@ -29,6 +30,7 @@ from ...constants import (
 from ...models import AppealItem
 from ...selectors import filter_student_appeals, paginate_student_appeals, student_appeals_queryset
 from ...services import (
+    appeal_block_reason,
     appeal_deadline,
     appeal_item_result_visible_to_student,
     can_create_appeal,
@@ -120,13 +122,18 @@ def _attempt_appeals_for_student(attempt):
     return appeals
 
 
-def _render_appeal_window_closed(request, exam, attempt, *, window_closed):
-    """Pəncərə bağlı (və ya icazə yox) — read-only appeal səhifəsi."""
+def _render_appeal_window_closed(request, exam, attempt, *, window_closed, block_reason=""):
+    """Pəncərə bağlı (və ya icazə yox) — read-only appeal səhifəsi.
+
+    ``block_reason`` (Audit 2026-09-28 EXA-02/EXA-07) banner mətnini seçir:
+    yoxlanmamış yazılı iş və apellyasiya verilməyən kateqoriya «müddət bitib»
+    kimi göstərilmir."""
     is_profile_results_request = _is_profile_results_request(request)
     context = {
         "exam": exam,
         "attempt": attempt,
         "appeal_window_closed": True,
+        "appeal_block_reason": block_reason or "",
         "appeal_window_days": APPEAL_WINDOW_DAYS,
         "appeal_deadline": appeal_deadline(attempt),
         "window_expired": window_closed,
@@ -151,13 +158,16 @@ def appeal_create(request, attempt_id):
     if not tenant_scoped_exams(request).filter(id=exam.id).exists():
         raise Http404
 
-    if not can_create_appeal(request, attempt):
+    block_reason = appeal_block_reason(request, attempt)
+    if block_reason is not None:
         # UX: pəncərə (3 gün) bağlanıbsa çılpaq error/redirect əvəzinə oxu-rejimli
         # "müddət bitib" səhifəsi göstərilir — tələbə əvvəlki nəticəyə və öz
         # apellyasiyalarının nəticəsinə baxa bilir, yenidən vermək istəsə isə
         # 3-gün qaydası aydın UX formatında görünür.
         window_closed = not is_within_appeal_window(attempt)
-        return _render_appeal_window_closed(request, exam, attempt, window_closed=window_closed)
+        return _render_appeal_window_closed(
+            request, exam, attempt, window_closed=window_closed, block_reason=block_reason
+        )
 
     delivered_answers = list(
         attempt.answers.select_related("question")
@@ -229,7 +239,12 @@ def appeal_create(request, attempt_id):
         # EXAM-P0-05: nəticə səhifəsindəki release kilidi appeal
         # URL-indən yan keçilə bilməz. Eyni siyasət correctness variantlarını,
         # ideal cavabı və tələbə seçimini birlikdə gizlədir.
-        "hide_answer_details": is_profile_results_request or answers_release_locked,
+        "hide_answer_details": (
+            is_profile_results_request
+            or answers_release_locked
+            # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar apellyasiya səhifəsində də gizlidir.
+            or attempt_answer_key_hidden(attempt, user=request.user)
+        ),
         "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }

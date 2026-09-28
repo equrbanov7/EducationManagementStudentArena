@@ -199,7 +199,7 @@ class LiveExamRoundScenarioTest(TestCase):
         top_scores = [row["score"] for row in data["top"][:6]]
         self.assertEqual(top_scores, [1000, 975, 950, 925, 900, 875])
 
-    def test_multi_choice_round_can_award_partial_points_for_partially_wrong_answers(self):
+    def test_multi_choice_round_rejects_select_all_and_awards_partial_points(self):
         exam = Exam.objects.create(
             title="Multi Choice Scenario",
             author=self.teacher,
@@ -242,12 +242,26 @@ class LiveExamRoundScenarioTest(TestCase):
             client_id="multi-choice-partial-client",
         )
 
-        ok, result = save_answer_and_score(
+        # Audit 2026-09-28 EX28-10: server ``max_select``-i (burada 2) tətbiq
+        # edir — «hamısını seç» (3 variant) artıq rədd olunur, qismən bal isə
+        # natamam (1/2 düz) cavab üçün qalır.
+        ok, _rejected = save_answer_and_score(
             pin=session.pin,
             player_id=player.id,
             client_id=player.client_id,
             question_id=question.id,
             option_ids=[option_2.id, option_3.id, option_4.id],
+            answer_ms=0,
+        )
+        self.assertFalse(ok)
+        self.assertFalse(LiveAnswer.objects.filter(session=session, player=player).exists())
+
+        ok, result = save_answer_and_score(
+            pin=session.pin,
+            player_id=player.id,
+            client_id=player.client_id,
+            question_id=question.id,
+            option_ids=[option_2.id],
             answer_ms=0,
         )
 

@@ -82,7 +82,7 @@
                 <form method="post" action="{% url 'notifications:notification_delete' notification.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-sm btn-outline-danger"
-                            onclick="return confirm('{% trans "Delete this notification?" %}')">
+                            data-ems-confirm="{% trans "Delete this notification?" %}">
                         <i class="fas fa-trash me-1"></i>{% trans "Delete" %}
                     </button>
                 </form>

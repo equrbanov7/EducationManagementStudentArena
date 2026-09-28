@@ -47,6 +47,7 @@ def student_panel(context) -> dict:
 def campaigns_panel(context) -> dict:
     """«Sorğu kampaniyaları» — dövrlər üzrə kampaniyalar, iştirak, idarə formaları."""
     from ..public import campaigns_for
+    from .analytics_guard import count_bucket, round5
     from .filters import ResultFilters
     from .participation import participation
 
@@ -59,9 +60,13 @@ def campaigns_panel(context) -> dict:
     scope = results_scope(user, organization, request=request)
     rows = campaigns_for(organization)
     for index, row in enumerate(rows):
+        part = participation(organization, scope, ResultFilters(), [row["id"]]) if index < RATE_CAMPAIGNS else None
+        # Audit 2026-09-28 SV-4: dəqiq say/faiz yoxdur — nəticə panelindəki kimi səbət və 5%-lik faiz.
         row["participation"] = (
-            participation(organization, scope, ResultFilters(), [row["id"]]) if index < RATE_CAMPAIGNS else None
+            {"expected": count_bucket(part.get("expected")), "rate": round5(part.get("rate"))} if part else None
         )
+        row["responses_label"] = count_bucket(row["responses"] + row.get("pending", 0))
+        row["receipts_label"] = count_bucket(row["receipts"])
         row["is_closed"] = row["status"] == CampaignStatus.CLOSED
         row["is_draft"] = row["status"] == CampaignStatus.DRAFT
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")

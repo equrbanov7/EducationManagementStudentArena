@@ -21,7 +21,7 @@
 # Mühit (defoltlar lokal agent sandbox-una uyğundur):
 #   LEGACY_DUMP=~/Downloads/myedudb.sql      MARIADB_CONTAINER=ems-legacy-mariadb-restore
 #   MARIADB_PORT=50310                        AGENT_PG=emsarena-agent-postgres
-#   AGENT_PG_URL=postgres://emsarena_agent:emsarena_agent_password@127.0.0.1:55432
+#   AGENT_PG_URL=postgres://emsarena_agent:$AGENT_POSTGRES_PASSWORD@127.0.0.1:55432
 #   PLAN_DB=ems_restore_plan_<tarix>         ORG=qku   ENROLLMENTS=1
 #
 # ⚠️ Plan faylı şəxsi akademik məlumat daşıyır — repoya/buluda/mesajlaşmaya QOYMAYIN.
@@ -36,7 +36,7 @@ LEGACY_SHA256="177ef2269027395fd3a80fc1dd592aab565dda7cbca5f6f08785313881d68fe0"
 MARIADB_CONTAINER="${MARIADB_CONTAINER:-ems-legacy-mariadb-restore}"
 MARIADB_PORT="${MARIADB_PORT:-50310}"
 AGENT_PG="${AGENT_PG:-emsarena-agent-postgres}"
-AGENT_PG_URL="${AGENT_PG_URL:-postgres://emsarena_agent:emsarena_agent_password@127.0.0.1:55432}"
+AGENT_PG_URL="${AGENT_PG_URL:-postgres://emsarena_agent:${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD or AGENT_PG_URL}@127.0.0.1:55432}"
 PLAN_DB="${PLAN_DB:-ems_restore_plan_$(date -u +%Y%m%d%H%M)}"
 ORG="${ORG:-qku}"
 ENROLLMENTS="${ENROLLMENTS:-1}"
