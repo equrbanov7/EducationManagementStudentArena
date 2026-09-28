@@ -26,12 +26,21 @@ Environment overrides:
   AGENT_REDIS_PORT=56379
   AGENT_POSTGRES_DB=emsarena_agent
   AGENT_POSTGRES_USER=emsarena_agent
-  AGENT_POSTGRES_PASSWORD=emsarena_agent_password
+  AGENT_POSTGRES_PASSWORD   REQUIRED, no default — keep it in the gitignored
+                            .env.agent (loaded automatically when present)
+                            or export it; see docs/operations/CLAUDE_POSTGRES_SANDBOX.md
 USAGE
 }
 
 compose() {
-    docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" "$@"
+    # Audit 2026-09-28 AD-03: compose AGENT_POSTGRES_PASSWORD-u TƏLƏB edir (repoda
+    # default yoxdur). Gitignore-dakı .env.agent varsa onu oxuyuruq; ixrac olunmuş
+    # mühit dəyişəni yenə də üstünlük təşkil edir (compose qaydası).
+    local env_args=()
+    if [ -f "$ROOT_DIR/.env.agent" ]; then
+        env_args=(--env-file "$ROOT_DIR/.env.agent")
+    fi
+    docker compose -f "$COMPOSE_FILE" -p "$PROJECT_NAME" ${env_args[@]+"${env_args[@]}"} "$@"
 }
 
 ensure_docker() {

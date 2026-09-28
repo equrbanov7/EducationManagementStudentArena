@@ -19,30 +19,27 @@
 
         {% if assigned_courses %}
         {% trans "uncategorized" context "profile.assigned_courses" as assigned_uncategorized %}
-        <div class="assigned-course-cards-grid">
+        {% comment %}2026-09-28: «Kurslarım» ilə eyni kart komponenti (`.mc-card`, my_courses.css) —
+        köhnə kartda uzun ad bir sətirdə kəsilirdi.{% endcomment %}
+        <div class="mc-grid" data-mc-grid>
             {% for course in assigned_courses %}
-            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=assigned-courses&return_to={{ request.get_full_path|urlencode }}" class="modern-assigned-course-card">
-                
-                <div class="assigned-course-icon">
-                    <i class="fas fa-graduation-cap"></i>
-                </div>
-                
-                <div class="assigned-course-content">
-                    <h4 class="assigned-course-title">{{ course.title }}</h4>
-                    <div class="assigned-course-meta">
-                        <span class="meta-item"><i class="fas fa-layer-group"></i> {{ course.category|default:assigned_uncategorized }}</span>
-                    </div>
-                </div>
-
-                <div class="assigned-course-action">
-                    <span class="btn-action-text">{% trans "enter_course" context "profile.assigned_courses" %}</span>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-                
+            {% with cover_image_url=course.cover_image_url %}
+            <a href="{% url 'courses:course_dashboard' course.pk %}?from_section=assigned-courses&return_to={{ request.get_full_path|urlencode }}" class="mc-card" data-mc-card>
+                <span class="mc-card__cover mc-card__cover--student{% if cover_image_url %} has-img{% endif %}" aria-hidden="true">
+                    {% if cover_image_url %}<img src="{{ cover_image_url }}" alt="" loading="lazy">{% else %}<i class="fas fa-graduation-cap"></i>{% endif %}
+                </span>
+                <span class="mc-card__body">
+                    <span class="mc-card__title">{{ course.title }}</span>
+                    {% if course.description %}<span class="mc-card__desc">{{ course.description }}</span>{% endif %}
+                    <span class="mc-card__stats">
+                        <span class="mc-stat"><i class="fas fa-layer-group" aria-hidden="true"></i> {{ course.category|default:assigned_uncategorized }}</span>
+                        <span class="mc-card__cta">{% trans "enter_course" context "profile.assigned_courses" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                    </span>
+                </span>
             </a>
+            {% endwith %}
             {% endfor %}
         </div>
-        
         {% else %}
         <div class="modern-empty-state">
             <div class="empty-icon-wrapper icon-emerald-light">

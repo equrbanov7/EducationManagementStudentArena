@@ -3,7 +3,6 @@
 import secrets
 from itertools import product
 
-from django.db.models import Q
 from django.utils.translation import get_language
 
 from apps.live_exam.auth import LIVE_CLIENT_ID_COOKIE_MAX_AGE, LIVE_CLIENT_ID_COOKIE_NAME, clean_nickname, get_client_id
@@ -16,7 +15,6 @@ from core.utils import get_client_ip
 
 from .constants import (
     _AMBIGUOUS_PIN_GLYPHS,
-    _JOINABLE_SESSION_STATES,
     _MAX_AMBIGUOUS_PIN_CANDIDATES,
     JOIN_RESUME_COPY,
     NICKNAME_CONFLICT_COPY,
@@ -81,7 +79,7 @@ def _candidate_pin_variants(pin_value: str) -> tuple[str, ...]:
 
 
 def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]:
-    from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH
+    from apps.live_exam.models import MIN_PIN_LENGTH
 
     normalized = _normalize_pin(raw_pin)
     if len(normalized) < MIN_PIN_LENGTH:
@@ -92,28 +90,14 @@ def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]
         if exact_match:
             return exact_match.pin, exact_match
 
+        # Audit 2026-09-28 EX28-10: yalnız TAM PIN uyğunluğu (qarışdırılan
+        # simvol variantları da tam uzunluqdadır). Əvvəlki ``pin__startswith``
+        # prefiks axtarışı 6 simvolla aktiv oyunu tapmağa imkan verirdi —
+        # 10 simvollu PIN-in entropiyası praktiki olaraq 6 simvola enirdi.
         candidates = _candidate_pin_variants(normalized)
         matches = list(LiveSession.objects.select_related("exam").filter(pin__in=candidates).order_by("id")[:2])
         if len(matches) == 1:
             return matches[0].pin, matches[0]
-
-        if len(normalized) < PIN_LENGTH:
-            prefix_candidates = tuple(
-                dict.fromkeys(candidate for candidate in candidates if len(candidate) >= MIN_PIN_LENGTH)
-            )
-            prefix_query = None
-            for prefix in prefix_candidates:
-                clause = Q(pin__startswith=prefix)
-                prefix_query = clause if prefix_query is None else prefix_query | clause
-
-            if prefix_query is not None:
-                prefix_matches = list(
-                    LiveSession.objects.select_related("exam")
-                    .filter(prefix_query, state__in=_JOINABLE_SESSION_STATES)
-                    .order_by("id")[:2]
-                )
-                if len(prefix_matches) == 1:
-                    return prefix_matches[0].pin, prefix_matches[0]
 
     return normalized, None
 
@@ -150,6 +134,11 @@ def _nickname_is_taken(
 
 def _live_client_id_key(request) -> str:
     return request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME) or get_client_ip(request) or "unknown"
+
+
+def _live_ip_key(request) -> str:
+    """Cookie-dən asılı olmayan İP açarı (EX28-10)."""
+    return f"ip:{get_client_ip(request) or 'unknown'}"
 
 
 def _ensure_live_client_cookie(request, response):

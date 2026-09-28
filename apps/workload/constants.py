@@ -55,8 +55,9 @@ class TaskStatus(models.TextChoices):
 EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
 #: Bölgü (təyinat) əməliyyatlarına açıq statuslar.
 #: ``approved`` F2 zəncirinin çıxışıdır — dekanlıq təsdiqindən sonra kafedra
-#: müdiri bölgüyə başlayır; ``draft`` yalnız HEÇ VAXT göndərilməmiş sənəd üçün
-#: keçərlidir (``services.workflow.ensure_distribution_stage`` yoxlayır).
+#: müdiri bölgüyə başlayır.  ``draft`` status siyahısında qalır, amma
+#: ``services.workflow.ensure_distribution_stage`` onu HƏMİŞƏ bağlayır
+#: (Audit 2026-09-28 W1: göndərilməmiş qaralama bölünmür).
 ASSIGNABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.APPROVED, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
 #: Təsdiqdən sonrakı statuslar — dəyişiklik yalnız amendment axını ilə.
 LOCKED_STATUSES = frozenset({TaskStatus.DISTRIBUTED, TaskStatus.CANCELLED})

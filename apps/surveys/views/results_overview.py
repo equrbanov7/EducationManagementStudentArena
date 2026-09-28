@@ -14,6 +14,7 @@ from django.utils.translation import pgettext
 
 from .. import public
 from ..services import analytics_guard as guard
+from ..services.analytics_units import org_blocked_campaigns
 from .results_filters import campaign_label
 from .results_labels import likert_labels, short_label
 
@@ -21,7 +22,12 @@ CTX = "surveys.results"
 
 
 def _pct_list(buckets, total):
-    return [round(count * 100 / total) if total else 0 for count in buckets]
+    """Paylanma faizləri — Audit 2026-09-28 SV-4: 5-ə yuvarlaq (tam faizlər n-i açırdı: 17/83 ⇒ n=6)."""
+    return [guard.round5(count / total) if total else 0 for count in buckets]
+
+
+def _pct5(share):
+    return guard.round5(share) if share is not None else None
 
 
 def _question_rows(summary, benchmarks):
@@ -35,7 +41,7 @@ def _question_rows(summary, benchmarks):
                 "label": short_label(row["code"], row["text"]),
                 "text": row["text"],
                 "avg": row["avg"],
-                "top2": round(row["top2"] * 100) if row["top2"] is not None else None,
+                "top2": _pct5(row["top2"]),
                 "org": benchmarks["org"].get(row["code"]),
                 "department": benchmarks["department"].get(row["code"]),
             }
@@ -115,6 +121,12 @@ def trend_block(organization, scope, filters, campaigns):
         series.append(
             {"key": "org", "label": pgettext(CTX, "Universitet"), "points": public.trend(organization, ORG_WIDE_SCOPE)}
         )
+    if has_units and not scope.is_org_wide:
+        # Audit 2026-09-28 SV-1: dar əhatədə «universitet − əhatə» 1…k−1 olan dövrün universitet nöqtəsi gizli.
+        blocked = org_blocked_campaigns(organization, scope, [point["campaign_id"] for point in series[-1]["points"]])
+        for point in series[-1]["points"]:
+            if point["campaign_id"] in blocked and not point.get("suppressed"):
+                public.hide_row(point, secondary=True)
     for item in series:
         item["points"] = _published_points(item["points"], published_ids)
     labels = [campaign_label(point) for point in series[0]["points"]]
@@ -161,7 +173,7 @@ def _breakdown_rows(data):
                 "secondary": row.get("secondary", False),
                 "overall": row["avg_overall"],
                 "index": row["likert_index"],
-                "recommend": round(row["recommend_top2"] * 100) if row["recommend_top2"] is not None else None,
+                "recommend": _pct5(row["recommend_top2"]),
             }
         )
     visible = sorted((row for row in rows if not row["suppressed"]), key=lambda r: -(r["overall"] or 0))

@@ -158,7 +158,7 @@
                                         {# 2026-09-14 (audit FE-F17): ikon-only düymələrə əlçatan ad #}
                                         <button class="btn btn-sm btn-light text-primary js-edit-question me-1 border rounded-3" aria-label="{% trans 'action_edit' context 'labs.template.manage_blocks' %}" 
                                                 data-id="{{ q.id }}"
-                                                data-text="{{ q.question_text|escapejs }}"
+                                                data-text="{{ q.question_text }}"
                                                 data-points="{{ q.points }}"
                                                 data-attachment="{% if q.attachment %}{{ q.attachment.url }}{% endif %}">
                                             <i class="fas fa-edit" aria-hidden="true"></i>
@@ -389,9 +389,10 @@
      data-i18n-error-unknown="{% trans 'error_unknown' context 'labs.js.manage_blocks' %}"
      data-i18n-error-server="{% trans 'error_server' context 'labs.js.manage_blocks' %}"
      data-i18n-confirm-delete-block="{% trans 'confirm_delete_block' context 'labs.js.manage_blocks' %}"
-     data-i18n-confirm-delete-question="{% trans 'confirm_delete_question' context 'labs.js.manage_blocks' %}"></div>
-<script src="{% static 'labs/js/manage_blocks_template.js' %}"></script>
-<script src="{% static 'labs/js/manage_blocks.js' %}"></script>
+     data-i18n-confirm-delete-question="{% trans 'confirm_delete_question' context 'labs.js.manage_blocks' %}"
+     data-i18n-action-close="{% trans 'Bağla' context 'labs.js.manage_blocks' %}"></div>
+<script src="{% static 'labs/js/manage_blocks_template.js' %}" defer></script>
+<script src="{% static 'labs/js/manage_blocks.js' %}" defer></script>
 {% endblock %}
 
 {% block extraJs %}

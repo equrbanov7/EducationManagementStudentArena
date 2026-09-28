@@ -13,6 +13,7 @@ təqdim edir.
 import hashlib
 import logging
 import os
+import uuid
 
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -27,6 +28,7 @@ from apps.exams.models import (
     QuestionBank,
 )
 from apps.exams.services.language_variants import ensure_default_variant
+from apps.exams.services.option_order import display_label, shuffled, shuffled_option_rows
 from apps.exams.services.question_bank import normalize_question_text
 from core.search_text import tolerant_q
 
@@ -124,17 +126,8 @@ def create_bank_questions_from_parsed(
             fingerprint=_question_fingerprint(text),
             created_by=created_by,
         )
-        correct = set(question.get("correct") or [])
-        option_rows = [
-            BankQuestionOption(
-                question=bank_question,
-                label=label,
-                text=options[label],
-                is_correct=(label in correct),
-            )
-            for label in "ABCDE"
-            if label in options
-        ]
+        # Audit 2026-09-28 EX28-01: təsadüfi yaradılma sırası + A..E yenidən hərfləmə.
+        option_rows = shuffled_option_rows(BankQuestionOption, bank_question, options, question.get("correct"))
         if option_rows:
             BankQuestionOption.objects.bulk_create(option_rows)
         created.append(bank_question)
@@ -144,7 +137,7 @@ def create_bank_questions_from_parsed(
 # ---------------------------------------------------------------------------
 # Snapshot köçürmə
 # ---------------------------------------------------------------------------
-def _duplicate_filefield(source_fieldfile, target_instance, target_field_name, *, required=False):
+def _duplicate_filefield(source_fieldfile, target_instance, target_field_name, *, required=False, anonymize_name=False):
     """
     Mənbə fayl sahəsinin məzmununu hədəf instansiyaya kopyalayır (snapshot).
 
@@ -163,6 +156,9 @@ def _duplicate_filefield(source_fieldfile, target_instance, target_field_name, *
         finally:
             source_fieldfile.close()
         name = os.path.basename(source_fieldfile.name)
+        if anonymize_name:
+            # EX28-01: idxal adı (`..._option_A.png`) mənbə hərfini tələbəyə açmasın.
+            name = f"option_{uuid.uuid4().hex[:16]}{os.path.splitext(name)[1].lower()}"
         getattr(target_instance, target_field_name).save(name, ContentFile(content), save=True)
     except Exception as exc:
         logger.warning(
@@ -237,10 +233,13 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
             is_active=True,
         )
 
-        for bank_option in bank_question.options.all():
+        # Audit 2026-09-28 EX28-01: köhnə banklar A→E (END_QUESTION-da düzgün
+        # cavab birinci) yaradılıb — snapshot təsadüfi sıra ilə köçürülür və
+        # A..E yenidən hərflənir; şəkil faylının adı da mənbə hərfini daşımır.
+        for position, bank_option in enumerate(shuffled(bank_question.options.all())):
             exam_option = ExamQuestionOption.objects.create(
                 question=exam_question,
-                label=bank_option.label,
+                label=display_label(position),
                 text=bank_option.text,
                 image_replaces_text=bank_option.image_replaces_text,
                 is_correct=bank_option.is_correct,
@@ -250,6 +249,7 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
                 exam_option,
                 "image",
                 required=bank_option.image_replaces_text,
+                anonymize_name=True,
             )
 
         # Media-nı snapshot kimi DUBLİKAT et (mənbə silinsə imtahan qorunsun).

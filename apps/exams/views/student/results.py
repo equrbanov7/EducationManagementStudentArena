@@ -18,7 +18,7 @@ from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
-from apps.exams.services.result_release import exam_answers_release_locked
+from apps.exams.services.result_release import attempt_answer_key_hidden, exam_answers_release_locked
 from apps.exams.services.supervision import attach_attempt_interventions, get_attempt_intervention
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.search_text import tolerant_q
@@ -157,6 +157,8 @@ def exam_result(request, slug, attempt_id):
     is_trial_result = bool(getattr(attempt, "is_trial", False))
     is_final_center_result = is_final_exam_result and not is_profile_results and not is_trial_result
     answers_release_locked = exam_answers_release_locked(exam)
+    # Audit 2026-09-28 EX28-03: cəhd haqqı qalıbsa açar gizli (verdikt/bal görünür).
+    answer_key_hidden = attempt_answer_key_hidden(attempt, user=request.user)
     hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
         exam, is_profile_results=is_profile_results
     ) or (getattr(exam, "exam_type", "") == "test" and answers_release_locked)
@@ -358,6 +360,7 @@ def exam_result(request, slug, attempt_id):
             "is_trial_result": is_trial_result,
             "hide_test_answer_correctness": hide_test_answer_correctness,
             "answers_release_locked": answers_release_locked,
+            "answer_key_hidden": answer_key_hidden,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,

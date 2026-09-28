@@ -20,6 +20,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from apps.registrar.audit_write import create_audit_row
 from apps.registrar.models import AttendanceStatus
 
 # resource_type prefix — all grade-change kinds share it for a single-filter fetch.
@@ -82,26 +83,23 @@ def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, re
     if not changes:
         return
     changes = _stamp_impersonation(changes, request)
-    try:
-        from django.apps import apps as django_apps
+    # Audit 2026-09-28 DB-01: INSERT öz SAVEPOINT-ində (audit_write) — best-effort
+    # rejimdə audit xətası artıq xarici jurnal tranzaksiyasını səssizcə geri
+    # qaytarmır (əvvəl qiymətlər itir, müəllimə isə «yadda saxlanıldı» deyilirdi).
+    from core.constants import AuditAction
 
-        from core.constants import AuditAction
-
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type=f"{_RESOURCE_PREFIX}.{kind}",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject.code} — qiymət dəyişikliyi ({len(changes)})",
-            changes=changes,
-            new_values={"count": len(changes)},
-            reason=f"{len(changes)} qiymət dəyişikliyi ({kind}).",
-        )
-    except Exception:  # noqa: BLE001 — caller chooses the transaction policy
-        if fail_closed:
-            raise
+    create_audit_row(
+        fail_closed=fail_closed,
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=offering.organization,
+        action=AuditAction.UPDATE,
+        resource_type=f"{_RESOURCE_PREFIX}.{kind}",
+        resource_id=str(offering.pk),
+        resource_repr=f"{offering.subject.code} — qiymət dəyişikliyi ({len(changes)})",
+        changes=changes,
+        new_values={"count": len(changes)},
+        reason=f"{len(changes)} qiymət dəyişikliyi ({kind}).",
+    )
 
 
 def log_backdated_lesson(*, offering, lesson, by_user):

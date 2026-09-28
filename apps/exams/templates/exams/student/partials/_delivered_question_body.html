@@ -48,7 +48,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                 <label class="option-card">
                     <input type="checkbox"
                            name="q_{{ question_id }}"
-                           value="{{ opt.id }}"
+                           value="{{ opt.token }}"
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter box-mark">{{ opt.label }}</span>
@@ -62,7 +62,7 @@ Markup canlı slide ilə eyni siniflərdədir ki, mövcud JS/CSS dəyişmədən 
                 <label class="option-card">
                     <input type="radio"
                            name="q_{{ question_id }}"
-                           value="{{ opt.id }}"
+                           value="{{ opt.token }}"
                            data-question-id="{{ question_id }}"
                            {% if opt.is_selected %}checked{% endif %}>
                     <span class="option-letter circle-mark">{{ opt.label }}</span>

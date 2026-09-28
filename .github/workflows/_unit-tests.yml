@@ -30,6 +30,13 @@ on:
         description: "Coverage hesabatı yığılsın (yalnız bölünməmiş dəstdə mənalıdır)"
         type: boolean
         default: true
+      # Audit 2026-09-28 AD-07: release yolunda (main/Staging push) shard-lar xam
+      # `.coverage` datasını artefakt kimi yükləyir; ci.yml-in `coverage-combine`
+      # job-u onları birləşdirib `--fail-under` qapısını tətbiq edir.
+      coverage-data:
+        description: "Shard-ın xam coverage datasını artefakt kimi yüklə (birləşdirmə ci.yml-dədir)"
+        type: boolean
+        default: false
 
 jobs:
   unit-tests:
@@ -106,7 +113,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.txt') }}
+          key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
           restore-keys: |
             ${{ runner.os }}-pip-${{ inputs.python-version }}-
             ${{ runner.os }}-pip-
@@ -114,7 +121,8 @@ jobs:
       - name: 📥 Install dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          pip install -r requirements/test.txt
+          # Audit 2026-09-28 AD-06: tam, hash-li lock (giriş: requirements/test.txt).
+          pip install --require-hashes -r requirements/test.lock
 
       - name: ✅ Django system check
         env:
@@ -185,6 +193,7 @@ jobs:
           SHARD: ${{ inputs.shard }}
           SHARDS: ${{ inputs.shards }}
           COVERAGE: ${{ inputs.coverage }}
+          COVERAGE_DATA: ${{ inputs.coverage-data }}
         run: |
           echo "::group::🧪 Running Tests (shard $SHARD/$SHARDS, coverage=$COVERAGE)"
           extra=()
@@ -194,6 +203,9 @@ jobs:
           fi
           if [ "$COVERAGE" = "true" ]; then
             extra+=(--cov=apps --cov=core --cov=config --cov-report=xml:coverage.xml --cov-report=html:htmlcov --cov-report=term-missing --cov-fail-under=68)
+          elif [ "$COVERAGE_DATA" = "true" ]; then
+            # Yalnız xam data (hesabat/qapı yox) — qapı birləşdirilmiş datada tətbiq olunur.
+            extra+=(--cov=apps --cov=core --cov=config --cov-report=)
           fi
           pytest \
             -n 4 --dist loadfile \
@@ -214,6 +226,25 @@ jobs:
             coverage.xml
             htmlcov/
           retention-days: 7
+
+      - name: 🗂️ Stage shard coverage data
+        if: inputs.coverage-data && !inputs.coverage
+        env:
+          SHARD: ${{ inputs.shard }}
+        run: |
+          test -f .coverage
+          mv .coverage ".coverage.shard-${SHARD}"
+
+      - name: 📤 Upload shard coverage data
+        uses: actions/upload-artifact@v4
+        if: inputs.coverage-data && !inputs.coverage
+        with:
+          name: coverage-data-${{ inputs.python-version }}-shard-${{ inputs.shard }}
+          path: .coverage.shard-${{ inputs.shard }}
+          # `.coverage.*` gizli fayldır — upload-artifact v4.4+ onları default atır.
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 3
 
       - name: 📈 Coverage Report to PR
         uses: orgoro/coverage@v3.2

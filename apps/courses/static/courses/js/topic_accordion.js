@@ -31,7 +31,12 @@
     function deleteTopic(courseId, topicId) {
         var cfg = getCfg();
         if (!cfg) { return; }
-        window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteTopic, danger: true }).then(function (ok) {
+        window.EMSConfirm.open({
+            title: cfg.dataset.i18nConfirmDeleteTopicTitle,
+            body: cfg.dataset.i18nConfirmDeleteTopic,
+            confirmLabel: cfg.dataset.i18nDelete,
+            danger: true
+        }).then(function (ok) {
             if (ok) { postDeleteForm("/courses/" + courseId + "/topic/" + topicId + "/delete/"); }
         });
     }
@@ -39,7 +44,12 @@
     function deleteResource(courseId, resourceId) {
         var cfg = getCfg();
         if (!cfg) { return; }
-        window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteResource, danger: true }).then(function (ok) {
+        window.EMSConfirm.open({
+            title: cfg.dataset.i18nConfirmDeleteResourceTitle,
+            body: cfg.dataset.i18nConfirmDeleteResource,
+            confirmLabel: cfg.dataset.i18nDelete,
+            danger: true
+        }).then(function (ok) {
             if (ok) { postDeleteForm("/courses/" + courseId + "/resource/" + resourceId + "/delete/"); }
         });
     }

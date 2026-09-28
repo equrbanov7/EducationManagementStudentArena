@@ -83,7 +83,6 @@ def _get_publish_notification_targets(user, capabilities, organization=None):
     """
     from apps.accounts.services.notification_scopes import CATEGORY_LABELS, organization_targets
     from apps.exams.models import StudentGroup
-    from apps.organizations.models import Membership
 
     targets = []
     is_superadmin = capabilities["is_superadmin"]
@@ -124,30 +123,22 @@ def _get_publish_notification_targets(user, capabilities, organization=None):
     # Non-superadmin targets are cumulative: a user can be both an organization
     # admin (e.g. an owner) and a teacher, in which case they should be able to
     # target the whole organization as well as their own student groups.
-    if is_org_admin:
-        # Get user's active org memberships
-        org_memberships = (
-            Membership.objects.filter(user=user, is_active=True, organization__is_active=True)
-            .select_related("organization")
-            .order_by("organization__name", "organization_id", "-role__level", "id")
-        )
-        seen_org_ids = set()
+    # Audit 2026-09-28 T-01: org admini yalnız AKTİV təşkilatı hədəfləyə bilər
+    # (əvvəl istənilən üzvlüyü olan bütün org-lar siyahıda idi — server də
+    # yalnız aktiv org-u qəbul edir, bax ``resolve_notification_recipients``).
+    if is_org_admin and organization is not None:
         org_prefix_label = _("target_org_prefix")
         all_members_label = _("target_org_all_members")
-        for membership in org_memberships:
-            if membership.organization_id in seen_org_ids:
-                continue
-            seen_org_ids.add(membership.organization_id)
-            targets.append(
-                {
-                    "value": f"org_{membership.organization_id}",
-                    "label": f"{org_prefix_label}: {membership.organization.name} ({all_members_label})",
-                    "is_exclusive": False,
-                    "category": "org",
-                    "category_label": CATEGORY_LABELS["org"],
-                    "icon": "fa-building",
-                }
-            )
+        targets.append(
+            {
+                "value": f"org_{organization.pk}",
+                "label": f"{org_prefix_label}: {organization.name} ({all_members_label})",
+                "is_exclusive": False,
+                "category": "org",
+                "category_label": CATEGORY_LABELS["org"],
+                "icon": "fa-building",
+            }
+        )
 
     if is_teacher:
         teacher_groups = StudentGroup.objects.filter(teacher=user).order_by("name")

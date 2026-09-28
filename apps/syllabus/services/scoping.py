@@ -111,6 +111,48 @@ def is_author(actor: SyllabusActor, syllabus) -> bool:
     return bool(offering and offering.instructor_id == user_id)
 
 
+def _author_users(syllabus) -> list:
+    """Sillabusun müəllif sayılan istifadəçiləri (``is_author`` ilə eyni qayda)."""
+    users = [getattr(syllabus, "author", None)]
+    offering = getattr(syllabus, "offering", None)
+    if offering is not None:
+        users.append(getattr(offering, "instructor", None))
+    seen, result = set(), []
+    for user in users:
+        if user is not None and user.pk not in seen:
+            seen.add(user.pk)
+            result.append(user)
+    return result
+
+
+def is_self_authored_by_decider(syllabus, permission: str = PERM_APPROVE) -> bool:
+    """Audit 2026-09-28 SYL-1: müəllif bu kafedrada ÖZÜ qərarvericidirmi.
+
+    Belə sillabusda müəllif qərar verə bilmir (``forbid_author``), ona görə
+    qərar növbəti pilləyə — fakültə səviyyəli açar sahibinə (dekan) və ya
+    org-wide aktora — keçir.  Fail-closed: müəllif tapılmasa ``False``.
+    """
+    organization = getattr(syllabus, "organization", None)
+    for user in _author_users(syllabus):
+        author_actor = resolve_actor(user, organization)
+        if author_actor.has(permission) and author_actor.covers_chair_unit(syllabus.chair_unit_id, permission):
+            return True
+    return False
+
+
+def has_escalated_decision_scope(actor: SyllabusActor, permission: str = PERM_APPROVE) -> bool:
+    """Qərar açarı olan, amma kafedra səviyyəli olmayan (fakültə) əhatə.
+
+    Audit 2026-09-28 SYL-1: belə aktor YALNIZ müəllifi kafedra qərarvericisi
+    olan sillabuslarda qərar verir — UI düymələri versiya üzrə
+    ``available_actions`` ilə daraldılır.
+    """
+    if actor.is_superadmin or not actor.has(permission):
+        return False
+    scope = actor.scope_for(permission)
+    return bool(scope.is_unit_scoped and not has_decision_scope(actor, permission))
+
+
 def can_view(actor: SyllabusActor, syllabus) -> bool:
     """Baxış hüququ: müəllif HƏMİŞƏ, digərləri icazə + kafedra əhatəsi ilə."""
     if is_author(actor, syllabus):
@@ -141,4 +183,12 @@ def has_decision_scope(actor: SyllabusActor, permission: str = PERM_APPROVE) -> 
     return has_chair_level_unit(actor.organization, scope.unit_ids)
 
 
-__all__ = ["SyllabusActor", "can_view", "has_decision_scope", "is_author", "resolve_actor"]
+__all__ = [
+    "SyllabusActor",
+    "can_view",
+    "has_decision_scope",
+    "has_escalated_decision_scope",
+    "is_author",
+    "is_self_authored_by_decider",
+    "resolve_actor",
+]

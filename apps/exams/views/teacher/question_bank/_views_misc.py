@@ -18,6 +18,7 @@ from apps.exams.services.import_media import (
     clear_stash,
 )
 from apps.exams.services.language_variants import ensure_default_variant
+from apps.exams.services.option_order import relabel_options_by_creation_order, shuffled_option_rows
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
@@ -354,18 +355,14 @@ def test_question_bank(request, slug):
             created_questions = ExamQuestion.objects.bulk_create(question_rows, batch_size=100)
             created_count = len(created_questions)
 
+            # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılır
+            # (id sırası düzgün cavabı açmasın). Media mənbə etiketi ilə
+            # bağlandığı üçün math_token olanda yenidən hərfləmə sonra edilir.
             option_rows = []
             for eq, (options, correct) in zip(created_questions, option_payloads):
-                for lab in "ABCDE":
-                    if lab in options:
-                        option_rows.append(
-                            ExamQuestionOption(
-                                question=eq,
-                                label=lab,
-                                text=options[lab],
-                                is_correct=(lab in correct),
-                            )
-                        )
+                option_rows.extend(
+                    shuffled_option_rows(ExamQuestionOption, eq, options, correct, relabel=not math_token)
+                )
 
             if option_rows:
                 ExamQuestionOption.objects.bulk_create(option_rows, batch_size=500)
@@ -378,6 +375,7 @@ def test_question_bank(request, slug):
                     owner_id=request.user.pk,
                     organization_id=exam.organization_id,
                 )
+                relabel_options_by_creation_order(ExamQuestionOption, [eq.pk for eq in created_questions])
 
         if math_token:
             clear_stash(math_token)

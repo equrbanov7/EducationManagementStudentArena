@@ -128,6 +128,7 @@ def results_summary(organization, scope, filters=None, *, with_participation=Tru
     iç-içə dəstlər arasındakı kiçik fərqdə böyük dəst gizlədilir.
     """
     from .analytics_guard import general_filtered, nested_set_ok
+    from .analytics_units import unit_view_ok
 
     filters = filters or flt.ResultFilters()
     campaign_ids = flt.campaign_ids_for(organization, filters)
@@ -146,9 +147,16 @@ def results_summary(organization, scope, filters=None, *, with_participation=Tru
         general_baseline = flt.responses(
             organization, scope, flt.ResultFilters(), campaign_ids, section=Section.GENERAL
         ).count()
-    visible = is_visible(n, k, baseline) and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
-    general_visible = is_visible(general_n, k, general_baseline) and nested_set_ok(
-        organization, scope, filters, campaign_ids, family, k, section=Section.GENERAL
+    # Audit 2026-09-28 SV-1: fakültə/kafedra görünüşü yalnız dərc olunan vahid üçün (analytics_units).
+    visible = (
+        is_visible(n, k, baseline)
+        and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
+        and unit_view_ok(organization, scope, filters, campaign_ids, k)
+    )
+    general_visible = (
+        is_visible(general_n, k, general_baseline)
+        and nested_set_ok(organization, scope, filters, campaign_ids, family, k, section=Section.GENERAL)
+        and unit_view_ok(organization, scope, filters, campaign_ids, k, section=Section.GENERAL)
     )
     teacher_counts = dict(
         base.exclude(teacher__isnull=True).values("teacher_id").annotate(c=Count("id")).values_list("teacher_id", "c")
@@ -192,6 +200,7 @@ def set_metrics(organization, scope, filters, campaign_ids, *, family=None) -> d
     """Verilmiş kampaniya dəstinin göstəriciləri (əvvəlki dövrlə müqayisə üçün) — k,
     daraldıcı filtr və iç-içə dövr dəstləri üzrə tamamlayıcı qayda ilə."""
     from .analytics_guard import nested_set_ok
+    from .analytics_units import unit_view_ok
 
     campaign_ids = list(campaign_ids or [])
     if not campaign_ids or not scope.has_structure_access:
@@ -202,7 +211,11 @@ def set_metrics(organization, scope, filters, campaign_ids, *, family=None) -> d
     baseline = None
     if filters.is_narrowed:
         baseline = flt.responses(organization, scope, filters.without_narrowing(), campaign_ids).count()
-    visible = is_visible(n, k, baseline) and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
+    visible = (
+        is_visible(n, k, baseline)
+        and nested_set_ok(organization, scope, filters, campaign_ids, family, k)
+        and unit_view_ok(organization, scope, filters, campaign_ids, k)
+    )
     return {"k": k, **_metrics(row, visible)}
 
 
@@ -275,7 +288,11 @@ def question_distributions(organization, scope, filters=None, *, section=Section
             baseline = flt.responses(
                 organization, scope, filters.without_narrowing(), campaign_ids, section=section
             ).count()
-        visible = is_visible(n, k, baseline)
+        from .analytics_units import unit_view_ok
+
+        visible = is_visible(n, k, baseline) and unit_view_ok(
+            organization, scope, filters, campaign_ids, k, section=section
+        )
     return {"k": k, "suppressed": not visible, "questions": distribution_rows(base) if visible else []}
 
 
@@ -310,12 +327,20 @@ def question_benchmarks(
         # İç-içə dövr dəstləri arasında kiçik fərq varsa müqayisə nöqtəsi də verilmir.
         return nested_set_ok(organization, scope_, filters_, campaign_ids, family, k, section=section)
 
+    from .analytics_units import org_benchmark_ok, unit_view_ok
+
     org_filters = flt.ResultFilters()
     org_base = flt.responses(organization, ORG_WIDE_SCOPE, org_filters, campaign_ids, section=section)
-    result = {"k": k, "org": _question_avgs(org_base, k) if safe(ORG_WIDE_SCOPE, org_filters) else {}, "department": {}}
+    # Audit 2026-09-28 SV-1: dar əhatəli izləyici üçün «universitet − əhatə» 0 və ya ≥ k olmalıdır.
+    org_ok = safe(ORG_WIDE_SCOPE, org_filters) and org_benchmark_ok(
+        organization, scope, campaign_ids, k, section=section
+    )
+    result = {"k": k, "org": _question_avgs(org_base, k) if org_ok else {}, "department": {}}
     if department_id is not None:
         dept_filters = flt.ResultFilters(department_id=department_id)
-        if safe(scope, dept_filters):
+        if safe(scope, dept_filters) and unit_view_ok(
+            organization, scope, dept_filters, campaign_ids, k, section=section
+        ):
             dept_base = flt.responses(organization, scope, dept_filters, campaign_ids, section=section)
             result["department"] = _question_avgs(dept_base, k)
     return result
@@ -367,11 +392,20 @@ def safe_breakdown(
     nested = set()
     if rows:
         nested = nested_hidden_keys(organization, scope, filters, campaign_ids, family, k, key=key, section=section)
+    units = None
+    if rows and by in ("faculty", "department"):
+        # Audit 2026-09-28 SV-1: vahid sətri yalnız dərc olunan vahid üçün (analytics_units).
+        from .analytics_units import publishable_units
+
+        published = publishable_units(organization, scope, filters, campaign_ids, k, section=section)
+        units = published.faculties if by == "faculty" else published.departments
     for row in rows:
         if row["suppressed"]:
             continue
         if row["key"] in nested or (wide_filters is not None and not complement_ok(row["n"], k, wide.get(row["key"]))):
             hide_row(row)
+        elif units is not None and row["key"] not in units:
+            hide_row(row, secondary=True)
     finalize(rows, k=k, total_n=total_n)
     return data
 

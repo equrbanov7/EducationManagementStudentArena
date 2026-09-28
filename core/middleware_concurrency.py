@@ -1,0 +1,119 @@
+"""Proses başına eyni anda işlənən HTTP sorğularının sayına tavan (admission control).
+
+Audit 2026-09-28 DB-03
+======================
+Daphne altında ``ASGI_THREADS`` sync view-ların paralelliyini MƏHDUDLAŞDIRMIR:
+Django hər sorğu üçün ``ThreadSensitiveContext`` açır və asgiref ona AYRICA
+bir thread verir (probe: ``ASGI_THREADS=12`` ilə 60 paralel sorğu → 60 thread).
+PgBouncer session rejimində hər thread sorğu boyu bir server bağlantısını tutur.
+Nəticədə yük artanda thread-lər sərhədsiz çoxalır, hamı yavaşlayır və sorğular
+PgBouncer növbəsində 120 s-ə qədər gözləyir — rədd (shed) edilmir.
+
+Bu middleware BÜTÜN metodlar üçün proses başına ``MAX_INFLIGHT_REQUESTS``
+(default 32; ``0`` = söndürülüb) eyni anlı sorğu buraxır. Yer yoxdursa sorğu
+``MAX_INFLIGHT_WAIT_SECONDS`` (default 2 s) gözləyir, sonra ``503`` +
+``Retry-After`` (default 5 s) və qısa, tərcümə olunmuş mətn alır — sessiya/auth/
+DB işinə çatmadan. Health/metrics/static/media/WebSocket yolları istisnadır.
+
+Niyə sync
+---------
+Mövcud ``RequestQueueMiddleware`` kimi sync-dir: ASGI altında Django sync
+middleware zəncirini sorğunun ÖZ thread-ində işlədir, yəni ``BoundedSemaphore``
+gözləməsi yalnız həmin sorğunun thread-ini bloklayır (event loop-u yox).
+Sayğac proses daxilindəki bütün thread-lər üçün ortaqdır.
+"""
+
+from __future__ import annotations
+
+import logging
+import threading
+
+from django.core.exceptions import MiddlewareNotUsed
+from django.http import HttpResponse, JsonResponse
+from django.utils.translation import pgettext
+
+from core.middleware import _request_wants_json
+from core.settings_utils import safe_float_setting as _safe_float_setting
+from core.settings_utils import safe_int_setting as _safe_int_setting
+
+logger = logging.getLogger(__name__)
+
+DEFAULT_MAX_INFLIGHT_REQUESTS = 32
+DEFAULT_WAIT_SECONDS = 2.0
+DEFAULT_RETRY_AFTER_SECONDS = 5
+DEFAULT_EXEMPT_PREFIXES = (
+    "/static/",
+    "/media/",
+    "/internal_media/",
+    "/metrics/",
+    "/ping/",
+    "/health/",
+    "/ws/",
+)
+
+
+class ConcurrencyLimitMiddleware:
+    """Proses başına in-flight sorğu tavanı; dolanda qısa gözləmə, sonra 503."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        limit = _safe_int_setting("MAX_INFLIGHT_REQUESTS", DEFAULT_MAX_INFLIGHT_REQUESTS, minimum=0)
+        if limit <= 0:
+            # Söndürülüb — zəncirdən tamamilə çıxır (sıfır əlavə xərc).
+            raise MiddlewareNotUsed
+        self.limit = limit
+        self._slots = threading.BoundedSemaphore(limit)
+        self._inflight = 0
+        self._inflight_guard = threading.Lock()
+
+    @property
+    def inflight(self) -> int:
+        return self._inflight
+
+    def __call__(self, request):
+        if self._is_exempt(request):
+            return self.get_response(request)
+
+        wait = _safe_float_setting("MAX_INFLIGHT_WAIT_SECONDS", DEFAULT_WAIT_SECONDS, minimum=0.0)
+        if not self._slots.acquire(timeout=wait):
+            return self._overloaded_response(request)
+        with self._inflight_guard:
+            self._inflight += 1
+        try:
+            return self.get_response(request)
+        finally:
+            with self._inflight_guard:
+                self._inflight -= 1
+            self._slots.release()
+
+    @staticmethod
+    def _is_exempt(request) -> bool:
+        from django.conf import settings
+
+        path = request.path_info or request.path or ""
+        prefixes = getattr(settings, "MAX_INFLIGHT_EXEMPT_PATH_PREFIXES", DEFAULT_EXEMPT_PREFIXES)
+        return any(path.startswith(prefix) for prefix in prefixes)
+
+    def _overloaded_response(self, request):
+        logger.warning(
+            "concurrency limit: %s in-flight (limit %s) — %s %s rədd edildi (503)",
+            self._inflight,
+            self.limit,
+            request.method,
+            request.path_info,
+        )
+        message = pgettext(
+            "core.middleware.concurrency_limit.message",
+            "Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin.",
+        )
+        if _request_wants_json(request):
+            response = JsonResponse({"ok": False, "error": message}, status=503)
+        else:
+            response = HttpResponse(message, status=503, content_type="text/plain; charset=utf-8")
+        retry_after = _safe_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", DEFAULT_RETRY_AFTER_SECONDS, minimum=1)
+        response["Retry-After"] = str(retry_after)
+        response["X-Concurrency-Limited"] = "1"
+        return response
+
+
+__all__ = ["ConcurrencyLimitMiddleware"]

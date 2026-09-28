@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import uuid
 from collections.abc import Callable
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager, nullcontext
 
 from django.core.cache import cache
 from django.db import transaction
@@ -77,6 +77,7 @@ def finish_attempts_under_row_lock(
     narrow: Callable[[object], object],
     select_related: tuple[str, ...],
     action: Callable[[ExamAttempt], bool],
+    scope: Callable[[], AbstractContextManager] | None = None,
 ) -> int:
     """Namizədləri bir-bir sətir kilidi altında yenidən oxuyub ``action`` tətbiq et (P2-6).
 
@@ -85,23 +86,35 @@ def finish_attempts_under_row_lock(
     (tələbə təhvil verib) yenidən yazılmasın. ``skip_locked`` — başqa
     tranzaksiyanın (tələbənin təhvili) tutduğu sətir ötürülür.
     ``action`` cəhdi bitiribsə True qaytarır. Bitirilən say qaytarılır.
+
+    Audit 2026-09-28 EX28-05: ``scope`` — hər DB addımını (namizəd sorğusu və HƏR
+    cəhd ayrıca) saran kontekst fabriki (Celery sweep-i üçün
+    ``rls_worker_atomic() + bypass_rls()``). Əvvəl bütün sweep bir xarici
+    ``rls_worker_atomic``-də idi: ``RLS_TRANSACTION_SCOPED`` açıq olanda daxili
+    ``atomic`` savepoint-ə çevrilir və emal olunmuş bütün cəhdlərin sətir
+    kilidləri sweep bitənə qədər qalırdı. İndi hər cəhd öz real tranzaksiyasında
+    commit olunur (kilid dərhal buraxılır, jurnal ``on_commit``-i dərhal işləyir),
+    bir cəhdin xətası loglanır və digərlərini dayandırmır.
     """
+    scope = scope or nullcontext
     # ID-lər əvvəlcədən materiallaşdırılır: hər cəhd öz tranzaksiyasında
     # işlənir, açıq server-side kursor + daxili atomic bloklar qarışmasın.
-    candidate_ids = list(narrow(queryset).values_list("pk", flat=True))
+    with scope():
+        candidate_ids = list(narrow(queryset).values_list("pk", flat=True))
     finished = 0
     for attempt_id in candidate_ids:
-        with transaction.atomic():
-            attempt = (
-                narrow(queryset.select_for_update(of=("self",), skip_locked=True))
-                .select_related(*select_related)
-                .filter(pk=attempt_id)
-                .first()
-            )
-            if attempt is None:
-                # Ya artıq bitirilib (status filtri kəsdi), ya da sətir başqa
+        try:
+            with scope(), transaction.atomic():
+                attempt = (
+                    narrow(queryset.select_for_update(of=("self",), skip_locked=True))
+                    .select_related(*select_related)
+                    .filter(pk=attempt_id)
+                    .first()
+                )
+                # None: ya artıq bitirilib (status filtri kəsdi), ya da sətir başqa
                 # tranzaksiyada kilidlidir — hər iki halda toxunmuruq.
-                continue
-            if action(attempt):
-                finished += 1
+                if attempt is not None and action(attempt):
+                    finished += 1
+        except Exception:  # noqa: BLE001 — bir cəhdin xətası bütün sweep-i dayandırmasın (EX28-05)
+            logger.exception("sweep: attempt %s could not be processed", attempt_id)
     return finished

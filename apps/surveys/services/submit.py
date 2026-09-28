@@ -1,4 +1,8 @@
-"""Cavabın göndərilməsi — qəbz + anonim cavab EYNİ tranzaksiyada, ortaq açarsız.
+"""Cavabın göndərilməsi — qəbz + anonim BUFER sətri EYNİ tranzaksiyada, ortaq açarsız.
+
+Audit 2026-09-28 SV-3: cavab ``SurveyResponse``-a birbaşa yazılmır — şəxssiz buferə
+(``services/pending.enqueue``) düşür və ayrı tranzaksiyada, eyni snapshot üzrə ≥ k
+cavablıq partiyalarla təsadüfi sıra ilə köçürülür (qəbzlə fiziki sıra / ``xmin`` bağı yoxdur).
 
 Təkrar göndərişə qarşı qoruma DB səviyyəsindədir: qəbzin şərtli unikal
 məhdudiyyəti (``surveys_receipt_teacher_once`` / ``surveys_receipt_general_once``).
@@ -19,7 +23,8 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from .. import registrar_bridge as bridge
-from ..models import SurveyAnswer, SurveyReceipt, SurveyResponse
+from ..models import SurveyReceipt
+from .pending import enqueue
 
 _CTX = "surveys.submit"
 
@@ -59,30 +64,21 @@ def submit_target(*, campaign, student, target, cleaned_answers) -> None:
                 )
         except IntegrityError as exc:
             raise AlreadySubmitted(pgettext(_CTX, "Bu sorğunu artıq doldurmusunuz.")) from exc
-        response = SurveyResponse.objects.create(
+        enqueue(
             organization_id=organization,
             campaign=campaign,
-            scope=target.scope,
-            offering_id=None if target.is_general else target.offering_id,
-            teacher_id=None if target.is_general else target.teacher_id,
-            subject_id=snapshot.get("subject_id"),
-            group_id=snapshot.get("group_id"),
-            teacher_department_id=department_id,
-            faculty_id=snapshot.get("faculty_id"),
-            program_id=snapshot.get("program_id"),
-            course_year=snapshot.get("course_year"),
-        )
-        SurveyAnswer.objects.bulk_create(
-            [
-                SurveyAnswer(
-                    organization_id=organization,
-                    response=response,
-                    question=question,
-                    score=score,
-                    text=text,
-                )
-                for question, score, text in cleaned_answers
-            ]
+            snapshot={
+                "scope": target.scope,
+                "offering_id": None if target.is_general else target.offering_id,
+                "teacher_id": None if target.is_general else target.teacher_id,
+                "subject_id": snapshot.get("subject_id"),
+                "group_id": snapshot.get("group_id"),
+                "teacher_department_id": department_id,
+                "faculty_id": snapshot.get("faculty_id"),
+                "program_id": snapshot.get("program_id"),
+                "course_year": snapshot.get("course_year"),
+            },
+            answers=cleaned_answers,
         )
 
 

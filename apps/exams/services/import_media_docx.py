@@ -328,7 +328,8 @@ def attach_docx_media_batch(
                 png = _target_png(token, manifest, refs)
                 if not png:
                     continue
-                name = f"docx_{token[:8]}_q{source_index + 1}_option_{label}.png"
+                # Audit 2026-09-28 EX28-01: fayl adında mənbə hərfi saxlanmır.
+                name = f"docx_{token[:8]}_q{source_index + 1}_option_{uuid.uuid4().hex[:12]}.png"
                 option.image.save(name, ContentFile(png), save=False)
                 created.append((option.image.storage, option.image.name))
                 option.image_replaces_text = False

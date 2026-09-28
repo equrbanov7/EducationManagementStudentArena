@@ -18,6 +18,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE, EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.models import ExamLanguageVariant, ExamQuestion, ExamQuestionOption
+from apps.exams.services.option_order import relabel_options_by_creation_order, shuffled_option_rows
 from apps.exams.services.utils import _effective_needed_count
 
 EXAM_LANGUAGE_LABELS = dict(EXAM_LANGUAGE_CHOICES)
@@ -284,18 +285,14 @@ def create_questions_for_variant(
 
     created = ExamQuestion.objects.bulk_create(rows, batch_size=100)
 
+    # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılır (id
+    # sırası düzgün cavabı açmasın); media mənbə etiketi ilə bağlandığı üçün
+    # math_token olanda A..E yenidən hərfləmə media-dan sonra edilir.
     option_rows = []
     for exam_question, (options, correct) in zip(created, option_payloads):
-        for label in "ABCDE":
-            if label in options:
-                option_rows.append(
-                    ExamQuestionOption(
-                        question=exam_question,
-                        label=label,
-                        text=options[label],
-                        is_correct=(label in correct),
-                    )
-                )
+        option_rows.extend(
+            shuffled_option_rows(ExamQuestionOption, exam_question, options, correct, relabel=not math_token)
+        )
     if option_rows:
         ExamQuestionOption.objects.bulk_create(option_rows, batch_size=500)
 
@@ -308,6 +305,7 @@ def create_questions_for_variant(
             owner_id=media_owner_id,
             organization_id=exam.organization_id,
         )
+        relabel_options_by_creation_order(ExamQuestionOption, [question.pk for question in created])
 
     return created
 

@@ -400,6 +400,31 @@ def record_exam_score(
     return entry
 
 
+def record_appeal_score_change(*, enrollment, old_score, new_score, by_user, appeal_id, note=""):
+    """Rəqəmsal apellyasiya qərarının jurnal balına təsirini ledger-ə yaz (Audit 2026-09-28 EXA-03).
+
+    ``FinalGrade``-i YAZMIR (bunu ``exam_bridge.record_exam_result`` edir) — yalnız
+    ``ExamScoreEntry(kind=appeal)`` sətri əlavə edir ki, «Dəyişən nəticələr» və cəhd
+    tarixçəsi apellyasiya dəyişikliyini göstərsin. Sübut sənədi tələb olunmur:
+    sübut rəqəmsal apellyasiyanın özüdür (``note``-da id). Bal dəyişməyibsə ``None``.
+    """
+    if new_score is None or _same_score(old_score, new_score):
+        return None
+    entry = ExamScoreEntry(
+        organization=enrollment.organization,
+        enrollment=enrollment,
+        kind=ExamScoreEntryKind.APPEAL,
+        old_score=old_score,
+        new_score=new_score,
+        reason=CorrectionReason.APPEAL,
+        note=(note or f"Rəqəmsal apellyasiya #{appeal_id}").strip(),
+        entered_by=by_user,
+        entered_by_name=correction_author_name(by_user),
+    )
+    entry.save()
+    return entry
+
+
 def _period_audit_suffix(policy) -> str:
     if policy.correction_mode:
         return " · past-period correction"

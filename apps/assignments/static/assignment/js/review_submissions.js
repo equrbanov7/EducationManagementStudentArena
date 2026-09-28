@@ -11,6 +11,17 @@
 
     var bound = false;
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; sorğu EMSCore.fetchJSON ilə —
+    // 403/500 və qeyri-JSON cavab `catch`-ə düşür, serverin `error` mətni göstərilir.
+    function notifyError(message) {
+        if (!message) { return; }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
     function getCfg() {
         return document.getElementById("reviewSubmissionsConfig");
     }
@@ -140,28 +151,28 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> ' + i18n.i18nSubmitting;
 
-        return fetch("/assignments/submission/" + submissionId + "/grade/", {
+        return EMSCore.fetchJSON("/assignments/submission/" + submissionId + "/grade/", {
             method: "POST",
-            headers: {
-                "X-CSRFToken": EMSCore.getCsrfToken(),
-                "X-Requested-With": "XMLHttpRequest"
-            },
             body: formData
         })
-            .then(function (r) { return r.json(); })
             .then(function (data) {
-                if (data.success) {
+                if (data && data.success) {
                     location.reload();
                     return true;
                 }
-                alert(i18n.i18nErrorPrefix + ": " + (data.error || i18n.i18nUnknownError));
+                notifyError(i18n.i18nErrorPrefix + ": " + ((data && data.error) || i18n.i18nUnknownError));
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.i18nGradeSubmit;
                 return false;
             })
             .catch(function (err) {
                 console.error(err);
-                alert(i18n.i18nServerError);
+                var payload = err && err.payload;
+                if (!(payload && typeof payload === "object" && payload.view_as_blocked)) {
+                    notifyError(payload && typeof payload === "object" && payload.error
+                        ? i18n.i18nErrorPrefix + ": " + payload.error
+                        : i18n.i18nServerError);
+                }
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> ' + i18n.i18nGradeSubmit;
                 return false;

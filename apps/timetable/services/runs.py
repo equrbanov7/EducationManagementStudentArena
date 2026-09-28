@@ -277,7 +277,8 @@ def execute(run_id, *, time_cap=None, db_block=nullcontext):
         with db_block():
             Run.objects.filter(pk=run_id).update(
                 status=RunStatus.FAILED,
-                error=str(exc)[:2000] or exc.__class__.__name__,
+                # Ətraflı səbəb yalnız serverdə (log + sütun); brauzer `public_error` görür.
+                error=f"{exc.__class__.__name__}: {exc}"[:2000],
                 finished_at=timezone.now(),
                 progress={"phase": "failed", "frac": 1.0},
             )
@@ -317,6 +318,20 @@ def is_stale(run) -> bool:
     return (timezone.now() - reference).total_seconds() > STALE_AFTER
 
 
+#: Audit 2026-09-28 TT-4: brauzerə gedən YEGANƏ xəta mətni — DB/mühərrik xətasının
+#: xam mətni (`run.error`) yalnız serverdə (log + sütun) qalır.
+PUBLIC_ERROR = pgettext_lazy(
+    _CTX, "İşləmə texniki xəta ilə dayandı. Parametrləri yoxlayıb yenidən cəhd edin; təkrarlansa inzibatçıya bildirin."
+)
+
+
+def public_error(run) -> str:
+    """İstifadəçiyə göstərilən xəta mətni (xam istisna mətni SIZMIR)."""
+    if run.status != RunStatus.FAILED and not run.error:
+        return ""
+    return str(PUBLIC_ERROR)
+
+
 def status_payload(run) -> dict:
     progress = dict(run.progress or {})
     return {
@@ -328,7 +343,7 @@ def status_payload(run) -> dict:
         "frac": progress.get("frac", 0),
         "unplaced": progress.get("unplaced"),
         "stale": is_stale(run),
-        "error": run.error,
+        "error": public_error(run),
         "is_active": run.status in ACTIVE_STATUSES,
     }
 
@@ -378,6 +393,7 @@ __all__ = [
     "discard",
     "execute",
     "is_stale",
+    "public_error",
     "reason_text",
     "rerun",
     "start",

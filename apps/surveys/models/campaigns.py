@@ -54,6 +54,9 @@ class SurveyCampaign(UUIDModel, TimeStampedModel):
     )
     opened_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
+    #: Audit 2026-09-28 SV-2: nəticələrin İLK dərc anı (ilk bağlanma). Bundan sonra gələn cavablar
+    #: (yenidən açılış) buferdə qalır və yalnız ≥ k eyni-snapshotlu cavab yığılanda birlikdə dərc olunur.
+    results_published_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = pgettext_lazy(_CTX, "sorğu kampaniyası")

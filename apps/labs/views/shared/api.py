@@ -30,6 +30,7 @@ def api_get_groups(request, course_id):
         .exclude(group_name__isnull=True)
         .values_list("group_name", flat=True)
         .distinct()
+        .order_by("group_name")
     )
 
     return JsonResponse({"groups": [{"id": i, "name": name} for i, name in enumerate(groups, 1)]})

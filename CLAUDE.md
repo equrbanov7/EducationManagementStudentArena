@@ -91,7 +91,11 @@ və ya `EMSDelegate.on(evt, selector, fn)` işlət. CSRF/fetch üçün `EMSCore.
 
 Dəyişiklikdən sonra:
 ```bash
-grep -rlE '<style|<script(?![^>]*src=)[^>]*>[^<]' apps templates --include='*.html'
+venv/bin/python scripts/check_inline_assets.py
 ```
-azalmalıdır; `python manage.py collectstatic --dry-run` və dəyişən səhifənin
+0 tapıntı ilə (exit 0) keçməlidir — `<style>`, `src`-siz icra olunan `<script>`
+(`application/json` / `ld+json` data blokları sayılmır) və `onclick=`/`onsubmit=`
+kimi inline hadisə atributlarını tutur (e-poçt şablonları istisnadır). Eyni qapı
+`core/tests/test_inline_assets_guard.py`-da pytest ilə də işləyir.
+Sonra `python manage.py collectstatic --dry-run` və dəyişən səhifənin
 brauzerdə konsol/CSP xətası olmadan işlədiyi yoxlanılır.

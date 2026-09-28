@@ -17,7 +17,7 @@ from django.views.decorators.http import require_GET, require_POST
 from apps.exams.features import practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.metrics import record_autosave
 from apps.exams.models import CodingExamQuestion, CodingSubmission, ExamAttempt
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_can_view_attempt_results
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.services.coding_runtime import (
     LANGUAGE_MODES,
@@ -31,17 +31,14 @@ from apps.exams.services.coding_runtime import (
     run_visible_code,
 )
 from apps.exams.services.coding_throttle import acquire_run_slot, release_run_slot
-from apps.exams.views.shared.tenant import tenant_scoped_exams
+from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, tenant_scoped_exams
 
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
 from .access_guard import ensure_active_attempt_access
 
 
 def _json_error(message, *, status=400, extra=None):
-    payload = {"success": False, "error": message}
-    if extra:
-        payload.update(extra)
-    return JsonResponse(payload, status=status)
+    return JsonResponse({"success": False, "error": message, **(extra or {})}, status=status)
 
 
 def _coding_disabled_error():
@@ -168,10 +165,10 @@ def _get_submission_download_attempt(request, slug, attempt_id):
             return attempt
         raise PermissionDenied
 
-    _ensure_teacher(request.user)
-    if tenant_scoped_exams(request).filter(id=attempt.exam_id).exists():
-        return attempt
-    raise PermissionDenied
+    # Audit 2026-09-28 EX28-09: org-daxili hər müəllim yox — müəllif və ya imtahan mərkəzi.
+    _ensure_can_view_attempt_results(request.user)
+    get_result_viewable_exam_or_404(request, id=attempt.exam_id)
+    return attempt
 
 
 def _serialize_visible_test_cases(coding_question):
@@ -383,7 +380,7 @@ def coding_autosave(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    if attempt.is_finished or attempt.expire_if_time_limit_reached():
+    if attempt.is_finished or attempt.expire_if_write_window_closed():
         return _json_error(
             pgettext("exams.view.coding.error", "attempt_already_finished"),
             status=409,
@@ -416,7 +413,7 @@ def coding_run(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    if attempt.is_finished or attempt.expire_if_time_limit_reached():
+    if attempt.is_finished or attempt.expire_if_write_window_closed():
         return _json_error(
             pgettext("exams.view.coding.error", "attempt_already_finished"),
             status=409,
@@ -495,11 +492,12 @@ def coding_submit(request, slug, attempt_id):
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
 
-    # Attempt lock-u paralel ikinci final submit-i idempotent edir (EXAM-P1-13).
+    # Attempt lock-u paralel ikinci final submit-i idempotent edir (EXAM-P1-13). Audit 2026-09-28
+    # EX28-08: deadline (+grace) keçibsə təhvil qəbul olunmur — cəhd bağlanır (test/yazılı kimi).
     with transaction.atomic():
         locked_attempt = ExamAttempt.objects.select_for_update().get(pk=attempt.pk)
         ensure_active_attempt_access(locked_attempt, request.user, request=request)
-        if locked_attempt.is_finished:
+        if locked_attempt.is_finished or locked_attempt.expire_if_write_window_closed():
             return JsonResponse(
                 {
                     "success": True,

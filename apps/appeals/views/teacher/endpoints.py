@@ -2,8 +2,9 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -31,6 +32,7 @@ from ...models import Appeal
 from ...services import (
     accept_appeal_item,
     can_review_appeal,
+    delivered_question_points,
     effective_test_score,
     reject_appeal_item,
     revert_item_adjustment,
@@ -203,6 +205,35 @@ def manage_appeals(request):
     return render(request, "appeals/partials/_manage_appeals_body.html", context)
 
 
+def _apply_review_decisions(request, appeal, decisions):
+    """Bütün qərarları TƏK tranzaksiyada tətbiq et (Audit 2026-09-28 EXA-05).
+
+    5 dəqiqəlik redaktə pəncərəsində yenidən qərar: əvvəlki bal düzəlişinin geri
+    alınması (``revert_item_adjustment``) və yeni qərar eyni tranzaksiyadadır və
+    geri alma da REVIEWER adına (ledger ``grader``, audit ``user``) yazılır — əvvəl
+    ``reviewer``/``request`` ötürülmürdü (ledger-də ``grader_id=None``), yarımçıq
+    xəta isə balı geri alınmış, yeni qərarsız vəziyyətdə qoyurdu.
+
+    Kilid sırası servislə eynidir: əvvəl ``Appeal`` (bax ``decisions._lock_appeal``),
+    sonra item-lər."""
+    with transaction.atomic():
+        Appeal.objects.select_for_update(of=("self",)).filter(pk=appeal.pk).first()
+        for item, decision, response_text, was_decided in decisions:
+            # Window içində yenidən redaktə → əvvəlki bal düzəlişini təmizlə ki,
+            # yeni qərar təmiz tətbiq olunsun (bal ikiqat sayılmasın).
+            if was_decided:
+                revert_item_adjustment(item, reviewer=request.user, request=request)
+            if decision == "accept":
+                # Qəbul → sabit +1 bal (bax scoring.accept_appeal_item).
+                accept_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
+            else:
+                reject_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
+        note = (request.POST.get("reviewer_note") or "").strip()
+        if note:
+            appeal.reviewer_note = note
+            appeal.save(update_fields=["reviewer_note", "updated_at"])
+
+
 @login_required
 def review_appeal(request, appeal_id):
     """Müəllim/reviewer apellyasiya detalı + qərar (per-sual accept/reject)."""
@@ -295,28 +326,14 @@ def review_appeal(request, appeal_id):
             error_message = pgettext("appeals.view.message", "Hər qərar üçün izah/cavab mətni yazmalısınız.")
 
         if not error_message:
-            for item, decision, response_text, was_decided in decisions:
-                # Window içində yenidən redaktə → əvvəlki bal düzəlişini təmizlə ki,
-                # yeni qərar təmiz tətbiq olunsun (bal ikiqat sayılmasın).
-                if was_decided:
-                    revert_item_adjustment(item)
-                if decision == "accept":
-                    # Qəbul → sabit +1 bal (bax scoring.accept_appeal_item).
-                    accept_appeal_item(
-                        item,
-                        reviewer=request.user,
-                        response_text=response_text,
-                        request=request,
-                    )
-                else:
-                    reject_appeal_item(item, reviewer=request.user, response_text=response_text, request=request)
+            try:
+                _apply_review_decisions(request, appeal, decisions)
+            except ValidationError as exc:
+                error_message = exc.messages[0] if exc.messages else str(exc)
 
+        if not error_message:
             score_after, _, _ = _current_review_score(appeal, is_test)
             score_delta = score_after - score_before
-            note = (request.POST.get("reviewer_note") or "").strip()
-            if note:
-                appeal.reviewer_note = note
-                appeal.save(update_fields=["reviewer_note", "updated_at"])
 
             success_text = pgettext("appeals.view.message", "Qərarlar yadda saxlanıldı.")
             if is_fragment:
@@ -357,7 +374,8 @@ def review_appeal(request, appeal_id):
     for item in items:
         item.is_decided = item.status in final_item_statuses
         item.is_locked = _edit_locked(item)
-        item.max_points = item.question.points or 1
+        # Audit 2026-09-28 EXA-08: tavan ÇATDIRILAN snapshot-dan (servis clamp-i ilə eyni).
+        item.max_points = delivered_question_points(item.answer, item.question)
         item.current_decision = (
             "accept"
             if item.status == APPEAL_ITEM_STATUS_ACCEPTED

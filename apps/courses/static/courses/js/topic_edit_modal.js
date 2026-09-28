@@ -10,6 +10,19 @@
     var bound = false;
     var pendingTopicData = null;
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (və ya kursun `notify`-ı);
+    // sorğu EMSCore.fetchJSON ilə — 403/500 və qeyri-JSON cavab `catch`-ə düşür.
+    function toastError(message) {
+        if (!message) { return; }
+        if (typeof window.notify === "function") {
+            window.notify(message, "error");
+        } else if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
     function init() {
         var cfg = document.getElementById("topicEditModalConfig");
         if (!cfg || bound) { return; }
@@ -77,7 +90,7 @@
             var topicId = document.getElementById("editTopicId").value;
 
             if (!topicId) {
-                alert(d.i18nTopicIdNotFound);
+                toastError(d.i18nTopicIdNotFound);
                 return;
             }
 
@@ -89,14 +102,9 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + d.i18nUpdating;
 
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData,
-                headers: { "X-Requested-With": "XMLHttpRequest" }
-            })
-                .then(function (r) { return r.json(); })
+            EMSCore.fetchJSON(actionUrl, { method: "POST", body: formData })
                 .then(function (data) {
-                    if (data.success) {
+                    if (data && data.success) {
                         var modal = bootstrap.Modal.getInstance(modalEl);
                         if (modal) { modal.hide(); }
 
@@ -106,16 +114,24 @@
 
                         setTimeout(function () { location.reload(); }, 1000);
                     } else {
-                        showFormErrors("topicEditErrors", data.errors || {});
+                        showFormErrors("topicEditErrors", (data && data.errors) || {});
                     }
                 })
                 .catch(function (err) {
-                    console.error(d.logError, err);
-                    if (typeof notify === "function") {
-                        notify(d.i18nErrorRetry, "error");
-                    } else {
-                        alert(d.i18nError);
+                    var payload = err && err.payload;
+                    if (payload && typeof payload === "object") {
+                        if (payload.view_as_blocked) { return; } // EMSCore.fetchJSON artıq göstərib
+                        if (payload.errors) {
+                            showFormErrors("topicEditErrors", payload.errors);
+                            return;
+                        }
+                        if (payload.error) {
+                            toastError(payload.error);
+                            return;
+                        }
                     }
+                    console.error(d.logError, err);
+                    toastError(d.i18nErrorRetry || d.i18nError);
                 })
                 .finally(function () {
                     submitBtn.disabled = false;

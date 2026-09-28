@@ -111,8 +111,10 @@ from .services import (  # noqa: F401
     can_view,
     coverage_report,
     has_decision_scope,
+    has_escalated_decision_scope,
     has_review_scope,
     import_migrated_version,
+    is_author,
     list_syllabi,
     offering_syllabus_state,
     preload_syllabus_for_offering,
@@ -198,7 +200,11 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         return {"view_state": "permission", "syllabus": None, "version": None, "sections": []}
 
     rows = {row.section_id: row for row in version.sections.all()}
-    report = completion_rules.evaluate(section_data_map(version), version.plan_hours or {})
+    # Audit 2026-09-28 SYL-7: redaktorun tamamlanması göndərmə ilə EYNİ
+    # qaydadır — təşkilatın qiymətləndirmə çəkiləri (``recompute_completion``).
+    report = completion_rules.evaluate(
+        section_data_map(version), version.plan_hours or {}, assessment_weights(organization)
+    )
     sections = [
         {
             "id": section_id,
@@ -219,6 +225,9 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         "completion": report.as_dict(),
         "view_state": view_state,
         "actions": available_actions(version=version, actor=actor),
+        # Audit 2026-09-28 SYL-7: GET zamanı yalnız MÜƏLLİFİN sessiyası plan
+        # saatını/həftəlik bölgünü yazır — kafedranın baxışı heç nə dəyişmir.
+        "is_author": is_author(actor, syllabus),
         "selfwork_options": SELFWORK_OPTIONS,
         "selfwork_disallowed": SELFWORK_DISALLOWED,
         "teaching_methods": TEACHING_METHODS,
@@ -280,7 +289,11 @@ def build_review_queue_context(
     # (və ya org-wide override) əhatəsi olan aktora göstərilir.  Dekan növbəni
     # görür və oxuyur, amma düymə görmür — servis qatı onu onsuz da 403 ilə
     # dayandırardı, UI-nın yalan düymə göstərməsinin mənası yoxdur.
-    can_decide = has_decision_scope(actor)
+    # Audit 2026-09-28 SYL-1: kafedra müdirinin ÖZ sillabusu növbəti pilləyə
+    # keçir — qərar açarı olan fakültə səviyyəli aktor da düymələri görür;
+    # hansı versiyada aktiv olduqları panel açılanda ``available_actions`` ilə
+    # (versiya üzrə) daraldılır.
+    can_decide = has_decision_scope(actor) or has_escalated_decision_scope(actor)
     return {
         "queue": review_queue(
             organization=organization,

@@ -3,8 +3,10 @@
 düzüm bir yerə yığıldı). Hər səhifə yalnız mətn bloklarını doldurur; düzüm/CSS
 `static/css/error-pages.css`-dədir. `csrf_failure.html` ayrıca qalır (auto-redirect
 meta + fərqli düymələr).{% endcomment %}
+{% comment %}Audit 2026-09-28 FQ-A11Y-1: `lang` aktiv dildən gəlir (500-də request konteksti
+yoxdur — get_current_language thread-local aktiv dili oxuyur; boşdursa az).{% endcomment %}{% get_current_language as CURRENT_LANGUAGE %}
 <!DOCTYPE html>
-<html lang="az">
+<html lang="{{ CURRENT_LANGUAGE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

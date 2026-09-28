@@ -13,7 +13,10 @@ from .teacher import (
     AddMemberView,
     AddResourceView,
     AddTopicView,
+    AvailableGroupsView,
     AvailableStudentsView,
+    CourseAIApplyView,
+    CourseAIPlanView,
     CourseMembersView,
     CreateCourseView,
     DeleteCourseView,
@@ -30,6 +33,8 @@ from .teacher import (
 )
 
 __all__ = [
+    "CourseAIPlanView",
+    "CourseAIApplyView",
     "CreateCourseView",
     "EditCourseView",
     "DeleteCourseView",
@@ -43,6 +48,7 @@ __all__ = [
     "DeleteResourceView",
     "CourseMembersView",
     "AvailableStudentsView",
+    "AvailableGroupsView",
     "AddMemberView",
     "AddMembersBulkView",
     "DeleteMemberView",

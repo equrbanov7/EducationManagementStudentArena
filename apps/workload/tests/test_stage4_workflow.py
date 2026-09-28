@@ -387,20 +387,22 @@ class DistributionGateTest(ChainBase):
         task.refresh_from_db()
         self.assertEqual(task.status, TaskStatus.DISTRIBUTING)
 
-    def test_legacy_chair_created_draft_still_distributes(self):
-        """F1-dən ƏVVƏLKİ sənəd (heç vaxt göndərilməyib) işləməyə davam edir.
+    def test_legacy_chair_created_draft_no_longer_distributes(self):
+        """Audit 2026-09-28 W1: F1-dən əvvəlki «kafedranın öz qaralaması» istisnası LƏĞV edildi.
 
-        Audit 2026-09-13 F-T1: istisna yalnız KAFEDRANIN ÖZÜ yaratdığı qaralama
-        üçündür — tədris şöbəsinin göndərilməmiş qaralaması artıq bölünmür
-        (`test_audit_2026_09_13_draft_distribution_gate`)."""
+        Heç vaxt göndərilməmiş sənəd (yaradanından asılı olmayaraq) bölünmür —
+        əks halda kafedra müdiri koordinator vizası və dekan təsdiqi olmadan
+        açılış/qeydiyyat yaradırdı (`test_audit_2026_09_13_draft_distribution_gate`)."""
         task = make_task(self.org, self.stack["chair"], created_by=self.chair_head)
         make_row(task, self.stack)
         row = task.rows.first()
-        assign_teacher(
-            row=row, actor=self.actor(self.chair_head), activity="lecture", teacher_id=self.teacher.pk, hours=10
-        )
+        with self.assertRaises(WorkloadDenied) as ctx:
+            assign_teacher(
+                row=row, actor=self.actor(self.chair_head), activity="lecture", teacher_id=self.teacher.pk, hours=10
+            )
+        self.assertEqual(ctx.exception.code, "workload.not_approved_yet")
         task.refresh_from_db()
-        self.assertEqual(task.status, TaskStatus.DISTRIBUTING)
+        self.assertEqual(task.status, TaskStatus.DRAFT)
 
 
 class ObjectionTest(ChainBase):

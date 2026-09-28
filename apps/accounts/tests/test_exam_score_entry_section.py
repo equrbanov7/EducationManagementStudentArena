@@ -292,7 +292,7 @@ class ExamScoreEntrySectionTest(TestCase):
     def test_student_cabinet_shows_previous_attempts(self):
         from django.utils import timezone
 
-        from apps.exams.models import Exam, ExamAttempt
+        from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestion
 
         with bypass_rls():
             for index, (correct, wrong, minutes) in enumerate(((8, 2, 120), (65, 35, 30))):
@@ -302,14 +302,18 @@ class ExamScoreEntrySectionTest(TestCase):
                     author=self.teacher,
                     title=f"Yazılı imtahan {index + 1}",
                     exam_type="written",
+                    exam_type_extended="final",  # Audit 2026-09-28 EXA-03: tarixçə yalnız yekun imtahandır
                     subject=self.subject,
                     start_datetime=start,
                     end_datetime=start + datetime.timedelta(hours=1),
                     is_active=True,
                 )
+                # Yazılı faiz = teacher_score ÷ çatdırılan sualların tavanı (jurnal ilə eyni qayda).
+                question = ExamQuestion.objects.create(exam=exam, order=1, text="Q", points=correct + wrong)
                 attempt = ExamAttempt.objects.create(
-                    user=self.student, exam=exam, status="submitted", correct_count=correct, wrong_count=wrong
+                    user=self.student, exam=exam, status="submitted", checked_by_teacher=True, teacher_score=correct
                 )
+                ExamAnswer.objects.create(attempt=attempt, question=question, teacher_score=correct)
                 ExamAttempt.objects.filter(pk=attempt.pk).update(started_at=start, finished_at=start)
 
         resp = self._client(self.student).get(reverse("accounts:profile"), {"section": "my-subjects"})

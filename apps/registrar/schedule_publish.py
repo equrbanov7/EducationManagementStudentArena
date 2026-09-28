@@ -36,7 +36,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.registrar import campus, schedule_conflicts, schedule_manage, schedule_slot_teachers
+from apps.registrar import campus, schedule_conflicts, schedule_lock, schedule_manage, schedule_slot_teachers
 from apps.registrar.models import AcademicStatus, ScheduleSlot, SlotKind, StudentAcademicRecord, WeekType
 from apps.registrar.schedule import effective_instructor_id, stored_instructor_id
 
@@ -262,18 +262,21 @@ def publish_slots(
                 "dərs yükünü yoxlayıb qaralamanı yenidən yaradın.",
             ),
         )
-    conflicts = find_conflicts(
-        organization=organization, period=period, rows=rows, offerings=offerings, replaced_ids=ids
-    )
-    if conflicts:
-        raise PublishError(
-            "conflict",
-            pgettext(_CTX, "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var.") % {"count": len(conflicts)},
-            errors={"conflicts": conflicts[:50]},
-            status=409,
-        )
     now = timezone.now()
     with transaction.atomic():
+        # Audit 2026-09-28 W3: toqquşma yoxlaması + əvəzləmə bir semestr kilidi altında —
+        # paralel redaktor/dərc yoxlamanı keçib üst-üstə düşən slot yarada bilməz.
+        schedule_lock.lock_schedule(organization.pk, getattr(period, "pk", None))
+        conflicts = find_conflicts(
+            organization=organization, period=period, rows=rows, offerings=offerings, replaced_ids=ids
+        )
+        if conflicts:
+            raise PublishError(
+                "conflict",
+                pgettext(_CTX, "Dərc olunmadı: canlı cədvəllə %(count)s toqquşma var.") % {"count": len(conflicts)},
+                errors={"conflicts": conflicts[:50]},
+                status=409,
+            )
         old = ScheduleSlot.all_objects.filter(organization=organization, offering_id__in=ids, is_deleted=False)
         removed_ids = [str(pk) for pk in old.values_list("pk", flat=True)]
         old.update(is_deleted=True, deleted_at=now, is_parked=False, updated_at=now)

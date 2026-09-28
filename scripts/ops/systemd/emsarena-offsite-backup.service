@@ -1,0 +1,18 @@
+[Unit]
+Description=EMSArena off-site encrypted backup (restic: DB dumps + media volume)
+Documentation=file:///home/wcu/EducationManagementStudentArena/docs/operations/deployment.md
+Wants=docker.service network-online.target
+After=docker.service network-online.target emsarena-db-backup.service
+
+[Service]
+Type=oneshot
+# Repository, password file and backend credentials (chmod 600, root-owned).
+# Missing file = "not configured": the script writes the metric as 0 and exits 3,
+# so the OffsiteBackupStale alert keeps firing until it is configured.
+EnvironmentFile=-/etc/emsarena/offsite-backup.env
+ExecStart=/usr/local/sbin/emsarena-offsite-backup.sh run
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+# A large first upload may take hours; later runs are incremental (dedup).
+TimeoutStartSec=12h

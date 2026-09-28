@@ -25,30 +25,28 @@ from django.shortcuts import get_object_or_404
 
 from apps.registrar import transcript as transcript_service
 from apps.registrar import transcript_pdf
+from apps.registrar.audit_write import create_audit_row
 from apps.registrar.catalog_console import can_manage as _can_manage_registrar
 from apps.registrar.models import StudentAcademicRecord
 
 
 def _audit_issue(organization, record, by_user):
-    """Best-effort audit entry for an issued transcript (never blocks the download)."""
-    try:
-        from django.apps import apps as django_apps
+    """Best-effort audit entry for an issued transcript (never blocks the download).
 
-        from core.constants import AuditAction
+    Audit 2026-09-28 DB-01: SAVEPOINT-li yazı (audit_write) — ATOMIC_REQUESTS
+    rejimində udulmuş xəta sorğu tranzaksiyasını zəhərləmir."""
+    from core.constants import AuditAction
 
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        student = record.student if record else by_user
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.transcript_pdf",
-            resource_id=str(record.pk) if record else "",
-            resource_repr=f"Transkript PDF — {student.get_full_name() or student.username}",
-            reason="Akademik transkript PDF olaraq yükləndi.",
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the download
-        pass
+    student = record.student if record else by_user
+    create_audit_row(
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=organization,
+        action=AuditAction.UPDATE,
+        resource_type="registrar.transcript_pdf",
+        resource_id=str(record.pk) if record else "",
+        resource_repr=f"Transkript PDF — {student.get_full_name() or student.username}",
+        reason="Akademik transkript PDF olaraq yükləndi.",
+    )
 
 
 #: AZ hərflərinin ASCII qarşılığı — `Content-Disposition`-un ASCII geri dönüşü
@@ -156,24 +154,20 @@ def journal_xlsx(request, offering_id):
 
 
 def _audit_export(offering, by_user):
-    """Best-effort audit entry for a journal export (never blocks the download)."""
-    try:
-        from django.apps import apps as django_apps
+    """Best-effort audit entry for a journal export (never blocks the download).
 
-        from core.constants import AuditAction
+    Audit 2026-09-28 DB-01: SAVEPOINT-li yazı (audit_write)."""
+    from core.constants import AuditAction
 
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.journal_export",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject.code} jurnalı — xlsx ixracı",
-            reason="Elektron jurnal xlsx olaraq ixrac edildi.",
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the download
-        pass
+    create_audit_row(
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=offering.organization,
+        action=AuditAction.UPDATE,
+        resource_type="registrar.journal_export",
+        resource_id=str(offering.pk),
+        resource_repr=f"{offering.subject.code} jurnalı — xlsx ixracı",
+        reason="Elektron jurnal xlsx olaraq ixrac edildi.",
+    )
 
 
 @login_required

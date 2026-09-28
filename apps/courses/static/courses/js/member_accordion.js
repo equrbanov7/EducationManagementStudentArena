@@ -12,6 +12,16 @@
         return document.getElementById("memberAccordionConfig");
     }
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast (aria-live, dizayn sistemi).
+    function toastError(message) {
+        if (!message) { return; }
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
     window.EMSReady.once("member-accordion-delete", function () {
         document.addEventListener("click", async function (e) {
             var btn = e.target.closest(".js-delete-member");
@@ -24,29 +34,29 @@
             var memberId = btn.dataset.memberId;
 
             // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-            var confirmed = await window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteUser, danger: true });
+            var who = btn.dataset.memberName ? btn.dataset.memberName + "\n\n" : "";
+            var confirmed = await window.EMSConfirm.open({
+                title: cfg.dataset.i18nConfirmDeleteUserTitle,
+                body: who + cfg.dataset.i18nConfirmDeleteUser,
+                confirmLabel: cfg.dataset.i18nDelete,
+                danger: true
+            });
             if (!confirmed) { return; }
 
             btn.disabled = true;
 
             try {
-                var resp = await fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": EMSCore.getCsrfToken(),
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
+                // EMSCore.fetchJSON: 403/500 və qeyri-JSON cavab `catch`-ə düşür (err.payload).
+                var data = await EMSCore.fetchJSON(url, { method: "POST" });
 
-                var data = await resp.json();
-
-                if (!resp.ok || !data.success) {
-                    alert(data.error || cfg.dataset.i18nErrorDeleteFailed);
+                if (!data || !data.success) {
+                    toastError((data && data.error) || cfg.dataset.i18nErrorDeleteFailed);
                     btn.disabled = false;
                     return;
                 }
 
                 var row = document.getElementById("member-row-" + memberId);
+                var wasStudent = !!(row && row.querySelector(".cd-avatar--student"));
                 if (row) { row.remove(); }
 
                 function decCountElement(el) {
@@ -65,11 +75,19 @@
 
                 decCountById("sidebar-members-count");
                 decCountById("accordion-members-count");
-                decCountBySelector('.snav-item[data-key="members"] .snav-count');
+                decCountBySelector('[data-count="members"]');
+                if (wasStudent) { decCountBySelector('[data-count="students"]'); }
 
             } catch (err) {
                 console.error(err);
-                alert(cfg.dataset.i18nErrorNetwork);
+                var payload = err && err.payload;
+                if (!(payload && typeof payload === "object" && payload.view_as_blocked)) {
+                    if (err && err.status) {
+                        toastError((payload && typeof payload === "object" && payload.error) || cfg.dataset.i18nErrorDeleteFailed);
+                    } else {
+                        toastError(cfg.dataset.i18nErrorNetwork);
+                    }
+                }
                 btn.disabled = false;
             }
         });

@@ -404,9 +404,13 @@
             if (!host) return;
             var payload = formValues(q("[data-wl-assign-form]"));
             window.EMSCore.fetchJSON(host.dataset.assignUrl, { method: "POST", data: payload })
-                .then(function () {
+                .then(function (result) {
                     var instance = modal("[data-wl-assign-modal]");
                     if (instance) instance.hide();
+                    // Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıbsa xəbərdarlıq.
+                    if (result && result.warning && window.EMSToast) {
+                        window.EMSToast.show(result.warning, "warning");
+                    }
                     loadRows();
                 })
                 .catch(function (err) {

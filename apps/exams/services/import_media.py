@@ -433,7 +433,8 @@ def _prepare_targets(
 
 
 def _image_filename(token: str, batch_id: str, target: _Target) -> str:
-    suffix = "stem" if target.label is None else f"option_{target.label}"
+    # Audit 2026-09-28 EX28-01: fayl adında mənbə hərfi olmasın (END_QUESTION-da «A» = düzgün).
+    suffix = "stem" if target.label is None else f"option_{uuid.uuid4().hex[:12]}"
     return f"pdf_{token[:8]}_{batch_id}_q{target.source_index + 1}_{suffix}.png"
 
 

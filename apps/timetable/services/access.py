@@ -98,29 +98,53 @@ def run_or_404(request, organization, raw):
     return run
 
 
-def run_visible(user, organization, run) -> bool:
-    """Aktor işləmənin qruplarından ən azı birini idarə edirsə görür (fail-closed)."""
+def _is_privileged(user, organization) -> bool:
+    """Superadmin / təşkilat sahibi / org-wide ``schedule.manage`` — bütün işləmələr."""
     if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return True
+    return bool(schedule_manage.actor_scope(user, organization).is_org_wide)
+
+
+def run_visible(user, organization, run) -> bool:
+    """Audit 2026-09-28 TT-2: işləməni yaradan, org-wide aktor və ya işləmənin
+    BÜTÜN qruplarını idarə edən görür (fail-closed).
+
+    Əvvəl bir ortaq qrup başqa koordinatorun bütün işləməsini açırdı (baxış,
+    ləğv, kilid, köçürmə).  Dəyişiklik hüququ ayrıca :func:`run_mutable`-dadır.
+    """
     if run.created_by_id == getattr(user, "pk", None):
         return True
-    group_ids = list(run.slots.values_list("offering__group_id", flat=True).distinct()[:200])
-    if not group_ids:
+    if _is_privileged(user, organization):
+        return True
+    group_ids = {pk for pk in run.slots.values_list("offering__group_id", flat=True).distinct()}
+    if not group_ids or None in group_ids:
         return False
-    return scoped_groups(user, organization).filter(pk__in=group_ids).exists()
+    return scoped_groups(user, organization).filter(pk__in=group_ids).count() == len(group_ids)
+
+
+def run_mutable(user, organization, run) -> bool:
+    """Audit 2026-09-28 TT-2: işləməni dəyişmək (ləğv/kilid/köçürmə/dərc/sinxron)
+    YALNIZ yaradana və org-wide aktora (superadmin/sahib daxil) açıqdır."""
+    if run.created_by_id == getattr(user, "pk", None):
+        return True
+    return _is_privileged(user, organization)
 
 
 def visible_runs(user, organization, period):
-    """Siyahı üçün işləmələr: öz yaratdıqları + əhatəsindəki qrupların işləmələri."""
+    """Siyahı üçün işləmələr: öz yaratdıqları + BÜTÜN qrupları əhatəsində olanlar."""
     Run = django_apps.get_model("timetable", "TimetableRun")
+    Slot = django_apps.get_model("timetable", "TimetableDraftSlot")
     runs = Run.objects.filter(organization=organization, period=period)
-    if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
-        return runs
-    scope = schedule_manage.actor_scope(user, organization)
-    if scope.is_org_wide:
+    if _is_privileged(user, organization):
         return runs
     groups = scoped_groups(user, organization).values("pk")
-    return runs.filter(Q(created_by=user) | Q(slots__offering__group__in=groups)).distinct()
+    inside = Slot.objects.filter(organization=organization, offering__group__in=groups).values("run_id")
+    outside = (
+        Slot.objects.filter(organization=organization)
+        .filter(Q(offering__group__isnull=True) | ~Q(offering__group__in=groups))
+        .values("run_id")
+    )
+    return runs.filter(Q(created_by=user) | (Q(pk__in=inside) & ~Q(pk__in=outside)))
 
 
 __all__ = [
@@ -128,6 +152,7 @@ __all__ = [
     "organization_for",
     "period_choices",
     "period_or_default",
+    "run_mutable",
     "run_or_404",
     "run_visible",
     "scoped_groups",

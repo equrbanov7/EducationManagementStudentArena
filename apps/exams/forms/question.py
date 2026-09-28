@@ -348,7 +348,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
             if not cleaned_data.get("block"):
                 self.add_error(
                     "block",
-                    forms.ValidationError("Sual üçün mövzu bloku seçilməlidir."),
+                    forms.ValidationError(pgettext_lazy("exams.form.question", "Sual üçün mövzu bloku seçilməlidir.")),
                 )
             return cleaned_data
 

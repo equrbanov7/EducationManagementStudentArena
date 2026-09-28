@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
@@ -39,6 +40,7 @@ from ..services import (
     teacher_pool,
     unassign,
 )
+from ..services.tasks import TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
@@ -282,7 +284,8 @@ def row_save(request) -> JsonResponse:
                 return error("workload.row_not_found", "Sətir tapılmadı.", status=404)
         saved = save_row(task=instance, actor=actor, data=payload, row=row, request=request)
     except WorkloadDenied as exc:
-        return denied(exc)
+        # Audit 2026-09-28 W2: bölünmüş saatdan az cəm — vəziyyət toqquşması (409).
+        return denied(exc, status=409 if exc.code == TOTAL_BELOW_ASSIGNED else 403)
     return JsonResponse(
         {"ok": True, "row_id": str(saved.pk), "warnings": row_warnings(saved), "task": _task_payload(instance)}
     )
@@ -352,7 +355,17 @@ def assign(request) -> JsonResponse:
         )
     except WorkloadDenied as exc:
         return denied(exc)
-    return JsonResponse({"ok": True, "assignment_id": str(saved.pk)})
+    body = {"ok": True, "assignment_id": str(saved.pk)}
+    conflicts = int((getattr(saved, "offering_sync", None) or {}).get("schedule_conflicts") or 0)
+    if conflicts:
+        # Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıb — səssiz keçmir.
+        body["schedule_conflicts"] = conflicts
+        body["warning"] = pgettext(
+            "workload",
+            "Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s toqquşma). "
+            "Dərs cədvəlini yoxlayın.",
+        ) % {"count": conflicts}
+    return JsonResponse(body)
 
 
 @never_cache

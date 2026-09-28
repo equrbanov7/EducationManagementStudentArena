@@ -1,13 +1,14 @@
 """accounts auth view paketi — _shared."""
 
-import json
+import hashlib
+import logging
 import secrets
 
 from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.cache import caches
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature
-from django.http import JsonResponse
 
 from apps.accounts.models import EmailOTP
 from core.helpers import _safe_same_origin_redirect_path
@@ -21,11 +22,17 @@ from .constants import (
     AUTH_DEVICE_ID_RE,
     AUTH_REDIRECT_DISALLOWED_CHARS,
     AUTH_REDIRECT_MAX_LENGTH,
+    LOGIN_ACCOUNT_DISTINCT_IP_ALERT_DEFAULT,
+    LOGIN_ACCOUNT_IP_TRACK_SECONDS,
+    LOGIN_ACCOUNT_RATE_LIMIT_DEFAULT,
+    LOGIN_LIMIT_SCOPE_ACCOUNT,
     LOGIN_LIMIT_SCOPE_DEVICE,
     LOGIN_LIMIT_SCOPE_IDENTITY,
     LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE,
     LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT_DEFAULT,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _new_auth_device_id():
@@ -93,6 +100,11 @@ def _login_limit_keys(request, username):
     vedrəsinə düşür və limit heç vaxt işə düşmür (brute-force tam açıq).
     İP qatı bu yolu bağlayır, geniş həddi isə paylaşılan İP-ni qorumaqda davam
     edir.
+
+    Audit 2026-09-28 SA-03: üçüncü, **hesab qatı** (`LOGIN_ACCOUNT_RATE_LIMIT`,
+    yumşaq — 20/1h) yalnız normalizə olunmuş istifadəçi adına bağlıdır. Hər
+    cəhdi fərqli İP-dən (cookie-siz) göndərən paylanmış hücum əvvəlki iki qatı
+    keçirdi; indi bir hesab üçün saatda ən çox 20 uğursuz cəhd mümkündür.
     """
     device_id = _get_auth_device_id(request)
     normalized_username = normalize_rate_identity(username)
@@ -107,7 +119,46 @@ def _login_limit_keys(request, username):
         # Geniş: cookie-siz hücumu dayandıran İP qapısı.
         (ip_rate, LOGIN_LIMIT_SCOPE_DEVICE, ip_key),
         (ip_rate, LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized_username),
+        # Yumşaq: yalnız hesab (SA-03) — paylanmış təxminə qarşı.
+        (_login_account_rate_limit(), LOGIN_LIMIT_SCOPE_ACCOUNT, normalized_username),
     ]
+
+
+def _login_account_rate_limit():
+    return getattr(settings, "LOGIN_ACCOUNT_RATE_LIMIT", LOGIN_ACCOUNT_RATE_LIMIT_DEFAULT)
+
+
+def _note_failed_login_ip(request, username):
+    """Audit 2026-09-28 SA-03: bir hesab üçün uğursuz cəhd edən fərqli İP-ləri say.
+
+    Say ``LOGIN_ACCOUNT_DISTINCT_IP_ALERT`` həddinə çatanda (pəncərə ərzində bir
+    dəfə) WARNING yazılır — paylanmış parol təxmininin siqnalı. İP-lər xam deyil,
+    heş kimi saxlanılır; keş xətası login-i heç vaxt sındırmır.
+    """
+    threshold = int(getattr(settings, "LOGIN_ACCOUNT_DISTINCT_IP_ALERT", LOGIN_ACCOUNT_DISTINCT_IP_ALERT_DEFAULT))
+    if threshold <= 0:
+        return
+    normalized_username = normalize_rate_identity(username)
+    digest = hashlib.sha256(normalized_username.encode("utf-8")).hexdigest()
+    ip_digest = hashlib.sha256(_client_ip_key(request).encode("utf-8")).hexdigest()[:16]
+    track_key = f"accounts.login.account_ips:{digest}"
+    alert_key = f"{track_key}:alerted"
+    try:
+        cache = caches[getattr(settings, "RATELIMIT_USE_CACHE", "default")]
+        seen = list(cache.get(track_key) or [])
+        if ip_digest in seen:
+            return
+        seen = (seen + [ip_digest])[-(threshold + 1) :]
+        cache.set(track_key, seen, timeout=LOGIN_ACCOUNT_IP_TRACK_SECONDS)
+        if len(seen) >= threshold and cache.add(alert_key, 1, timeout=LOGIN_ACCOUNT_IP_TRACK_SECONDS):
+            logger.warning(
+                "Distributed login failures: %s distinct IPs failed for one account within %s s",
+                len(seen),
+                LOGIN_ACCOUNT_IP_TRACK_SECONDS,
+                extra={"username_hash": digest[:16], "distinct_ips": len(seen)},
+            )
+    except Exception:  # noqa: BLE001 — siqnal login axınını sındırmamalıdır.
+        logger.debug("Failed-login IP tracking skipped", exc_info=True)
 
 
 def _clear_login_rate_limits_after_password_reset(request, user):
@@ -132,6 +183,7 @@ def _clear_login_rate_limits_after_password_reset(request, user):
             normalized = normalize_rate_identity(identity)
             clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized)
             clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized)
+            clear_rate_limit(LOGIN_LIMIT_SCOPE_ACCOUNT, normalized)
 
 
 def _client_ip_key(request):
@@ -230,38 +282,8 @@ def _sanitize_auth_redirect_target(request, candidate_url):
     return safe_path
 
 
-def _load_request_payload(request):
-    if request.content_type == "application/json":
-        try:
-            return json.loads(request.body.decode("utf-8") or "{}")
-        except (TypeError, ValueError):
-            return {}
-    return request.POST
-
-
 def _validate_otp_email(value):
     email = EmailOTP.normalize_email(value)
     if not email or "@" not in email:
         raise ValidationError("Etibarlı email ünvanı daxil edin.")
     return email
-
-
-def _resolve_otp_purpose(value, *, default=EmailOTP.Purpose.LOGIN):
-    candidate = str(value or "").strip().lower()
-    allowed = {
-        EmailOTP.Purpose.SIGNUP,
-        EmailOTP.Purpose.LOGIN,
-        EmailOTP.Purpose.PASSWORD_RESET,
-    }
-    if candidate in allowed:
-        return candidate
-    return default
-
-
-def _json_error(message, *, status=400, retry_after=None, **extra):
-    payload = {"success": False, "detail": message}
-    payload.update(extra)
-    response = JsonResponse(payload, status=status)
-    if retry_after:
-        response.headers["Retry-After"] = str(retry_after)
-    return response

@@ -54,6 +54,7 @@ class TrialAttemptNotAppealableTests(TestCase):
             author=self.teacher,
             organization=self.org,
             exam_type="test",
+            exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
             is_active=True,
             is_public=True,
         )

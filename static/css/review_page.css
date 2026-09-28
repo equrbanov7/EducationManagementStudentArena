@@ -1,0 +1,596 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   review_page.css — müəllimin «Təqdim olunan cavablar» səhifələri (2026-09-28)
+   Sərbəst iş (assignments/review_submissions.html) və kurs işi
+   (projects/review_submissions.html) — eyni quruluş, bir stil faylı.
+
+   Dizayn tənqidindən: çörək qırıntısı + başlıq kartı + xülasə göstəriciləri,
+   filtr kartı, yalnız seçimdə görünən kütləvi əməllər paneli, kart içində
+   cədvəl (yumşaq status nişanları, aydın əsas əməl), kabinet üslubunda modallar.
+   Rənglər/ölçülər yalnız design-tokens.css-dən; hər şey `.rv-page`/`.rv-modal` altında.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.rv-page {
+    max-width: 1180px;
+    padding-bottom: 64px;
+    color: var(--ems-neutral-800);
+}
+
+/* ── Çörək qırıntısı ─────────────────────────────────────────────────────── */
+.rv-crumbs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    margin-bottom: 12px;
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-500);
+}
+
+.rv-crumbs__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px 4px 4px;
+    margin-left: -4px;
+    border-radius: var(--ems-r-md);
+    color: var(--ems-neutral-600);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.rv-crumbs__link:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.rv-crumbs__link i {
+    font-size: 11px;
+}
+
+.rv-crumbs__sep {
+    color: var(--ems-neutral-300);
+}
+
+.rv-crumbs__cur {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--ems-neutral-700);
+    font-weight: 700;
+}
+
+/* ── Başlıq kartı ────────────────────────────────────────────────────────── */
+.rv-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    margin-bottom: 16px;
+    padding: 20px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.rv-head__main {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.rv-head__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.rv-kind {
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.rv-head__title {
+    margin: 0;
+    font-size: var(--ems-fs-3xl);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.rv-head__sub {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-500);
+}
+
+.rv-kpis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rv-kpi {
+    display: flex;
+    flex-direction: column;
+    min-width: 96px;
+    padding: 10px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.rv-kpi b {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-kpi span {
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-neutral-500);
+}
+
+.rv-kpi--warn {
+    border-color: var(--ems-warning-bd);
+    background: #fffbeb;
+}
+
+.rv-kpi--warn b {
+    color: var(--ems-warning-800);
+}
+
+.rv-kpi--ok {
+    border-color: var(--ems-success-bd);
+    background: #f0fdf4;
+}
+
+.rv-kpi--ok b {
+    color: var(--ems-success-700);
+}
+
+/* ── Filtr kartı (results_filter_ui.css üzərində tənzim) ─────────────────── */
+.rv-page .results-filter-card {
+    margin-bottom: 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-card);
+}
+
+.rv-page .results-filter-label {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.rv-page .results-filter-card .form-control,
+.rv-page .results-filter-card .form-select {
+    min-height: var(--ems-h-field);
+    border-color: var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+}
+
+.rv-page .results-filter-card .form-control:focus {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.rv-page .bootstrap-single-select__toggle {
+    min-height: var(--ems-h-field);
+    padding: 0 12px;
+    border-color: var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+}
+
+.rv-page .results-filter-submit,
+.rv-page .results-filter-clear {
+    min-height: var(--ems-h-field);
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+}
+
+/* ── Kütləvi əməllər (yalnız seçimdə) ───────────────────────────────────── */
+.rv-page .rv-bulk[hidden] {
+    display: none;
+}
+
+.rv-page .rv-bulk {
+    position: sticky;
+    top: 72px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 10px 12px 10px 16px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    box-shadow: var(--ems-sh-raised);
+    animation: rvBulkIn 0.16s ease;
+}
+
+@keyframes rvBulkIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+.rv-page .rv-bulk .selected-counter {
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-primary-800);
+}
+
+.rv-page .rv-bulk .results-bulk-btn {
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    background-image: none;
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.rv-page .rv-bulk .results-bulk-btn:hover:not(:disabled) {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+}
+
+.rv-page .rv-bulk .results-bulk-btn--delete {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger);
+    color: #fff;
+}
+
+.rv-page .rv-bulk .results-bulk-btn--delete:hover:not(:disabled) {
+    border-color: var(--ems-danger-strong);
+    background: var(--ems-danger-strong);
+    color: #fff;
+}
+
+.rv-page .rv-bulk .results-bulk-btn:disabled {
+    opacity: 0.5;
+}
+
+/* ── Cədvəl kartı ────────────────────────────────────────────────────────── */
+.rv-card {
+    overflow: hidden;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.rv-card__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+}
+
+.rv-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.rv-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+}
+
+.rv-table {
+    margin: 0;
+    font-size: var(--ems-fs-base);
+}
+
+.rv-table > :not(caption) > * > * {
+    padding: 12px 16px;
+    border-bottom-color: var(--ems-neutral-100);
+    background: transparent;
+    box-shadow: none;
+}
+
+.rv-table thead th {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rv-table tbody tr:hover > * {
+    background: var(--ems-bg-subtle);
+}
+
+.rv-table tbody tr.results-row-selected > * {
+    background: var(--ems-primary-50);
+}
+
+.rv-table .rv-col-check {
+    width: 44px;
+}
+
+.rv-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.rv-table .student-name-cell strong {
+    color: var(--ems-text);
+}
+
+.rv-table .results-action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.rv-page .rv-btn-recheck {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.rv-page .rv-btn-recheck:hover:not(:disabled) {
+    border-color: var(--ems-warning-600);
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+.rv-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 3px 9px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.rv-icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-lg);
+    background: transparent;
+    color: var(--ems-neutral-500);
+    cursor: pointer;
+}
+
+.rv-icon-btn--danger:hover {
+    border-color: var(--ems-danger-200);
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+.rv-page .ems-btn:focus-visible,
+.rv-icon-btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.rv-page .pagination {
+    margin: 0;
+    padding: 12px 20px;
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+/* ── Boş vəziyyət ────────────────────────────────────────────────────────── */
+.rv-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 48px 20px;
+    text-align: center;
+}
+
+.rv-empty__ic {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+    border-radius: 16px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 22px;
+}
+
+.rv-empty__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.rv-empty__body {
+    max-width: 46ch;
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-500);
+}
+
+/* ── Modallar ────────────────────────────────────────────────────────────── */
+.rv-modal .modal-content {
+    border: 0;
+    border-radius: var(--ems-r-2xl);
+    overflow: hidden;
+    box-shadow: var(--ems-sh-dialog);
+}
+
+.rv-modal .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg);
+}
+
+.rv-modal .modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.rv-modal .modal-title > i {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 16px;
+}
+
+.rv-modal .modal-body {
+    padding: 20px;
+}
+
+.rv-modal .modal-body strong {
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--ems-neutral-600);
+}
+
+.rv-modal .results-modal-answer {
+    margin-top: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-md);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.rv-modal .form-control {
+    min-height: var(--ems-h-field);
+    border-color: var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-md);
+}
+
+.rv-modal .form-control:focus {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.rv-modal .btn {
+    min-height: var(--ems-h-field);
+    padding: 0 16px;
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+}
+
+.rv-modal .btn-success {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-600);
+}
+
+.rv-modal .btn-success:hover {
+    border-color: var(--ems-primary-700);
+    background: var(--ems-primary-700);
+}
+
+.rv-modal .btn-secondary {
+    border: 1px solid var(--ems-neutral-300);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+}
+
+.rv-modal .modal-footer {
+    gap: 8px;
+    padding: 14px 20px;
+}
+
+@media (max-width: 640px) {
+    .rv-head {
+        padding: 16px;
+    }
+
+    .rv-head__title {
+        font-size: 21px;
+    }
+
+    .rv-kpi {
+        flex: 1 1 calc(50% - 8px);
+        min-width: 0;
+    }
+
+    .rv-page .rv-bulk {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rv-table > :not(caption) > * > * {
+        padding: 10px 12px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rv-page .rv-bulk {
+        animation: none;
+    }
+}
+
+.rv-modal .form-label {
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 800 !important;
+    letter-spacing: 0.02em;
+    color: var(--ems-neutral-600);
+}

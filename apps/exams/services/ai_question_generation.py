@@ -92,7 +92,7 @@ def _json_from_model_text(text: str) -> dict:
     return payload
 
 
-def _call_gemini_text(*, prompt: str, model_chain: tuple[str, ...]) -> str:
+def _call_gemini_text(*, prompt: str, model_chain: tuple[str, ...], request_timeout: float | None = None) -> str:
     import google.generativeai as genai
 
     api_key = _get_api_key()
@@ -110,7 +110,14 @@ def _call_gemini_text(*, prompt: str, model_chain: tuple[str, ...]) -> str:
             try:
                 model = genai.GenerativeModel(model_name)
                 try:
-                    response = model.generate_content(prompt, generation_config=generation_config)
+                    if request_timeout:
+                        response = model.generate_content(
+                            prompt,
+                            generation_config=generation_config,
+                            request_options={"timeout": request_timeout},
+                        )
+                    else:
+                        response = model.generate_content(prompt, generation_config=generation_config)
                 except TypeError:
                     response = model.generate_content(prompt)
                 return (getattr(response, "text", "") or "").strip()

@@ -29,7 +29,7 @@ from ..state_machine import Transition, TransitionDenied, check
 from . import notifications as syllabus_notifications
 from . import versioning
 from .drafts import recompute_completion, refresh_pointers
-from .scoping import is_author
+from .scoping import is_author, is_self_authored_by_decider
 
 #: Keçid → domen qeydinin qərar dəyəri.
 _DECISION_BY_TRANSITION = {
@@ -69,7 +69,17 @@ def _in_scope(actor, syllabus, name: str) -> bool:
     if permission is None:
         return is_author(actor, syllabus)
     if name in _CHAIR_LEVEL_TRANSITIONS:
-        return actor.covers_chair_unit(syllabus.chair_unit_id, permission)
+        if actor.covers_chair_unit(syllabus.chair_unit_id, permission):
+            return True
+        # Audit 2026-09-28 SYL-1: müəllif özü bu kafedranın qərarvericisidirsə
+        # (kafedra müdiri öz fənnini tədris edir), qərar NÖVBƏTİ PİLLƏYƏ keçir —
+        # açarı olan fakültə səviyyəli aktor (dekan) alt-ağac əhatəsi ilə qərar
+        # verə bilir.  Org-wide override (rektor/prorektor/RİM) yuxarıda keçir.
+        return (
+            actor.has(permission)
+            and actor.covers_unit(syllabus.chair_unit_id, permission)
+            and is_self_authored_by_decider(syllabus, permission)
+        )
     return actor.covers_unit(syllabus.chair_unit_id, permission)
 
 
@@ -168,22 +178,38 @@ def submit(*, version, actor, request=None):
     versiya CARİ semestrə tətbiq olunur və artıq açılmış jurnalın strukturunu
     dəyişərdi.  Qaldırma :mod:`apps.syllabus.services.versioning`-dədir.
     """
-    version, escalated = versioning.escalate_if_structural(version, actor=actor, request=request)
-    recompute_completion(version)
-    version.refresh_from_db(fields=["completion_percent"])
-    now = timezone.now()
-    updated = _apply(
-        version=version,
-        actor=actor,
-        name=Transition.SUBMIT,
-        request=request,
-        submitted_at=now,
-        submitted_by=actor.user,
-        locked_at=now,
-        decision_reason="",
-        reviewer=None,
-        review_started_at=None,
-    )
+    # Audit 2026-09-28 SYL-4: icazə/müəllif/əhatə/status YOXLAMASI yazıdan
+    # ƏVVƏLDİR, qaldırma + tamamlanma + keçid isə TƏK kilidli tranzaksiyadadır —
+    # uğursuz göndərmə (məs. natamam qaralama, kənar aktor) heç bir iz qoymur:
+    # versiya MAJOR-a qalxmır, audit sətri yazılmır.
+    with transaction.atomic():
+        locked = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=version.pk)
+        locked.syllabus = version.syllabus
+        syllabus = locked.syllabus
+        check(
+            name=Transition.SUBMIT,
+            status=locked.status,
+            permissions=actor.permissions if not actor.is_superadmin else ["*"],
+            is_author=is_author(actor, syllabus),
+            # Tamamlanma qaldırma/yenidən hesablamadan SONRA `_apply`-da yoxlanılır.
+            completion_percent=100,
+            in_scope=_in_scope(actor, syllabus, Transition.SUBMIT),
+        )
+        locked, escalated = versioning.escalate_if_structural(locked, actor=actor, request=request)
+        recompute_completion(locked)
+        now = timezone.now()
+        updated = _apply(
+            version=locked,
+            actor=actor,
+            name=Transition.SUBMIT,
+            request=request,
+            submitted_at=now,
+            submitted_by=actor.user,
+            locked_at=now,
+            decision_reason="",
+            reviewer=None,
+            review_started_at=None,
+        )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(current_version=updated)
     syllabus_notifications.notify_submitted(updated)
     # UI mesajı üçün: qaldırma baş veribsə hansı bölmələr səbəb olub.

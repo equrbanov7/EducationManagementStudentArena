@@ -270,9 +270,8 @@ class ViewAsMiddleware:
     BLOCKED_URL_NAMES = frozenset(
         {
             "accounts:set_initial_password",
-            "accounts:send_otp_api",
-            "accounts:verify_otp_api",
-            "accounts:resend_otp_api",
+            # Audit 2026-09-28 SA-01/02: parolsuz OTP JSON API-ləri (send/verify/resend_otp_api)
+            # silindi — adları burada saxlamağa ehtiyac yoxdur.
             "accounts:resend_code",
             "accounts:delete_account",
         }

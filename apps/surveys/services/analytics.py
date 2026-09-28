@@ -146,6 +146,18 @@ def _baseline_counts(organization, scope, filters, campaign_ids, key) -> dict:
     return {row[key]: row["n"] for row in rows}
 
 
+def _unit_baseline_counts(organization, scope, filters, campaign_ids, key):
+    """Audit 2026-09-28 SV-1: fakültə/kafedra filtri də daraldıcıdır — sətrin vahidsiz sayı
+    (``None`` — vahid filtri yoxdur). Müəllim bir neçə kafedrada dərs deyəndə «müəllim −
+    müəllim∩kafedra» fərqi 1…k−1 olarsa sətir gizlədilir."""
+    from .analytics_units import has_unit_filter, without_units
+
+    if not has_unit_filter(filters):
+        return None
+    rows = flt.responses(organization, scope, without_units(filters), campaign_ids).values(key).annotate(n=Count("id"))
+    return {row[key]: row["n"] for row in rows}
+
+
 def _names(user_ids) -> dict:
     from django.contrib.auth import get_user_model
 
@@ -164,19 +176,27 @@ def _unit_names(unit_ids) -> dict:
     return dict(OrgUnit.objects.filter(pk__in={pk for pk in unit_ids if pk}).values_list("pk", "name"))
 
 
-def department_benchmarks(organization, campaign_ids, k) -> dict:
+def department_benchmarks(organization, campaign_ids, k, *, scope=None) -> dict:
     """``{department_id: metrics}`` + ``"__org__"`` açarında təşkilat ortası (əhatədən asılı DEYİL).
 
-    Bench — aqreqat müqayisə nöqtəsidir (≥ k cavab), fərdi məlumat vermir.
+    Bench — aqreqat müqayisə nöqtəsidir (≥ k cavab), fərdi məlumat vermir. Audit 2026-09-28
+    SV-1: kafedra ortası yalnız DƏRC OLUNAN kafedra üçün (``analytics_units``) — əks halda
+    «universitet − görünən kafedra ortaları» kiçik kafedranı açardı; ``scope`` dar əhatədirsə
+    təşkilat ortası yalnız ``universitet − əhatə`` 0 və ya ≥ k olanda verilir.
     """
     from apps.organizations.public import ORG_WIDE_SCOPE
 
+    from .analytics_units import org_benchmark_ok, publishable_units
+
     base = flt.responses(organization, ORG_WIDE_SCOPE, flt.ResultFilters(), campaign_ids)
+    departments = publishable_units(organization, ORG_WIDE_SCOPE, flt.ResultFilters(), campaign_ids, k).departments
     result = {}
     for row in base.values("teacher_department_id").annotate(**_metric_annotations()):
-        result[row["teacher_department_id"]] = _metrics(row, (row["n"] or 0) >= k)
+        visible = (row["n"] or 0) >= k and row["teacher_department_id"] in departments
+        result[row["teacher_department_id"]] = _metrics(row, visible)
     org_row = aggregate_metrics(base)
-    result["__org__"] = _metrics(org_row, (org_row["n"] or 0) >= k)
+    org_visible = (org_row["n"] or 0) >= k and (scope is None or org_benchmark_ok(organization, scope, campaign_ids, k))
+    result["__org__"] = _metrics(org_row, org_visible)
     return result
 
 
@@ -202,16 +222,19 @@ def teacher_table(organization, scope, filters=None, *, order_by="-avg_overall",
     base = flt.responses(organization, scope, filters, campaign_ids).exclude(teacher__isnull=True)
     grouped = list(base.values("teacher_id").annotate(**_metric_annotations()))
     baseline = _baseline_counts(organization, scope, filters, campaign_ids, "teacher_id") if filters.is_narrowed else {}
+    unit_baseline = _unit_baseline_counts(organization, scope, filters, campaign_ids, "teacher_id")
     departments = {}
     for row in base.values("teacher_id", "teacher_department_id").annotate(c=Count("id")).order_by("-c"):
         departments.setdefault(row["teacher_id"], row["teacher_department_id"])
-    bench = department_benchmarks(organization, campaign_ids, k)
+    bench = department_benchmarks(organization, campaign_ids, k, scope=scope)
     names = _names(row["teacher_id"] for row in grouped)
     unit_names = _unit_names(departments.values())
     rows = []
     for row in grouped:
         teacher_id = row["teacher_id"]
         visible = is_visible(row["n"] or 0, k, baseline.get(teacher_id) if filters.is_narrowed else None)
+        if unit_baseline is not None:
+            visible = visible and is_visible(row["n"] or 0, k, unit_baseline.get(teacher_id))
         metrics = _metrics(row, visible)
         department_id = departments.get(teacher_id)
         dept = bench.get(department_id, {})

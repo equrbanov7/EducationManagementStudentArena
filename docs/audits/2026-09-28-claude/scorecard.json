@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-28",
+  "commit": "914a6571+uncommitted",
+  "scores": {
+    "architecture": 77, "backend": 77, "frontend": 83, "database": 80, "security": 80,
+    "authentication": 73, "authorization": 76, "multi_tenancy": 86, "exam_system": 70,
+    "business_logic": 71, "performance": 82, "scalability": 64, "reliability": 68, "ux_ui": 77,
+    "accessibility": 76, "testing": 75, "code_quality": 80, "devops": 72, "monitoring": 70,
+    "backup_recovery": 45, "internationalization": 76, "maintainability": 74
+  },
+  "average": 74,
+  "extra": {"api": 79, "privacy": 68, "configuration": 74, "concurrency": 82},
+  "p0": ["EX28-01"],
+  "p1": ["AD-01", "AD-02", "AD-03", "EX28-02", "EXA-01", "SYL-1", "S1", "SV-1"],
+  "fixed_during_audit": ["C1/S1 (course groups part)", "T-03", "DB-04", "DB-05", "DB-06"],
+  "tests": {"passed": 10317, "skipped": 224, "failed_then_fixed": 1}
+}

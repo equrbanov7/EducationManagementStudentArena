@@ -2,7 +2,14 @@
 #
 # Standalone local stack for Claude/Codex-style agents that need a real
 # PostgreSQL server. It intentionally avoids the repository .env contract by
-# using AGENT_* variables with safe local defaults.
+# using AGENT_* variables.
+#
+# Audit 2026-09-28 AD-03: the sandbox holds production-copy databases, so
+#   * ports are published on 127.0.0.1 ONLY (was 0.0.0.0 → reachable from the LAN);
+#   * AGENT_POSTGRES_PASSWORD is REQUIRED (no committed default). Keep it in the
+#     untracked `.env.agent` (gitignored by `.env.*`, chmod 600) and pass it:
+#       docker compose --env-file .env.agent -f docker-compose.agent.yml -p emsarena-agent …
+#     See docs/operations/CLAUDE_POSTGRES_SANDBOX.md.
 
 name: emsarena-agent
 
@@ -13,9 +20,9 @@ services:
     environment:
       POSTGRES_DB: ${AGENT_POSTGRES_DB:-emsarena_agent}
       POSTGRES_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
-      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD (see .env.agent / CLAUDE_POSTGRES_SANDBOX.md)}
     ports:
-      - "${AGENT_POSTGRES_PORT:-55432}:5432"
+      - "127.0.0.1:${AGENT_POSTGRES_PORT:-55432}:5432"
     volumes:
       - agent_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -30,7 +37,7 @@ services:
     image: redis:7-alpine
     container_name: emsarena-agent-redis
     ports:
-      - "${AGENT_REDIS_PORT:-56379}:6379"
+      - "127.0.0.1:${AGENT_REDIS_PORT:-56379}:6379"
     volumes:
       - agent_redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
@@ -63,19 +70,19 @@ services:
       SECRET_KEY: ${AGENT_SECRET_KEY:-emsarena-agent-dev-secret-key-not-for-production}
       DEBUG: ${AGENT_DEBUG:-True}
       ALLOWED_HOSTS: ${AGENT_ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0,testserver}
-      DATABASE_URL: postgres://${AGENT_POSTGRES_USER:-emsarena_agent}:${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}@postgres:5432/${AGENT_POSTGRES_DB:-emsarena_agent}
+      DATABASE_URL: postgres://${AGENT_POSTGRES_USER:-emsarena_agent}:${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD}@postgres:5432/${AGENT_POSTGRES_DB:-emsarena_agent}
       POSTGRES_DB: ${AGENT_POSTGRES_DB:-emsarena_agent}
       POSTGRES_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
-      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD}
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USER: ${AGENT_POSTGRES_USER:-emsarena_agent}
-      DB_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      DB_PASSWORD: ${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD}
       PGHOST: postgres
       PGPORT: "5432"
       PGDATABASE: ${AGENT_POSTGRES_DB:-emsarena_agent}
       PGUSER: ${AGENT_POSTGRES_USER:-emsarena_agent}
-      PGPASSWORD: ${AGENT_POSTGRES_PASSWORD:-emsarena_agent_password}
+      PGPASSWORD: ${AGENT_POSTGRES_PASSWORD:?set AGENT_POSTGRES_PASSWORD}
       USE_REDIS: ${AGENT_USE_REDIS:-True}
       REDIS_URL: redis://redis:6379/0
       PYTHONPATH: /app

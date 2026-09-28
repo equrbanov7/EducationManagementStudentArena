@@ -13,17 +13,24 @@ ANONİMLİK MÜQAVİLƏSİ (dəyişdirməzdən əvvəl oxu):
   «zip» oluna bilərdi).
 * Qəbz və cavab EYNİ tranzaksiyada yazılır (ikisi birlikdə və ya heç biri),
   amma ortaq açarları yoxdur; UI/API onları heç vaxt birləşdirmir.
+* Audit 2026-09-28 SV-3: cavab əvvəl şəxssiz BUFERƏ (``SurveyPendingResponse``) düşür və
+  ``SurveyResponse``-a qəbzdən AYRI tranzaksiyada, eyni snapshot üzrə ≥ k cavablıq
+  partiyalarla, təsadüfi sıra ilə köçürülür (``services/pending.py``) — fiziki sıra /
+  ``xmin`` cavabı qəbzə deyil, ən azı k nəfərlik partiyaya bağlayır.
 * Cavabın analitika «snapshot»-u yalnız AÇILIŞDAN/MÜƏLLİMDƏN törəyən atributlardır
   (fənn, açılışın qrupu, müəllimin kafedrası/fakültəsi, ixtisas, kurs) — yəni
   cavab «O açılışın hansısa tələbəsi T müəllimini qiymətləndirdi»dən artıq heç
   nə demir. Ümumi bölmə cavabı tələbənin öz qrupunu/ixtisasını daşıyır —
   nəticələr k-həddi altında gizlədilir.
 
-QALIQ RİSK (bilinən, sənədləşdirilmiş): DB-yə birbaşa çıxışı olan administrator
-MVCC sistem sütunları (``xmin`` — eyni tranzaksiya), fiziki daxiletmə sırası
-(``ctid``) və ya veb-server jurnalındakı POST vaxtı ilə cavabı qəbzə bağlaya
-bilər; tək tələbəli açılışda isə cavab onsuz da tək nəfərindir. Tətbiq
-istifadəçiləri (UI/API) üçün qoruma tamdır; bax ``apps/surveys/public.py``.
+QALIQ RİSK (bilinən, sənədləşdirilmiş): cavab BUFERDƏ olduğu müddətdə (snapshot üzrə k
+yığılana və ya ilk dərcə qədər) DB-yə birbaşa çıxışı olan administrator və ya həmin anda
+alınmış ``pg_dump`` bufer sətrini ``xmin`` / fiziki sıra ilə qəbzə bağlaya bilər; WAL /
+replika jurnalları və veb-server jurnalındakı POST vaxtı da bu qorumanın xaricindədir.
+Köçürülmüş cavab isə yalnız ≥ k nəfərlik partiyaya bağlanır; eyni açılışda k-dan az
+tələbə varsa cavab onsuz da o kiçik qrupundur (nəticələr k-həddi ilə gizlidir). Sorğu
+cədvəllərinin ehtiyat nüsxələri həssas məlumat sayılmalıdır. Tətbiq istifadəçiləri
+(UI/API) üçün qoruma tamdır; bax ``apps/surveys/public.py``.
 """
 
 from __future__ import annotations
@@ -163,3 +170,28 @@ class SurveyAnswer(models.Model):
 
     def __str__(self):
         return f"answer<{self.question_id}>"
+
+
+class SurveyPendingResponse(models.Model):
+    """Audit 2026-09-28 SV-2/SV-3 — hələ dərc olunmamış ANONİM cavab (bufer).
+
+    Tələbə FK-sı, vaxt damğası, qəbzə bağ YOXDUR; ``payload`` — cavabın snapshot-u və
+    cavabları (``SurveyResponse`` ilə eyni məzmun). ``bucket`` — snapshot-un həşi: eyni
+    açar üzrə ≥ k cavab yığılanda hamısı birlikdə, təsadüfi sıra ilə ``SurveyResponse``-a
+    köçürülür və buradan silinir (``services/pending.py``). Nəticələr bu cədvəli OXUMUR.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="+")
+    campaign = models.ForeignKey(SurveyCampaign, on_delete=models.CASCADE, related_name="pending_responses")
+    scope = models.CharField(max_length=16, choices=Section.choices)
+    bucket = models.CharField(max_length=64)
+    payload = models.JSONField(default=dict)
+
+    class Meta:
+        verbose_name = pgettext_lazy(_CTX, "dərc gözləyən anonim cavab")
+        verbose_name_plural = pgettext_lazy(_CTX, "dərc gözləyən anonim cavablar")
+        indexes = [models.Index(fields=["campaign", "bucket"], name="surveys_pending_camp_bucket")]
+
+    def __str__(self):
+        return f"pending<{self.campaign_id}:{self.scope}>"

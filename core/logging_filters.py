@@ -20,17 +20,31 @@ class SensitiveDataFilter(logging.Filter):
     _AUTH_RE = re.compile(r"(?i)(authorization\s*[:=]\s*)(?:bearer\s+)?([^\s,;\"']+)")
     _KEY_VALUE_RE = re.compile(
         r"(?ix)"
-        r"([\"']?(?:password|pass|pwd|token|authorization|auth[_-]?token|secret|email|phone)[\"']?\s*[:=]\s*)"
+        r"([\"']?(?:password|pass|pwd|token|authorization|auth[_-]?token|secret|email|phone"
+        r"|x-goog-api-key|api[_-]?key)[\"']?\s*[:=]\s*)"
         r"([\"']?[^\"'\s,}\]]+[\"']?)"
     )
+    # Audit 2026-09-28 SA-06: URL query-dəki ``key=`` / ``api_key=`` (Gemini
+    # köhnə çağırış forması) da maskalanır. ``(?<![A-Za-z0-9])`` — ``monkey=``
+    # kimi sözlərin içindəki ``key=`` tutulmasın.
     _QUERY_VALUE_RE = re.compile(
-        r"(?ix)" r"((?:password|pass|pwd|token|authorization|email|phone)\s*=\s*)" r"([^&\s]+)"
+        r"(?ix)"
+        r"((?<![A-Za-z0-9])(?:password|pass|pwd|token|authorization|email|phone|api[_-]?key|apikey|key)\s*=\s*)"
+        r"([^&\s]+)"
     )
 
     def filter(self, record: logging.LogRecord) -> bool:
         record.msg = self._sanitize(record.msg)
         if record.args:
             record.args = self._sanitize(record.args)
+        # SA-06: traceback mətni (``exc_info``) filtrdən yan keçirdi — formatlayıcı
+        # ``exc_text`` hazırdırsa onu istifadə edir, ona görə burada maskalanmış
+        # halda əvvəlcədən qurulur.
+        if record.exc_info and not record.exc_text:
+            try:
+                record.exc_text = self._sanitize_text(logging.Formatter().formatException(record.exc_info))
+            except Exception:  # noqa: BLE001 — log filtri heç vaxt yazını sındırmamalıdır.
+                pass
         return True
 
     def _sanitize(self, value):
@@ -52,6 +66,10 @@ class SensitiveDataFilter(logging.Filter):
             return {self._sanitize(item) for item in value}
         if isinstance(value, str):
             return self._sanitize_text(value)
+        if isinstance(value, BaseException):
+            # SA-06: istisna obyekti (məs. ``requests.ConnectionError`` — mətnində
+            # tam URL) ``%s`` ilə göstəriləndə filtrdən yan keçirdi.
+            return self._sanitize_text(str(value))
         return value
 
     def _sanitize_text(self, text: str) -> str:
@@ -120,7 +138,9 @@ class JsonFormatter(logging.Formatter):
             "request_id": getattr(record, "request_id", "-"),
         }
 
-        if record.exc_info:
+        if record.exc_text:
+            payload["exc_info"] = record.exc_text
+        elif record.exc_info:
             payload["exc_info"] = "".join(traceback.format_exception(*record.exc_info))
 
         return json.dumps(payload, ensure_ascii=False, default=str)

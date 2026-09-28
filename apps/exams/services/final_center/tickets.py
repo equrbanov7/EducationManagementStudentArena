@@ -27,6 +27,7 @@ from apps.exams.services.language_variants import available_language_options, ge
 from core.audit import log_action
 from core.constants import AuditAction
 
+from .eligibility import admission_block_reason
 from .events import broadcast_to_staff, notify_ticket
 from .pins import revoke_ticket_pin, set_ticket_pin
 from .presence import drop_presence
@@ -283,6 +284,11 @@ def _ensure_exam_start_policy(ticket):
     left = exam.attempts_left_for(student)
     if left is not None and left <= 0:
         raise TicketStateError(pgettext("exams.model.access", "attempt_limit_reached"))
+    # Audit 2026-09-28 EXA-04: qayıb limiti buraxılış qapısı bilet yolunda da —
+    # FAIL-CLOSED (registrar xətası = start yoxdur), bax ``eligibility``.
+    block_reason = admission_block_reason(student, exam)
+    if block_reason:
+        raise TicketStateError(block_reason)
 
 
 def begin_attempt_for_ticket(ticket):

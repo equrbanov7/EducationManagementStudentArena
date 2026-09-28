@@ -2,9 +2,11 @@
 
 from .creation import create_appeal
 from .permissions import (
+    appeal_block_reason,
     can_create_appeal,
     can_decide_appeal,
     can_review_appeal,
+    can_view_appeal,
 )
 from .scoring import (
     accept_appeal_item,
@@ -13,6 +15,7 @@ from .scoring import (
     appeal_result_hidden_from_student,
     appeal_score_state,
     apply_bonus_to_test_result,
+    delivered_question_points,
     effective_test_score,
     recompute_appeal_status,
     reject_appeal_item,
@@ -26,6 +29,8 @@ from .state_machine import InvalidAppealTransition, assert_transition, can_trans
 from .window import (
     APPEAL_ELIGIBLE_ATTEMPT_STATUSES,
     appeal_deadline,
+    appeal_window_start,
+    attempt_awaiting_grading,
     is_within_appeal_window,
     remaining_window_seconds,
 )
@@ -34,18 +39,23 @@ __all__ = [
     "APPEAL_ELIGIBLE_ATTEMPT_STATUSES",
     "InvalidAppealTransition",
     "accept_appeal_item",
+    "appeal_block_reason",
     "appeal_bonus_map",
     "appeal_item_result_visible_to_student",
     "appeal_result_hidden_from_student",
     "appeal_deadline",
     "appeal_score_state",
+    "appeal_window_start",
     "apply_bonus_to_test_result",
     "assert_transition",
+    "attempt_awaiting_grading",
     "can_create_appeal",
     "can_decide_appeal",
     "can_review_appeal",
     "can_transition",
+    "can_view_appeal",
     "create_appeal",
+    "delivered_question_points",
     "effective_test_score",
     "is_within_appeal_window",
     "recompute_appeal_status",

@@ -330,8 +330,9 @@ class PdfImageBundleFlowTests(TestCase):
         self.assertFalse(first.image_replaces_text)
         self.assertTrue(first.image.storage.exists(first.image.name))
         self.assertFalse(second.image)
-        options = {opt.label: opt for opt in second.options.all()}
-        self.assertTrue(options["B"].image, "3-cü sualın B variantı şəkilli olmalıdır")
-        self.assertEqual(options["B"].text, "two")
-        self.assertFalse(options["A"].image)
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb A..E
+        # yenidən hərflənir — media mənbə etiketi ilə bağlanır, yoxlama mətnə görədir.
+        options = {opt.text: opt for opt in second.options.all()}
+        self.assertTrue(options["two"].image, "3-cü sualın B variantı şəkilli olmalıdır")
+        self.assertFalse(options["one"].image)
         self.assertFalse(import_media.default_storage.exists(f"question_imports/{token}/manifest.json"))

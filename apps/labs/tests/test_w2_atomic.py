@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
-from apps.courses.models import Course
+from apps.courses.models import Course, CourseMembership
 from apps.labs.models import Lab, LabBlock, LabQuestion
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -51,6 +51,8 @@ class _Base(TestCase):
         _assign(self.teacher, self.org, ProfileRole.TEACHER, "teacher")
         _assign(self.student, self.org, ProfileRole.STUDENT, "student")
         self.course = Course.objects.create(owner=self.teacher, title="W2 Lab Course", status="published")
+        # 2026-09-28: create_lab yalnız kursun tələbə üzvlərini qəbul edir.
+        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
         self.client = Client()
         self.client.force_login(self.teacher)
         session = self.client.session

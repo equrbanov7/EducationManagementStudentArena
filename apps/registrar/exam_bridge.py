@@ -21,6 +21,8 @@ from __future__ import annotations
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 
+from django.db import transaction
+
 from apps.registrar import absence_limit
 from apps.registrar import exam_eligibility as eligibility_gate
 from apps.registrar import finals, gradebook, services
@@ -263,7 +265,9 @@ def _actor_can_write(organization, user):
     ).exists()
 
 
-def record_exam_result(*, student, subject_id, organization, score_percent, is_expelled=False, by_user=None):
+def record_exam_result(
+    *, student, subject_id, organization, score_percent, is_expelled=False, by_user=None, appeal_id=None
+):
     """İmtahan nəticəsini jurnala yaz (``FinalGrade.exam_score``).
 
     ``score_percent`` — 0–100 xam faiz. ``is_expelled`` (proctordan qovulma) →
@@ -292,7 +296,24 @@ def record_exam_result(*, student, subject_id, organization, score_percent, is_e
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     exam_score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
     note = "imtahan mərkəzi" if by_user is not None else "imtahan mərkəzi · avtomatik"
-    return finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
+    if appeal_id is None:
+        return finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
+    # Audit 2026-09-28 EXA-03: apellyasiya qərarı balı dəyişirsə ledger-də «apellyasiya» sətri.
+    from apps.registrar.exam_score_entry import record_appeal_score_change
+    from apps.registrar.models import FinalGrade
+
+    with transaction.atomic():
+        previous = FinalGrade.objects.filter(enrollment=enrollment).values_list("exam_score", flat=True).first()
+        grade = finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
+        if grade is not None:
+            record_appeal_score_change(
+                enrollment=enrollment,
+                old_score=previous,
+                new_score=grade.exam_score,
+                by_user=by_user,
+                appeal_id=appeal_id,
+            )
+    return grade
 
 
 def exam_result_summary(*, student, subject_id, organization):

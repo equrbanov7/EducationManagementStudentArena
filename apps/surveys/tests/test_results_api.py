@@ -7,6 +7,7 @@ from django.test import TestCase
 from apps.registrar.models import CourseOffering, Enrollment
 from apps.surveys import public
 from apps.surveys.forms import validate_answers
+from apps.surveys.services.pending import publish_results
 from apps.surveys.services.submit import submit_target
 from apps.surveys.services.targets import student_targets
 from apps.surveys.services.templates import template_questions
@@ -78,6 +79,8 @@ class ResultsApiTest(TestCase):
                     else:
                         cleaned = _answers(template, "teacher", score=5, overall=8, text=f"Şərh {index}")
                     submit_target(campaign=cls.campaign, student=student, target=target, cleaned_answers=cleaned)
+            # Audit 2026-09-28 SV-3: cavablar buferdən köçürülür (ilk dərc) — F1 API yalnız köçürülmüşü oxuyur.
+            publish_results(cls.campaign.pk)
             cls.rector = member(w["org"], "svres_rector", "rector")
             cls.chair_head = member(w["org"], "svres_chair", "chair_head", unit=w["chair_a"])
             cls.qc_staff = member(w["org"], "svres_qc", "quality_control_staff")

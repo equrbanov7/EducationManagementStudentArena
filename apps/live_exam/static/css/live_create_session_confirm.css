@@ -1,0 +1,43 @@
+/* live_create_session_confirm.css — canlı sessiya yaratma təsdiqi (Audit 2026-09-28 EX28-10). */
+.live-create-confirm {
+    display: flex;
+    justify-content: center;
+    padding: 48px 16px;
+}
+
+.live-create-confirm__card {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px;
+    border-radius: 16px;
+    background: var(--color-surface, #fff);
+    border: 1px solid var(--color-border, #e5e7eb);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.live-create-confirm__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.live-create-confirm__exam {
+    margin: 0 0 12px;
+    font-weight: 600;
+    color: var(--color-text-muted, #475569);
+}
+
+.live-create-confirm__hint {
+    margin: 0 0 16px;
+    color: var(--color-warning-text, #92400e);
+}
+
+.live-create-confirm__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}

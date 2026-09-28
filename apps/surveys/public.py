@@ -16,12 +16,18 @@ ANONİMLİK ZƏMANƏTLƏRİ (dəyişdirməzdən əvvəl oxu)
 * Cavab snapshot-u (fənn, açılışın qrupu, müəllimin kafedrası/fakültəsi, ixtisas,
   kurs) açılışdan/müəllimdən törəyir — tələbəyə aid atribut YOXDUR (ümumi bölmə
   istisna: tələbənin qrupu/ixtisası/fakültəsi, k-həddi altında).
-* QALIQ RİSK: DB-yə birbaşa çıxışı olan administrator ``xmin`` (eyni tranzaksiya),
-  fiziki sıra (``ctid``) və ya veb-jurnaldakı POST vaxtı ilə cavabı qəbzə bağlaya
-  bilər; tək tələbəli açılışda cavab onsuz da bir nəfərindir (UI/API onu
-  göstərmir). Qoruma tətbiq istifadəçilərinə qarşı tamdır, DB adminə qarşı deyil.
-* Fərqləndirmə (differencing) hücumuna qarşı qoruma bir səviyyəlidir (tamamlayıcı
-  qayda); müxtəlif filtr kombinasiyalarının ardıcıl çıxılması nəzəri olaraq qalır —
+* Audit 2026-09-28 SV-3: cavab əvvəl şəxssiz buferə düşür və ayrı tranzaksiyada, eyni
+  snapshot üzrə ≥ k partiya ilə, təsadüfi sıra ilə köçürülür (``services/pending``) —
+  ``xmin`` / fiziki sıra cavabı qəbzə deyil, ≥ k nəfərlik partiyaya bağlayır. SV-2: ilk
+  dərcdən sonra gələn cavablar yalnız eyni snapshotla ≥ k yığılanda görünür.
+* QALIQ RİSK: bufer müddətində DB-yə birbaşa çıxışı olan administrator / o anda alınmış
+  dump bufer sətrini qəbzə bağlaya bilər; veb-jurnaldakı POST vaxtı da qorunmur; tək
+  tələbəli açılışda cavab onsuz da bir nəfərindir (UI/API onu göstərmir). Qoruma tətbiq
+  istifadəçilərinə qarşı tamdır, DB adminə qarşı deyil.
+* Fərqləndirmə (differencing) hücumuna qarşı qoruma: daraldıcı filtrdə tamamlayıcı qayda;
+  fakültə/kafedra filtrində vahid dərc qaydası (Audit 2026-09-28 SV-1,
+  ``services/analytics_units`` — görünən vahid görünüşlərindən çoxluq cəbri ilə alınan
+  istənilən dəst 0 və ya ≥ k); müxtəlif filtr kombinasiyalarının ardıcıl çıxılması nəzəri olaraq qalır —
   F2 UI xam sətir ixracı ETMƏMƏLİDİR, yalnız bu funksiyaların nəticələrini göstərməlidir.
 
 ══════════════════════════════════════════════════════════════════════════════
@@ -54,7 +60,12 @@ Ortaq «metrics» açarları: ``n`` (cavab sayı), ``suppressed`` (bool), ``avg_
 * ``campaigns_for(organization)`` → ``[{"id", "period_id", "period_name",
   "academic_year", "start_date", "status", "effective_status", "opens_on",
   "closes_on", "grace_until", "mandatory", "min_group_size", "opened_via",
-  "responses", "receipts"}]`` (yeni dövr birinci).
+  "responses", "pending", "receipts", "results_published"}]`` (yeni dövr birinci;
+  ``responses`` — dərc olunmuş, ``pending`` — buferdə gözləyən müəllim cavabları, dəqiq
+  saylar — UI yalnız səbətlə göstərir).
+* ``publish_due(campaign_choices(org))`` — effektiv bağlı kampaniyanın ilk dərci
+  (Audit 2026-09-28 SV-2/SV-3, ``services/pending``); nəticə görünüşləri hesablamadan
+  ƏVVƏL çağırılır.
 * ``summary(organization, scope, filters)`` → ``{"k", "campaign_ids", **metrics,
   "teachers", "questions": [{"code", "kind", "section", "text", "n", "avg", "top2"}],
   "general_n", "general_questions": [...], "participation": {"receipts",
@@ -200,6 +211,7 @@ from .services.analytics_publish import publishable_by_campaign, publishable_tea
 from .services.analytics_text import keyword_frequency, suggestion_digest
 from .services.filters import ResultFilters
 from .services.participation import daily_timeline, participation
+from .services.pending import publish_due
 
 
 def cabinet_state(user):
@@ -218,7 +230,7 @@ def pending_badge(user) -> int:
 
 def campaigns_for(organization) -> list:
     """Kampaniyalar (yeni dövr birinci) — cavab/qəbz SAYLARI ilə (bax modul sənədi)."""
-    from .models import SurveyCampaign, SurveyReceipt, SurveyResponse
+    from .models import SurveyCampaign, SurveyPendingResponse, SurveyReceipt, SurveyResponse
 
     if organization is None:
         return []
@@ -232,6 +244,12 @@ def campaigns_for(organization) -> list:
     # İki ayrı qruplaşdırılmış sorğu: iki əks əlaqə üzrə tək JOIN sətirləri çoxaldardı.
     responses = dict(
         SurveyResponse.objects.filter(campaign_id__in=ids, scope=Section.TEACHER)
+        .values("campaign_id")
+        .annotate(c=Count("id"))
+        .values_list("campaign_id", "c")
+    )
+    pending = dict(
+        SurveyPendingResponse.objects.filter(campaign_id__in=ids, scope=Section.TEACHER)
         .values("campaign_id")
         .annotate(c=Count("id"))
         .values_list("campaign_id", "c")
@@ -258,7 +276,9 @@ def campaigns_for(organization) -> list:
             "min_group_size": campaign.min_group_size,
             "opened_via": campaign.opened_via,
             "responses": responses.get(campaign.pk, 0),
+            "pending": pending.get(campaign.pk, 0),
             "receipts": receipts.get(campaign.pk, 0),
+            "results_published": campaign.results_published_at is not None,
         }
         for campaign in campaigns
     ]
@@ -331,6 +351,7 @@ __all__ = [
     "nested_hidden_keys",
     "nested_set_ok",
     "published_campaigns",
+    "publish_due",
     "redact",
     "round5",
     "sibling_suppress",

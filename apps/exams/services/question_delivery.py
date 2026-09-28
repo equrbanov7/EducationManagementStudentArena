@@ -4,6 +4,7 @@ import random
 from types import SimpleNamespace
 
 from apps.exams.constants import LABELS
+from apps.exams.services.option_tokens import option_token
 from apps.exams.services.question_snapshot import delivered_question_view
 from core.media_urls import protected_media_url
 
@@ -48,6 +49,8 @@ def safe_delivered_question(answer):
         safe_options.append(
             SimpleNamespace(
                 id=option_id,
+                # Audit 2026-09-28 EX28-01: input ``value``-su — xam id deyil.
+                token=option_token(answer.attempt_id, option_id),
                 label=LABELS[index] if index < len(LABELS) else "",
                 text=option.get("text", "") or "",
                 image_url=_storage_url(option.get("image", "")),

@@ -14,7 +14,8 @@ checkbox-larında `name` YOXDUR ki, ikiqat göndərilməsin. Bu partial həm
 `course_members.html`, həm də `course_dashboard.html` tərəfindən include olunur —
 ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_order).
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'courses/css/member_picker.css' %}?v=20260912-1">
+<link rel="stylesheet" href="{% static 'courses/css/member_form_modal.css' %}?v=20260928-1">
+<link rel="stylesheet" href="{% static 'courses/css/member_picker.css' %}?v=20260928-1">
 
 <div id="memberFormModalConfig" hidden
      data-delete-member-url="{% url 'courses:delete_member' course.id 0 %}"
@@ -32,14 +33,14 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
      data-i18n-remove="{% trans 'Çıxar' context 'registrar.guest_roster' %}"></div>
 
 <div class="modal fade" id="addStudentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
                     <i class="fas fa-user-plus"></i> {% trans "student_modal_title" context "courses.partial.member_modal" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                        data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
             </div>
 
             <form id="addStudentForm" method="post"
@@ -81,7 +82,9 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                         </div>
 
                         <div id="student_list_container" class="custom-list-container" aria-live="polite" aria-busy="false">
-                            <div class="picker-status" data-student-picker-status>{% trans "loading" context "courses.partial.member_modal" %}</div>
+                            <div class="picker-skeleton" data-student-picker-status aria-hidden="true">
+                                <span></span><span></span><span></span><span></span>
+                            </div>
                         </div>
 
                         <div class="picker-footer">
@@ -94,17 +97,11 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
                         </div>
                     </div>
 
-                    <div id="studentLoadingIndicator" class="text-center mt-3 d-none">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
-                        </div>
-                        <p class="text-muted mt-2">{% trans "students_adding" context "courses.partial.member_modal" %}</p>
-                    </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.member_modal" %}
+                        {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-check"></i> {% trans "action_add" context "courses.partial.member_modal" %}
@@ -115,74 +112,68 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
     </div>
 </div>
 
-<div class="modal fade" id="addGroupModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="addGroupModal" tabindex="-1" aria-hidden="true" aria-labelledby="addGroupModalTitle">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header bg-secondary text-white">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="addGroupModalTitle">
                     <i class="fas fa-users-cog"></i> {% trans "group_modal_title" context "courses.partial.member_modal" %}
                 </h5>
                 <button type="button" class="btn-close btn-close-white"
-                        data-bs-dismiss="modal" aria-label="Close"></button>
+                        data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
             </div>
 
+            {% comment %}2026-09-28: qruplar reyestrdən (OrgUnit) asinxron gəlir —
+            `courses:available_groups`. Seçilmiş id-lər `#group_selected_chips`
+            içində gizli `group_ids` input-ları kimi saxlanılır (axtarış dəyişəndə
+            itmir); siyahı sətirlərinin checkbox-larında `name` YOXDUR.{% endcomment %}
             <form id="addGroupForm" method="post"
                   action="{% url 'courses:add_members_bulk' course.id %}">
                 {% csrf_token %}
 
                 <div class="modal-body">
-
-                    <div class="custom-selector-wrapper" role="group" aria-labelledby="group-selector-label">
-                        <label class="form-label fw-bold mb-2" id="group-selector-label">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
+                    <div class="custom-selector-wrapper" role="group" aria-labelledby="group-selector-label"
+                         id="groupPicker"
+                         data-available-url="{% url 'courses:available_groups' course.id %}"
+                         data-i18n-mine="{% trans 'groups_mine' context 'courses.partial.member_modal' %}"
+                         data-i18n-others="{% trans 'groups_others' context 'courses.partial.member_modal' %}"
+                         data-i18n-in-course="{% trans 'group_in_course' context 'courses.partial.member_modal' %}"
+                         data-i18n-students="{% trans 'stat_students' context 'courses.dashboard' %}"
+                         data-i18n-empty-mine="{% trans 'groups_mine_empty' context 'courses.partial.member_modal' %}"
+                         data-i18n-empty-search="{% trans 'empty_group_not_found' context 'courses.partial.member_modal' %}"
+                         data-i18n-search-hint="{% trans 'groups_search_hint' context 'courses.partial.member_modal' %}"
+                         data-i18n-error="{% trans 'msg_server_error' context 'courses.partial.member_modal' %}">
+                        <label class="form-label fw-bold mb-2" id="group-selector-label" for="group_search_input">{% trans "label_groups" context "courses.partial.member_modal" %}</label>
 
                         <div class="search-input-group">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="group_search_input" class="custom-search-input"
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                            <input type="search" id="group_search_input" class="custom-search-input"
+                                   autocomplete="off" aria-controls="group_list_container"
                                    placeholder="{% trans 'placeholder_search_groups' context 'courses.partial.member_modal' %}">
                         </div>
 
-                        <div id="group_list_container" class="custom-list-container">
-                            {% if all_groups %}
-                                {% for group in all_groups %}
-                                <div class="list-item-row" data-search="{{ group.name|lower }}">
-                                    <input type="checkbox"
-                                           id="group_{{ group.id }}"
-                                           name="group_ids"
-                                           value="{{ group.id }}"
-                                           class="custom-item-checkbox">
-                                    <label for="group_{{ group.id }}" class="custom-item-label">
-                                        {{ group.name }}
-                                    </label>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="p-3 text-center text-muted">{% trans "empty_group_not_found" context "courses.partial.member_modal" %}</div>
-                            {% endif %}
+                        <div id="group_selected_row" class="picker-selected-row" hidden>
+                            <span class="picker-selected-label">{% trans "selected_items" context "assignment.legacy.modals" %}:</span>
+                            <div id="group_selected_chips" class="picker-chips"></div>
                         </div>
 
-                        <div class="selection-counter">
-                            {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="group_counter">0</span>
-                        </div>
-                    </div>
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-info-circle"></i>
-                        {% trans "groups_info_text" context "courses.partial.member_modal" %}
-                    </div>
+                        <div id="group_list_container" class="custom-list-container picker-groups" aria-live="polite" aria-busy="false"></div>
 
-                    <div id="groupLoadingIndicator" class="text-center mt-3 d-none">
-                        <div class="spinner-border text-secondary" role="status">
-                            <span class="visually-hidden">{% trans "loading" context "courses.partial.member_modal" %}</span>
+                        <div class="picker-footer">
+                            <span class="picker-hint">{% trans "groups_info_text" context "courses.partial.member_modal" %}</span>
+                            <div class="selection-counter">
+                                {% trans "selected_count" context "courses.partial.member_modal" %}: <span id="group_counter">0</span>
+                            </div>
                         </div>
-                        <p class="text-muted mt-2">{% trans "groups_adding" context "courses.partial.member_modal" %}</p>
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i> {% trans "action_cancel" context "courses.partial.member_modal" %}
+                        {% trans "action_cancel" context "courses.partial.member_modal" %}
                     </button>
-                    <button type="submit" class="btn btn-secondary">
-                        <i class="fas fa-check"></i> {% trans "action_add_groups" context "courses.partial.member_modal" %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check" aria-hidden="true"></i> {% trans "action_add_groups" context "courses.partial.member_modal" %}
                     </button>
                 </div>
             </form>
@@ -190,4 +181,5 @@ ona görə CSS/JS-i özü yükləyir (JS `defer` ilə — bax test_shell_script_
     </div>
 </div>
 
-<script src="{% static 'courses/js/_member_form_modal.js' %}?v=20260926-search" defer></script>
+<script src="{% static 'courses/js/_member_form_modal.js' %}?v=20260928-1" defer></script>
+<script src="{% static 'courses/js/_member_group_picker.js' %}?v=20260928-1" defer></script>

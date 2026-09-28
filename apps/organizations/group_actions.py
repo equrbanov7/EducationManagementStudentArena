@@ -36,7 +36,15 @@ from django.views.decorators.http import require_POST
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
-from .groups_registry import can_manage_groups, can_view_groups, education_form_choices, group_meta, group_scope
+from .groups_registry import (
+    can_manage_groups,
+    can_view_groups,
+    education_form_choices,
+    group_manage_scope,
+    group_meta,
+    group_scope,
+    student_record_scope_q,
+)
 from .groups_registry import visible_group as _visible_group
 from .models import Organization, OrgUnit
 from .scoping import scope_org_units
@@ -311,6 +319,8 @@ def _add_students(request, organization, scope):
     records = list(
         StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
         .filter(Q(group__isnull=True) | Q(group__is_active=False))
+        # Audit 2026-09-28 S3: yalnız aktorun idarə əhatəsindəki tələbələr.
+        .filter(student_record_scope_q(scope))
         .select_related("student", "program", "organization", "group")
     )
     if not records:
@@ -437,11 +447,15 @@ def group_action(request, slug):
     if not can_view_groups(request):
         return _error(pgettext(_CTX, "Qrup reyestrinə səlahiyyətiniz yoxdur."), status=403, code="forbidden")
 
-    scope = group_scope(request, organization)
-    if not scope.has_structure_access:
+    if not group_scope(request, organization).has_structure_access:
         return _error(pgettext(_CTX, "Struktur əhatəniz yoxdur."), status=403, code="forbidden")
     if not can_manage_groups(request):
         return _error(pgettext(_CTX, "Qrupları idarə etmək səlahiyyətiniz yoxdur."), status=403, code="forbidden")
+    # Audit 2026-09-28 S4: yazı əməlləri `unit.view` deyil, `unit.group_manage`
+    # əhatəsi ilə — hədəf qrup/ixtisas/tələbə bu əhatədən kənardadırsa 404.
+    scope = group_manage_scope(request, organization)
+    if not scope.has_structure_access:
+        return _error(pgettext(_CTX, "Struktur əhatəniz yoxdur."), status=403, code="forbidden")
 
     handler = _HANDLERS.get((request.POST.get("action") or "").strip())
     if handler is None:

@@ -1,5 +1,9 @@
 version: 2
 updates:
+  # Audit 2026-09-28 AD-06: Dependabot GİRİŞ fayllarını (requirements/*.txt —
+  # birbaşa pin-lər) yeniləyir. Hash-li lock-lar (requirements/*.lock) ondan
+  # törədilir: Dependabot PR-ında `scripts/deps/lock.sh` işlədilib lock-lar
+  # commit olunmalıdır — lint job-unun «lock files in sync» addımı bunu tələb edir.
   - package-ecosystem: "pip"
     directory: "/requirements"
     schedule:
@@ -17,3 +21,13 @@ updates:
       time: "03:30"
       timezone: "UTC"
     open-pull-requests-limit: 5
+
+  # Audit 2026-09-28 FQ-TEST-1: CI-dakı jsdom qoşqusu (tests/js).
+  - package-ecosystem: "npm"
+    directory: "/tests/js"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 2

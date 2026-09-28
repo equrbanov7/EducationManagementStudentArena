@@ -59,6 +59,7 @@ içəri, Escape bağlayır, bağlananda fokus əvvəlki elementə qayıdır.
         {% if not sr.can_decide %}
         <span class="syl-decide__readonly">{{ sr.read_only.title }}</span>
         {% endif %}
+        <span class="syl-decide__readonly" data-syl-rv-own hidden></span>
         {% if sr.can_reject %}
         <button type="button" class="syl-btn syl-btn--danger syl-btn--lg" data-syl-decide="reject">{% trans "Rədd et" context "accounts.syllabus" %}</button>
         {% endif %}

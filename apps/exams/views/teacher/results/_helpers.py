@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta
 from urllib.parse import urlencode, urlsplit
 
-from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.crypto import salted_hmac
@@ -216,15 +215,20 @@ def _parse_filter_date(raw_value):
         return "", None
 
 
+def _view_action_state():
+    return {
+        "code": "view",
+        "label": pgettext("exams.teacher.results.action", "Bax"),
+        "url_name": "exams:teacher_view_attempt",
+        "countdown_seconds": 0,
+        "countdown_mode": "",
+    }
+
+
 def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_seconds, identity_window_seconds):
-    if attempt.exam.exam_type == "test":
-        return {
-            "code": "view",
-            "label": pgettext("exams.teacher.results.action", "Bax"),
-            "url_name": "exams:teacher_view_attempt",
-            "countdown_seconds": 0,
-            "countdown_mode": "",
-        }
+    # Audit 2026-09-28 EX28-02: bitməmiş cəhd (tələbə hələ yazır) — «Yoxla» yox, yalnız «Bax».
+    if attempt.exam.exam_type == "test" or not attempt.is_finished:
+        return _view_action_state()
 
     if attempt.checked_by_teacher:
         if review_window_seconds:
@@ -235,13 +239,7 @@ def _resolve_attempt_action_state(attempt, *, can_view_name, review_window_secon
                 "countdown_seconds": review_window_seconds,
                 "countdown_mode": "recheck",
             }
-        return {
-            "code": "view",
-            "label": pgettext("exams.teacher.results.action", "Bax"),
-            "url_name": "exams:teacher_view_attempt",
-            "countdown_seconds": 0,
-            "countdown_mode": "",
-        }
+        return _view_action_state()
 
     return {
         "code": "review",
@@ -292,11 +290,8 @@ def _attempt_effective_finish(attempt, *, now=None):
     - finished_at yoxdursa: started_at + limit (əgər müddət bitibsə).
     - Müddət hələ bitməyibsə None.
     """
-    started_at = getattr(attempt, "started_at", None)
-    duration_minutes = getattr(attempt.exam, "total_duration_minutes", None)
-    deadline = None
-    if started_at and duration_minutes:
-        deadline = started_at + timedelta(minutes=int(duration_minutes))
+    # Audit 2026-09-28 EX28-07: deadline = min(start + müddət, end_datetime) — modeldəki qayda.
+    deadline = attempt.deadline_at
 
     finished_at = getattr(attempt, "finished_at", None)
     if finished_at:
@@ -334,27 +329,22 @@ def _apply_appeal_bonus(test_result, bonus):
     return score_adjustments.apply_bonus(test_result, bonus)
 
 
-def _expire_overdue_attempts(exam, *, now=None):
+def _expire_overdue_attempts(exam):
     """Vaxt limiti keçmiş, amma hələ də 'davam edir'/'qaralama' görünən
-    cəhdləri toplu şəkildə expire edir (lazy maintenance).
+    cəhdləri expire edir (lazy maintenance).
 
     Tələbə səhifəyə qayıtmayanda expire_if_time_limit_reached heç vaxt
-    işləmir və cəhd siyahıda əbədi "davam edir" qalırdı. Tək bulk UPDATE —
-    per-row save yoxdur.
+    işləmir və cəhd siyahıda əbədi "davam edir" qalırdı.
+
+    Audit 2026-09-28 EX28-04 / EX28-07: əvvəl kilidsiz bulk UPDATE idi — grace-i
+    gözləmirdi (müəllimin səhifəni açması tələbənin son təhvilini itirirdi),
+    ``end_datetime``-ı nəzərə almırdı və ``mark_finished``-i keçdiyi üçün jurnal
+    sinxronizasiyası da işləmirdi. İndi imtahan-skoplu sweep ilə eyni yol:
+    SQL ön-filtri + sətir kilidi + ``mark_finished``.
     """
-    duration_minutes = getattr(exam, "total_duration_minutes", None)
-    if not duration_minutes:
-        return 0
-    duration_minutes = int(duration_minutes)
-    cutoff = (now or timezone.now()) - timedelta(minutes=duration_minutes)
-    return exam.attempts.filter(
-        status__in=("in_progress", "draft"),
-        started_at__lt=cutoff,
-    ).update(
-        status="expired",
-        finished_at=F("started_at") + timedelta(minutes=duration_minutes),
-        duration_seconds=duration_minutes * 60,
-    )
+    from apps.exams.services.attempts import sweep_overdue_attempts
+
+    return sweep_overdue_attempts(queryset=exam.attempts.all())
 
 
 def _apply_results_filters(exam, request):

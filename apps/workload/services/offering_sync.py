@@ -78,6 +78,8 @@ COUNTER_KEYS = (
     "guest_present",
     "guest_deferred",
     "guest_failed",
+    # Audit 2026-09-28 W4: müəllim dəyişikliyinin yaratdığı cədvəl toqquşmaları.
+    "schedule_conflicts",
 )
 
 #: ``registrar.services.enroll_group_students`` hesabatı → bu modulun sayğacları.
@@ -204,6 +206,7 @@ class _Sync:
         self.counters = dict.fromkeys(COUNTER_KEYS, 0)
         self.offering_ids: list[str] = []
         self.missing_seasons: dict = {}
+        self.schedule_conflicts: list[dict] = []
         self._closed = None
 
     def run(self, rows, *, anchor_id=None) -> dict:
@@ -225,7 +228,12 @@ class _Sync:
         return self.report()
 
     def report(self) -> dict:
-        return {**self.counters, "offering_ids": self.offering_ids, "missing_seasons": self.missing_seasons}
+        return {
+            **self.counters,
+            "offering_ids": self.offering_ids,
+            "missing_seasons": self.missing_seasons,
+            "schedule_conflict_details": self.schedule_conflicts,
+        }
 
     # ── toplu oxu ─────────────────────────────────────────────────────────
     def _existing(self, keys) -> dict:
@@ -415,9 +423,19 @@ class _Sync:
         self.counters["updated"] += 1
         self.counters["hours_updated"] += int("lesson_hours" in fields)
         if "instructor" in fields:
-            self._audit_instructor(offering, old_id, new_id, outcome, entry["rows"])
+            conflicts = self._timetable_conflicts(offering, new_id)
+            self._audit_instructor(offering, old_id, new_id, outcome, entry["rows"], conflicts=conflicts)
 
-    def _audit_instructor(self, offering, old_id, new_id, outcome, rows) -> None:
+    def _timetable_conflicts(self, offering, new_id) -> list:
+        """Audit 2026-09-28 W4: yeni müəllim açılışın slotlarında başqa dərslə toqquşurmu."""
+        from .offering_timetable import instructor_change_conflicts
+
+        conflicts = instructor_change_conflicts(offering, new_id)
+        self.counters["schedule_conflicts"] += len(conflicts)
+        self.schedule_conflicts.extend(conflicts)
+        return conflicts
+
+    def _audit_instructor(self, offering, old_id, new_id, outcome, rows, *, conflicts=()) -> None:
         log_action(
             AuditAction.UPDATE,
             user=self.actor_user,
@@ -429,6 +447,7 @@ class _Sync:
                 "outcome": outcome,
                 "task": str(self.task.pk),
                 "rows": [str(row.pk) for row in rows],
+                "schedule_conflicts": [item.get("message", "") for item in conflicts],
             },
             reason="workload.offering_instructor_synced",
             request=self.request,

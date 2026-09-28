@@ -12,6 +12,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.appeals.constants import (
     APPEAL_ITEM_STATUS_REJECTED,
@@ -184,7 +185,15 @@ class WrittenExamScoringTests(_Base):
             title="S Written", author=self.teacher, organization=self.org, exam_type="written", is_active=True
         )
         self.question = ExamQuestion.objects.create(exam=self.exam, order=1, text="Q1", points=5)
-        self.attempt = ExamAttempt.objects.create(user=self.student, exam=self.exam, status="submitted")
+        # Audit 2026-09-28 EXA-02: yazılı cəhdə qərar yalnız YOXLANMIŞ cəhddə verilir.
+        self.attempt = ExamAttempt.objects.create(
+            user=self.student,
+            exam=self.exam,
+            status="submitted",
+            checked_by_teacher=True,
+            teacher_checked_at=timezone.now(),
+            teacher_score=0,
+        )
         # Müəllim əvvəlcə 0 bal verib.
         self.answer = ExamAnswer.objects.create(attempt=self.attempt, question=self.question, teacher_score=0)
 

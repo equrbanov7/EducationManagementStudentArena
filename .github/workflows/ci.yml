@@ -8,7 +8,8 @@
 #
 # Dependency graph:
 #
-#   lint ──┬──► unit-tests (3.11 + 3.12)
+#   lint ──┬──► unit-tests (3.11 + 3.12) ──► coverage-combine (main/Staging push)
+#          ├──► js-tests (Node + jsdom)
 #          ├──► build
 #          ├──► security
 #          ├──► secret-scan
@@ -75,7 +76,9 @@ jobs:
       python-version: "3.11"
 
   # ── 2b. Unit Tests (Python 3.12) ───────────────────────────────────────
-  # 8 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı), coverage yox.
+  # 8 paralel shard (hər biri öz Postgres/Redis-i ilə; .test_durations ilə balanslı).
+  # Audit 2026-09-28 AD-07: release yolunda (main/Staging push) shard-lar xam
+  # coverage datasını yükləyir → `coverage-combine` qapısı; PR/Develop-da yox.
   unit-tests-312:
     needs: lint
     strategy:
@@ -88,6 +91,63 @@ jobs:
       shard: ${{ matrix.shard }}
       shards: "8"
       coverage: false
+      coverage-data: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging') }}
+
+  # ── 2b'. Coverage gate on the release path (Audit 2026-09-28 AD-07) ────
+  # Əvvəl coverage qapısı (--fail-under=68) yalnız PR-dakı 3.11 job-unda idi;
+  # prod deploy-u (main push) və Staging promosiyası qapısız keçirdi. İndi 8
+  # shard-ın datası birləşdirilir və EYNİ hədd tətbiq olunur.
+  coverage-combine:
+    name: 📊 Coverage gate (combined shards)
+    needs: unit-tests-312
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v6
+
+      - name: 🐍 Setup Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: 📥 Install coverage (version from requirements/test.lock)
+        run: |
+          ver="$(sed -n 's/^coverage==\([0-9.]*\).*/\1/p' requirements/test.lock)"
+          test -n "$ver"
+          python -m pip install "coverage==${ver}"
+
+      - name: 📥 Download shard coverage data
+        uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-data-3.12-shard-*
+          path: coverage-data
+          merge-multiple: true
+
+      - name: 📊 Combine and enforce --fail-under
+        run: |
+          count="$(find coverage-data -name '.coverage.shard-*' | wc -l)"
+          echo "Shard data files: ${count}"
+          test "$count" -eq 8
+          coverage combine coverage-data
+          coverage report --fail-under=68 --skip-covered --sort=cover | tail -n 40
+          coverage xml -o coverage.xml
+
+      - name: 📤 Upload combined coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report-combined
+          path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ── 2d. Shipped JS tests (Node + jsdom) — Audit 2026-09-28 FQ-TEST-1 ────
+  js-tests:
+    needs: lint
+    uses: ./.github/workflows/_js-tests.yml
+    with:
+      python-version: "3.12"
 
   # ── 2c. RLS Transaction-Pooling Gate (FAZA 4 / Task 3) ─────────────────
   # `pytest -m postgres` yalnız `RLS_TRANSACTION_SCOPED=True` altında —
@@ -164,6 +224,8 @@ jobs:
       - lint
       - unit-tests-311
       - unit-tests-312
+      - coverage-combine
+      - js-tests
       - rls-txn-pool
       - build
       - security
@@ -179,11 +241,15 @@ jobs:
         env:
           # Develop/Staging push-larında Docker zənciri qəsdən ötürülür (bax docker-build.if).
           DOCKER_CHAIN_OPTIONAL: ${{ (github.event_name == 'push' && github.ref != 'refs/heads/main') && '1' || '0' }}
+          # Audit 2026-09-28 AD-07: coverage qapısı main/Staging push-larında MƏCBURİDİR.
+          COVERAGE_GATE_REQUIRED: ${{ (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Staging')) && '1' || '0' }}
         run: |
           echo "=== CI Pipeline Summary ==="
           echo "Lint:             ${{ needs.lint.result }}"
           echo "Unit Tests 3.11:  ${{ needs.unit-tests-311.result }}"
           echo "Unit Tests 3.12:  ${{ needs.unit-tests-312.result }}"
+          echo "Coverage gate:    ${{ needs.coverage-combine.result }}"
+          echo "JS Tests:         ${{ needs.js-tests.result }}"
           echo "RLS Txn-Pool:     ${{ needs.rls-txn-pool.result }}"
           echo "Build:            ${{ needs.build.result }}"
           echo "Security:         ${{ needs.security.result }}"
@@ -207,6 +273,22 @@ jobs:
           fi
           if [[ "${{ needs.unit-tests-311.result }}" != "success" && "${{ needs.unit-tests-311.result }}" != "skipped" ]]; then
             echo "❌ Unit Tests (3.11) failed: ${{ needs.unit-tests-311.result }}"
+            exit 1
+          fi
+
+          # Release yolunda (main/Staging push) birləşdirilmiş coverage qapısı məcburidir;
+          # PR/Develop-da job qəsdən ötürülür (PR-da 3.11 job-u öz --fail-under-i ilə gedir).
+          if [[ "$COVERAGE_GATE_REQUIRED" == "1" && "${{ needs.coverage-combine.result }}" != "success" ]]; then
+            echo "❌ Coverage gate did not succeed: ${{ needs.coverage-combine.result }}"
+            exit 1
+          fi
+          if [[ "$COVERAGE_GATE_REQUIRED" != "1" && "${{ needs.coverage-combine.result }}" != "skipped" && "${{ needs.coverage-combine.result }}" != "success" ]]; then
+            echo "❌ Coverage gate failed: ${{ needs.coverage-combine.result }}"
+            exit 1
+          fi
+
+          if [[ "${{ needs.js-tests.result }}" != "success" ]]; then
+            echo "❌ JS tests (Node + jsdom) did not succeed: ${{ needs.js-tests.result }}"
             exit 1
           fi
 

@@ -15,6 +15,20 @@ qapısı düşər. Ona görə model app registry-dən götürülür — registra
 ``organizations`` modellərini oxuduğu ilə eyni sanksiyalı üsul
 (bax ``apps/registrar/public.py`` şərhi). Registrar faylında heç bir
 ``from apps.exams`` sətri YOXDUR.
+
+Audit 2026-09-28 EXA-03 (sahibin 2026-09-07 memo-su — «hər təkrar cəhd və
+apellyasiya izlənsin, koordinator/dekanlıq görsün»): tarixçə yanlış data
+göstərirdi. İndi:
+
+* YALNIZ yekun (``exam_type_extended="final"``) cəhdlər — midterm/quiz «rəsmi»
+  kimi görünmür (``FinalGrade.exam_score`` də yalnız finaldan yazılır);
+* faiz jurnala yazılan RƏSMİ faizlə eynidir (test → apellyasiya bonusu daxil,
+  yazılı → ``teacher_score`` ÷ çatdırılan snapshot tavanı, yoxlanmamış → «—»);
+* rəsmi = ən son BİTMİŞ (``finished_at``) qeyri-sınaq final cəhdi;
+* hər cəhdə apellyasiya sətirləri (``appeals``: qərar, bal fərqi, baxan, tarix).
+
+Faiz və apellyasiya sətirləri ``appeals`` modulundan app registry üzərindən
+(``AppealsConfig.attempt_history_provider``) alınır — yenə statik import yoxdur.
 """
 
 from __future__ import annotations
@@ -25,6 +39,9 @@ logger = logging.getLogger(__name__)
 
 #: Bitmiş sayılan cəhd statusları (yarımçıq/başlanmış cəhd tarixçəyə düşmür).
 _FINISHED_STATUSES = ("submitted", "expired")
+
+#: Tarixçəyə düşən kateqoriya — yalnız yekun imtahan (``journal_sync`` ilə eyni qayda).
+_FINAL_CATEGORY = "final"
 
 #: AZ sıra sayı şəkilçisi — son rəqəmə görə (1-ci, 3-cü, 6-cı, 9-cu…).
 #: Şablonda hesablamaq mümkün deyil, ona görə etiket burada hazırlanır.
@@ -53,16 +70,47 @@ def _attempt_model():
     return django_apps.get_model("exams", "ExamAttempt")
 
 
-def _safe_percent(attempt):
-    """Cəhdin faizi — hesablama sınarsa tarixçə yenə də göstərilsin."""
+def _history_provider():
+    """``appeals`` modulunun tarixçə provayderi (app registry) və ya ``None``."""
+    from django.apps import apps as django_apps
+
     try:
-        value = attempt.score_percent
+        config = django_apps.get_app_config("appeals")
+    except LookupError:
+        return None
+    factory = getattr(config, "attempt_history_provider", None)
+    return factory() if callable(factory) else None
+
+
+def _final_attempts(**filters):
+    """Tarixçə sorğusu — bitmiş, qeyri-sınaq YEKUN cəhdlər, köhnədən yeniyə (rəsmi = sonuncu)."""
+    from django.db.models.functions import Coalesce
+
+    return (
+        _attempt_model()
+        .objects.filter(
+            is_trial=False,
+            status__in=_FINISHED_STATUSES,
+            exam__exam_type_extended=_FINAL_CATEGORY,
+            **filters,
+        )
+        .select_related("exam")
+        .order_by(Coalesce("finished_at", "started_at"), "attempt_number", "id")
+    )
+
+
+def _history_extras(attempts):
+    """(faiz xəritəsi, apellyasiya sətirləri) — provayder yoxdursa/sınarsa boş (səhifə sınmır)."""
+    provider = _history_provider()
+    if provider is None or not attempts:
+        return {}, {}
+    try:
+        percents = provider.attempt_percents(attempts)
+        appeals = provider.appeal_rows_by_attempt([attempt.id for attempt in attempts])
     except Exception:  # noqa: BLE001 — tarixçə heç vaxt səhifəni sındırmır
-        logger.exception("exam_attempt_history: score_percent failed for attempt %s", getattr(attempt, "id", "?"))
-        return None
-    if value is None:
-        return None
-    return round(float(value), 1)
+        logger.exception("exam_attempt_history: provider failed for %s attempts", len(attempts))
+        return {}, {}
+    return percents, appeals
 
 
 def attempt_rows_for_subject(*, student, subject_id, organization):
@@ -71,7 +119,9 @@ def attempt_rows_for_subject(*, student, subject_id, organization):
     Nəticə sətirləri::
 
         {"number": 1, "label": "1-ci", "percent": 80.0, "is_official": False,
-         "exam_title": "…", "finished_at": …, "is_expelled": False}
+         "exam_title": "…", "finished_at": …, "is_expelled": False,
+         "attempt_id": 7, "appeals": [{"status": "accepted", "delta_points": …,
+         "reviewer_name": "…", "reviewed_at": …, …}]}
 
     ``is_official`` — YALNIZ sonuncu (ən yeni) cəhddə ``True``. Boş siyahı =
     bu fənn üzrə rəqəmsal cəhd yoxdur (kağız imtahan) — səth heç nə göstərmir.
@@ -79,40 +129,40 @@ def attempt_rows_for_subject(*, student, subject_id, organization):
     if not subject_id or student is None or organization is None:
         return []
     try:
-        attempt_model = _attempt_model()
+        attempts = list(_final_attempts(user=student, exam__subject_id=subject_id, exam__organization=organization))
     except LookupError:  # exams modulu quraşdırılmayıb (test/tenant konfiqurasiyası)
         return []
-
-    attempts = list(
-        attempt_model.objects.filter(
-            user=student,
-            exam__subject_id=subject_id,
-            exam__organization=organization,
-            is_trial=False,
-            status__in=_FINISHED_STATUSES,
-        )
-        .select_related("exam")
-        .order_by("started_at", "attempt_number")
-    )
     # Sətir formatı TƏK yerdən (toplu variant da eyni funksiyanı işlədir).
-    return _rows_from_attempts(attempts)
+    percents, appeals = _history_extras(attempts)
+    return _rows_from_attempts(attempts, percents, appeals)
 
 
-def _rows_from_attempts(attempts) -> list:
-    """Sıralanmış cəhd sətirlərini UI formatına çevir (rəsmi = SONUNCU)."""
+def _rows_from_attempts(attempts, percents, appeals) -> list:
+    """Sıralanmış cəhd sətirlərini UI formatına çevir (rəsmi = SONUNCU bitmiş final cəhdi)."""
     last_index = len(attempts) - 1
     return [
         {
             "number": index + 1,
             "label": ordinal_label(index + 1),
-            "percent": _safe_percent(attempt),
+            "percent": percents.get(attempt.id),
             "is_official": index == last_index,
             "exam_title": getattr(attempt.exam, "title", "") or "",
             "finished_at": attempt.finished_at or attempt.started_at,
             "is_expelled": getattr(attempt, "supervision_status", "") == "removed",
+            "attempt_id": attempt.id,
+            "appeals": appeals.get(attempt.id, []),
         }
         for index, attempt in enumerate(attempts)
     ]
+
+
+def _grouped_rows(attempts, key) -> dict:
+    """Cəhdləri ``key(attempt)`` üzrə qruplaşdır — faiz/apellyasiya TƏK toplu çağırışla."""
+    percents, appeals = _history_extras(attempts)
+    grouped: dict = {}
+    for attempt in attempts:
+        grouped.setdefault(key(attempt), []).append(attempt)
+    return {group: _rows_from_attempts(rows, percents, appeals) for group, rows in grouped.items()}
 
 
 def attempt_rows_by_student(*, student_ids, subject_id, organization) -> dict:
@@ -126,24 +176,10 @@ def attempt_rows_by_student(*, student_ids, subject_id, organization) -> dict:
     if not ids or not subject_id or organization is None:
         return {}
     try:
-        attempt_model = _attempt_model()
+        attempts = list(_final_attempts(user_id__in=ids, exam__subject_id=subject_id, exam__organization=organization))
     except LookupError:  # exams modulu quraşdırılmayıb
         return {}
-    attempts = (
-        attempt_model.objects.filter(
-            user_id__in=ids,
-            exam__subject_id=subject_id,
-            exam__organization=organization,
-            is_trial=False,
-            status__in=_FINISHED_STATUSES,
-        )
-        .select_related("exam")
-        .order_by("started_at", "attempt_number")
-    )
-    by_student: dict = {}
-    for attempt in attempts:
-        by_student.setdefault(attempt.user_id, []).append(attempt)
-    return {student_id: _rows_from_attempts(rows) for student_id, rows in by_student.items()}
+    return _grouped_rows(attempts, lambda attempt: attempt.user_id)
 
 
 def attempt_rows_by_subject(*, student, subject_ids, organization) -> dict:
@@ -159,24 +195,10 @@ def attempt_rows_by_subject(*, student, subject_ids, organization) -> dict:
     if not ids or student is None or organization is None:
         return {}
     try:
-        attempt_model = _attempt_model()
+        attempts = list(_final_attempts(user=student, exam__subject_id__in=ids, exam__organization=organization))
     except LookupError:  # exams modulu quraşdırılmayıb
         return {}
-    attempts = (
-        attempt_model.objects.filter(
-            user=student,
-            exam__subject_id__in=ids,
-            exam__organization=organization,
-            is_trial=False,
-            status__in=_FINISHED_STATUSES,
-        )
-        .select_related("exam")
-        .order_by("started_at", "attempt_number")
-    )
-    by_subject: dict = {}
-    for attempt in attempts:
-        by_subject.setdefault(attempt.exam.subject_id, []).append(attempt)
-    return {subject_id: _rows_from_attempts(rows) for subject_id, rows in by_subject.items()}
+    return _grouped_rows(attempts, lambda attempt: attempt.exam.subject_id)
 
 
 def attempt_rows_for_enrollment(enrollment):

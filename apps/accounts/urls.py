@@ -19,9 +19,9 @@ urlpatterns = [
     path("verify-code/", views.verify_code_view, name="verify_code"),
     path("verify-email/", views.verify_email_link_view, name="verify_email_link"),
     path("resend-code/", views.resend_code_view, name="resend_code"),
-    path("send-otp/", views.send_otp_api_view, name="send_otp_api"),
-    path("verify-otp/", views.verify_otp_api_view, name="verify_otp_api"),
-    path("resend-otp/", views.resend_otp_api_view, name="resend_otp_api"),
+    # Audit 2026-09-28 SA-01/SA-02: köhnə JSON OTP marşrutları (`send-otp/`,
+    # `verify-otp/`, `resend-otp/`) silindi — heç bir UI istifadə etmirdi, amma
+    # parolsuz giriş (yalnız e-poçt OTP) və hesab orakulu yaradırdı.
     # First-login: provisioned users set their own password + verify email.
     path("set-password/", views.set_initial_password_view, name="set_initial_password"),
     # Login: generic /login/ artıq PORTAL SEÇİMİ (tələbə vs müəllim/əməkdaş);

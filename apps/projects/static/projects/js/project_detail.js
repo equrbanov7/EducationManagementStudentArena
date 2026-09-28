@@ -7,6 +7,26 @@
 (function () {
     "use strict";
 
+    // Audit 2026-09-28 FQ-FE-4: native alert() → EMSToast; sorğu EMSCore.fetchJSON ilə —
+    // 403/500 və qeyri-JSON cavab `catch`-ə düşür, serverin `error` mətni göstərilir.
+    function notifyError(message) {
+        if (!message) return;
+        if (window.EMSToast && typeof window.EMSToast.show === "function") {
+            window.EMSToast.show(message, "error");
+        } else if (window.console) {
+            window.console.error(message);
+        }
+    }
+
+    function serverErrorOf(err) {
+        var payload = err && err.payload;
+        if (payload && typeof payload === "object") {
+            if (payload.view_as_blocked) return null; // EMSCore.fetchJSON artıq göstərib
+            return payload.error || "";
+        }
+        return "";
+    }
+
     window.EMSReady(function () {
         var form = document.getElementById("submitForm");
         var fileInput = document.getElementById("fileInput");
@@ -78,28 +98,25 @@
 
             var formData = new FormData(form);
 
-            fetch(submitUrl, {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRFToken": EMSCore.getCsrfToken(),
-                    "X-Requested-With": "XMLHttpRequest"
-                }
-            })
-                .then(function (r) { return r.json(); })
+            EMSCore.fetchJSON(submitUrl, { method: "POST", body: formData })
                 .then(function (data) {
-                    if (data.success) {
+                    if (data && data.success) {
                         window.location.reload();
                         return;
                     }
                     submitConfirmed = false;
-                    alert((i18n.errorPrefix || "Error: ") + (data.error || i18n.unknownError || "Unknown error"));
+                    notifyError((i18n.errorPrefix || "Error: ") + ((data && data.error) || i18n.unknownError || "Unknown error"));
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> ' + (i18n.submit || "Submit");
                 })
-                .catch(function () {
+                .catch(function (err) {
                     submitConfirmed = false;
-                    alert(i18n.serverError || "Server error");
+                    var serverMessage = serverErrorOf(err);
+                    if (serverMessage !== null) {
+                        notifyError(serverMessage
+                            ? (i18n.errorPrefix || "Error: ") + serverMessage
+                            : i18n.serverError || "Server error");
+                    }
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane me-1"></i> ' + (i18n.submit || "Submit");
                 });

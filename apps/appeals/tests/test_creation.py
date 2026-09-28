@@ -48,7 +48,12 @@ class AppealCreationTests(TestCase):
             name="C Org", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
         )
         self.exam = Exam.objects.create(
-            title="C Exam", author=self.teacher, organization=self.org, exam_type="test", is_active=True
+            title="C Exam",
+            author=self.teacher,
+            organization=self.org,
+            exam_type="test",
+            exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
+            is_active=True,
         )
         self.q1 = ExamQuestion.objects.create(exam=self.exam, order=1, text="Q1")
         self.q2 = ExamQuestion.objects.create(exam=self.exam, order=2, text="Q2")
@@ -123,8 +128,11 @@ class AppealCreateViewTests(TestCase):
             author=self.teacher,
             organization=self.org,
             exam_type="test",
+            exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
             is_active=True,
             is_public=True,
+            # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar gizlidir — tək cəhdli imtahanda görünür.
+            max_attempts_per_user=1,
         )
         self.question = ExamQuestion.objects.create(exam=self.exam, order=1, text="GDPR sualı")
         self.correct = ExamQuestionOption.objects.create(
@@ -423,6 +431,7 @@ class AppealExamCenterRoutingTests(TestCase):
             author=self.teacher,
             organization=self.org,
             exam_type="test",
+            exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
             is_active=True,
             is_public=True,
         )

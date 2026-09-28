@@ -399,8 +399,8 @@
      data-i18n-error-unknown="{% trans 'error_unknown' context 'labs.js.lab_detail' %}"
      data-i18n-error-server="{% trans 'error_server' context 'labs.js.lab_detail' %}"
      data-i18n-action-finish-lab="{% trans 'action_finish_lab' context 'labs.js.lab_detail' %}"></div>
-<script src="{% static 'labs/js/lab_detail_template.js' %}"></script>
-<script src="{% static 'labs/js/lab_detail.js' %}"></script>
+<script src="{% static 'labs/js/lab_detail_template.js' %}" defer></script>
+<script src="{% static 'labs/js/lab_detail.js' %}" defer></script>
 {% endif %}
 
 {% endblock %}

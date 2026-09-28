@@ -238,7 +238,7 @@
                                     <label class="option-card">
                                         <input type="radio"
                                                name="q_{{ q.id }}"
-                                               value="{{ opt.id }}"
+                                               value="{{ opt.token }}"
                                                data-question-id="{{ q.id }}"
                                                {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                         <span class="option-letter circle-mark">{{ opt.label }}</span>
@@ -253,7 +253,7 @@
                                         <label class="option-card">
                                             <input type="checkbox"
                                                 name="q_{{ q.id }}"
-                                                value="{{ opt.id }}"
+                                                value="{{ opt.token }}"
                                                 data-question-id="{{ q.id }}"
                                                 {% if ans_data and opt.id in ans_data.selected_option_ids %}checked{% endif %}>
                                             <span class="option-letter box-mark">{{ opt.label }}</span>

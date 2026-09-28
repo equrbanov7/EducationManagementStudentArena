@@ -63,13 +63,19 @@
                                 <small class="text-muted"><i class="fas fa-redo"></i> {% blocktrans trimmed context "labs.template.lab_section" with max_attempts=lab.max_attempts|default:1 %}label_attempt {{ max_attempts }}{% endblocktrans %}</small>
                             </div>
                             
+                            {% comment %}2026-09-28: bloklar/redaktə/sil view-ları yalnız labı yaradana açıqdır və
+                               modallar yalnız kurs sahibinə render olunur; «Cavablar» (lab_submissions) isə kursun
+                               bütün müəllim/assistentlərinə açıqdır (Lab.can_teacher_access).{% endcomment %}
                             <div class="btn-group btn-group-sm gap-2">
+                                {% if lab.created_by_id == request.user.id %}
                                 <a href="{% url 'labs:manage_blocks' lab.id %}" class="btn btn-sm btn-outline-secondary">
                                     <i class="fas fa-cubes"></i> {% trans "action_blocks" context "labs.template.lab_section" %}
                                 </a>
+                                {% endif %}
                                 <a href="{% url 'labs:lab_submissions' lab.id %}" class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-eye"></i> {% trans "action_answers" context "labs.template.lab_section" %}
                                 </a>
+                                {% if is_owner and lab.created_by_id == request.user.id %}
                                 <button type="button" class="btn btn-sm btn-outline-primary js-edit-lab"
                                         data-url="{% url 'labs:edit_lab' lab.id %}">
                                     <i class="fas fa-pen"></i> {% trans "action_edit" context "labs.template.lab_section" %}
@@ -78,6 +84,7 @@
                                         data-url="{% url 'labs:delete_lab' lab.id %}">
                                     <i class="fas fa-trash"></i> {% trans "action_delete" context "labs.template.lab_section" %}
                                 </button>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}
@@ -86,9 +93,11 @@
                     <div class="alert alert-light text-center py-4">
                         <i class="fas fa-flask lab-section-1"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_no_labs_yet" context "labs.template.lab_section" %}</p>
+                        {% if is_owner %}
                         <button class="btn btn-danger btn-sm mt-3" data-bs-toggle="modal" data-bs-target="#addLabModal">
                             <i class="fas fa-plus-circle"></i> {% trans "action_add_first_lab" context "labs.template.lab_section" %}
                         </button>
+                        {% endif %}
                     </div>
                 {% endif %}
             
@@ -141,7 +150,7 @@
                                     <a href="{% url 'labs:my_lab_answers' lab.id %}?return_to={{ profile_return_url|urlencode }}" 
                                        class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-list-check"></i>
-                                        {% trans 'Cavablarım (' %}{{ item.attempt_count }})
+                                        {% blocktrans trimmed context "labs.template.lab_section" with attempts=item.attempt_count %}Cavablarım ({{ attempts }}){% endblocktrans %}
                                     </a>
                                     
                                     {% if item.attempts_left > 0 and lab.is_open %}
@@ -191,4 +200,3 @@
         </div>
     </div>
 </div>
-<script src="{% static 'labs/js/lab_section.js' %}"></script>

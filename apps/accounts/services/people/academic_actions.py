@@ -160,6 +160,7 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
     if previous == status:
         raise RimAccessError("status_unchanged", "Tələbə onsuz da bu statusdadır.", status=409)
 
+    from apps.registrar.public import movements as registrar_movements
     from apps.registrar.public import status as academic_status
 
     with transaction.atomic():
@@ -174,6 +175,11 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
             previous=previous,
             by_user=actor.user,
             reason=reason,
+        )
+        # Audit 2026-09-28 S1: xaric / akademik məzuniyyət → cari dövr qeydiyyatları
+        # dondurulur, bərpada geri qaytarılır (əmr yolu ilə eyni qayda).
+        registrar_movements.sync_enrollments_for_status(
+            record=record, previous=previous, to_status=status, actor=actor.user, reason=reason
         )
         log_action(
             AuditAction.UPDATE,

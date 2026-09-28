@@ -1,0 +1,228 @@
+/* EMSArena — Kurs paneli · başqa tətbiqlərin bölmələri (tapşırıq/lab/imtahan/layihə). Bölündü: course_panel_sections.css-dən. */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Başqa tətbiqlərin bölmə partial-ları (akkordeon qabığı → panel məzmunu)
+   ════════════════════════════════════════════════════════════════════════════ */
+.cd-panel__body > .accordion-item {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.cd-panel__body > .accordion-item > .accordion-header {
+    display: none;
+}
+
+.cd-panel__body .accordion-collapse,
+.cd-panel__body .accordion-collapse.collapse:not(.show) {
+    display: block !important;
+    height: auto !important;
+    visibility: visible !important;
+}
+
+.cd-panel__body .accordion-body {
+    padding: 0;
+}
+
+/* Siyahı elementləri → kart */
+.cd-panel__body .list-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cd-panel__body .list-group-item {
+    margin: 0 !important;
+    padding: 16px !important;
+    border: 1px solid var(--ems-neutral-200) !important;
+    border-radius: var(--ems-r-xl) !important;
+    background: var(--ems-bg);
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.cd-panel__body .list-group-item:hover {
+    border-color: var(--ems-neutral-300) !important;
+    box-shadow: var(--ems-sh-raised);
+}
+
+.cd-panel__body .list-group-item h6 {
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.cd-panel__body .list-group-item h6 > i {
+    margin-right: 6px;
+}
+
+.cd-panel__body .list-group-item .text-muted,
+.cd-panel__body .list-group-item small {
+    color: var(--ems-neutral-500) !important;
+    font-size: var(--ems-fs-sm);
+}
+
+/* Bootstrap badge → kabinet çipi */
+.cd-panel__body .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 22px;
+    padding: 2px 9px;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-pill);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.cd-panel__body .badge.bg-info { background: var(--ems-sky-100) !important; color: var(--ems-sky-900) !important; }
+.cd-panel__body .badge.bg-success { background: var(--ems-success-100) !important; color: var(--ems-success-700) !important; }
+.cd-panel__body .badge.bg-warning { background: var(--ems-warning-100) !important; color: var(--ems-warning-800) !important; }
+.cd-panel__body .badge.bg-danger { background: var(--ems-danger-100) !important; color: var(--ems-danger-700) !important; }
+.cd-panel__body .badge.bg-primary { background: var(--ems-primary-50) !important; color: var(--ems-primary-800) !important; }
+.cd-panel__body .badge.bg-secondary,
+.cd-panel__body .badge.bg-light { background: var(--ems-neutral-100) !important; color: var(--ems-neutral-700) !important; }
+
+/* Sətir əməl düymələri → kabinet ikinci düyməsi */
+.cd-panel__body .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px !important;
+}
+
+.cd-panel__body .list-group-item .btn,
+.cd-panel__body .btn-group > .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300) !important;
+    border-radius: var(--ems-r-lg) !important;
+    background: var(--ems-bg) !important;
+    color: var(--ems-neutral-700) !important;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    box-shadow: none !important;
+}
+
+.cd-panel__body .list-group-item .btn:hover,
+.cd-panel__body .btn-group > .btn:hover {
+    background: var(--ems-bg-subtle) !important;
+    color: var(--ems-text) !important;
+}
+
+.cd-panel__body .list-group-item .btn-outline-danger:hover,
+.cd-panel__body .btn-group > .btn-outline-danger:hover {
+    border-color: var(--ems-danger-200) !important;
+    background: var(--ems-danger-100) !important;
+    color: var(--ems-danger-700) !important;
+}
+
+/* Dolu rəngli Bootstrap düymələri sətrin ƏSAS əməlidir (tələbə: «Cavab göndər»,
+   «Başla») — kabinetin primary düyməsinə çevrilir; kontur düymələr ikinci dərəcəli. */
+.cd-panel__body .list-group-item .btn-primary,
+.cd-panel__body .list-group-item .btn-success,
+.cd-panel__body .list-group-item .btn-warning,
+.cd-panel__body .list-group-item .btn-info {
+    border-color: var(--ems-primary-600) !important;
+    background: var(--ems-primary-600) !important;
+    color: #fff !important;
+}
+
+.cd-panel__body .list-group-item .btn-primary:hover,
+.cd-panel__body .list-group-item .btn-success:hover,
+.cd-panel__body .list-group-item .btn-warning:hover,
+.cd-panel__body .list-group-item .btn-info:hover {
+    border-color: var(--ems-primary-700) !important;
+    background: var(--ems-primary-700) !important;
+    color: #fff !important;
+}
+
+.cd-panel__body .list-group-item .btn-danger {
+    border-color: var(--ems-danger) !important;
+    background: var(--ems-danger) !important;
+    color: #fff !important;
+}
+
+.cd-panel__body .list-group-item .btn:disabled,
+.cd-panel__body .list-group-item .btn.disabled {
+    opacity: 0.55;
+}
+
+/* Boş vəziyyət alert-ləri → cd-empty görünüşü */
+.cd-panel__body .accordion-body > .alert,
+.cd-panel__body .accordion-body > div > .alert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 36px 20px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-600);
+    text-align: center;
+    font-size: var(--ems-fs-md);
+}
+
+.cd-panel__body .accordion-body > .alert > i:first-child {
+    font-size: 26px;
+    color: var(--ems-neutral-500);
+}
+
+.cd-panel__body .accordion-body > .alert .btn {
+    min-height: var(--ems-h-field);
+    margin-top: 6px !important;
+    padding: 0 16px;
+    border: 1px solid var(--ems-primary-600) !important;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-600) !important;
+    color: #fff !important;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+}
+
+@media (max-width: 640px) {
+    .cd-topic__body {
+        padding: 0 12px 14px;
+    }
+
+    .cd-topic__row {
+        flex-wrap: wrap;
+    }
+
+    .cd-member {
+        flex-wrap: wrap;
+    }
+
+    .cd-member__tags {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        padding-left: 48px;
+    }
+
+    .cd-search {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+}
+
+/* Boş vəziyyətdə iki əməl yan-yana olanda yalnız «yarat» əsasdır;
+   «mövcudu əlaqələndir» (btn-info) ikinci dərəcəli — iki eyni tünd düymə rəqabət aparmasın. */
+.cd-panel__body .accordion-body > .alert .btn-info,
+.cd-panel__body .accordion-body > .alert .btn-outline-primary,
+.cd-panel__body .accordion-body > .alert .btn-secondary {
+    border-color: var(--ems-neutral-300) !important;
+    background: var(--ems-bg) !important;
+    color: var(--ems-neutral-700) !important;
+}
+
+.cd-panel__body .accordion-body > .alert .btn-info:hover,
+.cd-panel__body .accordion-body > .alert .btn-outline-primary:hover,
+.cd-panel__body .accordion-body > .alert .btn-secondary:hover {
+    background: var(--ems-bg-subtle) !important;
+    color: var(--ems-text) !important;
+}

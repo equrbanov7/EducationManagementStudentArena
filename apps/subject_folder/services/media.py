@@ -18,6 +18,7 @@ from django.http import FileResponse, Http404
 
 from ..models import FolderMaterial, SubmissionFile, TaskAttachment
 from . import access
+from .uploads import content_type_for_name
 
 
 def _single(queryset, **lookup):
@@ -56,7 +57,13 @@ def check_submission_media_access(user, path: str) -> bool:
 
 
 def file_response(field_file, *, filename: str, content_type: str = "") -> FileResponse:
-    """ƏLAVƏ kimi (``attachment``) verilir — brauzer faylı mənbə origin-ində icra etməsin."""
+    """ƏLAVƏ kimi (``attachment``) verilir — brauzer faylı mənbə origin-ində icra etməsin.
+
+    Audit 2026-09-28 SF-3: ``Content-Type`` saxlanmış (klientin bəyan etdiyi)
+    dəyərdən deyil, fayl adının UZANTISINDAN çıxarılır; ``content_type``
+    parametri geriyə uyğunluq üçün qalır və nəzərə alınmır.
+    """
+    del content_type
     if not field_file:
         raise Http404
     try:
@@ -64,7 +71,7 @@ def file_response(field_file, *, filename: str, content_type: str = "") -> FileR
     except (OSError, ValueError) as exc:  # pragma: no cover — itmiş fayl
         raise Http404 from exc
     response = FileResponse(handle, as_attachment=True, filename=filename or "fayl")
-    response["Content-Type"] = content_type or "application/octet-stream"
+    response["Content-Type"] = content_type_for_name(filename)
     response["X-Content-Type-Options"] = "nosniff"
     response["Cache-Control"] = "private, no-store"
     return response

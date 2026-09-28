@@ -44,7 +44,9 @@ def lab_detail(request, pk):
 
         # Tələbə üçün assignment yarat və sualları təyin et
         else:
-            if not can_student_access_lab(lab, request.user):
+            # Qaralama lab tələbəyə birbaşa linklə də açılmır (2026-09-28) — əks halda
+            # sual paylanır (LabAssignment yaranır) və dərc olunmamış məzmun görünürdü.
+            if lab.status == "draft" or not can_student_access_lab(lab, request.user):
                 _raise_lab_access_denied()
 
             assignment = get_lab_assignment_for_student(lab, request.user)

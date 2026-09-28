@@ -135,6 +135,9 @@ def create_slot(
     ``instructor`` — slotu aparan müəllim (bölünmüş tədris); jurnal sahibi ilə eynidirsə NULL yazılır."""
     room = (room or "").strip()
     instructor_id = stored_instructor_id(offering, getattr(instructor, "pk", None))
+    from apps.registrar.schedule_lock import lock_for_offering
+
+    lock_for_offering(offering)  # Audit 2026-09-28 W3: yoxla → yaz semestr kilidi altında
     conflict = find_conflict(
         organization=offering.organization,
         offering=offering,

@@ -1,0 +1,218 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs paneli · örtüklər (2026-09-28)
+   1) `.ems-cd-modals` — mövcud Bootstrap modallarının (5 app) kabinet görünüşü
+      (course_modals_enhance.js başlığa ikon plitəsi əlavə edir).
+   2) `.ems-ai-root` — «AI ilə kurs qur» çekməcəsi (course_ai_drawer.js).
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────── modallar ───────────────────────── */
+/* İmtahan sehrbazı (`.exam-wizard-modal`) öz dizaynındadır — qaydalardan kənarda. */
+.ems-cd-modals {
+    --sec: var(--ems-primary-600);
+    --sec-soft: var(--ems-primary-50);
+    --sec-deep: var(--ems-primary-800);
+    font-family: var(--font-main, inherit);
+}
+
+.ems-cd-modals .modal.fade:not(.exam-wizard-modal) .modal-dialog {
+    transition: transform 0.18s ease-out;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-content {
+    border: 0;
+    border-radius: var(--ems-r-2xl);
+    overflow: hidden;
+    box-shadow: var(--ems-sh-dialog);
+    color: var(--ems-neutral-800);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-header {
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ems-neutral-200);
+    background: var(--ems-bg) !important;
+    color: var(--ems-text) !important;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .ems-mh-ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .ems-mh-tx {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .ems-mh-sub {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-header .btn-close {
+    margin: 0 0 0 auto;
+    border-radius: var(--ems-r-md);
+    opacity: 0.5;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-header .btn-close:hover {
+    opacity: 1;
+    background-color: var(--ems-neutral-100);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-body {
+    padding: 20px;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-footer {
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-footer > * {
+    margin: 0;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-label {
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-neutral-800);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-control,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-select {
+    min-height: var(--ems-h-field);
+    padding: 8px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text);
+    box-shadow: none;
+}
+
+.ems-cd-modals textarea.form-control {
+    min-height: 88px;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-control:focus,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-select:focus {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .form-text,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .text-muted {
+    color: var(--ems-neutral-500) !important;
+    font-size: var(--ems-fs-sm);
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: var(--ems-h-field);
+    padding: 0 16px;
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+}
+
+.ems-cd-modals button[type="submit"].btn,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-footer .btn-primary {
+    border: 1px solid var(--ems-primary-600) !important;
+    background: var(--ems-primary-600) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+.ems-cd-modals button[type="submit"].btn:hover,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-footer .btn-primary:hover {
+    border-color: var(--ems-primary-700) !important;
+    background: var(--ems-primary-700) !important;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn[data-bs-dismiss="modal"],
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-secondary,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-light {
+    border: 1px solid var(--ems-neutral-300) !important;
+    background: var(--ems-bg) !important;
+    color: var(--ems-neutral-700) !important;
+    box-shadow: none !important;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn[data-bs-dismiss="modal"]:hover,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-secondary:hover,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-light:hover {
+    background: var(--ems-bg-subtle) !important;
+}
+
+.ems-cd-modals .ems-mh-ic--course {
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+}
+
+/* redaktə modalında cari qapaq şəkli */
+.ems-cc-current {
+    position: relative;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    aspect-ratio: 2 / 1;
+    max-height: 200px;
+}
+
+.ems-cc-current img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ems-cc-current span {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    padding: 3px 10px;
+    border-radius: var(--ems-r-pill);
+    background: rgba(15, 23, 42, 0.72);
+    color: #fff;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .modal-header .btn-close:focus-visible,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-info,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-success {
+    border: 1px solid var(--ems-primary-600) !important;
+    background: var(--ems-primary-600) !important;
+    color: #fff !important;
+}
+
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-info:hover,
+.ems-cd-modals .modal:not(.exam-wizard-modal) .btn-success:hover {
+    border-color: var(--ems-primary-700) !important;
+    background: var(--ems-primary-700) !important;
+}

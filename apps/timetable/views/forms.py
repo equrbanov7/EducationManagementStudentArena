@@ -9,6 +9,7 @@ from django.utils.translation import pgettext
 from apps.registrar.public import schedule, schedule_manage
 
 from ..constants import ScopeKind
+from ..services import runs
 
 _CTX = "timetable.run"
 
@@ -52,7 +53,8 @@ def run_row(run, tones) -> dict:
         "published_at": run.published_at,
         "seed": run.seed,
         "time_limit": (run.params or {}).get("time_limit"),
-        "error": run.error,
+        # Audit 2026-09-28 TT-4: xam istisna mətni brauzerə getmir.
+        "error": runs.public_error(run),
         "url": reverse("timetable:run_detail", args=[run.pk]),
     }
 

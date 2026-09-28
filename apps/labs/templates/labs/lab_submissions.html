@@ -8,31 +8,15 @@
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results/_part2.css' %}">
     <link rel="stylesheet" href="{% static 'css/results_filter_ui.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/review_page.css' %}?v=20260928-1">
 {% endblock %}
 
 {% block content %}
-<div class="container my-4">
-    <h1 class="h3">{{ lab.title }} - {% trans "heading_student_answers" context "labs.template.lab_submissions" %}</h1>
-
-    <div class="results-summary mb-4">
-        <div class="results-summary__row">
-            <span class="results-summary__label">{% trans 'Kurs:' %}</span>
-            <strong>{{ lab.course.title }}</strong>
-        </div>
-        <div class="results-summary__row">
-            <span class="results-summary__label">{% trans 'Status:' %}</span>
-            <span class="results-summary__pill results-summary__pill--{% if lab.status == 'published' %}success{% elif lab.status == 'draft' %}neutral{% else %}warning{% endif %}">
-                {{ lab.get_status_display|default:lab.status|upper }}
-            </span>
-        </div>
-        <div class="results-summary__row">
-            <span class="results-summary__label">{% trans 'Nəticələr:' %}</span>
-            <strong>{% blocktrans with total=stats.total %}Cəmi {{ total }}{% endblocktrans %}</strong>,
-            <span>{% blocktrans with pending=stats.pending %}gözləyən {{ pending }}{% endblocktrans %}</span>,
-            <span>{% blocktrans with graded=stats.graded %}qiymətləndirilib {{ graded }}{% endblocktrans %}</span>,
-            <span>{% blocktrans with late=stats.late %}gecikmiş {{ late }}{% endblocktrans %}</span>
-        </div>
-    </div>
+<div class="container my-4 rv-page">
+    {% trans "kind_lab" context "review.page" as rv_kind %}
+    {% include "partials/review/_review_header.html" with task_title=lab.title course_title=lab.course.title status_code=lab.status status_label=lab.get_status_display kind_label=rv_kind review_summary=stats back_url=back_url %}
 
     <div class="results-filter-card">
         <form method="get" id="resultsFiltersForm" class="results-filter-grid js-results-filters-form" novalidate>
@@ -133,7 +117,7 @@
     </div>
 
     {% if can_delete_submissions %}
-        <div class="results-toolbar">
+        <div class="results-toolbar rv-bulk" data-rv-bulk hidden>
             <span class="selected-counter">{% trans 'Seçilib:' %} <span id="selectedLabCount">0</span></span>
             <div class="results-toolbar__actions">
                 <button type="button" class="btn results-bulk-btn results-bulk-btn--select" id="selectAllLabsBtn">
@@ -149,14 +133,21 @@
         </div>
     {% endif %}
 
-    <h3>{% trans "heading_student_answers" context "labs.template.lab_submissions" %}</h3>
+    <section class="rv-card">
+        <div class="rv-card__head">
+            <h2 class="rv-card__title">{% trans "heading_student_answers" context "labs.template.lab_submissions" %}</h2>
+            <span class="rv-count">{{ page_obj.paginator.count }}</span>
+        </div>
     {% if submissions %}
         <div class="table-responsive">
-            <table class="table table-striped table-sm align-middle">
+            <table class="table align-middle rv-table">
                 <thead>
                     <tr>
                         {% if can_delete_submissions %}
-                            <th></th>
+                            <th class="rv-col-check">
+                                <input type="checkbox" class="results-table-checkbox" data-rv-select-all
+                                       aria-label="{% trans 'select_all' context 'review.page' %}">
+                            </th>
                         {% endif %}
                         <th>{% trans "table_student" context "labs.template.lab_submissions" %}</th>
                         <th>{% trans "filter_by_group" context "labs.template.lab_submissions" %}</th>
@@ -189,7 +180,7 @@
                         <td>
                             {% with group=student_groups|get_item:sub.assignment.student.id %}
                                 {% if group %}
-                                    <span class="badge bg-secondary">{{ group }}</span>
+                                    <span class="ems-badge ems-badge--neutral">{{ group }}</span>
                                 {% else %}
                                     <span class="text-muted">-</span>
                                 {% endif %}
@@ -199,11 +190,11 @@
                         <td>{{ sub.attempt_number }}</td>
                         <td>
                             {% if sub.status == 'graded' %}
-                                <span class="badge bg-success">{% trans "status_graded" context "labs.template.lab_submissions" %}</span>
+                                <span class="ems-badge ems-badge--success">{% trans "status_graded" context "labs.template.lab_submissions" %}</span>
                             {% elif sub.status == 'late' %}
-                                <span class="badge bg-secondary">{% trans "status_late" context "labs.template.lab_submissions" %}</span>
+                                <span class="ems-badge ems-badge--neutral">{% trans "status_late" context "labs.template.lab_submissions" %}</span>
                             {% else %}
-                                <span class="badge bg-info text-dark">{% trans "status_pending" context "labs.template.lab_submissions" %}</span>
+                                <span class="ems-badge ems-badge--info">{% trans "status_pending" context "labs.template.lab_submissions" %}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -218,31 +209,32 @@
                                 {% if sub.status == 'graded' %}
                                     {% if sub.in_recheck_window %}
                                         <div>
-                                            <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-edit"></i> {% trans 'Yenidən yoxla' %}
+                                            <a href="{% url 'labs:grade_submission_page' sub.id %}" class="ems-btn ems-btn--sm rv-btn-recheck">
+                                                <i class="fas fa-edit" aria-hidden="true"></i> {% trans 'Yenidən yoxla' %}
                                             </a>
-                                            <div class="countdown-timer mt-2">
+                                            <div class="countdown-timer rv-timer" title="{% trans 'recheck_window' context 'review.page' %}">
                                                 <i class="fas fa-clock"></i>
                                                 <span data-review-countdown="{{ sub.review_window_seconds_left }}">--:--:--</span>
                                             </div>
                                         </div>
                                     {% else %}
-                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="fas fa-eye"></i> Bax
+                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="ems-btn ems-btn--sm">
+                                            <i class="fas fa-eye" aria-hidden="true"></i> {% trans "action_view" context "review.page" %}
                                         </a>
                                     {% endif %}
                                 {% else %}
                                     <div>
-                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{% url 'labs:grade_submission_page' sub.id %}" class="ems-btn ems-btn--sm ems-btn--primary">
                                             {% trans "action_grade" context "labs.template.lab_submissions" %}
                                         </a>
                                     </div>
                                 {% endif %}
                                 {% if can_delete_submissions %}
                                     <button type="button"
-                                            class="btn btn-sm btn-outline-danger js-single-delete-lab-submission"
-                                            data-submission-id="{{ sub.id }}">
-                                        <i class="fas fa-trash"></i> Sil
+                                            class="rv-icon-btn rv-icon-btn--danger js-single-delete-lab-submission"
+                                            data-submission-id="{{ sub.id }}"
+                                            title="{% trans 'Sil' %}" aria-label="{% trans 'Sil' %}">
+                                        <i class="fas fa-trash" aria-hidden="true"></i>
                                     </button>
                                 {% endif %}
                             </div>
@@ -254,21 +246,18 @@
         </div>
         {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
     {% else %}
-        <p class="text-muted text-center py-4">
-            <i class="fas fa-inbox"></i>
+        <div class="rv-empty">
+            <span class="rv-empty__ic"><i class="fas fa-inbox" aria-hidden="true"></i></span>
+            <p class="rv-empty__title">
             {% if search_query or status_filter != 'all' or group_filter != 'all' or date_from or date_to %}
                 {% trans "empty_no_results_for_filter" context "labs.template.lab_submissions" %}
             {% else %}
                 {% trans "empty_no_student_submission_yet" context "labs.template.lab_submissions" %}
             {% endif %}
-        </p>
+            </p>
+        </div>
     {% endif %}
-
-    <div class="results-page-actions">
-        <a href="{{ back_url }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> {% trans 'Geri qayıt' %}
-        </a>
-    </div>
+    </section>
 </div>
 
 {% if can_delete_submissions %}
@@ -287,12 +276,12 @@
         <div id="deleteLabsInputs"></div>
     </form>
 
-    <div class="modal fade" id="deleteLabsConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade rv-modal" id="deleteLabsConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
+                <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-trash me-2"></i> {% trans 'Seçilən lab cavablarını sil' %}</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     {% trans 'Bu seçim geri qaytarılmır. Seçilmiş lab işi cavabları silinəcək.' %}
@@ -310,6 +299,7 @@
 {% block extraJs %}
 <script src="{% static 'js/results_filter_ui.js' %}"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
+<script src="{% static 'js/review_page_ui.js' %}?v=20260928-1" defer></script>
 <script src="{% static 'js/review_countdown.js' %}"></script>
 <div id="labSubmissionsConfig" hidden data-can-delete="{% if can_delete_submissions %}1{% else %}0{% endif %}"></div>
 <script src="{% static 'labs/js/lab_submissions_template.js' %}"></script>

@@ -276,11 +276,12 @@ class PasteBulkAddFlowTests(_MediaMixin, TestCase):
         self.assertTrue(saved.image)
         self.assertFalse(saved.image_replaces_text)
         self.assertTrue(saved.image.storage.exists(saved.image.name))
-        options = {opt.label: opt for opt in saved.options.all()}
-        self.assertTrue(options["A"].image)
-        self.assertEqual(options["A"].text, "dairə")
-        self.assertFalse(options["B"].image)
-        self.assertTrue(options["B"].is_correct)
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb A..E
+        # yenidən hərflənir — media mənbə etiketi ilə bağlanır, yoxlama mətnə görədir.
+        options = {opt.text: opt for opt in saved.options.all()}
+        self.assertTrue(options["dairə"].image)
+        self.assertFalse(options["kvadrat"].image)
+        self.assertTrue(options["kvadrat"].is_correct)
         self.assertFalse(default_storage.exists(bundle_name(token, "manifest.json")))
 
     def test_remove_action_drops_image_and_clears_token_when_last(self):

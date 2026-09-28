@@ -224,7 +224,7 @@ def _lesson_time(lesson):
 @transaction.atomic
 def revert_last_lesson_correction(*, lesson, by_user, request=None, correction_id=None) -> bool:
     """Reverse the selected latest lesson correction and retain both records."""
-    from .gradebook import update_lesson
+    from .gradebook import LessonRuleError, update_lesson
 
     correction, already_reversed = _select_active(
         LessonCorrection,
@@ -268,18 +268,22 @@ def revert_last_lesson_correction(*, lesson, by_user, request=None, correction_i
         from apps.registrar import schedule as schedule_service
 
         start, end = schedule_service.parse_time_slot(correction.old_time.replace("–", "|"))
-    ok = update_lesson(
-        lesson=lesson,
-        date=correction.old_date,
-        kind=correction.old_kind or None,
-        topic=correction.old_topic,
-        hours=correction.old_hours,
-        start_time=start or "",
-        end_time=end or "",
-        instructor=correction.old_instructor,
-        allow_past=True,
-        allow_locked=True,
-    )
+    try:
+        ok = update_lesson(
+            lesson=lesson,
+            date=correction.old_date,
+            kind=correction.old_kind or None,
+            topic=correction.old_topic,
+            hours=correction.old_hours,
+            start_time=start or "",
+            end_time=end or "",
+            instructor=correction.old_instructor,
+            allow_past=True,
+            allow_locked=True,
+            audit=False,  # geri alma öz audit izini yazır (_write_audit)
+        )
+    except LessonRuleError as exc:  # J-02: bərpa olunan slot artıq tutulubsa — oxunaqlı xəta
+        raise ValidationError(str(exc)) from exc
     if not ok:
         raise ValidationError(pgettext("registrar.correction", "The published journal cannot be changed."))
     if correction.old_instructor_id is None and lesson.instructor_id is not None:

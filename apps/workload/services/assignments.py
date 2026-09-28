@@ -69,14 +69,17 @@ def balance_for_rows(rows) -> dict:
         activities = {}
         for activity, field in ACTIVITY_TOTAL_FIELD.items():
             total = int(getattr(row, field, 0) or 0)
-            if not total:
-                continue
             used = assigned.get((row.pk, activity), 0)
+            if not total and not used:
+                continue
             activities[str(activity)] = {
                 "total": total,
                 "assigned": used,
                 "remaining": max(total - used, 0),
-                "is_complete": used >= total,
+                # Audit 2026-09-28 W2: artıq bölgü (used > total) də «tamamlanmamış»
+                # sayılır — xəta vəziyyətidir, bölgü təsdiqlənə bilməz.
+                "is_complete": used == total,
+                "is_over": used > total,
             }
         teaching = [activities[str(a)] for a in TEACHING_ACTIVITIES if str(a) in activities]
         result[str(row.pk)] = {

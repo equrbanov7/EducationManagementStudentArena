@@ -1,180 +1,143 @@
 {% load i18n %}
 {% load static %}
-
-<!-- ACCORDION 1: MÖVZULAR (Topics) -->
-<!-- courses/templates/courses/partials/_topic_accordion.html -->
+{% comment %}
+Mövzular paneli (2026-09-28 redizayn). Fayl adı tarixi səbəbdən «accordion»-dur;
+artıq Bootstrap akkordeonu yoxdur — panel başlığı `course_dashboard.html`-dədir.
+JS çəngəlləri (topic_accordion.js) dəyişməyib: `data-edit-topic-*`,
+`data-delete-topic-*`, `data-delete-resource-*`, `data-open-resource-modal-*`.
+⚠ Atributlarda `|escapejs` İŞLƏDİLMİR — HTML avto-escape kifayətdir; escapejs
+atributda `-` kimi kodları hərfi göstərirdi (redaktə modalında).
+Açılıb-bağlanma: `[data-cd-topic-toggle]` → course_panel.js.
+{% endcomment %}
 
 <div id="topicAccordionConfig" hidden
      data-i18n-confirm-delete-topic="{% trans 'confirm_delete_topic' context 'courses.partial.topic_accordion' %}"
+     data-i18n-confirm-delete-topic-title="{% trans 'confirm_delete_topic_title' context 'courses.dashboard' %}"
      data-i18n-confirm-delete-resource="{% trans 'confirm_delete_resource' context 'courses.partial.topic_accordion' %}"
+     data-i18n-confirm-delete-resource-title="{% trans 'confirm_delete_resource_title' context 'courses.dashboard' %}"
+     data-i18n-delete="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}"
      data-i18n-resource-modal-not-found="{% trans 'resourceFormModal tapılmadı!' %}"></div>
 
-<div class="accordion-item">
-    <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                data-bs-target="#topicCollapse">
-            <i class="fas fa-list text-primary me-2"></i>
-            <strong>{% trans "title_topics" context "courses.partial.topic_accordion" %}</strong>
-            <span class="badge bg-primary ms-2">{{ topics|length }}</span>
+{% if topics %}
+  <ol class="cd-topics">
+    {% for topic in topics %}
+    {% with res_count=topic.resources.all|length %}
+    <li class="cd-topic" id="topic-{{ topic.id }}">
+      <div class="cd-topic__row">
+        <button type="button" class="cd-topic__toggle" data-cd-topic-toggle
+                aria-expanded="false" aria-controls="topicResources{{ topic.id }}">
+          <span class="cd-topic__num" aria-hidden="true">{{ forloop.counter }}</span>
+          <span class="cd-topic__text">
+            <span class="cd-topic__title">{{ topic.title }}</span>
+            {% if topic.description %}<span class="cd-topic__desc">{{ topic.description }}</span>{% endif %}
+            <span class="cd-topic__meta">
+              <span class="cd-chip">
+                {% include "courses/partials/_cd_icon.html" with icon="folder" size=13 %}
+                {{ res_count }} {% trans "suffix_resources" context "courses.partial.topic_accordion" %}
+              </span>
+              <span class="cd-muted">{{ topic.created_at|date:"d.m.Y" }}</span>
+            </span>
+          </span>
+          <span class="cd-topic__chev" aria-hidden="true">{% include "courses/partials/_cd_icon.html" with icon="chev" size=18 %}</span>
         </button>
-    </h2>
-    <div id="topicCollapse" class="accordion-collapse collapse" data-bs-parent="#courseDashboard">
-        <div class="accordion-body">
-            
-            <!-- Add Topic Button (Owner only) -->
-            {% if is_owner %}
-                <button type="button" class="btn btn-primary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#topicFormModal">
-                    <i class="fas fa-plus-circle"></i> {% trans "action_add_new_topic" context "courses.partial.topic_accordion" %}
-                </button>
-            {% endif %}
-            
-            <!-- Topics List -->
-            {% if topics %}
-                <div class="topics-container">
-                    {% for topic in topics %}
-                        <div class="topic-card mb-3" id="topic-{{ topic.id }}">
-                            <!-- Topic Header (Clickable) -->
-                            <div class="topic-header" data-bs-toggle="collapse" 
-                                 data-bs-target="#topicResources{{ topic.id }}" 
-                                 aria-expanded="false">
-                                <div class="topic-info">
-                                    <div class="topic-title-row">
-                                        <span class="topic-order">{{ topic.order }}</span>
-                                        <h6 class="topic-title mb-1">
-                                            <i class="fas fa-bookmark text-primary me-2"></i>
-                                            {{ topic.title }}
-                                        </h6>
-                                        <i class="fas fa-chevron-down collapse-icon ms-auto"></i>
-                                    </div>
-                                    
-                                    {% if topic.description %}
-                                        <p class="topic-description mb-2">{{ topic.description|truncatechars:120 }}</p>
-                                    {% endif %}
-                                    
-                                    <!-- Topic Meta -->
-                                    <div class="topic-meta">
-                                        <span class="badge bg-light text-dark">
-                                            <i class="fas fa-file-alt"></i>
-                                            {# prefetch_related("resources") view-da var — .all|length cache-i işlədir, .count əlavə sorğu atardı #}
-                                            {{ topic.resources.all|length }} {% trans "suffix_resources" context "courses.partial.topic_accordion" %}
-                                        </span>
-                                        <span class="text-muted small">
-                                            <i class="fas fa-clock"></i>
-                                            {{ topic.created_at|date:"d.m.Y" }}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Action Buttons (Owner only) - Stop propagation -->
-                                {% if is_owner %}
-                                    <div class="topic-actions" data-stop-propagation>
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                                data-edit-topic-id="{{ topic.id }}"
-                                                data-edit-topic-title="{{ topic.title|escapejs }}"
-                                                data-edit-topic-description="{{ topic.description|escapejs }}"
-                                                title="{% trans 'action_edit' context 'courses.partial.topic_accordion' %}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        
-                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                data-delete-topic-course-id="{{ course.id }}"
-                                                data-delete-topic-id="{{ topic.id }}"
-                                                title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Topic Resources (Collapsible) -->
-                            <div class="collapse topic-resources" id="topicResources{{ topic.id }}">
-                                <div class="resources-container">
-                                    {% if topic.resources.all %}
-                                        <div class="resources-list">
-                                            {% for resource in topic.resources.all %}
-                                                <div class="resource-item">
-                                                    <div class="resource-icon">
-                                                        {% if resource.resource_type == 'file' %}
-                                                            <i class="fas fa-file-pdf text-danger"></i>
-                                                        {% elif resource.resource_type == 'link' %}
-                                                            <i class="fas fa-link text-primary"></i>
-                                                        {% elif resource.resource_type == 'video' %}
-                                                            <i class="fas fa-video text-success"></i>
-                                                        {% else %}
-                                                            <i class="fas fa-file text-secondary"></i>
-                                                        {% endif %}
-                                                    </div>
-                                                    
-                                                    <div class="resource-details">
-                                                        <h6 class="resource-title">{{ resource.title }}</h6>
-                                                        {% if resource.description %}
-                                                            <p class="resource-desc">{{ resource.description|truncatechars:80 }}</p>
-                                                        {% endif %}
-                                                        <small class="text-muted">
-                                                            {{ resource.get_resource_type_display }}
-                                                        </small>
-                                                    </div>
-                                                    
-                                                    <div class="resource-actions">
-                                                        {% if resource.is_file %}
-                                                            <a href="{{ resource.file.url }}" class="btn btn-sm btn-outline-primary" 
-                                                               download title="{% trans 'action_download' context 'courses.partial.topic_accordion' %}">
-                                                                <i class="fas fa-download"></i>
-                                                            </a>
-                                                        {% elif resource.is_link %}
-                                                            <a href="{{ resource.url }}" class="btn btn-sm btn-outline-primary" 
-                                                               target="_blank" title="{% trans 'action_open' context 'courses.partial.topic_accordion' %}">
-                                                                <i class="fas fa-external-link-alt"></i>
-                                                            </a>
-                                                        {% endif %}
-                                                        
-                                                        {% if is_owner %}
-                                                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                                                    data-delete-resource-course-id="{{ course.id }}"
-                                                                    data-delete-resource-id="{{ resource.id }}"
-                                                                    title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <div class="text-center py-3 text-muted">
-                                            <i class="fas fa-inbox fa-2x mb-2"></i>
-                                            <p class="mb-0">{% trans "empty_resource" context "courses.partial.topic_accordion" %}</p>
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <!-- Add Resource Button -->
-                                    {% if is_owner %}
-                                        <div class="add-resource-btn-container">
-                                            <button type="button" class="btn btn-sm btn-outline-primary w-100"
-                                                    data-open-resource-modal-topic-id="{{ topic.id }}"
-                                                    data-open-resource-modal-title="{{ topic.title|escapejs }}">
-                                                <i class="fas fa-plus-circle"></i> {% trans "action_add_resource" context "courses.partial.topic_accordion" %}
-                                            </button>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-info-circle"></i>
-                    {% trans "empty_topic" context "courses.partial.topic_accordion" %}
-                    {% if is_owner %}
-                        <button type="button" class="btn btn-link p-0 ms-2" data-bs-toggle="modal" data-bs-target="#topicFormModal">
-                            {% trans "action_add_first_topic" context "courses.partial.topic_accordion" %} →
-                        </button>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
 
-<script src="{% static 'courses/js/topic_accordion.js' %}"></script>
+        {% if is_owner %}
+        <div class="cd-row-actions">
+          <button type="button" class="cd-icon-btn"
+                  data-edit-topic-id="{{ topic.id }}"
+                  data-edit-topic-title="{{ topic.title }}"
+                  data-edit-topic-description="{{ topic.description }}"
+                  title="{% trans 'action_edit' context 'courses.partial.topic_accordion' %}"
+                  aria-label="{% trans 'action_edit' context 'courses.partial.topic_accordion' %}: {{ topic.title }}">
+            {% include "courses/partials/_cd_icon.html" with icon="edit" size=16 %}
+          </button>
+          <button type="button" class="cd-icon-btn cd-icon-btn--danger"
+                  data-delete-topic-course-id="{{ course.id }}"
+                  data-delete-topic-id="{{ topic.id }}"
+                  title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}"
+                  aria-label="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}: {{ topic.title }}">
+            {% include "courses/partials/_cd_icon.html" with icon="trash" size=16 %}
+          </button>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="cd-topic__body" id="topicResources{{ topic.id }}" hidden>
+        {% if res_count %}
+          <ul class="cd-res-list">
+            {% for resource in topic.resources.all %}
+            <li class="cd-res-item">
+              <span class="cd-res-ic cd-res-ic--{{ resource.resource_type }}" aria-hidden="true">
+                {% if resource.resource_type == 'link' %}{% include "courses/partials/_cd_icon.html" with icon="link" size=16 %}
+                {% elif resource.resource_type == 'video' %}{% include "courses/partials/_cd_icon.html" with icon="video" size=16 %}
+                {% else %}{% include "courses/partials/_cd_icon.html" with icon="file" size=16 %}{% endif %}
+              </span>
+              <span class="cd-res-item__text">
+                <span class="cd-res-item__title">{{ resource.title }}</span>
+                <span class="cd-muted">{{ resource.get_resource_type_display }}{% if resource.description %} · {{ resource.description|truncatechars:80 }}{% endif %}</span>
+              </span>
+              <span class="cd-row-actions">
+                {% if resource.is_file and resource.file %}
+                  <a href="{{ resource.file.url }}" class="cd-icon-btn" download
+                     title="{% trans 'action_download' context 'courses.partial.topic_accordion' %}"
+                     aria-label="{% trans 'action_download' context 'courses.partial.topic_accordion' %}: {{ resource.title }}">
+                    {% include "courses/partials/_cd_icon.html" with icon="download" size=16 %}
+                  </a>
+                {% elif resource.url %}
+                  <a href="{{ resource.url }}" class="cd-icon-btn" target="_blank" rel="noopener noreferrer"
+                     title="{% trans 'action_open' context 'courses.partial.topic_accordion' %}"
+                     aria-label="{% trans 'action_open' context 'courses.partial.topic_accordion' %}: {{ resource.title }}">
+                    {% include "courses/partials/_cd_icon.html" with icon="external" size=16 %}
+                  </a>
+                {% endif %}
+                {% if is_owner %}
+                  <button type="button" class="cd-icon-btn cd-icon-btn--danger"
+                          data-delete-resource-course-id="{{ course.id }}"
+                          data-delete-resource-id="{{ resource.id }}"
+                          title="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}"
+                          aria-label="{% trans 'action_delete' context 'courses.partial.topic_accordion' %}: {{ resource.title }}">
+                    {% include "courses/partials/_cd_icon.html" with icon="trash" size=16 %}
+                  </button>
+                {% endif %}
+              </span>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="cd-topic__empty">{% trans "empty_resource" context "courses.partial.topic_accordion" %}</p>
+        {% endif %}
+
+        {% if is_owner %}
+          <button type="button" class="cd-dashed-btn"
+                  data-open-resource-modal-topic-id="{{ topic.id }}"
+                  data-open-resource-modal-title="{{ topic.title }}">
+            {% include "courses/partials/_cd_icon.html" with icon="plus" size=15 stroke=2.4 %}
+            {% trans "action_add_resource" context "courses.partial.topic_accordion" %}
+          </button>
+        {% endif %}
+      </div>
+    </li>
+    {% endwith %}
+    {% endfor %}
+  </ol>
+{% else %}
+  <div class="cd-empty">
+    <span class="cd-empty__ic cd-empty__ic--topics">{% include "courses/partials/_cd_icon.html" with icon="book" size=26 stroke=1.8 %}</span>
+    <p class="cd-empty__title">{% trans "empty_topic" context "courses.partial.topic_accordion" %}</p>
+    {% if is_owner %}
+      <p class="cd-empty__body">{% trans "empty_topic_hint" context "courses.dashboard" %}</p>
+      <div class="cd-empty__actions">
+        <button type="button" class="ems-btn ems-btn--primary" data-bs-toggle="modal" data-bs-target="#topicFormModal">
+          {% include "courses/partials/_cd_icon.html" with icon="plus" size=16 stroke=2.4 %}
+          {% trans "action_add_first_topic" context "courses.partial.topic_accordion" %}
+        </button>
+        <button type="button" class="ems-btn cd-btn-ai-soft" data-ems-ai>
+          {% include "courses/partials/_cd_icon.html" with icon="spark" size=15 stroke=1.8 %}
+          {% trans "ai_build_title" context "courses.dashboard" %}
+        </button>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<script src="{% static 'courses/js/topic_accordion.js' %}?v=20260928-1" defer></script>

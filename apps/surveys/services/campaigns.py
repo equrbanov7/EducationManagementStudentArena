@@ -25,6 +25,7 @@ from ..constants import (
 from ..models import SurveyCampaign
 from .config import survey_config
 from .gate_snapshot import sync_gate_snapshot
+from .pending import publish_results
 from .templates import default_template_for
 
 _CTX = "surveys.campaigns"
@@ -155,6 +156,8 @@ def close_campaign(campaign, *, by_user, request=None):
         campaign.status = CampaignStatus.CLOSED
         campaign.closed_at = timezone.now()
         campaign.save(update_fields=["status", "closed_at", "updated_at"])
+        # Audit 2026-09-28 SV-2: ilk bağlanmada bufer tam köçürülür, nəticə dəsti dondurulur.
+        publish_results(campaign.pk)
         _audit(campaign, by_user=by_user, action="close", changes={}, request=request)
         sync_gate_snapshot(campaign.organization)
     return campaign
@@ -208,6 +211,9 @@ def update_campaign(
         for key, value in changes.items():
             setattr(campaign, key, value)
         campaign.save(update_fields=[*changes, "updated_at"])
+        if campaign.effective_status(timezone.localdate()) == CampaignStatus.CLOSED:
+            # Audit 2026-09-28 SV-2: ``closes_on`` keçmişə çəkildi — nəticə indi dərc olunur (dondurulur).
+            publish_results(campaign.pk)
         _audit(campaign, by_user=by_user, action="update", changes=changes, request=request)
         sync_gate_snapshot(campaign.organization)
     return campaign

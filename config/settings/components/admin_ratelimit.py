@@ -54,6 +54,13 @@ LOGIN_IP_RATE_LIMIT = os.getenv("LOGIN_IP_RATE_LIMIT", "60/10m")
 # yəni superadmin üçün brute-force sərhədsiz qalırdı. İndi qaçış yolu ayrıca,
 # çox dar vedrəyə bağlıdır: İP + istifadəçi adı üzrə saatda 3 parol yoxlaması.
 LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT = os.getenv("LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT", "3/1h")
+
+# Hesab qatı (Audit 2026-09-28 SA-03 / AD-04): İP-dən və cihazdan ASILI OLMAYAN,
+# hesab başına uğursuz-giriş vedrəsi (paylanmış «credential spray»-ə qarşı) və
+# bir hesaba fərqli İP-lərdən gələn uğursuz cəhdlər üçün WARNING həddi.
+# Kod eyni default-lara düşür (apps/accounts/views/auth/constants.py).
+LOGIN_ACCOUNT_RATE_LIMIT = os.getenv("LOGIN_ACCOUNT_RATE_LIMIT", "20/1h")
+LOGIN_ACCOUNT_DISTINCT_IP_ALERT = _env_int_setting("LOGIN_ACCOUNT_DISTINCT_IP_ALERT", 10, minimum=1)
 OTP_VERIFY_RATE_LIMIT = os.getenv("OTP_VERIFY_RATE_LIMIT", "5/10m")
 OTP_RESEND_RATE_LIMIT = os.getenv("OTP_RESEND_RATE_LIMIT", "3/10m")
 
@@ -67,6 +74,11 @@ OTP_SEND_IP_RATE_LIMIT = os.getenv("OTP_SEND_IP_RATE_LIMIT", "40/10m")
 OTP_VERIFY_IP_RATE_LIMIT = os.getenv("OTP_VERIFY_IP_RATE_LIMIT", "100/10m")
 SUBSCRIBE_RATE_LIMIT = os.getenv("SUBSCRIBE_RATE_LIMIT", "3/10m")
 LIVE_EXAM_JOIN_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_RATE_LIMIT", "20/5m")
+# Live-quiz İP vedrələri (Audit 2026-09-28 D / AD-04): qoşulma və PIN təxmini
+# İP başına; kampus NAT-ı üçün QƏSDƏN geniş. Default-lar
+# apps/live_exam/views/player/constants.py ilə eynidir.
+LIVE_EXAM_JOIN_IP_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_IP_RATE_LIMIT", "150/10m")
+LIVE_PIN_IP_RATE_LIMIT = os.getenv("LIVE_PIN_IP_RATE_LIMIT", "100/10m")
 LIVE_STATE_RATE_LIMIT = os.getenv("LIVE_STATE_RATE_LIMIT", "120/1m")
 LIVE_REACTION_RATE_LIMIT = os.getenv("LIVE_REACTION_RATE_LIMIT", "3/10s")
 # WebSocket-specific rate limits

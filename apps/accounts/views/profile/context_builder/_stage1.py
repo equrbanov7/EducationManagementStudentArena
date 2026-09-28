@@ -1,11 +1,11 @@
 """build_profile_response — stage 1 (god-file refaktoru, FAZA 4)."""
 
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.urls import reverse
 
 from apps.accounts import profile_hooks
-from apps.courses.models import Course, CourseMembership
+from apps.courses.models import Course, CourseMembership, CourseTopic
 from apps.exams.models import Exam, StudentGroup
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
@@ -50,6 +50,9 @@ from ._helpers import (
     build_teacher_subject_rows,
 )
 
+#: «Kurslarım» kart şəbəkəsinin tavanı (əvvəl səssiz `[:10]` idi).
+MY_COURSES_CARD_LIMIT = 120
+
 
 class _Stage1Mixin:
     #: `_profile_info_identity.html`-i render edən bölmələr (superadmin təşkilat
@@ -66,29 +69,37 @@ class _Stage1Mixin:
 
     @staticmethod
     def _attach_course_group_summaries(courses):
+        """Kart üçün qrup adları + tələbə və mövzu sayları — kurs sayından asılı olmayaraq 2 sorğu."""
         course_ids = [course.id for course in courses]
         if not course_ids:
             return
 
         memberships = (
-            CourseMembership.objects.filter(
-                course_id__in=course_ids,
-                role="student",
-            )
-            .exclude(group_name="")
+            CourseMembership.objects.filter(course_id__in=course_ids, role="student")
             .values_list("course_id", "group_name")
             .order_by("course_id", "group_name")
         )
         groups_by_course = {}
+        students_by_course = {}
         for course_id, group_name in memberships:
+            students_by_course[course_id] = students_by_course.get(course_id, 0) + 1
             cleaned = (group_name or "").strip()
             if cleaned:
                 groups_by_course.setdefault(course_id, set()).add(cleaned)
+
+        topic_counts = dict(
+            CourseTopic.objects.filter(course_id__in=course_ids)
+            .values("course_id")
+            .annotate(n=Count("id"))
+            .values_list("course_id", "n")
+        )
 
         for course in courses:
             group_names = sorted(groups_by_course.get(course.id, set()))
             course.profile_group_names = group_names
             course.profile_group_count = len(group_names)
+            course.profile_student_count = students_by_course.get(course.id, 0)
+            course.profile_topic_count = topic_counts.get(course.id, 0)
 
     def _stage_1(self):
         """
@@ -245,7 +256,9 @@ class _Stage1Mixin:
                 _created_count if _created_count is not None else self.created_courses_qs.count()
             )
             if self.active_section == "my-courses":
-                self.my_created_courses = list(self.created_courses_qs[:10])
+                # 2026-09-28: əvvəl `[:10]` idi və səhifələmə yox idi — 11-ci kurs kabinetdə
+                # heç görünmürdü. Kartlar yüngüldür; tavan yalnız patoloji hal üçündür.
+                self.my_created_courses = list(self.created_courses_qs[:MY_COURSES_CARD_LIMIT])
                 self._attach_course_group_summaries(self.my_created_courses)
             self._my_exams_ctx = build_my_exams_context(
                 self.request, my_exams_qs=self.my_exams_qs, active_section=self.active_section

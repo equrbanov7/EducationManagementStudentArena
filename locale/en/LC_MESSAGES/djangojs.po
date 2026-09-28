@@ -67,7 +67,7 @@ msgstr "Coursework"
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:28
 #: apps/courses/static/courses/js/course_ai_drawer.js:76
 msgid "Lab işləri"
-msgstr "Lab works"
+msgstr "Lab work"
 
 #: apps/accounts/static/accounts/js/permission_editor/labels.js:29
 msgid "Qiymətləndirmə"
@@ -828,7 +828,7 @@ msgstr "{n} decisions made"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:135
 msgid "Bu sərbəst işi silmək istədiyinizə əminsiniz?"
-msgstr "Are you sure you want to delete this self-study assignment?"
+msgstr "Are you sure you want to delete this assignment?"
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:156
 msgid "Silinmə zamanı xəta baş verdi"
@@ -838,7 +838,7 @@ msgstr "An error occurred while deleting"
 #: apps/assignments/static/assignment/js/assignment_modal.js:234
 #: apps/assignments/static/assignment/js/assignment_modal.js:264
 msgid "Xəta: "
-msgstr "Error:"
+msgstr "Error: "
 
 #: apps/assignments/static/assignment/js/assignment_modal.js:206
 #: apps/assignments/static/assignment/js/assignment_modal.js:243
@@ -1328,15 +1328,15 @@ msgstr "Lessons, files, video and links"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Tələbələr üçün tapşırıqlar və təqdimatlar"
-msgstr "Tasks and submissions for students"
+msgstr "Assignments and submissions for students"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:27
 msgid "Öğrenciler için görevler ve teslimler"
-msgstr "Tasks and submissions for students"
+msgstr "Assignments and submissions for students"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:28
 msgid "Bloklar və suallarla praktiki laboratoriyalar"
-msgstr "Practical labs with blocks and questions"
+msgstr "Hands-on lab work with blocks and questions"
 
 #: apps/courses/static/courses/js/course_panel_tabs.js:29
 msgid "Test və yazılı imtahanlar, nəzarət"
@@ -2017,7 +2017,7 @@ msgstr "Back to top"
 
 #: apps/labs/static/labs/js/grade_submission.js:111
 msgid "Qiymətləndirməni təsdiqləyin"
-msgstr "Confirm the assessment"
+msgstr "Confirm grading"
 
 #: apps/labs/static/labs/js/grade_submission.js:112
 msgid "Bu bal və rəyi saxlamaq istədiyinizə əminsiniz?"
@@ -2132,7 +2132,7 @@ msgstr "Confirm the submission"
 
 #: apps/projects/static/projects/js/project_detail.js:39
 msgid "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
-msgstr "Are you sure you want to submit this coursework?"
+msgstr "Are you sure you want to submit this course project?"
 
 #: apps/projects/static/projects/js/project_detail.js:40
 msgid "Göndər"
@@ -2873,8 +2873,12 @@ msgstr "Recipients"
 msgid "Anladım"
 msgstr "Got it"
 
-msgid "Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar verilməmiş suallar:"
-msgstr "Once the appeal is opened, no question may be left undecided. Undecided questions:"
+msgid ""
+"Apellyasiya açıldıqdan sonra heç bir sual qərarsız qala bilməz. Qərar "
+"verilməmiş suallar:"
+msgstr ""
+"Once the appeal is opened, no question may be left undecided. Undecided "
+"questions:"
 
 msgid "Axtar…"
 msgstr "Search…"
@@ -2888,7 +2892,9 @@ msgstr "Choose the start time."
 msgid "Bitmə vaxtını seçin."
 msgstr "Choose the end time."
 
-msgid "Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə edin."
+msgid ""
+"Bu PIN-i imtahan giriş səhifəsində istifadəçi adınızla birlikdə istifadə "
+"edin."
 msgstr "Use this PIN together with your username on the exam entry page."
 
 msgid "Bu dersin atandığı gruplar"
@@ -2901,7 +2907,8 @@ msgid "Bütün suallara qərar verin"
 msgstr "Decide on all questions"
 
 msgid "Cari cavablarınız yadda saxlanılıb. Ətraflı nəticəyə keçə bilərsiniz."
-msgstr "Your current answers have been saved. You can go to the detailed result."
+msgstr ""
+"Your current answers have been saved. You can go to the detailed result."
 
 msgid "Deaktiv"
 msgstr "Off"
@@ -2942,8 +2949,12 @@ msgstr "Go to the result"
 msgid "Nəzarət"
 msgstr "Proctoring"
 
-msgid "PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə edilir."
-msgstr "The PIN will only be shown close to the exam time, or it can be obtained from the exam centre."
+msgid ""
+"PIN yalnız imtahan vaxtına yaxın görünəcək və ya imtahan mərkəzindən əldə "
+"edilir."
+msgstr ""
+"The PIN will only be shown close to the exam time, or it can be obtained "
+"from the exam centre."
 
 msgid "Qruplar"
 msgstr "Groups"
@@ -2967,7 +2978,9 @@ msgid "Səbəb"
 msgstr "Reason"
 
 msgid "Səbəb tipini seçin və izahı ən azı {min} simvol yazın."
-msgstr "Choose the reason type and write an explanation of at least {min} characters."
+msgstr ""
+"Choose the reason type and write an explanation of at least {min} "
+"characters."
 
 msgid "Tip"
 msgstr "Type"
@@ -2984,14 +2997,26 @@ msgstr "Confirm and create"
 msgid "hesablanır…"
 msgstr "calculating…"
 
-msgid "{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "For question {q} you must write an explanation of at least {min} characters, or turn off the “Appeal” toggle."
+msgid ""
+"{q}-ci sualda izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et”"
+" düyməsini söndürməlisiniz."
+msgstr ""
+"For question {q} you must write an explanation of at least {min} characters,"
+" or turn off the “Appeal” toggle."
 
-msgid "{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "For question {q} you must choose the reason type and write an explanation of at least {min} characters, or turn off the “Appeal” toggle."
+msgid ""
+"{q}-ci sualda səbəb tipini seçib izahı ən azı {min} simvol yazmalısınız, ya "
+"da “Apellyasiya et” düyməsini söndürməlisiniz."
+msgstr ""
+"For question {q} you must choose the reason type and write an explanation of"
+" at least {min} characters, or turn off the “Appeal” toggle."
 
-msgid "{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini söndürməlisiniz."
-msgstr "For question {q} you must choose the reason type, or turn off the “Appeal” toggle."
+msgid ""
+"{q}-ci sualda səbəb tipini seçməlisiniz, ya da “Apellyasiya et” düyməsini "
+"söndürməlisiniz."
+msgstr ""
+"For question {q} you must choose the reason type, or turn off the “Appeal” "
+"toggle."
 
 msgid "İmtahan adı"
 msgstr "Exam title"
@@ -3032,14 +3057,24 @@ msgstr "Delete this row?"
 msgid "Bölgü silinsin?"
 msgstr "Delete this allocation?"
 
-msgid "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
-msgstr "Allocation confirmed. Journal offerings: %(created)s new, %(updated)s updated. Notified: %(notified)s"
+msgid ""
+"Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. "
+"Bildiriş: %(notified)s"
+msgstr ""
+"Allocation confirmed. Journal offerings: %(created)s new, %(updated)s "
+"updated. Notified: %(notified)s"
 
 msgid "Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."
-msgstr "No active curriculum plan rows were found for this department's specialties."
+msgstr ""
+"No active curriculum plan rows were found for this department's specialties."
 
-msgid "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
-msgstr "%(count)s suggestions found in the plan; the first one has been filled in. Hours are not stored in the curriculum plan — enter them manually (suggested: %(hours)s hours)."
+msgid ""
+"Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris "
+"planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
+msgstr ""
+"%(count)s suggestions found in the plan; the first one has been filled in. "
+"Hours are not stored in the curriculum plan — enter them manually "
+"(suggested: %(hours)s hours)."
 
 msgid "Qalıq: %(remaining)s / %(total)s saat"
 msgstr "Remaining: %(remaining)s / %(total)s hours"
@@ -3071,8 +3106,12 @@ msgstr "Incomplete rows"
 msgid "Aç"
 msgstr "Open"
 
-msgid "Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / .txt / .png / .jpg yükləyin."
-msgstr "This file type is not accepted for security reasons. Upload only .pdf / .docx / .txt / .png / .jpg."
+msgid ""
+"Bu fayl növü təhlükəsizlik səbəbi ilə qəbul edilmir. Yalnız .pdf / .docx / "
+".txt / .png / .jpg yükləyin."
+msgstr ""
+"This file type is not accepted for security reasons. Upload only .pdf / "
+".docx / .txt / .png / .jpg."
 
 msgid "Bitmə vaxtı başlama vaxtından sonra olmalıdır."
 msgstr "The end time must be after the start time."

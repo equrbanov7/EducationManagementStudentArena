@@ -13,6 +13,7 @@ from apps.exams.services.attempts import (
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
+from apps.exams.services.final_center import admission_block_reason
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.exams.views.student._helpers import ensure_student_exam_tenant_context
 
@@ -137,6 +138,12 @@ def exam_code_check(request):
             )
         messages.error(request, pgettext("exams.view.access.message", "exam_has_no_questions"))
         return redirect(_resolve_exam_failure_redirect(request))
+
+    # Audit 2026-09-28 EXA-04: qayıb limiti buraxılış qapısı kod yolunda da —
+    # FAIL-CLOSED (registrar xətası = start yoxdur; kabinet yolundakı köməkçi fail-open idi).
+    block_reason = admission_block_reason(request.user, exam)
+    if block_reason:
+        return _code_check_failure(request, block_reason)
 
     response = _start_or_resume_attempt(request, exam)
     if _is_ajax_request(request):

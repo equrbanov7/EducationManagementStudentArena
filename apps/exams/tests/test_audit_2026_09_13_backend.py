@@ -222,6 +222,10 @@ class _BrokenTestAttempt:
     id = 777
     user_id = 1
     is_trial = False
+    # Audit 2026-09-28 EX28-02 / EXA-01: körpü yalnız bitmiş cəhdi yazır; started_at=None
+    # «sonrakı final cəhdi» sorğusunu (DB) keçir — SimpleTestCase DB-siz qalır.
+    is_finished = True
+    started_at = None
     supervision_status = "active"
     teacher_score = None
     score_percent = _BrokenScore()
@@ -278,6 +282,8 @@ class JournalSyncFailureVisibilityTest(SimpleTestCase):
             teacher_score=5,
             answers=_BrokenAnswers(),
             graded_by=None,
+            is_finished=True,
+            started_at=None,
         )
         before = self._counter_value(journal_sync.SKIP_PERCENT_UNAVAILABLE)
         with self.assertLogs("apps.exams.services.journal_sync", level=logging.WARNING) as captured:
@@ -297,7 +303,14 @@ class JournalSyncFailureVisibilityTest(SimpleTestCase):
             questions=None,
         )
         attempt = SimpleNamespace(
-            id=779, user_id=1, exam=exam, is_trial=False, supervision_status="active", teacher_score=None
+            id=779,
+            user_id=1,
+            exam=exam,
+            is_trial=False,
+            supervision_status="active",
+            teacher_score=None,
+            is_finished=True,
+            started_at=None,
         )
         before = self._counter_value(journal_sync.SKIP_PERCENT_UNAVAILABLE)
         with self.assertNoLogs("apps.exams.services.journal_sync", level=logging.WARNING):
