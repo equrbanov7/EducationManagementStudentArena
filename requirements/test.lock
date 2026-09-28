@@ -115,7 +115,7 @@ cbor2==6.1.4 \
     --hash=sha256:e1fe2d62c50df290576280b18247ec63486f78be73e285bae269c2456c6ddff0 \
     --hash=sha256:e8097e8259b78c8feb5dd5b833b23f83ed588e821ef44cf1455082cfc9434440 \
     --hash=sha256:f3fc7d15cba4174373df2496070faa4a927fe3ed772130d281808120aec7b61c
-    # via autobahn, --override /Users/elvin/Developer/EMSArena/scripts/deps/overrides.txt, -r base.txt
+    # via autobahn, --override ../scripts/deps/overrides.txt, -r base.txt
 celery==5.5.2 \
     --hash=sha256:4d6930f354f9d29295425d7a37261245c74a32807c45d764bedc286afd0e724e \
     --hash=sha256:54425a067afdc88b57cd8d94ed4af2ffaf13ab8c7680041ac2c4ac44357bdf4c

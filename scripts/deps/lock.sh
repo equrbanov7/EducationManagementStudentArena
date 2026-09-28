@@ -49,6 +49,7 @@ compile() {
   local input="$1" output="$2"
   shift 2
   (
+    # Nisbi yol: annotasiyaya (# via --override …) maşından asılı mütləq yol düşməsin.
     cd "$REQ_DIR"
     "$UV" pip compile "$input" \
       --universal \
@@ -58,7 +59,7 @@ compile() {
       --annotation-style line \
       --index-url https://pypi.org/simple \
       --quiet \
-      --override "$ROOT_DIR/scripts/deps/overrides.txt" \
+      --override ../scripts/deps/overrides.txt \
       --output-file "$output" \
       "$@"
   )
