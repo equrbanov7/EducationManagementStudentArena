@@ -71,7 +71,9 @@ class SectionLoaderFocusTest(SimpleTestCase):
 
     def test_profile_template_busts_section_loader_cache(self):
         template = _read(PROFILE_TEMPLATE)
-        self.assertRegex(template, r"section_loader\.js' %\}\?v=2026091[3-9]|section_loader\.js' %\}\?v=20261")
+        self.assertRegex(
+            template, r"section_loader\.js' %\}\?v=202609(1[3-9]|2[0-9]|3[01])|section_loader\.js' %\}\?v=20261"
+        )
 
 
 class ProfileTemplateLandmarkTest(SimpleTestCase):

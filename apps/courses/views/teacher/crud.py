@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
@@ -22,7 +22,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, ListView, UpdateView, View
 
-from apps.courses.forms import CourseForm
+from apps.courses.forms import COURSE_STATUS_CHOICES, CourseForm
 from apps.courses.models import Course
 from apps.organizations.models import Organization
 from core.helpers import _safe_same_origin_redirect_path
@@ -158,13 +158,24 @@ class CreateCourseView(LoginRequiredMixin, CreateView):
 
 
 class EditCourseView(IsCourseOwnerMixin, UpdateView):
-    """Kurs məlumatını redaktə etmə."""
+    """Kurs məlumatını redaktə etmə — 2026-09-28-dən YALNIZ modal.
+
+    Ayrıca redaktə səhifəsi (edit_course.html) silindi: forma kurs panelində
+    Bootstrap modalı kimi render olunur (`_edit_course_modal.html`) və buraya
+    AJAX ilə göndərilir. Köhnə birbaşa GET linkləri panelə `?edit=1` ilə
+    yönləndirilir — panel modalı özü açır.
+
+    - GET (AJAX)  → forma gövdəsinin HTML-i (`_edit_course_form_body.html`)
+    - GET (adi)   → 302 kurs paneli `?edit=1`
+    - POST (AJAX) → {"success": true, "redirect"} / 400 {"success": false, "html"}
+    - POST (adi)  → 302 kurs paneli (köhnə davranış, testlər/fallback)
+    """
 
     model = Course
     form_class = CourseForm
-    template_name = "courses/edit_course.html"
     context_object_name = "course"
     pk_url_kwarg = "course_id"
+    body_template_name = "courses/partials/_edit_course_form_body.html"
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -172,12 +183,34 @@ class EditCourseView(IsCourseOwnerMixin, UpdateView):
         _require_org_permission(request, "course.edit")
         return super().dispatch(request, *args, **kwargs)
 
+    def _is_ajax(self):
+        return self.request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
+    def _render_body(self, form):
+        return render_to_string(
+            self.body_template_name, {"edit_course_form": form, "course": self.object}, request=self.request
+        )
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self._is_ajax():
+            return HttpResponse(self._render_body(self.get_form()))
+        return redirect(f"{reverse('courses:course_dashboard', args=[self.object.id])}?edit=1")
+
     def form_valid(self, form):
         messages.success(
             self.request,
             pgettext("courses.view.message", "course_updated").format(title=form.instance.title),
         )
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        if self._is_ajax():
+            return JsonResponse({"success": True, "redirect": str(self.get_success_url())})
+        return response
+
+    def form_invalid(self, form):
+        if self._is_ajax():
+            return JsonResponse({"success": False, "html": self._render_body(form)}, status=400)
+        return redirect(f"{reverse('courses:course_dashboard', args=[self.object.id])}?edit=1")
 
     def get_success_url(self):
         return reverse_lazy("courses:course_dashboard", args=[self.object.id])
@@ -235,7 +268,9 @@ def update_course_status(request, course_id):
         course.save(update_fields=["status", "updated_at"])
         messages.success(
             request,
-            pgettext("courses.view.message", "course_status_updated").format(status=course.get_status_display()),
+            pgettext("courses.view.message", "course_status_updated").format(
+                status=dict(COURSE_STATUS_CHOICES).get(course.status, course.status)
+            ),
         )
 
     redirect_target = _safe_same_origin_redirect_path(

@@ -337,6 +337,34 @@
             return true;
         }
 
+        /* 2026-09-28: bölmə skeleti (opt-in). `profile.html` bölmə üçün
+           `<template data-section-skeleton="<key>">` render edibsə, fraqment
+           gələnə qədər cari panel gizlənir və skelet göstərilir (əvvəl köhnə
+           panel donuq qalırdı, yalnız üst zolaq hərəkət edirdi). Skelet panel
+           DEYİL (`data-profile-section-panel` yoxdur) — replaceSectionHtml ona
+           toxunmur; uğur/xəta/abort-da `dropSectionSkeleton` silir. */
+        function showSectionSkeleton(section) {
+            dropSectionSkeleton(false);
+            var tpl = document.querySelector('template[data-section-skeleton="' + section + '"]');
+            if (!tpl || !ctx.sectionsHost || !tpl.content) { return; }
+            var prev = ctx.sectionsHost.querySelector("[data-profile-section-panel].is-active");
+            var sk = document.createElement("div");
+            sk.className = "profile-section-panel is-active profile-section-skeleton";
+            sk.setAttribute("aria-hidden", "true");
+            sk.appendChild(tpl.content.cloneNode(true));
+            if (prev) { prev.classList.remove("is-active"); }
+            ctx.sectionsHost.appendChild(sk);
+            ctx.sectionSkeleton = { el: sk, prev: prev };
+        }
+
+        function dropSectionSkeleton(restorePrev) {
+            var state = ctx.sectionSkeleton;
+            if (!state) { return; }
+            ctx.sectionSkeleton = null;
+            if (state.el && state.el.parentNode) { state.el.parentNode.removeChild(state.el); }
+            if (restorePrev && state.prev && state.prev.parentNode) { state.prev.classList.add("is-active"); }
+        }
+
         function tryAjaxLoadSection(section, options) {
             options = options || {};
             if (!isAjaxSafeSection(section)) {
@@ -348,6 +376,7 @@
             var controller = (typeof AbortController === "function") ? new AbortController() : null;
             ctx.ajaxLoadInFlight = controller;
             showSectionLoading();
+            showSectionSkeleton(section);
 
             var fetchOpts = {
                 credentials: "same-origin",
@@ -398,6 +427,9 @@
                     return false;
                 })
                 .then(function (result) {
+                    if (ctx.ajaxLoadInFlight === controller) {
+                        dropSectionSkeleton(result !== true);
+                    }
                     clearSectionLoading();
                     if (ctx.ajaxLoadInFlight === controller) {
                         ctx.ajaxLoadInFlight = null;

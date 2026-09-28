@@ -1,0 +1,347 @@
+/* EMSArena — Kurs paneli · tab-bar, panel başlığı, boş vəziyyət, responsiv. Bölündü: course_panel.css-dən. */
+
+/* ── Tab-bar ─────────────────────────────────────────────────────────────── */
+.cd-tabs-wrap {
+    position: sticky;
+    top: var(--cd-sticky-top);
+    z-index: 30;
+    margin: 18px 0 16px;
+    padding: 5px;
+    border: 1px solid var(--cd-line);
+    border-radius: var(--ems-r-2xl);
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--ems-sh-card);
+    backdrop-filter: saturate(1.4) blur(8px);
+}
+
+.cd-tabs-wrap::before,
+.cd-tabs-wrap::after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    width: 28px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.cd-tabs-wrap::before {
+    left: 5px;
+    border-radius: 12px 0 0 12px;
+    background: linear-gradient(90deg, #fff, rgba(255, 255, 255, 0));
+}
+
+.cd-tabs-wrap::after {
+    right: 5px;
+    border-radius: 0 12px 12px 0;
+    background: linear-gradient(270deg, #fff, rgba(255, 255, 255, 0));
+}
+
+.cd-tabs-wrap.is-scroll-start::before,
+.cd-tabs-wrap.is-scroll-end::after {
+    opacity: 1;
+}
+
+.cd-tabs {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+}
+
+.cd-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.cd-tab {
+    --tab: var(--ems-primary-600);
+    --tab-soft: var(--ems-primary-50);
+    --tab-ink: var(--ems-primary-800);
+
+    display: inline-flex;
+    flex: 1 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 12px 0 8px;
+    border: 0;
+    border-radius: var(--ems-r-xl);
+    background: transparent;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.cd-tab:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.cd-tab__ic {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--tab-soft);
+    color: var(--tab-ink);
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.cd-tab__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cd-tab[aria-selected="true"] {
+    background: var(--tab-soft);
+    color: var(--tab-ink);
+}
+
+.cd-tab[aria-selected="true"] .cd-tab__ic {
+    background: var(--tab);
+    color: #fff;
+}
+
+.cd-tab[aria-selected="true"] .cd-tab__count {
+    background: var(--tab);
+    color: #fff;
+}
+
+/* bölmə rəngləri (kabinetin imtahan-tipi palitrası ilə uyğun) */
+.cd-tab--assignments { --tab: var(--ems-warning-700); --tab-soft: var(--ems-warning-100); --tab-ink: var(--ems-warning-800); }
+.cd-tab--labs { --tab: var(--ems-violet-600); --tab-soft: var(--ems-violet-100); --tab-ink: var(--ems-violet-800); }
+.cd-tab--exams { --tab: var(--ems-sky-600); --tab-soft: var(--ems-sky-100); --tab-ink: var(--ems-sky-900); }
+.cd-tab--projects { --tab: var(--ems-rose-600); --tab-soft: var(--ems-rose-100); --tab-ink: var(--ems-rose-800); }
+.cd-tab--resources { --tab: var(--ems-success-strong); --tab-soft: #e6fbf7; --tab-ink: #0b544e; }
+.cd-tab--members { --tab: var(--ems-emerald-600); --tab-soft: var(--ems-success-100); --tab-ink: var(--ems-success-700); }
+
+/* ── Panel ──────────────────────────────────────────────────────────────── */
+.cd-panel {
+    padding: 20px;
+    border: 1px solid var(--cd-line);
+    border-radius: var(--cd-radius);
+    background: var(--cd-card);
+    box-shadow: var(--ems-sh-card);
+    animation: cdPanelIn 0.18s ease;
+    scroll-margin-top: calc(var(--cd-sticky-top) + 70px);
+}
+
+.cd-panel:focus {
+    outline: none;
+}
+
+.cd-panel[hidden] {
+    display: none;
+}
+
+@keyframes cdPanelIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+}
+
+.cd-panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 16px;
+    margin-bottom: 18px;
+}
+
+.cd-panel__titles {
+    min-width: 0;
+    flex: 1 1 260px;
+}
+
+.cd-panel__title {
+    margin: 0;
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--ems-text);
+}
+
+.cd-panel__hint {
+    margin: 4px 0 0;
+    font-size: var(--ems-fs-md);
+    color: var(--cd-muted);
+}
+
+.cd-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.cd-panel__actions:empty {
+    display: none;
+}
+
+/* ── Boş vəziyyət ────────────────────────────────────────────────────────── */
+.cd-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 40px 20px 36px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg-subtle);
+    text-align: center;
+}
+
+.cd-empty__ic {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+    border-radius: 16px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.cd-empty__ic--resources { background: #e6fbf7; color: #0b544e; }
+.cd-empty__ic--members { background: var(--ems-success-100); color: var(--ems-success-700); }
+
+.cd-empty__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.cd-empty__body {
+    max-width: 46ch;
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--cd-muted);
+    text-wrap: pretty;
+}
+
+.cd-empty__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.cd-empty-inline {
+    margin: 12px 0 0;
+    padding: 16px;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    color: var(--cd-muted);
+    text-align: center;
+    font-size: var(--ems-fs-md);
+}
+
+/* ── Responsiv ───────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .cd-hero {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .cd-hero__actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .cd-publish {
+        flex: 1 1 200px;
+    }
+
+    .cd-hero__row {
+        flex: 2 1 300px;
+    }
+}
+
+@media (max-width: 640px) {
+    .cd-shell {
+        padding: 14px 12px 88px;
+    }
+
+    .cd-hero {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 16px;
+    }
+
+    .cd-hero__cover {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+    }
+
+    .cd-hero__cover .cd-ic {
+        width: 26px;
+        height: 26px;
+    }
+
+    .cd-hero__title {
+        font-size: 21px;
+    }
+
+    .cd-stat {
+        flex: 1 1 calc(33% - 8px);
+        min-width: 0;
+    }
+
+    .cd-tabs-wrap {
+        top: 60px;
+        margin: 14px -12px 12px;
+        border-left: 0;
+        border-right: 0;
+        border-radius: 0;
+    }
+
+    .cd-tab {
+        flex: none;
+    }
+
+    .cd-panel {
+        padding: 16px 14px;
+    }
+
+    .cd-panel__actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .cd-panel__actions > * {
+        flex: 1 1 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ems-cd *,
+    .ems-cd *::before,
+    .ems-cd *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}

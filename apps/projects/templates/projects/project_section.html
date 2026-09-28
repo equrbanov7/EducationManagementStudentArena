@@ -75,6 +75,9 @@
                                 </small>
                             </div>
 
+                            {% comment %}2026-09-28: bax/redaktə/sil view-ları yalnız kurs sahibinə açıqdır,
+                               modallar da yalnız sahibə render olunur — digər müəllimə ölü düymə göstərilmir.{% endcomment %}
+                            {% if is_owner %}
                             <div class="btn-group btn-group-sm gap-2">
                                 <a href="{% url 'projects:review_project_submissions' p.id %}?from_section={{ profile_return_section|default:'my-courses' }}&return_to={{ request.get_full_path|urlencode }}"
                                    class="btn btn-sm btn-outline-info">
@@ -89,6 +92,7 @@
                                     <i class="fa-solid fa-trash"></i> {% trans "delete" context "projects.section" %}
                                 </button>
                             </div>
+                            {% endif %}
                         </div>
                         {% endfor %}
                     </div>
@@ -96,9 +100,11 @@
                     <div class="alert alert-light text-center py-4">
                         <i class="fa-solid fa-folder-open project-section-2"></i>
                         <p class="text-muted mt-2 mb-0">{% trans "empty_teacher" context "projects.section" %}</p>
+                        {% if is_owner %}
                         <button class="btn btn-info btn-sm mt-3 text-white" data-bs-toggle="modal" data-bs-target="#addProjectModal">
                             <i class="fa-solid fa-plus-circle"></i> {% trans "add_first_project" context "projects.section" %}
                         </button>
+                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -156,7 +162,7 @@
                                 {% if item.user_attempts > 0 %}
                                     <a href="{% url 'projects:my_submissions' p.id %}?return_to={{ profile_return_url|urlencode }}"
                                        class="btn btn-sm btn-outline-info">
-                                        <i class="fa-solid fa-list-check"></i> {% trans 'Cavablarım (' %}{{ item.user_attempts }})
+                                        <i class="fa-solid fa-list-check"></i> {% blocktrans trimmed context "projects.section" with attempts=item.user_attempts %}Cavablarım ({{ attempts }}){% endblocktrans %}
                                     </a>
                                 {% endif %}
 

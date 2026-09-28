@@ -103,10 +103,16 @@
         okBtn.textContent = opts.confirmLabel || okBtn.dataset.emsDefaultLabel;
         cancelBtn.textContent = opts.cancelLabel || cancelBtn.dataset.emsDefaultLabel;
         okBtn.className = "btn " + (opts.danger ? "btn-danger" : "btn-primary");
+        modalEl.classList.toggle("is-danger", !!opts.danger);
+        modalEl.classList.toggle("is-untitled", !opts.title);
 
         return new Promise(function (resolve) {
             pendingResolve = resolve;
             window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            // Destruktiv əməldə ilkin fokus «Ləğv et»-dədir (təsadüfi Enter silməsin).
+            modalEl.addEventListener("shown.bs.modal", function () {
+                (opts.danger ? cancelBtn : okBtn).focus();
+            }, { once: true });
         });
     }
 

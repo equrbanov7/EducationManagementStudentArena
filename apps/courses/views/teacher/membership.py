@@ -6,9 +6,7 @@ Contains:
 - CourseMembersView
 - AvailableStudentsView
 - AddMemberView
-- AddMembersBulkView
 - DeleteMemberView
-- DeleteGroupFromCourseView
 - link_exam_to_course (function-based)
 - unlink_exam_from_course (function-based)
 """
@@ -20,7 +18,6 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -29,7 +26,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import View
 
 from apps.courses.models import CourseMembership
-from apps.exams.models import Exam, StudentGroup
+from apps.exams.models import Exam
 from apps.exams.public import without_disabled_practical_exams
 from core.permissions import request_has_permission
 from core.search_text import tolerant_q
@@ -76,23 +73,12 @@ class CourseMembersView(LoginRequiredMixin, UserPassesTestMixin, View):
         # şablonda ~8 min checkbox sətri kimi render olunurdu. İndi modal
         # siyahını `courses:available_students` JSON endpoint-indən axtarışla,
         # səhifə-səhifə (max 50) çəkir — `all_users` kontekstdən çıxarıldı.
-        user_org = get_request_organization(request)
-
-        try:
-            all_groups_qs = StudentGroup.objects.filter(teacher=request.user)
-            if user_org is not None:
-                all_groups_qs = all_groups_qs.filter(organization=user_org)
-            all_groups = all_groups_qs.order_by("name")
-        except ImportError:
-            all_groups = []
-
         context = {
             "course": course,
             "members": members,
             "teacher": teacher,
             "assistants": assistants,
             "students": students,
-            "all_groups": all_groups,
             # `course.owner == request.user` owner sətrini ayrıca SELECT edirdi — id müqayisəsi kifayətdir.
             "is_owner": course.owner_id == request.user.id,
         }
@@ -133,7 +119,7 @@ def _available_students_queryset(request, course):
     qs = User.objects.exclude(id__in=course_user_ids)
     if user_org is not None:
         qs = qs.filter(profile__organization=user_org)
-    return _student_users_queryset(qs).order_by("username")
+    return _student_users_queryset(qs, organization=user_org).order_by("username")
 
 
 class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -256,7 +242,9 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                     user_qs = User.objects.filter(id=uid)
                     if owner_org is not None:
                         user_qs = user_qs.filter(profile__organization=owner_org)
-                    user = user_qs.get()
+                    # Audit 2026-09-28 T-03: yalnız TƏLƏBƏ (seçici ilə eyni qayda) —
+                    # birbaşa sorğu ilə müəllim/işçi «tələbə» kimi əlavə oluna bilmir.
+                    user = _student_users_queryset(user_qs, organization=owner_org).get()
                 except User.DoesNotExist:
                     continue
                 membership, created = CourseMembership.objects.get_or_create(
@@ -281,93 +269,6 @@ class AddMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
                 "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
             }
         )
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Add Members Bulk View
-# ════════════════════════════════════════════════════════════════════════════
-
-
-class AddMembersBulkView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """Qrupları toplu şəkildə kursa əlavə et."""
-
-    def test_func(self):
-        course_id = self.kwargs.get("course_id")
-        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
-
-    def handle_no_permission(self):
-        return JsonResponse({"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403)
-
-    def post(self, request, *args, **kwargs):
-        if not request_has_permission(request, "course.edit"):
-            return JsonResponse(
-                {"success": False, "error": pgettext("courses.view.message", "no_permission")}, status=403
-            )
-
-        from apps.notifications.public import notify_course_membership_assigned
-
-        course_id = kwargs.get("course_id")
-        course = _get_owner_course_or_404(request, course_id)
-
-        group_ids = request.POST.getlist("group_ids")
-
-        if not group_ids:
-            return JsonResponse(
-                {"success": False, "error": pgettext("courses.view.message", "no_group_selected")},
-                status=400,
-            )
-
-        try:
-            user_org = get_request_organization(request)
-            groups = StudentGroup.objects.filter(id__in=group_ids, teacher=request.user)
-            if user_org is not None:
-                groups = groups.filter(organization=user_org)
-
-            added_count = 0
-
-            # Audit 2026-09-13 backend F-07 (2026-09-14): qrupların toplu əlavəsi bir
-            # tranzaksiyada — ortada sınsa yarım qrup qalmasın (istisna `except`-ə çıxır → 500).
-            with transaction.atomic():
-                for group in groups:
-                    for student in group.students.all():
-                        membership, created = CourseMembership.objects.get_or_create(
-                            course=course,
-                            user=student,
-                            defaults={"role": "student", "group_name": group.name},
-                        )
-                        previous_group_name = membership.group_name or ""
-                        if created:
-                            added_count += 1
-                            notify_course_membership_assigned(
-                                membership=membership,
-                                created=True,
-                                previous_group_name=previous_group_name,
-                            )
-                        elif not (membership.group_name or "").strip():
-                            membership.group_name = group.name
-                            membership.save(update_fields=["group_name"])
-                            notify_course_membership_assigned(
-                                membership=membership,
-                                created=False,
-                                previous_group_name=previous_group_name,
-                            )
-
-            return JsonResponse(
-                {
-                    "success": True,
-                    "message": pgettext("courses.view.message", "students_added_to_course").format(count=added_count),
-                    "added_count": added_count,
-                }
-            )
-
-        except ImportError:
-            return JsonResponse(
-                {"success": False, "error": pgettext("courses.view.message", "studentgroup_model_not_found")},
-                status=500,
-            )
-        except Exception:
-            logger.exception("Unexpected error in AddMembersBulkView")
-            return JsonResponse({"success": False, "error": "An unexpected error occurred."}, status=500)
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -409,43 +310,6 @@ class DeleteMemberView(LoginRequiredMixin, UserPassesTestMixin, View):
             return JsonResponse({"success": True, "message": success_message})
 
         messages.success(request, success_message)
-        return redirect("courses:course_members", course_id=course_id)
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Delete Group From Course View
-# ════════════════════════════════════════════════════════════════════════════
-
-
-class DeleteGroupFromCourseView(LoginRequiredMixin, UserPassesTestMixin, View):
-    """Kursdan müəyyən bir qrup adını daşıyan bütün tələbələri silir."""
-
-    def test_func(self):
-        course_id = self.kwargs.get("course_id")
-        return _owner_courses_queryset(self.request).filter(id=course_id).exists()
-
-    def post(self, request, *args, **kwargs):
-        if not request_has_permission(request, "course.edit"):
-            raise PermissionDenied(pgettext("courses.view.permission", "no_permission_edit_course"))
-
-        course_id = kwargs.get("course_id")
-        group_name = request.POST.get("group_name")
-
-        if not group_name:
-            messages.error(request, pgettext_lazy("courses.view.message", "group_name_missing"))
-            return redirect("courses:course_members", course_id=course_id)
-
-        course = _get_owner_course_or_404(request, course_id)
-
-        deleted_count, _ = CourseMembership.objects.filter(course=course, group_name=group_name).delete()
-
-        messages.success(
-            request,
-            pgettext("courses.view.message", "group_removed_from_course").format(
-                group_name=group_name,
-                count=deleted_count,
-            ),
-        )
         return redirect("courses:course_members", course_id=course_id)
 
 

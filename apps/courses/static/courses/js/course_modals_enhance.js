@@ -27,14 +27,6 @@
     members:     { color:'#16A34A', soft:'#DCFCE7', deep:'#15803D', icon:'users' }
   };
 
-  /* AI text — səhifə dilinə görə */
-  var AI_TXT = {
-    az:{ btn:gettext('AI ilə doldur'), hint:gettext('Sahələri AI ilə doldur') },
-    ru:{ btn:'Заполнить с ИИ', hint:'Заполнить поля с ИИ' },
-    tr:{ btn:'AI ile doldur', hint:gettext('Alanları AI ile doldur') },
-    en:{ btn:'Fill with AI', hint:'Let AI fill the fields' }
-  };
-
   function keyForId(id) {
     id = (id || '').toLowerCase();
     if (id.indexOf('topic') > -1) return 'topics';
@@ -52,12 +44,12 @@
   }
 
   function sectionLabel(key) {
-    var el = document.querySelector('.snav-item[data-key="' + key + '"] .snav-label');
+    var el = document.querySelector('.cd-tab[data-cd-tab="' + key + '"] .cd-tab__label');
     return el ? el.textContent.trim() : '';
   }
 
   function enhance(modal, lang) {
-    if (!modal || modal.dataset.emsModalReady === '1') return;
+    if (!modal || modal.dataset.emsModalReady === '1' || modal.classList.contains('exam-wizard-modal')) return;
     var key = keyForId(modal.id);
     if (!key) return;
     var meta = SEC[key];

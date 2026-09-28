@@ -1,0 +1,522 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   EMSArena — Kurs paneli · bölmə məzmunu (2026-09-28)
+   Mövzular · resurslar · qruplar/üzvlər + başqa tətbiqlərin bölmə partial-ları
+   (tapşırıq/lab/imtahan/layihə) üçün vahid görünüş. Başqa tətbiqlərin
+   partial-ları hələ Bootstrap akkordeon qabığındadır — burada qabıq gizlədilir,
+   siyahı elementləri kabinet kartlarına çevrilir. Qabıq: course_panel.css.
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── ümumi çip / sayğac ──────────────────────────────────────────────────── */
+.cd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    min-height: 24px;
+    padding: 2px 9px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cd-chip--truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.cd-count-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 20px;
+    margin-left: 6px;
+    padding: 0 7px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    vertical-align: 2px;
+}
+
+.cd-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: none;
+}
+
+.cd-dashed-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 40px;
+    margin-top: 10px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: transparent;
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cd-dashed-btn:hover {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+
+/* ── Mövzular ───────────────────────────────────────────────────────────── */
+.cd-topics {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd-topic {
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.cd-topic:hover,
+.cd-topic.is-open {
+    border-color: var(--ems-neutral-300);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.cd-topic__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 10px 6px 6px;
+}
+
+.cd-topic__toggle {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+    padding: 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cd-topic__num {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+}
+
+.cd-topic__text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cd-topic__title {
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.cd-topic__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+}
+
+.cd-topic__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.cd-topic__chev {
+    display: grid;
+    place-items: center;
+    flex: none;
+    margin-left: auto;
+    width: 28px;
+    height: 28px;
+    color: var(--ems-neutral-500);
+    transition: transform 0.18s ease;
+}
+
+.cd-topic.is-open .cd-topic__chev {
+    transform: rotate(180deg);
+}
+
+.cd-topic__row .cd-row-actions {
+    padding-top: 8px;
+}
+
+.cd-topic__body {
+    padding: 0 16px 16px 60px;
+}
+
+.cd-topic__empty {
+    margin: 0;
+    padding: 12px 14px;
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-base);
+    color: var(--ems-neutral-500);
+}
+
+/* resurs sətri (mövzu içində) */
+.cd-res-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cd-res-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 8px 8px 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+}
+
+.cd-res-item__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.cd-res-item__title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.cd-res-ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-700);
+}
+
+.cd-res-ic--link { background: var(--ems-primary-50); color: var(--ems-primary-700); }
+.cd-res-ic--video { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.cd-res-ic--document { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+
+/* ── Resurslar (kart şəbəkəsi) ──────────────────────────────────────────── */
+.cd-res-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.cd-res-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.cd-res-card:hover {
+    border-color: var(--ems-neutral-300);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.cd-res-card__top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.cd-res-card__titles {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.cd-res-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.cd-res-card__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+    font-size: var(--ems-fs-base);
+    line-height: 1.5;
+    color: var(--ems-neutral-600);
+}
+
+.cd-res-card__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    min-width: 0;
+}
+
+/* ── Üzvlər: bloklar ─────────────────────────────────────────────────────── */
+.cd-block + .cd-block {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--ems-neutral-200);
+}
+
+.cd-block__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.cd-block__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.cd-block__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.cd-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 240px;
+    height: var(--ems-h-xs);
+    margin: 0;
+    padding: 0 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-500);
+}
+
+.cd-search:focus-within {
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.cd-search input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-base);
+}
+
+/* qrup kartları */
+.cd-group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+}
+
+.cd-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.cd-group__top {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.cd-group__ic {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.cd-group__titles {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.cd-group__name {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.cd-group__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cd-group__meta .cd-truncate {
+    max-width: 100%;
+}
+
+.cd-avatars {
+    display: flex;
+    padding-left: 6px;
+}
+
+.cd-avatars .cd-avatar {
+    width: 28px;
+    height: 28px;
+    margin-left: -6px;
+    border: 2px solid var(--ems-bg);
+    font-size: 10px;
+}
+
+.cd-avatar {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ems-success-100);
+    color: var(--ems-success-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.cd-avatar--teacher { background: var(--ems-warning-100); color: var(--ems-warning-800); }
+.cd-avatar--assistant { background: var(--ems-sky-100); color: var(--ems-sky-900); }
+.cd-avatar--more { background: var(--ems-neutral-100); color: var(--ems-neutral-600); }
+
+/* üzv siyahısı */
+.cd-members {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-xl);
+    overflow: hidden;
+}
+
+.cd-member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--ems-bg);
+}
+
+.cd-member + .cd-member {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.cd-member:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.cd-member[hidden] {
+    display: none;
+}
+
+.cd-member__text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.cd-member__name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.cd-member__tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}

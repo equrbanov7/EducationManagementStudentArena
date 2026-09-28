@@ -61,6 +61,14 @@
         document.getElementById('preview-' + questionId).classList.add('d-none');
     };
 
+    // Vaxt bitəndə avtomatik göndəriş (2026-09-28). Əvvəl `labForm.submit()` idi —
+    // forma action-suz olduğu üçün POST lab_detail-ə gedirdi (göndəriş yaranmırdı,
+    // səhifə sadəcə yenilənirdi). İndi adi «Bitir» axını (`/submit/`) bir dəfə,
+    // server hələ qəbul edərkən (son 3 saniyə) çağırılır.
+    const AUTO_SUBMIT_LEAD_SECONDS = 3;
+    let autoSubmitRequested = false;
+    let autoSubmitHandler = null;
+
     function updateTimers() {
         const now = new Date();
         const elapsed = Math.floor((now - labStartTime) / 1000);
@@ -71,9 +79,9 @@
         const remainingEl = document.getElementById('remainingTimer');
         if (remainingEl) remainingEl.textContent = formatDuration(remaining);
 
-        if (remaining <= 0) {
-            const form = document.getElementById('labForm');
-            if (form) form.submit();
+        if (remaining <= AUTO_SUBMIT_LEAD_SECONDS && !autoSubmitRequested && document.getElementById('labForm')) {
+            autoSubmitRequested = true;
+            if (autoSubmitHandler) autoSubmitHandler();
         }
     }
 
@@ -256,6 +264,9 @@
                 setConfirmButtonState(false);
             });
     }
+
+    autoSubmitHandler = submitLabForm;
+    if (autoSubmitRequested) submitLabForm();
 
     if (confirmFinishLabBtn) {
         confirmFinishLabBtn.addEventListener('click', function () {

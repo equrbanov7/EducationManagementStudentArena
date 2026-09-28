@@ -1182,7 +1182,7 @@ msgstr "Answer / Submission"
 #, python-format
 msgctxt "labs.template.my_lab_answers"
 msgid "label_question_count %(answer_count)s"
-msgstr "%(answer_count)s вопросы"
+msgstr "Вопросов: %(answer_count)s"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:88
 #: apps/labs/templates/labs/my_lab_answers.html:225
@@ -1217,7 +1217,7 @@ msgstr "Оценка:"
 #, python-format
 msgctxt "labs.template.my_lab_answers"
 msgid "label_points %(score)s"
-msgstr "%(score)s баллов"
+msgstr "Баллы: %(score)s"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:147
 #: apps/accounts/templates/accounts/my_result_detail.html:205
@@ -8494,7 +8494,7 @@ msgstr "Назначенные курсы"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
 msgctxt "profile.assigned_courses"
 msgid "search_placeholder"
-msgstr "Поиск курса..."
+msgstr "Поиск курсов..."
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:28
 msgctxt "profile.assigned_courses"
@@ -8509,12 +8509,12 @@ msgstr "Войти в курс"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:58
 msgctxt "profile.assigned_courses"
 msgid "empty_title"
-msgstr "Курс не найден"
+msgstr "Курсы не найдены"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:59
 msgctxt "profile.assigned_courses"
 msgid "empty_description"
-msgstr "В настоящее время вам не назначен курс."
+msgstr "Вам пока не назначено ни одного курса."
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:10
 msgctxt "profile.assigned_tasks"
@@ -9479,7 +9479,7 @@ msgstr "Детали апелляции"
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:10
 msgctxt "profile.my_courses"
 msgid "title"
-msgstr "Курсы, которые я создал"
+msgstr "Созданные мной курсы"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:19
 msgctxt "profile.my_courses"
@@ -9489,7 +9489,7 @@ msgstr "Новый курс"
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:55
 msgctxt "profile.my_courses"
 msgid "empty_title"
-msgstr "Курс не найден"
+msgstr "Курсы не найдены"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:56
 msgctxt "profile.my_courses"
@@ -18557,7 +18557,7 @@ msgstr "Основная информация"
 #: apps/assignments/admin.py:26
 msgctxt "assignment.admin.fieldset"
 msgid "grading"
-msgstr "Оценка"
+msgstr "Оценивание"
 
 #: apps/assignments/admin.py:28
 msgctxt "assignment.admin.fieldset"
@@ -18582,17 +18582,17 @@ msgstr "Информация об ответе"
 #: apps/assignments/admin.py:89
 msgctxt "assignment.submission.admin.fieldset"
 msgid "late_information"
-msgstr "Информация о задержке"
+msgstr "Сведения об опоздании"
 
 #: apps/assignments/admin.py:93
 msgctxt "assignment.submission.admin.fieldset"
 msgid "grading"
-msgstr "Оценка"
+msgstr "Оценивание"
 
 #: apps/assignments/admin.py:113
 msgctxt "assignment.notification.admin.fieldset"
 msgid "notification_information"
-msgstr "Информация для уведомлений"
+msgstr "Сведения об уведомлении"
 
 #: apps/assignments/admin.py:117
 msgctxt "assignment.notification.admin.fieldset"
@@ -18602,7 +18602,7 @@ msgstr "Статус"
 #: apps/assignments/apps.py:8
 msgctxt "assignment.app"
 msgid "title"
-msgstr "Задания"
+msgstr "Самостоятельные работы"
 
 #: apps/assignments/forms.py:19
 msgctxt "assignment.form.placeholder"
@@ -18617,7 +18617,7 @@ msgstr "Введите описание"
 #: apps/assignments/forms.py:35
 msgctxt "assignment.form.label"
 msgid "title"
-msgstr "Заголовок"
+msgstr "Название"
 
 #: apps/assignments/forms.py:36
 msgctxt "assignment.form.label"
@@ -18632,12 +18632,12 @@ msgstr "Дата начала"
 #: apps/assignments/forms.py:38
 msgctxt "assignment.form.label"
 msgid "due_date"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/forms.py:39
 msgctxt "assignment.form.label"
 msgid "max_attempts"
-msgstr "Максимальное усилие"
+msgstr "Максимальное число попыток"
 
 #: apps/assignments/forms.py:40 apps/assignments/forms.py:121
 msgctxt "assignment.form.label"
@@ -18677,7 +18677,7 @@ msgstr "Оценка"
 #: apps/assignments/forms.py:120
 msgctxt "assignment.form.label"
 msgid "feedback"
-msgstr "Мнение"
+msgstr "Отзыв"
 
 #: apps/assignments/models.py:34
 msgctxt "assignment.choice.type"
@@ -18687,12 +18687,12 @@ msgstr "Домашнее задание"
 #: apps/assignments/models.py:35
 msgctxt "assignment.choice.type"
 msgid "quiz"
-msgstr "Контрольный опрос"
+msgstr "Тест"
 
 #: apps/assignments/models.py:36
 msgctxt "assignment.choice.type"
 msgid "lab"
-msgstr "Лаборатория"
+msgstr "Лабораторная работа"
 
 #: apps/assignments/models.py:37
 msgctxt "assignment.choice.type"
@@ -18717,7 +18717,7 @@ msgstr "Черновик"
 #: apps/assignments/models.py:44
 msgctxt "assignment.choice.status"
 msgid "published"
-msgstr "Он был опубликован"
+msgstr "Опубликовано"
 
 #: apps/assignments/models.py:46
 msgctxt "assignment.choice.status"
@@ -18742,12 +18742,12 @@ msgstr "Курс"
 #: apps/assignments/models.py:62
 msgctxt "assignment.model.field"
 msgid "assignment_type"
-msgstr "Тип задачи"
+msgstr "Тип задания"
 
 #: apps/assignments/models.py:65
 msgctxt "assignment.model.field"
 msgid "title"
-msgstr "Заголовок"
+msgstr "Название"
 
 #: apps/assignments/models.py:66
 msgctxt "assignment.model.field"
@@ -18772,7 +18772,7 @@ msgstr "Вес/важность"
 #: apps/assignments/models.py:81
 msgctxt "assignment.model.help"
 msgid "weight_ratio"
-msgstr "Вес в общей цене (например: 0,1 = 10%)"
+msgstr "Вес в общей оценке (например: 0.1 = 10%)"
 
 #: apps/assignments/models.py:85
 msgctxt "assignment.model.field"
@@ -18782,22 +18782,22 @@ msgstr "Дата начала"
 #: apps/assignments/models.py:86
 msgctxt "assignment.model.help"
 msgid "start_date_for_submission"
-msgstr "Студенты могут ответить после этой даты"
+msgstr "Студенты могут сдавать работу после этой даты"
 
 #: apps/assignments/models.py:90
 msgctxt "assignment.model.field"
 msgid "due_date"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/models.py:97
 msgctxt "assignment.model.field"
 msgid "allow_late_submission"
-msgstr "Разрешить позднюю доставку"
+msgstr "Разрешить сдачу после срока"
 
 #: apps/assignments/models.py:104
 msgctxt "assignment.model.field"
 msgid "late_penalty_per_day"
-msgstr "Плата за просрочку платежа (за день)"
+msgstr "Штраф за опоздание (за день)"
 
 #: apps/assignments/models.py:105
 msgctxt "assignment.model.help"
@@ -18807,7 +18807,7 @@ msgstr "Процент баллов, снимаемых за каждый ден
 #: apps/assignments/models.py:109
 msgctxt "assignment.model.field"
 msgid "max_attempts"
-msgstr "Максимальное усилие"
+msgstr "Максимальное число попыток"
 
 #: apps/assignments/models.py:116
 msgctxt "assignment.model.field"
@@ -18827,37 +18827,37 @@ msgstr "Студенты"
 #: apps/assignments/models.py:149
 msgctxt "assignment.model.meta"
 msgid "verbose_name"
-msgstr "Внештатная работа"
+msgstr "Самостоятельная работа"
 
 #: apps/assignments/models.py:150
 msgctxt "assignment.model.meta"
 msgid "verbose_name_plural"
-msgstr "Внештатные вакансии"
+msgstr "Самостоятельные работы"
 
 #: apps/assignments/models.py:213
 msgctxt "assignment.submission.choice.status"
 msgid "submitted"
-msgstr "Поданный"
+msgstr "Сдано"
 
 #: apps/assignments/models.py:214
 msgctxt "assignment.submission.choice.status"
 msgid "grading"
-msgstr "Это оценивается"
+msgstr "На проверке"
 
 #: apps/assignments/models.py:215
 msgctxt "assignment.submission.choice.status"
 msgid "graded"
-msgstr "Рейтинг"
+msgstr "Оценено"
 
 #: apps/assignments/models.py:216
 msgctxt "assignment.submission.choice.status"
 msgid "returned"
-msgstr "Вернулся"
+msgstr "Возвращено"
 
 #: apps/assignments/models.py:223
 msgctxt "assignment.submission.field"
 msgid "assignment"
-msgstr "Задача"
+msgstr "Задание"
 
 #: apps/assignments/models.py:230
 msgctxt "assignment.submission.field"
@@ -18887,12 +18887,12 @@ msgstr "Список JSON: [{name, path, size}]"
 #: apps/assignments/models.py:248
 msgctxt "assignment.submission.field"
 msgid "submitted_at"
-msgstr "Дата доставки"
+msgstr "Дата сдачи"
 
 #: apps/assignments/models.py:253
 msgctxt "assignment.submission.field"
 msgid "is_late"
-msgstr "Разве это поздно?"
+msgstr "Просрочено?"
 
 #: apps/assignments/models.py:258
 msgctxt "assignment.submission.field"
@@ -18912,12 +18912,12 @@ msgstr "Оценка"
 #: apps/assignments/models.py:276
 msgctxt "assignment.submission.field"
 msgid "feedback"
-msgstr "Мнение"
+msgstr "Отзыв"
 
 #: apps/assignments/models.py:284
 msgctxt "assignment.submission.field"
 msgid "graded_by"
-msgstr "оценщик"
+msgstr "Кем оценено"
 
 #: apps/assignments/models.py:290
 msgctxt "assignment.submission.field"
@@ -18927,12 +18927,12 @@ msgstr "Дата оценки"
 #: apps/assignments/models.py:295
 msgctxt "assignment.submission.meta"
 msgid "verbose_name"
-msgstr "Доставка"
+msgstr "Сданная работа"
 
 #: apps/assignments/models.py:296
 msgctxt "assignment.submission.meta"
 msgid "verbose_name_plural"
-msgstr "Поставки"
+msgstr "Сданные работы"
 
 #: apps/assignments/models.py:385
 msgctxt "assignment.notification.choice.type"
@@ -18942,7 +18942,7 @@ msgstr "Напоминание о сроке"
 #: apps/assignments/models.py:386
 msgctxt "assignment.notification.choice.type"
 msgid "submission"
-msgstr "Новая поставка"
+msgstr "Новая сданная работа"
 
 #: apps/assignments/models.py:387
 msgctxt "assignment.notification.choice.type"
@@ -18977,7 +18977,7 @@ msgstr "Тип уведомления"
 #: apps/assignments/models.py:408
 msgctxt "assignment.notification.field"
 msgid "is_read"
-msgstr "Прочитано ли оно?"
+msgstr "Прочитано?"
 
 #: apps/assignments/models.py:411
 msgctxt "assignment.notification.field"
@@ -18987,7 +18987,7 @@ msgstr "Дата создания"
 #: apps/assignments/models.py:414
 msgctxt "assignment.notification.field"
 msgid "link"
-msgstr "Связь"
+msgstr "Ссылка"
 
 #: apps/assignments/models.py:418
 msgctxt "assignment.notification.meta"
@@ -19014,13 +19014,13 @@ msgstr "Назад"
 #: apps/assignments/templates/assignments/assignment_detail.html:51
 msgctxt "assignment.detail"
 msgid "due_date"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:55
 #: apps/assignments/templates/assignments/assignment_detail.html:201
 msgctxt "assignment.detail"
 msgid "attempts_left"
-msgstr "Попробуйте остальное"
+msgstr "Осталось попыток"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:71
 msgctxt "assignment.detail"
@@ -19045,7 +19045,7 @@ msgstr "Мои предыдущие ответы"
 #: apps/assignments/templates/assignments/assignment_detail.html:99
 msgctxt "assignment.detail"
 msgid "table_date"
-msgstr "История"
+msgstr "Дата"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:100
 msgctxt "assignment.detail"
@@ -19146,7 +19146,7 @@ msgstr "Вы использовали все свои попытки."
 #: apps/assignments/templates/assignments/assignment_detail.html:223
 msgctxt "assignment.detail"
 msgid "cannot_submit_inactive"
-msgstr "Эта задача в настоящее время отключена."
+msgstr "Это задание сейчас неактивно."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:225
 msgctxt "assignment.detail"
@@ -19156,28 +19156,28 @@ msgstr "В настоящее время невозможно отправить
 #: apps/assignments/templates/assignments/assignment_section.html:12
 msgctxt "assignment.section"
 msgid "title"
-msgstr "Задания"
+msgstr "Самостоятельные работы"
 
 #: apps/assignments/templates/assignments/assignment_section.html:29
 msgctxt "assignment.section"
 msgid "add_new"
-msgstr "Добавить новую работу"
+msgstr "Добавить работу"
 
 #: apps/assignments/templates/assignments/assignment_section.html:44
 msgctxt "assignment.section"
 msgid "submissions"
-msgstr "Отвечать"
+msgstr "сдано"
 
 #: apps/assignments/templates/assignments/assignment_section.html:46
 msgctxt "assignment.section"
 msgid "pending"
-msgstr "Ожидающий"
+msgstr "на проверке"
 
 #: apps/assignments/templates/assignments/assignment_section.html:62
 #: apps/assignments/templates/assignments/assignment_section.html:125
 msgctxt "assignment.section"
 msgid "deadline_passed"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/assignment_section.html:64
 #: apps/assignments/templates/assignments/assignment_section.html:127
@@ -19195,7 +19195,7 @@ msgstr "Неактивный"
 #: apps/assignments/templates/assignments/assignment_section.html:71
 msgctxt "assignment.section"
 msgid "max_attempts"
-msgstr "Макс попробуй"
+msgstr "Макс. попыток"
 
 #: apps/assignments/templates/assignments/assignment_section.html:78
 #: apps/courses/tests/test_views.py:246
@@ -19221,7 +19221,7 @@ msgstr "Самостоятельных работ пока нет"
 #: apps/assignments/templates/assignments/assignment_section.html:97
 msgctxt "assignment.section"
 msgid "add_first"
-msgstr "Добавьте свою первую вакансию фрилансера"
+msgstr "Добавьте первую самостоятельную работу"
 
 #: apps/assignments/templates/assignments/assignment_section.html:136
 msgctxt "assignment.section"
@@ -19231,12 +19231,12 @@ msgstr "Попытки"
 #: apps/assignments/templates/assignments/assignment_section.html:141
 msgctxt "assignment.section"
 msgid "attempts_left"
-msgstr "левый"
+msgstr "осталось"
 
 #: apps/assignments/templates/assignments/assignment_section.html:143
 msgctxt "assignment.section"
 msgid "attempts_finished"
-msgstr "Попытка окончена"
+msgstr "Попытки исчерпаны"
 
 #: apps/assignments/templates/assignments/assignment_section.html:152
 #: apps/exams/templates/exams/teacher/exam_section.html:229
@@ -19248,12 +19248,12 @@ msgstr "Мои ответы ("
 #: apps/assignments/templates/assignments/assignment_section.html:159
 msgctxt "assignment.section"
 msgid "submit_answer"
-msgstr "Отвечать"
+msgstr "Ответить"
 
 #: apps/assignments/templates/assignments/assignment_section.html:164
 msgctxt "assignment.section"
 msgid "deadline_passed_locked"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/assignment_section.html:180
 msgctxt "assignment.section"
@@ -19273,7 +19273,7 @@ msgstr "Продолжительность"
 #: apps/assignments/templates/assignments/detail.html:30
 msgctxt "assignment.legacy.detail"
 msgid "status_deadline_passed"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/detail.html:39
 msgctxt "assignment.legacy.detail"
@@ -19302,7 +19302,7 @@ msgstr "Произошла ошибка. Пожалуйста, попробуй�
 #: apps/assignments/templates/assignments/detail.html:61
 msgctxt "assignment.legacy.detail"
 msgid "label_answer_required"
-msgstr "Отвечать *"
+msgstr "Ответ *"
 
 #: apps/assignments/templates/assignments/detail.html:62
 msgid "Cavabınızı buraya yazın..."
@@ -19321,7 +19321,7 @@ msgstr "Вы можете выбрать несколько файлов (PDF, D
 #: apps/assignments/templates/assignments/detail.html:73
 msgctxt "assignment.legacy.detail"
 msgid "send"
-msgstr "Отправлять"
+msgstr "Отправить"
 
 #: apps/assignments/templates/assignments/detail.html:81
 msgctxt "assignment.legacy.detail"
@@ -19336,7 +19336,7 @@ msgstr "Вы превысили количество попыток"
 #: apps/assignments/templates/assignments/detail.html:96
 msgctxt "assignment.legacy.detail"
 msgid "current_score"
-msgstr "Ваш текущий результат"
+msgstr "Ваш текущий балл"
 
 #: apps/assignments/templates/assignments/detail.html:104
 msgid "Əla nəticə!"
@@ -19355,7 +19355,7 @@ msgstr "Предыдущие ответы"
 #: apps/assignments/templates/assignments/detail.html:125
 msgctxt "assignment.legacy.detail"
 msgid "attempt_label"
-msgstr "Пытаться"
+msgstr "Попытка"
 
 #: apps/assignments/templates/assignments/detail.html:143
 #, python-format
@@ -19365,17 +19365,17 @@ msgstr "Результат: %(score)s/%(max_score)s"
 #: apps/assignments/templates/assignments/detail.html:150
 msgctxt "assignment.legacy.detail"
 msgid "feedback_label"
-msgstr "Мнение"
+msgstr "Отзыв"
 
 #: apps/assignments/templates/assignments/modals.html:11
 msgctxt "assignment.legacy.modals"
 msgid "modal_add_title"
-msgstr "Добавить новую вакансию фрилансера"
+msgstr "Добавить новую самостоятельную работу"
 
 #: apps/assignments/templates/assignments/modals.html:12
 msgctxt "assignment.legacy.modals"
 msgid "close_aria"
-msgstr "Закрой это"
+msgstr "Закрыть"
 
 #: apps/assignments/templates/assignments/modals.html:20
 msgctxt "assignment.legacy.modals"
@@ -19385,12 +19385,12 @@ msgstr "Основная информация"
 #: apps/assignments/templates/assignments/modals.html:23
 msgctxt "assignment.legacy.modals"
 msgid "label_title"
-msgstr "Заголовок"
+msgstr "Название"
 
 #: apps/assignments/templates/assignments/modals.html:24
 msgctxt "assignment.legacy.modals"
 msgid "placeholder_title"
-msgstr "Пример: Лаборатория 1"
+msgstr "Например: Лаб. работа 1"
 
 #: apps/assignments/templates/assignments/modals.html:28
 msgctxt "assignment.legacy.modals"
@@ -19420,7 +19420,7 @@ msgstr "Макс. балл"
 #: apps/assignments/templates/assignments/modals.html:56
 msgctxt "assignment.legacy.modals"
 msgid "assign_to"
-msgstr "Кому его следует поручить?"
+msgstr "Кому назначить?"
 
 #: apps/assignments/templates/assignments/modals.html:67
 msgctxt "assignment.legacy.modals"
@@ -19435,7 +19435,7 @@ msgstr "Студенты"
 #: apps/assignments/templates/assignments/modals.html:77
 msgctxt "assignment.legacy.modals"
 msgid "placeholder_search_group"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы..."
 
 #: apps/assignments/templates/assignments/modals.html:89
 msgctxt "assignment.legacy.modals"
@@ -19445,7 +19445,7 @@ msgstr "Поиск студентов..."
 #: apps/assignments/templates/assignments/modals.html:108
 msgctxt "assignment.legacy.modals"
 msgid "selected_items"
-msgstr "Избранные"
+msgstr "Выбранные"
 
 #: apps/assignments/templates/assignments/modals.html:112
 msgctxt "assignment.legacy.modals"
@@ -19475,7 +19475,7 @@ msgstr "Мои ответы"
 #: apps/assignments/templates/assignments/my_submissions.html:34
 msgctxt "assignment.my_submissions"
 msgid "new_submission"
-msgstr "Дайте новый ответ"
+msgstr "Отправить новый ответ"
 
 #: apps/assignments/templates/assignments/my_submissions.html:38
 msgctxt "assignment.my_submissions"
@@ -19486,13 +19486,13 @@ msgstr "Назад"
 #: apps/labs/templates/labs/my_lab_answers.html:40
 msgctxt "assignment.my_submissions"
 msgid "attempts_used"
-msgstr "Попытка использована"
+msgstr "Использовано попыток"
 
 #: apps/assignments/templates/assignments/my_submissions.html:55
 #: apps/labs/templates/labs/my_lab_answers.html:46
 msgctxt "assignment.my_submissions"
 msgid "attempts_left"
-msgstr "Попробуйте остальное"
+msgstr "Осталось попыток"
 
 #: apps/assignments/templates/assignments/my_submissions.html:62
 #: apps/labs/templates/labs/my_lab_answers.html:57
@@ -19515,13 +19515,13 @@ msgstr "Активный"
 #: apps/labs/templates/labs/my_lab_answers.html:68
 msgctxt "assignment.my_submissions"
 msgid "submitted_answers"
-msgstr "Ответы, которые я отправил"
+msgstr "Отправленные ответы"
 
 #: apps/assignments/templates/assignments/my_submissions.html:85
 #: apps/labs/templates/labs/my_lab_answers.html:76
 msgctxt "assignment.my_submissions"
 msgid "table_submitted_at"
-msgstr "Дата отгрузки"
+msgstr "Дата отправки"
 
 #: apps/assignments/templates/assignments/my_submissions.html:86
 #: apps/labs/templates/labs/my_lab_answers.html:77
@@ -19539,7 +19539,7 @@ msgstr "Оценка"
 #: apps/labs/templates/labs/my_lab_answers.html:79
 msgctxt "assignment.my_submissions"
 msgid "table_action"
-msgstr "Операция"
+msgstr "Действия"
 
 #: apps/assignments/templates/assignments/my_submissions.html:103
 msgctxt "assignment.my_submissions"
@@ -19555,19 +19555,19 @@ msgstr "Оценено"
 #: apps/labs/templates/labs/my_lab_answers.html:126
 msgctxt "assignment.my_submissions"
 msgid "view"
-msgstr "Смотреть"
+msgstr "Просмотр"
 
 #: apps/assignments/templates/assignments/my_submissions.html:144
 #: apps/labs/templates/labs/my_lab_answers.html:144
 msgctxt "assignment.my_submissions"
 msgid "submission_number"
-msgstr "Отвечать"
+msgstr "Ответ"
 
 #: apps/assignments/templates/assignments/my_submissions.html:152
 #: apps/labs/templates/labs/my_lab_answers.html:151
 msgctxt "assignment.my_submissions"
 msgid "submitted_at"
-msgstr "Дата отгрузки"
+msgstr "Дата отправки"
 
 #: apps/assignments/templates/assignments/my_submissions.html:158
 msgctxt "assignment.my_submissions"
@@ -19589,7 +19589,7 @@ msgstr "Оценка"
 #: apps/labs/templates/labs/my_lab_answers.html:186
 msgctxt "assignment.my_submissions"
 msgid "teacher_feedback"
-msgstr "Отзывы учителей"
+msgstr "Отзыв преподавателя"
 
 #: apps/assignments/templates/assignments/my_submissions.html:192
 #: apps/labs/templates/labs/my_lab_answers.html:195
@@ -19630,7 +19630,7 @@ msgstr "Продолжительность"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:20
 msgctxt "assignment.legacy.item"
 msgid "deadline_passed"
-msgstr "Время прошло"
+msgstr "Срок истёк"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:22
 msgctxt "assignment.legacy.item"
@@ -19645,12 +19645,12 @@ msgstr "Попытки"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:41
 msgctxt "assignment.legacy.item"
 msgid "answers"
-msgstr "Отвечать"
+msgstr "Ответы"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:46
 msgctxt "assignment.legacy.item"
 msgid "pending"
-msgstr "Ожидающий"
+msgstr "На проверке"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:57
 msgctxt "assignment.legacy.item"
@@ -19675,12 +19675,12 @@ msgstr "Мои ответы"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:86
 msgctxt "assignment.legacy.item"
 msgid "answer"
-msgstr "Отвечать"
+msgstr "Ответить"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:90
 msgctxt "assignment.legacy.item"
 msgid "attempts_finished"
-msgstr "Попытка окончена"
+msgstr "Попытки исчерпаны"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:7
 msgctxt "assignment.modals"
@@ -19712,7 +19712,7 @@ msgstr "Нет студентов"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:12
 msgctxt "assignment.modals"
 msgid "data_not_received"
-msgstr "Информация не получена"
+msgstr "Данные не получены"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:13
 msgctxt "assignment.modals"
@@ -19750,7 +19750,7 @@ msgstr "Новая самостоятельная работа"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:105
 msgctxt "assignment.modals"
 msgid "label_title"
-msgstr "Заголовок"
+msgstr "Название"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:35
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:109
@@ -19792,7 +19792,7 @@ msgstr "Начало"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:129
 msgctxt "assignment.modals"
 msgid "label_deadline"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:59
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:133
@@ -19810,7 +19810,7 @@ msgstr "Допущенные группы"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:143
 msgctxt "assignment.modals"
 msgid "placeholder_group_search"
-msgstr "Поиск группы..."
+msgstr "Поиск групп..."
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:71
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:79
@@ -19846,7 +19846,7 @@ msgstr "Редактировать"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:20
 msgctxt "assignment.legacy.edit_form"
 msgid "assignment_name"
-msgstr "Название задачи"
+msgstr "Название задания"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:25
 msgctxt "assignment.legacy.edit_form"
@@ -19861,12 +19861,12 @@ msgstr "Дата начала"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:35
 msgctxt "assignment.legacy.edit_form"
 msgid "due_date"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:42
 msgctxt "assignment.legacy.edit_form"
 msgid "max_attempts"
-msgstr "Максимальное усилие"
+msgstr "Максимальное число попыток"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:46
 msgctxt "assignment.legacy.edit_form"
@@ -19876,12 +19876,12 @@ msgstr "Статус"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:56
 msgctxt "assignment.legacy.edit_form"
 msgid "target_selection"
-msgstr "Выбор цели"
+msgstr "Выбор получателей"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:59
 msgctxt "assignment.legacy.edit_form"
 msgid "search_group"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы..."
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:77
 msgctxt "assignment.legacy.edit_form"
@@ -19966,12 +19966,12 @@ msgstr "Проверить снова и сохранить"
 #: apps/assignments/templates/assignments/review.html:5
 msgctxt "assignment.legacy.review"
 msgid "page_title_suffix"
-msgstr "Внештатная работа"
+msgstr "Самостоятельные работы"
 
 #: apps/assignments/templates/assignments/review.html:10
 msgctxt "assignment.legacy.review"
 msgid "heading_suffix"
-msgstr "Внештатная работа"
+msgstr "Самостоятельные работы"
 
 #: apps/assignments/templates/assignments/review.html:12
 msgctxt "assignment.legacy.review"
@@ -19981,12 +19981,12 @@ msgstr "Добавить"
 #: apps/assignments/templates/assignments/review.html:20
 msgctxt "assignment.legacy.review"
 msgid "placeholder_search_group"
-msgstr "Искать в группе..."
+msgstr "Поиск по группе..."
 
 #: apps/assignments/templates/assignments/review.html:33
 msgctxt "assignment.legacy.review"
 msgid "table_name"
-msgstr "Имя"
+msgstr "Название"
 
 #: apps/assignments/templates/assignments/review.html:34
 msgctxt "assignment.legacy.review"
@@ -19996,7 +19996,7 @@ msgstr "Статус"
 #: apps/assignments/templates/assignments/review.html:35
 msgctxt "assignment.legacy.review"
 msgid "table_due_date"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/assignments/templates/assignments/review.html:36
 msgctxt "assignment.legacy.review"
@@ -20011,7 +20011,7 @@ msgstr "Целевые группы"
 #: apps/assignments/templates/assignments/review.html:38
 msgctxt "assignment.legacy.review"
 msgid "table_actions"
-msgstr "Операции"
+msgstr "Действия"
 
 #: apps/assignments/templates/assignments/review.html:51
 msgctxt "assignment.legacy.review"
@@ -20031,27 +20031,27 @@ msgstr "Архив"
 #: apps/assignments/templates/assignments/review.html:61
 msgctxt "assignment.legacy.review"
 msgid "deadline_passed"
-msgstr "Прошедший"
+msgstr "Истёк"
 
 #: apps/assignments/templates/assignments/review.html:67
 msgctxt "assignment.legacy.review"
 msgid "pending_waiting"
-msgstr "ждет"
+msgstr "ожидают"
 
 #: apps/assignments/templates/assignments/review.html:76
 msgctxt "assignment.legacy.review"
 msgid "all_groups"
-msgstr "Все они"
+msgstr "Все"
 
 #: apps/assignments/templates/assignments/review.html:92
 msgctxt "assignment.legacy.review"
 msgid "view"
-msgstr "Смотреть"
+msgstr "Просмотр"
 
 #: apps/assignments/templates/assignments/review.html:99
 msgctxt "assignment.legacy.review"
 msgid "empty_not_found"
-msgstr "Вакансий не найдено"
+msgstr "Самостоятельные работы не найдены"
 
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
@@ -20062,7 +20062,7 @@ msgstr "Ответы"
 #: apps/assignments/templates/assignments/review_submissions.html:126
 msgctxt "assignment.review_submissions"
 msgid "title_suffix"
-msgstr "Ответы предоставлены"
+msgstr "Отправленные ответы"
 
 #: apps/assignments/templates/assignments/review_submissions.html:19
 msgctxt "assignment.review_submissions"
@@ -20134,7 +20134,7 @@ msgstr "Студент"
 #: apps/assignments/templates/assignments/review_submissions.html:136
 msgctxt "assignment.review_submissions"
 msgid "table_submitted_at"
-msgstr "Дата подачи"
+msgstr "Дата отправки"
 
 #: apps/assignments/templates/assignments/review_submissions.html:138
 msgctxt "assignment.review_submissions"
@@ -20144,27 +20144,27 @@ msgstr "Оценка"
 #: apps/assignments/templates/assignments/review_submissions.html:139
 msgctxt "assignment.review_submissions"
 msgid "table_actions"
-msgstr "Операции"
+msgstr "Действия"
 
 #: apps/assignments/templates/assignments/review_submissions.html:164
 msgctxt "assignment.review_submissions"
 msgid "status_pending"
-msgstr "Он ждет"
+msgstr "Ожидает"
 
 #: apps/assignments/templates/assignments/review_submissions.html:166
 msgctxt "assignment.review_submissions"
 msgid "status_graded"
-msgstr "Рейтинг"
+msgstr "Оценено"
 
 #: apps/assignments/templates/assignments/review_submissions.html:168
 msgctxt "assignment.review_submissions"
 msgid "filter_status_grading"
-msgstr "Черновик"
+msgstr "На проверке"
 
 #: apps/assignments/templates/assignments/review_submissions.html:224
 msgctxt "assignment.review_submissions"
 msgid "empty_submissions"
-msgstr "Ответ еще не отправлен"
+msgstr "Ответов пока нет"
 
 #: apps/assignments/templates/assignments/review_submissions.html:230
 msgctxt "assignment.review_submissions"
@@ -20215,24 +20215,24 @@ msgstr "Оценка"
 #: apps/assignments/templates/assignments/review_submissions.html:317
 msgctxt "assignment.review_submissions"
 msgid "grade_placeholder"
-msgstr "Введите цену"
+msgstr "Введите оценку"
 
 #: apps/assignments/templates/assignments/review_submissions.html:321
 msgctxt "assignment.review_submissions"
 msgid "feedback"
-msgstr "Мнение"
+msgstr "Отзыв"
 
 #: apps/assignments/templates/assignments/review_submissions.html:326
 msgctxt "assignment.review_submissions"
 msgid "feedback_placeholder"
-msgstr "Напишите отзыв ученику..."
+msgstr "Напишите отзыв для студента..."
 
 #: apps/assignments/views/student/endpoints.py:63
 #: apps/assignments/views/student/endpoints.py:112
 #: apps/assignments/views/student/endpoints.py:184
 msgctxt "assignments.views.message"
 msgid "no_assignment_access"
-msgstr "Название задачи"
+msgstr "У вас нет доступа к этой самостоятельной работе."
 
 #: apps/assignments/views/student/endpoints.py:122
 msgctxt "assignments.views.message"
@@ -20260,36 +20260,36 @@ msgstr "У вас нет разрешения"
 #: apps/assignments/views/teacher/crud.py:102
 msgctxt "assignments.views.message"
 msgid "assignment_created"
-msgstr "Не удалось создать задание."
+msgstr "Задание создано."
 
 #: apps/assignments/views/teacher/crud.py:224
 #: apps/assignments/views/teacher/crud.py:225
 msgctxt "assignments.views.message"
 msgid "assignment_updated"
-msgstr "Не удалось обновить задание."
+msgstr "Задание обновлено."
 
 #: apps/assignments/views/teacher/crud.py:256
 #: apps/assignments/views/teacher/crud.py:257
 msgctxt "assignments.views.message"
 msgid "assignment_deleted"
-msgstr "Не удалось удалить задание."
+msgstr "Задание удалено."
 
 #: apps/assignments/views/teacher/endpoints.py:135
 #: apps/assignments/views/teacher/endpoints.py:140
 msgctxt "assignments.views.message"
 msgid "submission_not_found"
-msgstr "Отправка не найдена"
+msgstr "Ответ не найден"
 
 #: apps/assignments/views/teacher/endpoints.py:147
 msgctxt "assignments.views.message"
 msgid "submissions_deleted"
-msgstr "Удалено отправок: {count}."
+msgstr "Удалено ответов: {count}."
 
 #: apps/assignments/views/teacher/endpoints.py:198
 #: apps/assignments/views/teacher/endpoints.py:199
 msgctxt "assignment.message"
 msgid "grade_given_successfully"
-msgstr "Награжден!"
+msgstr "Оценка выставлена!"
 
 #: apps/audit/templates/audit/list.html:4
 msgctxt "audit.list"
@@ -22271,7 +22271,7 @@ msgstr "Организация"
 #: apps/courses/forms.py:84
 msgctxt "courses.form.course.placeholder"
 msgid "title"
-msgstr "Название курса (например, «Вводный курс Python»)"
+msgstr "Название курса (например, «Основы Python»)"
 
 #: apps/courses/forms.py:91
 msgctxt "courses.form.course.placeholder"
@@ -22301,17 +22301,17 @@ msgstr "Описание темы..."
 #: apps/courses/forms.py:202
 msgctxt "courses.form.topic.error"
 msgid "title_required"
-msgstr "Имя субъекта не может быть пустым."
+msgstr "Название темы не может быть пустым."
 
 #: apps/courses/forms.py:232
 msgctxt "courses.form.resource.placeholder"
 msgid "title"
-msgstr "Имя ресурса"
+msgstr "Название ресурса"
 
 #: apps/courses/forms.py:239
 msgctxt "courses.form.resource.placeholder"
 msgid "description"
-msgstr "Раскрытие..."
+msgstr "Описание..."
 
 #: apps/courses/forms.py:256
 msgctxt "courses.form.resource.placeholder"
@@ -22326,7 +22326,7 @@ msgstr "Загрузите файл или добавьте URL-ссылку (т
 #: apps/courses/forms.py:276
 msgctxt "courses.form.resource.error"
 msgid "file_and_url_mutually_exclusive"
-msgstr "Файл И URL-адрес не могут существовать одновременно. Выберите один."
+msgstr "Нельзя указать одновременно файл И URL. Выберите что-то одно."
 
 #: apps/courses/models/course.py:179
 msgctxt "courses.model.course.error"
@@ -22353,12 +22353,12 @@ msgstr "Создать с ИИ"
 #: apps/courses/templates/courses/course_dashboard.html:133
 msgctxt "courses.dashboard"
 msgid "label_teacher"
-msgstr "Учитель"
+msgstr "Преподаватель"
 
 #: apps/courses/templates/courses/course_dashboard.html:137
 msgctxt "courses.dashboard"
 msgid "label_created"
-msgstr "Созданный"
+msgstr "Создан"
 
 #: apps/courses/templates/courses/course_dashboard.html:151
 msgctxt "courses.dashboard"
@@ -22373,27 +22373,29 @@ msgstr "Черновик"
 #: apps/courses/templates/courses/course_dashboard.html:158
 msgctxt "courses.dashboard"
 msgid "status_published"
-msgstr "Выпущенный"
+msgstr "Опубликован"
 
 #: apps/courses/templates/courses/course_dashboard.html:167
 msgctxt "courses.dashboard"
 msgid "message_published_visible_students"
-msgstr "Этот курс опубликован и виден студентам."
+msgstr "Курс опубликован — студенты его видят."
 
 #: apps/courses/templates/courses/course_dashboard.html:172
 msgctxt "courses.dashboard"
 msgid "message_draft_hidden_students"
-msgstr "Этот курс находится в режиме черновика и не виден студентам."
+msgstr ""
+"Курс в черновике — студенты его пока не видят. Когда будет готов, нажмите "
+"«Опубликовать»."
 
 #: apps/courses/templates/courses/course_dashboard.html:179
 msgctxt "courses.dashboard"
 msgid "stat_topics"
-msgstr "Предмет"
+msgstr "Темы"
 
 #: apps/courses/templates/courses/course_dashboard.html:181
 msgctxt "courses.dashboard"
 msgid "stat_members"
-msgstr "Член"
+msgstr "Участники"
 
 #: apps/courses/templates/courses/course_dashboard.html:192
 msgctxt "courses.dashboard"
@@ -22410,22 +22412,24 @@ msgstr "Удалить"
 #: apps/courses/templates/courses/course_dashboard.html:216
 msgctxt "courses.dashboard"
 msgid "ai_build_title"
-msgstr "Создать курс с ИИ"
+msgstr "Собрать курс с ИИ"
 
 #: apps/courses/templates/courses/course_dashboard.html:221
 msgctxt "courses.dashboard"
 msgid "ai_build_sub"
-msgstr "Получите от ассистента программу, ресурсы и задания."
+msgstr "Получите от ассистента предложения по программе, ресурсам и заданиям."
 
 #: apps/courses/templates/courses/course_dashboard.html:256
 msgctxt "courses.dashboard"
 msgid "confirm_delete_course"
-msgstr "Вы хотели удалить этот курс?"
+msgstr ""
+"Курс будет удалён вместе со всеми темами, ресурсами и участниками. Это "
+"действие необратимо."
 
 #: apps/courses/templates/courses/course_dashboard.html:257
 msgctxt "courses.dashboard"
 msgid "confirm_delete_member_suffix"
-msgstr "хочешь удалить?"
+msgstr " — удалить этого участника?"
 
 #: apps/courses/templates/courses/course_dashboard.html:258
 msgctxt "courses.dashboard"
@@ -22435,7 +22439,7 @@ msgstr "Ошибка"
 #: apps/courses/templates/courses/course_members.html:5
 msgctxt "courses.members_page"
 msgid "page_suffix_members"
-msgstr "Члены"
+msgstr "Участники"
 
 #: apps/courses/templates/courses/course_members.html:24
 msgctxt "courses.members_page"
@@ -22445,7 +22449,7 @@ msgstr "Панель управления"
 #: apps/courses/templates/courses/course_members.html:27
 msgctxt "courses.members_page"
 msgid "title_members"
-msgstr "Члены"
+msgstr "Участники"
 
 #: apps/courses/templates/courses/course_members.html:35
 msgctxt "courses.members_page"
@@ -22460,7 +22464,7 @@ msgstr "Добавить группу"
 #: apps/courses/templates/courses/course_members.html:47
 msgctxt "courses.members_page"
 msgid "section_teacher"
-msgstr "Учитель"
+msgstr "Преподаватель"
 
 #: apps/courses/templates/courses/course_members.html:58
 msgctxt "courses.members_page"
@@ -22475,7 +22479,7 @@ msgstr "Студенты"
 #: apps/courses/templates/courses/course_members.html:68
 msgctxt "courses.members_page"
 msgid "count_people_suffix"
-msgstr "человек"
+msgstr "чел."
 
 #: apps/courses/templates/courses/course_members.html:79
 msgctxt "courses.members_page"
@@ -22551,18 +22555,17 @@ msgstr ""
 #: apps/courses/templates/courses/create_course.html:74
 msgctxt "courses.create_page"
 msgid "after_create_item_2"
-msgstr "Вы можете добавлять темы, вакансии и ресурсы на панель инструментов."
+msgstr "На панели управления можно добавлять темы, работы и ресурсы."
 
 #: apps/courses/templates/courses/create_course.html:75
 msgctxt "courses.create_page"
 msgid "after_create_item_3"
-msgstr ""
-"Вы можете сохранить свой курс в черновике и редактировать его много раз."
+msgstr "Курс можно держать в черновике и редактировать сколько угодно."
 
 #: apps/courses/templates/courses/create_course.html:76
 msgctxt "courses.create_page"
 msgid "after_create_item_4"
-msgstr "Опубликуйте статус, чтобы открыть его для учащихся."
+msgstr "Чтобы открыть курс студентам, опубликуйте его."
 
 #: apps/courses/templates/courses/edit_course.html:5
 msgctxt "courses.edit_page"
@@ -22587,27 +22590,27 @@ msgstr "Описание курса"
 #: apps/courses/templates/courses/edit_course.html:56
 msgctxt "courses.edit_page"
 msgid "field_course_cover"
-msgstr "Изображение курса (обложка)"
+msgstr "Обложка курса"
 
 #: apps/courses/templates/courses/edit_course.html:64
 msgctxt "courses.edit_page"
 msgid "alt_current_cover"
-msgstr "Доступная обложка"
+msgstr "Текущая обложка"
 
 #: apps/courses/templates/courses/edit_course.html:65
 msgctxt "courses.edit_page"
 msgid "label_current_image"
-msgstr "Доступное изображение"
+msgstr "Текущее изображение"
 
 #: apps/courses/templates/courses/edit_course.html:71
 msgctxt "courses.edit_page"
 msgid "alt_new_preview"
-msgstr "Новый предварительный просмотр"
+msgstr "Предпросмотр"
 
 #: apps/courses/templates/courses/edit_course.html:72
 msgctxt "courses.edit_page"
 msgid "label_new_selection"
-msgstr "Новый выбор"
+msgstr "Выбранное изображение"
 
 #: apps/courses/templates/courses/edit_course.html:79
 msgctxt "courses.edit_page"
@@ -22622,12 +22625,12 @@ msgstr "Статус курса"
 #: apps/courses/templates/courses/edit_course.html:98
 msgctxt "courses.edit_page"
 msgid "help_status_visibility"
-msgstr "Статус определяет, будет ли курс виден учащимся."
+msgstr "Статус определяет, видят ли курс студенты."
 
 #: apps/courses/templates/courses/edit_course.html:105
 msgctxt "courses.edit_page"
 msgid "action_cancel_back"
-msgstr "Отменить и вернуться назад"
+msgstr "Отменить и вернуться"
 
 #: apps/courses/templates/courses/edit_course.html:108
 msgctxt "courses.edit_page"
@@ -22643,22 +22646,22 @@ msgstr "Полезная информация"
 msgctxt "courses.edit_page"
 msgid "info_item_instant_update"
 msgstr ""
-"Мгновенное обновление: изменения, внесенные вами в название и описание "
-"курса, будут обновлены для учащихся сразу после их сохранения."
+"Мгновенное обновление: изменения названия и описания курса станут видны "
+"студентам сразу после сохранения."
 
 #: apps/courses/templates/courses/edit_course.html:121
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Важность статуса: вы можете легко работать над курсом, сохранив его в режиме"
-" «Черновик». Не забудьте «Опубликовать», когда будете готовы."
+"Важность статуса: пока курс в режиме «Черновик», над ним можно спокойно "
+"работать. Не забудьте опубликовать его, когда он будет готов."
 
 #: apps/courses/templates/courses/edit_course.html:122
 msgctxt "courses.edit_page"
 msgid "info_item_cover_size"
 msgstr ""
-"Размер изображения. Для наилучшего просмотра рекомендуется использовать "
-"высококачественные горизонтальные (альбомные) изображения."
+"Размер изображения: для лучшего вида рекомендуется использовать качественные"
+" горизонтальные (альбомные) изображения."
 
 #: apps/courses/templates/courses/my_courses.html:5
 #: apps/courses/templates/courses/my_courses.html:18
@@ -22699,12 +22702,12 @@ msgstr "Перейти на панель управления"
 #: apps/courses/templates/courses/my_courses.html:84
 msgctxt "courses.my_courses"
 msgid "pagination_previous"
-msgstr "Первый"
+msgstr "Назад"
 
 #: apps/courses/templates/courses/my_courses.html:96
 msgctxt "courses.my_courses"
 msgid "pagination_next"
-msgstr "Затем"
+msgstr "Далее"
 
 #: apps/courses/templates/courses/my_courses.html:111
 msgctxt "courses.my_courses"
@@ -22715,8 +22718,8 @@ msgstr "Вы еще не создали курс"
 msgctxt "courses.my_courses"
 msgid "empty_description"
 msgstr ""
-"Создайте свой первый курс и добавьте в панель управления темы, внештатную "
-"работу и лабораторные работы."
+"Создайте первый курс и добавьте на панели управления темы, самостоятельные и"
+" лабораторные работы."
 
 #: apps/courses/templates/courses/my_courses.html:120
 msgctxt "courses.my_courses"
@@ -22764,12 +22767,14 @@ msgstr "Необязательно"
 #: apps/courses/templates/courses/partials/_course_form_fields.html:54
 msgctxt "courses.create_page"
 msgid "help_course_description"
-msgstr "Напишите цель курса, интересы и для каких студентов он предназначен."
+msgstr ""
+"Опишите цель курса, его направленность и для каких студентов он "
+"предназначен."
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:66
 msgctxt "courses.create_page"
 msgid "field_course_cover"
-msgstr "Изображение курса (обложка)"
+msgstr "Обложка курса"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:74
 msgctxt "courses.create_page"
@@ -22779,7 +22784,7 @@ msgstr "Перетащите изображение или"
 #: apps/courses/templates/courses/partials/_course_form_fields.html:74
 msgctxt "courses.create_page"
 msgid "action_choose_image"
-msgstr "Выберите изображение"
+msgstr "Выбрать изображение"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:75
 msgctxt "courses.create_page"
@@ -22791,12 +22796,12 @@ msgstr ""
 #: apps/courses/templates/courses/partials/_course_form_fields.html:75
 msgctxt "courses.create_page"
 msgid "help_cover_optimal_size"
-msgstr "Оптимальный размер: 1200x600 пикселей."
+msgstr "Оптимальный размер: 1200x600px"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:80
 msgctxt "courses.create_page"
 msgid "alt_preview"
-msgstr "Предварительный просмотр"
+msgstr "Предпросмотр"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:81
 msgctxt "courses.create_page"
@@ -22846,7 +22851,7 @@ msgstr "Ошибки"
 #: apps/courses/templates/courses/partials/_courses_assets_js.html:5
 msgctxt "courses.common.js"
 msgid "please_wait"
-msgstr "Ждать..."
+msgstr "Подождите..."
 
 #: apps/courses/templates/courses/partials/_create_course_modal.html:6
 #: apps/courses/templates/courses/partials/_create_course_modal.html:21
@@ -22877,7 +22882,7 @@ msgstr "Закрыть"
 #: apps/courses/templates/courses/partials/_create_course_modal_form.html:20
 msgctxt "courses.partial.create_modal_form"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/courses/templates/courses/partials/_create_course_modal_form.html:24
 msgctxt "courses.partial.create_modal_form"
@@ -22887,7 +22892,7 @@ msgstr "Создать курс"
 #: apps/courses/templates/courses/partials/_member_accordion.html:10
 msgctxt "courses.partial.member_accordion"
 msgid "confirm_delete_user"
-msgstr "Вы хотите удалить этого пользователя из курса?"
+msgstr "Студент будет убран из курса. Его работы и оценки сохранятся."
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:11
 msgctxt "courses.partial.member_accordion"
@@ -22902,7 +22907,7 @@ msgstr "Ошибка сети."
 #: apps/courses/templates/courses/partials/_member_accordion.html:19
 msgctxt "courses.partial.member_accordion"
 msgid "title_members"
-msgstr "Члены"
+msgstr "Участники"
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:33
 msgctxt "courses.partial.member_accordion"
@@ -22922,12 +22927,12 @@ msgstr "Посмотреть все"
 #: apps/courses/templates/courses/partials/_member_accordion.html:66
 msgctxt "courses.partial.member_accordion"
 msgid "role_teacher"
-msgstr "Учитель"
+msgstr "Преподаватель"
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:68
 msgctxt "courses.partial.member_accordion"
 msgid "role_assistant"
-msgstr "Помощник"
+msgstr "Ассистент"
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:70
 msgctxt "courses.partial.member_accordion"
@@ -22938,7 +22943,7 @@ msgstr "Студент"
 #, python-format
 msgctxt "courses.partial.member_accordion"
 msgid "More %(count)s people..."
-msgstr "Еще %(count)s человек..."
+msgstr "Ещё %(count)s чел..."
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:101
 msgctxt "courses.partial.member_accordion"
@@ -22948,7 +22953,7 @@ msgstr "Ни один участник еще не добавлен."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:7
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_student"
-msgstr "Выберите хотя бы одного ученика!"
+msgstr "Выберите хотя бы одного студента!"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:8
 msgctxt "courses.partial.member_modal"
@@ -22963,7 +22968,7 @@ msgstr "Добавление..."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:10
 msgctxt "courses.partial.member_modal"
 msgid "msg_error_prefix"
-msgstr "Ошибка:"
+msgstr "Ошибка: "
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:11
 msgctxt "courses.partial.member_modal"
@@ -22978,12 +22983,12 @@ msgstr "Произошла ошибка сервера."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:13
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_member_confirm_suffix"
-msgstr "Вы хотите удалить студента из курса?"
+msgstr " — удалить этого студента из курса?"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:14
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_failed_prefix"
-msgstr "Не удалено:"
+msgstr "Не удалено: "
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:15
 msgctxt "courses.partial.member_modal"
@@ -22998,7 +23003,7 @@ msgstr "Добавить студента"
 #: apps/courses/templates/courses/partials/_member_form_modal.html:35
 msgctxt "courses.partial.member_modal"
 msgid "field_group_name_optional"
-msgstr "Имя группы (необязательно)"
+msgstr "Название группы (необязательно)"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:41
 msgctxt "courses.partial.member_modal"
@@ -23013,7 +23018,7 @@ msgstr "Студенты"
 #: apps/courses/templates/courses/partials/_member_form_modal.html:50
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_students"
-msgstr "Поиск студента (имя, имя пользователя)..."
+msgstr "Поиск студента (имя, логин)..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:71
 msgctxt "courses.partial.member_modal"
@@ -23041,12 +23046,12 @@ msgstr "Добавление студентов..."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:165
 msgctxt "courses.partial.member_modal"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:93
 msgctxt "courses.partial.member_modal"
 msgid "action_add"
-msgstr "Добавлять"
+msgstr "Добавить"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:106
 msgctxt "courses.partial.member_modal"
@@ -23061,7 +23066,7 @@ msgstr "Группы"
 #: apps/courses/templates/courses/partials/_member_form_modal.html:124
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_search_groups"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:142
 msgctxt "courses.partial.member_modal"
@@ -23071,7 +23076,7 @@ msgstr "Группа не найдена."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:152
 msgctxt "courses.partial.member_modal"
 msgid "groups_info_text"
-msgstr "Все учащиеся выбранных групп будут добавлены к курсу."
+msgstr "Активные студенты выбранных групп будут добавлены в курс."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:159
 msgctxt "courses.partial.member_modal"
@@ -23086,7 +23091,7 @@ msgstr "Добавить группы"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:10
 msgctxt "courses.partial.resource_accordion"
 msgid "confirm_delete_resource"
-msgstr "Вы хотели удалить этот ресурс?"
+msgstr "Удалить этот ресурс?"
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:17
 #: apps/courses/tests/test_views.py:251
@@ -23107,7 +23112,7 @@ msgstr "Скачать"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:83
 msgctxt "courses.partial.resource_accordion"
 msgid "action_open"
-msgstr "открыть"
+msgstr "Открыть"
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:92
 msgctxt "courses.partial.resource_accordion"
@@ -23117,7 +23122,7 @@ msgstr "Удалить"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:105
 msgctxt "courses.partial.resource_accordion"
 msgid "empty_resource"
-msgstr "Ресурс пока не добавлен."
+msgstr "Ресурсы пока не добавлены."
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:108
 msgctxt "courses.partial.resource_accordion"
@@ -23152,7 +23157,7 @@ msgstr "Файл"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:44
 msgctxt "courses.partial.resource_modal"
 msgid "type_link"
-msgstr "Связь"
+msgstr "Ссылка"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:50
 msgctxt "courses.partial.resource_modal"
@@ -23177,22 +23182,22 @@ msgstr "Например: Лекция 1 – Введение"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:75
 msgctxt "courses.partial.resource_modal"
 msgid "field_topic"
-msgstr "Предмет"
+msgstr "Тема"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:79
 msgctxt "courses.partial.resource_modal"
 msgid "option_no_topic"
-msgstr "Предмет не выбран (уровень курса)"
+msgstr "Тема не выбрана (уровень курса)"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:86
 msgctxt "courses.partial.resource_modal"
 msgid "help_topic_optional"
-msgstr "Необязательно: свяжите ресурс с определенной темой."
+msgstr "Необязательно: привяжите ресурс к конкретной теме"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:93
 msgctxt "courses.partial.resource_modal"
 msgid "field_description"
-msgstr "Раскрытие информации"
+msgstr "Описание"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:97
 msgctxt "courses.partial.resource_modal"
@@ -23207,7 +23212,7 @@ msgstr "Файл"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:108
 msgctxt "courses.partial.resource_modal"
 msgid "help_supported_formats"
-msgstr "Поддерживаемые форматы: PDF, ZIP, DOC, DOCX, PPT, PPTX, XLS, XLSX."
+msgstr "Поддерживаемые форматы: PDF, ZIP, DOC, DOCX, PPT, PPTX, XLS, XLSX"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:115
 msgctxt "courses.partial.resource_modal"
@@ -23232,17 +23237,17 @@ msgstr "Добавить ресурс"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:134
 msgctxt "courses.partial.resource_modal"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:8
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
-msgstr "Вы хотели удалить эту тему?\\n\\nВсе ресурсы по теме также будут удалены!"
+msgstr "Удалить эту тему?\\n\\nВсе ресурсы темы также будут удалены!"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:9
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_resource"
-msgstr "Вы хотели удалить этот ресурс?"
+msgstr "Удалить этот ресурс?"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:10
 msgid "resourceFormModal tapılmadı!"
@@ -23282,12 +23287,12 @@ msgstr "Скачать"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:126
 msgctxt "courses.partial.topic_accordion"
 msgid "action_open"
-msgstr "открыть"
+msgstr "Открыть"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:146
 msgctxt "courses.partial.topic_accordion"
 msgid "empty_resource"
-msgstr "Ресурс пока не добавлен."
+msgstr "Ресурсы пока не добавлены."
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:156
 msgctxt "courses.partial.topic_accordion"
@@ -23297,7 +23302,7 @@ msgstr "Добавить ресурс"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:168
 msgctxt "courses.partial.topic_accordion"
 msgid "empty_topic"
-msgstr "Ни одна тема еще не добавлена."
+msgstr "Темы пока не добавлены."
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:171
 msgctxt "courses.partial.topic_accordion"
@@ -23363,22 +23368,22 @@ msgstr "Закрыть"
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:41
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_name"
-msgstr "Имя субъекта"
+msgstr "Название темы"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:51
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_description"
-msgstr "Описание Тема"
+msgstr "Описание темы"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:63
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_save"
-msgstr "Сохранить в память"
+msgstr "Сохранить"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:66
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:10
 msgctxt "courses.partial.topic_modal"
@@ -23408,32 +23413,32 @@ msgstr "Закрыть"
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:33
 msgctxt "courses.partial.topic_modal"
 msgid "field_topic_name"
-msgstr "Имя субъекта"
+msgstr "Название темы"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:37
 msgctxt "courses.partial.topic_modal"
 msgid "placeholder_topic_name"
-msgstr "Пример: Неделя 1: Введение"
+msgstr "Например: Неделя 1: Введение"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:40
 msgctxt "courses.partial.topic_modal"
 msgid "help_topic_name"
-msgstr "Например: «Неделя 1», «Блок 1: Основные понятия»."
+msgstr "Например: «Неделя 1», «Блок 1: Основные понятия»"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:47
 msgctxt "courses.partial.topic_modal"
 msgid "field_topic_description"
-msgstr "Описание Тема"
+msgstr "Описание темы"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:51
 msgctxt "courses.partial.topic_modal"
 msgid "placeholder_topic_description"
-msgstr "Что изучается по этому предмету?"
+msgstr "Что изучается в этой теме?"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:53
 msgctxt "courses.partial.topic_modal"
 msgid "help_topic_goal"
-msgstr "Напишите цель этой темы для учащихся."
+msgstr "Опишите цель этой темы для студентов"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:63
 msgctxt "courses.partial.topic_modal"
@@ -23443,7 +23448,7 @@ msgstr "Добавить тему"
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:66
 msgctxt "courses.partial.topic_modal"
 msgid "action_cancel"
-msgstr "Отменить это"
+msgstr "Отмена"
 
 #: apps/courses/templates/courses/student_courses.html:5
 msgctxt "courses.student_courses"
@@ -23468,7 +23473,7 @@ msgstr "Вернуться в профиль"
 #: apps/courses/templates/courses/student_courses.html:56
 msgctxt "courses.student_courses"
 msgid "label_teacher"
-msgstr "Учитель"
+msgstr "Преподаватель"
 
 #: apps/courses/templates/courses/student_courses.html:62
 msgctxt "courses.student_courses"
@@ -23521,7 +23526,7 @@ msgstr "У вас нет необходимого разрешения: {permiss
 #: apps/courses/views/shared/_helpers.py:86
 msgctxt "courses.view.permission"
 msgid "teachers_only_action"
-msgstr "Эта операция доступна только учителям."
+msgstr "Это действие доступно только преподавателям."
 
 #: apps/courses/views/shared/_helpers.py:99
 #: apps/courses/views/teacher/membership.py:351
@@ -23547,7 +23552,7 @@ msgstr "✅ Курс «{title}» успешно создан!"
 #: apps/courses/views/teacher/crud.py:178
 msgctxt "courses.view.message"
 msgid "course_updated"
-msgstr "✅ Обновлён курс «{title}»."
+msgstr "✅ Курс «{title}» обновлён."
 
 #: apps/courses/views/teacher/crud.py:203
 msgctxt "courses.view.message"
@@ -23586,7 +23591,7 @@ msgstr "Ни один студент не был выбран."
 #: apps/courses/views/teacher/membership.py:280
 msgctxt "courses.view.message"
 msgid "students_added_to_course"
-msgstr "Студент {count} добавлен в курс."
+msgstr "Добавлено студентов в курс: {count}."
 
 #: apps/courses/views/teacher/membership.py:221
 #: apps/courses/views/teacher/membership.py:226
@@ -23607,7 +23612,7 @@ msgstr "Модель StudentGroup не найдена."
 #: apps/courses/views/teacher/membership.py:328
 msgctxt "courses.view.message"
 msgid "member_deleted"
-msgstr "{username} был удален."
+msgstr "Пользователь {username} удалён."
 
 #: apps/courses/views/teacher/membership.py:357
 msgctxt "courses.view.message"
@@ -23617,12 +23622,12 @@ msgstr "Название группы не найдено."
 #: apps/courses/views/teacher/membership.py:366
 msgctxt "courses.view.message"
 msgid "group_removed_from_course"
-msgstr "✅ Студент {count} из группы «{group_name}» был отчислен с курса."
+msgstr "✅ Из курса удалено студентов группы «{group_name}»: {count}."
 
 #: apps/courses/views/teacher/resources.py:41
 msgctxt "courses.view.message"
 msgid "resource_added"
-msgstr "Добавлен ресурс \"{title}\"."
+msgstr "Добавлен ресурс «{title}»."
 
 #: apps/courses/views/teacher/resources.py:83
 msgctxt "courses.view.message"
@@ -23632,7 +23637,7 @@ msgstr "✅ Ресурс «{title}» удален."
 #: apps/courses/views/teacher/topics.py:46
 msgctxt "courses.view.message"
 msgid "topic_added"
-msgstr "Добавлена ​​тема \"{title}\"."
+msgstr "Добавлена тема «{title}»."
 
 #: apps/courses/views/teacher/topics.py:67
 msgctxt "courses.view.message"
@@ -27738,7 +27743,7 @@ msgstr ""
 #: apps/exams/templates/exams/components/_exam_modals.html:25
 msgctxt "exams.partial.exam_modals"
 msgid "msg_error_prefix"
-msgstr "Ошибка:"
+msgstr "Ошибка: "
 
 #: apps/exams/templates/exams/components/_exam_modals.html:26
 msgctxt "exams.partial.exam_modals"
@@ -27749,7 +27754,7 @@ msgstr "Вы уверены, что хотите удалить?"
 #: apps/exams/templates/exams/teacher/exam_section.html:124
 msgctxt "exams.partial.exam_section"
 msgid "action_unlink"
-msgstr "Отменить это"
+msgstr "Удалить связь"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:28
 #: apps/exams/templates/exams/components/_exam_modals.html:81
@@ -27771,12 +27776,12 @@ msgstr "Сохранение..."
 #: apps/exams/templates/exams/components/_exam_modals.html:41
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
-msgstr "Редактировать курс"
+msgstr "Привязать существующий экзамен"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:47
 msgctxt "exams.partial.exam_modals"
 msgid "placeholder_search_by_exam_name"
-msgstr "Ищу учителя..."
+msgstr "Поиск экзамена..."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:57
 msgctxt "exams.partial.exam_modals"
@@ -27786,27 +27791,27 @@ msgstr "Вопрос"
 #: apps/exams/templates/exams/components/_exam_modals.html:59
 msgctxt "exams.partial.exam_modals"
 msgid "label_linked_to_course"
-msgstr "Назначенные преподаватели"
+msgstr "(уже привязан)"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:67
 msgctxt "exams.partial.exam_modals"
 msgid "status_linked"
-msgstr "Закрыто"
+msgstr "Привязан"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:69
 msgctxt "exams.partial.exam_modals"
 msgid "action_link"
-msgstr "Редактировать"
+msgstr "Привязать"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:77
 msgctxt "exams.partial.exam_modals"
 msgid "empty_no_exam_to_link"
-msgstr "Вакансий для проверки не найдено."
+msgstr "Экзамены для привязки не найдены."
 
 #: apps/exams/templates/exams/components/_exam_modals.html:82
 msgctxt "exams.partial.exam_modals"
 msgid "action_create_new_exam"
-msgstr "Создать курс"
+msgstr "Создать экзамен"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
@@ -29773,7 +29778,7 @@ msgstr "Время начала"
 #: apps/exams/templates/exams/teacher/exam_section.html:352
 msgctxt "exams.partial.exam_section"
 msgid "modal_label_end"
-msgstr "Время окончания"
+msgstr "Срок сдачи"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:411
 #: apps/exams/templates/exams/teacher/exam_section.html:358
@@ -31123,7 +31128,7 @@ msgstr "Привязать существующий экзамен"
 #: apps/exams/templates/exams/teacher/exam_section.html:146
 msgctxt "exams.partial.exam_section"
 msgid "action_create_new_exam"
-msgstr "Создать курс"
+msgstr "Добавить новый экзамен"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:56
 #: apps/exams/templates/exams/teacher/exam_section.html:176
@@ -31153,7 +31158,7 @@ msgstr "Неактивный"
 #, python-format
 msgctxt "exams.partial.exam_section"
 msgid "label_question_count_short %(question_count)s"
-msgstr "%(question_count)s вопросов"
+msgstr "%(question_count)s вопр."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:84
 #, python-format
@@ -31165,7 +31170,7 @@ msgstr "%(minutes)s мин"
 #, python-format
 msgctxt "exams.partial.exam_section"
 msgid "label_attempt_count_short %(attempts)s"
-msgstr "%(attempts)s попыток"
+msgstr "Попыток: %(attempts)s"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:107
 msgid "Detallı imtahana bax"
@@ -31195,7 +31200,7 @@ msgstr "Открыт"
 #, python-format
 msgctxt "exams.partial.exam_section"
 msgid "label_duration_minutes_full %(minutes)s"
-msgstr "%(minutes)s минут"
+msgstr "%(minutes)s мин."
 
 #: apps/exams/templates/exams/teacher/exam_section.html:214
 #, python-format
@@ -31221,12 +31226,12 @@ msgstr "Экзамен ещё не начался. Начало: {start_str}"
 #: apps/exams/templates/exams/teacher/exam_section.html:274
 msgctxt "exams.partial.exam_section"
 msgid "status_time_is_over"
-msgstr "Активный"
+msgstr "Время истекло"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:279
 msgctxt "exams.partial.exam_section"
 msgid "status_no_attempt_left"
-msgstr "Заполните форму, чтобы начать новую попытку"
+msgstr "Попытки исчерпаны"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:290
 msgctxt "exams.partial.exam_section"
@@ -31858,7 +31863,7 @@ msgstr "Открытый ответ, эссе или Paint — проверяе�
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:145
 msgctxt "exams.template.create_exam_modal_form"
 msgid "exam_type_extended_help"
-msgstr "Академическая категория экзамена (необязательно)."
+msgstr "Выбирайте только при необходимости: тест, мидтерм или финал."
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:157
 msgctxt "exams.template.create_exam_modal_form"
@@ -32036,7 +32041,7 @@ msgstr "Обнаруживать переключение вкладок"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:421
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_block_copy_paste"
-msgstr "Блокировать Копирование/Вставку"
+msgstr "Блокировать копирование/вставку"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:429
 msgctxt "exams.template.create_exam_modal_form"
@@ -32056,7 +32061,7 @@ msgstr "Ограничить клавиатурные сочетания"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:452
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_grace_period_label"
-msgstr "Период восстановления (секунды)"
+msgstr "Время на возврат (секунды)"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:460
 msgctxt "exams.template.create_exam_modal_form"
@@ -32106,7 +32111,7 @@ msgstr "Один дополнительный шанс"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:485
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_recovery_teacher_controlled"
-msgstr "Управляемое учителем"
+msgstr "Под контролем преподавателя"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:497
 msgctxt "exams.wizard"
@@ -36829,7 +36834,7 @@ msgstr "%(hours)s ч %(minutes)s мин"
 #: apps/labs/lab_submission_service.py:46
 msgctxt "labs.view.message"
 msgid "duration_minutes"
-msgstr "%(minutes)s мин."
+msgstr "%(minutes)s мин"
 
 #: apps/labs/templates/labs/grade_submission.html:5
 msgctxt "labs.template.grade_submission"
@@ -36869,7 +36874,7 @@ msgstr "Ответы студентов"
 #, python-format
 msgctxt "labs.template.grade_submission"
 msgid "label_question_count %(answer_count)s"
-msgstr "%(answer_count)s вопросы"
+msgstr "Вопросов: %(answer_count)s"
 
 #: apps/labs/templates/labs/grade_submission.html:90
 msgctxt "labs.template.grade_submission"
@@ -36893,7 +36898,7 @@ msgstr "Просмотр"
 #: apps/labs/templates/labs/grade_submission.html:144
 msgctxt "labs.template.grade_submission"
 msgid "heading_grading"
-msgstr "Оценка"
+msgstr "Оценивание"
 
 #: apps/labs/templates/labs/grade_submission.html:151
 msgctxt "labs.template.grade_submission"
@@ -36903,17 +36908,17 @@ msgstr "Балл"
 #: apps/labs/templates/labs/grade_submission.html:167
 msgctxt "labs.template.grade_submission"
 msgid "label_feedback"
-msgstr "Обратная связь"
+msgstr "Отзыв"
 
 #: apps/labs/templates/labs/grade_submission.html:169
 msgctxt "labs.template.grade_submission"
 msgid "placeholder_feedback"
-msgstr "Отзыв ученику..."
+msgstr "Отзыв для студента..."
 
 #: apps/labs/templates/labs/grade_submission.html:176
 msgctxt "labs.template.grade_submission"
 msgid "action_save"
-msgstr "Сохранять"
+msgstr "Сохранить"
 
 #: apps/labs/templates/labs/grade_submission.html:180
 msgctxt "labs.template.grade_submission"
@@ -36924,22 +36929,22 @@ msgstr "Отмена"
 #, python-format
 msgctxt "labs.template.grade_submission"
 msgid "label_graded_at %(graded_at)s"
-msgstr "Оценка %(graded_at)s"
+msgstr "Оценено %(graded_at)s"
 
 #: apps/labs/templates/labs/lab_detail.html:39
 msgctxt "labs.template.lab_detail"
 msgid "status_open"
-msgstr "Открыть"
+msgstr "Открыта"
 
 #: apps/labs/templates/labs/lab_detail.html:41
 msgctxt "labs.template.lab_detail"
 msgid "status_upcoming"
-msgstr "Предстоящие"
+msgstr "Предстоит"
 
 #: apps/labs/templates/labs/lab_detail.html:43
 msgctxt "labs.template.lab_detail"
 msgid "status_closed"
-msgstr "Закрыто"
+msgstr "Закрыта"
 
 #: apps/labs/templates/labs/lab_detail.html:47
 msgctxt "labs.template.lab_detail"
@@ -36971,7 +36976,7 @@ msgstr "Не оценено"
 #: apps/labs/templates/labs/lab_detail.html:99
 msgctxt "labs.template.lab_detail"
 msgid "label_answered"
-msgstr "Ответил"
+msgstr "Отвечено"
 
 #: apps/labs/templates/labs/lab_detail.html:110
 msgctxt "labs.template.lab_detail"
@@ -36986,17 +36991,17 @@ msgstr "Оставшееся время"
 #: apps/labs/templates/labs/lab_detail.html:133
 msgctxt "labs.template.lab_detail"
 msgid "card_lab_info"
-msgstr "Информация о лаборатории"
+msgstr "Информация о лабораторной работе"
 
 #: apps/labs/templates/labs/lab_detail.html:141
 msgctxt "labs.template.lab_detail"
 msgid "label_start"
-msgstr "Начинать"
+msgstr "Начало"
 
 #: apps/labs/templates/labs/lab_detail.html:150
 msgctxt "labs.template.lab_detail"
 msgid "label_deadline"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/labs/templates/labs/lab_detail.html:159
 msgctxt "labs.template.lab_detail"
@@ -37006,7 +37011,7 @@ msgstr "Максимальный балл"
 #: apps/labs/templates/labs/lab_detail.html:168
 msgctxt "labs.template.lab_detail"
 msgid "label_attempt"
-msgstr "Пытаться"
+msgstr "Попытка"
 
 #: apps/labs/templates/labs/lab_detail.html:177
 msgctxt "labs.template.lab_detail"
@@ -37017,7 +37022,7 @@ msgstr "Количество вопросов"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_questions_count_value %(question_count)s"
-msgstr "%(question_count)s элементы"
+msgstr "%(question_count)s вопр."
 
 #: apps/labs/templates/labs/lab_detail.html:187
 msgctxt "labs.template.lab_detail"
@@ -37027,7 +37032,7 @@ msgstr "Материалы"
 #: apps/labs/templates/labs/lab_detail.html:192
 msgctxt "labs.template.lab_detail"
 msgid "label_teacher_file"
-msgstr "Файл учителя"
+msgstr "Файл преподавателя"
 
 #: apps/labs/templates/labs/lab_detail.html:202
 msgctxt "labs.template.lab_detail"
@@ -37038,7 +37043,7 @@ msgstr "Инструкции"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_points %(points)s"
-msgstr "%(points)s баллов"
+msgstr "Баллы: %(points)s"
 
 #: apps/labs/templates/labs/lab_detail.html:254
 msgctxt "labs.template.lab_detail"
@@ -37062,7 +37067,7 @@ msgstr "Сохранено"
 #: apps/labs/templates/labs/lab_detail.html:283
 msgctxt "labs.template.lab_detail"
 msgid "status_waiting_for_answer"
-msgstr "Ожидание ответа"
+msgstr "Ожидает ответа"
 
 #: apps/labs/templates/labs/lab_detail.html:298
 msgctxt "labs.template.lab_detail"
@@ -37077,22 +37082,22 @@ msgstr "Вы не можете редактировать после отпра�
 #: apps/labs/templates/labs/lab_detail.html:303
 msgctxt "labs.template.lab_detail"
 msgid "action_finish_lab"
-msgstr "Завершить лабораторию"
+msgstr "Завершить лабораторную работу"
 
 #: apps/labs/templates/labs/lab_detail.html:315
 msgctxt "labs.template.lab_detail"
 msgid "empty_no_questions"
-msgstr "К этой лаборатории вопросов нет."
+msgstr "Для этой лабораторной работы нет вопросов"
 
 #: apps/labs/templates/labs/lab_detail.html:316
 msgctxt "labs.template.lab_detail"
 msgid "empty_teacher_has_not_added_questions"
-msgstr "Учитель еще не добавил вопросы"
+msgstr "Преподаватель ещё не добавил вопросы"
 
 #: apps/labs/templates/labs/lab_detail.html:325
 msgctxt "labs.template.lab_detail"
 msgid "notice_submission_successful"
-msgstr "Лаборатория успешно отправлена!"
+msgstr "Лабораторная работа успешно отправлена!"
 
 #: apps/labs/templates/labs/lab_detail.html:327
 #, python-format
@@ -37103,7 +37108,7 @@ msgstr "Попытки исчерпаны (%(attempt_count)s / %(max_attempts)s)
 #: apps/labs/templates/labs/lab_detail.html:339
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_not_started"
-msgstr "Лаборатория еще не началась"
+msgstr "Лабораторная работа ещё не началась"
 
 #: apps/labs/templates/labs/lab_detail.html:341
 #, python-format
@@ -37114,13 +37119,13 @@ msgstr "Начало: %(start_at)s"
 #: apps/labs/templates/labs/lab_detail.html:350
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_closed"
-msgstr "Лаборатория закрыта"
+msgstr "Лабораторная работа закрыта"
 
 #: apps/labs/templates/labs/lab_detail.html:352
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_deadline_at %(deadline)s"
-msgstr "Срок: %(deadline)s"
+msgstr "Срок сдачи: %(deadline)s"
 
 #: apps/labs/templates/labs/lab_detail.html:367
 msgctxt "labs.template.lab_detail"
@@ -37143,7 +37148,7 @@ msgstr "Нет, продолжить"
 #: apps/labs/templates/labs/lab_detail.html:382
 msgctxt "labs.template.lab_detail"
 msgid "confirm_finish_yes"
-msgstr "Да, завершить лабораторию"
+msgstr "Да, завершить работу"
 
 #: apps/labs/templates/labs/lab_detail.html:393
 msgctxt "labs.js.lab_detail"
@@ -37163,7 +37168,7 @@ msgstr "Ошибка"
 #: apps/labs/templates/labs/lab_detail.html:396
 msgctxt "labs.js.lab_detail"
 msgid "confirm_unanswered"
-msgstr "Вопросы {count} остаются без ответа. Все равно отправить?"
+msgstr "Вопросов без ответа: {count}. Всё равно отправить?"
 
 #: apps/labs/templates/labs/lab_detail.html:398
 msgctxt "labs.js.lab_detail"
@@ -37188,17 +37193,17 @@ msgstr "Ошибка сервера"
 #: apps/labs/templates/labs/lab_detail.html:402
 msgctxt "labs.js.lab_detail"
 msgid "action_finish_lab"
-msgstr "Завершить лабораторию"
+msgstr "Завершить лабораторную работу"
 
 #: apps/labs/templates/labs/lab_section.html:11
 msgctxt "labs.template.lab_section"
 msgid "section_title"
-msgstr "Лабораторные"
+msgstr "Лабораторные работы"
 
 #: apps/labs/templates/labs/lab_section.html:28
 msgctxt "labs.template.lab_section"
 msgid "action_add_new_lab"
-msgstr "Добавить новую лабораторию"
+msgstr "Добавить лабораторную работу"
 
 #: apps/labs/templates/labs/lab_section.html:45
 msgctxt "labs.template.lab_section"
@@ -37209,32 +37214,32 @@ msgstr "Черновик"
 #: apps/labs/templates/labs/lab_section.html:114
 msgctxt "labs.template.lab_section"
 msgid "status_upcoming"
-msgstr "Предстоящие"
+msgstr "Предстоит"
 
 #: apps/labs/templates/labs/lab_section.html:49
 #: apps/labs/templates/labs/lab_section.html:116
 msgctxt "labs.template.lab_section"
 msgid "status_open"
-msgstr "Открыть"
+msgstr "Открыта"
 
 #: apps/labs/templates/labs/lab_section.html:51
 #: apps/labs/templates/labs/lab_section.html:118
 msgctxt "labs.template.lab_section"
 msgid "status_closed"
-msgstr "Закрыто"
+msgstr "Закрыта"
 
 #: apps/labs/templates/labs/lab_section.html:63
 #: apps/labs/templates/labs/lab_section.html:130
 #, python-format
 msgctxt "labs.template.lab_section"
 msgid "label_points %(max_score)s"
-msgstr "%(max_score)s баллов"
+msgstr "Баллы: %(max_score)s"
 
 #: apps/labs/templates/labs/lab_section.html:64
 #, python-format
 msgctxt "labs.template.lab_section"
 msgid "label_attempt %(max_attempts)s"
-msgstr "Попытка: %(max_attempts)s"
+msgstr "Попыток: %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_section.html:69
 msgctxt "labs.template.lab_section"
@@ -37254,23 +37259,23 @@ msgstr "Удалить"
 #: apps/labs/templates/labs/lab_section.html:89
 msgctxt "labs.template.lab_section"
 msgid "empty_no_labs_yet"
-msgstr "Лабораторий пока нет"
+msgstr "Лабораторных работ пока нет"
 
 #: apps/labs/templates/labs/lab_section.html:91
 msgctxt "labs.template.lab_section"
 msgid "action_add_first_lab"
-msgstr "Добавить первую лабораторию"
+msgstr "Добавить первую лабораторную работу"
 
 #: apps/labs/templates/labs/lab_section.html:109
 msgctxt "labs.template.lab_section"
 msgid "status_submitted"
-msgstr "Поданный"
+msgstr "Отправлено"
 
 #: apps/labs/templates/labs/lab_section.html:133
 #, python-format
 msgctxt "labs.template.lab_section"
 msgid "label_attempt_ratio %(attempt_count)s / %(max_attempts)s"
-msgstr "Попытка: %(attempt_count)s / %(max_attempts)s."
+msgstr "Попытка: %(attempt_count)s / %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_section.html:135
 msgctxt "labs.template.lab_section"
@@ -37285,17 +37290,17 @@ msgstr "Отправить повторно"
 #: apps/labs/templates/labs/lab_section.html:154
 msgctxt "labs.template.lab_section"
 msgid "status_completed"
-msgstr "Завершенный"
+msgstr "Завершено"
 
 #: apps/labs/templates/labs/lab_section.html:160
 msgctxt "labs.template.lab_section"
 msgid "action_open_lab"
-msgstr "Открытая лаборатория"
+msgstr "Открыть лабораторную"
 
 #: apps/labs/templates/labs/lab_section.html:165
 msgctxt "labs.template.lab_section"
 msgid "status_not_started"
-msgstr "Еще не началось"
+msgstr "Ещё не началась"
 
 #: apps/labs/templates/labs/lab_section.html:170
 msgctxt "labs.template.lab_section"
@@ -37305,12 +37310,12 @@ msgstr "Срок истек"
 #: apps/labs/templates/labs/lab_section.html:181
 msgctxt "labs.template.lab_section"
 msgid "empty_no_assigned_labs"
-msgstr "Нет назначенных лабораторий"
+msgstr "Нет назначенных лабораторных работ"
 
 #: apps/labs/templates/labs/lab_section.html:188
 msgctxt "labs.template.lab_section"
 msgid "empty_no_labs"
-msgstr "Нет лабораторий"
+msgstr "Нет лабораторных работ"
 
 #: apps/labs/templates/labs/lab_submissions.html:5
 msgctxt "labs.template.lab_submissions"
@@ -37374,19 +37379,19 @@ msgstr "Все статусы"
 #: apps/labs/templates/labs/lab_submissions.html:206
 msgctxt "labs.template.lab_submissions"
 msgid "status_pending"
-msgstr "В ожидании"
+msgstr "Ожидает"
 
 #: apps/labs/templates/labs/lab_submissions.html:74
 #: apps/labs/templates/labs/lab_submissions.html:204
 msgctxt "labs.template.lab_submissions"
 msgid "status_late"
-msgstr "Поздно"
+msgstr "С опозданием"
 
 #: apps/labs/templates/labs/lab_submissions.html:77
 #: apps/labs/templates/labs/lab_submissions.html:202
 msgctxt "labs.template.lab_submissions"
 msgid "status_graded"
-msgstr "Оцененный"
+msgstr "Оценено"
 
 #: apps/labs/templates/labs/lab_submissions.html:80
 msgid "Qaytarılıb"
@@ -37416,7 +37421,7 @@ msgstr "Дата"
 #: apps/labs/templates/labs/lab_submissions.html:164
 msgctxt "labs.template.lab_submissions"
 msgid "table_attempt"
-msgstr "Пытаться"
+msgstr "Попытка"
 
 #: apps/labs/templates/labs/lab_submissions.html:165
 msgctxt "labs.template.lab_submissions"
@@ -37431,12 +37436,12 @@ msgstr "Балл"
 #: apps/labs/templates/labs/lab_submissions.html:167
 msgctxt "labs.template.lab_submissions"
 msgid "table_action"
-msgstr "Действие"
+msgstr "Действия"
 
 #: apps/labs/templates/labs/lab_submissions.html:237
 msgctxt "labs.template.lab_submissions"
 msgid "action_grade"
-msgstr "Оценка"
+msgstr "Оценить"
 
 #: apps/labs/templates/labs/lab_submissions.html:260
 msgctxt "labs.template.lab_submissions"
@@ -37446,7 +37451,7 @@ msgstr "Нет результатов по выбранным фильтрам"
 #: apps/labs/templates/labs/lab_submissions.html:262
 msgctxt "labs.template.lab_submissions"
 msgid "empty_no_student_submission_yet"
-msgstr "Пока нет заявок от студентов"
+msgstr "Студенты пока ничего не сдали"
 
 #: apps/labs/templates/labs/lab_submissions.html:294
 msgid "Seçilən lab cavablarını sil"
@@ -37471,7 +37476,7 @@ msgstr "Блоки и вопросы"
 #: apps/labs/templates/labs/manage_blocks.html:29
 msgctxt "labs.template.manage_blocks"
 msgid "action_random_preview"
-msgstr "Случайный просмотр"
+msgstr "Случайный предпросмотр"
 
 #: apps/labs/templates/labs/manage_blocks.html:32
 msgctxt "labs.template.manage_blocks"
@@ -37503,7 +37508,7 @@ msgstr "На одного студента"
 #: apps/labs/templates/labs/manage_blocks.html:334
 msgctxt "labs.template.manage_blocks"
 msgid "action_save"
-msgstr "Сохранять"
+msgstr "Сохранить"
 
 #: apps/labs/templates/labs/manage_blocks.html:69
 msgctxt "labs.template.manage_blocks"
@@ -37524,13 +37529,13 @@ msgstr "Черновик"
 #, python-format
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_badge %(question_count)s"
-msgstr "%(question_count)s вопросы"
+msgstr "%(question_count)s вопр."
 
 #: apps/labs/templates/labs/manage_blocks.html:98
 #, python-format
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_to_pick_badge %(questions_to_pick)s"
-msgstr "%(questions_to_pick)s выбрано"
+msgstr "Выбор: %(questions_to_pick)s"
 
 #: apps/labs/templates/labs/manage_blocks.html:115
 msgctxt "labs.template.manage_blocks"
@@ -37562,12 +37567,12 @@ msgstr "Вопрос"
 #: apps/labs/templates/labs/manage_blocks.html:322
 msgctxt "labs.template.manage_blocks"
 msgid "table_points"
-msgstr "Очки"
+msgstr "Баллы"
 
 #: apps/labs/templates/labs/manage_blocks.html:139
 msgctxt "labs.template.manage_blocks"
 msgid "table_action"
-msgstr "Действие"
+msgstr "Действия"
 
 #: apps/labs/templates/labs/manage_blocks.html:177
 msgctxt "labs.template.manage_blocks"
@@ -37610,7 +37615,7 @@ msgstr "Описание"
 #: apps/labs/templates/labs/manage_blocks.html:256
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_to_pick"
-msgstr "Вопросы на выбор из этого блока"
+msgstr "Сколько вопросов выбрать из этого блока"
 
 #: apps/labs/templates/labs/manage_blocks.html:224
 #: apps/labs/templates/labs/manage_blocks.html:258
@@ -37625,12 +37630,12 @@ msgstr "0 = все вопросы"
 #: apps/labs/templates/labs/manage_blocks.html:367
 msgctxt "labs.template.manage_blocks"
 msgid "action_close"
-msgstr "Закрывать"
+msgstr "Закрыть"
 
 #: apps/labs/templates/labs/manage_blocks.html:229
 msgctxt "labs.template.manage_blocks"
 msgid "action_create"
-msgstr "Создавать"
+msgstr "Создать"
 
 #: apps/labs/templates/labs/manage_blocks.html:240
 msgctxt "labs.template.manage_blocks"
@@ -37657,7 +37662,7 @@ msgstr "Вложенный файл"
 #: apps/labs/templates/labs/manage_blocks.html:298
 msgctxt "labs.template.manage_blocks"
 msgid "action_add"
-msgstr "Добавлять"
+msgstr "Добавить"
 
 #: apps/labs/templates/labs/manage_blocks.html:309
 msgctxt "labs.template.manage_blocks"
@@ -37711,7 +37716,7 @@ msgstr "Импорт"
 #: apps/labs/templates/labs/manage_blocks.html:377
 msgctxt "labs.js.manage_blocks"
 msgid "file_existing"
-msgstr "Файл существует"
+msgstr "Текущий файл"
 
 #: apps/labs/templates/labs/manage_blocks.html:378
 msgctxt "labs.js.manage_blocks"
@@ -37736,17 +37741,17 @@ msgstr "Импорт..."
 #: apps/labs/templates/labs/manage_blocks.html:382
 msgctxt "labs.js.manage_blocks"
 msgid "action_create"
-msgstr "Создавать"
+msgstr "Создать"
 
 #: apps/labs/templates/labs/manage_blocks.html:383
 msgctxt "labs.js.manage_blocks"
 msgid "action_save"
-msgstr "Сохранять"
+msgstr "Сохранить"
 
 #: apps/labs/templates/labs/manage_blocks.html:384
 msgctxt "labs.js.manage_blocks"
 msgid "action_add"
-msgstr "Добавлять"
+msgstr "Добавить"
 
 #: apps/labs/templates/labs/manage_blocks.html:385
 msgctxt "labs.js.manage_blocks"
@@ -37756,7 +37761,7 @@ msgstr "Импорт"
 #: apps/labs/templates/labs/manage_blocks.html:386
 msgctxt "labs.js.manage_blocks"
 msgid "success_import_default"
-msgstr "Вопросы {count} импортированы."
+msgstr "Импортировано вопросов: {count}"
 
 #: apps/labs/templates/labs/manage_blocks.html:387
 msgctxt "labs.js.manage_blocks"
@@ -37776,12 +37781,12 @@ msgstr "Ошибка сервера"
 #: apps/labs/templates/labs/manage_blocks.html:390
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_block"
-msgstr "Удалить блок"
+msgstr "Удалить этот блок и все вопросы в нём?"
 
 #: apps/labs/templates/labs/manage_blocks.html:391
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_question"
-msgstr "Удалить вопрос"
+msgstr "Удалить этот вопрос?"
 
 #: apps/labs/templates/labs/my_lab_answers.html:6
 msgctxt "labs.template.my_lab_answers"
@@ -37803,19 +37808,19 @@ msgstr "Назад"
 #: apps/labs/templates/labs/my_lab_answers.html:168
 msgctxt "labs.template.my_lab_answers"
 msgid "status_pending"
-msgstr "В ожидании"
+msgstr "Ожидает"
 
 #: apps/labs/templates/labs/my_lab_answers.html:104
 #: apps/labs/templates/labs/my_lab_answers.html:164
 msgctxt "labs.template.my_lab_answers"
 msgid "status_graded"
-msgstr "Оцененный"
+msgstr "Оценено"
 
 #: apps/labs/templates/labs/my_lab_answers.html:106
 #: apps/labs/templates/labs/my_lab_answers.html:166
 msgctxt "labs.template.my_lab_answers"
 msgid "status_late"
-msgstr "Поздно"
+msgstr "С опозданием"
 
 #: apps/labs/templates/labs/my_lab_answers.html:155
 msgctxt "labs.template.my_lab_answers"
@@ -37846,7 +37851,7 @@ msgstr "Для этой попытки ответов не найдено"
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:8
 msgctxt "labs.template.lab_modals"
 msgid "modal_new_lab"
-msgstr "Новая лаборатория"
+msgstr "Новая лабораторная работа"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:18
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:19
@@ -37870,7 +37875,7 @@ msgstr "Материалы"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:37
 msgctxt "labs.template.lab_modals"
 msgid "label_lab_title"
-msgstr "Название лаборатории"
+msgstr "Название лабораторной работы"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:41
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:42
@@ -37912,25 +37917,25 @@ msgstr "Описание"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:65
 msgctxt "labs.template.lab_modals"
 msgid "label_start"
-msgstr "Начинать"
+msgstr "Начало"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:68
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:69
 msgctxt "labs.template.lab_modals"
 msgid "label_deadline"
-msgstr "Крайний срок"
+msgstr "Срок сдачи"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:75
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:76
 msgctxt "labs.template.lab_modals"
 msgid "label_allowed_groups"
-msgstr "Разрешенные группы"
+msgstr "Допущенные группы"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:76
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:77
 msgctxt "labs.template.lab_modals"
 msgid "placeholder_search_group"
-msgstr "Поисковая группа..."
+msgstr "Поиск группы..."
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:78
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:86
@@ -37944,7 +37949,7 @@ msgstr "Выбрано"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:82
 msgctxt "labs.template.lab_modals"
 msgid "label_allowed_students"
-msgstr "Разрешено студентам"
+msgstr "Допущенные студенты"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:82
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:83
@@ -37973,13 +37978,13 @@ msgstr "0 = все вопросы"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:104
 msgctxt "labs.template.lab_modals"
 msgid "label_allow_late_submission"
-msgstr "Разрешить позднюю отправку"
+msgstr "Разрешить сдачу после срока"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:108
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:108
 msgctxt "labs.template.lab_modals"
 msgid "label_late_penalty_percent"
-msgstr "Штраф за поздний срок (%)"
+msgstr "Штраф за опоздание (%)"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:117
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:117
@@ -38009,39 +38014,39 @@ msgstr "Разрешенные типы файлов"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:139
 msgctxt "labs.template.lab_modals"
 msgid "label_teacher_file"
-msgstr "Файл учителя"
+msgstr "Файл преподавателя"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:143
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:144
 msgctxt "labs.template.lab_modals"
 msgid "label_teacher_instructions"
-msgstr "Инструкции учителя"
+msgstr "Инструкции преподавателя"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:151
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:152
 msgctxt "labs.template.lab_modals"
 msgid "action_close"
-msgstr "Закрывать"
+msgstr "Закрыть"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:152
 msgctxt "labs.template.lab_modals"
 msgid "action_create"
-msgstr "Создавать"
+msgstr "Создать"
 
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:8
 msgctxt "labs.template.lab_modals"
 msgid "modal_edit_lab"
-msgstr "Редактировать лабораторию"
+msgstr "Редактировать лабораторную работу"
 
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:153
 msgctxt "labs.template.lab_modals"
 msgid "action_save"
-msgstr "Сохранять"
+msgstr "Сохранить"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:7
 msgctxt "labs.js.lab_modals"
 msgid "modal_not_found"
-msgstr "Модальное окно не найдено!"
+msgstr "Окно не найдено!"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:8
 msgctxt "labs.js.lab_modals"
@@ -38051,7 +38056,7 @@ msgstr "Загрузка"
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:9
 msgctxt "labs.js.lab_modals"
 msgid "error_data_not_loaded"
-msgstr "Данные не удалось загрузить"
+msgstr "Не удалось загрузить данные"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:10
 msgctxt "labs.js.lab_modals"
@@ -38066,7 +38071,7 @@ msgstr "Произошла ошибка"
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:12
 msgctxt "labs.js.lab_modals"
 msgid "confirm_delete_lab"
-msgstr "Удалить лабораторию"
+msgstr "Удалить эту лабораторную работу?"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:13
 msgctxt "labs.js.lab_modals"
@@ -38096,17 +38101,17 @@ msgstr "Нет студентов"
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:18
 msgctxt "labs.js.lab_modals"
 msgid "existing_file"
-msgstr "Существующий файл"
+msgstr "Текущий файл"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:19
 msgctxt "labs.js.lab_modals"
 msgid "button_create"
-msgstr "Создавать"
+msgstr "Создать"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:20
 msgctxt "labs.js.lab_modals"
 msgid "button_save"
-msgstr "Сохранять"
+msgstr "Сохранить"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:21
 msgctxt "labs.js.lab_modals"
@@ -38116,17 +38121,17 @@ msgstr "Ошибка"
 #: apps/labs/templates/labs/preview_randomization.html:4
 msgctxt "labs.template.preview_randomization"
 msgid "title_suffix_random_preview"
-msgstr "Случайный просмотр"
+msgstr "Случайный предпросмотр"
 
 #: apps/labs/templates/labs/preview_randomization.html:26
 msgctxt "labs.template.preview_randomization"
 msgid "breadcrumb_random_preview"
-msgstr "Случайный просмотр"
+msgstr "Случайный предпросмотр"
 
 #: apps/labs/templates/labs/preview_randomization.html:30
 msgctxt "labs.template.preview_randomization"
 msgid "heading_randomization_preview"
-msgstr "Предварительный просмотр рандомизации"
+msgstr "Предпросмотр рандомизации"
 
 #: apps/labs/templates/labs/preview_randomization.html:34
 msgctxt "labs.template.preview_randomization"
@@ -38141,12 +38146,12 @@ msgstr "Выберите студента"
 #: apps/labs/templates/labs/preview_randomization.html:52
 msgctxt "labs.template.preview_randomization"
 msgid "placeholder_select_student"
-msgstr "-- Выберите ученика --"
+msgstr "-- Выберите студента --"
 
 #: apps/labs/templates/labs/preview_randomization.html:66
 msgctxt "labs.template.preview_randomization"
 msgid "help_select_student"
-msgstr "Выберите учащегося, чтобы просмотреть заданные ему вопросы."
+msgstr "Выберите студента, чтобы просмотреть назначенные ему вопросы."
 
 #: apps/labs/templates/labs/preview_randomization.html:79
 #, python-format
@@ -38158,18 +38163,18 @@ msgstr "Вопросы для %(student_name)s"
 #, python-format
 msgctxt "labs.template.preview_randomization"
 msgid "label_question_count %(question_count)s"
-msgstr "%(question_count)s вопросы"
+msgstr "%(question_count)s вопр."
 
 #: apps/labs/templates/labs/preview_randomization.html:103
 #, python-format
 msgctxt "labs.template.preview_randomization"
 msgid "label_points %(points)s"
-msgstr "%(points)s баллов"
+msgstr "Баллы: %(points)s"
 
 #: apps/labs/templates/labs/preview_randomization.html:116
 msgctxt "labs.template.preview_randomization"
 msgid "empty_no_questions"
-msgstr "К этой лаборатории вопросов нет."
+msgstr "Для этой лабораторной работы нет вопросов"
 
 #: apps/labs/templates/labs/preview_randomization.html:117
 msgid "Bu tələbə üçün seçiləcək heç bir sual tapılmadı."
@@ -38200,7 +38205,7 @@ msgstr "Вопросов на одного студента"
 #, python-format
 msgctxt "labs.template.preview_randomization"
 msgid "value_questions_count %(question_count)s"
-msgstr "%(question_count)s вопросы"
+msgstr "%(question_count)s вопр."
 
 #: apps/labs/templates/labs/preview_randomization.html:147
 msgctxt "labs.template.preview_randomization"
@@ -38221,7 +38226,7 @@ msgstr "Всего блоков"
 #, python-format
 msgctxt "labs.template.preview_randomization"
 msgid "value_blocks_count %(block_count)s"
-msgstr "Блоки %(block_count)s"
+msgstr "Блоков: %(block_count)s"
 
 #: apps/labs/views/student/endpoints.py:124
 msgctxt "labs.view.error"
@@ -38231,7 +38236,7 @@ msgstr "Задание не найдено"
 #: apps/labs/views/student/endpoints.py:132
 msgctxt "labs.view.error"
 msgid "submission_not_found"
-msgstr "Отправка не найдена"
+msgstr "Ответ не найден"
 
 #: apps/labs/views/student/submissions.py:29
 #: apps/labs/views/teacher/blocks.py:27 apps/labs/views/teacher/blocks.py:48
@@ -38255,7 +38260,7 @@ msgstr "У вас нет разрешения"
 #: apps/labs/views/student/submissions.py:117
 msgctxt "labs.view.error"
 msgid "lab_closed"
-msgstr "Лаборатория закрыта"
+msgstr "Лабораторная работа закрыта"
 
 #: apps/labs/views/student/submissions.py:126
 msgctxt "labs.view.error"
@@ -38275,12 +38280,12 @@ msgstr "Количество вопросов на студента обновл
 #: apps/labs/views/teacher/crud.py:218
 msgctxt "labs.view.message"
 msgid "lab_deleted"
-msgstr "Лаборатория удалена!"
+msgstr "Лабораторная работа удалена!"
 
 #: apps/labs/views/teacher/crud.py:247
 msgctxt "labs.view.message"
 msgid "lab_published"
-msgstr "Лаборатория опубликована!"
+msgstr "Лабораторная работа опубликована!"
 
 #: apps/labs/views/teacher/questions.py:138
 msgctxt "labs.view.error"
@@ -38291,12 +38296,12 @@ msgstr "Отправлен пустой текст"
 msgctxt "labs.view.error"
 msgid "import_no_questions_found_format"
 msgstr ""
-"Вопросов не найдено. Формат: «1. Текст вопроса» или «1) Текст вопроса»."
+"Вопросов не найдено. Формат: «1. Текст вопроса» или «1) Текст вопроса»"
 
 #: apps/labs/views/teacher/questions.py:196
 msgctxt "labs.view.message"
 msgid "import_success_with_count"
-msgstr "Вопросы %(count)s успешно добавлены"
+msgstr "Успешно добавлено вопросов: %(count)s"
 
 #: apps/labs/views/teacher/submissions.py:128
 #: apps/labs/views/teacher/submissions.py:345
@@ -40521,7 +40526,7 @@ msgstr "Настройки успешно обновлены."
 #: apps/projects/forms.py:27
 msgctxt "projects.form.project.placeholder"
 msgid "title"
-msgstr "Название проекта"
+msgstr "Название курсовой работы"
 
 #: apps/projects/forms.py:34
 msgctxt "projects.form.project.placeholder"
@@ -40586,7 +40591,7 @@ msgstr "0-100"
 #: apps/projects/forms.py:121
 msgctxt "projects.form.grade.placeholder"
 msgid "feedback"
-msgstr "Напишите отзыв студенту..."
+msgstr "Напишите отзыв для студента..."
 
 #: apps/projects/forms.py:127
 msgctxt "projects.form.grade.label"
@@ -40626,7 +40631,7 @@ msgstr "Курс"
 #: apps/projects/models.py:29
 msgctxt "projects.model.project.field"
 msgid "title"
-msgstr "Название проекта"
+msgstr "Название курсовой работы"
 
 #: apps/projects/models.py:31
 msgctxt "projects.model.project.field"
@@ -40661,12 +40666,12 @@ msgstr "Назначенные студенты"
 #: apps/projects/models.py:57
 msgctxt "projects.model.project.meta"
 msgid "singular"
-msgstr "Проект"
+msgstr "Курсовая работа"
 
 #: apps/projects/models.py:58
 msgctxt "projects.model.project.meta"
 msgid "plural"
-msgstr "Проекты"
+msgstr "Курсовые работы"
 
 #: apps/projects/models.py:97
 msgctxt "projects.model.submission.choice.status"
@@ -40691,12 +40696,12 @@ msgstr "Ответ / Пояснение"
 #: apps/projects/models.py:123
 msgctxt "projects.model.submission.meta"
 msgid "singular"
-msgstr "Отправка проекта"
+msgstr "Сданная курсовая работа"
 
 #: apps/projects/models.py:124
 msgctxt "projects.model.submission.meta"
 msgid "plural"
-msgstr "Отправки проекта"
+msgstr "Сданные курсовые работы"
 
 #: apps/projects/templates/projects/my_submissions.html:4
 msgctxt "projects.my_submissions"
@@ -40836,7 +40841,7 @@ msgstr "Отправить первый проект"
 #: apps/projects/templates/projects/partials/_project_modals.html:9
 msgctxt "projects.modals"
 msgid "add_modal_title"
-msgstr "Новый проект"
+msgstr "Новая курсовая работа"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:17
 #: apps/projects/templates/projects/partials/_project_modals.html:94
@@ -40902,7 +40907,7 @@ msgstr "Макс. балл"
 #: apps/projects/templates/projects/partials/_project_modals.html:133
 msgctxt "projects.modals"
 msgid "label_allowed_groups"
-msgstr "Разрешенные группы"
+msgstr "Допущенные группы"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:57
 #: apps/projects/templates/projects/partials/_project_modals.html:134
@@ -40922,7 +40927,7 @@ msgstr "Выбрано"
 #: apps/projects/templates/projects/partials/_project_modals.html:139
 msgctxt "projects.modals"
 msgid "label_allowed_students"
-msgstr "Разрешенные студенты"
+msgstr "Допущенные студенты"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:63
 #: apps/projects/templates/projects/partials/_project_modals.html:140
@@ -40950,7 +40955,7 @@ msgstr "Добавить"
 #: apps/projects/templates/projects/partials/_project_modals.html:85
 msgctxt "projects.modals"
 msgid "edit_modal_title"
-msgstr "Редактировать проект"
+msgstr "Редактировать курсовую работу"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:150
 msgctxt "projects.modals"
@@ -41221,22 +41226,22 @@ msgstr "Этот проект сейчас неактивен."
 #: apps/projects/templates/projects/project_section.html:11
 msgctxt "projects.section"
 msgid "section_title"
-msgstr "Проекты"
+msgstr "Курсовые работы"
 
 #: apps/projects/templates/projects/project_section.html:28
 msgctxt "projects.section"
 msgid "add_project_button"
-msgstr "Добавить новый проект"
+msgstr "Добавить курсовую работу"
 
 #: apps/projects/templates/projects/project_section.html:43
 msgctxt "projects.section"
 msgid "answers_suffix"
-msgstr "ответов"
+msgstr "сдано"
 
 #: apps/projects/templates/projects/project_section.html:45
 msgctxt "projects.section"
 msgid "pending_suffix"
-msgstr "ожидает"
+msgstr "на проверке"
 
 #: apps/projects/templates/projects/project_section.html:61
 #: apps/projects/templates/projects/project_section.html:129
@@ -41285,12 +41290,12 @@ msgstr "Удалить"
 #: apps/projects/templates/projects/project_section.html:99
 msgctxt "projects.section"
 msgid "empty_teacher"
-msgstr "Проектов пока нет"
+msgstr "Курсовых работ пока нет"
 
 #: apps/projects/templates/projects/project_section.html:101
 msgctxt "projects.section"
 msgid "add_first_project"
-msgstr "Добавить первый проект"
+msgstr "Добавить первую курсовую работу"
 
 #: apps/projects/templates/projects/project_section.html:144
 msgctxt "projects.section"
@@ -41325,12 +41330,12 @@ msgstr "Неактивно"
 #: apps/projects/templates/projects/project_section.html:188
 msgctxt "projects.section"
 msgid "empty_student"
-msgstr "Вам не назначен ни один проект"
+msgstr "Вам не назначено ни одной курсовой работы"
 
 #: apps/projects/templates/projects/project_section.html:195
 msgctxt "projects.section"
 msgid "empty_generic"
-msgstr "Проектов нет"
+msgstr "Курсовых работ нет"
 
 #: apps/projects/templates/projects/review_submissions.html:4
 msgctxt "projects.review"
@@ -41463,7 +41468,7 @@ msgstr "Поставить оценку"
 #: apps/projects/views/student/endpoints.py:178
 msgctxt "projects.views.message"
 msgid "no_project_access"
-msgstr "У вас нет доступа к этому проекту."
+msgstr "У вас нет доступа к этой курсовой работе."
 
 #: apps/projects/views/student/endpoints.py:109
 #: apps/projects/views/student/endpoints.py:119
@@ -41492,19 +41497,19 @@ msgstr "У вас нет разрешения."
 #: apps/projects/views/teacher/crud.py:101
 msgctxt "projects.views.message"
 msgid "project_created"
-msgstr "Проект успешно создан."
+msgstr "Курсовая работа успешно создана."
 
 #: apps/projects/views/teacher/crud.py:220
 #: apps/projects/views/teacher/crud.py:221
 msgctxt "projects.views.message"
 msgid "project_updated"
-msgstr "Проект успешно обновлен."
+msgstr "Курсовая работа успешно обновлена."
 
 #: apps/projects/views/teacher/crud.py:252
 #: apps/projects/views/teacher/crud.py:253
 msgctxt "projects.views.message"
 msgid "project_deleted"
-msgstr "Проект успешно удален."
+msgstr "Курсовая работа успешно удалена."
 
 #: apps/projects/views/teacher/endpoints.py:135
 #: apps/projects/views/teacher/endpoints.py:140
@@ -41515,7 +41520,7 @@ msgstr "Отправка не найдена"
 #: apps/projects/views/teacher/endpoints.py:147
 msgctxt "projects.views.message"
 msgid "submissions_deleted"
-msgstr "Удалено отправок: {count}."
+msgstr "Удалено сданных работ: {count}."
 
 #: apps/projects/views/teacher/endpoints.py:198
 #: apps/projects/views/teacher/endpoints.py:199
@@ -76573,7 +76578,7 @@ msgstr "Категория (Финал / Мидтерм / Квиз)"
 
 msgctxt "exams.template.create_exam_modal_form"
 msgid "Yalnız lazım olduqda seç: Sınaq, Midterm və ya Final."
-msgstr "Выбирайте только при необходимости: квиз, мидтерм или финал."
+msgstr "Выбирайте только при необходимости: тест, мидтерм или финал."
 
 msgctxt "exams.form.exam.error"
 msgid "Final və midterm imtahanlarını yalnız imtahan mərkəzi yarada bilər."
@@ -83409,3 +83414,440 @@ msgstr "До %(date)s: «%(name)s» — в составе «%(parent)s»."
 msgctxt "accounts.structure_tree"
 msgid "%(date)s tarixinədək adı: «%(name)s»."
 msgstr "Название до %(date)s: «%(name)s»."
+
+msgctxt "courses.dashboard"
+msgid "hint_topics"
+msgstr "Программа курса и понедельная структура"
+
+msgctxt "courses.dashboard"
+msgid "hint_assignments"
+msgstr "Самостоятельные работы и сдачи студентов"
+
+msgctxt "courses.dashboard"
+msgid "hint_labs"
+msgstr "Практические лабораторные работы с блоками и вопросами"
+
+msgctxt "courses.dashboard"
+msgid "hint_exams"
+msgstr "Тестовые и письменные экзамены курса"
+
+msgctxt "courses.dashboard"
+msgid "hint_projects"
+msgstr "Крупные курсовые работы и проекты"
+
+msgctxt "courses.dashboard"
+msgid "hint_resources"
+msgstr "Лекции, файлы, видео и ссылки"
+
+msgctxt "courses.dashboard"
+msgid "hint_members"
+msgstr "Группы и студенты, записанные на курс"
+
+msgctxt "courses.dashboard"
+msgid "action_publish"
+msgstr "Опубликовать"
+
+msgctxt "courses.dashboard"
+msgid "action_unpublish"
+msgstr "Вернуть в черновик"
+
+msgctxt "courses.dashboard"
+msgid "action_remove"
+msgstr "Убрать"
+
+msgctxt "courses.dashboard"
+msgid "action_remove_group"
+msgstr "Убрать группу из курса"
+
+msgctxt "courses.dashboard"
+msgid "breadcrumb_label"
+msgstr "Навигация"
+
+msgctxt "courses.dashboard"
+msgid "sections_label"
+msgstr "Разделы курса"
+
+msgctxt "courses.dashboard"
+msgid "stats_label"
+msgstr "Сводка курса"
+
+msgctxt "courses.dashboard"
+msgid "stat_students"
+msgstr "Студенты"
+
+msgctxt "courses.dashboard"
+msgid "stat_groups"
+msgstr "Группы"
+
+msgctxt "courses.dashboard"
+msgid "stat_tasks"
+msgstr "Задания"
+
+msgctxt "courses.dashboard"
+msgid "stat_resources"
+msgstr "Ресурсы"
+
+msgctxt "courses.dashboard"
+msgid "status_archived"
+msgstr "В архиве"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_course_title"
+msgstr "Удалить курс?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_topic_title"
+msgstr "Удалить тему?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_resource_title"
+msgstr "Удалить ресурс?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_member_title"
+msgstr "Убрать участника из курса?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_remove_group_title"
+msgstr "Убрать группу из курса?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_remove_group_body"
+msgstr ""
+"Все студенты группы «{group}» будут убраны из курса. Их работы и оценки "
+"сохранятся."
+
+msgctxt "courses.dashboard"
+msgid "empty_topic_hint"
+msgstr "Добавьте темы по неделям или попросите ИИ предложить программу."
+
+msgctxt "courses.dashboard"
+msgid "empty_resource_hint"
+msgstr "Соберите файлы лекций, видео и полезные ссылки в одном месте."
+
+msgctxt "courses.dashboard"
+msgid "empty_members_hint"
+msgstr "Добавьте свою группу одним нажатием — все её студенты попадут в курс."
+
+msgctxt "courses.dashboard"
+msgid "groups_title"
+msgstr "Группы"
+
+msgctxt "courses.dashboard"
+msgid "members_list_title"
+msgstr "Участники"
+
+msgctxt "courses.dashboard"
+msgid "members_search_label"
+msgstr "Поиск участников"
+
+msgctxt "courses.dashboard"
+msgid "members_search_placeholder"
+msgstr "Имя, логин или группа…"
+
+msgctxt "courses.dashboard"
+msgid "members_no_match"
+msgstr "Участники по запросу не найдены."
+
+msgctxt "courses.ai"
+msgid "ai_drawer_title"
+msgstr "ИИ-помощник курса"
+
+msgctxt "courses.ai"
+msgid "ai_drawer_sub"
+msgstr "Он предлагает — вы выбираете и подтверждаете"
+
+msgctxt "courses.ai"
+msgid "prompt_label"
+msgstr "Кратко опишите курс"
+
+msgctxt "courses.ai"
+msgid "prompt_placeholder"
+msgstr "Напр.: «14 недель, 2 курс, практика; от основ Python до ООП»"
+
+msgctxt "courses.ai"
+msgid "examples_label"
+msgstr "Примеры"
+
+msgctxt "courses.ai"
+msgid "example_1"
+msgstr "15-недельный курс для начинающих, одна тема в неделю"
+
+msgctxt "courses.ai"
+msgid "example_2"
+msgstr "С упором на практику, со ссылками на официальную документацию"
+
+msgctxt "courses.ai"
+msgid "example_3"
+msgstr "Продолжить существующие темы — заполнить оставшиеся недели"
+
+msgctxt "courses.ai"
+msgid "note_nothing_saved"
+msgstr ""
+"ИИ предлагает темы и открытые ссылки на ресурсы. Ничего не сохраняется, пока"
+" вы не выберете и не подтвердите; проверьте ссылки перед добавлением."
+
+msgctxt "courses.ai"
+msgid "action_generate"
+msgstr "Составить план"
+
+msgctxt "courses.ai"
+msgid "generating_title"
+msgstr "ИИ составляет план…"
+
+msgctxt "courses.ai"
+msgid "generating_sub"
+msgstr "Обычно это занимает 10–30 секунд"
+
+msgctxt "courses.ai"
+msgid "review_title"
+msgstr "План готов"
+
+msgctxt "courses.ai"
+msgid "review_sub"
+msgstr "Предложено тем: {count} — выберите нужные"
+
+msgctxt "courses.ai"
+msgid "select_all"
+msgstr "Все"
+
+msgctxt "courses.ai"
+msgid "resources_label"
+msgstr "Ресурсы"
+
+msgctxt "courses.ai"
+msgid "action_apply_selected"
+msgstr "Добавить выбранное ({count})"
+
+msgctxt "courses.ai"
+msgid "applying"
+msgstr "Добавляем…"
+
+msgctxt "courses.ai"
+msgid "action_back"
+msgstr "Назад"
+
+msgctxt "courses.ai"
+msgid "action_regenerate"
+msgstr "Сгенерировать заново"
+
+msgctxt "courses.ai"
+msgid "done_title"
+msgstr "Добавлено в курс"
+
+msgctxt "courses.ai"
+msgid "done_action"
+msgstr "Открыть курс"
+
+msgctxt "courses.ai"
+msgid "error_generic"
+msgstr "ИИ не ответил. Попробуйте ещё раз чуть позже."
+
+msgctxt "courses.ai"
+msgid "quota_remaining"
+msgstr "Осталось запросов в этот час: {count}"
+
+msgctxt "courses.ai"
+msgid "no_permission"
+msgstr "У вас нет прав изменять этот курс с помощью ИИ."
+
+msgctxt "courses.ai"
+msgid "prompt_required"
+msgstr "Напишите несколько слов о курсе."
+
+msgctxt "courses.ai"
+msgid "plan_empty"
+msgstr "ИИ не вернул пригодный план. Уточните описание и попробуйте снова."
+
+msgctxt "courses.ai"
+msgid "nothing_selected"
+msgstr "Не выбрано ни одной темы."
+
+msgctxt "courses.ai"
+msgid "apply_failed"
+msgstr "Не удалось сохранить предложения. Попробуйте ещё раз."
+
+msgctxt "courses.ai"
+msgid "applied_summary"
+msgstr "В курс добавлено тем: {topics}, ресурсов: {resources}."
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_mine"
+msgstr "Мои группы"
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_others"
+msgstr "Другие группы"
+
+msgctxt "courses.partial.member_modal"
+msgid "group_in_course"
+msgstr "Уже в курсе"
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_mine_empty"
+msgstr ""
+"В этом семестре за вами не закреплено групп. Воспользуйтесь поиском выше."
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_search_hint"
+msgstr "Чтобы найти другую группу, введите её название (напр. «234 K»)."
+
+msgctxt "courses.view.message"
+msgid "unexpected_error"
+msgstr "Произошла непредвиденная ошибка. Попробуйте ещё раз."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_empty_prompt"
+msgstr "Текст запроса пуст."
+
+msgctxt "courses.course_status"
+msgid "draft"
+msgstr "Черновик"
+
+msgctxt "courses.course_status"
+msgid "published"
+msgstr "Опубликован"
+
+msgctxt "courses.course_status"
+msgid "archived"
+msgstr "В архиве"
+
+#, python-format
+msgctxt "assignment.section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "Мои ответы (%(attempts)s)"
+
+msgctxt "assignment.section"
+msgid "Hələ başlamayıb"
+msgstr "Ещё не началось"
+
+#, python-format
+msgctxt "projects.section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "Мои ответы (%(attempts)s)"
+
+#, python-format
+msgctxt "labs.template.lab_section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "Мои ответы (%(attempts)s)"
+
+#, python-format
+msgctxt "exams.partial.exam_section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "Мои ответы (%(attempts)s)"
+
+msgctxt "exams.partial.exam_section"
+msgid "Detallı imtahana bax"
+msgstr "Подробнее об экзамене"
+
+msgctxt "exams.partial.exam_modals"
+msgid "Form yüklənmədi. Yenidən cəhd edin."
+msgstr "Не удалось загрузить форму. Попробуйте ещё раз."
+
+msgctxt "exams.partial.exam_modals"
+msgid "Yadda saxlanılır..."
+msgstr "Сохранение..."
+
+msgctxt "assignments.views.message"
+msgid "Bu sorğu üsuluna icazə verilmir."
+msgstr "Этот метод запроса не разрешён."
+
+msgctxt "assignments.views.message"
+msgid "Düzgün tələbə ID-si göndərilməlidir."
+msgstr "Требуется корректный ID студента."
+
+msgctxt "assignments.views.message"
+msgid "Tələbə bu kursda tapılmadı."
+msgstr "Студент не найден в этом курсе."
+
+#, python-format
+msgctxt "assignments.views.message"
+msgid "%(name)s sərbəst işdən çıxarıldı."
+msgstr "Студент %(name)s исключён из самостоятельной работы."
+
+msgctxt "labs.js.lab_modals"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "labs.template.lab_modals"
+msgid ""
+"Heç bir qrup və ya tələbə seçilməsə, lab kursun bütün tələbələrinə açıq "
+"olur."
+msgstr ""
+"Если не выбрана ни одна группа и ни один студент, лабораторная открыта всем "
+"студентам курса."
+
+msgctxt "labs.js.manage_blocks"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "review.page"
+msgid "breadcrumb"
+msgstr "Навигация"
+
+msgctxt "review.page"
+msgid "subtitle"
+msgstr "Проверяйте ответы студентов, ставьте оценки и пишите отзывы."
+
+msgctxt "review.page"
+msgid "summary"
+msgstr "Сводка"
+
+msgctxt "review.page"
+msgid "summary_total"
+msgstr "Ответы"
+
+msgctxt "review.page"
+msgid "summary_pending"
+msgstr "На проверке"
+
+msgctxt "review.page"
+msgid "summary_graded"
+msgstr "Оценено"
+
+msgctxt "review.page"
+msgid "summary_average"
+msgstr "Средний балл"
+
+msgctxt "review.page"
+msgid "kind_assignment"
+msgstr "Самостоятельная работа"
+
+msgctxt "review.page"
+msgid "kind_project"
+msgstr "Курсовая работа"
+
+msgctxt "review.page"
+msgid "select_all"
+msgstr "Выбрать все"
+
+msgctxt "review.page"
+msgid "recheck_window"
+msgstr "Время на повторную проверку"
+
+msgctxt "review.page"
+msgid "empty_hint"
+msgstr "Ответы появятся здесь, когда студенты их отправят."
+
+msgid "Son tarix"
+msgstr "Конечная дата"
+
+msgctxt "review.page"
+msgid "kind_lab"
+msgstr "Лабораторная работа"
+
+msgctxt "review.page"
+msgid "summary_late"
+msgstr "С опозданием"
+
+msgctxt "review.page"
+msgid "action_view"
+msgstr "Просмотр"
+
+msgctxt "courses.ai"
+msgid "busy"
+msgstr "Предыдущий план ещё готовится — подождите немного."
+
+msgctxt "courses.view.message"
+msgid "too_many_groups"
+msgstr "За один раз можно добавить не более 20 групп."

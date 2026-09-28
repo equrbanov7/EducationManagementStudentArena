@@ -1,0 +1,22 @@
+{% comment %}Kurs kartı bölmələrinin AJAX yükləmə skeleti (section_loader.js `template[data-section-skeleton]`, 2026-09-28).
+Kontekst: `skeleton_key` — bölmə açarı.{% endcomment %}
+<template data-section-skeleton="{{ skeleton_key }}">
+    <div class="mc-skeleton">
+        <div class="mc-skeleton__head">
+            <span class="skeleton skeleton-line skeleton-line--lg"></span>
+            <span class="skeleton skeleton-btn"></span>
+        </div>
+        <div class="mc-grid">
+            {% for _ in "XXXXXX"|make_list %}
+            <div class="mc-card mc-card--skeleton">
+                <span class="skeleton mc-sk-card-cover"></span>
+                <span class="mc-card__body">
+                    <span class="skeleton skeleton-line skeleton-line--lg"></span>
+                    <span class="skeleton skeleton-line skeleton-line--sm"></span>
+                    <span class="skeleton skeleton-pill"></span>
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</template>

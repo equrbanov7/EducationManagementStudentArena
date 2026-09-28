@@ -137,9 +137,11 @@ class LabDetailBackUrlTest(TestCase):
         response = self.client.get(reverse("labs:lab_submissions", kwargs={"pk": self.lab.id}))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "results-summary")
+        # 2026-09-28: ortaq yoxlama səhifəsi dizaynı (review_page.css) — başlıq + xülasə KPI.
+        self.assertContains(response, "rv-kpis")
         self.assertContains(response, "results-filter-card")
         self.assertContains(response, "selectedLabCount")
+        self.assertContains(response, "data-rv-select-all")
 
     def test_lab_detail_renders_finish_confirmation_modal(self):
         LabAssignment.get_or_create_for_student(self.lab, self.student)

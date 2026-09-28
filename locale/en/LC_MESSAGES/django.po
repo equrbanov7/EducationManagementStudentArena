@@ -8470,7 +8470,7 @@ msgstr "Close"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:10
 msgctxt "profile.assigned_courses"
 msgid "title"
-msgstr "Title"
+msgstr "Assigned courses"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_courses.html:22
 msgctxt "profile.assigned_courses"
@@ -9459,7 +9459,7 @@ msgstr "Appeal detail"
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:10
 msgctxt "profile.my_courses"
 msgid "title"
-msgstr "Title"
+msgstr "Courses I created"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:19
 msgctxt "profile.my_courses"
@@ -9479,7 +9479,7 @@ msgstr "You have not created any courses yet."
 #: apps/accounts/templates/accounts/profile/sections/_my_courses.html:61
 msgctxt "profile.my_courses"
 msgid "create_first_course"
-msgstr "Create first course"
+msgstr "Create your first course"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_exams.html:23
 msgctxt "exams.dashboard"
@@ -18530,7 +18530,7 @@ msgstr "Submission information"
 #: apps/assignments/admin.py:89
 msgctxt "assignment.submission.admin.fieldset"
 msgid "late_information"
-msgstr "Late information"
+msgstr "Late submission details"
 
 #: apps/assignments/admin.py:93
 msgctxt "assignment.submission.admin.fieldset"
@@ -18555,12 +18555,12 @@ msgstr "Assignments"
 #: apps/assignments/forms.py:19
 msgctxt "assignment.form.placeholder"
 msgid "title"
-msgstr "Title"
+msgstr "Enter a title"
 
 #: apps/assignments/forms.py:26
 msgctxt "assignment.form.placeholder"
 msgid "description"
-msgstr "Description"
+msgstr "Enter a description"
 
 #: apps/assignments/forms.py:35
 msgctxt "assignment.form.label"
@@ -18595,27 +18595,27 @@ msgstr "Status"
 #: apps/assignments/forms.py:49
 msgctxt "assignment.form.label"
 msgid "submission_file_optional"
-msgstr "Submission file optional"
+msgstr "File (optional)"
 
 #: apps/assignments/forms.py:61
 msgctxt "assignment.form.placeholder"
 msgid "submission_content"
-msgstr "Submission content"
+msgstr "Write your answer..."
 
 #: apps/assignments/forms.py:67
 msgctxt "assignment.form.label"
 msgid "submission_content"
-msgstr "Submission content"
+msgstr "Answer text"
 
 #: apps/assignments/forms.py:106
 msgctxt "assignment.form.placeholder"
 msgid "grade_range"
-msgstr "Grade range"
+msgstr "Grade from 0 to 100"
 
 #: apps/assignments/forms.py:113
 msgctxt "assignment.form.placeholder"
 msgid "feedback"
-msgstr "Feedback"
+msgstr "Write your feedback..."
 
 #: apps/assignments/forms.py:119
 msgctxt "assignment.form.label"
@@ -18640,7 +18640,7 @@ msgstr "Quiz"
 #: apps/assignments/models.py:36
 msgctxt "assignment.choice.type"
 msgid "lab"
-msgstr "Lab"
+msgstr "Lab work"
 
 #: apps/assignments/models.py:37
 msgctxt "assignment.choice.type"
@@ -18720,7 +18720,7 @@ msgstr "Weight"
 #: apps/assignments/models.py:81
 msgctxt "assignment.model.help"
 msgid "weight_ratio"
-msgstr "Weight ratio"
+msgstr "Weight in the overall grade (e.g. 0.1 = 10%)"
 
 #: apps/assignments/models.py:85
 msgctxt "assignment.model.field"
@@ -18730,7 +18730,7 @@ msgstr "Start date"
 #: apps/assignments/models.py:86
 msgctxt "assignment.model.help"
 msgid "start_date_for_submission"
-msgstr "Start date for submission"
+msgstr "Students can submit after this date"
 
 #: apps/assignments/models.py:90
 msgctxt "assignment.model.field"
@@ -18745,7 +18745,7 @@ msgstr "Allow late submission"
 #: apps/assignments/models.py:104
 msgctxt "assignment.model.field"
 msgid "late_penalty_per_day"
-msgstr "Late penalty per day"
+msgstr "Late penalty (per day)"
 
 #: apps/assignments/models.py:105
 msgctxt "assignment.model.help"
@@ -18775,12 +18775,12 @@ msgstr "Students"
 #: apps/assignments/models.py:149
 msgctxt "assignment.model.meta"
 msgid "verbose_name"
-msgstr "Verbose name"
+msgstr "Independent work"
 
 #: apps/assignments/models.py:150
 msgctxt "assignment.model.meta"
 msgid "verbose_name_plural"
-msgstr "Verbose name plural"
+msgstr "Independent work"
 
 #: apps/assignments/models.py:213
 msgctxt "assignment.submission.choice.status"
@@ -18820,7 +18820,7 @@ msgstr "Attempt number"
 #: apps/assignments/models.py:238
 msgctxt "assignment.submission.field"
 msgid "content"
-msgstr "Content"
+msgstr "Answer text"
 
 #: apps/assignments/models.py:243
 msgctxt "assignment.submission.field"
@@ -18830,7 +18830,7 @@ msgstr "Uploaded files"
 #: apps/assignments/models.py:244
 msgctxt "assignment.submission.help"
 msgid "files_json_format"
-msgstr "Files json format"
+msgstr "JSON list: [{name, path, size}]"
 
 #: apps/assignments/models.py:248
 msgctxt "assignment.submission.field"
@@ -18840,12 +18840,12 @@ msgstr "Submitted at"
 #: apps/assignments/models.py:253
 msgctxt "assignment.submission.field"
 msgid "is_late"
-msgstr "Is late"
+msgstr "Late?"
 
 #: apps/assignments/models.py:258
 msgctxt "assignment.submission.field"
 msgid "late_days"
-msgstr "Late days"
+msgstr "Days late"
 
 #: apps/assignments/models.py:265
 msgctxt "assignment.submission.field"
@@ -18875,12 +18875,12 @@ msgstr "Graded at"
 #: apps/assignments/models.py:295
 msgctxt "assignment.submission.meta"
 msgid "verbose_name"
-msgstr "Verbose name"
+msgstr "Submission"
 
 #: apps/assignments/models.py:296
 msgctxt "assignment.submission.meta"
 msgid "verbose_name_plural"
-msgstr "Verbose name plural"
+msgstr "Submissions"
 
 #: apps/assignments/models.py:385
 msgctxt "assignment.notification.choice.type"
@@ -18890,7 +18890,7 @@ msgstr "Deadline reminder"
 #: apps/assignments/models.py:386
 msgctxt "assignment.notification.choice.type"
 msgid "submission"
-msgstr "Submission"
+msgstr "New submission"
 
 #: apps/assignments/models.py:387
 msgctxt "assignment.notification.choice.type"
@@ -18900,7 +18900,7 @@ msgstr "Grade posted"
 #: apps/assignments/models.py:388
 msgctxt "assignment.notification.choice.type"
 msgid "system"
-msgstr "System"
+msgstr "System notification"
 
 #: apps/assignments/models.py:395
 msgctxt "assignment.notification.field"
@@ -18925,7 +18925,7 @@ msgstr "Notification type"
 #: apps/assignments/models.py:408
 msgctxt "assignment.notification.field"
 msgid "is_read"
-msgstr "Is read"
+msgstr "Read?"
 
 #: apps/assignments/models.py:411
 msgctxt "assignment.notification.field"
@@ -18940,12 +18940,12 @@ msgstr "Link"
 #: apps/assignments/models.py:418
 msgctxt "assignment.notification.meta"
 msgid "verbose_name"
-msgstr "Verbose name"
+msgstr "Notification"
 
 #: apps/assignments/models.py:419
 msgctxt "assignment.notification.meta"
 msgid "verbose_name_plural"
-msgstr "Verbose name plural"
+msgstr "Notifications"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:33
 #: apps/labs/templates/labs/lab_detail.html:83
@@ -18993,22 +18993,22 @@ msgstr "Previous submissions"
 #: apps/assignments/templates/assignments/assignment_detail.html:99
 msgctxt "assignment.detail"
 msgid "table_date"
-msgstr "Table date"
+msgstr "Date"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:100
 msgctxt "assignment.detail"
 msgid "table_file"
-msgstr "Table file"
+msgstr "File"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:101
 msgctxt "assignment.detail"
 msgid "table_status"
-msgstr "Table status"
+msgstr "Status"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:102
 msgctxt "assignment.detail"
 msgid "table_grade"
-msgstr "Table grade"
+msgstr "Grade"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:127
 msgctxt "assignment.detail"
@@ -19028,7 +19028,7 @@ msgstr "Submit answer"
 #: apps/assignments/templates/assignments/assignment_detail.html:165
 msgctxt "assignment.detail"
 msgid "submitting"
-msgstr "Submitting"
+msgstr "Submitting..."
 
 #: apps/assignments/templates/assignments/assignment_detail.html:166
 msgctxt "assignment.detail"
@@ -19055,12 +19055,12 @@ msgstr "Submit"
 #: apps/assignments/templates/assignments/assignment_detail.html:170
 msgctxt "assignment.detail"
 msgid "Göndərməni təsdiqləyin"
-msgstr "Confirm delivery"
+msgstr "Confirm submission"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:171
 msgctxt "assignment.detail"
 msgid "Bu sərbəst işi göndərmək istədiyinizə əminsiniz?"
-msgstr "Are you sure you want to submit this independent work?"
+msgstr "Are you sure you want to submit this assignment?"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:176
 msgctxt "assignment.detail"
@@ -19109,17 +19109,17 @@ msgstr "Assignments"
 #: apps/assignments/templates/assignments/assignment_section.html:29
 msgctxt "assignment.section"
 msgid "add_new"
-msgstr "Add new"
+msgstr "Add new assignment"
 
 #: apps/assignments/templates/assignments/assignment_section.html:44
 msgctxt "assignment.section"
 msgid "submissions"
-msgstr "Submissions"
+msgstr "submissions"
 
 #: apps/assignments/templates/assignments/assignment_section.html:46
 msgctxt "assignment.section"
 msgid "pending"
-msgstr "Pending"
+msgstr "pending"
 
 #: apps/assignments/templates/assignments/assignment_section.html:62
 #: apps/assignments/templates/assignments/assignment_section.html:125
@@ -19169,7 +19169,7 @@ msgstr "No assignments yet"
 #: apps/assignments/templates/assignments/assignment_section.html:97
 msgctxt "assignment.section"
 msgid "add_first"
-msgstr "Add first"
+msgstr "Add your first assignment"
 
 #: apps/assignments/templates/assignments/assignment_section.html:136
 msgctxt "assignment.section"
@@ -19179,12 +19179,12 @@ msgstr "Attempts"
 #: apps/assignments/templates/assignments/assignment_section.html:141
 msgctxt "assignment.section"
 msgid "attempts_left"
-msgstr "Attempts left"
+msgstr "left"
 
 #: apps/assignments/templates/assignments/assignment_section.html:143
 msgctxt "assignment.section"
 msgid "attempts_finished"
-msgstr "Attempts finished"
+msgstr "No attempts left"
 
 #: apps/assignments/templates/assignments/assignment_section.html:152
 #: apps/exams/templates/exams/teacher/exam_section.html:229
@@ -19201,7 +19201,7 @@ msgstr "Submit answer"
 #: apps/assignments/templates/assignments/assignment_section.html:164
 msgctxt "assignment.section"
 msgid "deadline_passed_locked"
-msgstr "Deadline passed locked"
+msgstr "Deadline passed"
 
 #: apps/assignments/templates/assignments/assignment_section.html:180
 msgctxt "assignment.section"
@@ -19221,7 +19221,7 @@ msgstr "Duration"
 #: apps/assignments/templates/assignments/detail.html:30
 msgctxt "assignment.legacy.detail"
 msgid "status_deadline_passed"
-msgstr "Time has passed"
+msgstr "Deadline passed"
 
 #: apps/assignments/templates/assignments/detail.html:39
 msgctxt "assignment.legacy.detail"
@@ -19313,17 +19313,17 @@ msgstr "Result: %(score)s/%(max_score)s"
 #: apps/assignments/templates/assignments/detail.html:150
 msgctxt "assignment.legacy.detail"
 msgid "feedback_label"
-msgstr "Opinion"
+msgstr "Feedback"
 
 #: apps/assignments/templates/assignments/modals.html:11
 msgctxt "assignment.legacy.modals"
 msgid "modal_add_title"
-msgstr "Add a new freelance job"
+msgstr "Add a new assignment"
 
 #: apps/assignments/templates/assignments/modals.html:12
 msgctxt "assignment.legacy.modals"
 msgid "close_aria"
-msgstr "Close it"
+msgstr "Close"
 
 #: apps/assignments/templates/assignments/modals.html:20
 msgctxt "assignment.legacy.modals"
@@ -19338,7 +19338,7 @@ msgstr "Title"
 #: apps/assignments/templates/assignments/modals.html:24
 msgctxt "assignment.legacy.modals"
 msgid "placeholder_title"
-msgstr "Ex: Lab 1"
+msgstr "E.g.: Lab 1"
 
 #: apps/assignments/templates/assignments/modals.html:28
 msgctxt "assignment.legacy.modals"
@@ -19363,12 +19363,12 @@ msgstr "Attempt limit"
 #: apps/assignments/templates/assignments/modals.html:49
 msgctxt "assignment.legacy.modals"
 msgid "label_max_score"
-msgstr "Max. Honey"
+msgstr "Max. score"
 
 #: apps/assignments/templates/assignments/modals.html:56
 msgctxt "assignment.legacy.modals"
 msgid "assign_to"
-msgstr "To whom should it be assigned?"
+msgstr "Who should it be assigned to?"
 
 #: apps/assignments/templates/assignments/modals.html:67
 msgctxt "assignment.legacy.modals"
@@ -19388,12 +19388,12 @@ msgstr "Search group..."
 #: apps/assignments/templates/assignments/modals.html:89
 msgctxt "assignment.legacy.modals"
 msgid "placeholder_search_student"
-msgstr "Search for students..."
+msgstr "Search students..."
 
 #: apps/assignments/templates/assignments/modals.html:108
 msgctxt "assignment.legacy.modals"
 msgid "selected_items"
-msgstr "Selected ones"
+msgstr "Selected"
 
 #: apps/assignments/templates/assignments/modals.html:112
 msgctxt "assignment.legacy.modals"
@@ -19418,12 +19418,12 @@ msgstr "My answers"
 #: apps/assignments/templates/assignments/my_submissions.html:28
 msgctxt "assignment.my_submissions"
 msgid "title"
-msgstr "Title"
+msgstr "My answers"
 
 #: apps/assignments/templates/assignments/my_submissions.html:34
 msgctxt "assignment.my_submissions"
 msgid "new_submission"
-msgstr "New submission"
+msgstr "Submit a new answer"
 
 #: apps/assignments/templates/assignments/my_submissions.html:38
 msgctxt "assignment.my_submissions"
@@ -19469,25 +19469,25 @@ msgstr "Submitted answers"
 #: apps/labs/templates/labs/my_lab_answers.html:76
 msgctxt "assignment.my_submissions"
 msgid "table_submitted_at"
-msgstr "Table submitted at"
+msgstr "Submitted at"
 
 #: apps/assignments/templates/assignments/my_submissions.html:86
 #: apps/labs/templates/labs/my_lab_answers.html:77
 msgctxt "assignment.my_submissions"
 msgid "table_status"
-msgstr "Table status"
+msgstr "Status"
 
 #: apps/assignments/templates/assignments/my_submissions.html:87
 #: apps/labs/templates/labs/my_lab_answers.html:78
 msgctxt "assignment.my_submissions"
 msgid "table_grade"
-msgstr "Table grade"
+msgstr "Grade"
 
 #: apps/assignments/templates/assignments/my_submissions.html:88
 #: apps/labs/templates/labs/my_lab_answers.html:79
 msgctxt "assignment.my_submissions"
 msgid "table_action"
-msgstr "Table action"
+msgstr "Actions"
 
 #: apps/assignments/templates/assignments/my_submissions.html:103
 msgctxt "assignment.my_submissions"
@@ -19509,7 +19509,7 @@ msgstr "View"
 #: apps/labs/templates/labs/my_lab_answers.html:144
 msgctxt "assignment.my_submissions"
 msgid "submission_number"
-msgstr "Submission number"
+msgstr "Submission"
 
 #: apps/assignments/templates/assignments/my_submissions.html:152
 #: apps/labs/templates/labs/my_lab_answers.html:151
@@ -19568,7 +19568,7 @@ msgstr "You have not submitted any assignment answers yet."
 #: apps/assignments/templates/assignments/my_submissions.html:223
 msgctxt "assignment.my_submissions"
 msgid "submit_first"
-msgstr "Submit first"
+msgstr "Submit your first answer"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:18
 msgctxt "assignment.legacy.item"
@@ -19578,7 +19578,7 @@ msgstr "Duration"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:20
 msgctxt "assignment.legacy.item"
 msgid "deadline_passed"
-msgstr "Time has passed"
+msgstr "Deadline passed"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:22
 msgctxt "assignment.legacy.item"
@@ -19593,17 +19593,17 @@ msgstr "Attempts"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:41
 msgctxt "assignment.legacy.item"
 msgid "answers"
-msgstr "Answer"
+msgstr "Answers"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:46
 msgctxt "assignment.legacy.item"
 msgid "pending"
-msgstr "Waiting"
+msgstr "Pending"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:57
 msgctxt "assignment.legacy.item"
 msgid "view_answers"
-msgstr "See the answers"
+msgstr "View answers"
 
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:62
 msgctxt "assignment.legacy.item"
@@ -19628,12 +19628,12 @@ msgstr "Answer"
 #: apps/assignments/templates/assignments/partials/_assignment_item.html:90
 msgctxt "assignment.legacy.item"
 msgid "attempts_finished"
-msgstr "The attempt is over"
+msgstr "No attempts left"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:7
 msgctxt "assignment.modals"
 msgid "loading"
-msgstr "Loading"
+msgstr "Loading..."
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:8
 msgctxt "assignment.modals"
@@ -19650,12 +19650,12 @@ msgstr "Error"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:151
 msgctxt "assignment.modals"
 msgid "select_group_first"
-msgstr "Select group first"
+msgstr "Select a group first"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:11
 msgctxt "assignment.modals"
 msgid "no_student"
-msgstr "No student"
+msgstr "No students"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:12
 msgctxt "assignment.modals"
@@ -19794,7 +19794,7 @@ msgstr "Edit"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:20
 msgctxt "assignment.legacy.edit_form"
 msgid "assignment_name"
-msgstr "Task name"
+msgstr "Assignment name"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:25
 msgctxt "assignment.legacy.edit_form"
@@ -19814,7 +19814,7 @@ msgstr "Deadline"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:42
 msgctxt "assignment.legacy.edit_form"
 msgid "max_attempts"
-msgstr "Maximum effort"
+msgstr "Max attempts"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:46
 msgctxt "assignment.legacy.edit_form"
@@ -19824,7 +19824,7 @@ msgstr "Status"
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:56
 msgctxt "assignment.legacy.edit_form"
 msgid "target_selection"
-msgstr "Target selection"
+msgstr "Target audience"
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:59
 msgctxt "assignment.legacy.edit_form"
@@ -19834,7 +19834,7 @@ msgstr "Search group..."
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:77
 msgctxt "assignment.legacy.edit_form"
 msgid "search_student"
-msgstr "Search for students..."
+msgstr "Search students..."
 
 #: apps/assignments/templates/assignments/partials/_edit_assignment_form.html:101
 msgctxt "assignment.legacy.edit_form"
@@ -19917,12 +19917,12 @@ msgstr "Review again and save"
 #: apps/assignments/templates/assignments/review.html:5
 msgctxt "assignment.legacy.review"
 msgid "page_title_suffix"
-msgstr "Freelance Jobs"
+msgstr "Assignments"
 
 #: apps/assignments/templates/assignments/review.html:10
 msgctxt "assignment.legacy.review"
 msgid "heading_suffix"
-msgstr "Freelance Jobs"
+msgstr "Assignments"
 
 #: apps/assignments/templates/assignments/review.html:12
 msgctxt "assignment.legacy.review"
@@ -19932,7 +19932,7 @@ msgstr "Add"
 #: apps/assignments/templates/assignments/review.html:20
 msgctxt "assignment.legacy.review"
 msgid "placeholder_search_group"
-msgstr "Search with group..."
+msgstr "Search by group..."
 
 #: apps/assignments/templates/assignments/review.html:33
 msgctxt "assignment.legacy.review"
@@ -19962,7 +19962,7 @@ msgstr "Target groups"
 #: apps/assignments/templates/assignments/review.html:38
 msgctxt "assignment.legacy.review"
 msgid "table_actions"
-msgstr "Operations"
+msgstr "Actions"
 
 #: apps/assignments/templates/assignments/review.html:51
 msgctxt "assignment.legacy.review"
@@ -19982,32 +19982,32 @@ msgstr "Archive"
 #: apps/assignments/templates/assignments/review.html:61
 msgctxt "assignment.legacy.review"
 msgid "deadline_passed"
-msgstr "Passed"
+msgstr "Expired"
 
 #: apps/assignments/templates/assignments/review.html:67
 msgctxt "assignment.legacy.review"
 msgid "pending_waiting"
-msgstr "is waiting"
+msgstr "pending"
 
 #: apps/assignments/templates/assignments/review.html:76
 msgctxt "assignment.legacy.review"
 msgid "all_groups"
-msgstr "All of them"
+msgstr "All"
 
 #: apps/assignments/templates/assignments/review.html:92
 msgctxt "assignment.legacy.review"
 msgid "view"
-msgstr "Look"
+msgstr "View"
 
 #: apps/assignments/templates/assignments/review.html:99
 msgctxt "assignment.legacy.review"
 msgid "empty_not_found"
-msgstr "No vacancies found"
+msgstr "No assignments found"
 
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
 msgid "page_title_suffix"
-msgstr "Results"
+msgstr "Answers"
 
 #: apps/assignments/templates/assignments/review_submissions.html:15
 #: apps/assignments/templates/assignments/review_submissions.html:126
@@ -20110,7 +20110,7 @@ msgstr "Graded"
 #: apps/assignments/templates/assignments/review_submissions.html:168
 msgctxt "assignment.review_submissions"
 msgid "filter_status_grading"
-msgstr "In review"
+msgstr "Grading"
 
 #: apps/assignments/templates/assignments/review_submissions.html:224
 msgctxt "assignment.review_submissions"
@@ -20141,7 +20141,7 @@ msgstr "Confirm deletion"
 #: apps/assignments/templates/assignments/review_submissions.html:275
 msgctxt "assignment.review_submissions"
 msgid "modal_title"
-msgstr "Review submission"
+msgstr "View submission"
 
 #: apps/assignments/templates/assignments/review_submissions.html:281
 msgctxt "assignment.review_submissions"
@@ -20183,7 +20183,7 @@ msgstr "Write feedback for the student..."
 #: apps/assignments/views/student/endpoints.py:184
 msgctxt "assignments.views.message"
 msgid "no_assignment_access"
-msgstr "Task name"
+msgstr "You do not have access to this assignment."
 
 #: apps/assignments/views/student/endpoints.py:122
 msgctxt "assignments.views.message"
@@ -20194,7 +20194,7 @@ msgstr "Submission is not allowed. Attempt limit reached or deadline passed."
 #: apps/assignments/views/student/endpoints.py:149
 msgctxt "assignment.message"
 msgid "submission_sent_successfully"
-msgstr "Submission sent successfully"
+msgstr "Your answer has been submitted!"
 
 #: apps/assignments/views/teacher/crud.py:57
 #: apps/assignments/views/teacher/crud.py:130
@@ -20211,19 +20211,19 @@ msgstr "Permission denied"
 #: apps/assignments/views/teacher/crud.py:102
 msgctxt "assignments.views.message"
 msgid "assignment_created"
-msgstr "Could not create assignment."
+msgstr "Assignment created."
 
 #: apps/assignments/views/teacher/crud.py:224
 #: apps/assignments/views/teacher/crud.py:225
 msgctxt "assignments.views.message"
 msgid "assignment_updated"
-msgstr "Could not update assignment."
+msgstr "Assignment updated."
 
 #: apps/assignments/views/teacher/crud.py:256
 #: apps/assignments/views/teacher/crud.py:257
 msgctxt "assignments.views.message"
 msgid "assignment_deleted"
-msgstr "Could not delete assignment."
+msgstr "Assignment deleted."
 
 #: apps/assignments/views/teacher/endpoints.py:135
 #: apps/assignments/views/teacher/endpoints.py:140
@@ -20240,7 +20240,7 @@ msgstr "{count} submissions deleted."
 #: apps/assignments/views/teacher/endpoints.py:199
 msgctxt "assignment.message"
 msgid "grade_given_successfully"
-msgstr "Grade given successfully"
+msgstr "Grade saved!"
 
 #: apps/audit/templates/audit/list.html:4
 msgctxt "audit.list"
@@ -22215,12 +22215,12 @@ msgstr "Organization"
 #: apps/courses/forms.py:48
 msgctxt "courses.form.course.placeholder"
 msgid "select_organization"
-msgstr "Table organization"
+msgstr "Organization"
 
 #: apps/courses/forms.py:84
 msgctxt "courses.form.course.placeholder"
 msgid "title"
-msgstr "Course name (eg \"Introductory Python\")"
+msgstr "Course name (e.g. \"Python Basics\")"
 
 #: apps/courses/forms.py:91
 msgctxt "courses.form.course.placeholder"
@@ -22240,17 +22240,17 @@ msgstr "Course name cannot exceed 255 characters."
 #: apps/courses/forms.py:185
 msgctxt "courses.form.topic.placeholder"
 msgid "title"
-msgstr "Topic name (eg \"Week 1: Introduction\")"
+msgstr "Topic name (e.g. \"Week 1: Introduction\")"
 
 #: apps/courses/forms.py:192
 msgctxt "courses.form.topic.placeholder"
 msgid "description"
-msgstr "Theme Description..."
+msgstr "Topic description..."
 
 #: apps/courses/forms.py:202
 msgctxt "courses.form.topic.error"
 msgid "title_required"
-msgstr "The subject name cannot be empty."
+msgstr "Topic name cannot be empty."
 
 #: apps/courses/forms.py:232
 msgctxt "courses.form.resource.placeholder"
@@ -22260,7 +22260,7 @@ msgstr "Resource name"
 #: apps/courses/forms.py:239
 msgctxt "courses.form.resource.placeholder"
 msgid "description"
-msgstr "Disclosure..."
+msgstr "Description..."
 
 #: apps/courses/forms.py:256
 msgctxt "courses.form.resource.placeholder"
@@ -22275,7 +22275,7 @@ msgstr "Upload a file or add a URL link (one of the two is required)."
 #: apps/courses/forms.py:276
 msgctxt "courses.form.resource.error"
 msgid "file_and_url_mutually_exclusive"
-msgstr "File AND URL cannot exist at the same time. Choose one."
+msgstr "You cannot provide a file AND a URL at the same time. Choose one."
 
 #: apps/courses/models/course.py:179
 msgctxt "courses.model.course.error"
@@ -22322,27 +22322,29 @@ msgstr "Draft"
 #: apps/courses/templates/courses/course_dashboard.html:158
 msgctxt "courses.dashboard"
 msgid "status_published"
-msgstr "Released"
+msgstr "Published"
 
 #: apps/courses/templates/courses/course_dashboard.html:167
 msgctxt "courses.dashboard"
 msgid "message_published_visible_students"
-msgstr "This course is published and visible to students."
+msgstr "The course is published — students can see it."
 
 #: apps/courses/templates/courses/course_dashboard.html:172
 msgctxt "courses.dashboard"
 msgid "message_draft_hidden_students"
-msgstr "This course is in draft mode and is not visible to students."
+msgstr ""
+"This course is a draft — students can't see it yet. Press “Publish” when "
+"it's ready."
 
 #: apps/courses/templates/courses/course_dashboard.html:179
 msgctxt "courses.dashboard"
 msgid "stat_topics"
-msgstr "Subject"
+msgstr "Topics"
 
 #: apps/courses/templates/courses/course_dashboard.html:181
 msgctxt "courses.dashboard"
 msgid "stat_members"
-msgstr "Member"
+msgstr "Members"
 
 #: apps/courses/templates/courses/course_dashboard.html:192
 msgctxt "courses.dashboard"
@@ -22359,22 +22361,24 @@ msgstr "Delete"
 #: apps/courses/templates/courses/course_dashboard.html:216
 msgctxt "courses.dashboard"
 msgid "ai_build_title"
-msgstr "Build course with AI"
+msgstr "Build with AI"
 
 #: apps/courses/templates/courses/course_dashboard.html:221
 msgctxt "courses.dashboard"
 msgid "ai_build_sub"
-msgstr "Get syllabus, resource and task ideas from the assistant."
+msgstr "Get syllabus, resource and assignment suggestions from the assistant."
 
 #: apps/courses/templates/courses/course_dashboard.html:256
 msgctxt "courses.dashboard"
 msgid "confirm_delete_course"
-msgstr "Did you want to delete this course?"
+msgstr ""
+"The course will be deleted together with all its topics, resources and "
+"memberships. This cannot be undone."
 
 #: apps/courses/templates/courses/course_dashboard.html:257
 msgctxt "courses.dashboard"
 msgid "confirm_delete_member_suffix"
-msgstr "do you want to delete?"
+msgstr " — do you want to remove this member?"
 
 #: apps/courses/templates/courses/course_dashboard.html:258
 msgctxt "courses.dashboard"
@@ -22424,7 +22428,7 @@ msgstr "Students"
 #: apps/courses/templates/courses/course_members.html:68
 msgctxt "courses.members_page"
 msgid "count_people_suffix"
-msgstr "person"
+msgstr "people"
 
 #: apps/courses/templates/courses/course_members.html:79
 msgctxt "courses.members_page"
@@ -22500,17 +22504,18 @@ msgstr ""
 #: apps/courses/templates/courses/create_course.html:74
 msgctxt "courses.create_page"
 msgid "after_create_item_2"
-msgstr "You can add Topics, Jobs, Resources in Dashboard."
+msgstr "On the dashboard you can add topics, assignments and resources."
 
 #: apps/courses/templates/courses/create_course.html:75
 msgctxt "courses.create_page"
 msgid "after_create_item_3"
-msgstr "You can save your course in Draft and edit it many times."
+msgstr ""
+"You can keep your course as a draft and edit it as many times as you like."
 
 #: apps/courses/templates/courses/create_course.html:76
 msgctxt "courses.create_page"
 msgid "after_create_item_4"
-msgstr "Publish the status to open it to students."
+msgstr "Publish the course to make it available to students."
 
 #: apps/courses/templates/courses/edit_course.html:5
 msgctxt "courses.edit_page"
@@ -22535,17 +22540,17 @@ msgstr "Course Description"
 #: apps/courses/templates/courses/edit_course.html:56
 msgctxt "courses.edit_page"
 msgid "field_course_cover"
-msgstr "Course Image (Cover Image)"
+msgstr "Course Cover Image"
 
 #: apps/courses/templates/courses/edit_course.html:64
 msgctxt "courses.edit_page"
 msgid "alt_current_cover"
-msgstr "Available cover"
+msgstr "Current cover"
 
 #: apps/courses/templates/courses/edit_course.html:65
 msgctxt "courses.edit_page"
 msgid "label_current_image"
-msgstr "Available Image"
+msgstr "Current Image"
 
 #: apps/courses/templates/courses/edit_course.html:71
 msgctxt "courses.edit_page"
@@ -22555,7 +22560,7 @@ msgstr "New preview"
 #: apps/courses/templates/courses/edit_course.html:72
 msgctxt "courses.edit_page"
 msgid "label_new_selection"
-msgstr "New Choice"
+msgstr "New Selection"
 
 #: apps/courses/templates/courses/edit_course.html:79
 msgctxt "courses.edit_page"
@@ -22591,22 +22596,22 @@ msgstr "Useful Information"
 msgctxt "courses.edit_page"
 msgid "info_item_instant_update"
 msgstr ""
-"Instant Update: Changes you make to the course name and description will be "
-"updated for students as soon as they are saved."
+"Instant update: changes to the course name and description become visible to"
+" students as soon as they are saved."
 
 #: apps/courses/templates/courses/edit_course.html:121
 msgctxt "courses.edit_page"
 msgid "info_item_status_importance"
 msgstr ""
-"Status Importance: You can easily work on the course by saving it in "
-"\"Draft\" mode. Don't forget to \"Publish\" when ready."
+"Why status matters: keep the course in \"Draft\" mode while you work on it. "
+"Don't forget to publish it when it's ready."
 
 #: apps/courses/templates/courses/edit_course.html:122
 msgctxt "courses.edit_page"
 msgid "info_item_cover_size"
 msgstr ""
-"Image Size: For the best view, it is recommended that you use high quality, "
-"horizontal (landscape) images."
+"Image size: for the best look, use high-quality horizontal (landscape) "
+"images."
 
 #: apps/courses/templates/courses/my_courses.html:5
 #: apps/courses/templates/courses/my_courses.html:18
@@ -22632,27 +22637,27 @@ msgstr "No description added."
 #: apps/courses/templates/courses/my_courses.html:61
 msgctxt "courses.my_courses"
 msgid "suffix_topics"
-msgstr "topic"
+msgstr "topics"
 
 #: apps/courses/templates/courses/my_courses.html:64
 msgctxt "courses.my_courses"
 msgid "suffix_students"
-msgstr "student"
+msgstr "students"
 
 #: apps/courses/templates/courses/my_courses.html:70
 msgctxt "courses.my_courses"
 msgid "action_go_dashboard"
-msgstr "Go to Dashboard"
+msgstr "Go to dashboard"
 
 #: apps/courses/templates/courses/my_courses.html:84
 msgctxt "courses.my_courses"
 msgid "pagination_previous"
-msgstr "First"
+msgstr "Previous"
 
 #: apps/courses/templates/courses/my_courses.html:96
 msgctxt "courses.my_courses"
 msgid "pagination_next"
-msgstr "Then"
+msgstr "Next"
 
 #: apps/courses/templates/courses/my_courses.html:111
 msgctxt "courses.my_courses"
@@ -22663,7 +22668,7 @@ msgstr "You have not created a course yet"
 msgctxt "courses.my_courses"
 msgid "empty_description"
 msgstr ""
-"Create your first course and add topics, freelance work, lab work in the "
+"Create your first course and add topics, assignments and lab work on the "
 "dashboard."
 
 #: apps/courses/templates/courses/my_courses.html:120
@@ -22712,12 +22717,13 @@ msgstr "Optional"
 #: apps/courses/templates/courses/partials/_course_form_fields.html:54
 msgctxt "courses.create_page"
 msgid "help_course_description"
-msgstr "Write the course's purpose, interests, and which students it is for."
+msgstr ""
+"Describe the course goals, focus and which students it is intended for."
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:66
 msgctxt "courses.create_page"
 msgid "field_course_cover"
-msgstr "Course Image (Cover Image)"
+msgstr "Course Cover Image"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:74
 msgctxt "courses.create_page"
@@ -22727,12 +22733,12 @@ msgstr "Drag an image here or"
 #: apps/courses/templates/courses/partials/_course_form_fields.html:74
 msgctxt "courses.create_page"
 msgid "action_choose_image"
-msgstr "Select Image"
+msgstr "Choose Image"
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:75
 msgctxt "courses.create_page"
 msgid "help_cover_default"
-msgstr "If no image is loaded, the system will use the default image."
+msgstr "If no image is uploaded, the system will use a default image."
 
 #: apps/courses/templates/courses/partials/_course_form_fields.html:75
 msgctxt "courses.create_page"
@@ -22792,7 +22798,7 @@ msgstr "Errors"
 #: apps/courses/templates/courses/partials/_courses_assets_js.html:5
 msgctxt "courses.common.js"
 msgid "please_wait"
-msgstr "Wait..."
+msgstr "Please wait..."
 
 #: apps/courses/templates/courses/partials/_create_course_modal.html:6
 #: apps/courses/templates/courses/partials/_create_course_modal.html:21
@@ -22823,7 +22829,7 @@ msgstr "Close"
 #: apps/courses/templates/courses/partials/_create_course_modal_form.html:20
 msgctxt "courses.partial.create_modal_form"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/courses/templates/courses/partials/_create_course_modal_form.html:24
 msgctxt "courses.partial.create_modal_form"
@@ -22833,7 +22839,9 @@ msgstr "Create Course"
 #: apps/courses/templates/courses/partials/_member_accordion.html:10
 msgctxt "courses.partial.member_accordion"
 msgid "confirm_delete_user"
-msgstr "Do you want to remove this user from the course?"
+msgstr ""
+"The student will be removed from the course. Their submissions and grades "
+"are kept."
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:11
 msgctxt "courses.partial.member_accordion"
@@ -22873,7 +22881,7 @@ msgstr "Teacher"
 #: apps/courses/templates/courses/partials/_member_accordion.html:68
 msgctxt "courses.partial.member_accordion"
 msgid "role_assistant"
-msgstr "Helper"
+msgstr "Assistant"
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:70
 msgctxt "courses.partial.member_accordion"
@@ -22884,12 +22892,12 @@ msgstr "Student"
 #, python-format
 msgctxt "courses.partial.member_accordion"
 msgid "More %(count)s people..."
-msgstr "More %(count)s people..."
+msgstr "%(count)s more people..."
 
 #: apps/courses/templates/courses/partials/_member_accordion.html:101
 msgctxt "courses.partial.member_accordion"
 msgid "empty_members"
-msgstr "No member added yet."
+msgstr "No members added yet."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:7
 msgctxt "courses.partial.member_modal"
@@ -22899,7 +22907,7 @@ msgstr "Select at least one student!"
 #: apps/courses/templates/courses/partials/_member_form_modal.html:8
 msgctxt "courses.partial.member_modal"
 msgid "msg_min_one_group"
-msgstr "Choose at least one group!"
+msgstr "Select at least one group!"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:9
 msgctxt "courses.partial.member_modal"
@@ -22909,7 +22917,7 @@ msgstr "Adding..."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:10
 msgctxt "courses.partial.member_modal"
 msgid "msg_error_prefix"
-msgstr "Error:"
+msgstr "Error: "
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:11
 msgctxt "courses.partial.member_modal"
@@ -22924,12 +22932,12 @@ msgstr "A server error has occurred."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:13
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_member_confirm_suffix"
-msgstr "Do you want to remove the student from the course?"
+msgstr " — remove this student from the course?"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:14
 msgctxt "courses.partial.member_modal"
 msgid "msg_delete_failed_prefix"
-msgstr "Not deleted:"
+msgstr "Not deleted: "
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:15
 msgctxt "courses.partial.member_modal"
@@ -22949,7 +22957,7 @@ msgstr "Group Name (optional)"
 #: apps/courses/templates/courses/partials/_member_form_modal.html:41
 msgctxt "courses.partial.member_modal"
 msgid "placeholder_group_name"
-msgstr "Eg: 940, 950, 842A1..."
+msgstr "E.g.: 940, 950, 842A1..."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:45
 msgctxt "courses.partial.member_modal"
@@ -22987,7 +22995,7 @@ msgstr "Adding students..."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:165
 msgctxt "courses.partial.member_modal"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:93
 msgctxt "courses.partial.member_modal"
@@ -23017,7 +23025,7 @@ msgstr "Group not found."
 #: apps/courses/templates/courses/partials/_member_form_modal.html:152
 msgctxt "courses.partial.member_modal"
 msgid "groups_info_text"
-msgstr "All students in the selected groups will be added to the course."
+msgstr "Active students of the selected groups will be added to the course."
 
 #: apps/courses/templates/courses/partials/_member_form_modal.html:159
 msgctxt "courses.partial.member_modal"
@@ -23032,7 +23040,7 @@ msgstr "Add Groups"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:10
 msgctxt "courses.partial.resource_accordion"
 msgid "confirm_delete_resource"
-msgstr "Did you want to delete this resource?"
+msgstr "Do you want to delete this resource?"
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:17
 #: apps/courses/tests/test_views.py:251
@@ -23053,7 +23061,7 @@ msgstr "Download"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:83
 msgctxt "courses.partial.resource_accordion"
 msgid "action_open"
-msgstr "open"
+msgstr "Open"
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:92
 msgctxt "courses.partial.resource_accordion"
@@ -23063,7 +23071,7 @@ msgstr "Delete"
 #: apps/courses/templates/courses/partials/_resource_accordion.html:105
 msgctxt "courses.partial.resource_accordion"
 msgid "empty_resource"
-msgstr "No resource added yet."
+msgstr "No resources added yet."
 
 #: apps/courses/templates/courses/partials/_resource_accordion.html:108
 msgctxt "courses.partial.resource_accordion"
@@ -23118,17 +23126,17 @@ msgstr "Resource Title"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:68
 msgctxt "courses.partial.resource_modal"
 msgid "placeholder_resource_title"
-msgstr "Eg: Lecture 1 - Introduction"
+msgstr "E.g.: Lecture 1 - Introduction"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:75
 msgctxt "courses.partial.resource_modal"
 msgid "field_topic"
-msgstr "Subject"
+msgstr "Topic"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:79
 msgctxt "courses.partial.resource_modal"
 msgid "option_no_topic"
-msgstr "No subject selected (course level)"
+msgstr "No topic selected (course level)"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:86
 msgctxt "courses.partial.resource_modal"
@@ -23138,7 +23146,7 @@ msgstr "Optional: Link the resource to a specific topic"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:93
 msgctxt "courses.partial.resource_modal"
 msgid "field_description"
-msgstr "Disclosure"
+msgstr "Description"
 
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:97
 msgctxt "courses.partial.resource_modal"
@@ -23178,19 +23186,19 @@ msgstr "Add Resource"
 #: apps/courses/templates/courses/partials/_resource_form_modal.html:134
 msgctxt "courses.partial.resource_modal"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:8
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_topic"
 msgstr ""
-"Did you want to delete this topic?\\n\\nAll resources related to the topic "
-"will also be deleted!"
+"Do you want to delete this topic?\\n\\nAll resources in this topic will also"
+" be deleted!"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:9
 msgctxt "courses.partial.topic_accordion"
 msgid "confirm_delete_resource"
-msgstr "Did you want to delete this resource?"
+msgstr "Do you want to delete this resource?"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:10
 msgid "resourceFormModal tapılmadı!"
@@ -23209,7 +23217,7 @@ msgstr "Add New Topic"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:59
 msgctxt "courses.partial.topic_accordion"
 msgid "suffix_resources"
-msgstr "resource"
+msgstr "resources"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:75
 msgctxt "courses.partial.topic_accordion"
@@ -23230,12 +23238,12 @@ msgstr "Download"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:126
 msgctxt "courses.partial.topic_accordion"
 msgid "action_open"
-msgstr "open"
+msgstr "Open"
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:146
 msgctxt "courses.partial.topic_accordion"
 msgid "empty_resource"
-msgstr "No resource added yet."
+msgstr "No resources added yet."
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:156
 msgctxt "courses.partial.topic_accordion"
@@ -23245,7 +23253,7 @@ msgstr "Add Resource"
 #: apps/courses/templates/courses/partials/_topic_accordion.html:168
 msgctxt "courses.partial.topic_accordion"
 msgid "empty_topic"
-msgstr "No topic added yet."
+msgstr "No topics added yet."
 
 #: apps/courses/templates/courses/partials/_topic_accordion.html:171
 msgctxt "courses.partial.topic_accordion"
@@ -23255,7 +23263,7 @@ msgstr "Add your first topic"
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:8
 msgctxt "courses.partial.topic_edit_modal"
 msgid "msg_topic_id_not_found"
-msgstr "Error: Thread ID not found!"
+msgstr "Error: Topic ID not found!"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:9
 msgctxt "courses.partial.topic_edit_modal"
@@ -23311,22 +23319,22 @@ msgstr "Close"
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:41
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_name"
-msgstr "Subject Name"
+msgstr "Topic Name"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:51
 msgctxt "courses.partial.topic_edit_modal"
 msgid "field_topic_description"
-msgstr "Description Subject"
+msgstr "Topic Description"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:63
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_save"
-msgstr "Save to memory"
+msgstr "Save"
 
 #: apps/courses/templates/courses/partials/_topic_edit_modal.html:66
 msgctxt "courses.partial.topic_edit_modal"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:10
 msgctxt "courses.partial.topic_modal"
@@ -23356,27 +23364,27 @@ msgstr "Close"
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:33
 msgctxt "courses.partial.topic_modal"
 msgid "field_topic_name"
-msgstr "Subject Name"
+msgstr "Topic Name"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:37
 msgctxt "courses.partial.topic_modal"
 msgid "placeholder_topic_name"
-msgstr "Ex: Week 1: Introduction"
+msgstr "E.g.: Week 1: Introduction"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:40
 msgctxt "courses.partial.topic_modal"
 msgid "help_topic_name"
-msgstr "Eg: \"Week 1\", \"Unit 1: Basic Concepts\""
+msgstr "E.g.: \"Week 1\", \"Unit 1: Basic Concepts\""
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:47
 msgctxt "courses.partial.topic_modal"
 msgid "field_topic_description"
-msgstr "Description Subject"
+msgstr "Topic Description"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:51
 msgctxt "courses.partial.topic_modal"
 msgid "placeholder_topic_description"
-msgstr "What is learned in this subject?"
+msgstr "What is covered in this topic?"
 
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:53
 msgctxt "courses.partial.topic_modal"
@@ -23391,7 +23399,7 @@ msgstr "Add Topic"
 #: apps/courses/templates/courses/partials/_topic_form_modal.html:66
 msgctxt "courses.partial.topic_modal"
 msgid "action_cancel"
-msgstr "Cancel it"
+msgstr "Cancel"
 
 #: apps/courses/templates/courses/student_courses.html:5
 msgctxt "courses.student_courses"
@@ -23469,7 +23477,7 @@ msgstr "You do not have the required permission: {permission}."
 #: apps/courses/views/shared/_helpers.py:86
 msgctxt "courses.view.permission"
 msgid "teachers_only_action"
-msgstr "This operation is only available for teachers."
+msgstr "This action is only available to teachers."
 
 #: apps/courses/views/shared/_helpers.py:99
 #: apps/courses/views/teacher/membership.py:351
@@ -23490,12 +23498,12 @@ msgstr "Organization selection is required."
 #: apps/courses/views/teacher/crud.py:127
 msgctxt "courses.view.message"
 msgid "course_created_successfully"
-msgstr "✅ \"{title}\" course has been successfully created!"
+msgstr "✅ Course \"{title}\" has been created successfully!"
 
 #: apps/courses/views/teacher/crud.py:178
 msgctxt "courses.view.message"
 msgid "course_updated"
-msgstr "✅ \"{title}\" course has been updated."
+msgstr "✅ Course \"{title}\" has been updated."
 
 #: apps/courses/views/teacher/crud.py:203
 msgctxt "courses.view.message"
@@ -23534,7 +23542,7 @@ msgstr "No student has been selected."
 #: apps/courses/views/teacher/membership.py:280
 msgctxt "courses.view.message"
 msgid "students_added_to_course"
-msgstr "{count} students were added to the course."
+msgstr "{count} student(s) added to the course."
 
 #: apps/courses/views/teacher/membership.py:221
 #: apps/courses/views/teacher/membership.py:226
@@ -23545,7 +23553,7 @@ msgstr "You do not have permission."
 #: apps/courses/views/teacher/membership.py:238
 msgctxt "courses.view.message"
 msgid "no_group_selected"
-msgstr "Group not selected."
+msgstr "No group selected."
 
 #: apps/courses/views/teacher/membership.py:287
 msgctxt "courses.view.message"
@@ -23566,7 +23574,8 @@ msgstr "Group name was not found."
 msgctxt "courses.view.message"
 msgid "group_removed_from_course"
 msgstr ""
-"✅ Student {count} from \"{group_name}\" group was expelled from the course."
+"✅ {count} student(s) from group \"{group_name}\" were removed from the "
+"course."
 
 #: apps/courses/views/teacher/resources.py:41
 msgctxt "courses.view.message"
@@ -23596,7 +23605,7 @@ msgstr "You do not have permission to edit this course."
 #: apps/courses/views/teacher/topics.py:99
 msgctxt "courses.view.message"
 msgid "topic_updated"
-msgstr "Thread \"{title}\" has been updated"
+msgstr "Topic \"{title}\" has been updated"
 
 #: apps/courses/views/teacher/topics.py:122
 msgctxt "courses.view.message"
@@ -27668,7 +27677,7 @@ msgstr ""
 #: apps/exams/templates/exams/components/_exam_modals.html:25
 msgctxt "exams.partial.exam_modals"
 msgid "msg_error_prefix"
-msgstr "Error:"
+msgstr "Error: "
 
 #: apps/exams/templates/exams/components/_exam_modals.html:26
 msgctxt "exams.partial.exam_modals"
@@ -27701,7 +27710,7 @@ msgstr "Saving..."
 #: apps/exams/templates/exams/components/_exam_modals.html:41
 msgctxt "exams.partial.exam_modals"
 msgid "heading_link_exam_to_course"
-msgstr "Link Exam to Course"
+msgstr "Link an existing exam"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:47
 msgctxt "exams.partial.exam_modals"
@@ -27716,7 +27725,7 @@ msgstr "Question"
 #: apps/exams/templates/exams/components/_exam_modals.html:59
 msgctxt "exams.partial.exam_modals"
 msgid "label_linked_to_course"
-msgstr "linked to a course"
+msgstr "(already linked)"
 
 #: apps/exams/templates/exams/components/_exam_modals.html:67
 msgctxt "exams.partial.exam_modals"
@@ -27736,7 +27745,7 @@ msgstr "No exam found to link."
 #: apps/exams/templates/exams/components/_exam_modals.html:82
 msgctxt "exams.partial.exam_modals"
 msgid "action_create_new_exam"
-msgstr "Create New Exam"
+msgstr "Create exam"
 
 #: apps/exams/templates/exams/components/_paint_answer.html:21
 msgctxt "exams.partial.paint_answer"
@@ -29705,7 +29714,7 @@ msgstr "Start time"
 #: apps/exams/templates/exams/teacher/exam_section.html:352
 msgctxt "exams.partial.exam_section"
 msgid "modal_label_end"
-msgstr "End time"
+msgstr "Submission deadline"
 
 #: apps/exams/templates/exams/student/student_exam_list.html:411
 #: apps/exams/templates/exams/teacher/exam_section.html:358
@@ -31052,7 +31061,7 @@ msgstr "Link Existing Exam"
 #: apps/exams/templates/exams/teacher/exam_section.html:146
 msgctxt "exams.partial.exam_section"
 msgid "action_create_new_exam"
-msgstr "Create New Exam"
+msgstr "Add new exam"
 
 #: apps/exams/templates/exams/teacher/exam_section.html:56
 #: apps/exams/templates/exams/teacher/exam_section.html:176
@@ -31979,7 +31988,7 @@ msgstr "Restrict keyboard shortcuts"
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:452
 msgctxt "exams.template.create_exam_modal_form"
 msgid "supervision_grace_period_label"
-msgstr "Recovery period (seconds)"
+msgstr "Grace period (seconds)"
 
 #: apps/exams/templates/exams/teacher/partials/_create_exam_modal_form.html:460
 msgctxt "exams.template.create_exam_modal_form"
@@ -36872,7 +36881,7 @@ msgstr "Back"
 #: apps/labs/templates/labs/lab_detail.html:61
 msgctxt "labs.template.lab_detail"
 msgid "notice_already_submitted"
-msgstr "You have already submitted this lab!"
+msgstr "You have already submitted this lab work!"
 
 #: apps/labs/templates/labs/lab_detail.html:64
 #, python-format
@@ -36909,7 +36918,7 @@ msgstr "Remaining time"
 #: apps/labs/templates/labs/lab_detail.html:133
 msgctxt "labs.template.lab_detail"
 msgid "card_lab_info"
-msgstr "Lab Information"
+msgstr "Lab Work Details"
 
 #: apps/labs/templates/labs/lab_detail.html:141
 msgctxt "labs.template.lab_detail"
@@ -36940,7 +36949,7 @@ msgstr "Question count"
 #, python-format
 msgctxt "labs.template.lab_detail"
 msgid "label_questions_count_value %(question_count)s"
-msgstr "%(question_count)s items"
+msgstr "%(question_count)s questions"
 
 #: apps/labs/templates/labs/lab_detail.html:187
 msgctxt "labs.template.lab_detail"
@@ -37015,7 +37024,7 @@ msgstr "Teacher has not added questions yet"
 #: apps/labs/templates/labs/lab_detail.html:325
 msgctxt "labs.template.lab_detail"
 msgid "notice_submission_successful"
-msgstr "Lab submitted successfully!"
+msgstr "Lab work submitted successfully!"
 
 #: apps/labs/templates/labs/lab_detail.html:327
 #, python-format
@@ -37026,7 +37035,7 @@ msgstr "Attempts exhausted (%(attempt_count)s / %(max_attempts)s)"
 #: apps/labs/templates/labs/lab_detail.html:339
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_not_started"
-msgstr "Lab has not started yet"
+msgstr "The lab work has not started yet"
 
 #: apps/labs/templates/labs/lab_detail.html:341
 #, python-format
@@ -37037,7 +37046,7 @@ msgstr "Start: %(start_at)s"
 #: apps/labs/templates/labs/lab_detail.html:350
 msgctxt "labs.template.lab_detail"
 msgid "notice_lab_closed"
-msgstr "Lab is closed"
+msgstr "The lab work is closed"
 
 #: apps/labs/templates/labs/lab_detail.html:352
 #, python-format
@@ -37114,12 +37123,12 @@ msgstr "Finish lab"
 #: apps/labs/templates/labs/lab_section.html:11
 msgctxt "labs.template.lab_section"
 msgid "section_title"
-msgstr "Labs"
+msgstr "Lab work"
 
 #: apps/labs/templates/labs/lab_section.html:28
 msgctxt "labs.template.lab_section"
 msgid "action_add_new_lab"
-msgstr "Add new lab"
+msgstr "Add new lab work"
 
 #: apps/labs/templates/labs/lab_section.html:45
 msgctxt "labs.template.lab_section"
@@ -37155,7 +37164,7 @@ msgstr "%(max_score)s points"
 #, python-format
 msgctxt "labs.template.lab_section"
 msgid "label_attempt %(max_attempts)s"
-msgstr "Attempt: %(max_attempts)s"
+msgstr "Attempts: %(max_attempts)s"
 
 #: apps/labs/templates/labs/lab_section.html:69
 msgctxt "labs.template.lab_section"
@@ -37175,12 +37184,12 @@ msgstr "Delete"
 #: apps/labs/templates/labs/lab_section.html:89
 msgctxt "labs.template.lab_section"
 msgid "empty_no_labs_yet"
-msgstr "No labs yet"
+msgstr "No lab work yet"
 
 #: apps/labs/templates/labs/lab_section.html:91
 msgctxt "labs.template.lab_section"
 msgid "action_add_first_lab"
-msgstr "Add first lab"
+msgstr "Add the first lab work"
 
 #: apps/labs/templates/labs/lab_section.html:109
 msgctxt "labs.template.lab_section"
@@ -37226,12 +37235,12 @@ msgstr "Deadline passed"
 #: apps/labs/templates/labs/lab_section.html:181
 msgctxt "labs.template.lab_section"
 msgid "empty_no_assigned_labs"
-msgstr "No assigned labs"
+msgstr "No assigned lab work"
 
 #: apps/labs/templates/labs/lab_section.html:188
 msgctxt "labs.template.lab_section"
 msgid "empty_no_labs"
-msgstr "No labs"
+msgstr "No lab work"
 
 #: apps/labs/templates/labs/lab_submissions.html:5
 msgctxt "labs.template.lab_submissions"
@@ -37352,7 +37361,7 @@ msgstr "Score"
 #: apps/labs/templates/labs/lab_submissions.html:167
 msgctxt "labs.template.lab_submissions"
 msgid "table_action"
-msgstr "Action"
+msgstr "Actions"
 
 #: apps/labs/templates/labs/lab_submissions.html:237
 msgctxt "labs.template.lab_submissions"
@@ -37367,7 +37376,7 @@ msgstr "No results for selected filters"
 #: apps/labs/templates/labs/lab_submissions.html:262
 msgctxt "labs.template.lab_submissions"
 msgid "empty_no_student_submission_yet"
-msgstr "No student submission yet"
+msgstr "No student submissions yet"
 
 #: apps/labs/templates/labs/lab_submissions.html:294
 msgid "Seçilən lab cavablarını sil"
@@ -37450,7 +37459,7 @@ msgstr "%(question_count)s questions"
 #, python-format
 msgctxt "labs.template.manage_blocks"
 msgid "label_questions_to_pick_badge %(questions_to_pick)s"
-msgstr "%(questions_to_pick)s selected"
+msgstr "%(questions_to_pick)s to pick"
 
 #: apps/labs/templates/labs/manage_blocks.html:115
 msgctxt "labs.template.manage_blocks"
@@ -37487,7 +37496,7 @@ msgstr "Points"
 #: apps/labs/templates/labs/manage_blocks.html:139
 msgctxt "labs.template.manage_blocks"
 msgid "table_action"
-msgstr "Action"
+msgstr "Actions"
 
 #: apps/labs/templates/labs/manage_blocks.html:177
 msgctxt "labs.template.manage_blocks"
@@ -37631,7 +37640,7 @@ msgstr "Import"
 #: apps/labs/templates/labs/manage_blocks.html:377
 msgctxt "labs.js.manage_blocks"
 msgid "file_existing"
-msgstr "File existing"
+msgstr "Existing file"
 
 #: apps/labs/templates/labs/manage_blocks.html:378
 msgctxt "labs.js.manage_blocks"
@@ -37696,12 +37705,12 @@ msgstr "Server error"
 #: apps/labs/templates/labs/manage_blocks.html:390
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_block"
-msgstr "Delete block"
+msgstr "Delete this block and all questions inside it?"
 
 #: apps/labs/templates/labs/manage_blocks.html:391
 msgctxt "labs.js.manage_blocks"
 msgid "confirm_delete_question"
-msgstr "Delete question"
+msgstr "Delete this question?"
 
 #: apps/labs/templates/labs/my_lab_answers.html:6
 msgctxt "labs.template.my_lab_answers"
@@ -37766,7 +37775,7 @@ msgstr "No answers found for this attempt"
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:8
 msgctxt "labs.template.lab_modals"
 msgid "modal_new_lab"
-msgstr "New Lab"
+msgstr "New Lab Work"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:18
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:19
@@ -37790,7 +37799,7 @@ msgstr "Materials"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:37
 msgctxt "labs.template.lab_modals"
 msgid "label_lab_title"
-msgstr "Lab title"
+msgstr "Lab work title"
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:41
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:42
@@ -37870,7 +37879,7 @@ msgstr "Allowed students"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:83
 msgctxt "labs.template.lab_modals"
 msgid "placeholder_search_student"
-msgstr "Search student..."
+msgstr "Search students..."
 
 #: apps/labs/templates/labs/partials/lab_modals/_add_lab_modal.html:84
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:85
@@ -37951,7 +37960,7 @@ msgstr "Create"
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:8
 msgctxt "labs.template.lab_modals"
 msgid "modal_edit_lab"
-msgstr "Edit Lab"
+msgstr "Edit Lab Work"
 
 #: apps/labs/templates/labs/partials/lab_modals/_edit_lab_modal.html:153
 msgctxt "labs.template.lab_modals"
@@ -37961,7 +37970,7 @@ msgstr "Save"
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:7
 msgctxt "labs.js.lab_modals"
 msgid "modal_not_found"
-msgstr "Modal not found!"
+msgstr "Dialog not found!"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:8
 msgctxt "labs.js.lab_modals"
@@ -37986,7 +37995,7 @@ msgstr "An error occurred"
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:12
 msgctxt "labs.js.lab_modals"
 msgid "confirm_delete_lab"
-msgstr "Delete lab"
+msgstr "Delete this lab work?"
 
 #: apps/labs/templates/labs/partials/lab_modals/_scripts.html:13
 msgctxt "labs.js.lab_modals"
@@ -38089,7 +38098,7 @@ msgstr "%(points)s points"
 #: apps/labs/templates/labs/preview_randomization.html:116
 msgctxt "labs.template.preview_randomization"
 msgid "empty_no_questions"
-msgstr "No questions for this lab"
+msgstr "No questions for this lab work"
 
 #: apps/labs/templates/labs/preview_randomization.html:117
 msgid "Bu tələbə üçün seçiləcək heç bir sual tapılmadı."
@@ -38175,7 +38184,7 @@ msgstr "You do not have permission"
 #: apps/labs/views/student/submissions.py:117
 msgctxt "labs.view.error"
 msgid "lab_closed"
-msgstr "Lab is closed"
+msgstr "The lab work is closed"
 
 #: apps/labs/views/student/submissions.py:126
 msgctxt "labs.view.error"
@@ -38195,12 +38204,12 @@ msgstr "The number of questions per student has been updated."
 #: apps/labs/views/teacher/crud.py:218
 msgctxt "labs.view.message"
 msgid "lab_deleted"
-msgstr "Lab deleted!"
+msgstr "Lab work deleted!"
 
 #: apps/labs/views/teacher/crud.py:247
 msgctxt "labs.view.message"
 msgid "lab_published"
-msgstr "Lab published!"
+msgstr "Lab work published!"
 
 #: apps/labs/views/teacher/questions.py:138
 msgctxt "labs.view.error"
@@ -40439,7 +40448,7 @@ msgstr "Settings updated successfully."
 #: apps/projects/forms.py:27
 msgctxt "projects.form.project.placeholder"
 msgid "title"
-msgstr "Project title"
+msgstr "Course project title"
 
 #: apps/projects/forms.py:34
 msgctxt "projects.form.project.placeholder"
@@ -40544,7 +40553,7 @@ msgstr "Course"
 #: apps/projects/models.py:29
 msgctxt "projects.model.project.field"
 msgid "title"
-msgstr "Project Title"
+msgstr "Course Project Title"
 
 #: apps/projects/models.py:31
 msgctxt "projects.model.project.field"
@@ -40579,12 +40588,12 @@ msgstr "Assigned Students"
 #: apps/projects/models.py:57
 msgctxt "projects.model.project.meta"
 msgid "singular"
-msgstr "Project"
+msgstr "Course project"
 
 #: apps/projects/models.py:58
 msgctxt "projects.model.project.meta"
 msgid "plural"
-msgstr "Projects"
+msgstr "Course projects"
 
 #: apps/projects/models.py:97
 msgctxt "projects.model.submission.choice.status"
@@ -40754,7 +40763,7 @@ msgstr "Submit First Project"
 #: apps/projects/templates/projects/partials/_project_modals.html:9
 msgctxt "projects.modals"
 msgid "add_modal_title"
-msgstr "New Project"
+msgstr "New Course Project"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:17
 #: apps/projects/templates/projects/partials/_project_modals.html:94
@@ -40868,7 +40877,7 @@ msgstr "Add"
 #: apps/projects/templates/projects/partials/_project_modals.html:85
 msgctxt "projects.modals"
 msgid "edit_modal_title"
-msgstr "Edit Project"
+msgstr "Edit Course Project"
 
 #: apps/projects/templates/projects/partials/_project_modals.html:150
 msgctxt "projects.modals"
@@ -41084,12 +41093,12 @@ msgstr "Server error"
 #: apps/projects/templates/projects/project_detail.html:152
 msgctxt "projects.detail"
 msgid "Göndərməni təsdiqləyin"
-msgstr "Confirm delivery"
+msgstr "Confirm submission"
 
 #: apps/projects/templates/projects/project_detail.html:153
 msgctxt "projects.detail"
 msgid "Bu kurs işini göndərmək istədiyinizə əminsiniz?"
-msgstr "Are you sure you want to submit this coursework?"
+msgstr "Are you sure you want to submit this course project?"
 
 #: apps/projects/templates/projects/project_detail.html:158
 msgctxt "projects.detail"
@@ -41139,12 +41148,12 @@ msgstr "This project is currently inactive."
 #: apps/projects/templates/projects/project_section.html:11
 msgctxt "projects.section"
 msgid "section_title"
-msgstr "Projects"
+msgstr "Course projects"
 
 #: apps/projects/templates/projects/project_section.html:28
 msgctxt "projects.section"
 msgid "add_project_button"
-msgstr "Add New Project"
+msgstr "Add New Course Project"
 
 #: apps/projects/templates/projects/project_section.html:43
 msgctxt "projects.section"
@@ -41203,12 +41212,12 @@ msgstr "Delete"
 #: apps/projects/templates/projects/project_section.html:99
 msgctxt "projects.section"
 msgid "empty_teacher"
-msgstr "No project yet"
+msgstr "No course projects yet"
 
 #: apps/projects/templates/projects/project_section.html:101
 msgctxt "projects.section"
 msgid "add_first_project"
-msgstr "Add First Project"
+msgstr "Add the First Course Project"
 
 #: apps/projects/templates/projects/project_section.html:144
 msgctxt "projects.section"
@@ -41223,7 +41232,7 @@ msgstr "left"
 #: apps/projects/templates/projects/project_section.html:151
 msgctxt "projects.section"
 msgid "attempts_finished"
-msgstr "Attempts finished"
+msgstr "No attempts left"
 
 #: apps/projects/templates/projects/project_section.html:167
 msgctxt "projects.section"
@@ -41243,23 +41252,23 @@ msgstr "Inactive"
 #: apps/projects/templates/projects/project_section.html:188
 msgctxt "projects.section"
 msgid "empty_student"
-msgstr "No project assigned to you"
+msgstr "No course projects assigned to you"
 
 #: apps/projects/templates/projects/project_section.html:195
 msgctxt "projects.section"
 msgid "empty_generic"
-msgstr "No projects"
+msgstr "No course projects"
 
 #: apps/projects/templates/projects/review_submissions.html:4
 msgctxt "projects.review"
 msgid "page_title"
-msgstr "Results"
+msgstr "Projects"
 
 #: apps/projects/templates/projects/review_submissions.html:15
 #: apps/projects/templates/projects/review_submissions.html:123
 msgctxt "projects.review"
 msgid "header_title"
-msgstr "Submitted answers"
+msgstr "Submitted projects"
 
 #: apps/projects/templates/projects/review_submissions.html:19
 msgctxt "projects.review"
@@ -41315,7 +41324,7 @@ msgstr "Rejected"
 #: apps/projects/templates/projects/review_submissions.html:219
 msgctxt "projects.review"
 msgid "empty_title"
-msgstr "No submissions yet."
+msgstr "No projects submitted yet"
 
 #: apps/projects/templates/projects/review_submissions.html:225
 msgctxt "projects.review"
@@ -41335,7 +41344,7 @@ msgstr ""
 #: apps/projects/templates/projects/review_submissions.html:270
 msgctxt "projects.review"
 msgid "modal_title"
-msgstr "Review submission"
+msgstr "View project"
 
 #: apps/projects/templates/projects/review_submissions.html:277
 msgctxt "projects.review"
@@ -41345,12 +41354,12 @@ msgstr "Student:"
 #: apps/projects/templates/projects/review_submissions.html:284
 msgctxt "projects.review"
 msgid "explanation"
-msgstr "Answer content:"
+msgstr "Project explanation:"
 
 #: apps/projects/templates/projects/review_submissions.html:289
 msgctxt "projects.review"
 msgid "file"
-msgstr "File:"
+msgstr "Project file:"
 
 #: apps/projects/templates/projects/review_submissions.html:293
 msgctxt "projects.review"
@@ -41381,7 +41390,7 @@ msgstr "Save grade"
 #: apps/projects/views/student/endpoints.py:178
 msgctxt "projects.views.message"
 msgid "no_project_access"
-msgstr "You do not have access to this project."
+msgstr "You do not have access to this course project."
 
 #: apps/projects/views/student/endpoints.py:109
 #: apps/projects/views/student/endpoints.py:119
@@ -41410,19 +41419,19 @@ msgstr "You do not have permission."
 #: apps/projects/views/teacher/crud.py:101
 msgctxt "projects.views.message"
 msgid "project_created"
-msgstr "Project created successfully."
+msgstr "Course project created successfully."
 
 #: apps/projects/views/teacher/crud.py:220
 #: apps/projects/views/teacher/crud.py:221
 msgctxt "projects.views.message"
 msgid "project_updated"
-msgstr "Project updated successfully."
+msgstr "Course project updated successfully."
 
 #: apps/projects/views/teacher/crud.py:252
 #: apps/projects/views/teacher/crud.py:253
 msgctxt "projects.views.message"
 msgid "project_deleted"
-msgstr "Project deleted successfully."
+msgstr "Course project deleted successfully."
 
 #: apps/projects/views/teacher/endpoints.py:135
 #: apps/projects/views/teacher/endpoints.py:140
@@ -83264,3 +83273,440 @@ msgstr "Until %(date)s: «%(name)s» — part of «%(parent)s»."
 msgctxt "accounts.structure_tree"
 msgid "%(date)s tarixinədək adı: «%(name)s»."
 msgstr "Name until %(date)s: «%(name)s»."
+
+msgctxt "courses.dashboard"
+msgid "hint_topics"
+msgstr "Course syllabus and weekly structure"
+
+msgctxt "courses.dashboard"
+msgid "hint_assignments"
+msgstr "Independent work and submissions for students"
+
+msgctxt "courses.dashboard"
+msgid "hint_labs"
+msgstr "Hands-on lab work with blocks and questions"
+
+msgctxt "courses.dashboard"
+msgid "hint_exams"
+msgstr "Tests and written exams linked to the course"
+
+msgctxt "courses.dashboard"
+msgid "hint_projects"
+msgstr "Larger course projects"
+
+msgctxt "courses.dashboard"
+msgid "hint_resources"
+msgstr "Lectures, files, videos and links"
+
+msgctxt "courses.dashboard"
+msgid "hint_members"
+msgstr "Groups and students enrolled in the course"
+
+msgctxt "courses.dashboard"
+msgid "action_publish"
+msgstr "Publish"
+
+msgctxt "courses.dashboard"
+msgid "action_unpublish"
+msgstr "Move back to draft"
+
+msgctxt "courses.dashboard"
+msgid "action_remove"
+msgstr "Remove"
+
+msgctxt "courses.dashboard"
+msgid "action_remove_group"
+msgstr "Remove group from course"
+
+msgctxt "courses.dashboard"
+msgid "breadcrumb_label"
+msgstr "Breadcrumb"
+
+msgctxt "courses.dashboard"
+msgid "sections_label"
+msgstr "Course sections"
+
+msgctxt "courses.dashboard"
+msgid "stats_label"
+msgstr "Course summary"
+
+msgctxt "courses.dashboard"
+msgid "stat_students"
+msgstr "Students"
+
+msgctxt "courses.dashboard"
+msgid "stat_groups"
+msgstr "Groups"
+
+msgctxt "courses.dashboard"
+msgid "stat_tasks"
+msgstr "Assignments"
+
+msgctxt "courses.dashboard"
+msgid "stat_resources"
+msgstr "Resources"
+
+msgctxt "courses.dashboard"
+msgid "status_archived"
+msgstr "Archived"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_course_title"
+msgstr "Delete this course?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_topic_title"
+msgstr "Delete this topic?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_resource_title"
+msgstr "Delete this resource?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_delete_member_title"
+msgstr "Remove this member from the course?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_remove_group_title"
+msgstr "Remove the group from the course?"
+
+msgctxt "courses.dashboard"
+msgid "confirm_remove_group_body"
+msgstr ""
+"All students of “{group}” will be removed from the course. Their submissions"
+" and grades are kept."
+
+msgctxt "courses.dashboard"
+msgid "empty_topic_hint"
+msgstr "Add weekly topics or let AI suggest a syllabus."
+
+msgctxt "courses.dashboard"
+msgid "empty_resource_hint"
+msgstr "Keep lecture files, videos and useful links in one place."
+
+msgctxt "courses.dashboard"
+msgid "empty_members_hint"
+msgstr ""
+"Add a group you teach in one click — all of its students join the course."
+
+msgctxt "courses.dashboard"
+msgid "groups_title"
+msgstr "Groups"
+
+msgctxt "courses.dashboard"
+msgid "members_list_title"
+msgstr "Members"
+
+msgctxt "courses.dashboard"
+msgid "members_search_label"
+msgstr "Search members"
+
+msgctxt "courses.dashboard"
+msgid "members_search_placeholder"
+msgstr "Name, username or group…"
+
+msgctxt "courses.dashboard"
+msgid "members_no_match"
+msgstr "No members match your search."
+
+msgctxt "courses.ai"
+msgid "ai_drawer_title"
+msgstr "AI course assistant"
+
+msgctxt "courses.ai"
+msgid "ai_drawer_sub"
+msgstr "It suggests — you choose and confirm"
+
+msgctxt "courses.ai"
+msgid "prompt_label"
+msgstr "Describe the course briefly"
+
+msgctxt "courses.ai"
+msgid "prompt_placeholder"
+msgstr "E.g. “14 weeks, 2nd year, hands-on; from Python basics to OOP”"
+
+msgctxt "courses.ai"
+msgid "examples_label"
+msgstr "Examples"
+
+msgctxt "courses.ai"
+msgid "example_1"
+msgstr "15-week beginner course, one topic per week"
+
+msgctxt "courses.ai"
+msgid "example_2"
+msgstr "Hands-on, with official documentation links for each topic"
+
+msgctxt "courses.ai"
+msgid "example_3"
+msgstr "Continue the existing topics — fill in the remaining weeks"
+
+msgctxt "courses.ai"
+msgid "note_nothing_saved"
+msgstr ""
+"AI suggests topics and open resource links for each. Nothing is saved until "
+"you select and confirm; please open and check the links."
+
+msgctxt "courses.ai"
+msgid "action_generate"
+msgstr "Generate plan"
+
+msgctxt "courses.ai"
+msgid "generating_title"
+msgstr "AI is drafting the plan…"
+
+msgctxt "courses.ai"
+msgid "generating_sub"
+msgstr "This usually takes 10–30 seconds"
+
+msgctxt "courses.ai"
+msgid "review_title"
+msgstr "The plan is ready"
+
+msgctxt "courses.ai"
+msgid "review_sub"
+msgstr "{count} topics suggested — pick the ones you need"
+
+msgctxt "courses.ai"
+msgid "select_all"
+msgstr "All"
+
+msgctxt "courses.ai"
+msgid "resources_label"
+msgstr "Resources"
+
+msgctxt "courses.ai"
+msgid "action_apply_selected"
+msgstr "Add selected ({count})"
+
+msgctxt "courses.ai"
+msgid "applying"
+msgstr "Adding…"
+
+msgctxt "courses.ai"
+msgid "action_back"
+msgstr "Back"
+
+msgctxt "courses.ai"
+msgid "action_regenerate"
+msgstr "Regenerate"
+
+msgctxt "courses.ai"
+msgid "done_title"
+msgstr "Added to the course"
+
+msgctxt "courses.ai"
+msgid "done_action"
+msgstr "View course"
+
+msgctxt "courses.ai"
+msgid "error_generic"
+msgstr "The AI did not respond. Please try again in a moment."
+
+msgctxt "courses.ai"
+msgid "quota_remaining"
+msgstr "Requests left this hour: {count}"
+
+msgctxt "courses.ai"
+msgid "no_permission"
+msgstr "You are not allowed to change this course with AI."
+
+msgctxt "courses.ai"
+msgid "prompt_required"
+msgstr "Write a few words about the course."
+
+msgctxt "courses.ai"
+msgid "plan_empty"
+msgstr "The AI returned no usable plan. Refine the description and try again."
+
+msgctxt "courses.ai"
+msgid "nothing_selected"
+msgstr "No topics selected."
+
+msgctxt "courses.ai"
+msgid "apply_failed"
+msgstr "The suggestions could not be saved. Please try again."
+
+msgctxt "courses.ai"
+msgid "applied_summary"
+msgstr "Added {topics} topics and {resources} resources to the course."
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_mine"
+msgstr "My groups"
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_others"
+msgstr "Other groups"
+
+msgctxt "courses.partial.member_modal"
+msgid "group_in_course"
+msgstr "In course"
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_mine_empty"
+msgstr "No groups are assigned to you this semester. Search above."
+
+msgctxt "courses.partial.member_modal"
+msgid "groups_search_hint"
+msgstr "Type a name to find another group (e.g. “234 K”)."
+
+msgctxt "courses.view.message"
+msgid "unexpected_error"
+msgstr "An unexpected error occurred. Please try again."
+
+msgctxt "exams.service.ai_summary.error"
+msgid "ai_empty_prompt"
+msgstr "The request text is empty."
+
+msgctxt "courses.course_status"
+msgid "draft"
+msgstr "Draft"
+
+msgctxt "courses.course_status"
+msgid "published"
+msgstr "Published"
+
+msgctxt "courses.course_status"
+msgid "archived"
+msgstr "Archived"
+
+#, python-format
+msgctxt "assignment.section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "My answers (%(attempts)s)"
+
+msgctxt "assignment.section"
+msgid "Hələ başlamayıb"
+msgstr "Not started yet"
+
+#, python-format
+msgctxt "projects.section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "My answers (%(attempts)s)"
+
+#, python-format
+msgctxt "labs.template.lab_section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "My answers (%(attempts)s)"
+
+#, python-format
+msgctxt "exams.partial.exam_section"
+msgid "Cavablarım (%(attempts)s)"
+msgstr "My answers (%(attempts)s)"
+
+msgctxt "exams.partial.exam_section"
+msgid "Detallı imtahana bax"
+msgstr "View exam details"
+
+msgctxt "exams.partial.exam_modals"
+msgid "Form yüklənmədi. Yenidən cəhd edin."
+msgstr "The form could not be loaded. Please try again."
+
+msgctxt "exams.partial.exam_modals"
+msgid "Yadda saxlanılır..."
+msgstr "Saving..."
+
+msgctxt "assignments.views.message"
+msgid "Bu sorğu üsuluna icazə verilmir."
+msgstr "This request method is not allowed."
+
+msgctxt "assignments.views.message"
+msgid "Düzgün tələbə ID-si göndərilməlidir."
+msgstr "A valid student ID is required."
+
+msgctxt "assignments.views.message"
+msgid "Tələbə bu kursda tapılmadı."
+msgstr "The student was not found in this course."
+
+#, python-format
+msgctxt "assignments.views.message"
+msgid "%(name)s sərbəst işdən çıxarıldı."
+msgstr "%(name)s was removed from the assignment."
+
+msgctxt "labs.js.lab_modals"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "labs.template.lab_modals"
+msgid ""
+"Heç bir qrup və ya tələbə seçilməsə, lab kursun bütün tələbələrinə açıq "
+"olur."
+msgstr ""
+"If no group or student is selected, the lab is open to every student in the "
+"course."
+
+msgctxt "labs.js.manage_blocks"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "review.page"
+msgid "breadcrumb"
+msgstr "Breadcrumb"
+
+msgctxt "review.page"
+msgid "subtitle"
+msgstr "Review student submissions, add grades and feedback."
+
+msgctxt "review.page"
+msgid "summary"
+msgstr "Summary"
+
+msgctxt "review.page"
+msgid "summary_total"
+msgstr "Submissions"
+
+msgctxt "review.page"
+msgid "summary_pending"
+msgstr "To review"
+
+msgctxt "review.page"
+msgid "summary_graded"
+msgstr "Graded"
+
+msgctxt "review.page"
+msgid "summary_average"
+msgstr "Average"
+
+msgctxt "review.page"
+msgid "kind_assignment"
+msgstr "Assignment"
+
+msgctxt "review.page"
+msgid "kind_project"
+msgstr "Course project"
+
+msgctxt "review.page"
+msgid "select_all"
+msgstr "Select all"
+
+msgctxt "review.page"
+msgid "recheck_window"
+msgstr "Time left to re-check"
+
+msgctxt "review.page"
+msgid "empty_hint"
+msgstr "Submissions will appear here as students send them."
+
+msgid "Son tarix"
+msgstr "End date"
+
+msgctxt "review.page"
+msgid "kind_lab"
+msgstr "Lab work"
+
+msgctxt "review.page"
+msgid "summary_late"
+msgstr "Late"
+
+msgctxt "review.page"
+msgid "action_view"
+msgstr "View"
+
+msgctxt "courses.ai"
+msgid "busy"
+msgstr "Your previous plan is still being prepared — please wait a moment."
+
+msgctxt "courses.view.message"
+msgid "too_many_groups"
+msgstr "You can add at most 20 groups at a time."

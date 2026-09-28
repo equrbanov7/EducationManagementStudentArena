@@ -1,0 +1,5 @@
+{% load i18n %}
+{% comment %}Redaktə modalının forma gövdəsi — panel ilk render-də və EditCourseView
+xəta cavabında (JSON `html`) eyni partial-ı işlədir.{% endcomment %}
+{% csrf_token %}
+{% include "courses/partials/_course_form_fields.html" with form=edit_course_form is_edit=True %}

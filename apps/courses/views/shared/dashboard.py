@@ -19,18 +19,17 @@ from django.utils.translation import pgettext
 from django.views.generic import DetailView
 
 from apps.courses import dashboard_sources
-from apps.courses.forms import CourseResourceForm, CourseTopicForm
+from apps.courses.forms import CourseForm, CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
-from apps.exams.models import Exam, ExamAttempt, StudentGroup
+from apps.exams.models import Exam, ExamAttempt
 from apps.exams.public import DEFAULT_EXAM_LANGUAGE, available_language_options, without_disabled_practical_exams
+from apps.registrar.public import course_groups
 from core.helpers import (
     ASSIGNED_TASK_FILTER_CHOICES,
     _safe_same_origin_redirect_path,
     _tenant_scoped_courses,
 )
-from core.tenancy import get_request_organization, scoped_by_organization
-
-from ..shared._helpers import _student_users_queryset
+from core.tenancy import scoped_by_organization
 
 User = get_user_model()
 
@@ -58,6 +57,11 @@ def _build_exam_language_modal_context(exam):
 
 
 def _course_group_summaries(course):
+    """Kursdakı qruplar (``CourseMembership.group_name`` üzrə) — reyestr qrupu ilə zənginləşdirilir.
+
+    2026-09-28: əvvəl müəllim/fənn məlumatı köhnə ``exams.StudentGroup``-dan gəlirdi
+    (real bazada boş). İndi eyni adlı reyestr qrupunun ixtisası göstərilir.
+    """
     memberships = list(
         CourseMembership.objects.filter(course=course, role="student")
         .select_related("user")
@@ -69,53 +73,68 @@ def _course_group_summaries(course):
         group_name = (membership.group_name or "").strip()
         if group_name:
             grouped_memberships[group_name].append(membership)
-
     if not grouped_memberships:
         return []
 
-    student_groups = (
-        StudentGroup.objects.filter(
-            organization=course.organization,
-            name__in=grouped_memberships.keys(),
-        )
-        .select_related("teacher", "org_unit")
-        .prefetch_related("teachers", "subjects")
-        .order_by("name", "id")
+    specialty_by_name = course_groups.specialty_by_group_name(
+        organization=course.organization, names=grouped_memberships.keys()
     )
-    group_by_name = {}
-    for group in student_groups:
-        if group.name not in group_by_name or group.has_teacher(course.owner):
-            group_by_name[group.name] = group
 
     summaries = []
     for group_name, group_memberships in sorted(grouped_memberships.items()):
-        group = group_by_name.get(group_name)
         students = [membership.user for membership in group_memberships]
-        teacher_names = []
-        subject_names = []
-        org_unit_name = ""
-        if group is not None:
-            teacher_names.append(group.teacher.get_full_name() or group.teacher.username)
-            for teacher in group.teachers.all():
-                teacher_label = teacher.get_full_name() or teacher.username
-                if teacher_label not in teacher_names:
-                    teacher_names.append(teacher_label)
-            subject_names = [str(subject) for subject in group.subjects.all()]
-            org_unit_name = getattr(group.org_unit, "name", "") or ""
-
         summaries.append(
             {
-                "id": group.id if group else None,
                 "name": group_name,
                 "student_count": len(students),
-                "students_preview": students[:8],
-                "students_more_count": max(0, len(students) - 8),
-                "teacher_names": teacher_names,
-                "subject_names": subject_names,
-                "org_unit_name": org_unit_name,
+                "students_preview": students[:12],
+                "students_more_count": max(0, len(students) - 12),
+                "specialty": specialty_by_name.get(group_name.casefold(), ""),
             }
         )
     return summaries
+
+
+# Panel tabları (2026-09-28 redizayn): tablar SERVERDƏ qurulur — əvvəl JS
+# akkordeon başlıqlarından oxuyub sonradan çəkirdi (ilk boyada tab-bar yox idi,
+# izah mətnləri JS-də sərt kodlanmış AZ idi). Etiketlər bölmə partial-larının
+# mövcud tərcümə açarlarıdır; izahlar `courses.dashboard` kontekstindədir.
+_TAB_META = (
+    ("topics", "book", ("courses.partial.topic_accordion", "title_topics"), "hint_topics"),
+    ("assignments", "clip", ("assignment.section", "title"), "hint_assignments"),
+    ("labs", "flask", ("labs.template.lab_section", "section_title"), "hint_labs"),
+    ("exams", "doc", ("exams.partial.exam_section", "section_exams"), "hint_exams"),
+    ("projects", "flow", ("projects.section", "section_title"), "hint_projects"),
+    ("resources", "folder", ("courses.partial.resource_accordion", "Resources"), "hint_resources"),
+    ("members", "users", ("courses.partial.member_accordion", "title_members"), "hint_members"),
+)
+
+
+def _build_dashboard_tabs(context):
+    manage = context["can_manage_course"]
+    counts = {
+        "topics": len(context["topics"]),
+        "assignments": len(context["assignments"] if manage else context["assignments_with_user_data"]),
+        "labs": len(context["labs"] if manage else context["labs_with_user_data"]),
+        "exams": len(context["course_exams"] if manage else context["exams_with_data"]),
+        "projects": len(context["projects"] if manage else context["projects_with_user_data"]),
+        "resources": len(context["resources"]),
+        "members": len(context["members"]),
+    }
+    tabs = []
+    for key, icon, (label_ctx, label_id), hint_id in _TAB_META:
+        if key == "members" and not context["can_view_members"]:
+            continue
+        tabs.append(
+            {
+                "key": key,
+                "icon": icon,
+                "label": pgettext(label_ctx, label_id),
+                "hint": pgettext("courses.dashboard", hint_id),
+                "count": counts[key],
+            }
+        )
+    return tabs, counts
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -205,7 +224,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
         # resources-i həm sayır (badge), həm iterate edir — prefetch olmasa hər
         # ikisi topic başına ayrı sorğu idi (N+1).
         context["topics"] = course.topics.prefetch_related("resources").order_by("order")
-        context["resources"] = course.resources.all().order_by("-created_at")
+        context["resources"] = course.resources.select_related("topic").order_by("-created_at")
 
         # ═══════════════════════════════════════════════════════════════════
         # 3. ÜZVLƏR (Yalnız owner və assistant görür)
@@ -340,6 +359,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
             # Form instance-ları
             # ─────────────────────────────────────────────────────────────────
             context["topic_form"] = CourseTopicForm()
+            context["edit_course_form"] = CourseForm(instance=course)
             context["resource_form"] = CourseResourceForm()
 
             # ─────────────────────────────────────────────────────────────────
@@ -354,30 +374,12 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 .order_by("group_name")
             )
 
-            # ─────────────────────────────────────────────────────────────────
-            # Kursa əlavə olunmamış istifadəçilər (üzv əlavə etmək üçün)
-            # ─────────────────────────────────────────────────────────────────
-            course_user_ids = course.memberships.values_list("user_id", flat=True)
-            user_org = get_request_organization(self.request)
-            user_candidates = User.objects.exclude(id__in=course_user_ids)
-            if user_org is not None:
-                user_candidates = user_candidates.filter(profile__organization=user_org)
-            context["all_users"] = _student_users_queryset(user_candidates).order_by("username")
-
-            # ─────────────────────────────────────────────────────────────────
-            # Bütün qruplar (StudentGroup modelindən)
-            # ─────────────────────────────────────────────────────────────────
-            try:
-                qs = StudentGroup.objects.filter(teacher=user)
-                if user_org is not None:
-                    qs = qs.filter(organization=user_org)
-                context["all_groups"] = qs.order_by("name")
-            except ImportError:
-                context["all_groups"] = []
         else:
             # Owner deyilsə boş saxla
-            context["all_users"] = []
-            context["all_groups"] = []
             context["assignment_groups"] = []
 
+        context["dashboard_tabs"], context["tab_counts"] = _build_dashboard_tabs(context)
+        members = context["members"]
+        context["student_member_count"] = sum(1 for m in members if m.role == "student")
+        context["task_total"] = sum(context["tab_counts"][key] for key in ("assignments", "labs", "exams", "projects"))
         return context

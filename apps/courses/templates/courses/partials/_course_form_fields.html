@@ -67,6 +67,12 @@
     <span class="opt">{% trans "optional" context "courses.create_page" %}</span>
   </label>
 
+  {% if is_edit and course.cover_image_url %}
+  <div class="ems-cc-current">
+    <img src="{{ course.cover_image_url }}" alt="{% trans 'alt_current_cover' context 'courses.edit_page' %}">
+    <span>{% trans "label_current_image" context "courses.edit_page" %}</span>
+  </div>
+  {% endif %}
   <div class="ems-cc-cover" data-ems-cover>
     <div class="ems-cc-cover-ic">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
@@ -94,7 +100,9 @@
 {% comment %} Status — backend kursu həmişə "Qaralama" yaradır, ona görə məlumat qeydi göstərilir.
    Real sahə DOM-da gizli saxlanılır ki, forma kontraktı pozulmasın. {% endcomment %}
 <div class="ems-cc-hidden-field">{{ form.status }}</div>
+{% if not is_edit %}
 <div class="ems-cc-note">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
   <span>{% trans "help_created_as_draft" context "courses.create_page" %}</span>
 </div>
+{% endif %}

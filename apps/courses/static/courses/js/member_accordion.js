@@ -24,7 +24,13 @@
             var memberId = btn.dataset.memberId;
 
             // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-            var confirmed = await window.EMSConfirm.open({ body: cfg.dataset.i18nConfirmDeleteUser, danger: true });
+            var who = btn.dataset.memberName ? btn.dataset.memberName + "\n\n" : "";
+            var confirmed = await window.EMSConfirm.open({
+                title: cfg.dataset.i18nConfirmDeleteUserTitle,
+                body: who + cfg.dataset.i18nConfirmDeleteUser,
+                confirmLabel: cfg.dataset.i18nDelete,
+                danger: true
+            });
             if (!confirmed) { return; }
 
             btn.disabled = true;
@@ -47,6 +53,7 @@
                 }
 
                 var row = document.getElementById("member-row-" + memberId);
+                var wasStudent = !!(row && row.querySelector(".cd-avatar--student"));
                 if (row) { row.remove(); }
 
                 function decCountElement(el) {
@@ -65,7 +72,8 @@
 
                 decCountById("sidebar-members-count");
                 decCountById("accordion-members-count");
-                decCountBySelector('.snav-item[data-key="members"] .snav-count');
+                decCountBySelector('[data-count="members"]');
+                if (wasStudent) { decCountBySelector('[data-count="students"]'); }
 
             } catch (err) {
                 console.error(err);

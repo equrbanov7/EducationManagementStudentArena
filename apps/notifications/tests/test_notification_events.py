@@ -255,6 +255,10 @@ class NotificationEventFlowTests(TestCase):
             status="published",
             organization=self.organization,
         )
+        # 2026-09-28: tapşırıq yalnız KURSUN tələbələrinə verilir (students[] süzülür).
+        from apps.courses.models import CourseMembership
+
+        CourseMembership.objects.create(course=course, user=self.student, role="student")
 
         _login_with_org(self.client, self.teacher, self.organization)
         start_at = timezone.now() - timezone.timedelta(hours=1)

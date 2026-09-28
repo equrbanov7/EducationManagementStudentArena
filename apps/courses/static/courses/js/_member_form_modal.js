@@ -190,7 +190,24 @@
             list.appendChild(status);
         }
         status.className = "picker-status" + (isError ? " picker-status--error" : "");
+        status.removeAttribute("aria-hidden");
         status.textContent = text;
+    }
+
+    /** Yükləmə skeleti — «Yüklənir…» mətni əvəzinə sətir formalı yer tutucular. */
+    function showSkeleton(list) {
+        var status = list.querySelector("[data-student-picker-status]");
+        if (!status) {
+            status = document.createElement("div");
+            status.setAttribute("data-student-picker-status", "");
+            list.appendChild(status);
+        }
+        status.className = "picker-skeleton";
+        status.setAttribute("aria-hidden", "true");
+        status.textContent = "";
+        for (var i = 0; i < 4; i++) {
+            status.appendChild(document.createElement("span"));
+        }
     }
 
     function chipLabel(user) {
@@ -220,11 +237,15 @@
         var label = document.createElement("label");
         label.htmlFor = checkbox.id;
         label.className = "custom-item-label";
-        label.textContent = user.username || "";
-        if (user.full_name && user.full_name !== user.username) {
+        var hasName = user.full_name && user.full_name !== user.username;
+        var main = document.createElement("span");
+        main.className = "picker-user__name";
+        main.textContent = hasName ? user.full_name : (user.username || "");
+        label.appendChild(main);
+        if (hasName) {
             var muted = document.createElement("span");
-            muted.className = "text-muted";
-            muted.textContent = " (" + user.full_name + ")";
+            muted.className = "picker-user__login";
+            muted.textContent = "@" + user.username;
             label.appendChild(muted);
         }
 
@@ -279,7 +300,7 @@
         }
         if (!append) {
             clearRows();
-            setStatus(d.i18nLoading || "", false);
+            showSkeleton(list);
         }
 
         window.EMSCore
@@ -415,51 +436,6 @@
         }
         picker.page += 1;
         load(true);
-    });
-
-    /* ── Qrup seçicisi (müəllimin öz qrupları — kiçik siyahı, serverdən gəlir) ── */
-    function updateGroupCount() {
-        var container = byId("group_list_container");
-        var counter = byId("group_counter");
-        if (container && counter) {
-            counter.textContent = String(container.querySelectorAll('input[type="checkbox"]:checked').length);
-        }
-    }
-
-    function filterGroupRows(term) {
-        var container = byId("group_list_container");
-        if (!container) {
-            return;
-        }
-        var q = String(term || "").trim();
-        var match = searchMatcher(q);
-        Array.prototype.forEach.call(container.querySelectorAll(".list-item-row"), function (row) {
-            row.classList.toggle("is-hidden", q !== "" && !match(row.getAttribute("data-search") || ""));
-        });
-    }
-
-    window.EMSDelegate.on("show.bs.modal", "#addGroupModal", function () {
-        filterGroupRows("");
-        updateGroupCount();
-    });
-
-    window.EMSDelegate.on("input", "#group_search_input", function (event, input) {
-        filterGroupRows(input.value || "");
-    });
-
-    window.EMSDelegate.on("change", "#group_list_container .custom-item-checkbox", function () {
-        updateGroupCount();
-    });
-
-    window.EMSDelegate.on("click", "#group_list_container .list-item-row", function (event, row) {
-        if (event.target.closest("input, label")) {
-            return;
-        }
-        var checkbox = row.querySelector(".custom-item-checkbox");
-        if (checkbox) {
-            checkbox.checked = !checkbox.checked;
-            updateGroupCount();
-        }
     });
 
     /* ── Formaların AJAX göndərişi ─────────────────────────────────────────── */

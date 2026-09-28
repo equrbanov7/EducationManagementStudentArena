@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+Müəllimin «Təqdim olunan cavablar» səhifələrinin ortaq başlığı (sərbəst iş / kurs işi) — 2026-09-28.
+Çörək qırıntısı (kursa qayıt) + başlıq + status + xülasə göstəriciləri. Köhnə dizaynda
+«Geri» düyməsi səhifənin ən altında idi və tapşırıq üzrə heç bir xülasə görünmürdü.
+
+Kontekst: task_title, course_title, back_url, status_code, status_label, review_summary
+({total, pending, graded, average}), kind_label (məs. «Sərbəst iş»).
+{% endcomment %}
+<nav class="rv-crumbs" aria-label="{% trans 'breadcrumb' context 'review.page' %}">
+    <a href="{{ back_url }}" class="rv-crumbs__link">
+        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        {{ course_title }}
+    </a>
+    <span class="rv-crumbs__sep" aria-hidden="true">/</span>
+    <span class="rv-crumbs__cur" aria-current="page">{{ task_title }}</span>
+</nav>
+
+<header class="rv-head">
+    <div class="rv-head__main">
+        <div class="rv-head__eyebrow">
+            <span class="rv-kind">{{ kind_label }}</span>
+            <span class="ems-badge {% if status_code == 'active' or status_code == 'published' %}ems-badge--success{% elif status_code == 'draft' %}ems-badge--muted{% else %}ems-badge--warning{% endif %}">
+                <span class="ems-badge__dot"></span>{{ status_label }}
+            </span>
+        </div>
+        <h1 class="rv-head__title">{{ task_title }}</h1>
+        <p class="rv-head__sub">{% trans "subtitle" context "review.page" %}</p>
+    </div>
+    <ul class="rv-kpis" aria-label="{% trans 'summary' context 'review.page' %}">
+        <li class="rv-kpi"><b>{{ review_summary.total|default:0 }}</b><span>{% trans "summary_total" context "review.page" %}</span></li>
+        <li class="rv-kpi rv-kpi--warn"><b>{{ review_summary.pending|default:0 }}</b><span>{% trans "summary_pending" context "review.page" %}</span></li>
+        <li class="rv-kpi rv-kpi--ok"><b>{{ review_summary.graded|default:0 }}</b><span>{% trans "summary_graded" context "review.page" %}</span></li>
+        {% if "late" in review_summary %}
+        <li class="rv-kpi"><b>{{ review_summary.late|default:0 }}</b><span>{% trans "summary_late" context "review.page" %}</span></li>
+        {% else %}
+        <li class="rv-kpi"><b>{% if review_summary.average is not None %}{{ review_summary.average|floatformat:1 }}{% else %}—{% endif %}</b><span>{% trans "summary_average" context "review.page" %}</span></li>
+        {% endif %}
+    </ul>
+</header>

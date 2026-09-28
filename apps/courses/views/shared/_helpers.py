@@ -15,6 +15,7 @@ Authorization convention for this app
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils.translation import pgettext
 
@@ -38,9 +39,20 @@ def _get_owner_course_or_404(request, course_id):
     return get_object_or_404(_owner_courses_queryset(request), id=course_id)
 
 
-def _student_users_queryset(queryset):
-    """Filter a user queryset to only include students."""
-    return queryset.filter(profile__role__in=["student", "lead_student"]).distinct()
+_STUDENT_ROLE_NAMES = ("student", "lead_student")
+
+
+def _student_users_queryset(queryset, organization=None):
+    """Filter a user queryset to only include students.
+
+    2026-09-28: real bazada `profile.role` hamı üçün «member»-dir — tələbə statusu
+    təşkilat üzvlüyünün (`Membership.role`) adındadır. Yalnız `profile.role`-a
+    baxanda «Tələbə əlavə et» seçicisi HEÇ KİMİ tapmırdı. İndi hər iki mənbə.
+    """
+    membership_q = Q(memberships__is_active=True, memberships__role__name__in=_STUDENT_ROLE_NAMES)
+    if organization is not None:
+        membership_q &= Q(memberships__organization=organization)
+    return queryset.filter(Q(profile__role__in=_STUDENT_ROLE_NAMES) | membership_q).distinct()
 
 
 def _require_org_permission(request, permission):

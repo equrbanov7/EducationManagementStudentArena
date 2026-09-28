@@ -6,6 +6,10 @@
  * #labModalsConfig data-*; CSRF from EMSCore. escapeHtml from utils/escape.js.
  */
 (function () {
+    // İkiqat yüklənmədə (dashboard partial təkrar render) dinləyicilər təkrarlanmasın.
+    if (window._LAB_MODAL_V2) return;
+    window._LAB_MODAL_V2 = true;
+
     // Tolerant axtarış (EMSSearch: az↔en hərfləri, «234king» → «234 K ing»).
     // «İ».toLowerCase() = «i» + U+0307 (birləşən nöqtə) — mətndən atılır.
     function searchMatcher(query) {
@@ -41,6 +45,7 @@
         existingFile: ds.i18nExistingFile,
         buttonCreate: ds.i18nButtonCreate,
         buttonSave: ds.i18nButtonSave,
+        buttonDelete: ds.i18nButtonDelete,
         stateError: ds.i18nStateError
     };
 
@@ -106,6 +111,21 @@
         });
 
         state.autoSelectedStudentIds = nextAutoSelectedIds;
+    }
+
+    // Seçilmiş, amma siyahıda render olunmayan tələbələr (qrupsuz tələbə və ya
+    // siyahı hələ yüklənir) — forma yalnız görünən checkbox-ları göndərir,
+    // ona görə toxunulmamış redaktə onları itirirdi (2026-09-28).
+    function buildFormData(mode, form) {
+        var fd = new FormData(form);
+        var rendered = new Set();
+        document.querySelectorAll('#' + mode + 'LabStudentList input[name="student_ids[]"]').forEach(function(cb) {
+            rendered.add(cb.value);
+        });
+        getModeState(mode).selectedStudentIds.forEach(function(studentId) {
+            if (!rendered.has(studentId)) fd.append('student_ids[]', studentId);
+        });
+        return fd;
     }
 
     function openDeleteConfirmation(options) {
@@ -188,7 +208,7 @@
         openDeleteConfirmation({
             title: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || I18N.confirmDeleteLab,
             message: I18N.confirmDeleteLab,
-            confirmLabel: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || 'Sil',
+            confirmLabel: (trigger && trigger.textContent ? trigger.textContent.trim() : '') || I18N.buttonDelete,
             confirmButtonClass: 'btn btn-danger',
             onConfirm: function() {
                 return fetch(url, {
@@ -373,7 +393,7 @@
 
             fetch('/labs/create/' + COURSE_ID + '/', {
                 method: 'POST',
-                body: new FormData(this),
+                body: buildFormData('add', this),
                 headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
             })
             .then(r => r.json())
@@ -402,7 +422,7 @@
 
             fetch('/labs/' + labId + '/edit/', {
                 method: 'POST',
-                body: new FormData(this),
+                body: buildFormData('edit', this),
                 headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
             })
             .then(r => r.json())
@@ -418,23 +438,21 @@
         });
     }
 
-    var addGSearch = $('addLabGroupSearch');
-    if (addGSearch) {
-        addGSearch.addEventListener('input', function(e) {
+    // Qrup + tələbə siyahısı axtarışı (tolerant). 2026-09-28: tələbə axtarış
+    // inputlarının (add/editLabStudentSearch) dinləyicisi yox idi — yazmaq heç nə etmirdi.
+    [
+        ['addLabGroupSearch', 'addLabGroupList'],
+        ['editLabGroupSearch', 'editLabGroupList'],
+        ['addLabStudentSearch', 'addLabStudentList'],
+        ['editLabStudentSearch', 'editLabStudentList'],
+    ].forEach(function(pair) {
+        var input = $(pair[0]);
+        if (!input) return;
+        input.addEventListener('input', function(e) {
             var match = searchMatcher(e.target.value);
-            document.querySelectorAll('#addLabGroupList .lab-chk-row').forEach(function(row) {
+            document.querySelectorAll('#' + pair[1] + ' .lab-chk-row').forEach(function(row) {
                 row.style.display = match(row.textContent) ? '' : 'none';
             });
         });
-    }
-
-    var editGSearch = $('editLabGroupSearch');
-    if (editGSearch) {
-        editGSearch.addEventListener('input', function(e) {
-            var match = searchMatcher(e.target.value);
-            document.querySelectorAll('#editLabGroupList .lab-chk-row').forEach(function(row) {
-                row.style.display = match(row.textContent) ? '' : 'none';
-            });
-        });
-    }
+    });
 })();

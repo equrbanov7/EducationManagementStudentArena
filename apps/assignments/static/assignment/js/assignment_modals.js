@@ -116,6 +116,20 @@
         state.autoSelectedStudentIds = nextAutoSelectedIds;
     }
 
+    // Seçilmiş, amma siyahıda render olunmayan tələbələr (qrupsuz tələbə və ya
+    // siyahı hələ yüklənir) — forma yalnız görünən checkbox-ları göndərir,
+    // ona görə toxunulmamış redaktə onları itirirdi (2026-09-28).
+    function buildFormData(mode, form) {
+        const fd = new FormData(form);
+        const rendered = new Set(
+            Array.from(document.querySelectorAll(`#${mode}AsnStudentList input[name="students[]"]`)).map(cb => cb.value)
+        );
+        getModeState(mode).selectedStudentIds.forEach(studentId => {
+            if (!rendered.has(studentId)) fd.append('students[]', studentId);
+        });
+        return fd;
+    }
+
     function loadingHtml() {
         return '<div class="d-flex flex-column gap-2 p-2" aria-hidden="true">'
             + '<span class="skeleton skeleton-line skeleton-line--sm"></span>'
@@ -263,7 +277,7 @@
 
         fetch(`/assignments/create/${COURSE_ID}/`, {
             method: 'POST',
-            body: new FormData(e.target),
+            body: buildFormData('add', e.target),
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
@@ -325,7 +339,7 @@
 
         fetch(`/assignments/${assignmentId}/edit/`, {
             method: 'POST',
-            body: new FormData(e.target),
+            body: buildFormData('edit', e.target),
             headers: {'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())

@@ -18,6 +18,17 @@ from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_fi
 
 from .models import Course, CourseResource, CourseTopic
 
+# Kurs statusunun TƏRCÜMƏ olunan etiketləri (2026-09-28). Modeldəki
+# `Course.STATUS_CHOICES` etiketləri sərt kodlanmış AZ-dır («Draft (yayımlanmayıb)»)
+# və dil dəyişəndə qalırdı; modeli dəyişmək miqrasiya tələb edir, ona görə forma
+# və şablonlar bu siyahını işlədir.
+COURSE_STATUS_CHOICES = (
+    ("draft", pgettext_lazy("courses.course_status", "draft")),
+    ("published", pgettext_lazy("courses.course_status", "published")),
+    ("archived", pgettext_lazy("courses.course_status", "archived")),
+)
+
+
 # ════════════════════════════════════════════════════════════════════════════
 # COURSE FORM (Kurs Yaratma/Redaksiya)
 # ════════════════════════════════════════════════════════════════════════════
@@ -54,6 +65,8 @@ class CourseForm(forms.ModelForm):
         initial_organization = kwargs.pop("initial_organization", None)
         super().__init__(*args, **kwargs)
         self._clear_missing_cover_image = False
+        if "status" in self.fields:
+            self.fields["status"].choices = COURSE_STATUS_CHOICES
 
         if allow_organization_selection:
             from apps.organizations.models import Organization
