@@ -10,6 +10,7 @@ enum. This layer is additive and never blocks the domain action.
 
 from __future__ import annotations
 
+from apps.registrar.audit_write import create_audit_row
 from apps.registrar.models import AcademicStatus
 
 
@@ -26,20 +27,16 @@ def audit_status_change(*, record, previous, by_user=None, reason="") -> None:
     the status change."""
     if previous is None or previous == record.status:
         return
-    try:
-        from django.apps import apps as django_apps
+    # Audit 2026-09-28 DB-01: SAVEPOINT-li yazı — audit xətası status
+    # tranzaksiyasını səssizcə geri qaytarmır, loga düşür.
+    from core.constants import AuditAction
 
-        from core.constants import AuditAction
-
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=record.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.student_status",
-            resource_id=str(record.pk),
-            resource_repr=f"{record.student_id} · {record.program.display_label}",
-            reason=reason or f"Akademik status: {previous} → {record.status}",
-        )
-    except Exception:  # noqa: BLE001 — audit must never block the domain action
-        pass
+    create_audit_row(
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=record.organization,
+        action=AuditAction.UPDATE,
+        resource_type="registrar.student_status",
+        resource_id=str(record.pk),
+        resource_repr=f"{record.student_id} · {record.program.display_label}",
+        reason=reason or f"Akademik status: {previous} → {record.status}",
+    )

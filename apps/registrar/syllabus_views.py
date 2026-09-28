@@ -26,6 +26,7 @@ from apps.syllabus import public as syllabus_services
 from apps.syllabus.public import build_document
 
 from . import journal_access
+from .audit_write import create_audit_row
 
 MODE_STAFF = "staff"
 MODE_STUDENT = "student"
@@ -131,24 +132,20 @@ def offering_syllabus_pdf(request, offering_id):
 
 
 def _audit_download(offering, version, by_user):
-    """Best-effort audit qeydi — mövcud ``audit_auditlog`` jurnalı (yeni jurnal YOX)."""
-    try:
-        from django.apps import apps as django_apps
+    """Best-effort audit qeydi — mövcud ``audit_auditlog`` jurnalı (yeni jurnal YOX).
 
-        from core.constants import AuditAction
+    Audit 2026-09-28 DB-01: SAVEPOINT-li yazı (audit_write)."""
+    from core.constants import AuditAction
 
-        AuditLog = django_apps.get_model("audit", "AuditLog")
-        AuditLog.objects.create(
-            user=by_user if getattr(by_user, "pk", None) else None,
-            organization=offering.organization,
-            action=AuditAction.UPDATE,
-            resource_type="registrar.syllabus_pdf",
-            resource_id=str(version.pk),
-            resource_repr=f"{offering.subject.code} sillabusu {version.label} — PDF",
-            reason="Sillabus PDF olaraq yükləndi.",
-        )
-    except Exception:  # noqa: BLE001 — audit heç vaxt yükləməni bloklamır
-        pass
+    create_audit_row(
+        user=by_user if getattr(by_user, "pk", None) else None,
+        organization=offering.organization,
+        action=AuditAction.UPDATE,
+        resource_type="registrar.syllabus_pdf",
+        resource_id=str(version.pk),
+        resource_repr=f"{offering.subject.code} sillabusu {version.label} — PDF",
+        reason="Sillabus PDF olaraq yükləndi.",
+    )
 
 
 __all__ = ["MODE_STAFF", "MODE_STUDENT", "offering_syllabus_json", "offering_syllabus_pdf"]

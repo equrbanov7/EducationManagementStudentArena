@@ -268,6 +268,7 @@ def save_component_scores(
     bypass_edit_window=False,
     require_all=False,
     fail_closed_audit=False,
+    report=False,
 ):
     """Persist per-(component, enrollment) scores. ``entries`` = list of
     ``{"component_id", "enrollment_id", "score"}``. Lock-aware + tenant-safe.
@@ -279,6 +280,11 @@ def save_component_scores(
     ``require_all`` rubrik roll-up kimi atomik çağıranlar üçündür: hər entry
     qəbul edilməzsə bütün transaction ``ValidationError`` ilə geri qaytarılır.
     Mövcud UI çağıranları üçün default best-effort davranış dəyişmir.
+
+    Audit 2026-09-28 J-03: best-effort yolda rəqəm olmayan / sonsuz dəyər
+    («abc», «NaN», «Infinity») əvvəl 0-a, 500-ə və ya maksimuma çevrilirdi. İndi
+    həmin xana YAZILMIR (mövcud bal toxunulmaz qalır) və ``rejected`` sayına düşür;
+    ``report=True`` → ``{"written", "rejected"}``.
     """
     from contextlib import nullcontext
 
@@ -292,14 +298,14 @@ def save_component_scores(
                 "Komponent balı paketi siyahı olmalıdır.",
                 code="component_score_batch_rejected",
             ) from None
-        return 0
+        return {"written": 0, "rejected": 0} if report else 0
     if journal_is_locked(offering):
         if require_all:
             raise ValidationError(
                 "Jurnal kilidli olduğu üçün komponent balları tam yazılmadı.",
                 code="component_score_batch_rejected",
             )
-        return 0
+        return {"written": 0, "rejected": 0} if report else 0
 
     component_query = AssessmentComponent.objects.filter(offering=offering)
     enrollment_query = offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
@@ -316,6 +322,7 @@ def save_component_scores(
         )
     written = 0
     processed = 0
+    rejected = 0
     seen_targets = set()
     audit_changes = []
     notify_events = []
@@ -389,7 +396,11 @@ def save_component_scores(
                         code="component_score_batch_rejected",
                     )
             else:
-                score = max(Decimal("0"), min(_to_decimal(raw), Decimal(component.max_score)))
+                score = _parse_finite(raw)
+                if score is None:
+                    rejected += 1
+                    continue
+                score = max(Decimal("0"), min(score, Decimal(component.max_score)))
             ComponentScore.objects.update_or_create(
                 organization=offering.organization,
                 component=component,
@@ -423,7 +434,16 @@ def save_component_scores(
         from apps.registrar import journal_notifications as jn
 
         _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
-    return written
+    return {"written": written, "rejected": rejected} if report else written
+
+
+def _parse_finite(raw):
+    """J-03: bal mətni → sonlu ``Decimal``; rəqəm olmayan / NaN / Infinity → ``None``."""
+    try:
+        value = Decimal(str(raw).strip())
+    except (ArithmeticError, TypeError, ValueError):
+        return None
+    return value if value.is_finite() else None
 
 
 def _component_change(component, enrollment, old_score, new_score):

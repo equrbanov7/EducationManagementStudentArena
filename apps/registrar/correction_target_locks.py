@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from .models import (
     AssessmentComponent,
     ComponentScore,
+    CourseOffering,
     CourseWork,
     Enrollment,
     Lesson,
@@ -52,6 +53,10 @@ def lock_grade_for_reversal(correction):
 
 
 def lock_lesson(lesson):
+    # Audit 2026-09-28 J-02: ``update_lesson`` indi dublikat-slot yoxlaması üçün açılış
+    # sətrini kilidləyir — layihənin kilid sırası (açılış → dərs) burada da qorunsun,
+    # yoxsa müəllimin redaktəsi ilə sənədli düzəliş bir-birini deadlock edə bilər.
+    CourseOffering.objects.select_for_update().filter(pk=lesson.offering_id).values_list("pk", flat=True).first()
     return Lesson.objects.select_for_update().get(pk=lesson.pk)
 
 

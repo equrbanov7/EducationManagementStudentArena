@@ -12,14 +12,13 @@ from __future__ import annotations
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, grade_audit, gradebook, journal_scope, legacy_excuse, lesson_rooms, schedule
+from . import campus, finals, grade_audit, gradebook, legacy_excuse, lesson_rooms, schedule
 from .models import AttendanceStatus, CorrectionReason, LessonKind
 
 
@@ -107,7 +106,9 @@ def journal_detail(request, offering_id):
         if action == "add_lesson":
             return _handle_add_lesson(request, offering)
         if action == "save_finals":
-            return _handle_save_finals(request, offering)
+            from .journal_finals import handle_save_finals  # J-01: ExamScoreEntry üzərindən
+
+            return handle_save_finals(request, offering)
         if action == "save_components":
             return _handle_save_components(request, offering)
         if action == "save_component_scores":
@@ -359,73 +360,11 @@ def _handle_save_component_scores(request, offering):
             continue
         _prefix, component_id, enrollment_id = parts
         entries.append({"component_id": component_id, "enrollment_id": enrollment_id, "score": raw})
-    written = gradebook.save_component_scores(offering=offering, entries=entries, by_user=request.user)
-    messages.success(request, _("Komponent balları yadda saxlanıldı (%(n)s xana).") % {"n": written})
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    from .journal_finals import warn_rejected_scores
 
-
-def _can_write_finals(user, offering) -> bool:
-    """Yekun imtahan / təkrar balı — YALNIZ `final_score.entry` daşıyan aktor (İmtahan
-    Mərkəzi) və ya superuser.  Müəllim jurnal redaktoru olsa da bu sahəni yazmır
-    (UI-da sahə yoxdur; crafted POST ilə yazıla bilirdi — QA 2026-09-05 JOURNAL-TEACHER-08)."""
-    if getattr(user, "is_superuser", False):
-        return True
-    scope = journal_scope.permission_scope_for(user, offering.organization, "final_score.entry")
-    return scope.has_structure_access
-
-
-@transaction.atomic  # F-07 (2026-09-14): sətir-sətir servis çağırışları BİR tranzaksiyada — yarımçıq toplu yazı olmasın
-def _handle_save_finals(request, offering):
-    """Yekun imtahan/təkrar balı (exam__/resit__) + bonus-rəy (bonus__/fcomment__).
-
-    Bal sahəsi `final_score.entry` tələb edir (İmtahan Mərkəzi); bonus/rəy (U15)
-    isə jurnal redaktorunundur. Ona görə icazəsiz aktorda bütün əməl 404 olmur —
-    yalnız bal açarları nəzərə alınmır (QA 2026-09-05 JOURNAL-TEACHER-08).
-    """
-    can_write_scores = _can_write_finals(request.user, offering)
-    if getattr(offering, "assessment_scheme", None) and offering.assessment_scheme.is_published:
-        messages.warning(request, _("Jurnal yekunlaşdırılıb — nəticə redaktəsi bağlıdır."))
-        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-
-    enrollments = {str(e.id): e for e in offering.enrollments.all()}
-    extras: dict = {}
-    refused_scores = False
-    for key, raw in request.POST.items():
-        if key.startswith("exam__"):
-            if not can_write_scores:
-                refused_scores = True
-                continue
-            enrollment = enrollments.get(key[len("exam__") :])
-            if enrollment is not None:
-                finals.set_exam_score(enrollment=enrollment, score=raw, by_user=request.user)
-        elif key.startswith("resit__"):
-            if not can_write_scores:
-                refused_scores = True
-                continue
-            enrollment = enrollments.get(key[len("resit__") :])
-            if enrollment is not None and raw.strip() != "":
-                finals.set_resit_score(enrollment=enrollment, score=raw, by_user=request.user)
-        elif key.startswith("bonus__"):
-            enrollment = enrollments.get(key[len("bonus__") :])
-            if enrollment is not None:
-                extras.setdefault(enrollment.id, {"enrollment": enrollment})["bonus"] = raw or "0"
-        elif key.startswith("fcomment__"):
-            enrollment = enrollments.get(key[len("fcomment__") :])
-            if enrollment is not None:
-                extras.setdefault(enrollment.id, {"enrollment": enrollment})["comment"] = raw
-    # Bonus/cərimə + rəy (U15) — bal daxil edilməsindən SONRA yazılır ki,
-    # evaluate_resit yekun vəziyyəti bonuslu total ilə görsün.
-    for data in extras.values():
-        finals.set_final_extras(
-            enrollment=data["enrollment"],
-            bonus=data.get("bonus"),
-            comment=data.get("comment"),
-            by_user=request.user,
-        )
-    if refused_scores:
-        messages.warning(request, _("İmtahan/təkrar balını yalnız İmtahan Mərkəzi yaza bilər — bu sahələr yazılmadı."))
-    else:
-        messages.success(request, _("Yekun nəticələr yadda saxlanıldı."))
+    result = gradebook.save_component_scores(offering=offering, entries=entries, by_user=request.user, report=True)
+    warn_rejected_scores(request, result["rejected"])  # J-03: rəqəm olmayan xana 0-a çevrilmir
+    messages.success(request, _("Komponent balları yadda saxlanıldı (%(n)s xana).") % {"n": result["written"]})
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 

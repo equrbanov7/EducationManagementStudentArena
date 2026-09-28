@@ -153,6 +153,15 @@ def apply_correction(
             raise ValidationError(
                 pgettext("registrar.correction", "Lecture cells hold no score — only attendance can be corrected.")
             )
+        # Audit 2026-09-28 J-05: qayıb / üzrlü qayıb xanasında bal olmur (save_marks ilə eyni
+        # qayda) — sənədli düzəliş də qayıb tələbəyə bal yaza bilməz; əvvəl davamiyyət düzəldilir.
+        if not was_empty and mark.status in (AttendanceStatus.ABSENT, AttendanceStatus.EXCUSED):
+            raise ValidationError(
+                pgettext(
+                    "registrar.correction",
+                    "Absent (or excused) cells hold no score — correct the attendance first.",
+                )
+            )
         score = _clean_int_score(new_score)
         correction.old_score = None if was_empty else (int(mark.score) if mark.score is not None else None)
         correction.new_score = score
@@ -247,7 +256,7 @@ def apply_lesson_correction(
     Bal düzəlişi ilə eyni müqavilə: səbəb + qeyd + PDF MƏCBURİ; 2 saatlıq
     pəncərə + keçmiş-tarix qadağası keçilir; dəyişiklik audit olunur. Ən azı bir
     sahə dəyişməlidir (əks halda ``ValidationError``)."""
-    from .gradebook import update_lesson
+    from .gradebook import LessonRuleError, update_lesson
 
     if reason not in CorrectionReason.values:
         raise ValidationError(pgettext("registrar.correction", "Choose a correction reason."))
@@ -274,18 +283,22 @@ def apply_lesson_correction(
     }
     old_instructor = lesson.instructor
     kind = new_kind if (new_kind in dict(LessonKind.choices)) else None
-    ok = update_lesson(
-        lesson=lesson,
-        date=new_date or None,
-        kind=kind,
-        topic=new_topic,
-        hours=new_hours,
-        start_time=new_start_time,
-        end_time=new_end_time,
-        instructor=new_instructor,
-        allow_past=True,
-        allow_locked=True,
-    )
+    try:
+        ok = update_lesson(
+            lesson=lesson,
+            date=new_date or None,
+            kind=kind,
+            topic=new_topic,
+            hours=new_hours,
+            start_time=new_start_time,
+            end_time=new_end_time,
+            instructor=new_instructor,
+            allow_past=True,
+            allow_locked=True,
+            audit=False,  # bu yol öz audit izini (LessonCorrection + log) yazır
+        )
+    except LessonRuleError as exc:  # J-02: saat aralığı / dublikat slot — forma xətası, 500 deyil
+        raise ValidationError(str(exc)) from exc
     if not ok:
         raise ValidationError(
             pgettext("registrar.correction", "The journal is published — the lesson can't be changed.")

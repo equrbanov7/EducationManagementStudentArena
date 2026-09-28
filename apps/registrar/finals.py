@@ -13,8 +13,9 @@ from __future__ import annotations
 import dataclasses
 from decimal import Decimal, InvalidOperation
 
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.utils.translation import pgettext
 
 from apps.registrar import (
     absence_limit,
@@ -43,11 +44,22 @@ def score_to_letter(total, organization=None) -> tuple[str, Decimal]:
     return grading_scale.score_to_letter(total, organization)
 
 
+_CTX = "registrar.finals"
+
+
 def _to_decimal(raw) -> Decimal:
+    """Bal mətni → ``Decimal``; rəqəm olmayan / sonsuz dəyər ``ValidationError``.
+
+    Audit 2026-09-28 J-01: əvvəl zibil («abc») səssizcə ``0`` olurdu (mövcud
+    40 bal 0-a düşürdü), «NaN» isə müqayisədə 500 verirdi. İndi xana RƏDD olunur
+    — çağıran onu buraxıb xəta kimi göstərir, heç vaxt 0-a çevirmir."""
     try:
-        return Decimal(str(raw))
+        value = Decimal(str(raw).strip())
     except (InvalidOperation, TypeError, ValueError):
-        return Decimal("0")
+        raise ValidationError(pgettext(_CTX, "Bal rəqəm olmalıdır."))
+    if not value.is_finite():
+        raise ValidationError(pgettext(_CTX, "Bal rəqəm olmalıdır."))
+    return value
 
 
 def _clamp(raw, ceiling) -> Decimal:

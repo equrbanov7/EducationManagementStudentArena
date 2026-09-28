@@ -24,6 +24,7 @@ from django.views.decorators.http import require_POST
 from core.http_ids import parse_uuid
 
 from . import corrections, gradebook
+from .journal_access import writable_offering_or_404
 from .models import (
     AssessmentComponent,
     AttendanceStatus,
@@ -204,7 +205,8 @@ def correction_apply(request, offering_id):
     """Bir jurnal xanasına rəsmi düzəliş tətbiq et (multipart: PDF sənəd daxil)."""
     _require_corrector(request)
     org = _active_org(request)
-    offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
+    # J-09 (audit 2026-09-28): ləğv edilmiş açılışa sənədli düzəliş də yazılmır.
+    offering = writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
 
     target = (request.POST.get("target") or "grade").strip()
     try:
@@ -244,7 +246,8 @@ def correction_delete(request, offering_id):
     """Append-only ledger ilə seçilmiş son düzəlişi geri al."""
     _require_corrector(request)
     org = _active_org(request)
-    offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
+    # J-09 (audit 2026-09-28): ləğv edilmiş açılışa sənədli düzəliş də yazılmır.
+    offering = writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
     try:
         ok = _revert_requested_correction(request, offering)
     except ValidationError as exc:
