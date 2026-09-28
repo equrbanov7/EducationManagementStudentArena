@@ -223,7 +223,7 @@ def _resolve_actor(attempt, actor):
     return None
 
 
-def sync_attempt_to_journal(attempt, *, actor=None):
+def sync_attempt_to_journal(attempt, *, actor=None, appeal_id=None):
     """Bitmiş imtahan cəhdinin nəticəsini registrar ``FinalGrade``-ə yaz.
 
     İmtahan bir jurnal fənninə bağlı deyilsə (``exam.subject`` null) no-op.
@@ -275,13 +275,15 @@ def sync_attempt_to_journal(attempt, *, actor=None):
             score_percent=percent,
             is_expelled=is_expelled,
             by_user=by_user,
+            # Audit 2026-09-28 EXA-03: apellyasiya qərarı → ledger-də «apellyasiya» sətri.
+            appeal_id=appeal_id,
         )
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("journal_sync: failed to write attempt %s to FinalGrade", getattr(attempt, "id", "?"))
         return _skip(SKIP_WRITE_FAILED, attempt, level=None)
 
 
-def schedule_journal_sync(attempt, *, actor=None):
+def schedule_journal_sync(attempt, *, actor=None, appeal_id=None):
     """Jurnal yazısını TRANZAKSİYA TƏSDİQİNDƏN SONRAYA planla.
 
     Cəhd/bal yazısı geri qayıdarsa (rollback) jurnala yalan nəticə düşməsin;
@@ -289,7 +291,7 @@ def schedule_journal_sync(attempt, *, actor=None):
     atomik blok yoxdursa callback-i dərhal işlədir — hər iki halda doğru."""
     from django.db import transaction
 
-    transaction.on_commit(lambda: sync_attempt_to_journal(attempt, actor=actor))
+    transaction.on_commit(lambda: sync_attempt_to_journal(attempt, actor=actor, appeal_id=appeal_id))
 
 
 def registrar_block_reason(request, exam):

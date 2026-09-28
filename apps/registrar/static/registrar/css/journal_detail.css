@@ -374,3 +374,5 @@
 .jd2-attempt { font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 999px; }
 .jd2-attempt.is-official { background: #dcfce7; color: #15803d; }
 .jd2-attempt.is-superseded { background: #f1f5f9; color: #64748b; text-decoration: line-through; }
+/* Audit 2026-09-28 EXA-03: apellyasiya sətri cəhd tarixçəsində */
+.jd2-attempt.is-appeal { background: #eff6ff; color: #1d4ed8; }

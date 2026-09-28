@@ -162,7 +162,7 @@ def _ensure_attempt_graded(attempt, exam):
         )
 
 
-def _schedule_journal_sync(attempt, *, actor):
+def _schedule_journal_sync(attempt, *, actor, appeal_id=None):
     """Qərardan sonra rəsmi qiyməti (elektron jurnal) yenilə.
 
     ``apps.exams.public`` fasadı üzərindən — appeals→exams istiqaməti legitim,
@@ -170,7 +170,7 @@ def _schedule_journal_sync(attempt, *, actor):
     try:
         from apps.exams.public import schedule_journal_sync
 
-        schedule_journal_sync(attempt, actor=actor)
+        schedule_journal_sync(attempt, actor=actor, appeal_id=appeal_id)
     except Exception:
         logger.warning("Appeal journal sync scheduling failed.", exc_info=True)
 
@@ -319,7 +319,7 @@ def accept_appeal_item(item, *, reviewer, response_text="", request=None, awarde
     _audit_score_change(request, reviewer, attempt, appeal=appeal, adjustment=adjustment)
     # 2026-08 auditi (G10): qərar RƏSMİ qiymətə (elektron jurnal) də çatmalıdır —
     # əvvəl bal yalnız ScoreAdjustment-da qalırdı. Aktor = reviewer.
-    _schedule_journal_sync(attempt, actor=reviewer)
+    _schedule_journal_sync(attempt, actor=reviewer, appeal_id=appeal.pk)
     recompute_appeal_status(appeal, reviewer=reviewer)
     return adjustment
 
@@ -397,7 +397,7 @@ def revert_item_adjustment(item, *, reviewer=None, request=None):
     adjustment.reverted = True
     adjustment.save(update_fields=["reverted"])
     _audit_score_revert(request, reviewer, adjustment)
-    _schedule_journal_sync(attempt, actor=reviewer)
+    _schedule_journal_sync(attempt, actor=reviewer, appeal_id=adjustment.appeal_item.appeal_id)
     return adjustment
 
 
