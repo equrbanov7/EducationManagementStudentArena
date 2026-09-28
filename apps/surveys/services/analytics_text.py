@@ -24,6 +24,7 @@ from ..constants import DEFAULT_MIN_GROUP_SIZE, QuestionKind, Section
 from ..models import SurveyAnswer, SurveyCampaign
 from . import filters as flt
 from .analytics import is_visible
+from .analytics_units import has_unit_filter, publishable_units_by_campaign
 
 #: Ekranda göstərilən təklif sayının tavanı (qalanı axtarışla daraldılır).
 SUGGESTION_LIMIT = 200
@@ -157,11 +158,18 @@ def _visible_campaigns(organization, scope, filters, campaign_ids):
     thresholds = dict(
         SurveyCampaign.objects.filter(pk__in=list(counts)).values_list("pk", "min_group_size") if counts else []
     )
+    units = {}
+    if counts and has_unit_filter(filters):
+        # Audit 2026-09-28 SV-1: fakültə filtri — mətnlər yalnız həmin kampaniyada dərc olunan vahid üçün.
+        units = publishable_units_by_campaign(organization, scope, filters, list(counts), section=Section.GENERAL)
     visible = []
     for campaign_id, count in counts.items():
         k = max(int(thresholds.get(campaign_id) or DEFAULT_MIN_GROUP_SIZE), DEFAULT_MIN_GROUP_SIZE)
-        if is_visible(count, k, wide.get(campaign_id) if narrowed else None):
-            visible.append(campaign_id)
+        if not is_visible(count, k, wide.get(campaign_id) if narrowed else None):
+            continue
+        if has_unit_filter(filters) and not (campaign_id in units and units[campaign_id].allows(filters)):
+            continue
+        visible.append(campaign_id)
     return base, counts, visible
 
 

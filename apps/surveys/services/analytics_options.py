@@ -25,7 +25,7 @@ from . import filters as flt
 def campaign_choices(organization) -> list:
     """Dövr seçicisi üçün YÜNGÜL kampaniya siyahısı (1 sorğu, yeni dövr birinci):
     ``[{"id", "period_id", "period_name", "academic_year", "start_date",
-    "effective_status", "min_group_size"}]`` — ``campaigns_for``-dan fərqli olaraq
+    "effective_status", "min_group_size", "results_published"}]`` — ``campaigns_for``-dan fərqli olaraq
     cavab/qəbz saylarını hesablamır."""
     from django.utils import timezone
 
@@ -43,6 +43,7 @@ def campaign_choices(organization) -> list:
             "start_date": campaign.period.start_date,
             "effective_status": campaign.effective_status(today),
             "min_group_size": campaign.min_group_size,
+            "results_published": campaign.results_published_at is not None,
         }
         for campaign in SurveyCampaign.objects.filter(organization=organization)
         .select_related("period")

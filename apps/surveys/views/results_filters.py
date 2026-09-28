@@ -223,6 +223,8 @@ def resolve(request, *, with_choices=False):
     if not scope.has_structure_access:
         return None
     campaigns = public.campaign_choices(organization)
+    # Audit 2026-09-28 SV-2/SV-3: effektiv bağlı kampaniyanın ilk dərci (bufer köçürülür, dəst donur).
+    public.publish_due(campaigns)
     query = parse_query(request.GET, campaigns)
     filters = query.filters
     campaign_ids = list(query.period.campaign_ids)

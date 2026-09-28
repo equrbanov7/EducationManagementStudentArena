@@ -47,11 +47,12 @@ Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.
         </header>
 
         <dl class="svc-stats">
-            <div><dt>{% trans "Cavablar" context "surveys.cabinet" %}</dt><dd>{{ row.responses }}</dd></div>
-            <div><dt>{% trans "Doldurulmuş hədəf" context "surveys.cabinet" %}</dt><dd>{{ row.receipts }}</dd></div>
+            {# Audit 2026-09-28 SV-4: saylar səbətlə («<5», «5+», …), faiz 5-ə yuvarlaq — dəqiq say yoxdur. #}
+            <div><dt>{% trans "Cavablar" context "surveys.cabinet" %}</dt><dd>{{ row.responses_label }}</dd></div>
+            <div><dt>{% trans "Doldurulmuş hədəf" context "surveys.cabinet" %}</dt><dd>{{ row.receipts_label }}</dd></div>
             {% if row.participation %}
             <div><dt>{% trans "Gözlənilən" context "surveys.cabinet" %}</dt><dd>{{ row.participation.expected }}</dd></div>
-            <div><dt>{% trans "İştirak" context "surveys.cabinet" %}</dt><dd>{% if row.participation.rate is not None %}{% widthratio row.participation.rate 1 100 %}%{% else %}—{% endif %}</dd></div>
+            <div><dt>{% trans "İştirak" context "surveys.cabinet" %}</dt><dd>{% if row.participation.rate is not None %}≈ {{ row.participation.rate }}%{% else %}—{% endif %}</dd></div>
             {% endif %}
             <div><dt>{% trans "Açılış" context "surveys.cabinet" %}</dt><dd>{{ row.opens_on|date:"d.m.Y"|default:"—" }}</dd></div>
             <div><dt>{% trans "Bağlanma" context "surveys.cabinet" %}</dt><dd>{{ row.closes_on|date:"d.m.Y"|default:"—" }}</dd></div>
