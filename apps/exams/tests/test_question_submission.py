@@ -188,7 +188,9 @@ class SubmissionServiceTests(_Base):
         self.assertEqual(bank.organization, self.org)
         self.assertEqual(BankQuestion.objects.filter(bank=bank).count(), 2)
         first = BankQuestion.objects.filter(bank=bank).order_by("id").first()
-        self.assertTrue(first.options.filter(label="A", is_correct=True).exists())
+        # Audit 2026-09-28 EX28-01: variantlar təsadüfi sıra ilə yaradılıb yenidən hərflənir —
+        # düzgünlük mətnə bağlıdır («*A) Bakı»), hərf təsadüfidir.
+        self.assertTrue(first.options.filter(text="Bakı", is_correct=True).exists())
         # Müəllimə qərar bildirişi.
         self.assertTrue(InAppNotification.objects.filter(recipient=self.teacher).exists())
 

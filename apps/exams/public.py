@@ -67,6 +67,7 @@ from apps.exams.services.result_calculation import (  # noqa: F401
     calculate_test_attempt_result,
 )
 from apps.exams.services.result_release import (  # noqa: F401
+    attempt_answer_key_hidden,
     exam_answers_release_locked,
 )
 from apps.exams.services.review_visibility import (  # noqa: F401
@@ -114,6 +115,7 @@ __all__ = [
     "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "ensure_can_manage_exam_rooms",
+    "attempt_answer_key_hidden",
     "exam_answers_release_locked",
     "is_exam_center_user",
     "calculate_test_attempt_result",

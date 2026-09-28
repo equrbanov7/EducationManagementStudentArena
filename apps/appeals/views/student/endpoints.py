@@ -11,6 +11,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAttempt
 from apps.exams.public import (
     append_query_params,
+    attempt_answer_key_hidden,
     current_return_to,
     delivered_question_render,
     ensure_student_exam_tenant_context,
@@ -238,7 +239,12 @@ def appeal_create(request, attempt_id):
         # EXAM-P0-05: nəticə səhifəsindəki release kilidi appeal
         # URL-indən yan keçilə bilməz. Eyni siyasət correctness variantlarını,
         # ideal cavabı və tələbə seçimini birlikdə gizlədir.
-        "hide_answer_details": is_profile_results_request or answers_release_locked,
+        "hide_answer_details": (
+            is_profile_results_request
+            or answers_release_locked
+            # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar apellyasiya səhifəsində də gizlidir.
+            or attempt_answer_key_hidden(attempt, user=request.user)
+        ),
         "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }

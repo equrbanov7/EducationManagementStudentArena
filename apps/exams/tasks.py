@@ -40,13 +40,11 @@ def expire_stale_resumed_attempts():
     # Imported lazily so the task module stays import-safe even when the app
     # registry is not fully loaded (e.g. during Celery autodiscovery).
     from apps.exams.services.supervision import sweep_expired_resume_windows
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
     # Global periodic sweep has no org_id argument; it intentionally scans every
     # tenant and each write records the attempt's own organization.
-    with rls_worker_atomic(), bypass_rls():
-        expired = sweep_expired_resume_windows()
+    # Audit 2026-09-28 EX28-05: xarici tranzaksiya yoxdur — hər cəhd öz scope-unda.
+    expired = sweep_expired_resume_windows(scope=_worker_bypass_scope)
     if expired:
         logger.info("expire_stale_resumed_attempts: auto-finished %d attempt(s)", expired)
     return expired

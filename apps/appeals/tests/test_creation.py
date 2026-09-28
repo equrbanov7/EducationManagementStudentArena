@@ -131,6 +131,8 @@ class AppealCreateViewTests(TestCase):
             exam_type_extended="midterm",  # Audit 2026-09-28 EXA-07: apellyasiya yalnız midterm/final
             is_active=True,
             is_public=True,
+            # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar gizlidir — tək cəhdli imtahanda görünür.
+            max_attempts_per_user=1,
         )
         self.question = ExamQuestion.objects.create(exam=self.exam, order=1, text="GDPR sualı")
         self.correct = ExamQuestionOption.objects.create(
