@@ -89,7 +89,7 @@ if [ -d "$DUMP" ]; then
   [ -n "$newest" ] || die "no *.sql.gz / *.sql / *.dump files under $DUMP"
   DUMP="$newest"
 fi
-[ -f "$DUMP" ] && [ -r "$DUMP" ] || die "dump file not readable: $DUMP"
+if [ ! -f "$DUMP" ] || [ ! -r "$DUMP" ]; then die "dump file not readable: $DUMP"; fi
 [ -s "$DUMP" ] || die "dump file is empty: $DUMP"
 
 SCRATCH_DB="${SCRATCH_DB:-emsarena_restore_drill_$(date +%Y%m%d_%H%M%S)}"
