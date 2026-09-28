@@ -23,7 +23,14 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from .group_actions import _error, _visible_group
-from .groups_registry import can_manage_groups, can_move_students, can_view_groups, group_scope
+from .groups_registry import (
+    can_manage_groups,
+    can_move_students,
+    can_view_groups,
+    group_manage_scope,
+    group_scope,
+    student_record_scope_q,
+)
 from .models import Organization
 
 _CTX = "accounts.groups"
@@ -96,12 +103,18 @@ def group_students(request, slug, unit_id):
         .select_related("student", "program", "group")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
+    # Audit 2026-09-28 S4: idarə düymələri yalnız qrup `unit.group_manage`
+    # əhatəsindədirsə (server yazıda onsuz da bu əhatəni yoxlayır).
+    manage_scope = group_manage_scope(request, organization)
+    can_manage = can_manage_groups(request) and (
+        _visible_group(organization, manage_scope, str(unit.pk), include_archived=True) is not None
+    )
     return JsonResponse(
         {
             "ok": True,
             "group": {"id": str(unit.pk), "name": unit.name, "is_active": unit.is_active},
             "rows": [_row(record) for record in records],
-            "can_manage": can_manage_groups(request),
+            "can_manage": can_manage,
             "can_move_students": can_move_students(request),
         }
     )
@@ -125,7 +138,8 @@ def group_student_candidates(request, slug, unit_id):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
     if not can_view_groups(request) or not can_manage_groups(request):
         return _error(pgettext(_CTX, "Qrupları idarə etmək səlahiyyətiniz yoxdur."), status=403, code="forbidden")
-    scope = group_scope(request, organization)
+    # Audit 2026-09-28 S4: namizəd siyahısı yazı əməlinin hissəsidir — idarə əhatəsi.
+    scope = group_manage_scope(request, organization)
     if not scope.has_structure_access:
         return _error(pgettext(_CTX, "Struktur əhatəniz yoxdur."), status=403, code="forbidden")
     unit = _visible_group(organization, scope, str(unit_id))
@@ -141,6 +155,8 @@ def group_student_candidates(request, slug, unit_id):
     records = (
         StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled")
         .filter(Q(group__isnull=True) | Q(group__is_active=False))
+        # Audit 2026-09-28 S3: başqa fakültənin qrupsuz tələbələri görünmür.
+        .filter(student_record_scope_q(scope))
         .select_related("student", "program", "group")
     )
     query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]

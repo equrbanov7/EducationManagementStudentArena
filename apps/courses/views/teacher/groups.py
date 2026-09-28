@@ -28,6 +28,8 @@ from django.views.generic import View
 
 from apps.courses.models import CourseMembership
 from apps.registrar.public import course_groups
+from core.audit import log_action
+from core.constants import AuditAction
 from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 from core.tenancy import get_request_organization
@@ -94,6 +96,28 @@ class AvailableGroupsView(_OwnerCourseMixin, View):
         return JsonResponse({"success": True, "mine": mine, "others": others, "q": q})
 
 
+def _audit_foreign_group_add(request, course, organization, group, added, candidates) -> None:
+    """Audit 2026-09-28 SA-09: müəllim DƏRS DEMƏDİYİ qrupu kursa əlavə edir.
+
+    Funksiya sahibin dizaynıdır (digər aktiv qruplar axtarışla) və saxlanılır,
+    lakin başqa qrupun siyahısını kursa çəkmək hər dəfə audit jurnalına düşür —
+    kim, hansı kursa, hansı qrupu, neçə tələbə ilə. Yazı bulk tranzaksiyanın
+    içindədir: audit alınmasa əlavə də geri qaytarılır (fail-closed).
+    """
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=course,
+        request=request,
+        resource_type="courses.course_group_add_untaught",
+        resource_id=str(course.pk),
+        resource_repr=(course.title or "")[:255],
+        new_values={"group_id": str(group.pk), "group_name": group.name, "added": added, "candidates": candidates},
+        reason=f"courses: untaught group «{group.name}» bulk-added to course",
+    )
+
+
 class AddMembersBulkView(_OwnerCourseMixin, View):
     """Seçilmiş reyestr qruplarının aktiv tələbələrini kursa əlavə edir (atomik)."""
 
@@ -115,6 +139,7 @@ class AddMembersBulkView(_OwnerCourseMixin, View):
         student_ids_by_group = course_groups.group_student_ids(
             organization=organization, groups=groups, teacher=request.user
         )
+        taught_ids = course_groups.taught_group_ids(organization=organization, teacher=request.user)
         allowed_users = User.objects.filter(is_active=True)
         if organization is not None:
             allowed_users = allowed_users.filter(profile__organization=organization)
@@ -126,6 +151,7 @@ class AddMembersBulkView(_OwnerCourseMixin, View):
             with transaction.atomic():
                 for group in groups:
                     ids = student_ids_by_group.get(group.pk) or []
+                    group_added = 0
                     for student in allowed_users.filter(pk__in=ids).order_by("pk"):
                         membership, created = CourseMembership.objects.get_or_create(
                             course=course,
@@ -135,6 +161,7 @@ class AddMembersBulkView(_OwnerCourseMixin, View):
                         previous_group_name = membership.group_name or ""
                         if created:
                             added_count += 1
+                            group_added += 1
                         elif membership.role == "student" and not previous_group_name.strip():
                             membership.group_name = group.name
                             membership.save(update_fields=["group_name"])
@@ -145,6 +172,8 @@ class AddMembersBulkView(_OwnerCourseMixin, View):
                             created=created,
                             previous_group_name=previous_group_name,
                         )
+                    if group.pk not in taught_ids:
+                        _audit_foreign_group_add(request, course, organization, group, group_added, len(ids))
         except Exception:
             logger.exception("Unexpected error in AddMembersBulkView")
             return JsonResponse({"success": False, "error": pgettext(_CTX, "unexpected_error")}, status=500)

@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -70,6 +70,31 @@ GROUP_SORTS: dict[str, tuple[str, ...]] = {
 def group_scope(request, organization):
     """Qrup reyestrinin əhatəsi — `unit.view` açarını daşıyan üzvlükdən."""
     return get_permission_scope(request.user, organization, PERM_VIEW, request=request)
+
+
+def group_manage_scope(request, organization):
+    """YAZI əməllərinin əhatəsi — `unit.group_manage` açarını daşıyan üzvlükdən.
+
+    Audit 2026-09-28 S4: yazı handler-ləri əvvəl `unit.view` əhatəsini alırdı —
+    baxışı geniş (məs. bütün təşkilat), idarəsi dar (bir fakültə) olan aktor
+    öz idarə əhatəsindən kənar qrupu dəyişə bilirdi. Yazı həmişə bu əhatə ilə.
+    """
+    return get_permission_scope(request.user, organization, PERM_MANAGE, request=request)
+
+
+def student_record_scope_q(scope) -> Q:
+    """`StudentAcademicRecord` üçün əhatə filtri — ixtisas bölməsi VƏ YA (arxiv) qrupu.
+
+    Audit 2026-09-28 S3: qrupsuz tələbə namizədləri əvvəl bütün tenant üzrə
+    gəlirdi. Qrupsuz tələbənin struktur yeri ixtisasının bölməsidir
+    (`program.specialty_unit`); arxivlənmiş qrupu varsa o da sayılır.
+    Təşkilat əhatəsi → filtr yoxdur; əhatəsiz → heç nə (fail-closed).
+    """
+    if scope.is_org_wide:
+        return Q()
+    return scope.unit_subtree_q(
+        path_field="program__specialty_unit__path", id_field="program__specialty_unit_id"
+    ) | scope.unit_subtree_q(path_field="group__path", id_field="group_id")
 
 
 def can_view_groups(request) -> bool:
@@ -363,10 +388,12 @@ __all__ = [
     "can_view_groups",
     "education_form_choices",
     "education_form_label",
+    "group_manage_scope",
     "group_meta",
     "group_scope",
     "language_form_options",
     "language_options",
+    "student_record_scope_q",
 ]
 
 

@@ -209,6 +209,20 @@ def resolve_groups(*, organization, group_ids) -> list:
     )
 
 
+def taught_group_ids(*, organization, teacher, period=None) -> set:
+    """Müəllimin (cari) dövrdə dərs dediyi qrupların id-ləri — BİR sorğu.
+
+    Audit 2026-09-28 SA-09: kursa «dərs demədiyi» qrupu əlavə edən müəllim
+    audit jurnalına yazılır; bu çoxluq həmin fərqi müəyyən edir.
+    """
+    if organization is None or teacher is None:
+        return set()
+    period = period or current_period(organization)
+    if period is None:
+        return set()
+    return set(_taught_offerings(organization, teacher, period).values_list("group_id", flat=True))
+
+
 def group_student_ids(*, organization, groups, teacher=None, period=None) -> dict:
     """``{group_id: [student_id, ...]}`` — qeydlər + (müəllim verilibsə) onun açılış qeydiyyatları."""
     if organization is None or not groups:
