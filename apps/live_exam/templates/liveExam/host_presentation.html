@@ -204,6 +204,8 @@
         "revealCorrectTag": "Correct",
         "revealWrongTag": "Incorrect"
     }</script>
+    {# 2026-09-29: host_lobby/utils.js və host_lobby_shell.js qlobal `gettext`-ə müraciət edir — bu müstəqil səhifə base.html-i extend etmədiyi üçün JS kataloqu burada yüklənməlidir (əks halda lobby render-i ReferenceError ilə dayanırdı). #}
+    <script src="{% url 'javascript-catalog' %}"></script>
     <script src="{% static 'js/host_lobby_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-fallback-20260408"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-fallback-20260408"></script>
