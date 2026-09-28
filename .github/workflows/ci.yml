@@ -118,7 +118,7 @@ jobs:
           python -m pip install "coverage==${ver}"
 
       - name: 📥 Download shard coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: coverage-data-3.12-shard-*
           path: coverage-data
