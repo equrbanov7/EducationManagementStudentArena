@@ -134,32 +134,32 @@ msgstr "Слушатель курса"
 #: apps/accounts/forms/auth/register.py:102
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school_teacher"
-msgstr "Школа"
+msgstr "Учитель школы"
 
 #: apps/accounts/forms/auth/register.py:106
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university_teacher"
-msgstr "Университет"
+msgstr "Преподаватель университета"
 
 #: apps/accounts/forms/auth/register.py:110
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_teacher"
-msgstr "Учебный центр"
+msgstr "Преподаватель учебного центра"
 
 #: apps/accounts/forms/auth/register.py:114
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school_staff"
-msgstr "Школа"
+msgstr "Сотрудник школы"
 
 #: apps/accounts/forms/auth/register.py:118
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university_staff"
-msgstr "Университет"
+msgstr "Сотрудник университета"
 
 #: apps/accounts/forms/auth/register.py:122
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_staff"
-msgstr "Слушатель курса"
+msgstr "Сотрудник учебного центра"
 
 #: apps/accounts/forms/auth/register.py:135
 msgctxt "accounts.form.register.label"
@@ -663,7 +663,7 @@ msgstr "Поиск курса..."
 #: apps/accounts/templates/accounts/assigned_courses.html:49
 msgctxt "accounts.assigned_courses_page"
 msgid "empty_state"
-msgstr "No courses assigned yet."
+msgstr "Назначенных курсов пока нет."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:3
 msgctxt "accounts.assigned_exams_page"
@@ -688,28 +688,28 @@ msgstr "Поиск экзамена..."
 #: apps/accounts/templates/accounts/assigned_exams.html:54
 msgctxt "accounts.assigned_exams_page"
 msgid "start_with_code"
-msgstr "Start with code"
+msgstr "Начать по коду"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:58
 msgctxt "accounts.assigned_exams_page"
 msgid "start"
-msgstr "Start"
+msgstr "Начать"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:69
 msgctxt "accounts.assigned_exams_page"
 msgid "empty_state"
-msgstr "No assigned exams found."
+msgstr "Назначенные экзамены не найдены."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:76
 #: apps/accounts/templates/accounts/assigned_exams.html:86
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_title"
-msgstr "Access code"
+msgstr "Код доступа"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:77
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_prompt_template"
-msgstr "Enter the code to access the {title} exam."
+msgstr "Введите код для доступа к экзамену «{title}»."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:78
 #: apps/exams/domain/access_policy.py:293
@@ -732,7 +732,7 @@ msgstr "Не удалось начать экзамен."
 #: apps/accounts/templates/accounts/assigned_exams.html:87
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_text"
-msgstr "Enter the exam code."
+msgstr "Введите код экзамена."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:98
 msgctxt "accounts.assigned_exams_page"
@@ -747,7 +747,7 @@ msgstr "Отмена"
 #: apps/accounts/templates/accounts/assigned_exams.html:106
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_confirm"
-msgstr "Confirm"
+msgstr "Подтвердить"
 
 #: apps/accounts/templates/accounts/emails/login_otp_email.html:22
 #, python-format
@@ -896,12 +896,12 @@ msgstr "Выход"
 #: apps/accounts/templates/accounts/grading_queue.html:3
 msgctxt "accounts.grading_queue_page"
 msgid "title"
-msgstr "Grading queue"
+msgstr "Очередь на оценивание"
 
 #: apps/accounts/templates/accounts/grading_queue.html:17
 msgctxt "accounts.grading_queue_page"
 msgid "heading"
-msgstr "Grading queue"
+msgstr "Очередь на оценивание"
 
 #: apps/accounts/templates/accounts/grading_queue.html:21
 msgctxt "accounts.grading_queue_page"
@@ -911,82 +911,82 @@ msgstr "Назад"
 #: apps/accounts/templates/accounts/grading_queue.html:30
 msgctxt "accounts.grading_queue_page"
 msgid "filter_course_label"
-msgstr "Course"
+msgstr "Курс"
 
 #: apps/accounts/templates/accounts/grading_queue.html:33
 msgctxt "accounts.grading_queue_page"
 msgid "filter_course_all"
-msgstr "All courses"
+msgstr "Все курсы"
 
 #: apps/accounts/templates/accounts/grading_queue.html:44
 msgctxt "accounts.grading_queue_page"
 msgid "filter_assignment_label"
-msgstr "Assignment"
+msgstr "Самостоятельная работа"
 
 #: apps/accounts/templates/accounts/grading_queue.html:47
 msgctxt "accounts.grading_queue_page"
 msgid "filter_assignment_all"
-msgstr "All assignments"
+msgstr "Все самостоятельные работы"
 
 #: apps/accounts/templates/accounts/grading_queue.html:58
 msgctxt "accounts.grading_queue_page"
 msgid "filter_sort_label"
-msgstr "Sort"
+msgstr "Сортировка"
 
 #: apps/accounts/templates/accounts/grading_queue.html:61
 msgctxt "accounts.grading_queue_page"
 msgid "sort_oldest"
-msgstr "Oldest first"
+msgstr "Сначала старые"
 
 #: apps/accounts/templates/accounts/grading_queue.html:62
 msgctxt "accounts.grading_queue_page"
 msgid "sort_newest"
-msgstr "Newest first"
+msgstr "Сначала новые"
 
 #: apps/accounts/templates/accounts/grading_queue.html:70
 msgctxt "accounts.grading_queue_page"
 msgid "filter_apply"
-msgstr "Apply filters"
+msgstr "Применить фильтры"
 
 #: apps/accounts/templates/accounts/grading_queue.html:81
 msgctxt "accounts.grading_queue_page"
 msgid "stat_pending"
-msgstr "Pending"
+msgstr "Ожидают"
 
 #: apps/accounts/templates/accounts/grading_queue.html:85
 msgctxt "accounts.grading_queue_page"
 msgid "stat_graded_today"
-msgstr "Graded today"
+msgstr "Оценено сегодня"
 
 #: apps/accounts/templates/accounts/grading_queue.html:89
 msgctxt "accounts.grading_queue_page"
 msgid "stat_avg_time"
-msgstr "Avg time"
+msgstr "Среднее время"
 
 #: apps/accounts/templates/accounts/grading_queue.html:100
 msgctxt "accounts.grading_queue_page"
 msgid "table_student"
-msgstr "Student"
+msgstr "Студент"
 
 #: apps/accounts/templates/accounts/grading_queue.html:101
 msgctxt "accounts.grading_queue_page"
 msgid "table_assignment"
-msgstr "Assignment"
+msgstr "Самостоятельная работа"
 
 #: apps/accounts/templates/accounts/grading_queue.html:102
 msgctxt "accounts.grading_queue_page"
 msgid "table_submitted_at"
-msgstr "Submitted at"
+msgstr "Время отправки"
 
 #: apps/accounts/templates/accounts/grading_queue.html:103
 msgctxt "accounts.grading_queue_page"
 msgid "table_file"
-msgstr "File"
+msgstr "Файл"
 
 #: apps/accounts/templates/accounts/grading_queue.html:104
 msgctxt "accounts.grading_queue_page"
 msgid "table_grading"
-msgstr "Grading"
+msgstr "Оценивание"
 
 #: apps/accounts/templates/accounts/grading_queue.html:116
 msgctxt "accounts.grading_queue_page"
@@ -996,27 +996,27 @@ msgstr "Анонимный студент"
 #: apps/accounts/templates/accounts/grading_queue.html:127
 msgctxt "accounts.grading_queue_page"
 msgid "time_ago_suffix"
-msgstr "ago"
+msgstr "назад"
 
 #: apps/accounts/templates/accounts/grading_queue.html:135
 msgctxt "accounts.grading_queue_page"
 msgid "file_download"
-msgstr "File download"
+msgstr "Скачать файл"
 
 #: apps/accounts/templates/accounts/grading_queue.html:145
 msgctxt "accounts.grading_queue_page"
 msgid "file_view"
-msgstr "File view"
+msgstr "Просмотреть файл"
 
 #: apps/accounts/templates/accounts/grading_queue.html:160
 msgctxt "accounts.grading_queue_page"
 msgid "score_placeholder"
-msgstr "Score"
+msgstr "Балл"
 
 #: apps/accounts/templates/accounts/grading_queue.html:171
 msgctxt "accounts.grading_queue_page"
 msgid "feedback_placeholder"
-msgstr "Feedback (optional)"
+msgstr "Отзыв (необязательно)"
 
 #: apps/accounts/templates/accounts/grading_queue.html:176
 msgctxt "accounts.grading_queue_page"
@@ -1031,17 +1031,17 @@ msgstr "Следующая оценка"
 #: apps/accounts/templates/accounts/grading_queue.html:192
 msgctxt "accounts.grading_queue_page"
 msgid "empty_title"
-msgstr "Great work!"
+msgstr "Отличная работа!"
 
 #: apps/accounts/templates/accounts/grading_queue.html:193
 msgctxt "accounts.grading_queue_page"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "Очередь на оценивание пуста"
 
 #: apps/accounts/templates/accounts/grading_queue.html:201
 msgctxt "accounts.grading_queue_page"
 msgid "loading"
-msgstr "Loading"
+msgstr "Загрузка"
 
 #: apps/accounts/templates/accounts/login.html:4
 #: apps/accounts/templates/accounts/login_portal.html:4
@@ -1134,49 +1134,49 @@ msgstr "Кабинет студента: результаты, экзамены 
 #: apps/accounts/templates/accounts/my_result_detail.html:3
 msgctxt "accounts.my_result_detail_page"
 msgid "title"
-msgstr "Result detail"
+msgstr "Подробности результата"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:17
 msgctxt "accounts.my_result_detail_page"
 msgid "file_name_fallback"
-msgstr "File"
+msgstr "Файл"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:23
 msgctxt "accounts.my_result_detail_page"
 msgid "back_to_results"
-msgstr "My Results"
+msgstr "Мои результаты"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:30
 msgctxt "accounts.my_result_detail_page"
 msgid "label_type"
-msgstr "Type"
+msgstr "Тип"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:34
 msgctxt "accounts.my_result_detail_page"
 msgid "label_context"
-msgstr "Context"
+msgstr "Контекст"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:38
 msgctxt "accounts.my_result_detail_page"
 msgid "label_status"
-msgstr "Status"
+msgstr "Статус"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:44
 msgctxt "accounts.my_result_detail_page"
 msgid "label_submitted_at"
-msgstr "Submitted at"
+msgstr "Время отправки"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:48
 msgctxt "accounts.my_result_detail_page"
 msgid "label_score"
-msgstr "Score"
+msgstr "Балл"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:58
 #: apps/accounts/templates/accounts/my_result_detail.html:137
 #: apps/accounts/templates/accounts/my_result_detail.html:181
 msgctxt "accounts.my_result_detail_page"
 msgid "answer_submission_title"
-msgstr "Answer / Submission"
+msgstr "Ответ / сданная работа"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:62
 #, python-format
@@ -1223,40 +1223,40 @@ msgstr "Баллы: %(score)s"
 #: apps/accounts/templates/accounts/my_result_detail.html:205
 msgctxt "accounts.my_result_detail_page"
 msgid "view_file"
-msgstr "View file"
+msgstr "Просмотреть файл"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:161
 #: apps/accounts/templates/accounts/my_result_detail.html:166
 #: apps/accounts/templates/accounts/my_result_detail.html:215
 msgctxt "accounts.my_result_detail_page"
 msgid "view_link"
-msgstr "View link"
+msgstr "Открыть ссылку"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:174
 #: apps/accounts/templates/accounts/my_result_detail.html:186
 msgctxt "accounts.my_result_detail_page"
 msgid "no_text_answer"
-msgstr "No text answer"
+msgstr "Текстового ответа нет"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:225
 msgctxt "accounts.my_result_detail_page"
 msgid "teacher_feedback_title"
-msgstr "Teacher feedback"
+msgstr "Отзыв преподавателя"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:231
 msgctxt "accounts.my_result_detail_page"
 msgid "feedback_missing"
-msgstr "Feedback missing"
+msgstr "Отзыва пока нет"
 
 #: apps/accounts/templates/accounts/my_results.html:4
 msgctxt "accounts.my_results_page"
 msgid "title"
-msgstr "My Results"
+msgstr "Мои результаты"
 
 #: apps/accounts/templates/accounts/my_results.html:15
 msgctxt "accounts.my_results_page"
 msgid "heading"
-msgstr "My Results"
+msgstr "Мои результаты"
 
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
@@ -1266,7 +1266,7 @@ msgstr "Вернуться в профиль"
 #: apps/accounts/templates/accounts/my_results.html:26
 msgctxt "accounts.my_results_page"
 msgid "tab_all"
-msgstr "All"
+msgstr "Все"
 
 #: apps/accounts/templates/accounts/my_results.html:30
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:28
@@ -1279,17 +1279,17 @@ msgstr "Академический"
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
 msgid "tab_exams"
-msgstr "Exams"
+msgstr "Экзамены"
 
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Свободные работы"
+msgstr "Самостоятельные работы"
 
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_labs"
-msgstr "Labs"
+msgstr "Лабораторные работы"
 
 #: apps/accounts/templates/accounts/my_results.html:46
 msgctxt "accounts.my_results_page"
@@ -1348,27 +1348,27 @@ msgstr ""
 #: apps/accounts/templates/accounts/my_results.html:127
 msgctxt "accounts.my_results_page"
 msgid "status_graded"
-msgstr "Graded"
+msgstr "Оценено"
 
 #: apps/accounts/templates/accounts/my_results.html:129
 msgctxt "accounts.my_results_page"
 msgid "status_pending"
-msgstr "Pending"
+msgstr "Ожидает"
 
 #: apps/accounts/templates/accounts/my_results.html:131
 msgctxt "accounts.my_results_page"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Отправлено"
 
 #: apps/accounts/templates/accounts/my_results.html:136
 msgctxt "accounts.my_results_page"
 msgid "score_prefix"
-msgstr "Score"
+msgstr "Балл"
 
 #: apps/accounts/templates/accounts/my_results.html:156
 msgctxt "accounts.my_results_page"
 msgid "view_details"
-msgstr "View answer/details"
+msgstr "Посмотреть ответ и подробности"
 
 #: apps/accounts/templates/accounts/my_results.html:172
 msgctxt "accounts.my_results_page"
@@ -1378,7 +1378,7 @@ msgstr "Информация не найдена."
 #: apps/accounts/templates/accounts/my_results.html:174
 msgctxt "accounts.my_results_page"
 msgid "empty_state"
-msgstr "No items found."
+msgstr "Ничего не найдено."
 
 #: apps/accounts/templates/accounts/my_results.html:176
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:326
@@ -1852,17 +1852,17 @@ msgstr ""
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:5
 msgctxt "accounts.grading_queue_page"
 msgid "toast_success"
-msgstr "Grading completed successfully!"
+msgstr "Оценивание успешно завершено!"
 
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:6
 msgctxt "accounts.grading_queue_page"
 msgid "toast_error_generic"
-msgstr "Something went wrong!"
+msgstr "Что-то пошло не так!"
 
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:7
 msgctxt "accounts.grading_queue_page"
 msgid "toast_error_prefix"
-msgstr "Error"
+msgstr "Ошибка"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:2
 msgctxt "profile.groups"
@@ -2022,7 +2022,7 @@ msgstr "Назначенные преподаватели"
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:198
 msgctxt "profile.groups"
 msgid "student_search_placeholder"
-msgstr "Поиск студента или экзамена..."
+msgstr "Поиск по имени студента, логину или e-mail"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:236
 msgctxt "profile.groups"
@@ -6723,19 +6723,19 @@ msgstr "Вернуться ко входу"
 #: apps/accounts/templates/accounts/password_reset_complete.html:4
 msgctxt "accounts.password_reset_complete_page"
 msgid "title"
-msgstr "Completed"
+msgstr "Готово"
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:22
 msgctxt "accounts.password_reset_complete_page"
 msgid "heading"
-msgstr "Password changed successfully!"
+msgstr "Пароль успешно изменён!"
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:25
 msgctxt "accounts.password_reset_complete_page"
 msgid "subheading"
 msgstr ""
-"Your account security has been restored. You can now log in with your new "
-"password."
+"Безопасность вашей учётной записи восстановлена. Теперь вы можете войти с "
+"новым паролем."
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:29
 msgctxt "accounts.password_reset_complete_page"
@@ -6745,17 +6745,17 @@ msgstr "Войти сейчас"
 #: apps/accounts/templates/accounts/password_reset_confirm.html:4
 msgctxt "accounts.password_reset_confirm_page"
 msgid "title"
-msgstr "New password"
+msgstr "Новый пароль"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:21
 msgctxt "accounts.password_reset_confirm_page"
 msgid "heading_valid"
-msgstr "Set new password"
+msgstr "Задайте новый пароль"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:23
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_valid"
-msgstr "Please enter a new strong password for your account."
+msgstr "Введите новый надёжный пароль для вашей учётной записи."
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:24
 msgid "Şifrəni yeniləmək üçün emailə gələn OTP kodunu da daxil edin."
@@ -6775,24 +6775,24 @@ msgstr "OTP и ссылка действительны %(minutes)s минут."
 #: apps/accounts/templates/accounts/password_reset_confirm.html:71
 msgctxt "accounts.password_reset_confirm_page"
 msgid "submit"
-msgstr "Change password"
+msgstr "Сменить пароль"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:79
 msgctxt "accounts.password_reset_confirm_page"
 msgid "heading_invalid"
-msgstr "Invalid link"
+msgstr "Недействительная ссылка"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:81
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_invalid"
 msgstr ""
-"This link has already been used or expired. For security reasons links are "
-"one-time only."
+"Эта ссылка уже использована или срок её действия истёк. В целях безопасности"
+" ссылки одноразовые."
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:85
 msgctxt "accounts.password_reset_confirm_page"
 msgid "retry"
-msgstr "Request password reset again"
+msgstr "Запросить сброс пароля ещё раз"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:3
 msgctxt "accounts.password_reset_done_page"
@@ -15857,17 +15857,17 @@ msgstr "Отзыв не добавлен."
 #: apps/accounts/templates/accounts/student_dashboard.html:4
 msgctxt "accounts.student_dashboard"
 msgid "title"
-msgstr "Student dashboard"
+msgstr "Панель студента"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:15
 msgctxt "accounts.student_dashboard"
 msgid "heading"
-msgstr "Heading"
+msgstr "Панель студента"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:16
 msgctxt "accounts.student_dashboard"
 msgid "welcome"
-msgstr "Welcome"
+msgstr "Добро пожаловать"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:19
 msgctxt "accounts.student_dashboard"
@@ -15877,27 +15877,27 @@ msgstr "Профиль"
 #: apps/accounts/templates/accounts/student_dashboard.html:22
 msgctxt "accounts.student_dashboard"
 msgid "btn_courses"
-msgstr "Courses"
+msgstr "Курсы"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:25
 msgctxt "accounts.student_dashboard"
 msgid "btn_exams"
-msgstr "Exams"
+msgstr "Экзамены"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:39
 msgctxt "accounts.student_dashboard"
 msgid "widget_courses_title"
-msgstr "Courses"
+msgstr "Курсы"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:40
 msgctxt "accounts.student_dashboard"
 msgid "course_unit"
-msgstr "Course unit"
+msgstr "курс(ов)"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:59
 msgctxt "accounts.student_dashboard"
 msgid "view_all"
-msgstr "View all"
+msgstr "Смотреть все"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:64
 msgctxt "accounts.student_dashboard"
@@ -15907,12 +15907,12 @@ msgstr "Курсов пока нет."
 #: apps/accounts/templates/accounts/student_dashboard.html:76
 msgctxt "accounts.student_dashboard"
 msgid "widget_assignments_title"
-msgstr "Assignments"
+msgstr "Самостоятельные работы"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:77
 msgctxt "accounts.student_dashboard"
 msgid "pending_unit"
-msgstr "Pending unit"
+msgstr "ожидают"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
@@ -15922,17 +15922,17 @@ msgstr "Заданий пока нет."
 #: apps/accounts/templates/accounts/student_dashboard.html:115
 msgctxt "accounts.student_dashboard"
 msgid "widget_upcoming_exams_title"
-msgstr "Upcoming exams"
+msgstr "Предстоящие экзамены"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:116
 msgctxt "accounts.student_dashboard"
 msgid "exam_unit"
-msgstr "Exam unit"
+msgstr "экзамен(ов)"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:131
 msgctxt "accounts.student_dashboard"
 msgid "start_exam"
-msgstr "Start exam"
+msgstr "Начать экзамен"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:139
 msgctxt "accounts.student_dashboard"
@@ -15942,12 +15942,12 @@ msgstr "Предстоящих экзаменов нет."
 #: apps/accounts/templates/accounts/student_dashboard.html:151
 msgctxt "accounts.student_dashboard"
 msgid "widget_recent_grades_title"
-msgstr "Recent grades"
+msgstr "Последние оценки"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:152
 msgctxt "accounts.student_dashboard"
 msgid "answer_unit"
-msgstr "Answer unit"
+msgstr "ответ(ов)"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
@@ -16417,17 +16417,17 @@ msgstr "Результат ещё не подведён. Он появится �
 #: apps/accounts/views/dashboard/results.py:128
 msgctxt "accounts.my_result_detail.type"
 msgid "course"
-msgstr "Course"
+msgstr "Самостоятельная работа"
 
 #: apps/accounts/views/dashboard/results.py:185
 msgctxt "accounts.my_result_detail.type"
 msgid "lab"
-msgstr "Lab"
+msgstr "Лабораторная работа"
 
 #: apps/accounts/views/dashboard/results.py:228
 msgctxt "accounts.my_result_detail.type"
 msgid "independent_work"
-msgstr "Independent work"
+msgstr "Курсовая работа"
 
 #: apps/accounts/views/dashboard/results.py:242
 msgctxt "accounts.my_results.message"
@@ -24059,12 +24059,12 @@ msgstr "Отметка времени"
 #: apps/exams/domain/attempts.py:506
 msgctxt "exams.model.proctoring.field"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Подробности"
 
 #: apps/exams/domain/attempts.py:507
 msgctxt "exams.model.proctoring.help"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Дополнительные данные события (JSON)."
 
 #: apps/exams/domain/attempts.py:511
 msgctxt "exams.model.proctoring.meta"
@@ -83851,3 +83851,260 @@ msgstr "Предыдущий план ещё готовится — подожд
 msgctxt "courses.view.message"
 msgid "too_many_groups"
 msgstr "За один раз можно добавить не более 20 групп."
+
+msgctxt "registrar.enrollment_status"
+msgid "Suspended"
+msgstr "Приостановлено"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavab"
+msgstr "анонимный ответ, ожидающий публикации"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavablar"
+msgstr "анонимные ответы, ожидающие публикации"
+
+msgctxt "appeals.service.create.error"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir."
+msgstr "Апелляция по этому типу экзамена не подаётся."
+
+msgctxt "appeals.service.create.error"
+msgid ""
+"İmtahanınız hələ yoxlanılmayıb — apellyasiya nəticə açıqlandıqdan sonra "
+"verilə bilər."
+msgstr ""
+"Ваша работа ещё не проверена — апелляцию можно подать после объявления "
+"результата."
+
+msgctxt "appeals.service.decision.error"
+msgid ""
+"İmtahan hələ yoxlanılmayıb — apellyasiyaya yoxlamadan sonra qərar verilə "
+"bilər."
+msgstr ""
+"Работа ещё не проверена — решение по апелляции можно принять только после "
+"проверки."
+
+msgctxt "appeals.template"
+msgid "İmtahanınız hələ yoxlanılmayıb"
+msgstr "Ваша работа ещё не проверена"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya işiniz yoxlanıb nəticə açıqlandıqdan sonra %(days)s gün ərzində "
+"göndərilə bilər."
+msgstr ""
+"Апелляцию можно подать в течение %(days)s дн. после проверки работы и "
+"объявления результата."
+
+msgctxt "appeals.template"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir"
+msgstr "Апелляция по этому типу экзамена не подаётся"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya yalnız aralıq (midterm) və yekun (final) imtahanları üzrə "
+"verilir."
+msgstr ""
+"Апелляция подаётся только по промежуточным (midterm) и итоговым (final) "
+"экзаменам."
+
+msgctxt "exams.final_center.error"
+msgid ""
+"İmtahana buraxılış yoxlanıla bilmədi — nəzarətçiyə və ya imtahan mərkəzinə "
+"müraciət edin."
+msgstr ""
+"Не удалось проверить допуск к экзамену — обратитесь к наблюдателю или в "
+"экзаменационный центр."
+
+msgctxt "exams.final_center.error"
+msgid "Qayıb limiti keçildiyi üçün bu imtahana buraxılmırsınız."
+msgstr "Вы не допущены к этому экзамену, так как превышен лимит пропусков."
+
+msgctxt "registrar.journal"
+msgid "Apellyasiya"
+msgstr "Апелляция"
+
+msgctxt "registrar.journal"
+msgid "+%(delta)s bal"
+msgstr "+%(delta)s балл."
+
+msgctxt "syllabus.notify"
+msgid ""
+"Bu sillabusun müəllifi kafedra müdirinin özüdür, ona görə öz sillabusunu "
+"təsdiqləyə bilməz. Qərar dekanlıq və ya universitet səviyyəsində "
+"verilməlidir."
+msgstr ""
+"Автор этого силлабуса — сам заведующий кафедрой, поэтому он не может "
+"утвердить собственный силлабус. Решение должно приниматься на уровне "
+"деканата или университета."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Öz sillabusunuz üzrə qərar verə bilməzsiniz — qərar dekanlıq və ya "
+"universitet səviyyəsindədir."
+msgstr ""
+"Вы не можете принимать решение по собственному силлабусу — решение "
+"принимается на уровне деканата или университета."
+
+msgctxt "workload"
+msgid ""
+"Bu fəaliyyət üzrə artıq %(assigned)s saat bölünüb — cəmi %(total)s saata "
+"endirmək olmaz. Əvvəlcə bölgünü azaldın."
+msgstr ""
+"По этому виду занятий уже распределено %(assigned)s ч — нельзя уменьшить "
+"итог до %(total)s ч. Сначала уменьшите распределение."
+
+msgctxt "workload"
+msgid ""
+"Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s "
+"toqquşma). Dərs cədvəlini yoxlayın."
+msgstr ""
+"Внимание: у нового преподавателя в расписании в это же время есть другое "
+"занятие (конфликтов: %(count)s). Проверьте расписание."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər."
+msgstr ""
+"Изменять настройки уровня по умолчанию может только управляющий расписанием "
+"на уровне университета."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər. "
+"Öz qruplarınız üçün aşağıda istisna yaza bilərsiniz."
+msgstr ""
+"Изменять настройки уровня по умолчанию может только управляющий расписанием "
+"на уровне университета. Для своих групп вы можете задать исключения ниже."
+
+msgctxt "timetable.api"
+msgid "Qrup identifikatoru düzgün deyil."
+msgstr "Неверный идентификатор группы."
+
+msgctxt "timetable.api"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Слишком частые запросы — повторите попытку немного позже."
+
+msgctxt "timetable.api"
+msgid ""
+"Bu işləməni yalnız onu yaradan və ya universitet səviyyəli idarəçi dəyişə "
+"bilər."
+msgstr ""
+"Изменять этот запуск может только его создатель или управляющий на уровне "
+"университета."
+
+msgctxt "timetable.run"
+msgid ""
+"İşləmə texniki xəta ilə dayandı. Parametrləri yoxlayıb yenidən cəhd edin; "
+"təkrarlansa inzibatçıya bildirin."
+msgstr ""
+"Запуск остановлен из-за технической ошибки. Проверьте параметры и повторите "
+"попытку; если ошибка повторится, сообщите администратору."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_view_only"
+msgstr ""
+"Студент ещё не завершил экзамен — попытка открыта только для просмотра. "
+"Проверка станет доступна после завершения попытки."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_cannot_grade"
+msgstr ""
+"Попытка ещё не завершена — её нельзя оценить, пока студент не завершит "
+"экзамен."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_answer_key_hidden_attempts_left"
+msgstr ""
+"У вас ещё остались попытки — правильные ответы будут показаны после "
+"последней попытки или по окончании срока экзамена. Балл и верность ваших "
+"ответов видны уже сейчас."
+
+msgctxt "registrar.finals"
+msgid "Bal rəqəm olmalıdır."
+msgstr "Балл должен быть числом."
+
+msgctxt "registrar.journal_finals"
+msgid ""
+"%(n)s xana yazılmadı: %(details)s. Yazılmış imtahan balının dəyişdirilməsi "
+"İmtahan Mərkəzinin bal daxiletmə səhifəsindən, təqdimatla aparılır."
+msgstr ""
+"Не сохранено ячеек: %(n)s: %(details)s. Уже внесённый экзаменационный балл "
+"изменяется только на странице ввода баллов Экзаменационного центра, с "
+"подтверждающим документом."
+
+msgctxt "registrar.journal_finals"
+msgid "%(n)s xana yazılmadı — bal rəqəm olmalıdır; mövcud bal dəyişdirilmədi."
+msgstr ""
+"Не сохранено ячеек: %(n)s — балл должен быть числом; прежний балл не "
+"изменён."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Количество часов занятия должно быть целым положительным числом."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı 1 ilə %(max)s arasında olmalıdır."
+msgstr "Количество часов занятия должно быть от 1 до %(max)s."
+
+msgctxt "registrar.correction"
+msgid ""
+"Absent (or excused) cells hold no score — correct the attendance first."
+msgstr ""
+"В ячейку пропуска (в том числе уважительного) балл не ставится — сначала "
+"исправьте посещаемость."
+
+msgctxt "assignments.views.message"
+msgid "invalid_attempts_or_score"
+msgstr "Число попыток и максимальный балл должны быть положительными числами."
+
+msgctxt "exams.final_center.message"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "Не удалось возобновить попытку."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_title"
+msgstr "Начать живую сессию"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_force_new_hint"
+msgstr ""
+"Активная живая сессия этого экзамена будет завершена, и будет создана новая."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_cancel"
+msgstr "Отмена"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_submit"
+msgstr "Начать"
+
+msgctxt "registrar.transfer"
+msgid "Yeni qrup tələbənin təşkilatına aid deyil."
+msgstr "Новая группа не принадлежит организации студента."
+
+msgctxt "registrar.transfer"
+msgid "Yeni struktur vahidi akademik qrup olmalıdır."
+msgstr "Новое подразделение должно быть академической группой."
+
+msgctxt "registrar.transfer"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "Учебный период не принадлежит организации студента."
+
+msgctxt "registrar.transfer"
+msgid "Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir."
+msgstr ""
+"Для перевода в группу необходимо указать активный текущий учебный период."
+
+msgctxt "registrar.transfer"
+msgid "Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər."
+msgstr ""
+"Перевод в группу возможен только для активного текущего учебного периода."
+
+msgctxt "exams.form.question"
+msgid "Sual üçün mövzu bloku seçilməlidir."
+msgstr "Для вопроса необходимо выбрать тематический блок."
+
+msgctxt "accounts.people.action"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."

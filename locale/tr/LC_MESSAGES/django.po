@@ -134,32 +134,32 @@ msgstr "Kurs öğrencisi"
 #: apps/accounts/forms/auth/register.py:102
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school_teacher"
-msgstr "Okul"
+msgstr "Okul öğretmeni"
 
 #: apps/accounts/forms/auth/register.py:106
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university_teacher"
-msgstr "Üniversite"
+msgstr "Üniversite öğretim elemanı"
 
 #: apps/accounts/forms/auth/register.py:110
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_teacher"
-msgstr "Kurs merkezi"
+msgstr "Kurs merkezi öğretmeni"
 
 #: apps/accounts/forms/auth/register.py:114
 msgctxt "accounts.form.register.choice"
 msgid "org_type_school_staff"
-msgstr "Okul"
+msgstr "Okul personeli"
 
 #: apps/accounts/forms/auth/register.py:118
 msgctxt "accounts.form.register.choice"
 msgid "org_type_university_staff"
-msgstr "Üniversite"
+msgstr "Üniversite personeli"
 
 #: apps/accounts/forms/auth/register.py:122
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_staff"
-msgstr "Kurs öğrencisi"
+msgstr "Kurs merkezi personeli"
 
 #: apps/accounts/forms/auth/register.py:135
 msgctxt "accounts.form.register.label"
@@ -291,13 +291,13 @@ msgstr "Kuruluş yöneticisi"
 #: apps/accounts/forms/auth/register.py:279
 msgctxt "accounts.form.register.label"
 msgid "accept_privacy_policy"
-msgstr "Gizlilik Politikasini okudum ve kabul ediyorum."
+msgstr "Gizlilik Politikası'nı okudum ve kabul ediyorum."
 
 #: apps/accounts/forms/auth/register.py:282
 #: apps/accounts/templates/accounts/register.html:283
 msgctxt "accounts.form.register.error"
 msgid "privacy_policy_required"
-msgstr "Devam etmek icin Gizlilik Politikasini kabul etmelisiniz."
+msgstr "Devam etmek için Gizlilik Politikası'nı kabul etmelisiniz."
 
 #: apps/accounts/forms/auth/register.py:293
 msgctxt "accounts.form.register.placeholder"
@@ -660,7 +660,7 @@ msgstr "Ders ara..."
 #: apps/accounts/templates/accounts/assigned_courses.html:49
 msgctxt "accounts.assigned_courses_page"
 msgid "empty_state"
-msgstr "No courses assigned yet."
+msgstr "Henüz atanmış ders yok."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:3
 msgctxt "accounts.assigned_exams_page"
@@ -685,28 +685,28 @@ msgstr "Sınav ara..."
 #: apps/accounts/templates/accounts/assigned_exams.html:54
 msgctxt "accounts.assigned_exams_page"
 msgid "start_with_code"
-msgstr "Start with code"
+msgstr "Kodla başla"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:58
 msgctxt "accounts.assigned_exams_page"
 msgid "start"
-msgstr "Start"
+msgstr "Başla"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:69
 msgctxt "accounts.assigned_exams_page"
 msgid "empty_state"
-msgstr "No assigned exams found."
+msgstr "Atanmış sınav bulunamadı."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:76
 #: apps/accounts/templates/accounts/assigned_exams.html:86
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_title"
-msgstr "Access code"
+msgstr "Erişim kodu"
 
 #: apps/accounts/templates/accounts/assigned_exams.html:77
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_prompt_template"
-msgstr "Enter the code to access the {title} exam."
+msgstr "{title} sınavına erişmek için kodu girin."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:78
 #: apps/exams/domain/access_policy.py:293
@@ -729,7 +729,7 @@ msgstr "Sınav başlatılamadı."
 #: apps/accounts/templates/accounts/assigned_exams.html:87
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_text"
-msgstr "Enter the exam code."
+msgstr "Sınav kodunu girin."
 
 #: apps/accounts/templates/accounts/assigned_exams.html:98
 msgctxt "accounts.assigned_exams_page"
@@ -744,7 +744,7 @@ msgstr "İptal"
 #: apps/accounts/templates/accounts/assigned_exams.html:106
 msgctxt "accounts.assigned_exams_page"
 msgid "modal_confirm"
-msgstr "Confirm"
+msgstr "Onayla"
 
 #: apps/accounts/templates/accounts/emails/login_otp_email.html:22
 #, python-format
@@ -893,12 +893,12 @@ msgstr "Çıkış"
 #: apps/accounts/templates/accounts/grading_queue.html:3
 msgctxt "accounts.grading_queue_page"
 msgid "title"
-msgstr "Grading queue"
+msgstr "Değerlendirme kuyruğu"
 
 #: apps/accounts/templates/accounts/grading_queue.html:17
 msgctxt "accounts.grading_queue_page"
 msgid "heading"
-msgstr "Grading queue"
+msgstr "Değerlendirme kuyruğu"
 
 #: apps/accounts/templates/accounts/grading_queue.html:21
 msgctxt "accounts.grading_queue_page"
@@ -908,82 +908,82 @@ msgstr "Geri"
 #: apps/accounts/templates/accounts/grading_queue.html:30
 msgctxt "accounts.grading_queue_page"
 msgid "filter_course_label"
-msgstr "Course"
+msgstr "Ders"
 
 #: apps/accounts/templates/accounts/grading_queue.html:33
 msgctxt "accounts.grading_queue_page"
 msgid "filter_course_all"
-msgstr "All courses"
+msgstr "Tüm dersler"
 
 #: apps/accounts/templates/accounts/grading_queue.html:44
 msgctxt "accounts.grading_queue_page"
 msgid "filter_assignment_label"
-msgstr "Assignment"
+msgstr "Ödev"
 
 #: apps/accounts/templates/accounts/grading_queue.html:47
 msgctxt "accounts.grading_queue_page"
 msgid "filter_assignment_all"
-msgstr "All assignments"
+msgstr "Tüm ödevler"
 
 #: apps/accounts/templates/accounts/grading_queue.html:58
 msgctxt "accounts.grading_queue_page"
 msgid "filter_sort_label"
-msgstr "Sort"
+msgstr "Sıralama"
 
 #: apps/accounts/templates/accounts/grading_queue.html:61
 msgctxt "accounts.grading_queue_page"
 msgid "sort_oldest"
-msgstr "Oldest first"
+msgstr "Önce en eskiler"
 
 #: apps/accounts/templates/accounts/grading_queue.html:62
 msgctxt "accounts.grading_queue_page"
 msgid "sort_newest"
-msgstr "Newest first"
+msgstr "Önce en yeniler"
 
 #: apps/accounts/templates/accounts/grading_queue.html:70
 msgctxt "accounts.grading_queue_page"
 msgid "filter_apply"
-msgstr "Apply filters"
+msgstr "Filtreleri uygula"
 
 #: apps/accounts/templates/accounts/grading_queue.html:81
 msgctxt "accounts.grading_queue_page"
 msgid "stat_pending"
-msgstr "Pending"
+msgstr "Bekleyen"
 
 #: apps/accounts/templates/accounts/grading_queue.html:85
 msgctxt "accounts.grading_queue_page"
 msgid "stat_graded_today"
-msgstr "Graded today"
+msgstr "Bugün değerlendirilen"
 
 #: apps/accounts/templates/accounts/grading_queue.html:89
 msgctxt "accounts.grading_queue_page"
 msgid "stat_avg_time"
-msgstr "Avg time"
+msgstr "Ort. süre"
 
 #: apps/accounts/templates/accounts/grading_queue.html:100
 msgctxt "accounts.grading_queue_page"
 msgid "table_student"
-msgstr "Student"
+msgstr "Öğrenci"
 
 #: apps/accounts/templates/accounts/grading_queue.html:101
 msgctxt "accounts.grading_queue_page"
 msgid "table_assignment"
-msgstr "Assignment"
+msgstr "Ödev"
 
 #: apps/accounts/templates/accounts/grading_queue.html:102
 msgctxt "accounts.grading_queue_page"
 msgid "table_submitted_at"
-msgstr "Submitted at"
+msgstr "Gönderilme zamanı"
 
 #: apps/accounts/templates/accounts/grading_queue.html:103
 msgctxt "accounts.grading_queue_page"
 msgid "table_file"
-msgstr "File"
+msgstr "Dosya"
 
 #: apps/accounts/templates/accounts/grading_queue.html:104
 msgctxt "accounts.grading_queue_page"
 msgid "table_grading"
-msgstr "Grading"
+msgstr "Değerlendirme"
 
 #: apps/accounts/templates/accounts/grading_queue.html:116
 msgctxt "accounts.grading_queue_page"
@@ -993,27 +993,27 @@ msgstr "Anonim öğrenci"
 #: apps/accounts/templates/accounts/grading_queue.html:127
 msgctxt "accounts.grading_queue_page"
 msgid "time_ago_suffix"
-msgstr "ago"
+msgstr "önce"
 
 #: apps/accounts/templates/accounts/grading_queue.html:135
 msgctxt "accounts.grading_queue_page"
 msgid "file_download"
-msgstr "File download"
+msgstr "Dosyayı indir"
 
 #: apps/accounts/templates/accounts/grading_queue.html:145
 msgctxt "accounts.grading_queue_page"
 msgid "file_view"
-msgstr "File view"
+msgstr "Dosyayı görüntüle"
 
 #: apps/accounts/templates/accounts/grading_queue.html:160
 msgctxt "accounts.grading_queue_page"
 msgid "score_placeholder"
-msgstr "Score"
+msgstr "Puan"
 
 #: apps/accounts/templates/accounts/grading_queue.html:171
 msgctxt "accounts.grading_queue_page"
 msgid "feedback_placeholder"
-msgstr "Feedback (optional)"
+msgstr "Geri bildirim (isteğe bağlı)"
 
 #: apps/accounts/templates/accounts/grading_queue.html:176
 msgctxt "accounts.grading_queue_page"
@@ -1028,17 +1028,17 @@ msgstr "Sonraki değerlendirme"
 #: apps/accounts/templates/accounts/grading_queue.html:192
 msgctxt "accounts.grading_queue_page"
 msgid "empty_title"
-msgstr "Great work!"
+msgstr "Harika iş!"
 
 #: apps/accounts/templates/accounts/grading_queue.html:193
 msgctxt "accounts.grading_queue_page"
 msgid "empty_description"
-msgstr "The grading queue is empty"
+msgstr "Değerlendirme kuyruğu boş"
 
 #: apps/accounts/templates/accounts/grading_queue.html:201
 msgctxt "accounts.grading_queue_page"
 msgid "loading"
-msgstr "Loading"
+msgstr "Yükleniyor"
 
 #: apps/accounts/templates/accounts/login.html:4
 #: apps/accounts/templates/accounts/login_portal.html:4
@@ -1131,49 +1131,49 @@ msgstr "Öğrenci paneli: sonuçlar, sınavlar ve itirazlar."
 #: apps/accounts/templates/accounts/my_result_detail.html:3
 msgctxt "accounts.my_result_detail_page"
 msgid "title"
-msgstr "Result detail"
+msgstr "Sonuç ayrıntısı"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:17
 msgctxt "accounts.my_result_detail_page"
 msgid "file_name_fallback"
-msgstr "File"
+msgstr "Dosya"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:23
 msgctxt "accounts.my_result_detail_page"
 msgid "back_to_results"
-msgstr "My Results"
+msgstr "Sonuçlarım"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:30
 msgctxt "accounts.my_result_detail_page"
 msgid "label_type"
-msgstr "Type"
+msgstr "Tür"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:34
 msgctxt "accounts.my_result_detail_page"
 msgid "label_context"
-msgstr "Context"
+msgstr "Bağlam"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:38
 msgctxt "accounts.my_result_detail_page"
 msgid "label_status"
-msgstr "Status"
+msgstr "Durum"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:44
 msgctxt "accounts.my_result_detail_page"
 msgid "label_submitted_at"
-msgstr "Submitted at"
+msgstr "Gönderilme zamanı"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:48
 msgctxt "accounts.my_result_detail_page"
 msgid "label_score"
-msgstr "Score"
+msgstr "Puan"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:58
 #: apps/accounts/templates/accounts/my_result_detail.html:137
 #: apps/accounts/templates/accounts/my_result_detail.html:181
 msgctxt "accounts.my_result_detail_page"
 msgid "answer_submission_title"
-msgstr "Answer / Submission"
+msgstr "Cevap / teslim"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:62
 #, python-format
@@ -1220,40 +1220,40 @@ msgstr "%(score)s puan"
 #: apps/accounts/templates/accounts/my_result_detail.html:205
 msgctxt "accounts.my_result_detail_page"
 msgid "view_file"
-msgstr "View file"
+msgstr "Dosyayı görüntüle"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:161
 #: apps/accounts/templates/accounts/my_result_detail.html:166
 #: apps/accounts/templates/accounts/my_result_detail.html:215
 msgctxt "accounts.my_result_detail_page"
 msgid "view_link"
-msgstr "View link"
+msgstr "Bağlantıyı aç"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:174
 #: apps/accounts/templates/accounts/my_result_detail.html:186
 msgctxt "accounts.my_result_detail_page"
 msgid "no_text_answer"
-msgstr "No text answer"
+msgstr "Metin cevabı yok"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:225
 msgctxt "accounts.my_result_detail_page"
 msgid "teacher_feedback_title"
-msgstr "Teacher feedback"
+msgstr "Öğretmen geri bildirimi"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:231
 msgctxt "accounts.my_result_detail_page"
 msgid "feedback_missing"
-msgstr "Feedback missing"
+msgstr "Henüz geri bildirim yok"
 
 #: apps/accounts/templates/accounts/my_results.html:4
 msgctxt "accounts.my_results_page"
 msgid "title"
-msgstr "My Results"
+msgstr "Sonuçlarım"
 
 #: apps/accounts/templates/accounts/my_results.html:15
 msgctxt "accounts.my_results_page"
 msgid "heading"
-msgstr "My Results"
+msgstr "Sonuçlarım"
 
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
@@ -1263,7 +1263,7 @@ msgstr "Profile dön"
 #: apps/accounts/templates/accounts/my_results.html:26
 msgctxt "accounts.my_results_page"
 msgid "tab_all"
-msgstr "All"
+msgstr "Tümü"
 
 #: apps/accounts/templates/accounts/my_results.html:30
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:28
@@ -1276,22 +1276,22 @@ msgstr "Akademik"
 #: apps/accounts/templates/accounts/my_results.html:34
 msgctxt "accounts.my_results_page"
 msgid "tab_exams"
-msgstr "Exams"
+msgstr "Sınavlar"
 
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Serbest işler"
+msgstr "Ödevler"
 
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_labs"
-msgstr "Labs"
+msgstr "Laboratuvar çalışmaları"
 
 #: apps/accounts/templates/accounts/my_results.html:46
 msgctxt "accounts.my_results_page"
 msgid "tab_independent"
-msgstr "Kurs işleri"
+msgstr "Dönem projeleri"
 
 #: apps/accounts/templates/accounts/my_results.html:57
 msgctxt "accounts.my_results_page"
@@ -1345,27 +1345,27 @@ msgstr ""
 #: apps/accounts/templates/accounts/my_results.html:127
 msgctxt "accounts.my_results_page"
 msgid "status_graded"
-msgstr "Graded"
+msgstr "Değerlendirildi"
 
 #: apps/accounts/templates/accounts/my_results.html:129
 msgctxt "accounts.my_results_page"
 msgid "status_pending"
-msgstr "Pending"
+msgstr "Bekliyor"
 
 #: apps/accounts/templates/accounts/my_results.html:131
 msgctxt "accounts.my_results_page"
 msgid "status_submitted"
-msgstr "Submitted"
+msgstr "Gönderildi"
 
 #: apps/accounts/templates/accounts/my_results.html:136
 msgctxt "accounts.my_results_page"
 msgid "score_prefix"
-msgstr "Score"
+msgstr "Puan"
 
 #: apps/accounts/templates/accounts/my_results.html:156
 msgctxt "accounts.my_results_page"
 msgid "view_details"
-msgstr "View answer/details"
+msgstr "Cevabı ve ayrıntıları görüntüle"
 
 #: apps/accounts/templates/accounts/my_results.html:172
 msgctxt "accounts.my_results_page"
@@ -1375,7 +1375,7 @@ msgstr "Aramaya uygun grup bulunamadı."
 #: apps/accounts/templates/accounts/my_results.html:174
 msgctxt "accounts.my_results_page"
 msgid "empty_state"
-msgstr "No items found."
+msgstr "Hiçbir kayıt bulunamadı."
 
 #: apps/accounts/templates/accounts/my_results.html:176
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:326
@@ -1844,17 +1844,17 @@ msgstr "Değiştirilen puan için gerekçe, not ve belge doldurulmalıdır."
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:5
 msgctxt "accounts.grading_queue_page"
 msgid "toast_success"
-msgstr "Grading completed successfully!"
+msgstr "Değerlendirme başarıyla tamamlandı!"
 
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:6
 msgctxt "accounts.grading_queue_page"
 msgid "toast_error_generic"
-msgstr "Something went wrong!"
+msgstr "Bir hata oluştu!"
 
 #: apps/accounts/templates/accounts/partials/_grading_queue_js.html:7
 msgctxt "accounts.grading_queue_page"
 msgid "toast_error_prefix"
-msgstr "Error"
+msgstr "Hata"
 
 #: apps/accounts/templates/accounts/partials/_groups_overview_content.html:2
 msgctxt "profile.groups"
@@ -5539,25 +5539,24 @@ msgstr ""
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:175
 msgctxt "accounts.register"
 msgid "privacy_card_title"
-msgstr "Gizlilik ve veri isleme"
+msgstr "Gizlilik ve veri işleme"
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:178
 msgctxt "accounts.register"
 msgid "privacy_card_description"
 msgstr ""
-"Hesabinizi olusturmadan once EMSArena'nin kayit ve egitim surecinde kisisel "
-"verileri nasil kullandigini inceleyin."
+"Hesabınızı oluşturmadan önce EMSArena'nın kayıt ve eğitim sürecinde kişisel "
+"verileri nasıl kullandığını inceleyin."
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:187
 msgctxt "accounts.register"
 msgid "privacy_open_button"
-msgstr "Gizlilik Politikasini ac"
+msgstr "Gizlilik Politikası'nı aç"
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:197
 msgctxt "accounts.register"
 msgid "privacy_accept_hint"
-msgstr ""
-"Tam metni modal pencerede acip inceledikten sonra kaydinizi tamamlayin."
+msgstr "Tam metni pencerede açıp inceledikten sonra kaydınızı tamamlayın."
 
 #: apps/accounts/templates/accounts/partials/register_steps/_step4.html:211
 msgctxt "accounts.register"
@@ -6699,19 +6698,19 @@ msgstr "Girişe dön"
 #: apps/accounts/templates/accounts/password_reset_complete.html:4
 msgctxt "accounts.password_reset_complete_page"
 msgid "title"
-msgstr "Completed"
+msgstr "Tamamlandı"
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:22
 msgctxt "accounts.password_reset_complete_page"
 msgid "heading"
-msgstr "Password changed successfully!"
+msgstr "Şifre başarıyla değiştirildi!"
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:25
 msgctxt "accounts.password_reset_complete_page"
 msgid "subheading"
 msgstr ""
-"Your account security has been restored. You can now log in with your new "
-"password."
+"Hesabınızın güvenliği yeniden sağlandı. Artık yeni şifrenizle giriş "
+"yapabilirsiniz."
 
 #: apps/accounts/templates/accounts/password_reset_complete.html:29
 msgctxt "accounts.password_reset_complete_page"
@@ -6721,17 +6720,17 @@ msgstr "Şimdi giriş yap"
 #: apps/accounts/templates/accounts/password_reset_confirm.html:4
 msgctxt "accounts.password_reset_confirm_page"
 msgid "title"
-msgstr "New password"
+msgstr "Yeni şifre"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:21
 msgctxt "accounts.password_reset_confirm_page"
 msgid "heading_valid"
-msgstr "Set new password"
+msgstr "Yeni şifre belirleyin"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:23
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_valid"
-msgstr "Please enter a new strong password for your account."
+msgstr "Hesabınız için yeni ve güçlü bir şifre girin."
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:24
 msgid "Şifrəni yeniləmək üçün emailə gələn OTP kodunu da daxil edin."
@@ -6749,24 +6748,24 @@ msgstr "OTP ve bağlantı %(minutes)s dakika geçerlidir."
 #: apps/accounts/templates/accounts/password_reset_confirm.html:71
 msgctxt "accounts.password_reset_confirm_page"
 msgid "submit"
-msgstr "Change password"
+msgstr "Şifreyi değiştir"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:79
 msgctxt "accounts.password_reset_confirm_page"
 msgid "heading_invalid"
-msgstr "Invalid link"
+msgstr "Geçersiz bağlantı"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:81
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_invalid"
 msgstr ""
-"This link has already been used or expired. For security reasons links are "
-"one-time only."
+"Bu bağlantı zaten kullanılmış veya süresi dolmuş. Güvenlik nedeniyle "
+"bağlantılar tek kullanımlıktır."
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:85
 msgctxt "accounts.password_reset_confirm_page"
 msgid "retry"
-msgstr "Request password reset again"
+msgstr "Şifre sıfırlamayı yeniden isteyin"
 
 #: apps/accounts/templates/accounts/password_reset_done.html:3
 msgctxt "accounts.password_reset_done_page"
@@ -15449,20 +15448,20 @@ msgstr "Ülkenizi seçin"
 #: apps/accounts/templates/accounts/register.html:99
 msgctxt "accounts.register"
 msgid "privacy_modal_eyebrow"
-msgstr "EMSArena kayit politikasi"
+msgstr "EMSArena kayıt politikası"
 
 #: apps/accounts/templates/accounts/register.html:102
 msgctxt "accounts.register"
 msgid "privacy_modal_title"
-msgstr "Gizlilik Politikasi"
+msgstr "Gizlilik Politikası"
 
 #: apps/accounts/templates/accounts/register.html:105
 msgctxt "accounts.register"
 msgid "privacy_modal_intro"
 msgstr ""
-"Bu politika, hesap olustururken, bir kuruma katilirken ve EMSArena icindeki "
-"kurs, sinav, laboratuvar, odev ve canli oturum ozelliklerini kullanirken "
-"bilgilerinizin nasil islendigini aciklar."
+"Bu politika, hesap oluştururken, bir kuruma katılırken ve EMSArena içindeki "
+"ders, sınav, laboratuvar, ödev ve canlı oturum özelliklerini kullanırken "
+"bilgilerinizin nasıl işlendiğini açıklar."
 
 #: apps/accounts/templates/accounts/register.html:108
 #: apps/accounts/templates/accounts/register.html:211
@@ -15473,15 +15472,15 @@ msgstr "Kapat"
 #: apps/accounts/templates/accounts/register.html:115
 msgctxt "accounts.register"
 msgid "privacy_modal_summary_badge"
-msgstr "Kisa ve net ozet"
+msgstr "Kısa ve net özet"
 
 #: apps/accounts/templates/accounts/register.html:118
 msgctxt "accounts.register"
 msgid "privacy_modal_summary"
 msgstr ""
-"Verileriniz hesabinizi olusturmak, girisi guvenli tutmak, kurum uyeligini "
-"yonetmek ve platformun egitim ozelliklerini calistirmak icin kullanilir. "
-"Verileriniz satilmaz ve yalnizca hizmet icin gerekli oldugunda paylasilir."
+"Verileriniz hesabınızı oluşturmak, girişi güvenli tutmak, kurum üyeliğini "
+"yönetmek ve platformun eğitim özelliklerini çalıştırmak için kullanılır. "
+"Verileriniz satılmaz ve yalnızca hizmet için gerekli olduğunda paylaşılır."
 
 #: apps/accounts/templates/accounts/register.html:129
 msgctxt "accounts.register"
@@ -15492,78 +15491,78 @@ msgstr "Hangi verileri topluyoruz"
 msgctxt "accounts.register"
 msgid "privacy_section_data_body"
 msgstr ""
-"Kayit sirasinda kullanici adinizi, adinizi, soyadinizi, e-posta adresinizi, "
-"ulkenizi, sectiginiz hesap turunu ve kurum bilgilerinizi toplariz. Platformu"
-" kullandikca kurslar, sinavlar, laboratuvarlar, odevler, sonuclar ve uyelik "
-"hareketleriyle ilgili operasyonel kayitlar da olusabilir."
+"Kayıt sırasında kullanıcı adınızı, adınızı, soyadınızı, e-posta adresinizi, "
+"ülkenizi, seçtiğiniz hesap türünü ve kurum bilgilerinizi toplarız. Platformu"
+" kullandıkça dersler, sınavlar, laboratuvarlar, ödevler, sonuçlar ve üyelik "
+"hareketleriyle ilgili operasyonel kayıtlar da oluşabilir."
 
 #: apps/accounts/templates/accounts/register.html:143
 msgctxt "accounts.register"
 msgid "privacy_section_use_title"
-msgstr "Verileri nasil kullaniyoruz"
+msgstr "Verileri nasıl kullanıyoruz"
 
 #: apps/accounts/templates/accounts/register.html:146
 msgctxt "accounts.register"
 msgid "privacy_section_use_body"
 msgstr ""
-"Bu veriler hesabinizi olusturmak, e-posta OTP dogrulamasi gondermek, "
-"workspace ve kurum erisimini yonetmek, ders ve sinav akislarini calistirmak,"
-" sonuclari gostermek ve denetim ile guvenlik kontrollerini desteklemek icin "
-"kullanilir."
+"Bu veriler hesabınızı oluşturmak, e-posta OTP doğrulaması göndermek, çalışma"
+" alanı ve kurum erişimini yönetmek, ders ve sınav akışlarını çalıştırmak, "
+"sonuçları göstermek ve denetim ile güvenlik kontrollerini desteklemek için "
+"kullanılır."
 
 #: apps/accounts/templates/accounts/register.html:157
 msgctxt "accounts.register"
 msgid "privacy_section_access_title"
-msgstr "Kurum icindeki gorunurluk"
+msgstr "Kurum içindeki görünürlük"
 
 #: apps/accounts/templates/accounts/register.html:160
 msgctxt "accounts.register"
 msgid "privacy_section_access_body"
 msgstr ""
-"Bir okula, universiteye veya kurs merkezine katildiginizda, o kurumdaki "
-"yetkili yoneticiler ve egitmenler temel profil bilgilerinizi, uyelik "
-"durumunuzu ve rolunuzle ilgili ogrenme faaliyetlerini gorebilir."
+"Bir okula, üniversiteye veya kurs merkezine katıldığınızda, o kurumdaki "
+"yetkili yöneticiler ve eğitmenler temel profil bilgilerinizi, üyelik "
+"durumunuzu ve rolünüzle ilgili öğrenme faaliyetlerini görebilir."
 
 #: apps/accounts/templates/accounts/register.html:171
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_title"
-msgstr "Veriler kimlerle paylasilir"
+msgstr "Veriler kimlerle paylaşılır"
 
 #: apps/accounts/templates/accounts/register.html:174
 msgctxt "accounts.register"
 msgid "privacy_section_sharing_body"
 msgstr ""
-"Bilgileriniz satilmaz. Verileriniz yalnizca sectiginiz kurumun yetkili "
-"yoneticileriyle, e-posta dogrulamasi veya barindirma gibi teknik hizmet "
-"saglayicilariyla ve yasal zorunluluk durumunda ilgili taraflarla "
-"paylasilabilir."
+"Bilgileriniz satılmaz. Verileriniz yalnızca seçtiğiniz kurumun yetkili "
+"yöneticileriyle, e-posta doğrulaması veya barındırma gibi teknik hizmet "
+"sağlayıcılarıyla ve yasal zorunluluk durumunda ilgili taraflarla "
+"paylaşılabilir."
 
 #: apps/accounts/templates/accounts/register.html:185
 msgctxt "accounts.register"
 msgid "privacy_section_retention_title"
-msgstr "Saklama ve guvenlik"
+msgstr "Saklama ve güvenlik"
 
 #: apps/accounts/templates/accounts/register.html:188
 msgctxt "accounts.register"
 msgid "privacy_section_retention_body"
 msgstr ""
-"Bilgiler hizmetin calismasi, denetim ve anlasmazlik incelemeleri icin "
-"gerekli oldugu surece saklanir. OTP dogrulamasi gibi hassas akislar kisa "
-"omurludur ve sistem genelinde teknik ve organizasyonel guvenlik onlemleri "
-"uygulanir."
+"Bilgiler hizmetin çalışması, denetim ve anlaşmazlık incelemeleri için "
+"gerekli olduğu sürece saklanır. OTP doğrulaması gibi hassas akışlar kısa "
+"ömürlüdür ve sistem genelinde teknik ve organizasyonel güvenlik önlemleri "
+"uygulanır."
 
 #: apps/accounts/templates/accounts/register.html:199
 msgctxt "accounts.register"
 msgid "privacy_section_rights_title"
-msgstr "Haklariniz"
+msgstr "Haklarınız"
 
 #: apps/accounts/templates/accounts/register.html:202
 msgctxt "accounts.register"
 msgid "privacy_section_rights_body"
 msgstr ""
-"Profil bilgilerinizi guncelleyebilir, kurum tercihlerinizi degistirebilir ve"
-" hesap verilerinizle ilgili aciklama veya silme talebinde bulunabilirsiniz. "
-"Bu haklari kullanmak icin platform yoneticisiyle iletisime gecebilirsiniz."
+"Profil bilgilerinizi güncelleyebilir, kurum tercihlerinizi değiştirebilir ve"
+" hesap verilerinizle ilgili açıklama veya silme talebinde bulunabilirsiniz. "
+"Bu hakları kullanmak için platform yöneticisiyle iletişime geçebilirsiniz."
 
 #: apps/accounts/templates/accounts/register.html:214
 msgctxt "accounts.register"
@@ -15778,17 +15777,17 @@ msgstr "Geri bildirim eklenmedi."
 #: apps/accounts/templates/accounts/student_dashboard.html:4
 msgctxt "accounts.student_dashboard"
 msgid "title"
-msgstr "Student dashboard"
+msgstr "Öğrenci paneli"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:15
 msgctxt "accounts.student_dashboard"
 msgid "heading"
-msgstr "Heading"
+msgstr "Öğrenci paneli"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:16
 msgctxt "accounts.student_dashboard"
 msgid "welcome"
-msgstr "Welcome"
+msgstr "Hoş geldiniz"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:19
 msgctxt "accounts.student_dashboard"
@@ -15798,27 +15797,27 @@ msgstr "Profil"
 #: apps/accounts/templates/accounts/student_dashboard.html:22
 msgctxt "accounts.student_dashboard"
 msgid "btn_courses"
-msgstr "Courses"
+msgstr "Dersler"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:25
 msgctxt "accounts.student_dashboard"
 msgid "btn_exams"
-msgstr "Exams"
+msgstr "Sınavlar"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:39
 msgctxt "accounts.student_dashboard"
 msgid "widget_courses_title"
-msgstr "Courses"
+msgstr "Dersler"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:40
 msgctxt "accounts.student_dashboard"
 msgid "course_unit"
-msgstr "Course unit"
+msgstr "ders"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:59
 msgctxt "accounts.student_dashboard"
 msgid "view_all"
-msgstr "View all"
+msgstr "Tümünü gör"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:64
 msgctxt "accounts.student_dashboard"
@@ -15828,12 +15827,12 @@ msgstr "Henüz ders yok."
 #: apps/accounts/templates/accounts/student_dashboard.html:76
 msgctxt "accounts.student_dashboard"
 msgid "widget_assignments_title"
-msgstr "Assignments"
+msgstr "Ödevler"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:77
 msgctxt "accounts.student_dashboard"
 msgid "pending_unit"
-msgstr "Pending unit"
+msgstr "bekleyen"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
@@ -15843,17 +15842,17 @@ msgstr "Henüz ödev yok."
 #: apps/accounts/templates/accounts/student_dashboard.html:115
 msgctxt "accounts.student_dashboard"
 msgid "widget_upcoming_exams_title"
-msgstr "Upcoming exams"
+msgstr "Yaklaşan sınavlar"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:116
 msgctxt "accounts.student_dashboard"
 msgid "exam_unit"
-msgstr "Exam unit"
+msgstr "sınav"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:131
 msgctxt "accounts.student_dashboard"
 msgid "start_exam"
-msgstr "Start exam"
+msgstr "Sınava başla"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:139
 msgctxt "accounts.student_dashboard"
@@ -15863,12 +15862,12 @@ msgstr "Yaklaşan sınav yok."
 #: apps/accounts/templates/accounts/student_dashboard.html:151
 msgctxt "accounts.student_dashboard"
 msgid "widget_recent_grades_title"
-msgstr "Recent grades"
+msgstr "Son notlar"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:152
 msgctxt "accounts.student_dashboard"
 msgid "answer_unit"
-msgstr "Answer unit"
+msgstr "cevap"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
@@ -16327,17 +16326,17 @@ msgstr "Sonuç henüz kesinleşmedi. {minutes} dakika dolduktan sonra görünece
 #: apps/accounts/views/dashboard/results.py:128
 msgctxt "accounts.my_result_detail.type"
 msgid "course"
-msgstr "Course"
+msgstr "Ödev"
 
 #: apps/accounts/views/dashboard/results.py:185
 msgctxt "accounts.my_result_detail.type"
 msgid "lab"
-msgstr "Lab"
+msgstr "Laboratuvar çalışması"
 
 #: apps/accounts/views/dashboard/results.py:228
 msgctxt "accounts.my_result_detail.type"
 msgid "independent_work"
-msgstr "Independent work"
+msgstr "Dönem projesi"
 
 #: apps/accounts/views/dashboard/results.py:242
 msgctxt "accounts.my_results.message"
@@ -23947,12 +23946,12 @@ msgstr "Zaman damgası"
 #: apps/exams/domain/attempts.py:506
 msgctxt "exams.model.proctoring.field"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Ayrıntılar"
 
 #: apps/exams/domain/attempts.py:507
 msgctxt "exams.model.proctoring.help"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Olayla ilgili ek veriler (JSON)."
 
 #: apps/exams/domain/attempts.py:511
 msgctxt "exams.model.proctoring.meta"
@@ -32556,7 +32555,7 @@ msgstr "Yinelenen"
 #: apps/exams/templates/exams/teacher/partials/_question_management.html:123
 msgctxt "exams.template.teacher_questions_bank"
 msgid "placeholder_search_questions"
-msgstr "Soru metni, blok veya cevap secenegine gore ara..."
+msgstr "Soru metni, blok veya cevap seçeneğine göre ara..."
 
 #: apps/exams/templates/exams/teacher/partials/_question_management.html:127
 msgctxt "exams.template.teacher_questions_bank"
@@ -32805,7 +32804,7 @@ msgstr "Sıfırla"
 #: apps/exams/templates/exams/teacher/partials/_question_management.html:391
 msgctxt "exams.template.teacher_questions_bank"
 msgid "empty_no_results"
-msgstr "Aramaniza uygun soru bulunamadi."
+msgstr "Aramanıza uygun soru bulunamadı."
 
 #: apps/exams/templates/exams/teacher/partials/_question_management.html:393
 msgctxt "exams.template.teacher_questions_bank"
@@ -83223,3 +83222,253 @@ msgstr "Önceki plan hâlâ hazırlanıyor — lütfen biraz bekleyin."
 msgctxt "courses.view.message"
 msgid "too_many_groups"
 msgstr "Tek seferde en fazla 20 grup eklenebilir."
+
+msgctxt "registrar.enrollment_status"
+msgid "Suspended"
+msgstr "Donduruldu"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavab"
+msgstr "yayın bekleyen anonim yanıt"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavablar"
+msgstr "yayın bekleyen anonim yanıtlar"
+
+msgctxt "appeals.service.create.error"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir."
+msgstr "Bu sınav türü için itiraz yapılamaz."
+
+msgctxt "appeals.service.create.error"
+msgid ""
+"İmtahanınız hələ yoxlanılmayıb — apellyasiya nəticə açıqlandıqdan sonra "
+"verilə bilər."
+msgstr ""
+"Sınavınız henüz değerlendirilmedi — sonuç açıklandıktan sonra itiraz "
+"edebilirsiniz."
+
+msgctxt "appeals.service.decision.error"
+msgid ""
+"İmtahan hələ yoxlanılmayıb — apellyasiyaya yoxlamadan sonra qərar verilə "
+"bilər."
+msgstr ""
+"Sınav henüz değerlendirilmedi — itiraz ancak değerlendirmeden sonra karara "
+"bağlanabilir."
+
+msgctxt "appeals.template"
+msgid "İmtahanınız hələ yoxlanılmayıb"
+msgstr "Sınavınız henüz değerlendirilmedi"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya işiniz yoxlanıb nəticə açıqlandıqdan sonra %(days)s gün ərzində "
+"göndərilə bilər."
+msgstr ""
+"İtiraz, çalışmanız değerlendirilip sonuç açıklandıktan sonra %(days)s gün "
+"içinde yapılabilir."
+
+msgctxt "appeals.template"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir"
+msgstr "Bu sınav türü için itiraz yapılamaz"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya yalnız aralıq (midterm) və yekun (final) imtahanları üzrə "
+"verilir."
+msgstr ""
+"İtiraz yalnızca ara sınav (midterm) ve final sınavları için yapılabilir."
+
+msgctxt "exams.final_center.error"
+msgid ""
+"İmtahana buraxılış yoxlanıla bilmədi — nəzarətçiyə və ya imtahan mərkəzinə "
+"müraciət edin."
+msgstr "Sınava kabul doğrulanamadı — gözetmene veya sınav merkezine başvurun."
+
+msgctxt "exams.final_center.error"
+msgid "Qayıb limiti keçildiyi üçün bu imtahana buraxılmırsınız."
+msgstr "Devamsızlık sınırı aşıldığı için bu sınava alınmıyorsunuz."
+
+msgctxt "registrar.journal"
+msgid "Apellyasiya"
+msgstr "İtiraz"
+
+msgctxt "registrar.journal"
+msgid "+%(delta)s bal"
+msgstr "+%(delta)s puan"
+
+msgctxt "syllabus.notify"
+msgid ""
+"Bu sillabusun müəllifi kafedra müdirinin özüdür, ona görə öz sillabusunu "
+"təsdiqləyə bilməz. Qərar dekanlıq və ya universitet səviyyəsində "
+"verilməlidir."
+msgstr ""
+"Bu izlencenin yazarı bölüm başkanının kendisidir, bu nedenle kendi "
+"izlencesini onaylayamaz. Karar dekanlık veya üniversite düzeyinde "
+"verilmelidir."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Öz sillabusunuz üzrə qərar verə bilməzsiniz — qərar dekanlıq və ya "
+"universitet səviyyəsindədir."
+msgstr ""
+"Kendi izlenceniz hakkında karar veremezsiniz — karar dekanlık veya "
+"üniversite düzeyinde verilir."
+
+msgctxt "workload"
+msgid ""
+"Bu fəaliyyət üzrə artıq %(assigned)s saat bölünüb — cəmi %(total)s saata "
+"endirmək olmaz. Əvvəlcə bölgünü azaldın."
+msgstr ""
+"Bu etkinlik için zaten %(assigned)s saat dağıtılmış — toplam %(total)s saate"
+" düşürülemez. Önce dağıtımı azaltın."
+
+msgctxt "workload"
+msgid ""
+"Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s "
+"toqquşma). Dərs cədvəlini yoxlayın."
+msgstr ""
+"Dikkat: yeni öğretmenin ders programında aynı saatte başka bir dersi var "
+"(%(count)s çakışma). Ders programını kontrol edin."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər."
+msgstr ""
+"Düzey varsayılanlarını yalnızca üniversite düzeyindeki ders programı "
+"yöneticisi değiştirebilir."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər. "
+"Öz qruplarınız üçün aşağıda istisna yaza bilərsiniz."
+msgstr ""
+"Düzey varsayılanlarını yalnızca üniversite düzeyindeki ders programı "
+"yöneticisi değiştirebilir. Kendi gruplarınız için aşağıda istisna "
+"tanımlayabilirsiniz."
+
+msgctxt "timetable.api"
+msgid "Qrup identifikatoru düzgün deyil."
+msgstr "Grup kimliği geçersiz."
+
+msgctxt "timetable.api"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Çok sık istek gönderiliyor — biraz sonra tekrar deneyin."
+
+msgctxt "timetable.api"
+msgid ""
+"Bu işləməni yalnız onu yaradan və ya universitet səviyyəli idarəçi dəyişə "
+"bilər."
+msgstr ""
+"Bu çalıştırmayı yalnızca onu oluşturan kişi veya üniversite düzeyindeki "
+"yönetici değiştirebilir."
+
+msgctxt "timetable.run"
+msgid ""
+"İşləmə texniki xəta ilə dayandı. Parametrləri yoxlayıb yenidən cəhd edin; "
+"təkrarlansa inzibatçıya bildirin."
+msgstr ""
+"Çalıştırma teknik bir hata nedeniyle durdu. Parametreleri kontrol edip "
+"tekrar deneyin; tekrarlanırsa yöneticiye bildirin."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_view_only"
+msgstr ""
+"Öğrenci sınavı henüz bitirmedi — deneme yalnızca görüntüleme modunda açıldı."
+" Değerlendirme deneme bittikten sonra yapılabilir."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_cannot_grade"
+msgstr ""
+"Deneme henüz bitmedi — öğrenci sınavı bitirene kadar değerlendirilemez."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_answer_key_hidden_attempts_left"
+msgstr ""
+"Hâlâ deneme hakkınız var — doğru cevaplar son denemenizden sonra veya sınav "
+"süresi bittiğinde gösterilecek. Puanınız ve cevaplarınızın doğru/yanlış "
+"sonucu şimdiden görünür."
+
+msgctxt "registrar.finals"
+msgid "Bal rəqəm olmalıdır."
+msgstr "Puan sayı olmalıdır."
+
+msgctxt "registrar.journal_finals"
+msgid ""
+"%(n)s xana yazılmadı: %(details)s. Yazılmış imtahan balının dəyişdirilməsi "
+"İmtahan Mərkəzinin bal daxiletmə səhifəsindən, təqdimatla aparılır."
+msgstr ""
+"%(n)s hücre kaydedilmedi: %(details)s. Girilmiş sınav puanı yalnızca Sınav "
+"Merkezinin puan girişi sayfasından, belge ile değiştirilebilir."
+
+msgctxt "registrar.journal_finals"
+msgid "%(n)s xana yazılmadı — bal rəqəm olmalıdır; mövcud bal dəyişdirilmədi."
+msgstr ""
+"%(n)s hücre kaydedilmedi — puan sayı olmalıdır; mevcut puan değiştirilmedi."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Ders saati pozitif bir tam sayı olmalıdır."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı 1 ilə %(max)s arasında olmalıdır."
+msgstr "Ders saati 1 ile %(max)s arasında olmalıdır."
+
+msgctxt "registrar.correction"
+msgid ""
+"Absent (or excused) cells hold no score — correct the attendance first."
+msgstr ""
+"Devamsız (veya mazeretli) hücreye puan girilmez — önce devam durumunu "
+"düzeltin."
+
+msgctxt "assignments.views.message"
+msgid "invalid_attempts_or_score"
+msgstr "Deneme sayısı ve maksimum puan pozitif sayı olmalıdır."
+
+msgctxt "exams.final_center.message"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "Deneme devam ettirilemedi."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_title"
+msgstr "Canlı oturumu başlat"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_force_new_hint"
+msgstr ""
+"Bu sınavın aktif canlı oturumu sonlandırılacak ve yenisi oluşturulacak."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_cancel"
+msgstr "İptal"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_submit"
+msgstr "Başlat"
+
+msgctxt "registrar.transfer"
+msgid "Yeni qrup tələbənin təşkilatına aid deyil."
+msgstr "Yeni grup öğrencinin kurumuna ait değil."
+
+msgctxt "registrar.transfer"
+msgid "Yeni struktur vahidi akademik qrup olmalıdır."
+msgstr "Yeni birim bir akademik grup olmalıdır."
+
+msgctxt "registrar.transfer"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "Akademik dönem öğrencinin kurumuna ait değil."
+
+msgctxt "registrar.transfer"
+msgid "Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir."
+msgstr "Grup nakli için etkin güncel akademik dönem belirtilmelidir."
+
+msgctxt "registrar.transfer"
+msgid "Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər."
+msgstr "Grup nakli yalnızca etkin güncel akademik dönem için yapılabilir."
+
+msgctxt "exams.form.question"
+msgid "Sual üçün mövzu bloku seçilməlidir."
+msgstr "Soru için bir konu bloğu seçilmelidir."
+
+msgctxt "accounts.people.action"
+msgid "Naməlum əməliyyat."
+msgstr "Bilinmeyen işlem."

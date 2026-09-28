@@ -159,7 +159,7 @@ msgstr "University staff"
 #: apps/accounts/forms/auth/register.py:122
 msgctxt "accounts.form.register.choice"
 msgid "org_type_course_staff"
-msgstr "Course staff"
+msgstr "Course center staff"
 
 #: apps/accounts/forms/auth/register.py:135
 msgctxt "accounts.form.register.label"
@@ -958,7 +958,7 @@ msgstr "Graded today"
 #: apps/accounts/templates/accounts/grading_queue.html:89
 msgctxt "accounts.grading_queue_page"
 msgid "stat_avg_time"
-msgstr "Avg time"
+msgstr "Avg. time"
 
 #: apps/accounts/templates/accounts/grading_queue.html:100
 msgctxt "accounts.grading_queue_page"
@@ -998,12 +998,12 @@ msgstr "ago"
 #: apps/accounts/templates/accounts/grading_queue.html:135
 msgctxt "accounts.grading_queue_page"
 msgid "file_download"
-msgstr "File download"
+msgstr "Download file"
 
 #: apps/accounts/templates/accounts/grading_queue.html:145
 msgctxt "accounts.grading_queue_page"
 msgid "file_view"
-msgstr "File view"
+msgstr "View file"
 
 #: apps/accounts/templates/accounts/grading_queue.html:160
 msgctxt "accounts.grading_queue_page"
@@ -1131,7 +1131,7 @@ msgstr "Student cabinet: results, exams and appeals."
 #: apps/accounts/templates/accounts/my_result_detail.html:3
 msgctxt "accounts.my_result_detail_page"
 msgid "title"
-msgstr "Result detail"
+msgstr "Result details"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:17
 msgctxt "accounts.my_result_detail_page"
@@ -1141,7 +1141,7 @@ msgstr "File"
 #: apps/accounts/templates/accounts/my_result_detail.html:23
 msgctxt "accounts.my_result_detail_page"
 msgid "back_to_results"
-msgstr "My Results"
+msgstr "My results"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:30
 msgctxt "accounts.my_result_detail_page"
@@ -1173,7 +1173,7 @@ msgstr "Score"
 #: apps/accounts/templates/accounts/my_result_detail.html:181
 msgctxt "accounts.my_result_detail_page"
 msgid "answer_submission_title"
-msgstr "Answer / Submission"
+msgstr "Answer / submission"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:62
 #, python-format
@@ -1227,7 +1227,7 @@ msgstr "View file"
 #: apps/accounts/templates/accounts/my_result_detail.html:215
 msgctxt "accounts.my_result_detail_page"
 msgid "view_link"
-msgstr "View link"
+msgstr "Open link"
 
 #: apps/accounts/templates/accounts/my_result_detail.html:174
 #: apps/accounts/templates/accounts/my_result_detail.html:186
@@ -1243,17 +1243,17 @@ msgstr "Teacher feedback"
 #: apps/accounts/templates/accounts/my_result_detail.html:231
 msgctxt "accounts.my_result_detail_page"
 msgid "feedback_missing"
-msgstr "Feedback missing"
+msgstr "No feedback yet"
 
 #: apps/accounts/templates/accounts/my_results.html:4
 msgctxt "accounts.my_results_page"
 msgid "title"
-msgstr "My Results"
+msgstr "My results"
 
 #: apps/accounts/templates/accounts/my_results.html:15
 msgctxt "accounts.my_results_page"
 msgid "heading"
-msgstr "My Results"
+msgstr "My results"
 
 #: apps/accounts/templates/accounts/my_results.html:18
 msgctxt "accounts.my_results_page"
@@ -1281,17 +1281,17 @@ msgstr "Exams"
 #: apps/accounts/templates/accounts/my_results.html:38
 msgctxt "accounts.my_results_page"
 msgid "tab_courses"
-msgstr "Free work"
+msgstr "Assignments"
 
 #: apps/accounts/templates/accounts/my_results.html:42
 msgctxt "accounts.my_results_page"
 msgid "tab_labs"
-msgstr "Labs"
+msgstr "Lab work"
 
 #: apps/accounts/templates/accounts/my_results.html:46
 msgctxt "accounts.my_results_page"
 msgid "tab_independent"
-msgstr "Coursework"
+msgstr "Course projects"
 
 #: apps/accounts/templates/accounts/my_results.html:57
 msgctxt "accounts.my_results_page"
@@ -1365,7 +1365,7 @@ msgstr "Score"
 #: apps/accounts/templates/accounts/my_results.html:156
 msgctxt "accounts.my_results_page"
 msgid "view_details"
-msgstr "View answer/details"
+msgstr "View answer and details"
 
 #: apps/accounts/templates/accounts/my_results.html:172
 msgctxt "accounts.my_results_page"
@@ -5917,7 +5917,7 @@ msgstr "Search for students..."
 #: apps/accounts/templates/accounts/partials/staff_management/_students_members.html:75
 msgctxt "staff.management"
 msgid "No student found."
-msgstr "No teacher found."
+msgstr "No student found."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:9
 msgctxt "staff.management"
@@ -5932,7 +5932,7 @@ msgstr "Respond to pending teacher requests here."
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:26
 msgctxt "staff.management"
 msgid "Search pending students..."
-msgstr "Search teacher invites..."
+msgstr "Search pending students..."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:62
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:69
@@ -5980,17 +5980,17 @@ msgstr "Delete"
 #: apps/accounts/templates/accounts/partials/staff_management/_students_pending.html:152
 msgctxt "staff.management"
 msgid "There are no pending students."
-msgstr "There are no pending teacher requests."
+msgstr "There are no pending students."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:9
 msgctxt "staff.management"
 msgid "Students without organization"
-msgstr "Teachers without organization"
+msgstr "Students without organization"
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:11
 msgctxt "staff.management"
 msgid "Students who can be invited appear here."
-msgstr "Teachers who can be invited appear here."
+msgstr "Students who can be invited appear here."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:65
 #, python-brace-format
@@ -6001,7 +6001,7 @@ msgstr "Invite selected teachers ({count} selected)"
 #: apps/accounts/templates/accounts/partials/staff_management/_students_unassigned.html:119
 msgctxt "staff.management"
 msgid "No student available for invitation."
-msgstr "No teacher available for invitation."
+msgstr "No student available for invitation."
 
 #: apps/accounts/templates/accounts/partials/staff_management/_superadmin_section.html:10
 msgctxt "staff.management"
@@ -6734,7 +6734,7 @@ msgstr "New password"
 #: apps/accounts/templates/accounts/password_reset_confirm.html:21
 msgctxt "accounts.password_reset_confirm_page"
 msgid "heading_valid"
-msgstr "Set new password"
+msgstr "Set a new password"
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:23
 msgctxt "accounts.password_reset_confirm_page"
@@ -6768,8 +6768,8 @@ msgstr "Invalid link"
 msgctxt "accounts.password_reset_confirm_page"
 msgid "subheading_invalid"
 msgstr ""
-"This link has already been used or expired. For security reasons links are "
-"one-time only."
+"This link has already been used or has expired. For security reasons links "
+"are one-time only."
 
 #: apps/accounts/templates/accounts/password_reset_confirm.html:85
 msgctxt "accounts.password_reset_confirm_page"
@@ -15822,7 +15822,7 @@ msgstr "Student dashboard"
 #: apps/accounts/templates/accounts/student_dashboard.html:15
 msgctxt "accounts.student_dashboard"
 msgid "heading"
-msgstr "Heading"
+msgstr "Student dashboard"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:16
 msgctxt "accounts.student_dashboard"
@@ -15852,7 +15852,7 @@ msgstr "Courses"
 #: apps/accounts/templates/accounts/student_dashboard.html:40
 msgctxt "accounts.student_dashboard"
 msgid "course_unit"
-msgstr "Course unit"
+msgstr "courses"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:59
 msgctxt "accounts.student_dashboard"
@@ -15872,7 +15872,7 @@ msgstr "Assignments"
 #: apps/accounts/templates/accounts/student_dashboard.html:77
 msgctxt "accounts.student_dashboard"
 msgid "pending_unit"
-msgstr "Pending unit"
+msgstr "pending"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:103
 msgctxt "accounts.student_dashboard"
@@ -15887,7 +15887,7 @@ msgstr "Upcoming exams"
 #: apps/accounts/templates/accounts/student_dashboard.html:116
 msgctxt "accounts.student_dashboard"
 msgid "exam_unit"
-msgstr "Exam unit"
+msgstr "exams"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:131
 msgctxt "accounts.student_dashboard"
@@ -15907,7 +15907,7 @@ msgstr "Recent grades"
 #: apps/accounts/templates/accounts/student_dashboard.html:152
 msgctxt "accounts.student_dashboard"
 msgid "answer_unit"
-msgstr "Answer unit"
+msgstr "answers"
 
 #: apps/accounts/templates/accounts/student_dashboard.html:183
 msgctxt "accounts.student_dashboard"
@@ -16374,17 +16374,17 @@ msgstr ""
 #: apps/accounts/views/dashboard/results.py:128
 msgctxt "accounts.my_result_detail.type"
 msgid "course"
-msgstr "Course"
+msgstr "Assignment"
 
 #: apps/accounts/views/dashboard/results.py:185
 msgctxt "accounts.my_result_detail.type"
 msgid "lab"
-msgstr "Lab"
+msgstr "Lab work"
 
 #: apps/accounts/views/dashboard/results.py:228
 msgctxt "accounts.my_result_detail.type"
 msgid "independent_work"
-msgstr "Independent work"
+msgstr "Course project"
 
 #: apps/accounts/views/dashboard/results.py:242
 msgctxt "accounts.my_results.message"
@@ -24014,12 +24014,12 @@ msgstr "Timestamp"
 #: apps/exams/domain/attempts.py:506
 msgctxt "exams.model.proctoring.field"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Details"
 
 #: apps/exams/domain/attempts.py:507
 msgctxt "exams.model.proctoring.help"
 msgid "details"
-msgstr "View answer/details"
+msgstr "Additional event data (JSON)."
 
 #: apps/exams/domain/attempts.py:511
 msgctxt "exams.model.proctoring.meta"
@@ -83710,3 +83710,258 @@ msgstr "Your previous plan is still being prepared — please wait a moment."
 msgctxt "courses.view.message"
 msgid "too_many_groups"
 msgstr "You can add at most 20 groups at a time."
+
+msgctxt "registrar.enrollment_status"
+msgid "Suspended"
+msgstr "Suspended"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavab"
+msgstr "pending anonymous response"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən anonim cavablar"
+msgstr "pending anonymous responses"
+
+msgctxt "appeals.service.create.error"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir."
+msgstr "Appeals are not accepted for this type of exam."
+
+msgctxt "appeals.service.create.error"
+msgid ""
+"İmtahanınız hələ yoxlanılmayıb — apellyasiya nəticə açıqlandıqdan sonra "
+"verilə bilər."
+msgstr ""
+"Your exam has not been graded yet — you can appeal once the result is "
+"published."
+
+msgctxt "appeals.service.decision.error"
+msgid ""
+"İmtahan hələ yoxlanılmayıb — apellyasiyaya yoxlamadan sonra qərar verilə "
+"bilər."
+msgstr ""
+"The exam has not been graded yet — the appeal can be decided only after "
+"grading."
+
+msgctxt "appeals.template"
+msgid "İmtahanınız hələ yoxlanılmayıb"
+msgstr "Your exam has not been graded yet"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya işiniz yoxlanıb nəticə açıqlandıqdan sonra %(days)s gün ərzində "
+"göndərilə bilər."
+msgstr ""
+"You can submit an appeal within %(days)s days after your work is graded and "
+"the result is published."
+
+msgctxt "appeals.template"
+msgid "Bu imtahan növü üzrə apellyasiya verilmir"
+msgstr "Appeals are not accepted for this type of exam"
+
+msgctxt "appeals.template"
+msgid ""
+"Apellyasiya yalnız aralıq (midterm) və yekun (final) imtahanları üzrə "
+"verilir."
+msgstr "Appeals can be submitted only for midterm and final exams."
+
+msgctxt "exams.final_center.error"
+msgid ""
+"İmtahana buraxılış yoxlanıla bilmədi — nəzarətçiyə və ya imtahan mərkəzinə "
+"müraciət edin."
+msgstr ""
+"Exam admission could not be verified — please contact the invigilator or the"
+" exam centre."
+
+msgctxt "exams.final_center.error"
+msgid "Qayıb limiti keçildiyi üçün bu imtahana buraxılmırsınız."
+msgstr ""
+"You are not admitted to this exam because you have exceeded the absence "
+"limit."
+
+msgctxt "registrar.journal"
+msgid "Apellyasiya"
+msgstr "Appeal"
+
+msgctxt "registrar.journal"
+msgid "+%(delta)s bal"
+msgstr "+%(delta)s pts"
+
+msgctxt "syllabus.notify"
+msgid ""
+"Bu sillabusun müəllifi kafedra müdirinin özüdür, ona görə öz sillabusunu "
+"təsdiqləyə bilməz. Qərar dekanlıq və ya universitet səviyyəsində "
+"verilməlidir."
+msgstr ""
+"The author of this syllabus is the head of department, who cannot approve "
+"their own syllabus. The decision must be made at the dean's office or "
+"university level."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Öz sillabusunuz üzrə qərar verə bilməzsiniz — qərar dekanlıq və ya "
+"universitet səviyyəsindədir."
+msgstr ""
+"You cannot decide on your own syllabus — the decision is made at the dean's "
+"office or university level."
+
+msgctxt "workload"
+msgid ""
+"Bu fəaliyyət üzrə artıq %(assigned)s saat bölünüb — cəmi %(total)s saata "
+"endirmək olmaz. Əvvəlcə bölgünü azaldın."
+msgstr ""
+"%(assigned)s hours of this activity are already assigned — the total cannot "
+"be reduced to %(total)s hours. Reduce the assignments first."
+
+msgctxt "workload"
+msgid ""
+"Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s "
+"toqquşma). Dərs cədvəlini yoxlayın."
+msgstr ""
+"Warning: the new teacher already has another class at the same time in the "
+"timetable (%(count)s conflict(s)). Check the class schedule."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər."
+msgstr ""
+"Only a university-level timetable manager can change the level defaults."
+
+msgctxt "timetable.policy"
+msgid ""
+"Pillə defoltunu yalnız universitet səviyyəli cədvəl idarəçisi dəyişə bilər. "
+"Öz qruplarınız üçün aşağıda istisna yaza bilərsiniz."
+msgstr ""
+"Only a university-level timetable manager can change the level defaults. You"
+" can add exceptions for your own groups below."
+
+msgctxt "timetable.api"
+msgid "Qrup identifikatoru düzgün deyil."
+msgstr "The group identifier is invalid."
+
+msgctxt "timetable.api"
+msgid "Çox tez-tez sorğu göndərilir — bir az sonra yenidən cəhd edin."
+msgstr "Too many requests — please try again in a moment."
+
+msgctxt "timetable.api"
+msgid ""
+"Bu işləməni yalnız onu yaradan və ya universitet səviyyəli idarəçi dəyişə "
+"bilər."
+msgstr ""
+"Only the creator of this run or a university-level manager can change it."
+
+msgctxt "timetable.run"
+msgid ""
+"İşləmə texniki xəta ilə dayandı. Parametrləri yoxlayıb yenidən cəhd edin; "
+"təkrarlansa inzibatçıya bildirin."
+msgstr ""
+"The run stopped because of a technical error. Check the parameters and try "
+"again; if it happens again, notify the administrator."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_view_only"
+msgstr ""
+"The student has not finished the exam yet — the attempt is opened in view-"
+"only mode. Grading is available once the attempt is finished."
+
+msgctxt "exams.view.results.message"
+msgid "attempt_not_finished_cannot_grade"
+msgstr ""
+"The attempt is not finished yet — it cannot be graded until the student "
+"finishes the exam."
+
+msgctxt "exams.template.student_exam_result"
+msgid "notice_answer_key_hidden_attempts_left"
+msgstr ""
+"You still have attempts left — the correct answers will be shown after your "
+"last attempt or when the exam period ends. Your score and whether each "
+"answer was right or wrong are shown now."
+
+msgctxt "registrar.finals"
+msgid "Bal rəqəm olmalıdır."
+msgstr "The score must be a number."
+
+msgctxt "registrar.journal_finals"
+msgid ""
+"%(n)s xana yazılmadı: %(details)s. Yazılmış imtahan balının dəyişdirilməsi "
+"İmtahan Mərkəzinin bal daxiletmə səhifəsindən, təqdimatla aparılır."
+msgstr ""
+"%(n)s cell(s) were not saved: %(details)s. An exam score that is already "
+"recorded can only be changed on the Exam Centre score entry page, with a "
+"supporting document."
+
+msgctxt "registrar.journal_finals"
+msgid "%(n)s xana yazılmadı — bal rəqəm olmalıdır; mövcud bal dəyişdirilmədi."
+msgstr ""
+"%(n)s cell(s) were not saved — the score must be a number; the existing "
+"score was kept."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı müsbət tam ədəd olmalıdır."
+msgstr "Lesson hours must be a positive whole number."
+
+msgctxt "registrar.journal_lessons"
+msgid "Dərs saatı 1 ilə %(max)s arasında olmalıdır."
+msgstr "Lesson hours must be between 1 and %(max)s."
+
+msgctxt "registrar.correction"
+msgid ""
+"Absent (or excused) cells hold no score — correct the attendance first."
+msgstr ""
+"Absent (or excused) cells hold no score — correct the attendance first."
+
+msgctxt "assignments.views.message"
+msgid "invalid_attempts_or_score"
+msgstr "Attempts and maximum score must be positive numbers."
+
+msgctxt "exams.final_center.message"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "The attempt could not be resumed."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_title"
+msgstr "Start live session"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_force_new_hint"
+msgstr ""
+"The active live session for this exam will be finished and a new one will be"
+" created."
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_cancel"
+msgstr "Cancel"
+
+msgctxt "live_exam.template.create_session_confirm"
+msgid "create_confirm_submit"
+msgstr "Start"
+
+msgctxt "registrar.transfer"
+msgid "Yeni qrup tələbənin təşkilatına aid deyil."
+msgstr "The new group does not belong to the student's organization."
+
+msgctxt "registrar.transfer"
+msgid "Yeni struktur vahidi akademik qrup olmalıdır."
+msgstr "The new unit must be an academic group."
+
+msgctxt "registrar.transfer"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "The academic period does not belong to the student's organization."
+
+msgctxt "registrar.transfer"
+msgid "Aktiv cari akademik dövr qrup köçürməsində göstərilməlidir."
+msgstr ""
+"The active current academic period must be specified for a group transfer."
+
+msgctxt "registrar.transfer"
+msgid "Qrup köçürməsi yalnız aktiv cari akademik dövr üçün aparıla bilər."
+msgstr ""
+"A group transfer can only be made for the active current academic period."
+
+msgctxt "exams.form.question"
+msgid "Sual üçün mövzu bloku seçilməlidir."
+msgstr "A topic block must be selected for the question."
+
+msgctxt "accounts.people.action"
+msgid "Naməlum əməliyyat."
+msgstr "Unknown action."
