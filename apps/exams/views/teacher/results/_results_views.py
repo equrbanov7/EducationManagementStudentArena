@@ -16,6 +16,7 @@ from apps.exams.models import ExamAnswer, ExamAttempt
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.attempt_budget import attempts_left_map
 from apps.exams.services.manual_grading import (
+    ManualGradingAttemptNotFinished,
     ManualGradingWindowClosed,
     apply_attempt_grade,
 )
@@ -126,6 +127,13 @@ def teacher_exam_results(request, slug):
                     feedback=feedback,
                     grader=request.user,
                 )
+            except ManualGradingAttemptNotFinished:
+                # Audit 2026-09-28 EX28-02: bitməmiş cəhd qiymətləndirilmir.
+                messages.error(
+                    request,
+                    pgettext_lazy("exams.view.results.message", "attempt_not_finished_cannot_grade"),
+                )
+                return redirect(request.path)
             except ManualGradingWindowClosed:
                 messages.error(
                     request,

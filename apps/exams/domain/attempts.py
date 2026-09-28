@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
+from apps.exams.domain.attempt_deadline import attempt_deadline_at, lazy_expiry_cutoff, write_window_closed
 from apps.exams.domain.grade_events import ExamGradeEventManager, _immutable_error
 from apps.exams.question_timer_protocol import default_question_timing
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
@@ -241,12 +242,8 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
 
     @property
     def deadline_at(self):
-        if not self.started_at:
-            return None
-        duration_minutes = getattr(self.exam, "total_duration_minutes", None)
-        if not duration_minutes:
-            return None
-        return self.started_at + timedelta(minutes=duration_minutes)
+        # Audit 2026-09-28 EX28-07: min(started_at + müddət, end_datetime) — bax attempt_deadline.
+        return attempt_deadline_at(self)
 
     @property
     def score_percent(self):
@@ -271,7 +268,15 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         return self.is_time_limit_reached()
 
     def expire_if_time_limit_reached(self, *, at_time=None):
-        if self.is_finished or not self.is_time_limit_reached(at_time=at_time):
+        # Audit 2026-09-28 EX28-04: defolt an ``now − grace`` — lazy GET/sweep grace-i pozmasın.
+        if self.is_finished or not self.is_time_limit_reached(at_time=at_time or lazy_expiry_cutoff()):
+            return False
+        self.mark_finished(status="expired")
+        return True
+
+    def expire_if_write_window_closed(self, *, at_time=None):
+        """POST yazı yolları: deadline və ya (müddətsizdə) ``end_datetime`` + grace keçibsə bağla."""
+        if self.is_finished or not write_window_closed(self, at_time=at_time or lazy_expiry_cutoff()):
             return False
         self.mark_finished(status="expired")
         return True

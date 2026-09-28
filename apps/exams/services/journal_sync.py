@@ -58,6 +58,12 @@ SKIP_MIDTERM_CATEGORY = "midterm_category"
 SKIP_NON_FINAL_CATEGORY = "non_final_category"
 #: Kateqoriyasız / tanınmayan kateqoriyalı imtahan — ``FinalGrade``-ə yazılmır (H-1).
 SKIP_UNCATEGORIZED = "uncategorized_category"
+#: Audit 2026-09-28 EX28-02: cəhd hələ bitməyib (draft / in_progress) — qismən bal rəsmi jurnala düşməsin.
+SKIP_NOT_FINISHED = "attempt_not_finished"
+#: Audit 2026-09-28 EXA-01 / EX28-06: eyni tələbə + fənn üzrə DAHA SONRAKI bitmiş final cəhdi var —
+#: rəsmi nəticə ən son bitmiş (sınaq olmayan) final cəhdidir; köhnə cəhdin gecikmiş yoxlaması
+#: və ya apellyasiyası yeni cəhdin jurnal balını əzmir.
+SKIP_SUPERSEDED_ATTEMPT = "superseded_attempt"
 
 #: ``Exam.exam_type_extended`` → ``FinalGrade``-ə yazılırmı (tək təsnifat mənbəyi):
 #:
@@ -173,6 +179,36 @@ def _attempt_percent(attempt):
     return round(float(teacher_score) * 100.0 / float(max_score), 1)
 
 
+def _superseded_by_later_final_attempt(attempt, subject_id) -> bool:
+    """Eyni tələbənin eyni fənn üzrə bu cəhddən SONRA başlamış bitmiş final cəhdi varmı.
+
+    Sahib siyasəti (2026-09-28): rəsmi nəticə (user, subject) üzrə ən son bitmiş,
+    sınaq olmayan final cəhdidir. «Sonra» — ``started_at`` (bərabərdirsə ``pk``)."""
+    from django.db.models import Q
+
+    from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+    from apps.exams.models import ExamAttempt
+    from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+
+    started_at = getattr(attempt, "started_at", None)
+    if started_at is None:
+        return False
+    later = Q(started_at__gt=started_at) | Q(started_at=started_at, pk__gt=attempt.pk)
+    return (
+        ExamAttempt.objects.filter(
+            later,
+            user_id=attempt.user_id,
+            exam__subject_id=subject_id,
+            exam__exam_type_extended=FINAL_EXAM_CATEGORY,
+            exam__is_deleted=False,
+            is_trial=False,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+        )
+        .exclude(pk=attempt.pk)
+        .exists()
+    )
+
+
 def _resolve_actor(attempt, actor):
     """Jurnal yazısının aktoru — tələbənin özü ASLA qaytarılmır.
 
@@ -195,6 +231,8 @@ def sync_attempt_to_journal(attempt, *, actor=None):
     skip kodu ilə atlanır (bax ``final_grade_skip_reason``); qovulma da daxil, yəni
     midtermdən qovulma yekun imtahan balını 0-a endirmir.
     Proctordan qovulan (``supervision_status == "removed"``) → 0 = avtomatik F.
+    Bitməmiş cəhd (EX28-02) və sonrakı bitmiş final cəhdi ilə əvəzlənmiş cəhd
+    (EXA-01 / EX28-06) sayılan skip kodu ilə atlanır.
     ``actor`` — yazını edən müəllim/reviewer; verilmirsə cəhdin ``graded_by``-ı,
     o da yoxdursa sistem (``None``) aktor kimi yazılır (bax modul docstring-i).
     """
@@ -204,6 +242,9 @@ def sync_attempt_to_journal(attempt, *, actor=None):
         return None  # jurnal fənninə bağlı deyil — gözlənilən no-op, sayılmır
     if getattr(attempt, "is_trial", False):
         return None  # müəllimin "Sınaq keç" cəhdi nəticələrə sayılmır
+    if not attempt.is_finished:
+        # Audit 2026-09-28 EX28-02: yazmaqda olan tələbənin qismən balı rəsmi jurnala yazılmır.
+        return _skip(SKIP_NOT_FINISHED, attempt)
     category_skip = final_grade_skip_reason(exam)
     if category_skip is not None:
         # Gözlənilən hal (xəta deyil) → INFO; sayğac etiketi monitorinqdə görünür.
@@ -211,6 +252,10 @@ def sync_attempt_to_journal(attempt, *, actor=None):
     organization = getattr(exam, "organization", None)
     if organization is None:
         return _skip(SKIP_NO_ORGANIZATION, attempt)
+    if _superseded_by_later_final_attempt(attempt, subject_id):
+        # Audit 2026-09-28 EXA-01 / EX28-06: köhnə cəhdin apellyasiyası / gecikmiş
+        # yoxlaması sonrakı (rəsmi) cəhdin balını əzməsin — gözlənilən hal, INFO.
+        return _skip(SKIP_SUPERSEDED_ATTEMPT, attempt, level=logging.INFO)
 
     is_expelled = getattr(attempt, "supervision_status", "") == "removed"
     percent = 0 if is_expelled else _attempt_percent(attempt)

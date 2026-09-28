@@ -1843,7 +1843,8 @@ class ExamGradingServiceTest(TestCase):
             points=10,
             order=1,
         )
-        self.attempt = ExamAttempt.objects.create(exam=self.exam, user=self.student)
+        # Audit 2026-09-28 EX28-02: yalnız BİTMİŞ cəhd qiymətləndirilir.
+        self.attempt = ExamAttempt.objects.create(exam=self.exam, user=self.student, status="submitted")
         self.answer = ExamAnswer.objects.create(
             attempt=self.attempt,
             question=self.question,

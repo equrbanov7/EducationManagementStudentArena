@@ -4243,6 +4243,8 @@ class StudentExamResultVisibilityWindowTest(TestCase):
             title=f"Release Lock Test Exam {end_delta}",
             exam_type="test",
             is_active=True,
+            # Audit 2026-09-28 EX28-03: tək cəhdli imtahan — cəhd haqqı qalmayıb, açar dərhal açıqdır.
+            max_attempts_per_user=1,
             start_datetime=timezone.now() - timedelta(hours=2),
             end_datetime=timezone.now() + end_delta,
         )
@@ -4315,6 +4317,7 @@ class StudentExamResultVisibilityWindowTest(TestCase):
             title="Immediate Written Exam",
             exam_type="written",
             is_active=True,
+            max_attempts_per_user=1,  # Audit 2026-09-28 EX28-03: cəhd haqqı qalıbsa ideal cavab gizlidir
             start_datetime=timezone.now() - timedelta(hours=2),
             end_datetime=timezone.now() + timedelta(hours=2),
         )

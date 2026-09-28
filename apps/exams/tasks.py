@@ -10,10 +10,21 @@ auto-finished by the backend so it does not linger in the supervision monitor.
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def _worker_bypass_scope():
+    """Celery sweep addımı: öz tranzaksiyası (flaq açıqdırsa) + RLS bypass (EX28-05)."""
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    with rls_worker_atomic(), bypass_rls():
+        yield
 
 
 @shared_task(name="exams.expire_stale_resumed_attempts")
@@ -54,13 +65,14 @@ def expire_overdue_attempts():
     Returns the number of attempts that were auto-finished.
     """
     from apps.exams.services.attempts import sweep_overdue_attempts
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
     # Global periodic sweep has no org_id argument; each finished attempt is
     # written under its own exam.organization, preserving tenant isolation.
-    with rls_worker_atomic(), bypass_rls():
-        expired = sweep_overdue_attempts()
+    # Audit 2026-09-28 EX28-05: bütün sweep-i BİR `rls_worker_atomic`-ə sarmırıq —
+    # `RLS_TRANSACTION_SCOPED` açıq olanda bu, emal olunan bütün cəhdlərin sətir
+    # kilidlərini sweep bitənə qədər saxlayırdı. `scope` hər DB addımını (namizəd
+    # sorğusu və hər cəhd) ayrıca real tranzaksiyaya + `SET LOCAL` bypass-a salır.
+    expired = sweep_overdue_attempts(scope=_worker_bypass_scope)
     if expired:
         logger.info("expire_overdue_attempts: auto-finished %d attempt(s)", expired)
     return expired

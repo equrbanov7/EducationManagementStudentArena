@@ -635,6 +635,9 @@ class CodingExamSubmissionApiTests(TestCase):
         )
         for file_item in second_submission.files:
             CodingFile.objects.create(submission=second_submission, **file_item)
+        # Audit 2026-09-28 EX28-02: yoxlama səhifəsi yalnız BİTMİŞ cəhd üçün açılır
+        # (final submission-lar təhvillə yaranır — cəhd artıq bitmiş olur).
+        ExamAttempt.objects.filter(pk=self.attempt.pk).update(status="submitted")
 
         self.client.force_login(self.teacher)
         session = self.client.session
