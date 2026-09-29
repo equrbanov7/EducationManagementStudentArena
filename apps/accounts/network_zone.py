@@ -18,7 +18,8 @@ yerləşdirməsi dəyişmir)
 -------------------------
 * ``/jurnal/`` (registrar — elektron jurnal): kənar zonadan HƏR KƏSƏ 403.
 * İnzibati hesab (tələbə/müəllim ailəsindən KƏNAR hər hansı aktiv rol, org sahibi,
-  superuser): kənar zonadan bütün səhifələr 403 — yalnız çıxış, statik/media,
+  superuser) — YALNIZ ``NETWORK_ZONE_STAFF_INTERNAL_ONLY=True`` olanda (sahib 2026-09-29: defolt
+  söndürülüb, kənardan yalnız jurnal bağlıdır): kənar zonadan bütün səhifələr 403 — yalnız çıxış, statik/media,
   health/ping və giriş səhifəsinin özü açıqdır (istifadəçi «niyə» səhifəsini görüb
   çıxa bilsin).
 * Tələbə (student/lead_student) və yalnız-müəllim (teacher ailəsi) hesabları
@@ -174,6 +175,9 @@ class NetworkZoneMiddleware:
         path = request.path_info
         if _journal_path(path):
             return self._deny(request, reason="journal_internal_only", kind=account_kind(request))
+        # Sahib 2026-09-29: inzibati hesabların daxili-şəbəkə məhdudiyyəti ayarla idarə olunur (defolt söndürülüb).
+        if not getattr(settings, "NETWORK_ZONE_STAFF_INTERNAL_ONLY", False):
+            return self.get_response(request)
         kind = account_kind(request)
         if kind == "staff" and not _is_open_path(path):
             return self._deny(request, reason="staff_internal_only", kind=kind)

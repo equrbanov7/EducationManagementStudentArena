@@ -163,3 +163,10 @@ INTERNAL_NETWORKS = [
 NETWORK_ZONE_ENFORCED = os.getenv("NETWORK_ZONE_ENFORCED", "False").strip().lower() in ("1", "true", "yes")
 # nginx-in qoyduğu X-EMS-Zone başlığına inanılsın? Yalnız nginx müştəri başlığını əzəndə (prod).
 NETWORK_ZONE_TRUST_HEADER = os.getenv("NETWORK_ZONE_TRUST_HEADER", "False").strip().lower() in ("1", "true", "yes")
+# Sahib 2026-09-29: kənardan YALNIZ elektron jurnal (/jurnal/) bağlıdır; inzibati hesablar da internetdən
+# daxil ola bilir. True → əvvəlki sərt qayda (inzibati hesablar yalnız universitet şəbəkəsindən).
+NETWORK_ZONE_STAFF_INTERNAL_ONLY = os.getenv("NETWORK_ZONE_STAFF_INTERNAL_ONLY", "False").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+)
