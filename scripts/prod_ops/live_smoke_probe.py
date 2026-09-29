@@ -15,9 +15,13 @@ from django.test import Client
 
 hosts = [h.lstrip(".") for h in (settings.ALLOWED_HOSTS or ["localhost"]) if h and h != "*"][:4]
 for host in hosts:
-    response = Client(secure=True, HTTP_HOST=host, REMOTE_ADDR="10.0.2.10").get("/live/")
+    # nginx arxasında HTTPS X-Forwarded-Proto ilə tanınır (SECURE_PROXY_SSL_HEADER) — başlıqsız 301 gəlir.
+    client = Client(secure=True, HTTP_HOST=host, REMOTE_ADDR="10.0.2.10", HTTP_X_FORWARDED_PROTO="https")
+    response = client.get("/live/")
     location = response.headers.get("Location", "")
-    print(f"GET /live/ host={host} -> {response.status_code} {location}")
+    body = response.content.decode("utf-8", "ignore") if response.status_code == 200 else ""
+    has_form = "pin" in body.lower() and "<form" in body.lower()
+    print(f"GET /live/ host={host} -> {response.status_code} {location} pin_form={has_form} bytes={len(body)}")
 
 root = Path(settings.STATIC_ROOT)
 missing = []
