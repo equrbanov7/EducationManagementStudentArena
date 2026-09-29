@@ -13,9 +13,11 @@ from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.test import Client
 
-host = (settings.ALLOWED_HOSTS or ["localhost"])[0].lstrip(".")
-response = Client(secure=True, HTTP_HOST=host).get("/live/")
-print(f"GET /live/ -> {response.status_code}")
+hosts = [h.lstrip(".") for h in (settings.ALLOWED_HOSTS or ["localhost"]) if h and h != "*"][:4]
+for host in hosts:
+    response = Client(secure=True, HTTP_HOST=host, REMOTE_ADDR="10.0.2.10").get("/live/")
+    location = response.headers.get("Location", "")
+    print(f"GET /live/ host={host} -> {response.status_code} {location}")
 
 root = Path(settings.STATIC_ROOT)
 missing = []
