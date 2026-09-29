@@ -1,4 +1,4 @@
-import { PHASES } from './constants.js';
+import { PHASES } from './constants.js?v=lx20260929';
 
 export const state = {
     sessionState: "lobby",
@@ -15,16 +15,11 @@ export const state = {
     frameId: 0,
     autoRevealTimeout: 0,
     autoNextTimeout: 0,
+    allAnsweredTimeout: 0,
     audioContext: null,
     masterGain: null,
     sfxVolume: Number(CONFIG.sessionSettings?.sfx_volume ?? 70),
-    lastIntroSoundKey: "",
-    lastCountdownSoundKey: "",
-    lastRevealSoundKey: "",
-    lastScoreboardSoundKey: "",
-    lastFinalSoundKey: "",
     lobbyMusicMode: "",
-    lobbyMusicTimer: 0,
     statePollTimer: 0,
     pendingSyncTimer: 0,
     lastStateMutationAt: 0,
@@ -32,6 +27,11 @@ export const state = {
     sessionSettings: Object.assign({}, CONFIG.sessionSettings || {}),
     isLocked: Boolean(CONFIG.sessionLocked),
     finalSignature: "",
+    finalPayload: null,
     serverTimeOffsetMs: 0,
     timelineMeta: null,
+    // Oyunçu seriyaları (ardıcıl düzgün cavab) — host-un gördüyü reveal-lərdən sayılır.
+    streaks: new Map(),
+    streakRevealKey: "",
+    lastTimerSecond: -1,
 };

@@ -1,49 +1,45 @@
-import { SESSION_SETTINGS } from './config.js';
-import { fetchInitialState } from './api.js';
-import { handleOptionClick } from './answer.js';
-import { bindPlayerEvents } from './events.js';
-import { handleSocketMessage } from './flow.js';
-import { startStatePolling } from './polling.js';
-import { renderIdle, setOptionClickHandler } from './render.js';
-import { applySessionSettings } from './settings.js';
-import { openPlayerSocket } from './sockets.js';
-import { renderPlayerIdentity, setConnection } from './ui.js';
+// LX-FE-PLAYER (2026-09-29): iştirakçı ekranının giriş nöqtəsi.
+import { SESSION_SETTINGS } from './config.js?v=lx20260929';
+import { fetchState, setSnapshotHandlers } from './api.js?v=lx20260929';
+import { bindPlayerEvents } from './events.js?v=lx20260929';
+import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20260929';
+import { resetWatchdog, startStatePolling } from './polling.js?v=lx20260929';
+import { renderBoot } from './render_status.js?v=lx20260929';
+import { applySessionSettings } from './settings.js?v=lx20260929';
+import { openPlayerSocket } from './sockets.js?v=lx20260929';
+import { renderPlayerIdentity, renderSoundToggle, setNetStatus } from './ui.js?v=lx20260929';
 
-setOptionClickHandler(handleOptionClick);
+applySessionSettings(SESSION_SETTINGS);
+renderPlayerIdentity();
+renderSoundToggle();
+renderBoot();
 bindPlayerEvents();
 
-renderPlayerIdentity();
-applySessionSettings(SESSION_SETTINGS);
-renderIdle();
-setConnection("connecting");
-
-let initialFetchDone = false;
+setSnapshotHandlers({
+    onSnapshot: handleSnapshot,
+    onAuthLost: handleAuthLost,
+});
 
 openPlayerSocket({
     onOpen: () => {
-        setConnection("online");
-        if (!initialFetchDone) {
-            initialFetchDone = true;
-            fetchInitialState();
-        }
+        setNetStatus("online");
+        resetWatchdog();
+        // Qopma zamanı buraxılmış mesajlar: snapshot vəziyyəti bərpa edir.
+        fetchState();
     },
     onClose: () => {
-        setConnection("offline");
-    },
-    onError: () => {
-        setConnection("offline");
+        setNetStatus(navigator.onLine === false ? "offline" : "reconnecting");
     },
     onMessage: (event) => {
+        let data = null;
         try {
-            handleSocketMessage(JSON.parse(event.data));
+            data = JSON.parse(event.data);
         } catch (error) {
-            console.error("live player message parse failed", error);
+            return;
         }
+        handleSocketMessage(data);
     },
 });
 
-startStatePolling(fetchInitialState);
-if (!initialFetchDone) {
-    initialFetchDone = true;
-    fetchInitialState();
-}
+fetchState();
+startStatePolling();

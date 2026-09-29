@@ -1,223 +1,216 @@
-import { UI } from './dom.js';
-import { PHASES } from './constants.js';
-import { state } from './state.js';
-import { playRevealSound, playScoreboardSound } from './audio.js';
-import { distributionLookup } from './lobby.js';
-import { distributionBarMarkup, optionMarkerLabel } from './options.js';
+import { UI } from './dom.js?v=lx20260929';
+import { PHASES } from './constants.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { playRevealSound } from './audio.js?v=lx20260929';
+import { icon } from './icons.js?v=lx20260929';
+import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20260929';
+import { nextQuestion } from './api.js?v=lx20260929';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20260929';
 import {
     avatarImageMarkup,
     controlsEnabled,
+    countUp,
     esc,
+    fitAll,
     fmt,
+    formatNumber,
+    formatSeconds,
+    lengthClass,
     nowMs,
     progressLabel,
     revealKey,
     toMs,
     tr,
-} from './utils.js';
-import { clearPhaseLoop, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js';
-
-let activeRevealChart = null;
+} from './utils.js?v=lx20260929';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260929';
 
 export function destroyRevealChart() {
-    if (activeRevealChart) {
-        try { activeRevealChart.destroy(); } catch (_) {}
-        activeRevealChart = null;
+    /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */
+}
+
+export function distributionLookup(payload) {
+    const counts = new Map();
+    (payload?.distribution?.counts || []).forEach((row) => {
+        counts.set(Number(row.option_id || 0), Number(row.count || 0));
+    });
+    return { counts, totalAnswers: Number(payload?.distribution?.total_answers || 0) };
+}
+
+const isText = (question, payload) => String(payload?.answer_input || question?.answer_input || "choice") === "text";
+
+/** Düzgün cavab sayı — yalnız tam məlumat olanda (təxmin YOX). */
+function correctCount(question, payload, distribution) {
+    const results = Array.isArray(payload?.results) ? payload.results : null;
+    if (results && results.length === distribution.totalAnswers) {
+        return results.filter((row) => row.is_correct).length;
     }
+    if (isText(question, payload) && Array.isArray(payload?.typed_summary)) {
+        return payload.typed_summary.filter((row) => row.correct).reduce((sum, row) => sum + Number(row.count || 0), 0);
+    }
+    if (!question?.multi) {
+        const correctIds = (payload?.correct_option_ids || []).map(Number);
+        return correctIds.reduce((sum, id) => sum + Number(distribution.counts.get(id) || 0), 0);
+    }
+    return null;
+}
+
+function fastestCorrect(payload, distribution) {
+    if (payload?.fastest_correct && payload.fastest_correct.nickname != null) return payload.fastest_correct;
+    const results = Array.isArray(payload?.results) ? payload.results : [];
+    if (!results.length || results.length !== distribution.totalAnswers) return null;
+    return results.filter((row) => row.is_correct).sort((a, b) => Number(a.answer_ms) - Number(b.answer_ms))[0] || null;
+}
+
+function footMarkup(question, payload, distribution) {
+    const parts = [];
+    const total = distribution.totalAnswers;
+    if (total <= 0) {
+        parts.push(`<span class="hx-stat hx-stat--muted">${esc(tr("noAnswers", "Bu raundda cavab verilmədi"))}</span>`);
+    } else {
+        const correct = correctCount(question, payload, distribution);
+        if (correct != null) {
+            parts.push(
+                `<span class="hx-stat hx-stat--correct">${icon("check")}<span>${esc(fmt(tr("correctSummary", "{correct} / {total} düzgün cavab"), { correct: formatNumber(correct), total: formatNumber(total) }))}</span></span>`
+            );
+        }
+        const fastest = fastestCorrect(payload, distribution);
+        if (fastest) {
+            parts.push(
+                `<span class="hx-stat hx-stat--fastest">${icon("bolt")}<span>${esc(tr("fastest", "Ən sürətli"))}:</span>${avatarImageMarkup(fastest, 36, "hx-stat__avatar")}<strong>${esc(fastest.nickname || "")}</strong><span>${esc(formatSeconds(fastest.answer_ms))} ${esc(tr("secondsShort", "san"))}</span></span>`
+            );
+        }
+    }
+    const scoring = String(payload?.multi_scoring || "");
+    if (question?.multi && (scoring === "partial" || scoring === "strict")) {
+        const text = scoring === "partial"
+            ? tr("partialCredit", "Qismən bal: hər düzgün seçim bal gətirir")
+            : tr("strictCredit", "Bal yalnız bütün düzgün variantlar seçiləndə verilir");
+        parts.push(`<span class="hx-stat hx-stat--note">${icon("sparkle")}<span>${esc(text)}</span></span>`);
+    }
+    return parts.length ? `<footer class="hx-reveal__foot">${parts.join("")}</footer>` : "";
+}
+
+function headMarkup(question, payload) {
+    const multi = question?.multi
+        ? `<span class="hx-badge hx-badge--multi">${icon("check")}${esc(tr("multiBadge", "Bir neçə düzgün cavab"))}</span>`
+        : "";
+    const text = isText(question, payload)
+        ? `<span class="hx-badge hx-badge--text">${icon("keyboard")}${esc(tr("textBadge", "Yazılı cavab"))}</span>`
+        : "";
+    return `<header class="hx-qhead"><span class="hx-pill">${esc(progressLabel(question))}</span>${multi}${text}</header>`;
+}
+
+function cardMarkup(question) {
+    const text = String(question?.text || "");
+    return `<div class="hx-qcard hx-qcard--reveal" data-len="${lengthClass(text)}"><h2 class="hx-qcard__text" data-fit>${esc(text)}</h2></div>`;
+}
+
+function typedMarkup(payload) {
+    const accepted = (Array.isArray(payload?.accepted_answers) ? payload.accepted_answers : []).map(String).filter(Boolean);
+    const summary = (Array.isArray(payload?.typed_summary) ? payload.typed_summary : [])
+        .slice()
+        .sort((a, b) => Number(b.count || 0) - Number(a.count || 0))
+        .slice(0, 8);
+    const max = Math.max(1, ...summary.map((row) => Number(row.count || 0)));
+    const main = accepted[0] || "";
+    return `
+        <div class="hx-accepted">
+            <span class="hx-accepted__label">${icon("check")}${esc(accepted.length > 1 ? tr("correctAnswers", "Düzgün cavablar") : tr("correctAnswer", "Düzgün cavab"))}</span>
+            <strong class="hx-accepted__main" data-fit>${esc(main || "—")}</strong>
+            ${
+                accepted.length > 1
+                    ? `<div class="hx-accepted__alts"><span class="hx-accepted__alts-label">${esc(tr("acceptedAlso", "Qəbul edilən variantlar"))}:</span>${accepted
+                          .slice(1, 10)
+                          .map((value) => `<span class="hx-chip">${esc(value)}</span>`)
+                          .join("")}</div>`
+                    : ""
+            }
+        </div>
+        ${
+            summary.length
+                ? `<div class="hx-typedsum">
+                    <h3 class="hx-typedsum__title">${esc(tr("typedTop", "Ən çox yazılan cavablar"))}</h3>
+                    <ol class="hx-typedsum__list">
+                        ${summary
+                            .map(
+                                (row) => `
+                            <li class="hx-typedsum__row ${row.correct ? "is-correct" : "is-wrong"}" data-ratio="${(Number(row.count || 0) / max).toFixed(4)}">
+                                <span class="hx-typedsum__bar" aria-hidden="true"></span>
+                                <span class="hx-typedsum__text">${esc(row.text || "")}</span>
+                                <strong class="hx-typedsum__count">${formatNumber(row.count || 0)}</strong>
+                                <span class="hx-typedsum__verdict" role="img" aria-label="${esc(row.correct ? tr("correctTag", "Düzgün") : tr("wrongTag", "Səhv"))}">${icon(row.correct ? "check" : "cross")}</span>
+                            </li>`
+                            )
+                            .join("")}
+                    </ol>
+                </div>`
+                : ""
+        }
+    `;
+}
+
+function animateBars(root) {
+    root.querySelectorAll("[data-ratio]").forEach((el) => {
+        el.style.setProperty("--k", el.dataset.ratio || "0");
+    });
+    root.querySelectorAll(".hx-bar").forEach((bar, index) => {
+        const target = Number(bar.dataset.count || 0);
+        const el = bar.querySelector("[data-bar-count]");
+        window.setTimeout(() => countUp(el, 0, target, 700), 250 + index * 90);
+    });
 }
 
 function renderRevealStage(question, payload) {
+    if (isCurrentPhase(PHASES.REVEAL, `${state.revealKey}:${PHASES.REVEAL}`)) return;
     const distribution = distributionLookup(payload);
-    const correctOptionIds = (payload?.correct_option_ids || []).map(value => Number(value));
-    const answeredSummary = fmt(tr("playersAnswered", "{answered} answered"), { answered: distribution.totalAnswers });
-    const noAnswersNote =
-        distribution.totalAnswers > 0
-            ? `<div class="distribution-note">${esc(answeredSummary)}</div>`
-            : `<div class="distribution-note">${esc(tr("distributionNoAnswers", "No answers were submitted this round."))}</div>`;
-
-    const sig = `${state.revealKey}:${PHASES.REVEAL}`;
-    const willRender = !(state.phaseSignature === sig && state.phase === PHASES.REVEAL);
-
+    const correctIds = (payload?.correct_option_ids || []).map(Number);
+    const options = question?.options || [];
+    const text = isText(question, payload);
     setPresentationMarkup(
         PHASES.REVEAL,
-        sig,
+        `${state.revealKey}:${PHASES.REVEAL}`,
         `
-            <section class="present-view present-view--quiz present-view--reveal-chart">
-                <div class="quiz-shell quiz-shell--reveal">
-                    <div class="quiz-shell__hud quiz-shell__hud--single">
-                        <div class="quiz-shell__hud-left">
-                            <div class="quiz-progress">${esc(progressLabel(question))}</div>
-                        </div>
-                    </div>
-                    <div class="question-card question-card--reveal">
-                        <h2 class="question-card__title">${esc(question?.text || "")}</h2>
-                    </div>
-                </div>
-                ${noAnswersNote}
-                <div class="reveal-chart-area">
-                    <canvas id="revealDistChart"></canvas>
-                </div>
-                <div class="distribution-chart">
-                    ${(question?.options || [])
-                        .map((option, index) => distributionBarMarkup(option, index, distribution, correctOptionIds))
-                        .join("")}
-                </div>
+            <section class="hx-scene hx-reveal ${text ? "hx-reveal--text" : ""}" aria-live="polite">
+                ${headMarkup(question, payload)}
+                ${cardMarkup(question)}
+                ${
+                    text
+                        ? typedMarkup(payload)
+                        : `
+                            <div class="hx-bars hx-bars--n${Math.min(6, options.length)}">${distributionBarsMarkup(options, distribution, correctIds)}</div>
+                            <div class="hx-tiles ${tilesGridClass(options.length)} is-reveal">
+                                ${options.map((option, index) => answerTileMarkup(option, index, correctIds.includes(Number(option?.id || 0)) ? "correct" : "wrong")).join("")}
+                            </div>
+                        `
+                }
+                ${footMarkup(question, payload, distribution)}
             </section>
-        `
+        `,
+        (root) => {
+            fitAll(root, "[data-fit]", { min: 18 });
+            fitAll(root, ".hx-tile__text", { min: 14 });
+            animateBars(root);
+        }
     );
+}
 
-    // Initialize Chart.js bar chart after DOM update
-    if (willRender && typeof Chart !== "undefined") {
-        requestAnimationFrame(() => {
-            const canvas = document.getElementById("revealDistChart");
-            if (!canvas) return;
-
-            if (activeRevealChart) {
-                try { activeRevealChart.destroy(); } catch (_) {}
-                activeRevealChart = null;
-            }
-
-            const options = question?.options || [];
-            const labels = options.map((opt, i) => optionMarkerLabel(opt, i));
-            const counts = options.map(opt => Number(distribution.counts.get(Number(opt?.id || 0)) || 0));
-            const barColors = ["#f0205f", "#2563eb", "#ff8b16", "#11b981"];
-            const borderColors = ["#ff5b79", "#4f9cff", "#f8c325", "#4fd39a"];
-            const bgColors = options.map((opt, i) => {
-                const isCorrect = correctOptionIds.includes(Number(opt?.id || 0));
-                const base = barColors[i % 4];
-                return isCorrect ? base : base + "99";
-            });
-            const borders = options.map((opt, i) => {
-                const isCorrect = correctOptionIds.includes(Number(opt?.id || 0));
-                return isCorrect ? "#4ade80" : borderColors[i % 4];
-            });
-
-            activeRevealChart = new Chart(canvas, {
-                type: "bar",
-                data: {
-                    labels,
-                    datasets: [{
-                        data: counts,
-                        backgroundColor: bgColors,
-                        borderColor: borders,
-                        borderWidth: 2,
-                        borderRadius: 12,
-                        barPercentage: 0.7,
-                        categoryPercentage: 0.75,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 800,
-                        easing: "easeOutQuart",
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: "rgba(15,23,42,0.92)",
-                            titleFont: { size: 14, weight: "bold" },
-                            bodyFont: { size: 13 },
-                            cornerRadius: 10,
-                            padding: 12,
-                            callbacks: {
-                                label(ctx) {
-                                    const total = distribution.totalAnswers || 0;
-                                    const pct = total > 0 ? Math.round((ctx.raw / total) * 100) : 0;
-                                    const opt = options[ctx.dataIndex];
-                                    const text = opt?.text || "";
-                                    return [`${text}`, `${ctx.raw} (${pct}%)`];
-                                },
-                            },
-                        },
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1,
-                                color: "rgba(255,255,255,0.7)",
-                                font: { size: 13, weight: "bold" },
-                            },
-                            grid: {
-                                color: "rgba(255,255,255,0.08)",
-                            },
-                        },
-                        x: {
-                            ticks: {
-                                color: "rgba(255,255,255,0.85)",
-                                font: { size: 15, weight: "900" },
-                            },
-                            grid: { display: false },
-                        },
-                    },
-                },
-            });
+function updateStreaks(payload) {
+    const key = revealKey(payload);
+    if (state.streakRevealKey === key) return;
+    state.streakRevealKey = key;
+    const results = Array.isArray(payload?.results) ? payload.results : [];
+    const complete = results.length === Number(payload?.distribution?.total_answers || 0) && results.length < 50;
+    const seen = new Set();
+    results.forEach((row) => {
+        const id = Number(row.player_id || 0);
+        seen.add(id);
+        state.streaks.set(id, row.is_correct ? (state.streaks.get(id) || 0) + 1 : 0);
+    });
+    if (complete) {
+        state.streaks.forEach((_, id) => {
+            if (!seen.has(id)) state.streaks.set(id, 0);
         });
     }
-}
-
-function movementBadge(player, index, previousTop) {
-    const previousIndex = (previousTop || []).findIndex(row => Number(row.player_id) === Number(player.player_id));
-    if (previousIndex === -1) {
-        return `<span class="scoreboard-row__movement scoreboard-row__movement--new">★ ${esc(
-            tr("scoreboardNewEntry", "New in top 5")
-        )}</span>`;
-    }
-
-    const moved = previousIndex - index;
-    if (moved > 0) {
-        return `<span class="scoreboard-row__movement">↑ ${moved}</span>`;
-    }
-
-    return "";
-}
-
-function renderScoreboardStage(payload) {
-    const previousTop = payload?.previous_top || [];
-    const rows = (payload?.top || []).slice(0, 5);
-    const signature = `${state.revealKey}:${PHASES.SCOREBOARD}`;
-    if (state.phase === PHASES.SCOREBOARD && state.phaseSignature === signature) {
-        return;
-    }
-    playScoreboardSound(state.revealKey || `${payload?.question_id || "0"}:scoreboard`);
-
-    setPresentationMarkup(
-        PHASES.SCOREBOARD,
-        signature,
-        `
-            <section class="present-view present-view--scoreboard">
-                <div class="scoreboard-stage__header">
-                    <div class="stage-pill">${esc(tr("scoreboardTitle", "Scoreboard"))}</div>
-                    <h2 class="stage-title">${esc(tr("scoreboardSubtitle", "Top 5 players"))}</h2>
-                </div>
-                <div class="scoreboard-list">
-                    ${rows
-                        .map(
-                            (player, index) => `
-                                <article class="scoreboard-row ${index === 0 ? "is-first" : ""}">
-                                    <div class="scoreboard-row__left">
-                                        <div class="scoreboard-row__rank">${index + 1}</div>
-                                        <div class="scoreboard-row__avatar">${avatarImageMarkup(
-                                            player,
-                                            58,
-                                            "host-avatar-image--scoreboard"
-                                        )}</div>
-                                        <div class="scoreboard-row__meta">
-                                            <div class="scoreboard-row__name">${esc(player.nickname || "")}</div>
-                                            ${movementBadge(player, index, previousTop)}
-                                        </div>
-                                    </div>
-                                    <div class="scoreboard-row__score">${Number(player.score || 0)}</div>
-                                </article>
-                            `
-                        )
-                        .join("")}
-                </div>
-            </section>
-        `
-    );
 }
 
 function syncRevealPresentation() {
@@ -225,12 +218,9 @@ function syncRevealPresentation() {
         clearPhaseLoop();
         return;
     }
-
     const leaderboardStartsAt = toMs(state.currentReveal.leaderboard_starts_at);
-    const now = nowMs();
-
-    if (leaderboardStartsAt && now >= leaderboardStartsAt) {
-        renderScoreboardStage(state.currentReveal);
+    if (leaderboardStartsAt && nowMs() >= leaderboardStartsAt) {
+        renderScoreboardStage(state.currentReveal, state.currentQuestion);
         clearPhaseLoop();
     } else {
         renderRevealStage(state.currentQuestion, state.currentReveal);
@@ -239,38 +229,32 @@ function syncRevealPresentation() {
 
 function scheduleAutoNext(payload) {
     clearTimeout(state.autoNextTimeout);
-    if (!controlsEnabled() || !UI.autoMode.checked || !payload?.next_question_at) return;
+    state.autoNextTimeout = 0;
+    if (!controlsEnabled() || !UI.autoMode?.checked || !payload?.next_question_at) return;
+    const key = revealKey(payload);
     const ms = Math.max(0, toMs(payload.next_question_at) - nowMs());
     state.autoNextTimeout = setTimeout(() => {
-        if (state.sessionState === "reveal") {
-            UI.nextBtn.click();
-        }
-    }, ms + 120);
+        if (state.sessionState === "reveal" && state.revealKey === key) nextQuestion();
+    }, ms + 150);
 }
 
 export function applyRevealState(payload, question) {
     if (!payload) return;
-
     const nextKey = revealKey(payload);
     const alreadyInReveal = state.sessionState === "reveal" && state.revealKey === nextKey;
+    if (alreadyInReveal && state.phase === PHASES.SCOREBOARD) return;
 
-    // Skip redundant reveal processing for the same reveal key
-    if (alreadyInReveal && state.phase === PHASES.SCOREBOARD) {
-        return;
-    }
-
-    if (question) {
-        state.currentQuestion = question;
-    }
-    state.currentReveal = payload;
-
+    if (question) state.currentQuestion = question;
+    // Snapshot-dan gələn reveal WS paketindən kasıb ola bilər — mövcud sahələri itirmə.
+    state.currentReveal = alreadyInReveal ? Object.assign({}, state.currentReveal || {}, payload) : payload;
     const shouldRestart = state.revealKey !== nextKey || state.sessionState !== "reveal";
-    if (state.revealKey !== nextKey) {
-        playRevealSound(nextKey);
-    }
     state.revealKey = nextKey;
+    playRevealSound(`reveal:${nextKey}`);
+    updateStreaks(state.currentReveal);
 
     clearTimeout(state.autoRevealTimeout);
+    clearTimeout(state.allAnsweredTimeout);
+    state.allAnsweredTimeout = 0;
     setSessionState("reveal");
     scheduleAutoNext(payload);
 

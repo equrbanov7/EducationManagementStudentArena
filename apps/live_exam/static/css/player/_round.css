@@ -1,0 +1,380 @@
+/* LX-FE-PLAYER (2026-09-29): raund — «Hazır ol», giriş, sual kartı, cavab plitələri (tək/çox
+ * seçim, yalnız fiqur rejimi), yazılı cavab, «cavab qəbul edildi», «vaxt bitdi».
+ * Plitələr: fiqur + rəng + mətn (rəngkor oyunçu fiqurla tanıyır); ən az 64 px hündürlük,
+ * basılma: 4 px «düymə» çökməsi; seçim: ton mürəkkəbi rəngində daxili halqa + işarə. */
+
+.lxp-top__count {
+    grid-column: 1;
+}
+
+/* Ton dəyişənləri (plitə + çip) */
+[data-tone="1"] {
+    --tone: var(--lxp-a1);
+    --tone2: var(--lxp-a1-2);
+    --ink: var(--lxp-a1-ink);
+}
+
+[data-tone="2"] {
+    --tone: var(--lxp-a2);
+    --tone2: var(--lxp-a2-2);
+    --ink: var(--lxp-a2-ink);
+}
+
+[data-tone="3"] {
+    --tone: var(--lxp-a3);
+    --tone2: var(--lxp-a3-2);
+    --ink: var(--lxp-a3-ink);
+}
+
+[data-tone="4"] {
+    --tone: var(--lxp-a4);
+    --tone2: var(--lxp-a4-2);
+    --ink: var(--lxp-a4-ink);
+}
+
+[data-tone="5"] {
+    --tone: var(--lxp-a5);
+    --tone2: var(--lxp-a5-2);
+    --ink: var(--lxp-a5-ink);
+}
+
+[data-tone="6"] {
+    --tone: var(--lxp-a6);
+    --tone2: var(--lxp-a6-2);
+    --ink: var(--lxp-a6-ink);
+}
+
+/* ── Hazır ol ── */
+.lxp-ready {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+.lxp-ready__ring {
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #ffffff, #dbeafe);
+    color: var(--lxp-ink);
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.12), 0 20px 44px rgba(0, 0, 0, 0.35);
+}
+
+.lxp-ready__num {
+    font: 800 3.6rem/1 var(--lxp-display);
+    font-variant-numeric: tabular-nums;
+}
+
+.lxp-ready__num.is-pulse {
+    animation: lxpCountPop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+/* ── Sual kartı ── */
+.lxp-qcard {
+    position: relative;
+    padding: 16px 18px;
+    border-radius: 22px;
+    background: var(--lxp-card);
+    color: var(--lxp-ink);
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.lxp-qcard__text {
+    margin: 0;
+    font: 700 1.5rem/1.25 var(--lxp-display);
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+    white-space: pre-line;
+}
+
+.lxp-qcard[data-len="s"] .lxp-qcard__text {
+    font-size: clamp(1.45rem, 6.6vw, 2.1rem);
+}
+
+.lxp-qcard[data-len="m"] .lxp-qcard__text {
+    font-size: clamp(1.2rem, 5.4vw, 1.65rem);
+}
+
+.lxp-qcard[data-len="l"] .lxp-qcard__text {
+    font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+    line-height: 1.32;
+}
+
+.lxp-qcard[data-len="xl"] .lxp-qcard__text {
+    font-size: clamp(0.98rem, 4.2vw, 1.2rem);
+    line-height: 1.38;
+    text-align: left;
+}
+
+.lxp-qcard.is-compact {
+    padding: 12px 14px;
+    border-radius: 18px;
+}
+
+.lxp-qcard.is-compact[data-len="s"] .lxp-qcard__text {
+    font-size: clamp(1.2rem, 5.4vw, 1.6rem);
+}
+
+.lxp-qcard.is-compact[data-len="m"] .lxp-qcard__text {
+    font-size: clamp(1.05rem, 4.6vw, 1.3rem);
+}
+
+.lxp-qcard.is-compact[data-len="l"] .lxp-qcard__text,
+.lxp-qcard.is-compact[data-len="xl"] .lxp-qcard__text {
+    font-size: clamp(0.98rem, 4.1vw, 1.12rem);
+    line-height: 1.38;
+}
+
+.lxp-qcard.is-clamped:not(.is-expanded) .lxp-qcard__text {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lxp-qcard__more {
+    min-height: 40px;
+    margin-top: 4px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: #e0e7ff;
+    color: var(--lxp-link);
+    font: 800 0.92rem/1 var(--lxp-font);
+    cursor: pointer;
+}
+
+.lxp-qcard.is-hidden-text .lxp-qcard__text {
+    font-size: 1.1rem;
+    color: var(--lxp-ink-soft);
+}
+
+/* ── Giriş (cavablar açılana qədər) ── */
+.lxp-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.lxp-meter {
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+}
+
+.lxp-meter__fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #a7f3d0, #fde047);
+    transform: scaleX(0);
+    transform-origin: left center;
+}
+
+.lxp-intro__hint {
+    margin: 0;
+    text-align: center;
+    font-weight: 800;
+    color: var(--lxp-muted);
+}
+
+/* ── Cavab plitələri ── */
+.lxp-round {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0;
+}
+
+.lxp-view--top > .lxp-round {
+    margin-bottom: 0;
+}
+
+.lxp-hint {
+    margin: 10px 0 0;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--lxp-muted);
+}
+
+.lxp-tiles {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.lxp-tiles[data-layout="grid"],
+.lxp-tiles[data-layout="shapes"] {
+    flex: 1 1 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(104px, 1fr);
+    max-height: 640px;
+}
+
+.lxp-tiles[data-layout="list"] {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.lxp-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+    min-height: 64px;
+    padding: 12px 42px 12px 12px;
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(160deg, var(--tone, var(--lxp-a1)), var(--tone2, var(--lxp-a1-2)));
+    color: var(--ink, var(--lxp-a1-ink));
+    font: 800 1.08rem/1.28 var(--lxp-font);
+    text-align: left;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3), 0 10px 22px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+.lxp-tiles[data-layout="grid"] .lxp-tile {
+    flex-direction: column;
+    justify-content: center;
+    min-height: 104px;
+    padding: 14px 12px;
+    text-align: center;
+}
+
+.lxp-tiles[data-layout="shapes"] .lxp-tile {
+    justify-content: center;
+    min-height: 116px;
+    padding: 14px;
+}
+
+.lxp-tile:active:not(:disabled) {
+    transform: translateY(4px) scale(0.985);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.lxp-tile__shape {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.16);
+}
+
+.lxp-tile[data-tone="3"] .lxp-tile__shape {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.lxp-shape {
+    display: block;
+    width: 26px;
+    height: 26px;
+}
+
+.lxp-tiles[data-layout="shapes"] .lxp-tile__shape {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+}
+
+.lxp-tiles[data-layout="shapes"] .lxp-shape {
+    width: 48px;
+    height: 48px;
+}
+
+.lxp-tile__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+}
+
+.lxp-tiles[data-layout="grid"] .lxp-tile__text {
+    flex: 0 1 auto;
+}
+
+.lxp-tile[data-len="s"] .lxp-tile__text {
+    font-size: 1.18rem;
+}
+
+.lxp-tile[data-len="l"] .lxp-tile__text {
+    font-size: 0.98rem;
+    font-weight: 700;
+}
+
+.lxp-tile[data-len="xl"] .lxp-tile__text {
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.32;
+}
+
+.lxp-tile__check {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    margin-top: -13px;
+    border-radius: 50%;
+    border: 2.5px solid var(--ink);
+    opacity: 0.7;
+}
+
+.lxp-tiles[data-layout="grid"] .lxp-tile__check {
+    top: 10px;
+    margin-top: 0;
+}
+
+.lxp-tile__check svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.15s ease, transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.lxp-tile.is-selected {
+    box-shadow: inset 0 0 0 4px var(--ink), 0 2px 0 rgba(0, 0, 0, 0.3), 0 10px 22px rgba(0, 0, 0, 0.25);
+    transform: translateY(2px);
+}
+
+.lxp-tile.is-selected .lxp-tile__check {
+    background: var(--ink);
+    color: var(--tone2);
+    opacity: 1;
+}
+
+.lxp-tile.is-selected .lxp-tile__check svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.lxp-tiles.is-full .lxp-tile:not(.is-selected) {
+    opacity: 0.55;
+}
+
+.lxp-tile.is-denied,
+.lxp-multibar__count.is-denied {
+    animation: lxpShake 0.36s ease;
+}
+
+.lxp-tile:disabled {
+    cursor: default;
+}

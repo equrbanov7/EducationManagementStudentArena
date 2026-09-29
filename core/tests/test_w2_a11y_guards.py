@@ -184,7 +184,8 @@ class IconOnlyButtonNamesTest(SimpleTestCase):
         ("apps/accounts/templates/accounts/assigned_exams.html", "data-close-exam-code-modal"),
         ("apps/accounts/templates/accounts/assigned_courses.html", 'type="submit" class="btn btn-primary"'),
         ("apps/assignments/templates/assignments/assignment_detail.html", 'id="clearFile"'),
-        ("apps/live_exam/templates/liveExam/host_lobby.html", 'id="closePodiumBtn"'),
+        # 2026-09-29: final səhnənin bağla düyməsi şablondan stage.js-ə köçdü (JS ilə render olunur).
+        ("apps/live_exam/static/js/host_lobby/stage.js", "data-stage-close"),
         ("apps/courses/templates/courses/course_members.html", "btn-icon-delete"),
         ("apps/courses/templates/courses/partials/_member_accordion.html", "js-delete-member"),
         ("apps/accounts/templates/accounts/profile/sections/_post_edit_modal.html", 'id="closeEditModal"'),

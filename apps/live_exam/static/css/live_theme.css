@@ -121,3 +121,27 @@ body[data-live-theme="sweet"] {
     --player-bg-3: #5eead4;
     --player-bg-4: #052e2b;
 }
+
+/* ── 2026-09-29 (LX-FE-STAGE): paylaşılan oyun tokenləri ─────────────────
+ * Host (proyektor) və oyunçu (telefon) EYNİ cavab rəngi + fiqurunu işlədir.
+ * Sıra = variant indeksi: 1 üçbucaq · 2 romb · 3 dairə · 4 kvadrat ·
+ * 5 ulduz (server açarı "pentagon") · 6 altıbucaq.
+ * Hamısı ağ mətnlə WCAG AA ≥ 4.5:1 (hər iki qradiyent nöqtəsində; hesablama
+ * LX-FE-STAGE hesabatındadır). Mövcud dəyişənlərin adı dəyişdirilmir. */
+:root {
+    --lx-ans-1-bg: #d7263d;  --lx-ans-1-bg2: #b8182f;  --lx-ans-1-ink: #ffffff;
+    --lx-ans-2-bg: #1f63d6;  --lx-ans-2-bg2: #174fb3;  --lx-ans-2-ink: #ffffff;
+    --lx-ans-3-bg: #b65400;  --lx-ans-3-bg2: #944300;  --lx-ans-3-ink: #ffffff;
+    --lx-ans-4-bg: #1a8445;  --lx-ans-4-bg2: #136b37;  --lx-ans-4-ink: #ffffff;
+    --lx-ans-5-bg: #7341d6;  --lx-ans-5-bg2: #5a2bb8;  --lx-ans-5-ink: #ffffff;
+    --lx-ans-6-bg: #0e7a73;  --lx-ans-6-bg2: #0a5f5a;  --lx-ans-6-ink: #ffffff;
+    --lx-correct: #22c55e;
+    --lx-correct-ink: #052e16;
+    --lx-wrong-bg: #2a3158;
+    --lx-wrong-ink: #d6dcf5;
+    --lx-gold: #ffc940;
+    --lx-gold-ink: #1a1300;
+    --lx-stage-bg: #0b1030;
+    --lx-stage-ink: #ffffff;
+    --lx-stage-muted: #c9d0ee;
+}

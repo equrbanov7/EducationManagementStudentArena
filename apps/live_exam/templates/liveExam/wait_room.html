@@ -3,7 +3,8 @@
 <html lang="{{ LANGUAGE_CODE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#062a33">
     <title>{% trans "title" context "live_exam.wait_room" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,164 +14,136 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}">
-    <link rel="stylesheet" href="{% static 'css/wait_room/_part1.css' %}">
-    <link rel="stylesheet" href="{% static 'css/wait_room/_part2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/wait_room/_base.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/wait_room/_overlays.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/wait_room/_sheet.css' %}?v=lxp-20260929">
 </head>
-<body class="wait-room-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
-    <div class="wait-room-shell">
-        <div class="wait-room-bg" aria-hidden="true">
-            <span class="wait-room-bg__blob wait-room-bg__blob--one"></span>
-            <span class="wait-room-bg__blob wait-room-bg__blob--two"></span>
-            <span class="wait-room-bg__grid"></span>
-            <span class="wait-room-bg__icon wait-room-bg__icon--one">🎯</span>
-            <span class="wait-room-bg__icon wait-room-bg__icon--two">🚀</span>
-            <span class="wait-room-bg__icon wait-room-bg__icon--three">🏆</span>
-            <span class="wait-room-bg__icon wait-room-bg__icon--four">✨</span>
-            <span class="wait-room-bg__icon wait-room-bg__icon--five">🎲</span>
+<body class="lxw" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+    {% comment %}LX-FE-PLAYER 2026-09-29: gözləmə otağı — telefon üçün: iri avatar, «müəllimi gözləyirik»
+    statusu, oyunçu sayı, reaksiya sırası, görünüşü dəyişmək üçün alt vərəq, «çıxarıldın» kartı.{% endcomment %}
+    <div class="lxw-shell">
+        <div class="lxw-bg" aria-hidden="true">
+            <span class="lxw-bg__glow lxw-bg__glow--a"></span>
+            <span class="lxw-bg__glow lxw-bg__glow--b"></span>
         </div>
 
-        <div class="wait-room-language">
-            {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
-        </div>
+        <header class="lxw-top">
+            <span class="lxw-brand"><span class="lxw-brand__dot" aria-hidden="true"></span><span>{% trans "title" context "live_exam.wait_room" %}</span></span>
+            <div class="lxw-lang">
+                {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
+            </div>
+        </header>
+        <div class="lxw-net" id="waitRoomNet" role="status" hidden></div>
 
-        <main class="wait-room-main">
-            <section class="wait-room-hero" aria-live="polite">
-                <button id="waitRoomEditButton" class="wait-room-hero__edit" type="button" aria-label="{% trans 'edit_button' context 'live_exam.wait_room' %}">
-                    <i class="fas fa-pen"></i>
-                </button>
-
-                <div id="waitRoomHeroAvatar" class="wait-room-hero__avatar"></div>
-                <h1 id="waitRoomHeroNickname" class="wait-room-hero__nickname">{{ my_player.nickname }}</h1>
-                <div class="wait-room-hero__badge">
-                    <i class="fas fa-circle-check"></i>
-                    <span>{% trans "success_badge" context "live_exam.wait_room" %}</span>
+        <main class="lxw-main">
+            <section class="lxw-hero">
+                <div class="lxw-hero__stage">
+                    <span class="lxw-hero__spot" aria-hidden="true"></span>
+                    <div id="waitRoomHeroAvatar" class="lxw-hero__avatar"></div>
+                    <button id="waitRoomEditButton" class="lxw-hero__edit" type="button" data-wait-room-open aria-label="{% trans 'edit_button' context 'live_exam.wait_room' %}">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 17.2V20h2.8l8.3-8.3-2.8-2.8zM19.7 7.1a1 1 0 0 0 0-1.4l-1.4-1.4a1 1 0 0 0-1.4 0l-1.3 1.3 2.8 2.8z" fill="currentColor"/></svg>
+                    </button>
                 </div>
-
-                {% with lang=LANGUAGE_CODE|default:'az'|slice:":2"|lower %}
-                <p class="wait-room-hero__question">
-                    {% if lang == "en" %}
-                        Do you see your nickname on screen?
-                    {% elif lang == "ru" %}
-                        Видишь свой ник на экране?
-                    {% elif lang == "tr" %}
-                        {% trans 'Takma adını ekranda görüyor musun?' %}
-                    {% else %}
-                        {% trans 'Nickname-ni ekranda görürsən?' %}
-                    {% endif %}
+                <h1 id="waitRoomHeroNickname" class="lxw-hero__name">{{ my_player.nickname }}</h1>
+                <p class="lxw-hero__badge">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M7.5 12.4l3 3 6-6.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>{% trans "success_badge" context "live_exam.wait_room" %}</span>
                 </p>
-                {% endwith %}
+                <p class="lxw-hero__status" aria-live="polite">
+                    <span id="waitRoomStatusText"></span>
+                    <span class="lxw-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                </p>
+                <p class="lxw-hero__hint" data-lxw-i18n="lookOnScreen"></p>
             </section>
+            <div class="lxw-chips">
+                <span class="lxw-chip" id="waitRoomPlayersChip">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.4" fill="currentColor"/><circle cx="16.5" cy="9" r="2.6" fill="currentColor" opacity=".7"/><path d="M2.8 19c.6-3.3 3.2-5.2 6.2-5.2s5.6 1.9 6.2 5.2zM14.6 14.2c2.6-.2 5.3 1.2 6 4.8h-4.4" fill="currentColor"/></svg>
+                    <span id="waitRoomPlayersCount"></span>
+                </span>
+                <span class="lxw-chip lxw-chip--lock" id="waitRoomLockedChip" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.2" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+                    <span id="waitRoomLockedText"></span>
+                </span>
+            </div>
         </main>
 
-        <div id="waitRoomFeedback" class="wait-room-feedback" aria-live="polite"></div>
-
-        <footer class="wait-room-footer">
-            <div class="wait-room-footer__identity">
-                <div id="waitRoomFooterAvatar" class="wait-room-footer__avatar"></div>
-                <div class="wait-room-footer__meta">
-                    <div id="waitRoomFooterNickname" class="wait-room-footer__nickname">{{ my_player.nickname }}</div>
-                    <div class="wait-room-footer__count">
-                        <span id="waitRoomPlayersCount">{{ players|length|add:"-1" }}</span>
-                    </div>
-                </div>
+        <footer class="lxw-dock">
+            <div id="waitRoomReactionDock" class="lxw-react">
+                <span class="lxw-react__label" id="waitRoomReactionLabel" data-lxw-i18n="reactionsHint"></span>
+                <div id="waitRoomReactionList" class="lxw-react__list" role="group" aria-labelledby="waitRoomReactionLabel"></div>
             </div>
-
-            <aside id="waitRoomReactionDock" class="wait-room-reaction" aria-label="{% trans 'reaction_title' context 'live_exam.wait_room' %}">
-                <div class="wait-room-reaction__panel">
-                    <div id="waitRoomReactionList" class="wait-room-reaction__list"></div>
-                </div>
-                <button id="waitRoomReactionFab" class="wait-room-reaction__fab" type="button">
-                    <span>😊</span>
-                    <span>{% trans "reaction_button" context "live_exam.wait_room" %}</span>
-                </button>
-            </aside>
+            <button type="button" class="lxw-btn lxw-btn--ghost" data-wait-room-open>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.9 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8h2.1A4.3 4.3 0 0 0 21 10.7C21 6.4 17 3 12 3z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="7.5" cy="11" r="1.5" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.5" fill="currentColor"/><circle cx="15" cy="7.8" r="1.5" fill="currentColor"/></svg>
+                <span data-lxw-i18n="editLook"></span>
+            </button>
         </footer>
-        <div id="waitRoomReactionOverlay" class="wait-room-reaction__overlay" aria-hidden="true"></div>
+        <div id="waitRoomReactionOverlay" class="lxw-bursts" aria-hidden="true"></div>
+        <div id="waitRoomFeedback" class="lxw-toast" role="status" aria-live="polite" hidden></div>
     </div>
 
-    <div id="waitRoomModalBackdrop" class="wait-room-modal-backdrop"></div>
-    <section id="waitRoomEditModal" class="wait-room-modal" role="dialog" aria-modal="true" aria-labelledby="waitRoomModalTitle">
-        <div class="wait-room-modal__header">
-            <div>
-                <h2 id="waitRoomModalTitle">{% trans "edit_title" context "live_exam.wait_room" %}</h2>
-            </div>
-            <button type="button" class="wait-room-modal__close" data-wait-room-close aria-label="{% trans 'close_button' context 'live_exam.wait_room' %}">
-                <i class="fas fa-xmark"></i>
+    <div id="waitRoomModalBackdrop" class="lxw-sheet-backdrop" hidden></div>
+    <section id="waitRoomEditModal" class="lxw-sheet" role="dialog" aria-modal="true" aria-labelledby="waitRoomModalTitle" hidden>
+        <div class="lxw-sheet__grip" aria-hidden="true"></div>
+        <header class="lxw-sheet__head">
+            <h2 id="waitRoomModalTitle">{% trans "edit_title" context "live_exam.wait_room" %}</h2>
+            <button type="button" class="lxw-sheet__close" data-wait-room-close aria-label="{% trans 'close_button' context 'live_exam.wait_room' %}">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
             </button>
-        </div>
-
-        <div class="wait-room-modal__body">
-            <aside class="wait-room-preview">
+        </header>
+        <div class="lxw-sheet__body">
+            <div class="lxw-sheet__preview">
                 <div id="waitRoomPreview"></div>
-                <div class="wait-room-preview__label">{% trans "preview_label" context "live_exam.wait_room" %}</div>
-            </aside>
-
-            <div class="wait-room-form">
-                <div class="wait-room-form__section">
-                    <label class="wait-room-form__label" for="waitRoomNicknameInput">{% trans "nickname_label" context "live_exam.wait_room" %}</label>
-                    <input
-                        id="waitRoomNicknameInput"
-                        class="wait-room-form__input"
-                        type="text"
-                        maxlength="32"
-                        value="{{ my_player.nickname }}"
-                        placeholder="{% trans 'nickname_placeholder' context 'live_exam.wait_room' %}"
-                        autocomplete="off">
-                    <div id="waitRoomNicknameError" class="wait-room-form__error" aria-live="polite"></div>
-                </div>
-
-                <div id="waitRoomAppearanceSection" class="wait-room-form__section">
-                    <div class="wait-room-picker-switch" role="tablist" aria-label="{% trans 'edit_title' context 'live_exam.wait_room' %}">
-                        <button
-                            id="waitRoomTabAvatar"
-                            type="button"
-                            class="wait-room-picker-switch__button is-active"
-                            data-wait-room-panel-target="avatar"
-                            aria-selected="true">
-                            {% trans "avatar_label" context "live_exam.wait_room" %}
-                        </button>
-                        <button
-                            id="waitRoomTabAccessory"
-                            type="button"
-                            class="wait-room-picker-switch__button"
-                            data-wait-room-panel-target="accessory"
-                            aria-selected="false">
-                            {% trans "accessory_label" context "live_exam.wait_room" %}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="wait-room-picker-panels">
-                    <section id="waitRoomAvatarPanel" class="wait-room-picker-panel is-active" data-wait-room-panel="avatar">
-                        <div id="waitRoomAvatarGrid" class="wait-room-picker__grid"></div>
-                    </section>
-
-                    <section id="waitRoomAccessoryPanel" class="wait-room-picker-panel" data-wait-room-panel="accessory" hidden>
-                        <div id="waitRoomAccessoryGrid" class="wait-room-picker__grid wait-room-picker__grid--accessories"></div>
-                    </section>
-                </div>
+                <span class="lxw-sheet__preview-label">{% trans "preview_label" context "live_exam.wait_room" %}</span>
             </div>
+            <div class="lxw-field">
+                <label class="lxw-field__label" for="waitRoomNicknameInput">{% trans "nickname_label" context "live_exam.wait_room" %}</label>
+                <div class="lxw-field__row">
+                    <input id="waitRoomNicknameInput" class="lxw-field__input" type="text" maxlength="32" value="{{ my_player.nickname }}"
+                           placeholder="{% trans 'nickname_placeholder' context 'live_exam.wait_room' %}" autocomplete="off" autocapitalize="words"
+                           spellcheck="false" enterkeyhint="done" aria-describedby="waitRoomNicknameError waitRoomNicknameHint">
+                    <span class="lxw-field__count" id="waitRoomNicknameCount" aria-hidden="true"></span>
+                </div>
+                <p id="waitRoomNicknameHint" class="lxw-field__hint" hidden></p>
+                <p id="waitRoomNicknameError" class="lxw-field__error" aria-live="polite"></p>
+            </div>
+            <div id="waitRoomAppearanceSection" class="lxw-tabs" role="tablist" aria-label="{% trans 'edit_title' context 'live_exam.wait_room' %}">
+                <button id="waitRoomTabAvatar" type="button" role="tab" class="lxw-tabs__tab is-active" data-wait-room-panel-target="avatar" aria-selected="true" aria-controls="waitRoomAvatarPanel">{% trans "avatar_label" context "live_exam.wait_room" %}</button>
+                <button id="waitRoomTabAccessory" type="button" role="tab" class="lxw-tabs__tab" data-wait-room-panel-target="accessory" aria-selected="false" aria-controls="waitRoomAccessoryPanel">{% trans "accessory_label" context "live_exam.wait_room" %}</button>
+            </div>
+            <section id="waitRoomAvatarPanel" class="lxw-panel is-active" role="tabpanel" data-wait-room-panel="avatar" aria-labelledby="waitRoomTabAvatar">
+                <div id="waitRoomAvatarGrid" class="lxw-grid"></div>
+            </section>
+            <section id="waitRoomAccessoryPanel" class="lxw-panel" role="tabpanel" data-wait-room-panel="accessory" aria-labelledby="waitRoomTabAccessory" hidden>
+                <div id="waitRoomAccessoryGrid" class="lxw-grid lxw-grid--chips"></div>
+            </section>
         </div>
+        <footer class="lxw-sheet__foot">
+            <button type="button" class="lxw-btn lxw-btn--ghost" data-wait-room-close>{% trans "cancel_button" context "live_exam.wait_room" %}</button>
+            <button id="waitRoomSaveButton" type="button" class="lxw-btn lxw-btn--primary">{% trans "save_button" context "live_exam.wait_room" %}</button>
+        </footer>
+    </section>
 
-        <div class="wait-room-modal__footer">
-            <button type="button" class="wait-room-modal__button wait-room-modal__button--ghost" data-wait-room-close>
-                {% trans "cancel_button" context "live_exam.wait_room" %}
-            </button>
-            <button id="waitRoomSaveButton" type="button" class="wait-room-modal__button wait-room-modal__button--primary">
-                {% trans "save_button" context "live_exam.wait_room" %}
-            </button>
+    <section id="waitRoomKicked" class="lxw-overlay" role="alertdialog" aria-modal="true" aria-labelledby="waitRoomKickedTitle" hidden>
+        <div class="lxw-overlay__card">
+            <div class="lxw-overlay__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M8 8l8 8M16 8l-8 8" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+            </div>
+            <h2 id="waitRoomKickedTitle"></h2>
+            <p id="waitRoomKickedBody"></p>
+            <a class="lxw-btn lxw-btn--primary" id="waitRoomKickedAction" href="{% url 'liveExam:pin_entry' %}"></a>
         </div>
     </section>
+    <div id="waitRoomStarting" class="lxw-overlay lxw-overlay--start" role="status" hidden>
+        <div class="lxw-start"><span class="lxw-start__ring" aria-hidden="true"></span><strong id="waitRoomStartingText"></strong></div>
+    </div>
 
     {{ players|json_script:"initialPlayers" }}
     {{ my_player|json_script:"waitRoomMyPlayer" }}
     {{ live_catalog|json_script:"waitRoomCatalog" }}
     {{ session_settings|json_script:"waitRoomSessionSettings" }}
-
-    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `wait_room_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline script yoxdur).{% endcomment %}
     <script id="waitRoomConfig" type="application/json">{
         "csrf": "{{ csrf_token }}",
         "wsPath": "/ws/live/{{ session.pin|escapejs }}/lobby/",
@@ -179,33 +152,78 @@
         "reactionUrl": "{% url 'liveExam:wait_room_reaction' session.pin %}",
         "playerScreenUrl": "{{ player_screen_url|escapejs }}",
         "joinPageUrl": "{% url 'liveExam:join_page' session.pin %}",
+        "pinEntryUrl": "{% url 'liveExam:pin_entry' %}",
+        "isLocked": {% if session.is_locked %}true{% else %}false{% endif %},
         "myPlayerId": {{ my_player_id }}
     }</script>
     <script id="waitRoomI18n" type="application/json">{
         "defaultPlayer": "{% filter escapejs %}{% trans 'default_player' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "waitingForHost": "{% filter escapejs %}{% trans 'status_waiting_host' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "playersEmpty": "{% filter escapejs %}{% trans 'players_empty' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "playersReady": "{% filter escapejs %}{% trans 'players_ready' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "nicknameRequired": "{% filter escapejs %}{% trans 'nickname_required' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "nicknameTooLong": "{% filter escapejs %}{% trans 'nickname_too_long' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "saving": "{% filter escapejs %}{% trans 'saving' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "saved": "{% filter escapejs %}{% trans 'saved' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "saveFailed": "{% filter escapejs %}{% trans 'save_failed' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "reactionFailed": "{% filter escapejs %}{% trans 'reaction_failed' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "wsConnecting": "{% filter escapejs %}{% trans 'ws_connecting' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "wsOnline": "{% filter escapejs %}{% trans 'ws_online' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "wsStarting": "{% filter escapejs %}{% trans 'ws_starting' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "wsDisconnected": "{% filter escapejs %}{% trans 'ws_disconnected' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "wsError": "{% filter escapejs %}{% trans 'ws_error' context 'live_exam.wait_room.js' %}{% endfilter %}",
-        "removedFromLobby": "You were removed from the lobby."
+        "playersCount": "{% filter escapejs %}{% trans 'players_count' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "playersAlone": "{% filter escapejs %}{% trans 'players_alone' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "waitingHost": "{% filter escapejs %}{% trans 'waiting_host_start' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "lockedBadge": "{% filter escapejs %}{% trans 'lobby_locked_badge' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "kickedTitle": "{% filter escapejs %}{% trans 'kicked_title' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "kickedBody": "{% filter escapejs %}{% trans 'kicked_body' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "kickedAction": "{% filter escapejs %}{% trans 'kicked_action' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "gameStarting": "{% filter escapejs %}{% trans 'game_starting' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "nicknameLockedHint": "{% filter escapejs %}{% trans 'nickname_locked_hint' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "reactionSent": "{% filter escapejs %}{% trans 'reaction_sent' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "reactionWait": "{% filter escapejs %}{% trans 'reaction_wait' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "netReconnecting": "{% filter escapejs %}{% trans 'net_reconnecting' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "netOffline": "{% filter escapejs %}{% trans 'net_offline' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "netBack": "{% filter escapejs %}{% trans 'net_back' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "playerFallback": "{% filter escapejs %}{% trans 'player_fallback' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "nicknameCounter": "{% filter escapejs %}{% trans 'nickname_counter' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "removedTitle": "{% filter escapejs %}{% trans 'removed_title' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "rejoin": "{% filter escapejs %}{% trans 'rejoin_game' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "lookOnScreen": "{% filter escapejs %}{% trans 'look_on_screen' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "reactionsHint": "{% filter escapejs %}{% trans 'reactions_hint' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "editLook": "{% filter escapejs %}{% trans 'edit_look' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:accessory_none": "{% filter escapejs %}{% trans 'accessory_name_accessory_none' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:glasses": "{% filter escapejs %}{% trans 'accessory_name_glasses' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:cap": "{% filter escapejs %}{% trans 'accessory_name_cap' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:crown": "{% filter escapejs %}{% trans 'accessory_name_crown' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:mask": "{% filter escapejs %}{% trans 'accessory_name_mask' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:sparkles": "{% filter escapejs %}{% trans 'accessory_name_sparkles' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:bowtie": "{% filter escapejs %}{% trans 'accessory_name_bowtie' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:headphones": "{% filter escapejs %}{% trans 'accessory_name_headphones' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:flower": "{% filter escapejs %}{% trans 'accessory_name_flower' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:pirate_patch": "{% filter escapejs %}{% trans 'accessory_name_pirate_patch' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "acc:halo": "{% filter escapejs %}{% trans 'accessory_name_halo' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_1": "{% filter escapejs %}{% trans 'avatar_name_avatar_1' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_2": "{% filter escapejs %}{% trans 'avatar_name_avatar_2' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_3": "{% filter escapejs %}{% trans 'avatar_name_avatar_3' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_4": "{% filter escapejs %}{% trans 'avatar_name_avatar_4' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_5": "{% filter escapejs %}{% trans 'avatar_name_avatar_5' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_6": "{% filter escapejs %}{% trans 'avatar_name_avatar_6' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_7": "{% filter escapejs %}{% trans 'avatar_name_avatar_7' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_8": "{% filter escapejs %}{% trans 'avatar_name_avatar_8' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_9": "{% filter escapejs %}{% trans 'avatar_name_avatar_9' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_10": "{% filter escapejs %}{% trans 'avatar_name_avatar_10' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_11": "{% filter escapejs %}{% trans 'avatar_name_avatar_11' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_12": "{% filter escapejs %}{% trans 'avatar_name_avatar_12' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_13": "{% filter escapejs %}{% trans 'avatar_name_avatar_13' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_14": "{% filter escapejs %}{% trans 'avatar_name_avatar_14' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_15": "{% filter escapejs %}{% trans 'avatar_name_avatar_15' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "ava:avatar_16": "{% filter escapejs %}{% trans 'avatar_name_avatar_16' context 'live_exam.wait_room.js' %}{% endfilter %}"
     }</script>
-    <script src="{% static 'js/wait_room_config.js' %}?v=20260921-1"></script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-    <script src="{% static 'js/wait_room_nickname_editor.js' %}"></script>
-    <script src="{% static 'js/wait_room_avatar_picker.js' %}"></script>
-    <script src="{% static 'js/wait_room_accessory_picker.js' %}"></script>
-    <script src="{% static 'js/wait_room_reaction_panel.js' %}"></script>
-    <script src="{% static 'js/wait_room_page.js' %}?v=live-http-fallback-20260408"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/ems_ajax_init.js' %}"></script>
+    <script src="{% static 'js/wait_room_config.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/wait_room_nickname_editor.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_avatar_picker.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_accessory_picker.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_reaction_panel.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_profile_sheet.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_page.js' %}?v=lxp-20260929"></script>
 </body>
 </html>

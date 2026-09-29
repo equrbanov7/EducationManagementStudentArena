@@ -1,14 +1,13 @@
-import { UI } from './dom.js';
-import { state } from './state.js';
-import { applySessionSettings } from './settings.js';
-import { renderIdleStage, renderLobbyPlayers, updateAnsweredCounter } from './lobby.js';
-import { applyQuestionState } from './question.js';
-import { applyRevealState } from './reveal.js';
-import { renderPodium } from './podium.js';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js';
+import { UI } from './dom.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { applySessionSettings } from './settings.js?v=lx20260929';
+import { renderLobbyPlayers } from './lobby.js?v=lx20260929';
+import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260929';
+import { applyRevealState } from './reveal.js?v=lx20260929';
+import { renderPodium } from './podium.js?v=lx20260929';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260929';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20260929';
 import {
-    controlsEnabled,
     esc,
     fmt,
     log,
@@ -18,15 +17,20 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js';
+} from './utils.js?v=lx20260929';
+
+/* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
+ * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
+ * serverlə sinxronlaşır (UI həmişə server vəziyyətinə yaxınsayır). */
 
 function spawnReaction(eventData) {
     if (!UI.reactionOverlay) return;
     const meta = (window.LiveAvatarCatalog || {}).reactions?.[eventData?.reaction_key] || {};
+    if (UI.reactionOverlay.childElementCount > 24) return; // çox reaksiya — DOM-u şişirtmə
     const burst = document.createElement("div");
     burst.className = "host-reaction-burst";
     burst.innerHTML = `
-        <span class="host-reaction-burst__emoji">${meta.emoji || eventData?.emoji || "✨"}</span>
+        <span class="host-reaction-burst__emoji">${esc(meta.emoji || eventData?.emoji || "✨")}</span>
         <span class="host-reaction-burst__name">${esc(eventData?.player?.nickname || "")}</span>
     `;
     burst.style.left = `${16 + Math.random() * 68}%`;
@@ -35,139 +39,136 @@ function spawnReaction(eventData) {
     setTimeout(() => burst.remove(), 2300);
 }
 
-
-let lobbyWS = null;
-let playWS = null;
+const sockets = { lobby: null, play: null, retries: { lobby: 0, play: 0 }, timers: { lobby: 0, play: 0 }, closing: false };
 let initialStateSynced = false;
 
 export async function ensureInitialStateSync() {
-    if (initialStateSynced) {
-        return null;
-    }
+    if (initialStateSynced) return null;
     initialStateSynced = true;
     return syncState();
 }
 
-export function connectHostSockets() {
-    lobbyWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/lobby/`));
-    lobbyWS.onopen = () => log(tr("wsLobbyOpen", "Lobby WS open"));
-    lobbyWS.onclose = () => log(tr("wsLobbyClosed", "Lobby WS closed"));
-    lobbyWS.onmessage = event => {
-        try {
-            const message = JSON.parse(event.data);
-            const data = message.data || message;
-            updateServerTimeOffset(data);
+function scheduleReconnect(kind, open) {
+    if (sockets.closing) return;
+    window.clearTimeout(sockets.timers[kind]);
+    const attempt = Math.min(sockets.retries[kind], 4);
+    const delay = Math.min(15000, 1000 * 2 ** attempt) + Math.random() * 400;
+    sockets.retries[kind] += 1;
+    sockets.timers[kind] = window.setTimeout(open, delay);
+}
 
-            if (data.type === "lobby_state") {
-                markStateMutation();
-                if (data.settings) {
-                    applySessionSettings(data.settings);
-                }
-                if (data.is_locked != null) {
-                    state.isLocked = Boolean(data.is_locked);
-                }
-                renderLobbyPlayers(data.players || [], data.count);
-
-                if (state.sessionState === "lobby") {
-                    renderIdleStage();
-                }
-                return;
-            }
-
-            if (data.type === "reaction_event") {
-                spawnReaction(data);
-            }
-        } catch (error) {
-            log(fmt(tr("lobbyMessageError", "Lobby message error: {message}"), { message: error.message || "" }));
+function onLobbyMessage(event) {
+    try {
+        const message = JSON.parse(event.data);
+        const data = message.data || message;
+        updateServerTimeOffset(data);
+        if (data.type === "lobby_state") {
+            markStateMutation();
+            if (data.settings) applySessionSettings(data.settings);
+            if (data.is_locked != null) state.isLocked = Boolean(data.is_locked);
+            renderLobbyPlayers(data.players || [], data.count);
+            return;
         }
-    };
+        if (data.type === "reaction_event") spawnReaction(data);
+    } catch (error) {
+        log(fmt(tr("lobbyMessageError", "Lobby message error: {message}"), { message: error.message || "" }));
+    }
+}
 
-    playWS = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
-    setPlaySocket(playWS);
-    playWS.onopen = async () => {
+function onPlayMessage(event) {
+    try {
+        const message = JSON.parse(event.data);
+        const data = message.data || message;
+        updateServerTimeOffset(data);
+
+        if (data.type === "question_published") {
+            if (!shouldApplyTimelinePayload(data)) return;
+            rememberTimelinePayload(data);
+            markStateMutation();
+            const sameQuestion = state.currentQuestion && Number(state.currentQuestion.id) === Number(data.question?.id);
+            applyQuestionState(data.question, sameQuestion ? state.answeredCount : 0, state.totalPlayers);
+            return;
+        }
+        if (data.type === "answer_progress") {
+            if (state.currentQuestion && Number(data.question_id || 0) !== Number(state.currentQuestion.id || 0)) return;
+            markStateMutation();
+            state.answeredCount = Number(data.answered_count || 0);
+            state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
+            updateAnsweredCounter();
+            return;
+        }
+        if (data.type === "reveal") {
+            if (!shouldApplyTimelinePayload(data)) return;
+            rememberTimelinePayload(data);
+            markStateMutation();
+            applyRevealState(data, state.currentQuestion);
+            return;
+        }
+        if (data.type === "session_settings") {
+            if (data.settings) applySessionSettings(data.settings);
+            if (data.is_locked != null) state.isLocked = Boolean(data.is_locked);
+            return;
+        }
+        if (data.type === "finished") {
+            if (!shouldApplyTimelinePayload(data)) return;
+            rememberTimelinePayload(data);
+            markStateMutation();
+            clearPhaseLoop();
+            clearAutoTimers();
+            stopStatePolling();
+            clearPendingStateSync();
+            setSessionState("finished");
+            renderPodium(data.top || [], data);
+        }
+    } catch (error) {
+        log(fmt(tr("playMessageError", "Play message error: {message}"), { message: error.message || "" }));
+    }
+}
+
+function openLobby() {
+    const ws = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/lobby/`));
+    sockets.lobby = ws;
+    ws.onopen = () => {
+        sockets.retries.lobby = 0;
+        log(tr("wsLobbyOpen", "Lobby WS open"));
+    };
+    ws.onclose = () => {
+        log(tr("wsLobbyClosed", "Lobby WS closed"));
+        if (sockets.lobby === ws && state.sessionState !== "finished") scheduleReconnect("lobby", openLobby);
+    };
+    ws.onmessage = onLobbyMessage;
+}
+
+function openPlay() {
+    const ws = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/play/`));
+    sockets.play = ws;
+    setPlaySocket(ws);
+    ws.onopen = async () => {
+        const reconnect = sockets.retries.play > 0;
+        sockets.retries.play = 0;
         log(tr("wsPlayOpen", "Play WS open"));
-        await ensureInitialStateSync();
+        if (reconnect) await syncState();
+        else await ensureInitialStateSync();
     };
-    playWS.onclose = () => log(tr("wsPlayClosed", "Play WS closed"));
-    playWS.onmessage = event => {
-        try {
-            const message = JSON.parse(event.data);
-            const data = message.data || message;
-            updateServerTimeOffset(data);
-
-            if (data.type === "question_published") {
-                if (!shouldApplyTimelinePayload(data)) {
-                    return;
-                }
-                rememberTimelinePayload(data);
-                markStateMutation();
-                state.answeredCount = 0;
-                applyQuestionState(data.question, 0, state.totalPlayers);
-                return;
-            }
-
-            if (data.type === "answer_progress") {
-                if (state.currentQuestion && Number(data.question_id || 0) !== Number(state.currentQuestion.id || 0)) {
-                    return;
-                }
-                markStateMutation();
-                state.answeredCount = Number(data.answered_count || 0);
-                state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
-                updateAnsweredCounter();
-
-                if (
-                    controlsEnabled()
-                    && state.answeredCount >= state.totalPlayers
-                    && state.totalPlayers > 0
-                    && state.sessionState === "question"
-                ) {
-                    log(tr("allAnsweredAutoReveal", "All answered, auto reveal!"));
-                    clearTimeout(state.autoRevealTimeout);
-                    setTimeout(() => {
-                        if (state.sessionState === "question") {
-                            UI.revealBtn.click();
-                        }
-                    }, 400);
-                }
-                return;
-            }
-
-            if (data.type === "reveal") {
-                if (!shouldApplyTimelinePayload(data)) {
-                    return;
-                }
-                rememberTimelinePayload(data);
-                markStateMutation();
-                applyRevealState(data, state.currentQuestion);
-                return;
-            }
-
-            if (data.type === "finished") {
-                if (!shouldApplyTimelinePayload(data)) return;
-                rememberTimelinePayload(data);
-                if (state.sessionState === "finished") return;
-                markStateMutation();
-                clearPhaseLoop();
-                clearAutoTimers();
-                stopStatePolling();
-                clearPendingStateSync();
-                setSessionState("finished");
-                renderPodium(data.top || []);
-                return;
-            }
-        } catch (error) {
-            log(fmt(tr("playMessageError", "Play message error: {message}"), { message: error.message || "" }));
-        }
+    ws.onclose = () => {
+        log(tr("wsPlayClosed", "Play WS closed"));
+        if (sockets.play === ws && state.sessionState !== "finished") scheduleReconnect("play", openPlay);
     };
+    ws.onmessage = onPlayMessage;
+}
 
-    return { lobbyWS, playWS };
+export function connectHostSockets() {
+    sockets.closing = false;
+    openLobby();
+    openPlay();
+    return { lobbyWS: sockets.lobby, playWS: sockets.play };
 }
 
 export function closeHostSockets() {
-    if (lobbyWS && lobbyWS.readyState <= WebSocket.OPEN) {
-        lobbyWS.close();
-    }
-    if (playWS && playWS.readyState <= WebSocket.OPEN) {
-        playWS.close();
-    }
+    sockets.closing = true;
+    window.clearTimeout(sockets.timers.lobby);
+    window.clearTimeout(sockets.timers.play);
+    [sockets.lobby, sockets.play].forEach((ws) => {
+        if (ws && ws.readyState <= WebSocket.OPEN) ws.close();
+    });
 }

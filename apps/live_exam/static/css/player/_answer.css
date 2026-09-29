@@ -1,0 +1,345 @@
+/* LX-FE-PLAYER (2026-09-29): iştirakçı ekranı — çox seçim paneli, yazılı cavab, «cavab qəbul
+ * edildi», «vaxt bitdi», seçim çipləri, planşet/landşaft düzülüşü (_round.css-dən ayrılıb). */
+
+/* Çox seçim paneli — ekranın altında «yapışqan» */
+.lxp-multibar {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 18px;
+    background: var(--lxp-panel-strong);
+    border: 1px solid var(--lxp-line);
+}
+
+.lxp-multibar__count {
+    flex: 0 0 auto;
+    padding: 9px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.14);
+    font: 800 0.98rem/1 var(--lxp-display);
+    font-variant-numeric: tabular-nums;
+}
+
+.lxp-multibar__count.is-full {
+    background: #fef08a;
+    color: #422006;
+}
+
+.lxp-multibar__send {
+    flex: 1 1 auto;
+}
+
+/* ── Yazılı cavab ── */
+.lxp-typed {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.lxp-typed__input {
+    width: 100%;
+    min-height: 62px;
+    padding: 12px 16px;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    border-radius: 16px;
+    background: #ffffff;
+    color: var(--lxp-ink);
+    font: 800 1.3rem/1.2 var(--lxp-font);
+    outline: none;
+    scroll-margin-bottom: 120px;
+}
+
+.lxp-typed__input::placeholder {
+    color: #64748b;
+    font-weight: 700;
+}
+
+.lxp-typed__input:focus {
+    border-color: #fde047;
+    box-shadow: 0 0 0 4px rgba(253, 224, 71, 0.35);
+}
+
+.lxp-typed__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lxp-typed__count {
+    min-width: 58px;
+    color: var(--lxp-muted);
+    font: 800 0.98rem/1 var(--lxp-display);
+    font-variant-numeric: tabular-nums;
+}
+
+.lxp-typed__count.is-near {
+    color: #fde68a;
+}
+
+.lxp-typed__row .lxp-btn {
+    flex: 1 1 auto;
+}
+
+.lxp-typed-echo {
+    margin: 12px 0 0;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.12);
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+/* ── Cavab qəbul edildi ── */
+.lxp-locked,
+.lxp-timeup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 12px 4px;
+}
+
+.lxp-locked__badge,
+.lxp-timeup__badge {
+    display: grid;
+    place-items: center;
+    width: 104px;
+    height: 104px;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    background: var(--lxp-card);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.1), 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
+.lxp-locked__badge {
+    color: var(--lxp-good);
+}
+
+.lxp-locked__badge svg {
+    width: 56px;
+    height: 56px;
+}
+
+.lxp-locked__badge[data-state="sending"] svg,
+.lxp-locked__badge[data-state="saved"] .lxp-spinner {
+    display: none;
+}
+
+.lxp-locked__badge[data-state="sending"] {
+    color: var(--lxp-ink-soft);
+}
+
+.lxp-locked__badge[data-state="saved"] {
+    animation: lxpPop 0.45s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.lxp-timeup__badge {
+    color: var(--lxp-warn);
+}
+
+.lxp-timeup__badge svg {
+    width: 54px;
+    height: 54px;
+}
+
+.lxp-choice {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.lxp-choice__label,
+.lxp-answerkey__label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lxp-muted);
+}
+
+.lxp-choice__chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.lxp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: linear-gradient(160deg, var(--tone, var(--lxp-a1)), var(--tone2, var(--lxp-a1-2)));
+    color: var(--ink, #fff);
+    font-weight: 800;
+    font-size: 0.98rem;
+    line-height: 1.25;
+    text-align: left;
+    overflow-wrap: anywhere;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+
+.lxp-chip__shape {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes lxpCountPop {
+    from {
+        transform: scale(1.5);
+        opacity: 0.4;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes lxpPop {
+    0% {
+        transform: scale(0.6);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes lxpShake {
+    20%,
+    60% {
+        transform: translateX(-6px);
+    }
+    40%,
+    80% {
+        transform: translateX(6px);
+    }
+}
+
+/* Planşet: plitələr 2 sütun (siyahı da), sual kartı daha geniş nəfəsli. */
+@media (min-width: 700px) {
+    .lxp-tiles[data-layout="list"][data-count="4"],
+    .lxp-tiles[data-layout="list"][data-count="6"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lxp-tile {
+        min-height: 88px;
+        font-size: 1.2rem;
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-tile {
+        min-height: 150px;
+        font-size: 1.35rem;
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-tile__shape {
+        width: 58px;
+        height: 58px;
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-shape {
+        width: 36px;
+        height: 36px;
+    }
+
+    .lxp-qcard {
+        padding: 22px 26px;
+    }
+
+    .lxp-qcard.is-compact[data-len="s"] .lxp-qcard__text {
+        font-size: 1.9rem;
+    }
+
+    .lxp-qcard.is-compact[data-len="m"] .lxp-qcard__text {
+        font-size: 1.55rem;
+    }
+}
+
+/* Landşaft telefon: plitələr 2 sütun, sual kartı yığcam. */
+@media (max-height: 480px) and (orientation: landscape) {
+    .lxp-tiles[data-layout="list"] {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* Landşaftda plitələr sətir düzülüşlü (fiqur solda) və mövcud hündürlüyə sığır. */
+    .lxp-round,
+    .lxp-tiles[data-layout="grid"],
+    .lxp-tiles[data-layout="shapes"] {
+        min-height: 0;
+    }
+
+    .lxp-tiles[data-layout="grid"],
+    .lxp-tiles[data-layout="shapes"] {
+        grid-auto-rows: minmax(52px, 1fr);
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-tile,
+    .lxp-tiles[data-layout="shapes"] .lxp-tile {
+        flex-direction: row;
+        justify-content: flex-start;
+        min-height: 52px;
+        padding: 8px 12px;
+        text-align: left;
+    }
+
+    .lxp-tile__shape,
+    .lxp-tiles[data-layout="grid"] .lxp-tile__shape,
+    .lxp-tiles[data-layout="shapes"] .lxp-tile__shape {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-shape,
+    .lxp-tiles[data-layout="shapes"] .lxp-shape {
+        width: 24px;
+        height: 24px;
+    }
+
+    .lxp-tiles[data-layout="grid"] .lxp-tile {
+        font-size: 1.05rem;
+    }
+
+    .lxp-ready__ring {
+        width: 96px;
+        height: 96px;
+    }
+
+    .lxp-locked__badge,
+    .lxp-timeup__badge {
+        width: 76px;
+        height: 76px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lxp-ready__num.is-pulse,
+    .lxp-locked__badge[data-state="saved"],
+    .lxp-tile.is-denied,
+    .lxp-multibar__count.is-denied {
+        animation: none;
+    }
+
+    .lxp-tile,
+    .lxp-tile__check svg {
+        transition: none;
+    }
+}
+
+/* Tək sayda plitə (3 və ya 5): sonuncu iki sütunu tutur — boş xana qalmır. */
+.lxp-tiles[data-layout="grid"][data-count="3"] .lxp-tile:last-child,
+.lxp-tiles[data-layout="shapes"][data-count="3"] .lxp-tile:last-child,
+.lxp-tiles[data-layout="shapes"][data-count="5"] .lxp-tile:last-child {
+    grid-column: span 2;
+}

@@ -1,14 +1,26 @@
+/* host_lobby_shell.js — aparıcının idarə «qabığı»: sol panel, tənzimləmə çekməcəsi,
+ * sürətli düymələr (Başla / Keç / Növbəti / Kilid). KLASSİK skript; host_lobby.entry.js
+ * modulu (window.LiveHostLobbyController, window.LiveHostIcons) ondan ƏVVƏL işləyir.
+ * 2026-09-29 (LX-FE-STAGE): Font Awesome → xüsusi SVG; native <select> → seqment
+ * düymələri (data-setting-choice); mətnlər LIVE_EXAM_HOST_I18N-dən (gettext yox).
+ */
 document.addEventListener("DOMContentLoaded", () => {
     const controller = window.LiveHostLobbyController;
     if (!controller) return;
 
     const presentationMode = Boolean(typeof CONFIG !== "undefined" && CONFIG.presentationOnly);
     const controlsEnabled = typeof CONFIG === "undefined" ? true : CONFIG.controlsEnabled !== false;
+    const I18N = window.LIVE_EXAM_HOST_I18N || {};
+    const tr = (key, fallback) => {
+        const value = I18N[key];
+        return value && !/^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(value) ? value : fallback;
+    };
+    const icons = window.LiveHostIcons || { icon: () => "" };
+    const icon = (name) => icons.icon(name);
 
     const dom = {
         body: document.body,
         controlBar: document.getElementById("controlBar"),
-        sidebarToggle: document.getElementById("sidebarToggle"),
         sidebarEdgeToggle: document.getElementById("sidebarEdgeToggle"),
         sidebarBackdrop: document.getElementById("hostSidebarBackdrop"),
         quickActions: document.getElementById("hostQuickActions"),
@@ -21,12 +33,12 @@ document.addEventListener("DOMContentLoaded", () => {
         drawer: document.getElementById("hostSettingsDrawer"),
         drawerBackdrop: document.getElementById("hostDrawerBackdrop"),
         closeSettingsBtn: document.getElementById("closeSettingsBtn"),
-        playersList: document.getElementById("playersList"),
         autoMode: document.getElementById("autoMode"),
         maxParticipants: document.getElementById("maxParticipants"),
         sfxVolumeSlider: document.getElementById("sfxVolumeSlider"),
         sfxVolumeLabel: document.getElementById("sfxVolumeLabel"),
         themeButtons: Array.from(document.querySelectorAll("[data-theme-key]")),
+        choiceGroups: Array.from(document.querySelectorAll("[data-setting-choice]")),
         drawerBody: document.querySelector(".host-settings-drawer__body"),
     };
 
@@ -47,41 +59,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ["settingTwoStepJoin", "two_step_join"],
     ].map(([id, key]) => [document.getElementById(id), key]).filter(([element]) => Boolean(element));
 
-    const selectControls = [
-        ["settingLanguage", "language"],
-        ["settingLobbyMusic", "lobby_music"],
-    ].map(([id, key]) => [document.getElementById(id), key]).filter(([element]) => Boolean(element));
-
-    const copy = (() => {
-        const lang = String((typeof CONFIG !== "undefined" ? CONFIG.languageCode : "az") || "az").slice(0, 2).toLowerCase();
-        const labels = {
-            az: {
-                open: gettext("Lobbi açıqdır"),
-                locked: "Lobbi kilidlidir",
-                skip: gettext("Keç"),
-                next: gettext("Növbəti"),
-            },
-            en: {
-                open: "Lobby open",
-                locked: "Lobby locked",
-                skip: "Skip",
-                next: "Next",
-            },
-            ru: {
-                open: "Лобби открыто",
-                locked: "Лобби закрыто",
-                skip: "Пропустить",
-                next: "Далее",
-            },
-            tr: {
-                open: gettext("Lobi açık"),
-                locked: "Lobi kilitli",
-                skip: "Atla",
-                next: "Sonraki",
-            },
-        };
-        return labels[lang] || labels.az;
-    })();
+    const copy = {
+        open: tr("lobbyOpenLabel", "Lobbi açıqdır"),
+        locked: tr("lobbyLockedLabel", "Lobbi bağlıdır"),
+        skip: tr("skipLabel", "Keç"),
+        next: tr("nextLabel", "Növbəti"),
+    };
 
     let currentState = controller.getState();
     let syncingControls = false;
@@ -90,43 +73,34 @@ document.addEventListener("DOMContentLoaded", () => {
     let pendingFlowState = "";
     let pendingFlowPhase = "";
 
-    function resetDrawerShellScroll() {
-        if (!dom.drawer || dom.drawer.scrollTop === 0) return;
-        dom.drawer.scrollTop = 0;
-    }
-
     function syncSidebarButtons() {
         const expanded = presentationMode
             ? dom.body.classList.contains("presentation-sidebar-open")
             : !dom.body.classList.contains("sidebar-collapsed");
-
-        dom.sidebarToggle?.setAttribute("aria-expanded", expanded ? "true" : "false");
         dom.sidebarEdgeToggle?.setAttribute("aria-expanded", expanded ? "true" : "false");
+    }
+
+    function remember(key, value) {
+        try {
+            window.localStorage.setItem(key, value);
+        } catch (error) {
+            /* yaddaş əlçatmazdır — vəziyyət yalnız bu səhifədə qalır */
+        }
     }
 
     function setCollapsed(collapsed) {
         if (presentationMode) return;
         dom.body.classList.toggle("sidebar-collapsed", Boolean(collapsed));
         syncSidebarButtons();
-        try {
-            window.localStorage.setItem("liveHostSidebarCollapsed", collapsed ? "1" : "0");
-        } catch (error) {
-            console.debug("live host sidebar state skipped", error);
-        }
+        remember("liveHostSidebarCollapsed", collapsed ? "1" : "0");
     }
 
     function setPresentationSidebarOpen(open) {
         if (!presentationMode) return;
         dom.body.classList.toggle("presentation-sidebar-open", Boolean(open));
-        if (dom.sidebarBackdrop) {
-            dom.sidebarBackdrop.hidden = !open;
-        }
+        if (dom.sidebarBackdrop) dom.sidebarBackdrop.hidden = !open;
         syncSidebarButtons();
-        try {
-            window.localStorage.setItem("liveHostPresentationSidebarOpen", open ? "1" : "0");
-        } catch (error) {
-            console.debug("live host presentation sidebar state skipped", error);
-        }
+        remember("liveHostPresentationSidebarOpen", open ? "1" : "0");
     }
 
     function toggleSidebar() {
@@ -139,48 +113,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setDrawerOpen(open) {
         dom.body.classList.toggle("host-settings-open", Boolean(open));
-        if (dom.drawer) {
-            dom.drawer.setAttribute("aria-hidden", open ? "false" : "true");
-            resetDrawerShellScroll();
-        }
-        if (dom.drawerBackdrop) {
-            dom.drawerBackdrop.hidden = !open;
-        }
+        if (dom.drawer) dom.drawer.setAttribute("aria-hidden", open ? "false" : "true");
+        if (dom.drawerBackdrop) dom.drawerBackdrop.hidden = !open;
         if (open && dom.drawerBody) {
             window.requestAnimationFrame(() => {
                 dom.drawerBody.scrollTop = 0;
+                dom.closeSettingsBtn?.focus();
             });
         }
     }
 
     function setLockButton(locked) {
+        const label = locked ? copy.locked : copy.open;
         if (dom.lockLobbyBtn) {
             dom.lockLobbyBtn.classList.toggle("is-locked", Boolean(locked));
             dom.lockLobbyBtn.setAttribute("aria-pressed", locked ? "true" : "false");
-            dom.lockLobbyBtn.innerHTML = `
-                <i class="fas ${locked ? "fa-lock" : "fa-lock-open"}"></i>
-                <span>${locked ? copy.locked : copy.open}</span>
-            `;
+            dom.lockLobbyBtn.innerHTML = `<span class="hx-i">${icon(locked ? "lock" : "unlock")}</span><span>${label}</span>`;
         }
         if (dom.quickLockBtn) {
             dom.quickLockBtn.classList.toggle("is-locked", Boolean(locked));
             dom.quickLockBtn.setAttribute("aria-pressed", locked ? "true" : "false");
-            dom.quickLockBtn.setAttribute("aria-label", locked ? copy.locked : copy.open);
-            dom.quickLockBtn.setAttribute("title", locked ? copy.locked : copy.open);
-            dom.quickLockBtn.innerHTML = `<i class="fas ${locked ? "fa-lock" : "fa-lock-open"}"></i>`;
+            dom.quickLockBtn.setAttribute("aria-label", label);
+            dom.quickLockBtn.setAttribute("title", label);
+            dom.quickLockBtn.innerHTML = `<span class="hx-i">${icon(locked ? "lock" : "unlock")}</span>`;
         }
+    }
+
+    function showQuick(element, visible) {
+        if (!element) return;
+        element.hidden = !visible;
     }
 
     function syncUi(snapshot) {
         currentState = snapshot;
-        resetDrawerShellScroll();
-        if (snapshot.sessionState !== "lobby") {
-            startPending = false;
-        }
-        if (
-            flowPending
-            && (snapshot.sessionState !== pendingFlowState || snapshot.phase !== pendingFlowPhase)
-        ) {
+        if (snapshot.sessionState !== "lobby") startPending = false;
+        if (flowPending && (snapshot.sessionState !== pendingFlowState || snapshot.phase !== pendingFlowPhase)) {
             flowPending = false;
             pendingFlowState = "";
             pendingFlowPhase = "";
@@ -191,57 +158,41 @@ document.addEventListener("DOMContentLoaded", () => {
         checkboxControls.forEach(([element, key]) => {
             element.checked = Boolean(snapshot.settings?.[key]);
         });
-
-        selectControls.forEach(([element, key]) => {
-            element.value = snapshot.settings?.[key] || element.value;
-            element._refreshBootstrapSelect && element._refreshBootstrapSelect();
+        dom.choiceGroups.forEach((group) => {
+            const key = group.dataset.settingChoice;
+            const value = String(snapshot.settings?.[key] ?? "");
+            group.querySelectorAll("[data-value]").forEach((button) => {
+                const active = button.dataset.value === value;
+                button.setAttribute("aria-checked", active ? "true" : "false");
+                button.tabIndex = active || (!value && button === group.firstElementChild) ? 0 : -1;
+            });
         });
-
         dom.themeButtons.forEach((button) => {
             const active = button.dataset.themeKey === (snapshot.settings?.theme_key || "aurora");
             button.classList.toggle("is-active", active);
+            button.setAttribute("aria-pressed", active ? "true" : "false");
         });
-
-        if (dom.autoMode) {
-            dom.autoMode.checked = Boolean(snapshot.settings?.autoplay);
-        }
-        if (dom.maxParticipants) {
-            dom.maxParticipants.value = String(snapshot.settings?.max_participants || 100);
-        }
-        if (dom.sfxVolumeSlider && snapshot.settings?.sfx_volume != null) {
-            const vol = Number(snapshot.settings.sfx_volume);
-            dom.sfxVolumeSlider.value = vol;
-            if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${vol}%`;
-            if (typeof setSfxVolume === "function") setSfxVolume(vol);
+        if (dom.autoMode) dom.autoMode.checked = Boolean(snapshot.settings?.autoplay);
+        if (dom.maxParticipants && document.activeElement !== dom.maxParticipants) {
+            dom.maxParticipants.value = String(snapshot.settings?.max_participants || 200);
         }
 
-        const showLobbyActions = snapshot.sessionState === "lobby";
-        const showFlowAction = snapshot.sessionState === "question" || snapshot.sessionState === "reveal";
-
-        if (dom.quickStartBtn) {
-            dom.quickStartBtn.hidden = !showLobbyActions || startPending;
-            dom.quickStartBtn.disabled = startPending;
-            dom.quickStartBtn.style.display = !showLobbyActions || startPending ? "none" : "";
-        }
-        if (dom.quickLockBtn) {
-            dom.quickLockBtn.hidden = !showLobbyActions;
-            dom.quickLockBtn.style.display = showLobbyActions ? "" : "none";
-        }
+        const inLobby = snapshot.sessionState === "lobby";
+        const inFlow = snapshot.sessionState === "question" || snapshot.sessionState === "reveal";
+        showQuick(dom.quickStartBtn, inLobby && !startPending);
+        if (dom.quickStartBtn) dom.quickStartBtn.disabled = startPending;
+        showQuick(dom.quickLockBtn, inLobby);
+        showQuick(dom.quickFlowBtn, inFlow);
         if (dom.quickFlowBtn) {
-            dom.quickFlowBtn.hidden = !showFlowAction;
-            dom.quickFlowBtn.disabled = !showFlowAction || flowPending;
-            dom.quickFlowBtn.style.display = showFlowAction ? "" : "none";
-            const isQuestionFlow = snapshot.sessionState === "question";
-            const flowLabel = isQuestionFlow ? copy.skip : copy.next;
-            const flowIcon = isQuestionFlow ? "fa-forward-fast" : "fa-forward-step";
-            dom.quickFlowBtn.setAttribute("aria-label", flowLabel);
-            dom.quickFlowBtn.setAttribute("title", flowLabel);
-            dom.quickFlowBtn.innerHTML = `<i class="fas ${flowIcon}"></i><span>${flowLabel}</span>`;
+            const isQuestion = snapshot.sessionState === "question";
+            const intro = isQuestion && ["intro", "countdown", "question"].includes(snapshot.phase);
+            const label = intro ? copy.skip : isQuestion ? tr("revealLabel", "Cavabı göstər") : copy.next;
+            dom.quickFlowBtn.disabled = !inFlow || flowPending;
+            dom.quickFlowBtn.setAttribute("aria-label", label);
+            dom.quickFlowBtn.setAttribute("title", label);
+            dom.quickFlowBtn.innerHTML = `<span class="hx-i">${icon(intro ? "skip" : isQuestion ? "eye" : "next")}</span><span>${label}</span>`;
         }
-        if (dom.quickActions) {
-            dom.quickActions.hidden = !showLobbyActions && !showFlowAction;
-            dom.quickActions.style.display = !showLobbyActions && !showFlowAction ? "none" : "";
-        }
+        if (dom.quickActions) dom.quickActions.hidden = !inLobby && !inFlow;
 
         setLockButton(snapshot.isLocked);
         syncingControls = false;
@@ -249,24 +200,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function updateSettings(updates) {
         const result = await controller.updateSettings(updates);
-        if (!result?.ok) {
-            syncUi(controller.getState());
-        }
+        if (!result?.ok) syncUi(controller.getState());
         return result;
     }
 
     checkboxControls.forEach(([element, key]) => {
         element.addEventListener("change", () => {
             if (syncingControls) return;
-            resetDrawerShellScroll();
             updateSettings({ [key]: Boolean(element.checked) });
         });
     });
 
-    selectControls.forEach(([element, key]) => {
-        element.addEventListener("change", () => {
-            if (syncingControls) return;
-            updateSettings({ [key]: element.value });
+    dom.choiceGroups.forEach((group) => {
+        const key = group.dataset.settingChoice;
+        const buttons = () => Array.from(group.querySelectorAll("[data-value]"));
+        group.addEventListener("click", (event) => {
+            const button = event.target.closest("[data-value]");
+            if (!button || syncingControls) return;
+            buttons().forEach((item) => item.setAttribute("aria-checked", item === button ? "true" : "false"));
+            updateSettings({ [key]: button.dataset.value });
+        });
+        group.addEventListener("keydown", (event) => {
+            if (!["ArrowRight", "ArrowLeft", "ArrowDown", "ArrowUp"].includes(event.key)) return;
+            event.preventDefault();
+            const list = buttons();
+            const index = list.indexOf(document.activeElement);
+            const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+            const next = list[(index + step + list.length) % list.length];
+            next?.focus();
+            next?.click();
         });
     });
 
@@ -274,35 +236,32 @@ document.addEventListener("DOMContentLoaded", () => {
         const initVol = Number(currentState.settings?.sfx_volume ?? 70);
         dom.sfxVolumeSlider.value = initVol;
         if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${initVol}%`;
-        if (typeof setSfxVolume === "function") setSfxVolume(initVol);
-
         dom.sfxVolumeSlider.addEventListener("input", () => {
             const vol = Number(dom.sfxVolumeSlider.value) || 0;
             if (dom.sfxVolumeLabel) dom.sfxVolumeLabel.textContent = `${vol}%`;
-            if (typeof setSfxVolume === "function") setSfxVolume(vol);
+            if (typeof window.setSfxVolume === "function") window.setSfxVolume(vol);
         });
         dom.sfxVolumeSlider.addEventListener("change", () => {
             if (syncingControls) return;
-            const vol = Number(dom.sfxVolumeSlider.value) || 0;
-            updateSettings({ sfx_volume: vol });
+            updateSettings({ sfx_volume: Number(dom.sfxVolumeSlider.value) || 0 });
         });
     }
 
     dom.themeButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-            updateSettings({ theme_key: button.dataset.themeKey || "aurora" });
-        });
+        button.addEventListener("click", () => updateSettings({ theme_key: button.dataset.themeKey || "aurora" }));
     });
 
-    dom.sidebarToggle?.addEventListener("click", toggleSidebar);
     dom.sidebarEdgeToggle?.addEventListener("click", toggleSidebar);
     dom.sidebarBackdrop?.addEventListener("click", () => setPresentationSidebarOpen(false));
-
     dom.settingsBtn?.addEventListener("click", () => setDrawerOpen(true));
-    dom.closeSettingsBtn?.addEventListener("click", () => setDrawerOpen(false));
+    dom.closeSettingsBtn?.addEventListener("click", () => {
+        setDrawerOpen(false);
+        dom.settingsBtn?.focus();
+    });
     dom.drawerBackdrop?.addEventListener("click", () => setDrawerOpen(false));
     dom.lockLobbyBtn?.addEventListener("click", () => controller.toggleLock(!currentState.isLocked));
     dom.quickLockBtn?.addEventListener("click", () => controller.toggleLock(!currentState.isLocked));
+
     dom.quickStartBtn?.addEventListener("click", async () => {
         if (startPending) return;
         startPending = true;
@@ -318,24 +277,22 @@ document.addEventListener("DOMContentLoaded", () => {
             syncUi(currentState);
         }
     });
+
     dom.quickFlowBtn?.addEventListener("click", async () => {
         if (flowPending) return;
         const actionState = currentState.sessionState;
         if (actionState !== "question" && actionState !== "reveal") return;
-
         flowPending = true;
         pendingFlowState = actionState;
         pendingFlowPhase = currentState.phase || "";
         syncUi(currentState);
-
         try {
-            const shouldSkipIntro = actionState === "question"
-                && ["intro", "countdown", "question"].includes(currentState.phase);
-            const result = shouldSkipIntro
+            const skipIntro = actionState === "question" && ["intro", "countdown", "question"].includes(currentState.phase);
+            const result = skipIntro
                 ? await controller.skipQuestionIntro?.()
                 : actionState === "question"
-                    ? await controller.revealQuestion?.()
-                    : await controller.nextQuestion?.();
+                  ? await controller.revealQuestion?.()
+                  : await controller.nextQuestion?.();
             if (!result?.ok) {
                 flowPending = false;
                 pendingFlowState = "";
@@ -349,6 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
             syncUi(currentState);
         }
     });
+
     dom.fullscreenBtn?.addEventListener("click", async () => {
         const root = document.documentElement;
         if (!root?.requestFullscreen) return;
@@ -359,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             await root.requestFullscreen({ navigationUI: "hide" });
         } catch (error) {
-            console.debug("live host fullscreen skipped", error);
+            /* brauzer tam ekranı rədd etdi */
         }
     });
 
@@ -367,26 +325,17 @@ document.addEventListener("DOMContentLoaded", () => {
         this.select();
     });
     dom.maxParticipants?.addEventListener("blur", () => {
-        const cap = Number((typeof CONFIG !== "undefined" ? CONFIG.maxParticipantsCap : 100) || 100);
+        const cap = Number((typeof CONFIG !== "undefined" ? CONFIG.maxParticipantsCap : 200) || 200);
         let value = parseInt(dom.maxParticipants.value, 10) || 1;
         value = Math.max(1, Math.min(value, cap));
         dom.maxParticipants.value = String(value);
-        if (!syncingControls) {
-            updateSettings({ max_participants: value });
-        }
+        if (!syncingControls) updateSettings({ max_participants: value });
     });
     dom.maxParticipants?.addEventListener("keydown", (event) => {
-        if ([8, 46, 9, 27, 13, 37, 38, 39, 40].includes(event.keyCode)) return;
-        if ((event.ctrlKey || event.metaKey) && [65, 67, 86, 88].includes(event.keyCode)) return;
-        if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) return;
+        if (["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        if ((event.ctrlKey || event.metaKey) && ["a", "c", "v", "x"].includes(String(event.key).toLowerCase())) return;
+        if (/^\d$/.test(event.key)) return;
         event.preventDefault();
-    });
-
-    dom.playersList?.addEventListener("click", async (event) => {
-        const button = event.target.closest("[data-remove-player-id]");
-        if (!button || currentState.sessionState !== "lobby") return;
-        button.disabled = true;
-        await controller.removePlayer(button.dataset.removePlayerId);
     });
 
     document.addEventListener("keydown", (event) => {
@@ -407,7 +356,6 @@ document.addEventListener("DOMContentLoaded", () => {
             setCollapsed(window.localStorage.getItem("liveHostSidebarCollapsed") === "1");
         }
     } catch (error) {
-        console.debug("live host sidebar state load skipped", error);
         syncSidebarButtons();
     }
 
