@@ -19,13 +19,13 @@ import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamQuestion, ExamQuestionOption
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType, RoleScopeType
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 DEFAULT_PASSWORD = "LiveDemo-2026!"
 TEACHER_USERNAME = "live_demo_teacher"
@@ -82,7 +82,8 @@ class Command(BaseCommand):
         if not settings.DEBUG and not options["force"]:
             raise CommandError("DEBUG söndürülüb — istehsal bazası ola bilər. Əmin olsanız --i-know-this-is-not-prod.")
         User = get_user_model()
-        with bypass_rls(), transaction.atomic():
+        # Request-dan kənar DB giriş nöqtəsi (FAZA4): layihə standartı rls_worker_atomic + bypass.
+        with rls_worker_atomic(), bypass_rls():
             teacher, created = User.objects.get_or_create(
                 username=TEACHER_USERNAME,
                 defaults={"email": "live-demo-teacher@example.invalid", "first_name": "Demo", "last_name": "Müəllim"},
