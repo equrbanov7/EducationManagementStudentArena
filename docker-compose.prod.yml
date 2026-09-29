@@ -1161,6 +1161,8 @@ services:
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/nginx/certs:/etc/nginx/certs:ro
+      # Let's Encrypt HTTP-01 webroot (prod-cert.yml issue-http/renew; APP_DIR-dən kənar — rsync silmir).
+      - ${ACME_WEBROOT:-/home/wcu/letsencrypt/www}:/var/www/acme:ro
       - static_data:/var/www/staticfiles:ro
       - media_data:/var/www/media:ro
     depends_on:
