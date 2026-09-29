@@ -12,6 +12,7 @@ from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import serialize_top, serialize_top_before_question
 from apps.live_exam.services import advance_to_next
+from apps.live_exam.tests.lx_be_support import grant_host_permission
 from apps.live_exam.transport import build_player_reveal_payload, build_reveal_payload
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
@@ -42,6 +43,8 @@ class LiveScorePayloadIntegrityTest(TestCase):
         self.teacher.profile.organization_type = self.org.org_type
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
         self.host_client.login(username="repro_teacher", password="StrongPass123!")
+        # LX-SEC/LX-BE: host state_json indi digər host endpoint-ləri kimi RBAC tələb edir.
+        grant_host_permission(self.host_client, self.teacher, self.org)
 
     def _activate_question(self, session, question, idx):
         now = timezone.now()

@@ -7,7 +7,7 @@
             <h2>{% trans "settings_drawer_title" context "live_exam.host_settings" %}</h2>
         </div>
         <button id="closeSettingsBtn" class="control-icon-btn" type="button" aria-label="{% trans 'settings_drawer_close' context 'live_exam.host_settings' %}">
-            <i class="fas fa-xmark"></i>
+            <span class="hx-i" data-icon="close"></span>
         </button>
     </div>
 
@@ -54,38 +54,30 @@
                     </button>
                 </div>
             </div>
+            {% comment %}2026-09-29 (LX-FE-STAGE): native <select> əvəzinə seqment düymələri (bu səhifədə
+            bootstrap_select.js yüklənmir → əvvəl native select görünürdü). role=radiogroup, klaviatura ilə işləyir.{% endcomment %}
             <div class="host-settings-item host-settings-item--field">
                 <div class="host-settings-item__copy">
-                    <strong>{% trans "language_label" context "live_exam.host_settings" %}</strong>
+                    <strong id="settingLanguageLabel">{% trans "language_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "language_help" context "live_exam.host_settings" %}</span>
                 </div>
-                <div class="bootstrap-single-select">
-                    <select id="settingLanguage"
-                            class="host-settings-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select
-                            aria-label="{% trans 'language_label' context 'live_exam.host_settings' %}">
-                        <option value="system">{% trans "language_system" context "live_exam.host_settings" %}</option>
-                        <option value="az">{% trans "language_az" context "live_exam.host_settings" %}</option>
-                        <option value="en">{% trans "language_en" context "live_exam.host_settings" %}</option>
-                        <option value="ru">{% trans "language_ru" context "live_exam.host_settings" %}</option>
-                        <option value="tr">{% trans "language_tr" context "live_exam.host_settings" %}</option>
-                    </select>
+                <div class="hx-seg hx-seg--wrap" role="radiogroup" aria-labelledby="settingLanguageLabel" data-setting-choice="language">
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="system">{% trans "language_system" context "live_exam.host_settings" %}</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="az">AZ</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="en">EN</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="ru">RU</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="tr">TR</button>
                 </div>
             </div>
             <div class="host-settings-item host-settings-item--field">
                 <div class="host-settings-item__copy">
-                    <strong>{% trans "lobby_music_label" context "live_exam.host_settings" %}</strong>
+                    <strong id="settingLobbyMusicLabel">{% trans "lobby_music_label" context "live_exam.host_settings" %}</strong>
                     <span>{% trans "lobby_music_help" context "live_exam.host_settings" %}</span>
                 </div>
-                <div class="bootstrap-single-select">
-                    <select id="settingLobbyMusic"
-                            class="host-settings-select bootstrap-single-select__native js-bootstrap-single-select"
-                            data-bootstrap-select
-                            aria-label="{% trans 'lobby_music_label' context 'live_exam.host_settings' %}">
-                        <option value="original">{% trans "music_original" context "live_exam.host_settings" %}</option>
-                        <option value="focus">{% trans "music_focus" context "live_exam.host_settings" %}</option>
-                        <option value="silent">{% trans "music_silent" context "live_exam.host_settings" %}</option>
-                    </select>
+                <div class="hx-seg" role="radiogroup" aria-labelledby="settingLobbyMusicLabel" data-setting-choice="lobby_music">
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="original">{% trans "music_original" context "live_exam.host_settings" %}</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="focus">{% trans "music_focus" context "live_exam.host_settings" %}</button>
+                    <button type="button" class="hx-seg__btn" role="radio" aria-checked="false" data-value="silent">{% trans "music_silent" context "live_exam.host_settings" %}</button>
                 </div>
             </div>
             <div class="host-settings-item host-settings-item--field">
@@ -111,6 +103,9 @@
                 <span class="host-switch" aria-hidden="true"><span></span></span>
             </label>
         </section>
+
+        {# Cavab rejimi (çox seçimli bal, yazı səhvlərinə dözüm, yazılı cavablı suallar) — host_lobby/typed_drawer.js doldurur. #}
+        <section class="host-settings-group host-settings-group--answers" id="hostAnswerModeSection" hidden></section>
 
         <section class="host-settings-group">
             <div class="host-settings-group__title">{% trans "group_hosting" context "live_exam.host_settings" %}</div>

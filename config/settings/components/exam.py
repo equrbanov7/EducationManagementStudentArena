@@ -183,7 +183,11 @@ REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
             "/accounts/login/,/accounts/register/,/accounts/verify-code/,"
             # Audit 2026-09-28 AD-04: /accounts/{send,verify,resend}-otp/
             # marşrutları silinib (parolsuz OTP API), siyahıdan çıxarıldı.
-            "/accounts/resend-code/,/accounts/password-reset/,/accounts/reset/"
+            "/accounts/resend-code/,/accounts/password-reset/,/accounts/reset/,"
+            # 2026-09-29 (LX-BE yük testi): canlı imtahanın ANONİM oyunçu POST-ları — eyni NAT
+            # İP + eyni telefon modeli bir kilidə düşürdü (join p95 7.1 s). Öz limitləri və DB
+            # sətir kilidləri var; host (/live/host/) yolları növbədə qalır.
+            "/live/join/,/live/play/,/live/wait/"
         ),
     ).split(",")
     if prefix.strip()

@@ -1,0 +1,367 @@
+/* LX-FE-PLAYER (2026-09-29): iştirakçı ekranı — bağlantı zolağı, toast, ümumi tipoqrafiya,
+ * düymələr, spinner/nöqtələr, klaviatura və yüksək kontrast rejimləri, animasiyalar, media
+ * sorğuları (_base.css-dən ayrılıb — 600 sətir limiti). */
+
+/* ── Bağlantı zolağı və toast ── */
+.lxp-net {
+    position: fixed;
+    bottom: calc(84px + var(--lxp-safe-bottom));
+    left: 50%;
+    z-index: 30;
+    max-width: calc(100vw - 32px);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    text-align: center;
+    transform: translateX(-50%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+    animation: lxpRise 0.3s ease both;
+}
+
+.lxp-net[data-kind="reconnecting"] {
+    background: #fef3c7;
+    color: #78350f;
+}
+
+.lxp-net[data-kind="offline"] {
+    background: #fee2e2;
+    color: var(--lxp-bad-deep);
+}
+
+.lxp-net[data-kind="back"] {
+    background: #dcfce7;
+    color: var(--lxp-good-deep);
+}
+
+.lxp-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(136px + var(--lxp-safe-bottom));
+    z-index: 35;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 11px 16px;
+    border-radius: 14px;
+    background: #0f172a;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.35;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translate(-50%, 12px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.lxp-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.lxp-toast[data-kind="error"] {
+    background: var(--lxp-bad-deep);
+}
+
+.lxp-toast[data-kind="warn"] {
+    background: #78350f;
+}
+
+.lxp-fx {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* ── Ümumi tipoqrafiya və komponentlər ── */
+.lxp-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    color: var(--lxp-muted);
+    font-weight: 800;
+    font-size: 0.84rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.lxp-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(253, 224, 71, 0.16);
+    border: 1px solid rgba(253, 224, 71, 0.42);
+    color: #fef08a;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.lxp-title {
+    margin: 0;
+    font: 800 clamp(1.7rem, 7.6vw, 2.6rem)/1.08 var(--lxp-display);
+    letter-spacing: -0.02em;
+    text-align: center;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.lxp-sub {
+    margin: 8px 0 0;
+    color: var(--lxp-muted);
+    font-size: clamp(0.98rem, 4.2vw, 1.12rem);
+    line-height: 1.45;
+    text-align: center;
+    text-wrap: balance;
+}
+
+.lxp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 54px;
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 16px;
+    font: 800 1.05rem/1.1 var(--lxp-font);
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+.lxp-btn svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+}
+
+.lxp-btn--primary {
+    background: var(--lxp-cta);
+    color: var(--lxp-cta-ink);
+    box-shadow: 0 5px 0 #b58a00, 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.lxp-btn--primary:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #b58a00, 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.lxp-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    box-shadow: none;
+}
+
+.lxp-spinner {
+    display: inline-block;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 4px solid rgba(15, 23, 42, 0.16);
+    border-top-color: currentColor;
+    animation: lxpSpin 0.8s linear infinite;
+}
+
+.lxp-spinner--lg {
+    width: 54px;
+    height: 54px;
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+}
+
+.lxp-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.lxp-dots span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    animation: lxpDot 1.2s ease-in-out infinite;
+}
+
+.lxp-dots span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.lxp-dots span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.lxp-dots--lg span {
+    width: 14px;
+    height: 14px;
+}
+
+.lxp-idle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 8px;
+    text-align: center;
+}
+
+.lxp-idle .lxp-btn {
+    margin-top: 10px;
+}
+
+/* ── Klaviatura açıq (yazılı cavab): alt panel gizlənir, yer açılır ── */
+body.lxp-kb-open .lxp-me {
+    display: none;
+}
+
+/* ── Host «kontrastı artır» parametri ── */
+.lxp-high-contrast {
+    --lxp-muted: #ffffff;
+    --lxp-panel: rgba(0, 0, 0, 0.7);
+    --lxp-panel-strong: rgba(0, 0, 0, 0.85);
+    --lxp-line: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Animasiyalar (yalnız transform/opacity) ── */
+@keyframes lxpViewIn {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes lxpViewOut {
+    to {
+        opacity: 0;
+        transform: translate3d(0, -12px, 0) scale(0.98);
+    }
+}
+
+@keyframes lxpPulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes lxpRing {
+    0% {
+        box-shadow: 0 0 0 0 rgba(253, 224, 71, 0.55);
+    }
+    70%,
+    100% {
+        box-shadow: 0 0 0 12px rgba(253, 224, 71, 0);
+    }
+}
+
+@keyframes lxpBump {
+    40% {
+        transform: scale(1.18);
+    }
+}
+
+@keyframes lxpRise {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 12px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+@keyframes lxpSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes lxpDot {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lxp-view.is-entering,
+    .lxp-view.is-leaving,
+    .lxp-timer.is-danger,
+    .lxp-sound[data-state="locked"],
+    .lxp-dots span,
+    .lxp-net,
+    .lxp-me__score strong.is-bumped {
+        animation: none;
+    }
+
+    .lxp-timebar {
+        display: none;
+    }
+
+    .lxp-bg::after,
+    .lxp-toast {
+        transition: none;
+    }
+}
+
+/* Planşet/geniş ekran: bir az daha iri tipoqrafiya, səhnə mərkəzdə. */
+@media (min-width: 700px) {
+    .lxp-shell {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .lxp-me__name {
+        font-size: 1.15rem;
+    }
+}
+
+/* Alçaq ekran (landşaft telefon): başlıq/alt panel yığcam. */
+@media (max-height: 480px) {
+    .lxp-top {
+        min-height: 44px;
+    }
+
+    .lxp-timer {
+        width: 44px;
+        height: 44px;
+        font-size: 1.15rem;
+    }
+
+    .lxp-me {
+        min-height: 48px;
+        padding: 4px 10px 4px 4px;
+    }
+}
+
+/* Kiçik avatar şəkilləri (data-URL <img>, bax utils.miniAvatar) */
+.lxp-mini,
+.lxp-lrow__art,
+.lxp-podium__img,
+.lxp-me__img {
+    display: block;
+    flex: 0 0 auto;
+    border-radius: 28%;
+    object-fit: cover;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}

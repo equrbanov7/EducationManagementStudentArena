@@ -38198,7 +38198,7 @@ msgstr "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
 #: apps/live_exam/views/api.py:199
 msgctxt "live_exam.consumer.error"
 msgid "rate_limited"
-msgstr "Format: sayı/süre. Örn: 100/1h = saatte 100 istek."
+msgstr "Çok fazla istek. Lütfen biraz bekleyip tekrar deneyin."
 
 #: apps/live_exam/consumers.py:245
 msgctxt "live_exam.consumer.error"
@@ -38238,7 +38238,7 @@ msgstr "Aktif soru bulunamadı."
 #: apps/live_exam/scoring.py:165
 msgctxt "live_exam.consumer.error"
 msgid "question_not_active"
-msgstr "Soruyu Düzenle"
+msgstr "Bu soru artık etkin değil."
 
 #: apps/live_exam/scoring.py:178
 msgctxt "live_exam.consumer.error"
@@ -38248,12 +38248,12 @@ msgstr "Zaten cevaplandı"
 #: apps/live_exam/scoring.py:194
 msgctxt "live_exam.consumer.error"
 msgid "question_not_accepting_answers"
-msgstr "Şu anda bekleyen cevap yok."
+msgstr "Bu soru şu anda cevap kabul etmiyor."
 
 #: apps/live_exam/scoring.py:205
 msgctxt "live_exam.consumer.error"
 msgid "submission_outside_active_window"
-msgstr "Yanıt gönderilemedi."
+msgstr "Bu soru için süre doldu."
 
 #: apps/live_exam/scoring.py:215
 msgctxt "live_exam.consumer.error"
@@ -39193,7 +39193,7 @@ msgstr "Takma ad"
 #: apps/live_exam/templates/liveExam/wait_room.html:119
 msgctxt "live_exam.wait_room"
 msgid "nickname_placeholder"
-msgstr "Takma adını gir"
+msgstr "Takma adını yaz"
 
 #: apps/live_exam/templates/liveExam/wait_room.html:132
 msgctxt "live_exam.wait_room"
@@ -39332,7 +39332,7 @@ msgstr "Cevap *"
 #: apps/live_exam/views/player/join.py:232
 msgctxt "live_exam.view.message"
 msgid "game_already_started"
-msgstr "Bu deneme zaten sonlandırılmış ve geri yüklenemez."
+msgstr "Oyun zaten başladı."
 
 #: apps/live_exam/views/host/game.py:75
 msgctxt "live_exam.view.message"
@@ -83477,3 +83477,1066 @@ msgctxt "core.middleware.concurrency_limit.message"
 msgid ""
 "Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin."
 msgstr "Sunucu şu anda çok yoğun. Lütfen birkaç saniye sonra tekrar deneyin."
+
+msgctxt "live_exam.view.message"
+msgid "typed_questions_invalid"
+msgstr "Yazılı cevap ayarları hatalı biçimde."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_in_exam"
+msgstr "Seçilen soru bu sınava ait değil."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_eligible"
+msgstr ""
+"{index}. soru yazılı cevaba uygun değil: yalnızca tek doğru seçeneği (≤ 60 "
+"karakter) olan veya kısa cevaplı (1–10 satır) sorular seçilebilir."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_many"
+msgstr "Bir soru için en fazla 10 kabul edilen cevap olabilir."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_long"
+msgstr "Kabul edilen cevap 60 karakterden uzun olamaz."
+
+msgctxt "live_exam.consumer.error"
+msgid "answer_retry"
+msgstr "Cevabınız kaydedilmedi, lütfen tekrar gönderin."
+
+msgctxt "live_exam.view.message"
+msgid "removed_by_host"
+msgstr "Öğretmen seni bu oyundan çıkardı."
+
+msgctxt "live_exam.view.message"
+msgid "profile_changes_lobby_only"
+msgstr "Rumuz ve avatar yalnızca oyun başlamadan önce değiştirilebilir."
+
+msgctxt "live_exam.view.message"
+msgid "nickname_locked"
+msgstr "Lobi kilitli — rumuz değiştirilemez."
+
+msgctxt "live_exam.view.message"
+msgid "reactions_lobby_only"
+msgstr "Tepkiler yalnızca bekleme odasında gönderilebilir."
+
+msgctxt "live_exam.view.message"
+msgid "ai_summary_invalid_request"
+msgstr "Yapay zekâ özeti yalnızca sonuç sayfasından istenebilir."
+
+msgctxt "live_exam.results.export"
+msgid "export_nickname"
+msgstr "Oyuncu"
+
+msgctxt "live_exam.results.export"
+msgid "export_total_score"
+msgstr "Toplam puan"
+
+msgctxt "live_exam.results.export"
+msgid "export_question_number"
+msgstr "Soru no."
+
+msgctxt "live_exam.results.export"
+msgid "export_question"
+msgstr "Soru"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer"
+msgstr "Cevap"
+
+msgctxt "live_exam.results.export"
+msgid "export_correct"
+msgstr "Doğru"
+
+msgctxt "live_exam.results.export"
+msgid "export_points"
+msgstr "Puan"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer_ms"
+msgstr "Cevap süresi (ms)"
+
+msgctxt "live_exam.results.export"
+msgid "export_yes"
+msgstr "Evet"
+
+msgctxt "live_exam.results.export"
+msgid "export_no"
+msgstr "Hayır"
+
+msgctxt "live_exam.player"
+msgid "page_title"
+msgstr "Canlı oyun"
+
+msgctxt "live_exam.player"
+msgid "announce_answers_open"
+msgstr "Cevapla! {seconds} saniye"
+
+msgctxt "live_exam.player"
+msgid "announce_question"
+msgstr "Soru {index}: {text}"
+
+msgctxt "live_exam.player"
+msgid "answer_locked"
+msgstr "Cevabın alındı!"
+
+msgctxt "live_exam.player"
+msgid "answer_sending"
+msgstr "Gönderiliyor…"
+
+msgctxt "live_exam.player"
+msgid "answers_label"
+msgstr "Cevap seçenekleri"
+
+msgctxt "live_exam.player"
+msgid "collapse_question"
+msgstr "Daralt"
+
+msgctxt "live_exam.player"
+msgid "connecting_game"
+msgstr "Oyuna bağlanılıyor…"
+
+msgctxt "live_exam.player"
+msgid "error_send"
+msgstr "Cevap gönderilemedi. Tekrar dene."
+
+msgctxt "live_exam.player"
+msgid "error_send_offline"
+msgstr "Cevap gönderilemedi — internet bağlantını kontrol et."
+
+msgctxt "live_exam.player"
+msgid "expand_question"
+msgstr "Devamını oku"
+
+msgctxt "live_exam.player"
+msgid "final_keep_going"
+msgstr "Her oyun seni daha güçlü yapar — bir dahaki sefere podyuma!"
+
+msgctxt "live_exam.player"
+msgid "final_podium_title"
+msgstr "Podyum"
+
+msgctxt "live_exam.player"
+msgid "final_second"
+msgstr "Gümüş madalya!"
+
+msgctxt "live_exam.player"
+msgid "final_third"
+msgstr "Bronz madalya!"
+
+msgctxt "live_exam.player"
+msgid "final_title"
+msgstr "Oyun bitti!"
+
+msgctxt "live_exam.player"
+msgid "final_well_played"
+msgstr "Harika oyundu, {name}!"
+
+msgctxt "live_exam.player"
+msgid "final_winner"
+msgstr "Kazanan sensin!"
+
+msgctxt "live_exam.player"
+msgid "final_your_place"
+msgstr "Sıralaman"
+
+msgctxt "live_exam.player"
+msgid "gap_line"
+msgstr "{name} senden {gap} puan önde"
+
+msgctxt "live_exam.player"
+msgid "gap_tie"
+msgstr "{name} ile puanınız eşit"
+
+msgctxt "live_exam.player"
+msgid "get_ready_body"
+msgstr "İlk soru geliyor…"
+
+msgctxt "live_exam.player"
+msgid "get_ready_title"
+msgstr "Hazır ol!"
+
+msgctxt "live_exam.player"
+msgid "intro_hint_main_screen"
+msgstr "Soruyu büyük ekranda gör"
+
+msgctxt "live_exam.player"
+msgid "intro_unlocking"
+msgstr "Cevaplar {seconds} sn sonra açılıyor"
+
+msgctxt "live_exam.player"
+msgid "last_question_note"
+msgstr "Bu son soruydu — final sonuçları geliyor!"
+
+msgctxt "live_exam.player"
+msgid "multi_badge"
+msgstr "Birden fazla cevap"
+
+msgctxt "live_exam.player"
+msgid "multi_counter"
+msgstr "{count}/{max} seçildi"
+
+msgctxt "live_exam.player"
+msgid "multi_hint"
+msgstr "En fazla {max} cevap seç, sonra “Gönder”e dokun"
+
+msgctxt "live_exam.player"
+msgid "multi_max_reached"
+msgstr "En fazla {max} seçenek seçebilirsin"
+
+msgctxt "live_exam.player"
+msgid "net_back"
+msgstr "Tekrar çevrimiçi!"
+
+msgctxt "live_exam.player"
+msgid "net_offline"
+msgstr "İnternet yok — bağlantı bekleniyor"
+
+msgctxt "live_exam.player"
+msgid "net_reconnecting"
+msgstr "Yeniden bağlanılıyor…"
+
+msgctxt "live_exam.player"
+msgid "next_question_soon"
+msgstr "Sıradaki soru birazdan…"
+
+msgctxt "live_exam.player"
+msgid "player_fallback"
+msgstr "Oyuncu"
+
+msgctxt "live_exam.player"
+msgid "points_short"
+msgstr "puan"
+
+msgctxt "live_exam.player"
+msgid "question_counter"
+msgstr "Soru {index} / {total}"
+
+msgctxt "live_exam.player"
+msgid "question_hidden_body"
+msgstr "Soru büyük ekranda — oradan oku"
+
+msgctxt "live_exam.player"
+msgid "question_short"
+msgstr "{index}/{total}"
+
+msgctxt "live_exam.player"
+msgid "rank_aria"
+msgstr "Sıran: {rank}"
+
+msgctxt "live_exam.player"
+msgid "rank_down"
+msgstr "{count} basamak aşağı"
+
+msgctxt "live_exam.player"
+msgid "rank_leader"
+msgstr "Liderdesin! Böyle devam 👑"
+
+msgctxt "live_exam.player"
+msgid "rank_line"
+msgstr "{place} sıradasın"
+
+msgctxt "live_exam.player"
+msgid "rank_up"
+msgstr "{count} basamak yukarı"
+
+msgctxt "live_exam.player"
+msgid "rejoin_game"
+msgstr "Tekrar katıl"
+
+msgctxt "live_exam.player"
+msgid "removed_body"
+msgstr ""
+"Oyuncu profilin bulunamadı — öğretmen seni çıkarmış ya da oyun kapanmış "
+"olabilir."
+
+msgctxt "live_exam.player"
+msgid "removed_title"
+msgstr "Bu oyunda değilsin"
+
+msgctxt "live_exam.player"
+msgid "result_accepted"
+msgstr "Doğru cevap"
+
+msgctxt "live_exam.player"
+msgid "result_correct"
+msgstr "Doğru!"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answer"
+msgstr "Doğru cevap"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answers"
+msgstr "Doğru cevaplar"
+
+msgctxt "live_exam.player"
+msgid "result_missed"
+msgstr "Bu soruyu kaçırdın"
+
+msgctxt "live_exam.player"
+msgid "result_no_answer"
+msgstr "Cevap verilmedi"
+
+msgctxt "live_exam.player"
+msgid "result_no_points"
+msgstr "Bu sefer puan yok"
+
+msgctxt "live_exam.player"
+msgid "result_partial"
+msgstr "Kısmen doğru"
+
+msgctxt "live_exam.player"
+msgid "result_partial_detail"
+msgstr "{correct}/{total} doğru"
+
+msgctxt "live_exam.player"
+msgid "result_speed"
+msgstr "{seconds} sn"
+
+msgctxt "live_exam.player"
+msgid "result_wrong"
+msgstr "Yanlış"
+
+msgctxt "live_exam.player"
+msgid "result_wrong_picked"
+msgstr "{count} yanlış seçim"
+
+msgctxt "live_exam.player"
+msgid "scoreboard_title"
+msgstr "Liderler"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_off"
+msgstr "Sesi kapat"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_on"
+msgstr "Sesi aç"
+
+msgctxt "live_exam.player"
+msgid "stat_avg_time"
+msgstr "Ortalama cevap süresi"
+
+msgctxt "live_exam.player"
+msgid "stat_best_streak"
+msgstr "En uzun seri"
+
+msgctxt "live_exam.player"
+msgid "stat_correct"
+msgstr "Doğru cevap"
+
+msgctxt "live_exam.player"
+msgid "streak_label"
+msgstr "Üst üste {count} doğru!"
+
+msgctxt "live_exam.player"
+msgid "submit_answer"
+msgstr "Cevabı gönder"
+
+msgctxt "live_exam.player"
+msgid "tap_for_sound"
+msgstr "Ses için ekrana dokun"
+
+msgctxt "live_exam.player"
+msgid "time_up_body"
+msgstr "Bu soruyu cevaplamadın. Sonrakinde bol şans!"
+
+msgctxt "live_exam.player"
+msgid "time_up_title"
+msgstr "Süre doldu!"
+
+msgctxt "live_exam.player"
+msgid "typed_badge"
+msgstr "Yazılı cevap"
+
+msgctxt "live_exam.player"
+msgid "typed_empty"
+msgstr "Önce cevabını yaz"
+
+msgctxt "live_exam.player"
+msgid "typed_label"
+msgstr "Cevabını yaz"
+
+msgctxt "live_exam.player"
+msgid "typed_placeholder"
+msgstr "Cevabını buraya yaz…"
+
+msgctxt "live_exam.player"
+msgid "typed_send"
+msgstr "Gönder"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_1"
+msgstr "Parmaklar çapraz 🤞"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_2"
+msgstr "Bakalım ne olacak…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_3"
+msgstr "Cesur seçim!"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_4"
+msgstr "Diğerleri hâlâ düşünüyor…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_5"
+msgstr "Sonucu birlikte göreceğiz!"
+
+msgctxt "live_exam.player"
+msgid "waiting_for_host"
+msgstr "Öğretmenin sonraki adımı bekleniyor…"
+
+msgctxt "live_exam.player"
+msgid "waiting_title"
+msgstr "Az kaldı!"
+
+msgctxt "live_exam.player"
+msgid "you_chose"
+msgstr "Seçimin"
+
+msgctxt "live_exam.player"
+msgid "you_label"
+msgstr "Sen"
+
+msgctxt "live_exam.player"
+msgid "your_answer"
+msgstr "Cevabın: “{text}”"
+
+msgctxt "live_exam.player"
+msgid "shape_triangle"
+msgstr "Üçgen"
+
+msgctxt "live_exam.player"
+msgid "shape_diamond"
+msgstr "Karo"
+
+msgctxt "live_exam.player"
+msgid "shape_circle"
+msgstr "Daire"
+
+msgctxt "live_exam.player"
+msgid "shape_square"
+msgstr "Kare"
+
+msgctxt "live_exam.player"
+msgid "shape_star"
+msgstr "Yıldız"
+
+msgctxt "live_exam.player"
+msgid "shape_hexagon"
+msgstr "Altıgen"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_count"
+msgstr "{count} oyuncu katıldı"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_alone"
+msgstr "Şimdilik sadece sen varsın"
+
+msgctxt "live_exam.wait_room.js"
+msgid "waiting_host_start"
+msgstr "Öğretmenin oyunu başlatması bekleniyor"
+
+msgctxt "live_exam.wait_room.js"
+msgid "lobby_locked_badge"
+msgstr "Lobi kilitli — oyun birazdan başlıyor"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_title"
+msgstr "Öğretmen seni oyundan çıkardı"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_body"
+msgstr ""
+"Bu cihazla bu oyuna tekrar katılamazsın. Bir hata varsa öğretmenine söyle."
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_action"
+msgstr "Başka PIN gir"
+
+msgctxt "live_exam.wait_room.js"
+msgid "game_starting"
+msgstr "Oyun başlıyor!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_locked_hint"
+msgstr "Lobi kilitli — adını değiştiremezsin ama avatarını değiştirebilirsin."
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_sent"
+msgstr "Gönderildi!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_wait"
+msgstr "Biraz bekle — çok sık tepki gönderiyorsun"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_reconnecting"
+msgstr "Yeniden bağlanılıyor…"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_offline"
+msgstr "İnternet yok — bağlantı bekleniyor"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_back"
+msgstr "Tekrar çevrimiçi!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "player_fallback"
+msgstr "Oyuncu"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_counter"
+msgstr "{count}/{max}"
+
+msgctxt "live_exam.wait_room.js"
+msgid "removed_title"
+msgstr "Bu oyunda değilsin"
+
+msgctxt "live_exam.wait_room.js"
+msgid "rejoin_game"
+msgstr "Tekrar katıl"
+
+msgctxt "live_exam.wait_room.js"
+msgid "look_on_screen"
+msgstr "Adını büyük ekranda ara!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "edit_look"
+msgstr "Görünümü değiştir"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reactions_hint"
+msgstr "Tepki gönder"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_accessory_none"
+msgstr "Yok"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_glasses"
+msgstr "Gözlük"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_cap"
+msgstr "Şapka"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_crown"
+msgstr "Taç"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_mask"
+msgstr "Maske"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_sparkles"
+msgstr "Parıltı"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_bowtie"
+msgstr "Papyon"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_headphones"
+msgstr "Kulaklık"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_flower"
+msgstr "Çiçek"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_pirate_patch"
+msgstr "Korsan bandı"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_halo"
+msgstr "Hale"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_1"
+msgstr "Tilki"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_2"
+msgstr "Panda"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_3"
+msgstr "Aslan"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_4"
+msgstr "Kaplan"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_5"
+msgstr "Koala"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_6"
+msgstr "Domuz yavrusu"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_7"
+msgstr "Kurbağa"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_8"
+msgstr "Ahtapot"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_9"
+msgstr "Maymun"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_10"
+msgstr "Tek boynuzlu at"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_11"
+msgstr "Tavşan"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_12"
+msgstr "Hamster"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_13"
+msgstr "Kurt"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_14"
+msgstr "Kutup ayısı"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_15"
+msgstr "Kızıl panda"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_16"
+msgstr "Nane tavşanı"
+
+msgctxt "live_exam.join.js"
+msgid "player_label"
+msgstr "Oyuncu"
+
+msgctxt "live_exam.join.js"
+msgid "nickname_required"
+msgstr "Takma adını yaz."
+
+msgctxt "live_exam.join.js"
+msgid "nickname_too_long"
+msgstr "Takma ad çok uzun."
+
+msgctxt "live_exam.join.js"
+msgid "reroll_avatar"
+msgstr "Başka avatar"
+
+msgctxt "live_exam.join.js"
+msgid "join_blocked_title"
+msgstr "Katılamadın"
+
+msgctxt "live_exam.join.js"
+msgid "try_again"
+msgstr "Tekrar dene"
+
+msgctxt "live_exam.join.js"
+msgid "enter_new_pin"
+msgstr "Başka PIN gir"
+
+msgctxt "live_exam.join.js"
+msgid "rate_limited_wait"
+msgstr "Çok fazla deneme — {seconds} sn sonra tekrar dene."
+
+msgctxt "live_exam.host_game"
+msgid "lobby_join_at"
+msgstr "Katılmak için adres"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_pin_label"
+msgstr "Oyun PIN'i"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_scan_qr"
+msgstr "Veya QR kodu tarayın"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_waiting"
+msgstr "Katılımcılar bekleniyor…"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready"
+msgstr "Oyun birazdan başlıyor!"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready_host"
+msgstr "Herkes hazır olunca “Başlat”a basın"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked"
+msgstr "Katılım kapatıldı"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_hint"
+msgstr "Yeni katılımcılar katılamaz"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_label"
+msgstr "Lobi kilitli"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_players_word"
+msgstr "katılımcı"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_participants"
+msgstr "Katılan oyuncular"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_empty"
+msgstr "Henüz kimse katılmadı — telefonunuzdan PIN'i girin"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_more"
+msgstr "+{count} kişi daha"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_remove_player"
+msgstr "Oyuncuyu çıkar"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready"
+msgstr "Hazır olun!"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready_sub"
+msgstr "{count} soru · telefonunuzu hazır tutun"
+
+msgctxt "live_exam.host_game"
+msgid "game_countdown_label"
+msgstr "Tur {value} saniye içinde başlıyor"
+
+msgctxt "live_exam.host_game"
+msgid "game_question_of"
+msgstr "Soru {index} / {total}"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_badge"
+msgstr "Birden fazla doğru cevap"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_pick"
+msgstr "{count} cevap seçin"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_badge"
+msgstr "Yazılı cevap"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_prompt"
+msgstr "Cevabınızı telefonunuza yazın"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_placeholder"
+msgstr "Cevabınızı yazın…"
+
+msgctxt "live_exam.host_game"
+msgid "game_seconds_short"
+msgstr "sn"
+
+msgctxt "live_exam.host_game"
+msgid "game_answers_label"
+msgstr "cevap"
+
+msgctxt "live_exam.host_game"
+msgid "game_all_answered"
+msgstr "Herkes cevapladı!"
+
+msgctxt "live_exam.host_game"
+msgid "game_time_up"
+msgstr "Süre doldu!"
+
+msgctxt "live_exam.host_game"
+msgid "game_read_time"
+msgstr "Soruyu okuyun…"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answer"
+msgstr "Doğru cevap"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answers"
+msgstr "Doğru cevaplar"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_summary"
+msgstr "{correct} / {total} doğru cevap"
+
+msgctxt "live_exam.host_game"
+msgid "game_no_answers"
+msgstr "Bu turda cevap verilmedi"
+
+msgctxt "live_exam.host_game"
+msgid "game_partial_credit"
+msgstr "Kısmi puan: her doğru seçim puan kazandırır"
+
+msgctxt "live_exam.host_game"
+msgid "game_strict_credit"
+msgstr "Puan yalnızca tüm doğru seçenekler seçildiğinde verilir"
+
+msgctxt "live_exam.host_game"
+msgid "game_fastest"
+msgstr "En hızlı"
+
+msgctxt "live_exam.host_game"
+msgid "game_accepted_also"
+msgstr "Kabul edilen diğer cevaplar"
+
+msgctxt "live_exam.host_game"
+msgid "game_typed_top"
+msgstr "En çok yazılan cevaplar"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard"
+msgstr "Liderlik tablosu"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard_last"
+msgstr "Son soru bitti — sırada final sahnesi var!"
+
+msgctxt "live_exam.host_game"
+msgid "game_new_entry"
+msgstr "Yeni"
+
+msgctxt "live_exam.host_game"
+msgid "game_streak"
+msgstr "Üst üste {count} doğru"
+
+msgctxt "live_exam.host_game"
+msgid "game_points"
+msgstr "puan"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct"
+msgstr "Doğru"
+
+msgctxt "live_exam.host_game"
+msgid "game_wrong"
+msgstr "Yanlış"
+
+msgctxt "live_exam.host_game"
+msgid "game_close"
+msgstr "Kapat"
+
+msgctxt "live_exam.host_game"
+msgid "game_skip"
+msgstr "Geç"
+
+msgctxt "live_exam.host_game"
+msgid "shape_triangle"
+msgstr "Üçgen"
+
+msgctxt "live_exam.host_game"
+msgid "shape_diamond"
+msgstr "Eşkenar dörtgen"
+
+msgctxt "live_exam.host_game"
+msgid "shape_circle"
+msgstr "Daire"
+
+msgctxt "live_exam.host_game"
+msgid "shape_square"
+msgstr "Kare"
+
+msgctxt "live_exam.host_game"
+msgid "shape_star"
+msgstr "Yıldız"
+
+msgctxt "live_exam.host_game"
+msgid "shape_hexagon"
+msgstr "Altıgen"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_title"
+msgstr "Ses"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_on"
+msgstr "Ses açık"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_off"
+msgstr "Ses kapalı"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_volume"
+msgstr "Ses düzeyi"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_music"
+msgstr "Arka plan müziği"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_enable"
+msgstr "Sesi açmak için tıklayın"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_title"
+msgstr "Final sonuçları"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_subtitle"
+msgstr "Kazananları tebrik ederiz!"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_1"
+msgstr "1. sıra"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_2"
+msgstr "2. sıra"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_3"
+msgstr "3. sıra"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_tie"
+msgstr "Eşit puan"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_replay"
+msgstr "Tekrar göster"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_no_players"
+msgstr "Bu oyunda katılımcı yoktu"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_more"
+msgstr "+{count} katılımcı"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_audience"
+msgstr "Diğer oyuncular"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_players"
+msgstr "katılımcı"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_questions"
+msgstr "soru"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_accuracy"
+msgstr "doğruluk"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_speed"
+msgstr "ort. cevap"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_correct_count"
+msgstr "{correct}/{answered} doğru"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_results"
+msgstr "Ayrıntılı sonuçlar"
+
+msgctxt "live_exam.host_settings"
+msgid "answer_mode_title"
+msgstr "Cevap modu"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_scoring_label"
+msgstr "Çoklu seçimli sorularda puan"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial"
+msgstr "Kısmi puan"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial_help"
+msgstr "Her doğru seçenek için orantılı puan verilir."
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict"
+msgstr "Hepsi doğru olmalı"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict_help"
+msgstr "Puan yalnızca tüm doğru seçenekler seçildiğinde verilir."
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_label"
+msgstr "Küçük yazım hatalarını kabul et"
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_help"
+msgstr ""
+"Yazılı cevaplarda 1–2 harflik hata, büyük/küçük harf ve fazla boşluklar "
+"dikkate alınmaz."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_title"
+msgstr "Yazılı cevap"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_help"
+msgstr "Uygun sorularda öğrenciler seçenek yerine cevabı kendileri yazar."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_toggle"
+msgstr "Yazılı cevap"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_accepted"
+msgstr "Kabul edilen cevaplar"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_add_placeholder"
+msgstr "Bir cevap ekleyip Enter'a basın"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_not_eligible"
+msgstr "Yalnızca seçenekli"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_limit"
+msgstr "En fazla 10 cevap, her biri 1–60 karakter."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_locked"
+msgstr "Oyun başladıktan sonra değiştirilemez"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_empty"
+msgstr "En az bir kabul edilen cevap yazın"
+
+msgctxt "live_exam.host_settings"
+msgid "chip_remove"
+msgstr "Kaldır"
+
+msgctxt "live_exam.host_settings"
+msgid "saved_label"
+msgstr "Kaydedildi"
+
+msgctxt "live_exam.host_settings"
+msgid "save_error"
+msgstr "Kaydedilemedi"
+
+msgctxt "liveExam.template.session_detail"
+msgid "export_csv"
+msgstr "CSV olarak dışa aktar"
+
+msgctxt "liveExam.template.session_detail"
+msgid "typed_answers_heading"
+msgstr "Yazılı cevaplar"

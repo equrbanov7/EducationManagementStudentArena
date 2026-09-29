@@ -1,323 +1,327 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const i18n = window.LIVE_EXAM_JOIN_I18N || {};
-    const tr = (key, fallback) => i18n[key] || fallback;
-    const catalog = window.LiveAvatarCatalog || {};
-    const nicknameTools = window.LiveWaitRoomNicknameEditor || {};
-    const rememberedPlayer = CONFIG.rememberedPlayer || null;
-    const sessionSettings = Object.assign({}, CONFIG.sessionSettings || {});
-    const charactersEnabled = sessionSettings.characters_enabled !== false;
-    let themeSocket = null;
-    let themeReconnectTimer = null;
-    let themeReconnectAttempts = 0;
+/* join.js — canlı oyuna qoşulma (LX-FE-PLAYER 2026-09-29).
+ *  • Təsadüfi avatar + «🎲 başqa avatar»; ad sahəsində sayğac (32);
+ *  • Xətalar: 409 (ad məşğuldur) / 400 → sahənin altında; 403 (lobbi kilidli, oyun başlayıb,
+ *    müəllim çıxarıb, limit dolub) / 404 → blok kartı (server mesajı + «Yenidən yoxla» / «Başqa PIN»);
+ *    429 → Retry-After saniyə sayğacı ilə düymə müvəqqəti bağlanır;
+ *  • Əvvəlki qoşulma tapılıbsa — davam et / yenidən qoşul dialoqu.
+ * Anonim WebSocket YOXDUR (server artıq rədd edir; tema server tərəfindən render olunur).
+ * AJAX-safe: EMSReady + idempotent qoruyucu.
+ */
+(function () {
+    "use strict";
 
-    const joinBtn = document.getElementById("joinBtn");
-    const nicknameInput = document.getElementById("nickname");
-    const nicknameError = document.getElementById("joinNicknameError");
-    const joinStatus = document.getElementById("joinStatus");
-    const preview = document.getElementById("joinPreview");
-    const resumeNoticeBtn = document.getElementById("resumePlayerBtn");
-    const resumePrompt = document.getElementById("joinResumePrompt");
-    const resumeContinueBtn = document.getElementById("joinResumeContinue");
-    const resumeRestartBtn = document.getElementById("joinResumeRestart");
-    const resumeCloseBtn = document.getElementById("joinResumeClose");
+    function init() {
+        const card = document.getElementById("joinCard");
+        if (!card || card.dataset.lxInit) return;
+        card.dataset.lxInit = "1";
 
-    if (!joinBtn || !nicknameInput || !preview) {
-        return;
-    }
+        const config = window.LiveJoinConfig || {};
+        const i18n = window.LIVE_EXAM_JOIN_I18N || {};
+        const catalog = window.LiveAvatarCatalog || {};
+        const renderer = window.LiveAvatarRenderer;
+        const nicknameTools = window.LiveWaitRoomNicknameEditor || {};
+        const UNTRANSLATED = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/;
+        const MAX = 32;
+        const tr = (key, fallback) => {
+            const value = i18n[key];
+            if (typeof value !== "string" || !value.trim() || UNTRANSLATED.test(value.trim())) return fallback;
+            return value;
+        };
+        const fmt = (template, values) =>
+            String(template).replace(/\{(\w+)\}/g, (match, key) =>
+                Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match
+            );
 
-    const defaultAvatar = catalog.defaultAvatarKey || "avatar_1";
-    const defaultAccessory = catalog.defaultAccessoryKey || "accessory_none";
-    const accessoryChoices = (catalog.accessoryKeys || []).filter((key) => key && key !== defaultAccessory);
-    const renderAvatarMarkup = (player, size, className) =>
-        window.LiveAvatarRenderer.renderAvatarMarkup(player || {}, { size, className, interactive: false });
-    const randomChoice = (items, fallback) => {
-        const source = Array.isArray(items) ? items.filter(Boolean) : [];
-        if (!source.length) return fallback;
-        return source[Math.floor(Math.random() * source.length)] || fallback;
-    };
-    const normalizeNickname = (value) =>
-        typeof nicknameTools.normalizeNickname === "function" ? nicknameTools.normalizeNickname(value) : String(value || "").trim();
-    const validateNickname = (value) =>
-        typeof nicknameTools.validateNickname === "function"
-            ? nicknameTools.validateNickname(value, {
-                required: tr("nicknameRequired", "Nickname is required."),
-                tooLong: tr("nicknameTooLong", "Nickname is too long."),
-            })
-            : { valid: Boolean(normalizeNickname(value)), value: normalizeNickname(value), message: "" };
+        // Server mesajı hələ tərcümə olunmayıbsa (msgid açarı gəlir) — tanınan açarlar üçün az ehtiyat mətni.
+        const SERVER_FALLBACK = {
+            removed_by_host: "Müəllim səni bu oyundan çıxarıb — bu cihazla yenidən qoşulmaq olmur.",
+            lobby_locked: "Lobbi kilidlənib — müəllimdən açmasını xahiş et.",
+            game_already_started: "Oyun artıq başlayıb — növbəti oyunu gözlə.",
+            session_finished: "Bu oyun artıq bitib.",
+            participant_limit_reached: "İştirakçı limiti dolub.",
+            nickname_required: "Adını yaz.",
+        };
+        const serverText = (message) => {
+            const text = String(message || "").trim();
+            if (!text) return tr("errorUnknown", "Xəta baş verdi");
+            if (UNTRANSLATED.test(text)) return SERVER_FALLBACK[text] || tr("errorUnknown", "Xəta baş verdi");
+            return text;
+        };
+        const $ = (id) => document.getElementById(id);
+        const dom = {
+            form: $("joinForm"),
+            input: $("nickname"),
+            count: $("joinNicknameCount"),
+            error: $("joinNicknameError"),
+            status: $("joinStatus"),
+            button: $("joinBtn"),
+            preview: $("joinPreview"),
+            reroll: $("joinReroll"),
+            blocked: $("joinBlocked"),
+            resumeNotice: $("resumePlayerBtn"),
+            resumePrompt: $("joinResumePrompt"),
+        };
+        if (!dom.form || !dom.input || !dom.button) return;
 
-    let selectedAvatar = charactersEnabled ? randomChoice(catalog.avatarKeys, defaultAvatar) : defaultAvatar;
-    let selectedAccessory = charactersEnabled ? randomChoice(accessoryChoices, defaultAccessory) : defaultAccessory;
-    let allowFreshJoin = !rememberedPlayer;
-    let isJoining = false;
-
-    if (!nicknameInput.value.trim() && CONFIG.generatedNickname) {
-        nicknameInput.value = CONFIG.generatedNickname;
-    }
-    if (!nicknameInput.value.trim() && rememberedPlayer?.nickname) {
-        nicknameInput.value = rememberedPlayer.nickname;
-    }
-
-    function applySessionSettings(nextSettings) {
-        Object.assign(sessionSettings, nextSettings || {});
-        document.body.dataset.liveTheme = sessionSettings.theme_key || "aurora";
-    }
-
-    function setStatus(message, kind) {
-        if (!joinStatus) return;
-        joinStatus.textContent = message || "";
-        joinStatus.classList.remove("is-error", "is-success");
-        if (kind) {
-            joinStatus.classList.add(`is-${kind}`);
-        }
-    }
-
-    function setNicknameError(message) {
-        if (!nicknameError) return;
-        nicknameError.textContent = message || "";
-        nicknameInput.setAttribute("aria-invalid", message ? "true" : "false");
-        nicknameInput.style.borderColor = message ? "#dc2626" : "";
-        nicknameInput.style.boxShadow = message ? "0 0 0 4px rgba(220, 38, 38, 0.12)" : "";
-    }
-
-    /* 2026-09-13 audit F-04: ləqəb istifadəçi girişidir — self-XSS gigiyenası. */
-    function escapeHtml(value) {
-        const div = document.createElement("div");
-        div.textContent = value == null ? "" : String(value);
-        return div.innerHTML;
-    }
-
-    function renderPreview() {
-        const nickname = normalizeNickname(nicknameInput.value) || "Player";
-        preview.innerHTML = `
-            <div class="join-preview__avatar-shell">
-                ${renderAvatarMarkup(
-                    {
-                        avatar_key: selectedAvatar,
-                        accessory_key: selectedAccessory,
-                    },
-                    78,
-                    "join-preview__avatar"
-                )}
-            </div>
-            <div class="join-preview__player">
-                <span class="join-preview__player-label">Player</span>
-                <strong class="join-preview__player-name">${escapeHtml(nickname)}</strong>
-            </div>
-        `;
-    }
-
-    function setJoiningState(active) {
-        isJoining = Boolean(active);
-        joinBtn.disabled = isJoining;
-        joinBtn.innerHTML = isJoining
-            ? `<i class="fas fa-spinner fa-spin"></i><span>${tr("buttonJoining", "Joining...")}</span>`
-            : `<i class="fas fa-play"></i><span>${tr("joinReady", "Join game")}</span>`;
-    }
-
-    function openResumePrompt() {
-        if (!resumePrompt) return;
-        resumePrompt.hidden = false;
-        document.body.classList.add("join-modal-open");
-    }
-
-    function closeResumePrompt() {
-        if (!resumePrompt) return;
-        resumePrompt.hidden = true;
-        document.body.classList.remove("join-modal-open");
-        focusNicknameInput();
-    }
-
-    function focusNicknameInput() {
-        if (!nicknameInput || document.activeElement === nicknameInput) return;
-        if (resumePrompt && !resumePrompt.hidden) return;
-        window.requestAnimationFrame(() => {
-            nicknameInput.focus({ preventScroll: true });
-            const valueLength = nicknameInput.value.length;
-            try {
-                nicknameInput.setSelectionRange(valueLength, valueLength);
-            } catch (error) {
-                // Some mobile browsers block selection APIs on unsupported input modes.
-            }
-        });
-    }
-
-    function continuePreviousPlayer() {
-        closeResumePrompt();
-        if (CONFIG.resumeUrl) {
-            window.location.href = CONFIG.resumeUrl;
-        }
-    }
-
-    function rerollAppearance() {
-        if (!charactersEnabled) {
-            selectedAvatar = defaultAvatar;
-            selectedAccessory = defaultAccessory;
-            return;
-        }
-        selectedAvatar = randomChoice(catalog.avatarKeys, defaultAvatar);
-        selectedAccessory = randomChoice(accessoryChoices, defaultAccessory);
-    }
-
-    function shouldOfferResume(normalizedNickname) {
-        if (!rememberedPlayer || allowFreshJoin) return false;
-        return (
-            normalizeNickname(rememberedPlayer.nickname) === normalizedNickname
-        );
-    }
-
-    function closeThemeSocket() {
-        if (themeReconnectTimer) {
-            window.clearTimeout(themeReconnectTimer);
-            themeReconnectTimer = null;
-        }
-        if (themeSocket) {
-            themeSocket.onclose = null;
-            themeSocket.close();
-            themeSocket = null;
-        }
-    }
-
-    function themeWsUrl() {
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        return `${protocol}//${window.location.host}/ws/live/${encodeURIComponent(CONFIG.pin)}/lobby/`;
-    }
-
-    function connectThemeSocket() {
-        closeThemeSocket();
-        if (!CONFIG.pin) return;
-
-        themeSocket = new WebSocket(themeWsUrl());
-
-        themeSocket.onopen = function () {
-            themeReconnectAttempts = 0;
+        const settings = config.sessionSettings || {};
+        const charactersEnabled = settings.characters_enabled !== false;
+        const remembered = config.rememberedPlayer || null;
+        const defaultAvatar = catalog.defaultAvatarKey || "avatar_1";
+        const defaultAccessory = catalog.defaultAccessoryKey || "accessory_none";
+        const accessoryChoices = (catalog.accessoryKeys || []).filter((key) => key && key !== defaultAccessory);
+        const pick = (items, fallback, avoid) => {
+            const pool = (items || []).filter((item) => item && item !== avoid);
+            return pool.length ? pool[Math.floor(Math.random() * pool.length)] : fallback;
         };
 
-        themeSocket.onmessage = function (event) {
-            try {
-                const message = JSON.parse(event.data);
-                const payload = message.data || message;
-                if ((payload.type === "lobby_state" || payload.type === "session_settings") && payload.settings) {
-                    applySessionSettings(payload.settings);
+        let avatarKey = defaultAvatar;
+        let accessoryKey = defaultAccessory;
+        let allowFreshJoin = !remembered;
+        let joining = false;
+        let rateTimer = null;
+        let rateLimitedUntil = 0;
+        let navigating = false;
+
+        function rollAppearance() {
+            if (!charactersEnabled) return;
+            avatarKey = pick(catalog.avatarKeys, defaultAvatar, avatarKey);
+            accessoryKey = pick(accessoryChoices, defaultAccessory, accessoryKey);
+        }
+
+        function renderPreview(dance) {
+            if (!dom.preview || !renderer) return;
+            dom.preview.innerHTML = renderer.renderAvatarMarkup(
+                { avatar_key: avatarKey, accessory_key: accessoryKey },
+                { size: 120, crop: "full", interactive: false, className: "lxj-avatar__svg", dance: dance || "idle" }
+            );
+        }
+
+        function updateCount() {
+            if (dom.count) dom.count.textContent = `${dom.input.value.length}/${MAX}`;
+        }
+
+        function setError(message) {
+            dom.error.textContent = message || "";
+            dom.input.setAttribute("aria-invalid", message ? "true" : "false");
+            dom.input.classList.toggle("is-invalid", Boolean(message));
+        }
+
+        function setStatus(message, kind) {
+            dom.status.textContent = message || "";
+            dom.status.dataset.kind = kind || "";
+        }
+
+        function setJoining(active) {
+            joining = Boolean(active);
+            dom.button.disabled = joining;
+            dom.button.classList.toggle("is-loading", joining);
+            const label = dom.button.querySelector("span");
+            if (label) {
+                label.textContent = joining ? tr("buttonJoining", "Qoşulur…") : tr("joinReady", "Oyuna qoşul!");
+            }
+        }
+
+        function showBlocked(message) {
+            $("joinBlockedTitle").textContent = tr("blockedTitle", "Qoşulmaq alınmadı");
+            $("joinBlockedMessage").textContent = serverText(message);
+            $("joinRetry").textContent = tr("tryAgain", "Yenidən yoxla");
+            const newPin = $("joinNewPin");
+            newPin.textContent = tr("enterNewPin", "Başqa PIN daxil et");
+            if (config.pinEntryUrl) newPin.href = config.pinEntryUrl;
+            dom.form.hidden = true;
+            dom.blocked.hidden = false;
+            $("joinRetry").focus();
+        }
+
+        function hideBlocked() {
+            dom.blocked.hidden = true;
+            dom.form.hidden = false;
+            setStatus("");
+            dom.input.focus();
+        }
+
+        function rateLimit(seconds) {
+            let left = Math.max(1, Math.round(seconds || 10));
+            rateLimitedUntil = Date.now() + left * 1000;
+            dom.button.disabled = true;
+            window.clearInterval(rateTimer);
+            const tick = () => {
+                setStatus(fmt(tr("rateLimited", "Çox tez-tez cəhd edildi — {seconds} san sonra yenidən yoxla."), { seconds: left }), "warn");
+                left -= 1;
+                if (left < 0) {
+                    window.clearInterval(rateTimer);
+                    setStatus("");
+                    dom.button.disabled = false;
                 }
-            } catch (error) {
-                console.error("join theme sync parse error", error);
+            };
+            tick();
+            rateTimer = window.setInterval(tick, 1000);
+        }
+
+        function validate() {
+            const messages = {
+                required: tr("nicknameRequired", "Adını yaz."),
+                tooLong: tr("nicknameTooLong", "Ad çox uzundur."),
+            };
+            if (typeof nicknameTools.validateNickname === "function") {
+                return nicknameTools.validateNickname(dom.input.value, messages);
             }
-        };
-
-        themeSocket.onclose = function () {
-            if (themeReconnectAttempts >= 8) return;
-            themeReconnectAttempts += 1;
-            themeReconnectTimer = window.setTimeout(connectThemeSocket, Math.min(1000 * themeReconnectAttempts, 5000));
-        };
-    }
-
-    async function submitJoin(forceFresh) {
-        const validation = validateNickname(nicknameInput.value);
-        const normalizedNickname = validation.value;
-        nicknameInput.value = normalizedNickname;
-
-        if (!validation.valid) {
-            setNicknameError(validation.message);
-            setStatus(validation.message, "error");
-            nicknameInput.focus();
-            renderPreview();
-            return;
+            const value = String(dom.input.value || "").trim();
+            return { valid: Boolean(value), value, message: value ? "" : messages.required };
         }
 
-        setNicknameError("");
-        renderPreview();
-
-        if (!forceFresh && shouldOfferResume(normalizedNickname)) {
-            openResumePrompt();
-            return;
+        function openResume() {
+            if (!dom.resumePrompt) return;
+            dom.resumePrompt.hidden = false;
+            document.body.classList.add("lxj-modal-open");
+            const first = $("joinResumeContinue");
+            if (first) first.focus();
         }
 
-        setJoiningState(true);
-        setStatus(tr("buttonJoining", "Joining..."));
+        function closeResume() {
+            if (!dom.resumePrompt || dom.resumePrompt.hidden) return;
+            dom.resumePrompt.hidden = true;
+            document.body.classList.remove("lxj-modal-open");
+            dom.input.focus();
+        }
 
-        try {
-            const formData = new FormData();
-            formData.append("nickname", normalizedNickname);
-            formData.append("avatar_key", selectedAvatar);
-            formData.append("accessory_key", selectedAccessory);
+        function continuePrevious() {
+            if (config.resumeUrl) window.location.href = config.resumeUrl;
+        }
 
-            const response = await fetch(CONFIG.joinUrl, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": CONFIG.csrf,
-                },
-                body: formData,
-            });
-
-            const data = await response.json();
-            if (data.ok) {
-                setStatus("");
-                window.location.href = data.redirect;
+        async function submitJoin(forceFresh) {
+            if (joining) return;
+            const validation = validate();
+            dom.input.value = validation.value;
+            updateCount();
+            if (!validation.valid) {
+                setError(validation.message);
+                dom.input.focus();
                 return;
             }
-
-            setStatus(data.message || tr("errorUnknown", "An error occurred"), "error");
-        } catch (error) {
-            console.error(error);
-            setStatus(tr("errorConnection", "Connection error"), "error");
-        } finally {
-            setJoiningState(false);
+            setError("");
+            if (!forceFresh && !allowFreshJoin && remembered && validation.value === String(remembered.nickname || "").trim()) {
+                openResume();
+                return;
+            }
+            setJoining(true);
+            setStatus("");
+            try {
+                const body = new FormData();
+                body.append("nickname", validation.value);
+                body.append("avatar_key", avatarKey);
+                body.append("accessory_key", accessoryKey);
+                const response = await fetch(config.joinUrl, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": config.csrf },
+                    credentials: "same-origin",
+                    body,
+                });
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (error) {
+                    data = {};
+                }
+                if (response.ok && data.ok && data.redirect) {
+                    navigating = true;
+                    renderPreview("jump");
+                    window.location.href = data.redirect;
+                    return;
+                }
+                if (response.status === 429) {
+                    rateLimit(Number(response.headers.get("Retry-After") || 10));
+                    return;
+                }
+                if (response.status === 409 || response.status === 400) {
+                    setError(serverText(data.message));
+                    dom.input.focus();
+                    return;
+                }
+                if (response.status === 403 || response.status === 404) {
+                    showBlocked(data.message);
+                    return;
+                }
+                setStatus(serverText(data.message), "error");
+            } catch (error) {
+                setStatus(tr("errorConnection", "Bağlantı xətası"), "error");
+            } finally {
+                if (navigating) return;
+                setJoining(false);
+                if (Date.now() < rateLimitedUntil) dom.button.disabled = true;
+            }
         }
+
+        // ── Başlanğıc ─────────────────────────────────────────────────────
+        if (remembered && charactersEnabled) {
+            avatarKey = remembered.avatar_key || defaultAvatar;
+            accessoryKey = remembered.accessory_key || defaultAccessory;
+        } else {
+            rollAppearance();
+        }
+        if (!dom.input.value.trim() && config.generatedNickname) dom.input.value = config.generatedNickname;
+        if (!dom.input.value.trim() && remembered && remembered.nickname) dom.input.value = remembered.nickname;
+        if (dom.reroll) {
+            dom.reroll.hidden = !charactersEnabled;
+            dom.reroll.setAttribute("aria-label", tr("rerollAvatar", "Başqa avatar"));
+            dom.reroll.title = tr("rerollAvatar", "Başqa avatar");
+        }
+        renderPreview("wave");
+        updateCount();
+
+        dom.form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            submitJoin(false);
+        });
+        dom.input.addEventListener("input", () => {
+            setError("");
+            if (dom.status.dataset.kind !== "warn") setStatus("");
+            updateCount();
+        });
+        if (dom.reroll) {
+            dom.reroll.addEventListener("click", () => {
+                rollAppearance();
+                renderPreview("jump");
+            });
+        }
+        $("joinRetry").addEventListener("click", () => {
+            hideBlocked();
+        });
+        if (dom.resumeNotice) dom.resumeNotice.addEventListener("click", continuePrevious);
+        const resumeContinue = $("joinResumeContinue");
+        if (resumeContinue) resumeContinue.addEventListener("click", continuePrevious);
+        const resumeRestart = $("joinResumeRestart");
+        if (resumeRestart) {
+            resumeRestart.addEventListener("click", () => {
+                allowFreshJoin = true;
+                closeResume();
+                rollAppearance();
+                renderPreview("jump");
+                submitJoin(true);
+            });
+        }
+        const resumeClose = $("joinResumeClose");
+        if (resumeClose) resumeClose.addEventListener("click", closeResume);
+        if (dom.resumePrompt) {
+            dom.resumePrompt.addEventListener("click", (event) => {
+                if (event.target === dom.resumePrompt) closeResume();
+            });
+        }
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeResume();
+        });
+        window.setTimeout(() => {
+            if (!dom.resumePrompt || dom.resumePrompt.hidden) {
+                try {
+                    dom.input.focus({ preventScroll: true });
+                } catch (error) {
+                    dom.input.focus();
+                }
+            }
+        }, 150);
     }
 
-    applySessionSettings(sessionSettings);
-    renderPreview();
-    setStatus("");
-    window.setTimeout(focusNicknameInput, 140);
-
-    joinBtn.addEventListener("click", function () {
-        if (!isJoining) {
-            submitJoin(false);
-        }
-    });
-
-    nicknameInput.addEventListener("input", function () {
-        setNicknameError("");
-        setStatus("");
-        renderPreview();
-    });
-
-    nicknameInput.addEventListener("blur", function () {
-        const normalizedNickname = normalizeNickname(nicknameInput.value);
-        nicknameInput.value = normalizedNickname;
-        renderPreview();
-    });
-
-    nicknameInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            joinBtn.click();
-        }
-    });
-
-    resumeNoticeBtn?.addEventListener("click", continuePreviousPlayer);
-    resumeContinueBtn?.addEventListener("click", continuePreviousPlayer);
-    resumeRestartBtn?.addEventListener("click", function () {
-        allowFreshJoin = true;
-        closeResumePrompt();
-        rerollAppearance();
-        renderPreview();
-        submitJoin(true);
-    });
-    resumeCloseBtn?.addEventListener("click", closeResumePrompt);
-
-    resumePrompt?.addEventListener("click", function (event) {
-        if (event.target === resumePrompt) {
-            closeResumePrompt();
-        }
-    });
-
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") {
-            closeResumePrompt();
-        }
-    });
-
-    connectThemeSocket();
-    window.addEventListener("beforeunload", closeThemeSocket);
-});
+    if (window.EMSReady) window.EMSReady(init);
+    else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+})();

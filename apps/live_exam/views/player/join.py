@@ -4,7 +4,7 @@ import io
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
-from django.http import Http404, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -22,7 +22,10 @@ from apps.live_exam.auth import (
     build_player_token,
     clean_nickname,
     get_client_id,
+    get_request_client_id,
     get_request_player,
+    has_signed_player_token,
+    is_client_kicked,
 )
 from apps.live_exam.constants import (
     ACCESSORY_KEYS,
@@ -35,118 +38,52 @@ from apps.live_exam.models import LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_identity
 from apps.live_exam.session_settings import DEFAULT_MAX_PARTICIPANTS, generate_guest_nickname, get_session_settings
 from apps.live_exam.transport import build_join_url
-from core.rate_limit import is_rate_limited, record_rate_limit_hit
+from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
 
 from ._shared import (
     _broadcast_lobby_state,
     _ensure_live_client_cookie,
     _join_resume_copy,
-    _live_client_id_key,
     _live_ip_key,
     _nickname_conflict_message,
+    _nickname_is_taken,
+    _normalize_pin,
     _pin_entry_copy,
     _pin_entry_theme_key,
     _random_join_accessory_key,
     _random_join_avatar_key,
     _resolve_live_session,
+    pin_lookup_limited,
+    record_pin_miss,
 )
 from .constants import (
     LIVE_JOIN_IP_LIMIT_SCOPE,
     LIVE_JOIN_IP_RATE_LIMIT_DEFAULT,
     LIVE_JOIN_LIMIT_SCOPE,
-    LIVE_PIN_IP_LIMIT_SCOPE,
-    LIVE_PIN_IP_RATE_LIMIT_DEFAULT,
-    LIVE_PIN_LIMIT_SCOPE,
     LIVE_RATE_LIMIT_MESSAGE,
 )
-
-
-def _pin_ip_rate():
-    return getattr(settings, "LIVE_PIN_IP_RATE_LIMIT", LIVE_PIN_IP_RATE_LIMIT_DEFAULT)
 
 
 def _join_ip_rate():
     return getattr(settings, "LIVE_EXAM_JOIN_IP_RATE_LIMIT", LIVE_JOIN_IP_RATE_LIMIT_DEFAULT)
 
 
-def _pin_lookup_limited(request):
-    """PIN axtarışı üçün (cookie + İP) vedrələri — ``(limited, retry_after)`` (EX28-10)."""
-    for scope, rate, key in (
-        (LIVE_PIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, _live_client_id_key(request)),
-        (LIVE_PIN_IP_LIMIT_SCOPE, _pin_ip_rate(), _live_ip_key(request)),
-    ):
-        limited, retry_after = is_rate_limited(scope, rate, key)
-        if limited:
-            return True, retry_after
-    return False, None
+def _json_error(message, status, *, retry_after=None):
+    response = JsonResponse({"ok": False, "message": message}, status=status)
+    if retry_after:
+        response.headers["Retry-After"] = str(retry_after)
+    return response
 
 
-def _record_pin_miss(request):
-    record_rate_limit_hit(LIVE_PIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, _live_client_id_key(request))
-    record_rate_limit_hit(LIVE_PIN_IP_LIMIT_SCOPE, _pin_ip_rate(), _live_ip_key(request))
-
-
-@never_cache
-def live_pin_entry(request):
+def _render_pin_entry(request, *, pin_value, error_message="", theme_key="aurora", status=200, retry_after=None):
     from apps.live_exam.models import MIN_PIN_LENGTH, PIN_LENGTH
-
-    copy = _pin_entry_copy()
-    raw_pin = request.POST.get("pin") if request.method == "POST" else request.GET.get("pin")
-    # EX28-10: GET ?pin= də PIN axtarışıdır — əvvəl limitsiz idi.
-    if request.method != "POST" and raw_pin:
-        get_limited, _retry = _pin_lookup_limited(request)
-        if get_limited:
-            raw_pin = ""
-    pin_value, matched_session = _resolve_live_session(raw_pin)
-    raw_theme = request.POST.get("theme") if request.method == "POST" else request.GET.get("theme")
-    theme_key = _pin_entry_theme_key(pin_value, raw_theme)
-    error_message = ""
-    status_code = 200
-    session_exists = matched_session is not None
-
-    if request.method != "POST" and session_exists:
-        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
-    if request.method != "POST" and raw_pin and not session_exists:
-        _record_pin_miss(request)
-
-    if request.method == "POST":
-        is_limited, retry_after = _pin_lookup_limited(request)
-        if is_limited:
-            response = render(
-                request,
-                "liveExam/pin_entry.html",
-                {
-                    "copy": copy,
-                    "pin_value": pin_value,
-                    "pin_length": PIN_LENGTH,
-                    "pin_slots": range(1, PIN_LENGTH + 1),
-                    "min_pin_length": MIN_PIN_LENGTH,
-                    "error_message": LIVE_RATE_LIMIT_MESSAGE,
-                    "theme_key": theme_key,
-                },
-                status=429,
-            )
-            if retry_after:
-                response.headers["Retry-After"] = str(retry_after)
-            return _ensure_live_client_cookie(request, response)
-
-        if len(pin_value) < MIN_PIN_LENGTH:
-            _record_pin_miss(request)
-            error_message = copy["invalid_pin"]
-            status_code = 400
-        elif not session_exists:
-            _record_pin_miss(request)
-            error_message = copy["session_not_found"]
-            status_code = 404
-        else:
-            return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
 
     response = render(
         request,
         "liveExam/pin_entry.html",
         {
-            "copy": copy,
+            "copy": _pin_entry_copy(),
             "pin_value": pin_value,
             "pin_length": PIN_LENGTH,
             "pin_slots": range(1, PIN_LENGTH + 1),
@@ -154,15 +91,75 @@ def live_pin_entry(request):
             "error_message": error_message,
             "theme_key": theme_key,
         },
-        status=status_code,
+        status=status,
     )
+    if retry_after:
+        response.headers["Retry-After"] = str(retry_after)
     return _ensure_live_client_cookie(request, response)
 
 
 @never_cache
+def live_pin_entry(request):
+    from apps.live_exam.models import MIN_PIN_LENGTH
+
+    copy = _pin_entry_copy()
+    is_post = request.method == "POST"
+    raw_pin = request.POST.get("pin") if is_post else request.GET.get("pin")
+    raw_theme = request.POST.get("theme") if is_post else request.GET.get("theme")
+    pin_value = _normalize_pin(raw_pin)
+    is_lookup = is_post or bool(raw_pin)
+
+    # Audit 2026-09-28 LXS-06: büdcə bitibsə PIN ümumiyyətlə HƏLL OLUNMUR — əvvəl
+    # POST onu həll edib 429 səhifəsində sessiyanın mövzusunu qaytarırdı (orakul).
+    if is_lookup:
+        limited, retry_after = pin_lookup_limited(request)
+        if limited:
+            return _render_pin_entry(
+                request,
+                pin_value=pin_value,
+                error_message=LIVE_RATE_LIMIT_MESSAGE,
+                theme_key=_pin_entry_theme_key(None, raw_theme),
+                status=429 if is_post else 200,
+                retry_after=retry_after,
+            )
+
+    pin_value, matched_session = _resolve_live_session(raw_pin) if is_lookup else (pin_value, None)
+    if matched_session is not None:
+        return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=matched_session.pin))
+
+    theme_key = _pin_entry_theme_key(None, raw_theme)
+    if not is_lookup:
+        return _render_pin_entry(request, pin_value=pin_value, theme_key=theme_key)
+
+    record_pin_miss(request)
+    if not is_post:
+        return _render_pin_entry(request, pin_value=pin_value, theme_key=theme_key)
+    if len(pin_value) < MIN_PIN_LENGTH:
+        return _render_pin_entry(
+            request, pin_value=pin_value, error_message=copy["invalid_pin"], theme_key=theme_key, status=400
+        )
+    return _render_pin_entry(
+        request, pin_value=pin_value, error_message=copy["session_not_found"], theme_key=theme_key, status=404
+    )
+
+
+@never_cache
 def live_join_page(request, pin):
+    # Audit 2026-09-28 LXS-06: join səhifəsi də PIN həll edir — eyni «miss» büdcəsi
+    # (əvvəl limitsiz 404/200 orakulu idi). Artıq qoşulmuş (imzalı token) oyunçu kəsilmir.
+    if not has_signed_player_token(request, pin=pin):
+        limited, retry_after = pin_lookup_limited(request)
+        if limited:
+            return _render_pin_entry(
+                request,
+                pin_value=_normalize_pin(pin),
+                error_message=LIVE_RATE_LIMIT_MESSAGE,
+                status=429,
+                retry_after=retry_after,
+            )
     resolved_pin, session = _resolve_live_session(pin)
     if session is None:
+        record_pin_miss(request)
         raise Http404()
     if resolved_pin != pin:
         return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=resolved_pin))
@@ -182,148 +179,136 @@ def live_join_page(request, pin):
     return _ensure_live_client_cookie(request, response)
 
 
-@require_POST
-def live_join_enter(request, pin):
-    is_limited, retry_after = record_rate_limit_hit(
-        LIVE_JOIN_LIMIT_SCOPE,
-        settings.LIVE_EXAM_JOIN_RATE_LIMIT,
-        pin,
-        _live_client_id_key(request),
-    )
-    # EX28-10: İP + sessiya vedrəsi — cookie dəyişməklə sıfırlanmır.
-    ip_limited, ip_retry_after = record_rate_limit_hit(
-        LIVE_JOIN_IP_LIMIT_SCOPE,
-        _join_ip_rate(),
-        pin,
-        _live_ip_key(request),
-    )
-    if ip_limited and not is_limited:
-        is_limited, retry_after = ip_limited, ip_retry_after
-    if is_limited:
-        response = JsonResponse(
-            {"ok": False, "message": LIVE_RATE_LIMIT_MESSAGE},
-            status=429,
+def _join_rate_limited(request, session, cookie_client_id):
+    """Qoşulma vedrələri — ``(limited, retry_after)`` (Audit 2026-09-28 LXS-05).
+
+    * per-klient sərt vedrə (pin + etibarlı cookie) — bir cihazın təkrarı;
+    * pin+İP vedrəsi YALNIZ yeni oyunçu cəhdlərini sayır: artıq qəbul olunmuş
+      oyunçunun reconnect-i (eyni cookie) sinfin ortaq NAT büdcəsini yemir.
+    """
+    if cookie_client_id:
+        limited, retry_after = record_rate_limit_hit(
+            LIVE_JOIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, session.pin, f"client:{cookie_client_id}"
         )
-        if retry_after:
-            response.headers["Retry-After"] = str(retry_after)
-        return response
+        if limited:
+            return True, retry_after
+        with bypass_rls():
+            if LivePlayer.objects.filter(session=session, client_id=cookie_client_id).exists():
+                return False, None
+    return record_rate_limit_hit(LIVE_JOIN_IP_LIMIT_SCOPE, _join_ip_rate(), session.pin, _live_ip_key(request))
 
-    resolved_pin, session = _resolve_live_session(pin)
-    if session is None:
-        raise Http404()
-    session_settings = get_session_settings(session)
 
-    if session.is_locked:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "lobby_locked")},
-            status=403,
-        )
+def _new_player_rejection(locked_session, client_id, max_participants):
+    """YENİ oyunçu qəbul olunmursa JSON cavabı (kilid yalnız yenilərə aiddir — LXS-08)."""
+    if locked_session.is_locked:
+        return _json_error(pgettext("live_exam.view.message", "lobby_locked"), 403)
+    # EXAM-P1-12: oyun lobby-dən çıxandan sonra yeni oyunçu qoşula bilməz.
+    if locked_session.state != LiveSession.STATE_LOBBY:
+        return _json_error(pgettext("live_exam.view.message", "game_already_started"), 403)
+    # Audit 2026-09-28 LXS-09: host-un çıxardığı klient eyni cookie ilə qayıtmır.
+    if is_client_kicked(locked_session, client_id):
+        return _json_error(pgettext("live_exam.view.message", "removed_by_host"), 403)
+    if LivePlayer.objects.filter(session=locked_session).count() >= max_participants:
+        message = pgettext("live_exam.view.message", "participant_limit_reached").format(limit=max_participants)
+        return _json_error(message, 403)
+    return None
 
+
+def _refresh_returning_player(locked_session, player, *, profile, now):
+    """Qayıdan oyunçu: yalnız AÇIQ lobbidə profil dəyişir (Audit 2026-09-28 LXS-07).
+
+    Oyun gedişində / kilidli lobbidə «reconnect» kimliyi dəyişmir — host-un
+    lobbidə yoxladığı ad sonradan (liderlik cədvəlində, nəticədə) dəyişməsin.
+    """
+    fields = ["is_connected", "last_seen"]
+    if locked_session.state == LiveSession.STATE_LOBBY and not locked_session.is_locked:
+        nickname = profile["nickname"]
+        if nickname != player.nickname and _nickname_is_taken(locked_session, nickname, exclude_player_id=player.id):
+            return _json_error(_nickname_conflict_message(), 409)
+        player.nickname = nickname
+        player.avatar_key = profile["avatar_key"]
+        player.accessory_key = profile["accessory_key"]
+        fields += ["nickname", "avatar_key", "accessory_key"]
+    player.is_connected = True
+    player.last_seen = now
+    player.save(update_fields=fields)
+    return None
+
+
+def _join_profile(request, session_settings):
     nickname = clean_nickname(request.POST.get("nickname"))
     if not nickname and session_settings.get("nickname_generator"):
         nickname = generate_guest_nickname()
-
-    characters_enabled = bool(session_settings.get("characters_enabled", True))
     avatar_key = request.POST.get("avatar_key") or ""
     accessory_key = request.POST.get("accessory_key") or ""
-    if not characters_enabled:
-        avatar_key = DEFAULT_AVATAR_KEY
-        accessory_key = DEFAULT_ACCESSORY_KEY
+    if not session_settings.get("characters_enabled", True):
+        avatar_key, accessory_key = DEFAULT_AVATAR_KEY, DEFAULT_ACCESSORY_KEY
     else:
         if avatar_key not in AVATAR_KEYS:
             avatar_key = _random_join_avatar_key()
         if accessory_key not in ACCESSORY_KEYS:
             accessory_key = _random_join_accessory_key()
+    return {"nickname": nickname, "avatar_key": avatar_key, "accessory_key": accessory_key}
 
-    if not nickname:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "nickname_required")},
-            status=400,
-        )
 
-    client_id = get_client_id(request)
+def _admit_player(session, client_id, profile, max_participants):
+    """Kilidli sessiya sətri altında qəbul — ``(player, error_response)``."""
     now = timezone.now()
-    max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))
+    with bypass_rls(), transaction.atomic():
+        locked_session = LiveSession.objects.select_for_update().get(pk=session.pk)
+        player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
 
-    with bypass_rls():
-        with transaction.atomic():
-            locked_session = LiveSession.objects.select_for_update().get(pk=session.pk)
+        # EXAM-P1-12: bitmiş oyuna heç kim qoşula bilməz (reconnect də). Yoxlamalar
+        # kilid daxilindədir ki, host-un state keçidi ilə yarış olmasın.
+        if locked_session.state == LiveSession.STATE_FINISHED:
+            return None, _json_error(pgettext("live_exam.view.message", "session_finished"), 403)
+        if player is not None:
+            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now)
+
+        rejection = _new_player_rejection(locked_session, client_id, max_participants)
+        if rejection is not None:
+            return None, rejection
+        if _nickname_is_taken(locked_session, profile["nickname"], exclude_client_id=client_id):
+            return None, _json_error(_nickname_conflict_message(), 409)
+        try:
+            with transaction.atomic():
+                player = LivePlayer.objects.create(
+                    session=locked_session, client_id=client_id, is_connected=True, last_seen=now, **profile
+                )
+        except IntegrityError:
             player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
+            if player is None:
+                raise
+            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now)
+    return player, None
 
-            # EXAM-P1-12: late-join qorunması. Bitmiş oyuna heç kim qoşula
-            # bilməz; oyun gedişdə olduqda (lobby-dən çıxıb) yalnız ARTIQ
-            # qəbul edilmiş oyunçu (reconnect) davam edə bilər — yeni oyunçu
-            # yox. Yoxlama kilid daxilindədir ki, host-un state keçidi ilə
-            # yarış olmasın.
-            if locked_session.state == LiveSession.STATE_FINISHED:
-                return JsonResponse(
-                    {"ok": False, "message": pgettext("live_exam.view.message", "session_finished")},
-                    status=403,
-                )
-            if player is None and locked_session.state != LiveSession.STATE_LOBBY:
-                return JsonResponse(
-                    {"ok": False, "message": pgettext("live_exam.view.message", "game_already_started")},
-                    status=403,
-                )
 
-            if player is None and LivePlayer.objects.filter(session=locked_session).count() >= max_participants:
-                return JsonResponse(
-                    {
-                        "ok": False,
-                        "message": pgettext("live_exam.view.message", "participant_limit_reached").format(
-                            limit=max_participants
-                        ),
-                    },
-                    status=403,
-                )
+@require_POST
+def live_join_enter(request, pin):
+    if not has_signed_player_token(request, pin=pin):
+        limited, retry_after = pin_lookup_limited(request)
+        if limited:
+            return _json_error(LIVE_RATE_LIMIT_MESSAGE, 429, retry_after=retry_after)
+    resolved_pin, session = _resolve_live_session(pin)
+    if session is None:
+        record_pin_miss(request)
+        raise Http404()
 
-            nickname_conflict = (
-                LivePlayer.objects.filter(session=locked_session, nickname__iexact=nickname)
-                .exclude(client_id=client_id)
-                .exists()
-            )
-            if nickname_conflict:
-                return JsonResponse(
-                    {"ok": False, "message": _nickname_conflict_message()},
-                    status=409,
-                )
+    cookie_client_id = get_request_client_id(request)
+    limited, retry_after = _join_rate_limited(request, session, cookie_client_id)
+    if limited:
+        return _json_error(LIVE_RATE_LIMIT_MESSAGE, 429, retry_after=retry_after)
 
-            if player:
-                player.nickname = nickname
-                player.avatar_key = avatar_key
-                player.accessory_key = accessory_key
-                player.is_connected = True
-                player.last_seen = now
-                player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
-            else:
-                try:
-                    player = LivePlayer.objects.create(
-                        session=locked_session,
-                        client_id=client_id,
-                        nickname=nickname,
-                        avatar_key=avatar_key,
-                        accessory_key=accessory_key,
-                        is_connected=True,
-                        last_seen=now,
-                    )
-                except IntegrityError:
-                    player = (
-                        LivePlayer.objects.select_for_update()
-                        .filter(
-                            session=locked_session,
-                            client_id=client_id,
-                        )
-                        .first()
-                    )
-                    if player is None:
-                        raise
+    session_settings = get_session_settings(session)
+    profile = _join_profile(request, session_settings)
+    if not profile["nickname"]:
+        return _json_error(pgettext("live_exam.view.message", "nickname_required"), 400)
 
-                    player.nickname = nickname
-                    player.avatar_key = avatar_key
-                    player.accessory_key = accessory_key
-                    player.is_connected = True
-                    player.last_seen = now
-                    player.save(update_fields=["nickname", "avatar_key", "accessory_key", "is_connected", "last_seen"])
+    client_id = cookie_client_id or get_client_id(request)
+    max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))
+    player, error_response = _admit_player(session, client_id, profile, max_participants)
+    if error_response is not None:
+        return error_response
 
     token = build_player_token(pin=session.pin, player_id=player.id, client_id=client_id)
 
@@ -332,12 +317,13 @@ def live_join_enter(request, pin):
     wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
     resp = JsonResponse({"ok": True, "redirect": wait_url})
 
-    # Set cookies with appropriate security flags
+    # Audit 2026-09-28 LXS-10: hər iki cookie HttpOnly (JS ``live_client_id``-ni oxumur).
     resp.set_cookie(
         LIVE_CLIENT_ID_COOKIE_NAME,
         client_id,
         max_age=LIVE_CLIENT_ID_COOKIE_MAX_AGE,
         samesite="Lax",
+        httponly=True,
         secure=request.is_secure(),
     )
     resp.set_cookie(
@@ -369,7 +355,5 @@ def live_qr_png(request, pin):
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
-
-    from django.http import HttpResponse
 
     return HttpResponse(buf.getvalue(), content_type="image/png")

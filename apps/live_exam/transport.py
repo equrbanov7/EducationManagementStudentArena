@@ -15,29 +15,28 @@ from asgiref.sync import async_to_sync
 from channels.exceptions import InvalidChannelLayerError
 from channels.layers import get_channel_layer
 
-from apps.live_exam.constants import (
-    PLAYER_LEADERBOARD_SECONDS,
-    PLAYER_QUESTION_PUBLISH_GRACE_SECONDS,
-    PLAYER_RESULT_SECONDS,
-    PLAYER_REVEAL_TRANSITION_SECONDS,
-)
-from apps.live_exam.domain.session import build_question_phase_times, build_reveal_phase_times
+from apps.live_exam.constants import PLAYER_QUESTION_PUBLISH_GRACE_SECONDS
+from apps.live_exam.domain.session import build_question_phase_times
+from apps.live_exam.reveal import Bundle, build_final_bundle, build_reveal_bundle
 from apps.live_exam.serializers import (
-    serialize_answer_distribution,
     serialize_player_identity,
     serialize_players,
     serialize_question,
-    serialize_question_results,
     serialize_top,
     serialize_top_before_question,
 )
 from apps.live_exam.session_settings import get_session_settings, session_join_path
+from apps.live_exam.text_safety import sanitize_player_text
+from apps.live_exam.typed_answers import TEXT_MAX_LENGTH
 
 #: Audit 2026-09-28 EX28-10: reveal-dən ƏVVƏL oyunçuya gedən cavab sahələri.
 #: ``is_correct`` / ``awarded_points`` / ``score`` / ``answer_rank`` və s.
 #: burada YOXDUR — əks halda atılan (throw-away) oyunçularla variantları
 #: yoxlayıb əsas oyunçu ilə düz cavab vermək olurdu.
 PRE_REVEAL_ANSWER_KEYS = ("player_id", "choice_ids", "message")
+
+#: Bir cavab mesajında maksimal variant sayı (saxta yükün ölçüsünü məhdudlaşdırır).
+MAX_OPTION_IDS_PER_ANSWER = 50
 
 
 def public_player_answer(answer: dict | None, *, revealed: bool) -> dict | None:
@@ -82,7 +81,20 @@ def build_join_url(request, session) -> str:
     return base_url
 
 
-def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
+def _group_send(group: str, event: dict[str, Any]) -> None:
+    try:
+        layer = get_channel_layer()
+    except (InvalidChannelLayerError, ModuleNotFoundError):
+        return
+    if layer is None:
+        return
+    try:
+        async_to_sync(layer.group_send)(group, event)
+    except (InvalidChannelLayerError, ModuleNotFoundError):
+        return
+
+
+def broadcast(pin: str, payload: dict[str, Any], group_suffix: str, *, personal: dict[str, str] | None = None) -> None:
     """Broadcast a payload to a specific channel-layer group.
 
     group_suffix can be:
@@ -90,21 +102,12 @@ def broadcast(pin: str, payload: dict[str, Any], group_suffix: str) -> None:
       - "play_host"       → live_<pin>_play_host  (play_event, host only)
       - "play_players"    → live_<pin>_play_players  (play_event, players only)
     """
-    try:
-        layer = get_channel_layer()
-    except (InvalidChannelLayerError, ModuleNotFoundError):
-        return
-    if layer is None:
-        return
-
     event_type = "lobby_event" if group_suffix == "lobby" else "play_event"
-    try:
-        async_to_sync(layer.group_send)(
-            f"live_{pin}_{group_suffix}",
-            {"type": event_type, "data": payload},
-        )
-    except (InvalidChannelLayerError, ModuleNotFoundError):
-        return
+    event = {"type": event_type, "data": payload}
+    if personal is not None:
+        # Şəxsi əlavələr (oyunçu id → JSON) — consumer yalnız öz sətrini klientə qoşur.
+        event["personal"] = personal
+    _group_send(f"live_{pin}_{group_suffix}", event)
 
 
 def broadcast_host(pin: str, payload: dict[str, Any]) -> None:
@@ -112,9 +115,9 @@ def broadcast_host(pin: str, payload: dict[str, Any]) -> None:
     broadcast(pin, payload, "play_host")
 
 
-def broadcast_players(pin: str, payload: dict[str, Any]) -> None:
+def broadcast_players(pin: str, payload: dict[str, Any], *, personal: dict[str, str] | None = None) -> None:
     """Broadcast a payload to the players-only play group."""
-    broadcast(pin, payload, "play_players")
+    broadcast(pin, payload, "play_players", personal=personal)
 
 
 def broadcast_play(pin: str, payload: dict[str, Any]) -> None:
@@ -123,17 +126,61 @@ def broadcast_play(pin: str, payload: dict[str, Any]) -> None:
     broadcast_players(pin, payload)
 
 
+def bundle_events(pin: str, bundle: Bundle) -> list[tuple[str, dict[str, Any]]]:
+    """Reveal/final paketinin kanal-qatı hadisələri: host tam paket, oyunçular ümumi
+    paket + ``personal`` (hər consumer yalnız öz sətrini klientə əlavə edir)."""
+    return [
+        (f"live_{pin}_play_host", {"type": "play_event", "data": bundle.host}),
+        (f"live_{pin}_play_players", {"type": "play_event", "data": bundle.players, "personal": bundle.personal}),
+    ]
+
+
+def broadcast_bundle(pin: str, bundle: Bundle) -> None:
+    for group, event in bundle_events(pin, bundle):
+        _group_send(group, event)
+
+
+def kick_events(pin: str, player_id: int) -> list[tuple[str, dict[str, Any]]]:
+    """Audit 2026-09-28 LXBE-07: silinmiş oyunçunun açıq socket-ləri bağlanır."""
+    event = {"type": "player_kicked", "player_id": int(player_id)}
+    return [(f"live_{pin}_lobby", dict(event)), (f"live_{pin}_play_players", dict(event))]
+
+
+def broadcast_player_kicked(pin: str, player_id: int) -> None:
+    for group, event in kick_events(pin, player_id):
+        _group_send(group, event)
+
+
 def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
+    """``(True, (question_id, option_ids, answer_ms, text))`` və ya ``(False, mesaj)``.
+
+    Yazılı cavab: ``text`` (sətir, ≤ 60 simvol) — ``option_id(s)`` ilə birgə gəlməz.
+    """
+    bad_payload = pgettext("live_exam.consumer.error", "bad_payload")
     try:
         question_id = int(data.get("question_id"))
         answer_ms = int(data.get("answer_ms") or 0)
+        # DB «integer out of range» (500) olmasın — id-lər int4 aralığındadır.
+        if not 0 < question_id < 2**31:
+            return False, bad_payload
+
+        if "text" in data and data.get("text") is not None:
+            raw_text = data.get("text")
+            has_options = bool(data.get("option_ids")) or data.get("option_id") is not None
+            if not isinstance(raw_text, str) or has_options or len(raw_text) > TEXT_MAX_LENGTH * 8:
+                return False, bad_payload
+            # LX-SEC gigiyenası: nəzarət/görünməz/bidi simvollar atılır (NUL → 500 olmasın).
+            text = sanitize_player_text(raw_text, max_length=TEXT_MAX_LENGTH * 4)
+            if len(text) > TEXT_MAX_LENGTH:
+                return False, bad_payload
+            return True, (question_id, [], answer_ms, text)
 
         if isinstance(data.get("option_ids"), list):
             raw_option_ids = data.get("option_ids")
             # Bound attacker-controlled list size before any processing; no real
             # question has anywhere near this many options.
-            if len(raw_option_ids) > 50:
-                return False, pgettext("live_exam.consumer.error", "bad_payload")
+            if len(raw_option_ids) > MAX_OPTION_IDS_PER_ANSWER:
+                return False, bad_payload
             option_ids = [int(value) for value in raw_option_ids if str(value).isdigit()]
         else:
             option_ids = [int(data.get("option_id"))]
@@ -142,9 +189,9 @@ def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:
         if not option_ids:
             return False, pgettext("live_exam.consumer.error", "no_options_selected")
 
-        return True, (question_id, option_ids, answer_ms)
+        return True, (question_id, option_ids, answer_ms, None)
     except Exception:
-        return False, pgettext("live_exam.consumer.error", "bad_payload")
+        return False, bad_payload
 
 
 def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
@@ -155,6 +202,7 @@ def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
         "count": len(players),
         "players": players,
         "is_locked": bool(session.is_locked),
+        # İctimai görünüş — yazılı cavabların qəbul siyahısı lobby-yə getmir.
         "settings": get_session_settings(session),
     }
 
@@ -242,36 +290,8 @@ def build_reveal_payload(
     revealed_at=None,
     exam_question=None,
 ) -> dict[str, Any]:
-    from apps.exams.models import ExamQuestion
-    from apps.live_exam.domain.session import detect_multi
-
-    if exam_question is None:
-        exam_question = (
-            ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
-        )
-    if not exam_question:
-        return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
-
-    revealed_at = revealed_at or session.question_ends_at or timezone.now()
-    leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
-    _, _, correct_ids = detect_multi(exam_question)
-    payload = {
-        "type": "reveal",
-        "server_time": timezone.now().isoformat(),
-        "question_id": question_id,
-        "correct_option_ids": correct_ids,
-        "distribution": serialize_answer_distribution(session, question_id),
-        "results": serialize_question_results(session, question_id, limit=50),
-        "top": serialize_top(session, limit=10),
-        "previous_top": serialize_top_before_question(session, question_id, limit=10),
-        "revealed_at": revealed_at.isoformat(),
-        "result_duration_ms": int(PLAYER_RESULT_SECONDS * 1000),
-        "leaderboard_duration_ms": int(PLAYER_LEADERBOARD_SECONDS * 1000),
-        "transition_duration_ms": int(PLAYER_REVEAL_TRANSITION_SECONDS * 1000),
-        "leaderboard_starts_at": leaderboard_starts_at.isoformat(),
-        "next_question_at": next_question_at.isoformat(),
-    }
-    return payload
+    """Host reveal paketi (``results`` daxil). Hər ikisi lazımdırsa ``build_reveal_bundle``."""
+    return build_reveal_bundle(session, question_id, revealed_at=revealed_at, exam_question=exam_question).host
 
 
 def build_player_reveal_payload(
@@ -286,42 +306,8 @@ def build_player_reveal_payload(
     Includes correct_option_ids (appropriate at reveal stage), distribution, and leaderboard
     data, but omits per-player answer details (``results``) which are host-only analytics.
     """
-    from apps.exams.models import ExamQuestion
-    from apps.live_exam.domain.session import detect_multi
-
-    if exam_question is None:
-        exam_question = (
-            ExamQuestion.objects.filter(exam=session.exam, id=question_id).prefetch_related("options").first()
-        )
-    if not exam_question:
-        return {"type": "error", "message": pgettext("live_exam.view.message", "question_not_found")}
-
-    revealed_at = revealed_at or session.question_ends_at or timezone.now()
-    leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
-    _, _, correct_ids = detect_multi(exam_question)
-    return {
-        "type": "reveal",
-        "server_time": timezone.now().isoformat(),
-        "question_id": question_id,
-        "correct_option_ids": correct_ids,
-        "distribution": serialize_answer_distribution(session, question_id),
-        "top": serialize_top(session, limit=10),
-        "previous_top": serialize_top_before_question(session, question_id, limit=10),
-        "revealed_at": revealed_at.isoformat(),
-        "result_duration_ms": int(PLAYER_RESULT_SECONDS * 1000),
-        "leaderboard_duration_ms": int(PLAYER_LEADERBOARD_SECONDS * 1000),
-        "transition_duration_ms": int(PLAYER_REVEAL_TRANSITION_SECONDS * 1000),
-        "leaderboard_starts_at": leaderboard_starts_at.isoformat(),
-        "next_question_at": next_question_at.isoformat(),
-    }
+    return build_reveal_bundle(session, question_id, revealed_at=revealed_at, exam_question=exam_question).players
 
 
 def build_finished_payload(session, *, finished_at=None, limit: int = 50) -> dict[str, Any]:
-    resolved_finished_at = finished_at or session.question_ends_at or timezone.now()
-    payload = {
-        "type": "finished",
-        "server_time": timezone.now().isoformat(),
-        "top": serialize_top(session, limit=limit),
-        "finished_at": resolved_finished_at.isoformat(),
-    }
-    return payload
+    return build_final_bundle(session, finished_at=finished_at, limit=limit).host

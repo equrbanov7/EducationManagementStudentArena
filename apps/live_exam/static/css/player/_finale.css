@@ -1,0 +1,344 @@
+/* LX-FE-PLAYER (2026-09-29): telefonda final — işıqlı səhnə, rəqs edən avatar (tac/medal),
+ * xal sayğacı, statistika, mini podium və 1-ci yer üçün kənarlardan konfetti.
+ * Rəqs: LX-FE-STAGE API-si `.live-avatar[data-dance]` (live_avatar.css); o CSS yoxdursa
+ * `.lxp-dance-fallback` öz yüngül tullanma animasiyasını verir. */
+
+.lxp-final {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 2px 14px;
+    text-align: center;
+}
+
+.lxp-final .lxp-kicker {
+    margin: 0;
+}
+
+.lxp-final__stage {
+    position: relative;
+    display: grid;
+    place-items: end center;
+    width: 210px;
+    height: 200px;
+    margin-top: 6px;
+}
+
+.lxp-final__stage::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 260px;
+    height: 260px;
+    margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.28), transparent);
+}
+
+.lxp-final[data-place="1"] .lxp-final__stage::before {
+    background: repeating-conic-gradient(from 0deg, rgba(253, 224, 71, 0.34) 0deg 10deg, transparent 10deg 30deg);
+    -webkit-mask: radial-gradient(closest-side, #000 45%, transparent 100%);
+    mask: radial-gradient(closest-side, #000 45%, transparent 100%);
+    animation: lxpRays 16s linear infinite;
+}
+
+.lxp-final__spot {
+    position: absolute;
+    left: 15%;
+    right: 15%;
+    bottom: -6px;
+    height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255, 255, 255, 0.45), transparent);
+}
+
+.lxp-final__dancer {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: end center;
+}
+
+.lxp-final__crown {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    z-index: 3;
+    width: 64px;
+    margin-left: -32px;
+    transform: rotate(-8deg);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
+    pointer-events: none;
+}
+
+.lxp-final__crown svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.lxp-final__medal {
+    position: absolute;
+    right: 18px;
+    bottom: 10px;
+    z-index: 3;
+    width: 46px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+    animation: lxpMedal 1.2s ease-in-out infinite alternate;
+}
+
+.lxp-final__medal svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.lxp-final__title {
+    margin: 4px 0 0;
+    font: 800 clamp(1.8rem, 8.4vw, 2.7rem)/1.05 var(--lxp-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+}
+
+.lxp-final[data-place="1"] .lxp-final__title {
+    color: #fde68a;
+}
+
+.lxp-final__score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.lxp-final__score strong {
+    font: 800 clamp(2.6rem, 13vw, 3.8rem)/1 var(--lxp-display);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.lxp-final__score span {
+    font-weight: 800;
+    color: var(--lxp-muted);
+}
+
+.lxp-final__place {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--lxp-card);
+    color: var(--lxp-ink);
+    font-weight: 800;
+}
+
+.lxp-final__place strong {
+    font: 800 1.35rem/1 var(--lxp-display);
+}
+
+.lxp-final__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 8px;
+    width: min(100%, 440px);
+    margin: 6px 0 0;
+}
+
+.lxp-stat {
+    padding: 10px 8px;
+    border-radius: 14px;
+    background: var(--lxp-panel);
+    border: 1px solid var(--lxp-line);
+}
+
+.lxp-stat dt {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--lxp-muted);
+}
+
+.lxp-stat dd {
+    margin: 4px 0 0;
+    font: 800 1.25rem/1.1 var(--lxp-display);
+}
+
+.lxp-final__cheer {
+    max-width: 420px;
+    margin: 2px 0 0;
+    color: var(--lxp-muted);
+    font-weight: 700;
+    line-height: 1.45;
+}
+
+/* Mini podium (ilk üç) */
+.lxp-podium {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 6px;
+    width: min(100%, 420px);
+    margin-top: 10px;
+}
+
+.lxp-podium__slot {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+}
+
+.lxp-podium__name,
+.lxp-podium__score {
+    position: relative;
+    z-index: 1;
+}
+
+.lxp-podium__art {
+    display: inline-flex;
+    margin-bottom: 2px;
+}
+
+.lxp-podium__name {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 800;
+    font-size: 0.86rem;
+}
+
+.lxp-podium__score {
+    font: 800 0.86rem/1 var(--lxp-display);
+    color: #fde68a;
+}
+
+.lxp-podium__block {
+    display: grid;
+    place-items: start center;
+    width: 100%;
+    padding-top: 6px;
+    border-radius: 12px 12px 4px 4px;
+    font: 800 1.2rem/1 var(--lxp-display);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.lxp-podium__slot.is-p1 .lxp-podium__block {
+    height: 62px;
+    background: linear-gradient(180deg, #d4a017, #8a6508);
+}
+
+.lxp-podium__slot.is-p2 .lxp-podium__block {
+    height: 46px;
+    background: linear-gradient(180deg, #94a3b8, #475569);
+}
+
+.lxp-podium__slot.is-p3 .lxp-podium__block {
+    height: 34px;
+    background: linear-gradient(180deg, #c2773b, #7c3f16);
+}
+
+.lxp-podium__slot.is-me .lxp-podium__name {
+    color: #fde68a;
+}
+
+/* Konfetti — ekranın sol və sağ kənarından (yalnız transform/opacity) */
+.lxp-confetti {
+    position: absolute;
+    top: var(--top, 70%);
+    width: 9px;
+    height: 15px;
+    border-radius: 2px;
+    background: var(--c, #fde047);
+    opacity: 0;
+    animation: lxpConfetti 2.9s cubic-bezier(0.18, 0.75, 0.3, 1) var(--d, 0s) forwards;
+    will-change: transform, opacity;
+}
+
+.lxp-confetti.is-left {
+    left: -12px;
+}
+
+.lxp-confetti.is-right {
+    right: -12px;
+}
+
+.lxp-confetti.is-round {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* Rəqs ehtiyatı (STAGE CSS-i yoxdursa) */
+.lxp-dance-fallback .live-avatar {
+    animation: lxpDanceFallback 0.9s ease-in-out infinite;
+    transform-origin: 50% 100%;
+}
+
+@keyframes lxpDanceFallback {
+    0%,
+    100% {
+        transform: translateY(0) scale(1.04, 0.95);
+    }
+    45% {
+        transform: translateY(-16%) scale(0.97, 1.04) rotate(-4deg);
+    }
+    70% {
+        transform: translateY(-4%) rotate(4deg);
+    }
+}
+
+@keyframes lxpConfetti {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    40% {
+        opacity: 1;
+        transform: translate3d(calc(var(--x) * 0.7), var(--y), 0) rotate(calc(var(--r) * 0.5));
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--x), var(--fall), 0) rotate(var(--r));
+    }
+}
+
+@keyframes lxpRays {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes lxpMedal {
+    from {
+        transform: rotate(-8deg);
+    }
+    to {
+        transform: rotate(8deg);
+    }
+}
+
+@media (max-height: 640px) {
+    .lxp-final__stage {
+        width: 170px;
+        height: 160px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lxp-final[data-place="1"] .lxp-final__stage::before,
+    .lxp-final__medal,
+    .lxp-dance-fallback .live-avatar,
+    .lxp-confetti {
+        animation: none;
+    }
+
+    .lxp-confetti {
+        display: none;
+    }
+}

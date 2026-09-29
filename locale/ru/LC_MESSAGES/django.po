@@ -38348,7 +38348,7 @@ msgstr "Произошла непредвиденная ошибка. Повто
 #: apps/live_exam/views/api.py:199
 msgctxt "live_exam.consumer.error"
 msgid "rate_limited"
-msgstr "Формат: количество/период. Напр.: 100/1h = 100 запросов в час."
+msgstr "Слишком много запросов. Подождите немного и повторите."
 
 #: apps/live_exam/consumers.py:245
 msgctxt "live_exam.consumer.error"
@@ -38388,7 +38388,7 @@ msgstr "Активный вопрос не найден."
 #: apps/live_exam/scoring.py:165
 msgctxt "live_exam.consumer.error"
 msgid "question_not_active"
-msgstr "Редактировать вопрос"
+msgstr "Этот вопрос уже не активен."
 
 #: apps/live_exam/scoring.py:178
 msgctxt "live_exam.consumer.error"
@@ -38398,12 +38398,12 @@ msgstr "Ответ уже отправлен"
 #: apps/live_exam/scoring.py:194
 msgctxt "live_exam.consumer.error"
 msgid "question_not_accepting_answers"
-msgstr "Сейчас нет ответов в ожидании."
+msgstr "Сейчас этот вопрос не принимает ответы."
 
 #: apps/live_exam/scoring.py:205
 msgctxt "live_exam.consumer.error"
 msgid "submission_outside_active_window"
-msgstr "Не удалось отправить ответ."
+msgstr "Время на ответ истекло."
 
 #: apps/live_exam/scoring.py:215
 msgctxt "live_exam.consumer.error"
@@ -39339,12 +39339,12 @@ msgstr "Предпросмотр"
 #: apps/live_exam/templates/liveExam/wait_room.html:112
 msgctxt "live_exam.wait_room"
 msgid "nickname_label"
-msgstr "Ник"
+msgstr "Никнейм"
 
 #: apps/live_exam/templates/liveExam/wait_room.html:119
 msgctxt "live_exam.wait_room"
 msgid "nickname_placeholder"
-msgstr "Введите ник"
+msgstr "Введи никнейм"
 
 #: apps/live_exam/templates/liveExam/wait_room.html:132
 msgctxt "live_exam.wait_room"
@@ -39389,12 +39389,12 @@ msgstr "Готов к старту"
 #: apps/live_exam/templates/liveExam/wait_room.html:191
 msgctxt "live_exam.wait_room.js"
 msgid "nickname_required"
-msgstr "Ник не может быть пустым."
+msgstr "Никнейм не может быть пустым."
 
 #: apps/live_exam/templates/liveExam/wait_room.html:192
 msgctxt "live_exam.wait_room.js"
 msgid "nickname_too_long"
-msgstr "Ник слишком длинный."
+msgstr "Никнейм слишком длинный."
 
 #: apps/live_exam/templates/liveExam/wait_room.html:193
 msgctxt "live_exam.wait_room.js"
@@ -39483,7 +39483,7 @@ msgstr "Отвечать *"
 #: apps/live_exam/views/player/join.py:232
 msgctxt "live_exam.view.message"
 msgid "game_already_started"
-msgstr "Эта попытка уже завершена и не может быть восстановлена."
+msgstr "Игра уже началась."
 
 #: apps/live_exam/views/host/game.py:75
 msgctxt "live_exam.view.message"
@@ -84113,3 +84113,1068 @@ msgctxt "core.middleware.concurrency_limit.message"
 msgid ""
 "Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin."
 msgstr "Сервер сейчас перегружен. Повторите попытку через несколько секунд."
+
+msgctxt "live_exam.view.message"
+msgid "typed_questions_invalid"
+msgstr "Настройки письменных ответов имеют неверный формат."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_in_exam"
+msgstr "Выбранный вопрос не относится к этому экзамену."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_eligible"
+msgstr ""
+"Вопрос {index} нельзя сделать письменным: подходят только вопросы с одним "
+"верным вариантом (≤ 60 символов) или с коротким ответом (1–10 строк)."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_many"
+msgstr "У вопроса может быть не более 10 допустимых ответов."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_long"
+msgstr "Допустимый ответ не может быть длиннее 60 символов."
+
+msgctxt "live_exam.consumer.error"
+msgid "answer_retry"
+msgstr "Ответ не сохранён — отправьте его ещё раз."
+
+msgctxt "live_exam.view.message"
+msgid "removed_by_host"
+msgstr "Ведущий удалил вас из этой игры."
+
+msgctxt "live_exam.view.message"
+msgid "profile_changes_lobby_only"
+msgstr "Ник и аватар можно менять только до начала игры."
+
+msgctxt "live_exam.view.message"
+msgid "nickname_locked"
+msgstr "Лобби закрыто — ник изменить нельзя."
+
+msgctxt "live_exam.view.message"
+msgid "reactions_lobby_only"
+msgstr "Реакции можно отправлять только в комнате ожидания."
+
+msgctxt "live_exam.view.message"
+msgid "ai_summary_invalid_request"
+msgstr "ИИ-сводку можно запросить только со страницы результатов."
+
+msgctxt "live_exam.results.export"
+msgid "export_nickname"
+msgstr "Игрок"
+
+msgctxt "live_exam.results.export"
+msgid "export_total_score"
+msgstr "Общий балл"
+
+msgctxt "live_exam.results.export"
+msgid "export_question_number"
+msgstr "№ вопроса"
+
+msgctxt "live_exam.results.export"
+msgid "export_question"
+msgstr "Вопрос"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer"
+msgstr "Ответ"
+
+msgctxt "live_exam.results.export"
+msgid "export_correct"
+msgstr "Верно"
+
+msgctxt "live_exam.results.export"
+msgid "export_points"
+msgstr "Баллы"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer_ms"
+msgstr "Время ответа (мс)"
+
+msgctxt "live_exam.results.export"
+msgid "export_yes"
+msgstr "Да"
+
+msgctxt "live_exam.results.export"
+msgid "export_no"
+msgstr "Нет"
+
+msgctxt "live_exam.player"
+msgid "page_title"
+msgstr "Живая игра"
+
+msgctxt "live_exam.player"
+msgid "announce_answers_open"
+msgstr "Отвечай! {seconds} сек."
+
+msgctxt "live_exam.player"
+msgid "announce_question"
+msgstr "Вопрос {index}: {text}"
+
+msgctxt "live_exam.player"
+msgid "answer_locked"
+msgstr "Ответ принят!"
+
+msgctxt "live_exam.player"
+msgid "answer_sending"
+msgstr "Отправляем…"
+
+msgctxt "live_exam.player"
+msgid "answers_label"
+msgstr "Варианты ответа"
+
+msgctxt "live_exam.player"
+msgid "collapse_question"
+msgstr "Свернуть"
+
+msgctxt "live_exam.player"
+msgid "connecting_game"
+msgstr "Подключаемся к игре…"
+
+msgctxt "live_exam.player"
+msgid "error_send"
+msgstr "Ответ не отправлен. Попробуй ещё раз."
+
+msgctxt "live_exam.player"
+msgid "error_send_offline"
+msgstr "Ответ не отправлен — проверь подключение к интернету."
+
+msgctxt "live_exam.player"
+msgid "expand_question"
+msgstr "Читать полностью"
+
+msgctxt "live_exam.player"
+msgid "final_keep_going"
+msgstr "Каждая игра делает тебя сильнее — в следующий раз на пьедестал!"
+
+msgctxt "live_exam.player"
+msgid "final_podium_title"
+msgstr "Пьедестал"
+
+msgctxt "live_exam.player"
+msgid "final_second"
+msgstr "Серебряная медаль!"
+
+msgctxt "live_exam.player"
+msgid "final_third"
+msgstr "Бронзовая медаль!"
+
+msgctxt "live_exam.player"
+msgid "final_title"
+msgstr "Игра окончена!"
+
+msgctxt "live_exam.player"
+msgid "final_well_played"
+msgstr "Отличная игра, {name}!"
+
+msgctxt "live_exam.player"
+msgid "final_winner"
+msgstr "Победа за тобой!"
+
+msgctxt "live_exam.player"
+msgid "final_your_place"
+msgstr "Твоё место"
+
+msgctxt "live_exam.player"
+msgid "gap_line"
+msgstr "{name} опережает тебя на {gap} очк."
+
+msgctxt "live_exam.player"
+msgid "gap_tie"
+msgstr "У тебя столько же очков, сколько у {name}"
+
+msgctxt "live_exam.player"
+msgid "get_ready_body"
+msgstr "Первый вопрос уже близко…"
+
+msgctxt "live_exam.player"
+msgid "get_ready_title"
+msgstr "Приготовься!"
+
+msgctxt "live_exam.player"
+msgid "intro_hint_main_screen"
+msgstr "Смотри вопрос на большом экране"
+
+msgctxt "live_exam.player"
+msgid "intro_unlocking"
+msgstr "Ответы откроются через {seconds} с"
+
+msgctxt "live_exam.player"
+msgid "last_question_note"
+msgstr "Это был последний вопрос — скоро итоги!"
+
+msgctxt "live_exam.player"
+msgid "multi_badge"
+msgstr "Несколько ответов"
+
+msgctxt "live_exam.player"
+msgid "multi_counter"
+msgstr "Выбрано: {count}/{max}"
+
+msgctxt "live_exam.player"
+msgid "multi_hint"
+msgstr "Выбери до {max} ответов и нажми «Отправить»"
+
+msgctxt "live_exam.player"
+msgid "multi_max_reached"
+msgstr "Можно выбрать не больше {max} вариантов"
+
+msgctxt "live_exam.player"
+msgid "net_back"
+msgstr "Снова в сети!"
+
+msgctxt "live_exam.player"
+msgid "net_offline"
+msgstr "Нет интернета — ждём подключения"
+
+msgctxt "live_exam.player"
+msgid "net_reconnecting"
+msgstr "Восстанавливаем соединение…"
+
+msgctxt "live_exam.player"
+msgid "next_question_soon"
+msgstr "Скоро следующий вопрос…"
+
+msgctxt "live_exam.player"
+msgid "player_fallback"
+msgstr "Игрок"
+
+msgctxt "live_exam.player"
+msgid "points_short"
+msgstr "очк."
+
+msgctxt "live_exam.player"
+msgid "question_counter"
+msgstr "Вопрос {index} / {total}"
+
+msgctxt "live_exam.player"
+msgid "question_hidden_body"
+msgstr "Вопрос на большом экране — читай там"
+
+msgctxt "live_exam.player"
+msgid "question_short"
+msgstr "{index}/{total}"
+
+msgctxt "live_exam.player"
+msgid "rank_aria"
+msgstr "Твоё место: {rank}"
+
+msgctxt "live_exam.player"
+msgid "rank_down"
+msgstr "на {count} вниз"
+
+msgctxt "live_exam.player"
+msgid "rank_leader"
+msgstr "Ты лидируешь! Так держать 👑"
+
+msgctxt "live_exam.player"
+msgid "rank_line"
+msgstr "Твоё место: {place}"
+
+msgctxt "live_exam.player"
+msgid "rank_up"
+msgstr "на {count} вверх"
+
+msgctxt "live_exam.player"
+msgid "rejoin_game"
+msgstr "Войти снова"
+
+msgctxt "live_exam.player"
+msgid "removed_body"
+msgstr ""
+"Профиль игрока не найден — возможно, преподаватель удалил тебя или игра "
+"закрыта."
+
+msgctxt "live_exam.player"
+msgid "removed_title"
+msgstr "Тебя нет в этой игре"
+
+msgctxt "live_exam.player"
+msgid "result_accepted"
+msgstr "Правильный ответ"
+
+msgctxt "live_exam.player"
+msgid "result_correct"
+msgstr "Верно!"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answer"
+msgstr "Правильный ответ"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answers"
+msgstr "Правильные ответы"
+
+msgctxt "live_exam.player"
+msgid "result_missed"
+msgstr "Этот вопрос пропущен"
+
+msgctxt "live_exam.player"
+msgid "result_no_answer"
+msgstr "Нет ответа"
+
+msgctxt "live_exam.player"
+msgid "result_no_points"
+msgstr "В этот раз без очков"
+
+msgctxt "live_exam.player"
+msgid "result_partial"
+msgstr "Частично верно"
+
+msgctxt "live_exam.player"
+msgid "result_partial_detail"
+msgstr "{correct}/{total} верно"
+
+msgctxt "live_exam.player"
+msgid "result_speed"
+msgstr "{seconds} с"
+
+msgctxt "live_exam.player"
+msgid "result_wrong"
+msgstr "Неверно"
+
+msgctxt "live_exam.player"
+msgid "result_wrong_picked"
+msgstr "неверных: {count}"
+
+msgctxt "live_exam.player"
+msgid "scoreboard_title"
+msgstr "Лидеры"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_off"
+msgstr "Выключить звук"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_on"
+msgstr "Включить звук"
+
+msgctxt "live_exam.player"
+msgid "stat_avg_time"
+msgstr "Среднее время ответа"
+
+msgctxt "live_exam.player"
+msgid "stat_best_streak"
+msgstr "Лучшая серия"
+
+msgctxt "live_exam.player"
+msgid "stat_correct"
+msgstr "Верных ответов"
+
+msgctxt "live_exam.player"
+msgid "streak_label"
+msgstr "{count} подряд!"
+
+msgctxt "live_exam.player"
+msgid "submit_answer"
+msgstr "Отправить ответ"
+
+msgctxt "live_exam.player"
+msgid "tap_for_sound"
+msgstr "Коснись экрана, чтобы включить звук"
+
+msgctxt "live_exam.player"
+msgid "time_up_body"
+msgstr "На этот вопрос ответа нет. Удачи в следующем!"
+
+msgctxt "live_exam.player"
+msgid "time_up_title"
+msgstr "Время вышло!"
+
+msgctxt "live_exam.player"
+msgid "typed_badge"
+msgstr "Письменный ответ"
+
+msgctxt "live_exam.player"
+msgid "typed_empty"
+msgstr "Сначала напиши ответ"
+
+msgctxt "live_exam.player"
+msgid "typed_label"
+msgstr "Напиши ответ"
+
+msgctxt "live_exam.player"
+msgid "typed_placeholder"
+msgstr "Напиши ответ здесь…"
+
+msgctxt "live_exam.player"
+msgid "typed_send"
+msgstr "Отправить"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_1"
+msgstr "Скрестим пальцы 🤞"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_2"
+msgstr "Посмотрим, что будет…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_3"
+msgstr "Смелый выбор!"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_4"
+msgstr "Остальные ещё думают…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_5"
+msgstr "Скоро узнаем результат!"
+
+msgctxt "live_exam.player"
+msgid "waiting_for_host"
+msgstr "Ждём следующего шага преподавателя…"
+
+msgctxt "live_exam.player"
+msgid "waiting_title"
+msgstr "Почти начали!"
+
+msgctxt "live_exam.player"
+msgid "you_chose"
+msgstr "Твой выбор"
+
+msgctxt "live_exam.player"
+msgid "you_label"
+msgstr "Ты"
+
+msgctxt "live_exam.player"
+msgid "your_answer"
+msgstr "Твой ответ: «{text}»"
+
+msgctxt "live_exam.player"
+msgid "shape_triangle"
+msgstr "Треугольник"
+
+msgctxt "live_exam.player"
+msgid "shape_diamond"
+msgstr "Ромб"
+
+msgctxt "live_exam.player"
+msgid "shape_circle"
+msgstr "Круг"
+
+msgctxt "live_exam.player"
+msgid "shape_square"
+msgstr "Квадрат"
+
+msgctxt "live_exam.player"
+msgid "shape_star"
+msgstr "Звезда"
+
+msgctxt "live_exam.player"
+msgid "shape_hexagon"
+msgstr "Шестиугольник"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_count"
+msgstr "Подключились: {count}"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_alone"
+msgstr "Пока ты один(одна)"
+
+msgctxt "live_exam.wait_room.js"
+msgid "waiting_host_start"
+msgstr "Ждём, пока преподаватель начнёт игру"
+
+msgctxt "live_exam.wait_room.js"
+msgid "lobby_locked_badge"
+msgstr "Лобби закрыто — игра скоро начнётся"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_title"
+msgstr "Преподаватель удалил тебя из игры"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_body"
+msgstr ""
+"С этого устройства вернуться в игру нельзя. Если это ошибка, скажи "
+"преподавателю."
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_action"
+msgstr "Ввести другой PIN"
+
+msgctxt "live_exam.wait_room.js"
+msgid "game_starting"
+msgstr "Игра начинается!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_locked_hint"
+msgstr "Лобби закрыто — имя менять нельзя, но аватар можно."
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_sent"
+msgstr "Отправлено!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_wait"
+msgstr "Подожди немного — слишком много реакций"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_reconnecting"
+msgstr "Восстанавливаем соединение…"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_offline"
+msgstr "Нет интернета — ждём подключения"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_back"
+msgstr "Снова в сети!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "player_fallback"
+msgstr "Игрок"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_counter"
+msgstr "{count}/{max}"
+
+msgctxt "live_exam.wait_room.js"
+msgid "removed_title"
+msgstr "Тебя нет в этой игре"
+
+msgctxt "live_exam.wait_room.js"
+msgid "rejoin_game"
+msgstr "Войти снова"
+
+msgctxt "live_exam.wait_room.js"
+msgid "look_on_screen"
+msgstr "Найди своё имя на большом экране!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "edit_look"
+msgstr "Изменить облик"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reactions_hint"
+msgstr "Отправь реакцию"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_accessory_none"
+msgstr "Нет"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_glasses"
+msgstr "Очки"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_cap"
+msgstr "Кепка"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_crown"
+msgstr "Корона"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_mask"
+msgstr "Маска"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_sparkles"
+msgstr "Блёстки"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_bowtie"
+msgstr "Бабочка"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_headphones"
+msgstr "Наушники"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_flower"
+msgstr "Цветок"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_pirate_patch"
+msgstr "Пиратская повязка"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_halo"
+msgstr "Нимб"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_1"
+msgstr "Лиса"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_2"
+msgstr "Панда"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_3"
+msgstr "Лев"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_4"
+msgstr "Тигр"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_5"
+msgstr "Коала"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_6"
+msgstr "Поросёнок"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_7"
+msgstr "Лягушка"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_8"
+msgstr "Осьминог"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_9"
+msgstr "Обезьяна"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_10"
+msgstr "Единорог"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_11"
+msgstr "Кролик"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_12"
+msgstr "Хомяк"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_13"
+msgstr "Волк"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_14"
+msgstr "Белый медведь"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_15"
+msgstr "Красная панда"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_16"
+msgstr "Мятный кролик"
+
+msgctxt "live_exam.join.js"
+msgid "player_label"
+msgstr "Игрок"
+
+msgctxt "live_exam.join.js"
+msgid "nickname_required"
+msgstr "Введи никнейм."
+
+msgctxt "live_exam.join.js"
+msgid "nickname_too_long"
+msgstr "Никнейм слишком длинный."
+
+msgctxt "live_exam.join.js"
+msgid "reroll_avatar"
+msgstr "Другой аватар"
+
+msgctxt "live_exam.join.js"
+msgid "join_blocked_title"
+msgstr "Не удалось подключиться"
+
+msgctxt "live_exam.join.js"
+msgid "try_again"
+msgstr "Попробовать снова"
+
+msgctxt "live_exam.join.js"
+msgid "enter_new_pin"
+msgstr "Ввести другой PIN"
+
+msgctxt "live_exam.join.js"
+msgid "rate_limited_wait"
+msgstr "Слишком много попыток — повтори через {seconds} с."
+
+msgctxt "live_exam.host_game"
+msgid "lobby_join_at"
+msgstr "Подключайтесь по адресу"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_pin_label"
+msgstr "PIN игры"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_scan_qr"
+msgstr "Или отсканируйте QR-код"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_waiting"
+msgstr "Ждём участников…"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready"
+msgstr "Игра скоро начнётся!"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready_host"
+msgstr "Нажмите «Старт», когда все подключатся"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked"
+msgstr "Вход закрыт"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_hint"
+msgstr "Новые участники не могут войти"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_label"
+msgstr "Лобби закрыто"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_players_word"
+msgstr "участников"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_participants"
+msgstr "Подключившиеся участники"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_empty"
+msgstr "Пока никто не подключился — введите PIN на телефоне"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_more"
+msgstr "ещё +{count}"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_remove_player"
+msgstr "Удалить участника"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready"
+msgstr "Приготовьтесь!"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready_sub"
+msgstr "Вопросов: {count} · держите телефон наготове"
+
+msgctxt "live_exam.host_game"
+msgid "game_countdown_label"
+msgstr "Раунд начнётся через {value}"
+
+msgctxt "live_exam.host_game"
+msgid "game_question_of"
+msgstr "Вопрос {index} из {total}"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_badge"
+msgstr "Несколько верных ответов"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_pick"
+msgstr "Выберите ответов: {count}"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_badge"
+msgstr "Письменный ответ"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_prompt"
+msgstr "Введите ответ на телефоне"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_placeholder"
+msgstr "Введите ответ…"
+
+msgctxt "live_exam.host_game"
+msgid "game_seconds_short"
+msgstr "сек"
+
+msgctxt "live_exam.host_game"
+msgid "game_answers_label"
+msgstr "ответов"
+
+msgctxt "live_exam.host_game"
+msgid "game_all_answered"
+msgstr "Все ответили!"
+
+msgctxt "live_exam.host_game"
+msgid "game_time_up"
+msgstr "Время вышло!"
+
+msgctxt "live_exam.host_game"
+msgid "game_read_time"
+msgstr "Прочитайте вопрос…"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answer"
+msgstr "Правильный ответ"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answers"
+msgstr "Правильные ответы"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_summary"
+msgstr "Верно ответили: {correct} из {total}"
+
+msgctxt "live_exam.host_game"
+msgid "game_no_answers"
+msgstr "В этом раунде ответов нет"
+
+msgctxt "live_exam.host_game"
+msgid "game_partial_credit"
+msgstr "Частичные баллы: каждый верный выбор приносит очки"
+
+msgctxt "live_exam.host_game"
+msgid "game_strict_credit"
+msgstr "Баллы только если выбраны все верные варианты"
+
+msgctxt "live_exam.host_game"
+msgid "game_fastest"
+msgstr "Самый быстрый"
+
+msgctxt "live_exam.host_game"
+msgid "game_accepted_also"
+msgstr "Также принимается"
+
+msgctxt "live_exam.host_game"
+msgid "game_typed_top"
+msgstr "Самые частые ответы"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard"
+msgstr "Таблица лидеров"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard_last"
+msgstr "Это был последний вопрос — впереди финальная сцена!"
+
+msgctxt "live_exam.host_game"
+msgid "game_new_entry"
+msgstr "Новый"
+
+msgctxt "live_exam.host_game"
+msgid "game_streak"
+msgstr "{count} верных подряд"
+
+msgctxt "live_exam.host_game"
+msgid "game_points"
+msgstr "очк."
+
+msgctxt "live_exam.host_game"
+msgid "game_correct"
+msgstr "Верно"
+
+msgctxt "live_exam.host_game"
+msgid "game_wrong"
+msgstr "Неверно"
+
+msgctxt "live_exam.host_game"
+msgid "game_close"
+msgstr "Закрыть"
+
+msgctxt "live_exam.host_game"
+msgid "game_skip"
+msgstr "Пропустить"
+
+msgctxt "live_exam.host_game"
+msgid "shape_triangle"
+msgstr "Треугольник"
+
+msgctxt "live_exam.host_game"
+msgid "shape_diamond"
+msgstr "Ромб"
+
+msgctxt "live_exam.host_game"
+msgid "shape_circle"
+msgstr "Круг"
+
+msgctxt "live_exam.host_game"
+msgid "shape_square"
+msgstr "Квадрат"
+
+msgctxt "live_exam.host_game"
+msgid "shape_star"
+msgstr "Звезда"
+
+msgctxt "live_exam.host_game"
+msgid "shape_hexagon"
+msgstr "Шестиугольник"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_title"
+msgstr "Звук"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_on"
+msgstr "Звук включён"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_off"
+msgstr "Звук выключен"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_volume"
+msgstr "Громкость"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_music"
+msgstr "Фоновая музыка"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_enable"
+msgstr "Нажмите, чтобы включить звук"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_title"
+msgstr "Итоги"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_subtitle"
+msgstr "Поздравляем победителей!"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_1"
+msgstr "1-е место"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_2"
+msgstr "2-е место"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_3"
+msgstr "3-е место"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_tie"
+msgstr "Равный счёт"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_replay"
+msgstr "Показать снова"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_no_players"
+msgstr "В этой игре не было участников"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_more"
+msgstr "+{count} участников"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_audience"
+msgstr "Остальные участники"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_players"
+msgstr "участников"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_questions"
+msgstr "вопросов"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_accuracy"
+msgstr "точность"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_speed"
+msgstr "средний ответ"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_correct_count"
+msgstr "верно {correct}/{answered}"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_results"
+msgstr "Подробные результаты"
+
+msgctxt "live_exam.host_settings"
+msgid "answer_mode_title"
+msgstr "Режим ответов"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_scoring_label"
+msgstr "Баллы за вопросы с несколькими ответами"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial"
+msgstr "Частичные баллы"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial_help"
+msgstr "За каждый верный вариант начисляется пропорциональная часть баллов."
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict"
+msgstr "Все должны быть верными"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict_help"
+msgstr "Баллы начисляются, только если выбраны все верные варианты."
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_label"
+msgstr "Принимать мелкие опечатки"
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_help"
+msgstr ""
+"В письменных ответах не учитываются ошибки в 1–2 буквы, регистр и лишние "
+"пробелы."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_title"
+msgstr "Письменный ответ"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_help"
+msgstr ""
+"В подходящих вопросах студенты вводят ответ сами вместо выбора варианта."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_toggle"
+msgstr "Письменный ответ"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_accepted"
+msgstr "Принимаемые ответы"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_add_placeholder"
+msgstr "Добавьте вариант и нажмите Enter"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_not_eligible"
+msgstr "Только варианты"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_limit"
+msgstr "До 10 вариантов, по 1–60 символов."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_locked"
+msgstr "Нельзя изменить после начала игры"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_empty"
+msgstr "Введите хотя бы один принимаемый ответ"
+
+msgctxt "live_exam.host_settings"
+msgid "chip_remove"
+msgstr "Удалить"
+
+msgctxt "live_exam.host_settings"
+msgid "saved_label"
+msgstr "Сохранено"
+
+msgctxt "live_exam.host_settings"
+msgid "save_error"
+msgstr "Не удалось сохранить"
+
+msgctxt "liveExam.template.session_detail"
+msgid "export_csv"
+msgstr "Экспорт в CSV"
+
+msgctxt "liveExam.template.session_detail"
+msgid "typed_answers_heading"
+msgstr "Письменные ответы"

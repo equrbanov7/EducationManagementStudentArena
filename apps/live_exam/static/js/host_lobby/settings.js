@@ -1,6 +1,6 @@
-import { UI } from './dom.js';
-import { state } from './state.js';
-import { setSfxVolume, syncLobbyMusic } from './audio.js';
+import { UI } from './dom.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { applyServerVolume, syncLobbyMusic } from './audio.js?v=lx20260929';
 
 export function applySessionSettings(nextSettings) {
     const previousLobbyMusic = state.sessionSettings.lobby_music;
@@ -11,9 +11,8 @@ export function applySessionSettings(nextSettings) {
         UI.autoMode.checked = Boolean(state.sessionSettings.autoplay);
     }
     if (previousLobbyMusic !== state.sessionSettings.lobby_music) {
-        syncLobbyMusic(true);
+        syncLobbyMusic();
     }
-    if (state.sessionSettings.sfx_volume != null) {
-        setSfxVolume(state.sessionSettings.sfx_volume);
-    }
+    // Server səs səviyyəsi yalnız bu cihazda şəxsi seçim yoxdursa tətbiq olunur.
+    applyServerVolume(state.sessionSettings.sfx_volume);
 }

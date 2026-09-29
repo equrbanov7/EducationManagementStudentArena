@@ -1,0 +1,283 @@
+/* ═══ FİNAL SƏHNƏSİ 2/2 — podium, rəqqaslar, tac, lövhələr, tamaşaçılar ═══
+ * 2026-09-29: pillələr alçaldıldı (1-ci 29→23vh) — qalibin tacı başlıq çiplərinin üstünə düşürdü.
+ * Pillə hündürlüyü YERƏ görədir (server sırası): 1 > 2 > 3. Mətn kontrastı AA:
+ * qızıl/gümüş/bürünc fonda tünd mürəkkəb.
+ */
+.hx-podium {
+    position: absolute;
+    left: 50%;
+    bottom: 21vh;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(3, min(21vw, 340px));
+    align-items: end;
+    transform: translate3d(-50%, 0, 0);
+}
+
+.hx-step {
+    --h: 14vh;
+    --c1: #f7c79b;
+    --c2: #c2742c;
+    --ink: #2b1300;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    transform: translate3d(0, 120%, 0);
+    transition: transform 0.95s cubic-bezier(0.2, 0.9, 0.25, 1.12);
+}
+
+.hx-step--left { grid-column: 1; transition-delay: 0.12s; }
+.hx-step--center { grid-column: 2; transition-delay: 0.24s; }
+.hx-step--right { grid-column: 3; }
+.hx-stagebox.is-podium .hx-step { transform: translate3d(0, 0, 0); }
+
+.hx-step--p1 { --h: 23vh; --c1: #ffe08a; --c2: #d99a00; --ink: #2b1b00; }
+.hx-step--p2 { --h: 17.5vh; --c1: #f1f5fb; --c2: #9aa7bd; --ink: #1b2436; }
+
+.hx-step__block {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: var(--h);
+    padding: 1.4vh 10px 0;
+    overflow: hidden;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(180deg, var(--c1), var(--c2));
+    color: var(--ink);
+    box-shadow: inset 0 10px 0 rgba(255, 255, 255, 0.32), inset 0 -30px 50px rgba(0, 0, 0, 0.28), 0 0 50px rgba(0, 0, 0, 0.5);
+}
+
+.hx-step--center .hx-step__block { z-index: 1; box-shadow: inset 0 10px 0 rgba(255, 255, 255, 0.4), inset 0 -30px 50px rgba(0, 0, 0, 0.24), 0 0 70px rgba(255, 190, 60, 0.35); }
+
+.hx-step__medal {
+    position: absolute;
+    right: -0.05em;
+    bottom: -0.18em;
+    font: 800 min(22vh, 220px)/1 var(--hx-display, sans-serif);
+    color: rgba(255, 255, 255, 0.28);
+    pointer-events: none;
+}
+
+.hx-plate {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5vh;
+    width: 100%;
+    min-width: 0;
+    text-align: center;
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition: opacity 0.5s 0.35s ease, transform 0.5s 0.35s var(--hx-ease-out, ease);
+}
+
+.hx-step.is-revealed .hx-plate { opacity: 1; transform: none; }
+
+.hx-plate__place { font: 800 clamp(11px, 0.85vw, 16px)/1.1 var(--hx-font, sans-serif); letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.85; }
+
+.hx-plate__name {
+    display: -webkit-box;
+    max-width: 100%;
+    overflow: hidden;
+    font: 800 clamp(16px, 1.55vw, 32px)/1.12 var(--hx-font, sans-serif);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+}
+
+.hx-step--p3 .hx-plate__name,
+.hx-step--p2 .hx-plate__name { font-size: clamp(15px, 1.35vw, 27px); }
+
+.hx-plate__score { font: 700 clamp(13px, 1vw, 19px)/1 var(--hx-font, sans-serif); }
+.hx-plate__score b { font: 800 clamp(20px, 1.9vw, 40px)/1 var(--hx-display, sans-serif); font-variant-numeric: tabular-nums; }
+
+.hx-plate__tie {
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font: 800 clamp(11px, 0.8vw, 14px)/1.2 var(--hx-font, sans-serif);
+}
+
+.hx-plate__extra { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; font: 800 clamp(11px, 0.8vw, 15px)/1.2 var(--hx-font, sans-serif); }
+.hx-plate__extra span { display: inline-flex; align-items: center; gap: 3px; }
+.hx-plate__extra .hx-icon { width: 14px; height: 14px; }
+.hx-step--p3 .hx-plate__extra { display: none; }
+
+/* ── Rəqqas (avatar) + işıq dairəsi ────────────────────────────── */
+.hx-dancer {
+    position: relative;
+    z-index: 2;
+    margin-bottom: -1.4vh;
+    line-height: 0;
+    opacity: 0;
+    transform: translate3d(0, -80vh, 0);
+}
+
+.hx-step.is-revealed .hx-dancer { animation: hxDrop 0.95s cubic-bezier(0.3, 1.3, 0.5, 1) forwards; }
+
+.hx-dancer .live-avatar { --live-avatar-size: min(19vh, 200px) !important; }
+.hx-step--p1 .hx-dancer .live-avatar { --live-avatar-size: min(22vh, 230px) !important; }
+
+@keyframes hxDrop {
+    0% { opacity: 1; transform: translate3d(0, -80vh, 0) scale(0.9, 1.1); }
+    62% { opacity: 1; transform: translate3d(0, 0, 0) scale(1.12, 0.86); }
+    80% { transform: translate3d(0, -3vh, 0) scale(0.96, 1.05); }
+    100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+.hx-step__spot {
+    position: absolute;
+    left: -30%;
+    bottom: 55%;
+    z-index: 1;
+    width: 160%;
+    height: 72vh;
+    background:
+        radial-gradient(ellipse 34% 7% at 50% 100%, rgba(255, 236, 190, 0.55), transparent 70%),
+        linear-gradient(180deg, rgba(255, 236, 190, 0), rgba(255, 236, 190, 0.2) 70%, rgba(255, 236, 190, 0.05));
+    clip-path: polygon(44% 0, 56% 0, 86% 100%, 14% 100%);
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+}
+
+.hx-step.is-revealed .hx-step__spot { opacity: 1; }
+.hx-stagebox[data-phase="party"] .hx-step__spot { opacity: 0.55; }
+
+/* ── Tac (qalibin avatarının İÇİNDƏ — tullananda onunla hərəkət edir) ── */
+.hx-crown {
+    position: absolute;
+    left: 50%;
+    top: 3%;
+    z-index: 3;
+    width: 34%;
+    opacity: 0;
+    transform: translate3d(-50%, -70vh, 0) rotate(-30deg);
+    pointer-events: none;
+}
+
+.hx-crown__svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 14px rgba(255, 190, 60, 0.55)); }
+.hx-crown.is-dropped { animation: hxCrown 0.95s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
+
+@keyframes hxCrown {
+    0% { opacity: 1; transform: translate3d(-50%, -70vh, 0) rotate(-30deg); }
+    70% { opacity: 1; transform: translate3d(-50%, -8%, 0) rotate(6deg); }
+    100% { opacity: 1; transform: translate3d(-50%, -12%, 0) rotate(-6deg); }
+}
+
+/* ── Tamaşaçılar (4–10-cu yerlər) ────────────────────────────────── */
+.hx-audience {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.2vh;
+    z-index: 4;
+    display: flex;
+    justify-content: center;
+    padding: 0 12vw;
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+    transition: opacity 0.8s 0.6s ease, transform 0.8s 0.6s var(--hx-ease-out, ease);
+}
+
+.hx-stagebox.is-podium .hx-audience { opacity: 1; transform: none; }
+
+.hx-audience::before {
+    content: "";
+    position: absolute;
+    left: 8vw;
+    right: 8vw;
+    bottom: -1.2vh;
+    height: 9vh;
+    border-radius: 40px 40px 0 0;
+    background: linear-gradient(180deg, #3b0a1c, #14040b);
+    box-shadow: inset 0 6px 0 rgba(255, 255, 255, 0.06);
+}
+
+.hx-audience__list {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(8px, 1.2vw, 24px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hx-fan {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: clamp(84px, 8vw, 140px);
+    min-width: 0;
+}
+
+.hx-fan .live-avatar { --live-avatar-size: min(11vh, 104px) !important; }
+
+.hx-fan__rank {
+    font: 800 clamp(12px, 0.85vw, 16px)/1 var(--hx-display, sans-serif);
+    color: #f3dcc0;
+}
+
+.hx-fan__name {
+    max-width: 100%;
+    padding: 3px 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(20, 8, 16, 0.85);
+    font: 800 clamp(12px, 0.9vw, 16px)/1.2 var(--hx-font, sans-serif);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hx-fan__score { font: 700 clamp(11px, 0.8vw, 14px)/1 var(--hx-font, sans-serif); color: #f3dcc0; font-variant-numeric: tabular-nums; }
+
+.hx-fan--more {
+    align-self: center;
+    justify-content: center;
+    width: auto;
+    padding: 10px 18px;
+    border: 1px solid rgba(255, 214, 102, 0.4);
+    border-radius: 999px;
+    background: rgba(20, 8, 16, 0.85);
+    font: 800 clamp(14px, 1vw, 19px)/1 var(--hx-font, sans-serif);
+    color: var(--st-gold);
+    white-space: nowrap;
+}
+
+/* ── İştirakçı yoxdur ────────────────────────────────────────────── */
+.hx-stagebox[data-phase="empty"] .hx-podium { display: none; }
+
+/* ── Kiçik ekran (1440×900 və aşağı) ─────────────────────────────── */
+@media (max-height: 920px) {
+    .hx-marquee { top: 11vh; }
+    .hx-podium { bottom: 19vh; }
+    /* Ümumi qayda ƏVVƏL gəlir: eyni spesifiklikdə sonrakı qayda qalib gəlir — əks halda
+       .hx-step bütün pillələri eyni hündürlüyə endirirdi (podium düz görünürdü). */
+    .hx-step { --h: 13vh; }
+    .hx-step--p1 { --h: 21vh; }
+    .hx-step--p2 { --h: 16vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hx-step,
+    .hx-plate,
+    .hx-audience,
+    .hx-step__spot { transition: none !important; }
+
+    .hx-step.is-revealed .hx-dancer,
+    .hx-crown.is-dropped { animation: none !important; opacity: 1; transform: none; }
+
+    .hx-crown.is-dropped { transform: translate3d(-50%, -12%, 0) rotate(-6deg); }
+}

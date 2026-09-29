@@ -11,6 +11,7 @@ from apps.live_exam.constants import PLAYER_GET_READY_SECONDS, PLAYER_QUESTION_I
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import serialize_answer_distribution
+from apps.live_exam.tests.lx_be_support import grant_host_permission
 from apps.organizations.models import Organization
 from core.constants import OrganizationType
 
@@ -36,6 +37,8 @@ class LiveExamRoundScenarioTest(TestCase):
         self.teacher.profile.save(update_fields=["organization", "organization_type", "updated_at"])
 
         self.host_client.login(username="scenario_teacher", password="StrongPass123!")
+        # LX-SEC/LX-BE: host state_json indi digər host endpoint-ləri kimi RBAC tələb edir.
+        grant_host_permission(self.host_client, self.teacher, self.org)
 
     def _make_active_single_choice_session(self):
         exam = Exam.objects.create(
@@ -109,6 +112,11 @@ class LiveExamRoundScenarioTest(TestCase):
             (players[9], 9000),
         ]
 
+        # Audit 2026-09-28 LXBE-01: bal vaxtı = max(serverin gördüyü vaxt, müştəri vaxtı).
+        # Ssenari deterministik olsun deyə server hər cavabı müştərinin dediyi anda alır.
+        answer_starts_at = session.question_started_at + timezone.timedelta(
+            seconds=PLAYER_GET_READY_SECONDS + PLAYER_QUESTION_INTRO_SECONDS
+        )
         for index, (player, answer_ms, expected_points) in enumerate(correct_plan, start=1):
             ok, result = save_answer_and_score(
                 pin=session.pin,
@@ -117,6 +125,7 @@ class LiveExamRoundScenarioTest(TestCase):
                 question_id=question.id,
                 option_ids=[correct_option.id],
                 answer_ms=answer_ms,
+                received_at=answer_starts_at + timezone.timedelta(milliseconds=answer_ms),
             )
 
             self.assertTrue(ok)
@@ -145,6 +154,7 @@ class LiveExamRoundScenarioTest(TestCase):
                 question_id=question.id,
                 option_ids=[wrong_option.id],
                 answer_ms=answer_ms,
+                received_at=answer_starts_at + timezone.timedelta(milliseconds=answer_ms),
             )
 
             self.assertTrue(ok)

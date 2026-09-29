@@ -3,9 +3,9 @@
  * fayla çıxarıldı — CSP `script-src` yalnız SELF + NONCE).
  *
  * JSON data-adaları:
- *   #playerBootstrap       — pin, csrf, quizTitle, stateUrl, answerUrl,
- *                            waitingMessages[], player{id, nickname, avatar_key,
- *                            accessory_key, score}
+ *   #playerBootstrap       — pin, csrf, quizTitle, stateUrl, answerUrl, waitRoomUrl,
+ *                            joinPageUrl, player{id, nickname, avatar_key,
+ *                            accessory_key, score}  (LX-FE-PLAYER 2026-09-29)
  *   #playerI18n            — LIVE_EXAM_PLAYER_I18N mətnləri
  *   #playerSessionSettings — session_settings (json_script, dəyişməyib)
  *

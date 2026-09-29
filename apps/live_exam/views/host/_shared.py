@@ -7,7 +7,11 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamQuestion
 from apps.live_exam.domain.session import get_total_questions
 from apps.live_exam.models import LiveSession
-from apps.live_exam.session_settings import allowed_max_participants_for_user, get_session_settings
+from apps.live_exam.session_settings import (
+    allowed_max_participants_for_user,
+    get_host_session_settings,
+    host_question_catalog,
+)
 from apps.live_exam.transport import build_join_url
 from core.permissions import request_has_permission
 
@@ -47,7 +51,8 @@ def _host_session_context(request, session: LiveSession, *, auto_fullscreen: str
     else:
         selected = 0
 
-    session_settings = get_session_settings(session)
+    # Host səhifələri: tam ayarlar (typed_questions daxil) — get_session_settings oyunçu üçün kəsilmiş görünüşdür.
+    session_settings = get_host_session_settings(session)
 
     return {
         "session": session,
@@ -60,4 +65,7 @@ def _host_session_context(request, session: LiveSession, *, auto_fullscreen: str
         "session_locked": bool(session.is_locked),
         "max_participants_cap": allowed_max_participants_for_user(request.user),
         "auto_fullscreen": auto_fullscreen,
+        # 2026-09-29: yazılı cavab ayarları üçün sual kataloqu (qəbul cavablarını ehtiva edir —
+        # yalnız host səhifələrinə verilir; şablon `json_script:"hostQuestions"` ilə ötürür).
+        "host_questions": host_question_catalog(session),
     }

@@ -1,250 +1,218 @@
-import { $ } from './dom.js';
-import { UI } from './dom.js';
-import { PHASES } from './constants.js';
-import { state } from './state.js';
-import { setPresentationMarkup } from './presentation.js';
+import { UI } from './dom.js?v=lx20260929';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { playJoin } from './audio.js?v=lx20260929';
+import { icon } from './icons.js?v=lx20260929';
+import { setPresentationMarkup } from './presentation.js?v=lx20260929';
 import {
-    answerWord,
     avatarImageMarkup,
-    avatarMarkup,
     buildJoinUrl,
     controlsEnabled,
     currentQrUrl,
     esc,
     fmt,
+    formatNumber,
     joinUrlLabel,
-    lobbyCopy,
     notifyHostShell,
-    progressLabel,
-    toMs,
+    pinMarkup,
     tr,
-} from './utils.js';
+} from './utils.js?v=lx20260929';
 
-export function renderIdleStage() {
-    const copy = lobbyCopy();
-    const joinedCount = Number(state.totalPlayers || 0);
-    const audienceText = joinedCount > 0 ? fmt(copy.audienceLabel, { count: joinedCount }) : copy.audienceEmpty;
-    const joinUrl = joinUrlLabel(buildJoinUrl());
-    const waitingLabel = state.isLocked ? copy.lockedLabel : copy.waitingLabel;
-    const waitingHint = state.isLocked ? copy.lockedHint : copy.waitingHint;
-    const audienceSignature = (state.players || [])
-        .map(player =>
-            [
-                Number(player?.id || 0),
-                String(player?.nickname || ""),
-                String(player?.avatar_key || ""),
-                String(player?.accessory_key || ""),
-            ].join(":")
-        )
-        .join("|");
-    const audienceMarkup = state.players.length
-        ? state.players
-            .map(
-                player => `
-                    <article class="lobby-stage__audience-card" data-player-id="${Number(player?.id || 0)}">
-                        <div class="lobby-stage__audience-avatar">${avatarImageMarkup(player, 64, "host-avatar-image--stage-participant")}</div>
-                        <div class="lobby-stage__audience-name">${esc(player?.nickname || "")}</div>
-                        ${
-                            controlsEnabled()
-                                ? `
-                                    <button
-                                        type="button"
-                                        class="lobby-stage__audience-remove"
-                                        data-remove-player-id="${Number(player?.id || 0)}"
-                                        aria-label="${esc(copy.removePlayerLabel)}: ${esc(player?.nickname || "player")}"
-                                        title="${esc(copy.removePlayerLabel)}">
-                                        <i class="fas fa-user-minus"></i>
-                                    </button>
-                                `
-                                : ""
-                        }
-                    </article>
-                `
-            )
-            .join("")
-        : `<div class="lobby-stage__audience-empty">${esc(copy.playersEmpty)}</div>`;
+/* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
+ * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn
+ * «pop» animasiyası + qoşulma səsi alır, köhnələr yerində qalır (sayrışma yoxdur). */
+const cloud = { rendered: new Map(), known: new Set(), initialized: false };
 
-    setPresentationMarkup(
-        PHASES.IDLE,
-        `idle:${joinedCount}:${state.isLocked ? "locked" : "open"}:${state.sessionSettings.two_step_join === false ? "direct" : "pin"}:${audienceSignature}`,
-        `
-            <section class="present-view present-view--lobby">
-                <header class="lobby-stage__join-board">
-                    <div class="lobby-stage__join-copy">
-                        <span class="lobby-stage__eyebrow">${esc(copy.joinLabel)}</span>
-                        <strong>${esc(joinUrl || CONFIG.entryUrl || "")}</strong>
-                        <p>${esc(copy.joinHint)}</p>
-                    </div>
-                    <div class="lobby-stage__pin">
-                        <span class="lobby-stage__eyebrow">${esc(copy.pinLabel)}</span>
-                        <strong>${esc(CONFIG.pin)}</strong>
-                        <small>${esc(audienceText)}</small>
-                    </div>
-                    <button type="button" class="lobby-stage__qr" data-action="open-qr" aria-label="QR">
-                        <img src="${esc(currentQrUrl())}" alt="QR">
-                    </button>
-                </header>
+export function resetLobbyStage() {
+    cloud.rendered.clear();
+    cloud.known.clear();
+    cloud.initialized = false;
+}
 
-                <div class="lobby-stage__hero">
-                    <div class="stage-pill stage-pill--brand">${esc(copy.brand)}</div>
-                    <h1 class="stage-title stage-title--lobby">${esc(CONFIG.examTitle || tr("introTitle", "Quiz"))}</h1>
-                    <div class="lobby-stage__status ${state.isLocked ? "is-locked" : ""}">
-                        <span class="lobby-stage__status-dot" aria-hidden="true"></span>
-                        <span>${esc(waitingLabel)}</span>
-                    </div>
-                </div>
+function shellSignature() {
+    return [
+        "lobby",
+        CONFIG.pin,
+        state.isLocked ? "locked" : "open",
+        state.sessionSettings.two_step_join === false ? "direct" : "pin",
+        CONFIG.entryUrl || "",
+    ].join(":");
+}
 
-                <section class="lobby-stage__audience-dock ${state.players.length ? "" : "is-empty"}" aria-label="${esc(copy.participantsTitle)}">
-                    <header class="lobby-stage__audience-head">
-                        <div class="lobby-stage__audience-copy">
-                            <span class="lobby-stage__audience-kicker">${esc(copy.participantsTitle)}</span>
-                            <strong>${esc(audienceText)}</strong>
+function shellMarkup() {
+    const joinUrl = joinUrlLabel(buildJoinUrl()) || CONFIG.entryUrl || "";
+    const locked = Boolean(state.isLocked);
+    return `
+        <section class="hx-scene hx-lobby ${locked ? "is-locked" : ""}" data-lobby>
+            <header class="hx-lobby__top">
+                <div class="hx-join">
+                    <div class="hx-join__step">
+                        <span class="hx-join__num" aria-hidden="true">1</span>
+                        <div class="hx-join__copy">
+                            <span class="hx-join__label">${esc(tr("lobbyJoinAt", "Qoşulmaq üçün keçid"))}</span>
+                            <strong class="hx-join__url">${esc(joinUrl)}</strong>
                         </div>
-                        <span class="lobby-stage__audience-count">${joinedCount}</span>
-                    </header>
-                    <div class="lobby-stage__audience-list">
-                        ${audienceMarkup}
                     </div>
-                </section>
+                    <div class="hx-join__step hx-join__step--pin">
+                        <span class="hx-join__num" aria-hidden="true">2</span>
+                        <div class="hx-join__copy">
+                            <span class="hx-join__label">${esc(tr("lobbyPinLabel", "Oyun PIN-i"))}</span>
+                            <strong class="hx-pin" aria-label="PIN ${esc(CONFIG.pin)}">${pinMarkup(CONFIG.pin)}</strong>
+                        </div>
+                    </div>
+                    ${
+                        locked
+                            ? `<div class="hx-join__locked" role="status">${icon("lock")}<span><strong>${esc(tr("lobbyLocked", "Qoşulma bağlanıb"))}</strong>${esc(tr("lobbyLockedHint", "Yeni iştirakçılar qoşula bilməz"))}</span></div>`
+                            : ""
+                    }
+                </div>
+                <button type="button" class="hx-qr" data-action="open-qr" aria-label="${esc(tr("lobbyScanQr", "QR kodu böyüt"))}">
+                    <img src="${esc(currentQrUrl())}" alt="" width="260" height="260">
+                    <span>${esc(tr("lobbyScanQr", "Və ya QR kodu skan edin"))}</span>
+                </button>
+            </header>
+            <div class="hx-lobby__mid">
+                <h1 class="hx-lobby__title" data-len="${String(CONFIG.examTitle || "").length > 48 ? "l" : "s"}">${esc(CONFIG.examTitle || tr("introTitle", "Viktorina"))}</h1>
+                <div class="hx-lobby__meta">
+                    <div class="hx-count" aria-live="polite">
+                        ${icon("users")}
+                        <strong data-lobby-count>0</strong>
+                        <span>${esc(tr("lobbyPlayersWord", "iştirakçı"))}</span>
+                    </div>
+                    <div class="hx-lobby__status" data-lobby-status></div>
+                </div>
+            </div>
+            <div class="hx-cloud" data-lobby-cloud data-density="l" aria-label="${esc(tr("lobbyParticipants", "Qoşulan iştirakçılar"))}"></div>
+            <p class="hx-lobby__empty" data-lobby-empty>
+                <span class="hx-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                ${esc(tr("lobbyEmpty", "Hələ heç kim qoşulmayıb — telefonla PIN-i daxil edin"))}
+            </p>
+        </section>
+    `;
+}
 
-                <footer class="lobby-stage__footer">
-                    <div class="lobby-stage__meta lobby-stage__meta--muted">${esc(waitingHint)}</div>
-                </footer>
-            </section>
-        `
-    );
+function bubbleMarkup(player, removable) {
+    const id = Number(player?.id || 0);
+    const name = esc(player?.nickname || "");
+    return `
+        <span class="hx-bubble__avatar">${avatarImageMarkup(player, 64, "hx-bubble__img")}</span>
+        <span class="hx-bubble__name" title="${name}">${name}</span>
+        ${
+            removable
+                ? `<button type="button" class="hx-bubble__remove" data-remove-player-id="${id}" aria-label="${esc(tr("lobbyRemove", "İştirakçını çıxar"))}: ${name}" title="${esc(tr("lobbyRemove", "İştirakçını çıxar"))}">${icon("close")}</button>`
+                : ""
+        }
+    `;
+}
+
+function bubbleKey(player) {
+    return [player?.nickname || "", player?.avatar_key || "", player?.accessory_key || ""].join("|");
+}
+
+function updateStatus(root, count) {
+    const status = root.querySelector("[data-lobby-status]");
+    if (!status) return;
+    let text = tr("lobbyWaiting", "İştirakçılar gözlənilir…");
+    let tone = "waiting";
+    if (state.isLocked) {
+        text = tr("lobbyLocked", "Qoşulma bağlanıb");
+        tone = "locked";
+    } else if (count > 0) {
+        text = controlsEnabled() ? tr("lobbyReadyHost", "Hazır olduqda «Başla» düyməsini basın") : tr("lobbyReady", "Oyun tezliklə başlayır!");
+        tone = "ready";
+    }
+    if (status.dataset.tone !== tone || status.textContent.trim() !== text) {
+        status.dataset.tone = tone;
+        status.innerHTML = `<span class="hx-lobby__dot" aria-hidden="true"></span><span>${esc(text)}</span>`;
+    }
+}
+
+function renderCloud(root, fromData) {
+    const list = root.querySelector("[data-lobby-cloud]");
+    if (!list) return;
+    const players = (Array.isArray(state.players) ? state.players : []).slice().reverse(); // server: ən yeni birinci
+    const total = Math.max(Number(state.totalPlayers || 0), players.length);
+    const visible = players.slice(-LOBBY_MAX_BUBBLES);
+    const hidden = Math.max(0, total - visible.length);
+    list.dataset.density = total <= 20 ? "l" : total <= 45 ? "m" : "s";
+
+    const removable = controlsEnabled();
+    const nextIds = new Set(visible.map((player) => String(player.id)));
+    cloud.rendered.forEach((entry, id) => {
+        if (!nextIds.has(id)) {
+            entry.el.remove();
+            cloud.rendered.delete(id);
+        }
+    });
+
+    let more = list.querySelector("[data-lobby-more]");
+    if (hidden > 0) {
+        if (!more) {
+            more = document.createElement("span");
+            more.className = "hx-bubble hx-bubble--more";
+            more.dataset.lobbyMore = "1";
+            list.prepend(more);
+        }
+        more.textContent = fmt(tr("lobbyMore", "+{count} daha"), { count: formatNumber(hidden) });
+    } else if (more) {
+        more.remove();
+    }
+
+    let anchor = more || null;
+    visible.forEach((player) => {
+        const id = String(player.id);
+        let entry = cloud.rendered.get(id);
+        const key = bubbleKey(player);
+        if (!entry) {
+            const el = document.createElement("article");
+            el.className = "hx-bubble";
+            el.dataset.playerId = id;
+            el.innerHTML = bubbleMarkup(player, removable);
+            // «Yeni» yalnız ilk server məlumatından SONRA gələnlərdir (refresh-də 30 pop olmasın).
+            if (cloud.initialized && !cloud.known.has(id)) {
+                el.classList.add("is-new");
+                playJoin(`join:${CONFIG.pin}:${id}`);
+            }
+            entry = { el, key };
+            cloud.rendered.set(id, entry);
+        } else if (entry.key !== key) {
+            entry.el.innerHTML = bubbleMarkup(player, removable);
+            entry.key = key;
+        }
+        const expected = anchor ? anchor.nextElementSibling : list.firstElementChild;
+        if (expected !== entry.el) {
+            if (anchor) anchor.after(entry.el);
+            else list.prepend(entry.el);
+        }
+        anchor = entry.el;
+    });
+
+    const countEl = root.querySelector("[data-lobby-count]");
+    if (countEl) countEl.textContent = formatNumber(total);
+    root.classList.toggle("has-players", total > 0);
+    updateStatus(root, total);
+    if (fromData) {
+        players.forEach((player) => cloud.known.add(String(player.id)));
+        cloud.initialized = true;
+    }
+}
+
+export function renderIdleStage(fromData = false) {
+    if (state.sessionState !== "lobby") return;
+    const signature = shellSignature();
+    const fresh = setPresentationMarkup(PHASES.IDLE, signature, shellMarkup());
+    if (fresh) {
+        cloud.rendered.clear();
+    }
+    const root = UI.presentationContent?.querySelector("[data-lobby]");
+    if (root) renderCloud(root, fromData);
 }
 
 export function renderLobbyPlayers(players, totalCount = null) {
     state.players = Array.isArray(players) ? players : [];
-    const expectedTotal = Number.isFinite(Number(totalCount)) ? Number(totalCount) : Number(state.players.length);
+    const expectedTotal = Number.isFinite(Number(totalCount)) && totalCount != null ? Number(totalCount) : state.players.length;
     state.totalPlayers = expectedTotal;
-
-    if (UI.playersCount) {
-        UI.playersCount.textContent = state.totalPlayers;
-    }
-    updateAnsweredCounter();
-
-    if (!UI.playersList) {
-        notifyHostShell();
-        return;
-    }
-
-    UI.playersList.innerHTML = "";
-    if (!state.players.length) {
-        const empty = document.createElement("div");
-        empty.className = "players-empty";
-        empty.textContent = lobbyCopy().playersEmpty;
-        UI.playersList.appendChild(empty);
-        notifyHostShell();
-        return;
-    }
-
-    state.players.forEach(player => {
-        const chip = document.createElement("article");
-        chip.className = "player-chip";
-        chip.dataset.playerId = String(player.id);
-        chip.innerHTML = `
-            <div class="player-chip__avatar">${avatarMarkup(player, 54, "host-avatar host-avatar--chip")}</div>
-            <div class="player-chip__name">${esc(player.nickname || "")}</div>
-            ${
-                !CONFIG.presentationOnly && state.sessionState === "lobby"
-                    ? `
-                        <button
-                            type="button"
-                            class="player-chip__remove"
-                            data-remove-player-id="${Number(player.id || 0)}"
-                            aria-label="Remove ${esc(player.nickname || "player")}">
-                            <i class="fas fa-user-minus"></i>
-                        </button>
-                    `
-                    : ""
-            }
-        `;
-        UI.playersList.appendChild(chip);
-    });
-
+    if (UI.playersCount) UI.playersCount.textContent = String(state.totalPlayers);
+    if (state.sessionState === "lobby") renderIdleStage(true);
     notifyHostShell();
-}
-
-export function updateAnsweredCounter() {
-    const answered = Number(state.answeredCount || 0);
-    const total = Number(state.totalPlayers || 0);
-    UI.answeredText.textContent = `${answered} / ${total}`;
-
-    const counter = $("answerCounterValue");
-    const counterNumber = $("answerCounterNumber");
-    const counterLabel = $("answerCounterLabel");
-    const subline = $("answerCounterSubline");
-    if (counter) {
-        counter.textContent = `${answered} ${answerWord(answered)}`;
-    }
-    if (counterNumber) {
-        counterNumber.textContent = `${answered}`;
-    }
-    if (counterLabel) {
-        counterLabel.textContent = answerWord(answered);
-    }
-    if (subline) {
-        subline.textContent = fmt(tr("playersAnswered", "{answered} answered"), { answered });
-    }
-}
-
-export function updateTimerBadge(nowMs) {
-    const value = $("answerTimerValue");
-    const badge = $("answerTimerBadge");
-    if (!value || !badge || !state.questionPlan) return;
-    const deadline = nowMs < state.questionPlan.answerStart ? state.questionPlan.answerStart : state.questionPlan.endsAt;
-    const leftSeconds = Math.max(0, Math.ceil((deadline - nowMs) / 1000));
-    value.textContent = `${leftSeconds}`;
-    badge.classList.toggle("is-warning", leftSeconds <= 10 && leftSeconds > 5);
-    badge.classList.toggle("is-danger", leftSeconds <= 5);
-}
-
-export function updateQuestionIntroProgress(nowMs) {
-    const fill = $("questionOnlyBarFill");
-    if (!fill || !state.questionPlan) return;
-    const start = Number(state.questionPlan.countdownEnd || 0);
-    const end = Number(state.questionPlan.answerStart || 0);
-    const duration = Math.max(1, end - start);
-    const progress = Math.max(0, Math.min(1, (nowMs - start) / duration));
-    fill.style.width = `${Math.round(progress * 100)}%`;
-}
-
-export function buildQuestionPlan(question) {
-    const startedAt = toMs(question?.started_at);
-    const getReadyMs = Math.max(0, Number(question?.get_ready_duration_ms || 0));
-    const introMs = Math.max(0, Number(question?.intro_duration_ms || 0));
-    const readyEndsAt = toMs(question?.ready_ends_at) || (startedAt + getReadyMs);
-    const answerStart = toMs(question?.answer_starts_at) || (readyEndsAt + introMs);
-    const endsAt = toMs(question?.ends_at);
-    const hasCountdown = getReadyMs > 0;
-    const quizDuration = hasCountdown ? Math.max(850, Math.min(1000, getReadyMs - 2200)) : 0;
-    const countdownStart = hasCountdown ? startedAt + quizDuration : readyEndsAt;
-    const countdownEnd = hasCountdown ? readyEndsAt : readyEndsAt;
-
-    return {
-        startedAt,
-        quizEnd: hasCountdown ? startedAt + quizDuration : startedAt,
-        countdownStart,
-        countdownEnd,
-        readyEndsAt,
-        answerStart,
-        endsAt,
-        hasCountdown,
-        getReadyMs,
-        introMs,
-    };
-}
-
-export function distributionLookup(payload) {
-    const counts = new Map();
-    const rows = payload?.distribution?.counts || [];
-    rows.forEach(row => {
-        counts.set(Number(row.option_id || 0), Number(row.count || 0));
-    });
-    return {
-        counts,
-        totalAnswers: Number(payload?.distribution?.total_answers || 0),
-    };
 }

@@ -1,82 +1,70 @@
-import { esc } from './utils.js';
+import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20260929';
+import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20260929';
 
-export function optionTone(index) {
-    return ["red", "blue", "yellow", "green"][index % 4];
+/* Cavab plitələri — rəng (t1..t6) + FİQUR (rəng korları üçün), host və telefonda eyni:
+ * 1 üçbucaq (qırmızı), 2 romb (göy), 3 dairə (kəhrəba), 4 kvadrat (yaşıl),
+ * 5 ulduz (bənövşəyi; server açarı "pentagon"), 6 altıbucaq (firuzəyi). */
+
+const SHAPE_LABELS = {
+    triangle: ["shapeTriangle", "Üçbucaq"],
+    diamond: ["shapeDiamond", "Romb"],
+    circle: ["shapeCircle", "Dairə"],
+    square: ["shapeSquare", "Kvadrat"],
+    star: ["shapeStar", "Ulduz"],
+    hexagon: ["shapeHexagon", "Altıbucaq"],
+};
+
+export function optionShapeLabel(option, index) {
+    const [key, fallback] = SHAPE_LABELS[shapeKey(option, index)] || SHAPE_LABELS.circle;
+    return tr(key, fallback);
 }
 
-const OPTION_SHAPES = ["triangle", "diamond", "circle", "square", "pentagon", "hexagon"];
-
-export function optionShapeKey(option, index) {
-    const fallback = OPTION_SHAPES[index % OPTION_SHAPES.length] || "circle";
-    const raw = String(option?.shape || fallback).toLowerCase();
-    return raw.replace(/[^a-z0-9_-]/g, "") || fallback;
+export function tilesGridClass(count) {
+    const n = Math.max(1, Math.min(6, Number(count) || 0));
+    return `hx-tiles--n${n}`;
 }
 
-export function optionMarkerLabel(option, index) {
-    if (option?.shape_label) return option.shape_label;
-    const shape = optionShapeKey(option, index).replace(/[-_]/g, " ");
-    return shape.charAt(0).toUpperCase() + shape.slice(1);
-}
-
-export function optionMarkerMarkup(option, index, className) {
-    const shape = optionShapeKey(option, index);
-    const label = optionMarkerLabel(option, index);
+/** verdict: undefined (sual) | "correct" | "wrong" (reveal). */
+export function answerTileMarkup(option, index, verdict) {
+    const shape = shapeKey(option, index);
+    const label = optionShapeLabel(option, index);
+    const text = String(option?.text || "");
+    const verdictClass = verdict === "correct" ? "is-correct" : verdict === "wrong" ? "is-wrong" : "";
+    const verdictText = verdict === "correct" ? tr("correctTag", "Düzgün") : verdict === "wrong" ? tr("wrongTag", "Səhv") : "";
     return `
-        <span class="${className} ${className}--shape" aria-label="${esc(label)}" title="${esc(label)}">
-            <span class="answer-shape answer-shape--${shape}" aria-hidden="true"></span>
-        </span>
-    `;
-}
-
-export function answerOptionMarkup(option, index) {
-    return `
-        <article class="host-option host-option--${optionTone(index)}">
-            <div class="host-option__main">
-                ${optionMarkerMarkup(option, index, "host-option__label")}
-                <span class="host-option__text">${esc(option?.text || "")}</span>
-            </div>
+        <article class="hx-tile hx-tile--t${toneIndex(index)} ${verdictClass}" data-len="${lengthClass(text)}" data-option-id="${Number(option?.id || 0)}">
+            <span class="hx-tile__shape" role="img" aria-label="${esc(label)}">${shapeSvg(shape)}</span>
+            <span class="hx-tile__text">${esc(text)}</span>
+            ${
+                verdict
+                    ? `<span class="hx-tile__verdict" role="img" aria-label="${esc(verdictText)}">${icon(verdict === "correct" ? "check" : "cross")}</span>`
+                    : ""
+            }
         </article>
     `;
 }
 
-export function revealOptionMarkup(option, index, distribution, correctOptionIds) {
-    const optionId = Number(option?.id || 0);
-    const isCorrect = correctOptionIds.includes(optionId);
-
-    return `
-        <article class="host-option host-option--${optionTone(index)} is-reveal ${isCorrect ? "is-correct" : "is-wrong"}">
-            <div class="host-option__main">
-                ${optionMarkerMarkup(option, index, "host-option__label")}
-                <span class="host-option__text">${esc(option?.text || "")}</span>
-                <span class="host-option__verdict">${isCorrect ? "✓" : "✕"}</span>
-            </div>
-        </article>
-    `;
-}
-
-export function distributionBarMarkup(option, index, distribution, correctOptionIds) {
-    const optionId = Number(option?.id || 0);
-    const count = Number(distribution.counts.get(optionId) || 0);
-    const totalAnswers = Math.max(0, Number(distribution.totalAnswers || 0));
-    const ratio = totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0;
-    const isCorrect = correctOptionIds.includes(optionId);
-
-    return `
-        <div class="distribution-bar distribution-bar--${optionTone(index)} ${isCorrect ? "is-correct" : ""}">
-            <div class="distribution-bar__meta">
-                <div class="distribution-bar__label-wrap">
-                    ${optionMarkerMarkup(option, index, "distribution-bar__label")}
-                    <span class="distribution-bar__answer">${esc(option?.text || "")}</span>
+/** Reveal sütun qrafiki (Chart.js əvəzinə — yalnız transform animasiyası). */
+export function distributionBarsMarkup(options, distribution, correctIds) {
+    const max = Math.max(1, ...options.map((option) => Number(distribution.counts.get(Number(option?.id || 0)) || 0)));
+    const total = Math.max(0, Number(distribution.totalAnswers || 0));
+    return options
+        .map((option, index) => {
+            const id = Number(option?.id || 0);
+            const count = Number(distribution.counts.get(id) || 0);
+            const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+            const correct = correctIds.includes(id);
+            return `
+                <div class="hx-bar hx-bar--t${toneIndex(index)} ${correct ? "is-correct" : "is-wrong"}" data-ratio="${(count / max).toFixed(4)}" data-count="${count}">
+                    <span class="hx-bar__value"><strong data-bar-count>0</strong><small>${pct}%</small></span>
+                    <span class="hx-bar__track"><span class="hx-bar__fill"></span></span>
+                    <span class="hx-bar__foot">
+                        <span class="hx-bar__shape" role="img" aria-label="${esc(optionShapeLabel(option, index))}">${shapeSvg(shapeKey(option, index))}</span>
+                        ${correct ? `<span class="hx-bar__check" role="img" aria-label="${esc(tr("correctTag", "Düzgün"))}">${icon("check")}</span>` : ""}
+                    </span>
+                    <span class="hx-sr">${esc(option?.text || "")}: ${formatNumber(count)} (${pct}%)</span>
                 </div>
-                <div class="distribution-bar__stats">
-                    <span>${count}</span>
-                    <span>${ratio}%</span>
-                    ${isCorrect ? '<span class="distribution-bar__correct">✓</span>' : ""}
-                </div>
-            </div>
-            <div class="distribution-bar__track" aria-hidden="true">
-                <span style="width:${ratio}%"></span>
-            </div>
-        </div>
-    `;
+            `;
+        })
+        .join("");
 }

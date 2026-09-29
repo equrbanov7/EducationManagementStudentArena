@@ -1,0 +1,305 @@
+/* LX-FE-PLAYER (2026-09-29): gözləmə otağı — «görünüşü dəyiş» alt vərəqi (bottom sheet):
+ * önizləmə, ad sahəsi (sayğac, kilid izahı), avatar/aksesuar tabları və şəbəkələri. */
+
+.lxw-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(2, 10, 16, 0.6);
+}
+
+body.lxw-sheet-open {
+    overflow: hidden;
+}
+
+.lxw-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 55;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 640px);
+    max-height: 92vh;
+    max-height: 92dvh;
+    margin: 0 auto;
+    border-radius: 24px 24px 0 0;
+    background: #ffffff;
+    color: var(--lxw-ink, #0b1f33);
+    box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.4);
+    transform: translateY(24px);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease;
+}
+
+.lxw-sheet.is-open {
+    transform: none;
+    opacity: 1;
+}
+
+.lxw-sheet__grip {
+    width: 44px;
+    height: 5px;
+    margin: 8px auto 0;
+    border-radius: 999px;
+    background: #cbd5e1;
+}
+
+.lxw-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 16px 6px 20px;
+}
+
+.lxw-sheet__head h2 {
+    margin: 0;
+    font: 800 1.25rem/1.2 var(--lxw-display);
+}
+
+.lxw-sheet__close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.lxw-sheet__close svg {
+    width: 20px;
+    height: 20px;
+}
+
+.lxw-sheet__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 4px 16px 12px;
+}
+
+.lxw-sheet__preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0 10px;
+    border-radius: 18px;
+    background: radial-gradient(120% 90% at 50% 10%, #e0f2fe, #f8fafc 70%);
+}
+
+.lxw-sheet__preview-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #475569;
+}
+
+.lxw-field {
+    margin-top: 14px;
+}
+
+.lxw-field__label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.lxw-field__row {
+    position: relative;
+}
+
+.lxw-field__input {
+    width: 100%;
+    min-height: 54px;
+    padding: 12px 64px 12px 14px;
+    border: 2px solid #cbd5e1;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #0f172a;
+    font: 800 1.1rem/1.2 var(--lxw-font);
+    outline: none;
+}
+
+.lxw-field__input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+
+.lxw-field__input:disabled {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.lxw-field__count {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font: 800 0.85rem/1 var(--lxw-display);
+    color: #475569;
+    font-variant-numeric: tabular-nums;
+}
+
+.lxw-field__hint {
+    margin: 6px 0 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #fef3c7;
+    color: #78350f;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.lxw-field__error {
+    min-height: 1.2em;
+    margin: 6px 0 0;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 800;
+}
+
+.lxw-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 6px;
+    padding: 4px;
+    border-radius: 14px;
+    background: #f1f5f9;
+}
+
+.lxw-tabs__tab {
+    min-height: 44px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #334155;
+    font: 800 0.98rem/1 var(--lxw-font);
+    cursor: pointer;
+}
+
+.lxw-tabs__tab.is-active {
+    background: #ffffff;
+    color: #0f172a;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.lxw-panel {
+    margin-top: 12px;
+}
+
+.lxw-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.lxw-grid__item {
+    display: grid;
+    place-items: center;
+    min-height: 72px;
+    padding: 6px;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    background: #f1f5f9;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+.lxw-grid__item:active {
+    transform: scale(0.95);
+}
+
+.lxw-grid__item.is-selected {
+    border-color: #2563eb;
+    background: #dbeafe;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.lxw-grid--chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lxw-chipbtn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 8px 12px;
+    border: 2px solid transparent;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #0f172a;
+    font: 800 0.95rem/1.2 var(--lxw-font);
+    text-align: left;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.lxw-chipbtn__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    color: #475569;
+}
+
+.lxw-chipbtn__icon svg {
+    max-width: 30px;
+    max-height: 30px;
+}
+
+.lxw-chipbtn.is-selected {
+    border-color: #2563eb;
+    background: #dbeafe;
+}
+
+.lxw-grid__item:focus-visible,
+.lxw-chipbtn:focus-visible,
+.lxw-tabs__tab:focus-visible,
+.lxw-sheet__close:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.lxw-sheet__foot {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px;
+    padding: 10px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid #e2e8f0;
+}
+
+.lxw-sheet__foot .lxw-btn--ghost {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #e2e8f0;
+}
+
+@media (min-width: 560px) {
+    .lxw-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .lxw-grid--chips {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lxw-sheet,
+    .lxw-grid__item {
+        transition: none;
+    }
+}
