@@ -3,13 +3,22 @@
 import secrets
 from itertools import product
 
+from django.conf import settings
 from django.utils.translation import get_language
 
-from apps.live_exam.auth import LIVE_CLIENT_ID_COOKIE_MAX_AGE, LIVE_CLIENT_ID_COOKIE_NAME, clean_nickname, get_client_id
+from apps.live_exam.auth import (
+    LIVE_CLIENT_ID_COOKIE_MAX_AGE,
+    LIVE_CLIENT_ID_COOKIE_NAME,
+    clean_nickname,
+    get_client_id,
+    get_request_client_id,
+    nickname_match_key,
+)
 from apps.live_exam.constants import ACCESSORY_KEYS, AVATAR_KEYS, DEFAULT_ACCESSORY_KEY, DEFAULT_AVATAR_KEY
 from apps.live_exam.models import LiveSession
 from apps.live_exam.session_settings import THEME_KEYS, get_session_settings
 from apps.live_exam.transport import broadcast, build_lobby_state_payload
+from core.rate_limit import is_rate_limited, record_rate_limit_hit
 from core.rls import bypass_rls
 from core.utils import get_client_ip
 
@@ -17,6 +26,9 @@ from .constants import (
     _AMBIGUOUS_PIN_GLYPHS,
     _MAX_AMBIGUOUS_PIN_CANDIDATES,
     JOIN_RESUME_COPY,
+    LIVE_PIN_IP_LIMIT_SCOPE,
+    LIVE_PIN_IP_RATE_LIMIT_DEFAULT,
+    LIVE_PIN_LIMIT_SCOPE,
     NICKNAME_CONFLICT_COPY,
     PIN_ENTRY_COPY,
 )
@@ -27,9 +39,11 @@ def _pin_entry_copy() -> dict[str, str]:
     return PIN_ENTRY_COPY.get(lang, PIN_ENTRY_COPY["az"])
 
 
-def _pin_entry_theme_key(pin_value: str, raw_theme: str | None = None) -> str:
-    _, session = _resolve_live_session(pin_value)
-    if session:
+def _pin_entry_theme_key(session: LiveSession | None = None, raw_theme: str | None = None) -> str:
+    # Audit 2026-09-28 LXS-06: mövzu ARTIQ həll olunmuş sessiyadan götürülür —
+    # əvvəl PIN burada ikinci dəfə (limitsiz) həll olunurdu və limit dolanda da
+    # 429 səhifəsinin ``data-live-theme``-i PIN-in mövcudluğunu açırdı.
+    if session is not None:
         return str(get_session_settings(session).get("theme_key") or "aurora")
 
     theme_key = str(raw_theme or "").strip().lower()
@@ -123,17 +137,37 @@ def _nickname_is_taken(
     exclude_player_id: int | None = None,
     exclude_client_id: str | None = None,
 ) -> bool:
+    """Ad «eyni görünür»mü — Audit 2026-09-28 LXS-03.
+
+    Əvvəl ``nickname__iexact`` idi: «Ali\\u200b», «Аli» (kiril А), «Ａｌｉ», «ALİ»
+    mövcud «Ali» ilə toqquşmurdu (liderlik cədvəlində saxta dublikat). İndi
+    təmizlənmiş, casefold + homoglif açarı Python-da müqayisə olunur (sessiyada
+    ≤ 500 oyunçu; çağıran adətən sessiya sətrini kilidləyib).
+    """
+    wanted = nickname_match_key(nickname)
+    if not wanted:
+        return False
     with bypass_rls():
-        queryset = session.players.filter(nickname__iexact=nickname)
-        if exclude_player_id:
-            queryset = queryset.exclude(id=exclude_player_id)
-        if exclude_client_id:
-            queryset = queryset.exclude(client_id=exclude_client_id)
-        return queryset.exists()
+        rows = session.players.values_list("id", "client_id", "nickname")
+        for player_id, client_id, other in rows:
+            if exclude_player_id and player_id == exclude_player_id:
+                continue
+            if exclude_client_id and client_id == exclude_client_id:
+                continue
+            if nickname_match_key(other) == wanted:
+                return True
+    return False
 
 
-def _live_client_id_key(request) -> str:
-    return request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME) or get_client_ip(request) or "unknown"
+def _live_client_bucket_key(request) -> str:
+    """Per-klient sərt vedrə açarı — YALNIZ etibarlı ``live_client_id`` üçün.
+
+    Audit 2026-09-28 LXS-05: əvvəl cookie-siz klientin açarı İP idi — bütün sinfin
+    NAT-ı bir «klient» vedrəsini (20/5dəq) bölüşürdü. Cookie-siz klienti yalnız
+    İP vedrələri məhdudlaşdırır.
+    """
+    client_id = get_request_client_id(request)
+    return f"client:{client_id}" if client_id else ""
 
 
 def _live_ip_key(request) -> str:
@@ -141,15 +175,50 @@ def _live_ip_key(request) -> str:
     return f"ip:{get_client_ip(request) or 'unknown'}"
 
 
+def _pin_ip_rate() -> str:
+    return getattr(settings, "LIVE_PIN_IP_RATE_LIMIT", LIVE_PIN_IP_RATE_LIMIT_DEFAULT)
+
+
+def _pin_miss_buckets(request):
+    buckets = [(LIVE_PIN_IP_LIMIT_SCOPE, _pin_ip_rate(), _live_ip_key(request))]
+    client_key = _live_client_bucket_key(request)
+    if client_key:
+        buckets.append((LIVE_PIN_LIMIT_SCOPE, settings.LIVE_EXAM_JOIN_RATE_LIMIT, client_key))
+    return buckets
+
+
+def pin_lookup_limited(request) -> tuple[bool, int | None]:
+    """UĞURSUZ PIN axtarışı büdcəsi (İP + etibarlı klient) bitibmi — ``(limited, retry_after)``.
+
+    Audit 2026-09-28 LXS-06: büdcə BÜTÜN PIN həll edən giriş nöqtələri üçün
+    ortaqdır (pin_entry, join səhifəsi, join/enter). Limit dolanda PIN ümumiyyətlə
+    HƏLL OLUNMUR — əks halda «tapıldı / tapılmadı» fərqi brute force-u davam etdirərdi.
+    """
+    for scope, rate, key in _pin_miss_buckets(request):
+        limited, retry_after = is_rate_limited(scope, rate, key)
+        if limited:
+            return True, retry_after
+    return False, None
+
+
+def record_pin_miss(request) -> None:
+    """Uğursuz PIN axtarışını say (uğurlu axtarış heç vaxt sayılmır — sinif NAT-ı)."""
+    for scope, rate, key in _pin_miss_buckets(request):
+        record_rate_limit_hit(scope, rate, key)
+
+
 def _ensure_live_client_cookie(request, response):
-    if request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME):
+    if get_request_client_id(request):
         return response
 
+    # Audit 2026-09-28 LXS-10: HttpOnly — JS bu cookie-ni oxumur, o isə
+    # join/enter-də oyunçunu geri almaq açarıdır (XSS ilə oğurlanmasın).
     response.set_cookie(
         LIVE_CLIENT_ID_COOKIE_NAME,
         get_client_id(request),
         max_age=LIVE_CLIENT_ID_COOKIE_MAX_AGE,
         samesite="Lax",
+        httponly=True,
         secure=request.is_secure(),
     )
     return response

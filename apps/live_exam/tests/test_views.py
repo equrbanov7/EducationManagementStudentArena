@@ -2242,9 +2242,16 @@ class LiveExamSessionStateHardeningTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_wait_room_for_nonexistent_session_returns_404(self):
-        """Wait room with unknown PIN returns 404."""
+        """Wait room with unknown PIN behaves like a known PIN without token (no PIN oracle).
+
+        Audit 2026-09-28 LXS-06: əvvəl 404 (mövcud PIN-ə isə 302) — limitsiz PIN
+        orakulu idi. İndi hər ikisi join səhifəsinə yönləndirir; orada naməlum PIN
+        404 verir VƏ uğursuz PIN büdcəsindən sayılır.
+        """
         response = self.client.get(reverse("liveExam:wait_room", kwargs={"pin": "ZZZZZZZZZZ"}))
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("liveExam:join_page", kwargs={"pin": "ZZZZZZZZZZ"}))
+        self.assertEqual(self.client.get(response.url).status_code, 404)
 
     def test_player_cannot_skip_to_screen_without_token(self):
         """Player screen must not be accessible without a valid player token."""

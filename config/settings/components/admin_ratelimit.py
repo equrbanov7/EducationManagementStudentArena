@@ -77,8 +77,14 @@ LIVE_EXAM_JOIN_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_RATE_LIMIT", "20/5m")
 # Live-quiz İP vedrələri (Audit 2026-09-28 D / AD-04): qoşulma və PIN təxmini
 # İP başına; kampus NAT-ı üçün QƏSDƏN geniş. Default-lar
 # apps/live_exam/views/player/constants.py ilə eynidir.
-LIVE_EXAM_JOIN_IP_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_IP_RATE_LIMIT", "150/10m")
-LIVE_PIN_IP_RATE_LIMIT = os.getenv("LIVE_PIN_IP_RATE_LIMIT", "100/10m")
+# Audit 2026-09-28 LX-SEC (LXS-05): 90–150 tələbə EYNİ NAT İP-sindən qoşulur.
+# JOIN_IP — pin+İP üzrə YALNIZ yeni oyunçu cəhdləri (≥ 3 × 150 hərəkət; reconnect
+# sayılmır); PIN_IP — İP üzrə YALNIZ UĞURSUZ PIN axtarışları (bütün giriş nöqtələri).
+LIVE_EXAM_JOIN_IP_RATE_LIMIT = os.getenv("LIVE_EXAM_JOIN_IP_RATE_LIMIT", "600/10m")
+LIVE_PIN_IP_RATE_LIMIT = os.getenv("LIVE_PIN_IP_RATE_LIMIT", "300/10m")
+# 2026-09-29 (LX-BE): WS qoşulmaları kimlik üzrə limitlənir + (PIN, İP) üzrə geniş tavan —
+# bir sinif (150 telefon) Wi-Fi kəsilmələrində təkrar qoşulanda bloklanmasın.
+LIVE_WS_CONNECT_IP_RATE_LIMIT = os.getenv("LIVE_WS_CONNECT_IP_RATE_LIMIT", "1000/1m")
 LIVE_STATE_RATE_LIMIT = os.getenv("LIVE_STATE_RATE_LIMIT", "120/1m")
 LIVE_REACTION_RATE_LIMIT = os.getenv("LIVE_REACTION_RATE_LIMIT", "3/10s")
 # WebSocket-specific rate limits

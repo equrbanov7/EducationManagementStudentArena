@@ -151,13 +151,29 @@ LIVE_JOIN_IP_LIMIT_SCOPE = "live_exam.join.ip"
 LIVE_PIN_IP_LIMIT_SCOPE = "live_exam.pin.ip"
 
 
-LIVE_JOIN_IP_RATE_LIMIT_DEFAULT = "150/10m"
+# Audit 2026-09-28 LXS-05: 90–150 tələbə eyni NAT İP-sindən qoşulur, bəziləri bir
+# neçə dəfə yenidən. pin+İP vedrəsi indi YALNIZ yeni oyunçu cəhdlərini sayır və
+# ≥ 3 × 150 hərəkətə görə ölçülüb (əvvəl 150/10dəq — reconnect-lər də sayılırdı,
+# sinif kilidlənirdi). Ayarlarla eyni default: config/settings/components/admin_ratelimit.py.
+LIVE_JOIN_IP_RATE_LIMIT_DEFAULT = "600/10m"
 
 
-LIVE_PIN_IP_RATE_LIMIT_DEFAULT = "100/10m"
+# Yalnız UĞURSUZ PIN axtarışları (brute force «miss» tələb edir); bütün PIN həll
+# edən giriş nöqtələri üçün ortaq büdcə. 10 simvollu PIN (31^10) üçün 300/10dəq
+# brute force-u praktiki olaraq sıfıra endirir, bir neçə sinfin səhvlərinə isə yer qoyur.
+LIVE_PIN_IP_RATE_LIMIT_DEFAULT = "300/10m"
 
 
 LIVE_REACTION_LIMIT_SCOPE = "live_exam.reaction"
+
+
+# Audit 2026-09-28 LXS-11: sessiya-səviyyəli reaksiya tavanı — hər reaksiya lobbi
+# qrupundakı BÜTÜN soketlərə yayılır (fan-out). Oyunçu başına 3/10s ilə atılan
+# oyunçular sərhədsiz yük yaradırdı. ``LIVE_REACTION_SESSION_RATE_LIMIT`` ayarı ilə dəyişir.
+LIVE_REACTION_SESSION_LIMIT_SCOPE = "live_exam.reaction.session"
+
+
+LIVE_REACTION_SESSION_RATE_LIMIT_DEFAULT = "60/10s"
 
 
 LIVE_RATE_LIMIT_MESSAGE = "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."

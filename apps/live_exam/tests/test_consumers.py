@@ -79,21 +79,18 @@ class LiveExamConsumerAuthTest(TransactionTestCase):
         session_cookie = client.cookies[settings.SESSION_COOKIE_NAME].value
         return [_WS_ORIGIN_HEADER, (b"cookie", f"{settings.SESSION_COOKIE_NAME}={session_cookie}".encode())]
 
-    def test_lobby_ws_allows_viewer_without_auth(self):
-        async def scenario():
-            communicator = WebsocketCommunicator(
-                application, f"/ws/live/{self.session.pin}/lobby/", headers=[_WS_ORIGIN_HEADER]
-            )
-            connected, _ = await communicator.connect()
-            message = await communicator.receive_json_from() if connected else None
+    def test_lobby_ws_rejects_anonymous_viewer(self):
+        # Audit 2026-09-28 LXS-15 / LX-BE: anonim socket əvvəl oyunçu adlarını (ros-ter)
+        # alırdı və PIN-in mövcudluğunu açırdı; indi PIN-dən asılı olmayaraq 4401.
+        async def scenario(pin):
+            communicator = WebsocketCommunicator(application, f"/ws/live/{pin}/lobby/", headers=[_WS_ORIGIN_HEADER])
+            connected, code = await communicator.connect()
             if connected:
                 await communicator.disconnect()
-            return connected, message
+            return connected, code
 
-        connected, message = async_to_sync(scenario)()
-        self.assertTrue(connected)
-        self.assertEqual(message["type"], "lobby_state")
-        self.assertEqual(message["count"], 1)
+        self.assertEqual(async_to_sync(scenario)(self.session.pin), (False, 4401))
+        self.assertEqual(async_to_sync(scenario)("ZZZZZZZZZZ"), (False, 4401))
 
     def test_play_ws_rejects_missing_auth(self):
         async def scenario():
@@ -1495,7 +1492,7 @@ class WebSocketRateLimitTest(TransactionTestCase):
                 communicator = WebsocketCommunicator(
                     application,
                     f"/ws/live/{self.session.pin}/lobby/",
-                    headers=[_WS_ORIGIN_HEADER],
+                    headers=self._player_headers(),
                 )
                 connected, close_code = await communicator.connect()
                 results.append((connected, close_code))
@@ -1537,17 +1534,24 @@ class WebSocketRateLimitTest(TransactionTestCase):
         self.assertTrue(len(rate_limited) > 0, "At least one connection should be rate limited")
 
     def test_lobby_connects_for_distinct_clients_sharing_same_ip(self):
-        """Different viewer client IDs behind one IP must not rate-limit each other."""
+        """Different players behind one IP must not rate-limit each other on the lobby socket."""
+        # LXS-15: anonim viewer artıq qəbul olunmur — fərqli OYUNÇULAR yoxlanır.
+        players = [
+            LivePlayer.objects.create(
+                session=self.session, nickname=f"LobbyNat{idx}", avatar_key="avatar_1", client_id=f"lobby-nat-{idx}"
+            )
+            for idx in range(4)
+        ]
 
         async def scenario():
             results = []
             communicators = []
             try:
-                for idx in range(4):
+                for player in players:
                     communicator = WebsocketCommunicator(
                         application,
                         f"/ws/live/{self.session.pin}/lobby/",
-                        headers=self._viewer_headers(f"viewer-{idx}"),
+                        headers=self._player_headers_for(player_id=player.id, client_id=player.client_id),
                     )
                     communicators.append(communicator)
                     connected, close_code = await communicator.connect()

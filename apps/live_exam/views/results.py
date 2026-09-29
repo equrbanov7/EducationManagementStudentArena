@@ -10,21 +10,38 @@ from collections import Counter
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Case, Count, IntegerField, Q, Sum, When
+from django.db.models import Avg, Case, Count, FloatField, IntegerField, OuterRef, Q, Subquery, Sum, When
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamQuestion
-from apps.exams.public import exam_breadcrumbs, generate_exam_statistics_summary, is_teacher_user
+from apps.exams.public import (
+    exam_breadcrumbs,
+    generate_exam_statistics_summary,
+    is_exam_center_user,
+    is_teacher_user,
+)
+from apps.live_exam.auth import clean_typed_answer
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.typed_answers import build_typed_summary
 from core.helpers import _safe_same_origin_redirect_path
 from core.permissions import request_has_permission
 
+#: Müəllim səhifəsində sual başına göstərilən yazılı cavab qrupları.
+TYPED_ANSWERS_PER_QUESTION = 20
+
 
 def _ensure_teacher_access(request, exam):
-    """Raise Http404 unless the user is a teacher with exam.manage permission."""
+    """Raise Http404 unless the user may read this exam's live results.
+
+    Audit 2026-09-28 LXS-01: əvvəl org-dakı İSTƏNİLƏN ``exam.host``/``exam.manage``
+    sahibi müəllim başqasının imtahanının canlı nəticələrini (sual mətnləri, düz
+    variantın rəngi ``chart_data.colors``, oyunçu ballları, AI xülasə) açırdı.
+    İndi ``exams`` tətbiqinin ``get_result_viewable_exam_or_404`` qaydası: müəllim
+    yalnız ÖZ imtahanını, imtahan mərkəzi (və superadmin) org daxilində hamısını.
+    """
     if not is_teacher_user(request.user):
         raise Http404
     if not (request_has_permission(request, "exam.manage") or request_has_permission(request, "exam.host")):
@@ -32,6 +49,22 @@ def _ensure_teacher_access(request, exam):
     org = getattr(request, "organization", None)
     if org is None or exam.organization_id != org.id:
         raise Http404
+    if exam.author_id != request.user.id and not is_exam_center_user(request.user):
+        raise Http404
+
+
+def _safe_return_to(request) -> str:
+    """``return_to`` — yalnız eyni-mənşəli NİSBİ yol.
+
+    Audit 2026-09-28 LXS-14: ``core.helpers._safe_same_origin_redirect_path``
+    ``http://host//evil.com`` üçün ``//evil.com`` (``/\\evil.com``) qaytarır —
+    brauzer bunu başqa hosta aparan protokol-nisbi URL kimi açır. Burada həmin
+    formalar atılır (köklü düzəliş core-dadır, bax SECURITY_REVIEW.md).
+    """
+    path = _safe_same_origin_redirect_path(request, request.GET.get("return_to"))
+    if not path.startswith("/") or path.startswith(("//", "/\\")):
+        return ""
+    return path
 
 
 def _build_score_distribution(scores, bucket_limit=6):
@@ -75,7 +108,7 @@ def _resolve_exam_navigation(request, exam, *, default_section="my-exams"):
         requested_profile_section = default_section
 
     fallback_return_url = f"{reverse('accounts:profile')}?section={requested_profile_section}"
-    return_to = _safe_same_origin_redirect_path(request, request.GET.get("return_to")) or fallback_return_url
+    return_to = _safe_return_to(request) or fallback_return_url
     navigation_query = urlencode(
         {
             "from_section": requested_profile_section,
@@ -133,6 +166,51 @@ def _truncate_question_text(value: str | None, limit: int) -> str:
     return f"{text[:limit]}..."
 
 
+def _typed_answers_by_question(raw_answers) -> dict[int, list[dict]]:
+    """Sual → yazılı cavab qrupları ``[{text, count, correct}]`` (reveal xülasəsi ilə eyni qruplaşma).
+
+    Audit 2026-09-28 LX-SEC (yazılı cavab): mətn oyunçu girişidir — nəzarət / bidi
+    / görünməz simvollar ``clean_typed_answer`` ilə atılır; HTML-escape şablonun
+    autoescape-i və ``json_script`` / JSON cavabı ilə, CSV-də formula
+    neytrallaşdırması ``core.export_safety`` ilə edilir (bax ``results_export``).
+    """
+    grouped: dict[int, list[dict]] = {}
+    for answer in raw_answers:
+        text = clean_typed_answer(answer.get("text_answer"))
+        if text:
+            grouped.setdefault(int(answer["question_id"]), []).append(
+                {"text_answer": text, "is_correct": bool(answer.get("is_correct"))}
+            )
+    return {
+        question_id: build_typed_summary(rows, limit=TYPED_ANSWERS_PER_QUESTION)
+        for question_id, rows in grouped.items()
+    }
+
+
+def finished_sessions_with_stats(exam):
+    """Bitmiş canlı sessiyalar + siyahı statistikası (oyunçu, cavab, düzgün sayı, orta bal).
+
+    2026-09-29: players × answers JOIN-i düzgün sayı oyunçu sayına vururdu, ortalamanı isə
+    cavab sayı ilə çəkirdi — distinct say + ayrıca alt-sorğu ilə orta bal.
+    """
+    return (
+        LiveSession.objects.filter(exam=exam, state=LiveSession.STATE_FINISHED)
+        .order_by("-created_at")
+        .annotate(
+            player_count=Count("players", distinct=True),
+            answer_count=Count("answers", distinct=True),
+            avg_score=Subquery(
+                LivePlayer.objects.filter(session=OuterRef("pk"))
+                .values("session")
+                .annotate(value=Avg("score"))
+                .values("value")[:1],
+                output_field=FloatField(),
+            ),
+            total_correct=Count("answers", filter=Q(answers__is_correct=True), distinct=True),
+        )
+    )
+
+
 @login_required
 def teacher_live_exam_results(request, slug):
     """
@@ -142,16 +220,7 @@ def teacher_live_exam_results(request, slug):
     _ensure_teacher_access(request, exam)
     exam_detail_url, _results_url, navigation_query = _resolve_exam_navigation(request, exam)
 
-    sessions = (
-        LiveSession.objects.filter(exam=exam, state=LiveSession.STATE_FINISHED)
-        .order_by("-created_at")
-        .annotate(
-            player_count=Count("players", distinct=True),
-            answer_count=Count("answers", distinct=True),
-            avg_score=Avg("players__score"),
-            total_correct=Count("answers", filter=Q(answers__is_correct=True)),
-        )
-    )
+    sessions = finished_sessions_with_stats(exam)
 
     return render(
         request,
@@ -197,14 +266,18 @@ def teacher_live_session_detail(request, slug, pin):
     question_ids = [question.id for question in questions]
 
     raw_answers = list(
-        LiveAnswer.objects.filter(session=session, question_id__in=question_ids).values(
+        LiveAnswer.objects.filter(session=session, question_id__in=question_ids)
+        .order_by("created_at", "id")
+        .values(
             "question_id",
             "choice_id",
             "choice_ids",
+            "text_answer",
             "is_correct",
             "answer_ms",
         )
     )
+    typed_answers = _typed_answers_by_question(raw_answers)
 
     question_totals: dict[int, dict[str, int]] = {
         question.id: {"total": 0, "correct": 0, "answer_ms_sum": 0} for question in questions
@@ -258,6 +331,7 @@ def teacher_live_session_detail(request, slug, pin):
                 "incorrect_answers": total - correct,
                 "accuracy_percent": (round(correct * 100 / total, 1) if total > 0 else 0),
                 "avg_answer_ms": avg_ms,
+                "typed_answers": typed_answers.get(q.id, []),
             }
         )
 
@@ -306,6 +380,13 @@ def teacher_live_session_detail(request, slug, pin):
 
     # ── AI Summary (AJAX) ─────────────────────────────────────────────
     if request.GET.get("ai_summary") == "1":
+        # Audit 2026-09-28 LXS-12: xarici AI çağırışı (kvota/xərc) GET-dir — yalnız
+        # səhifənin öz ``fetch``-i (``X-Requested-With``). Saytlararası naviqasiya
+        # bu başlığı qoya bilmir (CORS preflight tələb olunur).
+        if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+            return JsonResponse(
+                {"ok": False, "error": pgettext("live_exam.view.message", "ai_summary_invalid_request")}, status=400
+            )
         ai_stats = {
             "player_count": player_count,
             "total_answers": total_answers_count,
@@ -358,6 +439,7 @@ def teacher_live_session_detail(request, slug, pin):
                         "correct_answers": qs["correct_answers"],
                         "accuracy_percent": qs["accuracy_percent"],
                         "avg_answer_ms": qs["avg_answer_ms"],
+                        "typed_answers": qs["typed_answers"],
                     }
                     for qs in question_stats
                 ],

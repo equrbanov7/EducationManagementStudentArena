@@ -59,9 +59,19 @@ def get_question_by_index(session: LiveSession, index: int) -> ExamQuestion | No
     if selected:
         if index >= len(selected):
             return None
-        return ExamQuestion.objects.filter(exam=session.exam, id=selected[index]).prefetch_related("options").first()
+        return (
+            ExamQuestion.objects.filter(exam_id=session.exam_id, id=selected[index])
+            .select_related("exam")
+            .prefetch_related("options")
+            .first()
+        )
 
-    questions = ExamQuestion.objects.filter(exam=session.exam).prefetch_related("options").order_by("order", "id")
+    questions = (
+        ExamQuestion.objects.filter(exam_id=session.exam_id)
+        .select_related("exam")
+        .prefetch_related("options")
+        .order_by("order", "id")
+    )
     try:
         return questions[index]
     except Exception:
@@ -77,6 +87,7 @@ def get_active_question(session: LiveSession) -> ExamQuestion | None:
     if current_question_id:
         return (
             ExamQuestion.objects.filter(id=current_question_id, exam_id=session.exam_id)
+            .select_related("exam")
             .prefetch_related("options")
             .first()
         )
@@ -244,6 +255,10 @@ def selection_limits(exam_question: ExamQuestion, correct_count: int) -> tuple[b
         bool(getattr(exam_question, "is_multiple", False)),
         bool(getattr(exam_question, "multi_choice", False)),
         bool(getattr(exam_question, "allow_multiple", False)),
+        # Audit 2026-09-28 LXBE-11: müəllimin «çox seçimli» rejimi (answer_mode) nəzərə
+        # alınmırdı — tək düzgün variantlı «hamısını seç» sualı tək-seçim kimi
+        # göstərilir, ilk toxunuşda göndərilir və «bir düzgün var» sirrini açırdı.
+        str(getattr(exam_question, "answer_mode", "") or "").strip().lower() == "multiple",
     ]
     is_multi = any(flags) or (correct_count > 1)
 

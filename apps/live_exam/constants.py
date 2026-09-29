@@ -11,6 +11,16 @@ PLAYER_RESULT_SECONDS = 3.5
 PLAYER_LEADERBOARD_SECONDS = 5.0
 PLAYER_REVEAL_TRANSITION_SECONDS = PLAYER_RESULT_SECONDS + PLAYER_LEADERBOARD_SECONDS
 
+# Audit 2026-09-28 LX-BE — server tərəfi vaxt qaydaları:
+# * son saniyədə basılıb şəbəkə gecikməsi ilə ``ends_at``-dən az sonra ÇATAN cavab
+#   hələ qəbul olunur (vaxt əmsalı onsuz da minimumdadır, 0.5);
+# * ``autoplay`` açıqdırsa və host tabı reveal etməyibsə (bağlanıb/yuxudadır/POST
+#   uğursuz oldu), server ``ends_at + SERVER_AUTO_REVEAL_GRACE_SECONDS``-də özü reveal edir;
+# * lobby siyahısı (lobby_state) hər socket-ə ən çox bu intervalda bir dəfə göndərilir.
+ANSWER_LATENCY_GRACE_SECONDS = 0.5
+SERVER_AUTO_REVEAL_GRACE_SECONDS = 2.0
+LOBBY_STATE_COALESCE_SECONDS = 0.25
+
 DEFAULT_AVATAR_KEY = "avatar_1"
 DEFAULT_ACCESSORY_KEY = "accessory_none"
 

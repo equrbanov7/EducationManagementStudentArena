@@ -133,7 +133,10 @@ class LivePlayer(models.Model):
     client_id = models.CharField(max_length=64, db_index=True)
 
     score = models.IntegerField(default=0)
+    # Ardıcıl TAM düzgün cavablar (bonus bal vermir — yalnız göstərici). Qayda:
+    # docs/live_exam/ENGINE.md «Streak». Audit 2026-09-28 LXBE-06.
     streak = models.PositiveIntegerField(default=0)
+    best_streak = models.PositiveIntegerField(default=0)
 
     is_connected = models.BooleanField(default=True)
     last_seen = models.DateTimeField(default=timezone.now)
@@ -179,6 +182,8 @@ class LiveAnswer(models.Model):
 
     # ✅ yeni multi üçün
     choice_ids = models.JSONField(default=list, blank=True)
+    # Yazılı cavab (typed answer) — oyunçunun göndərdiyi xam mətn (≤ 60 simvol).
+    text_answer = models.CharField(max_length=60, blank=True, default="")
 
     is_correct = models.BooleanField(default=False)  # “perfect match” kimi saxlayacağıq
     answer_ms = models.IntegerField(default=0)
