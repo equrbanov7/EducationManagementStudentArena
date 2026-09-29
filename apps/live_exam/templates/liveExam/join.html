@@ -3,7 +3,8 @@
 <html lang="{{ LANGUAGE_CODE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#062a33">
     <title>{% trans "title" context "live_exam.join" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,93 +14,89 @@
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
     <link rel="stylesheet" href="{% static 'css/language-switcher.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}">
-    <link rel="stylesheet" href="{% static 'css/join/_part1.css' %}">
-    <link rel="stylesheet" href="{% static 'css/join/_part2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/join/_base.css' %}?v=lxp-20260929">
 </head>
-<body class="join-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
-    <div class="join-bg" aria-hidden="true">
-        <span class="join-bg__blob join-bg__blob--one"></span>
-        <span class="join-bg__blob join-bg__blob--two"></span>
-        <span class="join-bg__blob join-bg__blob--three"></span>
-        <span class="join-bg__grid"></span>
-        <span class="join-bg__spark join-bg__spark--one"></span>
-        <span class="join-bg__spark join-bg__spark--two"></span>
-        <span class="join-bg__spark join-bg__spark--three"></span>
-    </div>
+<body class="lxj" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+    {% comment %}LX-FE-PLAYER 2026-09-29: qoşulma — ad + təsadüfi avatar (🎲 dəyiş), sayğac, aydın xəta
+    halları (kilid/başlayıb/çıxarılıb → blok kartı; ad məşğuldur → sahə altında).{% endcomment %}
+    <div class="lxj-shell">
+        <div class="lxj-bg" aria-hidden="true">
+            <span class="lxj-bg__glow lxj-bg__glow--a"></span>
+            <span class="lxj-bg__glow lxj-bg__glow--b"></span>
+        </div>
+        <header class="lxj-top">
+            <span class="lxj-pinchip"><span>{% trans "game_pin_label" context "live_exam.join" %}</span><strong>{{ session.pin }}</strong></span>
+            <div class="lxj-lang">
+                {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
+            </div>
+        </header>
 
-    <div class="join-language">
-        {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
-    </div>
+        <main class="lxj-main">
+            <section class="lxj-card" id="joinCard">
+                <div class="lxj-avatar">
+                    <span class="lxj-avatar__spot" aria-hidden="true"></span>
+                    <div id="joinPreview" class="lxj-avatar__art"></div>
+                    <button id="joinReroll" type="button" class="lxj-reroll" hidden>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#ffffff"/><circle cx="8" cy="8" r="1.8" fill="#6d28d9"/><circle cx="16" cy="8" r="1.8" fill="#6d28d9"/><circle cx="12" cy="12" r="1.8" fill="#6d28d9"/><circle cx="8" cy="16" r="1.8" fill="#6d28d9"/><circle cx="16" cy="16" r="1.8" fill="#6d28d9"/></svg>
+                    </button>
+                </div>
+                <h1 class="lxj-title">{% trans "title" context "live_exam.join" %}</h1>
+                <p class="lxj-sub">{% trans "fun_text_prefix" context "live_exam.join" %} <span>{% trans "fun_text_highlight" context "live_exam.join" %}</span> {% trans "fun_text_suffix" context "live_exam.join" %}</p>
 
-    <main class="join-main">
-        <section class="join-card">
-            <div class="join-card__header">
-                <div class="join-card__preview">
-                    <div id="joinPreview" class="join-preview"></div>
-                    <div class="join-preview__meta">
-                        <span class="join-preview__eyebrow">{% trans "game_pin_label" context "live_exam.join" %}</span>
-                        <strong class="join-preview__pin">{{ session.pin }}</strong>
+                {% if remembered_player and remembered_join_copy %}
+                <div class="lxj-resume">
+                    <div class="lxj-resume__copy">
+                        <strong>{{ remembered_join_copy.notice_title }}</strong>
+                        <span>{{ remembered_join_copy.notice_body }}</span>
+                    </div>
+                    <button id="resumePlayerBtn" type="button" class="lxj-btn lxj-btn--light">{{ remembered_join_copy.continue_button }}</button>
+                </div>
+                {% endif %}
+
+                <form id="joinForm" class="lxj-form" novalidate autocomplete="off">
+                    <label class="lxj-label" for="nickname">{% trans "nickname_label" context "live_exam.join" %}</label>
+                    <div class="lxj-inputwrap">
+                        <input id="nickname" class="lxj-input" type="text" maxlength="32" autocomplete="off" autocapitalize="words"
+                               spellcheck="false" enterkeyhint="go" placeholder="{% trans 'nickname_placeholder' context 'live_exam.join' %}"
+                               aria-describedby="joinNicknameError" autofocus>
+                        <span id="joinNicknameCount" class="lxj-count" aria-hidden="true">0/32</span>
+                    </div>
+                    <p id="joinNicknameError" class="lxj-error" aria-live="polite"></p>
+                    <p id="joinStatus" class="lxj-status" aria-live="polite"></p>
+                    <button id="joinBtn" class="lxj-btn lxj-btn--primary" type="submit">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>
+                        <span>{% trans "join_button" context "live_exam.join" %}</span>
+                    </button>
+                </form>
+
+                <div id="joinBlocked" class="lxj-blocked" role="alert" hidden>
+                    <div class="lxj-blocked__icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.2" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>
+                    </div>
+                    <h2 id="joinBlockedTitle"></h2>
+                    <p id="joinBlockedMessage"></p>
+                    <div class="lxj-blocked__actions">
+                        <button id="joinRetry" type="button" class="lxj-btn lxj-btn--primary"></button>
+                        <a id="joinNewPin" class="lxj-btn lxj-btn--light" href="{% url 'liveExam:pin_entry' %}"></a>
                     </div>
                 </div>
-                <div class="join-card__copy">
-                    <h1>{% trans "title" context "live_exam.join" %}</h1>
-                    <p>{% trans "fun_text_prefix" context "live_exam.join" %} <span>{% trans "fun_text_highlight" context "live_exam.join" %}</span> {% trans "fun_text_suffix" context "live_exam.join" %}</p>
-                </div>
-            </div>
-
-            {% if remembered_player and remembered_join_copy %}
-            <div class="join-resume">
-                <div class="join-resume__copy">
-                    <strong>{{ remembered_join_copy.notice_title }}</strong>
-                    <span>{{ remembered_join_copy.notice_body }}</span>
-                </div>
-                <button id="resumePlayerBtn" type="button" class="join-resume__button">
-                    {{ remembered_join_copy.continue_button }}
-                </button>
-            </div>
-            {% endif %}
-
-            <div class="join-form__section">
-                <label class="join-form__label" for="nickname">
-                    <i class="fas fa-user"></i>
-                    <span>{% trans "nickname_label" context "live_exam.join" %}</span>
-                </label>
-                <input
-                    id="nickname"
-                    class="join-form__input"
-                    maxlength="32"
-                    placeholder="{% trans 'nickname_placeholder' context 'live_exam.join' %}"
-                    autocomplete="off"
-                    autofocus>
-                <div id="joinNicknameError" class="join-form__error" aria-live="polite"></div>
-            </div>
-
-            <div id="joinStatus" class="join-status" aria-live="polite"></div>
-
-            <button id="joinBtn" class="join-btn" type="button">
-                <i class="fas fa-play"></i>
-                <span>{% trans "join_button" context "live_exam.join" %}</span>
-            </button>
-        </section>
-    </main>
+            </section>
+        </main>
+    </div>
 
     {% if remembered_player and remembered_join_copy %}
-    <div id="joinResumePrompt" class="join-modal-backdrop" hidden>
-        <section class="join-modal" role="dialog" aria-modal="true" aria-labelledby="joinResumeTitle">
-            <button id="joinResumeClose" type="button" class="join-modal__close" aria-label="{{ remembered_join_copy.close_button }}">
-                <i class="fas fa-xmark"></i>
+    <div id="joinResumePrompt" class="lxj-modal-backdrop" hidden>
+        <section class="lxj-modal" role="dialog" aria-modal="true" aria-labelledby="joinResumeTitle">
+            <button id="joinResumeClose" type="button" class="lxj-modal__close" aria-label="{{ remembered_join_copy.close_button }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
             </button>
             <h2 id="joinResumeTitle">{{ remembered_join_copy.modal_title }}</h2>
             <p>{{ remembered_join_copy.modal_body }}</p>
-            <div class="join-modal__actions">
-                <button id="joinResumeContinue" type="button" class="join-modal__button join-modal__button--secondary">
-                    {{ remembered_join_copy.continue_button }}
-                </button>
-                <button id="joinResumeRestart" type="button" class="join-modal__button join-modal__button--primary">
-                    {{ remembered_join_copy.restart_button }}
-                </button>
+            <div class="lxj-modal__actions">
+                <button id="joinResumeContinue" type="button" class="lxj-btn lxj-btn--primary">{{ remembered_join_copy.continue_button }}</button>
+                <button id="joinResumeRestart" type="button" class="lxj-btn lxj-btn--light">{{ remembered_join_copy.restart_button }}</button>
             </div>
         </section>
     </div>
@@ -107,12 +104,13 @@
 
     {{ remembered_player|json_script:"rememberedPlayerData" }}
     {{ session_settings|json_script:"joinSessionSettings" }}
-    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `join_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline script yoxdur).{% endcomment %}
     <script id="joinConfig" type="application/json">{
         "pin": "{{ session.pin|escapejs }}",
         "joinUrl": "{% url 'liveExam:join_enter' session.pin %}",
         "csrf": "{{ csrf_token }}",
         "resumeUrl": "{{ resume_url|escapejs }}",
+        "pinEntryUrl": "{% url 'liveExam:pin_entry' %}",
         "generatedNickname": "{{ generated_nickname|escapejs }}"
     }</script>
     <script id="joinI18n" type="application/json">{
@@ -120,14 +118,21 @@
         "buttonJoining": "{% filter escapejs %}{% trans 'button_joining' context 'live_exam.join.js' %}{% endfilter %}",
         "errorUnknown": "{% filter escapejs %}{% trans 'error_unknown' context 'live_exam.join.js' %}{% endfilter %}",
         "errorConnection": "{% filter escapejs %}{% trans 'error_connection' context 'live_exam.join.js' %}{% endfilter %}",
-        "nicknameRequired": "Nickname is required.",
-        "nicknameTooLong": "Nickname is too long."
+        "playerLabel": "{% filter escapejs %}{% trans 'player_label' context 'live_exam.join.js' %}{% endfilter %}",
+        "nicknameRequired": "{% filter escapejs %}{% trans 'nickname_required' context 'live_exam.join.js' %}{% endfilter %}",
+        "nicknameTooLong": "{% filter escapejs %}{% trans 'nickname_too_long' context 'live_exam.join.js' %}{% endfilter %}",
+        "rerollAvatar": "{% filter escapejs %}{% trans 'reroll_avatar' context 'live_exam.join.js' %}{% endfilter %}",
+        "blockedTitle": "{% filter escapejs %}{% trans 'join_blocked_title' context 'live_exam.join.js' %}{% endfilter %}",
+        "tryAgain": "{% filter escapejs %}{% trans 'try_again' context 'live_exam.join.js' %}{% endfilter %}",
+        "enterNewPin": "{% filter escapejs %}{% trans 'enter_new_pin' context 'live_exam.join.js' %}{% endfilter %}",
+        "rateLimited": "{% filter escapejs %}{% trans 'rate_limited_wait' context 'live_exam.join.js' %}{% endfilter %}"
     }</script>
-    <script src="{% static 'js/join_config.js' %}?v=20260921-1"></script>
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-    <script src="{% static 'js/wait_room_nickname_editor.js' %}"></script>
-    <script src="{% static 'js/join.js' %}"></script>
+    <script src="{% static 'js/ems_ajax_init.js' %}"></script>
+    <script src="{% static 'js/join_config.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/wait_room_nickname_editor.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/join.js' %}?v=lxp-20260929"></script>
 </body>
 </html>

@@ -1,310 +1,453 @@
-import { state } from './state.js';
-
-const AudioCtor = window.AudioContext || window.webkitAudioContext;
+import { state } from './state.js?v=lx20260929';
 
 /* ═══════════════════════════════════════════════════════════════════
- *  SOUND EFFECTS SYSTEM
- *  ────────────────────
- *  All game sounds are synthesized via the Web Audio API below.
- *  To change a specific sound, find its function by name:
- *
- *    playIntroSound      – "Get ready" jingle before a question
- *    playCountdownSound  – 3-2-1 countdown beeps (escalating pitch)
- *    playRevealSound     – Dramatic reveal when answers are shown
- *    playScoreboardSound – Energetic build-up for the leaderboard
- *    playFinalSound      – Victory fanfare on the final podium
- *    scheduleLobbyMusicLoop – Background lobby music patterns
- *
- *  Each function contains clearly labelled note arrays you can
- *  tweak (frequency, duration, gain, type).
- *
- *  Volume is controlled by the master gain node (state.sfxVolume,
- *  range 0-100). The slider lives in the settings drawer.
+ *  SƏS MÜHƏRRİKİ (2026-09-29 LX-FE-STAGE) — yalnız WebAudio sintezi, fayl yoxdur.
+ *  Qraf: [sfx bus, music bus] → master (səs/susdur) → lowpass 9 kHz (sərt
+ *  yüksək tezliklər kəsilir) → kompressor/limiter → çıxış.
+ *  • Hər cue AÇARLA idempotentdir (`once`): eyni vəziyyətin təkrar render-i
+ *    səsi ikiqat çalmır.
+ *  • Dövrələr (lobbi musiqisi, drumroll, rəqs ritmi) lookahead planlayıcı ilə
+ *    işləyir; eyni adlı dövrə heç vaxt ikinci dəfə başlamır.
+ *  • Yalnız təqdimat (proyektor) pəncərəsi səs çalır (CONFIG.presentationOnly) —
+ *    idarə səhifəsi + proyektor açıq olanda səs ikiləşmir.
+ *  • Seçimlər (səs %, susdur, musiqi) localStorage-da (try/catch).
  * ═══════════════════════════════════════════════════════════════════ */
 
-function getAudioContext() {
-    if (!AudioCtor) return null;
-    if (!state.audioContext) {
-        state.audioContext = new AudioCtor();
-    }
-    return state.audioContext;
+const Ctor = window.AudioContext || window.webkitAudioContext;
+const PREF_KEY = "emsLiveHostSound.v1";
+const NOTE = (m) => 440 * 2 ** ((m - 69) / 12);
+
+const eng = {
+    ctx: null, master: null, sfx: null, music: null, noiseBuf: null,
+    loops: new Map(), want: new Map(), keys: new Map(), listeners: new Set(), lastJoin: 0,
+};
+
+function loadPrefs() {
+    const fallback = { volume: Number(CONFIG?.sessionSettings?.sfx_volume ?? 70), muted: false, music: true, custom: false };
+    try {
+        const raw = JSON.parse(window.localStorage.getItem(PREF_KEY) || "null");
+        if (raw && typeof raw === "object") {
+            return {
+                volume: Math.max(0, Math.min(100, Number(raw.volume ?? fallback.volume))),
+                muted: Boolean(raw.muted), music: raw.music !== false, custom: true,
+            };
+        }
+    } catch (error) { /* gizli pəncərə / bloklanmış yaddaş */ }
+    return fallback;
 }
 
-function getMasterGain() {
-    const context = getAudioContext();
-    if (!context) return null;
-    if (!state.masterGain) {
-        state.masterGain = context.createGain();
-        state.masterGain.connect(context.destination);
-    }
-    const vol = Math.max(0, Math.min(100, Number(state.sfxVolume ?? 70)));
-    state.masterGain.gain.value = vol / 100;
-    return state.masterGain;
+const prefs = loadPrefs();
+
+function savePrefs() {
+    try {
+        window.localStorage.setItem(PREF_KEY, JSON.stringify({ volume: prefs.volume, muted: prefs.muted, music: prefs.music }));
+    } catch (error) { /* yaddaş əlçatmazdır — seçim yalnız bu sessiyada qalır */ }
 }
 
-export function setSfxVolume(value) {
-    state.sfxVolume = Math.max(0, Math.min(100, Number(value) || 0));
-    const master = getMasterGain();
-    if (master) {
-        master.gain.value = state.sfxVolume / 100;
-    }
+export const audioEnabled = () => Boolean(CONFIG?.presentationOnly) && Boolean(Ctor);
+export const soundPrefs = () => ({ volume: prefs.volume, muted: prefs.muted, music: prefs.music });
+
+export function audioStatus() {
+    if (!audioEnabled()) return "off";
+    if (!eng.ctx) return "idle";
+    return eng.ctx.state === "running" ? "running" : "suspended";
+}
+
+export function onAudioStatus(listener) {
+    eng.listeners.add(listener);
+    return () => eng.listeners.delete(listener);
+}
+
+function emitStatus() {
+    const detail = { status: audioStatus(), ...soundPrefs() };
+    eng.listeners.forEach((fn) => { try { fn(detail); } catch (error) { /* dinləyici xətası səsi dayandırmasın */ } });
+}
+
+function ctx() {
+    if (!audioEnabled()) return null;
+    if (eng.ctx) return eng.ctx;
+    const c = new Ctor();
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 18; comp.ratio.value = 5;
+    comp.attack.value = 0.004; comp.release.value = 0.22;
+    const lp = c.createBiquadFilter();
+    lp.type = "lowpass"; lp.frequency.value = 9000; lp.Q.value = 0.5;
+    eng.master = c.createGain();
+    eng.sfx = c.createGain();
+    eng.music = c.createGain();
+    eng.sfx.connect(eng.master); eng.music.connect(eng.master);
+    eng.master.connect(lp); lp.connect(comp); comp.connect(c.destination);
+    eng.ctx = c;
+    applyGains(true);
+    c.onstatechange = () => { if (c.state === "running") startWantedLoops(); emitStatus(); };
+    return c;
+}
+
+function applyGains(immediate) {
+    if (!eng.ctx) return;
+    const t = eng.ctx.currentTime;
+    const v = prefs.muted ? 0 : (prefs.volume / 100) ** 1.6 * 0.9;
+    const m = prefs.music ? 0.55 : 0;
+    if (immediate) { eng.master.gain.value = v; eng.music.gain.value = m; return; }
+    eng.master.gain.setTargetAtTime(v, t, 0.05);
+    eng.music.gain.setTargetAtTime(m, t, 0.08);
+}
+
+export function setSfxVolume(value, options = {}) {
+    prefs.volume = Math.max(0, Math.min(100, Number(value) || 0));
+    state.sfxVolume = prefs.volume;
+    if (options.persist !== false) { prefs.custom = true; savePrefs(); }
+    applyGains(false);
     const slider = document.getElementById("sfxVolumeSlider");
-    if (slider && Number(slider.value) !== state.sfxVolume) {
-        slider.value = state.sfxVolume;
-    }
+    if (slider && Number(slider.value) !== prefs.volume) slider.value = prefs.volume;
     const label = document.getElementById("sfxVolumeLabel");
-    if (label) label.textContent = `${state.sfxVolume}%`;
+    if (label) label.textContent = `${prefs.volume}%`;
+    emitStatus();
 }
+
+/** Server tənzimləməsi — yalnız bu cihazda şəxsi seçim edilməyibsə tətbiq olunur. */
+export function applyServerVolume(value) {
+    if (prefs.custom || value == null) return;
+    setSfxVolume(value, { persist: false });
+}
+
+export function setMuted(muted) { prefs.muted = Boolean(muted); savePrefs(); applyGains(false); emitStatus(); }
+export function setMusicEnabled(on) { prefs.music = Boolean(on); savePrefs(); applyGains(false); emitStatus(); }
 
 export function unlockAudio() {
-    const context = getAudioContext();
-    if (!context || context.state !== "suspended") return;
-    context.resume().then(() => {
-        getMasterGain();
-        syncLobbyMusic(true);
-    }).catch(() => {});
+    const c = ctx();
+    if (!c) return;
+    if (c.state === "suspended") c.resume().then(() => { startWantedLoops(); emitStatus(); }).catch(() => {});
 }
 
-/**
- * Core tone generator. All sounds are built from layered calls to this.
- * @param {AudioContext} context
- * @param {Object} config – { startTime, duration, frequency, endFrequency?, gain, type }
- */
-function playTone(context, config) {
-    const master = getMasterGain();
-    if (!master) return;
-
-    const oscillator = context.createOscillator();
-    const gainNode = context.createGain();
-    const startTime = config.startTime;
-    const duration = config.duration;
-
-    oscillator.type = config.type || "triangle";
-    oscillator.frequency.setValueAtTime(config.frequency, startTime);
-    if (config.endFrequency) {
-        oscillator.frequency.exponentialRampToValueAtTime(Math.max(20, config.endFrequency), startTime + duration);
-    }
-    if (config.detune) {
-        oscillator.detune.setValueAtTime(config.detune, startTime);
-    }
-
-    gainNode.gain.setValueAtTime(0.0001, startTime);
-    gainNode.gain.linearRampToValueAtTime(config.gain || 0.04, startTime + (config.attack || 0.015));
-    if (config.sustain != null && config.sustainEnd != null) {
-        gainNode.gain.setValueAtTime(config.sustain, startTime + config.sustainEnd);
-    }
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(master);
-    oscillator.start(startTime);
-    oscillator.stop(startTime + duration + 0.05);
+function once(key) {
+    if (!key) return true;
+    if (eng.keys.has(key)) return false;
+    eng.keys.set(key, Date.now());
+    if (eng.keys.size > 400) eng.keys.delete(eng.keys.keys().next().value);
+    return true;
 }
 
-function withAudio(fn) {
-    const context = getAudioContext();
-    if (!context) return;
-    if (context.state === "suspended") {
-        context.resume().then(() => fn(context)).catch(() => {});
-        return;
-    }
-    fn(context);
+function live() {
+    const c = ctx();
+    return c && c.state === "running" ? c : null;
 }
 
-/* ── Intro Sound: bright ascending arpeggio ("Get ready!") ──────── */
+/* ── Primitivlər ───────────────────────────────────────────────────── */
+function tone(o) {
+    const c = eng.ctx;
+    const t = o.t ?? c.currentTime + 0.01;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = o.type || "sine";
+    osc.frequency.setValueAtTime(o.f, t);
+    if (o.f2) osc.frequency.exponentialRampToValueAtTime(o.f2, t + (o.glide ?? o.r ?? 0.3));
+    const a = o.a ?? 0.012;
+    const r = o.r ?? 0.3;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(o.g ?? 0.08, t + a);
+    if (o.hold) g.gain.setValueAtTime(o.g ?? 0.08, t + a + o.hold);
+    g.gain.setTargetAtTime(0.0001, t + a + (o.hold || 0), r / 3);
+    let node = osc;
+    if (o.lp) {
+        const f = c.createBiquadFilter();
+        f.type = "lowpass"; f.frequency.value = o.lp; f.Q.value = o.q ?? 0.7;
+        osc.connect(f); node = f;
+    }
+    node.connect(g);
+    g.connect(o.bus || eng.sfx);
+    osc.start(t);
+    osc.stop(t + a + (o.hold || 0) + r * 2.2 + 0.05);
+}
+
+function noiseBuffer() {
+    if (eng.noiseBuf) return eng.noiseBuf;
+    const c = eng.ctx;
+    const buf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
+    eng.noiseBuf = buf;
+    return buf;
+}
+
+function noise(o) {
+    const c = eng.ctx;
+    const t = o.t ?? c.currentTime + 0.01;
+    const src = c.createBufferSource();
+    src.buffer = noiseBuffer();
+    const f = c.createBiquadFilter();
+    f.type = o.ft || "bandpass";
+    f.frequency.setValueAtTime(o.f || 1500, t);
+    if (o.f2) f.frequency.exponentialRampToValueAtTime(o.f2, t + (o.glide ?? o.r ?? 0.3));
+    f.Q.value = o.q ?? 1;
+    const g = c.createGain();
+    const a = o.a ?? 0.004;
+    const r = o.r ?? 0.1;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(o.g ?? 0.1, t + a);
+    if (o.hold) g.gain.setValueAtTime(o.g ?? 0.1, t + a + o.hold);
+    g.gain.setTargetAtTime(0.0001, t + a + (o.hold || 0), r / 3);
+    src.connect(f); f.connect(g); g.connect(o.bus || eng.sfx);
+    src.start(t, Math.random() * 1.5);
+    src.stop(t + a + (o.hold || 0) + r * 2.2 + 0.05);
+}
+
+const pluck = (m, t, g, r, bus, type) => tone({ f: NOTE(m), t, type: type || "triangle", g: g ?? 0.05, a: 0.006, r: r ?? 0.35, lp: 3200, bus });
+const chord = (ms, t, g, r, bus, type) => ms.forEach((m) => pluck(m, t, g, r, bus, type));
+
+/* ── Oyun cue-ları ─────────────────────────────────────────────────── */
+const PENTA = [72, 74, 76, 79, 81, 84];
+
+export function playJoin(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const now = performance.now();
+    if (now - eng.lastJoin < 110) return; // bir anda çox qoşulma — səs sel olmasın
+    eng.lastJoin = now;
+    const m = PENTA[Math.floor(Math.random() * PENTA.length)];
+    tone({ f: NOTE(m - 5), f2: NOTE(m), glide: 0.07, type: "sine", g: 0.08, a: 0.004, r: 0.14 });
+    tone({ f: NOTE(m + 12), type: "triangle", g: 0.018, a: 0.004, r: 0.1, t: c.currentTime + 0.05 });
+}
+
+export function playWhoosh(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    noise({ ft: "bandpass", f: 280, f2: 3200, glide: 0.42, q: 1.4, g: 0.16, a: 0.18, r: 0.28 });
+    tone({ f: 110, f2: 220, glide: 0.4, type: "sine", g: 0.05, a: 0.2, r: 0.25 });
+}
+
 export function playIntroSound(key) {
-    if (!CONFIG.presentationOnly || state.lastIntroSoundKey === key) return;
-    withAudio(context => {
-        const t = context.currentTime + 0.01;
-        // Rising arpeggio: C4 → E4 → G4 → C5 with sparkle
-        const notes = [
-            { offset: 0.00, freq: 262, end: 280, dur: 0.18, gain: 0.06, type: "triangle" },
-            { offset: 0.10, freq: 330, end: 350, dur: 0.18, gain: 0.06, type: "triangle" },
-            { offset: 0.20, freq: 392, end: 420, dur: 0.20, gain: 0.07, type: "triangle" },
-            { offset: 0.32, freq: 523, end: 560, dur: 0.30, gain: 0.08, type: "sine" },
-        ];
-        notes.forEach(n => {
-            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.end, gain: n.gain, type: n.type });
-        });
-        // Sub bass warmth
-        playTone(context, { startTime: t, duration: 0.5, frequency: 131, endFrequency: 165, gain: 0.025, type: "sine" });
-        // Shimmer layer
-        playTone(context, { startTime: t + 0.32, duration: 0.35, frequency: 1047, endFrequency: 1100, gain: 0.015, type: "sine" });
-        state.lastIntroSoundKey = key;
-    });
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.02;
+    [60, 64, 67, 72].forEach((m, i) => pluck(m, t + i * 0.11, 0.07, 0.4));
+    chord([48, 55, 64], t + 0.44, 0.03, 1.1, undefined, "sine");
+    tone({ f: NOTE(84), t: t + 0.44, type: "sine", g: 0.02, r: 0.8 });
 }
 
-/* ── Countdown Sound: escalating tension beeps (3, 2, 1) ────────── */
 export function playCountdownSound(key) {
-    if (!CONFIG.presentationOnly || state.lastCountdownSoundKey === key) return;
-    withAudio(context => {
-        const t = context.currentTime + 0.01;
-        // Extract number from key: "xxx:3" → 3, "xxx:2" → 2, "xxx:1" → 1
-        const parts = String(key).split(":");
-        const num = parseInt(parts[parts.length - 1], 10) || 3;
-        // Higher pitch as countdown decreases: 3→low, 2→mid, 1→high
-        const pitches = { 3: 440, 2: 554, 1: 659 };
-        const baseFreq = pitches[num] || 440;
+    const c = live();
+    if (!c || !once(key)) return;
+    const n = parseInt(String(key).split(":").pop(), 10) || 3;
+    const m = { 3: 67, 2: 69, 1: 71 }[n] || 67;
+    const t = c.currentTime + 0.01;
+    tone({ f: NOTE(m), t, type: "sine", g: 0.13, a: 0.003, r: 0.35 });
+    tone({ f: NOTE(m) * 4, t, type: "sine", g: 0.018, a: 0.002, r: 0.08 });
+    if (n === 1) chord([72, 76, 79], t + 0.02, 0.02, 0.5, undefined, "sine");
+}
 
-        // Main beep with percussive attack
-        playTone(context, { startTime: t, duration: 0.18, frequency: baseFreq, endFrequency: baseFreq * 0.92, gain: 0.09, type: "square", attack: 0.005 });
-        // Soft harmonic layer
-        playTone(context, { startTime: t, duration: 0.22, frequency: baseFreq * 2, endFrequency: baseFreq * 1.8, gain: 0.025, type: "sine", attack: 0.005 });
-        // Sub pulse
-        playTone(context, { startTime: t, duration: 0.12, frequency: baseFreq / 2, gain: 0.04, type: "triangle", attack: 0.003 });
+export function playTick(key, urgent) {
+    const c = live();
+    if (!c || !once(key)) return;
+    noise({ ft: "bandpass", f: urgent ? 2100 : 1700, q: 7, g: urgent ? 0.22 : 0.16, a: 0.001, r: 0.05 });
+    tone({ f: urgent ? 1318 : 1175, type: "sine", g: urgent ? 0.05 : 0.035, a: 0.001, r: 0.05 });
+}
 
-        // On "1" add extra emphasis - a bright resolve
-        if (num === 1) {
-            playTone(context, { startTime: t + 0.06, duration: 0.28, frequency: baseFreq * 1.5, endFrequency: baseFreq * 1.6, gain: 0.04, type: "sine" });
-        }
-        state.lastCountdownSoundKey = key;
+export function playTimeUp(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    [[64, 0], [60, 0.22]].forEach(([m, d]) => {
+        tone({ f: NOTE(m), t: t + d, type: "triangle", g: 0.09, a: 0.006, r: 0.7, lp: 2200 });
+        tone({ f: NOTE(m) * 2.4, t: t + d, type: "sine", g: 0.015, a: 0.004, r: 0.4 });
     });
+    tone({ f: 70, f2: 45, glide: 0.3, t, type: "sine", g: 0.12, a: 0.005, r: 0.3 });
 }
 
-/* ── Lobby Music: ambient background loop patterns ──────────────── */
-export function stopLobbyMusic() {
-    if (state.lobbyMusicTimer) {
-        clearTimeout(state.lobbyMusicTimer);
-        state.lobbyMusicTimer = 0;
-    }
-    state.lobbyMusicMode = "";
+export function playAllAnswered(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    tone({ f: NOTE(84), t, type: "sine", g: 0.05, r: 0.4 });
+    tone({ f: NOTE(88), t: t + 0.09, type: "sine", g: 0.05, r: 0.5 });
 }
 
-function scheduleLobbyMusicLoop(mode) {
-    const context = getAudioContext();
-    if (!context || context.state !== "running" || state.sessionState !== "lobby" || mode === "silent") {
-        stopLobbyMusic();
-        return;
-    }
-
-    // Lobby music patterns – tweak notes here to change the vibe
-    const patterns = {
-        original: {
-            loopMs: 3200,
-            notes: [
-                { offset: 0.00, duration: 0.22, frequency: 196, endFrequency: 220, gain: 0.016, type: "triangle" },
-                { offset: 0.24, duration: 0.18, frequency: 246.94, endFrequency: 261.63, gain: 0.013, type: "sine" },
-                { offset: 0.52, duration: 0.22, frequency: 293.66, endFrequency: 329.63, gain: 0.015, type: "triangle" },
-                { offset: 0.84, duration: 0.24, frequency: 392, endFrequency: 440, gain: 0.016, type: "triangle" },
-                { offset: 1.24, duration: 0.26, frequency: 164.81, endFrequency: 174.61, gain: 0.01, type: "sine" },
-                { offset: 1.56, duration: 0.18, frequency: 261.63, endFrequency: 293.66, gain: 0.012, type: "square" },
-            ],
-        },
-        focus: {
-            loopMs: 3600,
-            notes: [
-                { offset: 0.00, duration: 0.34, frequency: 174.61, endFrequency: 196, gain: 0.012, type: "sine" },
-                { offset: 0.44, duration: 0.26, frequency: 220, endFrequency: 233.08, gain: 0.01, type: "triangle" },
-                { offset: 0.96, duration: 0.36, frequency: 261.63, endFrequency: 293.66, gain: 0.011, type: "sine" },
-                { offset: 1.54, duration: 0.24, frequency: 196, endFrequency: 174.61, gain: 0.009, type: "triangle" },
-            ],
-        },
-    };
-
-    const selected = patterns[mode] || patterns.original;
-    const base = context.currentTime + 0.04;
-    selected.notes.forEach((note) => {
-        playTone(context, {
-            startTime: base + note.offset,
-            duration: note.duration,
-            frequency: note.frequency,
-            endFrequency: note.endFrequency,
-            gain: note.gain,
-            type: note.type,
-        });
-    });
-
-    state.lobbyMusicMode = mode;
-    if (state.lobbyMusicTimer) {
-        clearTimeout(state.lobbyMusicTimer);
-    }
-    state.lobbyMusicTimer = window.setTimeout(() => {
-        scheduleLobbyMusicLoop(mode);
-    }, selected.loopMs);
-}
-
-export function syncLobbyMusic(force = false) {
-    const mode = String(state.sessionSettings.lobby_music || "original");
-    const context = getAudioContext();
-    const shouldPlay = state.sessionState === "lobby" && mode !== "silent";
-
-    if (!shouldPlay || !context || context.state !== "running") {
-        stopLobbyMusic();
-        return;
-    }
-
-    if (!force && state.lobbyMusicMode === mode && state.lobbyMusicTimer) {
-        return;
-    }
-
-    scheduleLobbyMusicLoop(mode);
-}
-
-/* ── Reveal Sound: dramatic suspense-to-resolve flourish ────────── */
 export function playRevealSound(key) {
-    if (state.lastRevealSoundKey === key) return;
-    withAudio(context => {
-        const t = context.currentTime + 0.01;
-        // Suspenseful descending sweep
-        playTone(context, { startTime: t, duration: 0.14, frequency: 880, endFrequency: 440, gain: 0.04, type: "sawtooth", attack: 0.005 });
-        // Resolve chord: bright major chord (C-E-G)
-        playTone(context, { startTime: t + 0.12, duration: 0.35, frequency: 523, endFrequency: 530, gain: 0.055, type: "triangle" });
-        playTone(context, { startTime: t + 0.14, duration: 0.32, frequency: 659, endFrequency: 665, gain: 0.04, type: "sine" });
-        playTone(context, { startTime: t + 0.16, duration: 0.30, frequency: 784, endFrequency: 790, gain: 0.035, type: "sine" });
-        // Deep bass hit
-        playTone(context, { startTime: t + 0.10, duration: 0.4, frequency: 131, endFrequency: 110, gain: 0.04, type: "sine" });
-        state.lastRevealSoundKey = key;
-    });
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    tone({ f: 330, f2: 990, glide: 0.16, t, type: "sine", g: 0.04, a: 0.01, r: 0.12 });
+    chord([72, 76, 79], t + 0.16, 0.06, 0.7);
+    chord([48, 60], t + 0.16, 0.05, 0.6, undefined, "sine");
+    noise({ ft: "highpass", f: 6000, t: t + 0.16, g: 0.025, r: 0.5 });
 }
 
-/* ── Scoreboard Sound: energetic ascending fanfare ──────────────── */
 export function playScoreboardSound(key) {
-    if (state.lastScoreboardSoundKey === key) return;
-    withAudio(context => {
-        const t = context.currentTime + 0.01;
-        // Quick ascending scale with rhythmic punch: C-D-E-F-G-C5
-        const arpeggio = [
-            { offset: 0.00, freq: 262, dur: 0.10, gain: 0.06, type: "square" },
-            { offset: 0.07, freq: 294, dur: 0.10, gain: 0.06, type: "square" },
-            { offset: 0.14, freq: 330, dur: 0.10, gain: 0.06, type: "triangle" },
-            { offset: 0.21, freq: 349, dur: 0.10, gain: 0.06, type: "triangle" },
-            { offset: 0.28, freq: 392, dur: 0.12, gain: 0.07, type: "triangle" },
-            { offset: 0.38, freq: 523, dur: 0.28, gain: 0.08, type: "sine" },
-        ];
-        arpeggio.forEach(n => {
-            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.freq * 1.02, gain: n.gain, type: n.type, attack: 0.005 });
-        });
-        // Warm bass underneath
-        playTone(context, { startTime: t, duration: 0.6, frequency: 131, endFrequency: 165, gain: 0.03, type: "sine" });
-        // Top shimmer on final note
-        playTone(context, { startTime: t + 0.38, duration: 0.3, frequency: 1047, endFrequency: 1060, gain: 0.015, type: "sine" });
-        state.lastScoreboardSoundKey = key;
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    [72, 74, 76, 79, 81, 84].forEach((m, i) => pluck(m, t + i * 0.065, 0.045, 0.22));
+    tone({ f: NOTE(48), t, type: "sine", g: 0.06, r: 0.6 });
+}
+
+/* ── Səhnə cue-ları ───────────────────────────────────────────────── */
+export function playImpact(key, big) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    tone({ f: 95, f2: 38, glide: 0.35, t, type: "sine", g: big ? 0.42 : 0.3, a: 0.003, r: 0.45 });
+    noise({ ft: "lowpass", f: 420, t, g: 0.18, a: 0.002, r: 0.18 });
+    if (big) noise({ ft: "highpass", f: 4200, t, g: 0.08, a: 0.004, r: 1.6 });
+}
+
+export function playFinalSound(key) { playFanfare(key); }
+
+export function playFanfare(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.02;
+    const brass = (m, at, hold, g) => {
+        tone({ f: NOTE(m), t: at, type: "sawtooth", g: g ?? 0.045, a: 0.03, hold, r: 0.5, lp: 1900, q: 1.1 });
+        tone({ f: NOTE(m), t: at, type: "sawtooth", g: (g ?? 0.045) * 0.6, a: 0.03, hold, r: 0.5, lp: 1900, detune: 8 });
+    };
+    brass(67, t, 0.08); brass(72, t + 0.16, 0.08); brass(76, t + 0.32, 0.08); brass(79, t + 0.48, 0.75, 0.055);
+    [60, 64, 67].forEach((m) => tone({ f: NOTE(m), t: t + 0.48, type: "triangle", g: 0.035, a: 0.05, hold: 0.7, r: 0.7, lp: 1600 }));
+    [0, 0.48].forEach((d) => tone({ f: 98, f2: 70, glide: 0.25, t: t + d, type: "sine", g: 0.22, a: 0.003, r: 0.3 }));
+}
+
+export function playCheer(key, strength = 1) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.02;
+    const len = 1.6 + strength * 1.2;
+    for (let i = 0; i < 10; i += 1) {
+        noise({ ft: "bandpass", f: 500 + Math.random() * 1800, q: 3 + Math.random() * 4, t: t + Math.random() * 0.3, g: 0.022 * strength, a: 0.35, hold: len * 0.4, r: len * 0.5 });
+    }
+    const claps = Math.round(18 + 22 * strength);
+    for (let i = 0; i < claps; i += 1) {
+        noise({ ft: "bandpass", f: 1300 + Math.random() * 900, q: 1.2, t: t + Math.random() * len, g: 0.05 * strength, a: 0.001, r: 0.035 });
+    }
+}
+
+export function playRiser(key, seconds = 1.8) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    noise({ ft: "bandpass", f: 350, f2: 5200, glide: seconds, q: 2, t, g: 0.09, a: seconds * 0.9, r: 0.2 });
+    tone({ f: 160, f2: 640, glide: seconds, t, type: "triangle", g: 0.03, a: seconds * 0.9, r: 0.2, lp: 1800 });
+}
+
+/** Barabam təkrarı — `seconds` ərzində crescendo; qaytarılan funksiya dayandırır. */
+export function startDrumroll(key, seconds = 3, from = 0.03, to = 0.14) {
+    const c = live();
+    if (!c || !once(key)) return () => {};
+    const bus = c.createGain();
+    bus.connect(eng.sfx);
+    const t0 = c.currentTime + 0.02;
+    const hits = Math.round(seconds * 19);
+    for (let i = 0; i < hits; i += 1) {
+        const k = i / hits;
+        noise({ ft: "bandpass", f: 1900 + Math.random() * 300, q: 0.9, t: t0 + i / 19 + Math.random() * 0.008, g: from + (to - from) * k * k, a: 0.001, r: 0.06, bus });
+    }
+    tone({ f: 82, t: t0, type: "sine", g: 0.05, a: seconds * 0.8, hold: 0.1, r: 0.3, bus });
+    return () => {
+        try { bus.gain.setTargetAtTime(0, c.currentTime, 0.03); setTimeout(() => bus.disconnect(), 400); } catch (error) { /* artıq bağlanıb */ }
+    };
+}
+
+/* ── Dövrələr (lookahead planlayıcı) ──────────────────────────────── */
+function startLoop(name, spec) {
+    const existing = eng.loops.get(name);
+    if (existing && existing.id === spec.id) return;
+    stopLoop(name, 0.15);
+    eng.want.set(name, spec);
+    const c = live();
+    if (!c) return;
+    const stepDur = 60 / spec.bpm / 4;
+    const bus = c.createGain();
+    bus.gain.value = spec.gain ?? 1;
+    bus.connect(spec.music ? eng.music : eng.sfx);
+    const loop = { id: spec.id, bus, step: 0, next: c.currentTime + 0.08, timer: 0 };
+    loop.timer = window.setInterval(() => {
+        const cc = eng.ctx;
+        if (!cc || cc.state !== "running") return;
+        if (loop.next < cc.currentTime) loop.next = cc.currentTime + 0.05; // gizli tab boşluğundan sonra
+        while (loop.next < cc.currentTime + 0.25) {
+            spec.onStep(loop.step, loop.next, bus, stepDur);
+            loop.step += 1;
+            loop.next += stepDur;
+            if (spec.maxSteps && loop.step >= spec.maxSteps) {
+                stopLoop(name, 1.2);
+                if (typeof spec.onEnd === "function") spec.onEnd();
+                return;
+            }
+        }
+    }, 50);
+    eng.loops.set(name, loop);
+}
+
+function stopLoop(name, fade = 0.25) {
+    eng.want.delete(name);
+    const loop = eng.loops.get(name);
+    if (!loop) return;
+    window.clearInterval(loop.timer);
+    eng.loops.delete(name);
+    try {
+        loop.bus.gain.setTargetAtTime(0, eng.ctx.currentTime, fade / 3);
+        window.setTimeout(() => loop.bus.disconnect(), fade * 1000 + 400);
+    } catch (error) { /* kontekst bağlanıb */ }
+}
+
+function startWantedLoops() {
+    eng.want.forEach((spec, name) => { if (!eng.loops.has(name)) startLoop(name, spec); });
+}
+
+export function stopAllLoops() {
+    Array.from(eng.loops.keys()).forEach((name) => stopLoop(name, 0.3));
+    eng.want.clear();
+}
+
+const PROG_LOBBY = [[48, [60, 64, 67]], [43, [59, 62, 67]], [45, [60, 64, 69]], [41, [60, 65, 69]]];
+
+function lobbyStep(mode) {
+    return (step, t, bus, sd) => {
+        const bar = Math.floor(step / 16) % 4;
+        const s = step % 16;
+        const [root, tri] = PROG_LOBBY[bar];
+        if (s === 0) tri.forEach((m) => tone({ f: NOTE(m), t, type: "triangle", g: 0.022, a: 0.35, hold: sd * 10, r: 1.4, lp: 1300, bus }));
+        if (mode === "focus") {
+            if (s === 0 || s === 8) pluck(tri[s === 0 ? 2 : 1] + 12, t, 0.03, 0.9, bus, "sine");
+            return;
+        }
+        if (s === 0 || s === 8) tone({ f: NOTE(root + 12), t, type: "triangle", g: 0.07, a: 0.01, r: 0.45, lp: 520, bus });
+        if (s === 14) tone({ f: NOTE(root + 14), t, type: "triangle", g: 0.045, a: 0.01, r: 0.2, lp: 520, bus });
+        if (s % 4 === 2) pluck([tri[0], tri[1], tri[2], tri[1]][(s - 2) / 4] + 12, t, 0.03, 0.28, bus, "sine");
+        if (s === 4 || s === 12) noise({ ft: "highpass", f: 7500, t, g: 0.012, a: 0.002, r: 0.05, bus });
+    };
+}
+
+export function stopLobbyMusic() { stopLoop("lobby", 0.6); }
+
+export function syncLobbyMusic() {
+    const mode = String(state.sessionSettings?.lobby_music || "original");
+    if (state.sessionState !== "lobby" || mode === "silent" || !audioEnabled()) {
+        stopLobbyMusic();
+        return;
+    }
+    const bpm = mode === "focus" ? 72 : 96;
+    startLoop("lobby", { id: `lobby:${mode}`, bpm, music: true, gain: 1, onStep: lobbyStep(mode) });
+}
+
+const PROG_DANCE = [[48, [60, 64, 67]], [45, [57, 60, 64]], [41, [57, 60, 65]], [43, [59, 62, 67]]];
+
+export function startDanceBeat(maxBars = 32, onEnd) {
+    startLoop("dance", {
+        id: "dance", bpm: 112, music: true, gain: 1, maxSteps: maxBars * 16, onEnd,
+        onStep(step, t, bus) {
+            const bar = Math.floor(step / 16) % 4;
+            const s = step % 16;
+            const [root, tri] = PROG_DANCE[bar];
+            if (s === 0 || s === 8 || (bar === 3 && s === 10)) tone({ f: 150, f2: 46, glide: 0.11, t, type: "sine", g: 0.36, a: 0.002, r: 0.2, bus });
+            if (s === 4 || s === 12) {
+                noise({ ft: "bandpass", f: 1500, q: 0.9, t, g: 0.13, a: 0.001, r: 0.09, bus });
+                noise({ ft: "bandpass", f: 1500, q: 0.9, t: t + 0.012, g: 0.1, a: 0.001, r: 0.1, bus });
+            }
+            if (s % 2 === 0) noise({ ft: "highpass", f: 7200, t, g: s % 4 === 2 ? 0.03 : 0.02, a: 0.001, r: s === 6 || s === 14 ? 0.12 : 0.03, bus });
+            if ([0, 3, 6, 8, 11, 14].includes(s)) tone({ f: NOTE(root + (s === 11 ? 19 : 12)), t, type: "triangle", g: 0.11, a: 0.004, r: 0.16, lp: 700, bus });
+            if (s === 4 || s === 12 || s === 7) chord(tri, t, 0.02, 0.12, bus);
+            if (bar === 3 && s % 2 === 0 && s < 8) pluck([79, 76, 72, 76][s / 2], t, 0.03, 0.3, bus, "sine");
+        },
     });
 }
 
-/* ── Final/Victory Sound: celebratory fanfare with harmony ──────── */
-export function playFinalSound(key) {
-    if (state.lastFinalSoundKey === key) return;
-    withAudio(context => {
-        const t = context.currentTime + 0.02;
-        // Triumphant ascending fanfare: C-E-G-C5-E5 with big sustain
-        const fanfare = [
-            { offset: 0.00, freq: 262, dur: 0.22, gain: 0.06, type: "triangle" },
-            { offset: 0.12, freq: 330, dur: 0.22, gain: 0.06, type: "triangle" },
-            { offset: 0.24, freq: 392, dur: 0.24, gain: 0.07, type: "triangle" },
-            { offset: 0.38, freq: 523, dur: 0.30, gain: 0.08, type: "sine" },
-            { offset: 0.54, freq: 659, dur: 0.65, gain: 0.09, type: "sine" },
-        ];
-        fanfare.forEach(n => {
-            playTone(context, { startTime: t + n.offset, duration: n.dur, frequency: n.freq, endFrequency: n.freq * 1.01, gain: n.gain, type: n.type });
-            // Doubled octave below for richness
-            playTone(context, { startTime: t + n.offset + 0.01, duration: n.dur * 0.8, frequency: n.freq / 2, endFrequency: n.freq / 2, gain: n.gain * 0.35, type: "sine" });
-        });
-        // Grand bass foundation
-        playTone(context, { startTime: t, duration: 1.2, frequency: 131, endFrequency: 98, gain: 0.035, type: "sine" });
-        // Sparkle overtone on the final sustained note
-        playTone(context, { startTime: t + 0.56, duration: 0.6, frequency: 1318, endFrequency: 1400, gain: 0.012, type: "sine" });
-        playTone(context, { startTime: t + 0.60, duration: 0.5, frequency: 1568, endFrequency: 1600, gain: 0.008, type: "sine" });
-        state.lastFinalSoundKey = key;
-    });
-}
+export function stopDanceBeat() { stopLoop("dance", 1); }

@@ -1,62 +1,153 @@
-import { UI } from './dom.js';
-import { state } from './state.js';
+import { UI } from './dom.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
 
 export const I18N = window.LIVE_EXAM_HOST_I18N || {};
 export const hostShellSubscribers = new Set();
-export const tr = (key, fallback) => I18N[key] || fallback;
+
+// Tərcümə hələ kompilyasiya olunmayıbsa şablon msgid-in özünü (məs. "stage_replay")
+// qaytarır — belə halda JS-dəki Azərbaycan dilində ehtiyat mətn göstərilir.
+const looksUntranslated = (value) => /^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(value);
+export const tr = (key, fallback) => {
+    const value = I18N[key];
+    return value && !looksUntranslated(value) ? value : fallback;
+};
 export const controlsEnabled = () => CONFIG.controlsEnabled !== false;
 export const fmt = (template, values) =>
     String(template || "").replace(/\{(\w+)\}/g, (_, key) => (values && key in values ? values[key] : `{${key}}`));
-export const esc = text => {
-    const div = document.createElement("div");
-    div.textContent = text == null ? "" : String(text);
-    return div.innerHTML;
-};
-export const wsUrl = path => `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`;
+export const esc = (text) =>
+    String(text == null ? "" : text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+export const wsUrl = (path) => `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}${path}`;
 export const safeDisplay = (node, value) => {
     if (node) node.style.display = value;
 };
-export const toMs = value => {
+export const toMs = (value) => {
     const parsed = value ? new Date(value).getTime() : 0;
     return Number.isFinite(parsed) ? parsed : 0;
 };
 export const nowMs = () => Date.now() + Number(state.serverTimeOffsetMs || 0);
-export const questionKey = question => `${question?.id || "0"}:${question?.started_at || ""}`;
-export const revealKey = payload => `${payload?.question_id || "0"}:${payload?.revealed_at || ""}`;
-export const answerWord = count => tr(count === 1 ? "answersSingular" : "answersPlural", count === 1 ? "Answer" : "Answers");
-export const progressLabel = question => `${Number(question?.index || 0)} of ${Number(question?.total || 0)}`;
+export const questionKey = (question) => `${question?.id || "0"}:${question?.started_at || ""}`;
+export const revealKey = (payload) => `${payload?.question_id || "0"}:${payload?.revealed_at || ""}`;
+export const lang = () => String(CONFIG.languageCode || document.documentElement.lang || "az").slice(0, 2).toLowerCase();
+export const reducedMotion = () => Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 export const usesPresentationStageLayout = () => document.body.classList.contains("host-presentation-page");
-export const progressBadgeMarkup = question => `
-    <div class="quiz-progress-badge" aria-label="${esc(progressLabel(question))}">
-        <strong>${Number(question?.index || 0)}</strong>
-        <span>of ${Number(question?.total || 0)}</span>
-    </div>
-`;
-export const avatarMarkup = (player, size, className = "") =>
+
+export const progressLabel = (question) =>
+    fmt(tr("questionOf", "Sual {index} / {total}"), {
+        index: Number(question?.index || 0),
+        total: Number(question?.total || 0),
+    });
+export const answerWord = () => tr("answersLabel", "cavab");
+
+export function formatNumber(value) {
+    try {
+        return new Intl.NumberFormat(lang()).format(Number(value || 0));
+    } catch (error) {
+        return String(Number(value || 0));
+    }
+}
+
+export function formatSeconds(ms) {
+    const seconds = Math.max(0, Number(ms || 0)) / 1000;
+    try {
+        return new Intl.NumberFormat(lang(), { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(seconds);
+    } catch (error) {
+        return seconds.toFixed(1);
+    }
+}
+
+/** Mətn uzunluğu sinfi — başlanğıc şrift ölçüsü CSS-də (data-len) verilir. */
+export function lengthClass(text) {
+    const n = String(text || "").length;
+    if (n <= 60) return "s";
+    if (n <= 120) return "m";
+    if (n <= 200) return "l";
+    return "xl";
+}
+
+/**
+ * Konteynerə sığana qədər şrifti addım-addım kiçildir (CSS: font-size: var(--fit-size, …)).
+ * Yalnız vəziyyət dəyişəndə çağırılır (hər kadrda yox) — layout xərci azdır.
+ */
+export function fitText(element, { min = 16, step = 0.9 } = {}) {
+    if (!element || !element.isConnected) return;
+    element.style.removeProperty("--fit-size");
+    let size = parseFloat(window.getComputedStyle(element).fontSize) || 32;
+    for (let guard = 0; guard < 16; guard += 1) {
+        // Dözüm: diakritika / aşağı çıxıntılar (ə, ı, ş, g…) sətir qutusundan bir neçə px
+        // çıxır — bu «daşma» deyil; yalnız həqiqi əlavə sətir kiçiltmə tələb edir.
+        const tolerance = Math.max(4, size * 0.3);
+        const overflow =
+            element.scrollHeight > element.clientHeight + tolerance || element.scrollWidth > element.clientWidth + 2;
+        if (!overflow || size <= min) break;
+        size = Math.max(min, Math.floor(size * step));
+        element.style.setProperty("--fit-size", `${size}px`);
+    }
+}
+
+export function fitAll(root, selector, options) {
+    (root || document).querySelectorAll(selector).forEach((element) => fitText(element, options));
+}
+
+const countUps = new WeakMap();
+
+/** Rəqəmi `from`-dan `to`-ya animasiya ilə sayır (yalnız textContent). */
+export function countUp(element, from, to, duration = 900) {
+    if (!element) return;
+    const previous = countUps.get(element);
+    if (previous) cancelAnimationFrame(previous);
+    const start = Number(from || 0);
+    const end = Number(to || 0);
+    if (reducedMotion() || duration <= 0 || start === end) {
+        element.textContent = formatNumber(end);
+        return;
+    }
+    const t0 = performance.now();
+    const tick = (now) => {
+        const k = Math.min(1, (now - t0) / duration);
+        const eased = 1 - (1 - k) ** 3;
+        element.textContent = formatNumber(Math.round(start + (end - start) * eased));
+        if (k < 1) countUps.set(element, requestAnimationFrame(tick));
+        else countUps.delete(element);
+    };
+    countUps.set(element, requestAnimationFrame(tick));
+}
+
+/** PIN-i oxunaqlı qruplara bölür (boşluq simvolu YOX — kopyalananda PIN bütöv qalır). */
+export function pinMarkup(pin) {
+    const value = String(pin || "");
+    const size = value.length <= 6 ? 3 : Math.ceil(value.length / 2);
+    const groups = [];
+    for (let i = 0; i < value.length; i += size) groups.push(value.slice(i, i + size));
+    return groups.map((group) => `<span class="hx-pin__group">${esc(group)}</span>`).join("");
+}
+
+export const avatarMarkup = (player, size, className = "", extra = {}) =>
     (window.LiveAvatarRenderer || { renderAvatarMarkup: () => "" }).renderAvatarMarkup(player || {}, {
         size,
         className,
         interactive: false,
+        ...extra,
     });
+
 export const avatarImageMarkup = (player, size, className = "") => {
     const renderer = window.LiveAvatarRenderer || {};
     if (typeof renderer.renderAvatarDataUrl !== "function") {
         return avatarMarkup(player, size, className);
     }
-
     const resolvedSize = Number(size) > 0 ? Number(size) : 72;
-    const label = esc(player?.nickname || "Player");
     const classes = ["host-avatar-image", className].filter(Boolean).join(" ");
-    return `<img class="${esc(classes)}" src="${renderer.renderAvatarDataUrl(player || {})}" alt="${label}" width="${resolvedSize}" height="${resolvedSize}" decoding="async">`;
+    return `<img class="${esc(classes)}" src="${renderer.renderAvatarDataUrl(player || {})}" alt="" width="${resolvedSize}" height="${resolvedSize}" decoding="async">`;
 };
-export const topSignature = rows =>
+
+export const topSignature = (rows) =>
     (Array.isArray(rows) ? rows : [])
         .map((player) =>
-            [
-                Number(player?.player_id || player?.id || 0),
-                String(player?.nickname || ""),
-                Number(player?.score || 0),
-            ].join(":")
+            [Number(player?.player_id || player?.id || 0), String(player?.nickname || ""), Number(player?.score || 0)].join(":")
         )
         .join("|");
 
@@ -87,31 +178,26 @@ export function updateServerTimeOffset(payload, receivedAtMs = Date.now()) {
 
 function extractTimelineMeta(payload) {
     if (!payload) return null;
-
-    const kind = payload.type === "finished" || payload.state === "finished"
-        ? "finished"
-        : payload.type === "reveal" || payload.state === "reveal"
-            ? "reveal"
-            : payload.type === "question_published" || payload.state === "question"
+    const kind =
+        payload.type === "finished" || payload.state === "finished"
+            ? "finished"
+            : payload.type === "reveal" || payload.state === "reveal"
+              ? "reveal"
+              : payload.type === "question_published" || payload.state === "question"
                 ? "question"
                 : "lobby";
     const question = payload.question || null;
     const questionId = Number(payload.question_id || question?.id || 0);
     let phaseAtMs = 0;
-
     if (kind === "finished") {
-        phaseAtMs = toMs(payload.finished_at) || toMs(payload.next_question_at) || toMs(payload.revealed_at) || toMs(question?.ends_at);
+        phaseAtMs =
+            toMs(payload.finished_at) || toMs(payload.next_question_at) || toMs(payload.revealed_at) || toMs(question?.ends_at);
     } else if (kind === "reveal") {
         phaseAtMs = toMs(payload.revealed_at) || toMs(question?.ends_at) || toMs(payload.question_ends_at);
     } else if (kind === "question") {
         phaseAtMs = toMs(question?.started_at) || toMs(payload.question_started_at);
     }
-
-    return {
-        phaseRank: timelinePhaseRank(kind),
-        phaseAtMs,
-        questionId,
-    };
+    return { phaseRank: timelinePhaseRank(kind), phaseAtMs, questionId };
 }
 
 function compareTimelineMeta(nextMeta, currentMeta) {
@@ -130,8 +216,7 @@ function compareTimelineMeta(nextMeta, currentMeta) {
 }
 
 export function shouldApplyTimelinePayload(payload) {
-    const nextMeta = extractTimelineMeta(payload);
-    return compareTimelineMeta(nextMeta, state.timelineMeta) >= 0;
+    return compareTimelineMeta(extractTimelineMeta(payload), state.timelineMeta) >= 0;
 }
 
 export function rememberTimelinePayload(payload) {
@@ -141,7 +226,6 @@ export function rememberTimelinePayload(payload) {
         state.timelineMeta = nextMeta;
     }
 }
-
 
 export function buildJoinUrl() {
     const twoStepJoin = state.sessionSettings.two_step_join !== false;
@@ -166,6 +250,17 @@ export function currentQrUrl() {
     return `${base}${base.includes("?") ? "&" : "?"}mode=${cacheKey}`;
 }
 
+export function joinUrlLabel(rawUrl) {
+    if (!rawUrl) return "";
+    try {
+        const parsed = new URL(rawUrl);
+        const path = parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/$/, "");
+        return `${parsed.host}${path}`;
+    } catch (error) {
+        return String(rawUrl).replace(/^https?:\/\//, "").replace(/\/$/, "");
+    }
+}
+
 export function publicHostState() {
     return {
         sessionState: state.sessionState,
@@ -180,7 +275,7 @@ export function publicHostState() {
 
 export function notifyHostShell() {
     const snapshot = publicHostState();
-    hostShellSubscribers.forEach(listener => {
+    hostShellSubscribers.forEach((listener) => {
         try {
             listener(snapshot);
         } catch (error) {
@@ -194,90 +289,11 @@ export function markStateMutation() {
     state.lastStateMutationAt = nowMs();
 }
 
-export function lobbyCopy() {
-    const lang = String(CONFIG.languageCode || "az").slice(0, 2).toLowerCase();
-    const copy = {
-        az: {
-            brand: "Canlı",
-            joinLabel: gettext("Qoşulmaq üçün"),
-            joinHint: gettext("Tələbələr link, PIN və ya QR kod ilə qoşula bilər."),
-            pinLabel: gettext("Canlı PIN"),
-            waitingLabel: gettext("İştirakçılar gözlənilir"),
-            waitingHint: gettext("Müəllim Başla düyməsini sıxan kimi ilk sual yayımlanacaq."),
-            audienceLabel: gettext("{count} iştirakçı qoşulub"),
-            audienceEmpty: gettext("Hələ heç kim qoşulmayıb"),
-            participantsTitle: gettext("Qoşulan iştirakçılar"),
-            playersEmpty: gettext("İştirakçılar burada görünəcək."),
-            lockedLabel: gettext("Qoşulma bağlanıb"),
-            lockedHint: gettext("Yeni iştirakçılar artıq bu lobby-yə daxil ola bilməz."),
-            removePlayerLabel: gettext("İştirakçını çıxar"),
-        },
-        en: {
-            brand: "Live",
-            joinLabel: "Join the live exam",
-            joinHint: "Students can join with the link, PIN, or QR code.",
-            pinLabel: "Live PIN",
-            waitingLabel: "Waiting for participants",
-            waitingHint: "The first question will appear as soon as the teacher presses Start.",
-            audienceLabel: "{count} participants joined",
-            audienceEmpty: "No participants have joined yet",
-            participantsTitle: "Joined participants",
-            playersEmpty: "Participants will appear here.",
-            lockedLabel: "Lobby locked",
-            lockedHint: "New participants cannot join until the teacher unlocks the session.",
-            removePlayerLabel: "Remove participant",
-        },
-        ru: {
-            brand: "Прямой эфир",
-            joinLabel: "Подключение к игре",
-            joinHint: "Участники могут войти по ссылке, PIN-коду или QR-коду.",
-            pinLabel: "PIN игры",
-            waitingLabel: "Ожидаем участников",
-            waitingHint: "Как только преподаватель нажмет Старт, появится первый вопрос.",
-            audienceLabel: "Подключились: {count}",
-            audienceEmpty: "Пока никто не подключился",
-            participantsTitle: "Подключившиеся участники",
-            playersEmpty: "Здесь появятся участники.",
-            lockedLabel: "Лобби закрыто",
-            lockedHint: "Новые участники больше не могут присоединиться к этой сессии.",
-            removePlayerLabel: "Удалить участника",
-        },
-        tr: {
-            brand: "Canlı",
-            joinLabel: gettext("Canli sinava katıl"),
-            joinHint: gettext("Öğrenciler bağlantı, PIN veya QR kod ile katılabilir."),
-            pinLabel: gettext("Canlı PIN"),
-            waitingLabel: gettext("Katılımcılar bekleniyor"),
-            waitingHint: gettext("Öğretmen Başlat'a basar basmaz ilk soru gösterilecek."),
-            audienceLabel: gettext("{count} katılımcı bağlandı"),
-            audienceEmpty: gettext("Henüz kimse bağlanmadı"),
-            participantsTitle: gettext("Katılan katılımcılar"),
-            playersEmpty: gettext("Katılımcılar burada görünecek."),
-            lockedLabel: "Lobi kilitli",
-            lockedHint: gettext("Öğretmen yeniden açana kadar yeni katılımcı giremez."),
-            removePlayerLabel: gettext("Katılımcıyı çıkar"),
-        },
-    };
-    return copy[lang] || copy.az;
-}
-
-export function joinUrlLabel(rawUrl) {
-    if (!rawUrl) return "";
-    try {
-        const parsed = new URL(rawUrl);
-        const path = parsed.pathname === "/" ? "" : parsed.pathname.replace(/\/$/, "");
-        return `${parsed.host}${path}`;
-    } catch (error) {
-        return String(rawUrl).replace(/^https?:\/\//, "").replace(/\/$/, "");
-    }
-}
-
 const logs = [];
+let debugOn = false;
 
 export function log(message) {
-    // 2026-09-13 frontend auditi F13: `console.log` hər çağırışda, debug
-    // bayrağından ƏVVƏL yazılırdı — istehsal konsolunu zibilləyirdi. İndi yalnız
-    // «Debug» paneli açıq olanda (`debugOn`) konsola da yazılır.
+    // 2026-09-13 frontend auditi F13: konsola yalnız «Debug» paneli açıq olanda yazılır.
     if (debugOn) console.log("[HOST]", message);
     if (!UI.debugLog) return;
     logs.unshift(`> ${new Date().toLocaleTimeString()} ${message}`);
@@ -285,13 +301,10 @@ export function log(message) {
     UI.debugLog.textContent = logs.join("\n");
 }
 
-
-let debugOn = false;
-
 export function bindDebugToggle() {
     UI.debugBtn?.addEventListener("click", () => {
         debugOn = !debugOn;
-        UI.debugBtn.innerHTML = `<i class="fas fa-terminal"></i> ${tr("debugLabel", "Debug")} ${debugOn ? "▾" : "▸"}`;
-        UI.debugLog.style.display = debugOn ? "block" : "none";
+        UI.debugBtn.setAttribute("aria-expanded", debugOn ? "true" : "false");
+        UI.debugLog.classList.toggle("is-open", debugOn);
     });
 }

@@ -1,20 +1,18 @@
-import { UI } from './dom.js';
-import { state } from './state.js';
-import { finishGame, nextQuestion, post, postJson, revealQuestion, startGame } from './api.js';
-import { unlockAudio } from './audio.js';
-import { openPresenterWindow, tryEnterFullscreen } from './presentation.js';
-import { controlsEnabled } from './utils.js';
+import { UI } from './dom.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { finishGame, nextQuestion, post, postJson, revealQuestion, startGame } from './api.js?v=lx20260929';
+import { unlockAudio } from './audio.js?v=lx20260929';
+import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20260929';
+import { controlsEnabled, fitAll } from './utils.js?v=lx20260929';
 
 export function bindHostEvents() {
-    UI.startBtn.onclick = startGame;
+    if (UI.startBtn) UI.startBtn.onclick = startGame;
+    if (UI.presentBtn) UI.presentBtn.onclick = () => openPresenterWindow();
+    if (UI.revealBtn) UI.revealBtn.onclick = revealQuestion;
+    if (UI.nextBtn) UI.nextBtn.onclick = nextQuestion;
+    if (UI.finishBtn) UI.finishBtn.onclick = finishGame;
 
-    if (UI.presentBtn) {
-        UI.presentBtn.onclick = () => openPresenterWindow();
-    }
-    UI.revealBtn.onclick = revealQuestion;
-    UI.nextBtn.onclick = nextQuestion;
-    UI.finishBtn.onclick = finishGame;
-    UI.presentationContent?.addEventListener("click", event => {
+    UI.presentationContent?.addEventListener("click", (event) => {
         if (event.target.closest("[data-action='open-qr']")) {
             if (typeof toggleQR === "function") toggleQR(true);
             return;
@@ -28,6 +26,7 @@ export function bindHostEvents() {
             button.disabled = false;
         });
     });
+
     UI.autoMode?.addEventListener("change", () => {
         if (controlsEnabled() && CONFIG?.urls?.settings) {
             postJson(CONFIG.urls.settings, { autoplay: Boolean(UI.autoMode.checked) });
@@ -37,19 +36,27 @@ export function bindHostEvents() {
     UI.questionCount?.addEventListener("focus", function onFocus() {
         this.select();
     });
-
     UI.questionCount?.addEventListener("blur", function onBlur() {
         let value = parseInt(this.value, 10) || 1;
         if (value < 1) value = 1;
         if (value > CONFIG.maxQuestions) value = CONFIG.maxQuestions;
         this.value = value;
     });
-
-    UI.questionCount?.addEventListener("keydown", event => {
-        if ([8, 46, 9, 27, 13, 37, 38, 39, 40].includes(event.keyCode)) return;
-        if ((event.ctrlKey || event.metaKey) && [65, 67, 86, 88].includes(event.keyCode)) return;
-        if ((event.keyCode >= 48 && event.keyCode <= 57) || (event.keyCode >= 96 && event.keyCode <= 105)) return;
+    UI.questionCount?.addEventListener("keydown", (event) => {
+        if (["Backspace", "Delete", "Tab", "Escape", "Enter", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
+        if ((event.ctrlKey || event.metaKey) && ["a", "c", "v", "x"].includes(String(event.key).toLowerCase())) return;
+        if (/^\d$/.test(event.key)) return;
         event.preventDefault();
+    });
+
+    // Pəncərə ölçüsü dəyişəndə uzun mətnləri yenidən sığdır (debounce).
+    let resizeTimer = 0;
+    window.addEventListener("resize", () => {
+        window.clearTimeout(resizeTimer);
+        resizeTimer = window.setTimeout(() => {
+            fitAll(UI.presentationContent, "[data-fit]", { min: 18 });
+            fitAll(UI.presentationContent, ".hx-tile__text", { min: 14 });
+        }, 160);
     });
 }
 
@@ -59,15 +66,17 @@ export function bindAudioUnlockEvents() {
     document.addEventListener("keydown", unlockAudio);
 
     if (CONFIG.presentationOnly) {
-        setTimeout(() => {
-            tryEnterFullscreen();
-        }, 80);
-        document.addEventListener("pointerdown", () => {
-            unlockAudio();
-            tryEnterFullscreen();
-        }, { once: true });
-        document.addEventListener("keydown", event => {
-            if (event.key && event.key.toLowerCase() === "f") {
+        setTimeout(() => tryEnterFullscreen(), 80);
+        document.addEventListener(
+            "pointerdown",
+            () => {
+                unlockAudio();
+                tryEnterFullscreen();
+            },
+            { once: true }
+        );
+        document.addEventListener("keydown", (event) => {
+            if (event.key && event.key.toLowerCase() === "f" && !event.target.closest?.("input, textarea, [contenteditable]")) {
                 unlockAudio();
                 tryEnterFullscreen();
             }

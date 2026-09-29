@@ -9,39 +9,36 @@ from __future__ import annotations
 import json
 
 from django.conf import settings
+from django.db import transaction
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.live_exam.auth import get_request_player
-from apps.live_exam.domain.session import (
-    build_question_phase_times,
-    detect_multi,
-    get_question_by_index,
-    get_total_questions,
-)
-from apps.live_exam.models import LiveSession
-from apps.live_exam.scoring import get_answer_progress, save_answer_and_score
+from apps.live_exam.domain.question_config import resolve_question_config
+from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
+from apps.live_exam.models import LiveAnswer, LiveSession
+from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_rank
+from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import (
     serialize_player_question_result,
     serialize_players,
     serialize_question,
-    serialize_top,
     serialize_top_before_question,
 )
-from apps.live_exam.session_settings import get_session_settings
+from apps.live_exam.services import auto_reveal_if_due
+from apps.live_exam.session_settings import get_host_session_settings, public_session_settings
 from apps.live_exam.transport import (
+    broadcast_bundle,
     broadcast_host,
     broadcast_players,
     build_answer_progress_payload,
     build_answer_saved_payload,
-    build_player_reveal_payload,
-    build_reveal_payload,
     parse_answer_submission,
     public_player_answer,
 )
+from apps.live_exam.views.host._shared import _ensure_host_org_permission
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
 from core.utils import get_client_ip
@@ -50,51 +47,107 @@ LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
 LIVE_ANSWER_HTTP_LIMIT_SCOPE = "live_exam.answer.http"
 LIVE_STATE_RATE_LIMIT_MESSAGE = "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
+_REVEAL_TIMING_KEYS = (
+    "top",
+    "previous_top",
+    "distribution",
+    "revealed_at",
+    "result_duration_ms",
+    "leaderboard_duration_ms",
+    "transition_duration_ms",
+    "leaderboard_starts_at",
+    "next_question_at",
+)
+_REVEAL_OPTIONAL_KEYS = (
+    "answer_input",
+    "accepted_answers",
+    "multi_scoring",
+    "total_correct",
+    "results",
+    "fastest_correct",
+    "typed_summary",
+    "typed_total",
+    "typed_correct",
+    "total_players",
+)
 
-# ════════════════════════════════════════════════════════════════════════════
-# API Endpoints
-# ════════════════════════════════════════════════════════════════════════════
+
+def _auth_error():
+    return JsonResponse({"ok": False, "message": pgettext("live_exam.view.message", "auth_required")}, status=403)
+
+
+def _rate_limited(request, pin):
+    if getattr(request.user, "is_authenticated", False):
+        rate_key = ("host", request.user.id, pin)
+    else:
+        rate_key = ("player", request.COOKIES.get("live_client_id") or get_client_ip(request) or "unknown", pin)
+    is_limited, retry_after = record_rate_limit_hit(LIVE_STATE_LIMIT_SCOPE, settings.LIVE_STATE_RATE_LIMIT, *rate_key)
+    if not is_limited:
+        return None
+    response = JsonResponse({"ok": False, "message": LIVE_STATE_RATE_LIMIT_MESSAGE}, status=429)
+    if retry_after:
+        response.headers["Retry-After"] = str(retry_after)
+    return response
+
+
+def _maybe_auto_reveal(session: LiveSession, now) -> LiveSession:
+    """LXBE-08: vaxt + güzəşt bitib, autoplay açıq, host reveal etməyib → server reveal edir."""
+    if session.state != LiveSession.STATE_QUESTION or session.question_ends_at is None:
+        return session
+    if now <= session.question_ends_at:
+        return session
+    bundle = auto_reveal_if_due(session.pin, session.current_question_id or None, now=now)
+    if bundle is None:
+        return session
+    transaction.on_commit(lambda: broadcast_bundle(session.pin, bundle))
+    return LiveSession.objects.select_related("exam").get(pk=session.pk)
+
+
+def _finished_fields(session, *, player, data: dict) -> None:
+    bundle = build_final_bundle(session, limit=50)
+    data["top"] = bundle.host["top"]
+    data["stats"] = bundle.host["stats"]
+    if player is not None:
+        data.update(bundle.personal_for(player.id))
+
+
+def _reveal_fields(session, eq, *, ends, is_host: bool, player, data: dict) -> None:
+    bundle = build_reveal_bundle(session, eq.id, revealed_at=ends, exam_question=eq)
+    source = bundle.host if is_host else bundle.players
+    for key in _REVEAL_TIMING_KEYS + _REVEAL_OPTIONAL_KEYS:
+        if key in source:
+            data[key] = source[key]
+    data["correct_option_ids"] = source.get("correct_option_ids", [])
+    if player is not None:
+        personal = bundle.personal_for(player.id)
+        data.update({key: value for key, value in personal.items() if key != "player_answer"})
+        data["player_answer"] = personal.get("player_answer")
 
 
 def live_state_json(request, pin):
     """
     ✅ NEW: cari state-i HTTP ilə almaq (late join / miss olunan WS üçün)
     """
-    if getattr(request.user, "is_authenticated", False):
-        rate_key = ("host", request.user.id, pin)
-    else:
-        rate_key = ("player", request.COOKIES.get("live_client_id") or get_client_ip(request) or "unknown", pin)
-
-    is_limited, retry_after = record_rate_limit_hit(
-        LIVE_STATE_LIMIT_SCOPE,
-        settings.LIVE_STATE_RATE_LIMIT,
-        *rate_key,
-    )
-    if is_limited:
-        response = JsonResponse(
-            {"ok": False, "message": LIVE_STATE_RATE_LIMIT_MESSAGE},
-            status=429,
-        )
-        if retry_after:
-            response.headers["Retry-After"] = str(retry_after)
-        return response
+    limited = _rate_limited(request, pin)
+    if limited is not None:
+        return limited
 
     with bypass_rls():
-        session = LiveSession.objects.filter(pin=pin).first()
+        session = LiveSession.objects.select_related("exam__organization").filter(pin=pin).first()
         if session is None:
-            return JsonResponse(
-                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-                status=403,
-            )
-        server_time = timezone.now()
+            return _auth_error()
         is_host = bool(getattr(request.user, "is_authenticated", False) and session.host_user_id == request.user.id)
+        if is_host:
+            # LX-SEC: host görünüşü (nəticələr + qəbul cavabları) digər host endpoint-ləri
+            # ilə EYNİ RBAC-dan keçir (təşkilat konteksti + exam.host/exam.manage).
+            _ensure_host_org_permission(request, session.exam.organization)
         player = None if is_host else get_request_player(request, pin=pin)
         if not is_host and player is None:
-            return JsonResponse(
-                {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-                status=403,
-            )
+            return _auth_error()
 
+        server_time = timezone.now()
+        session = _maybe_auto_reveal(session, server_time)
+        host_settings = get_host_session_settings(session)
         total = get_total_questions(session)
 
         data: dict = {
@@ -103,7 +156,8 @@ def live_state_json(request, pin):
             "pin": session.pin,
             "state": session.state,
             "is_locked": bool(session.is_locked),
-            "settings": get_session_settings(session),
+            # Oyunçuya yazılı cavabların qəbul siyahısı GETMİR (yalnız host-a).
+            "settings": host_settings if is_host else public_session_settings(host_settings),
             "current_index": int(session.current_index or 0),
             "total_questions": total,
             "created_at": session.created_at.isoformat() if session.created_at else None,
@@ -115,14 +169,16 @@ def live_state_json(request, pin):
                 else None
             ),
         }
-        if session.state == LiveSession.STATE_LOBBY:
+        if session.state == LiveSession.STATE_LOBBY and not (player is not None and request.GET.get("light") == "1"):
             players = serialize_players(session)
             data["players"] = players
             data["total_players"] = len(players)
         else:
+            # ``?light=1`` (oyunçu, lobby): 200 nəfərlik siyahı əvəzinə yalnız say — gözləmə
+            # otağının ehtiyat sorğusu üçün (LX-FE-PLAYER). Host cavabı dəyişmir.
             data["total_players"] = session.players.count()
         if session.state == LiveSession.STATE_FINISHED:
-            data["top"] = serialize_top(session, limit=50)
+            _finished_fields(session, player=player, data=data)
             return JsonResponse(data)
 
         idx = int(session.current_index or 0)
@@ -142,9 +198,7 @@ def live_state_json(request, pin):
             idx=idx,
         )
         ends = session.question_ends_at or computed_ends_at
-
-        _, _, correct_ids = detect_multi(eq)
-        question = serialize_question(
+        data["question"] = serialize_question(
             session,
             eq,
             idx=idx,
@@ -154,45 +208,34 @@ def live_state_json(request, pin):
             answer_starts_at=answer_starts_at,
             ends_at=ends,
         )
+        data["answered_count"] = LiveAnswer.objects.filter(session_id=session.id, question_id=eq.id).count()
 
-        data["question"] = question
-        data["answered_count"] = session.answers.filter(question_id=eq.id).values("player_id").distinct().count()
+        if session.state == LiveSession.STATE_REVEAL:
+            _reveal_fields(session, eq, ends=ends, is_host=is_host, player=player, data=data)
+            return JsonResponse(data)
+
         data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
+        data["correct_option_ids"] = []
         if player is not None:
+            # Refresh-dən sonra telefonun sıra göstəricisi — sualdan ƏVVƏLKİ sıra (sızma yoxdur).
+            data.update(pre_question_rank(session, player.id, eq.id))
             # EX28-10: açıq sual ərzində yalnız «cavab saxlanıb» (düzlük reveal-də).
             data["player_answer"] = public_player_answer(
-                serialize_player_question_result(session, eq.id, player.id),
-                revealed=session.state == LiveSession.STATE_REVEAL,
+                serialize_player_question_result(
+                    session, eq.id, player.id, config=resolve_question_config(session, eq)
+                ),
+                revealed=False,
             )
-
-        data["correct_option_ids"] = correct_ids if session.state == LiveSession.STATE_REVEAL else []
-        if session.state == LiveSession.STATE_REVEAL:
-            if is_host:
-                reveal_payload = build_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
-                data["results"] = reveal_payload["results"]
-            else:
-                reveal_payload = build_player_reveal_payload(session, eq.id, revealed_at=ends, exam_question=eq)
-            data["top"] = reveal_payload["top"]
-            data["previous_top"] = reveal_payload["previous_top"]
-            data["distribution"] = reveal_payload["distribution"]
-            data["revealed_at"] = reveal_payload["revealed_at"]
-            data["result_duration_ms"] = reveal_payload["result_duration_ms"]
-            data["leaderboard_duration_ms"] = reveal_payload["leaderboard_duration_ms"]
-            data["transition_duration_ms"] = reveal_payload["transition_duration_ms"]
-            data["leaderboard_starts_at"] = reveal_payload["leaderboard_starts_at"]
-            data["next_question_at"] = reveal_payload["next_question_at"]
-
         return JsonResponse(data)
 
 
 @require_POST
 def live_answer_submit(request, pin):
+    # LXBE-01: vaxt serverə ÇATMA anından ölçülür (bal üçün müştəri vaxtı yalnız azalda bilər).
+    received_at = timezone.now()
     player = get_request_player(request, pin=pin)
     if player is None:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "auth_required")},
-            status=403,
-        )
+        return _auth_error()
 
     is_limited, retry_after = record_rate_limit_hit(
         LIVE_ANSWER_HTTP_LIMIT_SCOPE,
@@ -213,6 +256,8 @@ def live_answer_submit(request, pin):
         payload = json.loads(request.body.decode("utf-8") or "{}")
     except (TypeError, ValueError, json.JSONDecodeError):
         payload = {}
+    if not isinstance(payload, dict):
+        payload = {}
     if not payload and request.POST:
         payload = request.POST.dict()
         if "option_ids" in request.POST:
@@ -222,7 +267,7 @@ def live_answer_submit(request, pin):
     if not ok:
         return JsonResponse({"ok": False, "message": parsed}, status=400)
 
-    question_id, option_ids, answer_ms = parsed
+    question_id, option_ids, answer_ms, text = parsed
     ok, result = save_answer_and_score(
         pin=pin,
         player_id=player.id,
@@ -230,43 +275,38 @@ def live_answer_submit(request, pin):
         question_id=question_id,
         option_ids=option_ids,
         answer_ms=answer_ms,
+        received_at=received_at,
+        text=text,
     )
     if not ok:
         return JsonResponse({"ok": False, "message": result}, status=400)
 
-    with bypass_rls():
-        session = get_object_or_404(LiveSession, pin=pin)
-        # EX28-10: düzlük/bal reveal-ə qədər oyunçuya qaytarılmır.
-        answer_payload = build_answer_saved_payload(result)
-
-        progress = result.get("progress") or get_answer_progress(pin=pin, question_id=question_id)
+    # EX28-10: düzlük/bal reveal-ə qədər oyunçuya qaytarılmır.
+    response_payload = {"ok": True, "answer": build_answer_saved_payload(result)}
+    progress = result.get("progress")
+    progress_payload = None
+    if progress:
         progress_payload = build_answer_progress_payload(
             question_id=question_id,
             answered_count=progress["answered_count"],
             total_players=progress["total_players"],
         )
+        response_payload["progress"] = progress_payload
 
-        response_payload = {
-            "ok": True,
-            "answer": answer_payload,
-            "progress": progress_payload,
-        }
-
-        reveal_question_id = result.get("reveal_question_id")
-        if reveal_question_id:
-            host_reveal_payload = build_reveal_payload(session, reveal_question_id)
-            player_reveal_payload = build_player_reveal_payload(session, reveal_question_id)
-            response_payload["reveal"] = player_reveal_payload
-        else:
-            host_reveal_payload = None
-            player_reveal_payload = None
+    bundle = None
+    reveal_question_id = result.get("reveal_question_id")
+    if reveal_question_id:
+        with bypass_rls():
+            session = LiveSession.objects.select_related("exam").get(pin=pin)
+            bundle = build_reveal_bundle(session, reveal_question_id)
+        response_payload["reveal"] = {**bundle.players, **bundle.personal_for(player.id)}
 
     # `answer_saved` is a per-player UI state; broadcasting it to all players
     # makes other devices look like they already answered.
-    broadcast_host(pin, progress_payload)
-
-    if host_reveal_payload and player_reveal_payload:
-        broadcast_host(pin, host_reveal_payload)
-        broadcast_players(pin, player_reveal_payload)
+    if progress_payload is not None:
+        broadcast_host(pin, progress_payload)
+    if bundle is not None:
+        broadcast_host(pin, bundle.host)
+        broadcast_players(pin, bundle.players, personal=bundle.personal)
 
     return JsonResponse(response_payload)

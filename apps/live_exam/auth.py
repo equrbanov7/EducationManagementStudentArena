@@ -9,8 +9,10 @@ import uuid
 from typing import Any
 
 from django.core import signing
+from django.db import transaction
 
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.text_safety import clean_nickname, clean_typed_answer, nickname_match_key  # noqa: F401
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -20,16 +22,65 @@ PLAYER_TOKEN_MAX_AGE = 60 * 60 * 6
 LIVE_CLIENT_ID_COOKIE_NAME = "live_client_id"
 LIVE_CLIENT_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
 
+# Audit 2026-09-28 LXS-10: ``live_client_id`` klientin yazdığı cookie-dir, amma
+# join/enter-də oyunçunu geri almaq açarıdır. Format yoxlanmırdı — 64+ simvol
+# ``varchar(64)``-ə yazılanda DataError (500) verirdi. Yararsız dəyər = cookie yoxdur.
+_CLIENT_ID_RE = re.compile(r"[A-Za-z0-9_-]{1,64}")
 
-def clean_nickname(name: str) -> str:
-    cleaned = (name or "").strip()
-    cleaned = re.sub(r"\s+", " ", cleaned)
-    return cleaned[:32]
+# Audit 2026-09-28 LXS-09: host-un çıxardığı klientlər (``host_settings`` daxili
+# açarı — ``get_session_settings`` onu heç vaxt klientə qaytarmır).
+KICKED_CLIENTS_KEY = "_kicked_client_ids"
+KICKED_CLIENTS_LIMIT = 500
+
+
+def normalize_client_id(value) -> str:
+    """Etibarlı ``live_client_id`` və ya boş sətir."""
+    candidate = str(value or "").strip()
+    return candidate if _CLIENT_ID_RE.fullmatch(candidate) else ""
+
+
+def get_request_client_id(request) -> str:
+    """Sorğunun etibarlı ``live_client_id`` cookie-si (yoxdursa / yararsızdırsa ``""``)."""
+    return normalize_client_id(request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME))
 
 
 def get_client_id(request) -> str:
-    client_id = request.COOKIES.get(LIVE_CLIENT_ID_COOKIE_NAME)
-    return client_id or uuid.uuid4().hex
+    return get_request_client_id(request) or uuid.uuid4().hex
+
+
+def is_client_kicked(session, client_id: str | None) -> bool:
+    raw = getattr(session, "host_settings", None) or {}
+    kicked = raw.get(KICKED_CLIENTS_KEY) if isinstance(raw, dict) else None
+    return bool(client_id) and isinstance(kicked, list) and str(client_id) in kicked
+
+
+def remember_kicked_client(session, client_id: str | None) -> None:
+    """Çıxarılan klienti yadda saxla — eyni cookie ilə yenidən qoşula bilməsin.
+
+    ``host_remove_player`` (LX-BE) ``player.delete()``-dən ƏVVƏL çağırmalıdır.
+    Sessiya sətri kilidlənir ki, paralel host yazıları siyahını itirməsin.
+    """
+    client_id = str(client_id or "").strip()[:64]
+    if not client_id:
+        return
+    with transaction.atomic():
+        locked = LiveSession.objects.select_for_update().only("id", "host_settings").get(pk=session.pk)
+        raw = dict(locked.host_settings or {}) if isinstance(locked.host_settings, dict) else {}
+        kicked = [value for value in raw.get(KICKED_CLIENTS_KEY) or [] if isinstance(value, str)]
+        if client_id not in kicked:
+            kicked.append(client_id)
+            raw[KICKED_CLIENTS_KEY] = kicked[-KICKED_CLIENTS_LIMIT:]
+            LiveSession.objects.filter(pk=locked.pk).update(host_settings=raw)
+    session.host_settings = raw
+
+
+def has_signed_player_token(request, *, pin: str) -> bool:
+    """Bu PIN üçün imzası düzgün oyunçu token-i varmı (DB sorğusuz).
+
+    Token yalnız server tərəfindən, uğurlu qoşulmada verilir — deməli sahibi PIN-i
+    təxmin etmir. PIN-miss limiti belə klientləri kəsmir (LXS-05).
+    """
+    return load_player_token_payload(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=pin) is not None
 
 
 def _resolve_session_pin(session_or_pin=None, *, pin: str | None = None, session=None) -> str:

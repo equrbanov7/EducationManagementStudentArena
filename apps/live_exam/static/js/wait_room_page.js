@@ -1,424 +1,528 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const config = window.LiveWaitRoomConfig || {};
-    const i18n = window.LIVE_EXAM_WAIT_ROOM_I18N || {};
-    const tr = (key, fallback) => i18n[key] || fallback;
-    const STATE_POLL_INTERVAL_MS = 2500;
+/* wait_room_page.js — canlı oyunun gözləmə otağı (LX-FE-PLAYER 2026-09-29).
+ *
+ * Nə edir:
+ *  • lobby WebSocket-i avtomatik yenidən qoşulma ilə (0.8 → 10 s, jitter); WS bağlıdırsa hər 3 s,
+ *    açıqdırsa hər 12 s «təhlükəsizlik» snapshot-u (qaçırılmış `game_started` də tutulur);
+ *  • `kicked` mesajı / snapshot 403 → «müəllim səni çıxardı» kartı, bütün taymerlər dayanır;
+ *  • lobbi kilidlənəndə ad sahəsi bağlanır (server qaydası: ad yalnız açıq lobbidə dəyişir);
+ *  • oyun başlayanda «Oyun başlayır!» örtüyü və oyun ekranına keçid;
+ *  • reaksiyalar yalnız lobbidə; 429 → sakit soyuma (Retry-After).
+ * AJAX-safe: EMSReady + idempotent qoruyucu (data-lx-init).
+ */
+(function () {
+    "use strict";
 
-    const state = {
-        myPlayer: config.myPlayer || {},
-        players: [],
-        sessionSettings: Object.assign({}, config.sessionSettings || {}),
-        socket: null,
-        reconnectTimer: null,
-        reconnectAttempts: 0,
-        pollTimer: null,
-        activePanel: "avatar"
-    };
+    function init() {
+        const shell = document.querySelector(".lxw-shell");
+        if (!shell || shell.dataset.lxInit) return;
+        shell.dataset.lxInit = "1";
 
-    const dom = {
-        heroAvatar: document.getElementById("waitRoomHeroAvatar"),
-        heroNickname: document.getElementById("waitRoomHeroNickname"),
-        footerAvatar: document.getElementById("waitRoomFooterAvatar"),
-        footerNickname: document.getElementById("waitRoomFooterNickname"),
-        footerCount: document.getElementById("waitRoomPlayersCount"),
-        wsStatus: document.getElementById("waitRoomWsStatus"),
-        editButton: document.getElementById("waitRoomEditButton"),
-        modal: document.getElementById("waitRoomEditModal"),
-        modalBackdrop: document.getElementById("waitRoomModalBackdrop"),
-        modalCloseButtons: document.querySelectorAll("[data-wait-room-close]"),
-        nicknameInput: document.getElementById("waitRoomNicknameInput"),
-        nicknameError: document.getElementById("waitRoomNicknameError"),
-        saveButton: document.getElementById("waitRoomSaveButton"),
-        preview: document.getElementById("waitRoomPreview"),
-        avatarGrid: document.getElementById("waitRoomAvatarGrid"),
-        accessoryGrid: document.getElementById("waitRoomAccessoryGrid"),
-        appearanceSection: document.getElementById("waitRoomAppearanceSection"),
-        panelButtons: document.querySelectorAll("[data-wait-room-panel-target]"),
-        pickerPanels: document.querySelectorAll("[data-wait-room-panel]"),
-        reactionRoot: document.getElementById("waitRoomReactionDock"),
-        reactionList: document.getElementById("waitRoomReactionList"),
-        reactionFab: document.getElementById("waitRoomReactionFab"),
-        reactionOverlay: document.getElementById("waitRoomReactionOverlay"),
-        feedback: document.getElementById("waitRoomFeedback")
-    };
+        const config = window.LiveWaitRoomConfig || {};
+        const i18n = window.LIVE_EXAM_WAIT_ROOM_I18N || {};
+        const catalog = window.LiveAvatarCatalog || {};
+        const renderer = window.LiveAvatarRenderer;
+        const nicknameTools = window.LiveWaitRoomNicknameEditor || {};
+        const UNTRANSLATED = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/;
 
-    const initialData = document.getElementById("initialPlayers");
-    if (initialData) {
-        try {
-            state.players = JSON.parse(initialData.textContent || "[]");
-        } catch (error) {
-            console.error("wait room initial players parse error", error);
-        }
-    }
-
-    const avatarPicker = new window.LiveWaitRoomAvatarPicker(dom.avatarGrid, {
-        value: state.myPlayer.avatar_key,
-        previewAccessoryKey: state.myPlayer.accessory_key,
-        onChange: function () {
-            renderEditPreview();
-        }
-    });
-    const accessoryPicker = new window.LiveWaitRoomAccessoryPicker(dom.accessoryGrid, {
-        value: state.myPlayer.accessory_key,
-        onChange: function (value) {
-            avatarPicker.setPreviewAccessoryKey(value);
-            renderEditPreview();
-        }
-    });
-    const reactionPanel = new window.LiveWaitRoomReactionPanel({
-        root: dom.reactionRoot,
-        list: dom.reactionList,
-        fab: dom.reactionFab,
-        overlay: dom.reactionOverlay,
-        cooldownMs: 900,
-        onSend: sendReaction
-    });
-
-    avatarPicker.render();
-    accessoryPicker.render();
-    reactionPanel.init();
-
-    function applySessionSettings(nextSettings) {
-        state.sessionSettings = Object.assign({}, state.sessionSettings, nextSettings || {});
-        const charactersEnabled = state.sessionSettings.characters_enabled !== false;
-        const reactionsEnabled = state.sessionSettings.reactions_enabled !== false;
-        document.body.dataset.liveTheme = state.sessionSettings.theme_key || "aurora";
-
-        if (dom.reactionRoot) {
-            dom.reactionRoot.hidden = !reactionsEnabled;
-        }
-
-        if (dom.appearanceSection) {
-            dom.appearanceSection.hidden = !charactersEnabled;
-        }
-
-        if (!charactersEnabled) {
-            setActivePanel("avatar");
-        }
-    }
-
-    function setFeedback(message, kind) {
-        if (!dom.feedback) return;
-        dom.feedback.textContent = message || "";
-        dom.feedback.className = "wait-room-feedback" + (kind ? ` is-${kind}` : "");
-    }
-
-    function renderHero() {
-        if (dom.heroAvatar) {
-            dom.heroAvatar.innerHTML = window.LiveAvatarRenderer.renderAvatarMarkup(state.myPlayer, {
-                size: 128,
-                className: "wait-room-hero__avatar-frame"
-            });
-        }
-        if (dom.heroNickname) {
-            dom.heroNickname.textContent = state.myPlayer.nickname || tr("defaultPlayer", "Player");
-        }
-        if (dom.footerAvatar) {
-            dom.footerAvatar.innerHTML = window.LiveAvatarRenderer.renderAvatarMarkup(state.myPlayer, {
-                size: 54,
-                className: "wait-room-footer__avatar-frame",
-                interactive: false
-            });
-        }
-        if (dom.footerNickname) {
-            dom.footerNickname.textContent = state.myPlayer.nickname || tr("defaultPlayer", "Player");
-        }
-    }
-
-    function renderPlayers(players, totalCount) {
-        state.players = Array.isArray(players) ? players : [];
-        const expectedTotal = Number.isFinite(Number(totalCount)) ? Number(totalCount) : state.players.length;
-        const me = state.players.find(function (player) {
-            return Number(player?.id) === Number(state.myPlayer?.id);
-        });
-        if (!me && expectedTotal <= state.players.length) {
-            setFeedback(tr("removedFromLobby", "You were removed from the lobby."), "error");
-            window.setTimeout(function () {
-                window.location.replace(config.joinPageUrl || window.location.href);
-            }, 450);
-            return;
-        }
-        if (me) {
-            state.myPlayer = Object.assign({}, state.myPlayer, me);
-            renderHero();
-        }
-        if (dom.footerCount) {
-            const otherPlayersCount = Math.max(expectedTotal - 1, 0);
-            dom.footerCount.textContent = String(Math.max(otherPlayersCount, 0));
-        }
-    }
-
-    function renderEditPreview() {
-        const nicknameState = window.LiveWaitRoomNicknameEditor.validateNickname(dom.nicknameInput.value, {
-            required: tr("nicknameRequired", "Nickname is required."),
-            tooLong: tr("nicknameTooLong", "Nickname is too long.")
-        });
-        const previewPlayer = {
-            nickname: nicknameState.value || state.myPlayer.nickname,
-            avatar_key: avatarPicker.value,
-            accessory_key: accessoryPicker.value
+        const tr = (key, fallback) => {
+            const value = i18n[key];
+            if (typeof value !== "string" || !value.trim() || UNTRANSLATED.test(value.trim())) return fallback;
+            return value;
         };
-        if (dom.preview) {
-            dom.preview.innerHTML = window.LiveAvatarRenderer.renderAvatarMarkup(previewPlayer, {
-                size: 104,
-                className: "wait-room-preview__avatar"
-            });
+        const fmt = (template, values) =>
+            String(template).replace(/\{(\w+)\}/g, (match, key) =>
+                Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : match
+            );
+
+        const AZ_ACCESSORY = {
+            accessory_none: "Yoxdur", glasses: "Eynək", cap: "Papaq", crown: "Tac", mask: "Maska",
+            sparkles: "Parıltı", bowtie: "Kəpənək qalstuk", headphones: "Qulaqlıq", flower: "Gül",
+            pirate_patch: "Pirat sarğısı", halo: "Halə",
+        };
+        const AZ_AVATAR = {
+            avatar_1: "Tülkü", avatar_2: "Panda", avatar_3: "Şir", avatar_4: "Pələng", avatar_5: "Koala",
+            avatar_6: "Donuz balası", avatar_7: "Qurbağa", avatar_8: "Səkkizayaq", avatar_9: "Meymun",
+            avatar_10: "Təkbuynuz", avatar_11: "Dovşan", avatar_12: "Hamster", avatar_13: "Canavar",
+            avatar_14: "Ağ ayı", avatar_15: "Qırmızı panda", avatar_16: "Nanə dovşanı",
+        };
+        const accessoryLabels = {};
+        (catalog.accessoryKeys || []).forEach((key) => {
+            accessoryLabels[key] = tr(`acc:${key}`, AZ_ACCESSORY[key] || key);
+        });
+        const avatarLabels = {};
+        (catalog.avatarKeys || []).forEach((key) => {
+            avatarLabels[key] = tr(`ava:${key}`, AZ_AVATAR[key] || key);
+        });
+
+        const $ = (id) => document.getElementById(id);
+        const dom = {
+            heroAvatar: $("waitRoomHeroAvatar"),
+            heroName: $("waitRoomHeroNickname"),
+            status: $("waitRoomStatusText"),
+            count: $("waitRoomPlayersCount"),
+            lockedChip: $("waitRoomLockedChip"),
+            lockedText: $("waitRoomLockedText"),
+            net: $("waitRoomNet"),
+            feedback: $("waitRoomFeedback"),
+            sheet: $("waitRoomEditModal"),
+            backdrop: $("waitRoomModalBackdrop"),
+            nickInput: $("waitRoomNicknameInput"),
+            nickCount: $("waitRoomNicknameCount"),
+            nickHint: $("waitRoomNicknameHint"),
+            nickError: $("waitRoomNicknameError"),
+            saveButton: $("waitRoomSaveButton"),
+            preview: $("waitRoomPreview"),
+            appearance: $("waitRoomAppearanceSection"),
+            avatarPanel: $("waitRoomAvatarPanel"),
+            accessoryPanel: $("waitRoomAccessoryPanel"),
+            reactionDock: $("waitRoomReactionDock"),
+            kicked: $("waitRoomKicked"),
+            starting: $("waitRoomStarting"),
+        };
+
+        const state = {
+            me: Object.assign({}, config.myPlayer || {}),
+            settings: Object.assign({}, config.sessionSettings || {}),
+            locked: Boolean(config.isLocked),
+            socket: null,
+            attempts: 0,
+            retryTimer: null,
+            pollTimer: null,
+            lastSync: 0,
+            done: false,
+            lastFocus: null,
+            feedbackTimer: null,
+            netTimer: null,
+            netShown: "",
+            danceTimer: null,
+            reactionWarnAt: 0,
+        };
+
+        // ── Göstərmə ────────────────────────────────────────────────────────
+        function avatar(profile, size, opts) {
+            if (!renderer) return "";
+            return renderer.renderAvatarMarkup(profile || {}, Object.assign({ size, interactive: false }, opts || {}));
         }
-    }
 
-    function escapeHtml(value) {
-        const div = document.createElement("div");
-        div.textContent = value || "";
-        return div.innerHTML;
-    }
-
-    function setWsStatus(kind, message) {
-        if (!dom.wsStatus) return;
-        dom.wsStatus.className = `wait-room-topbar__status is-${kind}`;
-        dom.wsStatus.querySelector("[data-wait-room-status-label]").textContent = message;
-    }
-
-    function setActivePanel(panelKey) {
-        state.activePanel = panelKey === "accessory" ? "accessory" : "avatar";
-        dom.panelButtons.forEach(function (button) {
-            const active = button.dataset.waitRoomPanelTarget === state.activePanel;
-            button.classList.toggle("is-active", active);
-            button.setAttribute("aria-selected", active ? "true" : "false");
-        });
-        dom.pickerPanels.forEach(function (panel) {
-            const active = panel.dataset.waitRoomPanel === state.activePanel;
-            panel.classList.toggle("is-active", active);
-            panel.hidden = !active;
-        });
-    }
-
-    function openModal() {
-        dom.modal?.classList.add("is-open");
-        dom.modalBackdrop?.classList.add("is-open");
-        document.body.classList.add("wait-room-modal-open");
-        dom.nicknameInput.value = state.myPlayer.nickname || "";
-        dom.nicknameError.textContent = "";
-        avatarPicker.setValue(state.myPlayer.avatar_key || window.LiveAvatarCatalog.defaultAvatarKey);
-        accessoryPicker.setValue(state.myPlayer.accessory_key || window.LiveAvatarCatalog.defaultAccessoryKey);
-        avatarPicker.setPreviewAccessoryKey(accessoryPicker.value);
-        renderEditPreview();
-        setActivePanel("avatar");
-        setFeedback("", "");
-        window.setTimeout(function () {
-            dom.nicknameInput?.focus();
-            dom.nicknameInput?.select();
-        }, 80);
-    }
-
-    function closeModal() {
-        dom.modal?.classList.remove("is-open");
-        dom.modalBackdrop?.classList.remove("is-open");
-        document.body.classList.remove("wait-room-modal-open");
-    }
-
-    async function saveProfile() {
-        const validation = window.LiveWaitRoomNicknameEditor.validateNickname(dom.nicknameInput.value, {
-            required: tr("nicknameRequired", "Nickname is required."),
-            tooLong: tr("nicknameTooLong", "Nickname is too long.")
-        });
-        dom.nicknameInput.value = validation.value;
-        dom.nicknameError.textContent = validation.message || "";
-        if (!validation.valid) return;
-
-        dom.saveButton.disabled = true;
-        setFeedback(tr("saving", "Saving changes..."), "muted");
-
-        try {
-            const body = new FormData();
-            body.append("nickname", validation.value);
-            body.append("avatar_key", avatarPicker.value);
-            body.append("accessory_key", accessoryPicker.value);
-
-            const response = await fetch(config.profileUrl, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": config.csrf
-                },
-                body: body
-            });
-            const data = await response.json();
-            if (!response.ok || !data.ok) {
-                throw new Error(data.message || tr("saveFailed", "Unable to save right now."));
+        function renderHero(dance) {
+            if (dom.heroAvatar) {
+                dom.heroAvatar.innerHTML = avatar(state.me, 150, {
+                    crop: "full",
+                    className: "lxw-hero__art",
+                    dance: dance || "idle",
+                });
             }
-
-            state.myPlayer = data.player;
-            renderHero();
-            renderEditPreview();
-            setFeedback(tr("saved", "Saved"), "success");
-            window.setTimeout(closeModal, 280);
-        } catch (error) {
-            dom.nicknameError.textContent = error.message || tr("saveFailed", "Unable to save right now.");
-            setFeedback("", "");
-        } finally {
-            dom.saveButton.disabled = false;
+            if (dom.heroName) dom.heroName.textContent = state.me.nickname || tr("defaultPlayer", "Oyunçu");
         }
-    }
 
-    async function sendReaction(reactionKey) {
-        try {
-            setFeedback("", "");
-            const body = new FormData();
-            body.append("reaction_key", reactionKey);
-            const response = await fetch(config.reactionUrl, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": config.csrf
-                },
-                body: body
-            });
-            const data = await response.json();
-            if (!response.ok || !data.ok) {
-                if (response.status === 429) {
-                    const retryAfter = Number(response.headers.get("Retry-After") || 0);
-                    if (retryAfter > 0) {
-                        reactionPanel.setCooldown(retryAfter * 1000);
-                    }
+        function celebrate(dance, ms) {
+            renderHero(dance);
+            window.clearTimeout(state.danceTimer);
+            state.danceTimer = window.setTimeout(() => renderHero("idle"), ms || 1800);
+        }
+
+        function showFeedback(message, kind) {
+            if (!dom.feedback || !message) return;
+            dom.feedback.textContent = message;
+            dom.feedback.dataset.kind = kind || "info";
+            dom.feedback.hidden = false;
+            dom.feedback.classList.remove("is-visible");
+            void dom.feedback.offsetWidth;
+            dom.feedback.classList.add("is-visible");
+            window.clearTimeout(state.feedbackTimer);
+            state.feedbackTimer = window.setTimeout(() => {
+                dom.feedback.classList.remove("is-visible");
+                state.feedbackTimer = window.setTimeout(() => {
+                    dom.feedback.hidden = true;
+                }, 260);
+            }, 2600);
+        }
+
+        function setNet(kind) {
+            if (!dom.net) return;
+            window.clearTimeout(state.netTimer);
+            if (kind === "online") {
+                if (!state.netShown) return;
+                state.netShown = "";
+                dom.net.dataset.kind = "back";
+                dom.net.textContent = tr("netBack", "Yenidən onlayn!");
+                state.netTimer = window.setTimeout(() => {
+                    dom.net.hidden = true;
+                }, 1500);
+                return;
+            }
+            const show = () => {
+                state.netShown = kind;
+                dom.net.dataset.kind = kind;
+                dom.net.textContent =
+                    kind === "offline"
+                        ? tr("netOffline", "İnternet yoxdur — bağlantı gözlənilir")
+                        : tr("netReconnecting", "Bağlantı bərpa olunur…");
+                dom.net.hidden = false;
+            };
+            if (state.netShown || kind === "offline") show();
+            else state.netTimer = window.setTimeout(show, 1500);
+        }
+
+        function renderCount(total) {
+            if (!dom.count) return;
+            const count = Math.max(1, Number(total) || 1);
+            dom.count.textContent =
+                count <= 1
+                    ? tr("playersAlone", "Hələlik yalnız sənsən")
+                    : fmt(tr("playersCount", "{count} oyunçu qoşulub"), { count });
+        }
+
+        function setLocked(locked) {
+            state.locked = Boolean(locked);
+            if (dom.lockedChip) dom.lockedChip.hidden = !state.locked;
+            if (dom.lockedText) dom.lockedText.textContent = tr("lockedBadge", "Lobbi bağlanıb — oyun tezliklə başlayır");
+            if (dom.nickInput) {
+                dom.nickInput.disabled = state.locked;
+                if (dom.nickHint) {
+                    dom.nickHint.hidden = !state.locked;
+                    dom.nickHint.textContent = tr(
+                        "nicknameLockedHint",
+                        "Lobbi bağlıdır — ad artıq dəyişmir, avatarı dəyişə bilərsən."
+                    );
                 }
-                throw new Error(data.message || tr("reactionFailed", "Reaction could not be sent."));
             }
-        } catch (error) {
-            setFeedback(error.message || tr("reactionFailed", "Reaction could not be sent."), "error");
         }
-    }
 
-    function getWsUrl() {
-        const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        return `${protocol}//${window.location.host}${config.wsPath}`;
-    }
-
-    async function syncLobbyState() {
-        if (!config.stateUrl) return null;
-        try {
-            const response = await fetch(config.stateUrl, {
-                headers: { Accept: "application/json" }
-            });
-            if (!response.ok) {
-                return null;
-            }
-            const snapshot = await response.json();
-            if (!snapshot || !snapshot.ok) {
-                return null;
-            }
-            applySessionSettings(snapshot.settings);
-            if (snapshot.state && snapshot.state !== "lobby") {
-                window.location.href = config.playerScreenUrl;
-                return snapshot;
-            }
-            state.players = Array.isArray(snapshot.players) ? snapshot.players : state.players;
-            renderPlayers(state.players, snapshot.total_players || state.players.length);
-            return snapshot;
-        } catch (error) {
-            console.error("wait room state sync failed", error);
-            return null;
+        function applySettings(next) {
+            state.settings = Object.assign({}, state.settings, next || {});
+            document.body.dataset.liveTheme = state.settings.theme_key || "aurora";
+            reactions.setEnabled(state.settings.reactions_enabled !== false && !state.done);
+            const characters = state.settings.characters_enabled !== false;
+            if (dom.appearance) dom.appearance.hidden = !characters;
+            if (dom.avatarPanel && !characters) dom.avatarPanel.hidden = true;
+            if (dom.accessoryPanel && !characters) dom.accessoryPanel.hidden = true;
         }
-    }
 
-    function stopStatePolling() {
-        if (state.pollTimer) {
+        function renderPlayers(players, total) {
+            const list = Array.isArray(players) ? players : [];
+            const count = Number.isFinite(Number(total)) ? Number(total) : list.length;
+            const me = list.find((player) => Number(player && player.id) === Number(state.me.id));
+            if (me) {
+                const changed =
+                    me.nickname !== state.me.nickname ||
+                    me.avatar_key !== state.me.avatar_key ||
+                    me.accessory_key !== state.me.accessory_key;
+                state.me = Object.assign({}, state.me, me);
+                if (changed) renderHero();
+            } else if (list.length && list.length >= count) {
+                // Tam siyahıda yoxuq — çox güman çıxarılmışıq; serverdən təsdiq alırıq (403).
+                syncState();
+            }
+            renderCount(count);
+        }
+
+        // ── Son vəziyyətlər ─────────────────────────────────────────────────
+        function stopAll() {
+            state.done = true;
+            window.clearTimeout(state.retryTimer);
             window.clearInterval(state.pollTimer);
             state.pollTimer = null;
-        }
-    }
-
-    function startStatePolling() {
-        if (state.pollTimer) return;
-        state.pollTimer = window.setInterval(function () {
-            if (!document.hidden) {
-                syncLobbyState();
+            if (state.socket) {
+                state.socket.onclose = null;
+                try {
+                    state.socket.close();
+                } catch (error) {
+                    // bağlıdır
+                }
+                state.socket = null;
             }
-        }, STATE_POLL_INTERVAL_MS);
-    }
-
-    function connectWebSocket() {
-        if (state.reconnectTimer) {
-            window.clearTimeout(state.reconnectTimer);
-            state.reconnectTimer = null;
+            reactions.setEnabled(false);
         }
 
-        setWsStatus("connecting", tr("wsConnecting", "Connecting"));
-        state.socket = new WebSocket(getWsUrl());
+        function showKicked() {
+            if (state.done && dom.kicked && !dom.kicked.hidden) return;
+            stopAll();
+            closeSheet();
+            if (!dom.kicked) return;
+            $("waitRoomKickedTitle").textContent = tr("kickedTitle", "Müəllim səni oyundan çıxardı");
+            $("waitRoomKickedBody").textContent = tr(
+                "kickedBody",
+                "Bu cihazla bu oyuna yenidən qoşulmaq mümkün deyil. Səhv olubsa, müəllimə yaz."
+            );
+            const action = $("waitRoomKickedAction");
+            action.textContent = tr("kickedAction", "Başqa PIN daxil et");
+            if (config.pinEntryUrl) action.href = config.pinEntryUrl;
+            dom.kicked.hidden = false;
+            window.setTimeout(() => action.focus(), 60);
+        }
 
-        state.socket.onopen = function () {
-            state.reconnectAttempts = 0;
-            setWsStatus("online", tr("wsOnline", "Online"));
-        };
+        function goToGame(url) {
+            if (state.done) return;
+            stopAll();
+            closeSheet();
+            if (dom.starting) {
+                $("waitRoomStartingText").textContent = tr("gameStarting", "Oyun başlayır!");
+                dom.starting.hidden = false;
+            }
+            celebrate("cheer", 4000);
+            window.location.href = url || config.playerScreenUrl;
+        }
 
-        state.socket.onmessage = function (event) {
+        // ── Server ilə sinxron ──────────────────────────────────────────────
+        async function syncState() {
+            if (state.done || !config.stateUrl) return;
+            state.lastSync = Date.now();
             try {
-                const message = JSON.parse(event.data);
-                const payload = message.data || message;
-                if (payload.type === "game_started" && payload.redirect) {
-                    setWsStatus("online", tr("wsStarting", "Starting"));
-                    window.location.href = payload.redirect;
+                const response = await fetch(config.stateUrl, {
+                    headers: { Accept: "application/json" },
+                    credentials: "same-origin",
+                    cache: "no-store",
+                });
+                if (response.status === 403) {
+                    showKicked();
                     return;
                 }
-                if (payload.type === "lobby_state") {
-                    applySessionSettings(payload.settings);
-                    state.players = Array.isArray(payload.players) ? payload.players : [];
-                    renderPlayers(state.players, payload.count);
+                if (!response.ok) return;
+                const snapshot = await response.json();
+                if (!snapshot || !snapshot.ok) return;
+                applySettings(snapshot.settings);
+                if (snapshot.state && snapshot.state !== "lobby") {
+                    goToGame(config.playerScreenUrl);
                     return;
                 }
-                if (payload.type === "session_settings" && payload.settings) {
-                    applySessionSettings(payload.settings);
+                setLocked(snapshot.is_locked);
+                renderPlayers(snapshot.players, snapshot.total_players);
+            } catch (error) {
+                // şəbəkə yoxdur — WS/yenidən cəhd idarə edir
+            }
+        }
+
+        function socketUrl() {
+            const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+            return `${protocol}//${window.location.host}${config.wsPath}`;
+        }
+
+        function scheduleReconnect() {
+            if (state.done) return;
+            state.attempts += 1;
+            const delay = Math.min(10000, 800 * Math.pow(2, state.attempts - 1)) + Math.floor(Math.random() * 400);
+            window.clearTimeout(state.retryTimer);
+            state.retryTimer = window.setTimeout(connect, delay);
+        }
+
+        function handleMessage(payload) {
+            switch (payload && payload.type) {
+                case "game_started": {
+                    // 90–150 telefon eyni anda yönləndirilməsin: server verdiyi pəncərədə səpələnir.
+                    const jitterMs = Math.min(Math.max(Number(payload.redirect_jitter_ms) || 0, 0), 3000);
+                    window.setTimeout(() => goToGame(payload.redirect), Math.random() * jitterMs);
+                    break;
+                }
+                case "lobby_state":
+                    applySettings(payload.settings);
+                    setLocked(payload.is_locked);
+                    renderPlayers(payload.players, payload.count);
+                    break;
+                case "session_settings":
+                    applySettings(payload.settings);
+                    if (payload.is_locked !== undefined) setLocked(payload.is_locked);
+                    break;
+                case "reaction_event":
+                    reactions.spawn(payload);
+                    break;
+                case "kicked":
+                    showKicked();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        function connect() {
+            window.clearTimeout(state.retryTimer);
+            if (state.done) return;
+            if (state.socket && state.socket.readyState <= 1) return;
+            let socket;
+            try {
+                socket = new WebSocket(socketUrl());
+            } catch (error) {
+                scheduleReconnect();
+                return;
+            }
+            state.socket = socket;
+            socket.onopen = () => {
+                if (socket !== state.socket) return;
+                state.attempts = 0;
+                setNet("online");
+            };
+            socket.onmessage = (event) => {
+                if (socket !== state.socket) return;
+                try {
+                    const message = JSON.parse(event.data);
+                    handleMessage(message.data || message);
+                } catch (error) {
+                    // yanlış mesaj — yox sayılır
+                }
+            };
+            socket.onclose = () => {
+                if (socket !== state.socket) return;
+                state.socket = null;
+                if (state.done) return;
+                setNet(navigator.onLine === false ? "offline" : "reconnecting");
+                scheduleReconnect();
+            };
+        }
+
+        function wsOpen() {
+            return Boolean(state.socket && state.socket.readyState === WebSocket.OPEN);
+        }
+
+        // ── Profil vərəqi (wait_room_profile_sheet.js) ──────────────────────
+        const sheet = window.LiveWaitRoomProfileSheet.create({
+            dom,
+            tr,
+            config,
+            catalog,
+            avatar,
+            nicknameTools,
+            avatarLabels,
+            accessoryLabels,
+            getState: () => state,
+            applyLocked: () => setLocked(state.locked),
+            onSaved: (player) => {
+                state.me = Object.assign({}, state.me, player || {});
+                celebrate("jump", 1600);
+                showFeedback(tr("saved", "Saxlanıldı"), "success");
+            },
+            onFailed: () => syncState(),
+        });
+        const openSheet = () => sheet.open();
+        const closeSheet = () => sheet.close();
+        const saveProfile = () => sheet.save();
+
+        // ── Reaksiyalar ─────────────────────────────────────────────────────
+        const reactions = new window.LiveWaitRoomReactionPanel({
+            root: dom.reactionDock,
+            list: $("waitRoomReactionList"),
+            overlay: $("waitRoomReactionOverlay"),
+            cooldownMs: 1100,
+            onSend: sendReaction,
+        });
+
+        async function sendReaction(reactionKey) {
+            try {
+                const body = new FormData();
+                body.append("reaction_key", reactionKey);
+                const response = await fetch(config.reactionUrl, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": config.csrf },
+                    credentials: "same-origin",
+                    body,
+                });
+                if (response.status === 429) {
+                    const retry = Number(response.headers.get("Retry-After") || 0);
+                    reactions.setCooldown(Math.max(2, retry || 5) * 1000);
+                    if (Date.now() - state.reactionWarnAt > 6000) {
+                        state.reactionWarnAt = Date.now();
+                        showFeedback(tr("reactionWait", "Bir az gözlə — reaksiyalar çox tez-tezdir"), "warn");
+                    }
                     return;
                 }
-                if (payload.type === "reaction_event") {
-                    reactionPanel.spawn(payload);
+                if (response.status === 403) {
+                    // Oyun başlayıb və ya reaksiyalar söndürülüb — panel gizlənir, snapshot yoxlanır.
+                    reactions.setEnabled(false);
+                    syncState();
                 }
             } catch (error) {
-                console.error("wait room message parse error", error);
+                // şəbəkə xətası — səssiz
             }
-        };
+        }
 
-        state.socket.onerror = function () {
-            setWsStatus("offline", tr("wsError", "Error"));
-        };
+        // ── Hadisələr ───────────────────────────────────────────────────────
+        const delegate =
+            window.EMSDelegate && typeof window.EMSDelegate.on === "function"
+                ? window.EMSDelegate.on
+                : (type, selector, handler) =>
+                      document.addEventListener(type, (event) => {
+                          const match = event.target && event.target.closest ? event.target.closest(selector) : null;
+                          if (match) handler.call(match, event, match);
+                      });
+        delegate("click", "[data-wait-room-open]", openSheet);
+        delegate("click", "[data-wait-room-close]", closeSheet);
+        delegate("click", "#waitRoomModalBackdrop", closeSheet);
+        delegate("click", "#waitRoomSaveButton", saveProfile);
+        delegate("click", "[data-wait-room-panel-target]", (event, tab) => sheet.setPanel(tab.dataset.waitRoomPanelTarget));
+        delegate("input", "#waitRoomNicknameInput", () => {
+            dom.nickError.textContent = "";
+            sheet.renderPreview();
+        });
+        delegate("keydown", "#waitRoomNicknameInput", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                saveProfile();
+            }
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeSheet();
+        });
+        window.addEventListener("online", () => {
+            if (wsOpen()) {
+                setNet("online");
+            } else {
+                setNet("reconnecting");
+                state.attempts = 0;
+                connect();
+            }
+            syncState();
+        });
+        window.addEventListener("offline", () => setNet("offline"));
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden || state.done) return;
+            state.attempts = 0;
+            connect();
+            syncState();
+        });
+        window.addEventListener("pagehide", () => {
+            if (state.socket) {
+                state.socket.onclose = null;
+                state.socket.close();
+                state.socket = null;
+            }
+        });
+        window.addEventListener("pageshow", (event) => {
+            if (event.persisted && !state.done) {
+                connect();
+                syncState();
+            }
+        });
 
-        state.socket.onclose = function () {
-            setWsStatus("offline", tr("wsDisconnected", "Disconnected"));
-            if (state.reconnectAttempts >= 10) return;
-            state.reconnectAttempts += 1;
-            const delay = Math.min(1000 * state.reconnectAttempts, 5000);
-            state.reconnectTimer = window.setTimeout(connectWebSocket, delay);
+        // ── Başlanğıc ───────────────────────────────────────────────────────
+        const STATIC_TEXT = {
+            lookOnScreen: "Adını böyük ekranda axtar!",
+            reactionsHint: "Reaksiya göndər",
+            editLook: "Görünüşü dəyiş",
         };
+        document.querySelectorAll("[data-lxw-i18n]").forEach((el) => {
+            const key = el.dataset.lxwI18n;
+            el.textContent = tr(key, STATIC_TEXT[key] || "");
+        });
+        reactions.init();
+        if (dom.status) dom.status.textContent = tr("waitingHost", "Müəllimin oyunu başlatmasını gözləyirik");
+        applySettings(state.settings);
+        setLocked(state.locked);
+        renderHero("wave");
+        window.setTimeout(() => renderHero("idle"), 2200);
+        try {
+            renderPlayers(JSON.parse(($("initialPlayers") || {}).textContent || "[]"));
+        } catch (error) {
+            renderCount(1);
+        }
+        connect();
+        syncState();
+        state.pollTimer = window.setInterval(() => {
+            if (state.done || document.hidden) return;
+            const gap = Date.now() - state.lastSync;
+            if ((!wsOpen() && gap >= 3000) || gap >= 12000) syncState();
+        }, 1000);
     }
 
-    applySessionSettings(state.sessionSettings);
-    renderHero();
-    renderPlayers(state.players, state.players.length);
-    dom.editButton?.addEventListener("click", openModal);
-    dom.modalCloseButtons.forEach(function (button) {
-        button.addEventListener("click", closeModal);
-    });
-    dom.modalBackdrop?.addEventListener("click", closeModal);
-    dom.nicknameInput?.addEventListener("input", function () {
-        dom.nicknameError.textContent = "";
-        renderEditPreview();
-    });
-    dom.saveButton?.addEventListener("click", saveProfile);
-    dom.panelButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            setActivePanel(button.dataset.waitRoomPanelTarget);
-        });
-    });
-    document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape") closeModal();
-    });
-
-    connectWebSocket();
-    syncLobbyState();
-    startStatePolling();
-    window.addEventListener("beforeunload", function () {
-        stopStatePolling();
-        if (state.reconnectTimer) {
-            window.clearTimeout(state.reconnectTimer);
-            state.reconnectTimer = null;
-        }
-        if (state.socket) state.socket.close();
-    });
-});
+    if (window.EMSReady) window.EMSReady(init);
+    else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+    else init();
+})();

@@ -48,6 +48,7 @@ from .player import (
 # Results Views (Teacher)
 # ═══════════════════════════════════════════════════════════════
 from .results import teacher_live_exam_results, teacher_live_session_detail
+from .results_export import teacher_live_session_export
 
 # ═══════════════════════════════════════════════════════════════
 # __all__ - Explicit exports
@@ -80,4 +81,5 @@ __all__ = [
     # Results
     "teacher_live_exam_results",
     "teacher_live_session_detail",
+    "teacher_live_session_export",
 ]

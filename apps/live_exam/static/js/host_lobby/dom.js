@@ -1,4 +1,4 @@
-export const $ = id => document.getElementById(id);
+export const $ = (id) => document.getElementById(id);
 
 export const UI = {
     startBtn: $("startBtn"),
@@ -16,9 +16,6 @@ export const UI = {
     playersCount: $("playersCount"),
     playersList: $("playersList"),
     finalPodium: $("finalPodium"),
-    podiumStage: $("podiumStage"),
-    othersList: $("othersList"),
-    confetti: $("confetti"),
     progressBox: $("progressBox"),
     answeredText: $("answeredText"),
     debugBtn: $("debugBtn"),

@@ -34,6 +34,12 @@ urlpatterns = [
         views.teacher_live_session_detail,
         name="teacher_live_session_detail",
     ),
+    # Audit 2026-09-28 LX-SEC: CSV ixracı (formula neytrallaşdırması ilə).
+    path(
+        "live/results/<slug:slug>/<str:pin>/export.csv",
+        views.teacher_live_session_export,
+        name="teacher_live_session_export",
+    ),
     # Player (anonim)
     path("live/join/<str:pin>/", views.live_join_page, name="join_page"),
     path("live/join/<str:pin>/enter/", views.live_join_enter, name="join_enter"),

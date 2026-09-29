@@ -38271,7 +38271,7 @@ msgstr "An unexpected error occurred. Please try again."
 #: apps/live_exam/views/api.py:199
 msgctxt "live_exam.consumer.error"
 msgid "rate_limited"
-msgstr "Format: count/period. E.g.: 100/1h = 100 requests per hour."
+msgstr "Too many requests. Please wait a moment and try again."
 
 #: apps/live_exam/consumers.py:245
 msgctxt "live_exam.consumer.error"
@@ -38311,7 +38311,7 @@ msgstr "Active question not found."
 #: apps/live_exam/scoring.py:165
 msgctxt "live_exam.consumer.error"
 msgid "question_not_active"
-msgstr "Edit Question"
+msgstr "This question is no longer active."
 
 #: apps/live_exam/scoring.py:178
 msgctxt "live_exam.consumer.error"
@@ -38321,12 +38321,12 @@ msgstr "Already answered"
 #: apps/live_exam/scoring.py:194
 msgctxt "live_exam.consumer.error"
 msgid "question_not_accepting_answers"
-msgstr "There are no pending answers right now."
+msgstr "This question is not accepting answers right now."
 
 #: apps/live_exam/scoring.py:205
 msgctxt "live_exam.consumer.error"
 msgid "submission_outside_active_window"
-msgstr "Could not send submission."
+msgstr "Time is up for this question."
 
 #: apps/live_exam/scoring.py:215
 msgctxt "live_exam.consumer.error"
@@ -39405,7 +39405,7 @@ msgstr "Answer *"
 #: apps/live_exam/views/player/join.py:232
 msgctxt "live_exam.view.message"
 msgid "game_already_started"
-msgstr "This attempt has already been terminated and cannot be restored."
+msgstr "The game has already started."
 
 #: apps/live_exam/views/host/game.py:75
 msgctxt "live_exam.view.message"
@@ -83970,3 +83970,1070 @@ msgctxt "core.middleware.concurrency_limit.message"
 msgid ""
 "Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin."
 msgstr "The server is busy right now. Please try again in a few seconds."
+
+msgctxt "live_exam.view.message"
+msgid "typed_questions_invalid"
+msgstr "The typed-answer settings are malformed."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_in_exam"
+msgstr "The selected question does not belong to this exam."
+
+msgctxt "live_exam.view.message"
+msgid "typed_question_not_eligible"
+msgstr ""
+"Question {index} cannot be a typed answer: only questions with exactly one "
+"correct option (≤ 60 characters) or a short answer (1–10 lines) are allowed."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_many"
+msgstr "A question can have at most 10 accepted answers."
+
+msgctxt "live_exam.view.message"
+msgid "typed_accepted_too_long"
+msgstr "An accepted answer cannot be longer than 60 characters."
+
+msgctxt "live_exam.consumer.error"
+msgid "answer_retry"
+msgstr "Your answer was not saved — please send it again."
+
+msgctxt "live_exam.view.message"
+msgid "removed_by_host"
+msgstr "The host removed you from this game."
+
+msgctxt "live_exam.view.message"
+msgid "profile_changes_lobby_only"
+msgstr "Nickname and avatar can only be changed before the game starts."
+
+msgctxt "live_exam.view.message"
+msgid "nickname_locked"
+msgstr "The lobby is locked — the nickname cannot be changed."
+
+msgctxt "live_exam.view.message"
+msgid "reactions_lobby_only"
+msgstr "Reactions can only be sent in the waiting room."
+
+msgctxt "live_exam.view.message"
+msgid "ai_summary_invalid_request"
+msgstr "The AI summary can only be requested from the results page."
+
+msgctxt "live_exam.results.export"
+msgid "export_nickname"
+msgstr "Player"
+
+msgctxt "live_exam.results.export"
+msgid "export_total_score"
+msgstr "Total score"
+
+msgctxt "live_exam.results.export"
+msgid "export_question_number"
+msgstr "Question #"
+
+msgctxt "live_exam.results.export"
+msgid "export_question"
+msgstr "Question"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer"
+msgstr "Answer"
+
+msgctxt "live_exam.results.export"
+msgid "export_correct"
+msgstr "Correct"
+
+msgctxt "live_exam.results.export"
+msgid "export_points"
+msgstr "Points"
+
+msgctxt "live_exam.results.export"
+msgid "export_answer_ms"
+msgstr "Answer time (ms)"
+
+msgctxt "live_exam.results.export"
+msgid "export_yes"
+msgstr "Yes"
+
+msgctxt "live_exam.results.export"
+msgid "export_no"
+msgstr "No"
+
+msgctxt "live_exam.player"
+msgid "page_title"
+msgstr "Live game"
+
+msgctxt "live_exam.player"
+msgid "announce_answers_open"
+msgstr "Answer now! {seconds} seconds"
+
+msgctxt "live_exam.player"
+msgid "announce_question"
+msgstr "Question {index}: {text}"
+
+msgctxt "live_exam.player"
+msgid "answer_locked"
+msgstr "Answer locked in!"
+
+msgctxt "live_exam.player"
+msgid "answer_sending"
+msgstr "Sending…"
+
+msgctxt "live_exam.player"
+msgid "answers_label"
+msgstr "Answer options"
+
+msgctxt "live_exam.player"
+msgid "collapse_question"
+msgstr "Show less"
+
+msgctxt "live_exam.player"
+msgid "connecting_game"
+msgstr "Connecting to the game…"
+
+msgctxt "live_exam.player"
+msgid "error_send"
+msgstr "Your answer was not sent. Try again."
+
+msgctxt "live_exam.player"
+msgid "error_send_offline"
+msgstr "Answer not sent — check your internet connection."
+
+msgctxt "live_exam.player"
+msgid "expand_question"
+msgstr "Read more"
+
+msgctxt "live_exam.player"
+msgid "final_keep_going"
+msgstr "Every game makes you stronger — podium next time!"
+
+msgctxt "live_exam.player"
+msgid "final_podium_title"
+msgstr "Podium"
+
+msgctxt "live_exam.player"
+msgid "final_second"
+msgstr "Silver medal!"
+
+msgctxt "live_exam.player"
+msgid "final_third"
+msgstr "Bronze medal!"
+
+msgctxt "live_exam.player"
+msgid "final_title"
+msgstr "Game over!"
+
+msgctxt "live_exam.player"
+msgid "final_well_played"
+msgstr "Well played, {name}!"
+
+msgctxt "live_exam.player"
+msgid "final_winner"
+msgstr "You won!"
+
+msgctxt "live_exam.player"
+msgid "final_your_place"
+msgstr "Your place"
+
+msgctxt "live_exam.player"
+msgid "gap_line"
+msgstr "{name} is {gap} pts ahead of you"
+
+msgctxt "live_exam.player"
+msgid "gap_tie"
+msgstr "You're tied with {name}"
+
+msgctxt "live_exam.player"
+msgid "get_ready_body"
+msgstr "The first question is coming…"
+
+msgctxt "live_exam.player"
+msgid "get_ready_title"
+msgstr "Get ready!"
+
+msgctxt "live_exam.player"
+msgid "intro_hint_main_screen"
+msgstr "Look at the big screen for the question"
+
+msgctxt "live_exam.player"
+msgid "intro_unlocking"
+msgstr "Answers open in {seconds}s"
+
+msgctxt "live_exam.player"
+msgid "last_question_note"
+msgstr "That was the last question — final results are coming!"
+
+msgctxt "live_exam.player"
+msgid "multi_badge"
+msgstr "Multiple answers"
+
+msgctxt "live_exam.player"
+msgid "multi_counter"
+msgstr "{count}/{max} selected"
+
+msgctxt "live_exam.player"
+msgid "multi_hint"
+msgstr "Pick up to {max} answers, then tap “Send”"
+
+msgctxt "live_exam.player"
+msgid "multi_max_reached"
+msgstr "You can pick at most {max} options"
+
+msgctxt "live_exam.player"
+msgid "net_back"
+msgstr "Back online!"
+
+msgctxt "live_exam.player"
+msgid "net_offline"
+msgstr "No internet — waiting for a connection"
+
+msgctxt "live_exam.player"
+msgid "net_reconnecting"
+msgstr "Reconnecting…"
+
+msgctxt "live_exam.player"
+msgid "next_question_soon"
+msgstr "Next question coming up…"
+
+msgctxt "live_exam.player"
+msgid "player_fallback"
+msgstr "Player"
+
+msgctxt "live_exam.player"
+msgid "points_short"
+msgstr "pts"
+
+msgctxt "live_exam.player"
+msgid "question_counter"
+msgstr "Question {index} / {total}"
+
+msgctxt "live_exam.player"
+msgid "question_hidden_body"
+msgstr "The question is on the big screen — read it there"
+
+msgctxt "live_exam.player"
+msgid "question_short"
+msgstr "{index}/{total}"
+
+msgctxt "live_exam.player"
+msgid "rank_aria"
+msgstr "Your place: {rank}"
+
+msgctxt "live_exam.player"
+msgid "rank_down"
+msgstr "down {count}"
+
+msgctxt "live_exam.player"
+msgid "rank_leader"
+msgstr "You're in the lead! Keep it up 👑"
+
+msgctxt "live_exam.player"
+msgid "rank_line"
+msgstr "You're in {place} place"
+
+msgctxt "live_exam.player"
+msgid "rank_up"
+msgstr "up {count}"
+
+msgctxt "live_exam.player"
+msgid "rejoin_game"
+msgstr "Join again"
+
+msgctxt "live_exam.player"
+msgid "removed_body"
+msgstr ""
+"Your player profile was not found — the teacher may have removed you or the "
+"game has closed."
+
+msgctxt "live_exam.player"
+msgid "removed_title"
+msgstr "You're not in this game"
+
+msgctxt "live_exam.player"
+msgid "result_accepted"
+msgstr "Accepted answer"
+
+msgctxt "live_exam.player"
+msgid "result_correct"
+msgstr "Correct!"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answer"
+msgstr "Correct answer"
+
+msgctxt "live_exam.player"
+msgid "result_correct_answers"
+msgstr "Correct answers"
+
+msgctxt "live_exam.player"
+msgid "result_missed"
+msgstr "You missed this one"
+
+msgctxt "live_exam.player"
+msgid "result_no_answer"
+msgstr "No answer"
+
+msgctxt "live_exam.player"
+msgid "result_no_points"
+msgstr "No points this time"
+
+msgctxt "live_exam.player"
+msgid "result_partial"
+msgstr "Partly correct"
+
+msgctxt "live_exam.player"
+msgid "result_partial_detail"
+msgstr "{correct}/{total} correct"
+
+msgctxt "live_exam.player"
+msgid "result_speed"
+msgstr "{seconds}s"
+
+msgctxt "live_exam.player"
+msgid "result_wrong"
+msgstr "Incorrect"
+
+msgctxt "live_exam.player"
+msgid "result_wrong_picked"
+msgstr "{count} wrong pick(s)"
+
+msgctxt "live_exam.player"
+msgid "scoreboard_title"
+msgstr "Leaderboard"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_off"
+msgstr "Mute sound"
+
+msgctxt "live_exam.player"
+msgid "sound_turn_on"
+msgstr "Turn sound on"
+
+msgctxt "live_exam.player"
+msgid "stat_avg_time"
+msgstr "Average answer time"
+
+msgctxt "live_exam.player"
+msgid "stat_best_streak"
+msgstr "Best streak"
+
+msgctxt "live_exam.player"
+msgid "stat_correct"
+msgstr "Correct answers"
+
+msgctxt "live_exam.player"
+msgid "streak_label"
+msgstr "{count} in a row!"
+
+msgctxt "live_exam.player"
+msgid "submit_answer"
+msgstr "Send answer"
+
+msgctxt "live_exam.player"
+msgid "tap_for_sound"
+msgstr "Tap the screen to enable sound"
+
+msgctxt "live_exam.player"
+msgid "time_up_body"
+msgstr "You didn't answer this one. Good luck on the next!"
+
+msgctxt "live_exam.player"
+msgid "time_up_title"
+msgstr "Time's up!"
+
+msgctxt "live_exam.player"
+msgid "typed_badge"
+msgstr "Typed answer"
+
+msgctxt "live_exam.player"
+msgid "typed_empty"
+msgstr "Type your answer first"
+
+msgctxt "live_exam.player"
+msgid "typed_label"
+msgstr "Type your answer"
+
+msgctxt "live_exam.player"
+msgid "typed_placeholder"
+msgstr "Type your answer here…"
+
+msgctxt "live_exam.player"
+msgid "typed_send"
+msgstr "Send"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_1"
+msgstr "Fingers crossed 🤞"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_2"
+msgstr "Let's see how it goes…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_3"
+msgstr "Bold choice!"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_4"
+msgstr "Others are still thinking…"
+
+msgctxt "live_exam.player"
+msgid "wait_msg_5"
+msgstr "We'll see the result together!"
+
+msgctxt "live_exam.player"
+msgid "waiting_for_host"
+msgstr "Waiting for the teacher's next step…"
+
+msgctxt "live_exam.player"
+msgid "waiting_title"
+msgstr "Almost there!"
+
+msgctxt "live_exam.player"
+msgid "you_chose"
+msgstr "Your choice"
+
+msgctxt "live_exam.player"
+msgid "you_label"
+msgstr "You"
+
+msgctxt "live_exam.player"
+msgid "your_answer"
+msgstr "Your answer: “{text}”"
+
+msgctxt "live_exam.player"
+msgid "shape_triangle"
+msgstr "Triangle"
+
+msgctxt "live_exam.player"
+msgid "shape_diamond"
+msgstr "Diamond"
+
+msgctxt "live_exam.player"
+msgid "shape_circle"
+msgstr "Circle"
+
+msgctxt "live_exam.player"
+msgid "shape_square"
+msgstr "Square"
+
+msgctxt "live_exam.player"
+msgid "shape_star"
+msgstr "Star"
+
+msgctxt "live_exam.player"
+msgid "shape_hexagon"
+msgstr "Hexagon"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_count"
+msgstr "{count} players joined"
+
+msgctxt "live_exam.wait_room.js"
+msgid "players_alone"
+msgstr "It's just you so far"
+
+msgctxt "live_exam.wait_room.js"
+msgid "waiting_host_start"
+msgstr "Waiting for the teacher to start"
+
+msgctxt "live_exam.wait_room.js"
+msgid "lobby_locked_badge"
+msgstr "Lobby is locked — the game starts soon"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_title"
+msgstr "The teacher removed you from the game"
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_body"
+msgstr ""
+"This device can't rejoin this game. If it's a mistake, tell your teacher."
+
+msgctxt "live_exam.wait_room.js"
+msgid "kicked_action"
+msgstr "Enter another PIN"
+
+msgctxt "live_exam.wait_room.js"
+msgid "game_starting"
+msgstr "The game is starting!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_locked_hint"
+msgstr ""
+"The lobby is locked — you can't change your name now, but you can change "
+"your avatar."
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_sent"
+msgstr "Sent!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reaction_wait"
+msgstr "Slow down a little — too many reactions"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_reconnecting"
+msgstr "Reconnecting…"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_offline"
+msgstr "No internet — waiting for a connection"
+
+msgctxt "live_exam.wait_room.js"
+msgid "net_back"
+msgstr "Back online!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "player_fallback"
+msgstr "Player"
+
+msgctxt "live_exam.wait_room.js"
+msgid "nickname_counter"
+msgstr "{count}/{max}"
+
+msgctxt "live_exam.wait_room.js"
+msgid "removed_title"
+msgstr "You're not in this game"
+
+msgctxt "live_exam.wait_room.js"
+msgid "rejoin_game"
+msgstr "Join again"
+
+msgctxt "live_exam.wait_room.js"
+msgid "look_on_screen"
+msgstr "Look for your name on the big screen!"
+
+msgctxt "live_exam.wait_room.js"
+msgid "edit_look"
+msgstr "Change look"
+
+msgctxt "live_exam.wait_room.js"
+msgid "reactions_hint"
+msgstr "Send a reaction"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_accessory_none"
+msgstr "None"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_glasses"
+msgstr "Glasses"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_cap"
+msgstr "Cap"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_crown"
+msgstr "Crown"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_mask"
+msgstr "Mask"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_sparkles"
+msgstr "Sparkles"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_bowtie"
+msgstr "Bow tie"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_headphones"
+msgstr "Headphones"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_flower"
+msgstr "Flower"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_pirate_patch"
+msgstr "Eye patch"
+
+msgctxt "live_exam.wait_room.js"
+msgid "accessory_name_halo"
+msgstr "Halo"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_1"
+msgstr "Fox"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_2"
+msgstr "Panda"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_3"
+msgstr "Lion"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_4"
+msgstr "Tiger"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_5"
+msgstr "Koala"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_6"
+msgstr "Piglet"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_7"
+msgstr "Frog"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_8"
+msgstr "Octopus"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_9"
+msgstr "Monkey"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_10"
+msgstr "Unicorn"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_11"
+msgstr "Rabbit"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_12"
+msgstr "Hamster"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_13"
+msgstr "Wolf"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_14"
+msgstr "Polar bear"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_15"
+msgstr "Red panda"
+
+msgctxt "live_exam.wait_room.js"
+msgid "avatar_name_avatar_16"
+msgstr "Mint bunny"
+
+msgctxt "live_exam.join.js"
+msgid "player_label"
+msgstr "Player"
+
+msgctxt "live_exam.join.js"
+msgid "nickname_required"
+msgstr "Enter your nickname."
+
+msgctxt "live_exam.join.js"
+msgid "nickname_too_long"
+msgstr "Nickname is too long."
+
+msgctxt "live_exam.join.js"
+msgid "reroll_avatar"
+msgstr "Another avatar"
+
+msgctxt "live_exam.join.js"
+msgid "join_blocked_title"
+msgstr "Couldn't join"
+
+msgctxt "live_exam.join.js"
+msgid "try_again"
+msgstr "Try again"
+
+msgctxt "live_exam.join.js"
+msgid "enter_new_pin"
+msgstr "Enter another PIN"
+
+msgctxt "live_exam.join.js"
+msgid "rate_limited_wait"
+msgstr "Too many attempts — try again in {seconds}s."
+
+msgctxt "live_exam.host_game"
+msgid "lobby_join_at"
+msgstr "Join at"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_pin_label"
+msgstr "Game PIN"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_scan_qr"
+msgstr "Or scan the QR code"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_waiting"
+msgstr "Waiting for players…"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready"
+msgstr "The game starts soon!"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_ready_host"
+msgstr "Press “Start” when everyone is in"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked"
+msgstr "Joining is locked"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_hint"
+msgstr "New players can't join"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_locked_label"
+msgstr "Lobby locked"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_players_word"
+msgstr "players"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_participants"
+msgstr "Joined players"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_empty"
+msgstr "No one has joined yet — enter the PIN on your phone"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_more"
+msgstr "+{count} more"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_remove_player"
+msgstr "Remove player"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready"
+msgstr "Get ready!"
+
+msgctxt "live_exam.host_game"
+msgid "game_get_ready_sub"
+msgstr "{count} questions · keep your phone ready"
+
+msgctxt "live_exam.host_game"
+msgid "game_countdown_label"
+msgstr "Round starts in {value}"
+
+msgctxt "live_exam.host_game"
+msgid "game_question_of"
+msgstr "Question {index} of {total}"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_badge"
+msgstr "Several correct answers"
+
+msgctxt "live_exam.host_game"
+msgid "game_multi_pick"
+msgstr "Pick {count} answers"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_badge"
+msgstr "Typed answer"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_prompt"
+msgstr "Type your answer on your phone"
+
+msgctxt "live_exam.host_game"
+msgid "game_text_placeholder"
+msgstr "Type your answer…"
+
+msgctxt "live_exam.host_game"
+msgid "game_seconds_short"
+msgstr "sec"
+
+msgctxt "live_exam.host_game"
+msgid "game_answers_label"
+msgstr "answers"
+
+msgctxt "live_exam.host_game"
+msgid "game_all_answered"
+msgstr "Everyone answered!"
+
+msgctxt "live_exam.host_game"
+msgid "game_time_up"
+msgstr "Time's up!"
+
+msgctxt "live_exam.host_game"
+msgid "game_read_time"
+msgstr "Read the question…"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answer"
+msgstr "Correct answer"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_answers"
+msgstr "Correct answers"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct_summary"
+msgstr "{correct} of {total} answered correctly"
+
+msgctxt "live_exam.host_game"
+msgid "game_no_answers"
+msgstr "No answers this round"
+
+msgctxt "live_exam.host_game"
+msgid "game_partial_credit"
+msgstr "Partial credit: every correct choice scores"
+
+msgctxt "live_exam.host_game"
+msgid "game_strict_credit"
+msgstr "Points only when all correct options are chosen"
+
+msgctxt "live_exam.host_game"
+msgid "game_fastest"
+msgstr "Fastest"
+
+msgctxt "live_exam.host_game"
+msgid "game_accepted_also"
+msgstr "Also accepted"
+
+msgctxt "live_exam.host_game"
+msgid "game_typed_top"
+msgstr "Most typed answers"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard"
+msgstr "Leaderboard"
+
+msgctxt "live_exam.host_game"
+msgid "game_leaderboard_last"
+msgstr "That was the last question — the final stage is next!"
+
+msgctxt "live_exam.host_game"
+msgid "game_new_entry"
+msgstr "New"
+
+msgctxt "live_exam.host_game"
+msgid "game_streak"
+msgstr "{count} correct in a row"
+
+msgctxt "live_exam.host_game"
+msgid "game_points"
+msgstr "pts"
+
+msgctxt "live_exam.host_game"
+msgid "game_correct"
+msgstr "Correct"
+
+msgctxt "live_exam.host_game"
+msgid "game_wrong"
+msgstr "Wrong"
+
+msgctxt "live_exam.host_game"
+msgid "game_close"
+msgstr "Close"
+
+msgctxt "live_exam.host_game"
+msgid "game_skip"
+msgstr "Skip"
+
+msgctxt "live_exam.host_game"
+msgid "shape_triangle"
+msgstr "Triangle"
+
+msgctxt "live_exam.host_game"
+msgid "shape_diamond"
+msgstr "Diamond"
+
+msgctxt "live_exam.host_game"
+msgid "shape_circle"
+msgstr "Circle"
+
+msgctxt "live_exam.host_game"
+msgid "shape_square"
+msgstr "Square"
+
+msgctxt "live_exam.host_game"
+msgid "shape_star"
+msgstr "Star"
+
+msgctxt "live_exam.host_game"
+msgid "shape_hexagon"
+msgstr "Hexagon"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_title"
+msgstr "Sound"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_on"
+msgstr "Sound on"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_off"
+msgstr "Sound off"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_volume"
+msgstr "Volume"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_music"
+msgstr "Background music"
+
+msgctxt "live_exam.host_sound"
+msgid "sound_enable"
+msgstr "Click to enable sound"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_title"
+msgstr "Final results"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_subtitle"
+msgstr "Congratulations to the winners!"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_1"
+msgstr "1st place"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_2"
+msgstr "2nd place"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_place_3"
+msgstr "3rd place"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_tie"
+msgstr "Tied score"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_replay"
+msgstr "Replay"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_no_players"
+msgstr "No one played this game"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_more"
+msgstr "+{count} players"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_audience"
+msgstr "Other players"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_players"
+msgstr "players"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_questions"
+msgstr "questions"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_accuracy"
+msgstr "accuracy"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_stats_speed"
+msgstr "avg. answer"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_correct_count"
+msgstr "{correct}/{answered} correct"
+
+msgctxt "live_exam.host_stage"
+msgid "stage_results"
+msgstr "Detailed results"
+
+msgctxt "live_exam.host_settings"
+msgid "answer_mode_title"
+msgstr "Answer mode"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_scoring_label"
+msgstr "Scoring for multi-select questions"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial"
+msgstr "Partial credit"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_partial_help"
+msgstr "Each correct option earns a proportional share of the points."
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict"
+msgstr "All must be correct"
+
+msgctxt "live_exam.host_settings"
+msgid "multi_strict_help"
+msgstr "Points are awarded only when all correct options are chosen."
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_label"
+msgstr "Accept small typos"
+
+msgctxt "live_exam.host_settings"
+msgid "typo_tolerance_help"
+msgstr ""
+"In typed answers, 1–2 letter mistakes, letter case and extra spaces are "
+"ignored."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_title"
+msgstr "Typed answer"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_list_help"
+msgstr ""
+"For suitable questions, students type the answer instead of choosing an "
+"option."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_toggle"
+msgstr "Typed answer"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_accepted"
+msgstr "Accepted answers"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_add_placeholder"
+msgstr "Add a variant and press Enter"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_not_eligible"
+msgstr "Choice only"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_limit"
+msgstr "Up to 10 variants, 1–60 characters each."
+
+msgctxt "live_exam.host_settings"
+msgid "typed_locked"
+msgstr "Can't be changed after the game starts"
+
+msgctxt "live_exam.host_settings"
+msgid "typed_empty"
+msgstr "Enter at least one accepted answer"
+
+msgctxt "live_exam.host_settings"
+msgid "chip_remove"
+msgstr "Remove"
+
+msgctxt "live_exam.host_settings"
+msgid "saved_label"
+msgstr "Saved"
+
+msgctxt "live_exam.host_settings"
+msgid "save_error"
+msgstr "Couldn't save"
+
+msgctxt "liveExam.template.session_detail"
+msgid "export_csv"
+msgstr "Export CSV"
+
+msgctxt "liveExam.template.session_detail"
+msgid "typed_answers_heading"
+msgstr "Typed answers"

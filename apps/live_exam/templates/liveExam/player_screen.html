@@ -1,90 +1,78 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'az' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Exam | {{ session.pin }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#062a33">
+    <meta name="format-detection" content="telephone=no">
+    <title>{% trans "page_title" context "live_exam.player" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}">
-    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}">
-    <link rel="stylesheet" href="{% static 'css/player/_part1.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/player/_part2.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/player/_part3.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/player/_part4.css' %}?v=live-option-shapes-20260520">
+    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_base.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_ui.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_round.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_answer.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_reveal.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_finale.css' %}?v=lxp-20260929">
 </head>
-<body class="live-player-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
-    <div class="live-player-shell">
-        <div class="live-player-bg" aria-hidden="true">
-            <span class="live-player-bg__blob live-player-bg__blob--one"></span>
-            <span class="live-player-bg__blob live-player-bg__blob--two"></span>
-            <span class="live-player-bg__blob live-player-bg__blob--three"></span>
-            <span class="live-player-bg__grid"></span>
-            <span class="live-player-bg__spark live-player-bg__spark--one"></span>
-            <span class="live-player-bg__spark live-player-bg__spark--two"></span>
-            <span class="live-player-bg__spark live-player-bg__spark--three"></span>
+<body class="lxp" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+    {% comment %}LX-FE-PLAYER 2026-09-29: telefon oyun ekranı. Faza görünüşləri JS ilə #lxpViews-ə
+    qurulur (player/*.js); burada yalnız sabit karkas var — inline style/script YOXDUR.{% endcomment %}
+    <div class="lxp-shell" id="lxpShell">
+        <div class="lxp-bg" aria-hidden="true">
+            <span class="lxp-bg__glow lxp-bg__glow--a"></span>
+            <span class="lxp-bg__glow lxp-bg__glow--b"></span>
         </div>
 
-        <header class="live-player-header">
-            <div class="live-player-chip live-player-chip--question" id="questionChip">Question</div>
-            <div class="live-player-header__status">
-                <div class="live-player-timer" id="timerBox">
-                    <i class="fa-solid fa-stopwatch"></i>
-                    <span id="timerText">--:--</span>
-                </div>
-            </div>
+        <header class="lxp-top">
+            <span class="lxp-top__count" id="questionChip" hidden></span>
+            <span class="lxp-timer" id="timerBox" hidden aria-hidden="true">
+                <span class="lxp-timer__num" id="timerText">0</span>
+            </span>
+            <button type="button" class="lxp-sound" id="soundToggle" aria-pressed="true" data-state="locked">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path class="lxp-sound__body" d="M4 9.5h3.2L12 5.2v13.6l-4.8-4.3H4z" fill="currentColor"/>
+                    <path class="lxp-sound__waves" d="M15.5 8.6a4.6 4.6 0 0 1 0 6.8M18 6.2a8 8 0 0 1 0 11.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <path class="lxp-sound__mute" d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+            </button>
         </header>
+        <div class="lxp-timebar" id="timeBar" hidden aria-hidden="true"><span class="lxp-timebar__fill" id="timeBarFill"></span></div>
+        <div class="lxp-net" id="netBanner" role="status" hidden></div>
 
-        <main class="live-player-stage">
-            <section class="phase-panel" id="phasePanel" aria-live="polite">
-                <div class="phase-panel__inner" id="phasePanelInner"></div>
-            </section>
-
-            <section class="options-shell" id="optionsShell">
-                <div class="options-grid" id="optionsContainer"></div>
-                <div class="multi-actions" id="multiActions">
-                    <div class="select-counter" id="selectCounter">Select your answers</div>
-                    <button class="submit-btn" id="submitBtn" type="button" disabled>
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>Submit answer</span>
-                    </button>
-                </div>
-            </section>
+        <main class="lxp-stage" id="lxpStage">
+            <div class="lxp-views" id="lxpViews"></div>
         </main>
 
-        <footer class="live-player-footer">
-            <div class="live-player-identity">
-                <div class="live-player-identity__avatar" id="playerAvatar"></div>
-                <div class="live-player-identity__meta">
-                    <div class="live-player-identity__name" id="playerName">{{ player.nickname }}</div>
-                    <div class="live-player-identity__scoreline">
-                        <span class="live-player-identity__score" id="playerScore">{{ player.score|default:0 }}</span>
-                    </div>
-                </div>
-            </div>
+        <footer class="lxp-me">
+            <span class="lxp-me__avatar" id="playerAvatar"></span>
+            <span class="lxp-me__name" id="playerName">{{ player.nickname }}</span>
+            <span class="lxp-me__rank" id="playerRank" hidden></span>
+            <span class="lxp-me__score"><strong id="playerScore">{{ player.score|default:0 }}</strong> <small data-lxp-i18n="pointsShort"></small></span>
         </footer>
+
+        <div class="lxp-toast" id="lxpToast" role="alert" hidden></div>
+        <div class="lxp-fx" id="lxpFx" aria-hidden="true"></div>
+        <div class="lxp-sr" id="lxpLive" aria-live="polite"></div>
     </div>
 
     {{ session_settings|json_script:"playerSessionSettings" }}
-    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `player_screen_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline script yoxdur); `player_screen_config.js`
+    KLASSİK skriptdir — modul yüklənməzdən ƏVVƏL qlobalları qurur.{% endcomment %}
     <script id="playerBootstrap" type="application/json">{
         "pin": "{{ session.pin|escapejs }}",
         "csrf": "{{ csrf_token }}",
         "quizTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
         "stateUrl": "{% url 'liveExam:state_json' session.pin %}",
         "answerUrl": "{% url 'liveExam:answer_submit' session.pin %}",
-        "waitingMessages": [
-            "Easy does it!",
-            "Nice move!",
-            "Let's see how you did!",
-            "Good call!",
-            "Locked in!"
-        ],
+        "waitRoomUrl": "{% url 'liveExam:wait_room' session.pin %}",
+        "joinPageUrl": "{% url 'liveExam:join_page' session.pin %}",
         "player": {
             "id": {{ player.id }},
             "nickname": "{{ player.nickname|escapejs }}",
@@ -94,48 +82,102 @@
         }
     }</script>
     <script id="playerI18n" type="application/json">{
-        "connectionOnline": "Online",
-        "connectionOffline": "Offline",
-        "connectionConnecting": "Connecting",
-        "questionLabel": "Question",
-        "waitingForHost": "Waiting for the host to start the next round.",
-        "getReadyTitle": "Get ready",
-        "getReadyBody": "Loading the first question...",
-        "introHint": "Read the question. Answers are about to appear.",
-        "introHintMainScreen": "Look at the main screen. Answers unlock soon.",
-        "introUnlocking": "Answers unlock in",
-        "questionPrompt": "Pick your answer before the timer runs out.",
-        "questionHiddenBody": "The question is on the main screen.",
-        "optionHiddenBody": "Match this answer on the main screen.",
-        "multiPrompt": "Choose up to {max} answers.",
-        "submitAnswer": "Submit answer",
-        "answerSending": "Locking in your answer...",
-        "answerLocked": "Answer locked in",
-        "answerTimeout": "Time is up. Waiting for the round to close.",
-        "waitingBody": "Hold tight while the rest of the class answers.",
-        "waitingProgress": "{answered} of {total} answered",
-        "resultCorrect": "Correct",
-        "resultIncorrect": "Incorrect",
-        "resultNoAnswer": "No answer submitted",
-        "resultEarned": "Earned",
-        "resultAnswered": "You answered",
-        "resultTotal": "Total score",
-        "resultNoRank": "No rank",
-        "scoreboardTitle": "Leaderboard",
-        "scoreboardSubtitle": "Updated totals after this round.",
-        "scoreboardTopFive": "Top 5 players",
-        "scoreboardMovementUp": "Moved up",
-        "scoreboardMovementNew": "New in top 5",
-        "scoreboardRank": "Rank",
-        "scoreboardScore": "Total",
-        "finalTitle": "Final results",
-        "finalBody": "The live exam is complete.",
-        "leaderboardTitle": "Top players",
-        "pointsSuffix": "pts"
+        "pageTitle": "{% filter escapejs %}{% trans 'page_title' context 'live_exam.player' %}{% endfilter %}",
+        "announceAnswersOpen": "{% filter escapejs %}{% trans 'announce_answers_open' context 'live_exam.player' %}{% endfilter %}",
+        "announceQuestion": "{% filter escapejs %}{% trans 'announce_question' context 'live_exam.player' %}{% endfilter %}",
+        "answerLocked": "{% filter escapejs %}{% trans 'answer_locked' context 'live_exam.player' %}{% endfilter %}",
+        "answerSending": "{% filter escapejs %}{% trans 'answer_sending' context 'live_exam.player' %}{% endfilter %}",
+        "answersLabel": "{% filter escapejs %}{% trans 'answers_label' context 'live_exam.player' %}{% endfilter %}",
+        "collapseQuestion": "{% filter escapejs %}{% trans 'collapse_question' context 'live_exam.player' %}{% endfilter %}",
+        "connecting": "{% filter escapejs %}{% trans 'connecting_game' context 'live_exam.player' %}{% endfilter %}",
+        "errorSend": "{% filter escapejs %}{% trans 'error_send' context 'live_exam.player' %}{% endfilter %}",
+        "errorSendOffline": "{% filter escapejs %}{% trans 'error_send_offline' context 'live_exam.player' %}{% endfilter %}",
+        "expandQuestion": "{% filter escapejs %}{% trans 'expand_question' context 'live_exam.player' %}{% endfilter %}",
+        "finalKeepGoing": "{% filter escapejs %}{% trans 'final_keep_going' context 'live_exam.player' %}{% endfilter %}",
+        "finalPodiumTitle": "{% filter escapejs %}{% trans 'final_podium_title' context 'live_exam.player' %}{% endfilter %}",
+        "finalSecond": "{% filter escapejs %}{% trans 'final_second' context 'live_exam.player' %}{% endfilter %}",
+        "finalThird": "{% filter escapejs %}{% trans 'final_third' context 'live_exam.player' %}{% endfilter %}",
+        "finalTitle": "{% filter escapejs %}{% trans 'final_title' context 'live_exam.player' %}{% endfilter %}",
+        "finalWellPlayed": "{% filter escapejs %}{% trans 'final_well_played' context 'live_exam.player' %}{% endfilter %}",
+        "finalWinner": "{% filter escapejs %}{% trans 'final_winner' context 'live_exam.player' %}{% endfilter %}",
+        "finalYourPlace": "{% filter escapejs %}{% trans 'final_your_place' context 'live_exam.player' %}{% endfilter %}",
+        "gapLine": "{% filter escapejs %}{% trans 'gap_line' context 'live_exam.player' %}{% endfilter %}",
+        "gapTie": "{% filter escapejs %}{% trans 'gap_tie' context 'live_exam.player' %}{% endfilter %}",
+        "getReadyBody": "{% filter escapejs %}{% trans 'get_ready_body' context 'live_exam.player' %}{% endfilter %}",
+        "getReadyTitle": "{% filter escapejs %}{% trans 'get_ready_title' context 'live_exam.player' %}{% endfilter %}",
+        "introHintMainScreen": "{% filter escapejs %}{% trans 'intro_hint_main_screen' context 'live_exam.player' %}{% endfilter %}",
+        "introUnlocking": "{% filter escapejs %}{% trans 'intro_unlocking' context 'live_exam.player' %}{% endfilter %}",
+        "lastQuestionNote": "{% filter escapejs %}{% trans 'last_question_note' context 'live_exam.player' %}{% endfilter %}",
+        "multiBadge": "{% filter escapejs %}{% trans 'multi_badge' context 'live_exam.player' %}{% endfilter %}",
+        "multiCounter": "{% filter escapejs %}{% trans 'multi_counter' context 'live_exam.player' %}{% endfilter %}",
+        "multiHint": "{% filter escapejs %}{% trans 'multi_hint' context 'live_exam.player' %}{% endfilter %}",
+        "multiMaxReached": "{% filter escapejs %}{% trans 'multi_max_reached' context 'live_exam.player' %}{% endfilter %}",
+        "netBack": "{% filter escapejs %}{% trans 'net_back' context 'live_exam.player' %}{% endfilter %}",
+        "netOffline": "{% filter escapejs %}{% trans 'net_offline' context 'live_exam.player' %}{% endfilter %}",
+        "netReconnecting": "{% filter escapejs %}{% trans 'net_reconnecting' context 'live_exam.player' %}{% endfilter %}",
+        "nextQuestionSoon": "{% filter escapejs %}{% trans 'next_question_soon' context 'live_exam.player' %}{% endfilter %}",
+        "playerFallback": "{% filter escapejs %}{% trans 'player_fallback' context 'live_exam.player' %}{% endfilter %}",
+        "pointsShort": "{% filter escapejs %}{% trans 'points_short' context 'live_exam.player' %}{% endfilter %}",
+        "questionCounter": "{% filter escapejs %}{% trans 'question_counter' context 'live_exam.player' %}{% endfilter %}",
+        "questionHiddenBody": "{% filter escapejs %}{% trans 'question_hidden_body' context 'live_exam.player' %}{% endfilter %}",
+        "questionShort": "{% filter escapejs %}{% trans 'question_short' context 'live_exam.player' %}{% endfilter %}",
+        "rankAria": "{% filter escapejs %}{% trans 'rank_aria' context 'live_exam.player' %}{% endfilter %}",
+        "rankDown": "{% filter escapejs %}{% trans 'rank_down' context 'live_exam.player' %}{% endfilter %}",
+        "rankLeader": "{% filter escapejs %}{% trans 'rank_leader' context 'live_exam.player' %}{% endfilter %}",
+        "rankLine": "{% filter escapejs %}{% trans 'rank_line' context 'live_exam.player' %}{% endfilter %}",
+        "rankUp": "{% filter escapejs %}{% trans 'rank_up' context 'live_exam.player' %}{% endfilter %}",
+        "rejoin": "{% filter escapejs %}{% trans 'rejoin_game' context 'live_exam.player' %}{% endfilter %}",
+        "removedBody": "{% filter escapejs %}{% trans 'removed_body' context 'live_exam.player' %}{% endfilter %}",
+        "removedTitle": "{% filter escapejs %}{% trans 'removed_title' context 'live_exam.player' %}{% endfilter %}",
+        "resultAccepted": "{% filter escapejs %}{% trans 'result_accepted' context 'live_exam.player' %}{% endfilter %}",
+        "resultCorrect": "{% filter escapejs %}{% trans 'result_correct' context 'live_exam.player' %}{% endfilter %}",
+        "resultCorrectAnswer": "{% filter escapejs %}{% trans 'result_correct_answer' context 'live_exam.player' %}{% endfilter %}",
+        "resultCorrectAnswers": "{% filter escapejs %}{% trans 'result_correct_answers' context 'live_exam.player' %}{% endfilter %}",
+        "resultMissed": "{% filter escapejs %}{% trans 'result_missed' context 'live_exam.player' %}{% endfilter %}",
+        "resultNoAnswer": "{% filter escapejs %}{% trans 'result_no_answer' context 'live_exam.player' %}{% endfilter %}",
+        "resultNoPoints": "{% filter escapejs %}{% trans 'result_no_points' context 'live_exam.player' %}{% endfilter %}",
+        "resultPartial": "{% filter escapejs %}{% trans 'result_partial' context 'live_exam.player' %}{% endfilter %}",
+        "resultPartialDetail": "{% filter escapejs %}{% trans 'result_partial_detail' context 'live_exam.player' %}{% endfilter %}",
+        "resultSpeed": "{% filter escapejs %}{% trans 'result_speed' context 'live_exam.player' %}{% endfilter %}",
+        "resultWrong": "{% filter escapejs %}{% trans 'result_wrong' context 'live_exam.player' %}{% endfilter %}",
+        "resultWrongPicked": "{% filter escapejs %}{% trans 'result_wrong_picked' context 'live_exam.player' %}{% endfilter %}",
+        "scoreboardTitle": "{% filter escapejs %}{% trans 'scoreboard_title' context 'live_exam.player' %}{% endfilter %}",
+        "soundTurnOff": "{% filter escapejs %}{% trans 'sound_turn_off' context 'live_exam.player' %}{% endfilter %}",
+        "soundTurnOn": "{% filter escapejs %}{% trans 'sound_turn_on' context 'live_exam.player' %}{% endfilter %}",
+        "statAvgTime": "{% filter escapejs %}{% trans 'stat_avg_time' context 'live_exam.player' %}{% endfilter %}",
+        "statBestStreak": "{% filter escapejs %}{% trans 'stat_best_streak' context 'live_exam.player' %}{% endfilter %}",
+        "statCorrect": "{% filter escapejs %}{% trans 'stat_correct' context 'live_exam.player' %}{% endfilter %}",
+        "streakLabel": "{% filter escapejs %}{% trans 'streak_label' context 'live_exam.player' %}{% endfilter %}",
+        "submitAnswer": "{% filter escapejs %}{% trans 'submit_answer' context 'live_exam.player' %}{% endfilter %}",
+        "tapForSound": "{% filter escapejs %}{% trans 'tap_for_sound' context 'live_exam.player' %}{% endfilter %}",
+        "timeUpBody": "{% filter escapejs %}{% trans 'time_up_body' context 'live_exam.player' %}{% endfilter %}",
+        "timeUpTitle": "{% filter escapejs %}{% trans 'time_up_title' context 'live_exam.player' %}{% endfilter %}",
+        "typedBadge": "{% filter escapejs %}{% trans 'typed_badge' context 'live_exam.player' %}{% endfilter %}",
+        "typedEmpty": "{% filter escapejs %}{% trans 'typed_empty' context 'live_exam.player' %}{% endfilter %}",
+        "typedLabel": "{% filter escapejs %}{% trans 'typed_label' context 'live_exam.player' %}{% endfilter %}",
+        "typedPlaceholder": "{% filter escapejs %}{% trans 'typed_placeholder' context 'live_exam.player' %}{% endfilter %}",
+        "typedSend": "{% filter escapejs %}{% trans 'typed_send' context 'live_exam.player' %}{% endfilter %}",
+        "waitMsg1": "{% filter escapejs %}{% trans 'wait_msg_1' context 'live_exam.player' %}{% endfilter %}",
+        "waitMsg2": "{% filter escapejs %}{% trans 'wait_msg_2' context 'live_exam.player' %}{% endfilter %}",
+        "waitMsg3": "{% filter escapejs %}{% trans 'wait_msg_3' context 'live_exam.player' %}{% endfilter %}",
+        "waitMsg4": "{% filter escapejs %}{% trans 'wait_msg_4' context 'live_exam.player' %}{% endfilter %}",
+        "waitMsg5": "{% filter escapejs %}{% trans 'wait_msg_5' context 'live_exam.player' %}{% endfilter %}",
+        "waitingForHost": "{% filter escapejs %}{% trans 'waiting_for_host' context 'live_exam.player' %}{% endfilter %}",
+        "waitingTitle": "{% filter escapejs %}{% trans 'waiting_title' context 'live_exam.player' %}{% endfilter %}",
+        "youChose": "{% filter escapejs %}{% trans 'you_chose' context 'live_exam.player' %}{% endfilter %}",
+        "youLabel": "{% filter escapejs %}{% trans 'you_label' context 'live_exam.player' %}{% endfilter %}",
+        "yourAnswer": "{% filter escapejs %}{% trans 'your_answer' context 'live_exam.player' %}{% endfilter %}",
+        "shapeTriangle": "{% filter escapejs %}{% trans 'shape_triangle' context 'live_exam.player' %}{% endfilter %}",
+        "shapeDiamond": "{% filter escapejs %}{% trans 'shape_diamond' context 'live_exam.player' %}{% endfilter %}",
+        "shapeCircle": "{% filter escapejs %}{% trans 'shape_circle' context 'live_exam.player' %}{% endfilter %}",
+        "shapeSquare": "{% filter escapejs %}{% trans 'shape_square' context 'live_exam.player' %}{% endfilter %}",
+        "shapeStar": "{% filter escapejs %}{% trans 'shape_star' context 'live_exam.player' %}{% endfilter %}",
+        "shapeHexagon": "{% filter escapejs %}{% trans 'shape_hexagon' context 'live_exam.player' %}{% endfilter %}"
     }</script>
-    <script src="{% static 'js/player_screen_config.js' %}?v=20260921-1"></script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}"></script>
-    <script type="module" src="{% static 'js/player/player.entry.js' %}?v=live-score-zero-fix-20260611"></script>
+    <script src="{% static 'js/ems_ajax_init.js' %}"></script>
+    <script src="{% static 'js/player_screen_config.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
+    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
+    <script type="module" src="{% static 'js/player/player.entry.js' %}?v=lxp-20260929"></script>
 </body>
 </html>

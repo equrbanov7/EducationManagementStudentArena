@@ -4,7 +4,7 @@
 {% block title %}{% trans "page_title" context "liveExam.template.session_detail" %} {{ session.pin }} — {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'live_exam/css/teacher_live_session_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/teacher_live_session_detail.css' %}?v=lxstage-20260929">
     {# Ortaq token teması (sahib 2026-09-21): imtahan səthləri eyni dildə. #}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_surfaces_theme.css' %}?v=20260921-theme">
 {% endblock %}
@@ -21,9 +21,15 @@
             <h1><i class="fas fa-chart-line"></i> {% trans "page_title" context "liveExam.template.session_detail" %}</h1>
             <p>{{ exam.title }} — {{ session.created_at|date:"d.m.Y H:i" }}</p>
         </div>
-        <span class="sd-header__pin">
-            <i class="fas fa-key"></i> {% trans "label_pin" context "liveExam.template.session_detail" %}: {{ session.pin }}
-        </span>
+        <div class="sd-header__actions">
+            <span class="sd-header__pin">
+                <i class="fas fa-key"></i> {% trans "label_pin" context "liveExam.template.session_detail" %}: {{ session.pin }}
+            </span>
+            {# 2026-09-29 (LX-FE-STAGE): LX-SEC-in CSV ixracı (formula neytrallaşdırması serverdədir). #}
+            <a class="sd-export-btn" href="{% url 'liveExam:teacher_live_session_export' exam.slug session.pin %}" download>
+                <i class="fas fa-file-csv" aria-hidden="true"></i> {% trans "export_csv" context "liveExam.template.session_detail" %}
+            </a>
+        </div>
     </div>
 
     <!-- ═══════════ Summary Cards ═══════════ -->
@@ -175,7 +181,16 @@
                     {% for qs in question_stats %}
                     <tr data-question="{{ qs.question.text|lower }}">
                         <td><span class="sd-rank">{{ forloop.counter }}</span></td>
-                        <td title="{{ qs.question.text }}">{{ qs.question.text|truncatechars:60 }}</td>
+                        <td title="{{ qs.question.text }}">
+                            {{ qs.question.text|truncatechars:60 }}
+                            {% if qs.typed_answers %}
+                            <div class="sd-typed" aria-label="{% trans 'typed_answers_heading' context 'liveExam.template.session_detail' %}">
+                                {% for t in qs.typed_answers|slice:":6" %}
+                                <span class="sd-typed__chip{% if t.correct %} is-correct{% endif %}">{{ t.text }} <b>{{ t.count }}</b></span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </td>
                         <td>{{ qs.total_answers }}</td>
                         <td class="sd-num--correct">{{ qs.correct_answers }}</td>
                         <td class="sd-num--incorrect">{{ qs.incorrect_answers }}</td>
@@ -212,9 +227,22 @@
                         <i class="fas fa-chart-bar"></i>
                         Q{{ forloop.counter }}: {{ qs.question.text|truncatechars:35 }}
                     </div>
+                    {% if qs.typed_answers %}
+                    {# Yazılı cavablı sual: variant qrafiki boş olardı — ən çox yazılan cavablar göstərilir (autoescape). #}
+                    <ol class="sd-typed-list" aria-label="{% trans 'typed_answers_heading' context 'liveExam.template.session_detail' %}">
+                        {% for t in qs.typed_answers|slice:":8" %}
+                        <li class="sd-typed-list__row{% if t.correct %} is-correct{% endif %}">
+                            <span class="sd-typed-list__text">{{ t.text }}</span>
+                            <b class="sd-typed-list__count">{{ t.count }}</b>
+                            <i class="fas {% if t.correct %}fa-check{% else %}fa-xmark{% endif %}" aria-hidden="true"></i>
+                        </li>
+                        {% endfor %}
+                    </ol>
+                    {% else %}
                     <div class="sd-chart-wrap sd-chart-wrap--md">
                         <canvas id="perQChart{{ forloop.counter0 }}"></canvas>
                     </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>

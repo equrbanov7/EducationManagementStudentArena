@@ -1,0 +1,318 @@
+/* ═══ FİNAL SƏHNƏSİ 1/2 — zal, duman, projektor şüaları, afişa, pərdələr ═══
+ * Oyun ekranlarından fərqli teatr görünüşü: tünd məxmər, qızılı vurğu, parıltı.
+ * Bütün hərəkət transform/opacity-dir (60 fps); şüalar mix-blend-mode: screen.
+ * Vəziyyət: [data-phase] intro|reveal|suspense|winner|party|static|empty,
+ *           .is-open (pərdə), .is-podium (pillələr), [data-focus="1|2|3"] (şüa hədəfi).
+ */
+.hx-stagebox {
+    --lva-beat: 0.5357s;
+    --st-gold: #ffc940;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    isolation: isolate;
+    background: #07040f;
+    color: #fff;
+    font-family: var(--hx-font, "Manrope", sans-serif);
+}
+
+/* ── Zal ───────────────────────────────────────────────────────────── */
+.hx-hall,
+.hx-hall > span {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.hx-hall__wall {
+    background:
+        repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0 3px, transparent 3px 96px),
+        radial-gradient(ellipse 70% 60% at 50% 38%, #4a1026 0%, #230716 45%, #0a040d 80%);
+}
+
+.hx-hall__haze {
+    inset: -20%;
+    background:
+        radial-gradient(40% 30% at 30% 40%, rgba(255, 255, 255, 0.06), transparent 70%),
+        radial-gradient(35% 28% at 72% 55%, rgba(255, 220, 180, 0.05), transparent 70%);
+    animation: hxHaze 16s ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+.hx-hall__floor {
+    top: auto;
+    height: 34vh;
+    background:
+        radial-gradient(ellipse 60% 55% at 50% 0%, rgba(255, 214, 150, 0.2), transparent 70%),
+        linear-gradient(180deg, #2a160c 0%, #120904 100%);
+    clip-path: polygon(8% 0, 92% 0, 100% 100%, 0 100%);
+}
+
+@keyframes hxHaze {
+    from { transform: translate3d(-3%, -2%, 0) scale(1); opacity: 0.8; }
+    to { transform: translate3d(3%, 2%, 0) scale(1.08); opacity: 1; }
+}
+
+/* ── Projektor şüaları ────────────────────────────────────────────── */
+.hx-beams {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.hx-stagebox.is-open .hx-beams { opacity: 1; }
+
+.hx-beam-rig {
+    position: absolute;
+    top: -8vh;
+    width: 0;
+    height: 0;
+    transform: rotate(var(--aim, 0deg));
+    transition: transform 1.1s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.hx-stagebox:not([data-focus]) .hx-beam-rig { transform: rotate(0deg); }
+.hx-beam-rig--1 { left: 7%; --from: -34deg; --to: 6deg; --sweep: 6.2s; }
+.hx-beam-rig--2 { left: 31%; --from: -20deg; --to: 26deg; --sweep: 7.4s; }
+.hx-beam-rig--3 { left: 69%; --from: 20deg; --to: -26deg; --sweep: 6.8s; }
+.hx-beam-rig--4 { left: 93%; --from: 34deg; --to: -6deg; --sweep: 7.9s; }
+
+.hx-beam {
+    position: absolute;
+    top: 0;
+    left: -15vw;
+    width: 30vw;
+    height: 124vh;
+    background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 240, 205, 0.62), rgba(255, 240, 205, 0.16) 52%, transparent 80%);
+    clip-path: polygon(47% 0, 53% 0, 100% 100%, 0 100%);
+    mix-blend-mode: screen;
+    transform-origin: 50% 0;
+    animation: hxSweep var(--sweep, 7s) ease-in-out infinite alternate;
+    will-change: transform;
+}
+
+.hx-beam-rig--2 .hx-beam { animation-delay: -2.1s; }
+.hx-beam-rig--3 .hx-beam { animation-delay: -3.3s; }
+.hx-beam-rig--4 .hx-beam { animation-delay: -1.2s; }
+
+.hx-stagebox[data-focus] .hx-beam { animation: hxWobble 2.6s ease-in-out infinite alternate; }
+.hx-stagebox[data-phase="suspense"] .hx-beam { --sweep: 1.6s; }
+.hx-stagebox[data-phase="winner"] .hx-beam {
+    background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 214, 102, 0.75), rgba(255, 190, 60, 0.2) 52%, transparent 80%);
+}
+
+.hx-stagebox[data-phase="party"] .hx-beam { --sweep: 2.8s; }
+.hx-stagebox[data-phase="party"] .hx-beam-rig--1 .hx-beam { background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 93, 143, 0.62), rgba(255, 93, 143, 0.16) 52%, transparent 80%); }
+.hx-stagebox[data-phase="party"] .hx-beam-rig--2 .hx-beam { background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(76, 201, 240, 0.6), rgba(76, 201, 240, 0.15) 52%, transparent 80%); }
+.hx-stagebox[data-phase="party"] .hx-beam-rig--3 .hx-beam { background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(255, 214, 102, 0.62), rgba(255, 214, 102, 0.16) 52%, transparent 80%); }
+.hx-stagebox[data-phase="party"] .hx-beam-rig--4 .hx-beam { background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(155, 93, 229, 0.62), rgba(155, 93, 229, 0.16) 52%, transparent 80%); }
+
+@keyframes hxSweep {
+    from { transform: rotate(var(--from, -20deg)); }
+    to { transform: rotate(var(--to, 20deg)); }
+}
+
+@keyframes hxWobble {
+    from { transform: rotate(-2.5deg); }
+    to { transform: rotate(2.5deg); }
+}
+
+/* ── Afişa (başlıq + lampalar + statistika) ──────────────────────── */
+.hx-marquee {
+    position: absolute;
+    top: 12.5vh;
+    left: 50%;
+    z-index: 4;
+    width: min(92vw, 1100px);
+    text-align: center;
+    transform: translate3d(-50%, 0, 0);
+    animation: hxMarqueeIn 0.9s 0.2s var(--hx-ease-out, ease) both;
+}
+
+.hx-marquee__bulbs {
+    display: block;
+    width: min(640px, 70%);
+    height: 14px;
+    margin: 0 auto 10px;
+    background: radial-gradient(circle at 7px 7px, #fff6d6 0 3.5px, rgba(255, 201, 64, 0.35) 4.5px 6.5px, transparent 7px) 0 0 / 28px 14px repeat-x;
+    animation: hxBulbs 0.9s steps(2) infinite;
+}
+
+.hx-stagebox[data-phase="party"] .hx-marquee__bulbs { animation-duration: 0.45s; }
+
+.hx-marquee__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    margin: 0;
+    font: 800 clamp(40px, 4.6vw, 96px)/1 var(--hx-display, sans-serif);
+    letter-spacing: -0.01em;
+}
+
+.hx-marquee__title span {
+    background: linear-gradient(180deg, #fff8dc 0%, #ffd766 50%, #d18a00 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 6px 24px rgba(255, 190, 60, 0.35));
+}
+
+.hx-marquee__title .hx-icon { width: 0.9em; height: 0.9em; color: var(--st-gold); filter: drop-shadow(0 4px 16px rgba(255, 190, 60, 0.5)); }
+.hx-marquee__sub { margin: 10px 0 0; font: 700 clamp(18px, 1.6vw, 30px)/1.3 var(--hx-font, sans-serif); color: #f3dcc0; }
+
+@keyframes hxBulbs {
+    to { background-position: 14px 0; }
+}
+
+@keyframes hxMarqueeIn {
+    from { opacity: 0; transform: translate3d(-50%, -30px, 0) scale(0.92); }
+}
+
+.hx-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 14px;
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+    transition: opacity 0.6s ease, transform 0.6s var(--hx-ease-out, ease);
+}
+
+.hx-stagebox[data-phase="party"] .hx-stats,
+.hx-stagebox[data-phase="static"] .hx-stats { opacity: 1; transform: none; }
+
+.hx-stats__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 214, 102, 0.35);
+    border-radius: 999px;
+    background: rgba(20, 8, 16, 0.72);
+    font: 700 clamp(14px, 1vw, 19px)/1 var(--hx-font, sans-serif);
+    color: #f3dcc0;
+}
+
+.hx-stats__chip strong { font: 800 clamp(16px, 1.2vw, 23px)/1 var(--hx-display, sans-serif); color: #fff; }
+.hx-stats__chip .hx-icon { width: 20px; height: 20px; color: var(--st-gold); }
+
+/* ── Pərdələr + drapirovka ───────────────────────────────────────── */
+.hx-curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 6;
+    width: 50.5%;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 25%, transparent 70%, rgba(0, 0, 0, 0.55)),
+        repeating-linear-gradient(90deg, #4f0818 0, #86112c 2vw, #b51d3c 3.1vw, #86112c 4.2vw, #4f0818 5.4vw);
+    box-shadow: inset 0 -22px 0 -8px #c99a2e;
+    transition: transform 1.9s cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+}
+
+.hx-curtain--l { left: 0; transform-origin: 0 50%; }
+.hx-curtain--r { right: 0; transform-origin: 100% 50%; }
+.hx-stagebox.is-open .hx-curtain { transform: scaleX(0.085); }
+
+.hx-curtain-spot {
+    position: absolute;
+    top: 30vh;
+    left: 50%;
+    z-index: 7;
+    width: 38vw;
+    height: 38vw;
+    margin-left: -19vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 235, 190, 0.34), transparent 65%);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: hxSpotRoam 2.6s ease-in-out infinite alternate;
+    transition: opacity 0.6s ease;
+}
+
+.hx-stagebox.is-open .hx-curtain-spot { opacity: 0; }
+
+@keyframes hxSpotRoam {
+    from { transform: translate3d(-22vw, 0, 0); }
+    to { transform: translate3d(22vw, 4vh, 0); }
+}
+
+.hx-valance {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 8;
+    height: 8vh;
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent),
+        repeating-linear-gradient(90deg, #5e0a1e 0, #9a1533 3vw, #5e0a1e 6vw);
+    border-bottom: 4px solid #c99a2e;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+.hx-valance::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3.6vh;
+    height: 3.6vh;
+    background: radial-gradient(ellipse at 50% 0, #8a1230 66%, #c99a2e 67%, #c99a2e 71%, transparent 72%) 0 0 / 8vw 100% repeat-x;
+}
+
+/* ── Kanva + idarə ─────────────────────────────────────────────────── */
+.hx-fx {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.hx-stage-controls {
+    position: absolute;
+    right: 2vw;
+    bottom: 2.4vh;
+    z-index: 9;
+    display: flex;
+    gap: 10px;
+    transition: opacity 0.35s ease;
+}
+
+.hx-stagebox.is-idle .hx-stage-controls:not(:focus-within) {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hx-stage-controls .hx-btn {
+    background: rgba(20, 8, 16, 0.78);
+    border-color: rgba(255, 214, 102, 0.4);
+    color: #fff;
+}
+
+.hx-stage-controls .hx-btn:hover:not(:disabled) { background: rgba(60, 20, 34, 0.92); }
+
+@media (prefers-reduced-motion: reduce) {
+    .hx-hall__haze,
+    .hx-beam,
+    .hx-marquee,
+    .hx-marquee__bulbs,
+    .hx-curtain-spot {
+        animation: none !important;
+    }
+
+    .hx-curtain { transition: none !important; }
+    .hx-beam-rig { transition: none !important; }
+    .hx-beam-rig--1 .hx-beam { transform: rotate(-12deg); }
+    .hx-beam-rig--2 .hx-beam { transform: rotate(6deg); }
+    .hx-beam-rig--3 .hx-beam { transform: rotate(-6deg); }
+    .hx-beam-rig--4 .hx-beam { transform: rotate(12deg); }
+}

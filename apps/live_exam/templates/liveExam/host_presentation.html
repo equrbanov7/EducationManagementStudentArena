@@ -6,54 +6,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% trans "title" context "live_exam.host_lobby" %} | {{ session.pin }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=live-host-fallback-20260408">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part1.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part2.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part3.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part4.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part5.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part6.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby/_part7.css' %}?v=live-option-shapes-20260520">
-    <link rel="stylesheet" href="{% static 'css/host_lobby_shell/_part1.css' %}?v=live-host-settings-20260506-scrollfix">
-    <link rel="stylesheet" href="{% static 'css/host_lobby_shell/_part2.css' %}?v=live-host-settings-20260506-scrollfix">
-    <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+    {% include "liveExam/partials/_host_head_assets.html" %}
 </head>
-<body class="host-live-page host-presentation-page" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
+<body class="host-live-page host-presentation-page{% if presentation_controls %} has-controls{% endif %}" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}" data-session-state="lobby">
+    <div class="hx-backdrop" aria-hidden="true">
+        <span class="hx-backdrop__glow hx-backdrop__glow--a"></span>
+        <span class="hx-backdrop__glow hx-backdrop__glow--b"></span>
+        <span class="hx-backdrop__rays"></span>
+        <span class="hx-backdrop__floor"></span>
+    </div>
     <div class="host-container host-container--presentation">
         <div id="hostReactionOverlay" class="host-reaction-overlay" aria-hidden="true"></div>
         {% if presentation_controls %}
-        <button
-            id="sidebarEdgeToggle"
-            class="host-sidebar-edge-toggle"
-            type="button"
-            aria-label="Toggle sidebar"
-            aria-controls="controlBar"
-            aria-expanded="false">
-            <i class="fas fa-chevron-right"></i>
-            <span>Controls</span>
+        <button id="sidebarEdgeToggle" class="host-sidebar-edge-toggle hx-btn hx-btn--glass" type="button" aria-label="{% trans 'settings_button' context 'live_exam.host_lobby' %}" aria-controls="controlBar" aria-expanded="false">
+            <span class="hx-i" data-icon="sliders"></span>
         </button>
-        <div id="hostQuickActions" class="host-quick-actions" aria-label="Quick actions">
-            <button id="quickStartBtn" class="host-quick-action host-quick-action--start" type="button">
-                <i class="fas fa-play"></i>
-                <span>{% trans "start_button" context "live_exam.host_lobby" %}</span>
+        <div id="hostQuickActions" class="host-quick-actions" aria-label="{% trans 'lobby_title' context 'live_exam.host_lobby' %}">
+            <button id="quickLockBtn" class="host-quick-action hx-btn hx-btn--glass hx-btn--icon" type="button" aria-pressed="false" aria-label="{% trans 'lobby_open' context 'live_exam.host_lobby' %}" title="{% trans 'lobby_open' context 'live_exam.host_lobby' %}">
+                <span class="hx-i" data-icon="unlock"></span>
             </button>
-            <button id="quickFlowBtn" class="host-quick-action host-quick-action--advance" type="button" hidden>
-                <i class="fas fa-forward-step"></i>
+            <button id="quickFlowBtn" class="host-quick-action hx-btn hx-btn--gold" type="button" hidden>
+                <span class="hx-i" data-icon="next"></span>
                 <span>{% trans "next_button" context "live_exam.host_lobby" %}</span>
             </button>
-            <button
-                id="quickLockBtn"
-                class="host-quick-action host-quick-action--lock host-quick-action--icon"
-                type="button"
-                aria-pressed="false"
-                aria-label="{% trans 'lobby_open' context 'live_exam.host_lobby' %}"
-                title="{% trans 'lobby_open' context 'live_exam.host_lobby' %}">
-                <i class="fas fa-lock-open"></i>
+            <button id="quickStartBtn" class="host-quick-action hx-btn hx-btn--gold hx-btn--lg" type="button">
+                <span class="hx-i" data-icon="play"></span>
+                <span>{% trans "start_button" context "live_exam.host_lobby" %}</span>
             </button>
         </div>
         <div id="hostSidebarBackdrop" class="host-sidebar-backdrop" hidden></div>
@@ -65,24 +43,11 @@
         </div>
         {% endif %}
 
-        <div id="gameArea" class="game-area presentation-game-area">
+        <main id="gameArea" class="game-area presentation-game-area">
             <div id="presentationStage" class="presentation-stage" data-phase="idle">
-                <div class="presentation-stage__glow presentation-stage__glow--left"></div>
-                <div class="presentation-stage__glow presentation-stage__glow--right"></div>
-                <div class="presentation-stage__grid"></div>
-                <div class="presentation-stage__scene" aria-hidden="true">
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--ceiling"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--board"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-a"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-b"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--window-c"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--desk"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-a"></span>
-                    <span class="presentation-stage__scene-layer presentation-stage__scene-layer--seats-b"></span>
-                </div>
                 <div class="presentation-stage__content" id="presentationContent"></div>
             </div>
-        </div>
+        </main>
 
         {% if not presentation_controls %}
         <div class="host-hidden-ui" aria-hidden="true">
@@ -92,14 +57,14 @@
             <div id="progressBox"></div>
             <div id="answeredText">0 / 0</div>
             <div id="gameState"></div>
-            <button id="startBtn" type="button"></button>
-            <button id="presentBtn" type="button"></button>
-            <button id="revealBtn" type="button"></button>
-            <button id="nextBtn" type="button"></button>
-            <button id="finishBtn" type="button"></button>
-            <input id="questionCount" type="text" value="{{ session.question_limit|default:1 }}">
-            <input id="autoMode" type="checkbox" checked>
-            <button id="debugBtn" type="button"></button>
+            <button id="startBtn" type="button" tabindex="-1"></button>
+            <button id="presentBtn" type="button" tabindex="-1"></button>
+            <button id="revealBtn" type="button" tabindex="-1"></button>
+            <button id="nextBtn" type="button" tabindex="-1"></button>
+            <button id="finishBtn" type="button" tabindex="-1"></button>
+            <input id="questionCount" type="text" value="{{ session.question_limit|default:1 }}" tabindex="-1">
+            <input id="autoMode" type="checkbox" checked tabindex="-1">
+            <button id="debugBtn" type="button" tabindex="-1"></button>
             <pre id="debugLog"></pre>
         </div>
         {% endif %}
@@ -109,23 +74,9 @@
     {% include "liveExam/_host_settings_drawer.html" %}
     {% endif %}
 
-    <div id="finalPodium" class="final-podium">
-        <div id="confetti" class="confetti-wrap"></div>
-        <div class="spotlight s1"></div>
-        <div class="spotlight s2"></div>
-        <div class="spotlight s3"></div>
-        <div class="podium-header">
-            <h1>🏆 {% trans "final_results_title" context "live_exam.host_lobby" %}</h1>
-            <p>{% trans "final_results_subtitle" context "live_exam.host_lobby" %}</p>
-        </div>
-        <div id="podiumStage" class="podium-stage"></div>
-        <div class="others-section">
-            <div class="others-title">{% trans "other_players" context "live_exam.host_lobby" %}</div>
-            <div id="othersList" class="others-list"></div>
-        </div>
-    </div>
+    <div id="finalPodium" class="final-podium" aria-live="off"></div>
 
-    <div id="qrModal" class="qr-modal">
+    <div id="qrModal" class="qr-modal" role="dialog" aria-modal="true" aria-label="QR">
         <div class="qr-modal__card">
             <div class="qr-modal__pin-badge">
                 <span>PIN</span>
@@ -137,7 +88,8 @@
     </div>
 
     {{ session_settings|json_script:"hostPresentationSessionSettings" }}
-    {% comment %}Konfiq/i18n inline nonce skriptdən JSON data-adalarına çıxarıldı (2026-09-21, CSP unsafe-inline yolu bağlanır); `host_lobby_config.js` KLASSİK, defer-siz skriptdir — əvvəlki mövqedə eyni qlobalları qurur.{% endcomment %}
+    {{ host_questions|json_script:"hostQuestions" }}
+    {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline skript yoxdur); `host_lobby_config.js` KLASSİK, defer-siz skriptdir.{% endcomment %}
     <script id="hostConfig" type="application/json">{
         "pin": "{{ session.pin|escapejs }}",
         "csrf": "{{ csrf_token }}",
@@ -145,6 +97,7 @@
         "examTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
         "entryUrl": "{{ entry_url|escapejs }}",
         "qrUrl": "{{ qr_url|escapejs }}",
+        "resultsUrl": "{% url 'liveExam:teacher_live_session_detail' session.exam.slug session.pin %}",
         "sessionSettingsId": "hostPresentationSessionSettings",
         "sessionLocked": {{ session_locked|yesno:"true,false" }},
         "maxParticipantsCap": {{ max_participants_cap }},
@@ -165,51 +118,7 @@
             "removePlayer": "{% url 'liveExam:host_remove_player' session.pin %}"
         }
     }</script>
-    <script id="hostI18n" type="application/json">{
-        "debugLabel": "{% filter escapejs %}{% trans 'debug_label' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "stateLobby": "{% filter escapejs %}{% trans 'state_lobby' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "stateQuestion": "{% filter escapejs %}{% trans 'state_question' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "stateReveal": "{% filter escapejs %}{% trans 'state_reveal' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "stateFinished": "{% filter escapejs %}{% trans 'state_finished' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "stateLog": "{% filter escapejs %}{% trans 'state_log' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "questionMeta": "{% filter escapejs %}{% trans 'question_meta' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "noAnswersYet": "{% filter escapejs %}{% trans 'no_answers_yet' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "pointsSuffix": "{% filter escapejs %}{% trans 'points_suffix' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "hostReady": "{% filter escapejs %}{% trans 'host_ready' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "wsLobbyOpen": "{% filter escapejs %}{% trans 'ws_lobby_open' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "wsLobbyClosed": "{% filter escapejs %}{% trans 'ws_lobby_closed' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "wsPlayOpen": "{% filter escapejs %}{% trans 'ws_play_open' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "wsPlayClosed": "{% filter escapejs %}{% trans 'ws_play_closed' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "allAnsweredAutoReveal": "{% filter escapejs %}{% trans 'all_answered_auto_reveal' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "lobbyMessageError": "{% filter escapejs %}{% trans 'lobby_message_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "playMessageError": "{% filter escapejs %}{% trans 'play_message_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "postError": "{% filter escapejs %}{% trans 'post_error' context 'live_exam.host_lobby.js' %}{% endfilter %}",
-        "introTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}",
-        "introSubtitle": "Get ready for the next round",
-        "countdownLabel": "Starting now",
-        "questionStageLabel": "Question",
-        "answersLabel": "Answers live",
-        "revealLabel": "Answer reveal",
-        "scoreboardTitle": "Scoreboard",
-        "scoreboardSubtitle": "Top 5 players",
-        "correctAnswerLabel": "Correct answer",
-        "answersSingular": "Answer",
-        "answersPlural": "Answers",
-        "playersAnswered": "{answered} answered",
-        "secondsLabel": "seconds",
-        "countdownNumberLabel": "Round starts in {value}",
-        "scoreboardMovedUp": "Moved up {count}",
-        "scoreboardNewEntry": "New in top 5",
-        "distributionNoAnswers": "No answers were submitted this round.",
-        "revealCorrectTag": "Correct",
-        "revealWrongTag": "Incorrect"
-    }</script>
-    <script src="{% static 'js/host_lobby_config.js' %}?v=20260921-1"></script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}?v=live-host-fallback-20260408"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}?v=live-host-fallback-20260408"></script>
-    <script type="module" src="{% static 'js/host_lobby/host_lobby.entry.js' %}?v=live-option-shapes-20260520"></script>
-    {% if presentation_controls %}
-    <script src="{% static 'js/host_lobby_shell.js' %}?v=live-host-settings-20260506-scrollfix"></script>
-    {% endif %}
+    {% include "liveExam/partials/_host_i18n.html" %}
+    {% include "liveExam/partials/_host_scripts.html" with with_shell=presentation_controls %}
 </body>
 </html>

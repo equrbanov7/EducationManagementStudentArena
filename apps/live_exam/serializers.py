@@ -14,8 +14,9 @@ from django.db.models.expressions import ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext
 
+from apps.live_exam.constants import ANSWER_LATENCY_GRACE_SECONDS
+from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import (
-    detect_multi,
     get_option_text,
     get_question_text,
     question_points,
@@ -24,6 +25,11 @@ from apps.live_exam.domain.session import (
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.session_settings import get_session_settings
+
+#: Liderlik cədvəlinin YEGANƏ sıralama qaydası (bərabər balda qoşulma sırası):
+#: bal ↓, qoşulma vaxtı ↑, id ↑. Canlı top, previous_top, final, nəticə səhifəsi
+#: eyni qaydanı istifadə edir (docs/live_exam/ENGINE.md «Leaderboard»).
+LEADERBOARD_ORDER = ("-score", "created_at", "id")
 
 
 def serialize_player_identity(player: LivePlayer) -> dict[str, Any]:
@@ -40,7 +46,7 @@ def serialize_players(session: LiveSession, limit: int = 200) -> list[dict[str, 
 
 
 def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
-    players = session.players.order_by("-score", "created_at", "id").values(
+    players = session.players.order_by(*LEADERBOARD_ORDER).values(
         "id",
         "nickname",
         "avatar_key",
@@ -136,12 +142,19 @@ def serialize_answer_distribution(session: LiveSession, question_id: int) -> dic
     }
 
 
+def speed_order_key(answer) -> tuple[int, int]:
+    """Cavab sürəti sırası (``answer_rank``): ``answer_ms`` ↑, sonra ``id`` ↑."""
+    if isinstance(answer, dict):
+        return safe_int(answer.get("answer_ms"), 0), safe_int(answer.get("id"), 0)
+    return safe_int(answer.answer_ms, 0), safe_int(answer.id, 0)
+
+
 def serialize_question_results(session: LiveSession, question_id: int, limit: int = 50) -> list[dict[str, Any]]:
     # Single query: fetch all answers with related player, ordered by speed for rank calculation.
     all_answers = list(
         LiveAnswer.objects.filter(session=session, question_id=question_id)
         .select_related("player")
-        .order_by("answer_ms", "created_at", "id")
+        .order_by("answer_ms", "id")
     )
     # Compute speed rank in Python — avoids a second DB round-trip.
     speed_rank_lookup = {answer.id: index + 1 for index, answer in enumerate(all_answers)}
@@ -149,7 +162,7 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
     # Sort for display: highest points first, then fastest answer.
     sorted_answers = sorted(
         all_answers,
-        key=lambda a: (-safe_int(a.awarded_points, 0), safe_int(a.answer_ms, 0), a.created_at, a.id),
+        key=lambda a: (-safe_int(a.awarded_points, 0), *speed_order_key(a)),
     )[:limit]
 
     results: list[dict[str, Any]] = []
@@ -170,8 +183,63 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
     return results
 
 
+def answer_choice_ids(answer) -> list[int]:
+    raw = answer.get("choice_ids") if isinstance(answer, dict) else answer.choice_ids
+    choice_ids = list(raw or [])
+    fallback = answer.get("choice_id") if isinstance(answer, dict) else answer.choice_id
+    if not choice_ids and fallback is not None:
+        choice_ids = [fallback]
+    return choice_ids
+
+
+def question_mode_fields(config, choice_ids: list[int] | None = None, text: str | None = None) -> dict[str, Any]:
+    """Cavab növünə görə əlavə şəxsi sahələr (yazılı: ``your_text``; multi: seçim sayları)."""
+    if config is None:
+        return {}
+    if config.is_text:
+        return {"your_text": text or ""}
+    if config.is_multi:
+        chosen = {safe_int(value, 0) for value in (choice_ids or [])}
+        correct = set(config.correct_ids)
+        return {
+            "correct_selected": len(chosen & correct),
+            "wrong_selected": len(chosen - correct),
+            "total_correct": len(correct),
+        }
+    return {}
+
+
+def speed_rank(session_id: int, question_id: int, answer) -> int:
+    answer_ms, answer_id = speed_order_key(answer)
+    faster = (
+        LiveAnswer.objects.filter(session_id=session_id, question_id=question_id)
+        .filter(Q(answer_ms__lt=answer_ms) | Q(answer_ms=answer_ms, id__lt=answer_id))
+        .count()
+    )
+    return faster + 1
+
+
+def personal_result_from_answer(session, answer, *, player=None, config=None, rank: bool = True) -> dict[str, Any]:
+    """Oyunçunun öz nəticəsi (reveal-də / sonuncu cavabda göndərilir)."""
+    owner = player if player is not None else answer.player
+    choice_ids = answer_choice_ids(answer)
+    result = {
+        "player_id": answer.player_id,
+        "choice_ids": choice_ids,
+        "is_correct": bool(answer.is_correct),
+        "awarded_points": safe_int(answer.awarded_points, 0),
+        "total_score": safe_int(owner.score, 0),
+        "answer_ms": safe_int(answer.answer_ms, 0),
+        "streak": safe_int(getattr(owner, "streak", 0), 0),
+    }
+    if rank:
+        result["answer_rank"] = speed_rank(session.id, answer.question_id, answer)
+    result.update(question_mode_fields(config, choice_ids, getattr(answer, "text_answer", "")))
+    return result
+
+
 def serialize_player_question_result(
-    session: LiveSession, question_id: int, player_id: int | None
+    session: LiveSession, question_id: int, player_id: int | None, *, config=None
 ) -> dict[str, Any] | None:
     if not player_id:
         return None
@@ -183,34 +251,14 @@ def serialize_player_question_result(
     )
     if answer is None:
         return None
+    if config is None:
+        from apps.exams.models import ExamQuestion
 
-    # Speed rank = how many answers sort strictly before this one under the
-    # (answer_ms, created_at, id) ordering. A targeted COUNT replaces the old
-    # "fetch every answer in the round" approach (O(players) rows per call).
-    answer_rank = (
-        LiveAnswer.objects.filter(session=session, question_id=question_id)
-        .filter(
-            Q(answer_ms__lt=answer.answer_ms)
-            | Q(answer_ms=answer.answer_ms, created_at__lt=answer.created_at)
-            | Q(answer_ms=answer.answer_ms, created_at=answer.created_at, id__lt=answer.id)
+        question = (
+            ExamQuestion.objects.filter(exam_id=session.exam_id, id=question_id).prefetch_related("options").first()
         )
-        .count()
-        + 1
-    )
-
-    choice_ids = list(answer.choice_ids or [])
-    if not choice_ids and answer.choice_id is not None:
-        choice_ids = [answer.choice_id]
-
-    return {
-        "player_id": answer.player_id,
-        "choice_ids": choice_ids,
-        "is_correct": bool(answer.is_correct),
-        "awarded_points": safe_int(answer.awarded_points, 0),
-        "total_score": safe_int(answer.player.score, 0),
-        "answer_ms": safe_int(answer.answer_ms, 0),
-        "answer_rank": answer_rank,
-    }
+        config = resolve_question_config(session, question) if question is not None else None
+    return personal_result_from_answer(session, answer, config=config)
 
 
 def options_seed(pin: str, question_id: int, started_at: datetime) -> int:
@@ -263,19 +311,23 @@ def serialize_question(
     answer_starts_at,
     ends_at,
 ) -> dict[str, Any]:
-    is_multi, max_select, _ = detect_multi(exam_question)
+    config = resolve_question_config(session, exam_question)
     settings = get_session_settings(session)
     randomize_answers = bool(settings.get("randomize_answers", True))
     seed = options_seed(session.pin, exam_question.id, started_at) if started_at and randomize_answers else None
+    # Yazılı cavab sualında variant/düzgünlük məlumatı HEÇ göndərilmir.
+    options = [] if config.is_text else build_options(exam_question, seed=seed, randomize=randomize_answers)
 
     return {
         "id": exam_question.id,
         "text": get_question_text(exam_question),
         "time_limit": question_time_limit(session, exam_question),
         "points": question_points(session, exam_question),
-        "multi": is_multi,
-        "max_select": max_select,
-        "options": build_options(exam_question, seed=seed, randomize=randomize_answers),
+        "multi": config.is_multi,
+        "max_select": config.max_select,
+        "options": options,
+        **config.to_payload_fields(),
+        "answer_grace_ms": int(ANSWER_LATENCY_GRACE_SECONDS * 1000),
         "started_at": started_at.isoformat() if started_at else None,
         "ready_ends_at": ready_ends_at.isoformat() if ready_ends_at else None,
         "answer_starts_at": answer_starts_at.isoformat() if answer_starts_at else None,

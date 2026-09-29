@@ -1,11 +1,11 @@
-import { UI } from './dom.js';
-import { PHASES } from './constants.js';
-import { state } from './state.js';
-import { syncLobbyMusic } from './audio.js';
-import { stopStatePolling } from './api.js';
-import { renderIdleStage } from './lobby.js';
-import { destroyRevealChart } from './reveal.js';
-import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js';
+import { UI } from './dom.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20260929';
+import { stopStatePolling } from './api.js?v=lx20260929';
+import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20260929';
+import { teardownStage } from './stage.js?v=lx20260929';
+import { cancelWipe } from './transitions.js?v=lx20260929';
+import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20260929';
 
 let presenterWindowRef = null;
 
@@ -19,8 +19,10 @@ export function clearPhaseLoop() {
 export function clearAutoTimers() {
     clearTimeout(state.autoRevealTimeout);
     clearTimeout(state.autoNextTimeout);
+    clearTimeout(state.allAnsweredTimeout);
     state.autoRevealTimeout = 0;
     state.autoNextTimeout = 0;
+    state.allAnsweredTimeout = 0;
 }
 
 function presenterUrl() {
@@ -75,60 +77,84 @@ export function schedulePhaseLoop(fn) {
 }
 
 function stateLabel(value) {
-    if (value === "question") return tr("stateQuestion", "Question");
-    if (value === "reveal") return tr("stateReveal", "Reveal");
-    if (value === "finished") return tr("stateFinished", "Finished");
-    return tr("stateLobby", "Lobby");
+    if (value === "question") return tr("stateQuestion", "Sual");
+    if (value === "reveal") return tr("stateReveal", "Cavab");
+    if (value === "finished") return tr("stateFinished", "Bitdi");
+    return tr("stateLobby", "Lobbi");
 }
 
-export function setPresentationMarkup(phase, signature, markup) {
-    if (!UI.presentationStage || !UI.presentationContent) return;
-    UI.presentationStage.dataset.phase = phase;
-    if (state.phaseSignature === signature && state.phase === phase) {
-        return;
-    }
-    // Destroy Chart.js instance when leaving the reveal phase
-    destroyRevealChart();
+/** Kadr dövrəsində (RAF) markup qurmadan ƏVVƏL yoxlamaq üçün — eyni faza/imza artıq ekrandadır? */
+export const isCurrentPhase = (phase, signature) => state.phase === phase && state.phaseSignature === signature;
+
+/**
+ * Fazanın məzmununu yalnız imza dəyişəndə yeniləyir (idempotent render):
+ * eyni vəziyyətin təkrar gəlməsi animasiyanı / səsi təkrarlamır.
+ * `afterMount(root)` — DOM daxil ediləndən sonra (şrift sığdırma və s.).
+ */
+export function setPresentationMarkup(phase, signature, markup, afterMount) {
+    if (!UI.presentationStage || !UI.presentationContent) return false;
+    if (UI.presentationStage.dataset.phase !== phase) UI.presentationStage.dataset.phase = phase;
+    if (isCurrentPhase(phase, signature)) return false;
     state.phase = phase;
     state.phaseSignature = signature;
     UI.presentationContent.innerHTML = markup;
+    if (typeof afterMount === "function") {
+        try {
+            afterMount(UI.presentationContent);
+        } catch (error) {
+            log(`afterMount: ${error.message || error}`);
+        }
+    }
     markStateMutation();
     notifyHostShell();
+    return true;
 }
 
 export function setSessionState(nextState) {
     if (nextState === "finished" && state.sessionState === "finished") {
         return;
     }
+    const previous = state.sessionState;
     state.sessionState = nextState;
+    document.body.dataset.sessionState = nextState;
     if (nextState !== "finished") {
         state.finalSignature = "";
+        if (previous === "finished") teardownStage();
     }
-    UI.gameState.textContent = stateLabel(nextState);
+    if (UI.gameState) UI.gameState.textContent = stateLabel(nextState);
 
-    UI.startBtn.disabled = nextState !== "lobby";
-    UI.revealBtn.disabled = nextState !== "question";
-    UI.nextBtn.disabled = nextState !== "reveal";
+    if (UI.startBtn) UI.startBtn.disabled = nextState !== "lobby";
+    if (UI.revealBtn) UI.revealBtn.disabled = nextState !== "question";
+    if (UI.nextBtn) UI.nextBtn.disabled = nextState !== "reveal";
+    if (UI.finishBtn) UI.finishBtn.disabled = nextState === "finished";
 
     const isLobby = nextState === "lobby";
     const isPlay = nextState === "question" || nextState === "reveal";
     const isFinished = nextState === "finished";
 
-    safeDisplay(UI.playersSection, CONFIG.presentationOnly ? "none" : (isLobby ? "block" : "none"));
+    safeDisplay(UI.playersSection, "none");
     safeDisplay(UI.gameArea, (isLobby || isPlay) && !isFinished ? "block" : "none");
-    safeDisplay(UI.finalPodium, isFinished ? "grid" : "none");
+    safeDisplay(UI.finalPodium, isFinished ? "block" : "none");
     safeDisplay(UI.progressBox, !CONFIG.presentationOnly && nextState === "question" ? "flex" : "none");
+
+    if (previous !== nextState) {
+        if (previous === "lobby") {
+            stopLobbyMusic();
+            resetLobbyStage();
+        }
+        if (previous === "finished") stopDanceBeat();
+        if (isFinished) stopAllLoops();
+    }
 
     if (isFinished) {
         clearPhaseLoop();
         clearAutoTimers();
+        cancelWipe();
         stopStatePolling();
-        if (UI.presentationContent) {
-            UI.presentationContent.innerHTML = "";
-        }
-        if (UI.presentationStage) {
-            UI.presentationStage.dataset.phase = "finished";
-        }
+        if (UI.presentationContent) UI.presentationContent.innerHTML = "";
+        if (UI.presentationStage) UI.presentationStage.dataset.phase = "finished";
+        state.phase = "finished";
+        state.phaseSignature = "";
     }
 
     if (isLobby) {
@@ -137,7 +163,9 @@ export function setSessionState(nextState) {
         renderIdleStage();
     }
 
-    syncLobbyMusic(true);
-    log(fmt(tr("stateLog", "State: {state}"), { state: stateLabel(nextState) }));
+    syncLobbyMusic();
+    if (previous !== nextState) {
+        log(fmt(tr("stateLog", "State: {state}"), { state: stateLabel(nextState) }));
+    }
     notifyHostShell();
 }

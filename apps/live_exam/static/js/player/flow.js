@@ -1,276 +1,268 @@
-import { PHASES } from './config.js';
-import { playRoundEndSound } from './audio.js';
+// LX-FE-PLAYER (2026-09-29): vəziyyət maşını. Mənbələr: WS mesajları, HTTP snapshot, cavab
+// hadisələri. Qaydalar:
+//  * UI HƏMİŞƏ server vəziyyətinə yaxınlaşır (snapshot sualı/reveal-i/finalı yenidən qurur);
+//  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
+//  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
+//  * faza dəyişəndə bütün taymerlər təmizlənir.
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20260929';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20260929';
+import { fetchState } from './api.js?v=lx20260929';
+import { renderFinal } from './finale.js?v=lx20260929';
+import { stopStatePolling } from './polling.js?v=lx20260929';
 import {
-    renderFinal,
+    questionKeyOf,
     renderGetReady,
-    renderIdle,
     renderIntro,
-    renderLeaderboard,
     renderLocked,
     renderQuestion,
-    renderResult,
-    renderWaiting,
-    updateWaitingProgress,
-} from './render.js';
-import { applySessionSettings } from './settings.js';
-import { state } from './state.js';
-import { clearPhaseTimer, clearTicker, queuePhaseTransition } from './timers.js';
-import { pickWaitingMessage, setQuestionChip, setRoundHint } from './ui.js';
+    renderTimeUp,
+    updateSelectionUI,
+} from './render_round.js?v=lx20260929';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20260929';
+import { renderIdle, renderRemoved } from './render_status.js?v=lx20260929';
+import { applySessionSettings } from './settings.js?v=lx20260929';
+import { closePlayerSocket } from './sockets.js?v=lx20260929';
+import { state } from './state.js?v=lx20260929';
+import { clearAckTimer, clearAllTimers, clearPhaseTimer, clearTicker, queuePhaseTransition, startTicker } from './timers.js?v=lx20260929';
 import {
-    getPersonalResult,
     getRevealKey,
     getRevealTimings,
-    isOwnPlayerResult,
     nowMs,
     rememberTimelinePayload,
-    setStoredTop,
     shouldApplyTimelinePayload,
-    tr,
     ts,
     updateServerTimeOffset,
-} from './utils.js';
+} from './utils.js?v=lx20260929';
+import { currentViewEl } from './views.js?v=lx20260929';
 
-export function startTicker() {
-    clearTicker();
-    state.ticker = window.setInterval(syncQuestionPhase, 120);
+let revealRefetchKey = "";
+let finalRefetchDone = false;
+
+function resetRound() {
+    state.selectedIds = new Set();
+    state.currentAnswer = null;
+    state.pendingSubmit = null;
+    state.typedDraft = "";
+    clearAckTimer();
+}
+
+function isOwn(answer) {
+    return Boolean(answer) && (answer.player_id == null || Number(answer.player_id) === Number(state.player.id));
+}
+
+function hasRecordedAnswer(answer) {
+    return (
+        isOwn(answer) &&
+        Boolean(
+            answer.saved ||
+                (Array.isArray(answer.choice_ids) && answer.choice_ids.length) ||
+                answer.is_correct !== undefined ||
+                answer.your_text
+        )
+    );
 }
 
 export function syncQuestionPhase() {
-    if (
-        !state.currentQuestion ||
-        state.phase === PHASES.RESULT ||
-        state.phase === PHASES.LEADERBOARD ||
-        state.phase === PHASES.FINAL
-    ) {
-        return;
-    }
-
-    if (state.currentAnswer) {
-        renderWaiting(state.waitingMessage || pickWaitingMessage());
-        return;
-    }
-
+    const question = state.currentQuestion;
+    if (!question || state.revealPayload || state.phase === PHASES.FINAL || state.phase === PHASES.REMOVED) return;
     const now = nowMs();
-    const readyEndsAt = ts(state.currentQuestion.ready_ends_at) || ts(state.currentQuestion.started_at);
-    const answerStartsAt = ts(state.currentQuestion.answer_starts_at) || readyEndsAt;
-    const endsAt = ts(state.currentQuestion.ends_at);
+    const startedAt = ts(question.started_at);
+    const readyEndsAt = ts(question.ready_ends_at) || startedAt;
+    const answerStartsAt = ts(question.answer_starts_at) || readyEndsAt;
+    const endsAt = ts(question.ends_at);
 
-    if (now < readyEndsAt) {
-        renderGetReady(state.currentQuestion);
+    if (state.currentAnswer || state.pendingSubmit) {
+        renderLocked(question, Math.max(0, endsAt - now));
         return;
     }
-
+    if (Number(question.get_ready_duration_ms || 0) > 0 && now < readyEndsAt) {
+        renderGetReady(question, readyEndsAt - now);
+        return;
+    }
     if (now < answerStartsAt) {
-        renderIntro(state.currentQuestion);
+        renderIntro(question, answerStartsAt - now, Math.max(1, answerStartsAt - readyEndsAt));
         return;
     }
-
-    if (now < endsAt) {
-        renderQuestion(state.currentQuestion);
+    if (!endsAt || now < endsAt) {
+        renderQuestion(question, Math.max(0, endsAt - now));
         return;
     }
-
-    renderLocked();
+    renderTimeUp(question);
 }
 
-export function applyQuestionState(question, playerAnswer, previousTop) {
-    const isNewQuestion =
-        !state.currentQuestion ||
-        Number(state.currentQuestion.id) !== Number(question.id) ||
-        state.currentQuestion.started_at !== question.started_at;
-
-    clearPhaseTimer();
-    state.revealPayload = null;
+export function applyQuestion(question, playerAnswer) {
+    if (!question || question.id == null) return;
+    const previous = state.currentQuestion;
+    const isNew =
+        !previous || Number(previous.id) !== Number(question.id) || previous.started_at !== question.started_at;
+    if (isNew) resetRound();
     state.currentQuestion = question;
-    state.resultSignature = "";
-    state.finalSignature = "";
-
-    if (isNewQuestion) {
-        state.selectedIds = new Set();
-        state.currentAnswer = null;
-        state.pendingScore = null;
-        state.submitting = false;
-        state.waitingMessage = "";
-        state.phase = "";
-        state.resultSignature = "";
-        state.leaderboardSignature = "";
-        setQuestionChip(question);
+    state.revealPayload = null;
+    clearPhaseTimer();
+    if (hasRecordedAnswer(playerAnswer)) {
+        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, playerAnswer, { saved: true });
+        state.pendingSubmit = null;
+        clearAckTimer();
     }
-
-    if (previousTop && previousTop.length) {
-        setStoredTop(previousTop);
-    }
-
-    if (playerAnswer) {
-        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, playerAnswer);
-        state.pendingScore = playerAnswer.total_score != null && Number.isFinite(Number(playerAnswer.total_score))
-            ? Number(playerAnswer.total_score)
-            : state.pendingScore;
-        state.waitingMessage = state.waitingMessage || pickWaitingMessage();
-    }
-
-    startTicker();
+    startTicker(syncQuestionPhase, 200);
     syncQuestionPhase();
 }
 
-export function applyRevealState(payload) {
-    clearTicker();
-    state.finalSignature = "";
-
+export function applyReveal(payload) {
+    if (!payload) return;
+    const questionId = Number(payload.question_id || (payload.question && payload.question.id) || 0);
+    const previous = state.currentQuestion;
+    const sameQuestion = previous && Number(previous.id) === questionId;
+    if (!sameQuestion) resetRound();
     if (payload.question) {
-        state.currentQuestion = payload.question;
+        state.currentQuestion = Object.assign({}, sameQuestion ? previous : {}, payload.question);
+    } else if (!sameQuestion) {
+        state.currentQuestion = { id: questionId };
     }
-    if (!state.currentQuestion && payload.question_id) {
-        state.currentQuestion = Object.assign({}, state.currentQuestion || {}, { id: payload.question_id });
+    if (hasRecordedAnswer(payload.player_answer)) {
+        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, payload.player_answer, { saved: true });
     }
+    // Raund bitdi: təsdiqlənməmiş göndəriş artıq heç nəyi dəyişə bilməz.
+    state.pendingSubmit = null;
+    clearAckTimer();
+    clearTicker();
 
-    if (payload.previous_top && payload.previous_top.length) {
-        setStoredTop(payload.previous_top);
-    }
-
-    const personalResult = getPersonalResult(payload);
-    if (personalResult) {
-        state.currentAnswer = Object.assign({}, state.currentAnswer || {}, personalResult);
-        state.pendingScore = personalResult.total_score != null && Number.isFinite(Number(personalResult.total_score))
-            ? Number(personalResult.total_score)
-            : state.pendingScore;
-    }
-
-    const revealKey = getRevealKey(payload);
-    const timings = getRevealTimings(payload);
-    const now = nowMs();
-
+    const key = getRevealKey(payload);
+    state.revealKey = key;
     state.revealPayload = payload;
-
-    if (state.revealKey !== revealKey) {
-        state.revealKey = revealKey;
-        playRoundEndSound(revealKey);
+    if (answeredButUnknown(payload) && revealRefetchKey !== key) {
+        // Cavab verilib, amma şəxsi nəticə gəlməyib — snapshot tam nəticəni gətirir (bir dəfə).
+        revealRefetchKey = key;
+        fetchState();
     }
-
-    if (now >= timings.leaderboardStartsAt) {
+    const { leaderboardStartsAt } = getRevealTimings(payload);
+    const now = nowMs();
+    if (now >= leaderboardStartsAt) {
+        clearPhaseTimer();
         renderLeaderboard(payload);
         return;
     }
-
     renderResult(payload);
     queuePhaseTransition(() => {
-        if (state.revealKey === revealKey && state.revealPayload) {
-            renderLeaderboard(state.revealPayload);
-        }
-    }, timings.leaderboardStartsAt - now);
+        if (state.revealKey === key && state.revealPayload) renderLeaderboard(state.revealPayload);
+    }, leaderboardStartsAt - now);
 }
 
-export function applyStateSnapshot(snapshot) {
-    updateServerTimeOffset(snapshot);
-    if (!snapshot || !snapshot.ok) {
-        if (!state.currentQuestion && state.phase !== PHASES.FINAL) {
-            renderIdle();
-        }
-        return;
+export function applyFinished(payload) {
+    clearAllTimers();
+    state.revealPayload = null;
+    state.pendingSubmit = null;
+    renderFinal(payload || {});
+    stopStatePolling();
+    if (payload && !payload.my_stats && !finalRefetchDone) {
+        // Şəxsi statistika (my_stats) ümumi yayımda olmaya bilər — bir dəfə snapshot çəkirik.
+        finalRefetchDone = true;
+        window.setTimeout(fetchState, 900);
     }
+    // Oyun bitib: 90 boş WebSocket serverdə açıq qalmasın.
+    window.setTimeout(closePlayerSocket, 2500);
+}
 
-    if (!shouldApplyTimelinePayload(snapshot)) {
-        return;
-    }
+export function handleAuthLost() {
+    if (state.phase === PHASES.FINAL) return;
+    state.removed = true;
+    clearAllTimers();
+    stopStatePolling();
+    closePlayerSocket();
+    renderRemoved();
+}
+
+export function handleSnapshot(snapshot) {
+    if (!snapshot || !snapshot.ok) return;
+    if (!shouldApplyTimelinePayload(snapshot)) return;
     rememberTimelinePayload(snapshot);
-
-    if (snapshot.settings) {
-        applySessionSettings(snapshot.settings);
+    if (snapshot.settings) applySessionSettings(snapshot.settings);
+    if (Number(snapshot.total_players)) state.totalPlayers = Number(snapshot.total_players);
+    switch (snapshot.state) {
+        case "finished":
+            applyFinished(snapshot);
+            return;
+        case "reveal":
+            if (snapshot.question || state.currentQuestion) applyReveal(snapshot);
+            else renderIdle();
+            return;
+        case "question":
+            if (snapshot.question) applyQuestion(snapshot.question, snapshot.player_answer);
+            else renderIdle();
+            return;
+        case "lobby":
+            if (BOOTSTRAP.waitRoomUrl) {
+                window.location.replace(BOOTSTRAP.waitRoomUrl);
+                return;
+            }
+            renderIdle();
+            return;
+        default:
+            renderIdle();
     }
-
-    state.totalPlayers = Number(snapshot.total_players || state.totalPlayers || 0);
-    state.answeredCount = Number(snapshot.answered_count || 0);
-
-    if (snapshot.state === "finished") {
-        renderFinal(snapshot);
-        return;
-    }
-
-    if (!snapshot.question) {
-        renderIdle();
-        return;
-    }
-
-    if (snapshot.state === "reveal") {
-        state.currentQuestion = snapshot.question;
-        applyRevealState(snapshot);
-        return;
-    }
-
-    applyQuestionState(snapshot.question, snapshot.player_answer || null, snapshot.previous_top || []);
-}
-
-export function handleAnswerSaved(data) {
-    if (!isOwnPlayerResult(data)) {
-        return;
-    }
-    state.submitting = false;
-    state.currentAnswer = Object.assign({}, state.currentAnswer || {}, data, {
-        // `??` instead of `||`: a legitimate total of 0 must not fall through
-        // to stale values.
-        total_score: data.total_score ?? data.score ?? state.pendingScore ?? state.player.score,
-    });
-    state.pendingScore = state.currentAnswer.total_score != null && Number.isFinite(Number(state.currentAnswer.total_score))
-        ? Number(state.currentAnswer.total_score)
-        : state.pendingScore;
-    state.waitingMessage = pickWaitingMessage();
-    syncQuestionPhase();
 }
 
 export function handleSocketMessage(message) {
-    const data = message.data || message;
+    const data = (message && message.data) || message;
+    if (!data || typeof data !== "object") return;
     updateServerTimeOffset(data);
     switch (data.type) {
         case "session_settings":
             applySessionSettings(data.settings);
-            if (state.currentQuestion) {
-                syncQuestionPhase();
-            }
+            if (state.currentQuestion && !state.revealPayload) syncQuestionPhase();
             break;
         case "question_published":
-            if (!shouldApplyTimelinePayload(data)) {
-                break;
-            }
+            if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
-            state.answeredCount = 0;
-            state.totalPlayers = Math.max(state.totalPlayers, 0);
-            applyQuestionState(data.question, null, data.previous_top || []);
+            applyQuestion(data.question, data.player_answer || null);
             break;
         case "answer_saved":
             handleAnswerSaved(data);
             break;
-        case "answer_progress":
-            if (state.currentQuestion && Number(data.question_id || 0) !== Number(state.currentQuestion.id || 0)) {
-                break;
-            }
-            state.answeredCount = Number(data.answered_count || 0);
-            state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
-            if (state.phase === PHASES.WAITING || state.phase === PHASES.LOCKED) {
-                updateWaitingProgress();
-            }
-            break;
         case "reveal":
-            if (!shouldApplyTimelinePayload(data)) {
-                break;
-            }
+            if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
-            applyRevealState(data);
+            applyReveal(data);
             break;
         case "finished":
-            if (!shouldApplyTimelinePayload(data)) {
-                break;
-            }
+            if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
-            renderFinal(data);
+            applyFinished(data);
             break;
         case "error":
-            state.submitting = false;
-            if (state.currentQuestion && !state.currentAnswer) {
-                renderQuestion(state.currentQuestion);
-            }
-            setRoundHint(data.message || "Unable to continue.");
+            handleAnswerError(data.message);
             break;
         default:
             break;
     }
 }
+
+function shakeTile(optionId) {
+    const root = currentViewEl();
+    const tile = root && root.querySelector(`[data-option-id="${Number(optionId)}"]`);
+    const counter = root && root.querySelector("[data-lxp-multicount]");
+    [tile, counter].forEach((el) => {
+        if (!el) return;
+        el.classList.remove("is-denied");
+        void el.offsetWidth;
+        el.classList.add("is-denied");
+    });
+}
+
+setAnswerHooks({
+    onSelectionChange: () => updateSelectionUI(),
+    onSelectionDenied: shakeTile,
+    onSubmitStarted: () => syncQuestionPhase(),
+    onAnswerSaved: () => syncQuestionPhase(),
+    onSubmitFailed: () => {
+        syncQuestionPhase();
+        fetchState();
+    },
+    onReveal: (payload) => {
+        if (!shouldApplyTimelinePayload(payload)) return;
+        rememberTimelinePayload(payload);
+        applyReveal(payload);
+    },
+});
+
+export { questionKeyOf };

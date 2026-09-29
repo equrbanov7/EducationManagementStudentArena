@@ -1,0 +1,228 @@
+/* LX-FE-PLAYER (2026-09-29): gözləmə otağı — uçan reaksiyalar, bağlantı zolağı, toast,
+ * «çıxarıldın»/«oyun başlayır» örtükləri, animasiyalar (_base.css-dən ayrılıb). */
+
+/* ── Uçan reaksiyalar ── */
+.lxw-bursts {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.lxw-burst {
+    position: absolute;
+    left: var(--x, 50vw);
+    bottom: 120px;
+    font-size: 2.2rem;
+    animation: lxwBurst 2.2s ease-out forwards;
+    will-change: transform, opacity;
+}
+
+/* ── Zolaq, toast, örtüklər ── */
+.lxw-net {
+    position: fixed;
+    top: calc(62px + var(--lxw-safe-top));
+    left: 50%;
+    z-index: 40;
+    max-width: calc(100vw - 32px);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.92rem;
+    transform: translateX(-50%);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+.lxw-net[data-kind="reconnecting"] {
+    background: #fef3c7;
+    color: #78350f;
+}
+
+.lxw-net[data-kind="offline"] {
+    background: #fee2e2;
+    color: #7f1d1d;
+}
+
+.lxw-net[data-kind="back"] {
+    background: #dcfce7;
+    color: #14532d;
+}
+
+.lxw-toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(170px + var(--lxw-safe-bottom));
+    z-index: 45;
+    width: max-content;
+    max-width: calc(100vw - 32px);
+    padding: 11px 16px;
+    border-radius: 14px;
+    background: #0f172a;
+    color: #fff;
+    font-weight: 700;
+    text-align: center;
+    opacity: 0;
+    transform: translate(-50%, 10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.lxw-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.lxw-toast[data-kind="success"] {
+    background: #14532d;
+}
+
+.lxw-toast[data-kind="warn"] {
+    background: #78350f;
+}
+
+.lxw-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(2, 10, 16, 0.82);
+}
+
+.lxw-overlay__card {
+    width: min(100%, 420px);
+    padding: 26px 22px;
+    border-radius: 24px;
+    background: #ffffff;
+    color: var(--lxw-ink);
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    animation: lxwPop 0.4s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.lxw-overlay__icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 12px;
+    color: #b91c1c;
+}
+
+.lxw-overlay__icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.lxw-overlay__card h2 {
+    margin: 0;
+    font: 800 1.5rem/1.2 var(--lxw-display);
+}
+
+.lxw-overlay__card p {
+    margin: 10px 0 18px;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.lxw-overlay__card .lxw-btn {
+    width: 100%;
+}
+
+.lxw-overlay--start {
+    background: rgba(2, 10, 16, 0.6);
+}
+
+.lxw-start {
+    display: grid;
+    place-items: center;
+    gap: 16px;
+    font: 800 clamp(1.8rem, 9vw, 2.6rem)/1.1 var(--lxw-display);
+    text-align: center;
+}
+
+.lxw-start__ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, 0.25);
+    border-top-color: var(--lxw-cta);
+    animation: lxwSpin 0.8s linear infinite;
+}
+
+@keyframes lxwDot {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes lxwSent {
+    40% {
+        transform: scale(1.25) rotate(-8deg);
+    }
+}
+
+@keyframes lxwBurst {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 20px, 0) scale(0.6);
+    }
+    15% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--drift, 0), -60vh, 0) scale(1.15);
+    }
+}
+
+@keyframes lxwPop {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes lxwSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-height: 620px) {
+    .lxw-hero__stage {
+        width: 150px;
+        height: 140px;
+    }
+
+    .lxw-hero__hint {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lxw-dots i,
+    .lxw-react__btn.is-sent,
+    .lxw-burst,
+    .lxw-overlay__card,
+    .lxw-start__ring {
+        animation: none;
+    }
+
+    .lxw-burst {
+        display: none;
+    }
+
+    .lxw-toast {
+        transition: none;
+    }
+}
