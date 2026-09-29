@@ -62,7 +62,11 @@ class PendingBufferTest(TestCase):
         self.assertEqual(set(row.payload), {"snapshot", "answers"})
         self.assertEqual(set(row.payload["snapshot"]), set(SNAPSHOT_FIELDS))
         self.assertEqual(row.payload["snapshot"]["teacher_id"], self.w["teacher_b"].pk)
-        self.assertNotIn(str(self.w["students"][0].pk), json.dumps(row.payload["snapshot"]))
+        # Dəyər müqayisəsi (substring yox): təsadüfi UUID-lərin içində tələbə id-sinin rəqəmləri ola bilər.
+        student_pk = self.w["students"][0].pk
+        values = list(row.payload["snapshot"].values())
+        self.assertNotIn(student_pk, values)
+        self.assertNotIn(str(student_pk), values)
 
     def test_submit_writes_receipt_and_buffer_but_no_response(self):
         with bypass_rls():
