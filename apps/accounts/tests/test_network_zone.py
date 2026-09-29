@@ -76,6 +76,14 @@ class ZoneMiddlewareTest(ViewAsTestBase):
             self.assertEqual(self._get(self.teacher, path, self.EXT).status_code, 403, path)
 
     @override_settings(**ZONE)
+    def test_staff_signs_in_from_outside_but_journal_stays_internal(self):
+        """Sahib 2026-09-29: defolt — inzibati hesab kənardan işləyir, /jurnal/ isə hər kəsə bağlıdır."""
+        profile = reverse("accounts:profile")
+        self.assertEqual(self._get(self.admin, profile, self.EXT).status_code, 200)
+        self.assertEqual(self._get(self.admin, "/jurnal/", self.EXT).status_code, 403)
+        self.assertEqual(self._get(self.teacher, "/jurnal/", self.EXT).status_code, 403)
+
+    @override_settings(**ZONE, NETWORK_ZONE_STAFF_INTERNAL_ONLY=True)
     def test_staff_is_blocked_outside_except_logout_and_allowed_inside(self):
         profile = reverse("accounts:profile")
         response = self._get(self.admin, profile, self.EXT)
@@ -87,7 +95,7 @@ class ZoneMiddlewareTest(ViewAsTestBase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(response.json()["reason"], "staff_internal_only")
 
-    @override_settings(**ZONE, NETWORK_ZONE_TRUST_HEADER=False)
+    @override_settings(**ZONE, NETWORK_ZONE_TRUST_HEADER=False, NETWORK_ZONE_STAFF_INTERNAL_ONLY=True)
     def test_client_zone_header_is_ignored_unless_trusted(self):
         profile = reverse("accounts:profile")
         self._login(self.admin)
