@@ -29,6 +29,7 @@ from ._shared import (
 )
 from .constants import (
     AUTH_RATE_LIMIT_MESSAGE,
+    LOGIN_LIMIT_SCOPE_DEVICE,
     OTP_SEND_IP_LIMIT_SCOPE,
     OTP_VERIFY_IP_LIMIT_SCOPE,
     PASSWORD_RESET_EMAIL_SESSION_KEY,
@@ -168,6 +169,16 @@ class CustomLoginView(LoginView):
                 "login_portal_message": self._audience_message(audience),
             }
         )
+        # Sahib 2026-10-01: blok zamanı geri sayım. POST-da ``post()`` hesablayır; GET-də (səhifə
+        # yeniləndi) cihaz/İP vedrəsi hələ doludursa sayğac yenə görünür.
+        lockout = getattr(self, "lockout_seconds", None)
+        if lockout is None and self.request.method == "GET":
+            # Yalnız cihaz/İP vedrələri — istifadəçi adı ("") üzrə hesab vedrəsi hamıya aid olardı.
+            device_keys = [key for key in _login_limit_keys(self.request, "") if key[1] == LOGIN_LIMIT_SCOPE_DEVICE]
+            lockout = _lockout_seconds(device_keys)
+        if lockout:
+            context["lockout_seconds"] = lockout
+            context["lockout_clock"] = "%02d:%02d" % divmod(lockout, 60)
         return context
 
     def _resolve_login_audience(self, next_url, student_cabinet_url, staff_cabinet_url):
@@ -226,6 +237,7 @@ class CustomLoginView(LoginView):
         for rate_spec, scope, *key_parts in limit_keys:
             is_limited, retry_after = is_rate_limited(scope, rate_spec, *key_parts)
             if is_limited:
+                self.lockout_seconds = _lockout_seconds(limit_keys) or int(retry_after or 0) or None
                 # F-01 (2026-09-13): qaçış yolu ayrıca dar vedrəyə bağlıdır və
                 # uğursuz cəhdlər normal limiterdə də sayılır — bax _shared.py.
                 superadmin_user = _superadmin_escape_under_login_limit(request, username, password, limit_keys)
@@ -257,6 +269,9 @@ class CustomLoginView(LoginView):
         for rate_spec, scope, *key_parts in limit_keys:
             record_rate_limit_hit(scope, rate_spec, *key_parts)
         _note_failed_login_ip(request, username)
+        # Bu cəhd limiti doldurdusa geri sayım DƏRHAL görünsün (növbəti cəhdi gözləmədən). Status
+        # dəyişmir (200) — növbəti cəhd əvvəlki kimi 429 alır.
+        self.lockout_seconds = _lockout_seconds(limit_keys)
         return self.form_invalid(form)
 
     def _wrong_portal_message(self):
@@ -297,6 +312,16 @@ class CustomLoginView(LoginView):
         response = super().form_valid(form)
         self.request.session[POST_LOGIN_REDIRECT_GUARD_SESSION_KEY] = True
         return response
+
+
+def _lockout_seconds(limit_keys):
+    """Dolmuş vedrələrdən ƏN UZUN gözləmə (saniyə) — heç biri dolmayıbsa ``None``."""
+    waits = []
+    for rate_spec, scope, *key_parts in limit_keys:
+        limited, retry_after = is_rate_limited(scope, rate_spec, *key_parts)
+        if limited:
+            waits.append(max(1, int(retry_after or 60)))
+    return max(waits) if waits else None
 
 
 def login_portal(request):

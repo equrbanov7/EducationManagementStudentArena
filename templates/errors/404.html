@@ -2,6 +2,7 @@
 {% load i18n %}
 {% block page_title %}{% trans '404 – Səhifə Tapılmadı' %}{% endblock %}
 {% block code %}404{% endblock %}
+{% block code_label %}404{% endblock %}
 {% block code_big %}404{% endblock %}
 {% block kicker_icon %}fa-map-signs{% endblock %}
 {% block kicker %}{% trans 'Səhifə tapılmadı' %}{% endblock %}
@@ -12,7 +13,7 @@
 {% endblock %}
 {% block pills %}
     <span class="error-pill"><i class="fas fa-link-slash"></i> {% trans 'URL-ni yenidən yoxlayın' %}</span>
-    <span class="error-pill"><i class="fas fa-compass"></i> Naviqasiyadan davam edin</span>
+    <span class="error-pill"><i class="fas fa-compass"></i> {% trans 'Menyudan davam edin' %}</span>
 {% endblock %}
 {% block footer_note %}{% trans 'Əgər bu keçid işləməli idisə, onu paylaşdığınız səhifəni və ya yönləndirməni yoxlayın.' %}{% endblock %}
 {% block caption %}{% trans 'İstənilən resurs serverdə tapılmadı və ya artıq əlçatan deyil.' %}{% endblock %}
