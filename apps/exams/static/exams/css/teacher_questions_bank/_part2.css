@@ -368,10 +368,17 @@
 }
 
 @media (max-width: 860px) {
-    .qb-filter-form { grid-template-columns: 1fr; }
+    /* RESP 2026-09-30: `1fr` = minmax(auto, 1fr) — ən uzun seçim variantının
+       eni sütunu 370px-ə itələyirdi, axtarış/seçicilər 390px-də kənardan
+       kəsilirdi. `minmax(0, 1fr)` sütunu konteynerə bağlayır. */
+    .qb-filter-form { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 720px) {
+    /* RESP 2026-09-30: şəkilli variantda mətn 22px-ə sıxılıb şəklin altında
+       qalırdı («üçbu…») — dar ekranda şəkil növbəti sətrə keçir. */
+    .qb-opt { flex-wrap: wrap; }
+    .qb-opt__image { max-width: 100%; }
     .qb-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .qb-btn-report { justify-self: stretch; width: 100%; }
     .qb-card__top { flex-direction: column; }

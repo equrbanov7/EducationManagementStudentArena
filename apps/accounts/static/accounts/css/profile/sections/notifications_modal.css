@@ -140,9 +140,12 @@
 
 /* ── Dar ekran ───────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
+    /* RESP 2026-09-30: növ seçiləndə («Qiymət», «Təsdiq»…) düymə enlənir və
+       «Hamısını oxunmuş işarələ» 320–360px-də sağdan çıxırdı — sarır. */
     .nfx-toolbar__end {
         margin-left: 0;
         width: 100%;
+        flex-wrap: wrap;
     }
 
     .nfx-search {

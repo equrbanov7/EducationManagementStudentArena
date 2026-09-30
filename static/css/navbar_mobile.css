@@ -31,7 +31,9 @@
     width: 300px;
     height: 100%;
     background: var(--card-bg, var(--ems-neutral-0));
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    /* QA 2026-09-30: kölgə yalnız açıq paneldə — bağlı panelin (right:-300px) kölgəsi
+       hər mobil səhifənin sağ kənarında boz zolaq kimi görünürdü. */
+    box-shadow: none;
     z-index: 999; /* Overlaydən yuxarıda */
     display: flex;
     flex-direction: column;
@@ -42,6 +44,7 @@
 
 .mobile-nav-panel.is-open {
     right: 0; /* Ekranın sağına gəlsin */
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
 }
 
 /* Mobil menyu elementləri */

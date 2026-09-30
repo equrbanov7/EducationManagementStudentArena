@@ -62,3 +62,10 @@
 
 .jc-empty { padding: 1.1rem; border: 1px dashed var(--ems-neutral-300); border-radius: 12px; color: var(--ems-neutral-500); font-size: .85rem; text-align: center; }
 .jc-empty--soft { border-style: solid; background: var(--ems-neutral-50); }
+
+/* RESP 2026-09-30: «Yenidən aç» forması (səbəb xanası min 230px + düymə, sarmır)
+   320–390px-də kartın sağından çıxırdı. Dar ekranda xana tam en, düymə altda. */
+@media (max-width: 576px) {
+    .jc-actions form { flex-wrap: wrap; width: 100%; }
+    .jc-reason { flex: 1 1 100%; min-width: 0; }
+}

@@ -374,12 +374,20 @@
         max-width: 100%;
     }
 
+    /* RESP 2026-09-30: `1fr` = minmax(auto, 1fr) və sütun başlığında
+       `align-items: flex-start` — nowrap başlıq («QA_TEST_w3sweep imtahan»)
+       kartı max-content enə dartırdı, 320px-də kartlar sağdan kəsilir və
+       bölmə üfüqi sürüşürdü. Sütun konteynerə bağlanır, başlıq ellipsis alır. */
     .results-cards-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
     }
     
     .result-card-header {
         flex-direction: column;
+    }
+
+    .result-title-group {
+        align-self: stretch;
     }
     
     .result-status-wrap {
