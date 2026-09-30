@@ -347,6 +347,53 @@
     }
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   7. Mobil qabıq (sahib 2026-09-30): heç nə ekrandan çıxmasın, şkaf öz içində
+      sürüşsün, iPhone-un təhlükəsiz sahələri nəzərə alınsın
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Şkafın sürüşməsi sona çatanda arxa səhifəyə ötürülməsin (scroll chaining);
+   səhifənin özü `EMSScrollLock` ilə kilidlənir (static/js/modal_scroll_lock.js). */
+.mobile-nav-panel {
+    overscroll-behavior: contain;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-right: env(safe-area-inset-right);
+}
+
+@media (max-width: 768px) {
+    /* İstifadəçi menyusu avatarın SAĞ kənarına bağlı idi; burger ondan sağda durduğu
+       üçün 320–360px-də menyu ekranın SOL kənarından 14–30px kənara çıxırdı. İndi
+       başlığın özünə (sticky → mövqeli blok) bağlanır: sağdan 12px, eni ekrana sığır,
+       hündür olanda (üfüqi telefon) öz içində sürüşür. */
+    .blog-header__user {
+        position: static;
+    }
+    .blog-header__user-menu {
+        left: auto;
+        right: max(12px, env(safe-area-inset-right));
+        top: calc(100% + 6px);
+        width: min(320px, calc(100vw - 24px));
+        max-height: calc(100vh - 88px);
+        max-height: calc(100dvh - 88px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    /* Başlığın sağ qrupu heç vaxt ekrandan çıxmasın — ən dar ekranda (320px) toggle-lar
+       sıxılır, burger həmişə görünür. */
+    .blog-header__auth {
+        min-width: 0;
+        flex: 0 1 auto;
+    }
+    .blog-header__search,
+    .blog-header__toggle {
+        flex: 0 0 auto;
+    }
+    .blog-header__container {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .blog-header__logo,
     .blog-header__search,

@@ -1,0 +1,38 @@
+{% load i18n profile_shell %}
+{% comment %}«Tənzimləmələr» — hesab ayarları (sahib 2026-09-30: «Profili redaktə et» və
+«Şifrəni dəyiş» header-in istifadəçi menyusundan sol menyuya köçsün).
+
+Menyunun SONUNDA, HƏR ÜÇ düzümdə göstərilir (`_sidebar.html` düzüm seçimindən sonra
+daxil edir): heyət akkordeonunda `<details>` qrupu, tələbə/müəllimin düz menyusunda
+sakit başlıqlı bölmə. Bəndlər `items/`-dədir (markup + görünürlük şərti tək yerdə).
+
+Bu açarlar düzüm seçiminə təsir etmir — `profile_shell.SIDEBAR_LAYOUT_NEUTRAL_SECTIONS`
+(hər düzümdə EYNİ yerdə dururlar). «Parol sıfırlama» bölməsini PWD qurur
+(`account-password-reset`); bənd yalnız `account.password_reset` icazəsi və ya
+superadmin olanda görünür (`profile_can_reset_passwords`).
+
+Dil seçimi burada YOXDUR: o, navbar-da (masaüstü) və mobil şkafdadır; 2026-09-25-də
+sidebar-dan məhz təkrar olduğu üçün çıxarılmışdı.{% endcomment %}
+{% profile_can_reset_passwords as can_reset_passwords %}
+{% if sidebar_layout == "full" %}
+<li class="sidebar-menu-group" data-sidebar-group="settings">
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|edit-profile|change-password|account-password-reset|" %} open{% endif %}>
+        {% trans "Tənzimləmələr" context "profile.sidebar" as group_label %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-gear" %}
+        <ul class="sidebar-menu-group-items">
+            {% include "accounts/profile/sidebar/items/_edit_profile.html" %}
+            {% include "accounts/profile/sidebar/items/_change_password.html" %}
+            {% include "accounts/profile/sidebar/items/_password_reset.html" %}
+        </ul>
+    </details>
+</li>
+{% else %}
+<li class="sidebar-section" data-sidebar-section="settings">
+    <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionSettings"><span class="sidebar-menu-group-title">{% trans "Tənzimləmələr" context "profile.sidebar" %}</span></div>
+    <ul class="sidebar-section-items" aria-labelledby="sidebarSectionSettings">
+        {% include "accounts/profile/sidebar/items/_edit_profile.html" %}
+        {% include "accounts/profile/sidebar/items/_change_password.html" %}
+        {% include "accounts/profile/sidebar/items/_password_reset.html" %}
+    </ul>
+</li>
+{% endif %}

@@ -260,16 +260,6 @@
     margin: 4px 4px;
 }
 
-/* «Hesab» — sidebar-dan köçən hesab əməllərinin kiçik başlığı (2026-09-25). */
-.blog-header__user-menu-label {
-    padding: 6px 12px 2px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--ems-neutral-500);
-}
-
 .blog-header__user-menu-item {
     display: flex;
     align-items: center;

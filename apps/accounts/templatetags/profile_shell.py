@@ -10,7 +10,12 @@
   təsir etmir.
 * ``profile_sidebar_filter_enabled`` — «Menyuda axtar» süzgəci yalnız uzun
   menyuda (> 20 bənd) göstərilir; say da eyni saf hesablamadandır.
+* ``profile_can_reset_passwords`` / ``profile_surveys_inbox_count`` (2026-09-30) —
+  «Tənzimləmələr → Parol sıfırlama» bəndinin görünürlüyü və «Sorğular» bəndinin
+  badge-i. İkisi də `request`-dən hesablanır ki, SPA və embed sidebar EYNİ olsun.
 """
+
+import logging
 
 from django import template
 from django.conf import settings
@@ -22,6 +27,9 @@ from apps.accounts.views.profile.context_builder._helpers import (
     _build_effective_user_roles,
     _build_primary_position_label,
 )
+from core.permissions import is_superadmin_user, request_has_permission
+
+logger = logging.getLogger(__name__)
 
 register = template.Library()
 
@@ -53,6 +61,7 @@ COMPACT_SIDEBAR_TREES = {
             "pending-answers",
             "my-appeals",
             "evaluation-survey",
+            "surveys-inbox",
             "notifications",
             "applications",
             "profile-info",
@@ -79,6 +88,7 @@ COMPACT_SIDEBAR_TREES = {
             "notifications",
             "publish-notification",
             "applications",
+            "surveys-inbox",
             "profile-info",
             "statistics",
         }
@@ -92,8 +102,9 @@ COMPACT_SIDEBAR_FLAG_ITEMS = {
 }
 
 #: Düzüm seçiminə TƏSİR ETMƏYƏN açarlar: menyuda ayrıca bənd kimi heç vaxt
-#: görünməyənlər (gizli / yalnız URL ilə / başqa bəndin aktiv halı) və hər iki
-#: düzümdə EYNİ yerdə — alt hesab blokunda — duranlar.
+#: görünməyənlər (gizli / yalnız URL ilə / başqa bəndin aktiv halı) və HƏR düzümdə
+#: EYNİ yerdə — menyunun sonundakı «Tənzimləmələr» qrupunda — duranlar
+#: (`sidebar/_group_settings.html`, 2026-09-30).
 SIDEBAR_LAYOUT_NEUTRAL_SECTIONS = frozenset(
     {
         "blog",
@@ -103,10 +114,18 @@ SIDEBAR_LAYOUT_NEUTRAL_SECTIONS = frozenset(
         "syllabus-editor",  # «Sillabuslar» bəndindən açılır, onu aktiv saxlayır
         "org-structure",  # köhnə açar — menyu bəndi yoxdur
         "groups",  # köhnə imtahan-kohortu bölməsi (2026-09-08 çıxarılıb)
-        "edit-profile",  # header istifadəçi menyusu (2026-09-25)
-        "change-password",  # header istifadəçi menyusu (2026-09-25)
+        "edit-profile",  # «Tənzimləmələr» (2026-09-30; əvvəl header menyusunda)
+        "change-password",  # «Tənzimləmələr» (2026-09-30; əvvəl header menyusunda)
+        "account-password-reset",  # «Tənzimləmələr → Parol sıfırlama» (icazə ilə)
     }
 )
+
+#: «Parol sıfırlama» bölməsinin icazə açarı (NAV/PWD müqaviləsi 2026-09-30; bölmə
+#: `account-password-reset`-i PWD qurur, menyu bəndi yalnız görünürlüyü yoxlayır).
+PASSWORD_RESET_PERMISSION = "account.password_reset"
+
+#: `request` üzərində «Sorğular» badge-inin keşi — kabinet renderində BİR çağırış.
+_SURVEYS_INBOX_CACHE_ATTR = "_ems_surveys_inbox_badge"
 
 
 #: «Menyuda axtar» süzgəci bu saydan başlayaraq göstərilir (sahib/orkestrator
@@ -133,7 +152,7 @@ def sidebar_menu_item_count(allowed_sections, capabilities, *, university_mode=T
     """Menyudakı bənd sayının (üst blok + qruplar) təxmini — süzgəc həddi üçün.
 
     Bölmə açarları + bayraqla görünən bəndlər («İmtahan Nəzarət Sistemi»).
-    Alt hesab bloku sayılmır (onun bəndləri süzgəcə düşmür).
+    «Tənzimləmələr» qrupunun açarları (neytral) sayılmır — hədd əvvəlki kimi qalır.
     """
     caps = capabilities or {}
     flags = sum(1 for flag in COMPACT_SIDEBAR_FLAG_ITEMS if caps.get(flag))
@@ -185,6 +204,53 @@ def profile_sidebar_filter_enabled(context):
         university_mode=bool(context.get("university_mode", True)),
     )
     return count >= SIDEBAR_FILTER_MIN_ITEMS
+
+
+@register.simple_tag(takes_context=True)
+def profile_can_reset_passwords(context):
+    """«Parol sıfırlama» bəndi görünsünmü: `account.password_reset` icazəsi və ya superadmin.
+
+    Superadmin ƏVVƏL yoxlanır: `request_has_permission` üzvlüyü olmayan superadmin üçün
+    hər çağırışda cross-org audit qeydi yazır — menyu renderi jurnalı doldurmasın.
+    Faktiki qapı bölmənin öz view-undadır (PWD); bu yalnız menyu bəndidir.
+    """
+    request = context.get("request")
+    user = getattr(request, "user", None)
+    if request is None or not getattr(user, "is_authenticated", False):
+        return False
+    if is_superadmin_user(user):
+        return True
+    return request_has_permission(request, PASSWORD_RESET_PERMISSION)
+
+
+@register.simple_tag(takes_context=True)
+def profile_surveys_inbox_count(context):
+    """«Sorğular» bəndinin badge-i — gözləyən sorğu sayı (0 → badge boş qalır).
+
+    SRV-nin `apps.surveys.public.inbox_badge_count(user, organization)` funksiyası paralel
+    qurulur, ona görə MÜDAFİƏLİ çağırılır: funksiya yoxdursa və ya xəta verirsə badge
+    sadəcə görünmür, sidebar heç vaxt sınmır. Nəticə `request`-də keşlənir — kabinet
+    renderində ən çoxu BİR çağırış (bənd bir neçə dəfə daxil olunsa belə).
+    """
+    request = context.get("request")
+    user = getattr(request, "user", None)
+    if request is None or not getattr(user, "is_authenticated", False):
+        return 0
+    cached = getattr(request, _SURVEYS_INBOX_CACHE_ATTR, None)
+    if cached is not None:
+        return cached
+    count = 0
+    try:
+        from apps.surveys.public import inbox_badge_count
+
+        count = max(0, int(inbox_badge_count(user, getattr(request, "organization", None)) or 0))
+    except (ImportError, AttributeError):
+        count = 0
+    except Exception:  # noqa: BLE001 — sayğac sidebar-ı bloklamamalıdır
+        logger.warning("surveys inbox badge failed", exc_info=True)
+        count = 0
+    setattr(request, _SURVEYS_INBOX_CACHE_ATTR, count)
+    return count
 
 
 @register.inclusion_tag("accounts/profile/_sidebar.html", takes_context=True)

@@ -50,13 +50,14 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 </li>
 {% endif %}
 
-{% if "notifications" in allowed_sections or "publish-notification" in allowed_sections or "applications" in allowed_sections %}
+{% if "notifications" in allowed_sections or "publish-notification" in allowed_sections or "applications" in allowed_sections or "surveys-inbox" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="communication">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionCommunication"><span class="sidebar-menu-group-title">{% trans "Ünsiyyət" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionCommunication">
         {% include "accounts/profile/sidebar/items/_notifications.html" %}
         {% include "accounts/profile/sidebar/items/_publish_notification.html" %}
         {% include "accounts/profile/sidebar/items/_applications.html" %}
+        {% include "accounts/profile/sidebar/items/_surveys_inbox.html" %}
     </ul>
 </li>
 {% endif %}

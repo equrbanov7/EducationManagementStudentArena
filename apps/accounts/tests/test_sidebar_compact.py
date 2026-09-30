@@ -11,7 +11,8 @@ Sahib: «tələbə və müəllimdə bölmə azdır — açılan menyulara ehtiya
    və görünürlük şərti tək yerdədir; QA süpürgəsinin atribut sırası qalır.
 4. Render olunmuş səhifədə: tələbə/müəllim `<details>`-siz, gözlənilən sırada
    bölmə və bənd alır; heyət akkordeonda qalır; qarışıq rol heç bir bəndi
-   itirmir; alt blokda hesab kartı var, dil seçicisi yoxdur, çıxış POST-dur.
+   itirmir; menyunun sonunda «Tənzimləmələr» var (2026-09-30), dil seçicisi
+   yoxdur, çıxış POST-dur.
 """
 
 from __future__ import annotations
@@ -57,12 +58,15 @@ STUDENT_ORDER = [
     "assigned-courses",
     "pending-answers",
     "my-appeals",
+    "evaluation-survey",
+    "surveys-inbox",
     "notifications",
     "applications",
     "profile-info",
     "statistics",
     "edit-profile",
     "change-password",
+    "account-password-reset",
 ]
 TEACHER_ORDER = [
     "dashboard",
@@ -82,10 +86,12 @@ TEACHER_ORDER = [
     "notifications",
     "publish-notification",
     "applications",
+    "surveys-inbox",
     "profile-info",
     "statistics",
     "edit-profile",
     "change-password",
+    "account-password-reset",
 ]
 
 
@@ -309,7 +315,7 @@ class SidebarLayoutRenderTest(TestCase):
         response = self._get(self.student)
         aside = _aside(response.content.decode())
         self._assert_flat(aside, "student")
-        self.assertEqual(BLOCK_RE.findall(aside), ["education", "tasks", "communication", "profile"])
+        self.assertEqual(BLOCK_RE.findall(aside), ["education", "tasks", "communication", "profile", "settings"])
         self._assert_order(
             aside, STUDENT_ORDER, core=("dashboard", "my-subjects", "my-journal", "assigned-exams", "my-results")
         )
@@ -319,7 +325,9 @@ class SidebarLayoutRenderTest(TestCase):
         response = self._get(self.teacher)
         aside = _aside(response.content.decode())
         self._assert_flat(aside, "teacher")
-        self.assertEqual(BLOCK_RE.findall(aside), ["teaching", "syllabus", "assessment", "communication", "profile"])
+        self.assertEqual(
+            BLOCK_RE.findall(aside), ["teaching", "syllabus", "assessment", "communication", "profile", "settings"]
+        )
         self._assert_order(
             aside, TEACHER_ORDER, core=("dashboard", "my-schedule", "my-exams", "pending-review", "syllabus-list")
         )
@@ -347,8 +355,9 @@ class SidebarLayoutRenderTest(TestCase):
             self.assertIn(marker, aside)
         self._assert_nothing_lost(response, aside)
 
-    def test_account_actions_live_in_the_header_menu_not_the_sidebar(self):
-        """Sahib 2026-09-25: hesab bloku sidebar-dan header-in istifadəçi menyusuna köçdü."""
+    def test_account_settings_live_in_the_sidebar_settings_group(self):
+        """Sahib 2026-09-30: «Profili redaktə et» / «Şifrəni dəyiş» header menyusundan (masaüstü
+        açılan menyu + mobil şkaf) sol menyunun «Tənzimləmələr» bölməsinə köçdü (2026-09-25-in əksi)."""
         for user in (self.student, self.teacher):
             with self.subTest(user=user.username):
                 html = self._get(user).content.decode()
@@ -358,13 +367,14 @@ class SidebarLayoutRenderTest(TestCase):
                 self.assertNotIn("language-switcher", aside)
                 self.assertIn("language-switcher--navbar", html)
                 self.assertIn("language-switcher--mobile", html)
+                settings_block = aside[aside.index('data-sidebar-section="settings"') :]
                 menu = html[html.index('<div class="blog-header__user-menu">') :]
                 menu = menu[: menu.index("</form>")]
                 for section in ("edit-profile", "change-password"):
-                    self.assertNotIn(f'data-section="{section}"', aside)
-                    self.assertIn(f'href="{reverse("accounts:profile")}?section={section}"', menu)
-                    # mobil şkafda da var
-                    self.assertEqual(html.count(f'?section={section}"'), 2)
+                    self.assertIn(f'data-section="{section}"', settings_block)
+                    self.assertNotIn(f"?section={section}", menu)
+                    # yalnız sidebar-da — mobil şkafda da artıq yoxdur
+                    self.assertEqual(html.count(f'?section={section}"'), 1)
 
     def test_logout_is_a_post_form_with_csrf(self):
         html = self._get(self.student).content.decode()

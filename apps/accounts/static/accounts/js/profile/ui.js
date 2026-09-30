@@ -39,6 +39,8 @@
             }
 
             document.body.classList.toggle("profile-sidebar-open-mobile", isMobileViewport() && !isCollapsed);
+            // 2026-09-30: arxa səhifə kilidi (html+body, iOS, mövqe bərpası) — static/js/modal_scroll_lock.js.
+            if (window.EMSScrollLock) { window.EMSScrollLock.set("profile-sidebar", isMobileViewport() && !isCollapsed, ctx.sidebar); }
         }
 
         var SIDEBAR_COLLAPSED_KEY = "profileSidebarCollapsed";

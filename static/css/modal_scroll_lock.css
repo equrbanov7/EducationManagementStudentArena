@@ -21,3 +21,19 @@ dialog,
 .ems-overlay {
     overscroll-behavior: contain;
 }
+
+/* ── Şkaf / sidebar kilidi — `window.EMSScrollLock` (bax modal_scroll_lock.js, 2026-09-30) ──
+   `main.css`-də `html { overflow-x: hidden }` olduğu üçün body-nin overflow-u viewport-a
+   keçmir — kilid HƏM <html>, HƏM <body>-də olmalıdır. `overscroll-behavior: none` —
+   Android Chrome-da «çək-yenilə» və kənar sıçrayışı şkaf açıqkən səhifəyə keçməsin.
+   Masaüstündə scrollbar yox olanda məzmun sağa sıçramasın deyə onun eni qədər boşluq
+   (mobil overlay scrollbar-da dəyər 0-dır). */
+html.ems-scroll-locked,
+html.ems-scroll-locked body {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+}
+
+html.ems-scroll-locked body {
+    padding-right: var(--ems-scroll-lock-gutter, 0px);
+}

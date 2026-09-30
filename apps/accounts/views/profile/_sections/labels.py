@@ -116,6 +116,7 @@ def build_section_titles() -> dict:
         "superadmin-organizations": pgettext_lazy("profile.section", "superadmin_control"),
         "superadmin-users": pgettext_lazy("superadmin.users", "user_management_title"),
         "rim-center": pgettext_lazy("profile.section", "rim_center"),
+        "account-password-reset": pgettext_lazy("profile.sidebar", "Parol sıfırlama"),
         "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
         "superadmin-exam-rooms": pgettext_lazy("profile.section", "İmtahan zalları"),
         "exam-center-pins": pgettext_lazy("profile.section", "PIN axtarışı"),
@@ -170,6 +171,8 @@ def build_section_titles() -> dict:
         "evaluation-survey": pgettext_lazy("profile.sidebar", "Anonim sorğu"),
         "evaluation-results": pgettext_lazy("profile.sidebar", "Sorğu nəticələri"),
         "evaluation-campaigns": pgettext_lazy("profile.sidebar", "Sorğu kampaniyaları"),
+        "surveys-inbox": pgettext_lazy("profile.sidebar", "Sorğular"),
+        "surveys-builder": pgettext_lazy("profile.sidebar", "Sorğu qurucusu"),
         # «Fənn qovluğu» (apps.subject_folder) — sidebar bəndləri ilə eyni mətnlər.
         "subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqları"),
         "subject-folder-review": pgettext_lazy("profile.sidebar", "Tapşırıq yoxlaması"),
