@@ -25,8 +25,66 @@ from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_match, tolerant_q
 
 from ._helpers import _role_capabilities
+from .profile._sections.labels import build_section_titles
 
 MAX_PER_GROUP = 6
+#: Sorğu yazılanda naviqasiya qrupunun ölçüsü (bütün menyu bölmələri axtarılır).
+MAX_NAV_MATCHES = 8
+#: Menyudan birbaşa açılmayan / redaktor alt-səhifələri — axtarışda keçid kimi göstərilmir.
+_NAV_SKIP = frozenset({"syllabus-editor", "curriculum-editor", "create-post", "create-category", "posts", "blog"})
+#: İnsanların yazdığı sinonimlər (başlıqda olmayan): «parol» ↔ «şifrə», «anket» ↔ «sorğu» …
+_NAV_KEYWORDS = {
+    "change-password": "parol şifrə password dəyiş",
+    "account-password-reset": "parol şifrə sıfırla reset unutdu",
+    "edit-profile": "profil redaktə email e-poçt poçt telefon şəkil",
+    "surveys-inbox": "sorğu anket survey",
+    "surveys-builder": "sorğu anket survey qurucu yarat",
+    "evaluation-survey": "sorğu anket qiymətləndirmə müəllim",
+    "rim-center": "rim hesab istifadəçi blok",
+    "publish-notification": "bildiriş göndər elan xəbər",
+    "people-teachers": "müəllim heyət kataloq",
+    "people-students": "tələbə kataloq siyahı",
+    "question-bank": "sual bank",
+    "my-results": "nəticə bal qiymət",
+    "audit-log": "audit jurnal log hərəkət",
+}
+#: Əlavə bölmələrin ikonları (yoxdursa ümumi ox).
+_NAV_ICONS = {
+    "dashboard": "fa-house",
+    "edit-profile": "fa-user-pen",
+    "change-password": "fa-key",
+    "account-password-reset": "fa-key",
+    "rim-center": "fa-user-shield",
+    "surveys-inbox": "fa-square-poll-vertical",
+    "surveys-builder": "fa-pen-ruler",
+    "evaluation-survey": "fa-square-poll-vertical",
+    "evaluation-results": "fa-chart-simple",
+    "evaluation-campaigns": "fa-bullhorn",
+    "publish-notification": "fa-paper-plane",
+    "statistics": "fa-chart-column",
+    "people-teachers": "fa-chalkboard-user",
+    "people-students": "fa-user-graduate",
+    "student-registry": "fa-id-card",
+    "groups-registry": "fa-people-group",
+    "programs-registry": "fa-graduation-cap",
+    "subject-catalog": "fa-book",
+    "syllabus-list": "fa-file-lines",
+    "question-bank": "fa-circle-question",
+    "my-results": "fa-square-poll-horizontal",
+    "my-courses": "fa-layer-group",
+    "courses": "fa-layer-group",
+    "my-appeals": "fa-scale-balanced",
+    "manage-appeals": "fa-scale-balanced",
+    "appeal-stats": "fa-scale-balanced",
+    "my-workload": "fa-briefcase",
+    "workload-center": "fa-briefcase",
+    "audit-log": "fa-clipboard-list",
+    "org-members": "fa-users",
+    "schedule-manage": "fa-calendar-plus",
+    "exam-center-pins": "fa-hashtag",
+    "exam-center-stats": "fa-chart-pie",
+    "applications": "fa-inbox",
+}
 MIN_ENTITY_QUERY = 2
 #: Tələbə nəticəsinin kod sahələri: ixtisas şifrləri (hər iki nəsil) + alt sətirdə görünən qrup adı
 #: («234king» → «234 K ing»). Qısa hərf tokeni («PA») kod sahəsində də bitişik axtarılır
@@ -74,6 +132,17 @@ def _nav_targets(caps):
         for section, title, icon, keywords in candidates
         if section == "profile-info" or section in allowed
     ]
+    # Sahib 2026-10-01: «fərdə görə» — istifadəçinin SOL MENYUSUNDAKI hər bölmə axtarışda tapılsın
+    # (əvvəl yalnız yuxarıdakı 13 keçid idi: «parol», «sorğu», «RİM» heç nə tapmırdı). Başlıq
+    # kabinetin öz başlığıdır (dil ilə); boş sorğuda yalnız yuxarıdakı seçilmiş keçidlər görünür.
+    curated = {section for section, *_rest in candidates}
+    titles = build_section_titles()
+    for section in sorted(allowed):
+        if section in curated or section in _NAV_SKIP or section not in titles:
+            continue
+        title = str(titles[section])
+        keywords = f"{section.replace('-', ' ')} {title} {_NAV_KEYWORDS.get(section, '')}"
+        targets.append((title, _NAV_ICONS.get(section, "fa-arrow-right"), shell(section), keywords))
     return targets
 
 
@@ -83,7 +152,7 @@ def _nav_group(caps, query):
         # Az/ing dözümlü («jurnal», «cedvel» → «cədvəl»); boş sorğu → hamısı.
         if tolerant_match(query, f"{title} {keywords}"):
             items.append({"title": str(title), "subtitle": "", "icon": icon, "url": url})
-    return items[:MAX_PER_GROUP]
+    return items[: (MAX_NAV_MATCHES if query else MAX_PER_GROUP)]
 
 
 def _journal_group(user, organization, query):
@@ -184,6 +253,10 @@ def global_search(request):
     organization = getattr(request, "organization", None)
 
     groups = []
+    payload = {"query": query, "groups": groups}
+    if not query:
+        # «Son baxılanlar» (brauzerdə) yalnız hələ də icazəli bölmələri göstərsin.
+        payload["nav_urls"] = [url for _title, _icon, url, _keywords in _nav_targets(caps)]
 
     nav_items = _nav_group(caps, query)
     if nav_items:
@@ -208,4 +281,4 @@ def global_search(request):
             if students:
                 groups.append({"key": "students", "label": _("Tələbələr"), "items": students})
 
-    return JsonResponse({"query": query, "groups": groups})
+    return JsonResponse(payload)

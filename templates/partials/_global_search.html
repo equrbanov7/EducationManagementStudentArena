@@ -13,7 +13,9 @@
     Panelin görünən başlığı YOXDUR: dialoqun adı `aria-label`-dədir, ekranda isə
     placeholder onsuz da nəyin axtarıldığını deyir (başlıq təkrarı olmasın).
 {% endcomment %}
-<div class="gsearch" data-global-search data-search-url="{% url 'accounts:global_search' %}" hidden>
+<div class="gsearch" data-global-search data-search-url="{% url 'accounts:global_search' %}"
+     data-user-key="{{ request.user.pk|default:'' }}"
+     data-recent-label="{% trans 'Son baxılanlar' context 'search' %}" hidden>
     <div class="gsearch__backdrop" data-global-search-close></div>
     <div class="gsearch__panel" role="dialog" aria-modal="true"
          aria-label="{% trans 'Qlobal axtarış' context 'search' %}">
@@ -31,6 +33,10 @@
             </button>
             <button type="button" class="gsearch__esc" data-global-search-close
                     aria-label="{% trans 'bağla' context 'search' %}">esc</button>
+            {# Sahib 2026-10-01: telefonda «esc» yoxdur — görünən, barmaqla rahat «Bağla» düyməsi. #}
+            <button type="button" class="gsearch__close" data-global-search-close>
+                {% trans 'Bağla' context 'search' %}
+            </button>
         </div>
 
         <div class="gsearch__body">

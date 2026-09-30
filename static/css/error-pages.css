@@ -1,10 +1,14 @@
+/* Xəta səhifələri (templates/errors/_base.html) — sahib 2026-10-01: sadə, səliqəli, mərkəzdə tək kart.
+   Rəng hər kod üçün 4 dəyişəndən gəlir (--error-primary, --error-primary-dark, --error-tint, --error-bg). */
+
 :root {
-    --error-surface: rgba(255, 255, 255, 0.88);
-    --error-border: rgba(148, 163, 184, 0.18);
-    --error-text: var(--ems-neutral-900);
-    --error-muted: var(--ems-neutral-500);
-    --error-shadow: 0 28px 80px rgba(15, 23, 42, 0.14);
-    --error-radius: 28px;
+    --error-text: var(--ems-neutral-900, #0f172a);
+    --error-muted: var(--ems-neutral-600, #475569);
+    --error-border: var(--ems-neutral-200, #e2e8f0);
+    --error-primary: var(--ems-primary-600, #2563eb);
+    --error-primary-dark: var(--ems-primary-700, #1d4ed8);
+    --error-tint: var(--ems-primary-50, #eff6ff);
+    --error-bg: #f5f7fb;
 }
 
 *,
@@ -21,323 +25,276 @@ body {
 
 body.error-page {
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
     color: var(--error-text);
     background:
-        radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 30%),
-        linear-gradient(135deg, var(--error-bg-start), var(--error-bg-end));
+        radial-gradient(1200px 520px at 50% -180px, var(--error-tint), transparent 70%),
+        var(--error-bg);
 }
 
 .error-page-shell {
-    position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
-    overflow: hidden;
-    padding: 32px 18px;
-}
-
-.error-orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(10px);
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.error-orb-one {
-    width: 280px;
-    height: 280px;
-    top: -50px;
-    left: -70px;
-    background: rgba(255, 255, 255, 0.5);
-}
-
-.error-orb-two {
-    width: 220px;
-    height: 220px;
-    right: -40px;
-    bottom: 30px;
-    background: color-mix(in srgb, var(--error-accent) 30%, white);
+    padding: 32px 16px;
 }
 
 .error-card {
-    position: relative;
-    z-index: 1;
-    width: min(100%, 720px);
-    padding: 28px;
-    border-radius: var(--error-radius);
+    width: min(100%, 580px);
+    padding: 32px 36px 28px;
+    border-radius: 20px;
     border: 1px solid var(--error-border);
-    background: var(--error-surface);
-    backdrop-filter: blur(16px);
-    box-shadow: var(--error-shadow);
+    background: var(--ems-neutral-0, #fff);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 20px 48px -24px rgba(15, 23, 42, 0.22);
+    text-align: center;
 }
 
+/* ── Brend ─────────────────────────────────────────────────────────── */
 .error-brand {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 14px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    color: var(--ems-neutral-700);
+    color: var(--ems-neutral-700, #334155);
     font-size: 0.92rem;
     font-weight: 700;
-    letter-spacing: 0.01em;
+    text-decoration: none;
 }
 
-.error-brand-mark {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    display: inline-grid;
-    place-items: center;
-    background: linear-gradient(135deg, var(--error-primary), var(--error-accent));
-    color: var(--ems-neutral-0);
-    box-shadow: 0 10px 24px color-mix(in srgb, var(--error-primary) 22%, transparent);
+.error-brand-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: contain;
 }
 
-.error-grid {
+/* ── İkon + kod nişanı ─────────────────────────────────────────────── */
+.error-badge {
+    width: 72px;
+    height: 72px;
+    margin: 26px auto 14px;
+    border-radius: 50%;
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
-    gap: 28px;
-    align-items: center;
-    margin-top: 26px;
+    place-items: center;
+    background: var(--error-tint);
+    color: var(--error-primary);
+    font-size: 1.9rem;
+    box-shadow: 0 0 0 8px color-mix(in srgb, var(--error-tint) 55%, transparent);
 }
 
 .error-kicker {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 14px;
-    padding: 8px 12px;
+    margin: 0 0 12px;
+    padding: 5px 12px;
     border-radius: 999px;
-    background: color-mix(in srgb, var(--error-primary) 12%, white);
+    background: var(--error-tint);
     color: var(--error-primary-dark);
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 700;
 }
 
+.error-kicker-code:empty {
+    display: none;
+}
+
+.error-kicker-code {
+    padding-right: 8px;
+    border-right: 1px solid color-mix(in srgb, var(--error-primary) 30%, transparent);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Mətn ─────────────────────────────────────────────────────────── */
 .error-title {
-    margin: 0 0 12px;
-    font-size: clamp(2rem, 4vw, 3.15rem);
-    line-height: 1.05;
-    letter-spacing: -0.04em;
+    margin: 0 0 10px;
+    font-size: clamp(1.5rem, 3.6vw, 1.95rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
 }
 
 .error-description {
-    margin: 0;
-    max-width: 36rem;
+    margin: 0 auto;
+    max-width: 30rem;
     color: var(--error-muted);
-    font-size: 1.02rem;
-    line-height: 1.75;
+    font-size: 1rem;
+    line-height: 1.65;
 }
 
+.error-description p {
+    margin: 0;
+}
+
+/* Şəbəkə zonası izahı (2026-10-01): paraqraf + «Nə etməli?» addımları — sol hizalı qutu. */
+.error-zone-lead {
+    margin: 0;
+}
+
+.error-zone-steps-title {
+    margin: 18px 0 8px;
+    color: var(--error-text);
+    font-weight: 700;
+    text-align: left;
+}
+
+.error-zone-steps {
+    margin: 0;
+    padding: 12px 14px 12px 34px;
+    border-radius: 12px;
+    background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--error-border);
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    text-align: left;
+}
+
+.error-zone-steps li + li {
+    margin-top: 6px;
+}
+
+/* ── İpucları ─────────────────────────────────────────────────────── */
 .error-meta {
-    margin-top: 18px;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.error-meta:empty {
+    display: none;
 }
 
 .error-pill {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 12px;
+    gap: 6px;
+    padding: 6px 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.76);
-    border: 1px solid rgba(148, 163, 184, 0.16);
-    color: var(--ems-neutral-600);
-    font-size: 0.88rem;
+    background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--error-border);
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.82rem;
     font-weight: 600;
 }
 
-.error-visual {
-    position: relative;
-    min-height: 280px;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.56);
-    background:
-        linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.65)),
-        linear-gradient(135deg, color-mix(in srgb, var(--error-primary) 22%, white), rgba(255, 255, 255, 0.9));
+.error-pill i {
+    color: var(--error-primary);
 }
 
-.error-visual::before,
-.error-visual::after {
-    content: "";
-    position: absolute;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--error-accent) 16%, white);
-}
-
-.error-visual::before {
-    width: 160px;
-    height: 160px;
-    top: -34px;
-    right: -34px;
-}
-
-.error-visual::after {
-    width: 110px;
-    height: 110px;
-    bottom: -18px;
-    left: -18px;
-}
-
-.error-code-panel {
-    position: absolute;
-    /* RESP 2026-09-30: `::after` dekor dairəsi DOM-da paneldən sonra gəldiyi üçün
-       onun ÜSTÜNDƏ çəkilirdi və mobil hündürlükdə «İstənilən resurs…» mətnini
-       örtürdü. Panel dekorun üstünə qaldırılır (yarımşəffaf fon dekoru göstərir). */
-    z-index: 1;
-    inset: 22px;
-    display: grid;
-    align-content: space-between;
-    padding: 22px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.65);
-}
-
-.error-code-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--ems-neutral-600);
-    font-size: 0.88rem;
-    font-weight: 700;
-}
-
-.error-status-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--error-primary), var(--error-accent));
-    box-shadow: 0 0 0 5px color-mix(in srgb, var(--error-primary) 12%, white);
-}
-
-.error-code {
-    font-size: clamp(4.75rem, 12vw, 6.5rem);
-    line-height: 0.9;
-    font-weight: 900;
-    letter-spacing: -0.06em;
-    color: var(--error-primary-dark);
-}
-
-.error-code-caption {
-    margin-top: 10px;
-    color: var(--ems-neutral-500);
-    font-size: 0.98rem;
-    line-height: 1.6;
-}
-
+/* ── Düymələr ─────────────────────────────────────────────────────── */
 .error-actions {
-    margin-top: 26px;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
 }
 
 .error-btn {
-    appearance: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    min-width: 192px;
-    padding: 14px 18px;
-    border-radius: 16px;
-    text-decoration: none;
-    font-size: 0.98rem;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 0.95rem;
     font-weight: 700;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    text-decoration: none;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.error-btn:hover {
-    transform: translateY(-1px);
+.error-btn:focus-visible {
+    outline: 2px solid var(--error-primary);
+    outline-offset: 2px;
 }
 
 .error-btn-primary {
-    color: var(--ems-neutral-0);
-    background: linear-gradient(135deg, var(--error-primary), var(--error-accent));
-    box-shadow: 0 18px 30px color-mix(in srgb, var(--error-primary) 26%, transparent);
+    color: var(--ems-neutral-0, #fff);
+    background: var(--error-primary);
+    box-shadow: 0 8px 18px -10px var(--error-primary);
 }
 
 .error-btn-primary:hover {
-    color: var(--ems-neutral-0);
+    color: var(--ems-neutral-0, #fff);
+    background: var(--error-primary-dark);
 }
 
 .error-btn-secondary {
-    color: var(--error-primary-dark);
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid color-mix(in srgb, var(--error-primary) 18%, white);
+    color: var(--ems-neutral-800, #1e293b);
+    background: var(--ems-neutral-0, #fff);
+    border: 1px solid var(--error-border);
 }
 
 .error-btn-secondary:hover {
-    color: var(--error-primary-dark);
-    border-color: color-mix(in srgb, var(--error-primary) 34%, white);
+    background: var(--ems-neutral-50, #f8fafc);
+    border-color: var(--ems-neutral-300, #cbd5e1);
 }
 
 .error-footer-note {
-    margin-top: 16px;
-    color: var(--ems-neutral-500);
-    font-size: 0.88rem;
-    line-height: 1.6;
+    margin: 20px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--error-border);
+    color: var(--ems-neutral-500, #64748b);
+    font-size: 0.84rem;
+    line-height: 1.55;
 }
 
+.error-footer-note:empty {
+    display: none;
+}
+
+/* ── Kodlara görə rəng ────────────────────────────────────────────── */
 .error-page.error-400 {
-    --error-primary: var(--ems-warning-600);
-    --error-primary-dark: var(--ems-warning-800);
-    --error-accent: var(--ems-warning-500);
-    --error-bg-start: #fff7ed;
-    --error-bg-end: #fde68a;
+    --error-primary: var(--ems-warning-600, #d97706);
+    --error-primary-dark: var(--ems-warning-800, #92400e);
+    --error-tint: #fff7e6;
+    --error-bg: #fbf8f2;
 }
 
 .error-page.error-403 {
-    --error-primary: var(--ems-danger);
+    --error-primary: #dc2626;
     --error-primary-dark: #991b1b;
-    --error-accent: #fb7185;
-    --error-bg-start: #fff1f2;
-    --error-bg-end: #fecdd3;
+    --error-tint: #fef2f2;
+    --error-bg: #faf6f6;
 }
 
 .error-page.error-404 {
-    --error-primary: var(--ems-success-strong);
+    --error-primary: #0f766e;
     --error-primary-dark: #134e4a;
-    --error-accent: #14b8a6;
-    --error-bg-start: #ecfeff;
-    --error-bg-end: #bae6fd;
+    --error-tint: #ecfdf8;
+    --error-bg: #f4f8f8;
 }
 
 .error-page.error-500 {
-    --error-primary: var(--ems-primary-600);
-    --error-primary-dark: var(--ems-primary-700);
-    --error-accent: #60a5fa;
-    --error-bg-start: var(--ems-primary-50);
-    --error-bg-end: var(--ems-primary-100);
+    --error-primary: var(--ems-primary-600, #2563eb);
+    --error-primary-dark: var(--ems-primary-700, #1d4ed8);
+    --error-tint: var(--ems-primary-50, #eff6ff);
+    --error-bg: #f5f7fb;
 }
 
-@media (max-width: 760px) {
+/* ── Telefon ──────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+    .error-page-shell {
+        place-items: start center;
+        padding: 16px 12px;
+    }
+
     .error-card {
-        padding: 20px;
-        border-radius: 22px;
+        padding: 24px 18px 20px;
+        border-radius: 16px;
     }
 
-    .error-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .error-visual {
-        min-height: 220px;
-        order: -1;
-    }
-
-    .error-code-panel {
-        inset: 16px;
-        padding: 18px;
+    .error-badge {
+        width: 60px;
+        height: 60px;
+        margin-top: 20px;
+        font-size: 1.55rem;
     }
 
     .error-actions {
@@ -346,6 +303,11 @@ body.error-page {
 
     .error-btn {
         width: 100%;
-        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .error-btn {
+        transition: none;
     }
 }

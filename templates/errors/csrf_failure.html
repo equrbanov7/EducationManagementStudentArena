@@ -1,74 +1,33 @@
-{% load static %}
+{% extends "errors/_base.html" %}
 {% load i18n %}
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'az' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Page expired" context "core.errors.csrf" %} | {{ site_brand_name }}</title>
-    {% if auto_redirect %}
-    {# Stale auth form (bfcache / long-open tab): auto-redirect to a freshly #}
-    {# rendered form with a new CSRF token. Meta refresh is CSP-safe.       #}
+{% comment %}CSRF (köhnəlmiş forma) — ortaq xəta qabığı ilə (sahib 2026-10-01, «daha səliqəli»).
+Fərqi: köhnəlmiş auth formasında meta-refresh ilə təzə formaya avtomatik keçid (CSP-safe) və öz
+düymələri («yenidən cəhd et» + ana səhifə).{% endcomment %}
+{% block head_extra %}{% if auto_redirect %}
+    {# Stale auth form (bfcache / long-open tab): auto-redirect to a freshly rendered form with a new CSRF token. #}
     <meta http-equiv="refresh" content="4;url={{ retry_url }}">
+{% endif %}{% endblock %}
+{% block page_title %}{% trans "Page expired" context "core.errors.csrf" %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block kicker_icon %}fa-clock-rotate-left{% endblock %}
+{% block kicker %}{% trans "Page expired" context "core.errors.csrf" %}{% endblock %}
+{% block title %}{% trans "The security token has expired" context "core.errors.csrf" %}{% endblock %}
+{% block description %}
+    {% trans "This form went stale because the page stayed open for a long time or was restored from the browser cache. Don't worry — nothing was lost." context "core.errors.csrf" %}
+    {% if auto_redirect %}
+    {% trans "You will be redirected to a fresh page in a few seconds." context "core.errors.csrf" %}
+    {% else %}
+    {% trans "Refresh the page and try the action again." context "core.errors.csrf" %}
     {% endif %}
-    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
-    <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
-</head>
-<body class="error-page error-403">
-    <div class="error-page-shell">
-        <div class="error-orb error-orb-one"></div>
-        <div class="error-orb error-orb-two"></div>
-        <section class="error-card" aria-labelledby="error-title">
-            <div class="error-brand">
-                <span class="error-brand-mark"><i class="fas fa-rotate-right"></i></span>
-                <span>{{ site_brand_name }}</span>
-            </div>
-
-            <div class="error-grid">
-                <div class="error-copy">
-                    <div class="error-kicker">
-                        <i class="fas fa-clock-rotate-left"></i>
-                        {% trans "Page expired" context "core.errors.csrf" %}
-                    </div>
-                    <h1 id="error-title" class="error-title">{% trans "The security token has expired" context "core.errors.csrf" %}</h1>
-                    <p class="error-description">
-                        {% trans "This form went stale because the page stayed open for a long time or was restored from the browser cache. Don't worry — nothing was lost." context "core.errors.csrf" %}
-                        {% if auto_redirect %}
-                        {% trans "You will be redirected to a fresh page in a few seconds." context "core.errors.csrf" %}
-                        {% else %}
-                        {% trans "Refresh the page and try the action again." context "core.errors.csrf" %}
-                        {% endif %}
-                    </p>
-                    <div class="error-actions">
-                        <a href="{{ retry_url }}" class="error-btn error-btn-primary">
-                            <i class="fas fa-rotate-right"></i>
-                            {{ retry_label }}
-                        </a>
-                        <a href="/" class="error-btn error-btn-secondary">
-                            <i class="fas fa-house"></i>
-                            {% trans "Back to home" context "core.errors.csrf" %}
-                        </a>
-                    </div>
-                    <p class="error-footer-note">
-                        {% trans "If the problem persists, make sure browser cookies are enabled." context "core.errors.csrf" %}
-                    </p>
-                </div>
-
-                <div class="error-visual" aria-hidden="true">
-                    <div class="error-code-panel">
-                        <div class="error-code-top">
-                            <span>Status</span>
-                            <span class="error-status-dot"></span>
-                        </div>
-                        <div>
-                            <div class="error-code">403</div>
-                            <div class="error-code-caption">{% trans "Stale security token — the page needs to be refreshed." context "core.errors.csrf" %}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</body>
-</html>
+{% endblock %}
+{% block actions %}
+    <a href="{{ retry_url }}" class="error-btn error-btn-primary">
+        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        {{ retry_label }}
+    </a>
+    <a href="/" class="error-btn error-btn-secondary">
+        <i class="fas fa-house" aria-hidden="true"></i>
+        {% trans "Back to home" context "core.errors.csrf" %}
+    </a>
+{% endblock %}
+{% block footer_note %}{% trans "If the problem persists, make sure browser cookies are enabled." context "core.errors.csrf" %}{% endblock %}

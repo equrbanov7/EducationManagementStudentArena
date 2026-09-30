@@ -1,8 +1,11 @@
 {% load static i18n %}
-{% comment %}Xəta səhifələrinin ORTAQ qabığı (400/403/404/500 — sahib 2026-09-20, təkrar
-düzüm bir yerə yığıldı). Hər səhifə yalnız mətn bloklarını doldurur; düzüm/CSS
-`static/css/error-pages.css`-dədir. `csrf_failure.html` ayrıca qalır (auto-redirect
-meta + fərqli düymələr).{% endcomment %}
+{% comment %}Xəta səhifələrinin ORTAQ qabığı (400/403/404/500/CSRF/şəbəkə zonası). Hər səhifə yalnız
+mətn bloklarını doldurur; düzüm/CSS `static/css/error-pages.css`-dədir.
+
+Sahib 2026-10-01 («daha səliqəli»): mərkəzdə TƏK kart — universitet loqosu, rəngli ikon + kod nişanı,
+başlıq, izah, ipucları, iki düymə. Əvvəlki «Status 404» paneli və dekorativ kvadratlar çıxarıldı
+(telefonda başlığı aşağı itələyir, üst-üstə düşürdü). Blok adları dəyişməyib: `code_big` / `caption`
+geriyə uyğunluq üçün qalır, amma göstərilmir.{% endcomment %}
 {% comment %}Audit 2026-09-28 FQ-A11Y-1: `lang` aktiv dildən gəlir (500-də request konteksti
 yoxdur — get_current_language thread-local aktiv dili oxuyur; boşdursa az).{% endcomment %}{% get_current_language as CURRENT_LANGUAGE %}
 <!DOCTYPE html>
@@ -10,63 +13,51 @@ yoxdur — get_current_language thread-local aktiv dili oxuyur; boşdursa az).{%
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    {% block head_extra %}{% endblock %}
     <title>{% block page_title %}{% endblock %} | {{ site_brand_name }}</title>
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/fontawesome/css/all.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}">
+    <link rel="stylesheet" href="{% static 'css/error-pages.css' %}?v=20261001-2">
 </head>
 <body class="error-page error-{% block code %}{% endblock %}">
-    <div class="error-page-shell">
-        <div class="error-orb error-orb-one"></div>
-        <div class="error-orb error-orb-two"></div>
+    <main class="error-page-shell">
         <section class="error-card" aria-labelledby="error-title">
-            <div class="error-brand">
-                <span class="error-brand-mark"><i class="fas fa-shield-halved"></i></span>
+            <a class="error-brand" href="/">
+                <img class="error-brand-logo" src="{% static 'brand/wcu-logo-circle.png' %}" alt="" width="40" height="40">
                 <span>{{ site_brand_name }}</span>
-            </div>
+            </a>
 
-            <div class="error-grid">
-                <div class="error-copy">
-                    <div class="error-kicker">
-                        <i class="fas {% block kicker_icon %}fa-circle-exclamation{% endblock %}"></i>
-                        {% block kicker %}{% endblock %}
-                    </div>
-                    <h1 id="error-title" class="error-title">{% block title %}{% endblock %}</h1>
-                    <p class="error-description">
-                        {% block description %}{% endblock %}
-                    </p>
-                    <div class="error-meta">
-                        {% block pills %}{% endblock %}
-                    </div>
-                    <div class="error-actions">
-                        <a href="/" class="error-btn error-btn-primary">
-                            <i class="fas fa-house"></i>
-                            {% trans 'Ana səhifəyə qayıt' %}
-                        </a>
-                        <a href="{% firstof request.META.HTTP_REFERER '/' %}" class="error-btn error-btn-secondary">
-                            <i class="fas fa-arrow-left"></i>
-                            {% block back_label %}{% trans 'Əvvəlki səhifəyə dön' %}{% endblock %}
-                        </a>
-                    </div>
-                    <p class="error-footer-note">
-                        {% block footer_note %}{% endblock %}
-                    </p>
-                </div>
-
-                <div class="error-visual" aria-hidden="true">
-                    <div class="error-code-panel">
-                        <div class="error-code-top">
-                            <span>Status</span>
-                            <span class="error-status-dot"></span>
-                        </div>
-                        <div>
-                            <div class="error-code">{% block code_big %}{% endblock %}</div>
-                            <div class="error-code-caption">{% block caption %}{% endblock %}</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="error-badge" aria-hidden="true">
+                <i class="fas {% block kicker_icon %}fa-circle-exclamation{% endblock %}"></i>
             </div>
+            <p class="error-kicker">
+                <span class="error-kicker-code">{% block code_label %}{% endblock %}</span>
+                {% block kicker %}{% endblock %}
+            </p>
+            <h1 id="error-title" class="error-title">{% block title %}{% endblock %}</h1>
+            <div class="error-description">
+                {% block description %}{% endblock %}
+            </div>
+            <div class="error-meta">
+                {% block pills %}{% endblock %}
+            </div>
+            <div class="error-actions">
+                {% block actions %}
+                <a href="/" class="error-btn error-btn-primary">
+                    <i class="fas fa-house" aria-hidden="true"></i>
+                    {% trans 'Ana səhifəyə qayıt' %}
+                </a>
+                <a href="{% firstof request.META.HTTP_REFERER '/' %}" class="error-btn error-btn-secondary">
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    {% block back_label %}{% trans 'Əvvəlki səhifəyə dön' %}{% endblock %}
+                </a>
+                {% endblock %}
+            </div>
+            <p class="error-footer-note">{% block footer_note %}{% endblock %}</p>
+            {# Geriyə uyğunluq: köhnə şablonların doldurduğu bloklar (göstərilmir). #}
+            {% if False %}{% block code_big %}{% endblock %}{% block caption %}{% endblock %}{% endif %}
         </section>
-    </div>
+    </main>
 </body>
 </html>
