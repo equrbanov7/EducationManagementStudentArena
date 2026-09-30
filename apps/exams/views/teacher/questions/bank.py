@@ -4,12 +4,10 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.db.models.functions import Lower
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods
@@ -18,23 +16,54 @@ from apps.exams.constants import EXAM_LANGUAGE_CHOICES, EXAM_LANGUAGE_VALUES
 from apps.exams.models import ExamQuestion
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bank_analysis import analyze_question_bank
-from apps.exams.services.question_invariants import (
-    active_exam_question_invariant_message,
-    deactivate_exam_questions,
-    delete_exam_questions,
-)
+from apps.exams.services.question_invariants import MODE_DEACTIVATE, MODE_DELETE
 from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.search_text import tolerant_q
 
+from ._mutations import finish_mutation_request, run_question_mutation
 from ._shared import (
     _append_navigation_query,
-    _resequence_exam_questions,
     _resolve_question_bank_navigation,
 )
 from .constants import (
     QUESTION_BANK_SEARCH_MAX_LENGTH,
 )
+
+
+def _bank_post_redirect_url(
+    request, exam, *, allowed_sorts, allowed_flags, navigation_from_section, navigation_return_to
+):
+    """POST-dan sonra bank səhifəsinə qayıdış URL-i (süzgəc/səhifə/naviqasiya saxlanılır)."""
+    redirect_params = {}
+    redirect_q = (request.POST.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
+    redirect_status = (request.POST.get("status") or "all").strip().lower()
+    redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
+    redirect_flag = (request.POST.get("flag") or "").strip().lower()
+    redirect_language = (request.POST.get("language") or "").strip().lower()
+    redirect_page = (request.POST.get("page") or "").strip()
+
+    if redirect_q:
+        redirect_params["q"] = redirect_q
+    if redirect_status in {"active", "inactive"}:
+        redirect_params["status"] = redirect_status
+    if redirect_sort in allowed_sorts:
+        redirect_params["sort"] = redirect_sort
+    if redirect_flag in allowed_flags:
+        redirect_params["flag"] = redirect_flag
+    if redirect_language in EXAM_LANGUAGE_VALUES:
+        redirect_params["language"] = redirect_language
+    if redirect_page.isdigit():
+        redirect_params["page"] = redirect_page
+    if navigation_from_section:
+        redirect_params["from_section"] = navigation_from_section
+    if navigation_return_to:
+        redirect_params["return_to"] = navigation_return_to
+
+    redirect_url = reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug})
+    if redirect_params:
+        redirect_url = f"{redirect_url}?{urlencode(redirect_params)}"
+    return redirect_url
 
 
 @login_required
@@ -53,36 +82,43 @@ def teacher_questions_bank(request, slug):
         # imtahanda yalnız imtahan mərkəzi. GET (baxış) açıq qalır.
         ensure_can_manage_exam_questions(request.user, exam)
         action = (request.POST.get("bulk_action") or "").strip().lower()
+        redirect_url = _bank_post_redirect_url(
+            request,
+            exam,
+            allowed_sorts=allowed_sorts,
+            allowed_flags=allowed_flags,
+            navigation_from_section=navigation_from_section,
+            navigation_return_to=navigation_return_to,
+        )
+        # QB 2026-09-30: sil/deaktiv yolları «son aktiv suallar» təsdiq axını ilə
+        # (bax _mutations.py) — cavab (təsdiq/imtina) qayıdırsa axın orada bitir.
+        stop_response = None
+        deleted_message = pgettext("exams.view.questions_bank.message", "{count} sual silindi.")
 
         if action == "delete_all":
             question_ids = list(exam.questions.values_list("pk", flat=True))
-            try:
-                deleted = delete_exam_questions(exam, question_ids)
-            except (ValidationError, IntegrityError):
-                messages.error(request, active_exam_question_invariant_message())
-            else:
-                _resequence_exam_questions(exam)
-                messages.success(
-                    request,
-                    pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
-                )
+            stop_response = run_question_mutation(
+                request,
+                exam,
+                mode=MODE_DELETE,
+                question_ids=question_ids,
+                redirect_url=redirect_url,
+                success_message=deleted_message,
+            )
         elif action == "delete_language":
             lang = (request.POST.get("language") or "").strip().lower()
             if lang not in EXAM_LANGUAGE_VALUES:
                 messages.error(request, pgettext("exams.view.questions_bank.message", "Düzgün dil seçin."))
             else:
-                scoped_qs = exam.questions.filter(language=lang)
-                question_ids = list(scoped_qs.values_list("pk", flat=True))
-                try:
-                    deleted = delete_exam_questions(exam, question_ids)
-                except (ValidationError, IntegrityError):
-                    messages.error(request, active_exam_question_invariant_message())
-                else:
-                    _resequence_exam_questions(exam)
-                    messages.success(
-                        request,
-                        pgettext("exams.view.questions_bank.message", "{count} sual silindi.").format(count=deleted),
-                    )
+                question_ids = list(exam.questions.filter(language=lang).values_list("pk", flat=True))
+                stop_response = run_question_mutation(
+                    request,
+                    exam,
+                    mode=MODE_DELETE,
+                    question_ids=question_ids,
+                    redirect_url=redirect_url,
+                    success_message=deleted_message,
+                )
         else:
             selected_ids = [int(item) for item in request.POST.getlist("selected_question_ids") if item.isdigit()]
             selected_qs = ExamQuestion.objects.filter(exam=exam, id__in=selected_ids)
@@ -91,15 +127,14 @@ def teacher_questions_bank(request, slug):
             if selected_count == 0:
                 messages.warning(request, pgettext("exams.view.questions_bank.message", "select_at_least_one"))
             elif action == "deactivate":
-                try:
-                    updated = deactivate_exam_questions(exam, selected_ids)
-                except (ValidationError, IntegrityError):
-                    messages.error(request, active_exam_question_invariant_message())
-                else:
-                    messages.success(
-                        request,
-                        pgettext("exams.view.questions_bank.message", "deactivated_selected").format(count=updated),
-                    )
+                stop_response = run_question_mutation(
+                    request,
+                    exam,
+                    mode=MODE_DEACTIVATE,
+                    question_ids=selected_ids,
+                    redirect_url=redirect_url,
+                    success_message=pgettext("exams.view.questions_bank.message", "deactivated_selected"),
+                )
             elif action == "activate":
                 updated = selected_qs.update(is_active=True)
                 messages.success(
@@ -107,48 +142,20 @@ def teacher_questions_bank(request, slug):
                     pgettext("exams.view.questions_bank.message", "activated_selected").format(count=updated),
                 )
             elif action == "delete":
-                try:
-                    deleted = delete_exam_questions(exam, selected_ids)
-                except (ValidationError, IntegrityError):
-                    messages.error(request, active_exam_question_invariant_message())
-                else:
-                    _resequence_exam_questions(exam)
-                    messages.success(
-                        request,
-                        pgettext("exams.view.questions_bank.message", "deleted_selected").format(count=deleted),
-                    )
+                stop_response = run_question_mutation(
+                    request,
+                    exam,
+                    mode=MODE_DELETE,
+                    question_ids=selected_ids,
+                    redirect_url=redirect_url,
+                    success_message=pgettext("exams.view.questions_bank.message", "deleted_selected"),
+                )
             else:
                 messages.error(request, pgettext("exams.view.questions_bank.message", "invalid_bulk_action"))
 
-        redirect_params = {}
-        redirect_q = (request.POST.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
-        redirect_status = (request.POST.get("status") or "all").strip().lower()
-        redirect_sort = (request.POST.get("sort") or "newest").strip().lower()
-        redirect_flag = (request.POST.get("flag") or "").strip().lower()
-        redirect_language = (request.POST.get("language") or "").strip().lower()
-        redirect_page = (request.POST.get("page") or "").strip()
-
-        if redirect_q:
-            redirect_params["q"] = redirect_q
-        if redirect_status in {"active", "inactive"}:
-            redirect_params["status"] = redirect_status
-        if redirect_sort in allowed_sorts:
-            redirect_params["sort"] = redirect_sort
-        if redirect_flag in allowed_flags:
-            redirect_params["flag"] = redirect_flag
-        if redirect_language in EXAM_LANGUAGE_VALUES:
-            redirect_params["language"] = redirect_language
-        if redirect_page.isdigit():
-            redirect_params["page"] = redirect_page
-        if navigation_from_section:
-            redirect_params["from_section"] = navigation_from_section
-        if navigation_return_to:
-            redirect_params["return_to"] = navigation_return_to
-
-        redirect_url = reverse("exams:teacher_questions_bank", kwargs={"slug": exam.slug})
-        if redirect_params:
-            redirect_url = f"{redirect_url}?{urlencode(redirect_params)}"
-        return redirect(redirect_url)
+        if stop_response is not None:
+            return stop_response
+        return finish_mutation_request(request, redirect_url)
 
     search_query = (request.GET.get("q") or "").strip()[:QUESTION_BANK_SEARCH_MAX_LENGTH]
     status_filter = (request.GET.get("status") or "all").strip().lower()
