@@ -25,6 +25,7 @@ olanda görünür.
     <link rel="stylesheet" href="{% static 'accounts/css/public_profile.css' %}?v=20260907-redesign">
     <link rel="stylesheet" href="{% static 'accounts/css/public_profile_panels.css' %}?v=20260907-redesign">
     <link rel="stylesheet" href="{% static 'accounts/css/public_profile_academic.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/academic_attachment.css' %}?v=20261001-1">
 {% endblock %}
 
 {% block content %}
@@ -111,6 +112,11 @@ olanda görünür.
                                     </span>
                                     {% if item.detail or item.year %}
                                     <span class="public-academic-item__meta">{{ item.detail }}{% if item.detail and item.year %} · {% endif %}{% if item.year %}{{ item.year }}{% endif %}</span>
+                                    {% endif %}
+                                    {% comment %}Qoşma yalnız DAXİL OLMUŞ baxana (avatar qaydası) —
+                                    anonim üçün fayl route-u girişə yönləndirir.{% endcomment %}
+                                    {% if item.attachment and group.allows_attachment and request.user.is_authenticated %}
+                                    {% include "accounts/profile/sections/_academic_attachment_chip.html" with show_name=False %}
                                     {% endif %}
                                 </li>
                                 {% endfor %}

@@ -40,6 +40,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "org-structure": "accounts/profile/sections/_org_structure.html",
     "org-faculties": "accounts/profile/sections/_org_faculties.html",
     "org-kafedras": "accounts/profile/sections/_org_kafedras.html",
+    "org-overview": "accounts/profile/sections/_org_overview.html",
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
@@ -139,6 +140,8 @@ def build_section_titles() -> dict:
         "org-structure": pgettext_lazy("profile.sidebar", "Fakültə və kafedralar"),
         "org-faculties": pgettext_lazy("profile.sidebar", "Fakültələr"),
         "org-kafedras": pgettext_lazy("profile.sidebar", "Kafedralar"),
+        # «Təşkilat paneli» (sahib 2026-10-01) — köhnə `/organizations/<slug>/` panelinin kabinet varisi.
+        "org-overview": pgettext_lazy("profile.sidebar", "Təşkilat paneli"),
         "org-members": pgettext_lazy("profile.sidebar", "Struktur üzvləri"),
         "org-roles": pgettext_lazy("profile.sidebar", "Təşkilat rolları"),
         "audit-log": pgettext_lazy("profile.sidebar", "Audit jurnalı"),

@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import formats, translation
 from django.utils.timezone import localtime
 
 from core.constants import OrganizationType, OrgUnitType, RoleScopeType
@@ -80,9 +79,10 @@ class OrganizationI18nSmokeTest(TestCase):
         return self.client.get(url, HTTP_ACCEPT_LANGUAGE=lang)
 
     def test_pages_render_successfully_in_all_languages(self):
+        # 2026-10-01: panel / üzvlər / rollar kabinet bölmələrinə yönləndirir — son səhifə yoxlanılır.
         for lang in self.LANGUAGES:
             for url in self.routes:
-                response = self._get(url, lang)
+                response = self.client.get(url, HTTP_ACCEPT_LANGUAGE=lang, follow=True)
                 self.assertEqual(response.status_code, 200, f"Failed for {lang} {url}")
                 self.assertIn(f'lang="{lang}"', response.content.decode("utf-8", errors="ignore"))
 
@@ -104,14 +104,12 @@ class OrganizationI18nSmokeTest(TestCase):
             )
             self.assertContains(structure_response, expected[lang]["unit"])
 
-            members_response = self._get(
+            # 2026-10-01: köhnə üzv səhifəsi kabinetin «Struktur üzvləri» reyestrinə
+            # yönləndirir; reyestr qoşulma tarixini dildən asılı olmayan «dd.mm.YYYY»
+            # formatında göstərir (bax `structure_views/members_base.format_date`).
+            members_response = self.client.get(
                 reverse("organizations:members", kwargs={"slug": self.organization.slug}),
-                lang,
+                HTTP_ACCEPT_LANGUAGE=lang,
+                follow=True,
             )
-            with translation.override(lang):
-                expected_date = formats.date_format(
-                    localtime(self.membership.created_at),
-                    "SHORT_DATE_FORMAT",
-                    use_l10n=True,
-                )
-            self.assertContains(members_response, expected_date)
+            self.assertContains(members_response, localtime(self.membership.created_at).strftime("%d.%m.%Y"))

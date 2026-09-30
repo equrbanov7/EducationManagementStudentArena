@@ -1,0 +1,39 @@
+{% load i18n %}
+{% comment %}
+Profil şəkli redaktoru — «Profili redaktə et» bölməsi (2026-10-01).
+Axın: «Şəkil yüklə / Şəkli dəyiş» → fayl seçimi → dairəvi önizləmə →
+«Yadda saxla» / «Ləğv et» (yerində, JSON API); «Sil» → EMSConfirm təsdiqi →
+baş hərflər. Uğurdan sonra səhifədəki BÜTÜN avatar yerləri (navbar daxil)
+yenilənir. Davranış: accounts/js/profile/profile_avatar.js.
+{% endcomment %}
+<div class="avatar-editor" {% include "accounts/profile/sections/_avatar_scope_attrs.html" %}>
+    <span class="avatar-editor__thumb" data-avatar-display>
+        <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"{% else %}hidden{% endif %}
+             alt="" data-avatar-img>
+        <span class="avatar-editor__initials" data-avatar-initials{% if profile.avatar %} hidden{% endif %}>{{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}</span>
+    </span>
+    <div class="avatar-editor__body">
+        <div class="avatar-editor__actions" data-avatar-idle>
+            <button type="button" class="avatar-editor__btn" data-avatar-pick>
+                <i class="fas fa-camera" aria-hidden="true"></i>
+                <span data-avatar-pick-label>{% if profile.avatar %}{% trans 'Şəkli dəyiş' context 'profile.avatar' %}{% else %}{% trans 'Şəkil yüklə' context 'profile.avatar' %}{% endif %}</span>
+            </button>
+            <button type="button" class="avatar-editor__btn avatar-editor__btn--danger" data-avatar-remove{% if not profile.avatar %} hidden{% endif %}>
+                <i class="fas fa-trash" aria-hidden="true"></i>
+                <span>{% trans 'Sil' context 'profile.avatar' %}</span>
+            </button>
+        </div>
+        <div class="avatar-editor__actions" data-avatar-confirm hidden>
+            <button type="button" class="ems-btn ems-btn--primary" data-avatar-save>
+                <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                <i class="fas fa-check" aria-hidden="true"></i>{% trans 'Yadda saxla' context 'profile.avatar' %}
+            </button>
+            <button type="button" class="ems-btn" data-avatar-cancel>{% trans 'Ləğv et' context 'profile.avatar' %}</button>
+        </div>
+        <p class="avatar-editor__hint" data-avatar-hint
+           data-label-default="{% trans 'JPG, PNG, WEBP və ya GIF · maksimum 10 MB' context 'profile.avatar' %}">{% trans 'JPG, PNG, WEBP və ya GIF · maksimum 10 MB' context 'profile.avatar' %}</p>
+        <p class="avatar-editor__error" data-avatar-error role="alert" hidden></p>
+        <input type="file" class="avatar-editor__input" accept="image/jpeg,image/png,image/webp,image/gif"
+               data-avatar-input tabindex="-1" aria-hidden="true">
+    </div>
+</div>

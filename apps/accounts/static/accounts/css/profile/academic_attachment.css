@@ -1,0 +1,80 @@
+/* «Akademik fəaliyyət» qeydinin qoşma çipi (2026-10-01).
+   İstifadə: idarəetmə siyahısı, profil məlumatı, açıq profil
+   (_academic_attachment_chip.html). Yalnız --ems-* tokenləri. */
+
+.academic-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    min-height: 32px;
+    margin-top: 6px;
+    padding: 3px 10px 3px 4px;
+    border: 1px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 999px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-neutral-700, #334155);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    align-self: flex-start;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.academic-file:hover,
+.academic-file:focus-visible {
+    border-color: var(--ems-primary-300, #93c5fd);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.academic-file:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.academic-file__thumb {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--ems-neutral-100, #f1f5f9);
+}
+
+.academic-file__icon {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-600, #2563eb);
+    font-size: 0.75rem;
+}
+
+.academic-file__icon--pdf {
+    background: var(--ems-danger-50, #fef2f2);
+    color: var(--ems-danger-600, #dc2626);
+}
+
+.academic-file__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.academic-file__size {
+    flex: none;
+    color: var(--ems-neutral-500, #64748b);
+    font-weight: 500;
+}
+
+.academic-file__open {
+    flex: none;
+    font-size: 0.65rem;
+    color: var(--ems-neutral-500, #64748b);
+}

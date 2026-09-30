@@ -1,0 +1,342 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   profile_avatar.css — profil şəkli (2026-10-01, sahib: «profil şəkli tərəfini
+   yenidən düzəlt, ora yaxşı formada görünsün, şəkli qoymaq olduğu kimi silmək
+   də mümkün olsun»).
+
+   * Kimlik başlığı (`.pfx-avatar`): DAİRƏVİ avatar, şəkil yoxdursa səliqəli
+     baş hərflər; sağ-altda HƏMİŞƏ görünən kamera düyməsi (telefonda hover
+     yoxdur) → menyu: «Şəkli dəyiş / yüklə», «Şəkli sil».
+   * Önizləmə modalı (`.avatar-modal__*`): seçilən şəkil böyük dairədə.
+   * Redaktə bölməsi (`.avatar-editor`): eyni UX yerində — önizləmə + təsdiq.
+   Davranış: accounts/js/profile/profile_avatar.js. Yalnız --ems-* tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Kimlik başlığı ───────────────────────────────────────────────────────── */
+.pfx-avatar {
+    position: relative;
+    flex: none;
+    width: 88px;
+    height: 88px;
+}
+
+.pfx-avatar__frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--ems-neutral-100, #f1f5f9);
+    box-shadow: 0 0 0 3px var(--ems-neutral-0, #fff), 0 0 0 4px var(--ems-neutral-200, #e2e8f0);
+}
+
+.pfx-avatar__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pfx-avatar__initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--ems-primary-500, #3b82f6), var(--ems-primary-700, #1d4ed8));
+    color: var(--ems-neutral-0, #fff);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    user-select: none;
+}
+
+.pfx-avatar__img[hidden],
+.pfx-avatar__initials[hidden],
+.pfx-avatar__dropdown li[hidden] {
+    display: none;
+}
+
+.pfx-avatar__menu {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+}
+
+.pfx-avatar__cam {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid var(--ems-neutral-0, #fff);
+    border-radius: 50%;
+    background: var(--ems-primary-600, #2563eb);
+    color: var(--ems-neutral-0, #fff);
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+    transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.pfx-avatar__cam:hover {
+    background: var(--ems-primary-700, #1d4ed8);
+}
+
+.pfx-avatar__cam:focus-visible,
+.avatar-editor__btn:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.pfx-avatar__dropdown {
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--ems-neutral-200, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+}
+
+.pfx-avatar__dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ems-neutral-800, #1e293b);
+}
+
+.pfx-avatar__dropdown .dropdown-item i {
+    width: 16px;
+    text-align: center;
+    color: var(--ems-primary-600, #2563eb);
+}
+
+.pfx-avatar__dropdown .pfx-avatar__danger,
+.pfx-avatar__dropdown .pfx-avatar__danger i {
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.pfx-avatar__dropdown .pfx-avatar__danger:hover {
+    background: var(--ems-danger-50, #fef2f2);
+}
+
+/* Çılpaq file input gizlidir (JS onu düymədən açır). */
+.pfx-avatar__input,
+.avatar-editor__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Önizləmə modalı ─────────────────────────────────────────────────────── */
+.avatar-modal__dialog {
+    max-width: 420px;
+}
+
+.avatar-modal__preview {
+    display: grid;
+    place-items: center;
+    width: 168px;
+    height: 168px;
+    margin: 4px auto 12px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--ems-neutral-100, #f1f5f9);
+    box-shadow: 0 0 0 4px var(--ems-neutral-0, #fff), 0 0 0 5px var(--ems-neutral-200, #e2e8f0);
+}
+
+.avatar-modal__preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-modal__preview img[hidden],
+.avatar-modal__placeholder[hidden] {
+    display: none;
+}
+
+.avatar-modal__placeholder {
+    color: var(--ems-neutral-500, #64748b);
+    font-size: 2rem;
+}
+
+.avatar-modal__name {
+    margin: 0 0 10px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-neutral-600, #475569);
+    overflow-wrap: anywhere;
+}
+
+.avatar-modal__name:empty {
+    display: none;
+}
+
+.avatar-modal__dialog .pfx-help {
+    text-align: center;
+}
+
+.avatar-modal__repick {
+    margin-inline-end: auto;
+}
+
+/* ── Redaktə bölməsi ─────────────────────────────────────────────────────── */
+.avatar-editor {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-editor__thumb {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--ems-neutral-100, #f1f5f9);
+    box-shadow: 0 0 0 3px var(--ems-neutral-0, #fff), 0 0 0 4px var(--ems-neutral-200, #e2e8f0);
+}
+
+.avatar-editor__thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-editor__initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--ems-primary-500, #3b82f6), var(--ems-primary-700, #1d4ed8));
+    color: var(--ems-neutral-0, #fff);
+    font-size: 1.4rem;
+    font-weight: 800;
+    user-select: none;
+}
+
+.avatar-editor__thumb img[hidden],
+.avatar-editor__initials[hidden],
+.avatar-editor__actions[hidden],
+.avatar-editor__btn[hidden],
+.avatar-editor__error[hidden] {
+    display: none;
+}
+
+.avatar-editor__body {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+
+.avatar-editor__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.avatar-editor__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--profile-border, #e2e8f0);
+    border-radius: 10px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-fg, #0f172a);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.avatar-editor__btn:hover {
+    border-color: var(--ems-primary-600, #2563eb);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.avatar-editor__btn--danger {
+    border-color: var(--ems-danger-200, #fecaca);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.avatar-editor__btn--danger:hover {
+    border-color: var(--ems-danger-600, #dc2626);
+    background: var(--ems-danger-50, #fef2f2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.avatar-editor__hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--profile-muted, #64748b);
+    overflow-wrap: anywhere;
+}
+
+.avatar-editor__error {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+/* ── Telefon ──────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+    .pfx-avatar {
+        width: 76px;
+        height: 76px;
+    }
+
+    .pfx-avatar__initials {
+        font-size: 1.5rem;
+    }
+
+    .pfx-avatar__cam {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+@media (max-width: 420px) {
+    .avatar-editor {
+        gap: 12px;
+    }
+
+    .avatar-editor__thumb {
+        width: 64px;
+        height: 64px;
+    }
+
+    .avatar-modal__preview {
+        width: 144px;
+        height: 144px;
+    }
+
+    .avatar-modal__dialog .pfx-modal__foot {
+        flex-wrap: wrap;
+    }
+
+    .avatar-modal__repick {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pfx-avatar__cam {
+        transition: none;
+    }
+}

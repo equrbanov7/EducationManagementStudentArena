@@ -108,6 +108,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "org-structure": "accounts/profile/sections/_org_structure.html",
     "org-faculties": "accounts/profile/sections/_org_faculties.html",
     "org-kafedras": "accounts/profile/sections/_org_kafedras.html",
+    "org-overview": "accounts/profile/sections/_org_overview.html",
     "org-members": "accounts/profile/sections/_org_members.html",
     "org-roles": "accounts/profile/sections/_org_roles.html",
     "audit-log": "accounts/profile/sections/_audit_log.html",
@@ -229,6 +230,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "org-structure",
         "org-faculties",
         "org-kafedras",
+        "org-overview",  # «Təşkilat paneli» — tam OXU-ONLY xülasə (2026-10-01)
         "org-members",
         "org-roles",
         "audit-log",

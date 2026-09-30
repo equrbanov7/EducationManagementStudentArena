@@ -146,6 +146,8 @@ urlpatterns = [
         name="change_password_otp_request",
     ),
     path("profile-avatar/<int:user_id>/", views.profile_avatar, name="profile_avatar"),
+    # 2026-10-01: profil şəklini yerində yüklə / dəyiş / sil (JSON).
+    path("profile/api/avatar/", views.profile_avatar_api, name="profile_avatar_api"),
     # "View as" — səlahiyyətli rolların başqa istifadəçinin profilinə baxışı
     path("view-as/search/", views.view_as_search, name="view_as_search"),
     path("view-as/start/", views.view_as_start, name="view_as_start"),

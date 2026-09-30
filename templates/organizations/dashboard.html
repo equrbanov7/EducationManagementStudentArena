@@ -1,118 +1,101 @@
+{% extends "base.html" %}
 {% load static i18n %}
 {% load org_tags %}
-<!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE|default:'en' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ organization.name }} - {% trans "page_title" context "organizations.dashboard" %}</title>
-    <link rel="stylesheet" href="{% static 'css/organizations/dashboard.css' %}">
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="org-name">{{ organization.name }}</div>
-            <nav class="nav-menu">
-                <a href="{% url 'organizations:dashboard' organization.slug %}">{% trans "dashboard" context "organizations.nav" %}</a>
-                <a href="{% url 'organizations:structure' organization.slug %}">{% trans "structure" context "organizations.nav" %}</a>
-                <a href="{% url 'organizations:members' organization.slug %}">{% trans "members" context "organizations.nav" %}</a>
-                <a href="{% url 'organizations:roles' organization.slug %}">{% trans "roles" context "organizations.nav" %}</a>
-                <a href="{% url 'organizations:settings' organization.slug %}">{% trans "settings" context "organizations.nav" %}</a>
-                <a href="{% url 'organizations:select' %}">{% trans "switch_org" context "organizations.nav" %}</a>
-            </nav>
+{% comment %}
+Köhnə müstəqil təşkilat paneli (2026-10-01 yenilənib).
+
+İdarəetmə bölməsi olan aktor bu URL-dən kabinetin «Təşkilat paneli»nə
+(`?section=org-overview`) yönləndirilir (bax `organizations.cabinet_links`). Bu
+səhifə YALNIZ qalanlar üçün render olunur (məs. menyusunda idarəetmə bölməsi
+olmayan üzv): indi sayt qabığının (base.html) içindədir, xam HTML deyil.
+«Son fəaliyyət» axını yalnız audit qapısından keçənə göstərilir (view).
+{% endcomment %}
+
+{% block title %}{{ organization.name }} - {% trans "page_title" context "organizations.dashboard" %}{% endblock %}
+
+{% block extraCss %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'css/organizations/dashboard.css' %}?v=20261001-1">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4 orgdash">
+    <header class="orgdash-head">
+        <div class="orgdash-head__main">
+            <p class="orgdash-head__eyebrow">{% trans "heading" context "organizations.dashboard" %}</p>
+            <h1 class="orgdash-head__title">{{ organization.name }}</h1>
         </div>
-    </div>
+        <nav class="orgdash-nav" aria-label="{{ organization.name }}">
+            <a href="{% url 'accounts:profile' %}">{% trans "dashboard" context "organizations.nav" %}</a>
+            <a href="{% url 'organizations:select' %}">{% trans "switch_org" context "organizations.nav" %}</a>
+        </nav>
+    </header>
 
-    <div class="container">
-        <h1 class="dashboard-1">{% trans "heading" context "organizations.dashboard" %}</h1>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">{% trans "stat_total_members" context "organizations.dashboard" %}</div>
-                <div class="stat-value">{{ stats.total_members }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">{% trans "stat_total_units" context "organizations.dashboard" %}</div>
-                <div class="stat-value">{{ stats.total_units }}</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">{% trans "stat_total_roles" context "organizations.dashboard" %}</div>
-                <div class="stat-value">{{ stats.total_roles }}</div>
-            </div>
+    <section class="orgdash-stats">
+        <div class="orgdash-stat">
+            <span class="orgdash-stat__label">{% trans "stat_total_members" context "organizations.dashboard" %}</span>
+            <span class="orgdash-stat__value">{{ stats.total_members }}</span>
         </div>
-
-        <!-- Quick Actions -->
-        <div class="section">
-            <div class="section-title">{% trans "quick_actions" context "organizations.dashboard" %}</div>
-            <div class="quick-actions">
-                {% has_perm 'member.invite' as can_invite %}
-                {% if can_invite %}
-                <a href="{% url 'organizations:members' organization.slug %}" class="btn">{% trans "action_invite_members" context "organizations.dashboard" %}</a>
-                {% endif %}
-                
-                {% has_perm 'unit.create' as can_create_unit %}
-                {% if can_create_unit %}
-                <a href="{% url 'organizations:structure' organization.slug %}" class="btn">{% trans "action_manage_structure" context "organizations.dashboard" %}</a>
-                {% endif %}
-                
-                {% has_perm 'role.view' as can_view_roles %}
-                {% if can_view_roles %}
-                <a href="{% url 'organizations:roles' organization.slug %}" class="btn-secondary btn">{% trans "action_view_roles" context "organizations.dashboard" %}</a>
-                {% endif %}
-            </div>
+        <div class="orgdash-stat">
+            <span class="orgdash-stat__label">{% trans "stat_total_units" context "organizations.dashboard" %}</span>
+            <span class="orgdash-stat__value">{{ stats.total_units }}</span>
         </div>
+        <div class="orgdash-stat">
+            <span class="orgdash-stat__label">{% trans "stat_total_roles" context "organizations.dashboard" %}</span>
+            <span class="orgdash-stat__value">{{ stats.total_roles }}</span>
+        </div>
+    </section>
 
-        <!-- Recent Activity -->
-        <div class="section">
-            <div class="section-title">{% trans "recent_activity" context "organizations.dashboard" %}</div>
-            {% if recent_activity %}
-                {% for activity in recent_activity %}
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <div class="activity-user">
-                            {% if activity.user and activity.user.username %}
-                                {{ activity.user.username }}
-                            {% else %}
-                                {% trans "system_user" context "organizations.dashboard" %}
-                            {% endif %}
-                        </div>
-                        <div class="activity-action">
-                            {{ activity.get_action_display }} - {{ activity.get_resource_display }}
-                        </div>
-                    </div>
-                    <div class="activity-time">
-                        {{ activity.created_at|timesince }} {% trans "ago" context "organizations.dashboard" %}
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    {% trans "no_recent_activity" context "organizations.dashboard" %}
-                </div>
+    {% has_perm 'member.invite' as can_invite %}
+    {% has_perm 'unit.create' as can_create_unit %}
+    {% has_perm 'role.view' as can_view_roles %}
+    {% if can_invite or can_create_unit or can_view_roles %}
+    <section class="orgdash-card">
+        <h2 class="orgdash-card__title">{% trans "quick_actions" context "organizations.dashboard" %}</h2>
+        <div class="orgdash-actions">
+            {% if can_invite %}
+            <a href="{% url 'organizations:members' organization.slug %}" class="ems-btn ems-btn--primary">{% trans "action_invite_members" context "organizations.dashboard" %}</a>
+            {% endif %}
+            {% if can_create_unit %}
+            <a href="{% url 'organizations:structure' organization.slug %}" class="ems-btn">{% trans "action_manage_structure" context "organizations.dashboard" %}</a>
+            {% endif %}
+            {% if can_view_roles %}
+            <a href="{% url 'organizations:roles' organization.slug %}" class="ems-btn">{% trans "action_view_roles" context "organizations.dashboard" %}</a>
             {% endif %}
         </div>
+    </section>
+    {% endif %}
 
-        <!-- User Roles -->
-        <div class="section">
-            <div class="section-title">{% trans "your_roles" context "organizations.dashboard" %}</div>
-            {% if user_memberships %}
-                <div class="dash-actions-row">
-                    {% for membership in user_memberships %}
-                    <span class="dashboard-2">
-                        {{ membership.role|role_badge_label }}
-                        {% if membership.scope_unit %}
-                        ({{ membership.scope_unit.name }})
-                        {% endif %}
-                    </span>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    {% trans "no_roles_assigned" context "organizations.dashboard" %}
-                </div>
-            {% endif %}
+    {% if recent_activity %}
+    <section class="orgdash-card">
+        <h2 class="orgdash-card__title">{% trans "recent_activity" context "organizations.dashboard" %}</h2>
+        <ul class="orgdash-feed">
+            {% for activity in recent_activity %}
+            <li class="orgdash-feed__item">
+                <span class="orgdash-feed__who">
+                    {% if activity.user and activity.user.username %}{{ activity.user.username }}{% else %}{% trans "system_user" context "organizations.dashboard" %}{% endif %}
+                </span>
+                <span class="orgdash-feed__what">{{ activity.get_action_display }} · {{ activity.get_resource_display }}</span>
+                <span class="orgdash-feed__when">{{ activity.created_at|timesince }} {% trans "ago" context "organizations.dashboard" %}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    <section class="orgdash-card">
+        <h2 class="orgdash-card__title">{% trans "your_roles" context "organizations.dashboard" %}</h2>
+        {% if user_memberships %}
+        <div class="orgdash-roles">
+            {% for membership in user_memberships %}
+            <span class="orgdash-role">
+                {{ membership.role|role_badge_label }}{% if membership.scope_unit %} · {{ membership.scope_unit.name }}{% endif %}
+            </span>
+            {% endfor %}
         </div>
-    </div>
-</body>
-</html>
+        {% else %}
+        <p class="orgdash-empty">{% trans "no_roles_assigned" context "organizations.dashboard" %}</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

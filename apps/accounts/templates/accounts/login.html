@@ -5,7 +5,7 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
-    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20260707-auth2">
+    <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20261001-logo">
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20261001-lockout">
 {% endblock %}
 
@@ -34,8 +34,8 @@
         </form>
 
         <a href="{% url 'accounts:login' %}" class="auth-brand" aria-label="{{ site_brand_name }}">
-            <img src="{% static 'brand/wcu-logo-circle.png' %}" alt="{{ site_brand_name }}"
-                 class="auth-brand-logo auth-brand-logo--seal" width="108" height="108" loading="eager" decoding="async">
+            <img src="{% static 'brand/wcu-official-lockup.svg' %}?v=20261001" alt="{{ site_brand_name }}"
+                 class="auth-brand-logo auth-brand-logo--official" width="303" height="66" loading="eager" decoding="async">
         </a>
         <h1 class="auth-heading">{% trans "heading" context "accounts.login" %}</h1> {# auth-title -> auth-heading #}
         <p class="auth-subheading">{% trans "subheading" context "accounts.login" %}</p> {# auth-subtitle -> auth-subheading #}

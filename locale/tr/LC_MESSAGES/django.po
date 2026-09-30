@@ -86679,3 +86679,604 @@ msgstr ""
 
 msgid "Menyudan davam edin"
 msgstr "Menüden devam edin"
+
+msgctxt "ai_assistant.limit_exceeded"
+msgid "AI assistent bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin."
+msgstr "AI asistan bugünkü genel sınıra ulaştı. Lütfen yarın tekrar deneyin."
+
+msgctxt "accounts.academic_item_kind"
+msgid "Təhsil / dərəcə"
+msgstr "Eğitim / derece"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Peşəkar təcrübə"
+msgstr "Mesleki deneyim"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Kitab / dərslik"
+msgstr "Kitap / ders kitabı"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Elmi layihə / qrant"
+msgstr "Bilimsel proje / hibe"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Patent"
+msgstr "Patent"
+
+msgctxt "accounts.academic_item_kind"
+msgid "Mükafat / təltif"
+msgstr "Ödül / takdir"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məs.: Verilənlər bazası sistemləri"
+msgstr "Örn.: Veritabanı sistemleri"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Kafedra, səviyyə (bakalavr / magistr)"
+msgstr "Bölüm, düzey (lisans / yüksek lisans)"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məs.: Kompüter elmləri üzrə magistr"
+msgstr "Örn.: Bilgisayar bilimleri yüksek lisansı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Universitet, fakültə, şəhər"
+msgstr "Üniversite, fakülte, şehir"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məs.: Proqram mühəndisi"
+msgstr "Örn.: Yazılım mühendisi"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Təşkilat, dövr (2019–2023)"
+msgstr "Kurum, dönem (2019–2023)"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məqalənin adı"
+msgstr "Makalenin adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Jurnal, cild / nömrə, həmmüəlliflər"
+msgstr "Dergi, cilt / sayı, ortak yazarlar"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Kitabın / dərsliyin adı"
+msgstr "Kitabın / ders kitabının adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Nəşriyyat, ISBN, həmmüəlliflər"
+msgstr "Yayınevi, ISBN, ortak yazarlar"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məruzənin adı"
+msgstr "Bildirinin adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Konfransın adı, şəhər"
+msgstr "Konferansın adı, şehir"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Layihənin adı"
+msgstr "Projenin adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Maliyyələşdirən qurum, rolunuz (rəhbər / icraçı)"
+msgstr "Destekleyen kurum, rolünüz (yürütücü / araştırmacı)"
+
+msgctxt "accounts.academic_item_hint"
+msgid "İxtiranın adı"
+msgstr "Buluşun adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Patent nömrəsi, verən qurum"
+msgstr "Patent numarası, veren kurum"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Məs.: Cisco CCNA"
+msgstr "Örn.: Cisco CCNA"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Verən qurum, sertifikat nömrəsi"
+msgstr "Veren kurum, sertifika numarası"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Mükafatın adı"
+msgstr "Ödülün adı"
+
+msgctxt "accounts.academic_item_hint"
+msgid "Verən qurum, səbəb"
+msgstr "Veren kurum, gerekçe"
+
+msgctxt "accounts.academic_items.attachment"
+msgid "Faylın məzmunu PDF və ya şəkil formatına uyğun deyil."
+msgstr "Dosya içeriği PDF veya görsel biçimine uymuyor."
+
+msgctxt "accounts.academic_items.attachment"
+msgid "Şəklin ölçüsü çox böyükdür — daha kiçik şəkil seçin."
+msgstr "Görsel çok büyük — daha küçük bir görsel seçin."
+
+msgctxt "accounts.academic_items.attachment"
+msgid "Fayl seçilməyib."
+msgstr "Dosya seçilmedi."
+
+msgctxt "accounts.academic_items.attachment"
+msgid "Fayl boşdur."
+msgstr "Dosya boş."
+
+#, python-format
+msgctxt "accounts.academic_items.attachment"
+msgid "Fayl %(limit)s MB-dan böyük ola bilməz."
+msgstr "Dosya %(limit)s MB'tan büyük olamaz."
+
+msgctxt "accounts.academic_items.attachment"
+msgid "Yalnız PDF və ya şəkil (JPG, PNG, WEBP) yükləmək olar."
+msgstr "Yalnızca PDF veya görsel (JPG, PNG, WEBP) yüklenebilir."
+
+msgctxt "accounts.academic_items.error"
+msgid "Bu qeyd növünə fayl əlavə etmək olmur."
+msgstr "Bu kayıt türüne dosya eklenemez."
+
+#, python-format
+msgctxt "profile.academic_items"
+msgid "Əlavə et: %(kind)s"
+msgstr "Ekle: %(kind)s"
+
+msgctxt "profile.academic_items"
+msgid "Hələ qeyd əlavə edilməyib. Aşağıdan bölmə seçib başlayın."
+msgstr "Henüz kayıt eklenmedi. Başlamak için aşağıdan bir bölüm seçin."
+
+#, python-format
+msgctxt "profile.academic_items"
+msgid "Boş bölmələr (%(count)s)"
+msgstr "Boş bölümler (%(count)s)"
+
+msgctxt "profile.academic_items"
+msgid "əlavə etmək üçün seçin"
+msgstr "eklemek için seçin"
+
+msgctxt "profile.academic_items"
+msgid "Faylı aç"
+msgstr "Dosyayı aç"
+
+msgctxt "profile.academic_items"
+msgid "PDF sənəd"
+msgstr "PDF belge"
+
+msgctxt "profile.academic_items"
+msgid "Şəkil"
+msgstr "Görsel"
+
+msgctxt "profile.academic_items"
+msgid "Fayl 10 MB-dan böyük ola bilməz."
+msgstr "Dosya 10 MB'tan büyük olamaz."
+
+msgctxt "profile.academic_items"
+msgid "Yalnız PDF və ya şəkil (JPG, PNG, WEBP) yükləmək olar."
+msgstr "Yalnızca PDF veya görsel (JPG, PNG, WEBP) yüklenebilir."
+
+msgctxt "profile.academic_items"
+msgid "Fayl seç"
+msgstr "Dosya seç"
+
+msgctxt "profile.academic_items"
+msgid "Faylı dəyiş"
+msgstr "Dosyayı değiştir"
+
+msgctxt "profile.academic_items"
+msgid "Fayl (sənəd və ya şəkil)"
+msgstr "Dosya (belge veya görsel)"
+
+msgctxt "profile.academic_items"
+msgid "Faylı sil"
+msgstr "Dosyayı sil"
+
+msgctxt "profile.academic_items"
+msgid "Fayl yadda saxlayanda silinəcək."
+msgstr "Dosya kaydettiğinizde silinecek."
+
+msgctxt "profile.academic_items"
+msgid "Geri al"
+msgstr "Silmeyi geri al"
+
+msgctxt "profile.academic_items"
+msgid "PDF, JPG, PNG və ya WEBP · maksimum 10 MB"
+msgstr "PDF, JPG, PNG veya WEBP · en fazla 10 MB"
+
+msgctxt "profile.edit_v2"
+msgid ""
+"Təhsil və təcrübənizi, fənlərinizi, nəşr və layihələrinizi, sertifikat və "
+"mükafatlarınızı əlavə edin; lazım olan yerdə sənəd və ya şəkil də qoşa "
+"bilərsiniz. Bunlar profil səhifənizdə görünəcək."
+msgstr ""
+"Eğitim ve deneyiminizi, derslerinizi, yayın ve projelerinizi, sertifika ve "
+"ödüllerinizi ekleyin; gerektiğinde belge veya görsel de ekleyebilirsiniz. "
+"Bunlar profil sayfanızda görünecek."
+
+msgctxt "profile.avatar"
+msgid "Profil şəkli"
+msgstr "Profil fotoğrafı"
+
+msgctxt "profile.avatar"
+msgid "Şəkli dəyiş / yüklə"
+msgstr "Fotoğrafı değiştir / yükle"
+
+msgctxt "profile.avatar"
+msgid "Şəkli sil"
+msgstr "Fotoğrafı sil"
+
+msgctxt "profile.avatar"
+msgid "Şəkil yüklə"
+msgstr "Fotoğraf yükle"
+
+msgctxt "profile.avatar"
+msgid "Şəkli dəyiş"
+msgstr "Fotoğrafı değiştir"
+
+msgctxt "profile.avatar"
+msgid "Sil"
+msgstr "Kaldır"
+
+msgctxt "profile.avatar"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "profile.avatar"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "profile.avatar"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "profile.avatar"
+msgid "Başqa şəkil"
+msgstr "Başka fotoğraf"
+
+msgctxt "profile.avatar"
+msgid "Profil şəkli silinsin?"
+msgstr "Profil fotoğrafı silinsin mi?"
+
+msgctxt "profile.avatar"
+msgid "Şəkil silinəcək, yerində adınızın baş hərfləri görünəcək."
+msgstr "Fotoğraf silinecek, yerine adınızın baş harfleri görünecek."
+
+msgctxt "profile.avatar"
+msgid "Əməliyyat alınmadı. Yenidən cəhd edin."
+msgstr "İşlem başarısız oldu. Lütfen tekrar deneyin."
+
+msgctxt "profile.avatar"
+msgid "Şəkil 10 MB-dan böyük ola bilməz."
+msgstr "Fotoğraf 10 MB'tan büyük olamaz."
+
+msgctxt "profile.avatar"
+msgid "Yalnız JPG, PNG, WEBP və ya GIF şəkil seçin."
+msgstr "Yalnızca JPG, PNG, WEBP veya GIF görsel seçin."
+
+msgctxt "profile.avatar"
+msgid "JPG, PNG, WEBP və ya GIF · maksimum 10 MB"
+msgstr "JPG, PNG, WEBP veya GIF · en fazla 10 MB"
+
+msgctxt "profile.avatar"
+msgid "Profil şəkli yeniləndi."
+msgstr "Profil fotoğrafı güncellendi."
+
+msgctxt "profile.avatar"
+msgid "Profil şəkli silindi."
+msgstr "Profil fotoğrafı silindi."
+
+msgctxt "profile.avatar"
+msgid "Naməlum əməliyyat."
+msgstr "Bilinmeyen işlem."
+
+msgctxt "organizations.overview"
+msgid "Universitet strukturu"
+msgstr "Üniversite yapısı"
+
+msgctxt "organizations.overview"
+msgid "Fakültə, kafedra və ixtisas ağacı"
+msgstr "Fakülte, bölüm ve program ağacı"
+
+msgctxt "organizations.overview"
+msgid "Fakültələr"
+msgstr "Fakülteler"
+
+msgctxt "organizations.overview"
+msgid "Dekanlar, kafedralar, tələbə sayı"
+msgstr "Dekanlar, bölümler, öğrenci sayısı"
+
+msgctxt "organizations.overview"
+msgid "Kafedralar"
+msgstr "Bölümler"
+
+msgctxt "organizations.overview"
+msgid "Müdirlər və müəllim heyəti"
+msgstr "Başkanlar ve öğretim kadrosu"
+
+msgctxt "organizations.overview"
+msgid "Qruplar"
+msgstr "Gruplar"
+
+msgctxt "organizations.overview"
+msgid "Akademik qruplar və tələbələr"
+msgstr "Akademik gruplar ve öğrenciler"
+
+msgctxt "organizations.overview"
+msgid "Üzvlər"
+msgstr "Üyeler"
+
+msgctxt "organizations.overview"
+msgid "Rol, vəzifə və bölmə ilə üzv reyestri"
+msgstr "Rol, pozisyon ve birimle üye kaydı"
+
+msgctxt "organizations.overview"
+msgid "Rollar"
+msgstr "Roller"
+
+msgctxt "organizations.overview"
+msgid "Rol kataloqu və icazələr"
+msgstr "Rol kataloğu ve izinler"
+
+msgctxt "organizations.overview"
+msgid "Rolları idarə et"
+msgstr "Rolleri yönet"
+
+msgctxt "organizations.overview"
+msgid "Rol vermək və geri almaq"
+msgstr "Rol verme ve geri alma"
+
+msgctxt "organizations.overview"
+msgid "İcazələr"
+msgstr "İzinler"
+
+msgctxt "organizations.overview"
+msgid "Rolların icazə açarlarını redaktə et"
+msgstr "Rollerin izin anahtarlarını düzenle"
+
+msgctxt "organizations.overview"
+msgid "Audit jurnalı"
+msgstr "Denetim günlüğü"
+
+msgctxt "organizations.overview"
+msgid "Kim, nə vaxt, nəyi dəyişdi"
+msgstr "Kim, ne zaman, neyi değiştirdi"
+
+msgctxt "organizations.overview"
+msgid "Təşkilat ayarları"
+msgstr "Kurum ayarları"
+
+msgctxt "organizations.overview"
+msgid "Əlaqə məlumatı, ünvan və sayt"
+msgstr "İletişim bilgileri, adres ve web sitesi"
+
+msgctxt "organizations.overview"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "organizations.overview"
+msgid "Gözləmədə"
+msgstr "Beklemede"
+
+msgctxt "organizations.overview"
+msgid "Dayandırılıb"
+msgstr "Askıya alındı"
+
+msgctxt "organizations.overview"
+msgid "Aktiv təşkilat seçilməyib"
+msgstr "Aktif kurum seçilmedi"
+
+msgctxt "organizations.overview"
+msgid "Cari dövr"
+msgstr "Mevcut dönem"
+
+msgctxt "organizations.overview"
+msgid "Növbəti dövr"
+msgstr "Sonraki dönem"
+
+msgctxt "organizations.overview"
+msgid "Son dövr"
+msgstr "Son dönem"
+
+msgctxt "organizations.overview"
+msgid "Akademik dövr təyin edilməyib"
+msgstr "Akademik dönem tanımlanmamış"
+
+msgctxt "organizations.overview"
+msgid "Yaradılıb"
+msgstr "Oluşturuldu"
+
+msgctxt "organizations.overview"
+msgid "Üzv"
+msgstr "Üye"
+
+msgctxt "organizations.overview"
+msgid "Tələbə"
+msgstr "Öğrenci"
+
+msgctxt "organizations.overview"
+msgid "Müəllim"
+msgstr "Öğretmen"
+
+msgctxt "organizations.overview"
+msgid "Heyət"
+msgstr "Personel"
+
+msgctxt "organizations.overview"
+msgid "fərqli şəxs"
+msgstr "farklı kişi"
+
+msgctxt "organizations.overview"
+msgid "sizin əhatənizdə"
+msgstr "kapsamınızda"
+
+msgctxt "organizations.overview"
+msgid "tələbə olmayan rollar"
+msgstr "öğrenci dışı roller"
+
+msgctxt "organizations.overview"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "organizations.overview"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "organizations.overview"
+msgid "İxtisas"
+msgstr "Program"
+
+msgctxt "organizations.overview"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "organizations.overview"
+msgid "Sizin əhatəniz üzrə"
+msgstr "Kapsamınıza göre"
+
+#, python-format
+msgctxt "organizations.overview"
+msgid "Son 30 gündə yeni üzv: %(n)s"
+msgstr "Son 30 günde yeni üye: %(n)s"
+
+#, python-format
+msgctxt "organizations.overview"
+msgid "Dayandırılmış hesab: %(n)s"
+msgstr "Askıya alınmış hesap: %(n)s"
+
+msgctxt "organizations.overview"
+msgid "Əhatəniz təyin edilməyib"
+msgstr "Kapsamınız tanımlanmamış"
+
+msgctxt "organizations.overview"
+msgid ""
+"Rolunuz bölməyə bağlıdır, amma bölmə təyin edilməyib — üzv rəqəmləri "
+"göstərilmir."
+msgstr ""
+"Rolünüz bir birime bağlı, ancak birim atanmamış — üye sayıları "
+"gösterilmiyor."
+
+msgctxt "organizations.overview"
+msgid "Struktur"
+msgstr "Yapı"
+
+msgctxt "organizations.overview"
+msgid "Sürətli keçidlər"
+msgstr "Hızlı bağlantılar"
+
+msgctxt "organizations.overview"
+msgid "Rol paylanması"
+msgstr "Rol dağılımı"
+
+#, python-format
+msgctxt "organizations.overview"
+msgid "Digər rollar (%(n)s)"
+msgstr "Diğer roller (%(n)s)"
+
+msgctxt "organizations.overview"
+msgid ""
+"Say — rolu daşıyan fərqli şəxslərdir; bir nəfərin bir neçə rolu ola bilər."
+msgstr ""
+"Sayı, rolü taşıyan farklı kişilerdir; bir kişinin birden fazla rolü "
+"olabilir."
+
+msgctxt "organizations.overview"
+msgid "Hələ aktiv üzvlük yoxdur."
+msgstr "Henüz aktif üyelik yok."
+
+msgctxt "organizations.overview"
+msgid "Son qoşulanlar"
+msgstr "Son katılanlar"
+
+msgctxt "organizations.overview"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "organizations.overview"
+msgid "Əhatənizdə hələ üzv yoxdur."
+msgstr "Kapsamınızda henüz üye yok."
+
+msgctxt "organizations.overview"
+msgid "Son dəyişikliklər"
+msgstr "Son değişiklikler"
+
+msgctxt "organizations.overview"
+msgid "Sistem"
+msgstr "Sistem (otomatik)"
+
+msgctxt "organizations.overview"
+msgid "Son dövrdə üzvlük və ya rol dəyişikliyi qeydə alınmayıb."
+msgstr "Son dönemde üyelik veya rol değişikliği kaydedilmedi."
+
+msgctxt "profile.sidebar"
+msgid "Təşkilat paneli"
+msgstr "Kurum paneli"
+
+msgctxt "organizations.members"
+msgid "Hesab"
+msgstr "Hesap"
+
+msgctxt "organizations.members"
+msgid "Aktiv hesab"
+msgstr "Aktif hesap"
+
+msgctxt "organizations.members"
+msgid "Dayandırılmış hesab"
+msgstr "Askıya alınmış hesap"
+
+msgctxt "organizations.members"
+msgid "Ad Soyad"
+msgstr "Adı Soyadı"
+
+msgctxt "organizations.members"
+msgid "Üst bölmə"
+msgstr "Üst birim"
+
+msgctxt "organizations.members"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "organizations.members"
+msgid "İxrac üçün icazəniz yoxdur."
+msgstr "Dışa aktarma izniniz yok."
+
+#, python-format
+msgctxt "organizations.members"
+msgid "Üzv reyestri CSV ixracı: %(n)d sətir"
+msgstr "Üye kaydı CSV dışa aktarımı: %(n)d satır"
+
+msgctxt "organizations.members"
+msgid "Cari süzgəcə uyğun üzvləri CSV faylı kimi yüklə"
+msgstr "Geçerli filtrelere uyan üyeleri CSV dosyası olarak indir"
+
+msgctxt "organizations.members"
+msgid "CSV ixracı"
+msgstr "CSV dışa aktar"
+
+msgctxt "organizations.members"
+msgid "Panel"
+msgstr "Genel bakış"
+
+msgctxt "organizations.members"
+msgid "Struktur üzvləri"
+msgstr "Yapı üyeleri"
+
+msgctxt "organizations.roles_registry"
+msgid "Xüsusi"
+msgstr "Özel"
+
+msgctxt "organizations.roles_registry"
+msgid "səviyyə"
+msgstr "seviye"
+
+msgctxt "organizations.roles_registry"
+msgid "İcazə"
+msgstr "İzin"
+
+#, python-format
+msgctxt "organizations.roles_registry"
+msgid "%(n)s icazə"
+msgstr "%(n)s izin"
+
+msgctxt "organizations.roles_registry"
+msgid "Üzvlər"
+msgstr "Üyeler"

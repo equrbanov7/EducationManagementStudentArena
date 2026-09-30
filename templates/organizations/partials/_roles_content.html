@@ -10,11 +10,16 @@ Bu partial İKİ yerdə göstərilir:
     — başlığı qabıq verir, burada `<h1>` YAZILMIR;
   * müstəqil səhifədə (`organizations/roles.html`) — orada başlıq lazımdır.
 
+2026-10-01 (sahib: «Panel / Üzvlər / Rollar yenidən redizayn»): cədvəl KART
+TORUNA çevrildi (`roles/_card.html`) — telefonda üfüqi sürüşmə yoxdur, hər kartda
+səviyyə, sistem/xüsusi nişanı, üzv sayı və açılan «N icazə» xülasəsi var. KPI,
+süzgəc və «Ətraflı» çekmecəsi DƏYİŞMƏYİB; `ui.table_rows` konteksti də qalır.
+
 CSP: inline `<style>`/`<script>` bloku yoxdur; CSS/JS xarici fayldadır və
 partial-ın öz içindədir ki, AJAX swap-dan sonra da yüklənsin
 (bax `docs/frontend/AJAX_SAFE_JS_PATTERN.md`).{% endcomment %}
 {% with s=org_roles_section ui=org_roles_section.ui %}
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_registry.css' %}?v=20260909-1">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/roles_registry.css' %}?v=20261001-1">
 {% if not s.organization %}
     {% trans "Aktiv təşkilat tapılmadı." context "organizations.roles_registry" as rolreg_no_org %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=rolreg_no_org %}
@@ -30,10 +35,16 @@ partial-ın öz içindədir ki, AJAX swap-dan sonra da yüklənsin
 
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=ui.kpi_tiles kpi_variant="5" %}
 
-    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-roles" filter_prefix=ui.prefix filter_fields=ui.filter_fields filter_count_label=ui.filter_count_label filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="org-roles" filter_prefix=ui.prefix filter_fields=ui.filter_fields filter_count_label=ui.filter_count_label filter_base_url=s.filter_base_url|default:profile_base_url filter_auto=True filter_bootstrap=True %}
 
     <div data-ems-filter-target>
-        {% include "partials/ems_ui/_data_table.html" with table_columns=ui.columns table_rows=ui.table_rows table_state=ui.table_state table_zebra=True table_wide=True state_kind="empty" state_icon="fa-user-shield" state_title=ui.state_title state_body=ui.state_body %}
+        {% if ui.entries %}
+        <div class="rolreg-grid">
+            {% for e in ui.entries %}{% include "organizations/partials/roles/_card.html" %}{% endfor %}
+        </div>
+        {% else %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-shield" state_title=ui.state_title state_body=ui.state_body %}
+        {% endif %}
     </div>
 
     {{ ui.entries|json_script:"rolreg-data" }}

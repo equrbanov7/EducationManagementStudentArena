@@ -1,0 +1,535 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   academic_items_manage.css — «Profili redaktə et» → «Akademik fəaliyyət»
+   idarəetməsi + qeyd modalı (2026-10-01, sahib: «bir az da səliqəyə sal»).
+
+   Əvvəl edit_profile_v2.css-in içində idi (600 sətir büdcəsi). Telefonda
+   (360–390px) problemlər: «Əlavə et» düyməsi uzun başlıqda ALTA düşürdü, hər
+   boş növ ayrıca «Hələ qeyd əlavə edilməyib.» kartı idi, düymələr iri mavi
+   hap idi. İndi:
+   * qrup başlığı: ikon + ad + say SOLDA, yığcam «+ Əlavə et» SAĞDA,
+     `nowrap` — heç vaxt alta düşmür; ≤420px-də 40px-lik yalnız-ikon düymə;
+   * qeydlər kartın içində saç xətti ilə ayrılan sətirlərdir (qutu içində qutu
+     yox); əməliyyatlar dar ekranda öz-özünə növbəti sətrə keçir (flex-wrap);
+   * boş növlər aşağıda «Boş bölmələr (N)» çip sırasıdır;
+   * modal telefonda tam ekrandır (modal-fullscreen-sm-down).
+   Yalnız --ems-* / --profile-* tokenləri.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.academic-items-groups {
+    display: grid;
+    gap: 12px;
+}
+
+/* ── Dolu qrup kartı ──────────────────────────────────────────────────────── */
+.academic-items-group {
+    border: 1px solid var(--profile-border);
+    border-radius: 14px;
+    padding: 12px 14px 4px;
+    background: var(--ems-neutral-0, #fff);
+}
+
+.academic-items-group__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: nowrap;
+    min-height: 40px;
+    padding-bottom: 10px;
+}
+
+.academic-items-group__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 700;
+    color: var(--profile-text);
+}
+
+.academic-items-group__icon {
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-600);
+    font-size: 0.85rem;
+}
+
+.academic-items-group__name {
+    min-width: 0;
+    font-size: 0.95rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.academic-items-group__count {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--ems-neutral-100, #f1f5f9);
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+/* Yığcam «Əlavə et» — tint fonlu kontur düymə (əvvəlki iri qradiyent hap yox). */
+.academic-items-add-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-primary-200, #bfdbfe);
+    border-radius: 10px;
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.academic-items-add-btn:hover {
+    background: var(--ems-primary-100, #dbeafe);
+    border-color: var(--ems-primary-300, #93c5fd);
+}
+
+.academic-items-add-btn:focus-visible,
+.academic-items-chip:focus-visible,
+.academic-attach__btn:focus-visible,
+.academic-attach__remove:focus-visible {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.academic-items-add-btn i {
+    font-size: 0.75rem;
+}
+
+/* ── Qeyd sətirləri ───────────────────────────────────────────────────────── */
+.academic-items-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.academic-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--profile-border);
+}
+
+.academic-item__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.academic-item__title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--profile-text);
+    overflow-wrap: anywhere;
+}
+
+.academic-item__meta {
+    font-size: 0.8rem;
+    color: var(--profile-muted);
+    overflow-wrap: anywhere;
+}
+
+/* Dar ekranda əməliyyatlar növbəti sətrə keçir və SAĞA yığılır. */
+.academic-item__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    margin-inline-start: auto;
+}
+
+/* Əməliyyat düymələri GÖRÜNƏN çərçivəlidir (sahib: «qoyduğunu dəyişmək olmur
+   kimidir») — «Redaktə» etiketlidir. Ölçü 32px. */
+.academic-item__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 9px;
+    border: 1px solid var(--profile-border);
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--profile-text);
+    font-size: 0.8rem;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.academic-item__action--edit {
+    border-color: var(--ems-primary-200, #bfdbfe);
+    color: var(--ems-primary-700);
+}
+
+.academic-item__action-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.academic-item__action:hover,
+.academic-item__action:focus-visible {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.academic-item__action--danger:hover,
+.academic-item__action--danger:focus-visible {
+    background: var(--ems-danger-100, #fee2e2);
+    border-color: #991b1b;
+    color: #991b1b;
+}
+
+/* Boş vəziyyət + axtarışda «uyğun qeyd yoxdur» qeydi (JS də bu sinfi yazır). */
+.academic-items-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    color: var(--profile-muted);
+    font-size: 0.86rem;
+}
+
+.academic-items-group .academic-items-empty {
+    margin: 0;
+    padding: 10px 0;
+    border-top: 1px solid var(--profile-border);
+}
+
+/* ── Boş bölmələr: yığcam çip sırası ─────────────────────────────────────── */
+.academic-items-quickadd {
+    padding: 12px 14px 14px;
+    border: 1px dashed var(--ems-neutral-300, #cbd5e1);
+    border-radius: 14px;
+    background: var(--profile-bg);
+}
+
+.academic-items-quickadd__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    margin: 0 0 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--profile-text);
+}
+
+.academic-items-quickadd__sub {
+    font-weight: 500;
+    color: var(--profile-muted);
+}
+
+.academic-items-quickadd__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.academic-items-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    max-width: 100%;
+    padding: 0 12px;
+    border: 1px solid var(--profile-border);
+    border-radius: 999px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--profile-text);
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-align: start;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.academic-items-chip:hover {
+    border-color: var(--ems-primary-300, #93c5fd);
+    background: var(--ems-primary-50, #eff6ff);
+    color: var(--ems-primary-700, #1d4ed8);
+}
+
+.academic-items-chip__icon {
+    color: var(--ems-primary-600);
+    font-size: 0.82rem;
+}
+
+.academic-items-chip__plus {
+    color: var(--profile-muted);
+    font-size: 0.68rem;
+}
+
+/* Axtarış zamanı boş bölmələr və ümumi boş-vəziyyət mətni gizlənir. */
+.is-searching .academic-items-quickadd,
+.is-searching .academic-items-groups > .academic-items-empty {
+    display: none;
+}
+
+/* ── Axtarış + «Daha çox göstər» ─────────────────────────────────────────── */
+.academic-items-search {
+    position: relative;
+    margin-bottom: 14px;
+    max-width: 420px;
+}
+
+.academic-items-search i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--profile-muted);
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.academic-items-search .form-control {
+    padding-left: 34px;
+    border-radius: 10px;
+}
+
+.academic-items-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 10px;
+    padding: 4px 12px;
+    border: 1px dashed var(--ems-primary-200);
+    border-radius: 999px;
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.academic-items-toggle:hover {
+    background: var(--ems-primary-100);
+}
+
+/* [hidden] author display qaydalarını (flex) MƏĞLUB etməlidir — əks halda
+   axtarış/collapse gizlətməsi işləmir (review tapıntısı). */
+.academic-item[hidden],
+.academic-items-toggle[hidden],
+.academic-items-nomatch[hidden],
+.academic-attach [hidden] {
+    display: none !important;
+}
+
+/* ── Qeyd modalı ──────────────────────────────────────────────────────────── */
+.academic-item-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.academic-item-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.academic-item-field--full {
+    grid-column: 1 / -1;
+}
+
+/* Fayl sahəsi: çılpaq file input gizlidir, `<label for>` düymədir. */
+.academic-attach {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px dashed var(--ems-neutral-300, #cbd5e1);
+    border-radius: 12px;
+    background: var(--ems-neutral-50, #f8fafc);
+}
+
+.academic-attach__current,
+.academic-attach__removed {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.academic-attach__current .academic-file {
+    margin-top: 0;
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.academic-attach__removed {
+    font-size: 0.84rem;
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+.academic-attach__picker {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+}
+
+.academic-attach__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.academic-attach__btn,
+.academic-attach__remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--profile-border);
+    border-radius: 10px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--profile-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.academic-attach__btn:hover {
+    border-color: var(--ems-primary-600);
+    color: var(--ems-primary-700);
+}
+
+.academic-attach__remove {
+    min-height: 32px;
+    padding: 0 10px;
+    color: var(--ems-danger-700, #b91c1c);
+    border-color: var(--ems-danger-200, #fecaca);
+    font-size: 0.8rem;
+}
+
+.academic-attach__remove:hover {
+    background: var(--ems-danger-100, #fee2e2);
+}
+
+/* «Geri al» — neytral (təhlükəli əməl deyil). */
+.academic-attach__remove--undo {
+    color: var(--profile-text);
+    border-color: var(--profile-border);
+}
+
+.academic-attach__remove--undo:hover {
+    background: var(--ems-neutral-100, #f1f5f9);
+}
+
+.academic-attach__picker:has(.academic-attach__input:focus-visible) .academic-attach__btn {
+    outline: 2px solid var(--ems-primary-600, #2563eb);
+    outline-offset: 2px;
+}
+
+.academic-attach__hint {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--profile-muted);
+    overflow-wrap: anywhere;
+}
+
+.academic-attach__hint.is-selected {
+    color: var(--ems-primary-700);
+    font-weight: 600;
+}
+
+/* ── Telefon ──────────────────────────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+    .academic-item-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tam ekran modal: künc/kölgə yox, altlıq düymələri yarıbayarı. */
+    #academicItemModal .edit-profile-modal {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #academicItemModal .modal-footer > .ems-btn {
+        flex: 1 1 0;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 420px) {
+    .academic-items-group {
+        padding-inline: 12px;
+    }
+
+    .academic-items-add-btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+    }
+
+    .academic-items-add-btn i {
+        font-size: 0.85rem;
+    }
+
+    /* Mətn DOM-da qalır (ekran oxuyucu + aria-label), vizual olaraq gizli. */
+    .academic-items-add-btn__text {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}
+
+/* Modalda `<form>` header/body/footer-i sarır — Bootstrap-ın flex sütunu
+   (scrollable + fullscreen) formanın içində də işləsin deyə forma özü flex-dir:
+   gövdə sürüşür, altlıq həmişə görünür (telefonda ekranın altında). */
+#academicItemForm {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+#academicItemForm .modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+}

@@ -1,186 +1,180 @@
-/* EMSArena — organizations dashboard (standalone; C3-4 inline-CSS extraction 2026-07-04) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* =========================================================================
+   Köhnə müstəqil təşkilat paneli (`organizations/dashboard.html`) — 2026-10-01.
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f7fa;
-            color: #2d3748;
-        }
+   Səhifə indi base.html qabığının içindədir; idarəetmə aktorları kabinetin
+   «Təşkilat paneli»nə yönləndirilir, bu üslub yalnız qalan üzvlər üçündür.
+   Yalnız `--ems-*` tokenləri (tema/qaranlıq rejim), mobil-birinci.
+   ========================================================================= */
 
-        .header {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            color: white;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+.orgdash {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6, 16px);
+    min-width: 0;
+}
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.orgdash-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ems-sp-4, 12px);
+}
 
-        .org-name {
-            font-size: 24px;
-            font-weight: 600;
-        }
+.orgdash-head__main {
+    min-width: 0;
+}
 
-        .nav-menu {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
+.orgdash-head__eyebrow {
+    margin: 0 0 4px;
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
 
-        .nav-menu a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity 0.2s;
-        }
+.orgdash-head__title {
+    margin: 0;
+    font-size: var(--ems-fs-2xl, 1.5rem);
+    font-weight: 800;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
 
-        .nav-menu a:hover {
-            opacity: 0.8;
-        }
+.orgdash-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+}
 
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
+.orgdash-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg);
+    color: var(--ems-link);
+    font-weight: 600;
+    text-decoration: none;
+}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
+.orgdash-nav a:hover,
+.orgdash-nav a:focus-visible {
+    border-color: var(--ems-primary-300);
+    text-decoration: underline;
+}
 
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+.orgdash-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+    gap: var(--ems-sp-4, 12px);
+}
 
-        .stat-label {
-            color: #718096;
-            font-size: 14px;
-            margin-bottom: 0.5rem;
-        }
+.orgdash-stat,
+.orgdash-card {
+    padding: var(--ems-sp-5, 14px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
 
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #2563eb;
-        }
+.orgdash-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 
-        .section {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
+.orgdash-stat__label {
+    font-size: var(--ems-fs-xs, 0.75rem);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: #1a202c;
-        }
+.orgdash-stat__value {
+    font-size: var(--ems-fs-2xl, 1.5rem);
+    font-weight: 800;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
 
-        .activity-item {
-            padding: 1rem;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.orgdash-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4, 12px);
+}
 
-        .activity-item:last-child {
-            border-bottom: none;
-        }
+.orgdash-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-md, 1rem);
+    font-weight: 800;
+    color: var(--ems-text);
+}
 
-        .activity-info {
-            flex: 1;
-        }
+.orgdash-actions,
+.orgdash-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+}
 
-        .activity-user {
-            font-weight: 600;
-            color: #2d3748;
-        }
+.orgdash-role {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 3px 11px;
+    border-radius: var(--ems-r-pill, 999px);
+    border: 1px solid var(--ems-primary-100, var(--ems-border));
+    background: var(--ems-primary-50, var(--ems-bg-subtle));
+    color: var(--ems-primary-800, var(--ems-text));
+    font-size: var(--ems-fs-sm, 0.875rem);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
 
-        .activity-action {
-            color: #718096;
-            font-size: 14px;
-        }
+.orgdash-feed {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-        .activity-time {
-            color: #a0aec0;
-            font-size: 12px;
-        }
+.orgdash-feed__item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px var(--ems-sp-3, 8px);
+    padding: 9px 0;
+    font-size: var(--ems-fs-sm, 0.875rem);
+}
 
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
+.orgdash-feed__item + .orgdash-feed__item {
+    border-top: 1px solid var(--ems-neutral-100);
+}
 
-        .btn:hover {
-            background: #1e40af;
-        }
+.orgdash-feed__who {
+    font-weight: 700;
+    color: var(--ems-text);
+}
 
-        .btn-secondary {
-            background: #64748b;
-        }
+.orgdash-feed__what {
+    flex: 1 1 auto;
+    min-width: 0;
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
 
-        .btn-secondary:hover {
-            background: #475569;
-        }
+.orgdash-feed__when {
+    color: var(--ems-neutral-500);
+    white-space: nowrap;
+}
 
-        .quick-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 1.5rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #718096;
-        }
-
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-menu {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-/* C3 (2026-07-03): mikro inline-style köçürmələri */
-  .dashboard-1 { margin-bottom: 2rem; font-size: 28px; }
-  .dashboard-2 { background: #dbeafe; color: #1e40af; padding: 0.5rem 1rem; border-radius: 6px; font-size: 14px; }
-
-/* Əməl düymələri sırası — inline flex əvəzi (CSP). */
-.dash-actions-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.orgdash-empty {
+    margin: 0;
+    color: var(--ems-neutral-500);
+}

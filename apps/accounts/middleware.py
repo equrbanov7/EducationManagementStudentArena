@@ -283,6 +283,9 @@ class ViewAsMiddleware:
             # silindi — adları burada saxlamağa ehtiyac yoxdur.
             "accounts:resend_code",
             "accounts:delete_account",
+            # 2026-10-01: profil şəklinin JSON API-si — `update-avatar` forması
+            # kimi bütün rejimlərdə bağlıdır (hədəfin şəklini dəyişmək olmaz).
+            "accounts:profile_avatar_api",
         }
     )
 

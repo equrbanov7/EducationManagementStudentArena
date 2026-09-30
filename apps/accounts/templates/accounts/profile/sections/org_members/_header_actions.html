@@ -1,7 +1,24 @@
 {% load i18n %}
 {% comment %}Üzvlər başlıq əməlləri — struktur reyestrlərinə SPA keçidlər
-(yalnız aktorun icazəsi olan bölmələr). Yazı əməli yoxdur: üzv/rol təyinatı
-Fakültələr / Kafedralar reyestrindən və rol təyinatı bölməsindən aparılır.{% endcomment %}
+(yalnız aktorun icazəsi olan bölmələr) və CSV ixracı (2026-10-01; yalnız
+`can_export_members` — idarəetmə rolu və ya `member.edit`; cari süzgəclər daşınır).
+Yazı əməli yoxdur: üzv/rol təyinatı Fakültələr / Kafedralar reyestrindən və rol
+təyinatı bölməsindən aparılır.{% endcomment %}
+{% if org_members_section.export_url %}
+<a class="ems-btn" href="{{ org_members_section.export_url }}" data-force-navigation="true" data-om-export
+   title="{% trans 'Cari süzgəcə uyğun üzvləri CSV faylı kimi yüklə' context 'organizations.members' %}">
+    <i class="fas fa-file-csv" aria-hidden="true"></i>
+    {% trans "CSV ixracı" context "organizations.members" %}
+</a>
+{% endif %}
+{% if 'org-overview' in allowed_sections %}
+<a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-overview"
+   data-section="org-overview" data-source-url="{{ profile_base_url }}"
+   data-title="{% trans 'Təşkilat paneli' context 'profile.sidebar' %}">
+    <i class="fas fa-gauge-high" aria-hidden="true"></i>
+    {% trans "Panel" context "organizations.members" %}
+</a>
+{% endif %}
 {% if 'org-faculties' in allowed_sections %}
 <a class="ems-btn js-profile-section-link" href="{{ profile_base_url }}?section=org-faculties"
    data-section="org-faculties" data-source-url="{{ profile_base_url }}"

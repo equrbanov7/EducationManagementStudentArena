@@ -30,6 +30,8 @@ _SECTIONS = (
     ("workload-overview", "workload_overview_section", "workload_chain", "build_workload_overview_section"),
     # Mərhələ 6 (ekran 21) — «Keçilmiş dərslər» (müəllim + nəzarətçi).
     ("lessons-log", "lessons_log_section", "lessons_log", "build_lessons_log_section"),
+    # «Təşkilat paneli» (sahib 2026-10-01) — köhnə müstəqil təşkilat panelinin varisi.
+    ("org-overview", "org_overview_section", "org_overview", "build_org_overview_section"),
 )
 
 

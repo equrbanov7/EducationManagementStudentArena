@@ -72,6 +72,16 @@ def _get_rate_limit() -> str:
     return getattr(settings, "AI_ASSISTANT_RATE_LIMIT", "25/1h")
 
 
+#: Sahib 2026-10-01: BÜTÜN sistem üzrə gündəlik tavan — xərc nəzarəti (istifadəçi başına saatlıq
+#: limit minlərlə tələbə eyni anda yazanda xərci məhdudlaşdırmır). Uğurlu Gemini çağırışları sayılır.
+_GLOBAL_RATE_SCOPE = "ai_assistant_global"
+_GLOBAL_RATE_KEY = "all"
+
+
+def _get_global_rate_limit() -> str:
+    return getattr(settings, "AI_ASSISTANT_GLOBAL_RATE_LIMIT", "2000/1d")
+
+
 def _get_quota_info(user_id: int) -> dict:
     """Return remaining request count and reset time."""
     rate = _get_rate_limit()
@@ -192,6 +202,29 @@ def chat_view(request):
             status=429,
         )
 
+    global_rate = _get_global_rate_limit()
+    global_limited, _global_retry = is_rate_limited(_GLOBAL_RATE_SCOPE, global_rate, _GLOBAL_RATE_KEY)
+    if global_limited:
+        _log_request(
+            user=user,
+            organization=organization,
+            memberships=memberships,
+            prompt=message,
+            status=AIAssistantLog.Status.RATE_LIMITED,
+            block_reason="global_daily_limit",
+        )
+        return _json(
+            {
+                "error": "global_limit_exceeded",
+                "answer": pgettext(
+                    "ai_assistant.limit_exceeded",
+                    "AI assistent bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin.",
+                ),
+                **_get_quota_info(user.id),
+            },
+            status=429,
+        )
+
     # ── Build permission-filtered context ─────────────────────────────
     current_page = _page_path(body.get("current_page") if isinstance(body.get("current_page"), str) else "")
     try:
@@ -231,6 +264,7 @@ def chat_view(request):
 
     # ── Record rate limit hit and log ─────────────────────────────────
     record_rate_limit_hit(_RATE_SCOPE, rate, user.id)
+    record_rate_limit_hit(_GLOBAL_RATE_SCOPE, global_rate, _GLOBAL_RATE_KEY)
 
     _log_request(
         user=user,

@@ -1,0 +1,89 @@
+{% load i18n %}
+{% comment %}Rol kartı (sahib 2026-10-01: «Rollar» səhifəsi kart torudur). Kontekst: `e`
+(`roles_ui._entry`). Kartda: ad + texniki ad, kataloq səviyyəsi, sistem/xüsusi nişanı,
+əhatə, üzv sayı, «N icazə» xülasəsi — `<details>` ilə açılır (JS-siz, kateqoriya üzrə
+insan-oxunaqlı adlar; xam açarlar yalnız «Ətraflı» çekmecəsindədir). Keçidlər yalnız
+aktorun icazəli bölmələrinə: «İcazələri redaktə et» (`permission-editor`, rol seçilmiş)
+və «Üzvlər» (`org-members`, rol süzgəci ilə).{% endcomment %}
+<article class="rolreg-card{% if not e.is_active %} rolreg-card--off{% endif %}" data-rolreg-card="{{ e.id }}">
+    <header class="rolreg-card__head">
+        <div class="rolreg-card__titles">
+            <h3 class="rolreg-card__name">
+                <button type="button" class="rolreg-cell__name" data-rolreg-open="{{ e.id }}">{{ e.label }}</button>
+            </h3>
+            <code class="rolreg-cell__slug">{{ e.name }}</code>
+        </div>
+        <span class="rolreg-card__level" title="{% trans 'Kataloq səviyyəsi' context 'organizations.roles_registry' %}">
+            <span class="rolreg-card__levelnum">{{ e.level }}</span>
+            <span class="rolreg-card__levellabel">{% trans "səviyyə" context "organizations.roles_registry" %}</span>
+        </span>
+    </header>
+
+    <div class="rolreg-cell__tags">
+        {% if e.is_system %}
+            <span class="rolreg-tag rolreg-tag--system"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Sistem" context "organizations.roles_registry" %}</span>
+        {% else %}
+            <span class="rolreg-tag rolreg-tag--custom"><i class="fas fa-pen-ruler" aria-hidden="true"></i> {% trans "Xüsusi" context "organizations.roles_registry" %}</span>
+        {% endif %}
+        <span class="rolreg-tag">{{ e.scope_label }}</span>
+        {% if not e.is_active %}<span class="rolreg-tag rolreg-tag--off">{% trans "Deaktiv" context "organizations.roles_registry" %}</span>{% endif %}
+    </div>
+
+    {% if e.description %}<p class="rolreg-card__desc">{{ e.description }}</p>{% endif %}
+
+    <dl class="rolreg-card__stats">
+        <div class="rolreg-card__stat">
+            <dt>{% trans "Üzv" context "organizations.roles_registry" %}</dt>
+            <dd>{{ e.members }}</dd>
+        </div>
+        <div class="rolreg-card__stat">
+            <dt>{% trans "İcazə" context "organizations.roles_registry" %}</dt>
+            <dd>{% if e.wildcard %}∗{% else %}{{ e.permission_count }}{% endif %}</dd>
+        </div>
+    </dl>
+
+    {% if e.wildcard %}
+        <p class="rolreg-perm rolreg-perm--all"><i class="fas fa-infinity" aria-hidden="true"></i> {% trans "Bütün icazələr (*)" context "organizations.roles_registry" %}</p>
+    {% elif e.groups %}
+        <details class="rolreg-card__perms">
+            <summary>
+                <span class="rolreg-card__permsum">{% blocktrans context "organizations.roles_registry" with n=e.permission_count %}{{ n }} icazə{% endblocktrans %}</span>
+                <span class="rolreg-perm__cats">
+                    {% for g in e.groups|slice:":3" %}<span class="rolreg-chip">{{ g.label }} · {{ g.count }}</span>{% endfor %}
+                    {% if e.groups|length > 3 %}<span class="rolreg-chip rolreg-chip--more">+{{ e.groups|length|add:"-3" }}</span>{% endif %}
+                </span>
+            </summary>
+            <div class="rolreg-card__groups">
+                {% for g in e.groups %}
+                <div class="rolreg-card__group">
+                    <p class="rolreg-card__grouphead">{{ g.label }} <span>{{ g.count }}</span></p>
+                    <ul class="rolreg-card__permlist">
+                        {% for item in g.items %}<li>{{ item.label }}</li>{% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </details>
+    {% else %}
+        <p class="rolreg-perm rolreg-perm--none"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "İcazə verilməyib" context "organizations.roles_registry" %}</p>
+    {% endif %}
+
+    <footer class="rolreg-card__foot">
+        <button type="button" class="ems-btn ems-btn--sm" data-rolreg-open="{{ e.id }}">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            {% trans "Ətraflı" context "organizations.roles_registry" %}
+        </button>
+        {% if 'org-members' in allowed_sections and e.members %}
+        <a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=org-members&amp;om_role={{ e.name|urlencode }}" data-section="org-members">
+            <i class="fas fa-users" aria-hidden="true"></i>
+            {% trans "Üzvlər" context "organizations.roles_registry" %}
+        </a>
+        {% endif %}
+        {% if 'permission-editor' in allowed_sections %}
+        <a class="ems-btn ems-btn--sm" href="{{ profile_base_url }}?section=permission-editor&amp;pe_role={{ e.id }}" data-section="permission-editor">
+            <i class="fas fa-key" aria-hidden="true"></i>
+            {% trans "İcazələri redaktə et" context "organizations.roles_registry" %}
+        </a>
+        {% endif %}
+    </footer>
+</article>

@@ -47,6 +47,9 @@ _NAV_KEYWORDS = {
     "question-bank": "sual bank",
     "my-results": "nəticə bal qiymət",
     "audit-log": "audit jurnal log hərəkət",
+    "org-overview": "təşkilat universitet panel ümumi baxış statistika",
+    "org-members": "üzv üzvlər işçi heyət siyahı",
+    "org-roles": "rol rollar icazə",
 }
 #: Əlavə bölmələrin ikonları (yoxdursa ümumi ox).
 _NAV_ICONS = {
@@ -80,6 +83,8 @@ _NAV_ICONS = {
     "workload-center": "fa-briefcase",
     "audit-log": "fa-clipboard-list",
     "org-members": "fa-users",
+    "org-overview": "fa-gauge-high",
+    "org-roles": "fa-user-shield",
     "schedule-manage": "fa-calendar-plus",
     "exam-center-pins": "fa-hashtag",
     "exam-center-stats": "fa-chart-pie",
