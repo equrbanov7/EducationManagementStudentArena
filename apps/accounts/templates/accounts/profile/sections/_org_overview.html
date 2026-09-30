@@ -1,0 +1,101 @@
+{% load i18n static %}
+{% comment %}
+«Təşkilat paneli» (`org-overview`, sahib 2026-10-01) — köhnə müstəqil
+`/organizations/<slug>/` panelinin kabinet varisi.
+
+Kontekst `apps/accounts/views/profile/_sections/org_overview.py` (təşkilat rəqəmləri
+`apps/organizations/overview.py`). Hər vidcet öz data qapısı ilə gəlir: üzv
+rəqəmləri «Struktur üzvləri» reyestrinin əhatəsi ilə, audit axını `can_view_audit`
+ilə, keçidlər yalnız `allowed_sections`-dakı bölmələrə. Panel OXU-ONLY-dir (JS yoxdur);
+daxili keçidlər `?section=` linkləridir — qabığın `ajax.js`-i onları SPA ilə açır.
+⚠️ `<h1>` yazılmır — qabıq verir. CSS xarici fayldadır (CSP), panelin içindədir
+ki, AJAX swap-dan sonra da yüklənsin.
+{% endcomment %}
+{% if 'org-overview' in allowed_sections %}
+<section class="profile-section-panel profile-section--org-overview {% if active_section == 'org-overview' %}is-active{% endif %}"
+         data-profile-section-panel="org-overview"
+         data-source-url="{{ profile_base_url }}?section=org-overview">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_overview.css' %}?v=20261001-2">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_overview_cards.css' %}?v=20261001-2">
+{% with ov=org_overview_section %}
+{% if not ov.has_access %}
+    {% trans "Aktiv təşkilat seçilməyib" context "organizations.overview" as ov_empty %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=ov_empty %}
+{% else %}
+<div class="orgov" data-orgov-root>
+
+    {% include "accounts/profile/sections/org_overview/_hero.html" %}
+
+    {% if ov.member_tiles %}
+    <section class="orgov-block" aria-labelledby="orgov-members-title">
+        <div class="orgov-block__head">
+            <h2 class="orgov-block__title" id="orgov-members-title">{% trans "Üzvlər" context "organizations.overview" %}</h2>
+            {% if not ov.is_org_wide %}<span class="orgov-scope"><i class="fas fa-filter" aria-hidden="true"></i>{% trans "Sizin əhatəniz üzrə" context "organizations.overview" %}</span>{% endif %}
+        </div>
+        <div class="orgov-kpis">
+            {% for tile in ov.member_tiles %}{% include "accounts/profile/sections/org_overview/_tile.html" %}{% endfor %}
+        </div>
+        {% if ov.inactive_count or ov.recent_count %}
+        <div class="orgov-notes">
+            {% if ov.recent_count %}
+            <span class="orgov-note orgov-note--info">
+                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                {% blocktrans context "organizations.overview" with n=ov.recent_count %}Son 30 gündə yeni üzv: {{ n }}{% endblocktrans %}
+            </span>
+            {% endif %}
+            {% if ov.inactive_count %}
+            {% if ov.inactive_url %}<a class="orgov-note orgov-note--warn" href="{{ ov.inactive_url }}">{% else %}<span class="orgov-note orgov-note--warn">{% endif %}
+                <i class="fas fa-user-lock" aria-hidden="true"></i>
+                {% blocktrans context "organizations.overview" with n=ov.inactive_count %}Dayandırılmış hesab: {{ n }}{% endblocktrans %}
+            {% if ov.inactive_url %}</a>{% else %}</span>{% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+    {% elif ov.scope_unset %}
+    {% trans "Əhatəniz təyin edilməyib" context "organizations.overview" as ov_scope_title %}
+    {% trans "Rolunuz bölməyə bağlıdır, amma bölmə təyin edilməyib — üzv rəqəmləri göstərilmir." context "organizations.overview" as ov_scope_body %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-filter" state_title=ov_scope_title state_body=ov_scope_body %}
+    {% endif %}
+
+    <section class="orgov-block" aria-labelledby="orgov-structure-title">
+        <div class="orgov-block__head">
+            <h2 class="orgov-block__title" id="orgov-structure-title">{% trans "Struktur" context "organizations.overview" %}</h2>
+        </div>
+        <div class="orgov-kpis">
+            {% for tile in ov.structure_tiles %}{% include "accounts/profile/sections/org_overview/_tile.html" %}{% endfor %}
+        </div>
+    </section>
+
+    <div class="orgov-grid">
+        {% if ov.roles %}{% include "accounts/profile/sections/org_overview/_roles.html" %}{% endif %}
+        {% if ov.members_access %}{% include "accounts/profile/sections/org_overview/_recent.html" %}{% endif %}
+        {% if ov.show_activity %}{% include "accounts/profile/sections/org_overview/_activity.html" %}{% endif %}
+    </div>
+
+    {% if ov.links %}
+    <section class="orgov-block" aria-labelledby="orgov-links-title">
+        <div class="orgov-block__head">
+            <h2 class="orgov-block__title" id="orgov-links-title">{% trans "Sürətli keçidlər" context "organizations.overview" %}</h2>
+        </div>
+        <ul class="orgov-links">
+            {% for link in ov.links %}
+            <li>
+                <a class="orgov-link" href="{{ link.url }}"{% if link.section %} data-section="{{ link.section }}"{% endif %}>
+                    <span class="orgov-link__icon" aria-hidden="true"><i class="fas {{ link.icon }}"></i></span>
+                    <span class="orgov-link__text">
+                        <span class="orgov-link__title">{{ link.title }}</span>
+                        <span class="orgov-link__body">{{ link.body }}</span>
+                    </span>
+                    <i class="fas fa-chevron-right orgov-link__go" aria-hidden="true"></i>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+</div>
+{% endif %}
+{% endwith %}
+</section>
+{% endif %}

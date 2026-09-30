@@ -175,10 +175,10 @@ class UnitScopingTest(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}))
+        # 2026-10-01: köhnə URL kabinetin «Struktur üzvləri» reyestrinə yönləndirir.
+        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}), follow=True)
         self.assertEqual(response.status_code, 200)
-        members = list(response.context["members"])
-        member_users = {m.user_id for m in members}
+        member_users = {row["user_id"] for row in response.context["org_members_section"]["rows"]}
         self.assertIn(self.student_a.id, member_users)
         self.assertNotIn(self.student_b.id, member_users)
         # Dekanın özü scope_unit=faculty_a üzvlüyü ilə görünür.
@@ -191,9 +191,9 @@ class UnitScopingTest(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}))
+        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}), follow=True)
         self.assertEqual(response.status_code, 200)
-        member_users = {m.user_id for m in response.context["members"]}
+        member_users = {row["user_id"] for row in response.context["org_members_section"]["rows"]}
         self.assertIn(self.student_a.id, member_users)
         self.assertIn(self.student_b.id, member_users)
 
@@ -286,9 +286,9 @@ class TutorRoleTest(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}))
+        response = client.get(reverse("organizations:members", kwargs={"slug": self.org.slug}), follow=True)
         self.assertEqual(response.status_code, 200)
-        member_users = {m.user_id for m in response.context["members"]}
+        member_users = {row["user_id"] for row in response.context["org_members_section"]["rows"]}
         self.assertIn(self.student_in.id, member_users)
         self.assertNotIn(self.student_out.id, member_users)
 

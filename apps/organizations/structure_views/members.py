@@ -63,11 +63,13 @@ from .members_base import (  # noqa: F401 — yenidən ixrac
     NON_STAFF_ROLE_NAMES,
     PAGE_SIZE,
     SORTS,
+    STATUSES,
     STUDENT_ROLE_NAMES,
     TEACHING_ROLE_NAMES,
     MembersAccess,
     UnitIndex,
     _leader_q,
+    can_export_members,
     format_date,
     head_label,
     is_leader_role,
@@ -155,6 +157,65 @@ def _unit_options(units):
     return options
 
 
+def _status_options():
+    return [
+        {"value": "", "label": pgettext(_CTX, "Hamısı")},
+        {"value": "active", "label": pgettext(_CTX, "Aktiv hesab")},
+        {"value": "inactive", "label": pgettext(_CTX, "Dayandırılmış hesab")},
+    ]
+
+
+def _applied_chips(filter_fields) -> list:
+    """Tətbiq olunmuş süzgəclər — «×» ilə tək-tək götürülə bilən çiplər (sıralama xaric)."""
+    chips = []
+    for field in filter_fields:
+        value = field.get("value") or ""
+        if not value or field["name"] == "om_sort":
+            continue
+        label = value
+        if field["kind"] == "select":
+            label = next((o["label"] for o in field["options"] if str(o["value"]) == str(value)), value)
+        chips.append({"name": field["name"], "label": field["label"], "value_label": label})
+    return chips
+
+
+def read_filters(request) -> dict:
+    """`om_*` parametrləri — təmizlənmiş (reyestr və CSV ixracı EYNİ qaydanı işlədir)."""
+    kind = (request.GET.get("om_kind") or "").strip()
+    sort = (request.GET.get("om_sort") or "").strip()
+    status = (request.GET.get("om_status") or "").strip()
+    return {
+        "search": (request.GET.get("om_q") or "").strip()[:120],
+        "role": (request.GET.get("om_role") or "").strip()[:100],
+        "unit_id": _clean_uuid((request.GET.get("om_unit") or "").strip()),
+        "kind": kind if kind in KINDS else "",
+        "sort": sort if sort in SORTS else "role",
+        "status": status if status in STATUSES else "",
+    }
+
+
+def filter_memberships(base, access, filters, head_user_ids):
+    """Süzgəcləri tətbiq et; ``(queryset, unit_id)`` — tapılmayan bölmə boşaldılır."""
+    queryset = base.select_related("user", "role", "scope_unit")
+    search_q = tolerant_q(
+        filters["search"], ("user__first_name", "user__last_name", "user__username", "user__email", "title")
+    )
+    if search_q is not None:
+        queryset = queryset.filter(search_q)
+    if filters["role"]:
+        queryset = queryset.filter(role__name=filters["role"])
+    unit_id = filters["unit_id"]
+    unit = access.units.filter(pk=unit_id).only("id", "path").first() if unit_id else None
+    if unit is not None:
+        queryset = queryset.filter(Q(scope_unit_id=unit.id) | Q(scope_unit__path__startswith=f"{unit.path}/"))
+    else:
+        unit_id = ""
+    if filters["status"]:
+        queryset = queryset.filter(user__is_active=filters["status"] == "active")
+    queryset = _apply_kind(queryset, filters["kind"], head_user_ids).order_by(*SORTS[filters["sort"]], "pk")
+    return queryset, unit_id
+
+
 def _clean_uuid(value: str) -> str:
     try:
         return str(uuid.UUID(value)) if value else ""
@@ -181,44 +242,30 @@ def build_members_section(request, organization) -> dict:
         return _denied()
     slug = organization.slug
 
-    search = (request.GET.get("om_q") or "").strip()[:120]
-    role = (request.GET.get("om_role") or "").strip()[:100]
-    unit_id = _clean_uuid((request.GET.get("om_unit") or "").strip())
-    kind = (request.GET.get("om_kind") or "").strip()
-    kind = kind if kind in KINDS else ""
-    sort = (request.GET.get("om_sort") or "").strip()
-    sort = sort if sort in SORTS else "role"
+    filters = read_filters(request)
+    search, role, kind, sort, status = (filters[k] for k in ("search", "role", "kind", "sort", "status"))
 
     visible_ids = None if access.is_org_wide else set(access.units.order_by().values_list("id", flat=True))
     index = UnitIndex(organization, visible_ids)
     head_user_ids = set(index.heads)
     base = access.memberships
 
-    # ── KPI — sabit sayda COUNT (səhifə ölçüsündən asılı deyil). `order_by()`
-    # MƏCBURİDİR: Membership-in defolt sıralaması DISTINCT-ə sütun əlavə edərdi.
-    def distinct_users(queryset) -> int:
-        return queryset.order_by().values("user_id").distinct().count()
-
-    total = distinct_users(base)
-    staff = distinct_users(base.exclude(role__name__in=NON_STAFF_ROLE_NAMES))
-    teachers = distinct_users(base.filter(role__name__in=TEACHING_ROLE_NAMES))
-    students = distinct_users(base.filter(role__name__in=STUDENT_ROLE_NAMES))
-    leaders = distinct_users(base.filter(_leader_q(head_user_ids)))
-    unscoped = base.filter(role__scope_type=RoleScopeType.UNIT, scope_unit__isnull=True).order_by().count()
+    # ── KPI — TƏK aqreqat sorğu (şərti COUNT DISTINCT; 2026-10-01-ə qədər 6 ayrı
+    # COUNT idi). `order_by()` MƏCBURİDİR: defolt sıralama DISTINCT-ə sütun əlavə edərdi.
+    counts = base.order_by().aggregate(
+        total=Count("user_id", distinct=True),
+        staff=Count("user_id", distinct=True, filter=~Q(role__name__in=NON_STAFF_ROLE_NAMES)),
+        teachers=Count("user_id", distinct=True, filter=Q(role__name__in=TEACHING_ROLE_NAMES)),
+        students=Count("user_id", distinct=True, filter=Q(role__name__in=STUDENT_ROLE_NAMES)),
+        leaders=Count("user_id", distinct=True, filter=_leader_q(head_user_ids)),
+        unscoped=Count("id", filter=Q(role__scope_type=RoleScopeType.UNIT, scope_unit__isnull=True)),
+    )
+    total, staff, teachers, students, leaders, unscoped = (
+        counts[key] or 0 for key in ("total", "staff", "teachers", "students", "leaders", "unscoped")
+    )
 
     # ── Filtr + səhifə
-    queryset = base.select_related("user", "role", "scope_unit")
-    search_q = tolerant_q(search, ("user__first_name", "user__last_name", "user__username", "user__email", "title"))
-    if search_q is not None:
-        queryset = queryset.filter(search_q)
-    if role:
-        queryset = queryset.filter(role__name=role)
-    unit = access.units.filter(pk=unit_id).only("id", "path").first() if unit_id else None
-    if unit is not None:
-        queryset = queryset.filter(Q(scope_unit_id=unit.id) | Q(scope_unit__path__startswith=f"{unit.path}/"))
-    else:
-        unit_id = ""
-    queryset = _apply_kind(queryset, kind, head_user_ids).order_by(*SORTS[sort], "pk")
+    queryset, unit_id = filter_memberships(base, access, filters, head_user_ids)
     page_obj = Paginator(queryset, PAGE_SIZE).get_page(request.GET.get("om_page"))
 
     rows = []
@@ -280,7 +327,7 @@ def build_members_section(request, organization) -> dict:
                 {"include": f"{cell_dir}_cell_role.html"},
                 {"include": f"{cell_dir}_cell_position.html"},
                 {"include": f"{cell_dir}_cell_unit.html"},
-                {"text": row["joined"] or "—", "nowrap": True, "muted": not row["joined"]},
+                {"include": f"{cell_dir}_cell_joined.html", "nowrap": True, "muted": not row["joined"]},
             ],
             "actions_include": f"{cell_dir}_row_actions.html",
             "data": row,
@@ -358,6 +405,13 @@ def build_members_section(request, organization) -> dict:
             "value": kind,
         },
         {
+            "name": "om_status",
+            "label": pgettext(_CTX, "Hesab"),
+            "kind": "select",
+            "options": _status_options(),
+            "value": status,
+        },
+        {
             "name": "om_sort",
             "label": pgettext(_CTX, "Sıralama"),
             "kind": "select",
@@ -372,9 +426,14 @@ def build_members_section(request, organization) -> dict:
         "om_role": role,
         "om_unit": unit_id,
         "om_kind": kind,
+        "om_status": status,
         "om_sort": sort if sort != "role" else "",
     }
-    filtered = bool(search or role or unit_id or kind)
+    filtered = bool(search or role or unit_id or kind or status)
+    export_url = ""
+    if can_export_members(request, organization):
+        export_query = urlencode({k: v for k, v in base_params.items() if v and k != "section"})
+        export_url = reverse("organizations:members_export", args=[slug]) + (f"?{export_query}" if export_query else "")
 
     if access.scope_unset:
         state_title = pgettext(_CTX, "Əhatəniz təyin edilməyib")
@@ -405,6 +464,9 @@ def build_members_section(request, organization) -> dict:
         "filtered_count": page_obj.paginator.count,
         "kpi_tiles": kpi_tiles,
         "filter_fields": filter_fields,
+        "filter_applied": _applied_chips(filter_fields),
+        "filter_base_url": "",
+        "export_url": export_url,
         "filter_count_label": pgettext(_CTX, "Nəticə: %(n)d üzvlük") % {"n": page_obj.paginator.count},
         "state_title": state_title,
         "state_body": state_body,
@@ -422,9 +484,12 @@ __all__ = [
     "MembersAccess",
     "UnitIndex",
     "build_members_section",
+    "can_export_members",
+    "filter_memberships",
     "format_date",
     "head_label",
     "is_leader_role",
+    "read_filters",
     "resolve_members_access",
     "role_label",
     "role_text",

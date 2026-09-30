@@ -23,6 +23,18 @@ class AccountsConfig(AppConfig):
             "verify_otp_code", lambda user, *, code, purpose: verify_otp_code(user, code, purpose=purpose)
         )
 
+        # 2026-10-01: köhnə `/organizations/<slug>/{,members/,roles/}` səhifələri kabinet
+        # bölmələrinə yönləndirir — bölmə qapısı accounts-dadır (organizations → accounts
+        # importu qadağandır), ona görə həlledici burada qeydiyyatdan keçir (fail-closed).
+        from apps.organizations.public import register_cabinet_section_resolver
+
+        def _cabinet_section_allowed(request, section):
+            from .views._helpers.cabinet_sections import cabinet_section_allowed
+
+            return cabinet_section_allowed(request, section)
+
+        register_cabinet_section_resolver(_cabinet_section_allowed)
+
         # 2026-10-01: «Akademik fəaliyyət» qoşmaları — məxfi media prefiksinin
         # icazə siyasəti (core deny-by-default-dur) + qeyd silinəndə faylların
         # təmizlənməsi (istifadəçi kaskadı da daxil).

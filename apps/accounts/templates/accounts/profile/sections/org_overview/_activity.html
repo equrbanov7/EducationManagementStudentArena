@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Son üzvlük / rol dəyişiklikləri — audit jurnalının kiçik kəsiyi
+(`apps.audit.public.recent_org_changes`, qapı `can_view_audit`). Tam iz — «Audit jurnalı».{% endcomment %}
+<section class="orgov-card" aria-labelledby="orgov-activity-title">
+    <div class="orgov-card__head">
+        <h2 class="orgov-card__title" id="orgov-activity-title"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i>{% trans "Son dəyişikliklər" context "organizations.overview" %}</h2>
+        {% if ov.audit_url %}<a class="orgov-card__more" href="{{ ov.audit_url }}">{% trans "Audit jurnalı" context "organizations.overview" %}<i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}
+    </div>
+    {% if ov.activity %}
+    <ol class="orgov-feed">
+        {% for item in ov.activity %}
+        <li class="orgov-feed__item">
+            <span class="orgov-feed__dot" aria-hidden="true"></span>
+            <span class="orgov-feed__main">
+                <span class="orgov-feed__line">
+                    <strong>{% if item.actor_name %}{{ item.actor_name }}{% else %}{% trans "Sistem" context "organizations.overview" %}{% endif %}</strong>
+                    <span class="orgov-feed__action">{{ item.action_label }}</span>
+                </span>
+                {% if item.resource %}<span class="orgov-feed__resource">{{ item.resource_type }} · {{ item.resource }}</span>{% endif %}
+                {% if item.reason %}<span class="orgov-feed__reason">{{ item.reason|truncatechars:120 }}</span>{% endif %}
+            </span>
+            <time class="orgov-feed__time" datetime="{{ item.created_at|date:'c' }}">{{ item.created_at|date:"d.m.Y H:i" }}</time>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="orgov-card__empty">{% trans "Son dövrdə üzvlük və ya rol dəyişikliyi qeydə alınmayıb." context "organizations.overview" %}</p>
+    {% endif %}
+</section>

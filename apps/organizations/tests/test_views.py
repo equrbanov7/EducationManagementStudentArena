@@ -64,8 +64,10 @@ class OrganizationViewAccessTest(TestCase):
             reverse("organizations:roles", kwargs={"slug": self.organization.slug}),
             reverse("organizations:settings", kwargs={"slug": self.organization.slug}),
         ]
+        # 2026-10-01: panel / üzvlər / rollar kabinet bölmələrinə yönləndirir — son
+        # səhifə (kabinet və ya köhnə səhifə) 200 olmalıdır.
         for url in urls:
-            response = self.client.get(url)
+            response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200, msg=f"Expected 200 for {url}")
 
     def test_regular_member_cannot_open_members_or_roles_pages(self):

@@ -2574,7 +2574,11 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "Təşkilat girişləri")
         self.assertContains(response, owned_org.name)
         self.assertContains(response, member_org.name)
-        self.assertContains(response, reverse("organizations:dashboard", kwargs={"slug": member_org.slug}))
+        # 2026-10-01: AKTİV təşkilatın «Panel» keçidi kabinetin «Təşkilat paneli»nə aparır;
+        # başqa təşkilatın sətri köhnə URL-i saxlayır (o da eyni qapı ilə kabinetə yönləndirir).
+        rows = {row["organization"].id: row for row in response.context["organization_access_rows"]}
+        self.assertEqual(rows[member_org.id]["dashboard_url"], reverse("accounts:profile") + "?section=org-overview")
+        self.assertContains(response, reverse("organizations:dashboard", kwargs={"slug": owned_org.slug}))
         self.assertContains(response, reverse("organizations:switch", kwargs={"slug": owned_org.slug}))
 
     def test_superadmin_profile_renders_superadmin_control_inside_profile_without_active_org(self):

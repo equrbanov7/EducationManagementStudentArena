@@ -424,6 +424,7 @@ class _Stage2Mixin:
         # profili, ixtisas reyestri, fənn kataloqu. Default BOŞDUR: aktiv bölmə
         # olmayanda heç bir sorğu işləmir (bax `_stage3` şərtli çağırışlar).
         self.lessons_log_section = {"has_access": False, "rows": [], "days": [], "coverage": []}
+        self.org_overview_section = {"has_access": False}
         self.structure_tree_section = {"has_access": False, "tree_nodes": []}
         self.chair_profile_section = {"has_access": False, "chairs": [], "staff_rows": []}
         self.programs_registry_section = {"has_access": False, "rows": []}

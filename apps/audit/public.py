@@ -5,6 +5,7 @@ log_superadmin_cross_org_action (app-lardan da oradan istifadə edin).
 Bu fasad oxu/görüntüləmə tərəfini təqdim edir.
 """
 
+from apps.audit.recent import recent_org_changes  # noqa: F401
 from apps.audit.views import (  # noqa: F401
     build_audit_log_context,
 )
@@ -17,4 +18,5 @@ __all__ = [
     "build_audit_log_context",
     "log_action",
     "log_superadmin_cross_org_action",
+    "recent_org_changes",
 ]

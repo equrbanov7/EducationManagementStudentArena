@@ -225,3 +225,258 @@
         max-width: none;
     }
 }
+
+/* ── Kart toru (sahib 2026-10-01) ────────────────────────────────────────
+   Cədvəl əvəzinə kartlar: telefonda bir sütun, planşetdə iki, geniş ekranda
+   üç-dörd. `min(100%, 280px)` — 320 px-də də kart kənardan çıxmır. */
+.rolreg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: var(--ems-sp-5, 14px);
+}
+
+.rolreg-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4, 12px);
+    min-width: 0;
+    padding: var(--ems-sp-5, 14px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.rolreg-card--off {
+    background: var(--ems-bg-subtle);
+}
+
+.rolreg-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-4, 12px);
+}
+
+.rolreg-card__titles {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.rolreg-card__name {
+    margin: 0;
+    font-size: var(--ems-fs-md, 1rem);
+    line-height: 1.3;
+}
+
+.rolreg-card__name .rolreg-cell__name {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.rolreg-card__titles .rolreg-cell__slug {
+    overflow-wrap: anywhere;
+}
+
+.rolreg-card__level {
+    flex: 0 0 auto;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 5px 8px;
+    border-radius: var(--ems-r-lg, 10px);
+    border: 1px solid var(--ems-primary-100, var(--ems-border));
+    background: var(--ems-primary-50, var(--ems-bg-subtle));
+    color: var(--ems-primary-700, var(--ems-primary));
+}
+
+.rolreg-card__levelnum {
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.rolreg-card__levellabel {
+    font-size: var(--ems-fs-2xs, 0.68rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.rolreg-tag .fas {
+    font-size: 0.85em;
+}
+
+.rolreg-tag--custom {
+    border-color: var(--ems-success-bd, var(--ems-border));
+    background: var(--ems-success-bg, var(--ems-bg-subtle));
+    color: var(--ems-success-700, var(--ems-fg));
+}
+
+.rolreg-card__desc {
+    margin: 0;
+    color: var(--ems-fg-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.rolreg-card__stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-3, 8px);
+    margin: 0;
+}
+
+.rolreg-card__stat {
+    padding: 6px 10px;
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg-subtle);
+}
+
+.rolreg-card__stat dt {
+    margin: 0;
+    font-size: var(--ems-fs-2xs, 0.68rem);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-fg-muted);
+}
+
+.rolreg-card__stat dd {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+.rolreg-card > .rolreg-perm {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.rolreg-card__perms {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+}
+
+.rolreg-card__perms > summary {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.rolreg-card__perms > summary::-webkit-details-marker {
+    display: none;
+}
+
+.rolreg-card__perms > summary:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+    border-radius: var(--ems-r-lg, 10px);
+}
+
+.rolreg-card__permsum {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-fg);
+}
+
+.rolreg-card__permsum::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: 2px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg) translateY(-2px);
+    transition: transform 0.15s ease;
+}
+
+.rolreg-card__perms[open] .rolreg-card__permsum::after {
+    transform: rotate(-135deg) translateY(-1px);
+}
+
+.rolreg-card__groups {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 8px);
+    padding: 4px 12px 12px;
+    border-top: 1px solid var(--ems-border);
+}
+
+.rolreg-card__grouphead {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 6px 0 2px;
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-fg-muted);
+}
+
+.rolreg-card__permlist {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+    padding: 0 0 0 16px;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-fg);
+}
+
+.rolreg-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+    margin-top: auto;
+}
+
+/* Telefonda KPI kartları iki sütun (tək sütunda 5 kart bir ekranı tuturdu). */
+@media (max-width: 640px) {
+    .rolreg .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3, 8px);
+    }
+
+    .rolreg .ems-kpi {
+        padding: 11px 12px;
+    }
+
+    .rolreg .ems-kpi__value {
+        font-size: var(--ems-fs-2xl);
+    }
+}
+
+@media (max-width: 420px) {
+    .rolreg-card__foot .ems-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rolreg-card__permsum::after {
+        transition: none;
+    }
+}

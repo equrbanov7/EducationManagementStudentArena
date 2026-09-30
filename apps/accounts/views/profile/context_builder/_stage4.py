@@ -269,6 +269,7 @@ class _Stage4Mixin:
             "workload_approval_section": self.workload_approval_section,
             "workload_overview_section": self.workload_overview_section,
             "lessons_log_section": self.lessons_log_section,
+            "org_overview_section": self.org_overview_section,
             "structure_tree_section": self.structure_tree_section,
             "chair_profile_section": self.chair_profile_section,
             "programs_registry_section": self.programs_registry_section,

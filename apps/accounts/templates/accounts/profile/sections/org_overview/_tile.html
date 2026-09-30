@@ -1,0 +1,18 @@
+{% load i18n %}
+{% comment %}Panelin KPI kartı. `tile.url` varsa kart LİNKDİR (məs. «Tələbə» → üzv reyestri
+`om_kind=students` süzgəci ilə) — panel içindəki `?section=` linki SPA ilə açılır.
+Kontekst: `tile` {key, label, value, note, url}.{% endcomment %}
+{% if tile.url %}
+<a class="orgov-kpi orgov-kpi--link" href="{{ tile.url }}" data-orgov-kpi="{{ tile.key }}">
+    <span class="orgov-kpi__label">{{ tile.label }}</span>
+    <span class="orgov-kpi__value">{{ tile.value }}</span>
+    {% if tile.note %}<span class="orgov-kpi__note">{{ tile.note }}</span>{% endif %}
+    <i class="fas fa-arrow-right orgov-kpi__go" aria-hidden="true"></i>
+</a>
+{% else %}
+<div class="orgov-kpi" data-orgov-kpi="{{ tile.key }}">
+    <span class="orgov-kpi__label">{{ tile.label }}</span>
+    <span class="orgov-kpi__value">{{ tile.value }}</span>
+    {% if tile.note %}<span class="orgov-kpi__note">{{ tile.note }}</span>{% endif %}
+</div>
+{% endif %}
