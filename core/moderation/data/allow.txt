@@ -1,0 +1,22 @@
+# Allowlist — nalayiq kökü İÇİNDƏ daşıyan, amma təmiz sözlər (2026-09-30).
+#
+#   söz    bu token «kök» (söz*) və «içində» (*söz*) qaydalarından azaddır
+#   söz*   bu köklə başlayan bütün tokenlər azaddır
+#
+# Bütöv söz qaydaları («sik», «хуй») allowlist-dən asılı deyil — onlar yalnız tam
+# uyğunluqda işləyir. Yazılış normallaşdırılmış formadadır (kiçik hərf; ё→е, й→и).
+
+# English
+niggl*
+retardant*
+retardation*
+slutsk*
+scunthorpe
+# «peysər» qaydası «Peiser» soyadını tutmasın (y → i qatlaması)
+peiser*
+# Rus: «сучк*» — «сучковатый» (düyünlü), «курв*» — «курвиметр» (ölçü cihazı)
+сучковат*
+# «Сучков / Сучкова» — rus soyadı (2026-09-30)
+сучков*
+сучкоруб*
+курвиметр*

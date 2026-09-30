@@ -14,6 +14,7 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
 from apps.organizations.public import is_tenant_accessible_organization
+from core.moderation.enforcement import screen_names
 from core.rate_limit import clear_rate_limit, is_rate_limited, record_rate_limit_hit
 
 from ...forms import RegisterForm
@@ -69,13 +70,25 @@ def _signup_disabled_redirect(request):
     return redirect("accounts:login")
 
 
+def _reject_profane_names(request, form) -> bool:
+    """Sahib 2026-09-30: ad / soyadda nalayiq ifadə → sahə xətası + audit qeydi (anonim: IP)."""
+    rejection = screen_names(
+        request,
+        {f"accounts.register.{name}": form.cleaned_data.get(name, "") for name in ("first_name", "last_name")},
+    )
+    if rejection is None:
+        return False
+    form.add_error(rejection.field_name, rejection.message)
+    return True
+
+
 def register_view(request):
     """Start registration by caching the payload and sending a signup OTP."""
     if not _public_signup_enabled():
         return _signup_disabled_redirect(request)
     if request.method == "POST":
         form = RegisterForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and not _reject_profane_names(request, form):
             pending_registration = None
             try:
                 pending_registration = store_pending_registration(form.cleaned_data)

@@ -10,10 +10,11 @@ from urllib.parse import urlencode
 
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from core.ui import status_catalog
 
-from .views_filters import PREFIX, RANGE_ALL, REASONED_ACTIONS, STATUS_FAMILY
+from .views_filters import PREFIX, PROFANITY_RESOURCE_TYPE, RANGE_ALL, REASONED_ACTIONS, STATUS_FAMILY
 
 # ─── Sətir / detal serializasiyası ──────────────────────────────────────────
 
@@ -32,6 +33,8 @@ def _display_name(user) -> str:
 
 
 def _humanize_type(value: str) -> str:
+    if value == PROFANITY_RESOURCE_TYPE:
+        return pgettext("audit.section", "Moderasiya › nalayiq ad")
     return value.replace("_", " ").replace(".", " › ").strip().capitalize() if value else ""
 
 

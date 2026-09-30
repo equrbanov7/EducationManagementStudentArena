@@ -20,6 +20,7 @@ from apps.live_exam.constants import (
 from apps.live_exam.models import LiveSession
 from apps.live_exam.serializers import serialize_player_identity, serialize_players
 from apps.live_exam.session_settings import get_session_settings
+from apps.live_exam.text_safety import screen_nickname
 from apps.live_exam.transport import broadcast, build_reaction_event_payload
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
@@ -117,6 +118,11 @@ def live_wait_profile_update(request, pin):
         return _json_error(pgettext("live_exam.view.message", "invalid_accessory"), 400)
     if _nickname_is_taken(session, nickname, exclude_player_id=player.id):
         return _json_error(_nickname_conflict_message(), 409)
+    # Sahib 2026-09-30: yalnız DƏYİŞƏN ad yoxlanır; nalayiq ad rədd + audit (IP + live_client_id).
+    if nickname != player.nickname:
+        rejection = screen_nickname(request, nickname, session=session, client_id=player.client_id, stage="wait")
+        if rejection is not None:
+            return _json_error(rejection.message, rejection.status)
 
     with bypass_rls():
         player.nickname = nickname

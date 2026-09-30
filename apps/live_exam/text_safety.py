@@ -18,12 +18,19 @@ Ləqəb üçün əlavə olaraq NFKC (fullwidth «Ａｌｉ» → «Ali») və HT
 ``< > " ` `` simvolları atılır: bəzi JS render-ləri ``esc()``-in dırnağı
 qaçırmadığı atribut kontekstlərində ləqəb işlədir (bax SECURITY_REVIEW.md LXS-04).
 Yazılı cavabda isə NFC saxlanılır (``x²``, ``a < b`` mənası dəyişməməlidir).
+
+İSTİSNA — ``screen_nickname`` (sahib 2026-09-30, nalayiq ad filtri): request alan
+yeganə funksiyadır; moderasiya paketi (``core.moderation``) onun İÇİNDƏ tənbəl
+import olunur ki, modulun qalanı saf qalsın.
 """
 
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
+
+logger = logging.getLogger(__name__)
 
 NICKNAME_MAX_LENGTH = 32
 TYPED_ANSWER_MAX_LENGTH = 60
@@ -131,6 +138,39 @@ def nickname_match_key(name) -> str:
     return folded.translate(_CONFUSABLES)
 
 
+def screen_nickname(request, nickname, *, session, client_id: str = "", stage: str = "join"):
+    """Nalayiq ləqəb yoxlaması (sahib 2026-09-30): rədd → ``NameRejection``, təmiz → ``None``.
+
+    ``clean_nickname``-dən SONRA çağırılır (təmizlənmiş ad yoxlanır). Rədd olunan
+    cəhd sessiyanın təşkilatına audit qeydi kimi yazılır — anonim oyunçu üçün
+    ``live_client_id`` və IP ilə (bax ``core/moderation/enforcement.py``).
+    """
+    from django.db import transaction
+
+    from core.moderation.enforcement import screen_name
+    from core.rls import bypass_rls
+
+    # Təhlükəsizlik baxışı 2026-09-30 (L9): filtr/audit xətası (DB, keş) canlı imtahana
+    # qoşulmanı 500 ilə SINDIRMAMALIDIR — fail-open + log. Savepoint: xəta xarici
+    # tranzaksiyanı zəhərləməsin.
+    try:
+        with transaction.atomic():
+            # Anonim sorğuda RLS konteksti yoxdur — imtahanın təşkilatı bypass ilə oxunur.
+            with bypass_rls():
+                organization_id = getattr(getattr(session, "exam", None), "organization_id", None)
+            return screen_name(
+                request,
+                f"live_exam.{stage}.nickname",
+                nickname,
+                organization_id=organization_id,
+                client_id=client_id,
+                context={"live_session_id": session.pk, "exam_id": getattr(session, "exam_id", "") or ""},
+            )
+    except Exception:  # noqa: BLE001 — qoşulma filtr nasazlığından asılı olmamalıdır
+        logger.exception("Live nickname moderation failed (fail-open) for session %s", getattr(session, "pk", None))
+        return None
+
+
 __all__ = [
     "NICKNAME_MAX_LENGTH",
     "TYPED_ANSWER_MAX_LENGTH",
@@ -138,4 +178,5 @@ __all__ = [
     "clean_typed_answer",
     "nickname_match_key",
     "sanitize_player_text",
+    "screen_nickname",
 ]
