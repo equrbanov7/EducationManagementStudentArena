@@ -220,6 +220,7 @@
         }
         var query = (input.value || "").trim();
         var t = strings();
+        closeSuggest(scope);
         clearSecret();
         if (query.length < 2) {
             setStatus(scope, input.validationMessage || t.noResults, "warning");
@@ -248,6 +249,218 @@
                     button.disabled = false;
                 }
             });
+    });
+
+    /* ── Yazdıqca təklif (sahib 2026-09-30) ──────────────────────────────
+     * Yüngül siyahı (ən çoxu 8 nəfər) — 250 ms dayanmadan sonra BİR sorğu; köhnə
+     * sorğu AbortController ilə ləğv olunur, gecikmiş cavab (seq) atılır. Seçim
+     * istifadəçi adını xanaya yazıb adi axtarışı (tam kart + «sıfırla») işə salır. */
+    var SUGGEST_DELAY_MS = 250;
+    var suggestTimer = null;
+    var suggestController = null;
+    var suggestSeq = 0;
+
+    function suggestParts(scope) {
+        return {
+            input: scope.querySelector("[data-pwr-query]"),
+            list: scope.querySelector("[data-pwr-suggest]"),
+            hint: scope.querySelector("[data-pwr-suggest-hint]")
+        };
+    }
+
+    function closeSuggest(scope) {
+        if (suggestTimer) {
+            window.clearTimeout(suggestTimer);
+            suggestTimer = null;
+        }
+        if (suggestController) {
+            suggestController.abort();
+            suggestController = null;
+        }
+        suggestSeq += 1;
+        if (!scope) {
+            return;
+        }
+        var parts = suggestParts(scope);
+        if (parts.list) {
+            parts.list.hidden = true;
+            parts.list.textContent = "";
+        }
+        if (parts.hint) {
+            parts.hint.hidden = true;
+        }
+        if (parts.input) {
+            parts.input.setAttribute("aria-expanded", "false");
+            parts.input.removeAttribute("aria-activedescendant");
+        }
+    }
+
+    function initials(name) {
+        return String(name || "")
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map(function (word) {
+                return word.charAt(0).toUpperCase();
+            })
+            .join("");
+    }
+
+    function renderSuggest(scope, results) {
+        var t = strings();
+        var parts = suggestParts(scope);
+        if (!parts.list || !parts.input) {
+            return;
+        }
+        parts.list.textContent = "";
+        if (!results.length) {
+            parts.list.appendChild(el("li", "pwr-suggest__empty", t.suggestEmpty));
+        }
+        results.forEach(function (person, index) {
+            var item = el("li", "pwr-suggest__item");
+            item.id = "pwr-opt-" + index;
+            item.setAttribute("role", "option");
+            item.setAttribute("aria-selected", "false");
+            item.setAttribute("data-pwr-pick", person.username);
+            item.appendChild(el("span", "pwr-suggest__avatar", initials(person.full_name)));
+            var text = el("span", "pwr-suggest__text");
+            text.appendChild(el("span", "pwr-suggest__name", person.full_name));
+            text.appendChild(el("span", "pwr-suggest__meta", person.hint ? person.username + " \u00b7 " + person.hint : person.username));
+            item.appendChild(text);
+            parts.list.appendChild(item);
+        });
+        parts.list.hidden = false;
+        parts.input.setAttribute("aria-expanded", "true");
+        parts.input.removeAttribute("aria-activedescendant");
+        if (parts.hint) {
+            parts.hint.textContent = results.length ? t.suggestHint : "";
+            parts.hint.hidden = !results.length;
+        }
+    }
+
+    function requestSuggest(scope, query) {
+        if (suggestController) {
+            suggestController.abort();
+        }
+        suggestController = typeof window.AbortController === "function" ? new window.AbortController() : null;
+        suggestSeq += 1;
+        var mySeq = suggestSeq;
+        window.EMSCore.fetchJSON(scope.getAttribute("data-suggest-url"), {
+            method: "POST",
+            data: { q: query },
+            signal: suggestController ? suggestController.signal : undefined
+        })
+            .then(function (payload) {
+                if (mySeq === suggestSeq) {
+                    renderSuggest(scope, (payload && payload.results) || []);
+                }
+            })
+            .catch(function () {
+                // Ləğv edilmiş / uğursuz təklif sorğusu səssizdir — adi «Axtar» işləməkdə davam edir.
+            });
+    }
+
+    function pick(scope, username) {
+        var input = scope.querySelector("[data-pwr-query]");
+        var form = scope.querySelector("[data-pwr-search-form]");
+        closeSuggest(scope);
+        if (!input || !form) {
+            return;
+        }
+        input.value = username;
+        if (typeof form.requestSubmit === "function") {
+            form.requestSubmit();
+        } else {
+            form.dispatchEvent(new window.Event("submit", { bubbles: true, cancelable: true }));
+        }
+    }
+
+    function moveActive(scope, step) {
+        var parts = suggestParts(scope);
+        if (!parts.list || parts.list.hidden) {
+            return false;
+        }
+        var items = Array.prototype.slice.call(parts.list.querySelectorAll("[data-pwr-pick]"));
+        if (!items.length) {
+            return false;
+        }
+        var current = items.findIndex(function (item) {
+            return item.classList.contains("is-active");
+        });
+        var next = current + step;
+        if (next < 0) {
+            next = items.length - 1;
+        } else if (next >= items.length) {
+            next = 0;
+        }
+        items.forEach(function (item, index) {
+            var active = index === next;
+            item.classList.toggle("is-active", active);
+            item.setAttribute("aria-selected", active ? "true" : "false");
+        });
+        parts.input.setAttribute("aria-activedescendant", items[next].id);
+        if (typeof items[next].scrollIntoView === "function") {
+            items[next].scrollIntoView({ block: "nearest" });
+        }
+        return true;
+    }
+
+    window.EMSDelegate.on("input", "[data-pwr-query]", function (event, input) {
+        var scope = input.closest("[data-pwr-root]");
+        if (!scope || !scope.getAttribute("data-suggest-url")) {
+            return;
+        }
+        var query = (input.value || "").trim();
+        closeSuggest(scope);
+        if (query.length < 2) {
+            return;
+        }
+        suggestTimer = window.setTimeout(function () {
+            suggestTimer = null;
+            requestSuggest(scope, query);
+        }, SUGGEST_DELAY_MS);
+    });
+
+    window.EMSDelegate.on("keydown", "[data-pwr-query]", function (event, input) {
+        var scope = input.closest("[data-pwr-root]");
+        if (!scope) {
+            return;
+        }
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            if (moveActive(scope, event.key === "ArrowDown" ? 1 : -1)) {
+                event.preventDefault();
+            }
+        } else if (event.key === "Enter") {
+            var active = scope.querySelector("[data-pwr-suggest] .is-active[data-pwr-pick]");
+            if (active) {
+                event.preventDefault();
+                pick(scope, active.getAttribute("data-pwr-pick"));
+            }
+        } else if (event.key === "Escape") {
+            closeSuggest(scope);
+        }
+    });
+
+    // Klik xananın fokusunu itirməsin (mobil klaviatura da bağlanmasın).
+    window.EMSDelegate.on("mousedown", "[data-pwr-pick]", function (event) {
+        event.preventDefault();
+    });
+
+    window.EMSDelegate.on("click", "[data-pwr-pick]", function (event, item) {
+        event.preventDefault();
+        var scope = item.closest("[data-pwr-root]");
+        if (scope) {
+            pick(scope, item.getAttribute("data-pwr-pick"));
+        }
+    });
+
+    window.EMSReady.once("pwr-suggest-outside", function () {
+        document.addEventListener("click", function (event) {
+            var scope = root();
+            if (scope && !(event.target && event.target.closest && event.target.closest("[data-pwr-combo]"))) {
+                closeSuggest(scope);
+            }
+        });
     });
 
     /* ── Sıfırlama ────────────────────────────────────────────────────── */

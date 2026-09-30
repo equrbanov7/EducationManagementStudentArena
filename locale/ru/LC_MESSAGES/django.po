@@ -87197,3 +87197,11 @@ msgid ""
 msgstr ""
 "Если проблема не решается, обратитесь в Центр цифрового развития (RİM) — там"
 " могут сразу сбросить пароль."
+
+msgctxt "accounts.password_reset"
+msgid "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+msgstr "Подходящих пользователей нет — проверьте имя или фамилию."
+
+msgctxt "accounts.password_reset"
+msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+msgstr "Нажмите, чтобы выбрать, или используйте ↑ ↓ и Enter."

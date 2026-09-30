@@ -86647,3 +86647,11 @@ msgid ""
 msgstr ""
 "Problem qalırsa, RİM mərkəzinə müraciət edin — parolunuzu yerində sıfırlaya "
 "bilərlər."
+
+msgctxt "accounts.password_reset"
+msgid "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+msgstr "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+
+msgctxt "accounts.password_reset"
+msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+msgstr "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."

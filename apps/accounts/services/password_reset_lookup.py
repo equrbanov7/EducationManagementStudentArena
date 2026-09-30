@@ -17,10 +17,11 @@ olub əhatədən kənardırsa (daha yüksək rütbə, superadmin, özü) səbəb
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
+from django.db.models import Case, IntegerField, Value, When
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from core.search_text import tolerant_q
+from core.search_text import fold_regex, tokens_of, tolerant_q
 from core.staff_position import visible_role_label
 
 from .password_reset_admin import (
@@ -36,6 +37,8 @@ _CTX = "accounts.password_reset"
 MIN_QUERY_LENGTH = 2
 MAX_QUERY_LENGTH = 120
 MAX_RESULTS = 8
+#: Yazdıqca təklif siyahısının ölçüsü (sahib 2026-09-30: «5–10 nəfər»).
+SUGGEST_LIMIT = 8
 
 #: Dözümlü axtarışın sahələri — email/FİN QƏSDƏN yoxdur (PII qapısı, yuxarıya bax).
 _SEARCH_FIELDS = ("username", "first_name", "last_name", "profile__patronymic")
@@ -180,4 +183,63 @@ def lookup(actor, raw_query) -> dict:
     }
 
 
-__all__ = ["MAX_RESULTS", "MIN_QUERY_LENGTH", "lookup", "normalize_query", "serialize_candidates"]
+def suggest(actor, raw_query) -> list:
+    """Yazdıqca təklif — YÜNGÜL: ``{id, username, full_name, hint}``, ən çoxu ``SUGGEST_LIMIT``.
+
+    Sahib 2026-09-30: operator yazdıqca uyğun 5–10 nəfər görünsün, sistem yüklənmədən. Sabit
+    sorğu sayı (istifadəçilər + üzvlüklər + qrup — 3 sorğu), ``check_resettable`` YOXDUR: tam
+    kart (icazə səbəbi, sıfırla düyməsi) seçimdən sonra ``lookup`` ilə TƏK hədəf üçün qurulur.
+    Əhatə ``lookup`` ilə eynidir (``reset_scope_queryset``) — sıfırlana bilməyən hesab görünmür.
+    Sıra: istifadəçi adı tam → istifadəçi adı ilə başlayan → adı/soyadı ilk sözlə başlayan
+    (hərf qatlaması ilə: «Əli» ≈ «Ali») → qalanı (məs. ata adının içində uyğunluq).
+    """
+    query = normalize_query(raw_query)
+    if len(query) < MIN_QUERY_LENGTH:
+        return []
+    search_filter = tolerant_q(query, _SEARCH_FIELDS)
+    if search_filter is None:
+        return []
+    starts = "^" + fold_regex(tokens_of(query)[0])
+    users = list(
+        reset_scope_queryset(actor)
+        .filter(search_filter)
+        .annotate(
+            _pwr_rank=Case(
+                When(username__iexact=query, then=Value(0)),
+                When(username__istartswith=query, then=Value(1)),
+                When(first_name__iregex=starts, then=Value(2)),
+                When(last_name__iregex=starts, then=Value(2)),
+                default=Value(3),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("_pwr_rank", "last_name", "first_name", "username")[:SUGGEST_LIMIT]
+    )
+    if not users:
+        return []
+    organization = actor.organization
+    memberships = _memberships_by_user(users, organization)
+    groups = _student_groups(users, organization)
+    rows = []
+    for user in users:
+        profile = getattr(user, "profile", None)
+        hint = groups.get(user.pk, "")
+        if not hint:
+            for membership in memberships.get(user.pk, []):
+                hint = visible_role_label(membership.role.name, membership.role.display_name) or ""
+                if hint:
+                    break
+        full_name = profile.full_name_with_patronymic if profile is not None else user.get_full_name()
+        rows.append({"id": user.pk, "username": user.username, "full_name": full_name or user.username, "hint": hint})
+    return rows
+
+
+__all__ = [
+    "MAX_RESULTS",
+    "MIN_QUERY_LENGTH",
+    "SUGGEST_LIMIT",
+    "lookup",
+    "normalize_query",
+    "serialize_candidates",
+    "suggest",
+]

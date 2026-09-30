@@ -87050,3 +87050,11 @@ msgid ""
 msgstr ""
 "If the problem persists, contact the Digital Development Centre (RİM) — they"
 " can reset your password on the spot."
+
+msgctxt "accounts.password_reset"
+msgid "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+msgstr "No matching users — check the name or surname."
+
+msgctxt "accounts.password_reset"
+msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+msgstr "Click to choose, or use ↑ ↓ and Enter."

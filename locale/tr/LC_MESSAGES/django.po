@@ -86546,3 +86546,11 @@ msgid ""
 msgstr ""
 "Sorun devam ederse RİM merkezine başvurun — şifrenizi yerinde "
 "sıfırlayabilirler."
+
+msgctxt "accounts.password_reset"
+msgid "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+msgstr "Eşleşen kullanıcı yok — adı veya soyadı kontrol edin."
+
+msgctxt "accounts.password_reset"
+msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+msgstr "Seçmek için tıklayın veya ↑ ↓ ve Enter kullanın."
