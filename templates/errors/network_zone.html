@@ -7,8 +7,9 @@ Sahib 2026-10-01: «hamı developer deyil» — müəllim nə baş verdiyini və
 {% endcomment %}
 {% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'accounts.network_zone' %}{% endblock %}
 {% block code %}403{% endblock %}
+{% block code_label %}403{% endblock %}
 {% block code_big %}<i class="fas fa-wifi" aria-hidden="true"></i>{% endblock %}
-{% block kicker_icon %}fa-building-lock{% endblock %}
+{% block kicker_icon %}fa-wifi{% endblock %}
 {% block kicker %}{% trans 'Şəbəkə məhdudiyyəti' context 'accounts.network_zone' %}{% endblock %}
 {% block title %}{% if zone_reason == 'journal_internal_only' %}{% trans 'Elektron jurnal yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% elif zone_reason == 'admin_internal_only' %}{% trans 'İdarəetmə paneli yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% else %}{% trans 'Bu hesabla giriş yalnız universitet şəbəkəsindən mümkündür' context 'accounts.network_zone' %}{% endif %}{% endblock %}
 {% block description %}
