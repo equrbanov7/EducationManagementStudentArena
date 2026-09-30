@@ -10,6 +10,9 @@ PLAYER_QUESTION_PUBLISH_GRACE_SECONDS = 1.0
 PLAYER_RESULT_SECONDS = 3.5
 PLAYER_LEADERBOARD_SECONDS = 5.0
 PLAYER_REVEAL_TRANSITION_SECONDS = PLAYER_RESULT_SECONDS + PLAYER_LEADERBOARD_SECONDS
+# Sahib 2026-09-30: SON sualdan sonra liderlər lövhəsi göstərilmir — nəticə fazasından sonra
+# qısa «Nəticələr…» gərginlik fazası, sonra final səhnəsi (yerlər orada sürpriz kimi açılır).
+PLAYER_FINAL_SUSPENSE_SECONDS = 2.5
 
 # Audit 2026-09-28 LX-BE — server tərəfi vaxt qaydaları:
 # * son saniyədə basılıb şəbəkə gecikməsi ilə ``ends_at``-dən az sonra ÇATAN cavab

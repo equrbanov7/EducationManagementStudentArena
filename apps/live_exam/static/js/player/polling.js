@@ -3,11 +3,11 @@
 //  * WS açıqdırsa — «gözətçi»: gözlənilən server mesajı gecikibsə (sual bitib, reveal gəlməyib; və ya
 //    növbəti sual vaxtı keçib) snapshot çəkir; gecikmə davam etdikcə interval 4 → 8 → 16 → 30 s artır
 //    (host əl rejimində gözləyəndə 90 telefon serveri döyəcləməsin).
-import { PHASES } from './config.js?v=lx20260929';
-import { fetchState } from './api.js?v=lx20260929';
-import { isSocketOpen } from './sockets.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { getRevealTimings, nowMs, ts } from './utils.js?v=lx20260929';
+import { PHASES } from './config.js?v=lx20260930';
+import { fetchState } from './api.js?v=lx20260930';
+import { isSocketOpen } from './sockets.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { getRevealTimings, nowMs, ts } from './utils.js?v=lx20260930';
 
 let tickCount = 0;
 let watchdogDelay = 0;
@@ -26,7 +26,10 @@ function isOverdue() {
         const endsAt = ts(question.ends_at);
         return Boolean(endsAt && now > endsAt + 3000);
     }
-    if ((state.phase === PHASES.RESULT || state.phase === PHASES.LEADERBOARD) && state.revealPayload) {
+    if (
+        (state.phase === PHASES.RESULT || state.phase === PHASES.LEADERBOARD || state.phase === PHASES.SUSPENSE) &&
+        state.revealPayload
+    ) {
         return now > getRevealTimings(state.revealPayload).nextQuestionAt + 5000;
     }
     if (state.phase === PHASES.IDLE) {

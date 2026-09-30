@@ -1,7 +1,7 @@
-import { UI } from './dom.js?v=lx20260929';
-import { icon } from './icons.js?v=lx20260929';
-import { createFx } from './fx.js?v=lx20260929';
-import { audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { icon } from './icons.js?v=lx20260930';
+import { createFx } from './fx.js?v=lx20260930';
+import { audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20260930';
 import {
     playCheer,
     playFanfare,
@@ -10,8 +10,8 @@ import {
     startDanceBeat,
     startDrumroll,
     stopDanceBeat,
-} from './audio.js?v=lx20260929';
-import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20260929';
+} from './audio.js?v=lx20260930';
+import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20260930';
 
 /* FİNAL SƏHNƏSİ — qaranlıq zal, açılan pərdələr, süpürən projektorlar, qalxan
  * 3 pilləli podium; 3-cü → 2-ci → barabam → 1-ci (tac, fanfar, sol+sağ konfetti

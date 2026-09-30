@@ -66,8 +66,11 @@ PERM_PASSWORD_RESET = "account.password_reset"
 #: Rate-limit vedrələri — operator (istifadəçi id) başına.
 RESET_RATE_SCOPE = "account_password_reset"
 LOOKUP_RATE_SCOPE = "account_password_reset_lookup"
+#: Yazdıqca təklif (sahib 2026-09-30) — hər dayanmada bir sorğu, ona görə ayrıca, genişroq vedrə.
+SUGGEST_RATE_SCOPE = "account_password_reset_suggest"
 DEFAULT_RESET_RATE = "30/1h"
 DEFAULT_LOOKUP_RATE = "120/10m"
+DEFAULT_SUGGEST_RATE = "600/10m"
 
 #: Oxunaqlı əlifba — qarışan simvollar (0/O/o, 1/l/I/i) YOXDUR: parol kağıza
 #: yazılır və ya diktə olunur. 12 simvol × 54 hərf ≈ 69 bit — müvəqqəti parol
@@ -197,6 +200,10 @@ def _enforce_rate(scope: str, setting_name: str, default: str, request) -> None:
 
 def enforce_lookup_rate(request) -> None:
     _enforce_rate(LOOKUP_RATE_SCOPE, "ACCOUNT_PASSWORD_RESET_LOOKUP_RATE_LIMIT", DEFAULT_LOOKUP_RATE, request)
+
+
+def enforce_suggest_rate(request) -> None:
+    _enforce_rate(SUGGEST_RATE_SCOPE, "ACCOUNT_PASSWORD_RESET_SUGGEST_RATE_LIMIT", DEFAULT_SUGGEST_RATE, request)
 
 
 def enforce_reset_rate(request) -> None:

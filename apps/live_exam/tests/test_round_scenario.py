@@ -62,6 +62,8 @@ class LiveExamRoundScenarioTest(TestCase):
             text="Ganja",
             is_correct=False,
         )
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        ExamQuestion.objects.create(exam=exam, text="Next question", order=2, points=1000)
 
         now = timezone.now()
         session = LiveSession.objects.create(exam=exam, host_user=self.teacher)

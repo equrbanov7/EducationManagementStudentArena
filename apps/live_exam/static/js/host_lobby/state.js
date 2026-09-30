@@ -1,4 +1,4 @@
-import { PHASES } from './constants.js?v=lx20260929';
+import { PHASES } from './constants.js?v=lx20260930';
 
 export const state = {
     sessionState: "lobby",
@@ -21,6 +21,9 @@ export const state = {
     sfxVolume: Number(CONFIG.sessionSettings?.sfx_volume ?? 70),
     lobbyMusicMode: "",
     statePollTimer: 0,
+    lobbyResyncTimer: 0,
+    // Son tətbiq olunmuş lobbi siyahısının server vaxtı (ms) — köhnə `lobby_state` yeni sayı əzməsin.
+    lobbyStateAt: 0,
     pendingSyncTimer: 0,
     lastStateMutationAt: 0,
     players: [],

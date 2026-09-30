@@ -118,6 +118,10 @@ class LiveSocketBehaviourTest(TransactionTestCase):
         self.assertEqual(closed, {"type": "websocket.close", "code": 1009})
 
     def test_reveal_and_final_carry_only_own_personal_data(self):
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        second, _ = add_question(self.exam, "Q2", [("ok", True), ("no", False)], order=2)
+        self.session.selected_question_ids = [self.question.id, second.id]
+        self.session.save(update_fields=["selected_question_ids"])
         open_question(self.session, self.question)
 
         async def scenario():

@@ -1,18 +1,19 @@
-import { state } from './state.js?v=lx20260929';
-import { applySessionSettings } from './settings.js?v=lx20260929';
-import { renderLobbyPlayers } from './lobby.js?v=lx20260929';
-import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260929';
-import { applyRevealState } from './reveal.js?v=lx20260929';
-import { renderPodium } from './podium.js?v=lx20260929';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260929';
-import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20260929';
+import { state } from './state.js?v=lx20260930';
+import { applySessionSettings } from './settings.js?v=lx20260930';
+import { renderLobbyPlayers } from './lobby.js?v=lx20260930';
+import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260930';
+import { applyRevealState } from './reveal.js?v=lx20260930';
+import { renderPodium } from './podium.js?v=lx20260930';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260930';
+import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20260930';
 import {
     markStateMutation,
     notifyHostShell,
     rememberTimelinePayload,
     shouldApplyTimelinePayload,
+    toMs,
     updateServerTimeOffset,
-} from './utils.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
 
 export function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
@@ -24,7 +25,11 @@ export function applyStateSnapshot(snapshot) {
     if (snapshot.settings) applySessionSettings(snapshot.settings);
     if (snapshot.is_locked != null) state.isLocked = Boolean(snapshot.is_locked);
     if (snapshot.total_players != null) state.totalPlayers = Number(snapshot.total_players || 0);
-    if (Array.isArray(snapshot.players)) renderLobbyPlayers(snapshot.players, snapshot.total_players);
+    if (Array.isArray(snapshot.players)) {
+        // HTTP snapshot həqiqətdir; ondan köhnə WS `lobby_state` artıq tətbiq olunmur.
+        state.lobbyStateAt = Math.max(Number(state.lobbyStateAt || 0), toMs(snapshot.server_time));
+        renderLobbyPlayers(snapshot.players, snapshot.total_players);
+    }
     if (snapshot.answered_count != null) {
         state.answeredCount = Number(snapshot.answered_count || 0);
         updateAnsweredCounter();

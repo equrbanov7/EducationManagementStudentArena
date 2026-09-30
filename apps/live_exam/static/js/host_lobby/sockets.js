@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { applySessionSettings } from './settings.js?v=lx20260929';
-import { renderLobbyPlayers } from './lobby.js?v=lx20260929';
-import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260929';
-import { applyRevealState } from './reveal.js?v=lx20260929';
-import { renderPodium } from './podium.js?v=lx20260929';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260929';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { applySessionSettings } from './settings.js?v=lx20260930';
+import { renderLobbyPlayers } from './lobby.js?v=lx20260930';
+import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260930';
+import { applyRevealState } from './reveal.js?v=lx20260930';
+import { renderPodium } from './podium.js?v=lx20260930';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260930';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20260930';
 import {
     esc,
     fmt,
@@ -14,10 +14,11 @@ import {
     markStateMutation,
     rememberTimelinePayload,
     shouldApplyTimelinePayload,
+    toMs,
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
@@ -63,6 +64,10 @@ function onLobbyMessage(event) {
         const data = message.data || message;
         updateServerTimeOffset(data);
         if (data.type === "lobby_state") {
+            // Sıradan çıxmış (daha köhnə) siyahı yeni sayı əzməsin (sahib 2026-09-30: «say azalır»).
+            const builtAt = toMs(data.server_time);
+            if (builtAt && state.lobbyStateAt && builtAt < state.lobbyStateAt) return;
+            if (builtAt) state.lobbyStateAt = builtAt;
             markStateMutation();
             if (data.settings) applySessionSettings(data.settings);
             if (data.is_locked != null) state.isLocked = Boolean(data.is_locked);
@@ -129,8 +134,11 @@ function openLobby() {
     const ws = new WebSocket(wsUrl(`/ws/live/${CONFIG.pin}/lobby/`));
     sockets.lobby = ws;
     ws.onopen = () => {
+        const reconnect = sockets.retries.lobby > 0;
         sockets.retries.lobby = 0;
         log(tr("wsLobbyOpen", "Lobby WS open"));
+        // Qopma zamanı buraxılmış qoşulmalar: siyahını serverdən tutuşdur (sahib 2026-09-30).
+        if (reconnect && state.sessionState === "lobby") syncState();
     };
     ws.onclose = () => {
         log(tr("wsLobbyClosed", "Lobby WS closed"));

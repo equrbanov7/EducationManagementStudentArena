@@ -93,6 +93,10 @@ class LiveRevealGatingTest(TestCase):
         self.assertEqual(sorted(payload.get("correct_option_ids") or []), [self.correct.id])
 
     def test_player_and_host_payloads_do_not_leak_extra_answer_fields(self):
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        second = ExamQuestion.objects.create(exam=self.exam, text="Q2", order=2, points=1000)
+        self.session.selected_question_ids = [self.question.id, second.id]
+        self.session.save(update_fields=["selected_question_ids"])
         # Defense-in-depth: the player payload's key set must stay a strict
         # subset that excludes any per-player answer analytics.
         player_keys = set(self._player_payload().keys())

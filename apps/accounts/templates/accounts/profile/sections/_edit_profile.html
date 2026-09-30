@@ -56,7 +56,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                 <div class="info-item">
                     <label class="info-label" for="email">{% trans "email" context "profile.edit" %} *</label>
                     <input type="email" class="form-control" id="email" name="email"
-                           value="{{ user.email }}" required>
+                           value="{{ user.email }}" required autocomplete="email" inputmode="email"
+                           autocapitalize="none" autocorrect="off" spellcheck="false">
                 </div>
                 <div class="info-item">
                     <label class="info-label" for="phone">{% trans "phone" context "profile.edit" %}</label>

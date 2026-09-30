@@ -87197,3 +87197,47 @@ msgid ""
 msgstr ""
 "Если проблема не решается, обратитесь в Центр цифрового развития (RİM) — там"
 " могут сразу сбросить пароль."
+
+msgctxt "accounts.password_reset"
+msgid "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
+msgstr "Подходящих пользователей нет — проверьте имя или фамилию."
+
+msgctxt "accounts.password_reset"
+msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+msgstr "Нажмите, чтобы выбрать, или используйте ↑ ↓ и Enter."
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_title"
+msgstr "Итоги…"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_sub"
+msgstr "Кто победил? Начинается финальная сцена!"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_hint"
+msgstr "Нажмите «Следующий», чтобы открыть финальную сцену"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh"
+msgstr "Обновить"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh_hint"
+msgstr "Заново загрузить список игроков с сервера"
+
+msgctxt "live_exam.host_lobby"
+msgid "Yenilə"
+msgstr "Обновить"
+
+msgctxt "live_exam.host_lobby"
+msgid "Oyunçu siyahısını və sayını serverdən yenilə"
+msgstr "Заново загрузить список и число игроков с сервера"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_title"
+msgstr "Итоги — на большом экране!"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_body"
+msgstr "Твоё место откроется на финальной сцене — смотри на большой экран 👀"

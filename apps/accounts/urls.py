@@ -249,6 +249,11 @@ urlpatterns = [
         name="account_password_reset_lookup",
     ),
     path(
+        "password-reset-admin/suggest/",
+        password_reset_views.account_password_reset_suggest,
+        name="account_password_reset_suggest",
+    ),
+    path(
         "password-reset-admin/reset/",
         password_reset_views.account_password_reset_perform,
         name="account_password_reset_perform",

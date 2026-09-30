@@ -204,7 +204,9 @@ class LeaderboardAndFinalStatsTest(_Base):
     def setUp(self):
         super().setUp()
         self.question, (self.ok_option, self.bad_option) = add_question(self.exam, "Q", [("ok", True), ("no", False)])
-        self.session.selected_question_ids = [self.question.id]
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        self.next_question, _ = add_question(self.exam, "Q2", [("ok", True), ("no", False)], order=2)
+        self.session.selected_question_ids = [self.question.id, self.next_question.id]
         self.session.save(update_fields=["selected_question_ids"])
         self.players = make_players(self.session, 4)
 

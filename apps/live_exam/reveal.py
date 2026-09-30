@@ -13,20 +13,32 @@ növbə ilə). İndi reveal anında:
   onu göndərir — heç bir oyunçu başqasının şəxsi məlumatını almır.
 
 Liderlik sırası: ``serializers.LEADERBOARD_ORDER`` (bal ↓, qoşulma ↑, id ↑).
+
+SON sual (sahib 2026-09-30): reveal paketində liderlik cədvəli (``top``/``previous_top`` boş
+siyahıdır) və şəxsi sıra (``rank``/``gap_to_next``/``next_nickname``) YOXDUR — nə host-a, nə oyunçulara
+(WS, state JSON, HTTP cavabı eyni paketdən qurulur). Yerlər yalnız ``finished`` hadisəsi ilə,
+final səhnəsində açılır. Nəticə fazasından sonra liderlər lövhəsi əvəzinə qısa gərginlik fazası
+(``final_question``, ``final_suspense_ms``) gəlir.
 """
 
 from __future__ import annotations
 
 import json
 from dataclasses import dataclass, field
+from datetime import timedelta
 from typing import Any
 
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.live_exam.constants import PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS, PLAYER_REVEAL_TRANSITION_SECONDS
+from apps.live_exam.constants import PLAYER_FINAL_SUSPENSE_SECONDS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
 from apps.live_exam.domain.question_config import resolve_question_config
-from apps.live_exam.domain.session import build_reveal_phase_times, get_selected_question_ids, safe_int
+from apps.live_exam.domain.session import (
+    build_reveal_phase_times,
+    get_exam_question_ids,
+    get_selected_question_ids,
+    safe_int,
+)
 from apps.live_exam.models import LiveAnswer
 from apps.live_exam.serializers import answer_choice_ids, question_mode_fields, speed_order_key
 from apps.live_exam.typed_answers import build_typed_summary
@@ -91,16 +103,32 @@ def _rank_fields(ordered: list[dict[str, Any]]) -> dict[int, dict[str, Any]]:
     return fields
 
 
-def _timing_fields(session, revealed_at) -> dict[str, Any]:
+def is_final_question(session, question_id) -> bool:
+    """Sual oyunun SONUNCU sualıdırmı (seçilmiş sıra; köhnə sessiyada imtahan sırası)."""
+    ids = get_selected_question_ids(session) or get_exam_question_ids(session)
+    return bool(ids) and safe_int(ids[-1], 0) == safe_int(question_id, 0)
+
+
+def _timing_fields(session, revealed_at, *, final: bool = False) -> dict[str, Any]:
     leaderboard_starts_at, next_question_at = build_reveal_phase_times(session, revealed_at=revealed_at)
-    return {
+    result_ms = int(PLAYER_RESULT_SECONDS * 1000)
+    phase_ms = int(PLAYER_LEADERBOARD_SECONDS * 1000)
+    if final:
+        # Liderlər lövhəsi yoxdur: nəticədən sonra qısa gərginlik, sonra (auto) final səhnəsi.
+        phase_ms = int(PLAYER_FINAL_SUSPENSE_SECONDS * 1000)
+        next_question_at = leaderboard_starts_at + timedelta(milliseconds=phase_ms)
+    fields = {
         "revealed_at": revealed_at.isoformat(),
-        "result_duration_ms": int(PLAYER_RESULT_SECONDS * 1000),
-        "leaderboard_duration_ms": int(PLAYER_LEADERBOARD_SECONDS * 1000),
-        "transition_duration_ms": int(PLAYER_REVEAL_TRANSITION_SECONDS * 1000),
+        "result_duration_ms": result_ms,
+        "leaderboard_duration_ms": phase_ms,
+        "transition_duration_ms": result_ms + phase_ms,
         "leaderboard_starts_at": leaderboard_starts_at.isoformat(),
         "next_question_at": next_question_at.isoformat(),
     }
+    if final:
+        fields["final_question"] = True
+        fields["final_suspense_ms"] = phase_ms
+    return fields
 
 
 def _distribution(answers: list[dict[str, Any]]) -> dict[str, Any]:
@@ -136,6 +164,7 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
 
     config = resolve_question_config(session, exam_question)
     revealed_at = revealed_at or session.question_ends_at or timezone.now()
+    final = is_final_question(session, question_id)
     answers = list(LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).values(*_ANSWER_FIELDS))
     players = _players(session)
     by_id = {player["id"]: player for player in players}
@@ -153,11 +182,6 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
             safe_int(p["id"], 0),
         ),
     )
-    top = [_leader_row(player) for player in ordered[:10]]
-    previous_top = [
-        _leader_row(player, score=safe_int(player["score"], 0) - awarded_by_player.get(player["id"], 0))
-        for player in before[:10]
-    ]
 
     fastest = next((answer for answer in answers_by_speed if answer["is_correct"]), None)
     fastest_correct = None
@@ -194,10 +218,19 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
         "answer_input": config.answer_input,
         "correct_option_ids": list(config.correct_ids),
         "distribution": _distribution(answers),
-        "top": top,
-        "previous_top": previous_top,
-        **_timing_fields(session, revealed_at),
+        **_timing_fields(session, revealed_at, final=final),
     }
+    if final:
+        # Son sualda liderlik cədvəli GÖNDƏRİLMİR (sürpriz final səhnəsində açılır). Açarlar boş
+        # siyahı kimi qalır — keşdəki köhnə JS də çökmədən işləyir.
+        common["top"] = []
+        common["previous_top"] = []
+    else:
+        common["top"] = [_leader_row(player) for player in ordered[:10]]
+        common["previous_top"] = [
+            _leader_row(player, score=safe_int(player["score"], 0) - awarded_by_player.get(player["id"], 0))
+            for player in before[:10]
+        ]
     if config.is_text:
         common["accepted_answers"] = list(config.accepted)
     if config.is_multi:
@@ -212,11 +245,12 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
         host["typed_total"] = len(answers)
         host["typed_correct"] = sum(1 for answer in answers if answer["is_correct"])
 
-    ranks = _rank_fields(ordered)
+    # Son sualda şəxsi sıra da yoxdur — telefon yerini final səhnəsi ilə birlikdə öyrənir.
+    ranks = {} if final else _rank_fields(ordered)
     personal: dict[str, str] = {}
     answers_by_player = {answer["player_id"]: answer for answer in answers}
     for player in players:
-        entry = dict(ranks[player["id"]])
+        entry = dict(ranks.get(player["id"], {}))
         answer = answers_by_player.get(player["id"])
         if answer is not None:
             mode_fields = question_mode_fields(config, answer_choice_ids(answer), answer["text_answer"])
