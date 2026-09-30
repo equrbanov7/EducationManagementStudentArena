@@ -80,15 +80,19 @@ jobs:
           rm -f /tmp/gem_models.json
           # 1) Serverdən (runner = prod host) minimal generateContent — cavabdan yalnız status,
           #    xəta mesajı, finishReason və token sayları çap olunur (mətn/açar yox).
-          for tb in none 0; do
-            if [ "$tb" = none ]; then gen='{"maxOutputTokens":256}'; else gen='{"maxOutputTokens":256,"thinkingConfig":{"thinkingBudget":0}}'; fi
+          for tb in none budget0 level-low; do
+            case "$tb" in
+              none) gen='{"maxOutputTokens":512}' ;;
+              budget0) gen='{"maxOutputTokens":512,"thinkingConfig":{"thinkingBudget":0}}' ;;
+              level-low) gen='{"maxOutputTokens":512,"thinkingConfig":{"thinkingLevel":"low"}}' ;;
+            esac
             body=$(curl -sS --max-time 40 -w '\n%{http_code}' \
               -H "x-goog-api-key: ${GEMINI_KEY}" -H 'Content-Type: application/json' \
               -d "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Salam, bir cümlə ilə cavab ver: 2+2 neçədir?\"}]}],\"generationConfig\":${gen}}" \
               "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent")
             code=$(printf '%s' "$body" | tail -n1)
             printf '%s' "$body" | sed '$d' > /tmp/gem_diag.json
-            echo "── thinkingBudget=${tb}: HTTP ${code}"
+            echo "── thinking=${tb}: HTTP ${code}"
             python3 - <<'PY'
           import json
           try:
