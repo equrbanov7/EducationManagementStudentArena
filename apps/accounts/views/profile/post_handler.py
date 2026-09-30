@@ -187,6 +187,11 @@ def handle_profile_post(
             messages.error(request, name_rejection.message)
             return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
 
+        # 2026-09-30: e-poçt dəyişibsə «təsdiqli» sayılmır (RİM redaktəsi ilə eyni qayda) — növbəti
+        # məcburi parol dəyişməsində (operator sıfırlaması) yeni ünvan OTP ilə təsdiqlənəcək.
+        if (request.user.email or "").strip().lower() != new_email:
+            profile.email_verified = False
+
         # Update user info
         for field_name, field_value in user_update_payload.items():
             setattr(request.user, field_name, field_value)

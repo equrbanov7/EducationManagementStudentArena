@@ -1,9 +1,9 @@
-import { UI } from './dom.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { finishGame, nextQuestion, post, postJson, revealQuestion, startGame } from './api.js?v=lx20260929';
-import { unlockAudio } from './audio.js?v=lx20260929';
-import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20260929';
-import { controlsEnabled, fitAll } from './utils.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { finishGame, nextQuestion, post, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20260930';
+import { unlockAudio } from './audio.js?v=lx20260930';
+import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20260930';
+import { controlsEnabled, fitAll } from './utils.js?v=lx20260930';
 
 export function bindHostEvents() {
     if (UI.startBtn) UI.startBtn.onclick = startGame;
@@ -25,6 +25,15 @@ export function bindHostEvents() {
         post(CONFIG.urls.removePlayer, formData).finally(() => {
             button.disabled = false;
         });
+    });
+
+    // «Yenilə» (lobbi səhnəsi + idarə paneli): bir delegasiya dinləyicisi — səhnə yenidən
+    // çəkiləndə də işləyir (sahib 2026-09-30).
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest?.("[data-action='refresh-state']");
+        if (!button || button.disabled || !controlsEnabled()) return;
+        event.preventDefault();
+        refreshHostState();
     });
 
     UI.autoMode?.addEventListener("change", () => {

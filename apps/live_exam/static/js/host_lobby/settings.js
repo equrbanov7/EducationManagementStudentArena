@@ -1,6 +1,6 @@
-import { UI } from './dom.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { applyServerVolume, syncLobbyMusic } from './audio.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { applyServerVolume, syncLobbyMusic } from './audio.js?v=lx20260930';
 
 export function applySessionSettings(nextSettings) {
     const previousLobbyMusic = state.sessionSettings.lobby_music;

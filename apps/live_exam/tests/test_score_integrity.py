@@ -73,10 +73,12 @@ class LiveScorePayloadIntegrityTest(TestCase):
         q2 = ExamQuestion.objects.create(exam=exam, text="Q2", order=2, points=1000)
         q2_ok = ExamQuestionOption.objects.create(question=q2, text="ok", is_correct=True)
         q2_bad = ExamQuestionOption.objects.create(question=q2, text="bad", is_correct=False)
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        q3 = ExamQuestion.objects.create(exam=exam, text="Q3", order=3, points=1000)
 
         session = LiveSession.objects.create(exam=exam, host_user=self.teacher)
-        session.selected_question_ids = [q1.id, q2.id]
-        session.question_limit = 2
+        session.selected_question_ids = [q1.id, q2.id, q3.id]
+        session.question_limit = 3
         session.save(update_fields=["selected_question_ids", "question_limit"])
         self._activate_question(session, q1, 0)
 

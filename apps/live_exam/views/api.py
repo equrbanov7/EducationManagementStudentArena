@@ -69,6 +69,9 @@ _REVEAL_OPTIONAL_KEYS = (
     "typed_total",
     "typed_correct",
     "total_players",
+    # Sahib 2026-09-30: son sual — liderlik/sıra yoxdur, gərginlik fazası (reveal.py).
+    "final_question",
+    "final_suspense_ms",
 )
 
 
@@ -172,7 +175,8 @@ def live_state_json(request, pin):
         if session.state == LiveSession.STATE_LOBBY and not (player is not None and request.GET.get("light") == "1"):
             players = serialize_players(session)
             data["players"] = players
-            data["total_players"] = len(players)
+            # Host-un «Yenilə» düyməsi / avtomatik sinxronu bu sayı HƏQİQƏT kimi götürür (sahib 2026-09-30).
+            data["total_players"] = len(players) if len(players) < 200 else session.players.count()
         else:
             # ``?light=1`` (oyunçu, lobby): 200 nəfərlik siyahı əvəzinə yalnız say — gözləmə
             # otağının ehtiyat sorğusu üçün (LX-FE-PLAYER). Host cavabı dəyişmir.

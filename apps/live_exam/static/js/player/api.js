@@ -1,9 +1,9 @@
 // LX-FE-PLAYER (2026-09-29): HTTP snapshot (/live/state/<pin>/) — WS qopanda, səhifə yenilənəndə,
 // tab yenidən görünəndə və «gözlənilən mesaj gecikib» hallarında UI-ni server vəziyyətinə gətirir.
 // Eyni anda yalnız bir sorğu; 429-da Retry-After-a hörmət; 403 → oyunçu sessiyada yoxdur.
-import { BOOTSTRAP } from './config.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { updateServerTimeOffset } from './utils.js?v=lx20260929';
+import { BOOTSTRAP } from './config.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { updateServerTimeOffset } from './utils.js?v=lx20260930';
 
 let inFlight = null;
 let blockedUntil = 0;

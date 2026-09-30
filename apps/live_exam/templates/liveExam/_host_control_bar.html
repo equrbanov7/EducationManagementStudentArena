@@ -16,6 +16,11 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
                 <span class="hx-i" data-icon="unlock"></span>
                 <span>{% trans "lobby_open" context "live_exam.host_lobby" %}</span>
             </button>
+            {% comment %}Sahib 2026-09-30: vəziyyəti (oyunçu siyahısı/sayı) serverdən yenilə — səhifə yenilənmir.{% endcomment %}
+            <button id="refreshStateBtn" class="control-pill-btn" type="button" data-action="refresh-state" title="{% trans 'Oyunçu siyahısını və sayını serverdən yenilə' context 'live_exam.host_lobby' %}">
+                <span class="hx-i" data-icon="refresh"></span>
+                <span>{% trans "Yenilə" context "live_exam.host_lobby" %}</span>
+            </button>
         </div>
 
         <div class="control-fields">

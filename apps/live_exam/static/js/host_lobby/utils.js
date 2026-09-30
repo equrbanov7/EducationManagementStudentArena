@@ -1,5 +1,5 @@
-import { UI } from './dom.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
 
 export const I18N = window.LIVE_EXAM_HOST_I18N || {};
 export const hostShellSubscribers = new Set();

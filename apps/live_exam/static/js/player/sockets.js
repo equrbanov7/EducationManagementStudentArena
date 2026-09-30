@@ -2,8 +2,8 @@
 // jitter). Əvvəl soket bir dəfə açılırdı; Wi-Fi qopanda yalnız 2.5 s-lik HTTP sorğusu qalırdı.
 // Server qoşulma limiti (LIVE_WS_CONNECT_RATE_LIMIT, 20/dəq) aşılmasın deyə gecikmə 10 s-ə qədər artır;
 // 4429 (limit) → 15 s; 4401 (token etibarsız / oyunçu silinib) → yenidən cəhd yoxdur.
-import { BOOTSTRAP } from './config.js?v=lx20260929';
-import { wsUrl } from './utils.js?v=lx20260929';
+import { BOOTSTRAP } from './config.js?v=lx20260930';
+import { wsUrl } from './utils.js?v=lx20260930';
 
 let ws = null;
 let attempt = 0;

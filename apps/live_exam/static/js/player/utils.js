@@ -5,8 +5,8 @@ import {
     I18N,
     LANG,
     SESSION_SETTINGS,
-} from './config.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
+} from './config.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
 
 // Tərcümə hələ kompilyasiya olunmayıbsa {% trans %} msgid-i («answer_locked») qaytarır —
 // belə açarı xam göstərmirik, JS-dəki (az) ehtiyat mətni işlədirik.

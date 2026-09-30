@@ -24,10 +24,11 @@ from ..services.password_reset_admin import (
     audit_denied,
     enforce_lookup_rate,
     enforce_reset_rate,
+    enforce_suggest_rate,
     operator_for,
     reset_password,
 )
-from ..services.password_reset_lookup import lookup, serialize_candidates
+from ..services.password_reset_lookup import lookup, serialize_candidates, suggest
 
 _CTX = "accounts.password_reset"
 
@@ -64,6 +65,20 @@ def account_password_reset_lookup(request):
 @never_cache
 @login_required
 @require_POST
+def account_password_reset_suggest(request):
+    """Yazdıqca təklif (yüngül siyahı) — seçim sonra ``lookup`` ilə tam karta çevrilir."""
+    try:
+        enforce_suggest_rate(request)
+        actor = operator_for(request)
+        results = suggest(actor, _read_payload(request).get("q"))
+    except PasswordResetError as exc:
+        return _error(exc)
+    return JsonResponse({"ok": True, "results": results})
+
+
+@never_cache
+@login_required
+@require_POST
 def account_password_reset_perform(request):
     """Seçilmiş hədəfə müvəqqəti parol verir — parol cavabda BİR DƏFƏ qayıdır."""
     target_id = _read_payload(request).get("user_id")
@@ -92,6 +107,8 @@ def _js_strings() -> dict:
     """Xarici JS-in mətnləri — `json_script` ilə ötürülür (JS tərcümə tag-larından keçmir)."""
     return {
         "searching": pgettext(_CTX, "Axtarılır…"),
+        "suggestEmpty": pgettext(_CTX, "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."),
+        "suggestHint": pgettext(_CTX, "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."),
         "noResults": pgettext(_CTX, "Heç kim tapılmadı. İstifadəçi adını yoxlayın və ya ad və soyadla axtarın."),
         "hasMore": pgettext(_CTX, "Nəticə çoxdur — yalnız ilk 8-i göstərilir. Sorğunu dəqiqləşdirin."),
         "found": pgettext(_CTX, "Şəxsiyyəti sənədlə yoxlayın və yalnız sonra parolu sıfırlayın."),
@@ -134,6 +151,7 @@ def build_panel_context(request) -> dict:
         "denied_message": "",
         "organization_name": getattr(actor.organization, "name", "") or "",
         "lookup_url": reverse("accounts:account_password_reset_lookup"),
+        "suggest_url": reverse("accounts:account_password_reset_suggest"),
         "reset_url": reverse("accounts:account_password_reset_perform"),
         "js_strings": _js_strings(),
     }
@@ -142,5 +160,6 @@ def build_panel_context(request) -> dict:
 __all__ = [
     "account_password_reset_lookup",
     "account_password_reset_perform",
+    "account_password_reset_suggest",
     "build_panel_context",
 ]

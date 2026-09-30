@@ -127,6 +127,21 @@
     min-height: 44px;
 }
 
+/* Sahib 2026-09-30 (köçürməyə qarşı): sual/cavab səhnələrində mətn seçilmir, uzun basma
+ * menyusu açılmır (JS: host_lobby/copy_guard.js). Lobbi (keçid/PIN) seçilə bilən qalır. */
+.hx-question,
+.hx-reveal,
+.hx-suspense {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.hx-question img,
+.hx-reveal img {
+    -webkit-user-drag: none;
+}
+
 .hx-qcard {
     display: flex;
     align-items: center;

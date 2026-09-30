@@ -1,5 +1,5 @@
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının yeganə vəziyyət obyekti.
-import { BOOTSTRAP } from './config.js?v=lx20260929';
+import { BOOTSTRAP } from './config.js?v=lx20260930';
 
 export const state = {
     player: Object.assign({ score: 0 }, BOOTSTRAP.player || {}),

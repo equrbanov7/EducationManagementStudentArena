@@ -69,6 +69,23 @@ body.lxp {
     overflow: hidden;
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
+    /* Sahib 2026-09-30 (köçürməyə qarşı): mətn seçilmir, uzun basmada menyu/AI açılmır.
+     * Yazılı cavab xanası istisnadır (aşağıda); toxunuşlar (click) toxunulmaz qalır. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body.lxp input,
+body.lxp textarea {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+}
+
+body.lxp img,
+body.lxp svg {
+    -webkit-user-drag: none;
 }
 
 .lxp *,
@@ -154,6 +171,11 @@ body[data-tone="none"] .lxp-bg::after,
 body[data-tone="timeup"] .lxp-bg::after {
     opacity: 1;
     background: radial-gradient(90% 70% at 50% 30%, #3b4a63 0%, #1e293b 70%, #0b1220 100%);
+}
+
+body[data-tone="suspense"] .lxp-bg::after {
+    opacity: 1;
+    background: radial-gradient(90% 60% at 50% 26%, #3a2f86 0%, #1e1b4b 60%, #0b0a24 100%);
 }
 
 body[data-tone="final-1"] .lxp-bg::after {

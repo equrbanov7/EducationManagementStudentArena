@@ -199,7 +199,8 @@ def build_lobby_state_payload(session, *, limit: int = 200) -> dict[str, Any]:
     return {
         "type": "lobby_state",
         "server_time": timezone.now().isoformat(),
-        "count": len(players),
+        # Siyahı ``limit``-lə kəsilir; say isə həmişə həqiqi say olmalıdır (host sayğacı).
+        "count": len(players) if len(players) < limit else session.players.count(),
         "players": players,
         "is_locked": bool(session.is_locked),
         # İctimai görünüş — yazılı cavabların qəbul siyahısı lobby-yə getmir.
@@ -305,6 +306,8 @@ def build_player_reveal_payload(
 
     Includes correct_option_ids (appropriate at reveal stage), distribution, and leaderboard
     data, but omits per-player answer details (``results``) which are host-only analytics.
+    On the FINAL question the leaderboard (``top``/``previous_top``) is withheld as well —
+    places are revealed only by the ``finished`` event / final stage (owner 2026-09-30).
     """
     return build_reveal_bundle(session, question_id, revealed_at=revealed_at, exam_question=exam_question).players
 

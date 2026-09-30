@@ -147,6 +147,8 @@ class ServerAutoRevealTest(TestCase):
         self.assertEqual(self.session.state, LiveSession.STATE_REVEAL)
 
     def test_state_endpoint_reveals_lazily_when_host_is_gone(self):
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        add_question(self.exam, "Q2", [("ok", True), ("no", False)], order=2)
         open_question(self.session, self.question, answer_window_seconds=5, opened_seconds_ago=10)  # ends 5 s əvvəl
         response = player_client(self.session, self.player).get(
             reverse("liveExam:state_json", kwargs={"pin": self.session.pin})

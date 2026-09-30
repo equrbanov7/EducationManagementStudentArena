@@ -279,6 +279,44 @@
     font-weight: 700;
 }
 
+/* ── Son sualdan sonra: «Nəticələr ekranda!» (final_gate.js, sahib 2026-09-30) ── */
+.lxp-suspense {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 2px 12px;
+    text-align: center;
+}
+
+.lxp-suspense__badge {
+    display: grid;
+    place-items: center;
+    width: 112px;
+    height: 112px;
+    margin-bottom: 10px;
+    border-radius: 50%;
+    background: var(--lxp-card);
+    color: #b45309;
+    box-shadow: 0 0 0 12px rgba(253, 224, 71, 0.18), 0 22px 44px rgba(0, 0, 0, 0.35);
+    animation: lxpSuspenseBeat 0.9s ease-in-out infinite;
+}
+
+.lxp-suspense__badge svg {
+    width: 60px;
+    height: 60px;
+}
+
+@keyframes lxpSuspenseBeat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
 @keyframes lxpBadgeIn {
     0% {
         transform: scale(0.3) rotate(-25deg);
@@ -352,6 +390,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .lxp-suspense__badge,
     .lxp-result__badge,
     .lxp-result__points,
     .lxp-pill--streak,
