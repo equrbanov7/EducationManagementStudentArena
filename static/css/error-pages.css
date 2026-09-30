@@ -134,6 +134,28 @@ body.error-page {
     line-height: 1.75;
 }
 
+/* Şəbəkə zonası izahı (sahib 2026-10-01): paraqraf + «Nə etməli?» addımları. */
+.error-zone-lead {
+    margin: 0;
+}
+
+.error-zone-steps-title {
+    margin: 14px 0 6px;
+    color: var(--error-text, inherit);
+    font-weight: 700;
+}
+
+.error-zone-steps {
+    margin: 0;
+    padding-left: 1.3em;
+    font-size: 0.96rem;
+    line-height: 1.6;
+}
+
+.error-zone-steps li + li {
+    margin-top: 4px;
+}
+
 .error-meta {
     margin-top: 18px;
     display: flex;

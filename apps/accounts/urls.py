@@ -10,12 +10,15 @@ from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
+from .views import network_zone_page
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
 app_name = "accounts"
 
 urlpatterns = [
     # Authentication
+    # Şəbəkə zonası izah səhifəsi — nginx kənardan /jurnal/ və /manage/ sorğularını bura yönləndirir.
+    path("sebeke/<slug:area>/", network_zone_page.network_zone_denied, name="network_zone_denied"),
     path("register/", views.register_view, name="register"),
     path("verify-code/", views.verify_code_view, name="verify_code"),
     path("verify-email/", views.verify_email_link_view, name="verify_email_link"),

@@ -1,22 +1,36 @@
 {% extends "errors/_base.html" %}
 {% load i18n %}
+{% comment %}
+Şəbəkə zonası rəddi. Django middleware-i (`apps/accounts/network_zone.py`) və nginx yönləndirməsi
+(`/accounts/sebeke/<area>/`, `apps/accounts/views/network_zone_page.py`) bu səhifəni göstərir.
+Sahib 2026-10-01: «hamı developer deyil» — müəllim nə baş verdiyini və nə edəcəyini sadə dildə görsün.
+{% endcomment %}
 {% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'accounts.network_zone' %}{% endblock %}
 {% block code %}403{% endblock %}
-{% block code_big %}403{% endblock %}
+{% block code_big %}<i class="fas fa-wifi" aria-hidden="true"></i>{% endblock %}
 {% block kicker_icon %}fa-building-lock{% endblock %}
 {% block kicker %}{% trans 'Şəbəkə məhdudiyyəti' context 'accounts.network_zone' %}{% endblock %}
-{% block title %}{% if zone_reason == 'journal_internal_only' %}{% trans 'Elektron jurnal yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% else %}{% trans 'Bu hesabla giriş yalnız universitet şəbəkəsindən mümkündür' context 'accounts.network_zone' %}{% endif %}{% endblock %}
+{% block title %}{% if zone_reason == 'journal_internal_only' %}{% trans 'Elektron jurnal yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% elif zone_reason == 'admin_internal_only' %}{% trans 'İdarəetmə paneli yalnız universitet şəbəkəsində açılır' context 'accounts.network_zone' %}{% else %}{% trans 'Bu hesabla giriş yalnız universitet şəbəkəsindən mümkündür' context 'accounts.network_zone' %}{% endif %}{% endblock %}
 {% block description %}
-    {% if zone_reason == 'journal_internal_only' %}
-        {% trans 'Jurnal qeydləri kampus daxilindən (universitet Wi-Fi/LAN) aparılır. Digər bölmələr — fənlər, imtahanlar, sillabuslar — kənardan da işləyir.' context 'accounts.network_zone' %}
-    {% else %}
-        {% trans 'İnzibati hesablar təhlükəsizlik səbəbindən kənar şəbəkədən açılmır. Universitet şəbəkəsinə qoşulub yenidən daxil olun.' context 'accounts.network_zone' %}
-    {% endif %}
+    <p class="error-zone-lead">
+        {% trans 'Siz hazırda universitetdən kənar internetdən (mobil internet və ya ev Wi-Fi-ı) qoşulmusunuz.' context 'accounts.network_zone' %}
+        {% if zone_reason == 'journal_internal_only' %}
+            {% trans 'Təhlükəsizlik üçün qiymət və davamiyyət yalnız universitet binasında, universitetin Wi-Fi və ya kompüter şəbəkəsindən yazılır.' context 'accounts.network_zone' %}
+        {% else %}
+            {% trans 'Təhlükəsizlik üçün bu bölmə yalnız universitet binasında, universitetin Wi-Fi və ya kompüter şəbəkəsindən açılır.' context 'accounts.network_zone' %}
+        {% endif %}
+    </p>
+    <p class="error-zone-steps-title">{% trans 'Nə etməli?' context 'accounts.network_zone' %}</p>
+    <ol class="error-zone-steps">
+        <li>{% trans 'Universitetdəsinizsə: telefonda mobil interneti söndürün və universitetin Wi-Fi şəbəkəsinə qoşulun (kompüterdə — universitet şəbəkəsinə).' context 'accounts.network_zone' %}</li>
+        <li>{% trans 'Sonra bu səhifəni yeniləyin.' context 'accounts.network_zone' %}</li>
+        <li>{% trans 'Kabinetin digər bölmələri — dərs cədvəli, fənlər, imtahanlar, sillabus — evdən də işləyir.' context 'accounts.network_zone' %}</li>
+        <li>{% trans 'Universitet Wi-Fi-ına qoşulduğunuz halda da bu səhifə çıxırsa, RİM mərkəzinə müraciət edin.' context 'accounts.network_zone' %}</li>
+    </ol>
 {% endblock %}
 {% block pills %}
     <span class="error-pill"><i class="fas fa-wifi"></i> {% trans 'Universitet Wi-Fi / LAN' context 'accounts.network_zone' %}</span>
     <span class="error-pill"><i class="fas fa-shield-halved"></i> {% trans 'Şəbəkə zonası qaydası' context 'accounts.network_zone' %}</span>
 {% endblock %}
-{% block back_label %}{% trans 'Çıxış' context 'accounts.network_zone' %}{% endblock %}
 {% block footer_note %}{% trans 'Bu qayda sistem administratoru tərəfindən təyin olunub; sual olarsa RİM-ə müraciət edin.' context 'accounts.network_zone' %}{% endblock %}
 {% block caption %}{% trans 'Sorğu kənar şəbəkədən gəldi; bu bölmə üçün daxili zona tələb olunur.' context 'accounts.network_zone' %}{% endblock %}
