@@ -1,6 +1,7 @@
 """Sahib 2026-10-01 — AI çatbot: ən ucuz model və xərc/təhlükəsizlik qoruyucuları.
 
-* standart model ``gemini-2.5-flash`` (sahib: «normal model»; ``GEMINI_MODEL`` env üstündür);
+* standart model flash sinfi — ``gemini-3.8-flash`` (sahib: «normal model»; ``GEMINI_MODEL`` env üstündür;
+  2.5 adları yeni açarlara verilmir, ``core.ai_models`` çevirir);
 * BÜTÜN sistem üzrə gündəlik tavan (``AI_ASSISTANT_GLOBAL_RATE_LIMIT``) — dolanda Gemini çağırılmır, 429;
 * cavabdakı «/\\host» keçidi yerli sayılmır (brauzer onu «//host» kimi açır) — JS qaydası.
 """
@@ -28,11 +29,16 @@ class CheapestModelTests(TestCase):
             patch.dict(os.environ, {"GEMINI_MODEL": ""}),
             patch("apps.exams.public.get_ai_config", side_effect=Exception("no config")),
         ):
-            self.assertEqual(_get_model(), "gemini-2.5-flash")
+            self.assertEqual(_get_model(), "gemini-3.8-flash")
 
     def test_env_override_wins(self):
-        with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-2.5-flash-lite"}):
-            self.assertEqual(_get_model(), "gemini-2.5-flash-lite")
+        with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-3.5-flash-lite"}):
+            self.assertEqual(_get_model(), "gemini-3.5-flash-lite")
+
+    def test_legacy_env_model_is_mapped(self):
+        # 2026-10-01: Google yeni açarlara gemini-2.5-* vermir (HTTP 404) — köhnə ad cari modelə çevrilir.
+        with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-2.5-flash"}):
+            self.assertEqual(_get_model(), "gemini-3.8-flash")
 
 
 @override_settings(AI_ASSISTANT_RATE_LIMIT="50/1h", AI_ASSISTANT_GLOBAL_RATE_LIMIT="2/1d")
