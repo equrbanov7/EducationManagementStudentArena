@@ -118,6 +118,15 @@
         "DATABASE_URL=postgres://emsarena_agent:emsarena_agent_password@127.0.0.1:55432/ems_live_ui DEBUG=True USE_REDIS=False exec venv/bin/python manage.py runserver 127.0.0.1:8020"
       ],
       "port": 8020
+    },
+    {
+      "name": "emsarena-dev-clone-mailconsole",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "set -a && . .claude/dev-clone.env && set +a && LOCAL_USE_SMTP_EMAIL=0 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend EMS_DB_ROLE_ENFORCE=error USE_REDIS=False exec venv/bin/python manage.py runserver 8013 --noreload"
+      ],
+      "port": 8013
     }
   ]
 }
