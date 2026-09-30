@@ -17,28 +17,45 @@ GitHub tənzimləmə səhifələrinin naxışı; oxumaq üçün skan xətti bir 
 `.section-title` onlarla başqa şablonda işlədilir — onlara toxunmaq bütün
 kabineti dəyişərdi. Üslub `profile_identity.css`-dədir.
 
-JS müqaviləsi (profile_info_identity.js) dəyişmir: `profileIdentityAvatarImage`,
-`profileIdentityAvatarFallback`, `profileAvatarInput`, `profileAvatarPreview*`
-və `#profileAvatarUpdateModal` id-ləri saxlanılıb.
+2026-10-01 (sahib: «profil şəkli tərəfini yenidən düzəlt … qoymaq olduğu kimi
+silmək də mümkün olsun»): avatar DAİRƏVİDİR, üstündə kiçik kamera düyməsi
+menyu açır — «Şəkli dəyiş / yüklə» (fayl → modalda önizləmə → təsdiq) və şəkil
+varsa «Şəkli sil» (EMSConfirm). Hər ikisi yerində, JSON API ilə
+(accounts:profile_avatar_api); uğurdan sonra navbar avatarı da yenilənir.
+Davranış: profile_avatar.js (köhnə profile_info_identity.js əvəzinə);
+üslub: accounts/css/profile/profile_avatar.css. Köhnə `update-avatar` POST
+forması serverdə qalır (geri uyğunluq), şablon artıq onu göndərmir.
 {% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/profile_avatar.css' %}?v=20261001-1">
 
 {# ── Kimlik başlığı ──────────────────────────────────────────────────────── #}
 <header class="pfx-hero">
-    <div class="pfx-hero__avatar avatar-container--interactive"
-         data-bs-toggle="modal" data-bs-target="#profileAvatarUpdateModal"
-         role="button" tabindex="0" aria-label="{% trans 'Profil şəklini dəyiş' %}">
-        {% if profile.avatar %}
-        <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
-             alt="" class="pfx-hero__img" id="profileIdentityAvatarImage">
-        <div class="pfx-hero__initials pfx-hero__initials--fallback" id="profileIdentityAvatarFallback">
-            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+    <div class="pfx-avatar" {% include "accounts/profile/sections/_avatar_scope_attrs.html" %} data-avatar-modal="#profileAvatarUpdateModal">
+        <div class="pfx-avatar__frame" data-avatar-display>
+            <img {% if profile.avatar %}src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"{% else %}hidden{% endif %}
+                 alt="" class="pfx-avatar__img" data-avatar-img>
+            <span class="pfx-avatar__initials" data-avatar-initials{% if profile.avatar %} hidden{% endif %}>{{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}</span>
         </div>
-        {% else %}
-        <div class="pfx-hero__initials" id="profileIdentityAvatarFallback">
-            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
+        <div class="dropdown pfx-avatar__menu">
+            <button type="button" class="pfx-avatar__cam" data-bs-toggle="dropdown" aria-expanded="false"
+                    aria-label="{% trans 'Profil şəkli' context 'profile.avatar' %}" title="{% trans 'Profil şəkli' context 'profile.avatar' %}">
+                <i class="fas fa-camera" aria-hidden="true"></i>
+            </button>
+            <ul class="dropdown-menu pfx-avatar__dropdown">
+                <li>
+                    <button type="button" class="dropdown-item" data-avatar-pick>
+                        <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>{% trans 'Şəkli dəyiş / yüklə' context 'profile.avatar' %}
+                    </button>
+                </li>
+                <li data-avatar-remove-wrap{% if not profile.avatar %} hidden{% endif %}>
+                    <button type="button" class="dropdown-item pfx-avatar__danger" data-avatar-remove>
+                        <i class="fas fa-trash" aria-hidden="true"></i>{% trans 'Şəkli sil' context 'profile.avatar' %}
+                    </button>
+                </li>
+            </ul>
         </div>
-        {% endif %}
-        <span class="pfx-hero__camera" aria-hidden="true"><i class="fas fa-camera"></i></span>
+        <input type="file" class="pfx-avatar__input" accept="image/jpeg,image/png,image/webp,image/gif"
+               data-avatar-input tabindex="-1" aria-hidden="true">
     </div>
 
     <div class="pfx-hero__id">
@@ -241,44 +258,34 @@ və `#profileAvatarUpdateModal` id-ləri saxlanılıb.
     </aside>
 </div>
 
-{# ── Avatar dəyişmə modalı ───────────────────────────────────────────────── #}
-<div class="modal fade" id="profileAvatarUpdateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+{# ── Avatar önizləmə + təsdiq modalı (JS: seçilən fayl burada göstərilir) ── #}
+<div class="modal fade" id="profileAvatarUpdateModal" tabindex="-1" aria-hidden="true" aria-labelledby="profileAvatarModalTitle">
+    <div class="modal-dialog modal-dialog-centered avatar-modal__dialog">
         <div class="modal-content pfx-modal">
-            <form method="post" enctype="multipart/form-data" action="{{ profile_base_url }}">
-                {% csrf_token %}
-                <input type="hidden" name="profile_form" value="update-avatar">
-                <input type="hidden" name="section" value="profile-info">
+            <form data-avatar-modal-form novalidate>
                 <div class="modal-header pfx-modal__head">
-                    <h5 class="modal-title pfx-modal__title">
+                    <h5 class="modal-title pfx-modal__title" id="profileAvatarModalTitle">
                         <span class="pfx-modal__mark"><i class="fas fa-image" aria-hidden="true"></i></span>
                         {% trans 'Profil şəklini dəyiş' %}
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'profile.avatar' %}"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="pfx-avatar-preview">
-                        {% if profile.avatar %}
-                        <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
-                             alt="" id="profileAvatarPreviewImage">
-                        <div class="pfx-hero__initials pfx-hero__initials--fallback" id="profileAvatarPreviewFallback">
-                            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
-                        </div>
-                        {% else %}
-                        <img src="" alt="" id="profileAvatarPreviewImage" hidden>
-                        <div class="pfx-hero__initials" id="profileAvatarPreviewFallback">
-                            {{ user.first_name|first|default:user.username|first|upper }}{{ user.last_name|first|upper }}
-                        </div>
-                        {% endif %}
+                    <div class="avatar-modal__preview">
+                        <img alt="" data-avatar-preview hidden>
+                        <span class="avatar-modal__placeholder" data-avatar-preview-empty><i class="fas fa-image" aria-hidden="true"></i></span>
                     </div>
-
-                    <label for="profileAvatarInput" class="pfx-label">{% trans 'Yeni şəkil seçin' %}</label>
-                    <input id="profileAvatarInput" name="avatar" type="file" class="form-control" accept="image/*" required>
+                    <p class="avatar-modal__name" data-avatar-file-name></p>
+                    <div class="alert alert-danger" role="alert" data-avatar-modal-error hidden></div>
                     <p class="pfx-help">{% trans 'Maksimum fayl ölçüsü: 10 MB. Dəstəklənən formatlar: JPG, PNG, GIF, WEBP.' %}</p>
                 </div>
                 <div class="modal-footer pfx-modal__foot">
+                    <button type="button" class="pfx-btn avatar-modal__repick" data-avatar-pick-again>
+                        <i class="fas fa-images" aria-hidden="true"></i>{% trans 'Başqa şəkil' context 'profile.avatar' %}
+                    </button>
                     <button type="button" class="pfx-btn" data-bs-dismiss="modal">{% trans 'Ləğv et' %}</button>
-                    <button type="submit" class="pfx-btn pfx-btn--primary">
+                    <button type="submit" class="pfx-btn pfx-btn--primary" data-avatar-save>
+                        <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
                         <i class="fas fa-check" aria-hidden="true"></i>{% trans 'Şəkli yenilə' %}
                     </button>
                 </div>
@@ -288,4 +295,4 @@ və `#profileAvatarUpdateModal` id-ləri saxlanılıb.
 </div>
 
 {# defer: tam səhifə renderində EMSReady hələ yüklənməmiş olur (base.html sonunda). #}
-<script src="{% static 'accounts/js/profile/profile_info_identity.js' %}?v=20260907-redesign" defer></script>
+<script src="{% static 'accounts/js/profile/profile_avatar.js' %}?v=20261001-1" defer></script>

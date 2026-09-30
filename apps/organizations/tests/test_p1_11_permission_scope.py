@@ -300,11 +300,12 @@ class MembersContextCallersTest(_WorldMixin, TestCase):
         self.assertTrue(resolve_members_access(_request(self.hr, self.org), self.org).is_org_wide)
 
     def test_members_page_for_lent_dean(self):
+        # 2026-10-01: köhnə URL kabinetin «Struktur üzvləri» reyestrinə yönləndirir.
         response = _client(self.dean_lent, self.org).get(
-            reverse("organizations:members", kwargs={"slug": self.org.slug})
+            reverse("organizations:members", kwargs={"slug": self.org.slug}), follow=True
         )
         self.assertEqual(response.status_code, 200)
-        ids = {membership.user_id for membership in response.context["members"]}
+        ids = {row["user_id"] for row in response.context["org_members_section"]["rows"]}
         self.assertIn(self.student_a.id, ids)
         self.assertNotIn(self.student_b.id, ids)
 

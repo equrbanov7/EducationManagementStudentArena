@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Son qoşulanlar — əhatə daxilində ən yeni 8 şəxs (bir nəfər bir dəfə).
+Ad açıq profilə aparır (yeni tab — reyestrdəki «Profil» düyməsi ilə eyni).{% endcomment %}
+<section class="orgov-card" aria-labelledby="orgov-recent-title">
+    <div class="orgov-card__head">
+        <h2 class="orgov-card__title" id="orgov-recent-title"><i class="fas fa-user-clock" aria-hidden="true"></i>{% trans "Son qoşulanlar" context "organizations.overview" %}</h2>
+        {% if ov.members_url %}<a class="orgov-card__more" href="{{ ov.members_url }}">{% trans "Hamısı" context "organizations.overview" %}<i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}
+    </div>
+    {% if ov.recent %}
+    <ul class="orgov-people">
+        {% for person in ov.recent %}
+        <li class="orgov-person">
+            <span class="orgov-avatar{% if person.is_leader %} orgov-avatar--lead{% elif person.is_student %} orgov-avatar--student{% endif %}" aria-hidden="true">{{ person.initials }}</span>
+            <span class="orgov-person__main">
+                <a class="orgov-person__name" href="{{ person.profile_url }}" target="_blank" rel="noopener">{{ person.name }}</a>
+                <span class="orgov-person__meta">
+                    <span>{{ person.role_label }}</span>
+                    {% if person.unit_name %}<span class="orgov-person__unit">{{ person.unit_name }}</span>{% endif %}
+                    {% if not person.is_user_active %}<span class="ems-badge ems-badge--muted">{% trans "Dayandırılıb" context "organizations.overview" %}</span>{% endif %}
+                </span>
+            </span>
+            <span class="orgov-person__date">{{ person.joined }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="orgov-card__empty">{% trans "Əhatənizdə hələ üzv yoxdur." context "organizations.overview" %}</p>
+    {% endif %}
+</section>

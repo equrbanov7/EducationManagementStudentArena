@@ -135,6 +135,14 @@ body.auth-body {
     height: auto;
 }
 
+/* Sahib 2026-10-01: universitetin RƏSMİ loqosu (wcu.edu.az — emblem + «Western Caspian University»). */
+.auth-brand-logo--official {
+    width: min(280px, 78vw);
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 303 / 66;
+}
+
 .auth-brand-logo--seal {
     width: 108px;
     max-width: 34vw;

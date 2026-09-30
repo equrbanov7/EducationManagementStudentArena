@@ -90,65 +90,9 @@
     background: var(--ems-neutral-0);
 }
 
-.pfx-hero__avatar {
-    position: relative;
-    flex: none;
-    width: 88px;
-    height: 88px;
-    border-radius: 22px;
-    overflow: hidden;
-    cursor: pointer;
-    background: var(--ems-neutral-100);
-}
-
-.pfx-hero__avatar:focus-visible {
-    outline: 2px solid var(--ems-primary-600);
-    outline-offset: 3px;
-}
-
-.pfx-hero__img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.pfx-hero__initials {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--ems-primary-600);
-    color: var(--ems-neutral-0);
-    font-size: 1.9rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-}
-
-/* JS şəkil yüklənməyəndə `display:flex` qoyur — default gizlidir. */
-.pfx-hero__initials--fallback {
-    display: none;
-}
-
-/* Kamera işarəsi yalnız hover/fokusda — avatar «düymə» kimi qışqırmır. */
-.pfx-hero__camera {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 26px;
-    display: grid;
-    place-items: center;
-    background: rgba(15, 23, 42, 0.62);
-    color: var(--ems-neutral-0);
-    font-size: 0.72rem;
-    opacity: 0;
-    transition: opacity 0.16s;
-}
-
-.pfx-hero__avatar:hover .pfx-hero__camera,
-.pfx-hero__avatar:focus-visible .pfx-hero__camera {
-    opacity: 1;
-}
+/* Avatar (2026-10-01): dairəvi + kamera menyusu — üslub accounts/css/profile/
+   profile_avatar.css-dədir (`.pfx-avatar`); köhnə `.pfx-hero__avatar/__img/
+   __initials/__camera` qaydaları çıxarıldı. */
 
 .pfx-hero__id {
     flex: 1;

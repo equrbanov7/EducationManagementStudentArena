@@ -147,7 +147,8 @@ _LEAK_PATTERNS: list[re.Pattern] = [
 
 # Phrases indicating the model echoed its own system prompt / internal rules.
 _SYSTEM_PROMPT_ECHO = re.compile(
-    r"(?im)^\s*(?:RULES?:|SYSTEM[_\s]?PROMPT|FORMATTING:|CONTEXT AWARENESS:|"
+    r"(?im)^\s*(?:RULES?:|SYSTEM[_\s]?PROMPT|FORMATTING:|CONTEXT AWARENESS:|TWO KINDS OF KNOWLEDGE:|"
+    r"ROLE MODES:|SECURITY RULES|"
     r"\[User Context\b|\[Response Language\]|You are (?:the )?.{1,60}? AI [Aa]ssistant)"
 )
 

@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}
+Qeyd qoşmasının kiçik çipi (2026-10-01): PDF ikonu və ya şəkil önizləməsi
+(thumb — tam fayl yüklənmir), yeni tabda açılır. İstifadə olunur: idarəetmə
+siyahısı (``show_name=True`` — sahibə orijinal ad), profil məlumatı və açıq
+profil (ümumi «PDF sənəd» / «Şəkil» etiketi — orijinal fayl adı üçüncü şəxsə
+göstərilmir). URL ``protected_media``-dan keçir: giriş siyasəti
+services/academic_attachments.check_attachment_media_access.
+Üslub: accounts/css/profile/academic_attachment.css (çağıran yükləyir).
+{% endcomment %}
+<a class="academic-file{% if item.attachment_is_image %} academic-file--image{% endif %}"
+   href="{{ item.attachment_url }}" target="_blank" rel="noopener"
+   title="{% if show_name %}{{ item.attachment_name }}{% else %}{% trans 'Faylı aç' context 'profile.academic_items' %}{% endif %}">
+    {% if item.attachment_is_image and item.attachment_thumb %}
+    <img class="academic-file__thumb" src="{{ item.attachment_thumb_url }}" alt="" loading="lazy" width="28" height="28">
+    {% elif item.attachment_is_image %}
+    <i class="fas fa-image academic-file__icon" aria-hidden="true"></i>
+    {% else %}
+    <i class="fas fa-file-pdf academic-file__icon academic-file__icon--pdf" aria-hidden="true"></i>
+    {% endif %}
+    <span class="academic-file__label">{% if show_name and item.attachment_name %}{{ item.attachment_name }}{% elif item.attachment_is_pdf %}{% trans 'PDF sənəd' context 'profile.academic_items' %}{% else %}{% trans 'Şəkil' context 'profile.academic_items' %}{% endif %}</span>
+    {% if item.attachment_size %}<span class="academic-file__size">{{ item.attachment_size|filesizeformat }}</span>{% endif %}
+    <i class="fas fa-arrow-up-right-from-square academic-file__open" aria-hidden="true"></i>
+</a>

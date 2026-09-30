@@ -64,15 +64,19 @@
         return fallback;
     }
 
+    /* `fields` — obyekt (urlencoded) və ya hazır FormData (multipart: fayl qoşması). */
     function postAction(fields) {
         var manager = getManager();
         if (!manager || !manager.dataset.apiUrl || !window.EMSCore) {
             return Promise.reject(new Error("academic items manager not ready"));
         }
-        var body = new URLSearchParams();
-        Object.keys(fields).forEach(function (key) {
-            body.append(key, fields[key] === null || fields[key] === undefined ? "" : String(fields[key]));
-        });
+        var body = fields;
+        if (!(fields instanceof window.FormData)) {
+            body = new URLSearchParams();
+            Object.keys(fields).forEach(function (key) {
+                body.append(key, fields[key] === null || fields[key] === undefined ? "" : String(fields[key]));
+            });
+        }
         return window.EMSCore.fetchJSON(manager.dataset.apiUrl, { method: "POST", body: body });
     }
 
@@ -103,6 +107,8 @@
         var query = searchInput ? searchInput.value.trim() : "";
         var match = searchMatcher(query);
         var limit = parseInt(host.dataset.collapseLimit || "5", 10);
+        // Axtarış zamanı «Boş bölmələr» çipləri gizlənir (CSS: .is-searching).
+        host.classList.toggle("is-searching", Boolean(query));
 
         host.querySelectorAll(".academic-items-group").forEach(function (group) {
             var items = Array.prototype.slice.call(group.querySelectorAll(".academic-item"));
@@ -169,6 +175,101 @@
         });
     }
 
+    /* ── Fayl qoşması (2026-10-01): bir qeydə bir PDF/şəkil ─────────────── */
+
+    function attachNodes() {
+        var field = document.getElementById("academicItemAttachmentField");
+        if (!field) {
+            return null;
+        }
+        return {
+            field: field,
+            current: field.querySelector("[data-attach-current]"),
+            link: field.querySelector("[data-attach-current-link]"),
+            thumb: field.querySelector("[data-attach-current-thumb]"),
+            icon: field.querySelector("[data-attach-current-icon]"),
+            name: field.querySelector("[data-attach-current-name]"),
+            removed: field.querySelector("[data-attach-removed]"),
+            input: field.querySelector("[data-attach-input]"),
+            hint: field.querySelector("[data-attach-hint]"),
+            pickLabel: field.querySelector("[data-attach-pick-label]"),
+            removeFlag: field.querySelector("input[name=remove_attachment]"),
+        };
+    }
+
+    function modalLabel(key) {
+        var modalElement = document.getElementById("academicItemModal");
+        return (modalElement && modalElement.dataset[key]) || "";
+    }
+
+    function resetAttachment(values) {
+        var nodes = attachNodes();
+        if (!nodes) {
+            return;
+        }
+        var allowed = values.allowsAttachment === "1";
+        var hasCurrent = allowed && Boolean(values.attachmentUrl);
+        nodes.field.hidden = !allowed;
+        if (nodes.input) {
+            nodes.input.value = "";
+            nodes.input.disabled = !allowed;
+        }
+        if (nodes.removeFlag) {
+            nodes.removeFlag.value = "";
+        }
+        if (nodes.hint) {
+            nodes.hint.textContent = nodes.hint.dataset.labelEmpty || "";
+            nodes.hint.classList.remove("is-selected");
+        }
+        if (nodes.removed) {
+            nodes.removed.hidden = true;
+        }
+        if (nodes.current) {
+            nodes.current.hidden = !hasCurrent;
+        }
+        if (hasCurrent) {
+            nodes.link.href = values.attachmentUrl;
+            nodes.name.textContent = values.attachmentName || "";
+            var isImage = values.attachmentPdf !== "1";
+            if (nodes.thumb) {
+                if (isImage && values.attachmentThumb) {
+                    nodes.thumb.src = values.attachmentThumb;
+                    nodes.thumb.hidden = false;
+                } else {
+                    nodes.thumb.removeAttribute("src");
+                    nodes.thumb.hidden = true;
+                }
+            }
+            if (nodes.icon) {
+                nodes.icon.hidden = isImage && Boolean(values.attachmentThumb);
+                nodes.icon.className = isImage
+                    ? "fas fa-image academic-file__icon"
+                    : "fas fa-file-pdf academic-file__icon academic-file__icon--pdf";
+            }
+        }
+        if (nodes.pickLabel) {
+            nodes.pickLabel.textContent = hasCurrent ? modalLabel("labelChange") : modalLabel("labelPick");
+        }
+    }
+
+    function formatSize(bytes) {
+        if (bytes >= 1048576) {
+            return (bytes / 1048576).toFixed(1) + " MB";
+        }
+        return Math.max(1, Math.round(bytes / 1024)) + " KB";
+    }
+
+    function attachmentProblem(file) {
+        var maxBytes = parseInt(modalLabel("maxBytes") || "0", 10);
+        if (!/\.(pdf|jpe?g|png|webp)$/i.test(file.name || "")) {
+            return modalLabel("labelBadType");
+        }
+        if (maxBytes && file.size > maxBytes) {
+            return modalLabel("labelTooBig");
+        }
+        return "";
+    }
+
     function fillItemForm(values) {
         var form = document.getElementById("academicItemForm");
         if (!form) {
@@ -181,7 +282,29 @@
         form.elements.detail.value = values.detail || "";
         form.elements.year.value = values.year || "";
         form.elements.link.value = values.link || "";
+        // Növə görə placeholder-lər (məs. «Nəşriyyat, ISBN…» kitab üçün).
+        form.elements.title.placeholder = values.titleHint || modalLabel("labelTitleHint");
+        form.elements.detail.placeholder = values.detailHint || modalLabel("labelDetailHint");
+        resetAttachment(values);
         showError("academicItemFormError", "");
+    }
+
+    function valuesFrom(button, extra) {
+        var data = button.dataset;
+        var values = {
+            kind: data.kind,
+            titleHint: data.titleHint,
+            detailHint: data.detailHint,
+            allowsAttachment: data.allowsAttachment,
+            attachmentUrl: data.attachmentUrl,
+            attachmentName: data.attachmentName,
+            attachmentThumb: data.attachmentThumb,
+            attachmentPdf: data.attachmentPdf,
+        };
+        Object.keys(extra).forEach(function (key) {
+            values[key] = extra[key];
+        });
+        return values;
     }
 
     function setItemModalTitle(mode, kindLabel) {
@@ -222,7 +345,7 @@
             if (!modal) {
                 return;
             }
-            fillItemForm({ action: "create", kind: button.dataset.kind });
+            fillItemForm(valuesFrom(button, { action: "create", attachmentUrl: "" }));
             setItemModalTitle("create", button.dataset.kindLabel || "");
             modal.api.show();
         });
@@ -233,17 +356,67 @@
             if (!modal) {
                 return;
             }
-            fillItemForm({
-                action: "update",
-                itemId: button.dataset.itemId,
-                kind: button.dataset.kind,
-                title: button.dataset.title,
-                detail: button.dataset.detail,
-                year: button.dataset.year,
-                link: button.dataset.link,
-            });
+            fillItemForm(
+                valuesFrom(button, {
+                    action: "update",
+                    itemId: button.dataset.itemId,
+                    title: button.dataset.title,
+                    detail: button.dataset.detail,
+                    year: button.dataset.year,
+                    link: button.dataset.link,
+                })
+            );
             setItemModalTitle("update", button.dataset.kindLabel || "");
             modal.api.show();
+        });
+
+        window.EMSDelegate.on("change", "#academicItemAttachmentField [data-attach-input]", function (event, input) {
+            var nodes = attachNodes();
+            var file = input.files && input.files.length ? input.files[0] : null;
+            if (!nodes || !nodes.hint) {
+                return;
+            }
+            var problem = file ? attachmentProblem(file) : "";
+            showError("academicItemFormError", problem);
+            if (!file || problem) {
+                input.value = "";
+                nodes.hint.textContent = nodes.hint.dataset.labelEmpty || "";
+                nodes.hint.classList.remove("is-selected");
+                return;
+            }
+            nodes.hint.textContent = file.name + " · " + formatSize(file.size);
+            nodes.hint.classList.add("is-selected");
+            if (nodes.pickLabel) {
+                nodes.pickLabel.textContent = modalLabel("labelChange");
+            }
+        });
+
+        window.EMSDelegate.on("click", "#academicItemAttachmentField [data-attach-remove]", function (event) {
+            event.preventDefault();
+            var nodes = attachNodes();
+            if (!nodes) {
+                return;
+            }
+            nodes.removeFlag.value = "1";
+            nodes.current.hidden = true;
+            nodes.removed.hidden = false;
+            if (nodes.pickLabel) {
+                nodes.pickLabel.textContent = modalLabel("labelPick");
+            }
+        });
+
+        window.EMSDelegate.on("click", "#academicItemAttachmentField [data-attach-undo]", function (event) {
+            event.preventDefault();
+            var nodes = attachNodes();
+            if (!nodes) {
+                return;
+            }
+            nodes.removeFlag.value = "";
+            nodes.current.hidden = false;
+            nodes.removed.hidden = true;
+            if (nodes.pickLabel) {
+                nodes.pickLabel.textContent = modalLabel("labelChange");
+            }
         });
 
         window.EMSDelegate.on("click", ".js-academic-item-delete", function (event, button) {
@@ -270,16 +443,18 @@
             var submitButton = document.getElementById("academicItemSubmitBtn");
             var fallbackError = modalElement ? modalElement.dataset.labelError : "Error";
             showError("academicItemFormError", "");
+            // multipart: FormData formanın bütün sahələrini (fayl + remove_attachment) daşıyır.
+            var body = new window.FormData(form);
+            var nodes = attachNodes();
+            var file = nodes && nodes.input && nodes.input.files && nodes.input.files[0];
+            if (!file || (nodes && nodes.field.hidden)) {
+                body.delete("attachment");
+            } else if (attachmentProblem(file)) {
+                showError("academicItemFormError", attachmentProblem(file));
+                return;
+            }
             setBusy(submitButton, true);
-            postAction({
-                action: form.elements.action.value,
-                item_id: form.elements.item_id.value,
-                kind: form.elements.kind.value,
-                title: form.elements.title.value,
-                detail: form.elements.detail.value,
-                year: form.elements.year.value,
-                link: form.elements.link.value,
-            })
+            postAction(body)
                 .then(function (payload) {
                     swapList(payload && payload.html);
                     var modal = getModal("academicItemModal");

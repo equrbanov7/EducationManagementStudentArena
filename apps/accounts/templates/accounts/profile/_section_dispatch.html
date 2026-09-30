@@ -36,6 +36,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_org_faculties.html" %}
             {% elif active_section == "org-kafedras" %}
                 {% include "accounts/profile/sections/_org_kafedras.html" %}
+            {% elif active_section == "org-overview" and 'org-overview' in allowed_sections %}
+                {% include "accounts/profile/sections/_org_overview.html" %}
             {% elif active_section == "org-members" %}
                 {% include "accounts/profile/sections/_org_members.html" %}
             {% elif active_section == "org-roles" %}

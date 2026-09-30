@@ -125,6 +125,17 @@
     display: block;
 }
 
+/* Sahib 2026-10-01: RƏSMİ emblem (wcu.edu.az loqosunun emblem hissəsi, 523×476 → 240×218 PNG).
+   Köhnə SVG-dəki kəsim həndəsəsi lazım deyil — emblem pəncərəni tam doldurur. */
+.blog-header__logo-mark-img--official {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: left center;
+}
+
 /* Universitetin adı — bir sətir, kəsilmir, söz-nişanla təkrarlanmır. */
 .blog-header__logo-text {
     min-width: 0;

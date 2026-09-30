@@ -12,10 +12,19 @@
             {# Brand column #}
             <div class="ems-footer__brand">
                 <a href="{{ home_url }}" class="ems-footer__logo" aria-label="{% blocktrans %}{{ site_brand_name }} ana səhifə{% endblocktrans %}">
+                    {% if university_mode %}
+                    {# Sahib 2026-10-01: universitetin RƏSMİ loqosu (wcu.edu.az). #}
+                    <img src="{% static 'brand/wcu-official-lockup.svg' %}?v=20261001"
+                         alt="{{ site_brand_name }}"
+                         class="ems-footer__logo-img ems-footer__logo-img--official"
+                         width="303" height="66"
+                         loading="lazy">
+                    {% else %}
                     <img src="{% static 'brand/logo-horizontal.png' %}"
                          alt="{{ site_brand_name }}"
                          class="ems-footer__logo-img"
                          loading="lazy">
+                    {% endif %}
                 </a>
                 <p class="ems-footer__tagline">
                     {% trans "Təhsil idarəetmə və onlayn imtahan platforması. Universitetlər, məktəblər və kurs mərkəzləri üçün modern LMS həlli." %}

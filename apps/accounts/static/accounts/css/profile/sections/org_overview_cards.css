@@ -1,0 +1,333 @@
+/* =========================================================================
+   «Təşkilat paneli» (`org-overview`) — kartların içi (2026-10-01).
+
+   `org_overview.css`-dən ayrılıb (modul-ölçü qapısı 600 sətir): rol
+   paylanması zolaqları, son qoşulanlar, audit axını və sürətli keçidlər.
+   Əsas fayldan SONRA yüklənir; keçid torunun ölçü qaydaları buradadır ki,
+   baza qaydası onları üstələməsin. Yalnız `--ems-*` tokenləri.
+   ========================================================================= */
+
+/* ── Rol paylanması zolaqları ─────────────────────────────────────────── */
+
+.orgov-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orgov-bars__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 4px var(--ems-sp-3);
+}
+
+.orgov-bars__label {
+    min-width: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+.orgov-bars__value {
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    color: var(--ems-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* `<meter>` — brauzerin öz görünüşü söndürülür, zolaq tokenlərlə rənglənir. */
+.orgov-bars__bar {
+    grid-column: 1 / -1;
+    display: block;
+    width: 100%;
+    height: 6px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    -webkit-appearance: none;
+    appearance: none;
+    overflow: hidden;
+}
+
+.orgov-bars__bar::-webkit-meter-bar {
+    height: 6px;
+    border: 0;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+}
+
+.orgov-bars__bar::-webkit-meter-optimum-value,
+.orgov-bars__bar::-webkit-meter-suboptimum-value,
+.orgov-bars__bar::-webkit-meter-even-less-good-value {
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-500);
+}
+
+.orgov-bars__bar::-moz-meter-bar {
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-500);
+}
+
+.orgov-bars__row--other .orgov-bars__label {
+    color: var(--ems-neutral-500);
+    font-weight: 500;
+}
+
+/* ── Son qoşulanlar ───────────────────────────────────────────────────── */
+
+.orgov-people {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orgov-person {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 2px var(--ems-sp-4);
+    padding: 9px 0;
+}
+
+.orgov-person + .orgov-person {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.orgov-avatar {
+    grid-row: span 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+}
+
+.orgov-avatar--lead {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+.orgov-avatar--student {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+}
+
+.orgov-person__main {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.orgov-person__name {
+    font-size: var(--ems-fs-base);
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.orgov-person__name:hover,
+.orgov-person__name:focus-visible {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.orgov-person__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.orgov-person__unit::before {
+    content: "·";
+    margin-right: var(--ems-sp-2);
+    color: var(--ems-neutral-500);
+}
+
+.orgov-person__date {
+    grid-column: 2;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-neutral-500);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Son dəyişikliklər (audit) ────────────────────────────────────────── */
+
+.orgov-feed {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orgov-feed__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 2px var(--ems-sp-3);
+    padding: 9px 0;
+}
+
+.orgov-feed__item + .orgov-feed__item {
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.orgov-feed__dot {
+    grid-row: span 2;
+    width: 8px;
+    height: 8px;
+    margin-top: 7px;
+    border-radius: 50%;
+    background: var(--ems-primary-400);
+}
+
+.orgov-feed__main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.orgov-feed__line {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+
+.orgov-feed__action {
+    margin-left: 4px;
+    color: var(--ems-neutral-600);
+}
+
+.orgov-feed__resource,
+.orgov-feed__reason {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+    overflow-wrap: anywhere;
+}
+
+.orgov-feed__reason {
+    color: var(--ems-neutral-500);
+    font-style: italic;
+}
+
+.orgov-feed__time {
+    grid-column: 2;
+    font-size: var(--ems-fs-2xs);
+    color: var(--ems-neutral-500);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Sürətli keçidlər ─────────────────────────────────────────────────── */
+
+.orgov-links {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orgov-link {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    min-height: 56px;
+    height: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.orgov-link:hover,
+.orgov-link:focus-visible {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-bg-subtle);
+    text-decoration: none;
+}
+
+.orgov-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.orgov-link__icon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.orgov-link__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.orgov-link__title {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.orgov-link__body {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-500);
+    overflow-wrap: anywhere;
+}
+
+.orgov-link__go {
+    flex: 0 0 auto;
+    font-size: 0.8em;
+    color: var(--ems-neutral-500);
+}
+
+@media (min-width: 640px) {
+    .orgov-links {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .orgov-links {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .orgov-link {
+        transition: none;
+    }
+}

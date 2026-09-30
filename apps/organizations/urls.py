@@ -7,6 +7,7 @@ from django.urls import path
 from . import (
     group_actions,
     group_students,
+    members_export,
     members_registry_actions,
     structure_actions,
     structure_registry_actions,
@@ -77,6 +78,8 @@ urlpatterns = [
         name="group_student_candidates",
     ),
     path("<slug:slug>/members/", views.organization_members, name="members"),
+    # «Struktur üzvləri» — cari süzgəcin CSV ixracı (2026-10-01; idarəetmə və ya `member.edit`).
+    path("<slug:slug>/members/export/", members_export.members_export, name="members_export"),
     path("<slug:slug>/roles/", views.organization_roles, name="roles"),
     path("<slug:slug>/settings/", views.organization_settings, name="settings"),
 ]

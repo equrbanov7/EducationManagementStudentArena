@@ -189,6 +189,7 @@ class _Stage1Mixin:
                 active_organization=self.active_organization,
                 include_active_superadmin_org=self.capabilities["is_superadmin"],
                 profile_section="superadmin-organizations" if self.capabilities["is_superadmin"] else "profile-info",
+                allowed_sections=self.allowed_sections,
             )
         self.teacher_courses = _tenant_scoped_courses(
             self.request,

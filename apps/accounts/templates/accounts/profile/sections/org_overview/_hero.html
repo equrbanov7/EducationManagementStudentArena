@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Panelin başlıq kartı — loqo (yoxdursa inisial), növ, ad, status, cari dövr,
+yaradılma tarixi, identifikator və əlaqə. Kontekst: `ov` (bax `_org_overview.html`).{% endcomment %}
+{% with idn=ov.identity period=ov.period %}
+<header class="orgov-hero">
+    <div class="orgov-hero__logo" aria-hidden="true">
+        {% if idn.logo_url %}<img src="{{ idn.logo_url }}" alt="" loading="lazy">{% else %}<span>{{ idn.initials }}</span>{% endif %}
+    </div>
+    <div class="orgov-hero__main">
+        <p class="orgov-hero__eyebrow">{{ idn.type_label }}</p>
+        <h2 class="orgov-hero__name">{{ idn.name }}</h2>
+        <ul class="orgov-hero__chips">
+            <li><span class="ems-badge ems-badge--{{ idn.status.tone }}"><span class="ems-badge__dot" aria-hidden="true"></span>{{ idn.status.label }}</span></li>
+            {% if period %}
+            <li class="orgov-chip{% if period.running %} orgov-chip--live{% endif %}">
+                <i class="fas fa-calendar-days" aria-hidden="true"></i>
+                <span>
+                    {% if period.running %}{% trans "Cari dövr" context "organizations.overview" %}{% elif period.upcoming %}{% trans "Növbəti dövr" context "organizations.overview" %}{% else %}{% trans "Son dövr" context "organizations.overview" %}{% endif %}:
+                    <strong>{{ period.name }}</strong>
+                    <span class="orgov-chip__muted">{{ period.start|date:"d.m.Y" }} – {{ period.end|date:"d.m.Y" }}</span>
+                </span>
+            </li>
+            {% else %}
+            <li class="orgov-chip orgov-chip--muted"><i class="fas fa-calendar-xmark" aria-hidden="true"></i><span>{% trans "Akademik dövr təyin edilməyib" context "organizations.overview" %}</span></li>
+            {% endif %}
+            {% if idn.created %}
+            <li class="orgov-chip"><i class="fas fa-flag" aria-hidden="true"></i><span>{% trans "Yaradılıb" context "organizations.overview" %}: {{ idn.created|date:"d.m.Y" }}</span></li>
+            {% endif %}
+            {% if idn.identifier %}
+            <li class="orgov-chip"><i class="fas fa-hashtag" aria-hidden="true"></i><span class="ems-mono">{{ idn.identifier }}</span></li>
+            {% endif %}
+        </ul>
+        {% if idn.website or idn.email or idn.phone %}
+        <ul class="orgov-hero__contacts">
+            {% if idn.website %}<li><i class="fas fa-globe" aria-hidden="true"></i><a href="{{ idn.website }}" target="_blank" rel="noopener noreferrer">{{ idn.website }}</a></li>{% endif %}
+            {% if idn.email %}<li><i class="fas fa-envelope" aria-hidden="true"></i><a href="mailto:{{ idn.email }}">{{ idn.email }}</a></li>{% endif %}
+            {% if idn.phone %}<li><i class="fas fa-phone" aria-hidden="true"></i><span>{{ idn.phone }}</span></li>{% endif %}
+        </ul>
+        {% endif %}
+    </div>
+</header>
+{% endwith %}

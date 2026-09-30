@@ -1,0 +1,4 @@
+{% load i18n %}
+{% comment %}Qoşulma tarixi xanası (2026-10-01: telefonda kart görünüşü üçün etiketli include).{% endcomment %}
+<span class="om-cell-label">{% trans "Qoşulma" context "organizations.members" %}</span>
+{% if row.data.joined %}<span class="om-joined">{{ row.data.joined }}</span>{% else %}<span class="om-muted">—</span>{% endif %}

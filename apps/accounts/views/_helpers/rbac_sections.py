@@ -17,6 +17,11 @@ ORTAQ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
 
 from __future__ import annotations
 
+#: «Təşkilat paneli»ni açan idarəetmə bölmələri — bunlardan biri varsa panel də var.
+ORG_OVERVIEW_SOURCE_SECTIONS = frozenset(
+    {"org-members", "org-roles", "org-faculties", "org-kafedras", "org-structure-tree", "audit-log"}
+)
+
 
 def _effective_permissions(user, organization) -> list:
     """Aktorun aktiv təşkilatdakı effektiv icazələri (per-request memoizasiyalı).
@@ -324,7 +329,19 @@ def apply_permission_section_gates(
         if enabled:
             allowed_sections.add(section)
 
+    # «Təşkilat paneli» (`org-overview`, sahib 2026-10-01) — köhnə müstəqil
+    # `/organizations/<slug>/` panelinin kabinet varisi. Menyu yalnız təşkilat
+    # İDARƏETMƏ səthi olan aktora görünür (üzvlər/rollar/struktur/audit bölmələrindən
+    # biri, və ya sahib/superadmin/RİM rəhbəri): adi tələbə/müəllim üçün kabinetin
+    # «Ana səhifə»si qalır. Vidcetlərin hər biri öz data qapısı ilə yenidən süzülür.
+    can_view_org_overview = organization is not None and (
+        privileged or bool(allowed_sections & ORG_OVERVIEW_SOURCE_SECTIONS)
+    )
+    if can_view_org_overview:
+        allowed_sections.add("org-overview")
+
     return {
+        "can_view_org_overview": can_view_org_overview,
         "can_view_audit": can_view_audit,
         "can_use_rim_center": can_use_rim_center,
         "can_view_people_teachers": can_view_people_teachers,

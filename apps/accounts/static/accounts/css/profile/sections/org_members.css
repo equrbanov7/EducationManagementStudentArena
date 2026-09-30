@@ -482,3 +482,115 @@
     .om-detail__identity { flex-wrap: wrap; }
     .om-detail__facts { grid-template-columns: 1fr; }
 }
+
+/* ── Telefon: cədvəl → kart (sahib 2026-10-01) ───────────────────────────
+   Masaüstündə cədvəl olduğu kimi qalır; ≤640 px-də hər sətir kart olur,
+   xanalar alt-alta düzülür və hər birinin üstündə kiçik etiket görünür
+   (`.om-cell-label` — masaüstündə gizli, sütun başlığı onu əvəz edir).
+   Cədvəlin 900 px min-eni burada söndürülür: səhifə üfüqi sürüşmür. */
+
+.om-cell-label {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .om .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--ems-sp-3);
+    }
+
+    .om .ems-kpi {
+        padding: 11px 12px;
+    }
+
+    .om .ems-kpi__value {
+        font-size: var(--ems-fs-2xl);
+    }
+
+    .om .ems-tablescroll {
+        overflow-x: visible;
+    }
+
+    .om .ems-table {
+        display: block;
+        min-width: 0;
+    }
+
+    .om .ems-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .om .ems-table tbody {
+        display: block;
+    }
+
+    .om .ems-table tbody tr {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: var(--ems-sp-4) var(--ems-sp-5);
+        padding: var(--ems-sp-5);
+        border-bottom: 1px solid var(--ems-neutral-200);
+    }
+
+    .om .ems-table th[scope="row"],
+    .om .ems-table td {
+        display: block;
+        min-width: 0;
+        padding: 0;
+    }
+
+    /* Üzv (ad) və əməllər bütün eni tutur; rol/vəzifə/bölmə/tarix iki sütunda. */
+    .om .ems-table th[scope="row"],
+    .om .ems-table td:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .om .ems-table--sticky th[scope="row"] {
+        position: static;
+        background: transparent;
+    }
+
+    .om .ems-table--zebra.ems-table--sticky tbody tr:nth-child(odd) th[scope="row"] {
+        background: transparent;
+    }
+
+    .om-cell-label {
+        display: block;
+        margin-bottom: 3px;
+        font-size: var(--ems-fs-2xs);
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ems-neutral-500);
+    }
+
+    .om-member__email {
+        max-width: 100%;
+    }
+
+    .om-role__badge,
+    .om-role__line {
+        white-space: normal;
+    }
+
+    .om .ems-rowactions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .om .ems-rowactions .ems-btn {
+        flex: 1 1 auto;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 360px) {
+    .om .ems-table tbody tr {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

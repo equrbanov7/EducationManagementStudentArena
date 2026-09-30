@@ -1,0 +1,29 @@
+{% load i18n l10n %}
+{% comment %}Rol paylanması — fərqli şəxs sayı ilə ən böyük 7 rol + «Digər». Zolaq `<meter>`-dir
+(dəyər/maks. atributları) — inline `style` YOXDUR (CSP, `test_cabinet_no_duplicate_titles`).{% endcomment %}
+<section class="orgov-card" aria-labelledby="orgov-roles-title">
+    <div class="orgov-card__head">
+        <h2 class="orgov-card__title" id="orgov-roles-title"><i class="fas fa-chart-bar" aria-hidden="true"></i>{% trans "Rol paylanması" context "organizations.overview" %}</h2>
+        {% if ov.roles_url %}<a class="orgov-card__more" href="{{ ov.roles_url }}">{% trans "Rollar" context "organizations.overview" %}<i class="fas fa-arrow-right" aria-hidden="true"></i></a>{% endif %}
+    </div>
+    {% if ov.roles.rows %}
+    <ul class="orgov-bars">
+        {% for item in ov.roles.rows %}
+        <li class="orgov-bars__row">
+            <span class="orgov-bars__label">{{ item.label }}</span>
+            <span class="orgov-bars__value">{{ item.count }}</span>
+            <meter class="orgov-bars__bar" min="0" max="{{ ov.roles.peak|unlocalize }}" value="{{ item.count|unlocalize }}" aria-hidden="true"></meter>
+        </li>
+        {% endfor %}
+        {% if ov.roles.other_count %}
+        <li class="orgov-bars__row orgov-bars__row--other">
+            <span class="orgov-bars__label">{% blocktrans context "organizations.overview" with n=ov.roles.other_roles %}Digər rollar ({{ n }}){% endblocktrans %}</span>
+            <span class="orgov-bars__value">{{ ov.roles.other_count }}</span>
+        </li>
+        {% endif %}
+    </ul>
+    <p class="orgov-card__foot">{% trans "Say — rolu daşıyan fərqli şəxslərdir; bir nəfərin bir neçə rolu ola bilər." context "organizations.overview" %}</p>
+    {% else %}
+    <p class="orgov-card__empty">{% trans "Hələ aktiv üzvlük yoxdur." context "organizations.overview" %}</p>
+    {% endif %}
+</section>

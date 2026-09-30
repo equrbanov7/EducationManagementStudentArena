@@ -215,6 +215,30 @@ def mask_email(email: str) -> str:
     return f"***@{domain}" if domain else ""
 
 
+#: Köməkçi rejimi üçün rol ailələri (sahib 2026-10-01: «hər kəs öz rolu çərçivəsində kömək alsın»).
+#: ``apps/accounts/network_zone.py`` ilə eyni adlar (modul sərhədi səbəbindən burada təkrarlanır).
+_STUDENT_ROLE_NAMES = frozenset({"student", "lead_student", "alumni"})
+_TEACHER_ROLE_NAMES = frozenset(
+    {"teacher", "assistant_teacher", "instructor", "professor", "associate_professor", "assistant", "lab_assistant"}
+)
+_NEUTRAL_ROLE_NAMES = frozenset({"member"})
+
+
+def assistant_modes(user, memberships) -> list[str]:
+    """``["student"]``, ``["teacher"]``, ``["staff", "teacher"]`` … — köməkçinin davranış rejimləri."""
+    if is_superadmin_user(user):
+        return ["staff"]
+    names = {m.role.name for m in memberships if getattr(m, "role", None) is not None} - _NEUTRAL_ROLE_NAMES
+    modes = []
+    if names - _STUDENT_ROLE_NAMES - _TEACHER_ROLE_NAMES:
+        modes.append("staff")
+    if names & _TEACHER_ROLE_NAMES:
+        modes.append("teacher")
+    if names & _STUDENT_ROLE_NAMES and not modes:
+        modes.append("student")
+    return modes or ["general"]
+
+
 def _user_identity_section(user, organization, memberships) -> str:
     lines = [
         "[User Identity]",
@@ -239,6 +263,7 @@ def _user_identity_section(user, organization, memberships) -> str:
     else:
         lines.append("Role: Individual User (no organization selected)")
 
+    lines.append(f"Assistant mode: {', '.join(assistant_modes(user, memberships))}")
     return "\n".join(lines)
 
 

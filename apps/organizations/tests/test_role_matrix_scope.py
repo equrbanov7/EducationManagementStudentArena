@@ -55,10 +55,13 @@ class RoleMatrixScopeTests(TestCase):
         response = self._client_for(self.dean).get(self.url)
         self.assertNotEqual(response.status_code, 200)
 
+    # 2026-10-01: qapıdan keçən aktor kabinetin `org-roles` bölməsinə yönləndirilir.
     def test_role_view_holder_still_reads_it(self):
-        response = self._client_for(self.rector).get(self.url)
+        response = self._client_for(self.rector).get(self.url, follow=True)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_section"], "org-roles")
 
     def test_owner_still_reads_it(self):
-        response = self._client_for(self.owner).get(self.url)
+        response = self._client_for(self.owner).get(self.url, follow=True)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["active_section"], "org-roles")

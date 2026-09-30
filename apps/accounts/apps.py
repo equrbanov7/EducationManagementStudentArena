@@ -22,3 +22,32 @@ class AccountsConfig(AppConfig):
         auth_otp.register(
             "verify_otp_code", lambda user, *, code, purpose: verify_otp_code(user, code, purpose=purpose)
         )
+
+        # 2026-10-01: köhnə `/organizations/<slug>/{,members/,roles/}` səhifələri kabinet
+        # bölmələrinə yönləndirir — bölmə qapısı accounts-dadır (organizations → accounts
+        # importu qadağandır), ona görə həlledici burada qeydiyyatdan keçir (fail-closed).
+        from apps.organizations.public import register_cabinet_section_resolver
+
+        def _cabinet_section_allowed(request, section):
+            from .views._helpers.cabinet_sections import cabinet_section_allowed
+
+            return cabinet_section_allowed(request, section)
+
+        register_cabinet_section_resolver(_cabinet_section_allowed)
+
+        # 2026-10-01: «Akademik fəaliyyət» qoşmaları — məxfi media prefiksinin
+        # icazə siyasəti (core deny-by-default-dur) + qeyd silinəndə faylların
+        # təmizlənməsi (istifadəçi kaskadı da daxil).
+        from django.db.models.signals import post_delete
+
+        from core.media_policies import register_media_policy
+
+        from .academic_models import ACADEMIC_ATTACHMENT_PREFIX, AcademicProfileItem
+        from .services.academic_attachments import check_attachment_media_access, cleanup_files_on_item_delete
+
+        register_media_policy(ACADEMIC_ATTACHMENT_PREFIX, check_attachment_media_access)
+        post_delete.connect(
+            cleanup_files_on_item_delete,
+            sender=AcademicProfileItem,
+            dispatch_uid="accounts.academic_item_attachment_cleanup",
+        )

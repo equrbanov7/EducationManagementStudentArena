@@ -93,9 +93,10 @@ def handle_profile_post(
             messages.error(request, avatar_error)
             return _result(redirect(f"{reverse('accounts:profile')}?section=profile-info"))
 
-        randomize_uploaded_filename(uploaded_avatar)
-        profile.avatar = uploaded_avatar
-        profile.save(update_fields=["avatar", "updated_at"])
+        # 2026-10-01: köhnə fayl da silinir (servis — JSON API ilə eyni yol).
+        from ...services.profile_avatar import replace_avatar
+
+        replace_avatar(profile, uploaded_avatar)
         messages.success(request, _("Profil şəkli uğurla yeniləndi."))
         return _result(redirect(f"{reverse('accounts:profile')}?section=profile-info"))
 
@@ -230,12 +231,14 @@ def handle_profile_post(
 
         # Handle avatar upload
         uploaded_avatar = request.FILES.get("avatar")
+        replaced_avatar = None
         if uploaded_avatar is not None:
             avatar_error = validate_avatar_upload(uploaded_avatar)
             if avatar_error:
                 messages.error(request, avatar_error)
                 return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
             randomize_uploaded_filename(uploaded_avatar)
+            replaced_avatar = (profile.avatar.storage, str(profile.avatar.name or "")) if profile.avatar else None
             profile.avatar = uploaded_avatar
 
         # Only admins can change supervisor_code
@@ -254,6 +257,11 @@ def handle_profile_post(
             return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
 
         profile.save()
+        if replaced_avatar is not None:
+            # 2026-10-01: dəyişdirilən köhnə şəkil faylı commit-dən sonra silinir.
+            from ...services.profile_avatar import schedule_file_delete
+
+            schedule_file_delete(*replaced_avatar, keep=profile.avatar.name)
 
         # Audit log for profile update
         from core.constants import AuditAction

@@ -18,6 +18,13 @@ from .rbac import _is_superadmin_user
 
 User = get_user_model()
 
+#: Kartın keçid açarı → kabinet bölməsi (aktiv təşkilat üçün, bölmə icazəlidirsə).
+_CABINET_LINKS = (
+    ("dashboard_url", "org-overview"),
+    ("members_url", "org-members"),
+    ("roles_url", "org-roles"),
+)
+
 
 def _build_user_organization_access_rows(
     user,
@@ -25,7 +32,16 @@ def _build_user_organization_access_rows(
     active_organization=None,
     include_active_superadmin_org=False,
     profile_section="profile-info",
+    allowed_sections=None,
 ):
+    """Profil kartı «Təşkilat girişləri»nin sətirləri.
+
+    ``allowed_sections`` (aktorun kabinet bölmələri) verilibsə, AKTİV təşkilatın
+    «Panel / Üzvlər / Rollar» keçidləri kabinet bölmələrinə aparır (sahib
+    2026-10-01: «bir səhifə, bir URL»). Bölmə açıq deyilsə və ya sətir başqa
+    təşkilatdırsa köhnə ``/organizations/<slug>/…`` URL-i qalır — o da artıq
+    eyni qapı ilə kabinetə yönləndirir (``organizations.cabinet_links``).
+    """
     from apps.organizations.models import Membership, Organization
 
     if not user or not getattr(user, "is_authenticated", False):
@@ -109,7 +125,9 @@ def _build_user_organization_access_rows(
             .annotate(member_count=Count("id"))
         }
 
-    section_url = _append_query_params(reverse("accounts:profile"), section=profile_section)
+    profile_url = reverse("accounts:profile")
+    section_url = _append_query_params(profile_url, section=profile_section)
+    cabinet_sections = set(allowed_sections or ())
     rows = []
     for row in grouped_rows.values():
         organization = row["organization"]
@@ -136,6 +154,10 @@ def _build_user_organization_access_rows(
         row["members_url"] = reverse("organizations:members", kwargs={"slug": organization.slug})
         row["roles_url"] = reverse("organizations:roles", kwargs={"slug": organization.slug})
         row["settings_url"] = reverse("organizations:settings", kwargs={"slug": organization.slug})
+        if row["is_current"]:
+            for key, section in _CABINET_LINKS:
+                if section in cabinet_sections:
+                    row[key] = _append_query_params(profile_url, section=section)
         rows.append(row)
 
     rows.sort(

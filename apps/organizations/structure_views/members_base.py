@@ -23,6 +23,7 @@ from ..scoping import get_permission_scope, scope_memberships_by_unit
 from ..services import get_user_org_role_level
 from ..views import _can_manage_organization, _has_org_permission, _visible_units_queryset
 from ..views.org_admin.context import _has_org_wide_membership
+from ..views.shared._helpers import _user_holds_org_permission
 from .constants import TEACHER_ROLE_NAMES
 from .registry import ROLE_LABELS, unit_type_label
 
@@ -69,6 +70,8 @@ TEACHING_ROLE_NAMES = frozenset(TEACHER_ROLE_NAMES) | frozenset(
 
 #: `om_kind` filtrinin dəyərləri (KPI kartları da bunları göndərir).
 KINDS = ("leaders", "staff", "teachers", "students", "unscoped")
+#: `om_status` filtri — istifadəçi HESABININ vəziyyəti (`User.is_active`), 2026-10-01.
+STATUSES = ("active", "inactive")
 
 SORTS = {
     "role": ("-role__level", "user__first_name", "user__last_name", "user__username"),
@@ -196,6 +199,25 @@ def resolve_members_access(request, organization) -> MembersAccess:
         memberships=memberships.none(),
         units=OrgUnit.objects.none(),
     )
+
+
+def can_export_members(request, organization) -> bool:
+    """CSV ixracı (2026-10-01) — üzv reyestrinə baxış + İDARƏETMƏ hüququ.
+
+    Ayrıca `member.export` açarı yoxdur (miqrasiya/rol toxumu tələb edərdi); ixrac
+    kütləvi şəxsi məlumat (e-poçt) çıxarışı olduğu üçün baxış açarı (`member.view`)
+    KİFAYƏT DEYİL: superadmin · sahib · idarəetmə rolu (`_can_manage_organization`)
+    və ya `member.edit` daşıyan (HR). Əhatə reyestrlə eynidir (dekan öz alt-ağacı).
+    URL-dəki təşkilat AKTİV təşkilat olmalıdır — `_has_org_permission` aktiv
+    təşkilatın icazələrini oxuyur (audit `access` F-07 dərsi).
+    """
+    active = getattr(request, "organization", None)
+    if active is None or getattr(active, "pk", None) != getattr(organization, "pk", None):
+        return False
+    user = request.user
+    if _can_manage_organization(user, organization):
+        return True
+    return _user_holds_org_permission(user, organization, "member.edit")
 
 
 # ─── Vahid xəritəsi (TƏK sorğu) ─────────────────────────────────────────────
