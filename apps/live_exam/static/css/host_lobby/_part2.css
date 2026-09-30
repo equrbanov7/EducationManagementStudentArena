@@ -197,6 +197,33 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* «Yenilə» (sahib 2026-09-30): oyunçu siyahısını serverdən yenidən çəkir (api.refreshHostState). */
+.hx-refresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--hx-line);
+    border-radius: 999px;
+    background: var(--hx-surface);
+    color: #fff;
+    font: 800 clamp(15px, 1.05cqw, 20px)/1 var(--hx-font);
+    cursor: pointer;
+}
+
+.hx-refresh .hx-icon { width: 22px; height: 22px; color: var(--hx-gold); }
+.hx-refresh:hover { background: var(--hx-surface-2); border-color: rgba(255, 255, 255, 0.32); }
+.hx-refresh:focus-visible { outline: 3px solid var(--hx-gold); outline-offset: 2px; }
+.hx-refresh:disabled { cursor: progress; opacity: 0.8; }
+
+[data-action="refresh-state"].is-busy .hx-icon { animation: hxRefreshSpin 0.8s linear infinite; }
+[data-action="refresh-state"].is-done .hx-icon { color: #4ade80; }
+
+@keyframes hxRefreshSpin {
+    to { transform: rotate(360deg); }
+}
+
 .hx-lobby__status {
     display: inline-flex;
     align-items: center;
@@ -368,6 +395,7 @@
     .hx-lobby__top,
     .hx-bubble.is-new,
     .hx-lobby__dot,
+    [data-action="refresh-state"].is-busy .hx-icon,
     .hx-dots i {
         animation: none !important;
     }

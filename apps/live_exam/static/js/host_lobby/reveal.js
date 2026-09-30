@@ -1,11 +1,12 @@
-import { UI } from './dom.js?v=lx20260929';
-import { PHASES } from './constants.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { playRevealSound } from './audio.js?v=lx20260929';
-import { icon } from './icons.js?v=lx20260929';
-import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20260929';
-import { nextQuestion } from './api.js?v=lx20260929';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { PHASES } from './constants.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { playRevealSound } from './audio.js?v=lx20260930';
+import { icon } from './icons.js?v=lx20260930';
+import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20260930';
+import { nextQuestion } from './api.js?v=lx20260930';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20260930';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20260930';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -21,8 +22,8 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20260929';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260930';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */
@@ -102,7 +103,7 @@ function headMarkup(question, payload) {
 
 function cardMarkup(question) {
     const text = String(question?.text || "");
-    return `<div class="hx-qcard hx-qcard--reveal" data-len="${lengthClass(text)}"><h2 class="hx-qcard__text" data-fit>${esc(text)}</h2></div>`;
+    return `<div class="hx-qcard hx-qcard--reveal notranslate" translate="no" data-len="${lengthClass(text)}"><h2 class="hx-qcard__text" data-fit>${esc(text)}</h2></div>`;
 }
 
 function typedMarkup(payload) {
@@ -178,7 +179,7 @@ function renderRevealStage(question, payload) {
                         ? typedMarkup(payload)
                         : `
                             <div class="hx-bars hx-bars--n${Math.min(6, options.length)}">${distributionBarsMarkup(options, distribution, correctIds)}</div>
-                            <div class="hx-tiles ${tilesGridClass(options.length)} is-reveal">
+                            <div class="hx-tiles notranslate ${tilesGridClass(options.length)} is-reveal" translate="no">
                                 ${options.map((option, index) => answerTileMarkup(option, index, correctIds.includes(Number(option?.id || 0)) ? "correct" : "wrong")).join("")}
                             </div>
                         `
@@ -220,7 +221,12 @@ function syncRevealPresentation() {
     }
     const leaderboardStartsAt = toMs(state.currentReveal.leaderboard_starts_at);
     if (leaderboardStartsAt && nowMs() >= leaderboardStartsAt) {
-        renderScoreboardStage(state.currentReveal, state.currentQuestion);
+        // Sahib 2026-09-30: son sualdan sonra liderlər lövhəsi YOX — «Nəticələr…» → final səhnəsi.
+        if (isFinalReveal(state.currentReveal, state.currentQuestion)) {
+            renderFinalSuspenseStage(state.currentReveal);
+        } else {
+            renderScoreboardStage(state.currentReveal, state.currentQuestion);
+        }
         clearPhaseLoop();
     } else {
         renderRevealStage(state.currentQuestion, state.currentReveal);
@@ -242,7 +248,7 @@ export function applyRevealState(payload, question) {
     if (!payload) return;
     const nextKey = revealKey(payload);
     const alreadyInReveal = state.sessionState === "reveal" && state.revealKey === nextKey;
-    if (alreadyInReveal && state.phase === PHASES.SCOREBOARD) return;
+    if (alreadyInReveal && (state.phase === PHASES.SCOREBOARD || state.phase === PHASES.SUSPENSE)) return;
 
     if (question) state.currentQuestion = question;
     // Snapshot-dan gələn reveal WS paketindən kasıb ola bilər — mövcud sahələri itirmə.

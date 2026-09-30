@@ -1,11 +1,11 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20260929';
-import { playSound } from './audio.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20260929';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20260929';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20260930';
+import { playSound } from './audio.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20260930';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20260930';
 import {
     esc,
     fmt,
@@ -17,8 +17,8 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20260929';
-import { currentViewEl, mountView } from './views.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
+import { currentViewEl, mountView } from './views.js?v=lx20260930';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -68,7 +68,7 @@ export function questionCardMarkup(question, { compact = false } = {}) {
     const text = show ? String(question.text || "") : tr("questionHiddenBody", "Sual böyük ekrandadır — oradan oxu");
     const long = show && text.length > (compact ? 110 : 220);
     return (
-        `<div class="lxp-qcard${compact ? " is-compact" : ""}${long ? " is-clamped" : ""}${show ? "" : " is-hidden-text"}" data-len="${lengthClass(text)}">` +
+        `<div class="lxp-qcard notranslate${compact ? " is-compact" : ""}${long ? " is-clamped" : ""}${show ? "" : " is-hidden-text"}" translate="no" data-len="${lengthClass(text)}">` +
         `<p class="lxp-qcard__text">${esc(text)}</p>` +
         (long
             ? `<button type="button" class="lxp-qcard__more" data-lxp-expand aria-expanded="false">${esc(tr("expandQuestion", "Tam oxu"))}</button>`
@@ -101,7 +101,7 @@ function tilesMarkup(question) {
             );
         })
         .join("");
-    return `<div class="lxp-tiles" data-layout="${layout}" data-count="${options.length}" role="group" aria-label="${esc(tr("answersLabel", "Cavab variantları"))}">${tiles}</div>`;
+    return `<div class="lxp-tiles notranslate" translate="no" data-layout="${layout}" data-count="${options.length}" role="group" aria-label="${esc(tr("answersLabel", "Cavab variantları"))}">${tiles}</div>`;
 }
 
 function multiBarMarkup(question) {

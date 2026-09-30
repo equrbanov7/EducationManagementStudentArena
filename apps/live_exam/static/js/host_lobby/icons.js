@@ -31,6 +31,7 @@ const PATHS = {
     mute: `<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" ${STROKE}/>`,
     music: `<path d="M9 18.5V5.5l11-2v12.5" ${STROKE}/><circle cx="6.5" cy="18.5" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/>`,
     replay: `<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" ${STROKE}/><path d="M4 3.8v4.4h4.4" ${STROKE}/><path d="M10.5 9v6l4.5-3z" fill="currentColor"/>`,
+    refresh: `<path d="M19.5 11A7.5 7.5 0 0 0 6.2 6.9L4.5 8.6" ${STROKE}/><path d="M4.5 4.2v4.4h4.4" ${STROKE}/><path d="M4.5 13a7.5 7.5 0 0 0 13.3 4.1l1.7-1.7" ${STROKE}/><path d="M19.5 19.8v-4.4h-4.4" ${STROKE}/>`,
     expand: `<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" ${STROKE}/>`,
     sliders: `<path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1" ${STROKE}/><circle cx="15" cy="6.5" r="2" ${STROKE}/><circle cx="9" cy="12" r="2" ${STROKE}/><circle cx="17" cy="17.5" r="2" ${STROKE}/>`,
     qr: `<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1" ${STROKE}/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5h1.5M18.5 14h2" ${STROKE}/>`,

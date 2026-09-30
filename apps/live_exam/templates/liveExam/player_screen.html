@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
     <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
     <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_base.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_base.css' %}?v=lxp-20260930">
     <link rel="stylesheet" href="{% static 'css/player/_ui.css' %}?v=lxp-20260929">
     <link rel="stylesheet" href="{% static 'css/player/_round.css' %}?v=lxp-20260929">
     <link rel="stylesheet" href="{% static 'css/player/_answer.css' %}?v=lxp-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_reveal.css' %}?v=lxp-20260929">
+    <link rel="stylesheet" href="{% static 'css/player/_reveal.css' %}?v=lxp-20260930">
     <link rel="stylesheet" href="{% static 'css/player/_finale.css' %}?v=lxp-20260929">
 </head>
 <body class="lxp" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
@@ -46,7 +46,9 @@
         <div class="lxp-timebar" id="timeBar" hidden aria-hidden="true"><span class="lxp-timebar__fill" id="timeBarFill"></span></div>
         <div class="lxp-net" id="netBanner" role="status" hidden></div>
 
-        <main class="lxp-stage" id="lxpStage">
+        {% comment %}Sahib 2026-09-30: sual/cavab mətni avtomatik tərcüməyə (Chrome, Tap-to-Translate) verilmir;
+        seçim/kopya/uzun basma menyusu CSS (player/_base.css) + player/guard.js ilə bağlanır.{% endcomment %}
+        <main class="lxp-stage notranslate" id="lxpStage" translate="no" data-lxp-guard>
             <div class="lxp-views" id="lxpViews"></div>
         </main>
 
@@ -94,6 +96,8 @@
         "errorSendOffline": "{% filter escapejs %}{% trans 'error_send_offline' context 'live_exam.player' %}{% endfilter %}",
         "expandQuestion": "{% filter escapejs %}{% trans 'expand_question' context 'live_exam.player' %}{% endfilter %}",
         "finalKeepGoing": "{% filter escapejs %}{% trans 'final_keep_going' context 'live_exam.player' %}{% endfilter %}",
+        "finalSuspenseTitle": "{% filter escapejs %}{% trans 'final_suspense_title' context 'live_exam.player' %}{% endfilter %}",
+        "finalSuspenseBody": "{% filter escapejs %}{% trans 'final_suspense_body' context 'live_exam.player' %}{% endfilter %}",
         "finalPodiumTitle": "{% filter escapejs %}{% trans 'final_podium_title' context 'live_exam.player' %}{% endfilter %}",
         "finalSecond": "{% filter escapejs %}{% trans 'final_second' context 'live_exam.player' %}{% endfilter %}",
         "finalThird": "{% filter escapejs %}{% trans 'final_third' context 'live_exam.player' %}{% endfilter %}",
@@ -178,6 +182,6 @@
     <script src="{% static 'js/player_screen_config.js' %}?v=lxp-20260929"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
-    <script type="module" src="{% static 'js/player/player.entry.js' %}?v=lxp-20260929"></script>
+    <script type="module" src="{% static 'js/player/player.entry.js' %}?v=lxp-20260930"></script>
 </body>
 </html>

@@ -87058,3 +87058,41 @@ msgstr "No matching users — check the name or surname."
 msgctxt "accounts.password_reset"
 msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
 msgstr "Click to choose, or use ↑ ↓ and Enter."
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_title"
+msgstr "The results…"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_sub"
+msgstr "Who won? The final stage is about to begin!"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_hint"
+msgstr "Press “Next” to open the final stage"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh"
+msgstr "Refresh"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh_hint"
+msgstr "Reload the player list from the server"
+
+msgctxt "live_exam.host_lobby"
+msgid "Yenilə"
+msgstr "Refresh"
+
+msgctxt "live_exam.host_lobby"
+msgid "Oyunçu siyahısını və sayını serverdən yenilə"
+msgstr "Reload the player list and count from the server"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_title"
+msgstr "Results are on the big screen!"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_body"
+msgstr ""
+"Your place will be revealed on the final stage — keep your eyes on the big "
+"screen 👀"

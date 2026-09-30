@@ -23,6 +23,8 @@ export const PHASES = Object.freeze({
     TIMEUP: "timeup",
     RESULT: "result",
     LEADERBOARD: "leaderboard",
+    // Sahib 2026-09-30: son sualdan sonra «Nəticələr ekranda!» — yer final səhnəsi ilə açılır.
+    SUSPENSE: "suspense",
     FINAL: "final",
     REMOVED: "removed",
 });

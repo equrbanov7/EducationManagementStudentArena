@@ -1086,6 +1086,8 @@ class LiveStateAPITest(TestCase):
         self.assertEqual(player_answer["total_score"], 12)
 
     def test_state_json_reveal_includes_leaderboard_transition_meta(self):
+        # Sahib 2026-09-30: SON sualın reveal-i liderlik/sıranı göndərmir — bu test ARALIQ sualı yoxlayır.
+        ExamQuestion.objects.create(exam=self.exam, text="Next question", order=2)
         player = self._authenticate_player()
         now = timezone.now()
         self.session.state = LiveSession.STATE_REVEAL

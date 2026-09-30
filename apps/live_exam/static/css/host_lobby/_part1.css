@@ -357,6 +357,8 @@ body.host-live-page input {
 }
 
 /* ── Suallar arası «pərdə» keçidi (transitions.js) ────────────────── */
+/* Sahib 2026-09-30: keçid TƏK süpürmədir — pərdə dərhal örtür (yeni səhnə altında qurulur),
+ * sonra bir dəfə soldan sağa çəkilir; qızılı kənar pərdənin arxa kənarıdır (::before). */
 .hx-wipe {
     position: fixed;
     inset: 0;
@@ -374,19 +376,22 @@ body.host-live-page input {
     bottom: -10%;
     left: -20%;
     width: 140%;
-    transform: translate3d(-120%, 0, 0) skewX(-12deg);
+    transform: translate3d(0, 0, 0) skewX(-12deg);
     background: linear-gradient(90deg, var(--hx-bg-1), var(--hx-bg-2) 60%, #2b3590);
-    will-change: transform;
+    will-change: transform, opacity;
 }
 
-.hx-wipe__panel--b {
-    width: 18%;
-    left: 50%;
-    background: linear-gradient(90deg, rgba(255, 201, 64, 0), var(--hx-gold));
+.hx-wipe__panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3%;
+    background: linear-gradient(90deg, var(--hx-gold), rgba(255, 201, 64, 0));
 }
 
-.hx-wipe.is-running .hx-wipe__panel--a { animation: hxWipe 1.05s cubic-bezier(0.7, 0, 0.3, 1) both; }
-.hx-wipe.is-running .hx-wipe__panel--b { animation: hxWipeEdge 1.05s cubic-bezier(0.7, 0, 0.3, 1) both; }
+.hx-wipe.is-running .hx-wipe__panel { animation: hxWipe 1.05s both; }
 
 .hx-wipe__label {
     position: absolute;
@@ -402,21 +407,18 @@ body.host-live-page input {
 
 .hx-wipe.is-running .hx-wipe__label { animation: hxWipeLabel 1.05s ease both; }
 
+/* 0–8%: örtük görünür (yerində), 8–45%: «Sual N / M», 45–100%: TƏK çəkilmə soldan sağa. */
 @keyframes hxWipe {
-    0% { transform: translate3d(-120%, 0, 0) skewX(-12deg); }
-    42%, 58% { transform: translate3d(0, 0, 0) skewX(-12deg); }
-    100% { transform: translate3d(120%, 0, 0) skewX(-12deg); }
-}
-
-@keyframes hxWipeEdge {
-    0% { transform: translate3d(-700%, 0, 0) skewX(-12deg); }
-    100% { transform: translate3d(700%, 0, 0) skewX(-12deg); }
+    0% { opacity: 0; transform: translate3d(0, 0, 0) skewX(-12deg); animation-timing-function: linear; }
+    8% { opacity: 1; transform: translate3d(0, 0, 0) skewX(-12deg); }
+    45% { opacity: 1; transform: translate3d(0, 0, 0) skewX(-12deg); animation-timing-function: cubic-bezier(0.7, 0, 0.3, 1); }
+    100% { opacity: 1; transform: translate3d(125%, 0, 0) skewX(-12deg); }
 }
 
 @keyframes hxWipeLabel {
-    0%, 30% { opacity: 0; transform: scale(0.9); }
-    45%, 58% { opacity: 1; transform: scale(1); }
-    72%, 100% { opacity: 0; transform: scale(1.04); }
+    0%, 6% { opacity: 0; transform: scale(0.9); }
+    16%, 44% { opacity: 1; transform: scale(1); }
+    60%, 100% { opacity: 0; transform: scale(1.04); }
 }
 
 @media (prefers-reduced-motion: reduce) {

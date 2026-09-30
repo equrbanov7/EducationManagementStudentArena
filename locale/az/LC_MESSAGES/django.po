@@ -86655,3 +86655,39 @@ msgstr "Uyğun istifadəçi yoxdur — adı və ya soyadı yoxlayın."
 msgctxt "accounts.password_reset"
 msgid "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
 msgstr "Seçmək üçün klikləyin və ya ↑ ↓ və Enter istifadə edin."
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_title"
+msgstr "Nəticələr…"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_sub"
+msgstr "Kim qalib gəldi? Final səhnəsi başlayır!"
+
+msgctxt "live_exam.host_game"
+msgid "game_final_suspense_hint"
+msgstr "Final səhnəsini açmaq üçün «Növbəti» düyməsini basın"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh"
+msgstr "Yenilə"
+
+msgctxt "live_exam.host_game"
+msgid "lobby_refresh_hint"
+msgstr "Oyunçu siyahısını serverdən yenilə"
+
+msgctxt "live_exam.host_lobby"
+msgid "Yenilə"
+msgstr "Yenilə"
+
+msgctxt "live_exam.host_lobby"
+msgid "Oyunçu siyahısını və sayını serverdən yenilə"
+msgstr "Oyunçu siyahısını və sayını serverdən yenilə"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_title"
+msgstr "Nəticələr ekranda!"
+
+msgctxt "live_exam.player"
+msgid "final_suspense_body"
+msgstr "Yerin final səhnəsində açılacaq — gözün böyük ekranda olsun 👀"

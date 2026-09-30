@@ -1,11 +1,11 @@
-import { UI } from './dom.js?v=lx20260929';
-import { STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { applySessionSettings } from './settings.js?v=lx20260929';
-import { renderIdleStage } from './lobby.js?v=lx20260929';
-import { applyStateSnapshot } from './snapshot.js?v=lx20260929';
-import { openPresenterWindow } from './presentation.js?v=lx20260929';
-import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { LOBBY_RESYNC_INTERVAL_MS, STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { applySessionSettings } from './settings.js?v=lx20260930';
+import { rebuildLobbyCloud, renderIdleStage } from './lobby.js?v=lx20260930';
+import { applyStateSnapshot } from './snapshot.js?v=lx20260930';
+import { openPresenterWindow } from './presentation.js?v=lx20260930';
+import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20260930';
 
 let playWS = null;
 // Eyni URL-ə eyni anda ikinci POST göndərilmir (sürətli təkrar kliklər → 409 yox).
@@ -88,9 +88,15 @@ export async function postJson(url, payload = {}) {
 }
 
 let syncInFlight = false;
-export async function syncState() {
-    if (syncInFlight) return null;
+let syncPromise = null;
+export function syncState() {
+    if (syncInFlight) return Promise.resolve(null);
     syncInFlight = true;
+    syncPromise = fetchAndApplyState();
+    return syncPromise;
+}
+
+async function fetchAndApplyState() {
     try {
         const response = await fetch(CONFIG.urls.state, { headers: { Accept: "application/json" } });
         if (!response.ok) {
@@ -107,6 +113,56 @@ export async function syncState() {
         return null;
     } finally {
         syncInFlight = false;
+        syncPromise = null;
+    }
+}
+
+/**
+ * Sahib 2026-09-30: aparıcının «Yenilə» düyməsi — HƏQİQİ vəziyyəti (oyunçu siyahısı + say,
+ * sual/cavab sayğacı) serverdən yenidən çəkir və səhifəni yeniləmədən yerində çəkir.
+ * Yolda olan sinxron varsa, onun bitməsini gözləyib TƏZƏ sorğu göndərir.
+ */
+export async function refreshHostState() {
+    const buttons = () => document.querySelectorAll("[data-action='refresh-state']");
+    buttons().forEach((button) => {
+        button.disabled = true;
+        button.classList.remove("is-done");
+        button.classList.add("is-busy");
+        button.setAttribute("aria-busy", "true");
+    });
+    let snapshot = null;
+    try {
+        if (syncPromise) await syncPromise;
+        snapshot = await syncState();
+        if (snapshot && snapshot.state === "lobby") rebuildLobbyCloud();
+    } finally {
+        buttons().forEach((button) => {
+            button.disabled = false;
+            button.classList.remove("is-busy");
+            button.removeAttribute("aria-busy");
+            if (snapshot) {
+                button.classList.add("is-done");
+                window.setTimeout(() => button.classList.remove("is-done"), 1400);
+            }
+        });
+    }
+    log(snapshot ? "State refreshed" : "State refresh failed");
+    return snapshot;
+}
+
+/** Lobbi açıq olduqca yüngül avtomatik sinxron (host başına ~15 s-də bir sorğu; oyunçularda YOX). */
+export function startLobbyResync() {
+    if (state.lobbyResyncTimer) return;
+    state.lobbyResyncTimer = window.setInterval(() => {
+        if (document.hidden || state.sessionState !== "lobby") return;
+        syncState();
+    }, LOBBY_RESYNC_INTERVAL_MS);
+}
+
+export function stopLobbyResync() {
+    if (state.lobbyResyncTimer) {
+        window.clearInterval(state.lobbyResyncTimer);
+        state.lobbyResyncTimer = 0;
     }
 }
 

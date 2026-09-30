@@ -4,11 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20260929';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20260929';
-import { fetchState } from './api.js?v=lx20260929';
-import { renderFinal } from './finale.js?v=lx20260929';
-import { stopStatePolling } from './polling.js?v=lx20260929';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20260930';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20260930';
+import { fetchState } from './api.js?v=lx20260930';
+import { renderFinal } from './finale.js?v=lx20260930';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20260930';
+import { stopStatePolling } from './polling.js?v=lx20260930';
+import { setRank } from './ui.js?v=lx20260930';
 import {
     questionKeyOf,
     renderGetReady,
@@ -17,13 +19,13 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20260929';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20260929';
-import { renderIdle, renderRemoved } from './render_status.js?v=lx20260929';
-import { applySessionSettings } from './settings.js?v=lx20260929';
-import { closePlayerSocket } from './sockets.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { clearAckTimer, clearAllTimers, clearPhaseTimer, clearTicker, queuePhaseTransition, startTicker } from './timers.js?v=lx20260929';
+} from './render_round.js?v=lx20260930';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20260930';
+import { renderIdle, renderRemoved } from './render_status.js?v=lx20260930';
+import { applySessionSettings } from './settings.js?v=lx20260930';
+import { closePlayerSocket } from './sockets.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { clearAckTimer, clearAllTimers, clearPhaseTimer, clearTicker, queuePhaseTransition, startTicker } from './timers.js?v=lx20260930';
 import {
     getRevealKey,
     getRevealTimings,
@@ -32,11 +34,17 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20260929';
-import { currentViewEl } from './views.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
+import { currentViewEl } from './views.js?v=lx20260930';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;
+// Final «darvazası»: {payload, revealed, timer} — öz yer final səhnəsi onu açanda göstərilir.
+let finalGate = null;
+// Sürprizi qorumaq üçün gözləmə yalnız bu qədərdən uzun olanda göstərilir (ms).
+const FINAL_GATE_MIN_WAIT_MS = 250;
+// `finished_at` bu qədər təzədirsə canlı hadisədir (səhnə ilə sinxron anker).
+const FINAL_FRESH_EVENT_MS = 5000;
 
 function resetRound() {
     state.selectedIds = new Set();
@@ -64,7 +72,9 @@ function hasRecordedAnswer(answer) {
 
 export function syncQuestionPhase() {
     const question = state.currentQuestion;
-    if (!question || state.revealPayload || state.phase === PHASES.FINAL || state.phase === PHASES.REMOVED) return;
+    if (!question || state.revealPayload || finalGate || state.phase === PHASES.FINAL || state.phase === PHASES.REMOVED) {
+        return;
+    }
     const now = nowMs();
     const startedAt = ts(question.started_at);
     const readyEndsAt = ts(question.ready_ends_at) || startedAt;
@@ -135,25 +145,61 @@ export function applyReveal(payload) {
         revealRefetchKey = key;
         fetchState();
     }
+    // Sahib 2026-09-30: son sualda liderlər lövhəsi YOX — nəticədən sonra «Nəticələr ekranda!».
+    const final = isFinalReveal(payload);
+    const afterResult = final ? renderFinalSuspense : renderLeaderboard;
     const { leaderboardStartsAt } = getRevealTimings(payload);
     const now = nowMs();
     if (now >= leaderboardStartsAt) {
         clearPhaseTimer();
-        renderLeaderboard(payload);
+        afterResult(payload);
         return;
     }
     renderResult(payload);
+    if (final) setRank(null); // əvvəlki sualın yeri sürprizdən əvvəl göstərilməsin
     queuePhaseTransition(() => {
-        if (state.revealKey === key && state.revealPayload) renderLeaderboard(state.revealPayload);
+        if (state.revealKey === key && state.revealPayload) afterResult(state.revealPayload);
     }, leaderboardStartsAt - now);
 }
 
+function revealFinal() {
+    if (!finalGate || finalGate.revealed) return;
+    finalGate.revealed = true;
+    finalGate.timer = null;
+    renderFinal(finalGate.payload);
+}
+
 export function applyFinished(payload) {
+    const data = payload || {};
+    if (finalGate) {
+        // Təkrar `finished` (WS + snapshot): məlumat tamamlanır, açılma VAXTI dəyişmir.
+        finalGate.payload = Object.assign({}, finalGate.payload, data, {
+            my_stats: data.my_stats || finalGate.payload.my_stats,
+            rank: data.rank || finalGate.payload.rank,
+        });
+        if (finalGate.revealed) renderFinal(finalGate.payload);
+        return;
+    }
+    const wasPlaying = Boolean(state.phase) && state.phase !== PHASES.IDLE && state.phase !== PHASES.REMOVED;
     clearAllTimers();
     state.revealPayload = null;
     state.pendingSubmit = null;
-    renderFinal(payload || {});
     stopStatePolling();
+    // Öz yer final səhnəsi onu açanda göstərilir; səhnə `finished` anında başlayır (aparıcı eyni
+    // hadisəni alır). Anker: təzə `finished_at` (WS) → o an; köhnə anker (snapshot-da son reveal
+    // vaxtı) + oyunu canlı izləyən telefon → indi; səhifə oyundan sonra açılıbsa → gözləmə yox.
+    const now = nowMs();
+    const finishedAt = ts(data.finished_at);
+    const fresh = finishedAt && now - finishedAt >= 0 && now - finishedAt <= FINAL_FRESH_EVENT_MS;
+    const anchor = fresh ? finishedAt : wasPlaying ? now : finishedAt || now;
+    const wait = anchor + stageRevealOffsetMs(data) - now;
+    finalGate = { payload: data, revealed: false, timer: null };
+    if (wait > FINAL_GATE_MIN_WAIT_MS) {
+        renderFinalSuspense();
+        finalGate.timer = window.setTimeout(revealFinal, wait);
+    } else {
+        revealFinal();
+    }
     if (payload && !payload.my_stats && !finalRefetchDone) {
         // Şəxsi statistika (my_stats) ümumi yayımda olmaya bilər — bir dəfə snapshot çəkirik.
         finalRefetchDone = true;
@@ -164,7 +210,7 @@ export function applyFinished(payload) {
 }
 
 export function handleAuthLost() {
-    if (state.phase === PHASES.FINAL) return;
+    if (state.phase === PHASES.FINAL || finalGate) return;
     state.removed = true;
     clearAllTimers();
     stopStatePolling();

@@ -1,6 +1,6 @@
 // LX-FE-PLAYER (2026-09-29): bütün taymerlər bir yerdən idarə olunur — faza dəyişəndə heç biri
 // «asılı» qalmır (QA: mərhələ keçidlərində köhnə interval/timeout işləməməlidir).
-import { state } from './state.js?v=lx20260929';
+import { state } from './state.js?v=lx20260930';
 
 export function clearTicker() {
     if (state.ticker) {

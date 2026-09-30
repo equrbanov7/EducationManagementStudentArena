@@ -1,11 +1,11 @@
-import { $, UI } from './dom.js?v=lx20260929';
-import { PHASES } from './constants.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20260929';
-import { icon } from './icons.js?v=lx20260929';
-import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20260929';
-import { revealQuestion } from './api.js?v=lx20260929';
-import { playWipe } from './transitions.js?v=lx20260929';
+import { $, UI } from './dom.js?v=lx20260930';
+import { PHASES } from './constants.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20260930';
+import { icon } from './icons.js?v=lx20260930';
+import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20260930';
+import { revealQuestion } from './api.js?v=lx20260930';
+import { playWipe } from './transitions.js?v=lx20260930';
 import {
     controlsEnabled,
     esc,
@@ -18,8 +18,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20260929';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260930';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -72,7 +72,7 @@ function headMarkup(question) {
 function cardMarkup(question, compact) {
     const text = String(question?.text || "");
     return `
-        <div class="hx-qcard ${compact ? "hx-qcard--compact" : ""}" data-len="${lengthClass(text)}">
+        <div class="hx-qcard notranslate ${compact ? "hx-qcard--compact" : ""}" translate="no" data-len="${lengthClass(text)}">
             <h2 class="hx-qcard__text" data-fit>${esc(text)}</h2>
         </div>
     `;
@@ -191,7 +191,7 @@ function renderAnswersStage(question) {
                 ${
                     text
                         ? typedIllustration()
-                        : `<div class="hx-tiles ${tilesGridClass(options.length)}">${options.map((option, index) => answerTileMarkup(option, index)).join("")}</div>`
+                        : `<div class="hx-tiles notranslate ${tilesGridClass(options.length)}" translate="no">${options.map((option, index) => answerTileMarkup(option, index)).join("")}</div>`
                 }
                 <div class="hx-banner" data-banner role="status" hidden></div>
             </section>

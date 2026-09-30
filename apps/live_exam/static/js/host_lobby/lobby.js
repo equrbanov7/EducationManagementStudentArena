@@ -1,9 +1,9 @@
-import { UI } from './dom.js?v=lx20260929';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20260929';
-import { state } from './state.js?v=lx20260929';
-import { playJoin } from './audio.js?v=lx20260929';
-import { icon } from './icons.js?v=lx20260929';
-import { setPresentationMarkup } from './presentation.js?v=lx20260929';
+import { UI } from './dom.js?v=lx20260930';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20260930';
+import { state } from './state.js?v=lx20260930';
+import { playJoin } from './audio.js?v=lx20260930';
+import { icon } from './icons.js?v=lx20260930';
+import { setPresentationMarkup } from './presentation.js?v=lx20260930';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -16,7 +16,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20260929';
+} from './utils.js?v=lx20260930';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn
@@ -37,6 +37,15 @@ function shellSignature() {
         state.sessionSettings.two_step_join === false ? "direct" : "pin",
         CONFIG.entryUrl || "",
     ].join(":");
+}
+
+/* Sahib 2026-09-30: «Yenilə» — oyunçu siyahısını/sayını serverdən (state JSON) yenidən çəkir,
+ * səhifəni yeniləmədən yerində çəkir (WS hadisəsi itibsə və ya qopub-qoşulubsa). Yalnız
+ * idarə edən aparıcıda (proyektor görünüşündə yox). Klik: events.js (delegasiya). */
+function refreshButtonMarkup() {
+    if (!controlsEnabled()) return "";
+    const hint = tr("refreshPlayersHint", "Oyunçu siyahısını serverdən yenilə");
+    return `<button type="button" class="hx-refresh" data-action="refresh-state" title="${esc(hint)}">${icon("refresh")}<span>${esc(tr("refreshPlayers", "Yenilə"))}</span></button>`;
 }
 
 function shellMarkup() {
@@ -79,6 +88,7 @@ function shellMarkup() {
                         <strong data-lobby-count>0</strong>
                         <span>${esc(tr("lobbyPlayersWord", "iştirakçı"))}</span>
                     </div>
+                    ${refreshButtonMarkup()}
                     <div class="hx-lobby__status" data-lobby-status></div>
                 </div>
             </div>
@@ -206,6 +216,17 @@ export function renderIdleStage(fromData = false) {
     }
     const root = UI.presentationContent?.querySelector("[data-lobby]");
     if (root) renderCloud(root, fromData);
+}
+
+/** «Yenilə»: bulud DOM-u sıfırdan qurulur (itmiş/artıq baloncuqlar düzəlir; «yeni» pop-u YOX). */
+export function rebuildLobbyCloud() {
+    if (state.sessionState !== "lobby") return;
+    const root = UI.presentationContent?.querySelector("[data-lobby]");
+    const list = root?.querySelector("[data-lobby-cloud]");
+    if (!root || !list) return;
+    list.textContent = "";
+    cloud.rendered.clear();
+    renderCloud(root, true);
 }
 
 export function renderLobbyPlayers(players, totalCount = null) {
