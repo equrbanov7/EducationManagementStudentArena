@@ -20,9 +20,8 @@ on:
         options: [verify, diagnose, apply, remove]
         default: verify
       model:
-        description: "Çatbot modeli (normal: gemini-2.5-flash; ən ucuz: gemini-2.5-flash-lite)"
-        type: choice
-        options: [gemini-2.5-flash, gemini-2.5-flash-lite]
+        description: "Çatbot modeli (diagnose siyahısındakı ad, məs. gemini-…-flash); yalnız [a-z0-9.-]"
+        type: string
         default: gemini-2.5-flash
 
 concurrency:
@@ -46,6 +45,7 @@ jobs:
         if: ${{ inputs.mode != 'remove' }}
         run: |
           set -euo pipefail
+          case "$MODEL" in (*[!a-z0-9.-]*|'') echo "::error::Model adı yalnız [a-z0-9.-] ola bilər"; exit 1 ;; esac
           if [ -z "${GEMINI_KEY:-}" ]; then
             echo "::error::GEMINI_API_KEY secret-i 'production' mühitində yoxdur: gh secret set GEMINI_API_KEY --env production"
             exit 1
@@ -63,9 +63,21 @@ jobs:
           esac
 
       - name: 🩺 Diaqnostika (kiçik real sorğu + app loqu; açar çap olunmur)
-        if: ${{ inputs.mode == 'diagnose' }}
+        if: ${{ always() && inputs.mode == 'diagnose' }}
         run: |
           set -uo pipefail
+          # 0) Bu açarla generateContent dəstəkləyən modellər (siyahı — token xərci yoxdur).
+          curl -sS --max-time 20 -H "x-goog-api-key: ${GEMINI_KEY}" \
+            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200" > /tmp/gem_models.json
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/gem_models.json"))
+          rows = [m for m in d.get("models", []) if "generateContent" in m.get("supportedGenerationMethods", [])]
+          print(f"── generateContent modelləri ({len(rows)}):")
+          for m in rows:
+              print("  ", m.get("name", "").replace("models/", ""), "| thinking:", m.get("thinking"), "| out:", m.get("outputTokenLimit"))
+          PY
+          rm -f /tmp/gem_models.json
           # 1) Serverdən (runner = prod host) minimal generateContent — cavabdan yalnız status,
           #    xəta mesajı, finishReason və token sayları çap olunur (mətn/açar yox).
           for tb in none 0; do
