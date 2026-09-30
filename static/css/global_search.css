@@ -160,6 +160,28 @@ body.gsearch-open {
     transition: background 0.15s ease, color 0.15s ease;
 }
 
+/* «Bağla» — yalnız telefonda görünür (masaüstündə «esc» ipucu var). */
+.gsearch__close {
+    display: none;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 12px;
+    margin-left: 2px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-800);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gsearch__close:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
 .gsearch__esc:hover {
     background: var(--ems-neutral-100);
     color: var(--ems-neutral-700);
@@ -521,15 +543,19 @@ body.gsearch-open {
         padding: 0;
     }
 
-    /* Mobil: panel demək olar tam ekran — barmaqla rahat, sətirlər geniş. */
+    /* Mobil (sahib 2026-10-01): panel artıq bütün ekranı tutmur — məzmuna görə ölçülən üst vərəq,
+       altında fon görünür (toxunanda bağlanır) və yuxarıda görünən «Bağla» düyməsi var. */
     .gsearch {
-        padding: 8px 8px 0;
-        align-items: stretch;
+        padding: 10px 10px 0;
+        align-items: flex-start;
     }
     .gsearch__panel {
         max-width: none;
-        max-height: calc(100dvh - 16px);
+        max-height: min(76dvh, 560px);
         border-radius: 16px;
+    }
+    .gsearch__close {
+        display: inline-flex;
     }
     .gsearch__input-wrap {
         height: 54px;

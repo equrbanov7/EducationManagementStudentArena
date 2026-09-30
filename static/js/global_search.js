@@ -6,7 +6,8 @@
  *
  * Davranış:
  *   - Aç   : ⌘K / Ctrl+K, yaxud [data-global-search-open] düyməsi.
- *   - Bağla: Esc, fon klikı, «esc» düyməsi və ya nəticə seçmək.
+ *   - Bağla: Esc, fon klikı, «esc» düyməsi (telefonda «Bağla») və ya nəticə seçmək.
+ *   - Boş sorğu: «Son baxılanlar» (yalnız menyu bölmələri, istifadəçiyə görə) + seçilmiş keçidlər.
  *   - Sorğu: [data-search-url]?q= ünvanına gecikdirilmiş GET → qruplu JSON.
  *   - Klaviatura: ↑/↓ (dövrələmə ilə), Home/End, ↵ açır, ⌘/Ctrl+↵ yeni tabda.
  *   - Tab fokusu panelin İÇİNDƏ dövr edir (modal tələbi).
@@ -121,6 +122,80 @@
         var searchUrl = root.getAttribute("data-search-url");
         if (!input || !resultsEl) {
             return;
+        }
+
+        /* «Son baxılanlar» (sahib 2026-10-01: «fərdə görə») — YALNIZ menyu bölmələri (şəxs/fənn
+           nəticələri saxlanmır: paylaşılan kompüterdə şəxsi məlumat qalmasın), istifadəçiyə görə
+           ayrı açarda, ən çoxu 5. Server boş sorğuda icazəli bölmələrin siyahısını (nav_urls)
+           qaytarır — rolu dəyişmiş istifadəçiyə artıq açıq olmayan bölmə göstərilmir. */
+        var RECENT_LIMIT = 5;
+        var recentKey = "ems.gsearch.recent." + (root.getAttribute("data-user-key") || "anon");
+        var recentLabel = root.getAttribute("data-recent-label") || "";
+
+        function readRecent() {
+            try {
+                var parsed = JSON.parse(window.localStorage.getItem(recentKey) || "[]");
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function rememberRecent(link) {
+            var group = link.getAttribute("data-gsearch-group");
+            if (group !== "nav" && group !== "recent") {
+                return;
+            }
+            var entry = {
+                title: link.getAttribute("data-gsearch-title") || "",
+                icon: link.getAttribute("data-gsearch-icon") || "",
+                url: link.getAttribute("href") || ""
+            };
+            if (!entry.url || !entry.title) {
+                return;
+            }
+            var list = readRecent().filter(function (item) {
+                return item && item.url !== entry.url;
+            });
+            list.unshift(entry);
+            try {
+                window.localStorage.setItem(recentKey, JSON.stringify(list.slice(0, RECENT_LIMIT)));
+            } catch (error) {
+                // Brauzer yaddaşı bağlıdır (gizli rejim) — «son baxılanlar» sadəcə görünmür.
+            }
+        }
+
+        function withRecent(groups, navUrls) {
+            if (!Array.isArray(navUrls) || !recentLabel) {
+                return groups;
+            }
+            var allowed = {};
+            navUrls.forEach(function (url) {
+                allowed[url] = true;
+            });
+            var recent = readRecent().filter(function (item) {
+                return item && allowed[item.url];
+            });
+            if (!recent.length) {
+                return groups;
+            }
+            var seen = {};
+            recent.forEach(function (item) {
+                seen[item.url] = true;
+            });
+            var rest = (groups || []).map(function (group) {
+                if (group.key !== "nav") {
+                    return group;
+                }
+                return {
+                    key: group.key,
+                    label: group.label,
+                    items: (group.items || []).filter(function (item) {
+                        return !seen[item.url];
+                    })
+                };
+            });
+            return [{ key: "recent", label: recentLabel, items: recent }].concat(rest);
         }
 
         var options = []; // düz siyahı: <a role="option">
@@ -240,6 +315,9 @@
 
                 items.forEach(function (item) {
                     var link = buildItem(item, query, options.length);
+                    link.setAttribute("data-gsearch-group", group.key || "");
+                    link.setAttribute("data-gsearch-title", item.title || "");
+                    link.setAttribute("data-gsearch-icon", item.icon || "");
                     section.appendChild(link);
                     options.push(link);
                 });
@@ -289,7 +367,7 @@
                     return response.ok ? response.json() : { groups: [] };
                 })
                 .then(function (data) {
-                    finish(data.groups);
+                    finish(query ? data.groups : withRecent(data.groups, data.nav_urls));
                 })
                 .catch(function () {
                     finish([]);
@@ -356,6 +434,7 @@
             if (!link) {
                 return;
             }
+            rememberRecent(link);
             if (event && (event.metaKey || event.ctrlKey)) {
                 window.open(link.href, "_blank", "noopener");
                 return;
