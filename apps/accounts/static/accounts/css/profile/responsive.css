@@ -59,13 +59,46 @@
         padding: 1rem;
     }
 
+    /* 2026-09-30 (sahib: «ikonlar konteynerdən çıxmasın, heç nə ekrandan kənara
+       düşməsin»): əvvəl 56px dairə ekranın sol kənarından 18px KƏNARA çıxırdı və
+       məzmunun 38px-ni örtürdü (başlıq, «İstifadəçi profilinə bax»). İndi kənara
+       yapışan dil-düymədir: ekrandan çıxmır, ikon içində mərkəzdədir, başlıq ona
+       yer verir. z-index başlığın (100) altındadır — istifadəçi menyusu, şkaf örtüyü
+       və dialoqlar onun üstünə düşür (əvvəl 1060 idi və hamısının üstündə «üzürdü»). */
     .profile-mobile-sidebar-trigger {
-        left: -18px;
-        top: 108px;
+        left: 0;
+        top: 104px;
+        width: 30px;
+        height: 52px;
+        border-radius: 0 14px 14px 0;
+        z-index: 90;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.16);
     }
 
+    .profile-mobile-sidebar-trigger i {
+        font-size: 1rem;
+        transform: none;
+    }
+
+    .profile-mobile-sidebar-trigger.is-hidden {
+        transform: translateX(-100%);
+    }
+
+    .profile-header:has(> .profile-mobile-sidebar-trigger) {
+        padding-left: 18px;
+    }
+
+    /* Kilidin özü `EMSScrollLock`-dadır (html+body, iOS) — bu sinif yalnız köhnə
+       asılılıqlar üçün qalır. Şkafın sürüşməsi sona çatanda arxaya ötürülmür
+       (`overscroll-behavior: contain`, sidebar.css); iPhone-un alt/sol təhlükəsiz
+       sahəsi şkafın içində boşluq kimi qalır. */
     body.profile-sidebar-open-mobile {
         overflow: hidden;
+    }
+
+    .profile-sidebar {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
     }
 
     .profile-title {

@@ -1,0 +1,111 @@
+{% load i18n %}
+{% comment %}Bir sual kartı: tutacaq (sürüklə / Alt+↑↓), nömrə, növ, bayraqlar, ↑/↓, sil və «Redaktə et»
+paneli. Növə görə sahələr `data-svb-kinds` ilə göstərilir (JS-siz hamısı görünür, server lazımsızları
+nəzərə almır). Kilidli sualda struktur sahələri `disabled`-dir.{% endcomment %}
+<li class="svb-q" data-svb-q="{{ row.q.pk }}">
+    <div class="svb-q__bar">
+        {% if not row.locked %}
+        <button type="button" class="svb-q__handle" data-svb-handle aria-describedby="svb-dnd-help"
+                aria-label="{% blocktrans trimmed with n=forloop.counter context 'surveys.builder' %}Sualın sırasını dəyiş: {{ n }}{% endblocktrans %}">
+            <i class="fas fa-grip-vertical" aria-hidden="true"></i>
+        </button>
+        {% endif %}
+        <span class="svb-q__num">{{ forloop.counter }}</span>
+        <span class="svc-chip svc-chip--muted">{{ row.kind_label }}</span>
+        {% if row.q.required %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.builder" %}</span>{% endif %}
+        {% if ed.teacher and row.q.in_index %}<span class="svc-chip svc-chip--open">{% trans "İndeksə daxil" context "surveys.builder" %}</span>{% endif %}
+        {% if row.metric %}<span class="svc-chip svc-chip--open" title="{% trans 'Nəticə panelinin göstəricisini qidalandırır' context 'surveys.builder' %}">{% trans "Göstərici" context "surveys.builder" %}</span>{% endif %}
+        {% if row.revisions %}<span class="svc-chip svc-chip--muted">{% blocktrans trimmed with n=row.revisions context "surveys.builder" %}Düzəlişlər: {{ n }}{% endblocktrans %}</span>{% endif %}
+        {% if not row.locked %}
+        <span class="svb-q__tools">
+            <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="move_question"><input type="hidden" name="question" value="{{ row.q.pk }}"><input type="hidden" name="direction" value="up"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                <button type="submit" class="svb-icon" aria-label="{% trans 'Yuxarı' context 'surveys.builder' %}"{% if forloop.first %} disabled{% endif %}><i class="fas fa-arrow-up" aria-hidden="true"></i></button></form>
+            <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="move_question"><input type="hidden" name="question" value="{{ row.q.pk }}"><input type="hidden" name="direction" value="down"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                <button type="submit" class="svb-icon" aria-label="{% trans 'Aşağı' context 'surveys.builder' %}"{% if forloop.last %} disabled{% endif %}><i class="fas fa-arrow-down" aria-hidden="true"></i></button></form>
+            <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="delete_question"><input type="hidden" name="question" value="{{ row.q.pk }}"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                <button type="submit" class="svb-icon svb-icon--danger" aria-label="{% trans 'Sualı sil' context 'surveys.builder' %}" data-ems-confirm="{% trans 'Sual silinsin?' context 'surveys.builder' %}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+        </span>
+        {% endif %}
+    </div>
+    <p class="svb-q__text">{{ row.q.text }}</p>
+    {% if row.q.help_text %}<p class="svb-q__help">{{ row.q.help_text }}</p>{% endif %}
+    {% if row.choices %}<ul class="svb-q__opts">{% for label in row.choices %}<li>{{ label }}</li>{% endfor %}</ul>{% endif %}
+
+    <details class="svb-q__edit">
+        <summary>{% trans "Redaktə et" context "surveys.builder" %}</summary>
+        <form method="post" action="{{ ed.post_url }}" class="svb-qform" data-svb-op data-svb-kindform>
+            {% csrf_token %}
+            <input type="hidden" name="op" value="update_question"><input type="hidden" name="question" value="{{ row.q.pk }}"><input type="hidden" name="next" value="{{ ed.next_url }}">
+            <div class="svc-field svb-field--wide">
+                <label for="svb-qt-{{ row.q.pk }}">{% trans "Sual" context "surveys.builder" %}</label>
+                <textarea id="svb-qt-{{ row.q.pk }}" class="svc-input svb-textarea" name="text" rows="2" maxlength="1000" required>{{ row.q.text }}</textarea>
+            </div>
+            <div class="svc-field svb-field--wide">
+                <label for="svb-qh-{{ row.q.pk }}">{% trans "İzah (istəyə görə)" context "surveys.builder" %}</label>
+                <input id="svb-qh-{{ row.q.pk }}" class="svc-input" type="text" name="help_text" maxlength="300" value="{{ row.q.help_text }}">
+            </div>
+            <div class="svb-row">
+                <div class="svc-field">
+                    <label for="svb-qk-{{ row.q.pk }}">{% trans "Növ" context "surveys.builder" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select id="svb-qk-{{ row.q.pk }}" name="kind" class="bootstrap-single-select__native" data-bootstrap-select data-svb-kind{% if row.locked %} disabled{% endif %}>
+                            {% for kind in ed.kinds %}<option value="{{ kind.value }}"{% if kind.value == row.q.kind %} selected{% endif %}>{{ kind.label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% if ed.teacher %}
+                <div class="svc-field">
+                    <label for="svb-qs-{{ row.q.pk }}">{% trans "Bölmə" context "surveys.builder" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select id="svb-qs-{{ row.q.pk }}" name="section" class="bootstrap-single-select__native" data-bootstrap-select{% if row.locked %} disabled{% endif %}>
+                            {% for item in ed.sections %}<option value="{{ item.value }}"{% if item.value == row.q.section %} selected{% endif %}>{{ item.label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% elif ed.groups|length > 1 %}
+                <div class="svc-field">
+                    <label for="svb-qp-{{ row.q.pk }}">{% trans "Bölmə" context "surveys.builder" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select id="svb-qp-{{ row.q.pk }}" name="page" class="bootstrap-single-select__native" data-bootstrap-select{% if row.locked %} disabled{% endif %}>
+                            {% for item in ed.groups %}{% if item.page %}<option value="{{ item.key }}"{% if item.key == group.key %} selected{% endif %}>{% if item.page.title %}{{ item.page.title }}{% else %}{% blocktrans trimmed with n=forloop.counter context "surveys.builder" %}Bölmə {{ n }}{% endblocktrans %}{% endif %}</option>{% endif %}{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                {% else %}<input type="hidden" name="page" value="{{ group.key }}">{% endif %}
+                <label class="svc-check"><input type="checkbox" name="required" value="1"{% if row.q.required %} checked{% endif %}{% if row.locked %} disabled{% endif %}> <span>{% trans "Məcburi sual" context "surveys.builder" %}</span></label>
+                {% if ed.teacher %}
+                <label class="svc-check" data-svb-kinds="likert5"><input type="checkbox" name="in_index" value="1"{% if row.q.in_index %} checked{% endif %}{% if row.locked %} disabled{% endif %}> <span>{% trans "İndeksə daxil" context "surveys.builder" %}</span></label>
+                {% endif %}
+            </div>
+
+            <div class="svb-kindbox" data-svb-kinds="single multi">
+                <label class="svb-picker__label" for="svb-qc-{{ row.q.pk }}">{% trans "Variantlar — hər sətirdə bir" context "surveys.builder" %}</label>
+                <textarea id="svb-qc-{{ row.q.pk }}" class="svc-input svb-textarea" name="choices_text" rows="4">{{ row.choices_text }}</textarea>
+                {% if row.locked %}<p class="svc-note">{% trans "Variantların sayı və sırası dəyişmir — yalnız yazı düzəlişi." context "surveys.builder" %}</p>{% endif %}
+            </div>
+            <div class="svb-row svb-kindbox" data-svb-kinds="multi">
+                <div class="svc-field svc-field--narrow"><label for="svb-qmin-{{ row.q.pk }}">{% trans "Ən az seçim" context "surveys.builder" %}</label><input id="svb-qmin-{{ row.q.pk }}" class="svc-input" type="number" min="0" max="30" name="min_choices" value="{{ row.min|default_if_none:'' }}"{% if row.locked %} disabled{% endif %}></div>
+                <div class="svc-field svc-field--narrow"><label for="svb-qmax-{{ row.q.pk }}">{% trans "Ən çox seçim" context "surveys.builder" %}</label><input id="svb-qmax-{{ row.q.pk }}" class="svc-input" type="number" min="1" max="30" name="max_choices" value="{{ row.max|default_if_none:'' }}"{% if row.locked %} disabled{% endif %}></div>
+            </div>
+            <fieldset class="svb-kindbox" data-svb-kinds="likert5">
+                <legend class="svb-picker__label">{% trans "Şkala etiketləri (boş — standart)" context "surveys.builder" %}</legend>
+                <div class="svb-labels">
+                    {% for value in row.labels %}
+                    <label class="svb-labels__item"><span class="svb-labels__score">{{ forloop.counter }}</span>
+                        <input class="svc-input" type="text" name="label_{{ forloop.counter0 }}" maxlength="80" value="{{ value }}" placeholder="{% for default in row.label_defaults %}{% if forloop.counter == forloop.parentloop.counter %}{{ default }}{% endif %}{% endfor %}"></label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+            <fieldset class="svb-kindbox" data-svb-kinds="nps">
+                <legend class="svb-picker__label">{% trans "Şkalanın uc etiketləri (0 və 10)" context "surveys.builder" %}</legend>
+                <div class="svb-row">
+                    <input class="svc-input" type="text" name="anchor_0" maxlength="80" value="{{ row.anchors.0 }}" aria-label="0" placeholder="{% trans 'Heç ehtimal etmirəm' context 'surveys.respond' %}">
+                    <input class="svc-input" type="text" name="anchor_1" maxlength="80" value="{{ row.anchors.1 }}" aria-label="10" placeholder="{% trans 'Mütləq' context 'surveys.respond' %}">
+                </div>
+            </fieldset>
+            <div class="svb-actions">
+                <button type="submit" class="svc-btn svc-btn--primary"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "surveys.builder" %}</button>
+            </div>
+        </form>
+    </details>
+</li>

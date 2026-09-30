@@ -65,7 +65,8 @@
 
 .sidebar-menu-link[data-section="applications"],
 .sidebar-menu-link[data-section="publish-notification"],
-.sidebar-menu-link[data-section="evaluation-survey"] {
+.sidebar-menu-link[data-section="evaluation-survey"],
+.sidebar-menu-link[data-section="surveys-inbox"] {
     --sb-icon: var(--ems-sky-600);
 }
 
@@ -73,7 +74,10 @@
     --sb-icon: var(--ems-emerald-600);
 }
 
-.sidebar-menu-link[data-section="profile-info"] {
+.sidebar-menu-link[data-section="profile-info"],
+.sidebar-menu-link[data-section="edit-profile"],
+.sidebar-menu-link[data-section="change-password"],
+.sidebar-menu-link[data-section="account-password-reset"] {
     --sb-icon: var(--ems-neutral-600);
 }
 
@@ -116,7 +120,8 @@
     --sb-icon: var(--ems-warning-700);
 }
 
-[data-sidebar-group="system"] {
+[data-sidebar-group="system"],
+[data-sidebar-group="settings"] {
     --sb-icon: var(--ems-neutral-600);
 }
 

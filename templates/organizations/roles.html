@@ -5,6 +5,11 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_management.css' %}">
+    {% comment %}RESP 2026-09-30: reyestr `ems_ui` komponentləri (cədvəl sürüşməsi, KPI,
+    süzgəc, çekmecə) üzərində qurulub; kabinet qabığı onların asset-lərini özü
+    yükləyir, müstəqil səhifə isə yükləmirdi — cədvəl mobil ekranda kənardan
+    kəsilir, düymələr/çekmecə üslubsuz qalırdı.{% endcomment %}
+    {% include "partials/ems_ui/_assets.html" %}
 {% endblock %}
 
 {% block content %}

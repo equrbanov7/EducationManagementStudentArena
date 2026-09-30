@@ -241,20 +241,10 @@
                                 {% endif %}
                             </a>
 
-                            {# 2026-09-25 (sahib): hesab əməlləri sidebar-ın alt blokundan BURAYA köçdü. #}
-                            <div class="blog-header__user-menu-sep" role="presentation"></div>
-                            <div class="blog-header__user-menu-label">{% trans "group_account" context "profile.sidebar" %}</div>
-                            <a href="{% url 'accounts:profile' %}?section=edit-profile"
-                               class="blog-header__user-menu-item {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'edit-profile' %}blog-header__user-menu-item--active{% endif %}">
-                                <i class="fas fa-user-pen blog-header__user-menu-icon" aria-hidden="true"></i>
-                                <span>{% trans "edit_profile" context "profile.sidebar" %}</span>
-                            </a>
-                            <a href="{% url 'accounts:profile' %}?section=change-password"
-                               class="blog-header__user-menu-item {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'change-password' %}blog-header__user-menu-item--active{% endif %}">
-                                <i class="fas fa-lock blog-header__user-menu-icon" aria-hidden="true"></i>
-                                <span>{% trans 'Şifrəni dəyiş' %}</span>
-                            </a>
-
+                            {% comment %}2026-09-30 (sahib): «Profili redaktə et» və «Şifrəni dəyiş»
+                            buradan kabinetin sol menyusundakı «Tənzimləmələr» qrupuna köçdü
+                            (`accounts/profile/sidebar/_group_settings.html`). Menyuda kimlik başlığı,
+                            «Mənim profilim», «Bildirişlər» və «Çıxış» qalır; dil seçimi başlıqdadır.{% endcomment %}
                             <div class="blog-header__user-menu-sep" role="presentation"></div>
 
                             <form method="post" action="{% url 'accounts:logout' %}" class="blog-header__user-menu-form">
@@ -364,17 +354,12 @@
         {% endif %}
         {% endif %}{# /not university_mode #}
 
+        {% comment %}2026-09-30 (sahib): «Canlı imtahan yarat» şkafdan ÇIXARILDI — canlı sessiya
+        imtahan səhifəsindən yaradılır. Müəllimdə şkafda yalnız (universitet olmayan rejimdə)
+        sınaq imtahanı sorğusu qalır.{% endcomment %}
         {% if request.user.is_teacher_or_above %}
-        <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
-        <li class="blog-header__nav-item">
-            <a href="{% url 'exams:create_exam' %}"
-               {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name == 'create_exam' %}aria-current="page"{% endif %}
-               class="blog-header__nav-link blog-header__nav-link--create {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name == 'create_exam' %}blog-header__nav-link--active{% endif %}">
-                <i class="fas fa-bolt" aria-hidden="true"></i>
-                <span>{% trans "create_live_exam" context "nav" %}</span>
-            </a>
-        </li>
         {% if not university_mode %}
+        <li class="blog-header__nav-item blog-header__nav-item--divider"></li>
         <li class="blog-header__nav-item">
             <a href="{% url 'trial_exams:request' %}"
                {% if request.resolver_match.namespace == 'trial_exams' %}aria-current="page"{% endif %}
@@ -425,20 +410,7 @@
                 {% if notif_count %}<span class="blog-header__user-menu-badge">{{ notif_count }}</span>{% endif %}
             </a>
         </li>
-        <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:profile' %}?section=edit-profile"
-               class="blog-header__nav-link {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'edit-profile' %}blog-header__nav-link--active{% endif %}">
-                <i class="fas fa-user-pen" aria-hidden="true"></i>
-                <span>{% trans "edit_profile" context "profile.sidebar" %}</span>
-            </a>
-        </li>
-        <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:profile' %}?section=change-password"
-               class="blog-header__nav-link {% if request.resolver_match.url_name == 'profile' and request.GET.section == 'change-password' %}blog-header__nav-link--active{% endif %}">
-                <i class="fas fa-lock" aria-hidden="true"></i>
-                <span>{% trans 'Şifrəni dəyiş' %}</span>
-            </a>
-        </li>
+        {# «Profili redaktə et» / «Şifrəni dəyiş» — kabinetin «Tənzimləmələr» qrupundadır (2026-09-30). #}
         <li class="blog-header__nav-item">
             <form method="post" action="{% url 'accounts:logout' %}" class="blog-header__nav-form">
                 {% csrf_token %}

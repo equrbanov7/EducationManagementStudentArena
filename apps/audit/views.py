@@ -56,6 +56,7 @@ from .views_filters import (  # noqa: F401 — yenidən ixrac
     FLAG_FAILED,
     FLAG_KEYS,
     FLAG_NOREASON,
+    FLAG_PROFANITY,
     OPTION_CAP,
     PAGE_SIZES,
     PREFIX,
@@ -114,6 +115,7 @@ def _flag_labels() -> dict:
         FLAG_NOREASON: pgettext(_CTX, "Səbəbsiz dəyişikliklər"),
         FLAG_FAILED: pgettext(_CTX, "Rədd və yoxlama sorğuları"),
         FLAG_ANON: pgettext(_CTX, "Anonim / sistem hadisələri"),
+        FLAG_PROFANITY: pgettext(_CTX, "Nalayiq ad cəhdləri"),
     }
 
 

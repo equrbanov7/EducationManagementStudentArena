@@ -22,6 +22,7 @@ from core.permissions import (  # noqa: F401
     has_permission,
 )
 
+from .permissions_account import merge_account_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 
@@ -456,6 +457,8 @@ PERMISSION_LABELS = {
 merge_stage2(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # Dizayn Mərhələ 3 (ekran 08/09) — `student.*` kateqoriyası eyni naxışla.
 merge_stage3(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Parol sıfırlama» (2026-09-30) — `account.password_reset` «users» kateqoriyasına.
+merge_account_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

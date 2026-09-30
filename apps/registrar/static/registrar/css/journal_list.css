@@ -190,8 +190,10 @@
 @media (max-width: 720px) {
     .jl-filters { padding: 12px; }
     .jl-f, .jl-f--grow, .jl-f--xs { flex: 1 1 100%; min-width: 0; }
-    .jl-seg { width: 100%; }
-    .jl-seg .jd2-kindpill { flex: 1; padding: 0 6px; }
+    /* RESP 2026-09-30: 320px-də 4 pill («Laboratoriya») sağ kənardan kəsilirdi —
+       sığmayanda ikinci sətrə keçir, hər sətir eni bərabər doldurur. */
+    .jl-seg { width: 100%; flex-wrap: wrap; }
+    .jl-seg .jd2-kindpill { flex: 1 1 auto; padding: 0 10px; }
     .jl-head-meta { margin-left: 0; }
     .jl-page .jd2-pagehead { flex-wrap: wrap; }
 }

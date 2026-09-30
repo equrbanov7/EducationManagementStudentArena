@@ -1,0 +1,14 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+{% block title %}{{ survey.title }} - {{ site_brand_name }}{% endblock %}
+{% block survey_content %}
+<section class="svy-block svy-block--empty">
+    <h1 class="svy-title">{{ survey.title }}</h1>
+    <p class="svy-empty">
+        {% if reason == "scheduled" %}{% blocktrans trimmed with day=survey.opens_on|date:"d.m.Y" context "surveys.respond" %}Bu sorğu {{ day }} tarixində açılacaq.{% endblocktrans %}
+        {% elif reason == "not_audience" %}{% trans "Bu sorğu sizə ünvanlanmayıb." context "surveys.respond" %}
+        {% else %}{% trans "Bu sorğu artıq cavab qəbul etmir." context "surveys.respond" %}{% endif %}
+    </p>
+    <a class="svy-btn svy-btn--ghost" href="{% url 'accounts:profile' %}?section=surveys-inbox">{% trans "Sorğulara qayıt" context "surveys.respond" %}</a>
+</section>
+{% endblock %}

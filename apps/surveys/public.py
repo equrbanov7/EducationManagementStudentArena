@@ -113,6 +113,17 @@ KABİNET (accounts) ÜÇÜN
 * ``can_view_results`` / ``can_manage_campaigns`` / ``PERM_RESULTS_VIEW`` / ``PERM_MANAGE``.
 
 ══════════════════════════════════════════════════════════════════════════════
+SORĞU QURUCUSU (2026-09-30) — ümumi sorğular + «Sorğular» inbox-u
+══════════════════════════════════════════════════════════════════════════════
+* ``INBOX_SECTION = "surveys-inbox"`` — hər təşkilat üzvünün «Sorğular» bölməsi (gözləyən /
+  tamamlanmış / bağlı sorğular + tələbənin semestr kampaniyası). Sidebar bəndi NAV-dadır:
+  ``?section=surveys-inbox``.
+* ``BUILDER_SECTION = "surveys-builder"`` — «Sorğu qurucusu» (``survey.manage``, org-wide).
+* ``inbox_badge_count(user, organization) -> int`` — doldurulmalı sorğu sayı (kampaniya bir bənd);
+  request-ömürlü keş (``user._survey_inbox_badge``), aktiv sorğu yoxdursa SIFIR sorğu.
+* ``inbox_section_visible(user, organization) -> bool`` — bölmə görünürlüyü (sıfır sorğu).
+
+══════════════════════════════════════════════════════════════════════════════
 F2 ƏLAVƏLƏRİ — «Sorğu nəticələri» UI-ı (``services/analytics_extra|options|text``)
 ══════════════════════════════════════════════════════════════════════════════
 Eyni k-qaydası + tamamlayıcı qayda; üstəlik bölgü cədvəllərində İKİNCİ DƏRƏCƏLİ
@@ -213,6 +224,20 @@ from .services.filters import ResultFilters
 from .services.participation import daily_timeline, participation
 from .services.pending import publish_due
 
+INBOX_SECTION = "surveys-inbox"
+BUILDER_SECTION = "surveys-builder"
+
+
+def inbox_badge_count(user, organization) -> int:
+    from .services.inbox import inbox_badge_count as _count
+
+    return _count(user, organization)
+
+
+def inbox_section_visible(user, organization) -> bool:
+    """«Sorğular» — təşkilat konteksti olan hər daxil olmuş istifadəçi (boş vəziyyət də məlumatdır)."""
+    return bool(organization is not None and user is not None and getattr(user, "is_authenticated", False))
+
 
 def cabinet_state(user):
     return getattr(user, "_survey_gate_state", None)
@@ -299,6 +324,10 @@ def question_catalog(campaign) -> list:
 
 
 __all__ = [
+    "BUILDER_SECTION",
+    "INBOX_SECTION",
+    "inbox_badge_count",
+    "inbox_section_visible",
     "PERM_MANAGE",
     "PERM_RESULTS_VIEW",
     "ResultFilters",

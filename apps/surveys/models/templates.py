@@ -48,6 +48,28 @@ class SurveyTemplate(UUIDModel, TimeStampedModel):
         return f"{self.name} v{self.version}"
 
 
+class SurveyPage(UUIDModel):
+    """Sorğu qurucusu (2026-09-30): ümumi sorğunun BÖLMƏSİ (başlıq + izah, sıra).
+
+    Müəllim qiymətləndirməsində bölmələr sabitdir (``SurveyQuestion.section`` — müəllim /
+    ümumi); səhifə yalnız ümumi sorğularda işlənir.
+    """
+
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="+")
+    template = models.ForeignKey("SurveyTemplate", on_delete=models.CASCADE, related_name="pages")
+    title = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = pgettext_lazy(_CTX, "sorğu bölməsi")
+        verbose_name_plural = pgettext_lazy(_CTX, "sorğu bölmələri")
+        ordering = ["order", "id"]
+
+    def __str__(self):
+        return f"{self.template_id}:page{self.order}"
+
+
 class SurveyQuestion(UUIDModel):
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="+")
     template = models.ForeignKey(SurveyTemplate, on_delete=models.CASCADE, related_name="questions")
@@ -61,6 +83,13 @@ class SurveyQuestion(UUIDModel):
     #: Likert indeksinə daxildir? (iş yükü / tövsiyə kimi nəticə göstəriciləri — yox).
     in_index = models.BooleanField(default=True)
     order = models.PositiveSmallIntegerField(default=0)
+    #: Sorğu qurucusu (2026-09-30): ümumi sorğunun bölməsi (müəllim qiymətləndirməsində boş).
+    page = models.ForeignKey(SurveyPage, null=True, blank=True, on_delete=models.SET_NULL, related_name="questions")
+    #: Növə görə parametrlər: ``choices`` [{"key", "label"}], ``labels`` (Likert 1–5),
+    #: ``anchors`` (NPS 0/10), ``min``/``max`` (çox seçim). Bax ``services/questions.py``.
+    options = models.JSONField(default=dict, blank=True)
+    #: Kilidli (cavablanmış) sualın mətn düzəlişləri — ``[{"at", "by", "text", "help", "choices"}]``.
+    history = models.JSONField(default=list, blank=True)
 
     class Meta:
         verbose_name = pgettext_lazy(_CTX, "sorğu sualı")

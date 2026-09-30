@@ -101,6 +101,25 @@ def _assert_email_available(email: str, target_user) -> None:
         )
 
 
+#: Nalayiq ifadə yoxlanan sahələr (sahib 2026-09-30).
+NAME_FIELDS = ("first_name", "last_name", "patronymic")
+
+
+def _screen_name_changes(actor: RimActor, target_user, changes: dict, *, request=None) -> None:
+    """Dəyişən ad sahələrində nalayiq ifadə → audit qeydi + ``RimAccessError`` (heç nə saxlanmır)."""
+    from core.moderation.enforcement import screen_names
+
+    rejection = screen_names(
+        request,
+        {f"accounts.rim.edit.{name}": changes[name]["new"] for name in NAME_FIELDS if name in changes},
+        organization=actor.organization,
+        target=target_user,
+        user=actor.user,
+    )
+    if rejection is not None:
+        raise RimAccessError("name_inappropriate", rejection.message, status=rejection.status)
+
+
 def update_user_fields(actor: RimActor, target_user, *, data, request=None, reason=""):
     """Hədəfin şəxsi məlumatlarını yeniləyir.
 
@@ -146,6 +165,8 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
 
     if not changes:
         return {}
+
+    _screen_name_changes(actor, target_user, changes, request=request)
 
     with transaction.atomic():
         user_updates = [name for name in USER_FIELDS if name in changes]

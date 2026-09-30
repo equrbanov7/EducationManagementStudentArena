@@ -146,6 +146,16 @@
     display: grid;
     gap: 6px;
     align-items: start;
+    /* RESP 2026-09-30: apellyasiya nişanı («100,0% · 2,00 / 2», nowrap) 320px-də
+       kartın sağ kənarından çıxırdı — nişan sarar, yığın konteynerə bağlıdır. */
+    min-width: 0;
+    max-width: 100%;
+}
+
+.result-value-stack .badge {
+    max-width: 100%;
+    white-space: normal;
+    text-align: start;
 }
 
 /* --- AYIRICI XƏTT --- */
@@ -531,12 +541,25 @@
     .exam-summary-card {
         grid-template-columns: 1fr;
     }
-    .question-header {
-        flex-direction: column;
+    /* RESP 2026-09-30: flex `h5`-in içində (`.question-header` yox) sual mətni
+       hər sözdən sonra sınırdı, «Apellyasiya…» nişanı kartın sağından kəsilirdi.
+       Mobildə: nömrə + mətn birinci sətirdə, bal/apellyasiya nişanları altda. */
+    .question-header h5 {
+        flex-wrap: wrap;
+    }
+    .question-header .q-text {
+        flex: 1 1 calc(100% - 38px);
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
     .q-points {
-        margin-top: 10px;
+        margin-left: 38px;
         align-self: flex-start;
+    }
+    .question-header .q-corrected {
+        align-self: flex-start;
+        max-width: 100%;
+        white-space: normal;
     }
     .attempt-search-group {
         display: grid !important;

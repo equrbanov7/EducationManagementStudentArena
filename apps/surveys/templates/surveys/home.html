@@ -1,14 +1,67 @@
 {% extends "surveys/base_survey.html" %}
-{% load i18n %}
+{% load i18n static %}
 {% comment %}Tələbənin sorğu siyahısı: müəllim kartları + ümumi bölmə + irəliləyiş.
 `<progress>` elementi — inline `style` olmadan dinamik zolaq (CSP).{% endcomment %}
 
+{% block extraCss %}{{ block.super }}
+<link rel="stylesheet" href="{% static 'surveys/css/respond.css' %}?v=20260930-qa">
+{% endblock %}
+
 {% block survey_content %}
+{% if survey_items %}
+{# Sorğu qurucusu (2026-09-30): ümumi sorğular — məcburilər birinci; qapı siyasətinə görə «keç» / «sonra». #}
+<header class="svy-hero">
+    <p class="svy-kicker"><i class="fas fa-clipboard-list" aria-hidden="true"></i> {% trans "Sorğular" context "surveys.student" %}</p>
+    <h1 class="svy-title">{% trans "Sizi gözləyən sorğular" context "surveys.student" %}</h1>
+    <p class="svy-lead">{% trans "Məcburi sorğu doldurulmayınca kabinet bağlı qala bilər. İmtahan səhifələri heç vaxt bağlanmır." context "surveys.student" %}</p>
+</header>
+<ul class="svy-targets">
+    {% for item in survey_items %}
+    <li class="svy-target svr-item{% if item.survey.mandatory %} svr-item--mandatory{% endif %}">
+        <div class="svy-target__body">
+            <p class="svy-target__teacher">{{ item.survey.title }}</p>
+            <p class="svy-target__meta">
+                {% if item.survey.mandatory %}{% trans "Məcburi" context "surveys.student" %}{% else %}{% trans "Könüllü" context "surveys.student" %}{% endif %}
+                {% if item.survey.anonymous %} · {% trans "Anonim" context "surveys.student" %}{% endif %}
+                {% if item.survey.closes_on %} · {% blocktrans trimmed with day=item.survey.closes_on|date:"d.m.Y" context "surveys.student" %}Son tarix: {{ day }}{% endblocktrans %}{% endif %}
+            </p>
+            {% if item.survey.mandatory and item.survey.gate_policy == "skip_once" %}
+            <p class="svy-defer__hint">{% if item.skipped %}{% trans "Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu doldurun." context "surveys.student" %}{% else %}{% trans "Bu dəfə keçə bilərsiniz, amma növbəti dəfə sorğunu doldurmadan kabinetə daxil ola bilməyəcəksiniz." context "surveys.student" %}{% endif %}</p>
+            {% elif item.survey.mandatory and item.survey.gate_policy == "block" %}
+            <p class="svy-defer__hint">{% trans "Doldurulmayınca kabinet bağlı qalır." context "surveys.student" %}</p>
+            {% endif %}
+        </div>
+        <div class="svr-item__actions">
+            <a class="svy-btn svy-btn--primary svy-btn--sm" href="{{ item.url }}">{% trans "Doldur" context "surveys.student" %}</a>
+            {% if item.can_skip %}
+            <form method="post" action="{% url 'surveys:skip' item.survey.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="svy-btn svy-btn--ghost svy-btn--sm">{% trans "Bu dəfə keç" context "surveys.student" %}</button>
+            </form>
+            {% elif item.can_defer %}
+            <form method="post" action="{% url 'surveys:survey_defer' item.survey.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="svy-btn svy-btn--ghost svy-btn--sm">{% trans "Sonra doldur" context "surveys.student" %}</button>
+            </form>
+            {% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if blocks %}
 <header class="svy-hero">
     <p class="svy-kicker"><i class="fas fa-clipboard-question" aria-hidden="true"></i> {% trans "Semestr sonu sorğusu" context "surveys.student" %}</p>
     <h1 class="svy-title">{% trans "Müəllimlərinizi anonim qiymətləndirin" context "surveys.student" %}</h1>
     <p class="svy-lead">{% trans "Hər müəllim üçün qısa bir forma — təxminən 2 dəqiqə. Sonda universitetdə nəyi yaxşılaşdırmaq olar sualı var." context "surveys.student" %}</p>
 </header>
+{% elif not survey_items %}
+<header class="svy-hero">
+    <p class="svy-kicker"><i class="fas fa-clipboard-list" aria-hidden="true"></i> {% trans "Sorğular" context "surveys.student" %}</p>
+    <h1 class="svy-title">{% trans "Sizi gözləyən sorğular" context "surveys.student" %}</h1>
+</header>
+{% endif %}
 
 {% for block in blocks %}
 <section class="svy-block" aria-labelledby="svy-block-{{ forloop.counter }}">
@@ -87,11 +140,13 @@
     </div>
 </section>
 {% empty %}
+{% if not survey_items %}
 <section class="svy-block svy-block--empty">
     <p class="svy-empty">{% trans "Hazırda sizin üçün açıq sorğu yoxdur." context "surveys.student" %}</p>
     <a class="svy-btn svy-btn--ghost" href="{% url 'accounts:profile' %}">{% trans "Kabinetə keç" context "surveys.student" %}</a>
 </section>
+{% endif %}
 {% endfor %}
 
-{% include "surveys/_anonymity.html" %}
+{% if blocks %}{% include "surveys/_anonymity.html" %}{% endif %}
 {% endblock %}

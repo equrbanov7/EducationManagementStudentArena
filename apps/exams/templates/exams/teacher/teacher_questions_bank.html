@@ -50,5 +50,7 @@
 </script>
 <script src="{% static 'exams/js/teacher_questions_bank/i18n_bootstrap.js' %}"></script>
 <script src="{% static 'exams/js/question_form.js' %}?v=20260914-1"></script>
-<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20260607-unified-question-modal"></script>
+{# QB 2026-09-30: «son aktiv suallar» → EMSConfirm «imtahan deaktiv edilsin?» axını. #}
+<script src="{% static 'exams/js/teacher_questions_bank/guarded_submit.js' %}?v=20260930-qb"></script>
+<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20260930-qb"></script>
 {% endblock %}

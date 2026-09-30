@@ -359,3 +359,20 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
+
+/* Sorğu qurucusu (2026-09-30): kampaniya kartında sual dəsti / qurucu linki. */
+.svc-link {
+    color: var(--ems-primary-700);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.svc-link:hover {
+    text-decoration: underline;
+}
+
+.svc-link:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
+}

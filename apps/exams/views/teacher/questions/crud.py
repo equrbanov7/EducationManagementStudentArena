@@ -2,10 +2,8 @@
 
 import logging
 
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -16,15 +14,16 @@ from apps.exams.models import ExamQuestion
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.services.language_variants import ensure_default_variant
+from apps.exams.services.question_invariants import MODE_DELETE
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
+from ._mutations import finish_mutation_request, run_question_mutation
 from ._shared import (
     _append_navigation_query,
     _is_question_modal_request,
     _question_form_blocks,
     _question_post_data_with_default_block,
     _render_question_form_html,
-    _resequence_exam_questions,
     _resolve_question_bank_navigation,
 )
 
@@ -303,22 +302,21 @@ def delete_exam_question(request, slug, question_id):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     if request.method == "POST":
-        from apps.exams.services.question_invariants import (
-            active_exam_question_invariant_message,
-            delete_exam_questions,
+        detail_url = _append_navigation_query(
+            reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
+            navigation_query,
         )
-
-        try:
-            delete_exam_questions(exam, [question.pk])
-            _resequence_exam_questions(exam)
-        except (ValidationError, IntegrityError):
-            messages.error(request, active_exam_question_invariant_message())
-            return redirect(
-                _append_navigation_query(
-                    reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
-                    navigation_query,
-                )
-            )
+        # QB 2026-09-30: son aktiv sual → təsdiq (imtahan deaktiv edilsin?) və ya
+        # «imtahan istifadədədir» imtinası; bax _mutations.run_question_mutation.
+        stop_response = run_question_mutation(
+            request,
+            exam,
+            mode=MODE_DELETE,
+            question_ids=[question.pk],
+            redirect_url=detail_url,
+        )
+        if stop_response is not None:
+            return stop_response
         # Invalidate the cached question ID list for this exam.
         try:
             from core.cache import invalidate_exam_question_ids_cache
@@ -332,12 +330,7 @@ def delete_exam_question(request, slug, question_id):
                 exam.pk,
                 exc_info=True,
             )
-        return redirect(
-            _append_navigation_query(
-                reverse("exams:teacher_exam_detail", kwargs={"slug": exam.slug}),
-                navigation_query,
-            )
-        )
+        return finish_mutation_request(request, detail_url)
 
     # JS-siz geri düşmə (bax exams/teacher/confirm_delete.html şərhinə).
     detail_url = _append_navigation_query(

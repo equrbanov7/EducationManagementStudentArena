@@ -262,10 +262,20 @@ def apply_permission_section_gates(
     # yalnız öz kafedrasını görür), kampaniyalar `survey.manage`. Tələbə bölməsi
     # icazəyə yox, qapı middleware-inin bu sorğuda hesabladığı vəziyyətə bağlıdır
     # (açıq kampaniyada hədəfi olan tələbə) — sıfır sorğu; view-as altında yoxdur.
-    from apps.surveys.public import student_section_visible
+    from apps.surveys.public import inbox_section_visible, student_section_visible
 
     can_view_survey_results = privileged or has_permission(permissions, "survey.results.view")
     can_manage_surveys = privileged or has_permission(permissions, "survey.manage")
+
+    # «Parol sıfırlama» (sahib 2026-09-30) — `account.password_reset`. NAV menyusu ilə
+    # EYNİ qapı: YALNIZ superadmin və ya üzvlük icazəsində açar (RİM rəhbərinin
+    # «privileged» görünürlüyü burada QƏSDƏN işlədilmir — açar miqrasiya 0055 və
+    # `*` şablonu ilə onsuz da ondadır). Faktiki qapı endpoint-dədir
+    # (`services/password_reset_admin.py`: view-as, tenant, iyerarxiya, rate-limit).
+    can_reset_passwords = bool(is_superadmin) or (
+        organization is not None
+        and has_permission(permissions or _effective_permissions(user, organization), "account.password_reset")
+    )
 
     for enabled, section in (
         (can_view_audit, "audit-log"),
@@ -305,7 +315,11 @@ def apply_permission_section_gates(
         (can_supervise_lessons, "lessons-log"),
         (can_view_survey_results, "evaluation-results"),
         (can_manage_surveys, "evaluation-campaigns"),
+        (can_reset_passwords, "account-password-reset"),
         (student_section_visible(user), "evaluation-survey"),
+        # Sorğu qurucusu (2026-09-30): «Sorğular» — hər üzv; «Sorğu qurucusu» — `survey.manage`.
+        (inbox_section_visible(user, organization), "surveys-inbox"),
+        (can_manage_surveys, "surveys-builder"),
     ):
         if enabled:
             allowed_sections.add(section)
@@ -345,6 +359,7 @@ def apply_permission_section_gates(
         "can_supervise_lessons": can_supervise_lessons,
         "can_view_survey_results": can_view_survey_results,
         "can_manage_surveys": can_manage_surveys,
+        "can_reset_passwords": can_reset_passwords,
     }
 
 

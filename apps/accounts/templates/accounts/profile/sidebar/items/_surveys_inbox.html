@@ -1,0 +1,24 @@
+{% load i18n profile_shell %}
+{% comment %}«Sorğular» — istifadəçinin DOLDURMALI olduğu sorğular (SRV sorğu platforması,
+2026-09-30): tələbə, müəllim və heyət. Bölmə açarı `surveys-inbox`; bənd yalnız açar
+`allowed_sections`-da olanda görünür (rbac + kabinet modul açarı orada tətbiq olunur).
+
+Badge — gözləyən sorğu sayı: `profile_surveys_inbox_count` SRV-nin
+`apps.surveys.public.inbox_badge_count(user, organization)` funksiyasını MÜDAFİƏLİ çağırır
+(funksiya yoxdursa badge boş qalır) və nəticəni sorğu (request) üzrə yadda saxlayır — kabinet
+renderində ən çoxu BİR çağırış. Boş badge CSS-lə gizlidir (`.sidebar-menu-badge:empty`);
+sayğac borusu (`section_loader.refreshBadges`) açarı `surveys_inbox`-dur.{% endcomment %}
+{% if "surveys-inbox" in allowed_sections %}
+{% profile_surveys_inbox_count as surveys_inbox_count %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=surveys-inbox"
+       data-section="surveys-inbox"
+       data-title="{% trans 'Sorğular' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'surveys-inbox' %}active{% endif %}">
+        <i class="fas fa-square-poll-vertical sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Sorğular" context "profile.sidebar" %}</span>
+        <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="surveys_inbox">{% if surveys_inbox_count %}{{ surveys_inbox_count }}{% endif %}</span>
+    </a>
+</li>
+{% endif %}

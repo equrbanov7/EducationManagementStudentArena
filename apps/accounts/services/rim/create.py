@@ -124,6 +124,28 @@ def _audit_reason(kind: str, note: str) -> str:
     return "RİM: yeni hesab yaradıldı (%s). Qeyd: %s" % (kind, str(note or "-")[:MAX_NOTE_LENGTH])
 
 
+def _screen_draft_names(request, draft, organization, user=None) -> None:
+    """Sahib 2026-09-30: ad / soyad / ata adında nalayiq ifadə → audit qeydi + sahə xətası."""
+    from core.moderation.enforcement import screen_names
+
+    rejection = screen_names(
+        request,
+        {
+            f"accounts.rim.create.{name}": draft.values.get(name, "")
+            for name in ("first_name", "last_name", "patronymic")
+        },
+        organization=organization,
+        user=user,
+    )
+    if rejection is not None:
+        raise field_error(
+            rejection.message,
+            {rejection.field_name: rejection.message},
+            code="name_inappropriate",
+            status=rejection.status,
+        )
+
+
 def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note: str = "") -> dict:
     """Bir hesab yaradır və birdəfəlik parolu **bir dəfə** qaytarır.
 
@@ -152,6 +174,7 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
     draft = build_draft(organization, kind, data)
     if not draft.ok:
         raise field_error(pgettext(_CTX, "Formda düzəliş tələb olunan sahələr var."), draft.errors)
+    _screen_draft_names(request, draft, organization, user=actor.user)
 
     try:
         role = intake_create.account_role(organization, kind)

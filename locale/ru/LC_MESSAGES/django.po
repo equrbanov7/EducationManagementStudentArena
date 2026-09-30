@@ -85178,3 +85178,1984 @@ msgstr "Экспорт в CSV"
 msgctxt "liveExam.template.session_detail"
 msgid "typed_answers_heading"
 msgstr "Письменные ответы"
+
+msgctxt "organizations.permission.label"
+msgid ""
+"Parolu sıfırlamaq (müvəqqəti parol vermək, ilk girişdə dəyişmək məcburi)"
+msgstr ""
+"Сбрасывать пароли (выдавать временный пароль, смена при первом входе "
+"обязательна)"
+
+msgctxt "profile.sidebar"
+msgid "Parol sıfırlama"
+msgstr "Сброс пароля"
+
+msgctxt "accounts.password_reset"
+msgid "Parol sıfırlamaq üçün icazəniz yoxdur."
+msgstr "У вас нет права сбрасывать пароли."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Başqasının adından baxış rejimində parol sıfırlamaq olmaz. Əvvəlcə baxış "
+"rejimindən çıxın."
+msgstr ""
+"Нельзя сбрасывать пароли в режиме просмотра от имени другого пользователя. "
+"Сначала выйдите из этого режима."
+
+msgctxt "accounts.password_reset"
+msgid "Təşkilatınız hələ təsdiqlənməyib — parol sıfırlamaq olmaz."
+msgstr "Ваша организация ещё не одобрена — сбрасывать пароли нельзя."
+
+msgctxt "accounts.password_reset"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Активная организация не выбрана."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi seçilməyib."
+msgstr "Пользователь не выбран."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi tapılmadı."
+msgstr "Пользователь не найден."
+
+msgctxt "accounts.password_reset"
+msgid "Superadmin hesabının parolu bu bölmədən sıfırlana bilməz."
+msgstr "Пароль учётной записи суперадминистратора нельзя сбросить здесь."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Öz parolunuzu bu bölmədən sıfırlaya bilməzsiniz — «Parolu dəyiş» bölməsindən"
+" istifadə edin."
+msgstr ""
+"Нельзя сбросить собственный пароль здесь — воспользуйтесь разделом «Сменить "
+"пароль»."
+
+msgctxt "accounts.password_reset"
+msgid "Təşkilat sahibinin parolunu yalnız superadmin sıfırlaya bilər."
+msgstr ""
+"Пароль владельца организации может сбросить только суперадминистратор."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Özünüzlə eyni və ya daha yüksək səlahiyyətli istifadəçinin parolunu "
+"sıfırlaya bilməzsiniz."
+msgstr ""
+"Нельзя сбросить пароль пользователя с таким же или более высоким уровнем "
+"полномочий."
+
+msgctxt "accounts.password_reset"
+msgid "Hesab silinib — əvvəlcə RİM mərkəzindən bərpa olunmalıdır."
+msgstr "Учётная запись удалена — сначала восстановите её в центре RİM."
+
+msgctxt "accounts.password_reset"
+msgid "Hesab bloklanıb — əvvəlcə RİM mərkəzindən blokdan çıxarılmalıdır."
+msgstr "Учётная запись заблокирована — сначала разблокируйте её в центре RİM."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Bu hesabla sistemə giriş bağlıdır (məzun/xaric arxivi və ya tamamlanmamış "
+"idxal)."
+msgstr ""
+"Вход для этой учётной записи закрыт (архив выпускников/отчисленных или "
+"незавершённый импорт)."
+
+msgctxt "accounts.password_reset"
+msgid "Çox sayda sorğu göndərildi. Bir az sonra yenidən cəhd edin."
+msgstr "Слишком много запросов. Повторите попытку немного позже."
+
+msgctxt "accounts.password_reset"
+msgid "Ən azı 2 simvol daxil edin."
+msgstr "Введите не менее 2 символов."
+
+msgctxt "accounts.password_reset"
+msgid "Parol yaradıla bilmədi. Yenidən cəhd edin."
+msgstr "Не удалось сгенерировать пароль. Повторите попытку."
+
+msgctxt "accounts.password_reset"
+msgid "Aktiv"
+msgstr "Активна"
+
+msgctxt "accounts.password_reset"
+msgid "Bloklanıb"
+msgstr "Заблокирована"
+
+msgctxt "accounts.password_reset"
+msgid "Silinib"
+msgstr "Удалена"
+
+msgctxt "accounts.password_reset"
+msgid "Giriş bağlıdır"
+msgstr "Вход закрыт"
+
+msgctxt "accounts.password_reset"
+msgid "Heç vaxt daxil olmayıb"
+msgstr "Ни разу не входил(а)"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə öz parolunu qurmağa məcbur"
+" olacaq."
+msgstr ""
+"Временный пароль создан. При первом входе пользователь будет обязан задать "
+"собственный пароль."
+
+msgctxt "accounts.password_reset"
+msgid "Axtarılır…"
+msgstr "Поиск…"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Heç kim tapılmadı. İstifadəçi adını yoxlayın və ya ad və soyadla axtarın."
+msgstr ""
+"Никто не найден. Проверьте имя пользователя или ищите по имени и фамилии."
+
+msgctxt "accounts.password_reset"
+msgid "Nəticə çoxdur — yalnız ilk 8-i göstərilir. Sorğunu dəqiqləşdirin."
+msgstr ""
+"Слишком много результатов — показаны только первые 8. Уточните запрос."
+
+msgctxt "accounts.password_reset"
+msgid "Şəxsiyyəti sənədlə yoxlayın və yalnız sonra parolu sıfırlayın."
+msgstr "Проверьте личность по документу и только затем сбрасывайте пароль."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.password_reset"
+msgid "Rol"
+msgstr "Роль"
+
+msgctxt "accounts.password_reset"
+msgid "Qrup / bölmə"
+msgstr "Группа / подразделение"
+
+msgctxt "accounts.password_reset"
+msgid "Son giriş"
+msgstr "Последний вход"
+
+msgctxt "accounts.password_reset"
+msgid "Əvvəlki müvəqqəti parol hələ dəyişdirilməyib"
+msgstr "Предыдущий временный пароль ещё не изменён"
+
+msgctxt "accounts.password_reset"
+msgid "Parolu sıfırla"
+msgstr "Сбросить пароль"
+
+msgctxt "accounts.password_reset"
+msgid "Sıfırlanır…"
+msgstr "Сброс…"
+
+msgctxt "accounts.password_reset"
+msgid "Parol sıfırlansın?"
+msgstr "Сбросить пароль?"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq.\n"
+"Köhnə parol dərhal etibarsız olacaq, istifadəçinin bütün açıq sessiyaları bağlanacaq.\n"
+"İstifadəçinin şəxsiyyətini yoxladınız?"
+msgstr ""
+"Для {name} ({username}) будет создан новый временный пароль.\n"
+"Старый пароль сразу перестанет действовать, все открытые сеансы пользователя будут закрыты.\n"
+"Вы проверили личность пользователя?"
+
+msgctxt "accounts.password_reset"
+msgid "Bəli, sıfırla"
+msgstr "Да, сбросить"
+
+msgctxt "accounts.password_reset"
+msgid "{name} ({username}) üçün müvəqqəti parol:"
+msgstr "Временный пароль для {name} ({username}):"
+
+msgctxt "accounts.password_reset"
+msgid "Parol kopyalandı."
+msgstr "Пароль скопирован."
+
+msgctxt "accounts.password_reset"
+msgid "Kopyalamaq alınmadı — parolu əl ilə yazın."
+msgstr "Не удалось скопировать — перепишите пароль вручную."
+
+msgctxt "accounts.password_reset"
+msgid "Xəta baş verdi. Yenidən cəhd edin."
+msgstr "Произошла ошибка. Повторите попытку."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Parolunu unudan istifadəçiyə müvəqqəti parol verin. İstifadəçi ilk girişdə "
+"öz parolunu qurmağa məcbur olacaq. Hər sıfırlama audit jurnalına yazılır."
+msgstr ""
+"Выдайте пользователю, забывшему пароль, временный пароль. При первом входе "
+"он будет обязан задать собственный пароль. Каждый сброс записывается в "
+"журнал аудита."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçini tapın"
+msgstr "Найдите пользователя"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"İstifadəçi adını dəqiq yazın (məs. ad.soyad) və ya ad və soyadla axtarın."
+msgstr ""
+"Введите точное имя пользователя (напр. имя.фамилия) или ищите по имени и "
+"фамилии."
+
+msgctxt "accounts.password_reset"
+msgid "Axtarış yalnız «%(org)s» daxilindədir."
+msgstr "Поиск ведётся только в «%(org)s»."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi adı və ya ad, soyad"
+msgstr "Имя пользователя или имя и фамилия"
+
+msgctxt "accounts.password_reset"
+msgid "məs. aysel.quliyeva və ya Quliyeva Aysel"
+msgstr "напр. aysel.quliyeva или Quliyeva Aysel"
+
+msgctxt "accounts.password_reset"
+msgid "Axtar"
+msgstr "Найти"
+
+msgctxt "accounts.password_reset"
+msgid "Müvəqqəti parol"
+msgstr "Временный пароль"
+
+msgctxt "accounts.password_reset"
+msgid "Kopyala"
+msgstr "Копировать"
+
+msgctxt "accounts.password_reset"
+msgid "Bu parol bir daha göstərilməyəcək"
+msgstr "Этот пароль больше не будет показан"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Parolu istifadəçiyə indi verin. İlk girişdə istifadəçi email ünvanını "
+"təsdiqləyib öz parolunu quracaq — o vaxta qədər sistemin heç bir bölməsi "
+"açılmayacaq."
+msgstr ""
+"Передайте пароль пользователю сейчас. При первом входе он подтвердит адрес "
+"электронной почты и задаст собственный пароль — до этого ни один раздел "
+"системы не откроется."
+
+msgctxt "accounts.password_reset"
+msgid "Verdim — parolu gizlət"
+msgstr "Передал(а) — скрыть пароль"
+
+msgctxt "moderation.profanity"
+msgid ""
+"Bu ad qəbul edilmir: tərkibində nalayiq ifadə var. Zəhmət olmasa başqa ad "
+"yazın."
+msgstr ""
+"Это имя нельзя использовать: оно содержит недопустимые выражения. "
+"Пожалуйста, выберите другое."
+
+msgctxt "moderation.profanity"
+msgid ""
+"Çox sayda nalayiq ad cəhdi edildi. Bir neçə dəqiqədən sonra yenidən cəhd "
+"edin."
+msgstr ""
+"Слишком много попыток с недопустимыми именами. Повторите попытку через "
+"несколько минут."
+
+msgctxt "audit.section"
+msgid "Nalayiq ad cəhdləri"
+msgstr "Попытки недопустимых имён"
+
+msgctxt "audit.section"
+msgid "Moderasiya › nalayiq ad"
+msgstr "Модерация › недопустимое имя"
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"Seçilmiş suallar bu dərc olunmuş (aktiv) imtahanın son aktiv suallarıdır. "
+"Onları silmək və ya deaktiv etmək üçün imtahan da deaktiv edilməlidir."
+msgstr ""
+"Выбранные вопросы — последние активные вопросы этого опубликованного "
+"(активного) экзамена. Чтобы удалить или деактивировать их, экзамен тоже "
+"нужно деактивировать."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"İmtahanı hazırda {count} tələbə yazır (başlanmış, bitməmiş cəhd). Onlar "
+"bitirənə qədər imtahan deaktiv edilə və bütün aktiv sualları silinə bilməz."
+msgstr ""
+"Сейчас этот экзамен сдают студенты: {count} (начатые, незавершённые "
+"попытки). Пока они не закончат, экзамен нельзя деактивировать и нельзя "
+"удалить все его активные вопросы."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"Bu imtahan üzrə canlı sessiya hələ bitməyib (PIN: {pin}). Əvvəl canlı "
+"sessiyanı bitirin, sonra sualları silin."
+msgstr ""
+"Живая сессия этого экзамена ещё не завершена (PIN: {pin}). Сначала завершите"
+" живую сессию, затем удалите вопросы."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"Bu imtahan üzrə final zal oturumu davam edir ({count} tələbə zalda). Oturum "
+"bitənə qədər imtahan deaktiv edilə bilməz."
+msgstr ""
+"По этому экзамену идёт сессия в экзаменационном зале (студентов в зале: "
+"{count}). Экзамен нельзя деактивировать, пока сессия не завершится."
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"Bu imtahanın bütün aktiv sualları silinəcək — imtahan deaktiv ediləcək. "
+"Davam edilsin?"
+msgstr ""
+"Все активные вопросы этого экзамена будут удалены — экзамен будет "
+"деактивирован. Продолжить?"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"Bu imtahanın bütün aktiv sualları deaktiv ediləcək — imtahan da deaktiv "
+"ediləcək. Davam edilsin?"
+msgstr ""
+"Все активные вопросы этого экзамена будут деактивированы — экзамен тоже "
+"будет деактивирован. Продолжить?"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "İmtahan deaktiv ediləcək"
+msgstr "Экзамен будет деактивирован"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "Bəli, davam et"
+msgstr "Да, продолжить"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Операция не выполнена. Обновите страницу и повторите попытку."
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"İmtahan deaktiv edildi (dərcdən çıxarıldı). Yeni suallar əlavə edib yenidən "
+"dərc edə bilərsiniz."
+msgstr ""
+"Экзамен деактивирован (снят с публикации). Вы можете добавить новые вопросы "
+"и снова опубликовать его."
+
+msgctxt "profile.sidebar"
+msgid "Sorğular"
+msgstr "Опросы"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu qurucusu"
+msgstr "Конструктор опросов"
+
+msgctxt "surveys.choice"
+msgid "Tək seçim"
+msgstr "Один вариант"
+
+msgctxt "surveys.choice"
+msgid "Çox seçim"
+msgstr "Несколько вариантов"
+
+msgctxt "surveys.choice"
+msgid "Reytinq / NPS (0–10)"
+msgstr "Оценка / NPS (0–10)"
+
+msgctxt "surveys.choice"
+msgid "Bəli / Xeyr"
+msgstr "Да / Нет"
+
+msgctxt "surveys.choice"
+msgid "Qısa mətn"
+msgstr "Короткий текст"
+
+msgctxt "surveys.choice"
+msgid "Müəllim qiymətləndirməsi"
+msgstr "Оценка преподавателя"
+
+msgctxt "surveys.choice"
+msgid "Ümumi sorğu"
+msgstr "Общий опрос"
+
+msgctxt "surveys.choice"
+msgid "Fənn / kurs rəyi"
+msgstr "Отзыв о предмете / курсе"
+
+msgctxt "surveys.choice"
+msgid "Tədbir / digər"
+msgstr "Мероприятие / другое"
+
+msgctxt "surveys.choice"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "surveys.choice"
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+msgctxt "surveys.choice"
+msgid "İnzibati heyət"
+msgstr "Административный персонал"
+
+msgctxt "surveys.choice"
+msgid "Hamı"
+msgstr "Все"
+
+msgctxt "surveys.choice"
+msgid "Doldurulmayınca kabinet bağlıdır"
+msgstr "Кабинет закрыт до заполнения"
+
+msgctxt "surveys.choice"
+msgid "Bir dəfə keçmək olar"
+msgstr "Можно пропустить один раз"
+
+msgctxt "surveys.choice"
+msgid "«Sonra doldur» möhləti (gün)"
+msgstr "Отсрочка «Заполнить позже» (дни)"
+
+msgctxt "surveys.choice"
+msgid "Dərc olunub"
+msgstr "Опубликован"
+
+msgctxt "surveys.choice"
+msgid "Arxivdə"
+msgstr "В архиве"
+
+msgctxt "surveys.model"
+msgid "sorğu"
+msgstr "опрос"
+
+msgctxt "surveys.model"
+msgid "sorğular"
+msgstr "опросы"
+
+msgctxt "surveys.model"
+msgid "sorğu bölməsi"
+msgstr "раздел опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu bölmələri"
+msgstr "разделы опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu iştirakı"
+msgstr "участие в опросе"
+
+msgctxt "surveys.model"
+msgid "sorğu iştirakları"
+msgstr "участия в опросах"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabı (forma)"
+msgstr "ответ на опрос (форма)"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabları (forma)"
+msgstr "ответы на опрос (формы)"
+
+msgctxt "surveys.model"
+msgid "sual cavabı"
+msgstr "ответ на вопрос"
+
+msgctxt "surveys.model"
+msgid "sual cavabları"
+msgstr "ответы на вопросы"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən sorğu cavabı"
+msgstr "ответ на опрос, ожидающий публикации"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən sorğu cavabları"
+msgstr "ответы на опрос, ожидающие публикации"
+
+msgctxt "surveys.model"
+msgid "sorğu qaralaması"
+msgstr "черновик опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu qaralamaları"
+msgstr "черновики опросов"
+
+msgctxt "surveys.model"
+msgid "sorğu keçidi"
+msgstr "пропуск опроса"
+
+msgctxt "surveys.model"
+msgid "sorğu keçidləri"
+msgstr "пропуски опросов"
+
+msgctxt "surveys.form"
+msgid "Seçim etibarsızdır — səhifəni yeniləyin."
+msgstr "Недопустимый вариант — обновите страницу."
+
+msgctxt "surveys.form"
+msgid "Ən azı %(n)s seçim edin."
+msgstr "Выберите не менее %(n)s."
+
+msgctxt "surveys.form"
+msgid "Ən çoxu %(n)s seçim edə bilərsiniz."
+msgstr "Можно выбрать не более %(n)s."
+
+msgctxt "surveys.notify"
+msgid "Yeni sorğu: %(title)s"
+msgstr "Новый опрос: %(title)s"
+
+msgctxt "surveys.notify"
+msgid ""
+"Məcburi sorğu — son tarix %(day)s. Kabinetdə «Sorğular» bölməsinə keçin."
+msgstr ""
+"Обязательный опрос — срок до %(day)s. Откройте раздел «Опросы» в кабинете."
+
+msgctxt "surveys.notify"
+msgid "Könüllü sorğu — son tarix %(day)s. Fikriniz bizim üçün vacibdir."
+msgstr "Добровольный опрос — срок до %(day)s. Ваше мнение важно для нас."
+
+msgctxt "surveys.cabinet"
+msgid "Sorğu qurucusu"
+msgstr "Конструктор опросов"
+
+msgctxt "surveys.cabinet"
+msgid "Sual dəsti"
+msgstr "Набор вопросов"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Sualları yazmaq, yeni sual dəsti yaratmaq və ya başqa auditoriya (müəllim, "
+"heyət, hamı) üçün sorğu açmaq —"
+msgstr ""
+"Чтобы написать вопросы, создать новый набор вопросов или открыть опрос для "
+"другой аудитории (преподаватели, персонал, все) —"
+
+msgctxt "surveys.student"
+msgid "Sorğular"
+msgstr "Опросы"
+
+msgctxt "surveys.student"
+msgid "Sizi gözləyən sorğular"
+msgstr "Опросы, ожидающие вас"
+
+msgctxt "surveys.student"
+msgid ""
+"Məcburi sorğu doldurulmayınca kabinet bağlı qala bilər. İmtahan səhifələri "
+"heç vaxt bağlanmır."
+msgstr ""
+"Пока обязательный опрос не заполнен, кабинет может оставаться закрытым. "
+"Страницы экзаменов никогда не блокируются."
+
+msgctxt "surveys.student"
+msgid "Məcburi"
+msgstr "Обязательный"
+
+msgctxt "surveys.student"
+msgid "Könüllü"
+msgstr "Добровольный"
+
+msgctxt "surveys.student"
+msgid "Anonim"
+msgstr "Анонимный"
+
+msgctxt "surveys.student"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+msgstr ""
+"Вы уже один раз пропустили этот опрос — заполните его, чтобы войти в "
+"кабинет."
+
+msgctxt "surveys.student"
+msgid ""
+"Bu dəfə keçə bilərsiniz, amma növbəti dəfə sorğunu doldurmadan kabinetə "
+"daxil ola bilməyəcəksiniz."
+msgstr ""
+"Сейчас можно пропустить, но в следующий раз вы не сможете войти в кабинет, "
+"не заполнив опрос."
+
+msgctxt "surveys.student"
+msgid "Doldurulmayınca kabinet bağlı qalır."
+msgstr "Кабинет остаётся закрытым до заполнения."
+
+msgctxt "surveys.student"
+msgid "Bu dəfə keç"
+msgstr "Пропустить в этот раз"
+
+msgctxt "surveys.inbox"
+msgid ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu"
+" yalnız istifadəçinin özü doldura bilər."
+msgstr ""
+"В режиме просмотра (профиль другого пользователя) опросы не показываются — "
+"заполнить их может только сам пользователь."
+
+msgctxt "surveys.inbox"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Контекст организации не найден."
+
+msgctxt "surveys.inbox"
+msgid ""
+"Universitetin sizə ünvanladığı sorğular. Məcburi sorğular doldurulmayınca "
+"kabinet bağlana bilər; anonim sorğularda cavabınız adınızla saxlanılmır."
+msgstr ""
+"Опросы, адресованные вам университетом. Обязательные опросы могут закрыть "
+"кабинет до заполнения; в анонимных опросах ваш ответ не хранится с вашим "
+"именем."
+
+msgctxt "surveys.inbox"
+msgid "Gözləyir: %(n)s"
+msgstr "Ожидают: %(n)s"
+
+msgctxt "surveys.inbox"
+msgid "Gözləyən"
+msgstr "Ожидают"
+
+msgctxt "surveys.inbox"
+msgid "Müəllimlərin anonim qiymətləndirilməsi"
+msgstr "Анонимная оценка преподавателей"
+
+msgctxt "surveys.inbox"
+msgid "Anonim"
+msgstr "Анонимно"
+
+msgctxt "surveys.inbox"
+msgid "Adla"
+msgstr "С именем"
+
+msgctxt "surveys.inbox"
+msgid "Məcburi"
+msgstr "Обязательный"
+
+msgctxt "surveys.inbox"
+msgid "Könüllü"
+msgstr "Добровольный"
+
+msgctxt "surveys.inbox"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "%(done)s / %(total)s заполнено"
+
+msgctxt "surveys.inbox"
+msgid "son tarix %(day)s"
+msgstr "срок до %(day)s"
+
+msgctxt "surveys.inbox"
+msgid "Davam et"
+msgstr "Продолжить"
+
+msgctxt "surveys.inbox"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — növbəti girişdə kabinet onu "
+"doldurmadan açılmayacaq."
+msgstr ""
+"Вы уже один раз пропустили этот опрос — при следующем входе кабинет не "
+"откроется, пока вы его не заполните."
+
+msgctxt "surveys.inbox"
+msgid ""
+"Bir dəfə keçmək olar; növbəti dəfə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+msgstr ""
+"Можно пропустить один раз; в следующий раз вы не сможете войти в кабинет, не"
+" заполнив опрос."
+
+msgctxt "surveys.inbox"
+msgid "Doldurulmayınca kabinet bağlı qalır."
+msgstr "Кабинет остаётся закрытым до заполнения."
+
+msgctxt "surveys.inbox"
+msgid "«Sonra doldur» imkanı %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+msgstr "«Заполнить позже» доступно до %(day)s (каждый раз на 24 часа)."
+
+msgctxt "surveys.inbox"
+msgid "Doldur"
+msgstr "Заполнить"
+
+msgctxt "surveys.inbox"
+msgid "Hazırda sizi gözləyən sorğu yoxdur."
+msgstr "Сейчас нет ожидающих вас опросов."
+
+msgctxt "surveys.inbox"
+msgid "Tamamlanmış"
+msgstr "Заполненные"
+
+msgctxt "surveys.inbox"
+msgid "Bağlı"
+msgstr "Закрытые"
+
+msgctxt "surveys.inbox"
+msgid "doldurulmayıb"
+msgstr "не заполнен"
+
+msgctxt "surveys.respond"
+msgid "Sorğu naviqasiyası"
+msgstr "Навигация по опросу"
+
+msgctxt "surveys.respond"
+msgid "Sorğular"
+msgstr "Опросы"
+
+msgctxt "surveys.respond"
+msgid "Anonim sorğu"
+msgstr "Анонимный опрос"
+
+msgctxt "surveys.respond"
+msgid "Adla sorğu"
+msgstr "Именной опрос"
+
+msgctxt "surveys.respond"
+msgid "Məcburi"
+msgstr "Обязательный"
+
+msgctxt "surveys.respond"
+msgid "Son tarix: %(day)s"
+msgstr "Срок: %(day)s"
+
+msgctxt "surveys.respond"
+msgid ""
+"Cavabınız adınızla saxlanılmır: yalnız «doldurdu» qeydi qalır, nəticələr ən "
+"azı k cavab yığılanda və sorğu bağlandıqdan sonra ümumiləşdirilmiş şəkildə "
+"görünür. Yarımçıq cavablar yalnız bu brauzer tabında saxlanılır."
+msgstr ""
+"Ваш ответ не хранится с вашим именем: остаётся лишь отметка «заполнено», а "
+"результаты показываются обобщённо, когда собрано не менее k ответов и опрос "
+"закрыт. Незавершённые ответы хранятся только в этой вкладке браузера."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu sorğu anonim deyil — cavablarınızı adınızla sorğunun idarəçiləri görür. "
+"Yarımçıq cavablar avtomatik saxlanılır."
+msgstr ""
+"Этот опрос не анонимный — администраторы опроса видят ваши ответы с вашим "
+"именем. Незавершённые ответы сохраняются автоматически."
+
+msgctxt "surveys.respond"
+msgid "0 / %(total)s cavablanıb"
+msgstr "0 / %(total)s отвечено"
+
+msgctxt "surveys.respond"
+msgid "__N__ / __T__ cavablanıb"
+msgstr "__N__ / __T__ отвечено"
+
+msgctxt "surveys.respond"
+msgid "Yadda saxlanıldı"
+msgstr "Сохранено"
+
+msgctxt "surveys.respond"
+msgid "Bu tabda saxlanıldı"
+msgstr "Сохранено в этой вкладке"
+
+msgctxt "surveys.respond"
+msgid "Bu sual məcburidir."
+msgstr "Этот вопрос обязателен."
+
+msgctxt "surveys.respond"
+msgid "Ən azı __N__ seçim edin."
+msgstr "Выберите не менее __N__."
+
+msgctxt "surveys.respond"
+msgid "Ən çoxu __N__ seçim edə bilərsiniz."
+msgstr "Можно выбрать не более __N__."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+msgstr ""
+"Некоторые вопросы остались без ответа или заполнены неверно — проверьте "
+"вопросы, отмеченные красным."
+
+msgctxt "surveys.respond"
+msgid "Anonim göndər"
+msgstr "Отправить анонимно"
+
+msgctxt "surveys.respond"
+msgid "Göndər"
+msgstr "Отправить"
+
+msgctxt "surveys.respond"
+msgid "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+msgstr "После отправки изменить ответ нельзя."
+
+msgctxt "surveys.respond"
+msgid "(məcburi)"
+msgstr "(обязательно)"
+
+msgctxt "surveys.respond"
+msgid "%(low)s–%(high)s variant seçin."
+msgstr "Выберите %(low)s–%(high)s вариантов."
+
+msgctxt "surveys.respond"
+msgid "Ən azı %(low)s variant seçin."
+msgstr "Выберите не менее %(low)s вариантов."
+
+msgctxt "surveys.respond"
+msgid "Ən çoxu %(high)s variant seçin."
+msgstr "Выберите не более %(high)s вариантов."
+
+msgctxt "surveys.respond"
+msgid "Bəli"
+msgstr "Да"
+
+msgctxt "surveys.respond"
+msgid "Xeyr"
+msgstr "Нет"
+
+msgctxt "surveys.respond"
+msgid "Heç ehtimal etmirəm"
+msgstr "Совсем маловероятно"
+
+msgctxt "surveys.respond"
+msgid "Mütləq"
+msgstr "Обязательно"
+
+msgctxt "surveys.respond"
+msgid "Təşəkkür edirik!"
+msgstr "Спасибо!"
+
+msgctxt "surveys.respond"
+msgid ""
+"Cavabınız anonim şəkildə qeydə alındı. Nəticələr sorğu bağlandıqdan sonra "
+"ümumiləşdirilmiş şəkildə təhlil olunacaq."
+msgstr ""
+"Ваш ответ записан анонимно. Результаты будут проанализированы обобщённо "
+"после закрытия опроса."
+
+msgctxt "surveys.respond"
+msgid "Cavabınız qeydə alındı."
+msgstr "Ваш ответ записан."
+
+msgctxt "surveys.respond"
+msgid "Digər sorğular"
+msgstr "Другие опросы"
+
+msgctxt "surveys.respond"
+msgid "Kabinetə qayıt"
+msgstr "Вернуться в кабинет"
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu %(day)s tarixində açılacaq."
+msgstr "Этот опрос откроется %(day)s."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu sizə ünvanlanmayıb."
+msgstr "Этот опрос адресован не вам."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu artıq cavab qəbul etmir."
+msgstr "Этот опрос больше не принимает ответы."
+
+msgctxt "surveys.respond"
+msgid "Sorğulara qayıt"
+msgstr "Вернуться к опросам"
+
+msgctxt "surveys.respond"
+msgid "Sorğu artıq qəbul edilmir."
+msgstr "Опрос больше не принимается."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Вы уже заполнили этот опрос."
+
+msgctxt "surveys.respond"
+msgid "Anonim sorğunun qaralaması yalnız brauzerdə saxlanır."
+msgstr "Черновик анонимного опроса хранится только в браузере."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğunu keçmək mümkün deyil."
+msgstr "Этот опрос нельзя пропустить."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+msgstr ""
+"Вы уже один раз пропустили этот опрос — заполните его, чтобы войти в "
+"кабинет."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu üçün möhlət yoxdur."
+msgstr "Для этого опроса нет отсрочки."
+
+msgctxt "surveys.respond"
+msgid "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+msgstr "Срок отсрочки истёк — заполнение опроса обязательно."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu dəfə keçdiniz. Növbəti girişdə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+msgstr ""
+"Вы пропустили опрос в этот раз. При следующем входе вы не сможете войти в "
+"кабинет, не заполнив его."
+
+msgctxt "surveys.respond"
+msgid "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+msgstr "Не забудьте заполнить опрос в течение 24 часов."
+
+msgctxt "surveys.export"
+msgid "Ad"
+msgstr "Имя"
+
+msgctxt "surveys.export"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "surveys.export"
+msgid "Vaxt"
+msgstr "Время"
+
+msgctxt "surveys.export"
+msgid "Sual"
+msgstr "Вопрос"
+
+msgctxt "surveys.export"
+msgid "Variant"
+msgstr "Вариант"
+
+msgctxt "surveys.export"
+msgid "Faiz / cavab"
+msgstr "Процент / ответ"
+
+msgctxt "surveys.export"
+msgid "Orta"
+msgstr "Среднее"
+
+msgctxt "surveys.export"
+msgid "Cavab sayı"
+msgstr "Количество ответов"
+
+msgctxt "surveys.export"
+msgid "Cavab sayı k-həddindən azdır — nəticələr gizlidir."
+msgstr "Ответов меньше порога k — результаты скрыты."
+
+msgctxt "surveys.export"
+msgid "gizli (k-dan az cavab)"
+msgstr "скрыто (меньше k ответов)"
+
+msgctxt "surveys.export"
+msgid "açıq cavab"
+msgstr "открытый ответ"
+
+msgctxt "surveys.export"
+msgid "Sorğu nəticələrinin ixracı"
+msgstr "Экспорт результатов опроса"
+
+msgctxt "surveys.builder"
+msgid "Sorğunun adı boş ola bilməz."
+msgstr "Название опроса не может быть пустым."
+
+msgctxt "surveys.builder"
+msgid "Ad %(limit)s simvoldan uzun ola bilməz."
+msgstr "Название не может быть длиннее %(limit)s символов."
+
+msgctxt "surveys.builder"
+msgid "Sorğu növü seçilməlidir."
+msgstr "Выберите тип опроса."
+
+msgctxt "surveys.builder"
+msgid "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+msgstr "Дата закрытия не может быть раньше даты открытия."
+
+msgctxt "surveys.builder"
+msgid "Sorğu %(days)s gündən uzun ola bilməz."
+msgstr "Опрос не может длиться дольше %(days)s дней."
+
+msgctxt "surveys.builder"
+msgid "Təsvir %(limit)s simvoldan uzun ola bilməz."
+msgstr "Описание не может быть длиннее %(limit)s символов."
+
+msgctxt "surveys.builder"
+msgid "Bu sorğunun növünü dəyişmək olmaz."
+msgstr "Тип этого опроса изменить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Auditoriya seçilməlidir."
+msgstr "Выберите аудиторию."
+
+msgctxt "surveys.builder"
+msgid ""
+"Dərc olunmuş sorğunun anonimliyi və auditoriyası dəyişmir — dublikat "
+"yaradın."
+msgstr ""
+"Анонимность и аудитория опубликованного опроса не меняются — создайте копию."
+
+msgctxt "surveys.builder"
+msgid "Artıq açılmış sorğunun açılış tarixi dəyişmir."
+msgstr "Дату открытия уже открытого опроса изменить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Dərc olunmuş sorğunun bağlanma tarixi olmalıdır."
+msgstr "У опубликованного опроса должна быть дата закрытия."
+
+msgctxt "surveys.builder"
+msgid "Qapı siyasəti seçilməlidir."
+msgstr "Выберите политику доступа."
+
+msgctxt "surveys.builder"
+msgid "Möhlət 0 ilə %(high)s gün arasında olmalıdır."
+msgstr "Отсрочка должна быть от 0 до %(high)s дней."
+
+msgctxt "surveys.builder"
+msgid "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Минимальный размер группы должен быть от %(low)s до %(high)s."
+
+msgctxt "surveys.builder"
+msgid "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
+msgstr "Порог k нельзя менять после публикации результатов."
+
+msgctxt "surveys.builder"
+msgid "Yalnız qaralama sorğu dərc oluna bilər."
+msgstr "Опубликовать можно только черновик."
+
+msgctxt "surveys.builder"
+msgid "Dərc etmək üçün ən azı bir sual əlavə edin."
+msgstr "Добавьте хотя бы один вопрос перед публикацией."
+
+msgctxt "surveys.builder"
+msgid "Dərc etmək üçün bağlanma tarixini seçin."
+msgstr "Выберите дату закрытия перед публикацией."
+
+msgctxt "surveys.builder"
+msgid "Yalnız dərc olunmuş sorğu bağlana bilər."
+msgstr "Закрыть можно только опубликованный опрос."
+
+msgctxt "surveys.builder"
+msgid "Yalnız bağlı sorğu yenidən açıla bilər."
+msgstr "Повторно открыть можно только закрытый опрос."
+
+msgctxt "surveys.builder"
+msgid "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+msgstr "Для повторного открытия выберите будущую дату закрытия."
+
+msgctxt "surveys.builder"
+msgid "Defolt sual dəsti arxivlənmir — əvvəl başqa dəsti defolt edin."
+msgstr ""
+"Набор вопросов по умолчанию нельзя архивировать — сначала назначьте другой "
+"набор."
+
+msgctxt "surveys.builder"
+msgid "Açıq kampaniyanın sual dəsti arxivlənmir."
+msgstr "Набор вопросов открытой кампании нельзя архивировать."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivdə deyil."
+msgstr "Опрос не в архиве."
+
+msgctxt "surveys.builder"
+msgid "Yalnız heç dərc olunmamış qaralama silinə bilər."
+msgstr "Удалить можно только ни разу не опубликованный черновик."
+
+msgctxt "surveys.builder"
+msgid "Kampaniyada istifadə olunan dəst silinmir."
+msgstr "Набор, используемый в кампании, удалить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Defolt yalnız dərc olunmuş müəllim qiymətləndirməsi dəsti ola bilər."
+msgstr "По умолчанию может быть только готовый набор оценки преподавателей."
+
+msgctxt "surveys.builder"
+msgid "nüsxə"
+msgstr "копия"
+
+msgctxt "surveys.builder"
+msgid ""
+"Cavab gəlmiş sualda yalnız kiçik düzəliş (yazı səhvi) mümkündür — mənanı "
+"dəyişmək üçün sorğunun dublikatını yaradın."
+msgstr ""
+"В вопросе с ответами возможны только мелкие исправления (опечатки) — чтобы "
+"изменить смысл, создайте копию опроса."
+
+msgctxt "surveys.builder"
+msgid "Sualın mətni boş ola bilməz."
+msgstr "Текст вопроса не может быть пустым."
+
+msgctxt "surveys.builder"
+msgid "«%(field)s» %(limit)s simvoldan uzun ola bilməz."
+msgstr "«%(field)s» не может быть длиннее %(limit)s символов."
+
+msgctxt "surveys.builder"
+msgid "Ən azı %(n)s seçim yazın (hər sətirdə bir)."
+msgstr "Введите не менее %(n)s вариантов (по одному в строке)."
+
+msgctxt "surveys.builder"
+msgid "Ən çoxu %(n)s seçim ola bilər."
+msgstr "Может быть не более %(n)s вариантов."
+
+msgctxt "surveys.builder"
+msgid "Seçim %(n)s simvoldan uzun ola bilməz."
+msgstr "Вариант не может быть длиннее %(n)s символов."
+
+msgctxt "surveys.builder"
+msgid "Seçimlər təkrarlanmamalıdır."
+msgstr "Варианты не должны повторяться."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sualın seçim sayı dəyişmir."
+msgstr "Количество вариантов у вопроса с ответами изменить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Etiket"
+msgstr "Подпись"
+
+msgctxt "surveys.builder"
+msgid "Minimum/maksimum seçim sayı tam ədəd olmalıdır."
+msgstr "Минимальное/максимальное число выбора должно быть целым."
+
+msgctxt "surveys.builder"
+msgid "Minimum/maksimum seçim sayı seçimlərin sayına uyğun olmalıdır."
+msgstr ""
+"Минимальное/максимальное число выбора должно соответствовать количеству "
+"вариантов."
+
+msgctxt "surveys.builder"
+msgid "Variant %(n)s"
+msgstr "Вариант %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Minimum seçim sayı maksimumdan böyük ola bilməz."
+msgstr "Минимальное число выбора не может превышать максимальное."
+
+msgctxt "surveys.builder"
+msgid "Bölmə seçilməlidir."
+msgstr "Выберите раздел."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuya sual əlavə etmək olmaz — dublikat yaradın."
+msgstr "В опрос с ответами нельзя добавлять вопросы — создайте копию."
+
+msgctxt "surveys.builder"
+msgid "Sorğuda ən çoxu %(n)s sual ola bilər."
+msgstr "В опросе может быть не более %(n)s вопросов."
+
+msgctxt "surveys.builder"
+msgid "Bu sorğu üçün sual növü uyğun deyil."
+msgstr "Этот тип вопроса не подходит для данного опроса."
+
+msgctxt "surveys.builder"
+msgid "Sual"
+msgstr "Вопрос"
+
+msgctxt "surveys.builder"
+msgid "İzah"
+msgstr "Пояснение"
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğudan sual silinmir."
+msgstr "Из опроса с ответами нельзя удалять вопросы."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuda sualların sırası dəyişmir."
+msgstr "Порядок вопросов в опросе с ответами изменить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Sıra köhnəlib — səhifəni yeniləyin."
+msgstr "Порядок устарел — обновите страницу."
+
+msgctxt "surveys.builder"
+msgid "Müəllim qiymətləndirməsinin bölmələri sabitdir."
+msgstr "Разделы оценки преподавателей фиксированы."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuya bölmə əlavə etmək olmaz."
+msgstr "В опрос с ответами нельзя добавлять разделы."
+
+msgctxt "surveys.builder"
+msgid "Ən çoxu %(n)s bölmə ola bilər."
+msgstr "Может быть не более %(n)s разделов."
+
+msgctxt "surveys.builder"
+msgid "Bölmə adı"
+msgstr "Название раздела"
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğudan bölmə silinmir."
+msgstr "Из опроса с ответами нельзя удалять разделы."
+
+msgctxt "surveys.builder"
+msgid "Sorğuda ən azı bir bölmə qalmalıdır."
+msgstr "В опросе должен остаться хотя бы один раздел."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuda bölmələrin sırası dəyişmir."
+msgstr "Порядок разделов в опросе с ответами изменить нельзя."
+
+msgctxt "surveys.builder"
+msgid "Tarix düzgün formatda deyil."
+msgstr "Неверный формат даты."
+
+msgctxt "surveys.builder"
+msgid "Bu əməliyyat üçün icazəniz yoxdur."
+msgstr "У вас нет прав на это действие."
+
+msgctxt "surveys.builder"
+msgid "Sorğu yaradıldı — indi sualları yazın."
+msgstr "Опрос создан — теперь напишите вопросы."
+
+msgctxt "surveys.builder"
+msgid "Ayarlar yadda saxlanıldı."
+msgstr "Настройки сохранены."
+
+msgctxt "surveys.builder"
+msgid "Sorğu dərc olundu."
+msgstr "Опрос опубликован."
+
+msgctxt "surveys.builder"
+msgid "Sorğu bağlandı."
+msgstr "Опрос закрыт."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivə köçürüldü."
+msgstr "Опрос перемещён в архив."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivdən çıxarıldı."
+msgstr "Опрос восстановлен из архива."
+
+msgctxt "surveys.builder"
+msgid "Sual dəsti yeni kampaniyalar üçün defolt edildi."
+msgstr "Набор вопросов назначен по умолчанию для новых кампаний."
+
+msgctxt "surveys.builder"
+msgid "Nüsxə yaradıldı (qaralama)."
+msgstr "Копия создана (черновик)."
+
+msgctxt "surveys.builder"
+msgid "Qaralama silindi."
+msgstr "Черновик удалён."
+
+msgctxt "surveys.builder"
+msgid "Sorğu yenidən açıldı."
+msgstr "Опрос снова открыт."
+
+msgctxt "surveys.builder"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "surveys.builder"
+msgid "Sual tapılmadı."
+msgstr "Вопрос не найден."
+
+msgctxt "surveys.builder"
+msgid "Bölmə tapılmadı."
+msgstr "Раздел не найден."
+
+msgctxt "surveys.builder"
+msgid "Sual əlavə olundu."
+msgstr "Вопрос добавлен."
+
+msgctxt "surveys.builder"
+msgid "Sual yadda saxlanıldı."
+msgstr "Вопрос сохранён."
+
+msgctxt "surveys.builder"
+msgid "Sual silindi."
+msgstr "Вопрос удалён."
+
+msgctxt "surveys.builder"
+msgid "Sıra dəyişdi."
+msgstr "Порядок изменён."
+
+msgctxt "surveys.builder"
+msgid "Bölmə əlavə olundu."
+msgstr "Раздел добавлен."
+
+msgctxt "surveys.builder"
+msgid "Bölmə yadda saxlanıldı."
+msgstr "Раздел сохранён."
+
+msgctxt "surveys.builder"
+msgid "Bölmə silindi, sualları qonşu bölməyə keçdi."
+msgstr "Раздел удалён, его вопросы перенесены в соседний раздел."
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu qurucusu üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır."
+msgstr ""
+"Для конструктора опросов нужно право «survey.manage» на уровне организации."
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğunu yaradın, suallarını yazın, kimin dolduracağını (tələbə, müəllim, "
+"heyət və ya hamı) və məcburiliyini seçin. «Müəllim qiymətləndirməsi» növü "
+"semestr kampaniyalarının sual dəstidir — tarixləri «Sorğu kampaniyaları» "
+"bölməsində idarə olunur."
+msgstr ""
+"Создайте опрос, напишите вопросы, выберите, кто должен его заполнить "
+"(студенты, преподаватели, персонал или все), и обязателен ли он. Тип «Оценка"
+" преподавателя» — это набор вопросов семестровых кампаний; их даты "
+"управляются в разделе «Кампании опросов»."
+
+msgctxt "surveys.builder"
+msgid "Sorğu növü"
+msgstr "Тип опроса"
+
+msgctxt "surveys.builder"
+msgid "Sorğunun adı"
+msgstr "Название опроса"
+
+msgctxt "surveys.builder"
+msgid "məs. Kitabxana xidmətlərindən məmnunluq"
+msgstr "напр. Удовлетворённость услугами библиотеки"
+
+msgctxt "surveys.builder"
+msgid "Sorğu yarat"
+msgstr "Создать опрос"
+
+msgctxt "surveys.builder"
+msgid "Status filtri"
+msgstr "Фильтр по статусу"
+
+msgctxt "surveys.builder"
+msgid "Aktiv"
+msgstr "Активные"
+
+msgctxt "surveys.builder"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "surveys.builder"
+msgid "Dərc olunub"
+msgstr "Опубликован"
+
+msgctxt "surveys.builder"
+msgid "Bağlı"
+msgstr "Закрыт"
+
+msgctxt "surveys.builder"
+msgid "Arxiv"
+msgstr "Архив"
+
+msgctxt "surveys.builder"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "surveys.builder"
+msgid "Defolt dəst"
+msgstr "Набор по умолчанию"
+
+msgctxt "surveys.builder"
+msgid "Anonim"
+msgstr "Анонимный"
+
+msgctxt "surveys.builder"
+msgid "Məcburi"
+msgstr "Обязательный"
+
+msgctxt "surveys.builder"
+msgid "Auditoriya"
+msgstr "Аудитория"
+
+msgctxt "surveys.builder"
+msgid "Jurnalı bağlanmış fənlərin tələbələri"
+msgstr "Студенты предметов с закрытым журналом"
+
+msgctxt "surveys.builder"
+msgid "Kampaniyalar"
+msgstr "Кампании"
+
+msgctxt "surveys.builder"
+msgid "daraldılıb"
+msgstr "сужена"
+
+msgctxt "surveys.builder"
+msgid "Açılış"
+msgstr "Открытие"
+
+msgctxt "surveys.builder"
+msgid "Bağlanma"
+msgstr "Закрытие"
+
+msgctxt "surveys.builder"
+msgid "Dolduran"
+msgstr "Заполнили"
+
+msgctxt "surveys.builder"
+msgid "Redaktə et"
+msgstr "Редактировать"
+
+msgctxt "surveys.builder"
+msgid "Nəticələr"
+msgstr "Результаты"
+
+msgctxt "surveys.builder"
+msgid "Bu filtrdə sorğu yoxdur. Yuxarıdan yeni sorğu yaradın."
+msgstr "Нет опросов с этим фильтром. Создайте новый опрос выше."
+
+msgctxt "surveys.builder"
+msgid "Hazır"
+msgstr "Готов"
+
+msgctxt "surveys.builder"
+msgid "Açıq"
+msgstr "Открыт"
+
+msgctxt "surveys.builder"
+msgid "Planlaşdırılıb"
+msgstr "Запланирован"
+
+msgctxt "surveys.builder"
+msgid "Arxivdə"
+msgstr "В архиве"
+
+msgctxt "surveys.builder"
+msgid "Bütün sorğular"
+msgstr "Все опросы"
+
+msgctxt "surveys.builder"
+msgid "Adla"
+msgstr "С именем"
+
+msgctxt "surveys.builder"
+msgid "Struktur kilidlidir"
+msgstr "Структура заблокирована"
+
+msgctxt "surveys.builder"
+msgid "Suallar: %(n)s"
+msgstr "Вопросов: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Sual dəsti kampaniyalar üçün hazır elan olunsun?"
+msgstr "Отметить набор вопросов как готовый для кампаний?"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu dərc olunsun? Açılış günü auditoriyaya bildiriş gedəcək; dərcdən sonra"
+" anonimlik və auditoriya dəyişmir."
+msgstr ""
+"Опубликовать опрос? В день открытия аудитория получит уведомление; после "
+"публикации анонимность и аудитория не меняются."
+
+msgctxt "surveys.builder"
+msgid "Hazır et"
+msgstr "Сделать готовым"
+
+msgctxt "surveys.builder"
+msgid "Dərc et"
+msgstr "Опубликовать"
+
+msgctxt "surveys.builder"
+msgid ""
+"Yeni semestr kampaniyaları bu sual dəstini götürsün? Mövcud kampaniyalar öz "
+"dəstində qalır."
+msgstr ""
+"Использовать этот набор вопросов в новых семестровых кампаниях? Существующие"
+" кампании сохранят свой набор."
+
+msgctxt "surveys.builder"
+msgid "Defolt et"
+msgstr "Сделать по умолчанию"
+
+msgctxt "surveys.builder"
+msgid "Formaya bax"
+msgstr "Посмотреть форму"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu bağlansın? Cavab qəbulu dayanacaq, məcburi qapı açılacaq, anonim "
+"nəticələr dərc olunacaq."
+msgstr ""
+"Закрыть опрос? Приём ответов прекратится, обязательная блокировка снимется, "
+"анонимные результаты будут опубликованы."
+
+msgctxt "surveys.builder"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "surveys.builder"
+msgid "Yeni bağlanma tarixi"
+msgstr "Новая дата закрытия"
+
+msgctxt "surveys.builder"
+msgid "Yenidən aç"
+msgstr "Открыть снова"
+
+msgctxt "surveys.builder"
+msgid "Dublikat"
+msgstr "Дублировать"
+
+msgctxt "surveys.builder"
+msgid "Arxivdən çıxar"
+msgstr "Восстановить"
+
+msgctxt "surveys.builder"
+msgid "Qaralama birdəfəlik silinsin?"
+msgstr "Удалить черновик навсегда?"
+
+msgctxt "surveys.builder"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivə köçürülsün? Açıqdırsa bağlanacaq; nəticələr qalır."
+msgstr ""
+"Переместить опрос в архив? Если он открыт, он будет закрыт; результаты "
+"сохранятся."
+
+msgctxt "surveys.builder"
+msgid "Arxivlə"
+msgstr "В архив"
+
+msgctxt "surveys.builder"
+msgid "Redaktor bölmələri"
+msgstr "Разделы редактора"
+
+msgctxt "surveys.builder"
+msgid "Ayarlar"
+msgstr "Настройки"
+
+msgctxt "surveys.builder"
+msgid "Suallar"
+msgstr "Вопросы"
+
+msgctxt "surveys.builder"
+msgid "Əsas məlumat"
+msgstr "Основное"
+
+msgctxt "surveys.builder"
+msgid "Ad"
+msgstr "Название"
+
+msgctxt "surveys.builder"
+msgid "Təsvir (respondentə göstərilir)"
+msgstr "Описание (видно респондентам)"
+
+msgctxt "surveys.builder"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "surveys.builder"
+msgid "Anonim sorğu"
+msgstr "Анонимный опрос"
+
+msgctxt "surveys.builder"
+msgid ""
+"cavab adla saxlanılmır; nəticələr yalnız bağlandıqdan sonra və ən azı k "
+"cavab olanda görünür."
+msgstr ""
+"ответы не хранятся с именами; результаты видны только после закрытия и при "
+"наличии не менее k ответов."
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsi həmişə anonimdir. Auditoriya — semestrdə jurnalı "
+"bağlanmış fənlərin tələbələri; açılış, bağlanma, «Sonra doldur» möhləti və "
+"məcburilik «Sorğu kampaniyaları» bölməsində hər semestr üçün ayrıca seçilir."
+" Burada yalnız sual dəstini idarə edirsiniz."
+msgstr ""
+"Оценка преподавателя всегда анонимна. Аудитория — студенты предметов с "
+"закрытым в семестре журналом; открытие, закрытие, отсрочка «Заполнить позже»"
+" и обязательность задаются для каждого семестра в разделе «Кампании "
+"опросов». Здесь вы управляете только набором вопросов."
+
+msgctxt "surveys.builder"
+msgid "Kim doldurmalıdır"
+msgstr "Кто должен заполнить"
+
+msgctxt "surveys.builder"
+msgid ""
+"Dərc olunmuş sorğunun auditoriyası dəyişmir — fərqli auditoriya üçün "
+"dublikat yaradın."
+msgstr ""
+"Аудитория опубликованного опроса не меняется — создайте копию для другой "
+"аудитории."
+
+msgctxt "surveys.builder"
+msgid "Auditoriyanı daralt (fakültə, kafedra, qrup, ixtisas, kurs)"
+msgstr "Сузить аудиторию (факультет, кафедра, группа, специальность, курс)"
+
+msgctxt "surveys.builder"
+msgid ""
+"Heç nə seçilməsə — bütün təşkilat. İxtisas və kurs yalnız tələbələrə aiddir:"
+" seçiləndə auditoriyada yalnız uyğun tələbələr qalır."
+msgstr ""
+"Если ничего не выбрано — вся организация. Специальность и курс относятся "
+"только к студентам: при выборе в аудитории остаются только подходящие "
+"студенты."
+
+msgctxt "surveys.builder"
+msgid "Struktur vahidləri"
+msgstr "Структурные подразделения"
+
+msgctxt "surveys.builder"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "surveys.builder"
+msgid "Struktur vahidi yoxdur."
+msgstr "Нет подразделений."
+
+msgctxt "surveys.builder"
+msgid "İxtisaslar (yalnız tələbələr)"
+msgstr "Специальности (только студенты)"
+
+msgctxt "surveys.builder"
+msgid "İxtisas yoxdur."
+msgstr "Нет специальностей."
+
+msgctxt "surveys.builder"
+msgid "Kurs (yalnız tələbələr)"
+msgstr "Курс (только студенты)"
+
+msgctxt "surveys.builder"
+msgid "%(n)s. kurs"
+msgstr "%(n)s-й курс"
+
+msgctxt "surveys.builder"
+msgid "Tarixlər"
+msgstr "Даты"
+
+msgctxt "surveys.builder"
+msgid ""
+"Açılış boşdursa dərc günü açılır. Bağlanma tarixi dərc üçün məcburidir; "
+"sonradan uzatmaq olar."
+msgstr ""
+"Если дата открытия пуста, опрос откроется в день публикации. Дата закрытия "
+"обязательна для публикации; её можно продлить позже."
+
+msgctxt "surveys.builder"
+msgid "Məcburilik"
+msgstr "Обязательность"
+
+msgctxt "surveys.builder"
+msgid "Könüllü"
+msgstr "Добровольный"
+
+msgctxt "surveys.builder"
+msgid "Doldurulmayanda kabinet necə davransın?"
+msgstr "Как должен вести себя кабинет, пока опрос не заполнен?"
+
+msgctxt "surveys.builder"
+msgid ""
+"İstifadəçi kabinetə girəndə dərhal sorğuya yönləndirilir; doldurmadan "
+"kabinet açılmır."
+msgstr ""
+"При входе в кабинет пользователь сразу перенаправляется на опрос; кабинет не"
+" откроется, пока опрос не заполнен."
+
+msgctxt "surveys.builder"
+msgid ""
+"İlk dəfə «Bu dəfə keç» deyə bilər və xəbərdarlıq alır: növbəti dəfə "
+"doldurmadan kabinetə daxil ola bilməyəcək."
+msgstr ""
+"В первый раз можно нажать «Пропустить в этот раз» с предупреждением: в "
+"следующий раз без заполнения войти в кабинет нельзя."
+
+msgctxt "surveys.builder"
+msgid ""
+"Açılışdan sonra N gün ərzində «Sonra doldur» (hər dəfə 24 saat), sonra "
+"kabinet bağlanır."
+msgstr ""
+"В течение N дней после открытия доступно «Заполнить позже» (каждый раз на 24"
+" часа), затем кабинет закрывается."
+
+msgctxt "surveys.builder"
+msgid "Möhlət (gün)"
+msgstr "Отсрочка (дни)"
+
+msgctxt "surveys.builder"
+msgid ""
+"İmtahan səhifələri, parol dəyişmə və çıxış heç vaxt bağlanmır — sorğu yalnız"
+" kabineti bağlayır."
+msgstr ""
+"Страницы экзаменов, смена пароля и выход никогда не блокируются — опрос "
+"закрывает только кабинет."
+
+msgctxt "surveys.builder"
+msgid "Anonimlik həddi"
+msgstr "Порог анонимности"
+
+msgctxt "surveys.builder"
+msgid "Minimum qrup (k)"
+msgstr "Минимальная группа (k)"
+
+msgctxt "surveys.builder"
+msgid ""
+"k-dan az cavab olan nəticə və açıq cavablar göstərilmir; faizlər 5-ə "
+"yuvarlaqlaşdırılır."
+msgstr ""
+"Результаты и открытые ответы при числе ответов меньше k скрываются; проценты"
+" округляются до 5."
+
+msgctxt "surveys.builder"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sıranı dəyişmək üçün tutacağı sürükləyin və ya tutacaqda Alt + yuxarı/aşağı "
+"ox düymələrini basın."
+msgstr ""
+"Чтобы изменить порядок, перетащите маркер или нажмите Alt + стрелку "
+"вверх/вниз на маркере."
+
+msgctxt "surveys.builder"
+msgid ""
+"Bu sorğuya cavab gəlib — nəticələrin bütövlüyü üçün sual əlavə etmək, "
+"silmək, növünü, sırasını və məcburiliyini dəyişmək bağlıdır. Yalnız kiçik "
+"mətn düzəlişi (yazı səhvi) mümkündür; hər düzəliş versiya kimi saxlanılır. "
+"Böyük dəyişiklik üçün dublikat yaradın."
+msgstr ""
+"На этот опрос уже есть ответы — ради целостности результатов добавление, "
+"удаление, смена типа, порядка и обязательности вопросов заблокированы. "
+"Возможны только мелкие правки текста (опечатки); каждая правка сохраняется "
+"как версия. Для крупных изменений создайте копию."
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsində sual növləri: Likert (1–5), bal (1–10) və açıq "
+"cavab. «Ümumi bal» (1–10) və «Tövsiyə» sualları nəticə panelinin "
+"göstəricilərini qidalandırır; «İndeksə daxil» Likert sualları orta indeksi "
+"təşkil edir."
+msgstr ""
+"Типы вопросов в оценке преподавателя: Лайкерт (1–5), балл (1–10) и открытый "
+"ответ. Вопросы «Общий балл» (1–10) и «Рекомендация» питают показатели панели"
+" результатов; вопросы Лайкерта с отметкой «В индексе» составляют средний "
+"индекс."
+
+msgctxt "surveys.builder"
+msgid "Adsız bölmə"
+msgstr "Раздел без названия"
+
+msgctxt "surveys.builder"
+msgid "Bölməni yuxarı"
+msgstr "Раздел вверх"
+
+msgctxt "surveys.builder"
+msgid "Bölməni aşağı"
+msgstr "Раздел вниз"
+
+msgctxt "surveys.builder"
+msgid "Bölməni sil"
+msgstr "Удалить раздел"
+
+msgctxt "surveys.builder"
+msgid "Bölmə silinsin? Sualları qonşu bölməyə keçəcək."
+msgstr "Удалить раздел? Его вопросы перейдут в соседний раздел."
+
+msgctxt "surveys.builder"
+msgid "Bölmənin adı və izahı"
+msgstr "Название и описание раздела"
+
+msgctxt "surveys.builder"
+msgid "Bölmənin adı"
+msgstr "Название раздела"
+
+msgctxt "surveys.builder"
+msgid "Bu bölmədə hələ sual yoxdur."
+msgstr "В этом разделе пока нет вопросов."
+
+msgctxt "surveys.builder"
+msgid "Yeni sual"
+msgstr "Новый вопрос"
+
+msgctxt "surveys.builder"
+msgid "Sualın mətni…"
+msgstr "Текст вопроса…"
+
+msgctxt "surveys.builder"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "surveys.builder"
+msgid "Yeni bölmə"
+msgstr "Новый раздел"
+
+msgctxt "surveys.builder"
+msgid "məs. Xidmətin keyfiyyəti"
+msgstr "напр. Качество обслуживания"
+
+msgctxt "surveys.builder"
+msgid "Bölmə əlavə et"
+msgstr "Добавить раздел"
+
+msgctxt "surveys.builder"
+msgid "Sualın sırasını dəyiş: %(n)s"
+msgstr "Изменить порядок вопроса %(n)s"
+
+msgctxt "surveys.builder"
+msgid "İndeksə daxil"
+msgstr "В индексе"
+
+msgctxt "surveys.builder"
+msgid "Nəticə panelinin göstəricisini qidalandırır"
+msgstr "Питает показатель панели результатов"
+
+msgctxt "surveys.builder"
+msgid "Göstərici"
+msgstr "Показатель"
+
+msgctxt "surveys.builder"
+msgid "Düzəlişlər: %(n)s"
+msgstr "Правок: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Yuxarı"
+msgstr "Вверх"
+
+msgctxt "surveys.builder"
+msgid "Aşağı"
+msgstr "Вниз"
+
+msgctxt "surveys.builder"
+msgid "Sualı sil"
+msgstr "Удалить вопрос"
+
+msgctxt "surveys.builder"
+msgid "Sual silinsin?"
+msgstr "Удалить вопрос?"
+
+msgctxt "surveys.builder"
+msgid "İzah (istəyə görə)"
+msgstr "Пояснение (необязательно)"
+
+msgctxt "surveys.builder"
+msgid "Bölmə"
+msgstr "Раздел"
+
+msgctxt "surveys.builder"
+msgid "Bölmə %(n)s"
+msgstr "Раздел %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Məcburi sual"
+msgstr "Обязательный вопрос"
+
+msgctxt "surveys.builder"
+msgid "Variantlar — hər sətirdə bir"
+msgstr "Варианты — по одному в строке"
+
+msgctxt "surveys.builder"
+msgid "Variantların sayı və sırası dəyişmir — yalnız yazı düzəlişi."
+msgstr ""
+"Количество и порядок вариантов не меняются — только исправление опечаток."
+
+msgctxt "surveys.builder"
+msgid "Ən az seçim"
+msgstr "Минимум выбора"
+
+msgctxt "surveys.builder"
+msgid "Ən çox seçim"
+msgstr "Максимум выбора"
+
+msgctxt "surveys.builder"
+msgid "Şkala etiketləri (boş — standart)"
+msgstr "Подписи шкалы (пусто — стандартные)"
+
+msgctxt "surveys.builder"
+msgid "Şkalanın uc etiketləri (0 və 10)"
+msgstr "Подписи краёв шкалы (0 и 10)"
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsinin nəticələri (müəllim reytinqi, kafedra/fakültə "
+"bölgüsü, dinamika) «Sorğu nəticələri» bölməsindədir."
+msgstr ""
+"Результаты оценки преподавателей (рейтинг, разбивка по кафедрам/факультетам,"
+" динамика) находятся в разделе «Результаты опросов»."
+
+msgctxt "surveys.builder"
+msgid "Nəticələrə keç"
+msgstr "Перейти к результатам"
+
+msgctxt "surveys.builder"
+msgid "Sorğu hələ dərc olunmayıb — nəticə yoxdur."
+msgstr "Опрос ещё не опубликован — результатов нет."
+
+msgctxt "surveys.builder"
+msgid "İştirak"
+msgstr "Участие"
+
+msgctxt "surveys.builder"
+msgid "Vahidlər üzrə iştirak"
+msgstr "Участие по подразделениям"
+
+msgctxt "surveys.builder"
+msgid "Vahid"
+msgstr "Подразделение"
+
+msgctxt "surveys.builder"
+msgid ""
+"Anonim sorğu davam edir — nəticələr sorğu bağlandıqdan sonra görünəcək "
+"(canlı nəticə cavab verənin kimliyini aça bilər)."
+msgstr ""
+"Анонимный опрос продолжается — результаты появятся после закрытия (живые "
+"результаты могут раскрыть личность отвечающего)."
+
+msgctxt "surveys.builder"
+msgid "Cavab sayı: %(n)s"
+msgstr "Ответов: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "anonimlik həddi k = %(k)s"
+msgstr "порог анонимности k = %(k)s"
+
+msgctxt "surveys.builder"
+msgid "CSV ixrac"
+msgstr "Экспорт CSV"
+
+msgctxt "surveys.builder"
+msgid "Cavab sayı anonimlik həddindən (k) azdır — nəticələr gizlidir."
+msgstr "Ответов меньше порога анонимности (k) — результаты скрыты."
+
+msgctxt "surveys.builder"
+msgid "%(n)s cavab"
+msgstr "Ответов: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Bu suala k-dan az cavab verilib — gizlidir."
+msgstr "На этот вопрос меньше k ответов — скрыто."
+
+msgctxt "surveys.builder"
+msgid "və daha %(n)s cavab (CSV ixracında)"
+msgstr "и ещё %(n)s ответов (в экспорте CSV)"
+
+msgctxt "surveys.builder"
+msgid "Açıq cavab yoxdur."
+msgstr "Нет открытых ответов."
+
+msgctxt "surveys.builder"
+msgid "Orta"
+msgstr "Среднее"
+
+msgctxt "surveys.builder"
+msgid "tərəfdar"
+msgstr "сторонники"
+
+msgctxt "surveys.builder"
+msgid "neytral"
+msgstr "нейтральные"
+
+msgctxt "surveys.builder"
+msgid "tənqidçi"
+msgstr "критики"
+
+msgctxt "surveys.builder"
+msgid "Respondentlər (yalnız idarəçi görür)"
+msgstr "Респонденты (видны только администраторам)"
+
+msgctxt "surveys.builder"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "surveys.builder"
+msgid "Vaxt"
+msgstr "Время"
+
+msgctxt "profile.sidebar"
+msgid "Tənzimləmələr"
+msgstr "Настройки"
+
+msgctxt "accounts.first_login"
+msgid ""
+"Parolunuz administrasiya tərəfindən sıfırlanıb. Davam etmək üçün özünüzə "
+"yeni parol təyin edin."
+msgstr ""
+"Ваш пароль был сброшен администрацией. Чтобы продолжить, задайте новый "
+"пароль."
+
+msgctxt "accounts.first_login"
+msgid "Yeni parol müvəqqəti paroldan fərqli olmalıdır."
+msgstr "Новый пароль должен отличаться от временного."
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"Seçilmiş suallardan bəzilərinə tələbələrin cavabları və ya apellyasiyaları "
+"var. Silinsələr imtahan nəticələri və tarixçəsi itər. Bunun əvəzinə sualları"
+" deaktiv edin — imtahandan çıxarılırlar, amma cavablar və nəticələr qalır."
+msgstr ""
+"На некоторые из выбранных вопросов есть ответы студентов или апелляции. Их "
+"удаление сотрёт результаты и историю экзамена. Вместо этого деактивируйте "
+"вопросы — они будут убраны из экзамена, а ответы и результаты сохранятся."

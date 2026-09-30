@@ -132,6 +132,10 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_evaluation_results.html" %}
             {% elif active_section == "evaluation-campaigns" and 'evaluation-campaigns' in allowed_sections %}
                 {% include "accounts/profile/sections/_evaluation_campaigns.html" %}
+            {% elif active_section == "surveys-inbox" and 'surveys-inbox' in allowed_sections %}
+                {% include "accounts/profile/sections/_surveys_inbox.html" %}
+            {% elif active_section == "surveys-builder" and 'surveys-builder' in allowed_sections %}
+                {% include "accounts/profile/sections/_surveys_builder.html" %}
             {% elif active_section == "subject-folders" and 'subject-folders' in allowed_sections %}
                 {% include "accounts/profile/sections/_subject_folders.html" %}
             {% elif active_section == "subject-folder-review" and 'subject-folder-review' in allowed_sections %}
@@ -174,6 +178,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/superadmin/_superadmin_user_management.html" %}
             {% elif active_section == "rim-center" and 'rim-center' in allowed_sections %}
                 {% include "accounts/profile/sections/_rim_center.html" %}
+            {% elif active_section == "account-password-reset" and 'account-password-reset' in allowed_sections %}
+                {% include "accounts/profile/sections/_account_password_reset.html" %}
             {% elif active_section == "superadmin-ai" %}
                 {% include "accounts/profile/sections/superadmin/_superadmin_ai_settings.html" %}
             {% elif active_section == "superadmin-exam-rooms" and 'superadmin-exam-rooms' in allowed_sections %}

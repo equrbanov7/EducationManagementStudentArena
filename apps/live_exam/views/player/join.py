@@ -37,6 +37,7 @@ from apps.live_exam.constants import (
 from apps.live_exam.models import LivePlayer, LiveSession
 from apps.live_exam.serializers import serialize_player_identity
 from apps.live_exam.session_settings import DEFAULT_MAX_PARTICIPANTS, generate_guest_nickname, get_session_settings
+from apps.live_exam.text_safety import screen_nickname
 from apps.live_exam.transport import build_join_url
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
@@ -303,6 +304,10 @@ def live_join_enter(request, pin):
     profile = _join_profile(request, session_settings)
     if not profile["nickname"]:
         return _json_error(pgettext("live_exam.view.message", "nickname_required"), 400)
+    # Sahib 2026-09-30: nalayiq ləqəb rədd olunur və audit-ə (IP + live_client_id) yazılır.
+    rejection = screen_nickname(request, profile["nickname"], session=session, client_id=cookie_client_id)
+    if rejection is not None:
+        return _json_error(rejection.message, rejection.status, retry_after=rejection.retry_after)
 
     client_id = cookie_client_id or get_client_id(request)
     max_participants = max(1, int(session_settings.get("max_participants", DEFAULT_MAX_PARTICIPANTS) or 0))

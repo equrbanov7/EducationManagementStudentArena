@@ -1,0 +1,10 @@
+{% if 'surveys-builder' in allowed_sections %}
+{% comment %}«Sorğu qurucusu» (survey.manage, 2026-09-30) — siyahı + redaktor (ayarlar, suallar,
+nəticələr). Formalar `surveys:builder_*`-ə POST edib `next` ilə bu bölməyə qayıdır; sual
+redaktoru XHR ilə siyahını yerində yeniləyir. Tam səhifə bölmədir (AJAX-safe siyahısında deyil).{% endcomment %}
+<section class="profile-section-panel profile-section--surveys-builder {% if active_section == 'surveys-builder' %}is-active{% endif %}"
+         data-profile-section-panel="surveys-builder"
+         data-source-url="{{ profile_base_url }}?section=surveys-builder">
+    {% include "surveys/builder/_panel.html" %}
+</section>
+{% endif %}

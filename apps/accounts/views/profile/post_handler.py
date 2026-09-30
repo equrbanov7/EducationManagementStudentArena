@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import pgettext_lazy
 
 from apps.audit.public import log_action
+from core.moderation.enforcement import screen_names
 from core.upload_security import randomize_uploaded_filename
 
 from ... import profile_hooks
@@ -170,6 +171,20 @@ def handle_profile_post(
 
         if new_email and User.objects.exclude(pk=request.user.pk).filter(email__iexact=new_email).exists():
             messages.error(request, pgettext_lazy("accounts.profile_edit.message", "email_already_in_use"))
+            return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
+
+        # Sahib 2026-09-30: DƏYİŞƏN ad/soyadda nalayiq ifadə → rədd + audit (IP, vaxt, sahə).
+        name_rejection = screen_names(
+            request,
+            {
+                f"accounts.profile.{field}": value
+                for field, value in (("first_name", first_name), ("last_name", last_name))
+                if value != (getattr(request.user, field, "") or "")
+            },
+            target=request.user,
+        )
+        if name_rejection is not None:
+            messages.error(request, name_rejection.message)
             return _result(redirect(f"{reverse('accounts:profile')}?section=edit-profile"))
 
         # Update user info

@@ -152,7 +152,10 @@ jobs:
         if: env.MODE == 'issue-http'
         run: |
           set -euo pipefail
-          mkdir -p "$LE_DIR"/config "$LE_DIR"/work "$LE_DIR"/logs "$LE_DIR"/www/.well-known/acme-challenge
+          # nginx konteyneri olmayan bind-mount qovluğunu (www) root sahibliyi ilə yaradır → runner yaza bilmir.
+          # Qovluqlar root (docker) ilə yaradılıb sahiblik runner istifadəçisinə qaytarılır.
+          docker run --rm -v "$LE_DIR:/le" alpine:3.20 sh -c \
+            "mkdir -p /le/config /le/work /le/logs /le/www/.well-known/acme-challenge && chown -R $(id -u):$(id -g) /le"
           chmod 700 "$LE_DIR"
           chmod 755 "$LE_DIR/www" "$LE_DIR/www/.well-known" "$LE_DIR/www/.well-known/acme-challenge"
           # 1) nginx webroot-u verirmi? (loopback — server öz publik IP-sinə hairpin ilə çata bilmir)

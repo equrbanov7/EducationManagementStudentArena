@@ -189,6 +189,10 @@ body.error-page {
 
 .error-code-panel {
     position: absolute;
+    /* RESP 2026-09-30: `::after` dekor dairəsi DOM-da paneldən sonra gəldiyi üçün
+       onun ÜSTÜNDƏ çəkilirdi və mobil hündürlükdə «İstənilən resurs…» mətnini
+       örtürdü. Panel dekorun üstünə qaldırılır (yarımşəffaf fon dekoru göstərir). */
+    z-index: 1;
     inset: 22px;
     display: grid;
     align-content: space-between;

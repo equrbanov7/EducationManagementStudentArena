@@ -48,15 +48,18 @@ COMMENT_RE = re.compile(r"{%\s*comment\s*%}.*?{%\s*endcomment\s*%}|{#.*?#}", re.
 SUMMARY_RE = re.compile(r"<summary\b.*?</summary>", re.S)
 DETAILS_RE = re.compile(r"<details\b.*?</details>", re.S)
 
-#: Başlıqlı akkordeon qrupları — üst blok (`_group_general`), alt hesab bloku və ortaq
-#: başlıq partialı (`_group_summary`) xaric.
+#: Başlıqlı akkordeon qrupları — üst blok (`_group_general`) və ortaq başlıq partialı
+#: (`_group_summary`) xaric. «Tənzimləmələr» (`_group_settings`) heyətdə akkordeon qrupudur.
 NOT_ACCORDION_GROUPS = {"_group_general.html", "_group_summary.html"}
 ACCORDION_GROUPS = sorted(
     path.name for path in SIDEBAR_DIR.glob("_group_*.html") if path.name not in NOT_ACCORDION_GROUPS
 )
 
-STUDENT_SECTIONS = frozenset(STUDENT_ORDER) - {"edit-profile", "change-password", "my-transcript"}
-TEACHER_SECTIONS = frozenset(TEACHER_ORDER) - {"edit-profile", "change-password"} | {"my-journal"}
+#: «Tənzimləmələr» açarları və yalnız şərtlə görünən sorğu bəndləri (2026-09-30) çıxılır —
+#: testlər onları ayrıca əlavə edir.
+_EXTRA_KEYS = {"edit-profile", "change-password", "account-password-reset", "evaluation-survey", "surveys-inbox"}
+STUDENT_SECTIONS = frozenset(STUDENT_ORDER) - _EXTRA_KEYS - {"my-transcript"}
+TEACHER_SECTIONS = frozenset(TEACHER_ORDER) - _EXTRA_KEYS | {"my-journal"}
 
 
 def _source(path: Path) -> str:

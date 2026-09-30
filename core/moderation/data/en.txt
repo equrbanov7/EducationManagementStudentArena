@@ -1,0 +1,45 @@
+# English — obscenities and slurs (name moderation list, 2026-09-30).
+# Format and letter folding: see the header of az.txt.
+# Deliberately ABSENT (false positives on real names/words): ass, dick, cock, cum,
+# anal, fag, kike, rape — only their unambiguous compounds are listed.
+
+*fuck*
+*fvck*
+*phuck*
+fck
+fuk
+*bitch*
+*asshole*
+*dickhead*
+*cocksuck*
+*blowjob*
+*bullshit*
+shit
+shitty
+shithead*
+shitface*
+horseshit
+cunt*
+twat
+wank
+wanker*
+wanking
+pussy
+pussies
+whore*
+slut*
+bastard*
+nigg*
+faggot*
+retard*
+rapist
+dildo*
+porn*
+jizz*
+tits
+titties
+bollock*
+douchebag*
+jackass
+dumbass
+arsehole*

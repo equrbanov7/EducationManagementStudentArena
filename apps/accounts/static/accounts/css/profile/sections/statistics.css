@@ -1,4 +1,8 @@
-.stx { display: grid; gap: 1rem; min-width: 0; }
+/* RESP 2026-09-30: gizli (auto) grid sütunu 900px-lik «Təşkilatlar» cədvəlinin
+   min-content eninə qədər böyüyürdü — 320–390px-də bütün bölmə (KPI, süzgəc)
+   902px olub üfüqi sürüşürdü. Sütun konteynerə bağlanır, cədvəl öz sürüşmə
+   qabında (`.ems-tablescroll`) qalır. */
+.stx { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; min-width: 0; }
 .stx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 1rem; }
 .stx-block { min-width: 0; }
 .stx-window, .stx-extra__title { margin: 0; }

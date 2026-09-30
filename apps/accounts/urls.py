@@ -7,6 +7,7 @@ from django.urls import path
 
 from . import views
 from .views import academic_records as academic_records_views
+from .views import account_password_reset as password_reset_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
@@ -240,6 +241,18 @@ urlpatterns = [
     # (`user.import`), ona görə bir universitet birini verib digərini unutmur.
     path("rim/create/", views.rim_create_account, name="rim_create_account"),
     path("rim/create/catalog/", views.rim_create_catalog, name="rim_create_catalog"),
+    # «Parol sıfırlama» (2026-09-30) — `account.password_reset`; YALNIZ POST + CSRF.
+    # Bölmə: `/accounts/profile/?section=account-password-reset`.
+    path(
+        "password-reset-admin/lookup/",
+        password_reset_views.account_password_reset_lookup,
+        name="account_password_reset_lookup",
+    ),
+    path(
+        "password-reset-admin/reset/",
+        password_reset_views.account_password_reset_perform,
+        name="account_password_reset_perform",
+    ),
     # «Müəllimlər» / «Tələbələr» kataloqu — icazə-qapılı (`people.*`) VƏ struktur
     # scope-una tabe. RİM-dən FƏRQİ: burada dekan/kafedra müdiri yalnız öz
     # alt-ağacını görür (bax apps/accounts/services/people/permissions.py).

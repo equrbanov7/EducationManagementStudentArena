@@ -458,3 +458,23 @@
     background: var(--ems-primary-600);
     color: var(--ems-neutral-0);
 }
+
+/* ── RESP 2026-09-30: dar ekran ───────────────────────────────────────────
+   «Sıralama + Cədvəl/Kart» quyruğu sarmırdı: 360px-də «Kart» düyməsi
+   `.profile-main`-in sağ kənarından çıxıb bütün bölməni üfüqi sürüşdürürdü.
+   Quyruq öz sətrinə keçir və lazım olanda sarır; axtarış sahəsinin 210px
+   minimumu da 320px-lik ekranda daşmasın deyə buraxılır. */
+@media (max-width: 576px) {
+    .syl-filters__tail {
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        margin-left: 0;
+        min-width: 0;
+    }
+
+    .syl-field--search,
+    .syl-filters .syl-field {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+}

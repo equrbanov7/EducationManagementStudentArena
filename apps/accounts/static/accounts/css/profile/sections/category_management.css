@@ -46,6 +46,9 @@
 
 .category-tree-list {
     display: grid;
+    /* RESP 2026-09-30: gizli `auto` sütun məzmunun min-content eninə qədər
+       böyüyürdü — 320–360px-də kateqoriya kartları sağdan kəsilirdi. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
 }
 
@@ -71,6 +74,7 @@
 
 .subcategory-list {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.9rem;
     margin-top: 1rem;
 }
@@ -208,6 +212,11 @@
     .category-subcategory-toggle {
         width: 100%;
         justify-content: space-between;
+        /* RESP 2026-09-30: say + «Alt kateqoriyaları gizlət» + ikon bir sırada
+           sarmırdı (düymənin min-content eni kartdan böyük idi). */
+        flex-wrap: wrap;
+        min-width: 0;
+        text-align: start;
     }
 
     .category-translation-grid {

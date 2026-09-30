@@ -37,10 +37,12 @@ NİYƏ BELƏDİR
    ağaclar onu daxil edir. `data-section` / `href` / `data-source-url` /
    `data-badge-key` iki düzümdə eynidir.
 
-4. ALT BLOK YOXDUR (sahib 2026-09-25) — hesab kartı (ad, rol, «Profili redaktə
-   et» · «Şifrəni dəyiş» · «Çıxış») header-in istifadəçi menyusuna köçdü
-   (`templates/partials/_navbar.html`, masaüstü açılan menyu + mobil şkaf).
-   Dil seçimi də navbar-dadır.
+4. «TƏNZİMLƏMƏLƏR» (sahib 2026-09-30) — menyunun SONUNDA, hər üç düzümdə:
+   «Profili redaktə et» · «Şifrəni dəyiş» · (icazə ilə) «Parol sıfırlama»
+   (`sidebar/_group_settings.html`; heyətdə akkordeon qrupu, tələbə/müəllimdə
+   düz bölmə). Header-in istifadəçi menyusunda kimlik başlığı, «Mənim profilim»,
+   «Bildirişlər» və «Çıxış» qalır. Dil seçimi navbar-dadır (masaüstü + mobil
+   şkaf) — sidebar-da təkrarlanmır.
 
 ⚠️ `<aside class="profile-sidebar"` açılışı OLDUĞU KİMİ qalmalıdır (testlər
 bu mətnlə sidebar-ı kəsib götürür) — düzüm `data-sidebar-layout`-dadır.
@@ -114,6 +116,7 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
             {% include "accounts/profile/sidebar/_group_system.html" %}
             {% include "accounts/profile/sidebar/_group_content.html" %}
             {% endif %}
+            {% include "accounts/profile/sidebar/_group_settings.html" %}
         </ul>
         {% if sidebar_filter %}
         {# Süzgəcin nəticəsi ekran oxuyucuya: boşdursa görünmür, heç nə tapılmayanda JS mətni yazır. #}
