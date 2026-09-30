@@ -58,7 +58,47 @@ def ensure_default_template(organization) -> SurveyTemplate:
     ]
     if missing:
         SurveyQuestion.objects.bulk_create(missing, ignore_conflicts=True)
+    ensure_wrapper(template)
     return template
+
+
+def ensure_wrapper(template):
+    """Sorğu qurucusu (2026-09-30): sual dəstinin ``teacher_evaluation`` sarğısı (idempotent).
+
+    Qurucu siyahısı vahiddir — hər dəst bir ``Survey`` sətri ilə görünür; kampaniya isə əvvəlki
+    kimi ``SurveyCampaign.template``-i oxuyur. Sarğı yoxdursa yaradılır (miqrasiyadan sonra
+    yaranan dəstlər üçün).
+    """
+    from ..constants import SurveyKind, SurveyStatus
+    from ..models import Survey
+
+    existing = Survey.objects.filter(template=template).first()
+    if existing is not None:
+        return existing
+    title = template.name if template.version <= 1 else f"{template.name} v{template.version}"
+    try:
+        with transaction.atomic():
+            return Survey.objects.create(
+                organization_id=template.organization_id,
+                template=template,
+                kind=SurveyKind.TEACHER_EVALUATION,
+                title=title[:200],
+                anonymous=True,
+                status=SurveyStatus.PUBLISHED if template.is_active else SurveyStatus.ARCHIVED,
+            )
+    except IntegrityError:  # paralel çağırış
+        return Survey.objects.filter(template=template).first()
+
+
+def adopt_templates(organization) -> int:
+    """Sarğısız bütün dəstlərə sarğı (qurucu siyahısı açılanda, self-healing)."""
+    from ..models import Survey
+
+    wrapped = Survey.objects.filter(organization=organization).values("template_id")
+    orphans = list(SurveyTemplate.objects.filter(organization=organization).exclude(pk__in=wrapped))
+    for template in orphans:
+        ensure_wrapper(template)
+    return len(orphans)
 
 
 def default_template_for(organization) -> SurveyTemplate:

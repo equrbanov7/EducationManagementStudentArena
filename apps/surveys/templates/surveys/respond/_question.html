@@ -1,0 +1,65 @@
+{% load i18n %}
+{% comment %}Bir sual (`row` — views.respond._row). Fieldset/legend + doğma idarələr; xəta `aria-describedby` ilə.{% endcomment %}
+<fieldset class="svy-q svr-q{% if row.error %} is-invalid{% endif %}" id="{{ row.name }}-set" data-svr-q data-kind="{{ row.kind }}"
+          data-required="{% if row.question.required %}1{% else %}0{% endif %}"{% if row.min %} data-min="{{ row.min }}"{% endif %}{% if row.max %} data-max="{{ row.max }}"{% endif %}
+          aria-describedby="{{ row.name }}-error{% if row.help %} {{ row.name }}-help{% endif %}">
+    <legend class="svy-q__text" id="{{ row.name }}-legend">
+        {{ row.text }}{% if row.question.required %} <span class="svy-q__req" aria-hidden="true">*</span><span class="svr-sr">{% trans "(məcburi)" context "surveys.respond" %}</span>{% endif %}
+    </legend>
+    {% if row.help %}<p class="svy-q__help" id="{{ row.name }}-help">{{ row.help }}</p>{% endif %}
+
+    {% if row.kind == "likert5" %}
+    <div class="svy-likert">
+        {% for score, label in row.choices %}
+        <label class="svy-pill">
+            <input class="svy-pill__input" type="radio" name="{{ row.name }}" value="{{ score }}"{% if row.value == score %} checked{% endif %}>
+            <span class="svy-pill__face"><span class="svy-pill__score">{{ score }}</span><span class="svy-pill__label">{{ label }}</span></span>
+        </label>
+        {% endfor %}
+    </div>
+    {% elif row.kind == "nps" %}
+    <div class="svy-scale svr-nps">
+        {% for score in row.choices %}
+        <label class="svy-seg">
+            <input class="svy-seg__input" type="radio" name="{{ row.name }}" value="{{ score }}"{% if row.value == score %} checked{% endif %}>
+            <span class="svy-seg__face">{{ score }}</span>
+        </label>
+        {% endfor %}
+    </div>
+    <div class="svy-scale__anchors" aria-hidden="true"><span>0 — {{ row.anchor_low }}</span><span>10 — {{ row.anchor_high }}</span></div>
+    {% elif row.kind == "yesno" %}
+    <div class="svr-yesno">
+        {% for value, label in row.choices %}
+        <label class="svy-pill svr-yesno__pill">
+            <input class="svy-pill__input" type="radio" name="{{ row.name }}" value="{{ value }}"{% if row.value == value %} checked{% endif %}>
+            <span class="svy-pill__face"><span class="svy-pill__label">{{ label }}</span></span>
+        </label>
+        {% endfor %}
+    </div>
+    {% elif row.kind == "single" or row.kind == "multi" %}
+    {% if row.kind == "multi" and row.min or row.kind == "multi" and row.max %}
+    <p class="svy-q__help">{% if row.min and row.max %}{% blocktrans trimmed with low=row.min high=row.max context "surveys.respond" %}{{ low }}–{{ high }} variant seçin.{% endblocktrans %}{% elif row.min %}{% blocktrans trimmed with low=row.min context "surveys.respond" %}Ən azı {{ low }} variant seçin.{% endblocktrans %}{% else %}{% blocktrans trimmed with high=row.max context "surveys.respond" %}Ən çoxu {{ high }} variant seçin.{% endblocktrans %}{% endif %}</p>
+    {% endif %}
+    <div class="svr-choices">
+        {% for key, label in row.choices %}
+        <label class="svr-choice">
+            <input class="svr-choice__input" type="{% if row.kind == 'multi' %}checkbox{% else %}radio{% endif %}" name="{{ row.name }}" value="{{ key }}"{% if key in row.values %} checked{% endif %}>
+            <span class="svr-choice__label">{{ label }}</span>
+        </label>
+        {% endfor %}
+    </div>
+    {% elif row.kind == "short_text" %}
+    <input class="svy-text svr-short" type="text" id="{{ row.name }}" name="{{ row.name }}" maxlength="{{ row.maxlength }}" value="{{ row.value }}"
+           data-svy-counter="{{ row.name }}-count" aria-labelledby="{{ row.name }}-legend">
+    <div class="svy-text__foot"><span class="svy-text__hint"></span><span class="svy-text__count" id="{{ row.name }}-count" aria-live="polite">{{ row.value|length }} / {{ row.maxlength }}</span></div>
+    {% else %}
+    <textarea class="svy-text" id="{{ row.name }}" name="{{ row.name }}" rows="4" maxlength="{{ row.maxlength }}"
+              data-svy-counter="{{ row.name }}-count" aria-labelledby="{{ row.name }}-legend">{{ row.value }}</textarea>
+    <div class="svy-text__foot">
+        <span class="svy-text__hint">{% if survey.anonymous %}{{ privacy_hint }}{% endif %}</span>
+        <span class="svy-text__count" id="{{ row.name }}-count" aria-live="polite">{{ row.value|length }} / {{ row.maxlength }}</span>
+    </div>
+    {% endif %}
+
+    <p class="svy-q__error" id="{{ row.name }}-error" data-svr-error{% if not row.error %} hidden{% endif %}>{{ row.error }}</p>
+</fieldset>

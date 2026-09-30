@@ -1,0 +1,137 @@
+/* =========================================================================
+   «Sorğular» inbox-u (sorğu qurucusu, 2026-09-30) — kabinet bölməsi surveys-inbox.
+   survey_cabinet.css-in (.svc-*) üzərinə kartlar və siyahılar. Mobil birinci.
+   ========================================================================= */
+
+.svi-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.svi-head .svc-intro {
+    flex: 1 1 320px;
+}
+
+.svi-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3, 8px);
+}
+
+.svi-group__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svi-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-5, 12px);
+    padding: var(--ems-sp-5, 12px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svi-card--mandatory {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.svi-card__body {
+    flex: 1 1 280px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svi-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 700;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.svi-card__text,
+.svi-card__note {
+    margin: 0;
+    font-size: var(--ems-fs-base, 13px);
+    line-height: 1.5;
+    color: var(--ems-neutral-700);
+}
+
+.svi-card__note {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm, 12px);
+}
+
+.svi-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+    margin: 0;
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-600);
+}
+
+.svi-card__actions {
+    display: flex;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svi-due.is-soon {
+    color: var(--ems-danger-700, var(--ems-danger));
+    font-weight: 700;
+}
+
+.svi-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+}
+
+.svi-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    font-size: var(--ems-fs-base, 13px);
+}
+
+.svi-row + .svi-row {
+    border-top: 1px solid var(--ems-border);
+}
+
+.svi-row__icon {
+    color: var(--ems-success-700, var(--ems-success));
+}
+
+.svi-row--closed .svi-row__icon {
+    color: var(--ems-neutral-400);
+}
+
+.svi-row__title {
+    flex: 1 1 200px;
+    min-width: 0;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.svi-row__meta {
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm, 12px);
+}

@@ -1,0 +1,152 @@
+{% load i18n %}
+{% comment %}«Ayarlar» tab-ı. Dondurulmuş sahələr (dərcdən sonra anonimlik/auditoriya, açılmış sorğunun
+açılış tarixi, dərcdən sonra k) `disabled`-dir və server onları oxumur. Auditoriya və qapı siyasəti
+radio kartlarıdır (native select yoxdur); vahid/proqram siyahıları axtarışlı checkbox siyahısıdır.{% endcomment %}
+{% with st=bp.settings survey=bp.survey %}
+<form method="post" action="{{ st.post_url }}" class="svb-form" data-svb-settings>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ bp.next_url }}">
+
+    <fieldset class="svb-card">
+        <legend class="svb-card__title">{% trans "Əsas məlumat" context "surveys.builder" %}</legend>
+        <div class="svc-field svb-field--wide">
+            <label for="svb-title">{% trans "Ad" context "surveys.builder" %}</label>
+            <input id="svb-title" class="svc-input" type="text" name="title" maxlength="200" required value="{{ survey.title }}">
+        </div>
+        <div class="svc-field svb-field--wide">
+            <label for="svb-description">{% trans "Təsvir (respondentə göstərilir)" context "surveys.builder" %}</label>
+            <textarea id="svb-description" class="svc-input svb-textarea" name="description" rows="3" maxlength="2000">{{ survey.description }}</textarea>
+        </div>
+        {% if not survey.is_teacher_evaluation %}
+        <div class="svc-field">
+            <label for="svb-kind">{% trans "Növ" context "surveys.builder" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="svb-kind" name="kind" class="bootstrap-single-select__native" data-bootstrap-select{% if st.frozen %} disabled{% endif %}>
+                    {% for kind in st.kinds %}<option value="{{ kind.value }}"{% if kind.value == survey.kind %} selected{% endif %}>{{ kind.label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <label class="svc-check svb-toggle">
+            <input type="checkbox" name="anonymous" value="1"{% if survey.anonymous %} checked{% endif %}{% if st.frozen %} disabled{% endif %}>
+            <span><strong>{% trans "Anonim sorğu" context "surveys.builder" %}</strong> — {% trans "cavab adla saxlanılmır; nəticələr yalnız bağlandıqdan sonra və ən azı k cavab olanda görünür." context "surveys.builder" %}</span>
+        </label>
+        {% endif %}
+    </fieldset>
+
+    {% if survey.is_teacher_evaluation %}
+    <div class="svb-notice" role="note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <p>{% trans "Müəllim qiymətləndirməsi həmişə anonimdir. Auditoriya — semestrdə jurnalı bağlanmış fənlərin tələbələri; açılış, bağlanma, «Sonra doldur» möhləti və məcburilik «Sorğu kampaniyaları» bölməsində hər semestr üçün ayrıca seçilir. Burada yalnız sual dəstini idarə edirsiniz." context "surveys.builder" %}</p>
+    </div>
+    {% else %}
+    <fieldset class="svb-card"{% if st.frozen %} aria-describedby="svb-frozen-note"{% endif %}>
+        <legend class="svb-card__title">{% trans "Kim doldurmalıdır" context "surveys.builder" %}</legend>
+        {% if st.frozen %}<p id="svb-frozen-note" class="svc-note">{% trans "Dərc olunmuş sorğunun auditoriyası dəyişmir — fərqli auditoriya üçün dublikat yaradın." context "surveys.builder" %}</p>{% endif %}
+        <div class="svb-radios" role="radiogroup" aria-label="{% trans 'Auditoriya' context 'surveys.builder' %}">
+            {% for item in st.audiences %}
+            <label class="svb-radio">
+                <input type="radio" name="audience" value="{{ item.value }}"{% if item.value == survey.audience %} checked{% endif %}{% if st.frozen %} disabled{% endif %}>
+                <span class="svb-radio__face">
+                    <i class="fas {% if item.value == 'students' %}fa-user-graduate{% elif item.value == 'teachers' %}fa-chalkboard-user{% elif item.value == 'staff' %}fa-user-tie{% else %}fa-users{% endif %}" aria-hidden="true"></i>
+                    {{ item.label }}
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+        <details class="svb-narrow"{% if st.selected_units or st.selected_programs %} open{% endif %}>
+            <summary>{% trans "Auditoriyanı daralt (fakültə, kafedra, qrup, ixtisas, kurs)" context "surveys.builder" %}</summary>
+            <p class="svc-note">{% trans "Heç nə seçilməsə — bütün təşkilat. İxtisas və kurs yalnız tələbələrə aiddir: seçiləndə auditoriyada yalnız uyğun tələbələr qalır." context "surveys.builder" %}</p>
+            <div class="svb-pickers">
+                <div class="svb-picker">
+                    <label class="svb-picker__label" for="svb-units-q">{% trans "Struktur vahidləri" context "surveys.builder" %}</label>
+                    <input id="svb-units-q" class="svc-input svb-picker__search" type="search" data-svb-filter="svb-units" placeholder="{% trans 'Axtar…' context 'surveys.builder' %}" autocomplete="off"{% if st.frozen %} disabled{% endif %}>
+                    <ul id="svb-units" class="svb-picker__list">
+                        {% for unit in st.units %}
+                        <li class="svb-picker__item svb-picker__item--l{{ unit.level|default:0 }}" data-svb-label="{{ unit.label|lower }}">
+                            <label class="svc-check"><input type="checkbox" name="units" value="{{ unit.id }}"{% if unit.checked %} checked{% endif %}{% if st.frozen %} disabled{% endif %}> <span>{{ unit.label }}</span></label>
+                        </li>
+                        {% empty %}<li class="svc-note">{% trans "Struktur vahidi yoxdur." context "surveys.builder" %}</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="svb-picker">
+                    <label class="svb-picker__label" for="svb-programs-q">{% trans "İxtisaslar (yalnız tələbələr)" context "surveys.builder" %}</label>
+                    <input id="svb-programs-q" class="svc-input svb-picker__search" type="search" data-svb-filter="svb-programs" placeholder="{% trans 'Axtar…' context 'surveys.builder' %}" autocomplete="off"{% if st.frozen %} disabled{% endif %}>
+                    <ul id="svb-programs" class="svb-picker__list">
+                        {% for program in st.programs %}
+                        <li class="svb-picker__item" data-svb-label="{{ program.label|lower }}">
+                            <label class="svc-check"><input type="checkbox" name="programs" value="{{ program.id }}"{% if program.checked %} checked{% endif %}{% if st.frozen %} disabled{% endif %}> <span>{{ program.label }}</span></label>
+                        </li>
+                        {% empty %}<li class="svc-note">{% trans "İxtisas yoxdur." context "surveys.builder" %}</li>{% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <fieldset class="svb-years">
+                <legend class="svb-picker__label">{% trans "Kurs (yalnız tələbələr)" context "surveys.builder" %}</legend>
+                {% for year in st.years %}
+                <label class="svb-chipcheck"><input type="checkbox" name="course_years" value="{{ year.value }}"{% if year.checked %} checked{% endif %}{% if st.frozen %} disabled{% endif %}> <span>{% blocktrans trimmed with n=year.value context "surveys.builder" %}{{ n }}. kurs{% endblocktrans %}</span></label>
+                {% endfor %}
+            </fieldset>
+        </details>
+    </fieldset>
+
+    <fieldset class="svb-card">
+        <legend class="svb-card__title">{% trans "Tarixlər" context "surveys.builder" %}</legend>
+        <div class="svb-row">
+            <div class="svc-field">
+                <label for="svb-opens">{% trans "Açılış" context "surveys.builder" %}</label>
+                <input id="svb-opens" class="svc-input" type="date" name="opens_on" value="{{ survey.opens_on|date:'Y-m-d' }}"{% if st.opens_frozen %} disabled{% endif %}>
+            </div>
+            <div class="svc-field">
+                <label for="svb-closes">{% trans "Bağlanma" context "surveys.builder" %}</label>
+                <input id="svb-closes" class="svc-input" type="date" name="closes_on" value="{{ survey.closes_on|date:'Y-m-d' }}" placeholder="{{ st.suggested_close|date:'Y-m-d' }}">
+            </div>
+        </div>
+        <p class="svc-note">{% trans "Açılış boşdursa dərc günü açılır. Bağlanma tarixi dərc üçün məcburidir; sonradan uzatmaq olar." context "surveys.builder" %}</p>
+    </fieldset>
+
+    <fieldset class="svb-card" data-svb-obligation>
+        <legend class="svb-card__title">{% trans "Məcburilik" context "surveys.builder" %}</legend>
+        <div class="svb-radios" role="radiogroup" aria-label="{% trans 'Məcburilik' context 'surveys.builder' %}">
+            <label class="svb-radio"><input type="radio" name="obligation" value="voluntary"{% if not survey.mandatory %} checked{% endif %}> <span class="svb-radio__face"><i class="fas fa-hand" aria-hidden="true"></i> {% trans "Könüllü" context "surveys.builder" %}</span></label>
+            <label class="svb-radio"><input type="radio" name="obligation" value="mandatory"{% if survey.mandatory %} checked{% endif %}> <span class="svb-radio__face"><i class="fas fa-circle-exclamation" aria-hidden="true"></i> {% trans "Məcburi" context "surveys.builder" %}</span></label>
+        </div>
+        <div class="svb-policies" data-svb-policies{% if not survey.mandatory %} hidden{% endif %}>
+            <p class="svb-picker__label">{% trans "Doldurulmayanda kabinet necə davransın?" context "surveys.builder" %}</p>
+            {% for item in st.policies %}
+            <label class="svb-policy">
+                <input type="radio" name="gate_policy" value="{{ item.value }}"{% if item.value == survey.gate_policy %} checked{% endif %}>
+                <span class="svb-policy__body">
+                    <strong>{{ item.label }}</strong>
+                    <span class="svb-policy__hint">
+                        {% if item.value == "block" %}{% trans "İstifadəçi kabinetə girəndə dərhal sorğuya yönləndirilir; doldurmadan kabinet açılmır." context "surveys.builder" %}
+                        {% elif item.value == "skip_once" %}{% trans "İlk dəfə «Bu dəfə keç» deyə bilər və xəbərdarlıq alır: növbəti dəfə doldurmadan kabinetə daxil ola bilməyəcək." context "surveys.builder" %}
+                        {% else %}{% trans "Açılışdan sonra N gün ərzində «Sonra doldur» (hər dəfə 24 saat), sonra kabinet bağlanır." context "surveys.builder" %}{% endif %}
+                    </span>
+                </span>
+            </label>
+            {% endfor %}
+            <div class="svc-field svc-field--narrow" data-svb-defer{% if survey.gate_policy != "defer_days" %} hidden{% endif %}>
+                <label for="svb-defer">{% trans "Möhlət (gün)" context "surveys.builder" %}</label>
+                <input id="svb-defer" class="svc-input" type="number" name="defer_days" min="0" max="{{ st.defer_max }}" value="{{ survey.defer_days }}">
+            </div>
+            <p class="svc-note">{% trans "İmtahan səhifələri, parol dəyişmə və çıxış heç vaxt bağlanmır — sorğu yalnız kabineti bağlayır." context "surveys.builder" %}</p>
+        </div>
+    </fieldset>
+
+    {% if survey.anonymous %}
+    <fieldset class="svb-card">
+        <legend class="svb-card__title">{% trans "Anonimlik həddi" context "surveys.builder" %}</legend>
+        <div class="svc-field svc-field--narrow">
+            <label for="svb-k">{% trans "Minimum qrup (k)" context "surveys.builder" %}</label>
+            <input id="svb-k" class="svc-input" type="number" name="min_group_size" min="{{ st.k_floor }}" max="{{ st.k_ceil }}" value="{{ survey.min_group_size }}"{% if st.k_frozen %} disabled{% endif %}>
+        </div>
+        <p class="svc-note">{% trans "k-dan az cavab olan nəticə və açıq cavablar göstərilmir; faizlər 5-ə yuvarlaqlaşdırılır." context "surveys.builder" %}</p>
+    </fieldset>
+    {% endif %}
+    {% endif %}
+
+    <div class="svb-actions">
+        <button type="submit" class="svc-btn svc-btn--primary"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "surveys.builder" %}</button>
+    </div>
+</form>
+{% endwith %}

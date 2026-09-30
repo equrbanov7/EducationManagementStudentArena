@@ -146,5 +146,12 @@ class SubmitFlowTest(TestCase):
         self.assertFalse(SurveyReceipt.objects.exists())
 
     def test_staff_cannot_open_student_pages(self):
+        """Sorğu qurucusu (2026-09-30): ``/sorgu/`` artıq HƏR üzvün sorğu siyahısıdır (qapı müəllim/heyəti
+        də bura yönləndirə bilər), amma müəllimə kampaniya blokları göstərilmir və tələbə formaları bağlıdır."""
         client = client_for(self.w["org"], self.w["teacher_a"])
-        self.assertEqual(client.get(reverse("surveys:home")).status_code, 403)
+        home = client.get(reverse("surveys:home"))
+        self.assertEqual(home.status_code, 200)
+        self.assertEqual(home.context["blocks"], [])
+        self.assertEqual(client.get(self._url(self.w["off_math"], self.w["teacher_a"])).status_code, 403)
+        general = client.get(reverse("surveys:general", args=[self.campaign.pk]))
+        self.assertEqual(general.status_code, 403)

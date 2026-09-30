@@ -76,8 +76,58 @@ def active_entries(organization, day) -> list:
     return entries
 
 
+def active_survey_entries(organization, day) -> list:
+    """Sorğu qurucusu (2026-09-30): bu gün AKTİV ümumi sorğuların xülasəsi (SIFIR sorğu).
+
+    Sətir: ``{"id", "audience", "mandatory", "policy", "opens_on", "closes_on", "grace_until"}``.
+    """
+    raw = read_snapshot(organization).get("surveys")
+    entries = []
+    for item in raw if isinstance(raw, list) else []:
+        if not isinstance(item, dict) or not item.get("id"):
+            continue
+        opens_on, closes_on = _parse(item.get("opens_on")), _parse(item.get("closes_on"))
+        if (opens_on and day < opens_on) or (closes_on and day > closes_on):
+            continue
+        entries.append(
+            {
+                "id": str(item["id"]),
+                "audience": str(item.get("audience") or ""),
+                "mandatory": bool(item.get("mandatory")),
+                "policy": str(item.get("policy") or ""),
+                "opens_on": opens_on,
+                "closes_on": closes_on,
+                "grace_until": _parse(item.get("grace_until")),
+            }
+        )
+    return entries
+
+
 def snapshot_version(organization) -> str:
     return str(read_snapshot(organization).get("v") or "")
+
+
+def _survey_rows(organization) -> list:
+    from ..constants import SurveyKind, SurveyStatus
+    from ..models import Survey
+
+    rows = (
+        Survey.objects.filter(organization=organization, status=SurveyStatus.PUBLISHED)
+        .exclude(kind=SurveyKind.TEACHER_EVALUATION)
+        .order_by("opens_on", "created_at")
+    )
+    return [
+        {
+            "id": str(row.pk),
+            "audience": row.audience,
+            "mandatory": bool(row.mandatory),
+            "policy": row.gate_policy if row.mandatory else "",
+            "opens_on": _iso(row.opens_on),
+            "closes_on": _iso(row.closes_on),
+            "grace_until": _iso(row.grace_until),
+        }
+        for row in rows
+    ]
 
 
 def build_snapshot(organization) -> dict:
@@ -88,6 +138,9 @@ def build_snapshot(organization) -> dict:
     )
     return {
         "v": secrets.token_hex(6),
+        # Sorğu qurucusu (2026-09-30): dərc olunmuş ümumi sorğular — qapı/inbox «mənə aid sorğu
+        # varmı?» sualına sıfır sorğu ilə cavab versin.
+        "surveys": _survey_rows(organization),
         "campaigns": [
             {
                 "id": str(row.pk),
@@ -125,10 +178,11 @@ def sync_gate_snapshot(organization) -> dict:
 
 
 def snapshot_is_stale(organization) -> bool:
-    """Xülasə DB-dəki açıq kampaniyalarla (id + tarixlər + məcburilik) üst-üstə düşmürmü (1 sorğu).
+    """Xülasə DB-dəki açıq kampaniyalar / dərc olunmuş sorğularla üst-üstə düşmürmü (2 sorğu).
 
     Başqa kod ``Organization.settings``-i köhnə nüsxədən BÜTÖV yazsa (məs. modul
     görünürlüyü paneli), xülasə geri qayıda bilər — bu yoxlama onu tutur.
     """
-    stored = read_snapshot(organization)["campaigns"]
-    return build_snapshot(organization)["campaigns"] != stored
+    stored = read_snapshot(organization)
+    fresh = build_snapshot(organization)
+    return fresh["campaigns"] != stored["campaigns"] or fresh["surveys"] != (stored.get("surveys") or [])

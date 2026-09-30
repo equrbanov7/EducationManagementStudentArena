@@ -1,0 +1,10 @@
+{% if 'surveys-inbox' in allowed_sections %}
+{% comment %}«Sorğular» (sorğu qurucusu, 2026-09-30) — hər üzvün sorğu siyahısı: gözləyən (son
+tarix, məcburilik nişanı), tamamlanmış, bağlı; tələbəyə semestr kampaniyası da bir bənd kimi.
+Doldurma kabinetdən KƏNAR müstəqil formadadır (/sorgu/s/<id>/). Tam səhifə bölmədir.{% endcomment %}
+<section class="profile-section-panel profile-section--surveys-inbox {% if active_section == 'surveys-inbox' %}is-active{% endif %}"
+         data-profile-section-panel="surveys-inbox"
+         data-source-url="{{ profile_base_url }}?section=surveys-inbox">
+    {% include "surveys/cabinet/_inbox_panel.html" %}
+</section>
+{% endif %}

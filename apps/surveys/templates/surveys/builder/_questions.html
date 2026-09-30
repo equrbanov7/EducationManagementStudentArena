@@ -1,0 +1,98 @@
+{% load i18n %}
+{% comment %}Sual redaktoru — XHR cavabında serverdə YENİDƏN render olunan hissə (`builder.questions`).
+Hər forma `data-svb-op` daşıyır: JS onu fetch ilə göndərib bu bloku dəyişir; JS-siz adi POST + yönləndirmə.
+`data-svb-count` — başlıqdakı «Suallar: N» sayğacını JS yeniləyir (başlıq bu blokdan kənardadır).
+Sıra: sürükləmə (tutacaq) + klaviatura (tutacaqda Alt+↑/↓) + ↑/↓ düymələri. Kilidli sorğuda struktur
+idarələri yoxdur, yalnız mətn düzəlişi.{% endcomment %}
+<div class="svb-qeditor" data-svb-editor data-post-url="{{ ed.post_url }}" data-svb-count="{{ ed.count }}">
+    <p id="svb-dnd-help" class="svc-sr">{% trans "Sıranı dəyişmək üçün tutacağı sürükləyin və ya tutacaqda Alt + yuxarı/aşağı ox düymələrini basın." context "surveys.builder" %}</p>
+    <p class="svc-sr" aria-live="polite" data-svb-live></p>
+    {% if ed.locked %}
+    <div class="svb-notice svb-notice--warn" role="note">
+        <i class="fas fa-lock" aria-hidden="true"></i>
+        <p>{% trans "Bu sorğuya cavab gəlib — nəticələrin bütövlüyü üçün sual əlavə etmək, silmək, növünü, sırasını və məcburiliyini dəyişmək bağlıdır. Yalnız kiçik mətn düzəlişi (yazı səhvi) mümkündür; hər düzəliş versiya kimi saxlanılır. Böyük dəyişiklik üçün dublikat yaradın." context "surveys.builder" %}</p>
+    </div>
+    {% elif ed.teacher %}
+    <div class="svb-notice" role="note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <p>{% trans "Müəllim qiymətləndirməsində sual növləri: Likert (1–5), bal (1–10) və açıq cavab. «Ümumi bal» (1–10) və «Tövsiyə» sualları nəticə panelinin göstəricilərini qidalandırır; «İndeksə daxil» Likert sualları orta indeksi təşkil edir." context "surveys.builder" %}</p>
+    </div>
+    {% endif %}
+
+    {% for group in ed.groups %}
+    <section class="svb-group" aria-labelledby="svb-group-{{ forloop.counter }}">
+        <header class="svb-group__head">
+            <h3 id="svb-group-{{ forloop.counter }}" class="svb-group__title">
+                {% if group.page %}{% if group.page.title %}{{ group.page.title }}{% else %}{% trans "Adsız bölmə" context "surveys.builder" %}{% endif %}{% else %}{{ group.title }}{% endif %}
+                <span class="svb-group__count">{{ group.rows|length }}</span>
+            </h3>
+            {% if group.page %}
+            <div class="svb-group__tools">
+                {% if not ed.locked %}
+                {% if not group.first %}
+                <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="move_page"><input type="hidden" name="page_id" value="{{ group.page.pk }}"><input type="hidden" name="direction" value="up"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                    <button type="submit" class="svb-icon" aria-label="{% trans 'Bölməni yuxarı' context 'surveys.builder' %}"><i class="fas fa-arrow-up" aria-hidden="true"></i></button></form>
+                {% endif %}
+                {% if not group.last %}
+                <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="move_page"><input type="hidden" name="page_id" value="{{ group.page.pk }}"><input type="hidden" name="direction" value="down"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                    <button type="submit" class="svb-icon" aria-label="{% trans 'Bölməni aşağı' context 'surveys.builder' %}"><i class="fas fa-arrow-down" aria-hidden="true"></i></button></form>
+                {% endif %}
+                {% if ed.groups|length > 1 %}
+                <form method="post" action="{{ ed.post_url }}" data-svb-op>{% csrf_token %}<input type="hidden" name="op" value="delete_page"><input type="hidden" name="page_id" value="{{ group.page.pk }}"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                    <button type="submit" class="svb-icon svb-icon--danger" aria-label="{% trans 'Bölməni sil' context 'surveys.builder' %}" data-ems-confirm="{% trans 'Bölmə silinsin? Sualları qonşu bölməyə keçəcək.' context 'surveys.builder' %}"><i class="fas fa-trash" aria-hidden="true"></i></button></form>
+                {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        </header>
+        {% if group.page %}
+        <details class="svb-page-edit">
+            <summary>{% trans "Bölmənin adı və izahı" context "surveys.builder" %}</summary>
+            <form method="post" action="{{ ed.post_url }}" class="svb-inline" data-svb-op>
+                {% csrf_token %}<input type="hidden" name="op" value="update_page"><input type="hidden" name="page_id" value="{{ group.page.pk }}"><input type="hidden" name="next" value="{{ ed.next_url }}">
+                <div class="svc-field svb-field--wide"><label for="svb-pt-{{ group.key }}">{% trans "Bölmənin adı" context "surveys.builder" %}</label><input id="svb-pt-{{ group.key }}" class="svc-input" type="text" name="title" maxlength="200" value="{{ group.page.title }}"></div>
+                <div class="svc-field svb-field--wide"><label for="svb-pd-{{ group.key }}">{% trans "İzah" context "surveys.builder" %}</label><textarea id="svb-pd-{{ group.key }}" class="svc-input svb-textarea" name="description" rows="2" maxlength="1000">{{ group.page.description }}</textarea></div>
+                <button type="submit" class="svc-btn svc-btn--ghost">{% trans "Yadda saxla" context "surveys.builder" %}</button>
+            </form>
+        </details>
+        {% endif %}
+
+        <ol class="svb-qlist" data-svb-list data-group="{{ group.key }}">
+            {% for row in group.rows %}{% include "surveys/builder/_question_card.html" %}{% empty %}
+            <li class="svb-qlist__empty svc-note">{% trans "Bu bölmədə hələ sual yoxdur." context "surveys.builder" %}</li>{% endfor %}
+        </ol>
+
+        {% if not ed.locked %}
+        <form method="post" action="{{ ed.post_url }}" class="svb-add" data-svb-op data-svb-open-last>
+            {% csrf_token %}<input type="hidden" name="op" value="add_question"><input type="hidden" name="next" value="{{ ed.next_url }}">
+            {% if ed.teacher %}<input type="hidden" name="section" value="{{ group.key }}">{% else %}<input type="hidden" name="page" value="{{ group.key }}">{% endif %}
+            <input type="hidden" name="required" value="1">
+            <div class="svc-field svb-field--grow">
+                <label for="svb-add-text-{{ forloop.counter }}">{% trans "Yeni sual" context "surveys.builder" %}</label>
+                <input id="svb-add-text-{{ forloop.counter }}" class="svc-input" type="text" name="text" maxlength="1000" required placeholder="{% trans 'Sualın mətni…' context 'surveys.builder' %}">
+            </div>
+            <div class="svc-field">
+                <label for="svb-add-kind-{{ forloop.counter }}">{% trans "Növ" context "surveys.builder" %}</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select id="svb-add-kind-{{ forloop.counter }}" name="kind" class="bootstrap-single-select__native" data-bootstrap-select>
+                        {% for kind in ed.kinds %}<option value="{{ kind.value }}">{{ kind.label }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="svc-btn svc-btn--primary"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Əlavə et" context "surveys.builder" %}</button>
+        </form>
+        {% endif %}
+    </section>
+    {% endfor %}
+
+    {% if not ed.teacher and not ed.locked %}
+    <form method="post" action="{{ ed.post_url }}" class="svb-add svb-add--page" data-svb-op>
+        {% csrf_token %}<input type="hidden" name="op" value="add_page"><input type="hidden" name="next" value="{{ ed.next_url }}">
+        <div class="svc-field svb-field--grow">
+            <label for="svb-add-page">{% trans "Yeni bölmə" context "surveys.builder" %}</label>
+            <input id="svb-add-page" class="svc-input" type="text" name="title" maxlength="200" placeholder="{% trans 'məs. Xidmətin keyfiyyəti' context 'surveys.builder' %}">
+        </div>
+        <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "Bölmə əlavə et" context "surveys.builder" %}</button>
+    </form>
+    {% endif %}
+</div>

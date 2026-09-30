@@ -97,6 +97,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "exams.expire_overdue_attempts",
         "schedule": 60.0,  # seconds
     },
+    # Sorğu platforması (2026-09-30): açılış tarixi çatmış sorğular üçün auditoriyaya in-app
+    # bildiriş (hər sorğu üçün bir dəfə — `notified_at`). Saatda bir.
+    "surveys-notify-due": {
+        "task": "surveys.notify_due_surveys",
+        "schedule": 3600.0,
+    },
     # Final imtahanı yaxınlaşan tələbələrə xatırlatma bildirişi (saatda bir).
     # Dublikat FinalExamTicket.reminder_stage ilə əngəllənir, ona görə saatlıq
     # işləmə spam yaratmır.

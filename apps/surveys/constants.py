@@ -27,6 +27,12 @@ class QuestionKind(models.TextChoices):
     LIKERT5 = "likert5", pgettext_lazy(_CTX, "Razılıq şkalası (1–5)")
     SCALE10 = "scale10", pgettext_lazy(_CTX, "Bal şkalası (1–10)")
     TEXT = "text", pgettext_lazy(_CTX, "Sərbəst mətn")
+    # Sorğu qurucusu (2026-09-30) — ümumi sorğuların əlavə növləri.
+    SINGLE = "single", pgettext_lazy(_CTX, "Tək seçim")
+    MULTI = "multi", pgettext_lazy(_CTX, "Çox seçim")
+    NPS = "nps", pgettext_lazy(_CTX, "Reytinq / NPS (0–10)")
+    YESNO = "yesno", pgettext_lazy(_CTX, "Bəli / Xeyr")
+    SHORT_TEXT = "short_text", pgettext_lazy(_CTX, "Qısa mətn")
 
 
 class CampaignStatus(models.TextChoices):
@@ -74,3 +80,80 @@ NON_STAFF_ROLE_NAMES = STUDENT_ROLE_NAMES | {"member"}
 #: Bildiriş hadisəsi (metadata.event).
 EVENT_CAMPAIGN_OPENED = "survey_campaign_opened"
 AUDIT_RESOURCE_TYPE = "surveys.campaign"
+
+
+# ── Sorğu qurucusu (2026-09-30) ─────────────────────────────────────────────
+
+
+class SurveyKind(models.TextChoices):
+    #: Mövcud semestr axını (müəllim × fənn, anonim) — sual dəsti kampaniyalarda işlənir.
+    TEACHER_EVALUATION = "teacher_evaluation", pgettext_lazy(_CTX, "Müəllim qiymətləndirməsi")
+    GENERAL = "general", pgettext_lazy(_CTX, "Ümumi sorğu")
+    COURSE_FEEDBACK = "course_feedback", pgettext_lazy(_CTX, "Fənn / kurs rəyi")
+    EVENT = "event", pgettext_lazy(_CTX, "Tədbir / digər")
+
+
+class Audience(models.TextChoices):
+    STUDENTS = "students", pgettext_lazy(_CTX, "Tələbələr")
+    TEACHERS = "teachers", pgettext_lazy(_CTX, "Müəllimlər")
+    STAFF = "staff", pgettext_lazy(_CTX, "İnzibati heyət")
+    EVERYONE = "everyone", pgettext_lazy(_CTX, "Hamı")
+
+
+class GatePolicy(models.TextChoices):
+    BLOCK = "block", pgettext_lazy(_CTX, "Doldurulmayınca kabinet bağlıdır")
+    SKIP_ONCE = "skip_once", pgettext_lazy(_CTX, "Bir dəfə keçmək olar")
+    DEFER_DAYS = "defer_days", pgettext_lazy(_CTX, "«Sonra doldur» möhləti (gün)")
+
+
+class SurveyStatus(models.TextChoices):
+    DRAFT = "draft", pgettext_lazy(_CTX, "Qaralama")
+    PUBLISHED = "published", pgettext_lazy(_CTX, "Dərc olunub")
+    CLOSED = "closed", pgettext_lazy(_CTX, "Bağlı")
+    ARCHIVED = "archived", pgettext_lazy(_CTX, "Arxivdə")
+
+
+#: Müəllim qiymətləndirməsinin analitikası (indeks, «ümumi bal», tövsiyə) yalnız bu növləri oxuyur.
+TEACHER_EVAL_KINDS = (QuestionKind.LIKERT5, QuestionKind.SCALE10, QuestionKind.TEXT)
+GENERIC_KINDS = (
+    QuestionKind.LIKERT5,
+    QuestionKind.SINGLE,
+    QuestionKind.MULTI,
+    QuestionKind.NPS,
+    QuestionKind.YESNO,
+    QuestionKind.SHORT_TEXT,
+    QuestionKind.TEXT,
+)
+CHOICE_KINDS = (QuestionKind.SINGLE, QuestionKind.MULTI)
+TEXT_KINDS = (QuestionKind.TEXT, QuestionKind.SHORT_TEXT)
+#: Rəqəmli cavab diapazonları (``SurveySubmissionAnswer.number``); bəli = 1, xeyr = 0.
+NUMBER_RANGES = {
+    QuestionKind.LIKERT5: (1, 5),
+    QuestionKind.SCALE10: (1, 10),
+    QuestionKind.NPS: (0, 10),
+    QuestionKind.YESNO: (0, 1),
+}
+
+SHORT_TEXT_MAX_LENGTH = 300
+QUESTION_TEXT_MAX_LENGTH = 1000
+HELP_TEXT_MAX_LENGTH = 300
+OPTION_MAX_LENGTH = 200
+TITLE_MAX_LENGTH = 200
+DESCRIPTION_MAX_LENGTH = 2000
+MAX_QUESTIONS = 80
+MAX_PAGES = 20
+MAX_OPTIONS = 30
+MIN_OPTIONS = 2
+MAX_FILTER_ITEMS = 60
+MAX_DEFER_DAYS = 60
+DEFAULT_DEFER_DAYS = 3
+#: Kilidli (cavablanmış) sualda mətn düzəlişi «yazı səhvi» səviyyəsində olmalıdır (difflib nisbəti).
+TYPO_EDIT_MIN_RATIO = 0.8
+
+#: Ümumi sorğu qapısının sessiya açarları (kampaniyanınkından AYRI — mövcud axın toxunulmur).
+SESSION_SURVEY_STATE_KEY = "survey_gate_generic"
+SESSION_SURVEY_DEFER_KEY = "survey_gate_generic_defer"
+SESSION_SURVEY_SKIP_KEY = "survey_gate_generic_skip"
+
+EVENT_SURVEY_OPENED = "survey_opened"
+AUDIT_SURVEY_RESOURCE = "surveys.survey"

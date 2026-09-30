@@ -1,0 +1,95 @@
+{% load i18n %}
+{% comment %}«Nəticələr» tab-ı. Anonim sorğu: bağlanana qədər yalnız iştirak (səbət/5-lik faiz), sonra
+k-qaydası ilə paylanmalar (yalnız faiz), açıq cavablar təsadüfi sırada. Şəxsli sorğu: canlı nəticə,
+respondentlər yalnız idarəçiyə. Zolaqlar `<progress>` elementidir (inline style yoxdur — CSP).{% endcomment %}
+{% if res.teacher %}
+<div class="svb-notice" role="note">
+    <i class="fas fa-circle-info" aria-hidden="true"></i>
+    <p>{% trans "Müəllim qiymətləndirməsinin nəticələri (müəllim reytinqi, kafedra/fakültə bölgüsü, dinamika) «Sorğu nəticələri» bölməsindədir." context "surveys.builder" %} <a class="svb-link" href="{{ res.results_url }}">{% trans "Nəticələrə keç" context "surveys.builder" %}</a></p>
+</div>
+{% elif res.state == "draft" %}
+<p class="svc-empty">{% trans "Sorğu hələ dərc olunmayıb — nəticə yoxdur." context "surveys.builder" %}</p>
+{% else %}
+{% with part=res.participation %}
+<section class="svb-card" aria-labelledby="svb-part-title">
+    <h3 id="svb-part-title" class="svb-card__title">{% trans "İştirak" context "surveys.builder" %}</h3>
+    <dl class="svc-stats">
+        <div><dt>{% trans "Auditoriya" context "surveys.builder" %}</dt><dd>{{ part.expected }}</dd></div>
+        <div><dt>{% trans "Dolduran" context "surveys.builder" %}</dt><dd>{{ part.completed }}</dd></div>
+        <div><dt>{% trans "İştirak" context "surveys.builder" %}</dt><dd>{% if part.rate is not None %}{% if bp.survey.anonymous %}≈ {% endif %}{{ part.rate }}%{% else %}—{% endif %}</dd></div>
+    </dl>
+    {% if part.units %}
+    <div class="svb-tablewrap">
+        <table class="svb-table">
+            <caption class="svc-sr">{% trans "Vahidlər üzrə iştirak" context "surveys.builder" %}</caption>
+            <thead><tr><th scope="col">{% trans "Vahid" context "surveys.builder" %}</th><th scope="col">{% trans "Auditoriya" context "surveys.builder" %}</th><th scope="col">{% trans "Dolduran" context "surveys.builder" %}</th><th scope="col">{% trans "İştirak" context "surveys.builder" %}</th></tr></thead>
+            <tbody>
+                {% for row in part.units %}
+                <tr><th scope="row">{{ row.label }}</th><td>{{ row.expected }}</td><td>{{ row.completed }}</td><td>{% if row.rate is not None %}{{ row.rate }}%{% else %}—{% endif %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
+{% endwith %}
+
+{% if res.state == "live" %}
+<div class="svb-notice" role="note">
+    <i class="fas fa-hourglass-half" aria-hidden="true"></i>
+    <p>{% trans "Anonim sorğu davam edir — nəticələr sorğu bağlandıqdan sonra görünəcək (canlı nəticə cavab verənin kimliyini aça bilər)." context "surveys.builder" %}</p>
+</div>
+{% else %}
+<div class="svb-results-head">
+    <p class="svc-note">{% if res.results.n is not None %}{% blocktrans trimmed with n=res.results.n context "surveys.builder" %}Cavab sayı: {{ n }}{% endblocktrans %}{% else %}{% blocktrans trimmed with n=res.results.n_label context "surveys.builder" %}Cavab sayı: {{ n }}{% endblocktrans %}{% endif %}{% if bp.survey.anonymous %} · {% blocktrans trimmed with k=res.results.k context "surveys.builder" %}anonimlik həddi k = {{ k }}{% endblocktrans %}{% endif %}</p>
+    <a class="svc-btn svc-btn--ghost" href="{{ res.export_url }}"><i class="fas fa-file-csv" aria-hidden="true"></i> {% trans "CSV ixrac" context "surveys.builder" %}</a>
+</div>
+{% if res.results.suppressed %}
+<p class="svc-empty"><i class="fas fa-user-shield" aria-hidden="true"></i> {% trans "Cavab sayı anonimlik həddindən (k) azdır — nəticələr gizlidir." context "surveys.builder" %}</p>
+{% else %}
+{% for card in res.results.questions %}
+<article class="svb-card svb-result" aria-labelledby="svb-r-{{ forloop.counter }}">
+    <header class="svb-result__head">
+        <h3 id="svb-r-{{ forloop.counter }}" class="svb-result__title"><span class="svb-q__num">{{ forloop.counter }}</span> {{ card.question.display_text }}</h3>
+        <span class="svc-note">{% if card.answered is not None %}{% blocktrans trimmed with n=card.answered context "surveys.builder" %}{{ n }} cavab{% endblocktrans %}{% else %}{% blocktrans trimmed with n=card.answered_label context "surveys.builder" %}{{ n }} cavab{% endblocktrans %}{% endif %}</span>
+    </header>
+    {% if card.hidden %}
+    <p class="svc-note"><i class="fas fa-user-shield" aria-hidden="true"></i> {% trans "Bu suala k-dan az cavab verilib — gizlidir." context "surveys.builder" %}</p>
+    {% elif card.is_text %}
+    {% if card.texts %}
+    <ul class="svb-texts">
+        {% for item in card.texts %}<li class="svb-texts__item">{{ item.text }}{% if item.who %} <span class="svb-texts__who">— {{ item.who }}</span>{% endif %}</li>{% endfor %}
+    </ul>
+    {% if card.texts_more %}<p class="svc-note">{% blocktrans trimmed with n=card.texts_more context "surveys.builder" %}və daha {{ n }} cavab (CSV ixracında){% endblocktrans %}</p>{% endif %}
+    {% else %}<p class="svc-note">{% trans "Açıq cavab yoxdur." context "surveys.builder" %}</p>{% endif %}
+    {% else %}
+    {% if card.avg is not None %}<p class="svb-result__kpi">{% trans "Orta" context "surveys.builder" %}: <strong>{{ card.avg }}</strong>{% if card.nps %} · NPS: <strong>{{ card.nps.score }}</strong> <span class="svc-note">({% trans "tərəfdar" context "surveys.builder" %} {{ card.nps.promoters }}%, {% trans "neytral" context "surveys.builder" %} {{ card.nps.passives }}%, {% trans "tənqidçi" context "surveys.builder" %} {{ card.nps.detractors }}%)</span>{% endif %}</p>{% endif %}
+    <ul class="svb-bars">
+        {% for bucket in card.buckets %}
+        <li class="svb-bars__row">
+            <span class="svb-bars__label">{{ bucket.label }}</span>
+            <progress class="svb-bars__bar" value="{{ bucket.pct }}" max="100">{{ bucket.pct }}%</progress>
+            <span class="svb-bars__pct">{{ bucket.pct }}%{% if bucket.count is not None %} <span class="svc-note">({{ bucket.count }})</span>{% endif %}</span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</article>
+{% endfor %}
+{% endif %}
+
+{% if res.respondents %}
+<section class="svb-card" aria-labelledby="svb-resp-title">
+    <h3 id="svb-resp-title" class="svb-card__title">{% trans "Respondentlər (yalnız idarəçi görür)" context "surveys.builder" %}</h3>
+    <div class="svb-tablewrap">
+        <table class="svb-table">
+            <thead><tr><th scope="col">{% trans "Ad" context "surveys.builder" %}</th><th scope="col">{% trans "İstifadəçi adı" context "surveys.builder" %}</th><th scope="col">{% trans "Vaxt" context "surveys.builder" %}</th></tr></thead>
+            <tbody>
+                {% for row in res.respondents %}<tr><td>{{ row.name }}</td><td>{{ row.username }}</td><td>{{ row.at|date:"d.m.Y H:i" }}</td></tr>{% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+{% endif %}
+{% endif %}
