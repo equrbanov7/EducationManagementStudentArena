@@ -38,12 +38,22 @@ def _manage_list_html(request, capabilities):
     )
 
 
-def _log_item_action(request, *, action, item_id, summary):
-    """Uğurlu qeyd əməliyyatını audit jurnalına yazır."""
+def _log_item_action(request, *, action, item_id, summary, attachment_event=""):
+    """Uğurlu qeyd əməliyyatını audit jurnalına yazır.
+
+    ``attachment_event`` (uploaded / replaced / removed) fayl dəyişikliyini
+    ayrıca iz kimi saxlayır — kim, nə vaxt, hansı qeydə sənəd qoşub/silib.
+    """
+    reason = f"Academic profile item {action}"
+    changes = None
+    if attachment_event:
+        reason = f"{reason}; attachment {attachment_event}"
+        changes = {"attachment": attachment_event}
     log_action(
         action=_AUDIT_ACTIONS[action],
         user=request.user,
-        reason=f"Academic profile item {action}",
+        reason=reason,
+        changes=changes,
         request=request,
         resource_type="AcademicProfileItem",
         resource_id=str(item_id),
@@ -51,10 +61,21 @@ def _log_item_action(request, *, action, item_id, summary):
     )
 
 
+def _item_summary(item):
+    summary = f"{item.kind}: {item.title}"
+    if item.attachment_name:
+        summary = f"{summary} [{item.attachment_name}]"
+    return summary
+
+
 @login_required
 @require_POST
 def academic_items_api(request):
-    """create / update / delete əməliyyatları — yalnız öz qeydləri üzərində."""
+    """create / update / delete əməliyyatları — yalnız öz qeydləri üzərində.
+
+    Sorğu ``multipart/form-data``-dır (2026-10-01): ``attachment`` faylı və
+    ``remove_attachment=1`` bayrağı qəbul olunur; urlencoded sorğu da işləyir.
+    """
     profile = getattr(request.user, "profile", None)
     capabilities = _role_capabilities(request.user, profile)
 
@@ -67,18 +88,37 @@ def academic_items_api(request):
         "detail": request.POST.get("detail", ""),
         "year": request.POST.get("year", ""),
         "link": request.POST.get("link", ""),
+        "attachment": request.FILES.get("attachment"),
     }
 
     if action == "create":
         ok, item, error = academic_profile.create_item(request.user, capabilities, **fields)
         if ok:
-            _log_item_action(request, action=action, item_id=item.pk, summary=f"{item.kind}: {item.title}")
+            _log_item_action(
+                request,
+                action=action,
+                item_id=item.pk,
+                summary=_item_summary(item),
+                attachment_event=item.attachment_event,
+            )
     elif action == "update":
         if not item_id_raw.isdigit():
             return JsonResponse({"success": False, "error": not_found_error}, status=404)
-        ok, item, error = academic_profile.update_item(request.user, capabilities, int(item_id_raw), **fields)
+        ok, item, error = academic_profile.update_item(
+            request.user,
+            capabilities,
+            int(item_id_raw),
+            remove_attachment=(request.POST.get("remove_attachment") or "").strip() == "1",
+            **fields,
+        )
         if ok:
-            _log_item_action(request, action=action, item_id=item.pk, summary=f"{item.kind}: {item.title}")
+            _log_item_action(
+                request,
+                action=action,
+                item_id=item.pk,
+                summary=_item_summary(item),
+                attachment_event=item.attachment_event,
+            )
     elif action == "delete":
         if not item_id_raw.isdigit():
             return JsonResponse({"success": False, "error": not_found_error}, status=404)

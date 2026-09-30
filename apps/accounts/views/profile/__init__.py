@@ -18,6 +18,7 @@ Modules:
 
 from .academic_items import academic_items_api
 from .avatar import profile_avatar
+from .avatar_api import profile_avatar_api
 from .main import user_profile
 from .password_otp import change_password_otp_request
 from .public import public_user_profile
@@ -28,6 +29,7 @@ from .view_as import view_as_search, view_as_start, view_as_stop
 __all__ = [
     "user_profile",
     "profile_avatar",
+    "profile_avatar_api",
     "public_user_profile",
     "statistics_export_csv",
     # «Akademik fəaliyyət» + şifrə-dəyişmə OTP endpoint-ləri

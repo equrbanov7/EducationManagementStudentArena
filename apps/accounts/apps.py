@@ -22,3 +22,20 @@ class AccountsConfig(AppConfig):
         auth_otp.register(
             "verify_otp_code", lambda user, *, code, purpose: verify_otp_code(user, code, purpose=purpose)
         )
+
+        # 2026-10-01: «Akademik fəaliyyət» qoşmaları — məxfi media prefiksinin
+        # icazə siyasəti (core deny-by-default-dur) + qeyd silinəndə faylların
+        # təmizlənməsi (istifadəçi kaskadı da daxil).
+        from django.db.models.signals import post_delete
+
+        from core.media_policies import register_media_policy
+
+        from .academic_models import ACADEMIC_ATTACHMENT_PREFIX, AcademicProfileItem
+        from .services.academic_attachments import check_attachment_media_access, cleanup_files_on_item_delete
+
+        register_media_policy(ACADEMIC_ATTACHMENT_PREFIX, check_attachment_media_access)
+        post_delete.connect(
+            cleanup_files_on_item_delete,
+            sender=AcademicProfileItem,
+            dispatch_uid="accounts.academic_item_attachment_cleanup",
+        )

@@ -6,11 +6,14 @@ yalnız HTTP giriş nöqtəsidir (SoC). Bax: docs/frontend/AJAX_SAFE_JS_PATTERN.
 (fetchJSON istehlakçısı: accounts/js/profile/academic_items.js).
 """
 
+from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.accounts.models import AcademicProfileItem
 from core.roles import ProfileRole
+
+from . import academic_attachments as attachments
 
 #: Hər növ üzrə istifadəçi başına maksimum qeyd — UI-nin oxunaqlı qalması və
 #: sadə anti-abuse tavanı üçün.
@@ -21,20 +24,91 @@ DETAIL_MAX_LENGTH = 255
 LINK_MAX_LENGTH = 300
 YEAR_MIN = 1950
 
-#: «Tədris etdiyi fənn» yalnız tədris heyəti üçün mənalıdır; qalan növlər
-#: bütün rollara açıqdır (tələbə sertifikat/məqalə əlavə edə bilsin).
-TEACHING_ONLY_KINDS = {AcademicProfileItem.Kind.SUBJECT}
+_Kind = AcademicProfileItem.Kind
+
+#: Yalnız tədris heyəti üçün mənalı növlər: «Tədris etdiyi fənn», «Kitab /
+#: dərslik» (dərslik müəllifliyi) və «Patent». Qalanları bütün rollara açıqdır —
+#: tələbə də təhsil, təcrübə (staj), məqalə, konfrans, layihə/qrant, sertifikat
+#: və mükafat (olimpiada və s.) əlavə edə bilir. 2026-10-01: 6 yeni növ.
+TEACHING_ONLY_KINDS = {_Kind.SUBJECT, _Kind.BOOK, _Kind.PATENT}
 
 #: «Qeyd tapılmadı.» — view qatı 404 statusunu bu mesajla tanıyır.
 NOT_FOUND_ERROR = pgettext_lazy("accounts.academic_items.error", "Qeyd tapılmadı.")
 
 #: Növ üzrə Font Awesome ikonları (idarəetmə + görünüş kartları).
 KIND_ICONS = {
-    AcademicProfileItem.Kind.SUBJECT: "fa-book-open",
-    AcademicProfileItem.Kind.CERTIFICATE: "fa-certificate",
-    AcademicProfileItem.Kind.PUBLICATION: "fa-file-lines",
-    AcademicProfileItem.Kind.CONFERENCE: "fa-people-group",
+    _Kind.SUBJECT: "fa-book-open",
+    _Kind.EDUCATION: "fa-graduation-cap",
+    _Kind.EXPERIENCE: "fa-briefcase",
+    _Kind.PUBLICATION: "fa-file-lines",
+    _Kind.BOOK: "fa-book",
+    _Kind.CONFERENCE: "fa-people-group",
+    _Kind.PROJECT: "fa-flask",
+    _Kind.PATENT: "fa-lightbulb",
+    _Kind.CERTIFICATE: "fa-certificate",
+    _Kind.AWARD: "fa-trophy",
 }
+
+_HINT_CTX = "accounts.academic_item_hint"
+
+#: Növ üzrə modal placeholder-ləri: (Başlıq, Ətraflı).
+KIND_HINTS = {
+    _Kind.SUBJECT: (
+        pgettext_lazy(_HINT_CTX, "Məs.: Verilənlər bazası sistemləri"),
+        pgettext_lazy(_HINT_CTX, "Kafedra, səviyyə (bakalavr / magistr)"),
+    ),
+    _Kind.EDUCATION: (
+        pgettext_lazy(_HINT_CTX, "Məs.: Kompüter elmləri üzrə magistr"),
+        pgettext_lazy(_HINT_CTX, "Universitet, fakültə, şəhər"),
+    ),
+    _Kind.EXPERIENCE: (
+        pgettext_lazy(_HINT_CTX, "Məs.: Proqram mühəndisi"),
+        pgettext_lazy(_HINT_CTX, "Təşkilat, dövr (2019–2023)"),
+    ),
+    _Kind.PUBLICATION: (
+        pgettext_lazy(_HINT_CTX, "Məqalənin adı"),
+        pgettext_lazy(_HINT_CTX, "Jurnal, cild / nömrə, həmmüəlliflər"),
+    ),
+    _Kind.BOOK: (
+        pgettext_lazy(_HINT_CTX, "Kitabın / dərsliyin adı"),
+        pgettext_lazy(_HINT_CTX, "Nəşriyyat, ISBN, həmmüəlliflər"),
+    ),
+    _Kind.CONFERENCE: (
+        pgettext_lazy(_HINT_CTX, "Məruzənin adı"),
+        pgettext_lazy(_HINT_CTX, "Konfransın adı, şəhər"),
+    ),
+    _Kind.PROJECT: (
+        pgettext_lazy(_HINT_CTX, "Layihənin adı"),
+        pgettext_lazy(_HINT_CTX, "Maliyyələşdirən qurum, rolunuz (rəhbər / icraçı)"),
+    ),
+    _Kind.PATENT: (
+        pgettext_lazy(_HINT_CTX, "İxtiranın adı"),
+        pgettext_lazy(_HINT_CTX, "Patent nömrəsi, verən qurum"),
+    ),
+    _Kind.CERTIFICATE: (
+        pgettext_lazy(_HINT_CTX, "Məs.: Cisco CCNA"),
+        pgettext_lazy(_HINT_CTX, "Verən qurum, sertifikat nömrəsi"),
+    ),
+    _Kind.AWARD: (
+        pgettext_lazy(_HINT_CTX, "Mükafatın adı"),
+        pgettext_lazy(_HINT_CTX, "Verən qurum, səbəb"),
+    ),
+}
+
+
+def _group(kind, items):
+    """Template qrupu: növ metadata-sı + qeydlər (idarəetmə və görünüş üçün eyni)."""
+    title_hint, detail_hint = KIND_HINTS.get(kind, ("", ""))
+    return {
+        "kind": str(kind.value),
+        "label": kind.label,
+        "icon": KIND_ICONS.get(kind, "fa-star"),
+        "items": items,
+        "is_empty": not items,
+        "title_hint": title_hint,
+        "detail_hint": detail_hint,
+        "allows_attachment": attachments.kind_allows_attachment(kind),
+    }
 
 
 def allowed_kinds_for(capabilities, user=None):
@@ -71,15 +145,7 @@ def items_grouped_for(user, capabilities):
     for item in user.academic_items.all():
         if item.kind in items_by_kind:
             items_by_kind[item.kind].append(item)
-    return [
-        {
-            "kind": str(kind.value),
-            "label": kind.label,
-            "icon": KIND_ICONS.get(kind, "fa-star"),
-            "items": items_by_kind[kind],
-        }
-        for kind in allowed
-    ]
+    return [_group(kind, items_by_kind[kind]) for kind in allowed]
 
 
 def display_groups_for(user):
@@ -92,16 +158,7 @@ def display_groups_for(user):
     for item in user.academic_items.all():
         if item.kind in items_by_kind:
             items_by_kind[item.kind].append(item)
-    return [
-        {
-            "kind": str(kind.value),
-            "label": kind.label,
-            "icon": KIND_ICONS.get(kind, "fa-star"),
-            "items": items_by_kind[kind],
-        }
-        for kind in AcademicProfileItem.Kind
-        if items_by_kind[kind]
-    ]
+    return [_group(kind, items_by_kind[kind]) for kind in AcademicProfileItem.Kind if items_by_kind[kind]]
 
 
 def _clean_year(raw_year):
@@ -174,8 +231,27 @@ def _clean_fields(*, kind, title, detail, year, link, capabilities, user=None):
     return True, cleaned, ""
 
 
-def create_item(user, capabilities, *, kind, title, detail="", year=None, link=""):
-    """Yeni qeyd yaradır; (ok, item|None, xəta) qaytarır."""
+def _prepare_upload(kind, attachment):
+    """Fayl verilibsə növ icazəsini və məzmunu yoxlayır; (ok, payload|None, xəta)."""
+    if attachment is None:
+        return True, None, ""
+    if not attachments.kind_allows_attachment(kind):
+        return False, None, pgettext("accounts.academic_items.error", "Bu qeyd növünə fayl əlavə etmək olmur.")
+    return attachments.prepare_attachment(attachment)
+
+
+def _limit_error():
+    return pgettext("accounts.academic_items.error", "Bu növ üzrə maksimum %(limit)s qeyd əlavə etmək olar.") % {
+        "limit": MAX_ITEMS_PER_KIND
+    }
+
+
+def create_item(user, capabilities, *, kind, title, detail="", year=None, link="", attachment=None):
+    """Yeni qeyd yaradır; (ok, item|None, xəta) qaytarır.
+
+    ``attachment`` — ixtiyari yüklənən fayl (bax services/academic_attachments).
+    Uğurda ``item.attachment_event`` = "uploaded" | "" (audit üçün).
+    """
     ok, cleaned, error = _clean_fields(
         kind=kind, title=title, detail=detail, year=year, link=link, capabilities=capabilities, user=user
     )
@@ -184,19 +260,38 @@ def create_item(user, capabilities, *, kind, title, detail="", year=None, link="
 
     existing_count = user.academic_items.filter(kind=cleaned["kind"]).count()
     if existing_count >= MAX_ITEMS_PER_KIND:
-        return (
-            False,
-            None,
-            pgettext("accounts.academic_items.error", "Bu növ üzrə maksimum %(limit)s qeyd əlavə etmək olar.")
-            % {"limit": MAX_ITEMS_PER_KIND},
-        )
+        return False, None, _limit_error()
 
-    item = AcademicProfileItem.objects.create(user=user, **cleaned)
+    ok, payload, error = _prepare_upload(cleaned["kind"], attachment)
+    if not ok:
+        return False, None, error
+
+    item = AcademicProfileItem(user=user, **cleaned)
+    if payload is None:
+        item.save()
+        item.attachment_event = ""
+        return True, item, ""
+    attachments.apply_attachment(item, payload)
+    try:
+        with transaction.atomic():
+            item.save()
+    except Exception:
+        attachments.discard_new_files(item, [])
+        raise
+    item.attachment_event = "uploaded"
     return True, item, ""
 
 
-def update_item(user, capabilities, item_id, *, kind, title, detail="", year=None, link=""):
-    """Mövcud qeydi yeniləyir; yalnız sahibi üçün. (ok, item|None, xəta)."""
+def update_item(
+    user, capabilities, item_id, *, kind, title, detail="", year=None, link="", attachment=None, remove_attachment=False
+):
+    """Mövcud qeydi yeniləyir; yalnız sahibi üçün. (ok, item|None, xəta).
+
+    Fayl: yeni ``attachment`` köhnəni ƏVƏZ edir; ``remove_attachment`` onu silir;
+    növ qoşmasız növə dəyişirsə fayl da silinir. Köhnə fayl saxlanmadan
+    tranzaksiya uğurla bitəndən SONRA silinir. ``item.attachment_event`` —
+    "uploaded" | "replaced" | "removed" | "".
+    """
     item = user.academic_items.filter(pk=item_id).first()
     if item is None:
         return False, None, str(NOT_FOUND_ERROR)
@@ -212,21 +307,44 @@ def update_item(user, capabilities, item_id, *, kind, title, detail="", year=Non
     if cleaned["kind"] != item.kind:
         target_count = user.academic_items.filter(kind=cleaned["kind"]).exclude(pk=item.pk).count()
         if target_count >= MAX_ITEMS_PER_KIND:
-            return (
-                False,
-                None,
-                pgettext("accounts.academic_items.error", "Bu növ üzrə maksimum %(limit)s qeyd əlavə etmək olar.")
-                % {"limit": MAX_ITEMS_PER_KIND},
-            )
+            return False, None, _limit_error()
+
+    ok, payload, error = _prepare_upload(cleaned["kind"], attachment)
+    if not ok:
+        return False, None, error
+
+    had_attachment = bool(item.attachment)
+    old_names = []
+    event = ""
+    if payload is not None:
+        old_names = attachments.apply_attachment(item, payload)
+        event = "replaced" if had_attachment else "uploaded"
+    elif had_attachment and (remove_attachment or not attachments.kind_allows_attachment(cleaned["kind"])):
+        old_names = attachments.clear_attachment(item)
+        event = "removed"
 
     for field, value in cleaned.items():
         setattr(item, field, value)
-    item.save(update_fields=[*cleaned.keys(), "updated_at"])
+    update_fields = [*cleaned.keys(), "updated_at"]
+    if event:
+        update_fields += attachments.ATTACHMENT_FIELDS
+    try:
+        with transaction.atomic():
+            item.save(update_fields=update_fields)
+            attachments.delete_files_on_commit(item.attachment.storage, old_names)
+    except Exception:
+        if payload is not None:
+            attachments.discard_new_files(item, old_names)
+        raise
+    item.attachment_event = event
     return True, item, ""
 
 
 def delete_item(user, item_id):
-    """Qeydi silir; yalnız sahibi üçün. (ok, xəta) qaytarır."""
+    """Qeydi silir; yalnız sahibi üçün. (ok, xəta) qaytarır.
+
+    Qoşma faylları ``post_delete`` siqnalı silir (istifadəçi kaskadında da).
+    """
     item = user.academic_items.filter(pk=item_id).first()
     if item is None:
         return False, str(NOT_FOUND_ERROR)

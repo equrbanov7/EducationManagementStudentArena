@@ -21,12 +21,16 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
    saxlayır. «Akademik fəaliyyət» kartı ayrıca AJAX-la işlədiyi üçün panelin
    ARDINCA gəlir — ona ayrıca saxlama düyməsi lazım deyil.
  * Avatar sahəsi çılpaq `<input type="file">` deyil: cari şəkil önizləməsi +
-   adlandırılmış seçim düyməsi (bax edit_profile_avatar.js).
+   adlandırılmış seçim düyməsi. 2026-10-01: yerində yüklə/sil — bax
+   _avatar_editor.html + profile_avatar.js (edit_profile_avatar.js əvəzinə).
 {% endcomment %}
 {% if 'edit-profile' in allowed_sections %}
 <section class="profile-section-panel profile-section--edit-profile {% if active_section == 'edit-profile' %}is-active{% endif %}" data-profile-section-panel="edit-profile">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_v2.css' %}?v=20261001-acad">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile_modals.css' %}?v=20260911-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_items_manage.css' %}?v=20261001-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/academic_attachment.css' %}?v=20261001-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/profile_avatar.css' %}?v=20261001-1">
 
     {% trans 'Şəxsi əlaqə məlumatlarınızı və akademik profilinizi buradan yeniləyin. Universitetin təyin etdiyi struktur məlumatları yalnız oxunur.' context 'profile.edit_v2' as edit_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=edit_subtitle %}
@@ -81,31 +85,14 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                            value="{{ profile.location|default:'' }}" maxlength="100"
                            placeholder="{% trans 'placeholder_location' context 'profile.edit' %}">
                 </div>
+                {% comment %}2026-10-01 (sahib: «şəkli qoymaq olduğu kimi silmək də mümkün
+                olsun»): avatar ƏSAS FORMADAN AYRIDIR — seçim → önizləmə → «Yadda saxla»
+                yerində (JSON API), «Sil» EMSConfirm ilə. Input-un `name`-i YOXDUR:
+                forma onu göndərmir, saxlanmamış-dəyişiklik qoruyucusu da saymır.
+                Davranış: profile_avatar.js; üslub: profile_avatar.css.{% endcomment %}
                 <div class="info-item info-item--avatar">
                     <span class="info-label">{% trans "avatar" context "profile.edit" %}</span>
-                    <div class="edit-profile-avatar" data-avatar-picker>
-                        <span class="edit-profile-avatar__thumb">
-                            {% if profile.avatar %}
-                            <img src="{% url 'accounts:profile_avatar' user.id %}?v={{ profile.updated_at|date:'U' }}"
-                                 alt="" data-avatar-preview>
-                            {% else %}
-                            <i class="fas fa-user" aria-hidden="true" data-avatar-placeholder></i>
-                            <img src="" alt="" hidden data-avatar-preview>
-                            {% endif %}
-                        </span>
-                        <div class="edit-profile-avatar__body">
-                            <label class="edit-profile-avatar__btn" for="avatar">
-                                <i class="fas fa-image" aria-hidden="true"></i>
-                                {% trans 'Şəkil seç' context 'profile.edit_v2' %}
-                            </label>
-                            <input type="file" class="edit-profile-avatar__input" id="avatar" name="avatar" accept="image/*"
-                                   data-avatar-input
-                                   data-label-empty="{% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}">
-                            <p class="edit-profile-avatar__hint" data-avatar-name>
-                                {% trans 'PNG və ya JPG · maksimum 5 MB' context 'profile.edit_v2' %}
-                            </p>
-                        </div>
-                    </div>
+                    {% include "accounts/profile/sections/_avatar_editor.html" %}
                 </div>
             </div>
         </div>
@@ -246,7 +233,7 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
         </h2>
         <p class="settings-note">
             <i class="fas fa-circle-info"></i>
-            {% trans 'Tədris etdiyiniz fənləri, sertifikatlarınızı, məqalə və konfrans materiallarınızı əlavə edin — bunlar profil səhifənizdə görünəcək.' context 'profile.edit_v2' %}
+            {% trans 'Təhsil və təcrübənizi, fənlərinizi, nəşr və layihələrinizi, sertifikat və mükafatlarınızı əlavə edin; lazım olan yerdə sənəd və ya şəkil də qoşa bilərsiniz. Bunlar profil səhifənizdə görünəcək.' context 'profile.edit_v2' %}
         </p>
         <div class="academic-items-search">
             <i class="fas fa-search" aria-hidden="true"></i>
@@ -264,13 +251,20 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
     </div>
 
     {# ── Qeyd əlavə et / redaktə et modalı (overlay + fon scroll kilidi Bootstrap-dadır) ── #}
-    <div class="modal fade" id="academicItemModal" tabindex="-1" aria-hidden="true"
+    <div class="modal fade" id="academicItemModal" tabindex="-1" aria-hidden="true" aria-labelledby="academicItemModalTitle"
          data-label-create="{% trans 'Yeni qeyd' context 'profile.academic_items' %}"
          data-label-edit="{% trans 'Qeydi redaktə et' context 'profile.academic_items' %}"
-         data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}">
-        <div class="modal-dialog modal-dialog-centered">
+         data-label-error="{% trans 'Əməliyyat alınmadı. Yenidən cəhd edin.' context 'profile.academic_items' %}"
+         data-label-too-big="{% trans 'Fayl 10 MB-dan böyük ola bilməz.' context 'profile.academic_items' %}"
+         data-label-bad-type="{% trans 'Yalnız PDF və ya şəkil (JPG, PNG, WEBP) yükləmək olar.' context 'profile.academic_items' %}"
+         data-label-pick="{% trans 'Fayl seç' context 'profile.academic_items' %}"
+         data-label-change="{% trans 'Faylı dəyiş' context 'profile.academic_items' %}"
+         data-label-title-hint="{% trans 'Məs.: Verilənlər bazası sistemləri' context 'profile.academic_items' %}"
+         data-label-detail-hint="{% trans 'Jurnal / konfrans / qurum adı və s.' context 'profile.academic_items' %}"
+         data-max-bytes="10485760">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
             <div class="modal-content edit-profile-modal">
-                <form id="academicItemForm" novalidate>
+                <form id="academicItemForm" novalidate enctype="multipart/form-data">
                     <input type="hidden" name="action" value="create">
                     <input type="hidden" name="item_id" value="">
                     <input type="hidden" name="kind" value="">
@@ -300,7 +294,48 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                             <div class="academic-item-field">
                                 <label class="info-label" for="academicItemLink">{% trans 'Keçid (URL)' context 'profile.academic_items' %}</label>
                                 <input type="url" class="form-control" id="academicItemLink" name="link" maxlength="300"
-                                       placeholder="https://...">
+                                       inputmode="url" autocapitalize="none" spellcheck="false" placeholder="https://...">
+                            </div>
+                            {% comment %}Fayl qoşması (2026-10-01) — yalnız sənədli növlərdə görünür
+                            (JS `data-allows-attachment`-a görə açır). Bir qeydə bir fayl; yenisi
+                            köhnəni əvəz edir, «Faylı sil» `remove_attachment=1` göndərir.{% endcomment %}
+                            <div class="academic-item-field academic-item-field--full" id="academicItemAttachmentField" hidden>
+                                <span class="info-label" id="academicItemAttachmentLabel">{% trans 'Fayl (sənəd və ya şəkil)' context 'profile.academic_items' %}</span>
+                                <div class="academic-attach" data-academic-attach>
+                                    <div class="academic-attach__current" data-attach-current hidden>
+                                        <a class="academic-file" data-attach-current-link href="#" target="_blank" rel="noopener">
+                                            <img class="academic-file__thumb" data-attach-current-thumb alt="" width="28" height="28" hidden>
+                                            <i class="fas fa-file-pdf academic-file__icon academic-file__icon--pdf" data-attach-current-icon aria-hidden="true"></i>
+                                            <span class="academic-file__label" data-attach-current-name></span>
+                                            <i class="fas fa-arrow-up-right-from-square academic-file__open" aria-hidden="true"></i>
+                                        </a>
+                                        <button type="button" class="academic-attach__remove" data-attach-remove>
+                                            <i class="fas fa-trash" aria-hidden="true"></i>{% trans 'Faylı sil' context 'profile.academic_items' %}
+                                        </button>
+                                    </div>
+                                    <div class="academic-attach__removed" data-attach-removed hidden>
+                                        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                                        <span>{% trans 'Fayl yadda saxlayanda silinəcək.' context 'profile.academic_items' %}</span>
+                                        <button type="button" class="academic-attach__remove academic-attach__remove--undo" data-attach-undo>
+                                            <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans 'Geri al' context 'profile.academic_items' %}
+                                        </button>
+                                    </div>
+                                    <div class="academic-attach__picker">
+                                        <label class="academic-attach__btn" for="academicItemAttachment">
+                                            <i class="fas fa-paperclip" aria-hidden="true"></i>
+                                            <span data-attach-pick-label>{% trans 'Fayl seç' context 'profile.academic_items' %}</span>
+                                        </label>
+                                        <input type="file" class="academic-attach__input" id="academicItemAttachment" name="attachment"
+                                               aria-labelledby="academicItemAttachmentLabel"
+                                               accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
+                                               data-attach-input>
+                                        <p class="academic-attach__hint" data-attach-hint
+                                           data-label-empty="{% trans 'PDF, JPG, PNG və ya WEBP · maksimum 10 MB' context 'profile.academic_items' %}">
+                                            {% trans 'PDF, JPG, PNG və ya WEBP · maksimum 10 MB' context 'profile.academic_items' %}
+                                        </p>
+                                    </div>
+                                    <input type="hidden" name="remove_attachment" value="">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -370,8 +405,8 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
     </div>
 
     {# defer: EMSReady/EMSCore base.html sonunda yüklənir — sync script onlardan əvvəl işə düşərdi. #}
-    <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20260926-search" defer></script>
+    <script src="{% static 'accounts/js/profile/academic_items.js' %}?v=20261001-attach" defer></script>
     <script src="{% static 'accounts/js/profile/edit_profile_guard.js' %}?v=20260910-1" defer></script>
-    <script src="{% static 'accounts/js/profile/edit_profile_avatar.js' %}?v=20260910-1" defer></script>
+    <script src="{% static 'accounts/js/profile/profile_avatar.js' %}?v=20261001-1" defer></script>
 </section>
 {% endif %}
