@@ -1,0 +1,89 @@
+{% load i18n %}
+{% comment %}Redaktor başlığı + həyat dövrü düymələri + tab-lar (Ayarlar / Suallar / Nəticələr).
+Tab-lar adi linklərdir (tam səhifə); təhlükəli əməllər EMSConfirm ilə (data-ems-confirm).{% endcomment %}
+<nav class="svb-crumbs"><a class="svb-link" href="{{ bp.list_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Bütün sorğular" context "surveys.builder" %}</a></nav>
+
+<header class="svb-head">
+    <div class="svb-head__main">
+        <h2 class="svb-head__title">{{ bp.survey.title }}</h2>
+        <p class="svb-head__meta">
+            {% include "surveys/builder/_status_chip.html" with status=bp.status teacher=bp.survey.is_teacher_evaluation %}
+            <span class="svc-chip svc-chip--muted">{{ bp.kind_label }}</span>
+            {% if bp.is_default %}<span class="svc-chip svc-chip--open">{% trans "Defolt dəst" context "surveys.builder" %}</span>{% endif %}
+            {% if bp.survey.anonymous %}<span class="svc-chip svc-chip--muted"><i class="fas fa-user-secret" aria-hidden="true"></i> {% trans "Anonim" context "surveys.builder" %}</span>{% else %}<span class="svc-chip svc-chip--muted"><i class="fas fa-id-card" aria-hidden="true"></i> {% trans "Adla" context "surveys.builder" %}</span>{% endif %}
+            {% if bp.locked %}<span class="svc-chip svc-chip--warn"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Struktur kilidlidir" context "surveys.builder" %}</span>{% endif %}
+            <span class="svb-head__count">{% blocktrans trimmed with n=bp.question_count context "surveys.builder" %}Suallar: {{ n }}{% endblocktrans %}</span>
+        </p>
+    </div>
+    <div class="svb-head__actions">
+        {% if bp.survey.status == "draft" %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="publish"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <button type="submit" class="svc-btn svc-btn--primary" data-ems-confirm="{% if bp.survey.is_teacher_evaluation %}{% trans 'Sual dəsti kampaniyalar üçün hazır elan olunsun?' context 'surveys.builder' %}{% else %}{% trans 'Sorğu dərc olunsun? Açılış günü auditoriyaya bildiriş gedəcək; dərcdən sonra anonimlik və auditoriya dəyişmir.' context 'surveys.builder' %}{% endif %}" data-ems-confirm-danger="false">
+                <i class="fas fa-paper-plane" aria-hidden="true"></i> {% if bp.survey.is_teacher_evaluation %}{% trans "Hazır et" context "surveys.builder" %}{% else %}{% trans "Dərc et" context "surveys.builder" %}{% endif %}
+            </button>
+        </form>
+        {% endif %}
+        {% if bp.survey.is_teacher_evaluation and bp.survey.status == "published" and not bp.is_default %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="set_default"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <button type="submit" class="svc-btn svc-btn--ghost" data-ems-confirm="{% trans 'Yeni semestr kampaniyaları bu sual dəstini götürsün? Mövcud kampaniyalar öz dəstində qalır.' context 'surveys.builder' %}" data-ems-confirm-danger="false"><i class="fas fa-star" aria-hidden="true"></i> {% trans "Defolt et" context "surveys.builder" %}</button>
+        </form>
+        {% endif %}
+        {% if bp.survey.status == "published" and not bp.survey.is_teacher_evaluation %}
+        <a class="svc-btn svc-btn--ghost" href="{{ bp.take_url }}" target="_blank" rel="noopener"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Formaya bax" context "surveys.builder" %}</a>
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="close"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <button type="submit" class="svc-btn svc-btn--danger" data-ems-confirm="{% trans 'Sorğu bağlansın? Cavab qəbulu dayanacaq, məcburi qapı açılacaq, anonim nəticələr dərc olunacaq.' context 'surveys.builder' %}"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "Bağla" context "surveys.builder" %}</button>
+        </form>
+        {% endif %}
+        {% if bp.survey.status == "closed" %}
+        <form method="post" action="{{ bp.action_url }}" class="svc-reopen">
+            {% csrf_token %}<input type="hidden" name="action" value="reopen"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <label class="svc-sr" for="svb-reopen">{% trans "Yeni bağlanma tarixi" context "surveys.builder" %}</label>
+            <input id="svb-reopen" class="svc-input" type="date" name="closes_on" required>
+            <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən aç" context "surveys.builder" %}</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="duplicate">
+            <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-copy" aria-hidden="true"></i> {% trans "Dublikat" context "surveys.builder" %}</button>
+        </form>
+        {% if bp.survey.status == "archived" %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="restore"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <button type="submit" class="svc-btn svc-btn--ghost"><i class="fas fa-box-open" aria-hidden="true"></i> {% trans "Arxivdən çıxar" context "surveys.builder" %}</button>
+        </form>
+        {% elif bp.survey.status == "draft" and not bp.survey.published_at %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="delete">
+            <button type="submit" class="svc-btn svc-btn--danger" data-ems-confirm="{% trans 'Qaralama birdəfəlik silinsin?' context 'surveys.builder' %}"><i class="fas fa-trash" aria-hidden="true"></i> {% trans "Sil" context "surveys.builder" %}</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ bp.action_url }}">
+            {% csrf_token %}<input type="hidden" name="action" value="archive"><input type="hidden" name="next" value="{{ bp.next_url }}">
+            <button type="submit" class="svc-btn svc-btn--ghost" data-ems-confirm="{% trans 'Sorğu arxivə köçürülsün? Açıqdırsa bağlanacaq; nəticələr qalır.' context 'surveys.builder' %}"><i class="fas fa-box-archive" aria-hidden="true"></i> {% trans "Arxivlə" context "surveys.builder" %}</button>
+        </form>
+        {% endif %}
+    </div>
+</header>
+
+<nav class="svb-tabs" aria-label="{% trans 'Redaktor bölmələri' context 'surveys.builder' %}">
+    {% for item in bp.tabs %}
+    <a class="svb-tab{% if item.active %} is-active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+        {% if item.value == "settings" %}<i class="fas fa-sliders" aria-hidden="true"></i> {% trans "Ayarlar" context "surveys.builder" %}
+        {% elif item.value == "questions" %}<i class="fas fa-list-check" aria-hidden="true"></i> {% trans "Suallar" context "surveys.builder" %}
+        {% else %}<i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Nəticələr" context "surveys.builder" %}{% endif %}
+    </a>
+    {% endfor %}
+</nav>
+
+{% if bp.tab == "settings" %}
+{% include "surveys/builder/_settings.html" %}
+{% elif bp.tab == "questions" %}
+<div class="svb-qwrap" data-svb-questions data-post-url="{{ bp.ed.post_url }}">
+    {% include "surveys/builder/_questions.html" with ed=bp.ed %}
+</div>
+{% else %}
+{% include "surveys/builder/_results.html" with res=bp.res %}
+{% endif %}

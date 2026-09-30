@@ -115,6 +115,16 @@ document.addEventListener("DOMContentLoaded", function () {
   // Bank-only əməliyyatlar (bankManagement.js) eyni təsdiq modalını işlətsin
   window.qbConfirm = openConfirm;
 
+  // QB 2026-09-30: imtahan səhifəsində sil/deaktiv AJAX ilə gedir — server «son aktiv
+  // suallar» halında EMSConfirm təsdiqi istəyir (bax teacher_questions_bank/guarded_submit.js).
+  // Köməkçi yoxdursa (müstəqil bank səhifəsi) false → köhnə adi form göndərişi.
+  function guardedSubmit(form, fields) {
+    var guard = window.QBGuardedSubmit;
+    if (!form || !guard || !guard.enabled()) return false;
+    guard.submit(form, fields || {});
+    return true;
+  }
+
   function normalizeSearchInput() {
     if (!searchInput) return;
     var maxLength = parseInt(searchInput.getAttribute("data-max-length") || searchInput.getAttribute("maxlength"), 10);
@@ -239,6 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
       openConfirm({
         variant: cfg.variant, title: cfg.title, body: cfg.body, okLabel: cfg.okLabel,
         onConfirm: function () {
+          if (action !== "activate" && guardedSubmit(bulkForm, { bulk_action: action })) return;
           var hidden = document.createElement("input");
           hidden.type = "hidden";
           hidden.name = "bulk_action";
@@ -364,6 +375,7 @@ document.addEventListener("DOMContentLoaded", function () {
         onConfirm: function () {
           if (!singleDeleteForm || !singleDeleteQuestionId || !qid) return;
           singleDeleteQuestionId.value = qid;
+          if (guardedSubmit(singleDeleteForm)) return;
           singleDeleteForm.submit();
         },
       });
@@ -384,6 +396,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (!singleQuestionActionForm || !singleQuestionActionValue || !singleQuestionActionQuestionId) return;
           singleQuestionActionValue.value = action;
           singleQuestionActionQuestionId.value = qid;
+          if (action === "deactivate" && guardedSubmit(singleQuestionActionForm)) return;
           singleQuestionActionForm.submit();
         },
       });
@@ -403,6 +416,7 @@ document.addEventListener("DOMContentLoaded", function () {
         onConfirm: function () {
           if (!questionLangDeleteForm || !questionLangDeleteValue || !lang) return;
           questionLangDeleteValue.value = lang;
+          if (guardedSubmit(questionLangDeleteForm)) return;
           questionLangDeleteForm.submit();
         },
       });
@@ -419,7 +433,8 @@ document.addEventListener("DOMContentLoaded", function () {
         body: TXT.deleteAllBody.replace("{count}", String(count)),
         okLabel: TXT.okDelete,
         onConfirm: function () {
-          if (questionBankDeleteAllForm) questionBankDeleteAllForm.submit();
+          if (!questionBankDeleteAllForm || guardedSubmit(questionBankDeleteAllForm)) return;
+          questionBankDeleteAllForm.submit();
         },
       });
     });

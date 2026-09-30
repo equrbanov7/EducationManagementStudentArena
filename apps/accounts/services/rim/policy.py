@@ -270,6 +270,41 @@ def assert_can_manage(actor: RimActor, target_user) -> None:
         )
 
 
+def assert_no_foreign_authority(actor: RimActor, target_user) -> None:
+    """Parol verən əməliyyatlar üçün: hədəfin BAŞQA təşkilatdakı səlahiyyəti də sayılır.
+
+    Təhlükəsizlik baxışı 2026-09-30: `assert_can_manage` iyerarxiyanı yalnız aktorun
+    təşkilatında müqayisə edir — A-da tələbə, B-də rektor/sahib olan hesabın parolunu
+    A-nın operatoru sıfırlasa B-nin idarəçi hesabını ələ keçirərdi. Superadmin olmayan
+    aktor üçün rədd edilir: Django staff hesabı, istənilən təşkilatın sahibi və başqa
+    təşkilatda aktorla eyni və ya daha yüksək rütbəli aktiv üzvlüyü olan hesab.
+    """
+    if actor.is_superadmin or target_user is None:
+        return
+
+    from apps.organizations.models import Membership, Organization
+
+    if getattr(target_user, "is_staff", False):
+        raise RimAccessError(
+            "target_rank_too_high",
+            "Özünüzlə eyni və ya daha yüksək səlahiyyətli hesabı idarə edə bilməzsiniz.",
+        )
+    if Organization.objects.filter(owner=target_user).exists():
+        raise RimAccessError(
+            "target_is_owner",
+            "Təşkilat sahibinin hesabı RİM mərkəzindən idarə oluna bilməz.",
+        )
+    foreign = Membership.objects.filter(user=target_user, is_active=True, role__is_active=True)
+    if actor.organization is not None:
+        foreign = foreign.exclude(organization=actor.organization)
+    top = foreign.aggregate(top=Max("role__level")).get("top") or 0
+    if int(top) >= actor.level:
+        raise RimAccessError(
+            "target_rank_too_high",
+            "Özünüzlə eyni və ya daha yüksək səlahiyyətli hesabı idarə edə bilməzsiniz.",
+        )
+
+
 def manageable_users_queryset(actor: RimActor):
     """Aktorun RİM-də görə/idarə edə biləcəyi istifadəçilərin baza queryset-i.
 
@@ -328,6 +363,7 @@ __all__ = [
     "PERM_SOFT_DELETE",
     "RIM_PERMISSIONS",
     "RimAccessError",
+    "assert_no_foreign_authority",
     "RimActor",
     "assert_can_manage",
     "manageable_users_queryset",

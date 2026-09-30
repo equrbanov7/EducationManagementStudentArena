@@ -117,8 +117,18 @@
 }
 
 @media (max-width: 768px) {
+    /* RESP 2026-09-30: əvvəl `flex-direction: column` + `flex-wrap: wrap` idi.
+       (1) Çoxsətirli flex-də sətrin eni konteynerin eni YOX, ən enli elementin
+       max-content eni olur — uzun seçim mətni («Davamlı inkişafın idarə
+       edilməsi · …») sahələri 360px-ə dartıb bölməni üfüqi sürüşdürürdü.
+       (2) Səhifə CSS-lərindəki `.xxx-filters .ems-field { flex: 1 1 200px }`
+       sütunda HÜNDÜRLÜYƏ çevrilir — hər sahə 200–320px hündür olurdu
+       (imtahan balı, şans, apellyasiya/İM statistikası, mərkəz otaqları…).
+       Tək sütunlu grid hər iki problemi aradan qaldırır: `flex` xassələri
+       grid elementinə təsir etmir, sütun konteynerin eninə bağlıdır. */
     .ems-filters {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
         align-items: stretch;
     }
 

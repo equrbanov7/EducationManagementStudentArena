@@ -1,0 +1,378 @@
+/* =========================================================================
+   Sorğu qurucusu (2026-09-30) — kabinet bölməsi «Sorğu qurucusu».
+   survey_cabinet.css-in (.svc-*) üzərinə: filtr çipləri, redaktor başlığı, tab-lar,
+   ayar kartları, radio kartları, axtarışlı checkbox siyahıları, sual kartları
+   (sürüklə-burax), nəticə zolaqları. Rənglər --ems-* tokenlərindən.
+   ========================================================================= */
+
+.svb {
+    gap: var(--ems-sp-5, 12px);
+}
+
+.svb-link {
+    color: var(--ems-primary-700);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.svb-link:hover {
+    text-decoration: underline;
+}
+
+.svb-new {
+    align-items: flex-end;
+}
+
+.svb-field--grow {
+    flex: 1 1 260px;
+}
+
+.svb-field--wide {
+    flex: 1 1 100%;
+    width: 100%;
+}
+
+.svb-textarea {
+    min-height: 64px;
+    resize: vertical;
+    width: 100%;
+}
+
+/* ── Filtr çipləri, tab-lar ───────────────────────────────────────────── */
+.svb-filters,
+.svb-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svb-filter,
+.svb-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+    min-height: 36px;
+    padding: 0 var(--ems-sp-5, 12px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    text-decoration: none;
+}
+
+.svb-tabs {
+    border-bottom: 1px solid var(--ems-border);
+    padding-bottom: var(--ems-sp-3, 8px);
+}
+
+.svb-filter:hover,
+.svb-tab:hover {
+    border-color: var(--ems-primary-300, var(--ems-border-strong));
+}
+
+.svb-filter.is-active,
+.svb-tab.is-active {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+    color: var(--ems-primary-800, var(--ems-primary-700));
+}
+
+.svb-filter:focus-visible,
+.svb-tab:focus-visible,
+.svb-icon:focus-visible,
+.svb-q__handle:focus-visible,
+.svb-link:focus-visible {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.svb-card__link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.svb-card__link:hover {
+    text-decoration: underline;
+}
+
+/* ── Redaktor başlığı ─────────────────────────────────────────────────── */
+.svb-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--ems-sp-5, 12px);
+}
+
+.svb-head__main {
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.svb-head__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.svb-head__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+    margin: var(--ems-sp-3, 8px) 0 0;
+}
+
+.svb-head__count {
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-500);
+}
+
+.svb-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svb-head__actions form {
+    margin: 0;
+}
+
+/* ── Kartlar, bildiriş ───────────────────────────────────────────────── */
+.svb-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 12px);
+}
+
+.svb-card {
+    margin: 0;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-4, 10px);
+    padding: var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svb-card__title {
+    float: left;
+    width: 100%;
+    margin: 0 0 var(--ems-sp-2, 6px);
+    padding: 0;
+    font-size: var(--ems-fs-lg, 15px);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svb-notice {
+    display: flex;
+    gap: var(--ems-sp-3, 8px);
+    align-items: flex-start;
+    padding: var(--ems-sp-4, 10px) var(--ems-sp-5, 12px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base, 13px);
+    line-height: 1.5;
+}
+
+.svb-notice p {
+    margin: 0;
+}
+
+.svb-notice--warn {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.svb-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ems-sp-4, 10px);
+    width: 100%;
+}
+
+.svb-actions {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.svb-toggle {
+    width: 100%;
+}
+
+/* ── Radio kartları (auditoriya, məcburilik, siyasət) ───────────────── */
+.svb-radios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+    width: 100%;
+}
+
+.svb-radio {
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}
+
+.svb-radio input,
+.svb-chipcheck input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.svb-radio__face,
+.svb-chipcheck span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+    min-height: 40px;
+    padding: 0 var(--ems-sp-5, 12px);
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.svb-radio input:checked + .svb-radio__face,
+.svb-chipcheck input:checked + span {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+    color: var(--ems-primary-800, var(--ems-primary-700));
+}
+
+.svb-radio input:focus-visible + .svb-radio__face,
+.svb-chipcheck input:focus-visible + span {
+    outline: 1px solid var(--ems-neutral-400);
+    outline-offset: 1px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.svb-radio input:disabled + .svb-radio__face,
+.svb-chipcheck input:disabled + span {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.svb-policies {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 6px);
+    width: 100%;
+}
+
+.svb-policies[hidden],
+[data-svb-defer][hidden] {
+    display: none;
+}
+
+.svb-policy {
+    display: flex;
+    gap: var(--ems-sp-3, 8px);
+    align-items: flex-start;
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    cursor: pointer;
+}
+
+.svb-policy input {
+    margin-top: 3px;
+    accent-color: var(--ems-primary-600);
+}
+
+.svb-policy__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-text);
+}
+
+.svb-policy__hint {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm, 12px);
+}
+
+/* ── Daraltma: axtarışlı checkbox siyahıları ─────────────────────────── */
+.svb-narrow {
+    width: 100%;
+}
+
+.svb-narrow > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-base, 13px);
+}
+
+.svb-pickers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--ems-sp-4, 10px);
+    margin-top: var(--ems-sp-3, 8px);
+}
+
+.svb-picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 6px);
+    min-width: 0;
+}
+
+.svb-picker__label {
+    margin: 0;
+    font-size: var(--ems-fs-sm, 12px);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.svb-picker__list {
+    list-style: none;
+    margin: 0;
+    padding: var(--ems-sp-2, 6px);
+    max-height: 240px;
+    overflow: auto;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+}
+
+.svb-picker__item[hidden] {
+    display: none;
+}
+
+.svb-picker__item--l1 { padding-left: 12px; }
+.svb-picker__item--l2 { padding-left: 24px; }
+.svb-picker__item--l3 { padding-left: 36px; }
+.svb-picker__item--l4 { padding-left: 48px; }
+
+.svb-years {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 6px);
+    margin: var(--ems-sp-4, 10px) 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.svb-chipcheck {
+    position: relative;
+    margin: 0;
+    cursor: pointer;
+}

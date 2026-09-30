@@ -15,6 +15,13 @@ tələbə «Sonra doldur» ilə 24 saatlıq möhlət ala bilər; sonra qapı sə
 
 Sorğu büdcəsi: kabinet yolu olmayan hər sorğu və açıq kampaniyası olmayan hər
 təşkilat üçün SIFIR əlavə sorğu (bax ``services.gate``).
+
+Sorğu qurucusu (2026-09-30): eyni qapı dərc olunmuş MƏCBURİ ümumi sorğular üçün də işləyir
+(``services/survey_gate.py`` — tələbə, müəllim, heyət; siyasət ``block`` / ``skip_once`` /
+``defer_days``). Qapı YALNIZ kabinetdir (``/accounts/profile/…``): imtahan axını (``/exams/``,
+``/live/``), çıxış, ``/sorgu/`` səhifələri, statik fayllar, sağlamlıq ucu, parol bərpası heç vaxt
+bağlanmır; kabinet içində parol dəyişmə bölməsi və «Mənə təyin edilmiş imtahanlar» bölməsi də
+istisnadır — imtahana gedən tələbə sorğu ilə dayandırılmır.
 """
 
 from __future__ import annotations
@@ -24,13 +31,32 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from .services import survey_gate
 from .services.gate import compute_state, deferral_active, student_entries
 
 
 class SurveyGateMiddleware:
     CABINET_PREFIX = "/accounts/profile/"
     EXEMPT_PREFIXES = ("/accounts/profile/api/badges/", "/accounts/profile/api/password-otp/")
-    EXEMPT_SECTIONS = frozenset({"change-password"})
+    #: «Mənə təyin edilmiş imtahanlar» (2026-09-30): imtahan girişi sorğu ilə bağlanmır.
+    #: Təhlükəsizlik baxışı 2026-09-30 (M5): qapı indi müəllim/heyətə də aiddir — imtahanı
+    #: İDARƏ edən bölmələr (PIN, zal, bal girişi, imtahanlarım, şans, apellyasiya statistikası)
+    #: və parol sıfırlama da məcburi sorğu ilə bağlanmır.
+    EXEMPT_SECTIONS = frozenset(
+        {
+            "change-password",
+            "assigned-exams",
+            "account-password-reset",
+            "appeal-stats",
+            "exam-center-pins",
+            "exam-center-stats",
+            "exam-chance",
+            "exam-score-entry",
+            "my-exams",
+            "superadmin-exam-rooms",
+            "unit-exams",
+        }
+    )
     SECTION_API_PREFIX = "/accounts/profile/api/sections/"
 
     def __init__(self, get_response):
@@ -41,9 +67,17 @@ class SurveyGateMiddleware:
         if not path.startswith(self.CABINET_PREFIX):
             return self.get_response(request)
         today = timezone.localdate()
+        blocked = self._campaign_blocks(request, today)
+        blocked = self._surveys_block(request, today) or blocked
+        if not blocked or self._is_exempt(request, path):
+            return self.get_response(request)
+        return self._gate_response(request)
+
+    @staticmethod
+    def _campaign_blocks(request, today) -> bool:
         entries = student_entries(request, today)
         if not entries:
-            return self.get_response(request)
+            return False
         state = compute_state(request, request.organization, entries)
         request.survey_gate = state
         # Kabinet RBAC-ı (bölmə görünürlüyü, sayğac) request-siz işləyir — vəziyyət
@@ -53,12 +87,24 @@ class SurveyGateMiddleware:
         except Exception:  # noqa: BLE001 — dəyişməz istifadəçi obyekti (nadir)
             pass
         blocking = state.blocking_campaign()
-        if blocking is None or self._is_exempt(request, path):
-            return self.get_response(request)
+        if blocking is None:
+            return False
         grace_until = blocking["grace_until"]
-        if grace_until and today <= grace_until and deferral_active(request, blocking["id"], today):
-            return self.get_response(request)
-        return self._gate_response(request)
+        return not (grace_until and today <= grace_until and deferral_active(request, blocking["id"], today))
+
+    @staticmethod
+    def _surveys_block(request, today) -> bool:
+        """Sorğu qurucusu (2026-09-30): məcburi ümumi sorğu (sıfır sorğu — aid sorğu yoxdursa)."""
+        entries = survey_gate.generic_entries(request, today)
+        if not entries:
+            return False
+        rows = survey_gate.compute_state(request, request.organization, entries)
+        request.survey_gate_generic = rows
+        try:
+            request.user._survey_generic_state = rows
+        except Exception:  # noqa: BLE001 — dəyişməz istifadəçi obyekti (nadir)
+            pass
+        return survey_gate.blocking_row(request, rows, today) is not None
 
     def _is_exempt(self, request, path) -> bool:
         """Parol dəyişmə HƏMİŞƏ açıqdır — amma YALNIZ həqiqətən o bölmədirsə.

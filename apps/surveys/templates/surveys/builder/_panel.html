@@ -1,0 +1,17 @@
+{% load i18n static survey_cabinet %}
+{% comment %}«Sorğu qurucusu» — siyahı (?section=surveys-builder) və ya redaktor (&survey=<id>&tab=…).
+Select-lər layihə komponentidir (bootstrap-single-select); stil/skript xarici fayllarda.{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/builder.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/builder_editor.css' %}?v=20260930-1">
+{% survey_builder_panel as bp %}
+<div class="svc svb">
+    {% if not bp.has_access %}
+    <p class="svc-empty">{% trans "Sorğu qurucusu üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır." context "surveys.builder" %}</p>
+    {% elif bp.mode == "editor" %}
+    {% include "surveys/builder/_editor.html" %}
+    {% else %}
+    {% include "surveys/builder/_list.html" %}
+    {% endif %}
+</div>
+<script src="{% static 'surveys/js/builder.js' %}?v=20260930-qa" defer></script>

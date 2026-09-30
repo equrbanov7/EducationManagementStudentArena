@@ -33,14 +33,19 @@
 
           <form method="post" action="{{ confirm_action }}" class="mt-4">
             {% csrf_token %}
+            {% comment %}QB 2026-09-30: «imtahan deaktiv edilsin?» təsdiqi ilkin POST sahələrini
+               (toplu əməl, seçilmiş suallar, süzgəclər) + təsdiq bayrağını təkrar göndərir.{% endcomment %}
+            {% for field_name, field_value in confirm_hidden_fields %}
+              <input type="hidden" name="{{ field_name }}" value="{{ field_value }}">
+            {% endfor %}
             <div class="d-flex flex-wrap gap-2">
               <a href="{{ cancel_url }}" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>
                 {% trans "action_cancel" context "exams.template.confirm_delete" %}
               </a>
               <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash-alt me-1" aria-hidden="true"></i>
-                {% trans "action_delete" context "exams.template.confirm_delete" %}
+                <i class="fas {{ confirm_icon|default:'fa-trash-alt' }} me-1" aria-hidden="true"></i>
+                {% if confirm_submit_label %}{{ confirm_submit_label }}{% else %}{% trans "action_delete" context "exams.template.confirm_delete" %}{% endif %}
               </button>
             </div>
           </form>

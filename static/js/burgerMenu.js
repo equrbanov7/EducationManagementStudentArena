@@ -42,32 +42,73 @@ function initMobileNav() {
         return;
     }
 
+    /* 2026-09-30 (sahib: «menyu açıqkən içində sürüşdürəndə arxa səhifə də
+       sürüşür»). Əvvəl yalnız `body.style.overflow` bağlanırdı — `html`-in öz
+       `overflow-x`-i olduğu üçün təsirsiz idi. İndi ortaq `EMSScrollLock`
+       (modal_scroll_lock.js): html+body kilidi, iOS touchmove qoruyucusu,
+       bağlananda scroll mövqeyinin dəqiq bərpası. Şkafın öz sürüşməsi qalır. */
+    var LOCK_KEY = 'mobile-nav';
+
+    function setPageLock(on) {
+        if (window.EMSScrollLock) {
+            window.EMSScrollLock.set(LOCK_KEY, on, mobileNavPanel);
+        }
+    }
+
+    function isOpen() {
+        return mobileNavPanel.classList.contains('is-open');
+    }
+
     function openMobileNav() {
+        // Başlığın açılan menyuları (istifadəçi, dil) şkafın altında açıq qalmasın.
+        document.dispatchEvent(new CustomEvent('ems:popover:open', { detail: { source: 'mobile-nav' } }));
         mobileNavPanel.classList.add('is-open');
         mobileNavOverlay.classList.add('is-open');
         navToggle.classList.add('is-open');
         navToggle.setAttribute('aria-expanded', 'true');
-        body.style.overflow = 'hidden';
+        setPageLock(true);
     }
 
     function closeMobileNav() {
+        if (!isOpen()) {
+            return;
+        }
         mobileNavPanel.classList.remove('is-open');
         mobileNavOverlay.classList.remove('is-open');
         navToggle.classList.remove('is-open');
         navToggle.setAttribute('aria-expanded', 'false');
         body.style.overflow = '';
+        setPageLock(false);
+    }
+
+    /* Ekran masaüstü ölçüsünə keçəndə (fırlatma, pəncərə genişlənməsi) şkaf CSS ilə
+       gizlənir (`display: none`) — açıq qalsa səhifə görünməz şkafa kilidli qalardı. */
+    var desktopQuery = window.matchMedia ? window.matchMedia('(min-width: 769px)') : null;
+    function onBreakpoint(event) {
+        if (event.matches) {
+            closeMobileNav();
+        }
+    }
+    if (desktopQuery) {
+        if (typeof desktopQuery.addEventListener === 'function') {
+            desktopQuery.addEventListener('change', onBreakpoint);
+        } else if (typeof desktopQuery.addListener === 'function') {
+            desktopQuery.addListener(onBreakpoint);
+        }
     }
 
     // Panelin öz «×» düyməsi — delegasiya ilə (açar bu faylda təkdir).
+    // `preventScroll`: toggle yapışqan başlıqdadır; adi `focus()` Chrome-da sənədi
+    // ƏN BAŞA sürüşdürürdü — bağlananda istifadəçi oxuduğu yeri itirirdi.
     if (window.EMSDelegate) {
         window.EMSDelegate.on('click', '[data-mobile-nav-close]', function () {
             closeMobileNav();
-            navToggle.focus();
+            navToggle.focus({ preventScroll: true });
         });
     }
 
     navToggle.addEventListener('click', function () {
-        if (mobileNavPanel.classList.contains('is-open')) {
+        if (isOpen()) {
             closeMobileNav();
             return;
         }
@@ -81,7 +122,15 @@ function initMobileNav() {
     });
 
     document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && mobileNavPanel.classList.contains('is-open')) {
+        if (event.key === 'Escape' && isOpen()) {
+            closeMobileNav();
+            navToggle.focus({ preventScroll: true });
+        }
+    });
+
+    // bfcache-dən qayıdanda (iOS «geri») şkaf açıq qalıbsa kilidlə birlikdə bağla.
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
             closeMobileNav();
         }
     });

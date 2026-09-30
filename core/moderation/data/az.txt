@@ -1,0 +1,77 @@
+# Azərbaycan dili — nalayiq / söyüş ifadələri (ad moderasiyası lüğəti, 2026-09-30).
+#
+# FORMAT (bir sətir = bir qayda; `#` ilə başlayan sətir şərhdir):
+#   söz          bütöv söz — token tam uyğun gəlməlidir («sik» ≠ «sikkə»)
+#   söz*         kök — token bu köklə BAŞLAYIR («sikdir*» → «sikdirin»)
+#   *söz*        tokenin istənilən yerində + boşluqsuz birləşmədə («fu ck»); YALNIZ
+#                heç bir təmiz sözün içində rast gəlinməyən, çox fərqli köklər üçün
+#   =söz, =söz*  «sərt»: hərf qatlaması YOXDUR (ö yalnız ö, ç yalnız ç — «göt» ≠ «got»)
+#   iki söz      ifadə: ardıcıl tokenlər; boşluqsuz yazılış da tutulur; son söz * ala bilər
+#
+# HƏRF QATLAMASI (sərt olmayan qaydalarda, lüğətdəki hərf → girişdə qəbul olunan):
+#   ə→ə/e/a  ı→ı/i  ş→ş/s/sh  ç→ç/c/ch  ğ→ğ/g/gh  ö→ö/o/oe  ü→ü/u/ue  q→q/g/k  k→k/q
+#   x→x/h/kh  y→y/i/j. Lüğətdəki ADİ hərf yalnız özünü tutur: «sik» qaydası «şik»
+#   (şıq) və ya «sık» (tr. «tez-tez») sözünü TUTMUR. Hərf təkrarı («siiik») həmişə tutulur.
+#
+# YANLIŞ POZİTİV QAYDASI: «sik*», «am», «amın*» kimi QISA köklər QƏSDƏN yoxdur —
+# «sikkə», «şikayət» (ş-siz yazılış), «Amin», «Amina» adlarını bloklayardı. Yeni
+# qayda əlavə edəndə core/tests/test_moderation_detector.py-dakı ad siyahısını işlədin.
+
+# «sik-» feli — yalnız konkret formalar
+sik
+*siktir*
+*sikdir*
+sikim*
+sikiş*
+sikər*
+sikil*
+sikib*
+sikik*
+sikir*
+sikiy*
+sikəc*
+sikmə*
+sikdiy*
+sikey*
+siktiğ*
+
+# cinsiyyət orqanları / fahişəlik
+amcıq*
+amcığ*
+qancıq*
+qancığ*
+qəhbə*
+fahişə*
+=göt
+götvər*
+götoş*
+dıllaq
+gicdılla*
+gijdılla*
+
+# təhqir
+oğraş*
+peysər*
+şərəfsiz*
+namussuz*
+namusuz*
+vələdüzna*
+pox
+
+# ifadələr
+# «amına qoy*» prefiksi QƏSDƏN yoxdur — «Amina Qoyunova / Goyushova» adlarını tuturdu
+# (təhlükəsizlik baxışı 2026-09-30); yalnız konkret fel formaları.
+amına qoyum
+amına qoyim
+amına qoyam
+amına qoyaram
+amına qoydum
+amına qoyduğum
+amına qoysun
+amına qoyacağam
+ananı sik*
+anavı sik*
+anasını sik*
+bacını sik*
+köpək oğlu
+it oğlu

@@ -19,6 +19,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from core.constants import AuditAction
+from core.moderation.enforcement import PROFANITY_RESOURCE_TYPE
 from core.permissions import is_superadmin_user, request_has_permission
 from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
@@ -48,7 +49,9 @@ RANGE_KEYS = (RANGE_TODAY, RANGE_7D, RANGE_30D, RANGE_ALL, RANGE_CUSTOM)
 FLAG_NOREASON = "noreason"
 FLAG_FAILED = "failed"
 FLAG_ANON = "anon"
-FLAG_KEYS = (FLAG_NOREASON, FLAG_FAILED, FLAG_ANON)
+#: Sahib 2026-09-30: nalayiq ad cəhdləri (``core.moderation``) — yalnız oxu süzgəci.
+FLAG_PROFANITY = "profanity"
+FLAG_KEYS = (FLAG_NOREASON, FLAG_FAILED, FLAG_ANON, FLAG_PROFANITY)
 
 SORT_NEWEST = "newest"
 SORT_OLDEST = "oldest"
@@ -242,6 +245,8 @@ def apply_filters(queryset, filters: dict):
         queryset = queryset.filter(action__in=FAILED_ACTIONS)
     elif flag == FLAG_ANON:
         queryset = queryset.filter(user__isnull=True)
+    elif flag == FLAG_PROFANITY:
+        queryset = queryset.filter(resource_type=PROFANITY_RESOURCE_TYPE)
     if filters["q"]:
         queryset = queryset.filter(_search_q(filters["q"]))
     order = ("created_at", "id") if filters["sort"] == SORT_OLDEST else ("-created_at", "-id")

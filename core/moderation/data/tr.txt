@@ -1,0 +1,26 @@
+# Türk dili — nalayiq / söyüş ifadələri (ad moderasiyası lüğəti, 2026-09-30).
+# Format və hərf qatlaması: az.txt başlığına baxın. Azərbaycan dili ilə ortaq
+# köklər («sik-», «amcık», «kancık», «göt») az.txt-dədir və türkcə yazılışı da tutur.
+# «amk» abbreviaturu QƏSDƏN yoxdur — «A. M. K.» inisialları (Anar Məmməd Kərimov) bloklanardı.
+
+*orospu*
+orosbu*
+=piç
+ibne*
+yavşak*
+pezevenk*
+gavat*
+kahpe*
+yarrak*
+taşak*
+sürtük*
+kaltak*
+puşt
+# «amına koy*» prefiksi QƏSDƏN yoxdur — «Amina Koyuncu» adını tuturdu (2026-09-30).
+amına koyayım
+amına koyayim
+amına koyarım
+amına koydum
+amına koyduğum
+amına koyacağım
+amına koyim

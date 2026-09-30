@@ -1,0 +1,89 @@
+{% load i18n static survey_cabinet %}
+{% comment %}«Sorğular» inbox-u — gözləyən / tamamlanmış / bağlı sorğular (sorğu qurucusu, 2026-09-30).
+Kartlar sadə linkdir — JS tələb olunmur; «Bu dəfə keç» / «Sonra doldur» düymələri qapının eniş
+səhifəsindədir (/sorgu/). Stil xarici faylda.{% endcomment %}
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/inbox.css' %}?v=20260930-1">
+{% survey_inbox_panel as ip %}
+<div class="svc svi">
+    {% if ip.view_as %}
+    <p class="svc-empty">{% trans "Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu yalnız istifadəçinin özü doldura bilər." context "surveys.inbox" %}</p>
+    {% elif not ip.available %}
+    <p class="svc-empty">{% trans "Təşkilat konteksti tapılmadı." context "surveys.inbox" %}</p>
+    {% else %}
+    <header class="svi-head">
+        <p class="svc-intro">{% trans "Universitetin sizə ünvanladığı sorğular. Məcburi sorğular doldurulmayınca kabinet bağlana bilər; anonim sorğularda cavabınız adınızla saxlanılmır." context "surveys.inbox" %}</p>
+        {% if ip.count %}<span class="svc-chip svc-chip--warn">{% blocktrans trimmed with n=ip.count context "surveys.inbox" %}Gözləyir: {{ n }}{% endblocktrans %}</span>{% endif %}
+    </header>
+
+    <section class="svi-group" aria-labelledby="svi-pending-title">
+        <h2 id="svi-pending-title" class="svi-group__title">{% trans "Gözləyən" context "surveys.inbox" %}</h2>
+        {% if ip.campaign and ip.campaign.pending %}
+        <article class="svi-card svi-card--pending">
+            <div class="svi-card__body">
+                <h3 class="svi-card__title">{% trans "Müəllimlərin anonim qiymətləndirilməsi" context "surveys.inbox" %}</h3>
+                <p class="svi-card__meta">
+                    <span class="svc-chip svc-chip--muted"><i class="fas fa-user-secret" aria-hidden="true"></i> {% trans "Anonim" context "surveys.inbox" %}</span>
+                    {% if ip.campaign.mandatory %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.inbox" %}</span>{% endif %}
+                    {% blocktrans trimmed with done=ip.campaign.done total=ip.campaign.total context "surveys.inbox" %}{{ done }} / {{ total }} tamamlanıb{% endblocktrans %}
+                    {% if ip.campaign.closes_on %} · {% blocktrans trimmed with day=ip.campaign.closes_on|date:"d.m.Y" context "surveys.inbox" %}son tarix {{ day }}{% endblocktrans %}{% endif %}
+                </p>
+                <progress class="svc-meter" value="{{ ip.campaign.done }}" max="{{ ip.campaign.total }}">{{ ip.campaign.done }} / {{ ip.campaign.total }}</progress>
+            </div>
+            <a class="svc-btn svc-btn--primary" href="{{ ip.campaign.url }}">{% trans "Davam et" context "surveys.inbox" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+        </article>
+        {% endif %}
+        {% for item in ip.pending %}
+        <article class="svi-card svi-card--pending{% if item.survey.mandatory %} svi-card--mandatory{% endif %}">
+            <div class="svi-card__body">
+                <h3 class="svi-card__title">{{ item.survey.title }}</h3>
+                {% if item.survey.description %}<p class="svi-card__text">{{ item.survey.description|truncatechars:220 }}</p>{% endif %}
+                <p class="svi-card__meta">
+                    {% if item.survey.anonymous %}<span class="svc-chip svc-chip--muted"><i class="fas fa-user-secret" aria-hidden="true"></i> {% trans "Anonim" context "surveys.inbox" %}</span>{% else %}<span class="svc-chip svc-chip--muted"><i class="fas fa-id-card" aria-hidden="true"></i> {% trans "Adla" context "surveys.inbox" %}</span>{% endif %}
+                    {% if item.survey.mandatory %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.inbox" %}</span>{% else %}<span class="svc-chip svc-chip--muted">{% trans "Könüllü" context "surveys.inbox" %}</span>{% endif %}
+                    {% if item.survey.closes_on %}<span class="svi-due{% if item.days_left is not None and item.days_left <= 2 %} is-soon{% endif %}"><i class="fas fa-calendar-day" aria-hidden="true"></i> {% blocktrans trimmed with day=item.survey.closes_on|date:"d.m.Y" context "surveys.inbox" %}son tarix {{ day }}{% endblocktrans %}</span>{% endif %}
+                </p>
+                {% if item.survey.mandatory and item.survey.gate_policy == "skip_once" %}
+                <p class="svi-card__note">{% if item.skipped %}{% trans "Bu sorğunu artıq bir dəfə keçmisiniz — növbəti girişdə kabinet onu doldurmadan açılmayacaq." context "surveys.inbox" %}{% else %}{% trans "Bir dəfə keçmək olar; növbəti dəfə sorğunu doldurmadan kabinetə daxil ola bilməyəcəksiniz." context "surveys.inbox" %}{% endif %}</p>
+                {% elif item.survey.mandatory and item.survey.gate_policy == "block" %}
+                <p class="svi-card__note">{% trans "Doldurulmayınca kabinet bağlı qalır." context "surveys.inbox" %}</p>
+                {% elif item.grace_until %}
+                <p class="svi-card__note">{% blocktrans trimmed with day=item.grace_until|date:"d.m.Y" context "surveys.inbox" %}«Sonra doldur» imkanı {{ day }} tarixinə qədərdir (hər dəfə 24 saat).{% endblocktrans %}</p>
+                {% endif %}
+            </div>
+            <div class="svi-card__actions">
+                <a class="svc-btn svc-btn--primary" href="{{ item.url }}">{% trans "Doldur" context "surveys.inbox" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </article>
+        {% endfor %}
+        {% if not ip.pending and not ip.campaign.pending %}
+        <p class="svc-empty"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Hazırda sizi gözləyən sorğu yoxdur." context "surveys.inbox" %}</p>
+        {% endif %}
+    </section>
+
+    {% if ip.completed or ip.campaign and not ip.campaign.pending %}
+    <section class="svi-group" aria-labelledby="svi-done-title">
+        <h2 id="svi-done-title" class="svi-group__title">{% trans "Tamamlanmış" context "surveys.inbox" %}</h2>
+        <ul class="svi-list">
+            {% if ip.campaign and not ip.campaign.pending %}
+            <li class="svi-row"><i class="fas fa-circle-check svi-row__icon" aria-hidden="true"></i> <span class="svi-row__title">{% trans "Müəllimlərin anonim qiymətləndirilməsi" context "surveys.inbox" %}</span></li>
+            {% endif %}
+            {% for item in ip.completed %}
+            <li class="svi-row"><i class="fas fa-circle-check svi-row__icon" aria-hidden="true"></i> <span class="svi-row__title">{{ item.survey.title }}</span> <span class="svi-row__meta">{{ item.completed_on|date:"d.m.Y" }}</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if ip.closed %}
+    <section class="svi-group" aria-labelledby="svi-closed-title">
+        <h2 id="svi-closed-title" class="svi-group__title">{% trans "Bağlı" context "surveys.inbox" %}</h2>
+        <ul class="svi-list">
+            {% for item in ip.closed %}
+            <li class="svi-row svi-row--closed"><i class="fas fa-lock svi-row__icon" aria-hidden="true"></i> <span class="svi-row__title">{{ item.survey.title }}</span> <span class="svi-row__meta">{% trans "doldurulmayıb" context "surveys.inbox" %}{% if item.survey.closes_on %} · {{ item.survey.closes_on|date:"d.m.Y" }}{% endif %}</span></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+    {% endif %}
+</div>

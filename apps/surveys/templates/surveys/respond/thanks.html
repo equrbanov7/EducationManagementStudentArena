@@ -1,0 +1,17 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n %}
+{% block title %}{{ survey.title }} - {{ site_brand_name }}{% endblock %}
+{% block survey_content %}
+<section class="svy-block svy-block--thanks">
+    <p class="svy-thanks__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></p>
+    <h1 class="svy-title">{% trans "Təşəkkür edirik!" context "surveys.respond" %}</h1>
+    <p class="svy-lead">
+        {% if survey.anonymous %}{% trans "Cavabınız anonim şəkildə qeydə alındı. Nəticələr sorğu bağlandıqdan sonra ümumiləşdirilmiş şəkildə təhlil olunacaq." context "surveys.respond" %}
+        {% else %}{% trans "Cavabınız qeydə alındı." context "surveys.respond" %}{% endif %}
+    </p>
+    <div class="svy-actions">
+        <a class="svy-btn svy-btn--primary" href="{{ home_url }}">{% trans "Digər sorğular" context "surveys.respond" %}</a>
+        <a class="svy-btn svy-btn--ghost" href="{{ inbox_url }}">{% trans "Kabinetə qayıt" context "surveys.respond" %}</a>
+    </div>
+</section>
+{% endblock %}

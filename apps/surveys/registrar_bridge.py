@@ -249,3 +249,50 @@ def offering_labels(offering_ids) -> dict:
         .values_list("pk", "subject__name", "subject__code", "group__name")
     )
     return {pk: {"subject": name, "subject_code": code, "group": group or ""} for pk, name, code, group in rows}
+
+
+# ── Sorğu qurucusu (2026-09-30): auditoriya daraltması ──────────────────────
+
+
+def active_student_rows(organization, student_ids=None) -> list:
+    """Aktiv akademik qeydlər: ``[{"student_id", "group_id", "group_path", "program_id", "course_year"}]``.
+
+    ``student_ids`` verilərsə yalnız onlar (qapı yoxlaması — 1 sorğu); əks halda bütün təşkilat
+    (iştirak faizi — 1 sorğu, yalnız lazımi sütunlar).
+    """
+    queryset = _model("registrar", "StudentAcademicRecord").objects.filter(organization=organization, is_active=True)
+    if student_ids is not None:
+        queryset = queryset.filter(student_id__in=list(student_ids))
+    rows = []
+    for student_id, group_id, group_path, group_settings, program_id in queryset.values_list(
+        "student_id", "group_id", "group__path", "group__settings", "program_id"
+    ):
+        rows.append(
+            {
+                "student_id": student_id,
+                "group_id": group_id,
+                "group_path": group_path or "",
+                "program_id": program_id,
+                "course_year": group_course_year(group_settings),
+            }
+        )
+    return rows
+
+
+def program_choices(organization) -> list:
+    """Qurucu üçün ixtisas (proqram) seçimləri: ``[{"id", "label"}]`` (kod + ad)."""
+    rows = (
+        _model("registrar", "Program")
+        .objects.filter(organization=organization)
+        .order_by("code", "name")
+        .values_list("pk", "code", "name")
+    )
+    return [{"id": str(pk), "label": f"{code} · {name}" if code else name} for pk, code, name in rows]
+
+
+def program_labels(organization, program_ids) -> dict:
+    ids = [pk for pk in program_ids if pk]
+    if not ids:
+        return {}
+    rows = _model("registrar", "Program").objects.filter(organization=organization, pk__in=ids)
+    return {str(pk): name for pk, name in rows.values_list("pk", "name")}

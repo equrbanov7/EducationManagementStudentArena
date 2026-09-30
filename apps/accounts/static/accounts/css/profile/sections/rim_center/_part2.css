@@ -251,4 +251,14 @@ ul.rim-note {
     .rim-card-actions {
         justify-content: flex-start;
     }
+
+    /* RESP 2026-09-30: 5 status tabı (Hamısı … Silinmiş) bir sırada 400px-ə
+       çatırdı — 320–390px-də «Silinmiş» ekrandan kənarda qalırdı. Sarır. */
+    .rim-status-tabs {
+        flex-wrap: wrap;
+    }
+
+    .rim-status-tab {
+        flex: 1 1 auto;
+    }
 }

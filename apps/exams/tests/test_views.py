@@ -4529,7 +4529,10 @@ class TeacherQuestionsBankViewTest(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
+        # QB 2026-09-30: dalana dirənmə yerinə «imtahan deaktiv edilsin?» təsdiqi
+        # (JS-siz formaya server təsdiq səhifəsi) — təsdiqsiz heç nə silinmir.
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "exams/teacher/confirm_delete.html")
         self.assertEqual(self.exam.questions.count(), len(self.questions))
 
     def test_questions_bank_deletes_all_questions_from_draft_exam(self):

@@ -3,6 +3,10 @@
 Axın: siyahı (müəllim kartları, «2 / 5») → hər müəllim üçün bir səhifəlik forma →
 ümumi bölmə → «təşəkkür» → kabinet açılır. View-as altında səth BAĞLIDIR (aktor
 tələbənin adından nə doldura, nə də kimi qiymətləndirdiyini görə bilər).
+
+Sorğu qurucusu (2026-09-30): ``/sorgu/`` (``home``) qapının VAHİD eniş səhifəsidir — hər üzv
+(tələbə, müəllim, heyət) gözləyən ümumi sorğuları «Doldur / Bu dəfə keç / Sonra doldur» ilə
+görür; müəllim qiymətləndirməsi blokları yalnız tələbəyə göstərilir, formaları yalnız tələbəyə açıqdır.
 """
 
 from __future__ import annotations
@@ -76,15 +80,46 @@ def _remember(request, organization, campaign, targets):
     store_counts(request, organization, {str(campaign.pk): [pending, len(targets)]})
 
 
+def _guard_member(request):
+    """Sorğu qurucusu (2026-09-30): ``/sorgu/`` HƏR üzv üçündür (qapı müəllim/heyəti də bura
+    yönləndirə bilər); müəllim qiymətləndirməsi blokları isə yalnız tələbəyə göstərilir."""
+    if getattr(request, "is_view_as", False):
+        return None, _unavailable(request, "view_as")
+    organization = getattr(request, "organization", None)
+    if organization is None:
+        return None, _unavailable(request, "no_org", status=404)
+    return organization, None
+
+
 @login_required
 def home(request):
-    organization, denied = _guard(request)
+    from ..services.inbox import build_inbox
+
+    organization, denied = _guard_member(request)
     if denied:
         return denied
     today = timezone.localdate()
     if snapshot_is_stale(organization):
         # Xülasə başqa yazı ilə əzilibsə (bax gate_snapshot sənədi) — bərpa (1 sorğu).
         sync_gate_snapshot(organization)
+    inbox = build_inbox(request, today)
+    blocks = _campaign_blocks(request, organization, today) if _is_student(request) else []
+    return render(
+        request,
+        "surveys/home.html",
+        {"blocks": blocks, "today": today, "survey_items": inbox["pending"], "inbox_url": _inbox_url()},
+    )
+
+
+def _inbox_url():
+    return reverse("accounts:profile") + "?section=surveys-inbox"
+
+
+def _is_student(request) -> bool:
+    return is_student_account(getattr(request, "org_memberships", None))
+
+
+def _campaign_blocks(request, organization, today) -> list:
     blocks = []
     for campaign in _active_campaigns(organization):
         targets = student_targets(campaign, request.user, with_labels=True)
@@ -111,7 +146,7 @@ def home(request):
                 "teachers_left": sum(1 for t in targets if not t.done and not t.is_general),
             }
         )
-    return render(request, "surveys/home.html", {"blocks": blocks, "today": today})
+    return blocks
 
 
 def _question_rows(questions, values=None, errors=None):

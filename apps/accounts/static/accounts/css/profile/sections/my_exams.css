@@ -431,6 +431,14 @@
   .profile-section--my-exams .tx-card-foot { flex-wrap: wrap; }
   .profile-section--my-exams .tx-foot-actions { margin-left: 0; width: 100%; }
 }
+/* RESP 2026-09-30: 320px-də 2 sütunlu KPI kartında «PLANLAŞDIRILMIŞ» (uppercase +
+   hərf aralığı) kartın içindən 20px çıxıb kəsilirdi. Ən dar ekranda aralıqlar və
+   hərf aralığı sıxılır; başqa dildə daha uzun söz olsa, son çarə — sözdaxili sarma. */
+@media (max-width: 359px) {
+  .profile-section--my-exams .tx-kpis { gap: var(--ems-sp-2); }
+  .profile-section--my-exams .tx-kpi { padding: 12px 10px 12px 14px; }
+  .profile-section--my-exams .tx-kpi-label { gap: 6px; font-size: 10px; letter-spacing: .02em; overflow-wrap: anywhere; }
+}
 @media (prefers-reduced-motion: reduce) {
   .profile-section--my-exams * { animation: none !important; transition: none !important; }
 }

@@ -136,6 +136,41 @@
         if (isOpen) { hasGreeted = true; addBotMessage(uiText.greeting); }
     }
 
+    // ── Mobil qabıq (sahib 2026-09-30) — yalnız YERLƏŞMƏ ──────────────────
+    // Telefonda (≤480px) panel tam ekrandır: açıq ikən arxa səhifə sürüşməsin
+    // (ortaq `EMSScrollLock`, static/js/modal_scroll_lock.js). Ekran ölçüsü
+    // dəyişəndə (fırlatma) kilid panelin görünüşünə uyğunlaşır.
+    const fullscreenQuery = window.matchMedia ? window.matchMedia("(max-width: 480px)") : null;
+    const phoneQuery = window.matchMedia ? window.matchMedia("(max-width: 768px)") : null;
+    function syncChatLock() {
+        if (!window.EMSScrollLock) return;
+        window.EMSScrollLock.set("ai-chat", isOpen && !!(fullscreenQuery && fullscreenQuery.matches), panel);
+    }
+    if (fullscreenQuery && typeof fullscreenQuery.addEventListener === "function") {
+        fullscreenQuery.addEventListener("change", syncChatLock);
+    }
+    // Telefonda aşağı sürüşəndə düymə kənara çəkilir (siyahı bəndlərini örtməsin),
+    // yuxarı sürüşəndə, səhifənin başında və sonunda qayıdır.
+    let lastScrollY = window.pageYOffset || 0;
+    let tuckQueued = false;
+    function updateTuck() {
+        tuckQueued = false;
+        const root = document.documentElement;
+        const y = window.pageYOffset || root.scrollTop || 0;
+        const delta = y - lastScrollY;
+        if (Math.abs(delta) < 8) return;
+        lastScrollY = y;
+        const atEdge = y < 80 || window.innerHeight + y >= root.scrollHeight - 4;
+        const tuck = !!(phoneQuery && phoneQuery.matches) && !isOpen && delta > 0 && !atEdge;
+        botBtn.classList.toggle("ai-bot-btn--tucked", tuck);
+        if (tuck) tooltip.classList.remove("ai-bot-tooltip--visible");
+    }
+    window.addEventListener("scroll", () => {
+        if (tuckQueued) return;
+        tuckQueued = true;
+        window.requestAnimationFrame(updateTuck);
+    }, { passive: true });
+
     // ── Panel ───────────────────────────────────────────────────────────
     function openPanel() {
         resetHistoryIfExpired();
@@ -145,6 +180,7 @@
         botBtn.classList.add("ai-bot-btn--hidden");
         botBtn.setAttribute("aria-expanded", "true");
         tooltip.classList.remove("ai-bot-tooltip--visible");
+        syncChatLock();
         fetchQuota();
         if (!hasGreeted) { hasGreeted = true; addBotMessage(uiText.greeting); }
         if (isAvailable) inputEl.focus();
@@ -154,6 +190,7 @@
         panel.classList.remove("ai-chat-panel--open");
         botBtn.classList.remove("ai-bot-btn--hidden");
         botBtn.setAttribute("aria-expanded", "false");
+        syncChatLock();
         window.setTimeout(() => { if (!isOpen) panel.hidden = true; }, 180);
         botBtn.focus();
     }
@@ -168,7 +205,7 @@
 
     // İlk dəfə (səhifə açılandan 6 s sonra) bir dəfə diqqət çəkir — daimi dalğa yox.
     window.setTimeout(() => {
-        if (isOpen) return;
+        if (isOpen || botBtn.classList.contains("ai-bot-btn--tucked")) return;
         botBtn.classList.add("ai-bot-btn--wave");
         tooltip.classList.add("ai-bot-tooltip--visible");
         window.setTimeout(() => botBtn.classList.remove("ai-bot-btn--wave"), 1600);

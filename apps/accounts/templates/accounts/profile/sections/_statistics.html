@@ -18,7 +18,7 @@ CSP: inline CSS/JS YOXDUR — üslub bu panelin öz faylından, skript panelin
 <section class="profile-section-panel profile-section--statistics {% if active_section == 'statistics' %}is-active{% endif %}"
          data-profile-section-panel="statistics"
          data-stx-profile="{{ statistics_data.profile|default:'restricted' }}">
-  <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/statistics.css' %}?v=20260912-1">
+  <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/statistics.css' %}?v=20260930-resp">
 
   {% if 'statistics' not in allowed_sections %}
   {% trans "section_not_available" context "profile.statistics" as stx_locked %}

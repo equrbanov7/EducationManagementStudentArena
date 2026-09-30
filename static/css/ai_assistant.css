@@ -174,10 +174,41 @@ body:has(.sticky-footer) .ai-bot-tooltip { bottom: 94px; }
 .ai-chat-send-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
 .ai-chat-footnote { margin: 0; padding: 4px 14px 10px; font-size: var(--ems-fs-2xs); color: var(--ems-neutral-400); font-weight: 500; line-height: 1.4; }
 
+.ai-chat-messages { overscroll-behavior: contain; }
+
+/* ── Mobil qabıq (sahib 2026-09-30: «robot düyməsi siyahı və menyu bəndlərini örtür») ──
+   • şkaf / sidebar açıqkən (`html.ems-scroll-locked`) və istifadəçi menyusu açıqkən
+     düymə GİZLƏNİR — onların bəndlərinin üstünə düşürdü;
+   • telefonda düymə kiçikdir (48px), iPhone-un təhlükəsiz sahəsinə hörmət edir və
+     aşağı sürüşəndə kənara çəkilir (`--tucked`, ai_assistant.js), yuxarı sürüşəndə
+     və səhifənin sonunda qayıdır — oxunan siyahı sətrini örtmür;
+   • tam ekran panel `dvh` ilə ölçülür (iOS alətlər zolağı yazma sahəsini örtməsin),
+     yazma sahəsi 16px — iOS fokusda səhifəni böyütməsin. */
+html.ems-scroll-locked .ai-bot-btn,
+html.ems-scroll-locked .ai-bot-tooltip,
+body:has(.blog-header__user-menu--open) .ai-bot-btn,
+body:has(.blog-header__user-menu--open) .ai-bot-tooltip {
+    opacity: 0; visibility: hidden; pointer-events: none;
+}
+@media (max-width: 768px) {
+    .ai-bot-btn {
+        width: 48px; height: 48px; border-radius: 16px;
+        right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom));
+    }
+    .ai-bot-btn__icon { width: 30px; height: 30px; }
+    .ai-bot-btn--tucked { opacity: 0; pointer-events: none; transform: translateX(calc(100% + 16px)); }
+    .ai-bot-tooltip { right: calc(max(12px, env(safe-area-inset-right)) + 58px); bottom: max(18px, env(safe-area-inset-bottom)); max-width: min(240px, calc(100vw - 96px)); }
+    body:has(.sticky-footer) .ai-bot-btn { bottom: calc(76px + env(safe-area-inset-bottom)); }
+    .ai-chat-panel { height: min(620px, calc(100vh - 48px)); height: min(620px, calc(100dvh - 48px)); }
+    .ai-chat-input { font-size: 16px; }
+}
 @media (max-width: 480px) {
-    .ai-chat-panel { right: 0; bottom: 0; width: 100vw; height: 100vh; border-radius: 0; }
-    .ai-bot-btn { right: 16px; bottom: 16px; }
-    .ai-bot-tooltip { right: 82px; }
+    .ai-chat-panel {
+        top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100vh; height: 100dvh; max-height: none;
+        border: 0; border-radius: 0;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+    }
+    .ai-chat-footnote { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
 }
 @media (prefers-reduced-motion: reduce) {
     .ai-bot-btn, .ai-chat-panel, .ai-bot-tooltip { transition: none; }

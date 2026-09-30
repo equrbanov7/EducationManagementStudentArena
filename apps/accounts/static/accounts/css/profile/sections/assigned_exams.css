@@ -538,8 +538,13 @@
         max-width: 100%;
     }
 
+    /* RESP 2026-09-30: bax my_results.css — `1fr` kartı max-content enə dartırdı. */
     .profile-section--assigned-exams .results-cards-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .profile-section--assigned-exams .result-title-group {
+        align-self: stretch;
     }
 
     .profile-section--assigned-exams .result-card-header {

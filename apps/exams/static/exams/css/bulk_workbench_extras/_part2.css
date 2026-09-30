@@ -263,6 +263,16 @@
 /* ═══ Faza 6.4 Sprint-4 (2026-07-02): exam_language_manager inline → klass ═══ */
 .elm-wrapper-flush { padding-bottom: 0; }
 .wb-panel__body--flush { padding: 0; }
+
+/* RESP 2026-09-30: «Mövcud dillər» cədvəli 320–390px-də `.wb-panel`-in
+   `overflow: hidden`-ı ilə kəsilirdi — «Əməliyyat» sütunu (Aktiv/Deaktiv et)
+   tamamilə görünmürdü. Dar ekranda xanalar sıxılır, sığmasa cədvəl öz
+   gövdəsinin içində üfüqi sürüşür. */
+.wb-panel__body--flush { overflow-x: auto; }
+@media (max-width: 576px) {
+    .wb-lang-table th,
+    .wb-lang-table td { padding-left: 12px; padding-right: 12px; }
+}
 .elm-cell-right { text-align: right; }
 .elm-inline-form { display: inline; }
 .qbx-btn--compact { padding: 7px 14px; }

@@ -8,8 +8,9 @@ bölmə qrupları (akkordeon) gəlir; aradakı incə xətti CSS çəkir.
 
 Sıra heyətin GÜNDƏLİK iş tezliyinə görədir: ana səhifə → bildirişlər →
 müraciətlər (emalçılar üçün iş növbəsidir) → bildiriş göndərmək → statistika
-→ öz profil kartı. Bəndlərin markup-ı və görünürlük şərti `sidebar/items/`-
-dədir (düz menyu ilə ORTAQ). "Təşkilata qoşul" (student-organization-request)
+→ öz profil kartı. «Sorğular» (doldurulmalı sorğular, 2026-09-30) müraciətlərin
+ardındadır — heyət üçün də gündəlik «gələnlər qutusu»dur. Bəndlərin markup-ı və
+görünürlük şərti `sidebar/items/`-dədir (düz menyu ilə ORTAQ). "Təşkilata qoşul" (student-organization-request)
 bəndi GİZLİDİR (istifadəçilər yalnız admin tərəfindən əlavə olunur); bölmə
 birbaşa URL ilə qalır.
 
@@ -18,6 +19,7 @@ qrupların önündə daxil edir.{% endcomment %}
 {% include "accounts/profile/sidebar/_home_menu_item.html" %}
 {% include "accounts/profile/sidebar/items/_notifications.html" %}
 {% include "accounts/profile/sidebar/items/_applications.html" %}
+{% include "accounts/profile/sidebar/items/_surveys_inbox.html" %}
 {% include "accounts/profile/sidebar/items/_publish_notification.html" %}
 {% include "accounts/profile/sidebar/items/_statistics.html" %}
 {% include "accounts/profile/sidebar/items/_profile_info.html" %}

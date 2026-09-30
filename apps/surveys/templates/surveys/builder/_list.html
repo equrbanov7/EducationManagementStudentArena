@@ -1,0 +1,78 @@
+{% load i18n %}
+{% comment %}Qurucu siyahısı: yeni sorğu forması, status filtri, sorğu kartları.{% endcomment %}
+<p class="svc-intro">{% trans "Sorğunu yaradın, suallarını yazın, kimin dolduracağını (tələbə, müəllim, heyət və ya hamı) və məcburiliyini seçin. «Müəllim qiymətləndirməsi» növü semestr kampaniyalarının sual dəstidir — tarixləri «Sorğu kampaniyaları» bölməsində idarə olunur." context "surveys.builder" %}</p>
+
+<form method="post" action="{{ bp.create_url }}" class="svc-new svb-new">
+    {% csrf_token %}
+    <div class="svc-field">
+        <label for="svb-new-kind">{% trans "Sorğu növü" context "surveys.builder" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select id="svb-new-kind" name="kind" class="bootstrap-single-select__native" data-bootstrap-select required>
+                {% for kind in bp.kinds %}
+                <option value="{{ kind.value }}"{% if kind.value == "general" %} selected{% endif %}>{{ kind.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="svc-field">
+        <label for="svb-new-audience">{% trans "Kim doldurmalıdır" context "surveys.builder" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select id="svb-new-audience" name="audience" class="bootstrap-single-select__native" data-bootstrap-select>
+                {% for item in bp.audiences %}
+                <option value="{{ item.value }}">{{ item.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="svc-field svb-field--grow">
+        <label for="svb-new-title">{% trans "Sorğunun adı" context "surveys.builder" %}</label>
+        <input id="svb-new-title" class="svc-input" type="text" name="title" maxlength="200" required
+               placeholder="{% trans 'məs. Kitabxana xidmətlərindən məmnunluq' context 'surveys.builder' %}">
+    </div>
+    <button type="submit" class="svc-btn svc-btn--primary"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Sorğu yarat" context "surveys.builder" %}</button>
+</form>
+
+<nav class="svb-filters" aria-label="{% trans 'Status filtri' context 'surveys.builder' %}">
+    {% for item in bp.status_filters %}
+    <a class="svb-filter{% if item.active %} is-active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+        {% if item.value == "active" %}{% trans "Aktiv" context "surveys.builder" %}
+        {% elif item.value == "draft" %}{% trans "Qaralama" context "surveys.builder" %}
+        {% elif item.value == "published" %}{% trans "Dərc olunub" context "surveys.builder" %}
+        {% elif item.value == "closed" %}{% trans "Bağlı" context "surveys.builder" %}
+        {% elif item.value == "archived" %}{% trans "Arxiv" context "surveys.builder" %}
+        {% else %}{% trans "Hamısı" context "surveys.builder" %}{% endif %}
+    </a>
+    {% endfor %}
+</nav>
+
+{% for row in bp.rows %}
+<article class="svc-camp svb-card svc-camp--{{ row.status }}" aria-labelledby="svb-card-{{ forloop.counter }}">
+    <header class="svc-camp__head">
+        <h3 id="svb-card-{{ forloop.counter }}" class="svc-camp__title"><a class="svb-card__link" href="{{ row.edit_url }}">{{ row.survey.title }}</a></h3>
+        {% include "surveys/builder/_status_chip.html" with status=row.status teacher=row.survey.is_teacher_evaluation %}
+        <span class="svc-chip svc-chip--muted">{{ row.kind_label }}</span>
+        {% if row.is_default %}<span class="svc-chip svc-chip--open">{% trans "Defolt dəst" context "surveys.builder" %}</span>{% endif %}
+        {% if row.survey.anonymous %}<span class="svc-chip svc-chip--muted"><i class="fas fa-user-secret" aria-hidden="true"></i> {% trans "Anonim" context "surveys.builder" %}</span>{% endif %}
+        {% if row.survey.mandatory and not row.survey.is_teacher_evaluation %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.builder" %}</span>{% endif %}
+    </header>
+    <dl class="svc-stats">
+        {% if row.survey.is_teacher_evaluation %}
+        <div><dt>{% trans "Auditoriya" context "surveys.builder" %}</dt><dd>{% trans "Jurnalı bağlanmış fənlərin tələbələri" context "surveys.builder" %}</dd></div>
+        <div><dt>{% trans "Kampaniyalar" context "surveys.builder" %}</dt><dd>{{ row.campaigns }}</dd></div>
+        {% else %}
+        <div><dt>{% trans "Auditoriya" context "surveys.builder" %}</dt><dd>{{ row.audience_label }}{% if row.narrowed %} · {% trans "daraldılıb" context "surveys.builder" %}{% endif %}</dd></div>
+        <div><dt>{% trans "Açılış" context "surveys.builder" %}</dt><dd>{{ row.survey.opens_on|date:"d.m.Y"|default:"—" }}</dd></div>
+        <div><dt>{% trans "Bağlanma" context "surveys.builder" %}</dt><dd>{{ row.survey.closes_on|date:"d.m.Y"|default:"—" }}</dd></div>
+        <div><dt>{% trans "Dolduran" context "surveys.builder" %}</dt><dd>{{ row.done_label }}</dd></div>
+        {% endif %}
+    </dl>
+    <div class="svc-camp__actions">
+        <a class="svc-btn svc-btn--ghost" href="{{ row.edit_url }}"><i class="fas fa-pen" aria-hidden="true"></i> {% trans "Redaktə et" context "surveys.builder" %}</a>
+        {% if not row.survey.is_teacher_evaluation and row.survey.status != "draft" %}
+        <a class="svc-btn svc-btn--ghost" href="{{ row.results_url }}"><i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Nəticələr" context "surveys.builder" %}</a>
+        {% endif %}
+    </div>
+</article>
+{% empty %}
+<p class="svc-empty">{% trans "Bu filtrdə sorğu yoxdur. Yuxarıdan yeni sorğu yaradın." context "surveys.builder" %}</p>
+{% endfor %}

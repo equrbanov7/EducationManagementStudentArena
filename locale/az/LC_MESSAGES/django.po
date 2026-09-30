@@ -84643,3 +84643,1969 @@ msgstr "CSV-yə ixrac"
 msgctxt "liveExam.template.session_detail"
 msgid "typed_answers_heading"
 msgstr "Yazılı cavablar"
+
+msgctxt "organizations.permission.label"
+msgid ""
+"Parolu sıfırlamaq (müvəqqəti parol vermək, ilk girişdə dəyişmək məcburi)"
+msgstr ""
+"Parolu sıfırlamaq (müvəqqəti parol vermək, ilk girişdə dəyişmək məcburi)"
+
+msgctxt "profile.sidebar"
+msgid "Parol sıfırlama"
+msgstr "Parol sıfırlama"
+
+msgctxt "accounts.password_reset"
+msgid "Parol sıfırlamaq üçün icazəniz yoxdur."
+msgstr "Parol sıfırlamaq üçün icazəniz yoxdur."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Başqasının adından baxış rejimində parol sıfırlamaq olmaz. Əvvəlcə baxış "
+"rejimindən çıxın."
+msgstr ""
+"Başqasının adından baxış rejimində parol sıfırlamaq olmaz. Əvvəlcə baxış "
+"rejimindən çıxın."
+
+msgctxt "accounts.password_reset"
+msgid "Təşkilatınız hələ təsdiqlənməyib — parol sıfırlamaq olmaz."
+msgstr "Təşkilatınız hələ təsdiqlənməyib — parol sıfırlamaq olmaz."
+
+msgctxt "accounts.password_reset"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Aktiv təşkilat seçilməyib."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi seçilməyib."
+msgstr "İstifadəçi seçilməyib."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi tapılmadı."
+msgstr "İstifadəçi tapılmadı."
+
+msgctxt "accounts.password_reset"
+msgid "Superadmin hesabının parolu bu bölmədən sıfırlana bilməz."
+msgstr "Superadmin hesabının parolu bu bölmədən sıfırlana bilməz."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Öz parolunuzu bu bölmədən sıfırlaya bilməzsiniz — «Parolu dəyiş» bölməsindən"
+" istifadə edin."
+msgstr ""
+"Öz parolunuzu bu bölmədən sıfırlaya bilməzsiniz — «Parolu dəyiş» bölməsindən"
+" istifadə edin."
+
+msgctxt "accounts.password_reset"
+msgid "Təşkilat sahibinin parolunu yalnız superadmin sıfırlaya bilər."
+msgstr "Təşkilat sahibinin parolunu yalnız superadmin sıfırlaya bilər."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Özünüzlə eyni və ya daha yüksək səlahiyyətli istifadəçinin parolunu "
+"sıfırlaya bilməzsiniz."
+msgstr ""
+"Özünüzlə eyni və ya daha yüksək səlahiyyətli istifadəçinin parolunu "
+"sıfırlaya bilməzsiniz."
+
+msgctxt "accounts.password_reset"
+msgid "Hesab silinib — əvvəlcə RİM mərkəzindən bərpa olunmalıdır."
+msgstr "Hesab silinib — əvvəlcə RİM mərkəzindən bərpa olunmalıdır."
+
+msgctxt "accounts.password_reset"
+msgid "Hesab bloklanıb — əvvəlcə RİM mərkəzindən blokdan çıxarılmalıdır."
+msgstr "Hesab bloklanıb — əvvəlcə RİM mərkəzindən blokdan çıxarılmalıdır."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Bu hesabla sistemə giriş bağlıdır (məzun/xaric arxivi və ya tamamlanmamış "
+"idxal)."
+msgstr ""
+"Bu hesabla sistemə giriş bağlıdır (məzun/xaric arxivi və ya tamamlanmamış "
+"idxal)."
+
+msgctxt "accounts.password_reset"
+msgid "Çox sayda sorğu göndərildi. Bir az sonra yenidən cəhd edin."
+msgstr "Çox sayda sorğu göndərildi. Bir az sonra yenidən cəhd edin."
+
+msgctxt "accounts.password_reset"
+msgid "Ən azı 2 simvol daxil edin."
+msgstr "Ən azı 2 simvol daxil edin."
+
+msgctxt "accounts.password_reset"
+msgid "Parol yaradıla bilmədi. Yenidən cəhd edin."
+msgstr "Parol yaradıla bilmədi. Yenidən cəhd edin."
+
+msgctxt "accounts.password_reset"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "accounts.password_reset"
+msgid "Bloklanıb"
+msgstr "Bloklanıb"
+
+msgctxt "accounts.password_reset"
+msgid "Silinib"
+msgstr "Silinib"
+
+msgctxt "accounts.password_reset"
+msgid "Giriş bağlıdır"
+msgstr "Giriş bağlıdır"
+
+msgctxt "accounts.password_reset"
+msgid "Heç vaxt daxil olmayıb"
+msgstr "Heç vaxt daxil olmayıb"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə öz parolunu qurmağa məcbur"
+" olacaq."
+msgstr ""
+"Müvəqqəti parol yaradıldı. İstifadəçi ilk girişdə öz parolunu qurmağa məcbur"
+" olacaq."
+
+msgctxt "accounts.password_reset"
+msgid "Axtarılır…"
+msgstr "Axtarılır…"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Heç kim tapılmadı. İstifadəçi adını yoxlayın və ya ad və soyadla axtarın."
+msgstr ""
+"Heç kim tapılmadı. İstifadəçi adını yoxlayın və ya ad və soyadla axtarın."
+
+msgctxt "accounts.password_reset"
+msgid "Nəticə çoxdur — yalnız ilk 8-i göstərilir. Sorğunu dəqiqləşdirin."
+msgstr "Nəticə çoxdur — yalnız ilk 8-i göstərilir. Sorğunu dəqiqləşdirin."
+
+msgctxt "accounts.password_reset"
+msgid "Şəxsiyyəti sənədlə yoxlayın və yalnız sonra parolu sıfırlayın."
+msgstr "Şəxsiyyəti sənədlə yoxlayın və yalnız sonra parolu sıfırlayın."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "accounts.password_reset"
+msgid "Rol"
+msgstr "Rol"
+
+msgctxt "accounts.password_reset"
+msgid "Qrup / bölmə"
+msgstr "Qrup / bölmə"
+
+msgctxt "accounts.password_reset"
+msgid "Son giriş"
+msgstr "Son giriş"
+
+msgctxt "accounts.password_reset"
+msgid "Əvvəlki müvəqqəti parol hələ dəyişdirilməyib"
+msgstr "Əvvəlki müvəqqəti parol hələ dəyişdirilməyib"
+
+msgctxt "accounts.password_reset"
+msgid "Parolu sıfırla"
+msgstr "Parolu sıfırla"
+
+msgctxt "accounts.password_reset"
+msgid "Sıfırlanır…"
+msgstr "Sıfırlanır…"
+
+msgctxt "accounts.password_reset"
+msgid "Parol sıfırlansın?"
+msgstr "Parol sıfırlansın?"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq.\n"
+"Köhnə parol dərhal etibarsız olacaq, istifadəçinin bütün açıq sessiyaları bağlanacaq.\n"
+"İstifadəçinin şəxsiyyətini yoxladınız?"
+msgstr ""
+"{name} ({username}) üçün yeni müvəqqəti parol yaradılacaq.\n"
+"Köhnə parol dərhal etibarsız olacaq, istifadəçinin bütün açıq sessiyaları bağlanacaq.\n"
+"İstifadəçinin şəxsiyyətini yoxladınız?"
+
+msgctxt "accounts.password_reset"
+msgid "Bəli, sıfırla"
+msgstr "Bəli, sıfırla"
+
+msgctxt "accounts.password_reset"
+msgid "{name} ({username}) üçün müvəqqəti parol:"
+msgstr "{name} ({username}) üçün müvəqqəti parol:"
+
+msgctxt "accounts.password_reset"
+msgid "Parol kopyalandı."
+msgstr "Parol kopyalandı."
+
+msgctxt "accounts.password_reset"
+msgid "Kopyalamaq alınmadı — parolu əl ilə yazın."
+msgstr "Kopyalamaq alınmadı — parolu əl ilə yazın."
+
+msgctxt "accounts.password_reset"
+msgid "Xəta baş verdi. Yenidən cəhd edin."
+msgstr "Xəta baş verdi. Yenidən cəhd edin."
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Parolunu unudan istifadəçiyə müvəqqəti parol verin. İstifadəçi ilk girişdə "
+"öz parolunu qurmağa məcbur olacaq. Hər sıfırlama audit jurnalına yazılır."
+msgstr ""
+"Parolunu unudan istifadəçiyə müvəqqəti parol verin. İstifadəçi ilk girişdə "
+"öz parolunu qurmağa məcbur olacaq. Hər sıfırlama audit jurnalına yazılır."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçini tapın"
+msgstr "İstifadəçini tapın"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"İstifadəçi adını dəqiq yazın (məs. ad.soyad) və ya ad və soyadla axtarın."
+msgstr ""
+"İstifadəçi adını dəqiq yazın (məs. ad.soyad) və ya ad və soyadla axtarın."
+
+msgctxt "accounts.password_reset"
+msgid "Axtarış yalnız «%(org)s» daxilindədir."
+msgstr "Axtarış yalnız «%(org)s» daxilindədir."
+
+msgctxt "accounts.password_reset"
+msgid "İstifadəçi adı və ya ad, soyad"
+msgstr "İstifadəçi adı və ya ad, soyad"
+
+msgctxt "accounts.password_reset"
+msgid "məs. aysel.quliyeva və ya Quliyeva Aysel"
+msgstr "məs. aysel.quliyeva və ya Quliyeva Aysel"
+
+msgctxt "accounts.password_reset"
+msgid "Axtar"
+msgstr "Axtar"
+
+msgctxt "accounts.password_reset"
+msgid "Müvəqqəti parol"
+msgstr "Müvəqqəti parol"
+
+msgctxt "accounts.password_reset"
+msgid "Kopyala"
+msgstr "Kopyala"
+
+msgctxt "accounts.password_reset"
+msgid "Bu parol bir daha göstərilməyəcək"
+msgstr "Bu parol bir daha göstərilməyəcək"
+
+msgctxt "accounts.password_reset"
+msgid ""
+"Parolu istifadəçiyə indi verin. İlk girişdə istifadəçi email ünvanını "
+"təsdiqləyib öz parolunu quracaq — o vaxta qədər sistemin heç bir bölməsi "
+"açılmayacaq."
+msgstr ""
+"Parolu istifadəçiyə indi verin. İlk girişdə istifadəçi email ünvanını "
+"təsdiqləyib öz parolunu quracaq — o vaxta qədər sistemin heç bir bölməsi "
+"açılmayacaq."
+
+msgctxt "accounts.password_reset"
+msgid "Verdim — parolu gizlət"
+msgstr "Verdim — parolu gizlət"
+
+msgctxt "moderation.profanity"
+msgid ""
+"Bu ad qəbul edilmir: tərkibində nalayiq ifadə var. Zəhmət olmasa başqa ad "
+"yazın."
+msgstr ""
+"Bu ad qəbul edilmir: tərkibində nalayiq ifadə var. Zəhmət olmasa başqa ad "
+"yazın."
+
+msgctxt "moderation.profanity"
+msgid ""
+"Çox sayda nalayiq ad cəhdi edildi. Bir neçə dəqiqədən sonra yenidən cəhd "
+"edin."
+msgstr ""
+"Çox sayda nalayiq ad cəhdi edildi. Bir neçə dəqiqədən sonra yenidən cəhd "
+"edin."
+
+msgctxt "audit.section"
+msgid "Nalayiq ad cəhdləri"
+msgstr "Nalayiq ad cəhdləri"
+
+msgctxt "audit.section"
+msgid "Moderasiya › nalayiq ad"
+msgstr "Moderasiya › nalayiq ad"
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"Seçilmiş suallar bu dərc olunmuş (aktiv) imtahanın son aktiv suallarıdır. "
+"Onları silmək və ya deaktiv etmək üçün imtahan da deaktiv edilməlidir."
+msgstr ""
+"Seçilmiş suallar bu dərc olunmuş (aktiv) imtahanın son aktiv suallarıdır. "
+"Onları silmək və ya deaktiv etmək üçün imtahan da deaktiv edilməlidir."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"İmtahanı hazırda {count} tələbə yazır (başlanmış, bitməmiş cəhd). Onlar "
+"bitirənə qədər imtahan deaktiv edilə və bütün aktiv sualları silinə bilməz."
+msgstr ""
+"İmtahanı hazırda {count} tələbə yazır (başlanmış, bitməmiş cəhd). Onlar "
+"bitirənə qədər imtahan deaktiv edilə və bütün aktiv sualları silinə bilməz."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"Bu imtahan üzrə canlı sessiya hələ bitməyib (PIN: {pin}). Əvvəl canlı "
+"sessiyanı bitirin, sonra sualları silin."
+msgstr ""
+"Bu imtahan üzrə canlı sessiya hələ bitməyib (PIN: {pin}). Əvvəl canlı "
+"sessiyanı bitirin, sonra sualları silin."
+
+msgctxt "exams.service.exam_usage"
+msgid ""
+"Bu imtahan üzrə final zal oturumu davam edir ({count} tələbə zalda). Oturum "
+"bitənə qədər imtahan deaktiv edilə bilməz."
+msgstr ""
+"Bu imtahan üzrə final zal oturumu davam edir ({count} tələbə zalda). Oturum "
+"bitənə qədər imtahan deaktiv edilə bilməz."
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"Bu imtahanın bütün aktiv sualları silinəcək — imtahan deaktiv ediləcək. "
+"Davam edilsin?"
+msgstr ""
+"Bu imtahanın bütün aktiv sualları silinəcək — imtahan deaktiv ediləcək. "
+"Davam edilsin?"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"Bu imtahanın bütün aktiv sualları deaktiv ediləcək — imtahan da deaktiv "
+"ediləcək. Davam edilsin?"
+msgstr ""
+"Bu imtahanın bütün aktiv sualları deaktiv ediləcək — imtahan da deaktiv "
+"ediləcək. Davam edilsin?"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "İmtahan deaktiv ediləcək"
+msgstr "İmtahan deaktiv ediləcək"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "Bəli, davam et"
+msgstr "Bəli, davam et"
+
+msgctxt "exams.view.questions_bank.guard"
+msgid "Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "exams.view.questions_bank.guard"
+msgid ""
+"İmtahan deaktiv edildi (dərcdən çıxarıldı). Yeni suallar əlavə edib yenidən "
+"dərc edə bilərsiniz."
+msgstr ""
+"İmtahan deaktiv edildi (dərcdən çıxarıldı). Yeni suallar əlavə edib yenidən "
+"dərc edə bilərsiniz."
+
+msgctxt "profile.sidebar"
+msgid "Sorğular"
+msgstr "Sorğular"
+
+msgctxt "profile.sidebar"
+msgid "Sorğu qurucusu"
+msgstr "Sorğu qurucusu"
+
+msgctxt "surveys.choice"
+msgid "Tək seçim"
+msgstr "Tək seçim"
+
+msgctxt "surveys.choice"
+msgid "Çox seçim"
+msgstr "Çox seçim"
+
+msgctxt "surveys.choice"
+msgid "Reytinq / NPS (0–10)"
+msgstr "Reytinq / NPS (0–10)"
+
+msgctxt "surveys.choice"
+msgid "Bəli / Xeyr"
+msgstr "Bəli / Xeyr"
+
+msgctxt "surveys.choice"
+msgid "Qısa mətn"
+msgstr "Qısa mətn"
+
+msgctxt "surveys.choice"
+msgid "Müəllim qiymətləndirməsi"
+msgstr "Müəllim qiymətləndirməsi"
+
+msgctxt "surveys.choice"
+msgid "Ümumi sorğu"
+msgstr "Ümumi sorğu"
+
+msgctxt "surveys.choice"
+msgid "Fənn / kurs rəyi"
+msgstr "Fənn / kurs rəyi"
+
+msgctxt "surveys.choice"
+msgid "Tədbir / digər"
+msgstr "Tədbir / digər"
+
+msgctxt "surveys.choice"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "surveys.choice"
+msgid "Müəllimlər"
+msgstr "Müəllimlər"
+
+msgctxt "surveys.choice"
+msgid "İnzibati heyət"
+msgstr "İnzibati heyət"
+
+msgctxt "surveys.choice"
+msgid "Hamı"
+msgstr "Hamı"
+
+msgctxt "surveys.choice"
+msgid "Doldurulmayınca kabinet bağlıdır"
+msgstr "Doldurulmayınca kabinet bağlıdır"
+
+msgctxt "surveys.choice"
+msgid "Bir dəfə keçmək olar"
+msgstr "Bir dəfə keçmək olar"
+
+msgctxt "surveys.choice"
+msgid "«Sonra doldur» möhləti (gün)"
+msgstr "«Sonra doldur» möhləti (gün)"
+
+msgctxt "surveys.choice"
+msgid "Dərc olunub"
+msgstr "Dərc olunub"
+
+msgctxt "surveys.choice"
+msgid "Arxivdə"
+msgstr "Arxivdə"
+
+msgctxt "surveys.model"
+msgid "sorğu"
+msgstr "sorğu"
+
+msgctxt "surveys.model"
+msgid "sorğular"
+msgstr "sorğular"
+
+msgctxt "surveys.model"
+msgid "sorğu bölməsi"
+msgstr "sorğu bölməsi"
+
+msgctxt "surveys.model"
+msgid "sorğu bölmələri"
+msgstr "sorğu bölmələri"
+
+msgctxt "surveys.model"
+msgid "sorğu iştirakı"
+msgstr "sorğu iştirakı"
+
+msgctxt "surveys.model"
+msgid "sorğu iştirakları"
+msgstr "sorğu iştirakları"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabı (forma)"
+msgstr "sorğu cavabı (forma)"
+
+msgctxt "surveys.model"
+msgid "sorğu cavabları (forma)"
+msgstr "sorğu cavabları (forma)"
+
+msgctxt "surveys.model"
+msgid "sual cavabı"
+msgstr "sual cavabı"
+
+msgctxt "surveys.model"
+msgid "sual cavabları"
+msgstr "sual cavabları"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən sorğu cavabı"
+msgstr "dərc gözləyən sorğu cavabı"
+
+msgctxt "surveys.model"
+msgid "dərc gözləyən sorğu cavabları"
+msgstr "dərc gözləyən sorğu cavabları"
+
+msgctxt "surveys.model"
+msgid "sorğu qaralaması"
+msgstr "sorğu qaralaması"
+
+msgctxt "surveys.model"
+msgid "sorğu qaralamaları"
+msgstr "sorğu qaralamaları"
+
+msgctxt "surveys.model"
+msgid "sorğu keçidi"
+msgstr "sorğu keçidi"
+
+msgctxt "surveys.model"
+msgid "sorğu keçidləri"
+msgstr "sorğu keçidləri"
+
+msgctxt "surveys.form"
+msgid "Seçim etibarsızdır — səhifəni yeniləyin."
+msgstr "Seçim etibarsızdır — səhifəni yeniləyin."
+
+msgctxt "surveys.form"
+msgid "Ən azı %(n)s seçim edin."
+msgstr "Ən azı %(n)s seçim edin."
+
+msgctxt "surveys.form"
+msgid "Ən çoxu %(n)s seçim edə bilərsiniz."
+msgstr "Ən çoxu %(n)s seçim edə bilərsiniz."
+
+msgctxt "surveys.notify"
+msgid "Yeni sorğu: %(title)s"
+msgstr "Yeni sorğu: %(title)s"
+
+msgctxt "surveys.notify"
+msgid ""
+"Məcburi sorğu — son tarix %(day)s. Kabinetdə «Sorğular» bölməsinə keçin."
+msgstr ""
+"Məcburi sorğu — son tarix %(day)s. Kabinetdə «Sorğular» bölməsinə keçin."
+
+msgctxt "surveys.notify"
+msgid "Könüllü sorğu — son tarix %(day)s. Fikriniz bizim üçün vacibdir."
+msgstr "Könüllü sorğu — son tarix %(day)s. Fikriniz bizim üçün vacibdir."
+
+msgctxt "surveys.cabinet"
+msgid "Sorğu qurucusu"
+msgstr "Sorğu qurucusu"
+
+msgctxt "surveys.cabinet"
+msgid "Sual dəsti"
+msgstr "Sual dəsti"
+
+msgctxt "surveys.cabinet"
+msgid ""
+"Sualları yazmaq, yeni sual dəsti yaratmaq və ya başqa auditoriya (müəllim, "
+"heyət, hamı) üçün sorğu açmaq —"
+msgstr ""
+"Sualları yazmaq, yeni sual dəsti yaratmaq və ya başqa auditoriya (müəllim, "
+"heyət, hamı) üçün sorğu açmaq —"
+
+msgctxt "surveys.student"
+msgid "Sorğular"
+msgstr "Sorğular"
+
+msgctxt "surveys.student"
+msgid "Sizi gözləyən sorğular"
+msgstr "Sizi gözləyən sorğular"
+
+msgctxt "surveys.student"
+msgid ""
+"Məcburi sorğu doldurulmayınca kabinet bağlı qala bilər. İmtahan səhifələri "
+"heç vaxt bağlanmır."
+msgstr ""
+"Məcburi sorğu doldurulmayınca kabinet bağlı qala bilər. İmtahan səhifələri "
+"heç vaxt bağlanmır."
+
+msgctxt "surveys.student"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "surveys.student"
+msgid "Könüllü"
+msgstr "Könüllü"
+
+msgctxt "surveys.student"
+msgid "Anonim"
+msgstr "Anonim"
+
+msgctxt "surveys.student"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+msgstr ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+
+msgctxt "surveys.student"
+msgid ""
+"Bu dəfə keçə bilərsiniz, amma növbəti dəfə sorğunu doldurmadan kabinetə "
+"daxil ola bilməyəcəksiniz."
+msgstr ""
+"Bu dəfə keçə bilərsiniz, amma növbəti dəfə sorğunu doldurmadan kabinetə "
+"daxil ola bilməyəcəksiniz."
+
+msgctxt "surveys.student"
+msgid "Doldurulmayınca kabinet bağlı qalır."
+msgstr "Doldurulmayınca kabinet bağlı qalır."
+
+msgctxt "surveys.student"
+msgid "Bu dəfə keç"
+msgstr "Bu dəfə keç"
+
+msgctxt "surveys.inbox"
+msgid ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu"
+" yalnız istifadəçinin özü doldura bilər."
+msgstr ""
+"Baxış rejimində (başqa istifadəçinin profili) sorğular göstərilmir — sorğunu"
+" yalnız istifadəçinin özü doldura bilər."
+
+msgctxt "surveys.inbox"
+msgid "Təşkilat konteksti tapılmadı."
+msgstr "Təşkilat konteksti tapılmadı."
+
+msgctxt "surveys.inbox"
+msgid ""
+"Universitetin sizə ünvanladığı sorğular. Məcburi sorğular doldurulmayınca "
+"kabinet bağlana bilər; anonim sorğularda cavabınız adınızla saxlanılmır."
+msgstr ""
+"Universitetin sizə ünvanladığı sorğular. Məcburi sorğular doldurulmayınca "
+"kabinet bağlana bilər; anonim sorğularda cavabınız adınızla saxlanılmır."
+
+msgctxt "surveys.inbox"
+msgid "Gözləyir: %(n)s"
+msgstr "Gözləyir: %(n)s"
+
+msgctxt "surveys.inbox"
+msgid "Gözləyən"
+msgstr "Gözləyən"
+
+msgctxt "surveys.inbox"
+msgid "Müəllimlərin anonim qiymətləndirilməsi"
+msgstr "Müəllimlərin anonim qiymətləndirilməsi"
+
+msgctxt "surveys.inbox"
+msgid "Anonim"
+msgstr "Anonim"
+
+msgctxt "surveys.inbox"
+msgid "Adla"
+msgstr "Adla"
+
+msgctxt "surveys.inbox"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "surveys.inbox"
+msgid "Könüllü"
+msgstr "Könüllü"
+
+msgctxt "surveys.inbox"
+msgid "%(done)s / %(total)s tamamlanıb"
+msgstr "%(done)s / %(total)s tamamlanıb"
+
+msgctxt "surveys.inbox"
+msgid "son tarix %(day)s"
+msgstr "son tarix %(day)s"
+
+msgctxt "surveys.inbox"
+msgid "Davam et"
+msgstr "Davam et"
+
+msgctxt "surveys.inbox"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — növbəti girişdə kabinet onu "
+"doldurmadan açılmayacaq."
+msgstr ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — növbəti girişdə kabinet onu "
+"doldurmadan açılmayacaq."
+
+msgctxt "surveys.inbox"
+msgid ""
+"Bir dəfə keçmək olar; növbəti dəfə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+msgstr ""
+"Bir dəfə keçmək olar; növbəti dəfə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+
+msgctxt "surveys.inbox"
+msgid "Doldurulmayınca kabinet bağlı qalır."
+msgstr "Doldurulmayınca kabinet bağlı qalır."
+
+msgctxt "surveys.inbox"
+msgid "«Sonra doldur» imkanı %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+msgstr "«Sonra doldur» imkanı %(day)s tarixinə qədərdir (hər dəfə 24 saat)."
+
+msgctxt "surveys.inbox"
+msgid "Doldur"
+msgstr "Doldur"
+
+msgctxt "surveys.inbox"
+msgid "Hazırda sizi gözləyən sorğu yoxdur."
+msgstr "Hazırda sizi gözləyən sorğu yoxdur."
+
+msgctxt "surveys.inbox"
+msgid "Tamamlanmış"
+msgstr "Tamamlanmış"
+
+msgctxt "surveys.inbox"
+msgid "Bağlı"
+msgstr "Bağlı"
+
+msgctxt "surveys.inbox"
+msgid "doldurulmayıb"
+msgstr "doldurulmayıb"
+
+msgctxt "surveys.respond"
+msgid "Sorğu naviqasiyası"
+msgstr "Sorğu naviqasiyası"
+
+msgctxt "surveys.respond"
+msgid "Sorğular"
+msgstr "Sorğular"
+
+msgctxt "surveys.respond"
+msgid "Anonim sorğu"
+msgstr "Anonim sorğu"
+
+msgctxt "surveys.respond"
+msgid "Adla sorğu"
+msgstr "Adla sorğu"
+
+msgctxt "surveys.respond"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "surveys.respond"
+msgid "Son tarix: %(day)s"
+msgstr "Son tarix: %(day)s"
+
+msgctxt "surveys.respond"
+msgid ""
+"Cavabınız adınızla saxlanılmır: yalnız «doldurdu» qeydi qalır, nəticələr ən "
+"azı k cavab yığılanda və sorğu bağlandıqdan sonra ümumiləşdirilmiş şəkildə "
+"görünür. Yarımçıq cavablar yalnız bu brauzer tabında saxlanılır."
+msgstr ""
+"Cavabınız adınızla saxlanılmır: yalnız «doldurdu» qeydi qalır, nəticələr ən "
+"azı k cavab yığılanda və sorğu bağlandıqdan sonra ümumiləşdirilmiş şəkildə "
+"görünür. Yarımçıq cavablar yalnız bu brauzer tabında saxlanılır."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu sorğu anonim deyil — cavablarınızı adınızla sorğunun idarəçiləri görür. "
+"Yarımçıq cavablar avtomatik saxlanılır."
+msgstr ""
+"Bu sorğu anonim deyil — cavablarınızı adınızla sorğunun idarəçiləri görür. "
+"Yarımçıq cavablar avtomatik saxlanılır."
+
+msgctxt "surveys.respond"
+msgid "0 / %(total)s cavablanıb"
+msgstr "0 / %(total)s cavablanıb"
+
+msgctxt "surveys.respond"
+msgid "__N__ / __T__ cavablanıb"
+msgstr "__N__ / __T__ cavablanıb"
+
+msgctxt "surveys.respond"
+msgid "Yadda saxlanıldı"
+msgstr "Yadda saxlanıldı"
+
+msgctxt "surveys.respond"
+msgid "Bu tabda saxlanıldı"
+msgstr "Bu tabda saxlanıldı"
+
+msgctxt "surveys.respond"
+msgid "Bu sual məcburidir."
+msgstr "Bu sual məcburidir."
+
+msgctxt "surveys.respond"
+msgid "Ən azı __N__ seçim edin."
+msgstr "Ən azı __N__ seçim edin."
+
+msgctxt "surveys.respond"
+msgid "Ən çoxu __N__ seçim edə bilərsiniz."
+msgstr "Ən çoxu __N__ seçim edə bilərsiniz."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+msgstr ""
+"Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş "
+"sualları yoxlayın."
+
+msgctxt "surveys.respond"
+msgid "Anonim göndər"
+msgstr "Anonim göndər"
+
+msgctxt "surveys.respond"
+msgid "Göndər"
+msgstr "Göndər"
+
+msgctxt "surveys.respond"
+msgid "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+msgstr "Göndərdikdən sonra cavabı dəyişmək mümkün deyil."
+
+msgctxt "surveys.respond"
+msgid "(məcburi)"
+msgstr "(məcburi)"
+
+msgctxt "surveys.respond"
+msgid "%(low)s–%(high)s variant seçin."
+msgstr "%(low)s–%(high)s variant seçin."
+
+msgctxt "surveys.respond"
+msgid "Ən azı %(low)s variant seçin."
+msgstr "Ən azı %(low)s variant seçin."
+
+msgctxt "surveys.respond"
+msgid "Ən çoxu %(high)s variant seçin."
+msgstr "Ən çoxu %(high)s variant seçin."
+
+msgctxt "surveys.respond"
+msgid "Bəli"
+msgstr "Bəli"
+
+msgctxt "surveys.respond"
+msgid "Xeyr"
+msgstr "Xeyr"
+
+msgctxt "surveys.respond"
+msgid "Heç ehtimal etmirəm"
+msgstr "Heç ehtimal etmirəm"
+
+msgctxt "surveys.respond"
+msgid "Mütləq"
+msgstr "Mütləq"
+
+msgctxt "surveys.respond"
+msgid "Təşəkkür edirik!"
+msgstr "Təşəkkür edirik!"
+
+msgctxt "surveys.respond"
+msgid ""
+"Cavabınız anonim şəkildə qeydə alındı. Nəticələr sorğu bağlandıqdan sonra "
+"ümumiləşdirilmiş şəkildə təhlil olunacaq."
+msgstr ""
+"Cavabınız anonim şəkildə qeydə alındı. Nəticələr sorğu bağlandıqdan sonra "
+"ümumiləşdirilmiş şəkildə təhlil olunacaq."
+
+msgctxt "surveys.respond"
+msgid "Cavabınız qeydə alındı."
+msgstr "Cavabınız qeydə alındı."
+
+msgctxt "surveys.respond"
+msgid "Digər sorğular"
+msgstr "Digər sorğular"
+
+msgctxt "surveys.respond"
+msgid "Kabinetə qayıt"
+msgstr "Kabinetə qayıt"
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu %(day)s tarixində açılacaq."
+msgstr "Bu sorğu %(day)s tarixində açılacaq."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu sizə ünvanlanmayıb."
+msgstr "Bu sorğu sizə ünvanlanmayıb."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu artıq cavab qəbul etmir."
+msgstr "Bu sorğu artıq cavab qəbul etmir."
+
+msgctxt "surveys.respond"
+msgid "Sorğulara qayıt"
+msgstr "Sorğulara qayıt"
+
+msgctxt "surveys.respond"
+msgid "Sorğu artıq qəbul edilmir."
+msgstr "Sorğu artıq qəbul edilmir."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğunu artıq doldurmusunuz."
+msgstr "Bu sorğunu artıq doldurmusunuz."
+
+msgctxt "surveys.respond"
+msgid "Anonim sorğunun qaralaması yalnız brauzerdə saxlanır."
+msgstr "Anonim sorğunun qaralaması yalnız brauzerdə saxlanır."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğunu keçmək mümkün deyil."
+msgstr "Bu sorğunu keçmək mümkün deyil."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+msgstr ""
+"Bu sorğunu artıq bir dəfə keçmisiniz — kabinetə daxil olmaq üçün onu "
+"doldurun."
+
+msgctxt "surveys.respond"
+msgid "Bu sorğu üçün möhlət yoxdur."
+msgstr "Bu sorğu üçün möhlət yoxdur."
+
+msgctxt "surveys.respond"
+msgid "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+msgstr "Möhlət müddəti bitib — sorğunu doldurmaq məcburidir."
+
+msgctxt "surveys.respond"
+msgid ""
+"Bu dəfə keçdiniz. Növbəti girişdə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+msgstr ""
+"Bu dəfə keçdiniz. Növbəti girişdə sorğunu doldurmadan kabinetə daxil ola "
+"bilməyəcəksiniz."
+
+msgctxt "surveys.respond"
+msgid "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+msgstr "Sorğunu 24 saat ərzində doldurmağı unutmayın."
+
+msgctxt "surveys.export"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "surveys.export"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "surveys.export"
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgctxt "surveys.export"
+msgid "Sual"
+msgstr "Sual"
+
+msgctxt "surveys.export"
+msgid "Variant"
+msgstr "Variant"
+
+msgctxt "surveys.export"
+msgid "Faiz / cavab"
+msgstr "Faiz / cavab"
+
+msgctxt "surveys.export"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "surveys.export"
+msgid "Cavab sayı"
+msgstr "Cavab sayı"
+
+msgctxt "surveys.export"
+msgid "Cavab sayı k-həddindən azdır — nəticələr gizlidir."
+msgstr "Cavab sayı k-həddindən azdır — nəticələr gizlidir."
+
+msgctxt "surveys.export"
+msgid "gizli (k-dan az cavab)"
+msgstr "gizli (k-dan az cavab)"
+
+msgctxt "surveys.export"
+msgid "açıq cavab"
+msgstr "açıq cavab"
+
+msgctxt "surveys.export"
+msgid "Sorğu nəticələrinin ixracı"
+msgstr "Sorğu nəticələrinin ixracı"
+
+msgctxt "surveys.builder"
+msgid "Sorğunun adı boş ola bilməz."
+msgstr "Sorğunun adı boş ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Ad %(limit)s simvoldan uzun ola bilməz."
+msgstr "Ad %(limit)s simvoldan uzun ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Sorğu növü seçilməlidir."
+msgstr "Sorğu növü seçilməlidir."
+
+msgctxt "surveys.builder"
+msgid "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+msgstr "Bağlanma tarixi açılış tarixindən əvvəl ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Sorğu %(days)s gündən uzun ola bilməz."
+msgstr "Sorğu %(days)s gündən uzun ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Təsvir %(limit)s simvoldan uzun ola bilməz."
+msgstr "Təsvir %(limit)s simvoldan uzun ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Bu sorğunun növünü dəyişmək olmaz."
+msgstr "Bu sorğunun növünü dəyişmək olmaz."
+
+msgctxt "surveys.builder"
+msgid "Auditoriya seçilməlidir."
+msgstr "Auditoriya seçilməlidir."
+
+msgctxt "surveys.builder"
+msgid ""
+"Dərc olunmuş sorğunun anonimliyi və auditoriyası dəyişmir — dublikat "
+"yaradın."
+msgstr ""
+"Dərc olunmuş sorğunun anonimliyi və auditoriyası dəyişmir — dublikat "
+"yaradın."
+
+msgctxt "surveys.builder"
+msgid "Artıq açılmış sorğunun açılış tarixi dəyişmir."
+msgstr "Artıq açılmış sorğunun açılış tarixi dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Dərc olunmuş sorğunun bağlanma tarixi olmalıdır."
+msgstr "Dərc olunmuş sorğunun bağlanma tarixi olmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Qapı siyasəti seçilməlidir."
+msgstr "Qapı siyasəti seçilməlidir."
+
+msgctxt "surveys.builder"
+msgid "Möhlət 0 ilə %(high)s gün arasında olmalıdır."
+msgstr "Möhlət 0 ilə %(high)s gün arasında olmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+msgstr "Minimum qrup ölçüsü %(low)s ilə %(high)s arasında olmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
+msgstr "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Yalnız qaralama sorğu dərc oluna bilər."
+msgstr "Yalnız qaralama sorğu dərc oluna bilər."
+
+msgctxt "surveys.builder"
+msgid "Dərc etmək üçün ən azı bir sual əlavə edin."
+msgstr "Dərc etmək üçün ən azı bir sual əlavə edin."
+
+msgctxt "surveys.builder"
+msgid "Dərc etmək üçün bağlanma tarixini seçin."
+msgstr "Dərc etmək üçün bağlanma tarixini seçin."
+
+msgctxt "surveys.builder"
+msgid "Yalnız dərc olunmuş sorğu bağlana bilər."
+msgstr "Yalnız dərc olunmuş sorğu bağlana bilər."
+
+msgctxt "surveys.builder"
+msgid "Yalnız bağlı sorğu yenidən açıla bilər."
+msgstr "Yalnız bağlı sorğu yenidən açıla bilər."
+
+msgctxt "surveys.builder"
+msgid "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+msgstr "Yenidən açmaq üçün gələcək bağlanma tarixi seçin."
+
+msgctxt "surveys.builder"
+msgid "Defolt sual dəsti arxivlənmir — əvvəl başqa dəsti defolt edin."
+msgstr "Defolt sual dəsti arxivlənmir — əvvəl başqa dəsti defolt edin."
+
+msgctxt "surveys.builder"
+msgid "Açıq kampaniyanın sual dəsti arxivlənmir."
+msgstr "Açıq kampaniyanın sual dəsti arxivlənmir."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivdə deyil."
+msgstr "Sorğu arxivdə deyil."
+
+msgctxt "surveys.builder"
+msgid "Yalnız heç dərc olunmamış qaralama silinə bilər."
+msgstr "Yalnız heç dərc olunmamış qaralama silinə bilər."
+
+msgctxt "surveys.builder"
+msgid "Kampaniyada istifadə olunan dəst silinmir."
+msgstr "Kampaniyada istifadə olunan dəst silinmir."
+
+msgctxt "surveys.builder"
+msgid "Defolt yalnız dərc olunmuş müəllim qiymətləndirməsi dəsti ola bilər."
+msgstr "Defolt yalnız dərc olunmuş müəllim qiymətləndirməsi dəsti ola bilər."
+
+msgctxt "surveys.builder"
+msgid "nüsxə"
+msgstr "nüsxə"
+
+msgctxt "surveys.builder"
+msgid ""
+"Cavab gəlmiş sualda yalnız kiçik düzəliş (yazı səhvi) mümkündür — mənanı "
+"dəyişmək üçün sorğunun dublikatını yaradın."
+msgstr ""
+"Cavab gəlmiş sualda yalnız kiçik düzəliş (yazı səhvi) mümkündür — mənanı "
+"dəyişmək üçün sorğunun dublikatını yaradın."
+
+msgctxt "surveys.builder"
+msgid "Sualın mətni boş ola bilməz."
+msgstr "Sualın mətni boş ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "«%(field)s» %(limit)s simvoldan uzun ola bilməz."
+msgstr "«%(field)s» %(limit)s simvoldan uzun ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Ən azı %(n)s seçim yazın (hər sətirdə bir)."
+msgstr "Ən azı %(n)s seçim yazın (hər sətirdə bir)."
+
+msgctxt "surveys.builder"
+msgid "Ən çoxu %(n)s seçim ola bilər."
+msgstr "Ən çoxu %(n)s seçim ola bilər."
+
+msgctxt "surveys.builder"
+msgid "Seçim %(n)s simvoldan uzun ola bilməz."
+msgstr "Seçim %(n)s simvoldan uzun ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Seçimlər təkrarlanmamalıdır."
+msgstr "Seçimlər təkrarlanmamalıdır."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sualın seçim sayı dəyişmir."
+msgstr "Cavab gəlmiş sualın seçim sayı dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Etiket"
+msgstr "Etiket"
+
+msgctxt "surveys.builder"
+msgid "Minimum/maksimum seçim sayı tam ədəd olmalıdır."
+msgstr "Minimum/maksimum seçim sayı tam ədəd olmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Minimum/maksimum seçim sayı seçimlərin sayına uyğun olmalıdır."
+msgstr "Minimum/maksimum seçim sayı seçimlərin sayına uyğun olmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Variant %(n)s"
+msgstr "Variant %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Minimum seçim sayı maksimumdan böyük ola bilməz."
+msgstr "Minimum seçim sayı maksimumdan böyük ola bilməz."
+
+msgctxt "surveys.builder"
+msgid "Bölmə seçilməlidir."
+msgstr "Bölmə seçilməlidir."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuya sual əlavə etmək olmaz — dublikat yaradın."
+msgstr "Cavab gəlmiş sorğuya sual əlavə etmək olmaz — dublikat yaradın."
+
+msgctxt "surveys.builder"
+msgid "Sorğuda ən çoxu %(n)s sual ola bilər."
+msgstr "Sorğuda ən çoxu %(n)s sual ola bilər."
+
+msgctxt "surveys.builder"
+msgid "Bu sorğu üçün sual növü uyğun deyil."
+msgstr "Bu sorğu üçün sual növü uyğun deyil."
+
+msgctxt "surveys.builder"
+msgid "Sual"
+msgstr "Sual"
+
+msgctxt "surveys.builder"
+msgid "İzah"
+msgstr "İzah"
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğudan sual silinmir."
+msgstr "Cavab gəlmiş sorğudan sual silinmir."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuda sualların sırası dəyişmir."
+msgstr "Cavab gəlmiş sorğuda sualların sırası dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Sıra köhnəlib — səhifəni yeniləyin."
+msgstr "Sıra köhnəlib — səhifəni yeniləyin."
+
+msgctxt "surveys.builder"
+msgid "Müəllim qiymətləndirməsinin bölmələri sabitdir."
+msgstr "Müəllim qiymətləndirməsinin bölmələri sabitdir."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuya bölmə əlavə etmək olmaz."
+msgstr "Cavab gəlmiş sorğuya bölmə əlavə etmək olmaz."
+
+msgctxt "surveys.builder"
+msgid "Ən çoxu %(n)s bölmə ola bilər."
+msgstr "Ən çoxu %(n)s bölmə ola bilər."
+
+msgctxt "surveys.builder"
+msgid "Bölmə adı"
+msgstr "Bölmə adı"
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğudan bölmə silinmir."
+msgstr "Cavab gəlmiş sorğudan bölmə silinmir."
+
+msgctxt "surveys.builder"
+msgid "Sorğuda ən azı bir bölmə qalmalıdır."
+msgstr "Sorğuda ən azı bir bölmə qalmalıdır."
+
+msgctxt "surveys.builder"
+msgid "Cavab gəlmiş sorğuda bölmələrin sırası dəyişmir."
+msgstr "Cavab gəlmiş sorğuda bölmələrin sırası dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Tarix düzgün formatda deyil."
+msgstr "Tarix düzgün formatda deyil."
+
+msgctxt "surveys.builder"
+msgid "Bu əməliyyat üçün icazəniz yoxdur."
+msgstr "Bu əməliyyat üçün icazəniz yoxdur."
+
+msgctxt "surveys.builder"
+msgid "Sorğu yaradıldı — indi sualları yazın."
+msgstr "Sorğu yaradıldı — indi sualları yazın."
+
+msgctxt "surveys.builder"
+msgid "Ayarlar yadda saxlanıldı."
+msgstr "Ayarlar yadda saxlanıldı."
+
+msgctxt "surveys.builder"
+msgid "Sorğu dərc olundu."
+msgstr "Sorğu dərc olundu."
+
+msgctxt "surveys.builder"
+msgid "Sorğu bağlandı."
+msgstr "Sorğu bağlandı."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivə köçürüldü."
+msgstr "Sorğu arxivə köçürüldü."
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivdən çıxarıldı."
+msgstr "Sorğu arxivdən çıxarıldı."
+
+msgctxt "surveys.builder"
+msgid "Sual dəsti yeni kampaniyalar üçün defolt edildi."
+msgstr "Sual dəsti yeni kampaniyalar üçün defolt edildi."
+
+msgctxt "surveys.builder"
+msgid "Nüsxə yaradıldı (qaralama)."
+msgstr "Nüsxə yaradıldı (qaralama)."
+
+msgctxt "surveys.builder"
+msgid "Qaralama silindi."
+msgstr "Qaralama silindi."
+
+msgctxt "surveys.builder"
+msgid "Sorğu yenidən açıldı."
+msgstr "Sorğu yenidən açıldı."
+
+msgctxt "surveys.builder"
+msgid "Naməlum əməliyyat."
+msgstr "Naməlum əməliyyat."
+
+msgctxt "surveys.builder"
+msgid "Sual tapılmadı."
+msgstr "Sual tapılmadı."
+
+msgctxt "surveys.builder"
+msgid "Bölmə tapılmadı."
+msgstr "Bölmə tapılmadı."
+
+msgctxt "surveys.builder"
+msgid "Sual əlavə olundu."
+msgstr "Sual əlavə olundu."
+
+msgctxt "surveys.builder"
+msgid "Sual yadda saxlanıldı."
+msgstr "Sual yadda saxlanıldı."
+
+msgctxt "surveys.builder"
+msgid "Sual silindi."
+msgstr "Sual silindi."
+
+msgctxt "surveys.builder"
+msgid "Sıra dəyişdi."
+msgstr "Sıra dəyişdi."
+
+msgctxt "surveys.builder"
+msgid "Bölmə əlavə olundu."
+msgstr "Bölmə əlavə olundu."
+
+msgctxt "surveys.builder"
+msgid "Bölmə yadda saxlanıldı."
+msgstr "Bölmə yadda saxlanıldı."
+
+msgctxt "surveys.builder"
+msgid "Bölmə silindi, sualları qonşu bölməyə keçdi."
+msgstr "Bölmə silindi, sualları qonşu bölməyə keçdi."
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu qurucusu üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır."
+msgstr ""
+"Sorğu qurucusu üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır."
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğunu yaradın, suallarını yazın, kimin dolduracağını (tələbə, müəllim, "
+"heyət və ya hamı) və məcburiliyini seçin. «Müəllim qiymətləndirməsi» növü "
+"semestr kampaniyalarının sual dəstidir — tarixləri «Sorğu kampaniyaları» "
+"bölməsində idarə olunur."
+msgstr ""
+"Sorğunu yaradın, suallarını yazın, kimin dolduracağını (tələbə, müəllim, "
+"heyət və ya hamı) və məcburiliyini seçin. «Müəllim qiymətləndirməsi» növü "
+"semestr kampaniyalarının sual dəstidir — tarixləri «Sorğu kampaniyaları» "
+"bölməsində idarə olunur."
+
+msgctxt "surveys.builder"
+msgid "Sorğu növü"
+msgstr "Sorğu növü"
+
+msgctxt "surveys.builder"
+msgid "Sorğunun adı"
+msgstr "Sorğunun adı"
+
+msgctxt "surveys.builder"
+msgid "məs. Kitabxana xidmətlərindən məmnunluq"
+msgstr "məs. Kitabxana xidmətlərindən məmnunluq"
+
+msgctxt "surveys.builder"
+msgid "Sorğu yarat"
+msgstr "Sorğu yarat"
+
+msgctxt "surveys.builder"
+msgid "Status filtri"
+msgstr "Status filtri"
+
+msgctxt "surveys.builder"
+msgid "Aktiv"
+msgstr "Aktiv"
+
+msgctxt "surveys.builder"
+msgid "Qaralama"
+msgstr "Qaralama"
+
+msgctxt "surveys.builder"
+msgid "Dərc olunub"
+msgstr "Dərc olunub"
+
+msgctxt "surveys.builder"
+msgid "Bağlı"
+msgstr "Bağlı"
+
+msgctxt "surveys.builder"
+msgid "Arxiv"
+msgstr "Arxiv"
+
+msgctxt "surveys.builder"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "surveys.builder"
+msgid "Defolt dəst"
+msgstr "Defolt dəst"
+
+msgctxt "surveys.builder"
+msgid "Anonim"
+msgstr "Anonim"
+
+msgctxt "surveys.builder"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "surveys.builder"
+msgid "Auditoriya"
+msgstr "Auditoriya"
+
+msgctxt "surveys.builder"
+msgid "Jurnalı bağlanmış fənlərin tələbələri"
+msgstr "Jurnalı bağlanmış fənlərin tələbələri"
+
+msgctxt "surveys.builder"
+msgid "Kampaniyalar"
+msgstr "Kampaniyalar"
+
+msgctxt "surveys.builder"
+msgid "daraldılıb"
+msgstr "daraldılıb"
+
+msgctxt "surveys.builder"
+msgid "Açılış"
+msgstr "Açılış"
+
+msgctxt "surveys.builder"
+msgid "Bağlanma"
+msgstr "Bağlanma"
+
+msgctxt "surveys.builder"
+msgid "Dolduran"
+msgstr "Dolduran"
+
+msgctxt "surveys.builder"
+msgid "Redaktə et"
+msgstr "Redaktə et"
+
+msgctxt "surveys.builder"
+msgid "Nəticələr"
+msgstr "Nəticələr"
+
+msgctxt "surveys.builder"
+msgid "Bu filtrdə sorğu yoxdur. Yuxarıdan yeni sorğu yaradın."
+msgstr "Bu filtrdə sorğu yoxdur. Yuxarıdan yeni sorğu yaradın."
+
+msgctxt "surveys.builder"
+msgid "Hazır"
+msgstr "Hazır"
+
+msgctxt "surveys.builder"
+msgid "Açıq"
+msgstr "Açıq"
+
+msgctxt "surveys.builder"
+msgid "Planlaşdırılıb"
+msgstr "Planlaşdırılıb"
+
+msgctxt "surveys.builder"
+msgid "Arxivdə"
+msgstr "Arxivdə"
+
+msgctxt "surveys.builder"
+msgid "Bütün sorğular"
+msgstr "Bütün sorğular"
+
+msgctxt "surveys.builder"
+msgid "Adla"
+msgstr "Adla"
+
+msgctxt "surveys.builder"
+msgid "Struktur kilidlidir"
+msgstr "Struktur kilidlidir"
+
+msgctxt "surveys.builder"
+msgid "Suallar: %(n)s"
+msgstr "Suallar: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Sual dəsti kampaniyalar üçün hazır elan olunsun?"
+msgstr "Sual dəsti kampaniyalar üçün hazır elan olunsun?"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu dərc olunsun? Açılış günü auditoriyaya bildiriş gedəcək; dərcdən sonra"
+" anonimlik və auditoriya dəyişmir."
+msgstr ""
+"Sorğu dərc olunsun? Açılış günü auditoriyaya bildiriş gedəcək; dərcdən sonra"
+" anonimlik və auditoriya dəyişmir."
+
+msgctxt "surveys.builder"
+msgid "Hazır et"
+msgstr "Hazır et"
+
+msgctxt "surveys.builder"
+msgid "Dərc et"
+msgstr "Dərc et"
+
+msgctxt "surveys.builder"
+msgid ""
+"Yeni semestr kampaniyaları bu sual dəstini götürsün? Mövcud kampaniyalar öz "
+"dəstində qalır."
+msgstr ""
+"Yeni semestr kampaniyaları bu sual dəstini götürsün? Mövcud kampaniyalar öz "
+"dəstində qalır."
+
+msgctxt "surveys.builder"
+msgid "Defolt et"
+msgstr "Defolt et"
+
+msgctxt "surveys.builder"
+msgid "Formaya bax"
+msgstr "Formaya bax"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sorğu bağlansın? Cavab qəbulu dayanacaq, məcburi qapı açılacaq, anonim "
+"nəticələr dərc olunacaq."
+msgstr ""
+"Sorğu bağlansın? Cavab qəbulu dayanacaq, məcburi qapı açılacaq, anonim "
+"nəticələr dərc olunacaq."
+
+msgctxt "surveys.builder"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "surveys.builder"
+msgid "Yeni bağlanma tarixi"
+msgstr "Yeni bağlanma tarixi"
+
+msgctxt "surveys.builder"
+msgid "Yenidən aç"
+msgstr "Yenidən aç"
+
+msgctxt "surveys.builder"
+msgid "Dublikat"
+msgstr "Dublikat"
+
+msgctxt "surveys.builder"
+msgid "Arxivdən çıxar"
+msgstr "Arxivdən çıxar"
+
+msgctxt "surveys.builder"
+msgid "Qaralama birdəfəlik silinsin?"
+msgstr "Qaralama birdəfəlik silinsin?"
+
+msgctxt "surveys.builder"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "surveys.builder"
+msgid "Sorğu arxivə köçürülsün? Açıqdırsa bağlanacaq; nəticələr qalır."
+msgstr "Sorğu arxivə köçürülsün? Açıqdırsa bağlanacaq; nəticələr qalır."
+
+msgctxt "surveys.builder"
+msgid "Arxivlə"
+msgstr "Arxivlə"
+
+msgctxt "surveys.builder"
+msgid "Redaktor bölmələri"
+msgstr "Redaktor bölmələri"
+
+msgctxt "surveys.builder"
+msgid "Ayarlar"
+msgstr "Ayarlar"
+
+msgctxt "surveys.builder"
+msgid "Suallar"
+msgstr "Suallar"
+
+msgctxt "surveys.builder"
+msgid "Əsas məlumat"
+msgstr "Əsas məlumat"
+
+msgctxt "surveys.builder"
+msgid "Ad"
+msgstr "Ad"
+
+msgctxt "surveys.builder"
+msgid "Təsvir (respondentə göstərilir)"
+msgstr "Təsvir (respondentə göstərilir)"
+
+msgctxt "surveys.builder"
+msgid "Növ"
+msgstr "Növ"
+
+msgctxt "surveys.builder"
+msgid "Anonim sorğu"
+msgstr "Anonim sorğu"
+
+msgctxt "surveys.builder"
+msgid ""
+"cavab adla saxlanılmır; nəticələr yalnız bağlandıqdan sonra və ən azı k "
+"cavab olanda görünür."
+msgstr ""
+"cavab adla saxlanılmır; nəticələr yalnız bağlandıqdan sonra və ən azı k "
+"cavab olanda görünür."
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsi həmişə anonimdir. Auditoriya — semestrdə jurnalı "
+"bağlanmış fənlərin tələbələri; açılış, bağlanma, «Sonra doldur» möhləti və "
+"məcburilik «Sorğu kampaniyaları» bölməsində hər semestr üçün ayrıca seçilir."
+" Burada yalnız sual dəstini idarə edirsiniz."
+msgstr ""
+"Müəllim qiymətləndirməsi həmişə anonimdir. Auditoriya — semestrdə jurnalı "
+"bağlanmış fənlərin tələbələri; açılış, bağlanma, «Sonra doldur» möhləti və "
+"məcburilik «Sorğu kampaniyaları» bölməsində hər semestr üçün ayrıca seçilir."
+" Burada yalnız sual dəstini idarə edirsiniz."
+
+msgctxt "surveys.builder"
+msgid "Kim doldurmalıdır"
+msgstr "Kim doldurmalıdır"
+
+msgctxt "surveys.builder"
+msgid ""
+"Dərc olunmuş sorğunun auditoriyası dəyişmir — fərqli auditoriya üçün "
+"dublikat yaradın."
+msgstr ""
+"Dərc olunmuş sorğunun auditoriyası dəyişmir — fərqli auditoriya üçün "
+"dublikat yaradın."
+
+msgctxt "surveys.builder"
+msgid "Auditoriyanı daralt (fakültə, kafedra, qrup, ixtisas, kurs)"
+msgstr "Auditoriyanı daralt (fakültə, kafedra, qrup, ixtisas, kurs)"
+
+msgctxt "surveys.builder"
+msgid ""
+"Heç nə seçilməsə — bütün təşkilat. İxtisas və kurs yalnız tələbələrə aiddir:"
+" seçiləndə auditoriyada yalnız uyğun tələbələr qalır."
+msgstr ""
+"Heç nə seçilməsə — bütün təşkilat. İxtisas və kurs yalnız tələbələrə aiddir:"
+" seçiləndə auditoriyada yalnız uyğun tələbələr qalır."
+
+msgctxt "surveys.builder"
+msgid "Struktur vahidləri"
+msgstr "Struktur vahidləri"
+
+msgctxt "surveys.builder"
+msgid "Axtar…"
+msgstr "Axtar…"
+
+msgctxt "surveys.builder"
+msgid "Struktur vahidi yoxdur."
+msgstr "Struktur vahidi yoxdur."
+
+msgctxt "surveys.builder"
+msgid "İxtisaslar (yalnız tələbələr)"
+msgstr "İxtisaslar (yalnız tələbələr)"
+
+msgctxt "surveys.builder"
+msgid "İxtisas yoxdur."
+msgstr "İxtisas yoxdur."
+
+msgctxt "surveys.builder"
+msgid "Kurs (yalnız tələbələr)"
+msgstr "Kurs (yalnız tələbələr)"
+
+msgctxt "surveys.builder"
+msgid "%(n)s. kurs"
+msgstr "%(n)s. kurs"
+
+msgctxt "surveys.builder"
+msgid "Tarixlər"
+msgstr "Tarixlər"
+
+msgctxt "surveys.builder"
+msgid ""
+"Açılış boşdursa dərc günü açılır. Bağlanma tarixi dərc üçün məcburidir; "
+"sonradan uzatmaq olar."
+msgstr ""
+"Açılış boşdursa dərc günü açılır. Bağlanma tarixi dərc üçün məcburidir; "
+"sonradan uzatmaq olar."
+
+msgctxt "surveys.builder"
+msgid "Məcburilik"
+msgstr "Məcburilik"
+
+msgctxt "surveys.builder"
+msgid "Könüllü"
+msgstr "Könüllü"
+
+msgctxt "surveys.builder"
+msgid "Doldurulmayanda kabinet necə davransın?"
+msgstr "Doldurulmayanda kabinet necə davransın?"
+
+msgctxt "surveys.builder"
+msgid ""
+"İstifadəçi kabinetə girəndə dərhal sorğuya yönləndirilir; doldurmadan "
+"kabinet açılmır."
+msgstr ""
+"İstifadəçi kabinetə girəndə dərhal sorğuya yönləndirilir; doldurmadan "
+"kabinet açılmır."
+
+msgctxt "surveys.builder"
+msgid ""
+"İlk dəfə «Bu dəfə keç» deyə bilər və xəbərdarlıq alır: növbəti dəfə "
+"doldurmadan kabinetə daxil ola bilməyəcək."
+msgstr ""
+"İlk dəfə «Bu dəfə keç» deyə bilər və xəbərdarlıq alır: növbəti dəfə "
+"doldurmadan kabinetə daxil ola bilməyəcək."
+
+msgctxt "surveys.builder"
+msgid ""
+"Açılışdan sonra N gün ərzində «Sonra doldur» (hər dəfə 24 saat), sonra "
+"kabinet bağlanır."
+msgstr ""
+"Açılışdan sonra N gün ərzində «Sonra doldur» (hər dəfə 24 saat), sonra "
+"kabinet bağlanır."
+
+msgctxt "surveys.builder"
+msgid "Möhlət (gün)"
+msgstr "Möhlət (gün)"
+
+msgctxt "surveys.builder"
+msgid ""
+"İmtahan səhifələri, parol dəyişmə və çıxış heç vaxt bağlanmır — sorğu yalnız"
+" kabineti bağlayır."
+msgstr ""
+"İmtahan səhifələri, parol dəyişmə və çıxış heç vaxt bağlanmır — sorğu yalnız"
+" kabineti bağlayır."
+
+msgctxt "surveys.builder"
+msgid "Anonimlik həddi"
+msgstr "Anonimlik həddi"
+
+msgctxt "surveys.builder"
+msgid "Minimum qrup (k)"
+msgstr "Minimum qrup (k)"
+
+msgctxt "surveys.builder"
+msgid ""
+"k-dan az cavab olan nəticə və açıq cavablar göstərilmir; faizlər 5-ə "
+"yuvarlaqlaşdırılır."
+msgstr ""
+"k-dan az cavab olan nəticə və açıq cavablar göstərilmir; faizlər 5-ə "
+"yuvarlaqlaşdırılır."
+
+msgctxt "surveys.builder"
+msgid "Yadda saxla"
+msgstr "Yadda saxla"
+
+msgctxt "surveys.builder"
+msgid ""
+"Sıranı dəyişmək üçün tutacağı sürükləyin və ya tutacaqda Alt + yuxarı/aşağı "
+"ox düymələrini basın."
+msgstr ""
+"Sıranı dəyişmək üçün tutacağı sürükləyin və ya tutacaqda Alt + yuxarı/aşağı "
+"ox düymələrini basın."
+
+msgctxt "surveys.builder"
+msgid ""
+"Bu sorğuya cavab gəlib — nəticələrin bütövlüyü üçün sual əlavə etmək, "
+"silmək, növünü, sırasını və məcburiliyini dəyişmək bağlıdır. Yalnız kiçik "
+"mətn düzəlişi (yazı səhvi) mümkündür; hər düzəliş versiya kimi saxlanılır. "
+"Böyük dəyişiklik üçün dublikat yaradın."
+msgstr ""
+"Bu sorğuya cavab gəlib — nəticələrin bütövlüyü üçün sual əlavə etmək, "
+"silmək, növünü, sırasını və məcburiliyini dəyişmək bağlıdır. Yalnız kiçik "
+"mətn düzəlişi (yazı səhvi) mümkündür; hər düzəliş versiya kimi saxlanılır. "
+"Böyük dəyişiklik üçün dublikat yaradın."
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsində sual növləri: Likert (1–5), bal (1–10) və açıq "
+"cavab. «Ümumi bal» (1–10) və «Tövsiyə» sualları nəticə panelinin "
+"göstəricilərini qidalandırır; «İndeksə daxil» Likert sualları orta indeksi "
+"təşkil edir."
+msgstr ""
+"Müəllim qiymətləndirməsində sual növləri: Likert (1–5), bal (1–10) və açıq "
+"cavab. «Ümumi bal» (1–10) və «Tövsiyə» sualları nəticə panelinin "
+"göstəricilərini qidalandırır; «İndeksə daxil» Likert sualları orta indeksi "
+"təşkil edir."
+
+msgctxt "surveys.builder"
+msgid "Adsız bölmə"
+msgstr "Adsız bölmə"
+
+msgctxt "surveys.builder"
+msgid "Bölməni yuxarı"
+msgstr "Bölməni yuxarı"
+
+msgctxt "surveys.builder"
+msgid "Bölməni aşağı"
+msgstr "Bölməni aşağı"
+
+msgctxt "surveys.builder"
+msgid "Bölməni sil"
+msgstr "Bölməni sil"
+
+msgctxt "surveys.builder"
+msgid "Bölmə silinsin? Sualları qonşu bölməyə keçəcək."
+msgstr "Bölmə silinsin? Sualları qonşu bölməyə keçəcək."
+
+msgctxt "surveys.builder"
+msgid "Bölmənin adı və izahı"
+msgstr "Bölmənin adı və izahı"
+
+msgctxt "surveys.builder"
+msgid "Bölmənin adı"
+msgstr "Bölmənin adı"
+
+msgctxt "surveys.builder"
+msgid "Bu bölmədə hələ sual yoxdur."
+msgstr "Bu bölmədə hələ sual yoxdur."
+
+msgctxt "surveys.builder"
+msgid "Yeni sual"
+msgstr "Yeni sual"
+
+msgctxt "surveys.builder"
+msgid "Sualın mətni…"
+msgstr "Sualın mətni…"
+
+msgctxt "surveys.builder"
+msgid "Əlavə et"
+msgstr "Əlavə et"
+
+msgctxt "surveys.builder"
+msgid "Yeni bölmə"
+msgstr "Yeni bölmə"
+
+msgctxt "surveys.builder"
+msgid "məs. Xidmətin keyfiyyəti"
+msgstr "məs. Xidmətin keyfiyyəti"
+
+msgctxt "surveys.builder"
+msgid "Bölmə əlavə et"
+msgstr "Bölmə əlavə et"
+
+msgctxt "surveys.builder"
+msgid "Sualın sırasını dəyiş: %(n)s"
+msgstr "Sualın sırasını dəyiş: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "İndeksə daxil"
+msgstr "İndeksə daxil"
+
+msgctxt "surveys.builder"
+msgid "Nəticə panelinin göstəricisini qidalandırır"
+msgstr "Nəticə panelinin göstəricisini qidalandırır"
+
+msgctxt "surveys.builder"
+msgid "Göstərici"
+msgstr "Göstərici"
+
+msgctxt "surveys.builder"
+msgid "Düzəlişlər: %(n)s"
+msgstr "Düzəlişlər: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Yuxarı"
+msgstr "Yuxarı"
+
+msgctxt "surveys.builder"
+msgid "Aşağı"
+msgstr "Aşağı"
+
+msgctxt "surveys.builder"
+msgid "Sualı sil"
+msgstr "Sualı sil"
+
+msgctxt "surveys.builder"
+msgid "Sual silinsin?"
+msgstr "Sual silinsin?"
+
+msgctxt "surveys.builder"
+msgid "İzah (istəyə görə)"
+msgstr "İzah (istəyə görə)"
+
+msgctxt "surveys.builder"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "surveys.builder"
+msgid "Bölmə %(n)s"
+msgstr "Bölmə %(n)s"
+
+msgctxt "surveys.builder"
+msgid "Məcburi sual"
+msgstr "Məcburi sual"
+
+msgctxt "surveys.builder"
+msgid "Variantlar — hər sətirdə bir"
+msgstr "Variantlar — hər sətirdə bir"
+
+msgctxt "surveys.builder"
+msgid "Variantların sayı və sırası dəyişmir — yalnız yazı düzəlişi."
+msgstr "Variantların sayı və sırası dəyişmir — yalnız yazı düzəlişi."
+
+msgctxt "surveys.builder"
+msgid "Ən az seçim"
+msgstr "Ən az seçim"
+
+msgctxt "surveys.builder"
+msgid "Ən çox seçim"
+msgstr "Ən çox seçim"
+
+msgctxt "surveys.builder"
+msgid "Şkala etiketləri (boş — standart)"
+msgstr "Şkala etiketləri (boş — standart)"
+
+msgctxt "surveys.builder"
+msgid "Şkalanın uc etiketləri (0 və 10)"
+msgstr "Şkalanın uc etiketləri (0 və 10)"
+
+msgctxt "surveys.builder"
+msgid ""
+"Müəllim qiymətləndirməsinin nəticələri (müəllim reytinqi, kafedra/fakültə "
+"bölgüsü, dinamika) «Sorğu nəticələri» bölməsindədir."
+msgstr ""
+"Müəllim qiymətləndirməsinin nəticələri (müəllim reytinqi, kafedra/fakültə "
+"bölgüsü, dinamika) «Sorğu nəticələri» bölməsindədir."
+
+msgctxt "surveys.builder"
+msgid "Nəticələrə keç"
+msgstr "Nəticələrə keç"
+
+msgctxt "surveys.builder"
+msgid "Sorğu hələ dərc olunmayıb — nəticə yoxdur."
+msgstr "Sorğu hələ dərc olunmayıb — nəticə yoxdur."
+
+msgctxt "surveys.builder"
+msgid "İştirak"
+msgstr "İştirak"
+
+msgctxt "surveys.builder"
+msgid "Vahidlər üzrə iştirak"
+msgstr "Vahidlər üzrə iştirak"
+
+msgctxt "surveys.builder"
+msgid "Vahid"
+msgstr "Vahid"
+
+msgctxt "surveys.builder"
+msgid ""
+"Anonim sorğu davam edir — nəticələr sorğu bağlandıqdan sonra görünəcək "
+"(canlı nəticə cavab verənin kimliyini aça bilər)."
+msgstr ""
+"Anonim sorğu davam edir — nəticələr sorğu bağlandıqdan sonra görünəcək "
+"(canlı nəticə cavab verənin kimliyini aça bilər)."
+
+msgctxt "surveys.builder"
+msgid "Cavab sayı: %(n)s"
+msgstr "Cavab sayı: %(n)s"
+
+msgctxt "surveys.builder"
+msgid "anonimlik həddi k = %(k)s"
+msgstr "anonimlik həddi k = %(k)s"
+
+msgctxt "surveys.builder"
+msgid "CSV ixrac"
+msgstr "CSV ixrac"
+
+msgctxt "surveys.builder"
+msgid "Cavab sayı anonimlik həddindən (k) azdır — nəticələr gizlidir."
+msgstr "Cavab sayı anonimlik həddindən (k) azdır — nəticələr gizlidir."
+
+msgctxt "surveys.builder"
+msgid "%(n)s cavab"
+msgstr "%(n)s cavab"
+
+msgctxt "surveys.builder"
+msgid "Bu suala k-dan az cavab verilib — gizlidir."
+msgstr "Bu suala k-dan az cavab verilib — gizlidir."
+
+msgctxt "surveys.builder"
+msgid "və daha %(n)s cavab (CSV ixracında)"
+msgstr "və daha %(n)s cavab (CSV ixracında)"
+
+msgctxt "surveys.builder"
+msgid "Açıq cavab yoxdur."
+msgstr "Açıq cavab yoxdur."
+
+msgctxt "surveys.builder"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "surveys.builder"
+msgid "tərəfdar"
+msgstr "tərəfdar"
+
+msgctxt "surveys.builder"
+msgid "neytral"
+msgstr "neytral"
+
+msgctxt "surveys.builder"
+msgid "tənqidçi"
+msgstr "tənqidçi"
+
+msgctxt "surveys.builder"
+msgid "Respondentlər (yalnız idarəçi görür)"
+msgstr "Respondentlər (yalnız idarəçi görür)"
+
+msgctxt "surveys.builder"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "surveys.builder"
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgctxt "profile.sidebar"
+msgid "Tənzimləmələr"
+msgstr "Tənzimləmələr"
+
+msgctxt "accounts.first_login"
+msgid ""
+"Parolunuz administrasiya tərəfindən sıfırlanıb. Davam etmək üçün özünüzə "
+"yeni parol təyin edin."
+msgstr ""
+"Parolunuz administrasiya tərəfindən sıfırlanıb. Davam etmək üçün özünüzə "
+"yeni parol təyin edin."
+
+msgctxt "accounts.first_login"
+msgid "Yeni parol müvəqqəti paroldan fərqli olmalıdır."
+msgstr "Yeni parol müvəqqəti paroldan fərqli olmalıdır."
+
+msgctxt "exams.service.lifecycle"
+msgid ""
+"Seçilmiş suallardan bəzilərinə tələbələrin cavabları və ya apellyasiyaları "
+"var. Silinsələr imtahan nəticələri və tarixçəsi itər. Bunun əvəzinə sualları"
+" deaktiv edin — imtahandan çıxarılırlar, amma cavablar və nəticələr qalır."
+msgstr ""
+"Seçilmiş suallardan bəzilərinə tələbələrin cavabları və ya apellyasiyaları "
+"var. Silinsələr imtahan nəticələri və tarixçəsi itər. Bunun əvəzinə sualları"
+" deaktiv edin — imtahandan çıxarılırlar, amma cavablar və nəticələr qalır."

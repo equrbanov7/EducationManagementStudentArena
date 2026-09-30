@@ -9,6 +9,12 @@ forced — by ``FirstLoginPasswordMiddleware`` — to:
 
 After that the email is marked verified (usable for password recovery) and the
 ``password_change_required`` flag is cleared, unlocking the rest of the system.
+
+2026-09-30 (sahib: «parolu unudan gələrsə … ilk girişdən sonra dəyişmək məcburi olsun»):
+e-poçtu ARTIQ təsdiqlənmiş hesab (RİM / «Parol sıfırlama» ilə operator parolu
+sıfırlayıb) OTP addımını keçmir — yalnız yeni parol təyin edir. Operator şəxsiyyəti
+yerində yoxlayıb; e-poçt gecikməsi (Brevo ~1 saat) imtahan günü tələbəni
+bağlamamalıdır. Yeni yaradılmış hesab (``email_verified=False``) əvvəlki kimi OTP-dən keçir.
 """
 
 from __future__ import annotations
@@ -51,6 +57,15 @@ def _email_unavailable_message():
     return pgettext(_CTX, "Bu email ünvanı istifadə oluna bilməz. Başqa ünvan daxil edin.")
 
 
+def _email_already_verified(user) -> bool:
+    """E-poçt əvvəlki OTP ilə təsdiqlənibsə (və hələ də eynidirsə) ``True`` — OTP addımı yoxdur.
+
+    RİM e-poçtu dəyişəndə ``email_verified`` sıfırlanır (``rim/profile_edit.py``).
+    """
+    profile = getattr(user, "profile", None)
+    return bool(getattr(profile, "email_verified", False) and (user.email or "").strip())
+
+
 def _profile_requires_first_login(user) -> bool:
     profile = getattr(user, "profile", None)
     return bool(profile is not None and getattr(profile, "password_change_required", False))
@@ -67,11 +82,15 @@ def set_initial_password_view(request):
     prefilled_email = (request.session.get(_OTP_SENT_SESSION_KEY) or user.email or "").strip()
     otp_sent = bool(request.session.get(_OTP_SENT_SESSION_KEY))
 
+    direct = _email_already_verified(user)
+
     if request.method == "POST":
         action = request.POST.get("action", "")
-        if action == "send_otp":
+        if action == "send_otp" and not direct:
             return _handle_send_otp(request, user)
         if action == "set_password":
+            if direct:
+                return _handle_set_password_direct(request, user)
             return _handle_set_password(request, user)
 
     return render(
@@ -80,9 +99,53 @@ def set_initial_password_view(request):
         {
             "email": prefilled_email,
             "otp_sent": otp_sent,
+            "direct": direct,
             "user_display": user.get_full_name() or user.username,
         },
     )
+
+
+def _validated_new_password(request, user):
+    """İki sahə eynidir və validatorlardan keçir → parol; əks halda mesaj + ``None``."""
+    password1 = request.POST.get("password1", "")
+    password2 = request.POST.get("password2", "")
+    if password1 != password2:
+        messages.error(request, pgettext(_CTX, "Parollar uyğun gəlmir."))
+        return None
+    try:
+        validate_password(password1, user=user)
+    except ValidationError as exc:
+        for message in exc.messages:
+            messages.error(request, message)
+        return None
+    return password1
+
+
+def _finish(request, user, *, verified_email=False):
+    update_session_auth_hash(request, user)  # keep the user logged in after set_password
+    profile = user.profile
+    profile.password_change_required = False
+    fields = ["password_change_required", "updated_at"]
+    if verified_email:
+        profile.email_verified = True
+        fields.append("email_verified")
+    profile.save(update_fields=fields)
+    request.session.pop(_OTP_SENT_SESSION_KEY, None)
+    messages.success(request, pgettext(_CTX, "Parolunuz təyin olundu. Sistemə xoş gəlmisiniz!"))
+    return redirect("accounts:profile")
+
+
+def _handle_set_password_direct(request, user):
+    """E-poçtu artıq təsdiqli hesab: yalnız yeni parol (OTP yox, e-poçt dəyişmir)."""
+    password = _validated_new_password(request, user)
+    if password is None:
+        return redirect("accounts:set_initial_password")
+    if user.check_password(password):
+        messages.error(request, pgettext(_CTX, "Yeni parol müvəqqəti paroldan fərqli olmalıdır."))
+        return redirect("accounts:set_initial_password")
+    user.set_password(password)
+    user.save(update_fields=["password"])
+    return _finish(request, user)
 
 
 def _handle_send_otp(request, user):
@@ -127,18 +190,8 @@ def _handle_set_password(request, user):
         return redirect("accounts:set_initial_password")
 
     code = request.POST.get("code", "").strip()
-    password1 = request.POST.get("password1", "")
-    password2 = request.POST.get("password2", "")
-
-    if password1 != password2:
-        messages.error(request, pgettext(_CTX, "Parollar uyğun gəlmir."))
-        return redirect("accounts:set_initial_password")
-
-    try:
-        validate_password(password1, user=user)
-    except ValidationError as exc:
-        for message in exc.messages:
-            messages.error(request, message)
+    password1 = _validated_new_password(request, user)
+    if password1 is None:
         return redirect("accounts:set_initial_password")
 
     verification = verify_email_otp(email=email, code=code, user=user, purpose=EmailOTP.Purpose.PASSWORD_RESET)
@@ -160,13 +213,4 @@ def _handle_set_password(request, user):
         request.session.pop(_OTP_SENT_SESSION_KEY, None)
         messages.error(request, _email_unavailable_message())
         return redirect("accounts:set_initial_password")
-    update_session_auth_hash(request, user)  # keep the user logged in after set_password
-
-    profile = user.profile
-    profile.email_verified = True
-    profile.password_change_required = False
-    profile.save(update_fields=["email_verified", "password_change_required", "updated_at"])
-
-    request.session.pop(_OTP_SENT_SESSION_KEY, None)
-    messages.success(request, pgettext(_CTX, "Parolunuz təyin olundu. Sistemə xoş gəlmisiniz!"))
-    return redirect("accounts:profile")
+    return _finish(request, user, verified_email=True)

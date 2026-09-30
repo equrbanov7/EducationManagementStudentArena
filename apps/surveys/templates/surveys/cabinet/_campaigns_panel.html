@@ -3,12 +3,13 @@
 tarixlər, k-həddi, məcburilik. Formalar `surveys:manage`-ə POST edir və `next` ilə bu
 bölməyə qayıdır (tam səhifə bölmə — panel içi fraqment naviqasiyası YOXDUR).
 Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.{% endcomment %}
-<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260925-1">
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
 {% survey_campaigns_panel as cp %}
 <div class="svc">
     {% if not cp.has_access %}
     <p class="svc-empty">{% trans "Kampaniyaları idarə etmək üçün təşkilat səviyyəsində «survey.manage» icazəsi lazımdır." context "surveys.cabinet" %}</p>
     {% else %}
+    <p class="svc-note"><i class="fas fa-pen-to-square" aria-hidden="true"></i> {% trans "Sualları yazmaq, yeni sual dəsti yaratmaq və ya başqa auditoriya (müəllim, heyət, hamı) üçün sorğu açmaq —" context "surveys.cabinet" %} <a class="svc-link" href="{{ cp.builder_url }}">{% trans "Sorğu qurucusu" context "surveys.cabinet" %}</a></p>
     <p class="svc-intro">{% blocktrans trimmed with days=cp.config.close_after_days grace=cp.config.grace_days context "surveys.cabinet" %}RİM semestr jurnallarını bağlayanda həmin dövrün sorğusu özü açılır: {{ days }} gün açıq qalır, ilk {{ grace }} gün tələbə «Sonra doldur» deyə bilər, sonra kabinet sorğu doldurulmayınca açılmır. Burada kampaniyanı əl ilə də aça, bağlaya və uzada bilərsiniz.{% endblocktrans %}</p>
 
     {% if cp.periods %}
@@ -58,6 +59,7 @@ Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.
             <div><dt>{% trans "Bağlanma" context "surveys.cabinet" %}</dt><dd>{{ row.closes_on|date:"d.m.Y"|default:"—" }}</dd></div>
             <div><dt>{% trans "«Sonra» möhləti" context "surveys.cabinet" %}</dt><dd>{{ row.grace_until|date:"d.m.Y"|default:"—" }}</dd></div>
             <div><dt>{% trans "Minimum qrup (k)" context "surveys.cabinet" %}</dt><dd>{{ row.min_group_size }}</dd></div>
+            {% if row.question_set %}<div><dt>{% trans "Sual dəsti" context "surveys.cabinet" %}</dt><dd><a class="svc-link" href="{{ row.question_set.url }}">{{ row.question_set.title }}</a></dd></div>{% endif %}
         </dl>
 
         <form method="post" action="{{ cp.post_url }}" class="svc-edit">

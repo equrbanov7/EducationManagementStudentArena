@@ -83,6 +83,11 @@ SECTION_PARTIALS: dict[str, str] = {
     "superadmin-organizations": "accounts/profile/sections/superadmin/_superadmin_organizations.html",
     "superadmin-users": "accounts/profile/sections/superadmin/_superadmin_user_management.html",
     "rim-center": "accounts/profile/sections/_rim_center.html",
+    # «Parol sıfırlama» (`account.password_reset`, 2026-09-30) — hələlik TAM SƏHİFƏ
+    # bölməsidir (AJAX_SAFE_SECTIONS-da yoxdur). Panel artıq AJAX-safe yazılıb (link/skript
+    # panelin içində, EMSDelegate); SPA keçidi üçün bu açarı həm `AJAX_SAFE_SECTIONS`-a,
+    # həm də `profile.html` `data-ajax-sections`-a əlavə etmək kifayətdir.
+    "account-password-reset": "accounts/profile/sections/_account_password_reset.html",
     "superadmin-ai": "accounts/profile/sections/superadmin/_superadmin_ai_settings.html",
     "superadmin-exam-rooms": "accounts/profile/sections/superadmin/_superadmin_exam_rooms.html",
     "exam-center-pins": "accounts/profile/sections/_exam_center_pins.html",
@@ -181,6 +186,10 @@ SECTION_PARTIALS: dict[str, str] = {
     "evaluation-survey": "accounts/profile/sections/_evaluation_survey.html",
     "evaluation-results": "accounts/profile/sections/_evaluation_results.html",
     "evaluation-campaigns": "accounts/profile/sections/_evaluation_campaigns.html",
+    # Sorğu qurucusu (apps.surveys, 2026-09-30): «Sorğular» (hər üzv) və «Sorğu qurucusu»
+    # (`survey.manage`) — ikisi də TAM SƏHİFƏ bölmədir (formalar `surveys:*`-ə POST edib qayıdır).
+    "surveys-inbox": "accounts/profile/sections/_surveys_inbox.html",
+    "surveys-builder": "accounts/profile/sections/_surveys_builder.html",
     # «Fənn qovluğu» (apps.subject_folder, 2026-09-25): müəllimin qovluqları + tapşırıq
     # yoxlaması, tələbənin «Fənn qovluqlarım». Panel məzmunu `subject_folder_cabinet`
     # tag-ı ilə qurulur; yazı `subject_folder:action` JSON endpoint-inə gedir.
@@ -537,6 +546,14 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
         from apps.surveys.public import pending_badge
 
         payload["evaluation_survey"] = pending_badge(request.user)
+    # «Sorğular» (2026-09-30) — doldurulmalı sorğu sayı; bölmələr arası keçiddə də yenilənsin.
+    if "surveys-inbox" in capabilities.get("allowed_sections", set()):
+        try:
+            from apps.surveys.public import inbox_badge_count
+
+            payload["surveys_inbox"] = int(inbox_badge_count(request.user, active_org) or 0)
+        except Exception:  # noqa: BLE001 — badge heç vaxt səhifəni sındırmır
+            logger.exception("surveys inbox badge failed")
     if capabilities.get("can_manage_appeals"):
         from apps.appeals.public import count_pending_manage_appeals
 

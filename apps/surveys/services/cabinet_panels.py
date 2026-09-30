@@ -69,6 +69,7 @@ def campaigns_panel(context) -> dict:
         row["receipts_label"] = count_bucket(row["receipts"])
         row["is_closed"] = row["status"] == CampaignStatus.CLOSED
         row["is_draft"] = row["status"] == CampaignStatus.DRAFT
+    _attach_question_sets(organization, rows)
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
     used = {row["period_id"] for row in rows}
     periods = [
@@ -87,7 +88,29 @@ def campaigns_panel(context) -> dict:
         "next_url": reverse("accounts:profile") + "?section=evaluation-campaigns",
         "k_floor": MIN_GROUP_SIZE_FLOOR,
         "k_ceil": MIN_GROUP_SIZE_CEIL,
+        "builder_url": reverse("accounts:profile") + "?section=surveys-builder&status=all",
     }
+
+
+def _attach_question_sets(organization, rows) -> None:
+    """Sorğu qurucusu (2026-09-30): hər kampaniyanın sual dəsti (ad + qurucuda redaktə linki), 2 sorğu."""
+    from ..models import Survey, SurveyCampaign
+
+    templates = dict(
+        SurveyCampaign.objects.filter(organization=organization, pk__in=[row["id"] for row in rows]).values_list(
+            "pk", "template_id"
+        )
+    )
+    wrappers = {
+        template_id: (pk, title)
+        for pk, template_id, title in Survey.objects.filter(template_id__in=set(templates.values())).values_list(
+            "pk", "template_id", "title"
+        )
+    }
+    base = reverse("accounts:profile") + "?section=surveys-builder&tab=questions&survey="
+    for row in rows:
+        wrapper = wrappers.get(templates.get(row["id"]))
+        row["question_set"] = {"title": wrapper[1], "url": f"{base}{wrapper[0]}"} if wrapper else None
 
 
 def results_panel(context) -> dict:

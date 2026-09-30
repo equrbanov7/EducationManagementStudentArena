@@ -1,0 +1,192 @@
+/* =========================================================================
+   Ümumi sorğu forması + /sorgu/ siyahısının əlavələri (sorğu qurucusu, 2026-09-30).
+   survey.css-in üzərinə: seçim siyahıları, NPS, bəli/xeyr, yapışqan irəliləyiş,
+   avtomatik saxlama statusu. Mobil birinci; rənglər --ems-* tokenlərindən.
+   Fokus: nazik neytral kontur + --ems-sh-focus (qalın mavi daxili haşiyə YOX).
+   ========================================================================= */
+
+.svr-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.svr-autosave {
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-500);
+    min-height: 1em;
+}
+
+.svr-privacy {
+    margin: 0;
+    display: flex;
+    gap: var(--ems-sp-3, 8px);
+    align-items: flex-start;
+    padding: var(--ems-sp-4, 10px) var(--ems-sp-5, 12px);
+    border-radius: var(--ems-r-lg, 10px);
+    border: 1px solid var(--ems-success-bd);
+    background: var(--ems-success-bg);
+    font-size: var(--ems-fs-base, 13px);
+    line-height: 1.5;
+    color: var(--ems-neutral-700);
+}
+
+.svr-privacy--named {
+    border-color: var(--ems-info-bd, var(--ems-border));
+    background: var(--ems-info-bg, var(--ems-neutral-50));
+}
+
+/* ── Yapışqan irəliləyiş ─────────────────────────────────────────────── */
+.svr-progress {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1, 4px);
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.svr-progress__label {
+    font-size: var(--ems-fs-sm, 12px);
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+}
+
+/* ── Bölmələr ─────────────────────────────────────────────────────────── */
+.svr-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 12px);
+}
+
+.svr-section + .svr-section {
+    margin-top: var(--ems-sp-6, 16px);
+}
+
+.svr-section__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl, 16px);
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svr-section__text {
+    margin: var(--ems-sp-2, 6px) 0 0;
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-neutral-600);
+}
+
+/* ── Tək / çox seçim ─────────────────────────────────────────────────── */
+.svr-choices {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svr-choice {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+    min-height: 44px;
+    padding: var(--ems-sp-3, 8px) var(--ems-sp-4, 10px);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.svr-choice:hover {
+    border-color: var(--ems-primary-300, var(--ems-border-strong));
+}
+
+.svr-choice__input {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    accent-color: var(--ems-primary-600);
+}
+
+.svr-choice__input:focus-visible {
+    outline: 2px solid var(--ems-neutral-400);
+    outline-offset: 2px;
+    box-shadow: var(--ems-sh-focus);
+}
+
+.svr-choice:has(.svr-choice__input:checked) {
+    border-color: var(--ems-primary-500, var(--ems-primary-600));
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+}
+
+.svr-choice__label {
+    font-size: var(--ems-fs-md, 14px);
+    line-height: 1.4;
+    color: var(--ems-text);
+}
+
+/* ── Bəli / Xeyr, NPS ────────────────────────────────────────────────── */
+.svr-yesno {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-3, 8px);
+    max-width: 360px;
+}
+
+.svr-yesno__pill .svy-pill__face {
+    justify-content: center;
+}
+
+.svr-nps {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+}
+
+@media (max-width: 480px) {
+    .svr-nps {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+}
+
+.svr-short {
+    min-height: 44px;
+}
+
+/* ── /sorgu/ siyahısı: ümumi sorğu bəndləri ──────────────────────────── */
+.svr-item--mandatory {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.svr-item__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2, 6px);
+}
+
+.svr-item__actions form {
+    margin: 0;
+}
+
+/* QA 2026-09-30: 360px-də «Bu dəfə keç» düyməsi dar sütunda 3 sətrə bölünürdü —
+   düymə mətni bölünmür, telefonda düymələr mətnin ALTINA keçir. */
+.svr-item__actions .svy-btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .svy-target.svr-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

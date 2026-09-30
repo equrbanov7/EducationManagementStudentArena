@@ -1,0 +1,73 @@
+{% extends "surveys/base_survey.html" %}
+{% load i18n static %}
+{% comment %}Ümumi sorğunun mobil-birinci forması (sorğu qurucusu, 2026-09-30): bölmələr, yapışqan
+irəliləyiş zolağı, avtomatik saxlama (şəxsli — server qaralaması; anonim — yalnız sessionStorage),
+server yoxlaması. Bütün idarələr doğma radio/checkbox/textarea-dır (klaviatura + ekran oxuyucusu).{% endcomment %}
+
+{% block title %}{{ survey.title }} - {{ site_brand_name }}{% endblock %}
+
+{% block extraCss %}{{ block.super }}
+<link rel="stylesheet" href="{% static 'surveys/css/respond.css' %}?v=20260930-qa">
+{% endblock %}
+
+{% block survey_content %}
+<nav class="svy-crumbs" aria-label="{% trans 'Sorğu naviqasiyası' context 'surveys.respond' %}">
+    <a class="svy-link" href="{{ inbox_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Sorğular" context "surveys.respond" %}</a>
+    <span class="svr-autosave" data-svr-status aria-live="polite"></span>
+</nav>
+
+<header class="svy-subject">
+    <p class="svy-kicker">{% if survey.anonymous %}<i class="fas fa-user-secret" aria-hidden="true"></i> {% trans "Anonim sorğu" context "surveys.respond" %}{% else %}<i class="fas fa-id-card" aria-hidden="true"></i> {% trans "Adla sorğu" context "surveys.respond" %}{% endif %}{% if survey.mandatory %} · {% trans "Məcburi" context "surveys.respond" %}{% endif %}</p>
+    <h1 class="svy-title">{{ survey.title }}</h1>
+    {% if survey.description %}<p class="svy-lead">{{ survey.description|linebreaksbr }}</p>{% endif %}
+    {% if survey.closes_on %}<p class="svy-deadline"><i class="fas fa-calendar-day" aria-hidden="true"></i> {% blocktrans trimmed with day=survey.closes_on|date:"d.m.Y" context "surveys.respond" %}Son tarix: {{ day }}{% endblocktrans %}</p>{% endif %}
+</header>
+
+{% if survey.anonymous %}
+<p class="svr-privacy"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Cavabınız adınızla saxlanılmır: yalnız «doldurdu» qeydi qalır, nəticələr ən azı k cavab yığılanda və sorğu bağlandıqdan sonra ümumiləşdirilmiş şəkildə görünür. Yarımçıq cavablar yalnız bu brauzer tabında saxlanılır." context "surveys.respond" %}</p>
+{% else %}
+<p class="svr-privacy svr-privacy--named"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Bu sorğu anonim deyil — cavablarınızı adınızla sorğunun idarəçiləri görür. Yarımçıq cavablar avtomatik saxlanılır." context "surveys.respond" %}</p>
+{% endif %}
+
+<div class="svr-progress" data-svr-progress>
+    <span class="svr-progress__label" data-svr-progress-label>{% blocktrans trimmed with total=total context "surveys.respond" %}0 / {{ total }} cavablanıb{% endblocktrans %}</span>
+    <progress class="svy-meter__bar" value="0" max="{{ total }}" data-svr-progress-bar>0 / {{ total }}</progress>
+</div>
+
+{% if errors %}
+<div class="svy-alert" role="alert">
+    <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+    {% trans "Bəzi suallar cavabsız qalıb və ya düzgün deyil — qırmızı ilə işarələnmiş sualları yoxlayın." context "surveys.respond" %}
+</div>
+{% endif %}
+
+<form method="post" class="svy-form svr-form" data-svy-form data-svr-form novalidate
+      data-draft-url="{{ draft_url }}" data-storage-key="{% if survey.anonymous %}{{ storage_key }}{% endif %}"
+      data-total="{{ total }}" data-label-progress="{% trans '__N__ / __T__ cavablanıb' context 'surveys.respond' %}"
+      data-label-saved="{% trans 'Yadda saxlanıldı' context 'surveys.respond' %}" data-label-local="{% trans 'Bu tabda saxlanıldı' context 'surveys.respond' %}"
+      data-label-required="{% trans 'Bu sual məcburidir.' context 'surveys.respond' %}" data-label-min="{% trans 'Ən azı __N__ seçim edin.' context 'surveys.respond' %}" data-label-max="{% trans 'Ən çoxu __N__ seçim edə bilərsiniz.' context 'surveys.respond' %}">
+    {% csrf_token %}
+    {% for section in sections %}
+    <section class="svr-section">
+        {% if section.title or section.description %}
+        <header class="svr-section__head">
+            {% if section.title %}<h2 class="svr-section__title">{{ section.title }}</h2>{% endif %}
+            {% if section.description %}<p class="svr-section__text">{{ section.description|linebreaksbr }}</p>{% endif %}
+        </header>
+        {% endif %}
+        {% for row in section.rows %}{% include "surveys/respond/_question.html" %}{% endfor %}
+    </section>
+    {% endfor %}
+
+    <div class="svy-actions svy-actions--form">
+        <button type="submit" class="svy-btn svy-btn--primary" data-svy-submit>
+            <i class="fas fa-paper-plane" aria-hidden="true"></i> {% if survey.anonymous %}{% trans "Anonim göndər" context "surveys.respond" %}{% else %}{% trans "Göndər" context "surveys.respond" %}{% endif %}
+        </button>
+        <span class="svy-actions__note">{% trans "Göndərdikdən sonra cavabı dəyişmək mümkün deyil." context "surveys.respond" %}</span>
+    </div>
+</form>
+{% endblock %}
+
+{% block extraJs %}{{ block.super }}
+<script src="{% static 'surveys/js/respond.js' %}?v=20260930-qa" defer></script>
+{% endblock %}

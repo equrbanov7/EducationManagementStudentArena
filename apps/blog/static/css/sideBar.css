@@ -94,6 +94,15 @@
   .category-list__label {
     min-width: 0;
     line-height: 1.35;
+    /* RESP 2026-09-30: 320px-də «Kibertəhlükəsizlik» say nişanına dəyirdi —
+       dar ekranda sayın sabit 46px eni buraxılır (aşağıda); sarma son çarədir. */
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 400px) {
+    .category-count {
+      min-width: 0;
+    }
   }
 
   .category-count {
