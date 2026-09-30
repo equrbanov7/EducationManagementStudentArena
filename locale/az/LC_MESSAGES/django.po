@@ -86782,3 +86782,7 @@ msgstr ""
 
 msgid "Menyudan davam edin"
 msgstr "Menyudan davam edin"
+
+msgctxt "ai_assistant.limit_exceeded"
+msgid "AI assistent bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin."
+msgstr "AI assistent bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin."

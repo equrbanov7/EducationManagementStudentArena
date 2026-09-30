@@ -109,9 +109,11 @@ x-app-env: &app-env
   EMAIL_REPLY_TO: ${EMAIL_REPLY_TO:-}
   GEMINI_API_KEY: ${GEMINI_API_KEY:-}
   GEMINI_MODEL: ${GEMINI_MODEL:-}
-  GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-4096}
+  # Sahib 2026-10-01: ən ucuz rejim — cavab tavanı 1024 token (xərc nəzarəti).
+  GEMINI_MAX_OUTPUT_TOKENS: ${GEMINI_MAX_OUTPUT_TOKENS:-1024}
   AI_RATE_LIMIT: ${AI_RATE_LIMIT:-100/1h}
   AI_ASSISTANT_RATE_LIMIT: ${AI_ASSISTANT_RATE_LIMIT:-25/1h}
+  AI_ASSISTANT_GLOBAL_RATE_LIMIT: ${AI_ASSISTANT_GLOBAL_RATE_LIMIT:-2000/1d}
   # Audit 2026-09-28 AD-04: .env.production.example-də sənədləşdirilmiş, amma
   # konteynerə heç vaxt ÖTÜRÜLMƏYƏN sahib açarları (compose `env_file` işlətmir —
   # yalnız burada adı çəkilən dəyişən konteynerə düşür). Defoltlar kodun

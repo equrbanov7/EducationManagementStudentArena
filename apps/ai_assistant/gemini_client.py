@@ -25,9 +25,9 @@ _REQUEST_TIMEOUT = 60
 _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 
-# Gemini model for the assistant. flash is faster, cheaper and far less prone
-# to 503 "high demand" errors than pro. Overridable via GEMINI_MODEL env var.
-_DEFAULT_MODEL = "gemini-2.5-flash"
+# Gemini model for the assistant. Sahib 2026-10-01: «ən ucuz, ən zəif model» — flash-lite (Gemini-nin
+# ən ucuz modeli). Overridable via GEMINI_MODEL env var / SuperAdmin AI settings.
+_DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
 
 def _system_prompt() -> str:
@@ -65,7 +65,7 @@ def _get_model() -> str:
     Priority:
       1. GEMINI_MODEL env var (explicit operator override).
       2. AIConfiguration.assistant_model (SuperAdmin panel setting).
-      3. _DEFAULT_MODEL (gemini-2.5-flash).
+      3. _DEFAULT_MODEL (gemini-2.5-flash-lite).
     """
     env_model = os.getenv("GEMINI_MODEL")
     if env_model:

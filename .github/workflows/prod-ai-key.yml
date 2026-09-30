@@ -1,0 +1,112 @@
+name: 🤖 Prod AI açarı (Gemini)
+
+# Sahib 2026-10-01: AI çatbotu ƏN UCUZ modellə qoşmaq. Açar HEÇ VAXT workflow input-u deyil (input-lar
+# run loqunda görünür) — GitHub «production» mühitinin ŞİFRƏLİ secret-indən oxunur, loqda maskalanır:
+#
+#   gh secret set GEMINI_API_KEY --env production     # dəyəri terminal soruşur, ekranda görünmür
+#
+# Rejimlər:
+#   verify  — açar və model Google-da işləyirmi (modelin məlumat ucu; token XƏRCİ YOXDUR). .env-ə toxunmur.
+#   apply   — verify + .env-ə GEMINI_API_KEY, GEMINI_MODEL, GEMINI_MAX_OUTPUT_TOKENS yazılır (ehtiyat nüsxə),
+#             config-only redeploy (app yenidən başlayır — əvvəl prod-exam-ops exam_activity_probe!).
+#   remove  — açar .env-dən silinir, redeploy (çatbot «hələ qoşulmayıb» vəziyyətinə qayıdır).
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "verify / apply / remove"
+        type: choice
+        options: [verify, apply, remove]
+        default: verify
+      model:
+        description: "Çatbot modeli (ən ucuz: gemini-2.5-flash-lite)"
+        type: choice
+        options: [gemini-2.5-flash-lite, gemini-2.5-flash]
+        default: gemini-2.5-flash-lite
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ai-key:
+    runs-on: [self-hosted]
+    environment: production
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      MODE: ${{ inputs.mode }}
+      MODEL: ${{ inputs.model }}
+      GEMINI_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - name: 🔎 Açar + model yoxlaması (token xərci yoxdur)
+        if: ${{ inputs.mode != 'remove' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GEMINI_KEY:-}" ]; then
+            echo "::error::GEMINI_API_KEY secret-i 'production' mühitində yoxdur: gh secret set GEMINI_API_KEY --env production"
+            exit 1
+          fi
+          # Açar URL-də YOX, başlıqda gedir; cavabın gövdəsi çap olunmur.
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+            -H "x-goog-api-key: ${GEMINI_KEY}" \
+            "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}")
+          echo "Gemini model yoxlaması (${MODEL}): HTTP ${code}"
+          case "$code" in
+            200) echo "✅ Açar etibarlıdır, model mövcuddur." ;;
+            400|401|403) echo "::error::Açar rədd edildi (HTTP ${code}) — açarı AI Studio-da yoxlayın."; exit 1 ;;
+            404) echo "::error::Model tapılmadı: ${MODEL}"; exit 1 ;;
+            *) echo "::error::Gözlənilməz cavab: HTTP ${code} (şəbəkə / Google)"; exit 1 ;;
+          esac
+
+      - name: 📝 .env yenilənməsi (ehtiyat nüsxə ilə)
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          test -f .env || { echo "Missing $APP_DIR/.env" >&2; exit 1; }
+          ts="$(date +%Y%m%d-%H%M%S)"
+          cp -p .env ".env.bak.ai.${ts}"
+          chmod 600 ".env.bak.ai.${ts}"
+          ls -t .env.bak.ai.* 2>/dev/null | tail -n +6 | xargs -r rm -- || true
+          upsert() {  # upsert KEY VALUE — dəyər heç yerdə çap olunmur
+            grep -v "^$1=" .env > .env.tmp || true
+            printf '%s=%s\n' "$1" "$2" >> .env.tmp
+            mv .env.tmp .env
+          }
+          if [ "$MODE" = "apply" ]; then
+            upsert GEMINI_API_KEY "$GEMINI_KEY"
+            upsert GEMINI_MODEL "$MODEL"
+            upsert GEMINI_MAX_OUTPUT_TOKENS "1024"
+            echo "upserted: GEMINI_API_KEY (gizli), GEMINI_MODEL=${MODEL}, GEMINI_MAX_OUTPUT_TOKENS=1024"
+          else
+            grep -v "^GEMINI_API_KEY=" .env > .env.tmp || true
+            mv .env.tmp .env
+            echo "removed: GEMINI_API_KEY"
+          fi
+          chmod 600 .env
+          echo "backup: .env.bak.ai.${ts}"
+
+      - name: 🚢 Config-only redeploy
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          bash scripts/deploy/remote_deploy.sh
+
+      - name: ✅ Effektiv konfiqurasiya (açar çap olunmur)
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -uo pipefail
+          cd "$APP_DIR"
+          docker compose -f docker-compose.prod.yml exec -T app python -c "
+          from django.conf import settings as s; import os
+          print('AI key configured:', bool((s.GEMINI_API_KEY or '').strip()))
+          print('GEMINI_MODEL:', os.getenv('GEMINI_MODEL'))
+          print('GEMINI_MAX_OUTPUT_TOKENS:', os.getenv('GEMINI_MAX_OUTPUT_TOKENS'))
+          print('AI_ASSISTANT_RATE_LIMIT:', s.AI_ASSISTANT_RATE_LIMIT, '| GLOBAL:', getattr(s, 'AI_ASSISTANT_GLOBAL_RATE_LIMIT', None))
+          print('AI_ASSISTANT_ENABLED:', getattr(s, 'AI_ASSISTANT_ENABLED', None))
+          " 2>/dev/null || echo "config check skipped"

@@ -236,7 +236,8 @@
         html = html.replace(/(^|[^*])\*(?!\*)([^*\n]+?)\*(?!\*)/g, "$1<em>$2</em>");
         html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
         html = html.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, linkText, url) => {
-            const isLocal = url.startsWith("/") && !url.startsWith("//");
+            // «/\\host» brauzerdə «//host» kimi açılır (xarici sayt) — yerli sayılmır (2026-10-01).
+            const isLocal = url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\");
             const isHttps = url.startsWith("https://");
             if (!isLocal && !isHttps) return linkText;
             const extra = isHttps ? ' target="_blank" rel="noopener noreferrer"' : "";
