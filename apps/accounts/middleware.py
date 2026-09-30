@@ -193,6 +193,13 @@ class FirstLoginPasswordMiddleware:
         "/__debug__/",
     )
 
+    #: Sahib 2026-09-30: canlı imtahana QR / PIN ilə qoşulma HƏR vəziyyətdə işləməlidir —
+    #: ilk girişi (e-poçt kodu + öz parolu) hələ bitirməmiş tələbə də. Oyunçu axını qonaq üçün
+    #: onsuz da açıqdır, ona görə istisna heç nə açmır; host (``/live/host/…``) və kabinet
+    #: bağlı qalır.
+    LIVE_PLAYER_PREFIXES = ("/live/join/", "/live/wait/", "/live/play/", "/live/state/")
+    LIVE_PIN_ENTRY_PATH = "/live/"
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -220,6 +227,8 @@ class FirstLoginPasswordMiddleware:
     def _is_exempt(self, request):
         path = request.path
         if any(path.startswith(prefix) for prefix in self.EXEMPT_PREFIXES):
+            return True
+        if path == self.LIVE_PIN_ENTRY_PATH or path.startswith(self.LIVE_PLAYER_PREFIXES):
             return True
         try:
             exempt_paths = {
