@@ -1,6 +1,6 @@
 """Sahib 2026-10-01 — AI çatbot: ən ucuz model və xərc/təhlükəsizlik qoruyucuları.
 
-* standart model ``gemini-2.5-flash-lite`` (``GEMINI_MODEL`` env üstündür);
+* standart model ``gemini-2.5-flash`` (sahib: «normal model»; ``GEMINI_MODEL`` env üstündür);
 * BÜTÜN sistem üzrə gündəlik tavan (``AI_ASSISTANT_GLOBAL_RATE_LIMIT``) — dolanda Gemini çağırılmır, 429;
 * cavabdakı «/\\host» keçidi yerli sayılmır (brauzer onu «//host» kimi açır) — JS qaydası.
 """
@@ -23,12 +23,12 @@ GLOBAL = ("ai_assistant_global", "all")
 
 
 class CheapestModelTests(TestCase):
-    def test_default_model_is_flash_lite(self):
+    def test_default_model_is_flash(self):
         with (
             patch.dict(os.environ, {"GEMINI_MODEL": ""}),
             patch("apps.exams.public.get_ai_config", side_effect=Exception("no config")),
         ):
-            self.assertEqual(_get_model(), "gemini-2.5-flash-lite")
+            self.assertEqual(_get_model(), "gemini-2.5-flash")
 
     def test_env_override_wins(self):
         with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-2.5-flash-lite"}):
@@ -79,3 +79,39 @@ class LocalLinkRuleTests(TestCase):
     def test_backslash_host_is_not_treated_as_local(self):
         js = (Path(__file__).resolve().parents[2] / "static/js/ai_assistant.js").read_text(encoding="utf-8")
         self.assertIn('!url.startsWith("/\\\\")', js)
+
+
+class RoleModeTests(TestCase):
+    """Sahib 2026-10-01: köməkçi hər istifadəçiyə öz rolu çərçivəsində kömək edir."""
+
+    def _membership(self, name):
+        from types import SimpleNamespace
+
+        return SimpleNamespace(role=SimpleNamespace(name=name, display_name=name))
+
+    def test_modes_follow_roles(self):
+        from .context_builder import assistant_modes
+
+        user = User.objects.create_user(username="ai_mode_user", email="ai_mode@example.com", password="pw12345!")
+        self.assertEqual(assistant_modes(user, [self._membership("student")]), ["student"])
+        self.assertEqual(assistant_modes(user, [self._membership("teacher")]), ["teacher"])
+        self.assertEqual(
+            assistant_modes(user, [self._membership("teacher"), self._membership("ikt_rehber")]), ["staff", "teacher"]
+        )
+        self.assertEqual(assistant_modes(user, []), ["general"])
+
+    def test_prompt_separates_personal_data_from_general_knowledge(self):
+        from .gemini_client import _system_prompt
+
+        prompt = _system_prompt()
+        self.assertIn("use ONLY the permission-filtered context", prompt)
+        self.assertIn("General academic knowledge", prompt)
+        self.assertIn("do not give the final answers", prompt)
+        self.assertIn("multiple choice", prompt)
+
+    def test_new_prompt_headings_are_redacted_if_echoed(self):
+        from .security import sanitize_ai_response
+
+        cleaned, changed = sanitize_ai_response("ROLE MODES:\nSECURITY RULES (always):\nSalam!")
+        self.assertTrue(changed)
+        self.assertNotIn("ROLE MODES", cleaned)

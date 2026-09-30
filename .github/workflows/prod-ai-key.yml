@@ -1,13 +1,13 @@
 name: 🤖 Prod AI açarı (Gemini)
 
-# Sahib 2026-10-01: AI çatbotu ƏN UCUZ modellə qoşmaq. Açar HEÇ VAXT workflow input-u deyil (input-lar
+# Sahib 2026-10-01: AI çatbotu qoşmaq (əvvəl «ən ucuz», sonra «normal model» — gemini-2.5-flash). Açar HEÇ VAXT workflow input-u deyil (input-lar
 # run loqunda görünür) — GitHub «production» mühitinin ŞİFRƏLİ secret-indən oxunur, loqda maskalanır:
 #
 #   gh secret set GEMINI_API_KEY --env production     # dəyəri terminal soruşur, ekranda görünmür
 #
 # Rejimlər:
 #   verify  — açar və model Google-da işləyirmi (modelin məlumat ucu; token XƏRCİ YOXDUR). .env-ə toxunmur.
-#   apply   — verify + .env-ə GEMINI_API_KEY, GEMINI_MODEL, GEMINI_MAX_OUTPUT_TOKENS yazılır (ehtiyat nüsxə),
+#   apply   — verify + .env-ə GEMINI_API_KEY, GEMINI_MODEL, GEMINI_MAX_OUTPUT_TOKENS=2048 yazılır (ehtiyat nüsxə),
 #             config-only redeploy (app yenidən başlayır — əvvəl prod-exam-ops exam_activity_probe!).
 #   remove  — açar .env-dən silinir, redeploy (çatbot «hələ qoşulmayıb» vəziyyətinə qayıdır).
 
@@ -20,10 +20,10 @@ on:
         options: [verify, apply, remove]
         default: verify
       model:
-        description: "Çatbot modeli (ən ucuz: gemini-2.5-flash-lite)"
+        description: "Çatbot modeli (normal: gemini-2.5-flash; ən ucuz: gemini-2.5-flash-lite)"
         type: choice
-        options: [gemini-2.5-flash-lite, gemini-2.5-flash]
-        default: gemini-2.5-flash-lite
+        options: [gemini-2.5-flash, gemini-2.5-flash-lite]
+        default: gemini-2.5-flash
 
 concurrency:
   group: production-deploy
@@ -80,8 +80,8 @@ jobs:
           if [ "$MODE" = "apply" ]; then
             upsert GEMINI_API_KEY "$GEMINI_KEY"
             upsert GEMINI_MODEL "$MODEL"
-            upsert GEMINI_MAX_OUTPUT_TOKENS "1024"
-            echo "upserted: GEMINI_API_KEY (gizli), GEMINI_MODEL=${MODEL}, GEMINI_MAX_OUTPUT_TOKENS=1024"
+            upsert GEMINI_MAX_OUTPUT_TOKENS "2048"
+            echo "upserted: GEMINI_API_KEY (gizli), GEMINI_MODEL=${MODEL}, GEMINI_MAX_OUTPUT_TOKENS=2048"
           else
             grep -v "^GEMINI_API_KEY=" .env > .env.tmp || true
             mv .env.tmp .env
