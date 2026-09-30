@@ -227,3 +227,68 @@
 .auth-logout-form .auth-link-btn {
     min-height: 40px;
 }
+
+/* ---------------------------------------------------------------------------
+   Giriş bloku geri sayımı (sahib 2026-10-01) — templates: accounts/login.html,
+   JS: accounts/js/login_lockout.js.
+   ------------------------------------------------------------------------- */
+.auth-lockout {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--ems-warning-100, #fef3c7);
+    border: 1px solid var(--ems-warning-500, #f59e0b);
+    color: var(--ems-neutral-800, #1e293b);
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+.auth-lockout p {
+    margin: 0;
+}
+.auth-lockout p + p {
+    margin-top: 6px;
+}
+.auth-lockout__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ems-warning-800, #92400e);
+    font-weight: 700;
+}
+.auth-lockout__icon {
+    flex: 0 0 auto;
+}
+.auth-lockout__reason {
+    color: var(--ems-neutral-700, #334155);
+}
+.auth-lockout__clock {
+    display: inline-block;
+    min-width: 4.2ch;
+    margin-left: 4px;
+    padding: 1px 8px;
+    border-radius: 8px;
+    background: var(--ems-neutral-0, #fff);
+    border: 1px solid var(--ems-warning-500, #f59e0b);
+    color: var(--ems-warning-800, #92400e);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.auth-lockout__hint {
+    color: var(--ems-neutral-600, #475569);
+    font-size: 0.84rem;
+}
+.auth-lockout.is-ready {
+    background: var(--ems-success-100, #dcfce7);
+    border-color: var(--ems-success-600, #059669);
+}
+.auth-lockout.is-ready .auth-lockout__title,
+.auth-lockout__ready {
+    color: var(--ems-success-strong, #0f766e);
+    font-weight: 700;
+}
+.auth-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}

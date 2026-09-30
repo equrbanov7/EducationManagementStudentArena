@@ -6,7 +6,7 @@
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'css/bootstrap-select.css' %}?v=20260909-focus">
     <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}?v=20260707-auth2">
-    <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260707-auth2">
+    <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20261001-lockout">
 {% endblock %}
 
 {% block content %}
@@ -48,7 +48,29 @@
         `role="alert"` ilə elan olunur; sahə xətaları Django 5.2-nin özünün widget-ə
         yazdığı `aria-invalid="true"` + `aria-describedby="<auto_id>_error"`-a uyğun
         `id` daşıyır (bax BoundField.aria_describedby).{% endcomment %}
-        {% if form.non_field_errors %}
+        {% if lockout_seconds %}
+            {% comment %}Sahib 2026-10-01: çoxlu uğursuz cəhddən sonra blok — geri sayım görünür, «Daxil ol»
+            vaxt bitənə qədər bağlıdır (static/…/login_lockout.js). Server tərəfi qapı dəyişmir (429).{% endcomment %}
+            <div class="auth-lockout" data-login-lockout data-seconds="{{ lockout_seconds }}" role="alert">
+                <p class="auth-lockout__title">
+                    <svg class="auth-lockout__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+                    {% trans "Giriş müvəqqəti dayandırıldı" context "accounts.login.lockout" %}
+                </p>
+                {% for error in form.non_field_errors %}
+                    <p class="auth-lockout__reason">{{ error }}</p>
+                {% endfor %}
+                <p class="auth-lockout__waiting" data-lockout-waiting>
+                    {% trans "Təhlükəsizlik üçün yenidən cəhd etməzdən əvvəl gözləyin:" context "accounts.login.lockout" %}
+                    <strong class="auth-lockout__clock" data-lockout-countdown>{{ lockout_clock }}</strong>
+                </p>
+                <p class="auth-lockout__ready" data-lockout-ready aria-live="polite" hidden>
+                    {% trans "Vaxt bitdi — indi yenidən daxil olmağa cəhd edə bilərsiniz." context "accounts.login.lockout" %}
+                </p>
+                <p class="auth-lockout__hint">
+                    {% trans "Parolu xatırlamırsınızsa, «Parolu unutdum» keçidindən istifadə edin və ya RİM mərkəzinə müraciət edin." context "accounts.login.lockout" %}
+                </p>
+            </div>
+        {% elif form.non_field_errors %}
             <div class="auth-global-errors" role="alert"> {# auth-errors -> auth-global-errors #}
                 {% for error in form.non_field_errors %}
                     <p>{{ error }}</p>
@@ -116,6 +138,7 @@
 {% endblock %}
 
 {% block extraJs %}
+<script src="{% static 'accounts/js/login_lockout.js' %}?v=20261001-1"></script>
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/bootstrap_select.js' %}?v=20260926-1"></script>
 <script src="{% static 'accounts/js/auth_language_form.js' %}"></script>

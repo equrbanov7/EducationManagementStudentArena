@@ -86759,3 +86759,26 @@ msgid ""
 msgstr ""
 "Universitet Wi-Fi-ına qoşulduğunuz halda da bu səhifə çıxırsa, RİM mərkəzinə"
 " müraciət edin."
+
+msgctxt "accounts.login.lockout"
+msgid "Giriş müvəqqəti dayandırıldı"
+msgstr "Giriş müvəqqəti dayandırıldı"
+
+msgctxt "accounts.login.lockout"
+msgid "Təhlükəsizlik üçün yenidən cəhd etməzdən əvvəl gözləyin:"
+msgstr "Təhlükəsizlik üçün yenidən cəhd etməzdən əvvəl gözləyin:"
+
+msgctxt "accounts.login.lockout"
+msgid "Vaxt bitdi — indi yenidən daxil olmağa cəhd edə bilərsiniz."
+msgstr "Vaxt bitdi — indi yenidən daxil olmağa cəhd edə bilərsiniz."
+
+msgctxt "accounts.login.lockout"
+msgid ""
+"Parolu xatırlamırsınızsa, «Parolu unutdum» keçidindən istifadə edin və ya "
+"RİM mərkəzinə müraciət edin."
+msgstr ""
+"Parolu xatırlamırsınızsa, «Parolu unutdum» keçidindən istifadə edin və ya "
+"RİM mərkəzinə müraciət edin."
+
+msgid "Menyudan davam edin"
+msgstr "Menyudan davam edin"

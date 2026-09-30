@@ -87164,3 +87164,26 @@ msgid ""
 msgstr ""
 "If you still see this page while connected to the university Wi-Fi, contact "
 "the Digital Development Centre (RİM)."
+
+msgctxt "accounts.login.lockout"
+msgid "Giriş müvəqqəti dayandırıldı"
+msgstr "Sign-in temporarily paused"
+
+msgctxt "accounts.login.lockout"
+msgid "Təhlükəsizlik üçün yenidən cəhd etməzdən əvvəl gözləyin:"
+msgstr "For security, please wait before trying again:"
+
+msgctxt "accounts.login.lockout"
+msgid "Vaxt bitdi — indi yenidən daxil olmağa cəhd edə bilərsiniz."
+msgstr "Time is up — you can try to sign in again now."
+
+msgctxt "accounts.login.lockout"
+msgid ""
+"Parolu xatırlamırsınızsa, «Parolu unutdum» keçidindən istifadə edin və ya "
+"RİM mərkəzinə müraciət edin."
+msgstr ""
+"If you don't remember your password, use “Forgot password” or contact the "
+"Digital Development Centre (RİM)."
+
+msgid "Menyudan davam edin"
+msgstr "Continue from the menu"

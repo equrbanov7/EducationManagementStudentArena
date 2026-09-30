@@ -87309,3 +87309,26 @@ msgid ""
 msgstr ""
 "Если эта страница появляется и при подключении к университетскому Wi-Fi, "
 "обратитесь в Центр цифрового развития (RİM)."
+
+msgctxt "accounts.login.lockout"
+msgid "Giriş müvəqqəti dayandırıldı"
+msgstr "Вход временно приостановлен"
+
+msgctxt "accounts.login.lockout"
+msgid "Təhlükəsizlik üçün yenidən cəhd etməzdən əvvəl gözləyin:"
+msgstr "В целях безопасности подождите перед следующей попыткой:"
+
+msgctxt "accounts.login.lockout"
+msgid "Vaxt bitdi — indi yenidən daxil olmağa cəhd edə bilərsiniz."
+msgstr "Время вышло — теперь можно снова попробовать войти."
+
+msgctxt "accounts.login.lockout"
+msgid ""
+"Parolu xatırlamırsınızsa, «Parolu unutdum» keçidindən istifadə edin və ya "
+"RİM mərkəzinə müraciət edin."
+msgstr ""
+"Если не помните пароль, воспользуйтесь ссылкой «Забыли пароль» или "
+"обратитесь в Центр цифрового развития (RİM)."
+
+msgid "Menyudan davam edin"
+msgstr "Продолжите через меню"
