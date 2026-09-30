@@ -15,9 +15,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "verify / apply / remove"
+        description: "verify / diagnose / apply / remove"
         type: choice
-        options: [verify, apply, remove]
+        options: [verify, diagnose, apply, remove]
         default: verify
       model:
         description: "Çatbot modeli (normal: gemini-2.5-flash; ən ucuz: gemini-2.5-flash-lite)"
@@ -62,8 +62,44 @@ jobs:
             *) echo "::error::Gözlənilməz cavab: HTTP ${code} (şəbəkə / Google)"; exit 1 ;;
           esac
 
+      - name: 🩺 Diaqnostika (kiçik real sorğu + app loqu; açar çap olunmur)
+        if: ${{ inputs.mode == 'diagnose' }}
+        run: |
+          set -uo pipefail
+          # 1) Serverdən (runner = prod host) minimal generateContent — cavabdan yalnız status,
+          #    xəta mesajı, finishReason və token sayları çap olunur (mətn/açar yox).
+          for tb in none 0; do
+            if [ "$tb" = none ]; then gen='{"maxOutputTokens":256}'; else gen='{"maxOutputTokens":256,"thinkingConfig":{"thinkingBudget":0}}'; fi
+            body=$(curl -sS --max-time 40 -w '\n%{http_code}' \
+              -H "x-goog-api-key: ${GEMINI_KEY}" -H 'Content-Type: application/json' \
+              -d "{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"Salam, bir cümlə ilə cavab ver: 2+2 neçədir?\"}]}],\"generationConfig\":${gen}}" \
+              "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent")
+            code=$(printf '%s' "$body" | tail -n1)
+            printf '%s' "$body" | sed '$d' > /tmp/gem_diag.json
+            echo "── thinkingBudget=${tb}: HTTP ${code}"
+            python3 - <<'PY'
+          import json
+          try:
+              d = json.load(open("/tmp/gem_diag.json"))
+          except Exception as exc:
+              print("  (JSON deyil)", exc); raise SystemExit
+          err = d.get("error") or {}
+          if err:
+              print("  error.status:", err.get("status"), "| message:", (err.get("message") or "")[:300])
+          for c in d.get("candidates", []):
+              parts = c.get("content", {}).get("parts", [])
+              print("  finishReason:", c.get("finishReason"), "| text_len:", sum(len(p.get("text") or "") for p in parts))
+          print("  usage:", d.get("usageMetadata"))
+          PY
+            rm -f /tmp/gem_diag.json
+          done
+          # 2) App loqunda son Gemini xətaları (açar loqa düşmür — başlıqda gedir).
+          cd "$APP_DIR"
+          docker compose -f docker-compose.prod.yml logs --since 3h app 2>/dev/null \
+            | grep -E "Gemini assistant|AI assistant" | tail -n 15 | cut -c1-400 || true
+
       - name: 📝 .env yenilənməsi (ehtiyat nüsxə ilə)
-        if: ${{ inputs.mode != 'verify' }}
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'remove' }}
         run: |
           set -euo pipefail
           cd "$APP_DIR"
@@ -91,7 +127,7 @@ jobs:
           echo "backup: .env.bak.ai.${ts}"
 
       - name: 🚢 Config-only redeploy
-        if: ${{ inputs.mode != 'verify' }}
+        if: ${{ inputs.mode == 'apply' || inputs.mode == 'remove' }}
         run: |
           set -euo pipefail
           cd "$APP_DIR"
