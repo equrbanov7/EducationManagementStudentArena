@@ -39,6 +39,8 @@ from .constants import User
 
 _CTX = "accounts.first_login"
 _OTP_SENT_SESSION_KEY = "first_login_otp_sent_email"
+#: «E-poçtu dəyiş» (sahib 2026-09-30): kod göndərilmiş ünvan 1-ci addımda redaktə üçün qalır.
+_EMAIL_DRAFT_SESSION_KEY = "first_login_email_draft"
 
 
 def _email_taken_by_another_account(email, user) -> bool:
@@ -79,7 +81,9 @@ def set_initial_password_view(request):
         # Nothing to do — the account is already set up.
         return redirect("accounts:profile")
 
-    prefilled_email = (request.session.get(_OTP_SENT_SESSION_KEY) or user.email or "").strip()
+    prefilled_email = (
+        request.session.get(_OTP_SENT_SESSION_KEY) or request.session.get(_EMAIL_DRAFT_SESSION_KEY) or user.email or ""
+    ).strip()
     otp_sent = bool(request.session.get(_OTP_SENT_SESSION_KEY))
 
     direct = _email_already_verified(user)
@@ -88,6 +92,8 @@ def set_initial_password_view(request):
         action = request.POST.get("action", "")
         if action == "send_otp" and not direct:
             return _handle_send_otp(request, user)
+        if action == "change_email" and not direct:
+            return _handle_change_email(request)
         if action == "set_password":
             if direct:
                 return _handle_set_password_direct(request, user)
@@ -103,6 +109,18 @@ def set_initial_password_view(request):
             "user_display": user.get_full_name() or user.username,
         },
     )
+
+
+def _handle_change_email(request):
+    """2-ci addımdan 1-ci addıma qayıt: yazılmış ünvan redaktə üçün saxlanılır, köhnə kod keçərsizdir.
+
+    Sahib 2026-09-30: yeni istifadəçi kodu göndərəndən sonra ünvanı səhv yazdığını görəndə geri
+    qayıda bilmirdi. Kod ünvana bağlıdır (``verify_email_otp(email=…)``) — yeni ünvana yeni kod lazımdır.
+    """
+    sent_email = request.session.pop(_OTP_SENT_SESSION_KEY, None)
+    if sent_email:
+        request.session[_EMAIL_DRAFT_SESSION_KEY] = sent_email
+    return redirect("accounts:set_initial_password")
 
 
 def _validated_new_password(request, user):
@@ -131,6 +149,7 @@ def _finish(request, user, *, verified_email=False):
         fields.append("email_verified")
     profile.save(update_fields=fields)
     request.session.pop(_OTP_SENT_SESSION_KEY, None)
+    request.session.pop(_EMAIL_DRAFT_SESSION_KEY, None)
     messages.success(request, pgettext(_CTX, "Parolunuz təyin olundu. Sistemə xoş gəlmisiniz!"))
     return redirect("accounts:profile")
 
@@ -179,6 +198,7 @@ def _handle_send_otp(request, user):
 
     record_rate_limit_hit("first_login_otp", rate, *limit_key)
     request.session[_OTP_SENT_SESSION_KEY] = email
+    request.session.pop(_EMAIL_DRAFT_SESSION_KEY, None)
     messages.success(request, pgettext(_CTX, "Təsdiq kodu email ünvanınıza göndərildi."))
     return redirect("accounts:set_initial_password")
 

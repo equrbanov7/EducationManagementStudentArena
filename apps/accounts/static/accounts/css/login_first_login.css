@@ -107,7 +107,8 @@
 }
 .auth-info-line strong {
     color: var(--ems-primary-700);
-    word-break: break-all;
+    /* 2026-09-30: ünvan yalnız sığmayanda qırılır (break-all «yanli s.unvan» kimi bölürdü). */
+    overflow-wrap: anywhere;
 }
 
 /* OTP say-geriyə banneri (otp_timer.js: [data-otp-expires-at]/[data-otp-countdown]/.is-expired) */
@@ -164,4 +165,65 @@
 }
 .auth-link-btn:hover {
     text-decoration: underline;
+}
+
+/* ---------------------------------------------------------------------------
+   Sahib 2026-09-30: e-poçt addımında kömək mətni, «E-poçtu dəyiş», «Kod gəlmir?»
+   və POST ilə çıxış (əvvəlki <a href> 405 verirdi).
+   ------------------------------------------------------------------------- */
+.auth-field-hint {
+    margin: 8px 0 0;
+    color: var(--ems-neutral-600);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    text-align: left;
+}
+.auth-inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px 6px;
+    margin: -10px 0 18px;
+    color: var(--ems-neutral-600);
+    font-size: 0.86rem;
+}
+.auth-inline-form .auth-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+}
+.auth-help {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    font-size: 0.85rem;
+    text-align: left;
+}
+.auth-help summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--ems-primary-700);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+}
+.auth-help ul {
+    margin: 8px 0 2px;
+    padding-left: 18px;
+    list-style: disc;
+    color: var(--ems-neutral-700);
+    line-height: 1.5;
+}
+.auth-help li + li {
+    margin-top: 4px;
+}
+.auth-logout-form {
+    margin-top: 16px;
+}
+.auth-logout-form .auth-link-btn {
+    min-height: 40px;
 }
