@@ -1,0 +1,137 @@
+/* İM monitoru — tələbə kimliyi (şəkil / baş hərflər), risk nişanları və
+   hadisə xronologiyası (2026-10-01, PROC). Render: proctor_identity.js.
+   monitor.css-dən SONRA yüklənir (xəritə hücrəsi ölçüsü burada böyüdülür). */
+
+/* ── Avatar ── */
+.fxc-ava {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #E0E7FF, #C7D2FE);
+    color: #3730A3;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 0 0 2px #fff;
+    user-select: none;
+}
+.fxc-ava--sm { width: 34px; height: 34px; font-size: .78rem; }
+.fxc-ava--md { width: 48px; height: 48px; font-size: .95rem; }
+.fxc-ava--lg { width: 104px; height: 104px; font-size: 1.9rem; }
+.fxc-ava__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #fff;
+}
+.fxc-ava--photo .fxc-ava__ini { visibility: hidden; }
+.fxc-ava--flagged { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #DC2626; }
+
+/* ── Kompüter xəritəsi hücrəsi: şəkil üçün bir az böyük ── */
+.fxc-computer-map { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.fxc-cell { gap: 1px; padding: 6px 4px; }
+.fxc-cell .fxc-cell-ava { margin-bottom: 2px; width: 40px; height: 40px; }
+.fxc-cell .fxc-cell-num { font-size: .95rem; }
+.fxc-cell--flagged { border-color: #DC2626; box-shadow: 0 0 0 2px rgba(220, 38, 38, .25); }
+.fxc-cell--hb-missing,
+.fxc-cell--hb-stale { border-style: dashed; border-color: #64748B; }
+.fxc-cell--hb-stale .fxc-cell-ava { filter: grayscale(1); opacity: .7; }
+
+/* ── Kiçik nişanlar ── */
+.fxc-pbadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: .7rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 2px 8px;
+    white-space: nowrap;
+    background: #F1F5F9;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+}
+.fxc-pbadge--flag { background: #DC2626; color: #fff; border-color: #DC2626; }
+.fxc-pbadge--sev-critical,
+.fxc-pbadge--sev-high { background: #FEE2E2; color: #991B1B; border-color: #FECACA; }
+.fxc-pbadge--sev-medium { background: #FEF3C7; color: #92400E; border-color: #FDE68A; }
+.fxc-pbadge--sev-low { background: #E0F2FE; color: #075985; border-color: #BAE6FD; }
+.fxc-pbadge--sig { background: #F5F3FF; color: #5B21B6; border-color: #DDD6FE; }
+.fxc-pbadge--hb-missing,
+.fxc-pbadge--hb-stale { background: #F8FAFC; color: #475569; border-style: dashed; border-color: #94A3B8; }
+
+/* ── «Qayda pozanlar» paneli sətri ── */
+.fxc-vio-who { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.fxc-vio-who__txt { display: flex; flex-direction: column; min-width: 0; }
+.fxc-vio-who .fxc-vio-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fxc-vio-meta { font-size: .72rem; color: #64748B; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fxc-vio-pbadges { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 0 8px; }
+.fxc-vio-row--flagged { border-color: #FCA5A5; background: #FEF2F2; }
+
+/* ── Oturum cədvəli «Tələbə» sütunu ── */
+.fxc-who { display: inline-flex; align-items: center; gap: 9px; }
+.fxc-who__txt { display: inline-flex; flex-direction: column; }
+.fxc-who__meta { font-size: .72rem; font-weight: 500; color: #64748B; }
+
+/* ── Kimlik kartı (modallar) ── */
+.fxc-snapshot-identity[hidden],
+.fxc-snapshot-timeline[hidden] { display: none; }
+.fxc-idcard {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    margin: 4px 0 12px;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    background: #F8FAFC;
+}
+.fxc-idcard__body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.fxc-idcard__kicker { font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #64748B; }
+.fxc-idcard__name { font-size: 1.12rem; font-weight: 800; color: #0F172A; overflow-wrap: anywhere; }
+.fxc-idcard__meta { font-size: .84rem; color: #334155; }
+.fxc-idcard__meta:empty { display: none; }
+.fxc-idcard__user { font-size: .78rem; color: #64748B; }
+.fxc-idcard__badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+
+/* ── Hadisə xronologiyası ── */
+.fxc-tl-wrap { margin-top: 14px; }
+.fxc-tl-title { font-size: .86rem; font-weight: 800; color: #0F172A; margin: 0 0 8px; display: flex; gap: 6px; align-items: center; }
+.fxc-tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.fxc-tl__item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 10px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    border-left: 4px solid #CBD5E1;
+    background: #F8FAFC;
+    font-size: .8rem;
+}
+.fxc-tl__item--critical,
+.fxc-tl__item--high { border-left-color: #DC2626; background: #FEF2F2; }
+.fxc-tl__item--medium { border-left-color: #F59E0B; background: #FFFBEB; }
+.fxc-tl__item--low { border-left-color: #0EA5E9; }
+.fxc-tl__time { color: #64748B; font-variant-numeric: tabular-nums; }
+.fxc-tl__label { color: #0F172A; font-weight: 600; overflow-wrap: anywhere; }
+.fxc-tl__tags { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; }
+.fxc-tl__src,
+.fxc-tl__sev,
+.fxc-tl__counts { font-size: .66rem; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #E2E8F0; color: #334155; }
+.fxc-tl__src--signal { background: #EDE9FE; color: #5B21B6; }
+.fxc-tl__counts { background: #FEE2E2; color: #991B1B; }
+.fxc-tl__empty { color: #64748B; font-size: .82rem; margin: 0; }
+
+@media (max-width: 640px) {
+    .fxc-idcard { flex-direction: column; align-items: flex-start; }
+    .fxc-ava--lg { width: 88px; height: 88px; }
+    .fxc-computer-map { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+    .fxc-cell .fxc-ava--sm { width: 28px; height: 28px; font-size: .68rem; }
+    .fxc-tl__item { grid-template-columns: 1fr; }
+    .fxc-tl__tags { grid-column: 1; }
+}

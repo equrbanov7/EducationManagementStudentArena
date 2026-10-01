@@ -1,0 +1,46 @@
+{% load i18n proctoring %}
+{% comment %}
+  2026-10-01 (PROC): qabaqcıl anti-cheat aşkarlaması — Exam.settings["proctoring"] (miqrasiyasız).
+  Şablondan (yüngül/orta/sərt) asılı DEYİL; hamısı yalnız QEYD edir (tələbəni kilidləmir),
+  risk xalı «şübhə həddi»nə çatanda cəhd nəzarətçi/müəllim ekranında «şübhəli» işarələnir.
+  Gizli marker olmadan göndərilən köhnə forma seçimlərə toxunmur (bax proctoring_options.py).
+{% endcomment %}
+{% proctoring_options_for form.instance as popts %}
+<input type="hidden" name="proctoring_advanced_present" value="1">
+<div class="form-group form-group-full">
+    <span class="ew-label ew-checks-label" id="ew-advanced-proctor-label">{% trans "Qabaqcıl aşkarlama (genişlənmə, süni intellekt, DevTools)" context "exams.proctoring.form" %}</span>
+    <p class="ew-switch-desc">{% trans "Bu yoxlamalar tələbəni kilidləmir — yalnız qeyd edir və nəzarətçiyə göstərir. Risk xalı həddə çatanda cəhd «şübhəli» işarələnir." context "exams.proctoring.form" %}</p>
+    <div class="ew-checks" role="group" aria-labelledby="ew-advanced-proctor-label">
+        <div class="form-group">
+            <label class="modal-check-label">
+                <input type="checkbox" name="proctoring_anti_ai" class="form-check-input" {% if popts.anti_ai %}checked{% endif %}>
+                <span class="modal-check-label-text">{% trans "Süni intellekt köməkçilərinə və brauzer genişlənmələrinə qarşı qoruma (sual mətni seçilmir, kənar elementlər aşkarlanır)" context "exams.proctoring.form" %}</span>
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="modal-check-label">
+                <input type="checkbox" name="proctoring_detect_text_injection" class="form-check-input" {% if popts.detect_text_injection %}checked{% endif %}>
+                <span class="modal-check-label-text">{% trans "Cavaba kənardan mətn daxil edilməsini aşkarla (yapışdırma, skriptlə yazma, qeyri-adi sürət)" context "exams.proctoring.form" %}</span>
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="modal-check-label">
+                <input type="checkbox" name="proctoring_detect_devtools" class="form-check-input" {% if popts.detect_devtools %}checked{% endif %}>
+                <span class="modal-check-label-text">{% trans "Tərtibatçı alətlərinin (DevTools) açılmasını aşkarla" context "exams.proctoring.form" %}</span>
+            </label>
+        </div>
+        <div class="form-group">
+            <label class="modal-check-label">
+                <input type="checkbox" name="proctoring_detect_multi_monitor" class="form-check-input" {% if popts.detect_multi_monitor %}checked{% endif %}>
+                <span class="modal-check-label-text">{% trans "Əlavə monitorun qoşulmasını aşkarla (dəstəkləyən brauzerlərdə)" context "exams.proctoring.form" %}</span>
+            </label>
+        </div>
+    </div>
+    <div class="ew-grid2">
+        <div class="form-group">
+            <label class="ew-label" for="modalProctoringFlagThreshold">{% trans "Şübhə həddi (risk xalı)" context "exams.proctoring.form" %}</label>
+            <input type="number" name="proctoring_flag_threshold" id="modalProctoringFlagThreshold" class="form-control"
+                   min="3" max="100" value="{{ popts.flag_threshold }}">
+        </div>
+    </div>
+</div>

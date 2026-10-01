@@ -1,0 +1,17 @@
+{% load i18n proctoring %}
+{% comment %}
+  2026-10-01 (PROC): imtahan başlığında tələbənin ÖZ şəkli / adı / qrupu / nömrəsi —
+  İM nəzarətçisi zalda yanından keçəndə ekrandakı şəxslə üzü tutuşdura bilsin.
+  Şəkil yalnız icazəli marşrutdan (exams:proctor_student_photo) gəlir; yoxdursa baş hərflər.
+{% endcomment %}
+{% proctor_identity attempt as ident %}
+<div class="proctor-id" data-proctor-identity>
+  <span class="proctor-id__ava{% if ident.photo_url %} proctor-id__ava--photo{% endif %}">
+    <span class="proctor-id__ini" aria-hidden="true">{{ ident.initials|default:"?" }}</span>
+    {% if ident.photo_url %}<img class="proctor-id__img" src="{{ ident.photo_url }}" alt="{{ ident.name }}" width="44" height="44" draggable="false" decoding="async">{% endif %}
+  </span>
+  <span class="proctor-id__txt">
+    <strong class="proctor-id__name">{{ ident.name|default:request.user.username }}</strong>
+    <span class="proctor-id__meta">{% if ident.group %}<span class="proctor-id__group">{% trans "Qrup" context "exams.proctoring.identity" %}: <b>{{ ident.group }}</b></span>{% endif %}{% if ident.student_number %}<span class="proctor-id__num">{% trans "Tələbə №" context "exams.proctoring.identity" %} <b>{{ ident.student_number }}</b></span>{% endif %}<span class="proctor-id__user">{{ ident.username|default:request.user.username }}</span></span>
+  </span>
+</div>

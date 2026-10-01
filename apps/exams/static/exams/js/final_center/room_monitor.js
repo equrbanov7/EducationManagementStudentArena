@@ -145,7 +145,8 @@
         var status = statusFilter && statusFilter.value;
         if (status && student.status !== status) return false;
         if (text) {
-            var hay = student.name + " " + student.username;
+            var hay = student.name + " " + student.username + " " + (student.group || "") + " " +
+                (student.student_number || "");
             if (!currentMatch(text)(hay)) return false;
         }
         return true;
@@ -174,6 +175,12 @@
                     "</span>");
             }
             if (s.removal_action) warn.push('<span class="fxc-pill fxc-pill--muted">' + esc(s.removal_action) + "</span>");
+            // 2026-10-01 (PROC): risk / şübhəli / nəzarət siqnalı nişanları.
+            var P = window.FXCProctor;
+            if (P) {
+                var pb = P.badgesHtml(s);
+                if (pb) warn.push(pb);
+            }
             var connCls = s.connected ? "online" : "offline";
             var connTxt = s.connected ? gettext("Qoşulu") : gettext("Oflayn");
             var actionable = live && (s.status === "waiting" || s.status === "ready" || s.status === "active");
@@ -184,8 +191,11 @@
                 : "";
             return "<tr data-status='" + esc(s.status) + "' data-row-ticket='" + esc(s.ticket_id) + "'>" +
                 '<td class="fxc-num">' + (s.seat != null ? esc(s.seat) : "—") + "</td>" +
-                '<td class="fxc-strong">' + esc(s.name) +
-                    ' <span class="fxc-muted">(' + esc(s.username) + ")</span></td>" +
+                '<td class="fxc-strong">' + (P
+                    ? '<span class="fxc-who">' + P.avatarHtml(s, "sm") + '<span class="fxc-who__txt">' +
+                        esc(s.name) + ' <span class="fxc-muted">(' + esc(s.username) + ")</span>" +
+                        '<span class="fxc-who__meta">' + P.metaLine(s) + "</span></span></span>"
+                    : esc(s.name) + ' <span class="fxc-muted">(' + esc(s.username) + ")</span>") + "</td>" +
                 '<td><span class="fxc-conn" data-state="' + connCls + '">' + connTxt + "</span></td>" +
                 '<td><span class="fxc-pill fxc-pill--t-' + esc(s.status) + '">' +
                     esc(STATUS_LABELS[s.status] || s.status) + "</span></td>" +
@@ -222,12 +232,20 @@
             if (s.violation_count) badges += '<span class="fxc-cell-vio">' + esc(s.violation_count) + "</span>";
             if (s.connected) badges += '<span class="fxc-cell-conn" title="' + esc(gettext("Qoşulu")) + '"></span>';
             var initials = (s.name || "?").trim().charAt(0).toUpperCase();
-            return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + '" ' +
+            // 2026-10-01 (PROC): tələbənin şəkli + şübhəli / siqnal vurğusu.
+            var P = window.FXCProctor;
+            var extra = "";
+            if (s.flagged) extra += " fxc-cell--flagged";
+            var hb = P ? P.heartbeatInfo(s.heartbeat) : null;
+            if (hb) extra += " fxc-cell--hb-" + hb.cls;
+            return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + extra + '" ' +
                 'data-ticket="' + esc(s.ticket_id) + '" ' +
-                'title="' + esc(s.name) + " · " + esc(STATUS_LABELS[s.status] || s.status) + '">' +
+                'title="' + esc(s.name) + (s.group ? " · " + esc(s.group) : "") + " · " +
+                    esc(STATUS_LABELS[s.status] || s.status) + '">' +
                 badges +
+                (P ? P.avatarHtml(s, "sm", "fxc-cell-ava") : "") +
                 '<span class="fxc-cell-num">' + esc(("0" + label).slice(-2)) + "</span>" +
-                '<span class="fxc-cell-ini">' + esc(initials) + "</span>" +
+                (P ? "" : '<span class="fxc-cell-ini">' + esc(initials) + "</span>") +
                 "</button>";
         }).join("");
     }

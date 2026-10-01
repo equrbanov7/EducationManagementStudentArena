@@ -21,6 +21,14 @@ from apps.exams.domain.final_center import (
 from .presence import presence_map
 from .tickets import sync_ticket_completion
 
+
+def _enrich(rows, organization_id, users):
+    """Kimlik (şəkil/qrup/nömrə) + risk + heartbeat — bax supervision.monitor_enrich."""
+    from apps.exams.services.supervision.monitor_enrich import enrich_monitor_rows
+
+    return enrich_monitor_rows(rows, organization_id, {user.pk: user for user in users if user is not None})
+
+
 # Bitmiş tələbənin nəticəsi kompüter xəritəsində maks bu qədər saniyə görünür,
 # sonra hücrə boşalır (yeni tələbə üçün). Seat yeni aktiv tələbə ilə tutulubsa
 # köhnə nəticə DƏRHAL düşür.
@@ -99,6 +107,7 @@ def _ticket_row(ticket, presence, exam_title=None):
         "violation_count": attempt.supervision_violation_count if attempt else 0,
         "removal_action": ticket.removal_action,
         "session_id": ticket.session_id,
+        "exam_id": ticket.exam_id,
         "exam_title": exam_title,
     }
 
@@ -137,6 +146,7 @@ def session_monitor_snapshot(session):
     )
     # İmtahan verib (iştirak edən) = cəhdə başlamış hər kəs (aktiv + bitirmiş).
     counts["participated"] = counts["active"] + counts["completed"]
+    visible = _visible_grid_tickets(tickets)
 
     return {
         "session_id": session.pk,
@@ -149,7 +159,11 @@ def session_monitor_snapshot(session):
         "ended_at": session.ended_at.isoformat() if session.ended_at else None,
         "server_now": timezone.now().isoformat(),
         "counts": counts,
-        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)],
+        "students": _enrich(
+            [_ticket_row(t, presence) for t in visible],
+            session.organization_id,
+            [t.student for t in visible],
+        ),
     }
 
 
@@ -225,10 +239,11 @@ def _room_attempt_rows(room):
                 "violation_count": attempt.supervision_violation_count,
                 "removal_action": "",
                 "session_id": f"exam-{attempt.exam_id}",
+                "exam_id": attempt.exam_id,
                 "exam_title": attempt.exam.title,
             }
         )
-    return rows
+    return rows, [attempt.user for attempt in attempts]
 
 
 def room_monitor_snapshot(room):
@@ -280,7 +295,7 @@ def room_monitor_snapshot(room):
 
     # Biletsiz (PIN) cəhdlər: sayğaclara və tələbə siyahısına əlavə olunur;
     # hər imtahan üçün psevdo-oturum çipi göstərilir (filter də işləsin).
-    attempt_rows = _room_attempt_rows(room)
+    attempt_rows, attempt_users = _room_attempt_rows(room)
     for row in attempt_rows:
         counts["total"] += 1
         counts[row["status"]] += 1
@@ -293,6 +308,7 @@ def room_monitor_snapshot(room):
 
     counts["offline"] = max(0, counts["waiting"] + counts["ready"] + counts["active"] - counts["connected"])
     counts["participated"] = counts["active"] + counts["completed"]
+    visible_tickets = _visible_grid_tickets(tickets)
 
     return {
         "room_id": room.pk,
@@ -321,7 +337,11 @@ def room_monitor_snapshot(room):
             }
             for sid, title in attempt_exams.items()
         ],
-        "students": [_ticket_row(t, presence) for t in _visible_grid_tickets(tickets)] + attempt_rows,
+        "students": _enrich(
+            [_ticket_row(t, presence) for t in visible_tickets] + attempt_rows,
+            room.organization_id,
+            [t.student for t in visible_tickets] + attempt_users,
+        ),
     }
 
 

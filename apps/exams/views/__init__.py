@@ -10,6 +10,7 @@ from .exam_center import (
     exam_center_reports,
     exam_center_room_assign_invigilators,
     exam_center_room_end_all,
+    exam_center_room_exam_hall,
     exam_center_room_list,
     exam_center_room_monitor,
     exam_center_room_open_all,
@@ -39,6 +40,7 @@ from .exam_center import (
     stats_faculty_search,
     stats_teacher_search,
 )
+from .exam_center.student_photo import proctor_student_photo
 from .shared.access import exam_code_check
 from .student.attempts import start_exam, take_exam
 from .student.coding import coding_autosave, coding_run, coding_submission_download, coding_submit
@@ -153,7 +155,9 @@ from .teacher.submission_review import (
     question_submission_review,
 )
 from .teacher.supervision import (
+    heartbeat_api,
     log_incident_api,
+    log_signal_api,
     supervision_status_api,
 )
 
@@ -247,7 +251,10 @@ __all__ = [
     "bank_question_edit",
     "exam_bank_picker",
     # Teacher - Supervision
+    "heartbeat_api",
     "log_incident_api",
+    "log_signal_api",
+    "proctor_student_photo",
     "supervision_status_api",
     # Student - Results
     "exam_result",
@@ -283,6 +290,7 @@ __all__ = [
     "exam_center_student_pins",
     "exam_center_reports",
     "exam_center_room_assign_invigilators",
+    "exam_center_room_exam_hall",
     "exam_center_room_list",
     "exam_center_room_monitor",
     "exam_center_room_end_all",

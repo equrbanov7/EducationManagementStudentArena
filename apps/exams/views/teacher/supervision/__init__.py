@@ -15,8 +15,11 @@ from .monitor import (  # noqa: F401
     log_incident_api,
     supervision_status_api,
 )
+from .signals import heartbeat_api, log_signal_api  # noqa: F401
 
 __all__ = [
+    "heartbeat_api",
     "log_incident_api",
+    "log_signal_api",
     "supervision_status_api",
 ]

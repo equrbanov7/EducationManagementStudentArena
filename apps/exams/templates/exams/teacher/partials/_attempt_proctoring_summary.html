@@ -1,0 +1,39 @@
+{% load i18n proctoring %}
+{% comment %}
+  2026-10-01 (PROC): müəllimin cəhd səhifəsində proktorinq hesabatı — pozuntu/siqnal sayı,
+  risk xalı / şübhə həddi və vahid hadisə xronologiyası (ciddiliklə). Tələbənin kimliyini
+  GÖSTƏRMİR (anonim yoxlama pəncərəsi pozulmur). Heç bir qeyd yoxdursa və nəzarət
+  sönülüdürsə blok görünmür.
+{% endcomment %}
+{% proctoring_summary attempt as ps %}
+{% if ps %}
+<details class="proctor-summary{% if ps.risk.flagged %} proctor-summary--flagged{% endif %}" data-proctor-summary{% if ps.risk.flagged %} open{% endif %}>
+  <summary class="proctor-summary__head">
+    <span class="proctor-summary__title"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Proktorinq hesabatı" context "exams.proctoring.teacher" %}</span>
+    <span class="proctor-summary__chips">
+      {% if ps.risk.flagged %}<span class="proctor-chip proctor-chip--flag"><i class="fas fa-flag" aria-hidden="true"></i> {% trans "Şübhəli" context "exams.proctoring.monitor" %}</span>{% endif %}
+      <span class="proctor-chip">{% trans "Pozuntu" context "exams.proctoring.teacher" %}: <b>{{ ps.violation_count }}</b></span>
+      <span class="proctor-chip">{% trans "Siqnal" context "exams.proctoring.monitor" %}: <b>{{ ps.risk.signals }}</b></span>
+      <span class="proctor-chip proctor-chip--sev-{{ ps.risk.max_severity|default:'none' }}">{% trans "Risk xalı" context "exams.proctoring.teacher" %}: <b>{{ ps.risk.score }}</b> / {{ ps.risk.threshold }}</span>
+    </span>
+  </summary>
+  <p class="proctor-summary__note">{% trans "Risk xalı qayda pozuntuları və evristik siqnalların ciddiliyinin cəmidir. Yalnız məlumat üçündür — nəticəyə avtomatik təsir etmir; qərarı müəllim/komissiya verir." context "exams.proctoring.teacher" %}</p>
+  {% if ps.timeline %}
+  <ol class="proctor-tl">
+    {% for row in ps.timeline %}
+    <li class="proctor-tl__item proctor-tl__item--{{ row.severity }}">
+      <time class="proctor-tl__time" datetime="{{ row.at|date:'c' }}">{{ row.at|date:"H:i:s" }}</time>
+      <span class="proctor-tl__label">{{ row.label }}</span>
+      <span class="proctor-tl__tags">
+        <span class="proctor-tl__src proctor-tl__src--{{ row.source }}">{% if row.source == "signal" %}{% trans "Siqnal" context "exams.proctoring.monitor" %}{% else %}{% trans "Qayda" context "exams.proctoring.monitor" %}{% endif %}</span>
+        <span class="proctor-tl__sev">{% proctor_severity_label row.severity %}</span>
+        {% if row.counts %}<span class="proctor-tl__counts">{% trans "pozuntu sayılır" context "exams.proctoring.monitor" %}</span>{% endif %}
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="proctor-summary__empty">{% trans "Hadisə qeydə alınmayıb." context "exams.proctoring.monitor" %}</p>
+  {% endif %}
+</details>
+{% endif %}

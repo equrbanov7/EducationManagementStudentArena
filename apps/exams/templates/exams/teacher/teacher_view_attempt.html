@@ -6,6 +6,7 @@
     {# Yeni CSS faylını qoşuruq #}
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_view_attempt.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_proctoring_summary.css' %}?v=20261001-proc">
 {% endblock %}
 
 {% block content %}
@@ -29,6 +30,8 @@
             {% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}
         </div>
     {% endif %}
+
+    {% include "exams/teacher/partials/_attempt_proctoring_summary.html" %}
 
     <div class="exam-summary-card shadow-sm">
         <div class="summary-item">

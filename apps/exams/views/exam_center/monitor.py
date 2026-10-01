@@ -73,8 +73,12 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
     _organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
     ticket = get_session_ticket_or_404(session, ticket_id)
 
+    from apps.exams.services.supervision.identity import student_identity
+    from apps.exams.services.supervision.monitor_enrich import attempt_proctor_detail
+
     if not ticket.attempt_id:
         # Hələ imtahana başlamayıb — kompüterdə tələbə var, amma iş yoxdur.
+        # Kimlik (şəkil/qrup) yenə göstərilir: nəzarətçi girişdə üzü yoxlasın.
         return JsonResponse(
             {
                 "has_attempt": False,
@@ -83,6 +87,7 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
                 "seat": ticket.seat_number,
                 "ticket_status": ticket.status,
                 "exam_title": ticket.exam.title,
+                "identity": student_identity(session.organization_id, ticket.student),
             }
         )
 
@@ -92,6 +97,8 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
     snapshot["ticket_status"] = ticket.status
     snapshot["exam_title"] = ticket.exam.title
     snapshot["session_id"] = session.pk
+    # 2026-10-01 (PROC): kimlik + risk xalı + vahid xronologiya + heartbeat.
+    snapshot["proctor"] = attempt_proctor_detail(ticket.attempt, session.organization_id)
     return JsonResponse(snapshot)
 
 
