@@ -11,12 +11,15 @@ Yoxlanır:
 """
 
 import importlib
+import json
+import re
 from unittest import mock
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from django.utils import translation
 
 from apps.accounts.models import ProfileRole
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
@@ -231,6 +234,22 @@ class RimMonitoringShellTests(_Base):
         self.assertContains(response, 'id="smx-i18n"')
         self.assertContains(response, "system_monitoring_summary.js")
         self.assertContains(response, "system_monitoring_ai.js")
+
+    def test_i18n_island_is_valid_json_in_every_language(self):
+        # 2026-10-02 prod: son elementdən sonrakı vergül JSON-u sındırırdı — JS bütün lüğəti atır,
+        # ekranda «whatToDo», «state_ok» kimi xam açarlar görünürdü.
+        for lang in ("az", "en", "ru", "tr"):
+            with translation.override(lang):
+                response = self.client_for(self.rim).get(
+                    reverse("accounts:profile") + "?section=system-monitoring", HTTP_ACCEPT_LANGUAGE=lang
+                )
+            match = re.search(
+                r'<script id="smx-i18n" type="application/json">(.*?)</script>', response.content.decode(), re.S
+            )
+            self.assertIsNotNone(match, lang)
+            strings = json.loads(match.group(1))
+            self.assertGreater(len(strings), 50, lang)
+            self.assertTrue(all(isinstance(v, str) and v for v in strings.values()), lang)
 
 
 class MonitoringPermissionCatalogueTests(TestCase):
