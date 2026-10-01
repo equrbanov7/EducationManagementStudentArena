@@ -246,7 +246,9 @@
                         {# Seq3: müəllimin GÖRDÜYÜ niyyət göndərilir — paralel tab double-flip etməsin. #}
                         {% if exam.is_active %}
                             <input type="hidden" name="desired_state" value="0">
-                            <button type="submit" class="action-btn warning-btn">
+                            {# EXAMQA R8 (2026-10-01): canlı imtahanda bir klik bütün tələbələrin yazısını bloklayırdı — təsdiq. #}
+                            {% trans "Deactivating stops the exam for everyone: students who are taking it right now will not be able to save or submit answers. Continue?" context "exams.template.teacher_exam_detail" as deactivate_confirm %}
+                            <button type="submit" class="action-btn warning-btn" data-ems-confirm="{{ deactivate_confirm }}">
                                 <i class="fas fa-pause-circle"></i> {% trans "action_deactivate" context "exams.template.teacher_exam_detail" %}
                             </button>
                         {% else %}
@@ -497,7 +499,7 @@
 <script src="{% static 'exams/js/question_form.js' %}?v=20260914-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20260914-2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261001-examqa"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260914-2"></script>

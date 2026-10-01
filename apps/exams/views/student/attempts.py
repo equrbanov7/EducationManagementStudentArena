@@ -83,6 +83,21 @@ def _finished_attempt_response(request, attempt, *, return_to):
     return redirect(redirect_url)
 
 
+def _supervision_locked_response(request, attempt, *, return_to):
+    message = pgettext(
+        "exams.view.access.message",
+        "İmtahanınız nəzarətçi tərəfindən dayandırılıb — kilid açılana qədər cavablar qəbul edilmir.",
+    )
+    if _is_ajax_request(request):
+        return JsonResponse({"success": False, "locked": True, "error": message}, status=423)
+    messages.error(request, message)
+    return redirect(
+        append_return_to(
+            reverse("exams:take_exam", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id}), return_to
+        )
+    )
+
+
 def _marked_question_ids_from_request(request, valid_question_ids):
     raw_payload = (request.POST.get("marked_question_ids") or "").strip()
     if not raw_payload:
@@ -211,6 +226,14 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         if attempt.is_finished:
             return _finished_attempt_response(request, attempt, return_to=return_to)
+
+        # EXAMQA 2026-10-01: nəzarət kilidi (pozuntu limiti və ya nəzarətçinin
+        # «dayandır»-ı) yalnız klient overlay-i idi — overlay-i DevTools ilə silən
+        # tələbə kilid altında cavab yaza / təhvil verə bilirdi. Kilidli cəhdə
+        # yazı qəbul olunmur (423); klient lokal draft-ı saxlayır və kilid
+        # açılandan (resumed) sonra növbəti autosave ilə göndərir.
+        if exam_supervision_enabled() and attempt.supervision_status == "locked":
+            return _supervision_locked_response(request, attempt, return_to=return_to)
 
         # EXAM-P1-06: autosave/finish optimistic concurrency — stale tab yazısı
         # 409 alır (helper-də; base_revision yoxdursa geriyə-uyğun).

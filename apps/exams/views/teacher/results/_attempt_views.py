@@ -392,7 +392,8 @@ def teacher_pending_attempts(request):
             checked_by_teacher=False,  # Hələ yoxlanmayıb
         )
         .exclude(exam__exam_type="test")  # Testləri çıxarırıq
-        .select_related("user", "exam")
+        # EXAMQA 2026-10-01: ad-görünürlüyü qərarı ``exam.organization``-a baxır (N+1).
+        .select_related("user", "exam", "exam__organization")
         .order_by("finished_at")
     )
 
