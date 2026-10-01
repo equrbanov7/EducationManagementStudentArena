@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}İmtahan zalı bayrağı düyməsi (sahib 2026-10-01) — «İmtahan zalı kimi qeyd et» /
+«İmtahan zallarından çıxar». Davranış: `exams/js/final_center/exam_hall_toggle.js`
+(AJAX + CSRF, `EMSConfirm` planlaşdırılmış oturumda, rədd → `EMSToast`). Düymə və
+onun ən yaxın `[data-hall-item]` kökü `data-hall="1|0"` daşıyır; nişanlar
+`[data-hall-badge]` / `[data-hall-badge-off]`, korpus sayğacı `[data-hall-count]`.
+Kontekst: `room`. Həm İmtahan Nəzarət Sistemində, həm kabinet bölməsində işlədilir.{% endcomment %}
+<button type="button"
+        class="ems-btn ems-btn--sm fxc-hall-toggle"
+        data-exam-hall-toggle
+        data-url="{% url 'exams:exam_center_room_exam_hall' room.pk %}"
+        data-hall="{{ room.is_exam_hall|yesno:'1,0' }}"
+        data-label-mark="{% trans 'İmtahan zalı kimi qeyd et' context 'exams.final_center.halls' %}"
+        data-label-unmark="{% trans 'İmtahan zallarından çıxar' context 'exams.final_center.halls' %}"
+        data-confirm-title="{% trans 'Zal imtahan zallarından çıxarılsın?' context 'exams.final_center.halls' %}"
+        data-confirm-ok="{% trans 'Bəli, çıxar' context 'exams.final_center.halls' %}"
+        data-error="{% trans 'Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin.' context 'exams.final_center.halls' %}"
+        title="{{ room.name }}">
+    <i class="fas {% if room.is_exam_hall %}fa-circle-minus{% else %}fa-circle-plus{% endif %}" aria-hidden="true" data-exam-hall-icon></i>
+    <span data-exam-hall-label>{% if room.is_exam_hall %}{% trans 'İmtahan zallarından çıxar' context 'exams.final_center.halls' %}{% else %}{% trans 'İmtahan zalı kimi qeyd et' context 'exams.final_center.halls' %}{% endif %}</span>
+    <span class="sr-only">— {{ room.name }}</span>
+</button>

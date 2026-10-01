@@ -451,3 +451,24 @@
         width: 100%;
     }
 }
+
+/* ── İmtahan zalı bayrağı (2026-10-01) ─────────────────────────────────────
+   Korpus qrupları/nişan/düymə üslubu ortaq `exams/css/final_center/exam_halls.css`-dədir;
+   burada yalnız cədvələ uyğunlaşma. */
+.sar-bld-list {
+    margin-top: var(--ems-sp-2, 8px);
+}
+
+.sar-cell-room__hall .ems-badge {
+    min-height: 0;
+    padding: 0 8px;
+    font-size: var(--ems-fs-xs);
+}
+
+.sar-bld-list .ems-rowactions {
+    flex-wrap: wrap;
+}
+
+.sar-bld-list .fxc-hall-toggle {
+    max-width: 220px;
+}

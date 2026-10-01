@@ -2,12 +2,13 @@
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Exists, OuterRef, Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.exams.models import Exam, ExamRoom
+from apps.exams.models import Exam, ExamRoom, ExamRoomSession
 from apps.exams.services.final_center import (
     build_final_report_workbook,
     filter_sessions,
@@ -46,7 +47,13 @@ def exam_center_reports(request):
         queryset = filter_tickets(organization, request.GET)
 
     page_obj = Paginator(queryset, 25).get_page(request.GET.get("page"))
-    rooms = ExamRoom.objects.filter(organization=organization).order_by("name")
+    # Süzgəc seçimləri: imtahan zalları + oturum tarixçəsi olan otaqlar (2026-10-01) —
+    # 150+ adi sinif otağı siyahını doldurmasın, keçmiş oturumların zalı isə itməsin.
+    rooms = (
+        ExamRoom.objects.filter(organization=organization)
+        .filter(Q(is_exam_hall=True) | Q(Exists(ExamRoomSession.objects.filter(room_id=OuterRef("pk")))))
+        .order_by("name")
+    )
     exams = (
         Exam.objects.filter(organization=organization, final_tickets__isnull=False)
         .distinct()

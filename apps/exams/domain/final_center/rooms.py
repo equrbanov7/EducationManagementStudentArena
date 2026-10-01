@@ -57,6 +57,19 @@ class ExamRoom(models.Model):
         default=True,
         verbose_name=pgettext_lazy("exams.model.exam_room.field", "is_active"),
     )
+    # İmtahan zalı bayrağı (sahib 2026-10-01): ``ExamRoom`` həm də təşkilatın
+    # YEGANƏ otaq reyestridir (jurnal dərs modalı, cədvəl — legacy 158+ otaq),
+    # ona görə «zal» = bu bayraq. İmtahan mərkəzinin zal siyahısı, zal idarəsi
+    # və hesabat süzgəci yalnız bayraqlıları (+ canlı oturumu olanları) göstərir;
+    # otaq reyestrini oxuyan başqa yerlər (jurnal, cədvəl) bayraqdan ASILI DEYİL.
+    # Defolt True — model tarixən «fiziki imtahan zalı»dır: «Yeni zal», demo
+    # seed-lər və mövcud testlər zal yaradır. Sinif otağı idxalı (legacy) False
+    # yazmalıdır; mövcud sətirlər 0070 miqrasiyası ilə təsnif olunur.
+    is_exam_hall = models.BooleanField(
+        default=True,
+        verbose_name=pgettext_lazy("exams.model.exam_room.field", "is_exam_hall"),
+        help_text=pgettext_lazy("exams.model.exam_room.help", "is_exam_hall"),
+    )
     # Zal səviyyəli nəzarətçilər: zala təyin olunan müəllim/mərkəz işçiləri
     # HƏMİN zaldakı BÜTÜN oturumları monitor edib idarə edə bilir (icazə
     # ``can_supervise_session`` içində zal→nəzarətçilər üzərindən yoxlanır).
@@ -88,6 +101,7 @@ class ExamRoom(models.Model):
         ]
         indexes = [
             models.Index(fields=["organization", "is_active", "name"], name="examroom_org_active_name_idx"),
+            models.Index(fields=["organization", "is_exam_hall"], name="examroom_org_hall_idx"),
         ]
 
     def __str__(self):

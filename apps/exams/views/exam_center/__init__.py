@@ -1,5 +1,6 @@
 """exam_center view paketi — FASAD (AGENTS §6 rol-qovluq konvensiyası)."""
 
+from .halls import exam_center_room_exam_hall
 from .monitor import (
     exam_center_session_cancel,
     exam_center_session_end,
@@ -54,6 +55,7 @@ __all__ = [
     "stats_teacher_search",
     "exam_center_reports",
     "exam_center_room_assign_invigilators",
+    "exam_center_room_exam_hall",
     "exam_center_room_list",
     "exam_center_room_monitor",
     "exam_center_room_end_all",

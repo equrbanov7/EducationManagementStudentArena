@@ -44,7 +44,8 @@ def exam_center_metrics(*, organization, window: Window, period=None) -> dict:
     )
 
     room_agg = (
-        ExamRoom.objects.filter(organization=organization, is_active=True)
+        # 2026-10-01: yalnız imtahan zalı kimi işarələnmiş otaqlar (ExamRoom həm də ümumi otaq siyahısıdır).
+        ExamRoom.objects.filter(organization=organization, is_active=True, is_exam_hall=True)
         .annotate(active_computer_count=Count("computers", filter=Q(computers__is_active=True)))
         .aggregate(rooms=Count("id"), capacity=Sum("capacity"), computers=Sum("active_computer_count"))
     )
@@ -84,7 +85,7 @@ def exam_center_metrics(*, organization, window: Window, period=None) -> dict:
         session_filter &= Q(sessions__scheduled_start__date__lte=window.date_to)
     session_count_kwargs = {"filter": session_filter} if session_filter else {}
     room_rows = list(
-        ExamRoom.objects.filter(organization=organization, is_active=True)
+        ExamRoom.objects.filter(organization=organization, is_active=True, is_exam_hall=True)
         .annotate(
             active_computers=Count("computers", filter=Q(computers__is_active=True), distinct=True),
             session_count=Count("sessions", distinct=True, **session_count_kwargs),

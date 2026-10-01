@@ -37,6 +37,7 @@ ortaq `sarComputerDialog`-u prefill ilə açır. Kontekst: `room`, `s`.{% endcom
             {% trans "Kompüterlər" context "accounts.superadmin_exam_rooms" %}
             <span class="sar-count">{{ room.computer_registered }}</span>
         </h3>
+        {% if room.is_exam_hall %}
         <div class="sar-subhead__actions">
             <button type="button" class="ems-btn ems-btn--sm"
                     data-tof-open="sarBulkDialog"
@@ -55,7 +56,13 @@ ortaq `sarComputerDialog`-u prefill ilə açır. Kontekst: `room`, `s`.{% endcom
                 {% trans "Kompüter əlavə et" context "accounts.superadmin_exam_rooms" %}
             </button>
         </div>
+        {% endif %}
     </div>
+    {% if not room.is_exam_hall %}
+    {% comment %}Kompüter qeydiyyatı yalnız imtahan zalları üçündür (final girişi qeydli
+    kompüterdən açılır) — adi otaqda «əlavə et» düymələri gizlənir (sahib 2026-10-01).{% endcomment %}
+    <p class="sar-room__notes"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Bu otaq imtahan zalı deyil — kompüter qeydiyyatı yalnız imtahan zalları üçündür. Əvvəlcə cədvəldə «İmtahan zalı kimi qeyd et» düyməsini vurun." context "exams.final_center.halls" %}</p>
+    {% endif %}
 
     {% if room.computer_rows %}
     <div class="ems-tablewrap sar-comptable">

@@ -18,7 +18,7 @@ import re
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.db.models import Count, Prefetch, Q, Sum
+from django.db.models import Case, Count, IntegerField, Prefetch, Q, Sum, Value, When
 from django.urls import reverse
 from django.utils.translation import pgettext
 
@@ -28,7 +28,8 @@ from core.search_text import tolerant_q
 _CTX = "accounts.superadmin_exam_rooms"
 _SECTION = "superadmin-exam-rooms"
 _LIVE_STATES = ("entry_open", "active")
-_PAGE_SIZE = 25
+#: «Yalnız imtahan zalları» — 25 sətir; «Hamısı» (bütün otaq reyestri) — daha böyük səhifə.
+_PAGE_SIZE = {"halls": 25, "all": 60}
 _CELL_DIR = "accounts/profile/sections/superadmin/exam_rooms/"
 
 #: Sütun sıralaması — açar ↔ `order_by` (ikinci açar sabit sıra üçündür).
@@ -48,7 +49,7 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
     if _SECTION not in allowed_sections or active_section != _SECTION:
         return
 
-    from apps.exams.public import ExamRoom, ExamRoomComputer
+    from apps.exams.public import ExamRoom, ExamRoomComputer, exam_hall_scope_q
     from apps.organizations.models import Organization
 
     # ── Hədəf təşkilat ─────────────────────────────────────────────────────
@@ -76,6 +77,7 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         "xr_q": filters["q"],
         "xr_status": filters["status"],
         "xr_building": filters["building"],
+        "xr_scope": filters["scope"] if filters["scope"] == "all" else "",
         "xr_sort": filters["sort"] if filters["sort"] != "name" else "",
     }
     query = {k: v for k, v in base_params.items() if v}
@@ -109,10 +111,14 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         return
 
     org_rooms = ExamRoom.objects.filter(organization=selected_org)
+    # Görünüş (sahib 2026-10-01): defolt YALNIZ imtahan zalları (+ canlı oturumlu
+    # otaq); «Hamısı» — bütün otaq reyestri (jurnal/cədvəl otaqları da buradadır).
+    scoped_rooms = org_rooms.filter(exam_hall_scope_q()) if filters["scope"] == "halls" else org_rooms
+    # Korpus seçimləri görünüşdən asılı deyil — «Göstər» dəyişəndə seçilmiş korpus itmir.
     buildings = _buildings(org_rooms)
 
     # ── Siyahı: filtr → sıralama → səhifə ─────────────────────────────────
-    queryset = org_rooms.annotate(computer_registered=Count("computers", distinct=True))
+    queryset = scoped_rooms.annotate(computer_registered=Count("computers", distinct=True))
     rooms_q = tolerant_q(filters["q"], ("name", "code"), compact=True)
     if rooms_q is not None:
         queryset = queryset.filter(rooms_q)
@@ -120,11 +126,16 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         queryset = queryset.filter(is_active=(filters["status"] == "active"))
     if filters["building"]:
         queryset = queryset.filter(building=filters["building"])
-    queryset = queryset.order_by(*_SORTS[filters["sort"]]).prefetch_related(
+    # Korpus qrupları: əvvəl korpus (boş korpus SONDA), qrup daxilində seçilmiş sıralama.
+    group_totals = _group_totals(queryset)
+    queryset = queryset.annotate(
+        _bld_empty=Case(When(building="", then=Value(1)), default=Value(0), output_field=IntegerField())
+    )
+    queryset = queryset.order_by("_bld_empty", "building", *_SORTS[filters["sort"]]).prefetch_related(
         Prefetch("computers", queryset=ExamRoomComputer.objects.order_by("seat_number", "label", "id")),
         "invigilators",
     )
-    page_obj = Paginator(queryset, _PAGE_SIZE).get_page(filters["page"] or 1)
+    page_obj = Paginator(queryset, _PAGE_SIZE[filters["scope"]]).get_page(filters["page"] or 1)
     rooms = list(page_obj.object_list)
 
     # Canlı oturum sayı ayrıca (yüngül) sorğudur — `computers` ilə eyni
@@ -138,12 +149,14 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         _decorate_room(room, live_by_room.get(room.pk, 0))
 
     is_filtered = bool(filters["q"] or filters["status"] or filters["building"])
+    section["scope"] = filters["scope"]
     section["rooms"] = rooms
     section["page_obj"] = page_obj
     section["pagination_query"] = urlencode(query)
     section["table_state"] = "ready" if rooms else "empty"
     section["columns"] = _columns(base_params, filters["sort"])
     section["table_rows"] = [_table_row(room) for room in rooms]
+    section["table_groups"] = _table_groups(section["table_rows"], group_totals)
     section["filter_fields"] = _filter_fields(filters, buildings)
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(n)d zal") % {"n": page_obj.paginator.count}
     section["kpi_tiles"] = _kpi_tiles(org_rooms, ExamRoomComputer.objects.filter(organization=selected_org))
@@ -155,6 +168,12 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         if is_filtered
         else pgettext(_CTX, "«Yeni zal» ilə ilk zalı yaradın; kompüterlər zalın çekmecəsindən əlavə olunur.")
     )
+    if filters["scope"] == "halls" and not is_filtered and not rooms and org_rooms.exists():
+        # Zal hələ yoxdur, amma otaq reyestri doludur → «Hamısı»-na yönəlt.
+        section["state_title"] = pgettext(_CTX, "Hələ imtahan zalı qeyd olunmayıb")
+        section["state_body"] = pgettext(
+            _CTX, "«Göstər: Hamısı» seçin və otağı «İmtahan zalı kimi qeyd et» düyməsi ilə zala çevirin."
+        )
     section["new_room_prefill"] = _prefill(
         action="create_room",
         room_id="",
@@ -166,6 +185,7 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
         computer_count="0",
         notes="",
         is_active="1",
+        is_exam_hall="1" if filters["scope"] == "halls" else "",
     )
     # Ortaq dialoqların gizli sahələri. `keep` olanlar prefill-dən kənardadır
     # (`data-tof-keep` — açılışda sıfırlanmır); `action`/`room_id`/`computer_id`
@@ -177,6 +197,8 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
     section["room_hidden"] = [
         {"name": "action", "value": "create_room"},
         {"name": "room_id", "value": ""},
+        # Dialoq «İmtahan zalı» checkbox-unu daşıyır → server onu oxuyur (yoxsa defolt).
+        {"name": "is_exam_hall_field", "value": "1", "keep": True},
         org_field,
         next_field,
     ]
@@ -218,6 +240,7 @@ def _read_filters(request):
     sort = (request.GET.get("xr_sort") or "").strip()
     status = (request.GET.get("xr_status") or "").strip()
     return {
+        "scope": "all" if (request.GET.get("xr_scope") or "").strip() == "all" else "halls",
         "q": (request.GET.get("xr_q") or "").strip()[:120],
         "status": status if status in ("active", "inactive") else "",
         "building": (request.GET.get("xr_building") or "").strip()[:120],
@@ -234,6 +257,36 @@ def _natural_key(value):
 def _buildings(org_rooms):
     values = {b for b in org_rooms.exclude(building="").order_by().values_list("building", flat=True) if b}
     return sorted(values, key=_natural_key)
+
+
+def _group_totals(queryset):
+    """Korpus → (otaq, imtahan zalı) sayları — SÜZÜLMÜŞ bütün siyahı üzrə (səhifə yox)."""
+    rows = (
+        queryset.order_by()
+        .values("building")
+        .annotate(rooms=Count("id", distinct=True), halls=Count("id", filter=Q(is_exam_hall=True), distinct=True))
+    )
+    return {(row["building"] or "").strip(): (row["rooms"], row["halls"]) for row in rows}
+
+
+def _table_groups(table_rows, totals):
+    """Səhifənin sətirlərini korpus qruplarına bölür (sətirlər artıq korpusa görə sıralıdır)."""
+    groups = []
+    for row in table_rows:
+        key = (row["room"].building or "").strip()
+        if not groups or groups[-1]["key"] != key:
+            rooms_total, halls_total = totals.get(key, (0, 0))
+            groups.append(
+                {
+                    "key": key,
+                    "label": key or pgettext(_CTX, "Korpus göstərilməyib"),
+                    "rows": [],
+                    "room_total": rooms_total,
+                    "hall_total": halls_total,
+                }
+            )
+        groups[-1]["rows"].append(row)
+    return groups
 
 
 def _prefill(**values):
@@ -263,6 +316,7 @@ def _decorate_room(room, live_count):
         computer_count=room.computer_count,
         notes=room.notes,
         is_active="1" if room.is_active else "",
+        is_exam_hall="1" if room.is_exam_hall else "",
     )
     room.computer_add_prefill = _prefill(
         action="add_computer",
@@ -352,6 +406,16 @@ def _filter_fields(filters, buildings):
     any_label = pgettext(_CTX, "Hamısı")
     fields = [
         {
+            "name": "xr_scope",
+            "label": pgettext(_CTX, "Göstər"),
+            "kind": "select",
+            "value": "all" if filters["scope"] == "all" else "",
+            "options": [
+                {"value": "", "label": pgettext(_CTX, "Yalnız imtahan zalları")},
+                {"value": "all", "label": pgettext(_CTX, "Hamısı (bütün otaqlar)")},
+            ],
+        },
+        {
             "name": "xr_q",
             "label": pgettext(_CTX, "Axtarış"),
             "kind": "search",
@@ -386,26 +450,39 @@ def _filter_fields(filters, buildings):
 
 
 def _kpi_tiles(org_rooms, org_computers):
-    """KPI-lar BÜTÜN təşkilat üzrədir (filtrdən asılı deyil) — iki aqreqat sorğu."""
+    """KPI-lar BÜTÜN təşkilat üzrədir (filtrdən asılı deyil) — iki aqreqat sorğu.
+
+    2026-10-01: zal rəqəmləri (say, aktiv, yer, plan) yalnız İMTAHAN ZALLARI
+    üzrədir; «cəmi otaq» qeyd kimi göstərilir. Birinci kartın `key`-i
+    (`exam-halls`) bayraq düyməsindən sonra JS-in dəyəri yeniləməsi üçündür.
+    """
     # Alias-lar model sahəsi ilə EYNİ ola bilməz (`capacity=Sum("capacity")` →
     # FieldError «'capacity' is an aggregate»).
+    hall = Q(is_exam_hall=True)
     rooms = org_rooms.aggregate(
         total=Count("id"),
-        active=Count("id", filter=Q(is_active=True)),
-        seats=Sum("capacity"),
-        active_seats=Sum("capacity", filter=Q(is_active=True)),
-        planned=Sum("computer_count"),
+        halls=Count("id", filter=hall),
+        active=Count("id", filter=hall & Q(is_active=True)),
+        seats=Sum("capacity", filter=hall),
+        active_seats=Sum("capacity", filter=hall & Q(is_active=True)),
+        planned=Sum("computer_count", filter=hall),
     )
     computers = org_computers.aggregate(
         total=Count("id"),
         with_ip=Count("id", filter=Q(ip_address__isnull=False)),
     )
     live_rooms = org_rooms.filter(sessions__state__in=_LIVE_STATES).distinct().count()
-    inactive = (rooms["total"] or 0) - (rooms["active"] or 0)
+    inactive = (rooms["halls"] or 0) - (rooms["active"] or 0)
     plan = rooms["planned"] or 0
     registered = computers["total"] or 0
     tiles = [
-        {"label": pgettext(_CTX, "Zal"), "value": rooms["total"] or 0, "tone": "primary"},
+        {
+            "label": pgettext(_CTX, "İmtahan zalı"),
+            "value": rooms["halls"] or 0,
+            "tone": "primary",
+            "key": "exam-halls",
+            "note": pgettext(_CTX, "cəmi otaq: %(n)d") % {"n": rooms["total"] or 0},
+        },
         {
             "label": pgettext(_CTX, "Aktiv zal"),
             "value": rooms["active"] or 0,

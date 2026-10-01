@@ -37,8 +37,9 @@ on:
           - exam_day_verify_login
           - exam_day_seed
           - legacy_expelled_access
+          - mark_exam_halls
       apply:
-        description: "exam_day_seed / legacy_expelled_access üçün: faktiki yaz (işarələnməsə dry-run)"
+        description: "exam_day_seed / legacy_expelled_access / mark_exam_halls üçün: faktiki yaz (işarələnməsə dry-run)"
         required: false
         type: boolean
         default: false
@@ -92,6 +93,21 @@ on:
         required: false
         type: string
         default: "LEGACY-XARIC-2026-09"
+      hall_building:
+        description: "mark_exam_halls: korpus (məs. B)"
+        required: false
+        type: string
+        default: "B"
+      hall_rooms:
+        description: "mark_exam_halls: vergüllə otaq nömrələri"
+        required: false
+        type: string
+        default: "03,28,38"
+      hall_unmark:
+        description: "mark_exam_halls: qeyd etmək əvəzinə zallardan çıxar"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: production-deploy
@@ -116,6 +132,9 @@ jobs:
       REPAIR_ACTOR: ${{ inputs.repair_actor }}
       REPAIR_ORDER: ${{ inputs.repair_order }}
       APPLY_FLAG: ${{ inputs.apply && 'yes' || 'no' }}
+      HALL_BUILDING: ${{ inputs.hall_building }}
+      HALL_ROOMS: ${{ inputs.hall_rooms }}
+      HALL_UNMARK: ${{ inputs.hall_unmark && 'yes' || 'no' }}
       TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
       - name: 📥 Checkout (skript mənbəyi)
@@ -129,7 +148,7 @@ jobs:
           case "$SCRIPT_NAME" in
             exam_day_probe|exam_day_probe2|exam_day_probe3|exam_day_seed|exam_day_import_questions|exam_day_verify_login) ;;
             exam_activity_probe|live_smoke_probe) ;;
-            legacy_expelled_access) ;;
+            legacy_expelled_access|mark_exam_halls) ;;
             *) echo "İcazəsiz skript: $SCRIPT_NAME" >&2; exit 1 ;;
           esac
 
@@ -170,4 +189,9 @@ jobs:
             -e SEED_WINDOW_DAYS="$WINDOW_DAYS" \
             -e MM_EXAM_TITLE="$MM_EXAM_TITLE" \
             -e EXAM_TEMP_PASSWORD="$TEMP_PASSWORD" \
+            -e HALLS_ORG="$ORG" \
+            -e HALLS_BUILDING="$HALL_BUILDING" \
+            -e HALLS_ROOMS="$HALL_ROOMS" \
+            -e HALLS_APPLY="$APPLY_FLAG" \
+            -e HALLS_UNMARK="$HALL_UNMARK" \
             --index 1 app python manage.py shell < "$payload"

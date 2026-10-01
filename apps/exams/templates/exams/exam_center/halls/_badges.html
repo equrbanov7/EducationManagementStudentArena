@@ -1,0 +1,9 @@
+{% load i18n %}
+{% comment %}Zal nişanları — bayraqlı otaqda «İmtahan zalı», bayraqsızda «Adi otaq».
+İkisi də DOM-dadır, JS (`exam_hall_toggle.js`) `hidden`-i dəyişir. Kontekst: `room`.{% endcomment %}
+<span class="ems-badge ems-badge--success fxc-hall-badge" data-hall-badge{% if not room.is_exam_hall %} hidden{% endif %}>
+    <i class="fas fa-clipboard-check" aria-hidden="true"></i> {% trans "İmtahan zalı" context "exams.final_center.halls" %}
+</span>
+<span class="ems-badge fxc-hall-badge fxc-hall-badge--off" data-hall-badge-off{% if room.is_exam_hall %} hidden{% endif %}>
+    {% trans "Adi otaq" context "exams.final_center.halls" %}
+</span>

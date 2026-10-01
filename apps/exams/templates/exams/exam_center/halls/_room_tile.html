@@ -1,0 +1,22 @@
+{% load i18n %}
+{% comment %}Yığcam otaq plitəsi («Hamısı» görünüşü, yalnız zal təyin edə bilənlər) — bütün
+otaqlar korpus qruplarında; plitədəki düymə otağı bir kliklə imtahan zalı kimi qeyd
+edir / zallardan çıxarır (sahib 2026-10-01). Kontekst: `room`.{% endcomment %}
+<li class="fxc-hall-tile" data-hall-item data-hall="{{ room.is_exam_hall|yesno:'1,0' }}">
+  <div class="fxc-hall-tile__head">
+    <span class="fxc-hall-tile__name">{{ room.name }}</span>
+    {% if room.live_session_count %}
+      <span class="fxc-pill fxc-pill--live"><span class="fxc-live-pulse" aria-hidden="true"></span> {{ room.live_session_count }} {% trans "canlı" %}</span>
+    {% elif not room.is_active %}
+      <span class="fxc-pill fxc-pill--muted">{% trans "Deaktiv" %}</span>
+    {% endif %}
+  </div>
+  <div class="fxc-hall-tile__meta">
+    <span title="{% trans 'Tutum' %}"><i class="fas fa-chair" aria-hidden="true"></i> {{ room.capacity }}</span>
+    <span title="{% trans 'Kompüter' %}"><i class="fas fa-desktop" aria-hidden="true"></i> {{ room.computer_count_real }}</span>
+    {% if room.floor %}<span title="{% trans 'Mərtəbə' context 'exams.final_center.halls' %}"><i class="fas fa-stairs" aria-hidden="true"></i> {{ room.floor }}</span>{% endif %}
+    <code class="fxc-hall-tile__code">{{ room.code }}</code>
+  </div>
+  <div class="fxc-hall-badges">{% include "exams/exam_center/halls/_badges.html" %}</div>
+  {% include "exams/exam_center/halls/_toggle.html" %}
+</li>

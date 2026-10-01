@@ -1,0 +1,198 @@
+/* =========================================================================
+   İmtahan zalları — korpus qrupları, yığcam otaq plitələri və zal bayrağı
+   düyməsi (sahib 2026-10-01). İşlədildiyi yerlər:
+   * İmtahan Nəzarət Sistemi → zallar (`exams/exam_center/room_list.html`);
+   * kabinet «İmtahan zalları» bölməsi (nişan + düymə, `superadmin_exam_rooms`).
+   Rənglər ems tokenlərindəndir (fallback ilə); 320–1440 px.
+   ========================================================================= */
+
+/* ── Korpus qrupları ───────────────────────────────────────────────────── */
+.fxc-bld-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6, 24px);
+}
+
+.fxc-bld__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-2, 8px) var(--ems-sp-3, 12px);
+    padding-bottom: var(--ems-sp-2, 8px);
+    margin-bottom: var(--ems-sp-3, 12px);
+    border-bottom: 1px solid var(--ems-border, #E2E8F0);
+}
+
+.fxc-bld__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-2, 8px);
+    margin: 0;
+    min-width: 0;
+    font-size: var(--ems-fs-lg, 1.05rem);
+    font-weight: 800;
+    color: var(--ems-fg, #0F172A);
+    overflow-wrap: anywhere;
+}
+
+.fxc-bld__title i {
+    color: var(--ems-primary, #2C5BFF);
+}
+
+.fxc-bld__counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2, 8px);
+}
+
+/* ── Yığcam otaq plitələri («Hamısı») ──────────────────────────────────── */
+.fxc-hall-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: var(--ems-sp-3, 12px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.fxc-hall-tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2, 8px);
+    min-width: 0;
+    padding: var(--ems-sp-3, 12px);
+    border: 1px solid var(--ems-border, #E2E8F0);
+    border-radius: var(--ems-r-lg, 12px);
+    background: var(--ems-bg, #fff);
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.fxc-hall-tile[data-hall="1"] {
+    border-color: var(--ems-success-bd, #86EFAC);
+    background: var(--ems-success-bg, #F0FDF4);
+}
+
+.fxc-hall-tile__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-2, 8px);
+}
+
+.fxc-hall-tile__name {
+    min-width: 0;
+    font-size: 1.02rem;
+    font-weight: 800;
+    color: var(--ems-fg, #0F172A);
+    overflow-wrap: anywhere;
+}
+
+.fxc-hall-tile__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: var(--ems-fs-sm, .82rem);
+    color: var(--ems-fg-muted, #64748B);
+}
+
+.fxc-hall-tile__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.fxc-hall-tile__code {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: .74rem;
+    color: var(--ems-fg-muted, #64748B);
+    background: transparent;
+    padding: 0;
+}
+
+.fxc-hall-tile .fxc-hall-toggle {
+    width: 100%;
+    justify-content: center;
+    margin-top: auto;
+}
+
+/* ── Nişanlar + düymə ──────────────────────────────────────────────────── */
+.fxc-hall-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.fxc-hall-badge[hidden] {
+    display: none;
+}
+
+.fxc-hall-badge--off {
+    color: var(--ems-fg-muted, #64748B);
+    border-color: var(--ems-border, #E2E8F0);
+    background: var(--ems-bg-subtle, #F8FAFC);
+}
+
+.fxc-hall-toggle {
+    white-space: normal;
+    text-align: center;
+}
+
+/* Bayraqlı otaqda düymə «çıxar» əməlidir — sakit, təhlükə tonlu kənar. */
+.fxc-hall-toggle[data-hall="1"] {
+    color: var(--ems-danger-700, #B91C1C);
+    border-color: var(--ems-danger-bd, #FECACA);
+    background: var(--ems-bg, #fff);
+}
+
+.fxc-hall-toggle[data-hall="1"]:hover:not(:disabled) {
+    background: var(--ems-danger-bg, #FEF2F2);
+}
+
+/* Bayraqsız otaqda düymə «qeyd et»dir — konturlu (yüzlərlə otaqlı siyahıda
+   hər plitədə dolu mavi düymə vizual səs-küy yaradırdı). */
+.fxc-hall-toggle[data-hall="0"] {
+    color: var(--ems-primary-700, #1D3FBF);
+    border-color: var(--ems-primary-200, #C7D2FE);
+    background: var(--ems-bg, #fff);
+}
+
+.fxc-hall-toggle[data-hall="0"]:hover:not(:disabled) {
+    color: #fff;
+    border-color: var(--ems-primary, #2C5BFF);
+    background: var(--ems-primary, #2C5BFF);
+}
+
+.fxc-hall-toggle[aria-busy="true"] {
+    cursor: progress;
+    opacity: .7;
+}
+
+/* Zal kartında: «Zala daxil ol» + bayraq düyməsi dar ekranda alt-alta düşür. */
+.fxc-room-card-actions {
+    flex-wrap: wrap;
+}
+
+.fxc-room-card .fxc-hall-toggle {
+    flex: 0 1 auto;
+}
+
+/* Kartdan çıxarılmış zal (səhifə yenilənənə qədər) — sakitləşdirilmiş görünüş. */
+.fxc-room-card[data-hall="0"] {
+    border-style: dashed;
+}
+
+@media (max-width: 560px) {
+    .fxc-hall-tiles {
+        grid-template-columns: 1fr;
+    }
+
+    .fxc-room-card .fxc-hall-toggle {
+        flex: 1 1 100%;
+        justify-content: center;
+    }
+}

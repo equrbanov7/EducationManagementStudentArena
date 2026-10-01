@@ -121,6 +121,10 @@ def _dispatch_action(request, action, organization):
         room = form.save(commit=False)
         room.organization = organization
         room.created_by = user
+        # Zal bayrağı (2026-10-01): dialoq checkbox-u daşıyırsa onu oxu, yoxsa model
+        # defoltu (zal). Mövcud otaqda bayraq yalnız AJAX düyməsi ilə dəyişir.
+        if request.POST.get("is_exam_hall_field") == "1":
+            room.is_exam_hall = request.POST.get("is_exam_hall") == "1"
         room.save()
         log_action(
             AuditAction.CREATE,
