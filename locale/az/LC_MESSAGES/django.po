@@ -88802,3 +88802,23 @@ msgid ""
 msgstr ""
 "Deaktiv etsəniz, imtahan hamı üçün dayanır: hazırda imtahan verən tələbələr "
 "cavablarını saxlaya və təhvil verə bilməyəcək. Davam edilsin?"
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam?"
+msgstr "İmtahana başlansın?"
+
+msgctxt "exams.start_confirm"
+msgid ""
+"When you start, an attempt is created and the timer begins. Start only when "
+"you are ready."
+msgstr ""
+"Başladığınız anda cəhd yaranır və vaxt hesablanmağa başlayır. Yalnız hazır "
+"olanda başlayın."
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam"
+msgstr "İmtahana başla"
+
+msgctxt "exams.start_confirm"
+msgid "Back"
+msgstr "Geri"
