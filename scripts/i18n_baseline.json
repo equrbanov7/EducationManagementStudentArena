@@ -7,16 +7,16 @@
    "missing_vs_source": 0,
    "raw_key_leak": 0,
    "source_missing": 0,
-   "total": 17171,
+   "total": 17490,
    "untranslated": 0
   },
   "en": {
    "bad_placeholder": 0,
    "extra_vs_source": 23,
-   "identity": 78,
+   "identity": 81,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 17194,
+   "total": 17513,
    "untranslated": 0
   },
   "ru": {
@@ -25,16 +25,16 @@
    "identity": 18,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 17194,
+   "total": 17513,
    "untranslated": 0
   },
   "tr": {
    "bad_placeholder": 0,
    "extra_vs_source": 1,
-   "identity": 261,
+   "identity": 276,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "total": 17172,
+   "total": 17491,
    "untranslated": 0
   }
  },
