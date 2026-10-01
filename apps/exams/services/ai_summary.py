@@ -22,6 +22,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import get_language, pgettext
 
+from core.ai_models import resolve_chain
 from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
 
 logger = logging.getLogger(__name__)
@@ -60,8 +61,8 @@ def _get_summary_model_chain() -> tuple[str, ...]:
     if cfg:
         primary = cfg.summary_model
         fallbacks = [m for m in ("gemini-2.5-flash", "gemini-2.5-flash-lite") if m != primary]
-        return (primary, *fallbacks)
-    return _DEFAULT_MODEL_CHAIN
+        return resolve_chain((primary, *fallbacks))
+    return resolve_chain(_DEFAULT_MODEL_CHAIN)
 
 
 def _is_ai_enabled() -> bool:

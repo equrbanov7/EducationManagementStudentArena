@@ -1,3 +1,9 @@
+/* system_monitoring_renderers.js — ətraflı (drill-down) tabların renderləri.
+ * 2026-10-01 redizayn: köhnə «İcmal» tabı «Ümumi vəziyyət» (`system_monitoring_summary.js`)
+ * ilə əvəz olundu; inline `style` atributları CSS class-larına çevrildi; filtr/səhifələmə
+ * select-ləri layihənin stilli komponentindədir (`format.selectMarkup`); insident əməlləri
+ * yalnız API `can_manage` verəndə (superadmin) görünür — RİM rəhbəri oxu-only görür.
+ */
 (function () {
     "use strict";
 
@@ -26,72 +32,10 @@
         var lineChart = context.lineChart;
         var rowsFrom = context.rowsFrom;
         var pager = context.pager;
+        var t = context.t || function (key) { return key; };
 
-        function renderOverview(data) {
-            var server = data.server || {};
-            var app = data.app || {};
-            var services = data.services || {};
-            var exams = data.exams || {};
-            var html = '<div class="smx-cards">';
-            html += card("CPU", percent(server.cpu_percent), statusClass(server.cpu_percent, 85, 95));
-            html += card("RAM", percent(server.memory_percent), statusClass(server.memory_percent, 85, 95));
-            html += card(gettext("Disk"), percent(server.disk_percent), statusClass(server.disk_percent, 80, 90));
-            html += card(gettext("Uptime"), escapeHtml(formatDuration(server.uptime_seconds)));
-            html += card(
-                gettext("Konteynerlər"),
-                number(data.containers_alive) + " <small>" + gettext("işlək") + "</small>"
-            );
-            html += card(gettext("Sorğu axını"), number(app.request_rate, 1) + " <small>req/s</small>");
-            html += card(
-                gettext("5xx nisbəti"),
-                percent(app.error_rate_percent),
-                statusClass(app.error_rate_percent, 2, 10)
-            );
-            html += card(
-                gettext("p95 gecikmə"),
-                app.p95_seconds == null ? "—" : (app.p95_seconds * 1000).toFixed(0) + " <small>ms</small>",
-                statusClass(app.p95_seconds, 2, 5)
-            );
-            ["postgres", "redis", "nginx"].forEach(function (service) {
-                var up = services[service + "_up"];
-                var title = service === "postgres" ? "PostgreSQL" : service[0].toUpperCase() + service.slice(1);
-                html += card(
-                    title,
-                    dot(up === 1) + (up === 1 ? gettext("işləyir") : up == null ? "—" : gettext("DAYANIB")),
-                    up === 1 ? "ok" : "crit"
-                );
-            });
-            var probesUp = services.endpoint_probes_up;
-            html += card(
-                gettext("Endpoint yoxlamaları"),
-                dot(probesUp === 1) + (probesUp === 1 ? gettext("işləyir") : probesUp == null ? "—" : gettext("PROBLEM")),
-                probesUp === 1 ? "ok" : probesUp == null ? "" : "crit"
-            );
-            html += card(
-                "Celery worker",
-                number(services.celery_workers),
-                (services.celery_workers || 0) > 0 ? "ok" : "crit"
-            );
-            html += card(
-                gettext("Son backup"),
-                escapeHtml(formatDuration(services.backup_age_seconds)) + " <small>" + gettext("əvvəl") + "</small>",
-                services.backup_age_seconds != null && services.backup_age_seconds > 93600 ? "crit" : "ok"
-            );
-            html += card(gettext("Aktiv imtahanlar"), number(exams.active_exams));
-            html += card(gettext("İmtahandakı tələbələr"), number(exams.students_in_exam));
-            html += card(
-                gettext("Açıq insidentlər"),
-                number(data.incidents_open),
-                (data.incidents_critical_open || 0) > 0 ? "crit" : (data.incidents_open || 0) > 0 ? "warn" : "ok"
-            );
-            html += card(gettext("Təhlükəsizlik (24s)"), number(data.security_events_24h)) + "</div>";
-            html += '<div class="smx-panel"><h4>' +
-                escapeHtml(gettext("Monitorinq hədəfləri (Prometheus job-ları)")) + "</h4><div>";
-            Object.keys(data.targets || {}).sort().forEach(function (job) {
-                html += '<span style="display:inline-block;margin:3px 14px 3px 0">' +
-                    dot(data.targets[job]) + escapeHtml(job) + "</span>";
-            });
-            body.innerHTML = html + "</div></div>";
+        function selectMarkup(attrs, options, current, label) {
+            return namespace.format.selectMarkup(attrs, options, current, label);
         }
 
         function renderServer(data) {
@@ -161,26 +105,26 @@
                     "<td>" + number(row.cpu_percent, 1) + "%</td>" +
                     "<td>" + formatBytes(row.memory_bytes) + "</td>" +
                     "<td>" + (row.memory_limit_bytes ? formatBytes(row.memory_limit_bytes) : "—") + "</td>" +
-                    '<td style="' + (row.restarts_24h > 3 ? "color:var(--smx-crit);font-weight:700" : "") + '">' +
+                    '<td class="' + (row.restarts_24h > 3 ? "smx-crit-text" : "") + '">' +
                     row.restarts_24h + "</td>" +
-                    '<td style="' + (row.oom_events > 0 ? "color:var(--smx-crit);font-weight:700" : "") + '">' +
+                    '<td class="' + (row.oom_events > 0 ? "smx-crit-text" : "") + '">' +
                     row.oom_events + "</td>" +
                     "<td>" + formatBytes(row.net_rx_bps) + "/s · " + formatBytes(row.net_tx_bps) + "/s</td>" +
-                    '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis">' +
+                    '<td class="smx-ellipsis">' +
                     escapeHtml(row.image) + "</td></tr>";
             });
             body.innerHTML = html + "</tbody></table></div>" + pager(data, rows.length);
         }
 
         function topTable(title, rows, unit) {
-            var html = '<div class="smx-panel" style="margin-top:12px"><h4>' + escapeHtml(title) + "</h4>";
+            var html = '<div class="smx-panel smx-panel--spaced"><h4>' + escapeHtml(title) + "</h4>";
             if (!rows || !rows.length) {
-                return html + '<div class="smx-empty" style="padding:12px">' +
+                return html + '<div class="smx-empty smx-empty--compact">' +
                     escapeHtml(gettext("Məlumat yoxdur")) + "</div></div>";
             }
             html += '<table class="smx-table"><tbody>';
             rows.forEach(function (row) {
-                html += "<tr><td>" + escapeHtml(row.path) + '</td><td style="text-align:right">' +
+                html += '<tr><td class="smx-wrap">' + escapeHtml(row.path) + '</td><td class="smx-num">' +
                     number(row.value, 3) + " " + unit + "</td></tr>";
             });
             return html + "</tbody></table></div>";
@@ -259,7 +203,7 @@
                 escapeHtml(formatDuration(summary.backup_age_seconds)),
                 summary.backup_age_seconds != null && summary.backup_age_seconds > 93600 ? "crit" : "ok"
             );
-            html += "</div><h4 style='margin:6px 0;color:var(--smx-navy)'>" +
+            html += '</div><h4 class="smx-subhead">' +
                 escapeHtml(gettext("PgBouncer (session mode — RLS üçün dəyişdirilmir)")) + "</h4>";
             html += '<div class="smx-cards">';
             html += card(gettext("Aktiv klientlər"), number(summary.pgbouncer_active_clients));
@@ -368,7 +312,7 @@
                     [gettext("Uğursuz PIN cəhdləri"), "smx-e-pin"],
                 ]);
             }
-            html += '<p style="color:#8a97a8;font-size:12px;margin-top:10px">' +
+            html += '<p class="smx-foot">' +
                 escapeHtml(gettext(
                     "Yalnız aqreqat statistika göstərilir — sual, cavab, PIN və şəxsi məlumat bu modulda YOXDUR."
                 )) + "</p>";
@@ -384,18 +328,14 @@
         function renderSecurity(data) {
             var state = states["security-events"];
             var rows = rowsFrom(data, "events");
-            var html = '<div class="smx-filter"><select id="smx-sec-type">' +
-                '<option value="">' + escapeHtml(gettext("Bütün hadisələr")) + "</option>" +
-                '<option value="login_failed"' + selected("login_failed", state.type) + ">" +
-                escapeHtml(gettext("Uğursuz giriş")) + "</option>" +
-                '<option value="login_brute_force"' + selected("login_brute_force", state.type) +
-                ">Brute-force</option>" +
-                '<option value="superadmin_login"' + selected("superadmin_login", state.type) + ">" +
-                escapeHtml(gettext("Superadmin girişi")) + "</option>" +
-                '<option value="superadmin_login_failed"' + selected("superadmin_login_failed", state.type) +
-                ">" + escapeHtml(gettext("Superadmin uğursuz girişi")) + "</option>" +
-                '<option value="unauthorized_monitoring"' + selected("unauthorized_monitoring", state.type) +
-                ">" + escapeHtml(gettext("İcazəsiz monitorinq")) + "</option></select></div>";
+            var html = '<div class="smx-filter">' + selectMarkup('id="smx-sec-type"', [
+                ["", gettext("Bütün hadisələr")],
+                ["login_failed", gettext("Uğursuz giriş")],
+                ["login_brute_force", "Brute-force"],
+                ["superadmin_login", gettext("Superadmin girişi")],
+                ["superadmin_login_failed", gettext("Superadmin uğursuz girişi")],
+                ["unauthorized_monitoring", gettext("İcazəsiz monitorinq")],
+            ], state.type, t("allEvents")) + "</div>";
             if (!rows.length) {
                 body.innerHTML = html + '<div class="smx-empty">' +
                     escapeHtml(gettext("Təhlükəsizlik hadisəsi yoxdur")) + "</div>";
@@ -411,7 +351,7 @@
                 html += "<tr><td>" + escapeHtml(new Date(row.last_seen).toLocaleString("az")) + "</td><td>" +
                     escapeHtml(row.event_type_display) + "</td><td>" + pill(row.severity, row.severity) + "</td><td>" +
                     escapeHtml(row.user || "—") + "</td><td>" + escapeHtml(row.ip || "—") + "</td><td>" + row.count +
-                    '</td><td style="white-space:normal">' + escapeHtml(row.message) + "</td></tr>";
+                    '</td><td class="smx-wrap">' + escapeHtml(row.message) + "</td></tr>";
             });
             body.innerHTML = html + "</tbody></table></div>" + pager(data, rows.length);
         }
@@ -420,17 +360,15 @@
             var state = states.logs;
             var rows = rowsFrom(data, "lines");
             var containers = data.containers || [];
-            var html = '<div class="smx-filter"><select id="smx-log-container">' +
-                '<option value="">' + escapeHtml(gettext("Bütün konteynerlər")) + "</option>" +
-                containers.map(function (name) {
-                    return '<option value="' + escapeHtml(name) + '"' + selected(name, state.container) + ">" +
-                        escapeHtml(name) + "</option>";
-                }).join("") + '</select><select id="smx-log-level"><option value="">' +
-                escapeHtml(gettext("Bütün səviyyələr")) + "</option>" +
-                '<option value="error"' + selected("error", state.level) + '>error</option>' +
-                '<option value="warning"' + selected("warning", state.level) + '>warning</option>' +
-                '<option value="critical"' + selected("critical", state.level) + '>critical</option></select>' +
-                '<input type="text" id="smx-log-q" placeholder="' +
+            var html = '<div class="smx-filter">' + selectMarkup(
+                'id="smx-log-container" data-live-search="true"',
+                [["", gettext("Bütün konteynerlər")]].concat(containers.map(function (name) { return [name, name]; })),
+                state.container,
+                gettext("Bütün konteynerlər")
+            ) + selectMarkup('id="smx-log-level"', [
+                ["", gettext("Bütün səviyyələr")], ["error", "error"], ["warning", "warning"], ["critical", "critical"],
+            ], state.level, gettext("Bütün səviyyələr")) +
+                '<input type="text" class="ems-input" id="smx-log-q" placeholder="' +
                 escapeHtml(gettext("Mətn axtarışı…")) + '" maxlength="120" value="' +
                 escapeHtml(state.q) + '"><button type="button" class="smx-btn" id="smx-log-go">' +
                 '<i class="fas fa-search"></i> ' + escapeHtml(gettext("Axtar")) + "</button></div>";
@@ -441,9 +379,9 @@
             }
             html += '<div class="smx-table-wrap"><table class="smx-table"><tbody>';
             rows.forEach(function (row) {
-                html += '<tr><td style="color:#8a97a8">' +
+                html += '<tr><td class="smx-muted">' +
                     escapeHtml(new Date(row.ts).toLocaleTimeString("az")) + "</td><td><b>" +
-                    escapeHtml(row.container) + '</b></td><td class="smx-log" style="white-space:normal">' +
+                    escapeHtml(row.container) + '</b></td><td class="smx-log">' +
                     escapeHtml(row.line) + "</td></tr>";
             });
             body.innerHTML = html + "</tbody></table></div>" + pager(data, rows.length);
@@ -465,7 +403,7 @@
                     pill(row.severity || "—", row.severity || "info") + "</td><td>" + escapeHtml(row.state) +
                     (row.silenced ? " " + pill(gettext("susdurulub"), "silenced") : "") + "</td><td>" +
                     escapeHtml(row.starts_at ? new Date(row.starts_at).toLocaleString("az") : "—") +
-                    '</td><td style="white-space:normal">' + escapeHtml(row.summary) + "</td></tr>";
+                    '</td><td class="smx-wrap">' + escapeHtml(row.summary) + "</td></tr>";
             });
             body.innerHTML = html + "</tbody></table></div>";
         }
@@ -473,15 +411,13 @@
         function renderIncidents(data) {
             var state = states.incidents;
             var rows = rowsFrom(data, "incidents");
-            var html = '<div class="smx-filter"><select id="smx-inc-status">' +
-                '<option value="open"' + selected("open", state.status) + ">" +
-                escapeHtml(gettext("Açıq olanlar")) + "</option>" +
-                '<option value=""' + selected("", state.status) + ">" +
-                escapeHtml(gettext("Hamısı")) + "</option>" +
-                '<option value="resolved"' + selected("resolved", state.status) + ">" +
-                escapeHtml(gettext("Həll olunub")) + "</option>" +
-                '<option value="silenced"' + selected("silenced", state.status) + ">" +
-                escapeHtml(gettext("Susdurulub")) + "</option></select></div>";
+            var canManage = data.can_manage === true;
+            var html = '<div class="smx-filter">' + selectMarkup('id="smx-inc-status"', [
+                ["open", gettext("Açıq olanlar")], ["", gettext("Hamısı")],
+                ["resolved", gettext("Həll olunub")], ["silenced", gettext("Susdurulub")],
+            ], state.status, gettext("Hamısı")) + "</div>" +
+                (canManage ? "" : '<p class="smx-readonly"><i class="fas fa-eye" aria-hidden="true"></i> ' +
+                    escapeHtml(t("readOnly")) + "</p>");
             if (!rows.length) {
                 body.innerHTML = html + '<div class="smx-empty">' + escapeHtml(gettext("İnsident yoxdur")) + "</div>";
                 return;
@@ -489,29 +425,29 @@
             html += '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
                 "<th>" + escapeHtml(gettext("Başlıq")) + "</th><th>" + escapeHtml(gettext("Önəm")) +
                 "</th><th>" + escapeHtml(gettext("Status")) + "</th><th>" + escapeHtml(gettext("Servis")) +
-                "</th><th>" + escapeHtml(gettext("Başlayıb")) + "</th><th>" + escapeHtml(gettext("Müddət")) +
-                "</th><th>" + escapeHtml(gettext("Əməliyyat")) + "</th></tr></thead><tbody>";
+                "</th><th>" + escapeHtml(gettext("Başlayıb")) + "</th><th>" + escapeHtml(gettext("Müddət")) + "</th>" +
+                (canManage ? "<th>" + escapeHtml(gettext("Əməliyyat")) + "</th>" : "") + "</tr></thead><tbody>";
             rows.forEach(function (row) {
-                var actions = row.status === "resolved" ? "" : '<span class="smx-actions">' +
-                    '<button data-inc="' + row.id + '" data-act="acknowledge">' +
+                var actions = !canManage || row.status === "resolved" ? "" : '<span class="smx-actions">' +
+                    '<button type="button" data-inc="' + row.id + '" data-act="acknowledge">' +
                     escapeHtml(gettext("Qəbul et")) + "</button>" +
-                    '<button data-inc="' + row.id + '" data-act="resolve">' +
+                    '<button type="button" data-inc="' + row.id + '" data-act="resolve">' +
                     escapeHtml(gettext("Həll olundu")) + "</button>" +
-                    '<button data-inc="' + row.id + '" data-act="silence">' +
+                    '<button type="button" data-inc="' + row.id + '" data-act="silence">' +
                     escapeHtml(gettext("Susdur")) + "</button></span>";
-                html += '<tr><td style="white-space:normal"><b>' + escapeHtml(row.title) + "</b>" +
-                    (row.resolution_note ? '<div style="color:#8a97a8;font-size:12px">' +
+                html += '<tr><td class="smx-wrap"><b>' + escapeHtml(row.title) + "</b>" +
+                    (row.resolution_note ? '<div class="smx-muted smx-small">' +
                         escapeHtml(row.resolution_note) + "</div>" : "") +
                     "</td><td>" + pill(row.severity, row.severity) + "</td><td>" +
                     pill(row.status, row.status) + "</td><td>" + escapeHtml(row.service || "—") + "</td><td>" +
                     escapeHtml(row.started_at ? new Date(row.started_at).toLocaleString("az") : "—") + "</td><td>" +
-                    escapeHtml(formatDuration(row.duration_seconds)) + "</td><td>" + actions + "</td></tr>";
+                    escapeHtml(formatDuration(row.duration_seconds)) + "</td>" +
+                    (canManage ? "<td>" + actions + "</td>" : "") + "</tr>";
             });
             body.innerHTML = html + "</tbody></table></div>" + pager(data, rows.length);
         }
 
         return {
-            overview: renderOverview,
             server: renderServer,
             containers: renderContainers,
             application: renderApplication,

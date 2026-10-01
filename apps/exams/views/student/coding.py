@@ -34,11 +34,26 @@ from apps.exams.services.coding_throttle import acquire_run_slot, release_run_sl
 from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, tenant_scoped_exams
 
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
+from ._supervision_lock import supervision_locked_json
 from .access_guard import ensure_active_attempt_access
 
 
 def _json_error(message, *, status=400, extra=None):
     return JsonResponse({"success": False, "error": message, **(extra or {})}, status=status)
+
+
+def _write_blocked_error(request, attempt):
+    """Autosave/run üçün: bitmiş cəhd → 409, nəzarət kilidi → 423 (EXAMQA R9), əks halda None."""
+    if attempt.is_finished or attempt.expire_if_write_window_closed():
+        return _json_error(
+            pgettext("exams.view.coding.error", "attempt_already_finished"),
+            status=409,
+            extra={
+                "finished": True,
+                "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
+            },
+        )
+    return supervision_locked_json(attempt)
 
 
 def _coding_disabled_error():
@@ -380,15 +395,8 @@ def coding_autosave(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    if attempt.is_finished or attempt.expire_if_write_window_closed():
-        return _json_error(
-            pgettext("exams.view.coding.error", "attempt_already_finished"),
-            status=409,
-            extra={
-                "finished": True,
-                "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
-            },
-        )
+    if (blocked := _write_blocked_error(request, attempt)) is not None:
+        return blocked
 
     coding_question, selected_language, payload, error = _build_submission_input(request, attempt)
     if error:
@@ -413,15 +421,8 @@ def coding_run(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
     attempt = _get_coding_attempt(request, slug, attempt_id)
-    if attempt.is_finished or attempt.expire_if_write_window_closed():
-        return _json_error(
-            pgettext("exams.view.coding.error", "attempt_already_finished"),
-            status=409,
-            extra={
-                "finished": True,
-                "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
-            },
-        )
+    if (blocked := _write_blocked_error(request, attempt)) is not None:
+        return blocked
 
     coding_question, selected_language, payload, error = _build_submission_input(request, attempt)
     if error:
@@ -505,7 +506,7 @@ def coding_submit(request, slug, attempt_id):
                     "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
                 }
             )
-        return _finalize_coding_submit(request, locked_attempt)
+        return supervision_locked_json(locked_attempt) or _finalize_coding_submit(request, locked_attempt)
 
 
 def _finalize_coding_submit(request, attempt):

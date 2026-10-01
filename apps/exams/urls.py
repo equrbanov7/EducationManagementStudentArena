@@ -43,6 +43,12 @@ urlpatterns = [
         views.exam_center_attempt_violations,
         name="exam_center_attempt_violations",
     ),
+    # İmtahan zalı bayrağı (qeyd et / çıxar) — AJAX, JSON (sahib 2026-10-01).
+    path(
+        "center/rooms/<int:room_id>/exam-hall/",
+        views.exam_center_room_exam_hall,
+        name="exam_center_room_exam_hall",
+    ),
     path("center/rooms/<int:room_id>/start-all/", views.exam_center_room_start_all, name="exam_center_room_start_all"),
     path("center/rooms/<int:room_id>/end-all/", views.exam_center_room_end_all, name="exam_center_room_end_all"),
     path("center/rooms/<int:room_id>/open-all/", views.exam_center_room_open_all, name="exam_center_room_open_all"),
@@ -415,6 +421,23 @@ urlpatterns = [
         "supervision/api/status/<int:attempt_id>/",
         views.supervision_status_api,
         name="supervision_status_api",
+    ),
+    # 2026-10-01 (PROC): evristik proktorinq siqnalları + skript heartbeat-i +
+    # nəzarətçi üçün icazəli tələbə şəkli (bax services/supervision/identity.py).
+    path(
+        "supervision/api/signal/<int:attempt_id>/",
+        views.log_signal_api,
+        name="supervision_log_signal",
+    ),
+    path(
+        "supervision/api/heartbeat/<int:attempt_id>/",
+        views.heartbeat_api,
+        name="supervision_heartbeat",
+    ),
+    path(
+        "supervision/photo/<int:user_id>/",
+        views.proctor_student_photo,
+        name="proctor_student_photo",
     ),
     # ✅ ƏN AXIRDA: Teacher exam detail (generic)
     path("<slug:slug>/", views.teacher_exam_detail, name="teacher_exam_detail"),

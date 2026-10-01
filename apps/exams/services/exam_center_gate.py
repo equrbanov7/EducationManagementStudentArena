@@ -68,6 +68,48 @@ def resolve_client_mac(request) -> str | None:
         return None
 
 
+# EXAMQA 2026-10-01: kanonik saxlanma formatı (``normalize_mac`` nəticəsi).
+_CANONICAL_MAC_REGEX = r"^[0-9A-F]{2}(:[0-9A-F]{2}){5}$"
+
+
+def _canonical_mac_or_none(raw) -> str | None:
+    from apps.exams.models import ExamRoomComputer
+
+    try:
+        return ExamRoomComputer.normalize_mac(raw)
+    except ValueError:
+        return None
+
+
+def _find_active_computer_by_mac(queryset, client_mac):
+    """Aktiv kompüter queryset-ində ``client_mac``-a (kanonik) uyğun sətir və ya None.
+
+    EXAMQA 2026-10-01: DB-də MAC formatı məcburi deyil (CHECK yoxdur) —
+    servis qatı (``room_admin``) normallaşdırır, amma skript/shell/SQL ilə
+    yazılmış köhnə sətirlər (``aa:bb:..``, ``AA-BB-..``) dəqiq müqayisədə
+    heç vaxt uyğun gəlmir və qeydli kompüterdəki tələbə «icazə yoxdur»
+    alırdı. Əvvəl indeksli dəqiq axtarış (normal yol, 1 sorğu); tapılmasa
+    YALNIZ qeyri-kanonik sətirlər Python-da normallaşdırılıb müqayisə olunur.
+    """
+    exact = queryset.filter(mac_address=client_mac).first()
+    if exact is not None:
+        return exact
+    for computer in queryset.exclude(mac_address__regex=_CANONICAL_MAC_REGEX):
+        if _canonical_mac_or_none(computer.mac_address) == client_mac:
+            return computer
+    return None
+
+
+def _log_unregistered_mac(where: str, request, client_mac: str) -> None:
+    """Qeydsiz MAC rəddi — İKT zalda «bu kompüterin MAC-ı nədir» sualını loqdan cavablasın."""
+    logger.warning(
+        "%s: MAC %s (IP %s) aktiv qeydli kompüterlərdə yoxdur — giriş rədd edildi.",
+        where,
+        client_mac,
+        get_client_ip(request),
+    )
+
+
 def get_client_ip(request) -> str:
     """Sorğunun müştəri IP-si (etibarlı proxy arxasında XFF-in SON üzvü).
 
@@ -133,14 +175,19 @@ def room_ip_access_allowed(request, room) -> bool:
       oxunmursa → ``False`` (fail-closed).
     """
     if mac_enforcement_active():
-        mac_values = set(room.computers.filter(is_active=True).values_list("mac_address", flat=True))
-        if not mac_values:
+        raw_values = list(room.computers.filter(is_active=True).values_list("mac_address", flat=True))
+        if not raw_values:
             return True
+        # Köhnə/xam formatda saxlanmış MAC-lar da kanonik formaya gətirilir.
+        mac_values = {_canonical_mac_or_none(value) for value in raw_values} - {None}
         client_mac = resolve_client_mac(request)
         if client_mac is None:
             logger.warning("room_access: müştəri MAC-ı tapılmadı — giriş rədd edildi.")
             return False
-        return client_mac in mac_values
+        if client_mac not in mac_values:
+            _log_unregistered_mac("room_access", request, client_mac)
+            return False
+        return True
 
     ip_values = [ip for ip in room.computers.filter(is_active=True).values_list("ip_address", flat=True) if ip]
     if not ip_values:
@@ -186,7 +233,10 @@ def org_computer_access_allowed(request, organization) -> bool:
             if client_mac is None:
                 logger.warning("org_computer_access: müştəri MAC-ı tapılmadı — giriş rədd edildi.")
                 return False
-            return qs.filter(mac_address=client_mac).exists()
+            if _find_active_computer_by_mac(qs, client_mac) is None:
+                _log_unregistered_mac("org_computer_access", request, client_mac)
+                return False
+            return True
         client_text = get_client_ip(request)
         try:
             client_ip = ipaddress.ip_address(client_text)
@@ -226,12 +276,14 @@ def resolve_room_computer(request, organization):
             logger.warning("resolve_room_computer: müştəri MAC-ı tapılmadı — kompüter uyğunlaşdırılmadı.")
             return None, None
         with bypass_rls():
-            comp = (
-                ExamRoomComputer.objects.filter(organization=organization, is_active=True, mac_address=client_mac)
-                .select_related("room")
-                .first()
+            comp = _find_active_computer_by_mac(
+                ExamRoomComputer.objects.filter(organization=organization, is_active=True).select_related("room"),
+                client_mac,
             )
-        return (comp.room, comp) if comp else (None, None)
+        if comp is None:
+            _log_unregistered_mac("resolve_room_computer", request, client_mac)
+            return None, None
+        return comp.room, comp
 
     client_text = get_client_ip(request)
     try:

@@ -149,7 +149,10 @@
                     toggleGroupMember(checkbox.checked);
                 });
                 row.addEventListener("click", function (event) {
-                    if (event.target === checkbox || event.target === label) {
+                    // EXAMQA 2026-10-01: label-in `for`-u yoxdur — ad mətninə klik
+                    // yalnız bu handler ilə işləyir (əvvəl label istisna edildiyindən
+                    // ada klik heç nə etmirdi). Yalnız checkbox-un öz kliki ötürülür.
+                    if (event.target === checkbox) {
                         return;
                     }
                     toggleGroupMember(!checkbox.checked);
@@ -212,7 +215,8 @@
                 toggle(checkbox.checked);
             });
             row.addEventListener("click", function (event) {
-                if (event.target === checkbox || event.target === label) {
+                // EXAMQA 2026-10-01: ada (label) klik də seçir — label `for`-suzdur.
+                if (event.target === checkbox) {
                     return;
                 }
                 checkbox.checked = !checkbox.checked;

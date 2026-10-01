@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/panel.css' %}?v=20260730-shared">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/room_list.css' %}?v=20260910-1">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/exam_halls.css' %}?v=20261001-1">
 {% endblock %}
 
 {% block content %}
@@ -21,7 +22,8 @@
     <div>
       <h1><i class="fas fa-tower-observation"></i> {% trans "İmtahan zalları" %}</h1>
       <p class="fxc-sub">
-        {% if can_manage %}{% trans "Zalı seçin — canlı imtahanları izləyin və idarə edin" %}
+        {% if can_designate and active_scope == "all" %}{% trans "Bütün otaqlar korpuslar üzrə — otağı bir kliklə imtahan zalı kimi qeyd edin və ya zallardan çıxarın" context "exams.final_center.halls" %}
+        {% elif can_manage %}{% trans "Zalı seçin — canlı imtahanları izləyin və idarə edin" %}
         {% else %}{% trans "Sizə təyin olunmuş zallar — daxil olub canlı nəzarəti başladın" %}{% endif %}
       </p>
     </div>
@@ -47,9 +49,9 @@
   {% comment %}KPI — canlı mənzərə (süzgəcdən asılı deyil, `live_scope` əhatəsi).{% endcomment %}
   <div class="ems-kpis ems-kpis--4 fxc-kpis">
     <div class="ems-kpi">
-      <div class="ems-kpi__label">{% trans "Zal" %}</div>
-      <div class="ems-kpi__value">{{ kpi_rooms }}</div>
-      <div class="ems-kpi__note">{% trans "sizə görünən" %}</div>
+      <div class="ems-kpi__label">{% trans "İmtahan zalı" context "exams.final_center.halls" %}</div>
+      <div class="ems-kpi__value" data-hall-kpi>{{ kpi_rooms }}</div>
+      <div class="ems-kpi__note">{% if kpi_org_rooms is not None %}{% blocktrans with n=kpi_org_rooms context "exams.final_center.halls" %}cəmi otaq: {{ n }}{% endblocktrans %}{% else %}{% trans "sizə görünən" %}{% endif %}</div>
     </div>
     <div class="ems-kpi{% if kpi_live_rooms %} ems-kpi--accent-success{% endif %}">
       <div class="ems-kpi__label">{% trans "Canlı zal" %}</div>
@@ -90,6 +92,28 @@
       </select>
       </div>
     </div>
+    {% if can_designate %}
+    <div class="ems-field">
+      <label class="ems-field__label" for="fxc-room-scope">{% trans "Göstər" context "exams.final_center.halls" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems fxc-toolbar-select">
+      <select name="scope" id="fxc-room-scope" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-fxc-autosubmit" data-bootstrap-select>
+        <option value="" {% if active_scope != 'all' %}selected{% endif %}>{% trans "Yalnız imtahan zalları" context "exams.final_center.halls" %}</option>
+        <option value="all" {% if active_scope == 'all' %}selected{% endif %}>{% trans "Hamısı (bütün otaqlar)" context "exams.final_center.halls" %}</option>
+      </select>
+      </div>
+    </div>
+    {% endif %}
+    {% if buildings %}
+    <div class="ems-field">
+      <label class="ems-field__label" for="fxc-room-building">{% trans "Korpus" context "exams.final_center.halls" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems fxc-toolbar-select">
+      <select name="building" id="fxc-room-building" class="ems-select bootstrap-single-select__native js-bootstrap-single-select js-fxc-autosubmit" data-bootstrap-select{% if buildings|length > 8 %} data-live-search="true"{% endif %}>
+        <option value="">{% trans "Bütün korpuslar" context "exams.final_center.halls" %}</option>
+        {% for b in buildings %}<option value="{{ b }}" {% if active_building == b %}selected{% endif %}>{{ b }}</option>{% endfor %}
+      </select>
+      </div>
+    </div>
+    {% endif %}
     <div class="ems-filters__actions">
       <button type="submit" class="ems-btn">{% trans "Axtar" %}</button>
       <a class="ems-btn" href="{% url 'exams:exam_center_room_list' %}">{% trans "Sıfırla" context "ui.filters" %}</a>
@@ -147,58 +171,48 @@
   </details>
   {% endif %}
 
+  {% comment %}Korpus qrupları (sahib 2026-10-01): «Yalnız imtahan zalları» — zal kartları;
+  «Hamısı» (yalnız zal təyin edə bilən) — bütün otaqlar yığcam plitələrlə, hər plitədə
+  «İmtahan zalı kimi qeyd et» / «İmtahan zallarından çıxar». Sayğaclar süzülmüş BÜTÜN
+  siyahıdandır (səhifədən yox). JS: `exam_hall_toggle.js`.{% endcomment %}
   {% if page_obj.object_list %}
-  <div class="fxc-room-grid">
-    {% for room in page_obj %}
-    <article class="fxc-room-card{% if room.live_session_count %} fxc-room-card--live{% endif %}">
-      <div class="fxc-room-card-head">
-        <div class="fxc-room-card-titles">
-          <h2 class="fxc-room-name"><i class="fas fa-door-open"></i> {{ room.name }}</h2>
-          <span class="fxc-room-code"><code>{{ room.code }}</code>{% if room.building %} · {{ room.building }}{% if room.floor %} / {{ room.floor }}{% endif %}{% endif %}</span>
+  <div class="fxc-bld-list">
+    {% for group in building_groups %}
+    <section class="fxc-bld" data-hall-group aria-labelledby="fxc-bld-{{ forloop.counter }}">
+      <header class="fxc-bld__head">
+        <h2 class="fxc-bld__title" id="fxc-bld-{{ forloop.counter }}"><i class="fas fa-building" aria-hidden="true"></i> {{ group.label }}</h2>
+        <div class="fxc-bld__counts">
+          {% if active_scope == "all" %}
+          <span class="ems-badge">{% trans "Otaq" context "exams.final_center.halls" %}: {{ group.room_total }}</span>
+          {% endif %}
+          <span class="ems-badge ems-badge--success">{% trans "İmtahan zalı" context "exams.final_center.halls" %}: <span data-hall-count>{{ group.hall_total }}</span></span>
         </div>
-        {% if room.live_session_count %}
-          <span class="fxc-pill fxc-pill--live"><span class="fxc-live-pulse" aria-hidden="true"></span> {{ room.live_session_count }} {% trans "canlı" %}</span>
-        {% elif room.is_active %}
-          <span class="fxc-pill fxc-pill--ok">{% trans "Aktiv" %}</span>
-        {% else %}
-          <span class="fxc-pill fxc-pill--muted">{% trans "Deaktiv" %}</span>
-        {% endif %}
+      </header>
+      {% if active_scope == "all" %}
+      <ul class="fxc-hall-tiles">
+        {% for room in group.rooms %}{% include "exams/exam_center/halls/_room_tile.html" %}{% endfor %}
+      </ul>
+      {% else %}
+      <div class="fxc-room-grid">
+        {% for room in group.rooms %}{% include "exams/exam_center/halls/_room_card.html" %}{% endfor %}
       </div>
-
-      <div class="fxc-room-stats">
-        <span title="{% trans 'Tutum' %}"><i class="fas fa-chair"></i> {{ room.capacity }} {% trans "yer" %}</span>
-        <span title="{% trans 'Kompüter' %}"><i class="fas fa-desktop"></i> {{ room.computer_count }} {% trans "kompüter" %}</span>
-        <span title="{% trans 'Ümumi oturum' %}"><i class="fas fa-calendar-days"></i> {{ room.session_count }} {% trans "oturum" %}</span>
-      </div>
-
-      <div class="fxc-room-exams">
-        {% if room.live_sessions %}
-          <span class="fxc-room-exams-label">{% trans "Zalda canlı oturum:" %}</span>
-          {% for s in room.live_sessions %}
-            <span class="fxc-room-exam-chip fxc-room-exam-chip--{{ s.state }}">{{ s.get_state_display }} · {{ s.scheduled_start|date:"H:i" }}</span>
-          {% endfor %}
-        {% else %}
-          <span class="fxc-room-exams-empty"><i class="far fa-clock"></i> {% trans "Hazırda canlı imtahan yoxdur" %}</span>
-        {% endif %}
-      </div>
-
-      <div class="fxc-room-card-actions">
-        <a href="{% url 'exams:exam_center_room_monitor' room_id=room.pk %}"
-           class="fxc-btn fxc-btn-sm {% if room.live_session_count %}fxc-btn-primary{% else %}fxc-btn-ghost{% endif %}">
-          <i class="fas fa-arrow-right-to-bracket"></i>
-          {% if room.live_session_count %}{% trans "Zala daxil ol — canlı" %}{% else %}{% trans "Zala daxil ol" %}{% endif %}
-        </a>
-      </div>
-    </article>
+      {% endif %}
+    </section>
     {% endfor %}
   </div>
-  {% include "partials/_pagination.html" with page_obj=page_obj %}
+  {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
   {% else %}
-  {% if search_query %}
+  {% if search_query or active_building %}
     {% trans "Axtarışa uyğun zal tapılmadı." as fxc_e1 %}
     {% trans "Axtarışı təmizlə" as fxc_e1a %}
     {% url 'exams:exam_center_room_list' as fxc_e1u %}
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-folder-open" state_title=fxc_e1 state_body="" state_action_label=fxc_e1a state_action_url=fxc_e1u %}
+  {% elif can_designate and active_scope != "all" %}
+    {% trans "Hələ imtahan zalı qeyd olunmayıb." context "exams.final_center.halls" as fxc_e5 %}
+    {% trans "«Hamısı» görünüşündə otağı imtahan zalı kimi qeyd edin." context "exams.final_center.halls" as fxc_e5b %}
+    {% trans "Bütün otaqları göstər" context "exams.final_center.halls" as fxc_e5a %}
+    {% url 'exams:exam_center_room_list' as fxc_e5u %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-door-closed" state_title=fxc_e5 state_body=fxc_e5b state_action_label=fxc_e5a state_action_url=fxc_e5u|add:"?scope=all" %}
   {% elif can_manage_rooms %}
     {% trans "Hələ zal yaradılmayıb." as fxc_e2 %}
     {% trans "Zallar superadmin bölməsində idarə olunur." as fxc_e2b %}
@@ -220,5 +234,6 @@
 
 {% block extraJs %}
     <script src="{% static 'exams/js/room_list.js' %}"></script>
+    <script src="{% static 'exams/js/final_center/exam_hall_toggle.js' %}?v=20261001-2" defer></script>
     <script src="{% static 'exams/js/final_center/panel_search.js' %}?v=20260926-search" defer></script>
 {% endblock %}

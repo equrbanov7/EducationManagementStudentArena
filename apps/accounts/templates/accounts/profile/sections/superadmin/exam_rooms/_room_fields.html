@@ -37,4 +37,10 @@ sahələri ilə birəbir. `is_active` checkbox-u «1» göndərir (BooleanField)
         <input type="checkbox" name="is_active" value="1">
         <span>{% trans "Aktiv" context "accounts.superadmin_exam_rooms" %}</span>
     </label>
+    {% comment %}Yalnız YENİ otaqda: zal bayrağı. Mövcud otaqda bayraq cədvəldəki düymə ilə
+    dəyişir (canlı oturum / kompüter qaydaları orada yoxlanır), redaktə onu toxunmur.{% endcomment %}
+    <label class="sar-check sar-formgrid__full" data-sar-create-only>
+        <input type="checkbox" name="is_exam_hall" value="1">
+        <span>{% trans "İmtahan zalı (imtahan mərkəzinin zal siyahısında görünür)" context "exams.final_center.halls" %}</span>
+    </label>
 </div>

@@ -2,59 +2,73 @@
 <section class="profile-section-panel profile-section--system-monitoring {% if active_section == 'system-monitoring' %}is-active{% endif %}"
          data-profile-section-panel="system-monitoring">
   <link rel="stylesheet"
-        href="{% static 'accounts/css/profile/sections/system_monitoring.css' %}?v=20260912-1">
+        href="{% static 'accounts/css/profile/sections/system_monitoring.css' %}?v=20261001-mon">
+  <link rel="stylesheet"
+        href="{% static 'accounts/css/profile/sections/system_monitoring_summary.css' %}?v=20261001-mon">
+  <link rel="stylesheet"
+        href="{% static 'accounts/css/profile/sections/system_monitoring_ai.css' %}?v=20261001-mon">
 
+  {% comment %}2026-10-01 (sahib): bölmə artıq superadmin-only DEYİL — `system.monitoring.view`
+  icazəsi olan üzv (RİM rəhbəri) də görür (qapı: `rbac_sections.can_view_monitoring` +
+  hər API-da `apps/monitoring/permissions.monitoring_view_required`). İlk tab «Ümumi
+  vəziyyət» (`summary/`) texniki olmayan oxucu üçün bir baxışda xülasədir; qalan tablar
+  ətraflı (drill-down) görünüşlərdir. İnsident əməlləri superadmin-only qalır — API
+  `can_manage` bayrağı verməsə düymələr render olunmur.
+
+  2026-09-12 (audit P2-1): «Sistem Monitorinqi» başlığı qabıqdan (`#profileSectionTitle`)
+  gəlir. ⚠️ Başlıq əməl yuvası `#smx-root` İÇİNDƏ qalmalıdır: `system_monitoring.js`
+  idarə elementlərini `scope.querySelector("#smx-…")` ilə yalnız kökün altında axtarır.{% endcomment %}
   <div class="smx" id="smx-root"
        data-api-base="/api/superadmin/monitoring/"
        data-csrf="{{ csrf_token }}">
-    {% comment %}2026-09-12 (audit P2-1): «Sistem Monitorinqi» başlığı qabıqdan
-    (`#profileSectionTitle`) gəlir — köhnə `<h2>` onu təkrarlayırdı. İzah
-    `ems_ui/_content_header.html` altbaşlığı, idarə paneli (aralıq / yenilə /
-    avto / vaxt) isə onun əməl yuvasıdır. ⚠️ Yuva `#smx-root` İÇİNDƏ qalmalıdır:
-    `system_monitoring.js` idarə elementlərini `scope.querySelector("#smx-…")`
-    ilə yalnız kökün altında axtarır.{% endcomment %}
-    {% trans "Server, infrastruktur, tətbiq və təhlükəsizlik — canlı vəziyyət" context "monitoring" as smx_subtitle %}
+    {% trans "Server, xidmətlər, xətalar, imtahan fəaliyyəti və təhlükəsizlik — canlı vəziyyət" context "monitoring.ui" as smx_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=smx_subtitle header_actions_include="accounts/profile/sections/superadmin/_system_monitoring_header_actions.html" %}
 
-
-    <div class="smx-tabs" role="tablist">
-      <button class="smx-tab active" data-tab="overview">{% trans "İcmal" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="server">{% trans "Server" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="containers">{% trans "Konteynerlər" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="application">{% trans "Tətbiq" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="database">{% trans "Baza" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="redis-celery">Redis · Celery</button>
-      <button class="smx-tab" data-tab="exams">{% trans "İmtahanlar" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="security-events">{% trans "Təhlükəsizlik" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="logs">{% trans "Loglar" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="alerts">{% trans "Alertlər" context "monitoring" %}</button>
-      <button class="smx-tab" data-tab="incidents">{% trans "İnsidentlər" context "monitoring" %}</button>
-    </div>
+    <nav class="smx-tabs" role="tablist" aria-label="{% trans 'Monitorinq bölmələri' context 'monitoring.ui' %}">
+      <button type="button" class="smx-tab active" role="tab" aria-controls="smx-body" aria-selected="true" data-tab="summary">
+        <i class="fas fa-gauge-high" aria-hidden="true"></i>{% trans "Ümumi vəziyyət" context "monitoring.ui" %}
+      </button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="server">{% trans "Server" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="containers">{% trans "Konteynerlər" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="application">{% trans "Tətbiq" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="database">{% trans "Baza" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="redis-celery">Redis · Celery</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="exams">{% trans "İmtahanlar" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="security-events">{% trans "Təhlükəsizlik" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="logs">{% trans "Loglar" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="alerts">{% trans "Alertlər" context "monitoring" %}</button>
+      <button type="button" class="smx-tab" role="tab" aria-controls="smx-body" aria-selected="false" data-tab="incidents">{% trans "İnsidentlər" context "monitoring" %}</button>
+    </nav>
 
     <div id="smx-degraded" class="smx-degraded" hidden>
-      <i class="fas fa-triangle-exclamation"></i>
+      <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
       <span id="smx-degraded-text"></span>
     </div>
-    <div id="smx-body" class="smx-body" aria-live="polite">
+    <div id="smx-body" class="smx-body" role="tabpanel">
       <div class="smx-cards" aria-hidden="true">
-        {% for i in "12345678" %}
+        {% for i in "123456" %}
         <div class="smx-card">
           <span class="skeleton skeleton-line skeleton-line--sm"></span>
-          <span class="skeleton skeleton-line skeleton-line--lg mt-2"></span>
+          <span class="skeleton skeleton-line skeleton-line--lg smx-skel-gap"></span>
         </div>
         {% endfor %}
       </div>
     </div>
   </div>
 
-  {% comment %}2026-09-21 bölgüsü (modul ölçü büdcəsi): saf format köməkçiləri
-  ayrı faylda; sıra format → renderers → əsas (hamısı defer, sıra fail-soft:
-  əsas fayl `namespace.format`/`createRenderers` olmadan boot etmir, sonrakı
-  fayl `bootPending()`-i özü çağırır).{% endcomment %}
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_format.js' %}?v=20260921-split"
+  {% include "accounts/profile/sections/superadmin/_system_monitoring_i18n.html" %}
+
+  {% comment %}Yükləmə sırası: format → renderers → summary → ai → əsas (hamısı defer;
+  sıra fail-soft: əsas fayl `namespace.format`/`createRenderers` olmadan boot etmir,
+  sonrakı fayllar `bootPending()`-i özü çağırır). Hamısı xarici fayldır (CSP).{% endcomment %}
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_format.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20260921-split"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20260921-split"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_summary.js' %}?v=20261001-mon"
+          nonce="{{ request.csp_nonce }}"></script>
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_ai.js' %}?v=20261001-mon"
+          nonce="{{ request.csp_nonce }}"></script>
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
 </section>

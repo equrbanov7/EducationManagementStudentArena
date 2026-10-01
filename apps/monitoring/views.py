@@ -1,4 +1,10 @@
-"""Sistem Monitorinqi API-ları — hamısı superadmin-only (permissions.py).
+"""Sistem Monitorinqi API-ları (permissions.py).
+
+OXU endpoint-ləri ``monitoring_view_required`` ilə qapılıdır: superadmin VƏ YA
+``system.monitoring.view`` icazəli üzv (RİM rəhbəri, 2026-10-01). İcazəli üzv
+tenant sətirlərində (təhlükəsizlik hadisələri, imtahan sayları) yalnız ÖZ
+təşkilatını + org-suz sətirləri görür; insident ƏMƏLLƏRİ superadmin-only qalır.
+Log sətirləri UI-a getməzdən əvvəl ``scrub.redact_secrets``-dən keçir.
 
 Frontend yalnız bu endpoint-lərə müraciət edir; Prometheus/Loki/Alertmanager
 heç vaxt birbaşa açılmır. Asılılıq əlçatmazdırsa cavab ``status="degraded"``
@@ -13,6 +19,7 @@ import logging
 import time
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -22,9 +29,22 @@ from . import queries
 from .clients import LOKI_MAX_LINES, AlertmanagerClient, LokiClient, PrometheusClient, degraded
 from .models import Incident, IncidentStatus, SecurityEvent
 from .pagination import clamp_page, paginated_data, parse_pagination
-from .permissions import superadmin_monitoring_required
+from .permissions import monitoring_view_required, superadmin_monitoring_required
+from .scrub import redact_secrets
 
 logger = logging.getLogger(__name__)
+
+
+def _scope(request):
+    return getattr(request, "monitoring_scope", None)
+
+
+def _org_filter(request, field: str = "organization_id") -> Q:
+    """İcazəli üzv üçün: öz təşkilatı + org-suz sətirlər; superadmin üçün filtr yoxdur."""
+    scope = _scope(request)
+    if scope is None or scope.platform:
+        return Q()
+    return Q(**{f"{field}__isnull": True}) | Q(**{field: scope.organization_id})
 
 
 def _range_seconds(request) -> int:
@@ -35,7 +55,7 @@ def _range_seconds(request) -> int:
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def overview_api(request):
     prom = PrometheusClient()
     targets = prom.query("up")
@@ -84,59 +104,66 @@ def overview_api(request):
         "incidents_critical_open": Incident.objects.filter(severity="critical")
         .exclude(status=IncidentStatus.RESOLVED)
         .count(),
-        "security_events_24h": SecurityEvent.objects.filter(
-            last_seen_at__gte=timezone.now() - timezone.timedelta(hours=24)
-        ).count(),
     }
     from apps.exams.models import Exam, ExamAttempt
 
     now = timezone.now()
+    scope = _scope(request)
+    exam_q = Q() if scope is None or scope.platform else Q(organization_id=scope.organization_id)
+    attempt_q = Q() if scope is None or scope.platform else Q(exam__organization_id=scope.organization_id)
+    data["security_events_24h"] = SecurityEvent.objects.filter(
+        _org_filter(request), last_seen_at__gte=now - timezone.timedelta(hours=24)
+    ).count()
     data["exams"] = {
-        "active_exams": Exam.objects.filter(is_deleted=False, start_datetime__lte=now, end_datetime__gte=now).count(),
-        "students_in_exam": ExamAttempt.objects.filter(status="in_progress").count(),
+        "active_exams": Exam.objects.filter(
+            exam_q, is_deleted=False, start_datetime__lte=now, end_datetime__gte=now
+        ).count(),
+        "students_in_exam": ExamAttempt.objects.filter(attempt_q, status="in_progress").count(),
     }
     return JsonResponse({"status": "ok", "data": data})
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def server_api(request):
     return JsonResponse(queries.server_section(_range_seconds(request)))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def containers_api(request):
     page, page_size = parse_pagination(request.GET)
     return JsonResponse(queries.containers_section(page=page, page_size=page_size))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def application_api(request):
     return JsonResponse(queries.application_section(_range_seconds(request)))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def database_api(request):
     return JsonResponse(queries.database_section(_range_seconds(request)))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def redis_celery_api(request):
     return JsonResponse(queries.redis_celery_section(_range_seconds(request)))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def exams_api(request):
-    return JsonResponse(queries.exams_section(_range_seconds(request)))
+    scope = _scope(request)
+    organization_id = None if scope is None or scope.platform else scope.organization_id
+    return JsonResponse(queries.exams_section(_range_seconds(request), organization_id=organization_id))
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def alerts_api(request):
     client = AlertmanagerClient()
     alerts = client.alerts()
@@ -152,14 +179,14 @@ def alerts_api(request):
                 "state": (alert.get("status") or {}).get("state", ""),
                 "silenced": bool((alert.get("status") or {}).get("silencedBy")),
                 "starts_at": alert.get("startsAt", ""),
-                "summary": (alert.get("annotations") or {}).get("summary", ""),
+                "summary": redact_secrets((alert.get("annotations") or {}).get("summary", "")),
             }
         )
     return JsonResponse({"status": "ok", "data": {"alerts": rows}})
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def logs_api(request):
     """Loki log axtarışı: servis + severity + mətn filtri, sərt limitlərlə."""
     container = (request.GET.get("container") or "").strip()[:80]
@@ -214,7 +241,7 @@ def logs_api(request):
                     "_ts_ns": ts_ns,
                     "ts": ts_ns // 1_000_000,  # ms
                     "container": labels.get("container", ""),
-                    "line": line[:1000],
+                    "line": redact_secrets(line[:1000]),
                 }
             )
     lines.sort(key=lambda row: (row["_ts_ns"], row["container"], row["line"]), reverse=True)
@@ -248,9 +275,11 @@ def logs_api(request):
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def incidents_api(request):
     status_filter = request.GET.get("status", "")
+    scope = _scope(request)
+    can_manage = bool(scope is None or scope.can_manage)
     qs = Incident.objects.all()
     if status_filter == "open":
         qs = qs.exclude(status=IncidentStatus.RESOLVED)
@@ -271,7 +300,7 @@ def incidents_api(request):
             "started_at": incident.started_at.isoformat() if incident.started_at else None,
             "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None,
             "duration_seconds": incident.duration_seconds,
-            "assigned_to": getattr(incident.assigned_to, "username", None),
+            "assigned_to": getattr(incident.assigned_to, "username", None) if can_manage else None,
             "resolution_note": incident.resolution_note,
         }
         for incident in qs.select_related("assigned_to")[(page - 1) * page_size : page * page_size]
@@ -282,6 +311,7 @@ def incidents_api(request):
         total=total,
         page=page,
         page_size=page_size,
+        extra={"can_manage": can_manage},
     )
     return JsonResponse({"status": "ok", "data": data})
 
@@ -303,9 +333,9 @@ def incident_action_api(request, incident_id: int):
 
 
 @require_GET
-@superadmin_monitoring_required
+@monitoring_view_required
 def security_events_api(request):
-    qs = SecurityEvent.objects.select_related("user", "incident")
+    qs = SecurityEvent.objects.select_related("user", "incident").filter(_org_filter(request))
     event_type = request.GET.get("type", "")
     if event_type:
         qs = qs.filter(event_type=event_type)

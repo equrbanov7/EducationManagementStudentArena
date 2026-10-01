@@ -6,19 +6,31 @@ bölməsində idarə olunur. Burada nəzarətçi/mərkəz yalnız zalları gör�
 zal monitoruna («Zala daxil ol») keçir.
 """
 
+from urllib.parse import urlencode
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import render
+from django.utils.translation import pgettext
 
 from apps.exams.models import ExamAttempt, ExamRoom, ExamRoomSession, FinalExamTicket
 from apps.exams.services.access_policy import can_manage_exam_rooms
 from apps.exams.services.final_center import can_manage_final_center, sessions_visible_to
+from apps.exams.services.final_center.halls import (
+    can_designate_exam_halls,
+    exam_hall_scope_q,
+    group_by_building,
+    natural_key,
+    room_sort_key,
+)
 from core.search_text import tolerant_q
 
 from ._shared import supervisor_org_or_403
 
 _LIVE_STATES = ("entry_open", "active")
+#: Səhifə ölçüsü: zal kartları (ağır) / «Hamısı» plitələri (yığcam — bütün korpuslar bir səhifədə).
+_PAGE_SIZE = {"halls": 24, "all": 400}
 
 
 def _live_exam_rows(room_scope):
@@ -77,10 +89,17 @@ def exam_center_room_list(request):
     görür. Hər zal kartı zaldakı canlı imtahanları (fənləri) çip kimi göstərir;
     "Zala daxil ol" ilə həmin zalın aqreqasiya monitoruna keçilir (start/nəzarət
     orada). Zal yaratma/redaktə burada YOXDUR — superadmin idarə edir.
+
+    2026-10-01 (sahib): siyahı YALNIZ imtahan zallarıdır (``is_exam_hall`` +
+    canlı oturumu olan otaq), korpuslar üzrə qruplaşdırılır. Zal təyin edə
+    bilən (``can_designate_exam_halls``) «Hamısı» görünüşündə BÜTÜN otaqları
+    görür və otağı bir kliklə zal kimi qeyd edir / zallardan çıxarır.
     """
     organization = supervisor_org_or_403(request)
     can_manage = can_manage_final_center(request.user)
     can_manage_rooms = can_manage_exam_rooms(request.user)
+    can_designate = can_designate_exam_halls(request.user)
+    scope = "all" if (can_designate and request.GET.get("scope") == "all") else "halls"
 
     # Kartda "bu zalda canlı oturum" çiplərini göstərmək üçün canlı oturumları
     # prefetch edirik (N+1 yox). Oturum imtahandan asılı deyil (zal oturumu).
@@ -101,7 +120,6 @@ def exam_center_room_list(request):
             computer_count_real=Count("computers", distinct=True),
         )
         .prefetch_related(live_prefetch)
-        .order_by("name", "id")
     )
 
     # Nəzarətçi (idarəçi deyil) YALNIZ özünə aid zalları görür: zala təyin
@@ -115,6 +133,8 @@ def exam_center_room_list(request):
             )
         ) | set(request.user.invigilated_rooms.filter(organization=organization).values_list("pk", flat=True))
         rooms = rooms.filter(pk__in=visible_room_ids)
+    if scope == "halls":
+        rooms = rooms.filter(exam_hall_scope_q())
 
     query = (request.GET.get("q") or "").strip()
     # Otaq adı/kodu — ayırıcıya dözümlü («101a» → «101-A»), korpus — adi (sahib 2026-09-26).
@@ -131,6 +151,13 @@ def exam_center_room_list(request):
     elif status == "inactive":
         rooms = rooms.filter(is_active=False)
 
+    # Korpus seçimi — seçimlər korpus süzgəcindən ƏVVƏLKİ siyahıdandır.
+    room_rows = sorted(rooms, key=room_sort_key)
+    buildings = sorted({(room.building or "").strip() for room in room_rows} - {""}, key=natural_key)
+    building = (request.GET.get("building") or "").strip()[:120]
+    if building:
+        room_rows = [room for room in room_rows if (room.building or "").strip() == building]
+
     # "Hazırda gedən imtahanlar" bölməsi — axtarış/status filtrindən ASILI DEYİL
     # (filtr zal kartlarını süzür, canlı mənzərə isə tam qalmalıdır).
     live_scope = ExamRoom.objects.filter(organization=organization)
@@ -139,23 +166,48 @@ def exam_center_room_list(request):
     live_exams = _live_exam_rows(live_scope)
 
     # KPI — səhifənin başındakı rəqəmlər. Süzgəcdən ASILI DEYİL (canlı mənzərə
-    # ilə eyni əhatə): iki ucuz aqreqat sorğu.
-    kpi_rooms = live_scope.count()
+    # ilə eyni əhatə): ucuz aqreqat sorğular. «Zal» = imtahan zalı əhatəsi.
+    kpi_rooms = live_scope.filter(is_exam_hall=True).count()
     kpi_live_rooms = live_scope.filter(sessions__state__in=_LIVE_STATES).distinct().count()
 
-    page_obj = Paginator(rooms, 20).get_page(request.GET.get("page"))
+    # «Hamısı» görünüşü yığcam plitələrdir — bir səhifədə bütün korpuslar.
+    page_obj = Paginator(room_rows, _PAGE_SIZE[scope]).get_page(request.GET.get("page"))
+    pagination_query = urlencode(
+        {
+            key: value
+            for key, value in (
+                ("q", query),
+                ("status", status),
+                ("scope", scope if scope == "all" else ""),
+                ("building", building),
+            )
+            if value
+        }
+    )
+    building_groups = group_by_building(
+        page_obj.object_list,
+        room_rows,
+        empty_label=pgettext("exams.final_center.halls", "Korpus göstərilməyib"),
+    )
     return render(
         request,
         "exams/exam_center/room_list.html",
         {
             "page_obj": page_obj,
+            "pagination_query": pagination_query,
+            "building_groups": building_groups,
             "live_exams": live_exams,
             "search_query": query,
             "active_status": status,
+            "active_scope": scope,
+            "active_building": building,
+            "buildings": buildings,
             "organization": organization,
             "can_manage": can_manage,
             "can_manage_rooms": can_manage_rooms,
+            "can_designate": can_designate,
             "kpi_rooms": kpi_rooms,
+            "kpi_org_rooms": live_scope.count() if can_designate else None,
             "kpi_live_rooms": kpi_live_rooms,
             "kpi_live_exams": len(live_exams),
             "kpi_live_students": sum(row["students"] for row in live_exams),

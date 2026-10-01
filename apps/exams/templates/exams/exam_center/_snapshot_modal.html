@@ -17,6 +17,8 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
       </span>
     </h2>
     <p class="fxc-snapshot-subject" id="fxc-snapshot-subject"></p>
+    {# 2026-10-01 (PROC): tələbənin şəkli/adı/qrupu — nəzarətçi üzü yoxlasın (proctor_identity.js). #}
+    <div class="fxc-snapshot-identity" id="fxc-snapshot-identity" hidden></div>
     <div class="fxc-snapshot-meta" id="fxc-snapshot-meta"></div>
     <div class="fxc-snapshot-actions" id="fxc-snapshot-actions" hidden>
       <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-success" data-snap-action="resume" hidden>
@@ -51,6 +53,7 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
         <div class="fxc-snap-q"><span class="skeleton skeleton-line skeleton-line--w65"></span></div>
       </div>
     </div>
+    <div class="fxc-snapshot-timeline" id="fxc-snapshot-timeline" hidden></div>
     <div class="fxc-actions">
       <button type="button" class="fxc-btn fxc-btn-ghost" id="fxc-snapshot-refresh">
         <i class="fas fa-rotate"></i> {% trans "Yenilə" %}

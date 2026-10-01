@@ -14,6 +14,7 @@ from apps.exams.services.ai_summary import (
     check_user_ai_rate_limit,
     get_user_ai_quota_info,
 )
+from core.ai_models import resolve_chain
 from core.rate_limit import record_rate_limit_hit
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,8 @@ def _question_model_chain() -> tuple[str, ...]:
     configured = (getattr(settings, "AI_QUESTION_MODEL", "") or "").strip()
     if configured:
         fallbacks = [model for model in _DEFAULT_MODEL_CHAIN if model != configured]
-        return (configured, *fallbacks)
-    return _DEFAULT_MODEL_CHAIN
+        return resolve_chain((configured, *fallbacks))
+    return resolve_chain(_DEFAULT_MODEL_CHAIN)
 
 
 def _language_name(code: str) -> str:

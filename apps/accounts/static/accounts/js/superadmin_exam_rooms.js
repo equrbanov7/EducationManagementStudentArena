@@ -64,6 +64,11 @@
         for (var i = 0; i < editOnly.length; i += 1) {
             editOnly[i].hidden = !editing;
         }
+        // Tərsi: «İmtahan zalı» bayrağı YALNIZ yeni otaqda (mövcudda cədvəl düyməsi).
+        var createOnly = dialog.querySelectorAll("[data-sar-create-only]");
+        for (var j = 0; j < createOnly.length; j += 1) {
+            createOnly[j].hidden = editing;
+        }
         // Təsdiq düyməsi: «Əlavə et» / «Zalı yarat» ↔ defolt «Yadda saxla».
         var submit = dialog.querySelector('.ems-dialog__foot [type="submit"]');
         if (submit) {

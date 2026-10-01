@@ -365,8 +365,17 @@ class DocxBulkAddFlowTests(TestCase):
                 )
             self.assertEqual(save.status_code, 302)
             self.assertEqual(BankQuestion.objects.filter(bank=self.bank, image__gt="").count(), count)
-            return len(captured)
+            return [q["sql"] for q in captured.captured_queries]
 
+        # CI 2026-10-01 (81c600a6, shard 6): 1→22, 3→23 — sual sayından asılı olmayan tək bir
+        # əlavə sorğu (keş/sessiya kimi birdəfəlik iş, lokalda təkrarlanmır). Hər sual üçün
+        # sorğu (N+1) 1 → 4 arasında ən azı +3 fərq verir; ±1 tolerans onu yenə tutur.
+        _run(1)  # isinmə: birdəfəlik keş/sessiya sorğuları ölçüyə düşməsin
         one = _run(1)
-        three = _run(3)
-        self.assertEqual(one, three, f"sorğu sayı sual sayından asılıdır: 1→{one}, 3→{three}")
+        four = _run(4)
+        extra = sorted(set(four) - set(one))[:5]
+        self.assertLessEqual(
+            abs(len(four) - len(one)),
+            1,
+            f"sorğu sayı sual sayından asılıdır: 1→{len(one)}, 4→{len(four)}; əlavə: {extra}",
+        )

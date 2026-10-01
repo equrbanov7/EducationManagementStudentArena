@@ -8,10 +8,15 @@ monitorinqi.
 qrupunda qaldı, buraya isə YALNIZ platforma səviyyəsi düşdü.
 
 ⚠️ XARİCİ ŞƏRT (`can_manage_org or …`) və hər bəndin öz açarı DƏYİŞMƏYİB —
-görünürlük eynidir, yalnız başlıq başqadır. Faktiki qapı server-sidedir
-(`system-monitoring` yalnız superadmində).{% endcomment %}
-{% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections %}
-{% if 'superadmin-org-inspector' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'superadmin-organizations' in allowed_sections %}
+görünürlük eynidir, yalnız başlıq başqadır. Faktiki qapı server-sidedir.
+
+2026-10-01 (sahib): «Sistem Monitorinqi» artıq superadmin-only DEYİL — bölmə
+`system.monitoring.view` icazəsi olan üzvə (RİM rəhbəri) də açılır
+(`rbac_sections.can_view_monitoring`). Ona görə bənd superadmin bloku
+(`superadmin-organizations`) XARİCİNƏ çıxarıldı və hər iki şərtə əlavə olundu —
+superadmin olmayan RİM rəhbəri də qrupu və bəndi görür.{% endcomment %}
+{% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections or 'system-monitoring' in allowed_sections %}
+{% if 'superadmin-org-inspector' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'superadmin-organizations' in allowed_sections or 'system-monitoring' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="system">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|superadmin-org-inspector|superadmin-exam-rooms|superadmin-org-features|superadmin-organizations|superadmin-users|superadmin-ai|system-monitoring|" %} open{% endif %}>
         {% trans "Sistem idarəetməsi" context "profile.sidebar" as group_label %}
@@ -85,6 +90,7 @@ görünürlük eynidir, yalnız başlıq başqadır. Faktiki qapı server-sidedi
                     <span class="sidebar-menu-text">{% trans "ai_settings" context "profile.sidebar" %}</span>
                 </a>
             </li>
+            {% endif %}
             {% if 'system-monitoring' in allowed_sections %}
             <li class="sidebar-menu-item">
                 <a href="{{ profile_base_url }}?section=system-monitoring"
@@ -96,7 +102,6 @@ görünürlük eynidir, yalnız başlıq başqadır. Faktiki qapı server-sidedi
                     <span class="sidebar-menu-text">{% trans 'Sistem Monitorinqi' context 'profile.sidebar' %}</span>
                 </a>
             </li>
-            {% endif %}
             {% endif %}
         </ul>
     </details>

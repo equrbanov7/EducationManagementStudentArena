@@ -2,7 +2,11 @@
  * qrafiklər (Chart.js), səhifələmə, insident əməlləri. Saf format köməkçiləri
  * 2026-09-21-də `system_monitoring_format.js`-ə (namespace.format) çıxarıldı —
  * modul ölçü büdcəsi; renderers `system_monitoring_renderers.js`-dədir.
- * Şablon sırası: format → renderers → bu fayl (hamısı defer; sıra fail-soft).
+ * 2026-10-01 (sahib): ilk tab «Ümumi vəziyyət» (`summary/`, renderer
+ * `system_monitoring_summary.js`) + «AI ilə təhlil et» (`system_monitoring_ai.js`);
+ * yeni mətnlər `#smx-i18n` JSON adasından (`t()` / `fmt()`), avto-yeniləmə 30 s
+ * (xülasə) / 60 s (ətraflı tablar), səhifə gizli olanda dayanır.
+ * Şablon sırası: format → renderers → summary → ai → bu fayl (defer; sıra fail-soft).
  */
 (function () {
     "use strict";
@@ -40,7 +44,9 @@
         var range = byId("smx-range");
         var autoRefresh = byId("smx-auto");
         var refreshButton = byId("smx-refresh");
-        var activeTab = "overview";
+        var activeTab = "summary";
+        var i18n = readI18n();
+        var tick = 0;
         var charts = {};
         var cache = {};
         var inFlight = null;
@@ -61,6 +67,26 @@
 
         function byId(id) {
             return scope.querySelector("#" + id);
+        }
+
+        function readI18n() {
+            var host = scope.closest("[data-profile-section-panel]") || document;
+            var node = host.querySelector("#smx-i18n");
+            try {
+                return node ? JSON.parse(node.textContent || "{}") : {};
+            } catch (error) {
+                return {};
+            }
+        }
+
+        function t(key) {
+            return Object.prototype.hasOwnProperty.call(i18n, key) ? i18n[key] : key;
+        }
+
+        function fmt(text, values) {
+            return String(text).replace(/\{(\w+)\}/g, function (match, name) {
+                return values && values[name] != null ? String(values[name]) : match;
+            });
         }
 
         // Saf format köməkçiləri ayrı fayldadır (system_monitoring_format.js,
@@ -90,7 +116,7 @@
             if (!canvas) return;
             var empty = canvas.parentNode.querySelector(".smx-chart-empty");
             var datasets = (Array.isArray(series) ? series : []).map(function (item, index) {
-                var colors = ["#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed"];
+                var colors = (options && options.colors) || ["#2563eb", "#16a34a", "#d97706", "#dc2626", "#7c3aed"];
                 var points = (item.points || []).map(function (point) {
                     return { x: Number(point[0]) * 1000, y: Number(point[1]) };
                 }).filter(function (point) {
@@ -175,41 +201,8 @@
         }
 
 
-        function pagination(data, count) {
-            var source = data.pagination || data;
-            var state = states[activeTab] || {};
-            var pageSize = Number(source.page_size || state.page_size || 20);
-            var total = Number(source.total == null ? count : source.total);
-            var page = Math.max(1, Number(source.page || state.page || 1));
-            var pages = Math.max(1, Number(source.total_pages || Math.ceil(total / pageSize)));
-            return {
-                page: page,
-                pageSize: pageSize,
-                total: total,
-                pages: pages,
-                hasPrevious: source.has_previous == null ? page > 1 : source.has_previous,
-                hasNext: source.has_next == null ? page < pages : source.has_next,
-            };
-        }
-
         function pager(data, count) {
-            var meta = pagination(data, count);
-            if (!meta.total) return "";
-            var start = (meta.page - 1) * meta.pageSize + 1;
-            var end = Math.min(meta.total, start + count - 1);
-            return '<div class="smx-pagination"><span class="smx-page-summary">' +
-                start + "–" + end + " / " + meta.total +
-                "</span><label>" + escapeHtml(gettext("Sətir")) + ' <select data-smx-page-size>' +
-                '<option value="10"' + selected(10, meta.pageSize) + '>10</option>' +
-                '<option value="20"' + selected(20, meta.pageSize) + '>20</option>' +
-                '<option value="50"' + selected(50, meta.pageSize) + '>50</option></select></label>' +
-                '<button class="smx-btn" data-smx-page="' + (meta.page - 1) + '"' +
-                (meta.hasPrevious ? "" : " disabled") + ' aria-label="' +
-                escapeHtml(gettext("Əvvəlki səhifə")) + '">‹</button>' +
-                "<span>" + meta.page + " / " + meta.pages + "</span>" +
-                '<button class="smx-btn" data-smx-page="' + (meta.page + 1) + '"' +
-                (meta.hasNext ? "" : " disabled") + ' aria-label="' +
-                escapeHtml(gettext("Növbəti səhifə")) + '">›</button></div>';
+            return F.pagerMarkup(data, count, states[activeTab] || {});
         }
 
         function setDegraded(payload) {
@@ -242,7 +235,27 @@
             lineChart: lineChart,
             rowsFrom: rowsFrom,
             pager: pager,
+            t: t,
         });
+        var summaryContext = {
+            t: t,
+            fmt: fmt,
+            api: api,
+            csrf: csrf,
+            escapeHtml: escapeHtml,
+            formatBytes: formatBytes,
+            formatDuration: formatDuration,
+            lineChart: function (id, series) {
+                lineChart(id, series, { colors: ["#2563eb", "#dc2626"] });
+            },
+        };
+        renderers.summary = function (data) {
+            if (namespace.summary && typeof namespace.summary.render === "function") {
+                namespace.summary.render(body, data, summaryContext);
+            } else {
+                body.innerHTML = '<div class="smx-empty">' + escapeHtml(t("emptyData")) + "</div>";
+            }
+        };
 
         function paramsFor(tab) {
             var params = { range: range.value };
@@ -284,6 +297,7 @@
                 if (data.next_cursor_ns) logCursors[states.logs.page + 1] = data.next_cursor_ns;
             }
             renderers[tab](data);
+            if (tab !== "summary" && window.EMSBootstrapSelect) window.EMSBootstrapSelect.init(body);
             lastLoadedAt = Date.now();
             updated.textContent = interpolate(gettext("Yeniləndi: %(time)s"), { time: new Date().toLocaleTimeString("az") }, true);
         }
@@ -378,13 +392,31 @@
         }
 
         function schedule() {
+            // 30 s addım: xülasə hər addımda, ağır ətraflı tablar hər 2-ci addımda (60 s).
             timer = window.setInterval(function () {
+                tick += 1;
                 if (!scope.isConnected) {
                     destroy();
-                } else if (started && autoRefresh.checked && visible()) {
+                } else if (started && autoRefresh.checked && visible() && (activeTab === "summary" || tick % 2 === 0)) {
                     refreshActiveSilently();
                 }
-            }, 60000);
+            }, 30000);
+        }
+
+        function activateTab(tabName) {
+            var target = scope.querySelector('.smx-tab[data-tab="' + tabName + '"]');
+            if (!target || tabName === activeTab) return;
+            scope.querySelectorAll(".smx-tab").forEach(function (item) {
+                item.classList.toggle("active", item === target);
+                item.setAttribute("aria-selected", item === target ? "true" : "false");
+            });
+            activeTab = tabName;
+            if (observer) observer.disconnect();
+            started = true;
+            load(activeTab);
+            if (typeof target.scrollIntoView === "function") {
+                target.scrollIntoView({ block: "nearest", inline: "nearest" });
+            }
         }
 
         function resetPagedState(tab) {
@@ -398,15 +430,7 @@
 
         scope.querySelectorAll(".smx-tab").forEach(function (tabButton) {
             tabButton.addEventListener("click", function () {
-                if (tabButton.dataset.tab === activeTab) return;
-                scope.querySelectorAll(".smx-tab").forEach(function (item) {
-                    item.classList.remove("active");
-                });
-                tabButton.classList.add("active");
-                activeTab = tabButton.dataset.tab;
-                if (observer) observer.disconnect();
-                started = true;
-                load(activeTab);
+                activateTab(tabButton.dataset.tab);
             });
         });
 
@@ -442,6 +466,11 @@
         });
 
         body.addEventListener("click", function (event) {
+            var gotoButton = event.target.closest("[data-smx-goto]");
+            if (gotoButton) {
+                activateTab(gotoButton.dataset.smxGoto);
+                return;
+            }
             var pageButton = event.target.closest("[data-smx-page]");
             if (pageButton && !pageButton.disabled) {
                 var nextPage = Number(pageButton.dataset.smxPage);
@@ -497,7 +526,7 @@
 
         function onVisibilityChange() {
             if (document.hidden || !autoRefresh.checked || !started) return;
-            if (Date.now() - lastLoadedAt > 60000 && visible()) refreshActiveSilently();
+            if (Date.now() - lastLoadedAt > 30000 && visible()) refreshActiveSilently();
         }
 
         function onSectionLoaded() {

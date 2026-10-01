@@ -87382,3 +87382,1423 @@ msgstr "%(n)s icazə"
 msgctxt "organizations.roles_registry"
 msgid "Üzvlər"
 msgstr "Üzvlər"
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid ""
+"«%(room)s» zalında hazırda imtahan gedir — oturum bitənə qədər zalı imtahan "
+"zallarından çıxarmaq olmaz."
+msgstr ""
+"«%(room)s» zalında hazırda imtahan gedir — oturum bitənə qədər zalı imtahan "
+"zallarından çıxarmaq olmaz."
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid ""
+"«%(room)s» zalında %(n)d aktiv kompüter qeydiyyatdadır — onlardan final "
+"imtahanına giriş mümkündür. Əvvəlcə kompüterləri deaktiv edin və ya silin "
+"(zal idarəetməsi)."
+msgstr ""
+"«%(room)s» zalında %(n)d aktiv kompüter qeydiyyatdadır — onlardan final "
+"imtahanına giriş mümkündür. Əvvəlcə kompüterləri deaktiv edin və ya silin "
+"(zal idarəetməsi)."
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid ""
+"«%(room)s» zalında %(n)d planlaşdırılmış oturum var. Zal imtahan zallarından"
+" çıxarılsın? Oturumlar silinmir, zal monitoru onlar üçün açıq qalır."
+msgstr ""
+"«%(room)s» zalında %(n)d planlaşdırılmış oturum var. Zal imtahan zallarından"
+" çıxarılsın? Oturumlar silinmir, zal monitoru onlar üçün açıq qalır."
+
+msgctxt "exams.final_center.halls"
+msgid "İmtahan zallarını yalnız zal idarəçiləri dəyişə bilər."
+msgstr "İmtahan zallarını yalnız zal idarəçiləri dəyişə bilər."
+
+msgctxt "exams.final_center.halls"
+msgid "Otaq tapılmadı."
+msgstr "Otaq tapılmadı."
+
+msgctxt "exams.final_center.halls"
+msgid "Sorğu natamamdır: is_exam_hall göstərilməyib."
+msgstr "Sorğu natamamdır: is_exam_hall göstərilməyib."
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid "«%(room)s» imtahan zalı kimi qeyd edildi."
+msgstr "«%(room)s» imtahan zalı kimi qeyd edildi."
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid "«%(room)s» imtahan zallarından çıxarıldı."
+msgstr "«%(room)s» imtahan zallarından çıxarıldı."
+
+msgctxt "exams.final_center.halls"
+msgid "Korpus göstərilməyib"
+msgstr "Korpus göstərilməyib"
+
+msgctxt "exams.final_center.halls"
+msgid "İmtahan zalı kimi qeyd et"
+msgstr "İmtahan zalı kimi qeyd et"
+
+msgctxt "exams.final_center.halls"
+msgid "İmtahan zallarından çıxar"
+msgstr "İmtahan zallarından çıxar"
+
+msgctxt "exams.final_center.halls"
+msgid "Zal imtahan zallarından çıxarılsın?"
+msgstr "Zal imtahan zallarından çıxarılsın?"
+
+msgctxt "exams.final_center.halls"
+msgid "Bəli, çıxar"
+msgstr "Bəli, çıxar"
+
+msgctxt "exams.final_center.halls"
+msgid "Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "exams.final_center.halls"
+msgid "İmtahan zalı"
+msgstr "İmtahan zalı"
+
+msgctxt "exams.final_center.halls"
+msgid "Adi otaq"
+msgstr "Adi otaq"
+
+msgctxt "exams.final_center.halls"
+msgid "Mərtəbə"
+msgstr "Mərtəbə"
+
+msgctxt "exams.final_center.halls"
+msgid "Otaq"
+msgstr "Otaq"
+
+#, python-format
+msgctxt "exams.final_center.halls"
+msgid "cəmi otaq: %(n)s"
+msgstr "cəmi otaq: %(n)s"
+
+msgctxt "exams.final_center.halls"
+msgid "Göstər"
+msgstr "Göstər"
+
+msgctxt "exams.final_center.halls"
+msgid "Yalnız imtahan zalları"
+msgstr "Yalnız imtahan zalları"
+
+msgctxt "exams.final_center.halls"
+msgid "Hamısı (bütün otaqlar)"
+msgstr "Hamısı (bütün otaqlar)"
+
+msgctxt "exams.final_center.halls"
+msgid "Korpus"
+msgstr "Korpus"
+
+msgctxt "exams.final_center.halls"
+msgid "Bütün korpuslar"
+msgstr "Bütün korpuslar"
+
+msgctxt "exams.final_center.halls"
+msgid ""
+"Bütün otaqlar korpuslar üzrə — otağı bir kliklə imtahan zalı kimi qeyd edin "
+"və ya zallardan çıxarın"
+msgstr ""
+"Bütün otaqlar korpuslar üzrə — otağı bir kliklə imtahan zalı kimi qeyd edin "
+"və ya zallardan çıxarın"
+
+msgctxt "exams.final_center.halls"
+msgid "Hələ imtahan zalı qeyd olunmayıb."
+msgstr "Hələ imtahan zalı qeyd olunmayıb."
+
+msgctxt "exams.final_center.halls"
+msgid "«Hamısı» görünüşündə otağı imtahan zalı kimi qeyd edin."
+msgstr "«Hamısı» görünüşündə otağı imtahan zalı kimi qeyd edin."
+
+msgctxt "exams.final_center.halls"
+msgid "Bütün otaqları göstər"
+msgstr "Bütün otaqları göstər"
+
+msgctxt "exams.final_center.halls"
+msgid "İmtahan zalı (imtahan mərkəzinin zal siyahısında görünür)"
+msgstr "İmtahan zalı (imtahan mərkəzinin zal siyahısında görünür)"
+
+msgctxt "exams.final_center.halls"
+msgid ""
+"Bu otaq imtahan zalı deyil — kompüter qeydiyyatı yalnız imtahan zalları "
+"üçündür. Əvvəlcə cədvəldə «İmtahan zalı kimi qeyd et» düyməsini vurun."
+msgstr ""
+"Bu otaq imtahan zalı deyil — kompüter qeydiyyatı yalnız imtahan zalları "
+"üçündür. Əvvəlcə cədvəldə «İmtahan zalı kimi qeyd et» düyməsini vurun."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hələ imtahan zalı qeyd olunmayıb"
+msgstr "Hələ imtahan zalı qeyd olunmayıb"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid ""
+"«Göstər: Hamısı» seçin və otağı «İmtahan zalı kimi qeyd et» düyməsi ilə zala"
+" çevirin."
+msgstr ""
+"«Göstər: Hamısı» seçin və otağı «İmtahan zalı kimi qeyd et» düyməsi ilə zala"
+" çevirin."
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Korpus göstərilməyib"
+msgstr "Korpus göstərilməyib"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Göstər"
+msgstr "Göstər"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Yalnız imtahan zalları"
+msgstr "Yalnız imtahan zalları"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Hamısı (bütün otaqlar)"
+msgstr "Hamısı (bütün otaqlar)"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "İmtahan zalı"
+msgstr "İmtahan zalı"
+
+#, python-format
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "cəmi otaq: %(n)d"
+msgstr "cəmi otaq: %(n)d"
+
+msgctxt "exams.model.exam_room.field"
+msgid "is_exam_hall"
+msgstr "İmtahan zalı"
+
+msgctxt "exams.model.exam_room.help"
+msgid "is_exam_hall"
+msgstr ""
+"İşarələnmiş otaqlar imtahan mərkəzinin zal siyahısında görünür; digər "
+"otaqlar yalnız otaq reyestrindədir (jurnal, cədvəl)."
+
+msgctxt "exams.view.access.message"
+msgid ""
+"İmtahanınız nəzarətçi tərəfindən dayandırılıb — kilid açılana qədər cavablar"
+" qəbul edilmir."
+msgstr ""
+"İmtahanınız nəzarətçi tərəfindən dayandırılıb — kilid açılana qədər cavablar"
+" qəbul edilmir."
+
+msgctxt "exams.view.student.result.message"
+msgid "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib."
+msgstr "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib."
+
+msgctxt "exams.proctoring.signal"
+msgid "Tərtibatçı alətləri (DevTools) açıq ola bilər"
+msgstr "Tərtibatçı alətləri (DevTools) açıq ola bilər"
+
+msgctxt "exams.proctoring.signal"
+msgid "Əlavə monitor qoşulub"
+msgstr "Əlavə monitor qoşulub"
+
+msgctxt "exams.proctoring.signal"
+msgid "Səhifəyə kənar element əlavə olunub"
+msgstr "Səhifəyə kənar element əlavə olunub"
+
+msgctxt "exams.proctoring.signal"
+msgid "Brauzer genişlənməsinin pəncərəsi aşkarlandı"
+msgstr "Brauzer genişlənməsinin pəncərəsi aşkarlandı"
+
+msgctxt "exams.proctoring.signal"
+msgid "Brauzer genişlənməsinin izi aşkarlandı"
+msgstr "Brauzer genişlənməsinin izi aşkarlandı"
+
+msgctxt "exams.proctoring.signal"
+msgid "Süni intellekt köməkçisi (genişlənmə) aşkarlandı"
+msgstr "Süni intellekt köməkçisi (genişlənmə) aşkarlandı"
+
+msgctxt "exams.proctoring.signal"
+msgid "Avtomatlaşdırılmış brauzer (bot)"
+msgstr "Avtomatlaşdırılmış brauzer (bot)"
+
+msgctxt "exams.proctoring.signal"
+msgid "Cavab xanasına yapışdırma cəhdi"
+msgstr "Cavab xanasına yapışdırma cəhdi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Cavaba bir anda böyük mətn daxil edildi"
+msgstr "Cavaba bir anda böyük mətn daxil edildi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Cavab skriptlə dəyişdirildi"
+msgstr "Cavab skriptlə dəyişdirildi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Qeyri-adi sürətli yazı"
+msgstr "Qeyri-adi sürətli yazı"
+
+msgctxt "exams.proctoring.signal"
+msgid "Çap cəhdi"
+msgstr "Çap cəhdi"
+
+msgctxt "exams.proctoring.signal"
+msgid "Nəzarət siqnalı müvəqqəti kəsilmişdi"
+msgstr "Nəzarət siqnalı müvəqqəti kəsilmişdi"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Kimlik yoxlaması"
+msgstr "Kimlik yoxlaması"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Şəkil yüklənməyib"
+msgstr "Şəkil yüklənməyib"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Tələbə №"
+msgstr "Tələbə №"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Risk xalı"
+msgstr "Risk xalı"
+
+msgctxt "exams.proctoring.monitor"
+msgid ""
+"Risk xalı / şübhə həddi — qayda pozuntuları və siqnalların ciddiliyinin cəmi"
+msgstr ""
+"Risk xalı / şübhə həddi — qayda pozuntuları və siqnalların ciddiliyinin cəmi"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Şübhəli"
+msgstr "Şübhəli"
+
+msgctxt "exams.proctoring.monitor"
+msgid "siqnal"
+msgstr "siqnal"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarət siqnalı kəsilib"
+msgstr "Nəzarət siqnalı kəsilib"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Nəzarət siqnalı yoxdur"
+msgstr "Nəzarət siqnalı yoxdur"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Hadisə xronologiyası"
+msgstr "Hadisə xronologiyası"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Qayda"
+msgstr "Qayda"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Siqnal"
+msgstr "Siqnal"
+
+msgctxt "exams.proctoring.monitor"
+msgid "pozuntu sayılır"
+msgstr "pozuntu sayılır"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Hadisə qeydə alınmayıb."
+msgstr "Hadisə qeydə alınmayıb."
+
+msgctxt "exams.proctoring.monitor"
+msgid "Kritik"
+msgstr "Kritik"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Yüksək"
+msgstr "Yüksək"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Aşağı"
+msgstr "Aşağı"
+
+msgctxt "exams.proctoring.monitor"
+msgid "Məlumat"
+msgstr "Məlumat"
+
+msgctxt "exams.proctoring.identity"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "exams.proctoring.identity"
+msgid "Tələbə №"
+msgstr "Tələbə №"
+
+msgctxt "exams.proctoring.form"
+msgid "Qabaqcıl aşkarlama (genişlənmə, süni intellekt, DevTools)"
+msgstr "Qabaqcıl aşkarlama (genişlənmə, süni intellekt, DevTools)"
+
+msgctxt "exams.proctoring.form"
+msgid ""
+"Bu yoxlamalar tələbəni kilidləmir — yalnız qeyd edir və nəzarətçiyə "
+"göstərir. Risk xalı həddə çatanda cəhd «şübhəli» işarələnir."
+msgstr ""
+"Bu yoxlamalar tələbəni kilidləmir — yalnız qeyd edir və nəzarətçiyə "
+"göstərir. Risk xalı həddə çatanda cəhd «şübhəli» işarələnir."
+
+msgctxt "exams.proctoring.form"
+msgid ""
+"Süni intellekt köməkçilərinə və brauzer genişlənmələrinə qarşı qoruma (sual "
+"mətni seçilmir, kənar elementlər aşkarlanır)"
+msgstr ""
+"Süni intellekt köməkçilərinə və brauzer genişlənmələrinə qarşı qoruma (sual "
+"mətni seçilmir, kənar elementlər aşkarlanır)"
+
+msgctxt "exams.proctoring.form"
+msgid ""
+"Cavaba kənardan mətn daxil edilməsini aşkarla (yapışdırma, skriptlə yazma, "
+"qeyri-adi sürət)"
+msgstr ""
+"Cavaba kənardan mətn daxil edilməsini aşkarla (yapışdırma, skriptlə yazma, "
+"qeyri-adi sürət)"
+
+msgctxt "exams.proctoring.form"
+msgid "Tərtibatçı alətlərinin (DevTools) açılmasını aşkarla"
+msgstr "Tərtibatçı alətlərinin (DevTools) açılmasını aşkarla"
+
+msgctxt "exams.proctoring.form"
+msgid "Əlavə monitorun qoşulmasını aşkarla (dəstəkləyən brauzerlərdə)"
+msgstr "Əlavə monitorun qoşulmasını aşkarla (dəstəkləyən brauzerlərdə)"
+
+msgctxt "exams.proctoring.form"
+msgid "Şübhə həddi (risk xalı)"
+msgstr "Şübhə həddi (risk xalı)"
+
+msgctxt "exams.proctoring.teacher"
+msgid "Proktorinq hesabatı"
+msgstr "Proktorinq hesabatı"
+
+msgctxt "exams.proctoring.teacher"
+msgid "Pozuntu"
+msgstr "Pozuntu"
+
+msgctxt "exams.proctoring.teacher"
+msgid "Risk xalı"
+msgstr "Risk xalı"
+
+msgctxt "exams.proctoring.teacher"
+msgid ""
+"Risk xalı qayda pozuntuları və evristik siqnalların ciddiliyinin cəmidir. "
+"Yalnız məlumat üçündür — nəticəyə avtomatik təsir etmir; qərarı "
+"müəllim/komissiya verir."
+msgstr ""
+"Risk xalı qayda pozuntuları və evristik siqnalların ciddiliyinin cəmidir. "
+"Yalnız məlumat üçündür — nəticəyə avtomatik təsir etmir; qərarı "
+"müəllim/komissiya verir."
+
+msgctxt "monitoring.ui"
+msgid ""
+"Server, xidmətlər, xətalar, imtahan fəaliyyəti və təhlükəsizlik — canlı "
+"vəziyyət"
+msgstr ""
+"Server, xidmətlər, xətalar, imtahan fəaliyyəti və təhlükəsizlik — canlı "
+"vəziyyət"
+
+msgctxt "monitoring.ui"
+msgid "Monitorinq bölmələri"
+msgstr "Monitorinq bölmələri"
+
+msgctxt "monitoring.ui"
+msgid "Ümumi vəziyyət"
+msgstr "Ümumi vəziyyət"
+
+msgctxt "monitoring.ui"
+msgid "Yeniləndi: {time}"
+msgstr "Yeniləndi: {time}"
+
+msgctxt "monitoring.ui"
+msgid "Ətraflı"
+msgstr "Ətraflı"
+
+msgctxt "monitoring.ui"
+msgid "Nə etməli:"
+msgstr "Nə etməli:"
+
+msgctxt "monitoring.ui"
+msgid "İşləyir"
+msgstr "İşləyir"
+
+msgctxt "monitoring.ui"
+msgid "Diqqət"
+msgstr "Diqqət"
+
+msgctxt "monitoring.ui"
+msgid "Problem"
+msgstr "Problem"
+
+msgctxt "monitoring.ui"
+msgid "Məlumat yoxdur"
+msgstr "Məlumat yoxdur"
+
+msgctxt "monitoring.ui"
+msgid "Xəbərdarlıq"
+msgstr "Xəbərdarlıq"
+
+msgctxt "monitoring.ui"
+msgid "AI ilə təhlil et"
+msgstr "AI ilə təhlil et"
+
+msgctxt "monitoring.ui"
+msgid "Bu saat üçün {remaining} / {limit} təhlil qalıb"
+msgstr "Bu saat üçün {remaining} / {limit} təhlil qalıb"
+
+msgctxt "monitoring.ui"
+msgid "AI təhlili hazırda əlçatan deyil"
+msgstr "AI təhlili hazırda əlçatan deyil"
+
+msgctxt "monitoring.ui"
+msgid "AI xidməti hələ qoşulmayıb"
+msgstr "AI xidməti hələ qoşulmayıb"
+
+msgctxt "monitoring.ui"
+msgid "AI təhlili"
+msgstr "AI təhlili"
+
+msgctxt "monitoring.ui"
+msgid "Göstəricilər təhlil olunur… Bu, 10–30 saniyə çəkə bilər."
+msgstr "Göstəricilər təhlil olunur… Bu, 10–30 saniyə çəkə bilər."
+
+msgctxt "monitoring.ui"
+msgid "Ciddilik"
+msgstr "Ciddilik"
+
+msgctxt "monitoring.ui"
+msgid ""
+"AI-yə yalnız aqreqat göstəricilər göndərilir — ad, e-poçt, IP ünvanı və sirr"
+" göndərilmir. Tövsiyələri tətbiq etməzdən əvvəl yoxlayın."
+msgstr ""
+"AI-yə yalnız aqreqat göstəricilər göndərilir — ad, e-poçt, IP ünvanı və sirr"
+" göndərilmir. Tövsiyələri tətbiq etməzdən əvvəl yoxlayın."
+
+msgctxt "monitoring.ui"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "monitoring.ui"
+msgid "AI təhlili alınmadı. Yenidən cəhd edin."
+msgstr "AI təhlili alınmadı. Yenidən cəhd edin."
+
+msgctxt "monitoring.ui"
+msgid "Hazırlandı: {time}"
+msgstr "Hazırlandı: {time}"
+
+msgctxt "monitoring.ui"
+msgid "Versiya"
+msgstr "Versiya"
+
+msgctxt "monitoring.ui"
+msgid "Son yeniləmə (deploy)"
+msgstr "Son yeniləmə (deploy)"
+
+msgctxt "monitoring.ui"
+msgid "Server fasiləsiz işləyir"
+msgstr "Server fasiləsiz işləyir"
+
+msgctxt "monitoring.ui"
+msgid "Aktiv sessiyalar"
+msgstr "Aktiv sessiyalar"
+
+msgctxt "monitoring.ui"
+msgid "son 15 dəqiqə, bütün server üzrə (təxmini)"
+msgstr "son 15 dəqiqə, bütün server üzrə (təxmini)"
+
+msgctxt "monitoring.ui"
+msgid "Bu gün daxil olanlar"
+msgstr "Bu gün daxil olanlar"
+
+msgctxt "monitoring.ui"
+msgid "son 1 saatda: {count}"
+msgstr "son 1 saatda: {count}"
+
+msgctxt "monitoring.ui"
+msgid "Hazırda imtahanda"
+msgstr "Hazırda imtahanda"
+
+msgctxt "monitoring.ui"
+msgid "aktiv imtahan: {count}"
+msgstr "aktiv imtahan: {count}"
+
+msgctxt "monitoring.ui"
+msgid "Sorğular və xətalar"
+msgstr "Sorğular və xətalar"
+
+msgctxt "monitoring.ui"
+msgid "Dövr"
+msgstr "Dövr"
+
+msgctxt "monitoring.ui"
+msgid "Sorğular"
+msgstr "Sorğular"
+
+msgctxt "monitoring.ui"
+msgid "Server xətası (5xx)"
+msgstr "Server xətası (5xx)"
+
+msgctxt "monitoring.ui"
+msgid "Xəta faizi"
+msgstr "Xəta faizi"
+
+msgctxt "monitoring.ui"
+msgid "Cavab müddəti (p95)"
+msgstr "Cavab müddəti (p95)"
+
+msgctxt "monitoring.ui"
+msgid "Hazırkı yük"
+msgstr "Hazırkı yük"
+
+msgctxt "monitoring.ui"
+msgid "sorğu/san"
+msgstr "sorğu/san"
+
+msgctxt "monitoring.ui"
+msgid "Son 24 saat: sorğu və xəta axını (san başına)"
+msgstr "Son 24 saat: sorğu və xəta axını (san başına)"
+
+msgctxt "monitoring.ui"
+msgid "Server xətaları"
+msgstr "Server xətaları"
+
+msgctxt "monitoring.ui"
+msgid "Xidmətlər"
+msgstr "Xidmətlər"
+
+msgctxt "monitoring.ui"
+msgid "gözləyən sorğu"
+msgstr "gözləyən sorğu"
+
+msgctxt "monitoring.ui"
+msgid "işçi onlayn"
+msgstr "işçi onlayn"
+
+msgctxt "monitoring.ui"
+msgid "{age} əvvəl yeniləndi"
+msgstr "{age} əvvəl yeniləndi"
+
+msgctxt "monitoring.ui"
+msgid "{count} gün qalıb"
+msgstr "{count} gün qalıb"
+
+msgctxt "monitoring.ui"
+msgid "cavab verməyən hədəf: {count}"
+msgstr "cavab verməyən hədəf: {count}"
+
+msgctxt "monitoring.ui"
+msgid "növbədə: {count}"
+msgstr "növbədə: {count}"
+
+msgctxt "monitoring.ui"
+msgid "bağlantı: {used} / {max}"
+msgstr "bağlantı: {used} / {max}"
+
+msgctxt "monitoring.ui"
+msgid "Server resursları"
+msgstr "Server resursları"
+
+msgctxt "monitoring.ui"
+msgid "Prosessor (CPU)"
+msgstr "Prosessor (CPU)"
+
+msgctxt "monitoring.ui"
+msgid "Yaddaş (RAM)"
+msgstr "Yaddaş (RAM)"
+
+msgctxt "monitoring.ui"
+msgid "Disk"
+msgstr "Disk"
+
+msgctxt "monitoring.ui"
+msgid "{free} boş / {total}"
+msgstr "{free} boş / {total}"
+
+msgctxt "monitoring.ui"
+msgid "İşləyən konteynerlər"
+msgstr "İşləyən konteynerlər"
+
+msgctxt "monitoring.ui"
+msgid "Yenidən başlamalar (24 saat)"
+msgstr "Yenidən başlamalar (24 saat)"
+
+msgctxt "monitoring.ui"
+msgid "Yaddaş çatışmazlığı — OOM (24 saat)"
+msgstr "Yaddaş çatışmazlığı — OOM (24 saat)"
+
+msgctxt "monitoring.ui"
+msgid "İmtahan fəaliyyəti (indi)"
+msgstr "İmtahan fəaliyyəti (indi)"
+
+msgctxt "monitoring.ui"
+msgid "Açıq imtahan cəhdləri"
+msgstr "Açıq imtahan cəhdləri"
+
+msgctxt "monitoring.ui"
+msgid "son 4 saatda başlayan: {count}"
+msgstr "son 4 saatda başlayan: {count}"
+
+msgctxt "monitoring.ui"
+msgid "Son 15 dəqiqədə başlayan"
+msgstr "Son 15 dəqiqədə başlayan"
+
+msgctxt "monitoring.ui"
+msgid "Son 15 dəqiqədə bitən"
+msgstr "Son 15 dəqiqədə bitən"
+
+msgctxt "monitoring.ui"
+msgid "Aktiv imtahanlar"
+msgstr "Aktiv imtahanlar"
+
+msgctxt "monitoring.ui"
+msgid "Canlı imtahan sessiyaları"
+msgstr "Canlı imtahan sessiyaları"
+
+msgctxt "monitoring.ui"
+msgid "hazırda sual gedir: {count}"
+msgstr "hazırda sual gedir: {count}"
+
+msgctxt "monitoring.ui"
+msgid "Cavab yazma xətaları (1 saat)"
+msgstr "Cavab yazma xətaları (1 saat)"
+
+msgctxt "monitoring.ui"
+msgid "Uğursuz PIN cəhdləri (1 saat)"
+msgstr "Uğursuz PIN cəhdləri (1 saat)"
+
+msgctxt "monitoring.ui"
+msgid ""
+"Hazırda imtahan gedir — server yeniləməsini və yenidən başlatmanı təxirə "
+"salın."
+msgstr ""
+"Hazırda imtahan gedir — server yeniləməsini və yenidən başlatmanı təxirə "
+"salın."
+
+msgctxt "monitoring.ui"
+msgid "Təhlükəsizlik hadisələri"
+msgstr "Təhlükəsizlik hadisələri"
+
+msgctxt "monitoring.ui"
+msgid "Hadisə"
+msgstr "Hadisə"
+
+msgctxt "monitoring.ui"
+msgid "24 saat"
+msgstr "24 saat"
+
+msgctxt "monitoring.ui"
+msgid "7 gün"
+msgstr "7 gün"
+
+msgctxt "monitoring.ui"
+msgid "Ehtiyat nüsxələr"
+msgstr "Ehtiyat nüsxələr"
+
+msgctxt "monitoring.ui"
+msgid "{age} əvvəl"
+msgstr "{age} əvvəl"
+
+msgctxt "monitoring.ui"
+msgid "Son hadisələr (7 gün)"
+msgstr "Son hadisələr (7 gün)"
+
+msgctxt "monitoring.ui"
+msgid "Son 7 gündə heç bir insident olmayıb."
+msgstr "Son 7 gündə heç bir insident olmayıb."
+
+msgctxt "monitoring.ui"
+msgid "{count} dəfə"
+msgstr "{count} dəfə"
+
+msgctxt "monitoring.ui"
+msgid "hələ açıqdır"
+msgstr "hələ açıqdır"
+
+msgctxt "monitoring.ui"
+msgid "həll olunub"
+msgstr "həll olunub"
+
+msgctxt "monitoring.ui"
+msgid "müddət: {duration}"
+msgstr "müddət: {duration}"
+
+msgctxt "monitoring.ui"
+msgid "açıq: {count}"
+msgstr "açıq: {count}"
+
+msgctxt "monitoring.ui"
+msgid "Ən yavaş səhifələr (son 1 saat, orta)"
+msgstr "Ən yavaş səhifələr (son 1 saat, orta)"
+
+msgctxt "monitoring.ui"
+msgid "Ən çox xəta verən səhifələr (24 saat)"
+msgstr "Ən çox xəta verən səhifələr (24 saat)"
+
+msgctxt "monitoring.ui"
+msgid "xəta"
+msgstr "xəta"
+
+msgctxt "monitoring.ui"
+msgid ""
+"Yalnız aqreqat göstəricilər göstərilir — bu xülasədə şəxsi məlumat yoxdur."
+msgstr ""
+"Yalnız aqreqat göstəricilər göstərilir — bu xülasədə şəxsi məlumat yoxdur."
+
+msgctxt "monitoring.ui"
+msgid ""
+"Təhlükəsizlik, imtahan və giriş sayları yalnız sizin təşkilatınız üzrədir; "
+"server göstəriciləri bütün platforma üçün ümumidir."
+msgstr ""
+"Təhlükəsizlik, imtahan və giriş sayları yalnız sizin təşkilatınız üzrədir; "
+"server göstəriciləri bütün platforma üçün ümumidir."
+
+msgctxt "monitoring.ui"
+msgid "Yalnız baxış — insident əməllərini platforma administratoru icra edir."
+msgstr ""
+"Yalnız baxış — insident əməllərini platforma administratoru icra edir."
+
+msgctxt "monitoring.ui"
+msgid "Bütün hadisələr"
+msgstr "Bütün hadisələr"
+
+msgctxt "monitoring.ui"
+msgid "Qrafiklərin vaxt aralığı"
+msgstr "Qrafiklərin vaxt aralığı"
+
+msgctxt "monitoring.ui"
+msgid "5 dəq"
+msgstr "5 dəq"
+
+msgctxt "monitoring.ui"
+msgid "15 dəq"
+msgstr "15 dəq"
+
+msgctxt "monitoring.ui"
+msgid "1 saat"
+msgstr "1 saat"
+
+msgctxt "monitoring.ui"
+msgid "6 saat"
+msgstr "6 saat"
+
+msgctxt "monitoring.ui"
+msgid "30 gün"
+msgstr "30 gün"
+
+msgctxt "monitoring.ui"
+msgid "Hər 30 saniyədən bir avtomatik yenilə (səhifə gizli olanda dayanır)"
+msgstr "Hər 30 saniyədən bir avtomatik yenilə (səhifə gizli olanda dayanır)"
+
+msgctxt "monitoring.alert"
+msgid "Monitorinq hədəflərindən biri cavab vermir"
+msgstr "Monitorinq hədəflərindən biri cavab vermir"
+
+msgctxt "monitoring.alert"
+msgid "Verilənlər bazası (PostgreSQL) əlçatmaz olub"
+msgstr "Verilənlər bazası (PostgreSQL) əlçatmaz olub"
+
+msgctxt "monitoring.alert"
+msgid "Server xətalarının (5xx) sayı artıb"
+msgstr "Server xətalarının (5xx) sayı artıb"
+
+msgctxt "monitoring.alert"
+msgid "Səhifələr gec açılır (cavab müddəti 2 saniyədən çox)"
+msgstr "Səhifələr gec açılır (cavab müddəti 2 saniyədən çox)"
+
+msgctxt "monitoring.alert"
+msgid "İmtahan cavablarının yazılmasında server xətası"
+msgstr "İmtahan cavablarının yazılmasında server xətası"
+
+msgctxt "monitoring.alert"
+msgid "Baza bağlantılarının sayı limitə yaxınlaşıb"
+msgstr "Baza bağlantılarının sayı limitə yaxınlaşıb"
+
+msgctxt "monitoring.alert"
+msgid "Serverdə disk yeri azalır"
+msgstr "Serverdə disk yeri azalır"
+
+msgctxt "monitoring.alert"
+msgid "Serverdə disk yeri demək olar ki, bitib"
+msgstr "Serverdə disk yeri demək olar ki, bitib"
+
+msgctxt "monitoring.alert"
+msgid "Serverin yaddaşı (RAM) çox dolub"
+msgstr "Serverin yaddaşı (RAM) çox dolub"
+
+msgctxt "monitoring.alert"
+msgid "Prosessor (CPU) yükü yüksəkdir"
+msgstr "Prosessor (CPU) yükü yüksəkdir"
+
+msgctxt "monitoring.alert"
+msgid "Prosessor (CPU) yükü kritik həddədir"
+msgstr "Prosessor (CPU) yükü kritik həddədir"
+
+msgctxt "monitoring.alert"
+msgid "Server yükü prosessor nüvələrinin sayını aşıb"
+msgstr "Server yükü prosessor nüvələrinin sayını aşıb"
+
+msgctxt "monitoring.alert"
+msgid "Yaddaş çatışmır — swap istifadəsi artıb"
+msgstr "Yaddaş çatışmır — swap istifadəsi artıb"
+
+msgctxt "monitoring.alert"
+msgid "Diskdə fayl indeksi (inode) ehtiyatı azalır"
+msgstr "Diskdə fayl indeksi (inode) ehtiyatı azalır"
+
+msgctxt "monitoring.alert"
+msgid "Xidmət konteynerlərindən biri dayanıb"
+msgstr "Xidmət konteynerlərindən biri dayanıb"
+
+msgctxt "monitoring.alert"
+msgid "Xidmət konteyneri təkrar-təkrar yenidən başlayır"
+msgstr "Xidmət konteyneri təkrar-təkrar yenidən başlayır"
+
+msgctxt "monitoring.alert"
+msgid "Xidmət yaddaş çatışmazlığından dayandırılıb (OOM)"
+msgstr "Xidmət yaddaş çatışmazlığından dayandırılıb (OOM)"
+
+msgctxt "monitoring.alert"
+msgid "Xidmətin yaddaşı limitə yaxındır"
+msgstr "Xidmətin yaddaşı limitə yaxındır"
+
+msgctxt "monitoring.alert"
+msgid "Keş və növbə serveri (Redis) əlçatmazdır"
+msgstr "Keş və növbə serveri (Redis) əlçatmazdır"
+
+msgctxt "monitoring.alert"
+msgid "Keş serverinin (Redis) yaddaşı dolur"
+msgstr "Keş serverinin (Redis) yaddaşı dolur"
+
+msgctxt "monitoring.alert"
+msgid "Keş serveri yer çatmadığı üçün məlumat silib"
+msgstr "Keş serveri yer çatmadığı üçün məlumat silib"
+
+msgctxt "monitoring.alert"
+msgid "Keş serverində gözləyən (bloklanmış) bağlantılar var"
+msgstr "Keş serverində gözləyən (bloklanmış) bağlantılar var"
+
+msgctxt "monitoring.alert"
+msgid "Veb server (Nginx) əlçatmazdır"
+msgstr "Veb server (Nginx) əlçatmazdır"
+
+msgctxt "monitoring.alert"
+msgid "Avtomatik yoxlama saytın açılmadığını göstərdi"
+msgstr "Avtomatik yoxlama saytın açılmadığını göstərdi"
+
+msgctxt "monitoring.alert"
+msgid "Avtomatik yoxlama saytın yavaş açıldığını göstərdi"
+msgstr "Avtomatik yoxlama saytın yavaş açıldığını göstərdi"
+
+msgctxt "monitoring.alert"
+msgid "Təhlükəsizlik sertifikatının (TLS) bitməsinə 30 gündən az qalıb"
+msgstr "Təhlükəsizlik sertifikatının (TLS) bitməsinə 30 gündən az qalıb"
+
+msgctxt "monitoring.alert"
+msgid "Təhlükəsizlik sertifikatının (TLS) bitməsinə 7 gündən az qalıb"
+msgstr "Təhlükəsizlik sertifikatının (TLS) bitməsinə 7 gündən az qalıb"
+
+msgctxt "monitoring.alert"
+msgid "Fon tapşırıqlarını icra edən işçilər (Celery) dayanıb"
+msgstr "Fon tapşırıqlarını icra edən işçilər (Celery) dayanıb"
+
+msgctxt "monitoring.alert"
+msgid "Planlı fon tapşırıqları (Celery Beat) işləmir"
+msgstr "Planlı fon tapşırıqları (Celery Beat) işləmir"
+
+msgctxt "monitoring.alert"
+msgid "Fon tapşırıqları növbədə yığılıb qalır"
+msgstr "Fon tapşırıqları növbədə yığılıb qalır"
+
+msgctxt "monitoring.alert"
+msgid "Ağır fon tapşırıqları (OCR/AI/ixrac) növbədə yığılır"
+msgstr "Ağır fon tapşırıqları (OCR/AI/ixrac) növbədə yığılır"
+
+msgctxt "monitoring.alert"
+msgid "Ağır fon tapşırıqlarının işçisi dayanıb"
+msgstr "Ağır fon tapşırıqlarının işçisi dayanıb"
+
+msgctxt "monitoring.alert"
+msgid "Bazanın ehtiyat nüsxəsi 26 saatdan köhnədir"
+msgstr "Bazanın ehtiyat nüsxəsi 26 saatdan köhnədir"
+
+msgctxt "monitoring.alert"
+msgid "Serverdən kənar ehtiyat nüsxə yenilənmir"
+msgstr "Serverdən kənar ehtiyat nüsxə yenilənmir"
+
+msgctxt "monitoring.alert"
+msgid "Serverdən kənar ehtiyat nüsxənin vəziyyəti bilinmir"
+msgstr "Serverdən kənar ehtiyat nüsxənin vəziyyəti bilinmir"
+
+msgctxt "monitoring.alert"
+msgid "Serverdən kənar ehtiyat nüsxənin son cəhdi uğursuz oldu"
+msgstr "Serverdən kənar ehtiyat nüsxənin son cəhdi uğursuz oldu"
+
+msgctxt "monitoring.alert"
+msgid "Ehtiyat nüsxədən bərpa məşqi vaxtında aparılmayıb"
+msgstr "Ehtiyat nüsxədən bərpa məşqi vaxtında aparılmayıb"
+
+msgctxt "monitoring.alert"
+msgid "Server göstəricilərinin bir hissəsi oxunmur"
+msgstr "Server göstəricilərinin bir hissəsi oxunmur"
+
+msgctxt "monitoring.alert"
+msgid "Bazaya qoşulmaq üçün növbədə gözləyən sorğular var"
+msgstr "Bazaya qoşulmaq üçün növbədə gözləyən sorğular var"
+
+msgctxt "monitoring.alert"
+msgid "Bazaya qoşulma növbəsində gözləmə uzanıb"
+msgstr "Bazaya qoşulma növbəsində gözləmə uzanıb"
+
+msgctxt "monitoring.alert"
+msgid "Naməlum xəbərdarlıq"
+msgstr "Naməlum xəbərdarlıq"
+
+msgctxt "monitoring.summary"
+msgid "Hər şey qaydasındadır"
+msgstr "Hər şey qaydasındadır"
+
+msgctxt "monitoring.summary"
+msgid "Diqqət tələb edən məqamlar var"
+msgstr "Diqqət tələb edən məqamlar var"
+
+msgctxt "monitoring.summary"
+msgid "Problem aşkarlandı"
+msgstr "Problem aşkarlandı"
+
+msgctxt "monitoring.summary"
+msgid "Vəziyyət tam müəyyən edilə bilmir"
+msgstr "Vəziyyət tam müəyyən edilə bilmir"
+
+msgctxt "monitoring.summary"
+msgid ""
+"Server, baza, keş və fon tapşırıqları normal işləyir; açıq problem yoxdur."
+msgstr ""
+"Server, baza, keş və fon tapşırıqları normal işləyir; açıq problem yoxdur."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "%(problems)s problem, %(warnings)s xəbərdarlıq"
+msgstr "%(problems)s problem, %(warnings)s xəbərdarlıq"
+
+msgctxt "monitoring.summary"
+msgid "Verilənlər bazası cavab vermir."
+msgstr "Verilənlər bazası cavab vermir."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Baza konteynerini və disk yerini dərhal yoxlayın; imtahan varsa İmtahan "
+"Mərkəzini xəbərdar edin."
+msgstr ""
+"Baza konteynerini və disk yerini dərhal yoxlayın; imtahan varsa İmtahan "
+"Mərkəzini xəbərdar edin."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Verilənlər bazası gec cavab verir (%(ms)s ms)."
+msgstr "Verilənlər bazası gec cavab verir (%(ms)s ms)."
+
+msgctxt "monitoring.summary"
+msgid "Yavaş sorğuları və server yükünü yoxlayın."
+msgstr "Yavaş sorğuları və server yükünü yoxlayın."
+
+msgctxt "monitoring.summary"
+msgid "Keş serveri (Redis) cavab vermir."
+msgstr "Keş serveri (Redis) cavab vermir."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Redis konteynerini yoxlayın — sessiyalar və fon tapşırıqları təsirlənə "
+"bilər."
+msgstr ""
+"Redis konteynerini yoxlayın — sessiyalar və fon tapşırıqları təsirlənə "
+"bilər."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Metrik sistemi (Prometheus) əlçatmazdır — server göstəriciləri görünmür."
+msgstr ""
+"Metrik sistemi (Prometheus) əlçatmazdır — server göstəriciləri görünmür."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Prometheus konteynerini yoxlayın. Tətbiq işləyir; baza, imtahan və "
+"təhlükəsizlik göstəriciləri görünür, server/trafik/konteyner göstəriciləri "
+"isə «—» qalır."
+msgstr ""
+"Prometheus konteynerini yoxlayın. Tətbiq işləyir; baza, imtahan və "
+"təhlükəsizlik göstəriciləri görünür, server/trafik/konteyner göstəriciləri "
+"isə «—» qalır."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Son 1 saatda sorğuların %(pct)s%%-i server xətası (5xx) ilə bitib."
+msgstr "Son 1 saatda sorğuların %(pct)s%%-i server xətası (5xx) ilə bitib."
+
+msgctxt "monitoring.summary"
+msgid "«Tətbiq» bölməsində ən çox xəta verən səhifələrə və «Loglar»a baxın."
+msgstr "«Tətbiq» bölməsində ən çox xəta verən səhifələrə və «Loglar»a baxın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid ""
+"Səhifələr gec açılır: sorğuların 95%%-i %(seconds)s saniyəyə qədər çəkir."
+msgstr ""
+"Səhifələr gec açılır: sorğuların 95%%-i %(seconds)s saniyəyə qədər çəkir."
+
+msgctxt "monitoring.summary"
+msgid "Ən yavaş səhifələrə və baza yükünə baxın."
+msgstr "Ən yavaş səhifələrə və baza yükünə baxın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Prosessor (CPU) yükü %(pct)s%%-dir."
+msgstr "Prosessor (CPU) yükü %(pct)s%%-dir."
+
+msgctxt "monitoring.summary"
+msgid "Hansı xidmətin yükləndiyini «Konteynerlər» bölməsində yoxlayın."
+msgstr "Hansı xidmətin yükləndiyini «Konteynerlər» bölməsində yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Serverin yaddaşı (RAM) %(pct)s%% doludur."
+msgstr "Serverin yaddaşı (RAM) %(pct)s%% doludur."
+
+msgctxt "monitoring.summary"
+msgid "Yaddaşı çox işlədən konteyneri tapın; lazım olsa yenidən başladın."
+msgstr "Yaddaşı çox işlədən konteyneri tapın; lazım olsa yenidən başladın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Server diskinin %(pct)s%%-i doludur."
+msgstr "Server diskinin %(pct)s%%-i doludur."
+
+msgctxt "monitoring.summary"
+msgid "Köhnə log və ehtiyat nüsxələri təmizləyin və ya diski genişləndirin."
+msgstr "Köhnə log və ehtiyat nüsxələri təmizləyin və ya diski genişləndirin."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "%(service)s işləmir."
+msgstr "%(service)s işləmir."
+
+msgctxt "monitoring.summary"
+msgid "Müvafiq konteyneri yoxlayın və yenidən başladın."
+msgstr "Müvafiq konteyneri yoxlayın və yenidən başladın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "%(count)s monitorinq hədəfi cavab vermir."
+msgstr "%(count)s monitorinq hədəfi cavab vermir."
+
+msgctxt "monitoring.summary"
+msgid ""
+"«Server» və «Konteynerlər» bölmələrində hansı xidmətin dayandığını yoxlayın."
+msgstr ""
+"«Server» və «Konteynerlər» bölmələrində hansı xidmətin dayandığını yoxlayın."
+
+msgctxt "monitoring.summary"
+msgid "Fon tapşırıqlarını icra edən işçi (Celery) onlayn deyil."
+msgstr "Fon tapşırıqlarını icra edən işçi (Celery) onlayn deyil."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Celery konteynerlərini yoxlayın — bildirişlər, ixrac və avtomatik təhvil "
+"gecikə bilər."
+msgstr ""
+"Celery konteynerlərini yoxlayın — bildirişlər, ixrac və avtomatik təhvil "
+"gecikə bilər."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Fon tapşırıqlarının statistikası %(minutes)s dəqiqədir yenilənmir."
+msgstr "Fon tapşırıqlarının statistikası %(minutes)s dəqiqədir yenilənmir."
+
+msgctxt "monitoring.summary"
+msgid "Planlı tapşırıqlar (Celery Beat) konteynerini yoxlayın."
+msgstr "Planlı tapşırıqlar (Celery Beat) konteynerini yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Növbədə %(count)s fon tapşırığı gözləyir."
+msgstr "Növbədə %(count)s fon tapşırığı gözləyir."
+
+msgctxt "monitoring.summary"
+msgid "İşçilərin sayını və ağır tapşırıqları yoxlayın."
+msgstr "İşçilərin sayını və ağır tapşırıqları yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Bazanın son ehtiyat nüsxəsi %(hours)s saat əvvəl alınıb."
+msgstr "Bazanın son ehtiyat nüsxəsi %(hours)s saat əvvəl alınıb."
+
+msgctxt "monitoring.summary"
+msgid "Ehtiyat nüsxə xidmətini dərhal yoxlayın — gündəlik cədvəl pozulub."
+msgstr "Ehtiyat nüsxə xidmətini dərhal yoxlayın — gündəlik cədvəl pozulub."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Serverdən kənar ehtiyat nüsxə %(hours)s saatdır yenilənmir."
+msgstr "Serverdən kənar ehtiyat nüsxə %(hours)s saatdır yenilənmir."
+
+msgctxt "monitoring.summary"
+msgid "Off-site backup xidmətinin loguna baxın (şəbəkə, parol və ya disk)."
+msgstr "Off-site backup xidmətinin loguna baxın (şəbəkə, parol və ya disk)."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "%(count)s kritik insident açıqdır."
+msgstr "%(count)s kritik insident açıqdır."
+
+msgctxt "monitoring.summary"
+msgid "«İnsidentlər» bölməsində açıq insidentlərə baxın."
+msgstr "«İnsidentlər» bölməsində açıq insidentlərə baxın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "%(count)s insident hələ həll olunmayıb."
+msgstr "%(count)s insident hələ həll olunmayıb."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid ""
+"Son 24 saatda %(count)s kobud güc (brute-force) giriş cəhdi qeydə alınıb."
+msgstr ""
+"Son 24 saatda %(count)s kobud güc (brute-force) giriş cəhdi qeydə alınıb."
+
+msgctxt "monitoring.summary"
+msgid ""
+"«Təhlükəsizlik» bölməsində mənbə ünvanlarına baxın; lazım olsa ünvanı "
+"bloklayın."
+msgstr ""
+"«Təhlükəsizlik» bölməsində mənbə ünvanlarına baxın; lazım olsa ünvanı "
+"bloklayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Son 24 saatda %(count)s uğursuz giriş cəhdi olub."
+msgstr "Son 24 saatda %(count)s uğursuz giriş cəhdi olub."
+
+msgctxt "monitoring.summary"
+msgid ""
+"Kütləvi parol təxmini olub-olmadığını «Təhlükəsizlik» bölməsində yoxlayın."
+msgstr ""
+"Kütləvi parol təxmini olub-olmadığını «Təhlükəsizlik» bölməsində yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Son 1 saatda imtahan cavablarının yazılmasında %(count)s xəta olub."
+msgstr "Son 1 saatda imtahan cavablarının yazılmasında %(count)s xəta olub."
+
+msgctxt "monitoring.summary"
+msgid ""
+"İmtahan Mərkəzi ilə əlaqə saxlayın və «Loglar»da xəta mətnlərinə baxın."
+msgstr ""
+"İmtahan Mərkəzi ilə əlaqə saxlayın və «Loglar»da xəta mətnlərinə baxın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "TLS sertifikatının bitməsinə %(days)s gün qalıb."
+msgstr "TLS sertifikatının bitməsinə %(days)s gün qalıb."
+
+msgctxt "monitoring.summary"
+msgid "Sertifikatı vaxtında yeniləyin."
+msgstr "Sertifikatı vaxtında yeniləyin."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Son 24 saatda xidmətlər %(count)s dəfə yenidən başlayıb."
+msgstr "Son 24 saatda xidmətlər %(count)s dəfə yenidən başlayıb."
+
+msgctxt "monitoring.summary"
+msgid "«Konteynerlər» bölməsində hansı xidmətin təkrar başladığını yoxlayın."
+msgstr "«Konteynerlər» bölməsində hansı xidmətin təkrar başladığını yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Son 24 saatda %(count)s dəfə yaddaş çatışmazlığı (OOM) olub."
+msgstr "Son 24 saatda %(count)s dəfə yaddaş çatışmazlığı (OOM) olub."
+
+msgctxt "monitoring.summary"
+msgid "Yaddaş limitlərini və yaddaşı çox işlədən xidməti yoxlayın."
+msgstr "Yaddaş limitlərini və yaddaşı çox işlədən xidməti yoxlayın."
+
+#, python-format
+msgctxt "monitoring.summary"
+msgid "Bazaya qoşulmaq üçün %(count)s sorğu növbədə gözləyir."
+msgstr "Bazaya qoşulmaq üçün %(count)s sorğu növbədə gözləyir."
+
+msgctxt "monitoring.summary"
+msgid "Baza yükünü və uzun sürən sorğuları yoxlayın."
+msgstr "Baza yükünü və uzun sürən sorğuları yoxlayın."
+
+msgctxt "monitoring.summary"
+msgid "Verilənlər bazası"
+msgstr "Verilənlər bazası"
+
+msgctxt "monitoring.summary"
+msgid "Baza bağlantı hovuzu"
+msgstr "Baza bağlantı hovuzu"
+
+msgctxt "monitoring.summary"
+msgid "Keş (Redis)"
+msgstr "Keş (Redis)"
+
+msgctxt "monitoring.summary"
+msgid "Fon tapşırıqları (Celery)"
+msgstr "Fon tapşırıqları (Celery)"
+
+msgctxt "monitoring.summary"
+msgid "Planlı tapşırıqlar (Beat)"
+msgstr "Planlı tapşırıqlar (Beat)"
+
+msgctxt "monitoring.summary"
+msgid "Veb server (Nginx)"
+msgstr "Veb server (Nginx)"
+
+msgctxt "monitoring.summary"
+msgid "Saytın avtomatik yoxlaması"
+msgstr "Saytın avtomatik yoxlaması"
+
+msgctxt "monitoring.summary"
+msgid "Metrik sistemi (Prometheus)"
+msgstr "Metrik sistemi (Prometheus)"
+
+msgctxt "monitoring.summary"
+msgid "TLS sertifikatı"
+msgstr "TLS sertifikatı"
+
+msgctxt "monitoring.summary"
+msgid "Bazanın gündəlik ehtiyat nüsxəsi"
+msgstr "Bazanın gündəlik ehtiyat nüsxəsi"
+
+msgctxt "monitoring.summary"
+msgid "Serverdən kənar ehtiyat nüsxə"
+msgstr "Serverdən kənar ehtiyat nüsxə"
+
+msgctxt "monitoring.summary"
+msgid "Bərpa məşqi (son uğurlu)"
+msgstr "Bərpa məşqi (son uğurlu)"
+
+msgctxt "monitoring.summary"
+msgid "Uğursuz giriş cəhdləri"
+msgstr "Uğursuz giriş cəhdləri"
+
+msgctxt "monitoring.summary"
+msgid "Kobud güc cəhdləri (bir ünvandan 10+ uğursuz giriş)"
+msgstr "Kobud güc cəhdləri (bir ünvandan 10+ uğursuz giriş)"
+
+msgctxt "monitoring.summary"
+msgid "Superadmin hesabına uğursuz giriş"
+msgstr "Superadmin hesabına uğursuz giriş"
+
+msgctxt "monitoring.summary"
+msgid "Limitə düşən sorğular (429)"
+msgstr "Limitə düşən sorğular (429)"
+
+msgctxt "monitoring.summary"
+msgid "Şəbəkə zonası rəddləri (xaricdən bağlı səhifələr)"
+msgstr "Şəbəkə zonası rəddləri (xaricdən bağlı səhifələr)"
+
+msgctxt "monitoring.summary"
+msgid "Nalayiq söz filtri blokları"
+msgstr "Nalayiq söz filtri blokları"
+
+msgctxt "monitoring.summary"
+msgid "İcazə rəddləri (audit)"
+msgstr "İcazə rəddləri (audit)"
+
+msgctxt "monitoring.summary"
+msgid "Qadağan olunmuş sorğular (403)"
+msgstr "Qadağan olunmuş sorğular (403)"
+
+msgctxt "monitoring.summary"
+msgid "İdarə panelinə rədd edilən girişlər"
+msgstr "İdarə panelinə rədd edilən girişlər"
+
+msgctxt "monitoring.summary"
+msgid "Monitorinqə icazəsiz baxış cəhdləri"
+msgstr "Monitorinqə icazəsiz baxış cəhdləri"
+
+msgctxt "monitoring.summary"
+msgid "Son 5 dəqiqə"
+msgstr "Son 5 dəqiqə"
+
+msgctxt "monitoring.summary"
+msgid "Son 1 saat"
+msgstr "Son 1 saat"
+
+msgctxt "monitoring.summary"
+msgid "Son 24 saat"
+msgstr "Son 24 saat"
+
+msgctxt "monitoring.ai"
+msgid "AI köməkçi hazırda söndürülüb."
+msgstr "AI köməkçi hazırda söndürülüb."
+
+msgctxt "monitoring.ai"
+msgid "AI xidməti hələ qoşulmayıb (açar təyin edilməyib)."
+msgstr "AI xidməti hələ qoşulmayıb (açar təyin edilməyib)."
+
+msgctxt "monitoring.ai"
+msgid "AI xidməti bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin."
+msgstr "AI xidməti bu gün üçün ümumi limitə çatıb. Sabah yenidən cəhd edin."
+
+msgctxt "monitoring.ai"
+msgid "Saatlıq AI təhlili limitinə çatdınız. Bir az sonra yenidən cəhd edin."
+msgstr "Saatlıq AI təhlili limitinə çatdınız. Bir az sonra yenidən cəhd edin."
+
+msgctxt "monitoring.ai"
+msgid "Başqa istifadəçi kimi baxış rejimində AI təhlili əlçatan deyil."
+msgstr "Başqa istifadəçi kimi baxış rejimində AI təhlili əlçatan deyil."
+
+msgctxt "monitoring.ai"
+msgid "AI xidməti vaxtında cavab vermədi. Yenidən cəhd edin."
+msgstr "AI xidməti vaxtında cavab vermədi. Yenidən cəhd edin."
+
+msgctxt "monitoring.ai"
+msgid "AI xidməti hazırda məşğuldur. Bir az sonra yenidən cəhd edin."
+msgstr "AI xidməti hazırda məşğuldur. Bir az sonra yenidən cəhd edin."
+
+msgctxt "monitoring.ai"
+msgid "AI təhlili alınmadı. Yenidən cəhd edin."
+msgstr "AI təhlili alınmadı. Yenidən cəhd edin."
+
+msgctxt "monitoring.ai"
+msgid "Normal"
+msgstr "Normal"
+
+msgctxt "monitoring.ai"
+msgid "Aşağı"
+msgstr "Aşağı"
+
+msgctxt "monitoring.ai"
+msgid "Orta"
+msgstr "Orta"
+
+msgctxt "monitoring.ai"
+msgid "Yüksək"
+msgstr "Yüksək"
+
+msgctxt "monitoring.ai"
+msgid "Kritik"
+msgstr "Kritik"
+
+msgctxt "organizations.permission.label"
+msgid ""
+"Sistem monitorinqinə baxış (server, xidmətlər, xətalar, təhlükəsizlik "
+"hadisələri)"
+msgstr ""
+"Sistem monitorinqinə baxış (server, xidmətlər, xətalar, təhlükəsizlik "
+"hadisələri)"
+
+msgctxt "exams.template.teacher_exam_detail"
+msgid ""
+"Deactivating stops the exam for everyone: students who are taking it right "
+"now will not be able to save or submit answers. Continue?"
+msgstr ""
+"Deaktiv etsəniz, imtahan hamı üçün dayanır: hazırda imtahan verən tələbələr "
+"cavablarını saxlaya və təhvil verə bilməyəcək. Davam edilsin?"

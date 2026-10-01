@@ -59,6 +59,12 @@ def save_supervision_config_from_form(exam, form_data):
 
     enabled = form_data.get("supervision_enabled") == "on"
 
+    # 2026-10-01 (PROC): qabaqcıl aşkarlama seçimləri Exam.settings-də (miqrasiyasız).
+    # Forma gizli marker göndərmirsə (köhnə klient) seçimlərə toxunulmur.
+    from .proctoring_options import save_proctoring_options_from_form
+
+    save_proctoring_options_from_form(exam, form_data)
+
     config, created = ExamSupervisionConfig.objects.get_or_create(
         exam=exam,
         defaults={"enabled": enabled},

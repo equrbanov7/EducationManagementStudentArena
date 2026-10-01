@@ -6,6 +6,7 @@
 {% block extraCss %} 
     <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/_part1.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_check_attempt/_part2.css' %}">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_proctoring_summary.css' %}?v=20261001-proc">
 {% endblock %}
 
 {% block content %}
@@ -69,6 +70,7 @@
                 {% blocktrans %}Tələbə adı anonim qalır. Qalan vaxt: <span data-review-countdown="{{ identity_window_seconds_left }}">--:--:--</span>{% endblocktrans %}
             </div>
         {% endif %}
+        {% include "exams/teacher/partials/_attempt_proctoring_summary.html" %}
     </div>
 
     <form method="post" id="gradingForm">

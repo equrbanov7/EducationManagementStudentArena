@@ -1,0 +1,79 @@
+/* Müəllimin cəhd səhifəsi — proktorinq hesabatı (2026-10-01, PROC).
+   Partial: exams/teacher/partials/_attempt_proctoring_summary.html */
+
+.proctor-summary {
+    margin: 14px 0;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    background: #fff;
+    padding: 0 14px;
+}
+.proctor-summary--flagged { border-color: #FCA5A5; background: #FEF2F2; }
+.proctor-summary__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 0;
+    cursor: pointer;
+    list-style: none;
+}
+.proctor-summary__head::-webkit-details-marker { display: none; }
+.proctor-summary__title { font-weight: 800; color: #0F172A; display: inline-flex; gap: 8px; align-items: center; }
+.proctor-summary__chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.proctor-chip {
+    font-size: .76rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 3px 10px;
+    background: #F1F5F9;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+    white-space: nowrap;
+}
+.proctor-chip--flag { background: #DC2626; border-color: #DC2626; color: #fff; }
+.proctor-chip--sev-critical,
+.proctor-chip--sev-high { background: #FEE2E2; border-color: #FECACA; color: #991B1B; }
+.proctor-chip--sev-medium { background: #FEF3C7; border-color: #FDE68A; color: #92400E; }
+.proctor-summary__note { font-size: .8rem; color: #64748B; margin: 0 0 10px; }
+.proctor-summary__empty { font-size: .84rem; color: #64748B; margin: 0 0 12px; }
+
+.proctor-tl {
+    list-style: none;
+    margin: 0 0 14px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+.proctor-tl__item {
+    display: grid;
+    grid-template-columns: 76px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-left: 4px solid #CBD5E1;
+    border-radius: 10px;
+    background: #F8FAFC;
+    font-size: .82rem;
+}
+.proctor-tl__item--critical,
+.proctor-tl__item--high { border-left-color: #DC2626; background: #FEF2F2; }
+.proctor-tl__item--medium { border-left-color: #F59E0B; background: #FFFBEB; }
+.proctor-tl__item--low { border-left-color: #0EA5E9; }
+.proctor-tl__time { color: #64748B; font-variant-numeric: tabular-nums; }
+.proctor-tl__label { color: #0F172A; font-weight: 600; overflow-wrap: anywhere; }
+.proctor-tl__tags { display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.proctor-tl__src,
+.proctor-tl__sev,
+.proctor-tl__counts { font-size: .68rem; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #E2E8F0; color: #334155; }
+.proctor-tl__src--signal { background: #EDE9FE; color: #5B21B6; }
+.proctor-tl__counts { background: #FEE2E2; color: #991B1B; }
+
+@media (max-width: 640px) {
+    .proctor-tl__item { grid-template-columns: 1fr; }
+    .proctor-tl__tags { justify-content: flex-start; }
+}

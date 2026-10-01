@@ -244,12 +244,16 @@ def exam_center_attempt_violations(request, room_id, attempt_id):
         pk=attempt_id,
         room_id=room.id,
     )
+    from apps.exams.services.supervision.monitor_enrich import attempt_proctor_detail
+
     incidents = attempt.supervision_incidents.order_by("-timestamp")[:200]
     intervention = get_attempt_intervention(attempt)
     return JsonResponse(
         {
             "student": attempt.user.get_full_name() or attempt.user.username,
             "username": attempt.user.username,
+            # 2026-10-01 (PROC): şəkil/qrup + risk + qayda+siqnal xronologiyası.
+            "proctor": attempt_proctor_detail(attempt, room.organization_id),
             "exam_title": attempt.exam.title,
             "violation_count": attempt.supervision_violation_count,
             "supervision_status": attempt.supervision_status,

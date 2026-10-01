@@ -1,9 +1,11 @@
 """Sistem Monitorinqi — giriş nəzarəti matrisi.
 
-Tələb: BÜTÜN monitorinq API-ları yalnız platforma superadmininə açıqdır.
-Rector/vice-rector/exam-center/HR/dean/chair-head/teacher/student/owner —
-hamısı 403 alır; anonim 401; icazəsiz cəhd SecurityEvent-ə yazılır;
-``is_staff`` bayrağı TƏK BAŞINA giriş vermir.
+2026-10-01 (sahib): OXU API-ları superadmin VƏ ``system.monitoring.view``
+icazəli üzv üçündür. Şablonda açar `*` wildcard-ı ilə ``ikt_rehber`` (RİM
+rəhbəri) və ``rector`` rollarındadır; vice-rector/exam-center/HR/dean/chair-head/
+teacher/student/üzvlüksüz owner — hamısı 403 alır; anonim 401; icazəsiz cəhd
+SecurityEvent-ə yazılır; ``is_staff`` bayrağı TƏK BAŞINA giriş vermir. İnsident
+ƏMƏLLƏRİ hələ də yalnız superadmin üçündür (icazəli üzvlər oxu-only).
 """
 
 from django.contrib.auth import get_user_model
@@ -21,6 +23,7 @@ User = get_user_model()
 #: (istifadəçi adı, membership rol adı, profil rolu)
 ROLE_MATRIX = [
     ("mon_rector", "rector", ProfileRole.MEMBER),
+    ("mon_rim", "ikt_rehber", ProfileRole.MEMBER),
     ("mon_vice", "vice_rector", ProfileRole.MEMBER),
     ("mon_center", "exam_center_head", ProfileRole.MEMBER),
     ("mon_hr", "hr", ProfileRole.MEMBER),
@@ -29,6 +32,9 @@ ROLE_MATRIX = [
     ("mon_teacher", "teacher", ProfileRole.TEACHER),
     ("mon_student", "student", ProfileRole.STUDENT),
 ]
+
+#: `*` wildcard-ı ilə `system.monitoring.view` açarını alan şablon rolları (oxu-only).
+PERMITTED_ROLES = ("rector", "ikt_rehber")
 
 API_NAMES = [
     "monitoring:overview",
@@ -78,10 +84,17 @@ class MonitoringAccessTests(TestCase):
             # Prometheus/Loki test mühitində yoxdur → degraded JSON, amma 200.
             self.assertEqual(response.status_code, 200, name)
 
-    def test_all_org_roles_get_403(self):
+    def test_roles_without_permission_get_403(self):
         for role_name, user in self.role_users.items():
+            if role_name in PERMITTED_ROLES:
+                continue
             response = self._get(user, "monitoring:overview")
             self.assertEqual(response.status_code, 403, f"{role_name} 403 almalı idi")
+
+    def test_permitted_roles_can_read(self):
+        for role_name in PERMITTED_ROLES:
+            response = self._get(self.role_users[role_name], "monitoring:overview")
+            self.assertEqual(response.status_code, 200, f"{role_name} 200 almalı idi")
 
     def test_org_owner_gets_403(self):
         response = self._get(self.owner, "monitoring:overview")
@@ -102,10 +115,11 @@ class MonitoringAccessTests(TestCase):
         self.assertGreater(after, before)
 
     def test_incident_action_requires_superadmin(self):
-        client = Client()
-        client.force_login(self.role_users["rector"])
-        response = client.post(reverse("monitoring:incident_action", args=[1]), {"action": "acknowledge"})
-        self.assertEqual(response.status_code, 403)
+        for role_name in PERMITTED_ROLES:
+            client = Client()
+            client.force_login(self.role_users[role_name])
+            response = client.post(reverse("monitoring:incident_action", args=[1]), {"action": "acknowledge"})
+            self.assertEqual(response.status_code, 403, role_name)
 
     def test_section_not_in_allowed_sections_for_regular_user(self):
         from apps.accounts.views._helpers.rbac import _role_capabilities

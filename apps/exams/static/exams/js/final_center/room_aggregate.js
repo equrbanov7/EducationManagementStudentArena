@@ -124,6 +124,23 @@
         if (vioModalSub) {
             vioModalSub.textContent = (d.student || "") + (d.exam_title ? " · " + d.exam_title : "");
         }
+        // 2026-10-01 (PROC): şəkil/qrup kartı + qayda VƏ siqnal xronologiyası (ciddiliklə).
+        var P = window.FXCProctor;
+        if (P && d.proctor) {
+            renderRemovalBanner(d);
+            if (vioModalBody) {
+                vioModalBody.innerHTML = P.identityCardHtml(d.proctor.identity, d.proctor) +
+                    '<div class="fxc-vio-modal__count">' + esc(d.violation_count || 0) + " " +
+                        esc(t("violations.word", gettext("pozuntu"))) + "</div>" +
+                    P.timelineSection(d.proctor.timeline);
+            }
+            return;
+        }
+        renderRemovalBanner(d);
+        renderLegacyIncidents(d);
+    }
+
+    function renderRemovalBanner(d) {
         if (vioModalRemoved) {
             if (d.removal && d.removal.is_terminal) {
                 vioModalRemoved.hidden = false;
@@ -135,6 +152,9 @@
                 vioModalRemoved.innerHTML = "";
             }
         }
+    }
+
+    function renderLegacyIncidents(d) {
         if (!vioModalBody) return;
         var incidents = d.incidents || [];
         if (!incidents.length) {
@@ -208,6 +228,24 @@
         return "idle";
     }
 
+    function proctorCellClass(s) {
+        var cls = "";
+        if (s.flagged) cls += " fxc-cell--flagged";
+        var hb = window.FXCProctor ? window.FXCProctor.heartbeatInfo(s.heartbeat) : null;
+        if (hb) cls += " fxc-cell--hb-" + hb.cls;
+        return cls;
+    }
+
+    function needsAttention(s) {
+        var hb = window.FXCProctor ? window.FXCProctor.heartbeatInfo(s.heartbeat) : null;
+        return (s.violation_count && s.violation_count > 0) || s.supervision_status === "locked" ||
+            s.flagged || !!hb || (s.signal_count && s.signal_count > 0);
+    }
+
+    function attentionRank(s) {
+        return (s.flagged ? 1000 : 0) + (s.risk_score || 0) * 10 + (s.violation_count || 0);
+    }
+
     function renderStats() {
         if (!snapshot || !statsEl) return;
         var c = snapshot.counts || {};
@@ -268,7 +306,8 @@
         }
         if (exam && String(s.session_id) !== String(exam)) return false;
         if (text) {
-            var hay = s.name + " " + s.username + " " + (s.exam_title || "");
+            var hay = s.name + " " + s.username + " " + (s.exam_title || "") + " " +
+                (s.group || "") + " " + (s.student_number || "");
             if (!currentMatch(text)(hay)) return false;
         }
         return true;
@@ -297,10 +336,16 @@
                 ? 'data-ticket="' + esc(s.ticket_id) + '" data-session="' + esc(s.session_id) + '" '
                 : "";
             var attemptAttr = s.attempt_id ? 'data-attempt="' + esc(s.attempt_id) + '" ' : "";
-            return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + '" ' +
+            // 2026-10-01 (PROC): tələbənin şəkli (yoxdursa baş hərflər) — nəzarətçi
+            // hücrəyə baxıb üzü yoxlayır; şübhəli / siqnalı kəsilmiş hücrə vurğulanır.
+            var P = window.FXCProctor;
+            var extra = proctorCellClass(s);
+            var title = s.name + (s.group ? " · " + s.group : "") + " · " + (s.exam_title || "");
+            return '<button type="button" class="fxc-cell fxc-cell--' + cellStateClass(s) + extra + '" ' +
                 ticketAttrs + attemptAttr +
-                'title="' + esc(s.name) + " · " + esc(s.exam_title || "") + '">' +
+                'title="' + esc(title) + '">' +
                 badges +
+                (P ? P.avatarHtml(s, "sm", "fxc-cell-ava") : "") +
                 '<span class="fxc-cell-num">' + esc(("0" + label).slice(-2)) + "</span>" +
                 '<span class="fxc-cell-ini">' + esc(subj) + "</span>" +
                 "</button>";
@@ -309,9 +354,8 @@
 
     function renderViolations() {
         if (!vioListEl) return;
-        var list = (snapshot && snapshot.students || []).filter(function (s) {
-            return (s.violation_count && s.violation_count > 0) || s.supervision_status === "locked";
-        }).sort(function (a, b) { return (b.violation_count || 0) - (a.violation_count || 0); });
+        var list = (snapshot && snapshot.students || []).filter(needsAttention)
+            .sort(function (a, b) { return attentionRank(b) - attentionRank(a); });
 
         if (vioCountEl) vioCountEl.textContent = list.length;
         // Yeni pozuntu meydana çıxanda paneli bir anlıq vurğula (diqqət çək).
@@ -336,18 +380,25 @@
                         'data-attempt="' + esc(s.attempt_id) + '">' +
                         '<i class="fas fa-eye"></i> ' + esc(t("violations.view", gettext("Bax"))) + "</button></div>"
                 : "";
+            var P = window.FXCProctor;
+            var who = P
+                ? '<span class="fxc-vio-who">' + P.avatarHtml(s, "sm") +
+                    '<span class="fxc-vio-who__txt"><span class="fxc-vio-name">' + esc(s.name) + "</span>" +
+                    '<span class="fxc-vio-meta">' + P.metaLine(s) + "</span></span></span>"
+                : '<span class="fxc-vio-name">' + esc(s.name) + "</span>";
+            var pbadges = P ? '<div class="fxc-vio-pbadges">' + P.badgesHtml(s) + "</div>" : "";
             if (!s.ticket_id) {
                 // Biletsiz (PIN) cəhd — bilet əməliyyatı yoxdur, amma "Bax" ilə
                 // hansı qaydaların pozulduğu detal modalında göstərilir.
-                return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") + '">' +
-                    '<div class="fxc-vio-top">' +
-                        '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
+                return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") +
+                    (s.flagged ? " fxc-vio-row--flagged" : "") + '">' +
+                    '<div class="fxc-vio-top">' + who +
                         '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
                             esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                     "</div>" +
                     '<div class="fxc-vio-sub">' + esc(subj) +
                         (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
-                    detailBtn +
+                    pbadges + detailBtn +
                     "</div>";
             }
             var mainBtn = locked
@@ -357,14 +408,15 @@
                 : '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-danger-ghost" data-vio-act="block" ' +
                     'data-session="' + esc(s.session_id) + '" data-ticket="' + esc(s.ticket_id) + '">' +
                     '<i class="fas fa-ban"></i> ' + esc(t("violations.block", gettext("Blokla"))) + "</button>";
-            return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") + '">' +
-                '<div class="fxc-vio-top">' +
-                    '<span class="fxc-vio-name">' + esc(s.name) + "</span>" +
+            return '<div class="fxc-vio-row' + (locked ? " fxc-vio-row--locked" : "") +
+                (s.flagged ? " fxc-vio-row--flagged" : "") + '">' +
+                '<div class="fxc-vio-top">' + who +
                     '<span class="fxc-vio-count-badge">' + esc(s.violation_count || 0) + " " +
                         esc(t("violations.word", gettext("pozuntu"))) + "</span>" +
                 "</div>" +
                 '<div class="fxc-vio-sub">' + esc(subj) +
                     (locked ? ' · <b>' + esc(t("violations.locked", gettext("Dayandırılıb"))) + "</b>" : "") + "</div>" +
+                pbadges +
                 '<div class="fxc-vio-actions">' +
                     '<button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-vio-act="detail" ' +
                         'data-attempt="' + esc(s.attempt_id || "") + '">' +

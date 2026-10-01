@@ -191,6 +191,8 @@ def materialise_rooms(context: RehearsalContext, decisions) -> dict[str, str]:
                     building=decision.building,
                     capacity=decision.capacity,
                     is_active=True,
+                    # Dərs otağıdır, imtahan zalı deyil (2026-10-01: zal ayrıca işarələnir).
+                    is_exam_hall=False,
                 )
                 for decision in missing
             ]

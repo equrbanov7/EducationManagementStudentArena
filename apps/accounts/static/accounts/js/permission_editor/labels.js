@@ -26,7 +26,8 @@
         analytics: "analytics",
         qa: "qa",
         audit: "audit",
-        people: "people"
+        people: "people",
+        system: "system"
     };
 
     var MODULE_LABELS = {
@@ -48,7 +49,8 @@
             analytics: "Analitika",
             qa: "Keyfiyyət",
             audit: "Audit",
-            people: "Müəllim və tələbə kataloqu"
+            people: "Müəllim və tələbə kataloqu",
+            system: "Sistem monitorinqi"
         },
         en: {
             org: "Organization",
@@ -68,7 +70,8 @@
             analytics: "Analytics",
             qa: "Quality",
             audit: "Audit",
-            people: "Teacher & student directory"
+            people: "Teacher & student directory",
+            system: "System monitoring"
         },
         ru: {
             org: "Организация",
@@ -88,7 +91,8 @@
             analytics: "Аналитика",
             qa: "Качество",
             audit: "Аудит",
-            people: "Каталог преподавателей и студентов"
+            people: "Каталог преподавателей и студентов",
+            system: "Мониторинг системы"
         },
         tr: {
             org: "Organizasyon",
@@ -108,7 +112,8 @@
             analytics: "Analitik",
             qa: "Kalite",
             audit: "Denetim",
-            people: "Öğretim elemanı ve öğrenci kataloğu"
+            people: "Öğretim elemanı ve öğrenci kataloğu",
+            system: "Sistem izleme"
         }
     };
 

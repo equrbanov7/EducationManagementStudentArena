@@ -473,7 +473,9 @@
     }
 
     .question-grid {
-        grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
+        /* 2026-10-01 (EXAMQA R7): auto-fit az sualda xanaları nəhəng kvadratlara uzadırdı (390 px) —
+           auto-fill boş sütunları saxlayır, xanalar 44 px ətrafında qalır. */
+        grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
     }
 
     .exam-footer {
