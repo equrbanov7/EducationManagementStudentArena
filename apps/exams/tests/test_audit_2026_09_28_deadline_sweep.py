@@ -59,7 +59,7 @@ class GraceWindowIsHonouredEverywhereTests(TestCase):
 
     def setUp(self):
         self.client = _student_client("a2grace_student", self.org)
-        self.client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        self.client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         self.attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         self.take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
         self.assertEqual(self.client.get(self.take_url).status_code, 200)
@@ -265,7 +265,7 @@ class NoDurationExamClosesAtEndTests(TestCase):
 
     def test_post_after_end_plus_grace_expires_without_saving(self):
         client = _student_client("a2nodur_student", self.org)
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         self.assertEqual(client.get(take_url).status_code, 200)

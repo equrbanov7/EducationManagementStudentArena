@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load exam_start static i18n %}
 {% block title %}{% trans "title" context "accounts.assigned_exams_page" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
@@ -53,7 +53,7 @@
                         <i class="fas fa-lock me-1"></i>{% trans "start_with_code" context "accounts.assigned_exams_page" %}
                     </button>
                     {% else %}
-                    <a href="{% url 'exams:start_exam' exam.slug %}" class="btn btn-primary btn-sm">
+                    <a href="{% url 'exams:start_exam' exam.slug %}?si={% exam_start_intent exam %}" class="btn btn-primary btn-sm">
                         <i class="fas fa-play me-1"></i>{% trans "start" context "accounts.assigned_exams_page" %}
                     </a>
                     {% endif %}

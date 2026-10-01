@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% comment %}EXAMQA R1 (2026-10-01): tokensiz start linki (məs. kənardan göndərilmiş link) cəhdi
+DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (POST + CSRF). Forma eyni URL-ə
+(query: next / trial / language saxlanılır) göndərilir. Bax apps/exams/services/start_intent.py.{% endcomment %}
+{% block title %}{% trans "Start the exam?" context "exams.start_confirm" %} — {{ site_brand_name }}{% endblock %}
+
+{% block extraHead %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261001-1">
+{% endblock %}
+
+{% block content %}
+<section class="exam-start-confirm" aria-labelledby="exam-start-confirm-title">
+  <div class="exam-start-confirm__icon" aria-hidden="true"><i class="fas fa-play"></i></div>
+  <h1 id="exam-start-confirm-title" class="exam-start-confirm__title">
+    {% trans "Start the exam?" context "exams.start_confirm" %}
+  </h1>
+  <p class="exam-start-confirm__exam">{{ exam.title }}</p>
+  <p class="exam-start-confirm__text">
+    {% trans "When you start, an attempt is created and the timer begins. Start only when you are ready." context "exams.start_confirm" %}
+  </p>
+  <form method="post" action="{{ request.get_full_path }}" class="exam-start-confirm__actions">
+    {% csrf_token %}
+    <button type="submit" class="exam-start-confirm__btn exam-start-confirm__btn--primary">
+      <i class="fas fa-play" aria-hidden="true"></i>
+      {% trans "Start the exam" context "exams.start_confirm" %}
+    </button>
+    <a href="{{ back_url }}" class="exam-start-confirm__btn exam-start-confirm__btn--ghost">
+      {% trans "Back" context "exams.start_confirm" %}
+    </a>
+  </form>
+</section>
+{% endblock %}

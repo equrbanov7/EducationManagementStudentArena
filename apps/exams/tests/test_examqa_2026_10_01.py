@@ -193,7 +193,7 @@ class SupervisionLockWriteGuardTests(TestCase):
 
     def setUp(self):
         self.client = _student_client("eqlock_student", self.org)
-        self.client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        self.client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         self.attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         self.url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": self.attempt.id})
         self.assertEqual(self.client.get(self.url).status_code, 200)
@@ -279,7 +279,7 @@ class AttemptIdorTests(TestCase):
 
     def test_other_student_cannot_touch_attempt_result_or_timer(self):
         owner = _student_client("eqidor_student", self.org)
-        owner.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        owner.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         answer = attempt.answers.order_by("id").first()
         intruder = _student_client("eqidor_other", self.org)
@@ -301,7 +301,7 @@ class AttemptIdorTests(TestCase):
         foreign_question = other_exam.questions.get()
         foreign_correct = foreign_question.options.get(is_correct=True)
         client = _student_client("eqidor_student", self.org)
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         response = client.post(

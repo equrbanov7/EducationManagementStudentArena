@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load exam_start static i18n %}
 
 {% block title %}{% trans "page_title" context "exams.template.student_exam_list" %}{% endblock %}
 
@@ -235,7 +235,7 @@
                                 <button type="button"
                                         class="ex-btn primary"
                                         data-open-exam-start-modal
-                                        data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                        data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
                                         data-exam-slug="{{ exam.slug }}"
                                         data-exam-title="{{ exam.title }}"
                                         data-exam-type="{{ exam.get_exam_type_display }}"
@@ -252,10 +252,10 @@
                                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                                 </button>
                             {% else %}
-                                <a href="{% url 'exams:start_exam' exam.slug %}"
+                                <a href="{% url 'exams:start_exam' exam.slug %}?si={% exam_start_intent exam %}"
                                    class="ex-btn primary"
                                    data-open-exam-start-modal
-                                   data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                   data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
                                    data-exam-slug="{{ exam.slug }}"
                                    data-exam-title="{{ exam.title }}"
                                    data-exam-type="{{ exam.get_exam_type_display }}"

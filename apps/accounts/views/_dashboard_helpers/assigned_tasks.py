@@ -12,7 +12,7 @@ from django.utils.translation import pgettext
 from apps.assignments.models import Assignment
 from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
-from apps.exams.public import ATTEMPT_FINISHED_STATUSES, student_final_exam_context
+from apps.exams.public import ATTEMPT_FINISHED_STATUSES, start_intent_token, student_final_exam_context
 from apps.labs.models import Lab
 from apps.projects.models import Project
 from core.search_text import tolerant_match
@@ -289,6 +289,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                     reverse("exams:start_exam", kwargs={"slug": exam.slug}),
                     from_section="assigned-exams",
                     assigned_type=filter_type,
+                    # EXAMQA R1 (2026-10-01): platformanın öz «Başla» linki — tokensiz GET cəhd yaratmır.
+                    si=start_intent_token(user.pk, exam.pk),
                 ),
                 assigned_at=(final_ctx.get("window_start") if has_ticket else exam.start_datetime) or exam.created_at,
                 deadline=final_ctx.get("window_end") if has_ticket else exam.end_datetime,
