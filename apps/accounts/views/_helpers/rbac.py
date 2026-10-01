@@ -318,7 +318,7 @@ def _role_capabilities(user, profile):
             "journal-close",  # semestr sonu toplu jurnal bağlaması (RİM)
             "exam-chance",  # imtahan şansı ver (ikinci şans — imtahan mərkəzi)
             "superadmin-contact-messages",  # public contact form inbox
-            "system-monitoring",  # Sistem Monitorinqi (yalnız superadmin; server-side qorunur)
+            "system-monitoring",  # Sistem Monitorinqi (superadmin + `system.monitoring.view`, 2026-10-01; server-side qorunur)
             "pending-post-approvals",
             "blog",
             "edit-profile",

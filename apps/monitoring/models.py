@@ -1,7 +1,10 @@
 """Sistem Monitorinqi modelləri: Incident + SecurityEvent.
 
 Platforma-səviyyə cədvəllərdir (tenant-scoped deyil) — onlara giriş yalnız
-superadmin API-ları üzərindəndir (permissions.superadmin_monitoring_required).
+monitorinq API-ları üzərindəndir: oxu superadmin + ``system.monitoring.view``
+icazəli üzv (RİM rəhbəri, 2026-10-01; ``SecurityEvent`` ona öz təşkilatı +
+org-suz sətirlərlə süzülür), insident əməlləri isə superadmin-only
+(``permissions.monitoring_view_required`` / ``superadmin_monitoring_required``).
 Heç bir sahədə həssas məzmun (parol, token, PIN, imtahan cavabı) saxlanmır;
 ``request_info`` yalnız təhlükəsiz metadata (path, method, user-agent) daşıyır.
 """
@@ -118,7 +121,7 @@ class SecurityEventType(models.TextChoices):
 
 
 class SecurityEvent(models.Model):
-    """Superadmin-only Təhlükəsizlik Hadisələri bölməsinin qeydi."""
+    """Sistem Monitorinqinin «Təhlükəsizlik» bölməsinin qeydi (superadmin + icazəli üzv)."""
 
     event_type = models.CharField(max_length=40, choices=SecurityEventType.choices, db_index=True)
     severity = models.CharField(max_length=16, choices=Severity.choices, default=Severity.LOW)

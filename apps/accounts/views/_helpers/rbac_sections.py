@@ -282,7 +282,18 @@ def apply_permission_section_gates(
         and has_permission(permissions or _effective_permissions(user, organization), "account.password_reset")
     )
 
+    # «Sistem Monitorinqi» (sahib 2026-10-01) — `system.monitoring.view`. Parol
+    # sıfırlama ilə EYNİ naxış: superadmin VƏ YA üzvlük icazəsində açar (RİM rəhbərinə
+    # miqrasiya 0056 + `*` şablonu ilə verilir). «privileged» görünürlüyü QƏSDƏN
+    # işlədilmir — açar rol redaktorundan götürüləndə menyu da itməlidir. Faktiki qapı
+    # hər API-dadır (`apps/monitoring/permissions.monitoring_view_required`).
+    can_view_monitoring = bool(is_superadmin) or (
+        organization is not None
+        and has_permission(permissions or _effective_permissions(user, organization), "system.monitoring.view")
+    )
+
     for enabled, section in (
+        (can_view_monitoring, "system-monitoring"),
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
         (can_view_people_teachers, "people-teachers"),
@@ -377,6 +388,7 @@ def apply_permission_section_gates(
         "can_view_survey_results": can_view_survey_results,
         "can_manage_surveys": can_manage_surveys,
         "can_reset_passwords": can_reset_passwords,
+        "can_view_monitoring": can_view_monitoring,
     }
 
 
