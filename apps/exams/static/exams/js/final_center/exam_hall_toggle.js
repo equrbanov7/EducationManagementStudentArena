@@ -44,7 +44,8 @@
         if (window.EMSConfirm && typeof window.EMSConfirm.open === "function") {
             return window.EMSConfirm.open(options);
         }
-        return Promise.resolve(window.confirm(message || ""));
+        // EMSConfirm yoxdursa (skript sırası) native confirm YOX — layihə qaydası; əməliyyat edilmir.
+        return Promise.resolve(false);
     }
 
     function setHidden(nodes, hidden) {
