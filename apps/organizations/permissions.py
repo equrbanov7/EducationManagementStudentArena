@@ -25,6 +25,7 @@ from core.permissions import (  # noqa: F401
 from .permissions_account import merge_account_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
+from .permissions_system import merge_system_permissions
 
 # Permission definitions by category
 #
@@ -459,6 +460,8 @@ merge_stage2(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABEL
 merge_stage3(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Parol sıfırlama» (2026-09-30) — `account.password_reset` «users» kateqoriyasına.
 merge_account_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Sistem monitorinqi» (2026-10-01) — `system.monitoring.view` (RİM rəhbəri, oxu-only).
+merge_system_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

@@ -1,7 +1,9 @@
 {% load i18n %}
 {% comment %}Zal sətrinin əməlləri: «Ətraflı» zalın çekmecəsini (kompüterlər + bütün
 əməllər) açır; qələm birbaşa ortaq zal dialoqunu sətir dəyərləri ilə açır
-(`data-tof-prefill` JSON-u viewda qurulub). Kontekst: `row.room`.{% endcomment %}
+(`data-tof-prefill` JSON-u viewda qurulub). Zal bayrağı düyməsi (AJAX) ortaq
+`exams/exam_center/halls/_toggle.html`-dir. Kontekst: `row.room`.{% endcomment %}
+{% include "exams/exam_center/halls/_toggle.html" with room=row.room %}
 <button type="button" class="ems-btn ems-btn--sm sar-row-open" data-ems-overlay-open="{{ row.room.drawer_id }}">
     <i class="fas fa-desktop" aria-hidden="true"></i>
     {% trans "Ətraflı" context "accounts.superadmin_exam_rooms" %}

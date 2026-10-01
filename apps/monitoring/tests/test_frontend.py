@@ -7,6 +7,7 @@ TEMPLATE = ROOT / "templates" / "accounts" / "profile" / "sections" / "superadmi
 CSS = ROOT / "static" / "accounts" / "css" / "profile" / "sections" / "system_monitoring.css"
 JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring.js"
 RENDERERS_JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring_renderers.js"
+FORMAT_JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring_format.js"
 
 
 class MonitoringFrontendTests(SimpleTestCase):
@@ -17,6 +18,7 @@ class MonitoringFrontendTests(SimpleTestCase):
         cls.css = CSS.read_text(encoding="utf-8")
         cls.js = JS.read_text(encoding="utf-8")
         cls.renderers = RENDERERS_JS.read_text(encoding="utf-8")
+        cls.format = FORMAT_JS.read_text(encoding="utf-8")
 
     def test_profile_fragment_owns_static_assets_and_ajax_panel(self):
         self.assertIn('data-profile-section-panel="system-monitoring"', self.template)
@@ -51,12 +53,16 @@ class MonitoringFrontendTests(SimpleTestCase):
         self.assertIn("AbortController", self.js)
         self.assertIn("inFlight.key === requestKey", self.js)
         self.assertIn("document.hidden", self.js)
-        self.assertIn("}, 60000);", self.js)
+        # 2026-10-01: 30 s addım (xülasə hər addımda, ətraflı tablar hər 2-ci addımda).
+        self.assertIn("}, 30000);", self.js)
+        self.assertIn('activeTab === "summary" || tick % 2 === 0', self.js)
 
     def test_paginated_tabs_send_page_and_page_size(self):
         self.assertIn("page_size: 20", self.js)
         self.assertIn("data-smx-page", self.js)
-        self.assertIn("source.total_pages", self.js)
+        # 2026-10-01: səhifələmə markup-u format moduluna köçdü (`pagerMarkup`).
+        self.assertIn("source.total_pages", self.format)
+        self.assertIn("F.pagerMarkup", self.js)
         self.assertIn("params.before_ns = logCursors[states.logs.page]", self.js)
         self.assertIn("data.next_cursor_ns", self.js)
         self.assertIn("states.logs.page > 1", self.js)

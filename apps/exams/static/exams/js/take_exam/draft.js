@@ -65,6 +65,9 @@
         return {
             version: 1,
             updatedAt: Date.now(),
+            // EXAMQA 2026-10-01: draft hansı server revision-una nisbətən yazılıb
+            // (bərpa zamanı OCC yoxlaması üçün — bax restoreLocalDraft).
+            baseRevision: ctx.autosaveRevisionField ? String(ctx.autosaveRevisionField.value || "0") : null,
             currentIndex: ctx.currentIndex,
             textAnswers: textAnswers,
             selectedAnswers: selectedAnswers
@@ -209,6 +212,22 @@
                 return;
             }
 
+            // EXAMQA 2026-10-01: draft yalnız yazıldığı server revision-una nisbətən
+            // etibarlıdır. Başqa tab bu arada yazıbsa (revision irəliləyib), köhnə
+            // tabın lokal draft-ı reload-dan sonra serverdəki daha yeni cavabları
+            // silirdi (məs. digər tabda seçilmiş variantı «boş» edirdi) — EXAM-P1-06
+            // OCC-si reload yolu ilə yan keçilirdi. Belə draft atılır, server
+            // vəziyyəti göstərilir. baseRevision-suz köhnə draft əvvəlki kimi bərpa olunur.
+            if (
+                draft.baseRevision !== undefined &&
+                draft.baseRevision !== null &&
+                ctx.autosaveRevisionField &&
+                String(draft.baseRevision) !== String(ctx.autosaveRevisionField.value || "0")
+            ) {
+                ns.draft.clearLocalDraft(ctx);
+                return;
+            }
+
             var restored = false;
 
             Object.entries(draft.textAnswers || {}).forEach(function (entry) {
@@ -257,7 +276,7 @@
         },
 
         queueAutoSave: function (ctx, delayMs) {
-            if (ctx.autosaveConflict || ctx.autoSaveTimer) {
+            if (ctx.autosaveConflict) {
                 return;
             }
 
@@ -268,8 +287,23 @@
             var effectiveDelayMs = delayMs === undefined
                 ? ctx.autoSaveDelayMs
                 : Math.max(250, Number(delayMs) || 0);
+            var dueAt = Date.now() + effectiveDelayMs;
+            if (ctx.autoSaveTimer) {
+                // EXAMQA 2026-10-01: uğursuz yazıdan (şəbəkə kəsintisi, 5xx) sonra
+                // `.catch` 30–40 s-lik fallback timer qoyur; «online» flush-u onu
+                // silmir. Əvvəl mövcud timer hər yeni cavabın 1 s-lik debounce-unu
+                // udurdu → cavab 40 s-ə qədər yalnız brauzerdə qalırdı. İndi daha
+                // tez düşən sorğu üstün gəlir, daha gec olan saxlanmır. Vaxtı
+                // bilinməyən timer (məs. taymer-sinxron retry-ı) toxunulmaz qalır.
+                if (!ctx.autoSaveDueAt || ctx.autoSaveDueAt <= dueAt) {
+                    return;
+                }
+                clearTimeout(ctx.autoSaveTimer);
+            }
+            ctx.autoSaveDueAt = dueAt;
             ctx.autoSaveTimer = setTimeout(function () {
                 ctx.autoSaveTimer = null;
+                ctx.autoSaveDueAt = 0;
                 ns.draft.flushAutoSave(ctx);
             }, effectiveDelayMs);
         },

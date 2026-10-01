@@ -187,7 +187,10 @@ REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES = tuple(
             # 2026-09-29 (LX-BE yük testi): canlı imtahanın ANONİM oyunçu POST-ları — eyni NAT
             # İP + eyni telefon modeli bir kilidə düşürdü (join p95 7.1 s). Öz limitləri və DB
             # sətir kilidləri var; host (/live/host/) yolları növbədə qalır.
-            "/live/join/,/live/play/,/live/wait/"
+            "/live/join/,/live/play/,/live/wait/,"
+            # 2026-10-01 (PROC): imtahan nəzarəti heartbeat/siqnalları autosave-in arxasında
+            # növbəyə düşməsin — öz sürət limitləri var, yalnız keşə/ProctoringLog-a yazırlar.
+            "/exams/supervision/api/heartbeat/,/exams/supervision/api/signal/"
         ),
     ).split(",")
     if prefix.strip()

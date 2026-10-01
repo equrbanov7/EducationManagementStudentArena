@@ -1,12 +1,14 @@
-"""Sistem Monitorinqi URL-ləri (hamısı superadmin-only API-lardır)."""
+"""Sistem Monitorinqi URL-ləri — oxu API-ları superadmin + `system.monitoring.view`, insident əməlləri superadmin-only."""
 
 from django.urls import path
 
-from . import views
+from . import views, views_summary
 
 app_name = "monitoring"
 
 urlpatterns = [
+    path("summary/", views_summary.summary_api, name="summary"),
+    path("ai-analysis/", views_summary.ai_analysis_api, name="ai_analysis"),
     path("overview/", views.overview_api, name="overview"),
     path("server/", views.server_api, name="server"),
     path("containers/", views.containers_api, name="containers"),

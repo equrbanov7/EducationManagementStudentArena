@@ -50,6 +50,10 @@ from apps.exams.services.final_center import (  # noqa: F401
     update_computer,
     user_supervises_final_sessions,
 )
+from apps.exams.services.final_center.halls import (  # noqa: F401
+    can_designate_exam_halls,
+    exam_hall_scope_q,
+)
 from apps.exams.services.grading import (  # noqa: F401
     calculate_attempt_score,
 )
@@ -91,6 +95,7 @@ __all__ = [
     "ATTEMPT_FINISHED_STATUSES",
     "DEFAULT_EXAM_LANGUAGE",
     "ExamRoom",
+    "exam_hall_scope_q",
     "ExamRoomComputer",
     "RoomAdminError",
     "StudentGroupForm",
@@ -112,6 +117,7 @@ __all__ = [
     "calculate_attempt_score",
     "can_create_question_bank",
     "can_manage_exam_questions",
+    "can_designate_exam_halls",
     "can_manage_exam_rooms",
     "can_manage_final_exam_content",
     "ensure_can_manage_exam_rooms",

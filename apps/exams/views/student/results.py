@@ -178,7 +178,10 @@ def exam_result(request, slug, attempt_id):
     exam_intervention = get_attempt_intervention(attempt)
     if not attempt.can_view_result:
         message = (
-            "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib."
+            pgettext(
+                "exams.view.student.result.message",
+                "Bu imtahanın nəticəsi müəllim tərəfindən tələbələrdən gizlədilib.",
+            )
             if getattr(attempt, "result_hidden_by_teacher", False)
             else pgettext(
                 "exams.view.student.result.message",
@@ -198,6 +201,9 @@ def exam_result(request, slug, attempt_id):
             status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .exclude(id=attempt.id)
+        # EXAMQA 2026-10-01: görünürlük/URL/bal xülasəsi hər cəhddə ``attempt.exam``-a
+        # baxır — select_related olmadan əvvəlki cəhd başına əlavə sorğu (N+1) gedirdi.
+        .select_related("exam")
         .order_by("-started_at")
     )
     previous_attempts = annotate_attempt_result_visibility(previous_attempts)
@@ -400,6 +406,9 @@ def student_exam_history(request):
     search_query = (request.GET.get("q") or "").strip()
     exam = None
 
+    # EXAMQA 2026-10-01: cavab/variant prefetch-i silindi — şablon onları oxumur;
+    # bal ``attach_test_result_summaries``-in öz toplu sorğusundan gəlir. Əvvəl hər
+    # səhifədə 12 cəhdin BÜTÜN cavab+variantları boşuna yüklənirdi.
     attempts = (
         ExamAttempt.objects.filter(
             user=request.user,
@@ -407,7 +416,6 @@ def student_exam_history(request):
             status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .select_related("exam")
-        .prefetch_related("answers__question__options", "answers__selected_options")
         .order_by("-started_at")
     )
 

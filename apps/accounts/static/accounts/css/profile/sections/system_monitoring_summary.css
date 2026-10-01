@@ -1,0 +1,585 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   system_monitoring_summary.css — «Ümumi vəziyyət» tabı + «AI ilə təhlil et»
+   (sahib 2026-10-01: RİM rəhbəri üçün «tam aydın, professional» xülasə).
+
+   Tokenlər `design-tokens.css`-dən (--ems-*); KPI kartları və xronologiya ortaq
+   `ems_ui` komponentləridir (`.ems-kpi`, `.ems-tl`) — burada yalnız bölməyə xas
+   düzülüş var. 320–1440 px: şəbəkə auto-fit, dar ekranda tək sütun.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.smx-sum {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+/* ── Status banneri ─────────────────────────────────────────────────────── */
+.smx-hero {
+    --smx-hero-accent: var(--ems-success-600);
+    --smx-hero-bg: var(--ems-success-bg);
+    --smx-hero-bd: var(--ems-success-bd);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--ems-sp-6);
+    align-items: start;
+    padding: 18px 20px;
+    border: 1px solid var(--smx-hero-bd);
+    border-left: 5px solid var(--smx-hero-accent);
+    border-radius: var(--ems-r-2xl);
+    background: var(--smx-hero-bg);
+}
+
+.smx-hero--warning {
+    --smx-hero-accent: var(--ems-warning-600);
+    --smx-hero-bg: var(--ems-warning-bg);
+    --smx-hero-bd: var(--ems-warning-bd);
+}
+
+.smx-hero--problem {
+    --smx-hero-accent: var(--ems-danger-600);
+    --smx-hero-bg: var(--ems-danger-bg);
+    --smx-hero-bd: var(--ems-danger-bd);
+}
+
+.smx-hero__icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--ems-bg);
+    color: var(--smx-hero-accent);
+    font-size: 24px;
+    box-shadow: var(--ems-sh-card);
+}
+
+.smx-hero__eyebrow {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.smx-hero__title {
+    margin: 4px 0 2px;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    line-height: 1.25;
+}
+
+.smx-hero__summary {
+    margin: 0;
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-md);
+}
+
+.smx-hero__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.smx-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin: var(--ems-sp-5) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.smx-reason {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--ems-sp-4);
+    align-items: start;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.smx-reason__badge {
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-100);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.smx-reason--problem .smx-reason__badge {
+    background: var(--ems-danger-100);
+    color: var(--ems-danger-strong);
+}
+
+.smx-reason__text p {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+}
+
+.smx-reason__text .smx-reason__hint {
+    margin-top: 2px;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+    font-weight: 400;
+}
+
+/* ── «Ətraflı →» keçidi ─────────────────────────────────────────────────── */
+.smx-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 4px;
+    border: 0;
+    border-radius: var(--ems-r-sm);
+    background: none;
+    color: var(--ems-link);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.smx-link:hover {
+    color: var(--ems-link-hover);
+    text-decoration: underline;
+}
+
+.smx-link:focus-visible {
+    outline: none;
+    box-shadow: var(--ems-sh-focus);
+}
+
+/* ── Əsas faktlar (ems_ui KPI) ──────────────────────────────────────────── */
+.smx-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+    gap: var(--ems-sp-5);
+    margin-bottom: 0;
+}
+
+.smx-kpi .ems-kpi__value {
+    font-size: var(--ems-fs-2xl);
+}
+
+.smx-kpi--live {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+}
+
+.smx-mono {
+    font-family: var(--ems-ff-mono, ui-monospace, Menlo, monospace);
+    font-size: var(--ems-fs-lg);
+    overflow-wrap: anywhere;
+}
+
+/* ── Kart şəbəkəsi ──────────────────────────────────────────────────────── */
+.smx-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.smx-box {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+
+.smx-box--wide {
+    grid-column: 1 / -1;
+}
+
+.smx-box__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.smx-box__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+}
+
+.smx-box__title i {
+    color: var(--ems-primary-600);
+}
+
+.smx-box__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    padding: 14px 16px 16px;
+    min-width: 0;
+}
+
+.smx-box__caption {
+    margin: 0;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.smx-muted {
+    margin: 0;
+    color: var(--ems-text-muted);
+}
+
+.smx-ok-line i {
+    color: var(--ems-success-600);
+}
+
+/* ── Siyahılar (xidmətlər, backup) ──────────────────────────────────────── */
+.smx-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.smx-list__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: 9px 0;
+    border-top: 1px solid var(--ems-border);
+}
+
+.smx-list__row:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.smx-list__main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.smx-list__name {
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.smx-list__detail {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    overflow-wrap: anywhere;
+}
+
+/* ── Faiz zolaqları ─────────────────────────────────────────────────────── */
+.smx-meter__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+}
+
+.smx-meter__head b {
+    color: var(--ems-text);
+}
+
+.smx-meter__track {
+    height: 8px;
+    margin-top: 6px;
+    overflow: hidden;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+}
+
+.smx-meter__fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ems-success-600);
+    transition: width 0.4s ease;
+}
+
+.smx-meter--warning .smx-meter__fill {
+    background: var(--ems-warning-500);
+}
+
+.smx-meter--problem .smx-meter__fill {
+    background: var(--ems-danger-600);
+}
+
+.smx-meter__note {
+    margin-top: 4px;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Fakt siyahısı (dt/dd) ──────────────────────────────────────────────── */
+.smx-facts {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+}
+
+.smx-facts > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+}
+
+.smx-facts dt {
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+}
+
+.smx-facts dd {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+}
+
+.smx-facts dd small {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 500;
+}
+
+.smx-facts .is-warning dd,
+.smx-mini-table .is-warning td,
+.smx-mini-table td.is-warning {
+    color: var(--ems-warning-700);
+}
+
+.smx-mini-table td.is-problem {
+    color: var(--ems-danger-600);
+}
+
+.smx-facts--grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    gap: var(--ems-sp-3) var(--ems-sp-6);
+}
+
+.smx-facts--grid > div {
+    flex-direction: column;
+    padding: 8px 10px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.smx-facts--grid dd {
+    align-items: flex-start;
+}
+
+.smx-callout {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+}
+
+/* ── Kiçik cədvəl (trafik, təhlükəsizlik) ──────────────────────────────── */
+.smx-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--ems-fs-base);
+}
+
+.smx-mini-table th,
+.smx-mini-table td {
+    padding: 7px 8px;
+    border-top: 1px solid var(--ems-border);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.smx-mini-table thead th {
+    border-top: 0;
+    vertical-align: bottom;
+    white-space: normal;
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.smx-mini-table th:first-child,
+.smx-mini-table td:first-child {
+    padding-left: 0;
+    text-align: left;
+}
+
+.smx-mini-table tbody th {
+    color: var(--ems-neutral-700);
+    font-weight: 600;
+}
+
+.smx-mini-table--labels tbody th {
+    white-space: normal;
+}
+
+.smx-inline-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3) var(--ems-sp-7);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-base);
+}
+
+.smx-inline-stats b {
+    color: var(--ems-text);
+}
+
+.smx-chart--sm,
+.smx-chart.smx-chart--sm {
+    height: 200px;
+    min-height: 200px;
+    max-height: 200px;
+}
+
+/* ── Səhifə siyahısı ────────────────────────────────────────────────────── */
+.smx-endpoints {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: var(--ems-fs-base);
+}
+
+.smx-endpoints li {
+    padding-left: 2px;
+}
+
+.smx-endpoints li::marker {
+    color: var(--ems-neutral-400);
+}
+
+.smx-endpoints b {
+    float: right;
+    margin-left: var(--ems-sp-4);
+    color: var(--ems-text);
+}
+
+.smx-endpoints__path {
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    overflow-wrap: anywhere;
+}
+
+.smx-tl {
+    margin: 0;
+}
+
+.smx-sum > .smx-foot {
+    margin: 0;
+}
+
+/* ── Responsiv (320–1440) ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .smx-hero {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .smx-hero__actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .smx-hero {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 14px;
+    }
+
+    .smx-hero__icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .smx-hero__title {
+        font-size: var(--ems-fs-xl);
+    }
+
+    .smx-hero__actions .smx-ai-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .smx-reason {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .smx-reason__badge {
+        justify-self: start;
+    }
+
+    .smx-reason .smx-link {
+        justify-self: start;
+        padding-left: 0;
+    }
+
+    .smx-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .smx-box__head,
+    .smx-box__body {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .smx-list__row {
+        align-items: flex-start;
+    }
+
+    .smx-mini-table th,
+    .smx-mini-table td {
+        padding: 6px 4px;
+    }
+
+    .smx-mini-table tbody th {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 360px) {
+    .smx-kpis {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

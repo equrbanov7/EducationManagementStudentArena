@@ -19,6 +19,8 @@ from django.utils.translation import get_language
 
 import requests
 
+from core.ai_models import resolve_model, thinking_config
+
 logger = logging.getLogger(__name__)
 
 _REQUEST_TIMEOUT = 60
@@ -26,9 +28,9 @@ _MAX_RETRIES = 2
 _RETRY_BASE_DELAY = 2
 
 # Gemini model for the assistant. Sahib 2026-10-01: əvvəl «ən ucuz» (flash-lite), sonra «normal model
-# seç, tələbəyə normal cavab versin» — gemini-2.5-flash (keyfiyyət/qiymət balansı; xərc qlobal gündəlik
+# seç, tələbəyə normal cavab versin» — flash sinfi (2.5 yeni açarlara verilmir → gemini-3.8-flash; xərc qlobal gündəlik
 # tavan və cavab tavanı ilə məhdudlaşır). Overridable via GEMINI_MODEL env var / SuperAdmin AI settings.
-_DEFAULT_MODEL = "gemini-2.5-flash"
+_DEFAULT_MODEL = "gemini-3.8-flash"
 
 
 def _system_prompt() -> str:
@@ -89,18 +91,20 @@ def _get_model() -> str:
     Priority:
       1. GEMINI_MODEL env var (explicit operator override).
       2. AIConfiguration.assistant_model (SuperAdmin panel setting).
-      3. _DEFAULT_MODEL (gemini-2.5-flash).
+      3. _DEFAULT_MODEL (gemini-3.8-flash).
+
+    Köhnə adlar (gemini-2.5-*) ``core.ai_models.resolve_model`` ilə cari modelə çevrilir.
     """
     env_model = os.getenv("GEMINI_MODEL")
-    if env_model:
-        return env_model.strip()
+    if env_model and env_model.strip():
+        return resolve_model(env_model)
 
     try:
         from apps.exams.public import get_ai_config
 
         configured = (get_ai_config().assistant_model or "").strip()
         if configured:
-            return configured
+            return resolve_model(configured)
     except Exception:  # pragma: no cover - DB/config unavailable, fall back
         logger.debug("Could not read assistant_model from AIConfiguration; using default.")
 
@@ -242,13 +246,17 @@ def ask_gemini(*, user_message: str, context: str, conversation_history: list[di
     # Add the current user message
     contents.append({"role": "user", "parts": [{"text": user_message}]})
 
+    generation_config = {
+        "temperature": 0.3,
+        "maxOutputTokens": _get_max_output_tokens(),
+    }
+    thinking = thinking_config(model)
+    if thinking:
+        generation_config["thinkingConfig"] = thinking
     payload = {
         "system_instruction": {"parts": [{"text": full_system}]},
         "contents": contents,
-        "generationConfig": {
-            "temperature": 0.3,
-            "maxOutputTokens": _get_max_output_tokens(),
-        },
+        "generationConfig": generation_config,
     }
 
     for attempt in range(_MAX_RETRIES + 1):

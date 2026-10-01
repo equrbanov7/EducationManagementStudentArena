@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n proctoring %}
 
 {% block title %}{{ session.room.name }} — {% trans "Canlı monitor" %}{% endblock %}
 
@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/stats.css' %}?v=20260729-stats">
     <link rel="stylesheet" href="{% static 'exams/css/final_center/monitor.css' %}?v=20260716-live-snapshot">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/proctor_identity.css' %}?v=20261001-proc">
 {% endblock %}
 
 {% block content %}
@@ -244,9 +245,11 @@
 {% include "exams/exam_center/_snapshot_modal.html" %}
 
 {{ snapshot|json_script:"fxc-initial-snapshot" }}
+{% proctoring_ui_labels as proctor_labels %}{{ proctor_labels|json_script:"fxc-proctor-i18n" }}
 {% endblock %}
 
 {% block extraJs %}
-    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20260717-score-bal" defer></script>
-    <script src="{% static 'exams/js/final_center/room_monitor.js' %}" defer></script>
+    <script src="{% static 'exams/js/final_center/proctor_identity.js' %}?v=20261001-proc" defer></script>
+    <script src="{% static 'exams/js/final_center/snapshot_modal.js' %}?v=20261001-proc" defer></script>
+    <script src="{% static 'exams/js/final_center/room_monitor.js' %}?v=20261001-proc" defer></script>
 {% endblock %}

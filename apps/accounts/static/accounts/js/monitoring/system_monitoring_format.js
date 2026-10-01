@@ -67,7 +67,7 @@
 
     function skeletonCards(count) {
         var s = '<div class="smx-card"><span class="skeleton skeleton-line skeleton-line--sm"></span>' +
-            '<span class="skeleton skeleton-line skeleton-line--lg" style="margin-top:8px"></span></div>';
+            '<span class="skeleton skeleton-line skeleton-line--lg smx-skel-gap"></span></div>';
         return '<div class="smx-cards" aria-hidden="true">' + new Array(count || 8).fill(s).join("") + "</div>";
     }
 
@@ -92,6 +92,38 @@
         }).join("") + "</div>";
     }
 
+    /** Layihənin stilli select komponenti (native görünüş YOX — sahib qaydası 2026-09-09).
+     * `options` = [[value, label], …]; render-dən sonra `EMSBootstrapSelect.init(body)` gücləndirir. */
+    function selectMarkup(attrs, options, current, label) {
+        return '<div class="bootstrap-single-select bootstrap-single-select--ems smx-select-wrap">' +
+            '<select class="ems-select bootstrap-single-select__native" data-bootstrap-select ' + attrs +
+            ' aria-label="' + escapeHtml(label) + '">' + options.map(function (option) {
+                return '<option value="' + escapeHtml(option[0]) + '"' + selected(option[0], current) + ">" +
+                    escapeHtml(option[1]) + "</option>";
+            }).join("") + "</select></div>";
+    }
+
+    /** Səhifələmə: API-nin `pagination` müqaviləsi (source.total_pages / has_next …) → markup. */
+    function pagerMarkup(data, count, state) {
+        var source = data.pagination || data;
+        var pageSize = Number(source.page_size || state.page_size || 20);
+        var total = Number(source.total == null ? count : source.total);
+        var page = Math.max(1, Number(source.page || state.page || 1));
+        var pages = Math.max(1, Number(source.total_pages || Math.ceil(total / pageSize)));
+        var hasPrevious = source.has_previous == null ? page > 1 : source.has_previous;
+        var hasNext = source.has_next == null ? page < pages : source.has_next;
+        if (!total) return "";
+        var start = (page - 1) * pageSize + 1;
+        var end = Math.min(total, start + count - 1);
+        return '<div class="smx-pagination"><span class="smx-page-summary">' + start + "–" + end + " / " + total +
+            "</span>" + selectMarkup("data-smx-page-size", [["10", "10"], ["20", "20"], ["50", "50"]], pageSize, gettext("Sətir")) +
+            '<button type="button" class="smx-btn" data-smx-page="' + (page - 1) + '"' + (hasPrevious ? "" : " disabled") +
+            ' aria-label="' + escapeHtml(gettext("Əvvəlki səhifə")) + '">‹</button>' +
+            "<span>" + page + " / " + pages + "</span>" +
+            '<button type="button" class="smx-btn" data-smx-page="' + (page + 1) + '"' + (hasNext ? "" : " disabled") +
+            ' aria-label="' + escapeHtml(gettext("Növbəti səhifə")) + '">›</button></div>';
+    }
+
     function rowsFrom(data, legacyKey) {
         if (Array.isArray(data.items)) return data.items;
         return Array.isArray(data[legacyKey]) ? data[legacyKey] : [];
@@ -112,6 +144,8 @@
         chartPanel: chartPanel,
         chartGrid: chartGrid,
         rowsFrom: rowsFrom,
+        selectMarkup: selectMarkup,
+        pagerMarkup: pagerMarkup,
     };
 
     if (typeof namespace.bootPending === "function") {

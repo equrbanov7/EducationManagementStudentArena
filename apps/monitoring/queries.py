@@ -353,8 +353,13 @@ def redis_celery_section(range_seconds: int) -> dict:
     return _ok({"charts": charts, "summary": summary})
 
 
-def exams_section(range_seconds: int) -> dict:
-    """Yalnız aqreqat imtahan metrikaları — heç bir sual/cavab/PIN məzmunu."""
+def exams_section(range_seconds: int, *, organization_id: int | None = None) -> dict:
+    """Yalnız aqreqat imtahan metrikaları — heç bir sual/cavab/PIN məzmunu.
+
+    ``organization_id`` verilibsə (icazəli üzv, RİM rəhbəri — 2026-10-01) baza
+    sayğacları yalnız həmin təşkilatın imtahanlarını sayır; Prometheus qrafikləri
+    platforma səviyyəlidir (etiketlərdə tenant yoxdur).
+    """
     prom = PrometheusClient()
     charts = {
         "attempt_starts": _series(prom, "sum(rate(exam_attempt_started_total[15m])) * 900", range_seconds),
@@ -364,15 +369,20 @@ def exams_section(range_seconds: int) -> dict:
     }
     prometheus_ok = charts["attempt_starts"] is not None
 
+    from django.db.models import Q
     from django.utils import timezone
 
     from apps.exams.models import Exam, ExamAttempt
 
     now = timezone.now()
+    exam_q = Q() if organization_id is None else Q(organization_id=organization_id)
+    attempt_q = Q() if organization_id is None else Q(exam__organization_id=organization_id)
     db_stats = {
-        "active_exams": Exam.objects.filter(is_deleted=False, start_datetime__lte=now, end_datetime__gte=now).count(),
-        "in_progress_attempts": ExamAttempt.objects.filter(status="in_progress").count(),
-        "submitted_today": ExamAttempt.objects.filter(finished_at__date=now.date()).count(),
+        "active_exams": Exam.objects.filter(
+            exam_q, is_deleted=False, start_datetime__lte=now, end_datetime__gte=now
+        ).count(),
+        "in_progress_attempts": ExamAttempt.objects.filter(attempt_q, status="in_progress").count(),
+        "submitted_today": ExamAttempt.objects.filter(attempt_q, finished_at__date=now.date()).count(),
     }
     counters = {}
     if prometheus_ok:

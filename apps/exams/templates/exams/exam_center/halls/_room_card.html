@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}Zal kartı («Yalnız imtahan zalları» görünüşü) — `room_list.html`-dən çıxarılıb
+(2026-10-01). Zal təyin edə bilən (`can_designate`) kartda «İmtahan zallarından çıxar»
+düyməsini də görür; canlı oturumu olan bayraqsız otaq «Adi otaq» nişanı ilə görünür.
+Kontekst: `room`, `can_designate`.{% endcomment %}
+<article class="fxc-room-card{% if room.live_session_count %} fxc-room-card--live{% endif %}" data-hall-item data-hall="{{ room.is_exam_hall|yesno:'1,0' }}">
+  <div class="fxc-room-card-head">
+    <div class="fxc-room-card-titles">
+      <h3 class="fxc-room-name"><i class="fas fa-door-open" aria-hidden="true"></i> {{ room.name }}</h3>
+      <span class="fxc-room-code"><code>{{ room.code }}</code>{% if room.building %} · {{ room.building }}{% if room.floor %} / {{ room.floor }}{% endif %}{% endif %}</span>
+    </div>
+    {% if room.live_session_count %}
+      <span class="fxc-pill fxc-pill--live"><span class="fxc-live-pulse" aria-hidden="true"></span> {{ room.live_session_count }} {% trans "canlı" %}</span>
+    {% elif room.is_active %}
+      <span class="fxc-pill fxc-pill--ok">{% trans "Aktiv" %}</span>
+    {% else %}
+      <span class="fxc-pill fxc-pill--muted">{% trans "Deaktiv" %}</span>
+    {% endif %}
+  </div>
+
+  {% if can_designate or not room.is_exam_hall %}
+  <div class="fxc-hall-badges">{% include "exams/exam_center/halls/_badges.html" %}</div>
+  {% endif %}
+
+  <div class="fxc-room-stats">
+    <span title="{% trans 'Tutum' %}"><i class="fas fa-chair" aria-hidden="true"></i> {{ room.capacity }} {% trans "yer" %}</span>
+    <span title="{% trans 'Kompüter' %}"><i class="fas fa-desktop" aria-hidden="true"></i> {{ room.computer_count }} {% trans "kompüter" %}</span>
+    <span title="{% trans 'Ümumi oturum' %}"><i class="fas fa-calendar-days" aria-hidden="true"></i> {{ room.session_count }} {% trans "oturum" %}</span>
+  </div>
+
+  <div class="fxc-room-exams">
+    {% if room.live_sessions %}
+      <span class="fxc-room-exams-label">{% trans "Zalda canlı oturum:" %}</span>
+      {% for s in room.live_sessions %}
+        <span class="fxc-room-exam-chip fxc-room-exam-chip--{{ s.state }}">{{ s.get_state_display }} · {{ s.scheduled_start|date:"H:i" }}</span>
+      {% endfor %}
+    {% else %}
+      <span class="fxc-room-exams-empty"><i class="far fa-clock" aria-hidden="true"></i> {% trans "Hazırda canlı imtahan yoxdur" %}</span>
+    {% endif %}
+  </div>
+
+  <div class="fxc-room-card-actions">
+    <a href="{% url 'exams:exam_center_room_monitor' room_id=room.pk %}"
+       class="fxc-btn fxc-btn-sm {% if room.live_session_count %}fxc-btn-primary{% else %}fxc-btn-ghost{% endif %}">
+      <i class="fas fa-arrow-right-to-bracket" aria-hidden="true"></i>
+      {% if room.live_session_count %}{% trans "Zala daxil ol — canlı" %}{% else %}{% trans "Zala daxil ol" %}{% endif %}
+    </a>
+    {% if can_designate %}{% include "exams/exam_center/halls/_toggle.html" %}{% endif %}
+  </div>
+</article>

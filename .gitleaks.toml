@@ -44,6 +44,12 @@ regexes = [
     '''^AIzaSyBvgGTd3zRxAuuymMcOSYZyCOB1uWf_7A0$''',
     '''^abcd1234efgh5678$''',
 
+    # 2026-10-01 monitorinq testləri (apps/monitoring/tests/test_scrub_2026_10_01.py,
+    # test_rim_access_2026_10_01.py): loq maskalamasını sübut edən SAXTA nümunələr — 33 simvolluq
+    # «AIza…» (real Google açarı 39 simvoldur) və DSN-dəki uydurma parol. Credential deyil.
+    '''^AIzaSyA1234567890abcdefghijklmnop$''',
+    '''^TopSecret1$''',
+
     # test_import_retention retention testi: `_bundle(token, age_hours=72 ...)`
     # sətrində `token` sözü `age_hours=72`-nin yanında durduğu üçün
     # generic-api-key qaydası tetiklənir. Tutulan dəyər sadəcə keyword

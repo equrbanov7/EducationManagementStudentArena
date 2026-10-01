@@ -1,0 +1,20 @@
+{% load static proctoring %}
+{% comment %}
+  2026-10-01 (PROC): evristik anti-cheat qatı (genişlənmə/DevTools/monitor/mətn inyeksiyası +
+  heartbeat). YALNIZ nəzarətli cəhddə yüklənir. Dinamik dəyərlər data-* atributlarındadır
+  (xarici JS Django şablonundan keçmir — CLAUDE.md). Mövcud ES modul toxunulmazdır.
+{% endcomment %}
+{% if supervision.supervised %}
+{% proctoring_options_for exam as popts %}
+<div id="proctor-signals-config" hidden
+     data-supervised="1"
+     data-attempt-id="{{ attempt.id }}"
+     data-signal-url="{% url 'exams:supervision_log_signal' attempt.id %}"
+     data-heartbeat-url="{% url 'exams:supervision_heartbeat' attempt.id %}"
+     data-heartbeat-interval="{% proctoring_heartbeat_seconds %}"
+     data-anti-ai="{{ popts.anti_ai|yesno:'1,0' }}"
+     data-detect-devtools="{{ popts.detect_devtools|yesno:'1,0' }}"
+     data-detect-multi-monitor="{{ popts.detect_multi_monitor|yesno:'1,0' }}"
+     data-detect-text-injection="{{ popts.detect_text_injection|yesno:'1,0' }}"></div>
+<script src="{% static 'exams/js/exam_supervision/proctor_signals.js' %}?v=20261001-proc"></script>
+{% endif %}

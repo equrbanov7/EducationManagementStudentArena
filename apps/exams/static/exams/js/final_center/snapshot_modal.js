@@ -129,6 +129,7 @@
 
         if (nameEl) nameEl.textContent = d.student_name || "—";
         if (subjectEl) subjectEl.textContent = d.exam_title ? ("📘 " + d.exam_title) : "";
+        renderProctor(d);
 
         if (metaEl) {
             var meta = [];
@@ -194,6 +195,24 @@
             return;
         }
         body.innerHTML = '<ol class="fxc-snapshot-answers">' + answers.map(renderQuestion).join("") + "</ol>";
+    }
+
+    // 2026-10-01 (PROC): kimlik kartı (şəkil / ad / qrup / nömrə) + risk nişanları
+    // modalın başında, qayda + siqnal xronologiyası cavabların altında.
+    function renderProctor(d) {
+        var P = window.FXCProctor;
+        var idEl = document.getElementById("fxc-snapshot-identity");
+        var tlEl = document.getElementById("fxc-snapshot-timeline");
+        var proctor = d.proctor || null;
+        var identity = (proctor && proctor.identity) || d.identity || null;
+        if (idEl) {
+            idEl.innerHTML = P && identity ? P.identityCardHtml(identity, proctor || {}) : "";
+            idEl.hidden = !(P && identity);
+        }
+        if (tlEl) {
+            tlEl.innerHTML = P && proctor ? P.timelineSection(proctor.timeline) : "";
+            tlEl.hidden = !(P && proctor);
+        }
     }
 
     function renderQuestion(a, i) {

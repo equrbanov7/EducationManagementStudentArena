@@ -192,7 +192,7 @@ def _apply(ExamRoom, org, settings):
         for room in _rooms_from_csv():
             existing = ExamRoom.objects.filter(organization=org, code=room["code"]).first()
             if existing is None:
-                ExamRoom.objects.create(organization=org, is_active=True, **room)
+                ExamRoom.objects.create(organization=org, is_active=True, is_exam_hall=False, **room)
                 created += 1
             elif not (existing.building or "").strip() and room["building"]:
                 existing.building = room["building"]
