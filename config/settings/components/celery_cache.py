@@ -126,6 +126,11 @@ CELERY_BEAT_SCHEDULE = {
         "task": "monitoring.collect_celery_stats",
         "schedule": 60.0,  # seconds
     },
+    # 2026-10-02: «resolved» webhook-u çatmayan köhnə insidentləri Alertmanager-in aktiv siyahısı ilə uzlaşdır.
+    "monitoring-reconcile-incidents": {
+        "task": "monitoring.reconcile_incidents",
+        "schedule": 600.0,  # seconds
+    },
     # Backup təzəliyi (BackupTooOld alerti üçün) — 15 dəqiqədən bir.
     "monitoring-collect-backup-age": {
         "task": "monitoring.collect_backup_age",

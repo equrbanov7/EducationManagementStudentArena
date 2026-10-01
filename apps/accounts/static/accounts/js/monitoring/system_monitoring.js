@@ -525,7 +525,15 @@
         });
 
         function onVisibilityChange() {
-            if (document.hidden || !autoRefresh.checked || !started) return;
+            if (document.hidden) return;
+            // 2026-10-02: arxa plan tabında açılan səhifədə IntersectionObserver begin()-i çağırır, amma
+            // visible() false olduğu üçün heç nə yüklənmirdi və observer artıq bağlı idi — kartlar
+            // həmişəlik «skeleton»-da qalırdı. Tab görünən olan kimi ilk yükləmə burada başlayır.
+            if (!started) {
+                begin();
+                return;
+            }
+            if (!autoRefresh.checked) return;
             if (Date.now() - lastLoadedAt > 30000 && visible()) refreshActiveSilently();
         }
 
