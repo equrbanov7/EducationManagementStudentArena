@@ -89211,3 +89211,23 @@ msgid ""
 msgstr ""
 "Deactivating stops the exam for everyone: students who are taking it right "
 "now will not be able to save or submit answers. Continue?"
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam?"
+msgstr "Start the exam?"
+
+msgctxt "exams.start_confirm"
+msgid ""
+"When you start, an attempt is created and the timer begins. Start only when "
+"you are ready."
+msgstr ""
+"When you start, an attempt is created and the timer begins. Start only when "
+"you are ready."
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam"
+msgstr "Start the exam"
+
+msgctxt "exams.start_confirm"
+msgid "Back"
+msgstr "Back"

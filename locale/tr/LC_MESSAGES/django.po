@@ -88702,3 +88702,23 @@ msgid ""
 msgstr ""
 "Devre dışı bırakmak sınavı herkes için durdurur: şu anda sınava giren "
 "öğrenciler cevaplarını kaydedemez ve teslim edemez. Devam edilsin mi?"
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam?"
+msgstr "Sınava başlansın mı?"
+
+msgctxt "exams.start_confirm"
+msgid ""
+"When you start, an attempt is created and the timer begins. Start only when "
+"you are ready."
+msgstr ""
+"Başladığınızda bir deneme oluşturulur ve süre işlemeye başlar. Yalnızca "
+"hazır olduğunuzda başlayın."
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam"
+msgstr "Sınava başla"
+
+msgctxt "exams.start_confirm"
+msgid "Back"
+msgstr "Geri"

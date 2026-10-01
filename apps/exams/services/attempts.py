@@ -26,6 +26,7 @@ from apps.exams.services.language_variants import (
     resolve_requested_language,
 )
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
+from apps.exams.services.start_intent import exam_start_url
 from apps.exams.services.utils import _attempt_has_any_answer
 from core.settings_utils import safe_float_setting as _safe_float_setting
 from core.settings_utils import safe_int_setting as _safe_int_setting
@@ -482,7 +483,16 @@ def _start_or_resume_attempt(request, exam: Exam):
         # dalğa boşalır; tələbə heç nə etmir, səhifə start URL-inə geri dönür.
         base_retry = _safe_int_setting("EXAM_START_RETRY_AFTER_SECONDS", 3, minimum=1)
         retry_after = base_retry + (int(time.monotonic() * 1000) % 3)  # 0-2s jitter (deterministik-olmayan)
-        retry_url = _append_return_to(reverse("exams:start_exam", kwargs={"slug": exam.slug}), return_to)
+        # EXAMQA R1: təkrar cəhd GET-dir — imzalı niyyət tokeni ilə (trial/dil seçimi də saxlanılır).
+        retry_url = _append_return_to(
+            exam_start_url(
+                exam,
+                user,
+                trial="1" if is_trial else None,
+                language=chosen_language,
+            ),
+            return_to,
+        )
         response = render(
             request,
             "exams/student/exam_starting.html",

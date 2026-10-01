@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load exam_start static i18n %}
 
 {% block title %}{{ exam.title }}{% endblock %}
 
@@ -273,7 +273,7 @@
                     {% endcomment %}
                     {% if can_manage_exam_questions %}
                         {% if active_questions_count %}
-                            <a href="{% url 'exams:start_exam' exam.slug %}?trial=1"
+                            <a href="{% url 'exams:start_exam' exam.slug %}?trial=1&si={% exam_start_intent exam %}"
                                class="action-btn outline-btn"
                                title="{% trans 'trial_run_hint' context 'exams.template.teacher_exam_detail' %}">
                                 <i class="fas fa-vial"></i> {% trans "trial_run" context "exams.template.teacher_exam_detail" %}

@@ -91,7 +91,7 @@ class EndQuestionImportOptionTokenTests(TestCase):
 
     def _open(self, user):
         client = _student_client(user.username, self.org)
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=user)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         response = client.get(take_url)
@@ -151,7 +151,7 @@ class OptionTokenSubmissionTests(TestCase):
     def _open(self, user=None):
         user = user or self.student
         client = _student_client(user.username, self.org)
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=user)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         self.assertEqual(client.get(take_url).status_code, 200)

@@ -99,6 +99,14 @@ x-app-env: &app-env
   EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
   EMAIL_PORT: ${EMAIL_PORT:-587}
   EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+  # Sahib 2026-10-01: universitet poçtu (M365) — prod-mail.yml apply yazır; boşdursa əvvəlki (Brevo) davranış.
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+  EMAIL_USE_SSL: ${EMAIL_USE_SSL:-False}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+  EMAIL_RECOVERY_HOST_USER: ${EMAIL_RECOVERY_HOST_USER:-}
+  EMAIL_RECOVERY_HOST_PASSWORD: ${EMAIL_RECOVERY_HOST_PASSWORD:-}
+  EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-}
   BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
   BREVO_EMAIL: ${BREVO_EMAIL:-}
   BREVO_FROM_EMAIL: ${BREVO_FROM_EMAIL:-}
@@ -794,8 +802,12 @@ services:
     environment:
       SMTP_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
       SMTP_PORT: ${EMAIL_PORT:-587}
-      SMTP_USER: ${BREVO_SMTP_LOGIN:-}
-      SMTP_PASS: ${BREVO_SMTP_KEY:-}
+      # 2026-10-01: universitet poçtu — ALERT_SMTP_* (prod-mail.yml apply) doludursa o, yoxsa köhnə Brevo.
+      # Seçim aşağıdakı `sh -c`-dədir (compose iç-içə ${A:-${B}} dəstəkləmir).
+      ALERT_SMTP_USER: ${ALERT_SMTP_USER:-}
+      ALERT_SMTP_PASS: ${ALERT_SMTP_PASS:-}
+      BREVO_SMTP_LOGIN: ${BREVO_SMTP_LOGIN:-}
+      BREVO_SMTP_KEY: ${BREVO_SMTP_KEY:-}
       ALERT_FROM: ${ALERT_EMAIL_FROM:-no-reply@emsarena.com}
       ALERT_TO: ${ALERT_EMAIL_TO:-ops@example.invalid}
       WEBHOOK_TOKEN: ${ALERTMANAGER_WEBHOOK_TOKEN:-}
@@ -809,7 +821,9 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command:
       - >-
-        /bin/sh /etc/alertmanager/render-template.sh
+        export SMTP_USER="$${ALERT_SMTP_USER:-$${BREVO_SMTP_LOGIN:-}}"
+        SMTP_PASS="$${ALERT_SMTP_PASS:-$${BREVO_SMTP_KEY:-}}"
+        && /bin/sh /etc/alertmanager/render-template.sh
         /etc/alertmanager/alertmanager.tmpl.yml /tmp/alertmanager.yml
         SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASS ALERT_FROM ALERT_TO
         WEBHOOK_TOKEN WATCHDOG_REPEAT

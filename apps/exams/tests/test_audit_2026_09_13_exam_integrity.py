@@ -115,7 +115,7 @@ class InProgressResultPageTests(TestCase):
 
     def test_result_page_of_open_attempt_redirects_to_exam_without_answer_key(self):
         client = _student_client("ex01_student", self.org)
-        self.assertEqual(client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug})).status_code, 302)
+        self.assertEqual(client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug})).status_code, 302)
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         self.assertEqual(client.get(take_url).status_code, 200)
@@ -129,7 +129,7 @@ class InProgressResultPageTests(TestCase):
 
     def test_result_page_closes_attempt_whose_time_is_over(self):
         client = _student_client("ex01_student", self.org)
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         client.get(reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id}))
         ExamAttempt.objects.filter(pk=attempt.pk).update(started_at=timezone.now() - timedelta(minutes=61))
@@ -291,7 +291,7 @@ class DeadlineGraceTests(TestCase):
         cls.correct = cls.question.options.get(is_correct=True)
 
     def _open_attempt(self, client):
-        client.get(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
+        client.post(reverse("exams:start_exam", kwargs={"slug": self.exam.slug}))
         attempt = ExamAttempt.objects.get(exam=self.exam, user=self.student)
         take_url = reverse("exams:take_exam", kwargs={"slug": self.exam.slug, "attempt_id": attempt.id})
         self.assertEqual(client.get(take_url).status_code, 200)

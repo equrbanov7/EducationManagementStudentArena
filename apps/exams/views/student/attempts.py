@@ -19,10 +19,12 @@ from apps.exams.models import Exam, ExamAnswer, ExamAttempt
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     generate_random_questions_for_attempt,
+    get_active_attempt_for_user,
     get_attempt_limit_result_redirect_url,
     get_effective_max_attempts,
 )
 from apps.exams.services.question_timer import question_timer_expired
+from apps.exams.services.start_intent import has_valid_start_intent
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
@@ -204,6 +206,17 @@ def start_exam(request, slug):
     if block_reason:
         messages.error(request, block_reason)
         return redirect(resolve_exam_failure_redirect(request))
+
+    # EXAMQA R1 (2026-10-01): YENİ cəhd yalnız POST (CSRF) və ya platformanın öz linkindəki imzalı
+    # niyyət tokeni ilə yaranır — kənar link vaxtlı cəhdi başlada bilməz. Davam edən cəhdə qayıtmaq
+    # (resume) tokensiz də işləyir. Bax apps/exams/services/start_intent.py.
+    if (
+        request.method != "POST"
+        and not has_valid_start_intent(request, exam)
+        and get_active_attempt_for_user(exam, request.user) is None
+    ):
+        context = {"exam": exam, "back_url": resolve_exam_failure_redirect(request)}
+        return render(request, "exams/student/exam_start_confirm.html", context)
     return _start_or_resume_attempt(request, exam)
 
 

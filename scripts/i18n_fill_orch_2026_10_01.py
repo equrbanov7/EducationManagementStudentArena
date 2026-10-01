@@ -2,6 +2,7 @@
 """EMSArena i18n — 2026-10-01 orkestrator düzəlişləri (dalğa MON/PROC/EXAMQA/HALLS sonrası).
 
 Əlavə olunan mətnlər:
+  * `exams.start_confirm`: kənar linklə başlamanın təsdiq səhifəsi (EXAMQA R1);
   * `exams.template.teacher_exam_detail`: «Deaktiv et» təsdiqi (EXAMQA R8 — canlı imtahanda bir klik
     bütün tələbələrin yazısını bloklayırdı).
 
@@ -29,8 +30,24 @@ _DEACTIVATE = (
     "or submit answers. Continue?"
 )
 
+SC = "exams.start_confirm"
+
+# EXAMQA R1: tokensiz start linki üçün təsdiq səhifəsi (exams/student/exam_start_confirm.html).
+_START_CONFIRM = {
+    "Start the exam?": _t("İmtahana başlansın?", "Start the exam?", "Начать экзамен?", "Sınava başlansın mı?"),
+    "When you start, an attempt is created and the timer begins. Start only when you are ready.": _t(
+        "Başladığınız anda cəhd yaranır və vaxt hesablanmağa başlayır. Yalnız hazır olanda başlayın.",
+        "When you start, an attempt is created and the timer begins. Start only when you are ready.",
+        "При начале создаётся попытка и запускается таймер. Начинайте, только когда будете готовы.",
+        "Başladığınızda bir deneme oluşturulur ve süre işlemeye başlar. Yalnızca hazır olduğunuzda başlayın.",
+    ),
+    "Start the exam": _t("İmtahana başla", "Start the exam", "Начать экзамен", "Sınava başla"),
+    "Back": _t("Geri", "Back", "Назад", "Geri"),
+}
+
 # ctx → msgid → {az, en, ru, tr}
 ENTRIES = {
+    SC: _START_CONFIRM,
     TED: {
         _DEACTIVATE: _t(
             "Deaktiv etsəniz, imtahan hamı üçün dayanır: hazırda imtahan verən tələbələr cavablarını saxlaya və "

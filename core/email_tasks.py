@@ -31,6 +31,7 @@ from django.utils.html import strip_tags
 
 from celery import shared_task
 
+from core.mailing import sender_for
 from core.rls_pooling import rls_worker_atomic
 
 logger = logging.getLogger(__name__)
@@ -143,7 +144,7 @@ def send_account_otp_email(
             message = EmailMultiAlternatives(
                 subject=_otp_subject_for_purpose(purpose),
                 body=text_body,
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                from_email=sender_for(purpose),
                 to=[recipient_email],
             )
             message.attach_alternative(html_body, "text/html")
