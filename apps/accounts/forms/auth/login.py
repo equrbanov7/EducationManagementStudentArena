@@ -10,6 +10,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.utils.translation import pgettext_lazy
 
+from core.mailing import sender_for
 from core.utils import build_absolute_url, get_auth_otp_expiry_minutes
 
 from ...identity import canonical_identity_queryset, email_is_placeholder, user_access_is_login_blocked
@@ -154,6 +155,8 @@ class CustomPasswordResetForm(PasswordResetForm):
         extra_email_context=None,
     ):
         email = self.cleaned_data["email"]
+        # Sahib 2026-10-01: parol bərpası recovery@ qutusundan (konfiqurasiya yoxdursa DEFAULT_FROM_EMAIL).
+        from_email = from_email or sender_for(EmailOTP.Purpose.PASSWORD_RESET)
         self.password_reset_users = []
         for user in self.get_users(email):
             code, expires_at, _otp = issue_email_otp(user, purpose=EmailOTP.Purpose.PASSWORD_RESET)

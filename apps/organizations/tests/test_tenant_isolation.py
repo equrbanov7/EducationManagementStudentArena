@@ -569,7 +569,7 @@ class HttpTenantIsolationTest(TestCase):
     def test_org_a_student_cannot_start_org_b_exam(self):
         """An Org-A student gets 404 when attempting to start an Org-B exam."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug}))
+        response = self.client.post(reverse("exams:start_exam", kwargs={"slug": self.exam_b.slug}))
         self.assertEqual(response.status_code, 404)
 
     # ─────────────────────────────────────────────────────────────────────────

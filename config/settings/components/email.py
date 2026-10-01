@@ -23,6 +23,13 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EM
 # Boşdursa Reply-To başlığı əlavə olunmur. Bütün sistem məktubları
 # (`core.mailing.system_email_headers`) bunu işlədir.
 EMAIL_REPLY_TO = (os.getenv("EMAIL_REPLY_TO") or "").strip()
+# Sahib 2026-10-01: universitet poçtu (Microsoft 365) — parol bərpası ayrıca recovery@ qutusundan.
+# Hər ikisi doludursa core.mailing.sender_for("password_reset") onu qaytarır və
+# core.mail_backend.AccountRoutingEmailBackend həmin hesabla daxil olur. Boşdursa əvvəlki davranış.
+EMAIL_RECOVERY_HOST_USER = (os.getenv("EMAIL_RECOVERY_HOST_USER") or "").strip()
+EMAIL_RECOVERY_HOST_PASSWORD = os.getenv("EMAIL_RECOVERY_HOST_PASSWORD") or ""
+# From-da görünən ad (boşdursa SITE_BRAND_NAME).
+EMAIL_FROM_NAME = (os.getenv("EMAIL_FROM_NAME") or "").strip()
 # SMTP socket timeout. Kept low so the request thread (or even background
 # threads) cannot stall on an unresponsive SMTP host. Override via env if
 # the upstream server is known-slow.

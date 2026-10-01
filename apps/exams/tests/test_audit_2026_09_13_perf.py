@@ -121,7 +121,7 @@ class FinishAnswerWriteBatchTest(_OrgBase):
 
     def _start(self, exam):
         client = self._client(self.student)
-        self.assertEqual(client.get(reverse("exams:start_exam", kwargs={"slug": exam.slug})).status_code, 302)
+        self.assertEqual(client.post(reverse("exams:start_exam", kwargs={"slug": exam.slug})).status_code, 302)
         attempt = ExamAttempt.objects.get(exam=exam, user=self.student)
         take_url = reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id})
         self.assertEqual(client.get(take_url).status_code, 200)

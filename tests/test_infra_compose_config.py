@@ -309,7 +309,13 @@ def test_alertmanager_renders_watchdog_repeat_placeholder():
     template = (ROOT / "docker/alertmanager/alertmanager.tmpl.yml").read_text(encoding="utf-8")
     placeholders = {name.strip("_") for name in re.findall(r"__[A-Z_]+__", template)} - {"PLACEHOLDER"}
     assert placeholders <= variables, f"şablondakı placeholder-lar render olunmur: {placeholders - variables}"
-    assert variables <= set(alertmanager["environment"]), "render dəyişənləri compose environment-də olmalıdır"
+    # 2026-10-01: SMTP_USER/SMTP_PASS əmrdə `export` ilə seçilir (ALERT_SMTP_* → köhnə BREVO_* fallback);
+    # onların mənbələri isə environment-dədir.
+    exported = set(re.findall(r'(?:export\s+|\s)([A-Z_]+)="', command))
+    assert variables <= set(alertmanager["environment"]) | exported, "render dəyişənləri təyin olunmalıdır"
+    assert {"ALERT_SMTP_USER", "ALERT_SMTP_PASS", "BREVO_SMTP_LOGIN", "BREVO_SMTP_KEY"} <= set(
+        alertmanager["environment"]
+    )
 
 
 # ── 2026-09-14 infra auditi (wave 2): P3-3 Redis parolu argv-də deyil ──────

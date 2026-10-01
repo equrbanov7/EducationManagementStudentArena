@@ -17,7 +17,7 @@ from django.utils import timezone, translation
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
-from core.mailing import system_reply_to
+from core.mailing import sender_for, system_reply_to
 from core.utils import (
     build_absolute_url,
     generate_otp,
@@ -262,7 +262,7 @@ def send_otp_email(
         expires_at=expires_at,
     )
 
-    context["from_email"] = settings.DEFAULT_FROM_EMAIL
+    context["from_email"] = sender_for(purpose)
 
     try:
         _send_otp_message(email=normalized_email, purpose=purpose, context=context)

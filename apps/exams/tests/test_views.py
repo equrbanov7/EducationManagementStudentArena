@@ -2823,7 +2823,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(assigned_response.status_code, 200)
         self.assertContains(assigned_response, self.group_assigned_exam.title)
 
-        start_response = self.client.get(reverse("exams:start_exam", args=[self.group_assigned_exam.slug]))
+        start_response = self.client.post(reverse("exams:start_exam", args=[self.group_assigned_exam.slug]))
         self.assertEqual(start_response.status_code, 302)
         self.assertTrue(self.group_assigned_exam.attempts.filter(user=self.student).exists())
 
@@ -2862,7 +2862,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
 
     @patch("apps.exams.services.attempts.record_attempt_started")
     def test_course_assigned_exam_can_be_started_by_student(self, record_started):
-        response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(self.course_assigned_exam.attempts.filter(user=self.student).exists())
         record_started.assert_called_once_with(self.course_assigned_exam.exam_type)
@@ -2877,7 +2877,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
             attempt_number=1,
         )
 
-        response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:take_exam", args=[self.course_assigned_exam.slug, attempt.id]))
@@ -2920,7 +2920,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
             attempt_number=1,
         )
 
-        response = self.client.get(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:take_exam", args=[self.code_assigned_exam.slug, attempt.id]))
@@ -2938,7 +2938,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         attempt.started_at = timezone.now() - timedelta(minutes=31)
         attempt.save(update_fields=["started_at"])
 
-        response = self.client.get(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.course_assigned_exam.slug]))
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:exam_result", args=[self.course_assigned_exam.slug, attempt.id]))
@@ -2972,7 +2972,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         old_attempt.started_at = timezone.now() - timedelta(minutes=21)
         old_attempt.save(update_fields=["started_at"])
 
-        response = self.client.get(reverse("exams:start_exam", args=[written_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[written_exam.slug]))
 
         self.assertEqual(response.status_code, 302)
         old_attempt.refresh_from_db()
@@ -3638,12 +3638,12 @@ class StudentExamVisibilityFilteringTest(TestCase):
             language_variant=variant_en,
         )
 
-        missing_language_response = self.client.get(reverse("exams:start_exam", args=[multilingual_exam.slug]))
+        missing_language_response = self.client.post(reverse("exams:start_exam", args=[multilingual_exam.slug]))
         self.assertEqual(missing_language_response.status_code, 302)
         self.assertEqual(missing_language_response.url, reverse("exams:student_exam_list"))
         self.assertFalse(multilingual_exam.attempts.filter(user=self.student).exists())
 
-        selected_language_response = self.client.get(
+        selected_language_response = self.client.post(
             reverse("exams:start_exam", args=[multilingual_exam.slug]),
             {"language": "en"},
         )
@@ -3675,7 +3675,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         )
 
     def test_unassigned_private_exam_cannot_be_started(self):
-        response = self.client.get(reverse("exams:start_exam", args=[self.unassigned_private_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.unassigned_private_exam.slug]))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:student_exam_list"))
         self.assertFalse(self.unassigned_private_exam.attempts.filter(user=self.student).exists())
@@ -3690,7 +3690,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertFalse(self.unassigned_private_exam.attempts.filter(user=self.student).exists())
 
     def test_assigned_exam_with_code_requires_code_before_start(self):
-        response = self.client.get(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.code_assigned_exam.slug]))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("exams:student_exam_list"))
         self.assertFalse(self.code_assigned_exam.attempts.filter(user=self.student).exists())
@@ -3780,7 +3780,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertFalse(self.code_unassigned_exam.attempts.filter(user=self.student).exists())
 
     def test_other_tenant_exam_cannot_be_started(self):
-        response = self.client.get(reverse("exams:start_exam", args=[self.other_tenant_exam.slug]))
+        response = self.client.post(reverse("exams:start_exam", args=[self.other_tenant_exam.slug]))
         self.assertEqual(response.status_code, 404)
         self.assertFalse(self.other_tenant_exam.attempts.filter(user=self.student).exists())
 
@@ -4063,7 +4063,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
             attempt_number=1,
         )
 
-        start_response = self.client.get(
+        start_response = self.client.post(
             reverse("exams:start_exam", args=[self.course_assigned_exam.slug]),
             {"next": reverse("courses:course_dashboard", args=[self.assigned_course.id])},
         )

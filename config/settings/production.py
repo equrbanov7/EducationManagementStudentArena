@@ -314,6 +314,9 @@ EMAIL_HOST_USER = os.getenv("BREVO_SMTP_LOGIN") or os.getenv("BREVO_EMAIL") or o
 EMAIL_HOST_PASSWORD = os.getenv("BREVO_SMTP_KEY") or os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL") or os.getenv("BREVO_FROM_EMAIL") or "no-reply@emsarena.com"
 EMAIL_REPLY_TO = (os.getenv("EMAIL_REPLY_TO") or "").strip()
+EMAIL_RECOVERY_HOST_USER = (os.getenv("EMAIL_RECOVERY_HOST_USER") or "").strip()
+EMAIL_RECOVERY_HOST_PASSWORD = os.getenv("EMAIL_RECOVERY_HOST_PASSWORD") or ""
+EMAIL_FROM_NAME = (os.getenv("EMAIL_FROM_NAME") or "").strip()
 EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))  # seconds; avoids hanging workers
 
 # LAN host — real dəyər serverin .env-indən gəlir (LAN yerləşdirməsində IP).

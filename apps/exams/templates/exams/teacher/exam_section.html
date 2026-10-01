@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load exam_start i18n static %}
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/exam_section.css' %}">
 
@@ -231,7 +231,7 @@
                                     {% if item.can_start and item.attempts_left != 0 %}
                                         <button type="button"
                                                 class="btn btn-sm btn-info js-open-course-exam-modal"
-                                                data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                                data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
                                                 data-exam-slug="{{ exam.slug }}"
                                                 data-exam-title="{{ exam.title }}"
                                                 data-exam-type="{{ exam.get_exam_type_display }}"
@@ -249,7 +249,7 @@
                                 {% elif item.can_start %}
                                     <button type="button"
                                             class="btn btn-sm btn-info js-open-course-exam-modal"
-                                            data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}"
+                                            data-start-url="{% url 'exams:start_exam' exam.slug %}?next={{ request.get_full_path|urlencode }}&si={% exam_start_intent exam %}"
                                             data-exam-slug="{{ exam.slug }}"
                                             data-exam-title="{{ exam.title }}"
                                             data-exam-type="{{ exam.get_exam_type_display }}"

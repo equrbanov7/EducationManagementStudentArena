@@ -89367,3 +89367,23 @@ msgid ""
 msgstr ""
 "Деактивация останавливает экзамен для всех: студенты, которые сейчас его "
 "сдают, не смогут сохранить или отправить ответы. Продолжить?"
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam?"
+msgstr "Начать экзамен?"
+
+msgctxt "exams.start_confirm"
+msgid ""
+"When you start, an attempt is created and the timer begins. Start only when "
+"you are ready."
+msgstr ""
+"При начале создаётся попытка и запускается таймер. Начинайте, только когда "
+"будете готовы."
+
+msgctxt "exams.start_confirm"
+msgid "Start the exam"
+msgstr "Начать экзамен"
+
+msgctxt "exams.start_confirm"
+msgid "Back"
+msgstr "Назад"

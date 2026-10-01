@@ -479,7 +479,7 @@ class ExamSchedulingRulesTests(_Base):
         ExamAttempt.objects.create(user=self.student, exam=exam_a, status="in_progress")
 
         client = self._client_for(self.student)
-        response = client.get(reverse("exams:start_exam", kwargs={"slug": exam_b.slug}))
+        response = client.post(reverse("exams:start_exam", kwargs={"slug": exam_b.slug}))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(ExamAttempt.objects.filter(user=self.student, exam=exam_b).exists())
 

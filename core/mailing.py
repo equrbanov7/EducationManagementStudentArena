@@ -48,6 +48,24 @@ def system_reply_to() -> list[str]:
     return [value] if value else []
 
 
+RECOVERY_PURPOSES = frozenset({"password_reset"})
+
+
+def sender_for(purpose: str | None = None) -> str:
+    """Məktubun göndəricisi (From) — parol bərpası recovery@ qutusundan (sahib 2026-10-01).
+
+    ``EMAIL_RECOVERY_HOST_USER`` + parolu konfiqurasiya olunmayıbsa həmişə ``DEFAULT_FROM_EMAIL``
+    (əvvəlki davranış). Hesab seçimi ``core.mail_backend.AccountRoutingEmailBackend``-dədir.
+    """
+    from core.mail_backend import recovery_sender_address
+
+    if purpose in RECOVERY_PURPOSES:
+        recovery = recovery_sender_address()
+        if recovery:
+            return recovery
+    return settings.DEFAULT_FROM_EMAIL
+
+
 def _brevo_api_key() -> str:
     """Return the configured Brevo HTTP API key, or an empty string."""
     return getattr(settings, "BREVO_API_KEY", "") or os.environ.get("BREVO_API_KEY", "")

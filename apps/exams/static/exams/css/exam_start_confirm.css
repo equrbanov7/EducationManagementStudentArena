@@ -1,0 +1,92 @@
+/* Source: exams/student/exam_start_confirm.html — tokensiz start linki üçün təsdiq (EXAMQA R1, 2026-10-01). */
+
+.exam-start-confirm {
+    max-width: 520px;
+    margin: 10vh auto;
+    padding: 2rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+}
+
+.exam-start-confirm__icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 1.4rem;
+}
+
+.exam-start-confirm__title {
+    margin: 0 0 0.35rem;
+    color: #0f172a;
+    font-size: 1.3rem;
+    font-weight: 800;
+}
+
+.exam-start-confirm__exam {
+    margin: 0 0 0.75rem;
+    color: #1e3a8a;
+    font-weight: 700;
+}
+
+.exam-start-confirm__text {
+    margin: 0 0 1.25rem;
+    color: #475569;
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+.exam-start-confirm__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.exam-start-confirm__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0.6rem 1.3rem;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.exam-start-confirm__btn--primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.exam-start-confirm__btn--primary:hover {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+.exam-start-confirm__btn--ghost {
+    background: #fff;
+    border-color: #e2e8f0;
+    color: #1e293b;
+}
+
+@media (max-width: 560px) {
+    .exam-start-confirm {
+        margin: 16px;
+        padding: 1.5rem 1rem;
+    }
+
+    .exam-start-confirm__btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
