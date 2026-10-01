@@ -1,0 +1,159 @@
+name: ✉️ Prod poçt (universitet M365 SMTP)
+
+# Sahib 2026-10-01: «Brevo artıq olmasın» — sistem məktubları universitetin öz poçtundan (Microsoft 365):
+#   verification@wcu.edu.az — doğrulama kodları və qalan sistem məktubları (default hesab)
+#   recovery@wcu.edu.az     — parol bərpası
+#
+# Parollar HEÇ VAXT workflow input-u deyil (input-lar loqda görünür) — «production» mühitinin şifrəli
+# secret-lərindən oxunur, loqda maskalanır və çap olunmur:
+#
+#   gh secret set SMTP_VERIFICATION_PASSWORD --env production
+#   gh secret set SMTP_RECOVERY_PASSWORD     --env production
+#
+# Rejimlər:
+#   verify   — hər iki qutu ilə SMTP girişi (STARTTLS + AUTH LOGIN), MƏKTUB GÖNDƏRİLMİR. .env-ə toxunmur.
+#   apply    — verify + .env (ehtiyat nüsxə ilə): EMAIL_* M365-ə, Brevo sətirləri silinir, Alertmanager da
+#              M365-ə keçir; config-only redeploy (əvvəl prod-exam-ops exam_activity_probe!).
+#   rollback — ən son .env.bak.mail.* nüsxəsini qaytarır (Brevo-ya dönüş), redeploy.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "verify / apply / rollback"
+        type: choice
+        options: [verify, apply, rollback]
+        default: verify
+      smtp_host:
+        description: "SMTP host (M365: smtp.office365.com)"
+        type: string
+        default: smtp.office365.com
+      verification_user:
+        description: "Default qutu (kodlar + sistem məktubları)"
+        type: string
+        default: verification@wcu.edu.az
+      recovery_user:
+        description: "Parol bərpası qutusu"
+        type: string
+        default: recovery@wcu.edu.az
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  mail:
+    runs-on: [self-hosted]
+    environment: production
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      MODE: ${{ inputs.mode }}
+      SMTP_HOST_IN: ${{ inputs.smtp_host }}
+      VERIFY_USER: ${{ inputs.verification_user }}
+      RECOVERY_USER: ${{ inputs.recovery_user }}
+      VERIFY_PASS: ${{ secrets.SMTP_VERIFICATION_PASSWORD }}
+      RECOVERY_PASS: ${{ secrets.SMTP_RECOVERY_PASSWORD }}
+    steps:
+      - name: 🔎 SMTP girişi (məktub göndərilmir)
+        if: ${{ inputs.mode != 'rollback' }}
+        run: |
+          set -euo pipefail
+          case "$SMTP_HOST_IN" in (*[!a-z0-9.-]*|'') echo "::error::host yalnız [a-z0-9.-]"; exit 1 ;; esac
+          for u in "$VERIFY_USER" "$RECOVERY_USER"; do
+            case "$u" in (*[!A-Za-z0-9.@_+-]*|'') echo "::error::poçt ünvanı keçərsiz: $u"; exit 1 ;; esac
+          done
+          if [ -z "${VERIFY_PASS:-}" ] || [ -z "${RECOVERY_PASS:-}" ]; then
+            echo "::error::Secret yoxdur: gh secret set SMTP_VERIFICATION_PASSWORD / SMTP_RECOVERY_PASSWORD --env production"
+            exit 1
+          fi
+          python3 - <<'PY'
+          import os, smtplib, ssl, sys
+          host = os.environ["SMTP_HOST_IN"]
+          failed = False
+          for label, user, pw in (
+              ("verification", os.environ["VERIFY_USER"], os.environ["VERIFY_PASS"]),
+              ("recovery", os.environ["RECOVERY_USER"], os.environ["RECOVERY_PASS"]),
+          ):
+              try:
+                  with smtplib.SMTP(host, 587, timeout=20) as s:
+                      s.ehlo()
+                      s.starttls(context=ssl.create_default_context())
+                      s.ehlo()
+                      code, _ = s.login(user, pw)
+                      s.noop()
+                  print(f"✅ {label} ({user}): giriş OK (SMTP {code}) — məktub göndərilmədi")
+              except smtplib.SMTPAuthenticationError as exc:
+                  failed = True
+                  detail = exc.smtp_error.decode("utf-8", "replace")[:300] if isinstance(exc.smtp_error, bytes) else str(exc.smtp_error)[:300]
+                  print(f"❌ {label} ({user}): giriş RƏDD — SMTP {exc.smtp_code}: {detail}")
+                  if "basic authentication is disabled" in detail.lower() or "5.7.139" in detail:
+                      print("   → M365-də bu qutu üçün «Authenticated SMTP» söndürülüb və ya tenant basic auth-u bağlayıb.")
+              except Exception as exc:  # şəbəkə / TLS
+                  failed = True
+                  print(f"❌ {label} ({user}): {type(exc).__name__}: {str(exc)[:300]}")
+          sys.exit(1 if failed else 0)
+          PY
+
+      - name: 📝 .env (ehtiyat nüsxə ilə)
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          test -f .env || { echo "Missing $APP_DIR/.env" >&2; exit 1; }
+          if [ "$MODE" = "rollback" ]; then
+            latest=$(ls -t .env.bak.mail.* 2>/dev/null | head -n1 || true)
+            test -n "$latest" || { echo "::error::.env.bak.mail.* ehtiyat nüsxəsi yoxdur"; exit 1; }
+            cp -p "$latest" .env && chmod 600 .env
+            echo "rollback: $latest → .env"
+            exit 0
+          fi
+          ts="$(date +%Y%m%d-%H%M%S)"
+          cp -p .env ".env.bak.mail.${ts}" && chmod 600 ".env.bak.mail.${ts}"
+          ls -t .env.bak.mail.* 2>/dev/null | tail -n +6 | xargs -r rm -- || true
+          # Parolda tək dırnaq olsa, tək dırnaqlı .env dəyəri sınar — dayandır (parolu dəyişin).
+          case "$VERIFY_PASS$RECOVERY_PASS" in (*\'*) echo "::error::Parolda ' simvolu var — .env-də təhlükəsiz yazıla bilmir"; exit 1 ;; esac
+          drop() { grep -v "^$1=" .env > .env.tmp || true; mv .env.tmp .env; }
+          put() { drop "$1"; printf "%s='%s'\n" "$1" "$2" >> .env; }   # tək dırnaq: compose interpolyasiya etmir
+          for k in BREVO_SMTP_LOGIN BREVO_EMAIL BREVO_FROM_EMAIL BREVO_SMTP_KEY BREVO_API_KEY; do drop "$k"; done
+          put EMAIL_BACKEND "core.mail_backend.AccountRoutingEmailBackend"
+          put EMAIL_HOST "$SMTP_HOST_IN"
+          put EMAIL_PORT "587"
+          put EMAIL_USE_TLS "True"
+          put EMAIL_USE_SSL "False"
+          put EMAIL_HOST_USER "$VERIFY_USER"
+          put EMAIL_HOST_PASSWORD "$VERIFY_PASS"
+          put EMAIL_RECOVERY_HOST_USER "$RECOVERY_USER"
+          put EMAIL_RECOVERY_HOST_PASSWORD "$RECOVERY_PASS"
+          put DEFAULT_FROM_EMAIL "$VERIFY_USER"
+          put EMAIL_REPLY_TO ""
+          put ALERT_EMAIL_FROM "$VERIFY_USER"
+          put ALERT_SMTP_USER "$VERIFY_USER"
+          put ALERT_SMTP_PASS "$VERIFY_PASS"
+          chmod 600 .env
+          echo "upserted: EMAIL_* (M365, parollar gizli), ALERT_SMTP_*; silindi: BREVO_*; backup: .env.bak.mail.${ts}"
+
+      - name: 🚢 Config-only redeploy
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -euo pipefail
+          cd "$APP_DIR"
+          bash scripts/deploy/remote_deploy.sh
+
+      - name: ✅ Effektiv konfiqurasiya (parollar çap olunmur)
+        if: ${{ inputs.mode != 'verify' }}
+        run: |
+          set -uo pipefail
+          cd "$APP_DIR"
+          docker compose -f docker-compose.prod.yml exec -T app python -c "
+          from django.conf import settings as s
+          print('EMAIL_BACKEND:', s.EMAIL_BACKEND)
+          print('EMAIL_HOST:', s.EMAIL_HOST, s.EMAIL_PORT, 'TLS' if s.EMAIL_USE_TLS else '', 'SSL' if s.EMAIL_USE_SSL else '')
+          print('EMAIL_HOST_USER:', s.EMAIL_HOST_USER, '| password set:', bool(s.EMAIL_HOST_PASSWORD))
+          print('RECOVERY:', getattr(s, 'EMAIL_RECOVERY_HOST_USER', ''), '| password set:', bool(getattr(s, 'EMAIL_RECOVERY_HOST_PASSWORD', '')))
+          print('DEFAULT_FROM_EMAIL:', s.DEFAULT_FROM_EMAIL)
+          from core.mailing import sender_for
+          print('sender_for(password_reset):', sender_for('password_reset'), '| sender_for(login):', sender_for('login'))
+          " 2>/dev/null || echo "config check skipped"
