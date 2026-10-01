@@ -40,3 +40,17 @@
 # iki ID-nin göründüyünü təsdiqləyin)
 GHSA-6v7p-g79w-8964
 CVE-2025-47273
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2026-10-01: pip 26.2.1-in vendor etdiyi urllib3 (pip/_vendor/vendor.txt → urllib3==2.7.0)
+# ─────────────────────────────────────────────────────────────────────────────
+# Trivy aqreqat «Python» hədəfində urllib3 2.7.0 göstərir — bu pip-in DAXİLİ nüsxəsidir:
+#   * tətbiqin urllib3-ü `requirements/base.txt`-də 2.8.0-dır (67e1b0ef, pip-audit) və Trivy
+#     `site-packages/urllib3-2.8.0.dist-info`-nu 0 zəifliklə görür (main CI 36830301345);
+#   * pip runtime-da çağırılmır (yuxarıdakı qeydə bax), tətbiq `pip._vendor.*` idxal etmir —
+#     HTTPS-proxy / yaddaş DoS istismar yolu yoxdur;
+#   * pip-in yeni versiyası vendor-u 2.8.0-a qaldıranda və ya pip son image-dən çıxarılanda
+#     (planlanmış köklü həll) bu iki sətir silinməlidir.
+# Yenidən baxış: 2026-12-15 (yuxarıdakı pip-çıxarma planı ilə birlikdə).
+CVE-2026-97687
+CVE-2026-97689
