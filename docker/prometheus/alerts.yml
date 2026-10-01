@@ -171,8 +171,10 @@ groups:
   - name: emsarena-containers
     rules:
       - alert: ContainerDown
+        # 2026-10-02: `docker compose run` birdəfəlik konteynerləri (…-app-run-<hash>, deploy/miqrasiya/ops)
+        # iş bitəndə silinir — onlar «itib» sayılmamalıdır (yalançı kritik insident yaranırdı).
         expr: >
-          time() - container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+"} > 60
+          time() - container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+", name!~".+-run-.+"} > 60
         for: 1m
         labels:
           severity: critical
