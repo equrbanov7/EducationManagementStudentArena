@@ -1096,7 +1096,8 @@ services:
       resources:
         limits:
           cpus: "${PROMTAIL_CPU_LIMIT:-0.3}"
-          memory: ${PROMTAIL_MEM_LIMIT:-128M}
+          # 2026-10-02: 128M-də working set 90%+ idi (ContainerMemoryNearLimit insidenti) — host RAM-ı bol.
+          memory: ${PROMTAIL_MEM_LIMIT:-256M}
     networks:
       - emsarena-network
 

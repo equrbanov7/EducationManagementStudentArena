@@ -80,8 +80,12 @@ def _platform_info(metrics: dict) -> dict:
     build = get_build_info()
     sha = (build.get("sha") or "unknown")[:12]
     values = metrics.get("values") or {}
+    # docker-compose.prod.yml `APP_VERSION: ${APP_VERSION:-unknown}` — hərfi «unknown» versiya deyil (2026-10-02).
+    env_version = (os.getenv("APP_VERSION") or "").strip()[:40]
+    if env_version.lower() == "unknown":
+        env_version = ""
     return {
-        "version": (os.getenv("APP_VERSION") or "").strip()[:40] or sha,
+        "version": env_version or sha,
         "sha": sha,
         "built_at": build.get("built_at"),
         "server_uptime_seconds": values.get("server_uptime_seconds"),

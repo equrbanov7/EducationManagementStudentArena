@@ -10,6 +10,7 @@ dəyişikliyi audit log-a düşür.
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -179,3 +180,47 @@ def apply_incident_action(incident: Incident, *, action: str, user, note: str = 
     if action == "resolve":
         _notify(incident, resolved=True)
     return True
+
+
+#: Yeni yaranmış insident uzlaşdırmada bağlanmasın (webhook ↔ API gecikməsi, «flapping»).
+STALE_INCIDENT_GRACE_MINUTES = 30
+
+
+def _alert_keys(alert: dict) -> set[str]:
+    labels = alert.get("labels", {}) or {}
+    keys = {f"{labels.get('alertname', '?')}:{labels.get('instance', '')}"}
+    if alert.get("fingerprint"):
+        keys.add(alert["fingerprint"])
+    return keys
+
+
+def reconcile_stale_incidents(active_alerts: list[dict] | None, *, now=None) -> int:
+    """Alertmanager-də artıq aktiv olmayan açıq insidentləri bağla (2026-10-02).
+
+    «Resolved» webhook-u çatmayanda (Alertmanager deploy zamanı yenidən başlayır, şəbəkə xətası)
+    insident həmişəlik «açıq» qalırdı — panel köhnə kritik problem göstərirdi. ``active_alerts``
+    ``None``-dursa (Alertmanager əlçatan deyil) HEÇ NƏ bağlanmır: görmədiyimizi həll olunmuş saymırıq.
+    Susdurulmuş/inhibit olunmuş alertlər də aktiv sayılır.
+    """
+    if active_alerts is None:
+        return 0
+    now = now or timezone.now()
+    active = set()
+    for alert in active_alerts:
+        state = ((alert.get("status") or {}).get("state") or "active").lower()
+        if state in {"active", "suppressed", "unprocessed"}:
+            active |= _alert_keys(alert)
+    cutoff = now - timedelta(minutes=STALE_INCIDENT_GRACE_MINUTES)
+    stale = (
+        Incident.objects.filter(source="alertmanager", started_at__lt=cutoff)
+        .exclude(status=IncidentStatus.RESOLVED)
+        .exclude(fingerprint__in=active)
+    )
+    closed = 0
+    for incident in stale[:200]:
+        incident.status = IncidentStatus.RESOLVED
+        incident.resolved_at = now
+        incident.save(update_fields=["status", "resolved_at"])
+        _audit_incident(incident, "Alertmanager-də artıq aktiv deyil — avtomatik uzlaşdırma ilə həll")
+        closed += 1
+    return closed
