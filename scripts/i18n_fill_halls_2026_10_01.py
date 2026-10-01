@@ -40,10 +40,8 @@ _HALLS = [
         "«%(room)s» zalında hazırda imtahan gedir — oturum bitənə qədər zalı imtahan zallarından çıxarmaq olmaz.",
         "An exam is running in “%(room)s” right now — it cannot be removed from the exam halls until the "
         "session ends.",
-        "В зале «%(room)s» сейчас идёт экзамен — до окончания сеанса его нельзя исключить из экзаменационных "
-        "залов.",
-        "«%(room)s» salonunda şu anda sınav yapılıyor — oturum bitene kadar salon sınav salonlarından "
-        "çıkarılamaz.",
+        "В зале «%(room)s» сейчас идёт экзамен — до окончания сеанса его нельзя исключить из экзаменационных " "залов.",
+        "«%(room)s» salonunda şu anda sınav yapılıyor — oturum bitene kadar salon sınav salonlarından " "çıkarılamaz.",
     ),
     _t(
         "«%(room)s» zalında %(n)d aktiv kompüter qeydiyyatdadır — onlardan final imtahanına giriş mümkündür. "
