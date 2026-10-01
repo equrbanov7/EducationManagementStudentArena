@@ -29,6 +29,7 @@ from apps.exams.services.final_center.hall_matching import (
 from apps.exams.services.final_center.halls import ExamHallChangeError, set_exam_hall
 from apps.organizations.models import Organization
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 
 def _room_line(room) -> str:
@@ -52,7 +53,7 @@ class Command(BaseCommand):
             raise CommandError("--rooms boşdur (nümunə: --rooms 03,28,38).")
         target = not options["unmark"]
         apply = options["apply"]
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             organization = Organization.objects.filter(slug=options["org"]).first()
             if organization is None:
                 raise CommandError(f"Təşkilat tapılmadı: slug={options['org']!r}")
