@@ -1,0 +1,64 @@
+/* Qrupun «ilk giriş» çap vərəqi (sahib 2026-10-03) — şablon: accounts/people/activation_sheet.html.
+   Ekranda A4 kağız görünüşü; çapda alətlər zolağı gizlənir, cədvəl sətirləri səhifə arasında bölünmür. */
+
+.actsheet { max-width: 860px; margin: 24px auto 48px; padding: 0 16px; color: #0f172a; }
+.actsheet__bar { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 14px; }
+
+.actsheet__page {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+    padding: 28px 32px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.actsheet__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.actsheet__org { margin: 0 0 4px; font-size: 13px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em; }
+.actsheet__title { margin: 0 0 6px; font-size: 24px; font-weight: 800; line-height: 1.2; }
+.actsheet__meta { margin: 0; font-size: 14px; color: #334155; }
+
+.actsheet__qr { margin: 0; text-align: center; flex: 0 0 auto; }
+.actsheet__qr svg { display: block; width: 132px; height: 132px; }
+.actsheet__qr figcaption { margin-top: 4px; font-size: 12px; font-weight: 700; color: #334155; }
+
+.actsheet__steps h2,
+.actsheet__list h2 { margin: 22px 0 10px; font-size: 16px; font-weight: 800; display: flex; align-items: baseline; gap: 10px; }
+.actsheet__steps ol { margin: 0; padding-left: 22px; font-size: 14.5px; line-height: 1.6; }
+.actsheet__steps li { margin-bottom: 6px; padding-left: 4px; }
+
+.actsheet__help {
+    margin-top: 12px; padding: 10px 14px; border-radius: 12px;
+    background: #f8fafc; border: 1px dashed #cbd5e1; font-size: 13px; line-height: 1.5;
+}
+.actsheet__help p { margin: 0 0 4px; }
+.actsheet__help p:last-child { margin-bottom: 0; }
+
+.actsheet__count { font-size: 13px; font-weight: 600; color: #64748b; }
+
+.actsheet__table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.actsheet__table th,
+.actsheet__table td { border: 1px solid #cbd5e1; padding: 7px 9px; text-align: left; vertical-align: middle; }
+.actsheet__table thead th { background: #f1f5f9; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+.actsheet__table tr { break-inside: avoid; page-break-inside: avoid; }
+.actsheet__username { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; }
+.actsheet__sign { width: 110px; }
+
+.actsheet__done { margin: 0; padding: 12px 14px; border-radius: 12px; background: #ecfdf5; color: #065f46; font-weight: 600; }
+
+.actsheet__foot {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px;
+    margin-top: 18px; padding-top: 10px; border-top: 1px solid #e2e8f0;
+    font-size: 12px; color: #64748b;
+}
+
+@media (max-width: 640px) {
+    .actsheet__page { padding: 20px 16px; }
+    .actsheet__head { flex-direction: column-reverse; align-items: center; text-align: center; }
+    .actsheet__title { font-size: 20px; }
+}
+
+@media print {
+    @page { size: A4; margin: 14mm; }
+    body { background: #fff !important; }
+    .actsheet { max-width: none; margin: 0; padding: 0; }
+    .actsheet__bar { display: none; }
+    .actsheet__page { border: 0; border-radius: 0; box-shadow: none; padding: 0; }
+    .actsheet__qr svg { width: 34mm; height: 34mm; }
+}

@@ -148,6 +148,7 @@ from .schedule_manage import schedule_manage_action, schedule_manage_check
 
 # Global search (⌘K command palette)
 from .search import global_search
+from .student_activation_sheet import student_activation_sheet
 from .student_intake import (
     student_admission_create_group,
     student_intake_apply,
@@ -269,6 +270,7 @@ __all__ = [
     "student_intake_preview",
     "student_intake_apply",
     "student_admission_create_group",
+    "student_activation_sheet",
     "student_registry_action",
     "student_registry_card",
     "student_registry_document",

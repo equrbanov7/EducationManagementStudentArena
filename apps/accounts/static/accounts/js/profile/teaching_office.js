@@ -461,7 +461,11 @@
         function proceed() {
             btn.disabled = true;
             post(url, payload, null)
-                .then(function () {
+                .then(function (data) {
+                    // 2026-10-03: server nəticə mətni qaytarırsa (məs. «Xatırlat» — kimə getdi) göstər.
+                    if (data && data.message) {
+                        toast(data.message, "success");
+                    }
                     reload(section, sectionUrl(section, {}));
                 })
                 .catch(function (err) {
