@@ -4,9 +4,10 @@ Bu servis YALNIZ zal infrastrukturunu (zal özü + zaldakı fiziki kompüterlər
 MAC/IP qeydləri) idarə edir. İcazə ``can_manage_exam_rooms`` (superadmin, yaxud
 superadminin bayraqla həvalə etdiyi istifadəçi) view qatında yoxlanır.
 
-Təhlükəsizlik qeydi (``exam_center_gate.py``): MAC HTTP sorğusu ilə serverə
-çatmır — giriş məhdudiyyəti ``ip_address`` üzərindən tətbiq olunur; MAC etibarlı
-identifikasiya sahəsidir.
+Təhlükəsizlik qeydi (``exam_center_gate.py``): brauzer MAC göndərmir — server tələbənin IP-sini
+ARP agentinə soruşub MAC-ı özü tapır və bu cədvəldəki qeydlə (normallaşdırılmış formada) tutuşdurur
+(``EXAM_CLIENT_MAC_RESOLUTION=arp_agent``). Ona görə admin daxiletməsi sərt yoxlanır: səhv MAC həmin
+kompüterdə tələbəni bloklayır (2026-10-02, EXAMQA R3/R4).
 """
 
 from __future__ import annotations

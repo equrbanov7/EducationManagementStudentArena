@@ -112,11 +112,11 @@ class ExamRoomComputer(models.Model):
     """
     Zala təyin olunmuş fiziki kompüter — MAC + sabit IP ilə qeyd.
 
-    Təhlükəsizlik qeydi (bax ``exam_center_gate.py``): MAC ünvanı HTTP sorğusu
-    ilə serverə çatmır, ona görə giriş məhdudiyyəti server tərəfində **IP**
-    (``ip_address``) üzərindən tətbiq olunur; MAC yalnız etibarlı
-    identifikasiya/inventar sahəsidir. ``seat_number`` zal monitorunun kompüter
-    xəritəsindəki yeri (ticket ``seat_number`` ilə uyğunlaşır) təyin edir.
+    Təhlükəsizlik qeydi (bax ``exam_center_gate.py``): brauzer MAC göndərmir — server tələbənin
+    IP-sini ARP agentinə soruşub MAC-ı özü tapır (``EXAM_CLIENT_MAC_RESOLUTION=arp_agent``) və bu
+    qeydlə normallaşdırılmış formada tutuşdurur; MAC söndürüləndə IP/CIDR qaydası işləyir. Zal
+    kompüterləri serverlə eyni L2 seqmentində olmalıdır (ARP). ``seat_number`` zal monitorunun
+    kompüter xəritəsindəki yeri (ticket ``seat_number`` ilə uyğunlaşır) təyin edir.
     """
 
     # Denormalizasiya: RLS tenant izolyasiyası birbaşa NOT NULL ``organization_id``
