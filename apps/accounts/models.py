@@ -314,6 +314,14 @@ class UserProfile(models.Model):
         verbose_name="Email təsdiqlənib",
         help_text="İlk girişdə OTP ilə təsdiqləndikdən sonra True; parol bərpası üçün istifadə olunur.",
     )
+    # Sahib 2026-10-02: parol bərpasından (admin sıfırlaması və ya «Parolu unutdum») sonra tələbənin
+    # kabinetə İLK girişində «köhnə sistemdən köçürülən ballarda səhv ola bilər — İmtahan Mərkəzi ilə
+    # dəqiqləşdirin» modalı bir dəfə göstərilir; «Başa düşdüm» basılanda False olur.
+    grades_notice_pending = models.BooleanField(
+        default=False,
+        verbose_name="Bal xəbərdarlığı gözləyir",
+        help_text="Parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə xəbərdarlıq göstərilsin.",
+    )
 
     # Superadmin tərəfindən verilən "imtahan zalı idarəçisi" icazəsi: bu bayraq
     # açıq olan istifadəçi (superadmin olmasa da) imtahan zalı və zaldakı

@@ -402,5 +402,33 @@
             });
     });
 
+    /* ---- KPI kartı → «Vəziyyət» (sr_state) / «Hesab» (sr_account) filtri (2026-10-02) ---- */
+    // nav.js kart klikində `ems:kpi-filter` yayır; seçicini dəyişib filtr panelinin öz
+    // avto-göndəriş axınını (filter_auto: change → sorğu) işə salırıq — server tərəfli filtr.
+    document.addEventListener("ems:kpi-filter", function (event) {
+        var target = event.target;
+        var panel = target && target.closest ? target.closest('[data-profile-section-panel="student-registry"]') : null;
+        if (!panel) {
+            return;
+        }
+        // «account:activated» → Hesab filtri (sr_account); qalan açarlar → Vəziyyət (sr_state).
+        var raw = (event.detail && event.detail.filter) || "";
+        var lastTile = event.target.getAttribute ? event.target.getAttribute("data-ems-kpi-filter") || "" : "";
+        var isAccount = (raw || lastTile).indexOf("account:") === 0;
+        var select = panel.querySelector(isAccount ? 'select[name="sr_account"]' : 'select[name="sr_state"]');
+        if (!select) {
+            return;
+        }
+        var value = isAccount ? raw.replace("account:", "") : raw;
+        if (select.value === value) {
+            return;
+        }
+        select.value = value;
+        if (window.EMSBootstrapSelect && typeof window.EMSBootstrapSelect.refresh === "function") {
+            window.EMSBootstrapSelect.refresh(select);
+        }
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
     window.EMSStudentRegistry = { urlFor: urlFor };
 })(window, document);

@@ -89413,3 +89413,169 @@ msgid ""
 msgstr ""
 "Этот MAC-адрес не может принадлежать компьютеру (нулевой, широковещательный "
 "или multicast): %(mac)s"
+
+msgctxt "accounts.grades_notice"
+msgid "Vacib məlumat"
+msgstr "Важно"
+
+msgctxt "accounts.grades_notice"
+msgid "Qiymətlərinizi mütləq yoxlayın"
+msgstr "Обязательно проверьте свои оценки"
+
+msgctxt "accounts.grades_notice"
+msgid ""
+"Əvvəlki semestrlərin balları köhnə sistemdən bu yeni sistemə köçürülüb. "
+"Köçürmə zamanı bəzi ballarda səhv ola bilər."
+msgstr ""
+"Баллы за прошлые семестры перенесены из старой системы в эту новую. При "
+"переносе в некоторых баллах могли возникнуть ошибки."
+
+msgctxt "accounts.grades_notice"
+msgid "Məsələn, belə ola bilər:"
+msgstr "Например:"
+
+msgctxt "accounts.grades_notice"
+msgid "balınız əslində olduğundan fərqli yazılıb;"
+msgstr "балл указан не таким, какой он на самом деле;"
+
+msgctxt "accounts.grades_notice"
+msgid "keçdiyiniz fənn siyahıda görünmür;"
+msgstr "сданный вами предмет не виден в списке;"
+
+msgctxt "accounts.grades_notice"
+msgid "fənn başqa semestrdə görünür."
+msgstr "предмет отображается в другом семестре."
+
+msgctxt "accounts.grades_notice"
+msgid "Nə etməlisiniz?"
+msgstr "Что нужно сделать?"
+
+msgctxt "accounts.grades_notice"
+msgid "Səhv görsəniz, İmtahan Mərkəzinə yaxınlaşın və balınızı dəqiqləşdirin."
+msgstr ""
+"Если заметите ошибку, обратитесь в Экзаменационный центр и уточните свой "
+"балл."
+
+msgctxt "accounts.grades_notice"
+msgid "Hər şey düzdürsə, heç nə etməyinizə ehtiyac yoxdur."
+msgstr "Если всё верно, ничего делать не нужно."
+
+msgctxt "accounts.grades_notice"
+msgid "Başa düşdüm"
+msgstr "Понятно"
+
+msgctxt "accounts.grades_notice"
+msgid "Ballarıma indi baxım"
+msgstr "Посмотреть мои баллы"
+
+msgctxt "accounts.grades_notice"
+msgid "Bu məlumat yalnız bir dəfə göstərilir."
+msgstr "Это сообщение показывается только один раз."
+
+msgctxt "accounts.first_login"
+msgid "məs: adiniz@gmail.com"
+msgstr "напр.: vashe_imya@gmail.com"
+
+msgctxt "accounts.first_login"
+msgid ""
+"Bu sahəni özünüz doldurun: hər gün istifadə etdiyiniz e-poçtu yazın (məs. "
+"Gmail). Təsdiq kodu ora gələcək, parolu unutsanız bərpa da bu ünvanla "
+"olacaq."
+msgstr ""
+"Заполните это поле сами: укажите почту, которой пользуетесь каждый день "
+"(например, Gmail). Туда придёт код подтверждения, и по этому же адресу можно"
+" будет восстановить пароль."
+
+msgctxt "accounts.grades_notice"
+msgid "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
+msgstr ""
+"Внимательно проверьте свои баллы в разделе «Общая учебная информация»."
+
+msgctxt "accounts.student_registry"
+msgid "OXUYUR"
+msgstr "ОБУЧАЕТСЯ"
+
+msgctxt "accounts.student_registry"
+msgid "Oxu müddəti bitməyib"
+msgstr "Срок обучения не истёк"
+
+msgctxt "accounts.student_registry"
+msgid "OXU MÜDDƏTİ BİTİB"
+msgstr "СРОК ОБУЧЕНИЯ ИСТЁК"
+
+msgctxt "accounts.student_registry"
+msgid "Çox güman məzundur — rəsmiləşdirin"
+msgstr "Скорее всего выпускник — оформите официально"
+
+msgctxt "accounts.student_registry"
+msgid "ARXİV: MƏZUN / XARİC"
+msgstr "АРХИВ: ВЫПУСКНИК / ОТЧИСЛЕН"
+
+msgctxt "accounts.student_registry"
+msgid "Köhnə sistemdə «azad edilib»"
+msgstr "В старой системе отмечен как «освобождён»"
+
+msgctxt "accounts.student_registry"
+msgid "QƏBUL İLİ BİLİNMİR"
+msgstr "ГОД ПОСТУПЛЕНИЯ НЕИЗВЕСТЕН"
+
+msgctxt "accounts.student_registry"
+msgid "Köçürmədə il tapılmayıb"
+msgstr "Год не найден при переносе данных"
+
+msgctxt "accounts.student_registry"
+msgid "PAROLUNU QURUB / BƏRPA EDİB"
+msgstr "ЗАДАЛ / ВОССТАНОВИЛ ПАРОЛЬ"
+
+msgctxt "accounts.student_registry"
+msgid "Öz parolu + təsdiqli e-poçt"
+msgstr "Свой пароль + подтверждённая почта"
+
+msgctxt "accounts.student_registry"
+msgid "HƏLƏ İLKİN PAROLDA"
+msgstr "ВСЁ ЕЩЁ С НАЧАЛЬНЫМ ПАРОЛЕМ"
+
+msgctxt "accounts.student_registry"
+msgid "Daxil olub parolunu dəyişməyib"
+msgstr "Не вошёл и не сменил пароль"
+
+msgctxt "accounts.student_registry"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab"
+msgstr "Учётная запись"
+
+msgctxt "accounts.student_registry"
+msgid "Parolunu qurub / bərpa edib"
+msgstr "Задал / восстановил пароль"
+
+msgctxt "accounts.student_registry"
+msgid "Hələ ilkin parolda"
+msgstr "Всё ещё с начальным паролем"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi status"
+msgstr "Официальный статус"
+
+msgctxt "ui.status"
+msgid "Oxuyur"
+msgstr "Обучается"
+
+msgctxt "ui.status"
+msgid "Oxu müddəti bitib"
+msgstr "Срок обучения истёк"
+
+msgctxt "ui.status"
+msgid "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."
+msgstr ""
+"Скорее всего выпускник — нужно оформить официальный статус (выпускник)."
+
+msgctxt "ui.status"
+msgid "Qəbul ili bilinmir"
+msgstr "Год поступления неизвестен"
+
+msgctxt "ui.status"
+msgid "Arxiv: məzun və ya xaric"
+msgstr "Архив: выпускник или отчислен"

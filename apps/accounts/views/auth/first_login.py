@@ -81,8 +81,11 @@ def set_initial_password_view(request):
         # Nothing to do — the account is already set up.
         return redirect("accounts:profile")
 
+    # Sahib 2026-10-02: sistemdəki (köçürülmüş / administrasiyanın yazdığı) e-poçt sahəyə QOYULMUR — istifadəçi
+    # «bunu dəyişə bilərəmmi?» deyə soruşurdu. Sahə boş gəlir, istifadəçi ÖZ e-poçtunu yazır; yalnız bu axında
+    # özünün yazdığı ünvan (kod göndərilib / «e-poçtu dəyiş») geri qaytarılır. Boş sahə ilə kod göndərilmir.
     prefilled_email = (
-        request.session.get(_OTP_SENT_SESSION_KEY) or request.session.get(_EMAIL_DRAFT_SESSION_KEY) or user.email or ""
+        request.session.get(_OTP_SENT_SESSION_KEY) or request.session.get(_EMAIL_DRAFT_SESSION_KEY) or ""
     ).strip()
     otp_sent = bool(request.session.get(_OTP_SENT_SESSION_KEY))
 

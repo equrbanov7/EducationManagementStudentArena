@@ -89257,3 +89257,168 @@ msgid ""
 msgstr ""
 "This MAC address cannot belong to a computer (zero, broadcast or multicast):"
 " %(mac)s"
+
+msgctxt "accounts.grades_notice"
+msgid "Vacib məlumat"
+msgstr "Important"
+
+msgctxt "accounts.grades_notice"
+msgid "Qiymətlərinizi mütləq yoxlayın"
+msgstr "Please check your grades"
+
+msgctxt "accounts.grades_notice"
+msgid ""
+"Əvvəlki semestrlərin balları köhnə sistemdən bu yeni sistemə köçürülüb. "
+"Köçürmə zamanı bəzi ballarda səhv ola bilər."
+msgstr ""
+"Your scores from previous semesters were transferred from the old system to "
+"this new one. Some scores may have been transferred incorrectly."
+
+msgctxt "accounts.grades_notice"
+msgid "Məsələn, belə ola bilər:"
+msgstr "For example:"
+
+msgctxt "accounts.grades_notice"
+msgid "balınız əslində olduğundan fərqli yazılıb;"
+msgstr "a score is different from what it really is;"
+
+msgctxt "accounts.grades_notice"
+msgid "keçdiyiniz fənn siyahıda görünmür;"
+msgstr "a subject you passed is missing from the list;"
+
+msgctxt "accounts.grades_notice"
+msgid "fənn başqa semestrdə görünür."
+msgstr "a subject appears in a different semester."
+
+msgctxt "accounts.grades_notice"
+msgid "Nə etməlisiniz?"
+msgstr "What should you do?"
+
+msgctxt "accounts.grades_notice"
+msgid "Səhv görsəniz, İmtahan Mərkəzinə yaxınlaşın və balınızı dəqiqləşdirin."
+msgstr ""
+"If you see a mistake, go to the Exam Center and have your score checked."
+
+msgctxt "accounts.grades_notice"
+msgid "Hər şey düzdürsə, heç nə etməyinizə ehtiyac yoxdur."
+msgstr "If everything is correct, you don't need to do anything."
+
+msgctxt "accounts.grades_notice"
+msgid "Başa düşdüm"
+msgstr "I understand"
+
+msgctxt "accounts.grades_notice"
+msgid "Ballarıma indi baxım"
+msgstr "Check my scores now"
+
+msgctxt "accounts.grades_notice"
+msgid "Bu məlumat yalnız bir dəfə göstərilir."
+msgstr "This message is shown only once."
+
+msgctxt "accounts.first_login"
+msgid "məs: adiniz@gmail.com"
+msgstr "e.g. yourname@gmail.com"
+
+msgctxt "accounts.first_login"
+msgid ""
+"Bu sahəni özünüz doldurun: hər gün istifadə etdiyiniz e-poçtu yazın (məs. "
+"Gmail). Təsdiq kodu ora gələcək, parolu unutsanız bərpa da bu ünvanla "
+"olacaq."
+msgstr ""
+"Fill in this field yourself: enter the email you use every day (e.g. Gmail)."
+" The verification code will be sent there, and if you forget your password "
+"it will be recovered with this address."
+
+msgctxt "accounts.grades_notice"
+msgid "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
+msgstr ""
+"Look carefully at your scores in the “Overall academic information” section."
+
+msgctxt "accounts.student_registry"
+msgid "OXUYUR"
+msgstr "STUDYING"
+
+msgctxt "accounts.student_registry"
+msgid "Oxu müddəti bitməyib"
+msgstr "Study period not over"
+
+msgctxt "accounts.student_registry"
+msgid "OXU MÜDDƏTİ BİTİB"
+msgstr "STUDY PERIOD ENDED"
+
+msgctxt "accounts.student_registry"
+msgid "Çox güman məzundur — rəsmiləşdirin"
+msgstr "Most likely a graduate — make it official"
+
+msgctxt "accounts.student_registry"
+msgid "ARXİV: MƏZUN / XARİC"
+msgstr "ARCHIVE: GRADUATE / EXPELLED"
+
+msgctxt "accounts.student_registry"
+msgid "Köhnə sistemdə «azad edilib»"
+msgstr "Marked as “released” in the old system"
+
+msgctxt "accounts.student_registry"
+msgid "QƏBUL İLİ BİLİNMİR"
+msgstr "ADMISSION YEAR UNKNOWN"
+
+msgctxt "accounts.student_registry"
+msgid "Köçürmədə il tapılmayıb"
+msgstr "The year was not found during migration"
+
+msgctxt "accounts.student_registry"
+msgid "PAROLUNU QURUB / BƏRPA EDİB"
+msgstr "SET / RECOVERED PASSWORD"
+
+msgctxt "accounts.student_registry"
+msgid "Öz parolu + təsdiqli e-poçt"
+msgstr "Own password + verified email"
+
+msgctxt "accounts.student_registry"
+msgid "HƏLƏ İLKİN PAROLDA"
+msgstr "STILL ON INITIAL PASSWORD"
+
+msgctxt "accounts.student_registry"
+msgid "Daxil olub parolunu dəyişməyib"
+msgstr "Has not signed in and changed the password"
+
+msgctxt "accounts.student_registry"
+msgid "Vəziyyət"
+msgstr "Study state"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab"
+msgstr "Account"
+
+msgctxt "accounts.student_registry"
+msgid "Parolunu qurub / bərpa edib"
+msgstr "Set / recovered password"
+
+msgctxt "accounts.student_registry"
+msgid "Hələ ilkin parolda"
+msgstr "Still on initial password"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi status"
+msgstr "Official status"
+
+msgctxt "ui.status"
+msgid "Oxuyur"
+msgstr "Studying"
+
+msgctxt "ui.status"
+msgid "Oxu müddəti bitib"
+msgstr "Study period ended"
+
+msgctxt "ui.status"
+msgid "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."
+msgstr ""
+"Most likely a graduate — the official status (graduated) should be recorded."
+
+msgctxt "ui.status"
+msgid "Qəbul ili bilinmir"
+msgstr "Admission year unknown"
+
+msgctxt "ui.status"
+msgid "Arxiv: məzun və ya xaric"
+msgstr "Archive: graduate or expelled"

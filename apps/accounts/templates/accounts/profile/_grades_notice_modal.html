@@ -1,0 +1,47 @@
+{% load static i18n %}
+{% comment %}Sahib 2026-10-02: parol bərpasından sonra tələbənin kabinetə İLK girişində bir dəfə göstərilir
+(UserProfile.grades_notice_pending). Sadə dil — «köçürülmüş ballarda səhv ola bilər, İmtahan Mərkəzi ilə
+dəqiqləşdir». Bağlamaq yalnız düymə ilə (fon kliki / Esc yox) — mütləq oxunsun. JS: grades_notice.js.{% endcomment %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/grades_notice.css' %}?v=20261002-1">
+<div class="gn-overlay" data-grades-notice
+     data-ack-url="{% url 'accounts:grades_notice_ack' %}"
+     data-grades-url="{% if 'overall-academic' in allowed_sections %}{{ profile_base_url }}?section=overall-academic{% endif %}">
+  <section class="gn-card" role="alertdialog" aria-modal="true" aria-labelledby="gn-title" aria-describedby="gn-lead">
+    <div class="gn-icon" aria-hidden="true"><i class="fas fa-triangle-exclamation"></i></div>
+    <p class="gn-kicker">{% trans "Vacib məlumat" context "accounts.grades_notice" %}</p>
+    <h2 id="gn-title" class="gn-title">{% trans "Qiymətlərinizi mütləq yoxlayın" context "accounts.grades_notice" %}</h2>
+    <p id="gn-lead" class="gn-lead">
+      {% trans "Əvvəlki semestrlərin balları köhnə sistemdən bu yeni sistemə köçürülüb. Köçürmə zamanı bəzi ballarda səhv ola bilər." context "accounts.grades_notice" %}
+    </p>
+    <div class="gn-box">
+      <p class="gn-box__title">{% trans "Məsələn, belə ola bilər:" context "accounts.grades_notice" %}</p>
+      <ul class="gn-list">
+        <li>{% trans "balınız əslində olduğundan fərqli yazılıb;" context "accounts.grades_notice" %}</li>
+        <li>{% trans "keçdiyiniz fənn siyahıda görünmür;" context "accounts.grades_notice" %}</li>
+        <li>{% trans "fənn başqa semestrdə görünür." context "accounts.grades_notice" %}</li>
+      </ul>
+    </div>
+    <div class="gn-steps">
+      <p class="gn-steps__title">{% trans "Nə etməlisiniz?" context "accounts.grades_notice" %}</p>
+      <ol class="gn-steps__list">
+        <li>{% trans "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın." context "accounts.grades_notice" %}</li>
+        <li><strong>{% trans "Səhv görsəniz, İmtahan Mərkəzinə yaxınlaşın və balınızı dəqiqləşdirin." context "accounts.grades_notice" %}</strong></li>
+        <li>{% trans "Hər şey düzdürsə, heç nə etməyinizə ehtiyac yoxdur." context "accounts.grades_notice" %}</li>
+      </ol>
+    </div>
+    <div class="gn-actions">
+      <button type="button" class="gn-btn gn-btn--primary" data-grades-notice-ack data-go="0">
+        <i class="fas fa-check" aria-hidden="true"></i>
+        {% trans "Başa düşdüm" context "accounts.grades_notice" %}
+      </button>
+      {% if 'overall-academic' in allowed_sections %}
+      <button type="button" class="gn-btn gn-btn--ghost" data-grades-notice-ack data-go="1">
+        <i class="fas fa-list-check" aria-hidden="true"></i>
+        {% trans "Ballarıma indi baxım" context "accounts.grades_notice" %}
+      </button>
+      {% endif %}
+    </div>
+    <p class="gn-foot">{% trans "Bu məlumat yalnız bir dəfə göstərilir." context "accounts.grades_notice" %}</p>
+  </section>
+</div>
+<script src="{% static 'accounts/js/profile/grades_notice.js' %}?v=20261002-1" defer></script>

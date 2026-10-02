@@ -370,14 +370,8 @@
         </li>
         {% endif %}
         {% else %}
-        <li class="blog-header__nav-item">
-            <a href="{% url 'liveExam:pin_entry' %}"
-               {% if request.resolver_match.namespace == 'liveExam' %}aria-current="page"{% endif %}
-               class="blog-header__nav-link {% if request.resolver_match.namespace == 'liveExam' %}blog-header__nav-link--active{% endif %}">
-                <i class="fas fa-tower-broadcast" aria-hidden="true"></i>
-                <span>{% trans "live_exam" context "nav" %}</span>
-            </a>
-        </li>
+        {% comment %}2026-10-02 (sahib): mobil yan menyudakı «Canlı imtahan» bəndi ÇIXARILDI — tələbə canlı
+        imtahana müəllimin göstərdiyi QR/PIN ilə qoşulur (yuxarı paneldə «Qoşul» menyusu qalır).{% endcomment %}
         {% if request.user.is_authenticated and not university_mode %}
         <li class="blog-header__nav-item">
             <a href="{% url 'trial_exams:request' %}"
