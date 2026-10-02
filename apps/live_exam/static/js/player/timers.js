@@ -1,12 +1,29 @@
 // LX-FE-PLAYER (2026-09-29): bütün taymerlər bir yerdən idarə olunur — faza dəyişəndə heç biri
 // «asılı» qalmır (QA: mərhələ keçidlərində köhnə interval/timeout işləməməlidir).
-import { state } from './state.js?v=lx20260930';
+import { state } from './state.js?v=lx20261002';
 
 export function clearTicker() {
     if (state.ticker) {
         window.clearInterval(state.ticker);
         state.ticker = null;
     }
+    clearBoundary();
+}
+
+// LXNET: faza sərhədinə bir dəfəlik dəqiq taymer (tiker ilə birgə; yalnız ən yaxın sərhəd).
+export function clearBoundary() {
+    if (state.boundaryTimer) {
+        window.clearTimeout(state.boundaryTimer);
+        state.boundaryTimer = null;
+    }
+}
+
+export function scheduleBoundary(fn, delay) {
+    clearBoundary();
+    state.boundaryTimer = window.setTimeout(() => {
+        state.boundaryTimer = null;
+        fn();
+    }, Math.max(0, Number(delay) || 0));
 }
 
 export function startTicker(fn, intervalMs = 200) {

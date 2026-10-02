@@ -16,6 +16,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.live_exam.auth import get_request_player
+from apps.live_exam.delivery import build_delivery_progress_payload, received_count, record_question_seen
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
 from apps.live_exam.models import LiveAnswer, LiveSession
@@ -127,6 +128,13 @@ def _reveal_fields(session, eq, *, ends, is_host: bool, player, data: dict) -> N
         data["player_answer"] = personal.get("player_answer")
 
 
+def _record_delivery(pin: str, question_id: int, player_id: int, *, at) -> None:
+    received = record_question_seen(pin, question_id, player_id, at=at)
+    if received is not None:
+        payload = build_delivery_progress_payload(question_id=question_id, received=received)
+        transaction.on_commit(lambda: broadcast_host(pin, payload))
+
+
 def live_state_json(request, pin):
     """
     ✅ NEW: cari state-i HTTP ilə almaq (late join / miss olunan WS üçün)
@@ -218,9 +226,15 @@ def live_state_json(request, pin):
             _reveal_fields(session, eq, ends=ends, is_host=is_host, player=player, data=data)
             return JsonResponse(data)
 
-        data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
         data["correct_option_ids"] = []
+        if is_host:
+            data["previous_top"] = serialize_top_before_question(session, eq.id, limit=10)
+            # LXNET: sualı neçə telefon aldı (host-un «N/M aldı» sayğacı, refresh-dən sonra).
+            data["received_count"] = received_count(session.pin, eq.id)
         if player is not None:
+            # LXNET: HTTP snapshot sualı bu oyunçuya verdi — çatmanın server-vaxtlı sübutu
+            # (WS qopuq olanda yeganə yol). ``previous_top`` oyunçuya lazım deyil (ağır sorğu).
+            _record_delivery(session.pin, eq.id, player.id, at=server_time)
             # Refresh-dən sonra telefonun sıra göstəricisi — sualdan ƏVVƏLKİ sıra (sızma yoxdur).
             data.update(pre_question_rank(session, player.id, eq.id))
             # EX28-10: açıq sual ərzində yalnız «cavab saxlanıb» (düzlük reveal-də).

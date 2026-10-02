@@ -19,6 +19,13 @@
     <link rel="stylesheet" href="{% static 'css/wait_room/_base.css' %}?v=lxp-20260929">
     <link rel="stylesheet" href="{% static 'css/wait_room/_overlays.css' %}?v=lxp-20260929">
     <link rel="stylesheet" href="{% static 'css/wait_room/_sheet.css' %}?v=lxp-20260929">
+    {% comment %}LXNET 2026-10-02: lobbi vaxtı oyun ekranının stil/kod fayllarını (sual məzmunu YOX)
+    keşə al — «Oyun başlayır!» anında zəif şəbəkəli telefon ekranı keşdən açır (views/player/assets.py).{% endcomment %}
+    {% for href in player_assets.css %}<link rel="prefetch" as="style" href="{{ href }}">
+    {% endfor %}{% for src in player_assets.classic_js %}<link rel="prefetch" as="script" href="{{ src }}">
+    {% endfor %}<link rel="prefetch" as="script" crossorigin href="{{ player_assets.entry }}">
+    {% for href in player_assets.modules %}<link rel="prefetch" as="script" crossorigin href="{{ href }}">
+    {% endfor %}
 </head>
 <body class="lxw" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
     {% comment %}LX-FE-PLAYER 2026-09-29: gözləmə otağı — telefon üçün: iri avatar, «müəllimi gözləyirik»
@@ -224,6 +231,6 @@
     <script src="{% static 'js/wait_room_accessory_picker.js' %}?v=lxp-20260929"></script>
     <script src="{% static 'js/wait_room_reaction_panel.js' %}?v=lxp-20260929"></script>
     <script src="{% static 'js/wait_room_profile_sheet.js' %}?v=lxp-20260929"></script>
-    <script src="{% static 'js/wait_room_page.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/wait_room_page.js' %}?v=lxp-20261002"></script>
 </body>
 </html>

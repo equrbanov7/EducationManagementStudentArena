@@ -6,7 +6,8 @@ Qaydalar (tam təsvir: docs/live_exam/ENGINE.md):
 * **Vaxt əmsalı** — Kahoot: düzgün cavab 100% → 50% (cavab pəncərəsinin
   sonunadək xətti). Vaxt SERVERİN gördüyü andan ölçülür: mesajın serverə ÇATDIĞI
   an (WS ``receive`` / HTTP view girişi — növbə gözləməsi daxil deyil). Müştərinin
-  ``answer_ms``-i balı YALNIZ AZALDA bilər (Audit 2026-09-28 LXBE-01).
+  ``answer_ms``-i balı YALNIZ AZALDA bilər (Audit 2026-09-28 LXBE-01). Sual oyunçuya pəncərə
+  açılandan SONRA çatıbsa (server sübutu, ``delivery.py``), vaxt tavanla həmin andan ölçülür (LXNET).
 * **Çox seçimli** — ``multi_scoring``: ``partial`` (default) =
   baza × əmsal × max(0, (düz − səhv) / cəmi_düz); ``strict`` = yalnız dəqiq dəst.
 * **Yazılı cavab** — düzgün → baza × əmsal; səhv/boş → 0.
@@ -31,6 +32,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion
 from apps.live_exam.constants import ANSWER_LATENCY_GRACE_SECONDS
+from apps.live_exam.delivery import late_delivery_shift_ms, question_seen_at
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_active_question, question_points
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
@@ -212,8 +214,12 @@ def _already_answered(session, player, answer, question) -> tuple[bool, dict[str
     )
 
 
-def _score_submission(session, question, config, *, option_ids, text, answer_ms, received_at):
-    """``(score_dict, None)`` və ya ``(None, error_message)`` — pəncərə + forma yoxlaması."""
+def _score_submission(session, question, config, *, option_ids, text, answer_ms, received_at, seen_at=None):
+    """``(score_dict, None)`` və ya ``(None, error_message)`` — pəncərə + forma yoxlaması.
+
+    ``seen_at`` — sualın bu oyunçuya çatdığının server sübutu (``delivery``): pəncərə açılandan
+    SONRA çatıbsa, sürət vaxtı tavanla həmin andan ölçülür (LXNET 2026-10-02). Pəncərə dəyişmir.
+    """
     question_idx = int(session.current_index or 0)
     _, answer_starts_at, _ = build_question_phase_times(
         session, question, started_at=session.question_started_at, idx=question_idx
@@ -223,7 +229,8 @@ def _score_submission(session, question, config, *, option_ids, text, answer_ms,
         return None, _error("submission_outside_active_window")
 
     total_ms = max(0, int((session.question_ends_at - answer_starts_at).total_seconds() * 1000))
-    server_elapsed_ms = max(0, int((received_at - answer_starts_at).total_seconds() * 1000))
+    shift_ms = late_delivery_shift_ms(seen_at=seen_at, answer_starts_at=answer_starts_at, total_ms=total_ms)
+    server_elapsed_ms = max(0, int((received_at - answer_starts_at).total_seconds() * 1000) - shift_ms)
     effective_ms = effective_answer_ms(client_ms=answer_ms, server_elapsed_ms=server_elapsed_ms, total_ms=total_ms)
     base_points = question_points(session, question)
 
@@ -265,7 +272,7 @@ def _score_submission(session, question, config, *, option_ids, text, answer_ms,
     )
 
 
-def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text, answer_ms, received_at):
+def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text, answer_ms, received_at, seen_at=None):
     """Tranzaksiya 1: yoxla + saxla + bal/seriya. ``(ok, result|msg, answer, created, session)``."""
     with transaction.atomic():
         session = _lock_session_for_answer(pin)
@@ -293,7 +300,14 @@ def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text,
 
         config = resolve_question_config(session, question)
         score, error = _score_submission(
-            session, question, config, option_ids=option_ids, text=text, answer_ms=answer_ms, received_at=received_at
+            session,
+            question,
+            config,
+            option_ids=option_ids,
+            text=text,
+            answer_ms=answer_ms,
+            received_at=received_at,
+            seen_at=seen_at,
         )
         if error:
             return False, error, None, False, session
@@ -376,6 +390,8 @@ def _save_answer_and_score_impl(
     # Xarici tranzaksiya (RLS_TRANSACTION_SCOPED / ATOMIC_REQUESTS) daxilindəyiksə
     # «hamı cavab verdi» yoxlaması commit-ə qədər təxirə salınır.
     nested = connection.in_atomic_block
+    # Keş oxunuşu kilidlərdən ƏVVƏL (tranzaksiya içində şəbəkə gözləməsi olmasın).
+    seen_at = question_seen_at(pin, question_id, player_id)
     try:
         with bypass_rls():
             ok, result, answer, created, session = _persist_answer(
@@ -387,6 +403,7 @@ def _save_answer_and_score_impl(
                 text=text,
                 answer_ms=answer_ms,
                 received_at=received_at,
+                seen_at=seen_at,
             )
             if not ok or not created:
                 return ok, result, answer, created

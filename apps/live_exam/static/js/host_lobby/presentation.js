@@ -1,11 +1,11 @@
-import { UI } from './dom.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20260930';
-import { stopStatePolling } from './api.js?v=lx20260930';
-import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20260930';
-import { teardownStage } from './stage.js?v=lx20260930';
-import { cancelWipe } from './transitions.js?v=lx20260930';
-import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20260930';
+import { UI } from './dom.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20261002';
+import { stopStatePolling } from './api.js?v=lx20261002';
+import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20261002';
+import { teardownStage } from './stage.js?v=lx20261002';
+import { cancelWipe } from './transitions.js?v=lx20261002';
+import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20261002';
 
 let presenterWindowRef = null;
 

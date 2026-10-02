@@ -1,4 +1,4 @@
-import { PHASES } from './constants.js?v=lx20260930';
+import { PHASES } from './constants.js?v=lx20261002';
 
 export const state = {
     sessionState: "lobby",
@@ -11,6 +11,9 @@ export const state = {
     questionPlan: null,
     answeredCount: 0,
     totalPlayers: 0,
+    // LXNET 2026-10-02: cari sualı telefonuna alan oyunçu sayı (`delivery_progress`).
+    receivedCount: 0,
+    receivedQuestionId: 0,
     countdownValue: null,
     frameId: 0,
     autoRevealTimeout: 0,

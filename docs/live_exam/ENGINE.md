@@ -137,3 +137,19 @@ klientə qoşur, `personal` açarı heç vaxt klientə getmir.
 * Lobby `lobby_state` socket başına ≤ 4/s (ön + son kənar birləşdirmə).
 * State endpoint ~8 sorğu (əvvəl ~15+).
 * Ops tövsiyələri: bax LOAD_TEST.md «Tövsiyələr».
+
+## Zəif şəbəkə: sualın çatması, ədalət və bağlantı (LXNET, 2026-10-02)
+
+- **Çatma sübutu** (`apps/live_exam/delivery.py`): serverin öz saatı ilə, ilk qeyd qalib — play socket-in
+  ötürdüyü sual üçün klientin `seen` təsdiqi və ya `GET /live/state/<pin>/` sualı oyunçuya verdiyi an
+  (keşdə, `live_exam:seen:*`). Klient saatına etibar edilmir.
+- **Fərdi anker**: sual `answer_starts_at`-dan GEC çatıbsa, sürət balı `answer_starts_at + min(gecikmə, tavan)`-dan
+  ölçülür; tavan = `min(3 s, 0.2 × pəncərə)`. Pəncərə, reveal vaxtı, düzgün cavabın gizliliyi dəyişmir; maksimal
+  bal eynidir. Keş əlçatmazdırsa köhnə qayda.
+- **Yeni mesajlar**: `ping` / `pong` (6 s heartbeat; cavab gəlməsə klient yeni bağlantı açıb vəziyyəti HTTP ilə
+  çəkir), `seen` (klient → server), `delivery_progress` + `received_count` (yalnız HOST-a: «N/M aldı»).
+  Oyunçunun yeni sual mesajında `previous_top` artıq yoxdur (yalnız host alır).
+- **Klient saatı** (`static/js/player/clock.js`): server vaxtı round-trip ölçmələri ilə sinxronlanır; cavab
+  düymələri dəqiq anda açılır. State/answer sorğularının 6 s timeout-u var; WS ilişəndə cavab dərhal HTTP ilə.
+- Ölçmə (4 telefon, proksi ilə gecikmə/kəsinti): yavaş 3G-də düymələrin gecikməsi 457 → 10 ms, ilk sual
+  5.9 → 2.9 s; 8 s kəsintidə itən cavab 2/6 → 0.

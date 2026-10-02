@@ -1,4 +1,4 @@
-import { reducedMotion } from './utils.js?v=lx20260930';
+import { reducedMotion } from './utils.js?v=lx20261002';
 
 /* Suallar arası «pərdə» keçidi — TƏK süpürmə (sahib 2026-09-30, «animasiya iki dəfə oynayır»).
  *

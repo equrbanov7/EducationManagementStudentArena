@@ -1,14 +1,14 @@
 // LX-FE-PLAYER (2026-09-29): hadisələr — hamısı delegasiya ilə (EMSDelegate.on; view-lar
 // dəyişdikcə yeni düymələr avtomatik tutulur, dinləyici yığılmır).
-import { TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20260930';
-import { handleOptionTap, submitAnswer } from './answer.js?v=lx20260930';
-import { fetchState } from './api.js?v=lx20260930';
-import { isMuted, onAudioChange, playSound, setMuted, unlockAudio } from './audio.js?v=lx20260930';
-import { markUserActivation } from './haptics.js?v=lx20260930';
-import { isSocketOpen, reconnectNow } from './sockets.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { renderSoundToggle, setNetStatus } from './ui.js?v=lx20260930';
-import { toInt, tr } from './utils.js?v=lx20260930';
+import { TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261002';
+import { handleOptionTap, submitAnswer } from './answer.js?v=lx20261002';
+import { fetchState } from './api.js?v=lx20261002';
+import { isMuted, onAudioChange, playSound, setMuted, unlockAudio } from './audio.js?v=lx20261002';
+import { markUserActivation } from './haptics.js?v=lx20261002';
+import { isSocketOpen, reconnectNow } from './sockets.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { renderSoundToggle, setNetStatus } from './ui.js?v=lx20261002';
+import { toInt, tr } from './utils.js?v=lx20261002';
 
 function delegate(type, selector, handler) {
     if (window.EMSDelegate && typeof window.EMSDelegate.on === "function") {
@@ -108,17 +108,17 @@ export function bindPlayerEvents() {
             setNetStatus("reconnecting");
             reconnectNow();
         }
-        fetchState();
+        fetchState({ fresh: true });
     });
     document.addEventListener("visibilitychange", () => {
         if (document.hidden || state.removed) return;
         reconnectNow();
-        fetchState();
+        fetchState({ fresh: true });
     });
     window.addEventListener("pageshow", (event) => {
         if (event.persisted && !state.removed) {
             reconnectNow();
-            fetchState();
+            fetchState({ fresh: true });
         }
     });
     bindKeyboardAwareness();

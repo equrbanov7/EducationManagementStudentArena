@@ -4,12 +4,12 @@
 // stage.js-i) həmin yeri AÇAN anda göstərilir. Səhnənin zaman xətti aparıcının saf
 // stage_logic.js modulundan götürülür (tək həqiqət mənbəyi — iki yerdə təkrarlanmır).
 // Server də son sualın reveal paketində `top`/`rank` göndərmir (reveal.py).
-import { PHASES } from './config.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { announce, setQuestionChip, setRank, setTimer, stopTimeBar } from './ui.js?v=lx20260930';
-import { esc, isOwnRow, normalizeTopRows, toInt, tr } from './utils.js?v=lx20260930';
-import { mountView } from './views.js?v=lx20260930';
-import { buildStageModel, stageTimeline } from '../host_lobby/stage_logic.js?v=lx20260930';
+import { PHASES } from './config.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { announce, setQuestionChip, setRank, setTimer, stopTimeBar } from './ui.js?v=lx20261002';
+import { esc, isOwnRow, normalizeTopRows, toInt, tr } from './utils.js?v=lx20261002';
+import { mountView } from './views.js?v=lx20261002';
+import { buildStageModel, stageTimeline } from '../host_lobby/stage_logic.js?v=lx20261002';
 
 const TROPHY_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3.5h10v5a5 5 0 0 1-10 0z" fill="currentColor"/><path d="M7 5.5H4v1.5A3.5 3.5 0 0 0 7.4 10.5M17 5.5h3v1.5a3.5 3.5 0 0 1-3.4 3.5M12 13.5v3.5M8 20.5h8M9.5 17h5v3.5h-5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';

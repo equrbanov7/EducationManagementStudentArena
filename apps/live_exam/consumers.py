@@ -13,6 +13,16 @@ Audit 2026-09-28 LX-BE miqyas qaydaları (50–90, ehtiyatla 150 oyunçu):
 * Cavab vaxtı mesajın serverə ÇATDIĞI an götürülür (LXBE-01).
 * Lobby siyahısı socket başına ən çox ``LOBBY_STATE_COALESCE_SECONDS``-da bir dəfə
   göndərilir (qoşulma axınında O(N²) trafik əvəzinə) (LXBE-15).
+
+LXNET 2026-10-02 (zəif şəbəkə):
+
+* ``{"type":"ping","id":n}`` → ``{"type":"pong","id":n,"server_time":…}`` — klient «ölü»
+  (TCP-də ilişmiş) socket-i tez tanıyır və saatını RTT ilə sinxronlaşdırır. DB/keş YOXDUR;
+  socket başına sürət həddi yaddaşda (``PING_MIN_INTERVAL_SECONDS``), ümumi mesaj limitinə
+  düşmür (limitə düşən ping «ölü socket» kimi yanlış yenidən qoşulma doğurardı).
+* ``{"type":"seen","question_id":q}`` (yalnız oyunçu, yalnız BU socket-in ötürdüyü sual, bir dəfə) —
+  sualın telefona çatdığının server-vaxtlı sübutu (``delivery.py``): gec çatana ədalətli sürət
+  ankeri + host-a «N telefon aldı» (``delivery_progress``).
 """
 
 from __future__ import annotations
@@ -32,6 +42,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from apps.live_exam import consumer_support as support
 from apps.live_exam.auth import authorize_socket_connection
 from apps.live_exam.constants import LOBBY_STATE_COALESCE_SECONDS
+from apps.live_exam.delivery import build_delivery_progress_payload, record_question_seen
 from apps.live_exam.models import LiveSession
 from apps.live_exam.reveal import build_reveal_bundle
 from apps.live_exam.scoring import save_answer_and_score
@@ -53,6 +64,10 @@ logger = logging.getLogger("live_exam.ws.rate_limit")
 # Async wrappers — DB/cache işi thread hovuzunda (thread_sensitive=False).
 _record_rate_limit_hit = sync_to_async(record_rate_limit_hit, thread_sensitive=False)
 _cache_add = sync_to_async(cache.add, thread_sensitive=False)
+_record_seen = sync_to_async(record_question_seen, thread_sensitive=False)
+
+#: Eyni socket-dən iki ``pong`` arasında minimum interval (klient ~6 s-də bir ping göndərir).
+PING_MIN_INTERVAL_SECONDS = 0.8
 
 
 def _pool(func):
@@ -130,6 +145,16 @@ class LiveSocketBase(AsyncJsonWebsocketConsumer):
     def _own_player_id(self) -> int | None:
         return int(self.player_auth["player_id"]) if self.player_auth else None
 
+    async def _reply_pong(self, data: dict[str, Any]) -> None:
+        """LXNET: ürək döyüntüsü — server vaxtı ilə cavab (DB/keş yoxdur, yaddaşda sürət həddi)."""
+        now = asyncio.get_running_loop().time()
+        if now - getattr(self, "_last_pong_at", -1e9) < PING_MIN_INTERVAL_SECONDS:
+            return
+        self._last_pong_at = now
+        ping_id = data.get("id")
+        echo = ping_id if isinstance(ping_id, int) and not isinstance(ping_id, bool) and 0 <= ping_id < 2**31 else None
+        await self.send_json({"type": "pong", "id": echo, "server_time": timezone.now().isoformat()})
+
     async def player_kicked(self, event):
         """LXBE-07: host oyunçunu çıxardı — onun socket-i bağlanır, başqalarına ötürülmür."""
         if self._own_player_id() is not None and int(event.get("player_id") or 0) == self._own_player_id():
@@ -186,8 +211,9 @@ class LiveLobbyConsumer(LiveSocketBase):
             await self.channel_layer.group_discard(group_name, self.channel_name)
 
     async def receive_json(self, content, **kwargs):
-        # Lobby socket-i klientdən əmr qəbul etmir.
-        return
+        # Lobby socket-i klientdən yalnız ürək döyüntüsü (ping) qəbul edir.
+        if isinstance(content, dict) and content.get("type") == "ping":
+            await self._reply_pong(content)
 
     async def lobby_event(self, event):
         # view -> group_send(..., {"type":"lobby_event","data":{...}})
@@ -247,6 +273,9 @@ class LivePlayConsumer(LiveSocketBase):
 
     async def connect(self):
         self._auto_reveal_task = None
+        # LXNET: bu socket-in ötürdüyü son sual və artıq təsdiqlənmiş sual (``seen`` bir dəfə).
+        self._published_question_id = None
+        self._seen_question_id = None
         if not await self._admit():
             return
 
@@ -281,6 +310,13 @@ class LivePlayConsumer(LiveSocketBase):
         # LXBE-01: bal üçün vaxt mesajın ÇATDIĞI an (limit/DB növbəsindən əvvəl).
         received_at = timezone.now()
         if not isinstance(data, dict):
+            return
+        message_type = data.get("type")
+        if message_type == "ping":
+            await self._reply_pong(data)
+            return
+        if message_type == "seen":
+            await self._handle_seen(data, received_at)
             return
 
         from django.conf import settings
@@ -354,12 +390,38 @@ class LivePlayConsumer(LiveSocketBase):
             if bundle is not None:
                 await self._send_bundle(bundle)
 
+    async def _handle_seen(self, data: dict[str, Any], received_at) -> None:
+        """LXNET: sual telefona çatdı — server vaxtı ilə ilk sübut + host sayğacı."""
+        if self.player_auth is None:
+            return
+        try:
+            question_id = int(data.get("question_id"))
+        except (TypeError, ValueError):
+            return
+        # Yalnız bu socket-in ötürdüyü sual və yalnız bir dəfə (keşə saxta açar yazılmasın).
+        if question_id != self._published_question_id or question_id == self._seen_question_id:
+            return
+        self._seen_question_id = question_id
+        received = await _record_seen(self.pin, question_id, self._own_player_id(), at=received_at)
+        if received is not None:
+            await self.channel_layer.group_send(
+                f"live_{self.pin}_play_host",
+                {
+                    "type": "play_event",
+                    "data": build_delivery_progress_payload(question_id=question_id, received=received),
+                },
+            )
+
     async def play_event(self, event):
         # view -> group_send(... {"type":"play_event","data":{...}})
         data = event.get("data") or {}
         event_type = data.get("type")
         if event_type == "question_published":
             self._schedule_auto_reveal(data.get("question"))
+            try:
+                self._published_question_id = int((data.get("question") or {}).get("id"))
+            except (TypeError, ValueError):
+                self._published_question_id = None
         elif event_type in {"reveal", "finished"}:
             self._cancel_auto_reveal()
 

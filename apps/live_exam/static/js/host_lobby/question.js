@@ -1,11 +1,11 @@
-import { $, UI } from './dom.js?v=lx20260930';
-import { PHASES } from './constants.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20260930';
-import { icon } from './icons.js?v=lx20260930';
-import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20260930';
-import { revealQuestion } from './api.js?v=lx20260930';
-import { playWipe } from './transitions.js?v=lx20260930';
+import { $, UI } from './dom.js?v=lx20261002';
+import { PHASES } from './constants.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261002';
+import { icon } from './icons.js?v=lx20261002';
+import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20261002';
+import { revealQuestion } from './api.js?v=lx20261002';
+import { playWipe } from './transitions.js?v=lx20261002';
 import {
     controlsEnabled,
     esc,
@@ -18,8 +18,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20260930';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261002';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -264,6 +264,19 @@ export function updateAnsweredCounter() {
     checkAllAnswered();
 }
 
+// LXNET 2026-10-02: müəllim panelində «sualı alan telefonlar» (zəif şəbəkəli oyunçular görünür).
+export function updateReceivedCounter() {
+    const el = UI.receivedText;
+    if (!el) return;
+    const total = Number(state.totalPlayers || 0);
+    const received = Math.min(Number(state.receivedCount || 0), total || Number(state.receivedCount || 0));
+    const active = state.sessionState === "question" && total > 0;
+    el.hidden = !active;
+    if (!active) return;
+    el.textContent = fmt(tr("receivedCounter", "{received}/{total} aldı"), { received, total });
+    el.classList.toggle("is-lagging", received < total);
+}
+
 function checkAllAnswered() {
     if (state.sessionState !== "question" || state.phase !== PHASES.ANSWERS) return;
     const total = Number(state.totalPlayers || 0);
@@ -335,6 +348,10 @@ export function applyQuestionState(question, answeredCount, totalPlayers) {
     }
     state.questionKey = nextKey;
     state.countdownValue = null;
+    if (Number(state.receivedQuestionId) !== Number(question.id)) {
+        state.receivedQuestionId = Number(question.id);
+        state.receivedCount = 0;
+    }
 
     setSessionState("question");
     scheduleAutoReveal(question);
@@ -347,4 +364,5 @@ export function applyQuestionState(question, answeredCount, totalPlayers) {
         if (!state.frameId) schedulePhaseLoop(syncQuestionPresentation);
     }
     updateAnsweredCounter();
+    updateReceivedCounter();
 }

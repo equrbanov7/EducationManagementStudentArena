@@ -5,8 +5,9 @@ import {
     I18N,
     LANG,
     SESSION_SETTINGS,
-} from './config.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
+} from './config.js?v=lx20261002';
+import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
 
 // Tərcümə hələ kompilyasiya olunmayıbsa {% trans %} msgid-i («answer_locked») qaytarır —
 // belə açarı xam göstərmirik, JS-dəki (az) ehtiyat mətni işlədirik.
@@ -142,17 +143,20 @@ export function rememberTimelinePayload(payload) {
     }
 }
 
+// LXNET (2026-10-02): push mesajı yalnız aşağı sərhəddir — təxmin clock.js-də (NTP üsulu).
 export function updateServerTimeOffset(payload, receivedAtMs = Date.now()) {
-    const serverMs = ts(payload && payload.server_time);
-    if (!serverMs) return;
-    const sample = serverMs - receivedAtMs;
-    if (!Number.isFinite(sample)) return;
-    if (!state.hasServerOffset) {
-        state.serverTimeOffsetMs = sample;
-        state.hasServerOffset = true;
-        return;
-    }
-    state.serverTimeOffsetMs = Math.round((state.serverTimeOffsetMs * 3 + sample) / 4);
+    if (!payload || !payload.server_time) return;
+    recordPush(payload.server_time, receivedAtMs);
+    state.serverTimeOffsetMs = clockOffsetMs();
+    state.hasServerOffset = true;
+}
+
+// Gediş-gəliş nümunəsi (WS pong, HTTP snapshot): `t0`/`t1` — Date.now() göndəriş/qəbul anları.
+export function recordServerRoundTrip(t0, serverIso, t1) {
+    if (!serverIso) return;
+    recordRoundTrip(t0, serverIso, t1);
+    state.serverTimeOffsetMs = clockOffsetMs();
+    state.hasServerOffset = true;
 }
 
 // --- Sıralama / format ----------------------------------------------------------------------
