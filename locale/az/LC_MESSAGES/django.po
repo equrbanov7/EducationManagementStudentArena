@@ -88923,3 +88923,91 @@ msgstr ""
 msgctxt "accounts.grades_notice"
 msgid "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
 msgstr "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
+
+msgctxt "accounts.student_registry"
+msgid "OXUYUR"
+msgstr "OXUYUR"
+
+msgctxt "accounts.student_registry"
+msgid "Oxu müddəti bitməyib"
+msgstr "Oxu müddəti bitməyib"
+
+msgctxt "accounts.student_registry"
+msgid "OXU MÜDDƏTİ BİTİB"
+msgstr "OXU MÜDDƏTİ BİTİB"
+
+msgctxt "accounts.student_registry"
+msgid "Çox güman məzundur — rəsmiləşdirin"
+msgstr "Çox güman məzundur — rəsmiləşdirin"
+
+msgctxt "accounts.student_registry"
+msgid "ARXİV: MƏZUN / XARİC"
+msgstr "ARXİV: MƏZUN / XARİC"
+
+msgctxt "accounts.student_registry"
+msgid "Köhnə sistemdə «azad edilib»"
+msgstr "Köhnə sistemdə «azad edilib»"
+
+msgctxt "accounts.student_registry"
+msgid "QƏBUL İLİ BİLİNMİR"
+msgstr "QƏBUL İLİ BİLİNMİR"
+
+msgctxt "accounts.student_registry"
+msgid "Köçürmədə il tapılmayıb"
+msgstr "Köçürmədə il tapılmayıb"
+
+msgctxt "accounts.student_registry"
+msgid "PAROLUNU QURUB / BƏRPA EDİB"
+msgstr "PAROLUNU QURUB / BƏRPA EDİB"
+
+msgctxt "accounts.student_registry"
+msgid "Öz parolu + təsdiqli e-poçt"
+msgstr "Öz parolu + təsdiqli e-poçt"
+
+msgctxt "accounts.student_registry"
+msgid "HƏLƏ İLKİN PAROLDA"
+msgstr "HƏLƏ İLKİN PAROLDA"
+
+msgctxt "accounts.student_registry"
+msgid "Daxil olub parolunu dəyişməyib"
+msgstr "Daxil olub parolunu dəyişməyib"
+
+msgctxt "accounts.student_registry"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab"
+msgstr "Hesab"
+
+msgctxt "accounts.student_registry"
+msgid "Parolunu qurub / bərpa edib"
+msgstr "Parolunu qurub / bərpa edib"
+
+msgctxt "accounts.student_registry"
+msgid "Hələ ilkin parolda"
+msgstr "Hələ ilkin parolda"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi status"
+msgstr "Rəsmi status"
+
+msgctxt "ui.status"
+msgid "Oxuyur"
+msgstr "Oxuyur"
+
+msgctxt "ui.status"
+msgid "Oxu müddəti bitib"
+msgstr "Oxu müddəti bitib"
+
+msgctxt "ui.status"
+msgid "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."
+msgstr "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."
+
+msgctxt "ui.status"
+msgid "Qəbul ili bilinmir"
+msgstr "Qəbul ili bilinmir"
+
+msgctxt "ui.status"
+msgid "Arxiv: məzun və ya xaric"
+msgstr "Arxiv: məzun və ya xaric"

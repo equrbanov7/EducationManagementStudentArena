@@ -88823,3 +88823,91 @@ msgctxt "accounts.grades_notice"
 msgid "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
 msgstr ""
 "«Genel öğretim bilgisi» bölümünde puanlarınızı dikkatlice kontrol edin."
+
+msgctxt "accounts.student_registry"
+msgid "OXUYUR"
+msgstr "OKUYOR"
+
+msgctxt "accounts.student_registry"
+msgid "Oxu müddəti bitməyib"
+msgstr "Öğrenim süresi bitmedi"
+
+msgctxt "accounts.student_registry"
+msgid "OXU MÜDDƏTİ BİTİB"
+msgstr "ÖĞRENİM SÜRESİ BİTTİ"
+
+msgctxt "accounts.student_registry"
+msgid "Çox güman məzundur — rəsmiləşdirin"
+msgstr "Büyük olasılıkla mezun — resmileştirin"
+
+msgctxt "accounts.student_registry"
+msgid "ARXİV: MƏZUN / XARİC"
+msgstr "ARŞİV: MEZUN / İLİŞİĞİ KESİLMİŞ"
+
+msgctxt "accounts.student_registry"
+msgid "Köhnə sistemdə «azad edilib»"
+msgstr "Eski sistemde «serbest bırakıldı»"
+
+msgctxt "accounts.student_registry"
+msgid "QƏBUL İLİ BİLİNMİR"
+msgstr "KABUL YILI BİLİNMİYOR"
+
+msgctxt "accounts.student_registry"
+msgid "Köçürmədə il tapılmayıb"
+msgstr "Aktarımda yıl bulunamadı"
+
+msgctxt "accounts.student_registry"
+msgid "PAROLUNU QURUB / BƏRPA EDİB"
+msgstr "ŞİFRESİNİ KURDU / KURTARDI"
+
+msgctxt "accounts.student_registry"
+msgid "Öz parolu + təsdiqli e-poçt"
+msgstr "Kendi şifresi + doğrulanmış e-posta"
+
+msgctxt "accounts.student_registry"
+msgid "HƏLƏ İLKİN PAROLDA"
+msgstr "HÂLÂ İLK ŞİFREDE"
+
+msgctxt "accounts.student_registry"
+msgid "Daxil olub parolunu dəyişməyib"
+msgstr "Giriş yapıp şifresini değiştirmedi"
+
+msgctxt "accounts.student_registry"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab"
+msgstr "Hesap"
+
+msgctxt "accounts.student_registry"
+msgid "Parolunu qurub / bərpa edib"
+msgstr "Şifresini kurdu / kurtardı"
+
+msgctxt "accounts.student_registry"
+msgid "Hələ ilkin parolda"
+msgstr "Hâlâ ilk şifrede"
+
+msgctxt "accounts.student_registry"
+msgid "Rəsmi status"
+msgstr "Resmî durum"
+
+msgctxt "ui.status"
+msgid "Oxuyur"
+msgstr "Okuyor"
+
+msgctxt "ui.status"
+msgid "Oxu müddəti bitib"
+msgstr "Öğrenim süresi bitti"
+
+msgctxt "ui.status"
+msgid "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."
+msgstr "Büyük olasılıkla mezun — resmî durum (mezun) kaydedilmeli."
+
+msgctxt "ui.status"
+msgid "Qəbul ili bilinmir"
+msgstr "Kabul yılı bilinmiyor"
+
+msgctxt "ui.status"
+msgid "Arxiv: məzun və ya xaric"
+msgstr "Arşiv: mezun veya ilişiği kesilmiş"

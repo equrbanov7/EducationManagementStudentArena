@@ -4,7 +4,8 @@
 Əlavə olunan mətnlər:
   * `exams.final_center.room_admin`: sıfır/yayım/multicast MAC rədd mesajı (EXAMQA R3);
   * `accounts.grades_notice`: parol bərpasından sonrakı «köçürülmüş ballar» modalı;
-  * `accounts.first_login`: boş e-poçt sahəsinin nümunəsi və izahı.
+  * `accounts.first_login`: boş e-poçt sahəsinin nümunəsi və izahı;
+  * `accounts.student_registry` / `ui.status`: reyestrdə real təhsil vəziyyəti və hesab aktivləşdirməsi.
 
 ⚠️ `makemessages` İŞLƏDİLMİR. İdempotentdir; sonra `.mo` faylları yenidən qurulur.
 İstifadə:  python scripts/i18n_fill_night_2026_10_02.py
@@ -111,8 +112,92 @@ _FIRST_LOGIN = [
     ),
 ]
 
+SR = "accounts.student_registry"
+US = "ui.status"
+
+# Sahib 2026-10-02: reyestrdə real təhsil vəziyyəti + hesab aktivləşdirməsi.
+_REGISTRY = [
+    _t("OXUYUR", "STUDYING", "ОБУЧАЕТСЯ", "OKUYOR"),
+    _t("Oxu müddəti bitməyib", "Study period not over", "Срок обучения не истёк", "Öğrenim süresi bitmedi"),
+    _t("OXU MÜDDƏTİ BİTİB", "STUDY PERIOD ENDED", "СРОК ОБУЧЕНИЯ ИСТЁК", "ÖĞRENİM SÜRESİ BİTTİ"),
+    _t(
+        "Çox güman məzundur — rəsmiləşdirin",
+        "Most likely a graduate — make it official",
+        "Скорее всего выпускник — оформите официально",
+        "Büyük olasılıkla mezun — resmileştirin",
+    ),
+    _t(
+        "ARXİV: MƏZUN / XARİC",
+        "ARCHIVE: GRADUATE / EXPELLED",
+        "АРХИВ: ВЫПУСКНИК / ОТЧИСЛЕН",
+        "ARŞİV: MEZUN / İLİŞİĞİ KESİLMİŞ",
+    ),
+    _t(
+        "Köhnə sistemdə «azad edilib»",
+        "Marked as “released” in the old system",
+        "В старой системе отмечен как «освобождён»",
+        "Eski sistemde «serbest bırakıldı»",
+    ),
+    _t("QƏBUL İLİ BİLİNMİR", "ADMISSION YEAR UNKNOWN", "ГОД ПОСТУПЛЕНИЯ НЕИЗВЕСТЕН", "KABUL YILI BİLİNMİYOR"),
+    _t(
+        "Köçürmədə il tapılmayıb",
+        "The year was not found during migration",
+        "Год не найден при переносе данных",
+        "Aktarımda yıl bulunamadı",
+    ),
+    _t(
+        "PAROLUNU QURUB / BƏRPA EDİB",
+        "SET / RECOVERED PASSWORD",
+        "ЗАДАЛ / ВОССТАНОВИЛ ПАРОЛЬ",
+        "ŞİFRESİNİ KURDU / KURTARDI",
+    ),
+    _t(
+        "Öz parolu + təsdiqli e-poçt",
+        "Own password + verified email",
+        "Свой пароль + подтверждённая почта",
+        "Kendi şifresi + doğrulanmış e-posta",
+    ),
+    _t("HƏLƏ İLKİN PAROLDA", "STILL ON INITIAL PASSWORD", "ВСЁ ЕЩЁ С НАЧАЛЬНЫМ ПАРОЛЕМ", "HÂLÂ İLK ŞİFREDE"),
+    _t(
+        "Daxil olub parolunu dəyişməyib",
+        "Has not signed in and changed the password",
+        "Не вошёл и не сменил пароль",
+        "Giriş yapıp şifresini değiştirmedi",
+    ),
+    _t("Vəziyyət", "Study state", "Состояние", "Durum"),
+    _t("Hesab", "Account", "Учётная запись", "Hesap"),
+    _t(
+        "Parolunu qurub / bərpa edib",
+        "Set / recovered password",
+        "Задал / восстановил пароль",
+        "Şifresini kurdu / kurtardı",
+    ),
+    _t("Hələ ilkin parolda", "Still on initial password", "Всё ещё с начальным паролем", "Hâlâ ilk şifrede"),
+    _t("Rəsmi status", "Official status", "Официальный статус", "Resmî durum"),
+]
+
+_STUDY_STATE = [
+    _t("Oxuyur", "Studying", "Обучается", "Okuyor"),
+    _t("Oxu müddəti bitib", "Study period ended", "Срок обучения истёк", "Öğrenim süresi bitti"),
+    _t(
+        "Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir.",
+        "Most likely a graduate — the official status (graduated) should be recorded.",
+        "Скорее всего выпускник — нужно оформить официальный статус (выпускник).",
+        "Büyük olasılıkla mezun — resmî durum (mezun) kaydedilmeli.",
+    ),
+    _t("Qəbul ili bilinmir", "Admission year unknown", "Год поступления неизвестен", "Kabul yılı bilinmiyor"),
+    _t(
+        "Arxiv: məzun və ya xaric",
+        "Archive: graduate or expelled",
+        "Архив: выпускник или отчислен",
+        "Arşiv: mezun veya ilişiği kesilmiş",
+    ),
+]
+
 # ctx → msgid → {az, en, ru, tr}
 ENTRIES = {
+    SR: {row["az"]: row for row in _REGISTRY},
+    US: {row["az"]: row for row in _STUDY_STATE},
     GN: {row["az"]: row for row in _GRADES_NOTICE},
     FL: {row["az"]: row for row in _FIRST_LOGIN},
     RA: {
