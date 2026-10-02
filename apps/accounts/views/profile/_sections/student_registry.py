@@ -86,7 +86,8 @@ def _table_row(row, *, can_actions):
             {"text": row["form_label"]},
             {"text": row["funding_label"]},
             {"text": row["admission_year"], "num": True},
-            {"badge_family": "student_status", "badge_key": row["status"]},
+            # 2026-10-02: rəsmi status köçürmədə hamıda «enrolled» qaldı → hesablanan vəziyyət göstərilir.
+            {"badge_family": "student_study_state", "badge_key": row["study_state"]},
             {"text": row["movement_count"], "num": True},
         ],
         "actions_include": ("accounts/profile/sections/student_services/_registry_actions.html" if can_actions else ""),
@@ -134,6 +135,8 @@ def build_student_registry_section(request, section, *, active_organization, all
         "sr_form": values["form"],
         "sr_funding": values["funding"],
         "sr_status": values["status"],
+        "sr_state": values["state"],
+        "sr_account": values["account"],
     }
     section["base_params"] = base_params
     can_actions = can_move or can_transcript
@@ -174,6 +177,8 @@ def build_student_registry_section(request, section, *, active_organization, all
         },
         {"label": pgettext(_CTX, "DÖVLƏT SİFARİŞİ"), "value": kpis.get("state_funded", 0)},
     ]
+    section["state_tiles"] = _state_tiles(kpis, values)
+    section["account_tiles"] = _account_tiles(kpis, values)
     section["form_options"] = _form_options()
     # Gizli sahələr: DƏYƏRLƏR sətirdən (JS `data-tof-prefill` naxışı ilə),
     # ADLAR isə yalnız serverdən — şablona xam GET dəyəri düşmür.
@@ -194,6 +199,55 @@ def build_student_registry_section(request, section, *, active_organization, all
         )
     section["filter_fields"] = _filter_fields(values, section["options"])
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d sətir") % {"count": payload["total"]}
+
+
+def _state_tiles(kpis, values) -> list:
+    """Sahib 2026-10-02: «hamını aktiv göstərməsin» — real vəziyyət plitələri (klik = filtr)."""
+    current = values.get("state", "")
+    tiles = [
+        ("studying", pgettext(_CTX, "OXUYUR"), pgettext(_CTX, "Oxu müddəti bitməyib"), "accent-success"),
+        (
+            "period_ended",
+            pgettext(_CTX, "OXU MÜDDƏTİ BİTİB"),
+            pgettext(_CTX, "Çox güman məzundur — rəsmiləşdirin"),
+            "accent-warning",
+        ),
+        ("archived", pgettext(_CTX, "ARXİV: MƏZUN / XARİC"), pgettext(_CTX, "Köhnə sistemdə «azad edilib»"), None),
+        ("year_unknown", pgettext(_CTX, "QƏBUL İLİ BİLİNMİR"), pgettext(_CTX, "Köçürmədə il tapılmayıb"), None),
+    ]
+    return [
+        {
+            "label": label,
+            "value": kpis.get(f"state_{key}", 0),
+            "note": note,
+            "tone": tone,
+            "filter": key,
+            "pressed": current == key,
+        }
+        for key, label, note, tone in tiles
+    ]
+
+
+def _account_tiles(kpis, values) -> list:
+    """Sahib 2026-10-02: parolunu bərpa etmiş / öz parolunu qurmuş tələbələrin sayı (klik = filtr)."""
+    current = values.get("account", "")
+    return [
+        {
+            "label": pgettext(_CTX, "PAROLUNU QURUB / BƏRPA EDİB"),
+            "value": kpis.get("account_activated", 0),
+            "note": pgettext(_CTX, "Öz parolu + təsdiqli e-poçt"),
+            "tone": "accent-primary",
+            "filter": "account:activated",
+            "pressed": current == "activated",
+        },
+        {
+            "label": pgettext(_CTX, "HƏLƏ İLKİN PAROLDA"),
+            "value": kpis.get("account_initial", 0),
+            "note": pgettext(_CTX, "Daxil olub parolunu dəyişməyib"),
+            "filter": "account:initial",
+            "pressed": current == "initial",
+        },
+    ]
 
 
 def _filter_fields(values, options) -> list:
@@ -260,8 +314,26 @@ def _filter_fields(values, options) -> list:
             "options": everything + _funding_options(),
         },
         {
+            "name": "sr_state",
+            "label": pgettext(_CTX, "Vəziyyət"),
+            "kind": "select",
+            "value": values["state"],
+            "options": everything + _state_options(),
+        },
+        {
+            "name": "sr_account",
+            "label": pgettext(_CTX, "Hesab"),
+            "kind": "select",
+            "value": values["account"],
+            "options": everything
+            + [
+                {"value": "activated", "label": pgettext(_CTX, "Parolunu qurub / bərpa edib")},
+                {"value": "initial", "label": pgettext(_CTX, "Hələ ilkin parolda")},
+            ],
+        },
+        {
             "name": "sr_status",
-            "label": pgettext(_CTX, "Status"),
+            "label": pgettext(_CTX, "Rəsmi status"),
             "kind": "select",
             "value": values["status"],
             "options": everything + _status_options(),
@@ -316,3 +388,9 @@ def _status_options() -> list:
 
 
 __all__ = ["build_student_registry_section"]
+
+
+def _state_options() -> list:
+    from core.ui import status_catalog
+
+    return [{"value": item.key, "label": str(item.label)} for item in status_catalog.family("student_study_state")]

@@ -290,6 +290,24 @@ STUDENT_STATUS: tuple[Status, ...] = (
     _s("graduated", _t("Məzun"), "info", order=3),
 )
 
+#: 2026-10-02 (sahib: «hamını aktiv göstərməsin»): reyestrdə HESABLANAN təhsil vəziyyəti
+#: (`apps.accounts.services.people.study_state`). Rəsmi statusu dəyişmir — köçürmədə hamısı «enrolled» qalıb.
+STUDENT_STUDY_STATE: tuple[Status, ...] = (
+    _s("studying", _t("Oxuyur"), "success", order=0),
+    _s(
+        "period_ended",
+        _t("Oxu müddəti bitib"),
+        "warning",
+        order=1,
+        next_step=_t("Çox güman məzundur — rəsmi statusu (məzun) qeyd edilməlidir."),
+    ),
+    _s("year_unknown", _t("Qəbul ili bilinmir"), "neutral", order=2),
+    _s("archived", _t("Arxiv: məzun və ya xaric"), "neutral", order=3),
+    _s("academic_leave", _t("Akademik məzuniyyət"), "warning", order=4),
+    _s("expelled", _t("Xaric edilib"), "danger", order=5),
+    _s("graduated", _t("Məzun"), "info", order=6),
+)
+
 #: Ekran 09 — 6 hərəkət növü (enum kimi saxlanılır).
 STUDENT_MOVEMENT: tuple[Status, ...] = (
     _s("group_transfer", _t("Qrupdan qrupa köçürmə"), "info", order=0),
@@ -440,6 +458,7 @@ FAMILIES: dict[str, tuple[Status, ...]] = {
     "intake_steps": INTAKE_STEPS,
     "student_movement": STUDENT_MOVEMENT,
     "student_status": STUDENT_STATUS,
+    "student_study_state": STUDENT_STUDY_STATE,
     "journal_note": JOURNAL_NOTE,
     "appeal": APPEAL,
     "appeal_item": APPEAL_ITEM,
