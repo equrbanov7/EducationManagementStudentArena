@@ -6,7 +6,7 @@ from datetime import timedelta
 from pathlib import Path
 from unittest import mock
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from apps.monitoring.incidents import reconcile_stale_incidents
@@ -79,3 +79,35 @@ class AlertRuleConfigTests(TestCase):
         component = (ROOT / "config/settings/components/celery_cache.py").read_text(encoding="utf-8")
         block = component.split('"monitoring-reconcile-incidents"', 1)[1].split("}", 1)[0]
         self.assertIn('"task": "monitoring.reconcile_incidents"', block)
+
+
+@override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
+class BackupAgeFreshnessTests(TestCase):
+    """2026-10-02 prod: deploy-dan sonra keş boşalırdı → panel/AI «backup bilinmir» yazırdı."""
+
+    def test_age_is_computed_from_file_time_and_survives_long(self):
+        import time
+
+        from django.core.cache import cache
+
+        from apps.monitoring import collectors
+
+        now = time.time()
+        cache.set(collectors.BACKUP_CACHE_KEY, {"age_seconds": 10.0, "newest_mtime": now - 3600}, 60)
+        self.assertAlmostEqual(collectors.backup_age_from_cache(), 3600, delta=5)
+        cache.set(collectors.BACKUP_CACHE_KEY, {"age_seconds": 42.0}, 60)  # köhnə format
+        self.assertEqual(collectors.backup_age_from_cache(), 42.0)
+        cache.delete(collectors.BACKUP_CACHE_KEY)
+        self.assertIsNone(collectors.backup_age_from_cache())
+        self.assertGreaterEqual(collectors.BACKUP_CACHE_TTL, 4 * 15 * 60)
+
+
+class CounterQueriesDefaultToZeroTests(TestCase):
+    def test_event_counters_are_zero_filled(self):
+        from apps.monitoring.summary_metrics import SCALAR_QUERIES
+
+        for name in ("autosave_errors_1h", "pin_failures_1h", "errors_5m", "forbidden_24h", "oom_24h"):
+            self.assertTrue(SCALAR_QUERIES[name].endswith(") or vector(0)"), name)
+        # Göstəricilər (gauge) sıfırla doldurulmur — yoxdursa «bilinmir» qalmalıdır.
+        for name in ("pg_up", "backup_age_seconds", "drill_last_success", "cpu_percent"):
+            self.assertNotIn("vector(0)", SCALAR_QUERIES[name], name)

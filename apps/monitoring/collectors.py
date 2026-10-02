@@ -24,6 +24,8 @@ BACKUP_CACHE_KEY = "monitoring:backup_age"
 #: Beat intervalından bir qədər uzun TTL — beat dayananda gauge-lar itir və
 #: CeleryBeatStale/absent alert-i işə düşür.
 CACHE_TTL = 15 * 60
+#: Backup kollektoru 15 dəqiqədən bir işləyir — keş 2 saat yaşayır (deploy/beat restartı boşluğu olmasın).
+BACKUP_CACHE_TTL = 2 * 60 * 60
 
 BACKUP_DIR = os.environ.get("MONITORING_BACKUP_DIR", "/backups")
 
@@ -107,8 +109,23 @@ def collect_backup_age() -> float | None:
                 if newest is None or mtime > newest:
                     newest = mtime
     age = None if newest is None else max(0.0, time.time() - newest)
-    cache.set(BACKUP_CACHE_KEY, {"age_seconds": age, "collected_at": time.time()}, CACHE_TTL)
+    # 2026-10-02: TTL = interval (15 dəq) idi → deploy beat-i yenidən başladanda (ilk toplama 15 dəq sonra)
+    # keş boşalırdı və panel «backup bilinmir» göstərirdi. Faylın vaxtı saxlanır, yaş oxunanda hesablanır.
+    cache.set(
+        BACKUP_CACHE_KEY,
+        {"age_seconds": age, "newest_mtime": newest, "collected_at": time.time()},
+        BACKUP_CACHE_TTL,
+    )
     return age
+
+
+def backup_age_from_cache() -> float | None:
+    """Ən yeni backup faylının İNDİKİ yaşı (saniyə) — kollektorun yazdığı fayl vaxtından."""
+    backup = cache.get(BACKUP_CACHE_KEY) or {}
+    newest = backup.get("newest_mtime")
+    if newest:
+        return max(0.0, time.time() - float(newest))
+    return backup.get("age_seconds")
 
 
 class _CacheGaugeCollector:
@@ -160,12 +177,12 @@ class _CacheGaugeCollector:
                 "Statistikanın toplandığı unix vaxtı (beat sağlamlıq siqnalı)",
                 value=stats.get("collected_at", 0),
             )
-        backup = cache.get(BACKUP_CACHE_KEY)
-        if backup and backup.get("age_seconds") is not None:
+        backup_age = backup_age_from_cache()
+        if backup_age is not None:
             yield GaugeMetricFamily(
                 "emsarena_backup_age_seconds",
                 "Ən yeni PostgreSQL backup faylının yaşı",
-                value=backup["age_seconds"],
+                value=backup_age,
             )
 
 
