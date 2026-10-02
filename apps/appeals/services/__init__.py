@@ -2,6 +2,7 @@
 
 from .creation import create_appeal
 from .permissions import (
+    appeal_applicable,
     appeal_block_reason,
     can_create_appeal,
     can_decide_appeal,
@@ -49,6 +50,7 @@ __all__ = [
     "apply_bonus_to_test_result",
     "assert_transition",
     "attempt_awaiting_grading",
+    "appeal_applicable",
     "can_create_appeal",
     "can_decide_appeal",
     "can_review_appeal",

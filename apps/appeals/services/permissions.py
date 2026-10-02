@@ -79,6 +79,15 @@ def appeal_block_reason(request, attempt, *, at_time=None):
     return None
 
 
+def appeal_applicable(attempt):
+    """Cəhd növü apellyasiyaya aiddirmi (2026-10-02): sınaq deyil və imtahan kateqoriyası apellyasiya olunur.
+
+    Nəticə səhifəsi apellyasiya panelini yalnız bu halda göstərir — əvvəl quiz/sınaqda da
+    «apellyasiya pəncərəsi bağlıdır» yazılırdı (EXAMQA R6).
+    """
+    return not getattr(attempt, "is_trial", False) and is_appealable_exam(getattr(attempt, "exam", None))
+
+
 def can_create_appeal(request, attempt, *, at_time=None):
     return appeal_block_reason(request, attempt, at_time=at_time) is None
 
@@ -147,6 +156,7 @@ __all__ = [
     "can_decide_appeal",
     "can_review_appeal",
     "can_view_appeal",
+    "appeal_applicable",
     "is_appealable_exam",
     "oversight_covers_student",
 ]

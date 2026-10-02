@@ -292,6 +292,8 @@ def exam_result(request, slug, attempt_id):
             coding_submissions_by_qid.setdefault(submission.question.question_id, submission)
 
     can_appeal = score_adjustments.can_create(request, attempt)
+    # EXAMQA R6 (2026-10-02): apellyasiya olunmayan növdə (quiz/sınaq) panel «pəncərə bağlıdır» yazmasın.
+    appeal_applicable = score_adjustments.is_applicable(attempt)
     appeal_create_url = reverse("appeals:appeal_create", kwargs={"attempt_id": attempt.id})
     if is_profile_results:
         appeal_create_url = append_query_params(
@@ -372,6 +374,7 @@ def exam_result(request, slug, attempt_id):
             "previous_attempts": previous_attempts,
             "previous_attempts_count": len(previous_attempts) + 1,
             "can_appeal": can_appeal,
+            "appeal_applicable": appeal_applicable,
             "appeal_create_url": appeal_create_url,
             "appeal_remaining_seconds": appeal_remaining_seconds,
             # "Apellyasiyalarım" keçidi yalnız profildən (my-results) baxılan

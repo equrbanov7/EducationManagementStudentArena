@@ -4,14 +4,18 @@ Bu servis YALNIZ zal infrastrukturunu (zal özü + zaldakı fiziki kompüterlər
 MAC/IP qeydləri) idarə edir. İcazə ``can_manage_exam_rooms`` (superadmin, yaxud
 superadminin bayraqla həvalə etdiyi istifadəçi) view qatında yoxlanır.
 
-Təhlükəsizlik qeydi (``exam_center_gate.py``): MAC HTTP sorğusu ilə serverə
-çatmır — giriş məhdudiyyəti ``ip_address`` üzərindən tətbiq olunur; MAC etibarlı
-identifikasiya sahəsidir.
+Təhlükəsizlik qeydi (``exam_center_gate.py``): brauzer MAC göndərmir — server tələbənin IP-sini
+ARP agentinə soruşub MAC-ı özü tapır və bu cədvəldəki qeydlə (normallaşdırılmış formada) tutuşdurur
+(``EXAM_CLIENT_MAC_RESOLUTION=arp_agent``). Ona görə admin daxiletməsi sərt yoxlanır: səhv MAC həmin
+kompüterdə tələbəni bloklayır (2026-10-02, EXAMQA R3/R4).
 """
 
 from __future__ import annotations
 
+import re
+
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamRoom, ExamRoomComputer
@@ -37,13 +41,32 @@ def _clean_ip(raw: str) -> str:
     return value
 
 
+#: 2026-10-02 (EXAMQA R3): admin daxiletməsində yalnız hex + adi ayırıcılar. `normalize_mac` hex olmayan
+#: simvolları SƏSSİZCƏ atırdı («AA:BB:CC:DD:EE:GZ1» → başqa MAC) — səhv qeydiyyat tələbəni bloklayardı.
+_MAC_INPUT_RE = re.compile(r"^[0-9A-Fa-f:\-.\s]+$")
+
+
 def _normalize_mac_or_error(raw: str) -> str:
+    value = (raw or "").strip()
+    invalid = RoomAdminError(
+        pgettext("exams.final_center.room_admin", "MAC ünvanı düzgün deyil: %(mac)s") % {"mac": value}
+    )
+    if not value or not _MAC_INPUT_RE.match(value):
+        raise invalid
     try:
-        return ExamRoomComputer.normalize_mac(raw)
+        mac = ExamRoomComputer.normalize_mac(value)
     except ValueError as exc:
+        raise invalid from exc
+    # Sıfır, yayım (FF…) və multicast (1-ci oktetin ən kiçik biti) heç bir şəbəkə kartına aid deyil.
+    if mac in {"00:00:00:00:00:00", "FF:FF:FF:FF:FF:FF"} or int(mac[:2], 16) & 1:
         raise RoomAdminError(
-            pgettext("exams.final_center.room_admin", "MAC ünvanı düzgün deyil: %(mac)s") % {"mac": (raw or "").strip()}
-        ) from exc
+            pgettext(
+                "exams.final_center.room_admin",
+                "Bu MAC ünvanı kompüterə aid ola bilməz (sıfır, yayım və ya multicast): %(mac)s",
+            )
+            % {"mac": mac}
+        )
+    return mac
 
 
 def _coerce_seat(raw) -> int | None:
@@ -61,6 +84,21 @@ def _coerce_seat(raw) -> int | None:
     return seat
 
 
+def _same_mac_q(mac_norm: str) -> Q:
+    """Eyni MAC-ın istənilən saxlanmış yazılışı (EXAMQA R2, 2026-10-02).
+
+    Köhnə qeydlər «aa:bb:…», «AA-BB-…», «AABBCC…» kimi saxlanıla bilir; dəqiq bərabərlik onları tutmurdu →
+    eyni kompüter ikinci dəfə qeydə alına bilirdi (gate isə normallaşdırılmış müqayisədə iki qeyd tapırdı).
+    """
+    hexes = mac_norm.replace(":", "")
+    pairs = [hexes[i : i + 2] for i in range(0, 12, 2)]
+    variants = {":".join(pairs), "-".join(pairs), hexes, ".".join(hexes[i : i + 4] for i in range(0, 12, 4))}
+    query = Q()
+    for variant in variants:
+        query |= Q(mac_address__iexact=variant)
+    return query
+
+
 def _ensure_mac_free_in_org(room: ExamRoom, mac_norm: str, *, exclude_pk=None) -> None:
     """MAC bu təşkilatın BAŞQA zalında qeydlidirsə, zalın adını deyən xəta atır.
 
@@ -69,7 +107,7 @@ def _ensure_mac_free_in_org(room: ExamRoom, mac_norm: str, *, exclude_pk=None) -
     şikayətinin klassik səbəbi: qeyd başqa zalda/təşkilat seçimində qalıb).
     """
     clash = (
-        ExamRoomComputer.objects.filter(organization_id=room.organization_id, mac_address=mac_norm)
+        ExamRoomComputer.objects.filter(_same_mac_q(mac_norm), organization_id=room.organization_id)
         .exclude(room=room)
         .select_related("room")
     )
@@ -98,7 +136,7 @@ def add_computer(
     seat = _coerce_seat(seat_number)
 
     base = ExamRoomComputer.objects.filter(room=room)
-    if base.filter(mac_address=mac_norm).exists():
+    if base.filter(_same_mac_q(mac_norm)).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )
@@ -143,7 +181,7 @@ def update_computer(
     seat = _coerce_seat(seat_number)
 
     siblings = ExamRoomComputer.objects.filter(room=computer.room).exclude(pk=computer.pk)
-    if siblings.filter(mac_address=mac_norm).exists():
+    if siblings.filter(_same_mac_q(mac_norm)).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )
