@@ -101,6 +101,9 @@ jobs:
             docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5 || true
             echo "--- nginx: son 20000 sətirdə 400 cavabları (yol / UA, IP-siz)"
             docker logs --tail 20000 emsarena-nginx 2>/dev/null | grep '" 400 ' | sed -E 's/^[^"]*"([A-Z]+) ([^ ?]*)[^"]*" 400 [0-9]+ "[^"]*" "([^"]{0,40})[^"]*".*/\1 \2 | \3/' | sed -E 's#/[0-9]+/#/N/#g' | sort | uniq -c | sort -rn | head -15 || true
+            echo "--- nginx 400 nümunəsi (IP-lər maskalanıb)"
+            docker logs --tail 20000 emsarena-nginx 2>/dev/null | grep '" 400 ' | grep Dalvik | tail -2 | sed -E 's/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/x.x.x.x/g' | cut -c1-400 || true
+            grep -n "log_format" -A4 docker/nginx/*.conf docker/nginx/**/*.conf 2>/dev/null | head -12 || true
             echo "--- off-site / drill taymerləri (host)"
             host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
             host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true
