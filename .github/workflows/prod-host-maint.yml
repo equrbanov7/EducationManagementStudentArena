@@ -93,10 +93,17 @@ jobs:
             docker exec "$w" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('worker cache before:', cache.get(c.BACKUP_CACHE_KEY)); print('collect_backup_age():', c.collect_backup_age()); print('BACKUP_DIR:', c.BACKUP_DIR)" 2>&1 | tail -4
             a=$(docker ps --filter name=app-1 --format '{{.Names}}' | head -n1)
             docker exec "$a" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('app cache:', cache.get(c.BACKUP_CACHE_KEY)); from django.conf import settings; print('cache backend:', settings.CACHES['default']['BACKEND'])" 2>&1 | tail -3
+            echo "--- canlı baza sətir sayları (yalnız oxuma, bypass_rls)"
+            docker exec "$a" python manage.py shell -c "from core.rls import bypass_rls; from django.apps import apps as A; ctx = bypass_rls(); ctx.__enter__(); [print(m, A.get_model(*m.split('.')).objects.count()) for m in ('exams.Exam', 'exams.ExamAttempt', 'exams.ExamAnswer', 'exams.FinalExamTicket', 'live_exam.LiveSession', 'live_exam.LiveAnswer', 'appeals.Appeal')]" 2>&1 | tail -8
             echo "--- beat / worker loqları (collect_backup_age)"
             b=$(docker ps --filter name=celery-beat --format '{{.Names}}' | head -n1)
-            docker logs --since 2h "$b" 2>&1 | grep -i "backup_age" | tail -3
-            docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5
+            docker logs --since 2h "$b" 2>&1 | grep -i "backup_age" | tail -3 || true
+            docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5 || true
+            echo "--- nginx: son 20000 sətirdə 400 cavabları (yol / UA, IP-siz)"
+            docker logs --tail 20000 emsarena-nginx 2>/dev/null | grep '" 400 ' | sed -E 's/^[^"]*"([A-Z]+) ([^ ?]*)[^"]*" 400 [0-9]+ "[^"]*" "([^"]{0,40})[^"]*".*/\1 \2 | \3/' | sed -E 's#/[0-9]+/#/N/#g' | sort | uniq -c | sort -rn | head -15 || true
+            echo "--- nginx 400 nümunəsi (IP-lər maskalanıb)"
+            docker logs --tail 20000 emsarena-nginx 2>/dev/null | grep '" 400 ' | grep Dalvik | tail -2 | sed -E 's/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/x.x.x.x/g' | cut -c1-400 || true
+            grep -n "log_format" -A4 docker/nginx/*.conf docker/nginx/**/*.conf 2>/dev/null | head -12 || true
             echo "--- off-site / drill taymerləri (host)"
             host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
             host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true

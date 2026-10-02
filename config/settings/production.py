@@ -366,6 +366,9 @@ LOGGING = {
             "formatter": "json",
             "filters": ["mask_sensitive", "request_id"],
         },
+        "null": {
+            "class": "logging.NullHandler",
+        },
     },
     "root": {
         "handlers": ["console"],
@@ -385,6 +388,13 @@ LOGGING = {
         "core.email_tasks": {
             "handlers": ["console"],
             "level": "WARNING",
+            "propagate": False,
+        },
+        # 2026-10-02: Android sistem klientləri (Dalvik) saytı IP ilə yoxlayır → Django düzgün 400 verir,
+        # amma hər biri traceback-li ERROR yazırdı (~1100/gün) və real xətaları gizlədirdi. Cavab dəyişmir
+        # (400 qalır, http_requests_total-da sayılır); yalnız loq səs-küyü susdurulur (Django sənəd tövsiyəsi).
+        "django.security.DisallowedHost": {
+            "handlers": ["null"],
             "propagate": False,
         },
     },

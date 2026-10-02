@@ -111,3 +111,11 @@ class CounterQueriesDefaultToZeroTests(TestCase):
         # Göstəricilər (gauge) sıfırla doldurulmur — yoxdursa «bilinmir» qalmalıdır.
         for name in ("pg_up", "backup_age_seconds", "drill_last_success", "cpu_percent"):
             self.assertNotIn("vector(0)", SCALAR_QUERIES[name], name)
+
+
+class ContainerMemoryMetricTests(TestCase):
+    def test_containers_tab_shows_working_set_not_page_cache(self):
+        # usage_bytes səhifə keşini sayır → yalançı «95%»; alert və OOM working set-ə baxır.
+        source = (ROOT / "apps/monitoring/queries.py").read_text(encoding="utf-8")
+        self.assertIn("sum by (name) (container_memory_working_set_bytes", source)
+        self.assertNotIn("container_memory_usage_bytes{", source)
