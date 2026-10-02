@@ -189,6 +189,7 @@
         </div>
     </div>
 
+    {% if appeal_applicable %}
     <div class="result-action-panel">
         <div class="result-action-panel__copy">
             <span class="result-action-panel__eyebrow">{% trans "appeal_center" context "exams.template.student_exam_result" %}</span>
@@ -210,6 +211,7 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 
     <div class="section-divider"></div>
 

@@ -86,14 +86,18 @@
     {% endif %}
 
     <dl class="fexc-meta">
+      {% comment %}EXAMQA R5 (2026-10-02): zal sessiyasının 6 saatlıq pəncərəsi (03:19–09:19) əvəzinə imtahanın ÖZ
+      pəncərəsi; imtahanda yoxdursa sessiyanınkı. Çoxgünlük pəncərədə tarix aralığı.{% endcomment %}
+      {% with ws=exam.start_datetime|default:session.scheduled_start we=exam.end_datetime|default:session.scheduled_end %}
       <div>
         <dt>{% trans "Tarix" context "exams.template.final_gate" %}</dt>
-        <dd>{{ session.scheduled_start|date:"d.m.Y" }}</dd>
+        <dd>{{ ws|date:"d.m.Y" }}{% if we and we|date:"Ymd" != ws|date:"Ymd" %} – {{ we|date:"d.m.Y" }}{% endif %}</dd>
       </div>
       <div>
         <dt>{% trans "Vaxt" context "exams.template.final_gate" %}</dt>
-        <dd>{{ session.scheduled_start|time:"H:i" }} – {{ session.scheduled_end|time:"H:i" }}</dd>
+        <dd>{{ ws|time:"H:i" }}{% if we %} – {{ we|time:"H:i" }}{% endif %}</dd>
       </div>
+      {% endwith %}
       {% if exam.total_duration_minutes %}
       <div>
         <dt>{% trans "Müddət" context "exams.template.final_gate" %}</dt>
