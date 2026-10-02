@@ -76,6 +76,24 @@ SCALAR_QUERIES: dict[str, str] = {
     "celery_collected_at": "emsarena_celery_stats_collected_timestamp",
 }
 
+# 2026-10-02: hadisə SAYĞACLARI — heç baş verməyibsə seriya yoxdur və sorğu boş qaytarır; panel bunu
+# «məlumat yoxdur» kimi göstərirdi (AI təhlili «null» yazırdı). Prometheus işləyirsə «yoxdur» = 0.
+_ZERO_IF_ABSENT = (
+    "errors_5m",
+    "errors_1h",
+    "errors_24h",
+    "forbidden_24h",
+    "forbidden_7d",
+    "throttled_24h",
+    "throttled_7d",
+    "oom_24h",
+    "restarts_24h",
+    "autosave_errors_1h",
+    "pin_failures_1h",
+)
+for _name in _ZERO_IF_ABSENT:
+    SCALAR_QUERIES[_name] = f"({SCALAR_QUERIES[_name]}) or vector(0)"
+
 _SLOW_PROMQL = (
     "topk(6, sum by (path) (rate(http_request_duration_seconds_sum[1h]))"
     " / clamp_min(sum by (path) (rate(http_request_duration_seconds_count[1h])), 0.0001))"

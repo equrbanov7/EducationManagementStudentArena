@@ -1,11 +1,11 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20260930';
-import { playSound } from './audio.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20260930';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20260930';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261002';
+import { playSound } from './audio.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261002';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261002';
 import {
     esc,
     fmt,
@@ -17,8 +17,8 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20260930';
-import { currentViewEl, mountView } from './views.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
+import { currentViewEl, mountView } from './views.js?v=lx20261002';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -249,6 +249,9 @@ export function renderQuestion(question, msLeft) {
     state.phase = PHASES.QUESTION;
     const endsAt = ts(question.ends_at);
     const answerStartsAt = ts(question.answer_starts_at) || endsAt - msLeft;
+    // LXNET: plitələrin bu telefonda AÇILDIĞI an — klientin `answer_ms`-i buradan ölçülür (gec çatan
+    // sualda oyunçu öz reaksiya vaxtını bildirir; server bal üçün yalnız max(server, klient) götürür).
+    if (!state.answerOpenedAt) state.answerOpenedAt = nowMs();
     if (created) {
         setQuestionChip(question);
         playSound("go", questionKeyOf(question));

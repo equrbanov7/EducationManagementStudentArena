@@ -89387,3 +89387,21 @@ msgstr "Начать экзамен"
 msgctxt "exams.start_confirm"
 msgid "Back"
 msgstr "Назад"
+
+msgctxt "live_exam.player"
+msgid "net_good"
+msgstr "Соединение хорошее"
+
+msgctxt "live_exam.player"
+msgid "net_weak"
+msgstr "Слабое соединение — вопрос может прийти с задержкой"
+
+msgctxt "live_exam.host_lobby.js"
+msgid "received_counter"
+msgstr "получили {received}/{total}"
+
+msgctxt "live_exam.host_lobby"
+msgid "received_title"
+msgstr ""
+"Игроки, чей телефон уже получил текущий вопрос (при слабом интернете "
+"возможна задержка)"

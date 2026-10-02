@@ -168,6 +168,17 @@ body.host-presentation-page.presentation-sidebar-open .control-bar { transform: 
     font: 800 18px/1 var(--hx-display);
 }
 
+/* LXNET 2026-10-02: «N/M aldı» — sualı telefonuna alan oyunçular (zəif şəbəkə görünür). */
+.progress-box__recv {
+    margin-left: auto;
+    color: var(--hx-dim);
+    font: 700 13px/1 var(--hx-font);
+}
+
+.progress-box__recv.is-lagging { color: #fbbf24; }
+
+.progress-box__recv[hidden] { display: none; }
+
 .debug-section { display: grid; gap: 8px; }
 
 .debug-btn {

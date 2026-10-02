@@ -18,6 +18,7 @@ export const UI = {
     finalPodium: $("finalPodium"),
     progressBox: $("progressBox"),
     answeredText: $("answeredText"),
+    receivedText: $("receivedText"),
     debugBtn: $("debugBtn"),
     debugLog: $("debugLog"),
     reactionOverlay: $("hostReactionOverlay"),

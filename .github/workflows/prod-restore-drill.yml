@@ -1,0 +1,72 @@
+name: 💾 Prod restore drill (ehtiyat nüsxənin bərpa yoxlaması)
+
+# 2026-10-02 (sahib: «monitorinqdə nə problem varsa həll et»): panel/AI «drill bilinmir» göstərirdi —
+# docs/operations/deployment.md §12 «Monthly restore drill» heç vaxt real ölçüdə işlədilməmişdi.
+#
+# Ən yeni lokal dump (backups/postgres/daily) YENİ scratch bazaya bərpa olunur (canlı bazaya TOXUNULMUR),
+# say yoxlamaları aparılır, scratch baza silinir; nəticə node_exporter textfile metrikasına yazılır
+# (emsarena_restore_drill_last_success_timestamp_seconds → RestoreDrillOverdue alerti, panel «drill»).
+#
+# Qoruyucular: imtahan cəhdi açıqdırsa və ya canlı sessiya aktivdirsə İŞLƏMİR (force ilə keçilir);
+# avtomatik cədvəl ayda bir dəfə gecə 01:00 Bakı vaxtı (CPU/IO + 1× baza ölçüsündə disk lazımdır).
+
+on:
+  schedule:
+    - cron: "0 21 1 * *"   # hər ayın 1-i, 21:00 UTC = 2-si 01:00 Asia/Baku
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Aktiv imtahan olsa belə işlət (tövsiyə olunmur)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  drill:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 60
+    env:
+      APP_DIR: /home/wcu/EducationManagementStudentArena
+      HOST_IMAGE: postgres:16-alpine
+      FORCE: ${{ github.event.inputs.force || 'false' }}
+    steps:
+      - name: 🛡 İmtahan fəallığı yoxlaması
+        run: |
+          set -euo pipefail
+          app=$(docker ps --filter name=educationmanagementstudentarena-app-1 --format '{{.Names}}' | head -n1)
+          counts=$(docker exec -i "$app" python manage.py shell -c "
+          from datetime import timedelta
+          from django.utils import timezone
+          from core.rls import bypass_rls
+          from apps.exams.models import ExamAttempt
+          from apps.live_exam.models import LiveSession
+          with bypass_rls():
+              a = ExamAttempt.objects.filter(status__in=['in_progress', 'draft']).count()
+              s = LiveSession.objects.exclude(state=LiveSession.STATE_FINISHED).filter(
+                  created_at__gte=timezone.now() - timedelta(hours=6)).count()
+          print(a, s)
+          " 2>/dev/null | tail -n1)
+          echo "open_attempts live_sessions: $counts"
+          set -- $counts
+          if { [ "${1:-1}" != "0" ] || [ "${2:-1}" != "0" ]; } && [ "$FORCE" != "true" ]; then
+            echo "::error::Aktiv imtahan / canlı sessiya var — drill təxirə salındı (force ilə keçmək olar)"
+            exit 1
+          fi
+
+      - name: 💾 Restore drill (scratch baza, canlı bazaya toxunulmur)
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          host sh -c "df -h $APP_DIR | tail -n1"
+          host sh -c "cd $APP_DIR && bash scripts/ops/restore_drill.sh \
+            --metrics-file /var/lib/node_exporter/textfile_collector/emsarena_restore_drill.prom \
+            backups/postgres/daily" 2>&1 | tail -n 25 | tee -a "$GITHUB_STEP_SUMMARY"
+          host sh -c "ls -la /var/lib/node_exporter/textfile_collector/ && grep -h last_success /var/lib/node_exporter/textfile_collector/*.prom || true"

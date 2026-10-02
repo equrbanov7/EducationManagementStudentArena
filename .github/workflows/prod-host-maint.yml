@@ -9,12 +9,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status (yalnız oxuma) və ya reboot"
+        description: "status (yalnız oxuma), backup-status (yalnız oxuma) və ya reboot"
         required: true
         default: status
         type: choice
         options:
           - status
+          - backup-status
           - reboot
       confirm:
         description: "reboot üçün REBOOT yazın"
@@ -65,6 +66,40 @@ jobs:
             host systemctl is-enabled docker || true
             # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
             host sh -c 'for u in $(systemctl list-unit-files "actions.runner*" --no-legend | cut -d" " -f1); do printf "%s: " "$u"; systemctl is-enabled "$u"; done'
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 💾 Backup vəziyyəti (yalnız oxuma, 2026-10-02)
+        if: github.event.inputs.action == 'backup-status'
+        run: |
+          set -uo pipefail
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          APP_DIR=/home/wcu/EducationManagementStudentArena
+          {
+            echo "## 💾 Backup vəziyyəti"
+            echo '```'
+            echo "--- ./backups/postgres (sahib/icazə, ən yeni 12 fayl)"
+            host sh -c "ls -la $APP_DIR/backups/postgres 2>&1 | head -20"
+            host sh -c "find $APP_DIR/backups/postgres -type f -printf '%TY-%Tm-%Td %TH:%TM  %u:%g %m  %s  %p\n' 2>/dev/null | sort -r | head -12"
+            echo "--- postgres-backup konteyneri"
+            docker ps -a --filter name=emsarena-postgres-backup --format '{{.Names}}  {{.Status}}'
+            docker logs --tail 15 emsarena-postgres-backup 2>&1 | cut -c1-200
+            echo "--- celery_worker /backups görünüşü (monitorinq kollektoru buradan oxuyur)"
+            w=$(docker ps --filter name=celery_worker-1 --format '{{.Names}}' | grep -v heavy | head -n1)
+            echo "container: $w ($(docker exec "$w" id 2>&1))"
+            docker exec "$w" sh -c 'ls -la /backups 2>&1 | head -12; find /backups -name "*.sql.gz" 2>&1 | head -5'
+            echo "--- kollektor: worker-də birbaşa işlət + app keşdən oxu"
+            docker exec "$w" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('worker cache before:', cache.get(c.BACKUP_CACHE_KEY)); print('collect_backup_age():', c.collect_backup_age()); print('BACKUP_DIR:', c.BACKUP_DIR)" 2>&1 | tail -4
+            a=$(docker ps --filter name=app-1 --format '{{.Names}}' | head -n1)
+            docker exec "$a" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('app cache:', cache.get(c.BACKUP_CACHE_KEY)); from django.conf import settings; print('cache backend:', settings.CACHES['default']['BACKEND'])" 2>&1 | tail -3
+            echo "--- beat / worker loqları (collect_backup_age)"
+            b=$(docker ps --filter name=celery-beat --format '{{.Names}}' | head -n1)
+            docker logs --since 2h "$b" 2>&1 | grep -i "backup_age" | tail -3
+            docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5
+            echo "--- off-site / drill taymerləri (host)"
+            host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
+            host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 

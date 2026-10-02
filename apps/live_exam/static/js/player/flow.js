@@ -4,13 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20260930';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20260930';
-import { fetchState } from './api.js?v=lx20260930';
-import { renderFinal } from './finale.js?v=lx20260930';
-import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20260930';
-import { stopStatePolling } from './polling.js?v=lx20260930';
-import { setRank } from './ui.js?v=lx20260930';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261002';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261002';
+import { fetchState } from './api.js?v=lx20261002';
+import { renderFinal } from './finale.js?v=lx20261002';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261002';
+import { stopStatePolling } from './polling.js?v=lx20261002';
+import { setRank } from './ui.js?v=lx20261002';
 import {
     questionKeyOf,
     renderGetReady,
@@ -19,13 +19,21 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20260930';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20260930';
-import { renderIdle, renderRemoved } from './render_status.js?v=lx20260930';
-import { applySessionSettings } from './settings.js?v=lx20260930';
-import { closePlayerSocket } from './sockets.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { clearAckTimer, clearAllTimers, clearPhaseTimer, clearTicker, queuePhaseTransition, startTicker } from './timers.js?v=lx20260930';
+} from './render_round.js?v=lx20261002';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261002';
+import { renderIdle, renderRemoved } from './render_status.js?v=lx20261002';
+import { applySessionSettings } from './settings.js?v=lx20261002';
+import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import {
+    clearAckTimer,
+    clearAllTimers,
+    clearPhaseTimer,
+    clearTicker,
+    queuePhaseTransition,
+    scheduleBoundary,
+    startTicker,
+} from './timers.js?v=lx20261002';
 import {
     getRevealKey,
     getRevealTimings,
@@ -34,8 +42,8 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20260930';
-import { currentViewEl } from './views.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
+import { currentViewEl } from './views.js?v=lx20261002';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;
@@ -51,7 +59,23 @@ function resetRound() {
     state.currentAnswer = null;
     state.pendingSubmit = null;
     state.typedDraft = "";
+    state.answerOpenedAt = 0;
     clearAckTimer();
+}
+
+// LXNET (2026-10-02): sual telefona çatdı → server öz saatı ilə qeyd edir (gec çatana ədalətli
+// sürət ankeri + host-un «N/M aldı» sayğacı). WS bağlıdırsa HTTP snapshot bunu özü qeyd edir.
+function acknowledgeQuestion(question) {
+    if (!question || question.id == null || state.seenQuestionId === Number(question.id)) return;
+    if (sendJson({ type: "seen", question_id: Number(question.id) })) state.seenQuestionId = Number(question.id);
+}
+
+// Növbəti faza sərhədinə (hazır ol → giriş → cavab → vaxt bitdi) dəqiq taymer: 200 ms-lik
+// tiker plitələri orta hesabla ~100 ms gec açırdı.
+function scheduleNextBoundary(question, now) {
+    const marks = [ts(question.ready_ends_at), ts(question.answer_starts_at), ts(question.ends_at)];
+    const next = marks.filter((mark) => mark && mark > now).sort((a, b) => a - b)[0];
+    if (next) scheduleBoundary(syncQuestionPhase, next - now + 5);
 }
 
 function isOwn(answer) {
@@ -81,6 +105,7 @@ export function syncQuestionPhase() {
     const answerStartsAt = ts(question.answer_starts_at) || readyEndsAt;
     const endsAt = ts(question.ends_at);
 
+    scheduleNextBoundary(question, now);
     if (state.currentAnswer || state.pendingSubmit) {
         renderLocked(question, Math.max(0, endsAt - now));
         return;
@@ -108,6 +133,7 @@ export function applyQuestion(question, playerAnswer) {
     if (isNew) resetRound();
     state.currentQuestion = question;
     state.revealPayload = null;
+    acknowledgeQuestion(question);
     clearPhaseTimer();
     if (hasRecordedAnswer(playerAnswer)) {
         state.currentAnswer = Object.assign({}, state.currentAnswer || {}, playerAnswer, { saved: true });

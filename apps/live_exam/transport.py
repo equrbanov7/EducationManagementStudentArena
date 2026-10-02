@@ -120,10 +120,21 @@ def broadcast_players(pin: str, payload: dict[str, Any], *, personal: dict[str, 
     broadcast(pin, payload, "play_players", personal=personal)
 
 
+#: LXNET 2026-10-02: sual nəşrində yalnız host-un istifadə etdiyi sahələr — oyunçu kopyasından
+#: atılır (isti yolda daha kiçik kadr; telefon ``previous_top``-u reveal paketindən götürür).
+HOST_ONLY_QUESTION_KEYS = ("previous_top",)
+
+
+def player_question_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    if payload.get("type") != "question_published":
+        return payload
+    return {key: value for key, value in payload.items() if key not in HOST_ONLY_QUESTION_KEYS}
+
+
 def broadcast_play(pin: str, payload: dict[str, Any]) -> None:
-    """Broadcast a payload to both host and player play groups."""
+    """Broadcast a payload to both host and player play groups (sual nəşri oyunçuya yığcam)."""
     broadcast_host(pin, payload)
-    broadcast_players(pin, payload)
+    broadcast_players(pin, player_question_payload(payload))
 
 
 def bundle_events(pin: str, bundle: Bundle) -> list[tuple[str, dict[str, Any]]]:

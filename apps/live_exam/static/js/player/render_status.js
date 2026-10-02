@@ -1,10 +1,10 @@
 // LX-FE-PLAYER (2026-09-29): köməkçi görünüşlər — ilk yüklənmə, «müəllimi gözləyirik»,
 // «oyunçu sessiyada yoxdur» (403: silinib / token etibarsız).
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { announce, setQuestionChip, setTimer, stopTimeBar } from './ui.js?v=lx20260930';
-import { esc, tr } from './utils.js?v=lx20260930';
-import { mountView } from './views.js?v=lx20260930';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { announce, setQuestionChip, setTimer, stopTimeBar } from './ui.js?v=lx20261002';
+import { esc, tr } from './utils.js?v=lx20261002';
+import { mountView } from './views.js?v=lx20261002';
 
 export function renderBoot() {
     mountView(

@@ -48,8 +48,13 @@ test("when time is up the button unlocks and the ready line appears", async () =
     const window = await page(1);
     try {
         const doc = window.document;
-        await new Promise((resolve) => setTimeout(resolve, 1300));
-        assert.equal(doc.querySelector(".auth-submit-btn").disabled, false);
+        // CI 2026-10-02 (Node 20, yüklü runner): sayğac saniyədə bir yoxlayır — kilid 1-ci və ya 2-ci
+        // tikdə açılır. Sabit 1.3 s gözləmə əvəzinə şərti 3.5 s-yə qədər yoxla.
+        const button = doc.querySelector(".auth-submit-btn");
+        for (let waited = 0; button.disabled && waited < 3500; waited += 100) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        assert.equal(button.disabled, false);
         assert.equal(doc.querySelector("[data-lockout-ready]").hidden, false);
         assert.equal(doc.querySelector("[data-lockout-waiting]").hidden, true);
         assert.ok(doc.querySelector("[data-login-lockout]").classList.contains("is-ready"));

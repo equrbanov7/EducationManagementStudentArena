@@ -34,6 +34,65 @@
     color: var(--lxp-good-deep);
 }
 
+/* LXNET 2026-10-02: başlıqda bağlantı göstəricisi (ping RTT): good — 3 yaşıl, weak — 2 kəhrəba,
+ * down — 1 qırmızı zolaq (bərpa olunur). Rəng tək siqnal deyil: zolaq sayı da dəyişir. */
+.lxp-top__end {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lxp-signal {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 18px;
+    padding: 2px;
+}
+
+.lxp-signal[hidden] {
+    display: none;
+}
+
+.lxp-signal__bar {
+    width: 5px;
+    border-radius: 2px;
+    background: var(--lxp-line);
+}
+
+.lxp-signal__bar:nth-child(1) {
+    height: 7px;
+}
+
+.lxp-signal__bar:nth-child(2) {
+    height: 11px;
+}
+
+.lxp-signal__bar:nth-child(3) {
+    height: 16px;
+}
+
+.lxp-signal[data-level="good"] .lxp-signal__bar {
+    background: #4ade80;
+}
+
+.lxp-signal[data-level="weak"] .lxp-signal__bar:nth-child(-n + 2) {
+    background: #fbbf24;
+}
+
+.lxp-signal[data-level="down"] .lxp-signal__bar:nth-child(1) {
+    background: #f87171;
+    animation: lxpSignalBlink 1s ease-in-out infinite;
+}
+
+@keyframes lxpSignalBlink {
+    50% {
+        opacity: 0.35;
+    }
+}
+
 .lxp-toast {
     position: fixed;
     left: 50%;
@@ -310,6 +369,7 @@ body.lxp-kb-open .lxp-me {
     .lxp-sound[data-state="locked"],
     .lxp-dots span,
     .lxp-net,
+    .lxp-signal__bar,
     .lxp-me__score strong.is-bumped {
         animation: none;
     }
