@@ -20,6 +20,8 @@ tarixçəsi olduğu kimi qalır (§8 qayda 5).
 
 from __future__ import annotations
 
+import uuid
+
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
@@ -332,7 +334,7 @@ def _unlock(request, organization):
 _CHAIR_ROLES = ("chair_head", "department_head", "section_head")
 
 
-def _chair_recipients(organization, unit, *, actor_id) -> list:
+def chair_recipients(organization, unit, *, actor_id) -> list:
     """Kafedranın rəhbəri + kafedra rollu üzvlər (klonda kafedraların çoxu rəhbərsizdir)."""
     from apps.organizations.public import members_covering_unit
 
@@ -370,7 +372,7 @@ def _notify_chairs(organization, period, *, actor=None) -> int:
         chairs = chairs.filter(pk__in=owned)
     sent = 0
     for unit in chairs:
-        recipients = _chair_recipients(organization, unit, actor_id=getattr(actor, "id", None))
+        recipients = chair_recipients(organization, unit, actor_id=getattr(actor, "id", None))
         if not recipients:
             continue
         try:
@@ -393,6 +395,50 @@ def _notify_chairs(organization, period, *, actor=None) -> int:
     return sent
 
 
+def _remind_readiness(request, organization):
+    """«Semestr hazırlığı» → «Xatırlat»: kafedranın müəllimlərinə və rəhbərinə bildiriş (12 saatda bir)."""
+    from .semester_reminders import send_reminders
+
+    if not can_open_semester(request):
+        return _error(pgettext(_CTX, "Bu əməl üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
+    period = _period(organization, request.POST.get("period"))
+    if period is None:
+        return _error(pgettext(_CTX, "Dövr tapılmadı."), status=404, code="not_found")
+    chair = None
+    chair_id = (request.POST.get("chair") or "").strip()
+    if chair_id:
+        try:
+            chair_id = str(uuid.UUID(chair_id))
+        except ValueError:
+            return _error(pgettext(_CTX, "Kafedra tapılmadı."), status=404, code="not_found")
+        chair = (
+            django_apps.get_model("organizations", "OrgUnit")
+            .objects.filter(organization=organization, pk=chair_id, unit_type__in=("chair", "department"))
+            .first()
+        )
+        if chair is None:
+            return _error(pgettext(_CTX, "Kafedra tapılmadı."), status=404, code="not_found")
+    result = send_reminders(organization, period, chair, actor=request.user)
+    if result["throttled"]:
+        return _error(
+            pgettext(_CTX, "Bu kafedraya son 12 saatda artıq xatırlatma göndərilib."), status=429, code="throttled"
+        )
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=organization,
+        obj=period,
+        request=request,
+        reason="semester: readiness reminder sent",
+        new_values={"chair": chair_id, **result},
+    )
+    message = pgettext(_CTX, "Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına.") % {
+        "teachers": result["teachers"],
+        "chair": result["chair_members"],
+    }
+    return JsonResponse({"ok": True, "message": message, **result})
+
+
 _HANDLERS = {
     "save_period": _save_period,
     "set_current": _set_current,
@@ -401,6 +447,7 @@ _HANDLERS = {
     "cancel_offering": _cancel_offering,
     "lock": _lock,
     "unlock": _unlock,
+    "remind_readiness": _remind_readiness,
 }
 
 
@@ -424,4 +471,4 @@ def semester_action(request):
     return handler(request, organization)
 
 
-__all__ = ["semester_action"]
+__all__ = ["chair_recipients", "semester_action"]

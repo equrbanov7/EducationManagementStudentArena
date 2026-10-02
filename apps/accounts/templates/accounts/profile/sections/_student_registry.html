@@ -39,13 +39,20 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_registry_section.kpi_tiles kpi_variant="5" %}
     {# 2026-10-02 (sahib): real təhsil vəziyyəti və hesab aktivləşdirməsi — kart kliki filtrdir (student_registry.js). #}
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_registry_section.state_tiles kpi_variant="4" %}
+    {% if student_registry_section.view != "activation" %}
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=student_registry_section.account_tiles %}
+    {% endif %}
 
     {% include "partials/ems_ui/_filter_bar.html" with filter_section="student-registry" filter_prefix="sr_" filter_fields=student_registry_section.filter_fields filter_count_label=student_registry_section.filter_count_label filter_auto=True filter_bootstrap=True %}
 
+    {% if student_registry_section.view == "activation" %}
+    {# 2026-10-03 (sahib): hesab aktivləşdirmə — qruplar üzrə, çap vərəqi ilə. #}
+    {% include "accounts/profile/sections/student_services/_registry_activation.html" %}
+    {% else %}
     {% include "partials/ems_ui/_data_table.html" with table_columns=student_registry_section.columns table_rows=student_registry_section.table_rows table_state=student_registry_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-user-graduate" state_title=student_registry_section.state_title state_body=student_registry_section.state_body %}
 
     {% include "partials/_pagination.html" with page_obj=student_registry_section.page_obj page_param="sr_page" extra_query=student_registry_section.pagination_query %}
+    {% endif %}
 
     {% include "partials/ems_ui/_drawer.html" with drawer_id="srStudentCard" drawer_title=sr_card_title drawer_xl=True drawer_body_include="accounts/profile/sections/student_services/_registry_drawer.html" %}
 

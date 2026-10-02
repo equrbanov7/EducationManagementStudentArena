@@ -1,0 +1,59 @@
+{% load i18n %}
+{% comment %}
+«Semestr hazırlığı» — kafedra üzrə nə çatışmır (sahib 2026-10-03). Məntiq: apps.registrar.semester_readiness.
+Rəqəm = süzgəc linki (həmin kafedra + problem → aşağıdakı «Açılış sətirləri»). «Xatırlat» kafedranın
+müəllimlərinə (sillabus / jurnal) və rəhbərinə (xülasə) bildiriş göndərir — 12 saatda bir dəfə.
+Faiz `<meter>` ilə (inline style yoxdur).
+{% endcomment %}
+{% with rd=semester_opening_section.readiness period=semester_opening_section.period %}
+{% if rd.rows %}
+<div class="tof-pane tof-ready">
+    <h3 class="tof-pane__title">
+        {% trans "Semestr hazırlığı — kafedralar üzrə" context "accounts.semester" %}
+        <span class="tof-table-title__count">{% blocktrans with ready=rd.totals.ready total=rd.totals.total pct=rd.totals.pct context "accounts.semester" %}{{ ready }} / {{ total }} fənn tam hazırdır ({{ pct }}%){% endblocktrans %}</span>
+    </h3>
+    <p class="tof-pane__hint">{% blocktrans context "accounts.semester" %}Hər fənn üçün dörd şərt yoxlanılır: müəllim təyin olunub, sillabus təsdiqlənib, dərs cədvəlində yeri var, jurnalda dərs yazılır (semestrin ilk həftəsindən sonra; 14 gün yazılmırsa — «jurnal yazılmır»). Rəqəmə klik edin — həmin fənlər aşağıdakı cədvəldə açılacaq.{% endblocktrans %}</p>
+    <div class="tof-pane__scroll">
+    <table class="ems-table ems-table--zebra tof-ready__table">
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Kafedra" context "accounts.semester" %}</th>
+                <th scope="col" class="ems-table__num">{% trans "Fənn" context "accounts.semester" %}</th>
+                {% for key, label in rd.labels.items %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                <th scope="col">{% trans "Hazırdır" context "accounts.semester" %}</th>
+                {% if semester_opening_section.can_open and period %}<th scope="col"><span class="sr-only">{% trans "Əməllər" context "accounts.semester" %}</span></th>{% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rd.rows %}
+            <tr>
+                <th scope="row">{{ row.name }}</th>
+                <td class="ems-table__num">{{ row.total }}</td>
+                {% for cell in row.cells %}
+                <td class="ems-table__num">
+                    {% if cell.value and cell.url %}<a class="tof-ready__count tof-ready__count--{{ cell.key }}" href="{{ cell.url }}">{{ cell.value }}</a>{% elif cell.value %}<span class="tof-ready__count tof-ready__count--{{ cell.key }}">{{ cell.value }}</span>{% else %}<span class="tof-ready__zero">0</span>{% endif %}
+                </td>
+                {% endfor %}
+                <td>
+                    <meter class="tof-ready__meter" min="0" max="100" low="40" high="80" optimum="100" value="{{ row.pct }}">{{ row.pct }}%</meter>
+                    <span class="tof-ready__pct">{{ row.ready }} ({{ row.pct }}%)</span>
+                </td>
+                {% if semester_opening_section.can_open and period %}
+                <td>
+                    {% if row.ready < row.total %}
+                    <button type="button" class="ems-btn ems-btn--sm"
+                            data-tof-submit='{"action": "remind_readiness", "period": "{{ period.id }}", "chair": "{{ row.chair_id }}"}'
+                            data-tof-confirm="{% trans 'Bu kafedranın müəllimlərinə (sillabus / jurnal) və rəhbərinə (xülasə) xatırlatma bildirişi göndərilsin? Eyni kafedraya 12 saatda bir dəfə göndərilir.' context 'accounts.semester' %}">
+                        <i class="fas fa-bell" aria-hidden="true"></i> {% trans "Xatırlat" context "accounts.semester" %}
+                    </button>
+                    {% endif %}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endif %}
+{% endwith %}

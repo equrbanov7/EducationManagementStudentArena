@@ -50,6 +50,7 @@ from . import services
 from .curriculum_registry import programs_without_approved_plan
 from .models import CourseOffering, Curriculum, CurriculumSubject, Program, StudentAcademicRecord
 from .models.curriculum_meta import PlanStatus
+from .semester_readiness import ISSUES, approved_syllabus_offering_ids, offering_issues, readiness_by_chair
 
 _CTX = "accounts.semester"
 
@@ -280,17 +281,11 @@ def coverage(organization, period) -> dict:
     with_instructor = offerings.filter(instructor__isnull=False).count()
     with_course = offerings.filter(course__isnull=False).count()
     hours = offerings.aggregate(total=Sum("lesson_hours"))["total"] or 0
-    # Sillabusu olmayan fənlər (handoff §8 qayda 12) — sillabus modulu yoxdursa
-    # sayğac None qalır və UI xanası «—» göstərir (uydurma 0 YAZILMIR).
-    without_syllabus = None
-    try:
-        Syllabus = django_apps.get_model("syllabus", "Syllabus")
-        approved_subjects = set(
-            Syllabus.objects.filter(organization=organization, status="approved").values_list("subject_id", flat=True)
-        )
-        without_syllabus = offerings.exclude(subject_id__in=approved_subjects).count()
-    except Exception:  # pragma: no cover — sillabus modeli yoxdursa KPI boş qalır
-        without_syllabus = None
+    # Sillabusu olmayan fənlər (handoff §8 qayda 12). 2026-10-03: əvvəl `Syllabus.status` sahəsi ilə
+    # süzülürdü — belə sahə YOXDUR (status versiyadadır), istisna udulurdu və KPI həmişə «—» idi.
+    # İndi jurnalla EYNİ qayda: açılışa uyğun dosyenin `approved_version`-u (semester_readiness).
+    rows = list(offerings.values("id", "subject_id", "instructor_id"))
+    without_syllabus = len(rows) - len(approved_syllabus_offering_ids(organization, period, rows))
 
     return {
         "total": total,
@@ -411,7 +406,11 @@ def build_semester_opening(request, organization) -> dict:
             {"value": str(item.id), "label": item.display_label}
             for item in Program.objects.filter(organization=organization, is_archived=False).order_by("name")[:500]
         ],
-        "filters": {"period": str(period.id) if period else "", "chair": (request.GET.get("sm_chair") or "").strip()},
+        "filters": {
+            "period": str(period.id) if period else "",
+            "chair": (request.GET.get("sm_chair") or "").strip(),
+            "issue": issue if (issue := (request.GET.get("sm_issue") or "").strip()) in ISSUES else "",
+        },
         "period": None,
         "rows": [],
         "steps": [],
@@ -430,6 +429,10 @@ def build_semester_opening(request, organization) -> dict:
     )
     if chair:
         offerings = offerings.filter(subject__chair_unit_id=chair)
+    # 2026-10-03 «Semestr hazırlığı»: problem xəritəsi BİR dəfə hesablanır (kafedra cədvəli + süzgəc + sətir).
+    issues_map = offering_issues(organization, period)
+    if issue := payload["filters"]["issue"]:
+        offerings = offerings.filter(pk__in=[key for key, item in issues_map.items() if issue in item["issues"]])
 
     student_counts = dict(
         StudentAcademicRecord.objects.filter(organization=organization, is_active=True, group__isnull=False)
@@ -457,6 +460,7 @@ def build_semester_opening(request, organization) -> dict:
                 ),
                 "status_key": offering_status_key(offering),
                 "is_active": offering.is_active,
+                "issues": issues_map.get(offering.id, {}).get("issues", []),
             }
         )
 
@@ -475,6 +479,7 @@ def build_semester_opening(request, organization) -> dict:
                 "lock_reason": period.lock_reason,
             },
             "stats": stats,
+            "readiness": readiness_by_chair(organization, period, issues_map=issues_map),
             "rows": rows,
             "page_obj": page_obj,
             "rows_total": page_obj.paginator.count,

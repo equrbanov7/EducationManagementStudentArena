@@ -84,9 +84,14 @@ FILTER_DEFAULTS = {
     "admission_status": "",
     "channel": "",
     "language": "",
+    # 2026-10-03: «activation» — qruplar üzrə hesab aktivləşdirmə hesabatı (bax ``activation``).
+    "view": "",
     "sort": "name",
     "page": 1,
 }
+
+#: Reyestrin görünüş rejimləri (boş = tələbə siyahısı).
+REGISTRY_VIEWS = ("activation",)
 
 
 def normalize_values(values=None, request=None) -> dict:
@@ -124,6 +129,7 @@ def parse_registry_filters(request) -> dict:
         "admission_status": _get("admission_status"),
         "channel": _get("channel"),
         "language": _get("language"),
+        "view": _get("view") if _get("view") in REGISTRY_VIEWS else "",
         "sort": sort if sort in REGISTRY_SORT_OPTIONS else "name",
         "page": page,
     }
@@ -175,6 +181,14 @@ def _apply_filters(records, values, *, organization):
 
         records = records.filter(group_id__in=_sector_group_ids(organization, normalize_sector(values["sector"])))
     return records
+
+
+def filtered_state_records(*, actor, request=None, values=None):
+    """Əhatə + filtrlər + hesablanan vəziyyət — siyahı ilə EYNİ dəst (aktivləşdirmə hesabatı, çap vərəqi)."""
+    values = normalize_values(values, request)
+    records = registry_records_qs(actor, request=request)
+    records = annotate_study_state(_apply_filters(records, values, organization=actor.organization))
+    return _apply_state_filters(records, values)
 
 
 def _apply_state_filters(records, values):
@@ -435,9 +449,11 @@ __all__ = [
     "FILTER_DEFAULTS",
     "MAX_PAGE_SIZE",
     "REGISTRY_SORT_OPTIONS",
+    "REGISTRY_VIEWS",
     "SPECIAL_STATUSES",
     "build_registry_page",
     "export_rows",
+    "filtered_state_records",
     "registry_options",
     "normalize_values",
     "parse_registry_filters",
