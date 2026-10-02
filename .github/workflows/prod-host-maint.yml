@@ -89,6 +89,14 @@ jobs:
             w=$(docker ps --filter name=celery_worker-1 --format '{{.Names}}' | grep -v heavy | head -n1)
             echo "container: $w ($(docker exec "$w" id 2>&1))"
             docker exec "$w" sh -c 'ls -la /backups 2>&1 | head -12; find /backups -name "*.sql.gz" 2>&1 | head -5'
+            echo "--- kollektor: worker-də birbaşa işlət + app keşdən oxu"
+            docker exec "$w" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('worker cache before:', cache.get(c.BACKUP_CACHE_KEY)); print('collect_backup_age():', c.collect_backup_age()); print('BACKUP_DIR:', c.BACKUP_DIR)" 2>&1 | tail -4
+            a=$(docker ps --filter name=app-1 --format '{{.Names}}' | head -n1)
+            docker exec "$a" python manage.py shell -c "from django.core.cache import cache; from apps.monitoring import collectors as c; print('app cache:', cache.get(c.BACKUP_CACHE_KEY)); from django.conf import settings; print('cache backend:', settings.CACHES['default']['BACKEND'])" 2>&1 | tail -3
+            echo "--- beat / worker loqları (collect_backup_age)"
+            b=$(docker ps --filter name=celery-beat --format '{{.Names}}' | head -n1)
+            docker logs --since 2h "$b" 2>&1 | grep -i "backup_age" | tail -3
+            docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5
             echo "--- off-site / drill taymerləri (host)"
             host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
             host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true
