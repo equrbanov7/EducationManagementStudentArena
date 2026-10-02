@@ -89413,3 +89413,80 @@ msgid ""
 msgstr ""
 "Этот MAC-адрес не может принадлежать компьютеру (нулевой, широковещательный "
 "или multicast): %(mac)s"
+
+msgctxt "accounts.grades_notice"
+msgid "Vacib məlumat"
+msgstr "Важно"
+
+msgctxt "accounts.grades_notice"
+msgid "Qiymətlərinizi mütləq yoxlayın"
+msgstr "Обязательно проверьте свои оценки"
+
+msgctxt "accounts.grades_notice"
+msgid ""
+"Əvvəlki semestrlərin balları köhnə sistemdən bu yeni sistemə köçürülüb. "
+"Köçürmə zamanı bəzi ballarda səhv ola bilər."
+msgstr ""
+"Баллы за прошлые семестры перенесены из старой системы в эту новую. При "
+"переносе в некоторых баллах могли возникнуть ошибки."
+
+msgctxt "accounts.grades_notice"
+msgid "Məsələn, belə ola bilər:"
+msgstr "Например:"
+
+msgctxt "accounts.grades_notice"
+msgid "balınız əslində olduğundan fərqli yazılıb;"
+msgstr "балл указан не таким, какой он на самом деле;"
+
+msgctxt "accounts.grades_notice"
+msgid "keçdiyiniz fənn siyahıda görünmür;"
+msgstr "сданный вами предмет не виден в списке;"
+
+msgctxt "accounts.grades_notice"
+msgid "fənn başqa semestrdə görünür."
+msgstr "предмет отображается в другом семестре."
+
+msgctxt "accounts.grades_notice"
+msgid "Nə etməlisiniz?"
+msgstr "Что нужно сделать?"
+
+msgctxt "accounts.grades_notice"
+msgid "Səhv görsəniz, İmtahan Mərkəzinə yaxınlaşın və balınızı dəqiqləşdirin."
+msgstr ""
+"Если заметите ошибку, обратитесь в Экзаменационный центр и уточните свой "
+"балл."
+
+msgctxt "accounts.grades_notice"
+msgid "Hər şey düzdürsə, heç nə etməyinizə ehtiyac yoxdur."
+msgstr "Если всё верно, ничего делать не нужно."
+
+msgctxt "accounts.grades_notice"
+msgid "Başa düşdüm"
+msgstr "Понятно"
+
+msgctxt "accounts.grades_notice"
+msgid "Ballarıma indi baxım"
+msgstr "Посмотреть мои баллы"
+
+msgctxt "accounts.grades_notice"
+msgid "Bu məlumat yalnız bir dəfə göstərilir."
+msgstr "Это сообщение показывается только один раз."
+
+msgctxt "accounts.first_login"
+msgid "məs: adiniz@gmail.com"
+msgstr "напр.: vashe_imya@gmail.com"
+
+msgctxt "accounts.first_login"
+msgid ""
+"Bu sahəni özünüz doldurun: hər gün istifadə etdiyiniz e-poçtu yazın (məs. "
+"Gmail). Təsdiq kodu ora gələcək, parolu unutsanız bərpa da bu ünvanla "
+"olacaq."
+msgstr ""
+"Заполните это поле сами: укажите почту, которой пользуетесь каждый день "
+"(например, Gmail). Туда придёт код подтверждения, и по этому же адресу можно"
+" будет восстановить пароль."
+
+msgctxt "accounts.grades_notice"
+msgid "«Ümumi tədris məlumatı» bölməsində öz ballarınıza diqqətlə baxın."
+msgstr ""
+"Внимательно проверьте свои баллы в разделе «Общая учебная информация»."
