@@ -79,3 +79,64 @@ class RoutingBackendTests(SimpleTestCase):
 
     def test_empty_batch(self):
         self.assertEqual(AccountRoutingEmailBackend().send_messages([]), 0)
+
+
+@override_settings(**M365)
+class TransientRetryTests(SimpleTestCase):
+    """2026-10-02: M365 4xx (eyni-anlı bağlantı / throttling) — fasilə ilə təkrar, son cəhd digər qutudan."""
+
+    def _run(self, outcomes, *, fail_silently=False):
+        """outcomes: hər yaradılan backend-in send_messages nəticəsi (int və ya Exception)."""
+        created = []
+        queue = list(outcomes)
+
+        def factory(**kwargs):
+            backend = MagicMock()
+            outcome = queue.pop(0)
+
+            def send(msgs):
+                if isinstance(outcome, Exception):
+                    raise outcome
+                return outcome
+
+            backend.send_messages.side_effect = send
+            created.append(kwargs["username"])
+            return backend
+
+        message = EmailMessage("o", "b", "verification@wcu.edu.az", ["x@x.az"])
+        with patch("core.mail_backend.SMTPEmailBackend", side_effect=factory), patch("core.mail_backend.time.sleep"):
+            result = AccountRoutingEmailBackend(fail_silently=fail_silently).send_messages([message])
+        return result, created, message
+
+    def test_transient_then_success_retries_same_mailbox(self):
+        import smtplib
+
+        busy = smtplib.SMTPConnectError(432, b"4.3.2 Concurrent connections limit exceeded")
+        sent, created, message = self._run([busy, 1])
+        self.assertEqual(sent, 1)
+        self.assertEqual(created, ["verification@wcu.edu.az", "verification@wcu.edu.az"])
+        self.assertIn("verification@wcu.edu.az", message.from_email)
+
+    def test_last_attempt_fails_over_to_other_mailbox(self):
+        import smtplib
+
+        busy = smtplib.SMTPDataError(451, b"4.7.500 Server busy")
+        sent, created, message = self._run([busy, busy, 1])
+        self.assertEqual(sent, 1)
+        self.assertEqual(created[-1], "recovery@wcu.edu.az")
+        self.assertIn("<recovery@wcu.edu.az>", message.from_email)
+
+    def test_permanent_error_is_not_retried(self):
+        import smtplib
+
+        rejected = smtplib.SMTPRecipientsRefused({"x@x.az": (550, b"5.1.1 user unknown")})
+        with self.assertRaises(smtplib.SMTPRecipientsRefused):
+            self._run([rejected, 1, 1])
+
+    def test_fail_silently_swallows_final_failure(self):
+        import smtplib
+
+        auth = smtplib.SMTPAuthenticationError(535, b"5.7.3 Authentication unsuccessful")
+        sent, created, _message = self._run([auth], fail_silently=True)
+        self.assertEqual(sent, 0)
+        self.assertEqual(len(created), 1)
