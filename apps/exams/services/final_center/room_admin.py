@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamRoom, ExamRoomComputer
@@ -83,6 +84,21 @@ def _coerce_seat(raw) -> int | None:
     return seat
 
 
+def _same_mac_q(mac_norm: str) -> Q:
+    """Eyni MAC-ın istənilən saxlanmış yazılışı (EXAMQA R2, 2026-10-02).
+
+    Köhnə qeydlər «aa:bb:…», «AA-BB-…», «AABBCC…» kimi saxlanıla bilir; dəqiq bərabərlik onları tutmurdu →
+    eyni kompüter ikinci dəfə qeydə alına bilirdi (gate isə normallaşdırılmış müqayisədə iki qeyd tapırdı).
+    """
+    hexes = mac_norm.replace(":", "")
+    pairs = [hexes[i : i + 2] for i in range(0, 12, 2)]
+    variants = {":".join(pairs), "-".join(pairs), hexes, ".".join(hexes[i : i + 4] for i in range(0, 12, 4))}
+    query = Q()
+    for variant in variants:
+        query |= Q(mac_address__iexact=variant)
+    return query
+
+
 def _ensure_mac_free_in_org(room: ExamRoom, mac_norm: str, *, exclude_pk=None) -> None:
     """MAC bu təşkilatın BAŞQA zalında qeydlidirsə, zalın adını deyən xəta atır.
 
@@ -91,7 +107,7 @@ def _ensure_mac_free_in_org(room: ExamRoom, mac_norm: str, *, exclude_pk=None) -
     şikayətinin klassik səbəbi: qeyd başqa zalda/təşkilat seçimində qalıb).
     """
     clash = (
-        ExamRoomComputer.objects.filter(organization_id=room.organization_id, mac_address=mac_norm)
+        ExamRoomComputer.objects.filter(_same_mac_q(mac_norm), organization_id=room.organization_id)
         .exclude(room=room)
         .select_related("room")
     )
@@ -120,7 +136,7 @@ def add_computer(
     seat = _coerce_seat(seat_number)
 
     base = ExamRoomComputer.objects.filter(room=room)
-    if base.filter(mac_address=mac_norm).exists():
+    if base.filter(_same_mac_q(mac_norm)).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )
@@ -165,7 +181,7 @@ def update_computer(
     seat = _coerce_seat(seat_number)
 
     siblings = ExamRoomComputer.objects.filter(room=computer.room).exclude(pk=computer.pk)
-    if siblings.filter(mac_address=mac_norm).exists():
+    if siblings.filter(_same_mac_q(mac_norm)).exists():
         raise RoomAdminError(
             pgettext("exams.final_center.room_admin", "Bu MAC artıq bu zalda qeydlidir: %(mac)s") % {"mac": mac_norm}
         )

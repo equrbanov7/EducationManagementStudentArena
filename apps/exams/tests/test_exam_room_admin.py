@@ -77,6 +77,19 @@ class AddComputerServiceTests(_RoomBase):
         with self.assertRaises(RoomAdminError):
             add_computer(room=self.room, label="PC-01", mac="not-a-mac")
 
+    def test_legacy_spellings_still_count_as_duplicates(self):
+        # EXAMQA R2 (2026-10-02): köhnə qeyd kiçik hərf / defis / ayırıcısız saxlanıbsa dublikat tutulmurdu.
+        for index, legacy in enumerate(("aa:bb:cc:dd:ee:31", "AA-BB-CC-DD-EE-32", "aabbccddee33", "AABB.CCDD.EE34")):
+            ExamRoomComputer.objects.create(
+                organization=self.org, room=self.room, label=f"LEG-{index}", mac_address=legacy
+            )
+        other_room = ExamRoom.objects.create(organization=self.org, name="Zal B", code="ZB", capacity=10)
+        for wanted in ("AA:BB:CC:DD:EE:31", "aa-bb-cc-dd-ee-32", "AA:BB:CC:DD:EE:33", "aa:bb:cc:dd:ee:34"):
+            with self.assertRaises(RoomAdminError, msg=wanted):
+                add_computer(room=self.room, label="NEW", mac=wanted)
+            with self.assertRaises(RoomAdminError, msg=wanted):
+                add_computer(room=other_room, label="NEW", mac=wanted)
+
     def test_non_hex_characters_are_rejected_not_silently_dropped(self):
         # EXAMQA R3 (2026-10-02): «GZ» səssizcə atılır, başqa (səhv) MAC qeydə alınırdı.
         for bad in ("AA:BB:CC:DD:EE:GZ1", "AA:BB:CC:DD:EE:0O", "AA/BB/CC/DD/EE/01"):
