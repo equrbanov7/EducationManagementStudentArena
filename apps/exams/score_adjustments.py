@@ -55,6 +55,10 @@ def _default_remaining_window_seconds(attempt):
     return 0
 
 
+def _default_is_applicable(attempt):
+    return False
+
+
 _HOOKS = {
     "bonus_map": _default_bonus_map,
     "apply_bonus": _default_apply_bonus,
@@ -66,6 +70,7 @@ _HOOKS = {
     "student_visible_status_by_qid": _default_student_visible_status_by_qid,
     "can_create": _default_can_create,
     "remaining_window_seconds": _default_remaining_window_seconds,
+    "is_applicable": _default_is_applicable,
 }
 
 
@@ -114,3 +119,8 @@ def can_create(request, attempt):
 
 def remaining_window_seconds(attempt):
     return _HOOKS["remaining_window_seconds"](attempt)
+
+
+def is_applicable(attempt):
+    """Bu cəhd növü ümumiyyətlə apellyasiya olunurmu (kateqoriya + sınaq deyil) — pəncərədən asılı deyil."""
+    return _HOOKS["is_applicable"](attempt)
