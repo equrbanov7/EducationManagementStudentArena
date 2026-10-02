@@ -99,6 +99,8 @@ jobs:
             b=$(docker ps --filter name=celery-beat --format '{{.Names}}' | head -n1)
             docker logs --since 2h "$b" 2>&1 | grep -i "backup_age" | tail -3
             docker logs --since 2h "$w" 2>&1 | grep -i -E "backup_age|collect_backup" | tail -5
+            echo "--- nginx: son 20000 sətirdə 400 cavabları (yol / UA, IP-siz)"
+            docker logs --tail 20000 emsarena-nginx 2>/dev/null | grep '" 400 ' | sed -E 's/^[^"]*"([A-Z]+) ([^ ?]*)[^"]*" 400 [0-9]+ "[^"]*" "([^"]{0,40})[^"]*".*/\1 \2 | \3/' | sed -E 's#/[0-9]+/#/N/#g' | sort | uniq -c | sort -rn | head -15
             echo "--- off-site / drill taymerləri (host)"
             host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
             host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true
