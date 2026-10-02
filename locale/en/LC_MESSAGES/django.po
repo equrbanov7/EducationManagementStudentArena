@@ -89422,3 +89422,305 @@ msgstr "Admission year unknown"
 msgctxt "ui.status"
 msgid "Arxiv: məzun və ya xaric"
 msgstr "Archive: graduate or expelled"
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"1–2 dəqiqə gözləyin və «Spam» / «Promotions» qovluğuna baxın. Ünvanı səhv "
+"yazmısınızsa, «E-poçtu dəyiş» ilə düzəldin."
+msgstr ""
+"Wait 1–2 minutes and check the “Spam” / “Promotions” folder. If you mistyped"
+" the address, fix it with “Change email”."
+
+msgctxt "accounts.activation_sheet"
+msgid "Aktivləşdirib"
+msgstr "Activated"
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"Açılan səhifədə hər gün baxdığınız ÖZ e-poçtunuzu yazın (məs. "
+"adiniz@gmail.com) və «Təsdiq kodu göndər» düyməsini basın."
+msgstr ""
+"On the next page enter YOUR OWN email that you check every day (e.g. "
+"yourname@gmail.com) and press “Send verification code”."
+
+msgctxt "accounts.activation_sheet"
+msgid "Başlayıb, tamamlamayıb"
+msgstr "Started, not finished"
+
+msgctxt "accounts.activation_sheet"
+msgid "Bu qrupun bütün tələbələri hesabını aktivləşdirib."
+msgstr "All students of this group have activated their accounts."
+
+msgctxt "accounts.activation_sheet"
+msgid "Bu vərəqdə parol yoxdur."
+msgstr "This sheet contains no passwords."
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"E-poçtunuza gələn 6 rəqəmli kodu yazın və yalnız sizin bildiyiniz yeni parol"
+" qurun. Parolu heç kimə deməyin."
+msgstr ""
+"Enter the 6-digit code sent to your email and set a new password that only "
+"you know. Never share it."
+
+msgctxt "accounts.activation_sheet"
+msgid "Elektron universitetə ilk giriş"
+msgstr "First sign-in to the e-university"
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"Hazırdır! Ballarınızı, davamiyyətinizi və dərs cədvəlinizi kabinetinizdə "
+"görəcəksiniz."
+msgstr ""
+"Done! You will see your scores, attendance and timetable in your cabinet."
+
+msgctxt "accounts.activation_sheet"
+msgid "Heç girməyib"
+msgstr "Never signed in"
+
+msgctxt "accounts.activation_sheet"
+msgid "Hələ hesabını aktivləşdirməyən tələbələr"
+msgstr "Students who have not activated their account yet"
+
+msgctxt "accounts.activation_sheet"
+msgid "Kod gəlmir?"
+msgstr "No code?"
+
+msgctxt "accounts.activation_sheet"
+msgid "Nə etməli? — 5 addım, 3 dəqiqə"
+msgstr "What to do — 5 steps, 3 minutes"
+
+msgctxt "accounts.activation_sheet"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "accounts.activation_sheet"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "accounts.activation_sheet"
+msgid "Reyestrə qayıt"
+msgstr "Back to the registry"
+
+msgctxt "accounts.activation_sheet"
+msgid "Soyad, ad"
+msgstr "Surname, name"
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"Telefonun kamerası ilə QR kodu oxudun və ya brauzerdə <b>%(host)s</b> yazın,"
+" «Tələbə girişi»ni seçin."
+msgstr ""
+"Scan the QR code with your phone camera or type <b>%(host)s</b> in the "
+"browser and choose “Student sign-in”."
+
+msgctxt "accounts.activation_sheet"
+msgid "Çap et"
+msgstr "Print"
+
+msgctxt "accounts.activation_sheet"
+msgid "Çap tarixi"
+msgstr "Printed on"
+
+msgctxt "accounts.activation_sheet"
+msgid "İlk giriş təlimatı"
+msgstr "First sign-in guide"
+
+msgctxt "accounts.activation_sheet"
+msgid "İlkin parolu bilmirsiniz?"
+msgstr "Don't know your initial password?"
+
+msgctxt "accounts.activation_sheet"
+msgid "İmza"
+msgstr "Signature"
+
+msgctxt "accounts.activation_sheet"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"İstifadəçi adınızı (aşağıdakı cədvəldə) və sizə verilmiş ilkin parolu yazın."
+msgstr ""
+"Enter your username (in the table below) and the initial password you were "
+"given."
+
+msgctxt "accounts.activation_sheet"
+msgid ""
+"Şəxsiyyət vəsiqəniz ilə RİM mərkəzinə müraciət edin — parolunuzu yerində "
+"sıfırlayacaqlar."
+msgstr ""
+"Visit the Digital Development Centre (RİM) with your ID card — they will "
+"reset your password on the spot."
+
+msgctxt "accounts.student_registry"
+msgid "%(done)d / %(total)d tələbə"
+msgstr "%(done)d / %(total)d students"
+
+msgctxt "accounts.student_registry"
+msgid "AKTİVLƏŞDİRİB"
+msgstr "ACTIVATED"
+
+msgctxt "accounts.student_registry"
+msgid "Aktivləşdirib"
+msgstr "Activated"
+
+msgctxt "accounts.student_registry"
+msgid "Fakültələr üzrə"
+msgstr "By faculty"
+
+msgctxt "accounts.student_registry"
+msgid "HEÇ GİRMƏYİB"
+msgstr "NEVER SIGNED IN"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab aktivləşdirmə"
+msgstr "Account activation"
+
+msgctxt "accounts.student_registry"
+msgid "Heç girməyib"
+msgstr "Never signed in"
+
+msgctxt "accounts.student_registry"
+msgid "Nəticə: %(count)d qrup"
+msgstr "Result: %(count)d groups"
+
+msgctxt "accounts.student_registry"
+msgid "QRUP"
+msgstr "GROUPS"
+
+msgctxt "accounts.student_registry"
+msgid "Qruplar üzrə — ən geri qalan birinci"
+msgstr "By group — lowest first"
+
+msgctxt "accounts.student_registry"
+msgid "Qrupsuz"
+msgstr "No group"
+
+msgctxt "accounts.student_registry"
+msgid "Sistemə bir dəfə də daxil olmayıb"
+msgstr "Has never signed in to the system"
+
+msgctxt "accounts.student_registry"
+msgid "Siyahı"
+msgstr "List"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbə siyahısı"
+msgstr "Student list"
+
+msgctxt "accounts.student_registry"
+msgid ""
+"«Aktivləşdirib» — tələbə ilkin parolla daxil olub, öz e-poçtunu təsdiqləyib "
+"və öz parolunu qurub. Ballar, davamiyyət, sorğu və bildirişlər yalnız aktiv "
+"hesabda görünür. Qrupun çap vərəqini kuratora və ya qrup nümayəndəsinə verin"
+" — orada addım-addım təlimat və QR kod var."
+msgstr ""
+"“Activated” — the student signed in with the initial password, verified "
+"their own email and set their own password. Scores, attendance, surveys and "
+"notifications are visible only on an active account. Give the group's "
+"printable sheet to the curator or the group representative — it has step-by-"
+"step instructions and a QR code."
+
+msgctxt "accounts.student_registry"
+msgid "Çap vərəqi"
+msgstr "Printable sheet"
+
+msgctxt "accounts.student_registry"
+msgid "İlkin parolda"
+msgstr "On initial password"
+
+msgctxt "accounts.semester"
+msgid "%(ready)s / %(total)s fənn tam hazırdır (%(pct)s%%)"
+msgstr "%(ready)s / %(total)s courses fully ready (%(pct)s%%)"
+
+msgctxt "accounts.semester"
+msgid ""
+"Bu kafedranın müəllimlərinə (sillabus / jurnal) və rəhbərinə (xülasə) "
+"xatırlatma bildirişi göndərilsin? Eyni kafedraya 12 saatda bir dəfə "
+"göndərilir."
+msgstr ""
+"Send a reminder to this department's teachers (syllabus / journal) and its "
+"head (summary)? A department can be reminded once every 12 hours."
+
+msgctxt "accounts.semester"
+msgid "Bu kafedraya son 12 saatda artıq xatırlatma göndərilib."
+msgstr "This department has already been reminded in the last 12 hours."
+
+msgctxt "accounts.semester"
+msgid "Cədvəl"
+msgstr "Timetable"
+
+msgctxt "accounts.semester"
+msgid "Cədvəl yoxdur"
+msgstr "No timetable"
+
+msgctxt "accounts.semester"
+msgid "Hazırdır"
+msgstr "Ready"
+
+msgctxt "accounts.semester"
+msgid ""
+"Hər fənn üçün dörd şərt yoxlanılır: müəllim təyin olunub, sillabus "
+"təsdiqlənib, dərs cədvəlində yeri var, jurnalda dərs yazılır (semestrin ilk "
+"həftəsindən sonra; 14 gün yazılmırsa — «jurnal yazılmır»). Rəqəmə klik edin "
+"— həmin fənlər aşağıdakı cədvəldə açılacaq."
+msgstr ""
+"Four conditions are checked for every course: a teacher is assigned, the "
+"syllabus is approved, it has a slot in the timetable, lessons are recorded "
+"in the journal (after the first week of the semester; no lesson for 14 days "
+"means “journal not kept”). Click a number to open those courses in the table"
+" below."
+
+msgctxt "accounts.semester"
+msgid "Jurnal"
+msgstr "Journal"
+
+msgctxt "accounts.semester"
+msgid "Jurnal yazılmır"
+msgstr "Journal not kept"
+
+msgctxt "accounts.semester"
+msgid "Kafedra tapılmadı."
+msgstr "Department not found."
+
+msgctxt "accounts.semester"
+msgid "Kafedrası yazılmayıb"
+msgstr "No department set"
+
+msgctxt "accounts.semester"
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgctxt "accounts.semester"
+msgid "Müəllim yoxdur"
+msgstr "No teacher"
+
+msgctxt "accounts.semester"
+msgid "Problem"
+msgstr "Issue"
+
+msgctxt "accounts.semester"
+msgid "Semestr hazırlığı — kafedralar üzrə"
+msgstr "Semester readiness — by department"
+
+msgctxt "accounts.semester"
+msgid "Sillabus"
+msgstr "Syllabus"
+
+msgctxt "accounts.semester"
+msgid "Sillabus yoxdur"
+msgstr "No syllabus"
+
+msgctxt "accounts.semester"
+msgid "Xatırlat"
+msgstr "Remind"
+
+msgctxt "accounts.semester"
+msgid ""
+"Xatırlatma göndərildi: %(teachers)d müəllimə, %(chair)d kafedra əməkdaşına."
+msgstr "Reminder sent: %(teachers)d teachers, %(chair)d department staff."
+
+msgctxt "accounts.semester"
+msgid "Çatışmır"
+msgstr "Missing"
