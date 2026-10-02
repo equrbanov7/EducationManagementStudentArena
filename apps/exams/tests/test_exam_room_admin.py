@@ -77,6 +77,19 @@ class AddComputerServiceTests(_RoomBase):
         with self.assertRaises(RoomAdminError):
             add_computer(room=self.room, label="PC-01", mac="not-a-mac")
 
+    def test_non_hex_characters_are_rejected_not_silently_dropped(self):
+        # EXAMQA R3 (2026-10-02): «GZ» səssizcə atılır, başqa (səhv) MAC qeydə alınırdı.
+        for bad in ("AA:BB:CC:DD:EE:GZ1", "AA:BB:CC:DD:EE:0O", "AA/BB/CC/DD/EE/01"):
+            with self.assertRaises(RoomAdminError, msg=bad):
+                add_computer(room=self.room, label="PC-01", mac=bad)
+
+    def test_zero_broadcast_and_multicast_macs_are_rejected(self):
+        for bad in ("00:00:00:00:00:00", "ff-ff-ff-ff-ff-ff", "01:00:5E:00:00:01", "33:33:00:00:00:01"):
+            with self.assertRaises(RoomAdminError, msg=bad):
+                add_computer(room=self.room, label="PC-01", mac=bad)
+        comp = add_computer(room=self.room, label="PC-02", mac="02 00 4C 4F 4F 50")  # locally administered — OK
+        self.assertEqual(comp.mac_address, "02:00:4C:4F:4F:50")
+
     def test_same_mac_in_other_room_of_same_org_rejected_with_room_name(self):
         # «Əlavə etmişəm, amma görmürəm» bugı: MAC eyni təşkilatın BAŞQA zalında
         # qalıb — xəta hansı zalda olduğunu deməlidir.

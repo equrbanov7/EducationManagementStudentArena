@@ -11,6 +11,8 @@ identifikasiya sahəsidir.
 
 from __future__ import annotations
 
+import re
+
 from django.db import transaction
 from django.utils.translation import pgettext
 
@@ -37,13 +39,32 @@ def _clean_ip(raw: str) -> str:
     return value
 
 
+#: 2026-10-02 (EXAMQA R3): admin daxiletməsində yalnız hex + adi ayırıcılar. `normalize_mac` hex olmayan
+#: simvolları SƏSSİZCƏ atırdı («AA:BB:CC:DD:EE:GZ1» → başqa MAC) — səhv qeydiyyat tələbəni bloklayardı.
+_MAC_INPUT_RE = re.compile(r"^[0-9A-Fa-f:\-.\s]+$")
+
+
 def _normalize_mac_or_error(raw: str) -> str:
+    value = (raw or "").strip()
+    invalid = RoomAdminError(
+        pgettext("exams.final_center.room_admin", "MAC ünvanı düzgün deyil: %(mac)s") % {"mac": value}
+    )
+    if not value or not _MAC_INPUT_RE.match(value):
+        raise invalid
     try:
-        return ExamRoomComputer.normalize_mac(raw)
+        mac = ExamRoomComputer.normalize_mac(value)
     except ValueError as exc:
+        raise invalid from exc
+    # Sıfır, yayım (FF…) və multicast (1-ci oktetin ən kiçik biti) heç bir şəbəkə kartına aid deyil.
+    if mac in {"00:00:00:00:00:00", "FF:FF:FF:FF:FF:FF"} or int(mac[:2], 16) & 1:
         raise RoomAdminError(
-            pgettext("exams.final_center.room_admin", "MAC ünvanı düzgün deyil: %(mac)s") % {"mac": (raw or "").strip()}
-        ) from exc
+            pgettext(
+                "exams.final_center.room_admin",
+                "Bu MAC ünvanı kompüterə aid ola bilməz (sıfır, yayım və ya multicast): %(mac)s",
+            )
+            % {"mac": mac}
+        )
+    return mac
 
 
 def _coerce_seat(raw) -> int | None:
