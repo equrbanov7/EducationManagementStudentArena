@@ -18,6 +18,8 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from . import semester_readiness
+
 _CTX_PLAN = "accounts.curriculum"
 _CTX_GROUPS = "accounts.groups"
 _CTX_SEM = "accounts.semester"
@@ -384,6 +386,7 @@ def _offering_row(row, *, can_open):
             {"text": row["hours"], "num": True},
             {"text": row["chair_name"]},
             {"text": row["instructor"] or "—"},
+            semester_readiness.issue_cell(row.get("issues", [])),
             {"badge_family": "offering", "badge_key": row["status_key"]},
         ],
         "actions_include": "accounts/profile/sections/teaching_office/_offering_row_actions.html" if can_open else "",
@@ -413,6 +416,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         "section": "semester-opening",
         "sm_period": payload["filters"]["period"],
         "sm_chair": payload["filters"]["chair"],
+        "sm_issue": payload["filters"].get("issue", ""),
     }
     section["base_params"] = base_params
     specs = [
@@ -423,6 +427,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         ("", pgettext(_CTX_SEM, "Semestr saatı")),
         ("", pgettext(_CTX_SEM, "Dərsi aparan kafedra")),
         ("", pgettext(_CTX_SEM, "Təyin olunmuş müəllim")),
+        ("", pgettext(_CTX_SEM, "Çatışmır")),
         ("", pgettext(_CTX_SEM, "Açılışın vəziyyəti")),
     ]
     if payload["can_open"]:
@@ -457,6 +462,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
         {"label": pgettext(_CTX_SEM, "SEMESTR SAATI"), "value": stats["hours"], "unit": "saat"},
     ]
     section["chair_rows"] = offering_counts_by_chair(active_organization, _period_instance(active_organization, period))
+    section["readiness"] = semester_readiness.readiness_context(payload.get("readiness") or {}, base_params)
     section["filter_fields"] = [
         {
             "name": "sm_period",
@@ -475,6 +481,7 @@ def build_semester_section(request, section, *, active_organization, allowed_sec
             "value": payload["filters"]["chair"],
             "options": [{"value": "", "label": pgettext(_CTX_SEM, "Hamısı")}] + payload.get("chair_options", []),
         },
+        semester_readiness.issue_filter_field(payload["filters"].get("issue", "")),
     ]
     section["filter_count_label"] = pgettext(_CTX_SEM, "Nəticə: %(count)d açılış") % {
         "count": payload.get("rows_total", len(payload["rows"]))

@@ -118,6 +118,8 @@ SƏHİFƏLƏNİR (`sm_page`, 25/səhifə) — əvvəl ilk 400 sətir bir səhif�
         </div>
     </div>
 
+    {% include "accounts/profile/sections/teaching_office/_semester_readiness.html" %}
+
     <h3 class="tof-pane__title tof-table-title">{% trans "Açılış sətirləri" context "accounts.semester" %} <span class="tof-table-title__count">{{ semester_opening_section.filter_count_label }}</span></h3>
     {% include "partials/ems_ui/_data_table.html" with table_columns=semester_opening_section.columns table_rows=semester_opening_section.table_rows table_state=semester_opening_section.table_state table_zebra=True table_sticky=True table_wide=True state_kind="empty" state_icon="fa-calendar-check" state_title=semester_opening_section.state_title state_body=semester_opening_section.state_body %}
 
