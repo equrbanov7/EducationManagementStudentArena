@@ -51,6 +51,10 @@ def mark_self_service_password_set(user):
     if not profile.email_verified:
         profile.email_verified = True
         changed.append("email_verified")
+    # Sahib 2026-10-02: parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə bir dəfəlik xəbərdarlıq.
+    if not profile.grades_notice_pending:
+        profile.grades_notice_pending = True
+        changed.append("grades_notice_pending")
     if changed:
         profile.save(update_fields=changed + ["updated_at"])
 

@@ -286,6 +286,8 @@ class ViewAsMiddleware:
             # 2026-10-01: profil şəklinin JSON API-si — `update-avatar` forması
             # kimi bütün rejimlərdə bağlıdır (hədəfin şəklini dəyişmək olmaz).
             "accounts:profile_avatar_api",
+            # 2026-10-02: «köçürülmüş ballar» xəbərdarlığını hədəfin adından təsdiqləmək olmaz.
+            "accounts:grades_notice_ack",
         }
     )
 

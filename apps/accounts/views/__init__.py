@@ -120,6 +120,7 @@ from .post_management import (
 from .profile import (
     academic_items_api,
     change_password_otp_request,
+    grades_notice_ack,
     profile_avatar,
     profile_avatar_api,
     profile_badges_api,
@@ -200,6 +201,7 @@ __all__ = [
     "public_user_profile",
     "profile_avatar",
     "profile_avatar_api",
+    "grades_notice_ack",
     "statistics_export_csv",
     "profile_section_fragment",
     "profile_badges_api",

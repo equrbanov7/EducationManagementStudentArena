@@ -338,7 +338,9 @@ def reset_password(actor: RimActor, target_id, *, request):
         if profile is not None:
             # İlk girişdə `FirstLoginPasswordMiddleware` öz parolunu qurmağa məcbur edir.
             profile.password_change_required = True
-            profile.save(update_fields=["password_change_required", "updated_at"])
+            # Sahib 2026-10-02: parol bərpasından sonra ilk girişdə köçürülmüş ballar barədə xəbərdarlıq.
+            profile.grades_notice_pending = True
+            profile.save(update_fields=["password_change_required", "grades_notice_pending", "updated_at"])
         # DİQQƏT: audit sətrində parol YOXDUR və olmamalıdır.
         log_action(
             action=AuditAction.UPDATE,

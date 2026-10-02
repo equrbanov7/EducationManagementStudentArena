@@ -19,7 +19,20 @@ class _ProfileResponseBuilder(_Stage1Mixin, _Stage2Mixin, _Stage3Mixin, _Stage4M
         early, context = self.run_context()
         if early is not None:
             return early
+        context["grades_notice"] = self._grades_notice_due()
         return render(self.request, "accounts/profile.html", context)
+
+    def _grades_notice_due(self) -> bool:
+        """Sahib 2026-10-02: parol bərpasından sonrakı ilk girişdə köçürülmüş ballar barədə modal.
+
+        Yalnız tələbəyə (ballar onlarındır), view-as rejimində heç vaxt (aktorun gördüyü hədəfin modalı deyil).
+        """
+        if getattr(self.request, "view_as_mode", None):
+            return False
+        profile = getattr(self.request.user, "profile", None)
+        if profile is None or not getattr(profile, "grades_notice_pending", False):
+            return False
+        return bool((getattr(self, "capabilities", None) or {}).get("is_student"))
 
     def run_context(self):
         """``(early_response, context)`` — render OLMADAN.
