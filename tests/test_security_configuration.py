@@ -409,3 +409,19 @@ class ProductionTlsGuardTest(TestCase):
         )
         self.assertTrue(module.SESSION_COOKIE_SECURE)
         self.assertTrue(module.CSRF_COOKIE_SECURE)
+
+
+class ProductionDisallowedHostLoggingTest(TestCase):
+    """2026-10-02: IP ilə gələn yoxlamalar (Dalvik) ~1100/gün traceback-li ERROR yazırdı — susdurulur.
+
+    Cavab dəyişmir (Django yenə 400 verir); yalnız loq səs-küyü yoxdur.
+    """
+
+    def test_disallowed_host_logger_goes_to_null_handler(self):
+        module = ProductionAdminAllowlistSettingsTest._load_production_settings(ADMIN_ALLOWED_IPS="")
+        logger_cfg = module.LOGGING["loggers"]["django.security.DisallowedHost"]
+        self.assertEqual(logger_cfg["handlers"], ["null"])
+        self.assertFalse(logger_cfg["propagate"])
+        self.assertEqual(module.LOGGING["handlers"]["null"]["class"], "logging.NullHandler")
+        # Digər təhlükəsizlik loqları (CSRF və s.) toxunulmaz qalır.
+        self.assertNotIn("django.security", module.LOGGING["loggers"])
