@@ -36,6 +36,7 @@ from .constants import DEFAULT_PAGE_SIZE
 from .movements import registry_records_qs
 from .permissions import PERM_REGISTRY_VIEW
 from .rows import full_name_of, initials_of, resolve_unit_ancestors
+from .study_state import ACCOUNT_STATES, STUDY_STATES, annotate_study_state, study_state_counts
 
 #: Sıralama allowlist-i — xam GET sahə adı DB-yə düşmür.
 REGISTRY_SORT_OPTIONS = {
@@ -76,6 +77,9 @@ FILTER_DEFAULTS = {
     "form": "",
     "funding": "",
     "status": "",
+    # 2026-10-02: hesablanan təhsil vəziyyəti və hesab aktivləşdirməsi (bax ``study_state``).
+    "state": "",
+    "account": "",
     # ATİS qəbul sütunları (2026-09-19): qəbul növü, qəbul xətti, tədris dili.
     "admission_status": "",
     "channel": "",
@@ -115,6 +119,8 @@ def parse_registry_filters(request) -> dict:
         "form": _get("form"),
         "funding": _get("funding"),
         "status": _get("status"),
+        "state": _get("state") if _get("state") in STUDY_STATES else "",
+        "account": _get("account") if _get("account") in ACCOUNT_STATES else "",
         "admission_status": _get("admission_status"),
         "channel": _get("channel"),
         "language": _get("language"),
@@ -171,6 +177,15 @@ def _apply_filters(records, values, *, organization):
     return records
 
 
+def _apply_state_filters(records, values):
+    """Hesablanan vəziyyət filtrləri (``annotate_study_state``-dən SONRA)."""
+    if values.get("state"):
+        records = records.filter(study_state=values["state"])
+    if values.get("account"):
+        records = records.filter(account_state=values["account"])
+    return records
+
+
 def _sector_group_ids(organization, wanted: str) -> list:
     """Sektoru uyğun gələn qrupların id-ləri (JSON sahəsi filtrlənmir — Python)."""
     from apps.organizations.models import OrgUnit
@@ -210,6 +225,8 @@ def _row(record, *, ancestors, period, movement_counts) -> dict:
         "status": record.status,
         "status_label": str(STATUS_LABELS.get(record.status, record.status)),
         "status_tone": STATUS_TONES.get(record.status, "info"),
+        "study_state": getattr(record, "study_state", "") or record.status,
+        "account_state": getattr(record, "account_state", ""),
         "movement_count": movement_counts.get(str(record.pk), 0),
         "admission_score": str(record.admission_score) if record.admission_score is not None else "",
         # ATİS qəbul sütunları (2026-09-19).
@@ -243,9 +260,13 @@ def build_registry_page(*, actor, request=None, values=None, page_size: int = DE
     # FƏRQLİ mesajla göstərməlidir (administrator kanalı).
     has_scope = actor.scope_for(PERM_REGISTRY_VIEW, request=request).has_structure_access
     values = normalize_values(values, request)
-    records = _apply_filters(records, values, organization=actor.organization)
+    records = annotate_study_state(_apply_filters(records, values, organization=actor.organization))
+    # Vəziyyət plitələri digər filtrlərə əməl edir, amma vəziyyət filtrinin özündən ƏVVƏL sayılır —
+    # plitəyə klik bir vəziyyətdən digərinə keçid kimi işləsin.
+    state_counts = study_state_counts(records)
+    records = _apply_state_filters(records, values)
 
-    kpis = _kpis(records)
+    kpis = {**_kpis(records), **state_counts}
 
     records = records.select_related("student", "student__profile", "program", "group").order_by(
         *REGISTRY_SORT_OPTIONS.get(values.get("sort", "name"), REGISTRY_SORT_OPTIONS["name"])
@@ -399,7 +420,8 @@ def export_rows(*, actor, request=None, values=None, limit: int = 10000):
         return []
     records = registry_records_qs(actor, request=request)
     values = normalize_values(values, request)
-    records = _apply_filters(records, values, organization=actor.organization)
+    records = annotate_study_state(_apply_filters(records, values, organization=actor.organization))
+    records = _apply_state_filters(records, values)
     records = records.select_related("student", "student__profile", "program", "group").order_by(
         *REGISTRY_SORT_OPTIONS.get(values.get("sort", "name"), REGISTRY_SORT_OPTIONS["name"])
     )[:limit]
