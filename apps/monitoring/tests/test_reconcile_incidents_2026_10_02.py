@@ -71,6 +71,9 @@ class AlertRuleConfigTests(TestCase):
         rules = (ROOT / "docker/prometheus/alerts.yml").read_text(encoding="utf-8")
         block = rules.split("- alert: ContainerDown", 1)[1].split("- alert:", 1)[0]
         self.assertIn('name!~".+-run-.+"', block)
+        # Deploy-da konteyner yenidən yaradılanda köhnə seriya «itib» sayılmasın — xidmət üzrə max.
+        self.assertIn("max by (svc)", block)
+        self.assertIn('"svc", "$1", "name", "(.+?)(-[0-9]+)?"', block)
 
     def test_reconcile_task_is_scheduled(self):
         component = (ROOT / "config/settings/components/celery_cache.py").read_text(encoding="utf-8")
