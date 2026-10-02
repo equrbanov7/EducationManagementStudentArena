@@ -145,8 +145,10 @@ def journal_list_context(user, request=None) -> dict:
     year_choices = [{"value": y, "label": year_label_map[y]} for y in years]
 
     # YARIM İL = fəsil (Payız/Yaz/Yay) — TƏKRAR YOX (çox il olsa da hər fəsil bir dəfə).
-    _season_order = {"Payız": 0, "Yaz": 1, "Yay": 2}
-    season_choices = sorted({p.season_label for p in periods}, key=lambda s: _season_order.get(s, 9))
+    # Sıra tədris ilinin axını ilə: Payız → Yaz → Yay. Açarlar `schedule.season_label`-ın TAM
+    # etiketləridir (əvvəl «Payız» açarı «Payız semestri» ilə üst-üstə düşmür, sıra təsadüfi idi).
+    _season_order = {label: index for index, label in enumerate(jlq.SEASON_MONTHS)}
+    season_choices = sorted({p.season_label for p in periods}, key=lambda s: (_season_order.get(s, 9), s))
 
     selected_year = ""
     selected_season = ""
