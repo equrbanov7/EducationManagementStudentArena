@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}
+Qrupun «ilk giriş» çap vərəqi (sahib 2026-10-03) — dekanlıq/kurator çap edib qrupa paylayır.
+Görünüş: accounts.views.student_activation_sheet. PAROL / e-poçt YOXDUR. QR inline SVG-dir
+(kitabxana çıxışı). Stil/skript XARİCİ fayllardadır (CSP); «Çap et» düyməsi JS ilə.
+{% endcomment %}
+
+{% block title %}{% trans "İlk giriş təlimatı" context "accounts.activation_sheet" %} · {{ sheet.group_name }} - {{ site_brand_name }}{% endblock %}
+
+{% block route_progress %}{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block global_search %}{% endblock %}
+{% block global_search_js %}{% endblock %}
+{% block ai_assistant %}{% endblock %}
+{% block ai_assistant_js %}{% endblock %}
+
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+<link rel="stylesheet" href="{% static 'accounts/css/people/activation_sheet.css' %}?v=20261003-act">
+{% endblock %}
+
+{% block content %}
+<div class="actsheet">
+    <div class="actsheet__bar">
+        <a class="ems-btn" href="{{ back_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Reyestrə qayıt" context "accounts.activation_sheet" %}</a>
+        <button type="button" class="ems-btn ems-btn--primary" data-actsheet-print><i class="fas fa-print" aria-hidden="true"></i> {% trans "Çap et" context "accounts.activation_sheet" %}</button>
+    </div>
+
+    <article class="actsheet__page">
+        <header class="actsheet__head">
+            <div>
+                <p class="actsheet__org">{{ organization.name }}</p>
+                <h1 class="actsheet__title">{% trans "Elektron universitetə ilk giriş" context "accounts.activation_sheet" %}</h1>
+                <p class="actsheet__meta">
+                    {% trans "Qrup" context "accounts.activation_sheet" %}: <b>{{ sheet.group_name }}</b>{% if sheet.faculty %} · {{ sheet.faculty }}{% endif %}
+                </p>
+            </div>
+            <figure class="actsheet__qr">
+                {{ login_qr }}
+                <figcaption>{{ login_host }}</figcaption>
+            </figure>
+        </header>
+
+        <section class="actsheet__steps" aria-labelledby="actsheet-steps-title">
+            <h2 id="actsheet-steps-title">{% trans "Nə etməli? — 5 addım, 3 dəqiqə" context "accounts.activation_sheet" %}</h2>
+            <ol>
+                <li>{% blocktrans with host=login_host context "accounts.activation_sheet" %}Telefonun kamerası ilə QR kodu oxudun və ya brauzerdə <b>{{ host }}</b> yazın, «Tələbə girişi»ni seçin.{% endblocktrans %}</li>
+                <li>{% trans "İstifadəçi adınızı (aşağıdakı cədvəldə) və sizə verilmiş ilkin parolu yazın." context "accounts.activation_sheet" %}</li>
+                <li>{% trans "Açılan səhifədə hər gün baxdığınız ÖZ e-poçtunuzu yazın (məs. adiniz@gmail.com) və «Təsdiq kodu göndər» düyməsini basın." context "accounts.activation_sheet" %}</li>
+                <li>{% trans "E-poçtunuza gələn 6 rəqəmli kodu yazın və yalnız sizin bildiyiniz yeni parol qurun. Parolu heç kimə deməyin." context "accounts.activation_sheet" %}</li>
+                <li>{% trans "Hazırdır! Ballarınızı, davamiyyətinizi və dərs cədvəlinizi kabinetinizdə görəcəksiniz." context "accounts.activation_sheet" %}</li>
+            </ol>
+            <div class="actsheet__help">
+                <p><b>{% trans "Kod gəlmir?" context "accounts.activation_sheet" %}</b> {% trans "1–2 dəqiqə gözləyin və «Spam» / «Promotions» qovluğuna baxın. Ünvanı səhv yazmısınızsa, «E-poçtu dəyiş» ilə düzəldin." context "accounts.activation_sheet" %}</p>
+                <p><b>{% trans "İlkin parolu bilmirsiniz?" context "accounts.activation_sheet" %}</b> {% trans "Şəxsiyyət vəsiqəniz ilə RİM mərkəzinə müraciət edin — parolunuzu yerində sıfırlayacaqlar." context "accounts.activation_sheet" %}</p>
+            </div>
+        </section>
+
+        <section class="actsheet__list" aria-labelledby="actsheet-list-title">
+            <h2 id="actsheet-list-title">
+                {% trans "Hələ hesabını aktivləşdirməyən tələbələr" context "accounts.activation_sheet" %}
+                <span class="actsheet__count">{{ sheet.pending|length }} / {{ sheet.total }}</span>
+            </h2>
+            {% if sheet.pending %}
+            <table class="actsheet__table">
+                <thead>
+                    <tr>
+                        <th scope="col">№</th>
+                        <th scope="col">{% trans "Soyad, ad" context "accounts.activation_sheet" %}</th>
+                        <th scope="col">{% trans "İstifadəçi adı" context "accounts.activation_sheet" %}</th>
+                        <th scope="col">{% trans "Qeyd" context "accounts.activation_sheet" %}</th>
+                        <th scope="col" class="actsheet__sign">{% trans "İmza" context "accounts.activation_sheet" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in sheet.pending %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ student.name }}</td>
+                        <td class="actsheet__username">{{ student.username }}</td>
+                        <td>{% if student.never_logged_in %}{% trans "Heç girməyib" context "accounts.activation_sheet" %}{% else %}{% trans "Başlayıb, tamamlamayıb" context "accounts.activation_sheet" %}{% endif %}</td>
+                        <td class="actsheet__sign"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="actsheet__done">{% trans "Bu qrupun bütün tələbələri hesabını aktivləşdirib." context "accounts.activation_sheet" %}</p>
+            {% endif %}
+        </section>
+
+        <footer class="actsheet__foot">
+            <span>{% trans "Çap tarixi" context "accounts.activation_sheet" %}: {{ printed_at|date:"d.m.Y H:i" }}</span>
+            <span>{% trans "Aktivləşdirib" context "accounts.activation_sheet" %}: {{ sheet.activated }} / {{ sheet.total }}</span>
+            <span>{% trans "Bu vərəqdə parol yoxdur." context "accounts.activation_sheet" %}</span>
+        </footer>
+    </article>
+</div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'accounts/js/people/activation_sheet.js' %}?v=20261003-act" defer></script>
+{% endblock %}

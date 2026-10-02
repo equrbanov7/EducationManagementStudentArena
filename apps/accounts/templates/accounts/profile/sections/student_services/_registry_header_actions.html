@@ -2,7 +2,19 @@
 {% comment %}
 Ekran 09 başlıq əməlləri — CSV ixracı (server tərəfdə, `student.registry_view`
 ilə qapılı; link CARİ filtr dəstini daşıyır).
+2026-10-03: siyahı ↔ «Hesab aktivləşdirmə» (qruplar üzrə) görünüş keçidi — cari filtrlər qorunur.
 {% endcomment %}
+{% if student_registry_section.view == "activation" %}
+<a class="ems-btn" href="{{ student_registry_section.list_view_url }}">
+    <i class="fas fa-users" aria-hidden="true"></i>
+    {% trans "Tələbə siyahısı" context "accounts.student_registry" %}
+</a>
+{% else %}
+<a class="ems-btn" href="{{ student_registry_section.activation_view_url }}">
+    <i class="fas fa-user-check" aria-hidden="true"></i>
+    {% trans "Hesab aktivləşdirmə" context "accounts.student_registry" %}
+</a>
+{% endif %}
 <a class="ems-btn" href="{{ student_registry_section.export_url }}" download>
     <i class="fas fa-file-csv" aria-hidden="true"></i>
     {% trans "CSV ixracı" context "accounts.student_registry" %}

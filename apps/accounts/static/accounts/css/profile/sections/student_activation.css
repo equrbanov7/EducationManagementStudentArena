@@ -1,0 +1,40 @@
+/* «Tələbə reyestri» → «Hesab aktivləşdirmə» görünüşü (sahib 2026-10-03).
+   Şablon: accounts/profile/sections/student_services/_registry_activation.html.
+   Faiz `<meter>` elementidir — inline style yoxdur (CSP). */
+
+.sract { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+
+.sract__hint {
+    margin: 0; padding: 10px 14px; border-radius: 12px;
+    background: var(--ems-primary-50, #eff6ff); color: var(--ems-text, #1e293b);
+    font-size: 13px; line-height: 1.5;
+}
+.sract__hint i { color: var(--ems-primary-600, #2563eb); margin-right: 6px; }
+
+.sract__title { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--ems-text, #0f172a); }
+
+.sract__scroll { overflow-x: auto; border-radius: 12px; }
+.sract__table { width: 100%; }
+.sract__table td, .sract__table th { vertical-align: middle; }
+
+.sract__meter {
+    -webkit-appearance: none; appearance: none;
+    width: 72px; height: 8px; margin-right: 8px; vertical-align: middle;
+    border: 0; border-radius: 999px; background: #e2e8f0; overflow: hidden;
+}
+.sract__meter::-webkit-meter-bar { background: #e2e8f0; border: 0; border-radius: 999px; height: 8px; }
+.sract__meter::-webkit-meter-optimum-value { background: #10b981; border-radius: 999px; }
+.sract__meter::-webkit-meter-suboptimum-value { background: #f59e0b; border-radius: 999px; }
+.sract__meter::-webkit-meter-even-less-good-value { background: #ef4444; border-radius: 999px; }
+.sract__meter::-moz-meter-bar { border-radius: 999px; }
+.sract__meter--full::-moz-meter-bar { background: #10b981; }
+.sract__meter--half::-moz-meter-bar { background: #f59e0b; }
+.sract__meter--low::-moz-meter-bar { background: #ef4444; }
+
+.sract__pct { font-variant-numeric: tabular-nums; font-size: 13px; white-space: nowrap; }
+
+.sract__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+@media (max-width: 640px) {
+    .sract__meter { width: 48px; }
+}

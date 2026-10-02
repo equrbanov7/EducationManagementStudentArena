@@ -1,0 +1,96 @@
+{% load i18n %}
+{% comment %}
+«Tələbə reyestri» → «Hesab aktivləşdirmə» görünüşü (`sr_view=activation`, sahib 2026-10-03).
+Reyestr filtrləri tətbiq olunur; sətir = QRUP, ən geri qalan birinci. Faiz `<meter>` ilə — inline
+`style` yoxdur (CSP). «Siyahı» reyestri bu qrup + «ilkin paroldadır» süzgəci ilə açır; «Çap vərəqi»
+yeni pəncərədə QR + təlimat + aktivləşdirməyənlərin siyahısı (PAROLSUZ).
+{% endcomment %}
+{% with act=student_registry_section.activation %}
+{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=act.tiles kpi_variant="4" %}
+
+<div class="sract">
+    <p class="sract__hint">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% trans "«Aktivləşdirib» — tələbə ilkin parolla daxil olub, öz e-poçtunu təsdiqləyib və öz parolunu qurub. Ballar, davamiyyət, sorğu və bildirişlər yalnız aktiv hesabda görünür. Qrupun çap vərəqini kuratora və ya qrup nümayəndəsinə verin — orada addım-addım təlimat və QR kod var." context "accounts.student_registry" %}
+    </p>
+
+    {% if act.faculties|length > 1 %}
+    <h3 class="sract__title">{% trans "Fakültələr üzrə" context "accounts.student_registry" %}</h3>
+    <div class="sract__scroll">
+        <table class="ems-table ems-table--zebra sract__table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Fakültə" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Qrup" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Tələbə" context "accounts.student_registry" %}</th>
+                    <th scope="col">{% trans "Aktivləşdirib" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "İlkin parolda" context "accounts.student_registry" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in act.faculties %}
+                <tr>
+                    <th scope="row">{{ item.faculty|default:"—" }}</th>
+                    <td class="ems-table__num">{{ item.groups }}</td>
+                    <td class="ems-table__num">{{ item.total }}</td>
+                    <td>
+                        <meter class="sract__meter sract__meter--{{ item.tone }}" min="0" max="100" low="40" high="80" optimum="100" value="{{ item.pct }}">{{ item.pct }}%</meter>
+                        <span class="sract__pct">{{ item.activated }} ({{ item.pct }}%)</span>
+                    </td>
+                    <td class="ems-table__num">{{ item.initial }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <h3 class="sract__title">{% trans "Qruplar üzrə — ən geri qalan birinci" context "accounts.student_registry" %}</h3>
+    {% if act.rows %}
+    <div class="sract__scroll">
+        <table class="ems-table ems-table--zebra sract__table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Qrup" context "accounts.student_registry" %}</th>
+                    <th scope="col">{% trans "Fakültə" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Tələbə" context "accounts.student_registry" %}</th>
+                    <th scope="col">{% trans "Aktivləşdirib" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "İlkin parolda" context "accounts.student_registry" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Heç girməyib" context "accounts.student_registry" %}</th>
+                    <th scope="col">{% trans "Əməllər" context "accounts.student_registry" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in act.rows %}
+                <tr>
+                    <th scope="row">{{ row.group_label }}</th>
+                    <td>{{ row.faculty|default:"—" }}</td>
+                    <td class="ems-table__num">{{ row.total }}</td>
+                    <td>
+                        <meter class="sract__meter sract__meter--{{ row.tone }}" min="0" max="100" low="40" high="80" optimum="100" value="{{ row.pct }}">{{ row.pct }}%</meter>
+                        <span class="sract__pct">{{ row.activated }} ({{ row.pct }}%)</span>
+                    </td>
+                    <td class="ems-table__num">{{ row.initial }}</td>
+                    <td class="ems-table__num">{{ row.never }}</td>
+                    <td class="sract__actions">
+                        {% if row.list_url %}
+                        <a class="ems-btn ems-btn--sm" href="{{ row.list_url }}">
+                            <i class="fas fa-list" aria-hidden="true"></i> {% trans "Siyahı" context "accounts.student_registry" %}
+                        </a>
+                        {% endif %}
+                        {% if row.sheet_url and row.activated < row.total %}
+                        <a class="ems-btn ems-btn--sm" href="{{ row.sheet_url }}" target="_blank" rel="noopener">
+                            <i class="fas fa-print" aria-hidden="true"></i> {% trans "Çap vərəqi" context "accounts.student_registry" %}
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-check" state_title=student_registry_section.state_title state_body=student_registry_section.state_body %}
+    {% endif %}
+</div>
+{% endwith %}

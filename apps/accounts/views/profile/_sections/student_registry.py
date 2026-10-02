@@ -25,6 +25,8 @@ from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.registrar.public import catalog_console
 
+from . import student_activation
+
 _CTX = "accounts.student_registry"
 
 
@@ -137,8 +139,11 @@ def build_student_registry_section(request, section, *, active_organization, all
         "sr_status": values["status"],
         "sr_state": values["state"],
         "sr_account": values["account"],
+        "sr_view": values["view"],
     }
     section["base_params"] = base_params
+    section["view"] = values["view"]
+    section.update(student_activation.view_toggle_urls(base_params))
     can_actions = can_move or can_transcript
     section["columns"] = _columns(base_params, values["sort"], can_actions=can_actions)
     section["table_rows"] = [_table_row(row, can_actions=can_actions) for row in payload["rows"]]
@@ -199,6 +204,8 @@ def build_student_registry_section(request, section, *, active_organization, all
         )
     section["filter_fields"] = _filter_fields(values, section["options"])
     section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d sətir") % {"count": payload["total"]}
+    if values["view"] == "activation":
+        student_activation.build_activation_view(request, section, actor=actor, values=values, base_params=base_params)
 
 
 def _state_tiles(kpis, values) -> list:
