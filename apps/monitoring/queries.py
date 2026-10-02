@@ -179,7 +179,9 @@ def containers_section(*, page: int = 1, page_size: int = 25) -> dict:
         return mapping
 
     cpu = _metric_map(f"100 * sum by (name) (rate(container_cpu_usage_seconds_total{{{selector}}}[5m]))")
-    memory = _metric_map(f"sum by (name) (container_memory_usage_bytes{{{selector}}})")
+    # 2026-10-02: usage_bytes səhifə keşini də sayır (postgres-backup «95%», grafana «92%» görünürdü) —
+    # OOM-u təyin edən working set-dir; ContainerMemoryNearLimit alerti də onu işlədir (2026-09-15).
+    memory = _metric_map(f"sum by (name) (container_memory_working_set_bytes{{{selector}}})")
     mem_limit = _metric_map(f"sum by (name) (container_spec_memory_limit_bytes{{{selector}}})")
     started = _metric_map(f"max by (name) (container_start_time_seconds{{{selector}}})")
     restarts = _metric_map(f"changes(container_start_time_seconds{{{selector}}}[24h])")
