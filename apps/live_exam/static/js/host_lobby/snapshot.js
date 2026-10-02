@@ -1,11 +1,11 @@
-import { state } from './state.js?v=lx20260930';
-import { applySessionSettings } from './settings.js?v=lx20260930';
-import { renderLobbyPlayers } from './lobby.js?v=lx20260930';
-import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260930';
-import { applyRevealState } from './reveal.js?v=lx20260930';
-import { renderPodium } from './podium.js?v=lx20260930';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260930';
-import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20260930';
+import { state } from './state.js?v=lx20261002';
+import { applySessionSettings } from './settings.js?v=lx20261002';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261002';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261002';
+import { applyRevealState } from './reveal.js?v=lx20261002';
+import { renderPodium } from './podium.js?v=lx20261002';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261002';
+import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20261002';
 import {
     markStateMutation,
     notifyHostShell,
@@ -13,7 +13,7 @@ import {
     shouldApplyTimelinePayload,
     toMs,
     updateServerTimeOffset,
-} from './utils.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
 
 export function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
@@ -37,6 +37,11 @@ export function applyStateSnapshot(snapshot) {
 
     if (snapshot.state === "question" && snapshot.question) {
         applyQuestionState(snapshot.question, snapshot.answered_count, snapshot.total_players);
+        if (snapshot.received_count != null) {
+            state.receivedQuestionId = Number(snapshot.question.id);
+            state.receivedCount = Math.max(Number(state.receivedCount || 0), Number(snapshot.received_count || 0));
+            updateReceivedCounter();
+        }
         return;
     }
 

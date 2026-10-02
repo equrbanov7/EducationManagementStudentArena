@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { applySessionSettings } from './settings.js?v=lx20260930';
-import { renderLobbyPlayers } from './lobby.js?v=lx20260930';
-import { applyQuestionState, updateAnsweredCounter } from './question.js?v=lx20260930';
-import { applyRevealState } from './reveal.js?v=lx20260930';
-import { renderPodium } from './podium.js?v=lx20260930';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20260930';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20260930';
+import { UI } from './dom.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { applySessionSettings } from './settings.js?v=lx20261002';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261002';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261002';
+import { applyRevealState } from './reveal.js?v=lx20261002';
+import { renderPodium } from './podium.js?v=lx20261002';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261002';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261002';
 import {
     esc,
     fmt,
@@ -18,7 +18,7 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
@@ -100,6 +100,14 @@ function onPlayMessage(event) {
             state.answeredCount = Number(data.answered_count || 0);
             state.totalPlayers = Number(data.total_players || state.totalPlayers || 0);
             updateAnsweredCounter();
+            return;
+        }
+        if (data.type === "delivery_progress") {
+            // LXNET: sualı telefonuna alan oyunçu sayı (yalnız artır; köhnə sual üçün olanlar atılır).
+            if (!state.currentQuestion || Number(data.question_id || 0) !== Number(state.currentQuestion.id || 0)) return;
+            state.receivedQuestionId = Number(data.question_id);
+            state.receivedCount = Math.max(Number(state.receivedCount || 0), Number(data.received_count || 0));
+            updateReceivedCounter();
             return;
         }
         if (data.type === "reveal") {

@@ -89231,3 +89231,21 @@ msgstr "Start the exam"
 msgctxt "exams.start_confirm"
 msgid "Back"
 msgstr "Back"
+
+msgctxt "live_exam.player"
+msgid "net_good"
+msgstr "Connection is good"
+
+msgctxt "live_exam.player"
+msgid "net_weak"
+msgstr "Weak connection — questions may arrive a little late"
+
+msgctxt "live_exam.host_lobby.js"
+msgid "received_counter"
+msgstr "{received}/{total} received"
+
+msgctxt "live_exam.host_lobby"
+msgid "received_title"
+msgstr ""
+"Players whose phone has already received the current question (weak "
+"connections may lag)"

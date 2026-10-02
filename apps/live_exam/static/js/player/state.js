@@ -1,5 +1,5 @@
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının yeganə vəziyyət obyekti.
-import { BOOTSTRAP } from './config.js?v=lx20260930';
+import { BOOTSTRAP } from './config.js?v=lx20261002';
 
 export const state = {
     player: Object.assign({ score: 0 }, BOOTSTRAP.player || {}),
@@ -24,6 +24,10 @@ export const state = {
     watchdogTimer: null,
     phaseTimer: null,
     ackTimer: null,
+    boundaryTimer: null,
+    // LXNET: plitələrin BU telefonda açıldığı an (server saatı ilə) və «seen» təsdiqi göndərilmiş sual.
+    answerOpenedAt: 0,
+    seenQuestionId: null,
     serverTimeOffsetMs: 0,
     hasServerOffset: false,
     timelineMeta: null,

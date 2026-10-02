@@ -30,6 +30,7 @@ from ._shared import (
     _nickname_conflict_message,
     _nickname_is_taken,
 )
+from .assets import player_assets
 from .constants import (
     LIVE_REACTION_LIMIT_SCOPE,
     LIVE_REACTION_SESSION_LIMIT_SCOPE,
@@ -83,6 +84,7 @@ def live_wait_room(request, pin):
             "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
             "live_catalog": build_wait_room_catalog(),
             "session_settings": get_session_settings(session),
+            "player_assets": player_assets(),
         },
     )
 
@@ -216,5 +218,6 @@ def live_player_screen(request, pin):
             "session": session,
             "player": player,
             "session_settings": get_session_settings(session),
+            "player_assets": player_assets(),
         },
     )

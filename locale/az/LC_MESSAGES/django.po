@@ -88822,3 +88822,21 @@ msgstr "İmtahana başla"
 msgctxt "exams.start_confirm"
 msgid "Back"
 msgstr "Geri"
+
+msgctxt "live_exam.player"
+msgid "net_good"
+msgstr "Bağlantı yaxşıdır"
+
+msgctxt "live_exam.player"
+msgid "net_weak"
+msgstr "Bağlantı zəifdir — sual bir az gec gələ bilər"
+
+msgctxt "live_exam.host_lobby.js"
+msgid "received_counter"
+msgstr "{received}/{total} aldı"
+
+msgctxt "live_exam.host_lobby"
+msgid "received_title"
+msgstr ""
+"Cari sualı telefonuna artıq alan oyunçular (zəif internetli oyunçular gecikə"
+" bilər)"

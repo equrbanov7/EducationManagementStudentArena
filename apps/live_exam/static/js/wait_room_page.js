@@ -6,7 +6,9 @@
  *  • `kicked` mesajı / snapshot 403 → «müəllim səni çıxardı» kartı, bütün taymerlər dayanır;
  *  • lobbi kilidlənəndə ad sahəsi bağlanır (server qaydası: ad yalnız açıq lobbidə dəyişir);
  *  • oyun başlayanda «Oyun başlayır!» örtüyü və oyun ekranına keçid;
- *  • reaksiyalar yalnız lobbidə; 429 → sakit soyuma (Retry-After).
+ *  • reaksiyalar yalnız lobbidə; 429 → sakit soyuma (Retry-After);
+ *  • LXNET 2026-10-02: ~8 s-də bir ping; pong 5 s-də gəlməsə socket «ilişib» (TCP təkrar ötürmə)
+ *    sayılır → təzə socket + dərhal snapshot (əks halda `game_started` 12 s-ə qədər gecikə bilərdi).
  * AJAX-safe: EMSReady + idempotent qoruyucu (data-lx-init).
  */
 (function () {
@@ -96,6 +98,11 @@
             netShown: "",
             danceTimer: null,
             reactionWarnAt: 0,
+            // LXNET: ürək döyüntüsü — cavabsız ping-in göndərilmə anı / son ping / sıra nömrəsi.
+            pingAt: 0,
+            lastPingSent: 0,
+            pingSeq: 0,
+            pongSeen: false, // server ping-i dəstəkləyir (deploy anında köhnə backend → stall qərarı yox)
         };
 
         // ── Göstərmə ────────────────────────────────────────────────────────
@@ -349,12 +356,19 @@
             socket.onopen = () => {
                 if (socket !== state.socket) return;
                 state.attempts = 0;
+                state.pingAt = 0;
+                state.lastPingSent = 0;
                 setNet("online");
             };
             socket.onmessage = (event) => {
                 if (socket !== state.socket) return;
                 try {
                     const message = JSON.parse(event.data);
+                    if (message && message.type === "pong") {
+                        state.pingAt = 0;
+                        state.pongSeen = true;
+                        return;
+                    }
                     handleMessage(message.data || message);
                 } catch (error) {
                     // yanlış mesaj — yox sayılır
@@ -371,6 +385,43 @@
 
         function wsOpen() {
             return Boolean(state.socket && state.socket.readyState === WebSocket.OPEN);
+        }
+
+        // LXNET: ping/pong — «açıq», amma ilişmiş socket-i tanı, təzəsini aç və snapshot çək.
+        function heartbeat() {
+            if (!wsOpen()) return;
+            const now = Date.now();
+            if (state.pingAt && !state.pongSeen && now - state.pingAt > 9000) {
+                state.pingAt = 0; // köhnə server pong vermir — ürək döyüntüsü yalnız ehtiyat cəhddir
+                return;
+            }
+            if (state.pingAt && state.pongSeen && now - state.pingAt > 5000) {
+                const stale = state.socket;
+                state.socket = null;
+                state.pingAt = 0;
+                stale.onclose = null;
+                stale.onmessage = null;
+                try {
+                    stale.close();
+                } catch (error) {
+                    // artıq bağlıdır
+                }
+                setNet("reconnecting");
+                state.attempts = 0;
+                connect();
+                syncState();
+                return;
+            }
+            if (!state.pingAt && now - state.lastPingSent >= 8000) {
+                state.pingAt = now;
+                state.lastPingSent = now;
+                state.pingSeq += 1;
+                try {
+                    state.socket.send(JSON.stringify({ type: "ping", id: state.pingSeq }));
+                } catch (error) {
+                    state.pingAt = 0;
+                }
+            }
         }
 
         // ── Profil vərəqi (wait_room_profile_sheet.js) ──────────────────────
@@ -475,6 +526,8 @@
         document.addEventListener("visibilitychange", () => {
             if (document.hidden || state.done) return;
             state.attempts = 0;
+            // yuxudan oyanan telefon: «açıq» socket-i tez yoxla (server pong həddi 0.8 s — ən azı 1.5 s ara)
+            state.lastPingSent = Math.min(state.lastPingSent, Date.now() - 6500);
             connect();
             syncState();
         });
@@ -517,6 +570,7 @@
         syncState();
         state.pollTimer = window.setInterval(() => {
             if (state.done || document.hidden) return;
+            heartbeat();
             const gap = Date.now() - state.lastSync;
             if ((!wsOpen() && gap >= 3000) || gap >= 12000) syncState();
         }, 1000);

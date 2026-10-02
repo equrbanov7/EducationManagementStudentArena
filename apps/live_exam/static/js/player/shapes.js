@@ -1,8 +1,8 @@
 // LX-FE-PLAYER (2026-09-29): cavab fiqurları (SVG) — host ekranı ilə eyni forma + rəng sırası:
 // 1 üçbucaq (qırmızı), 2 romb (mavi), 3 dairə (kəhrəba), 4 kvadrat (yaşıl), 5 ulduz (server açarı
 // «pentagon»), 6 altıbucaq (firuzəyi). Rəng yalnız köməkçidir — forma rəngkor oyunçu üçün əsasdır.
-import { OPTION_SHAPES } from './config.js?v=lx20260930';
-import { tr } from './utils.js?v=lx20260930';
+import { OPTION_SHAPES } from './config.js?v=lx20261002';
+import { tr } from './utils.js?v=lx20261002';
 
 const PATHS = {
     triangle:

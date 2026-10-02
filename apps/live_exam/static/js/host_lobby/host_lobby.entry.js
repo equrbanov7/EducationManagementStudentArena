@@ -1,9 +1,9 @@
-import { bindDebugToggle, log, tr } from './utils.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { setSfxVolume, stopAllLoops } from './audio.js?v=lx20260930';
-import { hydrateIcons } from './icons.js?v=lx20260930';
-import { setSessionState } from './presentation.js?v=lx20260930';
-import { applySessionSettings } from './settings.js?v=lx20260930';
+import { bindDebugToggle, log, tr } from './utils.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { setSfxVolume, stopAllLoops } from './audio.js?v=lx20261002';
+import { hydrateIcons } from './icons.js?v=lx20261002';
+import { setSessionState } from './presentation.js?v=lx20261002';
+import { applySessionSettings } from './settings.js?v=lx20261002';
 import {
     clearPendingStateSync,
     startLobbyResync,
@@ -11,13 +11,13 @@ import {
     stopLobbyResync,
     stopStatePolling,
     syncState,
-} from './api.js?v=lx20260930';
-import { closeHostSockets, connectHostSockets, ensureInitialStateSync } from './sockets.js?v=lx20260930';
-import { bindAudioUnlockEvents, bindHostEvents } from './events.js?v=lx20260930';
-import { installHostController } from './controller.js?v=lx20260930';
-import { mountSoundDock } from './sound_dock.js?v=lx20260930';
-import { mountTypedDrawer } from './typed_drawer.js?v=lx20260930';
-import { bindCopyGuard } from './copy_guard.js?v=lx20260930';
+} from './api.js?v=lx20261002';
+import { closeHostSockets, connectHostSockets, ensureInitialStateSync } from './sockets.js?v=lx20261002';
+import { bindAudioUnlockEvents, bindHostEvents } from './events.js?v=lx20261002';
+import { installHostController } from './controller.js?v=lx20261002';
+import { mountSoundDock } from './sound_dock.js?v=lx20261002';
+import { mountTypedDrawer } from './typed_drawer.js?v=lx20261002';
+import { bindCopyGuard } from './copy_guard.js?v=lx20261002';
 
 // Tənzimləmə çekməcəsindəki səs sürüşdürücüsü (host_lobby_shell.js) bu qlobalı çağırır.
 window.setSfxVolume = setSfxVolume;

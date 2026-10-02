@@ -171,16 +171,24 @@ groups:
   - name: emsarena-containers
     rules:
       - alert: ContainerDown
-        # 2026-10-02: `docker compose run` birdəfəlik konteynerləri (…-app-run-<hash>, deploy/miqrasiya/ops)
-        # iş bitəndə silinir — onlar «itib» sayılmamalıdır (yalançı kritik insident yaranırdı).
+        # 2026-10-02: XİDMƏT səviyyəsində — hər deploy konteynerləri yenidən yaradır və köhnə konteynerin
+        # `container_last_seen` seriyası bir neçə dəqiqə «köhnəlmiş» qalır; ad üzrə qayda hər deploy-da
+        # bütün xidmətlər üçün yalançı «itib» insidenti açırdı. İndi xidmətin (…-app-3 → …-app) ƏN SON
+        # görünən konteyneri 60 s-dən köhnədirsə alert yanır. `docker compose run` birdəfəlik
+        # konteynerləri (…-app-run-<hash>) istisnadır.
         expr: >
-          time() - container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+", name!~".+-run-.+"} > 60
+          time() - max by (svc) (
+            label_replace(
+              container_last_seen{name=~"emsarena-.+|educationmanagementstudentarena-.+", name!~".+-run-.+"},
+              "svc", "$1", "name", "(.+?)(-[0-9]+)?"
+            )
+          ) > 60
         for: 1m
         labels:
           severity: critical
         annotations:
-          summary: "Konteyner itib: {{ $labels.name }}"
-          description: "{{ $labels.name }} 1 dəqiqədən çoxdur cAdvisor-da görünmür."
+          summary: "Konteyner itib: {{ $labels.svc }}"
+          description: "{{ $labels.svc }} xidmətinin heç bir konteyneri 1 dəqiqədən çoxdur cAdvisor-da görünmür."
 
       - alert: ContainerRestartLoop
         expr: >

@@ -11,15 +11,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/design-tokens.css' %}?v=20260701-1">
-    <link rel="stylesheet" href="{% static 'css/live_avatar.css' %}?v=lx-20260929">
-    <link rel="stylesheet" href="{% static 'css/live_theme.css' %}?v=lx-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_base.css' %}?v=lxp-20260930">
-    <link rel="stylesheet" href="{% static 'css/player/_ui.css' %}?v=lxp-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_round.css' %}?v=lxp-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_answer.css' %}?v=lxp-20260929">
-    <link rel="stylesheet" href="{% static 'css/player/_reveal.css' %}?v=lxp-20260930">
-    <link rel="stylesheet" href="{% static 'css/player/_finale.css' %}?v=lxp-20260929">
+    {% comment %}LXNET 2026-10-02: stil/skript siyahısı views/player/assets.py-dədir (gözləmə otağı eyni
+    URL-ləri prefetch edir). Bütün ES modulları modulepreload — import qrafı bir dalğada yüklənir.{% endcomment %}
+    {% for href in player_assets.css %}<link rel="stylesheet" href="{{ href }}">
+    {% endfor %}<link rel="modulepreload" href="{{ player_assets.entry }}">
+    {% for href in player_assets.modules %}<link rel="modulepreload" href="{{ href }}">
+    {% endfor %}
 </head>
 <body class="lxp" data-live-theme="{{ session_settings.theme_key|default:'aurora' }}">
     {% comment %}LX-FE-PLAYER 2026-09-29: telefon oyun ekranı. Faza görünüşləri JS ilə #lxpViews-ə
@@ -35,6 +32,10 @@
             <span class="lxp-timer" id="timerBox" hidden aria-hidden="true">
                 <span class="lxp-timer__num" id="timerText">0</span>
             </span>
+            <span class="lxp-top__end">
+            <span class="lxp-signal" id="netSignal" role="img" data-level="down" hidden aria-label="">
+                <span class="lxp-signal__bar"></span><span class="lxp-signal__bar"></span><span class="lxp-signal__bar"></span>
+            </span>
             <button type="button" class="lxp-sound" id="soundToggle" aria-pressed="true" data-state="locked">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <path class="lxp-sound__body" d="M4 9.5h3.2L12 5.2v13.6l-4.8-4.3H4z" fill="currentColor"/>
@@ -42,6 +43,7 @@
                     <path class="lxp-sound__mute" d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
             </button>
+            </span>
         </header>
         <div class="lxp-timebar" id="timeBar" hidden aria-hidden="true"><span class="lxp-timebar__fill" id="timeBarFill"></span></div>
         <div class="lxp-net" id="netBanner" role="status" hidden></div>
@@ -117,6 +119,8 @@
         "multiHint": "{% filter escapejs %}{% trans 'multi_hint' context 'live_exam.player' %}{% endfilter %}",
         "multiMaxReached": "{% filter escapejs %}{% trans 'multi_max_reached' context 'live_exam.player' %}{% endfilter %}",
         "netBack": "{% filter escapejs %}{% trans 'net_back' context 'live_exam.player' %}{% endfilter %}",
+        "netGood": "{% filter escapejs %}{% trans 'net_good' context 'live_exam.player' %}{% endfilter %}",
+        "netWeak": "{% filter escapejs %}{% trans 'net_weak' context 'live_exam.player' %}{% endfilter %}",
         "netOffline": "{% filter escapejs %}{% trans 'net_offline' context 'live_exam.player' %}{% endfilter %}",
         "netReconnecting": "{% filter escapejs %}{% trans 'net_reconnecting' context 'live_exam.player' %}{% endfilter %}",
         "nextQuestionSoon": "{% filter escapejs %}{% trans 'next_question_soon' context 'live_exam.player' %}{% endfilter %}",
@@ -178,10 +182,7 @@
         "shapeStar": "{% filter escapejs %}{% trans 'shape_star' context 'live_exam.player' %}{% endfilter %}",
         "shapeHexagon": "{% filter escapejs %}{% trans 'shape_hexagon' context 'live_exam.player' %}{% endfilter %}"
     }</script>
-    <script src="{% static 'js/ems_ajax_init.js' %}"></script>
-    <script src="{% static 'js/player_screen_config.js' %}?v=lxp-20260929"></script>
-    <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
-    <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
-    <script type="module" src="{% static 'js/player/player.entry.js' %}?v=lxp-20260930"></script>
+    {% for src in player_assets.classic_js %}<script src="{{ src }}"></script>
+    {% endfor %}<script type="module" src="{{ player_assets.entry }}"></script>
 </body>
 </html>

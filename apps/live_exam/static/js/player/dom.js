@@ -5,6 +5,7 @@ export const $ = (id) => document.getElementById(id);
 export const UI = {
     shell: $("lxpShell"),
     netBanner: $("netBanner"),
+    netSignal: $("netSignal"),
     questionChip: $("questionChip"),
     timerBox: $("timerBox"),
     timerText: $("timerText"),

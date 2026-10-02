@@ -1,9 +1,9 @@
-import { UI } from './dom.js?v=lx20260930';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { playJoin } from './audio.js?v=lx20260930';
-import { icon } from './icons.js?v=lx20260930';
-import { setPresentationMarkup } from './presentation.js?v=lx20260930';
+import { UI } from './dom.js?v=lx20261002';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { playJoin } from './audio.js?v=lx20261002';
+import { icon } from './icons.js?v=lx20261002';
+import { setPresentationMarkup } from './presentation.js?v=lx20261002';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -16,7 +16,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20260930';
+} from './utils.js?v=lx20261002';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn

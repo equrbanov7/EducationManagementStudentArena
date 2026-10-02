@@ -1,10 +1,10 @@
 // LX-FE-PLAYER (2026-09-29): başlıq (sual sayğacı, taymer, səs), alt panel (avatar, xal, yer),
 // bağlantı zolağı, toast və ekran oxuyucusu üçün aria-live elanları.
-import { BOOTSTRAP, prefersReducedMotion } from './config.js?v=lx20260930';
-import { UI } from './dom.js?v=lx20260930';
-import { audioState, isMuted } from './audio.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { fmt, formatNumber, miniAvatar, tr } from './utils.js?v=lx20260930';
+import { BOOTSTRAP, prefersReducedMotion } from './config.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261002';
+import { audioState, isMuted } from './audio.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { fmt, formatNumber, miniAvatar, tr } from './utils.js?v=lx20261002';
 
 let toastTimer = null;
 let netTimer = null;
@@ -186,6 +186,24 @@ export function setNetStatus(kind) {
             show();
         }, 1200);
     }
+}
+
+// LXNET (2026-10-02): başlıqdakı bağlantı göstəricisi — "good" | "weak" | "down" (ping RTT-dən).
+const SIGNAL_TEXT = {
+    good: () => tr("netGood", "Bağlantı yaxşıdır"),
+    weak: () => tr("netWeak", "Bağlantı zəifdir — sual bir az gec gələ bilər"),
+    down: () => tr("netReconnecting", "Bağlantı bərpa olunur…"),
+};
+
+export function setNetSignal(level) {
+    const el = UI.netSignal;
+    const text = SIGNAL_TEXT[level];
+    if (!el || !text) return;
+    if (el.dataset.level === level && !el.hidden) return;
+    el.dataset.level = level;
+    el.hidden = false;
+    el.setAttribute("aria-label", text());
+    el.title = text();
 }
 
 export function renderSoundToggle() {

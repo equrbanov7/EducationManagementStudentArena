@@ -1,5 +1,5 @@
 // LX-FE-PLAYER (2026-09-29): host sessiya parametrləri (tema, yüksək kontrast) telefonda da tətbiq olunur.
-import { SESSION_SETTINGS } from './config.js?v=lx20260930';
+import { SESSION_SETTINGS } from './config.js?v=lx20261002';
 
 export function applySessionSettings(nextSettings) {
     Object.assign(SESSION_SETTINGS, nextSettings || {});

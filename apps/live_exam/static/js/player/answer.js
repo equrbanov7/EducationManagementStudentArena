@@ -4,14 +4,15 @@
 //  * Yazılı cavab: `text` sahəsi (serverin eyni «answer» mesajı).
 //  * WS ilə göndərilib ACK_TIMEOUT_MS ərzində `answer_saved` gəlməsə — HTTP ehtiyat yolu
 //    (server təkrar cavabı «artıq cavab verilib» kimi qəbul edir → idempotent).
-import { ACK_TIMEOUT_MS, BOOTSTRAP, PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20260930';
-import { playSound, unlockAudio } from './audio.js?v=lx20260930';
-import { buzz, HAPTIC } from './haptics.js?v=lx20260930';
-import { sendJson } from './sockets.js?v=lx20260930';
-import { state } from './state.js?v=lx20260930';
-import { clearAckTimer } from './timers.js?v=lx20260930';
-import { showToast } from './ui.js?v=lx20260930';
-import { fmt, isMulti, isTextQuestion, maxSelect, nowMs, toInt, tr, ts } from './utils.js?v=lx20260930';
+import { ACK_TIMEOUT_MS, BOOTSTRAP, PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261002';
+import { playSound, unlockAudio } from './audio.js?v=lx20261002';
+import { fetchWithTimeout } from './api.js?v=lx20261002';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261002';
+import { isSocketSuspect, sendJson, smoothedRttMs } from './sockets.js?v=lx20261002';
+import { state } from './state.js?v=lx20261002';
+import { clearAckTimer } from './timers.js?v=lx20261002';
+import { showToast } from './ui.js?v=lx20261002';
+import { fmt, isMulti, isTextQuestion, maxSelect, nowMs, toInt, tr, ts } from './utils.js?v=lx20261002';
 
 const noop = () => {};
 // Server mesajı tərcümə olunmayıbsa (msgid açarı) oyunçuya xam açar göstərilmir.
@@ -76,7 +77,11 @@ export function handleOptionTap(optionId) {
 }
 
 function buildPayload(question, text) {
-    const startedAt = ts(question.answer_starts_at) || ts(question.started_at) || nowMs();
+    // LXNET: vaxt plitələrin BU telefonda açıldığı andan (gec çatan sualda pəncərə açılışından sonra).
+    const startedAt =
+        Math.max(ts(question.answer_starts_at) || 0, Number(state.answerOpenedAt) || 0) ||
+        ts(question.started_at) ||
+        nowMs();
     const payload = {
         type: "answer",
         question_id: question.id,
@@ -123,15 +128,22 @@ export function submitAnswer({ text } = {}) {
     return true;
 }
 
+// LXNET: təsdiq gözləmə müddəti ölçülmüş RTT-yə uyğunlaşır (sağlam slow 3G-də ~2 s, əvvəl sabit 3.5 s).
+export function ackTimeoutMs() {
+    const rtt = Number(smoothedRttMs()) || 0;
+    return rtt ? Math.min(ACK_TIMEOUT_MS, Math.max(1500, Math.round(rtt * 3 + 800))) : ACK_TIMEOUT_MS;
+}
+
 function dispatch(pending) {
     clearAckTimer();
     pending.attempts += 1;
-    if (pending.attempts === 1 && sendJson(pending.payload)) {
+    // Socket ilişibsə (ping cavabsız) cavab gözləmədən HTTP ilə gedir; server təkrarı idempotent qəbul edir.
+    if (pending.attempts === 1 && !isSocketSuspect() && sendJson(pending.payload)) {
         pending.via = "ws";
         state.ackTimer = window.setTimeout(() => {
             state.ackTimer = null;
             if (state.pendingSubmit === pending) sendHttp(pending);
-        }, ACK_TIMEOUT_MS);
+        }, ackTimeoutMs());
         return;
     }
     sendHttp(pending);
@@ -141,16 +153,22 @@ async function sendHttp(pending) {
     pending.via = "http";
     const { type, ...body } = pending.payload;
     try {
-        const response = await fetch(BOOTSTRAP.answerUrl, {
-            method: "POST",
-            credentials: "same-origin",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "X-CSRFToken": BOOTSTRAP.csrf || "",
+        // LXNET: ilişən sorğu 6 s-dən sonra ləğv olunur → təkrar cəhd təzə bağlantı ilə (server
+        // təkrar cavabı «artıq cavab verilib» kimi idempotent qəbul edir).
+        const response = await fetchWithTimeout(
+            BOOTSTRAP.answerUrl,
+            {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "X-CSRFToken": BOOTSTRAP.csrf || "",
+                },
+                body: JSON.stringify(Object.assign({ type }, body)),
             },
-            body: JSON.stringify(Object.assign({ type }, body)),
-        });
+            6000
+        );
         let data = {};
         try {
             data = await response.json();

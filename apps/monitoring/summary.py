@@ -70,8 +70,7 @@ def _celery_from_cache() -> dict:
 
 
 def _backup_from_cache() -> float | None:
-    backup = cache.get(collectors.BACKUP_CACHE_KEY) or {}
-    return backup.get("age_seconds")
+    return collectors.backup_age_from_cache()
 
 
 def _platform_info(metrics: dict) -> dict:

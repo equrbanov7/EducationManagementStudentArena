@@ -10,6 +10,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from datetime import timedelta
 from pathlib import Path
@@ -215,9 +216,17 @@ class FinalRevealSocketTest(TransactionTestCase):
     def test_player_socket_final_reveal_then_finished(self):
         open_question(self.session, self.q2, index=1)
 
-        async def drain(communicator):
+        async def drain(communicator, until_type):
+            # CI 2026-10-02 (main shard 8): yüklü runner-də «reveal» 0.6 s sükutdan GEC gəlirdi → StopIteration.
+            # Gözlənilən tip gələnə qədər (5 s tavan) oxu, sonra qalan mesajları qısa sükutla topla.
             messages = []
-            while not await communicator.receive_nothing(timeout=0.6):
+            loop = asyncio.get_running_loop()
+            deadline = loop.time() + 5
+            while loop.time() < deadline and not any(m.get("type") == until_type for m in messages):
+                if await communicator.receive_nothing(timeout=0.2):
+                    continue
+                messages.append(await communicator.receive_json_from())
+            while not await communicator.receive_nothing(timeout=0.3):
                 messages.append(await communicator.receive_json_from())
             return messages
 
@@ -235,9 +244,9 @@ class FinalRevealSocketTest(TransactionTestCase):
                 await socket.send_json_to(
                     {"type": "answer", "question_id": self.q2.id, "option_id": option.id, "answer_ms": 300}
                 )
-            revealed = [await drain(socket) for socket in sockets]
+            revealed = [await drain(socket, "reveal") for socket in sockets]
             await sync_to_async(services.advance_to_next)(self.session)
-            finished = [await drain(socket) for socket in sockets]
+            finished = [await drain(socket, "finished") for socket in sockets]
             for socket in sockets:
                 await socket.disconnect()
             return revealed, finished
