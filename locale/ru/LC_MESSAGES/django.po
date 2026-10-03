@@ -89879,3 +89879,225 @@ msgstr ""
 msgctxt "accounts.semester"
 msgid "Çatışmır"
 msgstr "Не хватает"
+
+msgctxt "accounts.account_block"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün kimə yaxınlaşsın"
+msgstr "К кому обратиться для разблокировки"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün yaxınlaşın"
+msgstr "Для разблокировки обратитесь"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbi"
+msgstr "Причина приостановки"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbini seçin."
+msgstr "Выберите причину приостановки."
+
+msgctxt "accounts.account_block"
+msgid "Dayandırılma tarixi"
+msgstr "Дата приостановки"
+
+msgctxt "accounts.account_block"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "accounts.account_block"
+msgid "Fakültənizin dekanlığı"
+msgstr "Деканат вашего факультета"
+
+msgctxt "accounts.account_block"
+msgid "Giriş müvəqqəti bağlıdır"
+msgstr "Вход временно закрыт"
+
+msgctxt "accounts.account_block"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Вернуться на страницу входа"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil."
+msgstr ""
+"Пока аккаунт не будет разблокирован, доступ ко всем разделам системы закрыт."
+
+msgctxt "accounts.account_block"
+msgid "Hesabın təhlükəsizliyi (şübhəli giriş)"
+msgstr "Безопасность аккаунта (подозрительный вход)"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız dayandırılıb"
+msgstr "Ваш аккаунт приостановлен"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız müvəqqəti dayandırılıb"
+msgstr "Ваш аккаунт временно приостановлен"
+
+msgctxt "accounts.account_block"
+msgid "Maliyyə şöbəsi (mühasibatlıq)"
+msgstr "Финансовый отдел (бухгалтерия)"
+
+msgctxt "accounts.account_block"
+msgid "Müraciət ünvanı yanlışdır."
+msgstr "Неверное место обращения."
+
+msgctxt "accounts.account_block"
+msgid "Nə etməli?"
+msgstr "Что делать?"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur."
+msgstr ""
+"Никому не сообщайте пароль: сотрудники университета никогда его не "
+"спрашивают."
+
+msgctxt "accounts.account_block"
+msgid ""
+"Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və "
+"parolla daxil olun."
+msgstr ""
+"После решения вопроса аккаунт откроют — входите с тем же именем пользователя"
+" и паролем."
+
+msgctxt "accounts.account_block"
+msgid "RİM — Rəqəmsal İnkişaf Mərkəzi"
+msgstr "RİM — Центр цифрового развития"
+
+msgctxt "accounts.account_block"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbi seçin"
+msgstr "Выберите причину"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin."
+msgstr "Выбирается автоматически по причине — при необходимости измените."
+
+msgctxt "accounts.account_block"
+msgid "Sənədlər tam təqdim edilməyib"
+msgstr "Документы представлены не полностью"
+
+msgctxt "accounts.account_block"
+msgid "Tədris şöbəsi"
+msgstr "Учебный отдел"
+
+msgctxt "accounts.account_block"
+msgid "Təhsil haqqı üzrə borc"
+msgstr "Задолженность по оплате обучения"
+
+msgctxt "accounts.account_block"
+msgid "Tələbə Xidmətləri Mərkəzi"
+msgstr "Центр студенческих услуг"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək"
+" — sistemə isə daxil ola bilməyəcək."
+msgstr ""
+"Введя имя пользователя и пароль, студент увидит причину, это место обращения"
+" и примечание — но войти в систему не сможет."
+
+msgctxt "accounts.account_block"
+msgid "Tələbəyə qeyd (otaq, telefon, iş saatı)"
+msgstr "Примечание для студента (кабинет, телефон, часы)"
+
+msgctxt "accounts.account_block"
+msgid "məs: 2-ci korpus, 105-ci otaq, 09:00–17:00"
+msgstr "напр.: корпус 2, кабинет 105, 09:00–17:00"
+
+msgctxt "accounts.account_block"
+msgid "səbəb qeyd olunmayıb"
+msgstr "причина не указана"
+
+msgctxt "accounts.account_block"
+msgid "«Digər» seçildikdə səbəbi qısaca izah edin."
+msgstr "При выборе «Другое» кратко поясните причину."
+
+msgctxt "accounts.account_block"
+msgid "İmtahan Mərkəzi"
+msgstr "Экзаменационный центр"
+
+msgctxt "accounts.account_block"
+msgid "İmtahan qaydalarının pozulması"
+msgstr "Нарушение правил экзамена"
+
+msgctxt "accounts.account_block"
+msgid "İntizam qaydalarının pozulması"
+msgstr "Нарушение правил дисциплины"
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və "
+"davamiyyətiniz silinməyib."
+msgstr ""
+"Имя пользователя и пароль верны, но университет временно приостановил доступ"
+" к вашему аккаунту. Ваши данные, баллы и посещаемость не удалены."
+
+msgctxt "accounts.account_block"
+msgid "Şəxsi məlumatlar dəqiqləşdirilməlidir"
+msgstr "Необходимо уточнить личные данные"
+
+msgctxt "accounts.account_block"
+msgid "Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın."
+msgstr "Возьмите удостоверение личности и обратитесь в указанное выше место."
+
+msgctxt "accounts.student_registry"
+msgid "Aktiv — sistemə daxil ola bilir"
+msgstr "Активен — может войти"
+
+msgctxt "accounts.student_registry"
+msgid "Arxiv (məzun / xaric) — giriş bağlıdır"
+msgstr "Архив (выпускник / отчислен) — вход закрыт"
+
+msgctxt "accounts.student_registry"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxar"
+msgstr "Разблокировать"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxmaq üçün"
+msgstr "Для разблокировки"
+
+msgctxt "accounts.student_registry"
+msgid "Dayandırılıb — sistemə daxil ola bilmir"
+msgstr "Приостановлен — не может войти"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək."
+msgstr "Восстановить аккаунт? Студент снова сможет войти в систему."
+
+msgctxt "accounts.student_registry"
+msgid "Hesabı dayandır"
+msgstr "Приостановить аккаунт"
+
+msgctxt "accounts.student_registry"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "accounts.student_registry"
+msgid "Silinib"
+msgstr "Удалён"
+
+msgctxt "accounts.student_registry"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.student_registry"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbəyə qeyd"
+msgstr "Примечание для студента"

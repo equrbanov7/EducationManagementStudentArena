@@ -54,6 +54,32 @@ QƏSDƏN yoxdur (§8/13, sətir başına aqreqat qadağandır).
     </div>
     {% endif %}
 
+    {% comment %}2026-10-03 (sahib): HESAB bloku — vəziyyət, dayandırma səbəbi və «kimə yaxınlaşmalı»;
+    `people.manage_status` olan aktor buradan dayandırır / bərpa edir (student_registry_account.js).{% endcomment %}
+    <div class="stsvc-account" data-sr-account hidden
+         data-label-active="{% trans 'Aktiv — sistemə daxil ola bilir' context 'accounts.student_registry' %}"
+         data-label-blocked="{% trans 'Dayandırılıb — sistemə daxil ola bilmir' context 'accounts.student_registry' %}"
+         data-label-archived="{% trans 'Arxiv (məzun / xaric) — giriş bağlıdır' context 'accounts.student_registry' %}"
+         data-label-deleted="{% trans 'Silinib' context 'accounts.student_registry' %}">
+        <h3 class="stsvc-card__title">{% trans "Hesab" context "accounts.student_registry" %}</h3>
+        <p class="stsvc-account__status" data-sr-account-status></p>
+        <dl class="stsvc-account__facts" data-sr-account-facts hidden>
+            <div><dt>{% trans "Səbəb" context "accounts.student_registry" %}</dt><dd data-sr-account-field="reason"></dd></div>
+            <div><dt>{% trans "Blokdan çıxmaq üçün" context "accounts.student_registry" %}</dt><dd data-sr-account-field="contact"></dd></div>
+            <div><dt>{% trans "Tələbəyə qeyd" context "accounts.student_registry" %}</dt><dd data-sr-account-field="note"></dd></div>
+            <div><dt>{% trans "Tarix" context "accounts.student_registry" %}</dt><dd data-sr-account-field="blocked_at"></dd></div>
+        </dl>
+        <div class="stsvc-account__actions">
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-sr-account-block hidden>
+                <i class="fas fa-user-lock" aria-hidden="true"></i> {% trans "Hesabı dayandır" context "accounts.student_registry" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-sr-account-unblock hidden
+                    data-confirm="{% trans 'Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək.' context 'accounts.student_registry' %}">
+                <i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Blokdan çıxar" context "accounts.student_registry" %}
+            </button>
+        </div>
+    </div>
+
     <h3 class="stsvc-card__title">{% trans "Hərəkət tarixçəsi" context "accounts.student_registry" %}</h3>
     <p class="stsvc-card__empty" data-sr-history-empty hidden>
         {% trans "Bu tələbə üzrə hərəkət əmri yoxdur." context "accounts.student_registry" %}

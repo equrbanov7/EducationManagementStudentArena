@@ -20,7 +20,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.translation import pgettext
 
-from apps.accounts.services import people
+from apps.accounts.services import account_block_reasons, people
 from apps.accounts.services.people import movements as movement_service
 from apps.accounts.services.people import registry as registry_service
 from apps.registrar.public import catalog_console
@@ -158,6 +158,10 @@ def build_student_registry_section(request, section, *, active_organization, all
         section["pagination_query"],
     )
     section["programs_url"] = reverse("accounts:student_registry_programs")
+    # 2026-10-03: kartdan hesabı dayandır / bərpa et — kataloqun eyni endpoint-i və səbəb kataloqu.
+    section["people_action_url"] = reverse("accounts:people_action")
+    section["block_options"] = account_block_reasons.form_options() if actor.can_manage_status else {}
+    section["block_note_max"] = account_block_reasons.MAX_NOTE_LENGTH
     section["groups_url"] = reverse("accounts:people_academic_groups")
     section["document_url_base"] = reverse(
         "accounts:student_registry_document", args=["00000000-0000-0000-0000-000000000000"]

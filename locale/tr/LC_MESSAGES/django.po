@@ -89213,3 +89213,224 @@ msgstr ""
 msgctxt "accounts.semester"
 msgid "Çatışmır"
 msgstr "Eksik"
+
+msgctxt "accounts.account_block"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik izin"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün kimə yaxınlaşsın"
+msgstr "Engelin kaldırılması için kime başvurmalı"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün yaxınlaşın"
+msgstr "Engelin kaldırılması için başvurun"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbi"
+msgstr "Askıya alma nedeni"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbini seçin."
+msgstr "Askıya alma nedenini seçin."
+
+msgctxt "accounts.account_block"
+msgid "Dayandırılma tarixi"
+msgstr "Askıya alma tarihi"
+
+msgctxt "accounts.account_block"
+msgid "Digər"
+msgstr "Diğer"
+
+msgctxt "accounts.account_block"
+msgid "Fakültənizin dekanlığı"
+msgstr "Fakültenizin dekanlığı"
+
+msgctxt "accounts.account_block"
+msgid "Giriş müvəqqəti bağlıdır"
+msgstr "Giriş geçici olarak kapalı"
+
+msgctxt "accounts.account_block"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Giriş sayfasına dön"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil."
+msgstr "Hesap açılana kadar sistemin hiçbir bölümüne erişilemez."
+
+msgctxt "accounts.account_block"
+msgid "Hesabın təhlükəsizliyi (şübhəli giriş)"
+msgstr "Hesap güvenliği (şüpheli giriş)"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız dayandırılıb"
+msgstr "Hesabınız askıya alındı"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız müvəqqəti dayandırılıb"
+msgstr "Hesabınız geçici olarak askıya alındı"
+
+msgctxt "accounts.account_block"
+msgid "Maliyyə şöbəsi (mühasibatlıq)"
+msgstr "Mali işler (muhasebe)"
+
+msgctxt "accounts.account_block"
+msgid "Müraciət ünvanı yanlışdır."
+msgstr "Başvuru yeri geçersiz."
+
+msgctxt "accounts.account_block"
+msgid "Nə etməli?"
+msgstr "Ne yapmalı?"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur."
+msgstr ""
+"Parolanızı kimseyle paylaşmayın; üniversite personeli onu asla sormaz."
+
+msgctxt "accounts.account_block"
+msgid ""
+"Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və "
+"parolla daxil olun."
+msgstr ""
+"Sorun çözüldükten sonra hesabınız açılacak — aynı kullanıcı adı ve parolayla"
+" giriş yapın."
+
+msgctxt "accounts.account_block"
+msgid "RİM — Rəqəmsal İnkişaf Mərkəzi"
+msgstr "RİM — Dijital Gelişim Merkezi"
+
+msgctxt "accounts.account_block"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbi seçin"
+msgstr "Neden seçin"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin."
+msgstr "Nedene göre otomatik seçilir — gerekirse değiştirin."
+
+msgctxt "accounts.account_block"
+msgid "Sənədlər tam təqdim edilməyib"
+msgstr "Belgeler eksik teslim edildi"
+
+msgctxt "accounts.account_block"
+msgid "Tədris şöbəsi"
+msgstr "Öğrenci işleri"
+
+msgctxt "accounts.account_block"
+msgid "Təhsil haqqı üzrə borc"
+msgstr "Öğrenim ücreti borcu"
+
+msgctxt "accounts.account_block"
+msgid "Tələbə Xidmətləri Mərkəzi"
+msgstr "Öğrenci Hizmetleri Merkezi"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək"
+" — sistemə isə daxil ola bilməyəcək."
+msgstr ""
+"Öğrenci kullanıcı adı ve parolasını yazdığında nedeni, bu adresi ve notu "
+"görecek — sisteme ise giremeyecek."
+
+msgctxt "accounts.account_block"
+msgid "Tələbəyə qeyd (otaq, telefon, iş saatı)"
+msgstr "Öğrenciye not (oda, telefon, çalışma saatleri)"
+
+msgctxt "accounts.account_block"
+msgid "məs: 2-ci korpus, 105-ci otaq, 09:00–17:00"
+msgstr "ör.: 2. blok, 105 numaralı oda, 09:00–17:00"
+
+msgctxt "accounts.account_block"
+msgid "səbəb qeyd olunmayıb"
+msgstr "neden belirtilmemiş"
+
+msgctxt "accounts.account_block"
+msgid "«Digər» seçildikdə səbəbi qısaca izah edin."
+msgstr "«Diğer» seçildiğinde nedeni kısaca açıklayın."
+
+msgctxt "accounts.account_block"
+msgid "İmtahan Mərkəzi"
+msgstr "Sınav Merkezi"
+
+msgctxt "accounts.account_block"
+msgid "İmtahan qaydalarının pozulması"
+msgstr "Sınav kurallarının ihlali"
+
+msgctxt "accounts.account_block"
+msgid "İntizam qaydalarının pozulması"
+msgstr "Disiplin kurallarının ihlali"
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və "
+"davamiyyətiniz silinməyib."
+msgstr ""
+"Kullanıcı adınız ve parolanız doğru, ancak üniversite hesabınıza erişimi "
+"geçici olarak askıya aldı. Verileriniz, puanlarınız ve devam kayıtlarınız "
+"silinmedi."
+
+msgctxt "accounts.account_block"
+msgid "Şəxsi məlumatlar dəqiqləşdirilməlidir"
+msgstr "Kişisel bilgiler doğrulanmalı"
+
+msgctxt "accounts.account_block"
+msgid "Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın."
+msgstr "Kimlik kartınızı alıp yukarıda gösterilen yere başvurun."
+
+msgctxt "accounts.student_registry"
+msgid "Aktiv — sistemə daxil ola bilir"
+msgstr "Aktif — giriş yapabilir"
+
+msgctxt "accounts.student_registry"
+msgid "Arxiv (məzun / xaric) — giriş bağlıdır"
+msgstr "Arşiv (mezun / ilişiği kesilmiş) — giriş kapalı"
+
+msgctxt "accounts.student_registry"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxar"
+msgstr "Engeli kaldır"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxmaq üçün"
+msgstr "Engelin kaldırılması için"
+
+msgctxt "accounts.student_registry"
+msgid "Dayandırılıb — sistemə daxil ola bilmir"
+msgstr "Askıya alındı — giriş yapamaz"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək."
+msgstr "Hesap geri açılsın mı? Öğrenci yeniden giriş yapabilecek."
+
+msgctxt "accounts.student_registry"
+msgid "Hesabı dayandır"
+msgstr "Hesabı askıya al"
+
+msgctxt "accounts.student_registry"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "accounts.student_registry"
+msgid "Silinib"
+msgstr "Silindi"
+
+msgctxt "accounts.student_registry"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "accounts.student_registry"
+msgid "Tarix"
+msgstr "Tarih"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbəyə qeyd"
+msgstr "Öğrenciye not"

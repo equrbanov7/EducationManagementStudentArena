@@ -27,6 +27,7 @@ from django.db import transaction
 from core.audit import log_action
 from core.constants import AuditAction
 
+from .. import account_block_reasons as block_reasons
 from ..rim import lifecycle as rim_lifecycle
 from ..rim import policy as rim_policy
 from ..rim.policy import RimAccessError
@@ -118,17 +119,33 @@ def _actor_level(actor) -> int:
     return level
 
 
-def set_account_status(actor, target, *, active: bool, reason: str, request=None) -> dict:
+def _block_notice(reason: str, reason_code: str, contact_code: str, contact_note: str) -> tuple[str, dict]:
+    """Seçilmiş səbəb + «kimə müraciət etməli» (sahib 2026-10-03). Kod yoxdursa köhnə sərbəst mətn yolu."""
+    if not reason_code and str(reason or "").strip():
+        return reason, {}
+    try:
+        code, contact, note = block_reasons.normalize_choice(reason_code, contact_code, contact_note)
+    except block_reasons.BlockReasonError as exc:
+        raise RimAccessError(exc.code, exc.message, status=400) from exc
+    text = str(reason or "").strip() or block_reasons.audit_text(code, note)
+    return text, {"reason_code": code, "contact_code": contact, "contact_note": note}
+
+
+def set_account_status(
+    actor, target, *, active: bool, reason: str, request=None, reason_code="", contact_code="", contact_note=""
+) -> dict:
     """Hesabı dayandırır (``active=False``) və ya bərpa edir (``active=True``)."""
     _require(actor, PERM_MANAGE_STATUS)
     catalog = assert_in_catalog_scope(actor, target, request=request)
     rim = _rim_actor(actor, request, extra_permissions={rim_policy.PERM_BLOCK})
 
+    notice: dict = {}
     if active:
         applied_reason = rim_lifecycle.unblock_user(rim, target, reason=reason, request=request)
         action_name = "people.account_unblocked"
     else:
-        applied_reason = rim_lifecycle.block_user(rim, target, reason=reason, request=request)
+        reason, notice = _block_notice(reason, reason_code, contact_code, contact_note)
+        applied_reason = rim_lifecycle.block_user(rim, target, reason=reason, request=request, **notice)
         action_name = "people.account_blocked"
 
     log_action(
@@ -141,9 +158,9 @@ def set_account_status(actor, target, *, active: bool, reason: str, request=None
         resource_type=_AUDIT_RESOURCE,
         resource_id=str(target.pk),
         resource_repr=target.get_full_name() or target.username,
-        changes={"action": action_name, "catalog": catalog, "is_active": active},
+        changes={"action": action_name, "catalog": catalog, "is_active": active, **notice},
     )
-    return {"status": "active" if active else "blocked", "reason": applied_reason}
+    return {"status": "active" if active else "blocked", "reason": applied_reason, **notice}
 
 
 def _teacher_role(organization):

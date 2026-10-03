@@ -13,6 +13,26 @@ from .identity import (
 )
 
 
+def single_login_candidate(username):
+    """İstifadəçi adı VƏ YA e-poçta TƏK uyğun hesab (kanonik forma); yoxdursa / birmənalı deyilsə ``None``.
+
+    Giriş backend-i və «hesab dayandırılıb» bildirişi (``account_block_notice``) EYNİ axtarışı işlədir.
+    """
+    key = canonical_identity(str(username or "").strip())
+    if not key:
+        return None
+    manager = get_user_model()._default_manager
+    username_candidates = canonical_identity_queryset(
+        manager.all(), "username", key, alias="_login_username_key"
+    ).order_by("pk")[:2]
+    email_candidates = canonical_identity_queryset(manager.all(), "email", key, alias="_login_email_key").order_by(
+        "pk"
+    )[:2]
+    candidates_by_id = {candidate.pk: candidate for candidate in (*username_candidates, *email_candidates)}
+    candidates = [candidates_by_id[pk] for pk in sorted(candidates_by_id)[:2]]
+    return candidates[0] if len(candidates) == 1 else None
+
+
 class EmailOrUsernameBackend(ModelBackend):
     """
     Authenticate users using either username or email.
@@ -28,32 +48,12 @@ class EmailOrUsernameBackend(ModelBackend):
         if not username:
             return None
 
-        user_model = get_user_model()
-        key = canonical_identity(username)
-        manager = user_model._default_manager
-        username_candidates = canonical_identity_queryset(
-            manager.all(),
-            "username",
-            key,
-            alias="_login_username_key",
-        ).order_by("pk")[:2]
-        email_candidates = canonical_identity_queryset(
-            manager.all(),
-            "email",
-            key,
-            alias="_login_email_key",
-        ).order_by(
-            "pk"
-        )[:2]
-        candidates_by_id = {candidate.pk: candidate for candidate in (*username_candidates, *email_candidates)}
-        candidates = [candidates_by_id[pk] for pk in sorted(candidates_by_id)[:2]]
-
+        user = single_login_candidate(username)
         # Keep the absent/ambiguous-user path close to the password-hash cost of
         # an existing account and never pick an arbitrary canonical collision.
-        if len(candidates) != 1:
-            user_model().set_password(password)
+        if user is None:
+            get_user_model()().set_password(password)
             return None
-        user = candidates[0]
         if not user.check_password(password):
             return None
         if not self.user_can_authenticate(user):

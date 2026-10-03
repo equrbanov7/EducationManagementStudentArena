@@ -83,8 +83,11 @@
         }
     }
 
-    // Cədvəl başlığı bulk düyməsi: q/b → "qb", i/e → "ie" (bal saxlanılmır).
+    // Cədvəl başlığı bulk düyməsi: YALNIZ BOŞ xanaları doldurur (sahib 2026-10-03) — müəllimin əvvəlcədən
+    // yazdığı q/b, i/e və bal TOXUNULMAZ qalır: «bir neçəsinə q/b yazıb toplu i/e vuranda q/b-lar qalsın,
+    // qalanlarına i/e getsin».
     function bulkSemSelect(select, mode) {
+        if (select.value !== "") return;
         setSelectValue(select, mode === "absent" ? "qb" : "ie");
     }
 
@@ -142,6 +145,8 @@
             document
                 .querySelectorAll('[data-jd-chip][data-lesson="' + lessonId + '"]')
                 .forEach(function (cellChip) {
+                    var cellInput = cellChip.parentElement.querySelector("[data-jd-att]");
+                    if (cellInput && cellInput.value !== "") return; // yazılmış qeyd qalır
                     setCell(cellChip, value);
                 });
             document
