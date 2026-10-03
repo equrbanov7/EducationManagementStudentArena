@@ -45,7 +45,7 @@ yeni pəncərədə QR + təlimat + aktivləşdirməyənlərin siyahısı (PAROLS
     </div>
     {% endif %}
 
-    <h3 class="sract__title">{% trans "Qruplar üzrə — ən geri qalan birinci" context "accounts.student_registry" %}</h3>
+    <h3 class="sract__title">{% trans "Qruplar üzrə — ən geri qalan birinci" context "accounts.student_registry" %}{% if act.page_obj.paginator.num_pages > 1 %} <span class="sract__range">{{ act.page_obj.start_index }}–{{ act.page_obj.end_index }} / {{ act.rows_total }}</span>{% endif %}</h3>
     {% if act.rows %}
     <div class="sract__scroll">
         <table class="ems-table ems-table--zebra sract__table">
@@ -89,6 +89,7 @@ yeni pəncərədə QR + təlimat + aktivləşdirməyənlərin siyahısı (PAROLS
             </tbody>
         </table>
     </div>
+    {% include "partials/_pagination.html" with page_obj=act.page_obj page_param="sr_page" extra_query=student_registry_section.pagination_query %}
     {% else %}
         {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-user-check" state_title=student_registry_section.state_title state_body=student_registry_section.state_body %}
     {% endif %}
