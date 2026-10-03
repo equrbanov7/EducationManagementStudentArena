@@ -366,7 +366,13 @@ if curl -s --max-time 5 "$PROM/-/ready" >/dev/null 2>&1; then
   PGMAX=$(promq 'pg_settings_max_connections' '%.0f'); case "$PGMAX" in ''|—|n/a) warn "postgres_exporter pg_settings_max_connections vermir — səhifədə max_connections «—» görünür";; *) ok "pg_settings_max_connections=$PGMAX (exporter)";; esac
   BK=$(promq 'max(emsarena_backup_age_seconds)' '%.0f'); case "$BK" in ''|*[!0-9]*) warn "emsarena_backup_age_seconds yoxdur — səhifədə backup yaşı bilinmir (beat kollektoru işləməyib?)";; *) ok "backup yaşı metriki var ($((BK/3600)) saat)";; esac
   CWO=$(promq 'max(emsarena_celery_workers_online)' '%.0f'); case "$CWO" in ''|*[!0-9]*) warn "emsarena_celery_workers_online yoxdur — Celery paneli boşdur";; *) ok "Celery statistikası Prometheus-da var (onlayn worker: $CWO)";; esac
+  # «Server» tabının rəqəmləri host ilə üst-üstə düşürmü? (node_exporter: pid host + rootfs=/host, amma bridge şəbəkə)
+  PCORES=$(promq 'count(count(node_cpu_seconds_total) by (cpu))' '%.0f'); [ "$PCORES" = "$(nproc)" ] && ok "node_exporter nüvə sayı $PCORES = nproc $(nproc)" || warn "node_exporter nüvə sayı $PCORES ≠ nproc $(nproc)"
+  PDISK=$(promq '100*(1-node_filesystem_avail_bytes{mountpoint="/",fstype!~"tmpfs|overlay"}/node_filesystem_size_bytes{mountpoint="/",fstype!~"tmpfs|overlay"})' '%.0f'); DFP=$(df --output=pcent / | tail -1 | tr -dc '0-9')
+  case "$PDISK" in ''|*[!0-9]*) warn "node_exporter kök disk seriyası yoxdur (mountpoint=\"/\") — səhifədə disk % boşdur";; *) [ $(( PDISK > DFP ? PDISK - DFP : DFP - PDISK )) -le 2 ] && ok "node_exporter disk ${PDISK}% ≈ df ${DFP}%" || warn "node_exporter disk ${PDISK}% ≠ df ${DFP}% (mountpoint/fstype seçicisi)";; esac
+  NETALL=$(promq 'count by (device)(node_network_receive_bytes_total)' '%.0f' | sed -n 's/^device=\([^ ,]*\).*/\1/p' | tr '\n' ' ')
   NETDEV=$(promq 'count by (device)(node_network_receive_bytes_total{device!~"lo|veth.*|br.*"})' '%.0f' | sed -n 's/^device=\([^ ,]*\).*/\1/p' | tr '\n' ' ')
+  echo "- ℹ️ node_exporter şəbəkə cihazları (hamısı): ${NETALL:-—}"
   HOSTNICS=""; for d in /sys/class/net/*; do d=${d##*/}; case "$d" in lo|veth*|br-*|docker*|'*') ;; *) HOSTNICS="$HOSTNICS$d ";; esac; done
   match=0; for d in $HOSTNICS; do case " $NETDEV " in *" $d "*) match=1;; esac; done
   [ "$match" = 1 ] && ok "node_exporter host NIC-lərini görür (exporter: ${NETDEV:-—}; host: ${HOSTNICS:-—})" || warn "node_exporter host şəbəkə ad-məkanında DEYİL (exporter cihazları: ${NETDEV:-—}; host NIC: ${HOSTNICS:-—}) — Server tabındakı şəbəkə RX/TX qrafiki host NIC-i deyil, exporter konteynerinin öz trafikini göstərir (compose: node_exporter üçün network_mode: host lazımdır)"
