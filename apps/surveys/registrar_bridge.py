@@ -20,7 +20,7 @@ import uuid
 from collections import defaultdict
 
 from django.apps import apps as django_apps
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.models.functions import Coalesce
 
 from core.constants import OrgUnitType
@@ -60,6 +60,28 @@ def closed_offerings(organization, period_id):
         .objects.filter(organization=organization, period_id=period_id)
         .filter(Q(assessment_scheme__is_published=True) | Q(assessment_scheme__approval_status="approved"))
     )
+
+
+def closed_offering_counts(organization, period_ids) -> dict:
+    """``{period_id: {"closed": n, "total": m}}`` — dövrün açılışlarından neçəsinin jurnalı bağlıdır (2 sorğu).
+
+    Sahib 2026-10-04: kampaniya hədəfləri YALNIZ bağlı jurnallardan yaranır — RİM dövrü seçəndə
+    və kampaniya kartında «bağlı jurnal 0 / N» görməlidir, yoxsa tələbələrin sorğunu niyə
+    görmədiyi aydın olmur.
+    """
+    period_ids = list(period_ids)
+    if not period_ids:
+        return {}
+    CourseOffering = _model("registrar", "CourseOffering")
+    base = CourseOffering.objects.filter(organization=organization, period_id__in=period_ids)
+    totals = dict(base.values("period_id").annotate(n=Count("id")).values_list("period_id", "n"))
+    closed = dict(
+        base.filter(Q(assessment_scheme__is_published=True) | Q(assessment_scheme__approval_status="approved"))
+        .values("period_id")
+        .annotate(n=Count("id"))
+        .values_list("period_id", "n")
+    )
+    return {pk: {"closed": closed.get(pk, 0), "total": totals.get(pk, 0)} for pk in period_ids}
 
 
 def student_ids_in_offerings(organization, offering_ids) -> set:

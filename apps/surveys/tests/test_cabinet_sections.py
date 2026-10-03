@@ -13,6 +13,7 @@ from apps.audit.models import AuditLog
 from apps.surveys.constants import CampaignStatus
 from apps.surveys.models import SurveyCampaign
 from apps.surveys.services.gate_snapshot import read_snapshot
+from core.constants import AcademicPeriodType
 from core.rls import bypass_rls
 
 from .factories import build_world, client_for, close_all, member, open_campaign
@@ -103,6 +104,52 @@ class CampaignsSectionTest(TestCase):
         self.assertContains(response, "bootstrap-single-select--ems")
         self.assertContains(response, self.w["period"].name)
         self.assertNotContains(response, 'style="')
+
+    def test_period_picker_puts_future_semester_last_and_flags_campaign_without_targets(self):
+        """Sahib 2026-10-04: prod-da seçimin ilk sətri gələcək «Yaz 2026/2027» idi — «Kampaniyanı aç»
+        dəyişdirilmədən basıldı və bağlı jurnalı olmayan (hədəfsiz) kampaniya «Açıq» göründü, amma
+        heç bir tələbə sorğunu görmədi. İndi: cari/keçmiş dövr əvvəl və seçili, hər seçimdə
+        «bağlı jurnal N / M», hədəfsiz açıq kampaniyada xəbərdarlıq və açılış mesajı."""
+        from apps.organizations.models import AcademicPeriod
+        from apps.registrar.models import CourseOffering
+        from apps.surveys.views import manage
+
+        with bypass_rls():
+            future = AcademicPeriod.objects.create(
+                organization=self.w["org"],
+                name="svcamp Yaz",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2026/2027",
+                start_date=datetime.date(2027, 2, 1),
+                end_date=datetime.date(2027, 6, 30),
+            )
+            CourseOffering.objects.create(
+                organization=self.w["org"],
+                subject=self.w["math"],
+                period=future,
+                group=self.w["group"],
+                instructor=self.w["teacher_a"],
+            )
+        html = self.client.get(PROFILE + "?section=evaluation-campaigns").content.decode()
+        current_label = f"{self.w['period'].name} · 2026/2027 — bağlı jurnal 2 / 2"
+        future_label = "svcamp Yaz · 2026/2027 — bağlı jurnal 0 / 1"
+        self.assertIn(current_label, html)
+        self.assertIn(future_label, html)
+        self.assertLess(html.index(current_label), html.index(future_label))
+        self.assertIn(f'value="{self.w["period"].pk}" selected', html)
+        self.assertNotIn(f'value="{future.pk}" selected', html)
+
+        self._post(action="create_open", period=str(future.pk))
+        campaign = SurveyCampaign.objects.get(period=future)
+        self.assertEqual(campaign.status, CampaignStatus.OPEN)
+        self.assertIn("heç bir jurnalı bağlanmayıb", manage._opened_message(self.w["org"], campaign))
+        self.assertEqual(manage._opened_message(self.w["org"], open_campaign(self.w)), "Kampaniya açıldı.")
+
+        page = self.client.get(PROFILE + "?section=evaluation-campaigns")
+        self.assertContains(page, "Hədəf yoxdur")
+        self.assertContains(page, "<dd>0 / 1</dd>")
+        self.assertContains(page, "<dd>2 / 2</dd>")
+        self.assertContains(page, "svc-camp__hint")
 
     def test_open_close_reopen_update_cycle_is_audited_and_synced(self):
         response = self._post(action="create_open", period=str(self.w["period"].pk))

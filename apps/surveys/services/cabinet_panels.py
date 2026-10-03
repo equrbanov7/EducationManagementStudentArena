@@ -12,7 +12,9 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import pgettext
 
+from .. import registrar_bridge as bridge
 from ..constants import MIN_GROUP_SIZE_CEIL, MIN_GROUP_SIZE_FLOOR, CampaignStatus
 from .access import can_manage_campaigns, results_scope
 from .config import survey_config
@@ -70,26 +72,61 @@ def campaigns_panel(context) -> dict:
         row["is_closed"] = row["status"] == CampaignStatus.CLOSED
         row["is_draft"] = row["status"] == CampaignStatus.DRAFT
     _attach_question_sets(organization, rows)
-    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    used = {row["period_id"] for row in rows}
-    periods = [
-        {"id": period.pk, "label": f"{period.name} · {period.academic_year}"}
-        for period in AcademicPeriod.objects.filter(organization=organization).order_by("-start_date")[:12]
-        if period.pk not in used
-    ]
+    today = timezone.localdate()
+    _attach_journal_counts(organization, rows)
     config = survey_config(organization)
     return {
         "has_access": True,
         "rows": rows,
-        "periods": periods,
+        "periods": _period_choices(organization, {row["period_id"] for row in rows}, today),
         "config": config,
-        "today": timezone.localdate(),
+        "today": today,
         "post_url": reverse("surveys:manage"),
         "next_url": reverse("accounts:profile") + "?section=evaluation-campaigns",
         "k_floor": MIN_GROUP_SIZE_FLOOR,
         "k_ceil": MIN_GROUP_SIZE_CEIL,
         "builder_url": reverse("accounts:profile") + "?section=surveys-builder&status=all",
     }
+
+
+def _attach_journal_counts(organization, rows) -> None:
+    """Sahib 2026-10-04: kartda «bağlı jurnal N / M» və açıq-amma-hədəfsiz xəbərdarlığı (2 sorğu).
+
+    Hədəflər YALNIZ bağlı jurnallardan yaranır — bağlı jurnalı olmayan dövrün kampaniyası «Açıq»
+    görünsə də heç bir tələbəyə çıxmır; RİM bunu kartın özündə görməlidir.
+    """
+    counts = bridge.closed_offering_counts(organization, [row["period_id"] for row in rows])
+    for row in rows:
+        item = counts.get(row["period_id"]) or {"closed": 0, "total": 0}
+        row["journals_closed"], row["journals_total"] = item["closed"], item["total"]
+        row["no_targets"] = row["effective_status"] == CampaignStatus.OPEN and not item["closed"]
+
+
+def _period_choices(organization, used, today) -> list:
+    """Yeni kampaniya seçimi: keçmiş/cari dövrlər ƏVVƏL (ən yenisi seçili), gələcək dövrlər SONDA.
+
+    Sahib 2026-10-04: siyahı ``-start_date`` ilə gəlirdi — ilk sətir gələcək «Yaz 2026/2027» idi və
+    «Kampaniyanı aç» seçim dəyişdirilmədən basılanda hədəfsiz kampaniya açılırdı. Hər seçimdə
+    «bağlı jurnal N / M» yazılır ki, boş dövr bir baxışda bilinsin.
+    """
+    AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
+    candidates = [
+        period
+        for period in AcademicPeriod.objects.filter(organization=organization).order_by("-start_date")[:12]
+        if period.pk not in used
+    ]
+    candidates.sort(key=lambda period: (period.start_date > today, -period.start_date.toordinal()))
+    counts = bridge.closed_offering_counts(organization, [period.pk for period in candidates])
+    suffix = pgettext("surveys.cabinet", "bağlı jurnal %(closed)s / %(total)s")
+    return [
+        {
+            "id": period.pk,
+            "label": f"{period.name} · {period.academic_year} — "
+            + suffix % (counts.get(period.pk) or {"closed": 0, "total": 0}),
+            "selected": index == 0,
+        }
+        for index, period in enumerate(candidates)
+    ]
 
 
 def _attach_question_sets(organization, rows) -> None:

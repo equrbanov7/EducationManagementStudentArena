@@ -295,6 +295,29 @@
     color: var(--ems-neutral-500);
 }
 
+.svc-chip--danger {
+    background: var(--ems-danger-bg, #fef2f2);
+    color: var(--ems-danger-700, #b91c1c);
+}
+
+/* Sahib 2026-10-04: açıq, amma hədəfsiz kampaniya — səbəb kartın başında yazılır. */
+.svc-camp__hint {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border-radius: var(--ems-r-md, 10px);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm, 13px);
+    line-height: 1.45;
+}
+
+.svc-camp__hint i {
+    margin-top: 2px;
+}
+
 .svc-stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
