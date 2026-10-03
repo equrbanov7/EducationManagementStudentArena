@@ -25,7 +25,7 @@ from django.utils import timezone
 from apps.registrar import grade_audit
 from apps.registrar import selfwork_points as rules
 from apps.registrar import selfwork_structure as structure
-from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
+from apps.registrar.gradebook import journal_is_locked, mark_edit_window
 from apps.registrar.models import Enrollment, SelfWorkMark, SelfWorkTopic
 from core.http_ids import parse_uuid
 
@@ -195,7 +195,7 @@ def set_selfwork_mark(
         if not allow_locked and rules.is_graded(mark):
             if mark.source == rules.SOURCE_SUBJECT_FOLDER:
                 return False  # fənn qovluğu balı — yalnız sənədli düzəliş
-            if (now - mark.updated_at) > MARK_EDIT_WINDOW:
+            if (now - mark.updated_at) > mark_edit_window():
                 return False  # verilmiş işi 2 saatdan sonra geri almaq/dəyişmək olmaz (İKT keçir)
         old = audit_value(mark, topic)
         mark.done = new_done

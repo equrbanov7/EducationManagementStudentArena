@@ -53,7 +53,7 @@ from django.utils import timezone
 
 from apps.registrar import selfwork_points as rules
 from apps.registrar import selfwork_structure as structure
-from apps.registrar.gradebook import MARK_EDIT_WINDOW
+from apps.registrar.gradebook import mark_edit_window
 from apps.registrar.models import (
     ComponentKind,
     ComponentScore,
@@ -158,7 +158,7 @@ def _cell(slot, mark, now) -> dict:
         "points": value,  # effektiv bal və ya None («—»)
         "points_value": rules.display(value) if value is not None else "",
         # geri alma/dəyişmə kilidi: qiymətlidir və 2 saat keçib
-        "locked": bool(graded and (now - mark.updated_at) > MARK_EDIT_WINDOW),
+        "locked": bool(graded and (now - mark.updated_at) > mark_edit_window()),
         "from_folder": from_folder,  # «Fənn qovluğu» nişanı — lövhədə oxu-only
         "graded_at": mark.graded_at if graded else None,
         "graded_by": _user_label(mark.entered_by) if graded and mark.entered_by_id else "",

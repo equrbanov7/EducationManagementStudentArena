@@ -198,6 +198,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_exam_score_entry.html" %}
             {% elif active_section == "legacy-grade-review" and 'legacy-grade-review' in allowed_sections %}
                 {% include "accounts/profile/sections/_legacy_grade_review.html" %}
+            {% elif active_section == "system-settings" and 'system-settings' in allowed_sections %}
+                {% include "accounts/profile/sections/_system_settings.html" %}
             {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}

@@ -95,6 +95,13 @@ def _get_model() -> str:
 
     Köhnə adlar (gemini-2.5-*) ``core.ai_models.resolve_model`` ilə cari modelə çevrilir.
     """
+    # 0. «Sistem tənzimləmələri» (RİM rəhbəri, 2026-10-03) — açıq seçim hamısından üstündür.
+    from core.ai_models import preferred_model
+
+    preferred = preferred_model()
+    if preferred:
+        return preferred
+
     env_model = os.getenv("GEMINI_MODEL")
     if env_model and env_model.strip():
         return resolve_model(env_model)

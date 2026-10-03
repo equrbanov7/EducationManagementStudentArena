@@ -74,11 +74,15 @@ OTP_VERIFY_IP_RATE_LIMIT_DEFAULT = "100/10m"
 
 
 def otp_send_ip_rate_limit():
-    return getattr(settings, "OTP_SEND_IP_RATE_LIMIT", OTP_SEND_IP_RATE_LIMIT_DEFAULT)
+    from core import runtime_settings
+
+    return runtime_settings.get("otp.send_ip_rate") or OTP_SEND_IP_RATE_LIMIT_DEFAULT
 
 
 def otp_verify_ip_rate_limit():
-    return getattr(settings, "OTP_VERIFY_IP_RATE_LIMIT", OTP_VERIFY_IP_RATE_LIMIT_DEFAULT)
+    from core import runtime_settings
+
+    return runtime_settings.get("otp.verify_ip_rate") or OTP_VERIFY_IP_RATE_LIMIT_DEFAULT
 
 
 OTP_VERIFY_LIMIT_SCOPE = "accounts.otp.verify"

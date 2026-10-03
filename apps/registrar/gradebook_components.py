@@ -25,7 +25,7 @@ from apps.registrar.models import (
     LessonMark,
 )
 
-from .gradebook import MARK_EDIT_WINDOW, _to_decimal, journal_is_locked  # noqa: F401
+from .gradebook import _to_decimal, journal_is_locked, mark_edit_window  # noqa: F401
 
 _INTEGER = Decimal("1")
 
@@ -367,7 +367,7 @@ def save_component_scores(
             if require_all:
                 existing_query = existing_query.select_for_update()
             existing = existing_query.first()
-            if not bypass_edit_window and existing is not None and (now - existing.created_at) > MARK_EDIT_WINDOW:
+            if not bypass_edit_window and existing is not None and (now - existing.created_at) > mark_edit_window():
                 if require_all:
                     raise ValidationError(
                         "Komponent balının redaktə müddəti bitib.",

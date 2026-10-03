@@ -7,10 +7,10 @@ qrupuna keçdi (əvvəllər hamısı bir siyahıda 13 bəndə qədər uzanırdı
 
 ⚠️ XARİCİ ŞƏRT (`can_manage_org or …`) OLDUĞU KİMİ saxlanılıb: qrupun
 görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmayıb.{% endcomment %}
-{% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections %}
-{% if 'role-assignment' in allowed_sections or 'rim-center' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-organization-management' in allowed_sections or 'permission-editor' in allowed_sections or 'manage-roles' in allowed_sections %}
+{% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections or 'system-settings' in allowed_sections %}
+{% if 'role-assignment' in allowed_sections or 'rim-center' in allowed_sections or 'system-settings' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-organization-management' in allowed_sections or 'permission-editor' in allowed_sections or 'manage-roles' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="management">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|role-assignment|rim-center|teacher-intake|student-organization-management|permission-editor|manage-roles|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|role-assignment|rim-center|system-settings|teacher-intake|student-organization-management|permission-editor|manage-roles|" %} open{% endif %}>
         {% trans "group_management" context "profile.sidebar" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-user-shield" %}
         <ul class="sidebar-menu-group-items">
@@ -36,6 +36,20 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'rim-center' %}active{% endif %}">
                     <i class="fas fa-id-card-alt sidebar-menu-icon" aria-hidden="true"></i>
                     <span class="sidebar-menu-text">{% trans "RİM mərkəzi" context "profile.rim" %}</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% comment %}2026-10-03 (sahib): «Sistem tənzimləmələri» — yalnız RİM rəhbəri / superadmin.{% endcomment %}
+            {% if 'system-settings' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=system-settings"
+                   data-section="system-settings"
+                   data-title="{% trans 'Sistem tənzimləmələri' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}?section=system-settings"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'system-settings' %}active{% endif %}">
+                    <i class="fas fa-sliders sidebar-menu-icon" aria-hidden="true"></i>
+                    <span class="sidebar-menu-text">{% trans "Sistem tənzimləmələri" context "profile.section" %}</span>
                 </a>
             </li>
             {% endif %}

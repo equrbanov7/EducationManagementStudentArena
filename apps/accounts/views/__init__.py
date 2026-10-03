@@ -180,6 +180,7 @@ from .syllabus import (
     syllabus_review_open,
     syllabus_section_save,
 )
+from .system_settings import system_settings_save
 from .teacher_intake import teacher_intake_apply, teacher_intake_preview, teacher_intake_template
 
 __all__ = [
@@ -271,6 +272,7 @@ __all__ = [
     "student_intake_apply",
     "student_admission_create_group",
     "student_activation_sheet",
+    "system_settings_save",
     "student_registry_action",
     "student_registry_card",
     "student_registry_document",

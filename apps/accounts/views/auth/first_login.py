@@ -31,6 +31,7 @@ from django.utils.translation import pgettext
 
 from apps.accounts.identity import canonical_identity_queryset
 from apps.accounts.models import EmailOTP
+from core import runtime_settings
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 
 from ...services import send_otp_email, verify_email_otp
@@ -179,7 +180,7 @@ def _handle_send_otp(request, user):
         return redirect("accounts:set_initial_password")
 
     # Throttle OTP sends per (user, email) to prevent email-bombing.
-    rate = getattr(settings, "OTP_RESEND_RATE_LIMIT", "5/10m")
+    rate = runtime_settings.override("otp.resend_rate") or getattr(settings, "OTP_RESEND_RATE_LIMIT", "5/10m")
     limit_key = _otp_limit_key(request, email)
     is_limited, _retry_after = is_rate_limited("first_login_otp", rate, *limit_key)
     if is_limited:

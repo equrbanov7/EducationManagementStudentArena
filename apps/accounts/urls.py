@@ -332,6 +332,8 @@ urlpatterns = [
     path("student-registry/programs/", views.student_registry_programs, name="student_registry_programs"),
     path("student-registry/action/", views.student_registry_action, name="student_registry_action"),
     path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
+    # 2026-10-03: «Sistem tənzimləmələri» — saxlama (yalnız RİM rəhbəri / superadmin).
+    path("system-settings/save/", views.system_settings_save, name="system_settings_save"),
     # 2026-10-03: qrupun «ilk giriş» çap vərəqi (QR + təlimat + aktivləşdirməyənlər, PAROLSUZ).
     path(
         "student-registry/activation-sheet/",

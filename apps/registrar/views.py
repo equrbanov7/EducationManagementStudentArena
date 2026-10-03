@@ -216,6 +216,9 @@ def journal_detail(request, offering_id):
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "seminar_score_options": list(range(0, 11)),
+        # 2026-10-03: pəncərələr «Sistem tənzimləmələri»ndən — mətnlər faktiki saatı göstərsin.
+        "lesson_edit_hours": int(gradebook.lesson_edit_window().total_seconds() // 3600),
+        "mark_edit_hours": int(gradebook.mark_edit_window().total_seconds() // 3600),
         "kollokvium_score_options": journal_extras.interim_score_options(offering),  # 0–10 / midterm 0–20
         "today_parity": today_parity,
         "active_main_nav": "journal",

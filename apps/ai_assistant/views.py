@@ -69,7 +69,9 @@ def _page_path(raw: str) -> str:
 
 
 def _get_rate_limit() -> str:
-    return getattr(settings, "AI_ASSISTANT_RATE_LIMIT", "25/1h")
+    from core import runtime_settings
+
+    return runtime_settings.override("ai.assistant_rate") or getattr(settings, "AI_ASSISTANT_RATE_LIMIT", "25/1h")
 
 
 #: Sahib 2026-10-01: BÜTÜN sistem üzrə gündəlik tavan — xərc nəzarəti (istifadəçi başına saatlıq

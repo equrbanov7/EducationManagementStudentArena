@@ -51,10 +51,20 @@ def resolve_model(name: str | None) -> str:
     return _aliases().get(model, model)
 
 
+def preferred_model() -> str:
+    """«Sistem tənzimləmələri»ndə RİM rəhbərinin seçdiyi model (2026-10-03); «Avtomatik» → boş sətir."""
+    try:
+        from core import runtime_settings
+
+        return resolve_model(runtime_settings.override("ai.model") or "")
+    except Exception:  # noqa: BLE001 — tənzimləmə oxunmasa mövcud qayda işləsin
+        return ""
+
+
 def resolve_chain(chain) -> tuple[str, ...]:
-    """Model zəncirini həll et, təkrarları at (sıra saxlanır)."""
+    """Model zəncirini həll et, təkrarları at (sıra saxlanır). Seçilmiş model varsa zəncirin BAŞINDADIR."""
     seen: list[str] = []
-    for name in chain:
+    for name in (preferred_model(), *chain):
         model = resolve_model(name)
         if model and model not in seen:
             seen.append(model)
