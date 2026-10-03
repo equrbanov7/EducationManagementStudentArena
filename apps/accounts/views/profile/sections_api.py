@@ -96,6 +96,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "kollokvium-windows": "accounts/profile/sections/_kollokvium_windows.html",
     "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
     "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
+    "system-settings": "accounts/profile/sections/_system_settings.html",
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "system-monitoring": "accounts/profile/sections/superadmin/_system_monitoring.html",
     "statistics": "accounts/profile/sections/_statistics.html",
@@ -297,6 +298,8 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # çərçivəni verir, sətirlər JSON GET-lə gəlir, qərar/düzəliş isə ayrıca
         # POST endpoint-inə (multipart, sənədlə) gedir.
         "legacy-grade-review",
+        # «Sistem tənzimləmələri» — forma JSON POST-la saxlanılır (system_settings.js), panel oxu-only render.
+        "system-settings",
         # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
         # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
         "org-structure-tree",

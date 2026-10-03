@@ -111,7 +111,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         data-lesson-start="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% endif %}"
                                         data-lesson-end="{% if lm.lesson.end_time %}{{ lm.lesson.end_time|time:'H:i' }}{% endif %}"
                                         data-action-url="{% url 'registrar:journal_lesson_action' offering.id lm.lesson.id %}"
-                                        title="{% trans 'Redaktə / sil (2 saat pəncərəsi)' context 'registrar.journal' %}"><i class="fas fa-pen"></i></button>
+                                        title="{% blocktrans with h=lesson_edit_hours|default:2 context 'registrar.journal' %}Redaktə / sil ({{ h }} saat pəncərəsi){% endblocktrans %}"><i class="fas fa-pen"></i></button>
                                 {% endif %}
                                 {% if can_edit and lm.markable %}
                                 <span class="jd2-th-bulk">
@@ -261,7 +261,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
     {# ── Alt legend zolağı (mockup) ───────────────────────────────────────── #}
     <div class="jd2-footbar">
         <span class="jd2-foot-legend"><b class="jd2-ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} <b class="jd2-qb">q/b</b> {% trans "qayıb" context "registrar.journal" %}</span>
-        <span class="jd2-foot-note">{% trans "Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd 2 saatdan sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir." context "registrar.journal" %}</span>
+        <span class="jd2-foot-note">{% blocktrans with h=mark_edit_hours|default:2 context "registrar.journal" %}Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd {{ h }} saatdan sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət edilir.{% endblocktrans %}</span>
         <span class="jd2-foot-chips">
             <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Limitə yaxın" context "registrar.journal" %}</span>
             <span class="jd2-limitchip jd2-limitchip--barred">■ {% trans "Limit keçib — kəsilir" context "registrar.journal" %}</span>

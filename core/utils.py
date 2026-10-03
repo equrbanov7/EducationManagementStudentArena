@@ -88,7 +88,14 @@ def build_absolute_url(path="", request=None):
 def get_auth_otp_expiry_seconds():
     """
     Return the configured OTP validity window in seconds.
+
+    2026-10-03: «Sistem tənzimləmələri» (RİM rəhbəri) dəyəri varsa o işləyir, yoxdursa mühitin ayarı.
     """
+    from core import runtime_settings
+
+    minutes = runtime_settings.override("otp.expiry_minutes")
+    if minutes:
+        return max(60, int(minutes) * 60)
     return max(60, int(getattr(settings, "AUTH_OTP_EXPIRY_SECONDS", 300)))
 
 
@@ -104,21 +111,30 @@ def get_auth_otp_resend_cooldown_seconds():
     """
     Return the minimum wait time before a new OTP can be resent.
     """
-    return max(30, int(getattr(settings, "AUTH_OTP_RESEND_COOLDOWN_SECONDS", 60)))
+    from core import runtime_settings
+
+    value = runtime_settings.override("otp.resend_cooldown_seconds")
+    return max(30, int(value if value else getattr(settings, "AUTH_OTP_RESEND_COOLDOWN_SECONDS", 60)))
 
 
 def get_auth_otp_max_attempts():
     """
     Return the maximum allowed verification attempts per OTP.
     """
-    return max(1, int(getattr(settings, "AUTH_OTP_MAX_ATTEMPTS", 5)))
+    from core import runtime_settings
+
+    value = runtime_settings.override("otp.max_attempts")
+    return max(1, int(value if value else getattr(settings, "AUTH_OTP_MAX_ATTEMPTS", 5)))
 
 
 def get_auth_otp_max_sends_per_hour():
     """
     Return the maximum number of OTP sends allowed per email per rolling hour.
     """
-    return max(1, int(getattr(settings, "AUTH_OTP_MAX_SENDS_PER_HOUR", 5)))
+    from core import runtime_settings
+
+    value = runtime_settings.override("otp.max_sends_per_hour")
+    return max(1, int(value if value else getattr(settings, "AUTH_OTP_MAX_SENDS_PER_HOUR", 5)))
 
 
 def get_auth_pending_signup_ttl_seconds():

@@ -156,8 +156,15 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
             ticket.save(update_fields=["pin_failed_attempts", "pin_locked_until", "updated_at"])
         return True
 
-    max_failures = int(getattr(settings, "FINAL_EXAM_PIN_MAX_FAILURES", 5))
-    lock_minutes = int(getattr(settings, "FINAL_EXAM_PIN_LOCK_MINUTES", 10))
+    # 2026-10-03: «Sistem tənzimləmələri» (RİM rəhbəri) dəyəri varsa o, yoxdursa mühitin ayarı.
+    from core import runtime_settings
+
+    max_failures = int(
+        runtime_settings.override("exam.pin_max_failures") or getattr(settings, "FINAL_EXAM_PIN_MAX_FAILURES", 5)
+    )
+    lock_minutes = int(
+        runtime_settings.override("exam.pin_lock_minutes") or getattr(settings, "FINAL_EXAM_PIN_LOCK_MINUTES", 10)
+    )
     # Atomic increment (F()) so parallel wrong-PIN attempts cannot lose counts
     # and slip past the lockout threshold under a race (EXAM-SEC-003).  Re-read
     # the persisted value before deciding whether to arm the lockout window, and

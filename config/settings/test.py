@@ -202,6 +202,10 @@ CACHES = {
     }
 }
 
+# «Sistem tənzimləmələri» (core.runtime_settings): testlərdə bazaya baxılmır — defoltlar işləyir, sorğu büdcəsi
+# testləri pozulmur. Xüsusiyyətin öz testləri `override_settings(RUNTIME_SETTINGS_ENABLED=True)` ilə açır.
+RUNTIME_SETTINGS_ENABLED = False
+
 # Use console email backend for tests
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = "http://testserver"

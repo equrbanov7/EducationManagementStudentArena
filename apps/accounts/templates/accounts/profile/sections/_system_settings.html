@@ -1,0 +1,73 @@
+{% load i18n static %}
+{% comment %}
+«Sistem tənzimləmələri» (sahib 2026-10-03) — YALNIZ RİM rəhbəri / superadmin. Limitlər bir yerdən dəyişir:
+giriş/parol cəhdləri, OTP, sessiya, jurnal müddətləri, AI modeli, final imtahan PIN-i. Dəyər defolta bərabər
+saxlananda sətir silinir (defolt işləyir). Göndəriş JSON POST-dur (system_settings.js), CSS/JS xarici fayldadır.
+{% endcomment %}
+{% if 'system-settings' in allowed_sections %}
+{% trans "Sistemin limitləri bir yerdən: dəyişiklik bütün serverlərdə 10–15 saniyəyə qüvvəyə minir və audit jurnalına yazılır. Boş saxlanan və ya defolta qaytarılan dəyər üçün sistemin standart qaydası işləyir." context "accounts.runtime_settings" as ss_subtitle %}
+<section class="profile-section-panel {% if active_section == 'system-settings' %}is-active{% endif %}"
+         data-profile-section-panel="system-settings"
+         data-source-url="{{ profile_base_url }}?section=system-settings">
+{% with ss=system_settings_section %}
+{% if not ss.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=ss.access_denied_message %}
+{% else %}
+<div class="sysset" data-ss-root data-ss-url="{{ ss.save_url }}">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ss_subtitle %}
+    <form class="sysset__form" data-ss-form novalidate>
+        {% csrf_token %}
+        {% for group in ss.groups %}
+        <fieldset class="sysset__group">
+            <legend class="sysset__legend">{{ group.label }}</legend>
+            {% for f in group.fields %}
+            <div class="sysset__row{% if f.overridden %} is-overridden{% endif %}" data-ss-field="{{ f.key }}">
+                <div class="sysset__meta">
+                    <label class="sysset__label" for="ss-{{ f.key }}">{{ f.label }}</label>
+                    {% if f.help %}<p class="sysset__help">{{ f.help }}</p>{% endif %}
+                    <p class="sysset__default">
+                        {% trans "Standart" context "accounts.runtime_settings" %}:
+                        {% if f.kind == "rate" %}{{ f.default_count }} / {{ f.default_window }} {% trans "dəq." context "accounts.runtime_settings" %}{% elif f.kind == "choice" %}{% if f.default %}{{ f.default }}{% else %}{% trans "Avtomatik" context "accounts.runtime_settings" %}{% endif %}{% else %}{{ f.default }} {{ f.unit }}{% endif %}
+                        {% if f.overridden %}<span class="sysset__badge" title="{{ f.updated_at|date:'d.m.Y H:i' }}">{% trans "Dəyişdirilib" context "accounts.runtime_settings" %}{% if f.updated_by %} · {{ f.updated_by }}{% endif %}{% if f.updated_at %} · {{ f.updated_at|date:"d.m.Y H:i" }}{% endif %}</span>{% endif %}
+                    </p>
+                    <p class="sysset__error" data-ss-error hidden></p>
+                </div>
+                <div class="sysset__control">
+                    {% if f.kind == "rate" %}
+                    <input class="ems-input sysset__num" type="number" id="ss-{{ f.key }}" name="{{ f.key }}.count" min="{{ f.min }}" max="{{ f.max }}" value="{{ f.count }}" data-default="{{ f.default_count }}">
+                    <span class="sysset__unit">{% trans "dəfə /" context "accounts.runtime_settings" %}</span>
+                    <input class="ems-input sysset__num" type="number" name="{{ f.key }}.window" min="1" max="1440" value="{{ f.window }}" data-default="{{ f.default_window }}" aria-label="{% trans 'Pəncərə (dəqiqə)' context 'accounts.runtime_settings' %}">
+                    <span class="sysset__unit">{% trans "dəqiqədə" context "accounts.runtime_settings" %}</span>
+                    {% elif f.kind == "choice" %}
+                    <div class="bootstrap-single-select bootstrap-single-select--ems sysset__select">
+                        <select class="bootstrap-single-select__native" id="ss-{{ f.key }}" name="{{ f.key }}" data-bootstrap-select data-default="{{ f.default }}">
+                            {% for option in f.choices %}
+                            <option value="{{ option.value }}"{% if option.value == f.value %} selected{% endif %}>{{ option.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                    <input class="ems-input sysset__num" type="number" id="ss-{{ f.key }}" name="{{ f.key }}" min="{{ f.min }}" max="{{ f.max }}" value="{{ f.value }}" data-default="{{ f.default }}">
+                    <span class="sysset__unit">{{ f.unit }}</span>
+                    {% endif %}
+                    <button type="button" class="ems-btn ems-btn--sm sysset__reset" data-ss-reset title="{% trans 'Standarta qaytar' context 'accounts.runtime_settings' %}">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i><span class="sr-only">{% trans "Standarta qaytar" context "accounts.runtime_settings" %}</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </fieldset>
+        {% endfor %}
+        <div class="sysset__actions">
+            <button type="submit" class="ems-btn ems-btn--primary" data-ss-submit>
+                <i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "accounts.runtime_settings" %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endif %}
+{% endwith %}
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/system_settings.css' %}?v=20261003-ss">
+<script src="{% static 'accounts/js/profile/system_settings.js' %}?v=20261003-ss" defer></script>
+</section>
+{% endif %}

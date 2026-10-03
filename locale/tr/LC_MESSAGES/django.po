@@ -89434,3 +89434,299 @@ msgstr "Tarih"
 msgctxt "accounts.student_registry"
 msgid "Tələbəyə qeyd"
 msgstr "Öğrenciye not"
+
+msgctxt "accounts.runtime_settings"
+msgid "Avtomatik"
+msgstr "Otomatik"
+
+msgctxt "accounts.runtime_settings"
+msgid "Bu əməl yalnız RİM rəhbəri üçündür."
+msgstr "Bu işlem yalnızca RİM başkanı içindir."
+
+msgctxt "accounts.runtime_settings"
+msgid "Bəzi dəyərlər yanlışdır."
+msgstr "Bazı değerler geçersiz."
+
+msgctxt "accounts.runtime_settings"
+msgid "Dəyişdirilib"
+msgstr "Değiştirildi"
+
+msgctxt "accounts.runtime_settings"
+msgid "Dəyişiklik yoxdur."
+msgstr "Değişiklik yok."
+
+msgctxt "accounts.runtime_settings"
+msgid "Dəyər %(min)s–%(max)s aralığında olmalıdır."
+msgstr "Değer %(min)s–%(max)s aralığında olmalıdır."
+
+msgctxt "accounts.runtime_settings"
+msgid "Pəncərə (dəqiqə)"
+msgstr "Pencere (dakika)"
+
+msgctxt "accounts.runtime_settings"
+msgid "Sistem tənzimləmələri yalnız RİM rəhbəri üçündür."
+msgstr "Sistem ayarları yalnızca RİM başkanı içindir."
+
+msgctxt "accounts.runtime_settings"
+msgid ""
+"Sistemin limitləri bir yerdən: dəyişiklik bütün serverlərdə 10–15 saniyəyə "
+"qüvvəyə minir və audit jurnalına yazılır. Boş saxlanan və ya defolta "
+"qaytarılan dəyər üçün sistemin standart qaydası işləyir."
+msgstr ""
+"Sistem limitleri tek yerden: değişiklik tüm sunucularda 10–15 saniye içinde "
+"yürürlüğe girer ve denetim günlüğüne yazılır. Varsayılana döndürülen değer "
+"için sistemin standart kuralı geçerlidir."
+
+msgctxt "accounts.runtime_settings"
+msgid "Siyahıdan seçin."
+msgstr "Listeden seçin."
+
+msgctxt "accounts.runtime_settings"
+msgid "Standart"
+msgstr "Varsayılan"
+
+msgctxt "accounts.runtime_settings"
+msgid "Standarta qaytar"
+msgstr "Varsayılana döndür"
+
+msgctxt "accounts.runtime_settings"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "accounts.runtime_settings"
+msgid ""
+"Yadda saxlanıldı: %(n)d dəyişiklik. Bütün serverlərdə 10–15 saniyəyə qüvvəyə"
+" minir."
+msgstr ""
+"Kaydedildi: %(n)d değişiklik. Tüm sunucularda 10–15 saniye içinde geçerli "
+"olur."
+
+msgctxt "accounts.runtime_settings"
+msgid "dəfə /"
+msgstr "kez /"
+
+msgctxt "accounts.runtime_settings"
+msgid "dəq."
+msgstr "dk"
+
+msgctxt "accounts.runtime_settings"
+msgid "dəqiqədə"
+msgstr "dakikada"
+
+msgctxt "core.runtime_settings"
+msgid "AI köməkçiyə bir istifadəçinin sual sayı"
+msgstr "Bir kullanıcının yapay zekâ asistanına soru sayısı"
+
+msgctxt "core.runtime_settings"
+msgid "AI modeli (köməkçi, xülasə, yoxlama)"
+msgstr "Yapay zekâ modeli (asistan, özet, değerlendirme)"
+
+msgctxt "core.runtime_settings"
+msgid "Avtomatik (cari tənzimləmə)"
+msgstr "Otomatik (mevcut yapılandırma)"
+
+msgctxt "core.runtime_settings"
+msgid "Bir cihazdan səhv parol cəhdi"
+msgstr "Bir cihazdan yanlış parola denemesi"
+
+msgctxt "core.runtime_settings"
+msgid "Bir e-poçta saatda göndərilən kod sayı"
+msgstr "Bir e-postaya saatte gönderilen kod sayısı"
+
+msgctxt "core.runtime_settings"
+msgid "Bir hesaba səhv parol cəhdi (bütün cihazlardan)"
+msgstr "Bir hesaba yanlış parola denemesi (tüm cihazlardan)"
+
+msgctxt "core.runtime_settings"
+msgid "Bir kod üçün səhv yazma cəhdi"
+msgstr "Bir kod için yanlış giriş denemesi"
+
+msgctxt "core.runtime_settings"
+msgid "Bir İP ünvanından giriş cəhdi"
+msgstr "Bir IP adresinden giriş denemesi"
+
+msgctxt "core.runtime_settings"
+msgid "Bir İP-dən parol bərpa kodu göndərmə"
+msgstr "Bir IP'den parola sıfırlama kodu gönderme"
+
+msgctxt "core.runtime_settings"
+msgid "Bir İP-dən parol bərpa kodunu yoxlama"
+msgstr "Bir IP'den parola sıfırlama kodu doğrulama"
+
+msgctxt "core.runtime_settings"
+msgid "Dərs sətrini (tarix, mövzu, saat) düzəltmə / silmə müddəti"
+msgstr "Ders satırını (tarih, konu, saat) düzeltme / silme süresi"
+
+msgctxt "core.runtime_settings"
+msgid "E-poçt kodu (OTP)"
+msgstr "E-posta kodu (OTP)"
+
+msgctxt "core.runtime_settings"
+msgid "E-poçta gələn 6 rəqəmli kod bu qədər dəqiqə işləyir."
+msgstr "E-postaya gelen 6 haneli kod bu kadar dakika geçerlidir."
+
+msgctxt "core.runtime_settings"
+msgid "Elektron jurnal"
+msgstr "Elektronik yoklama defteri"
+
+msgctxt "core.runtime_settings"
+msgid "Final imtahan PIN-ini səhv yazma cəhdi"
+msgstr "Final sınavı PIN'ini yanlış yazma denemesi"
+
+msgctxt "core.runtime_settings"
+msgid "Final imtahan girişi"
+msgstr "Final sınavı girişi"
+
+msgctxt "core.runtime_settings"
+msgid "Giriş və parol cəhdləri"
+msgstr "Giriş ve parola denemeleri"
+
+msgctxt "core.runtime_settings"
+msgid "Hərəkətsizlikdən sonra avtomatik çıxış"
+msgstr "Hareketsizlikten sonra otomatik çıkış"
+
+msgctxt "core.runtime_settings"
+msgid "Kodu yenidən göndərmə fasiləsi"
+msgstr "Kodu yeniden gönderme bekleme süresi"
+
+msgctxt "core.runtime_settings"
+msgid "Kodu yenidən istəmə (ilk giriş / qeydiyyat)"
+msgstr "Kodu yeniden isteme (ilk giriş / kayıt)"
+
+msgctxt "core.runtime_settings"
+msgid "Kodu yoxlama cəhdi (qeydiyyat)"
+msgstr "Kod doğrulama denemesi (kayıt)"
+
+msgctxt "core.runtime_settings"
+msgid "Kodun etibarlılıq müddəti"
+msgstr "Kodun geçerlilik süresi"
+
+msgctxt "core.runtime_settings"
+msgid "Müəllim dərsi yaratdıqdan sonra bu qədər saat ərzində dəyişə bilər."
+msgstr ""
+"Öğretim elemanı dersi oluşturduktan sonra bu kadar saat içinde "
+"değiştirebilir."
+
+msgctxt "core.runtime_settings"
+msgid "PIN səhvlərindən sonra kilid müddəti"
+msgstr "PIN hatalarından sonra kilit süresi"
+
+msgctxt "core.runtime_settings"
+msgid "Pəncərə ərzində icazə verilən say; keçəndə istifadəçi gözləməli olur."
+msgstr ""
+"Pencere içinde izin verilen sayı; aşılırsa kullanıcı beklemek zorunda kalır."
+
+msgctxt "core.runtime_settings"
+msgid "Sessiya"
+msgstr "Oturum"
+
+msgctxt "core.runtime_settings"
+msgid "Süni intellekt"
+msgstr "Yapay zekâ"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Universitet Wi-Fi-ında yüzlərlə tələbə EYNİ İP-dən çıxır — çox aşağı "
+"saxlamayın."
+msgstr ""
+"Üniversite Wi-Fi'ında yüzlerce öğrenci AYNI IP'den çıkar — çok düşük "
+"tutmayın."
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Yazılmış qeyd bu qədər saatdan sonra donur (sonra yalnız rəsmi düzəliş "
+"yolu)."
+msgstr ""
+"Yazılan kayıt bu kadar saatten sonra donar (sonra yalnızca resmî düzeltme "
+"yolu)."
+
+msgctxt "core.runtime_settings"
+msgid "cəhd"
+msgstr "deneme"
+
+msgctxt "core.runtime_settings"
+msgid "dəqiqə"
+msgstr "dakika"
+
+msgctxt "core.runtime_settings"
+msgid "kod"
+msgstr "kod"
+
+msgctxt "core.runtime_settings"
+msgid "q/b, i/e və balı dəyişmə müddəti"
+msgstr "Devamsızlık / katılım ve puanı değiştirme süresi"
+
+msgctxt "core.runtime_settings"
+msgid "saat"
+msgstr "saat"
+
+msgctxt "core.runtime_settings"
+msgid "saniyə"
+msgstr "saniye"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"«Avtomatik» — mövcud server tənzimləməsi; seçilən model hamısında birinci "
+"yoxlanılır."
+msgstr ""
+"«Otomatik» — mevcut sunucu yapılandırması; seçilen model her yerde ilk "
+"denenir."
+
+msgctxt "core.runtime_settings"
+msgid ""
+"İstifadəçi bu qədər saat heç nə etməsə, sistemdən çıxarılır (sessiya ən çox "
+"24 saat yaşayır)."
+msgstr ""
+"Kullanıcı bu kadar saat hiçbir şey yapmazsa oturumu kapatılır (oturum en "
+"fazla 24 saat sürer)."
+
+msgctxt "profile.section"
+msgid "Sistem tənzimləmələri"
+msgstr "Sistem ayarları"
+
+msgctxt "registrar.journal"
+msgid "%(h)s saat pəncərəsi bağlanıb"
+msgstr "%(h)s saatlik pencere kapandı"
+
+msgctxt "registrar.journal"
+msgid ""
+"Bu dərs kilidlənib (%(h)s saat keçib). Tarix/tip/saat/mövzu/müəllim "
+"dəyişikliyi VƏ YA dərsin silinməsi rəsmi sənədlə (təqdimat) audit olunur."
+msgstr ""
+"Bu ders kilitlendi (%(h)s saat geçti). Tarih/tür/saat/konu/öğretim elemanı "
+"değişikliği VEYA dersin silinmesi resmî belgeyle (dilekçe) denetlenir."
+
+msgctxt "registrar.journal"
+msgid ""
+"Davamiyyət yalnız cari gün üzrə qeyd edilə bilər · yazılmış qeyd %(h)s "
+"saatdan sonra kilidlənir — düzəliş üçün Tyutor xidmətinə yazılı müraciət "
+"edilir."
+msgstr ""
+"Devam yalnızca bugün için girilebilir · yazılan kayıt %(h)s saatten sonra "
+"kilitlenir — düzeltme için Tutor hizmetine yazılı başvuru yapılır."
+
+msgctxt "registrar.journal"
+msgid ""
+"Dərs əlavə edildikdə davamiyyət cədvəlinə yeni tarix sütunu açılır və "
+"qeydlər həmin gün aparılır. Səhv açılmış dərsi %(h)s saat içində "
+"silmək/düzəltmək olar."
+msgstr ""
+"Ders eklendiğinde devam tablosunda yeni bir tarih sütunu açılır ve kayıtlar "
+"o gün yapılır. Yanlış açılan ders %(h)s saat içinde "
+"silinebilir/düzeltilebilir."
+
+msgctxt "registrar.journal"
+msgid ""
+"Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd %(h)s "
+"saat sonra kilidlənir."
+msgstr ""
+"Dönem ödevi puanı final tablosunda ayrı bir sütunda gösterilir. Yazılan "
+"kayıt %(h)s saat sonra kilitlenir."
+
+msgctxt "registrar.journal"
+msgid "Redaktə (%(h)s saat pəncərəsi)"
+msgstr "Düzenle (%(h)s saatlik pencere)"
+
+msgctxt "registrar.journal"
+msgid "Redaktə / sil (%(h)s saat pəncərəsi)"
+msgstr "Düzenle / sil (%(h)s saatlik pencere)"

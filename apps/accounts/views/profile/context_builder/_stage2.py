@@ -441,6 +441,8 @@ class _Stage2Mixin:
         # Panel SPA-dır: burada YALNIZ çərçivə saxlanılır (URL + bayraq + sabit),
         # sətirlər JSON-la gəlir — 170 min sətirlik sübut qatı profil kontekstində
         # HEÇ VAXT hesablanmır.
+        # «Sistem tənzimləmələri» (sahib 2026-10-03) — yalnız RİM rəhbəri; aktiv olanda doldurulur.
+        self.system_settings_section = {"has_access": False, "groups": [], "save_url": ""}
         self.legacy_grade_review_section = {
             "has_access": False,
             "can_review": False,

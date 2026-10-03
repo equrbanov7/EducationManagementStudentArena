@@ -37,6 +37,13 @@ class SessionTimeoutMiddleware:
         self.timeout_seconds = settings.SESSION_INACTIVITY_TIMEOUT
         self.write_interval = getattr(settings, "SESSION_ACTIVITY_WRITE_INTERVAL", 300)
 
+    def _timeout_seconds(self):
+        """2026-10-03: «Sistem tənzimləmələri»ndə RİM rəhbərinin dəyəri (saat) varsa o, yoxdursa mühitin ayarı."""
+        from core import runtime_settings
+
+        hours = runtime_settings.override("session.idle_hours")
+        return int(hours) * 3600 if hours else self.timeout_seconds
+
     def __call__(self, request):
         # Backend siyahısından çıxarılmış köhnə/bypass backend sessiyası Django
         # tərəfindən anonymous kimi yüklənir, amma auth açarları sessiyada qala
@@ -62,7 +69,7 @@ class SessionTimeoutMiddleware:
 
             if last_activity:
                 seconds_since_activity = (now - last_activity).total_seconds()
-                if seconds_since_activity > self.timeout_seconds:
+                if seconds_since_activity > self._timeout_seconds():
                     # Session expired through inactivity → log the user out.
                     logout(request)
                 elif seconds_since_activity >= self.write_interval:
