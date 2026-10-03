@@ -3,7 +3,7 @@
 tarixlər, k-həddi, məcburilik. Formalar `surveys:manage`-ə POST edir və `next` ilə bu
 bölməyə qayıdır (tam səhifə bölmə — panel içi fraqment naviqasiyası YOXDUR).
 Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.{% endcomment %}
-<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20260930-1">
+<link rel="stylesheet" href="{% static 'surveys/css/survey_cabinet.css' %}?v=20261004-1">
 {% survey_campaigns_panel as cp %}
 <div class="svc">
     {% if not cp.has_access %}
@@ -22,7 +22,7 @@ Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.
             <div class="bootstrap-single-select bootstrap-single-select--ems">
                 <select id="svc-new-period" name="period" class="bootstrap-single-select__native" data-bootstrap-select required>
                     {% for period in cp.periods %}
-                    <option value="{{ period.id }}">{{ period.label }}</option>
+                    <option value="{{ period.id }}"{% if period.selected %} selected{% endif %}>{{ period.label }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -45,10 +45,16 @@ Select-lər layihə komponentidir (bootstrap-single-select); stil xarici faylda.
             </span>
             <span class="svc-chip svc-chip--muted">{% if row.opened_via == "journal_close" %}{% trans "Jurnal bağlanması ilə" context "surveys.cabinet" %}{% else %}{% trans "Əl ilə" context "surveys.cabinet" %}{% endif %}</span>
             {% if row.mandatory %}<span class="svc-chip svc-chip--warn">{% trans "Məcburi" context "surveys.cabinet" %}</span>{% endif %}
+            {% if row.no_targets %}<span class="svc-chip svc-chip--danger">{% trans "Hədəf yoxdur" context "surveys.cabinet" %}</span>{% endif %}
         </header>
+        {% if row.no_targets %}
+        {# Sahib 2026-10-04: kampaniya açıq idi, amma dövrün jurnalı bağlanmadığından heç bir tələbə sorğunu görmürdü. #}
+        <p class="svc-camp__hint"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "Bu semestrin heç bir jurnalı bağlanmayıb — tələbələr sorğunu görmür. Hədəflər RİM jurnalları bağlayanda özü yaranır; sınaq deyilsə kampaniyanı bağlayın." context "surveys.cabinet" %}</p>
+        {% endif %}
 
         <dl class="svc-stats">
             {# Audit 2026-09-28 SV-4: saylar səbətlə («<5», «5+», …), faiz 5-ə yuvarlaq — dəqiq say yoxdur. #}
+            <div><dt>{% trans "Bağlı jurnal" context "surveys.cabinet" %}</dt><dd>{{ row.journals_closed }} / {{ row.journals_total }}</dd></div>
             <div><dt>{% trans "Cavablar" context "surveys.cabinet" %}</dt><dd>{{ row.responses_label }}</dd></div>
             <div><dt>{% trans "Doldurulmuş hədəf" context "surveys.cabinet" %}</dt><dd>{{ row.receipts_label }}</dd></div>
             {% if row.participation %}

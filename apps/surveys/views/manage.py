@@ -76,6 +76,21 @@ def _period(organization, raw_id):
     return period
 
 
+def _opened_message(organization, campaign):
+    """Sahib 2026-10-04: bağlı jurnalı olmayan dövr üçün açılan kampaniyanı heç bir tələbə görmür —
+    bunu elə açılış anında deyirik (hədəflər yalnız bağlı jurnallardan yaranır)."""
+    from .. import registrar_bridge as bridge
+
+    counts = bridge.closed_offering_counts(organization, [campaign.period_id]).get(campaign.period_id) or {}
+    if counts.get("closed"):
+        return pgettext(_CTX, "Kampaniya açıldı.")
+    return pgettext(
+        _CTX,
+        "Kampaniya açıldı, amma bu semestrin heç bir jurnalı bağlanmayıb — tələbələr sorğunu hələ görməyəcək. "
+        "Hədəflər RİM jurnalları bağlayanda özü yaranır.",
+    )
+
+
 def _dispatch(request, organization, action):
     post = request.POST
     user = request.user
@@ -85,11 +100,11 @@ def _dispatch(request, organization, action):
         )
         if not opened and campaign.status != "open":
             raise ValidationError(pgettext(_CTX, "Bu semestrin kampaniyası artıq var — onu cədvəldən idarə edin."))
-        return pgettext(_CTX, "Kampaniya açıldı.")
+        return _opened_message(organization, campaign)
     campaign = _campaign(organization, post.get("campaign"))
     if action == "open":
         campaign_service.open_campaign(campaign, by_user=user, request=request)
-        return pgettext(_CTX, "Kampaniya açıldı.")
+        return _opened_message(organization, campaign)
     if action == "close":
         campaign_service.close_campaign(campaign, by_user=user, request=request)
         return pgettext(_CTX, "Kampaniya bağlandı.")
