@@ -39,6 +39,10 @@ echo "==> ufw (allow 22/80/443 BEFORE enable)"
 ufw allow 22/tcp
 ufw allow 80/tcp
 ufw allow 443/tcp
+# 2026-10-04: docker körpüsündən (172.18.0.0/16) host gateway-indəki servislərə — node_exporter
+# (Prometheus, 9100) və arp-agent (imtahan MAC, 8953). LAN-a açılmır; «deny incoming» bunları da kəsirdi.
+ufw allow in from 172.18.0.0/16 to 172.18.0.1 port 9100 proto tcp comment 'emsarena node_exporter (Prometheus)'
+ufw allow in from 172.18.0.0/16 to 172.18.0.1 port 8953 proto tcp comment 'emsarena arp-agent (imtahan MAC)'
 ufw default deny incoming
 ufw default allow outgoing
 yes | ufw enable
