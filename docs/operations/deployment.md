@@ -669,6 +669,28 @@ APP_REPLICAS` (≈ 25 for 8 replicas). **Note:** compose does not use `env_file`
 `MAX_INFLIGHT_REQUESTS` must be added to `x-app-env` in `docker-compose.prod.yml`
 before a `.env` value reaches the containers (until then the default 32 applies).
 
+## 5.5 2026-10-04 tutum auditi — konfiq tavanları hardware-dən əvvəl gəlməsin
+
+Oxu-yalnız audit (`prod-audit.yml` §10 «Tutum / konfiqurasiya», run 37154205286): server
+(10 vCPU / 31 GB) 20 %-dən az yüklüdür, amma pikdə ilk doyacaq yer konfiq tavanları idi.
+Repoda düzəldilənlər (adi CI deploy ilə gəlir):
+
+| Nə | Əvvəl | İndi |
+|---|---|---|
+| `app` / `nginx` konteyner `nofile` | Docker defoltu 1024 soft | `ulimits.nofile 65536` (compose) |
+| nginx əsas konfiqi | image defoltu: `worker_connections 1024`, `worker_rlimit_nofile` yox | `docker/nginx/nginx-main.conf` → `/etc/nginx/nginx.conf` (8192 bağlantı/worker, rlimit 65536); deploy skripti hər iki faylın hash-ini yoxlayır |
+| `node_exporter` | bridge şəbəkəsi — host NIC-ləri (ens*) görünmürdü, Monitorinq «Server» tabının şəbəkə qrafiki boş idi | `network_mode: host`, yalnız `172.18.0.1:9100`-ə bind (LAN-a açılmır); Prometheus hədəfi `172.18.0.1:9100` |
+| `postgres_exporter` | `pg_stat_user_tables` kolektoru hər 15 s 219 ms (DB vaxtının ən böyük istehlakçısı, heç yerdə oxunmur) | `--no-collector.stat_user_tables --no-collector.statio_user_tables` |
+| cadvisor | 7 günlük pikdə yaddaş limitinin 99.9 %-i | `--disable_metrics=…percpu,disk,diskIO`, 512M |
+| PostgreSQL | `track_io_timing=off` | `on` (`POSTGRES_TRACK_IO_TIMING`) |
+
+`.env` ilə (env-update.yml): `PGBOUNCER_DEFAULT_POOL_SIZE=110` (tələbat `APP_REPLICAS×MAX_INFLIGHT +
+celery` = 107 > köhnə 40 + 50), `POSTGRES_WORK_MEM=32MB` (2 həftədə 2.2 GB temp fayl).
+Host (`prod-host-maint.yml` → `tune`): `vm.overcommit_memory=1`, `vm.swappiness=10`
+(`/etc/sysctl.d/99-emsarena.conf`), Docker `live-restore=true`; `prune` — 7 gündən köhnə build keşi.
+Qalan (sahib qərarı): `legacy_import_*` cədvəlləri (1.2 GB) idxal bitəndə arxiv, 3 istifadəsiz
+`registrar_lessonmark` indeksi, off-site backup hədəfi.
+
 ## 6. Static & Private Media Handling
 
 ### Static files
