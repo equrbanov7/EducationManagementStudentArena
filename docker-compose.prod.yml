@@ -568,6 +568,12 @@ services:
     # (tests/test_infra_compose_config.py invariantı defoltları yoxlayır).
     stop_grace_period: ${APP_STOP_GRACE_PERIOD:-130s}
     logging: *default-logging
+    # 2026-10-04 tutum auditi: konteynerin defolt `nofile` 1024 soft idi — replika başına ≈1000
+    # eyni-anlı soket (WS + DB + Redis) tavanı hardware-dən çox əvvəl gəlirdi (5000 WS hədəfi).
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     deploy:
       resources:
         limits:
@@ -738,6 +744,12 @@ services:
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:v0.17.1
     container_name: emsarena-postgres-exporter
+    # 2026-10-04 tutum auditi: `pg_stat_user_tables` kolektoru hər cədvəl üçün
+    # `pg_total_relation_size` çağırır — 15 s-dən bir 219 ms, DB vaxtının ən böyük istehlakçısı
+    # idi (6.9 saat / 2 həftə); heç bir panel/alert bu iki ailəni oxumur (bax apps/monitoring).
+    command:
+      - --no-collector.stat_user_tables
+      - --no-collector.statio_user_tables
     environment:
       DATA_SOURCE_URI: postgres:5432/${POSTGRES_DB}?sslmode=disable
       DATA_SOURCE_USER: ${POSTGRES_USER}
@@ -957,13 +969,17 @@ services:
       - --housekeeping_interval=30s
       - --docker_only=true
       - --store_container_labels=false
+      # 2026-10-04 tutum auditi: 7 günlük pikdə yaddaş limitin 99.9 %-i, 20–39 % CPU. Monitorinq
+      # səhifəsi və alertlər yalnız cpu / memory / network / oom ailələrini oxuyur (bax
+      # apps/monitoring/queries.py); cadvisor-un öz defolt siyahısı + percpu/disk/diskIO söndürülür.
+      - --disable_metrics=advtcp,cpu_topology,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp,percpu,disk,diskIO
     restart: unless-stopped
     logging: *default-logging
     deploy:
       resources:
         limits:
           cpus: "${CADVISOR_CPU_LIMIT:-0.4}"
-          memory: ${CADVISOR_MEM_LIMIT:-384M}
+          memory: ${CADVISOR_MEM_LIMIT:-512M}
     networks:
       - emsarena-network
 
@@ -999,7 +1015,8 @@ services:
       resources:
         limits:
           cpus: "${NGINX_EXPORTER_CPU_LIMIT:-0.1}"
-          memory: ${NGINX_EXPORTER_MEM_LIMIT:-32M}
+          # 2026-10-04 tutum auditi: 32M-in 78 %-i dolu idi — OOM ehtiyatı.
+          memory: ${NGINX_EXPORTER_MEM_LIMIT:-64M}
     networks:
       - emsarena-network
 
@@ -1187,6 +1204,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    # 2026-10-04 tutum auditi: nginx worker-ləri də 1024 fd ilə başlayırdı (bax app).
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     deploy:
       resources:
         limits:
