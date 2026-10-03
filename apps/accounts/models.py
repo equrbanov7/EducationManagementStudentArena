@@ -389,6 +389,27 @@ class UserProfile(models.Model):
         verbose_name="Bloklanma səbəbi",
         help_text="RİM operatorunun yazdığı səbəb",
     )
+    # 2026-10-03 (sahib): dayandırma səbəbi SEÇİLİR və tələbəyə girişdə «kimə müraciət etməli» göstərilir.
+    # Kodlar `services/account_block_reasons.py` kataloqundadır (etiketlər tərcümə olunur, DB-yə yazılmır).
+    block_reason_code = models.CharField(
+        max_length=32,
+        blank=True,
+        default="",
+        verbose_name="Dayandırma səbəbi (kod)",
+    )
+    block_contact_code = models.CharField(
+        max_length=32,
+        blank=True,
+        default="",
+        verbose_name="Müraciət ünvanı (kod)",
+    )
+    block_contact_note = models.CharField(
+        max_length=200,
+        blank=True,
+        default="",
+        verbose_name="Tələbəyə qeyd",
+        help_text="Girişdə tələbəyə görünür: otaq, telefon, iş saatı və s.",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaradılma tarixi")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yenilənmə tarixi")

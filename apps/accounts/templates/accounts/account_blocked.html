@@ -1,0 +1,40 @@
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% comment %}
+«Hesabınız dayandırılıb» (sahib 2026-10-03) — YALNIZ doğru parol yazılanda göstərilir
+(accounts.views.auth.login → services.account_block_notice). Sessiya AÇILMIR: kabinetə keçid yoxdur,
+yalnız səbəb və «blokdan çıxmaq üçün kimə yaxınlaşmalı» (+ operatorun qeydi: otaq, telefon).
+{% endcomment %}
+{% block page_title %}{% trans 'Hesabınız dayandırılıb' context 'accounts.account_block' %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block code_label %}{% endblock %}
+{% block kicker_icon %}fa-user-lock{% endblock %}
+{% block kicker %}{% trans 'Giriş müvəqqəti bağlıdır' context 'accounts.account_block' %}{% endblock %}
+{% block title %}{% trans 'Hesabınız müvəqqəti dayandırılıb' context 'accounts.account_block' %}{% endblock %}
+{% block description %}
+    <p class="error-zone-lead">{% trans 'İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və davamiyyətiniz silinməyib.' context 'accounts.account_block' %}</p>
+    <p class="error-block-reason">
+        <b>{% trans 'Səbəb' context 'accounts.account_block' %}:</b> {% if notice.has_reason %}{{ notice.reason }}{% else %}{% trans 'səbəb qeyd olunmayıb' context 'accounts.account_block' %}{% endif %}
+    </p>
+    <div class="error-block-contact" role="note">
+        <p class="error-block-contact__title"><i class="fas fa-person-walking-arrow-right" aria-hidden="true"></i> {% trans 'Blokdan çıxmaq üçün yaxınlaşın' context 'accounts.account_block' %}</p>
+        <p class="error-block-contact__who">{{ notice.contact }}</p>
+        {% if notice.note %}<p class="error-block-contact__note">{{ notice.note }}</p>{% endif %}
+    </div>
+    <p class="error-zone-steps-title">{% trans 'Nə etməli?' context 'accounts.account_block' %}</p>
+    <ol class="error-zone-steps">
+        <li>{% trans 'Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın.' context 'accounts.account_block' %}</li>
+        <li>{% trans 'Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və parolla daxil olun.' context 'accounts.account_block' %}</li>
+        <li>{% trans 'Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur.' context 'accounts.account_block' %}</li>
+    </ol>
+{% endblock %}
+{% block pills %}
+    {% if notice.blocked_at %}<span class="error-pill"><i class="fas fa-calendar-xmark" aria-hidden="true"></i> {% trans 'Dayandırılma tarixi' context 'accounts.account_block' %}: {{ notice.blocked_at|date:"d.m.Y" }}</span>{% endif %}
+{% endblock %}
+{% block actions %}
+    <a href="{{ login_url }}" class="error-btn error-btn-primary">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        {% trans 'Giriş səhifəsinə qayıt' context 'accounts.account_block' %}
+    </a>
+{% endblock %}
+{% block footer_note %}{% trans 'Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil.' context 'accounts.account_block' %}{% endblock %}

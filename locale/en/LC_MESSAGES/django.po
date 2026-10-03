@@ -89724,3 +89724,223 @@ msgstr "Reminder sent: %(teachers)d teachers, %(chair)d department staff."
 msgctxt "accounts.semester"
 msgid "Çatışmır"
 msgstr "Missing"
+
+msgctxt "accounts.account_block"
+msgid "Akademik məzuniyyət"
+msgstr "Academic leave"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün kimə yaxınlaşsın"
+msgstr "Whom to contact to be unblocked"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün yaxınlaşın"
+msgstr "To get unblocked, contact"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbi"
+msgstr "Suspension reason"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbini seçin."
+msgstr "Choose the suspension reason."
+
+msgctxt "accounts.account_block"
+msgid "Dayandırılma tarixi"
+msgstr "Suspended on"
+
+msgctxt "accounts.account_block"
+msgid "Digər"
+msgstr "Other"
+
+msgctxt "accounts.account_block"
+msgid "Fakültənizin dekanlığı"
+msgstr "Your faculty's dean's office"
+
+msgctxt "accounts.account_block"
+msgid "Giriş müvəqqəti bağlıdır"
+msgstr "Sign-in temporarily closed"
+
+msgctxt "accounts.account_block"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Back to sign-in"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil."
+msgstr "Until the account is reopened, no part of the system can be accessed."
+
+msgctxt "accounts.account_block"
+msgid "Hesabın təhlükəsizliyi (şübhəli giriş)"
+msgstr "Account security (suspicious sign-in)"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız dayandırılıb"
+msgstr "Your account is suspended"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız müvəqqəti dayandırılıb"
+msgstr "Your account is temporarily suspended"
+
+msgctxt "accounts.account_block"
+msgid "Maliyyə şöbəsi (mühasibatlıq)"
+msgstr "Finance office (accounting)"
+
+msgctxt "accounts.account_block"
+msgid "Müraciət ünvanı yanlışdır."
+msgstr "Invalid contact office."
+
+msgctxt "accounts.account_block"
+msgid "Nə etməli?"
+msgstr "What to do?"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur."
+msgstr "Never share your password; university staff will never ask for it."
+
+msgctxt "accounts.account_block"
+msgid ""
+"Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və "
+"parolla daxil olun."
+msgstr ""
+"Once the issue is resolved your account will be reopened — sign in with the "
+"same username and password."
+
+msgctxt "accounts.account_block"
+msgid "RİM — Rəqəmsal İnkişaf Mərkəzi"
+msgstr "RİM — Digital Development Centre"
+
+msgctxt "accounts.account_block"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbi seçin"
+msgstr "Choose a reason"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin."
+msgstr "Chosen automatically from the reason — change it if needed."
+
+msgctxt "accounts.account_block"
+msgid "Sənədlər tam təqdim edilməyib"
+msgstr "Documents not fully submitted"
+
+msgctxt "accounts.account_block"
+msgid "Tədris şöbəsi"
+msgstr "Teaching office"
+
+msgctxt "accounts.account_block"
+msgid "Təhsil haqqı üzrə borc"
+msgstr "Tuition fee debt"
+
+msgctxt "accounts.account_block"
+msgid "Tələbə Xidmətləri Mərkəzi"
+msgstr "Student Services Centre"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək"
+" — sistemə isə daxil ola bilməyəcək."
+msgstr ""
+"When the student enters their username and password they will see the "
+"reason, this office and the note — but cannot enter the system."
+
+msgctxt "accounts.account_block"
+msgid "Tələbəyə qeyd (otaq, telefon, iş saatı)"
+msgstr "Note for the student (room, phone, hours)"
+
+msgctxt "accounts.account_block"
+msgid "məs: 2-ci korpus, 105-ci otaq, 09:00–17:00"
+msgstr "e.g. Building 2, room 105, 09:00–17:00"
+
+msgctxt "accounts.account_block"
+msgid "səbəb qeyd olunmayıb"
+msgstr "no reason recorded"
+
+msgctxt "accounts.account_block"
+msgid "«Digər» seçildikdə səbəbi qısaca izah edin."
+msgstr "When “Other” is chosen, briefly explain the reason."
+
+msgctxt "accounts.account_block"
+msgid "İmtahan Mərkəzi"
+msgstr "Exam Centre"
+
+msgctxt "accounts.account_block"
+msgid "İmtahan qaydalarının pozulması"
+msgstr "Violation of exam rules"
+
+msgctxt "accounts.account_block"
+msgid "İntizam qaydalarının pozulması"
+msgstr "Violation of disciplinary rules"
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və "
+"davamiyyətiniz silinməyib."
+msgstr ""
+"Your username and password are correct, but the university has temporarily "
+"suspended access to your account. Your data, scores and attendance have not "
+"been deleted."
+
+msgctxt "accounts.account_block"
+msgid "Şəxsi məlumatlar dəqiqləşdirilməlidir"
+msgstr "Personal data must be verified"
+
+msgctxt "accounts.account_block"
+msgid "Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın."
+msgstr "Take your ID card and go to the office shown above."
+
+msgctxt "accounts.student_registry"
+msgid "Aktiv — sistemə daxil ola bilir"
+msgstr "Active — can sign in"
+
+msgctxt "accounts.student_registry"
+msgid "Arxiv (məzun / xaric) — giriş bağlıdır"
+msgstr "Archive (graduate / expelled) — sign-in closed"
+
+msgctxt "accounts.student_registry"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxar"
+msgstr "Unblock"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxmaq üçün"
+msgstr "To be unblocked"
+
+msgctxt "accounts.student_registry"
+msgid "Dayandırılıb — sistemə daxil ola bilmir"
+msgstr "Suspended — cannot sign in"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək."
+msgstr "Restore the account? The student will be able to sign in again."
+
+msgctxt "accounts.student_registry"
+msgid "Hesabı dayandır"
+msgstr "Suspend account"
+
+msgctxt "accounts.student_registry"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "accounts.student_registry"
+msgid "Silinib"
+msgstr "Deleted"
+
+msgctxt "accounts.student_registry"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "accounts.student_registry"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbəyə qeyd"
+msgstr "Note for the student"

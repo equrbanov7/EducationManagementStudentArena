@@ -100,6 +100,10 @@ def people_action(request):
                 active=(action == "unblock"),
                 reason=reason,
                 request=request,
+                # 2026-10-03: seçilmiş səbəb + tələbənin girişdə görəcəyi müraciət ünvanı.
+                reason_code=str(payload.get("reason_code") or ""),
+                contact_code=str(payload.get("contact_code") or ""),
+                contact_note=str(payload.get("contact_note") or ""),
             )
         elif action == "assign_unit":
             result = people.assign_teacher_unit(

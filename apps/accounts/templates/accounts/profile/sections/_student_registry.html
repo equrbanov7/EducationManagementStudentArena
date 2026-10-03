@@ -32,7 +32,8 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
      data-sr-transcript-url="{{ student_registry_section.transcript_url_base }}"
      data-sr-action-url="{{ student_registry_section.action_url }}"
      data-sr-groups-url="{{ student_registry_section.groups_url }}"
-     data-sr-programs-url="{{ student_registry_section.programs_url }}">
+     data-sr-programs-url="{{ student_registry_section.programs_url }}"
+     data-sr-people-action-url="{{ student_registry_section.people_action_url }}">
 
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=sr_subtitle header_actions_include="accounts/profile/sections/student_services/_registry_header_actions.html" %}
 
@@ -55,6 +56,10 @@ SİLMƏ YOXDUR — status dəyişikliyi TARİXÇƏ YAZISIDIR (§8/5): hər əmr
     {% endif %}
 
     {% include "partials/ems_ui/_drawer.html" with drawer_id="srStudentCard" drawer_title=sr_card_title drawer_xl=True drawer_body_include="accounts/profile/sections/student_services/_registry_drawer.html" %}
+
+    {% if student_registry_section.block_options.reasons %}
+        {% include "accounts/profile/sections/student_services/_registry_block_dialog.html" %}
+    {% endif %}
 
     {% if student_registry_section.can_move %}
         {% include "partials/ems_ui/_reason_dialog.html" with reason_id="srMovementDialog" reason_title=sr_move_title reason_subtitle=sr_move_sub reason_label=sr_reason_label reason_submit_label=sr_move_btn reason_submit_tone="primary" reason_hidden=student_registry_section.movement_hidden reason_extra_include="accounts/profile/sections/student_services/_movement_fields.html" reason_form_data=student_registry_section.movement_form_data %}

@@ -89313,3 +89313,225 @@ msgstr ""
 msgctxt "accounts.semester"
 msgid "Çatışmır"
 msgstr "Çatışmır"
+
+msgctxt "accounts.account_block"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün kimə yaxınlaşsın"
+msgstr "Blokdan çıxmaq üçün kimə yaxınlaşsın"
+
+msgctxt "accounts.account_block"
+msgid "Blokdan çıxmaq üçün yaxınlaşın"
+msgstr "Blokdan çıxmaq üçün yaxınlaşın"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbi"
+msgstr "Dayandırma səbəbi"
+
+msgctxt "accounts.account_block"
+msgid "Dayandırma səbəbini seçin."
+msgstr "Dayandırma səbəbini seçin."
+
+msgctxt "accounts.account_block"
+msgid "Dayandırılma tarixi"
+msgstr "Dayandırılma tarixi"
+
+msgctxt "accounts.account_block"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "accounts.account_block"
+msgid "Fakültənizin dekanlığı"
+msgstr "Fakültənizin dekanlığı"
+
+msgctxt "accounts.account_block"
+msgid "Giriş müvəqqəti bağlıdır"
+msgstr "Giriş müvəqqəti bağlıdır"
+
+msgctxt "accounts.account_block"
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Giriş səhifəsinə qayıt"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil."
+msgstr ""
+"Hesab açılana qədər sistemin heç bir bölməsinə daxil olmaq mümkün deyil."
+
+msgctxt "accounts.account_block"
+msgid "Hesabın təhlükəsizliyi (şübhəli giriş)"
+msgstr "Hesabın təhlükəsizliyi (şübhəli giriş)"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız dayandırılıb"
+msgstr "Hesabınız dayandırılıb"
+
+msgctxt "accounts.account_block"
+msgid "Hesabınız müvəqqəti dayandırılıb"
+msgstr "Hesabınız müvəqqəti dayandırılıb"
+
+msgctxt "accounts.account_block"
+msgid "Maliyyə şöbəsi (mühasibatlıq)"
+msgstr "Maliyyə şöbəsi (mühasibatlıq)"
+
+msgctxt "accounts.account_block"
+msgid "Müraciət ünvanı yanlışdır."
+msgstr "Müraciət ünvanı yanlışdır."
+
+msgctxt "accounts.account_block"
+msgid "Nə etməli?"
+msgstr "Nə etməli?"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur."
+msgstr ""
+"Parolunuzu heç kimə deməyin; universitet əməkdaşı onu heç vaxt soruşmur."
+
+msgctxt "accounts.account_block"
+msgid ""
+"Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və "
+"parolla daxil olun."
+msgstr ""
+"Problem həll olunandan sonra hesabınız açılacaq — eyni istifadəçi adı və "
+"parolla daxil olun."
+
+msgctxt "accounts.account_block"
+msgid "RİM — Rəqəmsal İnkişaf Mərkəzi"
+msgstr "RİM — Rəqəmsal İnkişaf Mərkəzi"
+
+msgctxt "accounts.account_block"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbi seçin"
+msgstr "Səbəbi seçin"
+
+msgctxt "accounts.account_block"
+msgid "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin."
+msgstr "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin."
+
+msgctxt "accounts.account_block"
+msgid "Sənədlər tam təqdim edilməyib"
+msgstr "Sənədlər tam təqdim edilməyib"
+
+msgctxt "accounts.account_block"
+msgid "Tədris şöbəsi"
+msgstr "Tədris şöbəsi"
+
+msgctxt "accounts.account_block"
+msgid "Təhsil haqqı üzrə borc"
+msgstr "Təhsil haqqı üzrə borc"
+
+msgctxt "accounts.account_block"
+msgid "Tələbə Xidmətləri Mərkəzi"
+msgstr "Tələbə Xidmətləri Mərkəzi"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək"
+" — sistemə isə daxil ola bilməyəcək."
+msgstr ""
+"Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək"
+" — sistemə isə daxil ola bilməyəcək."
+
+msgctxt "accounts.account_block"
+msgid "Tələbəyə qeyd (otaq, telefon, iş saatı)"
+msgstr "Tələbəyə qeyd (otaq, telefon, iş saatı)"
+
+msgctxt "accounts.account_block"
+msgid "məs: 2-ci korpus, 105-ci otaq, 09:00–17:00"
+msgstr "məs: 2-ci korpus, 105-ci otaq, 09:00–17:00"
+
+msgctxt "accounts.account_block"
+msgid "səbəb qeyd olunmayıb"
+msgstr "səbəb qeyd olunmayıb"
+
+msgctxt "accounts.account_block"
+msgid "«Digər» seçildikdə səbəbi qısaca izah edin."
+msgstr "«Digər» seçildikdə səbəbi qısaca izah edin."
+
+msgctxt "accounts.account_block"
+msgid "İmtahan Mərkəzi"
+msgstr "İmtahan Mərkəzi"
+
+msgctxt "accounts.account_block"
+msgid "İmtahan qaydalarının pozulması"
+msgstr "İmtahan qaydalarının pozulması"
+
+msgctxt "accounts.account_block"
+msgid "İntizam qaydalarının pozulması"
+msgstr "İntizam qaydalarının pozulması"
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və "
+"davamiyyətiniz silinməyib."
+msgstr ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və "
+"davamiyyətiniz silinməyib."
+
+msgctxt "accounts.account_block"
+msgid "Şəxsi məlumatlar dəqiqləşdirilməlidir"
+msgstr "Şəxsi məlumatlar dəqiqləşdirilməlidir"
+
+msgctxt "accounts.account_block"
+msgid "Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın."
+msgstr "Şəxsiyyət vəsiqənizi götürüb yuxarıda göstərilən yerə yaxınlaşın."
+
+msgctxt "accounts.student_registry"
+msgid "Aktiv — sistemə daxil ola bilir"
+msgstr "Aktiv — sistemə daxil ola bilir"
+
+msgctxt "accounts.student_registry"
+msgid "Arxiv (məzun / xaric) — giriş bağlıdır"
+msgstr "Arxiv (məzun / xaric) — giriş bağlıdır"
+
+msgctxt "accounts.student_registry"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxar"
+msgstr "Blokdan çıxar"
+
+msgctxt "accounts.student_registry"
+msgid "Blokdan çıxmaq üçün"
+msgstr "Blokdan çıxmaq üçün"
+
+msgctxt "accounts.student_registry"
+msgid "Dayandırılıb — sistemə daxil ola bilmir"
+msgstr "Dayandırılıb — sistemə daxil ola bilmir"
+
+msgctxt "accounts.student_registry"
+msgid "Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək."
+msgstr "Hesab bərpa edilsin? Tələbə yenidən sistemə daxil ola biləcək."
+
+msgctxt "accounts.student_registry"
+msgid "Hesabı dayandır"
+msgstr "Hesabı dayandır"
+
+msgctxt "accounts.student_registry"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "accounts.student_registry"
+msgid "Silinib"
+msgstr "Silinib"
+
+msgctxt "accounts.student_registry"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "accounts.student_registry"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "accounts.student_registry"
+msgid "Tələbəyə qeyd"
+msgstr "Tələbəyə qeyd"

@@ -156,6 +156,50 @@ body.error-page {
     margin-top: 6px;
 }
 
+/* «Hesabınız dayandırılıb» (2026-10-03): səbəb + «blokdan çıxmaq üçün kimə yaxınlaşmalı» qutusu. */
+.error-block-reason {
+    margin: 14px 0 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--ems-neutral-50, #f8fafc);
+    border: 1px solid var(--error-border);
+    color: var(--error-text);
+    text-align: left;
+}
+
+.error-block-contact {
+    margin: 12px 0 0;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #7c2d12;
+    text-align: left;
+}
+
+.error-block-contact__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 4px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.error-block-contact__who {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: #431407;
+}
+
+.error-block-contact__note {
+    margin: 6px 0 0;
+    font-size: 0.95rem;
+}
+
 /* ── İpucları ─────────────────────────────────────────────────────── */
 .error-meta {
     display: flex;

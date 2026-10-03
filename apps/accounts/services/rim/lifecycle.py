@@ -61,8 +61,8 @@ def _wrap_deletion_error(exc: AccountDeletionError) -> RimAccessError:
     return RimAccessError("account_operation_failed", "Əməliyyat tamamlana bilmədi.", status=409)
 
 
-def block_user(actor: RimActor, target_user, *, reason, request=None):
-    """Hesabı bloklayır (`is_active=False`) — data toxunulmaz qalır."""
+def block_user(actor: RimActor, target_user, *, reason, request=None, reason_code="", contact_code="", contact_note=""):
+    """Hesabı bloklayır (`is_active=False`) — data toxunulmaz qalır (səbəb kodu + müraciət ünvanı ilə)."""
     require_permission(actor, PERM_BLOCK)
     assert_can_manage(actor, target_user)
     reason = normalize_reason(reason)
@@ -74,7 +74,15 @@ def block_user(actor: RimActor, target_user, *, reason, request=None):
         raise RimAccessError("already_blocked", "Hesab artıq bloklanıb.", status=409)
 
     try:
-        block_account(target_user, request=request, actor=actor.user, reason=reason)
+        block_account(
+            target_user,
+            request=request,
+            actor=actor.user,
+            reason=reason,
+            reason_code=reason_code,
+            contact_code=contact_code,
+            contact_note=contact_note,
+        )
     except AccountDeletionError as exc:
         raise _wrap_deletion_error(exc) from exc
     return reason

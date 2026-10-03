@@ -17,6 +17,7 @@ from core.utils import get_auth_otp_expiry_minutes, get_client_ip
 from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetCodeForm, OTPPasswordResetConfirmForm
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
 from ...services import get_otp_timer_context
+from ...services.account_block_notice import blocked_login_notice
 from ._shared import (
     _clear_login_rate_limits_after_password_reset,
     _ensure_auth_device_cookie,
@@ -265,6 +266,13 @@ class CustomLoginView(LoginView):
             for _rate_spec, scope, *key_parts in limit_keys:
                 clear_rate_limit(scope, *key_parts)
             return self.form_valid(form)
+
+        # 2026-10-03 (sahib): parol DOĞRUDUR, amma hesab dayandırılıb → sessiya AÇILMIR, yalnız səbəb və
+        # «blokdan çıxmaq üçün kimə yaxınlaşmalı» göstərilir (parol səhvdirsə adi xəta qalır).
+        notice = blocked_login_notice(username, password)
+        if notice is not None:
+            context = {"notice": notice, "login_url": request.path}
+            return render(request, "accounts/account_blocked.html", context, status=403)
 
         for rate_spec, scope, *key_parts in limit_keys:
             record_rate_limit_hit(scope, rate_spec, *key_parts)
