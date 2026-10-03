@@ -219,6 +219,10 @@ services:
       - work_mem=${POSTGRES_WORK_MEM:-16MB}
       - -c
       - maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM:-512MB}
+      # 2026-10-04 tutum auditi: pg_stat_statements-də I/O vaxtı görünsün (yavaş sorğu
+      # diaqnostikası); yük ~1 % — pg_test_timing ilə ucuz olduğu müasir VM-lərdə təhlükəsizdir.
+      - -c
+      - track_io_timing=${POSTGRES_TRACK_IO_TIMING:-on}
       - -c
       - wal_buffers=64MB
       - -c
@@ -787,7 +791,13 @@ services:
       # görünür (ro) — əlavə volume lazım deyil. Qovluq yoxdursa kollektor yalnız
       # node_textfile_scrape_error=1 verir, qalan metriklər işləyir.
       - --collector.textfile.directory=/host/var/lib/node_exporter/textfile_collector
+      # 2026-10-04 tutum auditi: bridge şəbəkəsində exporter yalnız öz eth0/lo-sunu görürdü —
+      # Monitorinq səhifəsinin «Server» tabındakı şəbəkə qrafiki host NIC-lərini (ens*) göstərmirdi.
+      # Host şəbəkəsində işləyir, amma YALNIZ docker körpüsünün gateway ünvanına bind olur
+      # (arp-agent kimi, bax EXAM_ARP_AGENT_URL) — LAN-a açılmır; Prometheus 172.18.0.1:9100-ü oxuyur.
+      - --web.listen-address=172.18.0.1:9100
     pid: host
+    network_mode: host
     volumes:
       - /:/host:ro
     restart: unless-stopped
@@ -797,8 +807,6 @@ services:
         limits:
           cpus: "${NODE_EXPORTER_CPU_LIMIT:-0.2}"
           memory: ${NODE_EXPORTER_MEM_LIMIT:-64M}
-    networks:
-      - emsarena-network
 
   # ─────────────────────────────────────────────────────────────────────────
   # Alertmanager — Prometheus alertlərini e-poçta (Brevo SMTP) göndərir.
@@ -1193,6 +1201,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      # 2026-10-04 tutum auditi: image-in əsas konfiqi (worker_connections 1024, fd limiti yox)
+      # tutum tavanı idi — əsas konfiq də repodan gəlir (worker_rlimit_nofile + 8192 bağlantı).
+      - ./docker/nginx/nginx-main.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/nginx/certs:/etc/nginx/certs:ro
       # Let's Encrypt HTTP-01 webroot (prod-cert.yml issue-http/renew; APP_DIR-dən kənar — rsync silmir).

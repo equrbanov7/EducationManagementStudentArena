@@ -200,11 +200,14 @@ refresh_nginx_upstream() {
   # işləyən container köhnə (deleted) inode-a bağlı qala bilər; bu halda
   # `nginx -s reload` də köhnə konfiqi yenidən oxuyur. Host/container hash
   # fərqi bunu aşkarlayır və yalnız nginx-i yeni mount ilə recreate edir.
+  # 2026-10-04: əsas konfiq (nginx-main.conf → /etc/nginx/nginx.conf) da bind mount-dur —
+  # hər iki faylın hash-i birlikdə müqayisə olunur.
+  local main_config_file="${NGINX_CONFIG_FILE%/*}/nginx-main.conf"
   if [ -f "$NGINX_CONFIG_FILE" ]; then
-    host_config_hash="$(sha256sum "$NGINX_CONFIG_FILE" | awk '{print $1}')"
+    host_config_hash="$(cat "$NGINX_CONFIG_FILE" "$main_config_file" 2>/dev/null | sha256sum | awk '{print $1}')"
     container_config_hash="$(
       docker compose -f "$COMPOSE_FILE" exec -T nginx \
-        sha256sum /etc/nginx/conf.d/default.conf 2>/dev/null | awk '{print $1}' || true
+        sh -c 'cat /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf' 2>/dev/null | sha256sum | awk '{print $1}' || true
     )"
   fi
 

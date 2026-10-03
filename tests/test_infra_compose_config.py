@@ -435,3 +435,43 @@ def test_network_zone_settings_reach_app_containers(service):
     geo = re.search(r"geo \$ems_zone \{(.*?)\}", nginx, re.S).group(1)
     geo_internal = set(re.findall(r"^\s*([0-9a-f.:/]+)\s+internal;", geo, re.M))
     assert geo_internal <= set(_interpolation_default(env["INTERNAL_NETWORKS"]).split(","))
+
+
+# ── 2026-10-04 tutum auditi: konfiq tavanları hardware-dən əvvəl gəlməsin ──────────────────
+
+
+def test_nginx_main_conf_raises_fd_and_connection_ceilings():
+    """Image defoltu `worker_connections 1024` + konteyner `nofile 1024` idi — 5000 WS hədəfi üçün az."""
+    compose = _compose()
+    nginx = compose["services"]["nginx"]
+    assert "./docker/nginx/nginx-main.conf:/etc/nginx/nginx.conf:ro" in nginx["volumes"]
+    conf = (ROOT / "docker/nginx/nginx-main.conf").read_text(encoding="utf-8")
+    rlimit = int(re.search(r"worker_rlimit_nofile\s+(\d+);", conf).group(1))
+    connections = int(re.search(r"worker_connections\s+(\d+);", conf).group(1))
+    assert connections >= 8192
+    assert rlimit >= connections
+    assert "include /etc/nginx/conf.d/*.conf;" in conf  # vhost qaydaları əvvəlki faylda qalır
+    assert int(nginx["ulimits"]["nofile"]["soft"]) >= rlimit
+    assert int(compose["services"]["app"]["ulimits"]["nofile"]["soft"]) >= 65536
+
+
+def test_node_exporter_uses_host_network_bound_to_the_bridge_gateway_only():
+    """Bridge şəbəkəsində exporter host NIC-lərini görmürdü (Server tabının şəbəkə qrafiki boş idi)."""
+    compose = _compose()
+    node = compose["services"]["node_exporter"]
+    assert node["network_mode"] == "host"
+    assert "networks" not in node
+    assert "--web.listen-address=172.18.0.1:9100" in node["command"]  # LAN-a açılmır
+    assert "172.18.0.0/16" in compose["networks"]["emsarena-network"]["ipam"]["config"][0]["subnet"]
+    prometheus = (ROOT / "docker/prometheus/prometheus.yml").read_text(encoding="utf-8")
+    assert "172.18.0.1:9100" in prometheus
+    assert "node_exporter:9100" not in prometheus
+
+
+def test_postgres_tracks_io_timing_and_exporter_skips_unused_table_collectors():
+    compose = _compose()
+    postgres_command = compose["services"]["postgres"]["command"]
+    assert any(str(item).startswith("track_io_timing=") for item in postgres_command)
+    exporter_command = compose["services"]["postgres_exporter"]["command"]
+    assert "--no-collector.stat_user_tables" in exporter_command
+    assert "--no-collector.statio_user_tables" in exporter_command

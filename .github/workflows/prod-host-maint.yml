@@ -9,13 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status (yalnız oxuma), backup-status (yalnız oxuma) və ya reboot"
+        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi) və ya reboot"
         required: true
         default: status
         type: choice
         options:
           - status
           - backup-status
+          - tune
+          - prune
           - reboot
       confirm:
         description: "reboot üçün REBOOT yazın"
@@ -107,6 +109,53 @@ jobs:
             echo "--- off-site / drill taymerləri (host)"
             host sh -c "systemctl list-timers --all --no-legend 2>/dev/null | grep -i -E 'backup|restic|drill|offsite' || echo 'taymer yoxdur'"
             host sh -c "ls -la /var/lib/node_exporter/textfile_collector 2>/dev/null | head; ls $APP_DIR/scripts/ops | grep -i -E 'backup|drill|restic'" || true
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 🧰 Host tuning — sysctl + docker live-restore (2026-10-04 tutum auditi)
+        if: github.event.inputs.action == 'tune'
+        run: |
+          set -euo pipefail
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          {
+            echo "## 🧰 Host tuning"
+            echo '```'
+            echo "--- əvvəl"
+            host sysctl vm.overcommit_memory vm.swappiness
+            echo "live-restore: $(docker info --format '{{.LiveRestoreEnabled}}')"
+            # vm.overcommit_memory=1 — Redis AOF rewrite / RDB fork-u yaddaş doluluğunda uğursuz olmasın;
+            # swappiness=10 — 31 GB RAM-lı DB serverində səhifə keşi swap-a getməsin. Fayl idempotentdir.
+            host sh -c 'printf "vm.overcommit_memory = 1\nvm.swappiness = 10\n" > /etc/sysctl.d/99-emsarena.conf && sysctl -q -p /etc/sysctl.d/99-emsarena.conf'
+            # daemon.json: live-restore=true — dockerd yenilənəndə/yenidən başlayanda konteynerlər dayanmasın.
+            # Yalnız açar əlavə olunur (mövcud açarlara toxunulmur); SIGHUP ilə oxunur, konteynerlər restart olunmur.
+            if host sh -c 'command -v python3 >/dev/null'; then
+              host python3 -c 'import json, os; p = "/etc/docker/daemon.json"; d = json.load(open(p)) if os.path.exists(p) else {}; print("live-restore artıq true" if d.get("live-restore") is True else (d.__setitem__("live-restore", True), json.dump(d, open(p, "w"), indent=2), "daemon.json yeniləndi")[-1])'
+              host systemctl reload docker
+              sleep 3
+            else
+              echo "python3 yoxdur — daemon.json dəyişdirilmədi"
+            fi
+            echo "--- sonra"
+            host sysctl vm.overcommit_memory vm.swappiness
+            echo "live-restore: $(docker info --format '{{.LiveRestoreEnabled}}')"
+            docker ps --format '{{.Names}} {{.Status}}' | grep -c Up | sed 's/^/işləyən konteynerlər: /'
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 🧹 Docker build keşi / dangling image-lər (7 gündən köhnə)
+        if: github.event.inputs.action == 'prune'
+        run: |
+          set -euo pipefail
+          {
+            echo "## 🧹 Prune"
+            echo '```'
+            docker system df
+            echo "--- builder prune (until=168h)"
+            docker builder prune --force --filter until=168h | tail -n 2
+            echo "--- dangling image prune (teqli release image-lərinə toxunmur)"
+            docker image prune --force --filter until=168h | tail -n 1
+            docker system df
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
