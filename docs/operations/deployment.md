@@ -687,7 +687,10 @@ Repoda düzəldilənlər (adi CI deploy ilə gəlir):
 `.env` ilə (env-update.yml): `PGBOUNCER_DEFAULT_POOL_SIZE=110` (tələbat `APP_REPLICAS×MAX_INFLIGHT +
 celery` = 107 > köhnə 40 + 50), `POSTGRES_WORK_MEM=32MB` (2 həftədə 2.2 GB temp fayl).
 Host (`prod-host-maint.yml` → `tune`): `vm.overcommit_memory=1`, `vm.swappiness=10`
-(`/etc/sysctl.d/99-emsarena.conf`), Docker `live-restore=true`; `prune` — 7 gündən köhnə build keşi.
+(`/etc/sysctl.d/99-emsarena.conf`), Docker `live-restore=true`; `prune` — 7 gündən köhnə build keşi;
+`bridge-fw` — ufw «deny incoming» docker körpüsündən (172.18.0.0/16) host gateway-inə (172.18.0.1) gedən
+trafiki də kəsir: node_exporter (9100) və arp-agent (8953) üçün yalnız körpü alt şəbəkəsindən icazə
+(`scripts/ops/server_hardening.sh`-da da var; yeni serverdə mütləq).
 Qalan (sahib qərarı): `legacy_import_*` cədvəlləri (1.2 GB) idxal bitəndə arxiv, 3 istifadəsiz
 `registrar_lessonmark` indeksi, off-site backup hədəfi.
 

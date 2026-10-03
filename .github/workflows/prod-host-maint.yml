@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi) və ya reboot"
+        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953) və ya reboot"
         required: true
         default: status
         type: choice
@@ -18,6 +18,7 @@ on:
           - backup-status
           - tune
           - prune
+          - bridge-fw
           - reboot
       confirm:
         description: "reboot üçün REBOOT yazın"
@@ -156,6 +157,49 @@ jobs:
             echo "--- dangling image prune (teqli release image-lərinə toxunmur)"
             docker image prune --force --filter until=168h | tail -n 1
             docker system df
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 🔥 Host firewall — docker körpüsü → gateway servisləri (node_exporter 9100, arp-agent 8953)
+        if: github.event.inputs.action == 'bridge-fw'
+        run: |
+          set -euo pipefail
+          # 2026-10-04: ufw «deny incoming» körpüdən (172.18.0.0/16) host gateway-inə (172.18.0.1) gedən
+          # trafiki də kəsir — host şəbəkəsindəki node_exporter (9100) Prometheus-a, arp-agent (8953)
+          # app-a görünmürdü. Qaydalar yalnız körpü alt şəbəkəsindəndir; LAN-a heç nə açılmır.
+          # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          APP_DIR=/home/wcu/EducationManagementStudentArena
+          cd "$APP_DIR"
+          probe() {
+            docker compose -f docker-compose.prod.yml exec -T --index 1 app python -c "
+          import socket
+          s = socket.socket(); s.settimeout(3)
+          try:
+              s.connect(('172.18.0.1', $1)); print('open')
+          except Exception as exc:
+              print('blocked:', exc)
+          " 2>/dev/null | tail -n1
+          }
+          {
+            echo "## 🔥 Körpü → gateway firewall"
+            echo '```'
+            echo "--- node_exporter konteyneri"
+            docker ps -a --filter name=emsarena-node-exporter --format '{{.Names}}  {{.Status}}'
+            docker logs --tail 5 emsarena-node-exporter 2>&1 | cut -c1-200
+            echo "--- host-da dinləyənlər (9100 / 8953)"
+            host sh -c 'ss -ltnp 2>/dev/null | grep -E ":9100|:8953" || echo "dinləyən yoxdur"'
+            echo "--- əvvəl: app konteynerindən 172.18.0.1"
+            echo "9100: $(probe 9100)"
+            echo "8953: $(probe 8953)"
+            echo "--- ufw qaydaları (idempotent)"
+            host ufw allow in from 172.18.0.0/16 to 172.18.0.1 port 9100 proto tcp comment 'emsarena node_exporter (Prometheus)'
+            host ufw allow in from 172.18.0.0/16 to 172.18.0.1 port 8953 proto tcp comment 'emsarena arp-agent (imtahan MAC)'
+            echo "--- sonra"
+            echo "9100: $(probe 9100)"
+            echo "8953: $(probe 8953)"
+            docker compose -f docker-compose.prod.yml exec -T prometheus wget -qO- --timeout=5 http://172.18.0.1:9100/metrics 2>/dev/null | grep -c '^node_' | sed 's/^/prometheus → node_ metrik sətirləri: /' || true
+            host sh -c 'ufw status | grep -E "9100|8953"'
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
