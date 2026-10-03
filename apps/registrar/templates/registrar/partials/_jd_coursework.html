@@ -58,9 +58,9 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                                 data-topic="{{ row.work.topic }}"
                                 data-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
                                 data-date="{% if row.work.submitted_on %}{{ row.work.submitted_on|date:'Y-m-d' }}{% endif %}"
-                                title="{% trans 'Redaktə (2 saat pəncərəsi)' context 'registrar.journal' %}">✎</button>
+                                title="{% blocktrans with h=mark_edit_hours|default:2 context 'registrar.journal' %}Redaktə ({{ h }} saat pəncərəsi){% endblocktrans %}">✎</button>
                         {% else %}
-                        <i class="fas fa-lock jcell-lock" title="{% trans '2 saat pəncərəsi bağlanıb' context 'registrar.journal' %}"></i>
+                        <i class="fas fa-lock jcell-lock" title="{% blocktrans with h=mark_edit_hours|default:2 context 'registrar.journal' %}{{ h }} saat pəncərəsi bağlanıb{% endblocktrans %}"></i>
                         {% endif %}
                     </td>
                     {% endif %}
@@ -110,7 +110,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 <button type="submit" class="jd2-apply-btn">{% trans "Tətbiq et" context "registrar.journal" %}</button>
                 <button type="reset" class="jd2-cancel-btn" data-jd-cw-reset>{% trans "İmtina et" context "registrar.journal" %}</button>
             </div>
-            <div class="jd2-cw-note">{% trans "Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd 2 saat sonra kilidlənir." context "registrar.journal" %}</div>
+            <div class="jd2-cw-note">{% blocktrans with h=mark_edit_hours|default:2 context "registrar.journal" %}Kurs işi balı yekun cədvəldə ayrıca sütunda göstərilir. Yazılan qeyd {{ h }} saat sonra kilidlənir.{% endblocktrans %}</div>
         </form>
     </div>
     {% endif %}

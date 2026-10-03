@@ -11,7 +11,6 @@ dərs qadağan; yeni işarə yalnız dərsin günündə; bal 0-10 clamp. Qayıb 
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -28,10 +27,8 @@ from apps.registrar.models import (
     LessonMark,
 )
 
-# Redaktə pəncərələri (2 saat — sonra toxunulmazdır; DB trigger də qoruyur).
-LESSON_EDIT_WINDOW = timedelta(hours=2)  # dərs sətri yaranışdan sonra
-MARK_EDIT_WINDOW = timedelta(hours=2)  # iştirak/bal yazıldıqdan sonra
-DATE_EDIT_WINDOW = LESSON_EDIT_WINDOW  # köhnə ad (geriyə-uyğunluq)
+# Redaktə pəncərələri (defolt 2 saat; RİM rəhbəri «Sistem tənzimləmələri»ndən dəyişir; DB trigger də qoruyur).
+from .journal_edit_windows import LESSON_EDIT_WINDOW, lesson_edit_window, mark_edit_window  # noqa: E402,F401
 
 DEFAULT_LESSON_HOURS = 2
 
@@ -98,9 +95,9 @@ def lesson_allows_score(lesson) -> bool:
 
 
 def can_edit_lesson(lesson, *, now=None) -> bool:
-    """Dərs sətri (tarix/növ/mövzu/saat/silmə) yalnız yaranışdan 2 saat içində."""
+    """Dərs sətri (tarix/növ/mövzu/saat/silmə) yalnız yaranışdan sonra pəncərə (defolt 2 saat) içində."""
     now = now or timezone.now()
-    return (now - lesson.created_at) <= LESSON_EDIT_WINDOW
+    return (now - lesson.created_at) <= lesson_edit_window()
 
 
 # Köhnə ad — mövcud çağırışlar üçün.
@@ -112,7 +109,7 @@ def can_edit_mark(mark, *, now=None) -> bool:
     if mark is None:
         return True
     now = now or timezone.now()
-    return (now - mark.created_at) <= MARK_EDIT_WINDOW
+    return (now - mark.created_at) <= mark_edit_window()
 
 
 # Hədd resolver-ləri TƏK mənbədədir (:mod:`apps.registrar.absence_limit`, F-06 / 2026-09-14);

@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature
 
 from apps.accounts.models import EmailOTP
+from core import runtime_settings
 from core.helpers import _safe_same_origin_redirect_path
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
 from core.utils import get_client_ip
@@ -110,8 +111,9 @@ def _login_limit_keys(request, username):
     normalized_username = normalize_rate_identity(username)
     client_ip = (get_client_ip(request) or "unknown").strip().lower()
     ip_key = f"ip:{client_ip}"
-    device_rate = settings.LOGIN_RATE_LIMIT
-    ip_rate = getattr(settings, "LOGIN_IP_RATE_LIMIT", device_rate)
+    # 2026-10-03: limitlər «Sistem tənzimləmələri»ndən (RİM rəhbəri dəyişir); yoxdursa mühitin defoltu.
+    device_rate = runtime_settings.get("login.device_rate")
+    ip_rate = runtime_settings.get("login.ip_rate")
     return [
         # Dar: cihaz cookie-si (mövcud davranış — paylaşılan İP-də izolyasiya).
         (device_rate, LOGIN_LIMIT_SCOPE_DEVICE, device_id),
@@ -125,7 +127,7 @@ def _login_limit_keys(request, username):
 
 
 def _login_account_rate_limit():
-    return getattr(settings, "LOGIN_ACCOUNT_RATE_LIMIT", LOGIN_ACCOUNT_RATE_LIMIT_DEFAULT)
+    return runtime_settings.get("login.account_rate") or LOGIN_ACCOUNT_RATE_LIMIT_DEFAULT
 
 
 def _note_failed_login_ip(request, username):

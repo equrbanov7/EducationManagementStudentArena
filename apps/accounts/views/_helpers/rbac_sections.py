@@ -308,6 +308,8 @@ def apply_permission_section_gates(
         (can_import_students, "teacher-intake"),
         (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
+        # «Sistem tənzimləmələri» — sahib 2026-10-03: YALNIZ RİM rəhbəri və superadmin (açar qapısı yox).
+        (bool(is_superadmin or is_rim_head), "system-settings"),
         (can_manage_workload, "workload-distribution"),
         (can_view_workload, "my-workload"),
         (can_manage_workload, "workload-center"),

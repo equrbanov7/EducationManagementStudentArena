@@ -464,6 +464,15 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
             )
+        if "system-settings" in self.allowed_sections and self.active_section == "system-settings":
+            from .._sections.system_settings import build_system_settings_section
+
+            build_system_settings_section(
+                self.request,
+                self.system_settings_section,
+                allowed_sections=self.allowed_sections,
+                active_section=self.active_section,
+            )
         if "exam-chance" in self.allowed_sections and self.active_section == "exam-chance":
             from .._sections.exam_chance import build_exam_chance_section
 

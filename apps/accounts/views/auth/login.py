@@ -12,7 +12,7 @@ from django.views.generic.edit import FormView
 
 from apps.accounts.models import EmailOTP, ProfileRole
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
-from core.utils import get_auth_otp_expiry_minutes, get_client_ip
+from core.utils import get_auth_otp_expiry_minutes, get_auth_otp_expiry_seconds, get_client_ip
 
 from ...forms import CustomLoginForm, CustomPasswordResetForm, OTPPasswordResetCodeForm, OTPPasswordResetConfirmForm
 from ...middleware import POST_LOGIN_REDIRECT_GUARD_SESSION_KEY
@@ -433,7 +433,7 @@ class NamespacedPasswordResetDoneView(FormView):
             context.update(get_otp_timer_context(email=reset_email, purpose=EmailOTP.Purpose.PASSWORD_RESET))
         else:
             context["otp_expires_at"] = None
-            context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
+            context["otp_expiry_seconds"] = get_auth_otp_expiry_seconds()
         context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
         context["password_reset_email"] = reset_email
         return context
@@ -463,7 +463,7 @@ class NamespacedPasswordResetConfirmView(PasswordResetConfirmView):
         else:
             context["otp_expires_at"] = None
             context["otp_expiry_minutes"] = get_auth_otp_expiry_minutes()
-            context["otp_expiry_seconds"] = settings.AUTH_OTP_EXPIRY_SECONDS
+            context["otp_expiry_seconds"] = get_auth_otp_expiry_seconds()
         return context
 
     def form_valid(self, form):

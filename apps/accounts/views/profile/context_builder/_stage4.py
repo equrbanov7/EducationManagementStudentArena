@@ -281,6 +281,7 @@ class _Stage4Mixin:
             "student_registry_section": self.student_registry_section,
             "exam_score_entry_section": self.exam_score_entry_section,
             "legacy_grade_review_section": self.legacy_grade_review_section,
+            "system_settings_section": self.system_settings_section,
             "exam_chance_section": self.exam_chance_section,
             "can_manage_exam_rooms": self.capabilities.get("can_manage_exam_rooms", False),
             "is_teacher": self.capabilities["is_teacher"],

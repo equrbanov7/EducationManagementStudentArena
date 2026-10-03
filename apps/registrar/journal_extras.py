@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from apps.registrar import absence_limit, exam_eligibility, grade_audit
-from apps.registrar.gradebook import MARK_EDIT_WINDOW, journal_is_locked
+from apps.registrar.gradebook import journal_is_locked, mark_edit_window
 
 # Keçmiş dövrlərin kollokvium sabitləri (geriyə uyğunluq) — rejim qərarı ``interim_assessment``-dədir.
 from apps.registrar.interim_assessment import KOLLOKVIUM_COUNT, KOLLOKVIUM_MAX  # noqa: F401
@@ -86,7 +86,7 @@ def save_course_work(*, enrollment, topic, score, submitted_on=None, by_user=Non
         return False
     existing = CourseWork.objects.filter(enrollment=enrollment).first()
     now = timezone.now()
-    if existing is not None and not allow_locked and (now - existing.created_at) > MARK_EDIT_WINDOW:
+    if existing is not None and not allow_locked and (now - existing.created_at) > mark_edit_window():
         return False
     value = _to_decimal(score)
     if value is not None:
@@ -143,7 +143,7 @@ def get_course_work_rows(offering):
                 "enrollment": e,
                 "student": e.student,
                 "work": work,
-                "locked": bool(work and (now - work.created_at) > MARK_EDIT_WINDOW),
+                "locked": bool(work and (now - work.created_at) > mark_edit_window()),
             }
         )
     return rows

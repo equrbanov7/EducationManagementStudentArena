@@ -14,8 +14,10 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.models import EmailOTP
 from apps.organizations.public import is_tenant_accessible_organization
+from core import runtime_settings
 from core.moderation.enforcement import screen_names
 from core.rate_limit import clear_rate_limit, is_rate_limited, record_rate_limit_hit
+from core.utils import get_auth_otp_expiry_seconds
 
 from ...forms import RegisterForm
 from ...queries import get_signup_lookup_payload
@@ -187,7 +189,7 @@ def verify_code_view(request):
         otp_limit_key = _otp_limit_key(request, email)
         is_limited, retry_after = is_rate_limited(
             OTP_VERIFY_LIMIT_SCOPE,
-            settings.OTP_VERIFY_RATE_LIMIT,
+            runtime_settings.override("otp.verify_rate") or settings.OTP_VERIFY_RATE_LIMIT,
             *otp_limit_key,
         )
         context = {
@@ -210,7 +212,7 @@ def verify_code_view(request):
         if not verification.success or verification.otp is None:
             record_rate_limit_hit(
                 OTP_VERIFY_LIMIT_SCOPE,
-                settings.OTP_VERIFY_RATE_LIMIT,
+                runtime_settings.override("otp.verify_rate") or settings.OTP_VERIFY_RATE_LIMIT,
                 *otp_limit_key,
             )
             messages.error(request, pgettext_lazy("accounts.auth.message", "code_invalid_or_expired"))
@@ -272,7 +274,7 @@ def verify_email_link_view(request):
     """Verify email using signed token link."""
     token = request.GET.get("token", "")
     try:
-        user_id = signer.unsign(token, max_age=settings.AUTH_OTP_EXPIRY_SECONDS)
+        user_id = signer.unsign(token, max_age=get_auth_otp_expiry_seconds())
         user = User.objects.get(pk=user_id)
         EmailOTP.objects.filter(
             user=user,
@@ -316,7 +318,7 @@ def resend_code_view(request):
     otp_limit_key = _otp_limit_key(request, email)
     is_limited, retry_after = record_rate_limit_hit(
         OTP_RESEND_LIMIT_SCOPE,
-        settings.OTP_RESEND_RATE_LIMIT,
+        runtime_settings.override("otp.resend_rate") or settings.OTP_RESEND_RATE_LIMIT,
         *otp_limit_key,
     )
     if is_limited:
