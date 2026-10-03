@@ -410,7 +410,11 @@ def restore_account(user, *, request=None, actor=None, reason=""):
     )
 
 
-def block_account(user, *, request=None, actor=None, reason=""):
+#: Bloklama zamanı yazılan / blokdan çıxanda təmizlənən profil sahələri (2026-10-03: səbəb kodu + müraciət ünvanı).
+_BLOCK_FIELDS = ("blocked_at", "blocked_by", "block_reason", "block_reason_code", "block_contact_code", "block_contact_note")  # fmt: skip
+
+
+def block_account(user, *, request=None, actor=None, reason="", reason_code="", contact_code="", contact_note=""):
     """
     Temporarily block a user account without marking it as deleted.
 
@@ -433,7 +437,10 @@ def block_account(user, *, request=None, actor=None, reason=""):
             profile.blocked_at = timezone.now()
             profile.blocked_by = resolved_actor if resolved_actor is not None else None
             profile.block_reason = str(reason or "")[:300]
-            profile.save(update_fields=["blocked_at", "blocked_by", "block_reason", "updated_at"])
+            profile.block_reason_code = str(reason_code or "")[:32]
+            profile.block_contact_code = str(contact_code or "")[:32]
+            profile.block_contact_note = str(contact_note or "")[:200]
+            profile.save(update_fields=[*_BLOCK_FIELDS, "updated_at"])
 
         log_action(
             action=AuditAction.UPDATE,
@@ -445,6 +452,7 @@ def block_account(user, *, request=None, actor=None, reason=""):
                 "target_user_id": str(user.pk),
                 "operation": "block",
                 "reason_text": str(reason or "")[:300],
+                "reason_code": str(reason_code or ""),
             },
             request=request,
             resource_type="User",
@@ -481,7 +489,10 @@ def unblock_account(user, *, request=None, actor=None, reason=""):
             profile.blocked_at = None
             profile.blocked_by = None
             profile.block_reason = ""
-            profile.save(update_fields=["blocked_at", "blocked_by", "block_reason", "updated_at"])
+            profile.block_reason_code = ""
+            profile.block_contact_code = ""
+            profile.block_contact_note = ""
+            profile.save(update_fields=[*_BLOCK_FIELDS, "updated_at"])
 
         log_action(
             action=AuditAction.UPDATE,

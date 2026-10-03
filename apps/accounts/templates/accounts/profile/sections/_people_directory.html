@@ -226,7 +226,10 @@ başlığında sənədlidir. Açar adlarını dəyişmə — JS onlara söykəni
         <div class="ems-dialog__body">
           <p class="ems-msg ems-msg--error" data-people-dialog-error role="alert" hidden></p>
           <div class="people-dialog__targets" data-people-dialog-targets></div>
-          <div class="ems-field">
+          {% if people_section.block_options.reasons %}
+          {% include "accounts/profile/sections/people/_block_reason_fields.html" with block_id_prefix="people-reason-dialog-"|add:people_section.kind block_options=people_section.block_options block_note_max=people_section.block_note_max %}
+          {% endif %}
+          <div class="ems-field" data-people-reason-field>
             <label class="ems-field__label" for="people-reason-dialog-{{ people_section.kind }}-text">{% trans "Səbəb" context "accounts.people" %} <span class="ems-field__req" data-people-dialog-req aria-hidden="true">*</span></label>
             <textarea class="ems-textarea" id="people-reason-dialog-{{ people_section.kind }}-text" name="reason" rows="3" maxlength="{{ people_section.max_reason_length }}"></textarea>
             <p class="ems-field__hint" data-people-dialog-hint></p>

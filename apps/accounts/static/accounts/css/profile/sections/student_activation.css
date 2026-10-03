@@ -12,6 +12,7 @@
 .sract__hint i { color: var(--ems-primary-600, #2563eb); margin-right: 6px; }
 
 .sract__title { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--ems-text, #0f172a); }
+.sract__range { margin-left: 8px; font-size: 12px; font-weight: 500; color: var(--ems-text-muted, #64748b); }
 
 .sract__scroll { overflow-x: auto; border-radius: 12px; }
 .sract__table { width: 100%; }

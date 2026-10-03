@@ -10,12 +10,16 @@ from __future__ import annotations
 
 from urllib.parse import urlencode
 
+from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.accounts.services.people import activation as activation_service
 
 _CTX = "accounts.student_registry"
+
+#: Qruplar cədvəlinin səhifə ölçüsü (sahib 2026-10-03: ~470 qrup bir dəfəyə yüklənməsin).
+ACTIVATION_PAGE_SIZE = 50
 
 
 def _tone(pct: int) -> str:
@@ -29,8 +33,10 @@ def build_activation_view(request, section, *, actor, values, base_params) -> No
     sheet_url = reverse("accounts:student_activation_sheet")
     keep = {key: value for key, value in base_params.items() if value not in ("", None) and key != "sr_view"}
 
+    # Səhifələmə SERVER tərəfdədir (reyestrin `sr_page` parametri) — linklər yalnız səhifədəki sətirlər üçün qurulur.
+    page_obj = Paginator(report["rows"], ACTIVATION_PAGE_SIZE).get_page(values.get("page", 1))
     rows = []
-    for row in report["rows"]:
+    for row in page_obj.object_list:
         list_params = {**keep, "sr_group": row["group_id"], "sr_account": "initial"} if row["group_id"] else None
         rows.append(
             {
@@ -45,6 +51,8 @@ def build_activation_view(request, section, *, actor, values, base_params) -> No
     totals = report["totals"]
     section["activation"] = {
         "rows": rows,
+        "page_obj": page_obj,
+        "rows_total": len(report["rows"]),
         "faculties": [{**item, "tone": _tone(item["pct"])} for item in report["faculties"]],
         "totals": totals,
         "tiles": [
@@ -65,10 +73,10 @@ def build_activation_view(request, section, *, actor, values, base_params) -> No
                 "value": totals["never"],
                 "note": pgettext(_CTX, "Sistemə bir dəfə də daxil olmayıb"),
             },
-            {"label": pgettext(_CTX, "QRUP"), "value": len(rows)},
+            {"label": pgettext(_CTX, "QRUP"), "value": len(report["rows"])},
         ],
     }
-    section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d qrup") % {"count": len(rows)}
+    section["filter_count_label"] = pgettext(_CTX, "Nəticə: %(count)d qrup") % {"count": len(report["rows"])}
 
 
 def view_toggle_urls(base_params: dict) -> dict:
@@ -81,4 +89,4 @@ def view_toggle_urls(base_params: dict) -> dict:
     }
 
 
-__all__ = ["build_activation_view", "view_toggle_urls"]
+__all__ = ["ACTIVATION_PAGE_SIZE", "build_activation_view", "view_toggle_urls"]

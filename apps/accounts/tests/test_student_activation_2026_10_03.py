@@ -112,3 +112,15 @@ class StudentActivationTest(StudentServicesBase):
         self.assertEqual(self._sheet(role="teacher").status_code, 404)  # reyestr icazəsi yoxdur
         self.assertEqual(self._sheet(group="not-a-uuid").status_code, 404)
         self.assertEqual(self._sheet(group="00000000-0000-0000-0000-000000000000").status_code, 404)
+
+    def test_group_table_is_paginated_server_side(self):
+        from unittest import mock
+
+        with mock.patch("apps.accounts.views.profile._sections.student_activation.ACTIVATION_PAGE_SIZE", 1):
+            first = self._section()["activation"]
+            second = self._section(sr_page="2")["activation"]
+        self.assertEqual(len(first["rows"]), 1)
+        self.assertGreaterEqual(first["page_obj"].paginator.num_pages, 3)
+        self.assertEqual(first["rows_total"], first["page_obj"].paginator.count)
+        self.assertNotEqual(first["rows"][0]["group_id"], second["rows"][0]["group_id"])
+        self.assertEqual(second["page_obj"].number, 2)

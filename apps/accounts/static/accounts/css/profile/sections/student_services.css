@@ -221,3 +221,18 @@
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* ── Tələbə kartı → «Hesab» bloku (2026-10-03): vəziyyət + dayandırma səbəbi + «kimə yaxınlaşmalı». ── */
+.stsvc-account { margin-top: 16px; }
+.stsvc-account__status { margin: 0 0 8px; font-weight: 700; }
+.stsvc-account__status[data-status="active"] { color: #047857; }
+.stsvc-account__status[data-status="blocked"] { color: #b91c1c; }
+.stsvc-account__status[data-status="archived"], .stsvc-account__status[data-status="deleted"] { color: #64748b; }
+.stsvc-account__facts { display: grid; gap: 6px; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: #fff7ed; border: 1px solid #fed7aa; }
+.stsvc-account__facts[hidden] { display: none; }
+.stsvc-account__facts div { display: grid; grid-template-columns: 150px 1fr; gap: 8px; }
+.stsvc-account__facts dt { color: #9a3412; font-size: 12px; font-weight: 700; }
+.stsvc-account__facts dd { margin: 0; font-size: 13px; }
+.stsvc-account__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.stsvc .people-block-fields, [data-sr-block-dialog] .people-block-fields { display: flex; flex-direction: column; gap: 12px; }
+[data-sr-block-dialog] .people-block-fields[hidden] { display: none; }

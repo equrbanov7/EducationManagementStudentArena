@@ -118,7 +118,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.accounts.services import people
+from apps.accounts.services import account_block_reasons, people
 from apps.accounts.services.people.academic import STATUS_LABELS as ACADEMIC_STATUS_LABELS
 from apps.accounts.services.people.actions import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.people.constants import AGE_UNKNOWN, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE
@@ -254,6 +254,9 @@ def build_people_section(request, kind: str) -> dict:
             "max_page_size": MAX_PAGE_SIZE,
             "min_reason_length": MIN_REASON_LENGTH,
             "max_reason_length": MAX_REASON_LENGTH,
+            # 2026-10-03: dayandırma səbəbi SEÇİLİR + tələbənin girişdə görəcəyi «kimə yaxınlaşmalı».
+            "block_options": account_block_reasons.form_options() if actor.can_manage_status else {},
+            "block_note_max": account_block_reasons.MAX_NOTE_LENGTH,
             "sort_options": _options(_SORT_KEYS[kind], _SORT_LABELS),
             "status_options": _options(("all", "active", "blocked", "archived", "deleted"), _STATUS_LABELS),
             "gender_options": _options(("male", "female", "unspecified"), _GENDER_LABELS),

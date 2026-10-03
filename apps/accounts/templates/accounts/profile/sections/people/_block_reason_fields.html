@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}
+Hesabı dayandırma — SƏBƏB seçimi + «blokdan çıxmaq üçün kimə yaxınlaşsın» + tələbəyə görünən qeyd
+(sahib 2026-10-03). «Tələbələr» kataloqu və «Tələbə reyestri» dialoqları EYNİ hissəni işlədir.
+Səbəb seçiləndə ünvan avtomatik təklif olunur (`data-contact`, account_block_fields.js); operator dəyişə bilər.
+Tələbə doğru parolla giriş edəndə səbəbi, ünvanı və qeydi görür — kabinetə isə daxil ola bilmir.
+Kontekst: block_id_prefix, block_options ({reasons, contacts}), block_note_max.
+{% endcomment %}
+<div class="people-block-fields" data-block-fields hidden
+     data-msg-reason="{% trans 'Dayandırma səbəbini seçin.' context 'accounts.account_block' %}"
+     data-msg-note="{% trans '«Digər» seçildikdə səbəbi qısaca izah edin.' context 'accounts.account_block' %}">
+  <div class="ems-field">
+    <label class="ems-field__label" for="{{ block_id_prefix }}-reason-code">{% trans "Dayandırma səbəbi" context "accounts.account_block" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="bootstrap-single-select__native" id="{{ block_id_prefix }}-reason-code" name="reason_code" data-block-reason data-bootstrap-select>
+        <option value="">{% trans "Səbəbi seçin" context "accounts.account_block" %}</option>
+        {% for option in block_options.reasons %}
+        <option value="{{ option.value }}" data-contact="{{ option.contact }}">{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="{{ block_id_prefix }}-contact-code">{% trans "Blokdan çıxmaq üçün kimə yaxınlaşsın" context "accounts.account_block" %}</label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+      <select class="bootstrap-single-select__native" id="{{ block_id_prefix }}-contact-code" name="contact_code" data-block-contact data-bootstrap-select>
+        {% for option in block_options.contacts %}
+        <option value="{{ option.value }}">{{ option.label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Səbəbə görə avtomatik seçilir — lazım olsa dəyişin." context "accounts.account_block" %}</p>
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="{{ block_id_prefix }}-contact-note">{% trans "Tələbəyə qeyd (otaq, telefon, iş saatı)" context "accounts.account_block" %}</label>
+    <input class="ems-input" type="text" id="{{ block_id_prefix }}-contact-note" name="contact_note" maxlength="{{ block_note_max }}"
+           placeholder="{% trans 'məs: 2-ci korpus, 105-ci otaq, 09:00–17:00' context 'accounts.account_block' %}">
+    <p class="ems-field__hint">{% trans "Tələbə istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi görəcək — sistemə isə daxil ola bilməyəcək." context "accounts.account_block" %}</p>
+  </div>
+</div>

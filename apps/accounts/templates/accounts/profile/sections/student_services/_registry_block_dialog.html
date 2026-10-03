@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}«Tələbə reyestri» → «Hesabı dayandır» dialoqu (sahib 2026-10-03). Sahələr «Tələbələr» kataloqu ilə
+EYNİDİR (`people/_block_reason_fields.html`); göndəriş `accounts:people_action` (block) — student_registry_account.js.{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="srBlockDialog" data-sr-block-dialog hidden>
+  <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="srBlockDialog-title">
+    <form novalidate data-sr-block-form>
+      <div class="ems-dialog__head">
+        <div>
+          <h2 class="ems-dialog__title" id="srBlockDialog-title">{% trans "Hesabı dayandır" context "accounts.student_registry" %}</h2>
+          <p class="ems-dialog__sub" data-sr-block-target></p>
+        </div>
+        <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'accounts.student_registry' %}">×</button>
+      </div>
+      <div class="ems-dialog__body">
+        <p class="ems-msg ems-msg--error" data-sr-block-error role="alert" hidden></p>
+        {% include "accounts/profile/sections/people/_block_reason_fields.html" with block_id_prefix="srBlockDialog" block_options=student_registry_section.block_options block_note_max=student_registry_section.block_note_max %}
+      </div>
+      <div class="ems-dialog__foot">
+        <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "accounts.student_registry" %}</button>
+        <button type="submit" class="ems-btn ems-btn--danger" data-sr-block-submit>{% trans "Hesabı dayandır" context "accounts.student_registry" %}</button>
+      </div>
+    </form>
+  </div>
+</div>

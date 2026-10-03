@@ -217,6 +217,8 @@
         window.EMSCore.fetchJSON(urlFor(host.getAttribute("data-sr-card-url"), btn.getAttribute("data-sr-card")))
             .then(function (payload) {
                 fillCard(payload);
+                // 2026-10-03: hesab bloku ayrıca modulda (student_registry_account.js).
+                document.dispatchEvent(new CustomEvent("sr:card", { detail: payload }));
                 if (window.EMSOverlay && drawer) {
                     window.EMSOverlay.open(drawer);
                 }

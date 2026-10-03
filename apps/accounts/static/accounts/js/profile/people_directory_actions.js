@@ -188,9 +188,35 @@
         if (form) {
             form.reset();
         }
+        // 2026-10-03: «Dayandır» — sərbəst mətn əvəzinə SƏBƏB seçimi + «kimə yaxınlaşsın» + tələbəyə qeyd.
+        var blockFields = dialog.querySelector("[data-block-fields]");
+        var reasonField = dialog.querySelector("[data-people-reason-field]");
+        var useBlock = action === "block" && !!blockFields && !!window.EMSBlockFields;
+        if (blockFields && window.EMSBlockFields) {
+            window.EMSBlockFields.show(blockFields, useBlock);
+            window.EMSBlockFields.reset(blockFields);
+        }
+        if (reasonField) {
+            reasonField.hidden = useBlock;
+        }
         showDialogError(dialog, "");
         renderTargets(dialog, ctx, ids);
         bindDialogSubmit(dialog, function (frm) {
+            if (useBlock) {
+                var picked = window.EMSBlockFields.read(blockFields);
+                if (picked.error) {
+                    showDialogError(dialog, picked.error);
+                    return;
+                }
+                runSequential(ctx, dialog, ids, function (id) {
+                    var body = { action: action, user_id: id };
+                    Object.keys(picked.payload).forEach(function (key) {
+                        body[key] = picked.payload[key];
+                    });
+                    return body;
+                }, onDone);
+                return;
+            }
             var reason = reasonFrom(frm, ctx, meta.required);
             if (reason === null) {
                 showDialogError(dialog, fmt(ctx.t("reasonRequired"), { d: ctx.minReason }).replace("%d", String(ctx.minReason)));
