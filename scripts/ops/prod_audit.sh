@@ -182,7 +182,7 @@ $COMPOSE ps --format '{{.Service}}' 2>/dev/null | sort | uniq -c | awk '{printf 
 printf '%-56s %6s %8s %6s %8s %s\n' NAME CPUs MEM_MB PIDs RESTART OOM/HEALTH
 TOTMEM=0; TOTCPU=0
 for c in $($COMPOSE ps -q 2>/dev/null); do
-  line=$(docker inspect --format '{{.Name}} {{.HostConfig.NanoCpus}} {{.HostConfig.Memory}} {{.HostConfig.PidsLimit}} {{.RestartCount}} {{.State.OOMKilled}} {{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$c" 2>/dev/null) || continue
+  line=$(docker inspect --format '{{.Name}} {{.HostConfig.NanoCpus}} {{.HostConfig.Memory}} {{if .HostConfig.PidsLimit}}{{.HostConfig.PidsLimit}}{{else}}0{{end}} {{.RestartCount}} {{.State.OOMKilled}} {{if .State.Health}}{{.State.Health.Status}}{{else}}n/a{{end}}' "$c" 2>/dev/null) || continue
   [ -z "$line" ] && continue
   # shellcheck disable=SC2086  # qəsdən: inspect sətrini sahələrə bölürük
   set -- $line
@@ -207,7 +207,7 @@ APPN=0; FIRSTAPP=""
 for c in $($COMPOSE ps -q app 2>/dev/null); do
   APPN=$((APPN+1)); [ -z "$FIRSTAPP" ] && FIRSTAPP="$c"
   printf '%s: ' "$(docker inspect --format '{{.Name}}' "$c" 2>/dev/null | sed 's#^/##')"
-  docker exec "$c" sh -c 'grep -E "^(Threads|VmRSS|VmHWM)" /proc/1/status | tr -s "\t\n" "  "; printf "fds=%s " "$(ls /proc/1/fd 2>/dev/null | wc -l)"; sed -n "s/^Max open files *\([0-9]*\) *\([0-9]*\).*/nofile=\1\/\2/p" /proc/1/limits; echo' 2>/dev/null || echo "(exec alınmadı)"
+  docker exec "$c" sh -c 'grep -E "^(Threads|VmRSS|VmHWM)" /proc/1/status | tr -s "\t\n" "  "; printf "fds=%s " "$(ls /proc/1/fd 2>/dev/null | wc -l)"; nf=$(sed -n "s/^Max open files *\([0-9]*\) *\([0-9]*\).*/nofile=\1\/\2/p" /proc/1/limits); echo "${nf:-nofile=?}"' 2>/dev/null || echo "(exec alınmadı)"
 done
 if [ -n "$FIRSTAPP" ]; then
   echo "-- PID 1 komandası (replika 1):"; docker exec "$FIRSTAPP" sh -c 'tr "\0" " " </proc/1/cmdline; echo' 2>/dev/null
@@ -235,7 +235,7 @@ done
 echo "-- celery inspect stats (pool; broker bloku qəsdən çap olunmur):"
 $COMPOSE exec -T --index 1 celery_worker celery -A config inspect stats --timeout 10 2>/dev/null | grep -E '^-> |"implementation"|"max-concurrency"|"max-tasks-per-child"|"prefetch_count"' | sed 's/^ *//'
 echo "-- celery inspect active_queues:"
-$COMPOSE exec -T --index 1 celery_worker celery -A config inspect active_queues --timeout 10 2>/dev/null | grep -E '^-> |"name"' | sed 's/^ *//' | head -12
+$COMPOSE exec -T --index 1 celery_worker celery -A config inspect active_queues --timeout 10 2>/dev/null | grep -E "^-> |'name': '" | sed -E "s/^ *\* \{'name': '([^']+)'.*/   növbə: \1/" | head -12
 echo '```'
 
 echo
@@ -283,7 +283,7 @@ rc INFO keyspace | grep -E '^db'
 printf 'io-threads=%s maxclients=%s hz=%s\n' "$(rc CONFIG GET io-threads | sed -n 2p)" "$(rc CONFIG GET maxclients | sed -n 2p)" "$(rc CONFIG GET hz | sed -n 2p)"
 echo '```'
 RU=$(rc INFO memory | awk -F: '/^used_memory:/{print $2}'); RM=$(rc INFO memory | awk -F: '/^maxmemory:/{print $2}')
-if [ -n "$RU" ] && [ -n "$RM" ] && [ "$RM" -gt 0 ] 2>/dev/null; then RP=$((RU*100/RM)); [ "$RP" -lt 70 ] && ok "redis yaddaşı maxmemory-nin ${RP}%-i" || warn "redis yaddaşı maxmemory-nin ${RP}%-i (noeviction → limitdə yazma xətası)"; fi
+if [ -n "$RU" ] && [ -n "$RM" ] && [ "$RM" -gt 0 ] 2>/dev/null; then RP=$((RU*100/RM)); RPF=$(awk -v u="$RU" -v m="$RM" 'BEGIN{printf "%.2f", 100*u/m}'); [ "$RP" -lt 70 ] && ok "redis yaddaşı maxmemory-nin ${RPF}%-i ($((RU/1048576)) MB / $((RM/1048576)) MB)" || warn "redis yaddaşı maxmemory-nin ${RPF}%-i (noeviction → limitdə yazma xətası)"; fi
 
 echo
 echo "### 10.10 nginx — worker-lər, bağlantı tavanı, gzip/http2/keepalive, stub_status"
@@ -291,6 +291,8 @@ echo '```'
 $COMPOSE exec -T nginx nginx -T 2>/dev/null | grep -E '^\s*(worker_processes|worker_connections|worker_rlimit_nofile|multi_accept|use |keepalive_timeout|keepalive_requests|gzip on|gzip_comp_level|gzip_static|http2|sendfile|tcp_nopush|tcp_nodelay|client_max_body_size|proxy_buffering|proxy_buffers|proxy_buffer_size|limit_conn |limit_req_zone|resolver|open_file_cache)' | sed 's/^\s*//' | sort | uniq -c | sort -rn | awk '{c=$1; $1=""; printf "%s  (×%s)\n", substr($0,2), c}'
 NGX=$($COMPOSE ps -q nginx 2>/dev/null | head -1)
 echo "-- işləyən nginx worker prosesləri: $([ -n "$NGX" ] && docker top "$NGX" 2>/dev/null | grep -c 'worker process' || echo '?') · host nproc $(nproc)"
+echo "-- nginx fayl deskriptoru limiti (worker_rlimit_nofile yoxdursa Docker defoltu; worker_connections bundan böyük olmamalıdır):"
+[ -n "$NGX" ] && docker exec "$NGX" sh -c 'for p in 1 $(pgrep -f "worker process" 2>/dev/null | head -1); do printf "pid %s: " "$p"; grep "Max open files" /proc/$p/limits 2>/dev/null | tr -s " "; done' 2>/dev/null
 echo "-- stub_status (Active = açıq müştəri bağlantıları, WS daxil):"; $COMPOSE exec -T nginx wget -qO- http://127.0.0.1:8081/stub_status 2>/dev/null
 echo '```'
 
@@ -301,8 +303,9 @@ AM_PORT="$(dotenv ALERTMANAGER_PORT)"; AM_PORT="${AM_PORT:-9093}"
 # promq "<PromQL>" [printf-format] → tək seriya: dəyər; çox seriya: "etiketlər = dəyər" sətirləri; boş: —; xəta: n/a
 promq() {
   local out fmt="${2:-%.1f}"
-  out=$(curl -sG --max-time 15 "$PROM/api/v1/query" --data-urlencode "query=$1" 2>/dev/null) || { echo "n/a"; return; }
+  out=$(curl -sG --max-time 25 "$PROM/api/v1/query" --data-urlencode "query=$1" 2>/dev/null) || { echo "n/a"; return; }
   if command -v python3 >/dev/null 2>&1; then
+    # DİQQƏT: aşağıdakı Python mətni bash tək dırnaq içindədir — içində TƏK DIRNAQ OLMAMALIDIR.
     printf '%s' "$out" | python3 -c '
 import json, sys
 fmt = sys.argv[1]
@@ -320,8 +323,8 @@ def f(v):
 if len(res) == 1:
     print(f(res[0]["value"][1])); sys.exit()
 for r in res:
-    lbl = ",".join(f"{k}={v}" for k, v in sorted(r.get("metric", {}).items()) if k != "__name__")
-    print(f"{lbl or '*'} = {f(r['value'][1])}")
+    lbl = ",".join(k + "=" + str(v) for k, v in sorted(r.get("metric", {}).items()) if k != "__name__")
+    print((lbl if lbl else "*") + " = " + f(r["value"][1]))
 ' "$fmt"
   else
     printf '%s' "$out" | sed -n 's/.*"value":\[[0-9.e+]*,"\([^"]*\)"\].*/\1/p' | head -1
@@ -334,7 +337,7 @@ if curl -s --max-time 5 "$PROM/-/ready" >/dev/null 2>&1; then
   echo "RAM: indi $(promq '100*(1-node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes)')% · 7g maks $(promq 'max_over_time((100*(1-node_memory_MemAvailable_bytes/node_memory_MemTotal_bytes))[7d:5m])')% · swap 7g maks $(promq 'max_over_time((node_memory_SwapTotal_bytes-node_memory_SwapFree_bytes)[7d:5m])/1048576' '%.0f') MB"
   echo "load1: 7g maks $(promq 'max_over_time(node_load1[7d:1m])' '%.2f') (nüvə: $(nproc)) · disk I/O məşğulluğu 24s orta $(promq '100*avg(rate(node_disk_io_time_seconds_total{device!~"loop.*|dm-.*"}[24h]))')% · 7g maks $(promq 'max_over_time((100*avg(rate(node_disk_io_time_seconds_total{device!~"loop.*|dm-.*"}[5m])))[7d:5m])')%"
   echo "HTTP: 24s orta $(promq 'sum(rate(http_requests_total[24h]))' '%.2f') r/s · 7g maks (5 dəq) $(promq 'max_over_time(sum(rate(http_requests_total[5m]))[7d:5m])' '%.1f') r/s · 7g cəmi $(promq 'sum(increase(http_requests_total[7d]))' '%.0f') sorğu"
-  echo "Gecikmə p95: 24s $(promq 'histogram_quantile(0.95, sum by (le)(rate(http_request_duration_seconds_bucket[24h])))*1000' '%.0f') ms · 7g maks (15 dəq) $(promq 'max_over_time((histogram_quantile(0.95, sum by (le)(rate(http_request_duration_seconds_bucket[15m]))))[7d:15m])*1000' '%.0f') ms"
+  echo "Gecikmə p95: 24s $(promq 'histogram_quantile(0.95, sum by (le)(rate(http_request_duration_seconds_bucket[24h])))*1000' '%.0f') ms · 7g maks (1 saat pəncərə) $(promq 'max_over_time((histogram_quantile(0.95, sum by (le)(rate(http_request_duration_seconds_bucket[1h]))))[7d:1h])*1000' '%.0f') ms"
   echo "Xətalar 7g: 5xx $(promq 'sum(increase(http_requests_total{status_code=~"5.."}[7d])) or vector(0)' '%.0f') · 503 (inflight shed) $(promq 'sum(increase(http_requests_total{status_code="503"}[7d])) or vector(0)' '%.0f') · 429 $(promq 'sum(increase(http_requests_total{status_code="429"}[7d])) or vector(0)' '%.0f')"
   echo "PostgreSQL bağlantı: indi $(promq 'sum(pg_stat_activity_count)' '%.0f') · 7g maks $(promq 'max_over_time(sum(pg_stat_activity_count)[7d:1m])' '%.0f') · max_connections (exporter) $(promq 'pg_settings_max_connections' '%.0f')"
   echo "PgBouncer: server aktiv indi $(promq 'sum(pgbouncer_pools_server_active_connections)' '%.0f') · 7g maks $(promq 'max_over_time(sum(pgbouncer_pools_server_active_connections)[7d:1m])' '%.0f') · müştəri aktiv 7g maks $(promq 'max_over_time(sum(pgbouncer_pools_client_active_connections)[7d:1m])' '%.0f') · gözləyən 7g maks $(promq 'max_over_time(sum(pgbouncer_pools_client_waiting_connections)[7d:1m])' '%.0f') · maxwait 7g $(promq 'max_over_time(max(pgbouncer_pools_client_maxwait_seconds)[7d:1m])' '%.1f') s"
@@ -342,10 +345,10 @@ if curl -s --max-time 5 "$PROM/-/ready" >/dev/null 2>&1; then
   echo "Celery: onlayn worker $(promq 'emsarena_celery_workers_online' '%.0f') · növbə 7g maks $(promq 'max_over_time(sum(emsarena_celery_queue_length)[7d:1m])' '%.0f') · aktiv task 7g maks $(promq 'max_over_time(emsarena_celery_active_tasks[7d:1m])' '%.0f') · backup yaşı $(promq 'emsarena_backup_age_seconds/3600' '%.1f') saat"
   echo "Prometheus TSDB: $(promq 'prometheus_tsdb_storage_blocks_bytes/1048576' '%.0f') MB · seriya $(promq 'prometheus_tsdb_head_series' '%.0f') · retention $(v=$(dotenv PROMETHEUS_RETENTION_TIME); echo "${v:-15d (defolt)}")"
   echo
-  echo "-- konteyner CPU, 7 gün maks (5 dəq pəncərə; % bir nüvə — 100 = tam bir nüvə):"
-  promq "topk(14, max_over_time((sum by (name)(rate(container_cpu_usage_seconds_total{$CRE}[5m])))[7d:5m])*100)" '%.1f'
+  echo "-- konteyner CPU, 7 gün maks (5 dəq pəncərə, 10 dəq addım; % bir nüvə — 100 = tam bir nüvə):"
+  promq "topk(14, max_over_time((sum by (name)(rate(container_cpu_usage_seconds_total{$CRE}[5m])))[7d:10m])*100)" '%.1f'
   echo "-- konteyner yaddaşı (working set) 7 gün maks, öz limitinin %-i:"
-  promq "topk(14, 100*max_over_time((sum by (name)(container_memory_working_set_bytes{$CRE}))[7d:5m]) / on(name) (sum by (name)(container_spec_memory_limit_bytes{$CRE}) > 0))" '%.1f'
+  promq "topk(14, 100*max_over_time((sum by (name)(container_memory_working_set_bytes{$CRE}))[7d:10m]) / on(name) (sum by (name)(container_spec_memory_limit_bytes{$CRE}) > 0))" '%.1f'
   echo '```'
   echo "#### Monitorinq səhifəsinin (apps/monitoring) məlumat mənbələri"
   TG=$(curl -s --max-time 10 "$PROM/api/v1/targets?state=active" 2>/dev/null)
