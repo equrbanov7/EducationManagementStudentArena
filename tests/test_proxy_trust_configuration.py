@@ -52,8 +52,11 @@ def test_deploy_recreates_nginx_when_single_file_bind_mount_is_stale():
     script = (ROOT / "scripts/deploy/remote_deploy.sh").read_text(encoding="utf-8")
     refresh = script.split("refresh_nginx_upstream() {", 1)[1].split("\n}", 1)[0]
 
-    assert 'sha256sum "$NGINX_CONFIG_FILE"' in refresh
-    assert "sha256sum /etc/nginx/conf.d/default.conf" in refresh
+    # 2026-10-04: əsas konfiq (nginx-main.conf → /etc/nginx/nginx.conf) da bind mount-dur —
+    # hər iki faylın birləşmiş hash-i host ↔ konteyner müqayisə olunur.
+    assert 'cat "$NGINX_CONFIG_FILE" "$main_config_file"' in refresh
+    assert "cat /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf" in refresh
+    assert "| sha256sum" in refresh
     assert '"$host_config_hash" != "$container_config_hash"' in refresh
     assert "run --rm --no-deps nginx nginx -t" in refresh
     assert "up -d --no-deps --force-recreate nginx" in refresh
