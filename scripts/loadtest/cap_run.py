@@ -127,7 +127,7 @@ class Stack:
 
     def psql(self, sql, db="capacity"):
         return sh(
-            ["docker", "exec", f"{PROJECT}-db-1", "psql", "-X", "-q", "-A", "-F", "\t", "-U", "capacity_owner", "-d", db, "-c", sql],
+            ["docker", "exec", f"{PROJECT}-db-1", "psql", "-X", "-q", "-A", "-t", "-F", "\t", "-U", "capacity_owner", "-d", db, "-c", sql],
             capture=True,
             check=False,
         )

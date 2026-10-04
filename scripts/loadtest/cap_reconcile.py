@@ -58,14 +58,14 @@ with rls_worker_atomic(), bypass_rls():
     examples = []
     for row in marks_expected:
         stored = {
-            f"{m.lesson_id}:{m.enrollment_id}": [m.status, m.score]
+            f"{m.lesson_id}:{m.enrollment_id}": [m.status, None if m.score is None else int(m.score)]
             for m in LessonMark.objects.filter(lesson__offering_id=row["offering"])
         }
         for key, (status, score) in row["marks"].items():
             cells += 1
             got = stored.get(key)
             want_score = None if status == "absent" else score
-            if got is None or got[0] != status or (got[1] if got[1] is None else int(got[1])) != want_score:
+            if got is None or got[0] != status or got[1] != want_score:
                 mism += 1
                 if len(examples) < 10:
                     examples.append({"offering": row["offering"], "cell": key, "want": [status, want_score], "got": got})
