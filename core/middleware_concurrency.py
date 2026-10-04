@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse, JsonResponse
@@ -63,6 +64,11 @@ class ConcurrencyLimitMiddleware:
             raise MiddlewareNotUsed
         self.limit = limit
         self._slots = threading.BoundedSemaphore(limit)
+        # Login admission happens before the shared semaphore: waiting logins
+        # must not occupy slots needed by students already taking an exam.
+        login_limit = _safe_int_setting("MAX_INFLIGHT_LOGIN_REQUESTS", 4, minimum=0)
+        self.login_limit = min(login_limit, max(1, limit - 1))
+        self._login_slots = threading.BoundedSemaphore(self.login_limit) if self.login_limit else None
         self._inflight = 0
         self._inflight_guard = threading.Lock()
 
@@ -75,16 +81,33 @@ class ConcurrencyLimitMiddleware:
             return self.get_response(request)
 
         wait = _safe_float_setting("MAX_INFLIGHT_WAIT_SECONDS", DEFAULT_WAIT_SECONDS, minimum=0.0)
-        if not self._slots.acquire(timeout=wait):
-            return self._overloaded_response(request)
-        with self._inflight_guard:
-            self._inflight += 1
+        deadline = time.monotonic() + wait
+        login_slots = self._login_slots if self._is_login_post(request) else None
+        if login_slots and not login_slots.acquire(timeout=wait):
+            return self._overloaded_response(request, scope="login")
         try:
-            return self.get_response(request)
-        finally:
+            if not self._slots.acquire(timeout=max(0, deadline - time.monotonic())):
+                return self._overloaded_response(request)
             with self._inflight_guard:
-                self._inflight -= 1
-            self._slots.release()
+                self._inflight += 1
+            try:
+                return self.get_response(request)
+            finally:
+                with self._inflight_guard:
+                    self._inflight -= 1
+                self._slots.release()
+        finally:
+            if login_slots:
+                login_slots.release()
+
+    @staticmethod
+    def _is_login_post(request) -> bool:
+        # Only the password-hashing POST is CPU-heavy; the login form GET stays
+        # in the shared pool so a burst never 503s the page students must open.
+        if request.method != "POST":
+            return False
+        path = request.path_info or request.path or ""
+        return path == "/accounts/login" or path.startswith("/accounts/login/")
 
     @staticmethod
     def _is_exempt(request) -> bool:
@@ -94,7 +117,7 @@ class ConcurrencyLimitMiddleware:
         prefixes = getattr(settings, "MAX_INFLIGHT_EXEMPT_PATH_PREFIXES", DEFAULT_EXEMPT_PREFIXES)
         return any(path.startswith(prefix) for prefix in prefixes)
 
-    def _overloaded_response(self, request):
+    def _overloaded_response(self, request, *, scope="global"):
         logger.warning(
             "concurrency limit: %s in-flight (limit %s) — %s %s rədd edildi (503)",
             self._inflight,
@@ -113,6 +136,7 @@ class ConcurrencyLimitMiddleware:
         retry_after = _safe_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", DEFAULT_RETRY_AFTER_SECONDS, minimum=1)
         response["Retry-After"] = str(retry_after)
         response["X-Concurrency-Limited"] = "1"
+        response["X-Concurrency-Scope"] = scope
         return response
 
 

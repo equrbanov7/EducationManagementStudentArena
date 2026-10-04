@@ -22,6 +22,9 @@ yerləşdirməsi dəyişmir)
   söndürülüb, kənardan yalnız jurnal bağlıdır): kənar zonadan bütün səhifələr 403 — yalnız çıxış, statik/media,
   health/ping və giriş səhifəsinin özü açıqdır (istifadəçi «niyə» səhifəsini görüb
   çıxa bilsin).
+* Superadmin — ``NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY=True`` (defolt AÇIQ, sahib 2026-10-05):
+  kənar zonadan heç bir səhifə, giriş formasından keçən uğurlu giriş də dərhal ləğv edilir
+  (sessiya bağlanır, 403). Yalnız çıxış açıqdır.
 * Tələbə (student/lead_student) və yalnız-müəllim (teacher ailəsi) hesabları
   kənardan işləyir. Müəllim + inzibati rol = inzibati (sərt qayda üstündür).
 
@@ -147,6 +150,16 @@ def _is_open_path(path: str) -> bool:
     return path.startswith("/accounts/login/") or path.startswith("/accounts/logout")
 
 
+def _is_superadmin(request) -> bool:
+    from core.permissions import is_superadmin_user
+
+    return is_superadmin_user(getattr(request, "user", None))
+
+
+def _is_logout_path(path: str) -> bool:
+    return path.startswith("/accounts/logout")
+
+
 #: `/jurnal/` altında olan, amma elektron jurnal OLMAYAN şəxsi səhifələr — tələbə/müəllim
 #: öz dərs cədvəlini, təqvimini və transkriptini kənardan da görür (sahib 2026-09-25:
 #: «kənardan elektron jurnala girmək olmasın, başqa şeylərə olar»). Yalnız DƏQİQ yol;
@@ -175,13 +188,27 @@ class NetworkZoneMiddleware:
         path = request.path_info
         if _journal_path(path):
             return self._deny(request, reason="journal_internal_only", kind=account_kind(request))
+        superadmin_gate = getattr(settings, "NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", True)
+        if superadmin_gate and _is_superadmin(request) and not _is_logout_path(path):
+            return self._deny_superadmin(request)
         # Sahib 2026-09-29: inzibati hesabların daxili-şəbəkə məhdudiyyəti ayarla idarə olunur (defolt söndürülüb).
-        if not getattr(settings, "NETWORK_ZONE_STAFF_INTERNAL_ONLY", False):
-            return self.get_response(request)
-        kind = account_kind(request)
-        if kind == "staff" and not _is_open_path(path):
-            return self._deny(request, reason="staff_internal_only", kind=kind)
-        return self.get_response(request)
+        if getattr(settings, "NETWORK_ZONE_STAFF_INTERNAL_ONLY", False):
+            kind = account_kind(request)
+            if kind == "staff" and not _is_open_path(path):
+                return self._deny(request, reason="staff_internal_only", kind=kind)
+        response = self.get_response(request)
+        # Sahib 2026-10-05: superadmin YALNIZ universitet şəbəkəsindən. Giriş formaları
+        # (və OTP addımları) açıq yoldur — bu sorğuda login() superadmin sessiyası
+        # açıbsa, kənar zonada həmin sessiya dərhal ləğv edilir.
+        if superadmin_gate and _is_superadmin(request) and not _is_logout_path(path):
+            return self._deny_superadmin(request)
+        return response
+
+    def _deny_superadmin(self, request):
+        from django.contrib.auth import logout
+
+        logout(request)
+        return self._deny(request, reason="superadmin_internal_only", kind="staff")
 
     def _deny(self, request, *, reason: str, kind: str):
         client_ip = get_client_ip(request) or ""

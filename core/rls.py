@@ -34,7 +34,7 @@ import logging
 from contextlib import contextmanager
 from typing import Any
 
-from django.db import connection
+from django.db import DatabaseError, InterfaceError, connection
 
 logger = logging.getLogger(__name__)
 
@@ -301,16 +301,26 @@ def reset_rls_context(*, local: bool | None = None, only_if_connection_open: boo
         return
     if only_if_connection_open and not _has_open_connection():
         return
+    if only_if_connection_open and getattr(connection.connection, "closed", False):
+        connection.close()
+        return
     # Same three resets as clear_rls_tenant + clear_rls_user + set_rls_bypass(False),
     # batched into one round-trip.
-    _set_rls_settings(
-        [
-            ("app.current_org_id", _NO_TENANT),
-            ("app.current_user_id", _NO_USER),
-            ("app.bypass_rls", _BYPASS_OFF),
-        ],
-        local=local,
-    )
+    try:
+        _set_rls_settings(
+            [
+                ("app.current_org_id", _NO_TENANT),
+                ("app.current_user_id", _NO_USER),
+                ("app.bypass_rls", _BYPASS_OFF),
+            ],
+            local=local,
+        )
+    except (DatabaseError, InterfaceError):
+        # A connection whose tenant state could not be reset must never be reused.
+        connection.close()
+        if not only_if_connection_open:
+            raise
+        logger.warning("RLS cleanup failed; database connection discarded.", exc_info=True)
 
 
 @contextmanager

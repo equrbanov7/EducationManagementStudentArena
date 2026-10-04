@@ -42,6 +42,16 @@ class SecurityEventTests(TestCase):
             ).exists()
         )
 
+    def test_server_side_superadmin_session_is_labelled_not_a_browser_login(self):
+        # Client.force_login builds a bare request without REMOTE_ADDR — exactly
+        # what an ops script running in the app container does.
+        admin = User.objects.create_superuser("super_skript", "super_skript@test.az", "Pass123!x")
+        Client().force_login(admin)
+        event = SecurityEvent.objects.get(event_type="superadmin_login", user=admin)
+        self.assertIsNone(event.ip_address)
+        self.assertEqual(event.severity, "medium")
+        self.assertIn("brauzer girişi deyil", event.message)
+
     def test_brute_force_pattern_detected(self):
         client = Client()
         for i in range(BRUTE_FORCE_THRESHOLD + 1):

@@ -43,6 +43,8 @@ Environment variables
                       (default: ``AAAA111111``).
 ``LOAD_COURSE_ID``  – Numeric course ID to exercise the course dashboard
                       (default: ``1``).
+``LOAD_USER_SHARD_COUNT`` – Number of accounts reserved for this worker;
+                      distributed workers must use disjoint offset/count ranges.
 """
 
 from __future__ import annotations
@@ -50,9 +52,11 @@ from __future__ import annotations
 import itertools
 import os
 import re
+from urllib.parse import urlsplit
 
 from locust import HttpUser, between, events, task
 from locust.contrib.fasthttp import FastHttpUser
+from locust.exception import StopUser
 
 # ---------------------------------------------------------------------------
 # Configuration from environment
@@ -77,7 +81,9 @@ _USER_PAD: int = int(os.environ.get("LOAD_USER_PAD", "4") or 4)
 #: Hovuzdan növbəti hesabı verən sayğac. Locust worker-ləri AYRI prosesdir,
 #: ona görə hər worker öz hovuz zolağından başlasın deyə `LOAD_USER_OFFSET`
 #: worker başına fərqli verilir (workflow bunu avtomatik edir).
-_user_cursor = itertools.count(int(os.environ.get("LOAD_USER_OFFSET", "0") or 0))
+_USER_OFFSET = int(os.environ.get("LOAD_USER_OFFSET", "0") or 0)
+_user_cursor = itertools.count(_USER_OFFSET)
+_USER_SHARD_COUNT = int(os.environ.get("LOAD_USER_SHARD_COUNT", str(_USER_COUNT - _USER_OFFSET)) or 0)
 
 #: `nginx`-i keçib app konteynerinə birbaşa vuranda iki başlıq lazımdır:
 #:
@@ -139,7 +145,9 @@ def _next_credentials() -> tuple[str, str]:
     """Bu VU üçün istifadəçi adı/parol — hovuz varsa növbəti hesab."""
     if not (_USER_PREFIX and _USER_COUNT):
         return _USERNAME, _PASSWORD
-    index = next(_user_cursor) % _USER_COUNT
+    index = next(_user_cursor)
+    if index < 0 or index >= min(_USER_COUNT, _USER_OFFSET + _USER_SHARD_COUNT):
+        raise StopUser("unikal test hesabları tükəndi")
     return f"{_USER_PREFIX}{index + 1:0{_USER_PAD}d}", _PASSWORD
 
 
@@ -151,9 +159,24 @@ def _login(user, label: str) -> None:
     «hər şey yaşıl» deyir, halbuki heç kim daxil ola bilməyib. Ona görə
     yönləndirmə olub-olmadığını yoxlayırıq.
     """
-    username, password = _next_credentials()
-    resp = user.client.get("/accounts/login/", name=f"{label} Login GET")
-    csrf = _extract_csrf(resp.text)
+    try:
+        username, password = _next_credentials()
+    except StopUser:
+        user.environment.events.request.fire(
+            request_type="FIXTURE",
+            name="unique account pool exhausted",
+            response_time=0,
+            response_length=0,
+            exception=RuntimeError("worker has no unused test account; increase its fixture shard"),
+        )
+        raise
+    with user.client.get("/accounts/login/", name=f"{label} Login GET", catch_response=True, timeout=15) as resp:
+        csrf = _extract_csrf(resp.text)
+        login_page_ok = resp.status_code == 200 and bool(csrf)
+        if not login_page_ok:
+            resp.failure(f"login GET: status={resp.status_code}, error={resp.error}, CSRF={bool(csrf)}")
+    if not login_page_ok:
+        raise StopUser()
     with user.client.post(
         "/accounts/login/",
         data={"username": username, "password": password, "csrfmiddlewaretoken": csrf},
@@ -161,13 +184,23 @@ def _login(user, label: str) -> None:
         name=f"{label} Login POST",
         catch_response=True,
         allow_redirects=False,
+        timeout=15,
     ) as post:
-        if post.status_code in (301, 302):
+        destination = urlsplit(post.headers.get("Location", "")).path
+        login_ok = (
+            post.status_code in (302, 303)
+            and bool(destination)
+            and not destination.startswith("/accounts/login")
+            and bool(user.client.cookies.get("sessionid"))
+        )
+        if login_ok:
             post.success()
         elif post.status_code == 200:
             post.failure("giriş formu geri qayıtdı — etimadnamə qəbul edilmədi")
         else:
-            post.failure(f"gözlənilməz status: {post.status_code}")
+            post.failure(f"login POST: status={post.status_code}, error={post.error}, session yoxdur")
+    if not login_ok:
+        raise StopUser()
 
 
 # ---------------------------------------------------------------------------
@@ -328,24 +361,9 @@ class AnswerSubmitter(_TlsAwareHttpUser):
 
     def on_start(self):
         super().on_start()
-        # Bu sinif `_login()`-dən istifadə ETMİR: sonrakı mutasiya sorğuları
-        # üçün login CAVABININ gövdəsindən CSRF çıxarır, `_login()` isə
-        # `allow_redirects=False` ilə işləyir və gövdə boş qalır.
-        username, password = _next_credentials()
-        resp = self.client.get("/accounts/login/")
-        csrf = _extract_csrf(resp.text)
-        login_resp = self.client.post(
-            "/accounts/login/",
-            data={
-                "username": username,
-                "password": password,
-                "csrfmiddlewaretoken": csrf,
-            },
-            headers={"Referer": self.host + "/accounts/login/"},
-            name="[answer] Login",
-        )
-        # Extract CSRF for subsequent mutation requests
-        self._csrf = _extract_csrf(login_resp.text) if login_resp else ""
+        _login(self, "[answer]")
+        # Login rotates CSRF; read the current cookie rather than a redirect body.
+        self._csrf = self.client.cookies.get("csrftoken", "")
 
     @task
     def submit_answer(self):

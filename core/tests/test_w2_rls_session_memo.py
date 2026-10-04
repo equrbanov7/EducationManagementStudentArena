@@ -94,6 +94,15 @@ class RlsSessionMemoTest(TransactionTestCase):
         self.assertEqual(len(ctx.captured_queries), 1)
         self.assertEqual(_db_value("app.current_org_id"), "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 
+    def test_cleanup_discards_driver_closed_connection_and_fresh_session_has_no_tenant(self):
+        rls.set_rls_tenant("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
+        rls.set_rls_bypass(True)
+        connection.connection.close()
+        rls.reset_rls_context(only_if_connection_open=True)
+        self.assertIsNone(connection.connection)
+        self.assertEqual(_db_value("app.current_org_id"), "")
+        self.assertNotEqual(_db_value("app.bypass_rls"), "on")
+
     @override_settings(RLS_TRANSACTION_SCOPED=True)
     def test_transaction_scoped_mode_disables_the_memo(self):
         rls.set_rls_tenant("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")

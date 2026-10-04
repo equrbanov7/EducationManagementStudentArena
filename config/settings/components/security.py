@@ -170,3 +170,9 @@ NETWORK_ZONE_STAFF_INTERNAL_ONLY = os.getenv("NETWORK_ZONE_STAFF_INTERNAL_ONLY",
     "true",
     "yes",
 )
+# Sahib 2026-10-05: superadmin hesabı YALNIZ universitet şəbəkəsindən (NETWORK_ZONE_ENFORCED açıq olanda).
+NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY = os.getenv("NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", "True").strip().lower() in (
+    "1",
+    "true",
+    "yes",
+)
