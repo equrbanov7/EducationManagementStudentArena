@@ -76,7 +76,6 @@ jobs:
           test -x "$CAP/toolenv/bin/locust" || { echo "::error::toolenv/locust yoxdur"; exit 1; }
           test -f "$CAP/compose.json" -a -f "$CAP/credentials.json" -a -f "$CAP/cert.pem" || { echo "::error::capacity fixture faylları yoxdur"; exit 1; }
           echo "edge nginx — müştəri IP xəritəsi:"; grep -o 'x_test_client[^;]*;\|X-Test-Client[^;]*;\|real_ip_header[^;]*;\|X-Forwarded-For[^;]*;' "$CAP/nginx.conf" | sort -u | head -10 || true
-          "$CAP/toolenv/bin/locust" --version
 
       - name: 📥 Checkout
         uses: actions/checkout@v6
