@@ -52,6 +52,9 @@ GROUP_SIZE = int(os.environ.get("CAP_GROUP_SIZE", "25") or 25)
 SUBJECTS = int(os.environ.get("CAP_SUBJECTS", "5") or 5)
 STUDENT_OFFSET = int(os.environ.get("CAP_JOURNAL_STUDENT_OFFSET", "40000") or 0)
 QUESTIONS = int(os.environ.get("CAP_EXAM_QUESTIONS", "10") or 10)
+# Real imtahan kimi: blokdan təsadüfi seçim (randomizer yolu da yük altında ölçülür).
+BLOCKS = int(os.environ.get("CAP_EXAM_BLOCKS", "3") or 1)
+POOL_PER_BLOCK = int(os.environ.get("CAP_EXAM_POOL_PER_BLOCK", "10") or 10)
 PAD = int(os.environ.get("CAP_STUDENT_PAD", "3") or 3)
 OUT = os.environ.get("CAP_OUT", "/capacity/cap-seed.json")
 ORG_SLUG = os.environ.get("CAP_ORG_SLUG", "stress-test-university")
@@ -78,23 +81,32 @@ def seed_exam(org, author, groups):
             slug=slug,
         )
     exam.allowed_groups.add(*groups)
-    block, _ = QuestionBlock.objects.get_or_create(exam=exam, order=1, defaults={"name": "Capacity"})
-    for i in range(exam.questions.count(), QUESTIONS):
-        question = ExamQuestion.objects.create(
-            exam=exam,
-            block=block,
-            order=i + 1,
-            text=f"Tutum sualı {i + 1}: düzgün variantı seçin.",
-            answer_mode="single",
-            points=1,
-            difficulty="easy",
-        )
-        ExamQuestionOption.objects.bulk_create(
-            [
-                ExamQuestionOption(question=question, label=label, text=f"Variant {label}", is_correct=label == "A")
-                for label in "ABCD"
-            ]
-        )
+    total = BLOCKS * POOL_PER_BLOCK
+    order = exam.questions.count()
+    for b in range(1, BLOCKS + 1):
+        block, _ = QuestionBlock.objects.get_or_create(exam=exam, order=b, defaults={"name": f"Blok {b}"})
+        for _i in range(block.questions.count() if hasattr(block, "questions") else 0, POOL_PER_BLOCK):
+            if order >= total:
+                break
+            order += 1
+            question = ExamQuestion.objects.create(
+                exam=exam,
+                block=block,
+                order=order,
+                text=f"Tutum sualı {order}: düzgün variantı seçin.",
+                answer_mode="single",
+                points=1,
+                difficulty="easy",
+            )
+            ExamQuestionOption.objects.bulk_create(
+                [
+                    ExamQuestionOption(question=question, label=label, text=f"Variant {label}", is_correct=label == "A")
+                    for label in "ABCD"
+                ]
+            )
+    if total > QUESTIONS and exam.random_question_count != QUESTIONS:
+        exam.random_question_count = QUESTIONS
+        exam.save(update_fields=["random_question_count"])
     return exam
 
 
@@ -211,7 +223,7 @@ def seed_journals(org, owner):
                 student=student,
                 defaults={"program": program, "curriculum": curriculum, "group": unit, "admission_year": 2026},
             )
-            if created or not record.enrollments.filter(offering__period=period).exists():
+            if created or not student.enrollments.filter(offering__period=period, offering__subject__in=subjects).exists():
                 registrar_services.enroll_mandatory_subjects(record=record, period=period, semester_number=1)
         group_offerings = list(
             CourseOffering.objects.filter(organization=org, period=period, group=unit, subject__in=subjects).order_by(
