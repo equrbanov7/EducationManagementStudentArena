@@ -144,17 +144,19 @@ class Stack:
         return self.compose(*args, timeout=timeout, check=False)
 
     def edge_ready(self):
-        code = ""
+        """Test şəbəkəsi `internal: true`-dur — host portu açılmır; yoxlama şəbəkə içindən."""
+        probe = (
+            "import ssl,urllib.request;"
+            "ctx=ssl._create_unverified_context();"
+            "print(urllib.request.urlopen('https://edge/ping/',context=ctx,timeout=5).status)"
+        )
+        out = ""
         for attempt in range(90):
-            code = sh(
-                ["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "5", "--resolve", "localhost:18443:127.0.0.1", "https://localhost:18443/ping/"],
-                capture=True,
-                check=False,
-            )
-            if code.strip() == "200":
+            out = sh(["docker", "exec", f"{PROJECT}-app1-1", "python", "-c", probe], capture=True, check=False, merge=True)
+            if out.strip().endswith("200"):
                 return True
             if attempt % 15 == 14:
-                log("edge not ready yet, http", code.strip())
+                log("edge not ready yet:", (out or "").strip().splitlines()[-1:] )
             time.sleep(2)
         return False
 
