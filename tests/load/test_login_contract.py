@@ -12,6 +12,8 @@ import pytest
 def scenario(monkeypatch):
     # Keep Locust's global gevent patch out of Django/PostgreSQL test threads.
     monkeypatch.setenv("LOCUST_SKIP_MONKEY_PATCH", "1")
+    # Locust is a load-test-only dependency (not in CI requirements).
+    pytest.importorskip("locust")
     spec = importlib.util.spec_from_file_location("capacity_locust_contract", Path(__file__).with_name("locustfile.py"))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
