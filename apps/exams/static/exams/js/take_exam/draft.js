@@ -309,14 +309,9 @@
                 return;
             }
 
-            if (ctx.autoSaveRequestInFlight) {
-                ns.draft.queueAutoSave(ctx);
-                return;
-            }
-            if (ns.retry.remaining(ctx)) {
-                // Timer may fire a few ms before the backoff ends: retry right
-                // after it, not after the 30 s fallback interval.
-                ns.draft.queueAutoSave(ctx, ns.retry.remaining(ctx));
+            if (ctx.autoSaveRequestInFlight || ns.retry.remaining(ctx)) {
+                // Backoff: retry when it ends (timers fire early), not after the 30 s fallback.
+                ns.draft.queueAutoSave(ctx, ctx.autoSaveRequestInFlight ? undefined : ns.retry.remaining(ctx));
                 return;
             }
 
