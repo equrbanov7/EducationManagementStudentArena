@@ -1,16 +1,48 @@
 name: 📈 Yük Testi (Locust)
 
-# ops/loadtest-2026-10-05 branch — KƏŞFİYYAT (oxu-yalnız). Heç nə dəyişmir:
-# Codex-in 2026-10-04 tutum mühitini, işləyən prosesləri və hostun yükünü göstərir.
+# ops/loadtest-2026-10-05 — İZOLƏ TUTUM TESTİ. Canlı sistemə yük VERMİR:
+# Codex-in `emsarena-capacity-20261004` izolə stack-i (internal şəbəkə, ayrıca
+# Postgres/PgBouncer/Redis/nginx/4 app) CANLI image ilə qaldırılır, sintetik
+# bazada ölçülür və dayandırılır. Canlı /health/ hər 10 s yoxlanır (qoruyucu).
 
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: "recon"
+      plan:
+        description: "Pillələr: mode:users@window (login|exam|journal|cabinet|mixed)"
         required: true
         type: string
-        default: "recon"
+        default: "login:20@10,exam:20@20,journal:10@20,cabinet:20@20"
+      teachers:
+        description: "Seed ediləcək müəllim/jurnal sayı"
+        required: true
+        type: string
+        default: "20"
+      app_cpus:
+        description: "Hər app replikasına CPU (4 replika)"
+        required: true
+        type: string
+        default: "1.0"
+      db_cpus:
+        description: "Postgres CPU"
+        required: true
+        type: string
+        default: "2.0"
+      think:
+        description: "Sual başına düşünmə vaxtı min:max saniyə"
+        required: true
+        type: string
+        default: "8:20"
+      preauth_rate:
+        description: "Ön-giriş sürəti (VU/s)"
+        required: true
+        type: string
+        default: "8"
+      stop_on_fail:
+        description: "Keçməyən pillədən sonra dayan"
+        required: true
+        type: boolean
+        default: false
 
 concurrency:
   group: prod-ops
@@ -20,38 +52,68 @@ permissions:
   contents: read
 
 jobs:
-  recon:
+  capacity:
     runs-on: [self-hosted]
-    timeout-minutes: 15
+    timeout-minutes: 240
     steps:
-      - name: 🔎 Kəşfiyyat
+      - name: 🧾 Girişləri yoxla
+        env:
+          PLAN: ${{ inputs.plan }}
+          TEACHERS: ${{ inputs.teachers }}
+          APP_CPUS: ${{ inputs.app_cpus }}
+          DB_CPUS: ${{ inputs.db_cpus }}
+          THINK: ${{ inputs.think }}
+          PREAUTH: ${{ inputs.preauth_rate }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
+          echo "$PLAN" | grep -Eq '^((login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)(,(login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)*$' || { echo "::error::plan formatı"; exit 1; }
+          case "$TEACHERS" in ''|*[!0-9]*) echo "::error::teachers rəqəm"; exit 1;; esac
+          [ "$TEACHERS" -le 1000 ] || { echo "::error::teachers ≤ 1000"; exit 1; }
+          echo "$APP_CPUS$DB_CPUS" | grep -Eq '^[0-9.]+$' || { echo "::error::cpus"; exit 1; }
+          echo "$THINK" | grep -Eq '^[0-9.]+:[0-9.]+$' || { echo "::error::think"; exit 1; }
+          echo "$PREAUTH" | grep -Eq '^[0-9.]+$' || { echo "::error::preauth"; exit 1; }
           CAP=/home/wcu/emsarena-capacity-20261004
-          mask() { sed -E 's/((PASSWORD|PASS|SECRET|TOKEN|KEY|DATABASE_URL|REDIS_URL)[A-Z_]*[=:][[:space:]]*)[^[:space:]]+/\1***MASKED***/Ig; s#(postgres(ql)?://[^:]+:)[^@]+@#\1***@#g'; }
-          echo "== whoami / host"; whoami; hostname; date; uptime; nproc; free -g; df -h / /var/lib/docker 2>/dev/null | sort -u
-          echo; echo "== running runners / locust"; pgrep -af 'phase[0-9]|runner\.py|locust|k6 ' | grep -v pgrep || echo "(none)"
-          echo; echo "== docker compose projects"; docker compose ls -a 2>&1 | head -20
-          echo; echo "== capacity containers"; docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Image}}' | grep -i capac || echo "(none)"
-          echo; echo "== docker stats (live)"; docker stats --no-stream --format '{{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' | sort -k2 -rn | head -25
-          echo; echo "== capacity dir tree"; ls -la "$CAP" 2>&1 | head -80
-          echo; echo "== subdirs"; find "$CAP" -maxdepth 3 -type f -printf '%10s %TY-%Tm-%Td %TH:%TM %p\n' 2>/dev/null | sort -k4 | head -200
-          echo; echo "== volumes"; docker volume ls --format '{{.Name}}' | grep -i capac || true
-      - name: 📄 Skriptlər (maskalı)
+          test -x "$CAP/toolenv/bin/locust" || { echo "::error::toolenv/locust yoxdur"; exit 1; }
+          test -f "$CAP/compose.json" -a -f "$CAP/credentials.json" -a -f "$CAP/cert.pem" || { echo "::error::capacity fixture faylları yoxdur"; exit 1; }
+          echo "edge nginx — müştəri IP xəritəsi:"; grep -o 'x_test_client[^;]*;\|X-Test-Client[^;]*;\|real_ip_header[^;]*;\|X-Forwarded-For[^;]*;' "$CAP/nginx.conf" | sort -u | head -10 || true
+          "$CAP/toolenv/bin/locust" --version
+
+      - name: 📥 Checkout
+        uses: actions/checkout@v6
+
+      - name: 📈 Tutum testi
+        env:
+          PLAN: ${{ inputs.plan }}
+          TEACHERS: ${{ inputs.teachers }}
+          APP_CPUS: ${{ inputs.app_cpus }}
+          DB_CPUS: ${{ inputs.db_cpus }}
+          THINK: ${{ inputs.think }}
+          PREAUTH: ${{ inputs.preauth_rate }}
+          STOP_ON_FAIL: ${{ inputs.stop_on_fail }}
         run: |
-          set -uo pipefail
-          CAP=/home/wcu/emsarena-capacity-20261004
-          mask() { sed -E 's/((PASSWORD|PASS|SECRET|TOKEN|KEY|DATABASE_URL|REDIS_URL)[A-Z_]*[=:][[:space:]]*)[^[:space:]]+/\1***MASKED***/Ig; s#(postgres(ql)?://[^:]+:)[^@]+@#\1***@#g'; }
-          find "$CAP" -maxdepth 3 -type f \( -name '*.py' -o -name '*.yml' -o -name '*.yaml' -o -name '*.sh' -o -name '*.md' -o -name '*.conf' -o -name '*.ini' -o -name '*.txt' -o -name '*.json' \) -size -200k 2>/dev/null | sort | while read -r f; do
-            echo; echo "################ $f ($(wc -l < "$f") lines)"
-            head -c 60000 "$f" | mask
-          done
-      - name: 🧾 Log quyruqları
+          set -euo pipefail
+          RUN_ID="cap_$(date -u +%Y%m%d_%H%M)"
+          echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+          EXTRA=()
+          [ "$STOP_ON_FAIL" = "true" ] && EXTRA+=(--stop-on-fail)
+          python3 scripts/loadtest/cap_run.py \
+            --plan "$PLAN" --run-id "$RUN_ID" --harness "$GITHUB_WORKSPACE/scripts/loadtest" \
+            --teachers "$TEACHERS" --app-cpus "$APP_CPUS" --db-cpus "$DB_CPUS" \
+            --think-min "${THINK%%:*}" --think-max "${THINK##*:}" --preauth-rate "$PREAUTH" \
+            --out "$RUNNER_TEMP/capout" "${EXTRA[@]}"
+
+      - name: 📊 Xülasə
+        if: always()
         run: |
-          set -uo pipefail
-          CAP=/home/wcu/emsarena-capacity-20261004
-          mask() { sed -E 's/((PASSWORD|PASS|SECRET|TOKEN|KEY|DATABASE_URL|REDIS_URL)[A-Z_]*[=:][[:space:]]*)[^[:space:]]+/\1***MASKED***/Ig; s#(postgres(ql)?://[^:]+:)[^@]+@#\1***@#g'; }
-          find "$CAP" -maxdepth 3 -type f \( -name '*.log' -o -name '*.csv' \) 2>/dev/null | sort | while read -r f; do
-            echo; echo "################ $f ($(wc -l < "$f") lines)"
-            tail -n 60 "$f" | cut -c1-400 | mask
-          done
+          if [ -f "$RUNNER_TEMP/capout/summary.md" ]; then cat "$RUNNER_TEMP/capout/summary.md" >> "$GITHUB_STEP_SUMMARY"; fi
+          docker ps --format '{{.Names}}' | grep -E 'cap-gen-|emsarena-capacity' && echo "::warning::test konteynerləri hələ işləyir" || echo "test konteynerləri dayandırılıb"
+          curl -sS --max-time 8 --resolve ems.wcu.edu.az:443:127.0.0.1 https://ems.wcu.edu.az/health/ | head -c 300; echo
+
+      - name: 📦 Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capacity-${{ env.RUN_ID }}
+          path: ${{ runner.temp }}/capout
+          retention-days: 14
+          if-no-files-found: warn
