@@ -25,6 +25,7 @@ function load() {
     });
     const { window } = dom;
     window.EMSTakeExam = {};
+    window.eval(fs.readFileSync(path.join(ROOT, "apps/exams/static/exams/js/take_exam/retry.js"), "utf8"));
     window.eval(SCRIPT);
     const ns = window.EMSTakeExam;
     const flushes = [];
@@ -194,6 +195,45 @@ test("persisted drafts carry the server revision they were based on", () => {
         const saved = JSON.parse(window.sessionStorage.getItem(ctx.draftStorageKey));
         assert.equal(saved.baseRevision, "7");
         assert.equal(saved.selectedAnswers["15"], "tokA");
+    } finally {
+        window.close();
+    }
+});
+
+test("503 backoff survives an online flush and shorter per-answer debounce", async () => {
+    const { window, ns, ctx, flushes } = load();
+    try {
+        window.Math.random = () => 0;
+        ns.retry.noteResponse(ctx, { status: 503, ok: false, headers: { get: () => "1" } });
+        ns.draft.queueAutoSave(ctx, 250);
+        ns.draft.flushAutoSave(ctx); // online event must not bypass Retry-After
+        await sleep(450);
+        assert.equal(flushes.length, 0);
+        assert.equal(ctx.hasUnsavedChanges, true);
+        await sleep(700);
+        assert.equal(flushes.length, 1);
+    } finally {
+        window.close();
+    }
+});
+
+test("Retry-After dates, fallback backoff and successful recovery are supported", () => {
+    const { window, ns, ctx } = load();
+    try {
+        window.Math.random = () => 0;
+        const future = new Date(Date.now() + 10000).toUTCString();
+        ns.retry.noteResponse(ctx, { status: 429, ok: false, headers: { get: () => future } });
+        assert.ok(ns.retry.remaining(ctx) >= 8500);
+        ns.retry.noteResponse(ctx, { status: 200, ok: true });
+        assert.equal(ns.retry.remaining(ctx), 0);
+        assert.equal(ctx.saveRetryCount, 0);
+        ns.retry.noteResponse(ctx, { status: 503, ok: false, headers: { get: () => "invalid" } });
+        assert.ok(ns.retry.remaining(ctx) >= 1900);
+        ns.retry.noteResponse(ctx, { status: 503, ok: false, headers: { get: () => null } });
+        assert.ok(ns.retry.remaining(ctx) >= 3900);
+        ns.retry.noteResponse(ctx, { status: 200, ok: true });
+        ns.retry.noteResponse(ctx, { status: 429, ok: false, headers: { get: () => "3600" } });
+        assert.ok(ns.retry.remaining(ctx) <= 61000, "server hint is capped");
     } finally {
         window.close();
     }

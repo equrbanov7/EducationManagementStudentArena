@@ -131,6 +131,8 @@ FINAL_EXAM_REMINDER_DAYS = tuple(
 # pool-u (bax docs/performance/OPTIMIZATION_5000_USERS.md). Middleware:
 # core/middleware_concurrency.py.
 MAX_INFLIGHT_REQUESTS = _env_int_setting("MAX_INFLIGHT_REQUESTS", 32, minimum=0)
+# Bound login GET/POST separately so login bursts leave shared capacity for exams.
+MAX_INFLIGHT_LOGIN_REQUESTS = _env_int_setting("MAX_INFLIGHT_LOGIN_REQUESTS", 4, minimum=0)
 MAX_INFLIGHT_WAIT_SECONDS = _env_float_setting("MAX_INFLIGHT_WAIT_SECONDS", 2.0, minimum=0.0)
 MAX_INFLIGHT_RETRY_AFTER_SECONDS = _env_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", 5, minimum=1)
 MAX_INFLIGHT_EXEMPT_PATH_PREFIXES = (

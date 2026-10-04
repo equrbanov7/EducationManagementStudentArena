@@ -287,14 +287,10 @@
             var effectiveDelayMs = delayMs === undefined
                 ? ctx.autoSaveDelayMs
                 : Math.max(250, Number(delayMs) || 0);
+            effectiveDelayMs = Math.max(effectiveDelayMs, ns.retry.remaining(ctx));
             var dueAt = Date.now() + effectiveDelayMs;
             if (ctx.autoSaveTimer) {
-                // EXAMQA 2026-10-01: uğursuz yazıdan (şəbəkə kəsintisi, 5xx) sonra
-                // `.catch` 30–40 s-lik fallback timer qoyur; «online» flush-u onu
-                // silmir. Əvvəl mövcud timer hər yeni cavabın 1 s-lik debounce-unu
-                // udurdu → cavab 40 s-ə qədər yalnız brauzerdə qalırdı. İndi daha
-                // tez düşən sorğu üstün gəlir, daha gec olan saxlanmır. Vaxtı
-                // bilinməyən timer (məs. taymer-sinxron retry-ı) toxunulmaz qalır.
+                // Prefer earlier answer debounce, while respecting server backoff.
                 if (!ctx.autoSaveDueAt || ctx.autoSaveDueAt <= dueAt) {
                     return;
                 }
@@ -313,7 +309,7 @@
                 return;
             }
 
-            if (ctx.autoSaveRequestInFlight) {
+            if (ctx.autoSaveRequestInFlight || ns.retry.remaining(ctx)) {
                 ns.draft.queueAutoSave(ctx);
                 return;
             }
@@ -345,7 +341,7 @@
                 return Promise.resolve(null);
             }
 
-            if (effectiveAction === "autosave" && ctx.autoSaveRequestInFlight) {
+            if (effectiveAction === "autosave" && (ctx.autoSaveRequestInFlight || ns.retry.remaining(ctx))) {
                 ns.draft.queueAutoSave(ctx);
                 return Promise.resolve(null);
             }
@@ -372,6 +368,7 @@
                 body: formData
             })
                 .then(function (res) {
+                    ns.retry.noteResponse(ctx, res);
                     // EXAM-P1-06: OCC konflikti — başqa tab daha yeni yazıb.
                     if (res.status === 409) {
                         return res.json().then(function (data) {
