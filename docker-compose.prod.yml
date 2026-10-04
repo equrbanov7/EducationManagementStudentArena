@@ -96,6 +96,8 @@ x-app-env: &app-env
   NETWORK_ZONE_TRUST_HEADER: ${NETWORK_ZONE_TRUST_HEADER:-False}
   # Sahib 2026-09-29: kənardan yalnız /jurnal/ bağlı; inzibati hesablar internetdən də daxil olur.
   NETWORK_ZONE_STAFF_INTERNAL_ONLY: ${NETWORK_ZONE_STAFF_INTERNAL_ONLY:-False}
+  # Sahib 2026-10-05: superadmin yalnız universitet şəbəkəsindən.
+  NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY: ${NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY:-True}
   EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
   EMAIL_PORT: ${EMAIL_PORT:-587}
   EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
@@ -147,6 +149,7 @@ x-app-env: &app-env
   # Audit 2026-09-28 DB-03: replika başına eyni-anlı sorğu tavanı (sonra 503 + Retry-After).
   # 8 replika × 24 = 192 ≤ PgBouncer hovuzu 150 + ehtiyat 50.
   MAX_INFLIGHT_REQUESTS: ${MAX_INFLIGHT_REQUESTS:-24}
+  MAX_INFLIGHT_LOGIN_REQUESTS: ${MAX_INFLIGHT_LOGIN_REQUESTS:-4}
   MAX_INFLIGHT_WAIT_SECONDS: ${MAX_INFLIGHT_WAIT_SECONDS:-2}
   MAX_INFLIGHT_RETRY_AFTER_SECONDS: ${MAX_INFLIGHT_RETRY_AFTER_SECONDS:-5}
   # Kod defoltu AUTH_OTP_EXPIRY_SECONDS-dir (bax app bloku) — iç-içə defolt eyni semantikanı saxlayır.

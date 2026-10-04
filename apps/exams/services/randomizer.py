@@ -263,7 +263,8 @@ def generate_random_questions_for_attempt(attempt, *, force_rebuild: bool = Fals
     exam = attempt.exam
 
     with transaction.atomic():
-        attempt = attempt.__class__.objects.select_for_update().select_related("exam").get(pk=attempt.pk)
+        # The shared exam row must not serialize unrelated students' starts.
+        attempt = attempt.__class__.objects.select_for_update(of=("self",)).select_related("exam").get(pk=attempt.pk)
         exam = attempt.exam
 
         # Əgər artıq suallar yaradılıbsa:

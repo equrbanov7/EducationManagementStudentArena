@@ -246,7 +246,8 @@ jobs:
           for i in $(seq 1 "$WORKERS"); do
             # Hər worker hovuzun ayrı zolağından başlasın — eyni hesabla
             # paralel giriş süni kilid yarışması yaradır.
-            LOAD_USER_OFFSET=$(( (i - 1) * (LOAD_USER_COUNT / WORKERS) )) \
+            LOAD_USER_OFFSET=$(( LOAD_USER_COUNT * (i - 1) / WORKERS )) \
+            LOAD_USER_SHARD_COUNT=$(( LOAD_USER_COUNT * i / WORKERS - LOAD_USER_COUNT * (i - 1) / WORKERS )) \
             /tmp/loadenv/bin/locust \
               -f tests/load/locustfile.py \
               --worker --master-host 127.0.0.1 &
