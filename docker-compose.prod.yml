@@ -96,6 +96,8 @@ x-app-env: &app-env
   NETWORK_ZONE_TRUST_HEADER: ${NETWORK_ZONE_TRUST_HEADER:-False}
   # Sahib 2026-09-29: kənardan yalnız /jurnal/ bağlı; inzibati hesablar internetdən də daxil olur.
   NETWORK_ZONE_STAFF_INTERNAL_ONLY: ${NETWORK_ZONE_STAFF_INTERNAL_ONLY:-False}
+  # Sahib 2026-10-05: superadmin yalnız universitet şəbəkəsindən.
+  NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY: ${NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY:-True}
   EMAIL_HOST: ${EMAIL_HOST:-smtp-relay.brevo.com}
   EMAIL_PORT: ${EMAIL_PORT:-587}
   EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}

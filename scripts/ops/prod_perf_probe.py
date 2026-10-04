@@ -3,8 +3,10 @@
 `prod_audit.sh` bunu app konteynerində `manage.py shell <` ilə işlədir.
 * Verilənlər bazası: ölçü, bağlantı sayı, cache hit ratio, uzun sorğular,
   seq_scan ağır cədvəllər, `pg_stat_statements` varsa ən yavaş 8 sorğu.
-* Tətbiq: real superadmin sessiyası ilə (force_login — parol yoxdur) 12 səhifəyə
-  GET; sorğu sayı + müddət (DEBUG yalnız bu prosesdə açılır, cavablar atılır).
+* Tətbiq: superadmin OLMAYAN rəhbər hesabı ilə (force_login — parol yoxdur) 12
+  səhifəyə GET; sorğu sayı + müddət (DEBUG yalnız bu prosesdə açılır, cavablar
+  atılır). Superadmin heç vaxt seçilmir (2026-10-05: zond «Superadmin girişi»
+  hadisələri yaradıb sahibi çaşdırırdı); zond sonda sessiyanı silir.
 Heç bir yazı yoxdur; POST edilmir.
 """
 
@@ -75,24 +77,30 @@ User = get_user_model()
 
 
 def _probe_user():
-    """Zond hesabı: superadmin çox vaxt 2FA/parol qapısına 302 alır — əvvəl RİM rəhbəri,
-    sonra sahib, sonra superadmin (hamısı yalnız OXU GET üçün, parolsuz force_login)."""
+    """Zond hesabı: RİM rəhbəri → rektor → tədris şöbəsi → sahib, superadmin ISTISNA.
+
+    Superadmin üçün parolsuz sessiya açmaq təhlükəsizlik panelində əsl
+    «Superadmin girişi» kimi görünür və tam səlahiyyətli sessiya yaradır.
+    """
     from apps.organizations.models import Membership
+    from core.roles import is_superadmin_user
 
     for role_name in ("ikt_rehber", "rector", "teaching_office_head"):
-        member = (
-            Membership.objects.filter(is_active=True, role__name=role_name, user__is_active=True)
+        members = (
+            Membership.objects.filter(
+                is_active=True, role__name=role_name, user__is_active=True, user__is_superuser=False
+            )
             .select_related("user")
-            .order_by("user_id")
-            .first()
+            .order_by("user_id")[:20]
         )
-        if member is not None:
-            return member.user, role_name
-    owner = User.objects.filter(owned_organizations__isnull=False, is_active=True).order_by("id").first()
-    if owner is not None:
-        return owner, "org_owner"
-    admin = User.objects.filter(is_superuser=True, is_active=True).order_by("id").first()
-    return admin, "superuser"
+        for member in members:
+            if not is_superadmin_user(member.user):
+                return member.user, role_name
+    owners = User.objects.filter(owned_organizations__isnull=False, is_active=True, is_superuser=False)
+    for owner in owners.distinct().order_by("id")[:20]:
+        if not is_superadmin_user(owner):
+            return owner, "org_owner"
+    return None, ""
 
 
 user, user_kind = _probe_user()
@@ -233,3 +241,6 @@ else:
         )
     except Exception as exc:  # noqa: BLE001
         print("   cədvəl zondu xətası:", exc)
+    finally:
+        # Zond sessiyası prod sessiya cədvəlində qalmasın.
+        client.logout()

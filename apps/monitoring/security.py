@@ -146,11 +146,19 @@ def _on_login(sender, user, request=None, **kwargs):
     from core.roles import is_superadmin_user
 
     if is_superadmin_user(user):
+        ip = _client_ip(request)
+        # No client IP means no real HTTP request: a server-side script/shell
+        # (e.g. test Client.force_login). Say so instead of looking like a browser login.
+        message = (
+            "Superadmin sistemə daxil oldu"
+            if ip
+            else "Superadmin sessiyası server daxilində açıldı (skript/shell, brauzer girişi deyil)"
+        )
         record_security_event(
             event_type="superadmin_login",
-            severity="info",
+            severity="info" if ip else "medium",
             user=user,
-            ip_address=_client_ip(request),
+            ip_address=ip,
             request=request,
-            message="Superadmin sistemə daxil oldu",
+            message=message,
         )

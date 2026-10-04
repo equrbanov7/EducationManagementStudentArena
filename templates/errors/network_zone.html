@@ -25,7 +25,9 @@ Sahib 2026-10-01: «hamı developer deyil» — müəllim nə baş verdiyini və
     <ol class="error-zone-steps">
         <li>{% trans 'Universitetdəsinizsə: telefonda mobil interneti söndürün və universitetin Wi-Fi şəbəkəsinə qoşulun (kompüterdə — universitet şəbəkəsinə).' context 'accounts.network_zone' %}</li>
         <li>{% trans 'Sonra bu səhifəni yeniləyin.' context 'accounts.network_zone' %}</li>
+        {% if zone_reason != 'superadmin_internal_only' %}
         <li>{% trans 'Kabinetin digər bölmələri — dərs cədvəli, fənlər, imtahanlar, sillabus — evdən də işləyir.' context 'accounts.network_zone' %}</li>
+        {% endif %}
         <li>{% trans 'Universitet Wi-Fi-ına qoşulduğunuz halda da bu səhifə çıxırsa, RİM mərkəzinə müraciət edin.' context 'accounts.network_zone' %}</li>
     </ol>
 {% endblock %}

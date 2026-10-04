@@ -109,3 +109,63 @@ class ZoneMiddlewareTest(ViewAsTestBase):
     def test_disabled_gate_changes_nothing(self):
         self.assertEqual(self._get(self.admin, reverse("accounts:profile"), self.EXT).status_code, 200)
         self.assertNotEqual(self._get(self.teacher, "/jurnal/", self.EXT).status_code, 403)
+
+
+class SuperadminInternalOnlyTest(ViewAsTestBase):
+    """Sahib 2026-10-05: superadmin yalnız universitet şəbəkəsindən — inzibati qayda söndürülü olsa belə."""
+
+    EXT = "85.132.1.1"
+    INT = "10.0.2.50"
+
+    @override_settings(**ZONE)
+    def test_existing_superadmin_session_is_ended_outside_and_works_inside(self):
+        profile = reverse("accounts:profile")
+        self._login(self.superadmin)
+        self.assertEqual(self.client.get(profile, REMOTE_ADDR=self.INT).status_code, 200)
+        response = self.client.get(profile, REMOTE_ADDR=self.EXT)
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateUsed(response, "errors/network_zone.html")
+        self.assertNotIn("_auth_user_id", self.client.session)
+        # Daxili zona da artıq sessiyasızdır — yenidən giriş lazımdır.
+        self.assertNotEqual(self.client.get(profile, REMOTE_ADDR=self.INT).status_code, 200)
+        # Qeyri-superadmin inzibati hesab (defolt qayda) kənardan işləməyə davam edir.
+        self._login(self.admin)
+        self.assertEqual(self.client.get(profile, REMOTE_ADDR=self.EXT).status_code, 200)
+
+    @override_settings(**ZONE)
+    def test_superadmin_password_login_from_outside_leaves_no_session(self):
+        response = self.client.post(
+            reverse("accounts:staff_login"),
+            {"username": self.superadmin.username, "password": PASSWORD},
+            REMOTE_ADDR=self.EXT,
+        )
+        self.assertNotIn(response.status_code, (301, 302))
+        self.assertNotIn("_auth_user_id", self.client.session)
+        response = self.client.get(reverse("accounts:profile"), REMOTE_ADDR=self.EXT)
+        self.assertNotEqual(response.status_code, 200)
+
+    @override_settings(**ZONE)
+    def test_logout_stays_open_and_xhr_gets_json(self):
+        self._login(self.superadmin)
+        response = self.client.get(
+            reverse("accounts:profile"), REMOTE_ADDR=self.EXT, HTTP_X_REQUESTED_WITH="XMLHttpRequest"
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["reason"], "superadmin_internal_only")
+        self._login(self.superadmin)
+        self.assertNotEqual(self.client.get(reverse("accounts:logout"), REMOTE_ADDR=self.EXT).status_code, 403)
+
+    @override_settings(**ZONE, NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY=False)
+    def test_setting_off_restores_previous_behaviour(self):
+        self._login(self.superadmin)
+        self.assertEqual(self.client.get(reverse("accounts:profile"), REMOTE_ADDR=self.EXT).status_code, 200)
+
+    @override_settings(**ZONE, NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY=False)
+    def test_control_same_password_login_succeeds_when_rule_is_off(self):
+        # Yuxarıdakı «sessiya qalmır» testinin mənalı olduğunu sübut edir: qayda olmadan eyni POST daxil edir.
+        self.client.post(
+            reverse("accounts:staff_login"),
+            {"username": self.superadmin.username, "password": PASSWORD},
+            REMOTE_ADDR=self.EXT,
+        )
+        self.assertEqual(self.client.session.get("_auth_user_id"), str(self.superadmin.pk))
