@@ -89761,3 +89761,78 @@ msgstr ""
 "Kampanya açıldı, ancak bu dönemin hiçbir günlüğü henüz kapatılmadı — "
 "öğrenciler anketi şimdilik görmeyecek. Hedefler RİM günlükleri kapattığında "
 "kendiliğinden oluşur."
+
+msgctxt "monitoring.ui"
+msgid "IP ünvanı və ya şəbəkə"
+msgstr "IP adresi veya ağ"
+
+msgctxt "monitoring.ui"
+msgid "IP və ya şəbəkə, məs. 5.191.0.0/16"
+msgstr "IP veya ağ, örn. 5.191.0.0/16"
+
+msgctxt "monitoring.ui"
+msgid "IP filtrini təmizlə"
+msgstr "IP filtresini temizle"
+
+msgctxt "monitoring.ui"
+msgid "Yalnız bu IP: {ip}"
+msgstr "Yalnızca bu IP: {ip}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu girişlər"
+msgstr "Bu IP'den başarılı girişler"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu girişlər"
+msgstr "Bu ağdan başarılı girişler"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu giriş yoxdur"
+msgstr "Bu IP'den başarılı giriş yok"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu giriş yoxdur"
+msgstr "Bu ağdan başarılı giriş yok"
+
+msgctxt "monitoring.ui"
+msgid "Girişlər: {logins} · Hesablar: {accounts}"
+msgstr "Giriş: {logins} · Hesap: {accounts}"
+
+msgctxt "monitoring.ui"
+msgid "Ən son {limit} qeyd göstərilir (hesab və cihaz üzrə qruplaşdırılıb)."
+msgstr "Son {limit} kayıt gösteriliyor (hesap ve cihaza göre gruplandı)."
+
+msgctxt "monitoring.ui"
+msgid "Yalnız təşkilatınızın üzvlərinin girişləri göstərilir."
+msgstr "Yalnızca kuruluşunuzun üyelerinin girişleri gösteriliyor."
+
+msgctxt "monitoring.ui"
+msgid "Son giriş"
+msgstr "En son giriş"
+
+msgctxt "monitoring.ui"
+msgid "Cihaz / brauzer"
+msgstr "Cihaz / tarayıcı"
+
+msgctxt "monitoring.ui"
+msgid "ilk: {time}"
+msgstr "ilk kez: {time}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP üzrə təhlükəsizlik hadisəsi yoxdur"
+msgstr "Bu IP için güvenlik olayı yok"
+
+msgctxt "monitoring.security"
+msgid ""
+"IP ünvanı düzgün deyil. Tək IP (məs. 192.168.1.10) və ya şəbəkə (məs. "
+"10.0.0.0/24) daxil edin."
+msgstr ""
+"IP adresi geçerli değil. Tek bir IP (örn. 192.168.1.10) veya ağ (örn. "
+"10.0.0.0/24) girin."
+
+msgctxt "monitoring.security"
+msgid ""
+"Şəbəkə (CIDR) filtri bu bazada dəstəklənmir — tək IP ünvanı daxil edin."
+msgstr ""
+"Ağ (CIDR) filtresi bu veritabanında desteklenmiyor — tek bir IP adresi "
+"girin."

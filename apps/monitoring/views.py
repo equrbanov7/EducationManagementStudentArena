@@ -31,6 +31,7 @@ from .models import Incident, IncidentStatus, SecurityEvent
 from .pagination import clamp_page, paginated_data, parse_pagination
 from .permissions import monitoring_view_required, superadmin_monitoring_required
 from .scrub import redact_secrets
+from .security_ip import InvalidIpFilter, parse_ip_filter, successful_logins
 
 logger = logging.getLogger(__name__)
 
@@ -335,10 +336,17 @@ def incident_action_api(request, incident_id: int):
 @require_GET
 @monitoring_view_required
 def security_events_api(request):
+    """Hadisələr (``type``, ``ip``, ``page``, ``page_size``); ``ip`` verilibsə ``data.logins`` da (security_ip.py)."""
+    try:
+        ip_filter = parse_ip_filter(request.GET.get("ip"))
+    except InvalidIpFilter as error:
+        return JsonResponse({"status": "error", "error": "invalid_ip", "detail": str(error)}, status=400)
     qs = SecurityEvent.objects.select_related("user", "incident").filter(_org_filter(request))
     event_type = request.GET.get("type", "")
     if event_type:
         qs = qs.filter(event_type=event_type)
+    if ip_filter is not None:
+        qs = qs.filter(ip_filter.q())
     page, page_size = parse_pagination(request.GET)
     total = qs.count()
     page = clamp_page(page, total=total, page_size=page_size)
@@ -359,12 +367,16 @@ def security_events_api(request):
         }
         for event in qs[(page - 1) * page_size : page * page_size]
     ]
+    extra = None
+    if ip_filter is not None:
+        extra = {"ip_filter": ip_filter.as_dict(), "logins": successful_logins(_scope(request), ip_filter)}
     data = paginated_data(
         "events",
         rows,
         total=total,
         page=page,
         page_size=page_size,
+        extra=extra,
     )
     return JsonResponse({"status": "ok", "data": data})
 

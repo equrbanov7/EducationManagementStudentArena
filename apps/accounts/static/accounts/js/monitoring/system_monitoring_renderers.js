@@ -3,6 +3,7 @@
  * ilə əvəz olundu; inline `style` atributları CSS class-larına çevrildi; filtr/səhifələmə
  * select-ləri layihənin stilli komponentindədir (`format.selectMarkup`); insident əməlləri
  * yalnız API `can_manage` verəndə (superadmin) görünür — RİM rəhbəri oxu-only görür.
+ * 2026-10-05: «Təhlükəsizlik» tabı öz moduluna (`system_monitoring_security.js`) köçdü — burada nümayəndə.
  */
 (function () {
     "use strict";
@@ -325,35 +326,14 @@
             }
         }
 
+        // «Təhlükəsizlik» tabı (hadisələr + IP filtri + uğurlu girişlər) 2026-10-05-dən
+        // `system_monitoring_security.js`-dədir; modul yüklənməyibsə sadə boş vəziyyət.
         function renderSecurity(data) {
-            var state = states["security-events"];
-            var rows = rowsFrom(data, "events");
-            var html = '<div class="smx-filter">' + selectMarkup('id="smx-sec-type"', [
-                ["", gettext("Bütün hadisələr")],
-                ["login_failed", gettext("Uğursuz giriş")],
-                ["login_brute_force", "Brute-force"],
-                ["superadmin_login", gettext("Superadmin girişi")],
-                ["superadmin_login_failed", gettext("Superadmin uğursuz girişi")],
-                ["unauthorized_monitoring", gettext("İcazəsiz monitorinq")],
-            ], state.type, t("allEvents")) + "</div>";
-            if (!rows.length) {
-                body.innerHTML = html + '<div class="smx-empty">' +
-                    escapeHtml(gettext("Təhlükəsizlik hadisəsi yoxdur")) + "</div>";
+            if (namespace.security && typeof namespace.security.render === "function") {
+                namespace.security.render(body, data, context);
                 return;
             }
-            html += '<div class="smx-table-wrap"><table class="smx-table"><thead><tr>' +
-                "<th>" + escapeHtml(gettext("Vaxt")) + "</th><th>" + escapeHtml(gettext("Hadisə")) +
-                "</th><th>" + escapeHtml(gettext("Önəm")) + "</th><th>" + escapeHtml(gettext("İstifadəçi")) +
-                "</th><th>IP</th><th>" + escapeHtml(gettext("Say")) + "</th><th>" +
-                escapeHtml(gettext("Mesaj")) + "</th>" +
-                "</tr></thead><tbody>";
-            rows.forEach(function (row) {
-                html += "<tr><td>" + escapeHtml(new Date(row.last_seen).toLocaleString("az")) + "</td><td>" +
-                    escapeHtml(row.event_type_display) + "</td><td>" + pill(row.severity, row.severity) + "</td><td>" +
-                    escapeHtml(row.user || "—") + "</td><td>" + escapeHtml(row.ip || "—") + "</td><td>" + row.count +
-                    '</td><td class="smx-wrap">' + escapeHtml(row.message) + "</td></tr>";
-            });
-            body.innerHTML = html + "</tbody></table></div>" + pager(data, rows.length);
+            body.innerHTML = '<div class="smx-empty">' + escapeHtml(gettext("Təhlükəsizlik hadisəsi yoxdur")) + "</div>";
         }
 
         function renderLogs(data) {
