@@ -42,6 +42,7 @@ START_WINDOW = float(os.environ.get("CAP_START_WINDOW", "60") or 60)
 THINK_MIN, THINK_MAX = (float(x) for x in os.environ.get("CAP_THINK", "8:20").split(":"))
 ORIGIN = os.environ.get("CAP_ORIGIN", "https://localhost:18443")
 CERT = str(CAP / "cert.pem")
+SESSIONS = json.loads(Path(os.environ["CAP_SESSIONS"]).read_text()) if os.environ.get("CAP_SESSIONS") else None
 
 _student_cursor = itertools.count(int(os.environ.get("CAP_OFFSET", "0")))
 _student_limit = int(os.environ.get("CAP_OFFSET", "0")) + int(os.environ.get("CAP_SHARD", "1000000"))
@@ -122,6 +123,19 @@ class _Base(HttpUser):
         COUNTERS["logged_in"] += 1
         return location
 
+    def _preauth_student(self, index, username):
+        """Sessiya hovuzu varsa login-siz (cookie), yoxdursa real login ilə."""
+        if SESSIONS is None:
+            self._login(username, "telebe", "[pre] ")
+            return
+        key = SESSIONS.get(str(index))
+        if not key:
+            COUNTERS["pool_exhausted"] += 1
+            fixture_error(self, "session pool missing", f"student {index}")
+            raise StopUser()
+        self.client.cookies.set("sessionid", key, domain=self.host.split("://", 1)[-1].split(":")[0], path="/")
+        COUNTERS["logged_in"] += 1
+
     def _wait_for_go(self):
         go = GO_AT + random.uniform(0, START_WINDOW)
         delay = go - time.time()
@@ -167,7 +181,7 @@ class ExamStudent(_Base):
     def on_start(self):
         self.index, self.username = _next_student(self)
         self._client_setup(self.index, "/accounts/login/telebe/")
-        self._login(self.username, "telebe", "[pre] ")
+        self._preauth_student(self.index, self.username)
 
     @task
     def take_exam(self):
@@ -350,12 +364,12 @@ class CabinetStudent(_Base):
 
     wait_time = between(5, 15)
     weight = 3
-    SECTIONS = ("assigned-exams", "my-results", "my-exams", "my-subjects")
+    SECTIONS = ("dashboard", "assigned-exams", "my-results", "profile-info")
 
     def on_start(self):
         self.index, self.username = _next_student(self)
         self._client_setup(self.index, "/accounts/login/telebe/")
-        self._login(self.username, "telebe", "[pre] ")
+        self._preauth_student(self.index, self.username)
         self._wait_for_go()
 
     @task(3)

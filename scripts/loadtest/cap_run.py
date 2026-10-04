@@ -33,9 +33,10 @@ P95_LIMIT_MS = 2500
 ERROR_LIMIT = 0.01
 
 
-def sh(args, check=True, capture=False, timeout=None, **kw):
+def sh(args, check=True, capture=False, timeout=None, merge=False, **kw):
     if capture:
-        return subprocess.run(args, check=check, text=True, capture_output=True, timeout=timeout, **kw).stdout
+        err = subprocess.STDOUT if merge else subprocess.PIPE
+        return subprocess.run(args, check=check, text=True, stdout=subprocess.PIPE, stderr=err, timeout=timeout, **kw).stdout
     return subprocess.run(args, check=check, timeout=timeout, **kw)
 
 
@@ -95,12 +96,20 @@ class Stack:
         for name in APPS + ("worker",):
             services[name]["image"] = self.image
             services[name]["volumes"] = [v for v in services[name].get("volumes", []) if "fix-" not in v and "phase4" not in v]
+            services[name]["volumes"] += self.overlay_mounts()
         for name in APPS:
             services[name]["cpus"] = self.args.app_cpus
             services[name]["environment"]["MAX_INFLIGHT_LOGIN_REQUESTS"] = str(self.args.login_lane)
         self.compose_file.write_text(json.dumps(cfg))
         os.chmod(self.compose_file, 0o600)
         log("compose built", "image", self.image[:19], "app_cpus", self.args.app_cpus, "db_cpus", self.args.db_cpus)
+
+    def overlay_mounts(self):
+        """--overlay: branch-in Python kodu canlı image-in asılılıqları üzərində."""
+        if not self.args.overlay:
+            return []
+        repo = Path(self.args.repo)
+        return [f"{repo / d}:/app/{d}:ro" for d in ("apps", "core", "config", "templates")]
 
     def compose(self, *extra, **kw):
         return sh(["docker", "compose", "-p", PROJECT, "-f", str(self.compose_file), *extra], **kw)
@@ -125,7 +134,7 @@ class Stack:
 
     def manage(self, *cmd, env=None, mounts=(), timeout=3600):
         args = ["run", "--rm", "--no-deps", "--user", "0", "-v", f"{CAP}:/capacity", "-v", f"{self.args.harness}:/harness:ro"]
-        for m in mounts:
+        for m in list(mounts) + self.overlay_mounts():
             args += ["-v", m]
         # release.sh ilə eyni: birdəfəlik owner əməliyyatları rol yoxlamasından keçmir.
         args += ["-e", f"DATABASE_URL={self.owner_url}", "-e", "EMS_DB_ROLE_ENFORCE=off"]
@@ -135,7 +144,8 @@ class Stack:
         return self.compose(*args, timeout=timeout, check=False)
 
     def edge_ready(self):
-        for _ in range(90):
+        code = ""
+        for attempt in range(90):
             code = sh(
                 ["curl", "-sk", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "5", "--resolve", "localhost:18443:127.0.0.1", "https://localhost:18443/ping/"],
                 capture=True,
@@ -143,12 +153,21 @@ class Stack:
             )
             if code.strip() == "200":
                 return True
+            if attempt % 15 == 14:
+                log("edge not ready yet, http", code.strip())
             time.sleep(2)
         return False
 
     def restart_apps(self):
         self.compose("restart", *APPS)
+        time.sleep(8)
+        # nginx upstream ünvanları start zamanı həll olunur — app-lar yenidən
+        # başlayanda edge də yenidən başlamalıdır (Codex runner-ləri də belə edirdi).
+        self.compose("restart", "edge")
         if not self.edge_ready():
+            for svc in ("edge",) + APPS:
+                tail = sh(["docker", "logs", "--tail", "25", f"{PROJECT}-{svc}-1"], capture=True, check=False, merge=True)
+                log(f"--- {svc} logs ---\n" + "\n".join((tail or "").splitlines()[-25:]))
             raise RuntimeError("test edge did not become ready")
 
     def stop(self):
@@ -237,16 +256,36 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
     name = f"{index:02d}-{mode}-{users}"
     workers = max(1, min(args.max_workers, math.ceil(users / args.users_per_worker)))
     teachers = len(json.loads(seed_path.read_text()).get("journals") or [])
+    sessions_env = []
     if mode == "login":
         spawn_rate = max(1.0, users / window)
         go_at = 0.0
         run_time = window + 60
     else:
-        spawn_rate = args.preauth_rate
-        preauth = users / spawn_rate
-        go_at = time.time() + preauth + 25
         exam_span = args.questions * (args.think_max + args.think_min) / 2 + 30
-        run_time = int(preauth + 25 + window + (exam_span if mode in ("exam", "mixed", "journal") else 180) + 60)
+        tail = exam_span if mode in ("exam", "mixed", "journal") else args.cabinet_seconds
+        if args.preauth == "session" and mode in ("exam", "cabinet", "mixed"):
+            sessions_path = run_dir / f"{name}-sessions.json"
+            log("session pool", name, users)
+            t0 = time.monotonic()
+            stack.manage(
+                "shell", "-c", "exec(open('/harness/cap_sessions.py').read())",
+                env={
+                    "CAP_SESSION_START": str(cursor + 1),
+                    "CAP_SESSION_COUNT": str(users),
+                    "CAP_SESSION_OUT": sessions_path.as_posix().replace(str(CAP), "/capacity"),
+                    "CAP_SESSION_THREADS": "8",
+                },
+            )
+            log("session pool ready", round(time.monotonic() - t0, 1), "s")
+            sessions_env = ["-e", f"CAP_SESSIONS={sessions_path.as_posix().replace(str(CAP), '/capacity')}"]
+            spawn_rate = max(20.0, users / 30)
+            preauth = users / spawn_rate
+        else:
+            spawn_rate = args.preauth_rate
+            preauth = users / spawn_rate
+        go_at = time.time() + preauth + 25
+        run_time = int(preauth + 25 + window + tail + 60)
     log("STAGE_START", name, f"users={users} window={window}s workers={workers} spawn={spawn_rate:.1f}/s run_time={run_time}s")
     stack.psql("SELECT pg_stat_statements_reset()")
     stop_generators()
@@ -258,6 +297,7 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
         "-e", f"CAP_RUN_DIR={run_dir.as_posix().replace(str(CAP), '/capacity')}",
         "-e", f"CAP_MODE={mode}", "-e", f"CAP_STAGE={name}", "-e", f"CAP_GO_AT={go_at}",
         "-e", f"CAP_START_WINDOW={window}", "-e", f"CAP_THINK={args.think_min}:{args.think_max}",
+        *sessions_env,
         "--entrypoint", "/capacity/toolenv/bin/locust", stack.image,
         "-f", "/harness/cap_locust.py",
     ]
@@ -296,7 +336,7 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
     telemetry.stop_event.set()
     telemetry.join(timeout=30)
     for cname in ["cap-gen-master"] + [f"cap-gen-w{w}" for w in range(workers)]:
-        logs = sh(["docker", "logs", cname], capture=True, check=False, stderr=subprocess.STDOUT)
+        logs = sh(["docker", "logs", cname], capture=True, check=False, merge=True)
         (run_dir / f"{name}-{cname}.log").write_text(logs or "")
         sh(["docker", "rm", "-f", cname], check=False, capture=True)
     sql = stack.psql(
@@ -434,10 +474,15 @@ def main():
     p.add_argument("--think-min", type=float, default=8)
     p.add_argument("--think-max", type=float, default=20)
     p.add_argument("--preauth-rate", type=float, default=8)
-    p.add_argument("--users-per-worker", type=int, default=600)
-    p.add_argument("--max-workers", type=int, default=3)
+    p.add_argument("--users-per-worker", type=int, default=1500)
+    p.add_argument("--max-workers", type=int, default=4)
     p.add_argument("--student-start", type=int, default=1000)
     p.add_argument("--stop-on-fail", action="store_true")
+    p.add_argument("--stop-mode-on-fail", action="store_true")
+    p.add_argument("--preauth", choices=("login", "session"), default="session")
+    p.add_argument("--cabinet-seconds", type=int, default=180)
+    p.add_argument("--overlay", action="store_true")
+    p.add_argument("--repo", default="")
     p.add_argument("--out", required=True)
     args = p.parse_args()
 
@@ -474,17 +519,27 @@ def main():
         stack.psql("ANALYZE")
         stack.restart_apps()
         cursor = args.student_start
+        failed_modes = set()
         for i, spec in enumerate([s.strip() for s in args.plan.split(",") if s.strip()], start=1):
+            if spec.split(":")[0] in failed_modes:
+                log("SKIP", spec, "(bu rejim əvvəlki pillədə keçmədi)")
+                continue
             if not live_health():
                 log("canlı sistem sağlam deyil — qalan pillələr ləğv edildi")
                 break
             result, cursor = run_stage(stack, args, spec, i, cursor, seed_path, run_dir)
             results.append(result)
+            write_report(run_dir, args, seed, results, {})
             if result["guard_tripped"]:
                 break
-            if args.stop_on_fail and not result["passed"]:
-                log("pillə keçmədi — dayanılır (--stop-on-fail)")
-                break
+            if not result["passed"]:
+                if args.stop_on_fail:
+                    log("pillə keçmədi — dayanılır (--stop-on-fail)")
+                    break
+                if args.stop_mode_on_fail:
+                    failed_modes.add(result["mode"])
+            if cursor > 44000:
+                cursor = args.student_start
             time.sleep(20)
         log("reconcile")
         stack.manage(
@@ -498,7 +553,7 @@ def main():
         logs_dir = run_dir / "app-logs"
         logs_dir.mkdir(exist_ok=True)
         for svc in APPS + ("db", "pool", "edge"):
-            text = sh(["docker", "logs", "--since", "3h", f"{PROJECT}-{svc}-1"], capture=True, check=False, stderr=subprocess.STDOUT)
+            text = sh(["docker", "logs", "--since", "3h", f"{PROJECT}-{svc}-1"], capture=True, check=False, merge=True)
             lines = [l for l in (text or "").splitlines() if any(w in l for w in ("ERROR", "Error", "error", "WARNING", "FATAL", "LOG:  duration", "lock", "Traceback", "503", "concurrency"))]
             (logs_dir / f"{svc}.log").write_text("\n".join(lines[-4000:]))
         stack.stop()

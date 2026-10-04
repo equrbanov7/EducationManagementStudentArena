@@ -38,8 +38,20 @@ on:
         required: true
         type: string
         default: "8"
-      stop_on_fail:
-        description: "Keçməyən pillədən sonra dayan"
+      on_fail:
+        description: "Keçməyən pillədə: continue | stop_mode (həmin rejimin qalanı ötürülür) | stop_all"
+        required: true
+        type: choice
+        default: stop_mode
+        options: [continue, stop_mode, stop_all]
+      preauth:
+        description: "İmtahan/kabinet ön-girişi: session (login yükü ayrıca ölçülür) | login"
+        required: true
+        type: choice
+        default: session
+        options: [session, login]
+      overlay:
+        description: "Branch kodunu canlı image üzərində mount et (optimallaşdırma sınağı)"
         required: true
         type: boolean
         default: false
@@ -88,13 +100,17 @@ jobs:
           DB_CPUS: ${{ inputs.db_cpus }}
           THINK: ${{ inputs.think }}
           PREAUTH: ${{ inputs.preauth_rate }}
-          STOP_ON_FAIL: ${{ inputs.stop_on_fail }}
+          ON_FAIL: ${{ inputs.on_fail }}
+          PREAUTH_MODE: ${{ inputs.preauth }}
+          OVERLAY: ${{ inputs.overlay }}
         run: |
           set -euo pipefail
           RUN_ID="cap_$(date -u +%Y%m%d_%H%M)"
           echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
-          EXTRA=()
-          [ "$STOP_ON_FAIL" = "true" ] && EXTRA+=(--stop-on-fail)
+          EXTRA=(--preauth "$PREAUTH_MODE")
+          [ "$ON_FAIL" = "stop_all" ] && EXTRA+=(--stop-on-fail)
+          [ "$ON_FAIL" = "stop_mode" ] && EXTRA+=(--stop-mode-on-fail)
+          [ "$OVERLAY" = "true" ] && EXTRA+=(--overlay --repo "$GITHUB_WORKSPACE")
           python3 scripts/loadtest/cap_run.py \
             --plan "$PLAN" --run-id "$RUN_ID" --harness "$GITHUB_WORKSPACE/scripts/loadtest" \
             --teachers "$TEACHERS" --app-cpus "$APP_CPUS" --db-cpus "$DB_CPUS" \
