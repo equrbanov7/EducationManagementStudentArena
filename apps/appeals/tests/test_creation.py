@@ -208,17 +208,20 @@ class AppealCreateViewTests(TestCase):
         self.wrong.is_correct = True
         self.wrong.save(update_fields=["text", "is_correct"])
 
+        # Midterm nəticə səhifəsində açar (düzgün variant) təhlükəsizlik qaydası ilə gizlidir
+        # (2026-10-05); apellyasiya səhifəsi isə düzgün cavabı göstərir.
         urls = [
-            reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]),
-            reverse("appeals:appeal_create", args=[self.attempt.id]),
+            (reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]), False),
+            (reverse("appeals:appeal_create", args=[self.attempt.id]), True),
         ]
-        for url in urls:
+        for url, shows_key in urls:
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, 200)
                 self.assertContains(response, "Çatdırılmış sual")
-                self.assertContains(response, "Çatdırılmış düzgün")
-                self.assertContains(response, "Çatdırılmış seçim")
+                if shows_key:
+                    self.assertContains(response, "Çatdırılmış seçim")
+                    self.assertContains(response, "Çatdırılmış düzgün")
                 self.assertNotContains(response, "Canlı redaktə edilmiş")
 
     def test_result_and_appeal_legacy_answer_fall_back_to_live_question(self):

@@ -29,9 +29,10 @@ _CTX = "workload.model"
 def amendment_document_path(instance, filename):
     """Org-scoped yol: ``workload_amendments/<org_id>/<task_id>/<uuid>.<ext>``.
 
-    2026-09-14 (tests auditi qeydi): prefiks ~62 simvoldur, sahə `max_length=100`
-    — istifadəçinin uzun fayl adı `DataError` (500) verirdi. Ad təsadüfiləşdirilir,
-    yalnız uzantı saxlanılır (digər sübut sahələri ilə eyni naxış).
+    2026-09-14 (tests auditi qeydi): istifadəçinin uzun fayl adı `DataError` (500)
+    verirdi. Ad təsadüfiləşdirilir, yalnız uzantı saxlanılır (digər sübut sahələri
+    ilə eyni naxış). 2026-10-05: iki UUID + 32 hex ad ilə yol ~130 simvoldur —
+    sahənin ``max_length``-i 255-dir (100 olanda HƏR yükləmə 500 verirdi).
     """
     from core.upload_security import randomize_uploaded_filename
 
@@ -62,6 +63,7 @@ class WorkloadAmendment(UUIDModel, TimeStampedModel):
     new_values = models.JSONField(default=dict, blank=True)
     document = models.FileField(
         upload_to=amendment_document_path,
+        max_length=255,
         null=True,
         blank=True,
         validators=[FileUploadValidator(allowed_extensions={".pdf"}, max_size_mb=10)],

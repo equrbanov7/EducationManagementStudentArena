@@ -24,7 +24,7 @@
         var box = document.createElement("div");
         box.textContent = value == null ? "" : value;
         // `innerHTML` dırnağı escape ETMİR — atribut dəyəri üçün əl ilə əlavə olunur.
-        return box.innerHTML.replace(/"/g, "&quot;");
+        return box.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function i18nOf(root) {

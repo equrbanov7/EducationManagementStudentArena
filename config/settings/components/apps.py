@@ -55,6 +55,9 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.SecurityHeadersMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Təhlükəsizlik auditi 2026-10-05: qlobal gövdə limiti 5 MB; yalnız imtahan cavabı
+    # POST-u böyük limit alır — POST-u oxuyan hər middleware-dən (CSRF) ƏVVƏL.
+    "core.upload_limits.ExamAnswerUploadLimitMiddleware",
     # Audit 2026-09-28 DB-03: admission control — sessiya/auth/DB işindən ƏVVƏL.
     # Metrics/RequestId-dən sonra (503-lər ölçülür və req_id daşıyır); statik
     # fayllar WhiteNoise-da artıq qaytarılıb. Bax core/middleware_concurrency.py.

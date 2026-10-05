@@ -141,27 +141,8 @@ def _check_exam_upload_access(user, path: str) -> bool:
         return False
 
 
-def _check_exam_paint_access(user, path: str) -> bool:
-    """
-    Verify access to ``exam_paints/`` files.
-
-    The student whose answer painting it is, or any teacher-level member of
-    the exam's organization, may access it.
-    """
-    try:
-        ExamAnswer = django_apps.get_model("exams", "ExamAnswer")
-
-        answer = ExamAnswer.objects.select_related(
-            "attempt__user",
-            "attempt__exam__organization",
-        ).get(paint_image=path)
-        attempt = answer.attempt
-        if attempt.user_id == user.id:
-            return True
-        org = attempt.exam.organization
-        return _user_has_org_membership(user, org, min_level=_TEACHER_MIN_LEVEL)
-    except ExamAnswer.DoesNotExist:
-        return False
+# Təhlükəsizlik auditi 2026-10-05: cəhd baxışı qaydası (EX28-09) — bax media_policies.
+_check_exam_paint_access = media_policies.check_exam_paint_access
 
 
 def _check_project_submission_access(user, path: str) -> bool:

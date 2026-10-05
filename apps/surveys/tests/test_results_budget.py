@@ -19,7 +19,8 @@ FRAGMENT = "accounts:profile_section_fragment"
 #: test_cabinet_shell_query_budget); bölmənin özü sabit sayda aqreqat sorğusudur.
 #: Audit 2026-09-28 SV-1: vahid dərc qaydası (kafedra müqayisə nöqtəsi, kafedra dinamikası) drawer-ə
 #: +3 (56), ixraca +1 (85) sabit sorğu əlavə edir — büdcə yenə «ölçülmüş + 3».
-BUDGETS = {"overview": 78, "teachers": 71, "general": 83, "drawer": 59, "export": 88, "search": 16}
+#: Təhlükəsizlik auditi 2026-10-05: drawer panel kimi filtr kaskadını hesablayır (+6 sabit, 62).
+BUDGETS = {"overview": 78, "teachers": 71, "general": 83, "drawer": 65, "export": 88, "search": 16}
 
 
 def _grow(world, extra):

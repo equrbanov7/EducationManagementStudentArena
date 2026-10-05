@@ -151,3 +151,21 @@ body:has(.jd2) .ai-bot-btn:focus-visible {
     .jd2-stu-name { font-size: 12px; line-height: 1.25; overflow-wrap: anywhere; }
     .jd2-tabsbar .jd2-tab { flex: 1 1 auto; padding: 0 10px; text-align: center; }
 }
+
+/* ── 9. Telefon: toxunma hədəfləri ≥ 44px (UX2 2026-10-05) ───────────────────
+   Davamiyyət/bal seçimi (~26px), toplu «i/e»/«q/b» düymələri (~20px) və dərs redaktə qələmi (~20px)
+   barmaqla vurulmaq üçün çox kiçik idi. Eni artırmırıq (sütun daralığı qalır) — yalnız hündürlük;
+   açılan menyunun sətirləri də 44px. Masaüstü düzümü dəyişmir. */
+@media (max-width: 640px) {
+    .jd2-semselect .bootstrap-single-select__toggle { min-height: 44px; font-size: 13px; }
+    .jd2-semselect .dropdown-menu { max-height: 60vh; }
+    .jd2-semselect .dropdown-menu .bootstrap-single-select__option { min-height: 44px; font-size: 14px; }
+    .att-chip { min-height: 44px; min-width: 44px; }
+    .jd2-th-bulk { gap: 6px; }
+    .jd2-bulk { min-height: 44px; min-width: 44px; font-size: 12px; }
+    .jd2-th-edit { min-height: 44px; min-width: 44px; font-size: 13px; }
+}
+
+/* Canlı q/b sayğacı: server sayından fərqlidirsə (hələ saxlanmayıb) incə çərçivə — «yadda saxla»
+   lazımdır işarəsi. Rəng (is-warning / is-barred) hələ server hesabıdır. */
+.jd2-qchip.is-live { box-shadow: 0 0 0 2px var(--j-line, #dce6f7); }

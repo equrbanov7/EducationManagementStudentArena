@@ -10,6 +10,19 @@ from ._base import (
     User,
 )
 
+#: Təhlükəsizlik auditi 2026-10-05: müəllimin təyin etdiyi fayl ölçüsünün server
+#: tavanı (layihənin yükləmə tavanı; nginx ``client_max_body_size 64M``-dən aşağı).
+LAB_MAX_FILE_SIZE_MB = 50
+
+
+def clamp_lab_max_file_size_mb(value, *, fallback=LAB_MAX_FILE_SIZE_MB):
+    """İstənilən girişi ``1..LAB_MAX_FILE_SIZE_MB`` aralığına sıxır."""
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = fallback
+    return min(max(1, parsed), LAB_MAX_FILE_SIZE_MB)
+
 
 class Lab(models.Model):
     """
@@ -141,6 +154,11 @@ class Lab(models.Model):
 
     def __str__(self):
         return f"{self.course.title} - {self.title}"
+
+    def save(self, *args, **kwargs):
+        # Hər yazma yolu (view, admin, import) üçün server tavanı.
+        self.max_file_size_mb = clamp_lab_max_file_size_mb(self.max_file_size_mb)
+        super().save(*args, **kwargs)
 
     @property
     def is_open(self):

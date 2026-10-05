@@ -22,7 +22,7 @@ const RETRY_ERROR = COURSES_I18N.retryError || "An error occurred. Please try ag
 function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
-    return div.innerHTML;
+    return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 /**

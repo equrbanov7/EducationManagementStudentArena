@@ -18,7 +18,7 @@
   var PAGE_SIZE = 15, offset = 0, hasMore = false, loadingMore = false, currentQuery = "";
   var i18nEl = document.getElementById("pl2-i18n");
   var T = i18nEl ? JSON.parse(i18nEl.textContent) : {};
-  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
   // KPI kartına dəyər yaz (`ems-kpi[data-ems-kpi-key]`) — kart yoxdursa keç.
   function setKpi(key, value){
     var host = root.querySelector('[data-ems-kpi-key="'+key+'"] .ems-kpi__value');

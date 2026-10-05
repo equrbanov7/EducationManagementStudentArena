@@ -8,7 +8,12 @@ from django.test import RequestFactory, SimpleTestCase, override_settings
 from core.middleware_concurrency import ConcurrencyLimitMiddleware
 
 
-@override_settings(MAX_INFLIGHT_REQUESTS=3, MAX_INFLIGHT_LOGIN_REQUESTS=1, MAX_INFLIGHT_WAIT_SECONDS=0.02)
+@override_settings(
+    MAX_INFLIGHT_REQUESTS=3,
+    MAX_INFLIGHT_LOGIN_REQUESTS=1,
+    MAX_INFLIGHT_WAIT_SECONDS=0.02,
+    MAX_INFLIGHT_LOGIN_WAIT_SECONDS=0.02,
+)
 class LoginAdmissionTests(SimpleTestCase):
     def setUp(self):
         self.factory = RequestFactory()
@@ -78,3 +83,24 @@ class LoginAdmissionTests(SimpleTestCase):
     def test_zero_restores_shared_only_admission(self):
         middleware = ConcurrencyLimitMiddleware(lambda request: HttpResponse("ok"))
         self.assertIsNone(middleware._login_slots)
+
+    @override_settings(MAX_INFLIGHT_LOGIN_WAIT_SECONDS=2.0)
+    def test_login_waits_in_its_lane_instead_of_failing_fast(self):
+        """Lane dolu olanda login 503 almır — slot boşalana qədər növbədə gözləyir."""
+        release = threading.Event()
+        entered = threading.Event()
+
+        def view(request):
+            if request.method == "POST" and not entered.is_set():
+                entered.set()
+                release.wait(5)
+            return HttpResponse("ok")
+
+        middleware = ConcurrencyLimitMiddleware(view)
+        first = threading.Thread(target=lambda: middleware(self.factory.post("/accounts/login/telebe/")))
+        first.start()
+        self.assertTrue(entered.wait(5))
+        threading.Timer(0.3, release.set).start()
+        response = middleware(self.factory.post("/accounts/login/telebe/"))
+        first.join(5)
+        self.assertEqual(response.status_code, 200)

@@ -158,6 +158,33 @@ class AiAnalysisEndpointTests(_Base):
             AuditLog.objects.filter(resource_type="monitoring.ai_analysis", action="deny", user=self.rim).exists()
         )
 
+    @override_settings(MONITORING_AI_RATE_LIMIT="1/1h")
+    def test_concurrent_requests_cannot_exceed_limit(self):
+        """Təhlükəsizlik auditi 2026-10-05: yoxla-və-say atomikdir və snapshot qurulmazdan ƏVVƏLdir.
+
+        Əvvəl ``is_rate_limited`` (yalnız oxu) → ``build_summary`` (yavaş) → ``record``
+        idi: bu pəncərədə gələn paralel sorğu da yoxlamadan keçib Gemini-yə gedirdi.
+        """
+        from apps.monitoring import views_summary
+
+        real_build_summary = views_summary.build_summary
+        concurrent = {}
+
+        def _build_summary_with_parallel_click(scope):
+            if "status" not in concurrent:
+                concurrent["status"] = None
+                concurrent["status"] = self._post().status_code
+            return real_build_summary(scope)
+
+        with (
+            mock.patch(GEMINI_POST, return_value=_gemini_response()) as post,
+            mock.patch.object(views_summary, "build_summary", side_effect=_build_summary_with_parallel_click),
+        ):
+            first = self._post()
+        self.assertEqual(first.status_code, 200)
+        self.assertEqual(concurrent["status"], 429)
+        self.assertEqual(post.call_count, 1)
+
     def test_gemini_failure_is_502_and_audited(self):
         failure = mock.Mock(status_code=500)
         with mock.patch(GEMINI_POST, return_value=failure):

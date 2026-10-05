@@ -28,7 +28,7 @@
     function esc(value) {
         var node = document.createElement("span");
         node.textContent = value == null ? "" : String(value);
-        return node.innerHTML;
+        return node.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function activeSeason() {

@@ -64,6 +64,25 @@ class AmendmentDocumentValidationTest(TestCase):
         with self.assertRaises(WorkloadDenied):
             self._amend(fake)
 
+    def test_valid_pdf_document_is_stored(self):
+        """Yol ~131 simvoldur (`workload_amendments/<org>/<task>/<uuid32>.pdf`) —
+        sahə `max_length=100` olanda hər yükləmə `DataError` (500) verirdi."""
+        from django.test import override_settings
+
+        pdf = SimpleUploadedFile(
+            "emr.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf"
+        )
+        with override_settings(
+            STORAGES={
+                "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+                "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+            }
+        ):
+            amendment = self._amend(pdf)
+            amendment.refresh_from_db()
+        self.assertGreater(len(amendment.document.name), 100)
+        self.assertTrue(amendment.document.name.endswith(".pdf"))
+
 
 class ForeignUnitSelectionTest(TestCase):
     """``wc_chair`` / ``wa_faculty`` GET parametrləri aktorun əhatəsi ilə kəsişdirilməlidir.
@@ -133,3 +152,80 @@ class ForeignUnitSelectionTest(TestCase):
         faculty_a = str(self.stack_a["faculty"].pk)
         payload = build_approval(self._request(self.dean, wa_year=YEAR, wa_faculty=faculty_a), self.org)
         self.assertEqual(payload["faculty_id"], faculty_a)
+
+
+class PostApprovalRowEditTest(TestCase):
+    """Dekan təsdiqindən sonra sətrin saat/struktur sahələri sərbəst dəyişməməlidir.
+
+    Əvvəl ``distributing`` EDITABLE idi: kafedra müdiri təsdiqlənmiş sənəddə saatları
+    dəyişə, sətir silə/əlavə edə bilirdi; ``amended`` isə istənilən sətri açırdı (yalnız
+    düzəlişin hədəf sətrini yox).
+    """
+
+    def setUp(self):
+        self.org = make_org("wl-secaudit-edit")
+        self.stack = make_structure(self.org, code="WLE")
+        self.head = User.objects.create_user("wle_head", "wle_head@x.test", "pw")
+        activate_member(
+            self.org,
+            self.head,
+            "chair_head",
+            permissions=CHAIR_PERMS,
+            scope_unit=self.stack["chair"],
+            level=70,
+            scope_type=RoleScopeType.UNIT,
+        )
+        self.actor = resolve_actor(self.head, self.org)
+        self.task = make_task(self.org, self.stack["chair"], status=TaskStatus.APPROVED, created_by=self.head)
+        self.row = make_row(self.task, self.stack, lecture_total=10, seminar_total=0)
+        self.other_row = make_row(self.task, self.stack, lecture_total=8, seminar_total=0, with_subject=False)
+
+    def _start_distribution(self):
+        assign_teacher(row=self.row, actor=self.actor, activity=Activity.LECTURE, teacher_id=None, hours=10)
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.status, TaskStatus.DISTRIBUTING)
+
+    def test_distributing_rows_are_not_editable(self):
+        from apps.workload.services import save_row
+        from apps.workload.services.tasks import delete_row
+
+        self._start_distribution()
+        self.assertFalse(self.task.is_editable)
+        with self.assertRaises(WorkloadDenied) as ctx:
+            save_row(task=self.task, actor=self.actor, data={"lecture_total": 40}, row=self.row)
+        self.assertEqual(ctx.exception.code, "workload.task_not_editable")
+        with self.assertRaises(WorkloadDenied):
+            save_row(task=self.task, actor=self.actor, data={"subject_text": "Yeni sətir"})
+        with self.assertRaises(WorkloadDenied):
+            delete_row(task=self.task, row=self.other_row, actor=self.actor)
+
+    def test_teacher_assignment_still_works_while_distributing(self):
+        self._start_distribution()
+        assign_teacher(row=self.other_row, actor=self.actor, activity=Activity.LECTURE, teacher_id=None, hours=8)
+        confirm_distribution(task=self.task, actor=self.actor)
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.status, TaskStatus.DISTRIBUTED)
+
+    def test_amended_task_only_opens_the_amendment_target_row(self):
+        from apps.workload.services import save_row
+
+        self._start_distribution()
+        assign_teacher(row=self.other_row, actor=self.actor, activity=Activity.LECTURE, teacher_id=None, hours=8)
+        confirm_distribution(task=self.task, actor=self.actor)
+        self.task.refresh_from_db()
+        open_amendment(
+            task=self.task,
+            actor=self.actor,
+            target_kind=AmendmentTarget.ROW,
+            target_id=self.row.pk,
+            reason=AmendmentReason.STUDENT_COUNT,
+            note="Tələbə sayı dəyişdi",
+        )
+        self.task.refresh_from_db()
+        updated = save_row(task=self.task, actor=self.actor, data={"student_count": 40}, row=self.row)
+        self.assertEqual(updated.student_count, 40)
+        with self.assertRaises(WorkloadDenied) as ctx:
+            save_row(task=self.task, actor=self.actor, data={"student_count": 41}, row=self.other_row)
+        self.assertEqual(ctx.exception.code, "workload.task_not_editable")
+        with self.assertRaises(WorkloadDenied):
+            save_row(task=self.task, actor=self.actor, data={"subject_text": "Yeni sətir"})

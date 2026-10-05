@@ -21,7 +21,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_GET, require_POST
 
 from core.constants import AuditAction
-from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
+from core.rate_limit import parse_rate, record_rate_limit_hit
 
 from .ai_snapshot import build_ai_snapshot
 from .permissions import monitoring_view_required
@@ -129,7 +129,10 @@ def ai_analysis_api(request):
         return _no_store({"error": code, "message": _error_message(code), **_ai_quota(user.pk)}, status=503)
 
     rate = _ai_rate()
-    limited, retry_after = is_rate_limited(AI_RATE_SCOPE, rate, user.pk)
+    # Təhlükəsizlik auditi 2026-10-05: yoxla-və-say ATOMİKDİR (cache.incr) və snapshot/
+    # Gemini-dən ƏVVƏLdir. Əvvəl «is_rate_limited → build_summary → record» idi: bu
+    # pəncərədə gələn paralel kliklər hamısı yoxlamadan keçib Gemini-yə gedirdi.
+    limited, retry_after = record_rate_limit_hit(AI_RATE_SCOPE, rate, user.pk)
     if limited:
         _audit(request, outcome="rate_limited", details={"retry_after": retry_after})
         response = _no_store(
@@ -140,8 +143,6 @@ def ai_analysis_api(request):
         return response
 
     snapshot = build_ai_snapshot(build_summary(request.monitoring_scope))
-    # Cəhd Gemini-yə getməzdən ƏVVƏL sayılır: paralel kliklər limiti aşmasın.
-    record_rate_limit_hit(AI_RATE_SCOPE, rate, user.pk)
     result = analyze_monitoring_snapshot(snapshot)
     details = {
         "ok": bool(result.get("ok")),
