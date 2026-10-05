@@ -67,12 +67,22 @@ class SecureCategoryAnswerKeyTest(TestCase):
         self.assertTrue(response.context["hide_test_answer_correctness"])
         self.assertNotContains(response, "correct-option")
 
-    def test_final_answer_key_hidden_without_cabinet_parameters(self):
+    def test_final_answer_key_hidden_in_cabinet(self):
         exam, attempt, _correct = self._exam_with_attempt("final")
-        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        url = reverse("exams:exam_result", args=[exam.slug, attempt.id]) + "?from_section=my-results"
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["hide_test_answer_correctness"])
         self.assertNotContains(response, "correct-option")
+
+    def test_final_center_review_keeps_time_boxed_answer_key(self):
+        """Parametrsiz final nəticəsi mərkəz rejimidir: açar server tərəfindən 5 dəq-lik
+        pəncərədə qəsdən görünür (sonra sessiya bağlanır) — qəbul edilmiş dizayn."""
+        exam, attempt, _correct = self._exam_with_attempt("final")
+        response = self.client.get(reverse("exams:exam_result", args=[exam.slug, attempt.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["hide_test_answer_correctness"])
+        self.assertIsNotNone(response.context.get("final_result_remaining_seconds"))
 
     def test_uncategorised_test_still_shows_answer_key(self):
         exam, attempt, _correct = self._exam_with_attempt("")
