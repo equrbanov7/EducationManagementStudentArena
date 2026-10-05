@@ -14,7 +14,7 @@
     function escapeHtml(value) {
         var node = document.createElement("div");
         node.textContent = value == null ? "" : String(value);
-        return node.innerHTML;
+        return node.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function selected(value, current) {
