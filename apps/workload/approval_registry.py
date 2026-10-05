@@ -54,7 +54,10 @@ def build_approval(request, organization) -> dict:
     years = known_years(organization)
     year = params.get("wa_year") or current_academic_year(organization)
     faculties = list(visible_faculties(actor))
-    faculty_id = safe_uuid(params.get("wa_faculty")) or (str(faculties[0].pk) if faculties else "")
+    faculty_id = safe_uuid(params.get("wa_faculty"))
+    # Təhlükəsizlik auditi 2026-10-05: GET-dən gələn fakültə dekanın əhatəsində olmalıdır.
+    if faculty_id not in {str(unit.pk) for unit in faculties}:
+        faculty_id = str(faculties[0].pk) if faculties else ""
 
     slices = list(
         TaskFacultySlice.objects.filter(
