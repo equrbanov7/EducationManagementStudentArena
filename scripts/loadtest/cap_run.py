@@ -269,7 +269,29 @@ def stop_generators():
         sh(["docker", "stop", "-t", "15", *names], check=False)
 
 
-def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
+def capture_stage_errors(run_dir, name, since_iso):
+    """Pillə ərzində app-ların ERROR sətirləri (503-lər çıxılmaqla) + traceback-ın sonu."""
+    rows = []
+    for svc in APPS:
+        text = sh(["docker", "logs", "--since", since_iso, f"{PROJECT}-{svc}-1"], capture=True, check=False, merge=True)
+        for line in (text or "").splitlines():
+            if '"level": "ERROR"' not in line or "Service Unavailable" in line:
+                continue
+            try:
+                rec = json.loads(line)
+            except ValueError:
+                continue
+            rows.append({"svc": svc, "message": rec.get("message", "")[:300], "exc": (rec.get("exc_info") or "")[-1500:]})
+    (run_dir / f"{name}-errors.json").write_text(json.dumps(rows[-300:], indent=1))
+    counts = {}
+    for r in rows:
+        key = r["message"][:120] + " || " + (r["exc"].strip().splitlines()[-1][:160] if r["exc"] else "")
+        counts[key] = counts.get(key, 0) + 1
+    for key, n in sorted(counts.items(), key=lambda kv: -kv[1])[:8]:
+        log("APP_ERROR", n, key)
+
+
+def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
     mode, rest = spec.split(":")
     users, window = rest.split("@") if "@" in rest else (rest, "60")
     users, window = int(users), int(window)
@@ -306,6 +328,7 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
             preauth = users / spawn_rate
         go_at = time.time() + preauth + 25
         run_time = int(preauth + 25 + window + tail + 60)
+    stage_started_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     log("STAGE_START", name, f"users={users} window={window}s workers={workers} spawn={spawn_rate:.1f}/s run_time={run_time}s")
     stack.psql("SELECT pg_stat_statements_reset()")
     stop_generators()
@@ -333,8 +356,9 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
     for w in range(workers):
         lo = cursor + student_share * w // workers
         hi = cursor + student_share * (w + 1) // workers
-        t_lo = teachers * w // workers
-        t_hi = teachers * (w + 1) // workers
+        t_users = min(users, teachers) if mode == "journal" else max(1, users // 10)
+        t_lo = (t_cursor + t_users * w // workers) % max(1, teachers)
+        t_hi = t_lo + (t_users * (w + 1) // workers - t_users * w // workers)
         sh([
             "docker", "run", "-d", "--name", f"cap-gen-w{w}", "--cpus", "1", "--memory", "1500m",
             "-e", f"CAP_WORKER={w}", "-e", f"CAP_OFFSET={lo}", "-e", f"CAP_SHARD={hi - lo}",
@@ -359,6 +383,7 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
         logs = sh(["docker", "logs", cname], capture=True, check=False, merge=True)
         (run_dir / f"{name}-{cname}.log").write_text(logs or "")
         sh(["docker", "rm", "-f", cname], check=False, capture=True)
+    capture_stage_errors(run_dir, name, stage_started_iso)
     sql = stack.psql(
         "SELECT calls, round(total_exec_time::numeric,1), round(mean_exec_time::numeric,2), round(max_exec_time::numeric,1), "
         "rows, left(regexp_replace(query, '\\s+', ' ', 'g'), 300) FROM pg_stat_statements "
@@ -368,6 +393,8 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir):
     result = summarize_stage(run_dir, name, mode, users, window, telemetry)
     result["guard_tripped"] = bool(telemetry.guard_tripped)
     log("STAGE_RESULT", json.dumps({k: v for k, v in result.items() if k not in ("requests", "errors")}))
+    used_t = (min(users, teachers) if mode == "journal" else (users // 10 if mode == "mixed" else 0))
+    result["t_cursor_next"] = (t_cursor + used_t) % max(1, teachers)
     return result, cursor + student_share
 
 
@@ -543,6 +570,7 @@ def main():
         stack.restart_apps()
         cursor = args.student_start
         failed_modes = set()
+        t_cursor = 0
         for i, spec in enumerate([s.strip() for s in args.plan.split(",") if s.strip()], start=1):
             if spec.split(":")[0] in failed_modes:
                 log("SKIP", spec, "(bu rejim əvvəlki pillədə keçmədi)")
@@ -550,7 +578,8 @@ def main():
             if not live_health():
                 log("canlı sistem sağlam deyil — qalan pillələr ləğv edildi")
                 break
-            result, cursor = run_stage(stack, args, spec, i, cursor, seed_path, run_dir)
+            result, cursor = run_stage(stack, args, spec, i, cursor, seed_path, run_dir, t_cursor)
+            t_cursor = result.get("t_cursor_next", 0)
             results.append(result)
             write_report(run_dir, args, seed, results, {})
             if result["guard_tripped"]:

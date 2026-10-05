@@ -53,7 +53,12 @@ with rls_worker_atomic(), bypass_rls():
         "examples": bad[:10],
     }
 
-    marks_expected = load("expected-marks")
+    # Eyni jurnal bir neçə pillədə saxlanıla bilər — yalnız SON gözlənti yoxlanır
+    # (fayllar pillə adına görə sıralanır: 01-, 02-, ...).
+    latest = {}
+    for row in load("expected-marks"):
+        latest.setdefault(row["offering"], {}).update(row["marks"])
+    marks_expected = [{"offering": k, "marks": v} for k, v in latest.items()]
     cells = mism = 0
     examples = []
     for row in marks_expected:
