@@ -17688,6 +17688,11 @@ msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
 msgstr "Apellyasiya şərhi çox qısadır (ən azı {min_length} simvol)."
 
+#: apps/appeals/services/creation.py:69
+msgctxt "appeals.service.create.error"
+msgid "Şərh {max_length} simvoldan uzun ola bilməz."
+msgstr "Şərh {max_length} simvoldan uzun ola bilməz."
+
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
 msgid "Apellyasiya müddəti bitib."

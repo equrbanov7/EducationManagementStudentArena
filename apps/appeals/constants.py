@@ -83,6 +83,8 @@ APPEAL_ITEM_STATUS_VALUES = frozenset(code for code, _ in APPEAL_ITEM_STATUS_CHO
 APPEAL_WINDOW_DAYS = 3
 # Hər apellyasiya şərhinin minimum uzunluğu (simvol).
 APPEAL_MIN_COMMENT_LENGTH = 30
+# Maksimum uzunluq (təhlükəsizlik auditi 2026-10-05) — TextField limitsiz idi.
+APPEAL_MAX_COMMENT_LENGTH = 5000
 
 # RBAC icazələri (apps/organizations/permissions.py-də artıq təyin olunub).
 PERM_APPEAL_CREATE = "appeal.create"

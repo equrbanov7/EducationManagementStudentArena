@@ -17650,6 +17650,11 @@ msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
 msgstr "İtiraz yorumu çok kısa (en az {min_length} karakter)."
 
+#: apps/appeals/services/creation.py:69
+msgctxt "appeals.service.create.error"
+msgid "Şərh {max_length} simvoldan uzun ola bilməz."
+msgstr "Yorum {max_length} karakterden uzun olamaz."
+
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
 msgid "Apellyasiya müddəti bitib."
