@@ -487,6 +487,17 @@ class Question(models.Model):
         verbose_name="Görə bilən istifadəçilər",
     )
 
+    #: Təhlükəsizlik auditi 2026-10-05: ``Post``-dan fərqli olaraq sual TENANT
+    #: məzmunudur — ``visible_to_all`` «hamı» = yaradıldığı təşkilatın üzvləri.
+    #: NULL = auditdən əvvəlki köhnə sətir: yalnız müəllifi və superadmin görür.
+    organization = models.ForeignKey(
+        "organizations.Organization",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="blog_questions",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -497,15 +508,29 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text[:50]
 
-    def can_user_see(self, user):
-        """
-        Bu funksiya ilə şablonda və view-lərdə yoxlaya bilərik:
-        bu user bu sualı görməlidirmi, yoxsa yox.
-        """
-        if self.visible_to_all:
-            return True
+    @classmethod
+    def visible_q(cls, user, organization):
+        """``user``-in ``organization`` kontekstində görə bildiyi suallar (Q filtri)."""
+        from core.permissions import is_superadmin_user
+
+        own_legacy = Q(organization__isnull=True, author=user)
+        if is_superadmin_user(user):
+            own_legacy = Q(organization__isnull=True)
+        if organization is None:
+            return own_legacy
+        in_org = Q(organization=organization) & (Q(visible_to_all=True) | Q(author=user) | Q(visible_users=user))
+        return in_org | own_legacy
+
+    def can_user_see(self, user, organization=None):
+        """Bu user (aktiv ``organization`` kontekstində) bu sualı görməlidirmi."""
+        from core.permissions import is_superadmin_user
+
         if not user.is_authenticated:
             return False
-        if user == self.author:
+        if self.organization_id is None:
+            return user == self.author or is_superadmin_user(user)
+        if organization is None or self.organization_id != organization.pk:
+            return False
+        if self.visible_to_all or user == self.author:
             return True
         return self.visible_users.filter(id=user.id).exists()

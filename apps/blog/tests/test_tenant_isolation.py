@@ -431,13 +431,12 @@ class BlogQuestionIsolationTest(TestCase):
 
 class BlogQuestionVisibleToAllCrossOrgTest(TestCase):
     """
-    Document / verify that ``visible_to_all=True`` intentionally makes a
-    Question visible across organizations.
+    ``visible_to_all=True`` must NOT leak a Question across organizations.
 
-    The Question model has no organization FK; visibility is controlled
-    solely by the ``visible_to_all`` flag and the ``visible_users`` M2M.
-    This is by design – the blog / Q&A subsystem is a global, non-tenant-
-    scoped feature.
+    Security audit 2026-10-05: the Question model used to have no
+    organization FK, so "visible to all" meant every tenant. Questions are now
+    bound to the author's active organization; legacy rows without an
+    organization are visible only to their author (and superadmins).
     """
 
     def setUp(self):
@@ -470,18 +469,14 @@ class BlogQuestionVisibleToAllCrossOrgTest(TestCase):
             visible_to_all=False,
         )
 
-    def test_visible_to_all_question_seen_by_other_org_teacher(self):
-        """
-        A question with visible_to_all=True is intentionally shown to
-        users from any organization.  This is expected behaviour — the
-        blog Question model is not org-scoped.
-        """
+    def test_visible_to_all_question_hidden_from_other_org_teacher(self):
+        """A legacy (organization-less) visible_to_all question no longer leaks to other users."""
         self.client.force_login(self.teacher_org_b)
         url = reverse("questions_i_can_see")
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         returned_ids = [q.id for q in response.context["questions"]]
-        self.assertIn(self.public_question.id, returned_ids)
+        self.assertNotIn(self.public_question.id, returned_ids)
 
     def test_private_question_hidden_from_other_org_teacher(self):
         """A private question is not visible to teachers in other orgs."""
