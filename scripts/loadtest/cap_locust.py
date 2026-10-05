@@ -80,6 +80,21 @@ def append_jsonl(name, row):
         fh.write(json.dumps(row) + "\n")
 
 
+class _Abort(Exception):
+    """Axın kəsildi — sorğu artıq hesabata yazılıb; VU pillə sonuna qədər park olur."""
+
+
+def parks(fn):
+    def wrapper(self, *a, **kw):
+        try:
+            return fn(self, *a, **kw)
+        except _Abort:
+            self._park()
+
+    wrapper.__name__ = fn.__name__
+    return wrapper
+
+
 class _Base(HttpUser):
     abstract = True
     host = "https://edge"
@@ -109,7 +124,7 @@ class _Base(HttpUser):
                 page.failure(f"login page: {page.status_code} {page.error}")
         if not ok:
             COUNTERS["login_failed"] += 1
-            self._park()
+            raise _Abort()
         with self.client.post(
             path,
             data={"username": username, "password": CRED["password"], "csrfmiddlewaretoken": token},
@@ -124,7 +139,7 @@ class _Base(HttpUser):
                 resp.failure(f"login submit: {resp.status_code} {resp.error} → {location}")
         if not ok:
             COUNTERS["login_failed"] += 1
-            self._park()
+            raise _Abort()
         COUNTERS["logged_in"] += 1
         return location
 
@@ -137,7 +152,7 @@ class _Base(HttpUser):
         if not key:
             COUNTERS["pool_exhausted"] += 1
             fixture_error(self, "session pool missing", f"student {index}")
-            self._park()
+            raise _Abort()
         self.client.cookies.set("sessionid", key, domain=self.host.split("://", 1)[-1].split(":")[0], path="/")
         COUNTERS["logged_in"] += 1
 
@@ -156,7 +171,7 @@ def _next_student(user):
     if index >= _student_limit or index >= int(CRED["count"]):
         COUNTERS["pool_exhausted"] += 1
         fixture_error(user, "student pool exhausted", f"index {index} ≥ {_student_limit}")
-        user._park()
+        raise _Abort()
     return index + 1, f"stress_student_{index + 1:0{PAD}d}"
 
 
@@ -167,6 +182,7 @@ class LoginStudent(_Base):
     weight = 1
 
     @task
+    @parks
     def login_once(self):
         index, username = _next_student(self)
         self._client_setup(index, "/accounts/login/telebe/")
@@ -174,7 +190,7 @@ class LoginStudent(_Base):
         with self.client.get(landing or "/accounts/kabinet/", name="cabinet landing", catch_response=True, timeout=20) as r:
             if r.status_code != 200:
                 r.failure(f"landing: {r.status_code} {r.error}")
-        self._park()
+        raise _Abort()
 
 
 class ExamStudent(_Base):
@@ -183,12 +199,14 @@ class ExamStudent(_Base):
     wait_time = between(1, 2)
     weight = 6
 
+    @parks
     def on_start(self):
         self.index, self.username = _next_student(self)
         self._client_setup(self.index, "/accounts/login/telebe/")
         self._preauth_student(self.index, self.username)
 
     @task
+    @parks
     def take_exam(self):
         self._wait_for_go()
         slug = SEED["exam_slug"]
@@ -198,7 +216,7 @@ class ExamStudent(_Base):
             token = csrf(r.text)
             if r.status_code != 200 or not token:
                 r.failure(f"confirm: {r.status_code} {r.error}")
-                self._park()
+                raise _Abort()
         with self.client.post(
             start_path,
             data={"csrfmiddlewaretoken": token},
@@ -210,14 +228,14 @@ class ExamStudent(_Base):
             found = re.search(r"/exams/[^/]+/attempt/\d+/", r.headers.get("Location", ""))
             if r.status_code not in (302, 303) or not found:
                 r.failure(f"start: {r.status_code} {r.error} → {r.headers.get('Location', '')[:120]} {r.headers.get('Retry-After', '')}")
-                self._park()
+                raise _Abort()
             url = found.group(0)
         self.client.headers["Referer"] = ORIGIN + url
         with self.client.get(url, name="exam questions page", catch_response=True, timeout=30) as r:
             html = r.text
             if r.status_code != 200:
                 r.failure(f"questions page: {r.status_code} {r.error}")
-                self._park()
+                raise _Abort()
         options = {}
         revision = "0"
         for tag in INPUT_RE.findall(html):
@@ -231,7 +249,7 @@ class ExamStudent(_Base):
         token = csrf(html) or token
         if not options:
             fixture_error(self, "exam questions parse", "no MCQ inputs on attempt page")
-            self._park()
+            raise _Abort()
         selected = {}
         headers = {"X-Requested-With": "XMLHttpRequest", "X-CSRFToken": token}
         order = list(options)
@@ -272,14 +290,14 @@ class ExamStudent(_Base):
                 payload = {}
             if not (r.status_code == 200 and payload.get("finished") is True):
                 r.failure(f"finish: {r.status_code} {r.error} {str(payload)[:80]}")
-                self._park()
+                raise _Abort()
         attempt = int(url.rstrip("/").split("/")[-1])
         append_jsonl("expected-answers", {"attempt": attempt, "selected": selected})
         COUNTERS["exam_finished"] += 1
         with self.client.get(payload.get("redirect_url") or url + "result/", name="exam result", catch_response=True, timeout=30) as r:
             if r.status_code != 200:
                 r.failure(f"result: {r.status_code} {r.error}")
-        self._park()
+        raise _Abort()
 
 
 class JournalTeacher(_Base):
@@ -288,13 +306,14 @@ class JournalTeacher(_Base):
     wait_time = between(1, 2)
     weight = 1
 
+    @parks
     def on_start(self):
         index = next(_teacher_cursor)
         journals = SEED.get("journals") or []
         if index >= _teacher_limit or index >= len(journals):
             COUNTERS["pool_exhausted"] += 1
             fixture_error(self, "teacher pool exhausted", f"index {index}")
-            self._park()
+            raise _Abort()
         self.username, self.offering = journals[index]
         self._client_setup(60000 + index, "/accounts/login/muellim/")
         self._login(self.username, "muellim", "[pre] ")
@@ -306,7 +325,7 @@ class JournalTeacher(_Base):
             body = r.text
             if r.status_code != 200:
                 r.failure(f"{name}: {r.status_code} {r.error}")
-                self._park()
+                raise _Abort()
         return body
 
     def _save(self, name, cells, token, pattern):
@@ -322,23 +341,24 @@ class JournalTeacher(_Base):
         with self.client.post(path, data=data, name=name, allow_redirects=False, catch_response=True, timeout=40) as r:
             if r.status_code not in (302, 303) or path not in r.headers.get("Location", ""):
                 r.failure(f"{name}: {r.status_code} {r.error}")
-                self._park()
+                raise _Abort()
         return expected
 
     @task
+    @parks
     def work(self):
         self._wait_for_go()
         self.client.headers["Referer"] = ORIGIN + "/jurnal/"
         with self.client.get("/jurnal/", name="journal list", catch_response=True, timeout=30) as r:
             if r.status_code != 200 or self.offering not in r.text:
                 r.failure(f"journal list: {r.status_code} {r.error} has_offering={self.offering in (r.text or '')}")
-                self._park()
+                raise _Abort()
         body = self._open("journal open")
         cells = sorted(set(ATT_RE.findall(body)))
         token = csrf(body)
         if not cells or not token:
             fixture_error(self, "journal grid parse", f"cells={len(cells)} csrf={bool(token)}")
-            self._park()
+            raise _Abort()
         self._think(10, 30)  # müəllim davamiyyəti işarələyir
 
         def first_pass(i):
@@ -361,7 +381,7 @@ class JournalTeacher(_Base):
         with self.client.get("/jurnal/cedvel/", name="journal schedule", catch_response=True, timeout=30) as r:
             if r.status_code != 200:
                 r.failure(f"schedule: {r.status_code} {r.error}")
-        self._park()
+        raise _Abort()
 
 
 class CabinetStudent(_Base):
@@ -371,6 +391,7 @@ class CabinetStudent(_Base):
     weight = 3
     SECTIONS = ("dashboard", "assigned-exams", "my-results", "profile-info")
 
+    @parks
     def on_start(self):
         self.index, self.username = _next_student(self)
         self._client_setup(self.index, "/accounts/login/telebe/")
@@ -378,10 +399,15 @@ class CabinetStudent(_Base):
         self._wait_for_go()
 
     @task(3)
+    @parks
     def section(self):
         name = random.choice(self.SECTIONS)
         with self.client.get(
-            f"/accounts/profile/api/sections/{name}/", name="cabinet section", catch_response=True, timeout=30
+            f"/accounts/profile/api/sections/{name}/",
+            name="cabinet section",
+            headers={"X-Requested-With": "XMLHttpRequest"},
+            catch_response=True,
+            timeout=30,
         ) as r:
             try:
                 good = r.status_code == 200 and r.json().get("ok") is True
@@ -391,12 +417,14 @@ class CabinetStudent(_Base):
                 r.failure(f"section {name}: {r.status_code} {r.error} {(r.text or '')[:160]!r}")
 
     @task(1)
+    @parks
     def cabinet(self):
         with self.client.get("/accounts/kabinet/", name="cabinet page", catch_response=True, timeout=30) as r:
             if r.status_code != 200:
                 r.failure(f"cabinet: {r.status_code} {r.error}")
 
     @task(1)
+    @parks
     def schedule(self):
         with self.client.get("/jurnal/cedvel/", name="student schedule", catch_response=True, timeout=30) as r:
             if r.status_code != 200:
