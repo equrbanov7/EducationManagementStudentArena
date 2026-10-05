@@ -42,9 +42,20 @@ EXAM_PAINT_MAX_BASE64_CHARS = _env_int_setting("EXAM_PAINT_MAX_BASE64_CHARS", 1_
 # That 400 is logged only to the `django.security` logger (no app traceback),
 # which is why the server "looks fine" while some students cannot submit.
 # File uploads stream to disk and do NOT count here; only text + paint do. We
-# keep the ceiling under nginx `client_max_body_size` (64M) so oversized bodies
-# still get a clean Django 400 instead of an opaque proxy 413.
-DATA_UPLOAD_MAX_MEMORY_SIZE = _env_int_setting("DATA_UPLOAD_MAX_MEMORY_SIZE_MB", 50, minimum=3) * 1024 * 1024
+# keep the exam ceiling under nginx `client_max_body_size` (64M) so oversized
+# bodies still get a clean Django 400 instead of an opaque proxy 413.
+#
+# Security audit 2026-10-05: the 50 MB ceiling used to be GLOBAL — every POST
+# (login, surveys, search, anonymous forms) could pin 50 MB of RAM per request.
+# Global is now 5 MB; only the exam answer POST (`exams:take_exam`, whole-form
+# submit with base64 paint fields) keeps the large limit, applied per request by
+# `core.upload_limits.ExamAnswerUploadLimitMiddleware` via `RequestScopedLimit`.
+from core.upload_limits import RequestScopedLimit  # noqa: E402
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = RequestScopedLimit(
+    _env_int_setting("DATA_UPLOAD_MAX_MEMORY_SIZE_MB", 5, minimum=3) * 1024 * 1024
+)
+DATA_UPLOAD_MAX_MEMORY_SIZE_EXAM = _env_int_setting("DATA_UPLOAD_MAX_MEMORY_SIZE_EXAM_MB", 50, minimum=5) * 1024 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = _env_int_setting("DATA_UPLOAD_MAX_NUMBER_FIELDS", 10_000, minimum=1_000)
 # Sized to DB write capacity (pgbouncer pool ~150 / Postgres max_connections),
 # NOT the legacy CPU cap. At 12/6 only a dozen students could start system-wide
