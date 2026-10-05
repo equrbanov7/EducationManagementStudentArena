@@ -24,6 +24,29 @@
 Test mühitində app-a cəmi 4–5 nüvə düşür. Canlı host 10 vCPU-dur, amma app replikası
 tək daphne prosesidir (aşağıda, №6). Bu səbəbdən rəqəmlər canlı tutumun aşağı həddi kimi oxunmalıdır.
 
+## Əsas problem nə idi (qısa)
+
+Server zəif deyildi. İki əsas səbəb var idi.
+
+1. **Kabinetdəki bir sorğu bazanı boğurdu.** Hər tələbə kabinetə girəndə «mənə təyin
+   olunmuş imtahanlar» sayılırdı.
+   - Sorğu qrupdakı bütün tələbələri (minlərlə sətir) birləşdirib, sonra təkrarları silirdi.
+   - Tək istifadəçidə bu hiss olunmurdu. 500 tələbə eyni anda girəndə isə hər sorğu
+     3,6–13 saniyə çəkdi və baza tam doldu. Login-dən sonra kabinet açılmadığı üçün
+     «login işləmir» görünürdü.
+   - Eyni naxışda daha üç kiçik problem tapıldı, hamısı düzəldildi:
+     - üzv sayı hər açılışda yenidən sayılırdı;
+     - imtahan başlanğıcında sual seçimi sayğacı bütün tələbələr üçün eyni anda yenidən hesablanırdı;
+     - jurnal hər açılışda bütün müəllimləri yükləyirdi.
+2. **Serverin yarısı boş dururdu.** Hər app replikası tək Python prosesidir və 1 nüvədən
+   çox işlədə bilmir. `.env`-də 4 replika olduğu üçün 10 nüvəli serverdən app-a cəmi ~4 nüvə
+   düşürdü. 2026-10-05 səhər replika sayı 8-ə qaldırıldı.
+
+Üçüncü, təbii hədd **parol yoxlamasıdır**. PBKDF2 hər girişdə CPU yeyir və bu qəsdəndir
+(təhlükəsizlik). Ona görə minlərlə tələbənin eyni dəqiqədə daxil olması məhduddur.
+Login növbəsi artıq 503 vermir, 15 saniyəyə qədər gözlədir. İmtahan günü girişi bir neçə
+dəqiqəyə yaymaq lazımdır.
+
 ## Nəticələr
 
 | Ssenari | Baza (canlı image) | Düzəlişlərdən sonra (eyni 4 CPU) |
@@ -80,15 +103,15 @@ Hər düzəliş üçün reqressiya testi var. Tam paket: 11 381 passed.
    - **Problem:** GIL səbəbindən replika ~1 nüvədən çox işlədə bilmir. Daphne HTTP-ni Python-da
      parse edir, hər sorğuya ayrıca thread açılır. Testdə sorğu başına ~120 ms CPU ölçüldü;
      eyni sorğu lokal `runserver`-də 18–36 ms çəkir.
-   - **Canlıda:** `.env`-də `APP_REPLICAS=4`-dür, yəni app 10 nüvədən faktiki ~4-ünü istifadə edir.
-   - **Tövsiyə:** `APP_REPLICAS=8`. Kod defoltu onsuz da 8-dir, və 8 × 24 slot = 192 ≤ PgBouncer
+   - **Canlıda:** `.env`-də `APP_REPLICAS=4` idi, yəni app 10 nüvədən faktiki ~4-ünü istifadə edirdi.
+   - **✅ Tətbiq olundu (2026-10-05 səhər):** `APP_REPLICAS=8`, 8 replika sağlam. Kod defoltu onsuz da 8-dir, və 8 × 24 slot = 192 ≤ PgBouncer
      150 + 50 ehtiyat. Daha sonra HTTP üçün uvicorn/gunicorn çox-prosesli işçiyə keçidi ölçmək lazımdır.
 7. **Login sıçrayışı.**
    - **Problem:** PBKDF2 (600k iterasiya) CPU-ya bağlıdır. 4 app nüvəsi 60 saniyədə ~300–400
      girişi xətasız qəbul edir; 500 giriş 2 dəqiqəyə yayılanda xəta yoxdur.
    - **Tövsiyə:**
      - imtahan günü girişi 2–5 dəqiqəlik pəncərəyə yaymaq (imtahandan əvvəl daxil olmaq);
-     - login növbəsində 2 s-dən uzun gözləmə (503 əvəzinə növbə).
+     - **✅ tətbiq olundu:** login növbəsində 15 s gözləmə (`MAX_INFLIGHT_LOGIN_WAIT_SECONDS`), 503 əvəzinə növbə.
    - Parol hash-i zəiflədilmir.
 8. **Test edge-in nginx 500-ü və başlanğıc timeout-u** (imtahan 1000–1500-də ~1%).
    - 500 cavabını Django yox, test nginx-i qaytarır (`Server: nginx`). App-da ERROR yoxdur.
