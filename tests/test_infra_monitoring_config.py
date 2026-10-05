@@ -393,7 +393,7 @@ def test_nginx_proxied_media_block_does_not_duplicate_django_nosniff():
 
 def test_nginx_health_is_internal_only_and_ping_stays_public():
     """/health/ `build.sha` + komponent statusları publik olmamalıdır; allow siyahısı
-    `/metrics/` ilə eynidir (loopback + docker bridge + LAN monitorinq). /ping/ isə
+    `/metrics/` ilə eynidir (loopback + docker bridge). /ping/ isə
     app healthcheck və deploy-un ilk qapısıdır — ayrıca bloku YOXDUR, `location /`
     ilə publik qalır."""
     conf = _nginx_conf()
@@ -411,6 +411,17 @@ def test_nginx_health_is_internal_only_and_ping_stays_public():
     assert "proxy_set_header X-Forwarded-Proto $scheme;" in health
     assert "proxy_set_header X-Forwarded-For   $remote_addr;" in health
     assert "location = /ping/" not in conf and "location /ping/" not in conf
+
+
+def test_nginx_metrics_allow_list_is_docker_bridge_and_loopback_only():
+    """Təhlükəsizlik auditi 2026-10-05: `/metrics/` (və eyni siyahılı `/health/`) bütün
+    LAN-a (10.0.0.0/8, 192.168.0.0/16) açıq idi. Prometheus docker şəbəkəsindədir
+    (172.16.0.0/12), deploy/smoke yoxlamaları loopback-dan gəlir — LAN lazım deyil."""
+    allow_re = re.compile(r"^\s*(allow|deny)\s+([^;]+);", flags=re.MULTILINE)
+    for marker in ("location /metrics/", "location = /health/"):
+        block = _nginx_location_block(marker)
+        rules = [(m.group(1), m.group(2).strip()) for m in allow_re.finditer(block)]
+        assert rules == [("allow", "127.0.0.1"), ("allow", "172.16.0.0/12"), ("deny", "all")], (marker, rules)
 
 
 def test_deploy_and_smoke_health_probes_come_from_allowed_sources():

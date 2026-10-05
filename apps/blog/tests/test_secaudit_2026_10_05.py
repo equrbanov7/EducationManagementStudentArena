@@ -65,3 +65,56 @@ class QuestionVisibleUsersScopeTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Question.objects.filter(visible_users=self.colleague).exists())
+
+    def test_created_question_is_bound_to_active_organization(self):
+        response = self.client.post(reverse("create_question"), {"question_text": "Sual", "answer_text": "Cavab"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Question.objects.get(author=self.teacher).organization_id, self.org.pk)
+
+
+class QuestionTenantVisibilityTest(TestCase):
+    """``visible_to_all`` sualı yalnız ÖZ təşkilatında görünür.
+
+    Əvvəl ``Question``-da təşkilat yox idi: A universitetinin müəllimi «hamı görə
+    bilər» seçəndə sual B universitetinin istifadəçilərinə də görünürdü.
+    """
+
+    def setUp(self):
+        self.author = User.objects.create_user("secqt_author", "secqt_author@example.com", "StrongPass123!")
+        self.peer = User.objects.create_user("secqt_peer", "secqt_peer@example.com", "StrongPass123!")
+        self.outsider = User.objects.create_user("secqt_out", "secqt_out@example.com", "StrongPass123!")
+        self.org = _org("SecQT Org A", self.author)
+        self.other_org = _org("SecQT Org B", self.outsider)
+        for user, org in ((self.author, self.org), (self.peer, self.org), (self.outsider, self.other_org)):
+            Membership.objects.create(
+                user=user, organization=org, role=org.roles.get(name="student"), is_primary=True, is_active=True
+            )
+        self.public_q = Question.objects.create(
+            author=self.author, question_text="Org A ümumi sual", visible_to_all=True, organization=self.org
+        )
+        self.legacy_q = Question.objects.create(author=self.author, question_text="Köhnə sual", visible_to_all=True)
+
+    def _visible(self, user):
+        self.client.force_login(user)
+        response = self.client.get(reverse("questions_i_can_see"))
+        self.assertEqual(response.status_code, 200)
+        return {q.pk for q in response.context["questions"]}
+
+    def test_public_question_visible_inside_own_org(self):
+        self.assertIn(self.public_q.pk, self._visible(self.peer))
+
+    def test_public_question_hidden_from_other_tenant(self):
+        visible = self._visible(self.outsider)
+        self.assertNotIn(self.public_q.pk, visible)
+        self.assertNotIn(self.legacy_q.pk, visible)
+
+    def test_legacy_question_without_org_only_for_author_and_superadmin(self):
+        self.assertNotIn(self.legacy_q.pk, self._visible(self.peer))
+        self.assertIn(self.legacy_q.pk, self._visible(self.author))
+        admin = User.objects.create_superuser("secqt_admin", "secqt_admin@example.com", "StrongPass123!")
+        self.assertIn(self.legacy_q.pk, self._visible(admin))
+
+    def test_can_user_see_respects_organization(self):
+        self.assertTrue(self.public_q.can_user_see(self.peer, organization=self.org))
+        self.assertFalse(self.public_q.can_user_see(self.outsider, organization=self.other_org))
+        self.assertFalse(self.legacy_q.can_user_see(self.peer, organization=self.org))

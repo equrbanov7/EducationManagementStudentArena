@@ -13,7 +13,7 @@ from core.helpers import ASSIGNED_TASK_FILTER_CHOICES, _safe_same_origin_redirec
 from core.tenancy import scoped_by_organization
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
-from ...models import Lab, LabBlock, LabQuestion, LabSubmission
+from ...models import Lab, LabBlock, LabQuestion, LabSubmission, clamp_lab_max_file_size_mb
 
 DEFAULT_LAB_ALLOWED_EXTENSIONS = {
     ".zip",
@@ -76,18 +76,16 @@ def _normalize_extensions(raw_extensions):
 
 
 def _parse_max_size_mb(raw_value, *, fallback=25):
-    try:
-        parsed = int(raw_value)
-    except (TypeError, ValueError):
-        parsed = fallback
-    return max(1, parsed)
+    # Təhlükəsizlik auditi 2026-10-05: yuxarı sərhəd yox idi — 1..LAB_MAX_FILE_SIZE_MB.
+    return clamp_lab_max_file_size_mb(raw_value, fallback=fallback)
 
 
 def _validate_and_prepare_lab_upload(uploaded_file, *, allowed_extensions, max_size_mb):
     validate_uploaded_file(
         uploaded_file,
         allowed_extensions=allowed_extensions,
-        max_size_mb=max_size_mb,
+        # Köhnə sətirdə tavandan böyük dəyər qalsa belə yoxlama tavanla aparılır.
+        max_size_mb=clamp_lab_max_file_size_mb(max_size_mb),
     )
     randomize_uploaded_filename(uploaded_file)
     return uploaded_file

@@ -3,7 +3,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils.translation import pgettext
 
@@ -24,6 +23,9 @@ def create_question(request):
             with transaction.atomic():
                 question = form.save(commit=False)
                 question.author = request.user
+                # Təhlükəsizlik auditi 2026-10-05: sual aktiv təşkilata bağlanır —
+                # ``visible_to_all`` yalnız bu təşkilatın üzvlərinə şamil olur.
+                question.organization = getattr(request, "organization", None)
                 question.save()
                 form.save_m2m()  # visible_users üçün lazımdır
             return redirect("my_questions")
@@ -45,14 +47,13 @@ def my_questions(request):
 @login_required
 def questions_i_can_see(request):
     """
-    Bu view login olan user-in görə bildiyi bütün sualları göstərir.
-    visible_to_all = True olanlar,
-    + author = user olanlar,
-    + visible_users siyahısında user olanlar.
+    Bu view login olan user-in AKTİV TƏŞKİLATDA görə bildiyi sualları göstərir:
+    həmin təşkilatın visible_to_all / öz / visible_users sualları + təşkilatsız
+    köhnə sətirlər yalnız müəllifinə (və superadmin-ə).
     """
 
     questions = (
-        Question.objects.filter(Q(visible_to_all=True) | Q(author=request.user) | Q(visible_users=request.user))
+        Question.objects.filter(Question.visible_q(request.user, getattr(request, "organization", None)))
         .distinct()
         .select_related("author")
     )

@@ -29,7 +29,7 @@
     function escapeHtml(value) {
         var div = document.createElement("div");
         div.textContent = value == null ? "" : String(value);
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function statusHtml(text) {

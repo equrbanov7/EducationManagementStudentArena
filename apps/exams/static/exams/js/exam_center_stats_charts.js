@@ -23,7 +23,7 @@
     function escapeHtml(s) {
         var d = document.createElement("div");
         d.textContent = (s == null ? "" : s);
-        return d.innerHTML;
+        return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     /* Sadə markdown → HTML (AI cavabı üçün); əvvəlcə HTML escape olunur. */

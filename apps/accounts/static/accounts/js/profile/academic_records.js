@@ -33,7 +33,7 @@
         box.textContent = value == null ? "" : value;
         // `innerHTML` dırnağı escape ETMİR — atribut dəyərində istifadə etdiyimiz
         // üçün (title=, data-label=) əl ilə əlavə edilir.
-        return box.innerHTML.replace(/"/g, "&quot;");
+        return box.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function state(icon, title, body, kind) {

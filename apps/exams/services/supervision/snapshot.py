@@ -230,7 +230,32 @@ def _submission_file_items_safe(submission):
     ]
 
 
-def get_attempt_live_snapshot(attempt):
+#: Açar/bal sahələri — ``include_answer_key=False`` olanda snapshot-dan çıxarılır.
+_SCORE_KEYS = ("correct_count", "wrong_count", "score_percent", "live_score_percent", "live_score", "live_max_score")
+
+
+def _strip_answer_key(snapshot):
+    """Cavab açarını (düzgün variant, düzgün/səhv) və balı snapshot-dan çıxarır.
+
+    Təhlükəsizlik auditi 2026-10-05: zal nəzarətçisi davam edən finalda «Düzgün cavab»
+    nişanlarını və canlı balı görürdü — açarı tələbəyə ötürə bilərdi.
+    """
+    for key in _SCORE_KEYS:
+        snapshot[key] = None
+    for row in snapshot.get("answers") or []:
+        for option in row.get("options") or []:
+            option.pop("is_correct", None)
+        for option in row.get("selected_options") or []:
+            option.pop("is_correct", None)
+        if "correct_options" in row:
+            row["correct_options"] = []
+        if "is_correct" in row:
+            row["is_correct"] = None
+    snapshot["answer_key_visible"] = False
+    return snapshot
+
+
+def get_attempt_live_snapshot(attempt, *, include_answer_key=True):
     """
     Detailed live snapshot of a single student's in-progress (or finished)
     attempt — what they have answered so far and every supervision event.
@@ -238,7 +263,17 @@ def get_attempt_live_snapshot(attempt):
     This is read-only monitoring: it never mutates the attempt, so a teacher can
     "look over the shoulder" without blocking the student. Scope MUST be enforced
     by the caller (exam already tenant/permission scoped).
+
+    ``include_answer_key=False`` (zal nəzarətçisi) — düzgün variantlar və bal çıxarılır.
     """
+    snapshot = _build_attempt_live_snapshot(attempt)
+    if not include_answer_key:
+        return _strip_answer_key(snapshot)
+    snapshot["answer_key_visible"] = True
+    return snapshot
+
+
+def _build_attempt_live_snapshot(attempt):
     if not exam_supervision_enabled():
         return {
             "attempt_id": attempt.id,

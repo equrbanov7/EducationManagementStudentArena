@@ -1,6 +1,8 @@
 """Sərbəst mətn analitikası — ümumi təkliflər və açar söz tezliyi (xarici NLP YOXDUR).
 
 ANONİMLİK:
+* Daraldıcı filtr (fənn, qrup, ixtisas, kurs) seçiləndə mətn HEÇ qaytarılmır
+  (təhlükəsizlik auditi 2026-10-05) — yalnız kampaniya səviyyəsində.
 * Ümumi bölmənin təklifləri KAMPANİYA BAŞINA k-həddi ilə açılır: dəstdə bir neçə
   kampaniya birləşəndə hər kampaniyanın öz ``min_group_size``-ı (≥ 3) yoxlanır və
   daraldıcı filtrdə tamamlayıcı qayda da tətbiq olunur — k-dan az cavablı
@@ -188,8 +190,11 @@ def suggestion_digest(organization, scope, filters=None, *, query="", limit=SUGG
         "truncated": False,
         "items": [],
         "keywords": [],
+        "narrowed": filters.is_narrowed,
     }
-    if not campaign_ids or not scope.has_structure_access:
+    # Təhlükəsizlik auditi 2026-10-05: təkliflər yalnız kampaniya səviyyəsində — daraldıcı filtr
+    # (fənn/qrup/ixtisas/kurs) altında mətn üslubu kiçik dilimin müəllifini açır.
+    if not campaign_ids or not scope.has_structure_access or filters.is_narrowed:
         return result
     base, counts, visible = _visible_campaigns(organization, scope, filters, campaign_ids)
     result.update(

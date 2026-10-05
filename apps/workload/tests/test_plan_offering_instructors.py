@@ -79,6 +79,24 @@ class _TeacherBase(PlanOfferingBase):
     def offering(self):
         return CourseOffering.objects.get(organization=self.org, subject=self.stack["subject"])
 
+    def amend_row(self, row):
+        """Təhlükəsizlik auditi 2026-10-05: təsdiqdən sonra sətir yalnız düzəlişin hədəfi kimi açılır."""
+        from apps.workload.constants import AmendmentReason, AmendmentTarget
+        from apps.workload.services import open_amendment
+
+        TeachingTask.objects.filter(pk=row.task_id).update(status=TaskStatus.DISTRIBUTED, distributed_at=timezone.now())
+        task = TeachingTask.objects.get(pk=row.task_id)
+        open_amendment(
+            task=task,
+            actor=self.actor(self.chair_head),
+            target_kind=AmendmentTarget.ROW,
+            target_id=row.pk,
+            reason=AmendmentReason.CORRECTION,
+            note="Sətir düzəlişi",
+        )
+        task.refresh_from_db()
+        return task
+
 
 class ImmediateInstructorTest(_TeacherBase):
     code = "P2I"
@@ -223,9 +241,10 @@ class LegacyDraftAndRowEditTest(_TeacherBase):
         self.assertEqual(self.offering().instructor_id, self.teacher_b.pk)  # yenidən təsdiqi GÖZLƏMİR
         self.assertEqual(changed.offering_sync["instructor_replaced"], 1)
 
-    def test_adding_a_group_to_a_distributing_row_opens_its_offering(self):
+    def test_adding_a_group_to_an_amended_row_opens_its_offering(self):
         _task, row = self.approved_row()
         self.assign(row, self.teacher_a)
+        self.amend_row(row)
         extra = OrgUnit.objects.create(
             organization=self.org,
             name="P2L-236 ing",

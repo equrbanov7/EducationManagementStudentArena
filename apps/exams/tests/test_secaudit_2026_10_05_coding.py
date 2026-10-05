@@ -82,3 +82,27 @@ class CodingSubmitHiddenCaseLeakTests(TestCase):
             if item:
                 self.assertIsNone(item.get("score"))
                 self.assertEqual(item.get("test_results"), [])
+
+    def test_run_and_autosave_hide_score_when_results_hidden(self):
+        """İkinci dalğa: «Run» (görünən testlər) və autosave cavabında da bal yoxdur."""
+        self._prepare()
+        self.exam.results_hidden_from_students = True
+        self.exam.save(update_fields=["results_hidden_from_students"])
+        kwargs = {"slug": self.exam.slug, "attempt_id": self.attempt.id}
+        with patch("apps.exams.services.coding_runtime.execute_code", side_effect=_echo):
+            run = self.client.post(
+                reverse("exams:coding_run", kwargs=kwargs),
+                data=json.dumps(PAYLOAD),
+                content_type="application/json",
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+        self.assertEqual(run.status_code, 200, run.content)
+        self.assertIsNone(run.json()["submission"]["score"])
+        autosave = self.client.post(
+            reverse("exams:coding_autosave", kwargs=kwargs),
+            data=json.dumps(PAYLOAD),
+            content_type="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(autosave.status_code, 200, autosave.content)
+        self.assertIsNone(autosave.json()["submission"]["score"])

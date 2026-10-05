@@ -33,6 +33,7 @@ from apps.exams.services.coding_runtime import (
 from apps.exams.services.coding_throttle import acquire_run_slot, release_run_slot
 from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, tenant_scoped_exams
 
+from ._coding_payload import _submission_payload
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
 from ._supervision_lock import supervision_locked_json
 from .access_guard import ensure_active_attempt_access
@@ -114,22 +115,6 @@ def _get_attempt_coding_question(attempt, coding_question_id=None):
         return None
 
     return coding_questions[0]
-
-
-def _submission_payload(submission):
-    if not submission:
-        return None
-    return {
-        "id": submission.id,
-        "status": submission.execution_status,
-        "output": submission.output,
-        "error": submission.error_message,
-        "score": float(submission.score) if submission.score is not None else None,
-        "test_results": submission.test_results,
-        "execution_time_ms": submission.execution_time_ms,
-        "memory_usage_kb": submission.memory_usage_kb,
-        "is_final": submission.is_final,
-    }
 
 
 def _safe_archive_name(name, used_names):
