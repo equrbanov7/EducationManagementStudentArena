@@ -50,10 +50,13 @@ def _assigned_courses_queryset(request, user):
 
 
 def _assigned_exams_queryset(request, user, *, active_only=True):
+    # Tutum testi 2026-10-05 (8 replika): təyinat artıq semi-join-dir (sətir təkrarlanmır),
+    # ``.distinct()`` isə hər kabinet bölməsində bütün sütunlar üzrə ``COUNT(DISTINCT …)``
+    # verirdi — DB CPU-nun ən böyük istehlakçılarından biri idi.
     return _tenant_scoped_exams(
         request,
         get_assigned_exams_for_user(user, active_only=active_only, include_public=False),
-    ).distinct()
+    )
 
 
 def _resolve_superadmin_target_org(request, *, query_param: str):

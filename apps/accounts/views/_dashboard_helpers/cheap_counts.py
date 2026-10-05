@@ -97,8 +97,6 @@ def _count_assigned_exams(request, user) -> int:
             | Q(max_attempts_per_user=0)
             | Q(_finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
         )
-        .values("id")
-        .distinct()
         .count()
     )
 
