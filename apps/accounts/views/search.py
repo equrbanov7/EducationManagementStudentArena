@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.http import urlencode
@@ -209,7 +210,30 @@ def _subject_group(organization, query):
     ]
 
 
-def _student_group(organization, query):
+def _student_scope(request, organization, caps):
+    """Tələbə axtarışının struktur süzgəci + e-poçt axtarışına icazə.
+
+    Təhlükəsizlik auditi 2026-10-05: əvvəl BÜTÜN təşkilat axtarılırdı — UNIT-scope-lu
+    dekan/koordinator öz fakültəsindən kənar tələbələri tapırdı, e-poçt sahəsi isə
+    kontakt icazəsi olmayana oracle idi. Scope axtarışı AÇAN icazədən hesablanır
+    (``member.view`` / ``member.student_manage``); ``None`` = scope yoxdur (fail-closed).
+    """
+    from apps.accounts.services.people import resolve_actor as resolve_people_actor
+    from apps.organizations.public import get_permission_scope
+
+    can_view_contacts = bool(caps.get("can_manage_registrar")) or resolve_people_actor(request).can_view_contacts
+    if caps.get("can_manage_registrar"):
+        return Q(), can_view_contacts
+    permission = "member.view" if caps.get("can_search_directory") else "member.student_manage"
+    scope = get_permission_scope(request.user, organization, permission, request=request)
+    if scope.is_org_wide:
+        return Q(), can_view_contacts
+    if not scope.has_structure_access:
+        return None, can_view_contacts
+    return scope.unit_subtree_q(path_field="group__path", id_field="group_id"), can_view_contacts
+
+
+def _student_group(organization, query, *, scope_q=None, search_email=True):
     """Tələbə nəticələri — alt sətirdə GÖSTƏRİLƏN hər şey axtarıla bilər.
 
     AXTARIŞ İNVARİANTI: alt sətir ``program.display_label`` çap edir («Dünya
@@ -224,11 +248,14 @@ def _student_group(organization, query):
     """
     Record = django_apps.get_model("registrar", "StudentAcademicRecord")
     qs = Record.objects.filter(organization=organization)
+    if scope_q is not None:
+        qs = qs.filter(scope_q)
     # Tokenləşmiş + az/ing dözümlü («Ad Soyad», «Aliyev» → «Əliyev», «Shahzad» →
     # «Şahzad»); şifrlər kod rejimində — bax core/search_text.py.
+    fields = ("student__first_name", "student__last_name", "student__username", "program__name")
     search = tolerant_q(
         query,
-        ("student__first_name", "student__last_name", "student__username", "student__email", "program__name"),
+        fields + (("student__email",) if search_email else ()),
         compact_fields=_STUDENT_CODE_FIELDS,
     )
     if search is not None:
@@ -282,7 +309,12 @@ def global_search(request):
                 subjects = _subject_group(organization, query)
                 if subjects:
                     groups.append({"key": "subjects", "label": _("Fənlər"), "items": subjects})
-            students = _student_group(organization, query)
+            scope_q, search_email = _student_scope(request, organization, caps)
+            students = (
+                _student_group(organization, query, scope_q=scope_q, search_email=search_email)
+                if scope_q is not None
+                else []
+            )
             if students:
                 groups.append({"key": "students", "label": _("Tələbələr"), "items": students})
 

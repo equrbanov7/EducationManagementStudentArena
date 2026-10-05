@@ -29,8 +29,12 @@ class GlobalSearchTest(TestCase):
                 status="active",
                 is_active=True,
             )
+            # 2026-10-05: tələbə axtarışı struktur scope-ludur — dekanın fakültəsi qrupu əhatə edir.
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org, name="GS Fakültə", slug="gs-f1", unit_type=OrgUnitType.FACULTY
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name="KE-101", slug="gs-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org, name="KE-101", slug="gs-g1", unit_type=OrgUnitType.GROUP, parent=cls.faculty
             )
             cls.period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -64,6 +68,7 @@ class GlobalSearchTest(TestCase):
                 user=cls.dean,
                 organization=cls.org,
                 role=cls.org.roles.get(name="dean"),
+                scope_unit=cls.faculty,
                 is_primary=True,
                 is_active=True,
             )

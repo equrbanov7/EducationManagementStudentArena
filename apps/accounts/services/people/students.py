@@ -154,6 +154,7 @@ def _apply_filters(queryset, actor, filters, *, records=None):
         filters.query,
         prefix="",
         extra=_program_search_matcher(records) if records is not None else None,
+        include_contacts=actor.can_view_contacts,
     )
     if search:
         queryset = queryset.filter(search)
