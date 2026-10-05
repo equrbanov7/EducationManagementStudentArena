@@ -370,6 +370,9 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
         "-e", f"CAP_RUN_DIR={run_dir.as_posix().replace(str(CAP), '/capacity')}",
         "-e", f"CAP_MODE={mode}", "-e", f"CAP_STAGE={name}", "-e", f"CAP_GO_AT={go_at}",
         "-e", f"CAP_START_WINDOW={window}", "-e", f"CAP_THINK={args.think_min}:{args.think_max}",
+        # Sabit saylı köməkçi rollar (locust `fixed_count`): İM bal aktorları / imtahan müəllifi.
+        "-e", f"CAP_CLERK_USERS={min(len(seed.get('clerks') or []), max(1, users // 10)) if mode == 'journalfinal' else 0}",
+        "-e", f"CAP_AUTHOR_USERS={max(1, users // 5) if mode == 'export' else 0}",
         *sessions_env,
         "--entrypoint", "/capacity/toolenv/bin/locust", stack.image,
         "-f", "/harness/cap_locust.py",

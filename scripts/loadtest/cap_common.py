@@ -175,3 +175,16 @@ def _next_student(user):
         fixture_error(user, "student pool exhausted", f"index {index} ≥ {_student_limit}")
         raise _Abort()
     return index + 1, f"stress_student_{index + 1:0{PAD}d}"
+
+
+def _next_teacher(user):
+    """Bu worker-in müəllim zolağından növbəti (müəllim, jurnal) cütü."""
+    index = next(_teacher_cursor)
+    journals = SEED.get("journals") or []
+    if index >= _teacher_limit or index >= len(journals):
+        COUNTERS["pool_exhausted"] += 1
+        fixture_error(user, "teacher pool exhausted", f"index {index}")
+        raise _Abort()
+    username, offering = journals[index]
+    return index, username, offering
+

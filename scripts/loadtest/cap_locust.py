@@ -42,8 +42,7 @@ from cap_common import (  # noqa: E402
     _Abort,
     _Base,
     _next_student,
-    _teacher_cursor,
-    _teacher_limit,
+    _next_teacher,
     append_jsonl,
     csrf,
     fixture_error,
@@ -184,13 +183,7 @@ class JournalTeacher(_Base):
 
     @parks
     def on_start(self):
-        index = next(_teacher_cursor)
-        journals = SEED.get("journals") or []
-        if index >= _teacher_limit or index >= len(journals):
-            COUNTERS["pool_exhausted"] += 1
-            fixture_error(self, "teacher pool exhausted", f"index {index}")
-            raise _Abort()
-        self.username, self.offering = journals[index]
+        index, self.username, self.offering = _next_teacher(self)
         self._client_setup(60000 + index, "/accounts/login/muellim/")
         self._login(self.username, "muellim", "[pre] ")
 
