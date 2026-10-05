@@ -569,8 +569,10 @@ def protected_media(request, path: str):
         # Delegate file serving to nginx via internal redirect.
         response = HttpResponse()
         response["X-Accel-Redirect"] = f"{accel_url}/{clean_path}"
-        response["Content-Type"] = mimetypes.guess_type(path)[0] or "application/octet-stream"
+        content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
+        response["Content-Type"] = content_type
         response["X-Content-Type-Options"] = "nosniff"
+        media_policies.apply_content_disposition(response, clean_path, content_type)
         if is_private:
             response["Cache-Control"] = "private, no-store"
         return response
@@ -584,6 +586,7 @@ def protected_media(request, path: str):
     content_type = mimetypes.guess_type(abs_path)[0] or "application/octet-stream"
     response = FileResponse(open(abs_path, "rb"), content_type=content_type)
     response["X-Content-Type-Options"] = "nosniff"
+    media_policies.apply_content_disposition(response, clean_path, content_type)
     if is_private:
         response["Cache-Control"] = "private, no-store"
     else:

@@ -17760,6 +17760,11 @@ msgid "comment_too_short"
 msgstr ""
 "Комментарий к апелляции слишком короткий (не менее {min_length} символов)."
 
+#: apps/appeals/services/creation.py:69
+msgctxt "appeals.service.create.error"
+msgid "Şərh {max_length} simvoldan uzun ola bilməz."
+msgstr "Комментарий не может быть длиннее {max_length} символов."
+
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
 msgid "Apellyasiya müddəti bitib."

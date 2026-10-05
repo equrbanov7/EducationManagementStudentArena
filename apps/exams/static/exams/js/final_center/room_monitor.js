@@ -95,7 +95,7 @@
     function esc(text) {
         var div = document.createElement("div");
         div.textContent = text == null ? "" : String(text);
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function formatRemaining(seconds) {

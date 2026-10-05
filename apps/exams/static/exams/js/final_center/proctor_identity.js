@@ -31,7 +31,7 @@
     function esc(text) {
         var d = document.createElement("div");
         d.textContent = text == null ? "" : String(text);
-        return d.innerHTML;
+        return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     var SEVERITIES = ["critical", "high", "medium", "low", "info"];

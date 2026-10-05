@@ -34,8 +34,44 @@ DEFAULT_LAB_ALLOWED_EXTENSIONS = {
 }
 
 
+#: Müəllimin seçə biləcəyi uzantıların SERVER tərəfli superset-i (2026-10-05
+#: təhlükəsizlik auditi). ``allowed_extensions`` müəllimin sərbəst mətnidir —
+#: superset-dən kənar uzantı (``xht``, ``rdf``, …) sükutla atılır ki, tələbə
+#: brauzerdə skript kimi icra olunan faylı müəllimə «təhvil» verə bilməsin.
+LAB_EXTENSION_SUPERSET = frozenset(
+    DEFAULT_LAB_ALLOWED_EXTENSIONS
+    | {
+        ".xls",
+        ".xlsx",
+        ".ppt",
+        ".pptx",
+        ".csv",
+        ".gif",
+        ".md",
+        ".json",
+        ".ipynb",
+        ".h",
+        ".hpp",
+        ".cs",
+        ".go",
+        ".rs",
+        ".kt",
+        ".swift",
+        ".rb",
+        ".r",
+        ".m",
+        ".sql",
+        ".tar",
+        ".gz",
+        ".mp4",
+        ".mp3",
+    }
+)
+
+
 def _normalize_extensions(raw_extensions):
     extensions = {f".{ext.strip().lstrip('.').lower()}" for ext in (raw_extensions or "").split(",") if ext.strip()}
+    extensions &= LAB_EXTENSION_SUPERSET
     return extensions or set(DEFAULT_LAB_ALLOWED_EXTENSIONS)
 
 

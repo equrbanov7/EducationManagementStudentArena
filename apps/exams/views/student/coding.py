@@ -588,12 +588,13 @@ def _finalize_coding_submit(request, attempt):
         ],
     )
 
+    shown = [] if attempt.exam.results_hidden_from_students else submissions  # 2026-10-05 audit: gizli nəticə
     return JsonResponse(
         {
             "success": True,
             "finished": True,
-            "submission": _submission_payload(submissions[0] if submissions else None),
-            "submissions": [_submission_payload(submission) for submission in submissions],
+            "submission": _submission_payload(shown[0] if shown else None),
+            "submissions": [_submission_payload(submission) for submission in shown],
             "redirect_url": build_exam_result_url(attempt, return_to=current_return_to(request)),
         }
     )

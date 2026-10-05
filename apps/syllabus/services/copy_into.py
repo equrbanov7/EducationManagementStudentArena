@@ -95,6 +95,10 @@ def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, 
         .first()
     )
     if target is not None:
+        # Təhlükəsizlik auditi 2026-10-05: HƏDƏF də eyni əhatə qapısından keçir —
+        # əks halda mənbənin müəllifi başqa müəllifin dosyesinə qaralama yazırdı.
+        if not is_author(actor, target) and not actor.covers_unit(target.chair_unit_id, PERM_EDIT):
+            raise TransitionDenied("transition.out_of_scope", params={"transition": "copy"})
         if target.approved_version_id is not None:
             raise TransitionDenied("copy.target_approved", params={"syllabus": str(target.pk)})
         open_version = target.versions.filter(status__in=sorted(OPEN_STATUSES)).first()

@@ -104,7 +104,7 @@
     function esc(t) {
         var d = document.createElement("div");
         d.textContent = t == null ? "" : String(t);
-        return d.innerHTML;
+        return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     // ── Pozuntu detalları modalı (hansı qaydalar pozulub + uzaqlaşdırma səbəbi) ──

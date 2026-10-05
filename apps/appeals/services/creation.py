@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils.translation import pgettext
 
 from apps.appeals.constants import (
+    APPEAL_MAX_COMMENT_LENGTH,
     APPEAL_MIN_COMMENT_LENGTH,
     APPEAL_STATUS_PENDING,
     APPEAL_TYPE_VALUES,
@@ -62,6 +63,12 @@ def _clean_items(attempt, items):
             raise ValidationError(
                 pgettext("appeals.service.create.error", "comment_too_short").format(
                     min_length=APPEAL_MIN_COMMENT_LENGTH
+                )
+            )
+        if len(comment) > APPEAL_MAX_COMMENT_LENGTH:
+            raise ValidationError(
+                pgettext("appeals.service.create.error", "Şərh {max_length} simvoldan uzun ola bilməz.").format(
+                    max_length=APPEAL_MAX_COMMENT_LENGTH
                 )
             )
 
