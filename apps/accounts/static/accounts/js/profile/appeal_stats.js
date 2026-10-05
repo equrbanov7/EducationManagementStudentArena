@@ -38,7 +38,7 @@
   var cards = root.querySelector(".js-aps-cards"), rows = root.querySelector(".js-aps-rows"),
       pager = root.querySelector(".js-aps-pager"), thead = root.querySelector(".js-aps-thead");
   var page = 1, sort = "-date", timer = null, charts = {};
-  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
   function detailUrl(id){ return U.detail ? U.detail.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
   function reviewUrl(id){ return U.review ? U.review.replace(/\/0\/?$/, "/"+id+"/") : "#"; }
 
