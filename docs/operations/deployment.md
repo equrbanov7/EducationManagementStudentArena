@@ -396,6 +396,9 @@ server start parameter, not a reload) — see the 2026-09-14 checklist in §5.2.
 
 ### Daphne proxy headers (infra audit 2026-09-14, P3-12)
 
+> Opt-in alternative server (`ASGI_SERVER=uvicorn`, `ASGI_WORKERS=N`) keeps the same client-IP
+> semantics (`--proxy-headers --forwarded-allow-ips '*'`): see `docs/operations/ASGI_SERVER.md`.
+
 `docker/prod-entrypoint.sh` starts Daphne with `--proxy-headers`, so the ASGI
 `scope["client"]` (used by WebSocket consumers, e.g. the live-exam connect
 rate limit in `apps/live_exam/consumers.py:_get_scope_ip`) and
