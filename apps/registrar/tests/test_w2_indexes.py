@@ -18,14 +18,11 @@ from django.test import TestCase
 
 import pytest
 
-# (cədvəl, silinən dublikat, saxlanılan indeks)
+# (cədvəl, silinən dublikat, saxlanılan indeks). `None` — qalan üzv də sonradan
+# qəsdən silinib: tutum testi 2026-10-05 (accounts 0030), canlıda idx_scan≈0.
 DUPLICATE_PAIRS = (
-    ("accounts_userprofile", "accounts_us_role_e16858_idx", "accounts_userprofile_role_f557a06b"),
-    (
-        "accounts_userprofile",
-        "accounts_us_request_9a72ac_idx",
-        "accounts_userprofile_requested_organization_id_14043874",
-    ),
+    ("accounts_userprofile", "accounts_us_role_e16858_idx", None),
+    ("accounts_userprofile", "accounts_us_request_9a72ac_idx", None),
     ("appeals_scoreadjustment", "score_adj_attempt_idx", "appeals_scoreadjustment_attempt_id_d1d212f5"),
     ("courses_course", "courses_cou_slug_2e551f_idx", "courses_course_slug_key"),
     ("courses_coursegroup", "courses_cou_course__225864_idx", "courses_coursegroup_course_id_f11bd514"),
@@ -75,7 +72,8 @@ class DuplicateIndexesRemovedTest(TestCase):
             with self.subTest(table=table, dropped=dropped):
                 indexes = _indexes_of(table)
                 self.assertNotIn(dropped, indexes, f"{table}: {dropped} hələ də var")
-                self.assertIn(kept, indexes, f"{table}: {kept} itib")
+                if kept is not None:
+                    self.assertIn(kept, indexes, f"{table}: {kept} itib")
 
     def test_no_duplicate_key_indexes_remain(self):
         with connection.cursor() as cursor:

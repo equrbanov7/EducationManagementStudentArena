@@ -41,11 +41,14 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         blank=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "teacher_checked_at"),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts")
+    # Tutum testi 2026-10-05: autosave tranzaksiyası exam + attempt cədvəllərinə
+    # toxunur; 31 indeks PG16-nın 16 fast-path kilid limitini aşırdı. `user` və
+    # `exam` tək indeksləri kompozit indekslərin prefiksidir.
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="exam_attempts", db_index=False)
     # Academic attempts outlive teacher-facing exam deletion actions.  Draft
     # exams without attempts may still be physically removed, while any
     # delivered attempt forces archive/soft-delete semantics.
-    exam = models.ForeignKey("exams.Exam", on_delete=models.PROTECT, related_name="attempts")
+    exam = models.ForeignKey("exams.Exam", on_delete=models.PROTECT, related_name="attempts", db_index=False)
     # Student imtahana başlayarkən seçdiyi dil. Çoxdilli imtahanlarda yalnız bu
     # dilin sualları yüklənir; tək-dilli imtahanlarda boş qala bilər.
     language = models.CharField(
@@ -71,7 +74,6 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     # Müəllimin "Sınaq keç" (trial run) cəhdi — nəticələrə/statistikaya sayılmır.
     is_trial = models.BooleanField(
         default=False,
-        db_index=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "is_trial"),
     )
     # Cəhdin fiziki yeri — girişdə qeydli zal kompüterindən (MAC/IP) həll
@@ -136,6 +138,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         blank=True,
         related_name="graded_exam_attempts",
         verbose_name=pgettext_lazy("exams.model.attempt.field", "graded_by"),
+        db_index=False,
     )
     # EXAM-P1-06: autosave optimistic concurrency. Hər uğurlu server yazısında
     # artır; client öz base_revision-unu göndərir. Uyğunsuzluq (başqa tab daha
