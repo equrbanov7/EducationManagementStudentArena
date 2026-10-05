@@ -19,8 +19,8 @@ from hashlib import sha256
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import F
-from django.utils.crypto import salted_hmac
 from django.utils import timezone
+from django.utils.crypto import salted_hmac
 
 from cryptography.fernet import Fernet, InvalidToken
 
