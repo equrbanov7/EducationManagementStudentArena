@@ -38,6 +38,7 @@ from apps.registrar.models import (
     CurriculumSubject,
     Lesson,
     LessonKind,
+    LessonMark,
     Program,
     StudentAcademicRecord,
     Subject,
@@ -327,6 +328,13 @@ def seed_history(org, offerings, teachers, today, period):
             for j, eid in enumerate(enrollment_ids)
         ]
         gradebook.save_marks(offering=offering, entries=entries, by_user=teacher, enforce_day=False)
+        # Keçmiş həftələrin qeydləri real kimi KİLİDLİ olsun (2 saat pəncərəsi bitib): əks
+        # halda seed-dən sonrakı 2 saatda jurnal pilləsi bu xanaları da «yazıla bilən» görür.
+        # (Təzə sətirlərdə UPDATE trigger-i keçir — OLD.created_at hələ 2 saat deyil.)
+        for lesson in new_lessons:
+            aged = timezone.make_aware(datetime.datetime.combine(lesson.date, datetime.time(12, 0)))
+            LessonMark.objects.filter(lesson=lesson).update(created_at=aged)
+            Lesson.objects.filter(pk=lesson.pk).update(created_at=aged)
         created += len(new_lessons)
     log("history lessons created", created)
 
