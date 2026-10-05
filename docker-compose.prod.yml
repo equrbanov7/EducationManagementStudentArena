@@ -510,6 +510,13 @@ services:
     environment:
       <<: *app-env
       RUN_RELEASE_ON_START: ${RUN_RELEASE_ON_START:-true}
+      # ASGI server: daphne (defolt, tək proses) | uvicorn (opt-in, ASGI_WORKERS
+      # proses). uvicorn-da MAX_INFLIGHT_* və Redis/DB pool-ları PROSES başınadır —
+      # ASGI_WORKERS artırılanda MAX_INFLIGHT_REQUESTS-i bölün və APP_MEM_LIMIT-i
+      # artırın. Hesab: docs/operations/ASGI_SERVER.md.
+      ASGI_SERVER: ${ASGI_SERVER:-daphne}
+      ASGI_WORKERS: ${ASGI_WORKERS:-1}
+      UVICORN_ACCESS_LOG: ${UVICORN_ACCESS_LOG:-true}
       ASGI_THREADS: ${ASGI_THREADS:-12}
       DAPHNE_HTTP_TIMEOUT: ${DAPHNE_HTTP_TIMEOUT:-900}
       DAPHNE_APPLICATION_CLOSE_TIMEOUT: ${DAPHNE_APPLICATION_CLOSE_TIMEOUT:-120}
