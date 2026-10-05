@@ -13,6 +13,19 @@ def take_exam_script_data(remaining_seconds):
             "draftSavedWithCheck": pgettext("exams.template.take_exam", "draft_saved_with_check"),
             "saveError": pgettext("exams.template.take_exam", "save_error"),
             "saveErrorRetry": pgettext("exams.template.take_exam", "save_error_retry"),
+            "autosaveBusy": pgettext(
+                "exams.template.take_exam",
+                "Server hazırda çox yüklüdür. Cavablarınız brauzerdə saxlanılır və avtomatik yenidən göndəriləcək — səhifəni bağlamayın.",
+            ),
+            "autosaveOffline": pgettext(
+                "exams.template.take_exam",
+                "Cavablar hələ serverə yazılmayıb. Onlar brauzerdə saxlanılır və bağlantı bərpa olunanda avtomatik göndəriləcək — internet bağlantısını yoxlayın, səhifəni bağlamayın.",
+            ),
+            "autosaveRecovered": pgettext("exams.template.take_exam", "Cavablarınız yenidən saxlanılır."),
+            "autosaveConflict": pgettext(
+                "exams.template.take_exam",
+                "Bu imtahan başqa tabda yenilənib — cavablar bu tabdan saxlanılmır. Səhifəni yeniləyin.",
+            ),
             "btnSaving": pgettext("exams.template.take_exam", "btn_saving"),
             "btnSaved": pgettext("exams.template.take_exam", "btn_saved"),
             "btnDraftSaved": pgettext("exams.template.take_exam", "btn_draft_saved"),

@@ -7,10 +7,8 @@
  * - Import this file in your HTML templates
  * - Use escapeHtml(userInput) before inserting into DOM
  *
- * Example:
- *   element.textContent = escapeHtml(userInput);
- *   // OR for innerHTML when needed:
- *   element.innerHTML = escapeHtml(userInput);
+ * Example (yalnız HTML sətri qurarkən — textContent üçün escape LAZIM DEYİL):
+ *   element.innerHTML = '<span title="' + escapeHtml(userInput) + '">' + escapeHtml(userInput) + '</span>';
  */
 
 /**
@@ -36,9 +34,12 @@ function escapeHtml(text) {
     const str = String(text);
 
     // Use browser's built-in text node to escape HTML
+    // Təhlükəsizlik auditi 2026-10-05: `innerHTML` dırnaqları escape ETMİR — nəticə
+    // `value="…"` / `id="…"` atributlarında da işlədilir (lab_modals.js), ona görə
+    // `"` və `'` əl ilə entity-yə çevrilir.
     const div = document.createElement('div');
     div.textContent = str;
-    return div.innerHTML;
+    return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 /**

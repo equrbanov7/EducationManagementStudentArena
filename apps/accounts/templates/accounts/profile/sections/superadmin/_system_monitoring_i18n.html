@@ -1,4 +1,5 @@
-{% load i18n %}{% comment %}«Sistem Monitorinqi» JS mətnləri (2026-10-01 redizayn) — xülasə və AI paneli.
+{% load i18n %}{% comment %}«Sistem Monitorinqi» JS mətnləri (2026-10-01 redizayn) — xülasə və AI paneli;
+2026-10-05: «Təhlükəsizlik» tabının IP filtri və «uğurlu girişlər» bloku (`ip*`, `logins*`).
 Açar = JS açarı (`t("key")`); dəyər = `monitoring.ui` kontekstli trans (django.po,
 `scripts/i18n_fill_mon_2026_10_01.py`). Yer tutucular `{name}` formasındadır və JS-də
 `fmt()` ilə doldurulur — `%` işlədilmir, çünki `{% trans %}` msgid-də onu `%%`-ə çevirir.
@@ -92,5 +93,20 @@ Tərcümə yoxdursa msgid (az) göstərilir.{% endcomment %}
   "note": "{% filter escapejs %}{% trans 'Yalnız aqreqat göstəricilər göstərilir — bu xülasədə şəxsi məlumat yoxdur.' context 'monitoring.ui' %}{% endfilter %}",
   "scopeOrg": "{% filter escapejs %}{% trans 'Təhlükəsizlik, imtahan və giriş sayları yalnız sizin təşkilatınız üzrədir; server göstəriciləri bütün platforma üçün ümumidir.' context 'monitoring.ui' %}{% endfilter %}",
   "readOnly": "{% filter escapejs %}{% trans 'Yalnız baxış — insident əməllərini platforma administratoru icra edir.' context 'monitoring.ui' %}{% endfilter %}",
-  "allEvents": "{% filter escapejs %}{% trans 'Bütün hadisələr' context 'monitoring.ui' %}{% endfilter %}"
+  "allEvents": "{% filter escapejs %}{% trans 'Bütün hadisələr' context 'monitoring.ui' %}{% endfilter %}",
+  "ipLabel": "{% filter escapejs %}{% trans 'IP ünvanı və ya şəbəkə' context 'monitoring.ui' %}{% endfilter %}",
+  "ipPlaceholder": "{% filter escapejs %}{% trans 'IP və ya şəbəkə, məs. 5.191.0.0/16' context 'monitoring.ui' %}{% endfilter %}",
+  "ipClear": "{% filter escapejs %}{% trans 'IP filtrini təmizlə' context 'monitoring.ui' %}{% endfilter %}",
+  "ipFilterBy": "{% filter escapejs %}{% trans 'Yalnız bu IP: {ip}' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsTitle": "{% filter escapejs %}{% trans 'Bu IP-dən uğurlu girişlər' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsTitleNet": "{% filter escapejs %}{% trans 'Bu şəbəkədən uğurlu girişlər' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsEmpty": "{% filter escapejs %}{% trans 'Bu IP-dən uğurlu giriş yoxdur' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsEmptyNet": "{% filter escapejs %}{% trans 'Bu şəbəkədən uğurlu giriş yoxdur' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsMeta": "{% filter escapejs %}{% trans 'Girişlər: {logins} · Hesablar: {accounts}' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsTruncated": "{% filter escapejs %}{% trans 'Ən son {limit} qeyd göstərilir (hesab və cihaz üzrə qruplaşdırılıb).' context 'monitoring.ui' %}{% endfilter %}",
+  "loginsOrgNote": "{% filter escapejs %}{% trans 'Yalnız təşkilatınızın üzvlərinin girişləri göstərilir.' context 'monitoring.ui' %}{% endfilter %}",
+  "colLastLogin": "{% filter escapejs %}{% trans 'Son giriş' context 'monitoring.ui' %}{% endfilter %}",
+  "colDevice": "{% filter escapejs %}{% trans 'Cihaz / brauzer' context 'monitoring.ui' %}{% endfilter %}",
+  "firstSeen": "{% filter escapejs %}{% trans 'ilk: {time}' context 'monitoring.ui' %}{% endfilter %}",
+  "eventsEmptyIp": "{% filter escapejs %}{% trans 'Bu IP üzrə təhlükəsizlik hadisəsi yoxdur' context 'monitoring.ui' %}{% endfilter %}"
 }</script>

@@ -115,3 +115,40 @@ __all__ = [
     "unit_student_record_filter",
     "user_in_allowed_units",
 ]
+
+
+def student_assigned_exams_q(user) -> Q:
+    """Tələbəyə təyin olunmuş imtahanlar — hər təyinat yolu ayrıca `pk IN (subquery)`.
+
+    Tutum testi 2026-10-05: OR ilə birləşmiş M2M şərtləri (`allowed_users`,
+    `allowed_groups__students`, `allowed_units`, kurs üzvlüyü) LEFT JOIN + DISTINCT
+    verirdi — Postgres `user_id = X`-i hər JOIN-ə ayrıca tətbiq edə bilmir və
+    2500 tələbəli qrupların bütün sətirlərini birləşdirirdi (kabinetdə hər sorğu
+    ~150-200 ms, 10 tələbədə DB 1.3 nüvə). Semi-join sətir çoxaltmır, DISTINCT
+    lazım deyil; nəticə çoxluğu əvvəlki şərtlə eynidir.
+    """
+    from apps.exams.models import Exam
+
+    exams = Exam.objects.order_by()
+    condition = (
+        Q(pk__in=exams.filter(allowed_users=user).values("pk"))
+        | Q(pk__in=exams.filter(allowed_groups__students=user).values("pk"))
+        | Q(
+            pk__in=exams.filter(
+                course__memberships__user=user,
+                course__memberships__role="student",
+                course__status="published",
+            ).values("pk")
+        )
+    )
+    unit_ids = user_unit_ids_with_parents(user)
+    if unit_ids:
+        condition |= Q(pk__in=exams.filter(allowed_units__in=unit_ids).values("pk"))
+    return condition
+
+
+def student_excluded_exams_q(user) -> Q:
+    """`exclude(...)` üçün: tələbə imtahandan xaric edilib (semi-join, DISTINCT-siz)."""
+    from apps.exams.models import Exam
+
+    return Q(pk__in=Exam.objects.order_by().filter(excluded_users=user).values("pk"))

@@ -1,0 +1,36 @@
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% comment %}
+«Server çox yüklüdür» (core/middleware_concurrency.py). Brauzer naviqasiyası (Accept: text/html) əvvəl
+xam mətn «Server hazırda çox yüklüdür…» görürdü — stilsiz, düyməsiz. Bu səhifə middleware-də
+`request` OLMADAN render olunur (sessiya/auth/DB-yə toxunmadan; kontekst prosessorları işləmir) və
+dil üzrə keşlənir — yük altında hər rədd edilən sorğu şablon render etmir. `can_retry` yalnız GET/HEAD
+üçündür: POST-u «yenilə» təkrarlaya bilməz, ona görə orada «geri qayıt» izahı verilir.
+{% endcomment %}
+{% block page_title %}{% trans 'Server məşğuldur' context 'core.error.503' %}{% endblock %}
+{% block code %}503{% endblock %}
+{% block code_label %}503{% endblock %}
+{% block kicker_icon %}fa-hourglass-half{% endblock %}
+{% block kicker %}{% trans 'Müvəqqəti yüklənmə' context 'core.error.503' %}{% endblock %}
+{% block title %}{% trans 'Server hazırda çox yüklüdür' context 'core.error.503' %}{% endblock %}
+{% block description %}
+    {% if can_retry %}
+        <p>{% trans 'Eyni anda çoxlu istifadəçi daxil olub. Bir neçə saniyə gözləyib səhifəni yenidən yükləyin — adətən dərhal açılır.' context 'core.error.503' %}</p>
+    {% else %}
+        <p>{% trans 'Əməliyyat yerinə yetirilmədi, çünki server hazırda çox yüklüdür. Bir neçə saniyə gözləyib əvvəlki səhifəyə qayıdın və əməliyyatı təkrarlayın.' context 'core.error.503' %}</p>
+    {% endif %}
+{% endblock %}
+{% block actions %}
+    {% if can_retry %}
+    {# href="" — cari ünvanı (query daxil) yenidən yükləyir; JS tələb olunmur (CSP). #}
+    <a href="" class="error-btn error-btn-primary">
+        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        {% trans 'Yenidən cəhd et' context 'core.error.503' %}
+    </a>
+    {% endif %}
+    <a href="/" class="error-btn {% if can_retry %}error-btn-secondary{% else %}error-btn-primary{% endif %}">
+        <i class="fas fa-house" aria-hidden="true"></i>
+        {% trans 'Ana səhifəyə qayıt' %}
+    </a>
+{% endblock %}
+{% block footer_note %}{% trans 'Problem bir neçə dəqiqədən çox davam edərsə, RİM-ə müraciət edin.' context 'core.error.503' %}{% endblock %}

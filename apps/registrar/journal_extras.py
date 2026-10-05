@@ -423,6 +423,21 @@ def journal_teaching_summary(offering):
     }
 
 
+def has_lesson_teacher_choices(offering) -> bool:
+    """Jurnal səhifəsi üçün: dərs modalında «müəllim» seçicisi göstərilsinmi.
+
+    Tutum testi 2026-10-05: səhifə əvvəl bütün namizəd siyahısını (təşkilatın
+    bütün dərs deyən müəllimləri — yüzlərlə `auth_user` sətri) hər açılışda
+    yükləyirdi, şablon isə yalnız boş olub-olmadığına baxır; siyahı lazy
+    `journal_lesson_teacher_search` endpoint-indən gəlir.
+    """
+    from apps.registrar.models import CourseOffering
+
+    if offering.instructor_id:
+        return True
+    return CourseOffering.objects.filter(organization=offering.organization, instructor__isnull=False).exists()
+
+
 def lesson_teacher_choices(offering):
     """Dərs modalı üçün müəllim namizədləri — açılışın müəllimi + təşkilatın digər
     dərs deyən müəllimləri (fənn 2 müəllim arasında bölünə bilər — mühazirə/seminar)."""

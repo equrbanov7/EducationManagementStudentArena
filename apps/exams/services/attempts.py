@@ -62,12 +62,14 @@ def _exam_start_lock_lease_seconds() -> int:
 
 
 def _release_capacity_counter(cache, key: str) -> None:
+    # Açar SİLİNMİR (tutum testi 2026-10-05): sıfıra enən açarın silinməsi paralel
+    # `add` → `incr` arasına düşəndə «Key not found» verirdi və qapı səssizcə
+    # söndürülürdü («bypassing the gate»). Açar lease ilə özü bitir.
     try:
-        value = cache.decr(key)
-        if value <= 0:
-            cache.delete(key)
+        if cache.decr(key) < 0:
+            cache.set(key, 0, timeout=_exam_start_lock_lease_seconds())
     except ValueError:
-        cache.delete(key)
+        pass
     except Exception:
         logger.warning("Exam start capacity counter release failed.", exc_info=True)
 
@@ -77,8 +79,11 @@ def _try_acquire_capacity_counter(cache, key: str, limit: int, lease_seconds: in
         return "disabled"
 
     try:
-        cache.add(key, 0, timeout=lease_seconds)
-        value = cache.incr(key)
+        try:
+            value = cache.incr(key)
+        except ValueError:
+            # Açar yoxdur (və ya lease bitib) — atomik yarat; yarış uduzularsa artır.
+            value = 1 if cache.add(key, 1, timeout=lease_seconds) else cache.incr(key)
         try:
             cache.touch(key, lease_seconds)
         except Exception:

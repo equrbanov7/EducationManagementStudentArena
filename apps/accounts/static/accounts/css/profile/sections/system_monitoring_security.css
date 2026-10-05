@@ -1,0 +1,158 @@
+/* «Təhlükəsizlik» tabı — IP filtri, «Bu IP-dən uğurlu girişlər» bloku və kliklənən IP
+   xanaları (sahib 2026-10-05; JS: `system_monitoring_security.js`). Ayrı fayldır, çünki
+   `system_monitoring.css` modul ölçü büdcəsinə (600 sətir) yaxındır. Inline style YOXDUR. */
+
+.smx-ipfilter {
+    align-items: center;
+    display: flex;
+    flex: 1 1 340px;
+    gap: 6px;
+    max-width: 520px;
+    min-width: 0;
+}
+
+.smx-ipfilter__field {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+}
+
+.smx-filter .smx-ipfilter__input {
+    font-family: ui-monospace, Menlo, monospace;
+    padding-right: 36px;
+    width: 100%;
+}
+
+.smx-ipfilter__input[aria-invalid="true"] {
+    border-color: var(--smx-crit);
+}
+
+.smx-ipfilter__clear {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: var(--ems-r-sm, 6px);
+    color: var(--ems-neutral-600, #5b6b82);
+    cursor: pointer;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+}
+
+.smx-ipfilter__clear[hidden] {
+    display: none;
+}
+
+.smx-ipfilter__clear:hover,
+.smx-ipfilter__clear:focus-visible {
+    background: var(--ems-neutral-100, #eef2f7);
+    color: var(--ems-text, #16202f);
+}
+
+.smx-ipfilter__clear:focus-visible {
+    box-shadow: var(--ems-sh-focus, 0 0 0 3px #93b4ff);
+    outline: none;
+}
+
+.smx-ipfilter__error {
+    align-items: center;
+    background: var(--ems-danger-bg, #fee2e2);
+    border-radius: 8px;
+    color: var(--ems-danger-strong, #b91c1c);
+    display: flex;
+    font-size: 13px;
+    gap: 8px;
+    margin: -2px 0 12px;
+    padding: 8px 12px;
+}
+
+/* Cədvəldəki IP — həmin IP-ni filtr kimi tətbiq edən düymə (görünüşcə keçid). */
+.smx-iplink {
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: var(--ems-primary-700, var(--smx-blue));
+    cursor: pointer;
+    font: inherit;
+    font-family: ui-monospace, Menlo, monospace;
+    padding: 0 2px;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+}
+
+.smx-iplink:hover {
+    text-decoration-style: solid;
+}
+
+.smx-iplink:focus-visible {
+    box-shadow: var(--ems-sh-focus, 0 0 0 3px #93b4ff);
+    outline: none;
+}
+
+.smx-iplink.is-active {
+    color: var(--ems-text, #16202f);
+    cursor: default;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.smx-logins {
+    margin-bottom: 14px;
+}
+
+.smx-logins__head {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.smx-panel h4.smx-logins__title {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+}
+
+.smx-logins__query {
+    background: var(--smx-bg);
+    border: 1px solid var(--smx-line);
+    border-radius: 6px;
+    font-size: 12px;
+    padding: 1px 6px;
+}
+
+.smx-logins__meta {
+    color: var(--ems-neutral-600, #5b6b82);
+    font-size: 12px;
+}
+
+/* Qısa etiket («Chrome 129 · Windows»); tam user-agent `title` ipucundadır. */
+.smx-logins__device {
+    cursor: help;
+}
+
+.smx-logins__sub {
+    color: var(--ems-text-muted, #8a97a8);
+    display: block;
+    font-size: 12px;
+}
+
+.smx-logins .smx-foot {
+    margin: 8px 0 0;
+}
+
+@media (max-width: 700px) {
+    .smx-ipfilter {
+        flex: 1 1 100%;
+        max-width: none;
+    }
+}

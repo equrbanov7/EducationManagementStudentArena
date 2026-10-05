@@ -103,6 +103,9 @@ def grade_files_against_tests(*, coding_question, selected_language, files, incl
     results = []
     total_score = Decimal("0")
     last_result = ExecutionResult(status=CodingSubmission.STATUS_SUCCESS)
+    # Təhlükəsizlik auditi 2026-10-05: ümumi ``output``/``error`` YALNIZ görünən testin
+    # icrasından — son icra gizli test ola bilər və tələbə kodu onun girişini çap edirdi.
+    last_visible = ExecutionResult(status=CodingSubmission.STATUS_SUCCESS)
     for test_case in test_cases:
         execution = execute_code(
             language=selected_language,
@@ -112,6 +115,8 @@ def grade_files_against_tests(*, coding_question, selected_language, files, incl
             memory_limit_mb=coding_question.memory_limit_mb,
         )
         last_result = execution
+        if test_case.visibility == CodingTestCase.VISIBILITY_VISIBLE:
+            last_visible = execution
         passed = execution.status == CodingSubmission.STATUS_SUCCESS and normalize_output(
             execution.output
         ) == normalize_output(test_case.expected_output)
@@ -142,8 +147,8 @@ def grade_files_against_tests(*, coding_question, selected_language, files, incl
 
     return {
         "status": final_status,
-        "output": last_result.output,
-        "error": last_result.error,
+        "output": last_visible.output,
+        "error": last_visible.error,
         "test_results": results,
         "score": total_score,
         "execution_time_ms": last_result.execution_time_ms,

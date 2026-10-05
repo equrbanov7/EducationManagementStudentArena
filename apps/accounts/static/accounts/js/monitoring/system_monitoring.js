@@ -6,7 +6,9 @@
  * `system_monitoring_summary.js`) + «AI ilə təhlil et» (`system_monitoring_ai.js`);
  * yeni mətnlər `#smx-i18n` JSON adasından (`t()` / `fmt()`), avto-yeniləmə 30 s
  * (xülasə) / 60 s (ətraflı tablar), səhifə gizli olanda dayanır.
- * Şablon sırası: format → renderers → summary → ai → bu fayl (defer; sıra fail-soft).
+ * 2026-10-05: «Təhlükəsizlik» tabı (IP filtri) `system_monitoring_security.js`-dədir; 400 cavabı
+ * (filtr doğrulaması) `data.invalid` kimi renderer-ə gedir ki, filtr zolağı itməsin.
+ * Şablon sırası: format → renderers → security → summary → ai → bu fayl (defer; sıra fail-soft).
  */
 (function () {
     "use strict";
@@ -61,7 +63,7 @@
         var states = {
             containers: { page: 1, page_size: 20 },
             logs: { page: 1, page_size: 20, container: "", level: "", q: "", anchor_ns: "" },
-            "security-events": { page: 1, page_size: 20, type: "" },
+            "security-events": { page: 1, page_size: 20, type: "", ip: "" },
             incidents: { page: 1, page_size: 20, status: "open" },
         };
 
@@ -236,6 +238,9 @@
             rowsFrom: rowsFrom,
             pager: pager,
             t: t,
+            fmt: fmt,
+            // Tab modulunun öz filtrləri (məs. «Təhlükəsizlik» IP filtri) üçün: 1-ci səhifədən təzə yüklə.
+            reload: function (tab) { resetPagedState(tab); load(tab, { force: true }); },
         });
         var summaryContext = {
             t: t,
@@ -333,6 +338,13 @@
                 .then(function (response) {
                     if (response.status === 403) {
                         throw new Error(gettext("Bu bölməyə icazəniz yoxdur."));
+                    }
+                    if (response.status === 400) {
+                        // Filtr doğrulaması (məs. yanlış IP): renderer filtr zolağını saxlayıb xətanı yerində göstərir.
+                        return response.json().catch(function () { return {}; }).then(function (error) {
+                            return { status: "invalid", data: { invalid: error.detail ||
+                                interpolate(gettext("Server xətası: %(status)s"), { status: 400 }, true) } };
+                        });
                     }
                     if (!response.ok) {
                         throw new Error(interpolate(gettext("Server xətası: %(status)s"), { status: response.status }, true));
@@ -454,10 +466,6 @@
                 states[activeTab].page_size = Number(event.target.value);
                 resetPagedState(activeTab);
                 load(activeTab, { force: true });
-            } else if (event.target.id === "smx-sec-type") {
-                states["security-events"].type = event.target.value;
-                resetPagedState("security-events");
-                load("security-events", { force: true });
             } else if (event.target.id === "smx-inc-status") {
                 states.incidents.status = event.target.value;
                 resetPagedState("incidents");

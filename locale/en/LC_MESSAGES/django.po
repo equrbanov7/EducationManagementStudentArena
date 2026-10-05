@@ -17712,6 +17712,11 @@ msgctxt "appeals.service.create.error"
 msgid "comment_too_short"
 msgstr "The appeal comment is too short (at least {min_length} characters)."
 
+#: apps/appeals/services/creation.py:69
+msgctxt "appeals.service.create.error"
+msgid "Şərh {max_length} simvoldan uzun ola bilməz."
+msgstr "The appeal comment cannot be longer than {max_length} characters."
+
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
 msgid "Apellyasiya müddəti bitib."
@@ -90269,3 +90274,148 @@ msgstr ""
 "The campaign is open, but no journal of this semester has been closed yet — "
 "students will not see the survey for now. Targets appear automatically when "
 "the RİM closes the journals."
+
+msgctxt "monitoring.ui"
+msgid "IP ünvanı və ya şəbəkə"
+msgstr "IP address or network"
+
+msgctxt "monitoring.ui"
+msgid "IP və ya şəbəkə, məs. 5.191.0.0/16"
+msgstr "IP or network, e.g. 5.191.0.0/16"
+
+msgctxt "monitoring.ui"
+msgid "IP filtrini təmizlə"
+msgstr "Clear the IP filter"
+
+msgctxt "monitoring.ui"
+msgid "Yalnız bu IP: {ip}"
+msgstr "Only this IP: {ip}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu girişlər"
+msgstr "Successful logins from this IP"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu girişlər"
+msgstr "Successful logins from this network"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu giriş yoxdur"
+msgstr "No successful logins from this IP"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu giriş yoxdur"
+msgstr "No successful logins from this network"
+
+msgctxt "monitoring.ui"
+msgid "Girişlər: {logins} · Hesablar: {accounts}"
+msgstr "Logins: {logins} · Accounts: {accounts}"
+
+msgctxt "monitoring.ui"
+msgid "Ən son {limit} qeyd göstərilir (hesab və cihaz üzrə qruplaşdırılıb)."
+msgstr "Showing the latest {limit} entries (grouped by account and device)."
+
+msgctxt "monitoring.ui"
+msgid "Yalnız təşkilatınızın üzvlərinin girişləri göstərilir."
+msgstr "Only logins of your organisation's members are shown."
+
+msgctxt "monitoring.ui"
+msgid "Son giriş"
+msgstr "Last login"
+
+msgctxt "monitoring.ui"
+msgid "Cihaz / brauzer"
+msgstr "Device / browser"
+
+msgctxt "monitoring.ui"
+msgid "ilk: {time}"
+msgstr "first: {time}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP üzrə təhlükəsizlik hadisəsi yoxdur"
+msgstr "No security events for this IP"
+
+msgctxt "monitoring.security"
+msgid ""
+"IP ünvanı düzgün deyil. Tək IP (məs. 192.168.1.10) və ya şəbəkə (məs. "
+"10.0.0.0/24) daxil edin."
+msgstr ""
+"The IP address is not valid. Enter a single IP (e.g. 192.168.1.10) or a "
+"network (e.g. 10.0.0.0/24)."
+
+msgctxt "monitoring.security"
+msgid ""
+"Şəbəkə (CIDR) filtri bu bazada dəstəklənmir — tək IP ünvanı daxil edin."
+msgstr ""
+"Network (CIDR) filtering is not supported by this database — enter a single "
+"IP address."
+
+msgctxt "exams.start_confirm"
+msgid "Duration: %(minutes)s min"
+msgstr "Duration: %(minutes)s min"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Server hazırda çox yüklüdür. Cavablarınız brauzerdə saxlanılır və avtomatik "
+"yenidən göndəriləcək — səhifəni bağlamayın."
+msgstr ""
+"The server is very busy right now. Your answers are kept in the browser and "
+"will be sent again automatically — do not close the page."
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Cavablar hələ serverə yazılmayıb. Onlar brauzerdə saxlanılır və bağlantı "
+"bərpa olunanda avtomatik göndəriləcək — internet bağlantısını yoxlayın, "
+"səhifəni bağlamayın."
+msgstr ""
+"Your answers have not been saved to the server yet. They are kept in the "
+"browser and will be sent automatically once the connection is back — check "
+"your internet connection and do not close the page."
+
+msgctxt "exams.template.take_exam"
+msgid "Cavablarınız yenidən saxlanılır."
+msgstr "Your answers are being saved again."
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Bu imtahan başqa tabda yenilənib — cavablar bu tabdan saxlanılmır. Səhifəni "
+"yeniləyin."
+msgstr ""
+"This exam was updated in another tab — answers are not saved from this tab. "
+"Reload the page."
+
+msgctxt "core.error.503"
+msgid "Server məşğuldur"
+msgstr "Server busy"
+
+msgctxt "core.error.503"
+msgid "Müvəqqəti yüklənmə"
+msgstr "Temporary load"
+
+msgctxt "core.error.503"
+msgid "Server hazırda çox yüklüdür"
+msgstr "The server is very busy right now"
+
+msgctxt "core.error.503"
+msgid ""
+"Eyni anda çoxlu istifadəçi daxil olub. Bir neçə saniyə gözləyib səhifəni "
+"yenidən yükləyin — adətən dərhal açılır."
+msgstr ""
+"Many users are online at the same time. Wait a few seconds and reload the "
+"page — it usually opens right away."
+
+msgctxt "core.error.503"
+msgid ""
+"Əməliyyat yerinə yetirilmədi, çünki server hazırda çox yüklüdür. Bir neçə "
+"saniyə gözləyib əvvəlki səhifəyə qayıdın və əməliyyatı təkrarlayın."
+msgstr ""
+"The action was not completed because the server is very busy right now. Wait"
+" a few seconds, go back to the previous page and repeat the action."
+
+msgctxt "core.error.503"
+msgid "Yenidən cəhd et"
+msgstr "Try again"
+
+msgctxt "core.error.503"
+msgid "Problem bir neçə dəqiqədən çox davam edərsə, RİM-ə müraciət edin."
+msgstr "If the problem lasts more than a few minutes, contact the RİM."

@@ -298,7 +298,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
                                 </span>
                             </div>
                             <textarea class="ems-textarea" data-appeal-comment name="comment_{{ q.id }}"
-                                      id="comment_{{ q.id }}" rows="3"
+                                      id="comment_{{ q.id }}" rows="3" maxlength="{{ max_comment_length }}"
                                       placeholder="{% blocktrans trimmed context 'appeals.template' with min=min_comment_length %}Səbəbinizi ən azı {{ min }} simvol ilə izah edin{% endblocktrans %}"
                                       {% if already_appealed %}disabled{% endif %}></textarea>
                             <p class="appeal-q-error" data-appeal-error hidden role="alert"></p>

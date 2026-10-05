@@ -18,7 +18,7 @@ def create_question(request):
         raise PermissionDenied(pgettext("blog.permission", "teacher_only"))
 
     if request.method == "POST":
-        form = QuestionForm(request.POST)
+        form = QuestionForm(request.POST, organization=getattr(request, "organization", None))
         if form.is_valid():
             # Audit 2026-09-13 backend F-07 (2026-09-14): sual + `visible_users` M2M birlikdə.
             with transaction.atomic():
@@ -28,7 +28,7 @@ def create_question(request):
                 form.save_m2m()  # visible_users üçün lazımdır
             return redirect("my_questions")
     else:
-        form = QuestionForm()
+        form = QuestionForm(organization=getattr(request, "organization", None))
 
     return render(request, "blog/create_question.html", {"form": form})
 

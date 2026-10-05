@@ -76,9 +76,10 @@ body.auth-body {
     font-weight: 600;
 }
 
+/* 118px «Azərbaycan dili» etiketini «Azərbay…» kimi kəsirdi — 160px tam sığır. */
 .auth-language-control {
-    width: 118px;
-    min-width: 118px;
+    width: 160px;
+    min-width: 160px;
 }
 
 .auth-language-select {

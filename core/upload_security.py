@@ -21,6 +21,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext
 
+from core.upload_markup import MARKUP_EXTENSIONS, guessed_type_is_markup
+
 DEFAULT_MAX_UPLOAD_SIZE_MB = 25
 
 BLOCKED_UPLOAD_EXTENSIONS = {
@@ -58,6 +60,8 @@ BLOCKED_UPLOAD_EXTENSIONS = {
     ".xslt",
     ".svgz",
 }
+
+BLOCKED_UPLOAD_EXTENSIONS |= MARKUP_EXTENSIONS  # 2026-10-05 təhlükəsizlik auditi — bax core/upload_markup.py
 
 BLOCKED_MIME_TYPES = {
     "application/x-msdownload",
@@ -327,7 +331,7 @@ def validate_uploaded_file(
     if not extension:
         raise ValidationError(pgettext("upload.security.error", "Fayl uzantısı müəyyən edilə bilmədi."))
 
-    if extension in BLOCKED_UPLOAD_EXTENSIONS:
+    if extension in BLOCKED_UPLOAD_EXTENSIONS or guessed_type_is_markup(getattr(uploaded_file, "name", "")):
         raise ValidationError(pgettext("upload.security.error", "Bu fayl tipi təhlükəsizlik səbəbi ilə bloklanıb."))
 
     if _has_dangerous_stem_extension(getattr(uploaded_file, "name", "")):

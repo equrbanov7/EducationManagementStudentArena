@@ -1,0 +1,159 @@
+/* take_exam UX review 2026-10-05 — _part1/_part2/_part3-dən SONRA yüklənir.
+   1) bildirişlər (əvvəl notifications.js inline cssText ilə verirdi);
+   2) autosave daimi vəziyyət sətri (#exam-sync-status, bax sync_status.js);
+   3) telefon düzümü: sual paleti sualdan SONRA gəlir, başlıq yığcamdır. */
+
+/* ── 1. Bildirişlər (toast) ───────────────────────────────────────────────
+   Rənglər əvvəlki #10b981/#ef4444/#3b82f6-dan tündləşdirildi: ağ mətnlə kontrast 2.5–3.8:1 idi
+   (WCAG AA 4.5:1). `pointer-events:none` — toast Növbəti/Əvvəlki düymələrini bloklamasın. */
+.auto-save-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #1d4ed8;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    animation: slideIn 0.3s ease;
+    transition: opacity 0.3s ease;
+}
+
+.auto-save-notification.success {
+    background: #047857;
+}
+
+.auto-save-notification.error {
+    background: #dc2626;
+}
+
+.auto-save-notification.is-hiding {
+    opacity: 0;
+}
+
+@keyframes examToastUp {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── 2. Autosave daimi vəziyyət sətri ─────────────────────────────────────── */
+.exam-sync-status {
+    margin: 14px 0 0;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.exam-sync-status--busy,
+.exam-sync-status--offline {
+    background: var(--exam-amber-soft);
+    border-color: var(--exam-amber);
+    color: #78350f;
+}
+
+.exam-sync-status--conflict {
+    background: var(--exam-red-soft);
+    border-color: var(--exam-red);
+    color: #7f1d1d;
+}
+
+.exam-sync-status--ok {
+    background: var(--exam-green-soft);
+    border-color: var(--exam-green);
+    color: #065f46;
+}
+
+/* ── 3. Telefon / planşet ─────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    /* Sual paleti (şəbəkə + legend + say + «İmtahanı bitir») DOM-da sualdan əvvəldir və tək
+       sütunda ~1500px yer tuturdu: tələbə imtahan başlayanda sualı görmək üçün onu aşağı
+       sürüşdürməli idi. İndi sual + Əvvəlki/Növbəti yuxarıdadır, palet və bitirmə düyməsi altda. */
+    .question-sidebar {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Yapışqan başlıq telefonda ~180px (başlıq + şəxs + taymer + irəliləyiş ayrı sətirlərdə) idi —
+       ekranın beşdə biri. Taymer başlıqla EYNİ sətirdə, irəliləyiş altda: ~120px. */
+    .exam-topbar__inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        gap: 8px 12px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .exam-meta {
+        grid-column: 1;
+        grid-row: 1;
+        min-width: 0;
+    }
+
+    .timer-strip {
+        grid-column: 2;
+        grid-row: 1;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .timer-badge,
+    .question-timer-badge {
+        flex: none;
+        min-height: 36px;
+        padding: 6px 12px;
+    }
+
+    .exam-progress-center {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        gap: 10px;
+    }
+
+    .proctor-id {
+        margin-top: 4px;
+    }
+
+    .proctor-id__ava {
+        width: 36px;
+        height: 36px;
+    }
+
+    /* «Qaralama saxla» yarım enli, 2 sətirə sınan düymə idi; tam sətir olur. */
+    .exam-footer #save-draft-btn {
+        grid-column: 1 / -1;
+    }
+
+    .auto-save-notification {
+        top: auto;
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        max-width: none;
+        text-align: center;
+        animation-name: examToastUp;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auto-save-notification {
+        animation: none;
+    }
+}

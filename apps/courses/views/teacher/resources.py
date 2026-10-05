@@ -35,6 +35,18 @@ class AddResourceView(IsCourseOwnerMixin, CreateView):
         self.course = _get_owner_course_or_404(request, kwargs["course_id"])
         return super().dispatch(request, *args, **kwargs)
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Təhlükəsizlik auditi 2026-10-05: mövzu YALNIZ bu kursun mövzularından —
+        # default queryset bütün CourseTopic-lər idi (başqa kursa resurs yeridilməsi).
+        form.fields["topic"].queryset = self.course.topics.all()
+        return form
+
+    def form_invalid(self, form):
+        # Modal/AJAX endpoint-dir — ``courses/courseresource_form.html`` şablonu YOXDUR
+        # (əvvəl hər yanlış forma TemplateDoesNotExist → 500 verirdi).
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
     def form_valid(self, form):
         form.instance.course = self.course
         response = super().form_valid(form)

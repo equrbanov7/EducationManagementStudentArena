@@ -105,7 +105,7 @@ def visible_teachers_qs(actor, *, request=None, filters=None):
 def _apply_filters(queryset, actor, filters, *, request=None):
     organization = actor.organization
 
-    search = people_filters.search_q(filters.query, prefix="")
+    search = people_filters.search_q(filters.query, prefix="", include_contacts=actor.can_view_contacts)
     if search:
         queryset = queryset.filter(search)
 

@@ -116,11 +116,15 @@ class GlobalSearchTolerantTest(TestCase):
                 status="active",
                 is_active=True,
             )
+            # 2026-10-05: tələbə axtarışı struktur scope-ludur — dekanın fakültəsi qrupları əhatə edir.
+            cls.faculty = OrgUnit.objects.create(
+                organization=cls.org, name="S2 Fakültə", slug="s2gs-f1", unit_type=OrgUnitType.FACULTY
+            )
             cls.group = OrgUnit.objects.create(
-                organization=cls.org, name=GROUP_NAME, slug="s2gs-g1", unit_type=OrgUnitType.GROUP
+                organization=cls.org, name=GROUP_NAME, slug="s2gs-g1", unit_type=OrgUnitType.GROUP, parent=cls.faculty
             )
             cls.other_group = OrgUnit.objects.create(
-                organization=cls.org, name="KE-101", slug="s2gs-g2", unit_type=OrgUnitType.GROUP
+                organization=cls.org, name="KE-101", slug="s2gs-g2", unit_type=OrgUnitType.GROUP, parent=cls.faculty
             )
             period = AcademicPeriod.objects.create(
                 organization=cls.org,
@@ -149,7 +153,12 @@ class GlobalSearchTolerantTest(TestCase):
                 (cls.shahzad, "student"),
             ):
                 Membership.objects.create(
-                    user=user, organization=cls.org, role=cls.org.roles.get(name=role), is_primary=True, is_active=True
+                    user=user,
+                    organization=cls.org,
+                    role=cls.org.roles.get(name=role),
+                    scope_unit=cls.faculty if role == "dean" else None,
+                    is_primary=True,
+                    is_active=True,
                 )
             for user, group in ((cls.aliyev, cls.other_group), (cls.shahzad, cls.group)):
                 StudentAcademicRecord.objects.create(

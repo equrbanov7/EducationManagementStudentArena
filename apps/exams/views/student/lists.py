@@ -12,7 +12,7 @@ from apps.exams.constants import (
     get_live_active_states,
     get_live_session_model,
 )
-from apps.exams.domain.unit_assignment import unit_assigned_exams_q
+from apps.exams.domain.unit_assignment import student_assigned_exams_q, student_excluded_exams_q
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.views.shared.tenant import tenant_scoped_exams
@@ -439,19 +439,8 @@ def assigned_student_exam_list(request):
     base_queryset = tenant_scoped_exams(
         request,
         Exam.objects.filter(is_active=True, is_public=False)
-        .filter(
-            Q(allowed_users=user)
-            | Q(allowed_groups__students=user)
-            # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı.
-            | unit_assigned_exams_q(user)
-            | Q(
-                course__memberships__user=user,
-                course__memberships__role="student",
-                course__status="published",
-            )
-        )
-        .exclude(excluded_users=user)
-        .distinct(),
+        # Semi-join təyinat şərti (tutum testi 2026-10-05) — DISTINCT lazım deyil.
+        .filter(student_assigned_exams_q(user)).exclude(student_excluded_exams_q(user)),
     )
 
     return _render_exam_list(
@@ -480,23 +469,10 @@ def student_exam_list(request):
     base_queryset = tenant_scoped_exams(
         request,
         Exam.objects.filter(is_active=True)
-        .filter(
-            Q(is_public=True)
-            | Q(allowed_users=user)
-            | Q(allowed_groups__students=user)
-            # 2026-09-14 (W4 `w4wizard`, R2): reyestr qrupu (OrgUnit GROUP) təyinatı.
-            | unit_assigned_exams_q(user)
-            | Q(
-                course__memberships__user=user,
-                course__memberships__role="student",
-                course__status="published",
-            )
-            | Q(author=user)
-        )
-        .exclude(excluded_users=user)
+        .filter(Q(is_public=True) | student_assigned_exams_q(user) | Q(author=user))
+        .exclude(student_excluded_exams_q(user))
         .exclude(exam_type_extended__in=("final", "midterm"))
-        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now))  # keçmişləri gizlədir
-        .distinct(),
+        .filter(Q(end_datetime__isnull=True) | Q(end_datetime__gte=now)),  # keçmişləri gizlədir
     )
 
     return _render_exam_list(

@@ -8,6 +8,7 @@ CSS = ROOT / "static" / "accounts" / "css" / "profile" / "sections" / "system_mo
 JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring.js"
 RENDERERS_JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring_renderers.js"
 FORMAT_JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring_format.js"
+SECURITY_JS = ROOT / "static" / "accounts" / "js" / "monitoring" / "system_monitoring_security.js"
 
 
 class MonitoringFrontendTests(SimpleTestCase):
@@ -19,6 +20,7 @@ class MonitoringFrontendTests(SimpleTestCase):
         cls.js = JS.read_text(encoding="utf-8")
         cls.renderers = RENDERERS_JS.read_text(encoding="utf-8")
         cls.format = FORMAT_JS.read_text(encoding="utf-8")
+        cls.security = SECURITY_JS.read_text(encoding="utf-8")
 
     def test_profile_fragment_owns_static_assets_and_ajax_panel(self):
         self.assertIn('data-profile-section-panel="system-monitoring"', self.template)
@@ -67,6 +69,7 @@ class MonitoringFrontendTests(SimpleTestCase):
         self.assertIn("data.next_cursor_ns", self.js)
         self.assertIn("states.logs.page > 1", self.js)
         self.assertIn('rowsFrom(data, "containers")', self.renderers)
-        self.assertIn('rowsFrom(data, "events")', self.renderers)
+        # 2026-10-05: «Təhlükəsizlik» tabı (IP filtri) öz moduluna köçdü.
+        self.assertIn('rowsFrom(data, "events")', self.security)
         self.assertIn('rowsFrom(data, "lines")', self.renderers)
         self.assertIn('rowsFrom(data, "incidents")', self.renderers)
