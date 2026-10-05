@@ -276,7 +276,7 @@ class ExamStudent(_Base):
                 if r.status_code == 200 and payload.get("success") is True:
                     revision = str(payload.get("server_revision", revision))
                 else:
-                    r.failure(f"autosave: {r.status_code} {r.error} {str(payload)[:80]}")
+                    r.failure(f"autosave: {r.status_code} {r.error} {str(payload)[:80]} body={(r.text or '')[:120]!r} srv={r.headers.get('Server', '')}")
                     # Real klient Retry-After/backoff ilə təkrarlayır — burada bir dəfə.
                     gevent.sleep(float(r.headers.get("Retry-After", "3") or 3))
         gevent.sleep(2)
@@ -291,7 +291,7 @@ class ExamStudent(_Base):
             except Exception:
                 payload = {}
             if not (r.status_code == 200 and payload.get("finished") is True):
-                r.failure(f"finish: {r.status_code} {r.error} {str(payload)[:80]}")
+                r.failure(f"finish: {r.status_code} {r.error} {str(payload)[:80]} body={(r.text or '')[:120]!r} srv={r.headers.get('Server', '')}")
                 raise _Abort()
         attempt = int(url.rstrip("/").split("/")[-1])
         append_jsonl("expected-answers", {"attempt": attempt, "selected": selected})
