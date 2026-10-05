@@ -10,6 +10,10 @@
                    + İmtahan Mərkəzi aktoru (`cap_examcenter_NNN`, `final_score.entry`):
                    «İmtahan balı» səhifəsi → yekun imtahan balları (ilk daxiletmə).
                    Gözləntilər `expected-midterm-*.jsonl` / `expected-finals-*.jsonl`.
+  export         — paralel ağır ixraclar: müəllim jurnal xlsx-i (`/jurnal/<id>/export.xlsx`)
+                   + imtahan müəllifi nəticə xlsx-i (`/exams/<slug>/results/export.xlsx`;
+                   >EXPORT_SYNC_MAX_ROWS cəhddə worker job → status poll → download).
+                   Vaxt və ölçü `exports-*.jsonl`-a; uçdan-uca vaxt `[e2e]` sətri kimi.
 """
 
 from __future__ import annotations
@@ -18,13 +22,16 @@ import itertools
 import os
 import random
 import re
+import time
 
+import gevent
 from locust import between, task
 
 from cap_common import (
     COUNTERS,
     ORIGIN,
     SEED,
+    SESSIONS,
     WORKER,
     _Abort,
     _Base,
@@ -262,7 +269,130 @@ class FinalScoreClerk(_Base):
                 r.failure(f"exam-score after save: {r.status_code} {r.error}")
 
 
+XLSX_CT = "spreadsheetml"
+JOB_RE = re.compile(r"/exams/export-jobs/([0-9a-f-]{36})/waiting/")
+
+
+def _e2e(user, name, started, length, error=None):
+    """Uçdan-uca (poll daxil) vaxt — `[e2e]` prefiksi ilə; p95 qapısına daxil edilmir."""
+    user.environment.events.request.fire(
+        request_type="E2E",
+        name=f"[e2e] {name}",
+        response_time=(time.monotonic() - started) * 1000,
+        response_length=length,
+        exception=RuntimeError(error) if error else None,
+    )
+
+
+def _record_export(kind, target, size, seconds):
+    COUNTERS["exports_done"] += 1
+    COUNTERS["export_bytes"] += size
+    append_jsonl("exports", {"kind": kind, "target": target, "bytes": size, "seconds": round(seconds, 3)})
+
+
+class ExportTeacher(_Base):
+    """Müəllim jurnalının xlsx ixracı (davamiyyət+bal + yekun vərəqi), təkrar-təkrar."""
+
+    wait_time = between(10, 30)
+    weight = 4
+
+    @parks
+    def on_start(self):
+        index, self.username, self.offering = _next_teacher(self)
+        self._client_setup(63000 + index, "/accounts/login/muellim/")
+        self._login(self.username, "muellim", "[pre] ")
+        self._wait_for_go()
+
+    @task
+    @parks
+    def export_journal(self):
+        path = f"/jurnal/{self.offering}/export.xlsx"
+        started = time.monotonic()
+        with self.client.get(path, name="export journal xlsx", catch_response=True, timeout=120) as r:
+            body = r.content or b""
+            if r.status_code != 200 or XLSX_CT not in r.headers.get("Content-Type", "") or not body.startswith(b"PK"):
+                r.failure(f"journal xlsx: {r.status_code} {r.error} {r.headers.get('Content-Type', '')}")
+                return
+        _record_export("journal_xlsx", self.offering, len(body), time.monotonic() - started)
+
+
+_author_cursor = itertools.count(int(WORKER) * 1000)
+
+
+class ExportExamResults(_Base):
+    """İmtahan müəllifi: nəticələrin xlsx ixracı (sinxron və ya worker job + poll + download)."""
+
+    wait_time = between(15, 40)
+    weight = 1
+    fixed_count = int(os.environ.get("CAP_AUTHOR_USERS", "0") or 0)
+
+    @parks
+    def on_start(self):
+        k = next(_author_cursor)
+        self._client_setup(64000 + k % 1000, "/exams/")
+        keys = sorted(SESSIONS or {}, key=int)
+        if not keys:
+            fixture_error(self, "author session pool empty", "CAP_SESSIONS")
+            raise _Abort()
+        self.client.cookies.set("sessionid", SESSIONS[keys[k % len(keys)]], path="/")
+        self.slug = SEED["exam_slug"]
+        self._wait_for_go()
+
+    @task
+    @parks
+    def export_results(self):
+        path = f"/exams/{self.slug}/results/export.xlsx"
+        self.client.headers["Referer"] = ORIGIN + f"/exams/{self.slug}/results/"
+        started = time.monotonic()
+        with self.client.get(path, name="export exam results", allow_redirects=False, catch_response=True, timeout=120) as r:
+            body = r.content or b""
+            location = r.headers.get("Location", "")
+            if r.status_code == 200 and body.startswith(b"PK"):
+                job = None
+            elif r.status_code in (302, 303) and JOB_RE.search(location):
+                job = JOB_RE.search(location).group(1)
+            else:
+                r.failure(f"results export: {r.status_code} {r.error} → {location[:120]}")
+                _e2e(self, "exam results xlsx", started, 0, "start failed")
+                return
+        if job is not None:
+            body = self._wait_job(job, started)
+            if body is None:
+                return
+        _record_export("exam_results_xlsx" + ("_job" if job else ""), self.slug, len(body), time.monotonic() - started)
+        _e2e(self, "exam results xlsx" + (" (job)" if job else ""), started, len(body))
+
+    def _wait_job(self, job, started):
+        status = "pending"
+        for _ in range(90):
+            gevent.sleep(2)
+            with self.client.get(
+                f"/exams/import/extract-jobs/{job}/", name="export job status", headers={"X-Requested-With": "XMLHttpRequest"},
+                catch_response=True, timeout=30,
+            ) as r:
+                try:
+                    status = r.json().get("status", "")
+                except Exception:
+                    status = ""
+                if r.status_code != 200 or not status:
+                    r.failure(f"job status: {r.status_code} {r.error}")
+                    continue
+            if status in ("success", "failed"):
+                break
+        if status != "success":
+            _e2e(self, "exam results xlsx (job)", started, 0, f"job {status}")
+            return None
+        with self.client.get(f"/exams/export-jobs/{job}/download/", name="export job download", catch_response=True, timeout=120) as r:
+            body = r.content or b""
+            if r.status_code != 200 or not body.startswith(b"PK"):
+                r.failure(f"job download: {r.status_code} {r.error}")
+                _e2e(self, "exam results xlsx (job)", started, 0, "download failed")
+                return None
+        return body
+
+
 EXTRA_CLASSES = {
     "studentjournal": [StudentJournal],
     "journalfinal": [JournalFinalTeacher, FinalScoreClerk],
+    "export": [ExportTeacher, ExportExamResults],
 }

@@ -9,7 +9,12 @@ import csv
 import json
 
 P95_LIMIT_MS = 2500
+# Ağır fayl ixracı interaktiv səhifə deyil — onun üçün ayrıca p95 büdcəsi.
+P95_LIMIT_BY_MODE = {"export": 15000}
 ERROR_LIMIT = 0.01
+# FIXTURE sətirləri (parse/hovuz xətası) iş sorğusu deyil, amma pillənin işini
+# görmədiyini göstərir (məs. 2026-10-05: 495 × «journal grid parse» — pillə yaşıl idi).
+FIXTURE_LIMIT = 0.01
 
 
 def pct(row, key):
@@ -23,7 +28,7 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
     stats_path = run_dir / f"{name}_stats.csv"
     rows = list(csv.DictReader(stats_path.open())) if stats_path.exists() else []
     per = []
-    work_total = work_fail = 0
+    work_total = work_fail = fixture_fail = 0
     work_p95 = 0.0
     for row in rows:
         if row["Name"] == "Aggregated":
@@ -41,7 +46,9 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
             "rps": round(pct(row, "Requests/s"), 2),
         }
         per.append(item)
-        if not row["Name"].startswith("[pre]") and row["Type"] != "FIXTURE":
+        if row["Type"] == "FIXTURE":
+            fixture_fail += fails
+        if not row["Name"].startswith(("[pre]", "[e2e]")) and row["Type"] not in ("FIXTURE", "E2E"):
             work_total += count
             work_fail += fails
             work_p95 = max(work_p95, item["p95"])
@@ -68,7 +75,13 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
         for k, v in (s.get("db_active") or {}).items():
             db_waits[k] = max(db_waits.get(k, 0), v)
     error_rate = work_fail / work_total if work_total else 1.0
-    passed = work_total > 0 and error_rate < ERROR_LIMIT and work_p95 < P95_LIMIT_MS and not telemetry.guard_tripped
+    passed = (
+        work_total > 0
+        and error_rate < ERROR_LIMIT
+        and work_p95 < P95_LIMIT_BY_MODE.get(mode, P95_LIMIT_MS)
+        and fixture_fail <= max(1, users * FIXTURE_LIMIT)
+        and not telemetry.guard_tripped
+    )
     return {
         "stage": name,
         "mode": mode,
@@ -78,6 +91,7 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
         "work_failures": work_fail,
         "error_rate": round(error_rate, 4),
         "worst_p95_ms": work_p95,
+        "fixture_failures": fixture_fail,
         "passed": passed,
         "counters": counters,
         "peak_cpu_percent": dict(sorted(peak.items(), key=lambda kv: -kv[1])[:14]),
