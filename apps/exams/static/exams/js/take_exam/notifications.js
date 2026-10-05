@@ -1,36 +1,16 @@
 (function (ns, document) {
     "use strict";
 
+    // Görünüş `take_exam/ux.css`-dədir (.auto-save-notification[.success|.error|.info]):
+    // əvvəl hər bildiriş inline cssText ilə sağ-yuxarıya yapışırdı və telefonda
+    // taymeri örtürdü; indi telefonda aşağıdan çıxır.
     ns.notifications = {
         show: function (message, type, duration) {
             var notification = document.createElement("div");
             var level = type || "info";
             notification.className = "auto-save-notification " + level;
+            notification.setAttribute("role", level === "error" ? "alert" : "status");
             notification.textContent = message;
-            notification.style.cssText = [
-                "position: fixed",
-                "top: 20px",
-                "right: 20px",
-                "padding: 12px 20px",
-                "border-radius: 8px",
-                "font-size: 14px",
-                "font-weight: 500",
-                "z-index: 10000",
-                "box-shadow: 0 4px 12px rgba(0,0,0,0.15)",
-                "animation: slideIn 0.3s ease",
-                "transition: opacity 0.3s ease"
-            ].join(";");
-
-            if (level === "success") {
-                notification.style.backgroundColor = "#10b981";
-                notification.style.color = "white";
-            } else if (level === "error") {
-                notification.style.backgroundColor = "#ef4444";
-                notification.style.color = "white";
-            } else {
-                notification.style.backgroundColor = "#3b82f6";
-                notification.style.color = "white";
-            }
 
             document.body.appendChild(notification);
 
@@ -45,7 +25,7 @@
 
         hide: function (notification) {
             if (notification && notification.parentNode) {
-                notification.style.opacity = "0";
+                notification.classList.add("is-hiding");
                 setTimeout(function () {
                     if (notification.parentNode) {
                         notification.parentNode.removeChild(notification);

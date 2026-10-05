@@ -10,6 +10,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.blog.models import Question
+from apps.organizations.models import Membership, Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -18,6 +20,14 @@ class CreateQuestionAtomicTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_superuser("w2bq_teacher", "w2bq_teacher@example.com", "pw")
         self.viewer = User.objects.create_user("w2bq_viewer", "w2bq_viewer@example.com", "pw")
+        # 2026-10-05: ``visible_users`` yalnız aktiv təşkilatın üzvlərindən seçilir.
+        org = Organization.objects.create(
+            name="W2BQ Org", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
+        )
+        for user, role in ((self.teacher, "teacher"), (self.viewer, "student")):
+            Membership.objects.create(
+                user=user, organization=org, role=org.roles.get(name=role), is_primary=True, is_active=True
+            )
         self.client.force_login(self.teacher)
 
     def _post(self):

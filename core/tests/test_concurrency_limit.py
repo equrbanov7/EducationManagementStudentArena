@@ -68,6 +68,34 @@ class ConcurrencyLimitMiddlewareTest(SimpleTestCase):
         self.assertEqual([r.status_code for r in results], [200, 200])
         self.assertEqual(middleware.inflight, 0)
 
+    def test_browser_navigation_gets_a_styled_html_503_page(self):
+        """UX review 2026-10-05: brauzer (Accept: text/html) xam mətn yox, stilli səhifə görür."""
+        view = _BlockingView()
+        middleware, _results, threads = self._saturate(view)
+        try:
+            html_accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            response = middleware(self.factory.get("/exams/x/", HTTP_ACCEPT=html_accept))
+            self.assertEqual(response.status_code, 503)
+            self.assertEqual(response["Content-Type"], "text/html; charset=utf-8")
+            self.assertEqual(response["Retry-After"], "5")
+            body = response.content.decode()
+            self.assertIn('class="error-card"', body)
+            self.assertIn('href=""', body, "GET səhifəsində «Yenidən cəhd et» (cari ünvanı yenilə) olmalıdır")
+
+            # POST «yenilə» ilə təkrarlana bilməz — retry linki yoxdur, geri qayıtmaq izah olunur.
+            post = middleware(self.factory.post("/exams/x/", HTTP_ACCEPT=html_accept))
+            self.assertEqual(post.status_code, 503)
+            self.assertNotIn('href=""', post.content.decode())
+
+            # Accept-siz müştəri (curl, yük testi) əvvəlki kimi düz mətn alır.
+            plain = middleware(self.factory.get("/exams/x/"))
+            self.assertEqual(plain["Content-Type"], "text/plain; charset=utf-8")
+            self.assertNotIn(b"<html", plain.content)
+        finally:
+            view.release.set()
+            for thread in threads:
+                thread.join(5)
+
     def test_json_clients_get_a_json_error(self):
         view = _BlockingView()
         middleware, _results, threads = self._saturate(view)

@@ -131,3 +131,36 @@ def test_second_copy_does_not_create_a_parallel_dossier(world):
         _copy_as(world, world["teacher_a"])
     assert excinfo.value.code == "copy.target_has_open_version"
     assert Syllabus.objects.filter(**scope).count() == after_first, "ikinci köçürmə YENİ dosye yaratmamalıdır"
+
+
+def test_copy_cannot_overwrite_another_authors_dossier(world):
+    """Təhlükəsizlik auditi 2026-10-05: HƏDƏF dosye də əhatə qapısından keçir.
+
+    ``copy_from_previous`` yalnız MƏNBƏNİ yoxlayırdı. Eyni fənn/dövr üçün başqa
+    müəllifin açılışsız (rədd edilmiş) dosyesi olanda müəllim A öz sillabusunu
+    «köçürüb» B-nin dosyesinə yeni qaralama yazır və ``current_version``-u dəyişirdi.
+    """
+    from apps.syllabus.models import SyllabusVersion
+
+    source = world["syllabus"]
+    actor_b = services.resolve_actor(world["teacher_b"], world["org"])
+    victim, victim_version = services.create_draft(
+        organization=world["org"],
+        subject=source.subject,
+        period=source.period,
+        actor=actor_b,
+        offering=None,
+        program=source.program,
+        chair_unit=source.chair_unit,
+        author=world["teacher_b"],
+        plan_hours=dict(PLAN_HOURS),
+    )
+    SyllabusVersion.objects.filter(pk=victim_version.pk).update(status="rejected", decision_reason="Rədd")
+
+    with pytest.raises(TransitionDenied) as excinfo:
+        _copy_as(world, world["teacher_a"])
+
+    assert excinfo.value.code == "transition.out_of_scope"
+    victim.refresh_from_db()
+    assert victim.current_version_id == victim_version.pk
+    assert victim.versions.count() == 1

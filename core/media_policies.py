@@ -27,7 +27,10 @@ verilirdi.  Reyestrə əlavə DEYİL, prefiks siyahısına əlavə də vacibdir 
 
 from __future__ import annotations
 
+import posixpath
+
 from django.apps import apps as django_apps
+from django.utils.http import content_disposition_header
 from django.utils.module_loading import import_string
 
 #: lab_assistant = 50, teacher = 60 → müəllim səviyyəsi.
@@ -542,3 +545,17 @@ ACCESS_CHECKERS: dict[str, object] = {
     "notifications/files/": check_notification_file_access,
     "notifications/images/": check_notification_file_access,
 }
+
+
+#: Brauzerdə ``inline`` açılmasına icazə verilən tiplər (2026-10-05 təhlükəsizlik
+#: auditi). Qalan hər şey — HTML/XHTML/XML/SVG/mətn də daxil — ``attachment`` ilə
+#: verilir ki, istifadəçi faylı öz origin-imizdə sənəd kimi icra olunmasın.
+_INLINE_SAFE_TYPES = frozenset({"image/png", "image/jpeg", "image/gif", "image/webp", "application/pdf"})
+_INLINE_SAFE_PREFIXES = ("video/", "audio/")
+
+
+def apply_content_disposition(response, path: str, content_type: str):
+    if content_type in _INLINE_SAFE_TYPES or content_type.startswith(_INLINE_SAFE_PREFIXES):
+        return response
+    response["Content-Disposition"] = content_disposition_header(True, posixpath.basename(path))
+    return response

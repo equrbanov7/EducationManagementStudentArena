@@ -137,3 +137,17 @@ body:has(.jd2) .ai-bot-btn:hover,
 body:has(.jd2) .ai-bot-btn:focus-visible {
     opacity: 1;
 }
+
+/* ── 8. Telefon: davamiyyət/bal xanası görünsün (UX review 2026-10-05) ───────
+   375px-də sabit ad sütunu (min-width 210px) + sağda sabit QAYIB sütunu (~80px)
+   340px-lik qutunun ~290px-ni tuturdu: yazılan xana yalnız ~50px-lik zolaqda,
+   hər iki sabit sütunun ALTINDAN sürüşərək görünürdü — müəllim hansı xananı
+   dəyişdiyini görmürdü. Ad sütunu daralır (ad sətrə sınır), nömrə gizlənir,
+   tab pillələri bərabər enli sətirlərə düzülür. Masaüstü düzümü dəyişmir. */
+@media (max-width: 640px) {
+    .jd2-th-student { min-width: 112px; padding-left: 10px !important; }
+    .jd2-td-student { padding: 8px 6px 8px 10px !important; }
+    .jd2-stu-no { display: none; }
+    .jd2-stu-name { font-size: 12px; line-height: 1.25; overflow-wrap: anywhere; }
+    .jd2-tabsbar .jd2-tab { flex: 1 1 auto; padding: 0 10px; text-align: center; }
+}

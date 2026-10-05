@@ -88,6 +88,19 @@ class AppealCreationTests(TestCase):
         with self.assertRaises(ValidationError):
             create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1, comment="too short")])
 
+    def test_oversized_comment_rejected(self):
+        # Təhlükəsizlik auditi 2026-10-05: TextField limitsiz idi — tələbə hər sual üçün
+        # meqabaytlarla mətn yazıb DB/bildiriş/apellyasiya panelini şişirdə bilirdi.
+        from apps.appeals.constants import APPEAL_MAX_COMMENT_LENGTH
+
+        with self.assertRaises(ValidationError):
+            create_appeal(
+                attempt=self.attempt,
+                student=self.student,
+                items=[self._item(self.q1, comment="x" * (APPEAL_MAX_COMMENT_LENGTH + 1))],
+            )
+        self.assertEqual(APPEAL_MAX_COMMENT_LENGTH, 5000)
+
     def test_duplicate_question_rejected(self):
         with self.assertRaises(ValidationError):
             create_appeal(attempt=self.attempt, student=self.student, items=[self._item(self.q1), self._item(self.q1)])

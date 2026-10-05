@@ -20,6 +20,7 @@ from apps.exams.public import (
 )
 
 from ...constants import (
+    APPEAL_MAX_COMMENT_LENGTH,
     APPEAL_MIN_COMMENT_LENGTH,
     APPEAL_STATUS_CHOICES,
     APPEAL_STATUS_UNDER_REVIEW,
@@ -231,6 +232,7 @@ def appeal_create(request, attempt_id):
         "answers": delivered_answers,
         "appeal_type_choices": APPEAL_TYPE_CHOICES,
         "min_comment_length": APPEAL_MIN_COMMENT_LENGTH,
+        "max_comment_length": APPEAL_MAX_COMMENT_LENGTH,
         "remaining_seconds": remaining_window_seconds(attempt),
         "result_url": _result_url(exam, attempt, request),
         "marked_question_by_qid": marked_map,

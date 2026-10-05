@@ -301,6 +301,14 @@ body.error-page {
     --error-bg: #fbf8f2;
 }
 
+/* 503 — «server yüklüdür» gözləmə tonu (400-ün kəhrəbası); səhv deyil, müvəqqəti vəziyyətdir. */
+.error-page.error-503 {
+    --error-primary: var(--ems-warning-600, #d97706);
+    --error-primary-dark: var(--ems-warning-800, #92400e);
+    --error-tint: #fff7e6;
+    --error-bg: #fbf8f2;
+}
+
 .error-page.error-403 {
     --error-primary: #dc2626;
     --error-primary-dark: #991b1b;
@@ -339,6 +347,14 @@ body.error-page {
         height: 60px;
         margin-top: 20px;
         font-size: 1.55rem;
+    }
+
+    /* Şəbəkə zonası izahı: ortalanmış 1rem abzas telefonda 7 sətir idi və «Nə etməli?»
+       siyahısından iri görünürdü; sol hizalı + addımlarla eyni ölçü. */
+    .error-zone-lead {
+        font-size: 0.94rem;
+        line-height: 1.55;
+        text-align: left;
     }
 
     .error-actions {

@@ -219,7 +219,11 @@ def parse_filters(params, *, sort_options, default_page_size) -> PeopleFilters:
     )
 
 
-def search_q(query: str, prefix: str, *, extra=None) -> Q:
+#: Kontakt/şəxsiyyət sahələri — YALNIZ ``people.view_contacts`` olan aktor üzrə axtarılır.
+CONTACT_SEARCH_FIELDS = frozenset({"email", "profile__fin"})
+
+
+def search_q(query: str, prefix: str, *, extra=None, include_contacts: bool = True) -> Q:
     """AND-of-ORs axtarış filtri (RİM `search.py` ilə eyni semantika) — az/ing hərflərinə dözümlü.
 
     Uyğunluq ``core.search_text.tolerant_q`` ilə gedir: «Aliyev» «Əliyev»i,
@@ -235,8 +239,13 @@ def search_q(query: str, prefix: str, *, extra=None) -> Q:
     ``SEARCH_FIELDS``-ə yazıla bilməz. Token-başına OR olur ki, «Aysel 050401»
     kimi qarışıq sorğu da işləsin.
     """
-    plain = tuple(f"{prefix}{field}" for field in SEARCH_FIELDS if field not in CODE_SEARCH_FIELDS)
-    coded = tuple(f"{prefix}{field}" for field in CODE_SEARCH_FIELDS)
+    # Təhlükəsizlik auditi 2026-10-05: kontakt sütununu GÖRMƏYƏN aktor e-poçt/FİN üzrə
+    # da axtara bilməz — əks halda «ad + FİN parçası» sorğusu FİN-i bərpa edən oracle idi.
+    hidden = frozenset() if include_contacts else CONTACT_SEARCH_FIELDS
+    plain = tuple(
+        f"{prefix}{field}" for field in SEARCH_FIELDS if field not in CODE_SEARCH_FIELDS and field not in hidden
+    )
+    coded = tuple(f"{prefix}{field}" for field in CODE_SEARCH_FIELDS if field not in hidden)
     combined = Q()
     # Hər token AYRICA: ``extra`` token-başına OR-lanır (qarışıq «Aysel 050401» sorğusu).
     for token in tokens_of(_clean_text(query, MAX_QUERY_LENGTH)):

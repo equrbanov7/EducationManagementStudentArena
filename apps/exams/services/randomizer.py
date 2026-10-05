@@ -37,20 +37,35 @@ def _usage_cache_seconds() -> int:
 
 
 def _cached_usage_counts(cache_key: str, builder):
+    """Usage counts with single-flight refresh.
+
+    Capacity test 2026-10-05: when the short TTL expired, every concurrent exam
+    start rebuilt the COUNT(DISTINCT user) aggregate over all answers at once
+    (~1.3 s each at tens of thousands of answers) and the DB stalled. Now one
+    request rebuilds while the others reuse the last value; fair distribution
+    only needs approximate counts.
+    """
     ttl = _usage_cache_seconds()
     if ttl <= 0:
         return builder()
 
+    stale_key = f"{cache_key}:stale"
     try:
         cached = cache.get(cache_key)
         if cached is not None:
             return cached
+        if not cache.add(f"{cache_key}:lock", 1, timeout=max(5, ttl)):
+            stale = cache.get(stale_key)
+            if stale is not None:
+                return stale
     except Exception:
         return builder()
 
     value = builder()
     try:
         cache.set(cache_key, value, ttl)
+        cache.set(stale_key, value, ttl * 20)
+        cache.delete(f"{cache_key}:lock")
     except Exception:
         pass
     return value

@@ -6,6 +6,7 @@ or superadmin context) for the profile "organizations" panel.
 """
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.db.models import Count
 from django.urls import reverse
 
@@ -24,6 +25,39 @@ _CABINET_LINKS = (
     ("members_url", "org-members"),
     ("roles_url", "org-roles"),
 )
+
+
+#: Təşkilat kartındakı üzv sayı — 5 dəqiqəlik keş (tutum testi 2026-10-05: hər kabinet
+#: açılışı 50 000 üzvlü təşkilatda COUNT ~80 ms, pikdə 2 s; 500 tələbədə DB doyurdu).
+_MEMBER_COUNT_CACHE_SECONDS = 300
+
+
+def _cached_member_counts(org_ids):
+    if not org_ids:
+        return {}
+    keys = {org_id: f"emsarena:org-member-count:{org_id}" for org_id in org_ids}
+    try:
+        cached = cache.get_many(list(keys.values()))
+    except Exception:
+        cached = {}
+    counts = {org_id: cached[key] for org_id, key in keys.items() if key in cached}
+    missing = [org_id for org_id in org_ids if org_id not in counts]
+    if missing:
+        from apps.organizations.models import Membership
+
+        fresh = {
+            row["organization_id"]: row["member_count"]
+            for row in Membership.objects.filter(organization_id__in=missing, is_active=True)
+            .values("organization_id")
+            .annotate(member_count=Count("id"))
+        }
+        fresh = {org_id: fresh.get(org_id, 0) for org_id in missing}
+        counts.update(fresh)
+        try:
+            cache.set_many({keys[org_id]: value for org_id, value in fresh.items()}, _MEMBER_COUNT_CACHE_SECONDS)
+        except Exception:
+            pass
+    return counts
 
 
 def _build_user_organization_access_rows(
@@ -116,14 +150,7 @@ def _build_user_organization_access_rows(
         }
 
     org_ids = list(grouped_rows.keys())
-    member_counts = {}
-    if org_ids:
-        member_counts = {
-            row["organization_id"]: row["member_count"]
-            for row in Membership.objects.filter(organization_id__in=org_ids, is_active=True)
-            .values("organization_id")
-            .annotate(member_count=Count("id"))
-        }
+    member_counts = _cached_member_counts(org_ids)
 
     profile_url = reverse("accounts:profile")
     section_url = _append_query_params(profile_url, section=profile_section)

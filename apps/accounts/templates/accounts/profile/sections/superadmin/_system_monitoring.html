@@ -7,6 +7,8 @@
         href="{% static 'accounts/css/profile/sections/system_monitoring_summary.css' %}?v=20261001-mon">
   <link rel="stylesheet"
         href="{% static 'accounts/css/profile/sections/system_monitoring_ai.css' %}?v=20261001-mon">
+  <link rel="stylesheet"
+        href="{% static 'accounts/css/profile/sections/system_monitoring_security.css' %}?v=20261005-ipf">
 
   {% comment %}2026-10-01 (sahib): bölmə artıq superadmin-only DEYİL — `system.monitoring.view`
   icazəsi olan üzv (RİM rəhbəri) də görür (qapı: `rbac_sections.can_view_monitoring` +
@@ -58,17 +60,20 @@
 
   {% include "accounts/profile/sections/superadmin/_system_monitoring_i18n.html" %}
 
-  {% comment %}Yükləmə sırası: format → renderers → summary → ai → əsas (hamısı defer;
+  {% comment %}Yükləmə sırası: format → renderers → security → summary → ai → əsas (hamısı defer;
   sıra fail-soft: əsas fayl `namespace.format`/`createRenderers` olmadan boot etmir,
-  sonrakı fayllar `bootPending()`-i özü çağırır). Hamısı xarici fayldır (CSP).{% endcomment %}
+  sonrakı fayllar `bootPending()`-i özü çağırır). Hamısı xarici fayldır (CSP).
+  2026-10-05: «Təhlükəsizlik» tabı (IP filtri + uğurlu girişlər) — `system_monitoring_security.js`.{% endcomment %}
   <script defer src="{% static 'accounts/js/monitoring/system_monitoring_format.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20261001-mon"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_renderers.js' %}?v=20261005-ipf"
+          nonce="{{ request.csp_nonce }}"></script>
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring_security.js' %}?v=20261005-ipf"
           nonce="{{ request.csp_nonce }}"></script>
   <script defer src="{% static 'accounts/js/monitoring/system_monitoring_summary.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
   <script defer src="{% static 'accounts/js/monitoring/system_monitoring_ai.js' %}?v=20261001-mon"
           nonce="{{ request.csp_nonce }}"></script>
-  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20261002-start"
+  <script defer src="{% static 'accounts/js/monitoring/system_monitoring.js' %}?v=20261005-ipf"
           nonce="{{ request.csp_nonce }}"></script>
 </section>

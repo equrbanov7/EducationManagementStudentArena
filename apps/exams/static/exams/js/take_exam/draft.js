@@ -416,6 +416,7 @@
                             // stale draft-ı növbəti retry-da legitim göstərərdi. Bütün
                             // avtomatik yazı yollarını reload-a qədər dondururuq.
                             ctx.autosaveConflict = true;
+                            if (ns.syncStatus) ns.syncStatus.show(ctx, "conflict");
                             if (ctx.autoSaveTimer) {
                                 clearTimeout(ctx.autoSaveTimer);
                                 ctx.autoSaveTimer = null;
@@ -510,6 +511,7 @@
                     }
                     ctx.hasUnsavedChanges = true;
                     ns.draft.persistLocalDraft(ctx);
+                    if (ns.syncStatus) ns.syncStatus.failed(ctx, err);
 
                     if (effectiveAction === "autosave") {
                         ns.draft.queueAutoSave(ctx);

@@ -238,8 +238,15 @@ def _task_view(request, organization, actor, payload) -> dict:
         chair_id = payload["cards"][0]["chair_id"]
     task = None
     if chair_id:
+        # Təhlükəsizlik auditi 2026-10-05: ``wc_chair`` GET-dən gəlir — yalnız aktorun
+        # idarə etdiyi kafedralar (əvvəl istənilən kafedranın tapşırığı oxunurdu).
         task = (
-            TeachingTask.objects.filter(organization=organization, chair_id=chair_id, academic_year=payload["year"])
+            TeachingTask.objects.filter(
+                organization=organization,
+                chair_id=chair_id,
+                chair_id__in=manageable_chairs(actor).values("pk"),
+                academic_year=payload["year"],
+            )
             .select_related("chair")
             .first()
         )

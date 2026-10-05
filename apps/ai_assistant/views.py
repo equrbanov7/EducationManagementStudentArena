@@ -18,7 +18,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_GET, require_POST
 
-from core.rate_limit import is_rate_limited, parse_rate, record_rate_limit_hit
+from core.rate_limit import parse_rate, record_rate_limit_hit
 
 from .context_builder import build_user_context
 from .gemini_client import ask_gemini
@@ -182,8 +182,11 @@ def chat_view(request):
         )
 
     # ── Rate limiting ─────────────────────────────────────────────────
+    # Təhlükəsizlik auditi 2026-10-05: yoxla-və-say ATOMİKDİR (cache.incr) və Gemini
+    # çağırışından ƏVVƏL baş verir. Əvvəl «is_rate_limited → Gemini → record» idi:
+    # paralel N sorğu hamısı yoxlamadan keçib həm şəxsi, həm qlobal xərc limitini aşırdı.
     rate = _get_rate_limit()
-    limited, retry_after = is_rate_limited(_RATE_SCOPE, rate, user.id)
+    limited, retry_after = record_rate_limit_hit(_RATE_SCOPE, rate, user.id)
     if limited:
         _log_request(
             user=user,
@@ -205,7 +208,7 @@ def chat_view(request):
         )
 
     global_rate = _get_global_rate_limit()
-    global_limited, _global_retry = is_rate_limited(_GLOBAL_RATE_SCOPE, global_rate, _GLOBAL_RATE_KEY)
+    global_limited, _global_retry = record_rate_limit_hit(_GLOBAL_RATE_SCOPE, global_rate, _GLOBAL_RATE_KEY)
     if global_limited:
         _log_request(
             user=user,
@@ -264,10 +267,7 @@ def chat_view(request):
     # way it is recorded in the audit log for review.
     answer, was_redacted = sanitize_ai_response(result["answer"])
 
-    # ── Record rate limit hit and log ─────────────────────────────────
-    record_rate_limit_hit(_RATE_SCOPE, rate, user.id)
-    record_rate_limit_hit(_GLOBAL_RATE_SCOPE, global_rate, _GLOBAL_RATE_KEY)
-
+    # ── Log (limit sayğacı artıq Gemini-dən əvvəl atomik artırılıb) ─────
     _log_request(
         user=user,
         organization=organization,

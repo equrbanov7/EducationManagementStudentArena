@@ -17760,6 +17760,11 @@ msgid "comment_too_short"
 msgstr ""
 "Комментарий к апелляции слишком короткий (не менее {min_length} символов)."
 
+#: apps/appeals/services/creation.py:69
+msgctxt "appeals.service.create.error"
+msgid "Şərh {max_length} simvoldan uzun ola bilməz."
+msgstr "Комментарий не может быть длиннее {max_length} символов."
+
 #: apps/appeals/services/creation.py:109
 msgctxt "appeals.service.create.error"
 msgid "Apellyasiya müddəti bitib."
@@ -90427,3 +90432,149 @@ msgstr ""
 "Кампания открыта, но в этом семестре ещё не закрыт ни один журнал — студенты"
 " пока не увидят опрос. Цели появляются автоматически, когда RİM закрывает "
 "журналы."
+
+msgctxt "monitoring.ui"
+msgid "IP ünvanı və ya şəbəkə"
+msgstr "IP-адрес или сеть"
+
+msgctxt "monitoring.ui"
+msgid "IP və ya şəbəkə, məs. 5.191.0.0/16"
+msgstr "IP или сеть, напр. 5.191.0.0/16"
+
+msgctxt "monitoring.ui"
+msgid "IP filtrini təmizlə"
+msgstr "Сбросить фильтр по IP"
+
+msgctxt "monitoring.ui"
+msgid "Yalnız bu IP: {ip}"
+msgstr "Только этот IP: {ip}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu girişlər"
+msgstr "Успешные входы с этого IP"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu girişlər"
+msgstr "Успешные входы из этой сети"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP-dən uğurlu giriş yoxdur"
+msgstr "С этого IP успешных входов нет"
+
+msgctxt "monitoring.ui"
+msgid "Bu şəbəkədən uğurlu giriş yoxdur"
+msgstr "Из этой сети успешных входов нет"
+
+msgctxt "monitoring.ui"
+msgid "Girişlər: {logins} · Hesablar: {accounts}"
+msgstr "Входов: {logins} · Аккаунтов: {accounts}"
+
+msgctxt "monitoring.ui"
+msgid "Ən son {limit} qeyd göstərilir (hesab və cihaz üzrə qruplaşdırılıb)."
+msgstr ""
+"Показаны последние {limit} записей (сгруппированы по аккаунту и устройству)."
+
+msgctxt "monitoring.ui"
+msgid "Yalnız təşkilatınızın üzvlərinin girişləri göstərilir."
+msgstr "Показаны только входы участников вашей организации."
+
+msgctxt "monitoring.ui"
+msgid "Son giriş"
+msgstr "Последний вход"
+
+msgctxt "monitoring.ui"
+msgid "Cihaz / brauzer"
+msgstr "Устройство / браузер"
+
+msgctxt "monitoring.ui"
+msgid "ilk: {time}"
+msgstr "первый: {time}"
+
+msgctxt "monitoring.ui"
+msgid "Bu IP üzrə təhlükəsizlik hadisəsi yoxdur"
+msgstr "Для этого IP нет событий безопасности"
+
+msgctxt "monitoring.security"
+msgid ""
+"IP ünvanı düzgün deyil. Tək IP (məs. 192.168.1.10) və ya şəbəkə (məs. "
+"10.0.0.0/24) daxil edin."
+msgstr ""
+"Неверный IP-адрес. Введите один IP (например, 192.168.1.10) или сеть "
+"(например, 10.0.0.0/24)."
+
+msgctxt "monitoring.security"
+msgid ""
+"Şəbəkə (CIDR) filtri bu bazada dəstəklənmir — tək IP ünvanı daxil edin."
+msgstr ""
+"Фильтр по сети (CIDR) не поддерживается этой базой данных — введите один IP-"
+"адрес."
+
+msgctxt "exams.start_confirm"
+msgid "Duration: %(minutes)s min"
+msgstr "Длительность: %(minutes)s мин"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Server hazırda çox yüklüdür. Cavablarınız brauzerdə saxlanılır və avtomatik "
+"yenidən göndəriləcək — səhifəni bağlamayın."
+msgstr ""
+"Сервер сейчас сильно загружен. Ваши ответы сохранены в браузере и будут "
+"отправлены повторно автоматически — не закрывайте страницу."
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Cavablar hələ serverə yazılmayıb. Onlar brauzerdə saxlanılır və bağlantı "
+"bərpa olunanda avtomatik göndəriləcək — internet bağlantısını yoxlayın, "
+"səhifəni bağlamayın."
+msgstr ""
+"Ответы ещё не записаны на сервер. Они сохранены в браузере и будут "
+"отправлены автоматически, как только связь восстановится — проверьте "
+"подключение к интернету и не закрывайте страницу."
+
+msgctxt "exams.template.take_exam"
+msgid "Cavablarınız yenidən saxlanılır."
+msgstr "Ваши ответы снова сохраняются."
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Bu imtahan başqa tabda yenilənib — cavablar bu tabdan saxlanılmır. Səhifəni "
+"yeniləyin."
+msgstr ""
+"Этот экзамен обновлён в другой вкладке — ответы из этой вкладки не "
+"сохраняются. Обновите страницу."
+
+msgctxt "core.error.503"
+msgid "Server məşğuldur"
+msgstr "Сервер занят"
+
+msgctxt "core.error.503"
+msgid "Müvəqqəti yüklənmə"
+msgstr "Временная нагрузка"
+
+msgctxt "core.error.503"
+msgid "Server hazırda çox yüklüdür"
+msgstr "Сервер сейчас сильно загружен"
+
+msgctxt "core.error.503"
+msgid ""
+"Eyni anda çoxlu istifadəçi daxil olub. Bir neçə saniyə gözləyib səhifəni "
+"yenidən yükləyin — adətən dərhal açılır."
+msgstr ""
+"Одновременно зашло много пользователей. Подождите несколько секунд и "
+"обновите страницу — обычно она открывается сразу."
+
+msgctxt "core.error.503"
+msgid ""
+"Əməliyyat yerinə yetirilmədi, çünki server hazırda çox yüklüdür. Bir neçə "
+"saniyə gözləyib əvvəlki səhifəyə qayıdın və əməliyyatı təkrarlayın."
+msgstr ""
+"Действие не выполнено, потому что сервер сейчас сильно загружен. Подождите "
+"несколько секунд, вернитесь на предыдущую страницу и повторите действие."
+
+msgctxt "core.error.503"
+msgid "Yenidən cəhd et"
+msgstr "Повторить попытку"
+
+msgctxt "core.error.503"
+msgid "Problem bir neçə dəqiqədən çox davam edərsə, RİM-ə müraciət edin."
+msgstr "Если проблема не исчезает дольше нескольких минут, обратитесь в RİM."

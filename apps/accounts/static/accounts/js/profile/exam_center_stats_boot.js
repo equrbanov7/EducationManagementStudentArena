@@ -31,7 +31,7 @@
     try { return JSON.parse(el.textContent) || {}; } catch (e) { return {}; }
   })();
   var page = 1, sort = "-date", timer = null;
-  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML; }
+  function esc(s){ var d=document.createElement("div"); d.textContent=(s==null?"":s); return d.innerHTML.replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
   function viewUrl(slug, id){ return U.view ? U.view.replace("__SLUG__", encodeURIComponent(slug)).replace("/attempt/0/", "/attempt/"+id+"/") : ""; }
 
   // Axtarışlı seçicilər — paylaşılan komponent (debounce + lazy infinite-scroll
