@@ -144,9 +144,12 @@
                         { answered: esc(d.answered), total: esc(d.total_questions) }, true) + "</span>");
                 // Bal: bitmiş cəhd üçün yekun faiz, davam edən test üçün canlı
                 // (müvəqqəti) faiz — imtahan indi bitsəydi neçə bal olardı.
-                if (d.is_finished && d.score_percent != null) {
+                // Təhlükəsizlik auditi 2026-10-05: bal/açar yalnız server icazə verəndə
+                // (answer_key_visible — imtahan mərkəzi / müəllif; nəzarətçi görmür).
+                var showScore = !!d.answer_key_visible;
+                if (showScore && d.is_finished && d.score_percent != null) {
                     meta.push('<span class="fxc-pill fxc-pill--score"><i class="fas fa-award"></i> ' + esc(d.score_percent) + "%</span>");
-                } else if (!d.is_finished && d.live_score != null) {
+                } else if (showScore && !d.is_finished && d.live_score != null) {
                     // Cari bal FAİZ deyil, BAL sayı ilə: keçid həddindən (17) aşağı
                     // qırmızı, ondan yuxarı yaşıl — nəzarətçi bir baxışda görsün.
                     var lv = parseFloat(d.live_score);
@@ -194,7 +197,10 @@
                 "<p>" + gettext("Hələ heç bir sual cavablanmayıb.") + "</p></div>";
             return;
         }
-        body.innerHTML = '<ol class="fxc-snapshot-answers">' + answers.map(renderQuestion).join("") + "</ol>";
+        var showKey = !!d.answer_key_visible;
+        body.innerHTML = '<ol class="fxc-snapshot-answers">' + answers.map(function (a, i) {
+            return renderQuestion(a, i, showKey);
+        }).join("") + "</ol>";
     }
 
     // 2026-10-01 (PROC): kimlik kartı (şəkil / ad / qrup / nömrə) + risk nişanları
@@ -215,7 +221,7 @@
         }
     }
 
-    function renderQuestion(a, i) {
+    function renderQuestion(a, i, showKey) {
         var cls = a.is_answered ? "answered" : "empty";
         var inner = "";
         var opts = a.options || [];
@@ -223,15 +229,16 @@
             // Test sualı — bütün variantları göstər, seçilən + düzgün işarələnir.
             inner = '<div class="fxc-snap-opts">' + opts.map(function (o) {
                 var oc = "";
+                var isCorrect = showKey && o.is_correct;
                 if (o.is_selected) oc += " selected";
-                if (o.is_correct) oc += " correct";
-                if (o.is_selected && !o.is_correct) oc += " wrong";
+                if (isCorrect) oc += " correct";
+                if (showKey && o.is_selected && !o.is_correct) oc += " wrong";
                 var badges = "";
                 if (o.is_selected) {
                     badges += '<span class="fxc-snap-badge fxc-snap-badge--selected">' +
                         gettext("Tələbənin cavabı") + "</span>";
                 }
-                if (o.is_correct) {
+                if (isCorrect) {
                     badges += '<span class="fxc-snap-badge fxc-snap-badge--correct">' +
                         gettext("Düzgün cavab") + "</span>";
                 }
