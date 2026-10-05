@@ -16,6 +16,7 @@ from django.utils.translation import pgettext
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
+from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.services.result_release import attempt_answer_key_hidden, exam_answers_release_locked
@@ -55,11 +56,15 @@ def _is_profile_results_request(request, return_to):
     return any(f"section={section}" in return_to for section in _PROFILE_CABINET_SECTIONS)
 
 
-def _hide_test_answer_correctness_in_cabinet(exam, *, is_profile_results):
+def _hide_secure_test_answer_key(exam):
+    """Final/midterm testin cavab açarı tələbəyə göstərilmir.
+
+    Təhlükəsizlik auditi 2026-10-05: qərar əvvəl ``from_section`` / ``return_to``
+    (tələbənin idarə etdiyi sorğu parametrləri) ilə verilirdi — parametrsiz adi nəticə
+    URL-i midterm açarını açırdı. İndi YALNIZ imtahan kateqoriyasına görə (serverdə).
+    """
     return bool(
-        is_profile_results
-        and getattr(exam, "exam_type", "") == "test"
-        and getattr(exam, "exam_type_extended", "") in {"final", "midterm"}
+        getattr(exam, "exam_type", "") == "test" and getattr(exam, "exam_type_extended", "") in SECURE_EXAM_CATEGORIES
     )
 
 
@@ -159,9 +164,9 @@ def exam_result(request, slug, attempt_id):
     answers_release_locked = exam_answers_release_locked(exam)
     # Audit 2026-09-28 EX28-03: cəhd haqqı qalıbsa açar gizli (verdikt/bal görünür).
     answer_key_hidden = attempt_answer_key_hidden(attempt, user=request.user)
-    hide_test_answer_correctness = _hide_test_answer_correctness_in_cabinet(
-        exam, is_profile_results=is_profile_results
-    ) or (getattr(exam, "exam_type", "") == "test" and answers_release_locked)
+    hide_test_answer_correctness = _hide_secure_test_answer_key(exam) or (
+        getattr(exam, "exam_type", "") == "test" and answers_release_locked
+    )
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
