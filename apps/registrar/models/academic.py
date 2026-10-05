@@ -175,8 +175,10 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, AdmissionRecordFie
     """A student's academic profile within a program: which curriculum + group
     they belong to. Drives the mandatory/elective enrollment flow (roadmap §2)."""
 
+    # Tutum testi 2026-10-05: `organization` tək indeksi (organization, group) və
+    # uniq_student_program prefiksidir — db_index=False (25 indeks → fast-path limiti).
     organization = models.ForeignKey(
-        "organizations.Organization", on_delete=models.CASCADE, related_name="student_records"
+        "organizations.Organization", on_delete=models.CASCADE, related_name="student_records", db_index=False
     )
     student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academic_records")
     program = models.ForeignKey(Program, on_delete=models.PROTECT, related_name="student_records")
@@ -194,7 +196,6 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, AdmissionRecordFie
         max_length=20,
         choices=AcademicStatus.choices,
         default=AcademicStatus.ENROLLED,
-        db_index=True,
         help_text="Akademik status (qeydiyyatlı / akademik məzuniyyət / xaric / məzun).",
     )
     # ── Rəsmi davamiyyət istisnası: idmançı-tələbə (milli yığma) ─────────────
@@ -234,7 +235,7 @@ class StudentAcademicRecord(ReferenceIdentityValidationMixin, AdmissionRecordFie
         db_default="",
         help_text="İstisnanın rəsmi əsası (Kollegiya qərarının nömrəsi/tarixi) — audit üçün.",
     )
-    is_active = models.BooleanField(default=True, db_index=True)
+    is_active = models.BooleanField(default=True)
 
     objects = models.Manager()
     active = ActiveManager()

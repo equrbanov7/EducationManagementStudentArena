@@ -37,7 +37,6 @@ class UserProfile(models.Model):
         max_length=16,
         choices=AccessState.choices,
         default=AccessState.ACTIVE,
-        db_index=True,
         verbose_name="Giriş vəziyyəti",
         help_text="Legacy import staged qalır; məzun/xaric archived olur (giriş bağlı, data qalır).",
     )
@@ -61,6 +60,7 @@ class UserProfile(models.Model):
         related_name="requested_members",
         verbose_name="Müraciət edilən təşkilat",
         help_text="Signup zamanı seçilən, amma hələ qoşulmadığı təşkilat",
+        db_index=False,
     )
 
     requested_organization_name = models.CharField(
@@ -96,7 +96,6 @@ class UserProfile(models.Model):
         max_length=100,
         blank=True,
         default="",
-        db_index=True,
         verbose_name="Ata adı",
         help_text="Ad+soyad eyni olan hesabları ayırd etmək üçün (RİM axtarışı).",
     )
@@ -116,7 +115,6 @@ class UserProfile(models.Model):
         max_length=16,
         choices=Gender.choices,
         default=Gender.UNSPECIFIED,
-        db_index=True,
         verbose_name="Cins",
         help_text="Mənbədə göstərilməyibsə «təyin edilməyib» qalır — təxmin edilmir.",
     )
@@ -125,7 +123,6 @@ class UserProfile(models.Model):
         null=True,
         blank=True,
         default=None,
-        db_index=True,
         verbose_name="Doğum tarixi",
         help_text="Yaş filtri üçün; pozuq və ya qeyri-müəyyən mənbə dəyəri NULL qalır.",
     )
@@ -257,7 +254,6 @@ class UserProfile(models.Model):
         max_length=30,
         choices=ProfileRole.CHOICES,
         default=ProfileRole.MEMBER,
-        db_index=True,
         verbose_name="Rol",
         help_text="Denormalizə keş — əsl rol Membership.role-dadır",
     )
@@ -304,13 +300,11 @@ class UserProfile(models.Model):
     # system. See FirstLoginPasswordMiddleware + accounts:set_initial_password.
     password_change_required = models.BooleanField(
         default=False,
-        db_index=True,
         verbose_name="Parol dəyişməlidir",
         help_text="İlk girişdə istifadəçi öz parolunu qurana qədər True qalır.",
     )
     email_verified = models.BooleanField(
         default=False,
-        db_index=True,
         verbose_name="Email təsdiqlənib",
         help_text="İlk girişdə OTP ilə təsdiqləndikdən sonra True; parol bərpası üçün istifadə olunur.",
     )
@@ -329,7 +323,6 @@ class UserProfile(models.Model):
     # apps.exams.services.access_policy.can_manage_exam_rooms.
     can_manage_exam_rooms = models.BooleanField(
         default=False,
-        db_index=True,
         verbose_name="Zal idarəçisi",
         help_text="Superadmin verir: imtahan zalı və kompüter/MAC qeydlərini idarə etmək icazəsi.",
     )
@@ -337,7 +330,6 @@ class UserProfile(models.Model):
     # Soft-delete fields for account deletion
     is_deleted = models.BooleanField(
         default=False,
-        db_index=True,
         verbose_name="Silinib",
         help_text="Hesab silinibsə True",
     )
@@ -360,6 +352,7 @@ class UserProfile(models.Model):
         related_name="rim_deleted_profiles",
         verbose_name="Silən",
         help_text="Hesabı soft-delete edən RİM operatoru",
+        db_index=False,
     )
     deletion_reason = models.CharField(
         max_length=300,
@@ -381,6 +374,7 @@ class UserProfile(models.Model):
         related_name="rim_blocked_profiles",
         verbose_name="Bloklayan",
         help_text="Hesabı bloklayan RİM operatoru",
+        db_index=False,
     )
     block_reason = models.CharField(
         max_length=300,
@@ -418,14 +412,12 @@ class UserProfile(models.Model):
         verbose_name = "İstifadəçi profili"
         verbose_name_plural = "İstifadəçi profilləri"
         ordering = ["-created_at"]
-        indexes = [
-            models.Index(fields=["organization", "created_at"]),
-            # `role` (db_index=True) və `requested_organization` (FK) üçün Django
-            # avtomatik indeks yaradır — buradakı təkrarlar 2026-09-14-də silindi
-            # (data auditi 2026-09-13 §6.2, miqrasiya 0023, CONCURRENTLY).
-            models.Index(fields=["is_deleted", "deleted_at"]),
-            # RİM axtarışı: FİN ilə birbaşa tapma (dəqiq uyğunluq).
-        ]
+        # Tutum testi 2026-10-05: profil hər sorğuda oxunur; 24 indeks PG16-nın 16
+        # fast-path kilid limitini aşıb `LWLock:LockManager` gözləməsi yaradırdı.
+        # Canlı `pg_stat_user_indexes` (DB yaradılandan bəri) idx_scan≈0 olan
+        # aşağı kardinallıqlı sahə/kompozit indekslər silindi; FİN (unique),
+        # user (unique) və organization FK indeksi qalır.
+        indexes = []
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"

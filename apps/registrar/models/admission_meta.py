@@ -83,7 +83,6 @@ class AdmissionRecordFields(models.Model):
         blank=True,
         default="",
         db_default="",
-        db_index=True,
         help_text="ATİS qəbul siyahısındakı sətir nömrəsi/identifikatoru.",
     )
     admission_score = models.DecimalField(
@@ -105,7 +104,6 @@ class AdmissionRecordFields(models.Model):
         choices=EducationForm.choices,
         default=EducationForm.FULL_TIME,
         db_default=EducationForm.FULL_TIME,
-        db_index=True,
         help_text="Tələbənin təhsil forması (ixtisasın default formasından fərqlənə bilər).",
     )
     funding_type = models.CharField(
@@ -113,7 +111,6 @@ class AdmissionRecordFields(models.Model):
         choices=FundingType.choices,
         default=FundingType.PAID,
         db_default=FundingType.PAID,
-        db_index=True,
         help_text="Maliyyələşmə mənbəyi (dövlət sifarişi / ödənişli).",
     )
 
@@ -123,7 +120,6 @@ class AdmissionRecordFields(models.Model):
         choices=AdmissionStatus.choices,
         default=AdmissionStatus.ADMITTED,
         db_default=AdmissionStatus.ADMITTED,
-        db_index=True,
         help_text="Qəbulun növü (ATİS STATUS): adi / möhlətlə / güzəştli / TTK.",
     )
     admission_channel = models.CharField(
@@ -132,7 +128,6 @@ class AdmissionRecordFields(models.Model):
         blank=True,
         default="",
         db_default="",
-        db_index=True,
         help_text="Qəbul xətti (ATİS): DİM imtahanı ilə / imtahansız.",
     )
     admission_tour = models.CharField(
@@ -144,7 +139,6 @@ class AdmissionRecordFields(models.Model):
         blank=True,
         default="",
         db_default="",
-        db_index=True,
         help_text="Tədris dili (ATİS) — qrup təyin olunmamış tələbə də süzülsün.",
     )
     tuition_fee = models.DecimalField(
