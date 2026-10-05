@@ -475,7 +475,10 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     }
     written, skipped, total, errors, failed_by_enrollment = 0, 0, 0, [], {}
     written_ids = []
-    for row in rows:
+    # Tutum testi 2026-10-05: hər sətir Enrollment-i `select_for_update` ilə kilidləyir və
+    # kilid çağıranın tranzaksiyası boyu qalır. İki işçi eyni siyahını fərqli ardıcıllıqla
+    # saxlayanda deadlock alınırdı — sətirlər sabit (enrollment_id) ardıcıllıqla yazılır.
+    for row in sorted(rows, key=lambda r: str(r.get("enrollment_id") or "")):
         enrollment_id = str(row.get("enrollment_id") or "")
         enrollment = enrollments.get(enrollment_id)
         total += 1
