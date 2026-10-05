@@ -86,10 +86,11 @@ class StudentExamListBatch:
         self._excluded_ids = frozenset(page.filter(excluded_users=user).values_list("id", flat=True))
         # 2026-09-14 (W4 `w4wizard`, R2): köhnə kohort VƏ YA reyestr qrupu — hər
         # ikisi eyni «qrupla təyin olunub» dəstinə düşür (tək sorğu, sətir sayından asılı deyil).
-        self._group_ids = frozenset(
-            page.filter(Q(allowed_groups__students=user) | unit_assigned_exams_q(user))
-            .values_list("id", flat=True)
-            .distinct()
+        group_q = Q(pk__in=Exam.objects.order_by().filter(allowed_groups__students=user).values("pk"))
+        unit_q = unit_assigned_exams_q(user)
+        # Semi-join (tutum testi 2026-10-05): OR + JOIN qrupun bütün tələbələrini birləşdirirdi.
+        self._group_ids = frozenset(page.filter(group_q).values_list("id", flat=True)) | frozenset(
+            page.filter(unit_q).values_list("id", flat=True).distinct()
         )
         self._course_member_ids = frozenset(
             page.filter(course__memberships__user=user, course__memberships__role="student")
