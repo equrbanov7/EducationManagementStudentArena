@@ -92,6 +92,21 @@ class Stack:
         services["pool"]["cpus"] = 1.0  # prod PGBOUNCER_CPU_LIMIT defoltu
         services["redis"]["cpus"] = 0.5
         services["edge"]["cpus"] = 0.75
+        # Prod nginx `upstream` bloku işlətmir (DNS ilə `app`) — replikaları «ölü» elan
+        # etmir. Codex-in edge-i defolt max_fails=1 + 15 s timeout ilə yük altında
+        # bütün replikaları atıb 502 kaskadı yaradırdı (prod-da olmayan artefakt).
+        edge_conf = CAP / "cap-nginx.conf"
+        edge_conf.write_text(
+            "events { worker_connections 8192; } http { upstream backend { least_conn; "
+            + " ".join(f"server {a}:8000 max_fails=0;" for a in APPS)
+            + " keepalive 64; } server { listen 443 ssl; ssl_certificate /cert.pem; ssl_certificate_key /key.pem; "
+            "location / { proxy_pass http://backend; proxy_http_version 1.1; proxy_set_header Connection \"\"; "
+            "proxy_set_header Host $http_host; proxy_set_header X-Forwarded-Proto https; "
+            "proxy_set_header X-Forwarded-For $http_x_test_client; proxy_read_timeout 60s; } } }"
+        )
+        services["edge"]["volumes"] = [
+            v.replace(f"{CAP}/nginx.conf:", f"{edge_conf}:") for v in services["edge"].get("volumes", [])
+        ]
         services["worker"]["cpus"] = 0.5
         for name in APPS + ("worker",):
             services[name]["image"] = self.image
