@@ -225,7 +225,8 @@ class LivePlayer(_LiveBase):
         scheme = "wss" if self.host.startswith("https") else "ws"
         url = f"{scheme}://{self.host.split('://', 1)[1]}/ws/live/{self.pin}/{kind}/"
         cookies = "; ".join(f"{c.name}={c.value}" for c in self.client.cookies)
-        headers = {"Cookie": cookies, "Origin": ORIGIN, "X-Test-Client": self.client.headers.get("X-Test-Client", "")}
+        # Origin = Host (AllowedHostsOriginValidator: ALLOWED_HOSTS-da olan host — HTTP sorğuları da «edge»).
+        headers = {"Cookie": cookies, "Origin": self.host, "X-Test-Client": self.client.headers.get("X-Test-Client", "")}
         started = time.monotonic()
         try:
             ws = WS(url, headers=headers, timeout=30, cafile=CERT if scheme == "wss" and os.path.exists(CERT) else None)
