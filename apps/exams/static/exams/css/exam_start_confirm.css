@@ -35,6 +35,19 @@
     font-weight: 700;
 }
 
+.exam-start-confirm__meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 0.75rem;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
 .exam-start-confirm__text {
     margin: 0 0 1.25rem;
     color: #475569;

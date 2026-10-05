@@ -31,7 +31,7 @@ import time
 
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse, JsonResponse
-from django.utils.translation import pgettext
+from django.utils.translation import get_language, pgettext
 
 from core.middleware import _request_wants_json
 from core.settings_utils import safe_float_setting as _safe_float_setting
@@ -51,6 +51,34 @@ DEFAULT_EXEMPT_PREFIXES = (
     "/health/",
     "/ws/",
 )
+
+
+# Brauzer naviqasiyası üçün stilli 503 səhifəsi dil üzrə BİR dəfə render olunur: yük altında hər rədd
+# edilən sorğu şablon engine-i işlətməsin (sessiya/auth/DB-yə də toxunmur — `request` verilmir).
+_OVERLOAD_HTML_CACHE: dict[tuple[str, bool], str] = {}
+
+
+def _wants_html_page(request) -> bool:
+    return "text/html" in request.META.get("HTTP_ACCEPT", "")
+
+
+def _overload_html(request) -> str | None:
+    """Stilli 503 HTML-i (dil+metod üzrə keşli); render alınmasa ``None`` (düz mətnə qayıdılır)."""
+    can_retry = request.method in ("GET", "HEAD")
+    key = (get_language() or "az", can_retry)
+    html = _OVERLOAD_HTML_CACHE.get(key)
+    if html is None:
+        try:
+            from django.conf import settings
+            from django.template.loader import render_to_string
+
+            brand = pgettext("brand", getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti"))
+            html = render_to_string("errors/503.html", {"site_brand_name": brand, "can_retry": can_retry})
+        except Exception:  # noqa: BLE001 — rədd yolu heç vaxt özü 500 verməməlidir
+            logger.exception("503 səhifəsi render olunmadı — düz mətn qaytarılır")
+            return None
+        _OVERLOAD_HTML_CACHE[key] = html
+    return html
 
 
 class ConcurrencyLimitMiddleware:
@@ -132,7 +160,11 @@ class ConcurrencyLimitMiddleware:
         if _request_wants_json(request):
             response = JsonResponse({"ok": False, "error": message}, status=503)
         else:
-            response = HttpResponse(message, status=503, content_type="text/plain; charset=utf-8")
+            html = _overload_html(request) if _wants_html_page(request) else None
+            if html is not None:
+                response = HttpResponse(html, status=503, content_type="text/html; charset=utf-8")
+            else:
+                response = HttpResponse(message, status=503, content_type="text/plain; charset=utf-8")
         retry_after = _safe_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", DEFAULT_RETRY_AFTER_SECONDS, minimum=1)
         response["Retry-After"] = str(retry_after)
         response["X-Concurrency-Limited"] = "1"

@@ -16,6 +16,7 @@
         ns.timers.initTimeWarning(ctx);
         ns.files.init(ctx);
         ns.draft.init(ctx);
+        ns.syncStatus.init(ctx);
         ns.timers.initExamTimer(ctx);
         ns.timers.initVisibilityRefresh(ctx);
         ns.navigation.init(ctx);

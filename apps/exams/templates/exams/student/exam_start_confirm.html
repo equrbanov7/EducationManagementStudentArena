@@ -10,7 +10,7 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
 {% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261001-1">
+<link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261005-1">
 {% endblock %}
 
 {% block content %}
@@ -20,6 +20,9 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
     {% trans "Start the exam?" context "exams.start_confirm" %}
   </h1>
   <p class="exam-start-confirm__exam">{{ exam.title }}</p>
+  {% if exam.total_duration_minutes %}
+  <p class="exam-start-confirm__meta"><i class="far fa-clock" aria-hidden="true"></i> {% blocktrans with minutes=exam.total_duration_minutes context "exams.start_confirm" %}Duration: {{ minutes }} min{% endblocktrans %}</p>
+  {% endif %}
   <p class="exam-start-confirm__text">
     {% trans "When you start, an attempt is created and the timer begins. Start only when you are ready." context "exams.start_confirm" %}
   </p>
