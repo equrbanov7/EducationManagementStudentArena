@@ -10,8 +10,8 @@ Rejimlər (`CAP_MODE`):
             yazısı → yenidən açılış → 3 xanalıq düzəliş → cədvəl.
   cabinet — tələbə kabineti: kabinet + bölmə fraqmentləri, düşünmə vaxtı ilə.
   mixed   — exam (60%) + cabinet (30%) + journal (10%).
-  Əlavə rejimlər (studentjournal, journalfinal, export, finalcenter) — bax
-  `cap_locust_extra.py`.
+  Əlavə rejimlər (studentjournal, journalfinal, export, finalcenter, live) — bax
+  `cap_locust_extra.py` və `cap_locust_live.py`.
 
 Hesab zolağı: hər worker `CAP_OFFSET`/`CAP_SHARD` (tələbə indeksləri) və
 `CAP_T_OFFSET`/`CAP_T_SHARD` (müəllim siyahısında) ilə ayrıca zolaq alır.

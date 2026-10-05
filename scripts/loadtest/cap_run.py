@@ -298,7 +298,8 @@ def capture_stage_errors(run_dir, name, since_iso):
 STUDENT_SESSION_MODES = ("exam", "cabinet", "mixed", "studentjournal")
 TEACHER_MODES = ("journal", "journalfinal", "export")
 EXAM_TAIL_MODES = ("exam", "mixed", "journal", "journalfinal", "finalcenter")
-MODES = ("login", "exam", "journal", "cabinet", "mixed", "studentjournal", "journalfinal", "export", "finalcenter")
+MODES = ("login", "exam", "journal", "cabinet", "mixed", "studentjournal", "journalfinal", "export", "finalcenter", "live")
+LIVE_PLAYERS_PER_GAME = 150  # live_exam DEFAULT_MAX_PARTICIPANTS = 200
 
 
 def make_sessions(stack, run_dir, name, start, count, user=""):
@@ -321,7 +322,7 @@ def make_sessions(stack, run_dir, name, start, count, user=""):
 
 def student_lane(mode, users, cursor, seed):
     """(ilk indeks, say, əsas kursor irəliləyirmi). studentjournal cap jurnal tələbələrini oxuyur."""
-    if mode in TEACHER_MODES:
+    if mode in TEACHER_MODES or mode == "live":
         return cursor, 0, False
     if mode == "studentjournal":
         total = int(seed.get("journal_students") or 0)
@@ -336,6 +337,9 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
     name = f"{index:02d}-{mode}-{users}"
     workers = max(1, min(args.max_workers, math.ceil(users / args.users_per_worker)))
     seed = json.loads(seed_path.read_text())
+    live_games = min(len(seed.get("live_exams") or []) or 1, max(1, math.ceil(users / LIVE_PLAYERS_PER_GAME)))
+    if mode == "live":
+        workers = 1  # oyun koordinasiyası (host PIN → oyunçular) proses daxilindədir
     teachers = len(seed.get("journals") or [])
     s_base, student_share, advances = student_lane(mode, users, cursor, seed)
     sessions_env = []
@@ -356,6 +360,11 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
             # Ön-giriş yoxdur (PIN girişi axının özüdür) — VU-lar tez qalxır, `go` pəncərəsində başlayır.
             spawn_rate = max(20.0, users / 30)
             preauth = users / spawn_rate
+        elif mode == "live":
+            sessions_env = make_sessions(stack, run_dir, name, 0, live_games + 1, user=seed.get("exam_author", "stress_teacher"))
+            spawn_rate = max(10.0, users / 30)
+            preauth = users / spawn_rate
+            tail = 8 * (20 + 6) + 90  # 8 sual × (sual + reveal) + nəticə
         elif mode == "export":
             # İmtahan nəticəsi ixracı müəllifin (stress_teacher) adına — eyni hesaba N sessiya.
             sessions_env = make_sessions(stack, run_dir, name, 0, max(1, users // 5) + 2, user=seed.get("exam_author", "stress_teacher"))
@@ -381,6 +390,7 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
         # Sabit saylı köməkçi rollar (locust `fixed_count`): İM bal aktorları / imtahan müəllifi.
         "-e", f"CAP_CLERK_USERS={min(len(seed.get('clerks') or []), max(1, users // 10)) if mode == 'journalfinal' else 0}",
         "-e", f"CAP_AUTHOR_USERS={max(1, users // 5) if mode == 'export' else 0}",
+        "-e", f"CAP_LIVE_GAMES={live_games}",
         *sessions_env,
         "--entrypoint", "/capacity/toolenv/bin/locust", stack.image,
         "-f", "/harness/cap_locust.py",

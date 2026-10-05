@@ -68,6 +68,9 @@ PAD = int(os.environ.get("CAP_STUDENT_PAD", "3") or 3)
 HISTORY = int(os.environ.get("CAP_HISTORY_LESSONS", "4") or 0)
 # İmtahan Mərkəzi «imtahan balı» aktorları (exam_center_head rolu).
 CLERKS = int(os.environ.get("CAP_CLERKS", "20") or 0)
+# live rejimi: hər oyun (host) öz imtahanında — bir host+imtahanın yalnız bir aktiv sessiyası olur.
+LIVE_EXAMS = int(os.environ.get("CAP_LIVE_EXAMS", "10") or 0)
+LIVE_QUESTIONS = int(os.environ.get("CAP_LIVE_QUESTIONS", "8") or 8)
 OUT = os.environ.get("CAP_OUT", "/capacity/cap-seed.json")
 ORG_SLUG = os.environ.get("CAP_ORG_SLUG", "stress-test-university")
 
@@ -132,6 +135,36 @@ def seed_exam(org, author, groups, *, prefix="cap", extended=None):
         exam.random_question_count = QUESTIONS
         exam.save(update_fields=["random_question_count"])
     return exam
+
+
+def seed_live_exams(org, author):
+    """Canlı viktorina imtahanları (`cap-live-<run>-<k>`): tək seçimli suallar, 4 variant."""
+    slugs = []
+    for k in range(1, LIVE_EXAMS + 1):
+        slug = slugify(f"cap-live-{RUN_ID}-{k}")
+        exam = Exam.objects.filter(organization=org, slug=slug).first()
+        if exam is None:
+            exam = Exam.objects.create(
+                organization=org,
+                author=author,
+                title=f"Tutum canlı {RUN_ID} #{k}",
+                exam_type="test",
+                is_active=True,
+                is_public=False,
+                slug=slug,
+            )
+            for order in range(1, LIVE_QUESTIONS + 1):
+                question = ExamQuestion.objects.create(
+                    exam=exam, order=order, text=f"Canlı sual {order}", points=1000, answer_mode="single"
+                )
+                ExamQuestionOption.objects.bulk_create(
+                    [
+                        ExamQuestionOption(question=question, label=label, text=f"Variant {label}", is_correct=label == "A")
+                        for label in "ABCD"
+                    ]
+                )
+        slugs.append(exam.slug)
+    return slugs
 
 
 def current_period(org, today):
@@ -399,6 +432,7 @@ with rls_worker_atomic(), bypass_rls():
     with transaction.atomic():
         exam = seed_exam(org, author, exam_groups)
         final_exam = seed_exam(org, author, exam_groups, prefix="cap-final", extended="final")
+        live_exams = seed_live_exams(org, author)
     log("exam", exam.slug, "questions", exam.questions.count(), "final", final_exam.slug)
     with transaction.atomic():
         journals, enrollments = seed_journals(org, owner)
@@ -429,6 +463,7 @@ with rls_worker_atomic(), bypass_rls():
         # finalcenter: hamı üçün eyni fərdi PIN (cap_prep.py PIN sətirlərini pillədən əvvəl yazır).
         "final_pin": "".join(secrets.choice("23456789") for _ in range(6)),
         "exam_author": author.username,
+        "live_exams": live_exams,
         "questions": exam.questions.count(),
         "journals": journals,
         "enrollments": enrollments,

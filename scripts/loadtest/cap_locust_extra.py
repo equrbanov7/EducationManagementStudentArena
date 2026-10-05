@@ -446,9 +446,12 @@ class FinalCenterStudent(_Base):
         raise _Abort()
 
 
+from cap_locust_live import LIVE_CLASSES  # noqa: E402
+
 EXTRA_CLASSES = {
     "studentjournal": [StudentJournal],
     "journalfinal": [JournalFinalTeacher, FinalScoreClerk],
     "export": [ExportTeacher, ExportExamResults],
     "finalcenter": [FinalCenterStudent],
+    "live": LIVE_CLASSES,
 }

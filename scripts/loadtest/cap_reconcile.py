@@ -6,6 +6,7 @@
   * midterm/kollokvium: ComponentScore (son yazı qalib — eyni xana bir neçə pillədə)
   * yekun imtahan balı: FinalGrade.exam_score + hər yazıya ExamScoreEntry sübut sətri
   * final mərkəzi: `expected-answers` sətirləri `kind=final` ilə ayrıca hesabatlanır
+  * canlı viktorina: `answer_saved` alınmış hər cavab ↔ LiveAnswer (pin, ləqəb, sual, variant)
 """
 
 import json
@@ -14,6 +15,7 @@ from pathlib import Path
 
 from apps.exams.models import ExamAttempt
 from apps.exams.services.option_tokens import option_token
+from apps.live_exam.models import LiveAnswer
 from apps.registrar.models import ComponentScore, LessonMark
 from apps.registrar.models.exam_score_entry import ExamScoreEntry
 from apps.registrar.models.grading import FinalGrade
@@ -124,6 +126,27 @@ with rls_worker_atomic(), bypass_rls():
         if grades.get(e) != want or e not in evidence
     ]
     result["final_scores"] = {"cells_checked": len(finals), "mismatches": len(bad), "examples": bad[:10]}
+
+    live_rows = load("expected-live")
+    if live_rows:
+        stored = {}
+        for pin, nickname, qid, choice, choices in LiveAnswer.objects.filter(
+            session__pin__in={r["pin"] for r in live_rows}
+        ).values_list("session__pin", "player__nickname", "question_id", "choice_id", "choice_ids"):
+            stored[(pin, nickname, int(qid))] = {int(c) for c in (choices or []) if str(c).isdigit()} | (
+                {int(choice)} if choice else set()
+            )
+        bad = [
+            r
+            for r in live_rows
+            if int(r["option_id"]) not in stored.get((r["pin"], r["nickname"], int(r["question_id"])), set())
+        ]
+        result["live"] = {
+            "sessions": len({r["pin"] for r in live_rows}),
+            "answers_checked": len(live_rows),
+            "mismatches": len(bad),
+            "examples": bad[:10],
+        }
 
 (RUN_DIR / "reconciliation.json").write_text(json.dumps(result, indent=2))
 print("CAP_RECONCILE " + json.dumps(result))
