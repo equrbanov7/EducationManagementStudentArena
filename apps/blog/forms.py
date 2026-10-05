@@ -401,3 +401,17 @@ class QuestionForm(forms.ModelForm):
             "visible_to_all": pgettext_lazy("blog.form.question", "label_visible_to_all"),
             "visible_users": pgettext_lazy("blog.form.question", "label_visible_users"),
         }
+
+    def __init__(self, *args, organization=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Təhlükəsizlik auditi 2026-10-05: default queryset ``User.objects.all()`` idi —
+        # müəllim BÜTÜN tenant-ların istifadəçilərini görür və seçə bilirdi. Seçim yalnız
+        # aktiv təşkilatın aktiv üzvləridir; təşkilat konteksti yoxdursa — boş.
+        users = self.fields["visible_users"].queryset
+        if organization is None:
+            users = users.none()
+        else:
+            users = users.filter(
+                memberships__organization=organization, memberships__is_active=True, is_active=True
+            ).distinct()
+        self.fields["visible_users"].queryset = users
