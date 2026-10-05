@@ -206,6 +206,10 @@ def update_campaign(
         }
         _validate(campaign.opens_on, new_values["closes_on"], new_values["grace_until"], new_values["min_group_size"])
         changes = {key: value for key, value in new_values.items() if getattr(campaign, key) != value}
+        if "min_group_size" in changes and campaign.results_published_at:
+            # Təhlükəsizlik auditi 2026-10-05 (``survey_builder`` qaydası): dərcdən sonra k-nı
+            # endirib eyni dəstin kiçik dilimlərini açmaq olmaz.
+            raise CampaignError(pgettext(_CTX, "Nəticələr dərc olunandan sonra k-həddi dəyişmir."))
         if not changes:
             return campaign
         for key, value in changes.items():
