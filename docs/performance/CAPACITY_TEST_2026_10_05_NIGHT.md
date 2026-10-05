@@ -154,6 +154,39 @@ Digər düzəlişlər:
 - Navbar oxunmamış bildiriş sayğacı imtahan/nəticə səhifəsində 2 dəfə (2 × COUNT + 4 `set_config`)
   hesablanırdı — sorğu daxilində bir dəfə.
 
+### İndeks düzəlişindən sonra (canlı image cf89a57f, eyni 8×0.5 CPU + DB 2 CPU)
+
+| Pillə | Xəta % | p50 / p95 | Qeyd |
+|---|---:|---|---|
+| login 500 / 120 s | 0 | 1.0 / 2.0 s | ✅ |
+| kabinet 500 | 0 | **0.52 / 4.1 s** (əvvəl 2.4 / 7.7 s) | LockManager gözləməsi 75 → 6 |
+| jurnal 500 (real qiymət yazısı) | 3.2 | 2.0 / 6.9 s (save) | 500 eyni anlı login + DB 200 % → 503 |
+| imtahan 1000 | 4.7 | 5.3 / 7.6 s (autosave) | DB 208 % (2 CPU limiti), LockManager 37 → 27 |
+| tələbə jurnalı 1000 | **38.6** | 6–8 s | app CPU: hər bölmə tam profil kontekstini qurur (~150 ms CPU) |
+| kollokvium/final balı 300 | 7.7 | — | **deadlock** (aşağıda) + 503 |
+| final mərkəzi 500 (PIN girişi) | **56** | PIN 40 s | PBKDF2: bir girişdə 3–4 PIN hash-i |
+| export 100 | 0 | jurnal xlsx 0.19 s, nəticə xlsx 7.5 s | ✅ |
+| canlı imtahan 300 (WS) | 8.9 | WS qoşulma 35 ms | host «start» 30 s timeout, join səhifəsi timeout |
+
+Bütövlük: imtahan 6990, final 110, jurnal 10 425, midterm 5025, final balı 775 xana — **0 uyğunsuzluq**.
+
+Bu gecə düzəldilənlər (testli):
+- **Deadlock — imtahan balı daxiletməsi** (`registrar/exam_score_entry.save_roster_scores`): hər sətir
+  Enrollment-i kilidləyir; iki işçi eyni siyahını fərqli ardıcıllıqla saxlayanda deadlock (500).
+  Sətirlər indi sabit `enrollment_id` ardıcıllığı ilə yazılır.
+- **Final PIN girişi:** eyni PIN eyni hash-ə qarşı iki dəfə yoxlanırdı (fərdi PIN yolu + `can_user_start`).
+  Uğurlu yoxlama 60 s proses daxilində yadda saxlanır (açar = saxlanan hash + PIN-in HMAC-ı; səhv PIN
+  həmişə tam hash). Hash gücü dəyişmir.
+
+Qalan (növbəti iş, sahib qərarı lazım deyil):
+- **Tələbə kabinet bölmələri** — bölmə endpoint-i tam profil kontekst qurucusunu işə salır; bölmə üzrə
+  yüngül qurucu lazımdır (ən böyük app CPU qazancı).
+- **Final mərkəzi PIN** — imtahan günü girişi zallara/dalğalara bölmək; PIN-in təyinatı (qrup əlavə
+  edəndə hər tələbəyə sinxron `make_password`) fona köçürülməlidir.
+- **Canlı imtahan host «start»** — 300 oyunçuda 30 s; hər oyunçu soketi öz auto-reveal taymerini qurur.
+- **DB CPU** — test DB-si 2 CPU ilə məhdud idi; canlıda DB ilə app eyni 10 vCPU-nu bölür. VM-in 24–32
+  vCPU-ya böyüdülməsi hər iki darboğazı birbaşa açır.
+
 ## 50 000 nəfər haqqında
 
 Tək 10 vCPU-luq serverdə 50 000 **eyni anda aktiv** istifadəçi mümkün deyil.
