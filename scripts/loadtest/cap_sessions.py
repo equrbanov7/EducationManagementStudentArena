@@ -26,9 +26,22 @@ COUNT = int(os.environ["CAP_SESSION_COUNT"])
 PAD = int(os.environ.get("CAP_STUDENT_PAD", "3"))
 OUT = os.environ["CAP_SESSION_OUT"]
 THREADS = int(os.environ.get("CAP_SESSION_THREADS", "8"))
+# Verilərsə: həmin BİR hesaba COUNT sessiya (açarlar "0".."COUNT-1") — məs. imtahan
+# müəllifinin paralel ixracları (export rejimi).
+ONE_USER = os.environ.get("CAP_SESSION_USER", "")
 User = get_user_model()
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 BACKEND = settings.AUTHENTICATION_BACKENDS[0]
+
+
+def _session_for(user):
+    request = HttpRequest()
+    request.META["REMOTE_ADDR"] = "10.250.0.1"
+    request.META["HTTP_USER_AGENT"] = "capacity-preauth"
+    request.session = SessionStore()
+    login(request, user, backend=BACKEND)
+    request.session.save()
+    return request.session.session_key
 
 
 def chunk(indexes):
@@ -36,22 +49,19 @@ def chunk(indexes):
     out = []
     try:
         with rls_worker_atomic(), bypass_rls():
+            if ONE_USER:
+                user = User.objects.get(username=ONE_USER)
+                return [[i, _session_for(user)] for i in indexes]
             names = {f"stress_student_{i:0{PAD}d}": i for i in indexes}
             for user in User.objects.filter(username__in=list(names)):
-                request = HttpRequest()
-                request.META["REMOTE_ADDR"] = "10.250.0.1"
-                request.META["HTTP_USER_AGENT"] = "capacity-preauth"
-                request.session = SessionStore()
-                login(request, user, backend=BACKEND)
-                request.session.save()
-                out.append([names[user.username], request.session.session_key])
+                out.append([names[user.username], _session_for(user)])
     finally:
         close_old_connections()
     return out
 
 
 started = time.monotonic()
-indexes = list(range(START, START + COUNT))
+indexes = list(range(0, COUNT)) if ONE_USER else list(range(START, START + COUNT))
 size = 250
 batches = [indexes[i : i + size] for i in range(0, len(indexes), size)]
 result = {}

@@ -14,7 +14,6 @@ Plan: `--plan "login:500@60,exam:500@60,journal:200@60,cabinet:500@60,mixed:1000
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import math
 import os
@@ -24,13 +23,13 @@ import threading
 import time
 from pathlib import Path
 
+from cap_report import summarize_stage, write_report
+
 CAP = Path("/home/wcu/emsarena-capacity-20261004")
 PROJECT = "emsarena-capacity-20261004"
 NETWORK = f"{PROJECT}_isolated"
 LIVE_APP = "educationmanagementstudentarena-app-1"
 APPS = ("app1", "app2", "app3", "app4")
-P95_LIMIT_MS = 2500
-ERROR_LIMIT = 0.01
 
 
 def sh(args, check=True, capture=False, timeout=None, merge=False, **kw):
@@ -291,13 +290,50 @@ def capture_stage_errors(run_dir, name, since_iso):
         log("APP_ERROR", n, key)
 
 
+# Rejim qrupları: tələbə sessiya hovuzu / müəllim rotasiyası / imtahan uzunluğunda quyruq.
+STUDENT_SESSION_MODES = ("exam", "cabinet", "mixed", "studentjournal")
+TEACHER_MODES = ("journal", "journalfinal", "export")
+EXAM_TAIL_MODES = ("exam", "mixed", "journal", "journalfinal", "finalcenter")
+MODES = ("login", "exam", "journal", "cabinet", "mixed", "studentjournal", "journalfinal", "export", "finalcenter")
+
+
+def make_sessions(stack, run_dir, name, start, count, user=""):
+    """Login-siz sessiya hovuzu (cap_sessions.py); `user` verilsə eyni hesaba `count` sessiya."""
+    sessions_path = run_dir / f"{name}-sessions.json"
+    log("session pool", name, count, user or f"students from {start}")
+    t0 = time.monotonic()
+    env = {
+        "CAP_SESSION_START": str(start),
+        "CAP_SESSION_COUNT": str(count),
+        "CAP_SESSION_OUT": sessions_path.as_posix().replace(str(CAP), "/capacity"),
+        "CAP_SESSION_THREADS": "8",
+    }
+    if user:
+        env["CAP_SESSION_USER"] = user
+    stack.manage("shell", "-c", "exec(open('/harness/cap_sessions.py').read())", env=env)
+    log("session pool ready", round(time.monotonic() - t0, 1), "s")
+    return ["-e", f"CAP_SESSIONS={sessions_path.as_posix().replace(str(CAP), '/capacity')}"]
+
+
+def student_lane(mode, users, cursor, seed):
+    """(ilk indeks, say, əsas kursor irəliləyirmi). studentjournal cap jurnal tələbələrini oxuyur."""
+    if mode in TEACHER_MODES:
+        return cursor, 0, False
+    if mode == "studentjournal":
+        total = int(seed.get("journal_students") or 0)
+        return int(seed.get("journal_student_offset") or 45000), min(users, total), False
+    return cursor, users, True
+
+
 def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
     mode, rest = spec.split(":")
     users, window = rest.split("@") if "@" in rest else (rest, "60")
     users, window = int(users), int(window)
     name = f"{index:02d}-{mode}-{users}"
     workers = max(1, min(args.max_workers, math.ceil(users / args.users_per_worker)))
-    teachers = len(json.loads(seed_path.read_text()).get("journals") or [])
+    seed = json.loads(seed_path.read_text())
+    teachers = len(seed.get("journals") or [])
+    s_base, student_share, advances = student_lane(mode, users, cursor, seed)
     sessions_env = []
     if mode == "login":
         spawn_rate = max(1.0, users / window)
@@ -305,23 +341,17 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
         run_time = window + 60
     else:
         exam_span = args.questions * (args.think_max + args.think_min) / 2 + 30
-        tail = exam_span if mode in ("exam", "mixed", "journal") else args.cabinet_seconds
-        if args.preauth == "session" and mode in ("exam", "cabinet", "mixed"):
-            sessions_path = run_dir / f"{name}-sessions.json"
-            log("session pool", name, users)
-            t0 = time.monotonic()
-            stack.manage(
-                "shell", "-c", "exec(open('/harness/cap_sessions.py').read())",
-                env={
-                    "CAP_SESSION_START": str(cursor + 1),
-                    "CAP_SESSION_COUNT": str(users),
-                    "CAP_SESSION_OUT": sessions_path.as_posix().replace(str(CAP), "/capacity"),
-                    "CAP_SESSION_THREADS": "8",
-                },
-            )
-            log("session pool ready", round(time.monotonic() - t0, 1), "s")
-            sessions_env = ["-e", f"CAP_SESSIONS={sessions_path.as_posix().replace(str(CAP), '/capacity')}"]
+        tail = exam_span if mode in EXAM_TAIL_MODES else args.cabinet_seconds
+        if mode == "finalcenter":
+            prep_final_center(stack, s_base + 1, student_share, run_dir, name)
+        if args.preauth == "session" and mode in STUDENT_SESSION_MODES and student_share:
+            sessions_env = make_sessions(stack, run_dir, name, s_base + 1, student_share)
             spawn_rate = max(20.0, users / 30)
+            preauth = users / spawn_rate
+        elif mode == "export":
+            # İmtahan nəticəsi ixracı müəllifin (stress_teacher) adına — eyni hesaba N sessiya.
+            sessions_env = make_sessions(stack, run_dir, name, 0, max(1, users // 5) + 2, user=seed.get("exam_author", "stress_teacher"))
+            spawn_rate = args.preauth_rate
             preauth = users / spawn_rate
         else:
             spawn_rate = args.preauth_rate
@@ -352,11 +382,10 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
         "--csv", csv_prefix, "--csv-full-history", "--html", f"{csv_prefix}.html", "--exit-code-on-error", "0",
     ]
     sh(master, capture=True)
-    student_share = users if mode != "journal" else 0
     for w in range(workers):
-        lo = cursor + student_share * w // workers
-        hi = cursor + student_share * (w + 1) // workers
-        t_users = min(users, teachers) if mode == "journal" else max(1, users // 10)
+        lo = s_base + student_share * w // workers
+        hi = s_base + student_share * (w + 1) // workers
+        t_users = min(users, teachers) if mode in TEACHER_MODES else max(1, users // 10)
         t_lo = (t_cursor + t_users * w // workers) % max(1, teachers)
         t_hi = t_lo + (t_users * (w + 1) // workers - t_users * w // workers)
         sh([
@@ -393,119 +422,25 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
     result = summarize_stage(run_dir, name, mode, users, window, telemetry)
     result["guard_tripped"] = bool(telemetry.guard_tripped)
     log("STAGE_RESULT", json.dumps({k: v for k, v in result.items() if k not in ("requests", "errors")}))
-    used_t = (min(users, teachers) if mode == "journal" else (users // 10 if mode == "mixed" else 0))
+    used_t = (min(users, teachers) if mode in TEACHER_MODES else (users // 10 if mode == "mixed" else 0))
     result["t_cursor_next"] = (t_cursor + used_t) % max(1, teachers)
-    return result, cursor + student_share
+    return result, cursor + (student_share if advances else 0)
 
 
-def pct(row, key):
-    try:
-        return float(row.get(key) or 0)
-    except ValueError:
-        return 0.0
-
-
-def summarize_stage(run_dir, name, mode, users, window, telemetry):
-    stats_path = run_dir / f"{name}_stats.csv"
-    rows = list(csv.DictReader(stats_path.open())) if stats_path.exists() else []
-    per = []
-    work_total = work_fail = 0
-    work_p95 = 0.0
-    for row in rows:
-        if row["Name"] == "Aggregated":
-            continue
-        count, fails = int(row["Request Count"]), int(row["Failure Count"])
-        item = {
-            "name": row["Name"],
-            "method": row["Type"],
-            "count": count,
-            "fail": fails,
-            "p50": pct(row, "50%"),
-            "p95": pct(row, "95%"),
-            "p99": pct(row, "99%"),
-            "max": round(pct(row, "Max Response Time")),
-            "rps": round(pct(row, "Requests/s"), 2),
-        }
-        per.append(item)
-        if not row["Name"].startswith("[pre]") and row["Type"] != "FIXTURE":
-            work_total += count
-            work_fail += fails
-            work_p95 = max(work_p95, item["p95"])
-    errors = []
-    fail_path = run_dir / f"{name}_failures.csv"
-    if fail_path.exists():
-        for row in csv.DictReader(fail_path.open()):
-            errors.append({"name": row["Name"], "error": row["Error"][:200], "count": int(row["Occurrences"])})
-        errors.sort(key=lambda e: -e["count"])
-    counters = {}
-    for path in run_dir.glob(f"counters-{name}-w*.jsonl"):
-        for line in path.read_text().splitlines():
-            for k, v in json.loads(line).items():
-                if isinstance(v, int):
-                    counters[k] = counters.get(k, 0) + v
-    samples = [json.loads(l) for l in telemetry.path.read_text().splitlines() if l.strip()] if telemetry.path.exists() else []
-    peak = {}
-    for s in samples:
-        for k, v in (s.get("cpu") or {}).items():
-            peak[k] = max(peak.get(k, 0.0), v)
-    pool_wait = max((int((s.get("pool") or {}).get("cl_waiting") or 0) for s in samples), default=0)
-    db_waits = {}
-    for s in samples:
-        for k, v in (s.get("db_active") or {}).items():
-            db_waits[k] = max(db_waits.get(k, 0), v)
-    error_rate = work_fail / work_total if work_total else 1.0
-    passed = work_total > 0 and error_rate < ERROR_LIMIT and work_p95 < P95_LIMIT_MS and not telemetry.guard_tripped
-    return {
-        "stage": name,
-        "mode": mode,
-        "users": users,
-        "window_s": window,
-        "work_requests": work_total,
-        "work_failures": work_fail,
-        "error_rate": round(error_rate, 4),
-        "worst_p95_ms": work_p95,
-        "passed": passed,
-        "counters": counters,
-        "peak_cpu_percent": dict(sorted(peak.items(), key=lambda kv: -kv[1])[:14]),
-        "pool_max_cl_waiting": pool_wait,
-        "db_peak_active_by_wait": dict(sorted(db_waits.items(), key=lambda kv: -kv[1])[:10]),
-        "live_health_failures": sum(1 for s in samples if s.get("live_healthy") is False),
-        "min_mem_available": min((s.get("mem_available", 1) for s in samples), default=None),
-        "requests": per,
-        "errors": errors[:12],
-    }
-
-
-def write_report(run_dir, args, seed, results, reconcile):
-    lines = ["# Tutum testi — " + run_dir.name, ""]
-    lines.append(
-        f"İzolə stack: {len(APPS)} app × {args.app_cpus} CPU, DB {args.db_cpus} CPU, PgBouncer 1 CPU, edge 0.75 CPU · "
-        f"canlı image · imtahan `{seed.get('exam_slug')}` ({seed.get('questions')} sual) · "
-        f"jurnal: {len(seed.get('journals') or [])} müəllim · düşünmə {args.think_min}-{args.think_max} s"
+def prep_final_center(stack, start, count, run_dir, name):
+    """finalcenter: tələbələrə final imtahanı üçün fərdi PIN + gün-qaydası grant-ı (cap_prep.py)."""
+    log("final center prep", name, start, count)
+    t0 = time.monotonic()
+    stack.manage(
+        "shell", "-c", "exec(open('/harness/cap_prep.py').read())",
+        env={
+            "CAP_PREP": "final_pins",
+            "CAP_PREP_START": str(start),
+            "CAP_PREP_COUNT": str(count),
+            "CAP_SEED_FILE": (run_dir / "seed.json").as_posix().replace(str(CAP), "/capacity"),
+        },
     )
-    lines.append("")
-    lines.append("| Pillə | VU | Pəncərə | İş sorğusu | Xəta | Xəta % | ən pis p95 ms | Nəticə |")
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---|")
-    for r in results:
-        lines.append(
-            f"| {r['stage']} | {r['users']} | {r['window_s']} s | {r['work_requests']} | {r['work_failures']} | "
-            f"{r['error_rate'] * 100:.2f} | {r['worst_p95_ms']:.0f} | {'✅ keçdi' if r['passed'] else '❌ keçmədi'} |"
-        )
-    for r in results:
-        lines += ["", f"## {r['stage']}", "", "| Sorğu | Say | Xəta | p50 | p95 | p99 | max | rps |", "|---|---:|---:|---:|---:|---:|---:|---:|"]
-        for q in r["requests"]:
-            lines.append(f"| {q['method']} {q['name']} | {q['count']} | {q['fail']} | {q['p50']:.0f} | {q['p95']:.0f} | {q['p99']:.0f} | {q['max']} | {q['rps']} |")
-        if r["errors"]:
-            lines += ["", "Xətalar:", ""] + [f"- {e['count']} × {e['name']}: `{e['error']}`" for e in r["errors"]]
-        lines += [
-            "",
-            f"Sayğaclar: `{json.dumps(r['counters'])}`",
-            f"Pik CPU %: `{json.dumps(r['peak_cpu_percent'])}`",
-            f"PgBouncer max cl_waiting: {r['pool_max_cl_waiting']} · DB pik aktiv (gözləmə növü): `{json.dumps(r['db_peak_active_by_wait'])}`",
-            f"Canlı sağlamlıq uğursuzluğu: {r['live_health_failures']} · min boş RAM: {r['min_mem_available']}",
-        ]
-    lines += ["", "## Bütövlük (reconcile)", "", "```", json.dumps(reconcile, indent=2, ensure_ascii=False), "```"]
-    (run_dir / "summary.md").write_text("\n".join(lines))
+    log("final center prep ready", round(time.monotonic() - t0, 1), "s")
 
 
 def main():
@@ -536,6 +471,10 @@ def main():
     global APPS
     APPS = tuple(f"app{i}" for i in range(1, max(1, args.replicas) + 1))
 
+    specs = [s.strip() for s in args.plan.split(",") if s.strip()]
+    unknown = sorted({sp.split(":")[0] for sp in specs} - set(MODES))
+    if unknown:
+        raise SystemExit(f"naməlum rejim(lər): {unknown}")
     if not live_health():
         raise SystemExit("canlı sistem sağlam deyil — test başlamır")
     if mem_available() < 0.3:
@@ -571,7 +510,7 @@ def main():
         cursor = args.student_start
         failed_modes = set()
         t_cursor = 0
-        for i, spec in enumerate([s.strip() for s in args.plan.split(",") if s.strip()], start=1):
+        for i, spec in enumerate(specs, start=1):
             if spec.split(":")[0] in failed_modes:
                 log("SKIP", spec, "(bu rejim əvvəlki pillədə keçmədi)")
                 continue

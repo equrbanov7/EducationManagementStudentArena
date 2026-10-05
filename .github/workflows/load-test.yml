@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       plan:
-        description: "Pillələr: mode:users@window (login|exam|journal|cabinet|mixed)"
+        description: "Pillələr: mode:users@window (login|exam|journal|cabinet|mixed|studentjournal|journalfinal|export|finalcenter)"
         required: true
         type: string
         default: "login:20@10,exam:20@20,journal:10@20,cabinet:20@20"
@@ -78,7 +78,7 @@ jobs:
           PREAUTH: ${{ inputs.preauth_rate }}
         run: |
           set -euo pipefail
-          echo "$PLAN" | grep -Eq '^((login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)(,(login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)*$' || { echo "::error::plan formatı"; exit 1; }
+          echo "$PLAN" | grep -Eq '^((login|exam|journal|cabinet|mixed|studentjournal|journalfinal|export|finalcenter):[0-9]{1,5}(@[0-9]{1,4})?)(,(login|exam|journal|cabinet|mixed|studentjournal|journalfinal|export|finalcenter):[0-9]{1,5}(@[0-9]{1,4})?)*$' || { echo "::error::plan formatı"; exit 1; }
           case "$TEACHERS" in ''|*[!0-9]*) echo "::error::teachers rəqəm"; exit 1;; esac
           [ "$TEACHERS" -le 1000 ] || { echo "::error::teachers ≤ 1000"; exit 1; }
           echo "$APP_CPUS" | grep -Eq '^([0-9]{1,2}x)?[0-9.]+$' || { echo "::error::app_cpus"; exit 1; }
