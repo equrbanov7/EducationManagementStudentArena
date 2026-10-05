@@ -356,3 +356,103 @@ class AssistantHardeningTests(TestCase):
         self.assertEqual(_page_path("javascript:alert(1)"), "")
         self.assertEqual(_page_path("//evil.example/x"), "/x")
         self.assertEqual(_page_path(""), "")
+
+
+class AIContextExamScoreLeakTests(TestCase):
+    """Təhlükəsizlik auditi 2026-10-05: AI konteksti cəhd balını sızdırmamalıdır.
+
+    ``save_draft`` ``recalculate_score`` çağırır — açıq (draft/in_progress) cəhdin
+    ``correct_count``-u hər cavabdan sonra dəyişir. Kontekst bunu göstərsəydi,
+    tələbə «balım neçədir?» sualı ilə hər variantın doğru olub-olmadığını imtahan
+    ZAMANI öyrənə bilərdi. Nəticəsi gizlədilmiş imtahan da göstərilməməlidir.
+    """
+
+    def setUp(self):
+        from apps.exams.models import Exam
+
+        owner = User.objects.create_user("leak_owner", "leak_owner@example.com", "pw")
+        self.student = User.objects.create_user("leak_student", "leak_student@example.com", "pw")
+        self.org = Organization.objects.create(
+            name="Leak Org", org_type=OrganizationType.UNIVERSITY, owner=owner, status="active", is_active=True
+        )
+        self.membership = Membership.objects.create(
+            user=self.student,
+            organization=self.org,
+            role=self.org.roles.get(name="student"),
+            is_primary=True,
+            is_active=True,
+        )
+        self.open_exam = Exam.objects.create(title="OPEN-EXAM", author=owner, organization=self.org, exam_type="test")
+        self.hidden_exam = Exam.objects.create(
+            title="HIDDEN-EXAM",
+            author=owner,
+            organization=self.org,
+            exam_type="test",
+            results_hidden_from_students=True,
+        )
+        self.done_exam = Exam.objects.create(title="DONE-EXAM", author=owner, organization=self.org, exam_type="test")
+
+    def _context(self):
+        class _Req:
+            pass
+
+        request = _Req()
+        request.user = self.student
+        request.organization = self.org
+        request.org_memberships = [self.membership]
+        request.org_permissions = list(self.membership.role.permissions or [])
+        return build_user_context(request, current_page="/exams/")
+
+    def test_open_and_hidden_attempt_scores_are_not_in_context(self):
+        from apps.exams.models import ExamAttempt
+
+        ExamAttempt.objects.create(
+            exam=self.open_exam, user=self.student, status="draft", correct_count=3, wrong_count=1
+        )
+        ExamAttempt.objects.create(
+            exam=self.hidden_exam, user=self.student, status="submitted", correct_count=2, wrong_count=2
+        )
+        ExamAttempt.objects.create(
+            exam=self.done_exam, user=self.student, status="submitted", correct_count=4, wrong_count=0
+        )
+
+        context = self._context()
+
+        self.assertNotIn("OPEN-EXAM: 3/4", context)
+        self.assertNotIn("HIDDEN-EXAM: 2/4", context)
+        self.assertIn("DONE-EXAM: 4/4", context)
+
+
+class AIRateLimitRaceTests(TestCase):
+    """Təhlükəsizlik auditi 2026-10-05: limit Gemini-dən ƏVVƏL atomik sayılmalıdır.
+
+    Paralel sorğular hamısı ``is_rate_limited``-dən (yalnız oxu) keçəndə limit
+    aşılırdı. Burada həmin pəncərə «oxu-yoxlaması həmişə keçir» kimi modelləşdirilir.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user("ai_race_user", "ai_race@example.com", "testpass123")
+        self.client.force_login(self.user)
+        clear_rate_limit("ai_assistant", self.user.id)
+
+    def tearDown(self):
+        clear_rate_limit("ai_assistant", self.user.id)
+
+    @override_settings(AI_ASSISTANT_RATE_LIMIT="1/1h")
+    @patch("apps.ai_assistant.views.ask_gemini")
+    def test_concurrent_requests_cannot_exceed_user_quota(self, mock_ask_gemini):
+        from apps.ai_assistant import views as ai_views
+
+        mock_ask_gemini.return_value = {"ok": True, "answer": "ok", "prompt_tokens": 1, "response_tokens": 1}
+        with patch.object(ai_views, "is_rate_limited", return_value=(False, None), create=True):
+            statuses = [
+                self.client.post(
+                    reverse("ai_assistant:chat"),
+                    data=json.dumps({"message": "Salam"}),
+                    content_type="application/json",
+                ).status_code
+                for _ in range(2)
+            ]
+
+        self.assertEqual(mock_ask_gemini.call_count, 1)
+        self.assertEqual(statuses, [200, 429])

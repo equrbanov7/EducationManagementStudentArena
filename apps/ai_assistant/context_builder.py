@@ -366,6 +366,7 @@ def _courses_section(user, organization, memberships, permissions) -> str:
 def _exams_section(user, organization, memberships, permissions) -> str:
     """Summarise the user's exam data (results for students, created exams for teachers)."""
     from apps.exams.models import Exam, ExamAttempt
+    from apps.exams.public import ATTEMPT_FINISHED_STATUSES
 
     lines = ["[My Exams]"]
 
@@ -378,9 +379,17 @@ def _exams_section(user, organization, memberships, permissions) -> str:
             for title, slug in created:
                 lines.append(f"  - {title} (/exams/{slug}/)")
 
-    # Student exam results — tenant-scoped via the exam's organization FK
+    # Student exam results — tenant-scoped via the exam's organization FK.
+    # Təhlükəsizlik auditi 2026-10-05: YALNIZ bitmiş cəhdlər və nəticəsi gizlədilməmiş
+    # imtahanlar — açıq cəhdin balı (``save_draft`` onu yenidən hesablayır) AI-dan
+    # soruşulub imtahan ZAMANI doğru cavab oracle-ı kimi istifadə olunurdu.
     attempts = (
-        ExamAttempt.objects.filter(user=user, exam__organization=organization)
+        ExamAttempt.objects.filter(
+            user=user,
+            exam__organization=organization,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+            exam__results_hidden_from_students=False,
+        )
         .select_related("exam")
         .order_by("-started_at")[:10]
     )
