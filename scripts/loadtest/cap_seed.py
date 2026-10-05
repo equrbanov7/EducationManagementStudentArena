@@ -311,8 +311,9 @@ def seed_history(org, offerings, teachers, today, period):
         return
     from apps.registrar import gradebook
 
-    dates = [today - datetime.timedelta(days=7 * k) for k in range(1, HISTORY + 1)]
-    dates = [d for d in dates if d >= period.start_date]
+    # Semestr başlanğıcından sabit həftələr — günlər keçdikcə yeni tarixlər yığılmasın.
+    dates = [period.start_date + datetime.timedelta(days=7 * k) for k in range(HISTORY)]
+    dates = [d for d in dates if d < today]
     have = set(
         Lesson.objects.filter(offering__in=offerings, topic="cap-history").values_list("offering_id", "date")
     )
