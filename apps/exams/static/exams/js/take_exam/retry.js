@@ -8,9 +8,12 @@
             if (response.ok) {
                 ctx.saveRetryUntil = 0;
                 ctx.saveRetryCount = 0;
+                if (ns.syncStatus) ns.syncStatus.recovered(ctx);
                 return;
             }
             if (response.status !== 429 && response.status !== 503) return;
+            // Daimi göstərici: autosave səssizdir, yoxsa tələbə cavabların hələ serverdə olmadığını bilmir.
+            if (ns.syncStatus) ns.syncStatus.show(ctx, "busy");
             ctx.saveRetryCount = Math.min(6, (ctx.saveRetryCount || 0) + 1);
             var raw = response.headers.get("Retry-After");
             var seconds = raw && /^\d+(\.\d+)?$/.test(raw.trim()) ? Number(raw) : NaN;
