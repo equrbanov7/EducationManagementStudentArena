@@ -64,6 +64,25 @@ class AmendmentDocumentValidationTest(TestCase):
         with self.assertRaises(WorkloadDenied):
             self._amend(fake)
 
+    def test_valid_pdf_document_is_stored(self):
+        """Yol ~131 simvoldur (`workload_amendments/<org>/<task>/<uuid32>.pdf`) —
+        sahə `max_length=100` olanda hər yükləmə `DataError` (500) verirdi."""
+        from django.test import override_settings
+
+        pdf = SimpleUploadedFile(
+            "emr.pdf", b"%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n", content_type="application/pdf"
+        )
+        with override_settings(
+            STORAGES={
+                "default": {"BACKEND": "django.core.files.storage.InMemoryStorage"},
+                "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+            }
+        ):
+            amendment = self._amend(pdf)
+            amendment.refresh_from_db()
+        self.assertGreater(len(amendment.document.name), 100)
+        self.assertTrue(amendment.document.name.endswith(".pdf"))
+
 
 class ForeignUnitSelectionTest(TestCase):
     """``wc_chair`` / ``wa_faculty`` GET parametrləri aktorun əhatəsi ilə kəsişdirilməlidir.
