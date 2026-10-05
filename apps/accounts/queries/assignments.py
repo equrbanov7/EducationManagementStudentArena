@@ -2,7 +2,6 @@
 Assignment and membership queries for accounts.
 """
 
-
 from apps.courses.models import Course, CourseMembership
 from apps.exams.models import Exam
 from apps.exams.public import student_assigned_exams_q, student_excluded_exams_q
