@@ -119,6 +119,41 @@ Hər düzəliş üçün reqressiya testi var. Tam paket: 11 381 passed.
      canlıda təkrarlanmış problem kimi qəbul edilmir. Yenə də replika artımından sonra canlı
      konfiqlə təkrar ölçülməlidir.
 
+## İkinci gecə (2026-10-05 axşam): 8 replika → darboğaz DB-yə keçdi
+
+8 replika × 0.5 CPU (eyni 4 CPU büdcəsi), DB 2 CPU, canlı image (gündüzkü düzəlişlər daxil):
+
+| Pillə | Xəta % | ən pis p95 | Qeyd |
+|---|---:|---:|---|
+| login 500 / 120 s | 0 | 2.2 s | ✅ |
+| kabinet 500 | 0 | 7.7 s | ❌ p95; **DB CPU 205 %**, PgBouncer gözləmə 87 |
+| jurnal 500 | 0 | 0.23 s | ✅ (harness-in cədvəl parser-i yeni UX markup-ını tanımadı — 495 fixture xətası, yükə aid deyil) |
+| imtahan 1000 | 5.1 | 30 s | ❌ **DB CPU 208 %**, autosave/finish 503, confirm timeout |
+
+Bütövlük: 689 cəhd, 6890 cavab — 0 uyğunsuzluq.
+
+**Nə dəyişdi:** app replikası artınca DB-yə eyni anda gələn sorğu sayı 2 qat artdı və darboğaz app-dan
+DB-yə keçdi. DB-də ən çox gözləmə **`LWLock:LockManager`** idi (kabinetdə 75 sessiya, imtahanda 37).
+
+**Səbəb:** PostgreSQL 16 hər backend üçün yalnız 16 «fast-path» kilid saxlayır. Sorğu cədvəli və
+onun BÜTÜN indekslərini kilidləyir. Hər sorğuda oxunan cədvəllərdə indeks çox idi:
+
+| Cədvəl | İndeks (əvvəl → sonra) | Canlıda istifadə |
+|---|---:|---|
+| `accounts_userprofile` | 24 → 6 | silinənlərin hamısı idx_scan ≈ 0 (DB yaradılandan bəri) |
+| `registrar_studentacademicrecord` | 25 → 9 | silinənlər 0 və ya kompozitin prefiksi |
+| `organizations_membership` | 14 → 8 | silinənlər 0 və ya kompozitin prefiksi |
+| `exams_exam` / `exams_examattempt` | 15 / 16 → 10 / 12 | yalnız prefiks-təkrar və boolean indekslər |
+
+Limit aşılanda kilid paylaşılan cədvələ düşür və bütün backend-lər bir LWLock üstündə növbəyə durur.
+Miqrasiyalar yalnız `DROP INDEX` edir (FK məhdudiyyətinə toxunmur; geri qaytarma `CREATE INDEX`).
+
+Digər düzəlişlər:
+- Kabinet bölmələri hər açılışda bütün sütunlar üzrə `COUNT(DISTINCT …)` edirdi (semi-join-dən sonra
+  lazımsız `.distinct()`) — silindi.
+- Navbar oxunmamış bildiriş sayğacı imtahan/nəticə səhifəsində 2 dəfə (2 × COUNT + 4 `set_config`)
+  hesablanırdı — sorğu daxilində bir dəfə.
+
 ## 50 000 nəfər haqqında
 
 Tək 10 vCPU-luq serverdə 50 000 **eyni anda aktiv** istifadəçi mümkün deyil.

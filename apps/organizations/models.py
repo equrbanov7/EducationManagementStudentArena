@@ -523,12 +523,11 @@ class Membership(UUIDModel, TimeStampedModel):
     Represents a user's membership in an organization with a specific role.
     """
 
+    # Tutum testi 2026-10-05: 14 indeks PG16 fast-path kilid limitini (16) aşırdı — prefiks indekslər silindi.
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="memberships",
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships", db_index=False
     )
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="memberships")
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="memberships", db_index=False)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="memberships")
     scope_unit = models.ForeignKey(
         OrgUnit,
@@ -545,9 +544,10 @@ class Membership(UUIDModel, TimeStampedModel):
         blank=True,
         on_delete=models.SET_NULL,
         related_name="assigned_memberships",
+        db_index=False,
     )
-    is_primary = models.BooleanField(default=False, db_index=True)
-    is_active = models.BooleanField(default=True, db_index=True)
+    is_primary = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     objects = models.Manager()
     active = ActiveManager()
@@ -558,7 +558,6 @@ class Membership(UUIDModel, TimeStampedModel):
         verbose_name = pgettext_lazy("organizations.model.membership.meta", "singular")
         verbose_name_plural = pgettext_lazy("organizations.model.membership.meta", "plural")
         indexes = [
-            models.Index(fields=["user", "organization"]),
             models.Index(fields=["organization", "role"]),
             models.Index(fields=["user", "is_primary"]),
             # Per-request active-membership resolution in OrganizationMiddleware

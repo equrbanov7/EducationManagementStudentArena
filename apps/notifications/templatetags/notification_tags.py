@@ -36,4 +36,13 @@ def user_unread_notification_count(context, user):
         and getattr(getattr(request, "user", None), "pk", None) == getattr(user, "pk", None)
     ):
         return precomputed
+    # Tutum testi 2026-10-05: kontekstdə say olmayan səhifələrdə (imtahan, nəticə)
+    # navbar-ın iki çağırışı hələ də 2 × (COUNT + 2 set_config) edirdi — sorğu
+    # daxilində bir dəfə hesablanır.
+    if request is not None and getattr(getattr(request, "user", None), "pk", None) == getattr(user, "pk", None):
+        cached = getattr(request, "_ems_unread_notification_count", None)
+        if cached is None:
+            cached = get_unread_count(user=user)
+            request._ems_unread_notification_count = cached
+        return cached
     return get_unread_count(user=user)

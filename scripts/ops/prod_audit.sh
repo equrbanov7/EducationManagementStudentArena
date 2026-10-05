@@ -262,6 +262,8 @@ SELECT s.relname, s.indexrelname, pg_size_pretty(pg_relation_size(s.indexrelid))
 SELECT round(total_exec_time/1000)::bigint, calls, round(mean_exec_time::numeric,1), rows, left(regexp_replace(query, '\s+', ' ', 'g'), 80) FROM pg_stat_statements WHERE dbid=(SELECT oid FROM pg_database WHERE datname=current_database()) AND query NOT ILIKE '%pg_stat_statements%' ORDER BY total_exec_time DESC LIMIT 10;
 \echo -- pg_stat_statements statistikasının başlanğıcı
 SELECT stats_reset::timestamp(0) FROM pg_stat_statements_info;
+\echo -- isti cədvəllərin indeksləri (cədvəl | indeks | idx_scan | ölçü | unique) — PG16 fast-path kilid limiti 16-dır; çox indeks → LWLock:LockManager
+SELECT s.relname, s.indexrelname, s.idx_scan, pg_size_pretty(pg_relation_size(s.indexrelid)), i.indisunique FROM pg_stat_user_indexes s JOIN pg_index i ON i.indexrelid=s.indexrelid WHERE s.relname IN ('registrar_studentacademicrecord','accounts_userprofile','exams_examattempt','exams_exam','organizations_membership','exams_examquestion','courses_course','auth_user','exams_examanswer') ORDER BY s.relname, s.idx_scan;
 SQL
 echo '```'
 

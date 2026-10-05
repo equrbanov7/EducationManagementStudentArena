@@ -49,6 +49,14 @@ whitenoise==6.5.0
 channels==4.3.2
 channels_redis==4.3.0
 daphne==4.2.2
+# Opt-in alternativ ASGI server (ASGI_SERVER=uvicorn, ASGI_WORKERS=N — bax
+# docker/prod-entrypoint.sh, docs/operations/ASGI_SERVER.md). Defolt Daphne-dir.
+# uvicorn[standard] əvəzinə yalnız lazım olanlar: watchfiles/python-dotenv/PyYAML
+# prod image-ə düşmür. websockets → `websockets-sansio` impl; uvloop Windows-da yoxdur.
+uvicorn==0.53.0
+httptools==0.8.0
+websockets==17.1
+uvloop==0.22.1 ; sys_platform != "win32"
 redis==7.1.0
 
 # ═══════════════════════════════════════════════════════════════════════════

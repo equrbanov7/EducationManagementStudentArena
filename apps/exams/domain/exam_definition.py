@@ -48,6 +48,8 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         on_delete=models.CASCADE,
         related_name="exams",
         verbose_name=pgettext_lazy("exams.model.exam.field", "author"),
+        # Tutum testi 2026-10-05: (author, created_at) kompozit indeksinin prefiksidir.
+        db_index=False,
     )
     title = models.CharField(
         max_length=200,
@@ -130,6 +132,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         blank=True,
         related_name="exams",
         verbose_name=pgettext_lazy("exams.model.exam.field", "course"),
+        db_index=False,  # (course, created_at) kompozitinin prefiksi
     )
     # Akademik fənn (registrar.Subject) — bu imtahanın hansı fənlə əlaqəli
     # olduğunu göstərir. Final/midterm imtahanlarında məcburidir (forma clean()).
@@ -147,6 +150,7 @@ class Exam(ExamAccessPolicyMixin, models.Model):
         related_name="exams",
         verbose_name=pgettext_lazy("exams.model.exam.field", "organization"),
         help_text=pgettext_lazy("exams.model.exam.help", "organization"),
+        db_index=False,  # (organization, is_active|exam_type, created_at) kompozitlərinin prefiksi
     )
     exam_type_extended = models.CharField(
         pgettext_lazy("exams.model.exam.field", "exam_type_extended"),
@@ -238,7 +242,6 @@ class Exam(ExamAccessPolicyMixin, models.Model):
     is_archived = models.BooleanField(
         pgettext_lazy("exams.model.exam.field", "is_archived"),
         default=False,
-        db_index=True,
         help_text=pgettext_lazy("exams.model.exam.help", "is_archived"),
     )
     archived_at = models.DateTimeField(
@@ -255,7 +258,6 @@ class Exam(ExamAccessPolicyMixin, models.Model):
     is_deleted = models.BooleanField(
         pgettext_lazy("exams.model.exam.field", "is_deleted"),
         default=False,
-        db_index=True,
         help_text=pgettext_lazy("exams.model.exam.help", "is_deleted"),
     )
     deleted_at = models.DateTimeField(
