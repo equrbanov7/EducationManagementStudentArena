@@ -56,8 +56,7 @@ _TAKE_EXAM = [
     _t(
         "Bu imtahan başqa tabda yenilənib — cavablar bu tabdan saxlanılmır. Səhifəni yeniləyin.",
         "This exam was updated in another tab — answers are not saved from this tab. Reload the page.",
-        "Этот экзамен обновлён в другой вкладке — ответы из этой вкладки не сохраняются. "
-        "Обновите страницу.",
+        "Этот экзамен обновлён в другой вкладке — ответы из этой вкладки не сохраняются. " "Обновите страницу.",
         "Bu sınav başka bir sekmede güncellendi — cevaplar bu sekmeden kaydedilmiyor. Sayfayı yenileyin.",
     ),
 ]
