@@ -10,7 +10,7 @@ zamanı doğrulanır. Kriptoqrafik primitivlər (salted hash + Fernet) mövcud
 import logging
 
 from django.conf import settings
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import make_password
 from django.core.cache import cache
 from django.db.models import Q
 from django.utils import timezone
@@ -18,7 +18,7 @@ from django.utils import timezone
 from cryptography.fernet import InvalidToken
 
 from apps.exams.models import ExamStudentPin
-from apps.exams.services.final_center.pins import _DUMMY_HASH, _fernet, generate_pin_value
+from apps.exams.services.final_center.pins import _DUMMY_HASH, _fernet, check_pin_hash, generate_pin_value
 from core.rls import bypass_rls
 
 logger = logging.getLogger("exams.student_pin.entry")
@@ -143,7 +143,7 @@ def verify_student_pin(exam, user, raw_pin: str) -> bool:
             ExamStudentPin.objects.filter(exam=exam, student=user).only("pin_hash", "expires_at", "revoked_at").first()
         )
     stored = pin.pin_hash if pin else _DUMMY_HASH
-    matched = check_password(raw_pin or "", stored)
+    matched = check_pin_hash(raw_pin, stored)
     ok = bool(pin) and pin.is_usable() and matched
     # EXAM-P1-20: PIN giriş nəticəsini SLI kimi qeyd et.
     from apps.exams.metrics import record_pin_attempt
@@ -222,6 +222,6 @@ def resolve_student_pin_login(username: str, raw_pin: str):
         )
     for pin in pins:
         # EXAM-P1-08: revoke/expiry olunmuş PIN girişi keçirməməlidir.
-        if pin.is_usable() and check_password(raw_pin, pin.pin_hash or ""):
+        if pin.is_usable() and check_pin_hash(raw_pin, pin.pin_hash or ""):
             return pin.exam, user
     return None, None

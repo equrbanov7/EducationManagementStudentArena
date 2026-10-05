@@ -9,13 +9,17 @@ Hər tələbəyə imtahan üçün fərdi, kriptoqrafik təsadüfi PIN:
 """
 
 import secrets
+import threading
+import time
 from base64 import urlsafe_b64encode
+from collections import OrderedDict
 from datetime import timedelta
 from hashlib import sha256
 
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import F
+from django.utils.crypto import salted_hmac
 from django.utils import timezone
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -31,6 +35,38 @@ _PIN_ALPHABET = "0123456789"
 # İstifadəçi tapılmayanda da eyni hesablama aparılır ki, cavab müddətindən
 # istifadəçi mövcudluğu sızmasın (user enumeration).
 _DUMMY_HASH = make_password("final-exam-dummy-pin")
+
+
+# Tutum testi 2026-10-05: final girişi eyni PIN-i eyni hash-ə qarşı bir neçə dəfə
+# yoxlayırdı (fərdi PIN yolu + ``can_user_start``) — hər biri ~1M PBKDF2 iterasiyası.
+# Yalnız UĞURLU nəticə 60 s yadda saxlanır; açar saxlanan hash + xam PIN-in HMAC-ıdır,
+# ona görə hash dəyişəndə (yeni PIN) memo avtomatik etibarsızdır. Səhv PIN həmişə
+# tam hash ilə yoxlanır — brute-force dəyəri dəyişmir.
+_VERIFIED_PIN_TTL = 60.0
+_VERIFIED_PIN_MAX = 4096
+_verified_pins: "OrderedDict[tuple[str, str], float]" = OrderedDict()
+_verified_pins_lock = threading.Lock()
+
+
+def check_pin_hash(raw_pin: str, encoded: str) -> bool:
+    """``check_password`` ilə eyni nəticə; təkrar uğurlu yoxlama hash-siz."""
+    raw_pin = raw_pin or ""
+    if not encoded:
+        return check_password(raw_pin, encoded)
+    key = (encoded, salted_hmac("exams.pin-verify-memo", raw_pin).hexdigest())
+    now = time.monotonic()
+    with _verified_pins_lock:
+        expires = _verified_pins.get(key)
+        if expires is not None and expires > now:
+            return True
+    matched = check_password(raw_pin, encoded)
+    if matched:
+        with _verified_pins_lock:
+            _verified_pins[key] = now + _VERIFIED_PIN_TTL
+            _verified_pins.move_to_end(key)
+            while len(_verified_pins) > _VERIFIED_PIN_MAX:
+                _verified_pins.popitem(last=False)
+    return matched
 
 
 def _pin_length() -> int:
@@ -147,7 +183,7 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
     """
     now = timezone.now()
     usable = ticket.has_valid_pin and not ticket.is_pin_locked
-    matched = check_password(raw_pin or "", ticket.pin_hash or _DUMMY_HASH)
+    matched = check_pin_hash(raw_pin, ticket.pin_hash or _DUMMY_HASH)
 
     if usable and matched:
         if ticket.pin_failed_attempts or ticket.pin_locked_until:
@@ -184,6 +220,7 @@ def equalize_verification_timing(raw_pin: str) -> None:
 
 
 __all__ = [
+    "check_pin_hash",
     "decrypt_ticket_pin",
     "equalize_verification_timing",
     "generate_pin_value",
