@@ -191,8 +191,8 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                             {% if offering.is_evening %}<span aria-hidden="true">·</span> <span>{% trans "axşam (21:30-dək)" context "registrar.journal" %}</span>{% endif %}
                         </div>
                     </td>
-                    <td class="jl-col-kind">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
-                    <td class="jl-col-count"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
+                    <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
+                    <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
                     <td class="jl-col-action">
                         <a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}{% if journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}">
                             {% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>

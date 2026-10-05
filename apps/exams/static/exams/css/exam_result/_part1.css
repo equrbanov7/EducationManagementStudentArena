@@ -150,13 +150,16 @@
 }
 
 /* Test Statistikaları Grid */
+/* UX2 2026-10-05: 5 kart (düzgün/səhv/cavabsız/verilmiş/işarələnmiş) grid-də 4+1 / 2+2+1 düşəndə
+   sonuncu kart yarım enli yalnız qalırdı. Flex-wrap + flex-grow: hər sətir tam doldurulur. */
 .test-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     width: 100%;
     margin-top: 4px;
 }
+.test-stats-grid > .stat-item { flex: 1 1 120px; min-width: 0; }
 
 .stat-item--marked {
     border-radius: 14px;

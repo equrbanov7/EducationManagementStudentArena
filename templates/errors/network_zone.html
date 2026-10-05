@@ -7,6 +7,8 @@ Sahib 2026-10-01: «hamı developer deyil» — müəllim nə baş verdiyini və
 {% endcomment %}
 {% block page_title %}{% trans 'Yalnız universitet şəbəkəsindən' context 'accounts.network_zone' %}{% endblock %}
 {% block code %}403{% endblock %}
+{# Uzun izah: telefonda düymələr mətndən ƏVVƏL gəlir (error-pages.css, .error-actions-first). #}
+{% block body_class %} error-actions-first{% endblock %}
 {% block code_label %}403{% endblock %}
 {% block code_big %}<i class="fas fa-wifi" aria-hidden="true"></i>{% endblock %}
 {% block kicker_icon %}fa-wifi{% endblock %}

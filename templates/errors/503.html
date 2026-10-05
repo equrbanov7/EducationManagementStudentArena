@@ -9,6 +9,8 @@ dil üzrə keşlənir — yük altında hər rədd edilən sorğu şablon render
 {% endcomment %}
 {% block page_title %}{% trans 'Server məşğuldur' context 'core.error.503' %}{% endblock %}
 {% block code %}503{% endblock %}
+{# Telefonda «Yenidən cəhd et» izahdan əvvəl gəlir (error-pages.css, .error-actions-first). #}
+{% block body_class %} error-actions-first{% endblock %}
 {% block code_label %}503{% endblock %}
 {% block kicker_icon %}fa-hourglass-half{% endblock %}
 {% block kicker %}{% trans 'Müvəqqəti yüklənmə' context 'core.error.503' %}{% endblock %}
