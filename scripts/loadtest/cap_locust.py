@@ -153,7 +153,9 @@ class _Base(HttpUser):
             COUNTERS["pool_exhausted"] += 1
             fixture_error(self, "session pool missing", f"student {index}")
             raise _Abort()
-        self.client.cookies.set("sessionid", key, domain=self.host.split("://", 1)[-1].split(":")[0], path="/")
+        # Domen verilmir: cookiejar nöqtəsiz hostu («edge») «edge.local» kimi saxlayır,
+        # domain="edge" olan kuki heç bir sorğuya uyğun gəlməzdi.
+        self.client.cookies.set("sessionid", key, path="/")
         COUNTERS["logged_in"] += 1
 
     def _wait_for_go(self):
