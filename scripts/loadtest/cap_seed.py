@@ -93,7 +93,18 @@ def seed_exam(org, author, groups, *, prefix="cap", extended=None):
             default_question_points=1,
             slug=slug,
         )
-    exam.allowed_groups.add(*groups)
+    if extended:
+        # Final/midterm: `allowed_groups.add` m2m siqnalı BÜTÜN təyin olunmuş tələbələrə
+        # sinxron PIN verir (hər birinə PBKDF2 make_password — 50k tələbədə ~1.5 saat).
+        # Through cədvəlinə birbaşa yazılır; PIN-ləri yalnız pillənin tələbələrinə
+        # cap_prep.py verir.
+        through = Exam.allowed_groups.through
+        have = set(through.objects.filter(exam_id=exam.pk).values_list("studentgroup_id", flat=True))
+        through.objects.bulk_create(
+            [through(exam_id=exam.pk, studentgroup_id=g.pk) for g in groups if g.pk not in have], batch_size=1000
+        )
+    else:
+        exam.allowed_groups.add(*groups)
     total = BLOCKS * POOL_PER_BLOCK
     order = exam.questions.count()
     for b in range(1, BLOCKS + 1):
