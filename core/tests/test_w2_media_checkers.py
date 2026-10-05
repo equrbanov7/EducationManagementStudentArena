@@ -229,7 +229,12 @@ class WorkloadAmendmentMediaTest(_MediaBase):
 
 
 class ExamPaintMediaTest(_MediaBase):
-    """`exam_paints/` — cavabın tələbəsi və ya imtahan təşkilatının müəllim səviyyəli üzvü."""
+    """`exam_paints/` — cavabın tələbəsi, imtahanın müəllifi və ya imtahan mərkəzi (EX28-09 qaydası).
+
+    Təhlükəsizlik auditi 2026-10-05: əvvəl təşkilatın HƏR müəllim səviyyəli üzvü (dekan,
+    rektor, başqa müəllim) istənilən tələbənin rəsm cavabını açırdı; fayl adı isə
+    ``paint_answer_<id>.png`` idi (təxmin oluna bilən).
+    """
 
     def setUp(self):
         super().setUp()
@@ -241,12 +246,29 @@ class ExamPaintMediaTest(_MediaBase):
             attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="submitted", attempt_number=1)
             self.path = self._file("exam_paints/2026/09/w2_paint.png")
             ExamAnswer.objects.create(attempt=attempt, question=question, has_paint=True, paint_image=self.path)
+            self.colleague = User.objects.create_user("w2m_colleague", "w2m_colleague@qku.edu.az", "pw")
+            self.exam_center = User.objects.create_user("w2m_ecs", "w2m_ecs@qku.edu.az", "pw")
+            for user, role in ((self.colleague, "teacher"), (self.exam_center, "exam_center_staff")):
+                Membership.objects.create(
+                    user=user,
+                    organization=self.org,
+                    role=self.org.roles.get(name=role),
+                    is_primary=True,
+                    is_active=True,
+                )
 
     def test_matrix(self):
         self.assert_matrix(
             self.path,
-            allowed=(self.student, self.teacher, self.dean, self.rector),
-            denied=(self.other_student, self.foreign_teacher, self.foreign_student),
+            allowed=(self.student, self.teacher, self.exam_center, self.superadmin),
+            denied=(
+                self.other_student,
+                self.colleague,
+                self.dean,
+                self.rector,
+                self.foreign_teacher,
+                self.foreign_student,
+            ),
         )
 
     def test_unknown_paint_is_denied(self):

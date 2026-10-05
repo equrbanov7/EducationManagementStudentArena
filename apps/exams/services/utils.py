@@ -1,4 +1,5 @@
 import base64
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -65,7 +66,9 @@ def _save_paint_png_to_answer(ans, data_url: str):
     except Exception:
         return False
 
-    filename = f"paint_answer_{ans.id}.png"
+    # Təhlükəsizlik auditi 2026-10-05: ad təsadüfidir — ``paint_answer_<id>.png`` ardıcıl id
+    # ilə başqa tələbələrin rəsm cavablarının yolunu təxmin etməyə imkan verirdi.
+    filename = f"paint_{uuid4().hex}.png"
     ans.paint_image.save(filename, ContentFile(binary), save=False)
     ans.paint_updated_at = timezone.now()
     ans.has_paint = True

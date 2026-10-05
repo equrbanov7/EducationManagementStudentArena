@@ -300,6 +300,33 @@ def check_exam_score_sheet_access(user, path: str) -> bool:
     return False
 
 
+#: ``User.is_exam_center`` (apps/accounts/roles.py) ilə eyni rol dəsti.
+EXAM_CENTER_ROLE_NAMES = ("exam_center", "exam_center_head", "exam_center_staff", "ikt_rehber")
+
+
+def check_exam_paint_access(user, path: str) -> bool:
+    """``exam_paints/`` — cəhd baxışı qaydası (EX28-09, ``teacher_view_attempt``).
+
+    Cavabın tələbəsi, imtahanın müəllifi, superadmin və ya imtahan təşkilatında imtahan
+    mərkəzi rolu (``is_exam_center_user`` ilə eyni; core apps idxal etmir). Təhlükəsizlik
+    auditi 2026-10-05: əvvəl org-un HƏR müəllim səviyyəli üzvü (dekan, rektor, başqa
+    müəllim) istənilən rəsm cavabını açırdı."""
+    ExamAnswer = django_apps.get_model("exams", "ExamAnswer")
+    answer = _get_single(ExamAnswer.objects.select_related("attempt__exam"), paint_image=path)
+    if answer is None:
+        return False
+    exam = answer.attempt.exam
+    if user.id in (answer.attempt.user_id, exam.author_id):
+        return True
+    if user.is_superuser or getattr(user, "is_superadmin", False):
+        return True
+    if getattr(user, "is_exam_center", False) and user_has_org_membership(user, exam.organization):
+        return True
+    return user.memberships.filter(
+        organization_id=exam.organization_id, is_active=True, role__name__in=EXAM_CENTER_ROLE_NAMES
+    ).exists()
+
+
 def check_guest_roster_document_access(user, path: str) -> bool:
     """``guest_roster_documents/`` — alt qrupdan əlavənin təqdimatı/sərəncamı.
 
