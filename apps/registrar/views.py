@@ -238,7 +238,7 @@ def journal_detail(request, offering_id):
         "correction_reasons": CorrectionReason.choices,
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(offering),
-        "lesson_teacher_choices": journal_extras.lesson_teacher_choices(offering),
+        "lesson_teacher_choices": journal_extras.has_lesson_teacher_choices(offering),
         # Dərs otağı: korpus → otaq kaskadı (korpus = otağın sahəsi); defolt korpus — campus.py.
         "lesson_rooms": rooms,
         "lesson_buildings": lesson_rooms.lesson_building_choices(rooms),
