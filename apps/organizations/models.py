@@ -523,18 +523,11 @@ class Membership(UUIDModel, TimeStampedModel):
     Represents a user's membership in an organization with a specific role.
     """
 
-    # Tutum testi 2026-10-05: hər sorğuda oxunan cədvəldə 14 indeks PG16-nın 16
-    # fast-path kilid limitini aşırdı (LWLock:LockManager). `user`/`organization`
-    # tək-sütun indeksləri kompozit indekslərin prefiksidir — db_index=False.
+    # Tutum testi 2026-10-05: 14 indeks PG16 fast-path kilid limitini (16) aşırdı — prefiks indekslər silindi.
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="memberships",
-        db_index=False,
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships", db_index=False
     )
-    organization = models.ForeignKey(
-        Organization, on_delete=models.CASCADE, related_name="memberships", db_index=False
-    )
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="memberships", db_index=False)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="memberships")
     scope_unit = models.ForeignKey(
         OrgUnit,
