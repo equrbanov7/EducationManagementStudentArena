@@ -19,7 +19,7 @@ on:
         type: string
         default: "20"
       app_cpus:
-        description: "Hər app replikasına CPU (4 replika)"
+        description: "Replikalar×CPU, məs. 4x1.0 və ya 6x1.0"
         required: true
         type: string
         default: "1.0"
@@ -81,7 +81,8 @@ jobs:
           echo "$PLAN" | grep -Eq '^((login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)(,(login|exam|journal|cabinet|mixed):[0-9]{1,5}(@[0-9]{1,4})?)*$' || { echo "::error::plan formatı"; exit 1; }
           case "$TEACHERS" in ''|*[!0-9]*) echo "::error::teachers rəqəm"; exit 1;; esac
           [ "$TEACHERS" -le 1000 ] || { echo "::error::teachers ≤ 1000"; exit 1; }
-          echo "$APP_CPUS$DB_CPUS" | grep -Eq '^[0-9.]+$' || { echo "::error::cpus"; exit 1; }
+          echo "$APP_CPUS" | grep -Eq '^([0-9]{1,2}x)?[0-9.]+$' || { echo "::error::app_cpus"; exit 1; }
+          echo "$DB_CPUS" | grep -Eq '^[0-9.]+$' || { echo "::error::db_cpus"; exit 1; }
           echo "$THINK" | grep -Eq '^[0-9.]+:[0-9.]+$' || { echo "::error::think"; exit 1; }
           echo "$PREAUTH" | grep -Eq '^[0-9.]+$' || { echo "::error::preauth"; exit 1; }
           CAP=/home/wcu/emsarena-capacity-20261004
@@ -113,7 +114,8 @@ jobs:
           [ "$OVERLAY" = "true" ] && EXTRA+=(--overlay --repo "$GITHUB_WORKSPACE")
           python3 scripts/loadtest/cap_run.py \
             --plan "$PLAN" --run-id "$RUN_ID" --harness "$GITHUB_WORKSPACE/scripts/loadtest" \
-            --teachers "$TEACHERS" --app-cpus "$APP_CPUS" --db-cpus "$DB_CPUS" \
+            --teachers "$TEACHERS" --replicas "$(case "$APP_CPUS" in *x*) echo "${APP_CPUS%%x*}";; *) echo 4;; esac)" \
+            --app-cpus "${APP_CPUS##*x}" --db-cpus "$DB_CPUS" \
             --think-min "${THINK%%:*}" --think-max "${THINK##*:}" --preauth-rate "$PREAUTH" \
             --out "$RUNNER_TEMP/capout" "${EXTRA[@]}"
 

@@ -75,6 +75,9 @@ class Stack:
     def build(self):
         cfg = json.loads(json.dumps(self.base))
         services = cfg["services"]
+        for name in APPS:
+            if name not in services:
+                services[name] = json.loads(json.dumps(services["app1"]))
         services["db"]["cpus"] = self.args.db_cpus
         services["db"]["command"] = [
             "postgres",
@@ -449,7 +452,7 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
 def write_report(run_dir, args, seed, results, reconcile):
     lines = ["# Tutum testi — " + run_dir.name, ""]
     lines.append(
-        f"İzolə stack: 4 app × {args.app_cpus} CPU, DB {args.db_cpus} CPU, PgBouncer 1 CPU, edge 0.75 CPU · "
+        f"İzolə stack: {len(APPS)} app × {args.app_cpus} CPU, DB {args.db_cpus} CPU, PgBouncer 1 CPU, edge 0.75 CPU · "
         f"canlı image · imtahan `{seed.get('exam_slug')}` ({seed.get('questions')} sual) · "
         f"jurnal: {len(seed.get('journals') or [])} müəllim · düşünmə {args.think_min}-{args.think_max} s"
     )
@@ -501,7 +504,10 @@ def main():
     p.add_argument("--overlay", action="store_true")
     p.add_argument("--repo", default="")
     p.add_argument("--out", required=True)
+    p.add_argument("--replicas", type=int, default=4)
     args = p.parse_args()
+    global APPS
+    APPS = tuple(f"app{i}" for i in range(1, max(1, args.replicas) + 1))
 
     if not live_health():
         raise SystemExit("canlı sistem sağlam deyil — test başlamır")
