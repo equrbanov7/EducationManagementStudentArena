@@ -30,7 +30,7 @@ class RowTotalFloorTest(_TeacherBase):
     def test_total_below_assigned_hours_is_refused(self):
         task, row = self.approved_row()
         self.assign(row, self.teacher_a, hours=30)
-        task.refresh_from_db()
+        task = self.amend_row(row)
 
         with self.assertRaises(WorkloadDenied) as ctx:
             save_row(task=task, actor=self.actor(self.chair_head), data={"lecture_total": 10}, row=row)
@@ -41,7 +41,7 @@ class RowTotalFloorTest(_TeacherBase):
     def test_total_equal_to_assigned_is_accepted(self):
         task, row = self.approved_row()
         self.assign(row, self.teacher_a, hours=20)
-        task.refresh_from_db()
+        task = self.amend_row(row)
 
         save_row(task=task, actor=self.actor(self.chair_head), data={"lecture_total": 20}, row=row)
 
@@ -50,6 +50,7 @@ class RowTotalFloorTest(_TeacherBase):
     def test_http_row_save_returns_409(self):
         task, row = self.approved_row()
         self.assign(row, self.teacher_a, hours=30)
+        task = self.amend_row(row)
         client = Client()
         client.force_login(self.chair_head)
         session = client.session

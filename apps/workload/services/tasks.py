@@ -12,15 +12,17 @@ from core.constants import AuditAction, OrgUnitType
 
 from ..constants import (
     ACTIVITY_TOTAL_FIELD,
+    AMENDMENT_SCOPED_STATUSES,
     EDITABLE_STATUSES,
     TOTAL_HOUR_FIELDS,
+    AmendmentTarget,
     DegreeLevel,
     EducationForm,
     RowKind,
     Season,
     TaskStatus,
 )
-from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
+from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
 from .people import resolve_chair
 from .plan_calendar import season_from_period as _season_from_period
 from .scoping import WorkloadDenied, ensure_can_manage
@@ -230,8 +232,25 @@ def resolve_specialty_and_faculty(organization, specialty_id):
     return specialty, faculty
 
 
-def _ensure_editable(task: TeachingTask) -> None:
-    if task.status not in EDITABLE_STATUSES:
+def _amendment_target_row_ids(task: TeachingTask) -> set:
+    """Açıq (son ``distributed``-dən sonrakı) sətir düzəlişlərinin hədəf sətirləri."""
+    amendments = WorkloadAmendment.objects.filter(task=task, target_kind=AmendmentTarget.ROW)
+    if task.distributed_at:
+        amendments = amendments.filter(created_at__gte=task.distributed_at)
+    return set(amendments.values_list("target_id", flat=True))
+
+
+def _ensure_editable(task: TeachingTask, row=None) -> None:
+    """Sətir yazısı (saat/struktur) icazəlidirmi.
+
+    Təhlükəsizlik auditi 2026-10-05: ``distributing`` (dekan təsdiqindən sonra) artıq
+    redaktəyə açıq deyil; ``amended`` yalnız açıq düzəlişin HƏDƏF sətrini açır — yeni
+    sətir və digər sətirlər bağlıdır.
+    """
+    allowed = task.status in EDITABLE_STATUSES
+    if allowed and task.status in AMENDMENT_SCOPED_STATUSES:
+        allowed = row is not None and row.pk is not None and row.pk in _amendment_target_row_ids(task)
+    if not allowed:
         raise WorkloadDenied(
             "workload.task_not_editable",
             "Bu statusda sətir dəyişmək olmaz — düzəliş axını (amendment) istifadə edilməlidir.",
@@ -309,9 +328,9 @@ def _ensure_totals_cover_assigned(row) -> None:
 
 @transaction.atomic
 def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -> TeachingTaskRow:
-    """Sətir yaradır və ya redaktə edir (draft/distributing statuslarında)."""
+    """Sətir yaradır və ya redaktə edir (draft/returned; amended — yalnız düzəlişin hədəf sətri)."""
     ensure_can_manage(actor, task.chair_id)
-    _ensure_editable(task)
+    _ensure_editable(task, row)
 
     row = row or TeachingTaskRow(organization=task.organization, task=task)
     if row.pk and row.task_id != task.pk:
@@ -413,7 +432,7 @@ def save_row(*, task: TeachingTask, actor, data: dict, row=None, request=None) -
 @transaction.atomic
 def delete_row(*, task: TeachingTask, row: TeachingTaskRow, actor, request=None) -> None:
     ensure_can_manage(actor, task.chair_id)
-    _ensure_editable(task)
+    _ensure_editable(task, row)
     if row.task_id != task.pk:
         raise WorkloadDenied("workload.row_foreign", "Sətir bu tapşırığa aid deyil.")
     label = row.subject_label
