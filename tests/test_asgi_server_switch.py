@@ -122,9 +122,8 @@ def test_entrypoint_rejects_invalid_switch(tmp_path, env):
 def test_uvicorn_proxy_headers_give_same_client_as_daphne(xff):
     """Django-nun REMOTE_ADDR-i və WS scope["client"] hər iki serverdə eynidir."""
     pytest.importorskip("uvicorn")
-    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-
     from daphne.utils import parse_x_forwarded_for
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
     daphne_addr, _ = parse_x_forwarded_for(
         {b"x-forwarded-for": [xff.encode()]}, original_addr=["172.18.0.5", 50000], original_scheme="http"
