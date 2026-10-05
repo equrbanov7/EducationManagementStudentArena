@@ -7,10 +7,12 @@
 
 from __future__ import annotations
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.upload_security import validate_uploaded_file
 
 from ..constants import AmendmentReason, AmendmentTarget, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow, WorkloadAmendment
@@ -99,6 +101,13 @@ def open_amendment(
         made_by=getattr(actor, "user", None),
     )
     if document is not None:
+        # 2026-10-05 təhlükəsizlik auditi: ``FileField.validators`` ``save()``-də
+        # İŞLƏMİR — PDF-only qaydası burada tətbiq olunur (əks halda HTML/SVG
+        # «sənəd» kimi saxlanıb protected media ilə açılırdı).
+        try:
+            validate_uploaded_file(document, allowed_extensions={".pdf"}, max_size_mb=10)
+        except ValidationError as exc:
+            raise WorkloadDenied("workload.invalid_document", " ".join(exc.messages)) from exc
         amendment.document = document
     amendment.save()
 
