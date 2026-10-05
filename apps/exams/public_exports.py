@@ -5,6 +5,8 @@ from .constants import ATTEMPT_FINISHED_STATUSES  # noqa: F401
 from .constants import EXAM_LANGUAGE_CHOICES  # noqa: F401
 from .constants import QUESTION_EXAM_KIND_CHOICES  # noqa: F401
 from .constants import QUESTION_EXAM_KIND_VALUES  # noqa: F401
+from .domain.unit_assignment import student_assigned_exams_q  # noqa: F401
+from .domain.unit_assignment import student_excluded_exams_q  # noqa: F401
 from .domain.unit_assignment import unit_assigned_exams_q  # noqa: F401
 from .domain.unit_assignment import unit_assigned_student_ids  # noqa: F401
 from .domain.unit_assignment import unit_student_record_filter  # noqa: F401
@@ -50,6 +52,8 @@ __all__ = [
     "split_group_filter_values",
     "student_visible_pin",
     "supervisor_org_or_403",
+    "student_assigned_exams_q",
+    "student_excluded_exams_q",
     "unit_assigned_exams_q",
     "unit_assigned_student_ids",
     "unit_row_labels",
