@@ -7,8 +7,9 @@ Yaradır (idempotent):
   * hər run üçün TƏZƏ MCQ imtahanı (`cap-<run>`) — bütün stress qruplarına açıq,
     cəhd limiti yoxdur → əvvəlki run-ların cəhdləri nəticəyə qarışmır;
   * `CAP_TEACHERS` müəllim (`cap_teacher_NNN`) — hər birinə öz elektron jurnalı
-    (CourseOffering), qrupda `CAP_GROUP_SIZE` tələbə və BU GÜNƏ tarixli seminar
-    dərsi (yeni qeyd yalnız dərs günü yazılır — gradebook.save_marks qaydası).
+    (CourseOffering), qrupda `CAP_GROUP_SIZE` tələbə və BU RUN-a məxsus, BU GÜNƏ
+    (Bakı) tarixli seminar dərsi (yeni qeyd yalnız dərs günü yazılır; mövcud qeyd
+    2 saatdan sonra kilidlənir — gradebook.save_marks + DB trigger).
 
 Nəticə: `CAP_OUT` (JSON) — imtahan slug-ı və müəllim → jurnal xəritəsi.
 """
@@ -234,6 +235,30 @@ def seed_journals(org, owner):
         if g % 10 == 0:
             log("groups", g, "/", groups, "offerings", len(offerings))
 
+    # Hər run ÖZ dərsini alır. Əvvəl `get_or_create(date=today)` idi: eyni Bakı günündə
+    # ikinci run (məs. 05:00 və 19:49) səhərki run-ın dərsini və İŞARƏLƏRİNİ təkrar
+    # istifadə edirdi — 2 saatlıq pəncərə (MARK_EDIT_WINDOW + DB trigger) keçdiyi üçün
+    # bütün xanalar kilidli idi, grid-də heç bir `att__` input render olunmurdu
+    # («journal grid parse cells=0», 2026-10-05). Bu gün/sabah tarixli köhnə cap
+    # dərsləri silinir (marks cascade; yalnız izolə test bazası).
+    used = offerings[: len(teachers)]
+    tag = f"cap-run {RUN_ID}"
+    dates = [today]
+    if timezone.localtime().hour >= 18:
+        # Run Bakı gecə yarısını keçərsə jurnal pilləsi «sabahın» dərsini yazır.
+        dates.append(today + datetime.timedelta(days=1))
+    stale, _ = (
+        Lesson.objects.filter(offering__in=used, date__in=dates).exclude(topic=tag).delete()
+    )
+    log("stale cap lessons deleted (incl. marks)", stale)
+    have = set(
+        Lesson.objects.filter(offering__in=used, topic=tag).values_list("offering_id", "date")
+    )
+    for o in used:  # .create (save/siqnallar işləsin), bulk_create yox
+        for d in dates:
+            if (o.pk, d) not in have:
+                Lesson.objects.create(organization=org, offering=o, date=d, kind=LessonKind.SEMINAR, hours=2, topic=tag)
+
     mapping = []
     for teacher, offering in zip(teachers, offerings):
         changed = []
@@ -245,12 +270,6 @@ def seed_journals(org, owner):
             changed.append("lesson_hours")
         if changed:
             offering.save(update_fields=changed)
-        Lesson.objects.get_or_create(
-            organization=org,
-            offering=offering,
-            date=today,
-            defaults={"kind": LessonKind.SEMINAR, "hours": 2},
-        )
         mapping.append([teacher.username, str(offering.pk)])
     return mapping
 

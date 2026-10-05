@@ -359,7 +359,13 @@ class JournalTeacher(_Base):
         cells = sorted(set(ATT_RE.findall(body)))
         token = csrf(body)
         if not cells or not token:
-            fixture_error(self, "journal grid parse", f"cells={len(cells)} csrf={bool(token)}")
+            # cells=0 + today_cols>0 → bugünkü dərs var, amma xanalar kilidlidir (köhnə işarə,
+            # 2 saat pəncərəsi); today_cols=0 → dərs tarixi Bakı «bu gün»ü deyil.
+            fixture_error(
+                self,
+                "journal grid parse",
+                f"cells={len(cells)} csrf={bool(token)} today_cols={body.count('is-today')} locked_ro={body.count('jd2-ro--')}",
+            )
             raise _Abort()
         self._think(10, 30)  # müəllim davamiyyəti işarələyir
 
