@@ -18,6 +18,7 @@ import datetime
 import json
 import math
 import os
+import secrets
 import time
 
 from django.apps import apps as django_apps
@@ -405,6 +406,8 @@ with rls_worker_atomic(), bypass_rls():
         "exam_id": exam.pk,
         "final_exam_slug": final_exam.slug,
         "final_exam_id": final_exam.pk,
+        # finalcenter: hamı üçün eyni fərdi PIN (cap_prep.py PIN sətirlərini pillədən əvvəl yazır).
+        "final_pin": "".join(secrets.choice("23456789") for _ in range(6)),
         "exam_author": author.username,
         "questions": exam.questions.count(),
         "journals": journals,

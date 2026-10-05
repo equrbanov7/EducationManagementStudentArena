@@ -14,6 +14,10 @@
                    + imtahan müəllifi nəticə xlsx-i (`/exams/<slug>/results/export.xlsx`;
                    >EXPORT_SYNC_MAX_ROWS cəhddə worker job → status poll → download).
                    Vaxt və ölçü `exports-*.jsonl`-a; uçdan-uca vaxt `[e2e]` sətri kimi.
+  finalcenter    — final imtahanı İmtahan Mərkəzi PIN axını ilə: `/exams/final/` (login
+                   YOX — istifadəçi adı + fərdi PIN, cap_prep.py yazır) → birbaşa start
+                   (org-da qeydli zal kompüteri yoxdur) → autosave → finish → nəticə +
+                   5 dəqiqəlik açar baxışı (nəticə səhifəsinə təkrar baxış).
 """
 
 from __future__ import annotations
@@ -39,6 +43,7 @@ from cap_common import (
     _next_teacher,
     _teacher_limit,
     append_jsonl,
+    run_attempt,
     csrf,
     fixture_error,
     parks,
@@ -391,8 +396,59 @@ class ExportExamResults(_Base):
         return body
 
 
+ATTEMPT_RE = re.compile(r"/exams/[^/]+/attempt/\d+/")
+
+
+class FinalCenterStudent(_Base):
+    """Final imtahanı: PIN girişi → cəhd → autosave → finish → nəticə + açar baxışı."""
+
+    wait_time = between(1, 2)
+    weight = 1
+
+    @parks
+    def on_start(self):
+        self.index, self.username = _next_student(self)
+        self._client_setup(self.index, "/exams/final/")
+
+    @task
+    @parks
+    def sit_final(self):
+        self._wait_for_go()
+        with self.client.get("/exams/final/", name="final entry page", catch_response=True, timeout=30) as r:
+            token = csrf(r.text)
+            if r.status_code != 200 or not token:
+                r.failure(f"final entry page: {r.status_code} {r.error}")
+                raise _Abort()
+        self._think(5, 15)  # istifadəçi adı + PIN yazır
+        with self.client.post(
+            "/exams/final/",
+            data={"csrfmiddlewaretoken": token, "username": self.username, "pin": SEED["final_pin"]},
+            name="final pin submit",
+            allow_redirects=False,
+            catch_response=True,
+            timeout=40,
+        ) as r:
+            location = r.headers.get("Location", "")
+            found = ATTEMPT_RE.search(location)
+            if r.status_code not in (302, 303) or not found:
+                hint = "hall/ticket flow (rooms registered) not supported" if location.endswith("/exams/final/") else ""
+                err = re.search(r'fexc-alert-error".*?<span>([^<]{0,160})</span>', r.text or "", re.S)
+                r.failure(f"pin submit: {r.status_code} {r.error} → {location[:100]} {hint} {(err.group(1).strip() if err else '')!r}")
+                raise _Abort()
+            url = found.group(0)
+        COUNTERS["logged_in"] += 1
+        result_url = run_attempt(self, url, csrf(r.text) or token, kind="final", prefix="final ")
+        # Final mərkəzi nəticədən sonra açarı 5 dəqiqə göstərir — tələbə yenidən baxır.
+        self._think(30, 120)
+        with self.client.get(result_url, name="final result review", catch_response=True, timeout=30) as rr:
+            if rr.status_code != 200:
+                rr.failure(f"result review: {rr.status_code} {rr.error}")
+        raise _Abort()
+
+
 EXTRA_CLASSES = {
     "studentjournal": [StudentJournal],
     "journalfinal": [JournalFinalTeacher, FinalScoreClerk],
     "export": [ExportTeacher, ExportExamResults],
+    "finalcenter": [FinalCenterStudent],
 }

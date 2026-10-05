@@ -348,6 +348,10 @@ def run_stage(stack, args, spec, index, cursor, seed_path, run_dir, t_cursor=0):
             sessions_env = make_sessions(stack, run_dir, name, s_base + 1, student_share)
             spawn_rate = max(20.0, users / 30)
             preauth = users / spawn_rate
+        elif mode == "finalcenter":
+            # Ön-giriş yoxdur (PIN girişi axının özüdür) — VU-lar tez qalxır, `go` pəncərəsində başlayır.
+            spawn_rate = max(20.0, users / 30)
+            preauth = users / spawn_rate
         elif mode == "export":
             # İmtahan nəticəsi ixracı müəllifin (stress_teacher) adına — eyni hesaba N sessiya.
             sessions_env = make_sessions(stack, run_dir, name, 0, max(1, users // 5) + 2, user=seed.get("exam_author", "stress_teacher"))

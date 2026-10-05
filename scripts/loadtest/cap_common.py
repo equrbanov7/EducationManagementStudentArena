@@ -188,3 +188,78 @@ def _next_teacher(user):
     username, offering = journals[index]
     return index, username, offering
 
+
+
+def run_attempt(user, url, token, kind="exam", prefix="exam "):
+    """Açılmış cəhd: suallar → hər sual üçün autosave → finish → nəticə. Nəticə URL-ini qaytarır.
+
+    Gözlənilən cavablar `expected-answers` ledger-inə (`kind` ilə) yazılır (cap_reconcile)."""
+    user.client.headers["Referer"] = ORIGIN + url
+    with user.client.get(url, name=f"{prefix}questions page", catch_response=True, timeout=30) as r:
+        html = r.text
+        if r.status_code != 200:
+            r.failure(f"questions page: {r.status_code} {r.error}")
+            raise _Abort()
+    options = {}
+    revision = "0"
+    for tag in INPUT_RE.findall(html):
+        name = re.search(r"name=.q_([0-9]+).", tag)
+        value = re.search(r"value=.([a-zA-Z0-9_-]+)", tag)
+        if name and value and "radio" in tag:
+            options.setdefault(name.group(1), []).append(value.group(1))
+        if 'name="autosave_revision"' in tag:
+            found_rev = re.search(r'value="(\d+)"', tag)
+            revision = found_rev.group(1) if found_rev else "0"
+    token = csrf(html) or token
+    if not options:
+        fixture_error(user, f"{prefix}questions parse", "no MCQ inputs on attempt page")
+        raise _Abort()
+    selected = {}
+    headers = {"X-Requested-With": "XMLHttpRequest", "X-CSRFToken": token}
+    order = list(options)
+    # ~20% tələbə bir cavabı sonradan dəyişir (real davranış).
+    changes = order + ([random.choice(order)] if random.random() < 0.2 else [])
+    for qid in changes:
+        user._think()
+        selected[qid] = random.choice(options[qid])
+        data = {
+            "csrfmiddlewaretoken": token,
+            "submit_action": "autosave",
+            "autosave_revision": revision,
+            f"q_{qid}": selected[qid],
+            f"q_present_{qid}": "1",
+            "changed_questions[]": [qid],
+        }
+        with user.client.post(url, data=data, headers=headers, name=f"{prefix}autosave", catch_response=True, timeout=30) as r:
+            try:
+                payload = r.json()
+            except Exception:
+                payload = {}
+            if r.status_code == 200 and payload.get("success") is True:
+                revision = str(payload.get("server_revision", revision))
+            else:
+                r.failure(f"autosave: {r.status_code} {r.error} {str(payload)[:80]} body={(r.text or '')[:120]!r} srv={r.headers.get('Server', '')}")
+                # Real klient Retry-After/backoff ilə təkrarlayır — burada bir dəfə.
+                gevent.sleep(float(r.headers.get("Retry-After", "3") or 3))
+    gevent.sleep(2)
+    data = {"csrfmiddlewaretoken": token, "submit_action": "finish", "autosave_revision": revision}
+    for qid, value in selected.items():
+        data[f"q_{qid}"] = value
+        data[f"q_present_{qid}"] = "1"
+    data["changed_questions[]"] = list(selected)
+    with user.client.post(url, data=data, headers=headers, name=f"{prefix}finish", catch_response=True, timeout=40) as r:
+        try:
+            payload = r.json()
+        except Exception:
+            payload = {}
+        if not (r.status_code == 200 and payload.get("finished") is True):
+            r.failure(f"finish: {r.status_code} {r.error} {str(payload)[:80]} body={(r.text or '')[:120]!r} srv={r.headers.get('Server', '')}")
+            raise _Abort()
+    attempt = int(url.rstrip("/").split("/")[-1])
+    append_jsonl("expected-answers", {"attempt": attempt, "selected": selected, "kind": kind})
+    COUNTERS["exam_finished" if kind == "exam" else "final_finished"] += 1
+    result_url = payload.get("redirect_url") or url + "result/"
+    with user.client.get(result_url, name=f"{prefix}result", catch_response=True, timeout=30) as r:
+        if r.status_code != 200:
+            r.failure(f"result: {r.status_code} {r.error}")
+    return result_url
