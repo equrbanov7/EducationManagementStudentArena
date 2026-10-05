@@ -1,7 +1,8 @@
 """Nəticə analitikası (II) — müəllim kartı, dinamika, ümumi təkliflər, filtr seçimləri.
 
 k-anonimlik və tamamlayıcı qayda ``analytics`` modulundakı ilə EYNİDİR. Sərbəst
-mətn (şərh/təklif) YALNIZ dəst ``k``-nı keçəndə qaytarılır; heç bir şərh fənn,
+mətn (şərh/təklif) YALNIZ dəst ``k``-nı keçəndə VƏ daraldıcı filtr (fənn, qrup, ixtisas,
+kurs) olmadan qaytarılır (təhlükəsizlik auditi 2026-10-05); heç bir şərh fənn,
 qrup, tarix və ya hər hansı identifikatorla birlikdə verilmir, sırası təsadüfi
 UUID-ə görədir (daxiletmə sırası deyil).
 """
@@ -112,7 +113,11 @@ def teacher_detail(organization, scope, teacher_id, filters=None) -> dict:
         "questions": question_stats(base, visible=visible),
         "distributions": distributions,
         "offerings": sorted(offerings, key=lambda r: (r["subject_name"], r["group_name"])),
-        "comments": _comments(base, ("strengths", "improve"), filters.text_query) if visible else [],
+        # Təhlükəsizlik auditi 2026-10-05: sərbəst mətn yalnız müəllim səviyyəsində — daraldıcı
+        # filtr (fənn/qrup/ixtisas/kurs) altında şərh üslubu kiçik dilimin müəllifini açır.
+        "comments": (
+            _comments(base, ("strengths", "improve"), filters.text_query) if visible and not filters.is_narrowed else []
+        ),
         "trend": trend(organization, scope, teacher_id=teacher_id),
     }
 
@@ -169,14 +174,15 @@ def general_suggestions(organization, scope, filters=None, *, query="", limit=50
         ).count()
     visible = is_visible(n, k, baseline)
     items = []
-    if visible:
+    # Təhlükəsizlik auditi 2026-10-05: mətn yalnız kampaniya səviyyəsində (daraldıcı filtrsiz).
+    if visible and not filters.is_narrowed:
         codes = list(
             SurveyAnswer.objects.filter(response__in=base.values("pk"), question__kind=QuestionKind.TEXT)
             .values_list("question__code", flat=True)
             .distinct()
         )
         items = _comments(base, codes, query or filters.text_query, limit=limit, offset=offset)
-    return {"k": k, "n": n, "suppressed": not visible, "items": items}
+    return {"k": k, "n": n, "suppressed": not visible, "narrowed": filters.is_narrowed, "items": items}
 
 
 def breakdown(organization, scope, filters=None, *, by="faculty", section=Section.TEACHER) -> dict:

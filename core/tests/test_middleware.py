@@ -428,3 +428,28 @@ class RequestQueueMiddlewareTest(TestCase):
 
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response["X-Request-Queued"], "timeout")
+
+    def test_timeout_response_is_styled_html_for_browsers_and_json_for_ajax(self):
+        """UX2 2026-10-05: brauzer formu 503-də xam mətn yox, stilli səhifə görür; JSON olduğu kimi qalır."""
+        from django.http import HttpResponse
+
+        from core.middleware import RequestQueueMiddleware
+
+        middleware = RequestQueueMiddleware(lambda request: HttpResponse("ok"))
+        html_accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+        browser = middleware._timeout_response(self.factory.post("/submit/", HTTP_ACCEPT=html_accept))
+        self.assertEqual(browser.status_code, 503)
+        self.assertEqual(browser["Content-Type"], "text/html; charset=utf-8")
+        self.assertEqual(browser["Retry-After"], "2")
+        self.assertEqual(browser["X-Request-Queued"], "timeout")
+        self.assertIn(b"<html", browser.content)
+        self.assertIn(b"error-btn", browser.content)
+
+        ajax = middleware._timeout_response(self.factory.post("/submit/", HTTP_X_REQUESTED_WITH="XMLHttpRequest"))
+        self.assertEqual(ajax["Content-Type"], "application/json")
+        self.assertEqual(json.loads(ajax.content)["ok"], False)
+
+        bare = middleware._timeout_response(self.factory.post("/submit/"))
+        self.assertEqual(bare["Content-Type"], "text/plain; charset=utf-8")
+        self.assertNotIn(b"<html", bare.content)

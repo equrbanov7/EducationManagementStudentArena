@@ -374,8 +374,8 @@ class QuestionTest(TestCase):
             question_text="Public question",
             visible_to_all=True,
         )
-        # Public questions visible to everyone
-        self.assertTrue(question.can_user_see(self.viewer))
+        # Legacy (organization-less) public questions: only the author (audit 2026-10-05)
+        self.assertFalse(question.can_user_see(self.viewer))
         self.assertTrue(question.can_user_see(self.author))
 
     def test_question_can_user_see_private(self):
@@ -392,15 +392,23 @@ class QuestionTest(TestCase):
 
     def test_question_can_user_see_with_specific_users(self):
         """Test can_user_see method with specific users."""
+        from apps.organizations.models import Organization
+        from core.constants import OrganizationType
+
+        org = Organization.objects.create(
+            name="Q Org", org_type=OrganizationType.UNIVERSITY, owner=self.author, status="active", is_active=True
+        )
         question = Question.objects.create(
             author=self.author,
             question_text="Restricted question",
             visible_to_all=False,
+            organization=org,
         )
+        self.assertFalse(question.can_user_see(self.viewer, organization=org))
         question.visible_users.add(self.viewer)
 
-        # Viewer should now be able to see it
-        self.assertTrue(question.can_user_see(self.viewer))
+        # Viewer should now be able to see it (inside the question's organization)
+        self.assertTrue(question.can_user_see(self.viewer, organization=org))
 
     def test_question_string_representation(self):
         """Test Question __str__ method."""

@@ -39,9 +39,9 @@ import uuid
 
 from django.conf import settings
 from django.core.cache import caches
-from django.http import HttpResponse, JsonResponse
 from django.utils.translation import pgettext
 
+from core.middleware_overload import overload_response
 from core.request_context import clear_request_id, set_request_id
 from core.settings_utils import safe_float_setting as _safe_float_setting
 from core.settings_utils import safe_int_setting as _safe_int_setting
@@ -345,10 +345,7 @@ class RequestQueueMiddleware:
             "Server is busy processing previous requests. Please try again shortly.",
         )
         retry_after = str(_safe_int_setting("REQUEST_QUEUE_RETRY_AFTER_SECONDS", 2, minimum=1))
-        if _request_wants_json(request):
-            response = JsonResponse({"ok": False, "error": message}, status=503)
-        else:
-            response = HttpResponse(message, status=503)
+        response = overload_response(request, message, wants_json=_request_wants_json(request))
         response["Retry-After"] = retry_after
         response["X-Request-Queued"] = "timeout"
         return response

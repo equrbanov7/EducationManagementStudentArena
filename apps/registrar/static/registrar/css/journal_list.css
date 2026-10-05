@@ -197,3 +197,42 @@
     .jl-head-meta { margin-left: 0; }
     .jl-page .jd2-pagehead { flex-wrap: wrap; }
 }
+
+/* ── Telefon: kart düzümü (UX2 2026-10-05) ──────────────────────────────────
+   375px-də 720px minimum enli cədvəl üfüqi sürüşürdü, «Jurnalı aç» düyməsi görünmürdü.
+   ≤640px-də hər sətir kartdır: qrup/fənn tam enli, «dərs tipi» və «tələbə sayı» yan-yana
+   (etiket data-label-dən), düymə tam en və 44px. Masaüstü dəyişməyib. */
+@media (max-width: 640px) {
+    .jl-page .jl-table-wrap { overflow: visible; border: none; background: transparent; box-shadow: none; }
+    .jl-page .jl-table,
+    .jl-page .jl-table tbody { display: block; min-width: 0; }
+    /* Başlıq sətri vizual gizlənir (kartlarda etiket data-label-dən gəlir). */
+    .jl-page .jl-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    .jl-page .jl-table tbody tr.jl-row {
+        display: grid; grid-template-columns: 1fr 1fr; gap: var(--ems-sp-4) var(--ems-sp-5);
+        padding: 14px; margin-bottom: var(--ems-sp-5);
+        border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl);
+        background: var(--ems-bg); box-shadow: var(--ems-sh-card);
+    }
+    .jl-page .jl-table tbody tr.jl-row--now { background: var(--ems-emerald-50); box-shadow: var(--ems-sh-card), inset 3px 0 0 var(--ems-success); }
+    .jl-page .jl-table tbody tr.jl-row td { display: block; padding: 0; border: none; width: auto; text-align: left; min-width: 0; }
+    .jl-page .jl-table tbody tr.jl-row td.jl-col-no { display: none; }
+    .jl-page .jl-table tbody tr.jl-row td:nth-child(2),
+    .jl-page .jl-table tbody tr.jl-row td.jl-col-action { grid-column: 1 / -1; }
+    .jl-page .jl-col-kind::before,
+    .jl-page .jl-col-count::before {
+        content: attr(data-label); display: block; margin-bottom: 4px;
+        font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; color: var(--ems-neutral-500);
+    }
+    .jl-page .jl-open-btn { display: flex; justify-content: center; width: 100%; min-height: 44px; }
+    .jl-page .jl-next { white-space: normal; padding-top: 4px; padding-bottom: 4px; }
+    .jl-page .jl-subject-sub { flex-wrap: wrap; }
+
+    /* Skeleton da kart: yalnız qrup/fənn xətləri (kind/say/düymə gizli), kart hündürlüyü real kartla uyğun. */
+    .jl-page .jl-skel .jl-table tbody tr.jl-skel-row {
+        display: block; padding: 14px; margin-bottom: var(--ems-sp-5);
+        border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); background: var(--ems-bg);
+    }
+    .jl-page .jl-skel .jl-table tbody tr.jl-skel-row td { display: none; padding: 0; border: none; height: auto; }
+    .jl-page .jl-skel .jl-table tbody tr.jl-skel-row td:nth-child(2) { display: block; }
+}

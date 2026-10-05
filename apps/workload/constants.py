@@ -52,7 +52,13 @@ class TaskStatus(models.TextChoices):
 #: new_values` sənədləşdirilir, TƏTBİQ olunmurdu). `confirm_distribution` artıq
 #: `amended`-i qəbul edir (yenidən `distributed`-ə bağlamaq üçün) — simmetriya
 #: bura ilə tamamlanır.
-EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.DISTRIBUTING, TaskStatus.AMENDED})
+#: Təhlükəsizlik auditi 2026-10-05: ``distributing`` ÇIXARILDI — dekan təsdiqindən sonra
+#: saat/struktur sahələri sərbəst dəyişmir (bölgü/təyinat ``ASSIGNABLE_STATUSES`` ilə
+#: işləməyə davam edir). ``amended`` qalır, amma ``services.tasks._ensure_editable``
+#: onu YALNIZ açıq düzəlişin hədəf sətri üçün buraxır (``AMENDMENT_SCOPED_STATUSES``).
+EDITABLE_STATUSES = frozenset({TaskStatus.DRAFT, TaskStatus.RETURNED, TaskStatus.AMENDED})
+#: Redaktəsi yalnız açıq düzəlişin hədəf sətri ilə məhdud statuslar.
+AMENDMENT_SCOPED_STATUSES = frozenset({TaskStatus.AMENDED})
 #: Bölgü (təyinat) əməliyyatlarına açıq statuslar.
 #: ``approved`` F2 zəncirinin çıxışıdır — dekanlıq təsdiqindən sonra kafedra
 #: müdiri bölgüyə başlayır.  ``draft`` status siyahısında qalır, amma
@@ -222,6 +228,7 @@ __all__ = [
     "DEAN_SECOND_APPROVAL_ENABLED",
     "DEFAULT_ANNUAL_NORM_HOURS",
     "DEFAULT_HOURLY_PAID_CAP",
+    "AMENDMENT_SCOPED_STATUSES",
     "EDITABLE_STATUSES",
     "HOURS_PER_CREDIT",
     "LOCKED_STATUSES",

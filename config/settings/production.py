@@ -411,6 +411,10 @@ if sentry_dsn:
     sentry_sdk.init(
         dsn=sentry_dsn,
         send_default_pii=False,
+        # Təhlükəsizlik auditi 2026-10-05: defolt «medium» xəta hadisəsinə POST gövdəsini
+        # (≤ 10 KB) əlavə edir — anonim sorğu cavabları, imtahan cavabları, formalar.
+        # Gövdə HEÇ VAXT göndərilmir (DjangoIntegration bu client seçimini oxuyur).
+        max_request_body_size="never",
         integrations=[
             DjangoIntegration(),
             CeleryIntegration(),

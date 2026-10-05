@@ -10,7 +10,8 @@
   dəstləri qaydasından keçir; fənn × qrup xanaları F1 tamamlayıcı qaydası + iç-içə
   dövr qaydası + qardaş xanalar (≥ 2 gizli xana, gizli cəm ≥ k) ilə qorunur; gizli
   xananın heç bir rəqəmi (``n`` də) verilmir; say səbətlə, paylanma yalnız faizlə.
-* Şərhlər yalnız dəst göstərilə bilən olanda, identifikatorsuz və tarixsiz.
+* Şərhlər yalnız dəst göstərilə bilən olanda VƏ daraldıcı filtr (fənn/qrup/ixtisas/kurs)
+  olmadan, identifikatorsuz və tarixsiz.
 """
 
 from __future__ import annotations
@@ -143,7 +144,9 @@ def _guarded_detail(resolved, teacher_id, filters):
 
 def detail_context(request, teacher_id):
     """``(context, status)`` — ``context`` ``None``-dursa ``status`` 403/404/409-dur."""
-    resolved = resolve(request)
+    # Təhlükəsizlik auditi 2026-10-05: panel kimi kaskad — uyğunsuz seçimlər atılır və çekməcə
+    # panelin HƏQİQƏTƏN tətbiq etdiyi (``effective``) filtrlərlə hesablanır.
+    resolved = resolve(request, with_choices=True)
     if resolved is None:
         return None, 403
     if not resolved.campaign_ids:

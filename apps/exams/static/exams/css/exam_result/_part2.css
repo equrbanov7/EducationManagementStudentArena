@@ -381,10 +381,9 @@
         padding: 6px 9px;
         font-size: 0.85rem;
     }
-    .test-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px 14px;
-    }
+    .test-stats-grid { gap: 10px 14px; }
+    /* Telefonda sətirdə 2 kart; tək qalan (5-ci) sətri tam doldurur. */
+    .test-stats-grid > .stat-item { flex: 1 1 calc(50% - 7px); }
     .result-action-panel {
         flex-direction: column;
         align-items: stretch;

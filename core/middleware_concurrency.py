@@ -27,13 +27,12 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 
 from django.core.exceptions import MiddlewareNotUsed
-from django.http import HttpResponse, JsonResponse
-from django.utils.translation import get_language, pgettext
+from django.utils.translation import pgettext
 
 from core.middleware import _request_wants_json
+from core.middleware_overload import overload_response
 from core.settings_utils import safe_float_setting as _safe_float_setting
 from core.settings_utils import safe_int_setting as _safe_int_setting
 
@@ -41,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MAX_INFLIGHT_REQUESTS = 32
 DEFAULT_WAIT_SECONDS = 2.0
+DEFAULT_LOGIN_WAIT_SECONDS = 15.0
 DEFAULT_RETRY_AFTER_SECONDS = 5
 DEFAULT_EXEMPT_PREFIXES = (
     "/static/",
@@ -51,34 +51,6 @@ DEFAULT_EXEMPT_PREFIXES = (
     "/health/",
     "/ws/",
 )
-
-
-# Brauzer naviqasiyası üçün stilli 503 səhifəsi dil üzrə BİR dəfə render olunur: yük altında hər rədd
-# edilən sorğu şablon engine-i işlətməsin (sessiya/auth/DB-yə də toxunmur — `request` verilmir).
-_OVERLOAD_HTML_CACHE: dict[tuple[str, bool], str] = {}
-
-
-def _wants_html_page(request) -> bool:
-    return "text/html" in request.META.get("HTTP_ACCEPT", "")
-
-
-def _overload_html(request) -> str | None:
-    """Stilli 503 HTML-i (dil+metod üzrə keşli); render alınmasa ``None`` (düz mətnə qayıdılır)."""
-    can_retry = request.method in ("GET", "HEAD")
-    key = (get_language() or "az", can_retry)
-    html = _OVERLOAD_HTML_CACHE.get(key)
-    if html is None:
-        try:
-            from django.conf import settings
-            from django.template.loader import render_to_string
-
-            brand = pgettext("brand", getattr(settings, "SITE_BRAND_NAME", "Qərbi Kaspi Universiteti"))
-            html = render_to_string("errors/503.html", {"site_brand_name": brand, "can_retry": can_retry})
-        except Exception:  # noqa: BLE001 — rədd yolu heç vaxt özü 500 verməməlidir
-            logger.exception("503 səhifəsi render olunmadı — düz mətn qaytarılır")
-            return None
-        _OVERLOAD_HTML_CACHE[key] = html
-    return html
 
 
 class ConcurrencyLimitMiddleware:
@@ -109,12 +81,14 @@ class ConcurrencyLimitMiddleware:
             return self.get_response(request)
 
         wait = _safe_float_setting("MAX_INFLIGHT_WAIT_SECONDS", DEFAULT_WAIT_SECONDS, minimum=0.0)
-        deadline = time.monotonic() + wait
         login_slots = self._login_slots if self._is_login_post(request) else None
-        if login_slots and not login_slots.acquire(timeout=wait):
+        # Tutum testi 2026-10-05: login sıçrayışında 2 s-dən sonra 503 tələbəni geri atırdı.
+        # Login növbəsində gözləmə ucuzdur (ortaq slot tutulmur) — daha uzun gözləyir.
+        login_wait = _safe_float_setting("MAX_INFLIGHT_LOGIN_WAIT_SECONDS", DEFAULT_LOGIN_WAIT_SECONDS, minimum=0.0)
+        if login_slots and not login_slots.acquire(timeout=login_wait):
             return self._overloaded_response(request, scope="login")
         try:
-            if not self._slots.acquire(timeout=max(0, deadline - time.monotonic())):
+            if not self._slots.acquire(timeout=wait):
                 return self._overloaded_response(request)
             with self._inflight_guard:
                 self._inflight += 1
@@ -157,14 +131,7 @@ class ConcurrencyLimitMiddleware:
             "core.middleware.concurrency_limit.message",
             "Server hazırda çox yüklüdür. Bir neçə saniyədən sonra yenidən cəhd edin.",
         )
-        if _request_wants_json(request):
-            response = JsonResponse({"ok": False, "error": message}, status=503)
-        else:
-            html = _overload_html(request) if _wants_html_page(request) else None
-            if html is not None:
-                response = HttpResponse(html, status=503, content_type="text/html; charset=utf-8")
-            else:
-                response = HttpResponse(message, status=503, content_type="text/plain; charset=utf-8")
+        response = overload_response(request, message, wants_json=_request_wants_json(request))
         retry_after = _safe_int_setting("MAX_INFLIGHT_RETRY_AFTER_SECONDS", DEFAULT_RETRY_AFTER_SECONDS, minimum=1)
         response["Retry-After"] = str(retry_after)
         response["X-Concurrency-Limited"] = "1"

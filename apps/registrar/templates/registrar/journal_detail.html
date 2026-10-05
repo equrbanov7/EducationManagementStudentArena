@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261005-ux">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261005-touch">
 {% endblock %}
 
 {% block content %}
@@ -313,6 +313,8 @@
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261003-bulk"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
+    {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
+    <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>

@@ -364,6 +364,28 @@ body.error-page {
     .error-btn {
         width: 100%;
     }
+
+    /* UX2 2026-10-05: uzun izahlı səhifələrdə (şəbəkə zonası 403, server məşğuldur 503) düymələr 375px-də
+       qatın altında qalırdı. Əsas əməl başlıqdan dərhal sonra gəlir, izah/ipucu/qeyd onun altında.
+       Yalnız `.error-actions-first` (şablon body_class bloku); digər xəta səhifələri dəyişməyib. */
+    .error-actions-first .error-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .error-actions-first .error-actions {
+        order: 1;
+        width: 100%;
+        margin: 6px 0 20px;
+    }
+
+    .error-actions-first .error-description,
+    .error-actions-first .error-meta,
+    .error-actions-first .error-footer-note {
+        order: 2;
+        width: 100%;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {

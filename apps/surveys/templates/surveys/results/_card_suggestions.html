@@ -17,7 +17,7 @@ Kontekst: `dg`.{% endcomment %}
     {% if dg.suppressed %}
         <div class="ems-state svr-state" role="status">
             <i class="fas fa-user-shield ems-state__icon" aria-hidden="true"></i>
-            <p class="ems-state__title">{% if not dg.n %}{% trans "Hələ təklif yoxdur" context "surveys.results" %}{% elif dg.n < dg.k %}{% blocktrans trimmed with k=dg.k context "surveys.results" %}Cavab sayı azdır (n &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}{% else %}{% trans "Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər göstərilmir." context "surveys.results" %}{% endif %}</p>
+            <p class="ems-state__title">{% if dg.narrowed %}{% trans "Anonimlik üçün təkliflər yalnız fənn, qrup, ixtisas və kurs filtrləri seçilmədikdə göstərilir." context "surveys.results" %}{% elif not dg.n %}{% trans "Hələ təklif yoxdur" context "surveys.results" %}{% elif dg.n < dg.k %}{% blocktrans trimmed with k=dg.k context "surveys.results" %}Cavab sayı azdır (n &lt; {{ k }}) — anonimliyi qorumaq üçün nəticə göstərilmir.{% endblocktrans %}{% else %}{% trans "Hər kampaniyada cavab sayı anonimlik həddindən azdır — təkliflər göstərilmir." context "surveys.results" %}{% endif %}</p>
         </div>
     {% else %}
         {% if dg.keywords %}

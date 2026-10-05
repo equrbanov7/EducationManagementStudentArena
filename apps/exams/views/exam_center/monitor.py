@@ -91,7 +91,10 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
             }
         )
 
-    snapshot = get_attempt_live_snapshot(ticket.attempt)
+    # Təhlükəsizlik auditi 2026-10-05: cavab açarı və canlı bal yalnız imtahan mərkəzinə və
+    # imtahanın müəllifinə — zal nəzarətçisi (invigilator) yalnız cavablanma gedişatını görür.
+    include_answer_key = can_manage_final_center(request.user) or ticket.exam.author_id == request.user.id
+    snapshot = get_attempt_live_snapshot(ticket.attempt, include_answer_key=include_answer_key)
     snapshot["has_attempt"] = True
     snapshot["seat"] = ticket.seat_number
     snapshot["ticket_status"] = ticket.status
