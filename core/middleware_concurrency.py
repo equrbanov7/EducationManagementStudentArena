@@ -27,7 +27,6 @@ from __future__ import annotations
 
 import logging
 import threading
-import time
 
 from django.core.exceptions import MiddlewareNotUsed
 from django.http import HttpResponse, JsonResponse
@@ -41,6 +40,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_MAX_INFLIGHT_REQUESTS = 32
 DEFAULT_WAIT_SECONDS = 2.0
+DEFAULT_LOGIN_WAIT_SECONDS = 15.0
 DEFAULT_RETRY_AFTER_SECONDS = 5
 DEFAULT_EXEMPT_PREFIXES = (
     "/static/",
@@ -109,12 +109,14 @@ class ConcurrencyLimitMiddleware:
             return self.get_response(request)
 
         wait = _safe_float_setting("MAX_INFLIGHT_WAIT_SECONDS", DEFAULT_WAIT_SECONDS, minimum=0.0)
-        deadline = time.monotonic() + wait
         login_slots = self._login_slots if self._is_login_post(request) else None
-        if login_slots and not login_slots.acquire(timeout=wait):
+        # Tutum testi 2026-10-05: login sıçrayışında 2 s-dən sonra 503 tələbəni geri atırdı.
+        # Login növbəsində gözləmə ucuzdur (ortaq slot tutulmur) — daha uzun gözləyir.
+        login_wait = _safe_float_setting("MAX_INFLIGHT_LOGIN_WAIT_SECONDS", DEFAULT_LOGIN_WAIT_SECONDS, minimum=0.0)
+        if login_slots and not login_slots.acquire(timeout=login_wait):
             return self._overloaded_response(request, scope="login")
         try:
-            if not self._slots.acquire(timeout=max(0, deadline - time.monotonic())):
+            if not self._slots.acquire(timeout=wait):
                 return self._overloaded_response(request)
             with self._inflight_guard:
                 self._inflight += 1
