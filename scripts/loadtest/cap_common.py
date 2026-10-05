@@ -28,6 +28,8 @@ PAD = int(os.environ.get("CAP_STUDENT_PAD", "3"))
 GO_AT = float(os.environ.get("CAP_GO_AT", "0") or 0)
 START_WINDOW = float(os.environ.get("CAP_START_WINDOW", "60") or 60)
 THINK_MIN, THINK_MAX = (float(x) for x in os.environ.get("CAP_THINK", "8:20").split(":"))
+# Yerli tüstü testi üçün: bütün düşünmə vaxtlarını (sabit aralıqlar daxil) miqyaslayır.
+THINK_SCALE = float(os.environ.get("CAP_THINK_SCALE", "1") or 1)
 ORIGIN = os.environ.get("CAP_ORIGIN", "https://localhost:18443")
 CERT = str(CAP / "cert.pem")
 SESSIONS = json.loads(Path(os.environ["CAP_SESSIONS"]).read_text()) if os.environ.get("CAP_SESSIONS") else None
@@ -97,7 +99,7 @@ def parks(fn):
 
 class _Base(HttpUser):
     abstract = True
-    host = "https://edge"
+    host = os.environ.get("CAP_HOST", "https://edge")
 
     def _park(self):
         """Bitmiş VU pillə sonuna qədər boş gözləyir (StopUser locust-da yenidən spawn edir)."""
@@ -165,7 +167,7 @@ class _Base(HttpUser):
             gevent.sleep(delay)
 
     def _think(self, low=None, high=None):
-        gevent.sleep(random.uniform(low if low is not None else THINK_MIN, high if high is not None else THINK_MAX))
+        gevent.sleep(THINK_SCALE * random.uniform(low if low is not None else THINK_MIN, high if high is not None else THINK_MAX))
 
 
 def _next_student(user):

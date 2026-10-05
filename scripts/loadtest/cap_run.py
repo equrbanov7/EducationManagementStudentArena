@@ -99,10 +99,14 @@ class Stack:
         # bütün replikaları atıb 502 kaskadı yaradırdı (prod-da olmayan artefakt).
         edge_conf = CAP / "cap-nginx.conf"
         edge_conf.write_text(
-            "events { worker_connections 8192; } http { upstream backend { least_conn; "
+            # WebSocket (live/final gözləmə otağı): Upgrade ötürülür; adi sorğularda
+            # Connection "" qalır (upstream keepalive pozulmur).
+            "events { worker_connections 8192; } http { map $http_upgrade $connection_upgrade { default upgrade; '' ''; } "
+            "upstream backend { least_conn; "
             + " ".join(f"server {a}:8000 max_fails=0;" for a in APPS)
             + " keepalive 64; } server { listen 443 ssl; ssl_certificate /cert.pem; ssl_certificate_key /key.pem; "
-            "location / { proxy_pass http://backend; proxy_http_version 1.1; proxy_set_header Connection \"\"; "
+            "location / { proxy_pass http://backend; proxy_http_version 1.1; "
+            "proxy_set_header Upgrade $http_upgrade; proxy_set_header Connection $connection_upgrade; "
             "proxy_set_header Host $http_host; proxy_set_header X-Forwarded-Proto https; "
             "proxy_set_header X-Forwarded-For $http_x_test_client; proxy_read_timeout 60s; } } }"
         )
