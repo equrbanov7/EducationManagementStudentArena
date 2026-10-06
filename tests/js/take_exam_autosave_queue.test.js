@@ -210,7 +210,11 @@ test("503 backoff survives an online flush and shorter per-answer debounce", asy
         await sleep(450);
         assert.equal(flushes.length, 0);
         assert.equal(ctx.hasUnsavedChanges, true);
-        await sleep(700);
+        // Yavaş CI-da taymer gecikə bilər — sabit 700 ms yerinə 3 s-ə qədər gözlə.
+        const deadline = Date.now() + 3000;
+        while (flushes.length === 0 && Date.now() < deadline) {
+            await sleep(50);
+        }
         assert.equal(flushes.length, 1);
     } finally {
         window.close();

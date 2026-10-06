@@ -141,7 +141,7 @@
     top: 0;
     right: 0;
     font-size: var(--ems-fs-xs, 11px);
-    color: var(--ems-neutral-400);
+    color: var(--ems-neutral-500);
     font-variant-numeric: tabular-nums;
 }
 
@@ -235,7 +235,7 @@
 .annm-unit--l3 label { padding-left: 60px; }
 .annm-unit--l4 label,
 .annm-unit--l5 label { padding-left: 76px; }
-.annm-unit__type { margin-left: auto; font-size: var(--ems-fs-xs, 11px); color: var(--ems-neutral-400); }
+.annm-unit__type { margin-left: auto; font-size: var(--ems-fs-xs, 11px); color: var(--ems-neutral-500); }
 .annm-picker__empty { padding: 12px; color: var(--ems-neutral-500); }
 
 .annm-files {
