@@ -16,6 +16,7 @@ from decimal import Decimal, InvalidOperation
 from django.db.models import Count
 from django.utils import timezone
 
+from apps.registrar import grade_audit  # noqa: F401 — `gradebook.grade_audit` köhnə giriş yolu (testlər/çağıranlar)
 from apps.registrar import absence_limit, exam_eligibility, journal_window, services
 from apps.registrar.models import (
     AssessmentScheme,
