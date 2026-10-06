@@ -100,10 +100,13 @@ class ScopedManagerTest(TestCase):
         with bypass_rls():
             self.assertFalse(Announcement.objects.filter(pk=draft.pk).exists())
         live = make_announcement(self.w, title="Arxivlənəcək")
-        client.post(reverse("announcements:manage_action", args=[live.pk]), {"action": "delete"})
         client.post(reverse("announcements:manage_action", args=[live.pk]), {"action": "archive"})
         with bypass_rls():
             self.assertEqual(Announcement.objects.get(pk=live.pk).status, "archived")
+        # Dərc olunmuş/arxivdəki elan da silinir — yumşaq (sətir qalır), bax test_delete.py.
+        client.post(reverse("announcements:manage_action", args=[live.pk]), {"action": "delete"})
+        with bypass_rls():
+            self.assertTrue(Announcement.objects.get(pk=live.pk).is_deleted)
 
 
 class ApplyTest(TestCase):

@@ -82,6 +82,57 @@
 .annm-state--scheduled { border-color: var(--ems-sky-100); background: var(--ems-sky-100); color: var(--ems-sky-800); }
 .annm-state--expired { color: var(--ems-neutral-500); }
 .annm-state--archived { background: var(--ems-neutral-100); color: var(--ems-neutral-500); }
+.annm-state--deleted { border-color: var(--ems-danger-bd); background: var(--ems-danger-bg); color: var(--ems-danger-700); }
+
+/* ── Silinmiş elan (yumşaq silmə) ──────────────────────────────────────── */
+.annm-row--deleted { border-style: dashed; }
+.annm-row--deleted .annm-row__title { color: var(--ems-neutral-600); }
+
+.annm-row__deleted {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-danger-700);
+}
+
+.annm-row__actions { display: flex; margin: 0; }
+
+.annm-deleted {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--ems-sp-4, 12px) var(--ems-sp-5, 14px);
+    padding: var(--ems-sp-5, 14px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-2xl, 16px);
+    background: var(--ems-danger-bg);
+}
+
+.annm-deleted__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg);
+    color: var(--ems-danger-700);
+}
+
+.annm-deleted__text { flex: 1 1 260px; min-width: 0; }
+.annm-deleted__title { margin: 0; font-size: var(--ems-fs-lg, 16px); font-weight: 700; color: var(--ems-danger-700); }
+.annm-deleted__meta { margin: 2px 0 6px; font-size: var(--ems-fs-sm, 12px); font-weight: 600; color: var(--ems-neutral-600); }
+.annm-deleted__hint { margin: 0; font-size: var(--ems-fs-md, 14px); line-height: 1.5; color: var(--ems-neutral-700); }
+
+.annm-deleted__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-self: center;
+}
 
 /* ── Forma ─────────────────────────────────────────────────────────────── */
 .annm-crumbs {
@@ -267,8 +318,20 @@
 
 .annm-hidden-form { display: none; }
 
+.annm-status__form { flex: 1 1 auto; }
+.annm-status__delete { margin-left: auto; }
+
+.annm-status__hint {
+    margin: 0;
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-500);
+}
+
 @media (max-width: 640px) {
     .annm-card { padding: var(--ems-sp-5, 14px); }
     .annm-stats { width: 100%; justify-content: space-around; }
     .annm-actions .ems-btn { flex: 1 1 auto; justify-content: center; }
+    .annm-status__delete { margin-left: 0; }
+    .annm-deleted__actions { width: 100%; }
+    .annm-deleted__actions .ems-btn { flex: 1 1 auto; justify-content: center; }
 }

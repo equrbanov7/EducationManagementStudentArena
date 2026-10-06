@@ -37,7 +37,7 @@ from ..services.queries import decorate
 from ._base import error, ok
 
 _CTX = "announcements.manage"
-_ACTIONS = ("publish", "unpublish", "archive", "restore", "delete")
+_ACTIONS = ("publish", "unpublish", "archive", "restore", "delete", "undelete")
 
 
 def _gate(request):
@@ -51,7 +51,7 @@ def _gate(request):
 def _load(request, organization, scope, announcement_id):
     announcement = (
         Announcement.objects.filter(organization=organization, pk=announcement_id)
-        .select_related("apply_kind", "apply_unit", "created_by")
+        .select_related("apply_kind", "apply_unit", "created_by", "deleted_by")
         .prefetch_related("attachments")
         .first()
     )
@@ -207,10 +207,12 @@ def _edit(request, organization, scope, announcement=None):
         for choice in options["unit_choices"]:
             choice["checked"] = choice["id"] in posted_units
     stats = None
+    hard_delete = False
     if announcement is not None:
         stats = manage.receipt_stats([announcement.pk]).get(announcement.pk, {"seen": 0, "read": 0, "applied": 0})
         stats["targeted"] = manage.targeted_count(announcement)
         decorate(announcement, timezone.now())
+        hard_delete = not announcement.is_deleted and manage.is_hard_delete(announcement)
     context = _page_context(
         request,
         form=form,
@@ -219,6 +221,7 @@ def _edit(request, organization, scope, announcement=None):
         selected_families=families,
         announcement=announcement,
         stats=stats,
+        hard_delete=hard_delete,
         **options,
     )
     return render(request, "announcements/manage/form.html", context)
@@ -243,8 +246,10 @@ def manage_action(request, announcement_id):
     announcement = _load(request, organization, scope, announcement_id)
     action = request.POST.get("action") or ""
     if action == "remove_attachment":
-        manage.remove_attachment(organization, announcement, request.POST.get("attachment") or None)
-        messages.success(request, pgettext(_CTX, "Sənəd silindi."))
+        if manage.remove_attachment(organization, announcement, request.POST.get("attachment") or None):
+            messages.success(request, pgettext(_CTX, "Sənəd silindi."))
+        elif announcement.is_deleted:
+            messages.error(request, pgettext(_CTX, "Elan silinib — əvvəlcə onu bərpa edin."))
         return redirect("announcements:manage_edit", announcement_id=announcement.pk)
     if action not in _ACTIONS:
         raise Http404
@@ -258,11 +263,20 @@ def manage_action(request, announcement_id):
         "unpublish": pgettext(_CTX, "Elan qaralamaya qaytarıldı."),
         "archive": pgettext(_CTX, "Elan arxivləndi."),
         "restore": pgettext(_CTX, "Elan arxivdən qaytarıldı (qaralama)."),
-        "delete": pgettext(_CTX, "Qaralama silindi."),
+        "undelete": pgettext(_CTX, "Elan bərpa olundu (qaralama)."),
     }
-    messages.success(request, labels[action])
     if action == "delete":
+        if announcement.is_deleted:
+            messages.success(
+                request,
+                pgettext(
+                    _CTX, "Elan silindi — alıcılar onu artıq görmür. «Silinmişlər» filtrindən bərpa edə bilərsiniz."
+                ),
+            )
+        else:
+            messages.success(request, pgettext(_CTX, "Qaralama silindi."))
         return redirect("announcements:manage_list")
+    messages.success(request, labels[action])
     return redirect("announcements:manage_edit", announcement_id=announcement.pk)
 
 

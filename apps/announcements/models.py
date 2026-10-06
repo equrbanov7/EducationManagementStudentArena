@@ -24,6 +24,7 @@ from .constants import (
     ATTACHMENT_EXTENSIONS,
     ATTACHMENT_MAX_MB,
     STATE_ACTIVE,
+    STATE_DELETED,
     STATE_EXPIRED,
     STATE_SCHEDULED,
     SUMMARY_MAX,
@@ -76,6 +77,14 @@ class Announcement(UUIDModel, TimeStampedModel):
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    #: Yumşaq silmə (sahib, 2026-10-07): sətir, qəbzlər (statistika) və sənədlər audit üçün qalır,
+    #: lakin elan BÜTÜN istifadəçi səthlərindən (siyahı, detal, popup, sayğac, müraciət) çıxır.
+    #: Menecer «Silinmişlər» filtrindən bərpa edir (→ qaralama). Qəbzsiz qaralama isə birdəfəlik silinir.
+    is_deleted = models.BooleanField(default=False, db_default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         verbose_name = pgettext_lazy(_CTX, "elan")
@@ -95,13 +104,19 @@ class Announcement(UUIDModel, TimeStampedModel):
             models.CheckConstraint(
                 condition=models.Q(status__in=[choice.value for choice in Status]), name="ann_status_valid"
             ),
+            models.CheckConstraint(
+                condition=models.Q(is_deleted=False) | models.Q(deleted_at__isnull=False),
+                name="ann_deleted_has_time",
+            ),
         ]
 
     def __str__(self):
         return f"announcement<{self.status}:{self.title[:40]}>"
 
     def effective_state(self, now=None) -> str:
-        """``draft`` / ``archived`` / ``scheduled`` / ``active`` / ``expired`` (tarixdən asılı)."""
+        """``deleted`` / ``draft`` / ``archived`` / ``scheduled`` / ``active`` / ``expired`` (tarixdən asılı)."""
+        if self.is_deleted:
+            return STATE_DELETED
         if self.status != Status.PUBLISHED:
             return self.status
         now = now or timezone.now()

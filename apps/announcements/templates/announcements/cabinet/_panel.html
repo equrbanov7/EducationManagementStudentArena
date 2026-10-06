@@ -2,7 +2,7 @@
 {% comment %}«Elanlar» kabinet paneli. `?elan=<id>` → detal, əks halda siyahı (1-ci səhifə server
 tərəfdə render olunur; filtr/axtarış/səhifələmə `list.js` ilə `/elanlar/api/list/`-dən gəlir).
 Stil və skriptlər xarici fayldadır və panelin İÇİNDƏDİR (AJAX swap-dan sonra da işləsin).{% endcomment %}
-<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-1">
+<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-2">
 {% announcements_panel as ann %}
 {% if not ann.available %}
 <p class="ann-note" role="status">{% trans "Elanlar üçün aktiv təşkilat konteksti tapılmadı." context "announcements.cabinet" %}</p>

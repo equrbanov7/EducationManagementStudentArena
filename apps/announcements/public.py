@@ -21,6 +21,11 @@ Gözləyən yoxdursa SIFIR sorğu (``Organization.settings`` xülasəsi + sessiy
 
 İDARƏ: ``announcement.manage`` (struktur əhatəsinə tabe; dekan yalnız öz fakültəsinə).
 
+SİLMƏ (2026-10-07): menecer əhatəsindəki İSTƏNİLƏN elanı silə bilər. Qəbzsiz qaralama
+birdəfəlik silinir; qalanı YUMŞAQ (``is_deleted``) — bütün istifadəçi səthlərindən çıxır,
+qəbzlər/sənədlər/yaradılmış müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur
+(→ qaralama). Silmə və bərpa audit jurnalına düşür.
+
 ══════════════════════════════════════════════════════════════════════════════
 KABİNET (accounts) ÜÇÜN
 ══════════════════════════════════════════════════════════════════════════════

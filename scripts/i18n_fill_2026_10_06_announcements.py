@@ -29,6 +29,12 @@ ROWS = {
         "Giriş tələb olunur.": ("Login required.", "Требуется вход.", "Giriş gerekli."),
     },
     "announcements.apply": {
+        # 2026-10-07: yumşaq silinmiş elana müraciət.
+        "Elan silinib — müraciət qəbul olunmur.": (
+            "The announcement was deleted — applications are not accepted.",
+            "Объявление удалено — заявки не принимаются.",
+            "Duyuru silindi — başvuru kabul edilmiyor.",
+        ),
         "Baxış rejimində müraciət etmək olmaz.": (
             "You cannot apply in view-as mode.",
             "В режиме просмотра подать заявку нельзя.",
@@ -468,6 +474,67 @@ ROWS = {
             "En fazla %(n)s birim seçilebilir.",
         ),
         "— seçin —": ("— select —", "— выберите —", "— seçiniz —"),
+        # 2026-10-07: istənilən elanın silinməsi (qəbzsiz qaralama → birdəfəlik, qalanı yumşaq) və bərpa.
+        "Alıcılar onu görmür (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır. Bərpa etsəniz elan qaralama kimi qayıdır.": (
+            "Recipients no longer see it (list, popup, counter, applications). Statistics, documents and submitted applications are kept. If you restore it, it returns as a draft.",
+            "Получатели его больше не видят (список, всплывающее окно, счётчик, заявки). Статистика, документы и поданные заявки сохраняются. После восстановления объявление вернётся как черновик.",
+            "Alıcılar artık görmüyor (liste, açılır pencere, sayaç, başvuru). İstatistikler, belgeler ve oluşturulan başvurular korunur. Geri yüklerseniz duyuru taslak olarak döner.",
+        ),
+        "Bu elan silinib": (
+            "This announcement has been deleted",
+            "Это объявление удалено",
+            "Bu duyuru silindi",
+        ),
+        "Bərpa et": ("Restore", "Восстановить", "Geri yükle"),
+        "Elan bərpa olundu (qaralama).": (
+            "The announcement was restored (draft).",
+            "Объявление восстановлено (черновик).",
+            "Duyuru geri yüklendi (taslak).",
+        ),
+        "Elan silindi — alıcılar onu artıq görmür. «Silinmişlər» filtrindən bərpa edə bilərsiniz.": (
+            "The announcement was deleted — recipients no longer see it. You can restore it from the “Deleted” filter.",
+            "Объявление удалено — получатели его больше не видят. Его можно восстановить из фильтра «Удалённые».",
+            "Duyuru silindi — alıcılar artık görmüyor. “Silinenler” filtresinden geri yükleyebilirsiniz.",
+        ),
+        "Elan silinib — əvvəlcə onu bərpa edin.": (
+            "The announcement was deleted — restore it first.",
+            "Объявление удалено — сначала восстановите его.",
+            "Duyuru silindi — önce geri yükleyin.",
+        ),
+        "Elan silinməyib.": (
+            "The announcement is not deleted.",
+            "Объявление не удалено.",
+            "Duyuru silinmemiş.",
+        ),
+        "Elan silinsin? O, bütün alıcılar üçün dərhal yox olacaq (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır; «Silinmişlər» filtrindən bərpa edə bilərsiniz.": (
+            "Delete the announcement? It will disappear for all recipients immediately (list, popup, counter, applications). Statistics, documents and submitted applications are kept; you can restore it from the “Deleted” filter.",
+            "Удалить объявление? Оно сразу исчезнет у всех получателей (список, всплывающее окно, счётчик, заявки). Статистика, документы и поданные заявки сохранятся; восстановить можно из фильтра «Удалённые».",
+            "Duyuru silinsin mi? Tüm alıcılar için hemen kaybolacak (liste, açılır pencere, sayaç, başvuru). İstatistikler, belgeler ve oluşturulan başvurular korunur; “Silinenler” filtresinden geri yükleyebilirsiniz.",
+        ),
+        "Qaralama birdəfəlik silinsin? Onu heç kim görməyib — bu əməliyyat geri qaytarılmır.": (
+            "Delete the draft permanently? Nobody has seen it — this cannot be undone.",
+            "Удалить черновик навсегда? Его никто не видел — это действие нельзя отменить.",
+            "Taslak kalıcı olarak silinsin mi? Kimse görmedi — bu işlem geri alınamaz.",
+        ),
+        "Qaralamanı heç kim görməyib — «Sil» onu birdəfəlik silir.": (
+            "Nobody has seen this draft — “Delete” removes it permanently.",
+            "Этот черновик никто не видел — «Удалить» удалит его навсегда.",
+            "Bu taslağı kimse görmedi — “Kaldır” onu kalıcı olarak siler.",
+        ),
+        "Silinib": ("Deleted", "Удалено", "Silindi"),
+        "Silinib: %(day)s": ("Deleted: %(day)s", "Удалено: %(day)s", "Silindi: %(day)s"),
+        "Silinmiş elan yoxdur": ("No deleted announcements", "Нет удалённых объявлений", "Silinmiş duyuru yok"),
+        "Silinmişlər": ("Deleted", "Удалённые", "Silinenler"),
+        "Silinən elanlar burada görünür və bərpa oluna bilər.": (
+            "Deleted announcements appear here and can be restored.",
+            "Удалённые объявления отображаются здесь, их можно восстановить.",
+            "Silinen duyurular burada görünür ve geri yüklenebilir.",
+        ),
+        "«Sil» elanı bütün alıcılardan gizlədir; statistika və müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur.": (
+            "“Delete” hides the announcement from all recipients; statistics and applications are kept, and it can be restored from the “Deleted” filter.",
+            "«Удалить» скрывает объявление от всех получателей; статистика и заявки сохраняются, восстановить можно из фильтра «Удалённые».",
+            "“Kaldır” duyuruyu tüm alıcılardan gizler; istatistikler ve başvurular korunur, “Silinenler” filtresinden geri yüklenebilir.",
+        ),
     },
     "announcements.model": {
         "Adi": ("Normal", "Обычный", "Normal"),

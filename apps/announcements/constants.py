@@ -114,8 +114,10 @@ FAMILY_TO_SENDER = {"students": "student", "teachers": "teacher", "staff": "staf
 STATE_SCHEDULED = "scheduled"
 STATE_ACTIVE = "active"
 STATE_EXPIRED = "expired"
+#: Yumşaq silinmiş elan (``is_deleted``) — istifadəçi səthlərindən tam çıxarılır, menecer bərpa edə bilər.
+STATE_DELETED = "deleted"
 
 #: Kabinet siyahısının filtr/sıralama dəyərləri (klientdən gələn hər şey bu dəstlərlə süzülür).
 USER_STATES = ("active", "expired", "all")
 SORTS = ("new", "deadline", "priority")
-MANAGE_STATES = ("all", "draft", "scheduled", "active", "expired", "archived")
+MANAGE_STATES = ("all", "draft", "scheduled", "active", "expired", "archived", "deleted")

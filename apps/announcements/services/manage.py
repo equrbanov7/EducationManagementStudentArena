@@ -63,6 +63,8 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
     user = request.user
     if announcement is not None and not access.can_edit(scope, user, announcement, organization):
         raise PermissionDenied
+    if announcement is not None and announcement.is_deleted:
+        raise ValidationError(pgettext(_CTX, "Elan silinib — əvvəlcə onu bərpa edin."))
     units, errors = access.validate_units(scope, organization, data.get("audience_units") or [])
     families = normalize_families(data.get("audience_families"))
     if not families:
@@ -99,10 +101,65 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
     return announcement
 
 
+def is_hard_delete(announcement) -> bool:
+    """Heç kimin görmədiyi (qəbzsiz) qaralama birdəfəlik silinir; qalan hər şey yumşaq silinir."""
+    return announcement.status == Status.DRAFT and not announcement.receipts.exists()
+
+
+def _delete(request, organization, announcement) -> Announcement:
+    """Qəbzsiz qaralama → birdəfəlik; əks halda yumşaq silmə (qəbz/sənəd/müraciətlər toxunulmaz qalır)."""
+    if is_hard_delete(announcement):
+        with transaction.atomic():
+            _audit(request, organization, AuditAction.DELETE, announcement, {"mode": "hard"})
+            for attachment in announcement.attachments.all():
+                attachment.file.delete(save=False)
+            announcement.delete()
+    else:
+        now = timezone.now()
+        previous = announcement.status
+        announcement.is_deleted = True
+        announcement.deleted_at = now
+        announcement.deleted_by = request.user
+        announcement.updated_by = request.user
+        with transaction.atomic():
+            announcement.save(update_fields=["is_deleted", "deleted_at", "deleted_by", "updated_by", "updated_at"])
+            _audit(request, organization, AuditAction.DELETE, announcement, {"mode": "soft", "status": previous})
+    snapshot.sync_snapshot(organization)  # popup/sayğac xülasəsi + versiya → keş və sessiya işarəsi köhnəlir
+    return announcement
+
+
+def _undelete(request, organization, announcement) -> Announcement:
+    """Silinmiş elanı bərpa edir — həmişə QARALAMA kimi (yenidən dərc şüurlu addımdır)."""
+    announcement.is_deleted = False
+    announcement.deleted_at = None
+    announcement.deleted_by = None
+    announcement.status = Status.DRAFT
+    announcement.archived_at = None
+    announcement.updated_by = request.user
+    with transaction.atomic():
+        announcement.save()
+        _audit(request, organization, AuditAction.UPDATE, announcement, {"action": "undelete", "status": Status.DRAFT})
+    snapshot.sync_snapshot(organization)
+    return announcement
+
+
 def transition(request, organization, scope, announcement, action: str) -> Announcement:
-    """``publish`` / ``unpublish`` (→ qaralama) / ``archive`` / ``restore`` (→ qaralama) / ``delete`` (qaralama)."""
+    """``publish`` / ``unpublish`` (→ qaralama) / ``archive`` / ``restore`` (→ qaralama) / ``delete`` /
+    ``undelete`` (silinmişdən → qaralama).
+
+    ``delete`` istənilən vəziyyətdə işləyir (əhatə qapısı redaktə ilə EYNİDİR): qəbzsiz qaralama
+    birdəfəlik, qalanı yumşaq silinir. Silinmiş elan üzərində yalnız ``undelete`` mümkündür.
+    """
     if not access.can_edit(scope, request.user, announcement, organization):
         raise PermissionDenied
+    if announcement.is_deleted and action != "undelete":
+        raise ValidationError(pgettext(_CTX, "Elan silinib — əvvəlcə onu bərpa edin."))
+    if action == "undelete":
+        if not announcement.is_deleted:
+            raise ValidationError(pgettext(_CTX, "Elan silinməyib."))
+        return _undelete(request, organization, announcement)
+    if action == "delete":
+        return _delete(request, organization, announcement)
     now = timezone.now()
     if action == "publish":
         if announcement.status == Status.ARCHIVED:
@@ -122,18 +179,6 @@ def transition(request, organization, scope, announcement, action: str) -> Annou
     elif action == "restore":
         announcement.status = Status.DRAFT
         announcement.archived_at = None
-    elif action == "delete":
-        if announcement.status != Status.DRAFT or announcement.receipts.exists():
-            raise ValidationError(
-                pgettext(_CTX, "Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin.")
-            )
-        with transaction.atomic():
-            _audit(request, organization, AuditAction.DELETE, announcement)
-            for attachment in announcement.attachments.all():
-                attachment.file.delete(save=False)
-            announcement.delete()
-        snapshot.sync_snapshot(organization)
-        return announcement
     else:
         raise ValidationError(pgettext(_CTX, "Naməlum əməliyyat."))
     announcement.updated_by = request.user
@@ -176,6 +221,8 @@ def add_attachments(request, organization, announcement, files) -> list:
 
 
 def remove_attachment(organization, announcement, attachment_id) -> bool:
+    if announcement.is_deleted:  # silinmiş elanın sənədləri audit üçün saxlanılır
+        return False
     try:
         attachment_id = uuid.UUID(str(attachment_id))
     except (TypeError, ValueError, AttributeError):
@@ -194,6 +241,8 @@ def manage_list(organization, scope, user, *, q="", state="all", category="", pa
 
     now = timezone.now()
     queryset = Announcement.objects.filter(organization=organization).filter(access.manageable_q(scope, user))
+    # «Silinmişlər» ayrıca filtrdir; qalan bütün görünüşlərdə silinmiş elan yoxdur.
+    queryset = queryset.filter(is_deleted=state == "deleted")
     live = Q(status=Status.PUBLISHED)
     state_q = {
         "draft": Q(status=Status.DRAFT),
@@ -208,11 +257,11 @@ def manage_list(organization, scope, user, *, q="", state="all", category="", pa
         queryset = queryset.filter(category=category)
     if q:
         queryset = queryset.filter(search_q(q))
-    queryset = queryset.order_by("-updated_at")
+    queryset = queryset.order_by("-deleted_at" if state == "deleted" else "-updated_at")
     total = queryset.count()
     pages = max(1, -(-total // page_size))
     page = max(1, min(page, pages))
-    rows = list(queryset.select_related("created_by")[(page - 1) * page_size : page * page_size])
+    rows = list(queryset.select_related("created_by", "deleted_by")[(page - 1) * page_size : page * page_size])
     stats = receipt_stats([row.pk for row in rows])
     for row in rows:
         row.state = row.effective_state(now)
@@ -270,6 +319,7 @@ def targeted_count(announcement) -> int:
 
 __all__ = [
     "add_attachments",
+    "is_hard_delete",
     "manage_list",
     "receipt_stats",
     "remove_attachment",
