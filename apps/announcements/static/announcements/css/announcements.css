@@ -38,9 +38,11 @@
 }
 
 /* ── Filtr zolağı ──────────────────────────────────────────────────────── */
+/* Flex-wrap: sütunlar məzmun eninə uyğunlaşır (sidebar açıq olanda media query
+   pəncərə eninə baxdığı üçün grid kartdan kənara daşırdı). */
 .ann-filters {
-    display: grid;
-    grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(150px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--ems-sp-3, 10px);
     align-items: center;
     padding: var(--ems-sp-4, 12px);
@@ -52,6 +54,13 @@
 
 .ann-filters__search {
     position: relative;
+    flex: 2 1 260px;
+    min-width: 0;
+}
+
+.ann-filters__select {
+    flex: 1 1 160px;
+    min-width: 0;
 }
 
 .ann-filters__search-icon {
@@ -69,7 +78,7 @@
 }
 
 .ann-filters__toggles {
-    grid-column: 1 / -1;
+    flex: 1 1 100%;
     display: flex;
     flex-wrap: wrap;
     gap: var(--ems-sp-3, 10px);
@@ -442,13 +451,7 @@
     justify-content: flex-end;
 }
 
-@media (max-width: 900px) {
-    .ann-filters { grid-template-columns: 1fr 1fr; }
-    .ann-filters__search { grid-column: 1 / -1; }
-}
-
 @media (max-width: 640px) {
-    .ann-filters { grid-template-columns: 1fr; }
     .ann-detail { padding: var(--ems-sp-5, 14px); }
     .ann-detail__title { font-size: var(--ems-fs-xl, 18px); }
     .ann-deadline-box__left { margin-left: 0; }
