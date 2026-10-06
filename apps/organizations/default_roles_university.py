@@ -4,6 +4,7 @@ modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyiş
 from core.constants import RoleScopeType
 
 from .default_roles_oversight import OVERSIGHT_ROLES
+from .permissions_announcements import apply_announcement_grants
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
 from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
@@ -553,3 +554,6 @@ apply_stage4_grants(UNIVERSITY_ROLES)
 # Anonim sorğu (2026-09-25): mövcud rollara `survey.results.view` (kafedra müdiri,
 # tədris şöbəsi, prorektor). Mövcud tenantlar: miqrasiya 0054.
 apply_quality_control_grants(UNIVERSITY_ROLES)
+
+# «Elanlar» (2026-10-06): `announcement.manage` — dekanlıq, kafedra, tədris şöbəsi, TXM. Mövcud: announcements/0003.
+apply_announcement_grants(UNIVERSITY_ROLES)
