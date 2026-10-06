@@ -290,6 +290,46 @@ def apply_rls_request_context(*, user_id, org_id=None, bypass: bool = False, loc
     _set_rls_settings(items, local=local)
 
 
+def preset_rls_tenant_from_sql(*, user_id, tenant_sql: str, tenant_params, local: bool | None = None) -> str | None:
+    """Set user + ``bypass=off`` + a tenant RESOLVED BY ``tenant_sql`` in ONE round-trip.
+
+    ``tenant_sql`` is a scalar ``SELECT`` (one ``text`` column, at most one row)
+    evaluated inside the same ``SELECT set_config(...)`` statement; no row → the
+    secure "no tenant" value ``''``. Returns the tenant value actually stored
+    (``set_config`` returns it), or ``None`` off PostgreSQL (no RLS there).
+
+    Perf 2026-10-07: ``OrganizationMiddleware`` used to read the session org's
+    memberships under ``bypass_rls()`` (on + off = 2 round-trips) and then apply
+    the request context (a 3rd). Resolving the tenant server-side lets the
+    membership read run under the TARGET tenant's own RLS — narrower than the
+    old all-tenant bypass — and the later ``apply_rls_request_context`` for the
+    same values is skipped by the session-state memo (outside atomic blocks).
+
+    Security: the caller MUST verify the result (membership rows) and call
+    :func:`reset_rls_context` when verification fails, before running anything
+    else; ``bypass`` is forced off here, never on.
+    """
+    if not _is_postgresql():
+        return None
+    is_local = _should_use_local(local)
+    # All three keys are ALWAYS written (never skipped via the session-state memo):
+    # it is the same single statement either way, and it re-synchronises the real
+    # connection state at the start of every request even if a raw ``set_config``
+    # elsewhere left the memo stale (the old bypass on/off toggle did that by accident).
+    fixed = [("app.current_user_id", str(user_id)), ("app.bypass_rls", _BYPASS_OFF)]
+    params: list[Any] = []
+    for name, value in fixed:
+        params.extend([name, value, is_local])
+    params.extend(["app.current_org_id", *tenant_params, _NO_TENANT, is_local])
+    sql = f"SELECT set_config(%s, %s, %s), set_config(%s, %s, %s), set_config(%s, COALESCE(({tenant_sql}), %s), %s)"
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)
+        row = cursor.fetchone()
+    tenant = str(row[-1] or "") if row else _NO_TENANT
+    _remember_session_values([*fixed, ("app.current_org_id", tenant)], is_local=is_local)
+    return tenant
+
+
 def reset_rls_context(*, local: bool | None = None, only_if_connection_open: bool = False) -> None:
     """Reset both tenant and bypass settings to the secure default state.
 

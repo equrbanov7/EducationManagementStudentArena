@@ -11,6 +11,8 @@ from .default_roles import get_default_roles_for_org_type  # noqa: F401
 from .groups_registry import build_groups_registry  # noqa: F401
 from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
+from .request_memberships import drop_request_memberships  # noqa: F401
+from .request_memberships import request_active_memberships  # noqa: F401
 from .scoping import EMPTY_SCOPE  # noqa: F401
 from .scoping import ORG_WIDE_SCOPE  # noqa: F401
 from .scoping import UnitScope  # noqa: F401
@@ -57,6 +59,7 @@ __all__ = [
     "dean_memberships_for_unit",
     "default_disabled_sections",
     "disabled_sections",
+    "drop_request_memberships",
     "get_active_memberships",
     "get_default_roles_for_org_type",
     "get_permission_label",
@@ -66,6 +69,7 @@ __all__ = [
     "members_covering_unit",
     "module_items",
     "register_cabinet_section_resolver",
+    "request_active_memberships",
     "resolve_ancestor",
     "resolve_members_access",
     "scope_memberships_by_unit",

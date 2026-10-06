@@ -108,19 +108,27 @@ def _permission_scope_memberships(user, organization) -> list:
     """
     from apps.organizations.models import Membership
 
+    from .request_memberships import request_active_memberships
+
     org_pk = getattr(organization, "pk", None)
     cache = getattr(user, "_org_scope_memberships_cache", None)
     if cache is not None and org_pk in cache:
         return cache[org_pk]
-    memberships = list(
-        Membership.objects.filter(
-            user=user,
-            organization=organization,
-            is_active=True,
-            role__organization=organization,
-            role__is_active=True,
-        ).select_related("role", "scope_unit")
-    )
+    # Perf 2026-10-07: middleware-in eyni request-də oxuduğu sətirlər (eyni süzgəc,
+    # `role__is_active` Python-da) — yararsızdırsa canlı sorğu. Sıra əhəmiyyətsizdir.
+    snapshot = request_active_memberships(user, organization)
+    if snapshot is not None:
+        memberships = [membership for membership in snapshot if membership.role.is_active]
+    else:
+        memberships = list(
+            Membership.objects.filter(
+                user=user,
+                organization=organization,
+                is_active=True,
+                role__organization=organization,
+                role__is_active=True,
+            ).select_related("role", "scope_unit")
+        )
     if cache is None:
         cache = {}
         try:
@@ -174,12 +182,16 @@ def invalidate_permission_scope_cache(user) -> None:
     pre-mutation data. A stale permission cache is a security bug, not a perf
     detail — see the module docstring.
     """
+    from .request_memberships import drop_request_memberships
+
     for attr in ("_org_scope_memberships_cache", "_org_scope_unit_paths_cache"):
         try:
             if hasattr(user, attr):
                 delattr(user, attr)
         except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
             pass
+    # Middleware-in request üzvlük snapshot-u da (bax `request_memberships`).
+    drop_request_memberships(user)
 
 
 def get_permission_scope(user, organization, permission: str, request=None) -> UnitScope:

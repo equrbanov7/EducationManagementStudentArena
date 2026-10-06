@@ -61,3 +61,8 @@ def _invalidate_actor_permissions_cache(user) -> None:
             del user._actor_perms_cache
     except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
         pass
+    # 2026-10-07: middleware-in request üzvlük snapshot-u (scoping/müraciətlər/ana
+    # səhifə onu təkrar istifadə edir) da köhnəlib — həmin istehlakçılar canlı sorğuya.
+    from apps.organizations.public import drop_request_memberships
+
+    drop_request_memberships(user)
