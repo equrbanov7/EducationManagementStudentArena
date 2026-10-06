@@ -166,6 +166,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     {# UX-15: qlobal təsdiq dialoqu markup-ı — bax static/js/ems_ui/confirm.js #}
     {% include "partials/_ems_confirm_modal.html" %}
 
+    {# «Elanlar» birdəfəlik popup-u — gözləyən yoxdursa heç nə render olunmur (sıfır sorğu; imtahan səhifələrində yox) #}
+    {% if request.user.is_authenticated %}{% include "announcements/popup/_mount.html" %}{% endif %}
+
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 

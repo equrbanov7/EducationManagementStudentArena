@@ -36,6 +36,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from apps.announcements.public import badge_payload as announcements_badge_payload
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 from core.logging_utils import safe_log_value
@@ -201,6 +202,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "subject-folders": "accounts/profile/sections/_subject_folders.html",
     "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
     "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
+    "announcements": "accounts/profile/sections/_announcements.html",  # «Elanlar» (apps.announcements)
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -344,6 +346,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "subject-folders",
         "subject-folder-review",
         "my-subject-folders",
+        "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
     }
 )
 
@@ -588,6 +591,7 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
                 99,
             )
 
+    payload.update(announcements_badge_payload(request.user, active_org, capabilities.get("allowed_sections")))
     return JsonResponse({"ok": True, "badges": payload})
 
 

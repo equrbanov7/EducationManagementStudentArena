@@ -26,7 +26,7 @@ from ..models import Application, ApplicationAttachment, ApplicationCounter, App
 from ..sla import add_working_days
 from ..state_machine import TransitionDenied
 from . import access, notify
-from .routing import route_for, sender_family_for
+from .routing import resolve_scope_unit, route_for, sender_family_for
 
 logger = logging.getLogger(__name__)
 
@@ -101,11 +101,15 @@ DUPLICATE_WINDOW = timedelta(minutes=2)
 
 
 @transaction.atomic
-def submit_application(*, organization, user, kind, subject: str, body: str, files=None, request=None) -> Application:
+def submit_application(
+    *, organization, user, kind, subject: str, body: str, files=None, request=None, unit_override=None
+) -> Application:
     """Yeni müraciət yaradır və aidiyyəti şöbəyə göndərir.
 
     Fail-closed yoxlamalar: ``application.create`` icazəsi, aktiv üzvlük
     (ailə), növün həmin ailəyə açıq olması, mətn uzunluqları.
+    ``unit_override`` (Elanlar, 2026-10-06): elanın müəllifinin seçdiyi şöbə — yalnız
+    bu təşkilatın AKTİV şöbəsi qəbul olunur; aidiyyət bölməsi yenə göndərənə görə həll olunur.
     """
     if not access.has_app_permission(user, organization, PERM_CREATE):
         raise TransitionDenied("permission.denied", "Müraciət yaratmaq səlahiyyətiniz yoxdur.")
@@ -138,6 +142,10 @@ def submit_application(*, organization, user, kind, subject: str, body: str, fil
         )
 
     unit, scope_unit, family, sender_unit = route_for(kind, user, organization=organization, family=family)
+    if unit_override is not None:
+        if unit_override.organization_id != organization.pk or not unit_override.is_active:
+            raise TransitionDenied("unit.invalid", "Seçilmiş şöbə bu təşkilatda aktiv deyil.")
+        unit, scope_unit = unit_override, resolve_scope_unit(unit_override, sender_unit)
     # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
     # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.
     # Belə halda əhatə açılır — şöbənin rolunu daşıyan HƏR KƏS görür (fail-open görünüş,

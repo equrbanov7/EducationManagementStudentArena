@@ -89931,3 +89931,890 @@ msgstr ""
 msgctxt "surveys.campaigns"
 msgid "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
 msgstr "Sonuçlar yayımlandıktan sonra k eşiği değişmez."
+
+msgctxt "announcements.api"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Etkin kurum bağlamı yok."
+
+msgctxt "announcements.api"
+msgid "Elan seçilməyib."
+msgstr "Duyuru seçilmedi."
+
+msgctxt "announcements.api"
+msgid "Giriş tələb olunur."
+msgstr "Giriş gerekli."
+
+msgctxt "announcements.apply"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "Görüntüleme modunda başvuru yapılamaz."
+
+msgctxt "announcements.apply"
+msgid "Bu elan üzrə müraciət nəzərdə tutulmayıb."
+msgstr "Bu duyuru için başvuru öngörülmemiş."
+
+msgctxt "announcements.apply"
+msgid "Elan"
+msgstr "Duyuru"
+
+msgctxt "announcements.apply"
+msgid "Elan: %(title)s"
+msgstr "Duyuru: %(title)s"
+
+msgctxt "announcements.apply"
+msgid "Elanın müddəti bitib."
+msgstr "Duyurunun süresi doldu."
+
+msgctxt "announcements.apply"
+msgid "Müraciət ünvanı konfiqurasiya olunmayıb — elanın müəllifinə bildirin."
+msgstr "Başvuru adresi yapılandırılmamış — duyurunun yazarına bildirin."
+
+msgctxt "announcements.apply"
+msgid "Müraciətin son tarixi keçib."
+msgstr "Başvurunun son tarihi geçti."
+
+msgctxt "announcements.apply"
+msgid "Qeyd ən çox %(n)s simvol ola bilər."
+msgstr "Not en fazla %(n)s karakter olabilir."
+
+msgctxt "announcements.apply"
+msgid "«%(title)s» elanına müraciət."
+msgstr "“%(title)s” duyurusuna başvuru."
+
+msgctxt "announcements.cabinet"
+msgid "%(day)s tarixinədək"
+msgstr "%(day)s tarihine kadar"
+
+msgctxt "announcements.cabinet"
+msgid "%(page)s / %(pages)s"
+msgstr "Sayfa %(page)s / %(pages)s"
+
+msgctxt "announcements.cabinet"
+msgid "Aktiv"
+msgstr "Aktif"
+
+msgctxt "announcements.cabinet"
+msgid "Axtarış sözünü dəyişin və ya filtrləri sıfırlayın."
+msgstr "Arama terimini değiştirin veya filtreleri sıfırlayın."
+
+msgctxt "announcements.cabinet"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "Görüntüleme modunda başvuru yapılamaz."
+
+msgctxt "announcements.cabinet"
+msgid "Başlıq və ya mətndə axtar…"
+msgstr "Başlıkta veya metinde ara…"
+
+msgctxt "announcements.cabinet"
+msgid "Bu gün son gündür"
+msgstr "Bugün son gün"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün elanlar"
+msgstr "Tüm duyurular"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün kateqoriyalar"
+msgstr "Tüm kategoriler"
+
+msgctxt "announcements.cabinet"
+msgid "Dərc: %(day)s"
+msgstr "Yayın: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Elan filtrləri"
+msgstr "Duyuru filtreleri"
+
+msgctxt "announcements.cabinet"
+msgid "Elan silinib, arxivlənib və ya sizə ünvanlanmayıb."
+msgstr "Duyuru silinmiş, arşivlenmiş veya size yönelik değil."
+
+msgctxt "announcements.cabinet"
+msgid "Elan tapılmadı"
+msgstr "Duyuru bulunamadı"
+
+msgctxt "announcements.cabinet"
+msgid "Elanlar üçün aktiv təşkilat konteksti tapılmadı."
+msgstr "Duyurular için etkin kurum bağlamı bulunamadı."
+
+msgctxt "announcements.cabinet"
+msgid "Elanlarda axtar"
+msgstr "Duyurularda ara"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları idarə et"
+msgstr "Duyuruları yönet"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Duyurular yüklenemedi. Biraz sonra tekrar deneyin."
+
+msgctxt "announcements.cabinet"
+msgid "Filtrə uyğun elan tapılmadı"
+msgstr "Filtreye uyan duyuru bulunamadı"
+
+msgctxt "announcements.cabinet"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "announcements.cabinet"
+msgid "Hazırda sizə aid aktiv elan yoxdur"
+msgstr "Şu anda size ait etkin duyuru yok"
+
+msgctxt "announcements.cabinet"
+msgid "Kateqoriya"
+msgstr "Kategori"
+
+msgctxt "announcements.cabinet"
+msgid "Keçid %(day)s tarixində açılıb."
+msgstr "Bağlantı %(day)s tarihinde açıldı."
+
+msgctxt "announcements.cabinet"
+msgid "Keçidi yenidən aç"
+msgstr "Bağlantıyı yeniden aç"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitib"
+msgstr "Süresi doldu"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş"
+msgstr "Süresi dolmuş"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş elan yoxdur"
+msgstr "Süresi dolmuş duyuru yok"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət"
+msgstr "Başvuru"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Müraciət edilib: %(number)s (%(day)s). Statusunu «Müraciətlərim» bölməsində "
+"izləyin."
+msgstr ""
+"Başvuruldu: %(number)s (%(day)s). Durumunu “Başvurularım” bölümünden "
+"izleyin."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət et"
+msgstr "Başvur"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Başvuru gönderilmedi. Biraz sonra tekrar deneyin."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət mümkündür"
+msgstr "Başvuru yapılabilir"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət xarici keçid vasitəsilə qəbul olunur."
+msgstr "Başvurular dış bağlantı üzerinden kabul edilir."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz göndərildi"
+msgstr "Başvurunuz gönderildi"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə aidiyyəti şöbəyə göndəriləcək."
+msgstr "Başvurunuz “%(kind)s” türüyle ilgili birime gönderilecek."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə «%(unit)s» şöbəsinə göndəriləcək."
+msgstr "Başvurunuz “%(kind)s” türüyle “%(unit)s” birimine gönderilecek."
+
+msgctxt "announcements.cabinet"
+msgid "Növbəti"
+msgstr "Sonraki"
+
+msgctxt "announcements.cabinet"
+msgid "Oxunmamış"
+msgstr "Okunmamış"
+
+msgctxt "announcements.cabinet"
+msgid "Prioritet"
+msgstr "Öncelik"
+
+msgctxt "announcements.cabinet"
+msgid "Qeyd (könüllü)"
+msgstr "Not (isteğe bağlı)"
+
+msgctxt "announcements.cabinet"
+msgid "Qüvvədədir: %(day)s tarixinədək"
+msgstr "%(day)s tarihine kadar geçerli"
+
+msgctxt "announcements.cabinet"
+msgid "Sancılmış"
+msgstr "Sabitlenmiş"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix"
+msgstr "Son tarih"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix keçib"
+msgstr "Son tarih geçti"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix yaxın olan"
+msgstr "Son tarihi yakın olan"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix: %(day)s"
+msgstr "Son tarih: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarixli"
+msgstr "Son tarihli"
+
+msgctxt "announcements.cabinet"
+msgid "Sıralama"
+msgstr "Sırala"
+
+msgctxt "announcements.cabinet"
+msgid "Səhifələr"
+msgstr "Sayfalar"
+
+msgctxt "announcements.cabinet"
+msgid "Sənədlər"
+msgstr "Belgeler"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Universitetin, fakültənizin və kafedranızın sizə ünvanladığı elanlar. Son "
+"tarixi olan elanlar ayrıca işarələnir."
+msgstr ""
+"Üniversitenin, fakültenizin ve bölümünüzün size yönelik duyuruları. Son "
+"tarihli duyurular ayrıca işaretlenir."
+
+msgctxt "announcements.cabinet"
+msgid "Vəziyyət"
+msgstr "Durum"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni"
+msgstr "Okunmadı"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni elan dərc olunanda burada görünəcək."
+msgstr "Yeni duyurular yayınlandığında burada görünecek."
+
+msgctxt "announcements.cabinet"
+msgid "İstifadəçi burada «Müraciət et» düyməsini görəcək."
+msgstr "Kullanıcı burada “Başvur” düğmesini görecek."
+
+msgctxt "announcements.cabinet"
+msgid "Əlavə etmək istədiyiniz məlumat…"
+msgstr "Eklemek istediğiniz bilgi…"
+
+msgctxt "announcements.cabinet"
+msgid "Ən yeni"
+msgstr "En yeni"
+
+msgctxt "announcements.cabinet"
+msgid "Əvvəlki"
+msgstr "Önceki"
+
+msgctxt "announcements.manage"
+msgid "Arxiv"
+msgstr "Arşiv"
+
+msgctxt "announcements.manage"
+msgid "Arxivdəki elanı əvvəlcə bərpa edin."
+msgstr "Arşivdeki duyuruyu önce geri yükleyin."
+
+msgctxt "announcements.manage"
+msgid "Arxivdən qaytar"
+msgstr "Arşivden geri al"
+
+msgctxt "announcements.manage"
+msgid "Arxivlə"
+msgstr "Arşivle"
+
+msgctxt "announcements.manage"
+msgid "Auditoriya"
+msgstr "Hedef kitle"
+
+msgctxt "announcements.manage"
+msgid "Axtar…"
+msgstr "Ara…"
+
+msgctxt "announcements.manage"
+msgid "Başlıq"
+msgstr "Başlık"
+
+msgctxt "announcements.manage"
+msgid "Başlıq ən azı 3 simvol olmalıdır."
+msgstr "Başlık en az 3 karakter olmalıdır."
+
+msgctxt "announcements.manage"
+msgid "Bir elana ən çox %(n)s sənəd əlavə etmək olar."
+msgstr "Bir duyuruya en fazla %(n)s belge eklenebilir."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı dərc vaxtından sonra olmalıdır."
+msgstr "Bitiş zamanı yayın zamanından sonra olmalıdır."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı keçib — əvvəlcə tarixi dəyişin."
+msgstr "Bitiş zamanı geçti — önce tarihi değiştirin."
+
+msgctxt "announcements.manage"
+msgid "Boş — dərc düyməsinə basılan an."
+msgstr "Boş — yayınla düğmesine basıldığı an."
+
+msgctxt "announcements.manage"
+msgid "Boş — müddətsiz. Bitəndən sonra «Müddəti bitmiş» arxivində qalır."
+msgstr "Boş — süresiz. Bittikten sonra “Süresi dolmuş” arşivinde kalır."
+
+msgctxt "announcements.manage"
+msgid "Bu bölmələr sizin əhatənizdən kənardadır: %(names)s"
+msgstr "Bu birimler yetki alanınızın dışında: %(names)s"
+
+msgctxt "announcements.manage"
+msgid "Bu müraciət növü seçilmiş auditoriyanın hamısına açıq deyil."
+msgstr "Bu başvuru türü seçilen kitlenin tamamına açık değil."
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar"
+msgstr "Birim ara"
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar…"
+msgstr "Birim ara…"
+
+msgctxt "announcements.manage"
+msgid "Bölmə seçimi yanlışdır."
+msgstr "Birim seçimi geçersiz."
+
+msgctxt "announcements.manage"
+msgid "Bölmələr (fakültə, kafedra, ixtisas, qrup)"
+msgstr "Birimler (fakülte, bölüm, program, grup)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata elan yalnız təşkilat səviyyəli səlahiyyətlə verilir — öz "
+"bölmənizi seçin."
+msgstr ""
+"Tüm kuruma duyuru yalnızca kurum düzeyinde yetkiyle yapılır — kendi "
+"biriminizi seçin."
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata və ya seçilmiş fakültə, kafedra, qrup üçün elan yaradın. "
+"Popup elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"Tüm kurum veya seçilen fakülte, bölüm, grup için duyuru oluşturun. Açılır "
+"duyuru her kullanıcıya yalnızca bir kez gösterilir."
+
+msgctxt "announcements.manage"
+msgid "Düymənin mətni (könüllü)"
+msgstr "Düğme metni (isteğe bağlı)"
+
+msgctxt "announcements.manage"
+msgid "Düz mətn: boş sətir — yeni abzas; keçidlər avtomatik link olur."
+msgstr ""
+"Düz metin: boş satır yeni paragraf; bağlantılar otomatik tıklanabilir olur."
+
+msgctxt "announcements.manage"
+msgid "Dərc et"
+msgstr "Yayınla"
+
+msgctxt "announcements.manage"
+msgid "Dərc vaxtı"
+msgstr "Yayın zamanı"
+
+msgctxt "announcements.manage"
+msgid "Dərc: %(day)s"
+msgstr "Yayın: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Dərcdən çıxar"
+msgstr "Yayından kaldır"
+
+msgctxt "announcements.manage"
+msgid "Elan arxivdən qaytarıldı (qaralama)."
+msgstr "Duyuru arşivden geri alındı (taslak)."
+
+msgctxt "announcements.manage"
+msgid "Elan arxivləndi."
+msgstr "Duyuru arşivlendi."
+
+msgctxt "announcements.manage"
+msgid "Elan dərc olundu."
+msgstr "Duyuru yayınlandı."
+
+msgctxt "announcements.manage"
+msgid "Elan qaralamaya qaytarıldı."
+msgstr "Duyuru taslağa döndürüldü."
+
+msgctxt "announcements.manage"
+msgid "Elan yadda saxlanıldı."
+msgstr "Duyuru kaydedildi."
+
+msgctxt "announcements.manage"
+msgid "Elan yoxdur"
+msgstr "Duyuru yok"
+
+msgctxt "announcements.manage"
+msgid "Elanlarım"
+msgstr "Duyurularım"
+
+msgctxt "announcements.manage"
+msgid "Elanların idarəsi"
+msgstr "Duyuru yönetimi"
+
+msgctxt "announcements.manage"
+msgid "Elanı redaktə et"
+msgstr "Duyuruyu düzenle"
+
+msgctxt "announcements.manage"
+msgid "Fayl əlavə et"
+msgstr "Dosya ekle"
+
+msgctxt "announcements.manage"
+msgid "Forma yadda saxlanmadı — aşağıdakıları düzəldin:"
+msgstr "Form kaydedilmedi — aşağıdakileri düzeltin:"
+
+msgctxt "announcements.manage"
+msgid "Girişdə popup kimi göstər"
+msgstr "Girişte açılır pencere olarak göster"
+
+msgctxt "announcements.manage"
+msgid "Görünmə bitir"
+msgstr "Görünürlük bitişi"
+
+msgctxt "announcements.manage"
+msgid "Göstər"
+msgstr "Göster"
+
+msgctxt "announcements.manage"
+msgid "Hara göndərilsin (şöbə)"
+msgstr "Nereye gönderilsin (birim)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Heç nə seçilməsə — bütün təşkilat. Seçilmiş bölmə alt bölmələri ilə birlikdə"
+" hədəflənir (məs. fakültə → onun bütün qrupları)."
+msgstr ""
+"Hiçbir şey seçilmezse — tüm kurum. Seçilen birim alt birimleriyle birlikte "
+"hedeflenir (ör. fakülte → tüm grupları)."
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriya"
+msgstr "Hedef kitle"
+
+msgctxt "announcements.manage"
+msgid "Keçid (https://… və ya /daxili/yol)"
+msgstr "Bağlantı (https://… veya /iç/yol)"
+
+msgctxt "announcements.manage"
+msgid "Keçid https:// ilə başlamalı və ya saytın daxili yolu (/…) olmalıdır."
+msgstr "Bağlantı https:// ile başlamalı veya sitenin iç yolu (/…) olmalıdır."
+
+msgctxt "announcements.manage"
+msgid "Kimə göstərilsin"
+msgstr "Kime gösterilsin"
+
+msgctxt "announcements.manage"
+msgid "Müraciət"
+msgstr "Başvuru"
+
+msgctxt "announcements.manage"
+msgid "Müraciət edib"
+msgstr "Başvurdu"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növü"
+msgstr "Başvuru türü"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növünü seçin."
+msgstr "Başvuru türünü seçin."
+
+msgctxt "announcements.manage"
+msgid "Müraciət rejimi"
+msgstr "Başvuru modu"
+
+msgctxt "announcements.manage"
+msgid "Mətn"
+msgstr "Metin"
+
+msgctxt "announcements.manage"
+msgid "Məzmun"
+msgstr "İçerik"
+
+msgctxt "announcements.manage"
+msgid "Naməlum əməliyyat."
+msgstr "Bilinmeyen işlem."
+
+msgctxt "announcements.manage"
+msgid "Naviqasiya"
+msgstr "Gezinme"
+
+msgctxt "announcements.manage"
+msgid "Növ seçilmiş auditoriyanın hamısına açıq olmalıdır (məs. tələbə növü)."
+msgstr "Tür, seçilen kitlenin tamamına açık olmalıdır (ör. öğrenci türü)."
+
+msgctxt "announcements.manage"
+msgid "Növün öz marşrutu ilə"
+msgstr "Türün kendi yönlendirmesiyle"
+
+msgctxt "announcements.manage"
+msgid "Oxuyub"
+msgstr "Okudu"
+
+msgctxt "announcements.manage"
+msgid ""
+"PDF, şəkil, Word/Excel/PowerPoint · hər biri 10 MB-a qədər · ən çox 5 fayl."
+msgstr ""
+"PDF, görsel, Word/Excel/PowerPoint · her biri 10 MB'a kadar · en fazla 5 "
+"dosya."
+
+msgctxt "announcements.manage"
+msgid "Planlaşdırılıb"
+msgstr "Planlandı"
+
+msgctxt "announcements.manage"
+msgid "Popup"
+msgstr "Açılır pencere"
+
+msgctxt "announcements.manage"
+msgid "Popup görüb"
+msgstr "Açılır pencereyi gördü"
+
+msgctxt "announcements.manage"
+msgid "Qalan gün göstərilir; keçəndən sonra «Müraciət et» bağlanır."
+msgstr "Kalan gün gösterilir; geçtikten sonra “Başvur” kapanır."
+
+msgctxt "announcements.manage"
+msgid "Qaralama"
+msgstr "Taslak"
+
+msgctxt "announcements.manage"
+msgid "Qaralama birdəfəlik silinsin?"
+msgstr "Taslak kalıcı olarak silinsin mi?"
+
+msgctxt "announcements.manage"
+msgid "Qaralama silindi."
+msgstr "Taslak silindi."
+
+msgctxt "announcements.manage"
+msgid "Qısa xülasə"
+msgstr "Kısa özet"
+
+msgctxt "announcements.manage"
+msgid "Redaktəyə qayıt"
+msgstr "Düzenlemeye dön"
+
+msgctxt "announcements.manage"
+msgid "Saxla və dərc et"
+msgstr "Kaydet ve yayınla"
+
+msgctxt "announcements.manage"
+msgid "Seçilib"
+msgstr "Seçildi"
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş bölmələrdən biri tapılmadı."
+msgstr "Seçilen birimlerden biri bulunamadı."
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş şöbə tapılmadı."
+msgstr "Seçilen birim bulunamadı."
+
+msgctxt "announcements.manage"
+msgid "Seçiləcək bölmə yoxdur."
+msgstr "Seçilecek birim yok."
+
+msgctxt "announcements.manage"
+msgid "Sil"
+msgstr "Kaldır"
+
+msgctxt "announcements.manage"
+msgid "Siyahıda və popup-da göstərilir (300 simvola qədər)."
+msgstr "Listede ve açılır pencerede gösterilir (300 karaktere kadar)."
+
+msgctxt "announcements.manage"
+msgid "Siyahının başına sanc"
+msgstr "Listenin başına sabitle"
+
+msgctxt "announcements.manage"
+msgid "Son tarix (nə vaxta qədər)"
+msgstr "Son tarih (ne zamana kadar)"
+
+msgctxt "announcements.manage"
+msgid "Son tarix dərc vaxtından sonra olmalıdır."
+msgstr "Son tarih yayın zamanından sonra olmalıdır."
+
+msgctxt "announcements.manage"
+msgid "Statistika"
+msgstr "İstatistik"
+
+msgctxt "announcements.manage"
+msgid "Səlahiyyət yoxdur."
+msgstr "Yetki yok."
+
+msgctxt "announcements.manage"
+msgid "Sənəd silindi."
+msgstr "Belge silindi."
+
+msgctxt "announcements.manage"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Eşleşen sonuç yok"
+
+msgctxt "announcements.manage"
+msgid "Vaxt və son tarix"
+msgstr "Zaman ve son tarih"
+
+msgctxt "announcements.manage"
+msgid "Yadda saxla"
+msgstr "Kaydet"
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin."
+msgstr ""
+"Yalnızca kimsenin görmediği taslak silinebilir; diğerlerini arşivleyin."
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız öz bölmənizə (və onun alt bölmələrinə) elan verə bilərsiniz. Popup "
+"elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"Yalnızca kendi biriminize (ve alt birimlerine) duyuru yapabilirsiniz. Açılır"
+" duyuru her kullanıcıya yalnızca bir kez gösterilir."
+
+msgctxt "announcements.manage"
+msgid "Yeni elan"
+msgstr "Yeni duyuru"
+
+msgctxt "announcements.manage"
+msgid "bitir: %(day)s"
+msgstr "bitiş: %(day)s"
+
+msgctxt "announcements.manage"
+msgid ""
+"hər istifadəçiyə yalnız BİR dəfə; bağlayandan sonra bir daha çıxmır. İmtahan"
+" səhifələrində göstərilmir."
+msgstr ""
+"her kullanıcıya yalnızca BİR kez; kapatıldıktan sonra bir daha çıkmaz. Sınav"
+" sayfalarında gösterilmez."
+
+msgctxt "announcements.manage"
+msgid "son tarix: %(day)s"
+msgstr "son tarih: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "«%(name)s» faylını sil"
+msgstr "“%(name)s” dosyasını sil"
+
+msgctxt "announcements.manage"
+msgid "«Müraciət et» düyməsi"
+msgstr "“Başvur” düğmesi"
+
+msgctxt "announcements.manage"
+msgid "«Yeni elan» düyməsi ilə ilk elanı yaradın."
+msgstr "İlk duyuruyu “Yeni duyuru” düğmesiyle oluşturun."
+
+msgctxt "announcements.manage"
+msgid "Önizləmə"
+msgstr "Önizleme"
+
+msgctxt "announcements.manage"
+msgid "Önizləmə — istifadəçi belə görəcək"
+msgstr "Önizleme — kullanıcı böyle görecek"
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir auditoriya seçin."
+msgstr "En az bir hedef kitle seçin."
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir bölmə seçin — yalnız öz əhatənizdəki bölmələr göstərilir."
+msgstr ""
+"En az bir birim seçin — yalnızca yetki alanınızdaki birimler gösterilir."
+
+msgctxt "announcements.manage"
+msgid "Ən çox %(n)s bölmə seçmək olar."
+msgstr "En fazla %(n)s birim seçilebilir."
+
+msgctxt "announcements.manage"
+msgid "— seçin —"
+msgstr "— seçiniz —"
+
+msgctxt "announcements.model"
+msgid "Adi"
+msgstr "Normal"
+
+msgctxt "announcements.model"
+msgid "Arxiv"
+msgstr "Arşiv"
+
+msgctxt "announcements.model"
+msgid "Daxili müraciət (Müraciətlər modulu)"
+msgstr "İç başvuru (Başvurular modülü)"
+
+msgctxt "announcements.model"
+msgid "Dərc olunub"
+msgstr "Yayınlandı"
+
+msgctxt "announcements.model"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "announcements.model"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "announcements.model"
+msgid "Keçid (link)"
+msgstr "Bağlantı"
+
+msgctxt "announcements.model"
+msgid "Kritik"
+msgstr "Çok önemli"
+
+msgctxt "announcements.model"
+msgid "Müraciət yoxdur"
+msgstr "Başvuru yok"
+
+msgctxt "announcements.model"
+msgid "Müəllimlər"
+msgstr "Öğretmenler"
+
+msgctxt "announcements.model"
+msgid "Qaralama"
+msgstr "Taslak"
+
+msgctxt "announcements.model"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "announcements.model"
+msgid "Təcili"
+msgstr "Acil"
+
+msgctxt "announcements.model"
+msgid "Tədbir"
+msgstr "Etkinlik"
+
+msgctxt "announcements.model"
+msgid "Tədris"
+msgstr "Eğitim"
+
+msgctxt "announcements.model"
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "announcements.model"
+msgid "Yüksək"
+msgstr "Yüksek"
+
+msgctxt "announcements.model"
+msgid "elan"
+msgstr "duyuru"
+
+msgctxt "announcements.model"
+msgid "elan qəbzi"
+msgstr "duyuru kaydı"
+
+msgctxt "announcements.model"
+msgid "elan qəbzləri"
+msgstr "duyuru kayıtları"
+
+msgctxt "announcements.model"
+msgid "elan sənədi"
+msgstr "duyuru belgesi"
+
+msgctxt "announcements.model"
+msgid "elan sənədləri"
+msgstr "duyuru belgeleri"
+
+msgctxt "announcements.model"
+msgid "elanlar"
+msgstr "duyurular"
+
+msgctxt "announcements.model"
+msgid "Ümumi"
+msgstr "Genel"
+
+msgctxt "announcements.model"
+msgid "İmtahan"
+msgstr "Sınav"
+
+msgctxt "announcements.model"
+msgid "İxtisas"
+msgstr "Program"
+
+msgctxt "announcements.model"
+msgid "Şöbə"
+msgstr "Birim"
+
+msgctxt "announcements.model"
+msgid "Əməkdaşlar"
+msgstr "Personel"
+
+msgctxt "announcements.popup"
+msgid "%(day)s tarixinədək"
+msgstr "%(day)s tarihine kadar"
+
+msgctxt "announcements.popup"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "announcements.popup"
+msgid "Dərc"
+msgstr "Yayın"
+
+msgctxt "announcements.popup"
+msgid "Növbəti elan"
+msgstr "Sonraki duyuru"
+
+msgctxt "announcements.popup"
+msgid "Qüvvədədir"
+msgstr "Geçerli"
+
+msgctxt "announcements.popup"
+msgid "Son tarix"
+msgstr "Son tarih"
+
+msgctxt "announcements.popup"
+msgid "Yeni elan"
+msgstr "Yeni duyuru"
+
+msgctxt "announcements.popup"
+msgid "Yeni elanlar"
+msgstr "Yeni duyurular"
+
+msgctxt "announcements.popup"
+msgid "Ətraflı bax"
+msgstr "Ayrıntılar"
+
+msgctxt "announcements.popup"
+msgid "Əvvəlki elan"
+msgstr "Önceki duyuru"
+
+msgctxt "organizations.permission.label"
+msgid "Elan yaratmaq və dərc etmək (öz əhatəsində)"
+msgstr "Duyuru oluşturmak ve yayınlamak (kendi yetki alanında)"
+
+msgctxt "profile.sidebar"
+msgid "Elanlar"
+msgstr "Duyurular"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s elan"
+msgid_plural "%(n)s elan"
+msgstr[0] "%(n)s duyuru"
+msgstr[1] "%(n)s duyuru"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s gün qaldı"
+msgid_plural "%(n)s gün qaldı"
+msgstr[0] "%(n)s gün kaldı"
+msgstr[1] "%(n)s gün kaldı"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Başvuruldu"

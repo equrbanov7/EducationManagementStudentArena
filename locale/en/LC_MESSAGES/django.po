@@ -90439,3 +90439,891 @@ msgstr ""
 msgctxt "surveys.campaigns"
 msgid "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
 msgstr "The k threshold cannot change after results are published."
+
+msgctxt "announcements.api"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "No active organization context."
+
+msgctxt "announcements.api"
+msgid "Elan seçilməyib."
+msgstr "No announcement selected."
+
+msgctxt "announcements.api"
+msgid "Giriş tələb olunur."
+msgstr "Login required."
+
+msgctxt "announcements.apply"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "You cannot apply in view-as mode."
+
+msgctxt "announcements.apply"
+msgid "Bu elan üzrə müraciət nəzərdə tutulmayıb."
+msgstr "This announcement does not accept applications."
+
+msgctxt "announcements.apply"
+msgid "Elan"
+msgstr "Announcement"
+
+msgctxt "announcements.apply"
+msgid "Elan: %(title)s"
+msgstr "Announcement: %(title)s"
+
+msgctxt "announcements.apply"
+msgid "Elanın müddəti bitib."
+msgstr "The announcement has expired."
+
+msgctxt "announcements.apply"
+msgid "Müraciət ünvanı konfiqurasiya olunmayıb — elanın müəllifinə bildirin."
+msgstr ""
+"The application destination is not configured — please tell the "
+"announcement's author."
+
+msgctxt "announcements.apply"
+msgid "Müraciətin son tarixi keçib."
+msgstr "The application deadline has passed."
+
+msgctxt "announcements.apply"
+msgid "Qeyd ən çox %(n)s simvol ola bilər."
+msgstr "The note can be at most %(n)s characters."
+
+msgctxt "announcements.apply"
+msgid "«%(title)s» elanına müraciət."
+msgstr "Application for the announcement “%(title)s”."
+
+msgctxt "announcements.cabinet"
+msgid "%(day)s tarixinədək"
+msgstr "until %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "%(page)s / %(pages)s"
+msgstr "%(page)s of %(pages)s"
+
+msgctxt "announcements.cabinet"
+msgid "Aktiv"
+msgstr "Active"
+
+msgctxt "announcements.cabinet"
+msgid "Axtarış sözünü dəyişin və ya filtrləri sıfırlayın."
+msgstr "Change the search term or reset the filters."
+
+msgctxt "announcements.cabinet"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "You cannot apply in view-as mode."
+
+msgctxt "announcements.cabinet"
+msgid "Başlıq və ya mətndə axtar…"
+msgstr "Search title or text…"
+
+msgctxt "announcements.cabinet"
+msgid "Bu gün son gündür"
+msgstr "Today is the last day"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün elanlar"
+msgstr "All announcements"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün kateqoriyalar"
+msgstr "All categories"
+
+msgctxt "announcements.cabinet"
+msgid "Dərc: %(day)s"
+msgstr "Published: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Elan filtrləri"
+msgstr "Announcement filters"
+
+msgctxt "announcements.cabinet"
+msgid "Elan silinib, arxivlənib və ya sizə ünvanlanmayıb."
+msgstr "The announcement was deleted, archived or is not addressed to you."
+
+msgctxt "announcements.cabinet"
+msgid "Elan tapılmadı"
+msgstr "Announcement not found"
+
+msgctxt "announcements.cabinet"
+msgid "Elanlar üçün aktiv təşkilat konteksti tapılmadı."
+msgstr "No active organization context for announcements."
+
+msgctxt "announcements.cabinet"
+msgid "Elanlarda axtar"
+msgstr "Search announcements"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları idarə et"
+msgstr "Manage announcements"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Could not load announcements. Please try again shortly."
+
+msgctxt "announcements.cabinet"
+msgid "Filtrə uyğun elan tapılmadı"
+msgstr "No announcements match the filters"
+
+msgctxt "announcements.cabinet"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "announcements.cabinet"
+msgid "Hazırda sizə aid aktiv elan yoxdur"
+msgstr "There are no active announcements for you right now"
+
+msgctxt "announcements.cabinet"
+msgid "Kateqoriya"
+msgstr "Category"
+
+msgctxt "announcements.cabinet"
+msgid "Keçid %(day)s tarixində açılıb."
+msgstr "The link was opened on %(day)s."
+
+msgctxt "announcements.cabinet"
+msgid "Keçidi yenidən aç"
+msgstr "Open the link again"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitib"
+msgstr "Expired"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş"
+msgstr "Expired"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş elan yoxdur"
+msgstr "No expired announcements"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət"
+msgstr "Application"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Müraciət edilib: %(number)s (%(day)s). Statusunu «Müraciətlərim» bölməsində "
+"izləyin."
+msgstr "Applied: %(number)s (%(day)s). Track its status in “My applications”."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət et"
+msgstr "Apply"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "The application was not sent. Please try again shortly."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət mümkündür"
+msgstr "Applications open"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət xarici keçid vasitəsilə qəbul olunur."
+msgstr "Applications are accepted via an external link."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz göndərildi"
+msgstr "Your application has been sent"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə aidiyyəti şöbəyə göndəriləcək."
+msgstr ""
+"Your application will be sent as “%(kind)s” to the responsible office."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə «%(unit)s» şöbəsinə göndəriləcək."
+msgstr "Your application will be sent as “%(kind)s” to “%(unit)s”."
+
+msgctxt "announcements.cabinet"
+msgid "Növbəti"
+msgstr "Next"
+
+msgctxt "announcements.cabinet"
+msgid "Oxunmamış"
+msgstr "Unread"
+
+msgctxt "announcements.cabinet"
+msgid "Prioritet"
+msgstr "Priority"
+
+msgctxt "announcements.cabinet"
+msgid "Qeyd (könüllü)"
+msgstr "Note (optional)"
+
+msgctxt "announcements.cabinet"
+msgid "Qüvvədədir: %(day)s tarixinədək"
+msgstr "Valid until %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Sancılmış"
+msgstr "Pinned"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix"
+msgstr "Deadline"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix keçib"
+msgstr "Deadline passed"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix yaxın olan"
+msgstr "Nearest deadline"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix: %(day)s"
+msgstr "Deadline: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarixli"
+msgstr "With deadline"
+
+msgctxt "announcements.cabinet"
+msgid "Sıralama"
+msgstr "Sort"
+
+msgctxt "announcements.cabinet"
+msgid "Səhifələr"
+msgstr "Pages"
+
+msgctxt "announcements.cabinet"
+msgid "Sənədlər"
+msgstr "Documents"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Universitetin, fakültənizin və kafedranızın sizə ünvanladığı elanlar. Son "
+"tarixi olan elanlar ayrıca işarələnir."
+msgstr ""
+"Announcements addressed to you by the university, your faculty and "
+"department. Announcements with a deadline are marked."
+
+msgctxt "announcements.cabinet"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni"
+msgstr "New"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni elan dərc olunanda burada görünəcək."
+msgstr "New announcements will appear here when published."
+
+msgctxt "announcements.cabinet"
+msgid "İstifadəçi burada «Müraciət et» düyməsini görəcək."
+msgstr "Users will see the “Apply” button here."
+
+msgctxt "announcements.cabinet"
+msgid "Əlavə etmək istədiyiniz məlumat…"
+msgstr "Anything you would like to add…"
+
+msgctxt "announcements.cabinet"
+msgid "Ən yeni"
+msgstr "Newest"
+
+msgctxt "announcements.cabinet"
+msgid "Əvvəlki"
+msgstr "Previous"
+
+msgctxt "announcements.manage"
+msgid "Arxiv"
+msgstr "Archive"
+
+msgctxt "announcements.manage"
+msgid "Arxivdəki elanı əvvəlcə bərpa edin."
+msgstr "Restore the archived announcement first."
+
+msgctxt "announcements.manage"
+msgid "Arxivdən qaytar"
+msgstr "Restore from archive"
+
+msgctxt "announcements.manage"
+msgid "Arxivlə"
+msgstr "Archive"
+
+msgctxt "announcements.manage"
+msgid "Auditoriya"
+msgstr "Audience"
+
+msgctxt "announcements.manage"
+msgid "Axtar…"
+msgstr "Search…"
+
+msgctxt "announcements.manage"
+msgid "Başlıq"
+msgstr "Title"
+
+msgctxt "announcements.manage"
+msgid "Başlıq ən azı 3 simvol olmalıdır."
+msgstr "The title must be at least 3 characters."
+
+msgctxt "announcements.manage"
+msgid "Bir elana ən çox %(n)s sənəd əlavə etmək olar."
+msgstr "At most %(n)s documents can be attached to an announcement."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı dərc vaxtından sonra olmalıdır."
+msgstr "The end time must be after the publish time."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı keçib — əvvəlcə tarixi dəyişin."
+msgstr "The end time has passed — change the date first."
+
+msgctxt "announcements.manage"
+msgid "Boş — dərc düyməsinə basılan an."
+msgstr "Empty — the moment you press publish."
+
+msgctxt "announcements.manage"
+msgid "Boş — müddətsiz. Bitəndən sonra «Müddəti bitmiş» arxivində qalır."
+msgstr "Empty — no end. After it ends it stays in the “Expired” archive."
+
+msgctxt "announcements.manage"
+msgid "Bu bölmələr sizin əhatənizdən kənardadır: %(names)s"
+msgstr "These units are outside your scope: %(names)s"
+
+msgctxt "announcements.manage"
+msgid "Bu müraciət növü seçilmiş auditoriyanın hamısına açıq deyil."
+msgstr "This application type is not open to the whole selected audience."
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar"
+msgstr "Search units"
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar…"
+msgstr "Search units…"
+
+msgctxt "announcements.manage"
+msgid "Bölmə seçimi yanlışdır."
+msgstr "Invalid unit selection."
+
+msgctxt "announcements.manage"
+msgid "Bölmələr (fakültə, kafedra, ixtisas, qrup)"
+msgstr "Units (faculty, department, specialty, group)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata elan yalnız təşkilat səviyyəli səlahiyyətlə verilir — öz "
+"bölmənizi seçin."
+msgstr ""
+"Organization-wide announcements require organization-level permission — "
+"select your unit."
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata və ya seçilmiş fakültə, kafedra, qrup üçün elan yaradın. "
+"Popup elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"Create announcements for the whole organization or for selected faculties, "
+"departments and groups. A popup announcement is shown to each user only "
+"once."
+
+msgctxt "announcements.manage"
+msgid "Düymənin mətni (könüllü)"
+msgstr "Button text (optional)"
+
+msgctxt "announcements.manage"
+msgid "Düz mətn: boş sətir — yeni abzas; keçidlər avtomatik link olur."
+msgstr ""
+"Plain text: a blank line starts a new paragraph; links become clickable "
+"automatically."
+
+msgctxt "announcements.manage"
+msgid "Dərc et"
+msgstr "Publish"
+
+msgctxt "announcements.manage"
+msgid "Dərc vaxtı"
+msgstr "Publish time"
+
+msgctxt "announcements.manage"
+msgid "Dərc: %(day)s"
+msgstr "Published: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Dərcdən çıxar"
+msgstr "Unpublish"
+
+msgctxt "announcements.manage"
+msgid "Elan arxivdən qaytarıldı (qaralama)."
+msgstr "The announcement was restored (draft)."
+
+msgctxt "announcements.manage"
+msgid "Elan arxivləndi."
+msgstr "The announcement was archived."
+
+msgctxt "announcements.manage"
+msgid "Elan dərc olundu."
+msgstr "The announcement was published."
+
+msgctxt "announcements.manage"
+msgid "Elan qaralamaya qaytarıldı."
+msgstr "The announcement was returned to draft."
+
+msgctxt "announcements.manage"
+msgid "Elan yadda saxlanıldı."
+msgstr "The announcement was saved."
+
+msgctxt "announcements.manage"
+msgid "Elan yoxdur"
+msgstr "No announcements"
+
+msgctxt "announcements.manage"
+msgid "Elanlarım"
+msgstr "My announcements"
+
+msgctxt "announcements.manage"
+msgid "Elanların idarəsi"
+msgstr "Announcement management"
+
+msgctxt "announcements.manage"
+msgid "Elanı redaktə et"
+msgstr "Edit announcement"
+
+msgctxt "announcements.manage"
+msgid "Fayl əlavə et"
+msgstr "Add files"
+
+msgctxt "announcements.manage"
+msgid "Forma yadda saxlanmadı — aşağıdakıları düzəldin:"
+msgstr "The form was not saved — fix the following:"
+
+msgctxt "announcements.manage"
+msgid "Girişdə popup kimi göstər"
+msgstr "Show as a popup on login"
+
+msgctxt "announcements.manage"
+msgid "Görünmə bitir"
+msgstr "Visible until"
+
+msgctxt "announcements.manage"
+msgid "Göstər"
+msgstr "Show"
+
+msgctxt "announcements.manage"
+msgid "Hara göndərilsin (şöbə)"
+msgstr "Send to (office)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Heç nə seçilməsə — bütün təşkilat. Seçilmiş bölmə alt bölmələri ilə birlikdə"
+" hədəflənir (məs. fakültə → onun bütün qrupları)."
+msgstr ""
+"If nothing is selected — the whole organization. A selected unit includes "
+"its sub-units (e.g. faculty → all its groups)."
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriya"
+msgstr "Target audience"
+
+msgctxt "announcements.manage"
+msgid "Keçid (https://… və ya /daxili/yol)"
+msgstr "Link (https://… or /internal/path)"
+
+msgctxt "announcements.manage"
+msgid "Keçid https:// ilə başlamalı və ya saytın daxili yolu (/…) olmalıdır."
+msgstr "The link must start with https:// or be an internal site path (/…)."
+
+msgctxt "announcements.manage"
+msgid "Kimə göstərilsin"
+msgstr "Who should see it"
+
+msgctxt "announcements.manage"
+msgid "Müraciət"
+msgstr "Applied"
+
+msgctxt "announcements.manage"
+msgid "Müraciət edib"
+msgstr "Applied"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növü"
+msgstr "Application type"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növünü seçin."
+msgstr "Select the application type."
+
+msgctxt "announcements.manage"
+msgid "Müraciət rejimi"
+msgstr "Application mode"
+
+msgctxt "announcements.manage"
+msgid "Mətn"
+msgstr "Text"
+
+msgctxt "announcements.manage"
+msgid "Məzmun"
+msgstr "Content"
+
+msgctxt "announcements.manage"
+msgid "Naməlum əməliyyat."
+msgstr "Unknown action."
+
+msgctxt "announcements.manage"
+msgid "Naviqasiya"
+msgstr "Navigation"
+
+msgctxt "announcements.manage"
+msgid "Növ seçilmiş auditoriyanın hamısına açıq olmalıdır (məs. tələbə növü)."
+msgstr ""
+"The type must be open to the whole selected audience (e.g. a student type)."
+
+msgctxt "announcements.manage"
+msgid "Növün öz marşrutu ilə"
+msgstr "Using the type's own routing"
+
+msgctxt "announcements.manage"
+msgid "Oxuyub"
+msgstr "Read"
+
+msgctxt "announcements.manage"
+msgid ""
+"PDF, şəkil, Word/Excel/PowerPoint · hər biri 10 MB-a qədər · ən çox 5 fayl."
+msgstr ""
+"PDF, images, Word/Excel/PowerPoint · up to 10 MB each · at most 5 files."
+
+msgctxt "announcements.manage"
+msgid "Planlaşdırılıb"
+msgstr "Scheduled"
+
+msgctxt "announcements.manage"
+msgid "Popup"
+msgstr "Pop-up"
+
+msgctxt "announcements.manage"
+msgid "Popup görüb"
+msgstr "Saw popup"
+
+msgctxt "announcements.manage"
+msgid "Qalan gün göstərilir; keçəndən sonra «Müraciət et» bağlanır."
+msgstr "Days left are shown; after it passes, “Apply” is closed."
+
+msgctxt "announcements.manage"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "announcements.manage"
+msgid "Qaralama birdəfəlik silinsin?"
+msgstr "Delete the draft permanently?"
+
+msgctxt "announcements.manage"
+msgid "Qaralama silindi."
+msgstr "The draft was deleted."
+
+msgctxt "announcements.manage"
+msgid "Qısa xülasə"
+msgstr "Short summary"
+
+msgctxt "announcements.manage"
+msgid "Redaktəyə qayıt"
+msgstr "Back to editing"
+
+msgctxt "announcements.manage"
+msgid "Saxla və dərc et"
+msgstr "Save and publish"
+
+msgctxt "announcements.manage"
+msgid "Seçilib"
+msgstr "Selected"
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş bölmələrdən biri tapılmadı."
+msgstr "One of the selected units was not found."
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş şöbə tapılmadı."
+msgstr "The selected office was not found."
+
+msgctxt "announcements.manage"
+msgid "Seçiləcək bölmə yoxdur."
+msgstr "There are no units to select."
+
+msgctxt "announcements.manage"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "announcements.manage"
+msgid "Siyahıda və popup-da göstərilir (300 simvola qədər)."
+msgstr "Shown in the list and the popup (up to 300 characters)."
+
+msgctxt "announcements.manage"
+msgid "Siyahının başına sanc"
+msgstr "Pin to the top of the list"
+
+msgctxt "announcements.manage"
+msgid "Son tarix (nə vaxta qədər)"
+msgstr "Deadline (until when)"
+
+msgctxt "announcements.manage"
+msgid "Son tarix dərc vaxtından sonra olmalıdır."
+msgstr "The deadline must be after the publish time."
+
+msgctxt "announcements.manage"
+msgid "Statistika"
+msgstr "Statistics"
+
+msgctxt "announcements.manage"
+msgid "Səlahiyyət yoxdur."
+msgstr "Permission denied."
+
+msgctxt "announcements.manage"
+msgid "Sənəd silindi."
+msgstr "The document was deleted."
+
+msgctxt "announcements.manage"
+msgid "Uyğun nəticə yoxdur"
+msgstr "No matching results"
+
+msgctxt "announcements.manage"
+msgid "Vaxt və son tarix"
+msgstr "Timing and deadline"
+
+msgctxt "announcements.manage"
+msgid "Yadda saxla"
+msgstr "Save"
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin."
+msgstr "Only a draft nobody has seen can be deleted; archive the others."
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız öz bölmənizə (və onun alt bölmələrinə) elan verə bilərsiniz. Popup "
+"elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"You can only announce to your own unit (and its sub-units). A popup "
+"announcement is shown to each user only once."
+
+msgctxt "announcements.manage"
+msgid "Yeni elan"
+msgstr "New announcement"
+
+msgctxt "announcements.manage"
+msgid "bitir: %(day)s"
+msgstr "ends: %(day)s"
+
+msgctxt "announcements.manage"
+msgid ""
+"hər istifadəçiyə yalnız BİR dəfə; bağlayandan sonra bir daha çıxmır. İmtahan"
+" səhifələrində göstərilmir."
+msgstr ""
+"only ONCE per user; after closing it never appears again. Not shown on exam "
+"pages."
+
+msgctxt "announcements.manage"
+msgid "son tarix: %(day)s"
+msgstr "deadline: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "«%(name)s» faylını sil"
+msgstr "Delete file “%(name)s”"
+
+msgctxt "announcements.manage"
+msgid "«Müraciət et» düyməsi"
+msgstr "“Apply” button"
+
+msgctxt "announcements.manage"
+msgid "«Yeni elan» düyməsi ilə ilk elanı yaradın."
+msgstr "Create the first announcement with “New announcement”."
+
+msgctxt "announcements.manage"
+msgid "Önizləmə"
+msgstr "Preview"
+
+msgctxt "announcements.manage"
+msgid "Önizləmə — istifadəçi belə görəcək"
+msgstr "Preview — this is what users will see"
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir auditoriya seçin."
+msgstr "Select at least one audience."
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir bölmə seçin — yalnız öz əhatənizdəki bölmələr göstərilir."
+msgstr "Select at least one unit — only units within your scope are listed."
+
+msgctxt "announcements.manage"
+msgid "Ən çox %(n)s bölmə seçmək olar."
+msgstr "At most %(n)s units can be selected."
+
+msgctxt "announcements.manage"
+msgid "— seçin —"
+msgstr "— select —"
+
+msgctxt "announcements.model"
+msgid "Adi"
+msgstr "Normal"
+
+msgctxt "announcements.model"
+msgid "Arxiv"
+msgstr "Archived"
+
+msgctxt "announcements.model"
+msgid "Daxili müraciət (Müraciətlər modulu)"
+msgstr "Internal application (Applications module)"
+
+msgctxt "announcements.model"
+msgid "Dərc olunub"
+msgstr "Published"
+
+msgctxt "announcements.model"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "announcements.model"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "announcements.model"
+msgid "Keçid (link)"
+msgstr "Link"
+
+msgctxt "announcements.model"
+msgid "Kritik"
+msgstr "Critical"
+
+msgctxt "announcements.model"
+msgid "Müraciət yoxdur"
+msgstr "No application"
+
+msgctxt "announcements.model"
+msgid "Müəllimlər"
+msgstr "Teachers"
+
+msgctxt "announcements.model"
+msgid "Qaralama"
+msgstr "Draft"
+
+msgctxt "announcements.model"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "announcements.model"
+msgid "Təcili"
+msgstr "Urgent"
+
+msgctxt "announcements.model"
+msgid "Tədbir"
+msgstr "Event"
+
+msgctxt "announcements.model"
+msgid "Tədris"
+msgstr "Academic"
+
+msgctxt "announcements.model"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "announcements.model"
+msgid "Yüksək"
+msgstr "High"
+
+msgctxt "announcements.model"
+msgid "elan"
+msgstr "announcement"
+
+msgctxt "announcements.model"
+msgid "elan qəbzi"
+msgstr "announcement receipt"
+
+msgctxt "announcements.model"
+msgid "elan qəbzləri"
+msgstr "announcement receipts"
+
+msgctxt "announcements.model"
+msgid "elan sənədi"
+msgstr "announcement document"
+
+msgctxt "announcements.model"
+msgid "elan sənədləri"
+msgstr "announcement documents"
+
+msgctxt "announcements.model"
+msgid "elanlar"
+msgstr "announcements"
+
+msgctxt "announcements.model"
+msgid "Ümumi"
+msgstr "General"
+
+msgctxt "announcements.model"
+msgid "İmtahan"
+msgstr "Exam"
+
+msgctxt "announcements.model"
+msgid "İxtisas"
+msgstr "Specialty"
+
+msgctxt "announcements.model"
+msgid "Şöbə"
+msgstr "Office"
+
+msgctxt "announcements.model"
+msgid "Əməkdaşlar"
+msgstr "Staff"
+
+msgctxt "announcements.popup"
+msgid "%(day)s tarixinədək"
+msgstr "until %(day)s"
+
+msgctxt "announcements.popup"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "announcements.popup"
+msgid "Dərc"
+msgstr "Published"
+
+msgctxt "announcements.popup"
+msgid "Növbəti elan"
+msgstr "Next announcement"
+
+msgctxt "announcements.popup"
+msgid "Qüvvədədir"
+msgstr "Valid"
+
+msgctxt "announcements.popup"
+msgid "Son tarix"
+msgstr "Deadline"
+
+msgctxt "announcements.popup"
+msgid "Yeni elan"
+msgstr "New announcement"
+
+msgctxt "announcements.popup"
+msgid "Yeni elanlar"
+msgstr "New announcements"
+
+msgctxt "announcements.popup"
+msgid "Ətraflı bax"
+msgstr "View details"
+
+msgctxt "announcements.popup"
+msgid "Əvvəlki elan"
+msgstr "Previous announcement"
+
+msgctxt "organizations.permission.label"
+msgid "Elan yaratmaq və dərc etmək (öz əhatəsində)"
+msgstr "Create and publish announcements (within own scope)"
+
+msgctxt "profile.sidebar"
+msgid "Elanlar"
+msgstr "Announcements"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s elan"
+msgid_plural "%(n)s elan"
+msgstr[0] "%(n)s announcement"
+msgstr[1] "%(n)s announcements"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s gün qaldı"
+msgid_plural "%(n)s gün qaldı"
+msgstr[0] "%(n)s day left"
+msgstr[1] "%(n)s days left"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Applied"

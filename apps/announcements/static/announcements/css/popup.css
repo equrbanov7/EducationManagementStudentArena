@@ -1,0 +1,145 @@
+/* =========================================================================
+   Birdəfəlik elan popup-u — Bootstrap modalının üzərində yüngül tema.
+   Çiplərin stili `announcements.css`-dədir; popup hər səhifədə yükləndiyi üçün
+   burada yalnız lazım olan çip qaydaları təkrarlanır.
+   ========================================================================= */
+
+.ann-popup__content {
+    border: 0;
+    border-radius: var(--ems-r-2xl, 16px);
+    box-shadow: var(--ems-sh-dialog);
+    overflow: hidden;
+}
+
+.ann-popup__header {
+    align-items: flex-start;
+    gap: 12px;
+    border-bottom: 1px solid var(--ems-border);
+    background: linear-gradient(180deg, var(--ems-primary-50), var(--ems-bg));
+}
+
+.ann-popup__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--ems-primary);
+    color: var(--ems-neutral-0);
+    font-size: 18px;
+}
+
+.ann-popup__heading {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ann-popup__eyebrow {
+    margin: 0;
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-primary-700);
+}
+
+.ann-popup__counter {
+    margin: 2px 0 0;
+    font-size: var(--ems-fs-sm, 12px);
+    color: var(--ems-neutral-500);
+    font-variant-numeric: tabular-nums;
+}
+
+.ann-popup__body {
+    padding: var(--ems-sp-6, 16px) var(--ems-sp-7, 24px);
+}
+
+.ann-popup__item {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ann-popup__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.ann-popup__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl, 18px);
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ems-neutral-900);
+}
+
+.ann-popup__summary {
+    margin: 0;
+    font-size: var(--ems-fs-md, 14px);
+    line-height: 1.6;
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
+
+.ann-popup__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 4px 0 0;
+}
+
+.ann-popup__facts dt {
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-500);
+}
+
+.ann-popup__facts dd {
+    margin: 0;
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.ann-popup__fact--deadline dd { color: var(--ems-danger-700); }
+
+.ann-popup__footer {
+    gap: 8px;
+    border-top: 1px solid var(--ems-border);
+}
+
+.ann-popup__steps {
+    display: inline-flex;
+    gap: 6px;
+    margin-right: auto;
+}
+
+.ann-popup .ann-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs, 11px);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.ann-popup .ann-chip--new { border-color: var(--ems-primary); background: var(--ems-primary); color: var(--ems-neutral-0); }
+.ann-popup .ann-chip--critical,
+.ann-popup .ann-deadline--today { border-color: var(--ems-danger-bd); background: var(--ems-danger-bg); color: var(--ems-danger-700); }
+.ann-popup .ann-chip--high,
+.ann-popup .ann-deadline--soon { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+
+@media (max-width: 575px) {
+    .ann-popup__body { padding: var(--ems-sp-5, 14px); }
+    .ann-popup__footer > .btn { flex: 1 1 auto; }
+}

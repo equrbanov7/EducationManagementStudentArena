@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Auditoriya seçicisi: rol ailələri (tələbə / müəllim / əməkdaş) × bölmələr. Bölmə siyahısı
+menecerin ƏHATƏSİ ilə süzülüb (dekan yalnız öz fakültəsinin ağacını görür); server yenə yoxlayır.
+Seçilməyən bölmə = bütün təşkilat (yalnız təşkilat səviyyəli menecer üçün).{% endcomment %}
+<section class="annm-card" aria-labelledby="annm-audience-title" data-annm-audience>
+    <h2 class="annm-card__title" id="annm-audience-title">{% trans "Kimə göstərilsin" context "announcements.manage" %}</h2>
+    <fieldset class="annm-fieldset">
+        <legend class="ems-field__label">{% trans "Auditoriya" context "announcements.manage" %} <span class="ems-field__req">*</span></legend>
+        <div class="annm-families">
+            {% for value, label in families %}
+            <label class="annm-family"><input type="checkbox" name="audience_families" value="{{ value }}"{% if value in selected_families %} checked{% endif %}> <span>{{ label }}</span></label>
+            {% endfor %}
+        </div>
+    </fieldset>
+    <div class="ems-field">
+        <span class="ems-field__label" id="annm-units-label">{% trans "Bölmələr (fakültə, kafedra, ixtisas, qrup)" context "announcements.manage" %}</span>
+        <p class="ems-field__hint">
+            {% if is_org_wide %}{% trans "Heç nə seçilməsə — bütün təşkilat. Seçilmiş bölmə alt bölmələri ilə birlikdə hədəflənir (məs. fakültə → onun bütün qrupları)." context "announcements.manage" %}{% else %}{% trans "Ən azı bir bölmə seçin — yalnız öz əhatənizdəki bölmələr göstərilir." context "announcements.manage" %}{% endif %}
+        </p>
+        <div class="annm-picker">
+            <div class="annm-picker__bar">
+                <input type="search" class="ems-input annm-picker__search" data-annm-unit-search autocomplete="off"
+                       placeholder="{% trans 'Bölmə axtar…' context 'announcements.manage' %}" aria-label="{% trans 'Bölmə axtar' context 'announcements.manage' %}">
+                <span class="annm-picker__count" data-annm-unit-count aria-live="polite" data-label="{% trans 'Seçilib' context 'announcements.manage' %}"></span>
+            </div>
+            <ul class="annm-picker__list" role="list" aria-labelledby="annm-units-label">
+                {% for unit in unit_choices %}
+                <li class="annm-unit annm-unit--l{{ unit.level|default:0 }}" data-annm-unit data-label="{{ unit.label|lower }}">
+                    <label><input type="checkbox" name="audience_units" value="{{ unit.id }}"{% if unit.checked %} checked{% endif %}> <span class="annm-unit__name">{{ unit.label }}</span> <span class="annm-unit__type">{{ unit.type_label }}</span></label>
+                </li>
+                {% empty %}
+                <li class="annm-picker__empty">{% trans "Seçiləcək bölmə yoxdur." context "announcements.manage" %}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <label class="annm-switch annm-switch--popup">
+        <input type="checkbox" name="show_as_popup" value="1"{% if values.show_as_popup %} checked{% endif %}>
+        <span><strong>{% trans "Girişdə popup kimi göstər" context "announcements.manage" %}</strong> — {% trans "hər istifadəçiyə yalnız BİR dəfə; bağlayandan sonra bir daha çıxmır. İmtahan səhifələrində göstərilmir." context "announcements.manage" %}</span>
+    </label>
+</section>

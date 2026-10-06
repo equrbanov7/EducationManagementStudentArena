@@ -1,0 +1,21 @@
+{% extends "accounts/profile_embed_base.html" %}
+{% load i18n static %}
+{% comment %}Önizləmə — istifadəçinin görəcəyi detal kartı (qaralama da). Heç bir yazı getmir.{% endcomment %}
+
+{% block embed_title %}{% trans "Önizləmə" context "announcements.manage" %}{% endblock %}
+
+{% block embed_extra_css %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261006-2">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261006-1">
+{% endblock %}
+
+{% block embed_content %}
+<div class="ann">
+    <nav class="annm-crumbs">
+        <a href="{% url 'announcements:manage_edit' item.pk %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Redaktəyə qayıt" context "announcements.manage" %}</a>
+        <span class="ann-chip">{% trans "Önizləmə — istifadəçi belə görəcək" context "announcements.manage" %}</span>
+    </nav>
+    {% include "announcements/cabinet/_detail.html" with item=item preview=True %}
+</div>
+{% endblock %}

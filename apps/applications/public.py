@@ -161,6 +161,26 @@ def assignable_handlers(user, organization, application_id) -> list:
     return [person(candidate) for candidate in handler_recipients(application)]
 
 
+def submit_linked_application(*, organization, user, kind, subject, body, unit=None, request=None):
+    """Başqa modulun (Elanlar «Müraciət et») adından müraciət — adi göndərişlə EYNİ qapılar.
+
+    İcazə, ailə, növün ailəyə açıqlığı, mətn uzunluqları, ikiqat göndəriş, SLA və
+    bildirişlər ``submit_application``-dadır; ``unit`` verilərsə hədəf şöbə odur.
+    ``TransitionDenied`` / ``ValidationError`` çağırana ötürülür.
+    """
+    from .services.submit import submit_application
+
+    return submit_application(
+        organization=organization,
+        user=user,
+        kind=kind,
+        subject=subject,
+        body=body,
+        request=request,
+        unit_override=unit,
+    )
+
+
 def can_use_applications(user, organization) -> bool:
     """Menyu görünürlüyü: üç açardan HƏR HANSI BİRİ bölməni açır."""
     if organization is None:
@@ -193,4 +213,5 @@ __all__ = [
     "pending_badge_count",
     "row_payload",
     "seed_catalog",
+    "submit_linked_application",
 ]
