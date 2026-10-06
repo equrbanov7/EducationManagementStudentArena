@@ -400,8 +400,26 @@ class TestExportJobs:
             )
 
 
+def _age_job(job_id, seconds=5):
+    """Job-u ``seconds`` əvvəl yaranmış kimi göstər (pickup-pəncərəsi keçib)."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    TextExtractionJob.objects.filter(pk=job_id).update(created_at=timezone.now() - timedelta(seconds=seconds))
+
+
+def _status(client, job_id):
+    return client.get(reverse("exams:text_extraction_status", kwargs={"job_id": job_id}))
+
+
 class TestWorkerDeadFallback:
-    """Codex blocking fix: broker sağ, worker ölü → pickup-watchdog inline icra."""
+    """Codex blocking fix: broker sağ, worker ölü → job yenə də bitir.
+
+    Tutum 2026-10-06: qoruyucu START sorğusunda yatmır (əvvəl 3 s ``sleep`` dövrü);
+    start dərhal 202 / gözləmə səhifəsi qaytarır, pickup-pəncərəsi keçəndən sonra
+    gələn STATUS poll-u job-u bir dəfə inline icra edir.
+    """
 
     @pytest.fixture(autouse=True)
     def _fast_watchdog(self, settings):
@@ -416,14 +434,63 @@ class TestWorkerDeadFallback:
         monkeypatch.setattr(exams_tasks.run_ai_generation_job, "delay", lambda *a, **kw: None)
         monkeypatch.setattr(exams_tasks.run_export_job, "delay", lambda *a, **kw: None)
 
-    def test_extract_falls_back_to_sync(self, teacher_client, _dead_worker):
+    @pytest.fixture
+    def _no_sleep(self, monkeypatch):
+        import time
+
+        def forbidden(*_a, **_kw):
+            raise AssertionError("sorğu axınında time.sleep çağırıldı")
+
+        monkeypatch.setattr(time, "sleep", forbidden)
+
+    def test_start_returns_immediately_without_waiting(self, teacher_client, _dead_worker, _no_sleep):
         resp = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()})
-        assert resp.status_code == 200
+        assert resp.status_code == 202
         data = resp.json()
+        assert data["ok"] is True and data["status"] == TextExtractionJob.STATUS_PENDING
+        # Start inline icra ETMİR — job hələ də növbədədir.
+        assert TextExtractionJob.objects.get(pk=data["job_id"]).status == TextExtractionJob.STATUS_PENDING
+
+    def test_status_inside_pickup_window_returns_current_state(self, teacher_client, settings, _dead_worker, _no_sleep):
+        settings.JOB_WORKER_PICKUP_TIMEOUT = 60  # pəncərə hələ açıqdır
+        start = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()}).json()
+        resp = _status(teacher_client, start["job_id"])
+        assert resp.status_code == 200
+        assert resp.json()["status"] == TextExtractionJob.STATUS_PENDING
+        assert TextExtractionJob.objects.get(pk=start["job_id"]).status == TextExtractionJob.STATUS_PENDING
+
+    def test_status_takes_over_stalled_extract(self, teacher_client, _dead_worker, _no_sleep):
+        start = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()}).json()
+        _age_job(start["job_id"])
+        data = _status(teacher_client, start["job_id"]).json()
         assert data["status"] == TextExtractionJob.STATUS_SUCCESS
         assert "Sual metni" in data["text"]
+        # Sonrakı poll-lar yenidən icra etmir — terminal vəziyyət dərhal qayıdır.
+        again = _status(teacher_client, start["job_id"]).json()
+        assert again["status"] == TextExtractionJob.STATUS_SUCCESS
 
-    def test_ai_falls_back_to_classic_response(self, teacher_client, teacher, org, _dead_worker, monkeypatch):
+    def test_watchdog_disabled_never_runs_inline(self, teacher_client, settings, _dead_worker):
+        settings.JOB_WORKER_PICKUP_TIMEOUT = 0
+        start = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()}).json()
+        _age_job(start["job_id"], seconds=3600)
+        assert _status(teacher_client, start["job_id"]).json()["status"] == TextExtractionJob.STATUS_PENDING
+
+    def test_processing_job_is_not_taken_over(self, teacher_client, teacher, org, monkeypatch):
+        """Worker götürüb (PROCESSING) — status poll heç nə icra etmir, dərhal qayıdır."""
+        from apps.exams import tasks as exams_tasks
+
+        job = TextExtractionJob.objects.create(
+            organization=org, user=teacher, status=TextExtractionJob.STATUS_PROCESSING
+        )
+        _age_job(job.pk, seconds=3600)
+
+        def boom(*_a, **_kw):
+            raise AssertionError("PROCESSING job inline icra olundu")
+
+        monkeypatch.setattr(exams_tasks, "run_text_extraction_job", boom)
+        assert _status(teacher_client, job.pk).json()["status"] == TextExtractionJob.STATUS_PROCESSING
+
+    def test_ai_job_completes_through_status_poll(self, teacher_client, teacher, org, _dead_worker, monkeypatch):
         from apps.exams.models import Exam
         from apps.exams.views.teacher import question_bank as qb_facade
 
@@ -438,19 +505,28 @@ class TestWorkerDeadFallback:
             {"prompt": "x", "question_count": "1", "difficulty": "easy"},
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
-        # Codex-in tələb etdiyi davranış: 202 YOX, klassik sinxron cavab
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["ok"] is True and data["text"] == "1. S" and data["remaining"] == 9
+        # aiQuestionBank.js 202 + job_id-ni poll edir (P4) — start artıq yatmır.
+        assert resp.status_code == 202
+        job_id = resp.json()["job_id"]
+        _age_job(job_id)
+        data = _status(teacher_client, job_id).json()
+        assert data["status"] == TextExtractionJob.STATUS_SUCCESS
+        assert data["text"] == "1. S" and data["meta"]["remaining"] == 9
 
-    def test_export_falls_back_to_attachment(self, teacher_client, teacher, org, _dead_worker, settings):
+    def test_export_completes_through_waiting_page(self, teacher_client, teacher, org, _dead_worker, settings):
         from apps.exams.models import Exam
 
         settings.EXPORT_SYNC_MAX_ROWS = -1
         exam = Exam.objects.create(title="Dead Worker Export", exam_type="test", author=teacher, organization=org)
         resp = teacher_client.get(reverse("exams:export_exam_results_xlsx", args=[exam.slug]))
-        assert resp.status_code == 200
-        assert "attachment" in resp["Content-Disposition"]
+        assert resp.status_code == 302  # gözləmə səhifəsi — start yatmır
+        job = TextExtractionJob.objects.get(kind=TextExtractionJob.KIND_EXPORT)
+        assert reverse("exams:export_job_waiting", kwargs={"job_id": job.pk}) in resp["Location"]
+        _age_job(job.pk)
+        assert _status(teacher_client, job.pk).json()["status"] == TextExtractionJob.STATUS_SUCCESS
+        download = teacher_client.get(reverse("exams:export_job_download", kwargs={"job_id": job.pk}))
+        assert download.status_code == 200
+        assert "attachment" in download["Content-Disposition"]
 
 
 class TestCasClaim:

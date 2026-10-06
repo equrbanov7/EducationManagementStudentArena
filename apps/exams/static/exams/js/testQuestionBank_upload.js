@@ -61,7 +61,14 @@ document.addEventListener("DOMContentLoaded", function () {
       return m ? decodeURIComponent(m[1]) : "";
     }
 
-    function pollExtractJob(statusUrl, attempt) {
+    // Tutum 2026-10-06: start/status DƏRHAL cavab verir (server yatmır) — poll
+    // geri çəkilmə ilə: 1 s → ×1.5 → 5 s tavan, ümumi büdcə ~10 dəq.
+    const POLL_START_MS = 1000;
+    const POLL_MAX_MS = 5000;
+    const POLL_BUDGET_MS = 10 * 60 * 1000;
+
+    function pollExtractJob(statusUrl, attempt, startedAt) {
+      startedAt = startedAt || Date.now();
       return fetch(statusUrl, {
         headers: { "X-Requested-With": "XMLHttpRequest" },
         credentials: "same-origin"
@@ -70,9 +77,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (json) {
           if (json.status === "success") return json;
           if (json.status === "failed") throw new Error(json.error || gettext("Fayldan mətn çıxarıla bilmədi."));
-          if (attempt >= 240) throw new Error(gettext("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."));
-          return new Promise(function (res) { setTimeout(res, 2500); }).then(function () {
-            return pollExtractJob(statusUrl, attempt + 1);
+          if (Date.now() - startedAt >= POLL_BUDGET_MS) throw new Error(gettext("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin."));
+          const delay = Math.min(POLL_MAX_MS, Math.round(POLL_START_MS * Math.pow(1.5, attempt)));
+          return new Promise(function (res) { setTimeout(res, delay); }).then(function () {
+            return pollExtractJob(statusUrl, attempt + 1, startedAt);
           });
         });
     }
