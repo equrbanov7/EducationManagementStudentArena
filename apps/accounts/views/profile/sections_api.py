@@ -46,8 +46,7 @@ from .._helpers import _get_active_organization, _load_user_profile, _role_capab
 
 logger = logging.getLogger(__name__)
 
-#: Qabıq dəyərləri (badge, bildiriş, forma …) tənbəldir — bax ``context_builder/_lazy.py``.
-LEAN_FRAGMENT_CONTEXT = True  # False → köhnə tam context (xarakterizasiya testi)
+LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/_lazy.py``); False → tam context (test)
 
 
 # --------------------------------------------------------------------------- #
@@ -595,9 +594,4 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"ok": True, "badges": payload})
 
 
-__all__ = [
-    "SECTION_PARTIALS",
-    "AJAX_SAFE_SECTIONS",
-    "profile_section_fragment",
-    "profile_badges_api",
-]
+__all__ = ["SECTION_PARTIALS", "AJAX_SAFE_SECTIONS", "profile_section_fragment", "profile_badges_api"]
