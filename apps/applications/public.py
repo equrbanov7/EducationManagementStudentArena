@@ -122,9 +122,11 @@ def pending_badge_count(user, organization) -> int:
     """
     if organization is None:
         return 0
+    # Tutum 2026-10-07: tam KPI dəsti (göndərən: 3 DISTINCT say + həll müddətləri
+    # sətirləri; emalçı: 4 say) əvəzinə yalnız lazım olan TƏK aqreqat sorğu — rəqəm eynidir.
     if access.is_handler_anywhere(user, organization):
-        return int(queries.handler_kpis(organization=organization, user=user).get("inbox_open", 0))
-    return int(queries.sender_kpis(organization=organization, user=user).get("waiting_info", 0))
+        return int(queries.handler_inbox_counts(organization=organization, user=user)["inbox_open"])
+    return int(queries.sender_counts(organization=organization, user=user)["waiting_info"])
 
 
 def handled_unit_names(user, organization) -> list:

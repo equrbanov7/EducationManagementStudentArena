@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.utils import timezone
 
 from core.search_text import tolerant_q
@@ -88,33 +88,73 @@ def list_applications(
     return queryset.distinct()
 
 
+_RESOLVED_STATUSES = (ApplicationStatus.RESOLVED, ApplicationStatus.CLOSED)
+
+
 def _count(queryset) -> int:
-    return queryset.distinct().count()
+    """Çox-qiymətli JOIN-li (``watches``) filtr üçün say — DISTINCT YALNIZ pk üzrə.
+
+    Tutum 2026-10-07: əvvəl ``queryset.distinct().count()`` bütün ~20 sütun üzrə
+    ``SELECT DISTINCT`` alt-sorğusu verirdi; pk unikal olduğu üçün say eynidir.
+    """
+    return queryset.values("pk").distinct().count()
+
+
+def _aggregate_counts(queryset, **filters) -> dict:
+    """Bir neçə şərtli sayı TƏK sorğuda — yalnız sətir TƏKRARLAMAYAN filtrlər üçün."""
+    totals = queryset.aggregate(**{key: Count("pk", filter=condition) for key, condition in filters.items()})
+    return {key: int(totals.get(key) or 0) for key in filters}
+
+
+def sender_counts(*, organization, user) -> dict:
+    """Göndərənin sayğacları — TƏK aqreqat sorğu (əvvəl 3 ayrı ``COUNT(DISTINCT …)``).
+
+    ``created_by`` sətir təkrarlamır (çox-qiymətli JOIN yoxdur) → ``DISTINCT``-siz
+    say əvvəlki ilə eynidir.
+    """
+    return _aggregate_counts(
+        Application.objects.filter(organization=organization, created_by=user),
+        open=Q(status__in=OPEN_STATUSES),
+        waiting_info=Q(status=ApplicationStatus.WAITING_INFO),
+        resolved=Q(status__in=_RESOLVED_STATUSES),
+    )
 
 
 def sender_kpis(*, organization, user) -> dict:
-    mine = base_queryset(organization).filter(created_by=user)
-    resolved = mine.filter(status__in=[ApplicationStatus.RESOLVED, ApplicationStatus.CLOSED])
+    resolved = base_queryset(organization).filter(created_by=user, status__in=_RESOLVED_STATUSES)
     durations = [
         working_days_between(app.submitted_at.date(), app.resolved_at.date())
         for app in resolved.exclude(resolved_at__isnull=True)
     ]
     average = round(sum(durations) / len(durations), 1) if durations else 0.0
+    counts = sender_counts(organization=organization, user=user)
     return {
-        "open": _count(mine.filter(status__in=OPEN_STATUSES)),
-        "waiting_info": _count(mine.filter(status=ApplicationStatus.WAITING_INFO)),
-        "resolved": _count(resolved),
+        "open": counts["open"],
+        "waiting_info": counts["waiting_info"],
+        "resolved": counts["resolved"],
         "avg_response_days": average,
     }
 
 
+def handler_inbox_counts(*, organization, user) -> dict:
+    """Emalçının «Gələnlər» sayğacları — TƏK aqreqat sorğu.
+
+    ``inbox_q`` yalnız tək-qiymətli FK-lardan (``current_unit``,
+    ``current_scope_unit``) ibarətdir — sətir təkrarlanmır, ``DISTINCT`` lazım deyil.
+    """
+    open_q = Q(status__in=OPEN_STATUSES)
+    return _aggregate_counts(
+        Application.objects.filter(organization=organization).filter(access.inbox_q(user, organization)),
+        inbox_open=open_q,
+        new_unseen=Q(status=ApplicationStatus.SUBMITTED),
+        overdue=open_q & Q(sla_due_on__lt=timezone.localdate()),
+    )
+
+
 def handler_kpis(*, organization, user) -> dict:
-    inbox = base_queryset(organization).filter(access.inbox_q(user, organization))
     watching = base_queryset(organization).filter(access.watching_q(user, organization))
     return {
-        "inbox_open": _count(inbox.filter(status__in=OPEN_STATUSES)),
-        "new_unseen": _count(inbox.filter(status=ApplicationStatus.SUBMITTED)),
-        "overdue": _count(inbox.filter(status__in=OPEN_STATUSES, sla_due_on__lt=timezone.localdate())),
+        **handler_inbox_counts(organization=organization, user=user),
         "watching": _count(watching.filter(status__in=OPEN_STATUSES)),
     }
 
@@ -134,9 +174,11 @@ __all__ = [
     "TABS",
     "base_queryset",
     "date_q",
+    "handler_inbox_counts",
     "handler_kpis",
     "list_applications",
     "search_q",
+    "sender_counts",
     "sender_kpis",
     "tab_counts",
 ]
