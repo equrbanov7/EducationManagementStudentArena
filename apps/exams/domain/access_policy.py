@@ -154,11 +154,52 @@ class ExamAccessPolicyMixin:
                 changed = True
         return changed
 
-    def _user_has_active_attempt(self, user: User) -> bool:
-        self._expire_stale_attempts_for(user)
-        return self.attempts.filter(user=user, status__in=["draft", "in_progress"]).exists()
+    @staticmethod
+    def _expire_and_any_still_open(open_attempts) -> bool:
+        # Perf 2026-10-06: köhnəlmiş cəhdləri bağlayan döngü elə bütün açıq
+        # cəhdləri oxuyur — bağlanmayanlar aktiv qalanlardır; ayrıca `EXISTS` yox.
+        still_active = False
+        for attempt in open_attempts:
+            if not attempt.expire_if_time_limit_reached():
+                still_active = True
+        return still_active
 
-    def _concurrent_or_same_day_block(self, user: User) -> tuple[bool, str | None]:
+    def _user_has_active_attempt(self, user: User) -> bool:
+        return self._expire_and_any_still_open(
+            self.attempts.filter(user=user, status__in=["draft", "in_progress"]).order_by("-started_at")
+        )
+
+    def _open_attempts_split(self, user: User):
+        """İstifadəçinin açıq cəhdləri TƏK sorğuda: ``(bu imtahanın, digər imtahanların rəsmi cəhdləri)``.
+
+        Perf 2026-10-06: `can_user_start` bunları əvvəl iki sorğu ilə oxuyurdu —
+        `_user_has_active_attempt`-in `self.attempts…`-i və `_concurrent_or_same_day_block`-un
+        `exclude(exam=self)`-i. Sıra (`-started_at`) və süzgəclər (digərlərində
+        `is_trial=False`) eynidir; bu imtahanın cəhdlərinə `exam` olaraq `self`
+        qoyulur (related manager-in etdiyi kimi).
+        """
+        from apps.exams.models import ExamAttempt
+
+        own, others = [], []
+        open_attempts = (
+            ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"))
+            .select_related("exam")
+            .order_by("-started_at")
+        )
+        for attempt in open_attempts:
+            if attempt.exam_id == self.pk:
+                attempt.exam = self
+                own.append(attempt)
+            elif not attempt.is_trial:
+                others.append(attempt)
+        return own, others
+
+    def _is_author(self, user: User) -> bool:
+        """``user == self.author`` — müəllif obyektini yükləmədən (pk müqayisəsi)."""
+        user_pk = getattr(user, "pk", None)
+        return user_pk is not None and user_pk == self.author_id
+
+    def _concurrent_or_same_day_block(self, user: User, *, other_active=None) -> tuple[bool, str | None]:
         """2026-07 imtahan-cədvəli qaydaları (yalnız YENİ cəhd üçün):
 
         1. **Eyni vaxtda bir imtahan** — tələbənin BAŞQA imtahanda aktiv (draft/
@@ -169,7 +210,8 @@ class ExamAccessPolicyMixin:
            İSTİSNA: imtahan mərkəzi bu imtahan üçün retake (əlavə cəhd) veribsə
            (``StudentExamAttemptGrant``), gün qaydası tətbiq olunmur.
 
-        Qaytarır: ``(bloklandı, lokalizə-səbəb)``.
+        Qaytarır: ``(bloklandı, lokalizə-səbəb)``. ``other_active`` — çağıran
+        digər imtahanların açıq rəsmi cəhdlərini artıq oxuyubsa (``_open_attempts_split``).
         """
         from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
         from apps.exams.models import ExamAttempt
@@ -179,11 +221,12 @@ class ExamAccessPolicyMixin:
         # növbəti imtahandan ƏBƏDİ bloklamamalıdır. Yalnız HƏQİQƏTƏN aktiv qalan
         # (deadline-ı keçməmiş) cəhd blok yaradır — bu, `_expire_stale_attempts_for`
         # məntiqinin digər imtahanlara genişləndirilməsidir.
-        other_active = (
-            ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False)
-            .exclude(exam_id=self.pk)
-            .select_related("exam")
-        )
+        if other_active is None:
+            other_active = (
+                ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False)
+                .exclude(exam_id=self.pk)
+                .select_related("exam")
+            )
         for attempt in other_active:
             if not attempt.expire_if_time_limit_reached():
                 return True, pgettext("exams.model.access", "other_exam_in_progress")
@@ -281,17 +324,20 @@ class ExamAccessPolicyMixin:
         # EXAM-P1-03: exclusion public imtahanlara da şamildir və aktiv cəhdin
         # davam etdirilməsindən əvvəl yoxlanır — istisna edilən tələbə davam
         # edə bilməz.
-        if user != self.author and self._user_is_excluded(user):
+        # Perf 2026-10-06: müəllif yoxlaması pk ilə (`self.author` ayrıca sorğu idi).
+        is_author = self._is_author(user)
+        if not is_author and self._user_is_excluded(user):
             return False, pgettext("exams.model.access", "no_exam_access")
 
-        if self._user_has_active_attempt(user):
+        own_open, other_open = self._open_attempts_split(user)
+        if self._expire_and_any_still_open(own_open):
             return True, None
 
         # YENİ cəhd (bu imtahanın aktiv cəhdi yoxdur). 2026-07 qaydaları:
         # (müəllif özü / sınaq bu qaydalardan azaddır — o, aşağıda user==author
         #  yolu ilə keçir; burada yalnız tələbələr yoxlanır.)
-        if user != self.author:
-            blocked, block_reason = self._concurrent_or_same_day_block(user)
+        if not is_author:
+            blocked, block_reason = self._concurrent_or_same_day_block(user, other_active=other_open)
             if blocked:
                 return False, block_reason
 
@@ -304,11 +350,13 @@ class ExamAccessPolicyMixin:
         if parity_error:
             return False, parity_error
 
-        left = self.attempts_left_for(user)
+        # Yuxarıdakı döngü bu imtahanın köhnəlmiş cəhdlərini artıq bağlayıb
+        # və açıq cəhd qalmayıb — limit hesabı həmin döngünü təkrarlamır.
+        left = self.attempts_left_for(user, stale_attempts_expired=True)
         if left is not None and left <= 0:
             return False, pgettext("exams.model.access", "attempt_limit_reached")
 
-        if user == self.author:
+        if is_author:
             return True, None
 
         in_allowed_any = (

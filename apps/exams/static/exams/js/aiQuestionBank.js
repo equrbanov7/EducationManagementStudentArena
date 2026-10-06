@@ -131,10 +131,18 @@
     // P3 (2026-07-02): fayl varsa AI sorğusundan ƏVVƏL mətn worker-də çıxarılır
     // (start + status-poll). OCR-lı PDF-lər sinxron sorğunu dəqiqələrlə tuturdu.
     // Endpoint yoxdursa/404-dürsə köhnə davranışa (faylı birbaşa göndər) qayıdır.
-    var EXTRACT_POLL_MS = 2500;
-    var EXTRACT_POLL_MAX = 240; // ~10 dəq
+    // Tutum 2026-10-06: start və status endpointləri DƏRHAL cavab verir (server
+    // yatmır) — poll geri çəkilmə ilə: 1 s → ×1.5 → 5 s tavan, büdcə ~10 dəq.
+    var EXTRACT_POLL_START_MS = 1000;
+    var EXTRACT_POLL_MAX_MS = 5000;
+    var EXTRACT_POLL_BUDGET_MS = 10 * 60 * 1000;
 
-    function pollJob(statusUrl, attempt, failFallback) {
+    function pollDelay(attempt) {
+        return Math.min(EXTRACT_POLL_MAX_MS, Math.round(EXTRACT_POLL_START_MS * Math.pow(1.5, attempt)));
+    }
+
+    function pollJob(statusUrl, attempt, failFallback, startedAt) {
+        startedAt = startedAt || Date.now();
         return fetch(statusUrl, {
             headers: { "X-Requested-With": "XMLHttpRequest" },
             credentials: "same-origin"
@@ -146,13 +154,13 @@
                     var meta = json.meta || {};
                     throw new Error(json.error || meta.error || failFallback);
                 }
-                if (attempt >= EXTRACT_POLL_MAX) {
+                if (Date.now() - startedAt >= EXTRACT_POLL_BUDGET_MS) {
                     throw new Error(t("extractTimeout", gettext("Mətn çıxarma çox uzun çəkdi. Yenidən cəhd edin.")));
                 }
                 return new Promise(function (resolve) {
-                    setTimeout(resolve, EXTRACT_POLL_MS);
+                    setTimeout(resolve, pollDelay(attempt));
                 }).then(function () {
-                    return pollJob(statusUrl, attempt + 1, failFallback);
+                    return pollJob(statusUrl, attempt + 1, failFallback, startedAt);
                 });
             });
     }

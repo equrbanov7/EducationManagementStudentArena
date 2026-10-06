@@ -384,17 +384,19 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
 
             schedule_journal_sync(self)
 
-    def recalculate_score(self):
+    def recalculate_score(self, *, answers=None, save=True):
+        # Perf 2026-10-06: `answers` — yüklənmiş TAM cavab dəsti; `save=False` → çağıranın save-inə qatılır.
         if getattr(self.exam, "exam_type", None) == "test":
             from apps.exams.services.result_calculation import sync_test_attempt_counts
 
-            sync_test_attempt_counts(self)
+            sync_test_attempt_counts(self, answers=answers, save=save)
             return
 
         qs = self.answers.all()
         self.correct_count = qs.filter(is_correct=True).count()
         self.wrong_count = qs.filter(is_correct=False).count()
-        self.save(update_fields=["correct_count", "wrong_count"])
+        if save:
+            self.save(update_fields=["correct_count", "wrong_count"])
 
 
 class ExamAnswer(AnswerGradingMixin, models.Model):

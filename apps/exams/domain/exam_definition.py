@@ -345,11 +345,18 @@ class Exam(ExamAccessPolicyMixin, models.Model):
             return EXAM_STATUS_SCHEDULED
         return EXAM_STATUS_ACTIVE
 
-    def attempts_left_for(self, user: User) -> int | None:
+    def attempts_left_for(self, user: User, *, stale_attempts_expired: bool = False) -> int | None:
+        """Qalan cəhd sayı (None = limitsiz).
+
+        ``stale_attempts_expired=True`` — çağıran bu istifadəçinin bu imtahandakı
+        açıq cəhdlərini ELƏ İNDİ köhnəlmə üçün yoxlayıb (və açıq cəhd qalmayıb);
+        eyni döngü təkrar işlədilmir (perf 2026-10-06).
+        """
         if not self.max_attempts_per_user:
             return None
 
-        self._expire_stale_attempts_for(user)
+        if not stale_attempts_expired:
+            self._expire_stale_attempts_for(user)
         used = self.attempts.filter(user=user, status__in=ATTEMPT_FINISHED_STATUSES).exclude(is_trial=True).count()
         # Müəllim konkret tələbəyə əlavə cəhd(lər) verə bilər — qlobal limiti
         # dəyişmədən yalnız bu tələbənin limitini artırır.

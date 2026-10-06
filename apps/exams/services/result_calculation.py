@@ -140,11 +140,12 @@ def calculate_test_attempt_result(attempt, *, answers=None):
     )
 
 
-def sync_test_attempt_counts(attempt, *, answers=None):
+def sync_test_attempt_counts(attempt, *, answers=None, save=True):
     result = calculate_test_attempt_result(attempt, answers=answers)
     attempt.correct_count = result.correct_count
     attempt.wrong_count = result.wrong_count
-    attempt.save(update_fields=["correct_count", "wrong_count"])
+    if save:
+        attempt.save(update_fields=["correct_count", "wrong_count"])
     return result
 
 

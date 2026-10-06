@@ -20,7 +20,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import F
 from django.utils import timezone
-from django.utils.crypto import salted_hmac
+from django.utils.crypto import constant_time_compare, salted_hmac
 
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -48,25 +48,78 @@ _verified_pins: "OrderedDict[tuple[str, str], float]" = OrderedDict()
 _verified_pins_lock = threading.Lock()
 
 
+def _memo_key(raw_pin: str, encoded: str) -> tuple[str, str]:
+    return (encoded, salted_hmac("exams.pin-verify-memo", raw_pin or "").hexdigest())
+
+
+def remember_verified_pin(raw_pin: str, encoded: str) -> None:
+    """``encoded`` məhz ``raw_pin``-dən yaradılıbsa (və ya yoxlanıbsa) memo-ya yaz."""
+    if not encoded:
+        return
+    key = _memo_key(raw_pin, encoded)
+    with _verified_pins_lock:
+        _verified_pins[key] = time.monotonic() + _VERIFIED_PIN_TTL
+        _verified_pins.move_to_end(key)
+        while len(_verified_pins) > _VERIFIED_PIN_MAX:
+            _verified_pins.popitem(last=False)
+
+
 def check_pin_hash(raw_pin: str, encoded: str) -> bool:
     """``check_password`` ilə eyni nəticə; təkrar uğurlu yoxlama hash-siz."""
     raw_pin = raw_pin or ""
     if not encoded:
         return check_password(raw_pin, encoded)
-    key = (encoded, salted_hmac("exams.pin-verify-memo", raw_pin).hexdigest())
-    now = time.monotonic()
+    key = _memo_key(raw_pin, encoded)
     with _verified_pins_lock:
         expires = _verified_pins.get(key)
-        if expires is not None and expires > now:
+        if expires is not None and expires > time.monotonic():
             return True
     matched = check_password(raw_pin, encoded)
     if matched:
-        with _verified_pins_lock:
-            _verified_pins[key] = now + _VERIFIED_PIN_TTL
-            _verified_pins.move_to_end(key)
-            while len(_verified_pins) > _VERIFIED_PIN_MAX:
-                _verified_pins.popitem(last=False)
+        remember_verified_pin(raw_pin, encoded)
     return matched
+
+
+def pin_cipher_matches(cipher: str, raw_pin: str) -> bool | None:
+    """Şifrəli nüsxə (Fernet) yazılan PIN-ə uyğundurmu — hash-SİZ, sabit-vaxt müqayisə.
+
+    Tutum testi 2026-10-06: giriş hər namizəd PIN üçün tam PBKDF2 yandırırdı. Şifrəli
+    nüsxə PIN-in özüdür (``SECRET_KEY``-dən törəyən açarla), ona görə o, yalnız HANSI
+    sətrin hash-lə yoxlanacağını SEÇMƏK üçün istifadə olunur — hakim yenə hash-dir.
+    ``None`` = şifrə yoxdur/oxunmur (silinib, açar dəyişib) → çağıran hash-ə keçir.
+    """
+    if not cipher:
+        return None
+    try:
+        plain = _fernet().decrypt(cipher.encode()).decode()
+    except (InvalidToken, ValueError):
+        return None
+    return constant_time_compare(plain, raw_pin or "")
+
+
+class PinHashBudget:
+    """Bir giriş sorğusunun tam PIN-hash sayğacı (tutum testi 2026-10-06).
+
+    Final girişi iki yolu ardıcıl yoxlayır (bilet PIN-i → fərdi PIN). Hər yol öz
+    uğursuzluğunda dummy hash etsə, bir sorğu 2+ PBKDF2 yandırır və vaxt fərqi
+    «bu istifadəçinin PIN-i var» məlumatını sızdırırdı. Çağıran BİR büdcəni hər
+    iki yola ötürür: real yoxlamalar ``charge`` edir, uğursuz sonluqda ``equalize``
+    yalnız heç bir hash olmayıbsa BİR dummy hash işlədir — nəticədə hər sonluq ≈1 hash.
+    """
+
+    __slots__ = ("spent",)
+
+    def __init__(self):
+        self.spent = 0
+
+    def charge(self, count: int = 1) -> None:
+        self.spent += count
+
+    def equalize(self, raw_pin: str) -> None:
+        if self.spent:
+            return
+        equalize_verification_timing(raw_pin)
+        self.spent += 1
 
 
 def _pin_length() -> int:
@@ -181,7 +234,6 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
     keçərsiz PIN-li biletdə də hash yoxlaması aparılır ki, cavab vaxtı
     fərqlənməsin.
     """
-    now = timezone.now()
     usable = ticket.has_valid_pin and not ticket.is_pin_locked
     matched = check_pin_hash(raw_pin, ticket.pin_hash or _DUMMY_HASH)
 
@@ -192,6 +244,18 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
             ticket.save(update_fields=["pin_failed_attempts", "pin_locked_until", "updated_at"])
         return True
 
+    register_ticket_pin_failure(ticket)
+    return False
+
+
+def register_ticket_pin_failure(ticket) -> None:
+    """Uğursuz bilet-PIN cəhdini say və həddə çatanda müvəqqəti kilidi qur (hash-siz).
+
+    ``verify_ticket_pin``-in uğursuz qolu; şifrəli nüsxə uyğunsuzluğu artıq bəlli
+    olan (və ya kilidli) namizəd üçün giriş bunu birbaşa çağırır — lockout
+    semantikası eynidir, yalnız boşuna PBKDF2 yandırılmır.
+    """
+    now = timezone.now()
     # 2026-10-03: «Sistem tənzimləmələri» (RİM rəhbəri) dəyəri varsa o, yoxdursa mühitin ayarı.
     from core import runtime_settings
 
@@ -211,7 +275,6 @@ def verify_ticket_pin(ticket, raw_pin: str) -> bool:
         locked_until = now + timedelta(minutes=lock_minutes)
         type(ticket).objects.filter(pk=ticket.pk, pin_locked_until__isnull=True).update(pin_locked_until=locked_until)
         ticket.pin_locked_until = locked_until
-    return False
 
 
 def equalize_verification_timing(raw_pin: str) -> None:
@@ -220,10 +283,14 @@ def equalize_verification_timing(raw_pin: str) -> None:
 
 
 __all__ = [
+    "PinHashBudget",
     "check_pin_hash",
     "decrypt_ticket_pin",
     "equalize_verification_timing",
     "generate_pin_value",
+    "pin_cipher_matches",
+    "register_ticket_pin_failure",
+    "remember_verified_pin",
     "revoke_ticket_pin",
     "set_ticket_pin",
     "student_visible_pin",

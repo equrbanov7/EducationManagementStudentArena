@@ -378,13 +378,19 @@ def _build_exam_result_url(exam, attempt, return_to):
     )
 
 
-def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
+def get_attempt_limit_result_redirect_url(request, exam: Exam, user, *, active_attempt_checked: bool = False):
+    """Limit dolubsa son nəticənin URL-i, yoxsa "".
+
+    ``active_attempt_checked=True`` — çağıran start kilidi altında
+    ``get_active_attempt_for_user``-i ELƏ İNDİ çağırıb və aktiv cəhd tapmayıb
+    (köhnəlmişlər bağlanıb); eyni oxuma burada təkrarlanmır (perf 2026-10-06).
+    """
     if not exam.max_attempts_per_user or not exam.is_active or exam.is_before_start() or exam.is_after_end():
         return ""
 
     return_to = current_return_to(request)
 
-    if get_active_attempt_for_user(exam, user):
+    if not active_attempt_checked and get_active_attempt_for_user(exam, user):
         return ""
 
     # Qrant-şüurlu limit yoxlaması: müəllimin verdiyi əlavə cəhd(lər) qlobal
@@ -393,7 +399,7 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
     # helper yalnız finished-count >= max_attempts yoxlayırdı və qrantı gözardı
     # edib "ikinci şans" verilmiş tələbəni geri atırdı (can_user_start icazə
     # versə belə).
-    attempts_left = exam.attempts_left_for(user)
+    attempts_left = exam.attempts_left_for(user, stale_attempts_expired=active_attempt_checked)
     if attempts_left is None or attempts_left > 0:
         return ""
 
@@ -402,6 +408,28 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user):
         return ""
 
     return _build_exam_result_url(exam, last_attempt, return_to)
+
+
+def _new_attempt_language(request, exam: Exam, *, return_to):
+    """Çoxdilli imtahan: YENİ attempt üçün dil seçimi — ``(dil, yönləndirmə | None)``.
+
+    Mövcud aktiv attempt varsa, dil onsuz da seçilib — çağıran bunu resume zamanı
+    çağırmır. Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
+    gəlməyibsə, attempt yaratmadan siyahıya qaytarılır (modal seçim göndərməlidir).
+    """
+    language_options = available_language_options(exam)
+    if len(language_options) == 1:
+        return language_options[0]["language"], None
+    if len(language_options) > 1:
+        chosen_language = resolve_requested_language(exam, request.GET.get("language") or request.POST.get("language"))
+        if chosen_language is None:
+            messages.warning(
+                request,
+                pgettext("exams.service.attempt.message", "language_required_for_multilingual_exam"),
+            )
+            return None, redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
+        return chosen_language, None
+    return None, None
 
 
 def _start_or_resume_attempt(request, exam: Exam):
@@ -415,25 +443,12 @@ def _start_or_resume_attempt(request, exam: Exam):
     # yalnız imtahan müəllifinə açıqdır və nəticələrə sayılmır (is_trial).
     is_trial = (request.GET.get("trial") == "1" or request.POST.get("trial") == "1") and user == exam.author
 
-    # ── Çoxdilli imtahan: yeni attempt üçün dil seçimi ──────────────────────
-    # Mövcud aktiv attempt varsa, dil onsuz da seçilib — resume zamanı sormuruq.
-    # Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
-    # gəlməyibsə, attempt yaratmadan siyahıya qaytarılır (modal seçim göndərməlidir).
+    # Perf 2026-10-06: aktiv cəhd yalnız start kilidi altında oxunur və dil
+    # seçimi (yalnız YENİ cəhd üçün) də orada həll olunur — əvvəl kilidsiz
+    # `get_active_attempt_for_user` + kilid altında eyni sorğu idi. Kilid alınmasa
+    # (busy) dil köhnə qayda ilə həll olunub retry URL-ə qoyulur (aşağıda).
     chosen_language = None
-    if get_active_attempt_for_user(exam, user) is None:
-        language_options = available_language_options(exam)
-        if len(language_options) == 1:
-            chosen_language = language_options[0]["language"]
-        elif len(language_options) > 1:
-            chosen_language = resolve_requested_language(
-                exam, request.GET.get("language") or request.POST.get("language")
-            )
-            if chosen_language is None:
-                messages.warning(
-                    request,
-                    pgettext("exams.service.attempt.message", "language_required_for_multilingual_exam"),
-                )
-                return redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
+    language_resolved = False
 
     try:
         with _exam_start_actor_lock(exam.id, user.id), _exam_start_capacity_gate(exam.id):
@@ -452,11 +467,18 @@ def _start_or_resume_attempt(request, exam: Exam):
                     )
                 )
 
-            # Mesaj üçün effektiv limit (qlobal + qrant) — bounce yalnız effektiv
-            # limit dolduqda baş verir, ona görə tələbəyə real haqqını göstərək.
-            max_attempts = get_effective_max_attempts(exam, user) or exam.max_attempts_per_user
-            attempt_limit_result_url = get_attempt_limit_result_redirect_url(request, exam, user)
+            chosen_language, language_redirect = _new_attempt_language(request, exam, return_to=return_to)
+            language_resolved = True
+            if language_redirect is not None:
+                return language_redirect
+
+            attempt_limit_result_url = get_attempt_limit_result_redirect_url(
+                request, exam, user, active_attempt_checked=True
+            )
             if attempt_limit_result_url:
+                # Mesaj üçün effektiv limit (qlobal + qrant) — bounce yalnız effektiv
+                # limit dolduqda baş verir, ona görə tələbəyə real haqqını göstərək.
+                max_attempts = get_effective_max_attempts(exam, user) or exam.max_attempts_per_user
                 messages.info(
                     request,
                     pgettext("exams.service.attempt.message", "max_attempts_reached").format(max_attempts=max_attempts),
@@ -483,6 +505,12 @@ def _start_or_resume_attempt(request, exam: Exam):
             generate_random_questions_for_attempt(attempt)
             record_attempt_started(exam.exam_type)
     except ExamStartBusy:
+        # Kilid alınmadı — dil seçimi köhnə ardıcıllıqla (yalnız yeni cəhd üçün)
+        # həll olunur: çoxdilli imtahanda seçim yoxdursa xəbərdarlıq + siyahı.
+        if not language_resolved and get_active_attempt_for_user(exam, user) is None:
+            chosen_language, language_redirect = _new_attempt_language(request, exam, return_to=return_to)
+            if language_redirect is not None:
+                return language_redirect
         # Bir imtahana eyni-anlı start stampede-i: worker thread-i tutub çökmək
         # əvəzinə tələbəyə yüngül, ÖZÜ-YENİLƏNƏN səhifə qaytarırıq. Növbə dalğa-
         # dalğa boşalır; tələbə heç nə etmir, səhifə start URL-inə geri dönür.
