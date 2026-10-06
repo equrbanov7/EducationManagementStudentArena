@@ -134,6 +134,7 @@ class AnnouncementAttachment(UUIDModel, TimeStampedModel):
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="+")
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="attachments")
     file = models.FileField(
+        max_length=255,
         upload_to=announcement_attachment_path,
         validators=[FileUploadValidator(allowed_extensions=set(ATTACHMENT_EXTENSIONS), max_size_mb=ATTACHMENT_MAX_MB)],
     )

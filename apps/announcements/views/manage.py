@@ -9,6 +9,7 @@ from __future__ import annotations
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -175,8 +176,11 @@ def _edit(request, organization, scope, announcement=None):
         form = AnnouncementForm(_bound_data(request), organization=organization)
         if form.is_valid():
             try:
-                saved = manage.save_announcement(request, organization, scope, form.cleaned_data, announcement=announcement)
-                manage.add_attachments(request, organization, saved, request.FILES.getlist("files"))
+                with transaction.atomic():
+                    saved = manage.save_announcement(
+                        request, organization, scope, form.cleaned_data, announcement=announcement
+                    )
+                    manage.add_attachments(request, organization, saved, request.FILES.getlist("files"))
             except ValidationError as exc:
                 form_errors = exc.messages
             else:
