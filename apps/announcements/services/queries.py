@@ -100,7 +100,9 @@ def user_list(organization, user, viewer: Viewer, params: ListParams, now=None) 
     if params.unread:
         queryset = queryset.filter(is_read=False)
 
-    pinned = Case(When(Q(is_pinned=True) & _active_q(now), then=Value(1)), default=Value(0), output_field=IntegerField())
+    pinned = Case(
+        When(Q(is_pinned=True) & _active_q(now), then=Value(1)), default=Value(0), output_field=IntegerField()
+    )
     queryset = queryset.annotate(pin_rank=pinned)
     if params.sort == "deadline":
         # Yaxın son tarix birinci; keçmiş son tarixlər və son tarixsizlər sonda.
@@ -152,7 +154,9 @@ def unread_count(organization, user, viewer: Viewer, now=None) -> int:
     return (
         published_for(organization, viewer, now)
         .filter(_active_q(now), publish_at__gte=since)
-        .exclude(Exists(AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, read_at__isnull=False)))
+        .exclude(
+            Exists(AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, read_at__isnull=False))
+        )
         .count()
     )
 

@@ -124,7 +124,9 @@ def transition(request, organization, scope, announcement, action: str) -> Annou
         announcement.archived_at = None
     elif action == "delete":
         if announcement.status != Status.DRAFT or announcement.receipts.exists():
-            raise ValidationError(pgettext(_CTX, "Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin."))
+            raise ValidationError(
+                pgettext(_CTX, "Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin.")
+            )
         with transaction.atomic():
             _audit(request, organization, AuditAction.DELETE, announcement)
             for attachment in announcement.attachments.all():
@@ -137,7 +139,9 @@ def transition(request, organization, scope, announcement, action: str) -> Annou
     announcement.updated_by = request.user
     with transaction.atomic():
         announcement.save()
-        _audit(request, organization, AuditAction.UPDATE, announcement, {"action": action, "status": announcement.status})
+        _audit(
+            request, organization, AuditAction.UPDATE, announcement, {"action": action, "status": announcement.status}
+        )
     snapshot.sync_snapshot(organization)
     return announcement
 
@@ -146,7 +150,12 @@ def add_attachments(request, organization, announcement, files) -> list:
     incoming = [item for item in files or [] if item]
     if announcement.attachments.count() + len(incoming) > ATTACHMENTS_PER_ANNOUNCEMENT:
         raise ValidationError(
-            {"files": [pgettext(_CTX, "Bir elana ən çox %(n)s sənəd əlavə etmək olar.") % {"n": ATTACHMENTS_PER_ANNOUNCEMENT}]}
+            {
+                "files": [
+                    pgettext(_CTX, "Bir elana ən çox %(n)s sənəd əlavə etmək olar.")
+                    % {"n": ATTACHMENTS_PER_ANNOUNCEMENT}
+                ]
+            }
         )
     created = []
     for uploaded in incoming:

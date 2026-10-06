@@ -135,9 +135,9 @@ def mark_popup_seen(request, announcement_ids) -> int:
     organization, user = request.organization, request.user
     viewer = viewer_for(user, organization, getattr(request, "org_memberships", None))
     visible = list(
-        published_for(organization, viewer).filter(pk__in=list(announcement_ids)[:POPUP_MAX_ITEMS * 2]).values_list(
-            "pk", flat=True
-        )
+        published_for(organization, viewer)
+        .filter(pk__in=list(announcement_ids)[: POPUP_MAX_ITEMS * 2])
+        .values_list("pk", flat=True)
     )
     count = _touch(organization, user, visible, "popup_seen_at")
     if getattr(request, "session", None) is not None:

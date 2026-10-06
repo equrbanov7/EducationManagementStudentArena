@@ -41,7 +41,16 @@ CONTEXTS = {
     "workload": ("workload",),
     "exams": ("exams", "live_exam", "appeals", "trial_exams"),
     "learning_tasks": ("courses", "assignments", "labs", "projects", "task_submission_core"),
-    "platform": ("notifications", "audit", "monitoring", "ai_assistant", "blog", "contact", "applications"),
+    "platform": (
+        "notifications",
+        "audit",
+        "monitoring",
+        "ai_assistant",
+        "blog",
+        "contact",
+        "applications",
+        "announcements",
+    ),
     "legacy_import": ("legacy_import",),
 }
 

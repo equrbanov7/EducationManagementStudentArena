@@ -4,7 +4,6 @@ modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyiş
 from core.constants import RoleScopeType
 
 from .default_roles_oversight import OVERSIGHT_ROLES
-from .permissions_announcements import apply_announcement_grants
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
 from .default_roles_rim import RIM_STAFF_ROLES
 from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
@@ -13,6 +12,7 @@ from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 from .default_roles_vice_dean import VICE_DEAN_ROLES
+from .permissions_announcements import apply_announcement_grants
 
 #: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
 #:

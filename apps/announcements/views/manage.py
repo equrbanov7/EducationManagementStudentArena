@@ -197,7 +197,9 @@ def _edit(request, organization, scope, announcement=None):
         families = request.POST.getlist("audience_families")
     else:
         form = AnnouncementForm(organization=organization)
-        values = _initial(announcement) if announcement else {"category": "general", "priority": 0, "apply_mode": "none"}
+        values = (
+            _initial(announcement) if announcement else {"category": "general", "priority": 0, "apply_mode": "none"}
+        )
         families = values.get("audience_families", []) if announcement else ["students"]
     options = _form_options(organization, scope, announcement)
     if request.method == "POST":

@@ -132,7 +132,13 @@ def scope_unit_choices(scope, organization) -> list:
     from ..constants import UNIT_TYPE_LABELS
 
     return [
-        {"id": str(pk), "label": name, "type": unit_type, "type_label": UNIT_TYPE_LABELS.get(unit_type, ""), "level": level or 0}
+        {
+            "id": str(pk),
+            "label": name,
+            "type": unit_type,
+            "type_label": UNIT_TYPE_LABELS.get(unit_type, ""),
+            "level": level or 0,
+        }
         for pk, name, unit_type, level in rows
     ]
 

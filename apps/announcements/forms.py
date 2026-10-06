@@ -83,9 +83,7 @@ class AnnouncementForm(forms.Form):
         values = [part.strip() for part in raw.replace(";", ",").split(",") if part.strip()]
         unique = list(dict.fromkeys(values))
         if len(unique) > MAX_TARGET_UNITS:
-            raise forms.ValidationError(
-                pgettext(_CTX, "Ən çox %(n)s bölmə seçmək olar.") % {"n": MAX_TARGET_UNITS}
-            )
+            raise forms.ValidationError(pgettext(_CTX, "Ən çox %(n)s bölmə seçmək olar.") % {"n": MAX_TARGET_UNITS})
         for value in unique:
             try:
                 uuid.UUID(value)
@@ -122,7 +120,9 @@ class AnnouncementForm(forms.Form):
                 data["apply_kind_obj"] = kind
             unit_pk = data.get("apply_unit")
             if unit_pk:
-                unit = ApplicationUnit.objects.filter(organization=self.organization, pk=unit_pk, is_active=True).first()
+                unit = ApplicationUnit.objects.filter(
+                    organization=self.organization, pk=unit_pk, is_active=True
+                ).first()
                 if unit is None:
                     self.add_error("apply_unit", pgettext(_CTX, "Seçilmiş şöbə tapılmadı."))
                 data["apply_unit_obj"] = unit

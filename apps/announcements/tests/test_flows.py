@@ -136,7 +136,9 @@ class PopupOnceTest(TestCase):
             from apps.organizations.models import Membership
 
             memberships = list(
-                Membership.objects.filter(user=self.w["s1"], organization=self.w["org"]).select_related("role", "scope_unit")
+                Membership.objects.filter(user=self.w["s1"], organization=self.w["org"]).select_related(
+                    "role", "scope_unit"
+                )
             )
         for path in ("/exams/final/", "/exams/some-exam/attempt/5/", "/live/play/1234/"):
             request = RequestFactory().get(path)
@@ -174,7 +176,10 @@ class TenantIsolationTest(TestCase):
         cls.a = build_world("annta")
         cls.b = build_world("anntb")
         cls.item = make_announcement(
-            cls.a, title="Yalnız A təşkilatı", families=["students", "teachers", "staff"], apply_mode="url",
+            cls.a,
+            title="Yalnız A təşkilatı",
+            families=["students", "teachers", "staff"],
+            apply_mode="url",
             apply_url="https://example.org/form",
         )
 

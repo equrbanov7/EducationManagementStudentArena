@@ -18,7 +18,9 @@ from django.views.decorators.http import require_GET, require_POST
 
 from ..constants import PROFILE_SECTION
 from ..models import AnnouncementAttachment
-from ..services import access, apply as apply_service, popup, queries
+from ..services import access
+from ..services import apply as apply_service
+from ..services import popup, queries
 from ..services.audience import viewer_for
 from ._base import error, json_body, member_endpoint, ok
 
@@ -43,7 +45,9 @@ def list_fragment(request):
     params = queries.ListParams.from_query(request.GET)
     result = queries.user_list(request.organization, request.user, _viewer(request), params)
     html = render_to_string(
-        "announcements/cabinet/_list.html", {"listing": result, "profile_base_url": reverse("accounts:profile")}, request
+        "announcements/cabinet/_list.html",
+        {"listing": result, "profile_base_url": reverse("accounts:profile")},
+        request,
     )
     return ok(html=html, total=result["total"], page=result["page"], pages=result["pages"])
 

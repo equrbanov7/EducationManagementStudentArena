@@ -29,14 +29,23 @@ PW = "AnnouncePass123!"
 def member(org, username, role_name, *, unit=None):
     user = User.objects.create_user(username, f"{username}@qku.edu.az", PW, first_name="Ad", last_name=username)
     Membership.objects.create(
-        user=user, organization=org, role=org.roles.get(name=role_name), scope_unit=unit, is_primary=True, is_active=True
+        user=user,
+        organization=org,
+        role=org.roles.get(name=role_name),
+        scope_unit=unit,
+        is_primary=True,
+        is_active=True,
     )
     return user
 
 
 def _unit(org, name, unit_type, parent=None):
     return OrgUnit.objects.create(
-        organization=org, name=name, slug=f"{org.slug}-{name}".lower().replace(" ", "-"), unit_type=unit_type, parent=parent
+        organization=org,
+        name=name,
+        slug=f"{org.slug}-{name}".lower().replace(" ", "-"),
+        unit_type=unit_type,
+        parent=parent,
     )
 
 
@@ -50,7 +59,12 @@ def build_world(slug: str) -> dict:
     owner = User.objects.create_user(f"{slug}_owner", f"{slug}_owner@qku.edu.az", PW)
     with bypass_rls():
         org = Organization.objects.create(
-            name=f"{slug} Univ", slug=slug, org_type=OrganizationType.UNIVERSITY, owner=owner, status="active", is_active=True
+            name=f"{slug} Univ",
+            slug=slug,
+            org_type=OrganizationType.UNIVERSITY,
+            owner=owner,
+            status="active",
+            is_active=True,
         )
         f1 = _unit(org, "Fakulte F1", OrgUnitType.FACULTY)
         chair_a = _unit(org, "Kafedra A", OrgUnitType.CHAIR, parent=f1)

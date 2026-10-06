@@ -26,7 +26,7 @@ def json_body(request) -> dict:
     if (request.content_type or "").startswith("application/json"):
         try:
             data = json.loads(request.body.decode("utf-8") or "{}")
-        except (ValueError, UnicodeDecodeError):
+        except ValueError:  # UnicodeDecodeError da ValueError-dur
             return {}
         return data if isinstance(data, dict) else {}
     return request.POST

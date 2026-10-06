@@ -173,7 +173,9 @@ class ApplyTest(TestCase):
         self.assertIn("apply_kind", form.errors)
 
     def test_url_mode_records_click_once(self):
-        item = make_announcement(self.w, title="Qeydiyyat formu", apply_mode="url", apply_url="https://forms.example.org/x")
+        item = make_announcement(
+            self.w, title="Qeydiyyat formu", apply_mode="url", apply_url="https://forms.example.org/x"
+        )
         client = client_for(self.w["org"], self.w["s1"])
         payload = client.post(reverse("announcements:apply", args=[item.pk])).json()
         self.assertEqual(payload["redirect"], "https://forms.example.org/x")
