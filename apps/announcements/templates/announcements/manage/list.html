@@ -8,7 +8,7 @@
 {% block embed_extra_css %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261006-1">
-    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261006-1">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-1">
 {% endblock %}
 
 {% block embed_content %}
@@ -38,6 +38,7 @@
                 <option value="active"{% if params.state == "active" %} selected{% endif %}>{% trans "Aktiv" context "announcements.cabinet" %}</option>
                 <option value="expired"{% if params.state == "expired" %} selected{% endif %}>{% trans "Müddəti bitmiş" context "announcements.cabinet" %}</option>
                 <option value="archived"{% if params.state == "archived" %} selected{% endif %}>{% trans "Arxiv" context "announcements.manage" %}</option>
+                <option value="deleted"{% if params.state == "deleted" %} selected{% endif %}>{% trans "Silinmişlər" context "announcements.manage" %}</option>
             </select>
         </div>
         <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">

@@ -7,10 +7,19 @@ from .models import Announcement, AnnouncementAttachment, AnnouncementReceipt
 
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ("title", "organization", "status", "category", "priority", "show_as_popup", "publish_at")
-    list_filter = ("status", "category", "show_as_popup")
+    list_display = (
+        "title",
+        "organization",
+        "status",
+        "is_deleted",
+        "category",
+        "priority",
+        "show_as_popup",
+        "publish_at",
+    )
+    list_filter = ("status", "is_deleted", "category", "show_as_popup")
     search_fields = ("title", "summary")
-    raw_id_fields = ("organization", "created_by", "updated_by", "apply_kind", "apply_unit")
+    raw_id_fields = ("organization", "created_by", "updated_by", "deleted_by", "apply_kind", "apply_unit")
 
 
 @admin.register(AnnouncementAttachment)

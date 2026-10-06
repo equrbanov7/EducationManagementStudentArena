@@ -9,7 +9,7 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
 {% block embed_extra_css %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261006-1">
-    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261006-1">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-1">
 {% endblock %}
 
 {% block embed_content %}
@@ -17,9 +17,25 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
     <nav class="annm-crumbs" aria-label="{% trans 'Naviqasiya' context 'announcements.manage' %}">
         <a href="{% url 'announcements:manage_list' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Elanların idarəsi" context "announcements.manage" %}</a>
         {% if announcement %}
-        <span class="annm-state annm-state--{{ announcement.state }}">{% if announcement.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif announcement.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif announcement.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif announcement.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
+        <span class="annm-state annm-state--{{ announcement.state }}">{% if announcement.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif announcement.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif announcement.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif announcement.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% elif announcement.state == "deleted" %}{% trans "Silinib" context "announcements.manage" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
         {% endif %}
     </nav>
+
+    {% if announcement.is_deleted %}
+    <section class="annm-deleted" role="status" aria-labelledby="annm-deleted-title">
+        <span class="annm-deleted__icon" aria-hidden="true"><i class="fas fa-trash-can"></i></span>
+        <div class="annm-deleted__text">
+            <h2 class="annm-deleted__title" id="annm-deleted-title">{% trans "Bu elan silinib" context "announcements.manage" %}</h2>
+            <p class="annm-deleted__meta">{% blocktrans trimmed with day=announcement.deleted_at|date:"d.m.Y H:i" context "announcements.manage" %}Silinib: {{ day }}{% endblocktrans %}{% if announcement.deleted_by %} · {{ announcement.deleted_by.get_full_name|default:announcement.deleted_by.username }}{% endif %}</p>
+            <p class="annm-deleted__hint">{% trans "Alıcılar onu görmür (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır. Bərpa etsəniz elan qaralama kimi qayıdır." context "announcements.manage" %}</p>
+        </div>
+        <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" class="annm-deleted__actions">
+            {% csrf_token %}
+            <a class="ems-btn" href="{% url 'announcements:manage_preview' announcement.pk %}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Önizləmə" context "announcements.manage" %}</a>
+            <button type="submit" class="ems-btn ems-btn--primary" name="action" value="undelete"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "announcements.manage" %}</button>
+        </form>
+    </section>
+    {% endif %}
 
     {% if stats %}
     <div class="ems-kpis ems-kpis--4 annm-kpis">
@@ -40,6 +56,7 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
     </div>
     {% endif %}
 
+    {% if not announcement.is_deleted %}
     <form method="post" enctype="multipart/form-data" class="annm-form" id="annm-form" novalidate>
         {% csrf_token %}
         <section class="annm-card" aria-labelledby="annm-content-title">
@@ -129,8 +146,9 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
             {% endif %}
         </div>
     </form>
+    {% endif %}
 
-    {% if announcement %}
+    {% if announcement and not announcement.is_deleted %}
     {% for file in announcement.attachments.all %}
     <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" id="annm-remove-{{ file.pk }}" class="annm-hidden-form">
         {% csrf_token %}<input type="hidden" name="action" value="remove_attachment"><input type="hidden" name="attachment" value="{{ file.pk }}">
@@ -140,7 +158,7 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
         <h2 class="annm-card__title" id="annm-status-title">{% trans "Vəziyyət" context "announcements.cabinet" %}</h2>
         <div class="annm-status__actions">
             <a class="ems-btn" href="{% url 'announcements:manage_preview' announcement.pk %}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Önizləmə" context "announcements.manage" %}</a>
-            <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}">
+            <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" class="annm-status__form">
                 {% csrf_token %}
                 {% if announcement.status == "published" %}
                 <button type="submit" class="ems-btn" name="action" value="unpublish">{% trans "Dərcdən çıxar" context "announcements.manage" %}</button>
@@ -148,12 +166,14 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
                 {% elif announcement.status == "draft" %}
                 <button type="submit" class="ems-btn ems-btn--primary" name="action" value="publish">{% trans "Dərc et" context "announcements.manage" %}</button>
                 <button type="submit" class="ems-btn ems-btn--warning" name="action" value="archive">{% trans "Arxivlə" context "announcements.manage" %}</button>
-                <button type="submit" class="ems-btn ems-btn--danger" name="action" value="delete" data-ems-confirm="{% trans 'Qaralama birdəfəlik silinsin?' context 'announcements.manage' %}">{% trans "Sil" context "announcements.manage" %}</button>
                 {% else %}
                 <button type="submit" class="ems-btn" name="action" value="restore">{% trans "Arxivdən qaytar" context "announcements.manage" %}</button>
                 {% endif %}
+                <button type="submit" class="ems-btn ems-btn--danger annm-status__delete" name="action" value="delete"
+                        data-ems-confirm="{% if hard_delete %}{% trans 'Qaralama birdəfəlik silinsin? Onu heç kim görməyib — bu əməliyyat geri qaytarılmır.' context 'announcements.manage' %}{% else %}{% trans 'Elan silinsin? O, bütün alıcılar üçün dərhal yox olacaq (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır; «Silinmişlər» filtrindən bərpa edə bilərsiniz.' context 'announcements.manage' %}{% endif %}"><i class="fas fa-trash" aria-hidden="true"></i> {% trans "Sil" context "announcements.manage" %}</button>
             </form>
         </div>
+        <p class="annm-status__hint">{% if hard_delete %}{% trans "Qaralamanı heç kim görməyib — «Sil» onu birdəfəlik silir." context "announcements.manage" %}{% else %}{% trans "«Sil» elanı bütün alıcılardan gizlədir; statistika və müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur." context "announcements.manage" %}{% endif %}</p>
     </section>
     {% endif %}
 </div>

@@ -7,7 +7,7 @@
     <li class="annm-row annm-row--{{ row.state }}">
         <div class="annm-row__main">
             <p class="annm-row__chips">
-                <span class="annm-state annm-state--{{ row.state }}">{% if row.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif row.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif row.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif row.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
+                <span class="annm-state annm-state--{{ row.state }}">{% if row.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif row.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif row.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif row.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% elif row.state == "deleted" %}{% trans "Silinib" context "announcements.manage" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
                 <span class="ann-chip ann-cat ann-cat--{{ row.category }}">{{ row.get_category_display }}</span>
                 {% if row.show_as_popup %}<span class="ann-chip"><i class="far fa-window-restore" aria-hidden="true"></i> {% trans "Popup" context "announcements.manage" %}</span>{% endif %}
                 {% if row.is_pinned %}<span class="ann-chip ann-chip--pin"><i class="fas fa-thumbtack" aria-hidden="true"></i></span>{% endif %}
@@ -19,12 +19,24 @@
                 {% if row.deadline_at %} · {% blocktrans trimmed with day=row.deadline_at|date:"d.m.Y" context "announcements.manage" %}son tarix: {{ day }}{% endblocktrans %}{% endif %}
                 {% if row.created_by %} · {{ row.created_by.get_full_name|default:row.created_by.username }}{% endif %}
             </p>
+            {% if row.is_deleted %}
+            <p class="annm-row__deleted">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>
+                {% blocktrans trimmed with day=row.deleted_at|date:"d.m.Y H:i" context "announcements.manage" %}Silinib: {{ day }}{% endblocktrans %}{% if row.deleted_by %} · {{ row.deleted_by.get_full_name|default:row.deleted_by.username }}{% endif %}
+            </p>
+            {% endif %}
         </div>
         <dl class="annm-stats" aria-label="{% trans 'Statistika' context 'announcements.manage' %}">
             <div><dt>{% trans "Popup görüb" context "announcements.manage" %}</dt><dd>{{ row.stats.seen }}</dd></div>
             <div><dt>{% trans "Oxuyub" context "announcements.manage" %}</dt><dd>{{ row.stats.read }}</dd></div>
             <div><dt>{% trans "Müraciət" context "announcements.manage" %}</dt><dd>{{ row.stats.applied }}</dd></div>
         </dl>
+        {% if row.is_deleted %}
+        <form method="post" action="{% url 'announcements:manage_action' row.pk %}" class="annm-row__actions">
+            {% csrf_token %}
+            <button type="submit" class="ems-btn ems-btn--sm" name="action" value="undelete"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "announcements.manage" %}</button>
+        </form>
+        {% endif %}
     </li>
     {% endfor %}
 </ul>
@@ -38,7 +50,12 @@
 {% else %}
 <div class="ems-empty ann-empty" role="status">
     <span class="ems-empty-icon"><i class="fas fa-bullhorn" aria-hidden="true"></i></span>
+    {% if params.state == "deleted" %}
+    <p class="ems-empty-title">{% trans "Silinmiş elan yoxdur" context "announcements.manage" %}</p>
+    <p class="ems-empty-hint">{% trans "Silinən elanlar burada görünür və bərpa oluna bilər." context "announcements.manage" %}</p>
+    {% else %}
     <p class="ems-empty-title">{% trans "Elan yoxdur" context "announcements.manage" %}</p>
     <p class="ems-empty-hint">{% trans "«Yeni elan» düyməsi ilə ilk elanı yaradın." context "announcements.manage" %}</p>
+    {% endif %}
 </div>
 {% endif %}

@@ -63,11 +63,15 @@ class ListParams:
 
 
 def published_for(organization, viewer: Viewer, now=None):
-    """Dərc olunmuş, başlamış, istifadəçiyə ünvanlanmış elanlar (müddəti bitmişlər də daxil)."""
+    """Dərc olunmuş, başlamış, istifadəçiyə ünvanlanmış, SİLİNMƏMİŞ elanlar (müddəti bitmişlər də daxil).
+
+    İstifadəçi səthlərinin hamısı (siyahı, detal, sayğac, oxundu, popup qəbzi, müraciət, sənəd)
+    bu bir süzgəcdən keçir — yumşaq silinmiş elan heç birində görünmür.
+    """
     now = now or timezone.now()
-    return Announcement.objects.filter(organization=organization, status=Status.PUBLISHED, publish_at__lte=now).filter(
-        visible_q(viewer)
-    )
+    return Announcement.objects.filter(
+        organization=organization, status=Status.PUBLISHED, is_deleted=False, publish_at__lte=now
+    ).filter(visible_q(viewer))
 
 
 def _active_q(now) -> Q:

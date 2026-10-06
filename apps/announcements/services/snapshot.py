@@ -73,7 +73,7 @@ def build_snapshot(organization) -> dict:
 
     now = timezone.now()
     rows = (
-        Announcement.objects.filter(organization=organization, status=Status.PUBLISHED)
+        Announcement.objects.filter(organization=organization, status=Status.PUBLISHED, is_deleted=False)
         .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
         .order_by("-priority", "-publish_at")
         .values("pk", "audience_families", "audience_units", "priority", "show_as_popup", "publish_at", "expires_at")[

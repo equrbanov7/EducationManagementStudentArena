@@ -40,6 +40,8 @@ class ApplyResult:
 def apply_closed_reason(announcement, now=None) -> str:
     """Boş sətir — müraciət açıqdır; əks halda istifadəçiyə göstərilən səbəb."""
     now = now or timezone.now()
+    if announcement.is_deleted:
+        return pgettext(_CTX, "Elan silinib — müraciət qəbul olunmur.")
     if not announcement.has_apply:
         return pgettext(_CTX, "Bu elan üzrə müraciət nəzərdə tutulmayıb.")
     if not announcement.is_visible_now(now):

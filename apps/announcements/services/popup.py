@@ -22,7 +22,7 @@ from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from ..constants import POPUP_EXEMPT_PREFIXES, POPUP_EXEMPT_SECTIONS, POPUP_MAX_ITEMS, POPUP_SESSION_KEY
+from ..constants import POPUP_EXEMPT_PREFIXES, POPUP_EXEMPT_SECTIONS, POPUP_MAX_ITEMS, POPUP_SESSION_KEY, Status
 from ..models import Announcement, AnnouncementReceipt
 from . import snapshot
 from .audience import families_only, matches, viewer_for
@@ -94,9 +94,9 @@ def pending_popups(request) -> list:
         return []
     order = {item["id"]: index for index, item in enumerate(remaining)}
     rows = list(
-        Announcement.objects.filter(organization=organization, pk__in=list(order)).order_by(
-            "-priority", "-is_pinned", "-publish_at"
-        )[:POPUP_MAX_ITEMS]
+        Announcement.objects.filter(
+            organization=organization, pk__in=list(order), status=Status.PUBLISHED, is_deleted=False
+        ).order_by("-priority", "-is_pinned", "-publish_at")[:POPUP_MAX_ITEMS]
     )
     for row in rows:
         decorate(row, now)
