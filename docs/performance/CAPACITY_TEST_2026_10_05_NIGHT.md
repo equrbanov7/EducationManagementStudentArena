@@ -187,6 +187,27 @@ Qalan (növbəti iş, sahib qərarı lazım deyil):
 - **DB CPU** — test DB-si 2 CPU ilə məhdud idi; canlıda DB ilə app eyni 10 vCPU-nu bölür. VM-in 24–32
   vCPU-ya böyüdülməsi hər iki darboğazı birbaşa açır.
 
+## Üçüncü dalğa (2026-10-06/07): qalan tapıntılar düzəldildi
+
+Hamısı testli, canlıya üç paketlə çıxdı (main 53b9f5e0, 1d8b9389, sonra RLS paketi):
+
+| Sahə | Əvvəl → sonra |
+|---|---|
+| Kabinet bölmə fraqmenti (tələbə) | qabıq dəyərləri tənbəl (`LazyValue`): ~13 sorğu az, ~30 % sürətli, HTML bayt-bayt eyni |
+| Autosave (1 MCQ) | 26 → 19 sorğu; attempt BİR dəfə sətir kilidi altında, bütün audit zəmanətləri eyni ardıcıllıqla |
+| Finish (5 sual) / start | 43 → 28 / 51 → 42 sorğu |
+| Jurnal saxlama (25 xana) | 93 → 14 sorğu; fənnin bütün dərs/qiymətləri artıq yüklənmir |
+| Final mərkəzi PIN girişi | uğurlu giriş 2–3 → 1 hash; uğursuz cəhd də 1 (istifadəçi-mövcudluq zaman sızması bağlandı) |
+| Qrupa final/midterm təyini (300 tələbə) | ~17.6 s sinxron hash → ~3 ms; hash fon tapşırığında (`heavy` növbəsi) |
+| Export / mətn çıxarışı | sorğuda 3 s gözləmə yoxdur; klient 1→5 s artan intervalla yoxlayır |
+| Canlı imtahan (300 oyunçu) | hər keçiddə host-a 303 → 5 göndəriş; auto-reveal kilidi 82 → 1 |
+| Hər sorğu: üzvlük + RLS | kabinet 30 → 26, imtahan səhifəsi 22 → 20; middleware üzvlüyü tenant RLS altında (bypass-sız) |
+| Müraciət nişanı | 3–4 `COUNT(DISTINCT bütün sütunlar)` → 1 aqreqat |
+| Autosave cavabı itəndə | eyni məzmunlu təkrar 409 yox, idempotent uğur |
+
+Qəsdən dəyişdirilməyənlər: imtahan start-ındakı qısa `sleep` (tutum növbəsi və istifadəçi kilidi — admission
+control); PIN hash gücü.
+
 ## 50 000 nəfər haqqında
 
 Tək 10 vCPU-luq serverdə 50 000 **eyni anda aktiv** istifadəçi mümkün deyil.
