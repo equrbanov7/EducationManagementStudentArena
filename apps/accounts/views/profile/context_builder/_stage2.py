@@ -7,6 +7,7 @@ from apps.accounts import profile_hooks
 from ..._helpers import STUDENT_ORG_REQUEST_MESSAGE_MAX_LENGTH
 from ..._helpers.org_sections.management import _empty_section as _empty_management_section
 from .._sections.review_queue import build_pending_review_context, build_review_results_context
+from ._lazy import force
 
 
 class _Stage2Mixin:
@@ -24,13 +25,13 @@ class _Stage2Mixin:
         self.pending_post_approval_pagination_query = ""
         self.pending_post_approval_total_count = 0
         if "pending-post-approvals" in self.allowed_sections and self.active_section != "pending-post-approvals":
-            self.pending_post_approval_count = profile_hooks.pending_posts_count(self.request.user)
+            self.pending_post_approval_count = self._defer(lambda: profile_hooks.pending_posts_count(self.request.user))
         if "pending-post-approvals" in self.allowed_sections and self.active_section == "pending-post-approvals":
             # M2 (2026-07-02): blog implementasiyası profile_hooks üzərindən
             # (apps/blog/profile_sections.py) — davranış köhnə inline blokla eynidir.
             _pp = profile_hooks.pending_posts_section(
                 self.request,
-                have_category_options=bool(self.post_category_root_options),
+                have_category_options=bool(force(self.post_category_root_options)),
             )
             self.pending_post_approval_items = _pp["items"]
             self.pending_post_approval_search_query = _pp["search_query"]
@@ -111,9 +112,9 @@ class _Stage2Mixin:
             "organizations": [],
             "search_query": "",
             "org_type_filter": "",
-            "pending_invites": list(self.pending_student_invites or []),
-            "pending_invites_count": len(self.pending_student_invites or []),
-            "has_pending_invites": bool(self.pending_student_invites),
+            "pending_invites": self._defer(lambda: list(force(self.pending_student_invites) or [])),
+            "pending_invites_count": self._defer(lambda: len(force(self.pending_student_invites) or [])),
+            "has_pending_invites": self._defer(lambda: bool(force(self.pending_student_invites))),
             "pending_student_requests": [],
             "pending_student_requests_count": 0,
             "has_pending_student_requests": False,
