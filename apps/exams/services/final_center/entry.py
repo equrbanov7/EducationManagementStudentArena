@@ -36,7 +36,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 from core.rls import bypass_rls
 
-from .pins import equalize_verification_timing, verify_ticket_pin
+from .pins import PinHashBudget, pin_cipher_matches, register_ticket_pin_failure, verify_ticket_pin
 
 logger = logging.getLogger("exams.final_center.entry")
 
@@ -107,7 +107,7 @@ def _candidate_tickets(user):
     )
 
 
-def validate_entry(request, username: str, raw_pin: str):
+def validate_entry(request, username: str, raw_pin: str, *, budget=None):
     """
     Final girişinin tam yoxlaması (yalnız PIN + istifadəçi — ZAL YOX).
 
@@ -116,21 +116,31 @@ def validate_entry(request, username: str, raw_pin: str):
 
     Qaytarır: ``(ticket, None)`` uğurda, ``(None, error_code)`` xətada.
     Xəta kodları QƏSDƏN generikdir — istifadəçi mövcudluğu sızdırılmır.
+
+    ``budget`` (``PinHashBudget``) verilibsə uğursuz sonluğun vaxt-bərabərləşdirmə
+    hash-i ÇAĞIRANIN işidir (view fərdi PIN yolu ilə davam edir və büdcəni
+    bağlayır); verilməyibsə funksiya özü düz bir hash ilə bərabərləşdirir.
     """
     username = (username or "").strip()
     raw_pin = (raw_pin or "").strip()
+    own_budget = budget is None
+    if own_budget:
+        budget = PinHashBudget()
+
+    def _fail(code):
+        if own_budget:
+            budget.equalize(raw_pin)
+        return None, code
 
     if _rate_limited(request, username):
         return None, ERROR_RATE_LIMITED
 
     if not username or not raw_pin:
-        equalize_verification_timing(raw_pin)
-        return None, ERROR_INVALID
+        return _fail(ERROR_INVALID)
 
     user = User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
     if user is None or not user.is_active:
-        equalize_verification_timing(raw_pin)
-        return None, ERROR_INVALID
+        return _fail(ERROR_INVALID)
 
     # Public pre-auth axınında aktiv tenant yoxdur. Bypass yalnız artıq
     # username ilə məhdudlaşdırılmış bilet namizədlərinin PIN yoxlaması,
@@ -138,14 +148,17 @@ def validate_entry(request, username: str, raw_pin: str):
     with bypass_rls():
         candidates = _candidate_tickets(user)
         if not candidates:
-            equalize_verification_timing(raw_pin)
-            return None, ERROR_INVALID
+            return _fail(ERROR_INVALID)
 
+        # Tutum testi 2026-10-06: hər namizəd üçün tam hash əvəzinə şifrəli nüsxə ilə
+        # (hash-siz) SEÇ, yalnız uyğun/şifrəsi oxunmayan biletin hash-ini yoxla. Kilidli
+        # və uyğunsuz namizədlərin uğursuz-cəhd sayğacı əvvəlki kimi artır.
         ticket = None
         for cand in candidates:
-            if cand.is_pin_locked:
-                verify_ticket_pin(cand, raw_pin)  # timing bərabərləşməsi; nəticə nəzərə alınmır
+            if cand.is_pin_locked or pin_cipher_matches(cand.pin_cipher, raw_pin) is False:
+                register_ticket_pin_failure(cand)
                 continue
+            budget.charge()
             if verify_ticket_pin(cand, raw_pin):
                 ticket = cand
                 break
@@ -154,8 +167,8 @@ def validate_entry(request, username: str, raw_pin: str):
             # Heç bir biletə uyğun gəlmədi — kilidli bilet varsa xüsusi mesaj.
             if any(c.is_pin_locked for c in candidates):
                 _log_suspicious(request, candidates[0], "pin_locked_attempt")
-                return None, ERROR_LOCKED
-            return None, ERROR_INVALID
+                return _fail(ERROR_LOCKED)
+            return _fail(ERROR_INVALID)
 
         now = timezone.now()
         if not ticket.entry_validated_at:
