@@ -385,6 +385,24 @@ else
   warn "Prometheus ${PROM} əlçatmaz — tarixçə ölçülmədi, Monitorinq səhifəsi də degraded göstərər"
 fi
 
+section "11. Tətbiq xətaları — son 48 saat (app + celery; yol/istisna növü üzrə qruplaşdırılıb, PII yox)"
+# Yalnız logger mesajının yolu (rəqəm/UUID maskalanır) və istisnanın SİNFİ çap olunur —
+# istisna mətni, sorğu gövdəsi, istifadəçi adları çap OLUNMUR.
+echo '```'
+for svc in app celery_worker celery_worker_heavy celery_beat; do
+  ERRS=$($COMPOSE logs --no-log-prefix --since 48h "$svc" 2>/dev/null | grep -E '"level": ?"(ERROR|CRITICAL)"')
+  N=$(printf '%s' "$ERRS" | grep -c . || true)
+  echo "-- $svc: ${N:-0} ERROR/CRITICAL sətir"
+  [ "${N:-0}" -gt 0 ] || continue
+  printf '%s\n' "$ERRS" | sed -nE 's/.*"message": ?"([^"]{0,160}).*/\1/p' \
+    | sed -E 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<uuid>/g; s/[0-9]+/<n>/g; s/(Internal Server Error: [^ ?]*).*/\1/' \
+    | sort | uniq -c | sort -rn | head -15
+  echo "   istisna sinifləri:"
+  printf '%s\n' "$ERRS" | grep -oE '\\n[A-Za-z_.]+(Error|Exception|Denied|DoesNotExist|Timeout|Interrupted)[A-Za-z]*:' \
+    | sed 's/^\\n//; s/:$//' | sort | uniq -c | sort -rn | head -10 | sed 's/^/   /'
+done
+echo '```'
+
 section "Yekun"
 echo "- ❌ kritik: **$FAIL** · ⚠️ xəbərdarlıq: **$WARN**"
 exit 0
