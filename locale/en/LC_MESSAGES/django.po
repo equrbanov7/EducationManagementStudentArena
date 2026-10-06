@@ -91323,3 +91323,7 @@ msgid "%(n)s gün qaldı"
 msgid_plural "%(n)s gün qaldı"
 msgstr[0] "%(n)s day left"
 msgstr[1] "%(n)s days left"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Applied"

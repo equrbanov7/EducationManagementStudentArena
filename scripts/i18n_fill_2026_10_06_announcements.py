@@ -143,6 +143,7 @@ ROWS = {
             "Başvuru gönderilmedi. Biraz sonra tekrar deneyin.",
         ),
         "Müraciət mümkündür": ("Applications open", "Можно подать заявку", "Başvuru yapılabilir"),
+        "Müraciət edilib": ("Applied", "Заявка подана", "Başvuruldu"),
         "Müraciət xarici keçid vasitəsilə qəbul olunur.": (
             "Applications are accepted via an external link.",
             "Заявки принимаются по внешней ссылке.",

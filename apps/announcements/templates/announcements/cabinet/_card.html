@@ -10,7 +10,7 @@
             <span><i class="far fa-calendar" aria-hidden="true"></i> {{ item.publish_at|date:"d.m.Y" }}</span>
             {% if item.expires_at %}<span>{% blocktrans trimmed with day=item.expires_at|date:"d.m.Y" context "announcements.cabinet" %}{{ day }} tarixinədək{% endblocktrans %}</span>{% endif %}
             {% with n=item.attachments.all|length %}{% if n %}<span><i class="fas fa-paperclip" aria-hidden="true"></i> {{ n }}</span>{% endif %}{% endwith %}
-            {% if item.has_apply %}<span class="ann-card__apply"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Müraciət mümkündür" context "announcements.cabinet" %}</span>{% endif %}
+            {% if item.is_applied %}<span class="ann-card__apply is-done"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Müraciət edilib" context "announcements.cabinet" %}</span>{% elif item.has_apply %}<span class="ann-card__apply"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Müraciət mümkündür" context "announcements.cabinet" %}</span>{% endif %}
         </span>
     </a>
 </article>

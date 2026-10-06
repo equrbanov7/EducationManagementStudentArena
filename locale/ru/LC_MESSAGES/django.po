@@ -91495,3 +91495,7 @@ msgstr[0] "остался %(n)s день"
 msgstr[1] "осталось %(n)s дня"
 msgstr[2] "осталось %(n)s дней"
 msgstr[3] "осталось %(n)s дня"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Заявка подана"

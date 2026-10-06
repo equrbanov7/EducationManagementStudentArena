@@ -90909,3 +90909,7 @@ msgid "%(n)s gün qaldı"
 msgid_plural "%(n)s gün qaldı"
 msgstr[0] "%(n)s gün qaldı"
 msgstr[1] "%(n)s gün qaldı"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Müraciət edilib"

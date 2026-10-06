@@ -78,6 +78,12 @@ def _read_exists(user):
     return Exists(AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, read_at__isnull=False))
 
 
+def _applied_exists(user):
+    return Exists(
+        AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, applied_at__isnull=False)
+    )
+
+
 def search_q(text: str) -> Q:
     query = tolerant_q(text, ("title", "summary", "body"))
     return Q() if query is None else query
@@ -96,7 +102,7 @@ def user_list(organization, user, viewer: Viewer, params: ListParams, now=None) 
         queryset = queryset.filter(deadline_at__isnull=False)
     if params.q:
         queryset = queryset.filter(search_q(params.q))
-    queryset = queryset.annotate(is_read=_read_exists(user))
+    queryset = queryset.annotate(is_read=_read_exists(user), is_applied=_applied_exists(user))
     if params.unread:
         queryset = queryset.filter(is_read=False)
 

@@ -144,6 +144,10 @@ class ApplyTest(TestCase):
         self.assertIsNotNone(receipt.applied_at)
         detail = client.get(f"/accounts/profile/?section=announcements&elan={self.item.pk}").content.decode()
         self.assertIn(application.number, detail)
+        # Siyahı kartı müraciət edildiyini göstərir («mümkündür» yox).
+        listing = client.get(reverse("announcements:list")).json()["html"]
+        self.assertIn("Müraciət edilib", listing)
+        self.assertNotIn("Müraciət mümkündür", listing)
 
     def test_apply_after_deadline_is_closed(self):
         with bypass_rls():
