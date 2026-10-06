@@ -118,8 +118,9 @@ def limit_percent_for_offering(offering) -> int:
     Yalnız başlıq/etiket üçün (müəllim qridinin «limit N q/b» sütunu); tələbə
     üzrə qərar :func:`row_limits` / :func:`limit_percent_for_enrollment`-dədir.
     """
+    # FK id-ləri ilə (JOIN-suz) — təşkilat/qrup obyektləri ayrıca yüklənmir (jurnal yazısı yolu).
     record = (
-        StudentAcademicRecord.objects.filter(organization=offering.organization, group=offering.group)
+        StudentAcademicRecord.objects.filter(organization_id=offering.organization_id, group_id=offering.group_id)
         .select_related("program")
         .first()
     )

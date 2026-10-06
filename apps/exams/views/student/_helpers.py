@@ -211,10 +211,31 @@ def _autosave_replay_response(request, attempt, action, base_revision):
 
 
 def bump_autosave_revision(attempt):
-    """Uğurlu yazıdan sonra attempt-in autosave revision-unu atomik artır."""
+    """Uğurlu yazıdan sonra attempt-in autosave revision-unu atomik artır.
+
+    Perf 2026-10-06: PostgreSQL-də ``UPDATE … RETURNING`` — yeni dəyər eyni
+    round-trip-də qayıdır (əvvəl UPDATE + ``refresh_from_db`` SELECT-i idi).
+    Artım yenə DB tərəfində (``col + 1``) olur; nəticə DB-nin öz dəyəridir.
+    """
+    from django.db import connections, router
     from django.db.models import F
 
-    type(attempt).objects.filter(pk=attempt.pk).update(autosave_revision=F("autosave_revision") + 1)
+    model = type(attempt)
+    connection = connections[router.db_for_write(model, instance=attempt)]
+    if connection.vendor == "postgresql":
+        quote = connection.ops.quote_name
+        column = quote(model._meta.get_field("autosave_revision").column)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"UPDATE {quote(model._meta.db_table)} SET {column} = {column} + 1 "
+                f"WHERE {quote(model._meta.pk.column)} = %s RETURNING {column}",
+                [attempt.pk],
+            )
+            row = cursor.fetchone()
+        if row is not None:
+            attempt.autosave_revision = row[0]
+            return
+    model.objects.filter(pk=attempt.pk).update(autosave_revision=F("autosave_revision") + 1)
     attempt.refresh_from_db(fields=["autosave_revision"])
 
 

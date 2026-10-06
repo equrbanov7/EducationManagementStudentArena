@@ -45,6 +45,7 @@ from apps.exams.services.final_center import (
     ERROR_LOCKED,
     ERROR_RATE_LIMITED,
     HEARTBEAT_INTERVAL_SECONDS,
+    PinHashBudget,
     TicketStateError,
     admission_block_reason,
     begin_attempt_for_ticket,
@@ -249,7 +250,10 @@ def final_exam_entry(request):
 def _handle_login(request):
     username = request.POST.get("username", "")
     raw_pin = request.POST.get("pin", "")
-    ticket, error_code = validate_entry(request, username, raw_pin)
+    # Tutum testi 2026-10-06: bilet və fərdi-PIN yolları BİR hash büdcəsini paylaşır —
+    # hər sonluq (uğur/səhv/naməlum istifadəçi) ≈1 tam PBKDF2, 3–4 yox.
+    budget = PinHashBudget()
+    ticket, error_code = validate_entry(request, username, raw_pin, budget=budget)
     if ticket is None:
         # Audit 2026-09-13 EX-06 (P2): IP+istifadəçi limiteri dolanda bilet
         # yolu «rate_limited» qaytarır, amma fərdi-PIN yolu yenə işləyirdi —
@@ -258,7 +262,7 @@ def _handle_login(request):
             return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
         # Bilet (otaq-oturum) sistemi olmayan finallar: tələbə username +
         # kabinetdə gördüyü fərdi PIN ilə birbaşa imtahana daxil olur.
-        pin_response = _handle_student_pin_login(request, username, raw_pin)
+        pin_response = _handle_student_pin_login(request, username, raw_pin, budget=budget)
         if pin_response is not None:
             return pin_response
         return _render_login(request, error=_entry_error_message(error_code), username=(username or "").strip())
@@ -287,7 +291,7 @@ def _handle_login(request):
     return redirect("exams:final_exam_entry")
 
 
-def _handle_student_pin_login(request, username, raw_pin):
+def _handle_student_pin_login(request, username, raw_pin, budget=None):
     """Fərdi ExamStudentPin ilə final girişi — GÖZLƏMƏ OTAĞI axını.
 
     Uyğun imtahan tapılmasa ``None`` qaytarır (çağıran generik xəta göstərir).
@@ -312,9 +316,12 @@ def _handle_student_pin_login(request, username, raw_pin):
         logger.warning("student_pin_login rate limited for username=%s", uname)
         return _render_login(request, error=_entry_error_message(ERROR_RATE_LIMITED), username=uname)
 
-    exam, student = resolve_student_pin_login(username, raw_pin)
+    exam, student = resolve_student_pin_login(username, raw_pin, budget=budget)
     if exam is None:
         return None
+    # Resolver PIN-i kəsilmiş (strip) formada yoxlayıb; eyni dəyər memo-ya düşür və
+    # ``can_user_start`` təkrar tam hash etmir.
+    raw_pin = (raw_pin or "").strip()
 
     # Qeydli kompüter qapısı: biletsiz yol da yalnız icazə verilmiş zal
     # kompüterlərindən işləyir (org-da qeydli kompüter varsa). Bax

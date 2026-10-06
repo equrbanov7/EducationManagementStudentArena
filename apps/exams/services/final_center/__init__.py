@@ -58,6 +58,7 @@ from .permissions import (
     user_supervises_final_sessions,
 )
 from .pins import (
+    PinHashBudget,
     decrypt_ticket_pin,
     generate_pin_value,
     revoke_ticket_pin,
@@ -117,6 +118,7 @@ __all__ = [
     "ensure_pin_ticket",
     "HEARTBEAT_INTERVAL_SECONDS",
     "PRESENCE_TTL_SECONDS",
+    "PinHashBudget",
     "RoomAdminError",
     "RoomSessionStateError",
     "TicketStateError",

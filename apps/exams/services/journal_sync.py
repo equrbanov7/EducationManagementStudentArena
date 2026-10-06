@@ -300,9 +300,12 @@ def registrar_block_reason(request, exam):
     İmtahan jurnal fənninə bağlı deyilsə həmişə ``None`` (qapı tətbiq olunmur).
     """
     subject_id = getattr(exam, "subject_id", None)
+    if not subject_id:
+        # Perf 2026-10-06: fənnsiz imtahan üçün `exam.organization` yüklənmir.
+        return None
     organization = getattr(exam, "organization", None)
     user = getattr(request, "user", None)
-    if not subject_id or organization is None or user is None or not user.is_authenticated:
+    if organization is None or user is None or not user.is_authenticated:
         return None
     try:
         from apps.registrar.public import exam_eligibility

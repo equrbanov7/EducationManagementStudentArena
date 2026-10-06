@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
-from django.db import transaction
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -31,7 +30,6 @@ from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, 
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
-    autosave_occ_conflict_response,
     build_exam_history_url,
     build_exam_result_url,
     build_take_exam_question_payload,
@@ -45,60 +43,48 @@ from ._helpers import (
     resolve_exam_failure_redirect,
     selected_option_ids_from_request,
 )
+from ._take_post_lock import finished_attempt_response, run_locked_take_exam_post
 from ._timer_write_guard import reject_unstarted_timed_write
-from .access_guard import ensure_active_attempt_access
+from .access_guard import USER_EXCLUDED_ANNOTATION, ensure_active_attempt_access, user_exclusion_annotation
 from .script_data import take_exam_script_data
 
 
-def _attempt_answers_queryset(attempt, *, question_ids=None):
+def _attempt_answers_queryset(attempt, *, question_ids=None, with_options=True, with_files=True):
     """
-    Return the answers (with question/options/files prefetched) for `attempt`.
+    Return the answers (with question + optional options/files prefetch) for `attempt`.
 
     P2.E — when `question_ids` is provided (autosave fast-path) the queryset is
     narrowed to only the changed questions so we don't load the full answer set
     for every autosave request.
+
+    Perf 2026-10-06: variantlar/seçimlər yalnız test imtahanında oxunur
+    (`with_options`), cavab faylları isə yalnız yazılı imtahan səhifəsində
+    göstərilir (`with_files`) — POST yolu faylları heç oxumur (əvəzləmə
+    `answer.files.all().delete()` öz sorğusudur).
     """
-    qs = (
-        attempt.answers.select_related("question", "question__exam", "question__block")
-        .prefetch_related("question__options", "selected_options", "files")
-        .order_by("id")
-    )
+    prefetch = []
+    if with_options:
+        prefetch += ["question__options", "selected_options"]
+    if with_files:
+        prefetch.append("files")
+    qs = attempt.answers.select_related("question", "question__exam", "question__block")
+    if prefetch:
+        qs = qs.prefetch_related(*prefetch)
+    qs = qs.order_by("id")
     if question_ids is not None:
         qs = qs.filter(question_id__in=list(question_ids))
     return qs
 
 
-def _is_ajax_request(request):
-    return request.headers.get("x-requested-with") == "XMLHttpRequest"
-
-
-def _finished_attempt_response(request, attempt, *, return_to):
-    redirect_url = build_exam_result_url(attempt, return_to=return_to)
-    if _is_ajax_request(request):
-        return JsonResponse(
-            {
-                "success": True,
-                "finished": True,
-                "already_finished": True,
-                "redirect_url": redirect_url,
-            }
-        )
-    return redirect(redirect_url)
-
-
-def _supervision_locked_response(request, attempt, *, return_to):
-    message = pgettext(
-        "exams.view.access.message",
-        "İmtahanınız nəzarətçi tərəfindən dayandırılıb — kilid açılana qədər cavablar qəbul edilmir.",
-    )
-    if _is_ajax_request(request):
-        return JsonResponse({"success": False, "locked": True, "error": message}, status=423)
-    messages.error(request, message)
-    return redirect(
-        append_return_to(
-            reverse("exams:take_exam", kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id}), return_to
-        )
-    )
+def _answers_by_question_id(answers, *, with_options):
+    """`{question_id: {"answer", "selected_option_ids"}}` — seçimlər yalnız prefetch olunubsa."""
+    return {
+        a.question_id: {
+            "answer": a,
+            "selected_option_ids": {option.id for option in a.selected_options.all()} if with_options else set(),
+        }
+        for a in answers
+    }
 
 
 def _marked_question_ids_from_request(request, valid_question_ids):
@@ -112,6 +98,10 @@ def _marked_question_ids_from_request(request, valid_question_ids):
         parsed_payload = raw_payload.split(",")
 
     if not isinstance(parsed_payload, (list, tuple, set)):
+        return []
+    if not parsed_payload:
+        # Perf 2026-10-06: klient hər autosave-də «[]» göndərir — boş siyahının
+        # validasiyası üçün attempt-in sual id-lərini oxumağa ehtiyac yoxdur.
         return []
 
     valid_question_ids = {int(question_id) for question_id in valid_question_ids}
@@ -129,8 +119,14 @@ def _marked_question_ids_from_request(request, valid_question_ids):
     return marked_question_ids
 
 
-def _save_marked_question_ids_from_request(request, attempt):
-    valid_question_ids = attempt.answers.values_list("question_id", flat=True)
+def _save_marked_question_ids_from_request(request, attempt, *, loaded_question_ids=None):
+    # `loaded_question_ids` — çağıran attempt-in BÜTÜN cavablarını artıq yükləyibsə
+    # onların sual id-ləri (eyni çoxluq; ayrıca `values_list` sorğusu getmir).
+    valid_question_ids = (
+        loaded_question_ids
+        if loaded_question_ids is not None
+        else attempt.answers.values_list("question_id", flat=True)
+    )
     marked_question_ids = _marked_question_ids_from_request(request, valid_question_ids)
     if marked_question_ids is None:
         return
@@ -221,200 +217,193 @@ def start_exam(request, slug):
     return _start_or_resume_attempt(request, exam)
 
 
-def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
-    action = (request.POST.get("submit_action") or "").strip()
-    is_ajax = _is_ajax_request(request)
+def _handle_take_exam_post(request, *, attempt, action, is_ajax, return_to):
+    """Kilid altında cavab yazıları + finish (çağıran: `run_locked_take_exam_post`).
 
-    with transaction.atomic():
-        # Audit 2026-09-13 EX-09 (P2): `of=("self",)` olmadan `FOR UPDATE`
-        # JOIN-lənmiş `exams_exam` sətrini də kilidləyirdi — bir imtahanın bütün
-        # tələbələrinin 3 saniyəlik autosave-ləri və müəllimin publish/unpublish
-        # keçidləri həmin sətir üzərində növbəyə düşürdü.
-        attempt = (
-            ExamAttempt.objects.select_for_update(of=("self",))
-            .select_related("exam")
-            .get(id=attempt.id, user=request.user)
+    Attempt artıq `FOR UPDATE` ilə yüklənib, giriş/nəzarət/OCC yoxlamaları
+    keçilib (bax `_take_post_lock.py`); burada atomic blok daxilindəyik.
+    """
+    exam = attempt.exam
+
+    # Re-check the deadline while holding the attempt row lock. This keeps
+    # final submit, autosave, and timer-expiry paths from racing each other.
+    # Audit 2026-09-28 EX28-07: deadline `end_datetime` ilə kəsilir; müddətsiz
+    # imtahanda `end_datetime` keçibsə də vaxt bitmiş sayılır (grace daxilində yazı saxlanır).
+    is_time_up = write_window_closed(attempt, at_time=timezone.now())
+
+    autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
+    with_options = exam.exam_type == "test"
+    answers_qs_kwargs = {"question_ids": autosave_question_ids_for_fetch, "with_options": with_options}
+    answers = list(_attempt_answers_queryset(attempt, with_files=False, **answers_qs_kwargs))
+
+    if not answers:
+        if not attempt.answers.exists():
+            generate_random_questions_for_attempt(attempt)
+        answers = list(_attempt_answers_queryset(attempt, with_files=False, **answers_qs_kwargs))
+
+    if not answers and autosave_question_ids_for_fetch is None:
+        if is_ajax:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": pgettext("exams.view.access.message", "exam_start_failed"),
+                },
+                status=400,
+            )
+        message_key = (
+            "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         )
-        exam = attempt.exam
-        ensure_active_attempt_access(attempt, request.user, request=request)
+        messages.error(request, pgettext("exams.view.access.message", message_key))
+        return redirect(resolve_exam_failure_redirect(request))
 
-        if attempt.is_finished:
-            return _finished_attempt_response(request, attempt, return_to=return_to)
+    # Tam yükləmədə (`question_ids is None`) `answers` attempt-in BÜTÜN cavablarıdır.
+    full_answer_set = autosave_question_ids_for_fetch is None
+    questions = [a.question for a in answers]
+    answers_by_qid = _answers_by_question_id(answers, with_options=with_options)
 
-        # EXAMQA 2026-10-01: nəzarət kilidi (pozuntu limiti və ya nəzarətçinin
-        # «dayandır»-ı) yalnız klient overlay-i idi — overlay-i DevTools ilə silən
-        # tələbə kilid altında cavab yaza / təhvil verə bilirdi. Kilidli cəhdə
-        # yazı qəbul olunmur (423); klient lokal draft-ı saxlayır və kilid
-        # açılandan (resumed) sonra növbəti autosave ilə göndərir.
-        if exam_supervision_enabled() and attempt.supervision_status == "locked":
-            return _supervision_locked_response(request, attempt, return_to=return_to)
+    _save_marked_question_ids_from_request(
+        request, attempt, loaded_question_ids=[a.question_id for a in answers] if full_answer_set else None
+    )
 
-        # EXAM-P1-06: autosave/finish optimistic concurrency — stale tab yazısı
-        # 409 alır (helper-də; base_revision yoxdursa geriyə-uyğun).
-        occ_conflict = autosave_occ_conflict_response(request, attempt, action)
-        if occ_conflict is not None:
-            return occ_conflict
+    autosave_changed_question_ids = autosave_question_ids_for_fetch
+    form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
 
-        # Re-check the deadline while holding the attempt row lock. This keeps
-        # final submit, autosave, and timer-expiry paths from racing each other.
-        # Audit 2026-09-28 EX28-07: deadline `end_datetime` ilə kəsilir; müddətsiz
-        # imtahanda `end_datetime` keçibsə də vaxt bitmiş sayılır (grace daxilində yazı saxlanır).
-        is_time_up = is_time_up or write_window_closed(attempt, at_time=timezone.now())
+    # Perf auditi 2026-09-13 F-05: test cavablarının yazıları döngüdə
+    # deyil, sonda TOPLU gedir (bax `TestAnswerWriteBatch`) — sorğu sayı
+    # sual sayından asılı olmur. Erkən `return`-lardan əvvəl də `flush()`
+    # çağırılır ki, əvvəlki sualların yazısı (köhnə davranış) itməsin.
+    write_batch = TestAnswerWriteBatch()
 
-        autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
-        answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+    for q in questions:
+        if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
+            continue
+        if autosave_changed_question_ids is None and finish_skips_absent_question(
+            request, q.id, form_has_presence_markers=form_has_presence_markers
+        ):
+            continue
+        timer_guard = reject_unstarted_timed_write(
+            request, attempt, q, exam_type=exam.exam_type, action=action, is_ajax=is_ajax
+        )
+        if timer_guard is not None:
+            write_batch.flush()
+            return timer_guard
+        # Server deadline keçmiş sualın yazısı saxlanmır.
+        if question_timer_expired(attempt, q):
+            continue
 
-        if not answers:
-            if not attempt.answers.exists():
-                generate_random_questions_for_attempt(attempt)
-            answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+        answer_data = answers_by_qid.get(q.id) or {}
+        ans = answer_data.get("answer")
+        if ans is None:
+            # Müdafiə qolu: `questions` elə `answers`-dən çıxarılır, yəni
+            # praktikada bura düşülmür (F-05 ölçüsündə 0 dəfə).
+            ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
+            answer_data = {"answer": ans, "selected_option_ids": set()}
+            full_answer_set = False  # yeni cavab `answers`-də yoxdur — bal hesabı təkrar oxusun
 
-        if not answers and autosave_question_ids_for_fetch is None:
-            if is_ajax:
-                return JsonResponse(
-                    {
-                        "success": False,
-                        "error": pgettext("exams.view.access.message", "exam_start_failed"),
-                    },
-                    status=400,
-                )
-            message_key = (
-                "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
+        if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
+            _save_test_answer_if_changed(
+                ans,
+                q,
+                selected_option_ids_from_request(request, q),
+                answer_data.get("selected_option_ids", set()),
+                batch=write_batch,
             )
-            messages.error(request, pgettext("exams.view.access.message", message_key))
-            return redirect(resolve_exam_failure_redirect(request))
-
-        questions = [a.question for a in answers]
-        answers_by_qid = {
-            a.question_id: {
-                "answer": a,
-                "selected_option_ids": {option.id for option in a.selected_options.all()},
-            }
-            for a in answers
-        }
-
-        _save_marked_question_ids_from_request(request, attempt)
-
-        autosave_changed_question_ids = posted_autosave_question_ids(request, action=action)
-        form_has_presence_markers = any(key.startswith("q_present_") for key in request.POST)
-
-        # Perf auditi 2026-09-13 F-05: test cavablarının yazıları döngüdə
-        # deyil, sonda TOPLU gedir (bax `TestAnswerWriteBatch`) — sorğu sayı
-        # sual sayından asılı olmur. Erkən `return`-lardan əvvəl də `flush()`
-        # çağırılır ki, əvvəlki sualların yazısı (köhnə davranış) itməsin.
-        write_batch = TestAnswerWriteBatch()
-
-        for q in questions:
-            if autosave_changed_question_ids is not None and q.id not in autosave_changed_question_ids:
-                continue
-            if autosave_changed_question_ids is None and finish_skips_absent_question(
-                request, q.id, form_has_presence_markers=form_has_presence_markers
-            ):
-                continue
-            timer_guard = reject_unstarted_timed_write(
-                request, attempt, q, exam_type=exam.exam_type, action=action, is_ajax=is_ajax
-            )
-            if timer_guard is not None:
-                write_batch.flush()
-                return timer_guard
-            # Server deadline keçmiş sualın yazısı saxlanmır.
-            if question_timer_expired(attempt, q):
-                continue
-
-            answer_data = answers_by_qid.get(q.id) or {}
-            ans = answer_data.get("answer")
-            if ans is None:
-                # Müdafiə qolu: `questions` elə `answers`-dən çıxarılır, yəni
-                # praktikada bura düşülmür (F-05 ölçüsündə 0 dəfə).
-                ans, _ = ExamAnswer.objects.get_or_create(attempt=attempt, question=q)
-                answer_data = {"answer": ans, "selected_option_ids": set()}
-
-            if exam.exam_type == "test" and q.answer_mode in ("single", "multiple"):
-                _save_test_answer_if_changed(
+        else:
+            try:
+                _save_written_answer_if_changed(
+                    request,
                     ans,
                     q,
-                    selected_option_ids_from_request(request, q),
-                    answer_data.get("selected_option_ids", set()),
-                    batch=write_batch,
+                    allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
                 )
-            else:
-                try:
-                    _save_written_answer_if_changed(
-                        request,
-                        ans,
-                        q,
-                        allow_binary_uploads=(action != "autosave" or settings.EXAM_AUTOSAVE_BINARY_UPLOADS_ENABLED),
+            except ValidationError as exc:
+                write_batch.flush()
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
+                messages.error(request, exc.messages[0])
+                return redirect(
+                    append_return_to(
+                        reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
+                        return_to,
                     )
-                except ValidationError as exc:
-                    write_batch.flush()
-                    if is_ajax:
-                        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
-                    messages.error(request, exc.messages[0])
-                    return redirect(
-                        append_return_to(
-                            reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}),
-                            return_to,
-                        )
-                    )
-
-        write_batch.flush()
-
-        if exam.exam_type == "test" and (action != "autosave" or is_time_up):
-            attempt.recalculate_score()
-
-        # EXAM-P1-06: uğurlu yazıdan sonra revision-u artır (OCC).
-        bump_autosave_revision(attempt)
-        remember_autosave_write(request, attempt, action)
-
-        if action == "finish" or is_time_up:
-            status = "expired" if is_time_up else "submitted"
-            attempt.mark_finished(status=status)
-            if is_ajax:
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "finished": True,
-                        "redirect_url": build_exam_result_url(attempt, return_to=return_to),
-                    }
                 )
-            return redirect(build_exam_result_url(attempt, return_to=return_to))
 
-        if action == "save_draft" and attempt.status != "draft":
-            attempt.status = "draft"
-            attempt.save(update_fields=["status"])
+    write_batch.flush()
 
-        if action == "autosave":
-            record_autosave("success")
+    finishing = action == "finish" or is_time_up
+    finish_extra_fields = None
+    if exam.exam_type == "test" and (action != "autosave" or is_time_up):
+        # Perf 2026-10-06: tam cavab dəsti artıq yüklənib (yazılar seçim
+        # snapshot-unu instansda yeniləyib) — bal hesabı onu təkrar oxumur.
+        # Finish-də say sahələri `mark_finished`-in TƏK UPDATE-inə qatılır.
+        attempt.recalculate_score(answers=answers if full_answer_set else None, save=not finishing)
+        if finishing:
+            finish_extra_fields = ["correct_count", "wrong_count"]
+
+    # EXAM-P1-06: uğurlu yazıdan sonra revision-u artır (OCC).
+    bump_autosave_revision(attempt)
+    remember_autosave_write(request, attempt, action)
+
+    if finishing:
+        status = "expired" if is_time_up else "submitted"
+        attempt.mark_finished(status=status, extra_update_fields=finish_extra_fields)
         if is_ajax:
-            return JsonResponse({"success": True, "finished": False, "server_revision": attempt.autosave_revision})
-
-        return redirect(
-            append_return_to(
-                reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to
+            return JsonResponse(
+                {
+                    "success": True,
+                    "finished": True,
+                    "redirect_url": build_exam_result_url(attempt, return_to=return_to),
+                }
             )
-        )
+        return redirect(build_exam_result_url(attempt, return_to=return_to))
+
+    if action == "save_draft" and attempt.status != "draft":
+        attempt.status = "draft"
+        attempt.save(update_fields=["status"])
+
+    if action == "autosave":
+        record_autosave("success")
+    if is_ajax:
+        return JsonResponse({"success": True, "finished": False, "server_revision": attempt.autosave_revision})
+
+    return redirect(
+        append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to)
+    )
 
 
 @login_required
 def take_exam(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
+    if request.method == "POST":
+        # Perf 2026-10-06: test/yazılı POST-u attempt-i TƏK dəfə, sətir kilidi
+        # altında yükləyir və bütün yoxlamaları orada edir (bax `_take_post_lock`).
+        # `None` → coding attempt (və ya tapılmadı) — aşağıdakı köhnə yol.
+        response = run_locked_take_exam_post(
+            request, slug=slug, attempt_id=attempt_id, write_answers=_handle_take_exam_post
+        )
+        if response is not None:
+            return response
     # P2.D — select_related ile attempt + exam + user + exam.author/course-u tək
-    # sorğuda yüklə (əvvəlcə hər biri ayrı round-trip idi).
+    # sorğuda yüklə (əvvəlcə hər biri ayrı round-trip idi). Perf 2026-10-06:
+    # nəzarət konfiqi (reverse one-to-one) və exclusion EXISTS də eyni sorğuda.
     attempt = get_object_or_404(
         ExamAttempt.objects.select_related(
             "exam",
             "exam__author",
             "exam__course",
             "exam__organization",
+            "exam__supervision_config",
             "user",
-        ),
+        ).annotate(**user_exclusion_annotation(request.user)),
         id=attempt_id,
         exam__in=tenant_scoped_exams(request),
         exam__slug=slug,
         user=request.user,
     )
     exam = attempt.exam
-    ensure_active_attempt_access(attempt, request.user, request=request)
+    ensure_active_attempt_access(
+        attempt, request.user, request=request, user_excluded=getattr(attempt, USER_EXCLUDED_ANNOTATION)
+    )
     return_to = current_return_to(request)
     history_url = build_exam_history_url(exam, return_to=return_to)
     supervision_feature_enabled = exam_supervision_enabled()
@@ -427,15 +416,10 @@ def take_exam(request, slug, attempt_id):
         supervision_feature_enabled and attempt.supervision_manual_lock and attempt.supervision_status == "locked"
     )
     if not is_manual_supervision_lock:
-        # Audit 2026-09-13 EX-05 (P2): deadline-dan dərhal sonra gələn POST
-        # (client-in avtomatik «finish»-i, son autosave) burada gövdəsi
-        # oxunmadan «expired» olurdu. Grace pəncərəsi daxilindəki yazı
-        # `_handle_take_exam_post`-a buraxılır — orada kilid altında
-        # `is_time_up` hesablanır, cavablar saxlanır, status «expired» olur.
-        # Audit 2026-09-28 EX28-04: GET də grace-i gözləyir (ikinci tab / reload
-        # cəhdi grace daxilində bağlayıb son təhvili itirməsin) — hər iki metod
-        # defolt olaraq `now − grace` ilə yoxlayır. EX28-07: POST müddətsiz
-        # imtahanda `end_datetime` + grace keçibsə də rədd olunur.
+        # Audit 2026-09-13 EX-05 (P2) / 2026-09-28 EX28-04, EX28-07: GET də
+        # grace-i gözləyir (`now − grace`) — ikinci tab / reload cəhdi grace
+        # daxilində bağlayıb son təhvili itirməsin. Test/yazılı POST eyni
+        # yoxlamanı kilid altında `_take_post_lock`-da edir.
         if request.method == "POST":
             attempt.expire_if_write_window_closed()
         else:
@@ -444,7 +428,7 @@ def take_exam(request, slug, attempt_id):
     if supervision_feature_enabled:
         attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
-        return _finished_attempt_response(request, attempt, return_to=return_to)
+        return finished_attempt_response(request, attempt, return_to=return_to)
 
     # Student is actually back in the exam → clear the pending "resumed" state
     # so the periodic sweep does not auto-finish an active student.
@@ -454,37 +438,24 @@ def take_exam(request, slug, attempt_id):
         mark_student_returned(attempt)
 
     if request.method == "POST" and exam.exam_type != "coding":
-        return _handle_take_exam_post(request, attempt=attempt, return_to=return_to, is_time_up=False)
+        # Test/yazılı POST-u yuxarıdakı kilidli yol emal edir; buraya yalnız iki
+        # sorğu arasında attempt-in tipi dəyişəndə düşülə bilər.
+        raise Http404("Attempt changed during the request.")
 
-    # P2.E — Autosave fast-path: yalnız dəyişən sual(lar) üçün cavabları yüklə.
-    # POST + action=="autosave" + changed_questions[] dolu olduqda full answer-set
-    # əvəzinə yalnız o sualları gətiririk. GET-də və finish/submit/save_draft-də
-    # hələ də tam answer-set lazımdır (timer, template render, recalculate_score).
-    # Coding exam-lar üçün ayrı `coding_autosave` view-i var — burada fast-path
-    # yalnız test/written exam üçün aktivdir.
-    is_autosave_post = (
-        request.method == "POST"
-        and (request.POST.get("submit_action") or "").strip() == "autosave"
-        and exam.exam_type != "coding"
-    )
-    autosave_question_ids_for_fetch = (
-        posted_autosave_question_ids(request, action="autosave") if is_autosave_post else None
-    )
+    # Coding attempt-də cavablar yalnız «hələ yaradılmayıb?» yoxlaması üçündür;
+    # variant/seçim yalnız test, fayllar yalnız yazılı səhifədə göstərilir.
+    with_options = exam.exam_type == "test"
+    answers_qs_kwargs = {"with_options": with_options, "with_files": exam.exam_type not in ("test", "coding")}
+    answers = list(_attempt_answers_queryset(attempt, **answers_qs_kwargs))
 
-    answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
-
-    # P2 cleanup — Əgər autosave fast-path işləyirsə amma DB-də o sual üçün
-    # answer hələ yaranmayıbsa, generate-i bir dəfə çağır və yenidən yüklə.
-    # Bu, GET-dən qabaq autosave-in gəlməsi kimi nadir, lakin sıfır olmayan
-    # ssenariyə qarşı təhlükəsizlik xəttidir.
+    # P2 cleanup — attempt üçün hələ heç bir cavab yoxdursa (nadir: start-dan
+    # sonra generate yarımçıq qalıb) generate-i bir dəfə çağır və yenidən yüklə.
     if not answers:
-        # Yalnız attempt üçün heç bir answer yoxdursa generate çağırırıq.
-        # Bu count tək sorğudur; fast-path-də yalnız ehtiyac olduqda işləyir.
         if not attempt.answers.exists():
             generate_random_questions_for_attempt(attempt)
-        answers = list(_attempt_answers_queryset(attempt, question_ids=autosave_question_ids_for_fetch))
+        answers = list(_attempt_answers_queryset(attempt, **answers_qs_kwargs))
 
-    if not answers and autosave_question_ids_for_fetch is None:
+    if not answers:
         message_key = (
             "exam_has_no_questions" if not exam.questions.filter(is_active=True).exists() else "exam_start_failed"
         )
@@ -515,12 +486,7 @@ def take_exam(request, slug, attempt_id):
     questions = [a.question for a in answers]
 
     # ✅ Hər cavab üçün seçilmiş option ID-lərini set olaraq saxla
-    answers_by_qid = {}
-    for a in answers:
-        answers_by_qid[a.question_id] = {
-            "answer": a,
-            "selected_option_ids": {option.id for option in a.selected_options.all()},
-        }
+    answers_by_qid = _answers_by_question_id(answers, with_options=with_options)
 
     # GET sorğusu
     # Load supervision status
