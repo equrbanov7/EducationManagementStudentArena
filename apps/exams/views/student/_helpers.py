@@ -123,6 +123,9 @@ def autosave_occ_conflict_response(request, attempt, action):
         return None
     if base_revision == attempt.autosave_revision:
         return None
+    replay = _autosave_replay_response(request, attempt, action, base_revision)
+    if replay is not None:
+        return replay
     if action == "autosave":
         record_autosave("conflict")
     message = pgettext(
@@ -143,6 +146,67 @@ def autosave_occ_conflict_response(request, attempt, action):
             "message": message,
         },
         status=409,
+    )
+
+
+# Tutum testi 2026-10-05: yük altında autosave serverdə yazılır, amma cavab klientə
+# çatmır (nginx 504 / şəbəkə). Klient eyni cavabları KÖHNƏ revision ilə təkrar göndərir
+# və 409 alır → autosave «səhifəni yeniləyin» ilə donur. Son uğurlu autosave-in
+# barmaq izi saxlanır; eyni məzmunlu, düz bir revision geridə qalan təkrar yazısız
+# uğur sayılır (server vəziyyəti həmin sorğunun nəticəsinin özüdür).
+_AUTOSAVE_REPLAY_TTL = 600
+
+
+def _autosave_replay_key(attempt):
+    return f"exam:autosave:last:{attempt.pk}"
+
+
+def _autosave_fingerprint(request):
+    import hashlib
+
+    items = sorted(
+        (key, tuple(request.POST.getlist(key)))
+        for key in request.POST.keys()
+        if key.startswith("q_") or key == "changed_questions[]"
+    )
+    return hashlib.sha256(repr(items).encode()).hexdigest()
+
+
+def remember_autosave_write(request, attempt, action):
+    """Uğurlu autosave-in (revision, barmaq izi) qeydi — təkrar göndərişi tanımaq üçün."""
+    if action != "autosave" or request.FILES:
+        return
+    from django.core.cache import cache
+
+    try:
+        cache.set(
+            _autosave_replay_key(attempt),
+            {"rev": attempt.autosave_revision, "fp": _autosave_fingerprint(request)},
+            _AUTOSAVE_REPLAY_TTL,
+        )
+    except Exception:  # noqa: BLE001 — keş əlçatmazdırsa sadəcə köhnə davranış (409)
+        pass
+
+
+def _autosave_replay_response(request, attempt, action, base_revision):
+    if action != "autosave" or request.FILES or base_revision != attempt.autosave_revision - 1:
+        return None
+    if request.headers.get("x-requested-with") != "XMLHttpRequest":
+        return None
+    from django.core.cache import cache
+    from django.http import JsonResponse
+
+    try:
+        last = cache.get(_autosave_replay_key(attempt))
+    except Exception:  # noqa: BLE001
+        return None
+    if not last or last.get("rev") != attempt.autosave_revision or last.get("fp") != _autosave_fingerprint(request):
+        return None
+    from apps.exams.metrics import record_autosave
+
+    record_autosave("success")
+    return JsonResponse(
+        {"success": True, "finished": False, "server_revision": attempt.autosave_revision, "replayed": True}
     )
 
 
