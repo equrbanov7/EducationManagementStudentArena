@@ -29,6 +29,8 @@ def user_unread_notification_count(context, user):
     if not user or not user.is_authenticated:
         return 0
     precomputed = context.get("in_app_unread_count")
+    if callable(precomputed):  # kabinet fraqmentinin tənbəl dəyəri (accounts `LazyValue`)
+        precomputed = precomputed()
     request = context.get("request")
     if (
         isinstance(precomputed, int)

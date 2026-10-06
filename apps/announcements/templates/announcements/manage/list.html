@@ -1,0 +1,63 @@
+{% extends "accounts/profile_embed_base.html" %}
+{% load i18n static %}
+{% comment %}Elanların idarəsi — siyahı + statistika (görüldü / oxundu / müraciət). Axtarış və filtr
+`manage.js` ilə AJAX-dır (300 ms debounce, skeleton), JS-siz də GET forması kimi işləyir.{% endcomment %}
+
+{% block embed_title %}{% trans "Elanların idarəsi" context "announcements.manage" %}{% endblock %}
+
+{% block embed_extra_css %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-3">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-3">
+{% endblock %}
+
+{% block embed_content %}
+<div class="ann annm" data-ann-root data-list-url="{% url 'announcements:manage_rows' %}">
+    <header class="ann-head">
+        <p class="ann-head__intro">
+            {% if is_org_wide %}{% trans "Bütün təşkilata və ya seçilmiş fakültə, kafedra, qrup üçün elan yaradın. Popup elan hər istifadəçiyə yalnız bir dəfə göstərilir." context "announcements.manage" %}{% else %}{% trans "Yalnız öz bölmənizə (və onun alt bölmələrinə) elan verə bilərsiniz. Popup elan hər istifadəçiyə yalnız bir dəfə göstərilir." context "announcements.manage" %}{% endif %}
+        </p>
+        <div class="annm-head__actions">
+            <a class="ems-btn" href="{{ cabinet_url }}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Elanlarım" context "announcements.manage" %}</a>
+            <a class="ems-btn ems-btn--primary" href="{% url 'announcements:manage_create' %}"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni elan" context "announcements.manage" %}</a>
+        </div>
+    </header>
+
+    <form class="ann-filters annm-filters" data-ann-filters method="get" role="search" aria-label="{% trans 'Elan filtrləri' context 'announcements.cabinet' %}">
+        <div class="ann-filters__search">
+            <i class="fas fa-magnifying-glass ann-filters__search-icon" aria-hidden="true"></i>
+            <input type="search" name="q" value="{{ params.q }}" class="ems-input ann-filters__input" maxlength="100" data-ann-search
+                   placeholder="{% trans 'Başlıq və ya mətndə axtar…' context 'announcements.cabinet' %}"
+                   aria-label="{% trans 'Elanlarda axtar' context 'announcements.cabinet' %}" autocomplete="off">
+        </div>
+        <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+            <select name="state" class="ems-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'Vəziyyət' context 'announcements.cabinet' %}">
+                <option value="all"{% if params.state == "all" %} selected{% endif %}>{% trans "Hamısı" context "announcements.cabinet" %}</option>
+                <option value="draft"{% if params.state == "draft" %} selected{% endif %}>{% trans "Qaralama" context "announcements.manage" %}</option>
+                <option value="scheduled"{% if params.state == "scheduled" %} selected{% endif %}>{% trans "Planlaşdırılıb" context "announcements.manage" %}</option>
+                <option value="active"{% if params.state == "active" %} selected{% endif %}>{% trans "Aktiv" context "announcements.cabinet" %}</option>
+                <option value="expired"{% if params.state == "expired" %} selected{% endif %}>{% trans "Müddəti bitmiş" context "announcements.cabinet" %}</option>
+                <option value="archived"{% if params.state == "archived" %} selected{% endif %}>{% trans "Arxiv" context "announcements.manage" %}</option>
+                <option value="deleted"{% if params.state == "deleted" %} selected{% endif %}>{% trans "Silinmişlər" context "announcements.manage" %}</option>
+            </select>
+        </div>
+        <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+            <select name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select aria-label="{% trans 'Kateqoriya' context 'announcements.cabinet' %}">
+                <option value="">{% trans "Bütün kateqoriyalar" context "announcements.cabinet" %}</option>
+                {% for value, label in categories %}<option value="{{ value }}"{% if params.category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <noscript><button type="submit" class="ems-btn">{% trans "Göstər" context "announcements.manage" %}</button></noscript>
+    </form>
+
+    <div class="ann-results" data-ann-results aria-live="polite" aria-busy="false">
+        {% include "announcements/manage/_rows.html" %}
+    </div>
+    <template data-ann-skeleton>{% include "announcements/cabinet/_skeleton.html" %}</template>
+    <p class="ann-sr-only" data-ann-error-text hidden>{% trans "Elanları yükləmək alınmadı. Bir az sonra yenidən cəhd edin." context "announcements.cabinet" %}</p>
+</div>
+{% endblock %}
+
+{% block embed_extra_js %}
+    <script src="{% static 'announcements/js/list.js' %}?v=20261006-1"></script>
+{% endblock %}

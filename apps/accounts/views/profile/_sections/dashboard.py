@@ -87,6 +87,11 @@ def _role_label(user, organization) -> str:
     return str(resolve_seeded_role_label(getattr(role, "name", ""), getattr(role, "display_name", "")) or "")
 
 
+def _resolve(value):
+    """Tənbəl (çağırıla bilən) sayğacın dəyəri — bax ``context_builder/_lazy.LazyValue``."""
+    return value() if callable(value) else value
+
+
 def _greeting(user) -> str:
     """«Salam, <ad>» — ad yoxdursa tam ad, o da yoxdursa istifadəçi adı."""
     name = (
@@ -175,6 +180,10 @@ def build_dashboard_section(
         own_applications = count_own_applications(user, active_organization)
         # Tələbə emalçı ola bilməz — şöbə kataloqu sorğusu ona sərf olunmur.
         is_handler = not (is_student and not is_teacher) and is_applications_handler(user, active_organization)
+    # Sayğaclar fraqment rejimində tənbəl ola bilər (`context_builder/_lazy.py`) — yalnız
+    # kartın oxuduğu halda hesablanır (emalçı / apellyasiya idarəçisi); dəyər eynidir.
+    applications_pending_count = _resolve(applications_pending_count) if is_handler else 0
+    pending_appeals_count = _resolve(pending_appeals_count) if capabilities.get("can_manage_appeals") else 0
 
     student_kwargs = {"record": record, "period": period, "subjects": subjects, "allowed_sections": allowed_sections}
     widgets = [

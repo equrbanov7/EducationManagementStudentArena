@@ -1,5 +1,6 @@
 """build_profile_response — əsas builder (stage-mixin birləşməsi, FAZA 4)."""
 
+from ._lazy import LazyValue, force
 from ._stage1 import _Stage1Mixin
 from ._stage2 import _Stage2Mixin
 from ._stage3 import _Stage3Mixin
@@ -10,8 +11,20 @@ class _ProfileResponseBuilder(_Stage1Mixin, _Stage2Mixin, _Stage3Mixin, _Stage4M
     """Profil context/response yığımı (köhnə 1243-sətirlik god-func; ~130 lokal
     self.* sahələrinə, gövdə ardıcıl stage-lərə bölünüb)."""
 
-    def __init__(self, request):
+    def __init__(self, request, *, lean=False):
         self.request = request
+        # Fraqment rejimi (yalnız GET): qabığa aid dəyərlər tənbəldir (bax `_lazy.py`).
+        self.lean = bool(lean) and request.method == "GET"
+
+    def _defer(self, fn):
+        """Tam rejimdə ``fn()``-in nəticəsi, fraqment rejimində tənbəl ``LazyValue(fn)``."""
+        return LazyValue(fn) if self.lean else fn()
+
+    def _pick(self, source, key, *default):
+        """``source[key]`` (və ya ``.get(key, default)``); ``source`` tənbəldirsə nəticə də tənbəldir."""
+        if isinstance(source, LazyValue):
+            return LazyValue(lambda: _lookup(force(source), key, default))
+        return _lookup(source, key, default)
 
     def run(self):
         from django.shortcuts import render
@@ -51,13 +64,20 @@ class _ProfileResponseBuilder(_Stage1Mixin, _Stage2Mixin, _Stage3Mixin, _Stage4M
         return None, self.context
 
 
+def _lookup(mapping, key, default):
+    return mapping.get(key, default[0]) if default else mapping[key]
+
+
 def build_profile_response(request):
     """Profil səhifəsinin context-ini yığıb HttpResponse qaytarır."""
     return _ProfileResponseBuilder(request).run()
 
 
-def build_profile_context(request):
+def build_profile_context(request, *, lean=False):
     """Profil context-ini render ETMƏDƏN qaytarır: ``(early_response, context)``.
+
+    ``lean=True`` (bölmə fraqmenti): qabığa aid (sidebar/navbar) dəyərlər
+    ``LazyValue`` kimi qalır və yalnız partial onları oxuyanda hesablanır.
 
     SPA bölmə fraqmenti üçün lazımdır: əvvəllər ``profile_section_fragment``
     bütün səhifəni (navbar + sidebar + footer + bütün asset teqləri) render edib
@@ -66,4 +86,4 @@ def build_profile_context(request):
     render edir; context yığımı isə eynidir, ona görə icazə/tenant/RLS/filtr
     davranışı dəyişmir.
     """
-    return _ProfileResponseBuilder(request).run_context()
+    return _ProfileResponseBuilder(request, lean=lean).run_context()

@@ -40,6 +40,7 @@ from ._helpers import (
     ensure_student_exam_tenant_context,
     finish_skips_absent_question,
     posted_autosave_question_ids,
+    remember_autosave_write,
     resolve_author_failure_redirect,
     resolve_exam_failure_redirect,
     selected_option_ids_from_request,
@@ -363,6 +364,7 @@ def _handle_take_exam_post(request, *, attempt, return_to, is_time_up):
 
         # EXAM-P1-06: uğurlu yazıdan sonra revision-u artır (OCC).
         bump_autosave_revision(attempt)
+        remember_autosave_write(request, attempt, action)
 
         if action == "finish" or is_time_up:
             status = "expired" if is_time_up else "submitted"

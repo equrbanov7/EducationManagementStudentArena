@@ -49,6 +49,7 @@ from ._helpers import (
     build_student_structure_levels,
     build_teacher_subject_rows,
 )
+from ._lazy import force
 
 #: «Kurslarım» kart şəbəkəsinin tavanı (əvvəl səssiz `[:10]` idi).
 MY_COURSES_CARD_LIMIT = 120
@@ -122,17 +123,22 @@ class _Stage1Mixin:
             self.profile.organization = _active_org
             _active_org_memberships = list(getattr(self.request, "org_memberships", None) or []) or None
         self.capabilities = _role_capabilities(self.request.user, self.profile)
-        self.notification_state = build_profile_notification_state(
-            user=self.request.user, profile=self.profile, active_org_memberships=_active_org_memberships
+        # Qabıq (navbar/sidebar) dəyərləri: fraqment rejimində tənbəl (bax `_lazy.py`).
+        self.notification_state = self._defer(
+            lambda: build_profile_notification_state(
+                user=self.request.user, profile=self.profile, active_org_memberships=_active_org_memberships
+            )
         )
-        self.pending_student_invites = self.notification_state["pending_student_invites"]
-        self.pending_student_join_requests = self.notification_state["pending_student_join_requests"]
-        self.pending_student_join_org_name = self.notification_state["pending_student_join_org_name"]
-        self.pending_student_join_message = self.notification_state["pending_student_join_message"]
-        self.student_can_leave_org = self.notification_state["student_can_leave_org"]
-        self.org_notification_count = self.notification_state["unread_count"]
-        self.in_app_unread_count = get_unread_count(user=self.request.user)
-        self.notifications_unread_count = self.org_notification_count + self.in_app_unread_count
+        self.pending_student_invites = self._pick(self.notification_state, "pending_student_invites")
+        self.pending_student_join_requests = self._pick(self.notification_state, "pending_student_join_requests")
+        self.pending_student_join_org_name = self._pick(self.notification_state, "pending_student_join_org_name")
+        self.pending_student_join_message = self._pick(self.notification_state, "pending_student_join_message")
+        self.student_can_leave_org = self._pick(self.notification_state, "student_can_leave_org")
+        self.org_notification_count = self._pick(self.notification_state, "unread_count")
+        self.in_app_unread_count = self._defer(lambda: get_unread_count(user=self.request.user))
+        self.notifications_unread_count = self._defer(
+            lambda: force(self.org_notification_count) + force(self.in_app_unread_count)
+        )
         self._validate_avatar_upload = validate_profile_avatar_upload
         self.allowed_sections = self.capabilities["allowed_sections"]
         self.active_section = (
@@ -144,10 +150,10 @@ class _Stage1Mixin:
         # qabıq «icazəniz yoxdur» xəbərdarlığı göstərir (QA dalğa-2, W2-8). AJAX ucu
         # onsuz da 403 verir; burada yalnız UX siqnalıdır, məzmun sızması yoxdur.
         self.section_denied = self.request.GET.get("section", "") not in ("", *self.allowed_sections)
-        self.password_change_form = CustomPasswordChangeForm(self.request.user)
+        self.password_change_form = self._defer(lambda: CustomPasswordChangeForm(self.request.user))
         # OTP ilə şifrə dəyişmə (mövcud şifrə unudulub) — unbound default;
         # POST xətasında post_handler bağlanmış formanı geri qaytarır.
-        self.password_otp_form = OTPPasswordResetConfirmForm(self.request.user)
+        self.password_otp_form = self._defer(lambda: OTPPasswordResetConfirmForm(self.request.user))
         self.category_management_create_form = None
         self.category_management_edit_form = None
         self.category_management_edit_item = None
@@ -203,16 +209,18 @@ class _Stage1Mixin:
         self.my_exams_qs = _tenant_scoped_exams(self.request, Exam.objects.filter(author=self.request.user)).order_by(
             "-created_at"
         )
-        self.profile_badge_counts = get_or_set_cached_profile_badge_counts(
-            user_id=self.request.user.pk,
-            org_id=self.active_organization.pk if self.active_organization is not None else None,
-            compute=lambda: compute_profile_badge_counts(
-                self.request,
-                self.request.user,
-                capabilities=self.capabilities,
-                my_exams_qs=self.my_exams_qs,
-                teacher_courses=self.teacher_courses,
-            ),
+        self.profile_badge_counts = self._defer(
+            lambda: get_or_set_cached_profile_badge_counts(
+                user_id=self.request.user.pk,
+                org_id=self.active_organization.pk if self.active_organization is not None else None,
+                compute=lambda: compute_profile_badge_counts(
+                    self.request,
+                    self.request.user,
+                    capabilities=self.capabilities,
+                    my_exams_qs=self.my_exams_qs,
+                    teacher_courses=self.teacher_courses,
+                ),
+            )
         )
         if self.capabilities["is_student"]:
             self.visible_courses_qs = self.enrolled_courses_qs
@@ -221,7 +229,7 @@ class _Stage1Mixin:
         # 2026-09-13 (audit §14/§21): eyni queryset-in COUNT-u aşağıda bir də
         # (`my_created_courses_count` / `assigned_courses_count`) alınırdı — bir dəfə
         # sayılıb paylaşılır; arada yazı yoxdur, dəyər eynidir.
-        self.courses_count = self.visible_courses_qs.count()
+        self.courses_count = self._defer(self.visible_courses_qs.count)
         _enrolled_count = self.courses_count if self.capabilities["is_student"] else None
         _created_count = None if self.capabilities["is_student"] else self.courses_count
         self.my_courses = []
@@ -254,25 +262,27 @@ class _Stage1Mixin:
         self.question_bank_section = {}
         if self.capabilities["can_view_owned_learning"]:
             self.my_created_courses_count = (
-                _created_count if _created_count is not None else self.created_courses_qs.count()
+                _created_count if _created_count is not None else self._defer(self.created_courses_qs.count)
             )
             if self.active_section == "my-courses":
                 # 2026-09-28: əvvəl `[:10]` idi və səhifələmə yox idi — 11-ci kurs kabinetdə
                 # heç görünmürdü. Kartlar yüngüldür; tavan yalnız patoloji hal üçündür.
                 self.my_created_courses = list(self.created_courses_qs[:MY_COURSES_CARD_LIMIT])
                 self._attach_course_group_summaries(self.my_created_courses)
-            self._my_exams_ctx = build_my_exams_context(
-                self.request, my_exams_qs=self.my_exams_qs, active_section=self.active_section
+            self._my_exams_ctx = self._defer(
+                lambda: build_my_exams_context(
+                    self.request, my_exams_qs=self.my_exams_qs, active_section=self.active_section
+                )
             )
-            self.my_exams_count = self._my_exams_ctx["my_exams_count"]
-            self.my_exams_list = self._my_exams_ctx["my_exams_list"]
-            self.my_exams_dashboard = self._my_exams_ctx["my_exams_dashboard"]
-            self.my_exams_search_query = self._my_exams_ctx["my_exams_search_query"]
-            self.my_exams_filter_type = self._my_exams_ctx["my_exams_filter_type"]
-            self.my_exams_filter_status = self._my_exams_ctx["my_exams_filter_status"]
-            self.my_exams_is_paginated = self._my_exams_ctx["my_exams_is_paginated"]
-            self.my_exams_page_obj = self._my_exams_ctx["my_exams_page_obj"]
-            self.my_exams_pagination_query = self._my_exams_ctx["my_exams_pagination_query"]
+            self.my_exams_count = self._pick(self._my_exams_ctx, "my_exams_count")
+            self.my_exams_list = self._pick(self._my_exams_ctx, "my_exams_list")
+            self.my_exams_dashboard = self._pick(self._my_exams_ctx, "my_exams_dashboard")
+            self.my_exams_search_query = self._pick(self._my_exams_ctx, "my_exams_search_query")
+            self.my_exams_filter_type = self._pick(self._my_exams_ctx, "my_exams_filter_type")
+            self.my_exams_filter_status = self._pick(self._my_exams_ctx, "my_exams_filter_status")
+            self.my_exams_is_paginated = self._pick(self._my_exams_ctx, "my_exams_is_paginated")
+            self.my_exams_page_obj = self._pick(self._my_exams_ctx, "my_exams_page_obj")
+            self.my_exams_pagination_query = self._pick(self._my_exams_ctx, "my_exams_pagination_query")
         self._unit_exams_ctx = build_unit_exams_context(
             self.request, allowed_sections=self.allowed_sections, active_section=self.active_section
         )
@@ -304,17 +314,19 @@ class _Stage1Mixin:
         # müəllim, Final/Midterm təyinatı) heç vaxt render olunmurdu.
         self.question_bank_is_center = self._qb_ctx["question_bank_is_center"]
         self.question_bank_section = self._qb_ctx["question_bank_section"]
-        self._posts_ctx = profile_hooks.posts_section(
-            self.request, capabilities=self.capabilities, active_section=self.active_section
+        self._posts_ctx = self._defer(
+            lambda: profile_hooks.posts_section(
+                self.request, capabilities=self.capabilities, active_section=self.active_section
+            )
         )
-        self.user_posts = self._posts_ctx["user_posts"]
-        self.posts_count = self._posts_ctx["posts_count"]
-        self.post_category_tree = self._posts_ctx["post_category_tree"]
-        self.post_category_root_options = self._posts_ctx["post_category_root_options"]
-        self.post_category_subcategory_options = self._posts_ctx["post_category_subcategory_options"]
-        self.post_creation_requires_approval = self._posts_ctx["post_creation_requires_approval"]
-        self.posting_blocked = self._posts_ctx["posting_blocked"]
-        self.posting_blocked_reason = self._posts_ctx["posting_blocked_reason"]
+        self.user_posts = self._pick(self._posts_ctx, "user_posts")
+        self.posts_count = self._pick(self._posts_ctx, "posts_count")
+        self.post_category_tree = self._pick(self._posts_ctx, "post_category_tree")
+        self.post_category_root_options = self._pick(self._posts_ctx, "post_category_root_options")
+        self.post_category_subcategory_options = self._pick(self._posts_ctx, "post_category_subcategory_options")
+        self.post_creation_requires_approval = self._pick(self._posts_ctx, "post_creation_requires_approval")
+        self.posting_blocked = self._pick(self._posts_ctx, "posting_blocked")
+        self.posting_blocked_reason = self._pick(self._posts_ctx, "posting_blocked_reason")
         self.assigned_exams_count = 0
         self.assigned_courses_count = 0
         self.assigned_tasks_count = 0
@@ -352,12 +364,12 @@ class _Stage1Mixin:
         self.pending_answers_search_query = ""
         self.pending_answers_count = 0
         if self.capabilities["can_view_student_assignments"]:
-            self.assigned_exams_qs = _assigned_exams_queryset(
-                self.request, self.request.user, active_only=True
-            ).order_by("-start_datetime", "-created_at")
-            self.assigned_exams_count = self.assigned_exams_qs.count()
+            # Təyinat Q-su qurularkən özü sorğu edir (vahid id-ləri) — say da tənbəldir.
+            self.assigned_exams_count = self._defer(
+                lambda: _assigned_exams_queryset(self.request, self.request.user, active_only=True).count()
+            )
             self.assigned_courses_count = (
-                _enrolled_count if _enrolled_count is not None else self.enrolled_courses_qs.count()
+                _enrolled_count if _enrolled_count is not None else self._defer(self.enrolled_courses_qs.count)
             )
             if self.active_section == "assigned-exams":
                 self.assigned_task_items, self.assigned_task_counts, self.assigned_tasks_active_filter = (
@@ -370,7 +382,7 @@ class _Stage1Mixin:
                 self.assigned_tasks_count = self.assigned_task_counts.get("all", 0)
                 self.assigned_tasks_search_query = (self.request.GET.get("assigned_search", "") or "").strip()
             else:
-                self.assigned_tasks_count = self.profile_badge_counts.get("assigned_tasks", 0)
+                self.assigned_tasks_count = self._pick(self.profile_badge_counts, "assigned_tasks", 0)
             if self.active_section == "assigned-courses":
                 self.assigned_courses_search_query = (self.request.GET.get("assigned_course_search", "") or "").strip()
                 self.assigned_courses_qs = self.enrolled_courses_qs
@@ -408,7 +420,7 @@ class _Stage1Mixin:
                 )
                 self.my_results_count = self.my_result_counts.get("all", 0)
             else:
-                self.my_results_count = self.profile_badge_counts.get("my_results", 0)
+                self.my_results_count = self._pick(self.profile_badge_counts, "my_results", 0)
             if self.active_section == "pending-answers":
                 (
                     self.pending_answer_items,
@@ -422,19 +434,19 @@ class _Stage1Mixin:
                 )
                 self.pending_answers_count = self.pending_answer_counts.get("all", 0)
             else:
-                self.pending_answers_count = self.profile_badge_counts.get("pending_answers", 0)
+                self.pending_answers_count = self._pick(self.profile_badge_counts, "pending_answers", 0)
         self.pending_appeals_count = 0
         if self.capabilities.get("can_manage_appeals"):
             from apps.appeals.public import count_pending_manage_appeals
 
-            self.pending_appeals_count = count_pending_manage_appeals(self.request)
+            self.pending_appeals_count = self._defer(lambda: count_pending_manage_appeals(self.request))
         # «Müraciətlərim» badge-i PAYLAŞILAN (keşlənən) dəstdən gəlir — səhifə,
         # fraqment və `profile_badges_api` eyni rəqəmi göstərsin deyə.
-        self.applications_pending_count = self.profile_badge_counts.get("applications_pending", 0)
+        self.applications_pending_count = self._pick(self.profile_badge_counts, "applications_pending", 0)
         # «Sual təsdiqi» badge-i — eyni paylaşılan (keşlənən) dəstdən.
-        self.question_chair_pending_count = self.profile_badge_counts.get("question_chair_pending", 0)
-        self.pending_review_count = self.profile_badge_counts.get("pending_review", 0)
-        self.evaluated_review_count = self.profile_badge_counts.get("evaluated_review", 0)
+        self.question_chair_pending_count = self._pick(self.profile_badge_counts, "question_chair_pending", 0)
+        self.pending_review_count = self._pick(self.profile_badge_counts, "pending_review", 0)
+        self.evaluated_review_count = self._pick(self.profile_badge_counts, "evaluated_review", 0)
         self.teacher_groups = []
         self.teacher_groups_count = 0
         self.teacher_groups_filtered_count = 0

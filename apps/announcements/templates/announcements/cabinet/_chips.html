@@ -1,0 +1,13 @@
+{% load i18n %}
+{% comment %}Kart / detal / popup üçün ortaq çiplər: sancılmış, yeni, kateqoriya, prioritet, son tarix.{% endcomment %}
+{% if item.is_pinned and item.state == "active" %}<span class="ann-chip ann-chip--pin"><i class="fas fa-thumbtack" aria-hidden="true"></i> {% trans "Sancılmış" context "announcements.cabinet" %}</span>{% endif %}
+{% if item.is_new %}<span class="ann-chip ann-chip--new">{% trans "Yeni" context "announcements.cabinet" %}</span>{% endif %}
+<span class="ann-chip ann-cat ann-cat--{{ item.category }}">{{ item.get_category_display }}</span>
+{% if item.priority == 2 %}<span class="ann-chip ann-chip--critical"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {{ item.get_priority_display }}</span>{% elif item.priority == 1 %}<span class="ann-chip ann-chip--high">{{ item.get_priority_display }}</span>{% endif %}
+{% if item.state == "expired" %}<span class="ann-chip ann-chip--muted">{% trans "Müddəti bitib" context "announcements.cabinet" %}</span>{% endif %}
+{% if item.deadline %}
+<span class="ann-chip ann-deadline ann-deadline--{{ item.deadline.state }}" data-ann-deadline="{{ item.deadline.iso }}" title="{% blocktrans trimmed with day=item.deadline.at|date:'d.m.Y H:i' context 'announcements.cabinet' %}Son tarix: {{ day }}{% endblocktrans %}">
+    <i class="far fa-clock" aria-hidden="true"></i>
+    {% if item.deadline.state == "overdue" %}{% trans "Son tarix keçib" context "announcements.cabinet" %}{% elif item.deadline.state == "today" %}{% trans "Bu gün son gündür" context "announcements.cabinet" %}{% else %}{% blocktrans trimmed count n=item.deadline.days context "announcements.cabinet" %}{{ n }} gün qaldı{% plural %}{{ n }} gün qaldı{% endblocktrans %}{% endif %}
+</span>
+{% endif %}

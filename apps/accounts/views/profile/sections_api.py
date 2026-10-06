@@ -36,6 +36,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from apps.announcements.public import badge_payload as announcements_badge_payload
 from apps.notifications.public import build_profile_notification_state, get_unread_count
 from core.cache import get_or_set_cached_profile_badge_counts
 from core.logging_utils import safe_log_value
@@ -44,6 +45,8 @@ from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, coun
 from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
 
 logger = logging.getLogger(__name__)
+
+LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/_lazy.py``); False → tam context (test)
 
 
 # --------------------------------------------------------------------------- #
@@ -198,6 +201,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "subject-folders": "accounts/profile/sections/_subject_folders.html",
     "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
     "my-subject-folders": "accounts/profile/sections/_my_subject_folders.html",
+    "announcements": "accounts/profile/sections/_announcements.html",  # «Elanlar» (apps.announcements)
 }
 
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin
@@ -341,6 +345,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "subject-folders",
         "subject-folder-review",
         "my-subject-folders",
+        "announcements",  # «Elanlar» — panel oxu-only; mutasiyalar `/elanlar/api/` JSON uclarına gedir
     }
 )
 
@@ -435,7 +440,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
 
     from .context_builder.builder import build_profile_context
 
-    early_response, context = build_profile_context(request)
+    early_response, context = build_profile_context(request, lean=LEAN_FRAGMENT_CONTEXT)
 
     if early_response is not None:
         status = getattr(early_response, "status_code", 200)
@@ -585,12 +590,8 @@ def profile_badges_api(request: HttpRequest) -> JsonResponse:
                 99,
             )
 
+    payload.update(announcements_badge_payload(request.user, active_org, capabilities.get("allowed_sections")))
     return JsonResponse({"ok": True, "badges": payload})
 
 
-__all__ = [
-    "SECTION_PARTIALS",
-    "AJAX_SAFE_SECTIONS",
-    "profile_section_fragment",
-    "profile_badges_api",
-]
+__all__ = ["SECTION_PARTIALS", "AJAX_SAFE_SECTIONS", "profile_section_fragment", "profile_badges_api"]

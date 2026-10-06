@@ -23,6 +23,11 @@ LXNET 2026-10-02 (zəif şəbəkə):
 * ``{"type":"seen","question_id":q}`` (yalnız oyunçu, yalnız BU socket-in ötürdüyü sual, bir dəfə) —
   sualın telefona çatdığının server-vaxtlı sübutu (``delivery.py``): gec çatana ədalətli sürət
   ankeri + host-a «N telefon aldı» (``delivery_progress``).
+
+Miqyas 2026-10-06 (yük testi: 300 oyunçuda host «start» 30 s): server auto-reveal taymeri prosesdə
+PIN başına BİRDİR, host-a gedən sayğaclar (``delivery_progress`` / ``answer_progress``) prosesdə
+birləşdirilir — bax ``socket_coordination.py``. Keçid (start/next/reveal) oyunçu sayı qədər
+taymer, keş iddiası və ya host göndərişi doğurmur.
 """
 
 from __future__ import annotations
@@ -31,7 +36,6 @@ import asyncio
 import logging
 from typing import Any
 
-from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -47,7 +51,7 @@ from apps.live_exam.models import LiveSession
 from apps.live_exam.reveal import build_reveal_bundle
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import serialize_player_question_result
-from apps.live_exam.services import auto_reveal_if_due
+from apps.live_exam.socket_coordination import auto_reveal_timers, host_progress
 from apps.live_exam.transport import (
     build_answer_progress_payload,
     build_answer_saved_payload,
@@ -63,7 +67,6 @@ logger = logging.getLogger("live_exam.ws.rate_limit")
 
 # Async wrappers — DB/cache işi thread hovuzunda (thread_sensitive=False).
 _record_rate_limit_hit = sync_to_async(record_rate_limit_hit, thread_sensitive=False)
-_cache_add = sync_to_async(cache.add, thread_sensitive=False)
 _record_seen = sync_to_async(record_question_seen, thread_sensitive=False)
 
 #: Eyni socket-dən iki ``pong`` arasında minimum interval (klient ~6 s-də bir ping göndərir).
@@ -72,6 +75,13 @@ PING_MIN_INTERVAL_SECONDS = 0.8
 
 def _pool(func):
     return database_sync_to_async(func, thread_sensitive=False)
+
+
+def _int_or_none(value) -> int | None:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def _error(msgid: str) -> dict[str, Any]:
@@ -272,7 +282,7 @@ class LivePlayConsumer(LiveSocketBase):
     kind = "play"
 
     async def connect(self):
-        self._auto_reveal_task = None
+        self._timer_attached = False
         # LXNET: bu socket-in ötürdüyü son sual və artıq təsdiqlənmiş sual (``seen`` bir dəfə).
         self._published_question_id = None
         self._seen_question_id = None
@@ -287,13 +297,22 @@ class LivePlayConsumer(LiveSocketBase):
             self.play_group = f"live_{self.pin}_play_players"
 
         await self.channel_layer.group_add(self.play_group, self.channel_name)
+        auto_reveal_timers.attach(self.pin, self.channel_name)
+        self._timer_attached = True
         await self.accept()
 
     def _on_kicked(self) -> None:
-        self._cancel_auto_reveal()
+        self._detach_timer()
+
+    def _detach_timer(self) -> None:
+        """Prosesdəki son play socket-i gedirsə PIN-in taymeri də dayanır (köhnə davranış)."""
+        if getattr(self, "_timer_attached", False):
+            self._timer_attached = False
+            if auto_reveal_timers.detach(self.pin, self.channel_name):
+                host_progress.forget(self.pin)
 
     async def disconnect(self, close_code):
-        self._cancel_auto_reveal()
+        self._detach_timer()
         play_group = getattr(self, "play_group", None)
         if play_group:
             await self.channel_layer.group_discard(play_group, self.channel_name)
@@ -380,9 +399,12 @@ class LivePlayConsumer(LiveSocketBase):
         # progress -> host group only (players do not need this; host uses it for the counter)
         progress = result.get("progress")
         if progress:
-            await self.channel_layer.group_send(
-                f"live_{self.pin}_play_host",
-                {"type": "play_event", "data": build_answer_progress_payload(**progress)},
+            # Prosesdə birləşdirilir: N cavab → N host göndərişi deyil (ən böyük say qalib gəlir).
+            await host_progress.offer(
+                self.pin,
+                ("answer", int(progress["question_id"])),
+                int(progress["answered_count"]),
+                build_answer_progress_payload(**progress),
             )
 
         if result.get("reveal_question_id"):
@@ -404,12 +426,12 @@ class LivePlayConsumer(LiveSocketBase):
         self._seen_question_id = question_id
         received = await _record_seen(self.pin, question_id, self._own_player_id(), at=received_at)
         if received is not None:
-            await self.channel_layer.group_send(
-                f"live_{self.pin}_play_host",
-                {
-                    "type": "play_event",
-                    "data": build_delivery_progress_payload(question_id=question_id, received=received),
-                },
+            # Sübut hər oyunçu üçün keşdədir; host sayğacı isə prosesdə birləşdirilmiş göndərişlə gedir.
+            await host_progress.offer(
+                self.pin,
+                ("seen", question_id),
+                int(received),
+                build_delivery_progress_payload(question_id=question_id, received=received),
             )
 
     async def play_event(self, event):
@@ -417,13 +439,19 @@ class LivePlayConsumer(LiveSocketBase):
         data = event.get("data") or {}
         event_type = data.get("type")
         if event_type == "question_published":
-            self._schedule_auto_reveal(data.get("question"))
+            # Prosesdə PIN başına bir taymer: eyni sual/vaxt üçün təkrar çağırış heç nə etmir.
+            auto_reveal_timers.schedule(self.pin, data.get("question"))
             try:
                 self._published_question_id = int((data.get("question") or {}).get("id"))
             except (TypeError, ValueError):
                 self._published_question_id = None
-        elif event_type in {"reveal", "finished"}:
-            self._cancel_auto_reveal()
+            if self._published_question_id is not None:
+                host_progress.forget(self.pin, keep_question_id=self._published_question_id)
+        elif event_type == "reveal":
+            auto_reveal_timers.cancel(self.pin, _int_or_none(data.get("question_id")))
+        elif event_type == "finished":
+            auto_reveal_timers.cancel(self.pin)
+            host_progress.forget(self.pin)
 
         if self.player_auth and event_type in {"reveal", "finished"}:
             merged = support.merge_personal(data, event, self._own_player_id())
@@ -434,47 +462,11 @@ class LivePlayConsumer(LiveSocketBase):
             data = merged if merged is not None else data
         await self.send_json(data)
 
-    # ── Server auto-reveal (LXBE-08) ────────────────────────────────────────
-
-    def _schedule_auto_reveal(self, question: dict[str, Any] | None) -> None:
-        self._cancel_auto_reveal()
-        due = support.auto_reveal_delay(question)
-        if due is not None:
-            self._auto_reveal_task = asyncio.ensure_future(self._auto_reveal_after(*due))
-
-    def _cancel_auto_reveal(self) -> None:
-        task = getattr(self, "_auto_reveal_task", None)
-        if task is not None and not task.done():
-            task.cancel()
-        self._auto_reveal_task = None
-
-    async def _auto_reveal_after(self, question_id: int, delay: float) -> None:
-        try:
-            await asyncio.sleep(delay)
-            try:
-                claimed = await _cache_add(f"live_exam:auto_reveal:{self.pin}:{question_id}", "1", 60)
-            except Exception:
-                claimed = True  # keş əlçatmazdır — DB-dəki şərtli keçid onsuz da tək qalibdir
-            if not claimed:
-                return
-            bundle = await self._auto_reveal(question_id)
-            if bundle is not None:
-                await self._send_bundle(bundle)
-        except asyncio.CancelledError:
-            pass
-        except Exception:
-            logger.exception("live auto-reveal failed", extra={"pin": self.pin, "question_id": question_id})
-
     async def _send_bundle(self, bundle) -> None:
         for group, event in bundle_events(self.pin, bundle):
             await self.channel_layer.group_send(group, event)
 
     # ── DB (thread hovuzu) ──────────────────────────────────────────────────
-
-    @_pool
-    def _auto_reveal(self, question_id: int):
-        with rls_worker_atomic(), bypass_rls():
-            return auto_reveal_if_due(self.pin, question_id)
 
     @_pool
     def _build_reveal_bundle(self, question_id: int):

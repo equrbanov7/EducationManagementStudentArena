@@ -81,17 +81,45 @@ def build_join_url(request, session) -> str:
     return base_url
 
 
-def _group_send(group: str, event: dict[str, Any]) -> None:
+def _group_send_many(events: list[tuple[str, dict[str, Any]]]) -> None:
+    """Hadisələr ARDICIL, amma event loop-a BİR keçidlə göndərilir (sync view-dan).
+
+    ``async_to_sync`` hər çağırışda işi əsas loop-a növbəyə qoyur; yüzlərlə socket-in hadisə
+    işləyiciləri ilə dolu loop-da hər keçid ayrıca gözləmədir (start = lobby + host + oyunçular).
+    """
+    if not events:
+        return
     try:
         layer = get_channel_layer()
     except (InvalidChannelLayerError, ModuleNotFoundError):
         return
     if layer is None:
         return
+
+    async def _send_all():
+        for group, event in events:
+            await layer.group_send(group, event)
+
     try:
-        async_to_sync(layer.group_send)(group, event)
+        async_to_sync(_send_all)()
     except (InvalidChannelLayerError, ModuleNotFoundError):
         return
+
+
+def _group_send(group: str, event: dict[str, Any]) -> None:
+    _group_send_many([(group, event)])
+
+
+def broadcast_event(
+    pin: str, payload: dict[str, Any], group_suffix: str, *, personal: dict[str, str] | None = None
+) -> tuple[str, dict[str, Any]]:
+    """``(qrup, kanal hadisəsi)`` — ``broadcast``-ın göndərmədən qurduğu cüt."""
+    event_type = "lobby_event" if group_suffix == "lobby" else "play_event"
+    event = {"type": event_type, "data": payload}
+    if personal is not None:
+        # Şəxsi əlavələr (oyunçu id → JSON) — consumer yalnız öz sətrini klientə qoşur.
+        event["personal"] = personal
+    return f"live_{pin}_{group_suffix}", event
 
 
 def broadcast(pin: str, payload: dict[str, Any], group_suffix: str, *, personal: dict[str, str] | None = None) -> None:
@@ -102,12 +130,7 @@ def broadcast(pin: str, payload: dict[str, Any], group_suffix: str, *, personal:
       - "play_host"       → live_<pin>_play_host  (play_event, host only)
       - "play_players"    → live_<pin>_play_players  (play_event, players only)
     """
-    event_type = "lobby_event" if group_suffix == "lobby" else "play_event"
-    event = {"type": event_type, "data": payload}
-    if personal is not None:
-        # Şəxsi əlavələr (oyunçu id → JSON) — consumer yalnız öz sətrini klientə qoşur.
-        event["personal"] = personal
-    _group_send(f"live_{pin}_{group_suffix}", event)
+    _group_send(*broadcast_event(pin, payload, group_suffix, personal=personal))
 
 
 def broadcast_host(pin: str, payload: dict[str, Any]) -> None:
@@ -131,10 +154,17 @@ def player_question_payload(payload: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if key not in HOST_ONLY_QUESTION_KEYS}
 
 
+def play_events(pin: str, payload: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    """Host + oyunçu play qrupları üçün hadisələr (sual nəşri oyunçuya yığcam)."""
+    return [
+        broadcast_event(pin, payload, "play_host"),
+        broadcast_event(pin, player_question_payload(payload), "play_players"),
+    ]
+
+
 def broadcast_play(pin: str, payload: dict[str, Any]) -> None:
     """Broadcast a payload to both host and player play groups (sual nəşri oyunçuya yığcam)."""
-    broadcast_host(pin, payload)
-    broadcast_players(pin, player_question_payload(payload))
+    _group_send_many(play_events(pin, payload))
 
 
 def bundle_events(pin: str, bundle: Bundle) -> list[tuple[str, dict[str, Any]]]:
@@ -147,8 +177,7 @@ def bundle_events(pin: str, bundle: Bundle) -> list[tuple[str, dict[str, Any]]]:
 
 
 def broadcast_bundle(pin: str, bundle: Bundle) -> None:
-    for group, event in bundle_events(pin, bundle):
-        _group_send(group, event)
+    _group_send_many(bundle_events(pin, bundle))
 
 
 def kick_events(pin: str, player_id: int) -> list[tuple[str, dict[str, Any]]]:
@@ -158,8 +187,7 @@ def kick_events(pin: str, player_id: int) -> list[tuple[str, dict[str, Any]]]:
 
 
 def broadcast_player_kicked(pin: str, player_id: int) -> None:
-    for group, event in kick_events(pin, player_id):
-        _group_send(group, event)
+    _group_send_many(kick_events(pin, player_id))
 
 
 def parse_answer_submission(data: dict[str, Any]) -> tuple[bool, Any]:

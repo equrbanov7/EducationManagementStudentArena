@@ -316,7 +316,7 @@ def build_section(*, request, organization, record, period, semester_number) -> 
     # Hər fənnin elektron jurnal xülasəsi (giriş balı + davamiyyət) — «Fənlərim»
     # eyni zamanda tələbənin «Qiymətlərim» görünüşüdür.
     journal_summary = gradebook.get_student_journal_summary(
-        record=record, period=period, semester_number=semester_number
+        record=record, period=period, semester_number=semester_number, **data["batch_inputs"]
     )
     journal_by_enrollment = {row["enrollment"].id: row["journal"] for row in journal_summary["subjects"]}
     enrich_subject_rows(
