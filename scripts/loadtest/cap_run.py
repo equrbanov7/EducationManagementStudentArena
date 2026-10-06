@@ -71,7 +71,32 @@ class Stack:
         self.owner_url = self.env["MIGRATION_DATABASE_URL"]
         self.db_password = self.base["services"]["db"]["environment"]["POSTGRES_PASSWORD"]
 
+    def refresh_cert(self):
+        """Test edge-in öz-imzalı sertifikatı (Codex 2026-10-04) müddəti bitəndə bütün sorğular
+        SSL «certificate has expired» ilə düşürdü (2026-10-07 run). 2 gündən az qalıbsa 30 günlük
+        yenisi (SAN=edge) yaradılır; locust `verify=cert.pem` onu tanıyır."""
+        cert, key = CAP / "cert.pem", CAP / "key.pem"
+        if cert.exists():
+            probe = subprocess.run(["openssl", "x509", "-checkend", "172800", "-noout", "-in", str(cert)], capture_output=True)
+            if probe.returncode == 0:
+                log("edge cert valid")
+                return
+        mode = cert.stat().st_mode & 0o777 if cert.exists() else 0o644
+        key_mode = key.stat().st_mode & 0o777 if key.exists() else 0o644
+        tmp_cert, tmp_key = CAP / "cert.pem.new", CAP / "key.pem.new"
+        subprocess.run(
+            ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "30", "-subj", "/CN=edge",
+             "-addext", "subjectAltName=DNS:edge", "-keyout", str(tmp_key), "-out", str(tmp_cert)],
+            check=True, capture_output=True,
+        )
+        os.chmod(tmp_cert, mode)
+        os.chmod(tmp_key, key_mode)
+        os.replace(tmp_cert, cert)
+        os.replace(tmp_key, key)
+        log("edge cert regenerated (30 days)")
+
     def build(self):
+        self.refresh_cert()
         cfg = json.loads(json.dumps(self.base))
         services = cfg["services"]
         for name in APPS:
