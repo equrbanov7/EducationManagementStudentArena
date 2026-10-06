@@ -22,6 +22,7 @@ from .._sections.role_assignment import build_role_assignment_section
 from .._sections.statistics import build_statistics_section
 from .._sections.superadmin_orgs import build_superadmin_orgs_sections
 from ._helpers import _get_publish_notification_targets
+from ._lazy import force
 from ._teaching_office import dispatch_teaching_office_sections
 
 
@@ -247,9 +248,9 @@ class _Stage3Mixin:
         if "superadmin-organizations" in self.allowed_sections and self.active_section != "superadmin-organizations":
             from apps.organizations.models import Organization as _PendingOrg
 
-            self.superadmin_organizations_section["pending_count"] = _PendingOrg.objects.filter(
-                status="pending"
-            ).count()
+            self.superadmin_organizations_section["pending_count"] = self._defer(
+                _PendingOrg.objects.filter(status="pending").count
+            )
         if (
             "superadmin-org-features" in self.allowed_sections
             and self.active_section == "superadmin-org-features"
@@ -401,8 +402,8 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
                 capabilities=self.capabilities,
-                applications_pending_count=self.applications_pending_count,
-                pending_appeals_count=self.pending_appeals_count,
+                applications_pending_count=force(self.applications_pending_count),
+                pending_appeals_count=force(self.pending_appeals_count),
             )
         if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
             from .._sections.student_intake import build_student_intake_section

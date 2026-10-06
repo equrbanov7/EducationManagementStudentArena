@@ -45,6 +45,9 @@ from .._helpers import _get_active_organization, _load_user_profile, _role_capab
 
 logger = logging.getLogger(__name__)
 
+#: Qabıq dəyərləri (badge, bildiriş, forma …) tənbəldir — bax ``context_builder/_lazy.py``.
+LEAN_FRAGMENT_CONTEXT = True  # False → köhnə tam context (xarakterizasiya testi)
+
 
 # --------------------------------------------------------------------------- #
 # Section mapping
@@ -435,7 +438,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
 
     from .context_builder.builder import build_profile_context
 
-    early_response, context = build_profile_context(request)
+    early_response, context = build_profile_context(request, lean=LEAN_FRAGMENT_CONTEXT)
 
     if early_response is not None:
         status = getattr(early_response, "status_code", 200)
