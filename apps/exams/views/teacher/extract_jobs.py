@@ -5,13 +5,25 @@ tuta bilir. Bu endpointlər faylı ``TextExtractionJob``-a yazıb Celery task-ı
 növbəyə qoyur; frontend statusu poll edib hazır mətni formaya doldurur.
 Broker əlçatan olmadıqda start endpointi köhnə sinxron yola qayıdır
 (graceful degradation) — davranış heç vaxt "işləmir"ə düşmür.
+
+Tutum 2026-10-06: HEÇ BİR endpoint sorğu axınında yatmır (``sleep``/poll yox).
+Əvvəl start endpointləri worker-in job-u götürməsini ``time.sleep(0.25)``
+dövrü ilə 3 s-ə qədər gözləyirdi — hər export / çıxarma / AI başlanğıcı veb
+axınını tuturdu. İndi start dərhal cavab verir (eager Celery-də job artıq
+bitib → köhnə klassik cavab; real broker-də 202 / gözləmə səhifəsi), status
+endpointi cari vəziyyəti dərhal qaytarır, müştəri JS-i geri çəkilmə ilə poll
+edir. Ölü-worker qoruyucusu (Codex blocking finding, EXAM-P1-16) status
+poll-una köçüb: job pickup-pəncərəsindən uzun PENDING qalıbsa, növbəti poll
+onu bir dəfə inline icra edir (CAS claim ikiqat icranı kəsir).
 """
 
 import logging
+from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
@@ -36,36 +48,49 @@ def _job_payload(job):
     return payload
 
 
-def _ensure_job_progress(job, runner):
-    """delay() uğurlu olsa belə WORKER ölü ola bilər (broker sağ) — Codex
-    blocking finding. Qısa pickup-pəncərəsində job PENDING-dən çıxmasa task
-    funksiyası inline işlədilir; task-lardakı atomik CAS claim double-run-u
-    kəsir (worker gecikib götürsə no-op olur).
+#: Job növü → onu icra edən Celery task-ın adı (``apps.exams.tasks``-da).
+_RUNNER_NAMES = {
+    TextExtractionJob.KIND_EXTRACT: "run_text_extraction_job",
+    TextExtractionJob.KIND_AI_GENERATE: "run_ai_generation_job",
+    TextExtractionJob.KIND_EXPORT: "run_export_job",
+}
 
-    ``JOB_WORKER_PICKUP_TIMEOUT`` (saniyə, default 3.0; ``0`` → watchdog
-    SÖNÜLÜdür — məs. real-broker davranışını test edən ssenarilər üçün).
-    """
-    import time
 
+def _pickup_timeout() -> float:
+    """``JOB_WORKER_PICKUP_TIMEOUT`` (saniyə, default 3.0; ``0`` → ölü-worker qoruyucusu SÖNÜLÜdür)."""
     from django.conf import settings
 
     timeout = getattr(settings, "JOB_WORKER_PICKUP_TIMEOUT", 3.0)
-    if not timeout or timeout <= 0:
+    return float(timeout) if timeout and timeout > 0 else 0.0
+
+
+def _take_over_stalled_job(job):
+    """Ölü-worker qoruyucusu — STATUS poll-unda, sorğunu yatırmadan.
+
+    delay() uğurlu olsa belə WORKER ölü ola bilər (broker sağ) — Codex blocking
+    finding. Əvvəl start endpointi 3 s yatıb gözləyirdi; indi job yaranışdan
+    ``JOB_WORKER_PICKUP_TIMEOUT``-dan çox PENDING qalıbsa (heç bir worker
+    götürməyib) status poll-u onu inline icra edir. Normal halda (worker sağ,
+    job götürülüb və ya pəncərə hələ bitməyib) heç nə gözlənmir — cavab dərhal.
+    Task-lardakı atomik CAS claim double-run-u kəsir: worker gecikib götürsə və
+    ya iki poll eyni anda gəlsə, ikincisi no-op olur.
+    """
+    if job.status != TextExtractionJob.STATUS_PENDING:
+        return job
+    timeout = _pickup_timeout()
+    if not timeout or timezone.now() - job.created_at < timedelta(seconds=timeout):
         return job
 
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        job.refresh_from_db(fields=["status"])
-        if job.status != TextExtractionJob.STATUS_PENDING:
-            return job
-        time.sleep(0.25)
+    from apps.exams import tasks
 
     logger.error(
-        "extract_jobs: worker pickup görünmədi (%.1fs) — inline fallback (job %s). "
+        "extract_jobs: worker pickup görünmədi (%.1fs) — inline fallback (job %s, %s). "
         "Celery worker-in işlədiyini yoxlayın!",
         timeout,
         job.pk,
+        job.kind,
     )
+    runner = getattr(tasks, _RUNNER_NAMES.get(job.kind, "run_text_extraction_job"))
     runner(str(job.pk))  # CAS: worker bu arada götürübsə no-op
     job.refresh_from_db()
     return job
@@ -106,9 +131,8 @@ def start_ai_generation_job(request, *, payload, uploaded, service_error_message
         # (köhnə sinxron davranış).
         logger.warning("start_ai_generation_job: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
         run_ai_generation_job(str(job.pk))
-    else:
-        # Broker qəbul etsə də worker ölü ola bilər — pickup-watchdog.
-        job = _ensure_job_progress(job, run_ai_generation_job)
+    # Gözləmə YOXDUR: eager-də job artıq bitib; real broker-də 202 → status poll
+    # (ölü worker halını status endpointi götürür — `_take_over_stalled_job`).
 
     job.refresh_from_db()
     if job.status == TextExtractionJob.STATUS_SUCCESS:
@@ -166,10 +190,7 @@ def start_text_extraction(request):
         # eyni nəticə forması; CAS sayəsində təhlükəsizdir).
         logger.warning("start_text_extraction: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
         run_text_extraction_job(str(job.pk))
-    else:
-        # Broker qəbul etsə də worker ölü ola bilər — pickup-watchdog
-        # (Codex blocking finding). Terminal olarsa cavab dərhal klassikdir.
-        job = _ensure_job_progress(job, run_text_extraction_job)
+    # Gözləmə YOXDUR: terminal (eager) → klassik cavab; əks halda 202 + status poll.
 
     job.refresh_from_db()
     if job.status == TextExtractionJob.STATUS_SUCCESS:
@@ -182,9 +203,15 @@ def start_text_extraction(request):
 @login_required
 @require_GET
 def text_extraction_status(request, job_id):
-    """Job statusu — yalnız sahibi üçün (tenant RLS + user filtri)."""
+    """Job statusu — yalnız sahibi üçün (tenant RLS + user filtri).
+
+    Cari vəziyyəti DƏRHAL qaytarır (yatmır, gözləmir). Yeganə istisna ölü-worker
+    halıdır: job pickup-pəncərəsindən uzun PENDING qalıbsa bu poll onu bir dəfə
+    inline icra edir (bax :func:`_take_over_stalled_job`).
+    """
     _ensure_teacher(request.user)
     job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
+    job = _take_over_stalled_job(job)
     return JsonResponse({"ok": True, **_job_payload(job)})
 
 
@@ -210,8 +237,7 @@ def start_export_job(request, *, export_name, params):
     except Exception:
         logger.warning("start_export_job: növbə əlçatan deyil, sinxron fallback (job %s)", job.pk)
         run_export_job(str(job.pk))
-    else:
-        job = _ensure_job_progress(job, run_export_job)
+    # Gözləmə YOXDUR: eager → fayl dərhal; real broker → gözləmə səhifəsi (status poll).
 
     job.refresh_from_db()
     if job.status == TextExtractionJob.STATUS_SUCCESS:
