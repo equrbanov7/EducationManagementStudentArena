@@ -4078,7 +4078,11 @@ class StudentExamVisibilityFilteringTest(TestCase):
             take_response,
             reverse("exams:exam_result", args=[self.course_assigned_exam.slug, previous_attempt.id]),
         )
-        self.assertContains(take_response, "exams/js/paint_answer.js")
+        # Perf 2026-10-07: `extraJs` əvvəl `content`-in içində də render olunurdu —
+        # skriptlər (KaTeX daxil) İKİ DƏFƏ icra edilirdi. Hər biri bir dəfə gəlməlidir.
+        self.assertContains(take_response, "exams/js/paint_answer.js", count=1)
+        self.assertContains(take_response, "vendor/katex/0.16.47/katex.min.js", count=1)
+        self.assertContains(take_response, "exams/js/exam_time_warning.js", count=1)
 
 
 class TeacherViewAttemptSearchPaginationTest(TestCase):
