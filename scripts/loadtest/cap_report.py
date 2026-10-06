@@ -107,7 +107,7 @@ def summarize_stage(run_dir, name, mode, users, window, telemetry):
 def write_report(run_dir, args, seed, results, reconcile):
     lines = ["# Tutum testi — " + run_dir.name, ""]
     lines.append(
-        f"İzolə stack: {args.replicas} app × {args.app_cpus} CPU, DB {args.db_cpus} CPU, PgBouncer 1 CPU, edge 0.75 CPU · "
+        f"İzolə stack: {args.replicas} app × {args.app_cpus} CPU ({getattr(args, 'asgi', 'daphne')}), DB {args.db_cpus} CPU, PgBouncer 1 CPU, edge 0.75 CPU · "
         f"canlı image · imtahan `{seed.get('exam_slug')}` ({seed.get('questions')} sual) · "
         f"jurnal: {len(seed.get('journals') or [])} müəllim · düşünmə {args.think_min}-{args.think_max} s"
     )

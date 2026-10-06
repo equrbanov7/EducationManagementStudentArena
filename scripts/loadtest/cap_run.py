@@ -118,9 +118,18 @@ class Stack:
             services[name]["image"] = self.image
             services[name]["volumes"] = [v for v in services[name].get("volumes", []) if "fix-" not in v and "phase4" not in v]
             services[name]["volumes"] += self.overlay_mounts()
+        asgi_server, _, asgi_workers = (self.args.asgi or "daphne").partition(":")
+        log("app1 original command", json.dumps(services["app1"].get("command")), "entrypoint", json.dumps(services["app1"].get("entrypoint")))
         for name in APPS:
             services[name]["cpus"] = self.args.app_cpus
             services[name]["environment"]["MAX_INFLIGHT_LOGIN_REQUESTS"] = str(self.args.login_lane)
+            if asgi_server == "uvicorn":
+                # A/B (docs/operations/ASGI_SERVER.md): prod entrypoint-i uvicorn rejimində;
+                # limitlər proses başınadır (replika × worker × MAX_INFLIGHT_REQUESTS).
+                services[name]["environment"].update(
+                    {"ASGI_SERVER": "uvicorn", "ASGI_WORKERS": asgi_workers or "2", "RUN_RELEASE_ON_START": "false"}
+                )
+                services[name]["command"] = ["/app/docker/prod-entrypoint.sh"]
         self.compose_file.write_text(json.dumps(cfg))
         os.chmod(self.compose_file, 0o600)
         log("compose built", "image", self.image[:19], "app_cpus", self.args.app_cpus, "db_cpus", self.args.db_cpus)
@@ -488,6 +497,7 @@ def main():
     p.add_argument("--repo", default="")
     p.add_argument("--out", required=True)
     p.add_argument("--replicas", type=int, default=4)
+    p.add_argument("--asgi", default="daphne", help="daphne | uvicorn:N (N worker/konteyner)")
     args = p.parse_args()
     global APPS
     APPS = tuple(f"app{i}" for i in range(1, max(1, args.replicas) + 1))

@@ -55,6 +55,11 @@ on:
         required: true
         type: boolean
         default: false
+      asgi:
+        description: "ASGI server: daphne | uvicorn:N (konteyner başına N worker; A/B)"
+        required: false
+        type: string
+        default: "daphne"
 
 concurrency:
   group: prod-ops
@@ -104,8 +109,10 @@ jobs:
           ON_FAIL: ${{ inputs.on_fail }}
           PREAUTH_MODE: ${{ inputs.preauth }}
           OVERLAY: ${{ inputs.overlay }}
+          ASGI: ${{ inputs.asgi }}
         run: |
           set -euo pipefail
+          echo "${ASGI:-daphne}" | grep -Eq '^(daphne|uvicorn:[1-8])$' || { echo "::error::asgi"; exit 1; }
           RUN_ID="cap_$(date -u +%Y%m%d_%H%M)"
           echo "RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
           EXTRA=(--preauth "$PREAUTH_MODE")
@@ -117,7 +124,7 @@ jobs:
             --teachers "$TEACHERS" --replicas "$(case "$APP_CPUS" in *x*) echo "${APP_CPUS%%x*}";; *) echo 4;; esac)" \
             --app-cpus "${APP_CPUS##*x}" --db-cpus "$DB_CPUS" \
             --think-min "${THINK%%:*}" --think-max "${THINK##*:}" --preauth-rate "$PREAUTH" \
-            --out "$RUNNER_TEMP/capout" "${EXTRA[@]}"
+            --asgi "${ASGI:-daphne}" --out "$RUNNER_TEMP/capout" "${EXTRA[@]}"
 
       - name: 📊 Xülasə
         if: always()
