@@ -7,7 +7,11 @@ eynidir.
 
 from django.core.paginator import Paginator
 
-from apps.accounts.views._dashboard_helpers import _collect_evaluated_review_items, _collect_pending_review_items
+from apps.accounts.views._dashboard_helpers import (
+    _collect_evaluated_review_items,
+    _collect_pending_review_items,
+    fill_evaluated_test_scores,
+)
 
 
 def build_pending_review_context(request) -> dict:
@@ -55,6 +59,8 @@ def build_review_results_context(request) -> dict:
         evaluated_review_submitted_order,
     ) = _collect_evaluated_review_items(request)
     evaluated_review_page_obj = Paginator(evaluated_review_items, 15).get_page(request.GET.get("er_page", 1))
+    # Test balı yalnız görünən 15 sətir üçün (əvvəl bütün tarixçə üçün hesablanırdı).
+    fill_evaluated_test_scores(evaluated_review_page_obj.object_list)
     er_extra = ["section=review-results"]
     if evaluated_review_search_query:
         er_extra.append(f"evaluated_search={evaluated_review_search_query}")
