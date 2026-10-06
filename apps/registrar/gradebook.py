@@ -13,11 +13,10 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation
 
-from django.db import transaction
 from django.db.models import Count
 from django.utils import timezone
 
-from apps.registrar import absence_limit, exam_eligibility, grade_audit, journal_window, services
+from apps.registrar import absence_limit, exam_eligibility, journal_window, services
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -118,164 +117,15 @@ absence_limit_percent_for = absence_limit.limit_percent_for_offering
 _allowed_absence_hours = absence_limit.allowed_absence_hours
 
 
-# ── Mark (iştirak/bal) yazma ─────────────────────────────────────────────────
-
-
-@transaction.atomic
-def save_marks(*, offering, entries, by_user=None, enforce_day=True, report=False, request=None):
-    """Persist attendance/score cells for an offering (bulk, from the grid).
-
-    ``entries``: iterable of ``{"lesson_id", "enrollment_id", "status", "score"}``.
-    Each cell is validated against the offering's own lessons/enrollments
-    (cross-offering/tenant injection rejected), honours the per-mark edit window
-    (locked cells are skipped) and the lesson type (lecture cells never store a
-    score). Blocked entirely when the journal is locked. Returns cells written.
-    ``enforce_day=False`` YALNIZ seed/test üçündür — HTTP qatı heç vaxt ötürmür.
-    ``report=True`` → ``{"written", "rejected"}`` (yazılmayan xanaların sayı ilə;
-    çağıran istifadəçiyə xəbərdarlıq göstərir — bax P3-10).
-    """
-    if journal_is_locked(offering):
-        return {"written": 0, "rejected": 0} if report else 0
-
-    # Codex audit §14 (2026-09-13): grid yazısı «oxu → yaz» naxışıdır (`existing`
-    # xəritəsi əvvəlcədən yüklənir). İki paralel yazı eyni xanaya gələndə ikinci
-    # `LessonMark` INSERT-i `uniq_lesson_enrollment_mark`-a çırpılıb bütün
-    # partiyanı 500 ilə çökdürürdü, eyni tələbənin qayıb saatı isə köhnə
-    # görüntüdən hesablanırdı. Açılış sətri `FOR UPDATE` ilə kilidlənir — eyni
-    # açılışın yazıları tranzaksiya səviyyəsində ardıcıllaşır (kilid sırası:
-    # açılış → qeydiyyat → xana; bax `correction_target_locks`).
-    type(offering).objects.select_for_update().filter(pk=offering.pk).exists()
-
-    # Çağırış vaxtı idxal: `gradebook_lessons` bu moduldan idxal edir (dövr).
-    from apps.registrar.gradebook_lessons import parse_lesson_score as _parse_score
-
-    lessons = {str(latt.id): latt for latt in offering.lessons.all()}
-    enrollments = {str(e.id): e for e in offering.enrollments.filter(status=Enrollment.Status.ENROLLED)}
-    existing = {(m.lesson_id, m.enrollment_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
-    # Rəsmi (sənədli) düzəliş almış xanalar müəllim tərəfindən DƏYİŞİLƏ BİLMƏZ —
-    # yalnız yeni rəsmi düzəliş (apps/registrar/corrections.py) dəyişə bilər.
-    from .models import JournalCorrection
-
-    corrected_ids = set(
-        JournalCorrection.objects.filter(lesson_mark__lesson__offering=offering, reversal__isnull=True).values_list(
-            "lesson_mark_id", flat=True
-        )
-    )
-    # Bildiriş keçidləri üçün yazıdan ƏVVƏLKİ qayıb saatları.
-    prior_hours = {e.id: e.absence_hours for e in enrollments.values()}
-
-    written = 0
-    rejected = 0
-    touched = set()
-    audit_changes = []
-    notify_events = []
-    now = timezone.now()
-    today = timezone.localdate()
-    for entry in entries or []:
-        lesson = lessons.get(str(entry.get("lesson_id")))
-        enrollment = enrollments.get(str(entry.get("enrollment_id")))
-        if lesson is None or enrollment is None:
-            continue
-        mark = existing.get((lesson.id, enrollment.id))
-        if mark is not None and mark.pk and mark.pk in corrected_ids:
-            continue  # rəsmi düzəlişli xana — müəllim üçün kilidli
-        if not can_edit_mark(mark, now=now):
-            continue  # locked — no back-dated tampering
-        if enforce_day and mark is None and lesson.date != today:
-            continue  # YENİ işarə yalnız dərsin öz günündə yazılır
-
-        status = entry.get("status")
-        if status not in (AttendanceStatus.PRESENT, AttendanceStatus.ABSENT):
-            status = AttendanceStatus.PRESENT
-        score = None
-        if status != AttendanceStatus.ABSENT and lesson_allows_score(lesson) and entry.get("score") not in (None, ""):
-            # Seminar/lab balı: tam ədəd, 0..10. Qayıb tələbəyə bal yazılmır —
-            # «q/b + 8 bal» xanası mümkün idi (QA 2026-09-05 JOURNAL-TEACHER-09).
-            score = _parse_score(entry.get("score"))
-            if score is None:
-                # Səhv dəyər SƏSSİZ 0-a çevrilmir — xana toxunulmadan qalır (P3-10).
-                rejected += 1
-                continue
-
-        old = grade_audit.mark_repr(mark.status, mark.score) if mark is not None and mark.pk else None
-        old_status = mark.status if mark is not None and mark.pk else None
-        old_score = mark.score if mark is not None and mark.pk else None
-        if mark is None:
-            mark = LessonMark(organization=offering.organization, lesson=lesson, enrollment=enrollment)
-        new = grade_audit.mark_repr(status, score)
-        mark.status = status
-        mark.score = score
-        mark.entered_by = by_user
-        mark.save()
-        if old != new:
-            audit_changes.append(
-                {
-                    "student": grade_audit.student_label(enrollment),
-                    "item": f"{lesson.date} · {lesson.get_kind_display()}",
-                    "old": old or "—",
-                    "new": new,
-                }
-            )
-            # Tələbə bildirişləri: q/b qeydi və yeni/dəyişmiş bal.
-            from apps.registrar import journal_notifications as jn
-
-            if status == AttendanceStatus.ABSENT and old_status != AttendanceStatus.ABSENT:
-                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT})
-            if score is not None and score != old_score:
-                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_SCORE, "score": score})
-        touched.add(enrollment)
-        written += 1
-
-    # Keep the denormalised Enrollment.absence_hours (used by the "Fənlərim"
-    # exam-eligibility badge) in sync with the journal — the single source of truth.
-    allowed = _allowed_absence_hours(offering, list(lessons.values()))
-    warn_at = allowed * _WARN_RATIO
-    for enrollment in touched:
-        new_hours = recompute_absence_hours(enrollment=enrollment)
-        prev = Decimal(prior_hours.get(enrollment.id, 0))
-        cur = Decimal(new_hours)
-        if allowed > 0 and cur > prev:
-            from apps.registrar import journal_notifications as jn
-
-            if prev <= allowed < cur:
-                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_BARRED})
-            elif prev < warn_at <= cur <= allowed:
-                notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_LIMIT_WARNING, "hours": new_hours})
-
-    # `request` → audit sətrinə «kim impersonasiya edib» möhürü (sahib qərarı).
-    grade_audit.log_grade_changes(
-        offering=offering, by_user=by_user, kind="mark", changes=audit_changes, request=request
-    )
-
-    if notify_events:
-        from django.db import transaction as _tx
-
-        from apps.registrar import journal_notifications as jn
-
-        _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
-    return {"written": written, "rejected": rejected} if report else written
-
-
-def recompute_absence_hours(*, enrollment):
-    """Recompute Enrollment.absence_hours from the student's lesson marks (qb).
-
-    ALT QRUP BİRLƏŞMƏSİ: tələbə öz jurnalından azad edilib bura köçürülübsə,
-    əvvəlki jurnalda yığdığı qayıb saatı da ÜSTƏGƏLdir — 25% buraxılış həddi
-    dərsə yox, FƏNNƏ + SEMESTRƏ aiddir, birləşmə onu sıfırlamamalıdır
-    (bax :mod:`apps.registrar.guest_merge`). Adi sətirlərdə ƏLAVƏ SORĞU OLMUR.
-    """
-    from apps.registrar import guest_merge
-
-    hours = sum(
-        m.lesson.hours
-        for m in LessonMark.objects.filter(enrollment=enrollment, status=AttendanceStatus.ABSENT).select_related(
-            "lesson"
-        )
-    ) + guest_merge.carried_absence_hours(enrollment)
-    if enrollment.absence_hours != hours:
-        enrollment.absence_hours = hours
-        enrollment.save(update_fields=["absence_hours"])
-    return hours
+# ── Mark (iştirak/bal) yazma + qayıb sayğacı ayrıca modulda (modul-ölçü büdcəsi) ──
+# Tutum 2026-10-06: yazı redaktə olunan xanalara mütənasibdir (bax gradebook_marks).
+# ⚠️ Bu re-eksport ``gradebook_lessons``-dan ƏVVƏL olmalıdır: o, ``recompute_absence_hours``-u
+# buradan idxal edir. ``gradebook_marks`` bu modulu yalnız çağırış vaxtı idxal edir (dövr yox).
+from apps.registrar.gradebook_marks import (  # noqa: E402,F401
+    recompute_absence_hours,
+    recompute_absence_hours_many,
+    save_marks,
+)
 
 
 def _lesson_parity(offering, lesson) -> str:
