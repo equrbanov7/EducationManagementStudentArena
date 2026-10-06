@@ -79,9 +79,7 @@ def _read_exists(user):
 
 
 def _applied_exists(user):
-    return Exists(
-        AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, applied_at__isnull=False)
-    )
+    return Exists(AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, applied_at__isnull=False))
 
 
 def search_q(text: str) -> Q:
