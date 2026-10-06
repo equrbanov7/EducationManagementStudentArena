@@ -37,8 +37,11 @@ jobs:
       - name: 📝 Upsert .env keys (with backup)
         run: |
           set -euo pipefail
+          # Sirr faylları yalnız sahibə oxunaqlı yaradılsın (.env.tmp / .env.bak.* daxil).
+          umask 077
           cd "$APP_DIR"
           test -f .env || { echo "Missing $APP_DIR/.env" >&2; exit 1; }
+          chmod 600 .env .env.bak.* 2>/dev/null || true
           ts="$(date +%Y%m%d-%H%M%S)"
           cp .env ".env.bak.${ts}"
           # Yalnız son 10 backup qalsın.

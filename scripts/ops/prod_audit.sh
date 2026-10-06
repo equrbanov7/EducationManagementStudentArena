@@ -128,6 +128,10 @@ LOG=$($COMPOSE logs --no-log-prefix --tail 20000 nginx 2>/dev/null)
 echo '```'
 echo "$LOG" | grep -oE '" [0-9]{3} ' | sort | uniq -c | sort -rn | head -8 | sed 's/^/status /'
 echo "-- 5xx nümunələri:"; echo "$LOG" | grep -E '" 5[0-9]{2} ' | tail -5 | cut -c1-180
+# 4xx haradan gəlir (bot/skaner, yoxsa real klient xətası)? Yol (rəqəm/UUID/sorğu maskalanmış) + status.
+echo "-- 4xx yol üzrə (ilk 12):"; echo "$LOG" | grep -oE '"(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) [^ ]+ [^"]*" 4[0-9]{2} ' \
+  | sed -E 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<uuid>/g' \
+  | awk '{p=$2; sub(/[?].*$/, "", p); gsub(/[0-9]+/, "<n>", p); print $NF, p}' | sort | uniq -c | sort -rn | head -12
 echo "-- rt= ən yavaş 8:"; echo "$LOG" | grep -oE '"(GET|POST) [^ ]+ [^"]*" [0-9]{3} .*rt=[0-9.]+' | awk '{match($0,/rt=[0-9.]+/); rt=substr($0,RSTART+3,RLENGTH-3); print rt, $2}' | sort -rn | head -8
 echo '```'
 
