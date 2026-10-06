@@ -98,6 +98,15 @@ class ApplyMode(models.TextChoices):
     URL = "url", pgettext_lazy(_CTX, "Keçid (link)")
 
 
+#: Auditoriya seçicisində bölmə tipinin etiketi.
+UNIT_TYPE_LABELS = {
+    "faculty": pgettext_lazy(_CTX, "Fakültə"),
+    "chair": pgettext_lazy(_CTX, "Kafedra"),
+    "department": pgettext_lazy(_CTX, "Şöbə"),
+    "specialty": pgettext_lazy(_CTX, "İxtisas"),
+    "group": pgettext_lazy(_CTX, "Qrup"),
+}
+
 #: Elan ailəsi → ``applications.SenderFamily`` dəyəri (növün ailəyə açıq olması yoxlaması).
 FAMILY_TO_SENDER = {"students": "student", "teachers": "teacher", "staff": "staff"}
 

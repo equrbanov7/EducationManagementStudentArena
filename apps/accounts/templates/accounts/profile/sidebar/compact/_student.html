@@ -50,10 +50,11 @@ semestr sonu doldurulur, gözləyən sorğu badge ilə görünür; ona görə bu
 </li>
 {% endif %}
 
-{% if "notifications" in allowed_sections or "applications" in allowed_sections %}
+{% if "notifications" in allowed_sections or "applications" in allowed_sections or "announcements" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="communication">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionCommunication"><span class="sidebar-menu-group-title">{% trans "Ünsiyyət" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionCommunication">
+        {% include "accounts/profile/sidebar/items/_announcements.html" %}
         {% include "accounts/profile/sidebar/items/_notifications.html" %}
         {% include "accounts/profile/sidebar/items/_applications.html" %}
     </ul>

@@ -1,0 +1,38 @@
+{% load i18n %}
+{% comment %}Filtr zolağı — axtarış (300 ms debounce, serverdə dözümlü), kateqoriya, vəziyyət, sıralama,
+«Oxunmamış» və «Son tarixli» açarları. Native select YOXDUR — layihənin bootstrap select komponenti.{% endcomment %}
+<form class="ann-filters" data-ann-filters role="search" aria-label="{% trans 'Elan filtrləri' context 'announcements.cabinet' %}" novalidate>
+    <div class="ann-filters__search">
+        <i class="fas fa-magnifying-glass ann-filters__search-icon" aria-hidden="true"></i>
+        <input type="search" name="q" value="{{ params.q }}" class="ems-input ann-filters__input" maxlength="100"
+               placeholder="{% trans 'Başlıq və ya mətndə axtar…' context 'announcements.cabinet' %}"
+               aria-label="{% trans 'Elanlarda axtar' context 'announcements.cabinet' %}" autocomplete="off" data-ann-search>
+    </div>
+    <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+        <select name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+                aria-label="{% trans 'Kateqoriya' context 'announcements.cabinet' %}">
+            <option value="">{% trans "Bütün kateqoriyalar" context "announcements.cabinet" %}</option>
+            {% for value, label in categories %}<option value="{{ value }}"{% if params.category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+    </div>
+    <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+        <select name="state" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+                aria-label="{% trans 'Vəziyyət' context 'announcements.cabinet' %}">
+            <option value="active"{% if params.state == "active" %} selected{% endif %}>{% trans "Aktiv" context "announcements.cabinet" %}</option>
+            <option value="expired"{% if params.state == "expired" %} selected{% endif %}>{% trans "Müddəti bitmiş" context "announcements.cabinet" %}</option>
+            <option value="all"{% if params.state == "all" %} selected{% endif %}>{% trans "Hamısı" context "announcements.cabinet" %}</option>
+        </select>
+    </div>
+    <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+        <select name="sort" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+                aria-label="{% trans 'Sıralama' context 'announcements.cabinet' %}">
+            <option value="new"{% if params.sort == "new" %} selected{% endif %}>{% trans "Ən yeni" context "announcements.cabinet" %}</option>
+            <option value="deadline"{% if params.sort == "deadline" %} selected{% endif %}>{% trans "Son tarix yaxın olan" context "announcements.cabinet" %}</option>
+            <option value="priority"{% if params.sort == "priority" %} selected{% endif %}>{% trans "Prioritet" context "announcements.cabinet" %}</option>
+        </select>
+    </div>
+    <div class="ann-filters__toggles">
+        <label class="ann-toggle"><input type="checkbox" name="unread" value="1"{% if params.unread %} checked{% endif %}> <span>{% trans "Oxunmamış" context "announcements.cabinet" %}</span></label>
+        <label class="ann-toggle"><input type="checkbox" name="deadline" value="1"{% if params.has_deadline %} checked{% endif %}> <span>{% trans "Son tarixli" context "announcements.cabinet" %}</span></label>
+    </div>
+</form>

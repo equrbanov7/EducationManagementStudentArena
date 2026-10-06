@@ -109,11 +109,12 @@ def _touch(organization, user, announcement_ids, field) -> int:
     updated = 0
     for announcement_id in announcement_ids:
         receipt, created = _get_or_create(organization, user, announcement_id, {field: now})
-        if not created and getattr(receipt, field) is None:
-            AnnouncementReceipt.objects.filter(pk=receipt.pk, **{f"{field}__isnull": True}).update(
+        if created:
+            updated += 1
+        elif getattr(receipt, field) is None:
+            updated += AnnouncementReceipt.objects.filter(pk=receipt.pk, **{f"{field}__isnull": True}).update(
                 **{field: now, "updated_at": now}
             )
-        updated += 1
     return updated
 
 
@@ -144,13 +145,15 @@ def mark_popup_seen(request, announcement_ids) -> int:
     return count
 
 
-def mark_read(request, announcement) -> None:
-    _touch(request.organization, request.user, [announcement.pk], "read_at")
+def mark_read(request, announcement) -> bool:
+    """``True`` — elan indi ilk dəfə oxundu (sayğac bir azalır)."""
+    newly = bool(_touch(request.organization, request.user, [announcement.pk], "read_at"))
     cache.delete(_badge_key(request.organization, request.user))
     try:
         del request.user._announcements_badge
     except AttributeError:
         pass
+    return newly
 
 
 #: Sayğac keşi (Redis): versiya xülasədən — dərc/redaktə hamının açarını köhnəldir; oxu öz açarını silir.

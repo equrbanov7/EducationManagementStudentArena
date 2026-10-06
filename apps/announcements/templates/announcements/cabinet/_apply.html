@@ -1,0 +1,43 @@
+{% load i18n %}
+{% trans "Müraciət et" context "announcements.cabinet" as apply_default %}
+{% comment %}«Müraciət et» — daxili müraciət (Müraciətlər modulu) və ya keçid. Vəziyyət serverdən gəlir:
+artıq müraciət edilib → nömrə; bağlıdır → səbəb; əks halda düymə. Nəticə mətnləri data-atributlardadır.{% endcomment %}
+<section class="ann-apply" aria-labelledby="ann-apply-title"
+         data-ann-apply data-apply-url="{{ ann.apply_url }}" data-mode="{{ item.apply_mode }}"
+         data-msg-done="{% trans 'Müraciətiniz göndərildi' context 'announcements.cabinet' %}"
+         data-msg-error="{% trans 'Müraciət göndərilmədi. Bir az sonra yenidən cəhd edin.' context 'announcements.cabinet' %}">
+    <h3 class="ann-apply__title" id="ann-apply-title">{% trans "Müraciət" context "announcements.cabinet" %}</h3>
+    {% if ann.receipt.applied_at %}
+    <p class="ann-apply__done" role="status"><i class="fas fa-circle-check" aria-hidden="true"></i>
+        {% if ann.receipt.application_number %}{% blocktrans trimmed with number=ann.receipt.application_number day=ann.receipt.applied_at|date:"d.m.Y H:i" context "announcements.cabinet" %}Müraciət edilib: {{ number }} ({{ day }}). Statusunu «Müraciətlərim» bölməsində izləyin.{% endblocktrans %}{% else %}{% blocktrans trimmed with day=ann.receipt.applied_at|date:"d.m.Y H:i" context "announcements.cabinet" %}Keçid {{ day }} tarixində açılıb.{% endblocktrans %}{% endif %}
+    </p>
+    {% if item.apply_mode == "url" and item.apply_url %}
+    <a class="ems-btn" href="{{ item.apply_url }}" target="_blank" rel="noopener noreferrer" data-force-navigation="true">{% trans "Keçidi yenidən aç" context "announcements.cabinet" %} <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+    {% endif %}
+    {% elif ann.apply_closed %}
+    <p class="ann-apply__closed" role="status"><i class="fas fa-lock" aria-hidden="true"></i> {{ ann.apply_closed }}</p>
+    {% elif ann.view_as %}
+    <p class="ann-apply__closed" role="status">{% trans "Baxış rejimində müraciət etmək olmaz." context "announcements.cabinet" %}</p>
+    {% elif item.apply_mode == "internal" %}
+    <p class="ann-apply__hint">
+        {% if item.apply_unit %}{% blocktrans trimmed with unit=item.apply_unit.name kind=item.apply_kind.label context "announcements.cabinet" %}Müraciətiniz «{{ kind }}» növü ilə «{{ unit }}» şöbəsinə göndəriləcək.{% endblocktrans %}{% else %}{% blocktrans trimmed with kind=item.apply_kind.label context "announcements.cabinet" %}Müraciətiniz «{{ kind }}» növü ilə aidiyyəti şöbəyə göndəriləcək.{% endblocktrans %}{% endif %}
+    </p>
+    <form class="ann-apply__form" data-ann-apply-form novalidate>
+        <label class="ems-field__label" for="ann-apply-note">{% trans "Qeyd (könüllü)" context "announcements.cabinet" %}</label>
+        <textarea id="ann-apply-note" name="note" class="ems-textarea" rows="3" maxlength="2000"
+                  placeholder="{% trans 'Əlavə etmək istədiyiniz məlumat…' context 'announcements.cabinet' %}"></textarea>
+        <div class="ann-apply__actions">
+            <button type="submit" class="ems-btn ems-btn--primary" data-ann-apply-submit>
+                <i class="fas fa-paper-plane" aria-hidden="true"></i> {{ item.apply_label|default:apply_default }}
+            </button>
+        </div>
+    </form>
+    <p class="ann-apply__result" data-ann-apply-result role="status" aria-live="polite" hidden></p>
+    {% else %}
+    <p class="ann-apply__hint">{% trans "Müraciət xarici keçid vasitəsilə qəbul olunur." context "announcements.cabinet" %}</p>
+    <button type="button" class="ems-btn ems-btn--primary" data-ann-apply-link data-href="{{ item.apply_url }}">
+        <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i> {{ item.apply_label|default:apply_default }}
+    </button>
+    <p class="ann-apply__result" data-ann-apply-result role="status" aria-live="polite" hidden></p>
+    {% endif %}
+</section>

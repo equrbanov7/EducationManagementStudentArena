@@ -62,6 +62,7 @@ COMPACT_SIDEBAR_TREES = {
             "my-appeals",
             "evaluation-survey",
             "surveys-inbox",
+            "announcements",
             "notifications",
             "applications",
             "profile-info",
@@ -89,6 +90,7 @@ COMPACT_SIDEBAR_TREES = {
             "publish-notification",
             "applications",
             "surveys-inbox",
+            "announcements",
             "profile-info",
             "statistics",
         }

@@ -54,8 +54,7 @@ def mark_read(request, announcement_id):
     if getattr(request, "is_view_as", False):
         return ok(recorded=False)
     announcement = _visible_or_404(request, announcement_id)
-    popup.mark_read(request, announcement)
-    return ok(recorded=True)
+    return ok(recorded=True, newly_read=popup.mark_read(request, announcement))
 
 
 @require_POST

@@ -1,0 +1,29 @@
+{% load i18n static announcements_tags %}
+{% comment %}«Elanlar» kabinet paneli. `?elan=<id>` → detal, əks halda siyahı (1-ci səhifə server
+tərəfdə render olunur; filtr/axtarış/səhifələmə `list.js` ilə `/elanlar/api/list/`-dən gəlir).
+Stil və skriptlər xarici fayldadır və panelin İÇİNDƏDİR (AJAX swap-dan sonra da işləsin).{% endcomment %}
+<link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261006-1">
+{% announcements_panel as ann %}
+{% if not ann.available %}
+<p class="ann-note" role="status">{% trans "Elanlar üçün aktiv təşkilat konteksti tapılmadı." context "announcements.cabinet" %}</p>
+{% elif ann.mode == "detail" %}
+    {% include "announcements/cabinet/_detail.html" with item=ann.item %}
+{% else %}
+<div class="ann" data-ann-root data-ann-cabinet data-list-url="{{ ann.list_url }}">
+    <header class="ann-head">
+        <p class="ann-head__intro">{% trans "Universitetin, fakültənizin və kafedranızın sizə ünvanladığı elanlar. Son tarixi olan elanlar ayrıca işarələnir." context "announcements.cabinet" %}</p>
+        {% if ann.can_manage %}
+        <a class="ems-btn ems-btn--primary ann-head__manage" href="{{ ann.manage_url }}" data-force-navigation="true">
+            <i class="fas fa-pen-to-square" aria-hidden="true"></i> {% trans "Elanları idarə et" context "announcements.cabinet" %}
+        </a>
+        {% endif %}
+    </header>
+    {% include "announcements/cabinet/_filters.html" with params=ann.params categories=ann.categories %}
+    <div class="ann-results" data-ann-results aria-live="polite" aria-busy="false">
+        {% include "announcements/cabinet/_list.html" with listing=ann.listing profile_base_url=ann.profile_base_url %}
+    </div>
+    <template data-ann-skeleton>{% include "announcements/cabinet/_skeleton.html" %}</template>
+    <p class="ann-sr-only" data-ann-error-text hidden>{% trans "Elanları yükləmək alınmadı. Bir az sonra yenidən cəhd edin." context "announcements.cabinet" %}</p>
+</div>
+<script src="{% static 'announcements/js/list.js' %}?v=20261006-1"></script>
+{% endif %}

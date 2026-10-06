@@ -1,0 +1,16 @@
+{% load i18n %}
+<article class="ann-card ann-card--p{{ item.priority }}{% if item.pin_rank %} is-pinned{% endif %}{% if item.is_new %} is-new{% endif %}{% if item.state == 'expired' %} is-expired{% endif %}">
+    <a class="ann-card__link" href="{{ profile_base_url }}?section=announcements&amp;elan={{ item.pk }}" data-section="announcements">
+        <span class="ann-card__top">
+            {% include "announcements/cabinet/_chips.html" %}
+        </span>
+        <span class="ann-card__title">{{ item.title }}</span>
+        {% if item.summary %}<span class="ann-card__summary">{{ item.summary }}</span>{% elif item.body %}<span class="ann-card__summary">{{ item.body|truncatechars:180 }}</span>{% endif %}
+        <span class="ann-card__meta">
+            <span><i class="far fa-calendar" aria-hidden="true"></i> {{ item.publish_at|date:"d.m.Y" }}</span>
+            {% if item.expires_at %}<span>{% blocktrans trimmed with day=item.expires_at|date:"d.m.Y" context "announcements.cabinet" %}{{ day }} tarixinədək{% endblocktrans %}</span>{% endif %}
+            {% with n=item.attachments.all|length %}{% if n %}<span><i class="fas fa-paperclip" aria-hidden="true"></i> {{ n }}</span>{% endif %}{% endwith %}
+            {% if item.has_apply %}<span class="ann-card__apply"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "Müraciət mümkündür" context "announcements.cabinet" %}</span>{% endif %}
+        </span>
+    </a>
+</article>

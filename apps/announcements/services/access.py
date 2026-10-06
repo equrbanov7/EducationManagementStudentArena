@@ -129,7 +129,12 @@ def scope_unit_choices(scope, organization) -> list:
     if not scope.is_org_wide:
         queryset = queryset.filter(scope.unit_subtree_q())
     rows = queryset.order_by("path").values_list("pk", "name", "unit_type", "level")[:2000]
-    return [{"id": str(pk), "label": name, "type": unit_type, "level": level or 0} for pk, name, unit_type, level in rows]
+    from ..constants import UNIT_TYPE_LABELS
+
+    return [
+        {"id": str(pk), "label": name, "type": unit_type, "type_label": UNIT_TYPE_LABELS.get(unit_type, ""), "level": level or 0}
+        for pk, name, unit_type, level in rows
+    ]
 
 
 __all__ = [

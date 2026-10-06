@@ -1,0 +1,10 @@
+{% comment %}«Elanlar» (apps.announcements, 2026-10-06) — hər təşkilat üzvünün elan siyahısı və detalı
+(`?section=announcements&elan=<id>`). Bütün məntiq və şablonlar `apps.announcements`-dadır;
+bu fayl yalnız bölmə çərçivəsidir. Mutasiyalar `/elanlar/api/…` JSON uclarına gedir → AJAX-safe.{% endcomment %}
+{% if 'announcements' in allowed_sections %}
+<section class="profile-section-panel profile-section--announcements {% if active_section == 'announcements' %}is-active{% endif %}"
+         data-profile-section-panel="announcements"
+         data-source-url="{{ profile_base_url }}?section=announcements">
+    {% include "announcements/cabinet/_panel.html" %}
+</section>
+{% endif %}
