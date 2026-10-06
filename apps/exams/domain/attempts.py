@@ -385,13 +385,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             schedule_journal_sync(self)
 
     def recalculate_score(self, *, answers=None, save=True):
-        """``correct_count``/``wrong_count``-u yenidən hesablayır.
-
-        Perf 2026-10-06: ``answers`` — çağıranın bu attempt üçün artıq yüklədiyi
-        TAM cavab dəsti (sual + variant + seçim prefetch-li); verilərsə təkrar
-        oxunmur. ``save=False`` — sahələr yalnız instansda dəyişir, çağıran onları
-        öz ``save``-inə qatır (məs. ``mark_finished(extra_update_fields=…)``).
-        """
+        # Perf 2026-10-06: `answers` — yüklənmiş TAM cavab dəsti; `save=False` → çağıranın save-inə qatılır.
         if getattr(self.exam, "exam_type", None) == "test":
             from apps.exams.services.result_calculation import sync_test_attempt_counts
 
