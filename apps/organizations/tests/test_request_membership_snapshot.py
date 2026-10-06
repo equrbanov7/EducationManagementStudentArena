@@ -335,3 +335,10 @@ class TenantScopedSessionReadUnderEnforcedRlsTests(TestCase):
         self.assertEqual(request.organization, self.org_a)
         self.assertEqual(request.session["active_organization"], self.org_a.slug)
         self.assertEqual(_setting("app.bypass_rls"), "off")
+
+    @override_settings(RLS_TRANSACTION_SCOPED=True)
+    def test_transaction_scoped_mode_resolves_session_org(self):
+        request = _run_middleware(self.user, self.org_a.slug)
+        self.assertEqual(request.organization, self.org_a)
+        self.assertEqual(len(request.org_memberships), 1)
+        self.assertFalse(getattr(connection, "_rls_txn_applied", False))
