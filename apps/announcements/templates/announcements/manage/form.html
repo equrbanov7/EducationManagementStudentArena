@@ -1,0 +1,184 @@
+{% extends "accounts/profile_embed_base.html" %}
+{% load i18n static %}
+{% comment %}Elan yarat / redaktə. Bütün yoxlamalar serverdədir (forma + əhatə); `manage.js` yalnız
+rahatlıq verir (bölmə axtarışı, seçilmiş say, müraciət rejiminin sahələri, simvol sayğacı).
+Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur).{% endcomment %}
+
+{% block embed_title %}{% if announcement %}{% trans "Elanı redaktə et" context "announcements.manage" %}{% else %}{% trans "Yeni elan" context "announcements.manage" %}{% endif %}{% endblock %}
+
+{% block embed_extra_css %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-3">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-3">
+{% endblock %}
+
+{% block embed_content %}
+<div class="ann annm-edit" data-annm-form-root>
+    <nav class="annm-crumbs" aria-label="{% trans 'Naviqasiya' context 'announcements.manage' %}">
+        <a href="{% url 'announcements:manage_list' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Elanların idarəsi" context "announcements.manage" %}</a>
+        {% if announcement %}
+        <span class="annm-state annm-state--{{ announcement.state }}">{% if announcement.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif announcement.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif announcement.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif announcement.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% elif announcement.state == "deleted" %}{% trans "Silinib" context "announcements.manage" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
+        {% endif %}
+    </nav>
+
+    {% if announcement.is_deleted %}
+    <section class="annm-deleted" role="status" aria-labelledby="annm-deleted-title">
+        <span class="annm-deleted__icon" aria-hidden="true"><i class="fas fa-trash-can"></i></span>
+        <div class="annm-deleted__text">
+            <h2 class="annm-deleted__title" id="annm-deleted-title">{% trans "Bu elan silinib" context "announcements.manage" %}</h2>
+            <p class="annm-deleted__meta">{% blocktrans trimmed with day=announcement.deleted_at|date:"d.m.Y H:i" context "announcements.manage" %}Silinib: {{ day }}{% endblocktrans %}{% if announcement.deleted_by %} · {{ announcement.deleted_by.get_full_name|default:announcement.deleted_by.username }}{% endif %}</p>
+            <p class="annm-deleted__hint">{% trans "Alıcılar onu görmür (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır. Bərpa etsəniz elan qaralama kimi qayıdır." context "announcements.manage" %}</p>
+        </div>
+        <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" class="annm-deleted__actions">
+            {% csrf_token %}
+            <a class="ems-btn" href="{% url 'announcements:manage_preview' announcement.pk %}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Önizləmə" context "announcements.manage" %}</a>
+            <button type="submit" class="ems-btn ems-btn--primary" name="action" value="undelete"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "announcements.manage" %}</button>
+        </form>
+    </section>
+    {% endif %}
+
+    {% if stats %}
+    <div class="ems-kpis ems-kpis--4 annm-kpis">
+        <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Hədəf auditoriya" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.targeted }}</div></div>
+        <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Popup görüb" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.seen }}</div></div>
+        <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Oxuyub" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.read }}</div></div>
+        <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Müraciət edib" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.applied }}</div></div>
+    </div>
+    {% endif %}
+
+    {% if form.errors or form_errors %}
+    <div class="annm-errors" role="alert">
+        <p class="annm-errors__title"><i class="fas fa-circle-exclamation" aria-hidden="true"></i> {% trans "Forma yadda saxlanmadı — aşağıdakıları düzəldin:" context "announcements.manage" %}</p>
+        <ul>
+            {% for message in form_errors %}<li>{{ message }}</li>{% endfor %}
+            {% for field, errors in form.errors.items %}{% for message in errors %}<li>{{ message }}</li>{% endfor %}{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if not announcement.is_deleted %}
+    <form method="post" enctype="multipart/form-data" class="annm-form" id="annm-form" novalidate>
+        {% csrf_token %}
+        <section class="annm-card" aria-labelledby="annm-content-title">
+            <h2 class="annm-card__title" id="annm-content-title">{% trans "Məzmun" context "announcements.manage" %}</h2>
+            <div class="ems-field">
+                <label class="ems-field__label" for="annm-title">{% trans "Başlıq" context "announcements.manage" %} <span class="ems-field__req">*</span></label>
+                <input id="annm-title" name="title" class="ems-input" maxlength="200" required value="{{ values.title|default:'' }}" data-annm-count="200">
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="annm-summary">{% trans "Qısa xülasə" context "announcements.manage" %}</label>
+                <input id="annm-summary" name="summary" class="ems-input" maxlength="300" value="{{ values.summary|default:'' }}" data-annm-count="300" aria-describedby="annm-summary-hint">
+                <p class="ems-field__hint" id="annm-summary-hint">{% trans "Siyahıda və popup-da göstərilir (300 simvola qədər)." context "announcements.manage" %}</p>
+            </div>
+            <div class="ems-field">
+                <label class="ems-field__label" for="annm-body">{% trans "Mətn" context "announcements.manage" %}</label>
+                <textarea id="annm-body" name="body" class="ems-textarea annm-body" rows="9" maxlength="20000" aria-describedby="annm-body-hint">{{ values.body|default:'' }}</textarea>
+                <p class="ems-field__hint" id="annm-body-hint">{% trans "Düz mətn: boş sətir — yeni abzas; keçidlər avtomatik link olur." context "announcements.manage" %}</p>
+            </div>
+            <div class="annm-grid">
+                <div class="ems-field">
+                    <span class="ems-field__label" id="annm-category-label">{% trans "Kateqoriya" context "announcements.cabinet" %}</span>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select aria-labelledby="annm-category-label">
+                            {% for value, label in categories %}<option value="{{ value }}"{% if values.category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="ems-field">
+                    <span class="ems-field__label" id="annm-priority-label">{% trans "Prioritet" context "announcements.cabinet" %}</span>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="priority" class="ems-select bootstrap-single-select__native" data-bootstrap-select aria-labelledby="annm-priority-label">
+                            {% for value, label in priorities %}<option value="{{ value }}"{% if values.priority|stringformat:'s' == value|stringformat:'s' %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <label class="annm-switch"><input type="checkbox" name="is_pinned" value="1"{% if values.is_pinned %} checked{% endif %}> <span>{% trans "Siyahının başına sanc" context "announcements.manage" %}</span></label>
+            </div>
+        </section>
+
+        <section class="annm-card" aria-labelledby="annm-time-title">
+            <h2 class="annm-card__title" id="annm-time-title">{% trans "Vaxt və son tarix" context "announcements.manage" %}</h2>
+            <div class="annm-grid annm-grid--3">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="annm-publish">{% trans "Dərc vaxtı" context "announcements.manage" %}</label>
+                    <input id="annm-publish" type="datetime-local" name="publish_at" class="ems-input" value="{{ values.publish_at|default:'' }}" aria-describedby="annm-publish-hint">
+                    <p class="ems-field__hint" id="annm-publish-hint">{% trans "Boş — dərc düyməsinə basılan an." context "announcements.manage" %}</p>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="annm-expires">{% trans "Görünmə bitir" context "announcements.manage" %}</label>
+                    <input id="annm-expires" type="datetime-local" name="expires_at" class="ems-input" value="{{ values.expires_at|default:'' }}" aria-describedby="annm-expires-hint">
+                    <p class="ems-field__hint" id="annm-expires-hint">{% trans "Boş — müddətsiz. Bitəndən sonra «Müddəti bitmiş» arxivində qalır." context "announcements.manage" %}</p>
+                </div>
+                <div class="ems-field">
+                    <label class="ems-field__label" for="annm-deadline">{% trans "Son tarix (nə vaxta qədər)" context "announcements.manage" %}</label>
+                    <input id="annm-deadline" type="datetime-local" name="deadline_at" class="ems-input" value="{{ values.deadline_at|default:'' }}" aria-describedby="annm-deadline-hint">
+                    <p class="ems-field__hint" id="annm-deadline-hint">{% trans "Qalan gün göstərilir; keçəndən sonra «Müraciət et» bağlanır." context "announcements.manage" %}</p>
+                </div>
+            </div>
+        </section>
+
+        {% include "announcements/manage/_audience.html" %}
+        {% include "announcements/manage/_apply_config.html" %}
+
+        <section class="annm-card" aria-labelledby="annm-files-title">
+            <h2 class="annm-card__title" id="annm-files-title">{% trans "Sənədlər" context "announcements.cabinet" %}</h2>
+            <div class="ems-field">
+                <label class="ems-field__label" for="annm-files">{% trans "Fayl əlavə et" context "announcements.manage" %}</label>
+                <input id="annm-files" type="file" name="files" class="ems-input" multiple accept="{{ attachment_accept }}" aria-describedby="annm-files-hint">
+                <p class="ems-field__hint" id="annm-files-hint">{% trans "PDF, şəkil, Word/Excel/PowerPoint · hər biri 10 MB-a qədər · ən çox 5 fayl." context "announcements.manage" %}</p>
+            </div>
+            {% if announcement and announcement.attachments.all %}
+            <ul class="annm-files" role="list">
+                {% for file in announcement.attachments.all %}
+                <li>
+                    <a class="ann-file" href="{% url 'announcements:attachment_download' announcement.pk file.pk %}"><i class="far fa-file-lines" aria-hidden="true"></i> <span class="ann-file__name">{{ file.original_name }}</span> <span class="ann-file__size">{{ file.size|filesizeformat }}</span></a>
+                    <button type="submit" form="annm-remove-{{ file.pk }}" class="ems-iconbtn ems-iconbtn--danger" aria-label="{% blocktrans trimmed with name=file.original_name context 'announcements.manage' %}«{{ name }}» faylını sil{% endblocktrans %}"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </section>
+
+        <div class="annm-actions">
+            <button type="submit" class="ems-btn" name="then" value="save"><i class="fas fa-floppy-disk" aria-hidden="true"></i> {% trans "Yadda saxla" context "announcements.manage" %}</button>
+            {% if not announcement or announcement.status != "published" %}
+            <button type="submit" class="ems-btn ems-btn--primary" name="then" value="publish"><i class="fas fa-bullhorn" aria-hidden="true"></i> {% trans "Saxla və dərc et" context "announcements.manage" %}</button>
+            {% endif %}
+        </div>
+    </form>
+    {% endif %}
+
+    {% if announcement and not announcement.is_deleted %}
+    {% for file in announcement.attachments.all %}
+    <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" id="annm-remove-{{ file.pk }}" class="annm-hidden-form">
+        {% csrf_token %}<input type="hidden" name="action" value="remove_attachment"><input type="hidden" name="attachment" value="{{ file.pk }}">
+    </form>
+    {% endfor %}
+    <section class="annm-card annm-status" aria-labelledby="annm-status-title">
+        <h2 class="annm-card__title" id="annm-status-title">{% trans "Vəziyyət" context "announcements.cabinet" %}</h2>
+        <div class="annm-status__actions">
+            <a class="ems-btn" href="{% url 'announcements:manage_preview' announcement.pk %}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Önizləmə" context "announcements.manage" %}</a>
+            <form method="post" action="{% url 'announcements:manage_action' announcement.pk %}" class="annm-status__form">
+                {% csrf_token %}
+                {% if announcement.status == "published" %}
+                <button type="submit" class="ems-btn" name="action" value="unpublish">{% trans "Dərcdən çıxar" context "announcements.manage" %}</button>
+                <button type="submit" class="ems-btn ems-btn--warning" name="action" value="archive">{% trans "Arxivlə" context "announcements.manage" %}</button>
+                {% elif announcement.status == "draft" %}
+                <button type="submit" class="ems-btn ems-btn--primary" name="action" value="publish">{% trans "Dərc et" context "announcements.manage" %}</button>
+                <button type="submit" class="ems-btn ems-btn--warning" name="action" value="archive">{% trans "Arxivlə" context "announcements.manage" %}</button>
+                {% else %}
+                <button type="submit" class="ems-btn" name="action" value="restore">{% trans "Arxivdən qaytar" context "announcements.manage" %}</button>
+                {% endif %}
+                <button type="submit" class="ems-btn ems-btn--danger annm-status__delete" name="action" value="delete"
+                        data-ems-confirm="{% if hard_delete %}{% trans 'Qaralama birdəfəlik silinsin? Onu heç kim görməyib — bu əməliyyat geri qaytarılmır.' context 'announcements.manage' %}{% else %}{% trans 'Elan silinsin? O, bütün alıcılar üçün dərhal yox olacaq (siyahı, popup, sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər saxlanılır; «Silinmişlər» filtrindən bərpa edə bilərsiniz.' context 'announcements.manage' %}{% endif %}"><i class="fas fa-trash" aria-hidden="true"></i> {% trans "Sil" context "announcements.manage" %}</button>
+            </form>
+        </div>
+        <p class="annm-status__hint">{% if hard_delete %}{% trans "Qaralamanı heç kim görməyib — «Sil» onu birdəfəlik silir." context "announcements.manage" %}{% else %}{% trans "«Sil» elanı bütün alıcılardan gizlədir; statistika və müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur." context "announcements.manage" %}{% endif %}</p>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block embed_extra_js %}
+    <script src="{% static 'announcements/js/manage.js' %}?v=20261006-1"></script>
+{% endblock %}

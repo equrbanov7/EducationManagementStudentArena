@@ -494,7 +494,7 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
 # ── Tələbə görünüşü ("Qiymətlərim") ──────────────────────────────────────────
 
 
-def get_student_journal_summary(*, record, period, semester_number):
+def get_student_journal_summary(*, record, period, semester_number, enrollments=None, hours_map=None, frozen_ids=None):
     """Per-subject entry score + attendance for the student view.
 
     ⚠️ **9-cu səth — QAYIB SAATI DENORMALLAŞMIŞ SAYĞACDAN GƏLİR.**
@@ -510,9 +510,11 @@ def get_student_journal_summary(*, record, period, semester_number):
     İndi mənbə digər səkkiz səthlə eynidir: ``Enrollment.absence_hours``.
     İşarələr yalnız giriş balı üçün oxunur (bal dərsə bağlıdır, sayğac deyil).
     """
-    plan = services.get_student_semester_plan(record=record, period=period, semester_number=semester_number)
+    # Tutum 2026-10-06: yalnız yazılışlar lazımdır (seçmə blokları/qərarları yox); «Fənlərim»
+    # onları + saat/donma dəstlərini ARTIQ oxuyub ötürür (eyni sorğular təkrarlanmırdı).
+    if enrollments is None:
+        enrollments = services.get_student_semester_enrollments(record=record, period=period)
     limit_percent = absence_limit.limit_percent_for_record(record)
-    enrollments = plan["enrollments"]
     if not enrollments:
         return {"subjects": []}
 
@@ -524,11 +526,13 @@ def get_student_journal_summary(*, record, period, semester_number):
         marks_by_enr[m.enrollment_id].append(m)
     from apps.registrar import finals_batch
 
-    hours_map = exam_eligibility.lesson_hours_map(offering_ids)
+    if hours_map is None:
+        hours_map = exam_eligibility.lesson_hours_map(offering_ids)
     # Giriş balı oxumaları BİR dəfə (fənn başına 1–3 sorğu idi); Midterm davamiyyəti eyni saat/hədd ilə.
     entry_batch = finals_batch.student_entry_batch(enrollments, record, period, marks_by_enr, hours_map)
     # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu).
-    frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
+    if frozen_ids is None:
+        frozen_ids = exam_eligibility.frozen_offering_ids(offering_ids)
     lesson_counts = {
         row["offering_id"]: row["c"]
         for row in Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(c=Count("id"))

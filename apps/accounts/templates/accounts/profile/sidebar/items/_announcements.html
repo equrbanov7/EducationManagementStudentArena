@@ -1,0 +1,18 @@
+{% load i18n announcements_tags %}
+{% comment %}«Elanlar» (2026-10-06) — hər təşkilat üzvü. Badge — oxunmamış aktiv elan sayı
+(`announcements_unread_count`: aktiv elan yoxdursa sıfır sorğu, request üzrə bir hesab);
+sayğac borusunun açarı `announcements_unread`-dir.{% endcomment %}
+{% if "announcements" in allowed_sections %}
+{% announcements_unread_count as announcements_unread %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=announcements"
+       data-section="announcements"
+       data-title="{% trans 'Elanlar' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'announcements' %}active{% endif %}">
+        <i class="fas fa-bullhorn sidebar-menu-icon" aria-hidden="true"></i>
+        <span class="sidebar-menu-text">{% trans "Elanlar" context "profile.sidebar" %}</span>
+        <span class="sidebar-menu-badge" data-badge-key="announcements_unread">{% if announcements_unread %}{{ announcements_unread }}{% endif %}</span>
+    </a>
+</li>
+{% endif %}

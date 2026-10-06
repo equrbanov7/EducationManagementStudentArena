@@ -1,0 +1,329 @@
+"""Yazı tərəfi: yaratma, redaktə, dərc, arxiv, silmə, sənədlər, statistika.
+
+Hər mutasiya: (1) əhatə yoxlaması (``access``), (2) atomik yazı, (3) xülasənin
+yenidən qurulması (``snapshot.sync_snapshot`` — popup/sayğac dərhal görür),
+(4) audit izi. Əhatəli menecerin hədəf bölmələri hər yazıda YENİDƏN yoxlanılır.
+"""
+
+from __future__ import annotations
+
+import uuid
+
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
+from django.db.models import Count, Q
+from django.utils import timezone
+from django.utils.translation import pgettext
+
+from apps.organizations.public import create_audit_log
+from core.constants import AuditAction
+from core.upload_security import validate_uploaded_file
+
+from ..constants import (
+    ATTACHMENT_EXTENSIONS,
+    ATTACHMENT_MAX_MB,
+    ATTACHMENTS_PER_ANNOUNCEMENT,
+    ApplyMode,
+    Status,
+)
+from ..models import Announcement, AnnouncementAttachment, AnnouncementReceipt
+from . import access, snapshot
+from .audience import normalize_families
+
+_CTX = "announcements.manage"
+_FIELDS = (
+    "title",
+    "summary",
+    "body",
+    "category",
+    "priority",
+    "is_pinned",
+    "show_as_popup",
+    "publish_at",
+    "expires_at",
+    "deadline_at",
+)
+
+
+def _audit(request, organization, action, announcement, changes=None):
+    create_audit_log(
+        getattr(request, "user", None),
+        organization,
+        action,
+        resource_type="announcement",
+        resource_id=str(announcement.pk),
+        resource_repr=announcement.title[:200],
+        new_values=changes or None,
+        request=request,
+    )
+
+
+def save_announcement(request, organization, scope, data, *, announcement=None) -> Announcement:
+    """Formanın ``cleaned_data``-sı → elan (yeni və ya mövcud). Əhatədən kənar → ``ValidationError``."""
+    user = request.user
+    if announcement is not None and not access.can_edit(scope, user, announcement, organization):
+        raise PermissionDenied
+    if announcement is not None and announcement.is_deleted:
+        raise ValidationError(pgettext(_CTX, "Elan silinib — əvvəlcə onu bərpa edin."))
+    units, errors = access.validate_units(scope, organization, data.get("audience_units") or [])
+    families = normalize_families(data.get("audience_families"))
+    if not families:
+        errors.append(pgettext(_CTX, "Ən azı bir auditoriya seçin."))
+    if errors:
+        raise ValidationError({"audience_units": errors})
+    creating = announcement is None
+    announcement = announcement or Announcement(organization=organization, created_by=user)
+    for field in _FIELDS:
+        setattr(announcement, field, data.get(field))
+    announcement.summary = (announcement.summary or "").strip()
+    announcement.body = (announcement.body or "").strip()
+    announcement.audience_families = families
+    announcement.audience_units = units
+    mode = data.get("apply_mode") or ApplyMode.NONE
+    announcement.apply_mode = mode
+    announcement.apply_kind = data.get("apply_kind_obj") if mode == ApplyMode.INTERNAL else None
+    announcement.apply_unit = data.get("apply_unit_obj") if mode == ApplyMode.INTERNAL else None
+    announcement.apply_url = data.get("apply_url") or "" if mode == ApplyMode.URL else ""
+    announcement.apply_label = (data.get("apply_label") or "").strip() if mode != ApplyMode.NONE else ""
+    announcement.updated_by = user
+    if announcement.status == Status.PUBLISHED and not announcement.publish_at:
+        announcement.publish_at = timezone.now()
+    with transaction.atomic():
+        announcement.save()
+        _audit(
+            request,
+            organization,
+            AuditAction.CREATE if creating else AuditAction.UPDATE,
+            announcement,
+            {"status": announcement.status, "families": families, "units": units, "popup": announcement.show_as_popup},
+        )
+    snapshot.sync_snapshot(organization)
+    return announcement
+
+
+def is_hard_delete(announcement) -> bool:
+    """Heç kimin görmədiyi (qəbzsiz) qaralama birdəfəlik silinir; qalan hər şey yumşaq silinir."""
+    return announcement.status == Status.DRAFT and not announcement.receipts.exists()
+
+
+def _delete(request, organization, announcement) -> Announcement:
+    """Qəbzsiz qaralama → birdəfəlik; əks halda yumşaq silmə (qəbz/sənəd/müraciətlər toxunulmaz qalır)."""
+    if is_hard_delete(announcement):
+        with transaction.atomic():
+            _audit(request, organization, AuditAction.DELETE, announcement, {"mode": "hard"})
+            for attachment in announcement.attachments.all():
+                attachment.file.delete(save=False)
+            announcement.delete()
+    else:
+        now = timezone.now()
+        previous = announcement.status
+        announcement.is_deleted = True
+        announcement.deleted_at = now
+        announcement.deleted_by = request.user
+        announcement.updated_by = request.user
+        with transaction.atomic():
+            announcement.save(update_fields=["is_deleted", "deleted_at", "deleted_by", "updated_by", "updated_at"])
+            _audit(request, organization, AuditAction.DELETE, announcement, {"mode": "soft", "status": previous})
+    snapshot.sync_snapshot(organization)  # popup/sayğac xülasəsi + versiya → keş və sessiya işarəsi köhnəlir
+    return announcement
+
+
+def _undelete(request, organization, announcement) -> Announcement:
+    """Silinmiş elanı bərpa edir — həmişə QARALAMA kimi (yenidən dərc şüurlu addımdır)."""
+    announcement.is_deleted = False
+    announcement.deleted_at = None
+    announcement.deleted_by = None
+    announcement.status = Status.DRAFT
+    announcement.archived_at = None
+    announcement.updated_by = request.user
+    with transaction.atomic():
+        announcement.save()
+        _audit(request, organization, AuditAction.UPDATE, announcement, {"action": "undelete", "status": Status.DRAFT})
+    snapshot.sync_snapshot(organization)
+    return announcement
+
+
+def transition(request, organization, scope, announcement, action: str) -> Announcement:
+    """``publish`` / ``unpublish`` (→ qaralama) / ``archive`` / ``restore`` (→ qaralama) / ``delete`` /
+    ``undelete`` (silinmişdən → qaralama).
+
+    ``delete`` istənilən vəziyyətdə işləyir (əhatə qapısı redaktə ilə EYNİDİR): qəbzsiz qaralama
+    birdəfəlik, qalanı yumşaq silinir. Silinmiş elan üzərində yalnız ``undelete`` mümkündür.
+    """
+    if not access.can_edit(scope, request.user, announcement, organization):
+        raise PermissionDenied
+    if announcement.is_deleted and action != "undelete":
+        raise ValidationError(pgettext(_CTX, "Elan silinib — əvvəlcə onu bərpa edin."))
+    if action == "undelete":
+        if not announcement.is_deleted:
+            raise ValidationError(pgettext(_CTX, "Elan silinməyib."))
+        return _undelete(request, organization, announcement)
+    if action == "delete":
+        return _delete(request, organization, announcement)
+    now = timezone.now()
+    if action == "publish":
+        if announcement.status == Status.ARCHIVED:
+            raise ValidationError(pgettext(_CTX, "Arxivdəki elanı əvvəlcə bərpa edin."))
+        if not announcement.audience_families:
+            raise ValidationError(pgettext(_CTX, "Ən azı bir auditoriya seçin."))
+        if announcement.expires_at and announcement.expires_at <= now:
+            raise ValidationError(pgettext(_CTX, "Bitmə vaxtı keçib — əvvəlcə tarixi dəyişin."))
+        announcement.status = Status.PUBLISHED
+        announcement.publish_at = announcement.publish_at or now
+        announcement.published_at = now
+    elif action == "unpublish":
+        announcement.status = Status.DRAFT
+    elif action == "archive":
+        announcement.status = Status.ARCHIVED
+        announcement.archived_at = now
+    elif action == "restore":
+        announcement.status = Status.DRAFT
+        announcement.archived_at = None
+    else:
+        raise ValidationError(pgettext(_CTX, "Naməlum əməliyyat."))
+    announcement.updated_by = request.user
+    with transaction.atomic():
+        announcement.save()
+        _audit(
+            request, organization, AuditAction.UPDATE, announcement, {"action": action, "status": announcement.status}
+        )
+    snapshot.sync_snapshot(organization)
+    return announcement
+
+
+def add_attachments(request, organization, announcement, files) -> list:
+    incoming = [item for item in files or [] if item]
+    if announcement.attachments.count() + len(incoming) > ATTACHMENTS_PER_ANNOUNCEMENT:
+        raise ValidationError(
+            {
+                "files": [
+                    pgettext(_CTX, "Bir elana ən çox %(n)s sənəd əlavə etmək olar.")
+                    % {"n": ATTACHMENTS_PER_ANNOUNCEMENT}
+                ]
+            }
+        )
+    created = []
+    for uploaded in incoming:
+        validate_uploaded_file(uploaded, allowed_extensions=set(ATTACHMENT_EXTENSIONS), max_size_mb=ATTACHMENT_MAX_MB)
+        attachment = AnnouncementAttachment(
+            organization=organization,
+            announcement=announcement,
+            file=uploaded,
+            original_name=(getattr(uploaded, "name", "") or "sened")[:255],
+            size=int(getattr(uploaded, "size", 0) or 0),
+            content_type=(getattr(uploaded, "content_type", "") or "")[:120],
+            uploaded_by=request.user,
+        )
+        attachment.full_clean()
+        attachment.save()
+        created.append(attachment)
+    return created
+
+
+def remove_attachment(organization, announcement, attachment_id) -> bool:
+    if announcement.is_deleted:  # silinmiş elanın sənədləri audit üçün saxlanılır
+        return False
+    try:
+        attachment_id = uuid.UUID(str(attachment_id))
+    except (TypeError, ValueError, AttributeError):
+        return False
+    attachment = announcement.attachments.filter(organization=organization, pk=attachment_id).first()
+    if attachment is None:
+        return False
+    attachment.file.delete(save=False)
+    attachment.delete()
+    return True
+
+
+def manage_list(organization, scope, user, *, q="", state="all", category="", page=1, page_size=20) -> dict:
+    """İdarə siyahısı + hər elan üçün qəbz statistikası (sabit sayda sorğu)."""
+    from .queries import search_q
+
+    now = timezone.now()
+    queryset = Announcement.objects.filter(organization=organization).filter(access.manageable_q(scope, user))
+    # «Silinmişlər» ayrıca filtrdir; qalan bütün görünüşlərdə silinmiş elan yoxdur.
+    queryset = queryset.filter(is_deleted=state == "deleted")
+    live = Q(status=Status.PUBLISHED)
+    state_q = {
+        "draft": Q(status=Status.DRAFT),
+        "archived": Q(status=Status.ARCHIVED),
+        "scheduled": live & Q(publish_at__gt=now),
+        "active": live & Q(publish_at__lte=now) & (Q(expires_at__isnull=True) | Q(expires_at__gt=now)),
+        "expired": live & Q(expires_at__lte=now),
+    }.get(state)
+    if state_q is not None:
+        queryset = queryset.filter(state_q)
+    if category:
+        queryset = queryset.filter(category=category)
+    if q:
+        queryset = queryset.filter(search_q(q))
+    queryset = queryset.order_by("-deleted_at" if state == "deleted" else "-updated_at")
+    total = queryset.count()
+    pages = max(1, -(-total // page_size))
+    page = max(1, min(page, pages))
+    rows = list(queryset.select_related("created_by", "deleted_by")[(page - 1) * page_size : page * page_size])
+    stats = receipt_stats([row.pk for row in rows])
+    for row in rows:
+        row.state = row.effective_state(now)
+        row.stats = stats.get(row.pk, {"seen": 0, "read": 0, "applied": 0})
+    return {"items": rows, "total": total, "page": page, "pages": pages}
+
+
+def receipt_stats(announcement_ids) -> dict:
+    if not announcement_ids:
+        return {}
+    rows = (
+        AnnouncementReceipt.objects.filter(announcement_id__in=announcement_ids)
+        .values("announcement_id")
+        .annotate(
+            seen=Count("pk", filter=Q(popup_seen_at__isnull=False)),
+            read=Count("pk", filter=Q(read_at__isnull=False)),
+            applied=Count("pk", filter=Q(applied_at__isnull=False)),
+        )
+    )
+    return {row["announcement_id"]: row for row in rows}
+
+
+def targeted_count(announcement) -> int:
+    """Hədəf auditoriyanın təxmini sayı (aktiv üzvlüklər; detal səhifəsində bir dəfə hesablanır)."""
+    from django.apps import apps as django_apps
+
+    from .audience import family_of
+
+    Membership = django_apps.get_model("organizations", "Membership")
+    families = set(announcement.audience_families or [])
+    units = {str(unit) for unit in announcement.audience_units or []}
+    rows = Membership.objects.filter(
+        organization_id=announcement.organization_id, is_active=True, user__is_active=True
+    ).values_list("user_id", "role__name", "scope_unit__path")
+    students, others = set(), set()
+    for user_id, role_name, path in rows:
+        family = family_of(role_name)
+        if family not in families:
+            continue
+        if family == "students":
+            students.add(user_id)
+        elif not units or set((path or "").split("/")) & units:
+            others.add(user_id)
+    if units and students:
+        StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+        matched = set()
+        for user_id, path in StudentAcademicRecord.objects.filter(
+            organization_id=announcement.organization_id, is_active=True, student_id__in=students
+        ).values_list("student_id", "group__path"):
+            if set((path or "").split("/")) & units:
+                matched.add(user_id)
+        students = matched
+    return len(students | others)
+
+
+__all__ = [
+    "add_attachments",
+    "is_hard_delete",
+    "manage_list",
+    "receipt_stats",
+    "remove_attachment",
+    "save_announcement",
+    "targeted_count",
+    "transition",
+]

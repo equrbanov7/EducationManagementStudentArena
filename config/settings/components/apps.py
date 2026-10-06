@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     "apps.applications.apps.ApplicationsConfig",
     # Anonim müəllim qiymətləndirmə sorğusu (2026-09-25) — bax apps/surveys/public.py.
     "apps.surveys.apps.SurveysConfig",
+    # «Elanlar» (2026-10-06) — elanlar, birdəfəlik popup, «Müraciət et». Bax apps/announcements/public.py.
+    "apps.announcements.apps.AnnouncementsConfig",
     # Avtomatik dərs cədvəli generatoru (2026-09-25) — bax apps/timetable/public.py.
     "apps.timetable.apps.TimetableConfig",
     # Fənn qovluğu — materiallar, sərbəst iş, ev tapşırığı (2026-09-25) — bax apps/subject_folder/public.py.

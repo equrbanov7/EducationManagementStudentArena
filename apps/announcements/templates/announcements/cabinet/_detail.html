@@ -1,0 +1,66 @@
+{% load i18n static %}
+{% comment %}Elanın detalı. Mətn DÜZ MƏTNDİR: `linebreaks` + `urlize` (ikisi də avtomatik escape edir) —
+`|safe` YOXDUR. Açılışda `detail.js` «oxundu» qəbzini POST edir (baxış rejimində yox).
+`preview=True` (menecerin önizləməsi) — heç bir yazı/düymə işləmir.{% endcomment %}
+<div class="ann ann-detail-wrap">
+    {% if not preview %}
+    <a class="ann-back" href="{{ ann.back_url }}" data-section="announcements">
+        <i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Bütün elanlar" context "announcements.cabinet" %}
+    </a>
+    {% endif %}
+    {% if not item %}
+    <div class="ems-empty ann-empty" role="status">
+        <span class="ems-empty-icon"><i class="fas fa-bullhorn" aria-hidden="true"></i></span>
+        <p class="ems-empty-title">{% trans "Elan tapılmadı" context "announcements.cabinet" %}</p>
+        <p class="ems-empty-hint">{% trans "Elan silinib, arxivlənib və ya sizə ünvanlanmayıb." context "announcements.cabinet" %}</p>
+    </div>
+    {% else %}
+    <article class="ann-detail ann-card--p{{ item.priority }}"
+             {% if not preview and not ann.view_as %}data-ann-detail data-read-url="{{ ann.read_url }}"{% endif %}
+             aria-labelledby="ann-detail-title">
+        <div class="ann-detail__chips">{% include "announcements/cabinet/_chips.html" %}</div>
+        <h2 class="ann-detail__title" id="ann-detail-title">{{ item.title }}</h2>
+        <p class="ann-detail__meta">
+            <span><i class="far fa-calendar" aria-hidden="true"></i> {% blocktrans trimmed with day=item.publish_at|date:"d.m.Y H:i" context "announcements.cabinet" %}Dərc: {{ day }}{% endblocktrans %}</span>
+            {% if item.expires_at %}<span>{% blocktrans trimmed with day=item.expires_at|date:"d.m.Y H:i" context "announcements.cabinet" %}Qüvvədədir: {{ day }} tarixinədək{% endblocktrans %}</span>{% endif %}
+        </p>
+
+        {% if item.deadline %}
+        <div class="ann-deadline-box ann-deadline-box--{{ item.deadline.state }}" role="note">
+            <i class="far fa-clock ann-deadline-box__icon" aria-hidden="true"></i>
+            <div>
+                <p class="ann-deadline-box__label">{% trans "Son tarix" context "announcements.cabinet" %}</p>
+                <p class="ann-deadline-box__date">{{ item.deadline.at|date:"d.m.Y, H:i" }}</p>
+            </div>
+            <p class="ann-deadline-box__left" data-ann-countdown="{{ item.deadline.iso }}">
+                {% if item.deadline.state == "overdue" %}{% trans "Son tarix keçib" context "announcements.cabinet" %}{% elif item.deadline.state == "today" %}{% trans "Bu gün son gündür" context "announcements.cabinet" %}{% else %}{% blocktrans trimmed count n=item.deadline.days context "announcements.cabinet" %}{{ n }} gün qaldı{% plural %}{{ n }} gün qaldı{% endblocktrans %}{% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+        {% if item.summary %}<p class="ann-detail__summary">{{ item.summary }}</p>{% endif %}
+        {% if item.body %}<div class="ann-detail__body">{{ item.body|urlize|linebreaks }}</div>{% endif %}
+
+        {% with files=item.attachments.all %}{% if files %}
+        <section class="ann-files" aria-labelledby="ann-files-title">
+            <h3 class="ann-files__title" id="ann-files-title">{% trans "Sənədlər" context "announcements.cabinet" %}</h3>
+            <ul class="ann-files__list" role="list">
+                {% for file in files %}
+                <li><a class="ann-file" href="{% url 'announcements:attachment_download' item.pk file.pk %}" data-force-navigation="true" download>
+                    <i class="far fa-file-lines" aria-hidden="true"></i> <span class="ann-file__name">{{ file.original_name }}</span>
+                    <span class="ann-file__size">{{ file.size|filesizeformat }}</span>
+                </a></li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}{% endwith %}
+
+        {% if item.has_apply and not preview %}
+            {% include "announcements/cabinet/_apply.html" %}
+        {% elif item.has_apply and preview %}
+        <p class="ann-note"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "İstifadəçi burada «Müraciət et» düyməsini görəcək." context "announcements.cabinet" %}</p>
+        {% endif %}
+    </article>
+    {% if not preview %}<script src="{% static 'announcements/js/detail.js' %}?v=20261006-1"></script>{% endif %}
+    {% endif %}
+</div>

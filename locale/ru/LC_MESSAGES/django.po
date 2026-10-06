@@ -90598,3 +90598,996 @@ msgstr ""
 msgctxt "surveys.campaigns"
 msgid "Nəticələr dərc olunandan sonra k-həddi dəyişmir."
 msgstr "Порог k нельзя менять после публикации результатов."
+
+msgctxt "announcements.api"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет активного контекста организации."
+
+msgctxt "announcements.api"
+msgid "Elan seçilməyib."
+msgstr "Объявление не выбрано."
+
+msgctxt "announcements.api"
+msgid "Giriş tələb olunur."
+msgstr "Требуется вход."
+
+msgctxt "announcements.apply"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "В режиме просмотра подать заявку нельзя."
+
+msgctxt "announcements.apply"
+msgid "Bu elan üzrə müraciət nəzərdə tutulmayıb."
+msgstr "По этому объявлению заявки не предусмотрены."
+
+msgctxt "announcements.apply"
+msgid "Elan"
+msgstr "Объявление"
+
+msgctxt "announcements.apply"
+msgid "Elan: %(title)s"
+msgstr "Объявление: %(title)s"
+
+msgctxt "announcements.apply"
+msgid "Elanın müddəti bitib."
+msgstr "Срок объявления истёк."
+
+msgctxt "announcements.apply"
+msgid "Müraciət ünvanı konfiqurasiya olunmayıb — elanın müəllifinə bildirin."
+msgstr "Адресат заявки не настроен — сообщите автору объявления."
+
+msgctxt "announcements.apply"
+msgid "Müraciətin son tarixi keçib."
+msgstr "Срок подачи заявок истёк."
+
+msgctxt "announcements.apply"
+msgid "Qeyd ən çox %(n)s simvol ola bilər."
+msgstr "Примечание может содержать не более %(n)s символов."
+
+msgctxt "announcements.apply"
+msgid "«%(title)s» elanına müraciət."
+msgstr "Заявка по объявлению «%(title)s»."
+
+msgctxt "announcements.cabinet"
+msgid "%(day)s tarixinədək"
+msgstr "до %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "%(page)s / %(pages)s"
+msgstr "%(page)s из %(pages)s"
+
+msgctxt "announcements.cabinet"
+msgid "Aktiv"
+msgstr "Активные"
+
+msgctxt "announcements.cabinet"
+msgid "Axtarış sözünü dəyişin və ya filtrləri sıfırlayın."
+msgstr "Измените запрос или сбросьте фильтры."
+
+msgctxt "announcements.cabinet"
+msgid "Baxış rejimində müraciət etmək olmaz."
+msgstr "В режиме просмотра подать заявку нельзя."
+
+msgctxt "announcements.cabinet"
+msgid "Başlıq və ya mətndə axtar…"
+msgstr "Поиск по заголовку или тексту…"
+
+msgctxt "announcements.cabinet"
+msgid "Bu gün son gündür"
+msgstr "Сегодня последний день"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün elanlar"
+msgstr "Все объявления"
+
+msgctxt "announcements.cabinet"
+msgid "Bütün kateqoriyalar"
+msgstr "Все категории"
+
+msgctxt "announcements.cabinet"
+msgid "Dərc: %(day)s"
+msgstr "Опубликовано: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Elan filtrləri"
+msgstr "Фильтры объявлений"
+
+msgctxt "announcements.cabinet"
+msgid "Elan silinib, arxivlənib və ya sizə ünvanlanmayıb."
+msgstr "Объявление удалено, архивировано или адресовано не вам."
+
+msgctxt "announcements.cabinet"
+msgid "Elan tapılmadı"
+msgstr "Объявление не найдено"
+
+msgctxt "announcements.cabinet"
+msgid "Elanlar üçün aktiv təşkilat konteksti tapılmadı."
+msgstr "Не найден активный контекст организации для объявлений."
+
+msgctxt "announcements.cabinet"
+msgid "Elanlarda axtar"
+msgstr "Поиск по объявлениям"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları idarə et"
+msgstr "Управление объявлениями"
+
+msgctxt "announcements.cabinet"
+msgid "Elanları yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось загрузить объявления. Повторите попытку позже."
+
+msgctxt "announcements.cabinet"
+msgid "Filtrə uyğun elan tapılmadı"
+msgstr "Нет объявлений по выбранным фильтрам"
+
+msgctxt "announcements.cabinet"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "announcements.cabinet"
+msgid "Hazırda sizə aid aktiv elan yoxdur"
+msgstr "Сейчас для вас нет активных объявлений"
+
+msgctxt "announcements.cabinet"
+msgid "Kateqoriya"
+msgstr "Категория"
+
+msgctxt "announcements.cabinet"
+msgid "Keçid %(day)s tarixində açılıb."
+msgstr "Ссылка открыта %(day)s."
+
+msgctxt "announcements.cabinet"
+msgid "Keçidi yenidən aç"
+msgstr "Открыть ссылку снова"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitib"
+msgstr "Срок истёк"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş"
+msgstr "Истёкшие"
+
+msgctxt "announcements.cabinet"
+msgid "Müddəti bitmiş elan yoxdur"
+msgstr "Нет истёкших объявлений"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət"
+msgstr "Заявка"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Müraciət edilib: %(number)s (%(day)s). Statusunu «Müraciətlərim» bölməsində "
+"izləyin."
+msgstr ""
+"Заявка подана: %(number)s (%(day)s). Следите за статусом в разделе «Мои "
+"заявки»."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət et"
+msgstr "Подать заявку"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Заявка не отправлена. Повторите попытку позже."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət mümkündür"
+msgstr "Можно подать заявку"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət xarici keçid vasitəsilə qəbul olunur."
+msgstr "Заявки принимаются по внешней ссылке."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz göndərildi"
+msgstr "Ваша заявка отправлена"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə aidiyyəti şöbəyə göndəriləcək."
+msgstr "Заявка будет отправлена с типом «%(kind)s» в ответственный отдел."
+
+msgctxt "announcements.cabinet"
+msgid "Müraciətiniz «%(kind)s» növü ilə «%(unit)s» şöbəsinə göndəriləcək."
+msgstr "Заявка будет отправлена с типом «%(kind)s» в отдел «%(unit)s»."
+
+msgctxt "announcements.cabinet"
+msgid "Növbəti"
+msgstr "Далее"
+
+msgctxt "announcements.cabinet"
+msgid "Oxunmamış"
+msgstr "Непрочитанные"
+
+msgctxt "announcements.cabinet"
+msgid "Prioritet"
+msgstr "Приоритет"
+
+msgctxt "announcements.cabinet"
+msgid "Qeyd (könüllü)"
+msgstr "Примечание (необязательно)"
+
+msgctxt "announcements.cabinet"
+msgid "Qüvvədədir: %(day)s tarixinədək"
+msgstr "Действует до %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Sancılmış"
+msgstr "Закреплено"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix"
+msgstr "Крайний срок"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix keçib"
+msgstr "Срок истёк"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix yaxın olan"
+msgstr "Ближайший срок"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarix: %(day)s"
+msgstr "Крайний срок: %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Son tarixli"
+msgstr "Со сроком"
+
+msgctxt "announcements.cabinet"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "announcements.cabinet"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "announcements.cabinet"
+msgid "Sənədlər"
+msgstr "Документы"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Universitetin, fakültənizin və kafedranızın sizə ünvanladığı elanlar. Son "
+"tarixi olan elanlar ayrıca işarələnir."
+msgstr ""
+"Объявления университета, вашего факультета и кафедры. Объявления со сроком "
+"отмечены отдельно."
+
+msgctxt "announcements.cabinet"
+msgid "Vəziyyət"
+msgstr "Статус"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni"
+msgstr "Новое"
+
+msgctxt "announcements.cabinet"
+msgid "Yeni elan dərc olunanda burada görünəcək."
+msgstr "Новые объявления появятся здесь после публикации."
+
+msgctxt "announcements.cabinet"
+msgid "İstifadəçi burada «Müraciət et» düyməsini görəcək."
+msgstr "Здесь пользователь увидит кнопку «Подать заявку»."
+
+msgctxt "announcements.cabinet"
+msgid "Əlavə etmək istədiyiniz məlumat…"
+msgstr "Дополнительная информация…"
+
+msgctxt "announcements.cabinet"
+msgid "Ən yeni"
+msgstr "Сначала новые"
+
+msgctxt "announcements.cabinet"
+msgid "Əvvəlki"
+msgstr "Назад"
+
+msgctxt "announcements.manage"
+msgid "Arxiv"
+msgstr "Архив"
+
+msgctxt "announcements.manage"
+msgid "Arxivdəki elanı əvvəlcə bərpa edin."
+msgstr "Сначала восстановите объявление из архива."
+
+msgctxt "announcements.manage"
+msgid "Arxivdən qaytar"
+msgstr "Вернуть из архива"
+
+msgctxt "announcements.manage"
+msgid "Arxivlə"
+msgstr "В архив"
+
+msgctxt "announcements.manage"
+msgid "Auditoriya"
+msgstr "Аудитория"
+
+msgctxt "announcements.manage"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "announcements.manage"
+msgid "Başlıq"
+msgstr "Заголовок"
+
+msgctxt "announcements.manage"
+msgid "Başlıq ən azı 3 simvol olmalıdır."
+msgstr "Заголовок должен содержать не менее 3 символов."
+
+msgctxt "announcements.manage"
+msgid "Bir elana ən çox %(n)s sənəd əlavə etmək olar."
+msgstr "К объявлению можно прикрепить не более %(n)s документов."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı dərc vaxtından sonra olmalıdır."
+msgstr "Время окончания должно быть позже времени публикации."
+
+msgctxt "announcements.manage"
+msgid "Bitmə vaxtı keçib — əvvəlcə tarixi dəyişin."
+msgstr "Время окончания прошло — сначала измените дату."
+
+msgctxt "announcements.manage"
+msgid "Boş — dərc düyməsinə basılan an."
+msgstr "Пусто — в момент нажатия «Опубликовать»."
+
+msgctxt "announcements.manage"
+msgid "Boş — müddətsiz. Bitəndən sonra «Müddəti bitmiş» arxivində qalır."
+msgstr "Пусто — бессрочно. После окончания остаётся в архиве «Истёкшие»."
+
+msgctxt "announcements.manage"
+msgid "Bu bölmələr sizin əhatənizdən kənardadır: %(names)s"
+msgstr "Эти подразделения вне вашей области: %(names)s"
+
+msgctxt "announcements.manage"
+msgid "Bu müraciət növü seçilmiş auditoriyanın hamısına açıq deyil."
+msgstr "Этот тип заявки доступен не всей выбранной аудитории."
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar"
+msgstr "Поиск подразделения"
+
+msgctxt "announcements.manage"
+msgid "Bölmə axtar…"
+msgstr "Поиск подразделения…"
+
+msgctxt "announcements.manage"
+msgid "Bölmə seçimi yanlışdır."
+msgstr "Неверный выбор подразделения."
+
+msgctxt "announcements.manage"
+msgid "Bölmələr (fakültə, kafedra, ixtisas, qrup)"
+msgstr "Подразделения (факультет, кафедра, специальность, группа)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata elan yalnız təşkilat səviyyəli səlahiyyətlə verilir — öz "
+"bölmənizi seçin."
+msgstr ""
+"Объявление для всей организации требует полномочий уровня организации — "
+"выберите своё подразделение."
+
+msgctxt "announcements.manage"
+msgid ""
+"Bütün təşkilata və ya seçilmiş fakültə, kafedra, qrup üçün elan yaradın. "
+"Popup elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"Создавайте объявления для всей организации или для выбранных факультетов, "
+"кафедр, групп. Всплывающее объявление показывается каждому пользователю "
+"только один раз."
+
+msgctxt "announcements.manage"
+msgid "Düymənin mətni (könüllü)"
+msgstr "Текст кнопки (необязательно)"
+
+msgctxt "announcements.manage"
+msgid "Düz mətn: boş sətir — yeni abzas; keçidlər avtomatik link olur."
+msgstr ""
+"Обычный текст: пустая строка — новый абзац; ссылки становятся активными "
+"автоматически."
+
+msgctxt "announcements.manage"
+msgid "Dərc et"
+msgstr "Опубликовать"
+
+msgctxt "announcements.manage"
+msgid "Dərc vaxtı"
+msgstr "Время публикации"
+
+msgctxt "announcements.manage"
+msgid "Dərc: %(day)s"
+msgstr "Опубликовано: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Dərcdən çıxar"
+msgstr "Снять с публикации"
+
+msgctxt "announcements.manage"
+msgid "Elan arxivdən qaytarıldı (qaralama)."
+msgstr "Объявление возвращено из архива (черновик)."
+
+msgctxt "announcements.manage"
+msgid "Elan arxivləndi."
+msgstr "Объявление отправлено в архив."
+
+msgctxt "announcements.manage"
+msgid "Elan dərc olundu."
+msgstr "Объявление опубликовано."
+
+msgctxt "announcements.manage"
+msgid "Elan qaralamaya qaytarıldı."
+msgstr "Объявление возвращено в черновики."
+
+msgctxt "announcements.manage"
+msgid "Elan yadda saxlanıldı."
+msgstr "Объявление сохранено."
+
+msgctxt "announcements.manage"
+msgid "Elan yoxdur"
+msgstr "Нет объявлений"
+
+msgctxt "announcements.manage"
+msgid "Elanlarım"
+msgstr "Мои объявления"
+
+msgctxt "announcements.manage"
+msgid "Elanların idarəsi"
+msgstr "Управление объявлениями"
+
+msgctxt "announcements.manage"
+msgid "Elanı redaktə et"
+msgstr "Редактировать объявление"
+
+msgctxt "announcements.manage"
+msgid "Fayl əlavə et"
+msgstr "Добавить файлы"
+
+msgctxt "announcements.manage"
+msgid "Forma yadda saxlanmadı — aşağıdakıları düzəldin:"
+msgstr "Форма не сохранена — исправьте следующее:"
+
+msgctxt "announcements.manage"
+msgid "Girişdə popup kimi göstər"
+msgstr "Показать всплывающим окном при входе"
+
+msgctxt "announcements.manage"
+msgid "Görünmə bitir"
+msgstr "Показывать до"
+
+msgctxt "announcements.manage"
+msgid "Göstər"
+msgstr "Показать"
+
+msgctxt "announcements.manage"
+msgid "Hara göndərilsin (şöbə)"
+msgstr "Куда отправить (отдел)"
+
+msgctxt "announcements.manage"
+msgid ""
+"Heç nə seçilməsə — bütün təşkilat. Seçilmiş bölmə alt bölmələri ilə birlikdə"
+" hədəflənir (məs. fakültə → onun bütün qrupları)."
+msgstr ""
+"Если ничего не выбрано — вся организация. Выбранное подразделение включает "
+"дочерние (например, факультет → все его группы)."
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriya"
+msgstr "Целевая аудитория"
+
+msgctxt "announcements.manage"
+msgid "Keçid (https://… və ya /daxili/yol)"
+msgstr "Ссылка (https://… или /внутренний/путь)"
+
+msgctxt "announcements.manage"
+msgid "Keçid https:// ilə başlamalı və ya saytın daxili yolu (/…) olmalıdır."
+msgstr ""
+"Ссылка должна начинаться с https:// или быть внутренним путём сайта (/…)."
+
+msgctxt "announcements.manage"
+msgid "Kimə göstərilsin"
+msgstr "Кому показывать"
+
+msgctxt "announcements.manage"
+msgid "Müraciət"
+msgstr "Заявки"
+
+msgctxt "announcements.manage"
+msgid "Müraciət edib"
+msgstr "Подали заявку"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növü"
+msgstr "Тип заявки"
+
+msgctxt "announcements.manage"
+msgid "Müraciət növünü seçin."
+msgstr "Выберите тип заявки."
+
+msgctxt "announcements.manage"
+msgid "Müraciət rejimi"
+msgstr "Режим заявки"
+
+msgctxt "announcements.manage"
+msgid "Mətn"
+msgstr "Текст"
+
+msgctxt "announcements.manage"
+msgid "Məzmun"
+msgstr "Содержание"
+
+msgctxt "announcements.manage"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "announcements.manage"
+msgid "Naviqasiya"
+msgstr "Навигация"
+
+msgctxt "announcements.manage"
+msgid "Növ seçilmiş auditoriyanın hamısına açıq olmalıdır (məs. tələbə növü)."
+msgstr ""
+"Тип должен быть доступен всей выбранной аудитории (например, студенческий "
+"тип)."
+
+msgctxt "announcements.manage"
+msgid "Növün öz marşrutu ilə"
+msgstr "По маршруту типа"
+
+msgctxt "announcements.manage"
+msgid "Oxuyub"
+msgstr "Прочитали"
+
+msgctxt "announcements.manage"
+msgid ""
+"PDF, şəkil, Word/Excel/PowerPoint · hər biri 10 MB-a qədər · ən çox 5 fayl."
+msgstr ""
+"PDF, изображения, Word/Excel/PowerPoint · до 10 МБ каждый · не более 5 "
+"файлов."
+
+msgctxt "announcements.manage"
+msgid "Planlaşdırılıb"
+msgstr "Запланировано"
+
+msgctxt "announcements.manage"
+msgid "Popup"
+msgstr "Всплывающее"
+
+msgctxt "announcements.manage"
+msgid "Popup görüb"
+msgstr "Видели окно"
+
+msgctxt "announcements.manage"
+msgid "Qalan gün göstərilir; keçəndən sonra «Müraciət et» bağlanır."
+msgstr ""
+"Показывается число оставшихся дней; после срока кнопка «Подать заявку» "
+"закрывается."
+
+msgctxt "announcements.manage"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "announcements.manage"
+msgid "Qaralama birdəfəlik silinsin?"
+msgstr "Удалить черновик навсегда?"
+
+msgctxt "announcements.manage"
+msgid "Qaralama silindi."
+msgstr "Черновик удалён."
+
+msgctxt "announcements.manage"
+msgid "Qısa xülasə"
+msgstr "Краткое описание"
+
+msgctxt "announcements.manage"
+msgid "Redaktəyə qayıt"
+msgstr "Вернуться к редактированию"
+
+msgctxt "announcements.manage"
+msgid "Saxla və dərc et"
+msgstr "Сохранить и опубликовать"
+
+msgctxt "announcements.manage"
+msgid "Seçilib"
+msgstr "Выбрано"
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş bölmələrdən biri tapılmadı."
+msgstr "Одно из выбранных подразделений не найдено."
+
+msgctxt "announcements.manage"
+msgid "Seçilmiş şöbə tapılmadı."
+msgstr "Выбранный отдел не найден."
+
+msgctxt "announcements.manage"
+msgid "Seçiləcək bölmə yoxdur."
+msgstr "Нет подразделений для выбора."
+
+msgctxt "announcements.manage"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "announcements.manage"
+msgid "Siyahıda və popup-da göstərilir (300 simvola qədər)."
+msgstr "Показывается в списке и во всплывающем окне (до 300 символов)."
+
+msgctxt "announcements.manage"
+msgid "Siyahının başına sanc"
+msgstr "Закрепить вверху списка"
+
+msgctxt "announcements.manage"
+msgid "Son tarix (nə vaxta qədər)"
+msgstr "Крайний срок (до какого времени)"
+
+msgctxt "announcements.manage"
+msgid "Son tarix dərc vaxtından sonra olmalıdır."
+msgstr "Крайний срок должен быть позже времени публикации."
+
+msgctxt "announcements.manage"
+msgid "Statistika"
+msgstr "Статистика"
+
+msgctxt "announcements.manage"
+msgid "Səlahiyyət yoxdur."
+msgstr "Нет полномочий."
+
+msgctxt "announcements.manage"
+msgid "Sənəd silindi."
+msgstr "Документ удалён."
+
+msgctxt "announcements.manage"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Нет совпадений"
+
+msgctxt "announcements.manage"
+msgid "Vaxt və son tarix"
+msgstr "Сроки"
+
+msgctxt "announcements.manage"
+msgid "Yadda saxla"
+msgstr "Сохранить"
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız heç kimin görmədiyi qaralama silinə bilər; digərlərini arxivləyin."
+msgstr ""
+"Удалить можно только черновик, который никто не видел; остальные отправьте в"
+" архив."
+
+msgctxt "announcements.manage"
+msgid ""
+"Yalnız öz bölmənizə (və onun alt bölmələrinə) elan verə bilərsiniz. Popup "
+"elan hər istifadəçiyə yalnız bir dəfə göstərilir."
+msgstr ""
+"Вы можете публиковать объявления только для своего подразделения (и "
+"дочерних). Всплывающее объявление показывается каждому пользователю один "
+"раз."
+
+msgctxt "announcements.manage"
+msgid "Yeni elan"
+msgstr "Новое объявление"
+
+msgctxt "announcements.manage"
+msgid "bitir: %(day)s"
+msgstr "до: %(day)s"
+
+msgctxt "announcements.manage"
+msgid ""
+"hər istifadəçiyə yalnız BİR dəfə; bağlayandan sonra bir daha çıxmır. İmtahan"
+" səhifələrində göstərilmir."
+msgstr ""
+"каждому пользователю только ОДИН раз; после закрытия больше не появляется. "
+"Не показывается на страницах экзаменов."
+
+msgctxt "announcements.manage"
+msgid "son tarix: %(day)s"
+msgstr "срок: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "«%(name)s» faylını sil"
+msgstr "Удалить файл «%(name)s»"
+
+msgctxt "announcements.manage"
+msgid "«Müraciət et» düyməsi"
+msgstr "Кнопка «Подать заявку»"
+
+msgctxt "announcements.manage"
+msgid "«Yeni elan» düyməsi ilə ilk elanı yaradın."
+msgstr "Создайте первое объявление кнопкой «Новое объявление»."
+
+msgctxt "announcements.manage"
+msgid "Önizləmə"
+msgstr "Предпросмотр"
+
+msgctxt "announcements.manage"
+msgid "Önizləmə — istifadəçi belə görəcək"
+msgstr "Предпросмотр — так увидит пользователь"
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir auditoriya seçin."
+msgstr "Выберите хотя бы одну аудиторию."
+
+msgctxt "announcements.manage"
+msgid "Ən azı bir bölmə seçin — yalnız öz əhatənizdəki bölmələr göstərilir."
+msgstr ""
+"Выберите хотя бы одно подразделение — показаны только подразделения вашей "
+"области."
+
+msgctxt "announcements.manage"
+msgid "Ən çox %(n)s bölmə seçmək olar."
+msgstr "Можно выбрать не более %(n)s подразделений."
+
+msgctxt "announcements.manage"
+msgid "— seçin —"
+msgstr "— выберите —"
+
+msgctxt "announcements.model"
+msgid "Adi"
+msgstr "Обычный"
+
+msgctxt "announcements.model"
+msgid "Arxiv"
+msgstr "Архив"
+
+msgctxt "announcements.model"
+msgid "Daxili müraciət (Müraciətlər modulu)"
+msgstr "Внутренняя заявка (модуль «Заявки»)"
+
+msgctxt "announcements.model"
+msgid "Dərc olunub"
+msgstr "Опубликовано"
+
+msgctxt "announcements.model"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "announcements.model"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "announcements.model"
+msgid "Keçid (link)"
+msgstr "Ссылка"
+
+msgctxt "announcements.model"
+msgid "Kritik"
+msgstr "Критический"
+
+msgctxt "announcements.model"
+msgid "Müraciət yoxdur"
+msgstr "Без заявки"
+
+msgctxt "announcements.model"
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+msgctxt "announcements.model"
+msgid "Qaralama"
+msgstr "Черновик"
+
+msgctxt "announcements.model"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "announcements.model"
+msgid "Təcili"
+msgstr "Срочно"
+
+msgctxt "announcements.model"
+msgid "Tədbir"
+msgstr "Мероприятие"
+
+msgctxt "announcements.model"
+msgid "Tədris"
+msgstr "Учебный процесс"
+
+msgctxt "announcements.model"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "announcements.model"
+msgid "Yüksək"
+msgstr "Высокий"
+
+msgctxt "announcements.model"
+msgid "elan"
+msgstr "объявление"
+
+msgctxt "announcements.model"
+msgid "elan qəbzi"
+msgstr "отметка объявления"
+
+msgctxt "announcements.model"
+msgid "elan qəbzləri"
+msgstr "отметки объявлений"
+
+msgctxt "announcements.model"
+msgid "elan sənədi"
+msgstr "документ объявления"
+
+msgctxt "announcements.model"
+msgid "elan sənədləri"
+msgstr "документы объявлений"
+
+msgctxt "announcements.model"
+msgid "elanlar"
+msgstr "объявления"
+
+msgctxt "announcements.model"
+msgid "Ümumi"
+msgstr "Общее"
+
+msgctxt "announcements.model"
+msgid "İmtahan"
+msgstr "Экзамен"
+
+msgctxt "announcements.model"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "announcements.model"
+msgid "Şöbə"
+msgstr "Отдел"
+
+msgctxt "announcements.model"
+msgid "Əməkdaşlar"
+msgstr "Сотрудники"
+
+msgctxt "announcements.popup"
+msgid "%(day)s tarixinədək"
+msgstr "до %(day)s"
+
+msgctxt "announcements.popup"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "announcements.popup"
+msgid "Dərc"
+msgstr "Опубликовано"
+
+msgctxt "announcements.popup"
+msgid "Növbəti elan"
+msgstr "Следующее объявление"
+
+msgctxt "announcements.popup"
+msgid "Qüvvədədir"
+msgstr "Действует"
+
+msgctxt "announcements.popup"
+msgid "Son tarix"
+msgstr "Крайний срок"
+
+msgctxt "announcements.popup"
+msgid "Yeni elan"
+msgstr "Новое объявление"
+
+msgctxt "announcements.popup"
+msgid "Yeni elanlar"
+msgstr "Новые объявления"
+
+msgctxt "announcements.popup"
+msgid "Ətraflı bax"
+msgstr "Подробнее"
+
+msgctxt "announcements.popup"
+msgid "Əvvəlki elan"
+msgstr "Предыдущее объявление"
+
+msgctxt "organizations.permission.label"
+msgid "Elan yaratmaq və dərc etmək (öz əhatəsində)"
+msgstr "Создавать и публиковать объявления (в своей области)"
+
+msgctxt "profile.sidebar"
+msgid "Elanlar"
+msgstr "Объявления"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s elan"
+msgid_plural "%(n)s elan"
+msgstr[0] "%(n)s объявление"
+msgstr[1] "%(n)s объявления"
+msgstr[2] "%(n)s объявлений"
+msgstr[3] "%(n)s объявления"
+
+msgctxt "announcements.cabinet"
+msgid "%(n)s gün qaldı"
+msgid_plural "%(n)s gün qaldı"
+msgstr[0] "остался %(n)s день"
+msgstr[1] "осталось %(n)s дня"
+msgstr[2] "осталось %(n)s дней"
+msgstr[3] "осталось %(n)s дня"
+
+msgctxt "announcements.cabinet"
+msgid "Müraciət edilib"
+msgstr "Заявка подана"
+
+msgctxt "announcements.apply"
+msgid "Elan silinib — müraciət qəbul olunmur."
+msgstr "Объявление удалено — заявки не принимаются."
+
+msgctxt "announcements.manage"
+msgid ""
+"Alıcılar onu görmür (siyahı, popup, sayğac, müraciət). Statistika, sənədlər "
+"və yaradılmış müraciətlər saxlanılır. Bərpa etsəniz elan qaralama kimi "
+"qayıdır."
+msgstr ""
+"Получатели его больше не видят (список, всплывающее окно, счётчик, заявки). "
+"Статистика, документы и поданные заявки сохраняются. После восстановления "
+"объявление вернётся как черновик."
+
+msgctxt "announcements.manage"
+msgid "Bu elan silinib"
+msgstr "Это объявление удалено"
+
+msgctxt "announcements.manage"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "announcements.manage"
+msgid "Elan bərpa olundu (qaralama)."
+msgstr "Объявление восстановлено (черновик)."
+
+msgctxt "announcements.manage"
+msgid ""
+"Elan silindi — alıcılar onu artıq görmür. «Silinmişlər» filtrindən bərpa edə"
+" bilərsiniz."
+msgstr ""
+"Объявление удалено — получатели его больше не видят. Его можно восстановить "
+"из фильтра «Удалённые»."
+
+msgctxt "announcements.manage"
+msgid "Elan silinib — əvvəlcə onu bərpa edin."
+msgstr "Объявление удалено — сначала восстановите его."
+
+msgctxt "announcements.manage"
+msgid "Elan silinməyib."
+msgstr "Объявление не удалено."
+
+msgctxt "announcements.manage"
+msgid ""
+"Elan silinsin? O, bütün alıcılar üçün dərhal yox olacaq (siyahı, popup, "
+"sayğac, müraciət). Statistika, sənədlər və yaradılmış müraciətlər "
+"saxlanılır; «Silinmişlər» filtrindən bərpa edə bilərsiniz."
+msgstr ""
+"Удалить объявление? Оно сразу исчезнет у всех получателей (список, "
+"всплывающее окно, счётчик, заявки). Статистика, документы и поданные заявки "
+"сохранятся; восстановить можно из фильтра «Удалённые»."
+
+msgctxt "announcements.manage"
+msgid ""
+"Qaralama birdəfəlik silinsin? Onu heç kim görməyib — bu əməliyyat geri "
+"qaytarılmır."
+msgstr ""
+"Удалить черновик навсегда? Его никто не видел — это действие нельзя "
+"отменить."
+
+msgctxt "announcements.manage"
+msgid "Qaralamanı heç kim görməyib — «Sil» onu birdəfəlik silir."
+msgstr "Этот черновик никто не видел — «Удалить» удалит его навсегда."
+
+msgctxt "announcements.manage"
+msgid "Silinib"
+msgstr "Удалено"
+
+msgctxt "announcements.manage"
+msgid "Silinib: %(day)s"
+msgstr "Удалено: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Silinmiş elan yoxdur"
+msgstr "Нет удалённых объявлений"
+
+msgctxt "announcements.manage"
+msgid "Silinmişlər"
+msgstr "Удалённые"
+
+msgctxt "announcements.manage"
+msgid "Silinən elanlar burada görünür və bərpa oluna bilər."
+msgstr "Удалённые объявления отображаются здесь, их можно восстановить."
+
+msgctxt "announcements.manage"
+msgid ""
+"«Sil» elanı bütün alıcılardan gizlədir; statistika və müraciətlər "
+"saxlanılır, «Silinmişlər» filtrindən bərpa olunur."
+msgstr ""
+"«Удалить» скрывает объявление от всех получателей; статистика и заявки "
+"сохраняются, восстановить можно из фильтра «Удалённые»."

@@ -1,0 +1,34 @@
+{% load i18n %}
+{% comment %}Siyahı fraqmenti — həm panelin ilk render-i, həm `/elanlar/api/list/` cavabı bu şablondur.{% endcomment %}
+<p class="ann-count" data-ann-count>{% blocktrans trimmed count n=listing.total context "announcements.cabinet" %}{{ n }} elan{% plural %}{{ n }} elan{% endblocktrans %}</p>
+{% if listing.items %}
+<ul class="ann-list" role="list">
+    {% for item in listing.items %}
+    <li>{% include "announcements/cabinet/_card.html" %}</li>
+    {% endfor %}
+</ul>
+{% if listing.pages > 1 %}
+<nav class="ann-pager" aria-label="{% trans 'Səhifələr' context 'announcements.cabinet' %}">
+    <button type="button" class="ems-btn ems-btn--sm" data-ann-page="{{ listing.page|add:'-1' }}"{% if listing.page <= 1 %} disabled{% endif %}>
+        <i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "announcements.cabinet" %}
+    </button>
+    <span class="ann-pager__info">{% blocktrans trimmed with page=listing.page pages=listing.pages context "announcements.cabinet" %}{{ page }} / {{ pages }}{% endblocktrans %}</span>
+    <button type="button" class="ems-btn ems-btn--sm" data-ann-page="{{ listing.page|add:'1' }}"{% if listing.page >= listing.pages %} disabled{% endif %}>
+        {% trans "Növbəti" context "announcements.cabinet" %} <i class="fas fa-chevron-right" aria-hidden="true"></i>
+    </button>
+</nav>
+{% endif %}
+{% else %}
+<div class="ems-empty ann-empty" role="status">
+    <span class="ems-empty-icon"><i class="fas fa-bullhorn" aria-hidden="true"></i></span>
+    {% if listing.params.q or listing.params.category or listing.params.unread or listing.params.has_deadline %}
+    <p class="ems-empty-title">{% trans "Filtrə uyğun elan tapılmadı" context "announcements.cabinet" %}</p>
+    <p class="ems-empty-hint">{% trans "Axtarış sözünü dəyişin və ya filtrləri sıfırlayın." context "announcements.cabinet" %}</p>
+    {% elif listing.params.state == "expired" %}
+    <p class="ems-empty-title">{% trans "Müddəti bitmiş elan yoxdur" context "announcements.cabinet" %}</p>
+    {% else %}
+    <p class="ems-empty-title">{% trans "Hazırda sizə aid aktiv elan yoxdur" context "announcements.cabinet" %}</p>
+    <p class="ems-empty-hint">{% trans "Yeni elan dərc olunanda burada görünəcək." context "announcements.cabinet" %}</p>
+    {% endif %}
+</div>
+{% endif %}

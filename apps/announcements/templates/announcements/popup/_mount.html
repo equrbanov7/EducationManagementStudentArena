@@ -1,0 +1,52 @@
+{% load i18n static announcements_tags %}
+{% comment %}Birdəfəlik elan popup-u (base.html-dən daxil olunur). Gözləyən yoxdursa HEÇ NƏ render
+olunmur və heç bir asset yüklənmir. Bootstrap modalı: role=dialog, aria-modal, fokus tələsi, Esc.
+«Bağla» / «Ətraflı bax» → `popup_seen` POST — yalnız GÖSTƏRİLMİŞ addımlar qeyd olunur
+(stepper-də açılmamış elan növbəti açılışda yenə çıxır). İmtahan səhifələrində tag `[]` qaytarır.{% endcomment %}
+{% announcements_popup as ann_popup %}
+{% if ann_popup %}
+<link rel="stylesheet" href="{% static 'announcements/css/popup.css' %}?v=20261006-1">
+<div class="modal fade ann-popup" id="annPopup" tabindex="-1" role="dialog" aria-modal="true"
+     aria-labelledby="annPopupHeading" data-ann-popup data-bs-backdrop="static"
+     data-seen-url="{% url 'announcements:popup_seen' %}">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content ann-popup__content">
+            <div class="modal-header ann-popup__header">
+                <span class="ann-popup__icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></span>
+                <div class="ann-popup__heading">
+                    <p class="ann-popup__eyebrow" id="annPopupHeading">{% if ann_popup|length > 1 %}{% trans "Yeni elanlar" context "announcements.popup" %}{% else %}{% trans "Yeni elan" context "announcements.popup" %}{% endif %}</p>
+                    {% if ann_popup|length > 1 %}<p class="ann-popup__counter" data-ann-popup-counter aria-live="polite">1 / {{ ann_popup|length }}</p>{% endif %}
+                </div>
+                <button type="button" class="btn-close" data-ann-popup-close aria-label="{% trans 'Bağla' context 'announcements.popup' %}"></button>
+            </div>
+            <div class="modal-body ann-popup__body">
+                {% for item in ann_popup %}
+                <section class="ann-popup__item" data-ann-popup-item data-id="{{ item.pk }}"
+                         data-detail-url="{% url 'accounts:profile' %}?section=announcements&amp;elan={{ item.pk }}"
+                         aria-labelledby="annPopupTitle{{ forloop.counter }}"{% if not forloop.first %} hidden{% endif %}>
+                    <div class="ann-popup__chips">{% include "announcements/cabinet/_chips.html" %}</div>
+                    <h2 class="ann-popup__title" id="annPopupTitle{{ forloop.counter }}">{{ item.title }}</h2>
+                    {% if item.summary %}<p class="ann-popup__summary">{{ item.summary }}</p>{% elif item.body %}<p class="ann-popup__summary">{{ item.body|truncatechars:320 }}</p>{% endif %}
+                    <dl class="ann-popup__facts">
+                        <div><dt>{% trans "Dərc" context "announcements.popup" %}</dt><dd>{{ item.publish_at|date:"d.m.Y" }}</dd></div>
+                        {% if item.expires_at %}<div><dt>{% trans "Qüvvədədir" context "announcements.popup" %}</dt><dd>{% blocktrans trimmed with day=item.expires_at|date:"d.m.Y" context "announcements.popup" %}{{ day }} tarixinədək{% endblocktrans %}</dd></div>{% endif %}
+                        {% if item.deadline %}<div class="ann-popup__fact--deadline"><dt>{% trans "Son tarix" context "announcements.popup" %}</dt><dd>{{ item.deadline.at|date:"d.m.Y, H:i" }}</dd></div>{% endif %}
+                    </dl>
+                </section>
+                {% endfor %}
+            </div>
+            <div class="modal-footer ann-popup__footer">
+                {% if ann_popup|length > 1 %}
+                <div class="ann-popup__steps">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-ann-popup-prev disabled aria-label="{% trans 'Əvvəlki elan' context 'announcements.popup' %}"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-ann-popup-next aria-label="{% trans 'Növbəti elan' context 'announcements.popup' %}"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+                </div>
+                {% endif %}
+                <button type="button" class="btn btn-light" data-ann-popup-close>{% trans "Bağla" context "announcements.popup" %}</button>
+                <a class="btn btn-primary" href="#" data-ann-popup-more>{% trans "Ətraflı bax" context "announcements.popup" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'announcements/js/popup.js' %}?v=20261006-1" defer></script>
+{% endif %}

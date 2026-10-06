@@ -247,9 +247,9 @@ class _Stage3Mixin:
         if "superadmin-organizations" in self.allowed_sections and self.active_section != "superadmin-organizations":
             from apps.organizations.models import Organization as _PendingOrg
 
-            self.superadmin_organizations_section["pending_count"] = _PendingOrg.objects.filter(
-                status="pending"
-            ).count()
+            self.superadmin_organizations_section["pending_count"] = self._defer(
+                _PendingOrg.objects.filter(status="pending").count
+            )
         if (
             "superadmin-org-features" in self.allowed_sections
             and self.active_section == "superadmin-org-features"
@@ -401,6 +401,7 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
                 capabilities=self.capabilities,
+                # Tənbəl ola bilər — vidjet yalnız lazım olanda hesablayır (`dashboard._resolve`).
                 applications_pending_count=self.applications_pending_count,
                 pending_appeals_count=self.pending_appeals_count,
             )

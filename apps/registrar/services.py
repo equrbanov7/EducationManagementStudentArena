@@ -171,8 +171,34 @@ def get_student_semester_plan(*, record, period, semester_number):
           "group_decisions": {group: Subject},       # already chosen for the group
         }
     """
-    enrollments = list(
-        Enrollment.objects.filter(organization=record.organization, student=record.student, offering__period=period)
+    # Tutum 2026-10-06: süzgəclər `*_id` ilə — qeydin `organization`/`student`/`curriculum`
+    # FK-larını obyekt kimi oxumaq hər çağırışda 3 əlavə SELECT idi (dəyər eynidir).
+    enrollments = get_student_semester_enrollments(record=record, period=period)
+
+    elective_rows = CurriculumSubject.objects.filter(
+        curriculum_id=record.curriculum_id, semester_number=semester_number, is_elective=True
+    ).select_related("subject")
+    blocks: dict[str, dict] = {}
+    for row in elective_rows:
+        block = blocks.setdefault(row.elective_group, {"required_choices": row.required_choices, "options": []})
+        block["options"].append(row.subject)
+
+    decisions = {
+        c.elective_group: c.chosen_subject
+        for c in GroupElectiveChoice.objects.filter(
+            organization_id=record.organization_id, group_id=record.group_id, period=period
+        ).select_related("chosen_subject")
+    }
+
+    return {"enrollments": enrollments, "elective_blocks": blocks, "group_decisions": decisions}
+
+
+def get_student_semester_enrollments(*, record, period):
+    """Semestr planının YALNIZ yazılışları (seçmə blokları/qərarları olmadan) — jurnal xülasəsi üçün."""
+    return list(
+        Enrollment.objects.filter(
+            organization_id=record.organization_id, student_id=record.student_id, offering__period=period
+        )
         .exclude(status=Enrollment.Status.DROPPED)
         .select_related(
             "offering__subject",
@@ -183,23 +209,6 @@ def get_student_semester_plan(*, record, period, semester_number):
             "offering__instructor",
         )
     )
-
-    elective_rows = CurriculumSubject.objects.filter(
-        curriculum=record.curriculum, semester_number=semester_number, is_elective=True
-    ).select_related("subject")
-    blocks: dict[str, dict] = {}
-    for row in elective_rows:
-        block = blocks.setdefault(row.elective_group, {"required_choices": row.required_choices, "options": []})
-        block["options"].append(row.subject)
-
-    decisions = {
-        c.elective_group: c.chosen_subject
-        for c in GroupElectiveChoice.objects.filter(
-            organization=record.organization, group=record.group, period=period
-        ).select_related("chosen_subject")
-    }
-
-    return {"enrollments": enrollments, "elective_blocks": blocks, "group_decisions": decisions}
 
 
 # ── Bologna credits + absence (qayıb) eligibility (U2-UI) ────────────────────
@@ -316,6 +325,8 @@ def get_student_cabinet_data(*, record, period, semester_number):
         "elective_blocks": plan["elective_blocks"],
         "group_decisions": plan["group_decisions"],
         "credit_summary": get_credit_summary(record=record),
+        # Eyni sorğunun toplu dəstləri — «Fənlərim» jurnal xülasəsi onları TƏKRAR oxumasın.
+        "batch_inputs": {"enrollments": plan["enrollments"], "hours_map": hours_map, "frozen_ids": frozen_ids},
     }
 
 

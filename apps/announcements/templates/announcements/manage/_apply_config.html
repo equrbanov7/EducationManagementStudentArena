@@ -1,0 +1,47 @@
+{% load i18n %}
+{% comment %}«Müraciət et» konfiqurasiyası — rejim (yoxdur / daxili / keçid) və «hara göndəriləcək».
+Daxili rejimdə müraciət «Müraciətlər» modulunda seçilmiş növlə yaranır; şöbə boşdursa növün öz
+marşrutu (göndərənin fakültəsi/kafedrası) işləyir. Görünməyən rejimin sahələri `manage.js` ilə gizlənir.{% endcomment %}
+<section class="annm-card" aria-labelledby="annm-apply-title" data-annm-apply>
+    <h2 class="annm-card__title" id="annm-apply-title">{% trans "«Müraciət et» düyməsi" context "announcements.manage" %}</h2>
+    <fieldset class="annm-fieldset">
+        <legend class="ems-sr-only ann-sr-only">{% trans "Müraciət rejimi" context "announcements.manage" %}</legend>
+        <div class="annm-modes">
+            {% for value, label in apply_modes %}
+            <label class="annm-mode"><input type="radio" name="apply_mode" value="{{ value }}"{% if values.apply_mode == value or not values.apply_mode and value == "none" %} checked{% endif %} data-annm-apply-mode> <span>{{ label }}</span></label>
+            {% endfor %}
+        </div>
+    </fieldset>
+    <div class="annm-grid" data-annm-apply-pane="internal">
+        <div class="ems-field">
+            <span class="ems-field__label" id="annm-kind-label">{% trans "Müraciət növü" context "announcements.manage" %} <span class="ems-field__req">*</span></span>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="apply_kind" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-live-search="true"
+                        data-live-search-placeholder="{% trans 'Axtar…' context 'announcements.manage' %}"
+                        data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'announcements.manage' %}"
+                        aria-labelledby="annm-kind-label">
+                    <option value="">{% trans "— seçin —" context "announcements.manage" %}</option>
+                    {% for kind in kinds %}<option value="{{ kind.id }}"{% if values.apply_kind == kind.id %} selected{% endif %}>{{ kind.label }} → {{ kind.unit }}</option>{% endfor %}
+                </select>
+            </div>
+            <p class="ems-field__hint">{% trans "Növ seçilmiş auditoriyanın hamısına açıq olmalıdır (məs. tələbə növü)." context "announcements.manage" %}</p>
+        </div>
+        <div class="ems-field">
+            <span class="ems-field__label" id="annm-appunit-label">{% trans "Hara göndərilsin (şöbə)" context "announcements.manage" %}</span>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select name="apply_unit" class="ems-select bootstrap-single-select__native" data-bootstrap-select aria-labelledby="annm-appunit-label">
+                    <option value="">{% trans "Növün öz marşrutu ilə" context "announcements.manage" %}</option>
+                    {% for unit in app_units %}<option value="{{ unit.id }}"{% if values.apply_unit == unit.id %} selected{% endif %}>{{ unit.label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="ems-field" data-annm-apply-pane="url">
+        <label class="ems-field__label" for="annm-apply-url">{% trans "Keçid (https://… və ya /daxili/yol)" context "announcements.manage" %} <span class="ems-field__req">*</span></label>
+        <input id="annm-apply-url" type="url" name="apply_url" class="ems-input" maxlength="500" value="{{ values.apply_url|default:'' }}" inputmode="url" placeholder="https://">
+    </div>
+    <div class="ems-field" data-annm-apply-pane="internal url">
+        <label class="ems-field__label" for="annm-apply-label">{% trans "Düymənin mətni (könüllü)" context "announcements.manage" %}</label>
+        <input id="annm-apply-label" name="apply_label" class="ems-input" maxlength="60" value="{{ values.apply_label|default:'' }}" placeholder="{% trans 'Müraciət et' context 'announcements.cabinet' %}">
+    </div>
+</section>

@@ -214,6 +214,13 @@ def build_profile_registrar_section(request, *, organization, section: str) -> d
     return {}
 
 
+def _prime_record_fks(record, *, organization, user):
+    """Qeyd məhz bu (təşkilat, tələbə) süzgəci ilə oxunub — FK keşinə həmin obyektlər qoyulur ki,
+    sonrakı ``record.organization`` / ``record.student`` oxunuşları ayrıca SELECT etməsin (tutum 2026-10-06)."""
+    record.organization = organization
+    record.student = user
+
+
 def build_student_journal_context(request, *, organization) -> dict | None:
     """Tələbənin öz elektron jurnal görünüşü (profil paneli, yalnız-oxu).
 
@@ -238,6 +245,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     )
     if record is None:
         return None
+    _prime_record_fks(record, organization=organization, user=request.user)
 
     from apps.registrar.page_contexts import _season_label
 
@@ -523,6 +531,7 @@ def build_student_subjects_context(request, *, organization, semester_number=Non
     )
     if record is None:
         return {"student_subjects_section": section}
+    _prime_record_fks(record, organization=organization, user=request.user)
 
     section["has_record"] = True
     section["record"] = record

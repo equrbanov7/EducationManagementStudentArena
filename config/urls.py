@@ -108,6 +108,8 @@ urlpatterns = [
     path("appeals/", include(("apps.appeals.urls", "appeals"), namespace="appeals")),
     # müraciətlər (Müraciətlər paneli — JSON/fayl endpoint-ləri; ekran profil bölməsidir)
     path("muracietler/", include(("apps.applications.urls", "applications"), namespace="applications")),
+    # elanlar (2026-10-06) — JSON uçları + idarə səhifələri; istifadəçi ekranı kabinet bölməsidir
+    path("elanlar/", include(("apps.announcements.urls", "announcements"), namespace="announcements")),
     # organizations
     path(
         "organizations/",

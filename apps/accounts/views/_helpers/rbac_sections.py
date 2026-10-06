@@ -267,6 +267,7 @@ def apply_permission_section_gates(
     # yalnız öz kafedrasını görür), kampaniyalar `survey.manage`. Tələbə bölməsi
     # icazəyə yox, qapı middleware-inin bu sorğuda hesabladığı vəziyyətə bağlıdır
     # (açıq kampaniyada hədəfi olan tələbə) — sıfır sorğu; view-as altında yoxdur.
+    from apps.announcements.public import section_visible as announcements_section_visible
     from apps.surveys.public import inbox_section_visible, student_section_visible
 
     can_view_survey_results = privileged or has_permission(permissions, "survey.results.view")
@@ -338,6 +339,7 @@ def apply_permission_section_gates(
         # Sorğu qurucusu (2026-09-30): «Sorğular» — hər üzv; «Sorğu qurucusu» — `survey.manage`.
         (inbox_section_visible(user, organization), "surveys-inbox"),
         (can_manage_surveys, "surveys-builder"),
+        (announcements_section_visible(user, organization), "announcements"),  # «Elanlar» — hər üzv (2026-10-06)
     ):
         if enabled:
             allowed_sections.add(section)
