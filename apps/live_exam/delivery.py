@@ -49,6 +49,15 @@ def _count_key(pin: str, question_id: int) -> str:
     return f"live_exam:seen_count:{pin}:{int(question_id)}"
 
 
+def _incr_count(count_key: str) -> int:
+    """Sayğac — adi halda bir keş əməliyyatı (açar yalnız sualın ilk çatmasında yaradılır)."""
+    try:
+        return int(cache.incr(count_key))
+    except ValueError:
+        cache.add(count_key, 0, SEEN_TTL_SECONDS)
+        return int(cache.incr(count_key))
+
+
 def record_question_seen(pin: str, question_id: int, player_id: int, *, at: datetime | None = None) -> int | None:
     """İlk çatma sübutunu yazır. Bu çağırış YAZDISA → sualı alan oyunçu sayı, əks halda ``None``."""
     at = at or timezone.now()
@@ -56,8 +65,7 @@ def record_question_seen(pin: str, question_id: int, player_id: int, *, at: date
     try:
         if not cache.add(_seen_key(pin, question_id, player_id), at.isoformat(), SEEN_TTL_SECONDS):
             return None
-        cache.add(count_key, 0, SEEN_TTL_SECONDS)
-        return int(cache.incr(count_key))
+        return _incr_count(count_key)
     except ValueError:  # sayğac açarı yoxdur (evict / dummy keş) — host sayğacı sadəcə yenilənmir
         return None
     except Exception:  # keş əlçatmazdır — ədalət ankeri sadəcə işləmir (köhnə qayda)
