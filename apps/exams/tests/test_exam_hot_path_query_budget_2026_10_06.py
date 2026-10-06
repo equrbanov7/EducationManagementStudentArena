@@ -4,14 +4,17 @@ Yük testində autosave DB-ni doyururdu. Ölçü (``config.settings.test``, 5 su
 quiz; saya hər sorğuda ~9 middleware sorğusu da daxildir — session/user/profile/
 Membership/RLS, bu dalğada toxunulmayıb):
 
-=====================================  =====  =====
-endpoint                               əvvəl  sonra
-=====================================  =====  =====
-start POST (yeni cəhd)                    43     38
-suallar səhifəsi GET                      28     25
-autosave POST (1 MCQ, marked «[]»)        26     19
-finish POST (5 MCQ: 3 düz + 2 səhv)       42     28
-=====================================  =====  =====
+=========================================  =====  =====
+endpoint                                   əvvəl  sonra
+=========================================  =====  =====
+start POST (yeni cəhd, limitsiz)              43     38
+start POST (yeni cəhd, max_attempts=1)        51     42
+suallar səhifəsi GET (test)                   28     25
+suallar səhifəsi GET (yazılı)                 28     24
+autosave POST (1 MCQ, marked «[]»)            26     19
+autosave POST (1 yazılı sual)                 25     16
+finish POST (5 MCQ: 3 düz + 2 səhv)           43     28
+=========================================  =====  =====
 
 Büdcələr yuxarı həddir (middleware-in sonrakı azalmaları testi sındırmır); struktur
 yoxlamaları isə konkret təkrarların geri qayıtmamasını təsdiqləyir: attempt POST-da
