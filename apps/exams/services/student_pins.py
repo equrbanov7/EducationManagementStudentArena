@@ -26,6 +26,12 @@ from apps.exams.services.final_center.pins import (
     generate_pin_value,
     pin_cipher_matches,
 )
+from apps.exams.services.student_pin_hashing import (
+    PIN_HASH_PENDING,
+    has_pending_student_pin_hashes,
+    schedule_student_pin_hashing,
+    verify_pending_student_pin,
+)
 from core.rls import bypass_rls
 
 logger = logging.getLogger("exams.student_pin.entry")
@@ -75,54 +81,72 @@ def _assigned_student_ids(exam) -> set[int]:
     return set(get_exam_assigned_user_ids(exam))
 
 
-def provision_exam_student_pins(exam) -> None:
+def provision_exam_student_pins(exam) -> int:
     """Təyin olunmuş hər tələbəyə PIN təmin et (idempotent).
 
     * final/midterm deyilsə → mövcud PIN-ləri təmizlə (kateqoriya dəyişibsə);
     * hər yeni tələbə üçün PIN yarat;
     * artıq təyin olunmayan tələbələrin PIN-lərini sil.
+
+    Tutum testi 2026-10-06: request daxilində ARTIQ hash hesablanmır (300 tələbə ×
+    ~0.1 s PBKDF2 ≈ 30 s → timeout). Sətir yalnız şifrəli nüsxə ilə yaranır
+    (``pin_hash`` boş = «hash hazırlanır»; PIN dərhal görünür), hash-lər commit-dən
+    sonra Celery-də yazılır — bax ``student_pin_hashing``. Qaytarır: hash
+    gözləyən yeni/yenilənmiş sətir sayı.
     """
     if not exam_requires_student_pins(exam):
         ExamStudentPin.objects.filter(exam=exam).delete()
-        return
+        return 0
 
     assigned_ids = _assigned_student_ids(exam)
     existing_ids = set(ExamStudentPin.objects.filter(exam=exam).values_list("student_id", flat=True))
     fernet = _fernet()
+    pending = 0
 
     to_create = assigned_ids - existing_ids
     if to_create:
-        new_pins = []
-        for student_id in to_create:
-            raw_pin = generate_pin_value()
-            new_pins.append(
-                ExamStudentPin(
-                    exam=exam,
-                    student_id=student_id,
-                    pin_hash=make_password(raw_pin),
-                    pin_cipher=fernet.encrypt(raw_pin.encode()).decode(),
-                )
+        new_pins = [
+            ExamStudentPin(
+                exam=exam,
+                student_id=student_id,
+                pin_hash=PIN_HASH_PENDING,
+                pin_cipher=fernet.encrypt(generate_pin_value().encode()).decode(),
             )
+            for student_id in to_create
+        ]
         ExamStudentPin.objects.bulk_create(new_pins, ignore_conflicts=True)
+        pending += len(new_pins)
 
     # 2026-07: boş şifrəli / köhnə-revoke olunmuş PIN-ləri BƏRPA et. Əvvəllər
     # imtahan başlayanda ExamStudentPin ləğv olunurdu (pin_cipher=""); indi
     # revoke edilmir, ona görə köhnə imtahanların boş PIN-ləri təzələnir ki,
     # tələbə kabinetdə PIN-ini yenidən görsün (təyin olunmuş tələbələr üçün).
-    stale_cipher = ExamStudentPin.objects.filter(exam=exam, student_id__in=assigned_ids).filter(
-        Q(pin_cipher="") | Q(revoked_at__isnull=False)
+    stale_cipher = list(
+        ExamStudentPin.objects.filter(exam=exam, student_id__in=assigned_ids).filter(
+            Q(pin_cipher="") | Q(revoked_at__isnull=False)
+        )
     )
-    for pin in stale_cipher:
-        raw_pin = generate_pin_value()
-        pin.pin_hash = make_password(raw_pin)
-        pin.pin_cipher = fernet.encrypt(raw_pin.encode()).decode()
-        pin.revoked_at = None
-        pin.expires_at = None
-        pin.save(update_fields=["pin_hash", "pin_cipher", "revoked_at", "expires_at", "updated_at"])
+    if stale_cipher:
+        now = timezone.now()
+        for pin in stale_cipher:
+            pin.pin_hash = PIN_HASH_PENDING
+            pin.pin_cipher = fernet.encrypt(generate_pin_value().encode()).decode()
+            pin.revoked_at = None
+            pin.expires_at = None
+            pin.updated_at = now
+        ExamStudentPin.objects.bulk_update(
+            stale_cipher, ["pin_hash", "pin_cipher", "revoked_at", "expires_at", "updated_at"]
+        )
+        pending += len(stale_cipher)
 
     stale_ids = existing_ids - assigned_ids
     if stale_ids:
         ExamStudentPin.objects.filter(exam=exam, student_id__in=stale_ids).delete()
+
+    # Əvvəlki növbə itkisi (broker düşüb) də burada özünü sağaldır.
+    if pending or has_pending_student_pin_hashes(exam):
+        schedule_student_pin_hashing(exam)
+    return pending
 
 
 def student_visible_pin(exam, user) -> str | None:
@@ -139,8 +163,14 @@ def student_visible_pin(exam, user) -> str | None:
 
 
 def verify_student_pin_row(pin, raw_pin: str) -> bool:
-    """Bir ``ExamStudentPin`` sətrinin hash yoxlaması — ən çox BİR tam hash (uğurlu təkrar memo-dan)."""
-    return check_pin_hash(raw_pin, pin.pin_hash or "")
+    """Bir ``ExamStudentPin`` sətrinin hash yoxlaması — ən çox BİR tam hash (uğurlu təkrar memo-dan).
+
+    Hash hələ worker-də hazırlanırsa (``PIN_HASH_PENDING``) şifrəli nüsxə ilə
+    yoxlanıb həmin sətrin hash-i yerində yazılır — yenə düz bir hash.
+    """
+    if pin.pin_hash:
+        return check_pin_hash(raw_pin, pin.pin_hash)
+    return verify_pending_student_pin(pin, raw_pin)
 
 
 def verify_student_pin(exam, user, raw_pin: str) -> bool:
