@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from apps.organizations.public import ancestor_unit_ids
+from apps.organizations.public import ancestor_unit_ids, request_active_memberships
 from core.constants import RoleScopeType
 from core.permissions import has_permission
 
@@ -41,15 +41,24 @@ def active_memberships(user, organization):
     cached = getattr(user, "_applications_memberships", None)
     if cached is not None and cached[0] == organization.pk:
         return cached[1]
-    memberships = list(
-        Membership.objects.filter(
-            user=user,
-            organization=organization,
-            is_active=True,
-            role__organization=organization,
-            role__is_active=True,
-        ).select_related("role", "scope_unit")
-    )
+    # Perf 2026-10-07: middleware-in eyni request-də oxuduğu sətirlər (eyni süzgəc);
+    # sıra canlı sorğunun `Membership.Meta.ordering`-i ilə eynidir (`handler_role_for`).
+    snapshot = request_active_memberships(user, organization)
+    if snapshot is not None:
+        memberships = sorted(
+            (membership for membership in snapshot if membership.role.is_active),
+            key=lambda membership: (not membership.is_primary, membership.role.level),
+        )
+    else:
+        memberships = list(
+            Membership.objects.filter(
+                user=user,
+                organization=organization,
+                is_active=True,
+                role__organization=organization,
+                role__is_active=True,
+            ).select_related("role", "scope_unit")
+        )
     try:
         user._applications_memberships = (organization.pk, memberships)
     except Exception:  # noqa: BLE001 — AnonymousUser kimi obyektlər immutable ola bilər

@@ -71,16 +71,22 @@ def _role_label(user, organization) -> str:
     """Ən yüksək aktiv rolun adı — seed-dən İngiliscə qalmış ad («Student») lokallaşdırılır."""
     if organization is None:
         return ""
-    from apps.organizations.public import get_active_memberships
+    from apps.organizations.public import get_active_memberships, request_active_memberships
     from core.roles import resolve_seeded_role_label
 
-    membership = (
-        get_active_memberships(user, organization)
-        .filter(organization=organization)
-        .select_related("role")
-        .order_by("-role__level")
-        .first()
-    )
+    # Perf 2026-10-07: middleware-in eyni request-də oxuduğu sətirlər (eyni süzgəc).
+    snapshot = request_active_memberships(user, organization)
+    if snapshot is not None:
+        ranked = sorted(snapshot, key=lambda item: -item.role.level)
+        membership = ranked[0] if ranked else None
+    else:
+        membership = (
+            get_active_memberships(user, organization)
+            .filter(organization=organization)
+            .select_related("role")
+            .order_by("-role__level")
+            .first()
+        )
     if membership is None:
         return ""
     role = membership.role

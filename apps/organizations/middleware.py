@@ -23,10 +23,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection, transaction
 from django.utils.functional import SimpleLazyObject
 
-from core.rls import apply_rls_request_context, bypass_rls, reset_rls_context
+from core.rls import apply_rls_request_context, bypass_rls, preset_rls_tenant_from_sql, reset_rls_context
 from core.roles import ProfileRole
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
+from .request_memberships import bind_request_memberships, drop_request_memberships, membership_epoch
 from .services import ensure_owner_membership, is_tenant_accessible_organization
 
 
@@ -139,6 +140,59 @@ class OrganizationMiddleware:
     def _profile_allows_owner_fallback(profile) -> bool:
         return getattr(profile, "role", None) in {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN}
 
+    @staticmethod
+    def _session_memberships_queryset(user, org_slug):
+        """Sessiya təşkilatındakı aktiv üzvlüklər — slug UNIKALDIR, hamısı eyni org-a aiddir."""
+        return (
+            user.memberships.filter(
+                organization__slug=org_slug,
+                organization__is_active=True,
+                is_active=True,
+            )
+            .select_related("organization", "role", "scope_unit")
+            .order_by("-is_primary", "-role__level")
+        )
+
+    @classmethod
+    def _tenant_scoped_session_memberships(cls, user, org_slug):
+        """Sessiya org-unun üzvlüklərini HƏMİN org-un öz RLS-i altında oxu (bypass-sız).
+
+        Perf/təhlükəsizlik 2026-10-07: əvvəl bu oxu ``bypass_rls()`` (BÜTÜN
+        tenant-lar) ilə gedirdi — on + off + sonradan kontekst tətbiqi = 3
+        round-trip. İndi BİR ifadə user-i, ``bypass=off``-u və tenant-ı (slug-dan
+        server tərəfdə, ``organizations_organization`` RLS-siz cədvəldir) qoyur;
+        üzvlük sətirləri tenant RLS-i altında oxunur və middleware-in sonrakı
+        ``apply_rls_request_context``-i eyni dəyərlər üçün heç bir ifadə göndərmir.
+
+        Doğrulama uğursuzdursa (org aktiv deyil / üzvlük yoxdur / uyğunsuzluq)
+        kontekst DƏRHAL təhlükəsiz defolta (``reset_rls_context``) qaytarılır və
+        ``None`` qaytarılır — çağıran köhnə ``bypass_rls`` yoluna düşür (nadir yol,
+        semantika dəyişmir). PostgreSQL deyilsə (RLS yoxdur) də ``None``.
+        """
+        from .models import Organization
+
+        meta = Organization._meta
+        quote = connection.ops.quote_name
+        tenant_sql = "SELECT {pk}::text FROM {table} WHERE {slug} = %s AND {active} AND {status} = %s".format(
+            pk=quote(meta.pk.column),
+            table=quote(meta.db_table),
+            slug=quote(meta.get_field("slug").column),
+            active=quote(meta.get_field("is_active").column),
+            status=quote(meta.get_field("status").column),
+        )
+        tenant = preset_rls_tenant_from_sql(user_id=user.pk, tenant_sql=tenant_sql, tenant_params=[org_slug, "active"])
+        if tenant is None:
+            return None
+        memberships = list(cls._session_memberships_queryset(user, org_slug)) if tenant else []
+        if (
+            memberships
+            and all(str(membership.organization_id) == tenant for membership in memberships)
+            and getattr(memberships[0].organization, "status", "") == "active"
+        ):
+            return memberships
+        reset_rls_context()
+        return None
+
     # ------------------------------------------------------------------
     # Organisation resolution (Steps 1–3)
     # ------------------------------------------------------------------
@@ -156,22 +210,25 @@ class OrganizationMiddleware:
         """
         from .models import Organization
 
+        # Perf 2026-10-07: request üzvlük snapshot-u (bax `request_memberships`).
+        # Eyni user instansında əvvəlki çağırışdan qalan snapshot heç vaxt keçmir;
+        # epoxa üzvlük oxusundan ƏVVƏL götürülür ki, arada olan yazı onu etibarsız etsin.
+        drop_request_memberships(request.user)
+        snapshot_epoch = membership_epoch()
+        snapshot_rows = None
+
         # ── Step 1: restore org from session ──────────────────────────────
         org_slug = request.session.get("active_organization")
         if org_slug:
-            # Single query: join memberships → organization to avoid a
-            # separate Organization.objects.get() round-trip.
-            with bypass_rls():
-                memberships = list(
-                    request.user.memberships.filter(
-                        organization__slug=org_slug,
-                        organization__is_active=True,
-                        is_active=True,
-                    )
-                    .select_related("organization", "role", "scope_unit")
-                    .order_by("-is_primary", "-role__level")
-                )
             is_superuser = getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+            # Adi istifadəçi: sessiya org-unun öz RLS-i altında (bypass-sız) oxu;
+            # superuser və ya doğrulanmayan halda köhnə yol (bypass, eyni sorğu).
+            memberships = None if is_superuser else self._tenant_scoped_session_memberships(request.user, org_slug)
+            if memberships is None:
+                # Single query: join memberships → organization to avoid a
+                # separate Organization.objects.get() round-trip.
+                with bypass_rls():
+                    memberships = list(self._session_memberships_queryset(request.user, org_slug))
             if memberships:
                 # All memberships share the same organization because the slug
                 # column has a UNIQUE constraint — memberships[0].organization
@@ -180,6 +237,7 @@ class OrganizationMiddleware:
                 if getattr(session_org, "status", "") == "active":
                     request.organization = session_org
                     request.org_memberships = memberships
+                    snapshot_rows = memberships
                 else:
                     request.blocked_organization = session_org
             elif is_superuser:
@@ -232,6 +290,7 @@ class OrganizationMiddleware:
                 request.org_memberships = [
                     m for m in active_memberships if m.organization_id == request.organization.id
                 ]
+                snapshot_rows = request.org_memberships
 
             elif len(unique_orgs) == 0:
                 # No active memberships: deny by default until an organization
@@ -297,6 +356,13 @@ class OrganizationMiddleware:
             # the data layer (migration organizations.0011) so RBAC stays fully
             # centralised — no role-name special-casing here.
             request.org_permissions = list(permissions_set)
+            # Snapshot yalnız tam üzvlük siyahısı olan iki əsas yolda (sessiya org-u,
+            # yeganə org avto-seçimi) və superuser OLMAYAN üçün — onun sonrakı canlı
+            # sorğuları məhz bu tenant-ın RLS-i altındadır (eynilik şərti).
+            if snapshot_rows and not (
+                getattr(request.user, "is_superuser", False) or getattr(request.user, "is_superadmin", False)
+            ):
+                bind_request_memberships(request.user, request.organization, snapshot_rows, epoch=snapshot_epoch)
         elif request.organization is not None:
             request.organization = None
             request.org_memberships = []
