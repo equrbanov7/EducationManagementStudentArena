@@ -256,7 +256,9 @@ def manage_list(organization, scope, user, *, q="", state="all", category="", pa
     from .queries import search_q
 
     now = timezone.now()
-    queryset = Announcement.objects.filter(organization=organization).filter(access.manageable_q(scope, user))
+    queryset = Announcement.objects.filter(organization=organization).filter(
+        access.manageable_q(scope, user, organization)
+    )
     # «Silinmişlər» ayrıca filtrdir; qalan bütün görünüşlərdə silinmiş elan yoxdur.
     queryset = queryset.filter(is_deleted=state == "deleted")
     live = Q(status=Status.PUBLISHED)

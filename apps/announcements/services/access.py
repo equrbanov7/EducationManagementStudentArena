@@ -83,16 +83,29 @@ def validate_units(scope, organization, unit_ids) -> tuple[list, list]:
     return [pk for pk in wanted if pk in rows], errors
 
 
-def manageable_q(scope, user) -> Q:
-    """İdarə siyahısının filtri (``Announcement`` üçün)."""
+def manageable_q(scope, user, organization) -> Q:
+    """İdarə siyahısının filtri (``Announcement`` üçün) — ``can_edit`` ilə EYNİ əhatə.
+
+    Əhatəli menecer: öz yazdığı VƏ YA bütün hədəf bölmələri əhatəsinin (aktiv) alt-ağacında
+    olan elan (``audience_units <@ alt-ağac``, boş hədəf = bütün təşkilat → yox). Review
+    2026-10-07: əvvəl hədəfin menecerin ÖZ bölmə id-si ilə dəqiq üst-üstə düşməsi
+    (``?|``) yoxlanırdı — kafedraya ünvanlanmış (redaktə oluna bilən) elan siyahıda
+    görünmürdü, yarısı əhatədən kənar olan isə görünüb klikdə 404 verirdi.
+    """
     if scope.is_org_wide:
         return Q()
     if not scope.is_unit_scoped:
         return Q(pk__in=[])
-    allowed = {str(pk) for pk in scope.unit_ids}
     q = Q(created_by=user)
-    if allowed:
-        q |= Q(audience_units__has_any_keys=sorted(allowed))
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    subtree = sorted(
+        str(pk)
+        for pk in OrgUnit.objects.filter(organization=organization, is_active=True)
+        .filter(scope.unit_subtree_q())
+        .values_list("pk", flat=True)
+    )
+    if subtree:
+        q |= Q(audience_units__contained_by=subtree) & ~Q(audience_units=[])
     return q
 
 

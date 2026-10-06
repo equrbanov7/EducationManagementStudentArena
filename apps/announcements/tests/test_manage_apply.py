@@ -69,6 +69,20 @@ class ScopedManagerTest(TestCase):
         response = client.post(reverse("announcements:manage_action", args=[item.pk]), {"action": "archive"})
         self.assertEqual(response.status_code, 404)
 
+    def test_dean_manage_list_matches_what_the_dean_can_edit(self):
+        # Review 2026-10-07: siyahı süzgəci hədəfin dekanın ÖZ bölmə id-si ilə DƏQİQ üst-üstə
+        # düşməsini yoxlayırdı — alt-bölməyə (kafedraya) ünvanlanmış, dekanın redaktə edə
+        # bildiyi elan siyahıda görünmürdü; yarısı əhatədən kənar olan elan isə görünürdü
+        # və klikdə 404 verirdi.
+        sub = make_announcement(self.w, title="Kafedraya elan", units=[self.w["chair_a"].pk])
+        mixed = make_announcement(self.w, title="İki fakültəyə elan", units=[self.w["f1"].pk, self.w["f2"].pk])
+        client = client_for(self.w["org"], self.w["dean"])
+        self.assertEqual(client.get(reverse("announcements:manage_edit", args=[sub.pk])).status_code, 200)
+        self.assertEqual(client.get(reverse("announcements:manage_edit", args=[mixed.pk])).status_code, 404)
+        html = client.get(reverse("announcements:manage_rows")).json()["html"]
+        self.assertIn("Kafedraya elan", html)
+        self.assertNotIn("İki fakültəyə elan", html)
+
     def test_teacher_has_no_manage_access(self):
         client = client_for(self.w["org"], self.w["t1"])
         self.assertEqual(_post_form(client, reverse("announcements:manage_create")).status_code, 403)
