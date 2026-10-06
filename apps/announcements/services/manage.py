@@ -58,6 +58,21 @@ def _audit(request, organization, action, announcement, changes=None):
     )
 
 
+def _validate_window(announcement, data) -> None:
+    """``expires_at > publish_at`` — dərc olunmuş elanda boş «Dərc vaxtı» ``indi`` sayılır.
+
+    Forma yalnız hər iki tarix göndəriləndə yoxlayır; dərc olunmuş elanda «Dərc vaxtı»
+    boşaldılıb «Bitmə vaxtı» keçmişə qoyulanda servis ``publish_at = indi`` qoyub
+    ``ann_window_ordered`` CHECK-inə çırpılırdı → 500 (review 2026-10-07).
+    """
+    expires_at = data.get("expires_at")
+    publish_at = data.get("publish_at")
+    if publish_at is None and announcement is not None and announcement.status == Status.PUBLISHED:
+        publish_at = timezone.now()
+    if expires_at and publish_at and expires_at <= publish_at:
+        raise ValidationError({"expires_at": [pgettext(_CTX, "Bitmə vaxtı dərc vaxtından sonra olmalıdır.")]})
+
+
 def save_announcement(request, organization, scope, data, *, announcement=None) -> Announcement:
     """Formanın ``cleaned_data``-sı → elan (yeni və ya mövcud). Əhatədən kənar → ``ValidationError``."""
     user = request.user
@@ -71,6 +86,7 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
         errors.append(pgettext(_CTX, "Ən azı bir auditoriya seçin."))
     if errors:
         raise ValidationError({"audience_units": errors})
+    _validate_window(announcement, data)
     creating = announcement is None
     announcement = announcement or Announcement(organization=organization, created_by=user)
     for field in _FIELDS:

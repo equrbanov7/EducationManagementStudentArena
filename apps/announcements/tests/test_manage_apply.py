@@ -7,6 +7,7 @@ import json
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.announcements.forms import safe_apply_url
 from apps.announcements.models import Announcement, AnnouncementAttachment, AnnouncementReceipt
@@ -107,6 +108,25 @@ class ScopedManagerTest(TestCase):
         client.post(reverse("announcements:manage_action", args=[live.pk]), {"action": "delete"})
         with bypass_rls():
             self.assertTrue(Announcement.objects.get(pk=live.pk).is_deleted)
+
+    def test_published_edit_with_cleared_publish_time_and_past_expiry_is_a_form_error(self):
+        # Review 2026-10-07: dərc olunmuş elanda «Dərc vaxtı» boşaldılıb «Bitmə vaxtı» keçmişə
+        # qoyulanda servis `publish_at = indi` qoyurdu → `ann_window_ordered` CHECK-i → 500.
+        live = make_announcement(self.w, title="Pəncərəsi pozulan")
+        client = client_for(self.w["org"], self.w["owner"])
+        past = days(-1).astimezone(timezone.get_current_timezone()).strftime("%Y-%m-%dT%H:%M")
+        response = _post_form(
+            client,
+            reverse("announcements:manage_edit", args=[live.pk]),
+            title="Pəncərəsi pozulan",
+            publish_at="",
+            expires_at=past,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("dərc vaxtından sonra olmalıdır", response.content.decode())
+        with bypass_rls():
+            live.refresh_from_db()
+        self.assertIsNone(live.expires_at)
 
 
 class ApplyTest(TestCase):
