@@ -69,6 +69,9 @@ CELERY_TASK_ROUTES = {
     "exams.run_text_extraction_job": {"queue": "heavy"},
     "exams.run_ai_generation_job": {"queue": "heavy"},
     "exams.run_export_job": {"queue": "heavy"},
+    # 2026-10-06: fərdi PIN-lərin toplu PBKDF2 hash-i (CPU-bound, gecikməyə dözümlü —
+    # PIN şifrəli nüsxədən dərhal görünür, ilk giriş tək sətri özü hash edir).
+    "exams.hash_pending_student_pins": {"queue": "heavy"},
 }
 # A long OCR/AI job must not hold prefetched slots hostage; re-queue on crash.
 CELERY_WORKER_PREFETCH_MULTIPLIER = _env_int_setting("CELERY_PREFETCH_MULTIPLIER", 1, minimum=1)

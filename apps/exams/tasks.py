@@ -27,6 +27,73 @@ def _worker_bypass_scope():
         yield
 
 
+_RLS_GUCS = ("app.current_org_id", "app.current_user_id", "app.bypass_rls")
+
+
+def _snapshot_rls_gucs():
+    """Eager rejimdə (testlər/lokal) task çağıranın bağlantısında işləyir — konteksti saxla."""
+    from django.db import connection
+
+    if connection.vendor != "postgresql":
+        return None
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT " + ", ".join("current_setting(%s, true)" for _ in _RLS_GUCS), list(_RLS_GUCS))
+        return cursor.fetchone()
+
+
+def _restore_rls_gucs(values):
+    from django.db import connection
+
+    if values is None or connection.vendor != "postgresql":
+        return
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT " + ", ".join("set_config(%s, %s, false)" for _ in _RLS_GUCS),
+            [item for pair in zip(_RLS_GUCS, [value or "" for value in values]) for item in pair],
+        )
+
+
+def _organization_tenant_scope(organization_id):
+    """Hər DB hissəsi: öz tranzaksiyası + imtahanın TƏŞKİLATI (bypass YOX — timetable pattern-i)."""
+    from django.db import transaction
+
+    from core.rls import set_rls_bypass, set_rls_tenant
+    from core.rls_pooling import rls_worker_atomic
+
+    @contextmanager
+    def scope():
+        with rls_worker_atomic(), transaction.atomic():
+            set_rls_bypass(False)
+            set_rls_tenant(organization_id)
+            yield
+
+    return scope
+
+
+@shared_task(name="exams.hash_pending_student_pins", time_limit=900, soft_time_limit=840)
+def hash_pending_student_pins(exam_id, organization_id):
+    """Tutum testi 2026-10-06: fərdi PIN-lərin PBKDF2 hash-i request-dən kənarda (``heavy`` növbə).
+
+    Provizion sətri şifrəli nüsxə ilə dərhal yaradır; bu task hash-ləri hissə-hissə
+    yazır (idempotent, ``SKIP LOCKED`` — paralel task-lar işi bölüşür). RLS: hər
+    hissə imtahanın təşkilatına bağlanır — yanlış ``organization_id`` heç bir
+    sətir görmür. Qaytarır: hash yazılan sətir sayı.
+    """
+    from apps.exams.services.student_pin_hashing import hash_pending_student_pins as _run
+
+    previous = _snapshot_rls_gucs()
+    try:
+        hashed = _run(exam_id, scope=_organization_tenant_scope(organization_id))
+    finally:
+        try:
+            _restore_rls_gucs(previous)
+        except Exception:  # pragma: no cover — bağlantı artıq bağlana bilər
+            logger.warning("hash_pending_student_pins: RLS konteksti bərpa olunmadı", exc_info=True)
+    if hashed:
+        logger.info("hash_pending_student_pins: exam=%s, %d PIN hash-i yazıldı", exam_id, hashed)
+    return hashed
+
+
 @shared_task(name="exams.expire_stale_resumed_attempts")
 def expire_stale_resumed_attempts():
     """
