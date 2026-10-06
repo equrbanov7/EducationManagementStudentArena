@@ -38,6 +38,8 @@ from core.rls import bypass_rls
 
 _CSRF_RE = re.compile(r'(name="csrfmiddlewaretoken" value=")[^"]+(")')
 _NONCE_RE = re.compile(r'(nonce=")[^"]+(")')
+#: İmzalı başlama tokeni (``si=``) zaman möhürlüdür — iki render arasında saniyə dəyişə bilər.
+_SIGNED_RE = re.compile(r"(si=)[^\"&]+")
 
 #: (aktor, bölmə, əlavə query). ``{enrollment}`` — tələbənin ilk qeydiyyatı.
 CASES = (
@@ -61,9 +63,9 @@ CASES = (
 STUDENT_FRAGMENT_BUDGET = {
     ("dashboard", ""): 22,
     ("profile-info", ""): 32,
-    ("my-journal", ""): 27,
-    ("my-journal", "&subject={enrollment}&period={period}"): 45,
-    ("my-subjects", ""): 53,
+    ("my-journal", ""): 22,
+    ("my-journal", "&subject={enrollment}&period={period}"): 40,
+    ("my-subjects", ""): 46,
     ("overall-academic", ""): 24,
     ("my-results", ""): 31,
     ("assigned-exams", ""): 21,
@@ -71,7 +73,7 @@ STUDENT_FRAGMENT_BUDGET = {
 
 
 def _normalise(html: str) -> str:
-    return _NONCE_RE.sub(r"\1N\2", _CSRF_RE.sub(r"\1T\2", html))
+    return _SIGNED_RE.sub(r"\1S", _NONCE_RE.sub(r"\1N\2", _CSRF_RE.sub(r"\1T\2", html)))
 
 
 def _add_exam_activity(tenant):
@@ -147,6 +149,26 @@ class SectionFragmentLeanContextTests(_FragmentMixin, TestCase):
                 count = len(ctx.captured_queries)
                 self.assertLessEqual(count, budget, f"{section}{extra}: {count} sorğu > {budget}")
 
+    def test_shell_only_work_is_skipped_for_student_fragments(self):
+        """Badge dəsti (cold keşdə ~17 sorğu), bildiriş vəziyyəti və oxunmamış say partial
+        oxumursa HEÇ hesablanmır: cold və warm keşdə sorğu sayı eynidir, cədvəllərə toxunulmur."""
+        client = self.clients["student"]
+        shell_tables = ('"notifications_inappnotification"', '"notifications_studentorganizationrequest"')
+        for section in ("dashboard", "my-journal", "my-subjects", "overall-academic", "assigned-exams"):
+            with self.subTest(section=section):
+                self._get(client, section, "")
+                with CaptureQueriesContext(connection) as warm:
+                    self._get(client, section, "")
+                cache.clear()
+                with CaptureQueriesContext(connection) as cold:
+                    self._get(client, section, "")
+                # Cold fərqi yalnız middleware-in keşlənmiş üzvlük bloku ola bilər (bypass_rls
+                # 3 ifadə + Membership); badge dəsti hesablansaydı ~17 sorğu əlavə olunardı.
+                extra = len(cold.captured_queries) - len(warm.captured_queries)
+                self.assertLessEqual(extra, 4, f"{section}: cold keşdə +{extra} sorğu")
+                touched = [q["sql"] for q in cold.captured_queries if any(t in q["sql"] for t in shell_tables)]
+                self.assertEqual(touched, [])
+
     def test_full_page_still_has_shell_counts(self):
         """Tam səhifə yolu dəyişməyib: sidebar badge-ləri və formalar context-dədir."""
         client = self.clients["student"]
@@ -173,20 +195,24 @@ class SectionFragmentPerfReport(_FragmentMixin, TestCase):
         with CaptureQueriesContext(connection) as ctx:
             self._get(client, section, extra)
         queries = len(ctx.captured_queries)
-        started = time.perf_counter()
+        started, cpu_started = time.perf_counter(), time.process_time()
         for _ in range(self.ROUNDS):
             self._get(client, section, extra)
-        return queries, (time.perf_counter() - started) * 1000 / self.ROUNDS
+        wall = (time.perf_counter() - started) * 1000 / self.ROUNDS
+        # process_time — yalnız app prosesinin CPU-su (DB gözləməsi daxil deyil).
+        return queries, wall, (time.process_time() - cpu_started) * 1000 / self.ROUNDS
 
     def test_report(self):
         lines = []
         for actor, section, extra in CASES:
             client = _client_for(self.tenant["org"], self.tenant[actor])
             with mock.patch("apps.accounts.views.profile.sections_api.LEAN_FRAGMENT_CONTEXT", False):
-                fq, fms = self._measure(client, section, extra)
-            lq, lms = self._measure(client, section, extra)
+                fq, fms, fcpu = self._measure(client, section, extra)
+            lq, lms, lcpu = self._measure(client, section, extra)
             label = (
                 f"{actor}:{section}{' (detal)' if 'subject' in extra else ''}{' (exams)' if 'results' in extra else ''}"
             )
-            lines.append(f"{label:<34} full {fq:>3} q {fms:7.1f} ms | lean {lq:>3} q {lms:7.1f} ms")
+            lines.append(
+                f"{label:<30} full {fq:>3} q {fms:6.1f} ms (cpu {fcpu:5.1f}) | lean {lq:>3} q {lms:6.1f} ms (cpu {lcpu:5.1f})"
+            )
         print("\n" + "\n".join(lines))

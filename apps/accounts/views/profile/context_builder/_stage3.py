@@ -22,7 +22,6 @@ from .._sections.role_assignment import build_role_assignment_section
 from .._sections.statistics import build_statistics_section
 from .._sections.superadmin_orgs import build_superadmin_orgs_sections
 from ._helpers import _get_publish_notification_targets
-from ._lazy import force
 from ._teaching_office import dispatch_teaching_office_sections
 
 
@@ -402,8 +401,9 @@ class _Stage3Mixin:
                 allowed_sections=self.allowed_sections,
                 active_section=self.active_section,
                 capabilities=self.capabilities,
-                applications_pending_count=force(self.applications_pending_count),
-                pending_appeals_count=force(self.pending_appeals_count),
+                # Tənbəl ola bilər — vidjet yalnız lazım olanda hesablayır (`dashboard._resolve`).
+                applications_pending_count=self.applications_pending_count,
+                pending_appeals_count=self.pending_appeals_count,
             )
         if "student-intake" in self.allowed_sections and self.active_section == "student-intake":
             from .._sections.student_intake import build_student_intake_section
