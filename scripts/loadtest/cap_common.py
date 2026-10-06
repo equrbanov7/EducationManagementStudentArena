@@ -232,17 +232,24 @@ def run_attempt(user, url, token, kind="exam", prefix="exam "):
             f"q_present_{qid}": "1",
             "changed_questions[]": [qid],
         }
-        with user.client.post(url, data=data, headers=headers, name=f"{prefix}autosave", catch_response=True, timeout=30) as r:
-            try:
-                payload = r.json()
-            except Exception:
-                payload = {}
-            if r.status_code == 200 and payload.get("success") is True:
-                revision = str(payload.get("server_revision", revision))
-            else:
+        # Real klient (retry.js) xətadan sonra EYNİ yazını backoff ilə təkrarlayır —
+        # cavabı itmiş, amma serverdə yazılmış autosave idempotent replay ilə uğur alır.
+        for try_no in (1, 2):
+            with user.client.post(url, data=data, headers=headers, name=f"{prefix}autosave", catch_response=True, timeout=30) as r:
+                try:
+                    payload = r.json()
+                except Exception:
+                    payload = {}
+                if r.status_code == 200 and payload.get("success") is True:
+                    revision = str(payload.get("server_revision", revision))
+                    if payload.get("replayed"):
+                        COUNTERS["autosave_replayed"] += 1
+                    break
                 r.failure(f"autosave: {r.status_code} {r.error} {str(payload)[:80]} body={(r.text or '')[:120]!r} srv={r.headers.get('Server', '')}")
-                # Real klient Retry-After/backoff ilə təkrarlayır — burada bir dəfə.
-                gevent.sleep(float(r.headers.get("Retry-After", "3") or 3))
+                retry_after = float(r.headers.get("Retry-After", "3") or 3)
+            if r.status_code == 409 or try_no == 2:
+                break
+            gevent.sleep(retry_after)
     gevent.sleep(2)
     data = {"csrfmiddlewaretoken": token, "submit_action": "finish", "autosave_revision": revision}
     for qid, value in selected.items():
