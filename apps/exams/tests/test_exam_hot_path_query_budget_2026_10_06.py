@@ -95,7 +95,15 @@ class ExamHotPathQueryBudgetTests(_HotPathBase):
             [s for s in sqls if 'FROM "auth_user"' in s and f'"auth_user"."id" = {self.teacher.pk}' in s],
             "exam.author ayrıca yüklənir",
         )
-        self.assertFalse([s for s in sqls if 'FROM "organizations_organization"' in s])
+        # Middleware-in RLS `set_config(... (SELECT id FROM organizations_organization ...))` alt-sorğusu
+        # (sessiya org-u server tərəfdə həll olunur) sayılmır — yoxlanan view-un öz org yükləməsidir.
+        self.assertFalse(
+            [
+                s
+                for s in sqls
+                if 'FROM "organizations_organization"' in s and not s.lstrip().startswith("SELECT set_config")
+            ]
+        )
 
     def test_questions_page_budget(self):
         self._start()

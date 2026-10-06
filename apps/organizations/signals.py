@@ -10,7 +10,8 @@ from core.rls import set_rls_tenant
 from core.rls_pooling import rls_worker_atomic
 
 from .default_roles import get_default_roles_for_org_type
-from .models import Country, Membership, Organization, Role
+from .models import Country, Membership, Organization, OrgUnit, Role
+from .request_memberships import bump_membership_epoch
 
 
 @receiver(post_save, sender=Organization)
@@ -72,3 +73,17 @@ def invalidate_org_switcher_on_membership_change(sender, instance, **kwargs):
         cache.delete(OrganizationMiddleware.org_switcher_cache_key(instance.user_id))
     except Exception:
         pass
+
+
+# ── Request üzvlük snapshot-unun epoxası (perf 2026-10-07) ────────────────────
+# `request_memberships` middleware-in oxuduğu aktiv üzvlükləri request boyu
+# istehlakçılara verir. Üzvlük/rol/struktur/təşkilat yazısı (istənilən thread-də)
+# epoxanı artırır → açıq snapshot-lar etibarsızdır, istehlakçı canlı sorğuya düşür.
+
+
+@receiver([post_save, post_delete], sender=Membership)
+@receiver([post_save, post_delete], sender=Role)
+@receiver([post_save, post_delete], sender=OrgUnit)
+@receiver([post_save, post_delete], sender=Organization)
+def invalidate_request_membership_snapshots(sender, **kwargs):
+    bump_membership_epoch()
