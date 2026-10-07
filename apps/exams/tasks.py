@@ -192,6 +192,21 @@ def purge_expired_import_stashes():
     return purged
 
 
+@shared_task(name="exams.purge_finished_extraction_jobs", ignore_result=True)
+def purge_finished_extraction_jobs():
+    """Fon işi tutumu 2026-10-07: bitmiş idxal/AI/export işləri (faylları ilə) saxlama müddətindən sonra.
+
+    Hər 1 000-lik hissə öz ``rls_worker_atomic() + bypass_rls()`` scope-unda (bax
+    ``apps/exams/services/import_retention.py``).
+    """
+    from apps.exams.services.import_retention import purge_finished_extraction_jobs as _purge
+
+    purged = _purge(scope=_worker_bypass_scope)
+    if purged:
+        logger.info("purge_finished_extraction_jobs: %d iş silindi", purged)
+    return purged
+
+
 @shared_task(name="exams.notify_upcoming_final_exams")
 def notify_upcoming_final_exams():
     """
@@ -202,11 +217,10 @@ def notify_upcoming_final_exams():
     Qaytarır: göndərilən bildiriş sayı.
     """
     from apps.exams.services.final_center import notify_upcoming_final_exams as _run
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
-    with rls_worker_atomic(), bypass_rls():
-        sent = _run()
+    # Fon işi tutumu 2026-10-07: bütün icra BİR tranzaksiyada deyil — namizəd sorğusu və hər
+    # 500-lük hissə öz qısa `rls_worker_atomic() + bypass_rls()` scope-unda (bilet kilidləri dərhal buraxılır).
+    sent = _run(scope=_worker_bypass_scope)
     if sent:
         logger.info("notify_upcoming_final_exams: sent %d reminder(s)", sent)
     return sent

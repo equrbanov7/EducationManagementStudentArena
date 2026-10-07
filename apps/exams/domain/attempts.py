@@ -405,7 +405,7 @@ class ExamAnswer(AnswerGradingMixin, models.Model):
     Test + yazılı üçün birləşmiş model.
     """
 
-    attempt = models.ForeignKey("exams.ExamAttempt", on_delete=models.CASCADE, related_name="answers")
+    attempt = models.ForeignKey("exams.ExamAttempt", on_delete=models.CASCADE, related_name="answers", db_index=False)
     question = models.ForeignKey("exams.ExamQuestion", on_delete=models.CASCADE, related_name="answers")
     selected_options = models.ManyToManyField(
         "exams.ExamQuestionOption",

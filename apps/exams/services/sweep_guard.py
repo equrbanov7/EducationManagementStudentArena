@@ -18,15 +18,27 @@
   uzun çəksə beat növbəti icranı da növbəyə qoyur və iki sweep paralel gəzir.
   ``cache.add`` (Redis ``SET NX``) ilə 55 s-lik qlobal kilid: kilid tutulubsa
   ikinci icra heç nə etmədən çıxır.
+
+Fon işi tutumu 2026-10-07: kilid TTL-i 55 s-dir, amma bir icranın müddəti
+namizəd sayına bağlı idi. Final imtahanında cəhd başına ~54 sorğu (jurnal yazısı
++ bildiriş) ≈ 48 ms → 5 000 vaxtı bitmiş cəhd ≈ 240 s. 55 s-dən sonra kilid
+düşür, beat hər dəqiqə yeni sweep başladır və ``celery`` növbəsinin 4 slotunun
+hamısı üst-üstə düşən sweep-lərlə dolur (OTP məktubları, bildirişlər gözləyir;
+300 s hard limit isə icranı ortada öldürür). İndi qlobal icra
+``SWEEP_TIME_BUDGET_SECONDS`` (defolt 45 s < TTL) büdcəsi ilə işləyir: büdcə
+bitəndə dayanır, qalan namizədləri növbəti dəqiqənin icrası götürür (köhnədən
+yeniyə, ``pk`` sırası ilə).
 """
 
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from collections.abc import Callable
 from contextlib import AbstractContextManager, contextmanager, nullcontext
 
+from django.conf import settings
 from django.core.cache import cache
 from django.db import transaction
 
@@ -38,6 +50,17 @@ logger = logging.getLogger(__name__)
 #: (kilid silinməsə) növbəti icra maksimum bir dövr gecikin.
 SWEEP_LOCK_TTL_SECONDS = 55
 SWEEP_LOCK_KEY_PREFIX = "lock:sweep:"
+#: Qlobal icranın vaxt büdcəsi — overlap kilidinin TTL-indən qısa olmalıdır.
+SWEEP_TIME_BUDGET_SECONDS = 45
+
+
+def sweep_time_budget() -> float:
+    """Qlobal sweep büdcəsi (s); ``EXAM_SWEEP_TIME_BUDGET_SECONDS`` ilə dəyişdirilə bilər."""
+    try:
+        value = float(getattr(settings, "EXAM_SWEEP_TIME_BUDGET_SECONDS", SWEEP_TIME_BUDGET_SECONDS))
+    except (TypeError, ValueError):
+        value = SWEEP_TIME_BUDGET_SECONDS
+    return max(0.0, min(value, SWEEP_LOCK_TTL_SECONDS - 5))
 
 
 @contextmanager
@@ -78,6 +101,8 @@ def finish_attempts_under_row_lock(
     select_related: tuple[str, ...],
     action: Callable[[ExamAttempt], bool],
     scope: Callable[[], AbstractContextManager] | None = None,
+    time_budget: float | None = None,
+    candidates: Callable[[object], list] | None = None,
 ) -> int:
     """Namizədləri bir-bir sətir kilidi altında yenidən oxuyub ``action`` tətbiq et (P2-6).
 
@@ -95,14 +120,34 @@ def finish_attempts_under_row_lock(
     kilidləri sweep bitənə qədər qalırdı. İndi hər cəhd öz real tranzaksiyasında
     commit olunur (kilid dərhal buraxılır, jurnal ``on_commit``-i dərhal işləyir),
     bir cəhdin xətası loglanır və digərlərini dayandırmır.
+
+    ``time_budget`` (s) — verilibsə hər cəhddən SONRA yoxlanır: büdcə bitibsə
+    qalan namizədlər növbəti icraya qalır (ən azı bir cəhd həmişə işlənir ki,
+    irəliləyiş olsun). Namizədlər ``pk`` sırası ilə — köhnə cəhdlər əvvəl.
+
+    ``candidates(queryset)`` — verilibsə ilkin ID siyahısını ``narrow`` əvəzinə o qurur
+    (məs. planlayıcının yanlış qiymətləndirdiyi join-dən qaçmaq üçün); kilid altındakı
+    təkrar yoxlama yenə ``narrow`` ilədir.
     """
     scope = scope or nullcontext
+    deadline = time.monotonic() + time_budget if time_budget is not None else None
     # ID-lər əvvəlcədən materiallaşdırılır: hər cəhd öz tranzaksiyasında
     # işlənir, açıq server-side kursor + daxili atomic bloklar qarışmasın.
     with scope():
-        candidate_ids = list(narrow(queryset).values_list("pk", flat=True))
+        if candidates is not None:
+            candidate_ids = sorted(candidates(queryset))
+        else:
+            candidate_ids = list(narrow(queryset).order_by("pk").values_list("pk", flat=True))
     finished = 0
-    for attempt_id in candidate_ids:
+    for index, attempt_id in enumerate(candidate_ids):
+        if index and deadline is not None and time.monotonic() >= deadline:
+            logger.warning(
+                "sweep: time budget %.0fs exhausted after %d/%d candidate(s); the rest go to the next run",
+                time_budget,
+                index,
+                len(candidate_ids),
+            )
+            break
         try:
             with scope(), transaction.atomic():
                 attempt = (
