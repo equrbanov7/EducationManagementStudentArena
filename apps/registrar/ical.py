@@ -20,23 +20,31 @@ seminarı assistent aparırsa onun adı, yoxdursa jurnal sahibi
 from __future__ import annotations
 
 import datetime
+import re
 
 from django.conf import settings
 
 from apps.registrar.models import WeekType
 from apps.registrar.schedule import effective_instructor, week_parity
 
+#: Sətir sonu sayılan bütün variantlar (CRLF, tək CR, NEL, U+2028/2029) — LF-ə normallaşır.
+_LINE_BREAKS = re.compile(r"\r\n|[\r\x85\u2028\u2029]")
+#: RFC 5545 §3.3.11: TEXT-də HTAB-dan başqa nəzarət simvolu (CTL) olmur — atılır.
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f]")
+
 
 def _escape(text: str) -> str:
-    """RFC 5545 TEXT escape: backslash, semicolon, comma, newline."""
-    return (
-        str(text or "")
-        .replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\r\n", "\\n")
-        .replace("\n", "\\n")
-    )
+    """RFC 5545 TEXT escape: backslash, semicolon, comma, newline.
+
+    Audit 2026-10-07: tək ``\\r`` qaçışsız qalırdı — CR sətir sonu kimi
+    təfsir edən parser-lərdə (``LOCATION``/``SUMMARY`` dəyəri ilə) yeni
+    xüsusiyyət sətri (``X-...:``, ``END:VEVENT``) yeridilə bilərdi. İndi hər
+    sətir sonu ``\\n`` olur, qalan nəzarət simvolları atılır — nəticədə xam
+    CR/LF qalmır (sətir ayırıcısı yalnız ``build_schedule_ics``-in CRLF-idir).
+    """
+    value = _LINE_BREAKS.sub("\n", str(text or ""))
+    value = _CONTROL_CHARS.sub("", value)
+    return value.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
 
 
 def _fold(line: str) -> str:
