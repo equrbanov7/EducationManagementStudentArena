@@ -2,12 +2,16 @@
 {% comment %}
 W3 2026-09-14 — KaTeX düstur render aktivləri (yalnız sual mətni göstərən səhifələr).
 Vendor: static/vendor/katex/0.16.47 (bax static/vendor/katex/README.md). Hamısı
-same-origin + `defer` — CSP (`script-src 'self'`, `style-src 'self'`) pozulmur,
-inline kod yoxdur. Render `static/js/ems_math.js` ilə `[data-ems-math]` içində.
-Partial AJAX ilə də gələ bilər — brauzer eyni src-i ikinci dəfə icra etsə də
-`ems_math.js` idempotentdir (`window.EMSMath.__loaded`).
+same-origin — CSP (`script-src 'self'`, `style-src 'self'`) pozulmur, inline kod yoxdur.
+Render `static/js/ems_math.js` ilə `[data-ems-math]` içində.
+
+Perf 2026-10-07: KaTeX (katex.min.js ≈266 KB / 74 KB gzip + auto-render + CSS) artıq
+birbaşa yüklənmir — yolları `data-katex-*` atributlarındadır və `ems_math.js` onları
+YALNIZ səhifədə düstur ayırıcısı (`$`, `\(`, `\[`) olan konteyner görəndə qoşur.
+Düstursuz imtahan/nəticə səhifəsi KaTeX-i nə endirir, nə də parse edir.
+Partial AJAX ilə də gələ bilər — `ems_math.js` idempotentdir (`window.EMSMath.__loaded`).
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'vendor/katex/0.16.47/katex.min.css' %}">
-<script defer src="{% static 'vendor/katex/0.16.47/katex.min.js' %}"></script>
-<script defer src="{% static 'vendor/katex/0.16.47/contrib/auto-render.min.js' %}"></script>
-<script defer src="{% static 'js/ems_math.js' %}?v=20260914-1"></script>
+<script defer src="{% static 'js/ems_math.js' %}?v=20261007-lazy"
+        data-katex-css="{% static 'vendor/katex/0.16.47/katex.min.css' %}"
+        data-katex-js="{% static 'vendor/katex/0.16.47/katex.min.js' %}"
+        data-katex-autorender="{% static 'vendor/katex/0.16.47/contrib/auto-render.min.js' %}"></script>
