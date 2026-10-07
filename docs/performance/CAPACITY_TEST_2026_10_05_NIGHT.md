@@ -208,6 +208,91 @@ Hamısı testli, canlıya üç paketlə çıxdı (main 53b9f5e0, 1d8b9389, sonra
 Qəsdən dəyişdirilməyənlər: imtahan start-ındakı qısa `sleep` (tutum növbəsi və istifadəçi kilidi — admission
 control); PIN hash gücü.
 
+## Canlı imtahan start gecikməsi (2026-10-07)
+
+**Simptom (yük testi 2026-10-07, 8 daphne × 0.5 CPU, 2 sessiya × 150 oyunçu).** Host-un
+`POST /live/host/<pin>/start/` sorğusu 28 s çəkdi, 1-ci sualın telefonlara çatması p95 28 s oldu.
+`next` ~100 ms idi. Join səhifəsində/`enter`-də timeout və 500 var idi. App CPU ~37 %, DB sorğuları
+qısa idi. Yəni sistem hesablamırdı, gözləyirdi.
+
+**Təkrar.** Real daphne konteynerlərdə işlədildi: 8 replika × 0.25 CPU (test serverinin yavaş nüvəsini
+təqlid edir), `ASGI_THREADS=8`, channels_redis, PgBouncer, Postgres 2 CPU, nginx `least_conn`. Yükü
+aiohttp klienti verdi, protokol `cap_locust_live.py` ilə eynidir: join səhifəsi → `enter` → wait room →
+lobby və play WS → `seen`/cavab. Oyunçular 12 s-də qoşuldu, «start» 3 s sonra verildi.
+
+**Kök səbəb — üç növbə bir-birini gücləndirirdi:**
+
+1. **Sessiya sətri kilidi (əsas səbəb).**
+   - `join enter` sessiya sətrini `SELECT … FOR UPDATE` ilə kilidləyir. Kilid altında hər oyunçu
+     üçün homoglif ad açarı hesablanırdı (O(N) Python) və 4 ayrıca sorğu gedirdi.
+   - CPU kvotası olan replikada kilidi tutan thread 100 ms-ə qədər dayanır (CFS throttling, GIL).
+     Qoşulmalar bu kilidin arxasında növbəyə düzülür.
+   - Host «start» da eyni sətri kilidləyir və bütün növbənin sonunda gözləyir.
+   - Postgres `log_lock_waits` göstərdi: düzəlişdən əvvəlki 10 qaçışın 9-da 0.5 s-dən uzun kilid
+     gözləmələri oldu, tək gözləmə 9.8 s-ə çatdı, bir qaçışda gözləmələrin cəmi 948 s idi.
+   - pg_stat_statements bunu az göstərir. Kilidi tutan tərəfin vaxtı sorğular arasındakı Python işidir.
+2. **channels-in tək thread hopu.**
+   - channels 4.x hər WS hadisəsindən əvvəl `sync_to_async(close_old_connections)` çağırır,
+     `thread_sensitive=True` ilə.
+   - Daphne-də WS scope-unda `ThreadSensitiveContext` yoxdur. Ona görə bu çağırışlar prosesin bütün
+     socket-ləri üçün asgiref-in TƏK thread-ində növbəyə düzülür. `ASGI_THREADS` hovuzu burada işləmir.
+   - Ölçü: qoşulma pəncərəsində 12–23 min hop, növbə gözləməsinin cəmi 57–182 s, tək gözləmə
+     1.5 s-ə qədər.
+3. **Lobby roster fan-out-u O(N²) idi.**
+   - Hər qoşulmada tam siyahı (≤ 200 sətir) hər oyunçu socket-inə ayrıca kanal çatdırılması ilə gedirdi.
+   - Mikro-ölçü, 0.5 CPU konteyner: 75 consumer × 60 yayım, 2 məşğul Python thread-i. Hop olmadan
+     9.5–11.8 s, hop ilə 24–30 s.
+
+**Düzəliş (`perf(live_exam)` commit-ləri):**
+
+- **`LiveSocketBase.dispatch` / `websocket_disconnect`** hər hadisədə tək-thread hopu etmir.
+  - Live consumer-lər event loop thread-ində ORM-ə toxunmur.
+  - DB işi `database_sync_to_async(thread_sensitive=False)`-dadır, keş işi
+    `sync_to_async(thread_sensitive=False)`-dadır.
+  - Tək thread-də yalnız qoşulma başına 1 iş qalır: channels `AuthMiddleware.get_user`.
+- **Roster `live_<pin>_lobby_roster` qrupuna gedir.**
+  - Host socket-i tam siyahını alır.
+  - Oyunçu socket-ləri `LobbyRosterFanout` ilə alır: prosesdə PIN başına BİR abunəçi, sonra yaddaşda
+    paylama.
+  - Oyunçuya say, ayarlar və yalnız öz sətri gedir. Wait room başqa adları göstərmir, ona görə
+    başqalarının ləqəbləri artıq telefonlara getmir.
+- **`join enter`-in kilidli hissəsi qısaldı (`_LobbyRoster`).**
+  - Ad açarları kilidDƏN ƏVVƏL hesablanır.
+  - Kilid altında BİR sorğu gedir: id, client_id, ləqəb. Say, qayıdan oyunçu və ad yoxlaması bundan çıxır.
+  - Qaydalar eynidir: limit, kilidli lobbi, kick, homoglif.
+
+**Nəticə** (eyni stend; əvvəl: 10 qaçış, sonra: 6 qaçış; median / ən pis):
+
+| Ölçü | Əvvəl | Sonra |
+|---|---|---|
+| host `start` | 0.42 / **8.4 s** | 0.36 / **0.98 s** |
+| 1-ci sualın çatması p95 | 1.0 / **8.6 s** | 0.48 / **1.5 s** |
+| `game_started` p95 | 0.94 / 8.6 s | 0.45 / 1.5 s |
+| `join enter` p95 | 2.2 / **10.6 s** | 0.40 / **1.8 s** |
+| join səhifəsi p95 | 0.55 / 0.9 s | 0.18 / 1.0 s |
+| lobby WS qoşulması p95 | 0.76 / 1.0 s | 0.21 / 1.3 s |
+| sessiya sətrində > 0.5 s kilid gözləməsi | 10 qaçışın 9-da, ən uzunu 9.8 s | 6 qaçışın 1-də (5 dəfə, ən uzunu 1.1 s) |
+| tək-thread hopu (qoşulma pəncərəsi) | 12 000–23 000 | 600 (qoşulma başına 1) |
+
+Hər iki dəstdə 300/300 oyunçu qoşuldu. Stend paylaşılan maşındadır, ona görə tək qaçışlar səs-küylüdür.
+Əsas fərq ən pis halın quyruğundadır: əvvəl kilid növbəsi bəzən saniyələrlə uzanırdı, sonra uzanmır.
+
+**Testlər:**
+
+- `test_ws_dispatch_single_thread_2026_10_07` — daphne şəraiti, 120 hadisə tək thread-ə 0 iş göndərir.
+  Köhnə kodda 122 idi.
+- `test_lobby_roster_fanout_2026_10_07`:
+  - roster prosesə 1 dəfə çatır;
+  - oyunçu yalnız öz sətrini alır;
+  - join sorğu sayı 3 və 60 oyunçuda eynidir;
+  - kilid altında ad açarı hesablanması ≤ 4 (köhnə kodda 63).
+
+**Qalan iş:**
+
+- channels `AuthMiddleware.get_user` hələ prosesin tək thread-indədir (WS qoşulması başına 1 iş).
+  Qlobal ASGI stack-dir, imtahan WS-lərinə də aiddir, ayrıca dəyişiklikdir.
+- Real test serverində təkrar ölçmə lazımdır (`load-test.yml`, live rejimi, 2 × 150).
+
 ## 50 000 nəfər haqqında
 
 Tək 10 vCPU-luq serverdə 50 000 **eyni anda aktiv** istifadəçi mümkün deyil.
