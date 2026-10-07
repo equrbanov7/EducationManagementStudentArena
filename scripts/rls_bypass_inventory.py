@@ -65,6 +65,9 @@ CATEGORY_RULES = (
     ("apps/surveys/management/", "C", "idarə əmrləri"),
     ("apps/timetable/tasks.py", "D", "Celery (cədvəl generatoru, run sətrinin təşkilatı)"),
     ("apps/workload/management/", "C", "idarə əmrləri (--org ilə)"),
+    # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
+    # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.
+    ("apps/accounts/ws_gate.py", "D", "WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit)"),
     ("apps/accounts/", "C", "superadmin / admin cross-org əməliyyatı"),
     ("apps/audit/", "C", "superadmin audit görünüşü"),
     ("apps/monitoring/", "C", "superadmin monitorinq"),

@@ -51,12 +51,18 @@ from channels.security.websocket import AllowedHostsOriginValidator
 django_asgi_app = get_asgi_application()
 
 # Import routing only after Django app registry is ready.
+from apps.accounts.ws_gate import WebSocketAccessGate
 from apps.exams.routing import websocket_urlpatterns as exams_ws_urlpatterns
 from apps.live_exam.routing import websocket_urlpatterns as live_exam_ws_urlpatterns
 
 all_websocket_urlpatterns = live_exam_ws_urlpatterns + exams_ws_urlpatterns
 
-websocket_application = AllowedHostsOriginValidator(AuthMiddlewareStack(URLRouter(all_websocket_urlpatterns)))
+# Təhlükəsizlik dizaynı 2026-10-08: WS qoşulmaları da HTTP-nin admin 2FA + şəbəkə zonası
+# qaydalarından keçir (eyni funksiyalar). Qapı AuthMiddlewareStack-in İÇİNDƏDİR — istifadəçi
+# və sessiya artıq həll olunub; rədd consumer-in accept()-indən ƏVVƏL. Bax apps/accounts/ws_gate.py.
+websocket_application = AllowedHostsOriginValidator(
+    AuthMiddlewareStack(WebSocketAccessGate(URLRouter(all_websocket_urlpatterns)))
+)
 
 application = ProtocolTypeRouter(
     {
