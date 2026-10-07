@@ -144,6 +144,28 @@ def score_pct_expression():
     )
 
 
+def student_visible_result_attempts(attempts_qs, *, now=None):
+    """Tələbənin ÖZ statistikasında balı göstərilə bilən cəhdlər — «Nəticələrim» qaydası.
+
+    Təhlükəsizlik auditi 2026-10-07: tələbə statistikası müəllimin
+    ``results_hidden_from_students`` ilə gizlətdiyi imtahanın faiz balını və
+    5 dəqiqəlik redaktə pəncərəsi (``REVIEW_EDIT_LOCK_WINDOW``) hələ bağlanmamış yazılı
+    qiyməti göstərirdi (nəticə səhifəsi və «Nəticələrim» hər ikisini gizlədir). Test
+    avtomatik qiymətlənir — yalnız «gizlət» seçimi tətbiq olunur.
+    """
+    from django.utils import timezone
+
+    from core.helpers import REVIEW_EDIT_LOCK_WINDOW
+
+    cutoff = (now or timezone.now()) - REVIEW_EDIT_LOCK_WINDOW
+    return attempts_qs.filter(exam__results_hidden_from_students=False).filter(
+        Q(exam__exam_type="test")
+        | Q(checked_by_teacher=False)
+        | Q(teacher_checked_at__isnull=True)
+        | Q(teacher_checked_at__lte=cutoff)
+    )
+
+
 def attempt_outcome(attempts_qs) -> dict:
     """Yekunlaşmış cəhdlərin nəticəsi — TƏK aqreqat sorğusu.
 

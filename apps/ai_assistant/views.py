@@ -68,6 +68,17 @@ def _page_path(raw: str) -> str:
     return path[:_MAX_PAGE_PATH]
 
 
+def _exam_in_progress(user) -> bool:
+    """Yazı pəncərəsi açıq rəsmi imtahan cəhdi varmı (xəta → bloklamır, çat işləyir)."""
+    try:
+        from apps.exams.public import user_has_open_exam_attempt
+
+        return user_has_open_exam_attempt(user)
+    except Exception:  # noqa: BLE001 — imtahan yoxlaması köməkçini sındırmamalıdır
+        logger.exception("AI assistant exam-in-progress check failed")
+        return False
+
+
 def _get_rate_limit() -> str:
     from core import runtime_settings
 
@@ -162,6 +173,31 @@ def chat_view(request):
     message = message.strip() if isinstance(message, str) else ""
     if not message:
         return _json({"error": "Message is required."}, status=400)
+
+    # ── İmtahan bütövlüyü (təhlükəsizlik auditi 2026-10-07) ──────────────
+    # Vidcet imtahan səhifəsində gizlidir, amma endpoint başqa tabdan çağırılırdı:
+    # açıq cəhd zamanı sual köməkçiyə yapışdırılıb cavab alınırdı. Gemini-yə və
+    # limit sayğacına çatmadan rədd edilir.
+    if _exam_in_progress(user):
+        _log_request(
+            user=user,
+            organization=organization,
+            memberships=memberships,
+            prompt=message,
+            status=AIAssistantLog.Status.BLOCKED,
+            block_reason="exam_in_progress",
+        )
+        return _json(
+            {
+                "error": "exam_in_progress",
+                "answer": pgettext(
+                    "ai_assistant.blocked",
+                    "İmtahan gedərkən AI köməkçi əlçatan deyil. İmtahanı bitirdikdən sonra yenidən yazın.",
+                ),
+                **_get_quota_info(user.id),
+            },
+            status=423,
+        )
 
     # ── Security: prompt injection check ──────────────────────────────
     is_safe, block_reason = check_message_safety(message)

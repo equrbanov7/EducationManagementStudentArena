@@ -8,7 +8,12 @@ from .actions import (  # noqa: F401
     teacher_resume_attempt,
     teacher_stop_attempt,
 )
-from .constants import EVENT_SEVERITY_MAP, NON_COUNTING_EVENT_TYPES, VIOLATION_EVENT_TYPES  # noqa: F401
+from .constants import (  # noqa: F401
+    EVENT_SEVERITY_MAP,
+    NON_COUNTING_EVENT_TYPES,
+    STUDENT_REPORTABLE_EVENT_TYPES,
+    VIOLATION_EVENT_TYPES,
+)
 from .incidents import log_supervision_incident  # noqa: F401
 from .interventions import attach_attempt_interventions, get_attempt_intervention  # noqa: F401
 from .monitor import get_attempt_supervision_status  # noqa: F401
@@ -17,6 +22,7 @@ from .snapshot import get_attempt_live_snapshot  # noqa: F401
 __all__ = [
     "EVENT_SEVERITY_MAP",
     "NON_COUNTING_EVENT_TYPES",
+    "STUDENT_REPORTABLE_EVENT_TYPES",
     "VIOLATION_EVENT_TYPES",
     "attach_attempt_interventions",
     "get_attempt_live_snapshot",

@@ -19,7 +19,7 @@ from decimal import Decimal
 from django.db.models import Count, Exists, OuterRef, Q
 from django.utils import timezone
 
-from ._shared import ROW_LIMIT, attempt_outcome, pct, score_pct_expression
+from ._shared import ROW_LIMIT, attempt_outcome, pct, score_pct_expression, student_visible_result_attempts
 
 _ZERO = Decimal("0")
 
@@ -159,6 +159,7 @@ def student_metrics(user, *, organization) -> dict:
     attempts = ExamAttempt.objects.filter(user=user, exam__is_deleted=False)
     if organization is not None:
         attempts = attempts.filter(exam__organization=organization)
+    attempts = student_visible_result_attempts(attempts, now=now)
     exams = attempt_outcome(attempts)
 
     recent_attempts = list(

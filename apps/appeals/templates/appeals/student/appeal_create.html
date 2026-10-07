@@ -186,7 +186,7 @@ Sıra: komponentlər → apellyasiya düzümü (part1 → part2 → part3).{% en
                             <span class="appeal-question-number">{{ forloop.counter }}</span>
                             <span>{{ delivered.text|striptags|truncatechars:190 }}</span>
                         </p>
-                        {% if hide_answer_details and not answers_release_locked and exam.exam_type == "test" %}
+                        {% if hide_answer_details and not answers_release_locked and not hide_answer_verdicts and exam.exam_type == "test" %}
                         <div class="appeal-meta">
                             {% if answer.is_correct %}
                             <span class="appeal-chip appeal-chip--ok"><i class="fas fa-check-circle" aria-hidden="true"></i>{% trans "Cavabınız: düzgün" context "appeals.template" %}</span>

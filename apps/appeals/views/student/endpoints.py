@@ -16,6 +16,7 @@ from apps.exams.public import (
     delivered_question_render,
     ensure_student_exam_tenant_context,
     exam_answers_release_locked,
+    secure_answer_key_hidden,
     tenant_scoped_exams,
 )
 
@@ -225,6 +226,7 @@ def appeal_create(request, attempt_id):
 
     is_profile_results_request = _is_profile_results_request(request)
     answers_release_locked = exam_answers_release_locked(exam)
+    results_hidden = bool(getattr(exam, "results_hidden_from_students", False))
 
     context = {
         "exam": exam,
@@ -244,9 +246,17 @@ def appeal_create(request, attempt_id):
         "hide_answer_details": (
             is_profile_results_request
             or answers_release_locked
+            or results_hidden
             # Audit 2026-09-28 EX28-03: cəhd qaldıqca açar apellyasiya səhifəsində də gizlidir.
             or attempt_answer_key_hidden(attempt, user=request.user)
+            # Təhlükəsizlik auditi 2026-10-07: əvvəl qərar yalnız tələbənin idarə etdiyi
+            # ``from_section``/``return_to`` ilə verilirdi — parametrsiz URL midterm açarını
+            # həmişə, finalın açarını isə 3 günlük pəncərə boyu açırdı. Nəticə səhifəsi ilə
+            # eyni server qaydası (midterm gizli; final yalnız mərkəzin 5 dəq-lik baxışında).
+            or secure_answer_key_hidden(attempt, is_profile_results=is_profile_results_request)
         ),
+        # Müəllim nəticəni gizlədibsə sual üzrə düz/səhv verdikti də göstərilmir.
+        "hide_answer_verdicts": results_hidden,
         "answers_release_locked": answers_release_locked,
         "is_final_exam": _is_final_exam(exam) and not is_profile_results_request,
     }
