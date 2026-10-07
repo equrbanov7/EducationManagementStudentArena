@@ -10,5 +10,5 @@ class ReportDateParamTests(SimpleTestCase):
         self.assertEqual(str(reports._report_date({"date_from": "2026-10-07"}, "date_from")), "2026-10-07")
 
     def test_invalid_dates_are_ignored(self):
-        for raw in ("2026-13-40", "abc", "2026-02-30", "", "x\";filename=evil"):
+        for raw in ("2026-13-40", "abc", "2026-02-30", "", 'x";filename=evil'):
             self.assertIsNone(reports._report_date({"date_from": raw}, "date_from"), raw)
