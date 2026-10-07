@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import uuid
 
-from django.http import FileResponse, Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
+
+from core.download_types import attachment_file_response
 
 from ..constants import PROFILE_SECTION
 from ..models import AnnouncementAttachment
@@ -109,15 +111,9 @@ def attachment_download(request, announcement_id, attachment_id):
         scope = access.manage_scope(request.user, organization, request=request)
         if not access.can_edit(scope, request.user, attachment.announcement, organization):
             raise Http404
-    try:
-        handle = attachment.file.open("rb")
-    except OSError as exc:  # pragma: no cover — itmiş fayl
-        raise Http404 from exc
-    response = FileResponse(handle, as_attachment=True, filename=attachment.original_name)
-    response["Content-Type"] = attachment.content_type or "application/octet-stream"
-    response["X-Content-Type-Options"] = "nosniff"
-    response["Cache-Control"] = "private, no-store"
-    return response
+    # Audit 2026-10-07: tip saxlanmış (klientin bəyan etdiyi) ``content_type``-dan YOX,
+    # adın uzantısından (ağ siyahı) — ``text/html`` bəyanlı PDF aktiv sənəd kimi getməsin.
+    return attachment_file_response(attachment.file, filename=attachment.original_name)
 
 
 @require_GET

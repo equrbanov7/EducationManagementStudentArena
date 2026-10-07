@@ -1,11 +1,14 @@
 """exam_center paketi — hesabatlar (oturum tarixçəsi + tələbə iştirakı)."""
 
+import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Exists, OuterRef, Q
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.http import content_disposition_header
 from django.utils.translation import pgettext
 
 from apps.exams.models import Exam, ExamRoom, ExamRoomSession
@@ -188,19 +191,35 @@ def _export_xlsx(request, organization):
     ]
     workbook = build_final_report_workbook(organization, tickets, meta_rows=meta_rows)
 
-    date_from = (request.GET.get("date_from") or "").strip()
-    date_to = (request.GET.get("date_to") or "").strip()
-    if date_from and date_from == date_to:
-        stamp = date_from.replace("-", "")
-    else:
-        stamp = timezone.localtime(timezone.now()).strftime("%Y%m%d_%H%M")
-
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
-    response["Content-Disposition"] = f'attachment; filename="imtahan_hesabati_{stamp}.xlsx"'
+    response["Content-Disposition"] = content_disposition_header(
+        True, f"imtahan_hesabati_{_export_stamp(request.GET)}.xlsx"
+    )
     workbook.save(response)
     return response
+
+
+def _iso_date(value):
+    """URL parametrini TARİX kimi yoxlayır; yararsız dəyər → ``None``."""
+    try:
+        return datetime.date.fromisoformat((value or "").strip())
+    except ValueError:
+        return None
+
+
+def _export_stamp(params) -> str:
+    """Fayl adı damğası — yalnız rəqəm/alt xətt.
+
+    Audit 2026-10-07: damğa xam ``date_from``-dan qurulurdu — dırnaq/``;``
+    ``Content-Disposition`` fayl adını dəyişə bilirdi. İndi tarix əvvəlcə
+    yoxlanır və ``strftime`` ilə yazılır; tək gün seçilməyibsə indiki vaxt.
+    """
+    date_from = _iso_date(params.get("date_from"))
+    if date_from is not None and date_from == _iso_date(params.get("date_to")):
+        return date_from.strftime("%Y%m%d")
+    return timezone.localtime(timezone.now()).strftime("%Y%m%d_%H%M")
 
 
 __all__ = ["exam_center_reports"]
