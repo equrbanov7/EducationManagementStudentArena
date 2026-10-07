@@ -108,6 +108,18 @@
             });
         }
 
+        /* Təsdiqdən sonra fokus gizlənən düymədə qalmasın (body-yə düşsə Esc modala çatmır, ekran
+         * oxuyucusu da yerini itirir): növbəti məcburi elanın checkbox-u, yoxdursa «Bağla» / «Ətraflı bax». */
+        function focusCurrent() {
+            var target = ackBox && !ackBox.hidden ? ackCheck : null;
+            if (!target) {
+                target = closers.filter(function (button) { return !button.hidden; }).pop() || more;
+            }
+            if (target && typeof target.focus === "function") {
+                try { target.focus(); } catch (e) { /* ignore */ }
+            }
+        }
+
         var modal = window.bootstrap.Modal.getOrCreateInstance(modalEl, { backdrop: "static", keyboard: true });
 
         modalEl.addEventListener("hide.bs.modal", function (event) {
@@ -151,6 +163,7 @@
                             return;
                         }
                         show(Math.min(index, items.length - 1));
+                        focusCurrent();
                     })
                     .catch(function (error) {
                         var payload = error && error.payload;
