@@ -166,6 +166,11 @@ def _notice_or_404(organization, notice_id):
 def _handle_save_notice(request, organization):
     notice_id = (request.POST.get("notice_id") or "").strip()
     instance = _notice_or_404(organization, notice_id) if notice_id else None
+    if instance is not None:
+        # Təhlükəsizlik auditi 2026-10-07 SEC-05: ORİJİNAL bölmə də əhatədə olmalıdır —
+        # əks halda unit-əhatəli aktor başqa fakültənin / bütün təşkilatın xəbərdarlığını
+        # `notice_id` ilə götürüb öz bölməsinə köçürürdü (forma instance-ı yerində dəyişir).
+        _assert_scope(request.user, organization, instance.org_unit)
     form = JournalCloseNoticeForm(request.POST, instance=instance, organization=organization)
     if not form.is_valid():
         raise JournalCloseAdminError(_first_form_error(form))
