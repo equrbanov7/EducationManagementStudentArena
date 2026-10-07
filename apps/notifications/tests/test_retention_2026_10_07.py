@@ -59,3 +59,24 @@ class PurgeOldNotificationsTaskTests(TestCase):
         self._make(deleted_days_ago=400)
         self.assertEqual(purge_old_notifications_task(), {"soft_deleted": 0, "read": 0})
         self.assertEqual(InAppNotification.objects.count(), 1)
+
+
+class NotificationIndexHygieneTests(TestCase):
+    """notifications/0005: prefiks-təkrar tək-sütun indeksləri yoxdur, kompozitlər qalır."""
+
+    def test_prefix_redundant_indexes_are_gone(self):
+        from django.db import connection
+
+        if connection.vendor != "postgresql":
+            self.skipTest("PostgreSQL catalog")
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'notifications_inappnotification'"
+            )
+            indexes = dict(cursor.fetchall())
+        self.assertNotIn("notifications_inappnotification_recipient_id_d4b9f908", indexes)
+        self.assertNotIn("notifications_inappnotification_organization_id_f508ee82", indexes)
+        definitions = " | ".join(indexes.values())
+        self.assertIn("(recipient_id, deleted_at, is_read)", definitions)
+        self.assertIn("(recipient_id, deleted_at, created_at)", definitions)
+        self.assertIn("(organization_id, recipient_id)", definitions)
