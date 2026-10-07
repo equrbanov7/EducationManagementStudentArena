@@ -601,7 +601,7 @@ def main():
         logs_dir.mkdir(exist_ok=True)
         for svc in APPS + ("db", "pool", "edge"):
             text = sh(["docker", "logs", "--since", "3h", f"{PROJECT}-{svc}-1"], capture=True, check=False, merge=True)
-            lines = [l for l in (text or "").splitlines() if any(w in l for w in ("ERROR", "Error", "error", "WARNING", "FATAL", "LOG:  duration", "lock", "Traceback", "503", "concurrency"))]
+            lines = [l for l in (text or "").splitlines() if any(w in l for w in ("ERROR", "Error", "error", "WARNING", "FATAL", "LOG:  duration", "lock", "Traceback", "503", "concurrency", "[alert]", "[crit]", "[emerg]", '" 500 ', '" 502 ', '" 504 ', " 500 ", "Internal Server Error"))]
             (logs_dir / f"{svc}.log").write_text("\n".join(lines[-4000:]))
         stack.stop()
         log("stack stopped; live healthy:", live_health())
