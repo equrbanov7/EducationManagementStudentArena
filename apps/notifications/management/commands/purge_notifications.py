@@ -24,7 +24,9 @@ Examples
     # Also purge READ notifications older than a year (opt-in):
     python manage.py purge_notifications --read-days 365 --commit
 
-Schedule via Celery beat / cron once validated in staging.
+The nightly automatic variant is the ``notifications.purge_old`` beat task
+(``apps/notifications/retention.py``, soft-deleted rows only by default); this
+command stays for ad-hoc / opt-in runs.
 """
 
 from __future__ import annotations
