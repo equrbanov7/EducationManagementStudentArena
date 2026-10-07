@@ -15,16 +15,24 @@
         bound = true;
         var d = cfg.dataset;
 
+        // Audit 2026-10-07: xəta mətni (Django choice/validator xətaları istifadəçi
+        // girişini əks etdirə bilər) innerHTML ilə YOX, textContent ilə yazılır.
         function showFormErrors(containerId, errors) {
             var container = document.getElementById(containerId);
-            var errorHtml = "<strong>" + d.i18nErrorsHeader + ":</strong><ul class=\"mb-0\">";
-            for (var field in errors) {
-                if (Object.prototype.hasOwnProperty.call(errors, field)) {
-                    errorHtml += "<li>" + errors[field][0] + "</li>";
-                }
-            }
-            errorHtml += "</ul>";
-            container.innerHTML = errorHtml;
+            if (!container) { return; }
+            container.textContent = "";
+            var header = document.createElement("strong");
+            header.textContent = (d.i18nErrorsHeader || "") + ":";
+            var list = document.createElement("ul");
+            list.className = "mb-0";
+            Object.keys(errors || {}).forEach(function (field) {
+                var messages = errors[field];
+                var item = document.createElement("li");
+                item.textContent = String((Array.isArray(messages) ? messages[0] : messages) || "");
+                list.appendChild(item);
+            });
+            container.appendChild(header);
+            container.appendChild(list);
             container.classList.remove("d-none");
         }
 
@@ -41,7 +49,11 @@
             var submitBtn = this.querySelector('button[type="submit"]');
             var originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + d.i18nAdding;
+            var spinner = document.createElement("i");
+            spinner.className = "fas fa-spinner fa-spin";
+            submitBtn.textContent = "";
+            submitBtn.appendChild(spinner);
+            submitBtn.appendChild(document.createTextNode(" " + (d.i18nAdding || "")));
 
             fetch(actionUrl, {
                 method: "POST",
