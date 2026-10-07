@@ -44,6 +44,10 @@ AI_ASSISTANT_LOG_MAX_CHARS = _env_int_setting("AI_ASSISTANT_LOG_MAX_CHARS", 8000
 # of returning "Docker sandbox is not available on this server".
 CODING_EXECUTION_BACKEND = os.getenv("CODING_EXECUTION_BACKEND", "auto").lower()
 
+# Docker sandbox konteynerinin istifadəçisi (``--user``). Default ``nobody``
+# (65534:65534); root (``0``/``root``) verilsə kod onu yox sayıb default-u işlədir.
+CODING_EXECUTION_DOCKER_USER = os.getenv("CODING_EXECUTION_DOCKER_USER", "65534:65534")
+
 # Piston endpoint. Defaults to the public emkc.org instance; in production
 # you should point this at a self-hosted instance to remove the public-API
 # rate limit (≈5 req/s) and to keep student code on infrastructure you control.

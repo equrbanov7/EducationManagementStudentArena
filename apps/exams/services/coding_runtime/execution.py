@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import uuid
 from pathlib import Path
 
 from django.conf import settings
@@ -94,9 +95,90 @@ def _ensure_docker_image(image):
 
 
 def _write_files(workspace, files):
+    # Konteyner NON-ROOT istifadəçi (``--user``) ilə işləyir: ``TemporaryDirectory``
+    # 0700 yaradılır, bind-mount sahib icazələrini saxlayır — oxuma icazəsi açılır
+    # (mount onsuz da ``:ro``-dur; məzmun tələbənin öz kodudur).
+    workspace.chmod(0o755)
     for item in files:
         path = workspace / item["name"]
         path.write_text(item.get("content", ""), encoding="utf-8")
+        path.chmod(0o644)
+
+
+#: Sandbox konteynerinin istifadəçisi — ``nobody`` (uid/gid 65534; alpine/debian
+#: image-lərinin hamısında var). ``settings.CODING_EXECUTION_DOCKER_USER`` ilə dəyişir,
+#: amma root (``0`` / ``root``) heç vaxt qəbul olunmur.
+DEFAULT_SANDBOX_USER = "65534:65534"
+#: Yetim konteynerləri (işçi prosesi ölübsə) əməliyyatçı süpürə bilsin:
+#: ``docker ps -aq --filter label=emsarena.code-runner | xargs docker rm -f``.
+SANDBOX_LABEL = "emsarena.code-runner=1"
+
+
+def _sandbox_user():
+    raw = str(getattr(settings, "CODING_EXECUTION_DOCKER_USER", "") or "").strip()
+    user = raw.split(":", 1)[0].strip()
+    if not raw or user in {"", "0", "root"}:
+        return DEFAULT_SANDBOX_USER
+    return raw
+
+
+def _docker_run_command(*, image, command, workspace, memory_limit_mb, container_name):
+    """``docker run`` argv-i — konteyner sərhədinin bütün məhdudiyyətləri burada.
+
+    Audit 2026-10-07: əvvəl root kimi, bütün default capability-lərlə və
+    adsız işləyirdi (timeout-da yalnız CLI prosesi ölür, konteyner qalırdı).
+    """
+    memory = f"{max(int(memory_limit_mb or 128), 16)}m"
+    return [
+        "docker",
+        "run",
+        "-i",
+        "--rm",
+        "--name",
+        container_name,
+        "--label",
+        SANDBOX_LABEL,
+        "--user",
+        _sandbox_user(),
+        "--cap-drop",
+        "ALL",
+        "--security-opt",
+        "no-new-privileges",
+        "--network",
+        "none",
+        "--memory",
+        memory,
+        "--memory-swap",
+        memory,
+        "--cpus",
+        "1",
+        "--pids-limit",
+        "64",
+        "--read-only",
+        "--tmpfs",
+        "/tmp:rw,exec,nosuid,nodev,size=128m,mode=1777",
+        "-v",
+        f"{workspace}:/workspace:ro",
+        "-w",
+        "/workspace",
+        image,
+        *command,
+    ]
+
+
+def _remove_container(container_name):
+    """Konteyneri öldür + sil (``docker rm -f``). Timeout-da ``subprocess.run`` yalnız
+    ``docker`` CLI-ni öldürür — ``--rm`` konteyneri isə sonsuz dövrlə işləməyə davam edirdi."""
+    try:
+        subprocess.run(  # nosec B603 - fixed argv, generated container name.
+            ["docker", "rm", "-f", container_name],
+            text=True,
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        logger.warning("Code sandbox container %s could not be removed: %s", container_name, exc)
 
 
 def _container_command(language, files):
@@ -215,29 +297,14 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
     with tempfile.TemporaryDirectory(prefix="emsarena-code-") as tmp:
         workspace = Path(tmp)
         _write_files(workspace, execution_files)
-        docker_command = [
-            "docker",
-            "run",
-            "-i",
-            "--rm",
-            "--network",
-            "none",
-            "--memory",
-            f"{max(int(memory_limit_mb or 128), 16)}m",
-            "--cpus",
-            "1",
-            "--pids-limit",
-            "64",
-            "--read-only",
-            "--tmpfs",
-            "/tmp:rw,exec,nosuid,size=128m",
-            "-v",
-            f"{workspace}:/workspace:ro",
-            "-w",
-            "/workspace",
-            image,
-            *command,
-        ]
+        container_name = f"emsarena-code-{uuid.uuid4().hex}"
+        docker_command = _docker_run_command(
+            image=image,
+            command=command,
+            workspace=workspace,
+            memory_limit_mb=memory_limit_mb,
+            container_name=container_name,
+        )
         start = time.perf_counter()
         execution_timeout = max(int(time_limit_seconds or 2), 1) + (8 if language in {"cpp", "java"} else 2)
         try:
@@ -251,6 +318,7 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
             )
         except subprocess.TimeoutExpired as exc:
             elapsed_ms = int((time.perf_counter() - start) * 1000)
+            _remove_container(container_name)
             timeout_error = clean_docker_stderr(exc.stderr)
             if timeout_error:
                 timeout_error = f"{timeout_error}\nExecution timed out."
@@ -262,6 +330,10 @@ def execute_code(*, language, files, stdin, time_limit_seconds, memory_limit_mb)
                 error=timeout_error,
                 execution_time_ms=elapsed_ms,
             )
+        except BaseException:
+            # Celery soft time limit / işçi dayandırılması və s. — CLI ölür, konteyner qalmasın.
+            _remove_container(container_name)
+            raise
 
     elapsed_ms = int((time.perf_counter() - start) * 1000)
     output = truncate_capture(completed.stdout)
