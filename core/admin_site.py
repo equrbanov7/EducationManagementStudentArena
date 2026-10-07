@@ -28,6 +28,7 @@ from core.admin_auth import (
     admin_verify_rate_limited,
     clear_admin_2fa_state,
     clear_admin_verify_rate_limit,
+    is_local_redirect_path,
     log_admin_security_event,
     mark_admin_2fa_pending,
     mark_admin_2fa_verified,
@@ -160,7 +161,9 @@ class EMSArenaAdminSite(admin.AdminSite):
         if not admin_2fa_pending_for_request(request):
             # Middleware əsas saytdan gələn yolu yadda saxlayıbsa ora qayıdırıq (2026-09-15).
             remembered = str(request.session.get(ADMIN_2FA_NEXT_URL_SESSION_KEY, "") or "")
-            next_url = remembered if remembered.startswith("/") else reverse("admin:index", current_app=self.name)
+            next_url = (
+                remembered if is_local_redirect_path(remembered) else reverse("admin:index", current_app=self.name)
+            )
             mark_admin_2fa_pending(request, next_url=next_url)
             try:
                 send_admin_otp_email(user, request=request)

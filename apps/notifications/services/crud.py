@@ -100,6 +100,33 @@ def create_notification_for_users(
         return InAppNotification.objects.bulk_create(notifications)
 
 
+def create_notifications(items) -> list[InAppNotification]:
+    """Fərqli mətnli bir neçə bildiriş — TƏK ``bypass_rls`` bloku + TƏK toplu INSERT.
+
+    ``items``: ``create_notification``-ın açar sözləri ilə dict-lər (``recipient``,
+    ``title``, ``message``, ``link``, ``notification_type``, ``metadata``,
+    ``organization``). Hər sətir ``create_notification``-ın yaradacağı ilə EYNİDİR;
+    fərq yalnız sorğu sayıdır (tutum 2026-10-07: jurnal yazısından sonra tələbə başına
+    4 ifadə — 40 tələbəlik qrupda 160 — gedirdi).
+    """
+    rows = [
+        InAppNotification(
+            recipient=item["recipient"],
+            organization_id=_resolve_organization_id(item.get("organization"), item.get("metadata")),
+            title=item["title"],
+            message=item.get("message", ""),
+            link=org_scoped_link(item.get("link", ""), item.get("organization")),
+            notification_type=item.get("notification_type", NotificationType.SYSTEM),
+            metadata=_serialize_metadata(item.get("metadata") or {}),
+        )
+        for item in items
+    ]
+    if not rows:
+        return []
+    with bypass_rls():
+        return InAppNotification.objects.bulk_create(rows)
+
+
 def delete_notification(*, notification: InAppNotification, user) -> None:
     """
     Soft-delete *notification* for *user*.

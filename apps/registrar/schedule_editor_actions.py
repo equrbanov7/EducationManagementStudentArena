@@ -224,7 +224,18 @@ def save_cell(*, actor, organization, group, period, data, request=None) -> dict
 
     subject = Subject.objects.filter(organization=organization, pk=str(data.get("subject_id") or "").strip()).first()
     instructor_id = str(data.get("instructor_id") or "").strip()
-    instructor = get_user_model().objects.filter(pk=instructor_id).first() if instructor_id else None
+    instructor = None
+    if instructor_id:
+        # Sec-audit 2026-10-07: jurnal sahibi yalnız bu təşkilatın AKTİV `grade.input` üzvü ola bilər.
+        # Əvvəl yoxlanmırdı — DB qoruyucusu (registrar_guard_active_member) rədd edir, cavab 500 olurdu;
+        # rəqəm olmayan id də 500 verirdi. İndi 400 + sahə xətası.
+        from apps.registrar import schedule_slot_teachers
+
+        pk = schedule_slot_teachers.user_pk(instructor_id)
+        if pk is None or pk not in schedule_slot_teachers.authorized_teacher_ids(organization.pk, {pk}):
+            message = pgettext(_CTX, "Slot yadda saxlanılmadı — məlumatları yoxlayın.")
+            raise schedule_editor.CellError("invalid", message, errors={"instructor_id": message})
+        instructor = get_user_model().objects.filter(pk=pk).first()
     lookup = {"actor": actor, "organization": organization, "group": group, "period": period, "subject": subject}
     slot_teacher = None
     if str(data.get("slot_instructor_id") or "").strip():

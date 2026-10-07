@@ -36,6 +36,16 @@ x-logging: &default-logging
     max-size: "10m"
     max-file: "3"
 
+# ─── Konteyner sərtləşdirməsi (təhlükəsizlik auditi 2026-10-07, AD-13) ──────
+# no-new-privileges: setuid/file-capability binarları ilə imtiyaz QAZANMAQ olmur
+# (root-la başlayıb su-exec/gosu ilə düşən postgres/redis/nginx-ə təsir etmir;
+# `docker exec -u 0` əməliyyatları da işləyir). Privileged cadvisor/piston istisnadır.
+# Non-root monitorinq image-lərinə əlavə olaraq cap_drop ALL (+ stateless olanlara
+# read_only). Hamısı cached prod image-ləri ilə lokal sınanıb; CI prod-smoke yığını
+# eyni faylı qaldırır.
+x-no-new-privileges: &no-new-privileges
+  - no-new-privileges:true
+
 # ─── Ortaq build tərifi (app / celery_worker / celery_beat eyni image) ──────
 x-app-build: &app-build
   context: .
@@ -281,6 +291,7 @@ services:
     # WAL bərpası). 60 s smart/fast shutdown-un bitməsinə imkan verir.
     stop_grace_period: 60s
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -326,6 +337,7 @@ services:
       - ./backups/postgres:/backups
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -385,6 +397,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -446,6 +459,7 @@ services:
     command: ["sh", "/etc/redis/entrypoint.sh"]
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -474,6 +488,8 @@ services:
   arp-agent:
     image: python:3.12-alpine
     command: ["python", "/agent/arp_agent.py"]
+    # Audit 2026-10-07: root lazım deyil — /proc/net/arp hamıya oxunaqlıdır, port > 1024.
+    user: "65534:65534"
     network_mode: host
     restart: unless-stopped
     volumes:
@@ -482,6 +498,9 @@ services:
       ARP_AGENT_BIND: ${ARP_AGENT_BIND:-172.18.0.1}
       ARP_AGENT_PORT: ${ARP_AGENT_PORT:-8953}
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -583,6 +602,7 @@ services:
     # (tests/test_infra_compose_config.py invariantı defoltları yoxlayır).
     stop_grace_period: ${APP_STOP_GRACE_PERIOD:-130s}
     logging: *default-logging
+    security_opt: *no-new-privileges
     # 2026-10-04 tutum auditi: konteynerin defolt `nofile` 1024 soft idi — replika başına ≈1000
     # eyni-anlı soket (WS + DB + Redis) tavanı hardware-dən çox əvvəl gəlirdi (5000 WS hədəfi).
     ulimits:
@@ -649,6 +669,7 @@ services:
     # SIGKILL olsa acks_late ilə task yenidən çatdırılır (ikiqat e-poçt/sweep).
     stop_grace_period: 300s
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -695,6 +716,7 @@ services:
     # SIGKILL olub 20 dəq sonra reaper ilə FAILED-ə düşürdü.
     stop_grace_period: 900s
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -730,6 +752,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -774,6 +797,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -813,6 +839,9 @@ services:
       - /:/host:ro
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -866,6 +895,11 @@ services:
       - alertmanager_data:/alertmanager
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
@@ -891,7 +925,9 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME:-15d}
-      - --web.enable-lifecycle
+      # Audit 2026-10-07: --web.enable-lifecycle SİLİNDİ — autentifikasiyasız POST /-/quit,
+      # /-/reload şəbəkədəki hər konteynerə açıq idi; deploy reload-u SIGHUP ilə edir
+      # (remote_deploy.sh reload_prometheus_config).
     ports:
       - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
     volumes:
@@ -912,6 +948,9 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -951,6 +990,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
@@ -1012,6 +1056,9 @@ services:
       - redis
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -1030,6 +1077,9 @@ services:
       - nginx
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -1049,6 +1099,9 @@ services:
       - pgbouncer
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
     deploy:
       resources:
         limits:
@@ -1079,6 +1132,11 @@ services:
       - ./docker/render-template.sh:/etc/blackbox_exporter/render-template.sh:ro
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp
     deploy:
       resources:
         limits:
@@ -1101,6 +1159,8 @@ services:
       - loki_data:/loki
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
+    cap_drop: [ALL]
     deploy:
       resources:
         limits:
@@ -1128,6 +1188,7 @@ services:
       - loki
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     deploy:
       resources:
         limits:
@@ -1208,9 +1269,13 @@ services:
   nginx:
     image: nginx:1.27-alpine
     container_name: emsarena-nginx
+    # Audit 2026-10-07: yalnız IPv4. `80:80` Docker-də [::]:80-i də açır; IPv4-only körpüyə
+    # IPv6 bağlantısını docker-proxy 172.18.0.1-dən ötürür → nginx `geo` və Django
+    # INTERNAL_NETWORKS müştərini «internal» sayır (şəbəkə zonası + /metrics/ /health/
+    # allow-u yan keçilir). Domenin yalnız A qeydi var; LAN 10.x IPv4-dür.
     ports:
-      - "80:80"
-      - "443:443"
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
     volumes:
       # 2026-10-04 tutum auditi: image-in əsas konfiqi (worker_connections 1024, fd limiti yox)
       # tutum tavanı idi — əsas konfiq də repodan gəlir (worker_rlimit_nofile + 8192 bağlantı).
@@ -1226,6 +1291,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     logging: *default-logging
+    security_opt: *no-new-privileges
     # 2026-10-04 tutum auditi: nginx worker-ləri də 1024 fd ilə başlayırdı (bax app).
     ulimits:
       nofile:

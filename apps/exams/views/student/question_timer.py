@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
+from apps.exams.features import exam_supervision_enabled
 from apps.exams.models import ExamAttempt
 from apps.exams.services.question_delivery import safe_delivered_question
 from apps.exams.services.question_timer import mark_question_seen
@@ -53,8 +54,20 @@ def question_seen(request, slug, attempt_id):
         user=request.user,
     )
     ensure_active_attempt_access(attempt, request.user, request=request)
+    # Təhlükəsizlik auditi 2026-10-07: POST yazı yolu ilə eyni pəncərə qaydası — vaxtı
+    # (deadline + grace) bitmiş, sweep-in hələ bağlamadığı cəhd burada bağlanır və vaxtlı
+    # sualın məzmunu çatdırılmır; nəzarət kilidi altında da (423) məzmun/taymer yoxdur.
+    # Müəllimin əl kilidində (dayandırma) saat dondurulur — POST yolu kimi bağlanmır.
+    supervision_on = exam_supervision_enabled()
+    manual_lock = supervision_on and attempt.supervision_manual_lock and attempt.supervision_status == "locked"
+    if not manual_lock:
+        attempt.expire_if_write_window_closed()
+    if supervision_on:
+        attempt.expire_if_resume_window_expired()
     if attempt.is_finished:
         return JsonResponse({"success": False, "error": "attempt_finished"}, status=409)
+    if supervision_on and attempt.supervision_status == "locked":
+        return JsonResponse({"success": False, "locked": True, "error": "supervision_locked"}, status=423)
 
     try:
         question_id = int(request.POST.get("question_id") or "")

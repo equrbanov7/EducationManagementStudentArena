@@ -3,6 +3,7 @@
 import io
 import os
 import re
+import warnings
 
 from django.conf import settings
 
@@ -40,6 +41,29 @@ def _ensure_tessdata_prefix() -> None:
             return
 
 
+#: Şəkil OCR-u üçün piksel tavanı (DOCX/vizual import yolları ilə eyni — 50 MP).
+OCR_MAX_IMAGE_PIXELS = 50_000_000
+
+
+#: OCR olunan səhifələrin sərt tavanı (``pdf_layout/ocr.py``-dakı ``_HARD_MAX_PAGES`` ilə eyni).
+OCR_HARD_MAX_PAGES = 100
+
+
+def _within_render_budget(document, dpi, max_pages) -> bool:
+    """Xref + elan olunan şəkil büdcəsi (``pdf_layout.limits``) — keçmirsə ``False``.
+
+    Səhifə ölçüsü burada rədd səbəbi DEYİL: DPI hər səhifə üçün ``adaptive_render_dpi`` ilə
+    büdcəyə endirilir (piksel ölçülü MediaBox-lu real skanlar da oxunur, bomba zərərsizdir)."""
+    from apps.exams.services.pdf_layout.limits import validate_embedded_budget
+
+    try:
+        validate_embedded_budget(document, page_limit=max_pages)
+    except ValueError as exc:
+        logger.warning("PDF OCR skipped — render budget exceeded: %s", exc)
+        return False
+    return True
+
+
 def _ocr_pdf_text(uploaded_file) -> str:
     """
     Skan edilmiş PDF-dən OCR ilə mətn çıxarır (PyMuPDF daxili Tesseract) və
@@ -66,7 +90,7 @@ def _ocr_pdf_text(uploaded_file) -> str:
     detect_highlight = getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT", True)
     try:
         dpi = max(300, int(getattr(settings, "EXAM_PDF_OCR_DPI", 300)))
-        max_pages = int(getattr(settings, "EXAM_PDF_OCR_MAX_PAGES", 100))
+        max_pages = min(OCR_HARD_MAX_PAGES, int(getattr(settings, "EXAM_PDF_OCR_MAX_PAGES", 100)))
         min_ratio = float(getattr(settings, "EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10))
     except (TypeError, ValueError):
         dpi, max_pages, min_ratio = 300, 100, 0.10
@@ -91,9 +115,28 @@ def _ocr_pdf_text(uploaded_file) -> str:
 
     try:
         with fitz.open(stream=data, filetype="pdf") as doc:
+            # Təhlükəsizlik auditi 2026-10-07: bu yol `pdf_layout`-un render büdcəsi
+            # rədd etdiyi PDF-lər üçün FALLBACK-dır — büdcə burada da tətbiq olunmasa,
+            # kiçik baytlı, nəhəng MediaBox-lu səhifə ≥300 DPI-də on GB-lıq pixmap-ə
+            # (OCR) çevrilir və worker-i OOM ilə öldürür.
+            if not _within_render_budget(doc, dpi, max_pages):
+                return ""
+            from apps.exams.services.pdf_layout.limits import _MAX_TOTAL_PIXELS, adaptive_render_dpi, render_pixels
+
+            rendered_pixels = 0
+            requested_dpi = dpi
             for index, page in enumerate(doc):
                 if index >= max_pages:
                     logger.info("PDF OCR truncated at %d pages (doc has %d).", max_pages, doc.page_count)
+                    break
+                dpi = adaptive_render_dpi(page, requested_dpi)
+                if dpi is None:
+                    logger.warning("PDF OCR page %d skipped — page too large to render safely.", index + 1)
+                    continue
+                zoom = dpi / 72.0
+                rendered_pixels += render_pixels(page, dpi)
+                if rendered_pixels > _MAX_TOTAL_PIXELS:
+                    logger.info("PDF OCR stopped at page %d — total render budget reached.", index + 1)
                     break
 
                 # OCR textpage (mətn + söz qutuları). İlk işləyən dili tap.
@@ -136,8 +179,16 @@ def _ocr_image_text(uploaded_file) -> str:
 
     try:
         uploaded_file.seek(0)
-        image = Image.open(uploaded_file)
-        image.load()
+        with warnings.catch_warnings():
+            # Təhlükəsizlik auditi 2026-10-07: Pillow-un default tavanı ~178 MP-dir
+            # (89 MP-dən yuxarı yalnız XƏBƏRDARLIQ). Ölçü `load()`-dan ƏVVƏL yoxlanılır:
+            # kiçik PNG nəhəng piksel sahəsi elan edib RAM + Tesseract CPU-nu tükədə bilər.
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            image = Image.open(uploaded_file)
+            width, height = image.size
+            if width <= 0 or height <= 0 or width * height > OCR_MAX_IMAGE_PIXELS:
+                raise ValueError(f"image dimensions over OCR budget: {width}x{height}")
+            image.load()
         uploaded_file.seek(0)
     except Exception as exc:
         logger.warning("Image OCR open failed for upload %s: %s", getattr(uploaded_file, "name", ""), exc)

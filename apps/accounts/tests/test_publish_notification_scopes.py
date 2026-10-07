@@ -107,7 +107,7 @@ class TargetListTest(_ScopesBase):
 class RecipientResolutionTest(_ScopesBase):
     def test_faculty_target_reaches_teachers_head_and_students(self):
         recipients = resolve_notification_recipients(
-            self.users["teaching_office_head"], CAPS, f"unit_{self.faculty.id}"
+            self.users["teaching_office_head"], CAPS, f"unit_{self.faculty.id}", organization=self.org
         )
         self.assertIsNotNone(recipients)
         ids = set(recipients.values_list("pk", flat=True))
@@ -117,22 +117,42 @@ class RecipientResolutionTest(_ScopesBase):
         self.assertNotIn(self.users["teaching_office_head"].pk, ids)
 
     def test_group_target_reaches_only_group_students(self):
-        recipients = resolve_notification_recipients(self.users["dean"], CAPS, f"unit_{self.group.id}")
+        recipients = resolve_notification_recipients(
+            self.users["dean"], CAPS, f"unit_{self.group.id}", organization=self.org
+        )
         self.assertEqual(set(recipients.values_list("pk", flat=True)), {self.users["student"].pk})
 
     def test_role_target_reaches_department_staff(self):
         recipients = resolve_notification_recipients(
-            self.users["teaching_office_head"], CAPS, f"role_exam_center_{self.org.id}"
+            self.users["teaching_office_head"], CAPS, f"role_exam_center_{self.org.id}", organization=self.org
         )
         self.assertEqual(set(recipients.values_list("pk", flat=True)), {self.users["chair_head"].pk})
 
     def test_unauthorised_actors_get_none(self):
-        self.assertIsNone(resolve_notification_recipients(self.users["teacher"], CAPS, f"unit_{self.faculty.id}"))
-        self.assertIsNone(resolve_notification_recipients(self.users["dean"], CAPS, f"unit_{self.other_faculty.id}"))
-        self.assertIsNone(resolve_notification_recipients(self.users["dean"], CAPS, f"role_exam_center_{self.org.id}"))
-        self.assertIsNone(resolve_notification_recipients(self.users["teaching_office_head"], CAPS, "unit_not-a-uuid"))
         self.assertIsNone(
-            resolve_notification_recipients(self.users["teaching_office_head"], CAPS, f"role_nope_{self.org.id}")
+            resolve_notification_recipients(
+                self.users["teacher"], CAPS, f"unit_{self.faculty.id}", organization=self.org
+            )
+        )
+        self.assertIsNone(
+            resolve_notification_recipients(
+                self.users["dean"], CAPS, f"unit_{self.other_faculty.id}", organization=self.org
+            )
+        )
+        self.assertIsNone(
+            resolve_notification_recipients(
+                self.users["dean"], CAPS, f"role_exam_center_{self.org.id}", organization=self.org
+            )
+        )
+        self.assertIsNone(
+            resolve_notification_recipients(
+                self.users["teaching_office_head"], CAPS, "unit_not-a-uuid", organization=self.org
+            )
+        )
+        self.assertIsNone(
+            resolve_notification_recipients(
+                self.users["teaching_office_head"], CAPS, f"role_nope_{self.org.id}", organization=self.org
+            )
         )
 
 
@@ -154,6 +174,7 @@ class AttachmentTest(_ScopesBase):
             },
         )
         request.user = self.users["teaching_office_head"]
+        request.organization = self.org
         with override_settings(MEDIA_ROOT=self.media_root):
             return publish_system_notification(request=request, capabilities=CAPS)
 

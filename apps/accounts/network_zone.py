@@ -108,9 +108,26 @@ def resolve_zone(request) -> str:
     return zone_for_ip(get_client_ip(request) or request.META.get("REMOTE_ADDR"))
 
 
+def _is_view_as(request) -> bool:
+    return bool(getattr(request, "is_view_as", False) and getattr(request, "real_user", None) is not None)
+
+
+def gate_actor(request):
+    """Qapının qiymətləndirdiyi hesab — view-as altında HƏDƏF deyil, ƏSL istifadəçi.
+
+    Təhlükəsizlik auditi 2026-10-07 (AUTH-01): ``ViewAsMiddleware`` bu middleware-dən
+    ƏVVƏL ``request.user``-i hədəflə əvəz edir. Qapı ``request.user``-ə baxanda
+    daxildə başladılmış view-as sessiyası (superadmin və ya inzibati aktor) kənar
+    zonadan işləməyə davam edirdi. Zona qaydası hesabın SAHİBİNƏ aiddir.
+    """
+    if _is_view_as(request):
+        return request.real_user
+    return getattr(request, "user", None)
+
+
 def account_kind(request) -> str:
-    """'anonymous' | 'student' | 'teacher' | 'staff' — aktiv üzvlüklərə görə."""
-    user = getattr(request, "user", None)
+    """'anonymous' | 'student' | 'teacher' | 'staff' — aktiv üzvlüklərə görə (view-as altında aktor)."""
+    user = gate_actor(request)
     if user is None or not getattr(user, "is_authenticated", False):
         return "anonymous"
     # Audit 2026-09-28 SA-04: profil rolu ``superadmin`` olan hesab da staff-dır
@@ -123,9 +140,15 @@ def account_kind(request) -> str:
     organization = getattr(request, "organization", None)
     if organization is not None and getattr(organization, "owner_id", None) == user.pk:
         return "staff"
-    memberships = getattr(request, "org_memberships", None)
+    # View-as altında ``org_memberships`` HƏDƏFİN üzvlükləridir — aktorunkunu təzədən oxu.
+    memberships = None if _is_view_as(request) else getattr(request, "org_memberships", None)
     if memberships is None:
-        memberships = list(user.memberships.filter(is_active=True).select_related("role"))
+        from core.rls import bypass_rls
+
+        # Sorğu ``user`` ilə açıq süzülür; RLS konteksti (view-as altında hədəfin org-u)
+        # aktorun başqa org-dakı üzvlüyünü gizlədib onu «tələbə» kimi buraxmasın.
+        with bypass_rls():
+            memberships = list(user.memberships.filter(is_active=True).select_related("role"))
     names = set()
     for membership in memberships:
         raw = getattr(getattr(membership, "role", None), "name", "") or ""
@@ -153,7 +176,7 @@ def _is_open_path(path: str) -> bool:
 def _is_superadmin(request) -> bool:
     from core.permissions import is_superadmin_user
 
-    return is_superadmin_user(getattr(request, "user", None))
+    return is_superadmin_user(gate_actor(request))
 
 
 def _is_logout_path(path: str) -> bool:

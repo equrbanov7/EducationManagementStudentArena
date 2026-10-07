@@ -1,4 +1,13 @@
+/* Standalone profil səhifələrinin (embed, nəticə detalı, post idarəsi) idxal manifesti.
+   Kabinet qabığı BU FAYLI İŞLƏTMİR — eyni siyahını birbaşa `<link>`-lərlə verir
+   (`accounts/profile/_section_assets.html`, perf 2026-10-07); siyahılar
+   `test_profile_section_assets.py`-da tutuşdurulur. Sidebar hissələri əvvəl sidebar.css-in
+   içində `@import` olunurdu — eyni kaskad sırası ilə buraya çəkilib (iç-içə zəncir yox). */
 @import url("profile/base.css");
+@import url("profile/sidebar_groups.css");
+@import url("profile/sidebar_filter.css");
+@import url("profile/sidebar_rail.css");
+@import url("profile/sidebar_icons.css");
 @import url("profile/sidebar.css");
 @import url("profile/layout.css?v=20260912-1");
 @import url("profile/common.css?v=20260912-1");

@@ -64,6 +64,7 @@ from apps.exams.services.journal_sync import (  # noqa: F401
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,
 )
+from apps.exams.services.open_attempts import user_has_open_exam_attempt  # noqa: F401
 from apps.exams.services.question_bank_attach import (  # noqa: F401
     accessible_banks,
 )
@@ -73,6 +74,7 @@ from apps.exams.services.result_calculation import (  # noqa: F401
 from apps.exams.services.result_release import (  # noqa: F401
     attempt_answer_key_hidden,
     exam_answers_release_locked,
+    secure_answer_key_hidden,
 )
 from apps.exams.services.review_visibility import (  # noqa: F401
     resolve_exam_attempt_name_visibility,
@@ -124,6 +126,8 @@ __all__ = [
     "ensure_can_manage_exam_rooms",
     "attempt_answer_key_hidden",
     "exam_answers_release_locked",
+    "secure_answer_key_hidden",
+    "user_has_open_exam_attempt",
     "is_exam_center_user",
     "calculate_test_attempt_result",
     "generate_exam_statistics_summary",

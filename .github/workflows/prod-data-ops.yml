@@ -80,7 +80,9 @@ jobs:
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı
         if: github.event.inputs.command == 'seed_staff_roster'
         env:
@@ -195,7 +197,7 @@ jobs:
           fi
       - name: 📦 Şifrəli hesabat/parol artifaktı
         if: always() && steps.creds.outputs.saved != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: staff-roster-encrypted
           path: ${{ runner.temp }}/staff-out/

@@ -1,5 +1,4 @@
 import json
-from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 from urllib.parse import parse_qs, urlencode, urlparse
 
@@ -10,16 +9,20 @@ from django.core.paginator import Paginator
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
-from apps.exams.services.access_policy import SECURE_EXAM_CATEGORIES
 from apps.exams.services.question_snapshot import delivered_question_render
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
-from apps.exams.services.result_release import attempt_answer_key_hidden, exam_answers_release_locked
+from apps.exams.services.result_release import (
+    FINAL_CENTER_REVIEW_SECONDS,
+    attempt_answer_key_hidden,
+    exam_answers_release_locked,
+    final_center_review_seconds_left,
+    secure_answer_key_hidden,
+)
 from apps.exams.services.supervision import attach_attempt_interventions, get_attempt_intervention
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from core.search_text import tolerant_q
@@ -34,7 +37,7 @@ from ._helpers import (
     safe_same_origin_redirect_path,
 )
 
-FINAL_RESULT_REVIEW_SECONDS = 5 * 60
+FINAL_RESULT_REVIEW_SECONDS = FINAL_CENTER_REVIEW_SECONDS
 
 
 def _is_final_exam(exam):
@@ -56,23 +59,6 @@ def _is_profile_results_request(request, return_to):
     return any(f"section={section}" in return_to for section in _PROFILE_CABINET_SECTIONS)
 
 
-def _hide_secure_test_answer_key(exam, *, is_profile_results):
-    """Final/midterm testin cavab açarı tələbəyə göstərilmirmi.
-
-    Təhlükəsizlik auditi 2026-10-05: qərar əvvəl yalnız ``from_section`` / ``return_to``
-    (tələbənin idarə etdiyi parametrlər) ilə verilirdi — parametrsiz URL midterm
-    açarını açırdı. İndi midterm (və digər təhlükəsiz kateqoriyalar) HƏR halda gizli.
-    Final: mərkəzin server tərəfindən 5 dəqiqə ilə məhdudlaşan baxışında açar qəsdən
-    görünür (sonra sessiya bağlanır, ``result_release``), kabinetdə isə gizlidir.
-    """
-    if getattr(exam, "exam_type", "") != "test":
-        return False
-    category = getattr(exam, "exam_type_extended", "")
-    if category == "final":
-        return bool(is_profile_results)
-    return category in SECURE_EXAM_CATEGORIES
-
-
 def _final_entry_url():
     return reverse("exams:final_exam_entry")
 
@@ -80,14 +66,6 @@ def _final_entry_url():
 def _final_result_timeout_url(request):
     separator = "&" if request.GET.urlencode() else "?"
     return f"{request.get_full_path()}{separator}final_timeout=1"
-
-
-def _final_result_remaining_seconds(attempt):
-    finished_at = getattr(attempt, "finished_at", None)
-    if not finished_at:
-        return FINAL_RESULT_REVIEW_SECONDS
-    expires_at = finished_at + timedelta(seconds=FINAL_RESULT_REVIEW_SECONDS)
-    return max(0, int((expires_at - timezone.now()).total_seconds()))
 
 
 def _format_score_delta(value):
@@ -169,14 +147,18 @@ def exam_result(request, slug, attempt_id):
     answers_release_locked = exam_answers_release_locked(exam)
     # Audit 2026-09-28 EX28-03: cəhd haqqı qalıbsa açar gizli (verdikt/bal görünür).
     answer_key_hidden = attempt_answer_key_hidden(attempt, user=request.user)
-    hide_test_answer_correctness = _hide_secure_test_answer_key(exam, is_profile_results=is_profile_results) or (
-        getattr(exam, "exam_type", "") == "test" and answers_release_locked
-    )
+    # Təhlükəsizlik auditi 2026-10-05 / 2026-10-07: final/midterm açarı serverdə, kateqoriyaya
+    # görə gizlədilir — test variantları VƏ yazılı imtahanın «ideal cavab» nümunəsi (əvvəl yazılı
+    # midterm-in ideal cavabı təhvildən dərhal sonra göstərilirdi).
+    secure_key_hidden = secure_answer_key_hidden(attempt, is_profile_results=is_profile_results)
+    is_test_exam = getattr(exam, "exam_type", "") == "test"
+    hide_test_answer_correctness = is_test_exam and (secure_key_hidden or answers_release_locked)
+    ideal_answer_hidden = secure_key_hidden or answer_key_hidden or answers_release_locked
     final_result_remaining_seconds = None
     final_result_timeout_url = ""
 
     if is_final_center_result:
-        final_result_remaining_seconds = _final_result_remaining_seconds(attempt)
+        final_result_remaining_seconds = final_center_review_seconds_left(attempt)
         final_result_timeout_url = _final_result_timeout_url(request)
         if request.GET.get("final_timeout") == "1" or final_result_remaining_seconds <= 0:
             logout(request)
@@ -379,6 +361,7 @@ def exam_result(request, slug, attempt_id):
             "hide_test_answer_correctness": hide_test_answer_correctness,
             "answers_release_locked": answers_release_locked,
             "answer_key_hidden": answer_key_hidden,
+            "ideal_answer_hidden": ideal_answer_hidden,
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,

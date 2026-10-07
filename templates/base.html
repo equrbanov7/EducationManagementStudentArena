@@ -172,7 +172,8 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
     <!-- Bootstrap 5 JS -->
     <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 
-    <script src="{% url 'javascript-catalog' %}"></script>
+    {# Perf 2026-10-07: `jsi18n_src` = /jsi18n/?l=<dil>&v=<kataloq hash-i> — 1 il immutable (core/jsi18n.py) #}
+    <script src="{% if jsi18n_src %}{{ jsi18n_src }}{% else %}{% url 'javascript-catalog' %}{% endif %}"></script>
 
     <!-- Sənin JS-lərin -->
     <!-- Universal AJAX-safe init + event delegation (EMSReady / EMSDelegate).

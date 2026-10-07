@@ -307,19 +307,34 @@ def save_component_scores(
             )
         return {"written": 0, "rejected": 0} if report else 0
 
+    # Tutum 2026-10-07: «oxu → toplu yaz» (``save_marks`` naxışı). Əvvəl hər xana üçün
+    # mövcud bal SELECT + ``update_or_create`` (SELECT FOR UPDATE + INSERT/UPDATE) +
+    # audit üçün tələbə SELECT-i gedirdi — 40 tələbəlik midterm yazısı ~420 sorğu.
+    # Açılış sətri ``FOR UPDATE`` ilə kilidlənir: eyni açılışın yazıları ardıcıllaşır
+    # (toplu INSERT yarışı / toplu UPDATE-lərin fərqli sıra ilə kilid tutması yoxdur;
+    # kilid sırası: açılış → komponent → qeydiyyat → xana, bax ``correction_target_locks``).
+    type(offering).objects.select_for_update().filter(pk=offering.pk).exists()
     component_query = AssessmentComponent.objects.filter(offering=offering)
-    enrollment_query = offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED)
+    enrollment_query = offering.enrollments.filter(status=offering.enrollments.model.Status.ENROLLED).select_related(
+        "student"
+    )
     if require_all:
         component_query = component_query.select_for_update()
-        enrollment_query = enrollment_query.select_for_update()
+        enrollment_query = enrollment_query.select_for_update(of=("self",))
     valid_components = {str(c.id): c for c in component_query}
     valid_enrollments = {str(e.id): e for e in enrollment_query}
+    existing_query = ComponentScore.objects.filter(
+        organization=offering.organization,
+        component__in=valid_components.values(),
+        enrollment__in=valid_enrollments.values(),
+    )
     if require_all:
-        list(
-            ComponentScore.objects.select_for_update()
-            .filter(component__in=valid_components.values(), enrollment__in=valid_enrollments.values())
-            .values_list("pk", flat=True)
-        )
+        existing_query = existing_query.select_for_update()
+    # (component_id, enrollment_id) → mövcud sətir | yeni (hələ yazılmamış) sətir | None (silinəcək).
+    state = {(cs.component_id, cs.enrollment_id): cs for cs in existing_query} if entries else {}
+    fresh = set()  # bu çağırışda yaradılan hədəflər (2 saat pəncərəsi onlara aid deyil)
+    to_update = {}  # mövcud sətirlər (hədəf → sətir) — update_or_create-in yeniləmə qolu
+    to_delete = set()
     written = 0
     processed = 0
     rejected = 0
@@ -363,11 +378,13 @@ def save_component_scores(
                         code="component_score_batch_rejected",
                     )
                 continue
-            existing_query = ComponentScore.objects.filter(component=component, enrollment=enrollment)
-            if require_all:
-                existing_query = existing_query.select_for_update()
-            existing = existing_query.first()
-            if not bypass_edit_window and existing is not None and (now - existing.created_at) > mark_edit_window():
+            existing = state.get(target)
+            if (
+                not bypass_edit_window
+                and existing is not None
+                and target not in fresh
+                and (now - existing.created_at) > mark_edit_window()
+            ):
                 if require_all:
                     raise ValidationError(
                         "Komponent balının redaktə müddəti bitib.",
@@ -378,7 +395,12 @@ def save_component_scores(
             raw = entry.get("score")
             if raw in (None, ""):
                 if existing is not None:
-                    existing.delete()
+                    if target in fresh:
+                        fresh.discard(target)
+                    else:
+                        to_delete.add(existing.pk)
+                        to_update.pop(target, None)
+                    state[target] = None
                     audit_changes.append(_component_change(component, enrollment, old_score, None))
                 processed += 1
                 continue
@@ -401,12 +423,21 @@ def save_component_scores(
                     rejected += 1
                     continue
                 score = max(Decimal("0"), min(score, Decimal(component.max_score)))
-            ComponentScore.objects.update_or_create(
-                organization=offering.organization,
-                component=component,
-                enrollment=enrollment,
-                defaults={"score": score, "entered_by": by_user},
-            )
+            if existing is None:
+                # ``update_or_create``-in yaratma qolu (sətir yox idi və ya bu paketdə silindi).
+                state[target] = ComponentScore(
+                    organization_id=offering.organization_id,
+                    component=component,
+                    enrollment=enrollment,
+                    score=score,
+                    entered_by=by_user,
+                )
+                fresh.add(target)
+            else:
+                existing.score = score
+                existing.entered_by = by_user
+                if target not in fresh:
+                    to_update[target] = existing
             if old_score != score:
                 audit_changes.append(_component_change(component, enrollment, old_score, score))
                 from apps.registrar import journal_notifications as jn
@@ -415,6 +446,12 @@ def save_component_scores(
                 notify_events.append({"enrollment": enrollment, "kind": kind, "score": score, "label": component.name})
             written += 1
             processed += 1
+        _flush_component_scores(
+            to_delete=to_delete,
+            to_create=[state[target] for target in fresh],
+            to_update=list(to_update.values()),
+            now=now,
+        )
     if require_all and processed != len(entries):
         raise ValidationError(
             "Komponent balları paketinin hamısı yazılmadı.",
@@ -435,6 +472,22 @@ def save_component_scores(
 
         _tx.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
     return {"written": written, "rejected": rejected} if report else written
+
+
+def _flush_component_scores(*, to_delete, to_create, to_update, now):
+    """Toplu yazı: silinənlər → yeni sətirlər (bir INSERT) → mövcud sətirlər (bir UPDATE).
+
+    ``update_or_create`` mövcud sətri HƏR dəfə yenidən yazırdı (bal dəyişməsə də —
+    ``entered_by``/``updated_at``); bu davranış saxlanılır, sadəcə bir sorğu ilə.
+    ``bulk_update`` ``auto_now``-u özü qoymur — ``updated_at`` burada təyin olunur."""
+    if to_delete:
+        ComponentScore.objects.filter(pk__in=to_delete).delete()
+    if to_create:
+        ComponentScore.objects.bulk_create(to_create)
+    if to_update:
+        for score in to_update:
+            score.updated_at = now
+        ComponentScore.objects.bulk_update(to_update, ["score", "entered_by", "updated_at"])
 
 
 def _parse_finite(raw):

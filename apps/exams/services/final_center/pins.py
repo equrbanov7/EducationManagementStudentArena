@@ -17,6 +17,7 @@ from datetime import timedelta
 from hashlib import sha256
 
 from django.conf import settings
+from django.contrib.auth import load_backend
 from django.contrib.auth.hashers import check_password, make_password
 from django.db.models import F
 from django.utils import timezone
@@ -282,11 +283,28 @@ def equalize_verification_timing(raw_pin: str) -> None:
     check_password(raw_pin or "", _DUMMY_HASH)
 
 
+#: Final girişi sessiyanı bu backend ilə açır (``views/student/final_center.py`` — ``login(..., backend=...)``).
+FINAL_ENTRY_LOGIN_BACKEND = "apps.accounts.backends.EmailOrUsernameBackend"
+
+
+def final_entry_login_allowed(user) -> bool:
+    """PIN girişi üçün hesab qapısı — sessiyanı açan backend-in ÖZ ``user_can_authenticate`` yoxlaması.
+
+    Auditi 2026-10-07 AUTH-03: ``login(request, user, backend=...)`` ``authenticate()``-dən keçmir, ona görə
+    backend-in qapısı (``is_active`` + ``access_state`` staged/archived) bu yolda işləmirdi; həlledicilər yalnız
+    ``is_active`` baxırdı, arxiv (məzun/xaric) hesabda isə o QƏSDƏN True qalır. Backend sətir yolu ilə yüklənir —
+    ``exams`` → ``accounts`` statik importu (modul dövrü) yaranmır.
+    """
+    return bool(user is not None and load_backend(FINAL_ENTRY_LOGIN_BACKEND).user_can_authenticate(user))
+
+
 __all__ = [
+    "FINAL_ENTRY_LOGIN_BACKEND",
     "PinHashBudget",
     "check_pin_hash",
     "decrypt_ticket_pin",
     "equalize_verification_timing",
+    "final_entry_login_allowed",
     "generate_pin_value",
     "pin_cipher_matches",
     "register_ticket_pin_failure",

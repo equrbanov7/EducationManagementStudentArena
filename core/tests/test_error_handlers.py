@@ -220,7 +220,12 @@ class SecurityHeadersTest(TestCase):
         resp = self.client.get("/ping/")
 
         self.assertEqual(resp["Referrer-Policy"], "strict-origin-when-cross-origin")
-        self.assertEqual(resp["Permissions-Policy"], "camera=(), geolocation=(), microphone=()")
+        policy = resp["Permissions-Policy"]
+        self.assertTrue(policy.startswith("camera=(), geolocation=(), microphone=()"), policy)
+        # Təhlükəsizlik auditi 2026-10-07: istifadə olunmayan güclü API-lər də bağlıdır.
+        for feature in ("payment", "usb", "serial", "hid", "bluetooth", "display-capture"):
+            self.assertIn(f"{feature}=()", policy)
+        self.assertNotIn("fullscreen=()", policy)  # imtahan nəzarəti tam ekran istəyir
         self.assertEqual(resp["Cross-Origin-Resource-Policy"], "same-origin")
         self.assertEqual(resp["Cross-Origin-Opener-Policy"], "same-origin")
 

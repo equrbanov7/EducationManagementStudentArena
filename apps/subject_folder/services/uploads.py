@@ -10,13 +10,13 @@ yalnız ``original_name`` sahəsinə yazılır.
 from __future__ import annotations
 
 import hashlib
-import mimetypes
 import os
 import unicodedata
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from core.download_types import content_type_for_name
 from core.upload_security import (
     DEFAULT_ALLOWED_MIME_TYPES,
     randomize_uploaded_filename,
@@ -97,32 +97,6 @@ def sha256_of(uploaded) -> str:
     except Exception:  # pragma: no cover
         pass
     return digest.hexdigest()
-
-
-#: Brauzerdə aktiv məzmun kimi işlənə bilən tiplər — endirmədə ümumi ikili tipə endirilir.
-_ACTIVE_CONTENT_TYPES = frozenset(
-    {
-        "text/html",
-        "application/xhtml+xml",
-        "image/svg+xml",
-        "text/xml",
-        "application/xml",
-        "text/javascript",
-        "application/javascript",
-        "application/x-javascript",
-    }
-)
-
-
-def content_type_for_name(name: str) -> str:
-    """Audit 2026-09-28 SF-3: MIME klientin bəyanından yox, UZANTIDAN çıxarılır.
-
-    Aktiv məzmun (HTML/SVG/XML/JS) və naməlum uzantı → ``application/octet-stream``.
-    """
-    guessed = (mimetypes.guess_type(f"x{extension_of(name or '')}")[0] or "").lower()
-    if not guessed or guessed in _ACTIVE_CONTENT_TYPES:
-        return "application/octet-stream"
-    return guessed[:120]
 
 
 def prepare_upload(uploaded, *, allowed_extensions, max_mb: int, image_only: bool = False) -> dict:

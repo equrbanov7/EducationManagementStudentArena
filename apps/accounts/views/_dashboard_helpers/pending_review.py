@@ -85,6 +85,10 @@ def _collect_pending_review_items(
             .filter(Q(checked_by_teacher=False) | Q(checked_by_teacher=True, teacher_checked_at__gte=review_cutoff))
             .exclude(exam__exam_type="test")
             .select_related("exam", "user", "exam__author", "exam__course")
+            # Ad-görünürlüyü qərarı ``attempt.exam.organization``-u oxuyur: əvvəl hər
+            # gözləyən cəhd üçün ayrıca təşkilat SELECT-i idi (32 cəhd → +32 sorğu).
+            # Prefetch — distinct təşkilatlar üçün TƏK sorğu (geniş sətir JOIN-siz).
+            .prefetch_related("exam__organization")
         )
         search_q = tolerant_q(search_query, ("exam__title", "exam__course__title"))
         if search_q is not None:

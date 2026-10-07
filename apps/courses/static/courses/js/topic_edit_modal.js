@@ -37,19 +37,25 @@
         }
         bound = true;
 
+        // Audit 2026-10-07: xəta mətni (Django choice/validator xətaları istifadəçi
+        // girişini əks etdirə bilər) innerHTML ilə YOX, textContent ilə yazılır.
         function showFormErrors(containerId, errors) {
             var container = document.getElementById(containerId);
             if (!container) { return; }
-            var errorHtml = "<strong>" + d.i18nErrorsHeader + ":</strong><ul class=\"mb-0\">";
-            for (var field in errors) {
-                if (Object.prototype.hasOwnProperty.call(errors, field)) {
-                    var messages = errors[field];
-                    var msg = (Array.isArray(messages) && messages[0]) ? messages[0] : d.i18nError;
-                    errorHtml += "<li>" + msg + "</li>";
-                }
-            }
-            errorHtml += "</ul>";
-            container.innerHTML = errorHtml;
+            container.textContent = "";
+            var header = document.createElement("strong");
+            header.textContent = (d.i18nErrorsHeader || "") + ":";
+            var list = document.createElement("ul");
+            list.className = "mb-0";
+            Object.keys(errors || {}).forEach(function (field) {
+                var messages = errors[field];
+                var msg = (Array.isArray(messages) && messages[0]) ? messages[0] : d.i18nError;
+                var item = document.createElement("li");
+                item.textContent = String(msg || "");
+                list.appendChild(item);
+            });
+            container.appendChild(header);
+            container.appendChild(list);
             container.classList.remove("d-none");
         }
 
@@ -62,7 +68,7 @@
                 var errContainer = document.getElementById("topicEditErrors");
                 if (errContainer) {
                     errContainer.classList.add("d-none");
-                    errContainer.innerHTML = "";
+                    errContainer.textContent = "";
                 }
 
                 setTimeout(function () {
@@ -100,7 +106,11 @@
             var submitBtn = this.querySelector('button[type="submit"]');
             var originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + d.i18nUpdating;
+            var spinner = document.createElement("i");
+            spinner.className = "fas fa-spinner fa-spin";
+            submitBtn.textContent = "";
+            submitBtn.appendChild(spinner);
+            submitBtn.appendChild(document.createTextNode(" " + (d.i18nUpdating || "")));
 
             EMSCore.fetchJSON(actionUrl, { method: "POST", body: formData })
                 .then(function (data) {
