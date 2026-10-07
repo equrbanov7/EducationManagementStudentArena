@@ -263,3 +263,51 @@ class AnswerIndexHygieneTests(TestCase):
         # Oxu / CASCADE yolları unikal kompozitlərlə indeksli qalır (prefiks = attempt_id / examanswer_id).
         self.assertTrue(any("UNIQUE" in d and "(attempt_id, question_id)" in d for d in answer.values()))
         self.assertTrue(any("UNIQUE" in d and "(examanswer_id, examquestionoption_id)" in d for d in options.values()))
+
+
+class OverdueCandidateSearchTests(_Base):
+    """İlkin namizəd axtarışı join-siz (2 sorğu) və köhnə SQL filtri ilə eyni çoxluğu verir."""
+
+    def test_two_step_search_matches_the_sql_narrow(self):
+        from apps.exams.domain.attempt_deadline import lazy_expiry_cutoff
+        from apps.exams.services.attempts import _narrow_overdue_candidates, _overdue_candidate_ids
+
+        now = timezone.now()
+        with bypass_rls():
+            ended = Exam.objects.create(
+                title="Ended",
+                author=self.teacher,
+                organization=self.org,
+                is_active=True,
+                total_duration_minutes=600,
+                end_datetime=now - timedelta(minutes=30),
+            )
+            untimed = Exam.objects.create(
+                title="Untimed", author=self.teacher, organization=self.org, is_active=True, total_duration_minutes=0
+            )
+            rows = [
+                (self.exam, 70, "in_progress", False),  # vaxtı bitib → namizəd
+                (self.exam, 5, "in_progress", False),  # hələ vaxtı var
+                (ended, 5, "draft", False),  # imtahanın end_datetime-ı keçib → namizəd
+                (untimed, 500, "in_progress", False),  # müddətsiz — bu sweep-in işi deyil
+            ]
+            trial_owner = User.objects.create_user("bgcap_trial", "bgcap_trial@example.com", "StrongPass123!")
+            attempts = []
+            for index, (exam, minutes_ago, status, is_trial) in enumerate(rows):
+                attempt = ExamAttempt.objects.create(user=self.students[index % 3], exam=exam, status=status)
+                ExamAttempt.objects.filter(pk=attempt.pk).update(
+                    started_at=now - timedelta(minutes=minutes_ago), is_trial=is_trial
+                )
+                attempts.append(attempt)
+            trial = ExamAttempt.objects.create(user=trial_owner, exam=self.exam, status="in_progress")
+            ExamAttempt.objects.filter(pk=trial.pk).update(started_at=now - timedelta(minutes=90), is_trial=True)
+
+            cutoff = lazy_expiry_cutoff()
+            with CaptureQueriesContext(connection) as ctx:
+                fast = sorted(_overdue_candidate_ids(ExamAttempt.objects.all(), cutoff))
+            narrow = sorted(_narrow_overdue_candidates(ExamAttempt.objects.all(), cutoff).values_list("pk", flat=True))
+
+        self.assertEqual(fast, narrow)
+        self.assertEqual(fast, sorted([attempts[0].pk, attempts[2].pk]))
+        self.assertEqual(len(ctx.captured_queries), 2)
+        self.assertNotIn("JOIN", ctx.captured_queries[0]["sql"], "açıq cəhdlər exams_exam join-i olmadan oxunmalıdır")

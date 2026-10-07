@@ -102,6 +102,7 @@ def finish_attempts_under_row_lock(
     action: Callable[[ExamAttempt], bool],
     scope: Callable[[], AbstractContextManager] | None = None,
     time_budget: float | None = None,
+    candidates: Callable[[object], list] | None = None,
 ) -> int:
     """Namizədləri bir-bir sətir kilidi altında yenidən oxuyub ``action`` tətbiq et (P2-6).
 
@@ -123,13 +124,20 @@ def finish_attempts_under_row_lock(
     ``time_budget`` (s) — verilibsə hər cəhddən SONRA yoxlanır: büdcə bitibsə
     qalan namizədlər növbəti icraya qalır (ən azı bir cəhd həmişə işlənir ki,
     irəliləyiş olsun). Namizədlər ``pk`` sırası ilə — köhnə cəhdlər əvvəl.
+
+    ``candidates(queryset)`` — verilibsə ilkin ID siyahısını ``narrow`` əvəzinə o qurur
+    (məs. planlayıcının yanlış qiymətləndirdiyi join-dən qaçmaq üçün); kilid altındakı
+    təkrar yoxlama yenə ``narrow`` ilədir.
     """
     scope = scope or nullcontext
     deadline = time.monotonic() + time_budget if time_budget is not None else None
     # ID-lər əvvəlcədən materiallaşdırılır: hər cəhd öz tranzaksiyasında
     # işlənir, açıq server-side kursor + daxili atomic bloklar qarışmasın.
     with scope():
-        candidate_ids = list(narrow(queryset).order_by("pk").values_list("pk", flat=True))
+        if candidates is not None:
+            candidate_ids = sorted(candidates(queryset))
+        else:
+            candidate_ids = list(narrow(queryset).order_by("pk").values_list("pk", flat=True))
     finished = 0
     for index, attempt_id in enumerate(candidate_ids):
         if index and deadline is not None and time.monotonic() >= deadline:
