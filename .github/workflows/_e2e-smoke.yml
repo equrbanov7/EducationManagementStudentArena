@@ -62,13 +62,13 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: 🔧 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: 🏗️ Load production image from cache
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           file: docker/Dockerfile.prod
@@ -159,7 +159,7 @@ jobs:
       # Install Python + Playwright for the E2E test runner.
       # Only the Chromium browser is installed to keep install time short.
       - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ inputs.python-version }}
 
@@ -194,13 +194,16 @@ jobs:
 
       - name: 📦 Upload E2E artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: e2e-playwright-results
           path: |
             test-results/
             playwright-report/
           if-no-files-found: ignore
+          # Playwright trace-ləri sorğu/cavab başlıqlarını (sessiya kukiləri daxil) saxlayır —
+          # repo defoltu 90 gün yerinə qısa (audit 2026-10-07).
+          retention-days: 7
 
       # Always dump container logs and tear down, even on failure.
       - name: 📋 Dump container logs

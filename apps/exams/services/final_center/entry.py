@@ -36,7 +36,13 @@ from core.audit import log_action
 from core.constants import AuditAction
 from core.rls import bypass_rls
 
-from .pins import PinHashBudget, pin_cipher_matches, register_ticket_pin_failure, verify_ticket_pin
+from .pins import (
+    PinHashBudget,
+    final_entry_login_allowed,
+    pin_cipher_matches,
+    register_ticket_pin_failure,
+    verify_ticket_pin,
+)
 
 logger = logging.getLogger("exams.final_center.entry")
 
@@ -139,7 +145,8 @@ def validate_entry(request, username: str, raw_pin: str, *, budget=None):
         return _fail(ERROR_INVALID)
 
     user = User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
-    if user is None or not user.is_active:
+    # Auditi 2026-10-07 AUTH-03: girişi bağlanmış (staged/archived) hesab bilet PIN-i ilə də girmir.
+    if not final_entry_login_allowed(user):
         return _fail(ERROR_INVALID)
 
     # Public pre-auth axınında aktiv tenant yoxdur. Bypass yalnız artıq

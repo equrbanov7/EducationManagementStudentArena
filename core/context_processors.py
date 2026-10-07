@@ -27,6 +27,8 @@ from django.conf import settings
 from django.templatetags.static import static
 from django.utils.translation import pgettext, pgettext_lazy
 
+from core.jsi18n import jsi18n_url
+
 # Registered as a literal so makemessages extracts the default brand name into
 # the "brand" context; the runtime pgettext(...) below then resolves the active
 # translation for the configured SITE_BRAND_NAME (az/en/ru/tr).
@@ -197,4 +199,6 @@ def feature_flags(request):
         # brand-neutral fallback. Avoids hardcoding a vendor inbox in templates.
         "contact_public_email": getattr(settings, "CONTACT_PUBLIC_EMAIL", ""),
         "contact_support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", ""),
+        # Perf 2026-10-07: dil + kataloq hash-i ilə versiyalı `/jsi18n/` (1 il immutable).
+        "jsi18n_src": jsi18n_url(),
     }

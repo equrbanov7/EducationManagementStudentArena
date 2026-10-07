@@ -51,6 +51,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Təhlükəsizlik auditi 2026-10-07: əvvəl top-level `permissions` yox idi — açıq
+# icazə verməyən hər job (o cümlədən prod serverdəki self-hosted `deploy-production`)
+# repo defoltu olan GITHUB_TOKEN-i alırdı (köhnə repolarda read/write-all). İndi
+# defolt yalnız oxumadır; əlavə icazə lazım olan job-lar (unit-tests-311 PR şərhi,
+# container-scan SARIF, secret-scan) onu job səviyyəsində açıq istəyir.
+permissions:
+  contents: read
+
 # ─────────────────────────────────────────────────────────────────────────
 # JOBS — each delegates to a focused reusable workflow
 # ─────────────────────────────────────────────────────────────────────────
@@ -104,10 +112,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: 🐍 Setup Python 3.12
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
 
@@ -118,7 +126,7 @@ jobs:
           python -m pip install "coverage==${ver}"
 
       - name: 📥 Download shard coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           pattern: coverage-data-3.12-shard-*
           path: coverage-data
@@ -134,7 +142,7 @@ jobs:
           coverage xml -o coverage.xml
 
       - name: 📤 Upload combined coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
           name: coverage-report-combined
@@ -365,7 +373,10 @@ jobs:
       DEPLOY_TIMEOUT_SECONDS: "300"
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          # Prod hostda token diskdə qalmasın — deploy checkout-dan sonra git auth istəmir.
+          persist-credentials: false
 
       - name: 🚢 Deploy (docker-compose, in place)
         run: |

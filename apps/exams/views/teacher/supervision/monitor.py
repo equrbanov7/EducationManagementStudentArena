@@ -17,8 +17,9 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.features import disabled_supervision_status, exam_supervision_enabled
-from apps.exams.models import ExamAttempt, SupervisionIncident
+from apps.exams.models import ExamAttempt
 from apps.exams.services.supervision import (
+    STUDENT_REPORTABLE_EVENT_TYPES,
     get_attempt_supervision_status,
     log_supervision_incident,
 )
@@ -115,9 +116,10 @@ def log_incident_api(request, attempt_id):
     event_type = body.get("event_type", "")
     metadata = body.get("metadata", {})
 
-    # Validate event type
-    valid_types = {c[0] for c in SupervisionIncident.EVENT_TYPE_CHOICES}
-    if event_type not in valid_types:
+    # Validate event type — təhlükəsizlik auditi 2026-10-07: yalnız brauzerin özünün
+    # müşahidə etdiyi növlər; sistem/müəllim hadisələri (teacher_resumed, auto_submitted …)
+    # tələbə tərəfindən yazıla bilməz (saxta nəzarət tarixçəsi).
+    if not isinstance(event_type, str) or event_type not in STUDENT_REPORTABLE_EVENT_TYPES:
         return JsonResponse({"error": "Invalid event type."}, status=400)
 
     # EXAM-P1-10: per-attempt throttle — bir cəhd üçün incident selini kəs.

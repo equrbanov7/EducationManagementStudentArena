@@ -13,7 +13,10 @@ from __future__ import annotations
 import csv
 import io
 
+from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext
+
+from core.upload_ooxml import validate_ooxml_expansion
 
 from . import spec
 from .spec import SHEET_NAME, columns, header_index, normalize_header
@@ -22,6 +25,10 @@ _CTX = "student_intake"
 
 #: Yüklənən faylın yuxarı həddi (bir qəbul siyahısı üçün bol-bol kifayətdir).
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+#: `.xlsx` paketinin AÇILMIŞ ölçüsü (2000 sətirlik siyahı ~1–2 MB açılır).
+#: Təhlükəsizlik auditi 2026-10-07: `read_only` rejim belə `sharedStrings.xml`-i tam
+#: yaddaşa yığır — 5 MB-lıq fayl GB-larla açılıb veb worker-i OOM edə bilirdi.
+MAX_EXPANDED_XLSX_BYTES = 40 * 1024 * 1024
 #: Bir faylda emal olunan maksimum tələbə sətri.
 MAX_ROWS = 2000
 #: Qəbul olunan uzantılar.
@@ -110,6 +117,18 @@ def _read_xlsx(payload: bytes, *, index=None, required=None, sheet_name=None) ->
         raise IntakeFileError(
             "intake_xlsx_unsupported",
             pgettext(_CTX, "Bu serverdə .xlsx oxunmur — faylı CSV kimi yadda saxlayıb yenidən yükləyin."),
+        ) from None
+    try:
+        validate_ooxml_expansion(payload, max_expanded_bytes=MAX_EXPANDED_XLSX_BYTES)
+    except ValidationError as exc:
+        if exc.code == "invalid_archive":
+            raise IntakeFileError(
+                "intake_file_unreadable",
+                pgettext(_CTX, "Fayl oxunmadı — zədəli və ya dəstəklənməyən Excel faylıdır."),
+            ) from None
+        raise IntakeFileError(
+            "intake_file_too_large",
+            pgettext(_CTX, "Fayl çox böyükdür (maksimum 5 MB)."),
         ) from None
     try:
         workbook = load_workbook(io.BytesIO(payload), read_only=True, data_only=True)

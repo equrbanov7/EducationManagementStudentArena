@@ -22,7 +22,7 @@ Modules:
 from .academic_results import academic_filter_options, count_academic_items
 from .assigned_tasks import _collect_assigned_tasks
 from .constants import SUBMISSION_DATE_ORDER_CHOICES
-from .evaluated_review import _collect_evaluated_review_items
+from .evaluated_review import _collect_evaluated_review_items, fill_evaluated_test_scores
 from .formatters import (
     _build_student_group_map_and_available,
     _format_score_display,
@@ -56,4 +56,5 @@ __all__ = [
     "_collect_pending_answer_items",
     "_collect_pending_review_items",
     "_collect_evaluated_review_items",
+    "fill_evaluated_test_scores",
 ]

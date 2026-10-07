@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.organizations.public import members_covering_unit
+from core.download_types import content_type_for_name
 from core.upload_security import validate_zip_archive
 
 from ..constants import (
@@ -91,7 +92,7 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
             file=uploaded,
             original_name=(getattr(uploaded, "name", "") or "sənəd")[:255],
             size=int(getattr(uploaded, "size", 0) or 0),
-            content_type=(getattr(uploaded, "content_type", "") or "")[:120],
+            content_type=content_type_for_name(getattr(uploaded, "name", "")),
             uploaded_by=uploaded_by,
         )
         attachment.full_clean(exclude=["event"])

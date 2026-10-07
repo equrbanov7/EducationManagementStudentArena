@@ -33,6 +33,18 @@ def canonical_identity(value: object) -> str:
     return unicodedata.normalize("NFKC", str(value or "")).strip().lower()
 
 
+def login_rate_identity(value: object) -> str:
+    """Login limit vedrələrinin istifadəçi adı açarı — giriş axtarışı ilə EYNİ kanonik forma.
+
+    Təhlükəsizlik auditi 2026-10-07 (AUTH-02): açar əvvəl yalnız trim + lower idi, giriş isə
+    ``canonical_identity`` (NFKC) ilə axtarılır. Unicode-ekvivalent yazılışlar EYNİ hesaba
+    düşür, amma ayrı vedrə alırdı — hesab səviyyəli limit (SA-03) belə yayınırdı.
+    """
+    from core.rate_limit import normalize_rate_identity
+
+    return normalize_rate_identity(canonical_identity(value))
+
+
 def email_is_placeholder(email: object) -> bool:
     """``…@placeholder.invalid`` — real əlaqə kanalı DEYİL.
 
@@ -178,6 +190,7 @@ __all__ = [
     "canonical_identity",
     "canonical_identity_queryset",
     "email_is_placeholder",
+    "login_rate_identity",
     "REQUEST_USER_LOGIN_CHECKED_ATTR",
     "login_blocked_access_states",
     "request_user_login_blocked",

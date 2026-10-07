@@ -453,8 +453,8 @@
                                     </div>
                                 </div>
                             {% else %}
-                                {# EXAM-P0-05: ideal cavab imtahan pəncərəsi bağlanana qədər açılmır #}
-                                {% if delivered.correct_answer and not answers_release_locked and not answer_key_hidden %}
+                                {# EXAM-P0-05 / EX28-03 / secaudit 2026-10-07: ideal cavab final/midterm-də serverin açar qaydası ilə gizlidir #}
+                                {% if delivered.correct_answer and not ideal_answer_hidden %}
                                     <div class="mt-4">
                                         <span class="response-label text-success mb-2">
                                             <i class="fas fa-check-double"></i> {% trans "label_ideal_answer_example" context "exams.template.student_exam_result" %}:

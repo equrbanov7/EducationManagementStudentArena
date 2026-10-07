@@ -54,7 +54,7 @@ def send_journal_events(*, offering, events) -> int:
 
     ``events``: list of ``{"enrollment", "kind", ...payload}``. Eyni tələbənin
     bütün hadisələri bir bildirişdə birləşdirilir."""
-    from apps.notifications.public import create_notification
+    from apps.notifications.public import create_notifications
 
     by_student: dict = {}
     for event in events or []:
@@ -64,21 +64,21 @@ def send_journal_events(*, offering, events) -> int:
         if line:
             by_student[enrollment.student_id]["lines"].append(line)
 
-    sent = 0
     subject_name = offering.subject.name
     link = f"{reverse('accounts:profile')}?section=my-journal"
-    for data in by_student.values():
-        lines = data["lines"]
-        if not lines:
-            continue
-        title = pgettext("registrar.notify", "Elektron jurnal — %(subject)s") % {"subject": subject_name}
-        create_notification(
-            recipient=data["enrollment"].student,
-            title=title,
-            message="\n".join(dict.fromkeys(lines)),  # təkrarları at, sıranı saxla
-            link=link,
-            organization=offering.organization,
-            metadata={"event": "journal_update", "offering_id": str(offering.id)},
-        )
-        sent += 1
-    return sent
+    title = pgettext("registrar.notify", "Elektron jurnal — %(subject)s") % {"subject": subject_name}
+    # Bütün tələbələrin bildirişi TƏK toplu INSERT-də (əvvəl tələbə başına 4 ifadə).
+    items = [
+        {
+            "recipient": data["enrollment"].student,
+            "title": title,
+            "message": "\n".join(dict.fromkeys(data["lines"])),  # təkrarları at, sıranı saxla
+            "link": link,
+            "organization": offering.organization,
+            "metadata": {"event": "journal_update", "offering_id": str(offering.id)},
+        }
+        for data in by_student.values()
+        if data["lines"]
+    ]
+    create_notifications(items)
+    return len(items)

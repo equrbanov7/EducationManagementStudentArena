@@ -7,32 +7,112 @@ limitinə tam dayanmışdı və yeni bölmə əlavə edilə bilmirdi. Blok burad
 qabıq isə tək `«include»` ilə onu gətirir.
 
 MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
-* Şərtlər `allowed_sections` ÜZƏRİNDƏDİR, `active_section` üzərində DEYİL: SPA
-  panel səhifə yeniləmədən istənilən icazəli bölməyə keçir.
+* Bu şablon BİRBAŞA include OLUNMUR — `{% profile_section_css %}` tag-ı
+  (`apps/accounts/views/profile/section_assets.py`) onu render edib linkləri
+  `data-ems-css-order` (bu fayldakı sıra) ilə verir; AJAX fraqmenti eyni siyahını
+  `assets.css` açarında qaytarır və `section_assets.js` çatışmayanları swap-dan
+  ƏVVƏL, kaskad sırasına uyğun yerə qoşur (perf 2026-10-07).
+* BÖLMƏ qrupları `asset_sections` ilə şərtlənir = RENDER OLUNAN bölmə + onun
+  `SECTION_ASSET_BORROWS`-dakı (icazəli) qonşuları. Əvvəl `allowed_sections` idi:
+  tələbə kabinetinin ilk açılışında açılmamış 25+ bölmənin üslubu yüklənirdi.
+  Bölmə BAŞQA bölmənin faylındakı qaydanı işlədirsə — həmin bölməni borc siyahısına
+  yazın (yoxsa SPA keçidində üslubsuz qalar).
+* QABIQ qrupları (`allowed_sections`): qabıqdakı modallar (my-courses / my-exams)
+  və superadmin üslubları — onlar istənilən bölmədən görünür.
 * Kaskad sırası MƏNALIDIR — qonşu şərhlərdə hansı faylın hansından SONRA
   gəlməli olduğu yazılıb; sıranı dəyişməyin.
 {% endcomment %}
 {% load static %}
     {% comment %}
-        Bölmə CSS-i İCAZƏLİ bölmələrə bağlanıb (aktiv bölməyə YOX): SPA panel
-        səhifə yeniləmədən istənilən icazəli bölməyə keçə bilər, ona görə şərt
-        `allowed_sections` üzərindədir. Əvvəllər bu blokdakı 31 faylın hamısı
-        rolundan asılı olmayaraq HƏR istifadəçiyə göndərilirdi — tələbə
-        superadmin, imtahan sehrbazı və registrar idarəetmə üslublarını da
-        yükləyirdi (2026-07-31 auditi).
+        Tarixçə: 2026-07-31 auditinə qədər bu blokdakı 31 faylın hamısı rolundan
+        asılı olmayaraq HƏR istifadəçiyə göndərilirdi; sonra `allowed_sections`-a,
+        2026-10-07-dən isə render olunan bölməyə (`asset_sections`) bağlandı.
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}?v=20260926-account">
+    {% comment %}
+        `accounts/css/profile.css` İDXAL MANİFESTİDİR (35 `@import`, sidebar.css-in içində daha 4):
+        brauzer onu yükləyib parse etməyincə 39 faylın heç birini kəşf etmir — 3 səviyyəli
+        render-bloklayan zəncir (mobil şəbəkədə hər səviyyə ≈ 1 RTT). Kabinet bu siyahını
+        BİRBAŞA `<link>`-lərlə, EYNİ sırada verir (kaskad eynidir) — paralel kəşf olunur.
+        Standalone səhifələr (embed, nəticə detalı, post idarəsi) `profile.css`-i işlətməkdə
+        davam edir. Siyahı ilə manifest `test_profile_section_assets.py`-da tutuşdurulur.
+        Admin/müəllim bölmələrinin faylları (adlar öz bölməsinə bağlıdır, selektor auditi
+        2026-10-07) yalnız həmin bölmə render olunanda gəlir.
+    {% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/base.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_groups.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_filter.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_rail.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar_icons.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/layout.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity_aside.css' %}?v=20260907-redesign">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/list_cards.css' %}?v=20260907-createbtn">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part1.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/posts/_part2.css' %}">
+    {% comment %}QABIQ: `.tx-toast` qabıqdakı `my_exams_dashboard.js`-dən də gəlir.{% endcomment %}
+    {% if 'my-exams' in allowed_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_exams.css' %}?v=20260930-resp">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_courses.css' %}?v=20260928-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/courses.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_exams.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/assigned_courses.css' %}?v=20260912-1">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260827-legacy-grade">
+    {% if 'pending-post-approvals' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_post_approvals.css' %}?v=20260912-1">
+    {% endif %}
+    {% if 'pending-review' in asset_sections or 'pending-answers' in asset_sections or 'review-results' in asset_sections or 'pending-post-approvals' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/pending_review.css' %}">
+    {% endif %}
+    {% if 'role-assignment' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/role_assignment.css' %}">
+    {% endif %}
+    {% if 'permission-editor' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/permission_editor.css' %}">
+    {% endif %}
+    {% if 'manage-roles' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/manage_roles.css' %}">
+    {% endif %}
+    {% if 'org-overview' in asset_sections or 'org-members' in asset_sections or 'org-roles' in asset_sections or 'org-structure' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections or 'student-organization-management' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_management.css' %}">
+    {% endif %}
+    {% if 'org-structure' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/org_unit_detail.css' %}">
+    {% endif %}
+    {% if 'student-organization-management' in asset_sections or 'student-organization-request' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_org_management.css' %}">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications.css' %}?v=20260908-files">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_rows.css' %}?v=20260908-files">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/notifications_modal.css' %}?v=20260930-resp">
+    {% if 'publish-notification' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/publish_notification.css' %}?v=20260908-scopes">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/publish_notification_preview.css' %}?v=20260908-scopes">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/edit_profile.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/shortcut_sections.css' %}">
+    {% if 'superadmin-contact-messages' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part1.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/contact_messages/_part2.css' %}">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/responsive.css' %}">
     {% comment %}«Ana səhifə» — default bölmə, HƏR üzvdə var (şərtsiz yüklənir).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/dashboard.css' %}?v=20260925-cards">
     <link rel="stylesheet" href="{% static 'css/blogCard.css' %}">
     <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    {% if 'statistics' in allowed_sections %}
+    {% if 'statistics' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/statistics.css' %}?v=20260613-1">
     {% endif %}
+    {% comment %}QABIQ: `.status-badge` / `.empty-state` / `.cabinet-module-*` qaydaları
+    superadmin-in BAŞQA bölmələrində də (təşkilat modulları, nəticələr…) işlənir.{% endcomment %}
     {% if 'superadmin-users' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_user_management.css' %}">
     {% endif %}
-    {% if 'rim-center' in allowed_sections or 'people-teachers' in allowed_sections or 'people-students' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-intake' in allowed_sections or 'student-admission' in allowed_sections %}
+    {% if 'rim-center' in asset_sections or 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'teacher-intake' in asset_sections or 'student-intake' in asset_sections or 'student-admission' in asset_sections %}
     {% comment %}⚠️ YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl səth
     (panel/axtarış/siyahı), sonra modallar, ən sonda «Yeni hesab» axını —
     üçüncü fayl ilk ikisinin başlıq və kart qaydalarını qəsdən tamamlayır.{% endcomment %}
@@ -40,12 +120,15 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part2.css' %}?v=20260930-resp">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/rim_center/_part3.css' %}?v=20260912-1">
     {% endif %}
+    {% comment %}QABIQ: `.info-grid` «Profili redaktə et»-də də işlənir.{% endcomment %}
     {% if 'superadmin-ai' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/superadmin_ai_settings.css' %}">
     {% endif %}
-    {% if 'assigned-exams' in allowed_sections %}
+    {% if 'assigned-exams' in asset_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/student_exam_list.css' %}">
     {% endif %}
+    {% comment %}QABIQ: kurs / imtahan yaratma modalları `profile.html`-də qabıqdadır
+    (istənilən bölmədən açılır) — üslubları icazə ilə qalır.{% endcomment %}
     {% if 'my-courses' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'courses/css/course_create.css' %}?v=20260629">
     <link rel="stylesheet" href="{% static 'courses/css/create_course_modal.css' %}">
@@ -56,34 +139,29 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
     {% endif %}
-    {% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
+    {% if 'category-management' in asset_sections or 'create-category' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/category_management.css' %}?v=20260930-resp">
     {% endif %}
-    {% if 'my-results' in allowed_sections %}
     {% comment %}
-      «Nəticələrim»in akademik kartı.  ⚠️ Bu fayl yarandığı gündən (5086a02e)
-      HEÇ BİR şablondan linklənməmişdi — yəni `.result-academic-*` /
-      `.result-legacy-*` markup-ı canlıda tamamilə ÜSLUBSUZ render olunurdu
-      (40 selektorun heç biri başqa CSS-də təkrarlanmır, brauzerdə yoxlanılıb:
-      panelin fonu şəffaf, `--ems-danger-strong` xəbərdarlığı isə qara idi).
-      Bölmə ilə şərtlənir — qonşu bölmə CSS-ləri ilə eyni konvensiya.
+      «Nəticələrim»in akademik kartı (`my_results_academic.css`) yuxarıda, `profile.css`
+      manifestinin yerindədir. Əvvəl burada (fərqli `?v=` ilə) İKİNCİ nüsxə də linklənirdi
+      → fayl iki dəfə yüklənirdi; 40 selektorun heç biri başqa CSS-də təkrarlanmır, ona
+      görə kaskad mövqeyi nəticəyə təsir etmir (2026-10-07).
     {% endcomment %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_results_academic.css' %}?v=20260901-notice">
-    {% endif %}
-    {% if 'my-subjects' in allowed_sections %}
+    {% if 'my-subjects' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects.css' %}?v=20260912-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/my_subjects_cards.css' %}?v=20260912-1">
     {% endif %}
-    {% if 'my-transcript' in allowed_sections %}
+    {% if 'my-transcript' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/transcript.css' %}?v=20260912-1">
     {% endif %}
-    {% if 'overall-academic' in allowed_sections %}
+    {% if 'overall-academic' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/overall_academic.css' %}?v=20260720-4">
     {% endif %}
-    {% if 'academic-records' in allowed_sections %}
+    {% if 'academic-records' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/academic_records.css' %}?v=20260910-1">
     {% endif %}
-    {% if 'people-teachers' in allowed_sections or 'people-students' in allowed_sections %}
+    {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections %}
     {% comment %}Kataloq üslubu modul ölçüsü qaydasına (SOFT_CAP=600) görə üçə
     bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: hero/filtr/toplu
     əməl → cədvəl/boş vəziyyət → dialoq/çekmecə/responsiv, sonra analitika.{% endcomment %}
@@ -92,7 +170,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_directory_dialogs.css' %}?v=20261003-block">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/people_analytics.css' %}?v=20260830-1">
     {% endif %}
-    {% if 'people-students' in allowed_sections %}
+    {% if 'people-students' in asset_sections %}
     {% comment %}Tələbə idarəetmə çekməcəsi — YALNIZ tələbə kataloqunda mənalıdır
     (müəllimin akademik qeydi yoxdur). Markup-ın özü əlavə olaraq
     `people_section.can_manage_academic` qapısındandır; burada isə üslub
@@ -108,7 +186,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     bölmə-xüsusi düzüm TƏK fayldadır və şablonun ÖZÜ onu yükləyir (AJAX swap-da
     da gəlsin deyə). Köhnə ikinci fayl (`…_dialog.css`) ləğv edildi — dialoq
     üslubu artıq `ems_ui/overlay.css`-dədir.{% endcomment %}
-    {% if 'workload-distribution' in allowed_sections or 'my-workload' in allowed_sections %}
+    {% if 'workload-distribution' in asset_sections or 'my-workload' in asset_sections %}
     {% comment %}Dərs yükü — üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600)
     görə ikiyə bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır:
     əvvəl səth (kartlar, cədvəl, qalıq zolaqları), sonra üst qat (modallar,
@@ -116,7 +194,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_base.css' %}?v=20260902-1">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_dialog.css' %}?v=20260902-1">
     {% endif %}
-    {% if 'syllabus-list' in allowed_sections or 'syllabus-review' in allowed_sections %}
+    {% if 'syllabus-list' in asset_sections or 'syllabus-review' in asset_sections %}
     {% comment %}Sillabus üslub dəsti modul ölçüsü qaydasına (SOFT_CAP=600) görə
     bölünüb; YÜKLƏNMƏ ARDICILLIĞI KASKADA görə saxlanılmalıdır: əvvəl ORTAQ
     komponentlər (base → dialog → list → drawer), sonra ekran-xüsusi qatlar.
@@ -128,7 +206,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_list.css' %}?v=20260930-resp">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_drawer.css' %}?v=20260830-3">
     {% endif %}
-    {% if 'syllabus-list' in allowed_sections %}
+    {% if 'syllabus-list' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_panels.css' %}?v=20260925-hours">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_aside.css' %}?v=20260830-3">
@@ -137,19 +215,26 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_carryover.css' %}?v=20260831-carry">
     {% endif %}
-    {% if 'syllabus-review' in allowed_sections %}
+    {% if 'syllabus-review' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review_panel.css' %}?v=20260830-3">
     {% endif %}
-    {% if 'my-appeals' in allowed_sections or 'appeal-stats' in allowed_sections %}
+    {% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part1.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part2b.css' %}?v=20260908-calm">
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
-    {% if 'my-journal' in allowed_sections or 'journal-close' in allowed_sections %}
+    {% comment %}RESP 2026-09-30: analitika cədvəlləri də `journal-grid-wrap`/`journal-grid`
+    işlədir (müstəqil `registrar/analytics.html` də journal.css yükləyir) — jurnal bölməsi
+    olmayan rolda (İM rəhbəri) cədvəl sürüşmə qabı olmadan mobil ekranın sağından
+    kəsilirdi. Əvvəl analitika qrupunda İKİNCİ nüsxə idi; 2026-10-07-dən hər fayl
+    şablonda BİR dəfədir (kaskad sırası = `data-ems-css-order`).{% endcomment %}
+    {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections or 'analytics' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
+    {% endif %}
+    {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_student.css' %}?v=20260719-term2">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20260914-a11y">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_list.css' %}?v=20260930-resp">
@@ -158,24 +243,27 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     ilə EYNİ stil faylı (apps/registrar/static/registrar/css/syllabus_view.css).{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     {% endif %}
-    {% if 'my-schedule' in allowed_sections or 'schedule-manage' in allowed_sections %}
+    {% if 'my-schedule' in asset_sections or 'schedule-manage' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/schedule.css' %}?v=20260909-select">
     {% comment %}Həftəlik matris — «Dərs cədvəli» (yalnız-oxu) ilə «Cədvəl
     idarəetməsi» (redaktor) ARASINDA ORTAQ grid stili.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/schedule_matrix.css' %}?v=20260909-matrix">
     {% endif %}
-    {% if 'schedule-manage' in allowed_sections %}
+    {% if 'schedule-manage' in asset_sections %}
     {% comment %}Redaktorun öz xromu (həftə pilləri, dialoq sahələri, park
     siyahısı) — matris CSS-indən SONRA yüklənir (kaskad).{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/schedule_editor.css' %}?v=20260930-resp">
     {% endif %}
-    {% if 'student-intake' in allowed_sections or 'teacher-intake' in allowed_sections %}
+    {% comment %}Qəbul paneli (`student-admission`, ekran 08) də bu fayl-yükləmə üslubunu
+    işlədir və `student_services.css`-dən ƏVVƏL gəlməlidir (kaskad) — əvvəl orada ikinci
+    nüsxə idi, indi şablonda BİR dəfədir.{% endcomment %}
+    {% if 'student-intake' in asset_sections or 'teacher-intake' in asset_sections or 'student-admission' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260911-1">
     {% endif %}
-    {% if 'academic-calendar' in allowed_sections %}
+    {% if 'academic-calendar' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/calendar.css' %}?v=20260705-1">
     {% endif %}
-    {% if 'applications' in allowed_sections %}
+    {% if 'applications' in asset_sections %}
     {% comment %}«Müraciətlərim» — panelin öz stili; detal/modal/dialoq faylları
     əsas fayldan SONRA gəlir (eyni `--apx-*` custom property-lərini işlədir).
     `applications_modal.css` `_detail`-dən də SONRA olmalıdır: detal panelinin
@@ -186,47 +274,38 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_modal.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260909-empty">
     {% endif %}
-    {% if 'analytics' in allowed_sections %}
-    {% if 'my-journal' not in allowed_sections and 'journal-close' not in allowed_sections %}
-    {% comment %}RESP 2026-09-30: analitika cədvəlləri `journal-grid-wrap`/`journal-grid`
-    işlədir (müstəqil `registrar/analytics.html` də journal.css yükləyir). Jurnal
-    bölməsi olmayan rolda (İM rəhbəri) bu fayl gəlmirdi — cədvəl sürüşmə qabı
-    olmadan mobil ekranın sağından kəsilirdi.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
-    {% endif %}
+    {% if 'analytics' in asset_sections %}
+    {% comment %}`journal.css` yuxarıda (jurnal qrupunda) analitika üçün də gəlir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
     {% endif %}
     {% comment %}Tədris şöbəsi (ekran 01–04) — YALNIZ düzüm; kart/cədvəl/badge/KPI
     ORTAQ `ems_ui` qatındadır (qabıqda bir dəfə yüklənir).{% endcomment %}
-    {% if 'org-structure-tree' in allowed_sections or 'chair-profile' in allowed_sections or 'programs-registry' in allowed_sections or 'subject-catalog' in allowed_sections %}
+    {% if 'org-structure-tree' in asset_sections or 'chair-profile' in asset_sections or 'programs-registry' in asset_sections or 'subject-catalog' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office.css' %}?v=20260908-tree">
     {% endif %}
     {% comment %}«İxtisas haqqında» çekmecəsi (2026-09-09) — ad klikləndikdə açılır.{% endcomment %}
-    {% if 'programs-registry' in allowed_sections %}
+    {% if 'programs-registry' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/programs_detail.css' %}?v=20260909-1">
     {% endif %}
     {% comment %}Mərhələ 2 (ekran 05/06/07) — plan redaktoru, qrup reyestri,
     semestr açılışı. Yenə YALNIZ düzüm; komponentlər `ems_ui`-dədir.{% endcomment %}
-    {% if 'curriculum-editor' in allowed_sections or 'groups-registry' in allowed_sections or 'semester-opening' in allowed_sections %}
+    {% if 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/teaching_office_plan.css' %}?v=20261003-ready">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_groups.css' %}?v=20260908-move">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/teaching_office_group_split.css' %}?v=20260920-split">
     {% endif %}
     {% comment %}Mərhələ 4 (ekran 12/13/15/17) — dərs yükü zənciri. YALNIZ düzüm
     (kart sırası, yekun zolağı, risk siyahısı); komponentlər `ems_ui`-dədir.{% endcomment %}
-    {% if 'workload-center' in allowed_sections or 'workload-visa' in allowed_sections or 'workload-approval' in allowed_sections or 'workload-overview' in allowed_sections or 'my-workload' in allowed_sections or 'workload-distribution' in allowed_sections %}
+    {% if 'workload-center' in asset_sections or 'workload-visa' in asset_sections or 'workload-approval' in asset_sections or 'workload-overview' in asset_sections or 'my-workload' in asset_sections or 'workload-distribution' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/workload_chain.css' %}?v=20260903-4">
     {% endif %}
     {% comment %}Mərhələ 3 (ekran 08/09) — Tələbə Xidmətləri Mərkəzi. YALNIZ
     düzüm; stepper/KPI/cədvəl/çekmecə/dialoq `ems_ui`-dədir. Qəbul paneli
-    əlavə olaraq mövcud `student_intake.css` fayl-yükləmə üslubunu işlədir,
-    ona görə o fayl ondan ƏVVƏL yüklənməlidir (kaskad).{% endcomment %}
-    {% if 'student-admission' in allowed_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/student_intake.css' %}?v=20260911-1">
-    {% endif %}
-    {% if 'student-admission' in allowed_sections or 'student-registry' in allowed_sections %}
+    əlavə olaraq `student_intake.css` fayl-yükləmə üslubunu işlədir — o fayl
+    yuxarıda (intake qrupunda) ondan ƏVVƏL yüklənir (kaskad).{% endcomment %}
+    {% if 'student-admission' in asset_sections or 'student-registry' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_services.css' %}?v=20261003-block">
     {% endif %}
-    {% if 'student-registry' in allowed_sections %}
+    {% if 'student-registry' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/student_activation.css' %}?v=20261003-page">
     {% endif %}

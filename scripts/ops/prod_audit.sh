@@ -128,6 +128,10 @@ LOG=$($COMPOSE logs --no-log-prefix --tail 20000 nginx 2>/dev/null)
 echo '```'
 echo "$LOG" | grep -oE '" [0-9]{3} ' | sort | uniq -c | sort -rn | head -8 | sed 's/^/status /'
 echo "-- 5xx nümunələri:"; echo "$LOG" | grep -E '" 5[0-9]{2} ' | tail -5 | cut -c1-180
+# Şəbəkə zonası yalnız nginx real müştəri IP-sini görəndə işləyir: Kerio DNAT mənbəni 10.x/172.x-ə
+# yenidən yazırsa, internetdən gələn hər kəs «daxili» sayılar (superadmin/heyət LAN qaydası yan keçilir).
+echo "-- müştəri IP sinfi (sətrin ilk sahəsi; özəl ≫ ictimai və ictimai 0-dırsa DNAT mənbəni yenidən yazır):"
+echo "$LOG" | awk '{print $1}' | awk -F. '{ if ($1=="10" || ($1=="172" && $2>=16 && $2<=31) || ($1=="192" && $2=="168") || $1=="127") print "özəl"; else if ($0 ~ /^[0-9]+\./) print "ictimai"; else print "digər" }' | sort | uniq -c
 # 4xx haradan gəlir (bot/skaner, yoxsa real klient xətası)? Yol (rəqəm/UUID/sorğu maskalanmış) + status.
 echo "-- 4xx yol üzrə (ilk 12):"; echo "$LOG" | grep -oE '"(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) [^ ]+ [^"]*" 4[0-9]{2} ' \
   | sed -E 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/<uuid>/g' \

@@ -94,6 +94,20 @@ def _appeals_link() -> dict:
     return {"label": "Rəsmi apellyasiya üçün «Apellyasiyalarım» bölməsi", "url": url}
 
 
+def _visible_attachment_count(application, viewer_is_handler) -> int:
+    """Siyahı sətrinin sənəd sayı (SEC-04 qaydası). Siyahı sorğusu sənədləri `_internal_note`
+    bayrağı ilə prefetch edir — onda SIFIR əlavə sorğu; prefetch yoxdursa DB-dən sayılır."""
+    cached = getattr(application, "_prefetched_objects_cache", {}).get("attachments")
+    if cached is not None:
+        items = list(cached)
+        if viewer_is_handler:
+            return len(items)
+        return sum(1 for item in items if not getattr(item, "_internal_note", False))
+    if viewer_is_handler:
+        return application.attachments.count()
+    return application.attachments.exclude(event__is_internal=True).count()
+
+
 def attachment_payload(attachment) -> dict:
     return {
         "id": str(attachment.pk),
@@ -153,7 +167,8 @@ def row_payload(application, *, viewer_is_handler: bool) -> dict:
         "sla_due_on": application.sla_due_on.isoformat() if application.sla_due_on else None,
         "is_open": application.is_open,
         "is_overdue": application.is_overdue,
-        "attachment_count": application.attachments.count(),
+        # SEC-04 (2026-10-07): daxili qeydin sənədi emalçı olmayana sayılmır (detal dəqiq sayı yazır).
+        "attachment_count": _visible_attachment_count(application, viewer_is_handler),
         "owner_label": ("sizdədir" if viewer_is_handler else f"{application.current_unit.name}-də"),
     }
 
@@ -169,8 +184,15 @@ def detail_payload(application, *, user) -> dict:
         for event in events
         if sees_internal or not event.is_internal
     ]
+    # SEC-04 (2026-10-07): daxili qeydə qoşulan sənəd də daxili qeyd kimi gizlidir — əvvəl
+    # ümumi siyahıya düşürdü və sahib onun adını görüb endirə bilirdi.
+    attachments = application.attachments.order_by("created_at")
+    if not sees_internal:
+        attachments = attachments.exclude(event__is_internal=True)
+    attachments = [attachment_payload(item) for item in attachments]
     return {
         **row_payload(application, viewer_is_handler=is_handler),
+        "attachment_count": len(attachments),
         "body": application.body,
         "assigned_to": person(application.assigned_to) if application.assigned_to_id else None,
         "current_scope_unit": (application.current_scope_unit.name if application.current_scope_unit_id else ""),
@@ -183,7 +205,7 @@ def detail_payload(application, *, user) -> dict:
         ),
         # BÜTÜN sənədlər — dizayn §4.7-nin «Əlavə olunan sənədlər» bölməsi tam
         # siyahıdır; hadisəyə bağlı olanlar əlavə olaraq zaman xəttində də görünür.
-        "attachments": [attachment_payload(item) for item in application.attachments.order_by("created_at")],
+        "attachments": attachments,
         "events": timeline,
         "viewer": {
             "is_handler": is_handler,

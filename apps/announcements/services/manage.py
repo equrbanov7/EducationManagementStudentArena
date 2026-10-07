@@ -23,6 +23,7 @@ from django.utils.translation import pgettext
 
 from apps.organizations.public import create_audit_log
 from core.constants import AuditAction
+from core.download_types import content_type_for_name
 from core.upload_security import validate_uploaded_file
 
 from ..constants import (
@@ -262,7 +263,7 @@ def add_attachments(request, organization, announcement, files) -> list:
                     file=uploaded,
                     original_name=(getattr(uploaded, "name", "") or "sened")[:255],
                     size=int(getattr(uploaded, "size", 0) or 0),
-                    content_type=(getattr(uploaded, "content_type", "") or "")[:120],
+                    content_type=content_type_for_name(getattr(uploaded, "name", "")),
                     uploaded_by=request.user,
                 )
                 attachment.full_clean()

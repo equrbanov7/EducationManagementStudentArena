@@ -136,9 +136,14 @@ SECURITY_RESPONSE_HEADERS = {
     k: v
     for k, v in {
         "Referrer-Policy": SECURE_REFERRER_POLICY,
+        # Təhlükəsizlik auditi 2026-10-07: göndərilən JS yalnız fullscreen və clipboard
+        # işlədir (grep: static/, apps/*/static) — istifadə olunmayan güclü API-lər də
+        # (ödəniş, USB/serial/HID/Bluetooth/MIDI, ekran paylaşımı, sensorlar) bağlanır ki,
+        # XSS/üçüncü tərəf skripti onları istəyə bilməsin.
         "Permissions-Policy": os.getenv(
             "PERMISSIONS_POLICY",
-            "camera=(), geolocation=(), microphone=()",
+            "camera=(), geolocation=(), microphone=(), payment=(), usb=(), serial=(), hid=(), "
+            "bluetooth=(), midi=(), display-capture=(), accelerometer=(), gyroscope=(), magnetometer=()",
         ),
         "Cross-Origin-Resource-Policy": os.getenv("CROSS_ORIGIN_RESOURCE_POLICY", "same-origin"),
         "Cross-Origin-Opener-Policy": os.getenv("CROSS_ORIGIN_OPENER_POLICY", "same-origin"),

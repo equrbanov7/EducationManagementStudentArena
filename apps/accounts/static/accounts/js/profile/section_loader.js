@@ -412,13 +412,23 @@
                     if (!payload || payload.ok !== true || !payload.html) {
                         throw new Error("bad_payload");
                     }
-                    if (!replaceSectionHtml(section, payload.html, {
-                        updateUrl: options.updateUrl,
-                        sourceUrl: options.sourceUrl
-                    })) {
-                        throw new Error("section_not_in_response");
-                    }
-                    return true;
+                    /* Perf 2026-10-07: qabıq yalnız render olunan bölmənin asset-lərini
+                       verir — çatışmayan CSS/JS swap-dan ƏVVƏL yüklənir (section_assets.js). */
+                    var assetsReady = (window.EMSSectionAssets && payload.assets)
+                        ? window.EMSSectionAssets.ensure(payload.assets)
+                        : Promise.resolve();
+                    return assetsReady.then(function () {
+                        if (controller && controller.signal && controller.signal.aborted) {
+                            return true; // yeni keçid başlayıb — bu cavab atılır
+                        }
+                        if (!replaceSectionHtml(section, payload.html, {
+                            updateUrl: options.updateUrl,
+                            sourceUrl: options.sourceUrl
+                        })) {
+                            throw new Error("section_not_in_response");
+                        }
+                        return true;
+                    });
                 })
                 .catch(function (err) {
                     if (err && err.name === "AbortError") {
