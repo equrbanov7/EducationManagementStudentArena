@@ -32,9 +32,17 @@ jobs:
       cancel-in-progress: false
     env:
       APP_DIR: /home/wcu/EducationManagementStudentArena
+      # Təhlükəsizlik auditi 2026-10-07: girişlər əvvəl `${{ github.event.inputs.* }}`
+      # ilə birbaşa `run:` skriptinə yapışdırılırdı — `asset_id`-ə yazılan `$(…)`/`"`
+      # prod hostda (docker qrupu = root) shell əmri kimi icra olunurdu. İndi yalnız
+      # mühit dəyişəni kimi gəlir və rəqəm olduğu yoxlanılır (prod-legacy-restore.yml naxışı).
+      ASSET_ID: ${{ github.event.inputs.asset_id }}
+      EXPECTED_USERS_INPUT: ${{ github.event.inputs.expected_users }}
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: 🔽 Download + decrypt dump
         env:
@@ -43,9 +51,13 @@ jobs:
         run: |
           set -euo pipefail
           test -n "$SEED_DUMP_KEY" || { echo "SEED_DUMP_KEY sirri yoxdur" >&2; exit 1; }
+          case "$ASSET_ID" in (*[!0-9]*|'') echo "asset_id rəqəm olmalıdır" >&2; exit 1;; esac
+          case "$EXPECTED_USERS_INPUT" in (*[!0-9]*|'') echo "expected_users rəqəm olmalıdır" >&2; exit 1;; esac
+          # Açılmış dump bütün bazadır (PII, parol heşləri) — yalnız runner istifadəçisinə oxunaqlı.
+          umask 077
           mkdir -p "$RUNNER_TEMP/seed"
           curl -sSfL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/octet-stream" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/${{ github.event.inputs.asset_id }}" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/assets/${ASSET_ID}" \
             -o "$RUNNER_TEMP/seed/seed.dump.enc"
           openssl enc -d -aes-256-cbc -pbkdf2 -pass env:SEED_DUMP_KEY \
             -in "$RUNNER_TEMP/seed/seed.dump.enc" -out "$RUNNER_TEMP/seed/seed.dump"
@@ -61,7 +73,7 @@ jobs:
           # Skriptin ən son versiyası checkout-dan (APP_DIR deploy ilə sinxrondur, amma zəmanət üçün).
           cp "$GITHUB_WORKSPACE/scripts/deploy/seed_database.sh" scripts/deploy/seed_database.sh
           SEED_CONFIRM=SEED SEED_DUMP="$RUNNER_TEMP/seed/seed.dump" \
-            EXPECTED_USERS="${{ github.event.inputs.expected_users }}" \
+            EXPECTED_USERS="$EXPECTED_USERS_INPUT" \
             bash scripts/deploy/seed_database.sh
 
       - name: 🧹 Cleanup

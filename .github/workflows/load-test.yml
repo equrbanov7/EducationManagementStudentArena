@@ -127,15 +127,21 @@ jobs:
           echo "✓ Giriş yoxlaması keçdi: $USERS VU, ramp $SPAWN/s, $RUN_TIME, hədəf $TARGET"
 
       - name: 📥 Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: 🐍 Locust mühiti
         run: |
           set -euo pipefail
-          python3 -m venv /tmp/loadenv
-          /tmp/loadenv/bin/pip install --quiet --upgrade pip
-          /tmp/loadenv/bin/pip install --quiet "locust==2.43.3"
-          /tmp/loadenv/bin/locust --version
+          # Təhlükəsizlik auditi 2026-10-07: əvvəl venv və hesabat /tmp-də sabit yolda idi —
+          # prod hostda hamıya yazıla bilən qovluq (başqa istifadəçi venv-i əvvəlcədən
+          # «hazırlaya» bilərdi; köhnə run-un hesabatı növbəti artefakta düşürdü). RUNNER_TEMP
+          # job-a məxsusdur və job bitəndə runner tərəfindən silinir.
+          python3 -m venv "$RUNNER_TEMP/loadenv"
+          "$RUNNER_TEMP"/loadenv/bin/pip install --quiet --upgrade pip
+          "$RUNNER_TEMP"/loadenv/bin/pip install --quiet "locust==2.43.3"
+          "$RUNNER_TEMP"/loadenv/bin/locust --version
 
       - name: 📈 Yükü işə sal
         env:
@@ -225,10 +231,10 @@ jobs:
           [ "$WORKERS" -lt 1 ] && WORKERS=1
           echo "nüvə=$CORES, lazım=$NEED, tavan=$MAX → worker=$WORKERS"
 
-          mkdir -p /tmp/loadreport
+          mkdir -p "$RUNNER_TEMP/loadreport"
           cd "$GITHUB_WORKSPACE"
 
-          /tmp/loadenv/bin/locust \
+          "$RUNNER_TEMP"/loadenv/bin/locust \
             -f tests/load/locustfile.py \
             --headless \
             --host "$HOST" \
@@ -237,8 +243,8 @@ jobs:
             --run-time "$RUN_TIME" \
             --stop-timeout 30 \
             --master --expect-workers "$WORKERS" \
-            --csv /tmp/loadreport/result \
-            --html /tmp/loadreport/report.html \
+            --csv "$RUNNER_TEMP/loadreport/result" \
+            --html "$RUNNER_TEMP/loadreport/report.html" \
             --exit-code-on-error 0 \
             "$SCENARIO" &
           MASTER=$!
@@ -248,7 +254,7 @@ jobs:
             # paralel giriş süni kilid yarışması yaradır.
             LOAD_USER_OFFSET=$(( LOAD_USER_COUNT * (i - 1) / WORKERS )) \
             LOAD_USER_SHARD_COUNT=$(( LOAD_USER_COUNT * i / WORKERS - LOAD_USER_COUNT * (i - 1) / WORKERS )) \
-            /tmp/loadenv/bin/locust \
+            "$RUNNER_TEMP"/loadenv/bin/locust \
               -f tests/load/locustfile.py \
               --worker --master-host 127.0.0.1 &
           done
@@ -269,7 +275,7 @@ jobs:
           TARGET: ${{ inputs.target }}
         run: |
           set -euo pipefail
-          STATS=/tmp/loadreport/result_stats.csv
+          STATS="$RUNNER_TEMP/loadreport/result_stats.csv"
           if [ ! -f "$STATS" ]; then
             echo "⚠️ Statistika faylı yaranmadı — test başlamadı." >> "$GITHUB_STEP_SUMMARY"
             exit 0
@@ -277,7 +283,7 @@ jobs:
 
           # Xülasə skripti ayrıca fayla yazılır: YAML blok skalyarının içində
           # heredoc/girinti qarışdığı üçün inline python etibarsızdır.
-          cat > /tmp/loadreport/summarise.py <<'PYSCRIPT'
+          cat > "$RUNNER_TEMP/summarise.py" <<'PYSCRIPT'
           import csv
           import os
           import sys
@@ -325,13 +331,14 @@ jobs:
           print("\n".join(out))
           PYSCRIPT
 
-          python3 /tmp/loadreport/summarise.py "$STATS" >> "$GITHUB_STEP_SUMMARY"
+          python3 "$RUNNER_TEMP/summarise.py" "$STATS" >> "$GITHUB_STEP_SUMMARY"
 
 
       - name: 📎 Hesabatı yüklə
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: load-report-${{ inputs.scenario }}-${{ inputs.users }}vu
-          path: /tmp/loadreport/
-          retention-days: 14
+          path: ${{ runner.temp }}/loadreport/
+          # Hesabat prod tutumunu/zəif nöqtələrini göstərir — qısa saxlanılır (audit 2026-10-07).
+          retention-days: 7
