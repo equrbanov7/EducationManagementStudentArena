@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 
+from ..statistics_metrics._shared import student_visible_result_attempts
 from ._shared import (
     _apply_date_filter,
     _parse_date,
@@ -33,6 +34,8 @@ def get_student_statistics(user, *, organization=None, filters=None):
     if course_id:
         exam_attempts = exam_attempts.filter(exam__course_id=course_id)
     exam_attempts = _apply_date_filter(exam_attempts, "started_at", date_from, date_to)
+    # Təhlükəsizlik auditi 2026-10-07: gizlədilmiş nəticə / açılmamış yazılı qiymət CSV-də də yoxdur.
+    exam_attempts = student_visible_result_attempts(exam_attempts)
     exam_list = list(
         exam_attempts.select_related("exam").values(
             "id",
@@ -204,6 +207,10 @@ def get_student_statistics(user, *, organization=None, filters=None):
             "lab_avg": _safe_avg(lab_scores),
             "project_avg": _safe_avg(proj_scores),
         },
-        "recent_activity": (exam_list + assignment_list + lab_list + proj_list)[:10],
+        # Açıq cəhdin ``correct_count``-u (``save_draft`` onu imtahan ZAMANI hesablayır) cavab
+        # oracle-ıdır — siyahıya yalnız bitmiş cəhdlər düşür (2026-10-07).
+        "recent_activity": (
+            [a for a in exam_list if a["status"] in ("submitted", "expired")] + assignment_list + lab_list + proj_list
+        )[:10],
         "courses": course_names,
     }
