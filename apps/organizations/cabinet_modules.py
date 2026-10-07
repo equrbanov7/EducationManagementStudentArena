@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from django.utils.translation import pgettext_lazy
 
+from .settings_store import update_settings_key
+
 MODULE_VISIBILITY_SETTINGS_KEY = "module_visibility"
 
 # label — panel etiketi; sections — modul bağlıykən gizlənən profil bölmələri;
@@ -108,15 +110,20 @@ def is_module_enabled(organization, module_key: str) -> bool:
 
 
 def set_module_enabled(organization, module_key: str, enabled: bool) -> None:
-    """Modulu aç/bağla — settings JSON-da qalıcı."""
+    """Modulu aç/bağla — settings JSON-da qalıcı.
+
+    Atomik (2026-10-07): ``module_visibility`` açarı kilid altında TƏZƏ oxunur və yalnız o yazılır —
+    köhnə nüsxə digər açarları (elan/sorğu xülasələri) və paralel dəyişdirilmiş modulları əzmir.
+    """
     if module_key not in CABINET_MODULES:
         raise ValueError(f"Naməlum kabinet modulu: {module_key}")
-    if not isinstance(organization.settings, dict):
-        organization.settings = {}
-    stored = dict(_stored(organization))
-    stored[module_key] = bool(enabled)
-    organization.settings[MODULE_VISIBILITY_SETTINGS_KEY] = stored
-    organization.save(update_fields=["settings", "updated_at"])
+
+    def _mutate(current):
+        stored = dict(current) if isinstance(current, dict) else {}
+        stored[module_key] = bool(enabled)
+        return stored
+
+    update_settings_key(organization, MODULE_VISIBILITY_SETTINGS_KEY, _mutate)
 
 
 def disabled_sections(organization) -> set:
