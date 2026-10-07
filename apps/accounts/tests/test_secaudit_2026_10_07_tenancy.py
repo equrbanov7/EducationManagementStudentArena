@@ -11,23 +11,30 @@ SEC-02  ``assert_no_foreign_authority`` başqa təşkilatdakı rütbəni RLS alt
         keçirdi; RİM-in qlobal hesab əməlləri (blok, silmə, bərpa, şəxsi
         məlumat/e-poçt redaktəsi) isə onu ümumiyyətlə çağırmırdı. A-nın RİM-i
         A-da tələbə, B-də rektor olan hesabı bloklaya / e-poçtunu dəyişə bilirdi.
+SEC-03  «Bildiriş göndər» bölmə (``unit_``) və şöbə (``role_``) hədəfləri aktiv
+        təşkilatla məhdudlaşmırdı (2026-09-28 T-01-in qardaşı).
 """
 
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.test import Client, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 import pytest
 
+from apps.accounts.models import ProfileRole
+from apps.accounts.services.profile_actions import publish_system_notification, resolve_notification_recipients
 from apps.accounts.services.rim.lifecycle import block_user, soft_delete_user, unblock_user
 from apps.accounts.services.rim.policy import RimAccessError, RimActor, assert_no_foreign_authority
 from apps.accounts.services.rim.profile_edit import update_user_fields
-from apps.organizations.models import Membership, Organization
-from core.constants import OrganizationType
+from apps.notifications.models import InAppNotification
+from apps.organizations.models import Membership, Organization, OrgUnit
+from core.constants import OrganizationType, OrgUnitType
 from core.rls import bypass_rls
+
+from .test_view_as import ViewAsTestBase
 
 User = get_user_model()
 
@@ -203,3 +210,72 @@ def test_foreign_authority_is_visible_under_tenant_rls(django_user_model):
         with connection.cursor() as cursor:
             cursor.execute("RESET ROLE")
             cursor.execute("SELECT set_config('app.current_org_id', '', false)")
+
+
+# ── SEC-03 ──────────────────────────────────────────────────────────────────
+
+
+class NotificationStructureTargetsStayInActiveOrgTest(ViewAsTestBase):
+    """SEC-03: ``unit_<uuid>`` / ``role_<key>_<org>`` hədəfləri aktiv təşkilatdan kənara çıxmır.
+
+    T-01 (2026-09-28) yalnız ``org_<id>`` hədəfini bağlamışdı. Bölmə/şöbə hədəfləri
+    hədəfin ÖZ təşkilatını tapıb ``capabilities`` (AKTİV org-un admin bayrağı) ilə
+    yoxlayırdı — A-nın admini B-də istənilən üzvlüyü olanda B-nin bölməsinə / bütün
+    tələbələrinə bildiriş göndərirdi (yalnız DB-nin RLS qatı dayandırırdı).
+    """
+
+    CAPS_ADMIN = {"is_superadmin": False, "is_org_admin": True, "is_teacher": False}
+
+    def setUp(self):
+        super().setUp()
+        self.other_unit = OrgUnit.objects.create(
+            organization=self.other_org,
+            unit_type=OrgUnitType.FACULTY,
+            name="Other Faculty",
+            slug="sec07-other-faculty",
+            is_active=True,
+        )
+        Membership.objects.filter(user=self.other_student, organization=self.other_org).update(
+            scope_unit=self.other_unit
+        )
+        # A-nın admini B-də adi tələbədir.
+        Membership.objects.create(
+            user=self.admin,
+            organization=self.other_org,
+            role=self.other_org.roles.filter(name=ProfileRole.STUDENT).first(),
+            is_active=True,
+            is_primary=False,
+        )
+
+    def _publish(self, targets):
+        request = RequestFactory().post(
+            "/accounts/profile/",
+            {
+                "profile_form": "publish-notification",
+                "notif_title": "SEC03 yoxlama",
+                "notif_message": "salam",
+                "notif_targets": targets,
+            },
+        )
+        request.user = self.admin
+        request.organization = self.org
+        return publish_system_notification(request=request, capabilities=self.CAPS_ADMIN)
+
+    def test_unit_target_of_another_org_is_refused(self):
+        target = f"unit_{self.other_unit.pk}"
+        self.assertIsNone(resolve_notification_recipients(self.admin, self.CAPS_ADMIN, target, organization=self.org))
+        ok, _key = self._publish([target])
+        self.assertFalse(ok)
+        self.assertFalse(InAppNotification.objects.filter(recipient=self.other_student).exists())
+
+    def test_role_target_of_another_org_is_refused(self):
+        target = f"role_students_{self.other_org.pk}"
+        self.assertIsNone(resolve_notification_recipients(self.admin, self.CAPS_ADMIN, target, organization=self.org))
+        ok, _key = self._publish([target])
+        self.assertFalse(ok)
+        self.assertFalse(InAppNotification.objects.filter(recipient=self.other_student).exists())
+
+    def test_targets_of_the_active_org_still_work(self):
+        ok, _key = self._publish([f"unit_{self.unit.pk}", f"role_students_{self.org.pk}"])
+        self.assertTrue(ok)
+        self.assertTrue(InAppNotification.objects.filter(recipient=self.student, title="SEC03 yoxlama").exists())

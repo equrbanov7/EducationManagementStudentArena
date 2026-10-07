@@ -123,12 +123,12 @@ def resolve_notification_recipients(user, capabilities, target: str, *, organiza
     if target.startswith("unit_"):
         from .notification_scopes import resolve_unit_target
 
-        return resolve_unit_target(user, capabilities, target)
+        return resolve_unit_target(user, capabilities, target, active_organization=organization)
 
     if target.startswith("role_"):
         from .notification_scopes import resolve_role_target
 
-        return resolve_role_target(user, capabilities, target)
+        return resolve_role_target(user, capabilities, target, active_organization=organization)
 
     if target.startswith("group_"):
         try:
