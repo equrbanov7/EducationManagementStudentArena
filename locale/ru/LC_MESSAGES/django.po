@@ -91591,3 +91591,64 @@ msgid ""
 msgstr ""
 "«Удалить» скрывает объявление от всех получателей; статистика и заявки "
 "сохраняются, восстановить можно из фильтра «Удалённые»."
+
+msgctxt "applications.transition"
+msgid "Naməlum əməl: %(action)s"
+msgstr "Неизвестное действие: %(action)s"
+
+msgctxt "applications.transition"
+msgid "«%(action)s» əməli «%(status)s» statusundan mümkün deyil."
+msgstr "Действие «%(action)s» невозможно из статуса «%(status)s»."
+
+msgctxt "applications.transition"
+msgid "Bu əməl üçün mətn məcburidir."
+msgstr "Для этого действия текст обязателен."
+
+msgctxt "applications.transition"
+msgid "Mətn ən azı %(n)s simvol olmalıdır."
+msgstr "Текст должен содержать не менее %(n)s символов."
+
+msgctxt "applications.transition"
+msgid "Müraciət yaratmaq səlahiyyətiniz yoxdur."
+msgstr "У вас нет права создавать заявки."
+
+msgctxt "applications.transition"
+msgid "Aktiv üzvlüyünüz olmadan müraciət göndərilə bilməz."
+msgstr "Без активного членства заявку отправить нельзя."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət növü sizin üçün açıq deyil."
+msgstr "Этот тип заявки вам недоступен."
+
+msgctxt "applications.transition"
+msgid "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın."
+msgstr ""
+"Такая же заявка была отправлена только что — проверьте её статус в списке."
+
+msgctxt "applications.transition"
+msgid "Seçilmiş şöbə bu təşkilatda aktiv deyil."
+msgstr "Выбранное подразделение не активно в этой организации."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət sizin şöbənizdə deyil."
+msgstr "Эта заявка не относится к вашему подразделению."
+
+msgctxt "applications.transition"
+msgid "Bu əməli yalnız müraciət sahibi edə bilər."
+msgstr "Это действие может выполнить только автор заявки."
+
+msgctxt "applications.transition"
+msgid "Bu müraciətə qeyd yaza bilməzsiniz."
+msgstr "Вы не можете добавить примечание к этой заявке."
+
+msgctxt "applications.transition"
+msgid "Seçilən şəxs bu şöbənin emalçısı deyil."
+msgstr "Выбранный сотрудник не обрабатывает заявки этого подразделения."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə tapılmadı."
+msgstr "Целевое подразделение не найдено."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə cari şöbə ilə eyni ola bilməz."
+msgstr "Целевое подразделение не может совпадать с текущим."

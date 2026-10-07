@@ -17,7 +17,7 @@ from django.utils.translation import pgettext, pgettext_lazy
 from apps.notifications.models import NotificationType
 from apps.notifications.public import create_notification
 from apps.organizations.models import REVIEW_VISIBILITY_FEATURES, Organization
-from apps.organizations.public import ensure_owner_membership
+from apps.organizations.public import ensure_owner_membership, save_review_identity_reveal
 from core.audit import log_action
 from core.constants import AuditAction
 from core.http_ids import parse_uuid
@@ -386,8 +386,8 @@ def superadmin_organizations(request):
                 return redirect(next_url)
 
             reveal_enabled = request.POST.get("enabled") == "1"
-            organization.set_review_identity_reveal_enabled(feature_name, reveal_enabled)
-            organization.save(update_fields=["settings", "updated_at"])
+            # Atomik: yalnız `review_visibility` alt-açarı (köhnə nüsxə digər açarları əzmir).
+            save_review_identity_reveal(organization, feature_name, reveal_enabled)
             feature_label = feature_config["short_label"].lower()
             # Ayrı tam mesajlar (şərti "söndürüldü/yenidən aktiv edildi" cümlə
             # daxilinə yerləşdirilmir — tərcümə oluna bilməsi üçün).

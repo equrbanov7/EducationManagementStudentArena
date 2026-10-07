@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 
+from apps.organizations.public import set_settings_keys
+
 LETTER_BANDS_SETTINGS_KEY = "letter_bands"
 
 # AZ Boloniya default: (min ümumi bal, hərf, GPA nöqtəsi).
@@ -96,21 +98,18 @@ def score_to_letter(total, organization=None) -> tuple[str, Decimal]:
 
 
 def set_bands(organization, bands) -> None:
-    """Şkalanı yaz (settings JSON-da qalıcı); pozuq giriş ``ValueError`` atır."""
+    """Şkalanı yaz (settings JSON-da qalıcı); pozuq giriş ``ValueError`` atır.
+
+    Atomik (2026-10-07): yalnız ``letter_bands`` açarı yazılır — köhnə nüsxə digər açarları əzmir.
+    """
     cleaned = _validate(list(bands))
-    if not isinstance(organization.settings, dict):
-        organization.settings = {}
-    organization.settings[LETTER_BANDS_SETTINGS_KEY] = [
-        [threshold, letter, str(gpa)] for threshold, letter, gpa in cleaned
-    ]
-    organization.save(update_fields=["settings", "updated_at"])
+    stored = [[threshold, letter, str(gpa)] for threshold, letter, gpa in cleaned]
+    set_settings_keys(organization, {LETTER_BANDS_SETTINGS_KEY: stored})
 
 
 def reset_bands(organization) -> None:
-    """Şkalanı default-a qaytar (açarı silir)."""
-    if isinstance(organization.settings, dict) and LETTER_BANDS_SETTINGS_KEY in organization.settings:
-        organization.settings.pop(LETTER_BANDS_SETTINGS_KEY)
-        organization.save(update_fields=["settings", "updated_at"])
+    """Şkalanı default-a qaytar (açarı atomik silir; köhnə nüsxədə görünməsə də)."""
+    set_settings_keys(organization, remove=[LETTER_BANDS_SETTINGS_KEY])
 
 
 def parse_bands_text(text: str) -> tuple[tuple[int, str, Decimal], ...]:
