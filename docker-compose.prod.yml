@@ -392,6 +392,18 @@ services:
       # — buna görə pgbouncer_exporter SHOW POOLS/STATS üçün xüsusi "pgbouncer"
       # pseudo-bazasına qoşula bilmirdi (Monitorinq Mərkəzi, 2026-07-13).
       ADMIN_USERS: ${POSTGRES_USER}
+      # Təhlükəsizlik auditi 2026-10-07: pgbouncer_exporter owner/superuser əvəzinə yalnız
+      # `stats_users`-dəki monitor istifadəçisi ilə admin konsola qoşulsun. İkisi də
+      # doludursa docker/pgbouncer/entrypoint.sh userlist-ə sətir + STATS_USERS əlavə edir;
+      # boşdursa (defolt) heç nə dəyişmir — image entrypoint-i əvvəlki kimi işləyir.
+      MONITOR_DB_USER: ${MONITOR_DB_USER:-}
+      MONITOR_DB_PASSWORD: ${MONITOR_DB_PASSWORD:-}
+    # Sarğı image-in /entrypoint.sh-ına `exec` ilə qayıdır; entrypoint dəyişəndə image CMD-i
+    # sıfırlandığı üçün onu açıq təkrarlayırıq (image defoltu ilə eynidir).
+    entrypoint: ["/bin/sh", "/opt/ems/pgbouncer-entrypoint.sh"]
+    command: ["/usr/bin/pgbouncer", "/etc/pgbouncer/pgbouncer.ini"]
+    volumes:
+      - ./docker/pgbouncer/entrypoint.sh:/opt/ems/pgbouncer-entrypoint.sh:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -447,6 +459,10 @@ services:
       # offloads socket I/O for the 5000-connection WS fan-out (redis 7).
       # Statik seçimlər docker/redis/redis.conf.tmpl-dədir.
       REDIS_MAXMEMORY: ${REDIS_MAXMEMORY:-3gb}
+      # Təhlükəsizlik auditi 2026-10-07: doludursa entrypoint.sh redis_exporter üçün
+      # yalnız-oxu ACL istifadəçisi `monitor` yaradır (açar yox, kanal yox, yalnız
+      # PING/INFO/SLOWLOG/LATENCY/CLIENT SETNAME). Boşdursa konfiq əvvəlki kimidir.
+      REDIS_MONITOR_PASSWORD: ${REDIS_MONITOR_PASSWORD:-}
     volumes:
       - redis_data:/data
       - ./docker/redis/redis.conf.tmpl:/etc/redis/redis.conf.tmpl:ro
@@ -790,8 +806,12 @@ services:
       - --no-collector.statio_user_tables
     environment:
       DATA_SOURCE_URI: postgres:5432/${POSTGRES_DB}?sslmode=disable
-      DATA_SOURCE_USER: ${POSTGRES_USER}
-      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+      # Təhlükəsizlik auditi 2026-10-07: least-privilege rol (`pg_monitor`, NOSUPERUSER
+      # NOBYPASSRLS, default_transaction_read_only) — scripts/deploy/provision_monitor_role.sh
+      # hər deploy-da idempotent yaradır. MONITOR_DB_USER/MONITOR_DB_PASSWORD boşdursa
+      # (və ya deploy rolu yarada bilməyib boş override ixrac edibsə) köhnə owner girişi.
+      DATA_SOURCE_USER: ${MONITOR_DB_USER:-${POSTGRES_USER}}
+      DATA_SOURCE_PASS: ${MONITOR_DB_PASSWORD:-${POSTGRES_PASSWORD}}
     depends_on:
       postgres:
         condition: service_healthy
@@ -1018,6 +1038,11 @@ services:
     image: ghcr.io/google/cadvisor:v0.60.5
     container_name: emsarena-cadvisor
     # cgroup v2 oxumaq üçün tələb olunur; bütün mount-lar read-only-dir.
+    # Təhlükəsizlik auditi 2026-10-07: promtail docker-socket-proxy-yə keçdi, cadvisor isə
+    # QƏSDƏN keçmədi — o, Docker API-dən çox host yollarını oxuyur (/sys/fs/cgroup, /rootfs,
+    # /var/lib/docker, /dev/kmsg) və bunun üçün privileged olmalıdır; privileged konteyner
+    # üçün socket-proxy heç bir sərhəd yaratmır (host artıq tam görünür). Kompensasiya:
+    # yalnız emsarena-network, publik/loopback port yoxdur, bütün mount-lar :ro.
     privileged: true
     devices:
       - /dev/kmsg:/dev/kmsg
@@ -1051,7 +1076,11 @@ services:
     container_name: emsarena-redis-exporter
     environment:
       REDIS_ADDR: redis://redis:6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # Təhlükəsizlik auditi 2026-10-07: REDIS_MONITOR_PASSWORD doludursa ACL istifadəçisi
+      # `monitor` (redis entrypoint.sh yaradır; CONFIG GET verilmir — requirepass-ı oxuya
+      # bilərdi). Boşdursa REDIS_USER boş qalır → `default` + əsas parol (köhnə davranış).
+      REDIS_USER: ${REDIS_MONITOR_PASSWORD:+monitor}
+      REDIS_PASSWORD: ${REDIS_MONITOR_PASSWORD:-${REDIS_PASSWORD}}
     depends_on:
       - redis
     restart: unless-stopped
@@ -1094,7 +1123,9 @@ services:
     image: prometheuscommunity/pgbouncer-exporter:v0.10.2
     container_name: emsarena-pgbouncer-exporter
     environment:
-      PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgbouncer:5432/pgbouncer?sslmode=disable
+      # Təhlükəsizlik auditi 2026-10-07: monitor istifadəçisi pgbouncer-də yalnız `stats_users`-dədir
+      # (SHOW-lar; PAUSE/KILL/SHUTDOWN yox). Boş override → köhnə owner (admin_users) girişi.
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: postgres://${MONITOR_DB_USER:-${POSTGRES_USER}}:${MONITOR_DB_PASSWORD:-${POSTGRES_PASSWORD}}@pgbouncer:5432/pgbouncer?sslmode=disable
     depends_on:
       - pgbouncer
     restart: unless-stopped
@@ -1174,18 +1205,102 @@ services:
     networks:
       - emsarena-network
 
+  # ─────────────────────────────────────────────────────────────────────────
+  # Docker API proxy — YALNIZ promtail üçün (təhlükəsizlik auditi 2026-10-07).
+  # Əvvəl promtail xam /var/run/docker.sock-u mount edirdi: socket-ə yaza bilən
+  # (`:ro` mount UNIX socket-ə qoşulmanı məhdudlaşdırmır) hər proses Docker API ilə
+  # privileged konteyner yaradıb host-da root ola bilərdi. İndi promtail HAProxy
+  # ACL-li proxy-dən keçir: yalnız GET (POST=0), yalnız /containers (docker_sd siyahı,
+  # inspect, logs) + /networks (Prometheus docker_sd refresh() NetworkList çağırır) +
+  # /_ping /version (API versiya danışığı). /events, /info, /exec, /images və s. bağlıdır.
+  # Qalıq risk: GET /containers/{id}/json konteyner env-lərini (sirlər daxil) qaytarır —
+  # ona görə proxy AYRICA `internal` şəbəkədədir və orada yalnız promtail var
+  # (app/celery və digər konteynerlər ona çata bilmir); publik/loopback port yoxdur.
+  # Log axını (follow) HAProxy `timeout server 10m` ilə sakit konteynerlərdə hər ~10 dəq
+  # kəsilir — promtail növbəti refresh-də (15 s) son mövqedən davam edir.
+  # ─────────────────────────────────────────────────────────────────────────
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:v0.5.0@sha256:1f5038b54f06c3e18422902cf00ba21803d1c97805aae032e5e6673d532d3459
+    container_name: emsarena-docker-socket-proxy
+    environment:
+      # Açıq olanlar (promtail-in istifadə etdiyi minimum):
+      CONTAINERS: "1"
+      NETWORKS: "1"
+      PING: "1"
+      VERSION: "1"
+      # Hər şey bağlı — image defoltlarına güvənmirik (EVENTS defoltu 1-dir).
+      POST: "0"
+      EVENTS: "0"
+      INFO: "0"
+      AUTH: "0"
+      SECRETS: "0"
+      BUILD: "0"
+      COMMIT: "0"
+      CONFIGS: "0"
+      DISTRIBUTION: "0"
+      EXEC: "0"
+      GRPC: "0"
+      IMAGES: "0"
+      NODES: "0"
+      PLUGINS: "0"
+      SERVICES: "0"
+      SESSION: "0"
+      SWARM: "0"
+      SYSTEM: "0"
+      TASKS: "0"
+      VOLUMES: "0"
+      ALLOW_START: "0"
+      ALLOW_STOP: "0"
+      ALLOW_RESTARTS: "0"
+      # Şəbəkə yalnız IPv4-dür; [::] bind-i IPv6-sız konteynerdə HAProxy-ni yıxa bilər.
+      DISABLE_IPV6: "1"
+      LOG_LEVEL: warning
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    logging: *default-logging
+    security_opt: *no-new-privileges
+    # Root (socket sahibi uid 0 → sahib icazə bitləri kifayətdir), amma capability-siz;
+    # konfiq /tmp-yə render olunur, pidfile /run-dadır — qalan rootfs read-only.
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /run
+      - /tmp
+    # Entrypoint `ulimit -n 10000` edir (HAProxy 3 strict-limits) — host defoltundan asılı olmasın.
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_PROXY_CPU_LIMIT:-0.1}"
+          memory: ${DOCKER_PROXY_MEM_LIMIT:-64M}
+    # /_ping proxy → docker.sock zəncirini yoxlayır (socket əlçatmazdırsa 503 → unhealthy).
+    # promtail bundan asılı deyil (service_started) — healthcheck yalnız görünürlük üçündür.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:2375/_ping >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - docker-api
+
   promtail:
     image: grafana/promtail:3.1.1
     container_name: emsarena-promtail
     command:
       - -config.file=/etc/promtail/promtail-config.yml
+    # Təhlükəsizlik auditi 2026-10-07: xam /var/run/docker.sock mount-u SİLİNDİ —
+    # docker_sd və log axını tcp://docker-socket-proxy:2375 üzərindən (yalnız GET).
     volumes:
       - ./docker/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - promtail_positions:/positions
     depends_on:
       - loki
+      - docker-socket-proxy
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
@@ -1197,6 +1312,7 @@ services:
           memory: ${PROMTAIL_MEM_LIMIT:-256M}
     networks:
       - emsarena-network
+      - docker-api
 
   # ─────────────────────────────────────────────────────────────────────────
   # Piston — self-hosted code execution sandbox
@@ -1328,6 +1444,11 @@ networks:
       config:
         - subnet: ${EMSARENA_NETWORK_SUBNET:-172.18.0.0/16}
           gateway: ${EMSARENA_NETWORK_GATEWAY:-172.18.0.1}
+  # Təhlükəsizlik auditi 2026-10-07: docker-socket-proxy ↔ promtail üçün ayrıca şəbəkə.
+  # `internal: true` — xarici marşrut yoxdur; üzvlər yalnız proxy və promtail-dir.
+  docker-api:
+    driver: bridge
+    internal: true
 
 volumes:
   postgres_data:
