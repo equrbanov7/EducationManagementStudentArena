@@ -15,9 +15,10 @@ class AnnouncementAdmin(admin.ModelAdmin):
         "category",
         "priority",
         "show_as_popup",
+        "requires_ack",
         "publish_at",
     )
-    list_filter = ("status", "is_deleted", "category", "show_as_popup")
+    list_filter = ("status", "is_deleted", "category", "show_as_popup", "requires_ack")
     search_fields = ("title", "summary")
     raw_id_fields = ("organization", "created_by", "updated_by", "deleted_by", "apply_kind", "apply_unit")
 
@@ -30,5 +31,13 @@ class AnnouncementAttachmentAdmin(admin.ModelAdmin):
 
 @admin.register(AnnouncementReceipt)
 class AnnouncementReceiptAdmin(admin.ModelAdmin):
-    list_display = ("announcement", "user", "popup_seen_at", "read_at", "applied_at", "application_number")
+    list_display = (
+        "announcement",
+        "user",
+        "popup_seen_at",
+        "read_at",
+        "acknowledged_at",
+        "applied_at",
+        "application_number",
+    )
     raw_id_fields = ("organization", "announcement", "user")

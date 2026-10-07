@@ -1,0 +1,30 @@
+{% load i18n %}
+{% comment %}Məcburi elanın təsdiq bloku (detal səhifəsi). Vəziyyət serverdən gəlir: təsdiq edilib → tarix;
+baxış rejimi / menecer önizləməsi → yalnız izah; əks halda checkbox + «Təsdiq edirəm» (checkbox
+işarələnənədək deaktiv). Nəticə mətnləri data-atributlardadır (i18n serverdə), `detail.js` POST edir.{% endcomment %}
+{% if preview %}
+<p class="ann-note ann-ack-note"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Məcburi elan: istifadəçi burada «Elanı oxudum və tanış oldum» təsdiqini verəcək; təsdiq edənədək elan hər səhifədə popup kimi açılır." context "announcements.cabinet" %}</p>
+{% elif ann.receipt.acknowledged_at %}
+<p class="ann-ack ann-ack--done" role="status"><i class="fas fa-circle-check" aria-hidden="true"></i> {% blocktrans trimmed with day=ann.receipt.acknowledged_at|date:"d.m.Y H:i" context "announcements.cabinet" %}Elanla tanış olduğunuzu {{ day }} tarixində təsdiq etmisiniz.{% endblocktrans %}</p>
+{% elif ann.view_as %}
+<p class="ann-note ann-ack-note" role="note"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Məcburi elan — baxış rejimində təsdiq yazılmır." context "announcements.cabinet" %}</p>
+{% else %}
+<section class="ann-ack" data-ann-ack data-ack-url="{{ ann.ack_url }}" aria-labelledby="ann-ack-title"
+         data-msg-done="{% trans 'Təsdiq edildi' context 'announcements.cabinet' %}"
+         data-msg-error="{% trans 'Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin.' context 'announcements.cabinet' %}">
+    <div class="ann-ack__head">
+        <span class="ann-ack__icon" aria-hidden="true"><i class="fas fa-shield-halved"></i></span>
+        <div class="ann-ack__text">
+            <h3 class="ann-ack__title" id="ann-ack-title">{% trans "Bu elan məcburidir" context "announcements.cabinet" %}</h3>
+            <p class="ann-ack__hint">{% trans "Elanla tanış olun və təsdiq edin. Təsdiq edənədək elan hər səhifədə popup kimi açılacaq." context "announcements.cabinet" %}</p>
+        </div>
+    </div>
+    <div class="ann-ack__controls" data-ann-ack-controls>
+        <label class="ann-ack__check"><input type="checkbox" data-ann-ack-check> <span>{% trans "Elanı oxudum və tanış oldum" context "announcements.cabinet" %}</span></label>
+        <button type="button" class="ems-btn ems-btn--primary ann-ack__submit" data-ann-ack-submit disabled>
+            <i class="fas fa-check" aria-hidden="true"></i> {% trans "Təsdiq edirəm" context "announcements.cabinet" %}
+        </button>
+    </div>
+    <p class="ann-ack__result" data-ann-ack-result role="status" aria-live="polite" hidden></p>
+</section>
+{% endif %}

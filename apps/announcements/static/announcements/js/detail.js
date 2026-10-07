@@ -1,4 +1,4 @@
-/* «Elanlar» detalı — «oxundu» qəbzi, son tarix geri sayımı, «Müraciət et».
+/* «Elanlar» detalı — «oxundu» qəbzi, son tarix geri sayımı, «Müraciət et», məcburi elanın təsdiqi.
  *
  * AJAX-safe: `EMSReady` (hər bölmə swap-ından sonra) yalnız hələ işlənməmiş detal kartını
  * götürür (`data-ann-read-sent`); düymələr `EMSDelegate` ilə. Mətnlər data-atributlardan
@@ -12,6 +12,13 @@
     }
     window.__emsAnnouncementsDetail = true;
 
+    function decrementBadge() {
+        document.querySelectorAll('.profile-sidebar [data-badge-key="announcements_unread"]').forEach(function (badge) {
+            var value = parseInt(badge.textContent, 10);
+            badge.textContent = value > 1 ? String(value - 1) : "";
+        });
+    }
+
     function markRead() {
         var card = document.querySelector("[data-ann-detail]:not([data-ann-read-sent])");
         if (!card || !window.EMSCore) { return; }
@@ -20,11 +27,7 @@
         if (!url) { return; }
         window.EMSCore.fetchJSON(url, { method: "POST", data: {} })
             .then(function (payload) {
-                if (!payload || !payload.newly_read) { return; }
-                document.querySelectorAll('.profile-sidebar [data-badge-key="announcements_unread"]').forEach(function (badge) {
-                    var value = parseInt(badge.textContent, 10);
-                    badge.textContent = value > 1 ? String(value - 1) : "";
-                });
+                if (payload && payload.newly_read) { decrementBadge(); }
             })
             .catch(function () { /* oxundu qəbzi kritik deyil */ });
     }
@@ -86,6 +89,47 @@
                 if (!opened) { window.location.href = href; }
             })
             .catch(function (error) { setResult(section, errorText(section, error), true); });
+    });
+
+    /* Məcburi elan: checkbox işarələnməyincə «Təsdiq edirəm» deaktivdir; POST {confirm: true}. */
+    window.EMSDelegate.on("change", "[data-ann-ack] [data-ann-ack-check]", function (event, box) {
+        var section = box.closest("[data-ann-ack]");
+        var button = section && section.querySelector("[data-ann-ack-submit]");
+        if (button && !button.hasAttribute("aria-busy")) { button.disabled = !box.checked; }
+    });
+
+    window.EMSDelegate.on("click", "[data-ann-ack] [data-ann-ack-submit]", function (event, button) {
+        event.preventDefault();
+        var section = button.closest("[data-ann-ack]");
+        var box = section && section.querySelector("[data-ann-ack-check]");
+        if (!section || !box || !box.checked || button.disabled || !window.EMSCore) { return; }
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        var result = section.querySelector("[data-ann-ack-result]");
+        window.EMSCore.fetchJSON(section.getAttribute("data-ack-url"), { method: "POST", data: { confirm: true } })
+            .then(function (payload) {
+                var controls = section.querySelector("[data-ann-ack-controls]");
+                if (controls) { controls.hidden = true; }
+                section.classList.add("ann-ack--done");
+                if (result) {
+                    var label = payload && payload.acknowledged_label ? ": " + payload.acknowledged_label : "";
+                    result.textContent = (section.getAttribute("data-msg-done") || "") + label;
+                    result.classList.remove("is-error");
+                    result.hidden = false;
+                }
+                if (payload && payload.newly_read) { decrementBadge(); }
+            })
+            .catch(function (error) {
+                var payload = error && error.payload;
+                var errors = payload && payload.errors && payload.errors.__all__;
+                if (result) {
+                    result.textContent = (errors && errors[0]) || section.getAttribute("data-msg-error") || "Error";
+                    result.classList.add("is-error");
+                    result.hidden = false;
+                }
+                button.disabled = !box.checked;
+            })
+            .then(function () { button.removeAttribute("aria-busy"); });
     });
 
     function hoursLeft() {

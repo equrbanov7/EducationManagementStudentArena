@@ -11,7 +11,7 @@ import math
 import uuid
 from dataclasses import dataclass
 
-from django.db.models import Case, Exists, F, IntegerField, OuterRef, Q, Value, When
+from django.db.models import Case, Exists, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.utils import timezone
 
 from core.search_text import tolerant_q
@@ -29,6 +29,8 @@ class ListParams:
     sort: str = "new"
     unread: bool = False
     has_deadline: bool = False
+    #: «Təsdiq gözləyənlər» — yalnız təsdiqlənməmiş məcburi elanlar.
+    pending: bool = False
     page: int = 1
 
     @classmethod
@@ -48,6 +50,7 @@ class ListParams:
             sort=_pick("sort", set(SORTS), "new"),
             unread=str(data.get("unread") or "") in ("1", "true", "on"),
             has_deadline=str(data.get("deadline") or "") in ("1", "true", "on"),
+            pending=str(data.get("pending") or "") in ("1", "true", "on"),
             page=page,
         )
 
@@ -59,7 +62,12 @@ class ListParams:
             "sort": self.sort,
             "unread": "1" if self.unread else "",
             "deadline": "1" if self.has_deadline else "",
+            "pending": "1" if self.pending else "",
         }
+
+    @property
+    def is_filtered(self) -> bool:
+        return bool(self.q or self.category or self.unread or self.has_deadline or self.pending)
 
 
 def published_for(organization, viewer: Viewer, now=None):
@@ -86,6 +94,13 @@ def _applied_exists(user):
     return Exists(AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user, applied_at__isnull=False))
 
 
+def _ack_at(user):
+    """İstifadəçinin bu elanı təsdiq vaxtı (eyni sorğuda alt-sorğu — əlavə sorğu yoxdur)."""
+    return Subquery(
+        AnnouncementReceipt.objects.filter(announcement=OuterRef("pk"), user=user).values("acknowledged_at")[:1]
+    )
+
+
 def search_q(text: str) -> Q:
     query = tolerant_q(text, ("title", "summary", "body"))
     return Q() if query is None else query
@@ -104,9 +119,11 @@ def user_list(organization, user, viewer: Viewer, params: ListParams, now=None) 
         queryset = queryset.filter(deadline_at__isnull=False)
     if params.q:
         queryset = queryset.filter(search_q(params.q))
-    queryset = queryset.annotate(is_read=_read_exists(user), is_applied=_applied_exists(user))
+    queryset = queryset.annotate(is_read=_read_exists(user), is_applied=_applied_exists(user), ack_at=_ack_at(user))
     if params.unread:
         queryset = queryset.filter(is_read=False)
+    if params.pending:
+        queryset = queryset.filter(requires_ack=True, ack_at__isnull=True)
 
     pinned = Case(
         When(Q(is_pinned=True) & _active_q(now), then=Value(1)), default=Value(0), output_field=IntegerField()

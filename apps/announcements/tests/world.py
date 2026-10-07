@@ -126,6 +126,8 @@ def make_announcement(world, *, author=None, publish=True, **fields) -> Announce
     for key in ("show_as_popup", "is_pinned"):
         if fields.pop(key, False):
             data[key] = "1"
+    if fields.pop("requires_ack", False):
+        data["popup_mode"] = "mandatory"
     for key in ("publish_at", "expires_at", "deadline_at"):
         value = fields.pop(key, None)
         if value is not None:

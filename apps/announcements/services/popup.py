@@ -1,8 +1,15 @@
-"""Birdəfəlik popup + oxundu qəbzləri + sidebar sayğacı.
+"""Popup (birdəfəlik + məcburi) + oxundu/təsdiq qəbzləri + sidebar sayğacı.
 
 Popup qaydası: aktiv, dərc olunmuş, ``show_as_popup`` elan istifadəçiyə ünvanlanıbsa və
 onun qəbzində ``popup_seen_at`` YOXDURSA növbəti tam səhifə açılışında göstərilir.
 «Bağla» / «Ətraflı bax» ``popup_seen_at`` yazır — bir daha göstərilmir.
+
+MƏCBURİ elan (``requires_ack``, 2026-10-07): ``acknowledged_at`` yazılanadək HƏR tam GET
+səhifəsində (eyni istisnalarla) göstərilir — ``popup_seen_at`` onu gizlətmir. Modalda məcburi
+elanlar birinci gəlir. Sessiya imzası məcburi id-ləri də daxil edir və yalnız «gözləyən YOXDUR»
+olanda yazılır, təsdiq isə geri alınmır — ona görə imza təsdiqlənməmiş məcburi elanı gizlədə bilməz.
+Elanın öz detal səhifəsində (``?section=announcements&elan=<id>``) həmin elan popup-a düşmür —
+orada eyni təsdiq bloku banner kimi göstərilir.
 
 Sorğu büdcəsi (adi səhifə açılışı):
 
@@ -17,12 +24,22 @@ Sorğu büdcəsi (adi səhifə açılışı):
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 
 from django.core.cache import cache
 from django.db import IntegrityError, transaction
+from django.db.models import F, Q, Value
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from ..constants import POPUP_EXEMPT_PREFIXES, POPUP_EXEMPT_SECTIONS, POPUP_MAX_ITEMS, POPUP_SESSION_KEY, Status
+from ..constants import (
+    POPUP_EXEMPT_PREFIXES,
+    POPUP_EXEMPT_SECTIONS,
+    POPUP_MAX_ITEMS,
+    POPUP_SESSION_KEY,
+    PROFILE_SECTION,
+    Status,
+)
 from ..models import Announcement, AnnouncementReceipt
 from . import snapshot
 from .audience import families_only, matches, viewer_for
@@ -45,25 +62,58 @@ def _eligible(request) -> bool:
     return request.method == "GET" and not _path_exempt(request)
 
 
-def _signature(organization, ids) -> str:
-    raw = f"{organization.pk}:{snapshot.version(organization)}:{','.join(sorted(ids))}"
+def _signature(organization, candidates) -> str:
+    """Namizəd dəstinin imzası — məcburi id-lər ayrıca daxildir (bayraq dəyişəndə imza da dəyişir)."""
+    ids = sorted(item["id"] for item in candidates)
+    mandatory = sorted(item["id"] for item in candidates if item.get("req"))
+    raw = f"{organization.pk}:{snapshot.version(organization)}:{','.join(ids)}|req:{','.join(mandatory)}"
     return hashlib.sha1(raw.encode(), usedforsecurity=False).hexdigest()[:16]
 
 
+def _viewing(request) -> str:
+    """Kabinetdə açıq olan elan detalının id-si (``?section=announcements&elan=<id>``), yoxdursa ``""``."""
+    if request.GET.get("section") != PROFILE_SECTION:
+        return ""
+    return str(request.GET.get("elan") or "").strip().lower()
+
+
 def _candidates(request, now) -> list:
-    """Ailəyə uyğun aktiv popup sətirləri (SIFIR sorğu)."""
+    """Ailəyə uyğun aktiv popup sətirləri (SIFIR sorğu). Açıq detalın öz məcburi elanı çıxarılır."""
     families = families_only(getattr(request, "org_memberships", None))
     if not families:
         return []
+    viewing = _viewing(request)
     return [
         item
         for item in snapshot.active_items(request.organization, now)
-        if item.get("pop") and set(item.get("f") or ()) & families
+        if item.get("pop")
+        and set(item.get("f") or ()) & families
+        and not (viewing and item.get("req") and item["id"] == viewing)
     ]
 
 
+def _closed_ids(organization, user, candidates) -> set:
+    """Artıq göstərilməyəcək namizədlər (BİR sorğu): adi popup — görülüb; məcburi — TƏSDİQ edilib."""
+    mandatory = {item["id"] for item in candidates if item.get("req")}
+    rows = (
+        AnnouncementReceipt.objects.filter(
+            organization=organization,
+            user=user,
+            announcement_id__in=[item["id"] for item in candidates],
+        )
+        .filter(Q(popup_seen_at__isnull=False) | Q(acknowledged_at__isnull=False))
+        .values_list("announcement_id", "popup_seen_at", "acknowledged_at")
+    )
+    closed = set()
+    for announcement_id, seen_at, acknowledged_at in rows:
+        key = str(announcement_id)
+        if acknowledged_at is not None or (seen_at is not None and key not in mandatory):
+            closed.add(key)
+    return closed
+
+
 def pending_popups(request) -> list:
-    """Modalda göstəriləcək elanlar (prioritet → yeni birinci); yoxdursa ``[]``."""
+    """Modalda göstəriləcək elanlar (məcburi → prioritet → yeni birinci); yoxdursa ``[]``."""
     if not _eligible(request):
         return []
     now = timezone.now()
@@ -71,20 +121,12 @@ def pending_popups(request) -> list:
     if not candidates:
         return []
     organization, user = request.organization, request.user
-    signature = _signature(organization, [item["id"] for item in candidates])
+    signature = _signature(organization, candidates)
     session = getattr(request, "session", None)
     if session is not None and session.get(POPUP_SESSION_KEY) == signature:
         return []
-    seen = set(
-        str(pk)
-        for pk in AnnouncementReceipt.objects.filter(
-            organization=organization,
-            user=user,
-            announcement_id__in=[item["id"] for item in candidates],
-            popup_seen_at__isnull=False,
-        ).values_list("announcement_id", flat=True)
-    )
-    remaining = [item for item in candidates if item["id"] not in seen]
+    closed = _closed_ids(organization, user, candidates)
+    remaining = [item for item in candidates if item["id"] not in closed]
     if remaining:
         viewer = viewer_for(user, organization, getattr(request, "org_memberships", None))
         remaining = [item for item in remaining if matches(item.get("f"), item.get("u"), viewer)]
@@ -96,7 +138,7 @@ def pending_popups(request) -> list:
     rows = list(
         Announcement.objects.filter(
             organization=organization, pk__in=list(order), status=Status.PUBLISHED, is_deleted=False
-        ).order_by("-priority", "-is_pinned", "-publish_at")[:POPUP_MAX_ITEMS]
+        ).order_by("-requires_ack", "-priority", "-is_pinned", "-publish_at")[:POPUP_MAX_ITEMS]
     )
     for row in rows:
         decorate(row, now)
@@ -145,15 +187,72 @@ def mark_popup_seen(request, announcement_ids) -> int:
     return count
 
 
-def mark_read(request, announcement) -> bool:
-    """``True`` — elan indi ilk dəfə oxundu (sayğac bir azalır)."""
-    newly = bool(_touch(request.organization, request.user, [announcement.pk], "read_at"))
+def _forget_badge(request) -> None:
     cache.delete(_badge_key(request.organization, request.user))
     try:
         del request.user._announcements_badge
     except AttributeError:
         pass
+
+
+def mark_read(request, announcement) -> bool:
+    """``True`` — elan indi ilk dəfə oxundu (sayğac bir azalır)."""
+    newly = bool(_touch(request.organization, request.user, [announcement.pk], "read_at"))
+    _forget_badge(request)
     return newly
+
+
+@dataclass(frozen=True)
+class AckResult:
+    """``mandatory=False`` — elan görünür, amma təsdiq tələb etmir (heç nə yazılmır)."""
+
+    mandatory: bool = True
+    newly: bool = False
+    newly_read: bool = False
+    acknowledged_at: object = None
+
+
+def acknowledge(request, announcement_id) -> AckResult | None:
+    """«Elanı oxudum və tanış oldum» — ``None``: elan yoxdur / istifadəçiyə ünvanlanmayıb (404).
+
+    Yalnız ``published_for`` süzgəcindən keçən (ünvanlanmış, dərc olunmuş, silinməmiş, başqa
+    təşkilatın olmayan) məcburi elan üçün. ``acknowledged_at`` + boşdursa ``popup_seen_at`` /
+    ``read_at`` yazılır. İdempotent: şərtli UPDATE (``acknowledged_at IS NULL``) və
+    ``_get_or_create`` paralel klikdə ikinci yazını no-op edir; ilk təsdiq vaxtı dəyişmir.
+    """
+    from .queries import published_for
+
+    organization, user = request.organization, request.user
+    viewer = viewer_for(user, organization, getattr(request, "org_memberships", None))
+    row = published_for(organization, viewer).filter(pk=announcement_id).values("pk", "requires_ack").first()
+    if row is None:
+        return None
+    if not row["requires_ack"]:
+        return AckResult(mandatory=False)
+    now = timezone.now()
+    receipt, created = _get_or_create(
+        organization, user, row["pk"], {"acknowledged_at": now, "popup_seen_at": now, "read_at": now}
+    )
+    newly, newly_read, acknowledged_at = created, created, receipt.acknowledged_at
+    if not created and receipt.acknowledged_at is None:
+        newly = bool(
+            AnnouncementReceipt.objects.filter(pk=receipt.pk, acknowledged_at__isnull=True).update(
+                acknowledged_at=now,
+                popup_seen_at=Coalesce(F("popup_seen_at"), Value(now)),
+                read_at=Coalesce(F("read_at"), Value(now)),
+                updated_at=now,
+            )
+        )
+        newly_read = newly and receipt.read_at is None
+        acknowledged_at = (
+            now
+            if newly
+            else AnnouncementReceipt.objects.filter(pk=receipt.pk).values_list("acknowledged_at", flat=True).first()
+        )
+    _forget_badge(request)
+    if getattr(request, "session", None) is not None:
+        request.session.pop(POPUP_SESSION_KEY, None)
+    return AckResult(mandatory=True, newly=newly, newly_read=newly_read, acknowledged_at=acknowledged_at)
 
 
 #: Sayğac keşi (Redis): versiya xülasədən — dərc/redaktə hamının açarını köhnəldir; oxu öz açarını silir.
@@ -191,4 +290,4 @@ def badge_count(user, organization, memberships=None) -> int:
     return count
 
 
-__all__ = ["badge_count", "mark_popup_seen", "mark_read", "pending_popups"]
+__all__ = ["AckResult", "acknowledge", "badge_count", "mark_popup_seen", "mark_read", "pending_popups"]

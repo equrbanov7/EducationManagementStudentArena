@@ -205,6 +205,19 @@
     color: var(--ems-success-700, #15803d);
 }
 
+.ann-card.is-ack-pending { border-left-color: var(--ems-warning-800); }
+
+.ann-card__ack {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.ann-card__ack.is-pending { color: var(--ems-warning-800); }
+.ann-card__ack.is-done { color: var(--ems-success-700); }
+.ann-toggle--ack i { color: var(--ems-warning-800); }
+
 /* ── Çiplər ────────────────────────────────────────────────────────────── */
 .ann-chip {
     display: inline-flex;
@@ -227,6 +240,7 @@
 .ann-chip--high { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 .ann-chip--critical { border-color: var(--ems-danger-bd); background: var(--ems-danger-bg); color: var(--ems-danger-700); }
 .ann-chip--muted { color: var(--ems-neutral-500); }
+.ann-chip--mandatory { border-color: var(--ems-warning-800); background: var(--ems-warning-800); color: var(--ems-neutral-0); }
 
 .ann-cat--academic { border-color: var(--ems-sky-100); background: var(--ems-sky-100); color: var(--ems-sky-800); }
 .ann-cat--exam { border-color: var(--ems-violet-100); background: var(--ems-violet-100); color: var(--ems-violet-800); }
@@ -446,6 +460,91 @@
     gap: 6px;
 }
 
+/* ── Məcburi elanın təsdiq bloku (detal) ──────────────────────────────── */
+.ann-ack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: var(--ems-sp-5, 14px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-warning-bd);
+    border-left: 4px solid var(--ems-warning-800);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-warning-bg);
+}
+
+.ann-ack__head { display: flex; align-items: flex-start; gap: 12px; }
+
+.ann-ack__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ems-warning-800);
+    color: var(--ems-neutral-0);
+}
+
+.ann-ack__text { min-width: 0; }
+.ann-ack__title { margin: 0; font-size: var(--ems-fs-md, 14px); font-weight: 700; color: var(--ems-warning-800); }
+.ann-ack__hint { margin: 2px 0 0; font-size: var(--ems-fs-base, 13px); line-height: 1.5; color: var(--ems-neutral-700); }
+
+.ann-ack__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+}
+
+.ann-ack__controls[hidden] { display: none; }
+
+.ann-ack__check {
+    display: flex;
+    flex: 1 1 240px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-800);
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ann-ack__check:has(input:checked) { border-color: var(--ems-primary-300); background: var(--ems-primary-50); }
+
+.ann-ack__check input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary);
+}
+
+.ann-ack__submit { min-height: 44px; justify-content: center; }
+.ann-ack__result { margin: 0; font-weight: 600; color: var(--ems-success-700); }
+.ann-ack__result.is-error { color: var(--ems-danger-700); }
+
+.ann-ack--done { border-color: var(--ems-success-bd); border-left-color: var(--ems-success-700); background: var(--ems-success-bg); }
+
+p.ann-ack {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    color: var(--ems-success-700);
+}
+
+.ann-ack-note { display: flex; align-items: flex-start; gap: 8px; }
+.ann-ack-note i { margin-top: 4px; color: var(--ems-warning-800); }
+
 .ann-apply__actions {
     display: flex;
     justify-content: flex-end;
@@ -456,6 +555,7 @@
     .ann-detail__title { font-size: var(--ems-fs-xl, 18px); }
     .ann-deadline-box__left { margin-left: 0; }
     .ann-head__manage { width: 100%; justify-content: center; }
+    .ann-ack__submit { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

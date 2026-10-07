@@ -1,0 +1,43 @@
+{% load i18n %}
+{% comment %}Məcburi elanın alıcı siyahısı (`recipients.recipient_page`) — həm ilk render, həm `manage_recipients` JSON cavabı.{% endcomment %}
+<p class="ann-count">{% blocktrans trimmed count n=ack_page.total context "announcements.manage" %}{{ n }} nəfər{% plural %}{{ n }} nəfər{% endblocktrans %}</p>
+{% if ack_page.items %}
+<ul class="annm-people" role="list">
+    {% for person in ack_page.items %}
+    <li class="annm-person">
+        <span class="annm-person__avatar" aria-hidden="true">{{ person.initials }}</span>
+        <span class="annm-person__who">
+            <span class="annm-person__name">{{ person.name }}</span>
+            <span class="annm-person__login">{{ person.username }}</span>
+        </span>
+        {% if person.ack_at %}
+        <span class="annm-person__state is-acked"><i class="fas fa-circle-check" aria-hidden="true"></i> {% blocktrans trimmed with day=person.ack_at|date:"d.m.Y H:i" context "announcements.manage" %}Təsdiq edib: {{ day }}{% endblocktrans %}</span>
+        {% elif person.read_at %}
+        <span class="annm-person__state is-pending"><i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Oxuyub, təsdiq gözləyir" context "announcements.manage" %}</span>
+        {% else %}
+        <span class="annm-person__state is-pending"><i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Təsdiq gözləyir" context "announcements.cabinet" %}</span>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% if ack_page.pages > 1 %}
+<nav class="ann-pager" aria-label="{% trans 'Səhifələr' context 'announcements.cabinet' %}">
+    <button type="button" class="ems-btn ems-btn--sm" data-annm-ack-page="{{ ack_page.page|add:'-1' }}"{% if ack_page.page <= 1 %} disabled{% endif %}><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "announcements.cabinet" %}</button>
+    <span class="ann-pager__info">{% blocktrans trimmed with page=ack_page.page pages=ack_page.pages context "announcements.cabinet" %}{{ page }} / {{ pages }}{% endblocktrans %}</span>
+    <button type="button" class="ems-btn ems-btn--sm" data-annm-ack-page="{{ ack_page.page|add:'1' }}"{% if ack_page.page >= ack_page.pages %} disabled{% endif %}>{% trans "Növbəti" context "announcements.cabinet" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+</nav>
+{% endif %}
+{% else %}
+<div class="ems-empty ann-empty annm-people__empty" role="status">
+    <span class="ems-empty-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+    {% if ack_page.q %}
+    <p class="ems-empty-title">{% trans "Axtarışa uyğun alıcı tapılmadı" context "announcements.manage" %}</p>
+    {% elif ack_page.status == "pending" %}
+    <p class="ems-empty-title">{% trans "Hədəf auditoriyanın hamısı təsdiq edib" context "announcements.manage" %}</p>
+    {% elif ack_page.status == "acked" %}
+    <p class="ems-empty-title">{% trans "Hələ heç kim təsdiq etməyib" context "announcements.manage" %}</p>
+    {% else %}
+    <p class="ems-empty-title">{% trans "Hədəf auditoriyada heç kim yoxdur" context "announcements.manage" %}</p>
+    {% endif %}
+</div>
+{% endif %}

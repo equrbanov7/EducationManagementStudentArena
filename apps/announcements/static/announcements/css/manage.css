@@ -285,6 +285,222 @@
 .annm-unit__type { margin-left: auto; font-size: var(--ems-fs-xs, 11px); color: var(--ems-neutral-500); }
 .annm-picker__empty { padding: 12px; color: var(--ems-neutral-500); }
 
+/* ── «Kim görəcək» xülasəsi ─────────────────────────────────────────── */
+.annm-summary {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.annm-summary__icon { flex: 0 0 auto; margin-top: 3px; }
+.annm-summary__text { min-width: 0; }
+.annm-summary[aria-busy="true"] .annm-summary__text { opacity: 0.6; }
+.annm-summary.is-warning { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+
+/* ── Popup rejimi — radio kartlar (native select yox) ─────────────────── */
+.annm-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: var(--ems-sp-3, 10px);
+    margin-top: 6px;
+}
+
+.annm-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl, 14px);
+    background: var(--ems-bg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.annm-choice:hover { border-color: var(--ems-primary-300); }
+
+.annm-choice__input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--ems-primary);
+}
+
+.annm-choice__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.annm-choice__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.annm-choice__hint {
+    font-size: var(--ems-fs-base, 13px);
+    line-height: 1.45;
+    color: var(--ems-neutral-600);
+}
+
+.annm-choice:has(input:checked) {
+    border-color: var(--ems-primary);
+    background: var(--ems-primary-50);
+    box-shadow: inset 0 0 0 1px var(--ems-primary);
+}
+
+.annm-choice--mandatory .annm-choice__title i { color: var(--ems-warning-800); }
+
+.annm-choice--mandatory:has(input:checked) {
+    border-color: var(--ems-warning-800);
+    background: var(--ems-warning-bg);
+    box-shadow: inset 0 0 0 1px var(--ems-warning-800);
+}
+
+.annm-choice:has(input:focus-visible) { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+
+/* ── KPI + məcburi elanın təsdiq statistikası ─────────────────────────── */
+.annm-kpi__of { font-size: var(--ems-fs-md, 14px); font-weight: 600; color: var(--ems-neutral-500); }
+.annm-stats__ack dd { color: var(--ems-success-700); }
+
+.annm-ack__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 16px;
+}
+
+.annm-ack__total { margin: 0; font-size: var(--ems-fs-md, 14px); color: var(--ems-neutral-700); }
+.annm-ack__total strong { font-size: var(--ems-fs-lg, 16px); color: var(--ems-neutral-900); }
+
+.annm-ack__bar {
+    width: 100%;
+    height: 8px;
+    border: 0;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+    appearance: none;
+}
+
+.annm-ack__bar::-webkit-progress-bar { background: var(--ems-neutral-100); border-radius: var(--ems-r-pill, 999px); }
+.annm-ack__bar::-webkit-progress-value { background: var(--ems-success-600); border-radius: var(--ems-r-pill, 999px); }
+.annm-ack__bar::-moz-progress-bar { background: var(--ems-success-600); border-radius: var(--ems-r-pill, 999px); }
+
+.annm-ack__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3, 10px);
+}
+
+.annm-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.annm-tab {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 6px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.annm-tab input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.annm-tab:has(input:checked) { border-color: var(--ems-primary); background: var(--ems-primary); color: var(--ems-neutral-0); }
+.annm-tab:has(input:focus-visible) { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+
+.annm-tab__n {
+    margin-left: 4px;
+    padding: 0 7px;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-variant-numeric: tabular-nums;
+}
+
+.annm-tab:has(input:checked) .annm-tab__n { background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+
+.annm-ack__search { flex: 1 1 220px; }
+
+.annm-people {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    overflow: hidden;
+}
+
+.annm-person {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--ems-border);
+}
+
+.annm-person:first-child { border-top: 0; }
+
+.annm-person__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm, 12px);
+    font-weight: 700;
+}
+
+.annm-person__who { display: flex; flex: 1 1 180px; flex-direction: column; min-width: 0; }
+.annm-person__name { font-weight: 600; color: var(--ems-neutral-900); overflow-wrap: anywhere; }
+.annm-person__login { font-size: var(--ems-fs-sm, 12px); color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+
+.annm-person__state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-sm, 12px);
+    font-weight: 600;
+}
+
+.annm-person__state.is-acked { color: var(--ems-success-700); }
+.annm-person__state.is-pending { color: var(--ems-warning-800); }
+
 .annm-files {
     display: flex;
     flex-direction: column;

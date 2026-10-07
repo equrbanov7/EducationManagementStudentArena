@@ -14,7 +14,7 @@
     window.__emsAnnouncementsList = true;
 
     var DEBOUNCE_MS = 300;
-    var FIELDS = ["q", "category", "state", "sort", "unread", "deadline"];
+    var FIELDS = ["q", "category", "state", "sort", "unread", "deadline", "pending"];
 
     function rootOf(node) {
         return node && node.closest ? node.closest("[data-ann-root]") : null;
