@@ -11,7 +11,7 @@ asset yüklənmir. Bootstrap modalı: role=dialog, aria-modal, fokus tələsi.
 {% announcements_popup as ann_popup %}
 {% if ann_popup %}
 {% with locked=ann_popup.0.requires_ack %}
-<link rel="stylesheet" href="{% static 'announcements/css/popup.css' %}?v=20261007-1">
+<link rel="stylesheet" href="{% static 'announcements/css/popup.css' %}?v=20261007-2">
 <div class="modal fade ann-popup{% if locked %} is-locked{% endif %}" id="annPopup" tabindex="-1" role="dialog" aria-modal="true"
      aria-labelledby="annPopupHeading" data-ann-popup data-bs-backdrop="static"
      data-seen-url="{% url 'announcements:popup_seen' %}"

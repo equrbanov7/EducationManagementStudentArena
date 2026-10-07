@@ -231,10 +231,39 @@
 .ann-popup .ann-chip--high,
 .ann-popup .ann-deadline--soon { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 
+/* ── Responsivlik (2026-10-07) ─────────────────────────────────────────────
+   Modal heç vaxt viewport-dan hündür olmur (`modal-dialog-scrollable`): mətn gövdədə sürüşür,
+   başlıq və footer (checkbox + təsdiq) həmişə görünür. Toxunma hədəfləri ≥ 40px. */
+.ann-popup__title { overflow-wrap: anywhere; }
+.ann-popup .ann-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+.ann-popup .modal-header .ann-popup__x {
+    box-sizing: content-box;
+    width: 16px;
+    height: 16px;
+    padding: 12px;
+    margin: -8px -8px -8px auto;
+}
+
+.ann-popup__steps .btn { min-width: 40px; min-height: 40px; }
+
+/* Telefon: footer 4 sətir əvəzinə 3 — checkbox, tam enli «Təsdiq edirəm», sonra bir sətirdə
+   stepper + «Bağla» / «Ətraflı bax». `display: contents` düymələri footer-in flex elementləri edir. */
 @media (max-width: 575px) {
     .ann-popup__body { padding: var(--ems-sp-5, 14px); }
-    .ann-popup__steps .btn { min-width: 44px; min-height: 40px; }
-    .ann-popup__actions { flex: 1 1 100%; margin-left: 0; }
-    .ann-popup__actions > .btn { flex: 1 1 140px; }
-    .ann-popup__actions > [data-ann-popup-confirm] { flex-basis: 100%; order: -1; }
+    .ann-popup__header { padding: 12px 14px; }
+    .ann-popup__footer { padding: 10px 14px 12px; }
+    .ann-popup__actions { display: contents; }
+    .ann-popup__ack { order: 0; }
+    .ann-popup__actions > [data-ann-popup-confirm] { flex: 1 1 100%; order: 1; min-height: 44px; }
+    .ann-popup__steps { order: 2; margin-right: 0; }
+    .ann-popup__actions > .btn:not([data-ann-popup-confirm]) { flex: 1 1 auto; order: 3; min-height: 44px; }
+}
+
+/* Alçaq ekran (telefon üfüqi): ikinci dərəcəli faktlar gizlənir — mətnə yer qalır. */
+@media (max-height: 560px) {
+    .ann-popup__facts { display: none; }
+    .ann-popup__header { padding-top: 8px; padding-bottom: 8px; }
+    .ann-popup__icon { flex-basis: 32px; width: 32px; height: 32px; font-size: 15px; }
+    .ann-popup__check { min-height: 40px; padding-top: 6px; padding-bottom: 6px; }
 }

@@ -490,13 +490,7 @@
 .annm-person__name { font-weight: 600; color: var(--ems-neutral-900); overflow-wrap: anywhere; }
 .annm-person__login { font-size: var(--ems-fs-sm, 12px); color: var(--ems-neutral-500); overflow-wrap: anywhere; }
 
-.annm-person__state {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: var(--ems-fs-sm, 12px);
-    font-weight: 600;
-}
+.annm-person__state { display: inline-flex; align-items: center; gap: 6px; font-size: var(--ems-fs-sm, 12px); font-weight: 600; }
 
 .annm-person__state.is-acked { color: var(--ems-success-700); }
 .annm-person__state.is-pending { color: var(--ems-warning-800); }
@@ -510,7 +504,9 @@
     list-style: none;
 }
 
-.annm-files li { display: flex; align-items: center; gap: 8px; }
+.annm-files li { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.annm-files .ann-file { flex: 0 1 auto; }
+.annm-files .ems-iconbtn { width: 40px; height: 40px; }
 
 .annm-actions,
 .annm-status__actions,
@@ -539,11 +535,58 @@
     color: var(--ems-neutral-500);
 }
 
+/* ── Responsivlik (2026-10-07) ─────────────────────────────────────────────
+   Bax `announcements.css` başlığı: düzülüş öz-özünə sınır (1024-də açıq sidebar məzmunu
+   ~670px edir), telefon qaydaları 640px-dədir; toxunma hədəfləri ≥ 40px; sabit en yoxdur. */
+.annm-row__main,
+.annm-row__chips,
+.annm-ack__results,
+.annm-people { min-width: 0; }
+
+.annm-row__title { display: block; margin: -8px 0; padding: 8px 0; }
+
+.annm-stats { flex-wrap: wrap; }
+
+.annm-crumbs a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+
+.annm-family,
+.annm-mode,
+.annm-switch { min-height: 40px; }
+
+.annm-unit label { min-height: 40px; }
+.annm-unit__name { min-width: 0; overflow-wrap: anywhere; }
+.annm-unit__type { flex: 0 0 auto; }
+
 @media (max-width: 640px) {
     .annm-card { padding: var(--ems-sp-5, 14px); }
+    .annm-row { padding: var(--ems-sp-4, 12px); }
     .annm-stats { width: 100%; justify-content: space-around; }
-    .annm-actions .ems-btn { flex: 1 1 auto; justify-content: center; }
+    .annm-head__actions { width: 100%; }
+    .annm-head__actions .ems-btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+
+    /* KPI-lər telefonda 5 tam enli kafel əvəzinə yığcam 2 sütun; «Təsdiq edən» tam en. */
+    .ems-kpis.annm-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ems-sp-3, 10px); }
+    .annm-kpis .ems-kpi { padding: 12px 14px; }
+    .annm-kpis .annm-kpi--ack { grid-column: 1 / -1; }
+
+    /* Saxla / dərc et: telefonda yapışqan zolaq sahələri örtürdü — formanın sonunda, əsas düymə
+       tam enli və birinci. */
+    .annm-actions { position: static; padding: 4px 0 0; background: none; }
+    .annm-actions .ems-btn { flex: 1 1 100%; justify-content: center; min-height: 44px; }
+    .annm-actions .ems-btn--primary { order: -1; }
+
+    .annm-modes .annm-mode { flex: 1 1 100%; }
+    .annm-status__actions > .ems-btn,
+    .annm-status__form { flex: 1 1 100%; }
+    .annm-status__form .ems-btn,
+    .annm-status__actions > .ems-btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
     .annm-status__delete { margin-left: 0; }
     .annm-deleted__actions { width: 100%; }
     .annm-deleted__actions .ems-btn { flex: 1 1 auto; justify-content: center; }
+
+    .annm-ack__search { flex-basis: 100%; }
+    .annm-tabs { width: 100%; }
+    .annm-tab { flex: 1 1 auto; justify-content: center; }
+    .annm-person__state { flex-basis: 100%; padding-left: 44px; }
+    .annm-files .ann-file { flex: 1 1 auto; }
 }
