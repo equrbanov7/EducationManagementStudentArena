@@ -10,6 +10,7 @@ from django.core.cache import caches
 from django.core.exceptions import ValidationError
 from django.core.signing import BadSignature
 
+from apps.accounts.identity import login_rate_identity
 from apps.accounts.models import EmailOTP
 from core import runtime_settings
 from core.helpers import _safe_same_origin_redirect_path
@@ -108,7 +109,7 @@ def _login_limit_keys(request, username):
     keçirdi; indi bir hesab üçün saatda ən çox 20 uğursuz cəhd mümkündür.
     """
     device_id = _get_auth_device_id(request)
-    normalized_username = normalize_rate_identity(username)
+    normalized_username = login_rate_identity(username)
     client_ip = (get_client_ip(request) or "unknown").strip().lower()
     ip_key = f"ip:{client_ip}"
     # 2026-10-03: limitlər «Sistem tənzimləmələri»ndən (RİM rəhbəri dəyişir); yoxdursa mühitin defoltu.
@@ -140,7 +141,7 @@ def _note_failed_login_ip(request, username):
     threshold = int(getattr(settings, "LOGIN_ACCOUNT_DISTINCT_IP_ALERT", LOGIN_ACCOUNT_DISTINCT_IP_ALERT_DEFAULT))
     if threshold <= 0:
         return
-    normalized_username = normalize_rate_identity(username)
+    normalized_username = login_rate_identity(username)
     digest = hashlib.sha256(normalized_username.encode("utf-8")).hexdigest()
     ip_digest = hashlib.sha256(_client_ip_key(request).encode("utf-8")).hexdigest()[:16]
     track_key = f"accounts.login.account_ips:{digest}"
@@ -182,7 +183,7 @@ def _clear_login_rate_limits_after_password_reset(request, user):
     }
     for identity in identities:
         if identity:
-            normalized = normalize_rate_identity(identity)
+            normalized = login_rate_identity(identity)
             clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized)
             clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, device_id, normalized)
             clear_rate_limit(LOGIN_LIMIT_SCOPE_ACCOUNT, normalized)
@@ -225,7 +226,7 @@ def _superadmin_escape_under_login_limit(request, username, password, limit_keys
     * yalnız superadmin hesabı üçün düzgün parol qaçışa icazə verir.
     """
     escape_rate = getattr(settings, "LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT", LOGIN_SUPERADMIN_ESCAPE_RATE_LIMIT_DEFAULT)
-    escape_key = (_client_ip_key(request), normalize_rate_identity(username))
+    escape_key = (_client_ip_key(request), login_rate_identity(username))
     escape_limited, _retry_after = is_rate_limited(LOGIN_LIMIT_SCOPE_SUPERADMIN_ESCAPE, escape_rate, *escape_key)
     if escape_limited:
         return None

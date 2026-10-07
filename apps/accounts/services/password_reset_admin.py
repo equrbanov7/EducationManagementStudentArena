@@ -44,10 +44,10 @@ from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
 from core.constants import AuditAction
-from core.rate_limit import clear_rate_limit, normalize_rate_identity, record_rate_limit_hit
+from core.rate_limit import clear_rate_limit, record_rate_limit_hit
 from core.utils import get_client_ip
 
-from ..identity import user_access_is_login_blocked
+from ..identity import login_rate_identity, user_access_is_login_blocked
 from .rim.policy import (
     RimAccessError,
     RimActor,
@@ -306,7 +306,7 @@ def _clear_login_limits(request, target) -> None:
     for identity in {getattr(target, "username", ""), getattr(target, "email", "")}:
         if not identity:
             continue
-        normalized = normalize_rate_identity(identity)
+        normalized = login_rate_identity(identity)
         clear_rate_limit(LOGIN_LIMIT_SCOPE_ACCOUNT, normalized)
         clear_rate_limit(LOGIN_LIMIT_SCOPE_IDENTITY, ip_key, normalized)
 
