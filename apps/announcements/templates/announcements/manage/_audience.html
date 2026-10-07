@@ -1,7 +1,9 @@
 {% load i18n %}
 {% comment %}Auditoriya seçicisi: rol ailələri (tələbə / müəllim / əməkdaş) × bölmələr. Bölmə siyahısı
 menecerin ƏHATƏSİ ilə süzülüb (dekan yalnız öz fakültəsinin ağacını görür); server yenə yoxlayır.
-Seçilməyən bölmə = bütün təşkilat (yalnız təşkilat səviyyəli menecer üçün).{% endcomment %}
+Seçilməyən bölmə = bütün təşkilat (yalnız təşkilat səviyyəli menecer üçün).
+Altdakı «Kim görəcək: … — təxminən N nəfər» xülasəsi `manage.js` ilə debounce-lu GET-dən
+(`announcements:manage_audience_count`, əhatə serverdə yoxlanılır) gəlir.{% endcomment %}
 <section class="annm-card" aria-labelledby="annm-audience-title" data-annm-audience>
     <h2 class="annm-card__title" id="annm-audience-title">{% trans "Kimə göstərilsin" context "announcements.manage" %}</h2>
     <fieldset class="annm-fieldset">
@@ -34,8 +36,10 @@ Seçilməyən bölmə = bütün təşkilat (yalnız təşkilat səviyyəli menec
             </ul>
         </div>
     </div>
-    <label class="annm-switch annm-switch--popup">
-        <input type="checkbox" name="show_as_popup" value="1"{% if values.show_as_popup %} checked{% endif %}>
-        <span><strong>{% trans "Girişdə popup kimi göstər" context "announcements.manage" %}</strong> — {% trans "hər istifadəçiyə yalnız BİR dəfə; bağlayandan sonra bir daha çıxmır. İmtahan səhifələrində göstərilmir." context "announcements.manage" %}</span>
-    </label>
+    <p class="annm-summary" data-annm-summary data-url="{% url 'announcements:manage_audience_count' %}"
+       data-msg-error="{% trans 'Kim görəcək: say hesablanmadı — bir az sonra yenidən yoxlayın.' context 'announcements.manage' %}"
+       role="status" aria-live="polite">
+        <i class="fas fa-users annm-summary__icon" aria-hidden="true"></i>
+        <span class="annm-summary__text" data-annm-summary-text>{% trans "Kim görəcək: hesablanır…" context "announcements.manage" %}</span>
+    </p>
 </section>

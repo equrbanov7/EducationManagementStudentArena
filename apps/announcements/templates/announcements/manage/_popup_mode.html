@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}Popup rejimi — üç radio kart (native select YOX): popup yoxdur / bir dəfəlik / məcburi.
+Server `popup_mode`-u `show_as_popup` + `requires_ack`-a çevirir (forms.AnnouncementForm); məcburi ⇒ popup.{% endcomment %}
+<section class="annm-card" aria-labelledby="annm-popup-title">
+    <h2 class="annm-card__title" id="annm-popup-title">{% trans "Popup və təsdiq" context "announcements.manage" %}</h2>
+    <fieldset class="annm-fieldset">
+        <legend class="ems-field__label">{% trans "Girişdə necə göstərilsin" context "announcements.manage" %}</legend>
+        <div class="annm-choices">
+            {% for value, label in popup_modes %}
+            <label class="annm-choice annm-choice--{{ value }}">
+                <input type="radio" class="annm-choice__input" name="popup_mode" value="{{ value }}"{% if values.popup_mode == value or not values.popup_mode and value == "none" %} checked{% endif %} aria-describedby="annm-popup-{{ value }}-hint">
+                <span class="annm-choice__body">
+                    <span class="annm-choice__title">
+                        <i class="fas {% if value == 'mandatory' %}fa-shield-halved{% elif value == 'once' %}fa-window-restore{% else %}fa-bell-slash{% endif %}" aria-hidden="true"></i>
+                        {{ label }}
+                    </span>
+                    <span class="annm-choice__hint" id="annm-popup-{{ value }}-hint">{% if value == "mandatory" %}{% trans "İstifadəçi «Tanış oldum» təsdiqi vermədən bağlaya bilməz — təsdiq edənədək hər səhifədə açılır." context "announcements.manage" %}{% elif value == "once" %}{% trans "Növbəti girişdə bir dəfə açılır — istifadəçi bağlaya bilər, sonra bir daha çıxmır." context "announcements.manage" %}{% else %}{% trans "Elan yalnız «Elanlar» bölməsində və sayğacda görünür." context "announcements.manage" %}{% endif %}</span>
+                </span>
+            </label>
+            {% endfor %}
+        </div>
+    </fieldset>
+    <p class="ems-field__hint">{% trans "İmtahan səhifələrində popup göstərilmir. Məcburi elanı kimin təsdiq etdiyini redaktə səhifəsində izləyə bilərsiniz." context "announcements.manage" %}</p>
+</section>

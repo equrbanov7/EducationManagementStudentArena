@@ -47,6 +47,7 @@ _FIELDS = (
     "priority",
     "is_pinned",
     "show_as_popup",
+    "requires_ack",
     "publish_at",
     "expires_at",
     "deadline_at",
@@ -99,6 +100,9 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
     announcement = announcement or Announcement(organization=organization, created_by=user)
     for field in _FIELDS:
         setattr(announcement, field, data.get(field))
+    announcement.requires_ack = bool(announcement.requires_ack)
+    # Məcburi ⇒ popup (forma da belə qurur; servis hər çağırana qarşı təmin edir — ann_ack_needs_popup).
+    announcement.show_as_popup = bool(announcement.show_as_popup) or announcement.requires_ack
     announcement.summary = (announcement.summary or "").strip()
     announcement.body = (announcement.body or "").strip()
     announcement.audience_families = families
@@ -119,7 +123,13 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
             organization,
             AuditAction.CREATE if creating else AuditAction.UPDATE,
             announcement,
-            {"status": announcement.status, "families": families, "units": units, "popup": announcement.show_as_popup},
+            {
+                "status": announcement.status,
+                "families": families,
+                "units": units,
+                "popup": announcement.show_as_popup,
+                "mandatory": announcement.requires_ack,
+            },
         )
     snapshot.sync_snapshot(organization)
     return announcement
@@ -328,8 +338,12 @@ def manage_list(organization, scope, user, *, q="", state="all", category="", pa
     stats = receipt_stats([row.pk for row in rows])
     for row in rows:
         row.state = row.effective_state(now)
-        row.stats = stats.get(row.pk, {"seen": 0, "read": 0, "applied": 0})
+        row.stats = stats.get(row.pk, dict(EMPTY_STATS))
     return {"items": rows, "total": total, "page": page, "pages": pages}
+
+
+#: Qəbzi olmayan elanın statistikası (şablonlar bütün açarları gözləyir).
+EMPTY_STATS = {"seen": 0, "read": 0, "applied": 0, "acked": 0}
 
 
 def receipt_stats(announcement_ids) -> dict:
@@ -342,45 +356,21 @@ def receipt_stats(announcement_ids) -> dict:
             seen=Count("pk", filter=Q(popup_seen_at__isnull=False)),
             read=Count("pk", filter=Q(read_at__isnull=False)),
             applied=Count("pk", filter=Q(applied_at__isnull=False)),
+            acked=Count("pk", filter=Q(acknowledged_at__isnull=False)),
         )
     )
     return {row["announcement_id"]: row for row in rows}
 
 
 def targeted_count(announcement) -> int:
-    """Hədəf auditoriyanın təxmini sayı (aktiv üzvlüklər; detal səhifəsində bir dəfə hesablanır)."""
-    from django.apps import apps as django_apps
+    """Hədəf auditoriyanın təxmini sayı — bir ``COUNT`` sorğusu (bax ``recipients.targeted_users``)."""
+    from .recipients import audience_count
 
-    from .audience import family_of
-
-    Membership = django_apps.get_model("organizations", "Membership")
-    families = set(announcement.audience_families or [])
-    units = {str(unit) for unit in announcement.audience_units or []}
-    rows = Membership.objects.filter(
-        organization_id=announcement.organization_id, is_active=True, user__is_active=True
-    ).values_list("user_id", "role__name", "scope_unit__path")
-    students, others = set(), set()
-    for user_id, role_name, path in rows:
-        family = family_of(role_name)
-        if family not in families:
-            continue
-        if family == "students":
-            students.add(user_id)
-        elif not units or set((path or "").split("/")) & units:
-            others.add(user_id)
-    if units and students:
-        StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
-        matched = set()
-        for user_id, path in StudentAcademicRecord.objects.filter(
-            organization_id=announcement.organization_id, is_active=True, student_id__in=students
-        ).values_list("student_id", "group__path"):
-            if set((path or "").split("/")) & units:
-                matched.add(user_id)
-        students = matched
-    return len(students | others)
+    return audience_count(announcement.organization_id, announcement.audience_families, announcement.audience_units)
 
 
 __all__ = [
+    "EMPTY_STATS",
     "add_attachments",
     "is_hard_delete",
     "manage_list",

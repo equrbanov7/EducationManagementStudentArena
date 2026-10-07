@@ -1,6 +1,6 @@
 {% load i18n %}
 {% comment %}Filtr zolağı — axtarış (300 ms debounce, serverdə dözümlü), kateqoriya, vəziyyət, sıralama,
-«Oxunmamış» və «Son tarixli» açarları. Native select YOXDUR — layihənin bootstrap select komponenti.{% endcomment %}
+«Oxunmamış», «Son tarixli» və «Təsdiq gözləyənlər» (məcburi, hələ təsdiqlənməmiş) açarları. Native select YOXDUR — layihənin bootstrap select komponenti.{% endcomment %}
 <form class="ann-filters" data-ann-filters role="search" aria-label="{% trans 'Elan filtrləri' context 'announcements.cabinet' %}" novalidate>
     <div class="ann-filters__search">
         <i class="fas fa-magnifying-glass ann-filters__search-icon" aria-hidden="true"></i>
@@ -34,5 +34,6 @@
     <div class="ann-filters__toggles">
         <label class="ann-toggle"><input type="checkbox" name="unread" value="1"{% if params.unread %} checked{% endif %}> <span>{% trans "Oxunmamış" context "announcements.cabinet" %}</span></label>
         <label class="ann-toggle"><input type="checkbox" name="deadline" value="1"{% if params.has_deadline %} checked{% endif %}> <span>{% trans "Son tarixli" context "announcements.cabinet" %}</span></label>
+        <label class="ann-toggle ann-toggle--ack"><input type="checkbox" name="pending" value="1"{% if params.pending %} checked{% endif %}> <span><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Təsdiq gözləyənlər" context "announcements.cabinet" %}</span></label>
     </div>
 </form>

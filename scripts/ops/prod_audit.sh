@@ -81,6 +81,66 @@ if [ -n "${GITHUB_WORKSPACE:-}" ] && [ -f "$GITHUB_WORKSPACE/scripts/deploy/rsyn
 fi
 for f in docker/nginx/certs/origin.key; do [ -f "$f" ] && { p=$(stat -c %a "$f"); [ "$p" = "600" ] || [ "$p" = "640" ] && ok "$f icazəsi $p" || warn "$f icazəsi $p"; }; done
 
+# ─────────────────────────────────────────────────────────────────────────────
+# 4a. Təhlükəsizlik auditi 2026-10-07: exporter-lər least-privilege girişlə, promtail
+# xam docker.sock-suz. Sirr ÇAP OLUNMUR: konteyner mühitindən yalnız istifadəçi adı
+# daşıyan açarlar oxunur, connection string-dən yalnız istifadəçi hissəsi kəsilir.
+# ─────────────────────────────────────────────────────────────────────────────
+section "4a. Monitorinq: exporter girişləri və Docker API (least privilege)"
+# cenv SERVİS AÇAR → konteynerin həmin mühit dəyişəni (yalnız sirr OLMAYAN açarlar üçün çağırın).
+cenv() { local id; id=$($COMPOSE ps -q "$1" 2>/dev/null | head -1); [ -n "$id" ] || return 0; docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$id" 2>/dev/null | sed -n "s/^$2=//p" | head -1; }
+OWNER_DB="$(dotenv POSTGRES_USER)"
+[ -n "$(dotenv MONITOR_DB_PASSWORD)" ] && ok "MONITOR_DB_PASSWORD .env-də var (dəyər göstərilmir)" || warn "MONITOR_DB_PASSWORD .env-də yoxdur — prod-secrets-generate key=MONITOR_DB_PASSWORD, sonra deploy"
+[ -n "$(dotenv REDIS_MONITOR_PASSWORD)" ] && ok "REDIS_MONITOR_PASSWORD .env-də var (dəyər göstərilmir)" || warn "REDIS_MONITOR_PASSWORD .env-də yoxdur — prod-secrets-generate key=REDIS_MONITOR_PASSWORD, sonra deploy"
+PGX_USER="$(cenv postgres_exporter DATA_SOURCE_USER)"
+if [ -z "$PGX_USER" ]; then
+  warn "postgres_exporter işləmir və ya DATA_SOURCE_USER oxunmadı"
+elif [ "$PGX_USER" = "$OWNER_DB" ]; then
+  warn "postgres_exporter owner rolu ($PGX_USER) ilə qoşulur — monitor rolu aktiv deyil (açar yoxdur və ya deploy fallback etdi; deploy logunda «Monitoring:» sətrinə baxın)"
+elif ! [[ "$PGX_USER" =~ ^[a-z_][a-z0-9_]*$ ]]; then
+  bad "postgres_exporter istifadəçi adı gözlənilməzdir"
+else
+  ROLEATTR=$($COMPOSE exec -T postgres sh -c "psql -X -At -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"SELECT rolsuper::int::text || rolbypassrls::int::text || pg_has_role(rolname, 'pg_monitor', 'MEMBER')::int::text FROM pg_roles WHERE rolname = '${PGX_USER}'\"" 2>/dev/null | tr -d '\r')
+  [ "$ROLEATTR" = "001" ] && ok "postgres_exporter least-privilege rolu ilə: $PGX_USER (NOSUPERUSER NOBYPASSRLS, pg_monitor)" || bad "postgres_exporter rolu $PGX_USER gözlənilən deyil (super/bypassrls/pg_monitor = ${ROLEATTR:-oxunmadı})"
+fi
+# `sed -n …p`: uyğun gəlməyən (parollu) connection string heç vaxt çap olunmur — yalnız istifadəçi adı.
+PGBX_USER="$(cenv pgbouncer_exporter PGBOUNCER_EXPORTER_CONNECTION_STRING | sed -nE 's#^[a-z]+://([A-Za-z0-9_]*):.*#\1#p')"
+if [ -z "$PGBX_USER" ]; then
+  warn "pgbouncer_exporter işləmir və ya istifadəçi oxunmadı"
+elif [ "$PGBX_USER" = "$OWNER_DB" ]; then
+  warn "pgbouncer_exporter owner (pgbouncer admin_users) ilə qoşulur — monitor istifadəçisi aktiv deyil"
+else
+  STATS=$($COMPOSE exec -T pgbouncer sh -c 'grep -E "^(stats_users|admin_users) = " /etc/pgbouncer/pgbouncer.ini' 2>/dev/null | tr -d '\r')
+  if printf '%s\n' "$STATS" | grep -Eq "^stats_users = (.*,)?${PGBX_USER}(,.*)?$" && ! printf '%s\n' "$STATS" | grep -Eq "^admin_users = (.*,)?${PGBX_USER}(,.*)?$"; then
+    ok "pgbouncer_exporter yalnız stats_users ilə: $PGBX_USER"
+  else
+    bad "pgbouncer_exporter istifadəçisi $PGBX_USER pgbouncer stats_users-də yoxdur və ya admin_users-dədir"
+  fi
+fi
+RDX_USER="$(cenv redis_exporter REDIS_USER)"
+if [ "$RDX_USER" = "monitor" ]; then
+  $COMPOSE exec -T redis redis-cli --no-auth-warning ACL USERS 2>/dev/null | tr -d '\r' | grep -qx monitor && ok "redis_exporter ACL istifadəçisi «monitor» ilə (açar/CONFIG icazəsi yoxdur)" || bad "redis_exporter «monitor» ilə qoşulur, amma Redis ACL-də belə istifadəçi yoxdur"
+else
+  warn "redis_exporter «default» istifadəçi + əsas Redis parolu ilə qoşulur — ACL istifadəçisi aktiv deyil"
+fi
+PT_ID=$($COMPOSE ps -q promtail 2>/dev/null | head -1)
+if [ -z "$PT_ID" ]; then
+  warn "promtail işləmir"
+elif docker inspect --format '{{range .Mounts}}{{println .Source}}{{end}}' "$PT_ID" 2>/dev/null | grep -q 'docker\.sock'; then
+  warn "promtail xam /var/run/docker.sock mount edir (host root-a bərabər) — docker-socket-proxy-yə keçid deploy olunmayıb"
+else
+  ok "promtail docker.sock mount etmir (Docker API docker-socket-proxy üzərindən)"
+fi
+DSP_POST="$(cenv docker-socket-proxy POST)"; DSP_EXEC="$(cenv docker-socket-proxy EXEC)"; DSP_EVENTS="$(cenv docker-socket-proxy EVENTS)"
+if [ -z "$($COMPOSE ps -q docker-socket-proxy 2>/dev/null)" ]; then
+  warn "docker-socket-proxy işləmir — promtail konteyner loglarını Loki-yə göndərə bilmir"
+elif [ "$DSP_POST" = "0" ] && [ "$DSP_EXEC" = "0" ] && [ "$DSP_EVENTS" = "0" ]; then
+  ok "docker-socket-proxy yalnız GET (POST=0, EXEC=0, EVENTS=0)"
+else
+  bad "docker-socket-proxy icazələri geniş: POST=${DSP_POST:-?} EXEC=${DSP_EXEC:-?} EVENTS=${DSP_EVENTS:-?}"
+fi
+echo "- ℹ️ cadvisor host yollarını (cgroup, /var/lib/docker, /var/run) oxuduğu üçün qəsdən privileged qalır — socket-proxy ona sərhəd yaratmır (bax docker-compose.prod.yml şərhi)."
+
 section "5. nginx + HTTP başlıqları (https://127.0.0.1, Host: $HOST)"
 $COMPOSE exec -T nginx nginx -t >/dev/null 2>&1 && ok "nginx -t keçdi" || bad "nginx -t xəta verdi"
 hdr() { curl -sk -o /dev/null -D - --max-time 15 -H "Host: $HOST" "https://127.0.0.1$1" 2>/dev/null; }
@@ -410,6 +470,58 @@ for svc in app celery_worker celery_worker_heavy celery_beat; do
     | sed 's/^\\n//; s/:$//' | sort | uniq -c | sort -rn | head -10 | sed 's/^/   /'
 done
 echo '```'
+
+section "12. Enerji kəsilməsi / özünü bərpa (selfheal) və resurs prioriteti"
+# Sahib 2026-10-07: «elektrik kəsilib server yenidən yananda sistem özü-özünü ayağa qaldırsın»,
+# «yüklənmədə çökməsin». OXU-YALNIZ: systemctl is-enabled/show, docker info/inspect, /proc.
+# Quraşdırma: prod-host-maint.yml → selfheal. Sənəd: docs/ops/POWER_OUTAGE_RECOVERY.md
+unit_enabled() { systemctl is-enabled "$1" 2>/dev/null || true; }
+DE=$(unit_enabled docker.service); [ "$DE" = "enabled" ] && ok "docker.service boot-da avtomatik qalxır (enabled)" || warn "docker.service: ${DE:-tapılmadı} — reboot-dan sonra stack qalxmaz"
+RUNNERS=$(systemctl list-unit-files 'actions.runner*' --no-legend 2>/dev/null | awk '{print $1}')
+if [ -z "$RUNNERS" ]; then
+  warn "GitHub runner systemd xidməti tapılmadı — reboot-dan sonra deploy/prod-host-maint işləməz"
+else
+  for u in $RUNNERS; do st=$(unit_enabled "$u"); [ "$st" = "enabled" ] && ok "$u enabled (reboot-dan sonra uzaqdan idarə qalır)" || warn "$u: $st"; done
+fi
+LR=$(docker info --format '{{.LiveRestoreEnabled}}' 2>/dev/null); [ "$LR" = "true" ] && ok "docker live-restore=true (dockerd restart-ı konteynerləri dayandırmır)" || warn "docker live-restore=${LR:-?} (prod-host-maint → tune)"
+CE=$(unit_enabled emsarena-converge.service)
+if [ "$CE" = "enabled" ]; then
+  ok "emsarena-converge.service enabled (boot-da stack sonuncu sağlam release ilə qaldırılır)"
+  CR=$(systemctl show -p Result --value emsarena-converge.service 2>/dev/null)
+  [ "${CR:-success}" = "success" ] && ok "son boot converge nəticəsi: ${CR:-success}" || warn "son boot converge nəticəsi: $CR (journalctl -u emsarena-converge)"
+else
+  warn "emsarena-converge.service: ${CE:-quraşdırılmayıb} (prod-host-maint → selfheal)"
+fi
+AE=$(unit_enabled emsarena-autoheal.timer); AA=$(systemctl is-active emsarena-autoheal.timer 2>/dev/null || true)
+[ "$AE" = "enabled" ] && [ "$AA" = "active" ] && ok "emsarena-autoheal.timer enabled + active (hər 2 dəq)" || warn "emsarena-autoheal.timer: enabled=${AE:-yox} active=${AA:-yox} (prod-host-maint → selfheal)"
+if [ "$AE" = "enabled" ]; then
+  AR=$(systemctl show -p Result --value emsarena-autoheal.service 2>/dev/null)
+  [ "${AR:-success}" = "success" ] && ok "son autoheal keçidi: ${AR:-success}" || warn "son autoheal keçidi: $AR (journalctl -u emsarena-autoheal)"
+fi
+[ -e /run/emsarena/autoheal.pause ] && warn "autoheal PAUZADADIR (/run/emsarena/autoheal.pause; 6 saatdan sonra özü keçir)"
+if [ -r /run/emsarena/autoheal/actions.log ]; then
+  NACT=$(grep -c "ACTION:" /run/emsarena/autoheal/actions.log 2>/dev/null || true)
+  echo "- ℹ️ autoheal əməliyyatları (bu boot-dan bəri): ${NACT:-0}"
+  echo '```'; tail -n 8 /run/emsarena/autoheal/actions.log; echo '```'
+  grep -q "LIMIT:" /run/emsarena/autoheal/actions.log && warn "autoheal saatlıq limitə çatıb (LIMIT) — həmin konteynerə əl ilə baxın"
+fi
+if [ "$(systemd-detect-virt 2>/dev/null)" = "vmware" ]; then
+  VT=$(systemctl is-active open-vm-tools 2>/dev/null || true)
+  [ "$VT" = "active" ] && ok "open-vm-tools aktivdir (ESXi host söndürüləndə VM səliqəli söndürülür)" || warn "open-vm-tools: ${VT:-yox} — ESXi «Shut down» əvəzinə VM-i söndürə bilməz (güc kəsilməsi kimi)"
+fi
+# cpu_shares / oom_score_adj — compose dəyəri (HostConfig) + kernelin faktiki dəyəri (/proc/<pid>/oom_score_adj).
+prio() { docker inspect --format '{{.HostConfig.OomScoreAdj}} {{.HostConfig.CpuShares}} {{.State.Pid}}' "$1" 2>/dev/null; }
+PGC=$($COMPOSE ps -q postgres 2>/dev/null | head -1); APC=$($COMPOSE ps -q app 2>/dev/null | head -1)
+if [ -n "$PGC" ] && [ -n "$APC" ]; then
+  read -r PG_OOM PG_SH PG_PID <<< "$(prio "$PGC")"; read -r AP_OOM AP_SH AP_PID <<< "$(prio "$APC")"
+  PG_EFF=$(cat "/proc/${PG_PID:-0}/oom_score_adj" 2>/dev/null || echo "?"); AP_EFF=$(cat "/proc/${AP_PID:-0}/oom_score_adj" 2>/dev/null || echo "?")
+  echo "- ℹ️ postgres: oom_score_adj=${PG_OOM} (kernel: ${PG_EFF}) cpu_shares=${PG_SH} · app: oom_score_adj=${AP_OOM} (kernel: ${AP_EFF}) cpu_shares=${AP_SH}"
+  { [ "${PG_OOM:-0}" -lt 0 ] && [ "$PG_EFF" = "$PG_OOM" ]; } 2>/dev/null && ok "postgres oom_score_adj=${PG_OOM} effektivdir — OOM-killer onu son seçir" || warn "postgres oom_score_adj effektiv deyil (compose ${PG_OOM:-?}, kernel ${PG_EFF}) — konteyner yeni compose ilə yaradılmayıb? (deploy)"
+  [ "${PG_OOM:-0}" -lt "${AP_OOM:-0}" ] 2>/dev/null && [ "$AP_EFF" = "$AP_OOM" ] && ok "app oom_score_adj=${AP_OOM} > postgres ${PG_OOM} (app replikası postgres-dən əvvəl qurban gedir)" || warn "app/postgres oom_score_adj sırası gözlənilən deyil (app ${AP_OOM:-?}/${AP_EFF}, postgres ${PG_OOM:-?})"
+  [ "${PG_SH:-0}" -gt "${AP_SH:-0}" ] 2>/dev/null && ok "cpu_shares postgres ${PG_SH} > app ${AP_SH} (CPU rəqabətində DB üstündür)" || warn "cpu_shares postgres ${PG_SH:-?} ≤ app ${AP_SH:-?} — prioritet tətbiq olunmayıb (deploy)"
+else
+  warn "postgres/app konteyneri tapılmadı — prioritet yoxlanmadı"
+fi
 
 section "Yekun"
 echo "- ❌ kritik: **$FAIL** · ⚠️ xəbərdarlıq: **$WARN**"

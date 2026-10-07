@@ -9,8 +9,11 @@ oxuması etmədən cavab verir (test mühitinin ``DummyCache``-i, soyuq start da
 Format::
 
     {"v": "<təsadüfi versiya>", "items": [
-        {"id": "<uuid>", "f": ["students"], "u": ["<unit-id>"], "p": 1, "pop": true,
+        {"id": "<uuid>", "f": ["students"], "u": ["<unit-id>"], "p": 1, "pop": true, "req": false,
          "from": "2026-10-06T08:00:00+00:00", "to": "2026-10-20T20:00:00+00:00"}]}
+
+``req`` (2026-10-07) — məcburi elan (``requires_ack``): popup təsdiq verilənədək hər tam səhifədə
+çıxır. Köhnə xülasədə açar yoxdursa ``False`` sayılır (idarə səhifəsinin self-healing-i yeniləyir).
 
 ``v`` hər sinxronda dəyişir — sessiyadakı «popup yoxdur» işarəsi onunla etibarsızlaşır.
 Vaxt pəncərəsi oxunanda Python-da süzülür, ona görə planlaşdırılmış elan öz vaxtında
@@ -75,9 +78,16 @@ def build_snapshot(organization) -> dict:
         Announcement.objects.filter(organization=organization, status=Status.PUBLISHED, is_deleted=False)
         .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
         .order_by("-priority", "-publish_at")
-        .values("pk", "audience_families", "audience_units", "priority", "show_as_popup", "publish_at", "expires_at")[
-            :SNAPSHOT_LIMIT
-        ]
+        .values(
+            "pk",
+            "audience_families",
+            "audience_units",
+            "priority",
+            "show_as_popup",
+            "requires_ack",
+            "publish_at",
+            "expires_at",
+        )[:SNAPSHOT_LIMIT]
     )
     return {
         "v": secrets.token_hex(6),
@@ -87,7 +97,8 @@ def build_snapshot(organization) -> dict:
                 "f": list(row["audience_families"] or []),
                 "u": [str(unit) for unit in row["audience_units"] or []],
                 "p": int(row["priority"] or 0),
-                "pop": bool(row["show_as_popup"]),
+                "pop": bool(row["show_as_popup"] or row["requires_ack"]),
+                "req": bool(row["requires_ack"]),
                 "from": row["publish_at"].isoformat() if row["publish_at"] else None,
                 "to": row["expires_at"].isoformat() if row["expires_at"] else None,
             }

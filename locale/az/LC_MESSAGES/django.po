@@ -91073,3 +91073,267 @@ msgid ""
 msgstr ""
 "İmtahan gedərkən AI köməkçi əlçatan deyil. İmtahanı bitirdikdən sonra "
 "yenidən yazın."
+
+msgctxt "announcements.api"
+msgid "Bu elan təsdiq tələb etmir."
+msgstr "Bu elan təsdiq tələb etmir."
+
+msgctxt "announcements.api"
+msgid "Əvvəlcə «Elanı oxudum və tanış oldum» qutusunu işarələyin."
+msgstr "Əvvəlcə «Elanı oxudum və tanış oldum» qutusunu işarələyin."
+
+msgctxt "announcements.cabinet"
+msgid "Bu elan məcburidir"
+msgstr "Bu elan məcburidir"
+
+msgctxt "announcements.cabinet"
+msgid "Elanla tanış olduğunuzu %(day)s tarixində təsdiq etmisiniz."
+msgstr "Elanla tanış olduğunuzu %(day)s tarixində təsdiq etmisiniz."
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Elanla tanış olun və təsdiq edin. Təsdiq edənədək elan hər səhifədə popup "
+"kimi açılacaq."
+msgstr ""
+"Elanla tanış olun və təsdiq edin. Təsdiq edənədək elan hər səhifədə popup "
+"kimi açılacaq."
+
+msgctxt "announcements.cabinet"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "Elanı oxudum və tanış oldum"
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi"
+msgstr "Məcburi"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Məcburi elan: istifadəçi burada «Elanı oxudum və tanış oldum» təsdiqini "
+"verəcək; təsdiq edənədək elan hər səhifədə popup kimi açılır."
+msgstr ""
+"Məcburi elan: istifadəçi burada «Elanı oxudum və tanış oldum» təsdiqini "
+"verəcək; təsdiq edənədək elan hər səhifədə popup kimi açılır."
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi elan — baxış rejimində təsdiq yazılmır."
+msgstr "Məcburi elan — baxış rejimində təsdiq yazılmır."
+
+msgctxt "announcements.cabinet"
+msgid "Sizə ünvanlanmış bütün məcburi elanları təsdiq etmisiniz."
+msgstr "Sizə ünvanlanmış bütün məcburi elanları təsdiq etmisiniz."
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi"
+msgstr "Təsdiq edildi"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi %(day)s"
+msgstr "Təsdiq edildi %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edirəm"
+msgstr "Təsdiq edirəm"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyir"
+msgstr "Təsdiq gözləyir"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyən elan yoxdur"
+msgstr "Təsdiq gözləyən elan yoxdur"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyənlər"
+msgstr "Təsdiq gözləyənlər"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+
+msgctxt "announcements.manage"
+msgid "Ad, soyad və ya login…"
+msgstr "Ad, soyad və ya login…"
+
+msgctxt "announcements.manage"
+msgid "Alıcı filtrləri"
+msgstr "Alıcı filtrləri"
+
+msgctxt "announcements.manage"
+msgid "Alıcılarda axtar"
+msgstr "Alıcılarda axtar"
+
+msgctxt "announcements.manage"
+msgid "Axtarışa uyğun alıcı tapılmadı"
+msgstr "Axtarışa uyğun alıcı tapılmadı"
+
+msgctxt "announcements.manage"
+msgid "Bir dəfəlik popup"
+msgstr "Bir dəfəlik popup"
+
+msgctxt "announcements.manage"
+msgid "Elan yalnız «Elanlar» bölməsində və sayğacda görünür."
+msgstr "Elan yalnız «Elanlar» bölməsində və sayğacda görünür."
+
+msgctxt "announcements.manage"
+msgid "Girişdə necə göstərilsin"
+msgstr "Girişdə necə göstərilsin"
+
+msgctxt "announcements.manage"
+msgid "Gözləyənlər"
+msgstr "Gözləyənlər"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyada heç kim yoxdur"
+msgstr "Hədəf auditoriyada heç kim yoxdur"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyanın hamısı təsdiq edib"
+msgstr "Hədəf auditoriyanın hamısı təsdiq edib"
+
+msgctxt "announcements.manage"
+msgid "Hələ heç kim təsdiq etməyib"
+msgstr "Hələ heç kim təsdiq etməyib"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: hesablanır…"
+msgstr "Kim görəcək: hesablanır…"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: say hesablanmadı — bir az sonra yenidən yoxlayın."
+msgstr "Kim görəcək: say hesablanmadı — bir az sonra yenidən yoxlayın."
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: əvvəlcə auditoriyanı seçin."
+msgstr "Kim görəcək: əvvəlcə auditoriyanı seçin."
+
+msgctxt "announcements.manage"
+msgid "Məcburi elan — təsdiq"
+msgstr "Məcburi elan — təsdiq"
+
+msgctxt "announcements.manage"
+msgid "Məcburi popup"
+msgstr "Məcburi popup"
+
+msgctxt "announcements.manage"
+msgid ""
+"Növbəti girişdə bir dəfə açılır — istifadəçi bağlaya bilər, sonra bir daha "
+"çıxmır."
+msgstr ""
+"Növbəti girişdə bir dəfə açılır — istifadəçi bağlaya bilər, sonra bir daha "
+"çıxmır."
+
+msgctxt "announcements.manage"
+msgid "Oxuyub, təsdiq gözləyir"
+msgstr "Oxuyub, təsdiq gözləyir"
+
+msgctxt "announcements.manage"
+msgid "Popup və təsdiq"
+msgstr "Popup və təsdiq"
+
+msgctxt "announcements.manage"
+msgid "Popup yoxdur"
+msgstr "Popup yoxdur"
+
+msgctxt "announcements.manage"
+msgid "Siyahını yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Siyahını yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+
+msgctxt "announcements.manage"
+msgid "Təsdiq"
+msgstr "Təsdiq"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edib: %(day)s"
+msgstr "Təsdiq edib: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən"
+msgstr "Təsdiq edən"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən: <strong>%(acked)s</strong> / %(total)s (hədəf)"
+msgstr "Təsdiq edən: <strong>%(acked)s</strong> / %(total)s (hədəf)"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlər"
+msgstr "Təsdiq edənlər"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlərin payı"
+msgstr "Təsdiq edənlərin payı"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq vəziyyəti"
+msgstr "Təsdiq vəziyyəti"
+
+msgctxt "announcements.manage"
+msgid "bütün təşkilat"
+msgstr "bütün təşkilat"
+
+msgctxt "announcements.manage"
+msgid "və daha %(n)s"
+msgstr "və daha %(n)s"
+
+msgctxt "announcements.manage"
+msgid ""
+"İmtahan səhifələrində popup göstərilmir. Məcburi elanı kimin təsdiq etdiyini"
+" redaktə səhifəsində izləyə bilərsiniz."
+msgstr ""
+"İmtahan səhifələrində popup göstərilmir. Məcburi elanı kimin təsdiq etdiyini"
+" redaktə səhifəsində izləyə bilərsiniz."
+
+msgctxt "announcements.manage"
+msgid ""
+"İstifadəçi «Tanış oldum» təsdiqi vermədən bağlaya bilməz — təsdiq edənədək "
+"hər səhifədə açılır."
+msgstr ""
+"İstifadəçi «Tanış oldum» təsdiqi vermədən bağlaya bilməz — təsdiq edənədək "
+"hər səhifədə açılır."
+
+msgctxt "announcements.model"
+msgid "Bir dəfəlik popup"
+msgstr "Bir dəfəlik popup"
+
+msgctxt "announcements.model"
+msgid "Məcburi popup"
+msgstr "Məcburi popup"
+
+msgctxt "announcements.model"
+msgid "Popup yoxdur"
+msgstr "Popup yoxdur"
+
+msgctxt "announcements.popup"
+msgid ""
+"Bu elan məcburidir: oxuyun və tanış olduğunuzu təsdiq edin. Təsdiq edənədək "
+"pəncərə bağlanmır."
+msgstr ""
+"Bu elan məcburidir: oxuyun və tanış olduğunuzu təsdiq edin. Təsdiq edənədək "
+"pəncərə bağlanmır."
+
+msgctxt "announcements.popup"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "Elanı oxudum və tanış oldum"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq edirəm"
+msgstr "Təsdiq edirəm"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+
+msgctxt "announcements.popup"
+msgid "Təsdiq tələb olunur"
+msgstr "Təsdiq tələb olunur"
+
+msgctxt "announcements.manage"
+msgid "%(n)s nəfər"
+msgid_plural "%(n)s nəfər"
+msgstr[0] "%(n)s nəfər"
+msgstr[1] "%(n)s nəfər"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgid_plural "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgstr[0] "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgstr[1] "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"

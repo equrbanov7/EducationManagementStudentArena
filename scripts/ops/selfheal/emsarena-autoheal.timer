@@ -1,0 +1,11 @@
+# EMS Arena — autoheal hər 2 dəqiqədən bir (boot-dan 5 dəq sonra başlayır: converge-ə vaxt).
+[Unit]
+Description=EMSArena autoheal - her 2 deqiqe
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=2min
+AccuracySec=15s
+
+[Install]
+WantedBy=timers.target

@@ -30,6 +30,12 @@ REAL_FUNCTIONS = (
     "resolve_release_image",
     "capture_previous_app_image",
     "predeploy_database_backup",
+    # Audit 2026-10-07: exporter monitor kredensialları — .env-də açar yoxdursa no-op (köhnə giriş).
+    "_monitor_secret_is_safe",
+    "preflight_monitor_credentials",
+    "_pgbouncer_stats_user_ready",
+    "_redis_monitor_user_ready",
+    "activate_monitor_credentials",
     "apply_app_role_timeouts",
     "ensure_textfile_collector_dir",
     "wait_for_app_and_worker_health",

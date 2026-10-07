@@ -110,11 +110,46 @@ def _group_send(group: str, event: dict[str, Any]) -> None:
     _group_send_many([(group, event)])
 
 
+def lobby_roster_group(pin: str) -> str:
+    """Roster (``lobby_state``) qrupu: host lobby socket-ləri + prosesdə PIN başına bir abunəçi."""
+    return f"live_{pin}_lobby_roster"
+
+
+def roster_index(data: dict[str, Any]) -> dict[int, dict[str, Any]]:
+    """``lobby_state`` siyahısı oyunçu id-si üzrə (prosesdə bir dəfə qurulur, hər socket-ə O(1))."""
+    index = {}
+    for row in data.get("players") or ():
+        if isinstance(row, dict):
+            try:
+                index[int(row.get("id"))] = row
+            except (TypeError, ValueError):
+                continue
+    return index
+
+
+def player_lobby_state_payload(
+    data: dict[str, Any], player_id: int, index: dict[int, dict[str, Any]] | None = None
+) -> dict[str, Any]:
+    """Oyunçuya ``lobby_state``: say/ayarlar/kilid + YALNIZ öz sətri (wait room başqa adları göstərmir).
+
+    Yük testi 2026-10-07: tam siyahı (≤ 200 sətir) hər qoşulmada hər telefona gedirdi — O(N²) bayt.
+    Siyahının tamı host socket-lərinə qalır.
+    """
+    own = (index if index is not None else roster_index(data)).get(int(player_id))
+    return {**data, "players": [own] if own else []}
+
+
 def broadcast_event(
     pin: str, payload: dict[str, Any], group_suffix: str, *, personal: dict[str, str] | None = None
 ) -> tuple[str, dict[str, Any]]:
-    """``(qrup, kanal hadisəsi)`` — ``broadcast``-ın göndərmədən qurduğu cüt."""
+    """``(qrup, kanal hadisəsi)`` — ``broadcast``-ın göndərmədən qurduğu cüt.
+
+    ``lobby_state`` (roster) lobby qrupuna deyil, ``lobby_roster_group``-a gedir (bax
+    ``socket_coordination.LobbyRosterFanout``); digər lobby hadisələri əvvəlki kimi ``live_<pin>_lobby``-dədir.
+    """
     event_type = "lobby_event" if group_suffix == "lobby" else "play_event"
+    if group_suffix == "lobby" and payload.get("type") == "lobby_state":
+        return lobby_roster_group(pin), {"type": event_type, "data": payload}
     event = {"type": event_type, "data": payload}
     if personal is not None:
         # Şəxsi əlavələr (oyunçu id → JSON) — consumer yalnız öz sətrini klientə qoşur.
