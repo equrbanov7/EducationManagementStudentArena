@@ -21,6 +21,7 @@ from .crud import (
     bulk_delete_notifications,
     create_notification,
     create_notification_for_users,
+    create_notifications,
     delete_notification,
 )
 from .events import (
@@ -51,6 +52,7 @@ __all__ = [
     # crud
     "create_notification",
     "create_notification_for_users",
+    "create_notifications",
     "delete_notification",
     "bulk_delete_notifications",
     # read state

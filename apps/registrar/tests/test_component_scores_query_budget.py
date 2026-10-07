@@ -149,14 +149,15 @@ class ComponentScoresQueryBudgetTest(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
-    def _post(self, case, score_for):
+    def _post(self, case, score_for, *, run_on_commit=False):
         url = reverse("registrar:journal_kollokvium_save", args=[case["offering"].id])
         data = {
             f"kscore__{case['midterm'].id}__{enrollment.id}": score_for(index)
             for index, enrollment in enumerate(case["enrollments"])
         }
         with CaptureQueriesContext(connection) as ctx:
-            response = self.client.post(url, data)
+            with self.captureOnCommitCallbacks(execute=run_on_commit):
+                response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
         return len(ctx.captured_queries)
 
@@ -186,6 +187,28 @@ class ComponentScoresQueryBudgetTest(TestCase):
         for index, enrollment in enumerate(self.large["enrollments"]):
             self.assertEqual(scores[enrollment.id].score, Decimal(11 + index % 8))
             self.assertEqual(scores[enrollment.id].entered_by_id, self.teacher.pk)
+
+    def test_student_notifications_are_one_bulk_insert(self):
+        """Commit-dən sonrakı tələbə bildirişləri (``send_journal_events``) də qrup ölçüsündən asılı deyil.
+
+        Əvvəl hər tələbə üçün ``create_notification`` (bypass_rls + INSERT = 4 ifadə): 40 tələbədə +160."""
+        from apps.notifications.models import InAppNotification
+
+        self.client.get(reverse("registrar:journal_detail", args=[self.small["offering"].id]), {"jt": "kollokvium"})
+        small = self._post(self.small, lambda i: str(10 + i % 8), run_on_commit=True)
+        large = self._post(self.large, lambda i: str(10 + i % 8), run_on_commit=True)
+        self.assertEqual(small, large)
+        with bypass_rls():
+            rows = list(
+                InAppNotification.objects.filter(recipient__enrollments__offering=self.large["offering"]).distinct()
+            )
+        self.assertEqual(len(rows), 40)
+        sample = rows[0]
+        self.assertEqual(sample.organization_id, self.org.pk)
+        self.assertIn(self.large["offering"].subject.name, sample.title)
+        self.assertEqual(sample.metadata, {"event": "journal_update", "offering_id": str(self.large["offering"].id)})
+        self.assertIn("section%3Dmy-journal", sample.link)  # org-scoped keçid (organizations:switch?next=…)
+        self.assertTrue(sample.message)
 
     def test_service_semantics_delete_reject_clamp_duplicates_and_audit(self):
         case = self.small
