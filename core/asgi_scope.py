@@ -16,7 +16,11 @@ from core.utils import get_client_ip
 
 
 def scope_meta(scope) -> dict[str, str]:
-    """``{"HTTP_X_FORWARDED_FOR": …, "REMOTE_ADDR": …}`` — Django ``request.META`` forması."""
+    """``{"HTTP_<BAŞLIQ>": …, "REMOTE_ADDR": …}`` — Django ``request.META`` forması.
+
+    XFF burada PARSE OLUNMUR — yalnız META-ya köçürülür; müştəri İP-si ``scope_client_ip``-də
+    ``core.utils.get_client_ip`` ilə (TƏK mənbə, ``core/tests/test_client_ip.py`` qoruyur).
+    """
     meta: dict[str, str] = {}
     for raw_name, raw_value in scope.get("headers") or ():
         try:
