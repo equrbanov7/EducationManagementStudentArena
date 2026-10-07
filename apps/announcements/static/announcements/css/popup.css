@@ -1,7 +1,9 @@
 /* =========================================================================
-   Birdəfəlik elan popup-u — Bootstrap modalının üzərində yüngül tema.
+   Elan popup-u (birdəfəlik + məcburi) — Bootstrap modalının üzərində yüngül tema.
    Çiplərin stili `announcements.css`-dədir; popup hər səhifədə yükləndiyi üçün
    burada yalnız lazım olan çip qaydaları təkrarlanır.
+   `modal-dialog-scrollable`: uzun mətn modalın İÇİNDƏ sürüşür, başlıq və düymələr
+   (təsdiq daxil) həmişə görünür — telefonda da.
    ========================================================================= */
 
 .ann-popup__content {
@@ -108,9 +110,77 @@
 
 .ann-popup__fact--deadline dd { color: var(--ems-danger-700); }
 
+/* ── Məcburi elan ─────────────────────────────────────────────────────── */
+.ann-popup.is-locked .ann-popup__icon { background: var(--ems-warning-800); }
+.ann-popup.is-locked .ann-popup__eyebrow { color: var(--ems-warning-800); }
+
+.ann-popup__mandatory {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-base, 13px);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.ann-popup__mandatory i { margin-top: 3px; }
+
 .ann-popup__footer {
+    flex-wrap: wrap;
     gap: 8px;
     border-top: 1px solid var(--ems-border);
+}
+
+.ann-popup__footer > * { margin: 0; }
+
+.ann-popup__ack {
+    display: flex;
+    flex: 1 1 100%;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ann-popup__ack[hidden] { display: none; }
+
+.ann-popup__check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-800);
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ann-popup__check:has(input:checked) {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+}
+
+.ann-popup__check input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ems-primary);
+}
+
+.ann-popup__ack-error {
+    margin: 0;
+    font-size: var(--ems-fs-base, 13px);
+    color: var(--ems-danger-700);
 }
 
 .ann-popup__steps {
@@ -118,6 +188,27 @@
     gap: 6px;
     margin-right: auto;
 }
+
+.ann-popup__steps[hidden] { display: none; }
+
+.ann-popup__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.ann-popup__actions > .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 40px;
+}
+
+.ann-popup__actions > [hidden],
+.ann-popup__x[hidden] { display: none; }
 
 .ann-popup .ann-chip {
     display: inline-flex;
@@ -134,12 +225,45 @@
 }
 
 .ann-popup .ann-chip--new { border-color: var(--ems-primary); background: var(--ems-primary); color: var(--ems-neutral-0); }
+.ann-popup .ann-chip--mandatory { border-color: var(--ems-warning-800); background: var(--ems-warning-800); color: var(--ems-neutral-0); }
 .ann-popup .ann-chip--critical,
 .ann-popup .ann-deadline--today { border-color: var(--ems-danger-bd); background: var(--ems-danger-bg); color: var(--ems-danger-700); }
 .ann-popup .ann-chip--high,
 .ann-popup .ann-deadline--soon { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 
+/* ── Responsivlik (2026-10-07) ─────────────────────────────────────────────
+   Modal heç vaxt viewport-dan hündür olmur (`modal-dialog-scrollable`): mətn gövdədə sürüşür,
+   başlıq və footer (checkbox + təsdiq) həmişə görünür. Toxunma hədəfləri ≥ 40px. */
+.ann-popup__title { overflow-wrap: anywhere; }
+.ann-popup .ann-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+.ann-popup .modal-header .ann-popup__x {
+    box-sizing: content-box;
+    width: 16px;
+    height: 16px;
+    padding: 12px;
+    margin: -8px -8px -8px auto;
+}
+
+.ann-popup__steps .btn { min-width: 40px; min-height: 40px; }
+
+/* Telefon: footer 4 sətir əvəzinə 3 — checkbox, tam enli «Təsdiq edirəm», sonra bir sətirdə
+   stepper + «Bağla» / «Ətraflı bax». `display: contents` düymələri footer-in flex elementləri edir. */
 @media (max-width: 575px) {
     .ann-popup__body { padding: var(--ems-sp-5, 14px); }
-    .ann-popup__footer > .btn { flex: 1 1 auto; }
+    .ann-popup__header { padding: 12px 14px; }
+    .ann-popup__footer { padding: 10px 14px 12px; }
+    .ann-popup__actions { display: contents; }
+    .ann-popup__ack { order: 0; }
+    .ann-popup__actions > [data-ann-popup-confirm] { flex: 1 1 100%; order: 1; min-height: 44px; }
+    .ann-popup__steps { order: 2; margin-right: 0; }
+    .ann-popup__actions > .btn:not([data-ann-popup-confirm]) { flex: 1 1 auto; order: 3; min-height: 44px; }
+}
+
+/* Alçaq ekran (telefon üfüqi): ikinci dərəcəli faktlar gizlənir — mətnə yer qalır. */
+@media (max-height: 560px) {
+    .ann-popup__facts { display: none; }
+    .ann-popup__header { padding-top: 8px; padding-bottom: 8px; }
+    .ann-popup__icon { flex-basis: 32px; width: 32px; height: 32px; font-size: 15px; }
+    .ann-popup__check { min-height: 40px; padding-top: 6px; padding-bottom: 6px; }
 }

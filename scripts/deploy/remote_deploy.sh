@@ -78,6 +78,11 @@ DEPLOY_ROLLBACK_ON_FAILURE="${DEPLOY_ROLLBACK_ON_FAILURE:-true}"
 DEPLOY_KEEP_RELEASE_IMAGES="${DEPLOY_KEEP_RELEASE_IMAGES:-$(dotenv_value DEPLOY_KEEP_RELEASE_IMAGES)}"
 DEPLOY_KEEP_RELEASE_IMAGES="${DEPLOY_KEEP_RELEASE_IMAGES:-3}"
 APP_IMAGE_REPOSITORY="${APP_IMAGE_REPOSITORY:-emsarena-prod}"
+# 2026-10-07 (selfheal): deploy bütün müddət ərzində bu kilidi saxlayır — host-dakı
+# emsarena-autoheal / emsarena-converge (scripts/ops/selfheal) onu görüb deploy-a
+# toxunmur. Qovluğu /etc/tmpfiles.d/emsarena.conf yaradır (prod-host-maint → selfheal).
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-/run/emsarena/deploy.lock}"
+DEPLOY_LOCK_WAIT_SECONDS="${DEPLOY_LOCK_WAIT_SECONDS:-900}"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
 # files owned by a different user (e.g. a previous root deploy) and failed with
@@ -721,6 +726,134 @@ apply_app_role_timeouts() {
   fi
 }
 
+# ─── Exporter-lər üçün least-privilege kredensiallar (təhlükəsizlik auditi 2026-10-07) ───
+# Compose: postgres/pgbouncer exporter-ləri ${MONITOR_DB_USER:-${POSTGRES_USER}} /
+# ${MONITOR_DB_PASSWORD:-${POSTGRES_PASSWORD}}, redis_exporter ${REDIS_MONITOR_PASSWORD:+monitor}
+# işlədir. Compose-da shell mühiti .env-dən üstündür — ona görə burada hər hansı
+# çatışmazlıq (açar yoxdur / dəyər təhlükəsiz deyil / rol yaradıla bilmədi / pgbouncer
+# və ya redis monitor istifadəçisini götürmədi) boş override İXRAC edir və exporter-lər
+# bu deploy-un qalan compose əmrlərində köhnə (owner / əsas parol) girişə qayıdır.
+# Heç bir addım deploy-u dayandırmır. Sirr dəyərləri çap olunmur və argv-yə düşmür.
+MONITOR_DB_STATE="off"
+REDIS_MONITOR_STATE="off"
+
+_monitor_secret_is_safe() {
+  # URI userinfo, pgbouncer userlist, psql `\set` və redis.conf üçün qaçırmasız dəst.
+  [[ "$1" =~ ^[A-Za-z0-9._~-]{16,128}$ ]]
+}
+
+preflight_monitor_credentials() {
+  local db_password db_user owner app_user redis_password
+  db_password="$(dotenv_value MONITOR_DB_PASSWORD)"
+  db_user="$(dotenv_value MONITOR_DB_USER)"
+  owner="$(dotenv_value POSTGRES_USER)"
+  app_user="$(dotenv_value APP_DATABASE_USER)"
+  redis_password="$(dotenv_value REDIS_MONITOR_PASSWORD)"
+
+  MONITOR_DB_STATE="off"
+  if [ -z "$db_password" ]; then
+    echo "Monitoring: MONITOR_DB_PASSWORD is not set; postgres/pgbouncer exporters keep the owner login (prod-secrets-generate key=MONITOR_DB_PASSWORD enables the pg_monitor role)."
+  elif ! _monitor_secret_is_safe "$db_password"; then
+    echo "WARNING: MONITOR_DB_PASSWORD must be 16-128 characters of [A-Za-z0-9._~-]; exporters keep the owner login." >&2
+  else
+    db_user="${db_user:-emsarena_monitor}"
+    if ! [[ "$db_user" =~ ^[a-z_][a-z0-9_]{0,62}$ ]] || [ "$db_user" = "$owner" ] || [ "$db_user" = "$app_user" ] || [ "$db_user" = "postgres" ]; then
+      echo "WARNING: MONITOR_DB_USER='${db_user}' must be a dedicated lower-case identifier (not POSTGRES_USER/APP_DATABASE_USER); exporters keep the owner login." >&2
+    else
+      MONITOR_DB_STATE="pending"
+    fi
+  fi
+  if [ "$MONITOR_DB_STATE" = "pending" ]; then
+    export MONITOR_DB_USER="$db_user"
+  else
+    export MONITOR_DB_USER="" MONITOR_DB_PASSWORD=""
+  fi
+
+  REDIS_MONITOR_STATE="off"
+  if [ -z "$redis_password" ]; then
+    echo "Monitoring: REDIS_MONITOR_PASSWORD is not set; redis_exporter keeps the main Redis password (prod-secrets-generate key=REDIS_MONITOR_PASSWORD enables the ACL user)."
+  elif ! _monitor_secret_is_safe "$redis_password"; then
+    echo "WARNING: REDIS_MONITOR_PASSWORD must be 16-128 characters of [A-Za-z0-9._~-]; redis_exporter keeps the main password." >&2
+  else
+    REDIS_MONITOR_STATE="pending"
+  fi
+  if [ "$REDIS_MONITOR_STATE" != "pending" ]; then
+    export REDIS_MONITOR_PASSWORD=""
+  fi
+}
+
+_pgbouncer_stats_user_ready() {
+  # 0 — pgbouncer.ini stats_users + userlist monitor istifadəçisini daşıyır; 1 — daşımır
+  # (konfiq artıq yaradılıb, gözləməyin mənası yoxdur); 2 — hələ hazır deyil (yenidən cəhd).
+  # Yalnız grep -q: userlist sətirləri (parollar) heç vaxt çap olunmur.
+  local rc=0
+  docker compose -f "$COMPOSE_FILE" exec -T pgbouncer sh -c \
+    "[ -f /etc/pgbouncer/pgbouncer.ini ] || exit 2; grep -Eq '^stats_users = (.*,)?${MONITOR_DB_USER}(,.*)?\$' /etc/pgbouncer/pgbouncer.ini && grep -q '^\"${MONITOR_DB_USER}\" ' /etc/pgbouncer/userlist.txt || exit 3" \
+    >/dev/null 2>&1 || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    3) return 1 ;;
+    *) return 2 ;;
+  esac
+}
+
+_redis_monitor_user_ready() {
+  # 0 — ACL-də `monitor` var; 1 — Redis cavab verir, amma istifadəçi yoxdur (entrypoint
+  # öz-yoxlaması onu buraxıb); 2 — hələ hazır deyil (start / AOF yüklənməsi).
+  local users
+  users="$(docker compose -f "$COMPOSE_FILE" exec -T redis redis-cli --no-auth-warning ACL USERS 2>/dev/null | tr -d '\r' || true)"
+  if printf '%s\n' "$users" | grep -qx 'monitor'; then
+    return 0
+  fi
+  if printf '%s\n' "$users" | grep -qx 'default'; then
+    return 1
+  fi
+  return 2
+}
+
+activate_monitor_credentials() {
+  # `up -d postgres redis pgbouncer …`-dan SONRA, tam `up -d`-dən ƏVVƏL çağırılır.
+  local attempt rc
+  local provision_script="${APP_DIR}/scripts/deploy/provision_monitor_role.sh"
+  if [ "${MONITOR_DB_STATE:-off}" = "pending" ]; then
+    rc=1
+    if APP_DIR="$APP_DIR" COMPOSE_FILE="$COMPOSE_FILE" MONITOR_DB_USER="$MONITOR_DB_USER" bash "$provision_script"; then
+      for attempt in $(seq 1 30); do
+        rc=0
+        _pgbouncer_stats_user_ready || rc=$?
+        [ "$rc" -eq 2 ] || break
+        sleep 2
+      done
+    fi
+    if [ "$rc" -eq 0 ]; then
+      MONITOR_DB_STATE="active"
+      echo "Monitoring: postgres/pgbouncer exporters use the least-privilege role ${MONITOR_DB_USER} (pg_monitor + pgbouncer stats_users)."
+    else
+      MONITOR_DB_STATE="off"
+      export MONITOR_DB_USER="" MONITOR_DB_PASSWORD=""
+      echo "WARNING: the monitor DB role could not be provisioned or pgbouncer did not pick it up; postgres/pgbouncer exporters fall back to the owner login for this deploy." >&2
+    fi
+  fi
+
+  if [ "${REDIS_MONITOR_STATE:-off}" = "pending" ]; then
+    rc=2
+    for attempt in $(seq 1 60); do
+      rc=0
+      _redis_monitor_user_ready || rc=$?
+      [ "$rc" -eq 2 ] || break
+      sleep 2
+    done
+    if [ "$rc" -eq 0 ]; then
+      REDIS_MONITOR_STATE="active"
+      echo "Monitoring: redis_exporter uses the read-only ACL user 'monitor'."
+    else
+      REDIS_MONITOR_STATE="off"
+      export REDIS_MONITOR_PASSWORD=""
+      echo "WARNING: Redis did not load the 'monitor' ACL user (see: docker compose logs redis); redis_exporter falls back to the main password for this deploy." >&2
+    fi
+  fi
+}
+
 ensure_textfile_collector_dir() {
   # Audit 2026-09-28 AD-01/DB-08: node_exporter textfile kollektorunun host qovluğu
   # (offsite_backup.sh / restore_drill.sh metrikləri). Runner istifadəçisinin sudo-su
@@ -830,6 +963,31 @@ prune_old_release_images() {
   done
 }
 
+acquire_deploy_lock() {
+  # 2026-10-07 (selfheal): autoheal keçidi (bir neçə dəqiqə) və ya boot converge-i
+  # (≤ 10 dəq) kilidi saxlaya bilər — deploy onları gözləyir, sonra özü saxlayır.
+  # fd 9 skript bitənə qədər açıq qalır (flock prosesin ölümü ilə də buraxılır).
+  # Kilid infrastrukturu yoxdursa (selfheal quraşdırılmayıb) deploy dayanmır.
+  local dir="${DEPLOY_LOCK_FILE%/*}"
+  if ! command -v flock >/dev/null 2>&1; then
+    echo "WARNING: flock is not installed; deploy lock skipped." >&2
+    return 0
+  fi
+  if [ ! -d "$dir" ] || [ ! -w "$dir" ]; then
+    echo "WARNING: deploy lock directory ${dir} is missing or not writable (run prod-host-maint → selfheal); continuing without the lock." >&2
+    return 0
+  fi
+  if [ ! -e "$DEPLOY_LOCK_FILE" ]; then
+    : >"$DEPLOY_LOCK_FILE"
+  fi
+  exec 9<"$DEPLOY_LOCK_FILE"
+  echo "Acquiring deploy lock ${DEPLOY_LOCK_FILE} (autoheal/converge pause while it is held)..."
+  if ! flock -w "$DEPLOY_LOCK_WAIT_SECONDS" 9; then
+    echo "Could not acquire ${DEPLOY_LOCK_FILE} within ${DEPLOY_LOCK_WAIT_SECONDS}s (a converge/autoheal pass is stuck?); nothing was changed." >&2
+    exit 1
+  fi
+}
+
 docker_deploy() {
   if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Missing ${APP_DIR}/${COMPOSE_FILE}." >&2
@@ -863,7 +1021,10 @@ docker_deploy() {
   export APT_SECURITY_REFRESH="${APT_SECURITY_REFRESH:-$(date +%G%V)}"
   docker compose -f "$COMPOSE_FILE" build
   capture_previous_app_image
+  # Audit 2026-10-07: exporter monitor kredensialları — çatışmazlıqda boş override (köhnə giriş).
+  preflight_monitor_credentials
   docker compose -f "$COMPOSE_FILE" up -d postgres redis pgbouncer postgres-backup
+  activate_monitor_credentials
   apply_app_role_timeouts
   ensure_textfile_collector_dir
   # P1-08: konfiqurasiya xətası miqrasiyadan və restart-dan ƏVVƏL tutulur.
@@ -910,6 +1071,7 @@ docker_deploy() {
 
 case "$DEPLOY_MODE" in
   docker)
+    acquire_deploy_lock
     docker_deploy
     ;;
   legacy)

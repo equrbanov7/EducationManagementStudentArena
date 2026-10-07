@@ -91487,3 +91487,272 @@ msgid ""
 msgstr ""
 "The AI assistant is unavailable while you are taking an exam. Please write "
 "again after you finish it."
+
+msgctxt "announcements.api"
+msgid "Bu elan təsdiq tələb etmir."
+msgstr "This announcement does not require confirmation."
+
+msgctxt "announcements.api"
+msgid "Əvvəlcə «Elanı oxudum və tanış oldum» qutusunu işarələyin."
+msgstr "First tick “I have read and understood the announcement”."
+
+msgctxt "announcements.cabinet"
+msgid "Bu elan məcburidir"
+msgstr "This announcement is mandatory"
+
+msgctxt "announcements.cabinet"
+msgid "Elanla tanış olduğunuzu %(day)s tarixində təsdiq etmisiniz."
+msgstr "You confirmed that you read this announcement on %(day)s."
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Elanla tanış olun və təsdiq edin. Təsdiq edənədək elan hər səhifədə popup "
+"kimi açılacaq."
+msgstr ""
+"Read the announcement and confirm. Until you confirm, it will open as a "
+"popup on every page."
+
+msgctxt "announcements.cabinet"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "I have read and understood the announcement"
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi"
+msgstr "Mandatory"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Məcburi elan: istifadəçi burada «Elanı oxudum və tanış oldum» təsdiqini "
+"verəcək; təsdiq edənədək elan hər səhifədə popup kimi açılır."
+msgstr ""
+"Mandatory announcement: the user will confirm “I have read and understood "
+"the announcement” here; until then it opens as a popup on every page."
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi elan — baxış rejimində təsdiq yazılmır."
+msgstr ""
+"Mandatory announcement — confirmations are not recorded in view-as mode."
+
+msgctxt "announcements.cabinet"
+msgid "Sizə ünvanlanmış bütün məcburi elanları təsdiq etmisiniz."
+msgstr "You have confirmed all mandatory announcements addressed to you."
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi"
+msgstr "Confirmed"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi %(day)s"
+msgstr "Confirmed %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edirəm"
+msgstr "I confirm"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyir"
+msgstr "Awaiting confirmation"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyən elan yoxdur"
+msgstr "No announcements awaiting confirmation"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyənlər"
+msgstr "Awaiting confirmation"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "The confirmation was not sent. Please try again a little later."
+
+msgctxt "announcements.manage"
+msgid "Ad, soyad və ya login…"
+msgstr "Name, surname or login…"
+
+msgctxt "announcements.manage"
+msgid "Alıcı filtrləri"
+msgstr "Recipient filters"
+
+msgctxt "announcements.manage"
+msgid "Alıcılarda axtar"
+msgstr "Search recipients"
+
+msgctxt "announcements.manage"
+msgid "Axtarışa uyğun alıcı tapılmadı"
+msgstr "No recipients match the search"
+
+msgctxt "announcements.manage"
+msgid "Bir dəfəlik popup"
+msgstr "One-time popup"
+
+msgctxt "announcements.manage"
+msgid "Elan yalnız «Elanlar» bölməsində və sayğacda görünür."
+msgstr ""
+"The announcement only appears in the “Announcements” section and the "
+"counter."
+
+msgctxt "announcements.manage"
+msgid "Girişdə necə göstərilsin"
+msgstr "How to show it at sign-in"
+
+msgctxt "announcements.manage"
+msgid "Gözləyənlər"
+msgstr "Pending"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyada heç kim yoxdur"
+msgstr "Nobody is in the target audience"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyanın hamısı təsdiq edib"
+msgstr "Everyone in the target audience has confirmed"
+
+msgctxt "announcements.manage"
+msgid "Hələ heç kim təsdiq etməyib"
+msgstr "Nobody has confirmed yet"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: hesablanır…"
+msgstr "Who will see it: calculating…"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: say hesablanmadı — bir az sonra yenidən yoxlayın."
+msgstr ""
+"Who will see it: the count could not be calculated — check again a little "
+"later."
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: əvvəlcə auditoriyanı seçin."
+msgstr "Who will see it: choose the audience first."
+
+msgctxt "announcements.manage"
+msgid "Məcburi elan — təsdiq"
+msgstr "Mandatory announcement — confirmations"
+
+msgctxt "announcements.manage"
+msgid "Məcburi popup"
+msgstr "Mandatory popup"
+
+msgctxt "announcements.manage"
+msgid ""
+"Növbəti girişdə bir dəfə açılır — istifadəçi bağlaya bilər, sonra bir daha "
+"çıxmır."
+msgstr ""
+"Opens once at the next visit — the user can close it and it will not appear "
+"again."
+
+msgctxt "announcements.manage"
+msgid "Oxuyub, təsdiq gözləyir"
+msgstr "Has read, awaiting confirmation"
+
+msgctxt "announcements.manage"
+msgid "Popup və təsdiq"
+msgstr "Popup and confirmation"
+
+msgctxt "announcements.manage"
+msgid "Popup yoxdur"
+msgstr "No popup"
+
+msgctxt "announcements.manage"
+msgid "Siyahını yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Could not load the list. Please try again a little later."
+
+msgctxt "announcements.manage"
+msgid "Təsdiq"
+msgstr "Confirmed"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edib: %(day)s"
+msgstr "Confirmed: %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən"
+msgstr "Confirmed"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən: <strong>%(acked)s</strong> / %(total)s (hədəf)"
+msgstr "Confirmed: <strong>%(acked)s</strong> / %(total)s (target)"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlər"
+msgstr "Confirmed"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlərin payı"
+msgstr "Share of confirmations"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq vəziyyəti"
+msgstr "Confirmation status"
+
+msgctxt "announcements.manage"
+msgid "bütün təşkilat"
+msgstr "the whole organization"
+
+msgctxt "announcements.manage"
+msgid "və daha %(n)s"
+msgstr "and %(n)s more"
+
+msgctxt "announcements.manage"
+msgid ""
+"İmtahan səhifələrində popup göstərilmir. Məcburi elanı kimin təsdiq etdiyini"
+" redaktə səhifəsində izləyə bilərsiniz."
+msgstr ""
+"Popups are never shown on exam pages. You can track who confirmed a "
+"mandatory announcement on its edit page."
+
+msgctxt "announcements.manage"
+msgid ""
+"İstifadəçi «Tanış oldum» təsdiqi vermədən bağlaya bilməz — təsdiq edənədək "
+"hər səhifədə açılır."
+msgstr ""
+"The user cannot close it without confirming “I have read it” — it opens on "
+"every page until confirmed."
+
+msgctxt "announcements.model"
+msgid "Bir dəfəlik popup"
+msgstr "One-time popup"
+
+msgctxt "announcements.model"
+msgid "Məcburi popup"
+msgstr "Mandatory popup"
+
+msgctxt "announcements.model"
+msgid "Popup yoxdur"
+msgstr "No popup"
+
+msgctxt "announcements.popup"
+msgid ""
+"Bu elan məcburidir: oxuyun və tanış olduğunuzu təsdiq edin. Təsdiq edənədək "
+"pəncərə bağlanmır."
+msgstr ""
+"This announcement is mandatory: read it and confirm. The window cannot be "
+"closed until you confirm."
+
+msgctxt "announcements.popup"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "I have read and understood the announcement"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq edirəm"
+msgstr "I confirm"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "The confirmation was not sent. Please try again a little later."
+
+msgctxt "announcements.popup"
+msgid "Təsdiq tələb olunur"
+msgstr "Confirmation required"
+
+msgctxt "announcements.manage"
+msgid "%(n)s nəfər"
+msgid_plural "%(n)s nəfər"
+msgstr[0] "%(n)s person"
+msgstr[1] "%(n)s people"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgid_plural "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgstr[0] "Who will see it: %(who)s · %(where)s — about %(n)s person"
+msgstr[1] "Who will see it: %(who)s · %(where)s — about %(n)s people"

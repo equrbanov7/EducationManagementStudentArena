@@ -21,7 +21,10 @@
 {% else %}
 <div class="ems-empty ann-empty" role="status">
     <span class="ems-empty-icon"><i class="fas fa-bullhorn" aria-hidden="true"></i></span>
-    {% if listing.params.q or listing.params.category or listing.params.unread or listing.params.has_deadline %}
+    {% if listing.params.pending and not listing.params.q %}
+    <p class="ems-empty-title">{% trans "Təsdiq gözləyən elan yoxdur" context "announcements.cabinet" %}</p>
+    <p class="ems-empty-hint">{% trans "Sizə ünvanlanmış bütün məcburi elanları təsdiq etmisiniz." context "announcements.cabinet" %}</p>
+    {% elif listing.params.is_filtered %}
     <p class="ems-empty-title">{% trans "Filtrə uyğun elan tapılmadı" context "announcements.cabinet" %}</p>
     <p class="ems-empty-hint">{% trans "Axtarış sözünü dəyişin və ya filtrləri sıfırlayın." context "announcements.cabinet" %}</p>
     {% elif listing.params.state == "expired" %}

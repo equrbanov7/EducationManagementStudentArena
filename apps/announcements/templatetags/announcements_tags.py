@@ -1,4 +1,4 @@
-"""Elanlar şablon tag-ları — kabinet paneli, sidebar sayğacı, birdəfəlik popup.
+"""Elanlar şablon tag-ları — kabinet paneli, sidebar sayğacı, popup (birdəfəlik + məcburi).
 
 Tag-lar ``accounts`` şablonlarından ``{% load announcements_tags %}`` ilə çağırılır (Python
 importu yoxdur → modul-sərhəd qrafında ``accounts → announcements`` kənarı yaranmır).
@@ -59,6 +59,8 @@ def announcements_panel(context):
             panel["apply_closed"] = apply_closed_reason(item)
             panel["read_url"] = reverse("announcements:read", kwargs={"announcement_id": item.pk})
             panel["apply_url"] = reverse("announcements:apply", kwargs={"announcement_id": item.pk})
+            panel["ack_url"] = reverse("announcements:ack", kwargs={"announcement_id": item.pk})
+            panel["ack_pending"] = bool(item.requires_ack and not getattr(receipt, "acknowledged_at", None))
         return panel
     params = queries.ListParams.from_query(request.GET)
     panel["mode"] = "list"

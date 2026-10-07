@@ -249,6 +249,7 @@ _CAP_DROP_REQUIRED = {
     "pgbouncer_exporter",
     "blackbox_exporter",
     "loki",
+    "docker-socket-proxy",
 }
 
 

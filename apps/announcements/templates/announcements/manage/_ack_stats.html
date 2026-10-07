@@ -1,0 +1,33 @@
+{% load i18n %}
+{% comment %}Məcburi elanın təsdiq statistikası: «Təsdiq edən: X / Y (hədəf)» + alıcı siyahısı (gözləyənlər /
+təsdiq edənlər / hamısı, axtarış, səhifələmə). İlk səhifə serverdə render olunur; filtr və axtarış
+`manage.js` ilə `announcements:manage_recipients` JSON fraqmentindən gəlir (sorğu sayı sabitdir).
+Əsas formadan KƏNARDADIR (iç-içə forma yoxdur).{% endcomment %}
+<section class="annm-card annm-ack" aria-labelledby="annm-ack-title" data-annm-ack
+         data-url="{% url 'announcements:manage_recipients' announcement.pk %}">
+    <div class="annm-ack__head">
+        <h2 class="annm-card__title" id="annm-ack-title">{% trans "Məcburi elan — təsdiq" context "announcements.manage" %}</h2>
+        <p class="annm-ack__total">{% blocktrans trimmed with acked=stats.acked_targeted total=stats.targeted context "announcements.manage" %}Təsdiq edən: <strong>{{ acked }}</strong> / {{ total }} (hədəf){% endblocktrans %}</p>
+    </div>
+    <progress class="annm-ack__bar" value="{{ stats.acked_targeted }}" max="{% if stats.targeted %}{{ stats.targeted }}{% else %}1{% endif %}"
+              aria-label="{% trans 'Təsdiq edənlərin payı' context 'announcements.manage' %}"></progress>
+    <form class="annm-ack__filters" data-annm-ack-filters role="search" novalidate
+          aria-label="{% trans 'Alıcı filtrləri' context 'announcements.manage' %}">
+        <fieldset class="annm-tabs">
+            <legend class="ann-sr-only">{% trans "Təsdiq vəziyyəti" context "announcements.manage" %}</legend>
+            <label class="annm-tab"><input type="radio" name="status" value="pending" data-annm-ack-status checked> <span>{% trans "Gözləyənlər" context "announcements.manage" %} <span class="annm-tab__n">{{ stats.pending }}</span></span></label>
+            <label class="annm-tab"><input type="radio" name="status" value="acked" data-annm-ack-status> <span>{% trans "Təsdiq edənlər" context "announcements.manage" %} <span class="annm-tab__n">{{ stats.acked_targeted }}</span></span></label>
+            <label class="annm-tab"><input type="radio" name="status" value="all" data-annm-ack-status> <span>{% trans "Hamısı" context "announcements.cabinet" %}</span></label>
+        </fieldset>
+        <div class="ann-filters__search annm-ack__search">
+            <i class="fas fa-magnifying-glass ann-filters__search-icon" aria-hidden="true"></i>
+            <input type="search" name="q" class="ems-input ann-filters__input" maxlength="100" autocomplete="off" data-annm-ack-search
+                   placeholder="{% trans 'Ad, soyad və ya login…' context 'announcements.manage' %}"
+                   aria-label="{% trans 'Alıcılarda axtar' context 'announcements.manage' %}">
+        </div>
+    </form>
+    <div class="annm-ack__results" data-annm-ack-results aria-live="polite" aria-busy="false">
+        {% include "announcements/manage/_recipients.html" %}
+    </div>
+    <p class="ann-sr-only" data-annm-ack-error hidden>{% trans "Siyahını yükləmək alınmadı. Bir az sonra yenidən cəhd edin." context "announcements.manage" %}</p>
+</section>

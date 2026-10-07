@@ -91660,3 +91660,273 @@ msgid ""
 msgstr ""
 "AI-ассистент недоступен во время экзамена. Напишите снова после его "
 "завершения."
+
+msgctxt "announcements.api"
+msgid "Bu elan təsdiq tələb etmir."
+msgstr "Это объявление не требует подтверждения."
+
+msgctxt "announcements.api"
+msgid "Əvvəlcə «Elanı oxudum və tanış oldum» qutusunu işarələyin."
+msgstr "Сначала отметьте «Я прочитал(а) объявление и ознакомлен(а)»."
+
+msgctxt "announcements.cabinet"
+msgid "Bu elan məcburidir"
+msgstr "Это обязательное объявление"
+
+msgctxt "announcements.cabinet"
+msgid "Elanla tanış olduğunuzu %(day)s tarixində təsdiq etmisiniz."
+msgstr "Вы подтвердили ознакомление с объявлением %(day)s."
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Elanla tanış olun və təsdiq edin. Təsdiq edənədək elan hər səhifədə popup "
+"kimi açılacaq."
+msgstr ""
+"Ознакомьтесь с объявлением и подтвердите. До подтверждения оно будет "
+"открываться всплывающим окном на каждой странице."
+
+msgctxt "announcements.cabinet"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "Я прочитал(а) объявление и ознакомлен(а)"
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi"
+msgstr "Обязательно"
+
+msgctxt "announcements.cabinet"
+msgid ""
+"Məcburi elan: istifadəçi burada «Elanı oxudum və tanış oldum» təsdiqini "
+"verəcək; təsdiq edənədək elan hər səhifədə popup kimi açılır."
+msgstr ""
+"Обязательное объявление: здесь пользователь подтвердит «Я прочитал(а) "
+"объявление и ознакомлен(а)»; до подтверждения оно открывается всплывающим "
+"окном на каждой странице."
+
+msgctxt "announcements.cabinet"
+msgid "Məcburi elan — baxış rejimində təsdiq yazılmır."
+msgstr ""
+"Обязательное объявление — в режиме просмотра подтверждение не записывается."
+
+msgctxt "announcements.cabinet"
+msgid "Sizə ünvanlanmış bütün məcburi elanları təsdiq etmisiniz."
+msgstr "Вы подтвердили все адресованные вам обязательные объявления."
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi"
+msgstr "Подтверждено"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edildi %(day)s"
+msgstr "Подтверждено %(day)s"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq edirəm"
+msgstr "Подтверждаю"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyir"
+msgstr "Ожидает подтверждения"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyən elan yoxdur"
+msgstr "Нет объявлений, ожидающих подтверждения"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq gözləyənlər"
+msgstr "Ожидают подтверждения"
+
+msgctxt "announcements.cabinet"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Подтверждение не отправлено. Повторите попытку чуть позже."
+
+msgctxt "announcements.manage"
+msgid "Ad, soyad və ya login…"
+msgstr "Имя, фамилия или логин…"
+
+msgctxt "announcements.manage"
+msgid "Alıcı filtrləri"
+msgstr "Фильтры получателей"
+
+msgctxt "announcements.manage"
+msgid "Alıcılarda axtar"
+msgstr "Поиск среди получателей"
+
+msgctxt "announcements.manage"
+msgid "Axtarışa uyğun alıcı tapılmadı"
+msgstr "Получатели по запросу не найдены"
+
+msgctxt "announcements.manage"
+msgid "Bir dəfəlik popup"
+msgstr "Однократное всплывающее окно"
+
+msgctxt "announcements.manage"
+msgid "Elan yalnız «Elanlar» bölməsində və sayğacda görünür."
+msgstr "Объявление видно только в разделе «Объявления» и в счётчике."
+
+msgctxt "announcements.manage"
+msgid "Girişdə necə göstərilsin"
+msgstr "Как показывать при входе"
+
+msgctxt "announcements.manage"
+msgid "Gözləyənlər"
+msgstr "Ожидают"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyada heç kim yoxdur"
+msgstr "В целевой аудитории никого нет"
+
+msgctxt "announcements.manage"
+msgid "Hədəf auditoriyanın hamısı təsdiq edib"
+msgstr "Все из целевой аудитории подтвердили"
+
+msgctxt "announcements.manage"
+msgid "Hələ heç kim təsdiq etməyib"
+msgstr "Пока никто не подтвердил"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: hesablanır…"
+msgstr "Кто увидит: подсчёт…"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: say hesablanmadı — bir az sonra yenidən yoxlayın."
+msgstr "Кто увидит: не удалось посчитать — проверьте чуть позже."
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: əvvəlcə auditoriyanı seçin."
+msgstr "Кто увидит: сначала выберите аудиторию."
+
+msgctxt "announcements.manage"
+msgid "Məcburi elan — təsdiq"
+msgstr "Обязательное объявление — подтверждения"
+
+msgctxt "announcements.manage"
+msgid "Məcburi popup"
+msgstr "Обязательное всплывающее окно"
+
+msgctxt "announcements.manage"
+msgid ""
+"Növbəti girişdə bir dəfə açılır — istifadəçi bağlaya bilər, sonra bir daha "
+"çıxmır."
+msgstr ""
+"Открывается один раз при следующем входе — пользователь может закрыть его, и"
+" оно больше не появится."
+
+msgctxt "announcements.manage"
+msgid "Oxuyub, təsdiq gözləyir"
+msgstr "Прочитал(а), ожидает подтверждения"
+
+msgctxt "announcements.manage"
+msgid "Popup və təsdiq"
+msgstr "Всплывающее окно и подтверждение"
+
+msgctxt "announcements.manage"
+msgid "Popup yoxdur"
+msgstr "Без всплывающего окна"
+
+msgctxt "announcements.manage"
+msgid "Siyahını yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось загрузить список. Повторите попытку чуть позже."
+
+msgctxt "announcements.manage"
+msgid "Təsdiq"
+msgstr "Подтвердили"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edib: %(day)s"
+msgstr "Подтвердил(а): %(day)s"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən"
+msgstr "Подтвердили"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edən: <strong>%(acked)s</strong> / %(total)s (hədəf)"
+msgstr "Подтвердили: <strong>%(acked)s</strong> / %(total)s (цель)"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlər"
+msgstr "Подтвердившие"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq edənlərin payı"
+msgstr "Доля подтвердивших"
+
+msgctxt "announcements.manage"
+msgid "Təsdiq vəziyyəti"
+msgstr "Статус подтверждения"
+
+msgctxt "announcements.manage"
+msgid "bütün təşkilat"
+msgstr "вся организация"
+
+msgctxt "announcements.manage"
+msgid "və daha %(n)s"
+msgstr "и ещё %(n)s"
+
+msgctxt "announcements.manage"
+msgid ""
+"İmtahan səhifələrində popup göstərilmir. Məcburi elanı kimin təsdiq etdiyini"
+" redaktə səhifəsində izləyə bilərsiniz."
+msgstr ""
+"Всплывающие окна не показываются на страницах экзаменов. Кто подтвердил "
+"обязательное объявление, видно на странице редактирования."
+
+msgctxt "announcements.manage"
+msgid ""
+"İstifadəçi «Tanış oldum» təsdiqi vermədən bağlaya bilməz — təsdiq edənədək "
+"hər səhifədə açılır."
+msgstr ""
+"Пользователь не сможет закрыть его без подтверждения «Ознакомлен(а)» — до "
+"подтверждения оно открывается на каждой странице."
+
+msgctxt "announcements.model"
+msgid "Bir dəfəlik popup"
+msgstr "Однократное всплывающее окно"
+
+msgctxt "announcements.model"
+msgid "Məcburi popup"
+msgstr "Обязательное всплывающее окно"
+
+msgctxt "announcements.model"
+msgid "Popup yoxdur"
+msgstr "Без всплывающего окна"
+
+msgctxt "announcements.popup"
+msgid ""
+"Bu elan məcburidir: oxuyun və tanış olduğunuzu təsdiq edin. Təsdiq edənədək "
+"pəncərə bağlanmır."
+msgstr ""
+"Это обязательное объявление: прочитайте и подтвердите ознакомление. До "
+"подтверждения окно не закроется."
+
+msgctxt "announcements.popup"
+msgid "Elanı oxudum və tanış oldum"
+msgstr "Я прочитал(а) объявление и ознакомлен(а)"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq edirəm"
+msgstr "Подтверждаю"
+
+msgctxt "announcements.popup"
+msgid "Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Подтверждение не отправлено. Повторите попытку чуть позже."
+
+msgctxt "announcements.popup"
+msgid "Təsdiq tələb olunur"
+msgstr "Требуется подтверждение"
+
+msgctxt "announcements.manage"
+msgid "%(n)s nəfər"
+msgid_plural "%(n)s nəfər"
+msgstr[0] "%(n)s человек"
+msgstr[1] "%(n)s человека"
+msgstr[2] "%(n)s человек"
+msgstr[3] "%(n)s человека"
+
+msgctxt "announcements.manage"
+msgid "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgid_plural "Kim görəcək: %(who)s · %(where)s — təxminən %(n)s nəfər"
+msgstr[0] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человек"
+msgstr[1] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человека"
+msgstr[2] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человек"
+msgstr[3] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человека"

@@ -1,7 +1,9 @@
 {% load i18n static %}
 {% comment %}Elanın detalı. Mətn DÜZ MƏTNDİR: `linebreaks` + `urlize` (ikisi də avtomatik escape edir) —
 `|safe` YOXDUR. Açılışda `detail.js` «oxundu» qəbzini POST edir (baxış rejimində yox).
-`preview=True` (menecerin önizləməsi) — heç bir yazı/düymə işləmir.{% endcomment %}
+`preview=True` (menecerin önizləməsi) — heç bir yazı/düymə işləmir.
+Məcburi elan (`requires_ack`) təsdiqlənməyibsə mətndən sonra «Elanı oxudum və tanış oldum» bloku
+çıxır (popup-dakı ilə EYNİ uc — `announcements:ack`); `detail.js` onu idarə edir.{% endcomment %}
 <div class="ann ann-detail-wrap">
     {% if not preview %}
     <a class="ann-back" href="{{ ann.back_url }}" data-section="announcements">
@@ -55,12 +57,14 @@
         </section>
         {% endif %}{% endwith %}
 
+        {% if item.requires_ack %}{% include "announcements/cabinet/_ack.html" %}{% endif %}
+
         {% if item.has_apply and not preview %}
             {% include "announcements/cabinet/_apply.html" %}
         {% elif item.has_apply and preview %}
         <p class="ann-note"><i class="fas fa-paper-plane" aria-hidden="true"></i> {% trans "İstifadəçi burada «Müraciət et» düyməsini görəcək." context "announcements.cabinet" %}</p>
         {% endif %}
     </article>
-    {% if not preview %}<script src="{% static 'announcements/js/detail.js' %}?v=20261007-1"></script>{% endif %}
+    {% if not preview %}<script src="{% static 'announcements/js/detail.js' %}?v=20261007-2"></script>{% endif %}
     {% endif %}
 </div>

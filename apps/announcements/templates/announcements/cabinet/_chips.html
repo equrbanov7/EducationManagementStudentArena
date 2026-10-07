@@ -1,5 +1,6 @@
 {% load i18n %}
-{% comment %}Kart / detal / popup üçün ortaq çiplər: sancılmış, yeni, kateqoriya, prioritet, son tarix.{% endcomment %}
+{% comment %}Kart / detal / popup üçün ortaq çiplər: məcburi, sancılmış, yeni, kateqoriya, prioritet, son tarix.{% endcomment %}
+{% if item.requires_ack %}<span class="ann-chip ann-chip--mandatory"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Məcburi" context "announcements.cabinet" %}</span>{% endif %}
 {% if item.is_pinned and item.state == "active" %}<span class="ann-chip ann-chip--pin"><i class="fas fa-thumbtack" aria-hidden="true"></i> {% trans "Sancılmış" context "announcements.cabinet" %}</span>{% endif %}
 {% if item.is_new %}<span class="ann-chip ann-chip--new">{% trans "Yeni" context "announcements.cabinet" %}</span>{% endif %}
 <span class="ann-chip ann-cat ann-cat--{{ item.category }}">{{ item.get_category_display }}</span>
