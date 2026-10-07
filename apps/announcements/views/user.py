@@ -1,4 +1,5 @@
-"""İstifadəçi səthi: siyahı fraqmenti (axtarış/filtr), oxundu, popup bağlandı, «Müraciət et», sənəd.
+"""İstifadəçi səthi: siyahı fraqmenti (axtarış/filtr), oxundu, popup bağlandı, məcburi elanın təsdiqi,
+«Müraciət et», sənəd.
 
 Ekranın özü kabinet bölməsidir (``?section=announcements``); bu uclar yalnız JSON/fayl verir.
 Hər uc görünüş qapısını YENİDƏN tətbiq edir (auditoriya + təşkilat) — tapılmayan və
@@ -12,6 +13,7 @@ import uuid
 from django.http import Http404, HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import dateformat, timezone
 from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
@@ -80,6 +82,37 @@ def popup_seen(request):
     return ok(recorded=popup.mark_popup_seen(request, ids))
 
 
+def _confirmed(body) -> bool:
+    return str(body.get("confirm") or "").strip().lower() in ("1", "true", "on", "yes")
+
+
+@require_POST
+@member_endpoint
+def ack(request, announcement_id):
+    """Məcburi elan: «Elanı oxudum və tanış oldum» — POST + CSRF; açıq ``confirm`` bayrağı tələb olunur.
+
+    Ünvanlanmamış / başqa təşkilatın / silinmiş elan → 404 (mövcudluq faktı sızmır); təsdiq
+    tələb etməyən elan → 409. Təkrar və paralel klik idempotentdir (ilk təsdiq vaxtı qalır).
+    """
+    if getattr(request, "is_view_as", False):
+        return ok(recorded=False)
+    if not _confirmed(json_body(request)):
+        return error(pgettext(_CTX, "Əvvəlcə «Elanı oxudum və tanış oldum» qutusunu işarələyin."))
+    result = popup.acknowledge(request, announcement_id)
+    if result is None:
+        raise Http404
+    if not result.mandatory:
+        return error(pgettext(_CTX, "Bu elan təsdiq tələb etmir."), status=409)
+    at = timezone.localtime(result.acknowledged_at) if result.acknowledged_at else None
+    return ok(
+        recorded=True,
+        newly=result.newly,
+        newly_read=result.newly_read,
+        acknowledged_at=at.isoformat() if at else None,
+        acknowledged_label=dateformat.format(at, "d.m.Y H:i") if at else "",
+    )
+
+
 @require_POST
 @member_endpoint
 def apply(request, announcement_id):
@@ -122,4 +155,4 @@ def detail_redirect(request, announcement_id):
     return HttpResponseRedirect(f"{reverse('accounts:profile')}?section={PROFILE_SECTION}&elan={announcement_id}")
 
 
-__all__ = ["apply", "attachment_download", "detail_redirect", "list_fragment", "mark_read", "popup_seen"]
+__all__ = ["ack", "apply", "attachment_download", "detail_redirect", "list_fragment", "mark_read", "popup_seen"]

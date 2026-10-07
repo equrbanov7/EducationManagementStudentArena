@@ -9,7 +9,7 @@
             <p class="annm-row__chips">
                 <span class="annm-state annm-state--{{ row.state }}">{% if row.state == "draft" %}{% trans "Qaralama" context "announcements.manage" %}{% elif row.state == "scheduled" %}{% trans "Planlaşdırılıb" context "announcements.manage" %}{% elif row.state == "active" %}{% trans "Aktiv" context "announcements.cabinet" %}{% elif row.state == "expired" %}{% trans "Müddəti bitmiş" context "announcements.cabinet" %}{% elif row.state == "deleted" %}{% trans "Silinib" context "announcements.manage" %}{% else %}{% trans "Arxiv" context "announcements.manage" %}{% endif %}</span>
                 <span class="ann-chip ann-cat ann-cat--{{ row.category }}">{{ row.get_category_display }}</span>
-                {% if row.show_as_popup %}<span class="ann-chip"><i class="far fa-window-restore" aria-hidden="true"></i> {% trans "Popup" context "announcements.manage" %}</span>{% endif %}
+                {% if row.requires_ack %}<span class="ann-chip ann-chip--mandatory"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Məcburi" context "announcements.cabinet" %}</span>{% elif row.show_as_popup %}<span class="ann-chip"><i class="far fa-window-restore" aria-hidden="true"></i> {% trans "Popup" context "announcements.manage" %}</span>{% endif %}
                 {% if row.is_pinned %}<span class="ann-chip ann-chip--pin"><i class="fas fa-thumbtack" aria-hidden="true"></i></span>{% endif %}
             </p>
             <a class="annm-row__title" href="{% url 'announcements:manage_edit' row.pk %}">{{ row.title }}</a>
@@ -30,6 +30,7 @@
             <div><dt>{% trans "Popup görüb" context "announcements.manage" %}</dt><dd>{{ row.stats.seen }}</dd></div>
             <div><dt>{% trans "Oxuyub" context "announcements.manage" %}</dt><dd>{{ row.stats.read }}</dd></div>
             <div><dt>{% trans "Müraciət" context "announcements.manage" %}</dt><dd>{{ row.stats.applied }}</dd></div>
+            {% if row.requires_ack %}<div class="annm-stats__ack"><dt>{% trans "Təsdiq" context "announcements.manage" %}</dt><dd>{{ row.stats.acked }}</dd></div>{% endif %}
         </dl>
         {% if row.is_deleted %}
         <form method="post" action="{% url 'announcements:manage_action' row.pk %}" class="annm-row__actions">

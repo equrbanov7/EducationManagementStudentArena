@@ -25,14 +25,16 @@ from ..constants import (
     MANAGE_PAGE_SIZE,
     MANAGE_STATES,
     PROFILE_SECTION,
+    RECIPIENT_STATUSES,
     ApplyMode,
     Audience,
     Category,
+    PopupMode,
     Priority,
 )
 from ..forms import AnnouncementForm
 from ..models import Announcement
-from ..services import access, manage, snapshot
+from ..services import access, manage, recipients, snapshot
 from ..services.queries import decorate
 from ._base import error, ok
 
@@ -128,6 +130,7 @@ def _form_options(organization, scope, announcement=None):
         "categories": Category.choices,
         "priorities": Priority.choices,
         "families": Audience.choices,
+        "popup_modes": PopupMode.choices,
         "apply_modes": ApplyMode.choices,
         "kinds": [
             {"id": str(kind.pk), "label": kind.label, "unit": kind.target_unit.name, "families": kind.families}
@@ -146,6 +149,23 @@ def _bound_data(request):
     return data
 
 
+def _popup_mode(announcement) -> str:
+    if announcement.requires_ack:
+        return PopupMode.MANDATORY.value
+    return PopupMode.ONCE.value if announcement.show_as_popup else PopupMode.NONE.value
+
+
+def _stats(announcement) -> tuple[dict, dict | None]:
+    """KPI-lər + (məcburi elanda) alıcı siyahısının ilk səhifəsi — sabit sayda sorğu."""
+    stats = manage.receipt_stats([announcement.pk]).get(announcement.pk, dict(manage.EMPTY_STATS))
+    if not announcement.requires_ack:
+        stats["targeted"] = manage.targeted_count(announcement)
+        return stats, None
+    summary = recipients.ack_summary(announcement)
+    stats.update(targeted=summary["targeted"], acked_targeted=summary["acked"], pending=summary["pending"])
+    return stats, recipients.recipient_page(announcement, status="pending")
+
+
 def _initial(announcement):
     def _local(value):
         return timezone.localtime(value).strftime("%Y-%m-%dT%H:%M") if value else ""
@@ -158,6 +178,7 @@ def _initial(announcement):
         "priority": announcement.priority,
         "is_pinned": announcement.is_pinned,
         "show_as_popup": announcement.show_as_popup,
+        "popup_mode": _popup_mode(announcement),
         "publish_at": _local(announcement.publish_at),
         "expires_at": _local(announcement.expires_at),
         "deadline_at": _local(announcement.deadline_at),
@@ -198,7 +219,9 @@ def _edit(request, organization, scope, announcement=None):
     else:
         form = AnnouncementForm(organization=organization)
         values = (
-            _initial(announcement) if announcement else {"category": "general", "priority": 0, "apply_mode": "none"}
+            _initial(announcement)
+            if announcement
+            else {"category": "general", "priority": 0, "apply_mode": "none", "popup_mode": "none"}
         )
         families = values.get("audience_families", []) if announcement else ["students"]
     options = _form_options(organization, scope, announcement)
@@ -206,11 +229,10 @@ def _edit(request, organization, scope, announcement=None):
         posted_units = set(request.POST.getlist("audience_units"))
         for choice in options["unit_choices"]:
             choice["checked"] = choice["id"] in posted_units
-    stats = None
+    stats = ack_page = None
     hard_delete = False
     if announcement is not None:
-        stats = manage.receipt_stats([announcement.pk]).get(announcement.pk, {"seen": 0, "read": 0, "applied": 0})
-        stats["targeted"] = manage.targeted_count(announcement)
+        stats, ack_page = _stats(announcement)
         decorate(announcement, timezone.now())
         hard_delete = not announcement.is_deleted and manage.is_hard_delete(announcement)
     context = _page_context(
@@ -221,6 +243,8 @@ def _edit(request, organization, scope, announcement=None):
         selected_families=families,
         announcement=announcement,
         stats=stats,
+        ack_page=ack_page,
+        recipient_statuses=RECIPIENT_STATUSES,
         hard_delete=hard_delete,
         **options,
     )

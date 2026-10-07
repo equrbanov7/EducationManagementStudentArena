@@ -205,6 +205,14 @@
     color: var(--ems-success-700, #15803d);
 }
 
+.ann-card.is-ack-pending { border-left-color: var(--ems-warning-800); }
+
+.ann-card__ack { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+
+.ann-card__ack.is-pending { color: var(--ems-warning-800); }
+.ann-card__ack.is-done { color: var(--ems-success-700); }
+.ann-toggle--ack i { color: var(--ems-warning-800); }
+
 /* ── Çiplər ────────────────────────────────────────────────────────────── */
 .ann-chip {
     display: inline-flex;
@@ -227,6 +235,7 @@
 .ann-chip--high { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
 .ann-chip--critical { border-color: var(--ems-danger-bd); background: var(--ems-danger-bg); color: var(--ems-danger-700); }
 .ann-chip--muted { color: var(--ems-neutral-500); }
+.ann-chip--mandatory { border-color: var(--ems-warning-800); background: var(--ems-warning-800); color: var(--ems-neutral-0); }
 
 .ann-cat--academic { border-color: var(--ems-sky-100); background: var(--ems-sky-100); color: var(--ems-sky-800); }
 .ann-cat--exam { border-color: var(--ems-violet-100); background: var(--ems-violet-100); color: var(--ems-violet-800); }
@@ -397,11 +406,17 @@
     list-style: none;
 }
 
+/* Uzun fayl adı sətri kartdan daşmasın: li + keçid enə görə sıxılır, ad ellipsis ilə kəsilir,
+   ölçü həmişə görünür (əvvəl 360px ekranda sətir kartdan 50px kənara çıxırdı). */
+.ann-files__list > li { max-width: 100%; min-width: 0; }
+
 .ann-file {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     max-width: 100%;
+    min-width: 0;
+    min-height: 44px;
     padding: 8px 12px;
     border: 1px solid var(--ems-border);
     border-radius: var(--ems-r-md, 8px);
@@ -412,8 +427,9 @@
 }
 
 .ann-file:hover { border-color: var(--ems-primary-300); color: var(--ems-primary-700); }
-.ann-file__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
-.ann-file__size { color: var(--ems-neutral-500); font-size: var(--ems-fs-sm, 12px); }
+.ann-file > i { flex: 0 0 auto; }
+.ann-file__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+.ann-file__size { flex: 0 0 auto; color: var(--ems-neutral-500); font-size: var(--ems-fs-sm, 12px); white-space: nowrap; }
 
 .ann-apply {
     display: flex;
@@ -446,16 +462,122 @@
     gap: 6px;
 }
 
+/* ── Məcburi elanın təsdiq bloku (detal) ──────────────────────────────── */
+.ann-ack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: var(--ems-sp-5, 14px) var(--ems-sp-6, 16px);
+    border: 1px solid var(--ems-warning-bd);
+    border-left: 4px solid var(--ems-warning-800);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-warning-bg);
+}
+
+.ann-ack__head { display: flex; align-items: flex-start; gap: 12px; }
+
+.ann-ack__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ems-warning-800);
+    color: var(--ems-neutral-0);
+}
+
+.ann-ack__text { min-width: 0; }
+.ann-ack__title { margin: 0; font-size: var(--ems-fs-md, 14px); font-weight: 700; color: var(--ems-warning-800); }
+.ann-ack__hint { margin: 2px 0 0; font-size: var(--ems-fs-base, 13px); line-height: 1.5; color: var(--ems-neutral-700); }
+
+.ann-ack__controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+
+.ann-ack__controls[hidden] { display: none; }
+
+.ann-ack__check {
+    display: flex;
+    flex: 1 1 240px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg, 10px);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-800);
+    font-size: var(--ems-fs-md, 14px);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.ann-ack__check:has(input:checked) { border-color: var(--ems-primary-300); background: var(--ems-primary-50); }
+
+.ann-ack__check input { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; accent-color: var(--ems-primary); }
+
+.ann-ack__submit { min-height: 44px; justify-content: center; }
+.ann-ack__result { margin: 0; font-weight: 600; color: var(--ems-success-700); }
+.ann-ack__result.is-error { color: var(--ems-danger-700); }
+
+.ann-ack--done { border-color: var(--ems-success-bd); border-left-color: var(--ems-success-700); background: var(--ems-success-bg); }
+
+p.ann-ack { flex-direction: row; align-items: center; gap: 8px; margin: 0; font-size: var(--ems-fs-md, 14px); font-weight: 600; color: var(--ems-success-700); }
+
+.ann-ack-note { display: flex; align-items: flex-start; gap: 8px; }
+.ann-ack-note i { margin-top: 4px; color: var(--ems-warning-800); }
+
 .ann-apply__actions {
     display: flex;
     justify-content: flex-end;
 }
+
+/* ── Responsivlik (2026-10-07) ─────────────────────────────────────────────
+   Hədəf enlər: 360 / 390 / 768 / 1024 / 1280 / 1440, profil sidebar-ı açıq və bağlı.
+   1024-də açıq sidebar məzmunu ~670px-ə endirir (768-də sidebar örtükdür, məzmun ~736px) —
+   ona görə düzülüş viewport breakpoint-indən çox, öz-özünə sınan flex/grid ilə qurulub;
+   media query yalnız telefona xas qaydalar üçündür (640px — layihənin əsas breakpoint-i).
+   Toxunma hədəfləri ≥ 40px. Heç bir sabit en / min-width konteyner yoxdur. */
+.ann,
+.ann-results,
+.ann-list > li { min-width: 0; }
+
+.ann-card__title,
+.ann-detail__title,
+.ann-card__summary { overflow-wrap: anywhere; }
+
+/* Çip ekrandan geniş ola bilməz (uzun tərcümə, məs. ru). */
+.ann-chip { max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* Tarix hissələri öz daxilində qırılmır, bütöv vahid kimi növbəti sətrə keçir. */
+.ann-card__meta > span,
+.ann-detail__meta > span { white-space: nowrap; }
+
+.ann-toggle { min-height: 40px; padding: 6px 14px; }
+.ann-back { min-height: 40px; }
+.ann-pager .ems-btn { min-height: 40px; }
+.ann-deadline-box > div { min-width: 0; }
 
 @media (max-width: 640px) {
     .ann-detail { padding: var(--ems-sp-5, 14px); }
     .ann-detail__title { font-size: var(--ems-fs-xl, 18px); }
     .ann-deadline-box__left { margin-left: 0; }
     .ann-head__manage { width: 100%; justify-content: center; }
+    .ann-ack__submit { width: 100%; }
+    .ann-card__link { padding: var(--ems-sp-4, 12px) var(--ems-sp-5, 14px); }
+    .ann-filters { padding: var(--ems-sp-3, 10px); }
+    .ann-filters__search,
+    .ann-filters__select { flex-basis: 100%; }
+    .ann-toggle { flex: 1 1 auto; justify-content: center; }
+    .ann-pager { gap: 8px; }
+    .ann-pager .ems-btn { flex: 1 1 0; }
+    .ann-pager__info { flex: 0 0 auto; }
+    .ann-files__list > li { flex: 1 1 100%; }
+    .ann-file { display: flex; }
+    .ann-file__name { flex: 1 1 auto; max-width: none; }
+    .ann-apply__actions .ems-btn,
+    .ann-apply > .ems-btn { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {

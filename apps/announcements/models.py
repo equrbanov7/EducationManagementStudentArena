@@ -57,6 +57,10 @@ class Announcement(UUIDModel, TimeStampedModel):
     #: «Son tarix» — məs. müraciətin qəbulu; keçəndən sonra «Müraciət et» bağlanır.
     deadline_at = models.DateTimeField(null=True, blank=True)
     show_as_popup = models.BooleanField(default=False)
+    #: Məcburi tanışlıq (2026-10-07): popup bağlana bilmir, istifadəçi «Tanış oldum» təsdiqi
+    #: verənədək (``AnnouncementReceipt.acknowledged_at``) hər tam səhifədə çıxır. Popup-u nəzərdə
+    #: tutur — ``ann_ack_needs_popup`` CHECK-i və forma/servis bunu təmin edir.
+    requires_ack = models.BooleanField(default=False, db_default=False)
     audience_families = models.JSONField(default=list, blank=True)
     audience_units = models.JSONField(default=list, blank=True)
     apply_mode = models.CharField(max_length=12, choices=ApplyMode.choices, default=ApplyMode.NONE)
@@ -107,6 +111,10 @@ class Announcement(UUIDModel, TimeStampedModel):
             models.CheckConstraint(
                 condition=models.Q(is_deleted=False) | models.Q(deleted_at__isnull=False),
                 name="ann_deleted_has_time",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(requires_ack=False) | models.Q(show_as_popup=True),
+                name="ann_ack_needs_popup",
             ),
         ]
 
@@ -170,13 +178,15 @@ class AnnouncementAttachment(UUIDModel, TimeStampedModel):
 
 
 class AnnouncementReceipt(UUIDModel, TimeStampedModel):
-    """İstifadəçi × elan: popup görülüb, oxunub, müraciət edilib (hər cüt üçün BİR sətir)."""
+    """İstifadəçi × elan: popup görülüb, oxunub, təsdiq edilib, müraciət edilib (hər cüt üçün BİR sətir)."""
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="+")
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="receipts")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="+")
     popup_seen_at = models.DateTimeField(null=True, blank=True)
     read_at = models.DateTimeField(null=True, blank=True)
+    #: Məcburi elanla «Elanı oxudum və tanış oldum» təsdiqi (yalnız ``requires_ack`` elanlarda yazılır).
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
     applied_at = models.DateTimeField(null=True, blank=True)
     #: Daxili müraciətin id-si / nömrəsi (FK deyil — modul sərhədi; müraciət öz modulunda yaşayır).
     application_id = models.UUIDField(null=True, blank=True)

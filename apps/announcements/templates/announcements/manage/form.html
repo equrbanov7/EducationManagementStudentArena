@@ -8,8 +8,8 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
 
 {% block embed_extra_css %}
     {% include "partials/ems_ui/_assets.html" %}
-    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-3">
-    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-3">
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-5">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-5">
 {% endblock %}
 
 {% block embed_content %}
@@ -38,11 +38,14 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
     {% endif %}
 
     {% if stats %}
-    <div class="ems-kpis ems-kpis--4 annm-kpis">
+    <div class="ems-kpis {% if announcement.requires_ack %}ems-kpis--5{% else %}ems-kpis--4{% endif %} annm-kpis">
         <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Hədəf auditoriya" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.targeted }}</div></div>
         <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Popup görüb" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.seen }}</div></div>
         <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Oxuyub" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.read }}</div></div>
         <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Müraciət edib" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.applied }}</div></div>
+        {% if announcement.requires_ack %}
+        <div class="ems-kpi annm-kpi--ack"><div class="ems-kpi__label">{% trans "Təsdiq edən" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ stats.acked_targeted }} <span class="annm-kpi__of">/ {{ stats.targeted }}</span></div></div>
+        {% endif %}
     </div>
     {% endif %}
 
@@ -118,6 +121,7 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
         </section>
 
         {% include "announcements/manage/_audience.html" %}
+        {% include "announcements/manage/_popup_mode.html" %}
         {% include "announcements/manage/_apply_config.html" %}
 
         <section class="annm-card" aria-labelledby="annm-files-title">
@@ -175,10 +179,11 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
         </div>
         <p class="annm-status__hint">{% if hard_delete %}{% trans "Qaralamanı heç kim görməyib — «Sil» onu birdəfəlik silir." context "announcements.manage" %}{% else %}{% trans "«Sil» elanı bütün alıcılardan gizlədir; statistika və müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur." context "announcements.manage" %}{% endif %}</p>
     </section>
+    {% if ack_page %}{% include "announcements/manage/_ack_stats.html" %}{% endif %}
     {% endif %}
 </div>
 {% endblock %}
 
 {% block embed_extra_js %}
-    <script src="{% static 'announcements/js/manage.js' %}?v=20261006-1"></script>
+    <script src="{% static 'announcements/js/manage.js' %}?v=20261007-1"></script>
 {% endblock %}

@@ -59,6 +59,12 @@ MANAGE_PAGE_SIZE = 20
 UNREAD_WINDOW_DAYS = 60
 #: Unit seçimi: maksimum hədəf bölmə sayı.
 MAX_TARGET_UNITS = 50
+#: Məcburi elanın «təsdiq edənlər / gözləyənlər» siyahısının səhifə ölçüsü (menecer).
+RECIPIENTS_PAGE_SIZE = 20
+#: Alıcı siyahısının vəziyyət filtri (klientdən gələn dəyər bu dəstlə süzülür).
+RECIPIENT_STATUSES = ("pending", "acked", "all")
+#: Auditoriya xülasəsində adı göstərilən maksimum bölmə sayı (qalanı «və daha N»).
+SUMMARY_UNIT_NAMES = 3
 
 
 class Category(models.TextChoices):
@@ -90,6 +96,18 @@ class Audience(models.TextChoices):
 
 
 ALL_FAMILIES = frozenset(choice.value for choice in Audience)
+
+
+class PopupMode(models.TextChoices):
+    """Formanın popup seçimi → ``show_as_popup`` / ``requires_ack`` (bax ``forms.AnnouncementForm``).
+
+    ``mandatory`` (2026-10-07, sahib): istifadəçi «Tanış oldum» təsdiqi verənədək HƏR tam səhifə
+    açılışında bağlana bilməyən popup görür; təsdiq ``AnnouncementReceipt.acknowledged_at``-dır.
+    """
+
+    NONE = "none", pgettext_lazy(_CTX, "Popup yoxdur")
+    ONCE = "once", pgettext_lazy(_CTX, "Bir dəfəlik popup")
+    MANDATORY = "mandatory", pgettext_lazy(_CTX, "Məcburi popup")
 
 
 class ApplyMode(models.TextChoices):

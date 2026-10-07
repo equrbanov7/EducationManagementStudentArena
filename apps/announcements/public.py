@@ -19,6 +19,11 @@ POPUP (birdəfəlik): aktiv, ünvanlanmış, ``show_as_popup`` elan qəbzində `
 yoxdursa növbəti TAM səhifə açılışında göstərilir (imtahan səhifələrində heç vaxt).
 Gözləyən yoxdursa SIFIR sorğu (``Organization.settings`` xülasəsi + sessiya işarəsi).
 
+MƏCBURİ (2026-10-07): ``requires_ack`` (⇒ ``show_as_popup``) elan bağlana bilməyən popup kimi
+HƏR tam səhifədə çıxır, istifadəçi «Elanı oxudum və tanış oldum» təsdiqi verənədək
+(``AnnouncementReceipt.acknowledged_at``, ``POST /elanlar/api/<id>/ack/``). Menecer
+«Təsdiq edən: X / Y» və alıcı siyahısını redaktə səhifəsində görür.
+
 İDARƏ: ``announcement.manage`` (struktur əhatəsinə tabe; dekan yalnız öz fakültəsinə).
 
 SİLMƏ (2026-10-07): menecer əhatəsindəki İSTƏNİLƏN elanı silə bilər. Qəbzsiz qaralama

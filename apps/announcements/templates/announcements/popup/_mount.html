@@ -1,31 +1,40 @@
 {% load i18n static announcements_tags %}
-{% comment %}Birdəfəlik elan popup-u (base.html-dən daxil olunur). Gözləyən yoxdursa HEÇ NƏ render
-olunmur və heç bir asset yüklənmir. Bootstrap modalı: role=dialog, aria-modal, fokus tələsi, Esc.
-«Bağla» / «Ətraflı bax» → `popup_seen` POST — yalnız GÖSTƏRİLMİŞ addımlar qeyd olunur
-(stepper-də açılmamış elan növbəti açılışda yenə çıxır). İmtahan səhifələrində tag `[]` qaytarır.{% endcomment %}
+{% comment %}Elan popup-u (base.html-dən daxil olunur). Gözləyən yoxdursa HEÇ NƏ render olunmur və heç bir
+asset yüklənmir. Bootstrap modalı: role=dialog, aria-modal, fokus tələsi.
+* Adi (birdəfəlik) elan: «Bağla» / Esc / «Ətraflı bax» → `popup_seen` POST — yalnız GÖSTƏRİLMİŞ addımlar
+  qeyd olunur (stepper-də açılmamış elan növbəti açılışda yenə çıxır).
+* MƏCBURİ elan (`requires_ack`, siyahıda birinci gəlir): statik fon, × yoxdur, Esc və fon klikləri heç
+  nə etmir — «Elanı oxudum və tanış oldum» + «Təsdiq edirəm» (`announcements:ack`) olmadan modal
+  bağlanmır. «Ətraflı bax» icazəlidir (detalda eyni təsdiq bloku var). Təsdiq düyməsi footer-dədir —
+  uzun mətn modalın İÇİNDƏ sürüşür, düymələr həmişə görünür.
+İmtahan səhifələrində tag `[]` qaytarır.{% endcomment %}
 {% announcements_popup as ann_popup %}
 {% if ann_popup %}
-<link rel="stylesheet" href="{% static 'announcements/css/popup.css' %}?v=20261006-1">
-<div class="modal fade ann-popup" id="annPopup" tabindex="-1" role="dialog" aria-modal="true"
+{% with locked=ann_popup.0.requires_ack %}
+<link rel="stylesheet" href="{% static 'announcements/css/popup.css' %}?v=20261007-2">
+<div class="modal fade ann-popup{% if locked %} is-locked{% endif %}" id="annPopup" tabindex="-1" role="dialog" aria-modal="true"
      aria-labelledby="annPopupHeading" data-ann-popup data-bs-backdrop="static"
-     data-seen-url="{% url 'announcements:popup_seen' %}">
+     data-seen-url="{% url 'announcements:popup_seen' %}"
+     data-msg-ack-error="{% trans 'Təsdiq göndərilmədi. Bir az sonra yenidən cəhd edin.' context 'announcements.popup' %}">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content ann-popup__content">
             <div class="modal-header ann-popup__header">
                 <span class="ann-popup__icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></span>
                 <div class="ann-popup__heading">
-                    <p class="ann-popup__eyebrow" id="annPopupHeading">{% if ann_popup|length > 1 %}{% trans "Yeni elanlar" context "announcements.popup" %}{% else %}{% trans "Yeni elan" context "announcements.popup" %}{% endif %}</p>
+                    <p class="ann-popup__eyebrow" id="annPopupHeading">{% if locked %}{% trans "Təsdiq tələb olunur" context "announcements.popup" %}{% elif ann_popup|length > 1 %}{% trans "Yeni elanlar" context "announcements.popup" %}{% else %}{% trans "Yeni elan" context "announcements.popup" %}{% endif %}</p>
                     {% if ann_popup|length > 1 %}<p class="ann-popup__counter" data-ann-popup-counter aria-live="polite">1 / {{ ann_popup|length }}</p>{% endif %}
                 </div>
-                <button type="button" class="btn-close" data-ann-popup-close aria-label="{% trans 'Bağla' context 'announcements.popup' %}"></button>
+                <button type="button" class="btn-close ann-popup__x" data-ann-popup-close aria-label="{% trans 'Bağla' context 'announcements.popup' %}"{% if locked %} hidden{% endif %}></button>
             </div>
             <div class="modal-body ann-popup__body">
                 {% for item in ann_popup %}
                 <section class="ann-popup__item" data-ann-popup-item data-id="{{ item.pk }}"
                          data-detail-url="{% url 'accounts:profile' %}?section=announcements&amp;elan={{ item.pk }}"
+                         {% if item.requires_ack %}data-mandatory="1" data-ack-url="{% url 'announcements:ack' item.pk %}"{% endif %}
                          aria-labelledby="annPopupTitle{{ forloop.counter }}"{% if not forloop.first %} hidden{% endif %}>
                     <div class="ann-popup__chips">{% include "announcements/cabinet/_chips.html" %}</div>
                     <h2 class="ann-popup__title" id="annPopupTitle{{ forloop.counter }}">{{ item.title }}</h2>
+                    {% if item.requires_ack %}<p class="ann-popup__mandatory"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Bu elan məcburidir: oxuyun və tanış olduğunuzu təsdiq edin. Təsdiq edənədək pəncərə bağlanmır." context "announcements.popup" %}</p>{% endif %}
                     {% if item.summary %}<p class="ann-popup__summary">{{ item.summary }}</p>{% elif item.body %}<p class="ann-popup__summary">{{ item.body|truncatechars:320 }}</p>{% endif %}
                     <dl class="ann-popup__facts">
                         <div><dt>{% trans "Dərc" context "announcements.popup" %}</dt><dd>{{ item.publish_at|date:"d.m.Y" }}</dd></div>
@@ -36,17 +45,25 @@ olunmur və heç bir asset yüklənmir. Bootstrap modalı: role=dialog, aria-mod
                 {% endfor %}
             </div>
             <div class="modal-footer ann-popup__footer">
+                <div class="ann-popup__ack" data-ann-popup-ack{% if not locked %} hidden{% endif %}>
+                    <label class="ann-popup__check"><input type="checkbox" data-ann-popup-ack-check> <span>{% trans "Elanı oxudum və tanış oldum" context "announcements.popup" %}</span></label>
+                    <p class="ann-popup__ack-error" data-ann-popup-ack-error role="alert" hidden></p>
+                </div>
                 {% if ann_popup|length > 1 %}
                 <div class="ann-popup__steps">
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-ann-popup-prev disabled aria-label="{% trans 'Əvvəlki elan' context 'announcements.popup' %}"><i class="fas fa-chevron-left" aria-hidden="true"></i></button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-ann-popup-next aria-label="{% trans 'Növbəti elan' context 'announcements.popup' %}"><i class="fas fa-chevron-right" aria-hidden="true"></i></button>
                 </div>
                 {% endif %}
-                <button type="button" class="btn btn-light" data-ann-popup-close>{% trans "Bağla" context "announcements.popup" %}</button>
-                <a class="btn btn-primary" href="#" data-ann-popup-more>{% trans "Ətraflı bax" context "announcements.popup" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                <div class="ann-popup__actions">
+                    <button type="button" class="btn btn-light" data-ann-popup-close{% if locked %} hidden{% endif %}>{% trans "Bağla" context "announcements.popup" %}</button>
+                    <a class="btn btn-outline-primary ann-popup__more" href="#" data-ann-popup-more>{% trans "Ətraflı bax" context "announcements.popup" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
+                    <button type="button" class="btn btn-primary" data-ann-popup-confirm disabled{% if not locked %} hidden{% endif %}><i class="fas fa-check" aria-hidden="true"></i> {% trans "Təsdiq edirəm" context "announcements.popup" %}</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script src="{% static 'announcements/js/popup.js' %}?v=20261006-1" defer></script>
+<script src="{% static 'announcements/js/popup.js' %}?v=20261007-2" defer></script>
+{% endwith %}
 {% endif %}

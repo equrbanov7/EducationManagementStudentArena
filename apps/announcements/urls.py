@@ -14,6 +14,7 @@ urlpatterns = [
     path("api/list/", views.list_fragment, name="list"),
     path("api/popup/seen/", views.popup_seen, name="popup_seen"),
     path("api/<uuid:announcement_id>/read/", views.mark_read, name="read"),
+    path("api/<uuid:announcement_id>/ack/", views.ack, name="ack"),
     path("api/<uuid:announcement_id>/apply/", views.apply, name="apply"),
     path(
         "api/<uuid:announcement_id>/files/<uuid:attachment_id>/",
@@ -22,9 +23,11 @@ urlpatterns = [
     ),
     path("idare/", views.manage_list, name="manage_list"),
     path("idare/api/rows/", views.manage_rows, name="manage_rows"),
+    path("idare/api/audience-count/", views.manage_audience_count, name="manage_audience_count"),
     path("idare/yeni/", views.manage_create, name="manage_create"),
     path("idare/<uuid:announcement_id>/", views.manage_edit, name="manage_edit"),
     path("idare/<uuid:announcement_id>/emel/", views.manage_action, name="manage_action"),
     path("idare/<uuid:announcement_id>/onizleme/", views.manage_preview, name="manage_preview"),
+    path("idare/<uuid:announcement_id>/api/recipients/", views.manage_recipients, name="manage_recipients"),
     path("<uuid:announcement_id>/", views.detail_redirect, name="detail"),
 ]

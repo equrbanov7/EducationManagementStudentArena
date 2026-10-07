@@ -4,6 +4,11 @@ Auditoriya bölmələrinin əhatə yoxlaması ``services/access.validate_units``
 əhatəsi formaya ötürülür). «Müraciət et» konfiqurasiyası: daxili rejimdə növ bu təşkilatın
 AKTİV növü olmalı və seçilmiş BÜTÜN ailələrə açıq olmalıdır; keçid rejimində yalnız
 ``http(s)://`` və ya eyni saytın ``/yol``-u (``//`` və ``javascript:`` rədd olunur).
+
+Popup seçimi (2026-10-07) üç rejimdir — ``popup_mode``: ``none`` / ``once`` / ``mandatory``.
+``clean`` onu modelin iki bayrağına çevirir: ``show_as_popup`` və ``requires_ack``
+(məcburi ⇒ popup; DB-də ``ann_ack_needs_popup`` CHECK-i). Köhnə klient yalnız
+``show_as_popup`` göndərirsə (``popup_mode`` yoxdur) o, «bir dəfəlik» sayılır.
 """
 
 from __future__ import annotations
@@ -27,6 +32,7 @@ from .constants import (
     ApplyMode,
     Audience,
     Category,
+    PopupMode,
     Priority,
 )
 
@@ -56,7 +62,9 @@ class AnnouncementForm(forms.Form):
     category = forms.ChoiceField(choices=Category.choices, initial=Category.GENERAL)
     priority = forms.TypedChoiceField(choices=Priority.choices, coerce=int, initial=Priority.NORMAL)
     is_pinned = forms.BooleanField(required=False)
+    #: Köhnə (tək checkbox) giriş — ``popup_mode`` göndərilməyəndə istifadə olunur.
     show_as_popup = forms.BooleanField(required=False)
+    popup_mode = forms.ChoiceField(choices=PopupMode.choices, required=False)
     publish_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
     expires_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
     deadline_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
@@ -96,8 +104,15 @@ class AnnouncementForm(forms.Form):
             return None
         return ApplicationKind.objects.filter(organization=self.organization, pk=pk, is_active=True).first()
 
+    def _popup_flags(self, data) -> None:
+        mode = data.get("popup_mode") or (PopupMode.ONCE if data.get("show_as_popup") else PopupMode.NONE)
+        data["popup_mode"] = str(mode)
+        data["requires_ack"] = mode == PopupMode.MANDATORY
+        data["show_as_popup"] = mode in (PopupMode.ONCE, PopupMode.MANDATORY)
+
     def clean(self):
         data = super().clean()
+        self._popup_flags(data)
         publish_at, expires_at, deadline_at = data.get("publish_at"), data.get("expires_at"), data.get("deadline_at")
         if publish_at and expires_at and expires_at <= publish_at:
             self.add_error("expires_at", pgettext(_CTX, "Bitmə vaxtı dərc vaxtından sonra olmalıdır."))
