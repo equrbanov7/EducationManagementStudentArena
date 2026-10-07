@@ -40,7 +40,51 @@ fayl CI-da (`core/tests/test_secaudit_2026_10_07_rls_bypass_inventory.py`) yıx�
 ## Sahib qərarı / server əməliyyatı tələb edənlər
 - Hostda 11 gözləyən apt təhlükəsizlik yeniləməsi — gecə tətbiq olunmalı (`prod-host-maint.yml`).
 - `EMS_DB_ROLE_ENFORCE=error` (app DB rolunun RLS-ə tabe olduğunu prod-audit təsdiqləyəndən sonra).
-- postgres/pgbouncer exporter-lərinə ayrıca `pg_monitor` rolu; promtail `docker.sock` üçün socket-proxy; Redis ACL.
+- ~~postgres/pgbouncer exporter-lərinə ayrıca `pg_monitor` rolu; promtail `docker.sock` üçün socket-proxy; Redis ACL.~~
+  **Avtomatlaşdırıldı** — aşağıdakı «Exporter least privilege» bölməsinə baxın; sahibə qalan yalnız iki workflow
+  düyməsi və adi deploy-dur.
 - GitHub `production` environment-ə tələb olunan reviewer + yalnız main.
 - Off-site backup (köhnə AD-01).
 - Dizayn riskləri (dəyişdirilmədi): hall kompüteri qeydiyyatsız təşkilatda final cəhdi istənilən cihazdan davam edə bilər; yazılı sualın vaxtlı məzmunu səhifə mənbəyindədir; WebSocket consumer-ləri admin-2FA/zona middleware-dən keçmir (hazırda yalnız oxu).
+
+## Exporter least privilege + promtail docker.sock-suz (2026-10-07, avtomatik rollout)
+
+Nə dəyişdi (testlər: `tests/test_infra_monitor_least_privilege_2026_10_07.py`, CI `prod-smoke` proxy addımı):
+
+| Komponent | Əvvəl | İndi | Açar yoxdursa |
+|---|---|---|---|
+| promtail | xam `/var/run/docker.sock` (= host root) | `tcp://docker-socket-proxy:2375` — yalnız GET, yalnız `/containers` `/networks` `/_ping` `/version`; proxy ayrıca `internal` `docker-api` şəbəkəsində (orada yalnız promtail) | — (həmişə aktiv, açar tələb etmir) |
+| postgres_exporter | `POSTGRES_USER` (superuser) | `emsarena_monitor`: NOSUPERUSER NOBYPASSRLS, yalnız `pg_monitor`, `default_transaction_read_only=on`, CONNECTION LIMIT 5 | owner (köhnə) |
+| pgbouncer_exporter | owner (`admin_users` → PAUSE/KILL/SHUTDOWN) | eyni monitor istifadəçisi yalnız `stats_users`-də (SHOW-lar) | owner (köhnə) |
+| redis_exporter | `default` + əsas parol | ACL `monitor`: açar/kanal yox, yalnız PING/INFO/CLIENT SETNAME/SLOWLOG/LATENCY (`CONFIG GET` YOX — `requirepass`-ı qaytarardı) | əsas parol (köhnə) |
+| cadvisor | privileged + host yolları | **dəyişmədi** — cgroup/`/var/lib/docker`/`/dev/kmsg` oxuyur, privileged konteyner üçün proxy sərhəd deyil (compose şərhi) | — |
+
+Avtomatlaşdırma (`scripts/deploy/remote_deploy.sh`, heç bir addım deploy-u dayandırmır):
+1. `preflight_monitor_credentials` — `.env`-də `MONITOR_DB_PASSWORD` / `REDIS_MONITOR_PASSWORD` yoxdursa və ya
+   təhlükəsiz deyilsə (16–128 simvol `[A-Za-z0-9._~-]`, rol adı owner/app ilə eyni olmamalı) **boş override ixrac edir**
+   (compose-da shell mühiti `.env`-dən üstündür) → exporter-lər `${MONITOR_DB_USER:-${POSTGRES_USER}}` /
+   `${REDIS_MONITOR_PASSWORD:-${REDIS_PASSWORD}}` ilə köhnə girişdə qalır.
+2. `up -d postgres redis pgbouncer …`-dan sonra `activate_monitor_credentials`: `scripts/deploy/provision_monitor_role.sh`
+   rolu idempotent yaradır/parolu yeniləyir (parol yalnız stdin ilə, log/pg_stat_statements söndürülmüş sessiyada);
+   pgbouncer-də `stats_users` + userlist, Redis-də `ACL USERS` yoxlanır. Hər hansı biri alınmasa → yenə boş override →
+   exporter-lər köhnə girişə qayıdır (deploy logunda `WARNING: … fall back`). Beləliklə `PostgresDown`/`RedisDown`
+   yalançı alertləri yaranmır.
+3. Redis entrypoint-i ACL sətrini əvvəl portsuz müvəqqəti `redis-server`-də sınayır; rədd olunsa ACL-siz qalxır
+   (səhv qayda Redis-i yıxmır).
+4. `prod_audit.sh` §4a: exporter-lərin hansı istifadəçi ilə qoşulduğu, rol atributları, pgbouncer stats_users,
+   Redis ACL, promtail-də docker.sock və proxy icazələri — ✅/⚠️/❌ (sirr çap olunmur).
+
+Sahibin bir dəfəlik addımları (serverə SSH lazım deyil; dəyərlər heç yerdə görünmür):
+1. Bu dəyişiklik main-ə çatsın və adi CD deploy keçsin — promtail proxy-yə keçir; exporter-lər hələ köhnə girişdədir
+   (deploy logunda `Monitoring: MONITOR_DB_PASSWORD is not set …`). Bu deploy redis və pgbouncer-i bir dəfə yenidən yaradır
+   (konfiq hash-i dəyişib, bir neçə saniyə).
+2. Actions → **🔑 Prod secret generate** → `key=MONITOR_DB_PASSWORD`, `redeploy=false` → logda yalnız
+   `MONITOR_DB_PASSWORD: generated` və `MONITOR_DB_USER: added (emsarena_monitor)`.
+3. Actions → **🔑 Prod secret generate** → `key=REDIS_MONITOR_PASSWORD`, `redeploy=true` → `generated`, ardınca deploy.
+   Deploy logunda: `Monitoring: postgres/pgbouncer exporters use the least-privilege role emsarena_monitor …` və
+   `Monitoring: redis_exporter uses the read-only ACL user 'monitor'.` (yenə redis/pgbouncer bir dəfə yenidən yaradılır).
+4. Yoxlama: **prod-audit** workflow-u → §4a-da hamısı ✅ olmalıdır.
+
+Geri qaytarmaq: `env-update` ilə açarları boşaltmaq (`MONITOR_DB_USER=` `MONITOR_DB_PASSWORD=` / `REDIS_MONITOR_PASSWORD=`)
+və ya serverdə sətirləri silib deploy — exporter-lər köhnə girişə qayıdır (rol bazada qalır, zərərsizdir:
+`DROP ROLE emsarena_monitor` istəyə bağlıdır). Promtail-i köhnə hala qaytarmaq yalnız kod revert-i ilədir.
