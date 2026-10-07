@@ -231,13 +231,46 @@
         }
 
         /* ── vaxt / say əlaqəli qaydalar (R1) — yalnız hər iki dəyər dolu olanda ── */
+        /* 2026-10-08: sahə artıq «gg.aa.iiii ss:dd» mətnidir (static/js/ems_datetime.js,
+           EMSDateTime) — ISO da (köhnə render / API) qəbul olunur. */
         function parseLocalDateTime(input) {
             var value = input ? (input.value || "").trim() : "";
+            var api = window.EMSDateTime;
+            if (api && typeof api.parse === "function") {
+                var res = api.parse(value);
+                return res.ok ? api.toDate(res.parts) : null;
+            }
             var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
             if (!m) {
                 return null;
             }
             return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], 0, 0);
+        }
+
+        /* Dolu, amma oxunmayan tarix-saat: «seçin» yox, NƏ səhv olduğunu de
+           (format / belə tarix yoxdur / saat 24 formatında / saat yazılmayıb). */
+        function requireDateTime(input, emptyMessage) {
+            if (!input) {
+                return null;
+            }
+            var value = (input.value || "").trim();
+            if (!value) {
+                markInvalid(input, emptyMessage);
+                return input;
+            }
+            var api = window.EMSDateTime;
+            if (api && typeof api.validate === "function") {
+                var res = api.validate(input);
+                if (!res.ok) {
+                    markInvalid(input, res.message);
+                    return input;
+                }
+            }
+            var group = input.closest(".form-group");
+            if (group) {
+                clearTransientError(group);
+            }
+            return null;
         }
 
         function validateTimingRelations(startInput, endInput, durationInput, countInput) {
@@ -320,8 +353,14 @@
                 var endInput = form.querySelector('[name="end_datetime"]');
                 var durationInput = form.querySelector('[name="total_duration_minutes"]');
                 var countInput = form.querySelector('[name="random_question_count"]');
-                requireField(startInput, i18n("startRequired", gettext("Başlama vaxtını seçin.")));
-                requireField(endInput, i18n("endRequired", gettext("Bitmə vaxtını seçin.")));
+                [
+                    requireDateTime(startInput, i18n("startRequired", gettext("Başlama vaxtını seçin."))),
+                    requireDateTime(endInput, i18n("endRequired", gettext("Bitmə vaxtını seçin.")))
+                ].forEach(function (bad) {
+                    if (bad && !firstInvalid) {
+                        firstInvalid = bad;
+                    }
+                });
                 requireField(durationInput, i18n("durationRequired", gettext("İmtahanın ümumi müddətini yazın.")));
                 /* 2026-09-14 (W4 `w4wizard`, R1): əlaqəli qaydalar da KLİENTDƏ tutulur —
                    əvvəl «bitmə < başlama» server 400-ü ilə gəlib sehrbazı 1-ci addıma

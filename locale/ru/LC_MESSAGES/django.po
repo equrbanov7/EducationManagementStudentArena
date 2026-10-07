@@ -91930,3 +91930,63 @@ msgstr[0] "Кто увидит: %(who)s · %(where)s — примерно %(n)s 
 msgstr[1] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человека"
 msgstr[2] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человек"
 msgstr[3] "Кто увидит: %(who)s · %(where)s — примерно %(n)s человека"
+
+msgctxt "core.datetime_input"
+msgid ""
+"Tarixi və saatı gg.aa.iiii ss:dd formatında yazın (məsələn, 06.10.2026 "
+"09:30)."
+msgstr ""
+"Введите дату и время в формате дд.мм.гггг чч:мм (например, 06.10.2026 "
+"09:30)."
+
+msgctxt "core.datetime_input"
+msgid "Belə tarix yoxdur. Günü, ayı və ili yoxlayın (gg.aa.iiii)."
+msgstr "Такой даты не существует. Проверьте день, месяц и год (дд.мм.гггг)."
+
+msgctxt "core.datetime_input"
+msgid "Saat 00:00 ilə 23:59 arasında olmalıdır (24 saat formatı)."
+msgstr "Время должно быть от 00:00 до 23:59 (24-часовой формат)."
+
+msgctxt "core.datetime_input"
+msgid "Saatı da yazın (ss:dd, 24 saat formatı)."
+msgstr "Укажите и время (чч:мм, 24-часовой формат)."
+
+msgctxt "core.datetime_input"
+msgid "gg.aa.iiii ss:dd"
+msgstr "дд.мм.гггг чч:мм"
+
+msgctxt "core.datetime_input"
+msgid "Format: gg.aa.iiii ss:dd (24 saat)"
+msgstr "Формат: дд.мм.гггг чч:мм (24 часа)"
+
+msgctxt "core.datetime_input"
+msgid "Təqvimi aç"
+msgstr "Открыть календарь"
+
+msgctxt "core.datetime_input"
+msgid "Tarix və saatı seçin"
+msgstr "Выберите дату и время"
+
+msgctxt "core.datetime_input"
+msgid "Əvvəlki ay"
+msgstr "Предыдущий месяц"
+
+msgctxt "core.datetime_input"
+msgid "Növbəti ay"
+msgstr "Следующий месяц"
+
+msgctxt "core.datetime_input"
+msgid "Saatı seçin"
+msgstr "Выберите час"
+
+msgctxt "core.datetime_input"
+msgid "Dəqiqəni seçin"
+msgstr "Выберите минуты"
+
+msgctxt "core.datetime_input"
+msgid "Bu gün"
+msgstr "Сегодня"
+
+msgctxt "core.datetime_input"
+msgid "Hazırdır"
+msgstr "Готово"

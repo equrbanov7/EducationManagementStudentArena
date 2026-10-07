@@ -1,0 +1,228 @@
+/* =========================================================================
+   ems_datetime.css — EMSDateTime sahəsi (core/datetime_input.py +
+   static/js/ems_datetime.js). Mətn sahəsi + təqvim düyməsi + kiçik dialoq.
+   Rənglər design-tokens.css-dən; inline style yoxdur (CSP).
+   ========================================================================= */
+.ems-dt {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.ems-dt .ems-dt__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 44px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.ems-dt__toggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--ems-r-md);
+  background: transparent;
+  color: var(--ems-neutral-500);
+  cursor: pointer;
+}
+
+.ems-dt__toggle:hover,
+.ems-dt.is-open .ems-dt__toggle {
+  background: var(--ems-primary-50);
+  color: var(--ems-primary-600);
+}
+
+.ems-dt__toggle:focus-visible {
+  outline: 2px solid var(--ems-primary-500);
+  outline-offset: 1px;
+}
+
+.ems-dt.is-invalid .ems-dt__input,
+.ems-dt__input[aria-invalid="true"] {
+  border-color: var(--ems-danger);
+}
+
+.ems-dt__hint {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--ems-fs-sm);
+  color: var(--ems-text-muted);
+}
+
+.ems-dt__error {
+  margin-top: 5px;
+  font-size: var(--ems-fs-sm);
+  color: var(--ems-danger-strong);
+}
+
+/* ── dialoq ── */
+.ems-dt__pop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1080;
+  width: 292px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
+  border: 1px solid var(--ems-neutral-200);
+  border-radius: var(--ems-r-xl);
+  background: var(--ems-bg);
+  color: var(--ems-text);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+}
+
+.ems-dt__pop--up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.ems-dt__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ems-dt__title {
+  font-size: var(--ems-fs-md);
+  font-weight: 700;
+}
+
+.ems-dt__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ems-neutral-200);
+  border-radius: var(--ems-r-md);
+  background: var(--ems-bg);
+  color: var(--ems-neutral-600);
+  cursor: pointer;
+}
+
+.ems-dt__nav:hover { background: var(--ems-neutral-100); }
+
+.ems-dt__grid {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.ems-dt__grid th {
+  padding: 4px 0;
+  font-size: var(--ems-fs-xs);
+  font-weight: 700;
+  color: var(--ems-neutral-500);
+  text-align: center;
+}
+
+.ems-dt__grid td {
+  padding: 1px;
+  text-align: center;
+}
+
+.ems-dt__day {
+  width: 100%;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: var(--ems-r-md);
+  background: transparent;
+  color: var(--ems-text);
+  font-size: var(--ems-fs-base);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ems-dt__day:hover { background: var(--ems-neutral-100); }
+
+.ems-dt__day.is-today {
+  border-color: var(--ems-primary-300);
+  font-weight: 700;
+}
+
+.ems-dt__day.is-selected {
+  background: var(--ems-primary-600);
+  border-color: var(--ems-primary-600);
+  color: var(--ems-neutral-0);
+  font-weight: 700;
+}
+
+.ems-dt__day:focus-visible,
+.ems-dt__nav:focus-visible,
+.ems-dt__btn:focus-visible,
+.ems-dt__tinput:focus-visible {
+  outline: 2px solid var(--ems-primary-500);
+  outline-offset: 1px;
+}
+
+.ems-dt__time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ems-neutral-200);
+}
+
+.ems-dt__clock {
+  margin-right: 4px;
+  color: var(--ems-neutral-500);
+}
+
+.ems-dt__tinput {
+  width: 46px;
+  height: 34px;
+  border: 1px solid var(--ems-neutral-300);
+  border-radius: var(--ems-r-md);
+  background: var(--ems-bg);
+  color: var(--ems-text);
+  font-size: var(--ems-fs-md);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ems-dt__colon { font-weight: 700; }
+
+.ems-dt__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ems-dt__btn {
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1px solid var(--ems-neutral-300);
+  border-radius: var(--ems-r-lg);
+  background: var(--ems-bg);
+  color: var(--ems-text);
+  font-size: var(--ems-fs-base);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ems-dt__btn--primary {
+  border-color: var(--ems-primary-600);
+  background: var(--ems-primary-600);
+  color: var(--ems-neutral-0);
+}
+
+@media (max-width: 420px) {
+  .ems-dt__pop {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
