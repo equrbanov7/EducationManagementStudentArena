@@ -172,3 +172,133 @@ def test_exam_ops_does_not_use_the_bash_groups_builtin_for_an_input():
     env = _jobs(doc)["run-script"]["env"]
     assert "GROUPS" not in env, "bash GROUPS massividir — mühit dəyəri əzilir"
     assert env["GROUPS_INPUT"] == "${{ inputs.groups }}"
+
+
+# ── NGX-1: proxy başlıqlarına etibar (AD-10) və nginx-in özü verdiyi cavablar ────
+
+NGINX = ROOT / "docker/nginx/nginx.conf"
+
+
+def _location_blocks(conf: str) -> dict[str, str]:
+    """Əsas (80/443) server blokunun location-ları — :8081 stub_status server-i daxil deyil."""
+    conf = conf[: conf.index("listen 8081;")]
+    blocks = {}
+    for match in re.finditer(r"^    location ([^{]+)\{", conf, flags=re.MULTILINE):
+        depth = 0
+        for index in range(match.end() - 1, len(conf)):
+            if conf[index] == "{":
+                depth += 1
+            elif conf[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    blocks[match.group(1).strip()] = conf[match.start() : index + 1]
+                    break
+    return blocks
+
+
+def test_every_proxied_location_overwrites_x_forwarded_host_and_port():
+    """Django USE_X_FORWARDED_HOST/PORT=True — müştərinin göndərdiyi dəyər app-a çatmamalıdır."""
+    proxied = {name: body for name, body in _location_blocks(_read(NGINX)).items() if "proxy_pass" in body}
+    assert len(proxied) >= 8
+    for name, body in proxied.items():
+        if "proxy_set_header Host              localhost;" in body:
+            assert "proxy_set_header X-Forwarded-Host  localhost;" in body, name
+        else:
+            assert "proxy_set_header Host              $host;" in body, name
+            assert "proxy_set_header X-Forwarded-Host  $host;" in body, name
+            assert "proxy_set_header X-Forwarded-Port  $server_port;" in body, name
+
+
+def test_tls_session_tickets_are_off_and_protocols_stay_modern():
+    conf = _read(NGINX)
+    assert "ssl_session_tickets off;" in conf
+    assert "ssl_protocols TLSv1.2 TLSv1.3;" in conf
+    assert "server_tokens off;" in conf
+
+
+def test_public_media_served_by_nginx_has_a_sandbox_csp_and_protected_media_is_rate_limited():
+    blocks = _location_blocks(_read(NGINX))
+    csp = "add_header Content-Security-Policy \"default-src 'none'; frame-ancestors 'self'; sandbox\" always;"
+    for prefix in ("/media/post_images/", "/media/course_covers/"):
+        assert "add_header X-Content-Type-Options nosniff always;" in blocks[prefix]
+        assert csp in blocks[prefix]
+    assert "limit_req zone=emsarena_general burst=1000 nodelay;" in blocks["/media/"]
+
+
+def test_metrics_health_and_webhook_stay_bridge_and_loopback_only():
+    blocks = _location_blocks(_read(NGINX))
+    for name in ("/metrics/", "= /health/", "= /api/superadmin/monitoring/alertmanager-webhook/"):
+        body = blocks[name]
+        assert re.findall(r"allow\s+(\S+);", body) == ["127.0.0.1", "172.16.0.0/12"], name
+        assert "deny all;" in body, name
+
+
+# ── CMP-1: compose — publik portlar, sərtləşdirmə, Prometheus lifecycle ─────────
+
+COMPOSE = ROOT / "docker-compose.prod.yml"
+_PRIVILEGED_OK = {"cadvisor", "piston"}
+_CAP_DROP_REQUIRED = {
+    "arp-agent",
+    "postgres_exporter",
+    "node_exporter",
+    "alertmanager",
+    "prometheus",
+    "grafana",
+    "redis_exporter",
+    "nginx_exporter",
+    "pgbouncer_exporter",
+    "blackbox_exporter",
+    "loki",
+}
+
+
+def _services() -> dict:
+    return _load(COMPOSE)["services"]
+
+
+def test_only_nginx_publishes_public_ports_and_only_on_ipv4():
+    for name, svc in _services().items():
+        for port in svc.get("ports", []):
+            spec = str(port)
+            if name == "nginx":
+                assert spec in {"0.0.0.0:80:80", "0.0.0.0:443:443"}, spec
+            else:
+                assert spec.startswith("127.0.0.1:"), f"{name}: {spec} loopback-a bağlı deyil"
+
+
+def test_host_namespaces_and_privileged_mode_are_limited_to_the_justified_services():
+    for name, svc in _services().items():
+        if svc.get("network_mode") == "host":
+            assert name in {"arp-agent", "node_exporter"}, name
+        if svc.get("pid") == "host":
+            assert name == "node_exporter", name
+        if svc.get("privileged"):
+            assert name in _PRIVILEGED_OK, name
+
+
+@pytest.mark.parametrize("name", sorted(set(_load(COMPOSE)["services"]) - _PRIVILEGED_OK))
+def test_non_privileged_services_cannot_gain_privileges(name):
+    svc = _services()[name]
+    assert "no-new-privileges:true" in svc.get("security_opt", []), name
+    if name in _CAP_DROP_REQUIRED:
+        assert svc.get("cap_drop") == ["ALL"], name
+
+
+def test_arp_agent_runs_unprivileged_with_a_read_only_rootfs():
+    svc = _services()["arp-agent"]
+    assert svc["user"] == "65534:65534"
+    assert svc["read_only"] is True
+
+
+def test_prometheus_lifecycle_api_is_disabled_and_deploy_reloads_with_sighup():
+    assert "--web.enable-lifecycle" not in _services()["prometheus"]["command"]
+    deploy = _read(ROOT / "scripts/deploy/remote_deploy.sh")
+    assert "exec -T prometheus kill -HUP 1" in deploy
+    assert "/-/reload" not in deploy
+
+
+# ── DJ-1: Django — dil kukisi ─────────────────────────────────────────────────────
+
+
+def test_language_cookie_follows_session_cookie_secure_in_production():
+    assert "LANGUAGE_COOKIE_SECURE = SESSION_COOKIE_SECURE" in _read(ROOT / "config/settings/production.py")
