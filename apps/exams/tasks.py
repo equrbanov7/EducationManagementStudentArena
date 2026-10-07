@@ -192,6 +192,21 @@ def purge_expired_import_stashes():
     return purged
 
 
+@shared_task(name="exams.purge_finished_extraction_jobs", ignore_result=True)
+def purge_finished_extraction_jobs():
+    """Fon işi tutumu 2026-10-07: bitmiş idxal/AI/export işləri (faylları ilə) saxlama müddətindən sonra.
+
+    Hər 1 000-lik hissə öz ``rls_worker_atomic() + bypass_rls()`` scope-unda (bax
+    ``apps/exams/services/import_retention.py``).
+    """
+    from apps.exams.services.import_retention import purge_finished_extraction_jobs as _purge
+
+    purged = _purge(scope=_worker_bypass_scope)
+    if purged:
+        logger.info("purge_finished_extraction_jobs: %d iş silindi", purged)
+    return purged
+
+
 @shared_task(name="exams.notify_upcoming_final_exams")
 def notify_upcoming_final_exams():
     """

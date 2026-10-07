@@ -172,4 +172,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "notifications.purge_old",
         "schedule": crontab(hour=3, minute=50),
     },
+    "exams-purge-finished-extraction-jobs": {
+        "task": "exams.purge_finished_extraction_jobs",
+        "schedule": crontab(hour=4, minute=0),
+    },
 }
