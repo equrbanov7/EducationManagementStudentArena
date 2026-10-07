@@ -1,5 +1,8 @@
 """supervision paketi — actions."""
 
+from datetime import timedelta
+
+from django.db.models import DateTimeField, ExpressionWrapper, F
 from django.utils import timezone
 
 from apps.exams.features import exam_supervision_enabled, supervision_disabled_message
@@ -269,17 +272,36 @@ def sweep_expired_resume_windows(queryset=None, *, scope=None):
     if not exam_supervision_enabled():
         return 0
 
-    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
+    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock, sweep_time_budget
+
+    now = timezone.now()
 
     def _narrow(qs):
-        return qs.filter(
-            supervision_status="locked",
-            supervision_locked_at__isnull=False,
-        ).exclude(
-            status__in=["submitted", "expired"],
+        # Fon işi tutumu 2026-10-07: əvvəl HƏR kilidli cəhd (pəncərəsi hələ bitməyən, əl ilə
+        # pauza, konfiqi söndürülmüş) dəqiqədə bir `FOR UPDATE` ilə kilidlənib Python-da rədd
+        # edilirdi (200 kilidli cəhd → dəqiqədə ~1 000 sorğu + tələbə autosave-i ilə kilid
+        # yarışı). İndi `supervision_resume_deadline`-ın SQL ekvivalenti ön-filtrdir; dəqiq
+        # qərar yenə kilid altında `expire_if_resume_window_expired` ilədir (üst çoxluq).
+        return (
+            qs.filter(
+                supervision_status="locked",
+                supervision_locked_at__isnull=False,
+                supervision_manual_lock=False,
+                exam__supervision_config__enabled=True,
+                exam__supervision_config__resume_window_seconds__gt=0,
+            )
+            .exclude(status__in=["submitted", "expired"])
+            .alias(
+                _resume_deadline=ExpressionWrapper(
+                    F("supervision_locked_at")
+                    + F("exam__supervision_config__resume_window_seconds") * timedelta(seconds=1),
+                    output_field=DateTimeField(),
+                )
+            )
+            .filter(_resume_deadline__lte=now)
         )
 
-    def _run(qs):
+    def _run(qs, time_budget=None):
         return finish_attempts_under_row_lock(
             qs,
             narrow=_narrow,
@@ -287,6 +309,7 @@ def sweep_expired_resume_windows(queryset=None, *, scope=None):
             action=lambda attempt: attempt.expire_if_resume_window_expired(),
             # Audit 2026-09-28 EX28-05: hər cəhd öz tranzaksiyasında (qlobal kilid yoxdur).
             scope=scope,
+            time_budget=time_budget,
         )
 
     if queryset is not None:
@@ -295,4 +318,4 @@ def sweep_expired_resume_windows(queryset=None, *, scope=None):
     with sweep_overlap_lock("expired_resume_windows") as acquired:
         if not acquired:
             return 0
-        return _run(ExamAttempt.objects.all())
+        return _run(ExamAttempt.objects.all(), time_budget=sweep_time_budget())

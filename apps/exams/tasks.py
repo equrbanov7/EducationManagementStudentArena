@@ -202,11 +202,10 @@ def notify_upcoming_final_exams():
     Qaytarır: göndərilən bildiriş sayı.
     """
     from apps.exams.services.final_center import notify_upcoming_final_exams as _run
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
 
-    with rls_worker_atomic(), bypass_rls():
-        sent = _run()
+    # Fon işi tutumu 2026-10-07: bütün icra BİR tranzaksiyada deyil — namizəd sorğusu və hər
+    # 500-lük hissə öz qısa `rls_worker_atomic() + bypass_rls()` scope-unda (bilet kilidləri dərhal buraxılır).
+    sent = _run(scope=_worker_bypass_scope)
     if sent:
         logger.info("notify_upcoming_final_exams: sent %d reminder(s)", sent)
     return sent

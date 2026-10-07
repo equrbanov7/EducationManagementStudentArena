@@ -250,19 +250,22 @@ def sweep_overdue_attempts(queryset=None, *, scope=None):
     Celery sweep-i ``rls_worker_atomic() + bypass_rls()`` ötürür ki, hər cəhd öz
     real tranzaksiyasında işlənsin (bax ``finish_attempts_under_row_lock``).
     """
-    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
+    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock, sweep_time_budget
 
     # Audit 2026-09-28 EX28-04: sweep də grace-i gözləyir (`now − grace`) — deadline-dan
     # 1–2 s sonra gələn son təhvil/autosave-i sweep «expired» edib itirməsin.
     cutoff = lazy_expiry_cutoff()
 
-    def _run(qs):
+    def _run(qs, time_budget=None):
         return finish_attempts_under_row_lock(
             qs,
             narrow=lambda candidates: _narrow_overdue_candidates(candidates, cutoff),
-            select_related=("exam", "exam__organization", "user"),
+            # `exam__author`: bitmə siqnalının müəllim bildirişi (notify_teacher_about_submission)
+            # müəllifi oxuyur — cəhd başına əlavə `auth_user` sorğusu olmasın (fon işi tutumu 2026-10-07).
+            select_related=("exam", "exam__organization", "exam__author", "user"),
             action=lambda attempt: attempt.expire_if_time_limit_reached(at_time=cutoff),
             scope=scope,
+            time_budget=time_budget,
         )
 
     if queryset is not None:
@@ -271,7 +274,8 @@ def sweep_overdue_attempts(queryset=None, *, scope=None):
     with sweep_overlap_lock("overdue_attempts") as acquired:
         if not acquired:
             return 0
-        return _run(ExamAttempt.objects.all())
+        # Fon işi tutumu 2026-10-07: qlobal icra overlap kilidinin TTL-indən uzun çəkməsin.
+        return _run(ExamAttempt.objects.all(), time_budget=sweep_time_budget())
 
 
 def can_user_start_new_attempt(exam, user):
