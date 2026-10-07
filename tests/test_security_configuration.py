@@ -409,6 +409,8 @@ class ProductionTlsGuardTest(TestCase):
         )
         self.assertTrue(module.SESSION_COOKIE_SECURE)
         self.assertTrue(module.CSRF_COOKIE_SECURE)
+        # Təhlükəsizlik auditi 2026-10-07: dil kukisi də yalnız HTTPS ilə.
+        self.assertTrue(module.LANGUAGE_COOKIE_SECURE)
 
 
 class ProductionDisallowedHostLoggingTest(TestCase):

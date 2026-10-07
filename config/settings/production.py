@@ -202,6 +202,9 @@ USE_X_FORWARDED_PORT = True
 SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", True)
 SESSION_COOKIE_HTTPONLY = _env_bool("SESSION_COOKIE_HTTPONLY", True)
 CSRF_COOKIE_SECURE = _env_bool("CSRF_COOKIE_SECURE", True)
+# Təhlükəsizlik auditi 2026-10-07: dil kukisi (/i18n/setlang/) Secure bayrağısız
+# gedirdi — sessiya/CSRF kukiləri ilə eyni qayda (HTTPS-dən kənara sızmasın).
+LANGUAGE_COOKIE_SECURE = SESSION_COOKIE_SECURE
 X_FRAME_OPTIONS = "DENY"
 
 # ⚠️ 2026-09-10 auditi: kod default-ları DOĞRU idi (hamısı `True`), amma
