@@ -21,7 +21,7 @@ import {
     updateSelectionUI,
 } from './render_round.js?v=lx20261008';
 import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261008';
-import { renderIdle, renderRemoved } from './render_status.js?v=lx20261008';
+import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261008';
 import { applySessionSettings } from './settings.js?v=lx20261008';
 import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261008';
 import { state } from './state.js?v=lx20261008';
@@ -235,6 +235,24 @@ export function applyFinished(payload) {
     window.setTimeout(closePlayerSocket, 2500);
 }
 
+// 2026-10-08 (L3): gec qoşulan oyunçu `active_from_index`-dən (0-dan) əvvəlki suallarda iştirak etmir.
+function activeFromIndex() {
+    return Math.max(0, Number(state.player && state.player.active_from_index) || 0);
+}
+
+function isPendingQuestion(question) {
+    return Boolean(question) && Number(question.index || 0) - 1 < activeFromIndex();
+}
+
+function enterLateJoinWait(payload) {
+    if (payload && payload.active_from_index != null) state.player.active_from_index = Number(payload.active_from_index);
+    clearAllTimers();
+    state.currentQuestion = null;
+    state.revealPayload = null;
+    resetRound();
+    renderLateJoin();
+}
+
 export function handleAuthLost() {
     if (state.phase === PHASES.FINAL || finalGate) return;
     state.removed = true;
@@ -250,6 +268,10 @@ export function handleSnapshot(snapshot) {
     rememberTimelinePayload(snapshot);
     if (snapshot.settings) applySessionSettings(snapshot.settings);
     if (Number(snapshot.total_players)) state.totalPlayers = Number(snapshot.total_players);
+    if (snapshot.late_join_pending) {
+        enterLateJoinWait(snapshot);
+        return;
+    }
     switch (snapshot.state) {
         case "finished":
             applyFinished(snapshot);
@@ -286,6 +308,10 @@ export function handleSocketMessage(message) {
         case "question_published":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            if (isPendingQuestion(data.question)) {
+                enterLateJoinWait(null);
+                break;
+            }
             applyQuestion(data.question, data.player_answer || null);
             break;
         case "answer_saved":
@@ -294,6 +320,11 @@ export function handleSocketMessage(message) {
         case "reveal":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            // Gec qoşulan: server keçən sualın cavabını göndərmir (`late_join_pending`) — gözləmə ekranı qalır.
+            if (data.late_join_pending) {
+                enterLateJoinWait(data);
+                break;
+            }
             applyReveal(data);
             break;
         case "finished":

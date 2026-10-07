@@ -185,6 +185,15 @@
                 <input id="settingTwoStepJoin" class="host-switch__input" type="checkbox">
                 <span class="host-switch" aria-hidden="true"><span></span></span>
             </label>
+            {% comment %}2026-10-08 (L3): gec qoşulma — default açıq (tövsiyə olunur).{% endcomment %}
+            <label class="host-settings-item">
+                <div class="host-settings-item__copy">
+                    <strong>{% trans "Gecikənlər qoşula bilsin" context "live_exam.host_settings" %} <span class="host-settings-badge host-settings-badge--ok">{% trans "Tövsiyə olunur" context "live_exam.host_settings" %}</span></strong>
+                    <span>{% trans "Oyun başlayandan sonra gələn tələbə növbəti sualdan qoşulur: keçən suallara bal almır və onların cavablarını görmür. Kilidli lobbi, iştirakçı limiti və çıxarılanlar qaydası qüvvədədir." context "live_exam.host_settings" %}</span>
+                </div>
+                <input id="settingLateJoinEnabled" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
         </section>
     </div>
 </aside>

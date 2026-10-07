@@ -91,7 +91,9 @@ function onPlayMessage(event) {
             rememberTimelinePayload(data);
             markStateMutation();
             const sameQuestion = state.currentQuestion && Number(state.currentQuestion.id) === Number(data.question?.id);
-            applyQuestionState(data.question, sameQuestion ? state.answeredCount : 0, state.totalPlayers);
+            // 2026-10-08 (L3): server bu suala cavab verməli oyunçu sayını göndərir (gec qoşulanlar növbəti sualdan).
+            const total = data.total_players != null ? Number(data.total_players) : state.totalPlayers;
+            applyQuestionState(data.question, sameQuestion ? state.answeredCount : 0, total);
             return;
         }
         if (data.type === "answer_progress") {

@@ -141,6 +141,11 @@ class LivePlayer(models.Model):
     is_connected = models.BooleanField(default=True)
     last_seen = models.DateTimeField(default=timezone.now)
 
+    # 2026-10-08 (L3): gec qoşulan oyunçu NÖVBƏTİ sual sərhədindən oyundadır — bu indeksdən
+    # (0-dan) əvvəlki suallara cavab vermir, onların cavablarını görmür və «hamı cavab verdi»
+    # sayına düşmür. Lobbidə qoşulanlar üçün 0.
+    active_from_index = models.PositiveIntegerField(default=0)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

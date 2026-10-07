@@ -52,6 +52,9 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     "team_talk_enabled": False,
     "nickname_generator": False,
     "two_step_join": True,
+    # 2026-10-08 (L3): «Gecikənlər qoşula bilsin» (tövsiyə: açıq) — oyun gedərkən qoşulan
+    # növbəti sual sərhədindən oynayır (keçən suallara bal almır, onların cavabını görmür).
+    "late_join_enabled": True,
     "max_participants": DEFAULT_MAX_PARTICIPANTS,
     "sfx_volume": 70,
     # Yazılı cavab + çox seçimli bal rejimi (sahib 2026-09-28).
@@ -80,6 +83,7 @@ BOOLEAN_SETTING_KEYS = {
     "nickname_generator",
     "two_step_join",
     "typed_typo_tolerance",
+    "late_join_enabled",
 }
 
 NICKNAME_ADJECTIVES = (
@@ -129,6 +133,13 @@ def _coerce_bool(value: Any, default: bool) -> bool:
         if normalized in {"0", "false", "no", "off"}:
             return False
     return default
+
+
+def late_join_enabled(session) -> bool:
+    """Gec qoşulma açıqdırmı (kilid altında oxunur — tam normallaşdırma olmadan, sorğusuz)."""
+    raw = getattr(session, "host_settings", None) or {}
+    value = raw.get("late_join_enabled") if isinstance(raw, dict) else None
+    return _coerce_bool(value, DEFAULT_SESSION_SETTINGS["late_join_enabled"])
 
 
 def allowed_max_participants_for_user(user) -> int:

@@ -21,6 +21,7 @@ from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
 from apps.live_exam.models import LiveAnswer, LiveSession
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_rank
+from apps.live_exam.roster import eligible_players, is_pending
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import (
     serialize_player_question_result,
@@ -185,10 +186,18 @@ def live_state_json(request, pin):
             data["players"] = players
             # Host-un «Yenilə» düyməsi / avtomatik sinxronu bu sayı HƏQİQƏT kimi götürür (sahib 2026-09-30).
             data["total_players"] = len(players) if len(players) < 200 else session.players.count()
+        elif session.state in (LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL):
+            # 2026-10-08 (L3): cari suala cavab verməli olanlar (gec qoşulan növbəti sualdan sayılır).
+            data["total_players"] = eligible_players(session.id, int(session.current_index or 0)).count()
         else:
             # ``?light=1`` (oyunçu, lobby): 200 nəfərlik siyahı əvəzinə yalnız say — gözləmə
             # otağının ehtiyat sorğusu üçün (LX-FE-PLAYER). Host cavabı dəyişmir.
             data["total_players"] = session.players.count()
+        if player is not None and is_pending(player, session):
+            # Gec qoşulan: növbəti sual gözlənilir — cari/keçən sualın məzmunu və cavabı GÖNDƏRİLMİR.
+            data["late_join_pending"] = True
+            data["active_from_index"] = int(player.active_from_index or 0)
+            return JsonResponse(data)
         if session.state == LiveSession.STATE_FINISHED:
             _finished_fields(session, player=player, data=data)
             return JsonResponse(data)

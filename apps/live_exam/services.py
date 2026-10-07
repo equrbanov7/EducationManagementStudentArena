@@ -53,6 +53,7 @@ from apps.live_exam.domain.session import (
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle
+from apps.live_exam.roster import eligible_players
 from apps.live_exam.session_settings import (
     get_host_session_settings,
     public_session_settings,
@@ -284,7 +285,7 @@ def reveal_if_all_answered(session_id: int, question_id: int, *, skip_locked: bo
         exam_question = get_active_question(locked)
         if exam_question is None or int(exam_question.id) != int(question_id):
             return False
-        total_players = LivePlayer.objects.filter(session_id=locked.id).count()
+        total_players = eligible_players(locked.id, int(locked.current_index or 0)).count()
         answered = LiveAnswer.objects.filter(session_id=locked.id, question_id=question_id).count()
         if total_players <= 0 or answered < total_players:
             return False

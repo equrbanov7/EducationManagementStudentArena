@@ -36,8 +36,14 @@ from apps.live_exam.constants import (
     build_wait_room_catalog,
 )
 from apps.live_exam.models import LivePlayer, LiveSession
+from apps.live_exam.roster import late_join_index
 from apps.live_exam.serializers import serialize_player_identity
-from apps.live_exam.session_settings import DEFAULT_MAX_PARTICIPANTS, generate_guest_nickname, get_session_settings
+from apps.live_exam.session_settings import (
+    DEFAULT_MAX_PARTICIPANTS,
+    generate_guest_nickname,
+    get_session_settings,
+    late_join_enabled,
+)
 from apps.live_exam.text_safety import screen_nickname
 from apps.live_exam.transport import build_join_url
 from core.rate_limit import record_rate_limit_hit
@@ -253,9 +259,13 @@ def _new_player_rejection(locked_session, client_id, max_participants, *, player
     """YENİ oyunçu qəbul olunmursa JSON cavabı (kilid yalnız yenilərə aiddir — LXS-08)."""
     if locked_session.is_locked:
         return _json_error(pgettext("live_exam.view.message", "lobby_locked"), 403)
-    # EXAM-P1-12: oyun lobby-dən çıxandan sonra yeni oyunçu qoşula bilməz.
-    if locked_session.state != LiveSession.STATE_LOBBY:
-        return _json_error(pgettext("live_exam.view.message", "game_already_started"), 403)
+    # EXAM-P1-12 + 2026-10-08 (L3): oyun başlayandan sonra yalnız «Gecikənlər qoşula bilsin»
+    # açıqdırsa (default) — gec qoşulan NÖVBƏTİ sualdan oynayır (``roster.late_join_index``).
+    if locked_session.state != LiveSession.STATE_LOBBY and not late_join_enabled(locked_session):
+        message = pgettext(
+            "live_exam.view.message", "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb."
+        )
+        return _json_error(message, 403)
     # Audit 2026-09-28 LXS-09: host-un çıxardığı klient eyni cookie ilə qayıtmır.
     if is_client_kicked(locked_session, client_id):
         return _json_error(pgettext("live_exam.view.message", "removed_by_host"), 403)
@@ -316,7 +326,7 @@ def _admit_player(session, client_id, profile, max_participants):
             return None, _json_error(pgettext("live_exam.view.message", "session_finished"), 403)
         existing_id = roster.player_id_for(client_id)
         if existing_id is not None:
-            player = LivePlayer.objects.select_for_update().get(pk=existing_id)
+            player = _joined(LivePlayer.objects.select_for_update().get(pk=existing_id), locked_session)
             return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
 
         rejection = _new_player_rejection(locked_session, client_id, max_participants, player_count=len(roster.rows))
@@ -327,14 +337,26 @@ def _admit_player(session, client_id, profile, max_participants):
         try:
             with transaction.atomic():
                 player = LivePlayer.objects.create(
-                    session=locked_session, client_id=client_id, is_connected=True, last_seen=now, **profile
+                    session=locked_session,
+                    client_id=client_id,
+                    is_connected=True,
+                    last_seen=now,
+                    active_from_index=late_join_index(locked_session),
+                    **profile,
                 )
         except IntegrityError:
             player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
             if player is None:
                 raise
+            player = _joined(player, locked_session)
             return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
-    return player, None
+    return _joined(player, locked_session), None
+
+
+def _joined(player, locked_session):
+    """Qəbul anındakı sessiya vəziyyəti (yönləndirmə üçün; əlavə sorğu yoxdur)."""
+    player.joined_state = locked_session.state
+    return player
 
 
 @require_POST
@@ -372,8 +394,10 @@ def live_join_enter(request, pin):
 
     _broadcast_lobby_state(session)
 
-    wait_url = reverse("liveExam:wait_room", kwargs={"pin": session.pin})
-    resp = JsonResponse({"ok": True, "redirect": wait_url})
+    # Oyun gedirsə (gec qoşulma) birbaşa oyun ekranına — gözləmə otağı onsuz da ora yönləndirir.
+    in_lobby = getattr(player, "joined_state", LiveSession.STATE_LOBBY) == LiveSession.STATE_LOBBY
+    target = "liveExam:wait_room" if in_lobby else "liveExam:player_screen"
+    resp = JsonResponse({"ok": True, "redirect": reverse(target, kwargs={"pin": session.pin})})
 
     # Audit 2026-09-28 LXS-10: hər iki cookie HttpOnly (JS ``live_client_id``-ni oxumur).
     resp.set_cookie(

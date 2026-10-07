@@ -116,6 +116,13 @@
 .hx-pill--time { border-color: rgba(255, 201, 64, 0.5); background: rgba(255, 201, 64, 0.14); }
 .hx-pill--time .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }
 
+/* 2026-10-08 (L3): gec qoşulma açıqdırsa PIN sual başlığında. */
+.hx-pill--pin { margin-left: auto; gap: 10px; font-family: var(--hx-font); }
+.hx-pill--pin .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }
+.hx-pill--pin strong { font: 800 1.08em/1 var(--hx-display); letter-spacing: 0.08em; color: #fff; }
+
+.host-settings-badge--ok { background: #dcfce7; color: #166534; }
+
 /* ── Bildirişlər ───────────────────────────────────────────────────── */
 .hx-toasts {
     position: fixed;

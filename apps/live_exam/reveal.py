@@ -53,7 +53,26 @@ _ANSWER_FIELDS = (
     "answer_ms",
     "awarded_points",
 )
-_PLAYER_FIELDS = ("id", "nickname", "avatar_key", "accessory_key", "score", "streak", "best_streak", "created_at")
+_PLAYER_FIELDS = (
+    "id",
+    "nickname",
+    "avatar_key",
+    "accessory_key",
+    "score",
+    "streak",
+    "best_streak",
+    "created_at",
+    "active_from_index",
+)
+
+#: 2026-10-08 (L3): gec qoşulan (bu sualda iştirak etməyən) oyunçunun reveal-i — keçən sualın
+#: cavabı ona göstərilmir. ``personal`` əlavələri ümumi sahələri üstələyir (consumer birləşdirir).
+LATE_JOIN_REDACTION = {
+    "late_join_pending": True,
+    "correct_option_ids": [],
+    "distribution": {"total_answers": 0, "counts": []},
+    "accepted_answers": [],
+}
 
 
 @dataclass
@@ -237,7 +256,9 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
         common["multi_scoring"] = config.multi_scoring
         common["total_correct"] = len(config.correct_ids)
 
-    host = {**common, "results": results, "fastest_correct": fastest_correct, "total_players": len(players)}
+    question_index = safe_int(session.current_index, 0)
+    eligible = [player for player in players if safe_int(player.get("active_from_index"), 0) <= question_index]
+    host = {**common, "results": results, "fastest_correct": fastest_correct, "total_players": len(eligible)}
     if config.is_text:
         host["typed_summary"] = build_typed_summary(
             answers, accepted=config.accepted, typo_tolerance=config.typo_tolerance
@@ -251,6 +272,10 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
     answers_by_player = {answer["player_id"]: answer for answer in answers}
     for player in players:
         entry = dict(ranks.get(player["id"], {}))
+        if safe_int(player.get("active_from_index"), 0) > question_index:
+            entry.update(LATE_JOIN_REDACTION, active_from_index=safe_int(player["active_from_index"], 0))
+            personal[str(player["id"])] = _dumps(entry)
+            continue
         answer = answers_by_player.get(player["id"])
         if answer is not None:
             mode_fields = question_mode_fields(config, answer_choice_ids(answer), answer["text_answer"])

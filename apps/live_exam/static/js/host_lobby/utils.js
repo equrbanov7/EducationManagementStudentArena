@@ -266,6 +266,7 @@ export function publicHostState() {
         sessionState: state.sessionState,
         phase: state.phase,
         totalPlayers: Number(state.totalPlayers || 0),
+        rosterCount: Number(state.rosterCount || 0),
         answeredCount: Number(state.answeredCount || 0),
         players: Array.isArray(state.players) ? [...state.players] : [],
         settings: Object.assign({}, state.sessionSettings),

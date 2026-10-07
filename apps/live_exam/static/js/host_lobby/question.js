@@ -68,12 +68,20 @@ function timePillMarkup(question) {
     return `<span class="hx-pill hx-pill--time" title="${esc(tr("timeLabel", "Hər sual üçün vaxt"))}">${icon("timer")}<span>${esc(secondsLabel(seconds))}</span></span>`;
 }
 
+/** 2026-10-08 (L3): gec qoşulma açıqdırsa PIN oyun gedərkən də görünür (gecikən tələbə qoşula bilsin). */
+function lateJoinPinMarkup() {
+    if (state.sessionSettings?.late_join_enabled === false || state.isLocked) return "";
+    const hint = tr("lateJoinPinHint", "Gecikənlər bu PIN ilə qoşula bilər");
+    return `<span class="hx-pill hx-pill--pin" title="${esc(hint)}" aria-label="${esc(hint)}: ${esc(CONFIG.pin)}">${icon("users")}<span>PIN</span><strong>${esc(CONFIG.pin)}</strong></span>`;
+}
+
 function headMarkup(question) {
     return `
         <header class="hx-qhead">
             <span class="hx-pill">${esc(progressLabel(question))}</span>
             ${timePillMarkup(question)}
             ${badgesMarkup(question)}
+            ${lateJoinPinMarkup()}
         </header>
     `;
 }

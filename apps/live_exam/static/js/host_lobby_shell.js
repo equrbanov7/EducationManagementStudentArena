@@ -57,6 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ["settingTeamTalkEnabled", "team_talk_enabled"],
         ["settingNicknameGenerator", "nickname_generator"],
         ["settingTwoStepJoin", "two_step_join"],
+        ["settingLateJoinEnabled", "late_join_enabled"],
     ].map(([id, key]) => [document.getElementById(id), key]).filter(([element]) => Boolean(element));
 
     const copy = {

@@ -35,6 +35,26 @@ export function renderIdle() {
     }
 }
 
+// 2026-10-08 (L3): gec qoşulan — cari sual (və onun cavabı) göstərilmir, növbəti sual gözlənilir.
+export function renderLateJoin() {
+    const { created } = mountView(
+        "late-join",
+        `<div class="lxp-idle lxp-idle--late">` +
+            `<div class="lxp-dots lxp-dots--lg" aria-hidden="true"><span></span><span></span><span></span></div>` +
+            `<h1 class="lxp-title">${esc(tr("lateJoinTitle", "Oyuna qoşuldun!"))}</h1>` +
+            `<p class="lxp-sub">${esc(tr("lateJoinBody", "Oyun artıq gedir — növbəti sual başlayanda daxil olacaqsan. Keçən suallar üçün bal verilmir."))}</p>` +
+            `</div>`,
+        { tone: "idle" }
+    );
+    state.phase = PHASES.LATE_JOIN;
+    if (created) {
+        setQuestionChip(null);
+        setTimer(false);
+        stopTimeBar();
+        announce(tr("lateJoinTitle", "Oyuna qoşuldun!"));
+    }
+}
+
 export function renderRemoved() {
     const joinUrl = BOOTSTRAP.joinPageUrl || "/live/";
     const { created } = mountView(

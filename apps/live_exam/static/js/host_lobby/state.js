@@ -11,6 +11,8 @@ export const state = {
     questionPlan: null,
     answeredCount: 0,
     totalPlayers: 0,
+    // 2026-10-08: sessiyadakı oyunçu sayı (lobbi siyahısı); `totalPlayers` — cari suala cavab verməli olanlar.
+    rosterCount: 0,
     // LXNET 2026-10-02: cari sualı telefonuna alan oyunçu sayı (`delivery_progress`).
     receivedCount: 0,
     receivedQuestionId: 0,

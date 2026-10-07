@@ -82,7 +82,8 @@
             "nickname": "{{ player.nickname|escapejs }}",
             "avatar_key": "{{ player.avatar_key|escapejs }}",
             "accessory_key": "{{ player.accessory_key|escapejs }}",
-            "score": {{ player.score|default:0 }}
+            "score": {{ player.score|default:0 }},
+            "active_from_index": {{ player.active_from_index|default:0 }}
         }
     }</script>
     <script id="playerI18n" type="application/json">{
@@ -113,6 +114,8 @@
         "getReadyTitle": "{% filter escapejs %}{% trans 'get_ready_title' context 'live_exam.player' %}{% endfilter %}",
         "introHintMainScreen": "{% filter escapejs %}{% trans 'intro_hint_main_screen' context 'live_exam.player' %}{% endfilter %}",
         "introUnlocking": "{% filter escapejs %}{% trans 'intro_unlocking' context 'live_exam.player' %}{% endfilter %}",
+        "lateJoinTitle": "{% filter escapejs %}{% trans 'Oyuna qoşuldun!' context 'live_exam.player' %}{% endfilter %}",
+        "lateJoinBody": "{% filter escapejs %}{% trans 'Oyun artıq gedir — növbəti sual başlayanda daxil olacaqsan. Keçən suallar üçün bal verilmir.' context 'live_exam.player' %}{% endfilter %}",
         "lastQuestionNote": "{% filter escapejs %}{% trans 'last_question_note' context 'live_exam.player' %}{% endfilter %}",
         "multiBadge": "{% filter escapejs %}{% trans 'multi_badge' context 'live_exam.player' %}{% endfilter %}",
         "multiCounter": "{% filter escapejs %}{% trans 'multi_counter' context 'live_exam.player' %}{% endfilter %}",

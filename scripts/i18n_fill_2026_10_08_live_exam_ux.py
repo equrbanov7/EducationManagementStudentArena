@@ -69,12 +69,52 @@ ROWS = {
             "Время на вопрос: {value}",
             "Soru başına süre: {value}",
         ),
+        "Gecikənlər bu PIN ilə qoşula bilər": (
+            "Latecomers can join with this PIN",
+            "Опоздавшие могут присоединиться с этим PIN",
+            "Geç kalanlar bu PIN ile katılabilir",
+        ),
+    },
+    "live_exam.view.message": {
+        "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb.": (
+            "The game has already started and the teacher has turned off joining late.",
+            "Игра уже началась, и преподаватель отключил вход для опоздавших.",
+            "Oyun zaten başladı ve öğretmen geç katılımı kapattı.",
+        ),
+    },
+    "live_exam.consumer.error": {
+        "Növbəti sual başlayanda oyuna qoşulacaqsan.": (
+            "You will join the game when the next question starts.",
+            "Вы присоединитесь к игре, когда начнётся следующий вопрос.",
+            "Bir sonraki soru başladığında oyuna katılacaksın.",
+        ),
+    },
+    "live_exam.player": {
+        "Oyuna qoşuldun!": ("You're in!", "Вы в игре!", "Oyuna katıldın!"),
+        "Oyun artıq gedir — növbəti sual başlayanda daxil olacaqsan. Keçən suallar üçün bal verilmir.": (
+            "The game is already running — you will enter when the next question starts. "
+            "Missed questions give no points.",
+            "Игра уже идёт — вы войдёте, когда начнётся следующий вопрос. "
+            "За пропущенные вопросы баллы не начисляются.",
+            "Oyun zaten sürüyor — bir sonraki soru başladığında gireceksin. Kaçırılan sorulara puan verilmez.",
+        ),
     },
     "live_exam.host_settings": {
         "Sual vaxtı 5–300 saniyə olmalıdır.": (
             "The question time must be 5–300 seconds.",
             "Время вопроса должно быть от 5 до 300 секунд.",
             "Soru süresi 5–300 saniye olmalıdır.",
+        ),
+        "Gecikənlər qoşula bilsin": ("Allow late joining", "Разрешить вход опоздавшим", "Geç katılıma izin ver"),
+        "Tövsiyə olunur": ("Recommended", "Рекомендуется", "Önerilir"),
+        "Oyun başlayandan sonra gələn tələbə növbəti sualdan qoşulur: keçən suallara bal almır və onların "
+        "cavablarını görmür. Kilidli lobbi, iştirakçı limiti və çıxarılanlar qaydası qüvvədədir.": (
+            "A student who arrives after the start joins from the next question: no points for missed questions "
+            "and their answers are not shown. Locked lobby, participant limit and removals still apply.",
+            "Студент, пришедший после начала, присоединяется со следующего вопроса: за пропущенные вопросы "
+            "баллов нет, их ответы не показываются. Закрытое лобби, лимит участников и удаления действуют.",
+            "Oyun başladıktan sonra gelen öğrenci bir sonraki sorudan katılır: kaçırılan sorulara puan almaz ve "
+            "cevaplarını görmez. Kilitli lobi, katılımcı sınırı ve çıkarılanlar kuralı geçerlidir.",
         ),
     },
 }

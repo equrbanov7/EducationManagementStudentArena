@@ -143,7 +143,7 @@ function renderCloud(root, fromData) {
     const list = root.querySelector("[data-lobby-cloud]");
     if (!list) return;
     const players = (Array.isArray(state.players) ? state.players : []).slice().reverse(); // server: ən yeni birinci
-    const total = Math.max(Number(state.totalPlayers || 0), players.length);
+    const total = Math.max(Number(state.rosterCount || 0), players.length);
     const visible = players.slice(-LOBBY_MAX_BUBBLES);
     const hidden = Math.max(0, total - visible.length);
     list.dataset.density = total <= 20 ? "l" : total <= 45 ? "m" : "s";
@@ -235,8 +235,11 @@ export function rebuildLobbyCloud() {
 export function renderLobbyPlayers(players, totalCount = null) {
     state.players = Array.isArray(players) ? players : [];
     const expectedTotal = Number.isFinite(Number(totalCount)) && totalCount != null ? Number(totalCount) : state.players.length;
-    state.totalPlayers = expectedTotal;
-    if (UI.playersCount) UI.playersCount.textContent = String(state.totalPlayers);
+    // 2026-10-08 (L3): roster sayı ≠ cari suala cavab verməli olanlar (gec qoşulan növbəti sualdan
+    // sayılır) — oyun gedərkən `totalPlayers`-i yalnız server sayğacları (answer_progress / sual) yeniləyir.
+    state.rosterCount = expectedTotal;
+    if (state.sessionState === "lobby") state.totalPlayers = expectedTotal;
+    if (UI.playersCount) UI.playersCount.textContent = String(state.rosterCount);
     if (state.sessionState === "lobby") renderIdleStage(true);
     notifyHostShell();
 }
