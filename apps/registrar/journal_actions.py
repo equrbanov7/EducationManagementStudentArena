@@ -379,28 +379,26 @@ def selfwork_action(request, offering_id):
         return _back(offering, "serbest")
 
     # İşarə / bal dəyişiklikləri: sw__<topic_id>__<enrollment_id> = 0|1, swp__… = «»|1…max
-    changed = 0
-    skipped = 0
+    # Lövhə bütün xanaları göndərir — TƏK paketdə yazılır (qayda xana-xana eynidir).
+    cells = []
     for key, raw in request.POST.items():
         parts = key.split("__", 2)
         if len(parts) != 3 or parts[0] not in ("sw", "swp"):
             continue
         # Lövhə yalnız TAM bal təklif edir (+ cari kəsr bal dəyişməz qalsın deyə);
         # dəyər servis qatında yoxlanır (0 < bal ≤ max, ən çoxu bir onluq).
-        extra = {"points": (raw or "").strip()} if parts[0] == "swp" else {}
-        ok = journal_extras.set_selfwork_mark(
-            offering=offering,
-            topic_id=parts[1],
-            enrollment_id=parts[2],
-            done=raw == "1" if parts[0] == "sw" else bool((raw or "").strip()),
-            by_user=request.user,
-            allow_locked=False,  # pəncərə bitibsə → sənədli düzəliş rejimi
-            **extra,
-        )
-        if ok:
-            changed += 1
-        else:
-            skipped += 1
+        cell = {
+            "topic_id": parts[1],
+            "enrollment_id": parts[2],
+            "done": raw == "1" if parts[0] == "sw" else bool((raw or "").strip()),
+        }
+        if parts[0] == "swp":
+            cell["points"] = (raw or "").strip()
+        cells.append(cell)
+    # allow_locked=False — pəncərə bitibsə → sənədli düzəliş rejimi
+    _changed, skipped = journal_extras.set_selfwork_marks(
+        offering=offering, cells=cells, by_user=request.user, allow_locked=False
+    )
     if skipped:
         messages.warning(
             request,

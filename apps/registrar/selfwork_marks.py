@@ -219,11 +219,121 @@ def set_selfwork_mark(
     return True
 
 
+@transaction.atomic
+def set_selfwork_marks(*, offering, cells, by_user=None, allow_locked=False) -> tuple[int, int]:
+    """Lövhə POST-u: bütün xanalar BİR paketdə — ``(qəbul olunan, qəbul olunmayan)``.
+
+    Hər xananın qaydası ``set_selfwork_mark`` ilə EYNİDİR (çeklist/bal, «ikinci bal
+    yoxdur», fənn qovluğu balı oxu-only, 2 saat pəncərəsi, mövcud olmayan hədəf).
+    Tutum 2026-10-07: lövhə HƏR xananı geri göndərir (5 mövzu × 40 tələbə = 200) və
+    əvvəl xana başına 4 SELECT (sxem, mövzu, qeydiyyat, işarə) + dəyişəndə INSERT/UPDATE,
+    tələbə SELECT-i və ayrıca audit sətri gedirdi — dəyişməyən lövhə ~1200, ilk yazı
+    ~1700 sorğu. İndi: açılış kilidi → qeydiyyatlar (tələbə ilə) → işarələr, hər biri
+    TƏK sorğu, toplu INSERT/UPDATE və TƏK aqreqat audit sətri (jurnal yazısı kimi).
+    ``cells``: ``{"topic_id", "enrollment_id", "done", "points"?}`` (``points`` yoxdursa UNSET)."""
+    cells = list(cells)
+    if not cells:
+        return 0, 0
+    if journal_is_locked(offering):
+        return 0, len(cells)
+    parsed = [(parse_uuid(cell.get("topic_id")), parse_uuid(cell.get("enrollment_id")), cell) for cell in cells]
+    topic_ids = {topic_pk for topic_pk, _enrollment_pk, _cell in parsed if topic_pk is not None}
+    enrollment_ids = {enrollment_pk for _topic_pk, enrollment_pk, _cell in parsed if enrollment_pk is not None}
+    structure.lock_offering(offering)  # kilid sırası: açılış → qeydiyyat → işarə
+    topics = {topic.pk: topic for topic in SelfWorkTopic.objects.filter(pk__in=topic_ids, offering=offering)}
+    enrollments = {
+        enrollment.pk: enrollment
+        for enrollment in offering.enrollments.filter(pk__in=enrollment_ids, status=Enrollment.Status.ENROLLED)
+        .select_related("student")
+        .select_for_update(of=("self",))
+        .order_by("pk")
+    }
+    marks = (
+        {
+            (mark.topic_id, mark.enrollment_id): mark
+            for mark in SelfWorkMark.objects.select_for_update()
+            .filter(topic__in=topics.values(), enrollment__in=enrollments.values())
+            .order_by("pk")
+        }
+        if topics and enrollments
+        else {}
+    )
+    now = timezone.now()
+    created, updated, changes = {}, {}, []
+    accepted = rejected = 0
+    for topic_pk, enrollment_pk, cell in parsed:
+        topic, enrollment = topics.get(topic_pk), enrollments.get(enrollment_pk)
+        if topic is None or enrollment is None:
+            rejected += 1
+            continue
+        key = (topic.pk, enrollment.pk)
+        mark = marks.get(key)
+        target = _target(topic, mark, cell.get("done"), cell.get("points", UNSET))
+        if target is None:
+            rejected += 1
+            continue
+        new_done, new_points = target
+        if mark is None:
+            if not new_done:
+                accepted += 1  # onsuz da yoxdur
+                continue
+            old = audit_value(None, topic)
+            mark = SelfWorkMark(
+                organization=offering.organization,
+                topic=topic,
+                enrollment=enrollment,
+                done=True,
+                points=new_points,
+                source=rules.SOURCE_JOURNAL,
+                graded_at=now,
+                entered_by=by_user,
+                updated_at=now,  # paket daxilində təkrar hədəf üçün (INSERT-də auto_now yenidən qoyur)
+            )
+            marks[key] = created[key] = mark
+        else:
+            if (bool(mark.done), mark.points) == (new_done, new_points):
+                accepted += 1
+                continue
+            if not allow_locked and rules.is_graded(mark):
+                if mark.source == rules.SOURCE_SUBJECT_FOLDER:
+                    rejected += 1  # fənn qovluğu balı — yalnız sənədli düzəliş
+                    continue
+                if (now - mark.updated_at) > mark_edit_window():
+                    rejected += 1  # verilmiş işi 2 saatdan sonra geri almaq/dəyişmək olmaz
+                    continue
+            old = audit_value(mark, topic)
+            mark.done = new_done
+            mark.points = new_points
+            mark.graded_at = now if new_done else None
+            mark.entered_by = by_user
+            mark.updated_at = now  # bulk_update ``auto_now``-u özü qoymur
+            if key not in created:
+                updated[key] = mark
+        changes.append(
+            {
+                "student": grade_audit.student_label(enrollment),
+                "item": _audit_item(topic),
+                "old": old,
+                "new": audit_value(mark, topic),
+            }
+        )
+        accepted += 1
+    if created:
+        SelfWorkMark.objects.bulk_create(list(created.values()))
+    if updated:
+        SelfWorkMark.objects.bulk_update(
+            list(updated.values()), ["done", "points", "graded_at", "entered_by", "updated_at"]
+        )
+    grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="component", changes=changes)
+    return accepted, rejected
+
+
 __all__ = [
     "UNSET",
     "add_selfwork_topic",
     "audit_value",
     "delete_selfwork_topic",
     "set_selfwork_mark",
+    "set_selfwork_marks",
     "topic_delete_block_reason",
 ]
