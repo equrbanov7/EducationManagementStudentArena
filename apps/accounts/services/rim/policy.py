@@ -283,6 +283,7 @@ def assert_no_foreign_authority(actor: RimActor, target_user) -> None:
         return
 
     from apps.organizations.models import Membership, Organization
+    from core.rls import bypass_rls
 
     if getattr(target_user, "is_staff", False):
         raise RimAccessError(
@@ -297,7 +298,12 @@ def assert_no_foreign_authority(actor: RimActor, target_user) -> None:
     foreign = Membership.objects.filter(user=target_user, is_active=True, role__is_active=True)
     if actor.organization is not None:
         foreign = foreign.exclude(organization=actor.organization)
-    top = foreign.aggregate(top=Max("role__level")).get("top") or 0
+    # Təhlükəsizlik auditi 2026-10-07 SEC-02: BAŞQA təşkilatın üzvlük/rol sətirləri
+    # tenant RLS-i altında GÖRÜNMÜR (prod rolu NOBYPASSRLS) — bypass-sız bu aqreqat
+    # həmişə 0 qaytarırdı və yoxlama boş keçirdi. Yalnız bir ədəd (maks. səviyyə)
+    # oxunur, sətir çağırana qayıtmır (RLS_BYPASS_AUDIT.md, kateqoriya C).
+    with bypass_rls():
+        top = foreign.aggregate(top=Max("role__level")).get("top") or 0
     if int(top) >= actor.level:
         raise RimAccessError(
             "target_rank_too_high",

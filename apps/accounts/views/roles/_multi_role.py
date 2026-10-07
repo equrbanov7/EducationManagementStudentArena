@@ -92,6 +92,18 @@ def _resolve_target_user(request):
     return User.objects.filter(pk=user_id).first()
 
 
+def _is_active_member(user, organization) -> bool:
+    """«Rol ver» yalnız təşkilatın MÖVCUD aktiv üzvünə əlavə rol verir.
+
+    Təhlükəsizlik auditi 2026-10-07 SEC-01: əvvəl ``user_id`` istənilən platforma
+    hesabı ola bilərdi — təşkilat-əhatəli aktor başqa tenantın üzvünü (və ya
+    üzvlüyü olmayan hesabı) öz təşkilatına «ilhaq» edirdi; sonra RİM parol/e-poçt
+    əməlləri həmin hesabı ələ keçirməyə imkan verirdi. Köhnə checkbox axını
+    (``manage_only_own_org_users``) və «Rol təyin et» axını bunu artıq rədd edir.
+    """
+    return Membership.objects.filter(user=user, organization=organization, is_active=True).exists()
+
+
 def _resolve_scope_unit(organization, raw_scope):
     raw_scope = (raw_scope or "").strip()
     if not raw_scope:
@@ -137,6 +149,8 @@ def _grant(request, *, organization, is_superadmin, actor_level, next_url):
     target_user = _resolve_target_user(request)
     if target_user is None:
         return _deny(request, next_url, pgettext(_CTX, "user_not_selected"))
+    if not _is_active_member(target_user, organization):
+        return _deny(request, next_url, pgettext(_CTX, "manage_only_own_org_users"))
 
     target_role = Role.objects.filter(
         organization=organization, pk=(request.POST.get("role_id") or "").strip() or None, is_active=True
