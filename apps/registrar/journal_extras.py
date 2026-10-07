@@ -53,6 +53,7 @@ from apps.registrar.selfwork_marks import (  # noqa: F401
     add_selfwork_topic,
     delete_selfwork_topic,
     set_selfwork_mark,
+    set_selfwork_marks,
 )
 from apps.registrar.selfwork_structure import ensure_selfwork_component  # noqa: F401
 

@@ -274,6 +274,14 @@ def kollokvium_save(request, offering_id):
 
     entries = []
     blocked = False
+    # Pəncərə vəziyyəti K üzrə BİR dəfə (əvvəl hər xana üçün pəncərə + əlavə gün SELECT-i).
+    open_by_index = {}
+
+    def _window_open(k_index):
+        if k_index not in open_by_index:
+            open_by_index[k_index] = kw.is_open(offering, k_index, today)
+        return open_by_index[k_index]
+
     for key, raw in request.POST.items():
         if not key.startswith("kscore__"):
             continue
@@ -281,7 +289,7 @@ def kollokvium_save(request, offering_id):
         if len(parts) != 3 or parts[1] not in idx_by_id:
             continue
         # Midterm dövründə yalnız əsas sütun (k_index=0) yazılır; balı olan köhnə qalıq oxu-rejimlidir.
-        if idx_by_id[parts[1]] >= spec.count or not kw.is_open(offering, idx_by_id[parts[1]], today):
+        if idx_by_id[parts[1]] >= spec.count or not _window_open(idx_by_id[parts[1]]):
             blocked = True
             continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
@@ -371,28 +379,26 @@ def selfwork_action(request, offering_id):
         return _back(offering, "serbest")
 
     # İşarə / bal dəyişiklikləri: sw__<topic_id>__<enrollment_id> = 0|1, swp__… = «»|1…max
-    changed = 0
-    skipped = 0
+    # Lövhə bütün xanaları göndərir — TƏK paketdə yazılır (qayda xana-xana eynidir).
+    cells = []
     for key, raw in request.POST.items():
         parts = key.split("__", 2)
         if len(parts) != 3 or parts[0] not in ("sw", "swp"):
             continue
         # Lövhə yalnız TAM bal təklif edir (+ cari kəsr bal dəyişməz qalsın deyə);
         # dəyər servis qatında yoxlanır (0 < bal ≤ max, ən çoxu bir onluq).
-        extra = {"points": (raw or "").strip()} if parts[0] == "swp" else {}
-        ok = journal_extras.set_selfwork_mark(
-            offering=offering,
-            topic_id=parts[1],
-            enrollment_id=parts[2],
-            done=raw == "1" if parts[0] == "sw" else bool((raw or "").strip()),
-            by_user=request.user,
-            allow_locked=False,  # pəncərə bitibsə → sənədli düzəliş rejimi
-            **extra,
-        )
-        if ok:
-            changed += 1
-        else:
-            skipped += 1
+        cell = {
+            "topic_id": parts[1],
+            "enrollment_id": parts[2],
+            "done": raw == "1" if parts[0] == "sw" else bool((raw or "").strip()),
+        }
+        if parts[0] == "swp":
+            cell["points"] = (raw or "").strip()
+        cells.append(cell)
+    # allow_locked=False — pəncərə bitibsə → sənədli düzəliş rejimi
+    _changed, skipped = journal_extras.set_selfwork_marks(
+        offering=offering, cells=cells, by_user=request.user, allow_locked=False
+    )
     if skipped:
         messages.warning(
             request,

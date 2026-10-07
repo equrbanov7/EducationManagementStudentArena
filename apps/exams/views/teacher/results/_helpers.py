@@ -76,6 +76,24 @@ def _sync_coding_answers_from_final_submissions(attempt):
             answer.save(update_fields=["text_answer", "updated_at"])
 
 
+def _load_review_answers(attempt, exam):
+    """Cəhdin cavabları (yoxlama/baxış səhifəsi) — sual başına imtahan SELECT-i olmadan.
+
+    ``_build_answer_review_item`` ``answer.question.exam``-ı oxuyur; əvvəl bu hər
+    sual üçün ayrıca ``exams_exam`` SELECT idi (20 suallıq cəhddə +20 sorğu). Sual
+    səhifənin imtahanına aiddirsə, eyni instans paylaşılır (sətir eyni, sorğu yox).
+    """
+    answers = list(
+        attempt.answers.select_related("question")
+        .prefetch_related("files", "selected_options", "question__options")
+        .order_by("id")
+    )
+    for answer in answers:
+        if answer.question.exam_id == exam.pk:
+            answer.question.exam = exam
+    return answers
+
+
 def _build_answer_review_item(answer):
     answer_files = list(answer.files.all())
     has_text_answer = bool((getattr(answer, "text_answer", "") or "").strip())
@@ -361,9 +379,13 @@ def _apply_results_filters_from_params(exam, params):
     # expired-ə çevir ki, status həm cədvəldə, həm filterlərdə düzgün görünsün.
     _expire_overdue_attempts(exam)
 
+    # ``exam`` select_related-də YOXDUR: ``exam.attempts`` hər sətrə eyni ``exam``
+    # instansını qoyur (known related object). Əvvəl JOIN hər sətrə ayrıca instans
+    # verirdi və ad-görünürlüyü qərarı (``attempt.exam.organization``) yazılı
+    # imtahanın 12-lik səhifəsində 12 təşkilat SELECT-i atırdı.
     attempts = (
         exam.attempts.exclude(is_trial=True)
-        .select_related("user", "exam")
+        .select_related("user")
         .prefetch_related(
             "answers__question__options",
             "answers__selected_options",

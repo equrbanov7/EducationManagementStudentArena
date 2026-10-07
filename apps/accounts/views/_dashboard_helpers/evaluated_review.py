@@ -32,6 +32,33 @@ from .formatters import (
 User = get_user_model()
 
 
+def fill_evaluated_test_scores(items):
+    """Test cəhdlərinin «Nəticə» sütunu — YALNIZ verilən (səhifənin) sətirləri üçün.
+
+    Səhifədəki cəhdlərin cavabları bir prefetch dəstində, apellyasiya bonusları
+    tək sorğuda oxunur; hesablama əvvəlki kimidir (bal / maks bal + faiz)."""
+    from django.db.models import prefetch_related_objects
+
+    from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
+    from apps.exams.public import calculate_test_attempt_result
+
+    pending = [item for item in items if item.get("pending_score_attempt") is not None]
+    if not pending:
+        return items
+    attempts = [item["pending_score_attempt"] for item in pending]
+    prefetch_related_objects(attempts, "answers__question__options", "answers__selected_options")
+    appeal_bonus_by_attempt = appeal_bonus_map([attempt.id for attempt in attempts])
+    for item, attempt in zip(pending, attempts):
+        result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
+        bonus = appeal_bonus_by_attempt.get(attempt.id)
+        if bonus:
+            result = apply_bonus_to_test_result(result, bonus)
+        item["score_display"] = f"{result.score_display} / {result.max_score_display}"
+        item["score_percent_display"] = f"{result.percentage_display}%"
+        item["pending_score_attempt"] = None
+    return items
+
+
 def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None, submitted_order=None):
     search_query = (search if search is not None else request.GET.get("evaluated_search", "")).strip()
     normalized_type = _normalize_pending_review_type(
@@ -74,10 +101,10 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff)
             )
             .select_related("exam", "user", "exam__author", "exam__course")
-            # Perf: aşağıda effective_test_score hər test attempt üçün cavabları
-            # oxuyur — prefetch olmadan bu, siyahıdakı hər sətir üçün 3-4 əlavə
-            # sorğu (N+1) deməkdir.
-            .prefetch_related("answers__question__options", "answers__selected_options")
+            # Cavablar burada prefetch OLUNMUR: test balı yalnız görünən səhifənin
+            # sətirləri üçün hesablanır (``fill_evaluated_test_scores``). Əvvəl
+            # müəllimin BÜTÜN test tarixçəsinin cavab + variant sətirləri hər
+            # açılışda yüklənirdi, səhifə isə 15 sətir göstərir (2026-10-07).
         )
         search_q = tolerant_q(
             search_query,
@@ -85,30 +112,20 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
         )
         if search_q is not None:
             attempts = attempts.filter(search_q)
-        from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
-        from apps.exams.public import calculate_test_attempt_result
-
-        attempts = list(attempts)
-        # Apellyasiya bonusları tək sorğu ilə (əvvəl hər attempt üçün ayrıca
-        # effective_test_score → ScoreAdjustment sorğusu = N+1 idi).
-        appeal_bonus_by_attempt = appeal_bonus_map([a.id for a in attempts])
-
         for attempt in attempts:
             course = attempt.exam.course
             submitted_at = attempt.finished_at or attempt.started_at
+            pending_score_attempt = None
             if attempt.exam.exam_type == "test":
                 # "Nəticə" sütununda əsas dəyər BAL-dır (bal / maks bal);
                 # faiz ayrıca badge kimi göstərilir (əvvəl yalnız faiz çıxırdı).
                 if attempt.teacher_score is not None:
                     score_display = _format_score_display(attempt.teacher_score)
-                    score_percent_display = ""
                 else:
-                    result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
-                    bonus = appeal_bonus_by_attempt.get(attempt.id)
-                    if bonus:
-                        result = apply_bonus_to_test_result(result, bonus)
-                    score_display = f"{result.score_display} / {result.max_score_display}"
-                    score_percent_display = f"{result.percentage_display}%"
+                    # Səhifələmədən SONRA doldurulur (bax ``fill_evaluated_test_scores``).
+                    score_display = ""
+                    pending_score_attempt = attempt
+                score_percent_display = ""
             else:
                 if attempt.teacher_score is not None:
                     score_display = _format_score_display(attempt.teacher_score)
@@ -136,6 +153,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                         return_to=profile_return_url,
                     ),
                     "action_label": pgettext_lazy("profile.pending_review.action", "review"),
+                    "pending_score_attempt": pending_score_attempt,
                 }
             )
 
