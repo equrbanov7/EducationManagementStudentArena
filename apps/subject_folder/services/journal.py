@@ -222,7 +222,10 @@ def retry_pending(*, organization_id=None, include_blocked: bool = False, limit:
     ).select_related("task", "assignment__offering", "enrollment", "reviewed_by")
     if organization_id is not None:
         rows = rows.filter(organization_id=organization_id)
-    rows = list(rows.order_by("reviewed_at")[: max(1, int(limit))])
+    # Fon işi tutumu 2026-10-07: əvvəl yalnız `reviewed_at` sırası idi — hook-u hər dəfə istisna
+    # atan (pending qalan) ən köhnə `limit` sətir hər 10 dəqiqədə yenidən götürülür və yeni
+    # pending ballar HEÇ VAXT növbəyə düşmürdü (aclıq). İndi ən az cəhd edilmişlər əvvəl.
+    rows = list(rows.order_by("journal_sync_attempts", "reviewed_at", "pk")[: max(1, int(limit))])
     summary = {"candidates": len(rows), "synced": 0, "pending": 0, "blocked": 0}
     if not apply:
         return summary
