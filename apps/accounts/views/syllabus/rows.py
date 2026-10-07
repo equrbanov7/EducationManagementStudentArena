@@ -130,9 +130,20 @@ def approver_text(syllabus, version, *, now=None) -> str:
 _APPROVAL_STATUSES = (SyllabusStatus.APPROVED.value, SyllabusStatus.ARCHIVED.value)
 
 
-def _reuse_keys(keys, status, reuse) -> tuple:
-    """Bağ vəziyyətinə görə əməl dəsti + sətir altı izah (``(keys, note)``)."""
+def _reuse_keys(keys, status, reuse, *, own: bool = True) -> tuple:
+    """Bağ vəziyyətinə görə əməl dəsti + sətir altı izah (``(keys, note)``).
+
+    ``own=False`` (rəhbər başqasının sətrinə baxır): izah QALIR, bağ əməlləri yox —
+    hamısı müəllif əməlidir (servis `author_only`).
+    """
     if not reuse:
+        return keys, ""
+    if not own:
+        keys = [key for key in keys if key not in ("new_version", "copy")] if reuse.get("linked") else keys
+        if reuse.get("linked"):
+            return keys, str(_LINKED_TO) % {"group": reuse.get("source_group") or "—"}
+        if reuse.get("linked_count"):
+            return keys, str(_SOURCE_OF) % {"count": reuse["linked_count"]}
         return keys, ""
     if reuse.get("linked"):
         # Bağlı dosyenin məzmunu mənbədən gəlir: «Yeni versiya» yox, «Ayır» var.
@@ -183,8 +194,45 @@ def _period_labels(period):
     return period.year_display, period.name
 
 
-def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None) -> dict:
-    """Mövcud sillabus dosyesindən cədvəl sətri (``reuse`` — ``reuse_context.page_flags``)."""
+#: Yalnız MÜƏLLİFİN edə bildiyi əməllər (servis `author_only` qapısı) — rəhbər
+#: başqasının sətrində bunları görmür, əvəzində oxu paneli («Bax») açılır.
+AUTHOR_ONLY_ACTIONS = frozenset({"resume", "fix", "withdraw"})
+#: `syllabus.edit` açarı tələb edən əməllər (əhatə yoxlamasını servis edir).
+EDIT_ACTIONS = frozenset({"copy", "new_version"})
+
+
+def _is_own(syllabus, viewer) -> bool:
+    """``is_author`` ilə eyni qayda — müəllif və ya açılışın müəllimi (əlavə sorğu yox)."""
+    user_id = (viewer or {}).get("user_id")
+    if user_id is None:
+        return True
+    if syllabus.author_id == user_id:
+        return True
+    offering = syllabus.offering if syllabus.offering_id else None
+    return bool(offering is not None and offering.instructor_id == user_id)
+
+
+def _viewer_keys(keys, syllabus, viewer) -> tuple:
+    """Rəhbərin siyahısında BAŞQASININ sətri: yalnız icra edə biləcəyi əməllər (sahib 2026-10-08)."""
+    if viewer is None:
+        return list(keys), True
+    own = _is_own(syllabus, viewer)
+    if not viewer.get("can_edit"):
+        keys = [key for key in keys if key not in EDIT_ACTIONS]
+    if own:
+        return list(keys), True
+    trimmed = [key for key in keys if key not in AUTHOR_ONLY_ACTIONS]
+    if len(trimmed) != len(keys) and "view" not in trimmed and not set(trimmed) & {"notes", "submitted_view"}:
+        trimmed = ["view"] + trimmed
+    return trimmed, False
+
+
+def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=None) -> dict:
+    """Mövcud sillabus dosyesindən cədvəl sətri.
+
+    ``reuse`` — ``reuse_context.page_flags``; ``viewer`` — ``{"user_id", "can_edit"}``:
+    verilibsə sətrin əməlləri baxanın ÖZ dosyesi olub-olmamasına görə daraldılır.
+    """
     version = syllabus.current_version
     status = version.status if version is not None else SyllabusStatus.DRAFT.value
     percent = version.completion_percent if version is not None else 0
@@ -192,7 +240,8 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None) -> dict
     keys = list(ACTIONS_BY_STATUS.get(status, ()))
     if status == SyllabusStatus.DRAFT.value and not can_copy:
         keys = [key for key in keys if key != "copy"]
-    keys, reuse_note = _reuse_keys(keys, status, reuse)
+    keys, own = _viewer_keys(keys, syllabus, viewer)
+    keys, reuse_note = _reuse_keys(keys, status, reuse, own=own)
     urls = detail_urls(syllabus.pk)
     return {
         "kind": "syllabus",
@@ -266,6 +315,8 @@ def build_missing_row(offering, *, can_copy: bool = False, siblings: int = 0) ->
 __all__ = [
     "ACTIONS_BY_STATUS",
     "ACTION_LABELS",
+    "AUTHOR_ONLY_ACTIONS",
+    "EDIT_ACTIONS",
     "DETAIL_LABEL",
     "detail_urls",
     "approver_text",

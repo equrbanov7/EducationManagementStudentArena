@@ -7,6 +7,8 @@ tətbiq et», «Ayır», «Mənbədən yenilə», «Bağlı sillabuslara tətbiq
 (`reuse.*`) mətnləri, «Təsdiq: <qrup> sillabusundan (eyni məzmun, eyni saatlar)»
 damğası və model seçimləri (`ApprovalSource.REUSE`, `ChangeKind.REUSED`).
 
+Rəhbərin siyahı açarı (ikinci mərhələ, eyni gün): «Göstər: Hamısı | Mənim fənlərim».
+
 Kontekstlər: `accounts.syllabus`, `syllabus.document`, `syllabus.model`.
 
 ⚠️ `makemessages` İŞLƏDİLMİR. İdempotentdir; sonra `.mo` faylları `msgfmt` ilə yenidən qurulur.
@@ -196,9 +198,11 @@ ROWS = {
             "Использовать тот же силлабус (связать)",
             "Aynı izlenceyi kullan (bağla)",
         ),
+        "Göstər": ("Show", "Показать", "Göster"),
         "Hamısına tətbiq et": ("Apply to all", "Применить ко всем", "Tümüne uygula"),
         "Hazırdır": ("Done", "Готово", "Tamam"),
         "Kopyala və uyğunlaşdır": ("Copy and adjust", "Скопировать и адаптировать", "Kopyala ve uyarla"),
+        "Mənim fənlərim": ("My subjects", "Мои дисциплины", "Derslerim"),
         "Mövcud sillabusdan istifadə et": (
             "Use an existing syllabus",
             "Использовать существующий силлабус",

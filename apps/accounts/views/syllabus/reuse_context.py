@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from collections import Counter
 
+from django.db.models import Q
 from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.models import ChangeKind, Syllabus
@@ -302,7 +303,7 @@ def build_options(organization, actor, target) -> dict:
 # ── Siyahı sətirləri ────────────────────────────────────────────────────────────
 
 
-def page_flags(page_syllabi, visible) -> dict:
+def page_flags(page_syllabi, visible, *, user_id=None) -> dict:
     """Səhifə dosyeləri üçün bağ bayraqları — SƏHİFƏ başına ən çox iki sorğu.
 
     ``{syllabus_id: {linked, behind, source_group, linked_count, behind_count, siblings}}``.
@@ -332,6 +333,8 @@ def page_flags(page_syllabi, visible) -> dict:
                 period_id__in={row.period_id for row in open_drafts},
                 reused_from__isnull=True,
             )
+            # Yalnız baxanın ÖZ dosyeləri mənbə ola bilər (rəhbər siyahısında başqaları da var).
+            .filter(Q(author_id=user_id) | Q(offering__instructor_id=user_id) if user_id else Q())
             .values_list("subject_id", "period_id")
         ):
             pairs[(subject_id, period_id)] += 1
@@ -389,6 +392,7 @@ def editor_reuse_state(request, organization, *, syllabus, version, is_author: b
                 exclude_syllabus_id=syllabus.pk,
                 exclude_offering_id=syllabus.offering_id,
             )
+            .filter(services.own_q(actor))  # mənbə yalnız öz dosyesi ola bilər (rəhbər də)
             .order_by()
             .values("pk")
             .count()

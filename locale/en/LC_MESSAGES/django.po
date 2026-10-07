@@ -92162,3 +92162,11 @@ msgstr "has its own syllabus — not changed"
 msgctxt "accounts.syllabus"
 msgid "Hazırdır"
 msgstr "Done"
+
+msgctxt "accounts.syllabus"
+msgid "Göstər"
+msgstr "Show"
+
+msgctxt "accounts.syllabus"
+msgid "Mənim fənlərim"
+msgstr "My subjects"

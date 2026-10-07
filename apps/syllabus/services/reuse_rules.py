@@ -39,7 +39,7 @@ from django.db.models import Case, Count, IntegerField, Q, Value, When
 
 from ..constants import LESSON_HOUR_KINDS, OPEN_STATUSES, PERM_EDIT, SyllabusStatus
 from ..models import ApprovalSource, Syllabus
-from .queries import _scope_filter
+from .queries import _scope_filter, own_q
 from .scoping import is_author
 
 # ── Səbəb kodları (UI mətni ``accounts/views/syllabus/labels.py``-dadır) ─────────
@@ -214,7 +214,7 @@ def reuse_origin(version):
 
 
 def _own_q(actor) -> Q:
-    return Q(author_id=actor.user_id) | Q(offering__instructor_id=actor.user_id)
+    return own_q(actor)
 
 
 def _copyable_annotation(actor):

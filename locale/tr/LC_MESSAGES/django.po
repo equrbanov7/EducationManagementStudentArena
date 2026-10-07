@@ -91640,3 +91640,11 @@ msgstr "kendi izlencesi var — değiştirilmedi"
 msgctxt "accounts.syllabus"
 msgid "Hazırdır"
 msgstr "Tamam"
+
+msgctxt "accounts.syllabus"
+msgid "Göstər"
+msgstr "Göster"
+
+msgctxt "accounts.syllabus"
+msgid "Mənim fənlərim"
+msgstr "Derslerim"

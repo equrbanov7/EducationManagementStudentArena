@@ -59,6 +59,11 @@
         if (chip && chip.getAttribute("data-value")) {
             params.status = chip.getAttribute("data-value");
         }
+        /* Rəhbərin «Hamısı | Mənim fənlərim» açarı (sahib 2026-10-08) — URL-də qalır. */
+        var scope = el.querySelector("[data-syl-scope].is-on");
+        if (scope && scope.getAttribute("data-syl-scope")) {
+            params.scope = scope.getAttribute("data-syl-scope");
+        }
         Object.keys(overrides || {}).forEach(function (key) {
             if (overrides[key] === null || overrides[key] === "") {
                 delete params[key];
@@ -343,6 +348,9 @@
         });
         window.EMSDelegate.on("click", "[data-syllabus-list] [data-syl-filter='status']", function (event, button) {
             reload(root(), { status: button.getAttribute("data-value"), page: null });
+        });
+        window.EMSDelegate.on("click", "[data-syllabus-list] [data-syl-scope]", function (event, button) {
+            reload(root(), { scope: button.getAttribute("data-syl-scope") || null, page: null });
         });
         window.EMSDelegate.on("click", "[data-syllabus-list] [data-syl-page]", function (event, button) {
             if (!button.disabled) {

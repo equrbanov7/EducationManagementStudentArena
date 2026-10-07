@@ -91738,3 +91738,11 @@ msgstr "öz sillabusu var — dəyişdirilmədi"
 msgctxt "accounts.syllabus"
 msgid "Hazırdır"
 msgstr "Hazırdır"
+
+msgctxt "accounts.syllabus"
+msgid "Göstər"
+msgstr "Göstər"
+
+msgctxt "accounts.syllabus"
+msgid "Mənim fənlərim"
+msgstr "Mənim fənlərim"

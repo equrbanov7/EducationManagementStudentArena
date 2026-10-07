@@ -92336,3 +92336,11 @@ msgstr "есть собственный силлабус — не изменён
 msgctxt "accounts.syllabus"
 msgid "Hazırdır"
 msgstr "Готово"
+
+msgctxt "accounts.syllabus"
+msgid "Göstər"
+msgstr "Показать"
+
+msgctxt "accounts.syllabus"
+msgid "Mənim fənlərim"
+msgstr "Мои дисциплины"

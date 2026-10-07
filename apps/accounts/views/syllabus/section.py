@@ -35,11 +35,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.models import CourseOffering
 from apps.syllabus.public import (
     QUEUE_STATUSES,
     STATUS_SORT_INDEX,
     SyllabusStatus,
     build_syllabus_list_context,
+    services,
     sla_days,
 )
 from core.search_text import tolerant_q
@@ -81,6 +83,10 @@ VIRTUAL_STATUS_KEYS = ("missing", "sla")
 
 ALL_CHIP = pgettext_lazy(_CTX, "Hamısı")
 
+#: Rəhbərin əhatə açarı (sahib 2026-10-08): «Hamısı» | «Mənim fənlərim».
+SCOPE_MINE = "mine"
+SCOPE_LABELS = {"": ALL_CHIP, SCOPE_MINE: pgettext_lazy(_CTX, "Mənim fənlərim")}
+
 #: Səhifə sətirlərinin JOIN-ləri — təsdiqləyən/rəyçi + bağ (mənbə qrupu, mənbənin
 #: qüvvədə olan versiyası, bağlı versiyanın mənbə qrupu) sətir başına sorğu açmasın.
 _PAGE_RELATED = (
@@ -105,8 +111,6 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
     açılışlarına dəyən ``(offering, subject, period)`` üçlükləri
     ``values_list`` ilə oxunur, açılış yoxdursa heç sorğu getmir.
     """
-    from apps.registrar.models import CourseOffering
-
     queryset = (
         CourseOffering.objects.filter(organization=organization, is_active=True, instructor=user)
         .select_related("subject", "period")
@@ -129,10 +133,10 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
             Q(offering_id__in=[offering.pk for offering in offerings])
             | Q(subject_id__in={offering.subject_id for offering in offerings})
         )
-        .values_list("offering_id", "subject_id", "period_id", "reused_from_id")
+        .values_list("offering_id", "subject_id", "period_id", "reused_from_id", "author_id", "offering__instructor_id")
     )
     covered_offerings, covered_pairs, sibling_pairs = set(), set(), Counter()
-    for offering_id, subject_id, period_id, reused_from_id in covered:
+    for offering_id, subject_id, period_id, reused_from_id, author_id, instructor_id in covered:
         if offering_id:
             covered_offerings.add(offering_id)
         else:
@@ -141,7 +145,9 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
             # 2026-10-08: əvvəl BAŞQA qrupun açılışlı dosyesi də bu dəstə düşürdü
             # və həmin qrupun jurnalı «sillabus yoxdur» deyərkən siyahı onu gizlədirdi.
             covered_pairs.add((subject_id, period_id))
-        if reused_from_id is None and period_id is not None:
+        # Təklif yalnız İSTİFADƏ EDİLƏ BİLƏN mənbə üçün: aktorun öz dosyesi (bağlama və
+        # kopyalama qapısı). Rəhbərin gördüyü başqa müəllimin sillabusu sayılmır.
+        if reused_from_id is None and period_id is not None and user.pk in (author_id, instructor_id):
             sibling_pairs[(subject_id, period_id)] += 1
 
     rows = []
@@ -213,12 +219,13 @@ class _MissingThenSyllabi:
     «sillabussuz» sətirlər, sonra sıralanmış sillabuslar.
     """
 
-    def __init__(self, missing, queryset, *, now, copyable, visible=None):
+    def __init__(self, missing, queryset, *, now, copyable, visible=None, viewer=None):
         self._missing = list(missing)
         self._queryset = queryset
         self._now = now
         self._copyable = copyable
         self._visible = visible if visible is not None else queryset
+        self._viewer = viewer
         self._count = None
 
     def __len__(self):
@@ -237,11 +244,37 @@ class _MissingThenSyllabi:
             return head
         page_syllabi = list(self._queryset.select_related(*_PAGE_RELATED)[offset : offset + limit])
         # Təkrar istifadə bayraqları (bağlı / mənbə / qonşu) — səhifə başına sabit sorğu.
-        flags = page_flags(page_syllabi, self._visible)
+        flags = page_flags(page_syllabi, self._visible, user_id=(self._viewer or {}).get("user_id"))
         return head + [
-            build_row(row, now=self._now, can_copy=row.subject_id in self._copyable, reuse=flags.get(row.pk))
+            build_row(
+                row,
+                now=self._now,
+                can_copy=row.subject_id in self._copyable,
+                reuse=flags.get(row.pk),
+                viewer=self._viewer,
+            )
             for row in page_syllabi
         ]
+
+
+def _scope_switch(context, visible, *, scope: str, organization, user):
+    """«Hamısı | Mənim fənlərim» açarı — yalnız GENİŞ əhatəli və DƏRS DEYƏN rəhbərə.
+
+    Müəllimin siyahısı onsuz da «özü»dür (``own_q``) — açar göstərilmir.  «Dərs
+    deyir» = öz dosyesi var (``own_q``) və ya aktiv açılışın müəllimidir; sorğu
+    yalnız rəhbər üçün işləyir (ən çox iki ``EXISTS``).
+    """
+    if not context["broad_scope"]:
+        return None
+    teaches = scope == SCOPE_MINE or (
+        visible.order_by().filter(services.own_q(context["actor"])).exists()
+        or CourseOffering.objects.filter(organization=organization, instructor=user, is_active=True).exists()
+    )
+    if not teaches:
+        return None
+    return {
+        "chips": [{"key": key, "label": SCOPE_LABELS[key], "active": scope == key} for key in ("", SCOPE_MINE)],
+    }
 
 
 def academic_filter_options(organization):
@@ -345,12 +378,15 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     status = _text(request, "status")
     sort = _text(request, "sort", "recent")
     view_mode = "card" if _text(request, "view") == "card" else "table"
+    # Sahib 2026-10-08: rəhbərin «Mənim fənlərim» süzgəci (`?scope=mine`, paylaşıla bilən URL).
+    scope = SCOPE_MINE if _text(request, "scope") == SCOPE_MINE else ""
 
     unit = _text(request, "unit")
 
     context = build_syllabus_list_context(
         request,
         organization=organization,
+        mine=scope == SCOPE_MINE,
         academic_year=academic_year or None,
         # «sla»/«missing» REAL status deyil — sorğuya ötürülsə heç nə uyğun
         # gəlməzdi; süzgəc aşağıda tətbiq olunur. Audit 2026-09-13 (perf F-12
@@ -397,10 +433,18 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         if status in ("", "missing")
         else []
     )
+    if not context["can_create"]:
+        # İcazəsiz «Sillabus yarat» düyməsi 403 ilə bitərdi — sətir yalnız məlumat olaraq qalır.
+        missing = [{**row, "actions": []} for row in missing]
+    viewer = {"user_id": getattr(request.user, "pk", None), "can_edit": context["can_create"]}
+    scope = scope if context["mine"] else ""
+    switch = _scope_switch(context, visible, scope=scope, organization=organization, user=request.user)
     if status == "missing":
-        sequence = _MissingThenSyllabi(missing, syllabi.none(), now=now, copyable=copyable, visible=visible)
+        sequence = _MissingThenSyllabi(
+            missing, syllabi.none(), now=now, copyable=copyable, visible=visible, viewer=viewer
+        )
     else:
-        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable, visible=visible)
+        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable, visible=visible, viewer=viewer)
 
     paginator = Paginator(sequence, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
@@ -422,7 +466,10 @@ def build_syllabus_list_section(request, *, organization) -> dict:
                 "status": status,
                 "sort": sort,
                 "view": view_mode,
+                "scope": scope,
             },
+            # «Hamısı | Mənim fənlərim» — YALNIZ geniş əhatəli VƏ dərs deyən rəhbərə (None → gizli).
+            "scope_switch": switch,
             "filter_options": {
                 "years": years,
                 "semesters": seasons,
@@ -455,6 +502,8 @@ __all__ = [
     "ACCESS_DENIED",
     "PAGE_SIZE",
     "SORT_LABELS",
+    "SCOPE_LABELS",
+    "SCOPE_MINE",
     "VIRTUAL_STATUS_KEYS",
     "academic_filter_options",
     "build_syllabus_list_section",
