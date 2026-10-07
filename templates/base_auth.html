@@ -39,7 +39,8 @@ Notes:
     {# A11y (Codex §19, 2026-09-13): «Əsas məzmuna keç» keçidi (base.html ilə eyni fayl) #}
     <link rel="stylesheet" href="{% static 'css/skip_link.css' %}?v=20260913-1">
 
-    <script src="{% url 'javascript-catalog' %}"></script>
+    {# Perf 2026-10-07: versiyalı kataloq URL-i — 1 il immutable (core/jsi18n.py) #}
+    <script src="{% if jsi18n_src %}{{ jsi18n_src }}{% else %}{% url 'javascript-catalog' %}{% endif %}"></script>
 
     {# Faza 6.3: EMSCore — auth səhifələrinin skriptlərindən əvvəl. #}
     <script src="{% static 'js/core/csrf.js' %}?v=20260702-1"></script>

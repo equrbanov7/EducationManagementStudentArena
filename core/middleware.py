@@ -351,6 +351,25 @@ class RequestQueueMiddleware:
         return response
 
 
+#: Görünüş cavaba bu atributu qoyubsa məzmun cookie-dən ASILI DEYİL (məs. versiyalı
+#: `/jsi18n/?l=…&v=…`, core/jsi18n.py). SessionMiddleware sessiyaya toxunan hər sorğuya
+#: `Vary: Cookie` əlavə edir — brauzer keşi onda hər cookie dəyişikliyində (csrftoken
+#: fırlanması, analitika cookie-ləri) boşa çıxır. Bu middleware SessionMiddleware-dən
+#: XARİCDƏ olduğu üçün cavabı ondan sonra görür və yalnız işarəli cavabda `Cookie`-ni çıxarır.
+COOKIE_INDEPENDENT_ATTR = "ems_cookie_independent"
+
+
+def _drop_vary_cookie(response) -> None:
+    vary = response.get("Vary")
+    if not vary:
+        return
+    kept = [part.strip() for part in vary.split(",") if part.strip() and part.strip().lower() != "cookie"]
+    if kept:
+        response["Vary"] = ", ".join(kept)
+    else:
+        del response["Vary"]
+
+
 class SecurityHeadersMiddleware:
     """Attach default hardening headers that are safe across the app."""
 
@@ -364,6 +383,8 @@ class SecurityHeadersMiddleware:
         for header_name, header_value in getattr(settings, "SECURITY_RESPONSE_HEADERS", {}).items():
             if header_value:
                 response.setdefault(header_name, header_value)
+        if getattr(response, COOKIE_INDEPENDENT_ATTR, False):
+            _drop_vary_cookie(response)
         return response
 
 
