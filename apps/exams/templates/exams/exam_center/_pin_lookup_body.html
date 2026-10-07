@@ -11,7 +11,7 @@
   `ems-card`, axtarış `ems-input`. `pl2-*` sinifləri SAXLANILIR — JS onları
   render edir. CSP: inline yoxdur.
 {% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/pin_lookup.css' %}?v=20260910-1">
+<link rel="stylesheet" href="{% static 'exams/css/pin_lookup.css' %}?v=20261008-device">
 
 {% trans "Soldan tələbəni tapıb seçin — təyin olunmuş imtahan, PIN və fənn məlumatları sağda görünür. Nəticələr yazdıqca dərhal gəlir." as pl2_subtitle %}
 
@@ -81,7 +81,10 @@
   "subject": "{% filter escapejs %}{% trans 'Fənn' %}{% endfilter %}",
   "seat": "{% filter escapejs %}{% trans 'Yer' %}{% endfilter %}",
   "lang": "{% filter escapejs %}{% trans 'Dil' %}{% endfilter %}",
-  "pick": "{% filter escapejs %}{% trans 'Detalları görmək üçün soldan tələbə seçin.' %}{% endfilter %}"
+  "pick": "{% filter escapejs %}{% trans 'Detalları görmək üçün soldan tələbə seçin.' %}{% endfilter %}",
+  "deviceChange": "{% filter escapejs %}{% trans 'Cihaz dəyişikliyinə icazə ver' context 'exams.final_center.device' %}{% endfilter %}",
+  "deviceChangePending": "{% filter escapejs %}{% trans 'Cihaz dəyişikliyi təsdiqlənib — tələbə yeni cihazdan daxil olmalıdır' context 'exams.final_center.device' %}{% endfilter %}",
+  "deviceChangeFailed": "{% filter escapejs %}{% trans 'Təsdiq alınmadı — yenidən cəhd edin.' context 'exams.final_center.device' %}{% endfilter %}"
 }
 </script>
-<script defer src="{% static 'exams/js/pin_lookup.js' %}?v=20260910-1"></script>
+<script defer src="{% static 'exams/js/pin_lookup.js' %}?v=20261008-device"></script>

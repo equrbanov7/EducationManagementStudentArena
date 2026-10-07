@@ -22,6 +22,7 @@ from apps.exams.services.question_delivery import safe_delivered_question
 from apps.exams.services.question_timer import mark_question_seen
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
+from ._final_device import final_device_guarded
 from ._helpers import ensure_student_exam_tenant_context
 from .access_guard import ensure_active_attempt_access
 
@@ -60,6 +61,7 @@ def _delivered_question_html(request, attempt, answer):
 
 @login_required
 @require_POST
+@final_device_guarded
 def question_seen(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
     attempt = get_object_or_404(
