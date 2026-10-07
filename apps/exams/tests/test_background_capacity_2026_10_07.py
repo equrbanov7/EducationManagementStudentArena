@@ -243,3 +243,23 @@ class FinalReminderBatchingTests(TestCase):
         with bypass_rls():
             self.assertEqual(set(FinalExamTicket.objects.values_list("reminder_stage", flat=True)), {0})
         self.assertEqual(self._run()[0], 3)
+
+
+class AnswerIndexHygieneTests(TestCase):
+    """exams/0072: cavab cədvəllərinin prefiks-təkrar indeksləri yoxdur, unikal kompozitlər qalır."""
+
+    def _indexes(self, table):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = %s", [table])
+            return dict(cursor.fetchall())
+
+    def test_prefix_redundant_answer_indexes_are_gone(self):
+        if connection.vendor != "postgresql":
+            self.skipTest("PostgreSQL catalog")
+        answer = self._indexes("exams_examanswer")
+        options = self._indexes("exams_examanswer_selected_options")
+        self.assertNotIn("exams_examanswer_attempt_id_3ba11114", answer)
+        self.assertNotIn("exams_examanswer_selected_options_examanswer_id_9bd3bf6c", options)
+        # Oxu / CASCADE yolları unikal kompozitlərlə indeksli qalır (prefiks = attempt_id / examanswer_id).
+        self.assertTrue(any("UNIQUE" in d and "(attempt_id, question_id)" in d for d in answer.values()))
+        self.assertTrue(any("UNIQUE" in d and "(examanswer_id, examquestionoption_id)" in d for d in options.values()))
