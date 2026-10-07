@@ -100,6 +100,30 @@
         }
     }
 
+    /* Bölmə yenidən yüklənəndən SONRA görünən bir dəfəlik mesaj (syllabus_list.js flash-ı). */
+    function flash(section, message) {
+        if (window.EMSSyllabusList && typeof window.EMSSyllabusList.flash === "function") {
+            window.EMSSyllabusList.flash(section, message);
+        }
+    }
+
+    function sectionOf(panel) {
+        return (panel && panel.getAttribute && panel.getAttribute("data-profile-section-panel")) || "";
+    }
+
+    /* Əməldən sonra keçid: redaktor (``toEditor``) və ya cari bölmənin yenilənməsi;
+       mesaj YENİ yüklənən bölmədə flash kimi bir dəfə göstərilir. */
+    function finish(panel, message, versionId, toEditor) {
+        if (toEditor && versionId) {
+            flash("syllabus-editor", message);
+            openEditor(panel, versionId);
+            return;
+        }
+        var section = sectionOf(panel);
+        flash(section === "syllabus-list" ? "syllabus-list" : "syllabus-editor", message);
+        refresh(panel, versionId);
+    }
+
     /* ── Dialoq qabığı ────────────────────────────────────────────────── */
     function show(node, on) {
         if (node) {
@@ -125,6 +149,7 @@
             current.trigger.focus();
         }
         if (reload || current.dirty) {
+            /* Toplu əməlin nəticəsi dialoqda göstərilib — yenilənən siyahıda təkrar flash yoxdur. */
             refresh(current.panel);
         }
     }
@@ -375,8 +400,8 @@
         setBusy(true);
         http(modal.getAttribute("data-action-url"), payload)
             .then(function (data) {
-                toast(panel, (data && data.message) || "");
                 if (kind === "bulk") {
+                    toast(panel, (data && data.message) || "");
                     /* Nəticə ekranı: seçim blokları bağlanır (hədəflərin vəziyyəti dəyişib),
                        dialoq bağlananda siyahı yenilənir. */
                     state.dirty = true;
@@ -395,11 +420,7 @@
                 var current = state;
                 state = null;
                 current.modal.hidden = true;
-                if (kind === "copy") {
-                    openEditor(current.panel, data && data.version);
-                } else {
-                    refresh(current.panel, data && data.version);
-                }
+                finish(current.panel, (data && data.message) || "", data && data.version, kind === "copy");
             })
             .catch(function (err) {
                 if (state) {
@@ -421,8 +442,7 @@
                 var current = state;
                 state = null;
                 current.modal.hidden = true;
-                toast(panel, (data && data.message) || "");
-                openEditor(panel, data && data.version);
+                finish(panel, (data && data.message) || "", data && data.version, true);
             })
             .catch(function (err) {
                 if (state) {
@@ -476,12 +496,7 @@
             .then(function (data) {
                 confirmState = null;
                 current.modal.hidden = true;
-                toast(current.panel, (data && data.message) || "");
-                if (current.action === "unlink" && data && data.version) {
-                    openEditor(current.panel, data.version);
-                } else {
-                    refresh(current.panel, data && data.version);
-                }
+                finish(current.panel, (data && data.message) || "", data && data.version, current.action === "unlink");
             })
             .catch(function (err) {
                 ok.disabled = false;

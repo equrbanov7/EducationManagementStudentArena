@@ -114,6 +114,80 @@
         }, 4000);
     }
 
+    /* ── Bir dəfəlik flash (2026-10-08) ─────────────────────────────────
+       Əməldən sonra bölmə AJAX ilə yenidən yüklənir və toast qovşağı köhnə
+       panellə birlikdə silinir — «Sillabus bağlandı» kimi təsdiq itirdi.  Mesaj
+       sessionStorage-a yazılır, HƏDƏF bölmə yüklənəndə (EMSReady) BİR DƏFƏ
+       göstərilib silinir.  Saxlama əlçatan deyilsə (private rejim) sakitcə
+       köhnə davranışa düşür; köhnəlmiş flash (TTL) göstərilmir. */
+    var FLASH_KEY = "ems.syllabus.flash";
+    var FLASH_TTL_MS = 30000;
+    var flashTimer = null;
+
+    function setFlash(section, message) {
+        if (!message) {
+            return;
+        }
+        try {
+            window.sessionStorage.setItem(
+                FLASH_KEY,
+                JSON.stringify({ section: section, message: String(message), at: Date.now() })
+            );
+        } catch (e) {
+            /* saxlama yoxdur — mesaj sadəcə göstərilmir */
+        }
+    }
+
+    function dropFlash() {
+        try {
+            window.sessionStorage.removeItem(FLASH_KEY);
+        } catch (e) {
+            /* yoxdur */
+        }
+    }
+
+    function readFlash() {
+        var raw = null;
+        try {
+            raw = window.sessionStorage.getItem(FLASH_KEY);
+        } catch (e) {
+            return null;
+        }
+        if (!raw) {
+            return null;
+        }
+        try {
+            return JSON.parse(raw);
+        } catch (e) {
+            dropFlash();
+            return null;
+        }
+    }
+
+    function consumeFlash() {
+        var flash = readFlash();
+        if (!flash) {
+            return;
+        }
+        if (!flash.message || Date.now() - (Number(flash.at) || 0) > FLASH_TTL_MS) {
+            dropFlash();
+            return;
+        }
+        var panel = document.querySelector("[data-profile-section-panel='" + String(flash.section || "") + "']");
+        var node = panel ? panel.querySelector("[data-syl-toast]") : null;
+        var text = panel ? panel.querySelector("[data-syl-toast-text]") : null;
+        if (!node || !text) {
+            return; /* hədəf bölmə hələ yüklənməyib — TTL daxilində növbəti swap-ı gözləyir */
+        }
+        dropFlash();
+        text.textContent = flash.message;
+        node.hidden = false;
+        window.clearTimeout(flashTimer);
+        flashTimer = window.setTimeout(function () {
+            node.hidden = true;
+        }, 5000);
+    }
+
     /* ── Dialoq ───────────────────────────────────────────────────────── */
     function closeModal(el) {
         var modal = el.querySelector("[data-syl-modal]");
@@ -201,10 +275,13 @@
         closeModal(el);
         csrfFetch(url, payload)
             .then(function (data) {
-                toast(el, (data && data.message) || "");
+                /* Bölmə yenidən yüklənir (köhnə toast DOM-dan çıxır) — mesaj flash ilə ötürülür. */
+                var message = (data && data.message) || "";
                 if (openAfter && data && data.version) {
+                    setFlash(EDITOR_SECTION, message);
                     openEditor(el, data.version);
                 } else {
+                    setFlash(SECTION, message);
                     reload(el, { page: null });
                 }
             })
@@ -450,6 +527,7 @@
     /* Təkrar istifadə dialoqu (`syllabus_reuse.js`) əməldən sonra siyahını CARİ
        filtrlərlə yeniləmək üçün bu iki qapını işlədir — filtr vəziyyəti burada qalır. */
     window.EMSSyllabusList = {
+        flash: setFlash,
         reload: function () {
             var el = root();
             if (el) {
@@ -466,6 +544,7 @@
 
     window.EMSReady(function () {
         bindOnce();
+        consumeFlash();
         var el = root();
         if (!el) {
             return;
