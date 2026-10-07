@@ -60,7 +60,11 @@ def is_org_admin(user, organization) -> bool:
     if getattr(user, "is_superuser", False) or is_superadmin_user(user):
         return True
     if getattr(user, "is_ikt_rehber", False):
-        return True
+        # SEC-06 (2026-10-07): ``is_ikt_rehber`` AKTİV təşkilatdakı roldur — obyektin
+        # təşkilatı ilə üst-üstə düşməlidir (media siyasəti faylı org süzgəcsiz tapır).
+        active = getattr(user, "active_organization", None)
+        if active is not None and organization is not None and _pk(active) == _pk(organization):
+            return True
     owner_id = getattr(organization, "owner_id", None)
     return owner_id is not None and owner_id == user.pk
 

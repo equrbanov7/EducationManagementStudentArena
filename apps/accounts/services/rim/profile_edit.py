@@ -23,7 +23,14 @@ from django.db import transaction
 from apps.audit.public import log_action
 from core.constants import AuditAction
 
-from .policy import PERM_EDIT, RimAccessError, RimActor, assert_can_manage, require_permission
+from .policy import (
+    PERM_EDIT,
+    RimAccessError,
+    RimActor,
+    assert_can_manage,
+    assert_no_foreign_authority,
+    require_permission,
+)
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -132,6 +139,9 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
     """
     require_permission(actor, PERM_EDIT)
     assert_can_manage(actor, target_user)
+    # SEC-02 (2026-10-07): ad/e-poçt/FİN hesabın QLOBAL sahələridir — e-poçt dəyişikliyi
+    # parol bərpasının köküdür, ona görə hədəfin başqa təşkilatdakı rütbəsi də sayılır.
+    assert_no_foreign_authority(actor, target_user)
 
     if not isinstance(data, dict):
         raise RimAccessError("invalid_payload", "Göndərilən məlumat düzgün deyil.", status=400)

@@ -174,7 +174,21 @@ def _active_org(org_id):
         return None
 
 
-def resolve_unit_target(user, capabilities, target: str):
+def _outside_active_org(capabilities, organization, active_organization) -> bool:
+    """Təhlükəsizlik auditi 2026-10-07 SEC-03 — hədəf AKTİV təşkilatda olmalıdır.
+
+    ``capabilities`` (``is_org_admin``) aktiv təşkilat üçün hesablanır; hədəfin öz
+    təşkilatı fərqlidirsə o bayraq orada heç nə demir. Əvvəl A-nın admini B-də
+    istənilən üzvlüyü ilə B-nin bölməsinə / şöbəsinə bildiriş göndərirdi (T-01-in
+    ``org_`` hədəfi üçün bağlanan boşluğun qardaşı). Superadmin istisnadır.
+    """
+    if capabilities.get("is_superadmin"):
+        return False
+    active_pk = getattr(active_organization, "pk", None)
+    return active_pk is None or str(active_pk) != str(organization.pk)
+
+
+def resolve_unit_target(user, capabilities, target: str, *, active_organization=None):
     """``unit_<uuid>`` → alıcı istifadəçilər (queryset) və ya ``None`` (icazə/yoxluq)."""
     from apps.registrar.models import StudentAcademicRecord
 
@@ -185,6 +199,8 @@ def resolve_unit_target(user, capabilities, target: str):
         return None
     organization = unit.organization
     if not organization.is_active:
+        return None
+    if _outside_active_org(capabilities, organization, active_organization):
         return None
     access = _access(user, capabilities, organization)
     if not access.is_member:
@@ -212,7 +228,7 @@ def resolve_unit_target(user, capabilities, target: str):
     return User.objects.filter(is_active=True).filter(Q(pk__in=member_ids) | Q(pk__in=student_ids) | Q(pk__in=head_ids))
 
 
-def resolve_role_target(user, capabilities, target: str):
+def resolve_role_target(user, capabilities, target: str, *, active_organization=None):
     """``role_<key>_<orgid>`` → alıcı istifadəçilər və ya ``None``."""
     from apps.registrar.models import StudentAcademicRecord
 
@@ -221,6 +237,8 @@ def resolve_role_target(user, capabilities, target: str):
         return None
     organization = _active_org(org_id)
     if organization is None:
+        return None
+    if _outside_active_org(capabilities, organization, active_organization):
         return None
     access = _access(user, capabilities, organization)
     if not access.is_member or not access.org_wide:
