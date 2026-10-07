@@ -200,7 +200,7 @@ def _status(row):
     return status, version
 
 
-def _sibling_row(row, *, actor, target, chair_id, target_code, candidates) -> dict:
+def _sibling_row(row, *, actor, target, chair_id, target_code, candidates, chair_memo=None) -> dict:
     from .rows import approver_text
 
     rules = services.reuse_rules
@@ -208,8 +208,15 @@ def _sibling_row(row, *, actor, target, chair_id, target_code, candidates) -> di
     base = approved or row.current_version
     base_hours = getattr(base, "plan_hours", None) or {}
     copyable = bool(row._copyable)
+    # Köhnə dosyedə kafedra ixtisasa işarə edə bilər — təsdiq marşrutunun EFFEKTİV kafedrası (memo ilə).
+    source_chair = rules.effective_chair_unit_id(row, chair_memo if chair_memo is not None else {})
     link_code = rules.link_code(
-        row, actor=actor, target_hours=target.plan_hours, target_chair_unit_id=chair_id, target_code=target_code
+        row,
+        actor=actor,
+        target_hours=target.plan_hours,
+        target_chair_unit_id=chair_id,
+        target_code=target_code,
+        source_chair_unit_id=source_chair,
     )
     copy_code = rules.copy_code(row, actor=actor, target_code=target_code, copyable=copyable)
     modes = {}
@@ -217,7 +224,12 @@ def _sibling_row(row, *, actor, target, chair_id, target_code, candidates) -> di
         if candidate.syllabus is not None:
             continue
         free_link = rules.link_code(
-            row, actor=actor, target_hours=candidate.plan_hours, target_chair_unit_id=candidate_chair, target_code=""
+            row,
+            actor=actor,
+            target_hours=candidate.plan_hours,
+            target_chair_unit_id=candidate_chair,
+            target_code="",
+            source_chair_unit_id=source_chair,
         )
         free_copy = rules.copy_code(row, actor=actor, target_code="", copyable=copyable)
         modes[str(candidate.offering.pk)] = "link" if not free_link else ("copy" if not free_copy else "")
@@ -262,6 +274,7 @@ def build_options(organization, actor, target) -> dict:
         )
     )
     target_code = services.reuse_rules.target_state_code(target_syllabus)
+    chair_memo: dict = {}
     chair_id = services.reuse.target_chair_unit_id(target, actor)
     candidates = (
         candidate_targets(
@@ -291,7 +304,13 @@ def build_options(organization, actor, target) -> dict:
         },
         "siblings": [
             _sibling_row(
-                row, actor=actor, target=target, chair_id=chair_id, target_code=target_code, candidates=candidates
+                row,
+                actor=actor,
+                target=target,
+                chair_id=chair_id,
+                target_code=target_code,
+                candidates=candidates,
+                chair_memo=chair_memo,
             )
             for row in siblings
         ],

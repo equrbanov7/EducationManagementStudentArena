@@ -110,21 +110,26 @@ def _validate_target(source, target, actor):
 
 
 def target_chair_unit_id(target, actor):
-    """Hədəfin təsdiq kafedrası — mövcud dosyedə onun öz bağı, yenidə ``create_draft`` qaydası."""
+    """Hədəfin təsdiq kafedrası — mövcud dosyedə EFFEKTİV bağı, yenidə ``create_draft`` qaydası."""
     if target.syllabus is not None:
-        return target.syllabus.chair_unit_id
+        return rules.effective_chair_unit_id(target.syllabus)
     from .units import resolve_syllabus_chair_unit
 
     unit = resolve_syllabus_chair_unit(unit=target.unit_hint, author=actor.user, organization=actor.organization)
     return getattr(unit, "pk", None)
 
 
-def planned_mode(source, target, actor, *, chair_unit_id=None) -> str:
+def planned_mode(source, target, actor, *, chair_unit_id=None, source_chair_unit_id=None) -> str:
     """Toplu əməl bu hədəf üçün nə edəcək: ``link`` | ``copy`` | ``""`` (heç nə)."""
     source = rules.reuse_root(source)
     chair_id = target_chair_unit_id(target, actor) if chair_unit_id is None else chair_unit_id
     if not rules.link_code(
-        source, actor=actor, target_hours=target.plan_hours, target_chair_unit_id=chair_id, target=target.syllabus
+        source,
+        actor=actor,
+        target_hours=target.plan_hours,
+        target_chair_unit_id=chair_id,
+        target=target.syllabus,
+        source_chair_unit_id=source_chair_unit_id,
     ):
         return "link"
     return "" if rules.copy_code(source, actor=actor, target=target.syllabus) else "copy"
@@ -322,9 +327,18 @@ def _link(source, target, actor, *, chair_unit_id, request=None):
 
 @transaction.atomic
 def link(*, source, target, actor, request=None):
-    """«Eyni sillabusu istifadə et (bağla)» — bax modul docstring-i (qərar 1–3)."""
+    """«Eyni sillabusu istifadə et (bağla)» — bax modul docstring-i (qərar 1–3).
+
+    Yazı yolu olduğu üçün köhnə (ixtisasa bağlı) dosyelər ``ensure_chair_unit`` ilə
+    kafedraya çəkilir — ``copy_from_previous`` / ``create_next_version`` ilə eyni.
+    """
+    from .units import ensure_chair_unit
+
     source = rules.reuse_root(source)
     _validate_target(source, target, actor)
+    ensure_chair_unit(source)
+    if target.syllabus is not None:
+        ensure_chair_unit(target.syllabus)
     return _link(source, target, actor, chair_unit_id=target_chair_unit_id(target, actor), request=request)
 
 
@@ -409,6 +423,7 @@ def apply_bulk(*, source, targets, actor, request=None) -> list:
     ``linked | copied | already | exists | skipped``.
     """
     root = rules.reuse_root(source)
+    source_chair = rules.effective_chair_unit_id(root)
     results = []
     for target in targets:
         if target.syllabus is not None:
@@ -418,7 +433,7 @@ def apply_bulk(*, source, targets, actor, request=None) -> list:
         try:
             _validate_target(root, target, actor)
             chair_id = target_chair_unit_id(target, actor)
-            mode = planned_mode(root, target, actor, chair_unit_id=chair_id)
+            mode = planned_mode(root, target, actor, chair_unit_id=chair_id, source_chair_unit_id=source_chair)
             if not mode:
                 raise _denied(rules.copy_code(root, actor=actor) or rules.CODE_COPY_OUT_OF_SCOPE)
             with transaction.atomic():
@@ -486,7 +501,7 @@ def sync_from_source(*, target_syllabus, actor, plan_hours=None, request=None):
         source,
         actor=actor,
         target_hours=hours,
-        target_chair_unit_id=target.chair_unit_id,
+        target_chair_unit_id=rules.effective_chair_unit_id(target),
         target_code=rules.CODE_TARGET_LOCKED if open_exists else "",
     )
     if code:

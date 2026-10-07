@@ -162,8 +162,51 @@ def same_slot(source, *, organization_id, subject_id, period_id) -> bool:
     )
 
 
-def link_code(source, *, actor, target_hours, target_chair_unit_id, target=None, target_code=None) -> str:
-    """Bağlamanın qadağa səbəbi (``""`` — bağlamaq olar). Bax modul docstring-i."""
+def effective_chair_unit_id(syllabus, memo=None):
+    """Təsdiq marşrutunun GÖRDÜYÜ kafedra — ``units.ensure_chair_unit`` ilə eyni həll, YAZISIZ.
+
+    Köhnə (köçürülmüş) dosyelərdə ``chair_unit`` ixtisasa/fakültəyə işarə edir;
+    yeni versiya açılanda ``ensure_chair_unit`` onu özü kafedraya çəkir
+    (struktur əcdadı → müəllifin kafedra üzvlüyü).  Bağlamanın «eyni kafedra»
+    şərti həmin EFFEKTİV kafedra ilə tutuşdurulmalıdır, əks halda köhnə dosyeyə
+    bağlanma səhvən «fərqli kafedra» ilə rədd olunurdu.  ``memo`` —
+    ``{(chair_unit_id, author_id): effektiv_id}`` (siyahıda sətir başına sorğu olmasın).
+    """
+    from .units import is_chair_unit, resolve_syllabus_chair_unit
+
+    if syllabus is None:
+        return None
+    key = (syllabus.chair_unit_id, syllabus.author_id)
+    if memo is not None and key in memo:
+        return memo[key]
+    current = syllabus.chair_unit if syllabus.chair_unit_id else None
+    if is_chair_unit(current):
+        result = current.pk
+    else:
+        resolved = resolve_syllabus_chair_unit(
+            unit=current, author=syllabus.author, organization=syllabus.organization_id
+        )
+        result = resolved.pk if resolved is not None else syllabus.chair_unit_id
+    if memo is not None:
+        memo[key] = result
+    return result
+
+
+def link_code(
+    source,
+    *,
+    actor,
+    target_hours,
+    target_chair_unit_id,
+    target=None,
+    target_code=None,
+    source_chair_unit_id=None,
+) -> str:
+    """Bağlamanın qadağa səbəbi (``""`` — bağlamaq olar). Bax modul docstring-i.
+
+    Kafedra müqayisəsi EFFEKTİV kafedra ilədir (``effective_chair_unit_id``);
+    çağıran onu əvvəlcədən hesablayıbsa ``source_chair_unit_id`` ilə ötürür.
+    """
     if not is_author(actor, source):
         return CODE_NOT_OWN
     approved = getattr(source, "approved_version", None)
@@ -175,7 +218,9 @@ def link_code(source, *, actor, target_hours, target_chair_unit_id, target=None,
         return CODE_HOURS_UNKNOWN
     if not hours_match(approved.plan_hours, target_hours):
         return CODE_HOURS_DIFFER
-    if source.chair_unit_id != target_chair_unit_id:
+    if source_chair_unit_id is None:
+        source_chair_unit_id = effective_chair_unit_id(source)
+    if source_chair_unit_id != target_chair_unit_id:
         return CODE_CHAIR_DIFFERS
     return target_state_code(target) if target_code is None else target_code
 
@@ -298,6 +343,7 @@ __all__ = [
     "REASON_CODES",
     "copy_base",
     "copy_code",
+    "effective_chair_unit_id",
     "hours_match",
     "hours_rows",
     "link_base",

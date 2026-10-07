@@ -320,3 +320,36 @@ def test_source_must_share_organization_and_subject(world):
         with connection.cursor() as cursor:
             cursor.execute("SET CONSTRAINTS syllabus_reuse_same_org_subject IMMEDIATE")
         Syllabus.objects.filter(pk=syllabus.pk).update(reused_from=stranger)
+
+
+# ── Köhnə dosyenin kafedrası (ixtisasa bağlı) ────────────────────────────────
+
+
+def _as_legacy(source, unit):
+    """Köçürülmüş dosyeni təqlid edir: ``chair_unit`` kafedraya yox, ixtisasa işarə edir."""
+    Syllabus.objects.filter(pk=source.pk).update(chair_unit=unit)
+    return Syllabus.objects.select_related("chair_unit", "author", "approved_version").get(pk=source.pk)
+
+
+def test_link_uses_the_effective_chair_of_a_legacy_source(world):
+    source, _version = approved_syllabus(world, "o1")
+    source = _as_legacy(source, world["groups"]["g1"].parent)
+    act = actor(world)
+    # Təsdiq marşrutu (ensure_chair_unit) ilə eyni: ixtisas → müəllifin kafedra üzvlüyü.
+    assert rules.effective_chair_unit_id(source) == world["chair"].pk
+    assert rules.link_code(source, actor=act, target_hours=PLAN_HOURS, target_chair_unit_id=world["chair"].pk) == ""
+
+    syllabus, version = services.reuse.link(source=source, target=target(world, "o2"), actor=act)
+    assert version.status == SyllabusStatus.APPROVED and version.approval_source == ApprovalSource.REUSE
+    assert syllabus.chair_unit_id == world["chair"].pk
+    source.refresh_from_db()
+    assert source.chair_unit_id == world["chair"].pk  # yazı yolunda self-heal (ensure_chair_unit)
+
+
+def test_a_legacy_source_under_another_chair_is_still_refused(world):
+    source, _version = approved_syllabus(world, "o1")
+    source = _as_legacy(source, world["groups"]["g4"].parent)  # ixtisas C — BAŞQA kafedranın altında
+    assert rules.effective_chair_unit_id(source) == world["other_chair"].pk
+    with pytest.raises(TransitionDenied) as denied:
+        services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))
+    assert denied.value.code == rules.CODE_CHAIR_DIFFERS

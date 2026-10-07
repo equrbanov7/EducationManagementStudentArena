@@ -302,3 +302,10 @@ def test_batched_plan_hours_match_the_single_lookup(world):
     offerings.append(lonely)
     batched = plan_hours_by_offering(offerings)
     assert batched == {offering.pk: plan_hours_for_offering(offering) for offering in offerings}
+
+
+def test_options_allow_linking_a_legacy_source_whose_chair_is_a_specialty(world):
+    source, _version = approved_syllabus(world, "o1")
+    Syllabus.objects.filter(pk=source.pk).update(chair_unit=world["groups"]["g1"].parent)
+    [row] = _options(_client(world), offering=world["offerings"]["o2"].pk).json()["siblings"]
+    assert row["can_link"] is True, row["link_reason"]
