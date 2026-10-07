@@ -22,6 +22,18 @@ NON_COUNTING_EVENT_TYPES = frozenset(
 )
 
 
+#: Tələbə brauzerinin özünün müşahidə edib bildirə biləcəyi hadisələr (``log_incident_api``).
+#: Təhlükəsizlik auditi 2026-10-07: endpoint modelin BÜTÜN növlərini qəbul edirdi — tələbə
+#: öz nəzarət tarixçəsinə saxta «müəllim bərpa etdi» / «avtomatik təhvil» qeydi yazırdı.
+#: Sistem və müəllim hadisələri (``auto_*``, ``teacher_*``, ``resume_window_expired``,
+#: ``suspicious_repeated``) YALNIZ server tərəfindən yaranır.
+STUDENT_REPORTABLE_EVENT_TYPES = (
+    VIOLATION_EVENT_TYPES
+    | NON_COUNTING_EVENT_TYPES
+    | frozenset({"fullscreen_restored", "window_focused", "exam_started_supervised", "student_acknowledged"})
+)
+
+
 EVENT_SEVERITY_MAP = {
     "fullscreen_exited": "high",
     "fullscreen_restored": "info",

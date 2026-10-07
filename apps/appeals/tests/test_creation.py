@@ -174,7 +174,14 @@ class AppealCreateViewTests(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
+    def _as_final_center_review(self):
+        """Təhlükəsizlik auditi 2026-10-07: apellyasiya səhifəsi açarı yalnız finalın mərkəz
+        baxışında (təhvildən sonrakı 5 dəq) göstərir; midterm-də açar həmişə gizlidir."""
+        self.exam.exam_type_extended = "final"
+        self.exam.save(update_fields=["exam_type_extended"])
+
     def test_create_page_shows_student_and_correct_answer_and_search(self):
+        self._as_final_center_review()
         response = self.client.get(reverse("appeals:appeal_create", args=[self.attempt.id]))
 
         self.assertEqual(response.status_code, 200)
@@ -208,8 +215,9 @@ class AppealCreateViewTests(TestCase):
         self.wrong.is_correct = True
         self.wrong.save(update_fields=["text", "is_correct"])
 
-        # Midterm nəticə səhifəsində açar (düzgün variant) təhlükəsizlik qaydası ilə gizlidir
-        # (2026-10-05); apellyasiya səhifəsi isə düzgün cavabı göstərir.
+        # Final mərkəz baxışı (5 dəq): nəticə səhifəsi də, apellyasiya səhifəsi də açarı göstərir;
+        # burada yalnız dondurulmuş snapshot-un render olunması yoxlanılır (2026-10-07).
+        self._as_final_center_review()
         urls = [
             (reverse("exams:exam_result", args=[self.exam.slug, self.attempt.id]), False),
             (reverse("appeals:appeal_create", args=[self.attempt.id]), True),
@@ -324,6 +332,7 @@ class AppealCreateViewTests(TestCase):
     def test_create_page_shows_answer_details_immediately(self):
         """Məhsul qərarı (2026-07-13): tələbə təhvildən sonra dərhal öz
         cavablarını və detallarını görür — apellyasiya səthi də kilidsizdir."""
+        self._as_final_center_review()
         self.exam.end_datetime = timezone.now() + timedelta(hours=1)
         self.exam.save(update_fields=["end_datetime"])
 
