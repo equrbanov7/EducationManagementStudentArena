@@ -261,7 +261,8 @@ def organization_settings(request, slug):
         organization.phone = request.POST.get("phone", "")
         organization.address = request.POST.get("address", "")
         organization.website = request.POST.get("website", "")
-        organization.save()
+        # Yalnız formadakı sahələr — `settings` JSON-u (xülasələr, modullar) bu yolla yazılmır.
+        organization.save(update_fields=["description", "email", "phone", "address", "website", "updated_at"])
 
         messages.success(request, pgettext("organizations.views.message", "settings_updated"))
         return redirect("organizations:settings", slug=slug)

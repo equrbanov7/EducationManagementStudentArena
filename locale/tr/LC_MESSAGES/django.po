@@ -90909,3 +90909,63 @@ msgid ""
 msgstr ""
 "“Kaldır” duyuruyu tüm alıcılardan gizler; istatistikler ve başvurular "
 "korunur, “Silinenler” filtresinden geri yüklenebilir."
+
+msgctxt "applications.transition"
+msgid "Naməlum əməl: %(action)s"
+msgstr "Bilinmeyen işlem: %(action)s"
+
+msgctxt "applications.transition"
+msgid "«%(action)s» əməli «%(status)s» statusundan mümkün deyil."
+msgstr "“%(action)s” işlemi “%(status)s” durumundan yapılamaz."
+
+msgctxt "applications.transition"
+msgid "Bu əməl üçün mətn məcburidir."
+msgstr "Bu işlem için metin zorunludur."
+
+msgctxt "applications.transition"
+msgid "Mətn ən azı %(n)s simvol olmalıdır."
+msgstr "Metin en az %(n)s karakter olmalıdır."
+
+msgctxt "applications.transition"
+msgid "Müraciət yaratmaq səlahiyyətiniz yoxdur."
+msgstr "Başvuru oluşturma yetkiniz yok."
+
+msgctxt "applications.transition"
+msgid "Aktiv üzvlüyünüz olmadan müraciət göndərilə bilməz."
+msgstr "Etkin üyeliğiniz olmadan başvuru gönderilemez."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət növü sizin üçün açıq deyil."
+msgstr "Bu başvuru türü sizin için açık değil."
+
+msgctxt "applications.transition"
+msgid "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın."
+msgstr "Aynı başvuru az önce gönderildi — durumunu listeden kontrol edin."
+
+msgctxt "applications.transition"
+msgid "Seçilmiş şöbə bu təşkilatda aktiv deyil."
+msgstr "Seçilen birim bu kurumda etkin değil."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət sizin şöbənizdə deyil."
+msgstr "Bu başvuru sizin biriminizde değil."
+
+msgctxt "applications.transition"
+msgid "Bu əməli yalnız müraciət sahibi edə bilər."
+msgstr "Bu işlemi yalnızca başvuru sahibi yapabilir."
+
+msgctxt "applications.transition"
+msgid "Bu müraciətə qeyd yaza bilməzsiniz."
+msgstr "Bu başvuruya not ekleyemezsiniz."
+
+msgctxt "applications.transition"
+msgid "Seçilən şəxs bu şöbənin emalçısı deyil."
+msgstr "Seçilen kişi bu birimde başvuruları işleyen biri değil."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə tapılmadı."
+msgstr "Hedef birim bulunamadı."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə cari şöbə ilə eyni ola bilməz."
+msgstr "Hedef birim mevcut birimle aynı olamaz."

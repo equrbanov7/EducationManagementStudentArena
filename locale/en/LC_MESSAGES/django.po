@@ -91418,3 +91418,64 @@ msgid ""
 msgstr ""
 "“Delete” hides the announcement from all recipients; statistics and "
 "applications are kept, and it can be restored from the “Deleted” filter."
+
+msgctxt "applications.transition"
+msgid "Naməlum əməl: %(action)s"
+msgstr "Unknown action: %(action)s"
+
+msgctxt "applications.transition"
+msgid "«%(action)s» əməli «%(status)s» statusundan mümkün deyil."
+msgstr "The “%(action)s” action is not possible from the “%(status)s” status."
+
+msgctxt "applications.transition"
+msgid "Bu əməl üçün mətn məcburidir."
+msgstr "Text is required for this action."
+
+msgctxt "applications.transition"
+msgid "Mətn ən azı %(n)s simvol olmalıdır."
+msgstr "The text must be at least %(n)s characters long."
+
+msgctxt "applications.transition"
+msgid "Müraciət yaratmaq səlahiyyətiniz yoxdur."
+msgstr "You are not allowed to create applications."
+
+msgctxt "applications.transition"
+msgid "Aktiv üzvlüyünüz olmadan müraciət göndərilə bilməz."
+msgstr "An application cannot be sent without an active membership."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət növü sizin üçün açıq deyil."
+msgstr "This application type is not available to you."
+
+msgctxt "applications.transition"
+msgid "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın."
+msgstr ""
+"The same application was sent a moment ago — check its status in the list."
+
+msgctxt "applications.transition"
+msgid "Seçilmiş şöbə bu təşkilatda aktiv deyil."
+msgstr "The selected unit is not active in this organization."
+
+msgctxt "applications.transition"
+msgid "Bu müraciət sizin şöbənizdə deyil."
+msgstr "This application is not in your unit."
+
+msgctxt "applications.transition"
+msgid "Bu əməli yalnız müraciət sahibi edə bilər."
+msgstr "Only the applicant can perform this action."
+
+msgctxt "applications.transition"
+msgid "Bu müraciətə qeyd yaza bilməzsiniz."
+msgstr "You cannot add a note to this application."
+
+msgctxt "applications.transition"
+msgid "Seçilən şəxs bu şöbənin emalçısı deyil."
+msgstr "The selected person does not handle applications in this unit."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə tapılmadı."
+msgstr "Target unit not found."
+
+msgctxt "applications.transition"
+msgid "Hədəf şöbə cari şöbə ilə eyni ola bilməz."
+msgstr "The target unit cannot be the same as the current unit."

@@ -13,6 +13,7 @@ from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
 from .request_memberships import drop_request_memberships  # noqa: F401
 from .request_memberships import request_active_memberships  # noqa: F401
+from .review_visibility import save_review_identity_reveal  # noqa: F401
 from .scoping import EMPTY_SCOPE  # noqa: F401
 from .scoping import ORG_WIDE_SCOPE  # noqa: F401
 from .scoping import UnitScope  # noqa: F401
@@ -21,6 +22,11 @@ from .scoping import scope_memberships_by_unit  # noqa: F401
 from .scoping import scope_org_units  # noqa: F401
 from .scoping import user_scope_covers_unit  # noqa: F401
 from .services import get_active_memberships  # noqa: F401
+from .settings_store import REMOVE as REMOVE_SETTINGS_KEY  # noqa: F401
+from .settings_store import UNCHANGED as UNCHANGED_SETTINGS_KEY  # noqa: F401
+from .settings_store import register_managed_settings_key  # noqa: F401
+from .settings_store import set_settings_keys  # noqa: F401
+from .settings_store import update_settings_key  # noqa: F401
 from .structure_views import build_structure_tree_context  # noqa: F401
 from .structure_views import chair_detail_context  # noqa: F401
 from .structure_views import visible_chairs  # noqa: F401
@@ -45,7 +51,9 @@ __all__ = [
     "EMPTY_SCOPE",
     "KAFEDRA_UNIT_TYPES",
     "ORG_WIDE_SCOPE",
+    "REMOVE_SETTINGS_KEY",
     "TEACHER_ROLE_NAMES",
+    "UNCHANGED_SETTINGS_KEY",
     "UNIT_TYPES_BY_ORG",
     "UnitScope",
     "ancestor_unit_ids",
@@ -69,13 +77,17 @@ __all__ = [
     "members_covering_unit",
     "module_items",
     "register_cabinet_section_resolver",
+    "register_managed_settings_key",
     "request_active_memberships",
     "resolve_ancestor",
     "resolve_members_access",
+    "save_review_identity_reveal",
     "scope_memberships_by_unit",
     "scope_org_units",
     "set_module_enabled",
+    "set_settings_keys",
     "unit_type_label",
+    "update_settings_key",
     "user_scope_covers_unit",
     "validate_unit_type_for_org",
     "visible_chairs",

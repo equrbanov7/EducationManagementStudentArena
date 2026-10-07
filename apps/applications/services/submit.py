@@ -8,6 +8,7 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from apps.organizations.public import members_covering_unit
 from core.upload_security import validate_zip_archive
@@ -29,6 +30,9 @@ from . import access, notify
 from .routing import resolve_scope_unit, route_for, sender_family_for
 
 logger = logging.getLogger(__name__)
+
+#: ``TransitionDenied`` mətnlərinin konteksti (``state_machine._CTX`` ilə eyni).
+_CTX = "applications.transition"
 
 
 def next_number(organization) -> str:
@@ -112,13 +116,17 @@ def submit_application(
     bu təşkilatın AKTİV şöbəsi qəbul olunur; aidiyyət bölməsi yenə göndərənə görə həll olunur.
     """
     if not access.has_app_permission(user, organization, PERM_CREATE):
-        raise TransitionDenied("permission.denied", "Müraciət yaratmaq səlahiyyətiniz yoxdur.")
+        raise TransitionDenied("permission.denied", pgettext(_CTX, "Müraciət yaratmaq səlahiyyətiniz yoxdur."))
 
     family = sender_family_for(user, organization)
     if family is None:
-        raise TransitionDenied("sender.no_membership", "Aktiv üzvlüyünüz olmadan müraciət göndərilə bilməz.")
+        raise TransitionDenied(
+            "sender.no_membership", pgettext(_CTX, "Aktiv üzvlüyünüz olmadan müraciət göndərilə bilməz.")
+        )
     if not kind.is_active or not kind.allows(family):
-        raise TransitionDenied("kind.not_allowed", "Bu müraciət növü sizin üçün açıq deyil.", {"kind": kind.code})
+        raise TransitionDenied(
+            "kind.not_allowed", pgettext(_CTX, "Bu müraciət növü sizin üçün açıq deyil."), {"kind": kind.code}
+        )
 
     errors = validate_text(subject, body)
     if errors:
@@ -137,14 +145,14 @@ def submit_application(
     if duplicate is not None:
         raise TransitionDenied(
             "duplicate.recent",
-            "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın.",
+            pgettext(_CTX, "Eyni müraciət az əvvəl göndərilib — siyahıdan onun statusuna baxın."),
             {"number": duplicate.number},
         )
 
     unit, scope_unit, family, sender_unit = route_for(kind, user, organization=organization, family=family)
     if unit_override is not None:
         if unit_override.organization_id != organization.pk or not unit_override.is_active:
-            raise TransitionDenied("unit.invalid", "Seçilmiş şöbə bu təşkilatda aktiv deyil.")
+            raise TransitionDenied("unit.invalid", pgettext(_CTX, "Seçilmiş şöbə bu təşkilatda aktiv deyil."))
         unit, scope_unit = unit_override, resolve_scope_unit(unit_override, sender_unit)
     # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
     # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.

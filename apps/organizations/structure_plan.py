@@ -31,6 +31,7 @@ from types import SimpleNamespace
 
 from django.utils.text import slugify
 
+from apps.organizations.settings_store import UNCHANGED, update_settings_key
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
 
@@ -293,26 +294,19 @@ class _Planner:
         wanted = self.plan.get("campuses") or {}
         if not wanted:
             return
-        settings = dict(self.org.settings or {})
-        campuses = [dict(item) for item in settings.get("campuses") or [] if isinstance(item, dict)]
-        changed = False
-        for item in campuses:
-            extra = wanted.get(item.get("building"))
-            if not extra:
-                continue
-            units = list(item.get("units") or [])
-            known = {norm(u) for u in units}
-            for name in extra:
-                if norm(name) not in known:
-                    units.append(name)
-                    known.add(norm(name))
-                    changed = True
-                    self.report.add("KORPUS", f"{item.get('building')}: + {name}")
-            item["units"] = units
-        if changed and self.apply:
-            settings["campuses"] = campuses
-            self.org.settings = settings
-            self.org.save(update_fields=["settings", "updated_at"])
+        if not self.apply:
+            _campuses, added = _merge_campuses((self.org.settings or {}).get("campuses"), wanted)
+        else:
+            # Atomik: `campuses` kilid altında TƏZƏ oxunur, yalnız o yazılır (köhnə nüsxə digər açarları əzmir).
+            added = []
+
+            def _mutate(current):
+                campuses, added[:] = _merge_campuses(current, wanted)
+                return campuses if added else UNCHANGED
+
+            update_settings_key(self.org, "campuses", _mutate)
+        for building, name in added:
+            self.report.add("KORPUS", f"{building}: + {name}")
 
     def _audit(self, action, unit, old, new):
         log_action(
@@ -324,6 +318,25 @@ class _Planner:
             old_values=old,
             new_values=new,
         )
+
+
+def _merge_campuses(current, wanted):
+    """Korpus xəritəsinə plandakı vahidləri əlavə edir → ``(yeni siyahı, [(korpus, ad), …])``."""
+    campuses = [dict(item) for item in current or [] if isinstance(item, dict)]
+    added = []
+    for item in campuses:
+        extra = wanted.get(item.get("building"))
+        if not extra:
+            continue
+        units = list(item.get("units") or [])
+        known = {norm(u) for u in units}
+        for name in extra:
+            if norm(name) not in known:
+                units.append(name)
+                known.add(norm(name))
+                added.append((item.get("building"), name))
+        item["units"] = units
+    return campuses, added
 
 
 def apply_structure_plan(organization, plan, *, apply=False, actor=None) -> Report:
