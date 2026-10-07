@@ -1,5 +1,20 @@
 # Server gücü kifayət edirmi? — 2026-10-07
 
+> **Yeniləmə 2026-10-08 00:00 (sahibin icazəsi ilə):** VM **20 vCPU / 48 GB**-a böyüdüldü. Topologiya:
+> 20 nüvə × 1 soket, NUMA node 1. Fasilə ~2,5–3 dəq oldu: guest shutdown → reconfig → power on.
+>
+> **Fiziki host:** HPE DL360 Gen10, 2 × Xeon Gold 6138 = 40 nüvə / 80 thread, 127 GB.
+> 20 vCPU VM bir fiziki prosessora (20 nüvə) tam sığır, ona görə 24 deyil, 20 seçildi. Xüsusən
+> DB üçün NUMA-lokal yaddaş daha sürətlidir.
+>
+> **Yeni ölçüyə uyğun `.env`:**
+> - `APP_REPLICAS=14`, `APP_MEM_LIMIT=1536M`;
+> - `POSTGRES_MAX_CONNECTIONS=250`;
+> - `PGBOUNCER_MAX_DB_CONNECTIONS=230`, `PGBOUNCER_DEFAULT_POOL_SIZE=150`, `PGBOUNCER_RESERVE_POOL_SIZE=50`;
+> - `POSTGRES_SHARED_BUFFERS=4GB`, `POSTGRES_EFFECTIVE_CACHE_SIZE=24GB`, `POSTGRES_MEM_LIMIT=12288M`.
+>
+> Bunlar aşağıdakı 10 vCPU təhlilini əvəz edir; təhlilin özü tarixçə üçün saxlanılır.
+
 Mənbə: prod-audit (2026-10-07 18:02 UTC, reboot-dan 4 saat 42 dəq sonra), Prometheus-un 7 günlük tarixçəsi,
 tutum testləri ([CAPACITY_TEST_2026_10_05_NIGHT.md](CAPACITY_TEST_2026_10_05_NIGHT.md)).
 
