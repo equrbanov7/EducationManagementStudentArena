@@ -6,11 +6,20 @@ qatında paginator-a verilir (yaddaşa tam yüklənmir).
 """
 
 from django.db.models import Q
+from django.utils.dateparse import parse_date
 
 from apps.exams.models import ExamRoomSession, FinalExamTicket
 from core.search_text import tolerant_q
 
 from .monitor import session_list_annotations
+
+
+def _report_date(params, key):
+    """URL-dən ISO tarix; yararsızdırsa (``2026-13-40``, mətn) filtr tətbiq olunmur — əvvəl 500 idi."""
+    try:
+        return parse_date((params.get(key) or "").strip())
+    except ValueError:
+        return None
 
 
 def filter_sessions(organization, params):
@@ -32,10 +41,10 @@ def filter_sessions(organization, params):
     invigilator_id = (params.get("invigilator") or "").strip()
     if invigilator_id.isdigit():
         qs = qs.filter(invigilator_id=int(invigilator_id))
-    date_from = (params.get("date_from") or "").strip()
+    date_from = _report_date(params, "date_from")
     if date_from:
         qs = qs.filter(scheduled_start__date__gte=date_from)
-    date_to = (params.get("date_to") or "").strip()
+    date_to = _report_date(params, "date_to")
     if date_to:
         qs = qs.filter(scheduled_start__date__lte=date_to)
     query = (params.get("q") or "").strip()
@@ -87,13 +96,13 @@ def filter_tickets(organization, params):
     removal = (params.get("removal") or "").strip()
     if removal:
         qs = qs.filter(removal_action=removal)
-    date_from = (params.get("date_from") or "").strip()
+    date_from = _report_date(params, "date_from")
     if date_from:
         qs = qs.filter(
             Q(entry_validated_at__date__gte=date_from)
             | Q(entry_validated_at__isnull=True, session__scheduled_start__date__gte=date_from)
         )
-    date_to = (params.get("date_to") or "").strip()
+    date_to = _report_date(params, "date_to")
     if date_to:
         qs = qs.filter(
             Q(entry_validated_at__date__lte=date_to)
