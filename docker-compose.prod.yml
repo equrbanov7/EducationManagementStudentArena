@@ -1348,6 +1348,9 @@ services:
     # konfiq /tmp-yə render olunur, pidfile /run-dadır — qalan rootfs read-only.
     cap_drop: [ALL]
     read_only: true
+    # Yalnız promtail-ə xidmət edir → monitorinq sinfi (yük altında geri çəkilir, OOM-da ilk gedənlərdəndir).
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     tmpfs:
       - /run
       - /tmp

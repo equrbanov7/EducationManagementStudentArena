@@ -55,6 +55,7 @@ MONITORING = {
     "redis_exporter",
     "nginx_exporter",
     "pgbouncer_exporter",
+    "docker-socket-proxy",
 }
 # servis → (cpu_shares, oom_score_adj) defoltları (sahibin cədvəli + arp-agent).
 EXPECTED = {
