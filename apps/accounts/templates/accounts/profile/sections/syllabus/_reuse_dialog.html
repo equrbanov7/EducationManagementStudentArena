@@ -1,0 +1,120 @@
+{% load i18n %}
+{% comment %}
+«Bu fənnin bu semestr üçün artıq sillabusu var» dialoqu (sahib tələbi 2026-10-08).
+
+Həm SİYAHIDA (sillabussuz açılış / qaralama sətri), həm REDAKTORDA (qaralama
+banneri) eyni partial işlədilir — JS dialoqu düymənin öz bölmə panelindən tapır
+(`[data-profile-section-panel]`), ona görə iki panelin eyni anda DOM-da olması
+toqquşma yaratmır (id işlədilmir, yalnız `data-*`).
+
+Məzmun `GET reuse_options` JSON-undan qurulur (mətnlər serverdə tərcümə olunub);
+burada yalnız qabıq + statik etiketlər var. Davranış: accounts/js/profile/syllabus_reuse.js
+Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama).
+{% endcomment %}
+<div class="syl-modal syl-reuse" data-syl-reuse-modal hidden
+     data-options-url="{{ urls.reuse_options }}"
+     data-action-url="{{ urls.reuse_action }}"
+     data-create-url="{{ urls.action }}">
+  <div class="syl-modal__backdrop" data-syl-reuse-close></div>
+  <div class="syl-modal__box syl-reuse__box" role="dialog" aria-modal="true" tabindex="-1"
+       aria-label="{% trans 'Bu fənnin bu semestr üçün artıq sillabusu var' context 'accounts.syllabus' %}">
+    <div class="syl-modal__head">
+      <h3>{% trans "Bu fənnin bu semestr üçün artıq sillabusu var" context "accounts.syllabus" %}</h3>
+      <p class="syl-modal__body" data-syl-reuse-target></p>
+    </div>
+
+    <div class="syl-reuse__body">
+      <p class="syl-reuse__status" data-syl-reuse-loading role="status">{% trans "Yüklənir…" context "accounts.syllabus" %}</p>
+      <p class="syl-reuse__alert" data-syl-reuse-blocked role="alert" hidden></p>
+
+      <div class="syl-reuse__group" data-syl-reuse-sources-wrap hidden>
+        <p class="syl-reuse__legend" aria-hidden="true">{% trans "Mənbə sillabus" context "accounts.syllabus" %}</p>
+        <div class="syl-reuse__sources" data-syl-reuse-sources role="radiogroup"
+             aria-label="{% trans 'Mənbə sillabus' context 'accounts.syllabus' %}"></div>
+      </div>
+
+      <div class="syl-reuse__choice" data-syl-reuse-choice hidden>
+        <div class="syl-reuse__option">
+          <button type="button" class="syl-btn syl-btn--primary" data-syl-reuse-do="link">
+            <i class="fas fa-link" aria-hidden="true"></i>
+            {% trans "Eyni sillabusu istifadə et (bağla)" context "accounts.syllabus" %}
+          </button>
+          <p class="syl-reuse__hint" data-syl-reuse-hint="link"></p>
+        </div>
+        <div class="syl-reuse__option">
+          <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-do="copy">
+            <i class="fas fa-copy" aria-hidden="true"></i>
+            {% trans "Kopyala və uyğunlaşdır" context "accounts.syllabus" %}
+          </button>
+          <p class="syl-reuse__hint" data-syl-reuse-hint="copy"></p>
+        </div>
+        <p class="syl-reuse__warn" data-syl-reuse-replace hidden>
+          <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+          {% trans "Bu qrupun mövcud qaralamasının məzmunu mənbənin məzmunu ilə əvəzlənəcək (əvvəlki mətn audit izində saxlanılır)." context "accounts.syllabus" %}
+        </p>
+      </div>
+
+      <div class="syl-reuse__group" data-syl-reuse-bulk hidden>
+        <p class="syl-reuse__legend">{% trans "Bu fənn üzrə digər qruplarınız" context "accounts.syllabus" %}</p>
+        <p class="syl-reuse__hint">{% trans "Seçilmiş qruplara eyni mənbə tətbiq olunur: saatlar eynidirsə bağlanır, fərqlidirsə kopyalanıb uyğunlaşdırılır. Sillabusu olan qrup dəyişdirilmir." context "accounts.syllabus" %}</p>
+        <div class="syl-reuse__cands" data-syl-reuse-cands></div>
+        <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-do="bulk">
+          <i class="fas fa-layer-group" aria-hidden="true"></i>
+          {% trans "Hamısına tətbiq et" context "accounts.syllabus" %}
+        </button>
+      </div>
+
+      <ul class="syl-reuse__results" data-syl-reuse-results role="status" aria-live="polite" hidden></ul>
+    </div>
+
+    <div class="syl-modal__foot">
+      <button type="button" class="syl-btn syl-btn--ghost" data-syl-reuse-blank hidden>{% trans "Boş qaralama yarat" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-close>{% trans "Ləğv et" context "accounts.syllabus" %}</button>
+    </div>
+  </div>
+</div>
+
+{% comment %}«Ayır» / «Mənbədən yenilə» / «Bağlı sillabuslara tətbiq et» təsdiq pəncərəsi.{% endcomment %}
+<div class="syl-modal syl-reuse" data-syl-reuse-confirm hidden data-action-url="{{ urls.reuse_action }}">
+  <div class="syl-modal__backdrop" data-syl-reuse-confirm-close></div>
+  {% comment %}`aria-label` JS ilə başlıq mətnindən qoyulur — id işlədilmir (iki panel eyni anda DOM-da ola bilər).{% endcomment %}
+  <div class="syl-modal__box" role="dialog" aria-modal="true" tabindex="-1" data-syl-reuse-confirm-box>
+    <div class="syl-modal__head">
+      <h3 data-syl-reuse-confirm-title></h3>
+      <p class="syl-modal__body" data-syl-reuse-confirm-body></p>
+    </div>
+    <div class="syl-modal__foot">
+      <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-confirm-close>{% trans "Ləğv et" context "accounts.syllabus" %}</button>
+      <button type="button" class="syl-btn syl-btn--primary" data-syl-reuse-confirm-ok></button>
+    </div>
+  </div>
+</div>
+
+<span class="syl-i18n" data-syl-reuse-i18n hidden
+      data-t-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.syllabus' %}"
+      data-t-cancel="{% trans 'Ləğv et' context 'accounts.syllabus' %}"
+      data-t-done="{% trans 'Hazırdır' context 'accounts.syllabus' %}"
+      data-t-empty="{% trans 'Sizin üçün uyğun mənbə sillabus tapılmadı.' context 'accounts.syllabus' %}"
+      data-t-linked-count="{% trans 'bağlı qrup: {count}' context 'accounts.syllabus' %}"
+      data-t-hours-same="{% trans 'Saatlar eynidir' context 'accounts.syllabus' %}"
+      data-t-hours-diff="{% trans 'Saatlar fərqlidir' context 'accounts.syllabus' %}"
+      data-t-link-ok="{% trans 'Saatlar eynidir — eyni təsdiqlənmiş məzmun bu qrup üçün də qüvvəyə minir, ayrıca təsdiq lazım deyil.' context 'accounts.syllabus' %}"
+      data-t-copy-ok="{% trans 'Məzmun qaralama kimi kopyalanır, həftəlik plan bu qrupun saatına uyğunlaşdırılır, sonra adi qaydada təsdiqə göndərilir.' context 'accounts.syllabus' %}"
+      data-t-mode-link="{% trans 'bağlanacaq' context 'accounts.syllabus' %}"
+      data-t-mode-copy="{% trans 'kopyalanacaq' context 'accounts.syllabus' %}"
+      data-t-mode-none="{% trans 'tətbiq olunmur' context 'accounts.syllabus' %}"
+      data-t-res-linked="{% trans 'bağlandı' context 'accounts.syllabus' %}"
+      data-t-res-copied="{% trans 'kopyalandı' context 'accounts.syllabus' %}"
+      data-t-res-already="{% trans 'artıq bağlı idi' context 'accounts.syllabus' %}"
+      data-t-res-exists="{% trans 'öz sillabusu var — dəyişdirilmədi' context 'accounts.syllabus' %}"
+      data-t-res-skipped="{% trans 'ötürüldü' context 'accounts.syllabus' %}"
+      data-t-res-synced="{% trans 'yeniləndi' context 'accounts.syllabus' %}"
+      data-t-unlink-title="{% trans 'Bağ ayrılsın?' context 'accounts.syllabus' %}"
+      data-t-unlink-body="{% trans 'Təsdiqlənmiş nüsxə tələbələr üçün qüvvədə qalır. Redaktə üçün müstəqil qaralama açılır və o, adi qaydada kafedra təsdiqinə göndərilir. Mənbədəki sonrakı dəyişikliklər bu qrupa artıq tətbiq olunmayacaq.' context 'accounts.syllabus' %}"
+      data-t-unlink-ok="{% trans 'Ayır və qaralama aç' context 'accounts.syllabus' %}"
+      data-t-sync-title="{% trans 'Mənbənin yeni versiyası tətbiq olunsun?' context 'accounts.syllabus' %}"
+      data-t-sync-body="{% trans 'Mənbədə yeni təsdiqlənmiş versiya var. Saatlar eyni qaldığı üçün eyni məzmun bu qrupa da tətbiq olunacaq; əvvəlki nüsxə arxivlənir.' context 'accounts.syllabus' %}"
+      data-t-sync-ok="{% trans 'Yenilə' context 'accounts.syllabus' %}"
+      data-t-propagate-title="{% trans 'Bağlı sillabuslara tətbiq edilsin?' context 'accounts.syllabus' %}"
+      data-t-propagate-body="{% trans 'Bu sillabusun son təsdiqlənmiş versiyası ona bağlı bütün qruplara tətbiq olunacaq. Saatı dəyişmiş və ya öz qaralaması açıq olan qrup ötürülür.' context 'accounts.syllabus' %}"
+      data-t-propagate-ok="{% trans 'Tətbiq et' context 'accounts.syllabus' %}"></span>

@@ -142,6 +142,7 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
 
     {% include "accounts/profile/sections/syllabus/_list_drawer.html" %}
     {% include "accounts/profile/sections/syllabus/_list_dialogs.html" %}
+    {% include "accounts/profile/sections/syllabus/_reuse_dialog.html" with urls=sl.urls %}
 
     <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
       <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>

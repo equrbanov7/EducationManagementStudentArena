@@ -439,6 +439,23 @@
         });
     }
 
+    /* Təkrar istifadə dialoqu (`syllabus_reuse.js`) əməldən sonra siyahını CARİ
+       filtrlərlə yeniləmək üçün bu iki qapını işlədir — filtr vəziyyəti burada qalır. */
+    window.EMSSyllabusList = {
+        reload: function () {
+            var el = root();
+            if (el) {
+                reload(el, {});
+            }
+        },
+        openEditor: function (versionId) {
+            var el = root();
+            if (el) {
+                openEditor(el, versionId);
+            }
+        }
+    };
+
     window.EMSReady(function () {
         bindOnce();
         var el = root();

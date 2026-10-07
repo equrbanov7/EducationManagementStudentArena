@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import uuid
+from collections import Counter
 
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -44,6 +45,7 @@ from apps.syllabus.public import (
 from core.search_text import tolerant_q
 
 from .labels import STATUS_TONES
+from .reuse_context import page_flags
 from .rows import build_missing_row, build_row
 
 _CTX = "accounts.syllabus"
@@ -78,6 +80,16 @@ _KPI_LABELS = {
 VIRTUAL_STATUS_KEYS = ("missing", "sla")
 
 ALL_CHIP = pgettext_lazy(_CTX, "Hamısı")
+
+#: Səhifə sətirlərinin JOIN-ləri — təsdiqləyən/rəyçi + bağ (mənbə qrupu, mənbənin
+#: qüvvədə olan versiyası, bağlı versiyanın mənbə qrupu) sətir başına sorğu açmasın.
+_PAGE_RELATED = (
+    "current_version__approved_by",
+    "current_version__reviewer",
+    "current_version__source_version__syllabus__offering__group",
+    "reused_from__approved_version",
+    "reused_from__offering__group",
+)
 
 
 def _text(request, key: str, default: str = "") -> str:
@@ -117,13 +129,20 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
             Q(offering_id__in=[offering.pk for offering in offerings])
             | Q(subject_id__in={offering.subject_id for offering in offerings})
         )
-        .values_list("offering_id", "subject_id", "period_id")
+        .values_list("offering_id", "subject_id", "period_id", "reused_from_id")
     )
-    covered_offerings, covered_pairs = set(), set()
-    for offering_id, subject_id, period_id in covered:
+    covered_offerings, covered_pairs, sibling_pairs = set(), set(), Counter()
+    for offering_id, subject_id, period_id, reused_from_id in covered:
         if offering_id:
             covered_offerings.add(offering_id)
-        covered_pairs.add((subject_id, period_id))
+        else:
+            # YALNIZ açılışsız (semestr səviyyəli) dosye bütün qrupları örtür —
+            # jurnal da onu `syllabus_for_offering`-in 2-ci pilləsi ilə tapır.
+            # 2026-10-08: əvvəl BAŞQA qrupun açılışlı dosyesi də bu dəstə düşürdü
+            # və həmin qrupun jurnalı «sillabus yoxdur» deyərkən siyahı onu gizlədirdi.
+            covered_pairs.add((subject_id, period_id))
+        if reused_from_id is None and period_id is not None:
+            sibling_pairs[(subject_id, period_id)] += 1
 
     rows = []
     for offering in offerings:
@@ -131,7 +150,13 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
             continue
         if (offering.subject_id, offering.period_id) in covered_pairs:
             continue
-        rows.append(build_missing_row(offering, can_copy=offering.subject_id in copyable))
+        rows.append(
+            build_missing_row(
+                offering,
+                can_copy=offering.subject_id in copyable,
+                siblings=sibling_pairs.get((offering.subject_id, offering.period_id), 0),
+            )
+        )
     return rows
 
 
@@ -188,11 +213,12 @@ class _MissingThenSyllabi:
     «sillabussuz» sətirlər, sonra sıralanmış sillabuslar.
     """
 
-    def __init__(self, missing, queryset, *, now, copyable):
+    def __init__(self, missing, queryset, *, now, copyable, visible=None):
         self._missing = list(missing)
         self._queryset = queryset
         self._now = now
         self._copyable = copyable
+        self._visible = visible if visible is not None else queryset
         self._count = None
 
     def __len__(self):
@@ -209,12 +235,13 @@ class _MissingThenSyllabi:
         limit = max(0, stop - len(self._missing)) - offset
         if limit <= 0:
             return head
-        page_syllabi = list(
-            self._queryset.select_related("current_version__approved_by", "current_version__reviewer")[
-                offset : offset + limit
-            ]
-        )
-        return head + [build_row(row, now=self._now, can_copy=row.subject_id in self._copyable) for row in page_syllabi]
+        page_syllabi = list(self._queryset.select_related(*_PAGE_RELATED)[offset : offset + limit])
+        # Təkrar istifadə bayraqları (bağlı / mənbə / qonşu) — səhifə başına sabit sorğu.
+        flags = page_flags(page_syllabi, self._visible)
+        return head + [
+            build_row(row, now=self._now, can_copy=row.subject_id in self._copyable, reuse=flags.get(row.pk))
+            for row in page_syllabi
+        ]
 
 
 def academic_filter_options(organization):
@@ -371,9 +398,9 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         else []
     )
     if status == "missing":
-        sequence = _MissingThenSyllabi(missing, syllabi.none(), now=now, copyable=copyable)
+        sequence = _MissingThenSyllabi(missing, syllabi.none(), now=now, copyable=copyable, visible=visible)
     else:
-        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable)
+        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable, visible=visible)
 
     paginator = Paginator(sequence, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
@@ -416,6 +443,8 @@ def build_syllabus_list_section(request, *, organization) -> dict:
                 "action": reverse("accounts:syllabus_action"),
                 # Şablon URL-i: JS «0…0» UUID-ini konkret dosye id-si ilə əvəzləyir.
                 "preview": reverse("accounts:syllabus_preview", kwargs={"syllabus_id": _URL_PLACEHOLDER_UUID}),
+                "reuse_options": reverse("accounts:syllabus_reuse_options"),
+                "reuse_action": reverse("accounts:syllabus_reuse_action"),
             },
             "empty": paginator.count == 0,
         }

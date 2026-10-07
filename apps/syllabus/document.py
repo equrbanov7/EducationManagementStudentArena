@@ -56,6 +56,23 @@ logger = logging.getLogger(__name__)
 
 _EMPTY = pgettext_lazy(_CTX, "— doldurulmayıb —")
 
+#: Bağlı (``approval_source = reuse``) versiyanın təsdiq izahı — təsdiqləyən UYDURULMUR.
+REUSE_APPROVAL_NOTE = pgettext_lazy(_CTX, "Təsdiq: %(group)s sillabusundan (eyni məzmun, eyni saatlar)")
+REUSE_APPROVAL_NOTE_PLAIN = pgettext_lazy(_CTX, "Təsdiq: bağlı sillabusdan (eyni məzmun, eyni saatlar)")
+
+
+def reuse_approval_note(version) -> str:
+    """«Təsdiq: <qrup> sillabusundan …» — adi təsdiqdə boş sətir."""
+    from .services.reuse_rules import reuse_origin
+
+    origin = reuse_origin(version)
+    if origin is None:
+        return ""
+    if origin["group"]:
+        return str(REUSE_APPROVAL_NOTE) % {"group": origin["group"]}
+    return str(REUSE_APPROVAL_NOTE_PLAIN)
+
+
 #: Sənədin blok başlıqları — ekranda və PDF-də EYNİ ardıcıllıqla göstərilir.
 BLOCK_TITLES = {
     "description": pgettext_lazy(_CTX, "Fənnin təsviri"),
@@ -260,6 +277,8 @@ def build_document(syllabus, version) -> dict:
         "status_label": str(SyllabusStatus(status).label),
         "approved_at": getattr(version, "approved_at", None) if version is not None else None,
         "approved_by": (approver.get_full_name() or approver.username).strip() if approver is not None else "",
+        # 2026-10-08: bağlı versiyada şəxs yoxdur — mənbə qrup izahı göstərilir.
+        "approval_note": reuse_approval_note(version) if version is not None else "",
         "author": _author_name(syllabus),
         "blocks": [
             {"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)
@@ -277,4 +296,4 @@ def _author_name(syllabus) -> str:
     return (author.get_full_name() or author.username).strip()
 
 
-__all__ = ["BLOCK_TITLES", "build_document", "build_preview_blocks"]
+__all__ = ["BLOCK_TITLES", "build_document", "build_preview_blocks", "reuse_approval_note"]

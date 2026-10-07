@@ -214,6 +214,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
     panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_carryover.css' %}?v=20260831-carry">
+    {% comment %}Təkrar istifadə (bağla / kopyala) dialoqu + banner — dialoq qabığından SONRA.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_reuse.css' %}?v=20261008-reuse">
     {% endif %}
     {% if 'syllabus-review' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">

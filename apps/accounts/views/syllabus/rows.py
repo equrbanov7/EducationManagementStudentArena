@@ -16,7 +16,7 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus
+from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus, reuse_approval_note
 
 from .labels import NEXT_STEP_TONES, STATUS_TONES
 
@@ -32,6 +32,14 @@ _REJECTED_BY = pgettext_lazy(_CTX, "Rədd: %(who)s")
 _WAITING_DAYS = pgettext_lazy(_CTX, "%(days)s gündür gözləyir")
 _ACTIVE_VERSION = pgettext_lazy(_CTX, "%(version)s aktivdir")
 _MIGRATED_APPROVER = pgettext_lazy(_CTX, "Sistem / köçürmə")
+_LINKED_TO = pgettext_lazy(_CTX, "Bağlıdır: %(group)s sillabusu")
+_LINKED_BEHIND = pgettext_lazy(_CTX, "Mənbədə yeni təsdiqlənmiş versiya var")
+_SOURCE_OF = pgettext_lazy(_CTX, "%(count)s qrup bu sillabusa bağlıdır")
+_SOURCE_BEHIND = pgettext_lazy(_CTX, "%(count)s bağlı sillabus köhnə versiyadadır")
+_SIBLINGS = pgettext_lazy(_CTX, "Bu fənnin bu semestr üçün artıq sillabusu var")
+_SIBLINGS_NEXT = pgettext_lazy(
+    _CTX, "Bu fənnin bu semestr üçün artıq sillabusu var — bağlaya və ya kopyalaya bilərsiniz"
+)
 
 #: Əməl açarı → (etiket, düymə növü). JS açara görə davranır (`data-action`).
 ACTION_LABELS = {
@@ -47,6 +55,11 @@ ACTION_LABELS = {
     "withdraw": (pgettext_lazy(_CTX, "Geri çağır"), "secondary"),
     "pdf": (pgettext_lazy(_CTX, "PDF yüklə"), "secondary"),
     "history": (pgettext_lazy(_CTX, "Versiya tarixçəsi"), "secondary"),
+    # Təkrar istifadə (2026-10-08) — davranış `syllabus_reuse.js`-dədir.
+    "reuse": (pgettext_lazy(_CTX, "Mövcud sillabusdan istifadə et"), "primary"),
+    "unlink": (pgettext_lazy(_CTX, "Ayır"), "secondary"),
+    "sync": (pgettext_lazy(_CTX, "Mənbədən yenilə"), "primary"),
+    "propagate": (pgettext_lazy(_CTX, "Bağlı sillabuslara tətbiq et"), "primary"),
 }
 
 #: Statusa görə əməl dəsti. ⚠️ TƏSDİQLƏNMİŞ sillabusda «redaktə» YOXDUR —
@@ -89,6 +102,10 @@ def approver_text(syllabus, version, *, now=None) -> str:
     if version is None:
         return _DASH
     status = version.status
+    note = reuse_approval_note(version) if status in _APPROVAL_STATUSES else ""
+    if note:
+        # Bağlı versiya: təsdiqləyən UYDURULMUR — mənbə qrup göstərilir.
+        return f"{note}, {version.approved_at:%d.%m.%Y}" if version.approved_at else note
     if status == SyllabusStatus.APPROVED.value:
         who = _person(version.approved_by) or str(_MIGRATED_APPROVER)
         return f"{who}, {version.approved_at:%d.%m.%Y}" if version.approved_at else who
@@ -110,11 +127,35 @@ def approver_text(syllabus, version, *, now=None) -> str:
     return _DASH
 
 
-def _actions(keys):
+_APPROVAL_STATUSES = (SyllabusStatus.APPROVED.value, SyllabusStatus.ARCHIVED.value)
+
+
+def _reuse_keys(keys, status, reuse) -> tuple:
+    """Bağ vəziyyətinə görə əməl dəsti + sətir altı izah (``(keys, note)``)."""
+    if not reuse:
+        return keys, ""
+    if reuse.get("linked"):
+        # Bağlı dosyenin məzmunu mənbədən gəlir: «Yeni versiya» yox, «Ayır» var.
+        keys = [key for key in keys if key not in ("new_version", "copy")] + ["unlink"]
+        if reuse.get("behind"):
+            keys = ["sync"] + keys
+        note = str(_LINKED_TO) % {"group": reuse.get("source_group") or "—"}
+        return keys, f"{note} · {_LINKED_BEHIND}" if reuse.get("behind") else note
+    if reuse.get("linked_count"):
+        if reuse.get("behind_count"):
+            keys = ["propagate"] + keys
+            return keys, str(_SOURCE_BEHIND) % {"count": reuse["behind_count"]}
+        return keys, str(_SOURCE_OF) % {"count": reuse["linked_count"]}
+    if reuse.get("siblings") and status == SyllabusStatus.DRAFT.value:
+        return ["reuse"] + [key for key in keys if key != "copy"], str(_SIBLINGS)
+    return keys, ""
+
+
+def _actions(keys, *, demote=()):
     rows = []
     for key in keys:
         label, kind = ACTION_LABELS[key]
-        rows.append({"key": key, "label": label, "kind": kind})
+        rows.append({"key": key, "label": label, "kind": "secondary" if key in demote else kind})
     return rows
 
 
@@ -142,8 +183,8 @@ def _period_labels(period):
     return period.year_display, period.name
 
 
-def build_row(syllabus, *, now=None, can_copy: bool = False) -> dict:
-    """Mövcud sillabus dosyesindən cədvəl sətri."""
+def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None) -> dict:
+    """Mövcud sillabus dosyesindən cədvəl sətri (``reuse`` — ``reuse_context.page_flags``)."""
     version = syllabus.current_version
     status = version.status if version is not None else SyllabusStatus.DRAFT.value
     percent = version.completion_percent if version is not None else 0
@@ -151,6 +192,7 @@ def build_row(syllabus, *, now=None, can_copy: bool = False) -> dict:
     keys = list(ACTIONS_BY_STATUS.get(status, ()))
     if status == SyllabusStatus.DRAFT.value and not can_copy:
         keys = [key for key in keys if key != "copy"]
+    keys, reuse_note = _reuse_keys(keys, status, reuse)
     urls = detail_urls(syllabus.pk)
     return {
         "kind": "syllabus",
@@ -174,14 +216,22 @@ def build_row(syllabus, *, now=None, can_copy: bool = False) -> dict:
         "next_step": STATUS_NEXT_STEP.get(status, ""),
         "next_tone": NEXT_STEP_TONES.get(status, "default"),
         "touched": version.updated_at if version is not None else syllabus.updated_at,
+        "reuse_note": reuse_note,
         "actions": _actions(keys),
     }
 
 
-def build_missing_row(offering, *, can_copy: bool = False) -> dict:
-    """Sillabusu OLMAYAN açılış — «Sillabus yarat» sətri (0 %, versiya yoxdur)."""
+def build_missing_row(offering, *, can_copy: bool = False, siblings: int = 0) -> dict:
+    """Sillabusu OLMAYAN açılış — «Sillabus yarat» sətri (0 %, versiya yoxdur).
+
+    ``siblings`` > 0: eyni fənnin bu semestr üçün başqa qrupda sillabusu var —
+    birinci əməl «Mövcud sillabusdan istifadə et» (bağla / kopyala dialoqu) olur.
+    """
     year, semester = _period_labels(offering.period)
-    keys = ["create"] + (["copy"] if can_copy else [])
+    if siblings:
+        keys = ["reuse", "create"]
+    else:
+        keys = ["create"] + (["copy"] if can_copy else [])
     return {
         "kind": "missing",
         "id": str(offering.pk),
@@ -202,11 +252,14 @@ def build_missing_row(offering, *, can_copy: bool = False) -> dict:
         "status_label": pgettext_lazy(_CTX, "Sillabus yoxdur"),
         "status_tone": "danger",
         "approver": _DASH,
-        "next_step": pgettext_lazy(_CTX, "Semestr başlayana qədər sillabus yaradılmalıdır"),
+        "next_step": (
+            _SIBLINGS_NEXT if siblings else pgettext_lazy(_CTX, "Semestr başlayana qədər sillabus yaradılmalıdır")
+        ),
         "next_tone": "warning",
         "touched": None,
         "touched_text": _NOT_CREATED,
-        "actions": _actions(keys),
+        "reuse_note": "",
+        "actions": _actions(keys, demote=("create",) if siblings else ()),
     }
 
 
