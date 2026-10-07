@@ -78,9 +78,18 @@ class ApplicationsSectionTest(TestCase):
         self.assertIn("applications_thread.js", html)
 
     def test_profile_shell_links_the_modal_stylesheet(self):
-        """Modal CSS-i qabıqdan yüklənir — əks halda yazışma ÜSLUBSUZ render olunur."""
-        response = self._client(self.world["student"]).get(reverse("accounts:profile"))
+        """Modal CSS-i qabıqdan yüklənir — əks halda yazışma ÜSLUBSUZ render olunur.
+
+        Perf 2026-10-07: yalnız bölmə RENDER OLUNANDA (tam səhifə `?section=`) və ya
+        AJAX fraqmentinin `assets.css` siyahısında — «Ana səhifə»də artıq yüklənmir.
+        """
+        client = self._client(self.world["student"])
+        response = client.get(reverse("accounts:profile") + "?section=applications")
         self.assertContains(response, "profile/applications_modal.css")
+        dashboard = client.get(reverse("accounts:profile"))
+        self.assertNotContains(dashboard, "profile/applications_modal.css")
+        assets = self._fragment(self.world["student"]).json()["assets"]
+        self.assertTrue(any("profile/applications_modal.css" in entry["href"] for entry in assets["css"]))
 
     # ── Ailəyə görə budaqlanma (bir şablon, bir view) ────────────────────
     def test_sender_sees_the_create_button_and_handler_does_not(self):

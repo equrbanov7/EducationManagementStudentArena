@@ -11,7 +11,8 @@
    adını itirmir (ikonlar `aria-hidden`-dir). Göz üçün ad — `title`
    tooltip-i, onu `js/profile/sidebar_nav.js` rels rejimində yazır.
 
-   `sidebar.css`-in başında @import olunur (kaskadda ondan ƏVVƏL) — ona görə
+   `sidebar.css`-dən ƏVVƏL linklənir (kaskadda ondan əvvəl; 2026-10-07-dək onun
+   başında @import olunurdu) — ona görə
    hər qayda `.profile-sidebar.collapsed …` ilə baza qaydasından güclüdür.
    ═══════════════════════════════════════════════════════════════════════════ */
 

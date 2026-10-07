@@ -13,6 +13,8 @@
 * ``profile_can_reset_passwords`` / ``profile_surveys_inbox_count`` (2026-09-30) —
   «Tənzimləmələr → Parol sıfırlama» bəndinin görünürlüyü və «Sorğular» bəndinin
   badge-i. İkisi də `request`-dən hesablanır ki, SPA və embed sidebar EYNİ olsun.
+* ``profile_section_css`` / ``profile_section_js`` (perf 2026-10-07) — kabinet qabığı
+  yalnız RENDER OLUNAN bölmənin CSS/JS-ini verir (``views/profile/section_assets.py``).
 """
 
 import logging
@@ -20,9 +22,11 @@ import logging
 from django import template
 from django.conf import settings
 from django.urls import reverse
+from django.utils.html import format_html_join
 
 from apps.accounts.models import UserProfile
 from apps.accounts.views._helpers.rbac import _role_capabilities
+from apps.accounts.views.profile import section_assets
 from apps.accounts.views.profile.context_builder._helpers import (
     _build_effective_user_roles,
     _build_primary_position_label,
@@ -253,6 +257,29 @@ def profile_surveys_inbox_count(context):
         count = 0
     setattr(request, _SURVEYS_INBOX_CACHE_ATTR, count)
     return count
+
+
+def _asset_sections(context):
+    return section_assets.asset_sections_for(context.get("active_section"), context.get("allowed_sections"))
+
+
+@register.simple_tag(takes_context=True)
+def profile_section_css(context):
+    """Render olunan bölmənin (+ qabığın) CSS linkləri — `data-ems-css-order` kaskad sırasıdır.
+
+    `section_assets.js` AJAX keçidində yeni linki bu sıraya görə yerləşdirir.
+    """
+    entries = section_assets.section_css(_asset_sections(context), context.get("allowed_sections"))
+    return format_html_join(
+        "\n", '<link rel="stylesheet" href="{}" data-ems-css-order="{}">', ((e["href"], e["order"]) for e in entries)
+    )
+
+
+@register.simple_tag(takes_context=True)
+def profile_section_js(context, phase):
+    """`_section_scripts.html`-in `phase` («pre» / «post») hissəsi — köhnə yerində, köhnə sırada."""
+    srcs = section_assets.section_js(_asset_sections(context), context.get("allowed_sections"), phase)
+    return format_html_join("\n", '<script src="{}"></script>', ((src,) for src in srcs))
 
 
 @register.inclusion_tag("accounts/profile/_sidebar.html", takes_context=True)

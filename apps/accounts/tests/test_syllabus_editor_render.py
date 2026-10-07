@@ -275,10 +275,12 @@ class SyllabusEditorAssetWiringTest(TestCase):
     Skan ikisini də oxuyur: yer dəyişikliyi bağı qırmamalıdır.
     """
 
-    #: Qabığın asset daşıyan faylları (CSS ayrıca include-a çıxarılıb).
+    #: Qabığın asset daşıyan faylları (CSS ayrıca include-a çıxarılıb; 2026-10-07-dən
+    #: bölmə JS-i də `_section_scripts.html`-dədir — `{% profile_section_js %}` render edir).
     _SHELL_TEMPLATES = (
         "apps/accounts/templates/accounts/profile.html",
         "apps/accounts/templates/accounts/profile/_section_assets.html",
+        "apps/accounts/templates/accounts/profile/_section_scripts.html",
     )
 
     def _shell_body(self) -> str:
@@ -303,7 +305,7 @@ class SyllabusEditorAssetWiringTest(TestCase):
 
     def test_the_fields_module_loads_before_the_engine(self):
         """Mühərrik init anında ``window.EMSSyllabusFields``-i oxuyur."""
-        template = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile.html"
+        template = Path(settings.BASE_DIR) / "apps/accounts/templates/accounts/profile/_section_scripts.html"
         body = template.read_text("utf-8")
 
         self.assertLess(
