@@ -45,15 +45,15 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ inputs.python-version }}
 
       - name: 📦 Cache pip
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-security-${{ hashFiles('requirements/base.txt') }}
@@ -66,14 +66,22 @@ jobs:
       # silindi — nəticəsi heç vaxt bloklamırdı (yanıltıcı yaşıl), `safety`
       # CLI-ı isə hesab/limit tələb etməyə başlayıb. pip-audit tək, bloklayan
       # asılılıq skaneri olaraq qalır.
+      # Təhlükəsizlik auditi 2026-10-07: əvvəl yalnız `requirements/base.txt` (birbaşa
+      # pin-lər, keçid asılılıqları CI-da TƏZƏDƏN həll olunurdu) yoxlanırdı — prod
+      # image-ə real düşən hash-li lock (sentry-sdk, psycopg2, uvicorn + bütün keçid
+      # versiyaları) heç vaxt audit olunmurdu. İndi image-in (production.lock) və CI-ın
+      # (test.lock) quraşdırdığı DƏQİQ dəst yoxlanır; pip-audit-in özü də pin-lənib.
       - name: 🛡️ Check dependencies for vulnerabilities
         run: |
-          pip install pip-audit
+          pip install "pip-audit==2.10.0"
           echo "::group::🔐 Pip Audit (known vulnerable dependencies — blocks merge)"
-          pip-audit -r requirements/base.txt --desc on || {
-            echo "::error::❌ pip-audit found vulnerable dependencies! Fix them before merging."
-            exit 1
-          }
+          for lock in requirements/production.lock requirements/test.lock; do
+            echo "── ${lock}"
+            pip-audit -r "$lock" --require-hashes --disable-pip --desc on || {
+              echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
+              exit 1
+            }
+          done
           echo "✅ No known vulnerable dependencies found."
           echo "::endgroup::"
 

@@ -231,8 +231,10 @@ def test_security_workflow_has_no_advisory_safety_step_and_pip_audit_blocks():
     assert not re.search(
         r"^\s*safety check", workflow, flags=re.MULTILINE
     ), "P3-15: `safety check … || true` yanıltıcı yaşıldır"
-    assert "pip-audit -r requirements/base.txt" in workflow
-    pip_audit_block = workflow.split("pip-audit -r requirements/base.txt", 1)[1][:300]
+    # Təhlükəsizlik auditi 2026-10-07: image-in və CI-ın quraşdırdığı hash-li lock-lar audit olunur.
+    assert "for lock in requirements/production.lock requirements/test.lock; do" in workflow
+    assert 'pip-audit -r "$lock" --require-hashes --disable-pip' in workflow
+    pip_audit_block = workflow.split('pip-audit -r "$lock"', 1)[1][:300]
     assert "exit 1" in pip_audit_block
 
 

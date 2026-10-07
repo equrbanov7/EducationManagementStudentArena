@@ -114,6 +114,11 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+# Təhlükəsizlik auditi 2026-10-07: self-hosted prod job-u repo defoltu olan (yazma)
+# GITHUB_TOKEN-i almasın — skript yalnız checkout edir.
+permissions:
+  contents: read
+
 jobs:
   run-script:
     name: 🎓 prod-exam-ops
@@ -124,7 +129,9 @@ jobs:
       SCRIPT_NAME: ${{ inputs.script }}
       ORG: ${{ inputs.org }}
       STUDENTS: ${{ inputs.students }}
-      GROUPS: ${{ inputs.groups }}
+      # `GROUPS` bash-ın xüsusi massividir (istifadəçinin GID-ləri) — mühitdən gələn dəyər
+      # əzilir və `$GROUPS` runner-in GID-ini verirdi (shellcheck SC2128). Ona görə başqa ad.
+      GROUPS_INPUT: ${{ inputs.groups }}
       SUBJECTS: ${{ inputs.subjects }}
       GROUP_TEACHER: ${{ inputs.group_teacher }}
       AZ_EXAM_ID: ${{ inputs.az_exam_id }}
@@ -139,7 +146,9 @@ jobs:
       TEMP_PASSWORD: ${{ secrets.EXAM_TEMP_PASSWORD }}
     steps:
       - name: 📥 Checkout (skript mənbəyi)
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: 🎓 İşlət
         run: |
@@ -177,7 +186,7 @@ jobs:
           docker compose -f docker-compose.prod.yml exec -T \
             -e PROBE_ORG="$ORG" \
             -e PROBE_STUDENTS="$STUDENTS" \
-            -e PROBE_GROUPS="$GROUPS" \
+            -e PROBE_GROUPS="$GROUPS_INPUT" \
             -e PROBE_SUBJECTS="$SUBJECTS" \
             -e SEED_ORG="$ORG" \
             -e SEED_APPLY="$APPLY_FLAG" \

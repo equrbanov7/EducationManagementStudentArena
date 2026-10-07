@@ -25,6 +25,10 @@ concurrency:
   group: production-deploy
   cancel-in-progress: false
 
+# Təhlükəsizlik auditi 2026-10-07: job token-ə ehtiyac duymur (checkout belə yoxdur) —
+# self-hosted prod runner-də repo defoltu olan yazma icazəli GITHUB_TOKEN verilmir.
+permissions: {}
+
 jobs:
   update-env:
     runs-on: [self-hosted]

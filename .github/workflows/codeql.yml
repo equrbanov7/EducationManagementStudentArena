@@ -35,6 +35,10 @@ on:
   # Allow manual trigger for ad-hoc analysis.
   workflow_dispatch:
 
+# Least-privilege default (audit 2026-10-07); the job below widens it explicitly.
+permissions:
+  contents: read
+
 jobs:
   analyze:
     name: 🔬 Analyze Python (CodeQL)
@@ -50,7 +54,7 @@ jobs:
     steps:
       # ── 1. Checkout ───────────────────────────────────────────────────
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           # Full history is required for accurate blame information in results.
           fetch-depth: 0
@@ -60,7 +64,7 @@ jobs:
       # The "security-extended" query pack includes the default security
       # queries plus additional experimental/beta queries for broader coverage.
       - name: 🔧 Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         with:
           languages: python
           # Use the security-extended suite for deeper analysis while keeping
@@ -72,7 +76,7 @@ jobs:
       # step to improve dependency resolution.  The autobuild action handles
       # this transparently for Python.
       - name: 🏗️ Autobuild
-        uses: github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
 
       # ── 4. Run analysis (SARIF lokal) ─────────────────────────────────
       # 2026-09-25: repo PRIVATE-dir — «Code scanning» (GitHub Code Security lisenziyası)
@@ -80,7 +84,7 @@ jobs:
       # Analiz eyni qalır; nəticə Security tab-ı əvəzinə artifakt + job xülasəsidir.
       # Code scanning yenidən açılsa `upload: never`-i silmək kifayətdir.
       - name: 🔬 Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4
         with:
           category: "/language:python"
           upload: never
@@ -131,7 +135,7 @@ jobs:
 
       - name: 📦 SARIF artifakt
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: codeql-sarif
           path: sarif-results/

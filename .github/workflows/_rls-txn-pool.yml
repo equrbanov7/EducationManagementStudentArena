@@ -73,17 +73,17 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
 
       - name: 🐍 Setup Python ${{ inputs.python-version }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ inputs.python-version }}
 
       - name: 📦 Cache pip dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ inputs.python-version }}-${{ hashFiles('requirements/test.lock') }}
@@ -149,6 +149,10 @@ jobs:
           SECRET_KEY: test-secret-key-for-ci-only-not-production
           DEBUG: "False"
           ALLOWED_HOSTS: "localhost,127.0.0.1"
+          # Təhlükəsizlik auditi 2026-10-07: workflow girişləri `run:`-a birbaşa
+          # interpolasiya olunmur — yalnız env ilə (_unit-tests.yml naxışı).
+          SHARD: ${{ inputs.shard }}
+          SHARDS: ${{ inputs.shards }}
         run: |
           echo "::group::🛡️ Postgres/RLS gate (transaction-pooling ON)"
           # Transaction-pooling yolunun izolyasiya regressiyalarını tutmaq üçün
@@ -157,8 +161,8 @@ jobs:
           # pytest-xdist: _unit-tests.yml ilə eyni naxış (hər worker öz DB-si,
           # probe rolları worker-suffiksli — bax apps/*/tests/*_postgres.py).
           extra=()
-          if [ "${{ inputs.shards }}" != "1" ]; then
-            extra+=(--splits "${{ inputs.shards }}" --group "${{ inputs.shard }}" --splitting-algorithm least_duration)
+          if [ "$SHARDS" != "1" ]; then
+            extra+=(--splits "$SHARDS" --group "$SHARD" --splitting-algorithm least_duration)
           fi
           pytest \
             "${extra[@]}" \
