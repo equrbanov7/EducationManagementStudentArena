@@ -5,6 +5,7 @@ View, API və management əmrləri buradan istifadə edir; modelə birbaşa
 :mod:`apps.syllabus.state_machine`-dədir).
 """
 
+from . import reuse, reuse_rules, reuse_sync  # noqa: F401 — təkrar istifadə (bağla/kopyala/sinxron), 2026-10-08
 from .coverage import (  # noqa: F401
     GROUP_CHAIR,
     GROUP_PROGRAM,
@@ -48,12 +49,16 @@ from .plan_hours import seed_week_hours, set_plan_hours  # noqa: F401
 from .queries import (  # noqa: F401
     QUEUE_SORT_KEYS,
     audit_entries,
+    has_broad_view_scope,
     list_syllabi,
+    own_q,
     review_queue,
     status_counts,
     version_diff,
     version_timeline,
 )
+from .reuse import ReuseTarget  # noqa: F401
+from .reuse_rules import hours_match, normalize_hours, reuse_origin, sibling_queryset  # noqa: F401
 from .scoping import (  # noqa: F401
     SyllabusActor,
     can_view,
@@ -89,6 +94,7 @@ __all__ = [
     "GROUP_CHAIR",
     "GROUP_PROGRAM",
     "QUEUE_SORT_KEYS",
+    "ReuseTarget",
     "STATE_APPROVED",
     "STATE_ARCHIVED",
     "STATE_DRAFT",
@@ -118,24 +124,33 @@ __all__ = [
     "escalate_if_structural",
     "has_decision_scope",
     "has_escalated_decision_scope",
+    "has_broad_view_scope",
     "has_review_scope",
+    "hours_match",
     "import_migrated_version",
     "is_author",
     "is_self_authored_by_decider",
     "list_syllabi",
+    "normalize_hours",
     "offering_syllabus_state",
     "open_version_for",
+    "own_q",
     "recompute_completion",
     "reject",
     "request_revision",
     "resolve_actor",
     "resume_editing",
+    "reuse",
+    "reuse_origin",
+    "reuse_rules",
+    "reuse_sync",
     "review_queue",
     "review_scope_queryset",
     "save_section",
     "seed_week_hours",
     "section_data_map",
     "set_plan_hours",
+    "sibling_queryset",
     "start_review",
     "structural_changes",
     "status_counts",

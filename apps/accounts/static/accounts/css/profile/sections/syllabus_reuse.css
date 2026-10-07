@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sillabus — TƏKRAR İSTİFADƏ (bağla / kopyala / hamısına tətbiq et), 2026-10-08
+   ───────────────────────────────────────────────────────────────────────────
+   Dialoq qabığı `syllabus_dialog.css`-dəndir (`.syl-modal`, `.syl-pick`);
+   burada yalnız mənbə kartlarının, «digər qruplar» siyahısının və banner/sətir
+   işarələrinin üstqatı var. Rəng tokenləri `--ems-*` (design-tokens.css).
+   360–1440 px: dialoq ekranı aşmır, gövdə öz daxilində sürüşür.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.syl-reuse__box {
+    max-width: 640px;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+}
+
+.syl-reuse__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.syl-reuse__status,
+.syl-reuse__alert {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--ems-text-muted);
+}
+
+.syl-reuse__alert {
+    padding: 10px 12px;
+    border-radius: 11px;
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    color: var(--ems-warning-800);
+}
+
+.syl-reuse__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syl-reuse__legend {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+.syl-reuse__sources {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.syl-reuse__src {
+    width: 100%;
+}
+
+.syl-reuse__src:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.syl-reuse__src-body {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.syl-reuse__src-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+.syl-reuse__hours {
+    font-size: 0.78rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.syl-reuse__hours.is-same {
+    color: var(--ems-success-700);
+}
+
+.syl-reuse__hours.is-diff {
+    color: var(--ems-warning-800);
+}
+
+.syl-reuse__choice {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.syl-reuse__option {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.syl-reuse__option .syl-btn {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+}
+
+.syl-reuse__hint {
+    margin: 0;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+}
+
+.syl-reuse__hint.is-bad {
+    color: var(--ems-warning-800);
+}
+
+.syl-reuse__warn {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--ems-warning-800);
+}
+
+.syl-reuse__cands {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--ems-border);
+    border-radius: 11px;
+    overflow: hidden;
+}
+
+.syl-reuse__cand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 9px 12px;
+    min-height: 44px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+
+.syl-reuse__cand:first-child {
+    border-top: 0;
+}
+
+.syl-reuse__cand--done {
+    cursor: default;
+    background: var(--ems-bg-subtle);
+}
+
+.syl-reuse__cand input {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--ems-primary-600);
+}
+
+.syl-reuse__cand-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.syl-reuse__cand-name {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.syl-reuse__mode {
+    flex: none;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.syl-reuse__mode--link {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.syl-reuse__mode--copy {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.syl-reuse__group .syl-btn {
+    align-self: flex-start;
+    min-height: 44px;
+}
+
+.syl-reuse__results {
+    margin: 0;
+    padding: 10px 12px 10px 28px;
+    border-radius: 11px;
+    background: var(--ems-bg-subtle);
+    border: 1px solid var(--ems-border);
+    font-size: 0.8rem;
+    line-height: 1.6;
+}
+
+.syl-reuse__results .syl-meta {
+    display: block;
+}
+
+.syl-reuse__result--linked strong,
+.syl-reuse__result--copied strong,
+.syl-reuse__result--synced strong {
+    color: var(--ems-success-700);
+}
+
+.syl-reuse__result--skipped strong,
+.syl-reuse__result--exists strong {
+    color: var(--ems-warning-800);
+}
+
+/* ── Siyahı sətri və redaktor banneri ─────────────────────────────────── */
+.syl-reuse-note {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin: 4px 0 0;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--ems-primary-800);
+    overflow-wrap: anywhere;
+}
+
+.syl-banner--info {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.syl-reuse-banner {
+    align-items: center;
+}
+
+.syl-reuse-banner__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .syl-modal.syl-reuse {
+        padding: 10px;
+    }
+
+    .syl-reuse__box {
+        max-height: calc(100vh - 20px);
+    }
+
+    .syl-reuse__body {
+        padding: 0 14px 12px;
+    }
+
+    .syl-reuse__choice {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .syl-reuse__group .syl-btn,
+    .syl-reuse-banner .syl-btn,
+    .syl-reuse-banner__actions {
+        width: 100%;
+    }
+
+    .syl-reuse-banner__actions .syl-btn {
+        flex: 1 1 auto;
+    }
+}

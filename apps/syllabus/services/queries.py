@@ -36,11 +36,30 @@ def _status_rank_annotation():
     return Case(*whens, default=len(STATUS_SORT_INDEX), output_field=IntegerField())
 
 
+def own_q(actor) -> Q:
+    """«Mənim sillabuslarım» — aktorun YAZDIĞI və ya AÇILIŞINI apardığı dosyelər.
+
+    Müəllim siyahısının əsas qaydası budur (``is_author`` ilə eyni); rəhbərin
+    «Mənim fənlərim» süzgəci də eyni Q-nu işlədir (sahib 2026-10-08).
+    """
+    return Q(author_id=actor.user_id) | Q(offering__instructor_id=actor.user_id)
+
+
+def has_broad_view_scope(actor) -> bool:
+    """Aktor siyahıda ÖZÜNDƏN BAŞQASINI da görürmü (kafedra / fakültə / org əhatəsi)."""
+    if actor.is_superadmin:
+        return True
+    if not actor.has(PERM_VIEW):
+        return False
+    scope = actor.scope_for(PERM_VIEW)
+    return bool(scope.is_org_wide or scope.is_unit_scoped)
+
+
 def _scope_filter(queryset, actor):
     """Aktorun görə bildiyi sillabuslar (fail-closed)."""
     if actor.is_superadmin:
         return queryset
-    own = Q(author_id=actor.user_id) | Q(offering__instructor_id=actor.user_id)
+    own = own_q(actor)
     if not actor.has(PERM_VIEW):
         return queryset.filter(own)
     scope = actor.scope_for(PERM_VIEW)
@@ -62,12 +81,19 @@ def list_syllabi(
     statuses=None,
     search: str = "",
     sort: str = "recent",
+    mine: bool = False,
 ):
-    """Müəllim/kafedra siyahısı — filtr + sıralama tətbiq olunmuş queryset."""
+    """Müəllim/kafedra siyahısı — filtr + sıralama tətbiq olunmuş queryset.
+
+    ``mine`` — rəhbərin «Mənim fənlərim» süzgəci: əhatə daxilində yalnız
+    ``own_q`` (öz yazdığı / apardığı açılışın dosyesi).
+    """
     queryset = Syllabus.objects.filter(organization=organization, is_active=True).select_related(
         "subject", "period", "program", "offering", "current_version", "approved_version"
     )
     queryset = _scope_filter(queryset, actor)
+    if mine:
+        queryset = queryset.filter(own_q(actor))
 
     if period is not None:
         queryset = queryset.filter(period=period)
@@ -253,7 +279,9 @@ __all__ = [
     "QUEUE_SORT_KEYS",
     "SORT_KEYS",
     "audit_entries",
+    "has_broad_view_scope",
     "list_syllabi",
+    "own_q",
     "review_queue",
     "status_counts",
     "version_diff",

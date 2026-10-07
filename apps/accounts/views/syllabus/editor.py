@@ -51,6 +51,7 @@ from apps.syllabus.public import (
 from . import editor_panels as panels_builder
 from .labels import HOUR_KIND_LABELS, STATUS_TONES, issue_text
 from .preview import build_preview_blocks
+from .reuse_context import editor_reuse_state
 
 _CTX = "accounts.syllabus"
 
@@ -543,9 +544,15 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             },
             "can_submit": (not readonly) and completion["percent"] >= 100,
             "actions": list(context["actions"]),
+            # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
+            "reuse": editor_reuse_state(
+                request, organization, syllabus=syllabus, version=version_row, is_author=bool(context["is_author"])
+            ),
             "urls": {
                 "save": reverse("accounts:syllabus_section_save", kwargs={"version_id": str(version_row.pk)}),
                 "action": reverse("accounts:syllabus_action"),
+                "reuse_options": reverse("accounts:syllabus_reuse_options"),
+                "reuse_action": reverse("accounts:syllabus_reuse_action"),
             },
         }
     }
