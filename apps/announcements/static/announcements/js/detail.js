@@ -74,7 +74,13 @@
         var href = button.getAttribute("data-href");
         if (!section || !href) { return; }
         // Pəncərə klik anında açılır (popup bloklayıcısı), qəbz isə paralel yazılır.
-        var opened = window.open(href, "_blank", "noopener,noreferrer");
+        // ⚠️ "noopener" xüsusiyyəti VERİLMİR: spesifikasiyaya görə o zaman `window.open` həmişə
+        // `null` qaytarır və aşağıdakı «bloklandı» fallback-i cari səhifəni də keçidə aparırdı
+        // (keçid iki dəfə açılırdı). Tabnabbing-ə qarşı opener əl ilə kəsilir.
+        var opened = window.open(href, "_blank");
+        if (opened) {
+            try { opened.opener = null; } catch (e) { /* ignore */ }
+        }
         window.EMSCore.fetchJSON(section.getAttribute("data-apply-url"), { method: "POST", data: {} })
             .then(function () {
                 if (!opened) { window.location.href = href; }
