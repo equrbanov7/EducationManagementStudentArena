@@ -58,4 +58,4 @@ Bunlardan başqa:
 - **Qəsdən dəyişdirilməyənlər:**
   - `APP_REPLICAS=8`, `MAX_INFLIGHT_REQUESTS=24`, PgBouncer 110+50. Tutum testində optimal çıxıb. PgBouncer növbəsi doyma anında admission control rolunu oynayır.
   - Postgres parametrləri. DB yaddaşa sığır, dəyişiklik restart tələb edir, faydası yoxdur.
-- **Gözləyən:** host-da `reboot-required` (avtomatik quraşdırılmış təhlükəsizlik yeniləmələri, kernel). Planlı reboot `prod-host-maint.yml` → `reboot` ilə edilir, yalnız sahibin icazəsi ilə.
+- **Planlı reboot (sahibin icazəsi ilə, 22:18):** `prod-host-maint.yml` → `reboot` ilə edildi. Sayt ~112 s əlçatmaz oldu. Kernel 7.0.0-34 → 7.0.0-38 oldu, `reboot-required` artıq yoxdur. Bütün konteynerlər sağlamdır, yeni yaddaş tavanları qüvvədədir.
