@@ -36,6 +36,20 @@ if ! docker exec "$PG_CONTAINER" sh -c 'exit 0' >/dev/null 2>&1; then
   exit 1
 fi
 
+# 2026-10-07 (selfheal): deploy ilə eyni kilid — skript yazanları dayandırır, host-dakı
+# emsarena-autoheal onları bərpa zamanı yenidən qaldırmasın (scripts/ops/selfheal).
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-/run/emsarena/deploy.lock}"
+if command -v flock >/dev/null 2>&1 && [ -d "${DEPLOY_LOCK_FILE%/*}" ] && [ -w "${DEPLOY_LOCK_FILE%/*}" ]; then
+  [ -e "$DEPLOY_LOCK_FILE" ] || : >"$DEPLOY_LOCK_FILE"
+  exec 9<"$DEPLOY_LOCK_FILE"
+  if ! flock -w "${DEPLOY_LOCK_WAIT_SECONDS:-900}" 9; then
+    echo "Deploy kilidi ($DEPLOY_LOCK_FILE) alınmadı — deploy/converge gedir; sonra təkrarlayın." >&2
+    exit 1
+  fi
+else
+  echo "XƏBƏRDARLIQ: deploy kilidi qovluğu yoxdur — autoheal quraşdırılıbsa əvvəlcə /run/emsarena/autoheal.pause yaradın." >&2
+fi
+
 dotenv_value() {
   local key="$1" value=""
   [ -f .env ] || return 0

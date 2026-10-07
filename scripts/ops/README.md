@@ -13,6 +13,7 @@ setup is reproducible and we don't have to re-derive it. All are idempotent.
 | `restore_drill.sh` | Restore a dump into a **new scratch DB** (`ON_ERROR_STOP`, single transaction), sanity counts, prints the restore time (RTO), drops the scratch DB (`--keep` for the real restore swap). Audit 2026-09-28 AD-02. |
 | `offsite_backup.sh` | Nightly **off-site, encrypted** copy (restic) of both dump dirs + the `media_data` volume (read-only), retention, Prometheus textfile metric. Audit 2026-09-28 AD-01. |
 | `systemd/emsarena-offsite-backup.{service,timer}` | Run `offsite_backup.sh` every night at 03:30. Config: `/etc/emsarena/offsite-backup.env` (template `offsite-backup.env.example`). |
+| `selfheal/` | Power-loss self-healing (2026-10-07): `emsarena-converge.service` (boot: `compose up -d --no-build` with the last healthy release) + `emsarena-autoheal.timer` (every 2 min, rate-limited restarts of unhealthy/failed project containers). Installed without sudo via Actions → «🛠 Prod host maintenance» → `selfheal` (`selfheal-off` disables). Doc: `docs/ops/POWER_OUTAGE_RECOVERY.md`. |
 
 ## Install the nightly backup (systemd timer)
 ```bash

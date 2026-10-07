@@ -411,6 +411,58 @@ for svc in app celery_worker celery_worker_heavy celery_beat; do
 done
 echo '```'
 
+section "12. Enerji kəsilməsi / özünü bərpa (selfheal) və resurs prioriteti"
+# Sahib 2026-10-07: «elektrik kəsilib server yenidən yananda sistem özü-özünü ayağa qaldırsın»,
+# «yüklənmədə çökməsin». OXU-YALNIZ: systemctl is-enabled/show, docker info/inspect, /proc.
+# Quraşdırma: prod-host-maint.yml → selfheal. Sənəd: docs/ops/POWER_OUTAGE_RECOVERY.md
+unit_enabled() { systemctl is-enabled "$1" 2>/dev/null || true; }
+DE=$(unit_enabled docker.service); [ "$DE" = "enabled" ] && ok "docker.service boot-da avtomatik qalxır (enabled)" || warn "docker.service: ${DE:-tapılmadı} — reboot-dan sonra stack qalxmaz"
+RUNNERS=$(systemctl list-unit-files 'actions.runner*' --no-legend 2>/dev/null | awk '{print $1}')
+if [ -z "$RUNNERS" ]; then
+  warn "GitHub runner systemd xidməti tapılmadı — reboot-dan sonra deploy/prod-host-maint işləməz"
+else
+  for u in $RUNNERS; do st=$(unit_enabled "$u"); [ "$st" = "enabled" ] && ok "$u enabled (reboot-dan sonra uzaqdan idarə qalır)" || warn "$u: $st"; done
+fi
+LR=$(docker info --format '{{.LiveRestoreEnabled}}' 2>/dev/null); [ "$LR" = "true" ] && ok "docker live-restore=true (dockerd restart-ı konteynerləri dayandırmır)" || warn "docker live-restore=${LR:-?} (prod-host-maint → tune)"
+CE=$(unit_enabled emsarena-converge.service)
+if [ "$CE" = "enabled" ]; then
+  ok "emsarena-converge.service enabled (boot-da stack sonuncu sağlam release ilə qaldırılır)"
+  CR=$(systemctl show -p Result --value emsarena-converge.service 2>/dev/null)
+  [ "${CR:-success}" = "success" ] && ok "son boot converge nəticəsi: ${CR:-success}" || warn "son boot converge nəticəsi: $CR (journalctl -u emsarena-converge)"
+else
+  warn "emsarena-converge.service: ${CE:-quraşdırılmayıb} (prod-host-maint → selfheal)"
+fi
+AE=$(unit_enabled emsarena-autoheal.timer); AA=$(systemctl is-active emsarena-autoheal.timer 2>/dev/null || true)
+[ "$AE" = "enabled" ] && [ "$AA" = "active" ] && ok "emsarena-autoheal.timer enabled + active (hər 2 dəq)" || warn "emsarena-autoheal.timer: enabled=${AE:-yox} active=${AA:-yox} (prod-host-maint → selfheal)"
+if [ "$AE" = "enabled" ]; then
+  AR=$(systemctl show -p Result --value emsarena-autoheal.service 2>/dev/null)
+  [ "${AR:-success}" = "success" ] && ok "son autoheal keçidi: ${AR:-success}" || warn "son autoheal keçidi: $AR (journalctl -u emsarena-autoheal)"
+fi
+[ -e /run/emsarena/autoheal.pause ] && warn "autoheal PAUZADADIR (/run/emsarena/autoheal.pause; 6 saatdan sonra özü keçir)"
+if [ -r /run/emsarena/autoheal/actions.log ]; then
+  NACT=$(grep -c "ACTION:" /run/emsarena/autoheal/actions.log 2>/dev/null || true)
+  echo "- ℹ️ autoheal əməliyyatları (bu boot-dan bəri): ${NACT:-0}"
+  echo '```'; tail -n 8 /run/emsarena/autoheal/actions.log; echo '```'
+  grep -q "LIMIT:" /run/emsarena/autoheal/actions.log && warn "autoheal saatlıq limitə çatıb (LIMIT) — həmin konteynerə əl ilə baxın"
+fi
+if [ "$(systemd-detect-virt 2>/dev/null)" = "vmware" ]; then
+  VT=$(systemctl is-active open-vm-tools 2>/dev/null || true)
+  [ "$VT" = "active" ] && ok "open-vm-tools aktivdir (ESXi host söndürüləndə VM səliqəli söndürülür)" || warn "open-vm-tools: ${VT:-yox} — ESXi «Shut down» əvəzinə VM-i söndürə bilməz (güc kəsilməsi kimi)"
+fi
+# cpu_shares / oom_score_adj — compose dəyəri (HostConfig) + kernelin faktiki dəyəri (/proc/<pid>/oom_score_adj).
+prio() { docker inspect --format '{{.HostConfig.OomScoreAdj}} {{.HostConfig.CpuShares}} {{.State.Pid}}' "$1" 2>/dev/null; }
+PGC=$($COMPOSE ps -q postgres 2>/dev/null | head -1); APC=$($COMPOSE ps -q app 2>/dev/null | head -1)
+if [ -n "$PGC" ] && [ -n "$APC" ]; then
+  read -r PG_OOM PG_SH PG_PID <<< "$(prio "$PGC")"; read -r AP_OOM AP_SH AP_PID <<< "$(prio "$APC")"
+  PG_EFF=$(cat "/proc/${PG_PID:-0}/oom_score_adj" 2>/dev/null || echo "?"); AP_EFF=$(cat "/proc/${AP_PID:-0}/oom_score_adj" 2>/dev/null || echo "?")
+  echo "- ℹ️ postgres: oom_score_adj=${PG_OOM} (kernel: ${PG_EFF}) cpu_shares=${PG_SH} · app: oom_score_adj=${AP_OOM} (kernel: ${AP_EFF}) cpu_shares=${AP_SH}"
+  { [ "${PG_OOM:-0}" -lt 0 ] && [ "$PG_EFF" = "$PG_OOM" ]; } 2>/dev/null && ok "postgres oom_score_adj=${PG_OOM} effektivdir — OOM-killer onu son seçir" || warn "postgres oom_score_adj effektiv deyil (compose ${PG_OOM:-?}, kernel ${PG_EFF}) — konteyner yeni compose ilə yaradılmayıb? (deploy)"
+  [ "${PG_OOM:-0}" -lt "${AP_OOM:-0}" ] 2>/dev/null && [ "$AP_EFF" = "$AP_OOM" ] && ok "app oom_score_adj=${AP_OOM} > postgres ${PG_OOM} (app replikası postgres-dən əvvəl qurban gedir)" || warn "app/postgres oom_score_adj sırası gözlənilən deyil (app ${AP_OOM:-?}/${AP_EFF}, postgres ${PG_OOM:-?})"
+  [ "${PG_SH:-0}" -gt "${AP_SH:-0}" ] 2>/dev/null && ok "cpu_shares postgres ${PG_SH} > app ${AP_SH} (CPU rəqabətində DB üstündür)" || warn "cpu_shares postgres ${PG_SH:-?} ≤ app ${AP_SH:-?} — prioritet tətbiq olunmayıb (deploy)"
+else
+  warn "postgres/app konteyneri tapılmadı — prioritet yoxlanmadı"
+fi
+
 section "Yekun"
 echo "- ❌ kritik: **$FAIL** · ⚠️ xəbərdarlıq: **$WARN**"
 exit 0

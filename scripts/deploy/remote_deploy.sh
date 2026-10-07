@@ -78,6 +78,11 @@ DEPLOY_ROLLBACK_ON_FAILURE="${DEPLOY_ROLLBACK_ON_FAILURE:-true}"
 DEPLOY_KEEP_RELEASE_IMAGES="${DEPLOY_KEEP_RELEASE_IMAGES:-$(dotenv_value DEPLOY_KEEP_RELEASE_IMAGES)}"
 DEPLOY_KEEP_RELEASE_IMAGES="${DEPLOY_KEEP_RELEASE_IMAGES:-3}"
 APP_IMAGE_REPOSITORY="${APP_IMAGE_REPOSITORY:-emsarena-prod}"
+# 2026-10-07 (selfheal): deploy bütün müddət ərzində bu kilidi saxlayır — host-dakı
+# emsarena-autoheal / emsarena-converge (scripts/ops/selfheal) onu görüb deploy-a
+# toxunmur. Qovluğu /etc/tmpfiles.d/emsarena.conf yaradır (prod-host-maint → selfheal).
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-/run/emsarena/deploy.lock}"
+DEPLOY_LOCK_WAIT_SECONDS="${DEPLOY_LOCK_WAIT_SECONDS:-900}"
 
 # Per-run, user-writable temp files. Fixed /tmp/emsarena-* paths collided with
 # files owned by a different user (e.g. a previous root deploy) and failed with
@@ -830,6 +835,31 @@ prune_old_release_images() {
   done
 }
 
+acquire_deploy_lock() {
+  # 2026-10-07 (selfheal): autoheal keçidi (bir neçə dəqiqə) və ya boot converge-i
+  # (≤ 10 dəq) kilidi saxlaya bilər — deploy onları gözləyir, sonra özü saxlayır.
+  # fd 9 skript bitənə qədər açıq qalır (flock prosesin ölümü ilə də buraxılır).
+  # Kilid infrastrukturu yoxdursa (selfheal quraşdırılmayıb) deploy dayanmır.
+  local dir="${DEPLOY_LOCK_FILE%/*}"
+  if ! command -v flock >/dev/null 2>&1; then
+    echo "WARNING: flock is not installed; deploy lock skipped." >&2
+    return 0
+  fi
+  if [ ! -d "$dir" ] || [ ! -w "$dir" ]; then
+    echo "WARNING: deploy lock directory ${dir} is missing or not writable (run prod-host-maint → selfheal); continuing without the lock." >&2
+    return 0
+  fi
+  if [ ! -e "$DEPLOY_LOCK_FILE" ]; then
+    : >"$DEPLOY_LOCK_FILE"
+  fi
+  exec 9<"$DEPLOY_LOCK_FILE"
+  echo "Acquiring deploy lock ${DEPLOY_LOCK_FILE} (autoheal/converge pause while it is held)..."
+  if ! flock -w "$DEPLOY_LOCK_WAIT_SECONDS" 9; then
+    echo "Could not acquire ${DEPLOY_LOCK_FILE} within ${DEPLOY_LOCK_WAIT_SECONDS}s (a converge/autoheal pass is stuck?); nothing was changed." >&2
+    exit 1
+  fi
+}
+
 docker_deploy() {
   if [ ! -f "$COMPOSE_FILE" ]; then
     echo "Missing ${APP_DIR}/${COMPOSE_FILE}." >&2
@@ -910,6 +940,7 @@ docker_deploy() {
 
 case "$DEPLOY_MODE" in
   docker)
+    acquire_deploy_lock
     docker_deploy
     ;;
   legacy)
