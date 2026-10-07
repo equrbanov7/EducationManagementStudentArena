@@ -171,3 +171,36 @@ class JoinQueryBudgetTest(TestCase):
     def test_join_query_count_does_not_grow_with_lobby_size(self):
         small, large = self._join_queries(3), self._join_queries(60)
         self.assertEqual(small, large, (small, large))
+
+    def test_nickname_keys_are_not_computed_while_the_session_row_is_locked(self):
+        """Sessiya sətri kilidli ikən O(N) Python işi yoxdur: ad açarları kilidDƏN ƏVVƏL hesablanır.
+
+        Yük testi 2026-10-07: kilid altında 150 açar + throttling → kilid 0.1–1.2 s tutulurdu, qoşulmalar
+        və host «start»-ı (eyni sətir kilidi) saniyələrlə növbədə qalırdı.
+        """
+        from apps.live_exam import text_safety
+        from apps.live_exam.views.player import _shared as player_shared
+        from apps.live_exam.views.player import join as join_view
+
+        session = make_session(self.exam, self.host)
+        make_players(session, 60, prefix="K")
+        base_depth = len(connection.atomic_blocks)
+        calls = {"locked": 0, "unlocked": 0}
+        original = text_safety.nickname_match_key
+
+        def counting(name):
+            calls["locked" if len(connection.atomic_blocks) > base_depth else "unlocked"] += 1
+            return original(name)
+
+        url = reverse("liveExam:join_enter", kwargs={"pin": session.pin})
+        patches = [
+            mock.patch.object(module, "nickname_match_key", counting, create=True)
+            for module in (join_view, player_shared)
+        ]
+        with patches[0], patches[1]:
+            response = self.client_class().post(url, {"nickname": "Yeni"}, REMOTE_ADDR="10.9.99.1")
+            conflict = self.client_class().post(url, {"nickname": "К000"}, REMOTE_ADDR="10.9.99.2")  # kiril К
+        self.assertEqual(response.status_code, 200, response.content[:200])
+        self.assertEqual(conflict.status_code, 409, conflict.content[:200])  # homoglif qaydası qalır
+        self.assertLessEqual(calls["locked"], 4, calls)  # hər qoşulmada yalnız yeni ad (+ arada yaranan sətir)
+        self.assertGreaterEqual(calls["unlocked"], 120, calls)

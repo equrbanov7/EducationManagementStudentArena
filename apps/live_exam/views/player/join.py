@@ -26,6 +26,7 @@ from apps.live_exam.auth import (
     get_request_player,
     has_signed_player_token,
     is_client_kicked,
+    nickname_match_key,
 )
 from apps.live_exam.constants import (
     ACCESSORY_KEYS,
@@ -48,7 +49,6 @@ from ._shared import (
     _join_resume_copy,
     _live_ip_key,
     _nickname_conflict_message,
-    _nickname_is_taken,
     _normalize_pin,
     _pin_entry_copy,
     _pin_entry_theme_key,
@@ -199,7 +199,57 @@ def _join_rate_limited(request, session, cookie_client_id):
     return record_rate_limit_hit(LIVE_JOIN_IP_LIMIT_SCOPE, _join_ip_rate(), session.pin, _live_ip_key(request))
 
 
-def _new_player_rejection(locked_session, client_id, max_participants):
+class _LobbyRoster:
+    """Sessiyanın oyunçu sətirləri + ad açarları (yük testi 2026-10-07: qoşulma kilidi qısa olsun).
+
+    Qoşulmalar sessiya sətrini ``FOR UPDATE`` ilə növbəyə düzür (state/limit/ad yoxlaması yarışsız
+    olsun). Əvvəl kilid altında hər oyunçunun homoglif açarı hesablanırdı (O(N) Python) + ayrıca
+    oyunçu/COUNT sorğuları; 0.5 CPU-luq replikada kilid tutma vaxtı 100 ms-ə çatırdı və 2 × 150
+    oyunçuluq axında növbə saniyələrlə uzanırdı (host «start» də həmin kilidi gözləyir). İndi açarlar
+    kilidDƏN ƏVVƏL hesablanır; kilid altında BİR sorğu (id, client_id, ləqəb) — say, qayıdan oyunçu
+    və ad yoxlaması ondan çıxır; yalnız arada yaranan/dəyişən adların açarı kilid altında hesablanır.
+    Nəticə əvvəlki yoxlamalarla eynidir (eyni sətirlər, eyni açar funksiyası).
+    """
+
+    def __init__(self, keys: dict[str, str]):
+        self.keys = keys
+        self.rows: list[tuple[int, str, str]] = []
+
+    @classmethod
+    def prefetch(cls, session) -> "_LobbyRoster":
+        with bypass_rls():
+            names = LivePlayer.objects.filter(session_id=session.pk).values_list("nickname", flat=True)
+            return cls({name: nickname_match_key(name) for name in names})
+
+    def load(self, locked_session) -> "_LobbyRoster":
+        self.rows = list(LivePlayer.objects.filter(session=locked_session).values_list("id", "client_id", "nickname"))
+        return self
+
+    def player_id_for(self, client_id: str) -> int | None:
+        return next((player_id for player_id, cid, _name in self.rows if cid == client_id), None)
+
+    def _key(self, name: str) -> str:
+        key = self.keys.get(name)
+        if key is None:
+            key = self.keys[name] = nickname_match_key(name)
+        return key
+
+    def taken(self, nickname: str, *, exclude_player_id=None, exclude_client_id=None) -> bool:
+        """``_nickname_is_taken`` ilə eyni qayda, hazır sətirlər və açarlar üzərində."""
+        wanted = nickname_match_key(nickname)
+        if not wanted:
+            return False
+        for player_id, client_id, name in self.rows:
+            if exclude_player_id and player_id == exclude_player_id:
+                continue
+            if exclude_client_id and client_id == exclude_client_id:
+                continue
+            if self._key(name) == wanted:
+                return True
+        return False
+
+
+def _new_player_rejection(locked_session, client_id, max_participants, *, player_count: int):
     """YENİ oyunçu qəbul olunmursa JSON cavabı (kilid yalnız yenilərə aiddir — LXS-08)."""
     if locked_session.is_locked:
         return _json_error(pgettext("live_exam.view.message", "lobby_locked"), 403)
@@ -209,13 +259,13 @@ def _new_player_rejection(locked_session, client_id, max_participants):
     # Audit 2026-09-28 LXS-09: host-un çıxardığı klient eyni cookie ilə qayıtmır.
     if is_client_kicked(locked_session, client_id):
         return _json_error(pgettext("live_exam.view.message", "removed_by_host"), 403)
-    if LivePlayer.objects.filter(session=locked_session).count() >= max_participants:
+    if player_count >= max_participants:
         message = pgettext("live_exam.view.message", "participant_limit_reached").format(limit=max_participants)
         return _json_error(message, 403)
     return None
 
 
-def _refresh_returning_player(locked_session, player, *, profile, now):
+def _refresh_returning_player(locked_session, player, *, profile, now, roster: _LobbyRoster):
     """Qayıdan oyunçu: yalnız AÇIQ lobbidə profil dəyişir (Audit 2026-09-28 LXS-07).
 
     Oyun gedişində / kilidli lobbidə «reconnect» kimliyi dəyişmir — host-un
@@ -224,7 +274,7 @@ def _refresh_returning_player(locked_session, player, *, profile, now):
     fields = ["is_connected", "last_seen"]
     if locked_session.state == LiveSession.STATE_LOBBY and not locked_session.is_locked:
         nickname = profile["nickname"]
-        if nickname != player.nickname and _nickname_is_taken(locked_session, nickname, exclude_player_id=player.id):
+        if nickname != player.nickname and roster.taken(nickname, exclude_player_id=player.id):
             return _json_error(_nickname_conflict_message(), 409)
         player.nickname = nickname
         player.avatar_key = profile["avatar_key"]
@@ -255,21 +305,24 @@ def _join_profile(request, session_settings):
 def _admit_player(session, client_id, profile, max_participants):
     """Kilidli sessiya sətri altında qəbul — ``(player, error_response)``."""
     now = timezone.now()
+    roster = _LobbyRoster.prefetch(session)  # ad açarları kilidDƏN ƏVVƏL
     with bypass_rls(), transaction.atomic():
         locked_session = LiveSession.objects.select_for_update().get(pk=session.pk)
-        player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
+        roster.load(locked_session)
 
         # EXAM-P1-12: bitmiş oyuna heç kim qoşula bilməz (reconnect də). Yoxlamalar
         # kilid daxilindədir ki, host-un state keçidi ilə yarış olmasın.
         if locked_session.state == LiveSession.STATE_FINISHED:
             return None, _json_error(pgettext("live_exam.view.message", "session_finished"), 403)
-        if player is not None:
-            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now)
+        existing_id = roster.player_id_for(client_id)
+        if existing_id is not None:
+            player = LivePlayer.objects.select_for_update().get(pk=existing_id)
+            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
 
-        rejection = _new_player_rejection(locked_session, client_id, max_participants)
+        rejection = _new_player_rejection(locked_session, client_id, max_participants, player_count=len(roster.rows))
         if rejection is not None:
             return None, rejection
-        if _nickname_is_taken(locked_session, profile["nickname"], exclude_client_id=client_id):
+        if roster.taken(profile["nickname"], exclude_client_id=client_id):
             return None, _json_error(_nickname_conflict_message(), 409)
         try:
             with transaction.atomic():
@@ -280,7 +333,7 @@ def _admit_player(session, client_id, profile, max_participants):
             player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
             if player is None:
                 raise
-            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now)
+            return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
     return player, None
 
 
