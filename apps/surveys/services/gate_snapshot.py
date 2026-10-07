@@ -13,8 +13,9 @@ Format::
          "closes_on": "2026-10-25", "grace_until": "2026-09-28"}]}
 
 ``v`` hər sinxronda dəyişir — tələbə sessiyasındakı gözləyən-say keşi onunla
-etibarsızlaşır (yeni jurnal bağlanması → yeni hədəflər). Yazı PostgreSQL-də
-``jsonb_set`` ilə atomikdir (digər ``settings`` açarlarına toxunmur).
+etibarsızlaşır (yeni jurnal bağlanması → yeni hədəflər). Yazı
+``apps.organizations.public.set_settings_keys`` ilə atomikdir (digər ``settings``
+açarlarına toxunmur).
 
 Mənbə-həqiqət ``SurveyCampaign`` cədvəlidir; xülasə hər kampaniya dəyişikliyində,
 jurnal bağlananda, kampaniyalar bölməsi açılanda və əmrlə yenidən qurulur
@@ -24,11 +25,9 @@ jurnal bağlananda, kampaniyalar bölməsi açılanda və əmrlə yenidən qurul
 from __future__ import annotations
 
 import datetime
-import json
 import secrets
 
-from django.apps import apps as django_apps
-from django.db import connection
+from apps.organizations.public import set_settings_keys
 
 from ..constants import GATE_SNAPSHOT_KEY, CampaignStatus
 
@@ -157,23 +156,9 @@ def build_snapshot(organization) -> dict:
 def sync_gate_snapshot(organization) -> dict:
     """Xülasəni DB-dən yenidən qurur və təşkilat sətrinə yazır (versiya dəyişir)."""
     snapshot = build_snapshot(organization)
-    Organization = django_apps.get_model("organizations", "Organization")
-    if connection.vendor == "postgresql":
-        table = connection.ops.quote_name(Organization._meta.db_table)
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"UPDATE {table} SET settings = jsonb_set("  # noqa: S608 — cədvəl adı modeldən, dəyərlər parametrdir
-                "CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END, "
-                "%s::text[], %s::jsonb, true) WHERE id = %s",
-                ["{" + GATE_SNAPSHOT_KEY + "}", json.dumps(snapshot), str(organization.pk)],
-            )
-    else:  # pragma: no cover — yalnız PostgreSQL olmayan lokal baza
-        stored = Organization.objects.filter(pk=organization.pk).values_list("settings", flat=True).first()
-        stored = dict(stored) if isinstance(stored, dict) else {}
-        stored[GATE_SNAPSHOT_KEY] = snapshot
-        Organization.objects.filter(pk=organization.pk).update(settings=stored)
-    current = organization.settings if isinstance(organization.settings, dict) else {}
-    organization.settings = {**current, GATE_SNAPSHOT_KEY: snapshot}
+    # Atomik üst-səviyyə birləşmə; açar `SurveysConfig.ready`-də «idarə olunan» kimi qeydə alınıb —
+    # `Organization.save()` onu köhnə nüsxədən heç vaxt yazmır.
+    set_settings_keys(organization, {GATE_SNAPSHOT_KEY: snapshot}, touch=False)
     return snapshot
 
 

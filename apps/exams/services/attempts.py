@@ -224,6 +224,41 @@ def _narrow_overdue_candidates(queryset, cutoff):
     )
 
 
+def _overdue_candidate_ids(queryset, cutoff):
+    """Fon işi tutumu 2026-10-07: ilkin namizəd siyahısı İKİ ucuz sorğu ilə.
+
+    ``_narrow_overdue_candidates``-in join-li forması RLS predikatı ilə planlayıcıda
+    ``exams_exam``-ı ~10 sətir sanır (real 2 006) və hər imtahan üçün açıq-cəhd
+    partial indeksini YENİDƏN skan edir: 2 006 × 5 000 indeks girişi = 130 ms hər
+    dəqiqə (imtahan sayı × aktiv cəhd sayı ilə böyüyür, ən çox da pik saatda).
+    Burada açıq cəhdlər bir dəfə partial indeksdən (``examattempt_active_sweep_idx``),
+    onların imtahanları PK ilə oxunur, deadline Python-da eyni qaydayla yoxlanır
+    (üst çoxluq; dəqiq qərar kilid altında ``expire_if_time_limit_reached``-dədir).
+    """
+    rows = list(
+        queryset.filter(status__in=["draft", "in_progress"], is_trial=False)
+        .order_by()
+        .values_list("pk", "exam_id", "started_at")
+    )
+    if not rows:
+        return []
+    exams = {
+        pk: (duration, end)
+        for pk, duration, end in Exam.objects.filter(
+            pk__in={exam_id for _pk, exam_id, _started in rows}, total_duration_minutes__gt=0
+        ).values_list("pk", "total_duration_minutes", "end_datetime")
+    }
+    candidate_ids = []
+    for pk, exam_id, started_at in rows:
+        exam = exams.get(exam_id)
+        if exam is None:
+            continue
+        duration, end = exam
+        if (started_at and started_at + timedelta(minutes=duration) < cutoff) or (end and end < cutoff):
+            candidate_ids.append(pk)
+    return candidate_ids
+
+
 def sweep_overdue_attempts(queryset=None, *, scope=None):
     """Vaxtı bitmiş (deadline-ı keçmiş) draft/in_progress cəhdləri avtomatik
     bitirir — tələbənin brauzeri bağlı olsa belə imtahan «yarımçıq/gözləmədə»
@@ -250,19 +285,23 @@ def sweep_overdue_attempts(queryset=None, *, scope=None):
     Celery sweep-i ``rls_worker_atomic() + bypass_rls()`` ötürür ki, hər cəhd öz
     real tranzaksiyasında işlənsin (bax ``finish_attempts_under_row_lock``).
     """
-    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock
+    from apps.exams.services.sweep_guard import finish_attempts_under_row_lock, sweep_overlap_lock, sweep_time_budget
 
     # Audit 2026-09-28 EX28-04: sweep də grace-i gözləyir (`now − grace`) — deadline-dan
     # 1–2 s sonra gələn son təhvil/autosave-i sweep «expired» edib itirməsin.
     cutoff = lazy_expiry_cutoff()
 
-    def _run(qs):
+    def _run(qs, time_budget=None):
         return finish_attempts_under_row_lock(
             qs,
             narrow=lambda candidates: _narrow_overdue_candidates(candidates, cutoff),
-            select_related=("exam", "exam__organization", "user"),
+            # `exam__author`: bitmə siqnalının müəllim bildirişi (notify_teacher_about_submission)
+            # müəllifi oxuyur — cəhd başına əlavə `auth_user` sorğusu olmasın (fon işi tutumu 2026-10-07).
+            select_related=("exam", "exam__organization", "exam__author", "user"),
             action=lambda attempt: attempt.expire_if_time_limit_reached(at_time=cutoff),
             scope=scope,
+            time_budget=time_budget,
+            candidates=lambda candidates: _overdue_candidate_ids(candidates, cutoff),
         )
 
     if queryset is not None:
@@ -271,7 +310,8 @@ def sweep_overdue_attempts(queryset=None, *, scope=None):
     with sweep_overlap_lock("overdue_attempts") as acquired:
         if not acquired:
             return 0
-        return _run(ExamAttempt.objects.all())
+        # Fon işi tutumu 2026-10-07: qlobal icra overlap kilidinin TTL-indən uzun çəkməsin.
+        return _run(ExamAttempt.objects.all(), time_budget=sweep_time_budget())
 
 
 def can_user_start_new_attempt(exam, user):

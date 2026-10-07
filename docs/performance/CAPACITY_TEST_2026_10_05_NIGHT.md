@@ -208,6 +208,30 @@ Hamısı testli, canlıya üç paketlə çıxdı (main 53b9f5e0, 1d8b9389, sonra
 Qəsdən dəyişdirilməyənlər: imtahan start-ındakı qısa `sleep` (tutum növbəsi və istifadəçi kilidi — admission
 control); PIN hash gücü.
 
+## Dördüncü ölçmə (2026-10-07 gecə, üç paket canlıda) + daphne/uvicorn A/B
+
+Eyni plan, eyni test stack-i (8 app × 0.5 CPU, DB 2 CPU), canlı image c46f772e:
+
+| Pillə | 10-05 axşam | 10-07 gecə |
+|---|---|---|
+| login 500 | 0 %, p95 2.0 s | 0 %, p95 **1.3 s** |
+| kabinet 500 | 0 %, p50/p95 0.52 / 4.1 s | 0 %, **0.17 / 0.30 s** ✅ |
+| jurnal 500 (real yazı) | 3.2 % | **1.2 %** |
+| imtahan 1000 | 4.7 % | **3.3 %** (autosave p50 5.3 → 3.2 s) |
+| tələbə jurnalı 1000 | 38.6 % | **17.5 %** |
+| kollokvium/final balı 300 | 7.7 % | **4.0 %** |
+| final mərkəzi 500 | **56 %**, PIN 40 s | **0 %**, PIN p95 **0.99 s** ✅ |
+| export 100 | 0 % | 0 % |
+| canlı imtahan 300 | 8.9 % | 2.1 % — host «start» hələ 28 s (ayrıca araşdırılır) |
+
+Bütövlük: imtahan 7650, final 5000, jurnal 11 725, midterm 6025, final balı 900, canlı 1616 cavab — **0 uyğunsuzluq**.
+Qalan xətaların hamısı tutum qapısının səliqəli 503-ləridir (Django tracebacki yoxdur); darboğaz test DB-sinin 2 CPU limitidir.
+
+**daphne vs uvicorn (eyni 4 CPU):** uvicorn 4 konteyner × 2 worker — login p50 970 → 460 ms (CPU-ya bağlı
+PBKDF2), kabinet eyni, amma imtahan 3.3 → 7.4 %, tələbə jurnalı 17.5 → 21.9 % xəta (limit worker başınadır,
+konteyner daxilində yük qeyri-bərabər paylanır → daha çox 503). **Qərar: canlıda daphne qalır**; `ASGI_SERVER`
+açarı A/B üçün saxlanılır.
+
 ## 50 000 nəfər haqqında
 
 Tək 10 vCPU-luq serverdə 50 000 **eyni anda aktiv** istifadəçi mümkün deyil.

@@ -20,11 +20,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from django.utils.translation import pgettext
+
 from .constants import HANDLER_ACTION_SOURCES, OPEN_STATUSES, ApplicationStatus
+
+#: ``TransitionDenied`` mətnlərinin tərcümə konteksti (``services.submit`` / ``services.workflow`` eyni
+#: literalı işlədir — i18n skaneri yalnız modulun öz string sabitini həll edir).
+_CTX = "applications.transition"
 
 
 class TransitionDenied(Exception):
-    """Keçid qadağandır. ``code`` maşın-oxunaqlı səbəbdir (UI mətni üçün açar)."""
+    """Keçid qadağandır. ``code`` maşın-oxunaqlı səbəbdir (UI mətni üçün açar; SABİTDİR).
+
+    ``message`` istifadəçiyə göstərilən mətndir — atılan yerdə ``pgettext("applications.transition", …)``
+    ilə aktiv dilə çevrilir (Elanlardan müraciət en/ru/tr istifadəçiyə də onu göstərir).
+    Müqayisə / məntiq üçün HƏMİŞƏ ``code`` işlədilir, mətn yox.
+    """
 
     def __init__(self, code: str, message: str = "", params: dict | None = None):
         super().__init__(code, message, params)
@@ -190,7 +201,9 @@ SENDER_ACTIONS = (Action.PROVIDE_INFO, Action.RESUBMIT, Action.CLOSE, Action.REO
 def rule_for(action: str) -> ActionRule:
     rule = RULES.get(action)
     if rule is None:
-        raise TransitionDenied("transition.unknown", f"Naməlum əməl: {action}", {"action": action})
+        raise TransitionDenied(
+            "transition.unknown", pgettext(_CTX, "Naməlum əməl: %(action)s") % {"action": action}, {"action": action}
+        )
     return rule
 
 
@@ -204,20 +217,21 @@ def ensure_allowed(*, action: str, status: str, text: str = "") -> ActionRule:
     if status not in rule.sources:
         raise TransitionDenied(
             "transition.invalid_source",
-            f"«{action}» əməli «{status}» statusundan mümkün deyil.",
+            pgettext(_CTX, "«%(action)s» əməli «%(status)s» statusundan mümkün deyil.")
+            % {"action": action, "status": status},
             {"action": action, "status": status},
         )
     cleaned = (text or "").strip()
     if rule.reason_required and not cleaned:
         raise TransitionDenied(
             "transition.reason_required",
-            "Bu əməl üçün mətn məcburidir.",
+            pgettext(_CTX, "Bu əməl üçün mətn məcburidir."),
             {"action": action},
         )
     if rule.min_text_length and len(cleaned) < rule.min_text_length:
         raise TransitionDenied(
             "transition.text_too_short",
-            f"Mətn ən azı {rule.min_text_length} simvol olmalıdır.",
+            pgettext(_CTX, "Mətn ən azı %(n)s simvol olmalıdır.") % {"n": rule.min_text_length},
             {"action": action, "min_length": rule.min_text_length},
         )
     return rule

@@ -57,10 +57,15 @@ _RUNNER_NAMES = {
 
 
 def _pickup_timeout() -> float:
-    """``JOB_WORKER_PICKUP_TIMEOUT`` (saniyə, default 3.0; ``0`` → ölü-worker qoruyucusu SÖNÜLÜdür)."""
+    """``JOB_WORKER_PICKUP_TIMEOUT`` (saniyə, default 20; ``0`` → ölü-worker qoruyucusu SÖNÜLÜdür).
+
+    Tutum testi 2026-10-07: 3 s-də `heavy` növbəsi sadəcə məşğul olanda da (worker sağ)
+    100 eyni-anlı export-dan 160-ı web prosesinə «oğurlanırdı» — web CPU-su ağır OCR/AI/export
+    işi görürdü. İndi status poll-u sorğunu yatırmır, ona görə uzun gözləmə istifadəçiyə
+    yalnız ölü worker halında hiss olunur."""
     from django.conf import settings
 
-    timeout = getattr(settings, "JOB_WORKER_PICKUP_TIMEOUT", 3.0)
+    timeout = getattr(settings, "JOB_WORKER_PICKUP_TIMEOUT", 20.0)
     return float(timeout) if timeout and timeout > 0 else 0.0
 
 

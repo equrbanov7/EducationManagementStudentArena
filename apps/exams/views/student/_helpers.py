@@ -161,13 +161,22 @@ def _autosave_replay_key(attempt):
     return f"exam:autosave:last:{attempt.pk}"
 
 
+#: Yazıya təsir etməyən nəqliyyat/naviqasiya sahələri — barmaq izinə daxil deyil.
+#: Qalan HƏR sahə (``q_*``, ``paint_*``, ``marked_question_ids`` …) daxildir: əvvəl yalnız
+#: ``q_*`` sayılırdı və eyni mətnli, fərqli rəsmli/işarəli təkrar yazısız «replay» olurdu
+#: (review 2026-10-07). Naməlum yeni sahə → fərqli iz → köhnə 409 (fail-closed).
+_AUTOSAVE_FINGERPRINT_IGNORED = frozenset(
+    {"csrfmiddlewaretoken", "autosave_revision", "submit_action", "return_to", "next", "from_section", "assigned_type"}
+)
+
+
 def _autosave_fingerprint(request):
     import hashlib
 
     items = sorted(
         (key, tuple(request.POST.getlist(key)))
         for key in request.POST.keys()
-        if key.startswith("q_") or key == "changed_questions[]"
+        if key not in _AUTOSAVE_FINGERPRINT_IGNORED
     )
     return hashlib.sha256(repr(items).encode()).hexdigest()
 

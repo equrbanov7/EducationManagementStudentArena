@@ -156,4 +156,24 @@ CELERY_BEAT_SCHEDULE = {
         "task": "subject_folder.send_submission_digests",
         "schedule": crontab(minute="*/15"),
     },
+    # Fon işi tutumu 2026-10-07: böyüyən cədvəllərin gecəlik saxlama süpürgələri (pik
+    # saatlardan kənar, hissə-hissə silmə — core/batch_purge.py). Əvvəl heç biri işləmirdi:
+    # django_session (cached_db) vaxtı keçmiş sətirləri, OTP-lər və istifadəçinin sildiyi
+    # bildirişlər sonsuz qalırdı.
+    "accounts-purge-expired-sessions": {
+        "task": "accounts.purge_expired_sessions",
+        "schedule": crontab(hour=3, minute=40),
+    },
+    "accounts-purge-stale-otps": {
+        "task": "accounts.purge_stale_otps",
+        "schedule": crontab(hour=3, minute=45),
+    },
+    "notifications-purge-old": {
+        "task": "notifications.purge_old",
+        "schedule": crontab(hour=3, minute=50),
+    },
+    "exams-purge-finished-extraction-jobs": {
+        "task": "exams.purge_finished_extraction_jobs",
+        "schedule": crontab(hour=4, minute=0),
+    },
 }

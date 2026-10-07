@@ -102,11 +102,14 @@ class InAppNotification(models.Model):
     notification does not lose it.
     """
 
+    # Fon işi tutumu 2026-10-07 (notifications/0005): tək `recipient_id` / `organization_id`
+    # indeksləri `(recipient, deleted_at, …)` və `notif_org_recipient_idx` kompozitlərinin
+    # prefiksidir — hər fan-out INSERT-də artıq yazı idi (50 000 bildiriş 3,9 → 2,5 s).
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="in_app_notifications",
-        db_index=True,
+        db_index=False,
     )
     # Tenant scope. A real, indexed FK — not a JSON key — so the PostgreSQL
     # RLS policy can enforce tenant isolation reliably (fail-closed).
@@ -119,7 +122,7 @@ class InAppNotification(models.Model):
         related_name="in_app_notifications",
         null=True,
         blank=True,
-        db_index=True,
+        db_index=False,
     )
     title = models.CharField(max_length=255)
     message = models.TextField(blank=True, default="")

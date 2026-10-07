@@ -21,13 +21,12 @@ mutasiyasında və idarə səhifəsi açılanda (self-healing) yenidən qurulur.
 from __future__ import annotations
 
 import datetime
-import json
 import secrets
 
-from django.apps import apps as django_apps
-from django.db import connection
 from django.db.models import Q
 from django.utils import timezone
+
+from apps.organizations.public import set_settings_keys
 
 from ..constants import SNAPSHOT_KEY, SNAPSHOT_LIMIT, Status
 
@@ -98,25 +97,13 @@ def build_snapshot(organization) -> dict:
 
 
 def sync_snapshot(organization) -> dict:
-    """Xülasəni DB-dən yenidən qurur və təşkilat sətrinə ATOMİK yazır (digər açarlara toxunmur)."""
+    """Xülasəni DB-dən yenidən qurur və təşkilat sətrinə ATOMİK yazır (digər açarlara toxunmur).
+
+    Açar ``AnnouncementsConfig.ready``-də «idarə olunan» kimi qeydə alınıb — ``Organization.save()``
+    onu köhnə nüsxədən heç vaxt yazmır; yeganə yazıçı bu funksiyadır.
+    """
     snapshot = build_snapshot(organization)
-    Organization = django_apps.get_model("organizations", "Organization")
-    if connection.vendor == "postgresql":
-        table = connection.ops.quote_name(Organization._meta.db_table)
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f"UPDATE {table} SET settings = jsonb_set("  # noqa: S608 — cədvəl adı modeldən, dəyərlər parametrdir
-                "CASE WHEN jsonb_typeof(settings) = 'object' THEN settings ELSE '{}'::jsonb END, "
-                "%s::text[], %s::jsonb, true) WHERE id = %s",
-                ["{" + SNAPSHOT_KEY + "}", json.dumps(snapshot), str(organization.pk)],
-            )
-    else:  # pragma: no cover — yalnız PostgreSQL olmayan lokal baza
-        stored = Organization.objects.filter(pk=organization.pk).values_list("settings", flat=True).first()
-        stored = dict(stored) if isinstance(stored, dict) else {}
-        stored[SNAPSHOT_KEY] = snapshot
-        Organization.objects.filter(pk=organization.pk).update(settings=stored)
-    current = organization.settings if isinstance(organization.settings, dict) else {}
-    organization.settings = {**current, SNAPSHOT_KEY: snapshot}
+    set_settings_keys(organization, {SNAPSHOT_KEY: snapshot}, touch=False)
     return snapshot
 
 

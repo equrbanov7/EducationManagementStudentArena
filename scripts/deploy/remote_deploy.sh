@@ -143,6 +143,11 @@ if [ ! -f "${APP_DIR}/.env" ]; then
   exit 1
 fi
 
+# 2026-10-07 prod audit: .env (və env-update-in .env.bak.* nüsxələri) 644 idi — sirlər
+# hostdakı digər istifadəçilərə oxunaqlı. Sahib runner istifadəçisidir; compose faylı
+# özü oxuyur (konteynerlər mühiti compose-dan alır), ona görə 600 kifayətdir.
+chmod 600 "${APP_DIR}/.env" "${APP_DIR}"/.env.bak.* 2>/dev/null || true
+
 curl_headers=(
   -H "Host: ${HEALTHCHECK_HOST}"
 )
