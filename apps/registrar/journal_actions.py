@@ -274,6 +274,14 @@ def kollokvium_save(request, offering_id):
 
     entries = []
     blocked = False
+    # Pəncərə vəziyyəti K üzrə BİR dəfə (əvvəl hər xana üçün pəncərə + əlavə gün SELECT-i).
+    open_by_index = {}
+
+    def _window_open(k_index):
+        if k_index not in open_by_index:
+            open_by_index[k_index] = kw.is_open(offering, k_index, today)
+        return open_by_index[k_index]
+
     for key, raw in request.POST.items():
         if not key.startswith("kscore__"):
             continue
@@ -281,7 +289,7 @@ def kollokvium_save(request, offering_id):
         if len(parts) != 3 or parts[1] not in idx_by_id:
             continue
         # Midterm dövründə yalnız əsas sütun (k_index=0) yazılır; balı olan köhnə qalıq oxu-rejimlidir.
-        if idx_by_id[parts[1]] >= spec.count or not kw.is_open(offering, idx_by_id[parts[1]], today):
+        if idx_by_id[parts[1]] >= spec.count or not _window_open(idx_by_id[parts[1]]):
             blocked = True
             continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
