@@ -208,7 +208,7 @@ def _exporter_env(env: dict[str, str]) -> dict[str, dict[str, str]]:
     }
 
 
-_BASE = {"POSTGRES_USER": "owner", "POSTGRES_PASSWORD": "OWNER-PW", "POSTGRES_DB": "db", "REDIS_PASSWORD": "MAIN-PW"}
+_BASE = {"POSTGRES_USER": "owner", "POSTGRES_PASSWORD": "OWN-PW", "POSTGRES_DB": "db", "REDIS_PASSWORD": "MAIN-PW"}
 
 
 @pytest.mark.parametrize(
@@ -223,10 +223,10 @@ _BASE = {"POSTGRES_USER": "owner", "POSTGRES_PASSWORD": "OWNER-PW", "POSTGRES_DB
 def test_absent_monitor_vars_keep_todays_effective_credentials(extra):
     env = _exporter_env({**_BASE, **extra})
     assert env["postgres_exporter"]["DATA_SOURCE_USER"] == "owner"
-    assert env["postgres_exporter"]["DATA_SOURCE_PASS"] == "OWNER-PW"
+    assert env["postgres_exporter"]["DATA_SOURCE_PASS"] == "OWN-PW"
     assert (
         env["pgbouncer_exporter"]["PGBOUNCER_EXPORTER_CONNECTION_STRING"]
-        == "postgres://owner:OWNER-PW@pgbouncer:5432/pgbouncer?sslmode=disable"
+        == "postgres://owner:OWN-PW@pgbouncer:5432/pgbouncer?sslmode=disable"
     )
     assert env["redis_exporter"]["REDIS_USER"] == ""  # default istifadəçi, bu günkü kimi
     assert env["redis_exporter"]["REDIS_PASSWORD"] == "MAIN-PW"
@@ -254,7 +254,7 @@ def test_monitor_vars_switch_exporters_and_drop_the_owner_and_main_passwords():
     }
     for name in ("postgres_exporter", "pgbouncer_exporter", "redis_exporter"):
         flat = json.dumps(env[name])
-        assert "OWNER-PW" not in flat and "MAIN-PW" not in flat, name
+        assert "OWN-PW" not in flat and "MAIN-PW" not in flat, name
 
 
 # ── docker/pgbouncer/entrypoint.sh (real sh, image entrypoint stub) ─────────────

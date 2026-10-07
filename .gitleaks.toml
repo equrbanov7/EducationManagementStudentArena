@@ -121,6 +121,9 @@ regexes = [
     '''^emsarena$''',
     # 2026-09-27 filter-repo əvəzləyiciləri (real parolların yerinə yazılıb).
     '''^Qku-Redacted-(Secret|Pw)-[0-9]+$''',
+    # tests/test_infra_monitor_least_privilege_2026_10_07.py — compose fallback testinin saxta owner
+    # parolu (commit f6de4a18; sonradan OWN-PW-ə qısaldıldı, tarixçədə qalır).
+    '''^OWNER-PW$''',
 ]
 # 2026-09-27: QA klon parolları və köhnə e-poçt parolu git TARİXÇƏSİNDƏN silindi (filter-repo,
 # repo private edildi) — əvvəlki SHA-ya bağlı `commits` istisnası artıq lazım deyil və tarix yenidən
