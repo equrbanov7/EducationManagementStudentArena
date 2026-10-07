@@ -94,6 +94,20 @@ def _appeals_link() -> dict:
     return {"label": "Rəsmi apellyasiya üçün «Apellyasiyalarım» bölməsi", "url": url}
 
 
+def _visible_attachment_count(application, viewer_is_handler) -> int:
+    """Siyahı sətrinin sənəd sayı (SEC-04 qaydası). Siyahı sorğusu sənədləri `_internal_note`
+    bayrağı ilə prefetch edir — onda SIFIR əlavə sorğu; prefetch yoxdursa DB-dən sayılır."""
+    cached = getattr(application, "_prefetched_objects_cache", {}).get("attachments")
+    if cached is not None:
+        items = list(cached)
+        if viewer_is_handler:
+            return len(items)
+        return sum(1 for item in items if not getattr(item, "_internal_note", False))
+    if viewer_is_handler:
+        return application.attachments.count()
+    return application.attachments.exclude(event__is_internal=True).count()
+
+
 def attachment_payload(attachment) -> dict:
     return {
         "id": str(attachment.pk),
@@ -154,11 +168,7 @@ def row_payload(application, *, viewer_is_handler: bool) -> dict:
         "is_open": application.is_open,
         "is_overdue": application.is_overdue,
         # SEC-04 (2026-10-07): daxili qeydin sənədi emalçı olmayana sayılmır (detal dəqiq sayı yazır).
-        "attachment_count": (
-            application.attachments.count()
-            if viewer_is_handler
-            else application.attachments.exclude(event__is_internal=True).count()
-        ),
+        "attachment_count": _visible_attachment_count(application, viewer_is_handler),
         "owner_label": ("sizdədir" if viewer_is_handler else f"{application.current_unit.name}-də"),
     }
 

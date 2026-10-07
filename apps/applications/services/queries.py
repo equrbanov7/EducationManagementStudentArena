@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, F, Prefetch, Q
 from django.utils import timezone
 
 from core.search_text import tolerant_q
@@ -91,7 +91,16 @@ def list_applications(
     return (
         queryset.distinct()
         .select_related("sender_scope_unit")
-        .prefetch_related(Prefetch("attachments", queryset=ApplicationAttachment.objects.only("id", "application_id")))
+        .prefetch_related(
+            Prefetch(
+                "attachments",
+                # SEC-04: daxili qeydin sənədi emalçı olmayana sayılmır — bayraq prefetch-də gəlir
+                # ki, sətir başına `.exclude().count()` sorğusu olmasın.
+                queryset=ApplicationAttachment.objects.only("id", "application_id", "event_id").annotate(
+                    _internal_note=F("event__is_internal")
+                ),
+            )
+        )
     )
 
 
