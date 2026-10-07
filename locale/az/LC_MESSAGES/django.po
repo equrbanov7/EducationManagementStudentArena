@@ -91421,3 +91421,11 @@ msgstr "İmtahan nəzarəti production mühitində deaktivdir."
 msgctxt "exams.form.question.label"
 msgid "Variant %(n)s"
 msgstr "Variant %(n)s"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ (bütün semestrlər)"
+msgstr "CƏMİ (bütün semestrlər)"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ — {season} semestri"
+msgstr "CƏMİ — {season} semestri"

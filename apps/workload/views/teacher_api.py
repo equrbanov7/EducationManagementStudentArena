@@ -47,7 +47,10 @@ def my_rows(request) -> JsonResponse:
             "years": teacher_years(organization=organization, teacher=request.user),
             "academic_year": year,
             "rows": rows,
-            "summary": teacher_workload_summary(organization=organization, teacher=request.user, academic_year=year),
+            # `season` — cədvəlin «CƏMİ» xanası görünən (semestr süzgəcli) sətirlərin cəmi olsun.
+            "summary": teacher_workload_summary(
+                organization=organization, teacher=request.user, academic_year=year, season=season
+            ),
         }
     )
 

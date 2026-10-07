@@ -92015,3 +92015,11 @@ msgstr "Наблюдение за экзаменами отключено в р�
 msgctxt "exams.form.question.label"
 msgid "Variant %(n)s"
 msgstr "Вариант %(n)s"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ (bütün semestrlər)"
+msgstr "ИТОГО (все семестры)"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ — {season} semestri"
+msgstr "ИТОГО — семестр «{season}»"

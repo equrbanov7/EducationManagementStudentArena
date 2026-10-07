@@ -91325,3 +91325,11 @@ msgstr "Sınav gözetimi canlı ortamda devre dışı."
 msgctxt "exams.form.question.label"
 msgid "Variant %(n)s"
 msgstr "Seçenek %(n)s"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ (bütün semestrlər)"
+msgstr "TOPLAM (tüm dönemler)"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ — {season} semestri"
+msgstr "TOPLAM — {season} dönemi"

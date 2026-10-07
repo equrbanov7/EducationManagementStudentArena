@@ -92,6 +92,15 @@ ROWS = {
     "exams.form.question.label": {
         "Variant %(n)s": ("Option %(n)s", "Вариант %(n)s", "Seçenek %(n)s"),
     },
+    # W1 — «Dərs yüküm» cədvəlinin «CƏMİ» xanası görünən sətirlərin cəmidir.
+    "accounts.workload": {
+        "CƏMİ (bütün semestrlər)": ("TOTAL (all semesters)", "ИТОГО (все семестры)", "TOPLAM (tüm dönemler)"),
+        "CƏMİ — {season} semestri": (
+            "TOTAL — {season} semester",
+            "ИТОГО — семестр «{season}»",
+            "TOPLAM — {season} dönemi",
+        ),
+    },
 }
 
 #: Bu skriptin öz kontekstləri — dəyər həmişə buradakı ilə sinxronlanır.

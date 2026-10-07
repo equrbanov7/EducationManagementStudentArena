@@ -91839,3 +91839,11 @@ msgstr "Exam supervision is disabled in production."
 msgctxt "exams.form.question.label"
 msgid "Variant %(n)s"
 msgstr "Option %(n)s"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ (bütün semestrlər)"
+msgstr "TOTAL (all semesters)"
+
+msgctxt "accounts.workload"
+msgid "CƏMİ — {season} semestri"
+msgstr "TOTAL — {season} semester"
