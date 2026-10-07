@@ -10,6 +10,7 @@ from django import forms
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from core.mailing import system_reply_to
 from core.rate_limit import clear_rate_limit, is_rate_limited, normalize_rate_identity, record_rate_limit_hit
@@ -80,12 +81,24 @@ def clear_admin_2fa_state(request) -> None:
         request.session.pop(key, None)
 
 
+def is_local_redirect_path(url) -> bool:
+    """YALNIZ bu saytın yolu: ``/…`` — ``//host``, ``/\\host``, sxem və ya nəzarət simvolu YOX.
+
+    Təhlükəsizlik auditi 2026-10-07: əvvəl ``startswith("/")`` kifayət sayılırdı —
+    ``/<admin>/login/?next=//evil.example`` OTP təsdiqindən sonra xarici sayta
+    yönləndirirdi (brauzer ``//host``-u protokol-nisbi URL kimi açır).
+    """
+
+    url = str(url or "").strip()
+    return url.startswith("/") and url_has_allowed_host_and_scheme(url, allowed_hosts=set())
+
+
 def mark_admin_2fa_pending(request, *, next_url: str = "") -> None:
     user = getattr(request, "user", None)
     clear_admin_2fa_state(request)
     if user and getattr(user, "is_authenticated", False):
         request.session[ADMIN_2FA_PENDING_USER_SESSION_KEY] = str(user.pk)
-    if next_url:
+    if next_url and is_local_redirect_path(next_url):
         request.session[ADMIN_2FA_NEXT_URL_SESSION_KEY] = next_url
     request.session.modified = True
 
@@ -107,7 +120,7 @@ def admin_2fa_pending_for_request(request) -> bool:
 
 def pop_admin_2fa_next_url(request, default_url: str) -> str:
     next_url = str(request.session.pop(ADMIN_2FA_NEXT_URL_SESSION_KEY, "") or "").strip()
-    if not next_url.startswith("/"):
+    if not is_local_redirect_path(next_url):
         return default_url
     return next_url
 
@@ -241,7 +254,7 @@ class AdminOTPGateMiddleware:
                 # bootstrap-ı bu dəyəri `next` kimi götürür.
                 if request.method == "GET" and not admin_2fa_pending_for_request(request):
                     remembered = request.get_full_path()
-                    if remembered.startswith("/") and not remembered.startswith("//"):
+                    if is_local_redirect_path(remembered):
                         request.session[ADMIN_2FA_NEXT_URL_SESSION_KEY] = remembered
                         request.session.modified = True
                 return redirect(reverse("admin:verify-otp"))

@@ -223,6 +223,7 @@ def start_export_job(request, *, export_name, params):
     from django.http import HttpResponseRedirect
     from django.shortcuts import redirect
 
+    from apps.exams.navigation import safe_same_origin_redirect_path
     from apps.exams.tasks import run_export_job
 
     job = TextExtractionJob.objects.create(
@@ -247,7 +248,8 @@ def start_export_job(request, *, export_name, params):
             messages.warning(request, pgettext("exams.view.export_job.error", "empty_export"))
         else:
             messages.error(request, pgettext("exams.view.export_job.error", "export_failed"))
-        fallback = request.META.get("HTTP_REFERER") or "/"
+        # Təhlükəsizlik auditi 2026-10-07: Referer xarici sayt ola bilər — yalnız eyni origin.
+        fallback = safe_same_origin_redirect_path(request, request.META.get("HTTP_REFERER")) or "/"
         return HttpResponseRedirect(fallback)
     return redirect("exams:export_job_waiting", job_id=job.pk)
 
