@@ -34,6 +34,7 @@ from apps.exams.services.coding_throttle import acquire_run_slot, release_run_sl
 from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, tenant_scoped_exams
 
 from ._coding_payload import _submission_payload
+from ._final_device import final_device_guarded
 from ._helpers import build_exam_result_url, current_return_to, ensure_student_exam_tenant_context
 from ._supervision_lock import supervision_locked_json
 from .access_guard import ensure_active_attempt_access
@@ -376,6 +377,7 @@ def _build_submission_items(request, attempt):
 
 @login_required
 @require_POST
+@final_device_guarded
 def coding_autosave(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
@@ -402,6 +404,7 @@ def coding_autosave(request, slug, attempt_id):
 
 @login_required
 @require_POST
+@final_device_guarded
 def coding_run(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()
@@ -473,6 +476,7 @@ def coding_run(request, slug, attempt_id):
 
 @login_required
 @require_POST
+@final_device_guarded
 def coding_submit(request, slug, attempt_id):
     if not practical_exams_enabled():
         return _coding_disabled_error()

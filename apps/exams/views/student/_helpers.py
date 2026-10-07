@@ -251,10 +251,15 @@ def bump_autosave_revision(attempt):
 def build_take_exam_question_payload(exam, attempt, questions):
     """take_exam slide payload-u: hər sual üçün {q, opts, server_delivery}.
 
-    EXAM-P1-04 strict delivery: yeni-protokol attempt-də vaxtlı test sualının
+    EXAM-P1-04 strict delivery: yeni-protokol attempt-də vaxtlı sualın
     məzmunu (mətn/variant/media/düzgün cavab) İLK GET-də səhifə mənbəyinə düşmür
     — ``server_delivery`` işarələnir, variantlar boş buraxılır və məzmun timer
     serverdə başlayandan sonra ``question-seen`` ilə gəlir.
+
+    Təhlükəsizlik dizaynı 2026-10-08: əvvəl yalnız TEST sualları üçün idi — vaxtlı
+    YAZILI sualın mətni/şəkli/videosu səhifə mənbəyində görünürdü. İndi bu səhifəni
+    işlədən hər növ (test + yazılı) eyni qaydadadır; yazılı sualın cavab sahəsi də
+    (textarea/rəsm/fayl) gövdə ilə birlikdə çatdırılır.
     """
     from apps.exams.services.option_tokens import option_token
     from apps.exams.services.question_timer import question_timer_start_required
@@ -263,7 +268,7 @@ def build_take_exam_question_payload(exam, attempt, questions):
     payload = []
     for question in questions:
         opts = []
-        strict_delivery = exam.exam_type == "test" and question_timer_start_required(attempt, question)
+        strict_delivery = exam.exam_type != "coding" and question_timer_start_required(attempt, question)
         if not strict_delivery and exam.exam_type == "test" and question.answer_mode in ("single", "multiple"):
             opts = build_shuffled_options(attempt.id, question)
             # Audit 2026-09-28 EX28-01: input ``value``-su xam id deyil, token.

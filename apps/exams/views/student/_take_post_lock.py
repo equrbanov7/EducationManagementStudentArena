@@ -33,6 +33,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.features import exam_supervision_enabled
 from apps.exams.models import ExamAttempt
+from apps.exams.services.final_center.device_binding import enforce_final_device
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._helpers import append_return_to, autosave_occ_conflict_response, build_exam_result_url, current_return_to
@@ -125,6 +126,9 @@ def _run_locked(request, *, slug, attempt_id, write_answers):
             raise PermissionDenied(reason)
         if final_entry_session_revoked(request, attempt):
             raise _EntrySessionRevoked
+        # 2026-10-08: final cəhdi başladığı cihaza bağlıdır (başqa cihaz → FinalDeviceMismatch,
+        # tranzaksiya geri qaytarılır; audit + 403 view qatında, kilidin xaricində).
+        enforce_final_device(request, attempt)
 
         supervision_enabled = exam_supervision_enabled()
         is_manual_supervision_lock = bool(

@@ -85,12 +85,20 @@ def revoke_final_entry_session(request):
 
 
 def ensure_active_attempt_access(attempt, user, *, request=None, user_excluded=None):
-    """Access ləğv olunubsa student endpoint-ini 403 ilə dayandırır."""
+    """Access ləğv olunubsa student endpoint-ini 403 ilə dayandırır.
+
+    2026-10-08: davam edən final cəhdi başladığı cihaza bağlıdır — başqa cihaz
+    ``FinalDeviceMismatch`` (bax ``services/final_center/device_binding.py``; view-lar
+    ``final_device_guarded`` ilə aydın mesaja çevirir).
+    """
     reason = active_attempt_access_denial_reason(attempt, user, user_excluded=user_excluded)
     if reason:
         raise PermissionDenied(reason)
     if final_entry_session_revoked(request, attempt):
         revoke_final_entry_session(request)
+    from apps.exams.services.final_center.device_binding import enforce_final_device
+
+    enforce_final_device(request, attempt)
 
 
 __all__ = [

@@ -196,6 +196,83 @@ def _journal_path(path: str) -> bool:
     return path.startswith("/jurnal/") and path not in JOURNAL_EXTERNAL_OPEN_PATHS
 
 
+REASON_JOURNAL = "journal_internal_only"
+REASON_SUPERADMIN = "superadmin_internal_only"
+REASON_STAFF = "staff_internal_only"
+
+
+def _superadmin_gate_enabled() -> bool:
+    return bool(getattr(settings, "NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", True))
+
+
+def zone_policy_denial(*, zone: str, path: str, is_superadmin, account_kind_of):
+    """ŞƏBƏKƏ ZONASI qaydası — HTTP middleware-i və WebSocket qapısı üçün TƏK mənbə.
+
+    Təhlükəsizlik dizaynı 2026-10-08: əvvəl qayda yalnız ``NetworkZoneMiddleware.__call__``-
+    da idi və WebSocket qoşulmaları (``/ws/…``) ondan heç keçmirdi. İndi hər iki nəqliyyat
+    bu funksiyanı çağırır — qaydalar ayrı-ayrı yazılıb bir-birindən uzaqlaşa bilməz.
+
+    ``is_superadmin`` / ``account_kind_of`` — tənbəl (lazy) çağırışlar: yalnız qayda onlara
+    çatanda hesablanır (daxili zonada və ya enforce söndürüləndə heç biri çağırılmır).
+    Hər ikisi zona qaydasının aid olduğu ƏSL hesabı (view-as altında aktoru) qiymətləndirir.
+
+    Qaytarır: ``(reason, account_kind)`` rədd üçün, keçidə ``None``.
+    """
+    if not getattr(settings, "NETWORK_ZONE_ENFORCED", False) or zone == ZONE_INTERNAL:
+        return None
+    if _journal_path(path):
+        return REASON_JOURNAL, account_kind_of()
+    if _superadmin_gate_enabled() and not _is_logout_path(path) and is_superadmin():
+        return REASON_SUPERADMIN, "staff"
+    # Sahib 2026-09-29: inzibati hesabların daxili-şəbəkə məhdudiyyəti ayarla idarə olunur (defolt söndürülüb).
+    if getattr(settings, "NETWORK_ZONE_STAFF_INTERNAL_ONLY", False):
+        kind = account_kind_of()
+        if kind == "staff" and not _is_open_path(path):
+            return REASON_STAFF, kind
+    return None
+
+
+class _HttpGateFacts:
+    """HTTP sorğusu üçün tənbəl faktlar — hesablanan dəyər sessiyaya yazılır (WS qapısı oxuyur)."""
+
+    def __init__(self, request):
+        self.request = request
+
+    def superadmin(self) -> bool:
+        from core.access_facts import FACT_SUPERADMIN, remember_access_facts
+
+        value = _is_superadmin(self.request)
+        remember_access_facts(self.request, gate_actor(self.request), **{FACT_SUPERADMIN: value})
+        return value
+
+    def kind(self) -> str:
+        from core.access_facts import FACT_ACCOUNT_KIND, remember_access_facts
+
+        value = account_kind(self.request)
+        remember_access_facts(self.request, gate_actor(self.request), **{FACT_ACCOUNT_KIND: value})
+        return value
+
+
+def log_zone_denial(request, *, reason: str, kind: str, transport: str = "http") -> None:
+    """Zona rəddinin logu + audit sətri — HTTP və WebSocket üçün eyni format."""
+    client_ip = get_client_ip(request) or ""
+    method = getattr(request, "method", "") or ""
+    logger.warning(
+        "network_zone: %s — %s %s ip=%s kind=%s transport=%s", reason, method, request.path, client_ip, kind, transport
+    )
+    try:
+        log_action(
+            action=AuditAction.DENY,
+            reason=f"network_zone: {reason}",
+            request=request,
+            resource_type="network_zone_deny",
+            resource_id=client_ip,
+            resource_repr=request.path[:200],
+        )
+    except Exception:  # noqa: BLE001 — audit heç vaxt cavabı sındırmasın
+        logger.exception("network_zone: audit yazılmadı")
+
+
 class NetworkZoneMiddleware:
     """`OrganizationMiddleware`-dən SONRA durur (rol/üzvlük hazırdır)."""
 
@@ -209,21 +286,18 @@ class NetworkZoneMiddleware:
             return self.get_response(request)
 
         path = request.path_info
-        if _journal_path(path):
-            return self._deny(request, reason="journal_internal_only", kind=account_kind(request))
-        superadmin_gate = getattr(settings, "NETWORK_ZONE_SUPERADMIN_INTERNAL_ONLY", True)
-        if superadmin_gate and _is_superadmin(request) and not _is_logout_path(path):
-            return self._deny_superadmin(request)
-        # Sahib 2026-09-29: inzibati hesabların daxili-şəbəkə məhdudiyyəti ayarla idarə olunur (defolt söndürülüb).
-        if getattr(settings, "NETWORK_ZONE_STAFF_INTERNAL_ONLY", False):
-            kind = account_kind(request)
-            if kind == "staff" and not _is_open_path(path):
-                return self._deny(request, reason="staff_internal_only", kind=kind)
+        facts = _HttpGateFacts(request)
+        denial = zone_policy_denial(zone=zone, path=path, is_superadmin=facts.superadmin, account_kind_of=facts.kind)
+        if denial is not None:
+            reason, kind = denial
+            if reason == REASON_SUPERADMIN:
+                return self._deny_superadmin(request)
+            return self._deny(request, reason=reason, kind=kind)
         response = self.get_response(request)
         # Sahib 2026-10-05: superadmin YALNIZ universitet şəbəkəsindən. Giriş formaları
         # (və OTP addımları) açıq yoldur — bu sorğuda login() superadmin sessiyası
         # açıbsa, kənar zonada həmin sessiya dərhal ləğv edilir.
-        if superadmin_gate and _is_superadmin(request) and not _is_logout_path(path):
+        if _superadmin_gate_enabled() and _is_superadmin(request) and not _is_logout_path(path):
             return self._deny_superadmin(request)
         return response
 
@@ -231,22 +305,10 @@ class NetworkZoneMiddleware:
         from django.contrib.auth import logout
 
         logout(request)
-        return self._deny(request, reason="superadmin_internal_only", kind="staff")
+        return self._deny(request, reason=REASON_SUPERADMIN, kind="staff")
 
     def _deny(self, request, *, reason: str, kind: str):
-        client_ip = get_client_ip(request) or ""
-        logger.warning("network_zone: %s — %s %s ip=%s kind=%s", reason, request.method, request.path, client_ip, kind)
-        try:
-            log_action(
-                action=AuditAction.DENY,
-                reason=f"network_zone: {reason}",
-                request=request,
-                resource_type="network_zone_deny",
-                resource_id=client_ip,
-                resource_repr=request.path[:200],
-            )
-        except Exception:  # noqa: BLE001 — audit heç vaxt cavabı sındırmasın
-            logger.exception("network_zone: audit yazılmadı")
+        log_zone_denial(request, reason=reason, kind=kind)
         if request.headers.get("X-Requested-With") == "XMLHttpRequest" or request.path.startswith("/api/"):
             return JsonResponse({"detail": "network_zone_denied", "reason": reason}, status=403)
         try:

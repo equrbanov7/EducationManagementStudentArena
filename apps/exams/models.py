@@ -11,7 +11,13 @@ from apps.exams.domain.ai_config import AIConfiguration
 from apps.exams.domain.attempts import ExamAnswer, ExamAnswerFile, ExamAttempt, ExamGradeEvent, ProctoringLog
 from apps.exams.domain.coding import CodingExamQuestion, CodingFile, CodingSubmission, CodingTestCase
 from apps.exams.domain.exam_definition import Exam, QuestionBlock
-from apps.exams.domain.final_center import ExamRoom, ExamRoomComputer, ExamRoomSession, FinalExamTicket
+from apps.exams.domain.final_center import (
+    ExamRoom,
+    ExamRoomComputer,
+    ExamRoomSession,
+    FinalAttemptDevice,
+    FinalExamTicket,
+)
 from apps.exams.domain.import_jobs import TextExtractionJob, extraction_job_upload_path
 from apps.exams.domain.language import ExamLanguageVariant
 from apps.exams.domain.question_bank import (
@@ -54,6 +60,7 @@ __all__ = [
     "ExamRoomSession",
     "ExamStudentPin",
     "ExamSupervisionConfig",
+    "FinalAttemptDevice",
     "FinalExamTicket",
     "ProctoringLog",
     "QuestionBank",

@@ -189,9 +189,9 @@
                      data-time-limit="{{ q.effective_time_limit|default:0 }}"{% if item.server_delivery %} data-server-delivery="1"{% endif %}>
 
                     {% if item.server_delivery %}
-                    {% comment %}  EXAM-P1-04 strict delivery: vaxtlı test sualının məzmunu İLK
-                       GET-də səhifə mənbəyinə DÜŞMÜR — timer serverdə başlayanda
-                       question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). {% endcomment %} 
+                    {% comment %}  EXAM-P1-04 strict delivery: vaxtlı sualın (test + 2026-10-08-dən yazılı)
+                       məzmunu və cavab sahəsi İLK GET-də səhifə mənbəyinə DÜŞMÜR — timer serverdə
+                       başlayanda question-seen JS injection ilə gəlir (aşağıdakı yer tutucu). {% endcomment %}
                     <div class="question-content" data-server-delivery-body>
                         <div class="server-delivery-pending" data-server-delivery-pending>
                             <span class="skeleton transition-skeleton-line"></span>
@@ -274,54 +274,9 @@
                                 </div>
                             {% endif %}
 
-                        {# --- YAZILI SUALLAR --- #}
+                        {# --- YAZILI SUALLAR (cavab sahəsi — strict delivery ilə ortaq partial) --- #}
                         {% else %}
-                            <textarea name="q_{{ q.id }}" 
-                                      class="written-answer" 
-                                      placeholder="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}" aria-label="{% trans 'placeholder_write_answer' context 'exams.template.take_exam' %}">{% if ans_data and ans_data.answer %}{{ ans_data.answer.text_answer }}{% endif %}</textarea>
-                            <br>
-                                
-                            {# --- PAINT CAVABI --- #}
-                            {% if q.paint_enabled_effective %}
-                                {% include "exams/components/_paint_answer.html" with q=q ans=ans_data.answer %}
-                            {% endif %}
-                        
-                        
-                        
-
-                            <div class="file-dropzone"
-                                 data-qid="{{ q.id }}"
-                                 data-exam-dropzone-qid="{{ q.id }}">
-
-                                <p>{% trans "drop_files_here_or_click" context "exams.template.take_exam" %}</p>
-
-                                <input type="file" 
-                                       name="file_{{ q.id }}[]" 
-                                       id="question-file-input-{{ q.id }}"
-                                       class="file-input" 
-                                       accept=".pdf,.png,.jpg,.jpeg,.zip"
-                                       multiple 
-                                       data-take-exam-file-input="{{ q.id }}">
-                            </div>
-
-                            <button type="button"
-                                    class="add-file-btn"
-                                    data-file-input-target="#question-file-input-{{ q.id }}">
-                                + {% trans "action_add_file" context "exams.template.take_exam" %}
-                            </button>
-
-                            <div id="file-preview-{{ q.id }}" class="file-preview-area">
-                                {% if ans_data and ans_data.answer %}
-                                    {% for f in ans_data.answer.files.all %}
-                                        <div class="file-preview-item">
-                                            <div class="file-preview-left">
-                                                <span class="file-icon">{{ f.filename|slice:"-3:"|upper }}</span>
-                                                <a href="{{ f.file.url }}" target="_blank">{{ f.filename }}</a>
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                {% endif %}
-                            </div>
+                            {% include "exams/student/partials/_written_answer_area.html" with q=q ans=ans_data.answer %}
                         {% endif %}
                     </div>
                     {% endif %}
