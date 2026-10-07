@@ -3,13 +3,17 @@ name: 🛠 Prod host maintenance
 # Audit 2026-09-28 (deploy sonrası): host səviyyəli baxım — sudo parolu OLMADAN.
 # Self-hosted runner docker qrupundadır; `nsenter -t 1` host-un namespace-lərinə
 # girir (postgres:16-alpine image-i serverdə artıq var, busybox nsenter).
-#   status — ufw, reboot tələbi, runner/docker xidmətlərinin autostart vəziyyəti (yalnız oxuma)
+#   status — ufw, reboot tələbi, runner/docker xidmətlərinin autostart vəziyyəti,
+#            selfheal vahidləri + son autoheal əməliyyatları (yalnız oxuma)
 #   reboot — qoruyucu yoxlamalardan sonra `shutdown -r +1` (job bitsin deyə 1 dəq gecikmə)
+#   selfheal — (2026-10-07, enerji kəsilməsi) boot converge + autoheal systemd vahidlərini
+#              idempotent quraşdırır: scripts/ops/selfheal/install.sh (docs/ops/POWER_OUTAGE_RECOVERY.md)
+#   selfheal-off — autoheal timer-i + boot converge-i söndürür (fayllar qalır; geri: selfheal)
 on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953) və ya reboot"
+        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953), selfheal / selfheal-off (boot converge + autoheal) və ya reboot"
         required: true
         default: status
         type: choice
@@ -19,6 +23,8 @@ on:
           - tune
           - prune
           - bridge-fw
+          - selfheal
+          - selfheal-off
           - reboot
       confirm:
         description: "reboot üçün REBOOT yazın"
@@ -69,6 +75,18 @@ jobs:
             host systemctl is-enabled docker || true
             # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: ifadə HOST-da açılır
             host sh -c 'for u in $(systemctl list-unit-files "actions.runner*" --no-legend | cut -d" " -f1); do printf "%s: " "$u"; systemctl is-enabled "$u"; done'
+            echo "--- selfheal (boot converge + autoheal; quraşdırma: action=selfheal)"
+            for u in emsarena-converge.service emsarena-autoheal.timer; do
+              st="$(host systemctl is-enabled "$u" 2>/dev/null || true)"
+              echo "$u: ${st:-quraşdırılmayıb}"
+            done
+            echo "autoheal timer aktiv: $(host systemctl is-active emsarena-autoheal.timer 2>/dev/null || true)"
+            host systemctl show -p ActiveState -p Result -p ExecMainExitTimestamp emsarena-converge.service 2>/dev/null | sed 's/^/converge /' || true
+            if host test -e /run/emsarena/autoheal.pause; then echo "autoheal PAUZADA: /run/emsarena/autoheal.pause"; fi
+            echo "--- son autoheal əməliyyatları (jurnal, 7 gün)"
+            host sh -c 'journalctl -u emsarena-autoheal.service --since -7d --no-pager -o short-iso 2>/dev/null | grep -E "ACTION|LIMIT|HOLD|ERROR|XƏTA" | tail -n 15' || true
+            echo "--- son boot converge (jurnal)"
+            host sh -c 'journalctl -u emsarena-converge.service -b --no-pager -o short-iso 2>/dev/null | tail -n 6' || true
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -200,6 +218,47 @@ jobs:
             echo "8953: $(probe 8953)"
             docker compose -f docker-compose.prod.yml exec -T prometheus wget -qO- --timeout=5 http://172.18.0.1:9100/metrics 2>/dev/null | grep -c '^node_' | sed 's/^/prometheus → node_ metrik sətirləri: /' || true
             host sh -c 'ufw status | grep -E "9100|8953"'
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: 📥 Checkout (selfheal skriptləri)
+        if: github.event.inputs.action == 'selfheal'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: 🩹 Selfheal — boot converge + autoheal systemd vahidləri (2026-10-07)
+        if: github.event.inputs.action == 'selfheal'
+        run: |
+          set -euo pipefail
+          # Sahib 2026-10-07: «elektrik kəsilib server yenidən yananda sistem özü-özünü ayağa qaldırsın».
+          # Skriptlər bu checkout-dan gəlir (runner host-dadır — yol host namespace-də də eynidir);
+          # install.sh root ilə nsenter içində işləyir və onları /usr/local/sbin + /etc/systemd/system-ə
+          # köçürür. Heç bir sirr oxunmur/çap olunmur: .env-ə yalnız sahibini bilmək üçün `stat`,
+          # compose konfiqi yalnız `config -q` ilə yoxlanır. Sənəd: docs/ops/POWER_OUTAGE_RECOVERY.md
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          APP_DIR=/home/wcu/EducationManagementStudentArena
+          SRC="$GITHUB_WORKSPACE/scripts/ops/selfheal"
+          for f in "$SRC"/*.sh; do bash -n "$f"; done
+          {
+            echo "## 🩹 Selfheal (boot converge + autoheal)"
+            echo '```'
+            host bash "$SRC/install.sh" --app-dir "$APP_DIR" --source "$SRC"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: ⏸ Selfheal söndür (autoheal timer + boot converge)
+        if: github.event.inputs.action == 'selfheal-off'
+        run: |
+          set -euo pipefail
+          host() { docker run --rm --privileged --pid=host --net=host "$HOST_IMAGE" nsenter -t 1 -m -u -i -n -p -- "$@"; }
+          {
+            echo "## ⏸ Selfheal söndürüldü"
+            echo '```'
+            host systemctl disable --now emsarena-autoheal.timer 2>&1 || true
+            host systemctl disable emsarena-converge.service 2>&1 || true
+            echo "emsarena-autoheal.timer: $(host systemctl is-enabled emsarena-autoheal.timer 2>/dev/null || true)"
+            echo "emsarena-converge.service: $(host systemctl is-enabled emsarena-converge.service 2>/dev/null || true)"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 

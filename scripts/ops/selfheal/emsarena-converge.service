@@ -1,0 +1,19 @@
+# EMS Arena — boot converge (scripts/ops/selfheal/install.sh quraşdırır; @RUN_AS@ = deploy istifadəçisi)
+# Host yenidən yananda docker-dən sonra compose stack-ını sonuncu SAĞLAM release ilə
+# bəyan olunmuş vəziyyətə gətirir. Sənəd: docs/ops/POWER_OUTAGE_RECOVERY.md
+[Unit]
+Description=EMSArena: boot-da docker compose stack-ini qaldir (converge)
+After=docker.service network-online.target
+Wants=network-online.target docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=@RUN_AS@
+ExecStart=/usr/local/sbin/emsarena-converge.sh
+# Skript özü 10 dəq (CONVERGE_TIMEOUT_SECONDS) təkrar cəhd edir; bu, systemd-in tavanıdır.
+TimeoutStartSec=15min
+SyslogIdentifier=emsarena-converge
+
+[Install]
+WantedBy=multi-user.target

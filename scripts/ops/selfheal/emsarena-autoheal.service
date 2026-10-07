@@ -1,0 +1,14 @@
+# EMS Arena — autoheal keçidi (emsarena-autoheal.timer işə salır; @RUN_AS@ = deploy istifadəçisi)
+# Yalnız bu compose layihəsinin unhealthy / start-ı alınmamış konteynerlərini limitlərlə
+# bərpa edir. Sənəd: docs/ops/POWER_OUTAGE_RECOVERY.md
+[Unit]
+Description=EMSArena: unhealthy/dayanmis compose konteynerlerini limitle berpa et (autoheal)
+After=docker.service emsarena-converge.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+User=@RUN_AS@
+ExecStart=/usr/local/sbin/emsarena-autoheal.sh
+TimeoutStartSec=10min
+SyslogIdentifier=emsarena-autoheal

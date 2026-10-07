@@ -16,7 +16,17 @@
 # REDIS_MEM_LIMIT-dən (4096M) kiçik saxlanmalıdır (tests/test_infra_compose_config.py).
 # io-threads: 5000-bağlantılı WS fan-out üçün soket I/O-nu ayrı thread-lərə verir.
 # `dir` verilmir → işçi qovluq /data (image WORKDIR), AOF əvvəlki kimi ora yazılır.
+#
+# Enerji kəsilməsi (2026-10-07): AOF açıqdır (appendfsync everysec — defolt, ən çox
+# ~1 s yazı itə bilər). Kəsilmədə AOF-un son əmri yarımçıq qala bilər; Redis 7-nin
+# defoltu `aof-load-truncated yes`-dir — yarımçıq quyruq atılır, loqa xəbərdarlıq
+# düşür və server QALXIR (`no` olsaydı start-da dayanardı, crash-loop). Defolt
+# dəyişə bilər deyə açıq yazılıb. AOF açıq olanda start-da dump.rdb deyil, AOF
+# (RDB preamble-lı baza + incr fayllar) yüklənir; baza faylı rewrite-da atomik
+# rename ilə yazılır. Ortadan korlanmış AOF (yarımçıq quyruq deyil) yenə dayanır —
+# əl ilə bərpa: docs/ops/POWER_OUTAGE_RECOVERY.md («Redis AOF korlanıb»).
 appendonly yes
+aof-load-truncated yes
 maxmemory __REDIS_MAXMEMORY__
 maxmemory-policy noeviction
 io-threads 4

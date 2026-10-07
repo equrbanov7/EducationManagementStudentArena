@@ -46,6 +46,33 @@ x-logging: &default-logging
 x-no-new-privileges: &no-new-privileges
   - no-new-privileges:true
 
+# ─── Resurs prioriteti: cpu_shares + oom_score_adj (sahib 2026-10-07) ────────
+# «Yüklənmədə çökməsin»: hər servis `cpu_shares` və `oom_score_adj` daşıyır
+# (.env ilə override: <SERVIS>_CPU_SHARES / <SERVIS>_OOM_SCORE_ADJ; monitorinq
+# ortaq MONITORING_*). Sıra (tests/test_infra_power_outage_selfheal.py yoxlayır):
+#   cpu_shares     postgres 4096 > pgbouncer/redis/nginx 2048 > app/arp-agent 1024
+#                  > celery_worker 768 > celery_beat 512 > heavy/backup/monitorinq/piston 256
+#   oom_score_adj  postgres -900 < pgbouncer -800 < redis -700 < nginx/arp-agent -500
+#                  < app/beat 0 < celery_worker 100 < backup 200 < heavy 300 < piston 400 < monitorinq 500
+# - `cpu_shares` TAVAN DEYİL, nisbi çəkidir (cgroup v2-də cpu.weight-ə çevrilir) və
+#   yalnız CPU UĞRUNDA RƏQABƏT olanda işləyir: boş serverdə hər konteyner bütün
+#   nüvələri ala bilər. İmtahan pikində 10 vCPU doyanda DB / hovuz / Redis / nginx
+#   fon işlərindən (OCR/AI/export, monitorinq, backup) əvvəl CPU alır — sorğu
+#   yolunun gecikməsi fon işlərinin hesabına qorunur.
+# - `oom_score_adj` host səviyyəli OOM-killer-in seçimini istiqamətləndirir.
+#   Yaddaş tavanlarının cəmi (~37 GB) RAM-dan (31 GB) böyükdür — hamısı eyni anda
+#   dolsa kernel bir prosesi öldürür; mənfi dəyər Postgres/Redis-i SON namizəd
+#   edir, əvəzində monitorinq/heavy/app replikası (vətəndaşlığı olmayan, 8 nüsxə)
+#   ölür. Konteynerin ÖZ `memory` limiti aşılanda isə OOM yalnız həmin cgroup
+#   daxilində seçir — bu açar ona təsir etmir.
+# - deploy.resources.limits (memory/cpus) ilə toqquşmur: compose `cpu_shares`-i
+#   HostConfig.CpuShares-ə, limitləri Memory/NanoCpus-a yazır (`cpus` açarı servis
+#   səviyyəsində yazılmır — o, deploy.resources.limits.cpus ilə toqquşardı).
+#   `no-new-privileges` ilə də toqquşmur: oom_score_adj-ı konteyner prosesi deyil,
+#   runc başlanğıcda (imtiyazlar atılmazdan əvvəl) yazır; prosesin özü onu dəyişmir.
+# - Dəyişiklik konfiq hash-ini dəyişir: ilk deploy BÜTÜN konteynerləri bir dəfə
+#   yenidən yaradır (postgres/redis ~10–30 s) — imtahan pəncərəsindən kənarda.
+
 # ─── Ortaq build tərifi (app / celery_worker / celery_beat eyni image) ──────
 x-app-build: &app-build
   context: .
@@ -275,6 +302,10 @@ services:
       - log_min_duration_statement=${POSTGRES_LOG_MIN_DURATION_MS:-1000}
       - -c
       - deadlock_timeout=1s
+      # Enerji kəsilməsi (2026-10-07): fsync / full_page_writes / synchronous_commit
+      # QƏSDƏN yazılmır — PG defoltları (on) qalır, ona görə kəsilmədən sonra WAL
+      # bərpası datanı itirmədən tamamlanır. Bunları heç vaxt `off` etməyin
+      # (tests/test_infra_power_outage_selfheal.py yoxlayır).
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -292,6 +323,9 @@ services:
     stop_grace_period: 60s
     logging: *default-logging
     security_opt: *no-new-privileges
+    # Ən yüksək CPU çəkisi, OOM-killer üçün ən son namizəd (bax x-no-new-privileges altındakı şərh).
+    cpu_shares: ${POSTGRES_CPU_SHARES:-4096}
+    oom_score_adj: ${POSTGRES_OOM_SCORE_ADJ:--900}
     deploy:
       resources:
         limits:
@@ -338,6 +372,8 @@ services:
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${BACKUP_CPU_SHARES:-256}
+    oom_score_adj: ${BACKUP_OOM_SCORE_ADJ:-200}
     deploy:
       resources:
         limits:
@@ -410,6 +446,8 @@ services:
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${PGBOUNCER_CPU_SHARES:-2048}
+    oom_score_adj: ${PGBOUNCER_OOM_SCORE_ADJ:--800}
     deploy:
       resources:
         limits:
@@ -476,6 +514,8 @@ services:
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${REDIS_CPU_SHARES:-2048}
+    oom_score_adj: ${REDIS_OOM_SCORE_ADJ:--700}
     deploy:
       resources:
         limits:
@@ -517,6 +557,10 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    # İmtahan qapısı fail-closed-dur (agent ölsə hamı rədd olunur) — app səviyyəsində CPU,
+    # nginx səviyyəsində OOM qorunması (RSS ~15 MB, heç kimdən yaddaş almır).
+    cpu_shares: ${ARP_AGENT_CPU_SHARES:-1024}
+    oom_score_adj: ${ARP_AGENT_OOM_SCORE_ADJ:--500}
     deploy:
       resources:
         limits:
@@ -625,6 +669,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    cpu_shares: ${APP_CPU_SHARES:-1024}
+    oom_score_adj: ${APP_OOM_SCORE_ADJ:-0}
     deploy:
       resources:
         limits:
@@ -686,6 +732,8 @@ services:
     stop_grace_period: 300s
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${CELERY_CPU_SHARES:-768}
+    oom_score_adj: ${CELERY_OOM_SCORE_ADJ:-100}
     deploy:
       resources:
         limits:
@@ -733,6 +781,9 @@ services:
     stop_grace_period: 900s
     logging: *default-logging
     security_opt: *no-new-privileges
+    # OCR/AI/export fon işidir: CPU rəqabətində sorğu yolundan geri qalır, OOM-da tez seçilir.
+    cpu_shares: ${CELERY_HEAVY_CPU_SHARES:-256}
+    oom_score_adj: ${CELERY_HEAVY_OOM_SCORE_ADJ:-300}
     deploy:
       resources:
         limits:
@@ -754,12 +805,21 @@ services:
   # CELERY_BEAT_SCHEDULE (config/settings/components/celery_cache.py) yalnız
   # bu servis işləyəndə icra olunur. Schedule state /tmp-də saxlanır —
   # restart-da itməsi problemsizdir (interval task yenidən hesablanır).
+  # Enerji kəsilməsi (2026-10-07): /tmp konteynerin yazıla bilən qatıdır və
+  # restart-dan sağ çıxır — yarımçıq yazılmış shelve faylı beat-i hər start-da
+  # çökdürürdü (crash-loop). docker/celery-beat/start.sh start-dan əvvəl faylı
+  # oxuyub yoxlayır, korlanıbsa silir və beat təmiz cədvəllə başlayır. Skript
+  # image-ə deyil, bind-mount ilə gəlir — rollback (köhnə image + bu compose)
+  # da işləsin. Healthcheck dəyişmir (eyni --schedule yolu).
   # ─────────────────────────────────────────────────────────────────────────
   celery_beat:
     image: ${APP_IMAGE:-emsarena-prod:latest}
     build: *app-build
     container_name: emsarena-celery-beat
-    command: ["celery", "-A", "config", "beat", "-l", "INFO", "--schedule", "/tmp/celerybeat-schedule"]
+    command:
+      ["sh", "/opt/emsarena/celery-beat-start.sh", "celery", "-A", "config", "beat", "-l", "INFO", "--schedule", "/tmp/celerybeat-schedule"]
+    volumes:
+      - ./docker/celery-beat/start.sh:/opt/emsarena/celery-beat-start.sh:ro
     environment: *app-env
     depends_on:
       pgbouncer:
@@ -769,6 +829,8 @@ services:
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${CELERY_BEAT_CPU_SHARES:-512}
+    oom_score_adj: ${CELERY_BEAT_OOM_SCORE_ADJ:-0}
     deploy:
       resources:
         limits:
@@ -820,6 +882,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -862,6 +926,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -920,6 +986,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -971,6 +1039,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1015,6 +1085,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1063,6 +1135,8 @@ services:
       - --disable_metrics=advtcp,cpu_topology,hugetlb,memory_numa,process,referenced_memory,resctrl,sched,tcp,udp,percpu,disk,diskIO
     restart: unless-stopped
     logging: *default-logging
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1088,6 +1162,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1109,6 +1185,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1133,6 +1211,8 @@ services:
     security_opt: *no-new-privileges
     cap_drop: [ALL]
     read_only: true
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1168,6 +1248,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1192,6 +1274,8 @@ services:
     logging: *default-logging
     security_opt: *no-new-privileges
     cap_drop: [ALL]
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1304,6 +1388,8 @@ services:
     restart: unless-stopped
     logging: *default-logging
     security_opt: *no-new-privileges
+    cpu_shares: ${MONITORING_CPU_SHARES:-256}
+    oom_score_adj: ${MONITORING_OOM_SCORE_ADJ:-500}
     deploy:
       resources:
         limits:
@@ -1361,6 +1447,8 @@ services:
       PISTON_RUN_TIMEOUT: ${PISTON_RUN_TIMEOUT:-15000}
       PISTON_OUTPUT_MAX_SIZE: ${PISTON_OUTPUT_MAX_SIZE:-65536}
     logging: *default-logging
+    cpu_shares: ${PISTON_CPU_SHARES:-256}
+    oom_score_adj: ${PISTON_OOM_SCORE_ADJ:-400}
     deploy:
       resources:
         limits:
@@ -1413,6 +1501,8 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+    cpu_shares: ${NGINX_CPU_SHARES:-2048}
+    oom_score_adj: ${NGINX_OOM_SCORE_ADJ:--500}
     deploy:
       resources:
         limits:
