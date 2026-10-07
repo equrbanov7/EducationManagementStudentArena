@@ -28,6 +28,9 @@ Miqyas 2026-10-06 (yük testi: 300 oyunçuda host «start» 30 s): server auto-r
 PIN başına BİRDİR, host-a gedən sayğaclar (``delivery_progress`` / ``answer_progress``) prosesdə
 birləşdirilir — bax ``socket_coordination.py``. Keçid (start/next/reveal) oyunçu sayı qədər
 taymer, keş iddiası və ya host göndərişi doğurmur.
+
+Yük testi 2026-10-07 («start» 28 s): hadisələr asgiref-in TƏK thread-indən keçmir — bax
+``LiveSocketBase.dispatch``.
 """
 
 from __future__ import annotations
@@ -40,7 +43,9 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from asgiref.sync import sync_to_async
+from channels.consumer import get_handler_name
 from channels.db import database_sync_to_async
+from channels.exceptions import StopConsumer
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from apps.live_exam import consumer_support as support
@@ -94,6 +99,32 @@ class LiveSocketBase(AsyncJsonWebsocketConsumer):
     kind = "socket"
     auth_context: dict[str, Any] | None = None
     player_auth: dict[str, Any] | None = None
+
+    async def dispatch(self, message):
+        """channels-in ``AsyncConsumer.dispatch``-i — HƏR mesajdan əvvəlki ``aclose_old_connections()`` OLMADAN.
+
+        Yük testi 2026-10-07 (8 daphne × 0.5 CPU, 2 × 150 oyunçu, «start» 28 s): channels 4.x hər
+        hadisədən (qoşulma, klient kadrı, hər ``lobby_event``/``play_event``) əvvəl
+        ``sync_to_async(close_old_connections)`` çağırır — ``thread_sensitive=True``. WebSocket
+        scope-unda ``ThreadSensitiveContext`` yoxdur, ona görə bu, prosesdəki BÜTÜN socket-lərin
+        hadisələrini asgiref-in TƏK thread-ində növbəyə düzür (``ASGI_THREADS`` hovuzu deyil).
+        Lobbidə hər qoşulma N socket-ə roster göndərir → qoşulma axınında O(N²) hop (ölçü:
+        2 × 150 oyunçuda ~23 000 hop, növbə gözləməsi cəmi ~57 s); ``game_started`` və 1-ci
+        sual həmin növbənin sonunda gözləyir. Bu consumer-lər event loop thread-ində DB-yə
+        toxunmur — DB işi ``database_sync_to_async(thread_sensitive=False)``-dadır və o, bağlantıları
+        işçi thread-də özü təmizləyir. Deməli bu hop yalnız gecikmə idi.
+        """
+        handler = getattr(self, get_handler_name(message), None)
+        if handler is None:
+            raise ValueError(f"No handler for message type {message['type']}")
+        await handler(message)
+
+    async def websocket_disconnect(self, message):
+        """channels-dəki kimi (qrup tərki + ``disconnect``), sonda tək-thread hopu olmadan."""
+        for group in self.groups:
+            await self.channel_layer.group_discard(group, self.channel_name)
+        await self.disconnect(message["code"])
+        raise StopConsumer()
 
     async def _admit(self) -> bool:
         """Autentifikasiya + limitlər. ``False`` → socket artıq bağlanıb."""
