@@ -44,6 +44,8 @@ from django.views.decorators.http import require_GET
 from core.permissions import is_superadmin_user
 from core.tenancy import get_request_organization
 
+from .option_cache import cached_rows
+from .option_cache import scope_key as option_scope_key
 from .views_export import audit_log_export  # noqa: F401 — yenidən ixrac (urls.py)
 from .views_filters import (  # noqa: F401 — yenidən ixrac
     ACTION_KEYS,
@@ -125,20 +127,30 @@ def _action_options() -> list[dict]:
     ]
 
 
-def _resource_options(scope) -> tuple[list[dict], dict]:
+def _resource_options(scope, cache_key=None) -> tuple[list[dict], dict]:
     """Əhatədəki fərqli resurs tipləri — `rt:<ad>` və (boş `resource_type`
-    olan sətirlər üçün) `ct:<content_type_id>` dəyərləri."""
+    olan sətirlər üçün) `ct:<content_type_id>` dəyərləri.
+
+    ``cache_key`` verilibsə xam sətirlər qısa müddət keşlənir (bax ``option_cache.py``)."""
     labels: dict = {}
-    for value in (
-        scope.exclude(resource_type="").order_by().values_list("resource_type", flat=True).distinct()[:OPTION_CAP]
-    ):
+
+    def _types():
+        return (
+            scope.exclude(resource_type="").order_by().values_list("resource_type", flat=True).distinct()[:OPTION_CAP]
+        )
+
+    def _content_types():
+        return (
+            scope.filter(resource_type="", content_type__isnull=False)
+            .order_by()
+            .values_list("content_type_id", flat=True)
+            .distinct()[:OPTION_CAP]
+        )
+
+    types = cached_rows("rt", cache_key, _types) if cache_key else _types()
+    for value in types:
         labels[f"rt:{value}"] = _humanize_type(value)
-    content_type_ids = list(
-        scope.filter(resource_type="", content_type__isnull=False)
-        .order_by()
-        .values_list("content_type_id", flat=True)
-        .distinct()[:OPTION_CAP]
-    )
+    content_type_ids = list(cached_rows("ct", cache_key, _content_types) if cache_key else _content_types())
     if content_type_ids:
         for content_type in ContentType.objects.filter(id__in=content_type_ids):
             labels[f"ct:{content_type.id}"] = f"{_humanize_type(content_type.model)} · {content_type.app_label}"
@@ -146,14 +158,18 @@ def _resource_options(scope) -> tuple[list[dict], dict]:
     return [{"value": "", "label": pgettext(_CTX, "Bütün resurslar")}] + options, labels
 
 
-def _actor_options(scope) -> tuple[list[dict], dict]:
+def _actor_options(scope, cache_key=None) -> tuple[list[dict], dict]:
     labels: dict = {}
-    rows = (
-        scope.filter(user__isnull=False)
-        .order_by()
-        .values_list("user_id", "user__username", "user__first_name", "user__last_name")
-        .distinct()[:OPTION_CAP]
-    )
+
+    def _rows():
+        return (
+            scope.filter(user__isnull=False)
+            .order_by()
+            .values_list("user_id", "user__username", "user__first_name", "user__last_name")
+            .distinct()[:OPTION_CAP]
+        )
+
+    rows = cached_rows("actor", cache_key, _rows) if cache_key else _rows()
     for user_id, username, first, last in rows:
         key = str(user_id)
         if key in labels:
@@ -220,12 +236,14 @@ def build_audit_log_context(request) -> dict:
             failed=Count("id", filter=Q(action__in=FAILED_ACTIONS)),
         )
         mix = list(queryset.order_by().values("action").annotate(n=Count("id")).order_by("-n", "action"))
+        # Fon işi tutumu 2026-10-07: seçicilər bütün tarixçə üzrə DISTINCT-dir (2 M sətirdə 4,3 s) — keşlə.
+        options_key = option_scope_key(is_superadmin=is_superadmin, organization=organization)
         return {
             "page_obj": page_obj,
             "totals": totals,
             "mix": mix,
-            "resource": _resource_options(scope),
-            "actor": _actor_options(scope),
+            "resource": _resource_options(scope, options_key),
+            "actor": _actor_options(scope, options_key),
             "org": _organization_options() if is_superadmin else ([], {}),
         }
 
