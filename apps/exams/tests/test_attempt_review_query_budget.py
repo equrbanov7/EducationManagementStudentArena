@@ -11,6 +11,9 @@
   təşkilat SELECT-i atırdı (ad-görünürlüyü ``attempt.exam.organization``-a baxır,
   ``select_related("exam")`` hər sətrə ayrıca imtahan instansı verirdi): 41/43 →
   32 sabit.
+* Yoxlama POST-u (``apply_manual_grading``) hər dəyişən cavab üçün ayrıca
+  ``UPDATE`` atırdı və yönləndirmədən əvvəl baxış cavablarını boş yerə yükləyirdi:
+  5 sualda 38, 20 sualda 52 sorğu → TƏK toplu UPDATE, ~30 sabit.
 
 Render olunan HTML eyni qalıb (müqayisə vaxt/uuid normallaşdırılması ilə aparılıb).
 """
@@ -37,6 +40,7 @@ User = get_user_model()
 CHECK_BUDGET = 32
 VIEW_BUDGET = 36
 RESULTS_BUDGET = 35
+GRADE_POST_BUDGET = 33
 
 
 def _assign(user, organization, profile_role, role_name):
@@ -204,3 +208,38 @@ class AttemptReviewQueryBudgetTest(TestCase):
         self.assertLessEqual(len(org_selects), 2, org_selects)
         # Yoxlanmamış yazılı cəhd — ad gizlidir (görünürlük qərarı dəyişməyib).
         self.assertTrue(all(not row["can_view_name"] for row in large_resp.context["attempts_data"]))
+
+    def test_grading_post_query_count_is_independent_of_question_count(self):
+        from django.contrib.contenttypes.models import ContentType
+
+        from apps.exams.models import ExamGradeEvent
+
+        ContentType.objects.get_for_model(ExamAttempt)  # audit yazısının proses keşi ölçüyə düşməsin
+        counts = {}
+        for size, question_count in (("small", 5), ("large", 20)):
+            exam, attempts = self.exams[("written", size)]
+            attempt = attempts[1]
+            url = reverse("exams:teacher_check_attempt", args=[exam.slug, attempt.id])
+            question_ids = list(exam.questions.order_by("id").values_list("id", flat=True))
+            payload = {f"score_{qid}": str(index % 6) for index, qid in enumerate(question_ids)}
+            payload.update({f"feedback_{qid}": f"rəy {index}" for index, qid in enumerate(question_ids)})
+            self.client.get(url)  # isinmə
+            with CaptureQueriesContext(connection) as ctx:
+                response = self.client.post(url, payload)
+            self.assertEqual(response.status_code, 302)
+            counts[size] = len(ctx.captured_queries)
+            answer_updates = [
+                q["sql"] for q in ctx.captured_queries if q["sql"].startswith('UPDATE "exams_examanswer"')
+            ]
+            self.assertEqual(len(answer_updates), 1, answer_updates)
+            # Yazılan dəyərlər, ledger və cəhd xülasəsi əvvəlki kimi.
+            answers = {a.question_id: a for a in ExamAnswer.objects.filter(attempt=attempt)}
+            for index, qid in enumerate(question_ids):
+                self.assertEqual(answers[qid].teacher_score, index % 6)
+                self.assertEqual(answers[qid].teacher_feedback, f"rəy {index}")
+            self.assertEqual(ExamGradeEvent.objects.filter(attempt=attempt).count(), question_count)
+            attempt.refresh_from_db()
+            self.assertTrue(attempt.checked_by_teacher)
+            self.assertEqual(attempt.teacher_score, sum(index % 6 for index in range(question_count)))
+        self.assertEqual(counts["small"], counts["large"], counts)
+        self.assertLessEqual(counts["large"], GRADE_POST_BUDGET, counts)

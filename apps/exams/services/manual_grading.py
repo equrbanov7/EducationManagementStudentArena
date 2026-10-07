@@ -198,7 +198,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
     A no-op payload does not claim original-grader ownership or start the review
     edit window.
     """
-    from apps.exams.models import ExamAttempt, ExamGradeEvent
+    from apps.exams.models import ExamAnswer, ExamAttempt, ExamGradeEvent
 
     now = current_time or timezone.now()
     attempt = ExamAttempt.objects.select_for_update().get(pk=attempt_id)
@@ -206,6 +206,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
 
     answers = list(attempt.answers.select_for_update().select_related("question").order_by("id"))
     grade_events = []
+    changed_answers = []
     grading_changed = False
     total_score = 0
     any_score = False
@@ -243,7 +244,7 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
         grading_changed = True
         answer.teacher_score = score
         answer.teacher_feedback = feedback
-        answer.save(update_fields=["teacher_score", "teacher_feedback", "updated_at"])
+        changed_answers.append(answer)
 
         if score != previous_score:
             grade_events.append(
@@ -256,6 +257,15 @@ def apply_manual_grading(*, attempt_id, grader, payload, current_time=None):
                     max_points=max_points,
                 )
             )
+
+    if changed_answers:
+        # Sual başına UPDATE əvəzinə TƏK toplu UPDATE (20 suallıq yoxlama: 20 → 1 sorğu).
+        # ``updated_at`` auto_now-dur — bulk_update onu özü qoymur, ona görə burada
+        # (``save()``-in etdiyi kimi real yazı anı ilə) təyin olunur.
+        stamp = timezone.now()
+        for answer in changed_answers:
+            answer.updated_at = stamp
+        ExamAnswer.objects.bulk_update(changed_answers, ["teacher_score", "teacher_feedback", "updated_at"])
 
     if grade_events:
         ExamGradeEvent.objects.bulk_create(grade_events)

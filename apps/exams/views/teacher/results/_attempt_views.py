@@ -243,8 +243,6 @@ def teacher_check_attempt(request, slug, attempt_id):
         )
         return redirect(view_attempt_url)
 
-    # YALNIZ bu attempt-ə düşən suallar
-    qa_list = [_build_answer_review_item(a) for a in _load_review_answers(attempt, exam)]
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
@@ -306,6 +304,8 @@ def teacher_check_attempt(request, slug, attempt_id):
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
         return redirect(results_return_url)
 
+    # YALNIZ bu attempt-ə düşən suallar — yalnız GET-də (POST həmişə yönləndirir).
+    qa_list = [_build_answer_review_item(a) for a in _load_review_answers(attempt, exam)]
     context = {
         "exam": exam,
         "attempt": attempt,
