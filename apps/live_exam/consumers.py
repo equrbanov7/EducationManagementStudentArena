@@ -56,13 +56,15 @@ from apps.live_exam.models import LiveSession
 from apps.live_exam.reveal import build_reveal_bundle
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import serialize_player_question_result
-from apps.live_exam.socket_coordination import auto_reveal_timers, host_progress
+from apps.live_exam.socket_coordination import auto_reveal_timers, host_progress, lobby_rosters
 from apps.live_exam.transport import (
     build_answer_progress_payload,
     build_answer_saved_payload,
     build_lobby_state_payload,
     bundle_events,
+    lobby_roster_group,
     parse_answer_submission,
+    player_lobby_state_payload,
 )
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
@@ -215,9 +217,10 @@ class LiveSocketBase(AsyncJsonWebsocketConsumer):
 class LiveLobbyConsumer(LiveSocketBase):
     """
     Wait room / lobby websocket:
-    - connect olanda hazırkı players listini göndərir
+    - connect olanda hazırkı vəziyyəti göndərir (oyunçuya say + öz sətri, host-a tam siyahı)
     - view tərəfdən group_send gələndə realtime update edir
-    Group: live_<pin>_lobby
+    Qruplar: live_<pin>_lobby (game_started, ayarlar, kick, reaksiya); roster — host socket-i
+    live_<pin>_lobby_roster qrupundadır, oyunçu socket-i ``lobby_rosters`` (prosesdə bir abunəçi) ilə alır.
     """
 
     kind = "lobby"
@@ -226,19 +229,31 @@ class LiveLobbyConsumer(LiveSocketBase):
         self._pending_lobby_state = None
         self._lobby_flush_handle = None
         self._last_lobby_sent = 0.0
+        self._lobby_closed = False
         if not await self._admit():
             return
         self.group_name = f"live_{self.pin}_lobby"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
+        if self.player_auth is None:
+            self.roster_group = lobby_roster_group(self.pin)
+            await self.channel_layer.group_add(self.roster_group, self.channel_name)
+        else:
+            await lobby_rosters.attach(self.pin, self)
+            self._roster_attached = True
         await self.accept()
 
-        # ilk açılan kimi state göndər
+        # ilk açılan kimi state göndər (qrup/abunəçi artıq hazırdır — arada roster itmir)
         state = await self._get_lobby_state(self.pin)
         if state is not None:
             self._last_lobby_sent = asyncio.get_running_loop().time()
-            await self.send_json(state)
+            await self.send_json(self._lobby_state_for_me(state))
+
+    def _lobby_state_for_me(self, data: dict[str, Any], index=None) -> dict[str, Any]:
+        player_id = self._own_player_id()
+        return data if player_id is None else player_lobby_state_payload(data, player_id, index)
 
     def _on_kicked(self) -> None:
+        self._lobby_closed = True
         handle = getattr(self, "_lobby_flush_handle", None)
         if handle is not None:
             handle.cancel()
@@ -247,20 +262,28 @@ class LiveLobbyConsumer(LiveSocketBase):
 
     async def disconnect(self, close_code):
         self._on_kicked()
-        group_name = getattr(self, "group_name", None)
-        if group_name:
-            await self.channel_layer.group_discard(group_name, self.channel_name)
+        for group_name in (getattr(self, "group_name", None), getattr(self, "roster_group", None)):
+            if group_name:
+                await self.channel_layer.group_discard(group_name, self.channel_name)
+        if getattr(self, "_roster_attached", False):
+            self._roster_attached = False
+            await lobby_rosters.detach(self.pin, self)
 
     async def receive_json(self, content, **kwargs):
         # Lobby socket-i klientdən yalnız ürək döyüntüsü (ping) qəbul edir.
         if isinstance(content, dict) and content.get("type") == "ping":
             await self._reply_pong(content)
 
+    async def deliver_lobby_state(self, data: dict[str, Any], index) -> None:
+        """``lobby_rosters`` abunəçisindən (prosesdə bir çatdırılma, yerli paylama)."""
+        if not getattr(self, "_lobby_closed", True):
+            await self._throttled_lobby_state(self._lobby_state_for_me(data, index))
+
     async def lobby_event(self, event):
         # view -> group_send(..., {"type":"lobby_event","data":{...}})
         data = event.get("data") or {}
         if data.get("type") == "lobby_state":
-            await self._throttled_lobby_state(data)
+            await self._throttled_lobby_state(self._lobby_state_for_me(data))
             return
         await self._flush_lobby_state()
         await self.send_json(data)

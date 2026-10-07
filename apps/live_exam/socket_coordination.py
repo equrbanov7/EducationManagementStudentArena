@@ -14,8 +14,12 @@ Yük testi 2026-10-05 (300 oyunçu, «start» 30 s): hər keçid N socket-də N 
   100 tutumunda host hadisələri itirdi). ``HostProgressCoalescer`` prosesdə (PIN, sual) üzrə ön
   kənarı dərhal, sonrakıları ``HOST_PROGRESS_COALESCE_SECONDS``-da bir dəfə ən böyük dəyərlə
   göndərir — host JS onsuz da maksimumu saxlayır.
+* **Lobby roster-i (yük testi 2026-10-07)** — ``LobbyRosterFanout``: hər qoşulmanın roster-i prosesə
+  BİR dəfə çatır və oyunçu socket-lərinə yaddaşda paylanır (əvvəl socket başına kanal çatdırılması
+  idi — qoşulma axınında O(N²)). Oyunçu yalnız say + öz sətrini alır (wait room başqa adları
+  göstərmir); tam siyahı host socket-lərinədir.
 
-Hər iki reyestr event loop-a bağlıdır (``WeakKeyDictionary``) — testlərdə hər ``async_to_sync``
+Bütün reyestrlər event loop-a bağlıdır (``WeakKeyDictionary``) — testlərdə hər ``async_to_sync``
 yeni loop açır, köhnə loop-un task-ları yeni loop-a qarışmır.
 """
 
@@ -35,7 +39,7 @@ from channels.layers import get_channel_layer
 
 from apps.live_exam import consumer_support as support
 from apps.live_exam.services import auto_reveal_if_due
-from apps.live_exam.transport import bundle_events
+from apps.live_exam.transport import bundle_events, lobby_roster_group, roster_index
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -241,5 +245,103 @@ class HostProgressCoalescer:
                 slot.handle.cancel()
 
 
+# ── Lobby roster: prosesdə PIN başına BİR abunəçi ─────────────────────────
+
+
+@dataclass
+class _RosterPin:
+    sockets: set = field(default_factory=set)
+    ready: asyncio.Event = field(default_factory=asyncio.Event)
+    task: asyncio.Task | None = None
+
+
+class LobbyRosterFanout:
+    """Oyunçu lobby socket-lərinə roster — kanal qatından prosesə BİR çatdırılma, sonra yerli paylama.
+
+    Əvvəl hər qoşulmanın roster-i (``lobby_state``) ``live_<pin>_lobby`` qrupunda HƏR oyunçu socket-inə
+    ayrıca çatdırılırdı: qoşulma axınında O(N²) kanal-qatı çatdırılması (channels_redis ``receive``-də
+    hər çatdırılma bütün gözləyən consumer-ləri oyadır). İndi roster ``live_<pin>_lobby_roster``
+    qrupuna gedir; orada host socket-ləri və hər prosesdə PIN başına bir abunəçi kanal var. Abunəçi
+    hadisəni bu prosesin oyunçu socket-lərinə yaddaşda paylayır (hər socket-in öz 250 ms birləşdirməsi
+    qalır). ``attach`` abunəçi qrupa qoşulandan SONRA qayıdır — consumer ilkin vəziyyəti ondan sonra
+    oxuduğu üçün arada roster itmir.
+    """
+
+    def __init__(self) -> None:
+        self._loops: weakref.WeakKeyDictionary = weakref.WeakKeyDictionary()
+
+    def _pins(self) -> dict[str, _RosterPin]:
+        loop = asyncio.get_running_loop()
+        pins = self._loops.get(loop)
+        if pins is None:
+            pins = self._loops[loop] = {}
+        return pins
+
+    async def attach(self, pin: str, socket) -> None:
+        pins = self._pins()
+        state = pins.get(pin)
+        if state is None:
+            state = pins[pin] = _RosterPin()
+        if state.task is None or state.task.done():
+            state.ready = asyncio.Event()
+            state.task = asyncio.ensure_future(self._run(pin, state))
+        state.sockets.add(socket)
+        await state.ready.wait()
+
+    async def detach(self, pin: str, socket) -> None:
+        pins = self._pins()
+        state = pins.get(pin)
+        if state is None:
+            return
+        state.sockets.discard(socket)
+        if state.sockets:
+            return
+        pins.pop(pin, None)
+        task = state.task
+        if task is not None and not task.done():
+            task.cancel()
+            await asyncio.wait([task], timeout=2)
+
+    def subscribers(self, pin: str) -> int:
+        """Bu prosesdə PIN-in oyunçu socket sayı (test/diaqnostika)."""
+        state = self._pins().get(pin)
+        return len(state.sockets) if state is not None else 0
+
+    async def _run(self, pin: str, state: _RosterPin) -> None:
+        layer = get_channel_layer()
+        group = lobby_roster_group(pin)
+        channel = None
+        try:
+            channel = await layer.new_channel()
+            await layer.group_add(group, channel)
+            state.ready.set()
+            while True:
+                await self._deliver(pin, state, await layer.receive(channel))
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            logger.exception("live lobby roster subscriber failed", extra={"pin": pin})
+        finally:
+            state.ready.set()
+            if channel is not None:
+                try:
+                    await layer.group_discard(group, channel)
+                except Exception:
+                    logger.warning("live lobby roster discard failed", extra={"pin": pin})
+
+    @staticmethod
+    async def _deliver(pin: str, state: _RosterPin, message: dict[str, Any]) -> None:
+        data = message.get("data") or {}
+        if message.get("type") != "lobby_event" or data.get("type") != "lobby_state":
+            return
+        index = roster_index(data)
+        for socket in list(state.sockets):
+            try:
+                await socket.deliver_lobby_state(data, index)
+            except Exception:
+                logger.exception("live lobby roster delivery failed", extra={"pin": pin})
+
+
 auto_reveal_timers = AutoRevealTimers()
 host_progress = HostProgressCoalescer()
+lobby_rosters = LobbyRosterFanout()
