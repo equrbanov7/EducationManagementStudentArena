@@ -47,7 +47,7 @@ CORRECT_PERMISSION = "journal.correct"
 #: statik ``apps.*`` idxalını qadağan edir (baseline ``core_to_apps: []``).
 #: Modul istəsə öz ``AppConfig.ready()``-sindən ``register_media_policy()``
 #: çağırıb bu default-u əvəz edə bilər.
-APPLICATIONS_CAN_VIEW_PATH = "apps.applications.services.access.can_view"
+APPLICATIONS_CAN_VIEW_PATH = "apps.applications.services.access.can_view_attachment"
 
 #: Runtime reyestr — app-ların ``AppConfig.ready()``-dən qeyd etdiyi siyasətlər.
 #: Buradakı qeyd modul-daxili ``ACCESS_CHECKERS`` default-undan ÜSTÜNDÜR.
@@ -369,12 +369,14 @@ def check_legacy_excuse_document_access(user, path: str) -> bool:
 def check_application_attachment_access(user, path: str) -> bool:
     """``applications/`` — müraciət qoşması.
 
-    Qərar ``apps.applications`` modulunun ÖZ ``can_view`` siyasətinə həvalə
-    olunur (göndərən, cari şöbənin əhatəli emalçısı, izləyən şöbə,
-    ``application.manage`` daşıyan, superuser/təşkilat sahibi)."""
+    Qərar ``apps.applications`` modulunun ÖZ ``can_view_attachment`` siyasətinə
+    həvalə olunur (göndərən, cari şöbənin əhatəli emalçısı, izləyən şöbə,
+    ``application.manage`` daşıyan, superuser/təşkilat sahibi; daxili qeydin
+    sənədi yalnız daxili qeydləri görənlərə — audit 2026-10-07 SEC-04)."""
     ApplicationAttachment = django_apps.get_model("applications", "ApplicationAttachment")
     attachment = _get_single(
         ApplicationAttachment.objects.select_related(
+            "event",
             "application__organization",
             "application__current_unit",
             "application__current_scope_unit",
@@ -384,10 +386,10 @@ def check_application_attachment_access(user, path: str) -> bool:
     if attachment is None:
         return False
     try:
-        can_view = import_string(APPLICATIONS_CAN_VIEW_PATH)
+        can_view_attachment = import_string(APPLICATIONS_CAN_VIEW_PATH)
     except ImportError:  # modul quraşdırılmayıbsa — fail-closed
         return False
-    return bool(can_view(user, attachment.application))
+    return bool(can_view_attachment(user, attachment))
 
 
 # ---------------------------------------------------------------------------
