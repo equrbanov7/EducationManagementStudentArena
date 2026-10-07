@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from django.db import transaction
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from ..constants import MIN_NOTE_LENGTH, ApplicationStatus, EventKind
 from ..models import ApplicationEvent, ApplicationWatch
@@ -15,6 +16,9 @@ from ..sla import add_working_days
 from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allowed, rule_for
 from . import access, notify
 from .submit import attach_files
+
+#: ``TransitionDenied`` mətnlərinin konteksti (``state_machine._CTX`` ilə eyni).
+_CTX = "applications.transition"
 
 #: Əməl → zaman xətti hadisə növü.
 _EVENT_KIND = {
@@ -44,10 +48,10 @@ def _authorize(user, application, rule):
     """Aktor tipinə görə icazə — fail-closed."""
     if rule.actor == ACTOR_HANDLER:
         if not access.can_act(user, application):
-            raise TransitionDenied("permission.not_handler", "Bu müraciət sizin şöbənizdə deyil.")
+            raise TransitionDenied("permission.not_handler", pgettext(_CTX, "Bu müraciət sizin şöbənizdə deyil."))
         return
     if not access.is_sender(user, application):
-        raise TransitionDenied("permission.not_sender", "Bu əməli yalnız müraciət sahibi edə bilər.")
+        raise TransitionDenied("permission.not_sender", pgettext(_CTX, "Bu əməli yalnız müraciət sahibi edə bilər."))
 
 
 def _guard(user, application, action, text=""):
@@ -106,7 +110,7 @@ def add_comment(*, application, user, text: str, is_internal: bool = False, file
     is_handler = access.can_act(user, application)
     if not is_handler:
         if not access.is_sender(user, application):
-            raise TransitionDenied("permission.denied", "Bu müraciətə qeyd yaza bilməzsiniz.")
+            raise TransitionDenied("permission.denied", pgettext(_CTX, "Bu müraciətə qeyd yaza bilməzsiniz."))
         # Sahibin qeydi HEÇ VAXT daxili ola bilməz — daxili qeyd emalçı sirridir.
         is_internal = False
     ensure_allowed(action=Action.ADD_COMMENT, status=application.status, text=text)
@@ -136,7 +140,7 @@ def assign(*, application, user, assignee, note: str = "", request=None):
     if assignee is None or not access.handles_unit(
         assignee, application.organization, application.current_unit, application.current_scope_unit
     ):
-        raise TransitionDenied("assignee.not_handler", "Seçilən şəxs bu şöbənin emalçısı deyil.")
+        raise TransitionDenied("assignee.not_handler", pgettext(_CTX, "Seçilən şəxs bu şöbənin emalçısı deyil."))
     old = application.status
     application.status = rule.target
     application.assigned_to = assignee
@@ -169,9 +173,9 @@ def forward(*, application, user, target_unit, note: str, keep_watching: bool = 
     """Müraciəti BAŞQA şöbəyə ötürür; müraciət İTMİR, məsul şöbə dəyişir."""
     rule = _guard(user, application, Action.FORWARD, note)
     if target_unit is None or not target_unit.is_active:
-        raise TransitionDenied("unit.unknown", "Hədəf şöbə tapılmadı.")
+        raise TransitionDenied("unit.unknown", pgettext(_CTX, "Hədəf şöbə tapılmadı."))
     if target_unit.pk == application.current_unit_id:
-        raise TransitionDenied("unit.same", "Hədəf şöbə cari şöbə ilə eyni ola bilməz.")
+        raise TransitionDenied("unit.same", pgettext(_CTX, "Hədəf şöbə cari şöbə ilə eyni ola bilməz."))
 
     from .routing import resolve_scope_unit
 

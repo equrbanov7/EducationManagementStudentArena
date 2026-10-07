@@ -86,6 +86,9 @@ EXAM_PDF_OCR_MAX_PAGES = _env_int_setting("EXAM_PDF_OCR_MAX_PAGES", 100, minimum
 EXAM_PDF_OCR_HIGHLIGHT = _env_bool_setting("EXAM_PDF_OCR_HIGHLIGHT", True)
 EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO = _env_float_setting("EXAM_PDF_OCR_HIGHLIGHT_MIN_RATIO", 0.10, minimum=0.0)
 EXAM_IMPORT_STASH_RETENTION_HOURS = _env_int_setting("EXAM_IMPORT_STASH_RETENTION_HOURS", 48, minimum=1)
+# Fon işi tutumu 2026-10-07: bitmiş TextExtractionJob sətirləri (çıxarılmış mətn + export faylı)
+# bu qədər gündən sonra exams.purge_finished_extraction_jobs ilə silinir; 0 → söndürülür.
+EXAM_EXTRACTION_JOB_RETENTION_DAYS = _env_int_setting("EXAM_EXTRACTION_JOB_RETENTION_DAYS", 14, minimum=0)
 
 # --- Final imtahan mərkəzi (/exams/final/) giriş siyahısı --------------------
 # Vergüllə ayrılmış IP və ya CIDR (məs. "10.0.0.5,192.168.10.0/24").

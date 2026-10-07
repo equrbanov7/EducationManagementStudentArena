@@ -64,3 +64,37 @@ class AutosaveReplayTests(TestCase):
         self._save("bir", 0)
         self._save("iki", 1)
         self.assertEqual(self._save("iki", 0).status_code, 409)
+
+    # Review 2026-10-07: barmaq izi yalnız `q_*` + `changed_questions[]` idi — eyni mətnli,
+    # amma FƏRQLİ rəsmli (`paint_data_*`) və ya fərqli işarəli (`marked_question_ids`) təkrar
+    # «replay» sayılıb yazısız 200 alırdı → klient «saxlandı» görür, yeni rəsm/işarə itirdi.
+
+    def _save_with(self, revision, **extra):
+        payload = {
+            "submit_action": "autosave",
+            "changed_questions[]": [str(self.question.id)],
+            f"q_{self.question.id}": "cavab",
+            "autosave_revision": str(revision),
+        }
+        payload.update(extra)
+        return self.client.post(self.url, payload, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+
+    def test_same_text_but_different_drawing_is_not_replayed(self):
+        paint = {f"paint_enabled_{self.question.id}": "1"}
+        first = self._save_with(0, **paint, **{f"paint_data_{self.question.id}": "data:image/png;base64,QUFB"})
+        self.assertEqual(first.status_code, 200, first.content[:200])
+        retry = self._save_with(0, **paint, **{f"paint_data_{self.question.id}": "data:image/png;base64,QkJC"})
+        self.assertEqual(retry.status_code, 409, "fərqli rəsm replay kimi yazısız qəbul olunmamalıdır")
+
+    def test_same_answers_but_different_marks_are_not_replayed(self):
+        first = self._save_with(0, marked_question_ids="[]")
+        self.assertEqual(first.status_code, 200, first.content[:200])
+        retry = self._save_with(0, marked_question_ids=f"[{self.question.id}]")
+        self.assertEqual(retry.status_code, 409, "fərqli işarələr replay kimi yazısız qəbul olunmamalıdır")
+
+    def test_identical_retry_with_meta_fields_still_replays(self):
+        meta = {"return_to": "/accounts/profile/", "csrfmiddlewaretoken": "x", "marked_question_ids": "[]"}
+        self.assertEqual(self._save_with(0, **meta).status_code, 200)
+        retry = self._save_with(0, **{**meta, "csrfmiddlewaretoken": "y"})
+        self.assertEqual(retry.status_code, 200, retry.content[:200])
+        self.assertTrue(retry.json()["replayed"])

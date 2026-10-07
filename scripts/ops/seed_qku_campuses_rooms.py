@@ -28,6 +28,7 @@ from django.apps import apps as django_apps
 from django.db import transaction
 
 from apps.organizations.models import Organization
+from apps.organizations.public import set_settings_keys
 from core.rls import bypass_rls
 
 DRY = os.environ.get("DRY") == "1"
@@ -176,19 +177,17 @@ def main():
     ExamRoom = django_apps.get_model("exams", "ExamRoom")
     with bypass_rls():
         org = Organization.objects.get(slug=ORG_SLUG)
-        settings = dict(org.settings or {})
-        settings["campuses"] = CAMPUSES
         try:
-            _apply(ExamRoom, org, settings)
+            _apply(ExamRoom, org)
         except _DryRunRollback:
             print("[DRY] heç nə yazılmadı (geri alındı).")
 
 
-def _apply(ExamRoom, org, settings):
+def _apply(ExamRoom, org):
     created = updated_building = kept = 0
     with transaction.atomic():
-        org.settings = settings
-        org.save(update_fields=["settings"])
+        # Atomik: yalnız `campuses` açarı (digər settings açarları — xülasələr və s. — toxunulmaz qalır).
+        set_settings_keys(org, {"campuses": CAMPUSES})
         for room in _rooms_from_csv():
             existing = ExamRoom.objects.filter(organization=org, code=room["code"]).first()
             if existing is None:

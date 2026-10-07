@@ -3,10 +3,16 @@
 Hər mutasiya: (1) əhatə yoxlaması (``access``), (2) atomik yazı, (3) xülasənin
 yenidən qurulması (``snapshot.sync_snapshot`` — popup/sayğac dərhal görür),
 (4) audit izi. Əhatəli menecerin hədəf bölmələri hər yazıda YENİDƏN yoxlanılır.
+
+Sənəd faylları (2026-10-07) DB tranzaksiyası ilə uyğunlaşdırılır: silmə YALNIZ commit-dən
+sonra (``transaction.on_commit``) — rollback olsa sətir də, fayl da qalır; yeni sənədlərin
+yazılmış faylları DB hissəsi uğursuz olanda (savepoint geri alınanda) dərhal silinir — yetim
+fayl qalmır.
 """
 
 from __future__ import annotations
 
+import logging
 import uuid
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -31,6 +37,7 @@ from . import access, snapshot
 from .audience import normalize_families
 
 _CTX = "announcements.manage"
+logger = logging.getLogger(__name__)
 _FIELDS = (
     "title",
     "summary",
@@ -58,6 +65,21 @@ def _audit(request, organization, action, announcement, changes=None):
     )
 
 
+def _validate_window(announcement, data) -> None:
+    """``expires_at > publish_at`` — dərc olunmuş elanda boş «Dərc vaxtı» ``indi`` sayılır.
+
+    Forma yalnız hər iki tarix göndəriləndə yoxlayır; dərc olunmuş elanda «Dərc vaxtı»
+    boşaldılıb «Bitmə vaxtı» keçmişə qoyulanda servis ``publish_at = indi`` qoyub
+    ``ann_window_ordered`` CHECK-inə çırpılırdı → 500 (review 2026-10-07).
+    """
+    expires_at = data.get("expires_at")
+    publish_at = data.get("publish_at")
+    if publish_at is None and announcement is not None and announcement.status == Status.PUBLISHED:
+        publish_at = timezone.now()
+    if expires_at and publish_at and expires_at <= publish_at:
+        raise ValidationError({"expires_at": [pgettext(_CTX, "Bitmə vaxtı dərc vaxtından sonra olmalıdır.")]})
+
+
 def save_announcement(request, organization, scope, data, *, announcement=None) -> Announcement:
     """Formanın ``cleaned_data``-sı → elan (yeni və ya mövcud). Əhatədən kənar → ``ValidationError``."""
     user = request.user
@@ -71,6 +93,7 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
         errors.append(pgettext(_CTX, "Ən azı bir auditoriya seçin."))
     if errors:
         raise ValidationError({"audience_units": errors})
+    _validate_window(announcement, data)
     creating = announcement is None
     announcement = announcement or Announcement(organization=organization, created_by=user)
     for field in _FIELDS:
@@ -101,6 +124,28 @@ def save_announcement(request, organization, scope, data, *, announcement=None) 
     return announcement
 
 
+def _stored_file(fieldfile):
+    """Storage-ə artıq YAZILMIŞ faylın ``(storage, ad)`` cütü; yazılmayıbsa ``None``."""
+    if fieldfile and fieldfile.name and getattr(fieldfile, "_committed", False):
+        return fieldfile.storage, fieldfile.name
+    return None
+
+
+def _remove_files(stored) -> None:
+    for storage, name in stored:
+        try:
+            storage.delete(name)
+        except Exception:  # noqa: BLE001 — fayl silinməsi əsas əməliyyatı yıxmamalıdır
+            logger.warning("announcements: attachment file %s could not be deleted", name, exc_info=True)
+
+
+def _remove_files_on_commit(fieldfiles) -> None:
+    """Faylları tranzaksiya COMMIT olunanda silir; rollback → callback atılır, fayl qalır."""
+    stored = [pair for pair in (_stored_file(item) for item in fieldfiles) if pair]
+    if stored:
+        transaction.on_commit(lambda: _remove_files(stored), robust=True)
+
+
 def is_hard_delete(announcement) -> bool:
     """Heç kimin görmədiyi (qəbzsiz) qaralama birdəfəlik silinir; qalan hər şey yumşaq silinir."""
     return announcement.status == Status.DRAFT and not announcement.receipts.exists()
@@ -111,9 +156,9 @@ def _delete(request, organization, announcement) -> Announcement:
     if is_hard_delete(announcement):
         with transaction.atomic():
             _audit(request, organization, AuditAction.DELETE, announcement, {"mode": "hard"})
-            for attachment in announcement.attachments.all():
-                attachment.file.delete(save=False)
+            files = [attachment.file for attachment in announcement.attachments.all()]
             announcement.delete()
+            _remove_files_on_commit(files)  # rollback olsa sətir qalır — faylı da qalmalıdır
     else:
         now = timezone.now()
         previous = announcement.status
@@ -202,21 +247,35 @@ def add_attachments(request, organization, announcement, files) -> list:
                 ]
             }
         )
-    created = []
-    for uploaded in incoming:
-        validate_uploaded_file(uploaded, allowed_extensions=set(ATTACHMENT_EXTENSIONS), max_size_mb=ATTACHMENT_MAX_MB)
-        attachment = AnnouncementAttachment(
-            organization=organization,
-            announcement=announcement,
-            file=uploaded,
-            original_name=(getattr(uploaded, "name", "") or "sened")[:255],
-            size=int(getattr(uploaded, "size", 0) or 0),
-            content_type=(getattr(uploaded, "content_type", "") or "")[:120],
-            uploaded_by=request.user,
-        )
-        attachment.full_clean()
-        attachment.save()
-        created.append(attachment)
+    created, stored = [], []
+    try:
+        # Savepoint: hər hansı sənəd (yoxlama / DB) uğursuz olsa əvvəlki sətirlər geri alınır,
+        # onların artıq storage-ə yazılmış faylları isə aşağıda silinir.
+        with transaction.atomic():
+            for uploaded in incoming:
+                validate_uploaded_file(
+                    uploaded, allowed_extensions=set(ATTACHMENT_EXTENSIONS), max_size_mb=ATTACHMENT_MAX_MB
+                )
+                attachment = AnnouncementAttachment(
+                    organization=organization,
+                    announcement=announcement,
+                    file=uploaded,
+                    original_name=(getattr(uploaded, "name", "") or "sened")[:255],
+                    size=int(getattr(uploaded, "size", 0) or 0),
+                    content_type=(getattr(uploaded, "content_type", "") or "")[:120],
+                    uploaded_by=request.user,
+                )
+                attachment.full_clean()
+                try:
+                    attachment.save()
+                finally:  # fayl yazılıb, INSERT uğursuz olubsa da silinməlidir
+                    pair = _stored_file(attachment.file)
+                    if pair:
+                        stored.append(pair)
+                created.append(attachment)
+    except BaseException:
+        _remove_files(stored)
+        raise
     return created
 
 
@@ -230,8 +289,9 @@ def remove_attachment(organization, announcement, attachment_id) -> bool:
     attachment = announcement.attachments.filter(organization=organization, pk=attachment_id).first()
     if attachment is None:
         return False
-    attachment.file.delete(save=False)
-    attachment.delete()
+    with transaction.atomic():
+        attachment.delete()
+        _remove_files_on_commit([attachment.file])  # fayl yalnız sətir silinməsi commit olunanda gedir
     return True
 
 
@@ -240,7 +300,9 @@ def manage_list(organization, scope, user, *, q="", state="all", category="", pa
     from .queries import search_q
 
     now = timezone.now()
-    queryset = Announcement.objects.filter(organization=organization).filter(access.manageable_q(scope, user))
+    queryset = Announcement.objects.filter(organization=organization).filter(
+        access.manageable_q(scope, user, organization)
+    )
     # «Silinmişlər» ayrıca filtrdir; qalan bütün görünüşlərdə silinmiş elan yoxdur.
     queryset = queryset.filter(is_deleted=state == "deleted")
     live = Q(status=Status.PUBLISHED)

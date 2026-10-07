@@ -157,3 +157,24 @@ def test_preview_includes_optional_journal_side(ready, monkeypatch):
 
     monkeypatch.setattr(services, "selfwork_points", SimpleNamespace(preview=broken), raising=False)
     assert public.journal_preview(row, points="4")["journal"] is None  # baxış heç vaxt sınmır
+
+
+def test_retry_prefers_least_attempted_rows_so_failing_rows_do_not_starve_new_ones(accepted, ready, monkeypatch):
+    """Fon işi tutumu 2026-10-07: hər dəfə xəta verən köhnə sətir limiti tutub yeni pending-i aclığa salmır."""
+    from apps.subject_folder.models import Submission
+
+    fresh = public.submit(task=ready.slot1, assignment=ready.assignment, student=ready.students[1], text="iş 2")
+    fresh = public.accept(fresh, by_user=ready.teacher, points="3")
+    public.sync_submission_to_journal(fresh)
+    # `accepted` daha əvvəl yoxlanılıb, amma artıq dəfələrlə uğursuz cəhd edilib.
+    Submission.objects.filter(pk=accepted.pk).update(journal_sync_attempts=50)
+
+    hook = Hook((True, ""))
+    monkeypatch.setattr(journal, "resolve_journal_hook", lambda: hook)
+    summary = journal.retry_pending(limit=1)
+
+    assert summary["synced"] == 1
+    fresh.refresh_from_db()
+    accepted.refresh_from_db()
+    assert fresh.journal_sync_status == "synced"
+    assert accepted.journal_sync_status == "pending"

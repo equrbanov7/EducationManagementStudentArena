@@ -24,6 +24,7 @@ from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, Ro
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 from .semester_meta import SemesterLockMixin  # noqa: F401  (ekran 07 kilid qatı)
+from .settings_store import ManagedSettingsSaveMixin  # save() törəmə settings açarlarını əzmir
 
 
 class Country(models.Model):
@@ -77,7 +78,7 @@ class Institution(models.Model):
         return f"{self.name} ({self.country.code})"
 
 
-class Organization(UUIDModel, TimeStampedModel):
+class Organization(ManagedSettingsSaveMixin, UUIDModel, TimeStampedModel):
     """
     Represents a top-level organization (university, school, course center, or individual).
     """
