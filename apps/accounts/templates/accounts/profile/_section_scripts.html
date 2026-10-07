@@ -1,0 +1,245 @@
+{% comment %}
+Kabinet qabığının BÖLMƏ SKRİPTLƏRİ — `profile.html`-in `«block extraJs»`-indən
+çıxarılıb (perf 2026-10-07). Bu şablon BİRBAŞA include OLUNMUR:
+`{% profile_section_js "pre" %}` (ajax.js ilə init.js ARASI) və
+`{% profile_section_js "post" %}` (profile.entry.js-dən SONRA) tag-ları
+(`apps/accounts/views/profile/section_assets.py`) onu `asset_phase` ilə render edir
+— köhnə yerləşmə və sıra OLDUĞU KİMİ qalır. AJAX fraqmenti hər iki fazanı `assets.js`
+açarında qaytarır; `section_assets.js` çatışmayanları swap-dan ƏVVƏL, ardıcıl və
+YALNIZ BİR DƏFƏ yükləyir (səhifədə artıq olan `src` təkrar yüklənmir).
+
+MÜQAVİLƏ:
+* BÖLMƏ qrupları `asset_sections` ilə şərtlənir (render olunan bölmə + icazəli
+  borc qonşuları — `SECTION_ASSET_BORROWS`). Belə skript tənbəl yüklənə bilər:
+  `EMSReady` / `EMSDelegate` / `profile:section:loaded` ilə init olunmalı,
+  `ns.register`-ə (yalnız ilk açılışda işləyir) və tək `DOMContentLoaded`-a
+  güvənməməlidir; skript bölmə paneli DOM-a düşməzdən ƏVVƏL icra olunur, panel
+  swap-dan sonra `profile:section:loaded` gəlir.
+* QABIQ qrupları (`allowed_sections`) — qabıqdakı modalların (my-courses / my-exams),
+  `DOMContentLoaded`-a bağlı köhnə modulların (category / superadmin) skriptləri.
+  Onlar burada yalnız köhnə sıranı saxlamaq üçündür.
+{% endcomment %}
+{% load static %}
+{% if asset_phase == "pre" %}
+{% if 'overall-academic' in asset_sections %}
+<script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260926-search"></script>
+{% endif %}
+{% if 'academic-records' in asset_sections %}
+<script src="{% static 'accounts/js/profile/academic_records.js' %}?v=20260910-1"></script>
+{% comment %}Tələbə detalı çekməcəsi — cədvəl modulundan MÜSTƏQİLDİR (paylaşılan
+vəziyyət yoxdur, yalnız sətir düyməsinin `data-*`-larından asılıdır); ayrı fayl
+həm modul ölçü büdcəsini, həm də məsuliyyət ayrımını saxlayır.{% endcomment %}
+<script src="{% static 'accounts/js/profile/academic_records_detail.js' %}?v=20260910-1"></script>
+{% endif %}
+{% if 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'student-registry' in asset_sections %}
+{% comment %}2026-10-03: hesabı dayandırma — səbəb seçimi + «kimə yaxınlaşsın» (kataloq və reyestr dialoqları).{% endcomment %}
+<script src="{% static 'accounts/js/profile/account_block_fields.js' %}?v=20261003-block"></script>
+{% endif %}
+{% if 'people-teachers' in asset_sections or 'people-students' in asset_sections %}
+{% comment %}Analitika modulu kataloqdan ƏVVƏL yüklənir: o, `people:filters`
+hadisəsinə qulaq asır və kataloqun ilk yüklənməsini ötürməməlidir (yenə də
+`dataset.peopleFilterQuery` ilə sıra-müstəqildir).{% endcomment %}
+<script src="{% static 'accounts/js/profile/people_analytics.js' %}?v=20260830-1"></script>
+<script src="{% static 'accounts/js/profile/people_detail.js' %}?v=20260908-page"></script>
+{% comment %}Kataloq 3 hissədə, SIRA VACİBDİR: köməkçilər (ad sahəsi) → əməllər →
+setup/boot (2026-09-21 bölgüsü, modul ölçü büdcəsi).{% endcomment %}
+<script src="{% static 'accounts/js/profile/people_directory.js' %}?v=20260921-split"></script>
+<script src="{% static 'accounts/js/profile/people_directory_actions.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/people_directory_setup.js' %}?v=20260921-split"></script>
+{% endif %}
+{% if 'people-students' in asset_sections %}
+{% comment %}Tələbə idarəetmə çekməcəsi. Saf render alt modulu (ön baxış cədvəli)
+əsas moduldan ƏVVƏL yüklənir; əsas modul onu `window.EMSPeopleAcademicPreview`
+üzərindən null-safe çağırır, ona görə sıra pozulsa da səhifə çökmür.
+
+Hər iki fayl `[data-psm-root]` yoxdursa heç nə etmir — icazəsi olmayan
+istifadəçidə markup onsuz da render olunmur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/people_academic_preview.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20260831-1"></script>
+{% endif %}
+{% if 'schedule-manage' in asset_sections %}
+{% comment %}Cədvəl idarəetməsi — panel server-render-lidir; JS yalnız seçici
+yenidən yükləməsini, saxlama-öncəsi konflikt yoxlamasını və silmə təsdiqini
+idarə edir (EMSReady/EMSDelegate, `[data-smx-root]` yoxdursa heç nə etmir).{% endcomment %}
+<script src="{% static 'accounts/js/schedule_editor_confirm.js' %}?v=20260909-confirm"></script>
+<script src="{% static 'accounts/js/schedule_editor.js' %}?v=20260925-slotinst"></script>
+<script src="{% static 'accounts/js/schedule_editor_subjects.js' %}?v=20260925-slotinst"></script>
+{% endif %}
+{% if 'student-intake' in asset_sections or 'student-admission' in asset_sections or 'teacher-intake' in asset_sections %}
+{% comment %}Tələbə idxalı / qəbulu — panel server-render-lidir; JS yalnız fayl
+yükləməsini, quru icranı, nəticə cədvəlini (ekran 08-də ATİS sütunları + qrup
+seçicisi) və parol CSV-sinin endirilməsini idarə edir (EMSDelegate,
+`[data-six-root]` yoxdursa heç nə etmir). TƏK fayl — «Tətbiq et» məntiqi iki
+yerdə saxlanılmasın deyə.{% endcomment %}
+{% comment %}Fayl seçimi səthi (sürüşdür-at, ad, «doldu» tonu) AYRI modul-dur və
+əsas moduldan ƏVVƏL yüklənir: əsas modul onu `window.EMSIntakeFile` üzərindən
+null-safe oxuyur, ona görə sıra pozulsa da səhifə çökmür.{% endcomment %}
+<script src="{% static 'accounts/js/profile/intake_file.js' %}?v=20260909-bulkadd"></script>
+<script src="{% static 'accounts/js/profile/student_intake.js' %}?v=20260909-bulkadd"></script>
+{% endif %}
+{% if 'student-registry' in asset_sections %}
+{% comment %}Tələbə reyestri — cədvəl server-render-lidir; JS yalnız çekmecəni
+(kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
+(EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
+<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/student_registry_account.js' %}?v=20261003-block"></script>
+{% endif %}
+{% if 'teaching-handover' in asset_sections %}
+{% comment %}Fənn təhvili — server-render panel (2026-09-09). Cədvəli JS ÇƏKMİR,
+ona görə köhnə `…_render.js` alt modulu ləğv edildi: burada yalnız seçim,
+xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-dədir.{% endcomment %}
+<script src="{% static 'accounts/js/profile/teaching_handover.js' %}?v=20260909-1"></script>
+{% endif %}
+{% if 'workload-distribution' in asset_sections %}
+{% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
+`window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
+çökmür — sadəcə bölmə init olunmur).{% endcomment %}
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20260913-1"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260913-1"></script>
+{% endif %}
+{% if 'my-workload' in asset_sections %}
+<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260913-1"></script>
+{% endif %}
+{% if 'syllabus-list' in asset_sections %}
+<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
+{% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
+mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260831-carry"></script>
+<script src="{% static 'accounts/js/profile/syllabus_plan_hours.js' %}?v=20260920-plan"></script>
+<script src="{% static 'accounts/js/profile/syllabus_editor.js' %}?v=20260831-carry"></script>
+{% endif %}
+{% if 'syllabus-review' in asset_sections %}
+{% comment %}Panel render-i mühərrikdən ƏVVƏL yüklənir — mühərrik init anında
+`window.EMSSyllabusReviewPanel`-i oxuyur.{% endcomment %}
+<script src="{% static 'accounts/js/profile/syllabus_review_panel.js' %}?v=20260830-3"></script>
+<script src="{% static 'accounts/js/profile/syllabus_review.js' %}?v=20260830-3"></script>
+{% endif %}
+{% endif %}
+{% if asset_phase == "post" %}
+{% comment %}Chart.js (≈200 KB) — YALNIZ qrafik çəkən bölmə render olunanda. Əvvəl
+«statistics» icazəsi olan HƏR kəsə (tələbə daxil) yüklənirdi; statistika bölməsi
+2026-09-12 redizaynından bəri Chart.js işlətmir — köhnə `accounts/js/statistics/*`
+paketi (STATS_DATA verilmədiyi üçün) heç nə etmirdi və çıxarıldı. İstehlakçılar
+(`people_analytics.js`, panel daxili `appeal_stats.js`, `exam_center_stats_charts.js`,
+`system_monitoring.js`) `window.Chart`-ı gözləyir; AJAX keçidində fayl swap-dan
+ƏVVƏL yüklənir.{% endcomment %}
+{% if 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'appeal-stats' in asset_sections or 'exam-center-stats' in asset_sections or 'system-monitoring' in asset_sections %}
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
+{% endif %}
+{% if 'category-management' in allowed_sections or 'create-category' in allowed_sections %}
+<script src="{% static 'accounts/js/category_management.js' %}"></script>
+{% endif %}
+{% if 'my-journal' in asset_sections or 'my-schedule' in asset_sections or 'journal-close' in asset_sections or 'schedule-manage' in asset_sections %}
+<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-4"></script>
+<script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
+<script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
+{% endif %}
+{% comment %}Rol / icazə bölmələri (2026-09-09 redizayn) — dialoq prefill-i,
+təsdiq axını və imzalı əməliyyat tokeni. `EMSDelegate`/`EMSOverlay` üzərində
+qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
+{% if 'role-assignment' in asset_sections or 'manage-roles' in asset_sections %}
+<script src="{% static 'accounts/js/profile/roles_ui.js' %}?v=20260909-3"></script>
+{% endif %}
+{% if 'permission-editor' in asset_sections %}
+<script src="{% static 'accounts/js/permission_editor/namespace.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/labels.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/matrix.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/interactions.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/save_state.js' %}"></script>
+<script src="{% static 'accounts/js/permission_editor/permission_editor.entry.js' %}"></script>
+{% endif %}
+{% if 'superadmin-users' in allowed_sections %}
+    {# istifadəçi CRUD modalı superadmin idarəetməsinə aiddir #}
+<script src="{% static 'accounts/js/superadmin_user_management.js' %}"></script>
+<script src="{% static 'js/post_category_picker.js' %}"></script>
+<script src="{% static 'js/user_profile/namespace.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/context.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/modal.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/create.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/edit.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/delete.js' %}?v=20260604-ajaxinit2"></script>
+<script src="{% static 'js/user_profile/entry.js' %}?v=20260604-ajaxinit2"></script>
+{% endif %}
+{% if 'rim-center' in asset_sections or 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'teacher-intake' in asset_sections or 'student-intake' in asset_sections or 'student-admission' in asset_sections %}
+    {# RIM merkezi — hesab idareetmesi paneli (AJAX-safe, EMSReady/EMSDelegate); «Yeni hesab» axını kataloqlarda da işlənir (2026-09-08) #}
+<script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/render.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20260826-1"></script>
+<script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20260826-1"></script>
+    {# «Yeni hesab» axini — combo seciciden SONRA form, sonra toplu idxal #}
+<script src="{% static 'accounts/js/rim_center/create_combo.js' %}?v=20260914-a11y"></script>
+<script src="{% static 'accounts/js/rim_center/create.js' %}?v=20260906-1"></script>
+<script src="{% static 'accounts/js/rim_center/create_bulk.js' %}?v=20260906-1"></script>
+    {# Inzibati bolme (sobe/merkez) — mevcud struktur agaci endpoint-ine gedir #}
+<script src="{% static 'accounts/js/rim_center/create_unit.js' %}?v=20260906-2"></script>
+{% endif %}
+{% if 'my-courses' in allowed_sections %}
+<script src="{% static 'courses/js/course_create_form.js' %}?v=20260629"></script>
+<script src="{% static 'courses/js/create_course_modal.js' %}?v=20260604-globalmodal"></script>
+<script src="{% static 'courses/js/course_card_nav.js' %}?v=20260928-1"></script>
+{% endif %}
+{% if 'my-exams' in allowed_sections %}
+<script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261001-examqa"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260914-2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260914-2"></script>
+<script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260926-search"></script>
+{% endif %}
+{% if 'question-bank' in asset_sections %}
+{% comment %}«Sual Bankı» bölməsinin dialoqları — əvvəl SƏHVƏN `my-exams`
+blokunda idi: bankı olan, amma «İmtahanlarım» bölməsi olmayan istifadəçi
+yaratma/redaktə dialoqunu aça bilmirdi.{% endcomment %}
+<script src="{% static 'exams/js/questionBankList.js' %}?v=20260909-ems"></script>
+{% endif %}
+{% if 'my-appeals' in asset_sections or 'appeal-stats' in asset_sections %}
+<script src="{% static 'appeals/js/appeals_review.js' %}?v=20260715-appeal-batch"></script>
+<script src="{% static 'appeals/js/appeals_sections.js' %}?v=20260715-appeal-batch"></script>
+{% endif %}
+{% if 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}
+<script src="{% static 'js/org_structure.js' %}?v=20260926-search"></script>
+{% endif %}
+{% comment %}Tədris şöbəsi bölmələri — server-render panellər; JS yalnız ağac
+seçimini, dialoq doldurulmasını və JSON POST-u idarə edir (EMSReady/EMSDelegate,
+`[data-tof-root]` yoxdursa heç nə etmir).{% endcomment %}
+{% if 'org-structure-tree' in asset_sections or 'chair-profile' in asset_sections or 'programs-registry' in asset_sections or 'subject-catalog' in asset_sections or 'curriculum-editor' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-center' in asset_sections or 'workload-visa' in asset_sections or 'workload-approval' in asset_sections or 'workload-overview' in asset_sections or 'my-workload' in asset_sections or 'workload-distribution' in asset_sections or 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections or 'teaching-handover' in asset_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office.js' %}?v=20261003-remind"></script>
+{% endif %}
+{% if 'programs-registry' in asset_sections %}
+{% comment %}«İxtisas haqqında» çekmecəsi — YALNIZ oxu (registrar:program_detail).{% endcomment %}
+<script src="{% static 'accounts/js/profile/programs_detail.js' %}?v=20260909-1"></script>
+{% endif %}
+{% comment %}Fakültələr / Kafedralar reyestri (2026-09-08) — «Heyət» çekmecəsi və
+dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endcomment %}
+{% if 'org-faculties' in asset_sections or 'org-kafedras' in asset_sections %}
+<script src="{% static 'accounts/js/profile/org_units.js' %}?v=20260908-3"></script>
+{% endif %}
+{% if 'org-members' in asset_sections %}<script src="{% static 'accounts/js/profile/org_members.js' %}?v=20260908-1"></script>{% endif %}
+{% comment %}«Heyət idarəetməsi» (2026-09-09) — «Üzv kartı» çekmecəsi, səbəbli
+çıxarma dialoqu və KPI→filtr körpüsü. Filtr/səhifələmə serverdədir; fayl
+`[data-hm-root]` yoxdursa heç nə etmir (AJAX-safe).{% endcomment %}
+{% if 'student-organization-management' in asset_sections %}<script src="{% static 'accounts/js/profile/staff_management.js' %}?v=20260909-1"></script>{% endif %}
+{% if 'audit-log' in asset_sections %}
+<script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
+{% endif %}
+{% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
+gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
+{% if 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-approval' in asset_sections %}
+<script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
+{% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
+`data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20260926-search"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_group_split.js' %}?v=20260920-split"></script>
+{% endif %}
+{% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq
+`teaching_office.js` urlencoded göndərir, fayl ondan keçmir).{% endcomment %}
+{% if 'workload-center' in asset_sections %}
+<script src="{% static 'accounts/js/profile/workload_chain.js' %}?v=20260903-4"></script>
+{% endif %}
+{% endif %}

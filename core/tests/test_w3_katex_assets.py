@@ -101,13 +101,20 @@ class KatexVendorAssetTests(SimpleTestCase):
         self.assertNotIn("<script>", html)
         self.assertNotRegex(html, r"<script\b(?![^>]*\bsrc=)[^>]*>\s*\S", "inline script qadağandır (CSP)")
         scripts = re.findall(r"<script\b[^>]*>", html)
-        self.assertEqual(len(scripts), 3)
-        for tag in scripts:
-            self.assertIn("defer", tag)
-            self.assertIn(settings.STATIC_URL, tag)
-            self.assertNotIn("http", tag.split("src=")[1][:8])
-        self.assertIn("vendor/katex/0.16.47/katex.min.css", html)
-        self.assertIn("js/ems_math.js", html)
+        # Perf 2026-10-07: KaTeX tənbəl yüklənir — partial YALNIZ ems_math.js-i verir,
+        # KaTeX yolları `data-katex-*` atributlarındadır (same-origin static).
+        self.assertEqual(len(scripts), 1)
+        tag = scripts[0]
+        self.assertIn("defer", tag)
+        self.assertIn("js/ems_math.js", tag)
+        self.assertNotIn("http", tag.split("src=")[1][:8])
+        for attr, path in (
+            ("data-katex-css", "vendor/katex/0.16.47/katex.min.css"),
+            ("data-katex-js", "vendor/katex/0.16.47/katex.min.js"),
+            ("data-katex-autorender", "vendor/katex/0.16.47/contrib/auto-render.min.js"),
+        ):
+            self.assertIn(f'{attr}="{settings.STATIC_URL}{path}"', tag)
+        self.assertNotIn("<link", html, "KaTeX CSS-i düstur olmayan səhifədə yüklənməməlidir")
 
     def test_csp_allows_vendored_assets_without_cdn(self):
         directives = settings.CONTENT_SECURITY_POLICY["DIRECTIVES"]
