@@ -21,10 +21,12 @@ from __future__ import annotations
 import unicodedata
 
 from django.apps import apps as django_apps
+from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
+from core.upload_ooxml import validate_ooxml_expansion
 
 from ..constants import DegreeLevel, EducationForm, RowKind, Season
 from ..models import TeachingTaskRow
@@ -32,6 +34,9 @@ from .scoping import WorkloadDenied, ensure_can_manage
 from .tasks import resolve_specialty_and_faculty
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
+#: Paketin AÇILMIŞ ölçüsü (təhlükəsizlik auditi 2026-10-07): `read_only` rejim belə
+#: `sharedStrings.xml`-i tam yaddaşa yığır — 10 MB-lıq fayl GB-larla açıla bilərdi.
+MAX_EXPANDED_BYTES = 100 * 1024 * 1024
 MAX_ROWS = 1000
 ALLOWED_SUFFIXES = (".xlsx", ".xlsm")
 
@@ -143,6 +148,12 @@ def parse_workbook(upload) -> list[dict]:
     except Exception as exc:  # pragma: no cover — openpyxl `requirements/base.txt`-dədir
         raise ImportFileError("workload.openpyxl_missing", "Excel oxuyucusu əlçatan deyil.") from exc
 
+    try:
+        validate_ooxml_expansion(upload, max_expanded_bytes=MAX_EXPANDED_BYTES)
+    except ValidationError as exc:
+        if exc.code == "invalid_archive":
+            raise ImportFileError("workload.unreadable", "Fayl oxunmadı — Excel formatı gözlənilir.") from exc
+        raise ImportFileError("workload.file_too_big", "Fayl 10 MB-dan böyükdür.") from exc
     try:
         workbook = load_workbook(upload, read_only=True, data_only=True)
     except Exception as exc:

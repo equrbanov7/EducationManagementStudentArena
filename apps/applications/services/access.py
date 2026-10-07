@@ -208,6 +208,21 @@ def can_see_internal(user, application) -> bool:
     return False
 
 
+def can_view_attachment(user, attachment) -> bool:
+    """Sənəd: müraciətin görünüşü + daxili qeydə bağlıdırsa daxili qeydləri görmə hüququ.
+
+    Təhlükəsizlik auditi 2026-10-07 SEC-04: endirmə ucu və ``/media/applications/``
+    siyasəti yalnız ``can_view``-a baxırdı — daxili (emalçı) qeydin sənədi müraciət
+    sahibinə açıq idi. Endirmə, media siyasəti və detal siyahısı EYNİ qaydanı işlədir.
+    """
+    application = attachment.application
+    if not can_view(user, application):
+        return False
+    if attachment.event_id is not None and attachment.event.is_internal:
+        return can_see_internal(user, application)
+    return True
+
+
 def is_sender(user, application) -> bool:
     return bool(user and getattr(user, "is_authenticated", False) and application.created_by_id == user.pk)
 
@@ -257,6 +272,7 @@ __all__ = [
     "active_units",
     "can_act",
     "can_view",
+    "can_view_attachment",
     "handled_unit_ids",
     "handler_role_for",
     "handles_unit",

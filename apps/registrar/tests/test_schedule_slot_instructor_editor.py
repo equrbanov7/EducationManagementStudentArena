@@ -176,6 +176,21 @@ class ServerValidationTest(_EditorBase):
             after = ScheduleSlot.objects.count()
         self.assertEqual(before, after)
 
+    def test_journal_owner_must_be_an_active_teacher_of_this_org(self):
+        """Sec-audit 2026-10-07: yad/üzvsüz istifadəçi və ya rəqəm olmayan id — 500 yox, 400 + sahə xətası."""
+        from django.contrib.auth import get_user_model
+
+        outsider = get_user_model().objects.create_user("sival_outsider", email="sival-outsider@example.com")
+        with bypass_rls():
+            before = ScheduleSlot.objects.count()
+            for raw in (str(outsider.pk), "abc", "999999"):
+                with self.assertRaises(schedule_editor.CellError) as caught:
+                    self._save(instructor_id=raw)
+                self.assertEqual(caught.exception.status, 400)
+                self.assertIn("instructor_id", caught.exception.errors)
+            after = ScheduleSlot.objects.count()
+        self.assertEqual(before, after)
+
     def test_invalid_choice_on_a_new_subject_creates_no_offering(self):
         with bypass_rls():
             before = CourseOffering.objects.count()

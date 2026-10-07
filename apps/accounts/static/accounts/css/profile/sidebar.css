@@ -16,16 +16,15 @@
      `min-width: 0`. Əvvəl `overflow-y: auto` üfüqi oxu da `auto` edirdi;
      trackpad jesti/fokus sidebar-ı yana sürüşdürəndə sol kənar kəsilirdi
      («rofil», «MUMİ»). Qoruyucu JS də var (`js/profile/sidebar_nav.js`).
-   • Fayllar (aşağıda import olunur; kaskad sırası: qruplar → süzgəc → alt blok →
-     rels, sonra bu faylın öz qaydaları): heyət akkordeonu `sidebar_groups.css`,
-     «Menyuda axtar» `sidebar_filter.css`, yığcam (ikon-rels) rejim
-     `sidebar_rail.css`. Hesab bloku 2026-09-25-dən header menyusundadır.
+   • Fayllar (kaskad sırası: qruplar → süzgəc → rels → ikonlar, sonra bu faylın öz
+     qaydaları): heyət akkordeonu `sidebar_groups.css`, «Menyuda axtar»
+     `sidebar_filter.css`, yığcam (ikon-rels) rejim `sidebar_rail.css`,
+     `sidebar_icons.css`. Hesab bloku 2026-09-25-dən header menyusundadır.
+   • 2026-10-07 (perf): əvvəl bu faylın başında `@import` olunurdular — üç səviyyəli
+     render-bloklayan zəncir idi (profile.css → sidebar.css → hissələr). İndi onları
+     bu fayldan ƏVVƏL birbaşa linkləyirlər: kabinet `profile/_section_assets.html`,
+     standalone səhifələr `profile.css` (kaskad eynidir).
    ═══════════════════════════════════════════════════════════════════════════ */
-
-@import url("sidebar_groups.css");
-@import url("sidebar_filter.css");
-@import url("sidebar_rail.css");
-@import url("sidebar_icons.css");
 
 .profile-sidebar {
     --sb-gutter: 12px;

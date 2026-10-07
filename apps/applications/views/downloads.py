@@ -13,6 +13,7 @@ from django.http import FileResponse, Http404
 from django.views.decorators.http import require_GET
 
 from ..models import ApplicationAttachment
+from ..services import access
 from ._base import json_endpoint, load_application
 
 
@@ -23,10 +24,15 @@ def attachment_download(request, application_id, attachment_id, *, organization)
     if application is None:
         raise Http404
 
-    attachment = ApplicationAttachment.objects.filter(
-        organization=organization, application=application, pk=attachment_id
-    ).first()
+    attachment = (
+        ApplicationAttachment.objects.filter(organization=organization, application=application, pk=attachment_id)
+        .select_related("event")
+        .first()
+    )
     if attachment is None or not attachment.file:
+        raise Http404
+    attachment.application = application  # artıq yüklənib və görünüş yoxlanıb
+    if not access.can_view_attachment(request.user, attachment):  # SEC-04: daxili qeydin sənədi
         raise Http404
 
     try:

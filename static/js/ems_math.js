@@ -11,8 +11,12 @@
    `EMSReady` + `MutationObserver` təkrar işə salır. Konteynerə bir dəfə
    `data-ems-math-done="1"` yazılır — idempotent, null-safe.
 
-   Yüklənmə: `templates/partials/ems_ui/_math_assets.html` (katex.min.js,
-   auto-render.min.js, bu fayl — hamısı `defer`, CSP-safe, CDN yoxdur).
+   Yüklənmə: `templates/partials/ems_ui/_math_assets.html` YALNIZ bu faylı (`defer`)
+   verir; KaTeX (katex.min.js ≈266 KB + auto-render + katex.min.css) yolları skript
+   teqinin `data-katex-*` atributlarındadır və TƏNBƏL yüklənir — yalnız səhifədə
+   (və ya sonradan gələn konteynerdə) düstur ayırıcısı olanda (perf 2026-10-07:
+   düstursuz imtahan səhifəsi KaTeX-i nə yükləyir, nə də parse edir). CSP-safe:
+   same-origin `script src`/`link`, CDN yoxdur.
    ========================================================================= */
 (function () {
     "use strict";
@@ -20,6 +24,15 @@
     if (window.EMSMath && window.EMSMath.__loaded) {
         return;
     }
+
+    // `document.currentScript` YALNIZ ilk icrada mövcuddur — atributlar indi oxunur.
+    var SELF = document.currentScript || null;
+    var KATEX = SELF && typeof SELF.getAttribute === "function" ? {
+        css: SELF.getAttribute("data-katex-css") || "",
+        js: SELF.getAttribute("data-katex-js") || "",
+        autorender: SELF.getAttribute("data-katex-autorender") || ""
+    } : null;
+    var katexState = 0; // 0 — yüklənməyib, 1 — yüklənir, 2 — bitdi (uğurlu və ya xəta)
 
     var DELIMITERS = [
         { left: "$$", right: "$$", display: true },
@@ -77,16 +90,75 @@
         }
     }
 
-    function renderAll(root) {
-        var scope = root || document;
-        if (scope.nodeType === 1 && scope.hasAttribute && scope.hasAttribute("data-ems-math")) {
-            renderOne(scope);
-        }
-        if (typeof scope.querySelectorAll !== "function") {
+    function appendScript(src, onDone) {
+        var script = document.createElement("script");
+        script.src = src;
+        script.async = false; // katex.min.js auto-render-dən ƏVVƏL icra olunsun
+        script.addEventListener("load", onDone);
+        script.addEventListener("error", onDone);
+        (document.head || document.body).appendChild(script);
+    }
+
+    function ensureKatex() {
+        if (katexState !== 0 || !KATEX || !KATEX.js || !KATEX.autorender || typeof document.createElement !== "function") {
             return;
         }
-        var nodes = scope.querySelectorAll("[data-ems-math]:not([data-ems-math-done])");
-        for (var i = 0; i < nodes.length; i += 1) {
+        katexState = 1;
+        if (KATEX.css) {
+            var link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = KATEX.css;
+            (document.head || document.body).appendChild(link);
+        }
+        var pending = 2;
+        function done() {
+            pending -= 1;
+            if (pending === 0) {
+                katexState = 2;
+                renderAll(document);
+            }
+        }
+        appendScript(KATEX.js, done);
+        appendScript(KATEX.autorender, done);
+    }
+
+    function collect(scope) {
+        var nodes = [];
+        if (scope.nodeType === 1 && scope.hasAttribute && scope.hasAttribute("data-ems-math")) {
+            nodes.push(scope);
+        }
+        if (typeof scope.querySelectorAll === "function") {
+            var found = scope.querySelectorAll("[data-ems-math]:not([data-ems-math-done])");
+            for (var i = 0; i < found.length; i += 1) {
+                nodes.push(found[i]);
+            }
+        }
+        return nodes;
+    }
+
+    function renderAll(root) {
+        var nodes = collect(root || document);
+        var i;
+        if (typeof window.renderMathInElement !== "function") {
+            // KaTeX hələ yoxdur: düstursuz konteynerlər bitmiş sayılır, düstur varsa
+            // KaTeX tənbəl yüklənir və bitəndə `renderAll` yenidən çağırılır.
+            var needsKatex = false;
+            for (i = 0; i < nodes.length; i += 1) {
+                if (nodes[i].getAttribute("data-ems-math-done") === "1") {
+                    continue;
+                }
+                if (QUICK_TEST.test(nodes[i].textContent || "")) {
+                    needsKatex = true;
+                } else {
+                    nodes[i].setAttribute("data-ems-math-done", "1");
+                }
+            }
+            if (needsKatex) {
+                ensureKatex();
+            }
+            return;
+        }
+        for (i = 0; i < nodes.length; i += 1) {
             renderOne(nodes[i]);
         }
     }

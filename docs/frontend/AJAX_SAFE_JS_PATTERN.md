@@ -128,3 +128,32 @@ bütün custom skriptlərdən əvvəl yüklənir:
   standart fetch sarğısı: CSRF başlığı avtomatik, JSON parse, same-origin,
   normallaşdırılmış xəta (`err.status`, `err.payload`). Köhnə fetch çağırışları
   toxunulmadan tədricən miqrasiya olunur.
+
+---
+
+## Bölmə asset-ləri — yalnız RENDER OLUNAN bölmə (perf 2026-10-07)
+
+Kabinet qabığı (`accounts/profile.html`) bölmə CSS/JS-ini artıq `allowed_sections`-a
+görə HAMISINI yükləmir. İki registr şablonu var:
+
+| Şablon | Nə | Render |
+|---|---|---|
+| `accounts/profile/_section_assets.html` | bölmə + qabıq CSS-i (`profile.css` manifestinin birbaşa linkləri daxil) | `{% profile_section_css %}` |
+| `accounts/profile/_section_scripts.html` | bölmə + qabıq JS-i, iki faza: `pre` (ajax.js ↔ init.js) və `post` (profile.entry.js-dən sonra) | `{% profile_section_js "pre" %}` / `"post"` |
+
+* Bölmə qrupları `asset_sections` ilə şərtlənir = render olunan bölmə + onun
+  `SECTION_ASSET_BORROWS`-dakı **icazəli** qonşuları
+  (`apps/accounts/views/profile/section_assets.py`). Bölmə başqa bölmənin faylındakı
+  sinfi / `data-*` hook-unu işlədirsə, qonşunu borc siyahısına yazın.
+* Qabıq qrupları (`allowed_sections`) yalnız ağ siyahıdadır (qabıqdakı modallar,
+  superadmin üslubları, `DOMContentLoaded` modulları) —
+  `test_profile_section_assets.py` başqasına icazə vermir.
+* AJAX fraqmenti (`profile_section_fragment`) `assets: {css: [{href, order}], js: [...]}`
+  qaytarır; `section_assets.js` çatışmayan CSS-i `data-ems-css-order` kaskad mövqeyinə
+  qoşub **yüklənənə qədər gözləyir** (FOUC yox), JS-i `async=false` ilə ardıcıl və bir
+  dəfə qoşur, sonra panel swap olunur və `profile:section:loaded` gəlir.
+* Tənbəl yüklənən bölmə skripti: `EMSReady` / `EMSDelegate` / `profile:section:loaded`
+  ilə init olunmalı; `ns.register` (yalnız ilk açılışda) və tək `DOMContentLoaded`-a
+  güvənməməli. Skript panel DOM-a düşməzdən **əvvəl** icra olunur (köhnə AJAX semantikası).
+* Panelin **öz içindəki** `<script src>`-lər əvvəlki kimi hər swap-da yenidən icra olunur
+  (`executeInlineScripts`) — bölmə-xüsusi kiçik skriptlər üçün bu yol qalır.

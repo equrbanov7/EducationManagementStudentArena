@@ -43,6 +43,7 @@ from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
+from .section_assets import section_assets_payload
 
 logger = logging.getLogger(__name__)
 
@@ -468,6 +469,7 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
             "ok": True,
             "section": section,
             "html": html,
+            "assets": section_assets_payload(section, context.get("allowed_sections")),  # perf 2026-10-07
             # Frontend hint: which DOM selector to extract from `html`.
             "extract_selector": '[data-profile-section-panel="{}"]'.format(section),
         }

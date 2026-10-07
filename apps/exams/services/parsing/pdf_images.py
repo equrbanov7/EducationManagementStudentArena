@@ -29,7 +29,13 @@ from dataclasses import dataclass, field
 from django.utils.translation import pgettext
 
 from apps.exams.constants import OPTION_RE, QUESTION_RE
-from apps.exams.services.parsing.docx_reader import MARKER_TEMPLATE, MAX_IMAGES, DocxImage, normalize_image_bytes
+from apps.exams.services.parsing.docx_reader import (
+    MARKER_TEMPLATE,
+    MAX_IMAGE_PIXELS,
+    MAX_IMAGES,
+    DocxImage,
+    normalize_image_bytes,
+)
 from apps.exams.services.parsing.extraction._deps import fitz
 
 _WARN = "exams.service.parsing.docx.warning"
@@ -108,6 +114,22 @@ def _read_anchors(document) -> list[_Anchor]:
     return anchors
 
 
+def _declared_size_ok(image_info) -> bool:
+    """Şəkil obyektinin ELAN etdiyi ölçü (``get_images(full=True)`` → [2]=en, [3]=hündürlük).
+
+    Təhlükəsizlik auditi 2026-10-07: ``extract_image`` / ``Pixmap`` Flate-sıxılmış
+    obyekti TAM açır (PNG-yə çevirir) — 1 MB-lıq axın 40000×40000 piksel elan edə
+    bilər (GB-larla RAM). ``normalize_image_bytes``-in 50 MP limiti açılmadan SONRA
+    işləyirdi; indi açılmadan ƏVVƏL eyni limitlə süzülür.
+    """
+
+    try:
+        width, height = int(image_info[2]), int(image_info[3])
+    except (IndexError, TypeError, ValueError):
+        return False
+    return 0 < width and 0 < height and width * height <= MAX_IMAGE_PIXELS
+
+
 def _read_placements(document) -> tuple[list[_Placement], int]:
     placements: list[_Placement] = []
     skipped = 0
@@ -121,6 +143,9 @@ def _read_placements(document) -> tuple[list[_Placement], int]:
             if xref in seen_xrefs:
                 continue
             seen_xrefs.add(xref)
+            if not _declared_size_ok(image):
+                skipped += 1
+                continue
             try:
                 rects = page.get_image_rects(xref)
             except Exception:  # noqa: BLE001

@@ -56,18 +56,22 @@ def _get_own_notification_or_404(pk, user):
 
 
 def _safe_next_url(request):
-    """Return a safe `next` URL from POST, defaulting to notification list."""
-    from urllib.parse import urlparse
+    """Return a safe `next` URL from POST, defaulting to notification list.
 
+    Təhlükəsizlik auditi 2026-10-07: əvvəl ``urlparse`` ilə «sxem/host yoxdur»
+    yoxlanırdı — ``/\\evil.example`` (və tab/CR qarışıq yollar) keçirdi, brauzer
+    isə onu ``//evil.example`` kimi açır. İndi Django-nun öz yoxlaması.
+    """
     from django.urls import reverse
+    from django.utils.http import url_has_allowed_host_and_scheme
 
     next_url = request.POST.get("next", "").strip()
     if next_url:
         if next_url.startswith("?"):
-            return f"{reverse('notifications:notification_list')}{next_url}"
-        parsed = urlparse(next_url)
-        # Only allow relative URLs (no scheme/netloc) for safety
-        if not parsed.scheme and not parsed.netloc:
+            next_url = f"{reverse('notifications:notification_list')}{next_url}"
+        if url_has_allowed_host_and_scheme(
+            next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
             return next_url
     return None
 

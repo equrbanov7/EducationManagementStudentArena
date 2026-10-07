@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from django.db.models import Count, Q
+from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 
 from core.search_text import tolerant_q
 
 from ..constants import CLOSED_STATUSES, OPEN_STATUSES, ApplicationStatus
-from ..models import Application
+from ..models import Application, ApplicationAttachment
 from ..sla import working_days_between
 from . import access
 
@@ -85,7 +85,14 @@ def list_applications(
     if kind_code:
         queryset = queryset.filter(kind__code=kind_code)
     queryset = queryset.filter(search_q(search)).filter(date_q(date_from, date_to))
-    return queryset.distinct()
+    # Siyahı sətri (``row_payload``) göndərənin bölməsini və sənəd sayını oxuyur — əvvəl
+    # hər sətir üçün 2 sorğu idi (orgunit SELECT + attachments COUNT; 20-lik səhifədə
+    # +40). İndi JOIN + səhifə üçün tək prefetch (yalnız id-lər; say = prefetch uzunluğu).
+    return (
+        queryset.distinct()
+        .select_related("sender_scope_unit")
+        .prefetch_related(Prefetch("attachments", queryset=ApplicationAttachment.objects.only("id", "application_id")))
+    )
 
 
 _RESOLVED_STATUSES = (ApplicationStatus.RESOLVED, ApplicationStatus.CLOSED)

@@ -34,6 +34,7 @@ from ._helpers import (
     _build_anonymous_name,
     _build_answer_review_item,
     _build_attempt_timing_context,
+    _load_review_answers,
     _resolve_profile_navigation,
     _safe_same_origin_redirect_path,
     _sync_coding_answers_from_final_submissions,
@@ -114,7 +115,8 @@ def teacher_view_attempt(request, slug, attempt_id):
 
     # "Zibil qutusu"ndan da yalnız-oxu baxış üçün silinmiş imtahanı tapa bilirik.
     exam = get_result_viewable_exam_or_404(request, slug=slug, include_deleted=True)
-    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+    # ``exam.attempts`` — ``attempt.exam`` səhifənin imtahan instansıdır (təkrar SELECT yox).
+    attempt = get_object_or_404(exam.attempts, id=attempt_id)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     # «Geri» = nəticələr səhifəsi (əvvəlki kramb); yalnız «yoxlama növbəsi»ndən gələn
     # kabinet bölməsinə qayıdır (sahib 2026-09-21: ilişən referer-lər ləğv edildi).
@@ -125,14 +127,10 @@ def teacher_view_attempt(request, slug, attempt_id):
     _sync_coding_answers_from_final_submissions(attempt)
 
     # Cavabları al
-    answers_qs = (
-        attempt.answers.select_related("question")
-        .prefetch_related("files", "selected_options", "question__options")
-        .order_by("id")
-    )
+    answers = _load_review_answers(attempt, exam)
 
-    qa_list = [_build_answer_review_item(a) for a in answers_qs]
-    test_result = calculate_test_attempt_result(attempt, answers=list(answers_qs)) if exam.exam_type == "test" else None
+    qa_list = [_build_answer_review_item(a) for a in answers]
+    test_result = calculate_test_attempt_result(attempt, answers=answers) if exam.exam_type == "test" else None
 
     # Apellyasiya nəticəsində bal düzəlibsə effektiv balı + düzəlmiş sualları göstər.
     effective_score_info = None
@@ -141,7 +139,7 @@ def teacher_view_attempt(request, slug, attempt_id):
     if exam.exam_type == "test":
         from apps.exams import score_adjustments
 
-        effective_score_info = score_adjustments.effective_test_score(attempt)
+        effective_score_info = score_adjustments.effective_test_score(attempt, answers=answers)
         _appeal_state = score_adjustments.score_state(attempt)
         appeal_bonus_points = _appeal_state["bonus_points"]
         appeal_corrected_qids = {qid: True for qid in _appeal_state["credited_question_ids"]}
@@ -214,7 +212,7 @@ def teacher_check_attempt(request, slug, attempt_id):
     _ensure_teacher(request.user)
 
     exam = get_teacher_exam_or_404(request, slug=slug)
-    attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam)
+    attempt = get_object_or_404(exam.attempts, id=attempt_id)
     profile_return_url, navigation_params = _resolve_profile_navigation(request, default_section="my-exams")
     if navigation_params.get("from_section") == "pending-review":
         results_return_url = profile_return_url
@@ -245,14 +243,6 @@ def teacher_check_attempt(request, slug, attempt_id):
         )
         return redirect(view_attempt_url)
 
-    # YALNIZ bu attempt-ə düşən suallar
-    answers_qs = (
-        attempt.answers.select_related("question")
-        .prefetch_related("files", "selected_options", "question__options")
-        .order_by("id")
-    )
-
-    qa_list = [_build_answer_review_item(a) for a in answers_qs]
     can_view_name, identity_window_seconds = _resolve_attempt_name_visibility(attempt, current_time=timezone.now())
     if attempt.exam.exam_type == "test":
         student_display = attempt.user.get_full_name() or attempt.user.username
@@ -314,6 +304,8 @@ def teacher_check_attempt(request, slug, attempt_id):
         messages.success(request, pgettext_lazy("exams.view.results.message", "attempt_checked_success"))
         return redirect(results_return_url)
 
+    # YALNIZ bu attempt-ə düşən suallar — yalnız GET-də (POST həmişə yönləndirir).
+    qa_list = [_build_answer_review_item(a) for a in _load_review_answers(attempt, exam)]
     context = {
         "exam": exam,
         "attempt": attempt,

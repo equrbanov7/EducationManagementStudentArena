@@ -53,6 +53,18 @@ CATEGORY_RULES = (
     ("apps/registrar/management/", "C", "idarə əmrləri"),
     ("apps/registrar/page_contexts.py", "D", "tenant konteksti itmiş səhifə fallback-i (şərhli)"),
     ("apps/syllabus/management/", "C", "idarə əmrləri"),
+    # 2026-10-07 təsnifatı (audit 2026-09-28 T-04 + 2026-10-07 təkrar yoxlama): hamısı
+    # request-siz fon işi / idarə əmri; servis sorğuları açıq `organization` süzgəci daşıyır.
+    ("apps/ai_assistant/retention.py", "D", "dövri log saxlama süpürgəsi (yalnız müddət üzrə DELETE)"),
+    ("apps/subject_folder/tasks.py", "D", "Celery (rls_worker_atomic; sətrin öz təşkilatı)"),
+    ("apps/subject_folder/services/plagiarism/dispatch.py", "D", "Celery/sinxron oxşarlıq (engine org süzgəcli)"),
+    ("apps/subject_folder/management/", "C", "idarə əmrləri"),
+    ("apps/surveys/tasks.py", "D", "Celery (rls_worker_atomic; sorğunun öz təşkilatı)"),
+    ("apps/surveys/services/pending.py", "D", "anonim cavab buferi köçürməsi (artıq icazəli kampaniya id-si)"),
+    ("apps/surveys/services/survey_buffer.py", "D", "anonim cavab buferi köçürməsi (artıq icazəli sorğu id-si)"),
+    ("apps/surveys/management/", "C", "idarə əmrləri"),
+    ("apps/timetable/tasks.py", "D", "Celery (cədvəl generatoru, run sətrinin təşkilatı)"),
+    ("apps/workload/management/", "C", "idarə əmrləri (--org ilə)"),
     ("apps/accounts/", "C", "superadmin / admin cross-org əməliyyatı"),
     ("apps/audit/", "C", "superadmin audit görünüşü"),
     ("apps/monitoring/", "C", "superadmin monitorinq"),

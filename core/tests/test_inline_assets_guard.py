@@ -6,6 +6,7 @@
 """
 
 import importlib.util
+import re
 from pathlib import Path
 
 from django.conf import settings
@@ -50,3 +51,47 @@ class InlineAssetScannerTest(SimpleTestCase):
 
     def test_main_exit_code(self):
         self.assertEqual(checker.main(["--quiet"]), 0)
+
+
+# base.html-in asset slotları: uşaq şablon bunları BAŞQA blokun içində təyin edərsə
+# Django override-ı iki yerdə render edir (həm valideyn blokun içində, həm də base-in
+# öz slotunda) — hər skript/stil İKİ DƏFƏ icra olunur.
+_BASE_ASSET_BLOCKS = ("extraHead", "extraCss", "extraJs", "global_search_js", "ai_assistant_js")
+_BLOCK_TAG = re.compile(r"{%\s*(?:block\s+(\w+)|endblock(?:\s+\w+)?)\s*%}")
+_COMMENT_BLOCK = re.compile(r"{%\s*comment\s*%}.*?{%\s*endcomment\s*%}", re.S)
+
+
+def _nested_asset_blocks(text: str) -> list[tuple[str, list[str]]]:
+    found = []
+    stack: list[str] = []
+    for match in _BLOCK_TAG.finditer(_COMMENT_BLOCK.sub("", text)):
+        name = match.group(1)
+        if name is None:
+            if stack:
+                stack.pop()
+            continue
+        if name in _BASE_ASSET_BLOCKS and stack:
+            found.append((name, list(stack)))
+        stack.append(name)
+    return found
+
+
+class AssetBlockNestingGuardTest(SimpleTestCase):
+    """Perf 2026-10-07: `take_exam.html`-də `extraJs` `content`-in içində idi —
+    KaTeX (266 KB), paint/nəzarət skriptləri hər imtahan açılışında İKİ DƏFƏ icra
+    olunurdu. Base asset blokları heç vaxt başqa blokun içində təyin olunmamalıdır."""
+
+    def test_detector(self):
+        bad = "{% block content %}<p>x</p>{% block extraJs %}<script src='a.js'></script>{% endblock %}{% endblock %}"
+        ok = "{% block content %}x{% endblock %}{% block extraJs %}{% block inner %}{% endblock %}{% endblock %}"
+        self.assertEqual(_nested_asset_blocks(bad), [("extraJs", ["content"])])
+        self.assertEqual(_nested_asset_blocks(ok), [])
+
+    def test_no_base_asset_block_is_nested(self):
+        base = Path(settings.BASE_DIR)
+        offenders = []
+        for pattern in ("apps/*/templates/**/*.html", "templates/**/*.html"):
+            for path in sorted(base.glob(pattern)):
+                for name, parents in _nested_asset_blocks(path.read_text(encoding="utf-8")):
+                    offenders.append(f"{path.relative_to(base)}: {{% block {name} %}} inside {parents}")
+        self.assertEqual(offenders, [], "Asset bloku başqa blokun içindədir — iki dəfə render olunur.")

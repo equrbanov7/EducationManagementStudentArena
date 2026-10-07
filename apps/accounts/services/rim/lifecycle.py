@@ -28,6 +28,7 @@ from .policy import (
     RimAccessError,
     RimActor,
     assert_can_manage,
+    assert_no_foreign_authority,
     require_permission,
 )
 from .search import STATUS_ACTIVE, STATUS_ARCHIVED, STATUS_BLOCKED, STATUS_DELETED, account_status
@@ -65,6 +66,9 @@ def block_user(actor: RimActor, target_user, *, reason, request=None, reason_cod
     """Hesabı bloklayır (`is_active=False`) — data toxunulmaz qalır (səbəb kodu + müraciət ünvanı ilə)."""
     require_permission(actor, PERM_BLOCK)
     assert_can_manage(actor, target_user)
+    # SEC-02 (2026-10-07): hesab QLOBALDIR (``is_active`` / silinmə hər tenantda
+    # təsir edir) — hədəfin başqa təşkilatdakı rütbəsi də sayılır.
+    assert_no_foreign_authority(actor, target_user)
     reason = normalize_reason(reason)
 
     status = account_status(target_user)
@@ -92,6 +96,9 @@ def unblock_user(actor: RimActor, target_user, *, reason, request=None):
     """Blokdan çıxarır. Silinmiş hesab üçün əvvəlcə bərpa tələb olunur."""
     require_permission(actor, PERM_BLOCK)
     assert_can_manage(actor, target_user)
+    # SEC-02 (2026-10-07): hesab QLOBALDIR (``is_active`` / silinmə hər tenantda
+    # təsir edir) — hədəfin başqa təşkilatdakı rütbəsi də sayılır.
+    assert_no_foreign_authority(actor, target_user)
     reason = normalize_reason(reason, required=False)
 
     status = account_status(target_user)
@@ -120,6 +127,9 @@ def soft_delete_user(actor: RimActor, target_user, *, reason, request=None):
     """Hesabı YUMŞAQ silir — tarixi akademik yazılar qalır, giriş bağlanır."""
     require_permission(actor, PERM_SOFT_DELETE)
     assert_can_manage(actor, target_user)
+    # SEC-02 (2026-10-07): hesab QLOBALDIR (``is_active`` / silinmə hər tenantda
+    # təsir edir) — hədəfin başqa təşkilatdakı rütbəsi də sayılır.
+    assert_no_foreign_authority(actor, target_user)
     reason = normalize_reason(reason)
 
     if account_status(target_user) == STATUS_DELETED:
@@ -141,6 +151,9 @@ def restore_user(actor: RimActor, target_user, *, reason, request=None):
     """
     require_permission(actor, PERM_SOFT_DELETE)
     assert_can_manage(actor, target_user)
+    # SEC-02 (2026-10-07): hesab QLOBALDIR (``is_active`` / silinmə hər tenantda
+    # təsir edir) — hədəfin başqa təşkilatdakı rütbəsi də sayılır.
+    assert_no_foreign_authority(actor, target_user)
     reason = normalize_reason(reason, required=False)
 
     if account_status(target_user) != STATUS_DELETED:
