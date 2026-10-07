@@ -119,6 +119,9 @@ class Stack:
         services["pool"]["cpus"] = 1.0  # prod PGBOUNCER_CPU_LIMIT defoltu
         services["redis"]["cpus"] = 0.5
         services["edge"]["cpus"] = 0.75
+        # 2026-10-08: defolt nofile=1024 WS-li mərhələlərdə (final/live gözləmə otaqları) bitirdi →
+        # `accept4() failed (24)`, join timeout/500 — prod nginx-də limit 65536-dır (artefakt idi).
+        services["edge"]["ulimits"] = {"nofile": {"soft": 65536, "hard": 65536}}
         # Prod nginx `upstream` bloku işlətmir (DNS ilə `app`) — replikaları «ölü» elan
         # etmir. Codex-in edge-i defolt max_fails=1 + 15 s timeout ilə yük altında
         # bütün replikaları atıb 502 kaskadı yaradırdı (prod-da olmayan artefakt).
@@ -126,7 +129,7 @@ class Stack:
         edge_conf.write_text(
             # WebSocket (live/final gözləmə otağı): Upgrade ötürülür; adi sorğularda
             # Connection "" qalır (upstream keepalive pozulmur).
-            "events { worker_connections 8192; } http { map $http_upgrade $connection_upgrade { default upgrade; '' ''; } "
+            "worker_rlimit_nofile 65536; events { worker_connections 8192; } http { map $http_upgrade $connection_upgrade { default upgrade; '' ''; } "
             "upstream backend { least_conn; "
             + " ".join(f"server {a}:8000 max_fails=0;" for a in APPS)
             + " keepalive 64; } server { listen 443 ssl; ssl_certificate /cert.pem; ssl_certificate_key /key.pem; "
