@@ -64,7 +64,21 @@ Sahibin quraşdırma sənədlərinə görə server HPE ProLiant-dır (iLO, Smart
 
 ### 2.2 ESXi: hostun və WEST VM-in autostart-ı
 
-ESXi Host Client-ə daxil olun: `https://10.0.1.240/ui` (Windows PC üzərindən).
+> **✅ 2026-10-07 22:44-də quruldu.** Host Autostart: Enabled=Yes, start/stop delay 120 s, Stop action=Shut down.
+> WEST: autostart sırası 1. VM-də VMware Tools işləyir.
+> Səhər baş verən hadisənin səbəbi də bu imiş: host ~10:30-da yenidən başlamışdı, autostart isə söndürülü idi.
+> Ona görə WEST VM 17:19-a qədər, kimsə əl ilə «Power on» basana qədər sönük qaldı.
+>
+> **Hardware:** HPE ProLiant DL360 Gen10, 2 × Xeon Gold 6138 (40 nüvə / 80 thread), 127 GB RAM, 1,7 TB datastore.
+> - **ESXi 8.0 U3:** `https://10.0.0.216/ui`
+> - **iLO 5:** `https://10.0.1.112`
+>
+> **⚠️ ESXi EVALUATION rejimindədir — lisenziya ~2026-11-08-də bitir.** Bitəndən sonra VM yandırıla
+> bilməz. Yəni ilk kəsilmədən sonra autostart da işləməz. Lisenziya açarı Host → Manage → Licensing →
+> **Assign license** ilə daxil edilməlidir.
+
+Aşağıdakı addımlar yenidən qurmaq lazım olsa istinad üçündür. ESXi Host Client-ə daxil olun: `https://10.0.0.216/ui`
+(Windows PC üzərindən; köhnə ünvan 10.0.1.240 idi).
 
 1. Navigator → **Host → Manage → System → Autostart** → **Edit settings** düyməsini basıb bunları qurun:
    - Enabled = **Yes**
