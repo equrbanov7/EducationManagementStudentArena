@@ -91301,3 +91301,27 @@ msgstr "Bugün"
 msgctxt "core.datetime_input"
 msgid "Hazırdır"
 msgstr "Tamam"
+
+msgctxt "exams.form.exam.help"
+msgid ""
+"0 yazsanız, bütün aktiv suallar düşəcək. Boş qalarsa, standart olaraq 10 "
+"sual götürülür. Test, yazılı və praktiki imtahanlara aiddir."
+msgstr ""
+"Tüm aktif soruların dahil edilmesi için 0 yazın. Boş bırakılırsa varsayılan "
+"olarak 10 soru alınır. Test, yazılı ve uygulamalı sınavlar için geçerlidir."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "İmtahanın kateqoriyasını seçin: Sınaq, Midterm və ya Final."
+msgstr "Sınav kategorisini seçin: Deneme, Midterm veya Final."
+
+msgctxt "exams.features"
+msgid "Praktiki imtahan hazırda production mühitində deaktivdir."
+msgstr "Uygulamalı sınavlar şu anda canlı ortamda devre dışı."
+
+msgctxt "exams.features"
+msgid "İmtahan nəzarəti production mühitində deaktivdir."
+msgstr "Sınav gözetimi canlı ortamda devre dışı."
+
+msgctxt "exams.form.question.label"
+msgid "Variant %(n)s"
+msgstr "Seçenek %(n)s"

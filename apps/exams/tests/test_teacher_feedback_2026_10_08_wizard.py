@@ -4,13 +4,17 @@ E1: tarix-saat sahəsi brauzer dilinə tabe idi (native ``datetime-local``: en-U
 mm/dd/yyyy + AM/PM; «06/10» iyun 10; yazılan dəyər boş gedirdi → «Başlama
 vaxtını seçin»). İndi HƏMİŞƏ ``gg.aa.iiii ss:dd`` (24 saat) + seçici; server ISO-nu
 da qəbul edir; vaxt Asia/Baku-da saxlanır.
+
+E2: ingilis UI-da sehrbaz/forma mətnləri Azərbaycan dilində qalırdı (məs. sual
+sayının köməkçi mətni «0 yazsan…» gettext-siz idi); AZ mətn rəsmi üsluba keçdi.
 """
 
+import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from apps.exams.forms import ExamForm
 from apps.exams.models import Exam
@@ -93,3 +97,48 @@ class WizardDayFirstDateTimeTests(_Base):
         html = str(form["start_datetime"])
         self.assertIn('value="06.10.2030 09:30"', html)
         self.assertIn('type="text"', html)
+
+
+AZ_ONLY_LETTERS = re.compile(r"[əƏıİğĞşŞçÇöÖüÜ]")
+
+
+def _visible_text(html):
+    """Göstərilən mətn + istifadəçiyə görünən atributlar (placeholder, title, aria-label)."""
+    html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.S)
+    attrs = re.findall(r'(?:placeholder|title|aria-label|data-ems-dt-i18n)="([^"]*)"', html)
+    text = re.sub(r"<[^>]+>", "\n", html)
+    return "\n".join([text] + attrs)
+
+
+class WizardEnglishSweepTests(_Base):
+    """E2: ingilis UI-da sehrbazda Azərbaycan mətni qalmamalıdır."""
+
+    def _render(self, url):
+        client = _login(self.teacher, self.org)
+        client.cookies["django_language"] = "en"
+        response = client.get(url, HTTP_X_REQUESTED_WITH="XMLHttpRequest", HTTP_ACCEPT_LANGUAGE="en")
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def _assert_no_azerbaijani(self, html):
+        offenders = sorted({line.strip() for line in _visible_text(html).split("\n") if AZ_ONLY_LETTERS.search(line)})
+        # Fənn/qrup/istifadəçi adları (data) yoxlanmır — fixture adları ASCII-dir.
+        self.assertEqual(offenders, [], offenders)
+
+    def test_create_wizard_has_no_azerbaijani_in_english(self):
+        self._assert_no_azerbaijani(self._render(reverse("exams:create_exam") + "?modal=1"))
+
+    def test_edit_wizard_has_no_azerbaijani_in_english(self):
+        exam = self._exam(is_active=False, title="Exam X")
+        self._assert_no_azerbaijani(self._render(reverse("exams:edit_exam", kwargs={"slug": exam.slug}) + "?modal=1"))
+
+    def test_random_question_count_help_is_translated_and_formal(self):
+        with translation.override("en"):
+            form = ExamForm(user=self.teacher, organization=self.org)
+            help_en = str(form.fields["random_question_count"].help_text)
+        self.assertNotRegex(help_en, AZ_ONLY_LETTERS)
+        with translation.override("az"):
+            form = ExamForm(user=self.teacher, organization=self.org)
+            help_az = str(form.fields["random_question_count"].help_text)
+        self.assertIn("yazsanız", help_az)
+        self.assertNotIn("yazsan,", help_az)

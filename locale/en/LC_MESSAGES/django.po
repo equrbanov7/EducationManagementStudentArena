@@ -91815,3 +91815,27 @@ msgstr "Today"
 msgctxt "core.datetime_input"
 msgid "Hazırdır"
 msgstr "Done"
+
+msgctxt "exams.form.exam.help"
+msgid ""
+"0 yazsanız, bütün aktiv suallar düşəcək. Boş qalarsa, standart olaraq 10 "
+"sual götürülür. Test, yazılı və praktiki imtahanlara aiddir."
+msgstr ""
+"Enter 0 to include all active questions. If left empty, 10 questions are "
+"used by default. Applies to test, written and practical exams."
+
+msgctxt "exams.template.create_exam_modal_form"
+msgid "İmtahanın kateqoriyasını seçin: Sınaq, Midterm və ya Final."
+msgstr "Choose the exam category: Quiz, Midterm or Final."
+
+msgctxt "exams.features"
+msgid "Praktiki imtahan hazırda production mühitində deaktivdir."
+msgstr "Practical exams are currently disabled in production."
+
+msgctxt "exams.features"
+msgid "İmtahan nəzarəti production mühitində deaktivdir."
+msgstr "Exam supervision is disabled in production."
+
+msgctxt "exams.form.question.label"
+msgid "Variant %(n)s"
+msgstr "Option %(n)s"

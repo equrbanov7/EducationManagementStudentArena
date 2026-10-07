@@ -4,6 +4,8 @@
 Yeni mətnlər:
 * E1 — `core.datetime_input`: locale-dən asılı olmayan «gg.aa.iiii ss:dd» tarix-saat sahəsi
   (xəta mesajları, seçici düymələri). Ay/gün adları Django-nun öz kataloqundandır.
+* E2 — sehrbaz/formalarda gettext-siz qalan mətnlər (sual sayı köməkçisi «0 yazsanız…»,
+  praktiki imtahan / nəzarət deaktiv mesajları, «Variant N») və qeyri-rəsmi «seç» → «seçin».
 
 Mənbə dili AZ-dır (msgid = AZ mətn). ⚠️ `makemessages` İŞLƏDİLMİR. İdempotentdir;
 sonra `.mo` faylları `msgfmt` ilə yenidən qurulur.
@@ -55,6 +57,40 @@ ROWS = {
         "Dəqiqəni seçin": ("Choose the minute", "Выберите минуты", "Dakikayı seçin"),
         "Bu gün": ("Today", "Сегодня", "Bugün"),
         "Hazırdır": ("Done", "Готово", "Tamam"),
+    },
+    # E2 — sehrbaz/formalarda gettext-siz və ya qeyri-rəsmi qalan mətnlər.
+    "exams.form.exam.help": {
+        "0 yazsanız, bütün aktiv suallar düşəcək. Boş qalarsa, standart olaraq 10 sual götürülür. "
+        "Test, yazılı və praktiki imtahanlara aiddir.": (
+            "Enter 0 to include all active questions. If left empty, 10 questions are used by default. "
+            "Applies to test, written and practical exams.",
+            "Укажите 0, чтобы включить все активные вопросы. Если оставить поле пустым, по умолчанию "
+            "берётся 10 вопросов. Относится к тестовым, письменным и практическим экзаменам.",
+            "Tüm aktif soruların dahil edilmesi için 0 yazın. Boş bırakılırsa varsayılan olarak 10 soru "
+            "alınır. Test, yazılı ve uygulamalı sınavlar için geçerlidir.",
+        ),
+    },
+    "exams.template.create_exam_modal_form": {
+        "İmtahanın kateqoriyasını seçin: Sınaq, Midterm və ya Final.": (
+            "Choose the exam category: Quiz, Midterm or Final.",
+            "Выберите категорию экзамена: пробный, Midterm или Final.",
+            "Sınav kategorisini seçin: Deneme, Midterm veya Final.",
+        ),
+    },
+    "exams.features": {
+        "Praktiki imtahan hazırda production mühitində deaktivdir.": (
+            "Practical exams are currently disabled in production.",
+            "Практические экзамены сейчас отключены в рабочей среде.",
+            "Uygulamalı sınavlar şu anda canlı ortamda devre dışı.",
+        ),
+        "İmtahan nəzarəti production mühitində deaktivdir.": (
+            "Exam supervision is disabled in production.",
+            "Наблюдение за экзаменами отключено в рабочей среде.",
+            "Sınav gözetimi canlı ortamda devre dışı.",
+        ),
+    },
+    "exams.form.question.label": {
+        "Variant %(n)s": ("Option %(n)s", "Вариант %(n)s", "Seçenek %(n)s"),
     },
 }
 

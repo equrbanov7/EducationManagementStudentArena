@@ -292,17 +292,13 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         self.initial["is_active"] = stable_active_state
 
         self.fields["random_question_count"].required = False
-        self.fields["random_question_count"].help_text = (
-            "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa standart 10 qəbul olunur. "
-            "Test, yazılı və praktiki imtahanlara aiddir."
-        )
-        self.fields["fair_question_distribution_enabled"].help_text = (
-            "Eyni sualın çox tələbəyə düşməməsi, mümkün olduqca hər tələbəyə fərqli sualların "
-            "və kifayət qədər blok varsa fərqli blokların düşməsi üçün."
-        )
-        self.fields["ai_difficulty_balance_enabled"].help_text = (
-            "AI sualların ağırlıq dərəcəsini yoxlayır və tələbələrə oxşar çətinlikdə sual dəsti "
-            "düşməsinə çalışır. AI açarı yoxdursa mövcud difficulty dəyərləri istifadə olunur."
+        # 2026-10-08 (müəllim rəyi E2): bu köməkçi mətn gettext-siz idi (ingilis UI-da da
+        # «0 yazsan…» görünürdü) və qeyri-rəsmi idi. Rəsmi AZ msgid + tərcümələr;
+        # «fair»/«AI» köməkçiləri Meta.help_texts-dəki (tərcümə olunmuş) mətnlərdir.
+        self.fields["random_question_count"].help_text = pgettext_lazy(
+            "exams.form.exam.help",
+            "0 yazsanız, bütün aktiv suallar düşəcək. Boş qalarsa, standart olaraq 10 sual götürülür. "
+            "Test, yazılı və praktiki imtahanlara aiddir.",
         )
         self._coding_field_names = [
             "coding_language",
