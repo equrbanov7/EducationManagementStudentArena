@@ -235,6 +235,53 @@ jobs:
           $COMPOSE exec -T redis sh -c 'redis-cli ping' | grep -q PONG
           echo "✅ Redis argv is clean and AUTH via REDISCLI_AUTH works."
 
+      # Təhlükəsizlik auditi 2026-10-07: promtail xam docker.sock-suz, Docker API yalnız-GET
+      # proxy üzərindən. Proxy cap_drop ALL + read_only ilə qalxmalı, GET keçməli, POST/INFO
+      # rədd olunmalı, loglar isə proxy üzərindən Loki-yə çatmalıdır (uçdan-uca).
+      - name: 🐳 Verify docker-socket-proxy is GET-only and promtail ships logs through it
+        env:
+          APP_IMAGE: emsarena-prod:ci
+          SECRET_KEY: ci-smoke-secret-key-not-for-production-use
+          POSTGRES_DB: emsarena
+          POSTGRES_USER: emsarena
+          POSTGRES_PASSWORD: ci-smoke-postgres-password
+          REDIS_PASSWORD: ci-smoke-redis-password
+          GRAFANA_ADMIN_PASSWORD: ci-smoke-grafana-password
+          ALLOWED_HOSTS: "localhost,127.0.0.1,nginx"
+          ADMIN_ALLOWED_IPS: "127.0.0.1"
+          CSRF_TRUSTED_ORIGINS: "http://localhost"
+          SITE_URL: "http://localhost"
+        run: |
+          set -euo pipefail
+          COMPOSE="docker compose -f docker-compose.prod.yml -f docker-compose.ci.yml"
+          PROXY_ID=$($COMPOSE ps -q docker-socket-proxy)
+          for _ in $(seq 1 30); do
+            STATUS=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$PROXY_ID")
+            [ "$STATUS" = "healthy" ] && break
+            sleep 2
+          done
+          [ "$STATUS" = "healthy" ] || { echo "::error::❌ docker-socket-proxy is $STATUS"; exit 1; }
+          $COMPOSE exec -T docker-socket-proxy wget -qO /dev/null http://127.0.0.1:2375/containers/json
+          if $COMPOSE exec -T docker-socket-proxy wget -qO /dev/null --post-data='{}' http://127.0.0.1:2375/containers/create; then
+            echo "::error::❌ docker-socket-proxy accepted a POST"; exit 1
+          fi
+          if $COMPOSE exec -T docker-socket-proxy wget -qO /dev/null http://127.0.0.1:2375/info; then
+            echo "::error::❌ docker-socket-proxy exposes /info"; exit 1
+          fi
+          PROMTAIL_ID=$($COMPOSE ps -q promtail)
+          if docker inspect --format '{{range .Mounts}}{{println .Source}}{{end}}' "$PROMTAIL_ID" | grep -q 'docker\.sock'; then
+            echo "::error::❌ promtail still mounts docker.sock"; exit 1
+          fi
+          for _ in $(seq 1 36); do
+            if $COMPOSE exec -T --index 1 app python -c "import json, urllib.request; v = json.load(urllib.request.urlopen('http://loki:3100/loki/api/v1/label/container/values', timeout=5)).get('data') or []; raise SystemExit(0 if v else 1)"; then
+              echo "✅ docker-socket-proxy: GET only (POST/INFO denied); promtail → proxy → Loki works."
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::❌ Loki has no container log streams — promtail cannot discover/tail through docker-socket-proxy"
+          exit 1
+
       # Always dump container logs for debugging, then tear down
       - name: 📋 Dump container logs
         if: always()
