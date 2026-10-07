@@ -16,7 +16,8 @@
 (function () {
     "use strict";
 
-    var ACTIONS = ["reuse", "unlink", "sync", "propagate"];
+    /* `copy` — «Keçən ildən köçür» (2026-10-08): eyni dialoq `mode=previous` ilə, yalnız kopyalama. */
+    var ACTIONS = ["reuse", "copy", "unlink", "sync", "propagate"];
     var state = null;
     var confirmState = null;
     var toastTimer = null;
@@ -259,7 +260,8 @@
             var hint = state.modal.querySelector("[data-syl-reuse-hint='" + kind + "']");
             var allowed = Boolean(source && !blocked && source["can_" + kind]);
             button.disabled = !allowed;
-            hint.textContent = !source ? "" : allowed ? t(panel, kind + "-ok") : source[kind + "_reason"] || "";
+            var okKey = kind + (state.mode === "previous" && kind === "copy" ? "-previous" : "") + "-ok";
+            hint.textContent = !source ? "" : allowed ? t(panel, okKey) : source[kind + "_reason"] || "";
             hint.classList.toggle("is-bad", Boolean(source) && !allowed);
         });
         renderCandidates(panel);
@@ -280,7 +282,8 @@
         show(modal.querySelector("[data-syl-reuse-loading]"), false);
         var blocked = modal.querySelector("[data-syl-reuse-blocked]");
         var siblings = data.siblings || [];
-        blocked.textContent = target.blocked ? target.blocked_reason : siblings.length ? "" : t(panel, "empty");
+        var emptyKey = state.mode === "previous" ? "empty-previous" : "empty";
+        blocked.textContent = target.blocked ? target.blocked_reason : siblings.length ? "" : t(panel, emptyKey);
         show(blocked, Boolean(target.blocked) || !siblings.length);
         var list = modal.querySelector("[data-syl-reuse-sources]");
         list.textContent = "";
@@ -301,14 +304,19 @@
         }
     }
 
-    function openPicker(panel, trigger) {
+    function openPicker(panel, trigger, mode) {
         var modal = panel.querySelector("[data-syl-reuse-modal]");
         if (!modal) {
             return;
         }
         var kind = trigger.getAttribute("data-row-kind") === "missing" ? "offering" : "syllabus";
         var id = trigger.getAttribute("data-id");
-        state = { panel: panel, modal: modal, trigger: trigger, kind: kind, id: id, data: null, dirty: false };
+        state = { panel: panel, modal: modal, trigger: trigger, kind: kind, id: id, data: null, dirty: false, mode: mode };
+        var title = modal.querySelector("[data-syl-reuse-title]");
+        if (title && t(panel, "title-" + mode)) {
+            title.textContent = t(panel, "title-" + mode);
+        }
+        show(modal.querySelector("[data-syl-reuse-link-option]"), mode !== "previous");
         ["[data-syl-reuse-sources-wrap]", "[data-syl-reuse-choice]", "[data-syl-reuse-bulk]", "[data-syl-reuse-blocked]",
             "[data-syl-reuse-results]", "[data-syl-reuse-blank]"].forEach(function (selector) {
             show(modal.querySelector(selector), false);
@@ -323,6 +331,9 @@
         focusBox(modal);
         var url = new URL(modal.getAttribute("data-options-url"), window.location.origin);
         url.searchParams.set(kind, id);
+        if (mode === "previous") {
+            url.searchParams.set("mode", "previous");
+        }
         http(url.pathname + url.search)
             .then(function (data) {
                 if (state && state.modal === modal) {
@@ -383,7 +394,7 @@
             return;
         }
         var modal = state.modal;
-        var payload = { action: kind, source: source.id };
+        var payload = { action: kind === "copy" && state.mode === "previous" ? "copy_previous" : kind, source: source.id };
         if (kind === "bulk") {
             payload.offerings = Array.prototype.map.call(
                 modal.querySelectorAll("[data-syl-reuse-cand]:checked"),
@@ -518,8 +529,8 @@
                 return;
             }
             var panel = panelOf(button);
-            if (action === "reuse") {
-                openPicker(panel, button);
+            if (action === "reuse" || action === "copy") {
+                openPicker(panel, button, action === "copy" ? "previous" : "reuse");
             } else {
                 openConfirm(panel, action, button);
             }

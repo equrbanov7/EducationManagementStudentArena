@@ -259,6 +259,26 @@ def _sibling_row(row, *, actor, target, chair_id, target_code, candidates, chair
     }
 
 
+def target_block(target, target_code) -> dict:
+    """Dialoq başlığının hədəf bloku (bağla/kopyala və «Keçən ildən köçür» üçün ortaq)."""
+    subject, period = _slot(target)
+    target_syllabus = target.syllabus
+    group = _offering_group(target.offering) if target.offering is not None else group_label(target_syllabus)
+    return {
+        "kind": "syllabus" if target_syllabus is not None else "offering",
+        "id": str(target_syllabus.pk if target_syllabus is not None else target.offering.pk),
+        "offering": str(target.offering_id or ""),
+        "group": group,
+        "subject": f"{subject.code} · {subject.name}",
+        "period": f"{period.year_display} · {period.name}" if period is not None else "",
+        "hours_text": hours_text(target.plan_hours),
+        "hours_known": bool(services.normalize_hours(target.plan_hours)),
+        "replaces_draft": target_syllabus is not None,
+        "blocked": bool(target_code),
+        "blocked_reason": transition_text(target_code) if target_code else "",
+    }
+
+
 def build_options(organization, actor, target) -> dict:
     """Dialoqun JSON-u — bax ``reuse_api.syllabus_reuse_options``."""
     subject, period = _slot(target)
@@ -287,21 +307,9 @@ def build_options(organization, actor, target) -> dict:
         if siblings
         else []
     )
-    group = _offering_group(target.offering) if target.offering is not None else group_label(target_syllabus)
     return {
-        "target": {
-            "kind": "syllabus" if target_syllabus is not None else "offering",
-            "id": str(target_syllabus.pk if target_syllabus is not None else target.offering.pk),
-            "offering": str(target.offering_id or ""),
-            "group": group,
-            "subject": f"{subject.code} · {subject.name}",
-            "period": f"{period.year_display} · {period.name}" if period is not None else "",
-            "hours_text": hours_text(target.plan_hours),
-            "hours_known": bool(services.normalize_hours(target.plan_hours)),
-            "replaces_draft": target_syllabus is not None,
-            "blocked": bool(target_code),
-            "blocked_reason": transition_text(target_code) if target_code else "",
-        },
+        "mode": "reuse",
+        "target": target_block(target, target_code),
         "siblings": [
             _sibling_row(
                 row,
@@ -322,7 +330,7 @@ def build_options(organization, actor, target) -> dict:
 # ── Siyahı sətirləri ────────────────────────────────────────────────────────────
 
 
-def page_flags(page_syllabi, visible, *, user_id=None) -> dict:
+def page_flags(page_syllabi, visible, *, user_id=None, actor=None) -> dict:
     """Səhifə dosyeləri üçün bağ bayraqları — SƏHİFƏ başına ən çox iki sorğu.
 
     ``{syllabus_id: {linked, behind, source_group, linked_count, behind_count, siblings}}``.
@@ -330,7 +338,7 @@ def page_flags(page_syllabi, visible, *, user_id=None) -> dict:
     page = list(page_syllabi)
     if not page:
         return {}
-    summary = services.reuse.linked_summary(page)
+    summary = services.reuse_sync.linked_summary(page)
     open_drafts = [
         row
         for row in page
@@ -357,19 +365,46 @@ def page_flags(page_syllabi, visible, *, user_id=None) -> dict:
             .values_list("subject_id", "period_id")
         ):
             pairs[(subject_id, period_id)] += 1
+    previous = _previous_flags(page, actor)
     flags = {}
     for row in page:
         entry = summary.get(row.pk, {})
         siblings = pairs.get((row.subject_id, row.period_id), 0) - 1 if row in open_drafts else 0
         flags[row.pk] = {
             "linked": bool(row.reused_from_id),
-            "behind": services.reuse.is_behind(row),
+            "behind": services.reuse_sync.is_behind(row),
             "source_group": group_label(row.reused_from) if row.reused_from_id else "",
             "linked_count": entry.get("linked", 0),
             "behind_count": entry.get("behind", 0),
             "siblings": max(siblings, 0),
+            "previous": row.pk in previous,
         }
     return flags
+
+
+def _previous_flags(page, actor) -> set:
+    """«Keçən ildən köçür» təklif olunan QARALAMA dosyeləri — səhifə başına bir sorğu.
+
+    Yalnız toxunulmamış (köçürülməmiş, bağlanmamış, təsdiqsiz) qaralama; mənbə BAŞQA
+    semestrdə və aktorun kopyalaya bildiyi dosyedir (``copy_from_previous`` qapısı).
+    """
+    drafts = [
+        row
+        for row in page
+        if row.period_id
+        and not row.reused_from_id
+        and row.approved_version_id is None
+        and row.current_version is not None
+        and row.current_version.status == SyllabusStatus.DRAFT.value
+        and row.current_version.change_kind != ChangeKind.COPIED.value
+    ]
+    if actor is None or not drafts:
+        return set()
+    rules = services.reuse_rules
+    pairs = rules.previous_source_pairs(
+        organization=drafts[0].organization_id, actor=actor, subject_ids={row.subject_id for row in drafts}
+    )
+    return {row.pk for row in drafts if rules.has_previous(pairs, subject_id=row.subject_id, period_id=row.period_id)}
 
 
 # ── Redaktor banneri ────────────────────────────────────────────────────────────
@@ -382,11 +417,11 @@ def editor_reuse_state(request, organization, *, syllabus, version, is_author: b
         return {
             "mode": "linked",
             "group": group_label(syllabus.reused_from),
-            "behind": services.reuse.is_behind(syllabus),
+            "behind": services.reuse_sync.is_behind(syllabus),
             "can_act": is_author,
             "syllabus": str(syllabus.pk),
         }
-    summary = services.reuse.linked_summary([syllabus]).get(syllabus.pk)
+    summary = services.reuse_sync.linked_summary([syllabus]).get(syllabus.pk)
     if summary and summary["linked"]:
         return {
             "mode": "source",
@@ -398,10 +433,14 @@ def editor_reuse_state(request, organization, *, syllabus, version, is_author: b
     if (
         is_author
         and syllabus.period_id
+        and not syllabus.reused_from_id
         and syllabus.approved_version_id is None
         and version.status == SyllabusStatus.DRAFT.value
         and version.change_kind != ChangeKind.COPIED.value
     ):
+        rules = services.reuse_rules
+        pairs = rules.previous_source_pairs(organization=organization, actor=actor, subject_ids={syllabus.subject_id})
+        previous = rules.has_previous(pairs, subject_id=syllabus.subject_id, period_id=syllabus.period_id)
         count = (
             services.sibling_queryset(
                 organization=organization,
@@ -416,13 +455,14 @@ def editor_reuse_state(request, organization, *, syllabus, version, is_author: b
             .values("pk")
             .count()
         )
-        if count:
-            return {"mode": "offer", "count": count, "syllabus": str(syllabus.pk)}
+        if count or previous:
+            return {"mode": "offer", "count": count, "previous": previous, "syllabus": str(syllabus.pk)}
     return {"mode": ""}
 
 
 __all__ = [
     "MAX_BULK_TARGETS",
+    "target_block",
     "build_options",
     "candidate_targets",
     "editor_reuse_state",

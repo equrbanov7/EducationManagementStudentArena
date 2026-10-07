@@ -253,8 +253,6 @@
 
         if (modalState.kind === "newver") {
             payload = { action: "new_version", syllabus: ctx.id, kind: modalState.versionKind };
-        } else if (modalState.kind === "copy") {
-            payload = { action: "copy", syllabus: ctx.id };
         } else if (modalState.kind === "create") {
             payload = { action: "create", offering: ctx.id };
         } else if (modalState.kind === "withdraw") {
@@ -397,8 +395,8 @@
             openDrawer(el, context.id);
         } else if (action === "new_version") {
             openModal(el, "newver", context);
-        } else if (action === "copy") {
-            openModal(el, "copy", context);
+        /* `copy` («Keçən ildən köçür») — syllabus_reuse.js dialoqu (mode=previous), burada YOX:
+           əvvəl sillabussuz sətirdə açılış id-si sillabus id-si kimi gedirdi və 404 alırdı. */
         } else if (action === "create") {
             openModal(el, "create", context);
         } else if (action === "withdraw") {

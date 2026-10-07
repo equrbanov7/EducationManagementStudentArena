@@ -142,6 +142,7 @@ TRANSITION_MESSAGES = {
     ),
     "reuse.target_linked": pgettext_lazy(_CTX, "Bu qrupun sillabusu artıq bağlıdır."),
     "reuse.not_sibling": pgettext_lazy(_CTX, "Mənbə eyni fənnin eyni semestrinə aid deyil."),
+    "reuse.not_previous": pgettext_lazy(_CTX, "Mənbə bu fənnin başqa semestrinə aid deyil."),
     "reuse.copy_out_of_scope": pgettext_lazy(_CTX, "Bu sillabusu kopyalamaq üçün icazəniz yoxdur."),
     "reuse.not_linked": pgettext_lazy(_CTX, "Bu sillabus heç bir sillabusa bağlı deyil."),
     "reuse.up_to_date": pgettext_lazy(_CTX, "Bağlı sillabus artıq mənbənin son təsdiqlənmiş versiyasındadır."),

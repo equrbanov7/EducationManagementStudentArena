@@ -158,7 +158,7 @@ def _reuse_keys(keys, status, reuse, *, own: bool = True) -> tuple:
             return keys, str(_SOURCE_BEHIND) % {"count": reuse["behind_count"]}
         return keys, str(_SOURCE_OF) % {"count": reuse["linked_count"]}
     if reuse.get("siblings") and status == SyllabusStatus.DRAFT.value:
-        return ["reuse"] + [key for key in keys if key != "copy"], str(_SIBLINGS)
+        return ["reuse"] + keys, str(_SIBLINGS)
     return keys, ""
 
 
@@ -196,7 +196,7 @@ def _period_labels(period):
 
 #: Yalnız MÜƏLLİFİN edə bildiyi əməllər (servis `author_only` qapısı) — rəhbər
 #: başqasının sətrində bunları görmür, əvəzində oxu paneli («Bax») açılır.
-AUTHOR_ONLY_ACTIONS = frozenset({"resume", "fix", "withdraw"})
+AUTHOR_ONLY_ACTIONS = frozenset({"resume", "fix", "withdraw", "copy"})
 #: `syllabus.edit` açarı tələb edən əməllər (əhatə yoxlamasını servis edir).
 EDIT_ACTIONS = frozenset({"copy", "new_version"})
 
@@ -238,6 +238,9 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
     percent = version.completion_percent if version is not None else 0
     year, semester = _period_labels(syllabus.period)
     keys = list(ACTIONS_BY_STATUS.get(status, ()))
+    if reuse is not None:
+        # «Keçən ildən köçür» yalnız BAŞQA semestrdə kopyalana bilən mənbə olanda (page_flags).
+        can_copy = bool(reuse.get("previous"))
     if status == SyllabusStatus.DRAFT.value and not can_copy:
         keys = [key for key in keys if key != "copy"]
     keys, own = _viewer_keys(keys, syllabus, viewer)
@@ -278,7 +281,7 @@ def build_missing_row(offering, *, can_copy: bool = False, siblings: int = 0) ->
     """
     year, semester = _period_labels(offering.period)
     if siblings:
-        keys = ["reuse", "create"]
+        keys = ["reuse"] + (["copy"] if can_copy else []) + ["create"]
     else:
         keys = ["create"] + (["copy"] if can_copy else [])
     return {

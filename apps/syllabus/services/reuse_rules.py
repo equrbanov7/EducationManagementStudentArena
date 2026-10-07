@@ -35,7 +35,7 @@ müəllifi və ya mənbənin kafedrasını ``syllabus.edit`` ilə əhatə edən 
 
 from __future__ import annotations
 
-from django.db.models import Case, Count, IntegerField, Q, Value, When
+from django.db.models import Case, Count, F, IntegerField, Q, Value, When
 
 from ..constants import LESSON_HOUR_KINDS, OPEN_STATUSES, PERM_EDIT, SyllabusStatus
 from ..models import ApprovalSource, Syllabus
@@ -52,6 +52,7 @@ CODE_CHAIR_DIFFERS = "reuse.chair_differs"
 CODE_TARGET_LOCKED = "reuse.target_locked"
 CODE_TARGET_LINKED = "reuse.target_linked"
 CODE_NOT_SIBLING = "reuse.not_sibling"
+CODE_NOT_PREVIOUS = "reuse.not_previous"
 CODE_COPY_OUT_OF_SCOPE = "reuse.copy_out_of_scope"
 CODE_NOT_LINKED = "reuse.not_linked"
 CODE_UP_TO_DATE = "reuse.up_to_date"
@@ -68,6 +69,7 @@ REASON_CODES = (
     CODE_TARGET_LOCKED,
     CODE_TARGET_LINKED,
     CODE_NOT_SIBLING,
+    CODE_NOT_PREVIOUS,
     CODE_COPY_OUT_OF_SCOPE,
     CODE_NOT_LINKED,
     CODE_UP_TO_DATE,
@@ -159,6 +161,15 @@ def same_slot(source, *, organization_id, subject_id, period_id) -> bool:
         and source.subject_id == subject_id
         and source.period_id is not None
         and source.period_id == period_id
+    )
+
+
+def previous_slot(source, *, organization_id, subject_id, period_id) -> bool:
+    """«Keçən ildən köçür» mənbəyi: eyni təşkilat + fənn, BAŞQA semestr və ya semestrsiz baza."""
+    return (
+        source.organization_id == organization_id
+        and source.subject_id == subject_id
+        and (source.period_id is None or source.period_id != period_id)
     )
 
 
@@ -278,6 +289,62 @@ def _copyable_annotation(actor):
     return Case(When(condition, then=Value(1)), default=Value(0), output_field=IntegerField())
 
 
+def _copyable_roots(*, organization, actor, subject_ids):
+    """Aktorun KOPYALAYA bildiyi kök dosyelər (``copy_from_previous`` qapısı, SQL-də)."""
+    queryset = Syllabus.objects.filter(
+        organization=organization, is_active=True, subject_id__in=list(subject_ids), reused_from__isnull=True
+    ).filter(Q(current_version__isnull=False) | Q(approved_version__isnull=False))
+    return _scope_filter(queryset, actor).annotate(_copyable=_copyable_annotation(actor)).filter(_copyable=1)
+
+
+def previous_source_pairs(*, organization, actor, subject_ids) -> set:
+    """``{(fənn_id, semestr_id|None)}`` — «Keçən ildən köçür» düyməsinin göstərilməsi üçün TƏK sorğu.
+
+    Çağıran tərəf açılışın semestrindən FƏRQLİ cütə baxır (bax ``has_previous``).
+    """
+    if organization is None or not subject_ids or not actor.has(PERM_EDIT):
+        return set()
+    rows = _copyable_roots(organization=organization, actor=actor, subject_ids=subject_ids)
+    return set(rows.order_by().values_list("subject_id", "period_id").distinct())
+
+
+def has_previous(pairs, *, subject_id, period_id) -> bool:
+    """Cütlər arasında bu fənnin BAŞQA semestrə (və ya bazaya) aid mənbəyi varmı."""
+    return any(subject == subject_id and period != period_id for subject, period in pairs)
+
+
+def previous_queryset(*, organization, actor, subject_id, period_id, limit: int = 20):
+    """«Keçən ildən köçür» mənbələri — kopyalana bilən, BAŞQA semestrdəki (və ya baza) dosyelər.
+
+    Sıra: öz dosyesi → ən yeni semestr (baza sonda) → təsdiqlənmiş → ən təzəsi. TƏK sorğu.
+    """
+    if organization is None or subject_id is None:
+        return Syllabus.objects.none()
+    queryset = _copyable_roots(organization=organization, actor=actor, subject_ids=[subject_id])
+    if period_id is not None:
+        queryset = queryset.exclude(period_id=period_id)
+    own = Case(When(_own_q(actor), then=Value(1)), default=Value(0), output_field=IntegerField())
+    approved_rank = Case(
+        When(approved_version__status=SyllabusStatus.APPROVED.value, then=Value(0)),
+        default=Value(1),
+        output_field=IntegerField(),
+    )
+    return (
+        queryset.select_related(
+            "subject",
+            "period",
+            "offering",
+            "offering__group",
+            "author",
+            "approved_version",
+            "approved_version__approved_by",
+            "current_version",
+        )
+        .annotate(_own=own, _approved_rank=approved_rank)
+        .order_by("-_own", F("period__start_date").desc(nulls_last=True), "_approved_rank", "-updated_at", "pk")[:limit]
+    )
+
+
 def sibling_queryset(*, organization, actor, subject_id, period_id, exclude_syllabus_id=None, exclude_offering_id=None):
     """Qonşu dosyelər — TƏK sorğu (oxu qapısı + annotasiyalar + select_related).
 
@@ -334,6 +401,7 @@ __all__ = [
     "CODE_LINKED_UNLINK_FIRST",
     "CODE_NOT_LINKED",
     "CODE_NOT_OWN",
+    "CODE_NOT_PREVIOUS",
     "CODE_NOT_SIBLING",
     "CODE_SOURCE_NOT_APPROVED",
     "CODE_SOURCE_NOT_HUMAN",
@@ -344,11 +412,15 @@ __all__ = [
     "copy_base",
     "copy_code",
     "effective_chair_unit_id",
+    "has_previous",
     "hours_match",
     "hours_rows",
     "link_base",
     "link_code",
     "normalize_hours",
+    "previous_queryset",
+    "previous_slot",
+    "previous_source_pairs",
     "reuse_origin",
     "reuse_root",
     "same_slot",

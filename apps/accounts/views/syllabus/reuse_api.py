@@ -5,6 +5,7 @@
 
 * ``link``      — «Eyni sillabusu istifadə et (bağla)»;
 * ``copy``      — «Kopyala və uyğunlaşdır»;
+* ``copy_previous`` — «Keçən ildən köçür» (mənbə başqa semestrdə; ``GET …?mode=previous``);
 * ``bulk``      — «Hamısına tətbiq et» (``offerings``: açılış id-ləri);
 * ``unlink``    — «Ayır» (``syllabus``: bağlı dosye);
 * ``sync``      — «Mənbədən yenilə» (``syllabus``: bağlı dosye);
@@ -43,6 +44,9 @@ _LINKED = pgettext_lazy(
     _CTX, "Sillabus bağlandı — %(group)s qrupunun təsdiqlənmiş sillabusu ilə eyni məzmun qüvvəyə mindi."
 )
 _COPIED = pgettext_lazy(_CTX, "Məzmun kopyalandı və saatlara uyğunlaşdırıldı — qaralamanı yoxlayıb təsdiqə göndərin.")
+_COPIED_PREVIOUS = pgettext_lazy(
+    _CTX, "Keçmiş semestrin sillabusu köçürüldü və bu qrupun saatına uyğunlaşdırıldı — QARALAMA açıldı."
+)
 _BULK = pgettext_lazy(_CTX, "Bağlandı: %(linked)s · kopyalandı: %(copied)s · ötürüldü: %(skipped)s.")
 _UNLINKED = pgettext_lazy(
     _CTX, "Bağ ayrıldı — redaktə üçün müstəqil qaralama açıldı. Təsdiqlənmiş nüsxə qüvvədə qalır."
@@ -75,6 +79,11 @@ def syllabus_reuse_options(request):
     )
     if target is None:
         return _fail(_NOT_FOUND, status=404)
+    if (request.GET.get("mode") or "").strip() == "previous":
+        # «Keçən ildən köçür» — eyni fənnin BAŞQA semestrlərdəki dosyeləri (yalnız kopyalama).
+        from .reuse_previous import build_previous_options
+
+        return JsonResponse({"ok": True, **build_previous_options(organization, actor, target)})
     return JsonResponse({"ok": True, **reuse_context.build_options(organization, actor, target)})
 
 
@@ -120,8 +129,11 @@ def _single(request, organization, actor, payload, action):
         syllabus, version = services.reuse.link(source=source, target=target, actor=actor, request=request)
         message = str(_LINKED) % {"group": reuse_context.group_label(source)}
     else:
-        syllabus, version = services.reuse.copy_adjust(source=source, target=target, actor=actor, request=request)
-        message = _COPIED
+        # `copy_previous` — «Keçən ildən köçür» (başqa semestr); `copy` — eyni semestrin qonşusu.
+        syllabus, version = services.reuse.copy_adjust(
+            source=source, target=target, actor=actor, request=request, previous=action == "copy_previous"
+        )
+        message = _COPIED_PREVIOUS if action == "copy_previous" else _COPIED
     return _version_payload(version, message, syllabus=str(syllabus.pk), mode=action)
 
 
@@ -170,14 +182,14 @@ def _link_maintenance(request, organization, actor, payload, action):
     if syllabus is None:
         return _fail(_NOT_FOUND, status=404)
     if action == "unlink":
-        version = services.reuse.unlink(target_syllabus=syllabus, actor=actor, request=request)
+        version = services.reuse_sync.unlink(target_syllabus=syllabus, actor=actor, request=request)
         return _version_payload(version, _UNLINKED, syllabus=str(syllabus.pk))
     if action == "sync":
-        version = services.reuse.sync_from_source(
+        version = services.reuse_sync.sync_from_source(
             target_syllabus=syllabus, actor=actor, plan_hours=_hours_for(syllabus), request=request
         )
         return _version_payload(version, _SYNCED, syllabus=str(syllabus.pk))
-    results = services.reuse.propagate(source=syllabus, actor=actor, hours_for=_hours_for, request=request)
+    results = services.reuse_sync.propagate(source=syllabus, actor=actor, hours_for=_hours_for, request=request)
     for row in results:
         if row["code"] and row["status"] == "skipped":
             row["message"] = transition_text(row["code"])
@@ -195,7 +207,7 @@ def syllabus_reuse_action(request):
     payload = _body(request)
     action = (payload.get("action") or "").strip()
     try:
-        if action in {"link", "copy"}:
+        if action in {"link", "copy", "copy_previous"}:
             return _single(request, organization, actor, payload, action)
         if action == "bulk":
             return _bulk(request, organization, actor, payload)

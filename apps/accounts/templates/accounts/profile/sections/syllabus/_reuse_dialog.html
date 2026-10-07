@@ -19,7 +19,8 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
   <div class="syl-modal__box syl-reuse__box" role="dialog" aria-modal="true" tabindex="-1"
        aria-label="{% trans 'Bu fənnin bu semestr üçün artıq sillabusu var' context 'accounts.syllabus' %}">
     <div class="syl-modal__head">
-      <h3>{% trans "Bu fənnin bu semestr üçün artıq sillabusu var" context "accounts.syllabus" %}</h3>
+      {% comment %}Başlıq rejimə görə JS ilə dəyişir (`mode=previous` — «Keçən ildən köçür»).{% endcomment %}
+      <h3 data-syl-reuse-title>{% trans "Bu fənnin bu semestr üçün artıq sillabusu var" context "accounts.syllabus" %}</h3>
       <p class="syl-modal__body" data-syl-reuse-target></p>
     </div>
 
@@ -34,7 +35,7 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
       </div>
 
       <div class="syl-reuse__choice" data-syl-reuse-choice hidden>
-        <div class="syl-reuse__option">
+        <div class="syl-reuse__option" data-syl-reuse-link-option>
           <button type="button" class="syl-btn syl-btn--primary" data-syl-reuse-do="link">
             <i class="fas fa-link" aria-hidden="true"></i>
             {% trans "Eyni sillabusu istifadə et (bağla)" context "accounts.syllabus" %}
@@ -93,6 +94,10 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
 <span class="syl-i18n" data-syl-reuse-i18n hidden
       data-t-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'accounts.syllabus' %}"
       data-t-cancel="{% trans 'Ləğv et' context 'accounts.syllabus' %}"
+      data-t-title-reuse="{% trans 'Bu fənnin bu semestr üçün artıq sillabusu var' context 'accounts.syllabus' %}"
+      data-t-title-previous="{% trans 'Keçmiş semestrin sillabusundan köçür' context 'accounts.syllabus' %}"
+      data-t-empty-previous="{% trans 'Bu fənn üzrə köçürə biləcəyiniz keçmiş sillabus tapılmadı.' context 'accounts.syllabus' %}"
+      data-t-copy-previous-ok="{% trans 'Keçmiş semestrin məzmunu qaralama kimi köçürülür, həftəlik plan bu qrupun saatına uyğunlaşdırılır, sonra adi qaydada təsdiqə göndərilir.' context 'accounts.syllabus' %}"
       data-t-done="{% trans 'Hazırdır' context 'accounts.syllabus' %}"
       data-t-empty="{% trans 'Sizin üçün uyğun mənbə sillabus tapılmadı.' context 'accounts.syllabus' %}"
       data-t-linked-count="{% trans 'bağlı qrup: {count}' context 'accounts.syllabus' %}"

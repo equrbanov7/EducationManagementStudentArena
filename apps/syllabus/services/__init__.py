@@ -5,7 +5,7 @@ View, API və management əmrləri buradan istifadə edir; modelə birbaşa
 :mod:`apps.syllabus.state_machine`-dədir).
 """
 
-from . import reuse, reuse_rules  # noqa: F401 — təkrar istifadə (bağla/kopyala), 2026-10-08
+from . import reuse, reuse_rules, reuse_sync  # noqa: F401 — təkrar istifadə (bağla/kopyala/sinxron), 2026-10-08
 from .coverage import (  # noqa: F401
     GROUP_CHAIR,
     GROUP_PROGRAM,
@@ -143,6 +143,7 @@ __all__ = [
     "reuse",
     "reuse_origin",
     "reuse_rules",
+    "reuse_sync",
     "review_queue",
     "review_scope_queryset",
     "save_section",

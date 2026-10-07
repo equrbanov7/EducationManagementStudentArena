@@ -102,7 +102,7 @@ def _text(request, key: str, default: str = "") -> str:
     return (request.GET.get(key) or default).strip()
 
 
-def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: str, search: str, copyable):
+def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: str, search: str, actor):
     """Müəllimin sillabusu OLMAYAN açılışları — «Sillabus yarat» sətirləri.
 
     ``syllabi`` — görünən dəstin QUERYSET-i. Perf auditi 2026-09-13 F-12:
@@ -150,35 +150,32 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
         if reused_from_id is None and period_id is not None and user.pk in (author_id, instructor_id):
             sibling_pairs[(subject_id, period_id)] += 1
 
+    pending = [
+        offering
+        for offering in offerings
+        if offering.pk not in covered_offerings and (offering.subject_id, offering.period_id) not in covered_pairs
+    ]
+    # «Keçən ildən köçür»: BAŞQA semestrdə kopyalana bilən mənbə varmı (il filtrindən asılı
+    # olmayan TƏK sorğu; əvvəl düymə görünən dəstdəki istənilən təsdiqə baxırdı və 404 verirdi).
+    previous = (
+        services.reuse_rules.previous_source_pairs(
+            organization=organization, actor=actor, subject_ids={offering.subject_id for offering in pending}
+        )
+        if pending
+        else set()
+    )
     rows = []
-    for offering in offerings:
-        if offering.pk in covered_offerings:
-            continue
-        if (offering.subject_id, offering.period_id) in covered_pairs:
-            continue
+    for offering in pending:
         rows.append(
             build_missing_row(
                 offering,
-                can_copy=offering.subject_id in copyable,
+                can_copy=services.reuse_rules.has_previous(
+                    previous, subject_id=offering.subject_id, period_id=offering.period_id
+                ),
                 siblings=sibling_pairs.get((offering.subject_id, offering.period_id), 0),
             )
         )
     return rows
-
-
-def _copyable_subjects(syllabi) -> set:
-    """Keçmiş (təsdiqlənmiş/arxivlənmiş) versiyası olan fənlər — «köçür» mənbəyi.
-
-    F-12: dəst QUERYSET-dir — yalnız uyğun ``subject_id``-lər oxunur
-    (``values_list``), sətirlərin özü yox.
-    """
-    done = [SyllabusStatus.APPROVED.value, SyllabusStatus.ARCHIVED.value]
-    return set(
-        syllabi.order_by()
-        .filter(Q(approved_version__isnull=False) | Q(current_version__status__in=done))
-        .values_list("subject_id", flat=True)
-        .distinct()
-    )
 
 
 def _chair_units(syllabi):
@@ -219,11 +216,10 @@ class _MissingThenSyllabi:
     «sillabussuz» sətirlər, sonra sıralanmış sillabuslar.
     """
 
-    def __init__(self, missing, queryset, *, now, copyable, visible=None, viewer=None):
+    def __init__(self, missing, queryset, *, now, visible=None, viewer=None):
         self._missing = list(missing)
         self._queryset = queryset
         self._now = now
-        self._copyable = copyable
         self._visible = visible if visible is not None else queryset
         self._viewer = viewer
         self._count = None
@@ -244,12 +240,12 @@ class _MissingThenSyllabi:
             return head
         page_syllabi = list(self._queryset.select_related(*_PAGE_RELATED)[offset : offset + limit])
         # Təkrar istifadə bayraqları (bağlı / mənbə / qonşu) — səhifə başına sabit sorğu.
-        flags = page_flags(page_syllabi, self._visible, user_id=(self._viewer or {}).get("user_id"))
+        viewer = self._viewer or {}
+        flags = page_flags(page_syllabi, self._visible, user_id=viewer.get("user_id"), actor=viewer.get("actor"))
         return head + [
             build_row(
                 row,
                 now=self._now,
-                can_copy=row.subject_id in self._copyable,
                 reuse=flags.get(row.pk),
                 viewer=self._viewer,
             )
@@ -418,7 +414,6 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     overdue_count = syllabi.filter(overdue_q).count()
     if status == "sla":
         syllabi = syllabi.filter(overdue_q)
-    copyable = _copyable_subjects(syllabi)
 
     missing = (
         _missing_rows(
@@ -428,7 +423,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
             academic_year=academic_year,
             semester=semester,
             search=search,
-            copyable=copyable,
+            actor=context["actor"],
         )
         if status in ("", "missing")
         else []
@@ -436,15 +431,17 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     if not context["can_create"]:
         # İcazəsiz «Sillabus yarat» düyməsi 403 ilə bitərdi — sətir yalnız məlumat olaraq qalır.
         missing = [{**row, "actions": []} for row in missing]
-    viewer = {"user_id": getattr(request.user, "pk", None), "can_edit": context["can_create"]}
+    viewer = {
+        "user_id": getattr(request.user, "pk", None),
+        "can_edit": context["can_create"],
+        "actor": context["actor"],
+    }
     scope = scope if context["mine"] else ""
     switch = _scope_switch(context, visible, scope=scope, organization=organization, user=request.user)
     if status == "missing":
-        sequence = _MissingThenSyllabi(
-            missing, syllabi.none(), now=now, copyable=copyable, visible=visible, viewer=viewer
-        )
+        sequence = _MissingThenSyllabi(missing, syllabi.none(), now=now, visible=visible, viewer=viewer)
     else:
-        sequence = _MissingThenSyllabi(missing, syllabi, now=now, copyable=copyable, visible=visible, viewer=viewer)
+        sequence = _MissingThenSyllabi(missing, syllabi, now=now, visible=visible, viewer=viewer)
 
     paginator = Paginator(sequence, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)

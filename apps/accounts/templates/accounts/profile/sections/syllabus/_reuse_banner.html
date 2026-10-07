@@ -2,7 +2,8 @@
 {% comment %}
 Redaktorun TƏKRAR İSTİFADƏ banneri (2026-10-08) — `se.reuse` (bax views/syllabus/reuse_context.py):
 
-* `offer`  — qaralamadır, eyni fənnin bu semestr üçün başqa qrupda sillabusu var;
+* `offer`  — qaralamadır, eyni fənnin bu semestr üçün başqa qrupda (`count`) və/və ya
+             keçmiş semestrlərdə (`previous`, «Keçən ildən köçür») sillabusu var;
 * `linked` — bu dosye başqa qrupun sillabusuna BAĞLIDIR (məzmun mənbədən gəlir);
 * `source` — başqa qruplar bu sillabusa bağlıdır.
 
@@ -13,12 +14,26 @@ Düymələr `syllabus_reuse.js`-in `data-syl-action` hook-larını işlədir (si
 <div class="syl-banner syl-banner--info syl-reuse-banner" role="status">
   <i class="fas fa-clone syl-banner__icon" aria-hidden="true"></i>
   <div>
+    {% if reuse.count %}
     <p class="syl-banner__title">{% trans "Bu fənnin bu semestr üçün artıq sillabusu var" context "accounts.syllabus" %}</p>
     <p class="syl-banner__body">{% trans "Sıfırdan yazmaq lazım deyil: saatlar eynidirsə təsdiqlənmiş sillabusa bağlayın, fərqlidirsə kopyalayıb bu qrupun saatına uyğunlaşdırın." context "accounts.syllabus" %}</p>
+    {% else %}
+    <p class="syl-banner__title">{% trans "Bu fənn üçün keçmiş semestrlərin sillabusu var" context "accounts.syllabus" %}</p>
+    <p class="syl-banner__body">{% trans "Keçmiş sillabusu köçürüb bu qrupun saatına uyğunlaşdıra bilərsiniz — nəticə qaralamadır və adi qaydada təsdiqə göndərilir." context "accounts.syllabus" %}</p>
+    {% endif %}
   </div>
-  <button type="button" class="syl-btn syl-btn--primary syl-btn--sm" data-syl-action="reuse" data-row-kind="syllabus" data-id="{{ reuse.syllabus }}">
-    {% trans "Mövcud sillabusdan istifadə et" context "accounts.syllabus" %}
-  </button>
+  <div class="syl-reuse-banner__actions">
+    {% if reuse.count %}
+    <button type="button" class="syl-btn syl-btn--primary syl-btn--sm" data-syl-action="reuse" data-row-kind="syllabus" data-id="{{ reuse.syllabus }}">
+      {% trans "Mövcud sillabusdan istifadə et" context "accounts.syllabus" %}
+    </button>
+    {% endif %}
+    {% if reuse.previous %}
+    <button type="button" class="syl-btn {% if reuse.count %}syl-btn--secondary{% else %}syl-btn--primary{% endif %} syl-btn--sm" data-syl-action="copy" data-row-kind="syllabus" data-id="{{ reuse.syllabus }}">
+      {% trans "Keçən ildən köçür" context "accounts.syllabus" %}
+    </button>
+    {% endif %}
+  </div>
 </div>
 {% elif reuse.mode == 'linked' %}
 <div class="syl-banner syl-banner--info syl-reuse-banner" role="status">

@@ -244,11 +244,11 @@ def test_new_source_approval_waits_for_an_explicit_apply(world):
 
     linked = Syllabus.objects.select_related("reused_from__approved_version", "approved_version").get(pk=linked.pk)
     assert linked.approved_version_id == first.pk  # avtomatik DƏYİŞMƏDİ
-    assert services.reuse.is_behind(linked)
+    assert services.reuse_sync.is_behind(linked)
     source = Syllabus.objects.select_related("approved_version").get(pk=source.pk)
-    assert services.reuse.linked_summary([source])[source.pk] == {"linked": 1, "behind": 1}
+    assert services.reuse_sync.linked_summary([source])[source.pk] == {"linked": 1, "behind": 1}
 
-    results = services.reuse.propagate(source=source, actor=actor(world), hours_for=lambda row: PLAN_HOURS)
+    results = services.reuse_sync.propagate(source=source, actor=actor(world), hours_for=lambda row: PLAN_HOURS)
     assert [row["status"] for row in results] == ["synced"]
     linked.refresh_from_db()
     current = linked.approved_version
@@ -258,7 +258,7 @@ def test_new_source_approval_waits_for_an_explicit_apply(world):
     assert _sections(current) == _sections(new_source)
     first.refresh_from_db()
     assert first.status == SyllabusStatus.ARCHIVED
-    again = services.reuse.propagate(source=source, actor=actor(world), hours_for=lambda row: PLAN_HOURS)
+    again = services.reuse_sync.propagate(source=source, actor=actor(world), hours_for=lambda row: PLAN_HOURS)
     assert [row["status"] for row in again] == ["already"]
 
 
@@ -267,12 +267,12 @@ def test_sync_skips_a_target_whose_hours_changed(world):
     linked, first = services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))
     _new_source_approval(world, source)
     source = Syllabus.objects.select_related("approved_version").get(pk=source.pk)
-    results = services.reuse.propagate(source=source, actor=actor(world), hours_for=lambda row: OTHER_HOURS)
+    results = services.reuse_sync.propagate(source=source, actor=actor(world), hours_for=lambda row: OTHER_HOURS)
     assert results[0]["status"] == "skipped" and results[0]["code"] == rules.CODE_HOURS_DIFFER
     linked.refresh_from_db()
     assert linked.approved_version_id == first.pk
     with pytest.raises(TransitionDenied) as denied:
-        services.reuse.propagate(source=source, actor=actor(world, "teacher2"))
+        services.reuse_sync.propagate(source=source, actor=actor(world, "teacher2"))
     assert denied.value.code == "transition.out_of_scope"
 
 
@@ -283,10 +283,10 @@ def test_unlink_keeps_the_approved_copy_and_opens_an_independent_draft(world):
         services.create_next_version(syllabus=linked, actor=actor(world), kind=ChangeKind.MINOR.value)
     assert denied.value.code == rules.CODE_LINKED_UNLINK_FIRST
     with pytest.raises(TransitionDenied) as denied:
-        services.reuse.unlink(target_syllabus=linked, actor=actor(world, "teacher2"))
+        services.reuse_sync.unlink(target_syllabus=linked, actor=actor(world, "teacher2"))
     assert denied.value.code == "transition.author_only"
 
-    draft = services.reuse.unlink(target_syllabus=linked, actor=actor(world))
+    draft = services.reuse_sync.unlink(target_syllabus=linked, actor=actor(world))
     linked.refresh_from_db()
     approved.refresh_from_db()
     assert linked.reused_from_id is None
@@ -295,7 +295,7 @@ def test_unlink_keeps_the_approved_copy_and_opens_an_independent_draft(world):
     assert draft.status == SyllabusStatus.DRAFT and draft.label == "v1.1"
     assert _sections(draft)[SectionKey.LIT.value] == _sections(approved)[SectionKey.LIT.value]
     with pytest.raises(TransitionDenied) as denied:
-        services.reuse.unlink(target_syllabus=linked, actor=actor(world))
+        services.reuse_sync.unlink(target_syllabus=linked, actor=actor(world))
     assert denied.value.code == rules.CODE_NOT_LINKED
 
 

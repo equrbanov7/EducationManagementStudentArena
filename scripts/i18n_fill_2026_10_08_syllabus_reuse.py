@@ -8,6 +8,7 @@ tətbiq et», «Ayır», «Mənbədən yenilə», «Bağlı sillabuslara tətbiq
 damğası və model seçimləri (`ApprovalSource.REUSE`, `ChangeKind.REUSED`).
 
 Rəhbərin siyahı açarı (ikinci mərhələ, eyni gün): «Göstər: Hamısı | Mənim fənlərim».
+«Keçən ildən köçür» açılışdan (üçüncü mərhələ): mənbə seçimi dialoqu, redaktor banneri.
 
 Kontekstlər: `accounts.syllabus`, `syllabus.document`, `syllabus.model`.
 
@@ -203,6 +204,54 @@ ROWS = {
         "Hazırdır": ("Done", "Готово", "Tamam"),
         "Kopyala və uyğunlaşdır": ("Copy and adjust", "Скопировать и адаптировать", "Kopyala ve uyarla"),
         "Mənim fənlərim": ("My subjects", "Мои дисциплины", "Derslerim"),
+        "Bu fənn üzrə köçürə biləcəyiniz keçmiş sillabus tapılmadı.": (
+            "No earlier syllabus of this subject is available for you to copy.",
+            "Нет прошлых силлабусов по этой дисциплине, которые вы можете скопировать.",
+            "Bu ders için kopyalayabileceğiniz önceki bir izlence bulunamadı.",
+        ),
+        "Bu fənn üçün keçmiş semestrlərin sillabusu var": (
+            "This subject has syllabi from earlier semesters",
+            "У этой дисциплины есть силлабусы прошлых семестров",
+            "Bu dersin önceki dönemlere ait izlenceleri var",
+        ),
+        "Keçmiş semestrin məzmunu qaralama kimi köçürülür, həftəlik plan bu qrupun saatına uyğunlaşdırılır, "
+        "sonra adi qaydada təsdiqə göndərilir.": (
+            "The earlier semester's content is copied as a draft, the weekly plan is adjusted to this group's hours, "
+            "then it goes through the usual approval.",
+            "Содержание прошлого семестра копируется как черновик, недельный план адаптируется к часам этой "
+            "группы, затем проходит обычное утверждение.",
+            "Önceki dönemin içeriği taslak olarak kopyalanır, haftalık plan bu grubun saatlerine uyarlanır, sonra "
+            "olağan onaya gönderilir.",
+        ),
+        "Keçmiş semestrin sillabusu köçürüldü və bu qrupun saatına uyğunlaşdırıldı — QARALAMA açıldı.": (
+            "The earlier semester's syllabus was copied and adjusted to this group's hours — a DRAFT is open.",
+            "Силлабус прошлого семестра скопирован и адаптирован к часам этой группы — открыт ЧЕРНОВИК.",
+            "Önceki dönemin izlencesi kopyalandı ve bu grubun saatlerine uyarlandı — TASLAK açıldı.",
+        ),
+        "Keçmiş semestrin sillabusundan köçür": (
+            "Copy from an earlier semester's syllabus",
+            "Скопировать из силлабуса прошлого семестра",
+            "Önceki dönemin izlencesinden kopyala",
+        ),
+        "Keçmiş sillabusu köçürüb bu qrupun saatına uyğunlaşdıra bilərsiniz — nəticə qaralamadır və adi qaydada "
+        "təsdiqə göndərilir.": (
+            "You can copy the earlier syllabus and adjust it to this group's hours — the result is a draft and goes "
+            "through the usual approval.",
+            "Можно скопировать прошлый силлабус и адаптировать его к часам этой группы — результат будет "
+            "черновиком и пройдёт обычное утверждение.",
+            "Önceki izlenceyi kopyalayıp bu grubun saatlerine uyarlayabilirsiniz — sonuç taslaktır ve olağan onaydan "
+            "geçer.",
+        ),
+        "Mənbə bu fənnin başqa semestrinə aid deyil.": (
+            "The source does not belong to another semester of this subject.",
+            "Источник не относится к другому семестру этой дисциплины.",
+            "Kaynak bu dersin başka bir dönemine ait değil.",
+        ),
+        "Semestrsiz baza sillabus": (
+            "Base syllabus (no semester)",
+            "Базовый силлабус (без семестра)",
+            "Dönemsiz temel izlence",
+        ),
         "Mövcud sillabusdan istifadə et": (
             "Use an existing syllabus",
             "Использовать существующий силлабус",
