@@ -1,11 +1,11 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261002';
-import { playSound } from './audio.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261002';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261002';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261008';
+import { playSound } from './audio.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261008';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261008';
 import {
     esc,
     fmt,
@@ -17,8 +17,8 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20261002';
-import { currentViewEl, mountView } from './views.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { currentViewEl, mountView } from './views.js?v=lx20261008';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';

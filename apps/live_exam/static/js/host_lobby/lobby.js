@@ -1,9 +1,10 @@
-import { UI } from './dom.js?v=lx20261002';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playJoin } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { setPresentationMarkup } from './presentation.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playJoin } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { setPresentationMarkup } from './presentation.js?v=lx20261008';
+import { renderTimeSettings } from './time_setting.js?v=lx20261008';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -16,7 +17,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn
@@ -89,6 +90,7 @@ function shellMarkup() {
                         <span>${esc(tr("lobbyPlayersWord", "iştirakçı"))}</span>
                     </div>
                     ${refreshButtonMarkup()}
+                    <div class="hx-lobby__time" data-time-setting></div>
                     <div class="hx-lobby__status" data-lobby-status></div>
                 </div>
             </div>
@@ -215,6 +217,7 @@ export function renderIdleStage(fromData = false) {
         cloud.rendered.clear();
     }
     const root = UI.presentationContent?.querySelector("[data-lobby]");
+    if (fresh && root) renderTimeSettings(root);
     if (root) renderCloud(root, fromData);
 }
 

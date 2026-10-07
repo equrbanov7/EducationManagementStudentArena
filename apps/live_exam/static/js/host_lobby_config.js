@@ -9,6 +9,7 @@
  *                 maxParticipantsCap, languageCode, presentationOnly, controlsEnabled,
  *                 autoFullscreen, urls{…}, sessionSettingsId (json_script elementinin id-si)
  *   #hostI18n   — LIVE_EXAM_HOST_I18N mətnləri
+ *   #hostQuestionTime — {default, presets, min, max} (sual vaxtı seçicisi, 2026-10-08)
  *
  * KLASSİK, defer-siz skript: host_lobby.entry.js modulundan ƏVVƏL işləyir və
  * inline blokla eyni adları qurur:
@@ -33,6 +34,8 @@ const CONFIG = (function () {
     }
     var config = readJson("hostConfig", {});
     config.sessionSettings = readJson(config.sessionSettingsId || "hostSessionSettings", {});
+    // 2026-10-08 (L2): «Hər sual üçün vaxt» seçicisinin standart dəyəri / hazır seçimləri.
+    config.questionTime = readJson("hostQuestionTime", {});
     window.LIVE_EXAM_HOST_I18N = readJson("hostI18n", {});
     return config;
 })();

@@ -1,11 +1,11 @@
-import { state } from './state.js?v=lx20261002';
-import { applySessionSettings } from './settings.js?v=lx20261002';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261002';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261002';
-import { applyRevealState } from './reveal.js?v=lx20261002';
-import { renderPodium } from './podium.js?v=lx20261002';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261002';
-import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20261002';
+import { state } from './state.js?v=lx20261008';
+import { applySessionSettings } from './settings.js?v=lx20261008';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261008';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261008';
+import { applyRevealState } from './reveal.js?v=lx20261008';
+import { renderPodium } from './podium.js?v=lx20261008';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261008';
+import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20261008';
 import {
     markStateMutation,
     notifyHostShell,
@@ -13,7 +13,7 @@ import {
     shouldApplyTimelinePayload,
     toMs,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
 
 export function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;

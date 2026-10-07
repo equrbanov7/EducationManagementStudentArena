@@ -1,5 +1,5 @@
-import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261002';
-import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20261002';
+import { icon, shapeKey, shapeSvg, toneIndex } from './icons.js?v=lx20261008';
+import { esc, formatNumber, lengthClass, tr } from './utils.js?v=lx20261008';
 
 /* Cavab plitələri — rəng (t1..t6) + FİQUR (rəng korları üçün), host və telefonda eyni:
  * 1 üçbucaq (qırmızı), 2 romb (göy), 3 dairə (kəhrəba), 4 kvadrat (yaşıl),

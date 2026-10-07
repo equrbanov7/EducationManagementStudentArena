@@ -56,6 +56,7 @@
 
     {{ session_settings|json_script:"hostSessionSettings" }}
     {{ host_questions|json_script:"hostQuestions" }}
+    {{ question_time_config|json_script:"hostQuestionTime" }}
     {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline skript yoxdur).{% endcomment %}
     <script id="hostConfig" type="application/json">{
         "pin": "{{ session.pin|escapejs }}",

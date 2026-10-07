@@ -5,9 +5,9 @@ import {
     I18N,
     LANG,
     SESSION_SETTINGS,
-} from './config.js?v=lx20261002';
-import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
+} from './config.js?v=lx20261008';
+import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
 
 // Tərcümə hələ kompilyasiya olunmayıbsa {% trans %} msgid-i («answer_locked») qaytarır —
 // belə açarı xam göstərmirik, JS-dəki (az) ehtiyat mətni işlədirik.

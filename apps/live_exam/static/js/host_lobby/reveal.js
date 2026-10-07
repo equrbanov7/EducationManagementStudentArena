@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261002';
-import { PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playRevealSound } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20261002';
-import { nextQuestion } from './api.js?v=lx20261002';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20261002';
-import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playRevealSound } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20261008';
+import { nextQuestion } from './api.js?v=lx20261008';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20261008';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261008';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -22,8 +22,8 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261002';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261008';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */

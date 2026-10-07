@@ -4,15 +4,15 @@
 //  * Yazılı cavab: `text` sahəsi (serverin eyni «answer» mesajı).
 //  * WS ilə göndərilib ACK_TIMEOUT_MS ərzində `answer_saved` gəlməsə — HTTP ehtiyat yolu
 //    (server təkrar cavabı «artıq cavab verilib» kimi qəbul edir → idempotent).
-import { ACK_TIMEOUT_MS, BOOTSTRAP, PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261002';
-import { playSound, unlockAudio } from './audio.js?v=lx20261002';
-import { fetchWithTimeout } from './api.js?v=lx20261002';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261002';
-import { isSocketSuspect, sendJson, smoothedRttMs } from './sockets.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { clearAckTimer } from './timers.js?v=lx20261002';
-import { showToast } from './ui.js?v=lx20261002';
-import { fmt, isMulti, isTextQuestion, maxSelect, nowMs, toInt, tr, ts } from './utils.js?v=lx20261002';
+import { ACK_TIMEOUT_MS, BOOTSTRAP, PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261008';
+import { playSound, unlockAudio } from './audio.js?v=lx20261008';
+import { fetchWithTimeout } from './api.js?v=lx20261008';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261008';
+import { isSocketSuspect, sendJson, smoothedRttMs } from './sockets.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { clearAckTimer } from './timers.js?v=lx20261008';
+import { showToast } from './ui.js?v=lx20261008';
+import { fmt, isMulti, isTextQuestion, maxSelect, nowMs, toInt, tr, ts } from './utils.js?v=lx20261008';
 
 const noop = () => {};
 // Server mesajı tərcümə olunmayıbsa (msgid açarı) oyunçuya xam açar göstərilmir.

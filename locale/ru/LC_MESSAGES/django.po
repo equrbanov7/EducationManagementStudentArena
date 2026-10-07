@@ -92480,3 +92480,51 @@ msgstr "есть собственный силлабус"
 msgctxt "accounts.syllabus"
 msgid "öz sillabusu var — dəyişdirilmədi"
 msgstr "есть собственный силлабус — не изменён"
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt"
+msgstr "Время на вопрос"
+
+msgctxt "live_exam.host_controls"
+msgid "Standart · {seconds} san"
+msgstr "По умолчанию · {seconds} с"
+
+msgctxt "live_exam.host_controls"
+msgid "{seconds} san"
+msgstr "{seconds} с"
+
+msgctxt "live_exam.host_controls"
+msgid "Digər ({min}–{max} san)"
+msgstr "Другое ({min}–{max} с)"
+
+msgctxt "live_exam.host_controls"
+msgid "Tətbiq et"
+msgstr "Применить"
+
+msgctxt "live_exam.host_controls"
+msgid "Dəyişiklik növbəti sualdan tətbiq olunur."
+msgstr "Изменение вступит в силу со следующего вопроса."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual bu qədər vaxt gedəcək."
+msgstr "Каждый вопрос будет длиться столько."
+
+msgctxt "live_exam.host_controls"
+msgid "Standart: sualın öz vaxtı, yoxdursa imtahanın vaxtı."
+msgstr "По умолчанию: время самого вопроса, иначе время экзамена."
+
+msgctxt "live_exam.host_controls"
+msgid "{min}–{max} saniyə arası rəqəm yazın"
+msgstr "Введите число от {min} до {max} секунд"
+
+msgctxt "live_exam.host_controls"
+msgid "Vaxt saxlanmadı. Yenidən cəhd edin."
+msgstr "Время не сохранено. Попробуйте ещё раз."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt: {value}"
+msgstr "Время на вопрос: {value}"
+
+msgctxt "live_exam.host_settings"
+msgid "Sual vaxtı 5–300 saniyə olmalıdır."
+msgstr "Время вопроса должно быть от 5 до 300 секунд."

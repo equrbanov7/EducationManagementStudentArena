@@ -1,0 +1,155 @@
+/* ═══ Aparıcı ekranı — idarə komponentləri (2026-10-08) ═══
+ * «Hər sual üçün vaxt» seçicisi (L2), bildirişlər (toast). Seçici native <select> DEYİL:
+ * düymə + açılan panel (hx-seg seqmentləri + xüsusi dəyər). Panel açıq fonlu kartdır
+ * (tənzimləmə çekməcəsi ilə eyni) — tünd səhnədə AA kontrast.
+ */
+
+/* ── «Hər sual üçün vaxt: [30 s ▾]» ───────────────────────────────── */
+.hx-timeset {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.hx-timeset__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 800 clamp(15px, 1.05cqw, 20px)/1.2 var(--hx-font);
+    color: var(--hx-muted);
+    white-space: nowrap;
+}
+
+.hx-timeset__label .hx-icon { width: 22px; height: 22px; color: var(--hx-gold); }
+
+.hx-timeset__toggle,
+.hx-timeset__value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px 0 18px;
+    border: 1px solid rgba(255, 201, 64, 0.55);
+    border-radius: 999px;
+    background: rgba(255, 201, 64, 0.16);
+    color: #fff;
+    font: 800 clamp(16px, 1.15cqw, 22px)/1 var(--hx-display);
+    white-space: nowrap;
+}
+
+.hx-timeset__value { padding-right: 18px; }
+.hx-timeset__toggle { cursor: pointer; transition: background-color 0.16s ease, border-color 0.16s ease; }
+.hx-timeset__toggle .hx-icon { width: 18px; height: 18px; transition: transform 0.16s var(--hx-ease-out); }
+.hx-timeset__toggle:hover { background: rgba(255, 201, 64, 0.26); border-color: var(--hx-gold); }
+.hx-timeset__toggle:focus-visible { outline: 3px solid var(--hx-gold); outline-offset: 2px; }
+.hx-timeset.is-open .hx-timeset__toggle .hx-icon { transform: rotate(180deg); }
+.hx-timeset.is-busy .hx-timeset__toggle { cursor: progress; opacity: 0.75; }
+
+.hx-timeset__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 48;
+    display: grid;
+    gap: 12px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 14px;
+    border: 1px solid #d9deed;
+    border-radius: 20px;
+    background: #f5f7fc;
+    color: #141a3a;
+    box-shadow: 0 24px 60px rgba(3, 4, 18, 0.45);
+}
+
+.hx-timeset__menu[hidden] { display: none; }
+.hx-timeset__choices.hx-seg--wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hx-timeset__choices .hx-seg__btn:first-child { grid-column: 1 / -1; }
+
+.hx-timeset__custom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.hx-timeset__custom-label { font: 800 13px/1.25 var(--hx-font); color: #3b4668; }
+
+.hx-timeset__input {
+    width: 100%;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid #c7cede;
+    border-radius: 12px;
+    background: #fff;
+    color: #10163a;
+    font: 800 18px/1 var(--hx-display);
+    text-align: center;
+}
+
+.hx-timeset__input:focus-visible { outline: 3px solid #1f55c4; outline-offset: 1px; }
+.hx-timeset__apply { min-height: 44px; padding: 0 16px; font-size: 14px; }
+.hx-timeset__note { margin: 0; font: 600 13px/1.4 var(--hx-font); color: #4f5b7d; }
+
+/* İdarə panelində (sürüşən sol panel) menyu yerində açılır — sürüşən konteynerdə kəsilmir. */
+.control-timeset.hx-timeset {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: 1px solid var(--hx-line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.control-timeset .hx-timeset__label { font-size: 13px; }
+.control-timeset .hx-timeset__toggle { min-height: 40px; font-size: 17px; }
+
+.control-timeset .hx-timeset__menu {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+}
+
+/* Proyektorda cari sualın vaxtı (sual başlığında). */
+.hx-pill--time { border-color: rgba(255, 201, 64, 0.5); background: rgba(255, 201, 64, 0.14); }
+.hx-pill--time .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }
+
+/* ── Bildirişlər ───────────────────────────────────────────────────── */
+.hx-toasts {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 95;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    width: min(560px, calc(100vw - 32px));
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.hx-toast {
+    max-width: 100%;
+    padding: 12px 20px;
+    border-radius: 16px;
+    background: rgba(8, 11, 36, 0.94);
+    color: #fff;
+    font: 800 16px/1.35 var(--hx-font);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+    animation: hxToastIn 0.24s var(--hx-ease-out) both;
+}
+
+.hx-toast--ok { border-left: 6px solid #22c55e; }
+.hx-toast--error { border-left: 6px solid #f43f5e; }
+.hx-toast.is-leaving { opacity: 0; transition: opacity 0.24s ease; }
+
+@keyframes hxToastIn {
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hx-toast,
+    .hx-timeset__toggle .hx-icon { animation: none !important; transition: none !important; }
+}

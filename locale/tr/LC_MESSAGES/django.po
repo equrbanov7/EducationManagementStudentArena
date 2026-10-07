@@ -91781,3 +91781,51 @@ msgstr "kendi izlencesi var"
 msgctxt "accounts.syllabus"
 msgid "öz sillabusu var — dəyişdirilmədi"
 msgstr "kendi izlencesi var — değiştirilmedi"
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt"
+msgstr "Soru başına süre"
+
+msgctxt "live_exam.host_controls"
+msgid "Standart · {seconds} san"
+msgstr "Varsayılan · {seconds} sn"
+
+msgctxt "live_exam.host_controls"
+msgid "{seconds} san"
+msgstr "{seconds} sn"
+
+msgctxt "live_exam.host_controls"
+msgid "Digər ({min}–{max} san)"
+msgstr "Özel ({min}–{max} sn)"
+
+msgctxt "live_exam.host_controls"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "live_exam.host_controls"
+msgid "Dəyişiklik növbəti sualdan tətbiq olunur."
+msgstr "Değişiklik bir sonraki sorudan itibaren uygulanır."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual bu qədər vaxt gedəcək."
+msgstr "Her soru bu kadar sürecek."
+
+msgctxt "live_exam.host_controls"
+msgid "Standart: sualın öz vaxtı, yoxdursa imtahanın vaxtı."
+msgstr "Varsayılan: sorunun kendi süresi, yoksa sınavın süresi."
+
+msgctxt "live_exam.host_controls"
+msgid "{min}–{max} saniyə arası rəqəm yazın"
+msgstr "{min}–{max} saniye arasında bir sayı girin"
+
+msgctxt "live_exam.host_controls"
+msgid "Vaxt saxlanmadı. Yenidən cəhd edin."
+msgstr "Süre kaydedilmedi. Lütfen tekrar deneyin."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt: {value}"
+msgstr "Soru başına süre: {value}"
+
+msgctxt "live_exam.host_settings"
+msgid "Sual vaxtı 5–300 saniyə olmalıdır."
+msgstr "Soru süresi 5–300 saniye olmalıdır."

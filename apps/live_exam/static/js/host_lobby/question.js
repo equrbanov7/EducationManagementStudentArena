@@ -1,11 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261002';
-import { PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20261002';
-import { revealQuestion } from './api.js?v=lx20261002';
-import { playWipe } from './transitions.js?v=lx20261002';
+import { $, UI } from './dom.js?v=lx20261008';
+import { PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20261008';
+import { revealQuestion } from './api.js?v=lx20261008';
+import { playWipe } from './transitions.js?v=lx20261008';
+import { secondsLabel } from './time_setting.js?v=lx20261008';
 import {
     controlsEnabled,
     esc,
@@ -18,8 +19,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261002';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261008';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -60,10 +61,18 @@ function badgesMarkup(question) {
     return badges.join("");
 }
 
+/** 2026-10-08 (L2): cari sualın vaxtı proyektorda HƏMİŞƏ görünür (server nəşrdə dondurur). */
+function timePillMarkup(question) {
+    const seconds = Number(question?.time_limit || 0);
+    if (!seconds) return "";
+    return `<span class="hx-pill hx-pill--time" title="${esc(tr("timeLabel", "Hər sual üçün vaxt"))}">${icon("timer")}<span>${esc(secondsLabel(seconds))}</span></span>`;
+}
+
 function headMarkup(question) {
     return `
         <header class="hx-qhead">
             <span class="hx-pill">${esc(progressLabel(question))}</span>
+            ${timePillMarkup(question)}
             ${badgesMarkup(question)}
         </header>
     `;

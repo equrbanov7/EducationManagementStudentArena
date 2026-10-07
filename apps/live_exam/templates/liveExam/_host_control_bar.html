@@ -38,6 +38,8 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
                     <span>/ {{ max_participants_cap }}</span>
                 </span>
             </label>
+            {% comment %}2026-10-08 (L2): «Hər sual üçün vaxt» — host_lobby/time_setting.js doldurur (oyun gedərkən də).{% endcomment %}
+            <div class="control-timeset" data-time-setting></div>
         </div>
 
         <label class="auto-toggle host-settings-item">

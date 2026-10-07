@@ -123,5 +123,16 @@ kompilyasiya olunmayıbsa JS (utils.tr) Azərbaycan dilində ehtiyat mətni gös
     "nextLabel": "{% filter escapejs %}{% trans 'next_button' context 'live_exam.host_lobby' %}{% endfilter %}",
     "revealLabel": "{% filter escapejs %}{% trans 'reveal_button' context 'live_exam.host_lobby' %}{% endfilter %}",
     "stageResults": "{% filter escapejs %}{% trans 'stage_results' context 'live_exam.host_stage' %}{% endfilter %}",
+    "timeLabel": "{% filter escapejs %}{% trans 'Hər sual üçün vaxt' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeStandard": "{% filter escapejs %}{% trans 'Standart · {seconds} san' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeSecondsValue": "{% filter escapejs %}{% trans '{seconds} san' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeCustom": "{% filter escapejs %}{% trans 'Digər ({min}–{max} san)' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeApply": "{% filter escapejs %}{% trans 'Tətbiq et' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeNoteNext": "{% filter escapejs %}{% trans 'Dəyişiklik növbəti sualdan tətbiq olunur.' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeNoteAll": "{% filter escapejs %}{% trans 'Hər sual bu qədər vaxt gedəcək.' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeNoteStandard": "{% filter escapejs %}{% trans 'Standart: sualın öz vaxtı, yoxdursa imtahanın vaxtı.' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeInvalid": "{% filter escapejs %}{% trans '{min}–{max} saniyə arası rəqəm yazın' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeSaveError": "{% filter escapejs %}{% trans 'Vaxt saxlanmadı. Yenidən cəhd edin.' context 'live_exam.host_controls' %}{% endfilter %}",
+    "timeSaved": "{% filter escapejs %}{% trans 'Hər sual üçün vaxt: {value}' context 'live_exam.host_controls' %}{% endfilter %}",
     "introTitle": "{{ session.exam.title|default:'Quiz'|escapejs }}"
 }</script>
