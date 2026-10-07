@@ -104,6 +104,11 @@
     gap: 10px;
 }
 
+/* «Keçən ildən köçür» rejimində «bağla» seçimi gizlidir — «kopyala» bütün sətri tutsun. */
+.syl-reuse__choice:has(> [data-syl-reuse-link-option][hidden]) {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .syl-reuse__option {
     display: flex;
     flex-direction: column;
