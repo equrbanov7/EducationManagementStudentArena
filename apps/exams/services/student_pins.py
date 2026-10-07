@@ -23,6 +23,7 @@ from apps.exams.services.final_center.pins import (
     PinHashBudget,
     _fernet,
     check_pin_hash,
+    final_entry_login_allowed,
     generate_pin_value,
     pin_cipher_matches,
 )
@@ -277,7 +278,8 @@ def resolve_student_pin_login(username: str, raw_pin: str, *, budget=None):
         return None, None
 
     user = user_model.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).first()
-    if user is None or not getattr(user, "is_active", False):
+    # Auditi 2026-10-07 AUTH-03: ``is_active`` + ``access_state`` (arxiv hesabda is_active True qalır).
+    if not final_entry_login_allowed(user):
         budget.equalize(raw_pin)
         return None, None
 
