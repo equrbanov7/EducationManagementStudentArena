@@ -287,6 +287,9 @@
         $("joinRetry").addEventListener("click", () => {
             hideBlocked();
         });
+        // 2026-10-08: server bu cihazın qoşula bilməyəcəyini əvvəlcədən bilirsə (çıxarılıb / gec qoşulma
+        // bağlıdır / oyun bitib) — formanı doldurtmadan izahlı blok kartı göstər.
+        if (config.blockedMessage) showBlocked(config.blockedMessage);
         if (dom.resumeNotice) dom.resumeNotice.addEventListener("click", continuePrevious);
         const resumeContinue = $("joinResumeContinue");
         if (resumeContinue) resumeContinue.addEventListener("click", continuePrevious);
@@ -311,6 +314,7 @@
             if (event.key === "Escape") closeResume();
         });
         window.setTimeout(() => {
+            if (config.blockedMessage) return;
             if (!dom.resumePrompt || dom.resumePrompt.hidden) {
                 try {
                     dom.input.focus({ preventScroll: true });

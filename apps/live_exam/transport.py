@@ -18,6 +18,7 @@ from channels.layers import get_channel_layer
 from apps.live_exam.constants import PLAYER_QUESTION_PUBLISH_GRACE_SECONDS
 from apps.live_exam.domain.session import build_question_phase_times
 from apps.live_exam.reveal import Bundle, build_final_bundle, build_reveal_bundle
+from apps.live_exam.roster import eligible_players
 from apps.live_exam.serializers import (
     serialize_player_identity,
     serialize_players,
@@ -326,6 +327,9 @@ def build_question_payload(session, exam_question, *, idx: int, total: int):
             ends_at=ends_at,
         ),
         "previous_top": serialize_top(session, limit=10),
+        # 2026-10-08 (L3): bu suala cavab verməli oyunçu sayı (host-un «N / M cavab» sayğacı;
+        # gec qoşulan növbəti sualdan sayılır).
+        "total_players": eligible_players(session.id, idx).count(),
     }
     return payload, started_at, ends_at
 
@@ -355,6 +359,7 @@ def build_question_phase_payload(
             ends_at=ends_at,
         ),
         "previous_top": serialize_top_before_question(session, exam_question.id, limit=10),
+        "total_players": eligible_players(session.id, idx).count(),
     }
 
 

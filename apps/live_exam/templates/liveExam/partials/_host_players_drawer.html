@@ -1,0 +1,36 @@
+{% load i18n %}{% comment %}2026-10-08 (L6): aparıcının «İştirakçılar» çekməcəsi — oyun gedərkən də iştirakçını çıxarmaq.
+Siyahını host_lobby/players_drawer.js doldurur (lobbi roster-i + state JSON); hər çıxarma təsdiq dialoqundan keçir.
+Çıxarılan: socket-i bağlanır, eyni cihazla qayıda bilmir, balı liderlər lövhəsində göstərilmir.{% endcomment %}
+<div id="hostPlayersBackdrop" class="host-drawer-backdrop" data-players-close hidden></div>
+<aside id="hostPlayersDrawer" class="host-settings-drawer host-players-drawer" aria-hidden="true" aria-labelledby="hostPlayersTitle">
+    <div class="host-settings-drawer__header">
+        <div>
+            <div class="host-settings-drawer__eyebrow">{% trans "Oyun idarəsi" context "live_exam.host_controls" %}</div>
+            <h2 id="hostPlayersTitle">{% trans "İştirakçılar" context "live_exam.host_controls" %} <span class="host-players-drawer__total" data-players-total>0</span></h2>
+        </div>
+        <button class="control-icon-btn" type="button" data-players-close aria-label="{% trans 'Bağla' context 'live_exam.host_controls' %}">
+            <span class="hx-i" data-icon="close"></span>
+        </button>
+    </div>
+    <div class="host-players-drawer__tools">
+        <label class="host-players-search">
+            <span class="hx-i" data-icon="search"></span>
+            <input type="search" data-players-search autocomplete="off" spellcheck="false"
+                   placeholder="{% trans 'Ad üzrə axtar…' context 'live_exam.host_controls' %}"
+                   aria-label="{% trans 'Ad üzrə axtar…' context 'live_exam.host_controls' %}">
+        </label>
+        <p class="host-players-drawer__hint">{% trans "Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər lövhəsində göstərilmir; nəticədə «Çıxarıldı» kimi qalır." context "live_exam.host_controls" %}</p>
+    </div>
+    <div class="host-settings-drawer__body host-players-drawer__body hx-scroll" data-players-list role="list" aria-labelledby="hostPlayersTitle"></div>
+</aside>
+
+<div id="hostConfirm" class="hx-confirm" role="alertdialog" aria-modal="true" aria-labelledby="hostConfirmTitle" aria-describedby="hostConfirmBody" hidden>
+    <div class="hx-confirm__card">
+        <h2 id="hostConfirmTitle" class="hx-confirm__title"></h2>
+        <p id="hostConfirmBody" class="hx-confirm__body"></p>
+        <div class="hx-confirm__actions">
+            <button type="button" class="hx-confirm__btn" data-confirm-cancel>{% trans "Ləğv et" context "live_exam.host_controls" %}</button>
+            <button type="button" class="hx-confirm__btn hx-confirm__btn--danger" data-confirm-ok>{% trans "Çıxar" context "live_exam.host_controls" %}</button>
+        </div>
+    </div>
+</div>

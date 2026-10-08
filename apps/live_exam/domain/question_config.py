@@ -13,7 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from apps.live_exam.domain.session import safe_int, selection_limits
+from apps.live_exam.domain.session import configured_time_limit, safe_int, selection_limits
 from apps.live_exam.session_settings import (
     MULTI_SCORING_KEYS,
     MULTI_SCORING_PARTIAL,
@@ -108,6 +108,9 @@ def resolve_question_config(session, exam_question) -> QuestionConfig:
 def freeze_question_config(session, exam_question) -> None:
     """Nəşr anında aktiv sualın qaydasını ``host_settings``-ə yazır (save çağıran edir)."""
     rules = _live_rules(session, exam_question)
+    # 2026-10-08 (L2): sualın vaxtı da dondurulur — aparıcı vaxtı sual gedərkən dəyişsə
+    # cari raundun pəncərəsi/«time_limit»-i dəyişmir, yeni dəyər növbəti sualdan keçərlidir.
+    rules["time_limit"] = configured_time_limit(session, exam_question)
     raw = dict(getattr(session, "host_settings", None) or {})
     raw[QUESTION_CONFIG_KEY] = {"question_id": int(exam_question.id), **rules}
     session.host_settings = raw

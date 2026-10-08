@@ -53,7 +53,26 @@ _ANSWER_FIELDS = (
     "answer_ms",
     "awarded_points",
 )
-_PLAYER_FIELDS = ("id", "nickname", "avatar_key", "accessory_key", "score", "streak", "best_streak", "created_at")
+_PLAYER_FIELDS = (
+    "id",
+    "nickname",
+    "avatar_key",
+    "accessory_key",
+    "score",
+    "streak",
+    "best_streak",
+    "created_at",
+    "active_from_index",
+)
+
+#: 2026-10-08 (L3): gec qoşulan (bu sualda iştirak etməyən) oyunçunun reveal-i — keçən sualın
+#: cavabı ona göstərilmir. ``personal`` əlavələri ümumi sahələri üstələyir (consumer birləşdirir).
+LATE_JOIN_REDACTION = {
+    "late_join_pending": True,
+    "correct_option_ids": [],
+    "distribution": {"total_answers": 0, "counts": []},
+    "accepted_answers": [],
+}
 
 
 @dataclass
@@ -165,7 +184,9 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
     config = resolve_question_config(session, exam_question)
     revealed_at = revealed_at or session.question_ends_at or timezone.now()
     final = is_final_question(session, question_id)
-    answers = list(LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).values(*_ANSWER_FIELDS))
+    answers = list(
+        LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).in_game().values(*_ANSWER_FIELDS)
+    )
     players = _players(session)
     by_id = {player["id"]: player for player in players}
 
@@ -237,7 +258,9 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
         common["multi_scoring"] = config.multi_scoring
         common["total_correct"] = len(config.correct_ids)
 
-    host = {**common, "results": results, "fastest_correct": fastest_correct, "total_players": len(players)}
+    question_index = safe_int(session.current_index, 0)
+    eligible = [player for player in players if safe_int(player.get("active_from_index"), 0) <= question_index]
+    host = {**common, "results": results, "fastest_correct": fastest_correct, "total_players": len(eligible)}
     if config.is_text:
         host["typed_summary"] = build_typed_summary(
             answers, accepted=config.accepted, typo_tolerance=config.typo_tolerance
@@ -251,6 +274,10 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
     answers_by_player = {answer["player_id"]: answer for answer in answers}
     for player in players:
         entry = dict(ranks.get(player["id"], {}))
+        if safe_int(player.get("active_from_index"), 0) > question_index:
+            entry.update(LATE_JOIN_REDACTION, active_from_index=safe_int(player["active_from_index"], 0))
+            personal[str(player["id"])] = _dumps(entry)
+            continue
         answer = answers_by_player.get(player["id"])
         if answer is not None:
             mode_fields = question_mode_fields(config, answer_choice_ids(answer), answer["text_answer"])
@@ -303,7 +330,8 @@ def build_final_bundle(session, *, finished_at=None, limit: int = 50) -> Bundle:
     ordered = sorted(players, key=leaderboard_key)
     per_player: dict[int, dict[str, int]] = {}
     answer_count = correct_total = ms_total = 0
-    for answer in LiveAnswer.objects.filter(session_id=session.id).values("player_id", "is_correct", "answer_ms"):
+    answers = LiveAnswer.objects.filter(session_id=session.id).in_game()
+    for answer in answers.values("player_id", "is_correct", "answer_ms"):
         stats = per_player.setdefault(answer["player_id"], {"correct": 0, "answered": 0, "ms": 0})
         stats["answered"] += 1
         stats["correct"] += 1 if answer["is_correct"] else 0

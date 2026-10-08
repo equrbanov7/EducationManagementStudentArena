@@ -91781,3 +91781,301 @@ msgstr "kendi izlencesi var"
 msgctxt "accounts.syllabus"
 msgid "öz sillabusu var — dəyişdirilmədi"
 msgstr "kendi izlencesi var — değiştirilmedi"
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt"
+msgstr "Soru başına süre"
+
+msgctxt "live_exam.host_controls"
+msgid "Standart · {seconds} san"
+msgstr "Varsayılan · {seconds} sn"
+
+msgctxt "live_exam.host_controls"
+msgid "{seconds} san"
+msgstr "{seconds} sn"
+
+msgctxt "live_exam.host_controls"
+msgid "Digər ({min}–{max} san)"
+msgstr "Özel ({min}–{max} sn)"
+
+msgctxt "live_exam.host_controls"
+msgid "Tətbiq et"
+msgstr "Uygula"
+
+msgctxt "live_exam.host_controls"
+msgid "Dəyişiklik növbəti sualdan tətbiq olunur."
+msgstr "Değişiklik bir sonraki sorudan itibaren uygulanır."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual bu qədər vaxt gedəcək."
+msgstr "Her soru bu kadar sürecek."
+
+msgctxt "live_exam.host_controls"
+msgid "Standart: sualın öz vaxtı, yoxdursa imtahanın vaxtı."
+msgstr "Varsayılan: sorunun kendi süresi, yoksa sınavın süresi."
+
+msgctxt "live_exam.host_controls"
+msgid "{min}–{max} saniyə arası rəqəm yazın"
+msgstr "{min}–{max} saniye arasında bir sayı girin"
+
+msgctxt "live_exam.host_controls"
+msgid "Vaxt saxlanmadı. Yenidən cəhd edin."
+msgstr "Süre kaydedilmedi. Lütfen tekrar deneyin."
+
+msgctxt "live_exam.host_controls"
+msgid "Hər sual üçün vaxt: {value}"
+msgstr "Soru başına süre: {value}"
+
+msgctxt "live_exam.host_settings"
+msgid "Sual vaxtı 5–300 saniyə olmalıdır."
+msgstr "Soru süresi 5–300 saniye olmalıdır."
+
+msgctxt "live_exam.host_controls"
+msgid "Gecikənlər bu PIN ilə qoşula bilər"
+msgstr "Geç kalanlar bu PIN ile katılabilir"
+
+msgctxt "live_exam.view.message"
+msgid "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb."
+msgstr "Oyun zaten başladı ve öğretmen geç katılımı kapattı."
+
+msgctxt "live_exam.consumer.error"
+msgid "Növbəti sual başlayanda oyuna qoşulacaqsan."
+msgstr "Bir sonraki soru başladığında oyuna katılacaksın."
+
+msgctxt "live_exam.player"
+msgid "Oyuna qoşuldun!"
+msgstr "Oyuna katıldın!"
+
+msgctxt "live_exam.player"
+msgid ""
+"Oyun artıq gedir — növbəti sual başlayanda daxil olacaqsan. Keçən suallar "
+"üçün bal verilmir."
+msgstr ""
+"Oyun zaten sürüyor — bir sonraki soru başladığında gireceksin. Kaçırılan "
+"sorulara puan verilmez."
+
+msgctxt "live_exam.host_settings"
+msgid "Gecikənlər qoşula bilsin"
+msgstr "Geç katılıma izin ver"
+
+msgctxt "live_exam.host_settings"
+msgid "Tövsiyə olunur"
+msgstr "Önerilir"
+
+msgctxt "live_exam.host_settings"
+msgid ""
+"Oyun başlayandan sonra gələn tələbə növbəti sualdan qoşulur: keçən suallara "
+"bal almır və onların cavablarını görmür. Kilidli lobbi, iştirakçı limiti və "
+"çıxarılanlar qaydası qüvvədədir."
+msgstr ""
+"Oyun başladıktan sonra gelen öğrenci bir sonraki sorudan katılır: kaçırılan "
+"sorulara puan almaz ve cevaplarını görmez. Kilitli lobi, katılımcı sınırı ve"
+" çıkarılanlar kuralı geçerlidir."
+
+msgctxt "live_exam.host_controls"
+msgid "Oyun idarəsi"
+msgstr "Oyun yönetimi"
+
+msgctxt "live_exam.host_controls"
+msgid "İştirakçılar"
+msgstr "Katılımcılar"
+
+msgctxt "live_exam.host_controls"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "live_exam.host_controls"
+msgid "Ad üzrə axtar…"
+msgstr "Ada göre ara…"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər "
+"lövhəsində göstərilmir; nəticədə «Çıxarıldı» kimi qalır."
+msgstr ""
+"Çıkarılan katılımcı bu oyuna aynı cihazla dönemez, puanı liderlik tablosunda"
+" gösterilmez; sonuçlarda “Çıkarıldı” olarak kalır."
+
+msgctxt "live_exam.host_controls"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxar"
+msgstr "Çıkar"
+
+msgctxt "live_exam.host_controls"
+msgid "Növbəti sualdan"
+msgstr "Sonraki sorudan"
+
+msgctxt "live_exam.host_controls"
+msgid "Uyğun iştirakçı yoxdur"
+msgstr "Eşleşen katılımcı yok"
+
+msgctxt "live_exam.host_controls"
+msgid "Hələ heç kim qoşulmayıb"
+msgstr "Henüz kimse katılmadı"
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarılsın?"
+msgstr "“{name}” oyundan çıkarılsın mı?"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Telefonu oyundan çıxacaq, bu cihazla geri qayıda bilməyəcək. Balı liderlər "
+"lövhəsində göstərilməyəcək."
+msgstr ""
+"Telefonu oyundan çıkacak ve bu cihazla geri dönemeyecek. Puanı liderlik "
+"tablosunda gösterilmeyecek."
+
+msgctxt "live_exam.host_controls"
+msgid "Telefonu lobbidən çıxacaq və bu cihazla geri qayıda bilməyəcək."
+msgstr "Telefonu lobiden çıkacak ve bu cihazla geri dönemeyecek."
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarıldı"
+msgstr "“{name}” oyundan çıkarıldı"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxarmaq alınmadı. Yenidən cəhd edin."
+msgstr "Çıkarılamadı. Lütfen tekrar deneyin."
+
+msgctxt "liveExam.template.session_detail"
+msgid "Çıxarıldı"
+msgstr "Çıkarıldı"
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçını oyun bitənə qədər çıxarmaq olar."
+msgstr "Katılımcı yalnızca oyun bitmeden çıkarılabilir."
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçı tapılmadı."
+msgstr "Katılımcı bulunamadı."
+
+msgctxt "live_exam.host_controls"
+msgid "Hamısını görmək üçün siyahını sürüşdürün"
+msgstr "Herkesi görmek için listeyi kaydırın"
+
+msgctxt "live_exam.view.message"
+msgid "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin."
+
+msgctxt "live_exam.view.message"
+msgid ""
+"Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "Çok fazla istek gönderildi. Lütfen biraz sonra tekrar deneyin."
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı imtahana qoşul"
+msgstr "Canlı sınava katıl"
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı"
+msgstr "Canlı oyun"
+
+msgctxt "live_exam.pin_entry"
+msgid "Müəllimin göstərdiyi PIN-i yaz, sonra adını seçib oyuna daxil ol."
+msgstr "Öğretmenin gösterdiği PIN kodunu gir, sonra adını seçip oyuna katıl."
+
+msgctxt "live_exam.pin_entry"
+msgid "Oyun PIN-i"
+msgstr "Oyun PIN'i"
+
+msgctxt "live_exam.pin_entry"
+msgid "Məsələn: 3A8K2B94F1"
+msgstr "Örnek: 3A8K2B94F1"
+
+msgctxt "live_exam.pin_entry"
+msgid "Davam et"
+msgstr "Devam et"
+
+msgctxt "live_exam.pin_entry"
+msgid ""
+"PIN-i ekranda gördüyün kimi daxil et. Növbəti addımda ad və avatar "
+"seçəcəksən."
+msgstr ""
+"PIN kodunu ekrandaki gibi gir. Sonraki adımda rumuz ve avatar seçeceksin."
+
+msgctxt "live_exam.pin_entry"
+msgid "Saniyələr içində qoşul"
+msgstr "Saniyeler içinde katıl"
+
+msgctxt "live_exam.pin_entry"
+msgid "Telefon, planşet və kompüterdən işləyir"
+msgstr "Telefon, tablet ve bilgisayarda çalışır"
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı nəticə və liderlik cədvəli"
+msgstr "Canlı sonuç ve lider tablosu"
+
+msgctxt "live_exam.pin_entry"
+msgid "Hazırsan?"
+msgstr "Hazır mısın?"
+
+msgctxt "live_exam.pin_entry"
+msgid "Bir URL, bir PIN, hamısı eyni oyunda."
+msgstr "Tek link, tek PIN, herkes aynı oturumda."
+
+msgctxt "live_exam.pin_entry"
+msgid "Müəllim ekranında PIN və QR kod görünür."
+msgstr "Öğretmen ekranında PIN ve QR kod görünür."
+
+msgctxt "live_exam.pin_entry"
+msgid "Daxil olduqdan sonra avatar və ad seçimi gəlir."
+msgstr "Bu adımdan sonra öğrenci ad ve avatar seçer."
+
+msgctxt "live_exam.pin_entry"
+msgid "Yoxlanılır..."
+msgstr "Kontrol ediliyor..."
+
+msgctxt "live_exam.pin_entry"
+msgid "Düzgün PIN daxil et."
+msgstr "Geçerli bir PIN gir."
+
+msgctxt "live_exam.pin_entry"
+msgid "Bu PIN tapılmadı və ya oyun bağlanıb."
+msgstr "Bu PIN bulunamadı veya oturum kapanmış."
+
+msgctxt "live_exam.join"
+msgid "Əvvəlki qoşulma tapıldı"
+msgstr "Önceki katılım bulundu"
+
+msgctxt "live_exam.join"
+msgid "{nickname} adı ilə bu oyuna artıq daxil olmusan."
+msgstr "Bu oyuna zaten {nickname} adıyla katıldın."
+
+msgctxt "live_exam.join"
+msgid ""
+"İstəsən həmin oyunçu ilə davam et, istəsən yeni ad və avatarla yenidən "
+"qoşul."
+msgstr ""
+"İstersen aynı oyuncuyla devam et, istersen yeni rumuz ve avatarla tekrar "
+"katıl."
+
+msgctxt "live_exam.join"
+msgid "{nickname} kimi davam et"
+msgstr "{nickname} olarak devam et"
+
+msgctxt "live_exam.join"
+msgid "Əvvəlki adla davam etmək istəyirsən?"
+msgstr "Önceki adınla devam etmek ister misin?"
+
+msgctxt "live_exam.join"
+msgid ""
+"Bu PIN üçün aktiv oyunçu profilin var. Həmin profil ilə gözləmə otağına "
+"qayıda və ya yeni ad/avatar seçib yenidən daxil ola bilərsən."
+msgstr ""
+"Bu PIN için aktif bir oyuncu profilin var. Bekleme odasına geri dönebilir ya"
+" da yeni rumuz ve avatarla yeniden katılabilirsin."
+
+msgctxt "live_exam.join"
+msgid "Yenidən daxil ol"
+msgstr "Yeniden katıl"
+
+msgctxt "live_exam.join"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "live_exam.join"
+msgid "Bu ad artıq istifadə olunur. Başqa ad seç."
+msgstr "Bu rumuz zaten kullanılıyor. Başka bir ad seç."

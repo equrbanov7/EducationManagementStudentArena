@@ -36,6 +36,7 @@ from apps.live_exam.delivery import late_delivery_shift_ms, question_seen_at
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_active_question, question_points
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.roster import eligible_count_for_current, is_pending
 from apps.live_exam.serializers import personal_result_from_answer, speed_rank
 from apps.live_exam.session_settings import MULTI_SCORING_STRICT
 from apps.live_exam.text_safety import sanitize_player_text
@@ -170,8 +171,9 @@ def answer_progress_counts(session_id: int, question_id: int) -> dict[str, int]:
     """Commit olunmuş cavab/oyunçu sayları (unikal məhdudiyyət: 1 cavab = 1 oyunçu)."""
     return {
         "question_id": int(question_id),
-        "answered_count": LiveAnswer.objects.filter(session_id=session_id, question_id=question_id).count(),
-        "total_players": LivePlayer.objects.filter(session_id=session_id).count(),
+        "answered_count": LiveAnswer.objects.filter(session_id=session_id, question_id=question_id).in_game().count(),
+        # 2026-10-08 (L3): yalnız bu suala cavab verməli olanlar (gec qoşulan növbəti sualdan sayılır).
+        "total_players": eligible_count_for_current(session_id),
     }
 
 
@@ -277,6 +279,9 @@ def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text,
     with transaction.atomic():
         session = _lock_session_for_answer(pin)
         player = LivePlayer.objects.select_for_update().get(id=player_id, session=session, client_id=client_id)
+        # 2026-10-08 (L3): gec qoşulan cari suala cavab vermir (növbəti sual sərhədindən oyundadır).
+        if is_pending(player, session):
+            return False, _error("Növbəti sual başlayanda oyuna qoşulacaqsan."), None, False, session
 
         question = get_active_question(session)
         if question is None or int(question_id) != int(question.id):

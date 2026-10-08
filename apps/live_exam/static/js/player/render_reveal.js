@@ -2,13 +2,13 @@
 // Yalnız serverin göndərdiyi məlumat göstərilir: şəxsi nəticə (`player_answer`), `rank`,
 // `gap_to_next`, `next_nickname`, `streak`, multi üçün `correct_selected/total_correct`,
 // yazılı cavab üçün `your_text`/`accepted_answers`. Sahə yoxdursa — o hissə sadəcə göstərilmir.
-import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261002';
-import { playSound } from './audio.js?v=lx20261002';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261002';
-import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { previousRank, rememberRank } from './stats.js?v=lx20261002';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261002';
+import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261008';
+import { playSound } from './audio.js?v=lx20261008';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261008';
+import { shapeKey, shapeLabel, shapeSvg, toneIndex } from './shapes.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { previousRank, rememberRank } from './stats.js?v=lx20261008';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261008';
 import {
     esc,
     fmt,
@@ -25,9 +25,9 @@ import {
     showQuestionsOnDevices,
     toInt,
     tr,
-} from './utils.js?v=lx20261002';
-import { mountView } from './views.js?v=lx20261002';
-import { CHECK_SVG } from './render_round.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { mountView } from './views.js?v=lx20261008';
+import { CHECK_SVG } from './render_round.js?v=lx20261008';
 
 const CROSS_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>';

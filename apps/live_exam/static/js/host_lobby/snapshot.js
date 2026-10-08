@@ -1,11 +1,11 @@
-import { state } from './state.js?v=lx20261002';
-import { applySessionSettings } from './settings.js?v=lx20261002';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261002';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261002';
-import { applyRevealState } from './reveal.js?v=lx20261002';
-import { renderPodium } from './podium.js?v=lx20261002';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261002';
-import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20261002';
+import { state } from './state.js?v=lx20261008';
+import { applySessionSettings } from './settings.js?v=lx20261008';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261008';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261008';
+import { applyRevealState } from './reveal.js?v=lx20261008';
+import { renderPodium } from './podium.js?v=lx20261008';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261008';
+import { clearPendingStateSync, stopStatePolling } from './api.js?v=lx20261008';
 import {
     markStateMutation,
     notifyHostShell,
@@ -13,7 +13,7 @@ import {
     shouldApplyTimelinePayload,
     toMs,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
 
 export function applyStateSnapshot(snapshot) {
     if (!snapshot || !snapshot.ok) return;
@@ -28,7 +28,8 @@ export function applyStateSnapshot(snapshot) {
     if (Array.isArray(snapshot.players)) {
         // HTTP snapshot həqiqətdir; ondan köhnə WS `lobby_state` artıq tətbiq olunmur.
         state.lobbyStateAt = Math.max(Number(state.lobbyStateAt || 0), toMs(snapshot.server_time));
-        renderLobbyPlayers(snapshot.players, snapshot.total_players);
+        // 2026-10-08: oyun gedərkən də (aparıcının «İştirakçılar» siyahısı) — say `roster_count`-dır.
+        renderLobbyPlayers(snapshot.players, snapshot.roster_count ?? snapshot.total_players);
     }
     if (snapshot.answered_count != null) {
         state.answeredCount = Number(snapshot.answered_count || 0);

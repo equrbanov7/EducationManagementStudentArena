@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261002';
-import { PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playRevealSound } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { answerTileMarkup, distributionBarsMarkup, tilesGridClass } from './options.js?v=lx20261002';
-import { nextQuestion } from './api.js?v=lx20261002';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20261002';
-import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playRevealSound } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261008';
+import { nextQuestion } from './api.js?v=lx20261008';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20261008';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261008';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -22,8 +22,8 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261002';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261008';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */
@@ -171,7 +171,7 @@ function renderRevealStage(question, payload) {
         PHASES.REVEAL,
         `${state.revealKey}:${PHASES.REVEAL}`,
         `
-            <section class="hx-scene hx-reveal ${text ? "hx-reveal--text" : ""}" aria-live="polite">
+            <section class="hx-scene hx-reveal ${text ? "hx-reveal--text" : ""}" data-opt-len="${optionsLengthClass(options)}" aria-live="polite">
                 ${headMarkup(question, payload)}
                 ${cardMarkup(question)}
                 ${
@@ -189,7 +189,7 @@ function renderRevealStage(question, payload) {
         `,
         (root) => {
             fitAll(root, "[data-fit]", { min: 18 });
-            fitAll(root, ".hx-tile__text", { min: 14 });
+            fitAll(root, ".hx-tile__text", { min: 13 });
             animateBars(root);
         }
     );

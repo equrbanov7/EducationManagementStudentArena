@@ -15,12 +15,14 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.live_exam.auth import get_request_player
+from apps.live_exam.auth import PLAYER_COOKIE_NAME, get_request_player, is_client_kicked, load_player_token_payload
 from apps.live_exam.delivery import build_delivery_progress_payload, received_count, record_question_seen
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
+from apps.live_exam.i18n import player_language
 from apps.live_exam.models import LiveAnswer, LiveSession
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_rank
+from apps.live_exam.roster import eligible_players, is_pending
 from apps.live_exam.scoring import save_answer_and_score
 from apps.live_exam.serializers import (
     serialize_player_question_result,
@@ -40,13 +42,13 @@ from apps.live_exam.transport import (
     public_player_answer,
 )
 from apps.live_exam.views.host._shared import _ensure_host_org_permission
+from apps.live_exam.views.player.texts import state_rate_limit_message
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
 from core.utils import get_client_ip
 
 LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
 LIVE_ANSWER_HTTP_LIMIT_SCOPE = "live_exam.answer.http"
-LIVE_STATE_RATE_LIMIT_MESSAGE = "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 _REVEAL_TIMING_KEYS = (
     "top",
@@ -80,6 +82,17 @@ def _auth_error():
     return JsonResponse({"ok": False, "message": pgettext("live_exam.view.message", "auth_required")}, status=403)
 
 
+def _player_auth_error(request, session):
+    """403; aparıcının çıxardığı klientə ``kicked: true`` (telefon «müəllim səni çıxardı» göstərir)."""
+    response = _auth_error()
+    payload = load_player_token_payload(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=session.pin)
+    if payload is not None and is_client_kicked(session, payload.get("client_id")):
+        response = JsonResponse(
+            {"ok": False, "kicked": True, "message": pgettext("live_exam.view.message", "removed_by_host")}, status=403
+        )
+    return response
+
+
 def _rate_limited(request, pin):
     if getattr(request.user, "is_authenticated", False):
         rate_key = ("host", request.user.id, pin)
@@ -88,7 +101,7 @@ def _rate_limited(request, pin):
     is_limited, retry_after = record_rate_limit_hit(LIVE_STATE_LIMIT_SCOPE, settings.LIVE_STATE_RATE_LIMIT, *rate_key)
     if not is_limited:
         return None
-    response = JsonResponse({"ok": False, "message": LIVE_STATE_RATE_LIMIT_MESSAGE}, status=429)
+    response = JsonResponse({"ok": False, "message": state_rate_limit_message()}, status=429)
     if retry_after:
         response.headers["Retry-After"] = str(retry_after)
     return response
@@ -154,7 +167,7 @@ def live_state_json(request, pin):
             _ensure_host_org_permission(request, session.exam.organization)
         player = None if is_host else get_request_player(request, pin=pin)
         if not is_host and player is None:
-            return _auth_error()
+            return _player_auth_error(request, session)
 
         server_time = timezone.now()
         session = _maybe_auto_reveal(session, server_time)
@@ -185,10 +198,24 @@ def live_state_json(request, pin):
             data["players"] = players
             # Host-un «Yenilə» düyməsi / avtomatik sinxronu bu sayı HƏQİQƏT kimi götürür (sahib 2026-09-30).
             data["total_players"] = len(players) if len(players) < 200 else session.players.count()
+            data["roster_count"] = data["total_players"]
+        elif session.state in (LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL):
+            # 2026-10-08 (L3): cari suala cavab verməli olanlar (gec qoşulan növbəti sualdan sayılır).
+            data["total_players"] = eligible_players(session.id, int(session.current_index or 0)).count()
         else:
             # ``?light=1`` (oyunçu, lobby): 200 nəfərlik siyahı əvəzinə yalnız say — gözləmə
             # otağının ehtiyat sorğusu üçün (LX-FE-PLAYER). Host cavabı dəyişmir.
             data["total_players"] = session.players.count()
+        if is_host and session.state != LiveSession.STATE_LOBBY:
+            # 2026-10-08 (L6): oyun gedərkən aparıcının «İştirakçılar» çekməcəsi (çıxarılanlar yoxdur).
+            roster = serialize_players(session)
+            data["players"] = roster
+            data["roster_count"] = len(roster) if len(roster) < 200 else session.players.count()
+        if player is not None and is_pending(player, session):
+            # Gec qoşulan: növbəti sual gözlənilir — cari/keçən sualın məzmunu və cavabı GÖNDƏRİLMİR.
+            data["late_join_pending"] = True
+            data["active_from_index"] = int(player.active_from_index or 0)
+            return JsonResponse(data)
         if session.state == LiveSession.STATE_FINISHED:
             _finished_fields(session, player=player, data=data)
             return JsonResponse(data)
@@ -220,7 +247,7 @@ def live_state_json(request, pin):
             answer_starts_at=answer_starts_at,
             ends_at=ends,
         )
-        data["answered_count"] = LiveAnswer.objects.filter(session_id=session.id, question_id=eq.id).count()
+        data["answered_count"] = LiveAnswer.objects.filter(session_id=session.id, question_id=eq.id).in_game().count()
 
         if session.state == LiveSession.STATE_REVEAL:
             _reveal_fields(session, eq, ends=ends, is_host=is_host, player=player, data=data)
@@ -286,16 +313,17 @@ def live_answer_submit(request, pin):
         return JsonResponse({"ok": False, "message": parsed}, status=400)
 
     question_id, option_ids, answer_ms, text = parsed
-    ok, result = save_answer_and_score(
-        pin=pin,
-        player_id=player.id,
-        client_id=str(player.client_id or ""),
-        question_id=question_id,
-        option_ids=option_ids,
-        answer_ms=answer_ms,
-        received_at=received_at,
-        text=text,
-    )
+    with player_language(player.session):  # xəta mətnləri aparıcının seçdiyi dildə (2026-10-08)
+        ok, result = save_answer_and_score(
+            pin=pin,
+            player_id=player.id,
+            client_id=str(player.client_id or ""),
+            question_id=question_id,
+            option_ids=option_ids,
+            answer_ms=answer_ms,
+            received_at=received_at,
+            text=text,
+        )
     if not ok:
         return JsonResponse({"ok": False, "message": result}, status=400)
 

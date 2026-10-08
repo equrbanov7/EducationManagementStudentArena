@@ -42,7 +42,11 @@ def serialize_player_identity(player: LivePlayer) -> dict[str, Any]:
 
 
 def serialize_players(session: LiveSession, limit: int = 200) -> list[dict[str, Any]]:
-    return list(session.players.order_by("-created_at").values("id", "nickname", "avatar_key", "accessory_key")[:limit])
+    # ``active_from_index`` — aparıcının siyahısında «növbəti sualdan» nişanı (gec qoşulan, 2026-10-08).
+    rows = session.players.order_by("-created_at").values(
+        "id", "nickname", "avatar_key", "accessory_key", "active_from_index"
+    )[:limit]
+    return list(rows)
 
 
 def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]:
@@ -114,7 +118,9 @@ def serialize_answer_distribution(session: LiveSession, question_id: int) -> dic
     counts: dict[int, int] = {}
     total_answers = 0
 
-    answers = LiveAnswer.objects.filter(session=session, question_id=question_id).values("choice_id", "choice_ids")
+    answers = (
+        LiveAnswer.objects.filter(session=session, question_id=question_id).in_game().values("choice_id", "choice_ids")
+    )
     for answer in answers:
         option_ids = list(answer.get("choice_ids") or [])
         if not option_ids and answer.get("choice_id") is not None:
@@ -153,6 +159,7 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
     # Single query: fetch all answers with related player, ordered by speed for rank calculation.
     all_answers = list(
         LiveAnswer.objects.filter(session=session, question_id=question_id)
+        .in_game()
         .select_related("player")
         .order_by("answer_ms", "id")
     )
@@ -213,6 +220,7 @@ def speed_rank(session_id: int, question_id: int, answer) -> int:
     answer_ms, answer_id = speed_order_key(answer)
     faster = (
         LiveAnswer.objects.filter(session_id=session_id, question_id=question_id)
+        .in_game()
         .filter(Q(answer_ms__lt=answer_ms) | Q(answer_ms=answer_ms, id__lt=answer_id))
         .count()
     )
