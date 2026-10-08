@@ -45,3 +45,30 @@ def create_audit_row(*, fail_closed: bool = False, **fields) -> bool:
             fields.get("resource_id"),
         )
         return False
+
+
+def create_audit_rows(rows, *, fail_closed: bool = False) -> bool:
+    """Bir neçə ``AuditLog`` sətri — ``create_audit_row`` ilə EYNİ siyasət, BİR INSERT.
+
+    2026-10-08 (toplu imtahan balı yazısı): sətir başına savepoint + INSERT əvəzinə
+    hamısı bir savepoint-də ``bulk_create`` olunur. Best-effort rejimdə xəta loga düşür
+    və yalnız bu audit sətirləri geri qayıdır — domen yazısı qalır.
+    """
+    rows = list(rows)
+    if not rows:
+        return True
+    try:
+        from core.audit import create_audit_logs
+
+        with transaction.atomic():
+            create_audit_logs(rows)
+        return True
+    except Exception:  # noqa: BLE001 — savepoint geri qayıdıb; siyasət çağırana aiddir
+        if fail_closed:
+            raise
+        logger.exception(
+            "Registrar audit yazısı alınmadı (resource_type=%s, %d sətir).",
+            rows[0].get("resource_type"),
+            len(rows),
+        )
+        return False

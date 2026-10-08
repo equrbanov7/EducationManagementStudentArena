@@ -82,16 +82,20 @@ class SaveFinalsAtomicTest(TestCase):
         return self.client.post(self.url, data)
 
     def test_second_row_failure_rolls_back_the_first(self):
-        original = finals.set_exam_score
+        # 2026-10-08: imtahan balı toplu yazılır (``exam_score_bulk``) — ``set_exam_score``
+        # artıq sətir-sətir çağırılmır. Xəta ikinci sətrin təkrar imtahan qərarında
+        # (``finals.resit_action`` — həm tək, həm toplu yolun ortaq addımı) atılır: o anda
+        # birinci sətrin ``FinalGrade``-i ARTIQ yazılıb, deməli geri alınması yoxlanır.
+        original = finals.resit_action
         calls = {"n": 0}
 
-        def _flaky(**kwargs):
+        def _flaky(*args, **kwargs):
             calls["n"] += 1
             if calls["n"] == 2:
                 raise RuntimeError("second row boom")
-            return original(**kwargs)
+            return original(*args, **kwargs)
 
-        with mock.patch("apps.registrar.views.finals.set_exam_score", side_effect=_flaky):
+        with mock.patch("apps.registrar.finals.resit_action", side_effect=_flaky):
             with self.assertRaises(RuntimeError):
                 self._post()
         with bypass_rls():

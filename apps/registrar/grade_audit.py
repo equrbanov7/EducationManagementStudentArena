@@ -82,24 +82,35 @@ def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, re
     """
     if not changes:
         return
-    changes = _stamp_impersonation(changes, request)
     # Audit 2026-09-28 DB-01: INSERT öz SAVEPOINT-ində (audit_write) — best-effort
     # rejimdə audit xətası artıq xarici jurnal tranzaksiyasını səssizcə geri
     # qaytarmır (əvvəl qiymətlər itir, müəllimə isə «yadda saxlanıldı» deyilirdi).
-    from core.constants import AuditAction
-
     create_audit_row(
         fail_closed=fail_closed,
-        user=by_user if getattr(by_user, "pk", None) else None,
-        organization=offering.organization,
-        action=AuditAction.UPDATE,
-        resource_type=f"{_RESOURCE_PREFIX}.{kind}",
-        resource_id=str(offering.pk),
-        resource_repr=f"{offering.subject.code} — qiymət dəyişikliyi ({len(changes)})",
-        changes=changes,
-        new_values={"count": len(changes)},
-        reason=f"{len(changes)} qiymət dəyişikliyi ({kind}).",
+        **grade_change_row(offering=offering, by_user=by_user, kind=kind, changes=changes, request=request),
     )
+
+
+def grade_change_row(*, offering, by_user, kind, changes, request=None) -> dict:
+    """``log_grade_changes``-in yazdığı ``AuditLog`` sahələri (INSERT etmədən).
+
+    2026-10-08: toplu imtahan balı yazısı (``exam_score_bulk``) eyni sətirləri bir
+    INSERT-də yazır (``audit_write.create_audit_rows``) — forma burada, bir yerdədir.
+    """
+    changes = _stamp_impersonation(changes, request)
+    from core.constants import AuditAction
+
+    return {
+        "user": by_user if getattr(by_user, "pk", None) else None,
+        "organization": offering.organization,
+        "action": AuditAction.UPDATE,
+        "resource_type": f"{_RESOURCE_PREFIX}.{kind}",
+        "resource_id": str(offering.pk),
+        "resource_repr": f"{offering.subject.code} — qiymət dəyişikliyi ({len(changes)})",
+        "changes": changes,
+        "new_values": {"count": len(changes)},
+        "reason": f"{len(changes)} qiymət dəyişikliyi ({kind}).",
+    }
 
 
 def log_backdated_lesson(*, offering, lesson, by_user):
