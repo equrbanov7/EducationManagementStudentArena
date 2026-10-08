@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load ems_ui static i18n %}
 {% comment %}C3 mikro inline-stil lab_modals.css-ə köçürüldü.{% endcomment %}
 <div class="modal fade" id="addLabModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -61,11 +61,11 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="add-lab-start">{% trans "label_start" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="start_datetime" id="add-lab-start" class="form-control" required>
+                                    {% ems_datetime_input "start_datetime" input_id="add-lab-start" required=True %}
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label" for="add-lab-end">{% trans "label_deadline" context "labs.template.lab_modals" %} <span class="text-danger">*</span></label>
-                                    <input type="datetime-local" name="end_datetime" id="add-lab-end" class="form-control" required>
+                                    {% ems_datetime_input "end_datetime" input_id="add-lab-end" required=True %}
                                 </div>
                             </div>
                             <hr>
