@@ -456,3 +456,14 @@ body.host-presentation-page.presentation-sidebar-open .control-bar { transform: 
     .hx-sound__hint { animation: none !important; }
     body.host-presentation-page .control-bar { transition: none; }
 }
+
+/* 2026-10-08 (L4): Başla / Cavabı göstər / Növbəti / Bitir HƏMİŞƏ görünür — 720p proyektorda panel
+ * hündürlüyü çatmayanda düymələr panelin altında qalırdı (sürüşdürmək lazım idi). */
+.control-bar .control-actions {
+    position: sticky;
+    bottom: -22px;
+    z-index: 2;
+    padding: 10px 0 12px;
+    background: rgba(8, 11, 36, 0.97);
+    box-shadow: 0 -14px 18px -10px rgba(8, 11, 36, 0.95);
+}

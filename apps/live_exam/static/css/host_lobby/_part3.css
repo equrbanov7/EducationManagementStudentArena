@@ -211,20 +211,49 @@
 .hx-readbar__label { font: 800 clamp(16px, 1.2cqw, 22px)/1 var(--hx-font); color: var(--hx-muted); }
 
 /* ── Cavab fazası: [taymer | sual | cavab sayı] + plitələr ─────────── */
+/* 2026-10-08 (L4): sual sırası və plitələr ekranın QALAN hündürlüyünü PAYLAŞIR (hər ikisi müəyyən
+ * ölçülü sətirdir) — əvvəl plitələrin hündürlüyü sabit idi (10–12vh): uzun variantın 2-ci sətri
+ * kəsilirdi, dar səhnədə (idarə paneli açıq) 5-ci plitə ekrandan çıxırdı. Uzun variantlarda
+ * plitələr daha çox pay alır; mətn sığmasa şrift kiçilir (fitText), sonda plitə daxilində sürüşür. */
 .hx-question--answers {
+    --qrow-share: 1fr;
+    --tiles-share: 1.15fr;
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, var(--qrow-share)) minmax(0, var(--tiles-share));
 }
+
+.hx-question--answers[data-opt-len="s"] { --tiles-share: 0.85fr; }
+.hx-question--answers[data-opt-len="l"] { --qrow-share: 0.8fr; --tiles-share: 1.5fr; }
+.hx-question--answers.is-text { grid-template-rows: auto minmax(0, 1fr) auto; }
 
 .hx-qrow {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
     align-items: center;
     gap: clamp(14px, 1.8cqw, 36px);
     min-height: 0;
 }
 
 .hx-qrow .hx-qcard { max-height: 100%; height: 100%; }
+
+.hx-question--answers .hx-timer,
+.hx-question--answers .hx-answered {
+    width: auto;
+    height: min(clamp(96px, 9.5cqw, 190px), 100%);
+    min-height: 72px;
+}
+
+.hx-question--answers:not(.is-text) .hx-tiles {
+    grid-auto-rows: minmax(0, 1fr);
+    min-height: 0;
+}
+
+.hx-question--answers .hx-tiles .hx-tile,
+.hx-tiles.is-reveal .hx-tile {
+    height: auto;
+    min-height: 0;
+}
 
 .hx-timer,
 .hx-answered {
@@ -327,6 +356,10 @@
 .hx-tiles--n5 .hx-tile,
 .hx-tiles--n6 .hx-tile { height: clamp(76px, 10vh, 128px); }
 
+/* Uzun mətn: şrift sığdırılır (fitText), yenə sığmasa plitə DAXİLİNDƏ sürüşür — heç nə kəsilmir. */
+.hx-tile__text.hx-scroll { scrollbar-color: rgba(255, 255, 255, 0.55) transparent; }
+.hx-tile__text.hx-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.5); }
+
 .hx-tile:nth-child(2) { animation-delay: 0.07s; }
 .hx-tile:nth-child(3) { animation-delay: 0.14s; }
 .hx-tile:nth-child(4) { animation-delay: 0.21s; }
@@ -355,7 +388,8 @@
     flex: 1 1 auto;
     min-width: 0;
     max-height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     font: 800 var(--fit-size, clamp(20px, 1.9cqw, 38px))/1.18 var(--hx-font);
     overflow-wrap: anywhere;
     text-shadow: 0 2px 0 rgba(0, 0, 0, 0.18);
@@ -447,8 +481,12 @@
 }
 
 @container hxstage (max-width: 900px) {
-    .hx-qrow { grid-template-columns: 1fr 1fr; }
-    .hx-qrow .hx-qcard { grid-column: 1 / -1; order: -1; }
+    /* Dar səhnə (idarə paneli açıq / kiçik ekran): taymer və say kartın yanında, kiçilmiş halda
+     * qalır (əvvəl kartın altına düşüb sırayı uzadırdı); 5–6 variant 3 sırada — plitələrə daha çox pay. */
+    .hx-qrow { gap: 12px; }
+    .hx-question--answers .hx-timer,
+    .hx-question--answers .hx-answered { height: min(96px, 100%); }
+    .hx-question--answers:has(.hx-tiles--n5, .hx-tiles--n6) { --qrow-share: 0.8fr; --tiles-share: 1.7fr; }
     .hx-tiles--n3,
     .hx-tiles--n5,
     .hx-tiles--n6 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

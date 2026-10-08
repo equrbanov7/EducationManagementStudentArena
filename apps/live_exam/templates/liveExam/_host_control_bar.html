@@ -24,6 +24,9 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
         </div>
 
         <div class="control-fields">
+            {% comment %}2026-10-08 (L2): «Hər sual üçün vaxt» — host_lobby/time_setting.js doldurur (oyun gedərkən də);
+            panelin YUXARISINDA — yapışqan düymələrin altında qalmasın.{% endcomment %}
+            <div class="control-timeset" data-time-setting></div>
             <label class="question-count-box" for="questionCount">
                 <span class="question-count-box__label"><span class="hx-i" data-icon="sparkle"></span>{% trans "question_label" context "live_exam.host_lobby" %}</span>
                 <span class="question-count-box__input">
@@ -38,8 +41,6 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
                     <span>/ {{ max_participants_cap }}</span>
                 </span>
             </label>
-            {% comment %}2026-10-08 (L2): «Hər sual üçün vaxt» — host_lobby/time_setting.js doldurur (oyun gedərkən də).{% endcomment %}
-            <div class="control-timeset" data-time-setting></div>
         </div>
 
         <label class="auto-toggle host-settings-item">

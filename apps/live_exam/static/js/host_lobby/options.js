@@ -19,6 +19,14 @@ export function optionShapeLabel(option, index) {
     return tr(key, fallback);
 }
 
+/** 2026-10-08 (L4): ən uzun variantın uzunluq sinfi — səhnə plitələrə hündürlüyün çox payını verir. */
+export function optionsLengthClass(options) {
+    const longest = (Array.isArray(options) ? options : []).reduce((max, option) => Math.max(max, String(option?.text || "").length), 0);
+    if (longest <= 40) return "s";
+    if (longest <= 90) return "m";
+    return "l";
+}
+
 export function tilesGridClass(count) {
     const n = Math.max(1, Math.min(6, Number(count) || 0));
     return `hx-tiles--n${n}`;
@@ -34,7 +42,7 @@ export function answerTileMarkup(option, index, verdict) {
     return `
         <article class="hx-tile hx-tile--t${toneIndex(index)} ${verdictClass}" data-len="${lengthClass(text)}" data-option-id="${Number(option?.id || 0)}">
             <span class="hx-tile__shape" role="img" aria-label="${esc(label)}">${shapeSvg(shape)}</span>
-            <span class="hx-tile__text">${esc(text)}</span>
+            <span class="hx-tile__text hx-scroll">${esc(text)}</span>
             ${
                 verdict
                     ? `<span class="hx-tile__verdict" role="img" aria-label="${esc(verdictText)}">${icon(verdict === "correct" ? "check" : "cross")}</span>`

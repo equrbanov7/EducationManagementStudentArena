@@ -3,7 +3,7 @@ import { PHASES } from './constants.js?v=lx20261008';
 import { state } from './state.js?v=lx20261008';
 import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261008';
 import { icon } from './icons.js?v=lx20261008';
-import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20261008';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261008';
 import { revealQuestion } from './api.js?v=lx20261008';
 import { playWipe } from './transitions.js?v=lx20261008';
 import { secondsLabel } from './time_setting.js?v=lx20261008';
@@ -198,7 +198,7 @@ function renderAnswersStage(question) {
         PHASES.ANSWERS,
         `${state.questionKey}:${PHASES.ANSWERS}`,
         `
-            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}">
+            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}" data-opt-len="${optionsLengthClass(options)}">
                 ${headMarkup(question)}
                 <div class="hx-qrow">
                     ${hudMarkup()}
@@ -215,7 +215,7 @@ function renderAnswersStage(question) {
         `,
         (root) => {
             fitQuestion(root);
-            fitAll(root, ".hx-tile__text", { min: 16 });
+            fitAll(root, ".hx-tile__text", { min: 15 });
         }
     );
     state.lastTimerSecond = -1;

@@ -34,7 +34,7 @@ PLAYER_CSS = (
     ("css/player/_base.css", "lxp-20260930"),
     ("css/player/_ui.css", "lxp-20261002"),
     ("css/player/_round.css", "lxp-20260929"),
-    ("css/player/_answer.css", "lxp-20260929"),
+    ("css/player/_answer.css", "lxp-20261008"),
     ("css/player/_reveal.css", "lxp-20260930"),
     ("css/player/_finale.css", "lxp-20260929"),
 )

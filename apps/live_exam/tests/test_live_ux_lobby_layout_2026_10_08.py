@@ -92,3 +92,43 @@ class ProjectorLayoutStaticTest(SimpleTestCase):
         drawer = (TEMPLATES / "partials" / "_host_players_drawer.html").read_text(encoding="utf-8")
         self.assertIn("hx-scroll", drawer)
         self.assertIn("data-players-list", drawer)
+
+
+class AnswerTilesLayoutStaticTest(SimpleTestCase):
+    """L4: uzun variantlar kəsilmir — plitələr hündürlüyü paylaşır, mətn sığdırılır, sonda plitədə sürüşür;
+    idarə düymələri həmişə görünür; telefonda yığcam plitə."""
+
+    def test_presenter_answers_scene_shares_height_and_tiles_scroll_inside(self):
+        part3 = (CSS / "host_lobby" / "_part3.css").read_text(encoding="utf-8")
+        scene = css_block(part3, ".hx-question--answers")
+        self.assertIn("minmax(0, var(--qrow-share))", scene)
+        self.assertIn("minmax(0, var(--tiles-share))", scene)
+        self.assertIn('.hx-question--answers[data-opt-len="l"]', part3)
+        text = css_block(part3, ".hx-tile__text")
+        self.assertIn("overflow-y: auto", text)
+        self.assertNotIn("overflow: hidden", text)
+        options = (JS / "options.js").read_text(encoding="utf-8")
+        self.assertIn('class="hx-tile__text hx-scroll"', options)
+        question = (JS / "question.js").read_text(encoding="utf-8")
+        self.assertIn('data-opt-len="${optionsLengthClass(options)}"', question)
+
+    def test_reveal_tiles_share_height_with_the_chart(self):
+        part4 = (CSS / "host_lobby" / "_part4.css").read_text(encoding="utf-8")
+        self.assertIn("minmax(0, var(--reveal-tiles-share))", part4)
+        self.assertNotIn("height: clamp(64px, 8.4vh, 104px)", part4)  # köhnə sabit hündürlük
+
+    def test_control_buttons_stay_visible(self):
+        part5 = (CSS / "host_lobby" / "_part5.css").read_text(encoding="utf-8")
+        actions = css_block(part5, ".control-bar .control-actions")
+        self.assertIn("position: sticky", actions)
+        bar = (TEMPLATES / "_host_control_bar.html").read_text(encoding="utf-8")
+        # «Hər sual üçün vaxt» panelin yuxarısındadır — yapışqan düymələrin altında qalmır.
+        self.assertLess(bar.index("data-time-setting"), bar.index('id="questionCount"'))
+
+    def test_player_long_options_are_compact_and_never_clamped(self):
+        render = (APP / "static" / "js" / "player" / "render_round.js").read_text(encoding="utf-8")
+        self.assertIn('data-long="${long}"', render)
+        answer_css = (CSS / "player" / "_answer.css").read_text(encoding="utf-8")
+        self.assertIn('.lxp-tiles[data-long="1"] .lxp-tile', answer_css)
+        round_css = (CSS / "player" / "_round.css").read_text(encoding="utf-8")
+        self.assertNotIn("line-clamp", css_block(round_css, ".lxp-tile__text"))

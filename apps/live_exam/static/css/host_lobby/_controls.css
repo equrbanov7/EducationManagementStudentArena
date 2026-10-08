@@ -127,6 +127,14 @@
     box-shadow: none;
 }
 
+.control-timeset .hx-timeset__choices.hx-seg--wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.control-timeset .hx-seg__btn { padding: 0 4px; white-space: nowrap; }
+.control-timeset .hx-timeset__custom { grid-template-columns: minmax(0, 1fr) auto; }
+.control-timeset .hx-timeset__custom-label { grid-column: 1 / -1; }
+
+/* Menyu panelin içində açıq ikən yapışqan düymələr onu örtməsin. */
+.control-bar:has(.control-timeset.is-open) .control-actions { position: static; box-shadow: none; }
+
 /* Proyektorda cari sualın vaxtı (sual başlığında). */
 .hx-pill--time { border-color: rgba(255, 201, 64, 0.5); background: rgba(255, 201, 64, 0.14); }
 .hx-pill--time .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }

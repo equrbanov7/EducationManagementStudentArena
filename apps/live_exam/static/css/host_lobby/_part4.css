@@ -3,9 +3,24 @@
  * böyümə animasiyası; düzgün sütun/plitə parlayır, səhvlər sakitləşir.
  */
 .hx-reveal {
+    --reveal-tiles-share: 0.85fr;
     display: grid;
     grid-template-rows: auto auto minmax(0, 1fr) auto auto;
 }
+
+/* 2026-10-08 (L4): açılmış plitələr sütun qrafiki ilə hündürlüyü PAYLAŞIR (sabit 8.4vh yox) —
+ * uzun variant mətni kəsilmir; sığmasa şrift kiçilir, sonda plitə daxilində sürüşür. */
+.hx-reveal:not(.hx-reveal--text) {
+    grid-template-rows: auto auto minmax(0, 1fr) minmax(0, var(--reveal-tiles-share)) auto;
+}
+
+.hx-reveal[data-opt-len="l"] { --reveal-tiles-share: 1.3fr; }
+.hx-tiles.is-reveal { grid-auto-rows: minmax(0, 1fr); min-height: 0; }
+
+/* Uzun variantlar: açılmış plitə yığcamdır (kiçik fiqur / işarə) — mətnə daha çox en qalır. */
+.hx-reveal[data-opt-len="l"] .hx-tile { gap: 10px; padding: 8px 12px; }
+.hx-reveal[data-opt-len="l"] .hx-tile__shape { width: clamp(30px, 2.4cqw, 44px); height: clamp(30px, 2.4cqw, 44px); }
+.hx-reveal[data-opt-len="l"] .hx-tile__verdict { width: clamp(28px, 2.2cqw, 40px); height: clamp(28px, 2.2cqw, 40px); }
 
 .hx-qcard--reveal {
     padding-block: clamp(12px, 1.4cqw, 26px);
@@ -117,7 +132,7 @@
 }
 
 /* ── Açılmış plitələr ──────────────────────────────────────────────── */
-.hx-tiles.is-reveal .hx-tile { height: clamp(64px, 8.4vh, 104px); }
+.hx-tiles.is-reveal .hx-tile { min-height: min(56px, 100%); }
 
 .hx-tiles.is-reveal .hx-tile.is-wrong {
     background: var(--lx-wrong-bg, #2a3158);

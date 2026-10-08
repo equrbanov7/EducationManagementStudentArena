@@ -101,7 +101,10 @@ function tilesMarkup(question) {
             );
         })
         .join("");
-    return `<div class="lxp-tiles notranslate" translate="no" data-layout="${layout}" data-count="${options.length}" role="group" aria-label="${esc(tr("answersLabel", "Cavab variantları"))}">${tiles}</div>`;
+    // 2026-10-08 (L4): uzun variantlar (≥ 4, ən uzunu > 90 simvol) — yığcam plitə (kiçik fiqur, daha
+    // geniş mətn sahəsi); tək seçimdə sağdakı «✓» yeri boşaldılır. Mətn heç vaxt kəsilmir, ekran sürüşür.
+    const long = layout === "list" && options.length >= 4 && longest > 90 ? "1" : "0";
+    return `<div class="lxp-tiles notranslate" translate="no" data-layout="${layout}" data-count="${options.length}" data-long="${long}" data-multi="${multi ? 1 : 0}" role="group" aria-label="${esc(tr("answersLabel", "Cavab variantları"))}">${tiles}</div>`;
 }
 
 function multiBarMarkup(question) {
