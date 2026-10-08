@@ -91951,3 +91951,7 @@ msgstr "Katılımcı yalnızca oyun bitmeden çıkarılabilir."
 msgctxt "live_exam.view.message"
 msgid "İştirakçı tapılmadı."
 msgstr "Katılımcı bulunamadı."
+
+msgctxt "live_exam.host_controls"
+msgid "Hamısını görmək üçün siyahını sürüşdürün"
+msgstr "Herkesi görmek için listeyi kaydırın"

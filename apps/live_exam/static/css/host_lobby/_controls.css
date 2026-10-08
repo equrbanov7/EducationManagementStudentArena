@@ -4,6 +4,21 @@
  * (tənzimləmə çekməcəsi ilə eyni) — tünd səhnədə AA kontrast.
  */
 
+/* ── Sürüşən konteyner (lobbi siyahısı, çekməcələr, uzun plitə mətni) — 2026-10-08 ── */
+.hx-scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+}
+
+.hx-scroll::-webkit-scrollbar { width: 10px; }
+.hx-scroll::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(148, 163, 184, 0.6); }
+.hx-scroll::-webkit-scrollbar-track { background: transparent; }
+.hx-scroll:focus-visible { outline: 3px solid var(--hx-gold, #ffc940); outline-offset: 2px; }
+
 /* ── «Hər sual üçün vaxt: [30 s ▾]» ───────────────────────────────── */
 .hx-timeset {
     position: relative;

@@ -94,7 +94,8 @@ function shellMarkup() {
                     <div class="hx-lobby__status" data-lobby-status></div>
                 </div>
             </div>
-            <div class="hx-cloud" data-lobby-cloud data-density="l" aria-label="${esc(tr("lobbyParticipants", "Qoşulan iştirakçılar"))}"></div>
+            <div class="hx-cloud hx-scroll" data-lobby-cloud data-density="l" tabindex="0" aria-label="${esc(tr("lobbyParticipants", "Qoşulan iştirakçılar"))}"></div>
+            <p class="hx-cloud-hint" aria-hidden="true">${icon("down")}<span>${esc(tr("lobbyScrollHint", "Hamısını görmək üçün siyahını sürüşdürün"))}</span></p>
             <p class="hx-lobby__empty" data-lobby-empty>
                 <span class="hx-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 ${esc(tr("lobbyEmpty", "Hələ heç kim qoşulmayıb — telefonla PIN-i daxil edin"))}
@@ -146,7 +147,6 @@ function renderCloud(root, fromData) {
     const total = Math.max(Number(state.rosterCount || 0), players.length);
     const visible = players.slice(-LOBBY_MAX_BUBBLES);
     const hidden = Math.max(0, total - visible.length);
-    list.dataset.density = total <= 20 ? "l" : total <= 45 ? "m" : "s";
 
     const removable = controlsEnabled();
     const nextIds = new Set(visible.map((player) => String(player.id)));
@@ -202,12 +202,64 @@ function renderCloud(root, fromData) {
     const countEl = root.querySelector("[data-lobby-count]");
     if (countEl) countEl.textContent = formatNumber(total);
     root.classList.toggle("has-players", total > 0);
+    fitCloud(root, list, total);
     updateStatus(root, total);
     if (fromData) {
         players.forEach((player) => cloud.known.add(String(player.id)));
         cloud.initialized = true;
     }
 }
+
+/* 2026-10-08 (L1): sıxlıq sayla başlayır, sığmırsa pillə-pillə kiçilir; ən kiçikdə də sığmırsa
+ * siyahı SÜRÜŞÜR (əvvəl `overflow: hidden` idi — 22 nəfərdə adlar ekranın altında itirdi). */
+const DENSITIES = ["l", "m", "s", "xs", "xxs"];
+const CROWD_THRESHOLD = 12;
+
+function densityForCount(total) {
+    if (total <= 12) return 0;
+    if (total <= 30) return 1;
+    if (total <= 60) return 2;
+    if (total <= 120) return 3;
+    return 4;
+}
+
+const overflows = (list) => list.scrollHeight > list.clientHeight + 2;
+
+function syncScrollEnd(list) {
+    const atEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+    list.classList.toggle("is-scrolled-end", atEnd);
+    list.closest("[data-lobby]")?.classList.toggle("is-scrolled-end", atEnd);
+}
+
+function fitCloud(root, list, total) {
+    root.dataset.crowd = total > CROWD_THRESHOLD ? "1" : "0";
+    let level = densityForCount(total);
+    list.dataset.density = DENSITIES[level];
+    while (level < DENSITIES.length - 1 && total > 0 && overflows(list)) {
+        level += 1;
+        list.dataset.density = DENSITIES[level];
+    }
+    const scrollable = total > 0 && overflows(list);
+    list.classList.toggle("is-scrollable", scrollable);
+    root.classList.toggle("is-overflowing", scrollable);
+    syncScrollEnd(list);
+}
+
+/** Pəncərə ölçüsü dəyişəndə (proyektor / tam ekran) sıxlığı yenidən seç. */
+export function refitLobbyCloud() {
+    if (state.sessionState !== "lobby") return;
+    const root = UI.presentationContent?.querySelector("[data-lobby]");
+    const list = root?.querySelector("[data-lobby-cloud]");
+    if (root && list) fitCloud(root, list, Math.max(Number(state.rosterCount || 0), list.childElementCount));
+}
+
+document.addEventListener(
+    "scroll",
+    (event) => {
+        if (event.target?.matches?.("[data-lobby-cloud]")) syncScrollEnd(event.target);
+    },
+    true
+);
 
 export function renderIdleStage(fromData = false) {
     if (state.sessionState !== "lobby") return;

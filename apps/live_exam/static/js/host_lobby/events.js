@@ -2,6 +2,7 @@ import { UI } from './dom.js?v=lx20261008';
 import { finishGame, nextQuestion, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20261008';
 import { unlockAudio } from './audio.js?v=lx20261008';
 import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20261008';
+import { refitLobbyCloud } from './lobby.js?v=lx20261008';
 import { controlsEnabled, fitAll } from './utils.js?v=lx20261008';
 
 export function bindHostEvents() {
@@ -56,6 +57,7 @@ export function bindHostEvents() {
         resizeTimer = window.setTimeout(() => {
             fitAll(UI.presentationContent, "[data-fit]", { min: 18 });
             fitAll(UI.presentationContent, ".hx-tile__text", { min: 14 });
+            refitLobbyCloud();
         }, 160);
     });
 }

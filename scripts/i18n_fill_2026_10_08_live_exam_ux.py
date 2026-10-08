@@ -74,6 +74,12 @@ ROWS = {
             "Опоздавшие могут присоединиться с этим PIN",
             "Geç kalanlar bu PIN ile katılabilir",
         ),
+        # L1 — lobbi siyahısı sürüşür.
+        "Hamısını görmək üçün siyahını sürüşdürün": (
+            "Scroll the list to see everyone",
+            "Прокрутите список, чтобы увидеть всех",
+            "Herkesi görmek için listeyi kaydırın",
+        ),
         # L6 — «İştirakçılar» çekməcəsi və çıxarma təsdiqi.
         "Oyun idarəsi": ("Game control", "Управление игрой", "Oyun yönetimi"),
         "İştirakçılar": ("Players", "Участники", "Katılımcılar"),

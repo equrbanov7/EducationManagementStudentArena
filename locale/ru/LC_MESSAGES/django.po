@@ -92651,3 +92651,7 @@ msgstr "Участника можно удалить только до окон�
 msgctxt "live_exam.view.message"
 msgid "İştirakçı tapılmadı."
 msgstr "Участник не найден."
+
+msgctxt "live_exam.host_controls"
+msgid "Hamısını görmək üçün siyahını sürüşdürün"
+msgstr "Прокрутите список, чтобы увидеть всех"

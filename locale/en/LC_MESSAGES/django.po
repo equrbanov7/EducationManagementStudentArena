@@ -92473,3 +92473,7 @@ msgstr "A player can only be removed before the game ends."
 msgctxt "live_exam.view.message"
 msgid "İştirakçı tapılmadı."
 msgstr "Player not found."
+
+msgctxt "live_exam.host_controls"
+msgid "Hamısını görmək üçün siyahını sürüşdürün"
+msgstr "Scroll the list to see everyone"

@@ -192,10 +192,13 @@
 .hx-count .hx-icon { width: clamp(28px, 2.2cqw, 40px); height: clamp(28px, 2.2cqw, 40px); color: var(--hx-gold); }
 
 .hx-count strong {
-    font: 800 clamp(32px, 2.8cqw, 58px)/1 var(--hx-display);
-    color: #fff;
+    font: 800 clamp(36px, 3.2cqw, 66px)/1 var(--hx-display);
+    color: var(--hx-gold);
     font-variant-numeric: tabular-nums;
 }
+
+/* 2026-10-08 (L1): ümumi say hər zaman iri və görünən (siyahı sürüşsə də). */
+.hx-count { border-color: rgba(255, 201, 64, 0.45); background: rgba(255, 201, 64, 0.12); color: #fff; }
 
 /* «Yenilə» (sahib 2026-09-30): oyunçu siyahısını serverdən yenidən çəkir (api.refreshHostState). */
 .hx-refresh {
@@ -247,27 +250,98 @@
 .hx-lobby__status[data-tone="locked"] { background: rgba(190, 18, 60, 0.42); }
 .hx-lobby__status[data-tone="locked"] .hx-lobby__dot { background: #fda4af; animation: none; }
 
-/* ── Oyunçu buludu ──────────────────────────────────────────────────── */
+/* ── Oyunçu siyahısı (2026-10-08, L1) ───────────────────────────────
+ * Əvvəl bulud `overflow: hidden` idi — 22 nəfərdə adlar proyektorun altından çıxırdı və siyahı
+ * sürüşmürdü. İndi: sürüşən konteyner (hx-scroll), avtomatik sütunlu çip şəbəkəsi və sıxlıq
+ * pillələri (l → m → s → xs → xxs). JS (lobby.js) sayla başlayır, sığmırsa pillə-pillə kiçildir;
+ * ən kiçik pillədə də sığmırsa siyahı sürüşür və «sürüşdürün» ipucu görünür.
+ */
 .hx-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: flex-start;
+    /* Ölçülər səhnə eninə (cqw) bağlıdır — 1920 px proyektorda çiplər oxunaqlı qalır. */
+    --chip-min: clamp(230px, 16cqw, 360px);
+    --chip-max: clamp(320px, 20cqw, 420px);
+    --chip-avatar: clamp(56px, 3.6cqw, 72px);
+    --chip-font: clamp(22px, 1.6cqw, 30px);
+    --chip-pad: 6px 22px 6px 6px;
+    --chip-gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--chip-min), 100%), var(--chip-max)));
+    grid-auto-rows: max-content;
+    align-content: start;
     justify-content: center;
     gap: 12px 14px;
     min-height: 0;
-    overflow: hidden;
     padding: 10px 6px 24px;
-    mask-image: linear-gradient(to bottom, #000 86%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, #000 86%, transparent);
 }
+
+.hx-cloud[data-density="m"] {
+    --chip-min: clamp(196px, 13cqw, 300px);
+    --chip-max: clamp(260px, 16cqw, 340px);
+    --chip-avatar: clamp(44px, 2.8cqw, 56px);
+    --chip-font: clamp(18px, 1.3cqw, 26px);
+    --chip-pad: 5px 18px 5px 5px;
+    --chip-gap: 10px;
+}
+
+.hx-cloud[data-density="s"] {
+    --chip-min: clamp(168px, 11cqw, 240px);
+    --chip-max: clamp(220px, 13.5cqw, 290px);
+    --chip-avatar: clamp(32px, 2.1cqw, 44px);
+    --chip-font: clamp(16px, 1.1cqw, 22px);
+    --chip-pad: 4px 14px 4px 4px;
+    --chip-gap: 8px;
+    gap: 8px 10px;
+}
+
+.hx-cloud[data-density="xs"] {
+    --chip-min: clamp(140px, 9cqw, 200px);
+    --chip-max: clamp(184px, 11cqw, 240px);
+    --chip-avatar: clamp(26px, 1.6cqw, 34px);
+    --chip-font: clamp(14px, 0.95cqw, 19px);
+    --chip-pad: 3px 10px 3px 3px;
+    --chip-gap: 6px;
+    gap: 6px 8px;
+}
+
+.hx-cloud[data-density="xxs"] {
+    --chip-min: clamp(118px, 7.5cqw, 170px);
+    --chip-max: clamp(150px, 9cqw, 200px);
+    --chip-avatar: clamp(22px, 1.35cqw, 28px);
+    --chip-font: clamp(13px, 0.85cqw, 17px);
+    --chip-pad: 2px 8px 2px 2px;
+    --chip-gap: 5px;
+    gap: 5px 6px;
+}
+
+/* Sığmayanda: altda solğunlaşma (davam edir) + ipucu. */
+.hx-cloud.is-scrollable {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
+
+.hx-cloud.is-scrolled-end { mask-image: none; -webkit-mask-image: none; }
+
+.hx-cloud-hint {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: -4px 0 0;
+    font: 800 clamp(13px, 0.95cqw, 17px)/1.2 var(--hx-font);
+    color: var(--hx-muted);
+}
+
+.hx-cloud-hint .hx-icon { width: 18px; height: 18px; color: var(--hx-gold); animation: hxDot 1.6s ease-in-out infinite; }
+.hx-lobby.is-overflowing .hx-cloud-hint { display: flex; }
+.hx-lobby.is-overflowing.is-scrolled-end .hx-cloud-hint { visibility: hidden; }
 
 .hx-bubble {
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    max-width: min(360px, 100%);
-    padding: 6px 22px 6px 6px;
+    gap: var(--chip-gap, 12px);
+    min-width: 0;
+    padding: var(--chip-pad, 6px 22px 6px 6px);
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.96);
     color: var(--hx-card-ink);
@@ -278,26 +352,26 @@
 
 .hx-bubble__img {
     display: block;
-    width: 60px;
-    height: 60px;
+    width: var(--chip-avatar, 60px);
+    height: var(--chip-avatar, 60px);
     border-radius: 50%;
 }
 
 .hx-bubble__name {
     min-width: 0;
     overflow: hidden;
-    font: 800 24px/1.15 var(--hx-font);
+    font: 800 var(--chip-font, 24px)/1.15 var(--hx-font);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.hx-cloud[data-density="m"] .hx-bubble { gap: 10px; padding-right: 18px; }
-.hx-cloud[data-density="m"] .hx-bubble__img { width: 46px; height: 46px; }
-.hx-cloud[data-density="m"] .hx-bubble__name { font-size: 19px; }
-.hx-cloud[data-density="s"] { gap: 8px 10px; }
-.hx-cloud[data-density="s"] .hx-bubble { gap: 8px; padding: 4px 14px 4px 4px; max-width: 260px; }
-.hx-cloud[data-density="s"] .hx-bubble__img { width: 34px; height: 34px; }
-.hx-cloud[data-density="s"] .hx-bubble__name { font-size: 16px; }
+/* Çox iştirakçı (> 12): qoşulma kartı / QR yığcamlaşır — siyahıya yer qalır. */
+.hx-lobby[data-crowd="1"] .hx-join__step { padding: clamp(10px, 1.1cqw, 22px) clamp(14px, 1.6cqw, 30px); }
+.hx-lobby[data-crowd="1"] .hx-join__url { font-size: clamp(16px, 1.45cqw, 30px); }
+.hx-lobby[data-crowd="1"] .hx-pin { font-size: clamp(34px, 3.5cqw, 78px); }
+.hx-lobby[data-crowd="1"] .hx-qr img { width: clamp(92px, 8cqw, 170px); }
+.hx-lobby[data-crowd="1"] .hx-qr span { display: none; }
+.hx-lobby[data-crowd="1"] .hx-lobby__title { -webkit-line-clamp: 1; font-size: clamp(22px, 2cqw, 40px); }
 
 .hx-bubble.is-new {
     animation: hxPop 0.6s var(--hx-ease-back) both;
