@@ -43,15 +43,15 @@
     function onConfirmAll(event, button) {
         event.preventDefault();
         var text = button.getAttribute("data-confirm-text") || "";
-        if (window.EMSConfirm && typeof window.EMSConfirm.open === "function") {
-            window.EMSConfirm.open({ title: "", body: text, danger: false }).then(function (ok) {
-                if (ok) {
-                    rerunPreview(button);
-                }
-            });
-        } else if (window.confirm(text)) {
-            rerunPreview(button);
+        if (!window.EMSConfirm || typeof window.EMSConfirm.open !== "function") {
+            rerunPreview(button); // EMSConfirm base.html-dədir; olmasa düymə özü açıq əmrdir
+            return;
         }
+        window.EMSConfirm.open({ title: "", body: text, danger: false }).then(function (ok) {
+            if (ok) {
+                rerunPreview(button);
+            }
+        });
     }
 
     function onToggle(event, box) {

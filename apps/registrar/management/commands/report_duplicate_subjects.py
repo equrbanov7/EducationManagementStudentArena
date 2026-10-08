@@ -15,12 +15,12 @@ açılış (jurnal) sayı göstərilir ki, admin hansının saxlanacağına qər
 
 from __future__ import annotations
 
-import csv
 import json
 
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 
+from core.export_safety import safe_csv_writer
 from core.rls import bypass_rls
 
 from ...subject_duplicates import find_duplicate_subject_groups
@@ -65,7 +65,7 @@ class Command(BaseCommand):
             self.stdout.write(json.dumps(payload, ensure_ascii=False, indent=2))
             return
         if output_format == "csv":
-            writer = csv.writer(self.stdout)
+            writer = safe_csv_writer(self.stdout)
             writer.writerow(["organization", "group_key", "subject_id", "code", "name", "is_active", "offerings"])
             for group in groups:
                 for subject in group.subjects:
