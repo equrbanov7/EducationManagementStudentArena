@@ -77,6 +77,7 @@
         "answerUrl": "{% url 'liveExam:answer_submit' session.pin %}",
         "waitRoomUrl": "{% url 'liveExam:wait_room' session.pin %}",
         "joinPageUrl": "{% url 'liveExam:join_page' session.pin %}",
+        "pinEntryUrl": "{% url 'liveExam:pin_entry' %}",
         "player": {
             "id": {{ player.id }},
             "nickname": "{{ player.nickname|escapejs }}",
@@ -114,6 +115,9 @@
         "getReadyTitle": "{% filter escapejs %}{% trans 'get_ready_title' context 'live_exam.player' %}{% endfilter %}",
         "introHintMainScreen": "{% filter escapejs %}{% trans 'intro_hint_main_screen' context 'live_exam.player' %}{% endfilter %}",
         "introUnlocking": "{% filter escapejs %}{% trans 'intro_unlocking' context 'live_exam.player' %}{% endfilter %}",
+        "kickedTitle": "{% filter escapejs %}{% trans 'kicked_title' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "kickedBody": "{% filter escapejs %}{% trans 'kicked_body' context 'live_exam.wait_room.js' %}{% endfilter %}",
+        "kickedAction": "{% filter escapejs %}{% trans 'kicked_action' context 'live_exam.wait_room.js' %}{% endfilter %}",
         "lateJoinTitle": "{% filter escapejs %}{% trans 'Oyuna qoşuldun!' context 'live_exam.player' %}{% endfilter %}",
         "lateJoinBody": "{% filter escapejs %}{% trans 'Oyun artıq gedir — növbəti sual başlayanda daxil olacaqsan. Keçən suallar üçün bal verilmir.' context 'live_exam.player' %}{% endfilter %}",
         "lastQuestionNote": "{% filter escapejs %}{% trans 'last_question_note' context 'live_exam.player' %}{% endfilter %}",

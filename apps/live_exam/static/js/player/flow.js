@@ -253,8 +253,10 @@ function enterLateJoinWait(payload) {
     renderLateJoin();
 }
 
-export function handleAuthLost() {
+export function handleAuthLost(event) {
     if (state.phase === PHASES.FINAL || finalGate) return;
+    // 2026-10-08 (L6): 4403 = aparıcı çıxardı (aydın mesaj, «yenidən qoşul» yox — eyni cihaz qayıtmır).
+    if (event && event.code === 4403) state.kicked = true;
     state.removed = true;
     clearAllTimers();
     stopStatePolling();
@@ -334,6 +336,10 @@ export function handleSocketMessage(message) {
             break;
         case "error":
             handleAnswerError(data.message);
+            break;
+        case "kicked":
+            state.kicked = true;
+            handleAuthLost();
             break;
         default:
             break;

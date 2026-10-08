@@ -247,3 +247,18 @@
 .sd-typed-list__row.is-correct { background: #ecfdf5; color: #166534; }
 .sd-typed-list__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sd-typed-list__row .fa-xmark { color: #b91c1c; }
+
+/* 2026-10-08 (L6): oyun gedərkən çıxarılan iştirakçı — reytinqsiz, solğun sətir. */
+.sd-row--removed td { color: var(--ems-text-muted, #64748b); }
+.sd-row--removed strong { font-weight: 600; text-decoration: line-through; text-decoration-thickness: 1px; }
+
+.sd-removed {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #fee2e2;
+    color: #991b1b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}

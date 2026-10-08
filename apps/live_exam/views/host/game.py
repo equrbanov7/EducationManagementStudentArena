@@ -194,38 +194,50 @@ def host_toggle_lock(request, pin):
     return JsonResponse({"ok": True, "is_locked": locked})
 
 
+def _finished_message() -> str:
+    return pgettext("live_exam.view.message", "İştirakçını oyun bitənə qədər çıxarmaq olar.")
+
+
+def _not_found_message() -> str:
+    return pgettext("live_exam.view.message", "İştirakçı tapılmadı.")
+
+
 @require_POST
 @login_required
 def host_remove_player(request, pin):
+    """Aparıcı oyunçunu çıxarır — lobbidə və oyun gedərkən (2026-10-08, L6).
+
+    İcazə: yalnız sessiyanın aparıcısı + təşkilat RBAC (``exam.host``/``exam.manage``) — başqası 404/403.
+    Bitmiş oyunda 409. Hər çıxarma audit jurnalına yazılır (ad, bal, vəziyyət).
+    """
     session = _host_session_or_404(request, pin)
 
-    if session.state != LiveSession.STATE_LOBBY:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "Players can only be removed in the lobby.")},
-            status=409,
-        )
+    if session.state == LiveSession.STATE_FINISHED:
+        return JsonResponse({"ok": False, "message": _finished_message()}, status=409)
 
     try:
         player_id = int(request.POST.get("player_id"))
     except (TypeError, ValueError):
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "Player was not found.")},
-            status=400,
-        )
+        return JsonResponse({"ok": False, "message": _not_found_message()}, status=400)
 
     try:
-        removed = services.remove_player(session, player_id)
+        summary = services.remove_player(session, player_id)
     except ValueError:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "Players can only be removed in the lobby.")},
-            status=409,
-        )
-    if not removed:
-        return JsonResponse(
-            {"ok": False, "message": pgettext("live_exam.view.message", "Player was not found.")},
-            status=404,
-        )
-    return JsonResponse({"ok": True, "player_id": player_id})
+        return JsonResponse({"ok": False, "message": _finished_message()}, status=409)
+    if summary is None:
+        return JsonResponse({"ok": False, "message": _not_found_message()}, status=404)
+
+    log_action(
+        action=AuditAction.UPDATE,
+        user=request.user,
+        organization=session.exam.organization,
+        obj=session,
+        old_values={"player_id": summary["player_id"], "nickname": summary["nickname"], "score": summary["score"]},
+        new_values={"removed": summary["mode"], "state": summary["state"]},
+        reason="live_player_removed",
+        request=request,
+    )
+    return JsonResponse({"ok": True, "player_id": player_id, "removed": summary["mode"]})
 
 
 @require_POST

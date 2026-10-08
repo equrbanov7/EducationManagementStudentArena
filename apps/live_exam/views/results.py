@@ -10,7 +10,7 @@ from collections import Counter
 from urllib.parse import urlencode
 
 from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Case, Count, FloatField, IntegerField, OuterRef, Q, Subquery, Sum, When
+from django.db.models import Avg, Case, Count, F, FloatField, IntegerField, OuterRef, Q, Subquery, Sum, When
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -197,8 +197,8 @@ def finished_sessions_with_stats(exam):
         LiveSession.objects.filter(exam=exam, state=LiveSession.STATE_FINISHED)
         .order_by("-created_at")
         .annotate(
-            player_count=Count("players", distinct=True),
-            answer_count=Count("answers", distinct=True),
+            player_count=Count("players", filter=Q(players__removed_at__isnull=True), distinct=True),
+            answer_count=Count("answers", filter=Q(answers__player__removed_at__isnull=True), distinct=True),
             avg_score=Subquery(
                 LivePlayer.objects.filter(session=OuterRef("pk"))
                 .values("session")
@@ -206,7 +206,11 @@ def finished_sessions_with_stats(exam):
                 .values("value")[:1],
                 output_field=FloatField(),
             ),
-            total_correct=Count("answers", filter=Q(answers__is_correct=True), distinct=True),
+            total_correct=Count(
+                "answers",
+                filter=Q(answers__is_correct=True, answers__player__removed_at__isnull=True),
+                distinct=True,
+            ),
         )
     )
 
@@ -252,21 +256,24 @@ def teacher_live_session_detail(request, slug, pin):
 
     session = get_object_or_404(LiveSession, exam=exam, pin=pin, state=LiveSession.STATE_FINISHED)
 
-    players = list(
-        LivePlayer.objects.filter(session=session)
-        .order_by("-score", "created_at")
+    # 2026-10-08 (L6): oyun gedərkən çıxarılanlar siyahının SONUNDA «Çıxarıldı» kimi (reytinq/statistika yox).
+    listed_players = list(
+        LivePlayer.all_objects.filter(session=session)
+        .order_by(F("removed_at").asc(nulls_first=True), "-score", "created_at")
         .annotate(
             correct_count=Count("answers", filter=Q(answers__is_correct=True)),
             total_answers=Count("answers"),
             total_points=Sum("answers__awarded_points"),
         )
     )
+    players = [player for player in listed_players if player.removed_at is None]
 
     questions = _session_questions(exam, session)
     question_ids = [question.id for question in questions]
 
     raw_answers = list(
         LiveAnswer.objects.filter(session=session, question_id__in=question_ids)
+        .in_game()
         .order_by("created_at", "id")
         .values(
             "question_id",
@@ -459,7 +466,7 @@ def teacher_live_session_detail(request, slug, pin):
                 current=f"PIN {session.pin}",
             ),
             "session": session,
-            "players": players,
+            "players": listed_players,
             "question_stats": question_stats,
             "player_count": player_count,
             "total_answers_count": total_answers_count,

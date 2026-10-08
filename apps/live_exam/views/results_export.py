@@ -81,10 +81,14 @@ def teacher_live_session_export(request, slug, pin):
     writer = safe_csv_writer(response)
     writer.writerow(_header())
     yes, no = pgettext(_CTX, "export_yes"), pgettext(_CTX, "export_no")
+    removed = pgettext("liveExam.template.session_detail", "Çıxarıldı")
     for answer in answers:
+        nickname = answer.player.nickname
+        if answer.player.removed_at is not None:  # 2026-10-08 (L6): oyun gedərkən çıxarılıb
+            nickname = f"{nickname} ({removed})"
         writer.writerow(
             [
-                answer.player.nickname,
+                nickname,
                 int(answer.player.score or 0),
                 positions.get(answer.question_id, ""),
                 texts.get(answer.question_id, ""),

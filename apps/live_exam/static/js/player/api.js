@@ -62,6 +62,13 @@ export function fetchState({ fresh = false } = {}) {
                 return null;
             }
             if (response.status === 403) {
+                // 2026-10-08 (L6): aparıcının çıxardığı klient — server `kicked: true` qaytarır.
+                try {
+                    const data = await response.json();
+                    if (data && data.kicked) state.kicked = true;
+                } catch (error) {
+                    /* cavab JSON deyil — adi «sessiyada yoxsan» */
+                }
                 authLostHandler();
                 return null;
             }

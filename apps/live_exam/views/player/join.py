@@ -219,20 +219,33 @@ class _LobbyRoster:
 
     def __init__(self, keys: dict[str, str]):
         self.keys = keys
-        self.rows: list[tuple[int, str, str]] = []
+        self.rows: list[tuple[int, str, str, object]] = []
 
     @classmethod
     def prefetch(cls, session) -> "_LobbyRoster":
         with bypass_rls():
-            names = LivePlayer.objects.filter(session_id=session.pk).values_list("nickname", flat=True)
+            names = LivePlayer.all_objects.filter(session_id=session.pk).values_list("nickname", flat=True)
             return cls({name: nickname_match_key(name) for name in names})
 
     def load(self, locked_session) -> "_LobbyRoster":
-        self.rows = list(LivePlayer.objects.filter(session=locked_session).values_list("id", "client_id", "nickname"))
+        # 2026-10-08 (L6): oyun gedərkən çıxarılanlar da (``removed_at``) — onların adı tutulu qalır
+        # (eyni kimliklə qayıtmasın), amma say/qayıdan oyunçu yoxlamasına düşmürlər. Hələ də BİR sorğu.
+        self.rows = list(
+            LivePlayer.all_objects.filter(session=locked_session).values_list(
+                "id", "client_id", "nickname", "removed_at"
+            )
+        )
         return self
 
+    @property
+    def active_count(self) -> int:
+        return sum(1 for *_rest, removed_at in self.rows if removed_at is None)
+
     def player_id_for(self, client_id: str) -> int | None:
-        return next((player_id for player_id, cid, _name in self.rows if cid == client_id), None)
+        return next(
+            (player_id for player_id, cid, _name, removed_at in self.rows if cid == client_id and removed_at is None),
+            None,
+        )
 
     def _key(self, name: str) -> str:
         key = self.keys.get(name)
@@ -245,7 +258,7 @@ class _LobbyRoster:
         wanted = nickname_match_key(nickname)
         if not wanted:
             return False
-        for player_id, client_id, name in self.rows:
+        for player_id, client_id, name, _removed_at in self.rows:
             if exclude_player_id and player_id == exclude_player_id:
                 continue
             if exclude_client_id and client_id == exclude_client_id:
@@ -329,7 +342,7 @@ def _admit_player(session, client_id, profile, max_participants):
             player = _joined(LivePlayer.objects.select_for_update().get(pk=existing_id), locked_session)
             return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
 
-        rejection = _new_player_rejection(locked_session, client_id, max_participants, player_count=len(roster.rows))
+        rejection = _new_player_rejection(locked_session, client_id, max_participants, player_count=roster.active_count)
         if rejection is not None:
             return None, rejection
         if roster.taken(profile["nickname"], exclude_client_id=client_id):
@@ -345,9 +358,13 @@ def _admit_player(session, client_id, profile, max_participants):
                     **profile,
                 )
         except IntegrityError:
-            player = LivePlayer.objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
+            player = (
+                LivePlayer.all_objects.select_for_update().filter(session=locked_session, client_id=client_id).first()
+            )
             if player is None:
                 raise
+            if player.removed_at is not None:  # çıxarılan kimlik qayıtmır (L6)
+                return None, _json_error(pgettext("live_exam.view.message", "removed_by_host"), 403)
             player = _joined(player, locked_session)
             return player, _refresh_returning_player(locked_session, player, profile=profile, now=now, roster=roster)
     return _joined(player, locked_session), None

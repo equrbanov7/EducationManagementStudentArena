@@ -19,6 +19,7 @@ import { mountSoundDock } from './sound_dock.js?v=lx20261008';
 import { mountTypedDrawer } from './typed_drawer.js?v=lx20261008';
 import { bindCopyGuard } from './copy_guard.js?v=lx20261008';
 import { bindTimeSettingEvents, renderTimeSettings } from './time_setting.js?v=lx20261008';
+import { bindPlayersDrawer } from './players_drawer.js?v=lx20261008';
 
 // Tənzimləmə çekməcəsindəki səs sürüşdürücüsü (host_lobby_shell.js) bu qlobalı çağırır.
 window.setSfxVolume = setSfxVolume;
@@ -30,6 +31,7 @@ connectHostSockets();
 bindHostEvents();
 bindCopyGuard();
 bindTimeSettingEvents();
+bindPlayersDrawer();
 
 setSessionState("lobby");
 applySessionSettings(state.sessionSettings);

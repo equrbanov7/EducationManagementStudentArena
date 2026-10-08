@@ -184,7 +184,9 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
     config = resolve_question_config(session, exam_question)
     revealed_at = revealed_at or session.question_ends_at or timezone.now()
     final = is_final_question(session, question_id)
-    answers = list(LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).values(*_ANSWER_FIELDS))
+    answers = list(
+        LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).in_game().values(*_ANSWER_FIELDS)
+    )
     players = _players(session)
     by_id = {player["id"]: player for player in players}
 
@@ -328,7 +330,8 @@ def build_final_bundle(session, *, finished_at=None, limit: int = 50) -> Bundle:
     ordered = sorted(players, key=leaderboard_key)
     per_player: dict[int, dict[str, int]] = {}
     answer_count = correct_total = ms_total = 0
-    for answer in LiveAnswer.objects.filter(session_id=session.id).values("player_id", "is_correct", "answer_ms"):
+    answers = LiveAnswer.objects.filter(session_id=session.id).in_game()
+    for answer in answers.values("player_id", "is_correct", "answer_ms"):
         stats = per_player.setdefault(answer["player_id"], {"correct": 0, "answered": 0, "ms": 0})
         stats["answered"] += 1
         stats["correct"] += 1 if answer["is_correct"] else 0

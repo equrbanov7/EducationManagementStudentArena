@@ -74,8 +74,63 @@ ROWS = {
             "Опоздавшие могут присоединиться с этим PIN",
             "Geç kalanlar bu PIN ile katılabilir",
         ),
+        # L6 — «İştirakçılar» çekməcəsi və çıxarma təsdiqi.
+        "Oyun idarəsi": ("Game control", "Управление игрой", "Oyun yönetimi"),
+        "İştirakçılar": ("Players", "Участники", "Katılımcılar"),
+        "Bağla": ("Close", "Закрыть", "Kapat"),
+        "Ad üzrə axtar…": ("Search by name…", "Поиск по имени…", "Ada göre ara…"),
+        "Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər lövhəsində göstərilmir; "
+        "nəticədə «Çıxarıldı» kimi qalır.": (
+            "A removed player cannot return to this game on the same device and their score is hidden from "
+            "the leaderboard; the results keep them as “Removed”.",
+            "Удалённый участник не сможет вернуться в эту игру с того же устройства, его баллы не показываются "
+            "в таблице лидеров; в результатах он остаётся как «Удалён».",
+            "Çıkarılan katılımcı bu oyuna aynı cihazla dönemez, puanı liderlik tablosunda gösterilmez; "
+            "sonuçlarda “Çıkarıldı” olarak kalır.",
+        ),
+        "Ləğv et": ("Cancel", "Отмена", "İptal"),
+        "Çıxar": ("Remove", "Удалить", "Çıkar"),
+        "Növbəti sualdan": ("From next question", "Со следующего вопроса", "Sonraki sorudan"),
+        "Uyğun iştirakçı yoxdur": ("No matching players", "Нет подходящих участников", "Eşleşen katılımcı yok"),
+        "Hələ heç kim qoşulmayıb": ("No one has joined yet", "Пока никто не присоединился", "Henüz kimse katılmadı"),
+        "«{name}» oyundan çıxarılsın?": (
+            "Remove “{name}” from the game?",
+            "Удалить «{name}» из игры?",
+            "“{name}” oyundan çıkarılsın mı?",
+        ),
+        "Telefonu oyundan çıxacaq, bu cihazla geri qayıda bilməyəcək. Balı liderlər lövhəsində göstərilməyəcək.": (
+            "Their phone will leave the game and cannot come back on this device. "
+            "Their score will not be shown on the leaderboard.",
+            "Телефон выйдет из игры и не сможет вернуться с этого устройства. "
+            "Баллы не будут показаны в таблице лидеров.",
+            "Telefonu oyundan çıkacak ve bu cihazla geri dönemeyecek. Puanı liderlik tablosunda gösterilmeyecek.",
+        ),
+        "Telefonu lobbidən çıxacaq və bu cihazla geri qayıda bilməyəcək.": (
+            "Their phone will leave the lobby and cannot come back on this device.",
+            "Телефон выйдет из лобби и не сможет вернуться с этого устройства.",
+            "Telefonu lobiden çıkacak ve bu cihazla geri dönemeyecek.",
+        ),
+        "«{name}» oyundan çıxarıldı": (
+            "“{name}” was removed from the game",
+            "«{name}» удалён из игры",
+            "“{name}” oyundan çıkarıldı",
+        ),
+        "Çıxarmaq alınmadı. Yenidən cəhd edin.": (
+            "Could not remove the player. Please try again.",
+            "Не удалось удалить участника. Попробуйте ещё раз.",
+            "Çıkarılamadı. Lütfen tekrar deneyin.",
+        ),
+    },
+    "liveExam.template.session_detail": {
+        "Çıxarıldı": ("Removed", "Удалён", "Çıkarıldı"),
     },
     "live_exam.view.message": {
+        "İştirakçını oyun bitənə qədər çıxarmaq olar.": (
+            "A player can only be removed before the game ends.",
+            "Участника можно удалить только до окончания игры.",
+            "Katılımcı yalnızca oyun bitmeden çıkarılabilir.",
+        ),
+        "İştirakçı tapılmadı.": ("Player not found.", "Участник не найден.", "Katılımcı bulunamadı."),
         "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb.": (
             "The game has already started and the teacher has turned off joining late.",
             "Игра уже началась, и преподаватель отключил вход для опоздавших.",

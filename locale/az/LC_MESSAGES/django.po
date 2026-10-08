@@ -91969,3 +91969,83 @@ msgstr ""
 "Oyun başlayandan sonra gələn tələbə növbəti sualdan qoşulur: keçən suallara "
 "bal almır və onların cavablarını görmür. Kilidli lobbi, iştirakçı limiti və "
 "çıxarılanlar qaydası qüvvədədir."
+
+msgctxt "live_exam.host_controls"
+msgid "Oyun idarəsi"
+msgstr "Oyun idarəsi"
+
+msgctxt "live_exam.host_controls"
+msgid "İştirakçılar"
+msgstr "İştirakçılar"
+
+msgctxt "live_exam.host_controls"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "live_exam.host_controls"
+msgid "Ad üzrə axtar…"
+msgstr "Ad üzrə axtar…"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər "
+"lövhəsində göstərilmir; nəticədə «Çıxarıldı» kimi qalır."
+msgstr ""
+"Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər "
+"lövhəsində göstərilmir; nəticədə «Çıxarıldı» kimi qalır."
+
+msgctxt "live_exam.host_controls"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxar"
+msgstr "Çıxar"
+
+msgctxt "live_exam.host_controls"
+msgid "Növbəti sualdan"
+msgstr "Növbəti sualdan"
+
+msgctxt "live_exam.host_controls"
+msgid "Uyğun iştirakçı yoxdur"
+msgstr "Uyğun iştirakçı yoxdur"
+
+msgctxt "live_exam.host_controls"
+msgid "Hələ heç kim qoşulmayıb"
+msgstr "Hələ heç kim qoşulmayıb"
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarılsın?"
+msgstr "«{name}» oyundan çıxarılsın?"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Telefonu oyundan çıxacaq, bu cihazla geri qayıda bilməyəcək. Balı liderlər "
+"lövhəsində göstərilməyəcək."
+msgstr ""
+"Telefonu oyundan çıxacaq, bu cihazla geri qayıda bilməyəcək. Balı liderlər "
+"lövhəsində göstərilməyəcək."
+
+msgctxt "live_exam.host_controls"
+msgid "Telefonu lobbidən çıxacaq və bu cihazla geri qayıda bilməyəcək."
+msgstr "Telefonu lobbidən çıxacaq və bu cihazla geri qayıda bilməyəcək."
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarıldı"
+msgstr "«{name}» oyundan çıxarıldı"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxarmaq alınmadı. Yenidən cəhd edin."
+msgstr "Çıxarmaq alınmadı. Yenidən cəhd edin."
+
+msgctxt "liveExam.template.session_detail"
+msgid "Çıxarıldı"
+msgstr "Çıxarıldı"
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçını oyun bitənə qədər çıxarmaq olar."
+msgstr "İştirakçını oyun bitənə qədər çıxarmaq olar."
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçı tapılmadı."
+msgstr "İştirakçı tapılmadı."

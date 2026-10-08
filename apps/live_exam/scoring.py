@@ -171,7 +171,7 @@ def answer_progress_counts(session_id: int, question_id: int) -> dict[str, int]:
     """Commit olunmuş cavab/oyunçu sayları (unikal məhdudiyyət: 1 cavab = 1 oyunçu)."""
     return {
         "question_id": int(question_id),
-        "answered_count": LiveAnswer.objects.filter(session_id=session_id, question_id=question_id).count(),
+        "answered_count": LiveAnswer.objects.filter(session_id=session_id, question_id=question_id).in_game().count(),
         # 2026-10-08 (L3): yalnız bu suala cavab verməli olanlar (gec qoşulan növbəti sualdan sayılır).
         "total_players": eligible_count_for_current(session_id),
     }

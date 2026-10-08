@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
-from apps.live_exam.auth import get_request_player
+from apps.live_exam.auth import PLAYER_COOKIE_NAME, get_request_player, is_client_kicked, load_player_token_payload
 from apps.live_exam.delivery import build_delivery_progress_payload, received_count, record_question_seen
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
@@ -79,6 +79,17 @@ _REVEAL_OPTIONAL_KEYS = (
 
 def _auth_error():
     return JsonResponse({"ok": False, "message": pgettext("live_exam.view.message", "auth_required")}, status=403)
+
+
+def _player_auth_error(request, session):
+    """403; aparıcının çıxardığı klientə ``kicked: true`` (telefon «müəllim səni çıxardı» göstərir)."""
+    response = _auth_error()
+    payload = load_player_token_payload(request.COOKIES.get(PLAYER_COOKIE_NAME), pin=session.pin)
+    if payload is not None and is_client_kicked(session, payload.get("client_id")):
+        response = JsonResponse(
+            {"ok": False, "kicked": True, "message": pgettext("live_exam.view.message", "removed_by_host")}, status=403
+        )
+    return response
 
 
 def _rate_limited(request, pin):
@@ -155,7 +166,7 @@ def live_state_json(request, pin):
             _ensure_host_org_permission(request, session.exam.organization)
         player = None if is_host else get_request_player(request, pin=pin)
         if not is_host and player is None:
-            return _auth_error()
+            return _player_auth_error(request, session)
 
         server_time = timezone.now()
         session = _maybe_auto_reveal(session, server_time)
@@ -186,6 +197,7 @@ def live_state_json(request, pin):
             data["players"] = players
             # Host-un «Yenilə» düyməsi / avtomatik sinxronu bu sayı HƏQİQƏT kimi götürür (sahib 2026-09-30).
             data["total_players"] = len(players) if len(players) < 200 else session.players.count()
+            data["roster_count"] = data["total_players"]
         elif session.state in (LiveSession.STATE_QUESTION, LiveSession.STATE_REVEAL):
             # 2026-10-08 (L3): cari suala cavab verməli olanlar (gec qoşulan növbəti sualdan sayılır).
             data["total_players"] = eligible_players(session.id, int(session.current_index or 0)).count()
@@ -193,6 +205,11 @@ def live_state_json(request, pin):
             # ``?light=1`` (oyunçu, lobby): 200 nəfərlik siyahı əvəzinə yalnız say — gözləmə
             # otağının ehtiyat sorğusu üçün (LX-FE-PLAYER). Host cavabı dəyişmir.
             data["total_players"] = session.players.count()
+        if is_host and session.state != LiveSession.STATE_LOBBY:
+            # 2026-10-08 (L6): oyun gedərkən aparıcının «İştirakçılar» çekməcəsi (çıxarılanlar yoxdur).
+            roster = serialize_players(session)
+            data["players"] = roster
+            data["roster_count"] = len(roster) if len(roster) < 200 else session.players.count()
         if player is not None and is_pending(player, session):
             # Gec qoşulan: növbəti sual gözlənilir — cari/keçən sualın məzmunu və cavabı GÖNDƏRİLMİR.
             data["late_join_pending"] = True
@@ -229,7 +246,7 @@ def live_state_json(request, pin):
             answer_starts_at=answer_starts_at,
             ends_at=ends,
         )
-        data["answered_count"] = LiveAnswer.objects.filter(session_id=session.id, question_id=eq.id).count()
+        data["answered_count"] = LiveAnswer.objects.filter(session_id=session.id, question_id=eq.id).in_game().count()
 
         if session.state == LiveSession.STATE_REVEAL:
             _reveal_fields(session, eq, ends=ends, is_host=is_host, player=player, data=data)

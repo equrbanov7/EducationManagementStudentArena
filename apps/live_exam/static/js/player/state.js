@@ -32,4 +32,6 @@ export const state = {
     hasServerOffset: false,
     timelineMeta: null,
     removed: false,
+    // 2026-10-08 (L6): aparıcı bu oyunçunu çıxarıb (WS `kicked` / 4403 / state 403 `kicked`).
+    kicked: false,
 };

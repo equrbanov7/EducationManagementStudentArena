@@ -28,7 +28,8 @@ export function applyStateSnapshot(snapshot) {
     if (Array.isArray(snapshot.players)) {
         // HTTP snapshot həqiqətdir; ondan köhnə WS `lobby_state` artıq tətbiq olunmur.
         state.lobbyStateAt = Math.max(Number(state.lobbyStateAt || 0), toMs(snapshot.server_time));
-        renderLobbyPlayers(snapshot.players, snapshot.total_players);
+        // 2026-10-08: oyun gedərkən də (aparıcının «İştirakçılar» siyahısı) — say `roster_count`-dır.
+        renderLobbyPlayers(snapshot.players, snapshot.roster_count ?? snapshot.total_players);
     }
     if (snapshot.answered_count != null) {
         state.answeredCount = Number(snapshot.answered_count || 0);

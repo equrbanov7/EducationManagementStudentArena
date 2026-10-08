@@ -57,12 +57,21 @@ export function renderLateJoin() {
 
 export function renderRemoved() {
     const joinUrl = BOOTSTRAP.joinPageUrl || "/live/";
+    // 2026-10-08 (L6): aparıcı çıxarıbsa — aydın mesaj və «başqa PIN» (eyni cihazla bu oyuna qayıtmaq olmur).
+    const kicked = Boolean(state.kicked);
+    const title = kicked ? tr("kickedTitle", "Müəllim səni oyundan çıxardı") : tr("removedTitle", "Bu oyunda deyilsən");
+    const body = kicked
+        ? tr("kickedBody", "Bu cihazla bu oyuna yenidən qoşulmaq mümkün deyil. Səhv olubsa, müəllimə yaz.")
+        : tr("removedBody", "Oyunçu profilin tapılmadı — müəllim səni çıxarmış və ya oyun bağlanmış ola bilər.");
+    const action = kicked
+        ? `<a class="lxp-btn lxp-btn--primary" href="${esc(BOOTSTRAP.pinEntryUrl || "/live/")}">${esc(tr("kickedAction", "Başqa PIN daxil et"))}</a>`
+        : `<a class="lxp-btn lxp-btn--primary" href="${esc(joinUrl)}">${esc(tr("rejoin", "Yenidən qoşul"))}</a>`;
     const { created } = mountView(
-        "removed",
+        kicked ? "kicked" : "removed",
         `<div class="lxp-idle lxp-idle--alert">` +
-            `<h1 class="lxp-title">${esc(tr("removedTitle", "Bu oyunda deyilsən"))}</h1>` +
-            `<p class="lxp-sub">${esc(tr("removedBody", "Oyunçu profilin tapılmadı — müəllim səni çıxarmış və ya oyun bağlanmış ola bilər."))}</p>` +
-            `<a class="lxp-btn lxp-btn--primary" href="${esc(joinUrl)}">${esc(tr("rejoin", "Yenidən qoşul"))}</a>` +
+            `<h1 class="lxp-title">${esc(title)}</h1>` +
+            `<p class="lxp-sub">${esc(body)}</p>` +
+            action +
             `</div>`,
         { tone: "timeup" }
     );
@@ -71,6 +80,6 @@ export function renderRemoved() {
         setQuestionChip(null);
         setTimer(false);
         stopTimeBar();
-        announce(tr("removedTitle", "Bu oyunda deyilsən"));
+        announce(title);
     }
 }

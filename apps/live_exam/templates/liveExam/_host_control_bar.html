@@ -49,6 +49,12 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
         </label>
 
         <div class="control-toolbar">
+            {% comment %}2026-10-08 (L6): iştirakçı siyahısı — oyun gedərkən də çıxarmaq (host_lobby/players_drawer.js).{% endcomment %}
+            <button id="playersBtn" class="control-toolbar__button control-toolbar__button--wide" type="button" data-action="open-players" aria-controls="hostPlayersDrawer" aria-expanded="false">
+                <span class="hx-i" data-icon="users"></span>
+                <span>{% trans "İştirakçılar" context "live_exam.host_controls" %}</span>
+                <span class="control-badge" data-players-count>0</span>
+            </button>
             <button id="settingsBtn" class="control-toolbar__button" type="button">
                 <span class="hx-i" data-icon="sliders"></span>
                 <span>{% trans "settings_button" context "live_exam.host_lobby" %}</span>

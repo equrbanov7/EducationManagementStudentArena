@@ -92393,3 +92393,83 @@ msgstr ""
 "A student who arrives after the start joins from the next question: no "
 "points for missed questions and their answers are not shown. Locked lobby, "
 "participant limit and removals still apply."
+
+msgctxt "live_exam.host_controls"
+msgid "Oyun idarəsi"
+msgstr "Game control"
+
+msgctxt "live_exam.host_controls"
+msgid "İştirakçılar"
+msgstr "Players"
+
+msgctxt "live_exam.host_controls"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "live_exam.host_controls"
+msgid "Ad üzrə axtar…"
+msgstr "Search by name…"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Çıxarılan iştirakçı bu oyuna həmin cihazla qayıda bilməz, balı liderlər "
+"lövhəsində göstərilmir; nəticədə «Çıxarıldı» kimi qalır."
+msgstr ""
+"A removed player cannot return to this game on the same device and their "
+"score is hidden from the leaderboard; the results keep them as “Removed”."
+
+msgctxt "live_exam.host_controls"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxar"
+msgstr "Remove"
+
+msgctxt "live_exam.host_controls"
+msgid "Növbəti sualdan"
+msgstr "From next question"
+
+msgctxt "live_exam.host_controls"
+msgid "Uyğun iştirakçı yoxdur"
+msgstr "No matching players"
+
+msgctxt "live_exam.host_controls"
+msgid "Hələ heç kim qoşulmayıb"
+msgstr "No one has joined yet"
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarılsın?"
+msgstr "Remove “{name}” from the game?"
+
+msgctxt "live_exam.host_controls"
+msgid ""
+"Telefonu oyundan çıxacaq, bu cihazla geri qayıda bilməyəcək. Balı liderlər "
+"lövhəsində göstərilməyəcək."
+msgstr ""
+"Their phone will leave the game and cannot come back on this device. Their "
+"score will not be shown on the leaderboard."
+
+msgctxt "live_exam.host_controls"
+msgid "Telefonu lobbidən çıxacaq və bu cihazla geri qayıda bilməyəcək."
+msgstr "Their phone will leave the lobby and cannot come back on this device."
+
+msgctxt "live_exam.host_controls"
+msgid "«{name}» oyundan çıxarıldı"
+msgstr "“{name}” was removed from the game"
+
+msgctxt "live_exam.host_controls"
+msgid "Çıxarmaq alınmadı. Yenidən cəhd edin."
+msgstr "Could not remove the player. Please try again."
+
+msgctxt "liveExam.template.session_detail"
+msgid "Çıxarıldı"
+msgstr "Removed"
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçını oyun bitənə qədər çıxarmaq olar."
+msgstr "A player can only be removed before the game ends."
+
+msgctxt "live_exam.view.message"
+msgid "İştirakçı tapılmadı."
+msgstr "Player not found."
