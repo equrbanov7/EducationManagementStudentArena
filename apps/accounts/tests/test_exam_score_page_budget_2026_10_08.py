@@ -7,7 +7,9 @@ p50 3.8 s, «save» p50 1.2 s, app CPU 100 %. Kök səbəblər və qıfıllanan 
   həm yadda saxlamadan sonrakı tarixçəli siyahı); S1..S10 xanalarının select-ində YALNIZ
   «—» + seçilmiş dəyər render olunur (`data-max=""` — 0..max variantlarını JS qurur);
   müəllim seçiciləri təşkilatın bütün üzvlüklərini oxumur (rol-əvvəl sorğu);
-* **POST** — toplu yazı: sorğu sayı yazılan sətirlərin sayından asılı deyil.
+* **POST** — toplu yazı: sorğu sayı yazılan sətirlərin sayından asılı deyil;
+* **Dərin keçid** — ``?ese_offering=`` (``ese_group`` olmadan; yük testinin və jurnal
+  keçidinin URL-i) həmin açılışı açır, siyahının birinci qrupunu yox.
 """
 
 from __future__ import annotations
@@ -183,3 +185,28 @@ class ExamScorePageBudgetTest(TestCase):
         self.assertEqual(tbody.count("<option"), BIG * 10 + BIG * 2)  # «—» hər xanada + 2 dolu sual
         self.assertIn('data-ese-qcell="6" hidden', tbody)
         self.assertIn('data-max=""', tbody)
+
+    def test_offering_deep_link_selects_its_group(self):
+        """``?ese_offering=`` (qrupsuz — jurnal / yük testi keçidi) həmin açılışı açır, birinci qrupu yox."""
+        client = self._client()
+        group, offering = self.offerings[BIG]
+        for mode in ("group", "subject"):
+            resp = client.get(
+                reverse("accounts:profile"),
+                {"section": "exam-score-entry", "ese_mode": mode, "ese_offering": str(offering.id)},
+            )
+            self.assertContains(resp, f'name="offering_id" value="{offering.id}"')
+        resp = client.get(
+            reverse("accounts:profile"), {"section": "exam-score-entry", "ese_offering": str(offering.id)}
+        )
+        self.assertContains(resp, f"ese_group={group.id}")
+        # Açıq ``ese_group`` üstündür; yanlış / yad açılış id-si defolta düşür (500 yox).
+        small_group, small_offering = self.offerings[SMALL]
+        resp = client.get(
+            reverse("accounts:profile"),
+            {"section": "exam-score-entry", "ese_group": str(small_group.id), "ese_offering": str(offering.id)},
+        )
+        self.assertContains(resp, f'name="offering_id" value="{small_offering.id}"')
+        for bogus in ("not-a-uuid", "00000000-0000-0000-0000-000000000000"):
+            resp = client.get(reverse("accounts:profile"), {"section": "exam-score-entry", "ese_offering": bogus})
+            self.assertEqual(resp.status_code, 200)
