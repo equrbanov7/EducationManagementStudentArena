@@ -1,5 +1,5 @@
 {% extends "accounts/profile_embed_base.html" %}
-{% load i18n static %}
+{% load ems_ui i18n static %}
 {% comment %}Elan yarat / redaktə. Bütün yoxlamalar serverdədir (forma + əhatə); `manage.js` yalnız
 rahatlıq verir (bölmə axtarışı, seçilmiş say, müraciət rejiminin sahələri, simvol sayğacı).
 Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur).{% endcomment %}
@@ -10,6 +10,8 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-5">
     <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-5">
+    {# 2026-10-08: vaxt sahələri «gg.aa.iiii ss:dd» (24 saat) + təqvim seçicisi — core/datetime_input.py #}
+    <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
 {% endblock %}
 
 {% block embed_content %}
@@ -104,17 +106,17 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
             <div class="annm-grid annm-grid--3">
                 <div class="ems-field">
                     <label class="ems-field__label" for="annm-publish">{% trans "Dərc vaxtı" context "announcements.manage" %}</label>
-                    <input id="annm-publish" type="datetime-local" name="publish_at" class="ems-input" value="{{ values.publish_at|default:'' }}" aria-describedby="annm-publish-hint">
+                    {% ems_datetime_input "publish_at" values.publish_at input_id="annm-publish" css_class="ems-input" describedby="annm-publish-hint" %}
                     <p class="ems-field__hint" id="annm-publish-hint">{% trans "Boş — dərc düyməsinə basılan an." context "announcements.manage" %}</p>
                 </div>
                 <div class="ems-field">
                     <label class="ems-field__label" for="annm-expires">{% trans "Görünmə bitir" context "announcements.manage" %}</label>
-                    <input id="annm-expires" type="datetime-local" name="expires_at" class="ems-input" value="{{ values.expires_at|default:'' }}" aria-describedby="annm-expires-hint">
+                    {% ems_datetime_input "expires_at" values.expires_at input_id="annm-expires" css_class="ems-input" describedby="annm-expires-hint" %}
                     <p class="ems-field__hint" id="annm-expires-hint">{% trans "Boş — müddətsiz. Bitəndən sonra «Müddəti bitmiş» arxivində qalır." context "announcements.manage" %}</p>
                 </div>
                 <div class="ems-field">
                     <label class="ems-field__label" for="annm-deadline">{% trans "Son tarix (nə vaxta qədər)" context "announcements.manage" %}</label>
-                    <input id="annm-deadline" type="datetime-local" name="deadline_at" class="ems-input" value="{{ values.deadline_at|default:'' }}" aria-describedby="annm-deadline-hint">
+                    {% ems_datetime_input "deadline_at" values.deadline_at input_id="annm-deadline" css_class="ems-input" describedby="annm-deadline-hint" %}
                     <p class="ems-field__hint" id="annm-deadline-hint">{% trans "Qalan gün göstərilir; keçəndən sonra «Müraciət et» bağlanır." context "announcements.manage" %}</p>
                 </div>
             </div>
@@ -185,5 +187,7 @@ Status əməlləri və sənəd silmə AYRI formalardır (iç-içə forma yoxdur)
 {% endblock %}
 
 {% block embed_extra_js %}
+    <script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+    <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
     <script src="{% static 'announcements/js/manage.js' %}?v=20261007-1"></script>
 {% endblock %}
