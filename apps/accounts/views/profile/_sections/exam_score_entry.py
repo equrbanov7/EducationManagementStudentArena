@@ -85,20 +85,35 @@ def _resolve_period(request, all_periods, today):
     return years, selected_year, periods_in_year, period
 
 
-def _resolve_subject(request, subjects):
-    requested = (request.GET.get("ese_subject") or "").strip()
+def _resolve_subject(request, subjects, implied=""):
+    requested = (request.GET.get("ese_subject") or "").strip() or implied
     ids = {row["id"] for row in subjects}
     if requested in ids:
         return requested
     return subjects[0]["id"] if subjects else ""
 
 
-def _resolve_group(request, groups):
-    requested = (request.GET.get("ese_group") or "").strip()
+def _resolve_group(request, groups, implied=""):
+    requested = (request.GET.get("ese_group") or "").strip() or implied
     ids = {row["id"] for row in groups}
     if requested in ids:
         return requested
     return groups[0]["id"] if groups else ""
+
+
+def _implied_key(request, sheets_service, organization, period, param, key) -> str:
+    """Dərin keçid: ``?ese_offering=`` var, ``param`` (qrup / fənn) yox — açılışın özündən (2026-10-08).
+
+    BİR sorğu, yalnız bu halda; nəticə yenə də əhatə/müəllim süzgəcindən keçmiş siyahıda
+    axtarılır (``_resolve_group`` / ``_resolve_subject``) — yad qrup seçilmir.
+    """
+    if (request.GET.get(param) or "").strip():
+        return ""
+    offering_id = (request.GET.get("ese_offering") or "").strip()
+    if not offering_id:
+        return ""
+    keys = sheets_service.offering_selection_keys(organization=organization, period=period, offering_id=offering_id)
+    return keys.get(key, "")
 
 
 def _resolve_offering(request, offerings):
@@ -435,7 +450,8 @@ def _group_first(request, section, filter_fields, service, sheets_service, selec
             organization=selected_org, period=period, instructor_id=selection.teacher_id
         )
     groups = selection.groups(groups, group_ids_with_teacher)
-    selected_group_id = _resolve_group(request, groups)
+    implied = _implied_key(request, sheets_service, selected_org, period, "ese_group", "group_id")
+    selected_group_id = _resolve_group(request, groups, implied)
     section["groups"] = groups
     section["selected_group_id"] = selected_group_id
     filter_fields.append(
@@ -483,8 +499,11 @@ def _offering_option_label(offering) -> str:
 
 def _subject_first(request, section, filter_fields, service, selected_org, period, selection):
     """Köhnə sıra: fənn → qrup (açılış). Davranış dəyişməyib (2026-09-14: + müəllim filtri)."""
+    from apps.registrar.public import exam_score_sheets as sheets_service
+
     subjects = service.subjects_for_period(organization=selected_org, period=period)
-    selected_subject_id = _resolve_subject(request, subjects)
+    implied = _implied_key(request, sheets_service, selected_org, period, "ese_subject", "subject_id")
+    selected_subject_id = _resolve_subject(request, subjects, implied)
     section["subjects"] = subjects
     section["selected_subject_id"] = selected_subject_id
     filter_fields.append(
@@ -500,8 +519,6 @@ def _subject_first(request, section, filter_fields, service, selected_org, perio
     offerings = selection.offerings(
         service.offerings_for_subject(organization=selected_org, period=period, subject_id=selected_subject_id)
     )
-    from apps.registrar.public import exam_score_sheets as sheets_service
-
     for offering in offerings:
         offering.group_label = service.offering_label(offering)
         offering.subject_label = sheets_service.subject_label(offering)

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n exam_score_cells %}
 {% comment %}Tələbə siyahısı — bal daxiletmə forması (əl ilə).
 
 Hər sətir: № + tələbə (sıra başlığı) · giriş balı · S1..S10 (sual balı SEÇİMİ,
@@ -13,6 +13,13 @@ Sual seçimləri TƏNBƏL gücləndirilir: `data-bootstrap-select` YOXDUR (qloba
 onlara toxunmur); server hazır toggle (`data-ese-qtoggle`) render edir, ilk
 klik/fokusda JS `EMSBootstrapSelect.enhance` çağırıb menyunu açır — 60 × 10
 seçim üçün ilk render sabit qalır, native görünüş heç vaxt olmur.
+2026-10-08 (tutum testi — səhifə 25 tələbədə 715 KB idi, 3000 <option>): xananın
+select-ində YALNIZ «—» + seçilmiş dəyər render olunur və `data-max=""` qalır —
+`exam_score_entry.js` (`applyQuestionGrid` → `rebuildOptions`) ilk render-də
+0..max variantlarını brauzerdə qurur (dəyər, POST və klaviatura eynidir). S1..S10
+xanaları sətir başına BİR teqlə (`{% ese_question_cells row %}`,
+`accounts/templatetags/exam_score_cells.py`) yığılır — markup eynidir; ad
+(`row.name`) və xananın `off` bayrağı serverdə bir dəfə hesablanır.
 
 Yadda saxlama: düymə TƏSDİQ dialoqunu açır (`_save_dialog_body.html`): yazılacaq
 hər tələbə — ad, giriş, imtahan, yekun, hərf (F qırmızı, sayı başlıqda); K>0
@@ -72,48 +79,31 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
             </tr>
           </thead>
           <tbody>
+            {% trans "İmtahan balı" context "registrar.exam_score_entry" as ese_score_aria %}
+            {% trans "Bal tarixçəsi" context "registrar.exam_score_entry" as ese_history_aria %}
             {% for row in s.rows %}
             <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}" data-ese-row data-locked="{% if row.locked %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
-                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                data-student="{{ row.name }}"
                 data-has-score="{% if row.has_score %}1{% else %}0{% endif %}" data-is-changed="{% if row.is_changed %}1{% else %}0{% endif %}"
                 data-barred="{% if row.barred %}1{% else %}0{% endif %}" data-bonus="{{ row.bonus|floatformat:0 }}">
               <th scope="row">
                 <span class="ese-idx">{{ forloop.counter }}</span>
-                <span class="ese-student">{{ row.student.get_full_name|default:row.student.username }}</span>
+                <span class="ese-student">{{ row.name }}</span>
                 <span class="ese-username">{{ row.student.username }}</span>
                 {% if row.enrollment.is_guest %}<span class="ems-badge ems-badge--muted ese-guest">{% trans "alt qrupdan" context "registrar.exam_score_entry" %}</span>{% endif %}
               </th>
-              <td class="ems-table__num ese-td--num" data-ese-entry="{{ row.entry_score|floatformat:0 }}">{{ row.entry_score|floatformat:0 }}</td>
-              {% for cell in row.question_cells %}
-              <td class="ese-td--num ese-td--q" data-ese-qcell="{{ cell.index }}"{% if cell.index > s.question_count %} hidden{% endif %}>
-                <div class="bootstrap-single-select bootstrap-single-select--ems bootstrap-single-select--compact ese-qsel" data-ese-qwrap>
-                  <select class="ems-select bootstrap-single-select__native is-enhanced" data-bootstrap-select-lazy name="q__{{ row.enrollment.id }}__{{ cell.index }}"
-                          aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}"
-                          {% if cell.index > s.question_count or row.locked %}disabled{% endif %}
-                          data-ese-q="{{ cell.index }}" data-initial="{{ cell.value }}" data-max="{{ s.question_max }}" tabindex="-1">
-                    <option value=""{% if not cell.value %} selected{% endif %}>—</option>
-                    {% for option in s.question_score_options %}
-                    <option value="{{ option }}"{% if cell.value == option|stringformat:'s' %} selected{% endif %}>{{ option }}</option>
-                    {% endfor %}
-                  </select>
-                  <button type="button" class="btn btn-outline-secondary dropdown-toggle bootstrap-single-select__toggle{% if not cell.value %} is-placeholder{% endif %}"
-                          data-ese-qtoggle{% if row.locked %} disabled{% endif %} aria-label="{{ cell.label }} — {{ row.student.get_full_name|default:row.student.username }}" aria-haspopup="listbox">
-                    <span class="bootstrap-single-select__label-text">{{ cell.value|default:"—" }}</span>
-                    <span class="bootstrap-single-select__caret"><i class="fas fa-chevron-down" aria-hidden="true"></i></span>
-                  </button>
-                </div>
-              </td>
-              {% endfor %}
+              {% with entry=row.entry_score|floatformat:0 %}<td class="ems-table__num ese-td--num" data-ese-entry="{{ entry }}">{{ entry }}</td>{% endwith %}
+              {% ese_question_cells row %}
               <td class="ese-td--num">
                 <input type="number" class="ems-input ese-score ese-total{% if s.question_count %} is-readonly{% endif %}" name="score__{{ row.enrollment.id }}"
-                       aria-label="{% trans 'İmtahan balı' context 'registrar.exam_score_entry' %} — {{ row.student.get_full_name|default:row.student.username }}"
+                       aria-label="{{ ese_score_aria }} — {{ row.name }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
                        {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if row.locked %} disabled{% endif %}
-                       value="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}"
-                       data-ese-score data-initial="{% if row.exam_score is not None %}{{ row.exam_score|floatformat:0 }}{% endif %}">
+                       value="{{ row.exam_display }}"
+                       data-ese-score data-initial="{{ row.exam_display }}">
               </td>
               <td class="ems-table__num ese-td--num" data-ese-total-cell>
-                <b data-ese-total data-initial="{% if row.graded %}{{ row.total|floatformat:0 }}{% else %}—{% endif %}">{% if row.graded %}{{ row.total|floatformat:0 }}{% else %}—{% endif %}</b>
+                {% if row.graded %}{% with total=row.total|floatformat:0 %}<b data-ese-total data-initial="{{ total }}">{{ total }}</b>{% endwith %}{% else %}<b data-ese-total data-initial="—">—</b>{% endif %}
               </td>
               <td class="ese-td--num">
                 <span class="ems-badge ese-letter-badge {% if not row.graded %}ems-badge--muted{% elif row.failed %}ems-badge--danger{% else %}ems-badge--success{% endif %}" data-ese-letter data-initial="{% if row.graded %}{{ row.letter }}{% endif %}" data-initial-tone="{% if not row.graded %}ems-badge--muted{% elif row.failed %}ems-badge--danger{% else %}ems-badge--success{% endif %}">{% if row.graded %}{{ row.letter }}{% else %}—{% endif %}</span>
@@ -125,7 +115,7 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
                 <div class="ems-rowactions">
                   <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost ese-history-btn" tabindex="-1"
                           data-ese-history="{{ row.enrollment.id }}"
-                          aria-label="{% trans 'Bal tarixçəsi' context 'registrar.exam_score_entry' %} — {{ row.student.get_full_name|default:row.student.username }}">
+                          aria-label="{{ ese_history_aria }} — {{ row.name }}">
                     <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
                     <span class="ese-history-btn__count">{{ row.entries|length }}</span>
                   </button>
