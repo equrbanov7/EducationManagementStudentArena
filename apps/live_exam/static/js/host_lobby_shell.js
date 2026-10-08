@@ -102,6 +102,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (dom.sidebarBackdrop) dom.sidebarBackdrop.hidden = !open;
         syncSidebarButtons();
         remember("liveHostPresentationSidebarOpen", open ? "1" : "0");
+        // 2026-10-08 (L5): geniş ekranda panel səhnəni itələyir — keçid bitəndə mətnlər (sual kartı,
+        // plitələr, lobbi siyahısı) yeni enə görə yenidən sığdırılır (events.js «resize» dinləyicisi).
+        window.setTimeout(() => window.dispatchEvent(new Event("resize")), 300);
     }
 
     function toggleSidebar() {

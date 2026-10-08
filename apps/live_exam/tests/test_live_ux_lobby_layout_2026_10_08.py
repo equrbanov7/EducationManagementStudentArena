@@ -132,3 +132,23 @@ class AnswerTilesLayoutStaticTest(SimpleTestCase):
         self.assertIn('.lxp-tiles[data-long="1"] .lxp-tile', answer_css)
         round_css = (CSS / "player" / "_round.css").read_text(encoding="utf-8")
         self.assertNotIn("line-clamp", css_block(round_css, ".lxp-tile__text"))
+
+
+class PresenterSidePanelStaticTest(SimpleTestCase):
+    """L5: açıq idarə paneli sual kartını örtmür — geniş ekranda səhnəni itələyir; vəziyyət yadda qalır."""
+
+    def test_open_panel_pushes_the_stage_on_wide_screens(self):
+        part5 = (CSS / "host_lobby" / "_part5.css").read_text(encoding="utf-8")
+        match = re.search(r"@media \(min-width: 1100px\) \{(.*?)\n\}", part5, re.S)
+        self.assertIsNotNone(match)
+        block = match.group(1)
+        self.assertIn(".presentation-sidebar-open .presentation-game-area", block)
+        self.assertIn("padding-left", block)
+        self.assertIn(".presentation-sidebar-open .host-sidebar-backdrop", block)  # fon bulanıqlaşmır
+
+    def test_panel_state_is_remembered_with_guarded_storage(self):
+        shell = (APP / "static" / "js" / "host_lobby_shell.js").read_text(encoding="utf-8")
+        self.assertIn('remember("liveHostPresentationSidebarOpen"', shell)
+        self.assertIn('dispatchEvent(new Event("resize"))', shell)  # itələmədən sonra mətn yenidən sığır
+        for match in re.finditer(r"localStorage\.(?:get|set)Item", shell):
+            self.assertIn("try {", shell[max(0, match.start() - 200) : match.start()])
