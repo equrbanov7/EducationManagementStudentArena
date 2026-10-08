@@ -4,6 +4,8 @@
 Yeni mətnlər:
 * E1 — `core.datetime_input`: locale-dən asılı olmayan «gg.aa.iiii ss:dd» tarix-saat sahəsi
   (xəta mesajları, seçici düymələri). Ay/gün adları Django-nun öz kataloqundandır.
+* S1 — idxal: «Düzgün cavab həmişə A variantıdır», «Hamısını təsdiqlə», «correct_defaulted»
+  mətni («Yoxlayın: …» — xəta yox, xəbərdarlıq).
 * E2 — sehrbaz/formalarda gettext-siz qalan mətnlər (sual sayı köməkçisi «0 yazsanız…»,
   praktiki imtahan / nəzarət deaktiv mesajları, «Variant N») və qeyri-rəsmi «seç» → «seçin».
 
@@ -171,13 +173,53 @@ ROWS = {
             "TOPLAM — {season} dönemi",
         ),
     },
+    # S1 — idxal: «Düzgün cavab həmişə A variantıdır» + «Hamısını təsdiqlə».
+    "exams.template.test_question_bank": {
+        "Düzgün cavab həmişə A variantıdır": (
+            "The correct answer is always option A",
+            "Правильный ответ — всегда вариант A",
+            "Doğru cevap her zaman A seçeneğidir",
+        ),
+        "İşarəsiz suallarda A düzgün sayılır və mətndə «*A)» kimi işarələnir — «düzgün cavab tapılmadı» "
+        "xəbərdarlığı çıxmır.": (
+            "In questions without a marker, A is taken as correct and marked as «*A)» in the text — no "
+            "“correct answer not found” warning is shown.",
+            "В вопросах без отметки правильным считается A, и в тексте он помечается как «*A)» — "
+            "предупреждение «правильный ответ не найден» не выводится.",
+            "İşaretsiz sorularda A doğru kabul edilir ve metinde «*A)» olarak işaretlenir — “doğru cevap "
+            "bulunamadı” uyarısı çıkmaz.",
+        ),
+        "%(count)s sualda düzgün cavab A kimi təsdiqlənəcək və mətndə «*A)» yazılacaq. Davam edilsin?": (
+            "In %(count)s questions the correct answer will be confirmed as A and «*A)» will be written in the "
+            "text. Continue?",
+            "В %(count)s вопросах правильным будет подтверждён вариант A, и в тексте появится «*A)». Продолжить?",
+            "%(count)s soruda doğru cevap A olarak onaylanacak ve metne «*A)» yazılacak. Devam edilsin mi?",
+        ),
+        "Hamısını təsdiqlə — A düzgündür (%(count)s)": (
+            "Confirm all — A is correct (%(count)s)",
+            "Подтвердить все — верен A (%(count)s)",
+            "Tümünü onayla — A doğru (%(count)s)",
+        ),
+    },
 }
 
 #: Bu skriptin öz kontekstləri — dəyər həmişə buradakı ilə sinxronlanır.
 FORCE = set(ROWS)
-#: Mövcud (başqa skriptin) kontekstlərində yalnız boş/fuzzy dəyər doldurulur,
-#: amma bu açarlar üçün dəyər bilərəkdən YENİLƏNİR (məs. qeyri-rəsmi «yazsan» → «yazsanız»).
-FORCE_KEYS: set[tuple[str, str]] = set()
+
+#: Açar-msgid-lər (msgid AZ mətn deyil) — (kontekst, açar) → (az, en, ru, tr); dəyər həmişə yenilənir.
+#: S1: «correct_defaulted» artıq XƏTA deyil, «Yoxlayın» xəbərdarlığıdır — mətn buna uyğunlaşdı.
+KEY_ROWS = {
+    ("exams.service.parsing.warning", "correct_defaulted"): (
+        "Yoxlayın: düzgün cavab işarəsi tapılmadı — A variantı düzgün qəbul edildi. A deyilsə, düzgün variantı "
+        "«*» ilə işarələyin.",
+        "Check: no correct-answer marker was found — option A was taken as correct. If it is not A, mark the "
+        "correct option with «*».",
+        "Проверьте: отметка правильного ответа не найдена — вариант A принят как правильный. Если это не A, "
+        "отметьте правильный вариант знаком «*».",
+        "Kontrol edin: doğru cevap işareti bulunamadı — A seçeneği doğru kabul edildi. A değilse doğru seçeneği "
+        "«*» ile işaretleyin.",
+    ),
+}
 
 
 def _value(lang, az, row):
@@ -197,16 +239,23 @@ def fill(lang):
                 po.append(polib.POEntry(msgctxt=ctx, msgid=msgid, msgstr=want))
                 added += 1
             elif entry.msgstr != want and (
-                not entry.msgstr
-                or "fuzzy" in entry.flags
-                or entry.obsolete
-                or ctx in FORCE
-                or (ctx, msgid) in FORCE_KEYS
+                not entry.msgstr or "fuzzy" in entry.flags or entry.obsolete or ctx in FORCE
             ):
                 entry.msgstr, entry.obsolete = want, False
                 if "fuzzy" in entry.flags:
                     entry.flags.remove("fuzzy")
                 changed += 1
+    for (ctx, key), values in KEY_ROWS.items():
+        want = values[LANGS.index(lang)]
+        entry = index.get((ctx, key))
+        if entry is None:
+            po.append(polib.POEntry(msgctxt=ctx, msgid=key, msgstr=want))
+            added += 1
+        elif entry.msgstr != want:
+            entry.msgstr, entry.obsolete = want, False
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            changed += 1
     if added or changed:
         po.save(path)
         subprocess.check_call(["msgfmt", "-o", path[:-3] + ".mo", path])

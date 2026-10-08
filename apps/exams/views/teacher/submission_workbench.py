@@ -17,6 +17,7 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
+from apps.exams.services.parsing.answer_markers import count_defaulted, mark_default_correct_a
 from apps.exams.services.submission_sources import subject_label
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.teacher.workbench_paste import paste_context
@@ -51,6 +52,13 @@ def process_workbench_post(request, organization, form_state):
                 request,
                 pgettext("exams.view.question_submission.message", "Fayl oxunmadı: {error}").format(error=exc),
             )
+
+    # 2026-10-08 (S1): «Düzgün cavab həmişə A variantıdır» — işarəsiz sualların A-sı mətndə
+    # «*A)» olur (redaktorda görünür, yadda saxlanan mətn və sonrakı parse-lar eyni qalır).
+    form_state["default_correct_a"] = (request.POST.get("default_correct_a") or "") == "1"
+    if form_state["default_correct_a"]:
+        raw_text, _marked = mark_default_correct_a(raw_text)
+        form_state["raw_text"] = raw_text
 
     analysis = analyze_mcq_bulk(raw_text)
     parsed = analysis["parsed"]
@@ -183,6 +191,10 @@ def build_workbench_context(
         "wb_show_format": False,
         "wb_format": "test",
         "wb_show_report": False,
+        # S1: «Düzgün cavab həmişə A» seçimi + «Hamısını təsdiqlə» (A-defolt xəbərdarlıqları).
+        "wb_show_default_a": True,
+        "wb_default_correct_a": bool(form_state.get("default_correct_a")),
+        "defaulted_count": count_defaulted(parsed),
         "wb_templates": [],
         "wb_save_label": save_label,
         # 2026-09-14: pano/sürükləmə ilə şəkil (bank toplu əlavə ilə eyni qol) —

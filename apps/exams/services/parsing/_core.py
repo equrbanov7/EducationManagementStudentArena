@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import ANSWERLINE_RE, LABELS, OPTION_RE, QUESTION_RE
 from apps.exams.services.utils import _norm
 
+from .answer_markers import apply_answer_key, split_answer_key
 from .extraction import (
     END_QUESTION_RE,
     JOINED_OPTION_BOUNDARY_RE,
@@ -66,15 +67,15 @@ def _finish_question(current: dict | None) -> dict | None:
         current["correct"] = current["_answerline_correct"]
 
     if not current["correct"]:
-        # Mətn içində düzgün cavab işarəsi tapılmadı — "A" yalnız texniki
-        # default-dur, real cavab açarı deyil. Müəllim workbench-də mütləq
-        # görsün deyə ERROR severity ilə xəbərdarlıq qoyulur.
+        # Düzgün cavab işarəsi tapılmadı — A defolt-dur (redaktor bələdçisi də «A
+        # düzgündür» deyir). 2026-10-08 (S1): XƏTA yox, sarı «Yoxlayın» xəbərdarlığı —
+        # 50 sualın hamısı «Xətalı» görünürdü; «Hamısını təsdiqlə» / idxal seçimi var.
         current["correct"] = ["A"]
         _add_warning(
             current,
             "correct_defaulted",
             pgettext("exams.service.parsing.warning", "correct_defaulted"),
-            severity=SEVERITY_ERROR,
+            severity=SEVERITY_WARNING,
         )
 
     current["answer_mode"] = "multiple" if len(current["correct"]) > 1 else "single"
@@ -464,6 +465,8 @@ def parse_bulk_mcq(raw_text: str):
     # Ön-emal: kiril etiketləri (rus tərcümələri), tək qalmış sual nömrələri
     # və bullet/√ markerləri parserin tanıdığı "A) / *B)" formasına salınır.
     raw_text = _normalize_cyrillic_option_labels(raw_text or "")
+    # S1 (2026-10-08): sonda «Cavablar: 1-A 2-B …» açarı — sual kimi oxunmasın, sonra tətbiq olunur.
+    raw_text, answer_key = split_answer_key(raw_text)
     raw_text = _isolate_end_question_markers(raw_text)
     raw_text = _merge_bare_question_numbers(raw_text)
     raw_text = _convert_marker_options(raw_text)
@@ -584,6 +587,7 @@ def parse_bulk_mcq(raw_text: str):
     if current:
         close_question()
 
+    apply_answer_key(questions, answer_key)
     _validate_questions(questions)
 
     return questions
