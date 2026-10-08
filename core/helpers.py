@@ -101,25 +101,39 @@ def _safe_same_origin_redirect_path(request, candidate_url):
 
 def parse_form_datetime(raw_value):
     """
-    Parse a datetime value coming from an HTML ``datetime-local`` form field.
+    Parse a deadline/window value coming from a form field.
 
-    Browsers submit ``datetime-local`` inputs without timezone information
-    (e.g. ``"2026-05-24T21:12"``). Saving such a naive value to a
-    ``DateTimeField`` while ``USE_TZ`` is active triggers a ``RuntimeWarning``
-    and may store the wrong instant. This helper parses the string and, if the
-    result is naive, attaches the project's current timezone.
+    2026-10-08 (teacher feedback): the deadline forms now use the locale-free
+    ``dd.mm.yyyy HH:MM`` (24-hour) field (``core.datetime_input``); ISO 8601
+    (``2026-05-24T21:12`` from old clients / ``datetime-local``) is still accepted.
+    A naive result is made aware in the project's current timezone (Asia/Baku) —
+    saving a naive value with ``USE_TZ`` would store the wrong instant.
 
     Returns ``None`` for empty/blank input and passes through values that are
     already ``datetime`` instances (making the result timezone-aware if needed).
+    Unreadable text raises ``ValidationError`` with a clear, translated message
+    (format / no such date / hour out of range / time missing) — previously the raw
+    string was handed to the model field, which failed with a generic ISO message.
     """
+    from django.core.exceptions import ValidationError
+
+    from core.datetime_input import DateTimeTextError, error_messages, parse_datetime_text
+
     if raw_value in (None, ""):
         return None
 
     if isinstance(raw_value, str):
-        parsed = parse_datetime(raw_value.strip())
-        if parsed is None:
-            # Let the model field raise its normal validation error.
-            return raw_value
+        text = raw_value.strip()
+        if not text:
+            return None
+        try:
+            parsed = parse_datetime_text(text)
+        except DateTimeTextError as exc:
+            # ISO date-only («2026-05-24») stayed valid for API clients (midnight).
+            iso_date = parse_datetime(f"{text}T00:00") if exc.code == "missing_time" and "-" in text[:5] else None
+            if iso_date is None:
+                raise ValidationError(error_messages()[exc.code], code=exc.code) from exc
+            parsed = iso_date
     else:
         parsed = raw_value
 

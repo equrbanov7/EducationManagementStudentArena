@@ -92790,3 +92790,7 @@ msgstr ""
 msgctxt "exams.template.test_question_bank"
 msgid "Hamısını təsdiqlə — A düzgündür (%(count)s)"
 msgstr "Confirm all — A is correct (%(count)s)"
+
+msgctxt "exams.model.question_submission.field"
+msgid "Reyestr qrupları"
+msgstr "Registry groups"

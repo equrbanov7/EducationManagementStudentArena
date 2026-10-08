@@ -9,7 +9,6 @@ tapılmayan obyekt 404, qalan domen xətaları 400. Kliyent (``cabinet.js``) mə
 
 from __future__ import annotations
 
-import datetime
 import uuid
 
 from django.http import JsonResponse
@@ -214,14 +213,20 @@ def int_or_none(value):
 
 
 def local_datetime(value):
-    """``<input type="datetime-local">`` dəyəri (cari saat qurşağında) → aware datetime; boş → ``None``."""
+    """Son tarix sahəsi → aware datetime (cari zona, Asia/Baku); boş → ``None``.
+
+    2026-10-08: sahə «gg.aa.iiii ss:dd» (24 saat) mətnidir (``core.datetime_input``); köhnə
+    ``datetime-local`` / ISO dəyəri də qəbul olunur. Oxunmayan mətn → AYDIN səbəb.
+    """
+    from core.datetime_input import DateTimeTextError, error_messages, parse_datetime_text
+
     text = str(value or "").strip()
     if not text:
         return None
     try:
-        parsed = datetime.datetime.fromisoformat(text)
-    except ValueError:
-        raise ActionError("invalid_datetime", pgettext(CTX, "Tarix və saat düzgün seçilməyib.")) from None
+        parsed = parse_datetime_text(text)
+    except DateTimeTextError as exc:
+        raise ActionError("invalid_datetime", error_messages()[exc.code]) from None
     if timezone.is_naive(parsed):
         parsed = timezone.make_aware(parsed, timezone.get_current_timezone())
     return parsed

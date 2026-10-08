@@ -197,6 +197,8 @@ def route_submission_to_chair(submission, *, actor, resubmitted=False, groups=No
         groups = list(submission.student_groups.all()) or (
             [submission.student_group] if submission.student_group else []
         )
+    if units is None:
+        units = list(submission.registry_groups.all())
     chair_unit = resolve_submission_chair_unit(
         organization=submission.organization,
         teacher=submission.teacher,

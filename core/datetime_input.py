@@ -192,8 +192,11 @@ class DayFirstDateTimeField(forms.DateTimeField):
         ),
     }
 
-    def __init__(self, *, require_time: bool = True, **kwargs):
+    def __init__(self, *, require_time: bool = True, allow_iso_date_only: bool = False, **kwargs):
         self.require_time = require_time
+        # Köhnə ISO yalnız-tarix («2026-10-06» → gecə yarısı) qəbul edən formalar üçün (məs. elanlar);
+        # gün-əvvəl yazıda saat HƏMİŞƏ tələb olunur.
+        self.allow_iso_date_only = allow_iso_date_only
         kwargs.setdefault("input_formats", [DISPLAY_FORMAT, "%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"])
         super().__init__(**kwargs)
 
@@ -204,10 +207,13 @@ class DayFirstDateTimeField(forms.DateTimeField):
             return from_current_timezone(value)
         if isinstance(value, datetime.date):
             return from_current_timezone(datetime.datetime(value.year, value.month, value.day))
+        text = str(value)
         try:
-            parsed = parse_datetime_text(str(value), require_time=self.require_time)
+            parsed = parse_datetime_text(text, require_time=self.require_time)
         except DateTimeTextError as exc:
-            raise ValidationError(error_messages()[exc.code], code=exc.code) from exc
+            if not (exc.code == CODE_MISSING_TIME and self.allow_iso_date_only and ISO_RE.match(text.strip())):
+                raise ValidationError(error_messages()[exc.code], code=exc.code) from exc
+            parsed = parse_datetime_text(text, require_time=False)
         if parsed is None:
             return None
         return from_current_timezone(parsed)
