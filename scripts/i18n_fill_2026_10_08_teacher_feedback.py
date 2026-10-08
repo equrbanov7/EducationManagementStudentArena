@@ -141,6 +141,27 @@ ROWS = {
             "Geçerli dönemin ders yükünde size bağlı grup bulunamadı; bölüm başkanına başvurun.",
         ),
     },
+    # N1 — «Sual göndərişləri»ndə canlı imtahan (Kahoot) sualları üçün yönləndirmə.
+    "accounts.profile.question_submissions": {
+        "Canlı imtahan (Kahoot) üçün suallar «İmtahanlarım» bölməsində əlavə olunur": (
+            "Questions for a live quiz (Kahoot-style) are added in “My exams”",
+            "Вопросы для живого экзамена (в стиле Kahoot) добавляются в разделе «Мои экзамены»",
+            "Canlı sınav (Kahoot) soruları “Sınavlarım” bölümünde eklenir",
+        ),
+        "Bu bölmə İmtahan Mərkəzinə göndərilən sual toplularıdır. Canlı viktorina üçün «İmtahanlarım»da test "
+        "imtahanı yaradın, suallarını imtahan səhifəsində əlavə edin, imtahanı aktiv edin və «Canlı imtahanı "
+        "başlat» düyməsini basın.": (
+            "This section is for question sets sent to the Exam Centre. For a live quiz, create a test exam in "
+            "“My exams”, add its questions on the exam page, activate the exam and press “Start live session”.",
+            "Этот раздел — для наборов вопросов, отправляемых в Экзаменационный центр. Для живой викторины "
+            "создайте тестовый экзамен в «Мои экзамены», добавьте вопросы на странице экзамена, активируйте "
+            "экзамен и нажмите «Запустить live-сессию».",
+            "Bu bölüm Sınav Merkezine gönderilen soru setleri içindir. Canlı yarışma için “Sınavlarım”da test "
+            "sınavı oluşturun, sorularını sınav sayfasında ekleyin, sınavı etkinleştirin ve “Canlı oturumu "
+            "başlat” düğmesine basın.",
+        ),
+        "İmtahanlarıma keç": ("Go to My exams", "Перейти к моим экзаменам", "Sınavlarıma git"),
+    },
     # W1 — «Dərs yüküm» cədvəlinin «CƏMİ» xanası görünən sətirlərin cəmidir.
     "accounts.workload": {
         "CƏMİ (bütün semestrlər)": ("TOTAL (all semesters)", "ИТОГО (все семестры)", "TOPLAM (tüm dönemler)"),

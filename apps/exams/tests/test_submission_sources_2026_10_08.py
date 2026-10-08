@@ -218,3 +218,21 @@ class TeachingLoadSubjectsTests(_LoadFixture):
         checked = re.search(rf'value="u:{self.group_a.pk}"[^>]*checked', html, re.S)
         self.assertIsNotNone(checked)
         self.assertIsNone(re.search(rf'value="u:{self.group_b.pk}"[^>]*\bchecked\b', html))
+
+
+class LiveExamHintTests(_Base):
+    """N1: «Sual göndərişləri»ndə canlı imtahan (Kahoot) sualları üçün yönləndirmə ipucu."""
+
+    def _section(self, user):
+        response = self._client_for(user).get(f"{reverse('accounts:profile')}?section=question-submissions")
+        self.assertEqual(response.status_code, 200)
+        return response.content.decode()
+
+    def test_teacher_sees_hint_with_link_to_my_exams(self):
+        html = self._section(self.teacher)
+        self.assertIn("data-qsub-live-hint", html)
+        self.assertIn("Canlı imtahan (Kahoot) üçün suallar «İmtahanlarım» bölməsində əlavə olunur", html)
+        self.assertIn("?section=my-exams", html)
+
+    def test_reviewer_does_not_see_hint(self):
+        self.assertNotIn("data-qsub-live-hint", self._section(self.exam_center))
