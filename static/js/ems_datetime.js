@@ -22,6 +22,7 @@
         EMSDateTime.format(parts) → "gg.aa.iiii ss:dd"
         EMSDateTime.validate(input) → {ok, empty, code, message, parts}
         EMSDateTime.toDate(parts) → Date (brauzerin yerli vaxtı)
+        EMSDateTime.display(isoOrText) → "gg.aa.iiii ss:dd" (modal prefill-i)
    ========================================================================= */
 (function (window, document) {
     "use strict";
@@ -112,6 +113,16 @@
 
     function toDate(parts) {
         return new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, 0, 0);
+    }
+
+    /* Server JSON-undakı yerli ISO («2026-10-06T09:30») → sahə dəyəri «06.10.2026 09:30»
+       (redaktə modallarının prefill-i üçün); boş → "", oxunmayan → olduğu kimi. */
+    function display(value) {
+        if (value === null || value === undefined || value === "") {
+            return "";
+        }
+        var res = parse(value);
+        return res.ok ? format(res.parts) : String(value);
     }
 
     /* ── i18n: vidjetin data-ems-dt-i18n JSON-u ── */
@@ -252,6 +263,7 @@
         parse: parse,
         format: format,
         toDate: toDate,
+        display: display,
         validate: validate,
         messageFor: messageFor,
         normalize: normalizeInput,
