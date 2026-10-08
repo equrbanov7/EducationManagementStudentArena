@@ -93,9 +93,12 @@ def _apply_reviewer_filters(filtered, filters, *, faculty, kafedra, periods, yea
 
     unit = kafedra or faculty
     if unit:
+        # 2026-10-08 (müəllim rəyi S2): reyestr qrupları (`registry_groups`, exams 0074) da
+        # süzgəcə düşür — dərs yükündən gələn qrupla göndərişin köhnə kohort FK-sı yoxdur.
         filtered = filtered.filter(
             Q(student_groups__org_unit__path__startswith=unit.path)
             | Q(student_group__org_unit__path__startswith=unit.path)
+            | Q(registry_groups__path__startswith=unit.path)
         )
 
     if filters["teacher"].isdigit():

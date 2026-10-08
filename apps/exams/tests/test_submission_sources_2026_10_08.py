@@ -175,6 +175,8 @@ class TeachingLoadSubjectsTests(_LoadFixture):
         self.assertEqual(submission.subject_ref, self.subj_db)
         self.assertEqual(set(submission.group_label.split(", ")), {"2233 İ", "2232 İ"})
         self.assertIsNone(submission.student_group)
+        # exams 0074: reyestr qrupları FK kimi də saxlanır (fakültə/kafedra süzgəci üçün).
+        self.assertEqual(set(submission.registry_groups.all()), {self.group_a, self.group_b})
         self.assertEqual(submission.chair_unit, self.chair)
         self.assertEqual(submission.language, "en")
 

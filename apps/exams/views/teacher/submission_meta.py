@@ -63,14 +63,18 @@ def _resolve_groups(form_state, groups):
 
 
 def prefill_group_keys(submission, groups):
-    """Redaktədə seçili qruplar: köhnə kohort FK-ları + adı ``group_label``-də olan
-    reyestr qrupları (reyestr qrupu FK kimi saxlanmır — etiketdə qalır)."""
+    """Redaktədə seçili qruplar: köhnə kohort FK-ları + ``registry_groups`` (0074).
+
+    ``registry_groups`` boşdursa (0074-dən əvvəlki, backfill-in qeyri-müəyyən saydığı
+    göndəriş) reyestr qrupu ``group_label``-dəki adından bərpa olunur."""
     keys = [str(g.id) for g in submission.student_groups.all()]
     if not keys and submission.student_group_id:
         keys = [str(submission.student_group_id)]
+    unit_ids = {str(pk) for pk in submission.registry_groups.values_list("pk", flat=True)}
+    if unit_ids:
+        return keys + [g.key for g in groups if g.unit is not None and str(g.unit.pk) in unit_ids]
     names = {part.strip() for part in (submission.group_label or "").split(",") if part.strip()}
-    keys += [g.key for g in groups if g.unit is not None and g.name in names]
-    return keys
+    return keys + [g.key for g in groups if g.unit is not None and g.name in names]
 
 
 def _validate_submission_meta(form_state, *, groups, subjects):
