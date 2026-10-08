@@ -37,6 +37,8 @@ const PATHS = {
     qr: `<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1" ${STROKE}/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5h1.5M18.5 14h2" ${STROKE}/>`,
     keyboard: `<rect x="2.5" y="6" width="19" height="12" rx="2.5" ${STROKE}/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M6.5 13.8h.01M17 13.8h.01M9.5 14h5" ${STROKE} stroke-width="2.4"/>`,
     chevronRight: `<path d="M9.5 5.5l6.5 6.5-6.5 6.5" ${STROKE} stroke-width="2.4"/>`,
+    chevronDown: `<path d="M5.5 9.5l6.5 6.5 6.5-6.5" ${STROKE} stroke-width="2.4"/>`,
+    search: `<circle cx="10.5" cy="10.5" r="6.5" ${STROKE}/><path d="M15.5 15.5l5 5" ${STROKE}/>`,
     up: '<path d="M12 5l7.5 9h-15z" fill="currentColor"/>',
     down: '<path d="M12 19l-7.5-9h15z" fill="currentColor"/>',
     close: `<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" ${STROKE} stroke-width="2.4"/>`,

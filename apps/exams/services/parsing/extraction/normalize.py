@@ -128,7 +128,13 @@ def normalize_pdf_extracted_text(text: str) -> str:
     t = re.sub(r"[ \t]+", " ", t)
 
     # "Cavab:" həmişə yeni sətirdən başlasın (az/en/ru/tr açar sözləri)
-    t = re.sub(r"(?i)\s+((?:cavab|correct|answer|ответ|cevap)\s*:)", r"\n\1", t)
+    # 2026-10-08 (S1): «Düzgün cavab:» / «Doğru cavab:» / «Correct answer:» tam halda
+    # keçirilir — əvvəl «Düzgün» sözü əvvəlki variantın sonunda qalırdı.
+    t = re.sub(
+        r"(?i)\s+((?:(?:düzgün|duzgun|düz|duz|doğru|dogru|right|correct)\s+)?(?:cavab|correct|answer|ответ|cevap)\s*:)",
+        r"\n\1",
+        t,
+    )
 
     # "* A)" kimi çıxırsa "*A)" et
     t = re.sub(r"\*\s+([A-E])", r"*\1", t, flags=re.IGNORECASE)

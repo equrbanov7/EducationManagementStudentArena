@@ -41,6 +41,7 @@ və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə 
           <td>
             <span class="syl-badge syl-badge--{{ row.status_tone }}">{{ row.status_label }}</span>
             <span class="syl-meta">{{ row.approver }}</span>
+            {% if row.reuse_note %}<span class="syl-reuse-note"><i class="fas fa-link" aria-hidden="true"></i> {{ row.reuse_note }}</span>{% endif %}
           </td>
           <td class="syl-cell-next">
             <span class="syl-next syl-next--{{ row.next_tone }}">{{ row.next_step }}</span>

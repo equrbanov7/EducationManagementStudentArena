@@ -27,6 +27,7 @@ from apps.exams.services.start_intent import has_valid_start_intent
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 
 from ._answer_writes import TestAnswerWriteBatch, _save_test_answer_if_changed, _save_written_answer_if_changed
+from ._final_device import final_device_guarded
 from ._helpers import (
     annotate_attempt_result_visibility,
     append_return_to,
@@ -372,6 +373,7 @@ def _handle_take_exam_post(request, *, attempt, action, is_ajax, return_to):
 
 
 @login_required
+@final_device_guarded
 def take_exam(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
     if request.method == "POST":

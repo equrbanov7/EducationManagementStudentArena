@@ -23,7 +23,7 @@ from django.templatetags.static import static
 
 PLAYER_JS_DIR = Path(__file__).resolve().parents[2] / "static" / "js" / "player"
 ENTRY_MODULE = "player.entry.js"
-ENTRY_VERSION = "lxp-20261002"
+ENTRY_VERSION = "lxp-20261008"
 _IMPORT_RE = re.compile(r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])\./([\w.-]+\.js)(\?v=[\w.-]+)?\1""")
 
 #: (yol, versiya) — player_screen.html-in stil faylları (sıra vacibdir).
@@ -34,7 +34,7 @@ PLAYER_CSS = (
     ("css/player/_base.css", "lxp-20260930"),
     ("css/player/_ui.css", "lxp-20261002"),
     ("css/player/_round.css", "lxp-20260929"),
-    ("css/player/_answer.css", "lxp-20260929"),
+    ("css/player/_answer.css", "lxp-20261008"),
     ("css/player/_reveal.css", "lxp-20260930"),
     ("css/player/_finale.css", "lxp-20260929"),
 )

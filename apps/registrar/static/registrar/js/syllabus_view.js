@@ -73,6 +73,10 @@
         if (data.approved_at) {
             meta = meta ? meta + " · " + data.approved_at : data.approved_at;
         }
+        /* Bağlı sillabus (2026-10-08): «Təsdiq: <qrup> sillabusundan …» — server mətni. */
+        if (data.approval_note) {
+            meta = meta ? meta + " · " + data.approval_note : data.approval_note;
+        }
         setText(root, "meta", meta);
 
         var note = q(root, "note");

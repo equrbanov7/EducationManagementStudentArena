@@ -115,12 +115,43 @@
       if (x.scheduled_start) meta.push('<span><b>'+T.time+':</b> '+esc(x.scheduled_start)+(x.scheduled_end?('–'+esc(x.scheduled_end)):'')+'</span>');
       if (x.seat) meta.push('<span><b>'+T.seat+':</b> '+esc(x.seat)+'</span>');
       if (x.language) meta.push('<span><b>'+T.lang+':</b> '+esc(x.language)+'</span>');
+      // 2026-10-08: davam edən final cəhdi cihaza bağlıdır — mərkəz tələbənin cihazını dəyişə bilir.
+      var device="";
+      if (x.device_change_url) {
+        device = x.device_change_pending
+          ? '<div class="pl2-device"><span class="pl2-device__note">'+esc(T.deviceChangePending)+'</span></div>'
+          : '<div class="pl2-device"><button type="button" class="ems-btn ems-btn--sm pl2-device__btn" data-pl2-device-url="'+
+            esc(x.device_change_url)+'"><i class="fas fa-laptop" aria-hidden="true"></i> '+esc(T.deviceChange)+'</button></div>';
+      }
       body+='<div class="pl2-exam"><div class="pl2-exam__top"><div><div class="pl2-exam__title">'+esc(x.exam_title)+'</div>'+
         (x.subject?'<div class="pl2-exam__subject">'+esc(x.subject)+'</div>':'')+'</div>'+pin+'</div>'+
-        '<div class="pl2-meta">'+meta.join("")+'</div></div>';
+        '<div class="pl2-meta">'+meta.join("")+'</div>'+device+'</div>';
     });
     detail.innerHTML=head+body;
   }
+  function csrfToken(){
+    var m=document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    if (m) return decodeURIComponent(m[1]);
+    var inp=document.querySelector("input[name=csrfmiddlewaretoken]");
+    return inp?inp.value:"";
+  }
+  // «Cihaz dəyişikliyinə icazə ver» — server təsdiqi audit-ə yazır və mesajı lokallaşdırılmış qaytarır.
+  detail.addEventListener("click", function(ev){
+    var btn=ev.target.closest ? ev.target.closest("[data-pl2-device-url]") : null;
+    if (!btn || btn.disabled) return;
+    btn.disabled=true;
+    fetch(btn.getAttribute("data-pl2-device-url"), {
+      method:"POST", credentials:"same-origin",
+      headers:{"X-Requested-With":"XMLHttpRequest","X-CSRFToken":csrfToken()}
+    })
+      .then(function(r){ return r.json().catch(function(){ return null; }); })
+      .then(function(d){
+        var box=btn.parentNode;
+        if (d && d.success){ box.innerHTML='<span class="pl2-device__note">'+esc(d.message||T.deviceChangePending)+'</span>'; }
+        else { btn.disabled=false; box.insertAdjacentHTML("beforeend",'<span class="pl2-device__note pl2-device__note--error">'+esc((d&&d.error)||T.deviceChangeFailed)+'</span>'); }
+      })
+      .catch(function(){ btn.disabled=false; });
+  });
   input.addEventListener("input", function(){
     if (timer) clearTimeout(timer);
     var q=input.value.trim();

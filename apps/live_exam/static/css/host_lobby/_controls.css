@@ -1,0 +1,353 @@
+/* ═══ Aparıcı ekranı — idarə komponentləri (2026-10-08) ═══
+ * «Hər sual üçün vaxt» seçicisi (L2), bildirişlər (toast). Seçici native <select> DEYİL:
+ * düymə + açılan panel (hx-seg seqmentləri + xüsusi dəyər). Panel açıq fonlu kartdır
+ * (tənzimləmə çekməcəsi ilə eyni) — tünd səhnədə AA kontrast.
+ */
+
+/* ── Sürüşən konteyner (lobbi siyahısı, çekməcələr, uzun plitə mətni) — 2026-10-08 ── */
+.hx-scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+}
+
+.hx-scroll::-webkit-scrollbar { width: 10px; }
+.hx-scroll::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(148, 163, 184, 0.6); }
+.hx-scroll::-webkit-scrollbar-track { background: transparent; }
+.hx-scroll:focus-visible { outline: 3px solid var(--hx-gold, #ffc940); outline-offset: 2px; }
+
+/* ── «Hər sual üçün vaxt: [30 s ▾]» ───────────────────────────────── */
+.hx-timeset {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.hx-timeset__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 800 clamp(15px, 1.05cqw, 20px)/1.2 var(--hx-font);
+    color: var(--hx-muted);
+    white-space: nowrap;
+}
+
+.hx-timeset__label .hx-icon { width: 22px; height: 22px; color: var(--hx-gold); }
+
+.hx-timeset__toggle,
+.hx-timeset__value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 14px 0 18px;
+    border: 1px solid rgba(255, 201, 64, 0.55);
+    border-radius: 999px;
+    background: rgba(255, 201, 64, 0.16);
+    color: #fff;
+    font: 800 clamp(16px, 1.15cqw, 22px)/1 var(--hx-display);
+    white-space: nowrap;
+}
+
+.hx-timeset__value { padding-right: 18px; }
+.hx-timeset__toggle { cursor: pointer; transition: background-color 0.16s ease, border-color 0.16s ease; }
+.hx-timeset__toggle .hx-icon { width: 18px; height: 18px; transition: transform 0.16s var(--hx-ease-out); }
+.hx-timeset__toggle:hover { background: rgba(255, 201, 64, 0.26); border-color: var(--hx-gold); }
+.hx-timeset__toggle:focus-visible { outline: 3px solid var(--hx-gold); outline-offset: 2px; }
+.hx-timeset.is-open .hx-timeset__toggle .hx-icon { transform: rotate(180deg); }
+.hx-timeset.is-busy .hx-timeset__toggle { cursor: progress; opacity: 0.75; }
+
+.hx-timeset__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 48;
+    display: grid;
+    gap: 12px;
+    width: min(380px, calc(100vw - 32px));
+    padding: 14px;
+    border: 1px solid #d9deed;
+    border-radius: 20px;
+    background: #f5f7fc;
+    color: #141a3a;
+    box-shadow: 0 24px 60px rgba(3, 4, 18, 0.45);
+}
+
+.hx-timeset__menu[hidden] { display: none; }
+.hx-timeset__choices.hx-seg--wrap { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hx-timeset__choices .hx-seg__btn:first-child { grid-column: 1 / -1; }
+
+.hx-timeset__custom {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 96px auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.hx-timeset__custom-label { font: 800 13px/1.25 var(--hx-font); color: #3b4668; }
+
+.hx-timeset__input {
+    width: 100%;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid #c7cede;
+    border-radius: 12px;
+    background: #fff;
+    color: #10163a;
+    font: 800 18px/1 var(--hx-display);
+    text-align: center;
+}
+
+.hx-timeset__input:focus-visible { outline: 3px solid #1f55c4; outline-offset: 1px; }
+.hx-timeset__apply { min-height: 44px; padding: 0 16px; font-size: 14px; }
+.hx-timeset__note { margin: 0; font: 600 13px/1.4 var(--hx-font); color: #4f5b7d; }
+
+/* İdarə panelində (sürüşən sol panel) menyu yerində açılır — sürüşən konteynerdə kəsilmir. */
+.control-timeset.hx-timeset {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: 1px solid var(--hx-line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.control-timeset .hx-timeset__label { font-size: 13px; }
+.control-timeset .hx-timeset__toggle { min-height: 40px; font-size: 17px; }
+
+.control-timeset .hx-timeset__menu {
+    position: static;
+    width: 100%;
+    box-shadow: none;
+}
+
+.control-timeset .hx-timeset__choices.hx-seg--wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.control-timeset .hx-seg__btn { padding: 0 4px; white-space: nowrap; }
+.control-timeset .hx-timeset__custom { grid-template-columns: minmax(0, 1fr) auto; }
+.control-timeset .hx-timeset__custom-label { grid-column: 1 / -1; }
+
+/* Menyu panelin içində açıq ikən yapışqan düymələr onu örtməsin. */
+.control-bar:has(.control-timeset.is-open) .control-actions { position: static; box-shadow: none; }
+
+/* Proyektorda cari sualın vaxtı (sual başlığında). */
+.hx-pill--time { border-color: rgba(255, 201, 64, 0.5); background: rgba(255, 201, 64, 0.14); }
+.hx-pill--time .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }
+
+/* 2026-10-08 (L3): gec qoşulma açıqdırsa PIN sual başlığında. */
+.hx-pill--pin { margin-left: auto; gap: 10px; font-family: var(--hx-font); }
+.hx-pill--pin .hx-icon { width: 1.1em; height: 1.1em; color: var(--hx-gold); }
+.hx-pill--pin strong { font: 800 1.08em/1 var(--hx-display); letter-spacing: 0.08em; color: #fff; }
+
+.host-settings-badge--ok { background: #dcfce7; color: #166534; }
+
+/* ── «İştirakçılar» çekməcəsi (L6) — tənzimləmə çekməcəsinin çərçivəsi ilə ── */
+body.host-players-open .host-players-drawer {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
+    transition: transform 0.26s var(--hx-ease-out, ease), visibility 0s;
+}
+
+.host-players-drawer__total {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    color: #1f3f86;
+    font: 800 20px/1.2 var(--hx-display, sans-serif);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.host-players-drawer__tools {
+    display: grid;
+    gap: 10px;
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid #e3e7f3;
+    background: #fff;
+}
+
+.host-players-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid #c7cede;
+    border-radius: 14px;
+    background: #f8fafc;
+    color: #4f5b7d;
+}
+
+.host-players-search:focus-within { border-color: #94a3b8; box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.28); }
+.host-players-search .hx-i,
+.host-players-search .hx-icon { width: 20px; height: 20px; flex: 0 0 auto; }
+
+.host-players-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #10163a;
+    font: 700 16px/1 var(--hx-font, sans-serif);
+}
+
+.host-players-drawer__hint { margin: 0; font: 600 13px/1.45 var(--hx-font, sans-serif); color: #4f5b7d; }
+.host-players-drawer__body { gap: 8px; }
+
+.host-player-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid #e3e7f3;
+    border-radius: 16px;
+    background: #fff;
+    color: #10163a;
+}
+
+.host-player-row__img { display: block; width: 40px; height: 40px; border-radius: 50%; }
+
+.host-player-row__name {
+    min-width: 0;
+    overflow: hidden;
+    font: 800 16px/1.25 var(--hx-font, sans-serif);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.host-player-row__tag {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+    font: 800 11px/1.3 var(--hx-font, sans-serif);
+    white-space: nowrap;
+}
+
+.host-player-row__remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    background: #fff1f2;
+    color: #9f1239;
+    font: 800 14px/1 var(--hx-font, sans-serif);
+    cursor: pointer;
+}
+
+.host-player-row__remove .hx-icon { width: 18px; height: 18px; }
+.host-player-row__remove:hover:not(:disabled) { background: #ffe4e6; border-color: #fda4af; }
+.host-player-row__remove:focus-visible { outline: 3px solid #1f55c4; outline-offset: 2px; }
+.host-player-row__remove:disabled { opacity: 0.5; cursor: progress; }
+.host-players-empty { margin: 24px 0; font: 700 15px/1.4 var(--hx-font, sans-serif); color: #4f5b7d; text-align: center; }
+
+.control-toolbar__button--wide { grid-column: 1 / -1; }
+
+.control-badge {
+    min-width: 28px;
+    margin-left: auto;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: var(--hx-gold);
+    color: var(--hx-gold-ink);
+    font: 800 14px/1 var(--hx-display);
+    text-align: center;
+}
+
+/* ── Təsdiq dialoqu (native confirm() yox — proyektorda tam ekranı qırmır) ── */
+.hx-confirm {
+    position: fixed;
+    inset: 0;
+    z-index: 92;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: rgba(3, 4, 18, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.hx-confirm[hidden] { display: none; }
+
+.hx-confirm__card {
+    display: grid;
+    gap: 14px;
+    width: min(460px, 100%);
+    padding: 24px;
+    border-radius: 24px;
+    background: #fff;
+    color: #10163a;
+    box-shadow: 0 30px 70px rgba(3, 4, 18, 0.5);
+    animation: hxToastIn 0.2s var(--hx-ease-out) both;
+}
+
+.hx-confirm__title { margin: 0; font: 800 22px/1.25 var(--hx-display, sans-serif); overflow-wrap: anywhere; }
+.hx-confirm__body { margin: 0; font: 600 15px/1.5 var(--hx-font, sans-serif); color: #3b4668; }
+.hx-confirm__actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+
+.hx-confirm__btn {
+    min-height: 46px;
+    padding: 0 20px;
+    border: 1px solid #c7cede;
+    border-radius: 14px;
+    background: #fff;
+    color: #10163a;
+    font: 800 15px/1 var(--hx-font, sans-serif);
+    cursor: pointer;
+}
+
+.hx-confirm__btn:hover { background: #f1f5f9; }
+.hx-confirm__btn:focus-visible { outline: 3px solid #1f55c4; outline-offset: 2px; }
+.hx-confirm__btn--danger { border-color: transparent; background: #be123c; color: #fff; }
+.hx-confirm__btn--danger:hover { background: #9f1239; }
+
+/* ── Bildirişlər ───────────────────────────────────────────────────── */
+.hx-toasts {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 95;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    width: min(560px, calc(100vw - 32px));
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.hx-toast {
+    max-width: 100%;
+    padding: 12px 20px;
+    border-radius: 16px;
+    background: rgba(8, 11, 36, 0.94);
+    color: #fff;
+    font: 800 16px/1.35 var(--hx-font);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.45);
+    animation: hxToastIn 0.24s var(--hx-ease-out) both;
+}
+
+.hx-toast--ok { border-left: 6px solid #22c55e; }
+.hx-toast--error { border-left: 6px solid #f43f5e; }
+.hx-toast.is-leaving { opacity: 0; transition: opacity 0.24s ease; }
+
+@keyframes hxToastIn {
+    from { opacity: 0; transform: translate3d(0, 12px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hx-toast,
+    .hx-timeset__toggle .hx-icon { animation: none !important; transition: none !important; }
+}

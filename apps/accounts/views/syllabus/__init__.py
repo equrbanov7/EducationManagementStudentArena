@@ -12,6 +12,7 @@ modullarını import etmir) — modul-sərhəd qrafında yeni dövr yaranmır.
 from .api import syllabus_action, syllabus_preview, syllabus_section_save  # noqa: F401
 from .detail import syllabus_detail, syllabus_detail_pdf  # noqa: F401
 from .editor import build_syllabus_editor_section  # noqa: F401
+from .reuse_api import syllabus_reuse_action, syllabus_reuse_options  # noqa: F401
 from .review import build_syllabus_review_section  # noqa: F401
 from .review_api import syllabus_decision, syllabus_review_open  # noqa: F401
 from .section import build_syllabus_list_section  # noqa: F401
@@ -25,6 +26,8 @@ __all__ = [
     "syllabus_detail",
     "syllabus_detail_pdf",
     "syllabus_preview",
+    "syllabus_reuse_action",
+    "syllabus_reuse_options",
     "syllabus_review_open",
     "syllabus_section_save",
 ]

@@ -18,6 +18,7 @@ from apps.exams.features import (
 )
 from apps.exams.models import CodingExamQuestion, CodingTestCase, Exam, StudentGroup
 from apps.organizations.public import organization_role_user_queryset
+from core.datetime_input import DayFirstDateTimeField, DayFirstDateTimeInput
 from core.roles import ProfileRole
 
 from .coding import dump_test_cases, parse_test_cases
@@ -37,6 +38,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
 
     class Meta:
         model = Exam
+        field_classes = {"start_datetime": DayFirstDateTimeField, "end_datetime": DayFirstDateTimeField}
         fields = [
             "title",
             "description",
@@ -97,28 +99,11 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
                     "class": "form-check-input",
                 }
             ),
-            "start_datetime": forms.DateTimeInput(
-                attrs={
-                    "class": "form-control",
-                    "type": "datetime-local",
-                    "lang": "en-GB",
-                    "step": "60",
-                    "data-hour-format": "24",
-                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "start_datetime"),
-                },
-                format="%Y-%m-%dT%H:%M",
-            ),
-            "end_datetime": forms.DateTimeInput(
-                attrs={
-                    "class": "form-control",
-                    "type": "datetime-local",
-                    "lang": "en-GB",
-                    "step": "60",
-                    "data-hour-format": "24",
-                    "placeholder": pgettext_lazy("exams.form.exam.placeholder", "end_datetime"),
-                },
-                format="%Y-%m-%dT%H:%M",
-            ),
+            # 2026-10-08 (müəllim rəyi): native datetime-local brauzer dilinə tabe idi
+            # (en-US: mm/dd/yyyy + AM/PM; «06/10» iyun 10). İndi HƏMİŞƏ gg.aa.iiii ss:dd
+            # (24 saat) mətn sahəsi + təqvim seçici; server ISO-nu da qəbul edir.
+            "start_datetime": DayFirstDateTimeInput(),
+            "end_datetime": DayFirstDateTimeInput(),
             "is_public": forms.CheckboxInput(
                 attrs={
                     "class": "form-check-input",
@@ -306,20 +291,14 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         self.fields["is_active"].initial = stable_active_state
         self.initial["is_active"] = stable_active_state
 
-        self.fields["start_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
-        self.fields["end_datetime"].input_formats = ["%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S"]
         self.fields["random_question_count"].required = False
-        self.fields["random_question_count"].help_text = (
-            "0 yazsan, bütün aktiv suallar düşəcək. Boş qalarsa standart 10 qəbul olunur. "
-            "Test, yazılı və praktiki imtahanlara aiddir."
-        )
-        self.fields["fair_question_distribution_enabled"].help_text = (
-            "Eyni sualın çox tələbəyə düşməməsi, mümkün olduqca hər tələbəyə fərqli sualların "
-            "və kifayət qədər blok varsa fərqli blokların düşməsi üçün."
-        )
-        self.fields["ai_difficulty_balance_enabled"].help_text = (
-            "AI sualların ağırlıq dərəcəsini yoxlayır və tələbələrə oxşar çətinlikdə sual dəsti "
-            "düşməsinə çalışır. AI açarı yoxdursa mövcud difficulty dəyərləri istifadə olunur."
+        # 2026-10-08 (müəllim rəyi E2): bu köməkçi mətn gettext-siz idi (ingilis UI-da da
+        # «0 yazsan…» görünürdü) və qeyri-rəsmi idi. Rəsmi AZ msgid + tərcümələr;
+        # «fair»/«AI» köməkçiləri Meta.help_texts-dəki (tərcümə olunmuş) mətnlərdir.
+        self.fields["random_question_count"].help_text = pgettext_lazy(
+            "exams.form.exam.help",
+            "0 yazsanız, bütün aktiv suallar düşəcək. Boş qalarsa, standart olaraq 10 sual götürülür. "
+            "Test, yazılı və praktiki imtahanlara aiddir.",
         )
         self._coding_field_names = [
             "coding_language",
@@ -513,7 +492,8 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
     @staticmethod
     def _ensure_local_aware(value):
         """
-        `datetime-local` input naive gəlir. İstifadəçinin seçdiyi saat onun yerli
+        Sahə (DayFirstDateTimeField) naive mətni artıq cari zonada aware edir; bu
+        ehtiyat qatıdır (başqa yoldan naive dəyər gələrsə). İstifadəçinin seçdiyi saat onun yerli
         vaxtıdır (TIME_ZONE = Asia/Baku) — onu açıq şəkildə cari zona ilə aware
         edirik ki, DB sürücüsü naive dəyəri UTC kimi saxlayıb 4 saat sürüşmə
         yaratmasın. Aware gəlibsə, toxunmuruq.

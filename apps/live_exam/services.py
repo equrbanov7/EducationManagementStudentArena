@@ -25,7 +25,7 @@ auto_reveal_if_due        – autoplay + vaxt bitib + host reveal etməyib → s
 finish_session            – mark a session as finished
 skip_question_intro       – intro-nu keçib cavab pəncərəsini dərhal açır
 toggle_session_lock       – toggle (or explicitly set) the session lock flag
-remove_player             – remove a player from the lobby (açıq socket-ləri də bağlanır)
+remove_player             – oyunçunu çıxarır: lobbidə silir, oyun gedərkən «çıxarıldı» (L6, 2026-10-08)
 update_host_settings      – ayarları yazır (typed/multi yoxlaması ilə) və yayımlayır
 """
 
@@ -53,6 +53,7 @@ from apps.live_exam.domain.session import (
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle
+from apps.live_exam.roster import eligible_players
 from apps.live_exam.session_settings import (
     get_host_session_settings,
     public_session_settings,
@@ -65,6 +66,7 @@ from apps.live_exam.transport import (
     broadcast_play,
     broadcast_player_kicked,
     broadcast_players,
+    build_answer_progress_payload,
     build_lobby_state_payload,
     build_question_payload,
     build_question_phase_payload,
@@ -284,8 +286,8 @@ def reveal_if_all_answered(session_id: int, question_id: int, *, skip_locked: bo
         exam_question = get_active_question(locked)
         if exam_question is None or int(exam_question.id) != int(question_id):
             return False
-        total_players = LivePlayer.objects.filter(session_id=locked.id).count()
-        answered = LiveAnswer.objects.filter(session_id=locked.id, question_id=question_id).count()
+        total_players = eligible_players(locked.id, int(locked.current_index or 0)).count()
+        answered = LiveAnswer.objects.filter(session_id=locked.id, question_id=question_id).in_game().count()
         if total_players <= 0 or answered < total_players:
             return False
         _apply_reveal(locked, exam_question, revealed_at=timezone.now())
@@ -384,31 +386,80 @@ def toggle_session_lock(session: LiveSession, *, locked: bool | None = None) -> 
     return row.is_locked
 
 
-def remove_player(session: LiveSession, player_id: int) -> bool:
-    """
-    Remove a player from the lobby by ID.
+def remove_player(session: LiveSession, player_id: int) -> dict[str, Any] | None:
+    """Aparıcı oyunçunu çıxarır — lobbidə VƏ oyun gedərkən (2026-10-08, L6).
 
-    Returns ``True`` if removed, ``False`` if not found.
+    * Lobbidə: sətir silinir (əvvəlki kimi — hələ cavab yoxdur).
+    * Oyun gedərkən: ``removed_at`` yazılır (soft) — müəllimin nəticəsində «çıxarıldı» kimi qalır,
+      liderlik / saylar / paylanma onu görmür (``LivePlayer.objects`` çıxarılmamışlardır).
+    * Hər iki halda klient yadda saxlanılır (LXS-09: eyni cookie ilə qayıtmır), açıq socket-ləri
+      ``kicked`` + 4403 ilə bağlanır; cari sualda qalanların hamısı cavab veribsə raund açılır.
 
-    Raises
-    ------
-    ValueError
-        If the session is not in STATE_LOBBY.
+    ``None`` — oyunçu tapılmadı. ``ValueError("session_finished")`` — bitmiş oyunda dəyişiklik yoxdur.
+    Qaytarır: ``{"player_id", "nickname", "score", "mode": "deleted"|"removed", "state"}`` (audit üçün).
     """
+    bundle = None
     with transaction.atomic():
         locked = lock_session(session)
-        if locked.state != LiveSession.STATE_LOBBY:
-            raise ValueError("players_can_only_be_removed_in_lobby")
-        player = LivePlayer.objects.filter(session_id=locked.id, id=player_id).first()
+        if locked.state == LiveSession.STATE_FINISHED:
+            raise ValueError("session_finished")
+        player = LivePlayer.objects.select_for_update().filter(session_id=locked.id, id=player_id).first()
         if player is None:
-            return False
+            return None
         # LX-SEC LXS-09: çıxarılan klient eyni cookie ilə yenidən qoşula bilməsin.
-        remember_kicked_client(locked, player.client_id)
-        player.delete()
+        remember_kicked_client(locked, player.client_id)  # ``locked.host_settings``-i də yeniləyir
+        summary = {
+            "player_id": player.id,
+            "nickname": player.nickname,
+            "score": int(player.score or 0),
+            "state": locked.state,
+            "mode": "deleted" if locked.state == LiveSession.STATE_LOBBY else "removed",
+        }
+        if locked.state == LiveSession.STATE_LOBBY:
+            player.delete()
+        else:
+            player.removed_at = timezone.now()
+            player.is_connected = False
+            player.save(update_fields=["removed_at", "is_connected"])
+            bundle = _reveal_if_rest_answered(locked)
+    _sync_instance(session, locked, _GAME_FIELDS)
     lobby_state = build_lobby_state_payload(locked)
     _after_commit(lambda: broadcast(locked.pin, lobby_state, "lobby"))
     _after_commit(lambda: broadcast_player_kicked(locked.pin, player_id))
-    return True
+    if summary["mode"] == "removed" and locked.state == LiveSession.STATE_QUESTION and bundle is None:
+        progress = _progress_payload(locked)
+        if progress is not None:
+            _after_commit(lambda: broadcast_host(locked.pin, progress))
+    if bundle is not None:
+        _after_commit(lambda: broadcast_bundle(locked.pin, bundle))
+    return summary
+
+
+def _reveal_if_rest_answered(locked: LiveSession):
+    """(Kilid altında) çıxarılandan sonra qalanların hamısı cavab veribsə reveal — ``Bundle`` və ya ``None``."""
+    if locked.state != LiveSession.STATE_QUESTION:
+        return None
+    exam_question = get_active_question(locked)
+    if exam_question is None:
+        return None
+    eligible = eligible_players(locked.id, int(locked.current_index or 0)).count()
+    answered = LiveAnswer.objects.filter(session_id=locked.id, question_id=exam_question.id).in_game().count()
+    if eligible <= 0 or answered < eligible:
+        return None
+    revealed_at = timezone.now()
+    _apply_reveal(locked, exam_question, revealed_at=revealed_at)
+    return build_reveal_bundle(locked, exam_question.id, revealed_at=revealed_at, exam_question=exam_question)
+
+
+def _progress_payload(locked: LiveSession) -> dict[str, Any] | None:
+    question_id = int(locked.current_question_id or 0)
+    if not question_id:
+        return None
+    return build_answer_progress_payload(
+        question_id=question_id,
+        answered_count=LiveAnswer.objects.filter(session_id=locked.id, question_id=question_id).in_game().count(),
+        total_players=eligible_players(locked.id, int(locked.current_index or 0)).count(),
+    )
 
 
 def update_host_settings(session: LiveSession, raw_updates: dict | None, *, max_participants_cap: int) -> dict:

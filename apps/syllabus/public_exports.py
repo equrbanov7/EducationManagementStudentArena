@@ -21,6 +21,7 @@ from .constants import SyllabusStatus  # noqa: F401
 from .document import BLOCK_TITLES  # noqa: F401
 from .document import build_document  # noqa: F401
 from .document import build_preview_blocks  # noqa: F401
+from .document import reuse_approval_note  # noqa: F401
 from .policy import escalation_days  # noqa: F401
 from .policy import sla_days  # noqa: F401
 from .services import section_data_map  # noqa: F401
@@ -52,6 +53,7 @@ __all__ = [
     "WEEK_ROWS",
     "build_document",
     "build_preview_blocks",
+    "reuse_approval_note",
     "escalation_days",
     "section_data_map",
     "services",

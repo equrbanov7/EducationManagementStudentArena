@@ -42,6 +42,8 @@ jobs:
   unit-tests:
     name: 🧪 Tests (Python ${{ inputs.python-version }}${{ inputs.shards != '1' && format(' · shard {0}/{1}', inputs.shard, inputs.shards) || '' }})
     runs-on: ubuntu-latest
+    # 2026-10-08: shard bir dəfə 50 dəq ilişdi (defolt limit 6 saat) — ilişmə tez yıxılsın.
+    timeout-minutes: ${{ inputs.shards != '1' && 45 || 150 }}
 
     env:
       DJANGO_SETTINGS_MODULE: "config.settings.test"

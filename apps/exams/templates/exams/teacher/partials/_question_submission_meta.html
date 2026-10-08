@@ -59,10 +59,18 @@ azı bir qrup MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənl�
                     {% endfor %}
                 </select>
             </div>
-            <span class="qsubm-hint">
-                {% if teacher_subjects %}{% trans "Yalnız sizin fənləriniz görünür." context "exams.template.question_submission" %}
-                {% else %}{% trans "Sizə hələ fənn təyin olunmayıb — qrupunuza fənn əlavə edilməlidir." context "exams.template.question_submission" %}{% endif %}
-            </span>
+            {% comment %}2026-10-08 (S2): fənlər dərs yükündən (cari semestrin açılışları +
+            təsdiqlənmiş bölgü) gəlir; fənn seçilə bilmirsə boş siyahı əvəzinə NİYƏ
+            (`submission_notices`, apps/exams/services/submission_sources.py).{% endcomment %}
+            {% if teacher_subjects %}
+            <span class="qsubm-hint">{% trans "Cari semestr üzrə dərs yükünüzdəki fənlər görünür." context "exams.template.question_submission" %}</span>
+            {% endif %}
+            {% for notice in submission_notices %}
+            <div class="qsubm-empty-note" role="status" data-qsub-subject-notice>
+                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                <span>{{ notice }}</span>
+            </div>
+            {% endfor %}
         </div>
 
         <div class="qsubm-field">
@@ -99,7 +107,7 @@ azı bir qrup MƏCBURİDİR (server də yoxlayır). Fənn müəllimin ÖZ fənl�
             {% else %}
             <div class="qsubm-empty-note">
                 <i class="fas fa-circle-info"></i>
-                {% trans "Sizə hələ qrup təyin olunmayıb. Qrup üçün imtahan mərkəzi/administrator ilə əlaqə saxlayın." context "exams.template.question_submission" %}
+                {% trans "Cari semestrin dərs yükündə sizə bağlı qrup tapılmadı — kafedra müdirinə müraciət edin." context "exams.template.question_submission" %}
             </div>
             {% endif %}
         </div>

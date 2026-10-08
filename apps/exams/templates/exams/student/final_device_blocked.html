@@ -1,0 +1,29 @@
+{% extends "errors/_base.html" %}
+{% load i18n %}
+{% comment %}
+Təhlükəsizlik dizaynı 2026-10-08: davam edən final cəhdi başladığı cihaza bağlıdır
+(apps/exams/services/final_center/device_binding.py). Başqa cihazdan açılanda bu səhifə
+göstərilir — sual məzmunu YOXDUR. Nəzarətçi «cihaz dəyişikliyi»ni təsdiqləyəndən sonra
+«Səhifəni yenilə» imtahanı bu cihazda davam etdirir.
+{% endcomment %}
+{% block page_title %}{% trans 'İmtahan başqa cihazda davam edir' context 'exams.final_center.device' %}{% endblock %}
+{% block code %}403{% endblock %}
+{% block code_label %}403{% endblock %}
+{% block kicker_icon %}fa-laptop{% endblock %}
+{% block kicker %}{% trans 'Final imtahanı' context 'exams.final_center.device' %}{% endblock %}
+{% block title %}{% trans 'İmtahan başqa cihazda davam edir' context 'exams.final_center.device' %}{% endblock %}
+{% block description %}
+    <p>{{ message }}</p>
+    <p>{% trans 'Cavablarınız serverdə saxlanılıb — təsdiqdən sonra imtahan qaldığı yerdən davam edəcək.' context 'exams.final_center.device' %}</p>
+{% endblock %}
+{% block pills %}
+    {% if exam %}<span class="error-pill"><i class="fas fa-file-pen" aria-hidden="true"></i> {{ exam.title }}</span>{% endif %}
+    <span class="error-pill"><i class="fas fa-user-shield" aria-hidden="true"></i> {% trans 'Nəzarətçi təsdiqi' context 'exams.final_center.device' %}</span>
+{% endblock %}
+{% block actions %}
+    <a href="{{ retry_url }}" class="error-btn error-btn-primary">
+        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+        {% trans 'Səhifəni yenilə' context 'exams.final_center.device' %}
+    </a>
+{% endblock %}
+{% block footer_note %}{% trans 'Hər cihaz dəyişikliyi nəzarətçi tərəfindən təsdiqlənir və jurnalda qeyd olunur.' context 'exams.final_center.device' %}{% endblock %}

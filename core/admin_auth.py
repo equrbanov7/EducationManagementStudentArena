@@ -48,24 +48,33 @@ class AdminOTPForm(forms.Form):
         return code
 
 
-def admin_2fa_required_for_user(user) -> bool:
+def admin_2fa_required_for_user(user, *, is_superadmin=None) -> bool:
+    """2FA bu hesab üçün məcburidirmi?
+
+    ``is_superadmin`` — istəyə bağlı tənbəl (lazy) predikat: WebSocket qapısı (2026-10-08)
+    superadmin faktını sessiya keşindən verir ki, hər qoşulmada profil sorğusu getməsin.
+    Verilməyibsə ``core.permissions.is_superadmin_user`` (HTTP, köhnə davranış).
+    """
     # Audit 2026-09-28 SA-04: 2FA yalnız ``is_staff`` üçün deyil — profil rolu
     # ``superadmin`` olan (``is_superuser=False``) hesab da level-999 səlahiyyət
     # daşıyır. Vahid predikat: ``core.permissions.is_superadmin_user``.
     from core.permissions import is_superadmin_user
 
-    return bool(
+    if not (
         getattr(settings, "ADMIN_2FA_REQUIRED", False)
         and user
         and getattr(user, "is_authenticated", False)
         and getattr(user, "is_active", False)
-        and (getattr(user, "is_staff", False) or is_superadmin_user(user))
-    )
+    ):
+        return False
+    if getattr(user, "is_staff", False):
+        return True
+    return bool(is_superadmin() if is_superadmin is not None else is_superadmin_user(user))
 
 
-def admin_2fa_verified(request) -> bool:
+def admin_2fa_verified(request, *, is_superadmin=None) -> bool:
     user = getattr(request, "user", None)
-    if not admin_2fa_required_for_user(user):
+    if not admin_2fa_required_for_user(user, is_superadmin=is_superadmin):
         return True
     expected_user_id = str(getattr(user, "pk", ""))
     verified_user_id = str(request.session.get(ADMIN_2FA_VERIFIED_USER_SESSION_KEY, ""))
@@ -242,7 +251,23 @@ class AdminOTPGateMiddleware:
 
     def __call__(self, request):
         user = getattr(request, "user", None)
-        if admin_2fa_required_for_user(user) and not admin_2fa_verified(request):
+        superadmin = None
+        if getattr(settings, "ADMIN_2FA_REQUIRED", False) and getattr(user, "is_authenticated", False):
+            # 2026-10-08: predikat onsuz da hesablanır (prod-da hər autentifikasiyalı sorğu) —
+            # nəticə sessiyaya fakt kimi yazılır ki, WebSocket qapısı profil sorğusu verməsin.
+            from core.access_facts import FACT_SUPERADMIN, remember_access_facts
+            from core.permissions import is_superadmin_user
+
+            superadmin = is_superadmin_user(user)
+            remember_access_facts(request, user, **{FACT_SUPERADMIN: superadmin})
+
+        def is_superadmin():
+            return superadmin
+
+        predicate = is_superadmin if superadmin is not None else None
+        if admin_2fa_required_for_user(user, is_superadmin=predicate) and not admin_2fa_verified(
+            request, is_superadmin=predicate
+        ):
             path = request.path_info
             if not any(path.startswith(prefix) for prefix in self._exempt_prefixes()):
                 from django.shortcuts import redirect

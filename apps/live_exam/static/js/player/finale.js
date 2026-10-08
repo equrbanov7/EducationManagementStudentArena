@@ -3,12 +3,12 @@
 //  * 2-ci/3-cü: medal + rəqs; digərləri: «Əla oyun idi!» kartı + statistika (`my_stats`).
 // Rəqs LX-FE-STAGE-in API-si ilə (data-dance, live_avatar.css); o CSS yoxdursa öz ehtiyat
 // animasiyamız (.lxp-dance-fallback) işləyir. Yer/xal/statistika yalnız serverdən gəlir.
-import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261002';
-import { playSound } from './audio.js?v=lx20261002';
-import { UI } from './dom.js?v=lx20261002';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261002';
+import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261008';
+import { playSound } from './audio.js?v=lx20261008';
+import { UI } from './dom.js?v=lx20261008';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261008';
 import {
     esc,
     fmt,
@@ -22,8 +22,8 @@ import {
     pickFirst,
     toInt,
     tr,
-} from './utils.js?v=lx20261002';
-import { mountView } from './views.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { mountView } from './views.js?v=lx20261008';
 
 const CROWN_SVG =
     '<svg viewBox="0 0 64 44" aria-hidden="true" focusable="false"><path d="M6 14l13 11L32 5l13 20 13-11-5 26H11z" fill="#fcd34d" stroke="#b45309" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="5" r="4" fill="#fb7185"/><circle cx="6" cy="14" r="3.5" fill="#38bdf8"/><circle cx="58" cy="14" r="3.5" fill="#34d399"/><rect x="11" y="34" width="42" height="6" rx="2" fill="#f59e0b"/></svg>';

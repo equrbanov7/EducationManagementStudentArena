@@ -123,6 +123,19 @@ class LiveSession(models.Model):
         return ExamQuestion.objects.filter(exam=self.exam).select_related("question").order_by("order")
 
 
+class ActiveLivePlayerManager(models.Manager):
+    """Default menecer: oyundan ÇIXARILMAMIŞ oyunçular (2026-10-08, L6).
+
+    Oyun gedərkən çıxarılan oyunçunun sətri (və cavabları) müəllimin nəticəsi üçün qalır, amma
+    liderlik cədvəli, lobbi siyahısı, saylar, token autentifikasiyası onu görmür — ``session.players``
+    də bu menecerlə işləyir. Hamısı lazım olanda (qoşulma ad/klient yoxlaması, nəticə səhifəsi):
+    ``LivePlayer.all_objects``.
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(removed_at__isnull=True)
+
+
 class LivePlayer(models.Model):
     session = models.ForeignKey(LiveSession, on_delete=models.CASCADE, related_name="players")
 
@@ -141,9 +154,21 @@ class LivePlayer(models.Model):
     is_connected = models.BooleanField(default=True)
     last_seen = models.DateTimeField(default=timezone.now)
 
+    # 2026-10-08 (L3): gec qoşulan oyunçu NÖVBƏTİ sual sərhədindən oyundadır — bu indeksdən
+    # (0-dan) əvvəlki suallara cavab vermir, onların cavablarını görmür və «hamı cavab verdi»
+    # sayına düşmür. Lobbidə qoşulanlar üçün 0.
+    active_from_index = models.PositiveIntegerField(default=0)
+
+    # 2026-10-08 (L6): aparıcı oyun gedərkən çıxarıb — liderlikdən gizlədilir, eyni kimliklə qayıtmır.
+    removed_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = ActiveLivePlayerManager()
+    all_objects = models.Manager()
+
     class Meta:
+        base_manager_name = "all_objects"
         constraints = [models.UniqueConstraint(fields=["session", "client_id"], name="uniq_player_per_session_client")]
 
     def __str__(self):
@@ -167,6 +192,10 @@ class LiveAnswerQuerySet(models.QuerySet):
 
     def get(self, *args, **kwargs):
         return super().get(*args, **self._normalize_kwargs(kwargs))
+
+    def in_game(self):
+        """Oyunda qalan oyunçuların cavabları (2026-10-08 L6: çıxarılanınkı paylanma/saylara düşmür)."""
+        return self.filter(player__removed_at__isnull=True)
 
 
 class LiveAnswer(models.Model):

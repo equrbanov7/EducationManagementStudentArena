@@ -22,6 +22,9 @@ qeydiyyatı 4 yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "sort_keys": tuple[str],              # recent | subject | completion | status
     "can_create": bool,
     "can_review": bool,
+    "broad_scope": bool,                  # siyahı özündən BAŞQASINI da göstərir (rəhbər)
+    "mine": bool,                         # «Mənim fənlərim» süzgəci tətbiq olunub
+    "actor": SyllabusActor,
 }``
 
 2. REDAKTOR CONTEXT-i — ``build_syllabus_editor_context``
@@ -110,6 +113,7 @@ from .services import (  # noqa: F401
     available_actions,
     can_view,
     coverage_report,
+    has_broad_view_scope,
     has_decision_scope,
     has_escalated_decision_scope,
     has_review_scope,
@@ -161,9 +165,17 @@ def build_syllabus_list_context(
     statuses=None,
     search: str = "",
     sort: str = "recent",
+    mine: bool = False,
 ) -> dict:
-    """«Müəllim — Sillabuslar» bölməsinin context-i."""
+    """«Müəllim — Sillabuslar» bölməsinin context-i.
+
+    ``mine`` (sahib 2026-10-08): GENİŞ əhatəli rəhbər üçün «Mənim fənlərim» —
+    dəst, sayğaclar və KPI yalnız ``own_q`` üzrə.  Əhatəsi onsuz da «öz»
+    olan müəllimdə süzgəc mənasızdır və nəzərə alınmır.
+    """
     actor = resolve_actor(getattr(request, "user", None), organization, request=request)
+    broad = has_broad_view_scope(actor)
+    mine = bool(mine and broad)
     queryset = list_syllabi(
         organization=organization,
         actor=actor,
@@ -173,6 +185,7 @@ def build_syllabus_list_context(
         statuses=statuses,
         search=search,
         sort=sort,
+        mine=mine,
     )
     return {
         "syllabi": queryset,
@@ -189,6 +202,9 @@ def build_syllabus_list_context(
         "sort_keys": ("recent", "subject", "completion", "status"),
         "can_create": actor.has(PERM_EDIT),
         "can_review": actor.has(PERM_REVIEW),
+        "broad_scope": broad,
+        "mine": mine,
+        "actor": actor,
     }
 
 

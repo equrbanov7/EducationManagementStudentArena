@@ -6,6 +6,7 @@ buraya köçürülüb; davranış eynidir. Əlavə: sual şəbəkəsi
 seçimi və idxal sütunlarında S1..Sn.
 """
 
+from django.template.defaultfilters import floatformat
 from django.urls import reverse
 from django.utils.translation import pgettext
 
@@ -72,8 +73,7 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
         {"value": str(n), "label": str(n) if n else pgettext(_CTX, "0 — yalnız yekun bal")}
         for n in range(0, service.exam_score_questions.QUESTION_COUNT_MAX + 1)
     ]
-    section["question_score_options"] = list(range(0, section["question_max"] + 1))
-    _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX)
+    _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX, section["question_count"])
     # Təsdiq dialoqu üçün server şkalası (json_script) — hərf/keçid JS-də eyni qayda ilə.
     section["confirm_config"] = {
         "letter_bands": roster["letter_bands"],
@@ -97,18 +97,28 @@ def _fill_offering(section, offering, period, service, sheets_service, selected_
     section["import_apply_url"] = reverse("accounts:exam_score_import_apply")
 
 
-def _attach_question_cells(rows, question_count_max) -> None:
-    """Hər sətrə S1..S10 xanaları (`index`, `label`, `value`) — şablonda iç-içə döngü əvəzinə hazır siyahı.
+def _attach_question_cells(rows, question_count_max, question_count) -> None:
+    """Hər sətrə S1..S10 xanaları (`index`, `label`, `value`, `off`) — şablonda iç-içə döngü əvəzinə hazır siyahı.
 
-    Sual sayından artıq xanalar şablonda `hidden` + `disabled` render olunur; JS
+    Sual sayından artıq xanalar (`off`) şablonda `hidden` + `disabled` render olunur; JS
     «Sual sayı» dəyişəndə açıb-bağlayır. Sonuncu daxiletmənin bölgüsü dəyər kimi.
+
+    2026-10-08 (tutum testi): xananın 0..max variantları serverdə render OLUNMUR
+    (`_roster.html` şərhinə bax) — `question_score_options` siyahısı artıq yoxdur;
+    imtahan balının göstərişi (`exam_display`, `floatformat:0` ilə eyni) bir dəfə hesablanır.
     """
     for row in rows:
         values = [str(v) for v in (row.get("question_scores") or [])]
         row["question_cells"] = [
-            {"index": index, "label": f"S{index}", "value": values[index - 1] if index <= len(values) else ""}
+            {
+                "index": index,
+                "label": f"S{index}",
+                "value": values[index - 1] if index <= len(values) else "",
+                "off": index > question_count,
+            }
             for index in range(1, question_count_max + 1)
         ]
+        row["exam_display"] = floatformat(row["exam_score"], 0) if row.get("exam_score") is not None else ""
 
 
 def _steps(*, offering, saved) -> list:

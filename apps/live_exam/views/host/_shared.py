@@ -5,7 +5,8 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion
-from apps.live_exam.domain.session import get_total_questions
+from apps.live_exam.constants import QUESTION_SECONDS_MAX, QUESTION_SECONDS_MIN, QUESTION_SECONDS_PRESETS
+from apps.live_exam.domain.session import exam_default_question_seconds, get_total_questions
 from apps.live_exam.models import LiveSession
 from apps.live_exam.session_settings import (
     allowed_max_participants_for_user,
@@ -68,4 +69,11 @@ def _host_session_context(request, session: LiveSession, *, auto_fullscreen: str
         # 2026-09-29: yazılı cavab ayarları üçün sual kataloqu (qəbul cavablarını ehtiva edir —
         # yalnız host səhifələrinə verilir; şablon `json_script:"hostQuestions"` ilə ötürür).
         "host_questions": host_question_catalog(session),
+        # 2026-10-08 (L2): «Hər sual üçün vaxt» seçicisi (lobbi + idarə paneli).
+        "question_time_config": {
+            "default": exam_default_question_seconds(session.exam),
+            "presets": list(QUESTION_SECONDS_PRESETS),
+            "min": QUESTION_SECONDS_MIN,
+            "max": QUESTION_SECONDS_MAX,
+        },
     }

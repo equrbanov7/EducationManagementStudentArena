@@ -50,21 +50,36 @@ def _active_membership_roles(*, organization, user):
 
 
 def eligible_instructor_user_ids(*, organization) -> set:
-    """Return active member IDs whose active role grants grade input."""
+    """Return active member IDs whose active role grants grade input.
+
+    2026-10-08 (tutum testi): icazə ROL səviyyəsində yoxlanır — əvvəl təşkilatın
+    BÜTÜN üzvlükləri (tələbələr daxil; QKU ~8 400, test universiteti ~50 000 sətir)
+    ``select_related("role")`` ilə yüklənib Python-da süzülürdü (İmtahan balı səhifəsi
+    hər açılışda). Qayda dəyişməyib: aktiv təşkilat/istifadəçi/üzvlük + eyni tenantın
+    aktiv rolu + ``grade.input`` — yalnız rol icazəsi rol başına BİR dəfə hesablanır
+    və üzvlük sorğusu ``role_id IN (…)`` ilə yalnız id-ləri qaytarır (iki sorğu).
+    """
+    Role = django_apps.get_model("organizations", "Role")
     Membership = django_apps.get_model("organizations", "Membership")
-    memberships = Membership.objects.filter(
-        organization_id=_pk(organization),
-        organization__is_active=True,
-        user__is_active=True,
-        is_active=True,
-        role__is_active=True,
-        role__organization_id=_pk(organization),
-    ).select_related("role")
-    return {
-        membership.user_id
-        for membership in memberships
-        if has_permission(list(membership.role.permissions or []), INSTRUCTOR_PERMISSION)
-    }
+    organization_id = _pk(organization)
+    role_ids = [
+        role_id
+        for role_id, permissions in Role.objects.filter(organization_id=organization_id, is_active=True).values_list(
+            "id", "permissions"
+        )
+        if has_permission(list(permissions or []), INSTRUCTOR_PERMISSION)
+    ]
+    if not role_ids:
+        return set()
+    return set(
+        Membership.objects.filter(
+            organization_id=organization_id,
+            organization__is_active=True,
+            user__is_active=True,
+            is_active=True,
+            role_id__in=role_ids,
+        ).values_list("user_id", flat=True)
+    )
 
 
 def validate_active_member(*, organization, user, field_name="student") -> None:

@@ -98,10 +98,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 <script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20260913-1"></script>
 {% endif %}
 {% if 'my-workload' in asset_sections %}
-<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20260913-1"></script>
+<script src="{% static 'accounts/js/profile/workload_my.js' %}?v=20261008-1"></script>
 {% endif %}
 {% if 'syllabus-list' in asset_sections %}
-<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20260830-1"></script>
+<script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20261008-prev"></script>
+<script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261008-prev"></script>
 {% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —
 mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/syllabus_editor_fields.js' %}?v=20260831-carry"></script>
@@ -134,7 +135,7 @@ paketi (STATS_DATA verilmədiyi üçün) heç nə etmirdi və çıxarıldı. İs
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
-<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20260830-syl1"></script>
+<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261008-reuse"></script>
 {% endif %}
 {% comment %}Rol / icazə bölmələri (2026-09-09 redizayn) — dialoq prefill-i,
 təsdiq axını və imzalı əməliyyat tokeni. `EMSDelegate`/`EMSOverlay` üzərində
@@ -187,9 +188,11 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 <script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261001-examqa"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
-<script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20260914-2"></script>
+<script src="{% static 'exams/js/exam_create_edit_modal/form.js' %}?v=20261008-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
-<script src="{% static 'exams/js/exam_wizard.js' %}?v=20260914-2"></script>
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20261008-1"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260926-search"></script>
 {% endif %}
 {% if 'question-bank' in asset_sections %}

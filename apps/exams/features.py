@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.translation import pgettext
 
 PRACTICAL_EXAM_TYPE = "coding"
 
@@ -24,11 +25,11 @@ def without_disabled_practical_exams(queryset):
 
 
 def practical_exam_disabled_message() -> str:
-    return "Praktiki imtahan hazırda production mühitində deaktivdir."
+    return pgettext("exams.features", "Praktiki imtahan hazırda production mühitində deaktivdir.")
 
 
 def supervision_disabled_message() -> str:
-    return "İmtahan nəzarəti production mühitində deaktivdir."
+    return pgettext("exams.features", "İmtahan nəzarəti production mühitində deaktivdir.")
 
 
 def disabled_supervision_status(attempt=None) -> dict:

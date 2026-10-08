@@ -77,6 +77,7 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
     </header>
 
     {% include "accounts/profile/sections/syllabus/_editor_banners.html" with se=se %}
+    {% include "accounts/profile/sections/syllabus/_reuse_banner.html" with se=se %}
 
     <div class="syl-editor__grid">
       <nav class="syl-steps" aria-label="{% trans 'Sillabus bölmələri' context 'accounts.syllabus' %}">
@@ -118,6 +119,7 @@ Davranış (addım, autosave, dialoq): accounts/js/profile/syllabus_editor.js
     </div>
 
     {% include "accounts/profile/sections/syllabus/_editor_dialog.html" %}
+    {% if se.reuse.mode %}{% include "accounts/profile/sections/syllabus/_reuse_dialog.html" with urls=se.urls %}{% endif %}
 
     <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
       <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>

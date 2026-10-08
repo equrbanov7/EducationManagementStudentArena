@@ -5,6 +5,7 @@
 # ═══════════════════════════════════════════════════════════════
 from .exam_center import (
     exam_center_attempt_violations,
+    exam_center_final_device_change,
     exam_center_pin_lookup,
     exam_center_pin_search,
     exam_center_reports,
@@ -308,6 +309,7 @@ __all__ = [
     "exam_center_session_start",
     "exam_center_ticket_readmit",
     "exam_center_ticket_reentry",
+    "exam_center_final_device_change",
     "exam_center_ticket_remove",
     "exam_center_ticket_resume",
     "exam_center_ticket_seat",

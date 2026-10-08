@@ -13,8 +13,8 @@
 //  * ilişmiş köhnə socket dərhal bağlanmır («ehtiyat»): uzun qopmada təzə bağlantının SYN-i də
 //    gecikir, köhnə TCP isə bəzən daha tez bərpa olunur — hansı birinci çatdırsa, o işlənir
 //    (zaman xətti təkrarı süzür); təzə socket açılan kimi köhnə bağlanır.
-import { BOOTSTRAP } from './config.js?v=lx20261002';
-import { recordServerRoundTrip, wsUrl } from './utils.js?v=lx20261002';
+import { BOOTSTRAP } from './config.js?v=lx20261008';
+import { recordServerRoundTrip, wsUrl } from './utils.js?v=lx20261008';
 
 const PING_INTERVAL_MS = 6000;
 const PONG_TIMEOUT_MIN_MS = 3500;

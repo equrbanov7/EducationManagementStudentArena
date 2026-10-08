@@ -11,14 +11,19 @@ from django.utils.dateparse import parse_datetime
 
 from apps.exams.models import ExamQuestion
 from apps.live_exam.constants import (
+    DEFAULT_QUESTION_SECONDS,
     PLAYER_GET_READY_SECONDS,
     PLAYER_LEADERBOARD_SECONDS,
     PLAYER_QUESTION_INTRO_SECONDS,
     PLAYER_RESULT_SECONDS,
+    QUESTION_SECONDS_MAX,
+    QUESTION_SECONDS_MIN,
 )
 from apps.live_exam.models import LiveSession
 
 QUESTION_PHASE_OVERRIDE_KEY = "_question_phase_override"
+#: ``domain.question_config.QUESTION_CONFIG_KEY`` ilə eyni (dairəvi import olmasın deyə burada da).
+QUESTION_CONFIG_KEY = "_question_config"
 
 
 def safe_int(value: Any, default: int = 0) -> int:
@@ -155,21 +160,62 @@ def clear_question_phase_override(session: LiveSession) -> bool:
     return True
 
 
-def question_time_limit(session: LiveSession, exam_question: ExamQuestion) -> int:
-    if hasattr(exam_question, "effective_time_limit"):
-        value = safe_int(getattr(exam_question, "effective_time_limit", 0), 0)
-        if value > 0:
-            return value
+def coerce_question_seconds(value: Any) -> int | None:
+    """Aparıcının «Hər sual üçün vaxt» dəyəri — ``None`` (standart) və ya [5, 300] saniyə."""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        seconds = int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
+    if seconds <= 0:
+        return None
+    return max(QUESTION_SECONDS_MIN, min(QUESTION_SECONDS_MAX, seconds))
+
+
+def session_question_seconds(session: LiveSession) -> int | None:
+    """Aparıcının bu sessiya üçün seçdiyi vaxt (``host_settings.question_time_seconds``)."""
+    raw = getattr(session, "host_settings", None) or {}
+    return coerce_question_seconds(raw.get("question_time_seconds")) if isinstance(raw, dict) else None
+
+
+def exam_default_question_seconds(exam) -> int:
+    """«Standart» seçimin vaxtı: imtahanın «Hər sual üçün standart vaxt»-ı, boşdursa 30 s."""
+    value = safe_int(getattr(exam, "default_question_time_seconds", 0), 0)
+    return value if value > 0 else DEFAULT_QUESTION_SECONDS
+
+
+def configured_time_limit(session: LiveSession, exam_question: ExamQuestion) -> int:
+    """CANLI hesab: aparıcının seçimi → sualın öz vaxtı → imtahanın standart vaxtı → 30 s.
+
+    2026-10-08 (L2): əvvəl son ehtiyat 15 s idi və aparıcının seçimi ümumiyyətlə yox idi —
+    imtahanda vaxt boş qalanda (placeholder «Məs: 60» dəyər kimi görünür) hər sual 15 s gedirdi.
+    """
+    override = session_question_seconds(session)
+    if override:
+        return override
 
     value = safe_int(getattr(exam_question, "time_limit_seconds", 0), 0)
     if value > 0:
         return value
 
-    value = safe_int(getattr(session.exam, "default_question_time_seconds", 0), 0)
-    if value > 0:
-        return value
+    return exam_default_question_seconds(session.exam)
 
-    return 15
+
+def _frozen_time_limit(session: LiveSession, question_id) -> int:
+    """Nəşr anında dondurulmuş vaxt (``_question_config.time_limit``) — raund ərzində dəyişmir."""
+    raw = getattr(session, "host_settings", None) or {}
+    snapshot = raw.get(QUESTION_CONFIG_KEY) if isinstance(raw, dict) else None
+    if not isinstance(snapshot, dict) or safe_int(snapshot.get("question_id"), 0) != safe_int(question_id, -1):
+        return 0
+    return max(0, safe_int(snapshot.get("time_limit"), 0))
+
+
+def question_time_limit(session: LiveSession, exam_question: ExamQuestion) -> int:
+    """Sualın cavab pəncərəsi (s). Aktiv sual üçün nəşrdə dondurulmuş dəyər qaytarılır —
+    aparıcı vaxtı sual gedərkən dəyişsə, dəyişiklik NÖVBƏTİ sualdan tətbiq olunur."""
+    frozen = _frozen_time_limit(session, getattr(exam_question, "id", None))
+    return frozen or configured_time_limit(session, exam_question)
 
 
 def question_intro_seconds(session: LiveSession, exam_question: ExamQuestion | None = None) -> float:

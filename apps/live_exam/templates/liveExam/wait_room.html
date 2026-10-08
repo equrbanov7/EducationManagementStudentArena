@@ -38,9 +38,11 @@
 
         <header class="lxw-top">
             <span class="lxw-brand"><span class="lxw-brand__dot" aria-hidden="true"></span><span>{% trans "title" context "live_exam.wait_room" %}</span></span>
+            {% if not session_language %}{# aparıcı dili sabitləyibsə seçici yoxdur (2026-10-08) #}
             <div class="lxw-lang">
                 {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
             </div>
+            {% endif %}
         </header>
         <div class="lxw-net" id="waitRoomNet" role="status" hidden></div>
 

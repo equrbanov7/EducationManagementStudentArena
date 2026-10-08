@@ -95,7 +95,11 @@ def _draw_identity(sheet, document):
             _("Təsdiq"),
             (
                 f"{document['approved_at'].strftime('%d.%m.%Y')}"
-                + (f" · {document['approved_by']}" if document["approved_by"] else "")
+                + (
+                    f" · {document['approved_by'] or document.get('approval_note', '')}"
+                    if document["approved_by"] or document.get("approval_note")
+                    else ""
+                )
                 if document["approved_at"]
                 else _("təsdiqlənməyib")
             ),

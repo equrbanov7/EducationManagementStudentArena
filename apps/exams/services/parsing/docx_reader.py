@@ -29,6 +29,7 @@ from django.utils.translation import pgettext
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
+from apps.exams.services.parsing.docx_emphasis import mark_emphasized_options, paragraph_is_emphasized
 from apps.exams.services.parsing.omml import M_NS, W_NS, omml_to_latex
 from apps.exams.services.pdf_math import remap_symbol_pua
 from core.upload_security import validate_zip_archive
@@ -86,6 +87,8 @@ class _Walker:
         self.document = document
         self.part = document.part
         self.lines: list[str] = []
+        # S1 (2026-10-08): sətir formatla (qalın/vurğu/rəng) vurğulanıbmı — düzgün cavab aşkarı.
+        self.emphasis: list[bool] = []
         self.images: list[DocxImage] = []
         self.warnings: list[str] = []
         self.formula_count = 0
@@ -201,18 +204,20 @@ class _Walker:
                 continue
         return "".join(parts)
 
-    def _emit(self, text: str) -> None:
-        for line in text.split("\n"):
-            cleaned = " ".join(line.split())
-            if cleaned:
-                self.lines.append(cleaned)
+    def _emit(self, text: str, *, emphasized: bool = False) -> None:
+        parts = [" ".join(line.split()) for line in text.split("\n")]
+        parts = [part for part in parts if part]
+        for part in parts:
+            self.lines.append(part)
+            # Vurğu yalnız TƏK sətirlik paraqrafa aiddir (mətn qutusu sətirləri yox).
+            self.emphasis.append(emphasized and len(parts) == 1)
 
     # -- gövdə ------------------------------------------------------------
     def walk(self, container) -> None:
         for child in container:
             tag = child.tag
             if tag == _w("p"):
-                self._emit(self._paragraph_text(child))
+                self._emit(self._paragraph_text(child), emphasized=paragraph_is_emphasized(child))
             elif tag == _w("tbl"):
                 for row in child.iter(_w("tr")):
                     for cell in row.findall(_w("tc")):
@@ -227,7 +232,7 @@ class _Walker:
         if self._skipped_unsupported:
             self.warnings.append(pgettext(_WARN, "images_unsupported_skipped").format(count=self._skipped_unsupported))
         return DocxExtract(
-            text="\n".join(self.lines),
+            text="\n".join(mark_emphasized_options(self.lines, self.emphasis)),
             images=self.images,
             warnings=self.warnings,
             formula_count=self.formula_count,

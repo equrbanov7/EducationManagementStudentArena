@@ -264,27 +264,47 @@ def evaluate_resit(*, enrollment, by_user=None):
         return enrollment.resit_records.first()
     result = compute_final_result(enrollment=enrollment)
     existing = enrollment.resit_records.first()
-
-    if result["failed"]:
-        reason = _resit_reason(result)
-        if existing is None:
-            return ResitRecord.objects.create(
-                organization=enrollment.organization,
-                enrollment=enrollment,
-                reason=reason,
-                status=ResitStatus.ELIGIBLE,
-                decided_by=by_user,
-            )
-        if existing.status == ResitStatus.ELIGIBLE and existing.reason != reason:
-            existing.reason = reason
-            existing.save(update_fields=["reason"])
+    action, reason = resit_action(result, existing)
+    if action == RESIT_CREATE:
+        return ResitRecord.objects.create(
+            organization=enrollment.organization,
+            enrollment=enrollment,
+            reason=reason,
+            status=ResitStatus.ELIGIBLE,
+            decided_by=by_user,
+        )
+    if action == RESIT_UPDATE_REASON:
+        existing.reason = reason
+        existing.save(update_fields=["reason"])
         return existing
-
-    # Passed → an untouched eligibility is no longer needed.
-    if existing and existing.status == ResitStatus.ELIGIBLE and existing.resit_score is None:
+    if action == RESIT_DELETE:
         existing.delete()
         return None
     return existing
+
+
+#: :func:`resit_action` nəticələri — ``evaluate_resit`` və toplu yazı (``exam_score_bulk``) EYNİ qərarı tətbiq edir.
+RESIT_CREATE = "create"
+RESIT_UPDATE_REASON = "update_reason"
+RESIT_DELETE = "delete"
+
+
+def resit_action(result, existing) -> tuple:
+    """``evaluate_resit``-in QƏRARI (yazısız): ``(əməl, səbəb)``; dəyişiklik yoxdursa ``(None, None)``.
+
+    Kəsilən tələbə: qeyd yoxdursa yarat, ``eligible`` qeydin səbəbi fərqlidirsə yenilə;
+    keçən tələbə: istifadə olunmamış ``eligible`` qeyd silinir."""
+    if result["failed"]:
+        reason = _resit_reason(result)
+        if existing is None:
+            return RESIT_CREATE, reason
+        if existing.status == ResitStatus.ELIGIBLE and existing.reason != reason:
+            return RESIT_UPDATE_REASON, reason
+        return None, None
+    # Passed → an untouched eligibility is no longer needed.
+    if existing and existing.status == ResitStatus.ELIGIBLE and existing.resit_score is None:
+        return RESIT_DELETE, None
+    return None, None
 
 
 def _lock_enrollment(enrollment):
@@ -340,17 +360,20 @@ def set_exam_score(*, enrollment, score, by_user=None, source_note=""):
             offering=enrollment.offering,
             by_user=by_user,
             kind="final",
-            changes=[
-                {
-                    "student": grade_audit.student_label(enrollment),
-                    "item": f"Yekun imtahan ({source_note})" if source_note else "Yekun imtahan",
-                    "old": grade_audit.score_repr(old_score),
-                    "new": grade_audit.score_repr(new_score),
-                }
-            ],
+            changes=[exam_score_change(enrollment, old_score, new_score, source_note=source_note)],
         )
     evaluate_resit(enrollment=enrollment, by_user=by_user)
     return final_grade
+
+
+def exam_score_change(enrollment, old_score, new_score, *, source_note="") -> dict:
+    """``set_exam_score``-un qiymət audit izinə yazdığı bir dəyişiklik sətri (toplu yolla ortaq)."""
+    return {
+        "student": grade_audit.student_label(enrollment),
+        "item": f"Yekun imtahan ({source_note})" if source_note else "Yekun imtahan",
+        "old": grade_audit.score_repr(old_score),
+        "new": grade_audit.score_repr(new_score),
+    }
 
 
 @transaction.atomic

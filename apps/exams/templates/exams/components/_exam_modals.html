@@ -13,6 +13,7 @@
 {% endcomment %}
 <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
 <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260914-2">
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
 
 {% if is_owner or user_role == 'teacher' %}
 
@@ -123,6 +124,9 @@
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/subject_select.js' %}?v=20260911-1"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/toggles.js' %}?v=20260911-1"></script>
+{# 2026-10-08: imtahan pəncərəsinin «gg.aa.iiii ss:dd» sahəsi + təqvim seçicisi (delegasiya ilə, inject olunan formada da). #}
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
 {# 2026-09-21 bölgüsü: forma köməkçiləri ayrı faylda; əsas fayl onları bindEditorForm() anında oxuyur. #}
 <script src="{% static 'exams/js/course_exam_dashboard.js' %}?v=20260926-search"></script>
 <script src="{% static 'exams/js/course_exam_dashboard_form.js' %}?v=20260926-search"></script>

@@ -19,6 +19,7 @@ from typing import Any
 from django.utils.translation import pgettext
 
 from apps.accounts.public import ProfileRole
+from apps.live_exam.domain.session import coerce_question_seconds
 from apps.live_exam.text_safety import sanitize_player_text
 from apps.live_exam.typed_answers import ACCEPTED_MAX_ITEMS, TEXT_MAX_LENGTH, dedupe_accepted, typed_eligibility
 
@@ -51,12 +52,18 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     "team_talk_enabled": False,
     "nickname_generator": False,
     "two_step_join": True,
+    # 2026-10-08 (L3): «Gecikənlər qoşula bilsin» (tövsiyə: açıq) — oyun gedərkən qoşulan
+    # növbəti sual sərhədindən oynayır (keçən suallara bal almır, onların cavabını görmür).
+    "late_join_enabled": True,
     "max_participants": DEFAULT_MAX_PARTICIPANTS,
     "sfx_volume": 70,
     # Yazılı cavab + çox seçimli bal rejimi (sahib 2026-09-28).
     "typed_typo_tolerance": True,
     "multi_scoring": MULTI_SCORING_PARTIAL,
     "typed_questions": {},
+    # 2026-10-08 (L2): «Hər sual üçün vaxt» — ``None`` = standart (sualın / imtahanın vaxtı,
+    # boşdursa 30 s); rəqəm = HƏR sual bu qədər saniyə (5–300). Növbəti sualdan tətbiq olunur.
+    "question_time_seconds": None,
 }
 
 #: Oyunçulara / anonim izləyicilərə HEÇ VAXT göndərilməyən açarlar.
@@ -76,6 +83,7 @@ BOOLEAN_SETTING_KEYS = {
     "nickname_generator",
     "two_step_join",
     "typed_typo_tolerance",
+    "late_join_enabled",
 }
 
 NICKNAME_ADJECTIVES = (
@@ -125,6 +133,13 @@ def _coerce_bool(value: Any, default: bool) -> bool:
         if normalized in {"0", "false", "no", "off"}:
             return False
     return default
+
+
+def late_join_enabled(session) -> bool:
+    """Gec qoşulma açıqdırmı (kilid altında oxunur — tam normallaşdırma olmadan, sorğusuz)."""
+    raw = getattr(session, "host_settings", None) or {}
+    value = raw.get("late_join_enabled") if isinstance(raw, dict) else None
+    return _coerce_bool(value, DEFAULT_SESSION_SETTINGS["late_join_enabled"])
 
 
 def allowed_max_participants_for_user(user) -> int:
@@ -271,7 +286,20 @@ def normalize_session_setting_updates(
     if "typed_questions" in raw:
         updates["typed_questions"] = normalize_typed_questions(raw.get("typed_questions"), session=session)
 
+    if "question_time_seconds" in raw:
+        updates["question_time_seconds"] = _question_seconds_update(raw.get("question_time_seconds"), strict=session)
+
     return updates
+
+
+def _question_seconds_update(value: Any, *, strict) -> int | None:
+    """``None``/""/0/"default" → standart; rəqəm → [5, 300]; yararsız mətn → host yazısında 400."""
+    if value is None or (isinstance(value, str) and value.strip().lower() in {"", "default", "standard", "0"}):
+        return None
+    seconds = coerce_question_seconds(value)
+    if seconds is None and strict is not None and not (isinstance(value, (int, float)) and value <= 0):
+        raise SessionSettingsError(pgettext("live_exam.host_settings", "Sual vaxtı 5–300 saniyə olmalıdır."))
+    return seconds
 
 
 def normalize_session_settings(raw: dict[str, Any] | None) -> dict[str, Any]:

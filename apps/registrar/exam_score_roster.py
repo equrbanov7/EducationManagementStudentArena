@@ -188,7 +188,7 @@ def roster_for_offering(*, offering):
 
     Hər sətir::
 
-        {"enrollment", "student", "exam_score", "exam_score_max", "entry_score",
+        {"enrollment", "student", "name", "exam_score", "exam_score_max", "entry_score",
          "total", "letter", "has_score", "is_changed", "question_scores",
          "entries": [...], "attempts": [...]}
     """
@@ -223,10 +223,13 @@ def roster_for_offering(*, offering):
         result = finals.compute_final_result(enrollment=enrollment, scheme=scheme, batch=batch)
         history = entries_by_enrollment.get(str(enrollment.id), [])
         latest = history[0] if history else None
+        student = enrollment.student
         rows.append(
             {
                 "enrollment": enrollment,
-                "student": enrollment.student,
+                "student": student,
+                # Göstərilən ad BİR dəfə (şablon sətir başına ~25 dəfə işlədir — 2026-10-08 tutum).
+                "name": student.get_full_name() or student.username,
                 "exam_score": result["exam_score"],
                 "has_score": result["exam_score"] is not None,
                 "is_changed": any(entry.kind != ExamScoreEntryKind.INITIAL for entry in history),

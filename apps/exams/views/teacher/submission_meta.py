@@ -8,14 +8,20 @@ View axını ``submission_inbox.py``-dadır.
 from django.utils.translation import pgettext
 
 from apps.exams.constants import EXAM_LANGUAGE_VALUES, QUESTION_EXAM_KIND_VALUES
-from apps.exams.models import StudentGroup
 from apps.exams.services.question_submission import analyze_submission_text
+from apps.exams.services.submission_sources import UNIT_PREFIX, resolve_unit_ids, teacher_submission_sources
 from core.search_text import tolerant_match
 
 
 def _normalize_language(raw_value):
     value = (raw_value or "").strip().lower()
     return value if value in EXAM_LANGUAGE_VALUES else "az"
+
+
+def _valid_group_key(raw) -> bool:
+    """Köhnə kohort id-si (rəqəm) və ya reyestr qrupu açarı (``u:<uuid>``)."""
+    text = str(raw or "").strip()
+    return text.isdigit() or (text.startswith(UNIT_PREFIX) and bool(resolve_unit_ids([text])))
 
 
 def _form_state(request):
@@ -27,8 +33,9 @@ def _form_state(request):
         "subject": (request.POST.get("subject") or "").strip(),
         # İmtahan növü (final/midterm/quiz) — view səviyyəsində məcburidir.
         "exam_kind": raw_kind if raw_kind in QUESTION_EXAM_KIND_VALUES else "",
-        # Çox qrup seçimi: `group_ids` (getlist). `group_id` geriyə-uyğunluq üçün.
-        "group_ids": [g for g in request.POST.getlist("group_ids") if str(g).strip().isdigit()],
+        # Çox qrup seçimi: `group_ids` (getlist) — köhnə kohort «<id>» və ya reyestr
+        # qrupu «u:<uuid>» (2026-10-08, S2). `group_id` geriyə-uyğunluq üçün.
+        "group_ids": [str(g).strip() for g in request.POST.getlist("group_ids") if _valid_group_key(g)],
         "group_id": (request.POST.get("group_id") or "").strip(),
         "group_label": (request.POST.get("group_label") or "").strip(),
         "teacher_note": (request.POST.get("teacher_note") or "").strip(),
@@ -39,33 +46,10 @@ def _form_state(request):
     }
 
 
-def _teacher_groups(request, organization):
-    """Müəllimin bu təşkilatdakı qrupları (dropdown üçün) — fənlərlə birlikdə."""
-    from django.db.models import Q
-
-    return (
-        StudentGroup.objects.filter(organization=organization)
-        .filter(Q(teacher=request.user) | Q(teachers=request.user))
-        .prefetch_related("subjects")
-        .distinct()
-        .order_by("name")
-    )
-
-
-def _teacher_subjects(request, organization, *, groups=None):
-    """Müəllimin ÖZ fənləri — təyin olunduğu qrupların fənlərinin birləşməsi
-    (registrar.Subject). Sual göndərişində fənn seçimi bu siyahıdan gəlir
-    (qrupdan asılı deyil — 2026-07 dəyişikliyi)."""
-    from apps.registrar.models import Subject
-
-    group_ids = [g.id for g in (groups if groups is not None else _teacher_groups(request, organization))]
-    if not group_ids:
-        return Subject.objects.none()
-    return (
-        Subject.objects.filter(organization=organization, student_groups__in=group_ids)
-        .distinct()
-        .order_by("code", "name")
-    )
+def _submission_sources(request, organization):
+    """Müəllimin qrupları + fənləri — DƏRS YÜKÜ (açılışlar + təsdiqlənmiş bölgü) və
+    köhnə kohortlar (2026-10-08, S2: əvvəl yalnız boş köhnə kohort cədvəli oxunurdu)."""
+    return teacher_submission_sources(request.user, organization)
 
 
 def _resolve_groups(form_state, groups):
@@ -76,6 +60,17 @@ def _resolve_groups(form_state, groups):
         ids = {form_state["group_id"]}
     chosen = [g for g in groups if str(g.id) in ids]
     return chosen, ", ".join(g.name for g in chosen)
+
+
+def prefill_group_keys(submission, groups):
+    """Redaktədə seçili qruplar: köhnə kohort FK-ları + adı ``group_label``-də olan
+    reyestr qrupları (reyestr qrupu FK kimi saxlanmır — etiketdə qalır)."""
+    keys = [str(g.id) for g in submission.student_groups.all()]
+    if not keys and submission.student_group_id:
+        keys = [str(submission.student_group_id)]
+    names = {part.strip() for part in (submission.group_label or "").split(",") if part.strip()}
+    keys += [g.key for g in groups if g.unit is not None and g.name in names]
+    return keys
 
 
 def _validate_submission_meta(form_state, *, groups, subjects):
@@ -195,11 +190,11 @@ __all__ = [
     "_normalize_language",
     "_preview_context",
     "_resolve_groups",
-    "_teacher_groups",
-    "_teacher_subjects",
+    "_submission_sources",
     "_validate_submission_meta",
     "annotate_display_numbers",
     "annotate_preview_flags",
     "filter_snapshot_questions",
+    "prefill_group_keys",
     "snapshot_flag_counts",
 ]

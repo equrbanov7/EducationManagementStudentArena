@@ -17,8 +17,9 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
+from apps.exams.services.parsing.answer_markers import count_defaulted, mark_default_correct_a
+from apps.exams.services.subject_labels import subject_label
 from apps.exams.services.visual_import_upload import prepare_question_upload
-from apps.exams.views.teacher.submission_meta import _teacher_subjects
 from apps.exams.views.teacher.workbench_paste import paste_context
 
 
@@ -51,6 +52,13 @@ def process_workbench_post(request, organization, form_state):
                 request,
                 pgettext("exams.view.question_submission.message", "Fayl oxunmadı: {error}").format(error=exc),
             )
+
+    # 2026-10-08 (S1): «Düzgün cavab həmişə A variantıdır» — işarəsiz sualların A-sı mətndə
+    # «*A)» olur (redaktorda görünür, yadda saxlanan mətn və sonrakı parse-lar eyni qalır).
+    form_state["default_correct_a"] = (request.POST.get("default_correct_a") or "") == "1"
+    if form_state["default_correct_a"]:
+        raw_text, _marked = mark_default_correct_a(raw_text)
+        form_state["raw_text"] = raw_text
 
     analysis = analyze_mcq_bulk(raw_text)
     parsed = analysis["parsed"]
@@ -128,7 +136,7 @@ def initial_workbench_state(request, organization, *, raw_text, math_token):
 def build_workbench_context(
     request,
     organization,
-    groups,
+    sources,
     form_state,
     *,
     analysis,
@@ -155,19 +163,15 @@ def build_workbench_context(
         "dp_value": "1",
         "math_token": math_token,
         # Meta sahələri (workbench-dən kənar kart). Fənn dəyərləri Subject pk-dır.
-        "teacher_groups": groups,
+        # 2026-10-08 (S2): mənbə — dərs yükü (açılışlar + təsdiqlənmiş bölgü) + köhnə
+        # kohortlar; etiketdə fənn ADI əvvəl, kod ikinci; boşdursa `submission_notices` NİYƏ.
+        "teacher_groups": sources.groups,
         "teacher_group_subjects": {
-            str(group.id): [
-                {"value": str(subject.pk), "label": f"{subject.code} — {subject.name}"}
-                for subject in group.subjects.all()
-            ]
-            for group in groups
+            key: [{"value": str(subject.pk), "label": subject_label(subject)} for subject in subjects]
+            for key, subjects in sources.group_subjects.items()
         },
-        # Fənn müəllimin ÖZ fənlərindən (qrupdan asılı deyil); qrup çox-seçimli.
-        "teacher_subjects": [
-            {"value": str(s.pk), "label": f"{s.code} — {s.name}"}
-            for s in _teacher_subjects(request, organization, groups=groups)
-        ],
+        "teacher_subjects": [{"value": str(s.pk), "label": subject_label(s)} for s in sources.subjects],
+        "submission_notices": sources.notices,
         "submission_languages": EXAM_LANGUAGE_CHOICES,
         "submission_exam_kinds": QUESTION_EXAM_KIND_CHOICES,
         "form_state": form_state,
@@ -187,6 +191,10 @@ def build_workbench_context(
         "wb_show_format": False,
         "wb_format": "test",
         "wb_show_report": False,
+        # S1: «Düzgün cavab həmişə A» seçimi + «Hamısını təsdiqlə» (A-defolt xəbərdarlıqları).
+        "wb_show_default_a": True,
+        "wb_default_correct_a": bool(form_state.get("default_correct_a")),
+        "defaulted_count": count_defaulted(parsed),
         "wb_templates": [],
         "wb_save_label": save_label,
         # 2026-09-14: pano/sürükləmə ilə şəkil (bank toplu əlavə ilə eyni qol) —

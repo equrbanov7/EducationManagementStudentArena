@@ -4,8 +4,8 @@ qalır — test_views.py yerli paketi yoxlayır (bax LX-FE-STAGE hesabatı: sili
     {# 2026-09-29: host_lobby_shell.js qlobal `gettext`-ə müraciət edə bilər — JS kataloqu yüklənir. #}
     <script src="{% if jsi18n_src %}{{ jsi18n_src }}{% else %}{% url 'javascript-catalog' %}{% endif %}"></script>
     <script src="{% static 'vendor/chartjs/chart.umd.min.js' %}" defer></script>
-    <script src="{% static 'js/host_lobby_config.js' %}?v=lxstage-20260929"></script>
+    <script src="{% static 'js/host_lobby_config.js' %}?v=lxstage-20261008"></script>
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=lxstage-20260929"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=lxstage-20260929"></script>
-    <script type="module" src="{% static 'js/host_lobby/host_lobby.entry.js' %}?v=lxstage-20261002"></script>
-    {% if with_shell %}<script src="{% static 'js/host_lobby_shell.js' %}?v=lxstage-20260929"></script>{% endif %}
+    <script type="module" src="{% static 'js/host_lobby/host_lobby.entry.js' %}?v=lxstage-20261008"></script>
+    {% if with_shell %}<script src="{% static 'js/host_lobby_shell.js' %}?v=lxstage-20261008b"></script>{% endif %}

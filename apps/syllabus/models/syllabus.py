@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.translation import pgettext_lazy
 
 from core.models import ActiveManager, TimeStampedModel, UUIDModel
@@ -34,6 +34,9 @@ class ChangeKind(models.TextChoices):
     MAJOR = "major", pgettext_lazy(_CTX, "Böyük dəyişiklik (növbəti semestr)")
     COPIED = "copied", pgettext_lazy(_CTX, "Keçən ildən köçürülüb")
     IMPORTED = "imported", pgettext_lazy(_CTX, "Köhnə sistemdən köçürülüb")
+    #: Eyni fənnin eyni semestrdəki başqa qrupunun TƏSDİQLƏNMİŞ sillabusuna bağlanıb
+    #: (məzmun və saat eynidir) — bax ``services/reuse.py``.
+    REUSED = "reused", pgettext_lazy(_CTX, "Başqa qrupun sillabusuna bağlanıb")
 
 
 class ApprovalSource(models.TextChoices):
@@ -43,10 +46,16 @@ class ApprovalSource(models.TextChoices):
     statusla gəlir, amma SAXTA insan təsdiqi UYDURULMUR. Belə qeydlərdə
     ``approved_by`` NULL qalır və mənbə ``migration`` damğalanır; UI təsdiqləyəni
     «sistem/köçürmə» kimi göstərir.
+
+    ``reuse`` (2026-10-08): versiya eyni fənnin eyni semestrdəki başqa qrupunun
+    İNSAN TƏRƏFİNDƏN təsdiqlənmiş versiyasının EYNİ nüsxəsidir (eyni saatlar).
+    Burada da təsdiqləyən UYDURULMUR — ``approved_by`` NULL qalır, mənbə versiya
+    ``source_version``-dadır və UI «Təsdiq: <qrup> sillabusundan» yazır.
     """
 
     HUMAN = "human", pgettext_lazy(_CTX, "İnsan qərarı")
     MIGRATION = "migration", pgettext_lazy(_CTX, "Sistem / köçürmə")
+    REUSE = "reuse", pgettext_lazy(_CTX, "Bağlı sillabusdan (eyni məzmun)")
 
 
 class Syllabus(UUIDModel, TimeStampedModel):
@@ -60,6 +69,11 @@ class Syllabus(UUIDModel, TimeStampedModel):
        BİLİNMƏYƏN qeyd (bax ``docs/migration/SILLABUS_KOCURME_SPEC.md``).
        Semestr uydurmaq əvəzinə dosye fənn + müəllim cütü ilə lövbərlənir;
        müəllim ondan «Keçən ildən köçür» ilə semestrli qaralama yaradır.
+
+    ``reused_from`` (2026-10-08) — eyni fənnin eyni semestrdəki başqa qrupunun
+    sillabusuna BAĞLI dosye: məzmunu mənbənin təsdiqlənmiş versiyasının eyni
+    nüsxəsidir, öz redaktəsi yoxdur (dəyişiklik üçün «Ayır»). Qaydalar
+    ``services/reuse.py``-dadır.
     """
 
     organization = models.ForeignKey("organizations.Organization", on_delete=models.CASCADE, related_name="syllabi")
@@ -120,6 +134,17 @@ class Syllabus(UUIDModel, TimeStampedModel):
         related_name="+",
         help_text="Hazırda QÜVVƏDƏ olan təsdiqlənmiş versiya — tələbənin gördüyü.",
     )
+    reused_from = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="reused_by",
+        help_text=(
+            "Bağlı (eyni məzmunlu) sillabusun MƏNBƏ dosyesi — eyni təşkilat, eyni fənn, eyni semestr. "
+            "Bağ ulduz formalıdır: mənbənin özü heç vaxt başqasına bağlı olmur."
+        ),
+    )
     is_active = models.BooleanField(default=True, db_index=True)
 
     objects = models.Manager()
@@ -146,11 +171,25 @@ class Syllabus(UUIDModel, TimeStampedModel):
                 condition=Q(offering__isnull=True, period__isnull=True),
                 name="uniq_syllabus_base_per_subject_author",
             ),
+            # Bağ (2026-10-08): dosye ÖZÜNƏ bağlana bilməz.
+            models.CheckConstraint(
+                condition=Q(reused_from__isnull=True) | ~Q(reused_from=F("id")),
+                name="syllabus_not_reused_from_self",
+            ),
+            # Kompozit FK-nın hədəf açarı: ``(reused_from, organization, subject)``
+            # → ``(id, organization, subject)``.  Mənbə ilə hədəfin eyni təşkilat
+            # və eyni fənn olması DB səviyyəsində qorunur (migrasiya 0005).
+            models.UniqueConstraint(
+                fields=["id", "organization", "subject"],
+                name="uniq_syllabus_reuse_anchor",
+            ),
         ]
         indexes = [
             models.Index(fields=["organization", "period"]),
             models.Index(fields=["organization", "chair_unit"]),
             models.Index(fields=["organization", "author"]),
+            # «Bu fənnin bu semestr üçün sillabusu varmı» (qonşu axtarışı).
+            models.Index(fields=["organization", "subject", "period"], name="syllabus_sibling_idx"),
         ]
 
     def __str__(self):

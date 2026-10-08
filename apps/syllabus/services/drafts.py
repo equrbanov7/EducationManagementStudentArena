@@ -270,6 +270,9 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
         raise TransitionDenied("transition.out_of_scope", params={"transition": "new_version"})
     if kind not in {ChangeKind.MINOR.value, ChangeKind.MAJOR.value}:
         raise TransitionDenied("version.kind_unknown", params={"kind": kind})
+    if syllabus.reused_from_id:
+        # Bağlı dosyenin məzmunu mənbədən gəlir (services/reuse.py) — redaktə üçün əvvəl «Ayır».
+        raise TransitionDenied("reuse.linked_unlink_first")
 
     # Struktur bağının SELF-HEALING-i (R-2): köçürmə vaxtı ixtisasa bağlanmış
     # köhnə dosye yeni versiya açılanda özü kafedraya çəkilir — əks halda

@@ -366,6 +366,10 @@ urlpatterns = [
         name="syllabus_section_save",
     ),
     path("profile/syllabus/<uuid:syllabus_id>/preview/", views.syllabus_preview, name="syllabus_preview"),
+    # Təkrar istifadə (2026-10-08): «Bu fənnin bu semestr üçün artıq sillabusu var» —
+    # bağla / kopyala / hamısına tətbiq et / ayır / sinxronla.
+    path("profile/syllabus/reuse/", views.syllabus_reuse_options, name="syllabus_reuse_options"),
+    path("profile/syllabus/reuse/action/", views.syllabus_reuse_action, name="syllabus_reuse_action"),
     # Sillabusun AYRICA TAM SƏHİFƏSİ — siyahıdan/təsdiq növbəsindən
     # `target="_blank"` ilə yeni tabda açılır. Profil bölməsi DEYİL, ona görə
     # `profile/` prefiksi yoxdur və `SECTION_PARTIALS`-a qeyd olunmur.
