@@ -15,6 +15,7 @@ from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
@@ -199,6 +200,10 @@ def create_assignment(request, course_id):
         messages.success(request, pgettext("assignments.views.message", "assignment_created"))
         return JsonResponse({"success": True, "assignment_id": assignment.id})
 
+    except ValidationError as exc:
+        # 2026-10-08: oxunmayan tarix-saat («gg.aa.iiii ss:dd») — aydın mesaj, 500 yox.
+        transaction.set_rollback(True)
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception:
 
         transaction.set_rollback(True)
@@ -322,6 +327,10 @@ def edit_assignment(request, pk):
         messages.success(request, pgettext("assignments.views.message", "assignment_updated"))
         return JsonResponse({"success": True, "message": pgettext("assignments.views.message", "assignment_updated")})
 
+    except ValidationError as exc:
+        # 2026-10-08: oxunmayan tarix-saat («gg.aa.iiii ss:dd») — aydın mesaj, 500 yox.
+        transaction.set_rollback(True)
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception:
 
         transaction.set_rollback(True)

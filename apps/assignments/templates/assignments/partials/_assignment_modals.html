@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load ems_ui i18n %}
 {% load static %}
 {% if request.user.is_teacher_or_above %}
 
@@ -49,11 +49,11 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="addAsnStartDate">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="addAsnStartDate" name="start_date" class="form-control" required>
+                            {% ems_datetime_input "start_date" input_id="addAsnStartDate" required=True %}
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="addAsnDeadline">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="addAsnDeadline" name="deadline" class="form-control" required>
+                            {% ems_datetime_input "deadline" input_id="addAsnDeadline" required=True %}
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="addAsnMaxAttempts">{% trans "label_max_attempts" context "assignment.modals" %}</label>
@@ -123,11 +123,11 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="editAsnStartDate">{% trans "label_start" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editAsnStartDate" name="start_date" class="form-control" required>
+                            {% ems_datetime_input "start_date" input_id="editAsnStartDate" required=True %}
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="editAsnDeadline">{% trans "label_deadline" context "assignment.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editAsnDeadline" name="deadline" class="form-control" required>
+                            {% ems_datetime_input "deadline" input_id="editAsnDeadline" required=True %}
                         </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label" for="editAsnMaxAttempts">{% trans "label_max_attempts" context "assignment.modals" %}</label>
@@ -166,4 +166,8 @@
 {% endif %}
 
 <link rel="stylesheet" href="{% static 'assignment/css/assignment_modals.css' %}">
-<script src="{% static 'assignment/js/assignment_modals.js' %}" defer></script>
+{# 2026-10-08: son tarix sahəsi «gg.aa.iiii ss:dd» (24 saat) + təqvim seçicisi — core/datetime_input.py #}
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
+<script src="{% static 'assignment/js/assignment_modals.js' %}?v=20261008-1" defer></script>

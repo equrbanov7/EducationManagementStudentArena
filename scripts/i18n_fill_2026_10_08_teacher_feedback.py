@@ -165,6 +165,10 @@ ROWS = {
         "İmtahanlarıma keç": ("Go to My exams", "Перейти к моим экзаменам", "Sınavlarıma git"),
     },
     # W1 — «Dərs yüküm» cədvəlinin «CƏMİ» xanası görünən sətirlərin cəmidir.
+    # S2 davamı (sahib qərarı): göndəriş → reyestr qrupları M2M (exams 0074).
+    "exams.model.question_submission.field": {
+        "Reyestr qrupları": ("Registry groups", "Группы реестра", "Kayıt grupları"),
+    },
     "accounts.workload": {
         "CƏMİ (bütün semestrlər)": ("TOTAL (all semesters)", "ИТОГО (все семестры)", "TOPLAM (tüm dönemler)"),
         "CƏMİ — {season} semestri": (

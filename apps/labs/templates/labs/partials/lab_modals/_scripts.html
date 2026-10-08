@@ -21,4 +21,8 @@
      data-i18n-state-error="{% trans 'state_error' context 'labs.js.lab_modals' %}"></div>
 
 <script src="{% static 'labs/js/utils/escape.js' %}" defer></script>
-<script src="{% static 'labs/js/lab_modals.js' %}" defer></script>
+{# 2026-10-08: son tarix sahəsi «gg.aa.iiii ss:dd» (24 saat) + təqvim seçicisi — core/datetime_input.py #}
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
+<script src="{% static 'labs/js/lab_modals.js' %}?v=20261008-1" defer></script>

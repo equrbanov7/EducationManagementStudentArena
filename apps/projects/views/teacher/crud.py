@@ -14,6 +14,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
@@ -157,6 +158,10 @@ def create_project(request, course_id):
         messages.success(request, pgettext("projects.views.message", "project_created"))
         return JsonResponse({"success": True, "project_id": project.id})
 
+    except ValidationError as exc:
+        # 2026-10-08: oxunmayan tarix-saat («gg.aa.iiii ss:dd») — aydın mesaj, 500 yox.
+        transaction.set_rollback(True)
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception:
 
         transaction.set_rollback(True)
@@ -269,6 +274,10 @@ def edit_project(request, pk):
         messages.success(request, pgettext("projects.views.message", "project_updated"))
         return JsonResponse({"success": True, "message": pgettext("projects.views.message", "project_updated")})
 
+    except ValidationError as exc:
+        # 2026-10-08: oxunmayan tarix-saat («gg.aa.iiii ss:dd») — aydın mesaj, 500 yox.
+        transaction.set_rollback(True)
+        return JsonResponse({"success": False, "error": exc.messages[0]}, status=400)
     except Exception:
 
         transaction.set_rollback(True)

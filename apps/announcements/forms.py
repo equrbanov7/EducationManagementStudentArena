@@ -20,6 +20,7 @@ from django import forms
 from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.applications.models import ApplicationKind, ApplicationUnit
+from core.datetime_input import DayFirstDateTimeField
 
 from .constants import (
     APPLY_LABEL_MAX,
@@ -37,7 +38,6 @@ from .constants import (
 )
 
 _CTX = "announcements.manage"
-_DT_FORMATS = ["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"]
 
 
 def safe_apply_url(value: str) -> str | None:
@@ -65,9 +65,10 @@ class AnnouncementForm(forms.Form):
     #: Köhnə (tək checkbox) giriş — ``popup_mode`` göndərilməyəndə istifadə olunur.
     show_as_popup = forms.BooleanField(required=False)
     popup_mode = forms.ChoiceField(choices=PopupMode.choices, required=False)
-    publish_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
-    expires_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
-    deadline_at = forms.DateTimeField(required=False, input_formats=_DT_FORMATS)
+    # 2026-10-08: «gg.aa.iiii ss:dd» (24 saat) + köhnə ISO (yalnız-tarix də) — cari zonada (Asia/Baku).
+    publish_at = DayFirstDateTimeField(required=False, allow_iso_date_only=True)
+    expires_at = DayFirstDateTimeField(required=False, allow_iso_date_only=True)
+    deadline_at = DayFirstDateTimeField(required=False, allow_iso_date_only=True)
     audience_families = forms.MultipleChoiceField(choices=Audience.choices)
     audience_units = forms.CharField(required=False)
     apply_mode = forms.ChoiceField(choices=ApplyMode.choices, initial=ApplyMode.NONE)

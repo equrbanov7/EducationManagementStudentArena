@@ -69,6 +69,15 @@ test("parse: day-first is ALWAYS day.month (06.10 = 6 October, not June 10)", ()
         { year: 2026, month: 10, day: 6, hour: 9, minute: 30 });
 });
 
+test("display: server-side local ISO becomes the field value (modal prefill)", () => {
+    const api = page("").EMSDateTime;
+    assert.equal(api.display("2026-10-06T09:30"), "06.10.2026 09:30");
+    assert.equal(api.display("06/10/2026 9:05"), "06.10.2026 09:05");
+    assert.equal(api.display(""), "");
+    assert.equal(api.display(null), "");
+    assert.equal(api.display("sabah"), "sabah");
+});
+
 test("parse: clear error codes", () => {
     const api = page("").EMSDateTime;
     assert.equal(api.parse("").code, "empty");
