@@ -37,8 +37,13 @@ Kilid modeli (`services.lock_session`, `scoring._lock_session_for_answer`):
 ## 2. Sual fazaları (server vaxtı)
 
 `started_at = nəşr + 1 s` → get-ready (yalnız 1-ci sual, 4 s) → intro 5 s → **cavab pəncərəsi** `[answer_starts_at, ends_at]`
-(`time_limit`, default 15 s) → reveal → nəticə 3.5 s → liderlik 5 s → `next_question_at` (host autoplay növbəti sualı açır).
+(`time_limit`) → reveal → nəticə 3.5 s → liderlik 5 s → `next_question_at` (host autoplay növbəti sualı açır).
 `skip-intro` pəncərəni dərhal açır (`_question_phase_override`).
+
+**`time_limit` (2026-10-08, L2):** aparıcının «Hər sual üçün vaxt» seçimi (`host_settings.question_time_seconds`,
+5–300 s, HƏR suala) → sualın öz vaxtı → imtahanın «Hər sual üçün standart vaxt»-ı → **30 s** (əvvəl 15 s idi və
+aparıcı seçimi yox idi). Vaxt nəşrdə `_question_config.time_limit`-də dondurulur: oyun gedərkən dəyişiklik
+NÖVBƏTİ sualdan tətbiq olunur (cari pəncərə, skip-intro, state JSON dəyişmir).
 
 ## 3. Kim reveal edir (vaxt bitəndə)?
 
@@ -54,9 +59,9 @@ Kilid modeli (`services.lock_session`, `scoring._lock_session_for_answer`):
 
 | Hal | Davranış |
 |---|---|
-| Gec qoşulma | Yalnız LOBBY-də yeni oyunçu; oyun gedərkən yalnız artıq qəbul olunmuş klient (cookie) geri qayıdır (`join.py`, LX-SEC) |
+| Gec qoşulma (2026-10-08, L3) | `late_join_enabled` (default açıq): yeni oyunçunun `active_from_index` = cari sual + 1 — cari suala cavab vermir, cari/keçən sualın məzmunu və cavabı ona getmir (state `late_join_pending`, reveal `personal` ört-basdırı), «hamı cavab verdi» sayına düşmür (`roster.py`). Sönülüdürsə yalnız LOBBY + qəbul olunmuş klientin qayıdışı. Kilid, limit, kick, oxşar ad qaydaları eynidir |
 | Kilidli sessiya | Yeni qoşulma 403 (mövcud oyunçu token-lə davam edir) |
-| Oyunçu çıxarıldı (kick) | Yalnız LOBBY; `remember_kicked_client` + sətir silinir; **açıq lobby/play socket-lərinə `{"type":"kicked"}` + close 4403** |
+| Oyunçu çıxarıldı (kick) | LOBBY: `remember_kicked_client` + sətir silinir. QUESTION/REVEAL (L6): `removed_at` (soft) — liderlik/say/paylanmadan gizlənir (`LivePlayer.objects`, `LiveAnswer…in_game()`), müəllim nəticəsində «Çıxarıldı»; hər iki halda **açıq lobby/play socket-lərinə `{"type":"kicked"}` + close 4403**, eyni klient/ad qayıtmır, audit qeydi. FINISHED: 409 |
 | Oyunçu yenidən qoşulur (refresh / Wi-Fi) | Play WS yenidən qoşulur, `GET state` — sual/pre-reveal «saved»/reveal (şəxsi)/final (`my_stats`) snapshot-u |
 | Host refresh / qopma | State snapshot (host: `results`, `fastest_correct`, `typed_summary`, tam ayarlar); autoplay taymerləri yenidən qurulur; server toru |
 | İkiqat göndəriş (WS + HTTP eyni an) | Oyunçu sətri `FOR UPDATE` → ikinci «already answered» (idempotent `answer_saved`), bir sətir |

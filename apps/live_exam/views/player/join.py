@@ -35,6 +35,7 @@ from apps.live_exam.constants import (
     DEFAULT_AVATAR_KEY,
     build_wait_room_catalog,
 )
+from apps.live_exam.i18n import player_language, session_language
 from apps.live_exam.models import LivePlayer, LiveSession
 from apps.live_exam.roster import late_join_index
 from apps.live_exam.serializers import serialize_player_identity
@@ -68,8 +69,8 @@ from .constants import (
     LIVE_JOIN_IP_LIMIT_SCOPE,
     LIVE_JOIN_IP_RATE_LIMIT_DEFAULT,
     LIVE_JOIN_LIMIT_SCOPE,
-    LIVE_RATE_LIMIT_MESSAGE,
 )
+from .texts import rate_limit_message
 
 
 def _join_ip_rate():
@@ -124,7 +125,7 @@ def live_pin_entry(request):
             return _render_pin_entry(
                 request,
                 pin_value=pin_value,
-                error_message=LIVE_RATE_LIMIT_MESSAGE,
+                error_message=rate_limit_message(),
                 theme_key=_pin_entry_theme_key(None, raw_theme),
                 status=429 if is_post else 200,
                 retry_after=retry_after,
@@ -160,7 +161,7 @@ def live_join_page(request, pin):
             return _render_pin_entry(
                 request,
                 pin_value=_normalize_pin(pin),
-                error_message=LIVE_RATE_LIMIT_MESSAGE,
+                error_message=rate_limit_message(),
                 status=429,
                 retry_after=retry_after,
             )
@@ -170,7 +171,12 @@ def live_join_page(request, pin):
         raise Http404()
     if resolved_pin != pin:
         return _ensure_live_client_cookie(request, redirect("liveExam:join_page", pin=resolved_pin))
-    remembered_player = get_request_player(request, pin=pin)
+    with player_language(session):
+        return _render_join_page(request, session)
+
+
+def _render_join_page(request, session):
+    remembered_player = get_request_player(request, pin=session.pin)
     session_settings = get_session_settings(session)
     context = {
         "session": session,
@@ -181,9 +187,24 @@ def live_join_page(request, pin):
         "resume_url": reverse("liveExam:wait_room", kwargs={"pin": session.pin}),
         "session_settings": session_settings,
         "generated_nickname": generate_guest_nickname() if session_settings.get("nickname_generator") else "",
+        # Aparıcı dili sabitləyibsə dil seçicisi göstərilmir (səhifə onsuz da həmin dildədir).
+        "session_language": session_language(session),
+        # 2026-10-08: qoşulmaq mümkün deyilsə (çıxarılıb / gec qoşulma bağlı / bitib) — blok kartı DƏRHAL.
+        "join_blocked_message": _join_blocked_message(request, session),
     }
     response = render(request, "liveExam/join.html", context)
     return _ensure_live_client_cookie(request, response)
+
+
+def _join_blocked_message(request, session) -> str:
+    """Bu cihaz üçün qoşulma bağlıdırsa izah (forma göndərilmədən əvvəl göstərilir), yoxsa ``""``."""
+    if session.state == LiveSession.STATE_FINISHED:
+        return pgettext("live_exam.view.message", "session_finished")
+    if is_client_kicked(session, get_request_client_id(request)):
+        return pgettext("live_exam.view.message", "removed_by_host")
+    if session.state != LiveSession.STATE_LOBBY and not late_join_enabled(session):
+        return pgettext("live_exam.view.message", "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb.")
+    return ""
 
 
 def _join_rate_limited(request, session, cookie_client_id):
@@ -381,16 +402,21 @@ def live_join_enter(request, pin):
     if not has_signed_player_token(request, pin=pin):
         limited, retry_after = pin_lookup_limited(request)
         if limited:
-            return _json_error(LIVE_RATE_LIMIT_MESSAGE, 429, retry_after=retry_after)
+            return _json_error(rate_limit_message(), 429, retry_after=retry_after)
     resolved_pin, session = _resolve_live_session(pin)
     if session is None:
         record_pin_miss(request)
         raise Http404()
+    with player_language(session):
+        return _join_enter(request, session)
+
+
+def _join_enter(request, session):
 
     cookie_client_id = get_request_client_id(request)
     limited, retry_after = _join_rate_limited(request, session, cookie_client_id)
     if limited:
-        return _json_error(LIVE_RATE_LIMIT_MESSAGE, 429, retry_after=retry_after)
+        return _json_error(rate_limit_message(), 429, retry_after=retry_after)
 
     session_settings = get_session_settings(session)
     profile = _join_profile(request, session_settings)

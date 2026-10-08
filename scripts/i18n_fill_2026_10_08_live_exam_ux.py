@@ -137,10 +137,106 @@ ROWS = {
             "Katılımcı yalnızca oyun bitmeden çıkarılabilir.",
         ),
         "İştirakçı tapılmadı.": ("Player not found.", "Участник не найден.", "Katılımcı bulunamadı."),
+        "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin.": (
+            "Too many attempts. Please try again a little later.",
+            "Слишком много попыток. Пожалуйста, повторите чуть позже.",
+            "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.",
+        ),
+        "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin.": (
+            "Too many requests. Please try again a little later.",
+            "Слишком много запросов. Пожалуйста, повторите чуть позже.",
+            "Çok fazla istek gönderildi. Lütfen biraz sonra tekrar deneyin.",
+        ),
         "Oyun artıq başlayıb və müəllim gecikənlərin qoşulmasını bağlayıb.": (
             "The game has already started and the teacher has turned off joining late.",
             "Игра уже началась, и преподаватель отключил вход для опоздавших.",
             "Oyun zaten başladı ve öğretmen geç katılımı kapattı.",
+        ),
+    },
+    "live_exam.pin_entry": {
+        "Canlı imtahana qoşul": ("Join a live exam", "Присоединитесь к живому экзамену", "Canlı sınava katıl"),
+        "Canlı": ("Live", "Прямой эфир", "Canlı oyun"),
+        "Müəllimin göstərdiyi PIN-i yaz, sonra adını seçib oyuna daxil ol.": (
+            "Enter the PIN shown by the teacher, then choose your name and join the game.",
+            "Введите PIN, который показал преподаватель, затем выберите имя и войдите в игру.",
+            "Öğretmenin gösterdiği PIN kodunu gir, sonra adını seçip oyuna katıl.",
+        ),
+        "Oyun PIN-i": ("Game PIN", "PIN игры", "Oyun PIN'i"),
+        "Məsələn: 3A8K2B94F1": ("Example: 3A8K2B94F1", "Например: 3A8K2B94F1", "Örnek: 3A8K2B94F1"),
+        "Davam et": ("Continue", "Продолжить", "Devam et"),
+        "PIN-i ekranda gördüyün kimi daxil et. Növbəti addımda ad və avatar seçəcəksən.": (
+            "Type the PIN exactly as shown on screen. You will choose your nickname and avatar next.",
+            "Введите PIN точно как на экране. На следующем шаге вы выберете ник и аватар.",
+            "PIN kodunu ekrandaki gibi gir. Sonraki adımda rumuz ve avatar seçeceksin.",
+        ),
+        "Saniyələr içində qoşul": ("Join in seconds", "Подключение за несколько секунд", "Saniyeler içinde katıl"),
+        "Telefon, planşet və kompüterdən işləyir": (
+            "Works on phone, tablet, and desktop",
+            "Работает на телефоне, планшете и компьютере",
+            "Telefon, tablet ve bilgisayarda çalışır",
+        ),
+        "Canlı nəticə və liderlik cədvəli": (
+            "Live results and leaderboard",
+            "Живые результаты и таблица лидеров",
+            "Canlı sonuç ve lider tablosu",
+        ),
+        "Hazırsan?": ("Ready to play?", "Готовы?", "Hazır mısın?"),
+        "Bir URL, bir PIN, hamısı eyni oyunda.": (
+            "One link, one PIN, everyone in the same session.",
+            "Одна ссылка, один PIN, одна общая сессия.",
+            "Tek link, tek PIN, herkes aynı oturumda.",
+        ),
+        "Müəllim ekranında PIN və QR kod görünür.": (
+            "The teacher screen shows the PIN and QR code.",
+            "На экране преподавателя видны PIN и QR-код.",
+            "Öğretmen ekranında PIN ve QR kod görünür.",
+        ),
+        "Daxil olduqdan sonra avatar və ad seçimi gəlir.": (
+            "After this step, students choose nickname and avatar.",
+            "После этого шага ученик выбирает ник и аватар.",
+            "Bu adımdan sonra öğrenci ad ve avatar seçer.",
+        ),
+        "Yoxlanılır...": ("Checking...", "Проверяем...", "Kontrol ediliyor..."),
+        "Düzgün PIN daxil et.": ("Enter a valid PIN.", "Введите действительный PIN.", "Geçerli bir PIN gir."),
+        "Bu PIN tapılmadı və ya oyun bağlanıb.": (
+            "This PIN was not found or the session is closed.",
+            "Такой PIN не найден или сессия уже закрыта.",
+            "Bu PIN bulunamadı veya oturum kapanmış.",
+        ),
+    },
+    "live_exam.join": {
+        "Əvvəlki qoşulma tapıldı": ("Previous join found", "Найдено предыдущее подключение", "Önceki katılım bulundu"),
+        "{nickname} adı ilə bu oyuna artıq daxil olmusan.": (
+            "You already joined this game as {nickname}.",
+            "Вы уже вошли в эту игру как {nickname}.",
+            "Bu oyuna zaten {nickname} adıyla katıldın.",
+        ),
+        "İstəsən həmin oyunçu ilə davam et, istəsən yeni ad və avatarla yenidən qoşul.": (
+            "Continue with that player or join again with a new nickname and avatar.",
+            "Можно продолжить с этим игроком или войти заново с новым именем и аватаром.",
+            "İstersen aynı oyuncuyla devam et, istersen yeni rumuz ve avatarla tekrar katıl.",
+        ),
+        "{nickname} kimi davam et": (
+            "Continue as {nickname}",
+            "Продолжить как {nickname}",
+            "{nickname} olarak devam et",
+        ),
+        "Əvvəlki adla davam etmək istəyirsən?": (
+            "Continue with your previous name?",
+            "Продолжить с прежним именем?",
+            "Önceki adınla devam etmek ister misin?",
+        ),
+        "Bu PIN üçün aktiv oyunçu profilin var. Həmin profil ilə gözləmə otağına qayıda və ya yeni ad/avatar seçib yenidən daxil ola bilərsən.": (
+            "You already have an active player profile for this PIN. You can jump back into the waiting room or join again with a new nickname and avatar.",
+            "Для этого PIN уже есть активный профиль игрока. Вы можете вернуться в комнату ожидания или войти заново с новым именем и аватаром.",
+            "Bu PIN için aktif bir oyuncu profilin var. Bekleme odasına geri dönebilir ya da yeni rumuz ve avatarla yeniden katılabilirsin.",
+        ),
+        "Yenidən daxil ol": ("Join again", "Войти заново", "Yeniden katıl"),
+        "Bağla": ("Close", "Закрыть", "Kapat"),
+        "Bu ad artıq istifadə olunur. Başqa ad seç.": (
+            "This nickname is already in use. Choose another one.",
+            "Этот ник уже используется. Выберите другой.",
+            "Bu rumuz zaten kullanılıyor. Başka bir ad seç.",
         ),
     },
     "live_exam.consumer.error": {

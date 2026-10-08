@@ -92477,3 +92477,128 @@ msgstr "Player not found."
 msgctxt "live_exam.host_controls"
 msgid "Hamısını görmək üçün siyahını sürüşdürün"
 msgstr "Scroll the list to see everyone"
+
+msgctxt "live_exam.view.message"
+msgid "Çox sayda cəhd edildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "Too many attempts. Please try again a little later."
+
+msgctxt "live_exam.view.message"
+msgid ""
+"Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
+msgstr "Too many requests. Please try again a little later."
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı imtahana qoşul"
+msgstr "Join a live exam"
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı"
+msgstr "Live"
+
+msgctxt "live_exam.pin_entry"
+msgid "Müəllimin göstərdiyi PIN-i yaz, sonra adını seçib oyuna daxil ol."
+msgstr ""
+"Enter the PIN shown by the teacher, then choose your name and join the game."
+
+msgctxt "live_exam.pin_entry"
+msgid "Oyun PIN-i"
+msgstr "Game PIN"
+
+msgctxt "live_exam.pin_entry"
+msgid "Məsələn: 3A8K2B94F1"
+msgstr "Example: 3A8K2B94F1"
+
+msgctxt "live_exam.pin_entry"
+msgid "Davam et"
+msgstr "Continue"
+
+msgctxt "live_exam.pin_entry"
+msgid ""
+"PIN-i ekranda gördüyün kimi daxil et. Növbəti addımda ad və avatar "
+"seçəcəksən."
+msgstr ""
+"Type the PIN exactly as shown on screen. You will choose your nickname and "
+"avatar next."
+
+msgctxt "live_exam.pin_entry"
+msgid "Saniyələr içində qoşul"
+msgstr "Join in seconds"
+
+msgctxt "live_exam.pin_entry"
+msgid "Telefon, planşet və kompüterdən işləyir"
+msgstr "Works on phone, tablet, and desktop"
+
+msgctxt "live_exam.pin_entry"
+msgid "Canlı nəticə və liderlik cədvəli"
+msgstr "Live results and leaderboard"
+
+msgctxt "live_exam.pin_entry"
+msgid "Hazırsan?"
+msgstr "Ready to play?"
+
+msgctxt "live_exam.pin_entry"
+msgid "Bir URL, bir PIN, hamısı eyni oyunda."
+msgstr "One link, one PIN, everyone in the same session."
+
+msgctxt "live_exam.pin_entry"
+msgid "Müəllim ekranında PIN və QR kod görünür."
+msgstr "The teacher screen shows the PIN and QR code."
+
+msgctxt "live_exam.pin_entry"
+msgid "Daxil olduqdan sonra avatar və ad seçimi gəlir."
+msgstr "After this step, students choose nickname and avatar."
+
+msgctxt "live_exam.pin_entry"
+msgid "Yoxlanılır..."
+msgstr "Checking..."
+
+msgctxt "live_exam.pin_entry"
+msgid "Düzgün PIN daxil et."
+msgstr "Enter a valid PIN."
+
+msgctxt "live_exam.pin_entry"
+msgid "Bu PIN tapılmadı və ya oyun bağlanıb."
+msgstr "This PIN was not found or the session is closed."
+
+msgctxt "live_exam.join"
+msgid "Əvvəlki qoşulma tapıldı"
+msgstr "Previous join found"
+
+msgctxt "live_exam.join"
+msgid "{nickname} adı ilə bu oyuna artıq daxil olmusan."
+msgstr "You already joined this game as {nickname}."
+
+msgctxt "live_exam.join"
+msgid ""
+"İstəsən həmin oyunçu ilə davam et, istəsən yeni ad və avatarla yenidən "
+"qoşul."
+msgstr ""
+"Continue with that player or join again with a new nickname and avatar."
+
+msgctxt "live_exam.join"
+msgid "{nickname} kimi davam et"
+msgstr "Continue as {nickname}"
+
+msgctxt "live_exam.join"
+msgid "Əvvəlki adla davam etmək istəyirsən?"
+msgstr "Continue with your previous name?"
+
+msgctxt "live_exam.join"
+msgid ""
+"Bu PIN üçün aktiv oyunçu profilin var. Həmin profil ilə gözləmə otağına "
+"qayıda və ya yeni ad/avatar seçib yenidən daxil ola bilərsən."
+msgstr ""
+"You already have an active player profile for this PIN. You can jump back "
+"into the waiting room or join again with a new nickname and avatar."
+
+msgctxt "live_exam.join"
+msgid "Yenidən daxil ol"
+msgstr "Join again"
+
+msgctxt "live_exam.join"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "live_exam.join"
+msgid "Bu ad artıq istifadə olunur. Başqa ad seç."
+msgstr "This nickname is already in use. Choose another one."

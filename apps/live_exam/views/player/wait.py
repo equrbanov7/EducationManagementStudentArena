@@ -17,6 +17,7 @@ from apps.live_exam.constants import (
     REACTION_KEYS,
     build_wait_room_catalog,
 )
+from apps.live_exam.i18n import player_language, session_language
 from apps.live_exam.models import LiveSession
 from apps.live_exam.serializers import serialize_player_identity, serialize_players
 from apps.live_exam.session_settings import get_session_settings
@@ -73,20 +74,22 @@ def live_wait_room(request, pin):
 
     with bypass_rls():
         players = serialize_players(session)
-    return render(
-        request,
-        "liveExam/wait_room.html",
-        {
-            "session": session,
-            "players": players,
-            "my_player": serialize_player_identity(player),
-            "my_player_id": player.id,
-            "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
-            "live_catalog": build_wait_room_catalog(),
-            "session_settings": get_session_settings(session),
-            "player_assets": player_assets(),
-        },
-    )
+    with player_language(session):
+        return render(
+            request,
+            "liveExam/wait_room.html",
+            {
+                "session": session,
+                "players": players,
+                "my_player": serialize_player_identity(player),
+                "my_player_id": player.id,
+                "player_screen_url": reverse("liveExam:player_screen", kwargs={"pin": session.pin}),
+                "live_catalog": build_wait_room_catalog(),
+                "session_settings": get_session_settings(session),
+                "session_language": session_language(session),
+                "player_assets": player_assets(),
+            },
+        )
 
 
 @require_POST
@@ -94,7 +97,11 @@ def live_wait_profile_update(request, pin):
     player = _signed_player(request, pin)
     if player is None:
         return _auth_required()
-    session = player.session
+    with player_language(player.session):
+        return _update_profile(request, player, player.session)
+
+
+def _update_profile(request, player, session):
 
     # Audit 2026-09-28 LXS-07: profil yalnız lobbidə dəyişir — əvvəl oyun gedişində
     # və BİTƏNDƏN sonra da ad dəyişirdi (host-un yoxladığı ad nəticə səhifəsində əvəzlənirdi).
@@ -164,7 +171,11 @@ def live_wait_reaction(request, pin):
     player = _signed_player(request, pin)
     if player is None:
         return _auth_required()
-    session = player.session
+    with player_language(player.session):
+        return _send_reaction(request, player, player.session)
+
+
+def _send_reaction(request, player, session):
 
     # Reaksiya paneli yalnız gözləmə otağındadır; oyun gedişində / bitəndən sonra
     # host ekranına reaksiya «spam»-ı göndərilməsin (Audit 2026-09-28 LXS-11).
@@ -211,13 +222,14 @@ def live_player_screen(request, pin):
         return redirect("liveExam:join_page", pin=pin)
     session = player.session
 
-    return render(
-        request,
-        "liveExam/player_screen.html",
-        {
-            "session": session,
-            "player": player,
-            "session_settings": get_session_settings(session),
-            "player_assets": player_assets(),
-        },
-    )
+    with player_language(session):
+        return render(
+            request,
+            "liveExam/player_screen.html",
+            {
+                "session": session,
+                "player": player,
+                "session_settings": get_session_settings(session),
+                "player_assets": player_assets(),
+            },
+        )

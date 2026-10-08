@@ -19,6 +19,7 @@ from apps.live_exam.auth import PLAYER_COOKIE_NAME, get_request_player, is_clien
 from apps.live_exam.delivery import build_delivery_progress_payload, received_count, record_question_seen
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_question_by_index, get_total_questions
+from apps.live_exam.i18n import player_language
 from apps.live_exam.models import LiveAnswer, LiveSession
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle, pre_question_rank
 from apps.live_exam.roster import eligible_players, is_pending
@@ -41,13 +42,13 @@ from apps.live_exam.transport import (
     public_player_answer,
 )
 from apps.live_exam.views.host._shared import _ensure_host_org_permission
+from apps.live_exam.views.player.texts import state_rate_limit_message
 from core.rate_limit import record_rate_limit_hit
 from core.rls import bypass_rls
 from core.utils import get_client_ip
 
 LIVE_STATE_LIMIT_SCOPE = "live_exam.state"
 LIVE_ANSWER_HTTP_LIMIT_SCOPE = "live_exam.answer.http"
-LIVE_STATE_RATE_LIMIT_MESSAGE = "Çox sayda sorğu göndərildi. Zəhmət olmasa bir az sonra yenidən cəhd edin."
 
 _REVEAL_TIMING_KEYS = (
     "top",
@@ -100,7 +101,7 @@ def _rate_limited(request, pin):
     is_limited, retry_after = record_rate_limit_hit(LIVE_STATE_LIMIT_SCOPE, settings.LIVE_STATE_RATE_LIMIT, *rate_key)
     if not is_limited:
         return None
-    response = JsonResponse({"ok": False, "message": LIVE_STATE_RATE_LIMIT_MESSAGE}, status=429)
+    response = JsonResponse({"ok": False, "message": state_rate_limit_message()}, status=429)
     if retry_after:
         response.headers["Retry-After"] = str(retry_after)
     return response
@@ -312,16 +313,17 @@ def live_answer_submit(request, pin):
         return JsonResponse({"ok": False, "message": parsed}, status=400)
 
     question_id, option_ids, answer_ms, text = parsed
-    ok, result = save_answer_and_score(
-        pin=pin,
-        player_id=player.id,
-        client_id=str(player.client_id or ""),
-        question_id=question_id,
-        option_ids=option_ids,
-        answer_ms=answer_ms,
-        received_at=received_at,
-        text=text,
-    )
+    with player_language(player.session):  # xəta mətnləri aparıcının seçdiyi dildə (2026-10-08)
+        ok, result = save_answer_and_score(
+            pin=pin,
+            player_id=player.id,
+            client_id=str(player.client_id or ""),
+            question_id=question_id,
+            option_ids=option_ids,
+            answer_ms=answer_ms,
+            received_at=received_at,
+            text=text,
+        )
     if not ok:
         return JsonResponse({"ok": False, "message": result}, status=400)
 
