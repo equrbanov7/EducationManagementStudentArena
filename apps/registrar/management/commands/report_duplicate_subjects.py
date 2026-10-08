@@ -22,6 +22,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 from core.export_safety import safe_csv_writer
 from core.rls import bypass_rls
+from core.rls_pooling import rls_worker_atomic
 
 from ...subject_duplicates import find_duplicate_subject_groups
 
@@ -51,7 +52,7 @@ class Command(BaseCommand):
         return [found]
 
     def handle(self, *args, **options):
-        with bypass_rls():
+        with rls_worker_atomic(), bypass_rls():
             organizations = self._organizations(options["organization"])
             groups = find_duplicate_subject_groups(
                 organizations=organizations, include_inactive=options["include_inactive"]
