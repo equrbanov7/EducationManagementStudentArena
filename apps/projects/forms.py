@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
+from core.datetime_input import DayFirstDateTimeField, DayFirstDateTimeInput
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Project, ProjectSubmission
@@ -20,6 +21,7 @@ class ProjectForm(forms.ModelForm):
             "max_score",
             "status",
         ]
+        field_classes = {"start_date": DayFirstDateTimeField, "deadline": DayFirstDateTimeField}
         widgets = {
             "title": forms.TextInput(
                 attrs={
@@ -34,8 +36,9 @@ class ProjectForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("projects.form.project.placeholder", "description"),
                 }
             ),
-            "start_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-            "deadline": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            # 2026-10-08: locale-dən asılı olmayan «gg.aa.iiii ss:dd» (24 saat) + ISO qəbulu.
+            "start_date": DayFirstDateTimeInput(),
+            "deadline": DayFirstDateTimeInput(),
             "max_attempts": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 1}),
             "max_score": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 100}),
             "status": forms.Select(attrs={"class": "form-select"}),

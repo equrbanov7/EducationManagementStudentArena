@@ -137,7 +137,8 @@ def submit_question_set(
     """Yeni göndəriş yaradır və KAFEDRA MÜDİRİNƏ yönləndirir (mərkəzə yox).
 
     ``groups`` — köhnə kohortlar (FK/M2M kimi saxlanır); ``units`` — reyestr qrupları
-    (``OrgUnit``; adları ``group_label``-dədir, kafedra onların əcdadından həll olunur).
+    (``OrgUnit`` → ``registry_groups``; adları ``group_label``-də də qalır, kafedra onların
+    əcdadından həll olunur).
     """
     title = (title or "").strip()
     if not title:
@@ -171,6 +172,8 @@ def submit_question_set(
     submission.save()
     if groups:
         submission.student_groups.set(groups)
+    if units:
+        submission.registry_groups.set(units)
     route_submission_to_chair(
         submission,
         actor=teacher,
@@ -264,6 +267,8 @@ def resubmit_question_set(
     if groups is not None:
         # [] = müəllim yalnız reyestr qrupu seçib → köhnə kohort bağları təmizlənir.
         submission.student_groups.set(groups)
+    if units is not None:
+        submission.registry_groups.set(units)
     if previous_token and previous_token != submission.import_token:
         from apps.exams.services.import_media import clear_stash
 

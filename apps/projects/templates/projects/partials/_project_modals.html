@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load ems_ui i18n static %}
 {% if request.user.is_teacher_or_above %}
 
 <!-- ADD MODAL -->
@@ -35,11 +35,11 @@
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="add-project-start-date">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="add-project-start-date" name="start_date" class="form-control" required>
+                            {% ems_datetime_input "start_date" input_id="add-project-start-date" required=True %}
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="add-project-deadline">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="add-project-deadline" name="deadline" class="form-control" required>
+                            {% ems_datetime_input "deadline" input_id="add-project-deadline" required=True %}
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="add-project-max-attempts">{% trans "label_max_attempts" context "projects.modals" %}</label>
@@ -112,11 +112,11 @@
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="editStartDate">{% trans "label_start_date" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editStartDate" name="start_date" class="form-control" required>
+                            {% ems_datetime_input "start_date" input_id="editStartDate" required=True %}
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="editDeadline">{% trans "label_deadline" context "projects.modals" %} <span class="text-danger">*</span></label>
-                            <input type="datetime-local" id="editDeadline" name="deadline" class="form-control" required>
+                            {% ems_datetime_input "deadline" input_id="editDeadline" required=True %}
                         </div>
                         <div class="col-md-3 mb-3">
                             <label class="form-label" for="editMaxAttempts">{% trans "label_max_attempts" context "projects.modals" %}</label>
@@ -173,4 +173,8 @@
      data-i18n-delete-confirm="{% trans 'delete_confirm' context 'projects.modals.js' %}"
      hidden></div>
 <link rel="stylesheet" href="{% static 'projects/css/project_modals.css' %}">
-<script src="{% static 'projects/js/project_modals.js' %}" defer></script>
+{# 2026-10-08: son tarix sahəsi «gg.aa.iiii ss:dd» (24 saat) + təqvim seçicisi — core/datetime_input.py #}
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
+<script src="{% static 'projects/js/project_modals.js' %}?v=20261008-1" defer></script>

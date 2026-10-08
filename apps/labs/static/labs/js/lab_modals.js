@@ -188,8 +188,10 @@
             if ($('editLabId')) $('editLabId').value = d.id;
             if ($('editLabTitle')) $('editLabTitle').value = d.title || '';
             if ($('editLabDescription')) $('editLabDescription').value = d.description || '';
-            if ($('editLabStart')) $('editLabStart').value = d.start_datetime || '';
-            if ($('editLabEnd')) $('editLabEnd').value = d.end_datetime || '';
+            // 2026-10-08: sahə «gg.aa.iiii ss:dd» (24 saat) — server yerli ISO verir.
+            var dtShow = function (v) { return window.EMSDateTime ? window.EMSDateTime.display(v) : (v || ''); };
+            if ($('editLabStart')) $('editLabStart').value = dtShow(d.start_datetime);
+            if ($('editLabEnd')) $('editLabEnd').value = dtShow(d.end_datetime);
             if ($('editLabMaxScore')) $('editLabMaxScore').value = d.max_score || 100;
             if ($('editLabMaxAttempts')) $('editLabMaxAttempts').value = d.max_attempts || 1;
             if ($('editLabStatus')) {

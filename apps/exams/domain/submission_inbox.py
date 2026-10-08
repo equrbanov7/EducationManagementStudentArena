@@ -143,6 +143,15 @@ class QuestionSubmission(models.Model):
         related_name="question_submissions_multi",
         verbose_name=pgettext_lazy("exams.model.question_submission.field", "student_groups"),
     )
+    # REYESTR qrupları (``OrgUnit`` GROUP, 2026-10-08): fənn/qrup indi müəllimin dərs
+    # yükündən gəlir (``services/submission_sources.py``); köhnə kohort FK-sı olmayan
+    # göndəriş də fakültə/kafedra süzgəcinə və kafedra marşrutuna düşsün deyə saxlanır.
+    registry_groups = models.ManyToManyField(
+        "organizations.OrgUnit",
+        blank=True,
+        related_name="registry_question_submissions",
+        verbose_name=pgettext_lazy("exams.model.question_submission.field", "Reyestr qrupları"),
+    )
     group_label = models.CharField(
         max_length=200,
         default="",

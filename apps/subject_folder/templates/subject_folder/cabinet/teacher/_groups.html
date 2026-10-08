@@ -89,8 +89,8 @@ pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğ
                             <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-sf-open="sfDeadline"
                                     data-sf-dialog-title="{% blocktrans trimmed with group=group.offering.group.name|default:group.offering context 'subject_folder.ui' %}Son tarix — {{ group }}{% endblocktrans %}"
                                     data-sf-fill-assignment="{{ group.assignment.pk }}" data-sf-fill-task="{{ row.task.pk }}"
-                                    data-sf-fill-opens_at="{% if row.deadline.opens_at %}{{ row.deadline.opens_at|date:'Y-m-d\TH:i' }}{% endif %}"
-                                    data-sf-fill-due_at="{% if row.deadline.due_at %}{{ row.deadline.due_at|date:'Y-m-d\TH:i' }}{% endif %}"
+                                    data-sf-fill-opens_at="{% if row.deadline.opens_at %}{{ row.deadline.opens_at|date:'d.m.Y H:i' }}{% endif %}"
+                                    data-sf-fill-due_at="{% if row.deadline.due_at %}{{ row.deadline.due_at|date:'d.m.Y H:i' }}{% endif %}"
                                     data-sf-fill-late_policy="{{ row.deadline.late_policy|default:'none' }}">
                                 <i class="fas fa-calendar-day" aria-hidden="true"></i> {% trans "Son tarix" context "subject_folder.ui" %}
                             </button>

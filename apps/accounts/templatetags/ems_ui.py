@@ -109,3 +109,43 @@ def ems_pct_style(value) -> str:
         number = 0.0
     number = max(0.0, min(100.0, number))
     return f"--ems-bar-pct:{number:.4g}%"
+
+
+@register.simple_tag(name="ems_datetime_input")
+def ems_datetime_input(
+    name: str,
+    value=None,
+    *,
+    input_id: str = "",
+    required: bool = False,
+    css_class: str = "form-control",
+    describedby: str = "",
+):
+    """Locale-dən asılı OLMAYAN tarix-saat sahəsi («gg.aa.iiii ss:dd», 24 saat) — əl ilə yazılmış formalar.
+
+    2026-10-08 (sahib qərarı): tapşırıq/laboratoriya/layihə/fənn qovluğu/elan son tarixləri
+    native ``datetime-local`` idi (brauzer dilinə tabe: en-US mm/dd/yyyy + AM/PM). Vidcet
+    ``core.datetime_input.DayFirstDateTimeInput``-dir; seçicini (``static/js/ems_datetime*.js``
+    + ``css/ems_datetime.css``) səhifə/partial özü yükləyir. ``value`` — ``datetime`` və ya
+    ISO/gün-əvvəl mətn; göstəriş CARİ zonada (Asia/Baku).
+    """
+    import datetime
+
+    from django.utils import timezone
+
+    from core.datetime_input import DateTimeTextError, DayFirstDateTimeInput, parse_datetime_text
+
+    if isinstance(value, str):
+        try:
+            value = parse_datetime_text(value) if value.strip() else None
+        except DateTimeTextError:
+            pass  # oxunmayan mətn olduğu kimi göstərilir — istifadəçi düzəltsin
+    if isinstance(value, datetime.datetime) and timezone.is_aware(value):
+        value = timezone.localtime(value)
+    attrs = {"id": input_id or f"id_{name}"}
+    if required:
+        attrs["required"] = True
+    if describedby:
+        attrs["aria-describedby"] = describedby
+    # Sinif: Bootstrap formaları «form-control», kabinet (ems_ui) formaları «ems-input».
+    return DayFirstDateTimeInput(attrs={"class": css_class}).render(name, value, attrs=attrs)

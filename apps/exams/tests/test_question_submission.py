@@ -648,6 +648,10 @@ class ProfileSectionTests(_Base):
             teacher=self.teacher, organization=self.org, name="875i-fak", org_unit=kafedra
         )
         self._to_center(self._submission(title="Fakültə daxili toplu", student_group=group, groups=[group]))
+        # QRUPSUZ göndəriş (nə köhnə kohort, nə də `registry_groups`) fakültə süzgəcinə düşmür —
+        # müəllimin kafedrası (`chair_unit`) süzgəc meyarı deyil. 2026-10-08-dən reyestr qrupu
+        # ilə göndəriş `registry_groups` vasitəsilə süzgəcə DÜŞÜR (bax
+        # test_submission_registry_groups_2026_10_08.py) — bu test həmin semantikanı da pinləyir.
         self._to_center(self._submission(title="Fakültə xarici toplu"))
 
         client = self._client_for(self.exam_center)
