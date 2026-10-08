@@ -253,6 +253,20 @@ export function refitLobbyCloud() {
     if (root && list) fitCloud(root, list, Math.max(Number(state.rosterCount || 0), list.childElementCount));
 }
 
+/* Siyahının ölçüsü dəyişəndə (pəncərə, tam ekran, idarə panelinin itələməsi — L5) sıxlıq yenidən seçilir.
+ * Yalnız «resize» hadisəsi kifayət etmir: panel keçidi / state sinxronu ilə yarışda köhnə enə görə ölçülürdü. */
+let refitFrame = 0;
+const cloudResizeObserver =
+    typeof ResizeObserver === "function"
+        ? new ResizeObserver(() => {
+              if (refitFrame) return;
+              refitFrame = window.requestAnimationFrame(() => {
+                  refitFrame = 0;
+                  refitLobbyCloud();
+              });
+          })
+        : null;
+
 document.addEventListener(
     "scroll",
     (event) => {
@@ -269,7 +283,14 @@ export function renderIdleStage(fromData = false) {
         cloud.rendered.clear();
     }
     const root = UI.presentationContent?.querySelector("[data-lobby]");
-    if (fresh && root) renderTimeSettings(root);
+    if (fresh && root) {
+        renderTimeSettings(root);
+        const list = root.querySelector("[data-lobby-cloud]");
+        if (list && cloudResizeObserver) {
+            cloudResizeObserver.disconnect();
+            cloudResizeObserver.observe(list);
+        }
+    }
     if (root) renderCloud(root, fromData);
 }
 

@@ -321,8 +321,11 @@
 
 .hx-cloud.is-scrolled-end { mask-image: none; -webkit-mask-image: none; }
 
+/* İpucu yerini HƏMİŞƏ tutur (yalnız görünməz olur) — görünməsi siyahının hündürlüyünü dəyişib
+ * yenidən sığdırma dövrəsi yaratmasın. */
 .hx-cloud-hint {
-    display: none;
+    display: flex;
+    visibility: hidden;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -332,7 +335,8 @@
 }
 
 .hx-cloud-hint .hx-icon { width: 18px; height: 18px; color: var(--hx-gold); animation: hxDot 1.6s ease-in-out infinite; }
-.hx-lobby.is-overflowing .hx-cloud-hint { display: flex; }
+.hx-lobby:not(.has-players) .hx-cloud-hint { display: none; }
+.hx-lobby.is-overflowing .hx-cloud-hint { visibility: visible; }
 .hx-lobby.is-overflowing.is-scrolled-end .hx-cloud-hint { visibility: hidden; }
 
 .hx-bubble {
@@ -463,6 +467,15 @@
     .hx-join { grid-template-columns: 1fr; }
     .hx-join__step + .hx-join__step { border-left: 0; border-top: 3px dashed #d7dcf0; }
     .hx-qr { flex-direction: row; justify-self: start; }
+}
+
+/* 2026-10-08 (L5): idarə paneli səhnəni itələyəndə (≈ 900 px səhnə) çox iştirakçılı lobbidə qoşulma
+ * kartı və QR yan-yana qalır — üst-üstə düzülsəydi siyahıya 2–3 sıra yer qalırdı. */
+@container hxstage (min-width: 760px) and (max-width: 1100px) {
+    .hx-lobby[data-crowd="1"] .hx-lobby__top { grid-template-columns: minmax(0, 1fr) auto; }
+    .hx-lobby[data-crowd="1"] .hx-join { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.45fr); }
+    .hx-lobby[data-crowd="1"] .hx-join__step + .hx-join__step { border-top: 0; border-left: 3px dashed #d7dcf0; }
+    .hx-lobby[data-crowd="1"] .hx-qr { flex-direction: column; justify-self: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
