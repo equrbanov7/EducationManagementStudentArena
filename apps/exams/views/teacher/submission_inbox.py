@@ -24,10 +24,10 @@ from apps.exams.services.question_submission import (
 )
 from apps.exams.views.teacher.submission_meta import (
     _form_state,
-    _teacher_groups,
-    _teacher_subjects,
+    _submission_sources,
     _validate_submission_meta,
     annotate_preview_flags,
+    prefill_group_keys,
 )
 from apps.exams.views.teacher.submission_workbench import (
     build_workbench_context,
@@ -63,7 +63,7 @@ def question_submission_create(request):
     """
     _ensure_teacher(request.user)
     organization = _require_organization(request)
-    groups = list(_teacher_groups(request, organization))
+    sources = _submission_sources(request, organization)
 
     from apps.exams.views.teacher.question_library._shared import _empty_analysis
 
@@ -98,13 +98,14 @@ def question_submission_create(request):
         if state["action"] == "save":
             _err, chosen_groups, group_label, subject_obj = _validate_submission_meta(
                 form_state,
-                groups=groups,
-                subjects=_teacher_subjects(request, organization, groups=groups),
+                groups=sources.groups,
+                subjects=sources.subjects,
             )
 
             if _err:
                 messages.error(request, _err)
             else:
+                cohorts, units = sources.split(chosen_groups)
                 try:
                     submission = submit_question_set(
                         teacher=request.user,
@@ -113,11 +114,12 @@ def question_submission_create(request):
                         subject=subject_obj.name,
                         subject_ref=subject_obj,
                         exam_kind=form_state["exam_kind"],
-                        student_group=chosen_groups[0],
+                        student_group=cohorts[0] if cohorts else None,
                         group_label=group_label,
                         language=form_state["language"],
                         raw_text=state["raw_text"],
-                        groups=chosen_groups,
+                        groups=cohorts,
+                        units=units,
                         parsed=state["chosen"],
                         teacher_note=form_state["teacher_note"],
                         import_token=state["math_token"],
@@ -137,7 +139,7 @@ def question_submission_create(request):
     context = build_workbench_context(
         request,
         organization,
-        groups,
+        sources,
         form_state,
         analysis=state["analysis"],
         parsed=state["parsed"],
@@ -221,18 +223,19 @@ def question_submission_detail(request, submission_id):
             # 2026-09-14: pano/sürükləmə ilə şəkil — yalnız redaktə hüququ olanda (yuxarıdakı qapı).
             return paste_image_response(request, organization_id=organization.pk)
         form_state = _form_state(request)
-        _groups = list(_teacher_groups(request, organization))
+        sources = _submission_sources(request, organization)
         state = process_workbench_post(request, organization, form_state)
 
         if state["action"] == "save":
             _err, chosen_groups, group_label, subject_obj = _validate_submission_meta(
                 form_state,
-                groups=_groups,
-                subjects=_teacher_subjects(request, organization, groups=_groups),
+                groups=sources.groups,
+                subjects=sources.subjects,
             )
             if _err:
                 messages.error(request, _err)
             else:
+                cohorts, units = sources.split(chosen_groups)
                 try:
                     submission = resubmit_question_set(
                         submission,
@@ -240,11 +243,12 @@ def question_submission_detail(request, submission_id):
                         subject=subject_obj.name,
                         subject_ref=subject_obj,
                         exam_kind=form_state["exam_kind"],
-                        student_group=chosen_groups[0],
+                        student_group=cohorts[0] if cohorts else None,
                         group_label=group_label,
                         language=form_state["language"],
                         raw_text=state["raw_text"],
-                        groups=chosen_groups,
+                        groups=cohorts,
+                        units=units,
                         parsed=state["chosen"],
                         teacher_note=form_state["teacher_note"],
                         import_token=state["math_token"],
@@ -263,12 +267,13 @@ def question_submission_detail(request, submission_id):
 
         # Preview (və ya xəta ilə yarımçıq save) — workbench vəziyyəti ilə render.
         context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
-        context.update(_detail_workbench_context(request, organization, _groups, submission, form_state, state))
+        context.update(_detail_workbench_context(request, organization, sources, submission, form_state, state))
         return render(request, "exams/teacher/question_submission_detail.html", context)
 
     context = _detail_context(submission, can_edit=can_edit, is_reviewer=is_reviewer)
     if can_edit:
-        _groups = list(_teacher_groups(request, organization))
+        sources = _submission_sources(request, organization)
+        context["form_state"]["group_ids"] = prefill_group_keys(submission, sources.groups)
         state = initial_workbench_state(
             request,
             organization,
@@ -276,12 +281,12 @@ def question_submission_detail(request, submission_id):
             math_token=submission.import_token,
         )
         context.update(
-            _detail_workbench_context(request, organization, _groups, submission, context["form_state"], state)
+            _detail_workbench_context(request, organization, sources, submission, context["form_state"], state)
         )
     return render(request, "exams/teacher/question_submission_detail.html", context)
 
 
-def _detail_workbench_context(request, organization, groups, submission, form_state, state):
+def _detail_workbench_context(request, organization, sources, submission, form_state, state):
     """Detal redaktəsinin workbench konteksti — yeni göndərişlə eyni qurucu,
     yalnız başlıq/etiketlər fərqlidir."""
     if submission.status == QuestionSubmission.STATUS_REJECTED:
@@ -291,7 +296,7 @@ def _detail_workbench_context(request, organization, groups, submission, form_st
     context = build_workbench_context(
         request,
         organization,
-        groups,
+        sources,
         form_state,
         analysis=state["analysis"],
         parsed=state["parsed"],

@@ -102,9 +102,41 @@ def seed_missing_hours(rows, plan_hours) -> tuple:
     return rows, changed
 
 
+def fit_rows_to_hours(rows, plan_hours) -> tuple:
+    """Kopyalanmış həftəlik cədvəli HƏDƏFİN saatına uyğunlaşdırır → ``(sətirlər, dəyişdi)``.
+
+    «Kopyala və uyğunlaşdır» (2026-10-08) üçündür:
+
+    * cəmi hədəfin plan saatına BƏRABƏR olan növə toxunulmur (müəllimin bölgüsü qalır);
+    * fərqli növ standart bölgü ilə (2-2-…-qalıq) yuxarıdan aşağı yenidən düzülür,
+      lazım olsa boş sətir əlavə edilir (sətir sayı ``ceil(saat / 2)``);
+    * hədəfdə saatı OLMAYAN növün sətir saatları sıfırlanır.
+
+    Mövzu, nəticə və digər açarlar toxunulmaz qalır — artıq mövzu sətirləri SİLİNMİR
+    (müəllim özü birləşdirir; tamamlanma qaydası onları göstərir).  Plan boşdursa heç
+    nə dəyişmir.
+    """
+    planned = _planned(plan_hours)
+    rows = [dict(row) for row in (rows or []) if isinstance(row, dict)]
+    if not any(planned.values()):
+        return rows, False
+    changed = False
+    for kind, hours in planned.items():
+        if sum(_int(row.get(kind)) for row in rows) == hours:
+            continue
+        changed = True
+        spread = default_distribution(hours)[:MAX_WEEK_ROWS]
+        while len(rows) < len(spread):
+            rows.append({"topic": "", "outcome": "", **{k: 0 for k in LESSON_HOUR_KINDS}})
+        for index, row in enumerate(rows):
+            row[kind] = spread[index] if index < len(spread) else 0
+    return rows, changed
+
+
 __all__ = [
     "default_distribution",
     "expected_week_rows",
+    "fit_rows_to_hours",
     "hour_choices",
     "rows_for_hours",
     "seed_missing_hours",

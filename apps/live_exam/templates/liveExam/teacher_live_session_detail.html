@@ -4,7 +4,7 @@
 {% block title %}{% trans "page_title" context "liveExam.template.session_detail" %} {{ session.pin }} — {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
-<link rel="stylesheet" href="{% static 'css/teacher_live_session_detail.css' %}?v=lxstage-20260929">
+<link rel="stylesheet" href="{% static 'css/teacher_live_session_detail.css' %}?v=lxstage-20261008">
     {# Ortaq token teması (sahib 2026-09-21): imtahan səthləri eyni dildə. #}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_surfaces_theme.css' %}?v=20260921-theme">
 {% endblock %}
@@ -122,11 +122,16 @@
                 </thead>
                 <tbody id="playerTbody">
                     {% for p in players %}
-                    <tr data-nickname="{{ p.nickname|lower }}">
+                    <tr data-nickname="{{ p.nickname|lower }}"{% if p.removed_at %} class="sd-row--removed"{% endif %}>
                         <td>
+                            {% if p.removed_at %}
+                            {% comment %}2026-10-08 (L6): oyun gedərkən çıxarılıb — reytinqdə yeri yoxdur.{% endcomment %}
+                            <span class="sd-removed">{% trans "Çıxarıldı" context "liveExam.template.session_detail" %}</span>
+                            {% else %}
                             <span class="sd-rank {% if forloop.counter <= 3 %}sd-rank--{{ forloop.counter }}{% endif %}">
                                 {{ forloop.counter }}
                             </span>
+                            {% endif %}
                         </td>
                         <td><strong>{{ p.nickname }}</strong></td>
                         <td><strong>{{ p.score }}</strong></td>

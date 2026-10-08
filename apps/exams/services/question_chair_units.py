@@ -74,12 +74,12 @@ def teacher_chair_unit(teacher, organization):
     return membership.scope_unit if membership else None
 
 
-def resolve_submission_chair_unit(*, organization, teacher, groups=()):
-    """Göndərişin kafedrası: qrup əcdadı → müəllimin kafedrası → ``None``."""
-    for group in groups or ():
-        if group is None:
-            continue
-        chair = resolve_chair_unit(getattr(group, "org_unit", None))
+def resolve_submission_chair_unit(*, organization, teacher, groups=(), units=()):
+    """Göndərişin kafedrası: qrup əcdadı → reyestr qrupunun əcdadı → müəllimin kafedrası → ``None``."""
+    candidates = [getattr(group, "org_unit", None) for group in groups or () if group is not None]
+    candidates += [unit for unit in units or () if unit is not None]
+    for unit in candidates:
+        chair = resolve_chair_unit(unit)
         if chair is not None:
             return chair
     return teacher_chair_unit(teacher, organization)

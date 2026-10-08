@@ -8,7 +8,14 @@ DRAFT ──(təsdiqə göndər)──> SUBMITTED ──(müdir açır)──> R
                                                           └─(rədd et, səbəb)──> REJECTED
 APPROVED ──(yeni versiya)──> minor (cari semestr) | major (növbəti semestr) → DRAFT
 Köhnə APPROVED ──(yeni versiya təsdiqlənəndə)──> ARCHIVED
+DRAFT ──(bağla: eyni fənn/semestr, eyni saat, İNSAN təsdiqli mənbə)──> APPROVED [reuse]
 ```
+
+``reuse`` keçidi (2026-10-08) kafedra QƏRARI DEYİL: hədəf versiya mənbənin
+insan tərəfindən təsdiqlənmiş versiyasının EYNİ nüsxəsidir, ``approved_by`` NULL
+qalır, ``approval_source = reuse``.  Mənbəyə aid şərtlər (təsdiq, saat, kafedra,
+müəllif) :mod:`apps.syllabus.services.reuse_rules`-dadır; burada yalnız status,
+icazə və müəllif şərti saxlanılır.
 
 Bu modul YALNIZ qaydaları saxlayır — DB yazısı yoxdur. Keçidin icrası
 :mod:`apps.syllabus.services.workflow`-dadır; view qatı state maşınını BİRBAŞA
@@ -25,6 +32,7 @@ from dataclasses import dataclass
 
 from .constants import (
     PERM_APPROVE,
+    PERM_EDIT,
     PERM_MANAGE,
     PERM_REJECT,
     PERM_REVIEW,
@@ -60,6 +68,7 @@ class Transition:
     REJECT = "reject"
     RESUME_EDITING = "resume_editing"
     ARCHIVE = "archive"
+    REUSE = "reuse"
 
 
 @dataclass(frozen=True)
@@ -139,6 +148,16 @@ TRANSITIONS = {
         sources=frozenset({SyllabusStatus.APPROVED.value}),
         target=SyllabusStatus.ARCHIVED.value,
         permission=PERM_MANAGE,
+    ),
+    # Bağlama: müəllif öz qaralamasını eyni fənnin eyni semestrdəki TƏSDİQLƏNMİŞ
+    # (insan qərarı) sillabusunun eyni nüsxəsi ilə əvəzləyir.  Təsdiqləyən
+    # uydurulmur — bax ``services/reuse.py``.
+    Transition.REUSE: TransitionRule(
+        name=Transition.REUSE,
+        sources=frozenset({SyllabusStatus.DRAFT.value}),
+        target=SyllabusStatus.APPROVED.value,
+        permission=PERM_EDIT,
+        author_only=True,
     ),
 }
 

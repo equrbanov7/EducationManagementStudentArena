@@ -1,9 +1,10 @@
-import { UI } from './dom.js?v=lx20261002';
-import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playJoin } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { setPresentationMarkup } from './presentation.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { LOBBY_MAX_BUBBLES, PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playJoin } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { setPresentationMarkup } from './presentation.js?v=lx20261008';
+import { renderTimeSettings } from './time_setting.js?v=lx20261008';
 import {
     avatarImageMarkup,
     buildJoinUrl,
@@ -16,7 +17,7 @@ import {
     notifyHostShell,
     pinMarkup,
     tr,
-} from './utils.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
 
 /* Lobbi: «qabıq» (qoşulma kartı, PIN, QR, başlıq) yalnız öz imzası dəyişəndə
  * yenidən çəkilir; oyunçu buludu isə id ilə fərq (diff) edilir — yeni gələn
@@ -89,10 +90,12 @@ function shellMarkup() {
                         <span>${esc(tr("lobbyPlayersWord", "iştirakçı"))}</span>
                     </div>
                     ${refreshButtonMarkup()}
+                    <div class="hx-lobby__time" data-time-setting></div>
                     <div class="hx-lobby__status" data-lobby-status></div>
                 </div>
             </div>
-            <div class="hx-cloud" data-lobby-cloud data-density="l" aria-label="${esc(tr("lobbyParticipants", "Qoşulan iştirakçılar"))}"></div>
+            <div class="hx-cloud hx-scroll" data-lobby-cloud data-density="l" tabindex="0" aria-label="${esc(tr("lobbyParticipants", "Qoşulan iştirakçılar"))}"></div>
+            <p class="hx-cloud-hint" aria-hidden="true">${icon("down")}<span>${esc(tr("lobbyScrollHint", "Hamısını görmək üçün siyahını sürüşdürün"))}</span></p>
             <p class="hx-lobby__empty" data-lobby-empty>
                 <span class="hx-dots" aria-hidden="true"><i></i><i></i><i></i></span>
                 ${esc(tr("lobbyEmpty", "Hələ heç kim qoşulmayıb — telefonla PIN-i daxil edin"))}
@@ -141,10 +144,9 @@ function renderCloud(root, fromData) {
     const list = root.querySelector("[data-lobby-cloud]");
     if (!list) return;
     const players = (Array.isArray(state.players) ? state.players : []).slice().reverse(); // server: ən yeni birinci
-    const total = Math.max(Number(state.totalPlayers || 0), players.length);
+    const total = Math.max(Number(state.rosterCount || 0), players.length);
     const visible = players.slice(-LOBBY_MAX_BUBBLES);
     const hidden = Math.max(0, total - visible.length);
-    list.dataset.density = total <= 20 ? "l" : total <= 45 ? "m" : "s";
 
     const removable = controlsEnabled();
     const nextIds = new Set(visible.map((player) => String(player.id)));
@@ -200,12 +202,78 @@ function renderCloud(root, fromData) {
     const countEl = root.querySelector("[data-lobby-count]");
     if (countEl) countEl.textContent = formatNumber(total);
     root.classList.toggle("has-players", total > 0);
+    fitCloud(root, list, total);
     updateStatus(root, total);
     if (fromData) {
         players.forEach((player) => cloud.known.add(String(player.id)));
         cloud.initialized = true;
     }
 }
+
+/* 2026-10-08 (L1): sıxlıq sayla başlayır, sığmırsa pillə-pillə kiçilir; ən kiçikdə də sığmırsa
+ * siyahı SÜRÜŞÜR (əvvəl `overflow: hidden` idi — 22 nəfərdə adlar ekranın altında itirdi). */
+const DENSITIES = ["l", "m", "s", "xs", "xxs"];
+const CROWD_THRESHOLD = 12;
+
+function densityForCount(total) {
+    if (total <= 12) return 0;
+    if (total <= 30) return 1;
+    if (total <= 60) return 2;
+    if (total <= 120) return 3;
+    return 4;
+}
+
+const overflows = (list) => list.scrollHeight > list.clientHeight + 2;
+
+function syncScrollEnd(list) {
+    const atEnd = list.scrollTop + list.clientHeight >= list.scrollHeight - 4;
+    list.classList.toggle("is-scrolled-end", atEnd);
+    list.closest("[data-lobby]")?.classList.toggle("is-scrolled-end", atEnd);
+}
+
+function fitCloud(root, list, total) {
+    root.dataset.crowd = total > CROWD_THRESHOLD ? "1" : "0";
+    let level = densityForCount(total);
+    list.dataset.density = DENSITIES[level];
+    while (level < DENSITIES.length - 1 && total > 0 && overflows(list)) {
+        level += 1;
+        list.dataset.density = DENSITIES[level];
+    }
+    const scrollable = total > 0 && overflows(list);
+    list.classList.toggle("is-scrollable", scrollable);
+    root.classList.toggle("is-overflowing", scrollable);
+    syncScrollEnd(list);
+}
+
+/** Pəncərə ölçüsü dəyişəndə (proyektor / tam ekran) sıxlığı yenidən seç. */
+export function refitLobbyCloud() {
+    if (state.sessionState !== "lobby") return;
+    const root = UI.presentationContent?.querySelector("[data-lobby]");
+    const list = root?.querySelector("[data-lobby-cloud]");
+    if (root && list) fitCloud(root, list, Math.max(Number(state.rosterCount || 0), list.childElementCount));
+}
+
+/* Siyahının ölçüsü dəyişəndə (pəncərə, tam ekran, idarə panelinin itələməsi — L5) sıxlıq yenidən seçilir.
+ * Yalnız «resize» hadisəsi kifayət etmir: panel keçidi / state sinxronu ilə yarışda köhnə enə görə ölçülürdü. */
+let refitFrame = 0;
+const cloudResizeObserver =
+    typeof ResizeObserver === "function"
+        ? new ResizeObserver(() => {
+              if (refitFrame) return;
+              refitFrame = window.requestAnimationFrame(() => {
+                  refitFrame = 0;
+                  refitLobbyCloud();
+              });
+          })
+        : null;
+
+document.addEventListener(
+    "scroll",
+    (event) => {
+        if (event.target?.matches?.("[data-lobby-cloud]")) syncScrollEnd(event.target);
+    },
+    true
+);
 
 export function renderIdleStage(fromData = false) {
     if (state.sessionState !== "lobby") return;
@@ -215,6 +283,14 @@ export function renderIdleStage(fromData = false) {
         cloud.rendered.clear();
     }
     const root = UI.presentationContent?.querySelector("[data-lobby]");
+    if (fresh && root) {
+        renderTimeSettings(root);
+        const list = root.querySelector("[data-lobby-cloud]");
+        if (list && cloudResizeObserver) {
+            cloudResizeObserver.disconnect();
+            cloudResizeObserver.observe(list);
+        }
+    }
     if (root) renderCloud(root, fromData);
 }
 
@@ -232,8 +308,11 @@ export function rebuildLobbyCloud() {
 export function renderLobbyPlayers(players, totalCount = null) {
     state.players = Array.isArray(players) ? players : [];
     const expectedTotal = Number.isFinite(Number(totalCount)) && totalCount != null ? Number(totalCount) : state.players.length;
-    state.totalPlayers = expectedTotal;
-    if (UI.playersCount) UI.playersCount.textContent = String(state.totalPlayers);
+    // 2026-10-08 (L3): roster sayı ≠ cari suala cavab verməli olanlar (gec qoşulan növbəti sualdan
+    // sayılır) — oyun gedərkən `totalPlayers`-i yalnız server sayğacları (answer_progress / sual) yeniləyir.
+    state.rosterCount = expectedTotal;
+    if (state.sessionState === "lobby") state.totalPlayers = expectedTotal;
+    if (UI.playersCount) UI.playersCount.textContent = String(state.rosterCount);
     if (state.sessionState === "lobby") renderIdleStage(true);
     notifyHostShell();
 }

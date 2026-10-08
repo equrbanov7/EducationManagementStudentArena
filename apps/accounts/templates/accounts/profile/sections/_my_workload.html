@@ -150,8 +150,13 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
       </tbody>
       <tfoot>
         <tr>
-          <th scope="row" colspan="3">{% trans "CƏMİ" context "accounts.workload" %}</th>
-          <td class="wlm-table__num" data-wlm-total>{{ my_workload_section.summary.total_hours|default:"0" }}</td>
+          {% comment %}2026-10-08 (müəllim rəyi W1): xana əvvəl semestr tabından asılı olmayaraq
+          İLLİK cəmi göstərirdi («Payız»da 300 saatlıq sətirlərin altında 630). İndi görünən
+          sətirlərin cəmidir; etiket hansı semestr olduğunu deyir (workload_my.js yeniləyir).{% endcomment %}
+          <th scope="row" colspan="3" data-wlm-total-label
+              data-label-all="{% trans 'CƏMİ (bütün semestrlər)' context 'accounts.workload' %}"
+              data-label-season="{% trans 'CƏMİ — {season} semestri' context 'accounts.workload' %}">{% trans "CƏMİ (bütün semestrlər)" context "accounts.workload" %}</th>
+          <td class="wlm-table__num" data-wlm-total>{{ my_workload_section.summary.rows_total_hours|default:"0" }}</td>
           <td colspan="3"></td>
         </tr>
       </tfoot>

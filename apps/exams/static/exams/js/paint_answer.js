@@ -269,8 +269,22 @@
 // }
 
   
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll(".paint-card").forEach(initPaintCard);
-    });
+    // 2026-10-08: vaxtlı yazılı sualın gövdəsi sonradan (question-seen) inject olunur —
+    // kartlar idempotent qoşulur, take_exam/timers.js inject-dən sonra initWithin çağırır.
+    function initWithin(root) {
+      (root || document).querySelectorAll(".paint-card").forEach((card) => {
+        if (card.getAttribute("data-paint-bound") === "1") return;
+        card.setAttribute("data-paint-bound", "1");
+        initPaintCard(card);
+      });
+    }
+
+    window.EMSPaintAnswer = { initWithin: initWithin };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", () => initWithin(document));
+    } else {
+      initWithin(document);
+    }
   })();
   

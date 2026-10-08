@@ -177,6 +177,8 @@ from .syllabus import (
     syllabus_detail,
     syllabus_detail_pdf,
     syllabus_preview,
+    syllabus_reuse_action,
+    syllabus_reuse_options,
     syllabus_review_open,
     syllabus_section_save,
 )
@@ -297,6 +299,8 @@ __all__ = [
     "syllabus_detail",
     "syllabus_detail_pdf",
     "syllabus_preview",
+    "syllabus_reuse_action",
+    "syllabus_reuse_options",
     "syllabus_review_open",
     "syllabus_section_save",
     # Post management

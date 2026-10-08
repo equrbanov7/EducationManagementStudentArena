@@ -13,6 +13,8 @@ Yeganə ictimai API
   sadalananları «kod» rejimində yoxlayır (qarışıq sahələr üçün).
 * ``fold_regex(token, *, compact=False)`` — bir token üçün şablon mətni;
   ``code_regex(token)`` — kod sahəsi üçün (``compact`` yalnız «kod kimi» tokendə, aşağıya bax).
+* ``word_prefix_q(query, fields)`` / ``word_prefix_match`` / ``starts_with_q`` — eyni qatlama,
+  amma token SÖZÜN ƏVVƏLİNDƏ (seçici axtarışları: «vo» «Devops»-u tapmasın; 2026-10-08);
 * ``tolerant_match(query, text, *, compact=False)`` — eyni qayda Python-da
   (yaddaşdakı siyahılar üçün); ``static/js/search_fold.js`` (``EMSSearch``) bunun
   brauzer əkizidir — paritet testi ``core/tests/test_search_text_js_parity.py``.
@@ -194,6 +196,50 @@ def tolerant_q(query: str, fields=(), *, compact: bool = False, compact_fields=(
             any_glued |= Q(**{f"{field}__iregex": glued})
         combined = combined | any_glued
     return combined
+
+
+#: Söz BAŞLANĞICI (2026-10-08, müəllim rəyi Q1): sətrin əvvəli və ya hərf/rəqəm OLMAYAN
+#: simvoldan sonra. Az hərfləri sinifdə açıq yazılıb — nəticə DB ctype-dan asılı olmasın.
+#: «vo» → «VoIP …», «Verilənlər … VoIP» tapılır; «bihevorial», «Devops» TAPILMIR.
+WORD_START = r"(?:^|[^0-9A-Za-zəƏıİöÖüÜğĞşŞçÇ])"
+
+
+def word_prefix_regex(token: str) -> str:
+    """Token sözün ƏVVƏLİNDƏ (dözümlü hərf qatlaması ilə) — ``WORD_START`` + ``fold_regex``."""
+    return WORD_START + fold_regex(token)
+
+
+def word_prefix_q(query: str, fields=()) -> Q | None:
+    """Hər token sahələrdən birində SÖZ BAŞLANĞICINDA olmalıdır (tokenlər arası VƏ)."""
+    tokens = tokens_of(query)
+    fields = tuple(fields or ())
+    if not tokens or not fields:
+        return None
+    combined = Q()
+    for token in tokens:
+        pattern = word_prefix_regex(token)
+        any_field = Q()
+        for field in fields:
+            any_field |= Q(**{f"{field}__iregex": pattern})
+        combined &= any_field
+    return combined
+
+
+def starts_with_q(query: str, field: str) -> Q | None:
+    """Sahə sorğunun ilk tokeni ilə BAŞLAYIR — sıralama üçün («prefiks əvvəl»)."""
+    tokens = tokens_of(query)
+    if not tokens:
+        return None
+    return Q(**{f"{field}__iregex": "^" + fold_regex(tokens[0])})
+
+
+def word_prefix_match(query: str, *texts) -> bool:
+    """``word_prefix_q``-nun yaddaş əkizi (hər token mətnlərdən birində söz başlanğıcında)."""
+    tokens = tokens_of(query)
+    if not tokens:
+        return True
+    haystack = [str(text).replace("̇", "") for text in texts if text not in (None, "")]
+    return all(any(re.search(word_prefix_regex(token), text, re.IGNORECASE) for text in haystack) for token in tokens)
 
 
 def tolerant_match(query: str, *texts, compact: bool = False) -> bool:

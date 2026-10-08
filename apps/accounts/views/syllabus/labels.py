@@ -120,6 +120,35 @@ TRANSITION_MESSAGES = {
         "dəyişiklik növbəti semestrdən qüvvəyə minir.",
     ),
     "import.status_not_allowed": pgettext_lazy(_CTX, "Bu status köçürmə borusu üçün icazəli deyil."),
+    # Təkrar istifadə (2026-10-08) — `apps/syllabus/services/reuse_rules.py` kodları.
+    "reuse.not_own_source": pgettext_lazy(
+        _CTX, "Bağlamaq yalnız öz sillabusunuza mümkündür — başqasının sillabusunu kopyalaya bilərsiniz."
+    ),
+    "reuse.source_not_approved": pgettext_lazy(
+        _CTX, "Mənbə sillabus hələ təsdiqlənməyib — bağlamaq təsdiqdən sonra mümkündür, indi kopyalaya bilərsiniz."
+    ),
+    "reuse.source_not_human_approved": pgettext_lazy(
+        _CTX, "Mənbənin təsdiqi kafedra qərarı deyil (köçürmə və ya bağlama) — yalnız kopyalamaq olar."
+    ),
+    "reuse.hours_unknown": pgettext_lazy(
+        _CTX, "Bu qrupun saat bölgüsü məlum deyil — bağlamaq üçün saatlar eyni olmalıdır."
+    ),
+    "reuse.hours_differ": pgettext_lazy(_CTX, "Saatlar fərqlidir — kopyalayıb həftəlik planı uyğunlaşdırın."),
+    "reuse.chair_differs": pgettext_lazy(
+        _CTX, "Sillabuslar fərqli kafedraların təsdiqinə düşür — kopyalayıb ayrıca təsdiqə göndərin."
+    ),
+    "reuse.target_locked": pgettext_lazy(
+        _CTX, "Bu qrupun sillabusu artıq göndərilib və ya təsdiqlənib — üstünə yazmaq olmaz."
+    ),
+    "reuse.target_linked": pgettext_lazy(_CTX, "Bu qrupun sillabusu artıq bağlıdır."),
+    "reuse.not_sibling": pgettext_lazy(_CTX, "Mənbə eyni fənnin eyni semestrinə aid deyil."),
+    "reuse.not_previous": pgettext_lazy(_CTX, "Mənbə bu fənnin başqa semestrinə aid deyil."),
+    "reuse.copy_out_of_scope": pgettext_lazy(_CTX, "Bu sillabusu kopyalamaq üçün icazəniz yoxdur."),
+    "reuse.not_linked": pgettext_lazy(_CTX, "Bu sillabus heç bir sillabusa bağlı deyil."),
+    "reuse.up_to_date": pgettext_lazy(_CTX, "Bağlı sillabus artıq mənbənin son təsdiqlənmiş versiyasındadır."),
+    "reuse.linked_unlink_first": pgettext_lazy(
+        _CTX, "Bu sillabus başqa qrupun sillabusuna bağlıdır — dəyişiklik üçün əvvəlcə «Ayır» düyməsini basın."
+    ),
 }
 
 _FALLBACK = pgettext_lazy(_CTX, "Əməliyyat yerinə yetirilmədi.")

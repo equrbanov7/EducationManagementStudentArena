@@ -136,6 +136,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     {% if 'my-exams' in allowed_sections %}
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260911-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260914-2">
+    <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260710-appeals-ux">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260710-appeals-ux">
     {% endif %}
@@ -214,6 +215,8 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     artıq həftə sətirləri, strukturdan artıq sərbəst iş yuvaları) — kaskadda
     panellərdən SONRA gəlir, çünki onların tonunu üstələyir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_editor_carryover.css' %}?v=20260831-carry">
+    {% comment %}Təkrar istifadə (bağla / kopyala) dialoqu + banner — dialoq qabığından SONRA.{% endcomment %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_reuse.css' %}?v=20261008-reuse">
     {% endif %}
     {% if 'syllabus-review' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/syllabus_review.css' %}?v=20260830-3">

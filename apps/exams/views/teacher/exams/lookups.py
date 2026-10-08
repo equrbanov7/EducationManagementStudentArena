@@ -13,10 +13,11 @@ from django.views.decorators.http import require_GET
 
 from apps.exams.models import Exam, StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.subject_labels import subject_option
 from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
-from core.search_text import tolerant_q
+from core.search_text import starts_with_q, tolerant_q, word_prefix_q
 
 from . import unit_assignment as _units
 from ._shared import _resolve_required_organization
@@ -54,7 +55,12 @@ def _paginate(qs, offset, limit, serializer):
 @login_required
 @require_GET
 def subject_search(request):
-    """Fənn (registrar.Subject) axtarışı — təşkilata görə, code/name üzrə."""
+    """Fənn (registrar.Subject) axtarışı — təşkilata görə, ad/kod üzrə.
+
+    2026-10-08 (müəllim rəyi Q1): ad SÖZ BAŞLANĞICI ilə axtarılır («vo» → «VoIP …»,
+    amma «bihevorial»/«Devops» yox), az/ing hərfə dözümlü; adı sorğu ilə BAŞLAYANLAR
+    birinci, sonra sözü sorğu ilə başlayanlar, sonra kod uyğunluqları. Etiket «Ad (KOD)».
+    """
     _ensure_teacher(request.user)
     organization = _resolve_required_organization(request)
     if organization is None:
@@ -64,14 +70,24 @@ def subject_search(request):
 
     query = (request.GET.get("q") or "").strip()
     qs = Subject.objects.filter(organization=organization)
-    # Ad — az/ing hərfə dözümlü; kod — ayırıcıya da dözümlü (sahib 2026-09-26).
-    search_q = tolerant_q(query, ("name",), compact_fields=("code",))
-    if search_q is not None:
-        qs = qs.filter(search_q)
-    qs = qs.order_by("code")
+    name_q = word_prefix_q(query, ("name",))
+    # Kod — ayırıcıya dözümlü alt-sətir (sahib 2026-09-26): «1203» → «QKU-1203».
+    code_q = tolerant_q(query, (), compact_fields=("code",))
+    if name_q is not None:
+        qs = qs.filter(name_q | code_q).annotate(
+            search_rank=Case(
+                When(starts_with_q(query, "name"), then=Value(0)),
+                When(name_q, then=Value(1)),
+                default=Value(2),
+                output_field=IntegerField(),
+            )
+        )
+        qs = qs.order_by("search_rank", "name", "code")
+    else:
+        qs = qs.order_by("name", "code")
 
     offset, limit = _page_bounds(request)
-    results, has_more = _paginate(qs, offset, limit, lambda s: {"id": str(s.pk), "text": f"{s.code} — {s.name}"})
+    results, has_more = _paginate(qs, offset, limit, subject_option)
     return JsonResponse({"results": results, "has_more": has_more})
 
 

@@ -719,9 +719,11 @@ class LiveJoinTest(TestCase):
         self.assertFalse(response.json()["ok"])
 
     def test_join_enter_rejects_new_player_after_game_started(self):
-        """EXAM-P1-12: oyun lobby-dən çıxandan sonra yeni oyunçu qoşula bilməz."""
+        """EXAM-P1-12: «Gecikənlər qoşula bilsin» SÖNÜLÜDÜRSƏ oyun başlayandan sonra yeni oyunçu qoşula
+        bilməz (2026-10-08 L3: default açıqdır — bax test_live_ux_late_join_2026_10_08)."""
         self.session.state = LiveSession.STATE_QUESTION
-        self.session.save(update_fields=["state"])
+        self.session.host_settings = {**(self.session.host_settings or {}), "late_join_enabled": False}
+        self.session.save(update_fields=["state", "host_settings"])
 
         response = self.client.post(
             reverse("liveExam:join_enter", kwargs={"pin": self.session.pin}),

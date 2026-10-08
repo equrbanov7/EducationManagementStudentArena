@@ -313,17 +313,7 @@ def record_exam_score(
     assert_sheet_matches(sheet, organization_id=enrollment.organization_id, offering_id=enrollment.offering_id)
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     cap = finals.exam_score_max(scheme)
-    cleaned_questions = None
-    if not questions.is_blank_list(question_scores):
-        # Şəbəkə vərəqdəndir; vərəqsiz tək yazıda (köhnə çağıranlar) defolt 5 × 10.
-        grid = (
-            {"question_count": sheet.question_count, "question_max": sheet.question_max}
-            if sheet is not None
-            else questions.question_defaults()
-        )
-        cleaned_questions, new_score = questions.clean_question_scores(question_scores, cap=cap, **grid)
-    else:
-        new_score = _clean_score(score, cap)
+    cleaned_questions, new_score = clean_row_score(score=score, question_scores=question_scores, sheet=sheet, cap=cap)
     if new_score is None:
         return None  # boş sahə = toxunma (kütləvi silinmə riskini aradan qaldırır)
     # Sahibin sözü: «yekun bal 100-dən çox ola bilməz» — tavanlar örtsə də açıq yoxla.
@@ -331,37 +321,34 @@ def record_exam_score(
 
     current = FinalGrade.objects.filter(enrollment=enrollment).first()
     old_score = current.exam_score if current is not None else None
-    if _same_score(old_score, new_score):
-        # Eyni cəm, amma sual bölgüsü fərqlidirsə bu da DƏYİŞİKLİKDİR (kağız
-        # qeydi dəyişir) — sətir yazılır, FinalGrade isə toxunulmur.
-        if cleaned_questions is None or questions.same_question_scores(
-            _latest_question_scores(enrollment), cleaned_questions
-        ):
-            return None  # eyni bal → nə dublikat sətir, nə audit
-
     policy = period_policy or period_lock.CURRENT_PERIOD
-    if old_score is not None and policy.changes_blocked:
-        raise period_lock.change_blocked_error()
-    is_correction = old_score is not None or policy.correction_mode
-    if is_correction:
-        _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
-    elif policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
-        period_lock.require_submission(
-            reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
-        )
-
-    entry = ExamScoreEntry(
-        organization=enrollment.organization,
-        enrollment=enrollment,
-        kind=_change_kind(kind) if is_correction else ExamScoreEntryKind.INITIAL,
+    is_correction = change_decision(
         old_score=old_score,
         new_score=new_score,
-        question_scores=cleaned_questions,
-        reason=reason if reason in CorrectionReason.values else "",
-        note=(note or "").strip(),
-        evidence=evidence or "",
-        entered_by=by_user,
-        entered_by_name=correction_author_name(by_user, request),
+        cleaned_questions=cleaned_questions,
+        latest_question_scores=lambda: _latest_question_scores(enrollment),
+        policy=policy,
+        reason=reason,
+        note=note,
+        evidence=evidence,
+        sheet=sheet,
+    )
+    if is_correction is None:
+        return None  # eyni bal → nə dublikat sətir, nə audit
+
+    entry = new_entry(
+        enrollment=enrollment,
+        organization=enrollment.organization,
+        is_correction=is_correction,
+        kind=kind,
+        old_score=old_score,
+        new_score=new_score,
+        cleaned_questions=cleaned_questions,
+        reason=reason,
+        note=note,
+        evidence=evidence,
+        by_user=by_user,
+        author_name=correction_author_name(by_user, request),
         sheet=sheet,
     )
     # Fayl (şəkil/PDF) ölçü + tip validatorları BAL YAZILMAMIŞDAN ƏVVƏL işləsin.
@@ -372,23 +359,118 @@ def record_exam_score(
     )
     if final_grade is None:
         # Qeydiyyat artıq aktiv deyil (köçürülüb/ləğv olunub) — sətir yazılmır.
-        raise ValidationError(pgettext(_CTX, "Bu qeydiyyat aktiv deyil — bal yazılmadı."))
+        raise ValidationError(inactive_enrollment_message())
 
     entry.save()
     log_action(
-        action=AuditAction.UPDATE,
-        user=by_user,
-        organization=enrollment.organization,
-        obj=entry,
-        reason=f"exam score entry: {entry.kind}" + _period_audit_suffix(policy),
-        request=request,
-        resource_type="registrar.exam_score_entry",
-        resource_id=str(entry.pk),
-        changes=[
+        **entry_log(
+            entry,
+            by_user=by_user,
+            organization=enrollment.organization,
+            policy=policy,
+            request=request,
+            cleaned_questions=cleaned_questions,
+        )
+    )
+    return entry
+
+
+# ── Ortaq qərar köməkçiləri (tək yazı + toplu yazı ``exam_score_bulk``) ──────
+
+
+def inactive_enrollment_message() -> str:
+    return pgettext(_CTX, "Bu qeydiyyat aktiv deyil — bal yazılmadı.")
+
+
+def clean_row_score(*, score, question_scores, sheet, cap):
+    """Sətrin balı → ``(sual balları | None, imtahan balı | None)``; boş sətir ``(None, None)``.
+
+    Sual balları verilibsə (hamısı boş deyilsə) imtahan balı onların CƏMİDİR; şəbəkə
+    vərəqdəndir, vərəqsiz tək yazıda (köhnə çağıranlar) defolt 5 × 10.
+    """
+    if not questions.is_blank_list(question_scores):
+        grid = (
+            {"question_count": sheet.question_count, "question_max": sheet.question_max}
+            if sheet is not None
+            else questions.question_defaults()
+        )
+        return questions.clean_question_scores(question_scores, cap=cap, **grid)
+    return None, _clean_score(score, cap)
+
+
+def change_decision(
+    *, old_score, new_score, cleaned_questions, latest_question_scores, policy, reason, note, evidence, sheet
+):
+    """Yazı lazımdırmı: ``None`` — eyni bal (toxunma); əks halda ``is_correction`` (bool).
+
+    Eyni cəm, amma sual bölgüsü fərqlidirsə bu da DƏYİŞİKLİKDİR (kağız qeydi dəyişir) —
+    ``latest_question_scores()`` yalnız o halda çağırılır. Bitmiş dövr qaydası və
+    təqdimat tələbi (səbəb + qeyd + sənəd) burada yoxlanır (``ValidationError``).
+    """
+    if _same_score(old_score, new_score):
+        if cleaned_questions is None or questions.same_question_scores(latest_question_scores(), cleaned_questions):
+            return None
+    if old_score is not None and policy.changes_blocked:
+        raise period_lock.change_blocked_error()
+    is_correction = old_score is not None or policy.correction_mode
+    if is_correction:
+        _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet)
+    elif policy.every_write_needs_submission:  # «çox köhnə» dövrə ilk köçürmə — sənədlə
+        period_lock.require_submission(
+            reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
+        )
+    return is_correction
+
+
+def new_entry(
+    *,
+    enrollment,
+    organization,
+    is_correction,
+    kind,
+    old_score,
+    new_score,
+    cleaned_questions,
+    reason,
+    note,
+    evidence,
+    by_user,
+    author_name,
+    sheet,
+):
+    """Yazılacaq (hələ saxlanmamış) ``ExamScoreEntry`` sətri."""
+    return ExamScoreEntry(
+        organization=organization,
+        enrollment=enrollment,
+        kind=_change_kind(kind) if is_correction else ExamScoreEntryKind.INITIAL,
+        old_score=old_score,
+        new_score=new_score,
+        question_scores=cleaned_questions,
+        reason=reason if reason in CorrectionReason.values else "",
+        note=(note or "").strip(),
+        evidence=evidence or "",
+        entered_by=by_user,
+        entered_by_name=author_name,
+        sheet=sheet,
+    )
+
+
+def entry_log(entry, *, by_user, organization, policy, request, cleaned_questions) -> dict:
+    """``log_action`` arqumentləri — daxiletmə sətrinin audit qeydi (tək və toplu yol eyni)."""
+    return {
+        "action": AuditAction.UPDATE,
+        "user": by_user,
+        "organization": organization,
+        "obj": entry,
+        "reason": f"exam score entry: {entry.kind}" + _period_audit_suffix(policy),
+        "request": request,
+        "resource_type": "registrar.exam_score_entry",
+        "resource_id": str(entry.pk),
+        "changes": [
             {
                 "field": "exam_score",
-                "old": str(old_score) if old_score is not None else "—",
-                "new": str(new_score),
+                "old": str(entry.old_score) if entry.old_score is not None else "—",
+                "new": str(entry.new_score),
             },
             *(
                 [{"field": "question_scores", "old": "—", "new": ",".join(str(v) for v in cleaned_questions)}]
@@ -396,8 +478,7 @@ def record_exam_score(
                 else []
             ),
         ],
-    )
-    return entry
+    }
 
 
 def record_appeal_score_change(*, enrollment, old_score, new_score, by_user, appeal_id, note=""):
@@ -438,9 +519,8 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
 
     ``rows`` — ``{"enrollment_id", "score", "reason", "note", "evidence",
     "question_scores", "kind"}`` lüğətləri (son ikisi opsional, 2026-09-14).
-    Hər sətir öz savepoint-ində yazılır: birinin rədd olunması
-    (məs. sənədsiz dəyişiklik) digərlərinin yazılmasını dayandırmır; xətalar
-    toplanıb geri qaytarılır.
+    Bir sətrin rədd olunması (məs. sənədsiz dəyişiklik) digərlərinin yazılmasını
+    dayandırmır; xətalar toplanıb geri qaytarılır.
 
     ``sheet`` — bütün sətirlərin bağlandığı köçürmə partiyası (2026-09-12);
     sayğacları çağıran tərəf ``exam_score_sheets.finalize_sheet`` ilə yazır.
@@ -452,76 +532,20 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     2026-09-26: bitmiş dövrdə yazı ``PermissionDenied`` ilə DAYANIR, əgər aktor
     RİM rəhbəri / superadmin deyilsə və ``correction_mode`` göndərilibsə; qalan
     qaydalar (dəyişiklik bağlıdır / təqdimat) sətir-sətir ``period_policy`` ilə.
+
+    2026-10-08 (tutum testi — 25 sətir ≈ 1 190 sorğu, p50 1.2 s): yazı TOPLUDUR,
+    sorğu sayı sətir sayından asılı deyil — ``exam_score_bulk`` (qayda və qərarlar
+    ``record_exam_score`` ilə ortaq köməkçilərdən; kilid sırası ``enrollment_id``).
     """
     policy = period_lock.write_policy(user=by_user, offering=offering, correction_mode=correction_mode)
     # Yad partiya = bütün toplu yazı DAYANIR (sətir-sətir N eyni xəta əvəzinə
     # bir aydın xəta; heç bir savepoint açılmır) — P2-09, 2026-09-13.
     assert_sheet_matches(sheet, organization_id=offering.organization_id, offering_id=offering.pk)
-    enrollments = {
-        str(enrollment.id): enrollment
-        for enrollment in offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related(
-            "student", "offering"
-        )
-    }
-    # Giriş balları BİR dəfə toplu (giriş + imtahan ≤ 100 yoxlaması üçün) —
-    # sətir başına 4 sorğu əvəzinə sabit sayda (2026-09-14, W2 `w2paper`).
-    from . import finals_batch
+    from . import exam_score_bulk
 
-    scheme = gradebook.ensure_assessment_scheme(offering=offering)
-    batch = finals_batch.build(list(enrollments.values()), with_finals=False)
-    entry_scores = {
-        enrollment_id: gradebook.entry_score_for(enrollment, scheme.entry_score_max, **batch.entry_kwargs(enrollment))
-        for enrollment_id, enrollment in enrollments.items()
-    }
-    written, skipped, total, errors, failed_by_enrollment = 0, 0, 0, [], {}
-    written_ids = []
-    # Tutum testi 2026-10-05: hər sətir Enrollment-i `select_for_update` ilə kilidləyir və
-    # kilid çağıranın tranzaksiyası boyu qalır. İki işçi eyni siyahını fərqli ardıcıllıqla
-    # saxlayanda deadlock alınırdı — sətirlər sabit (enrollment_id) ardıcıllıqla yazılır.
-    for row in sorted(rows, key=lambda r: str(r.get("enrollment_id") or "")):
-        enrollment_id = str(row.get("enrollment_id") or "")
-        enrollment = enrollments.get(enrollment_id)
-        total += 1
-        if enrollment is None:
-            message = pgettext(_CTX, "Bu qeydiyyat aktiv deyil — bal yazılmadı.")
-            errors.append((enrollment_id, message))
-            failed_by_enrollment[enrollment_id] = message
-            continue
-        try:
-            with transaction.atomic():
-                entry = record_exam_score(
-                    enrollment=enrollment,
-                    score=row.get("score"),
-                    by_user=by_user,
-                    reason=row.get("reason") or "",
-                    note=row.get("note") or "",
-                    evidence=row.get("evidence"),
-                    request=request,
-                    sheet=sheet,
-                    question_scores=row.get("question_scores"),
-                    kind=row.get("kind") or "",
-                    entry_score=entry_scores.get(enrollment_id),
-                    period_policy=policy,
-                )
-        except ValidationError as exc:
-            message = " ".join(exc.messages)
-            errors.append((_student_label(enrollment), message))
-            failed_by_enrollment[str(enrollment.id)] = message
-            continue
-        if entry is None:
-            skipped += 1
-        else:
-            written += 1
-            written_ids.append(str(enrollment.id))
-    return {
-        "written": written,
-        "skipped": skipped,
-        "failed": len(errors),
-        "total": total,
-        "errors": errors,
-        "failed_by_enrollment": failed_by_enrollment,
-        "written_ids": written_ids,
-    }
+    return exam_score_bulk.save_rows(
+        offering=offering, rows=rows, by_user=by_user, request=request, sheet=sheet, policy=policy
+    )
 
 
 def _student_label(enrollment) -> str:

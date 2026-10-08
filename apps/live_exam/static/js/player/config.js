@@ -27,6 +27,8 @@ export const PHASES = Object.freeze({
     SUSPENSE: "suspense",
     FINAL: "final",
     REMOVED: "removed",
+    // 2026-10-08 (L3): gec qoşulub — növbəti sual sərhədini gözləyir.
+    LATE_JOIN: "late_join",
 });
 
 export function prefersReducedMotion() {

@@ -96,6 +96,23 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
         <button type="button" class="syl-btn syl-btn--ghost" data-syl-reset>{% trans "Filtrləri sıfırla" context "accounts.syllabus" %}</button>
       </div>
 
+      {% if sl.scope_switch %}
+      {% comment %}Rəhbərin əhatə açarı (sahib 2026-10-08): «Hamısı» | «Mənim fənlərim» — status
+      çipləri ilə EYNİ komponent; seçim URL-də (`?scope=mine`) saxlanılır, KPI və sayğaclar ona tabedir.
+      Müəllim bu açarı görmür — onun siyahısı onsuz da «özü»dür.{% endcomment %}
+      <div class="syl-filters__row syl-filters__row--chips syl-filters__row--scope">
+        <span class="syl-filters__legend" id="syl-scope-legend">{% trans "Göstər" context "accounts.syllabus" %}</span>
+        <div class="syl-chips" role="group" aria-labelledby="syl-scope-legend">
+          {% for chip in sl.scope_switch.chips %}
+          <button type="button"
+                  class="syl-chip{% if chip.active %} is-on{% endif %}"
+                  data-syl-scope="{{ chip.key }}"
+                  aria-pressed="{% if chip.active %}true{% else %}false{% endif %}">{{ chip.label }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
       <div class="syl-filters__row syl-filters__row--chips">
         <span class="syl-filters__legend" id="syl-chip-legend">{% trans "Status" context "accounts.syllabus" %}</span>
         <div class="syl-chips" role="group" aria-labelledby="syl-chip-legend">
@@ -142,6 +159,7 @@ Davranış (filtr/əməl/drawer): accounts/js/profile/syllabus_list.js
 
     {% include "accounts/profile/sections/syllabus/_list_drawer.html" %}
     {% include "accounts/profile/sections/syllabus/_list_dialogs.html" %}
+    {% include "accounts/profile/sections/syllabus/_reuse_dialog.html" with urls=sl.urls %}
 
     <div class="syl-toast" data-syl-toast role="status" aria-live="polite" hidden>
       <i class="fas fa-circle-check syl-toast__icon" aria-hidden="true"></i>

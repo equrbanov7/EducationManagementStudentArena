@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.live_exam import services
-from apps.live_exam.models import LiveAnswer, LiveSession
+from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.session_settings import update_session_settings
 
 from .lx_be_support import (
@@ -98,12 +98,19 @@ class HostFlowGuardsTest(TestCase):
         self.assertTrue(last["answer"]["is_correct"])
         self.assertEqual(self._post("host_reveal").status_code, 409)
 
-    def test_remove_player_only_in_lobby_and_remembers_client(self):
+    def test_remove_player_in_lobby_and_mid_game_remembers_client(self):
         response = self._post("host_remove_player", {"player_id": self.players[0].id})
         self.assertEqual(response.status_code, 200)
         self.session.refresh_from_db()
         self.assertIn(self.players[0].client_id, self.session.host_settings.get("_kicked_client_ids", []))
+        # 2026-10-08 (L6): oyun gedərkən də çıxarılır (soft — liderlikdən gizlənir), bitmiş oyunda 409.
         open_question(self.session, self.q1)
+        self.assertEqual(self._post("host_remove_player", {"player_id": self.players[1].id}).status_code, 200)
+        self.session.refresh_from_db()
+        self.assertIn(self.players[1].client_id, self.session.host_settings.get("_kicked_client_ids", []))
+        self.assertFalse(LivePlayer.objects.filter(pk=self.players[1].pk).exists())
+        self.session.state = LiveSession.STATE_FINISHED
+        self.session.save(update_fields=["state"])
         self.assertEqual(self._post("host_remove_player", {"player_id": self.players[1].id}).status_code, 409)
 
     def test_settings_update_keeps_engine_keys(self):

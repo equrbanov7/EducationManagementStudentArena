@@ -198,6 +198,12 @@
       return url;
     }
 
+    function span(cls, text) {
+      var el = document.createElement("span");
+      el.className = cls;
+      return el.appendChild(document.createTextNode(text)) && el;
+    }
+
     function renderOption(o) {
       if (selected[o.id] && multi) {
         return;
@@ -214,15 +220,9 @@
       if (o.disabled) {
         div.className += " ems-ss__opt--disabled";
         div.setAttribute("aria-disabled", "true");
-        var label = document.createElement("span");
-        label.className = "ems-ss__opt-label";
-        label.textContent = o.text;
-        div.appendChild(label);
+        div.appendChild(span("ems-ss__opt-label", o.text));
         if (o.hint) {
-          var hint = document.createElement("span");
-          hint.className = "ems-ss__opt-hint";
-          hint.textContent = o.hint;
-          div.appendChild(hint);
+          div.appendChild(span("ems-ss__opt-hint", o.hint));
         }
         div.addEventListener("mousedown", function (ev) {
           ev.preventDefault(); // fokus getməsin, seçim də olmasın
@@ -230,7 +230,13 @@
         insertOption(div);
         return;
       }
-      div.textContent = o.text;
+      if (o.meta) { // 2026-10-08 (Q1): ad (`label`/`text`) solda, ikinci dərəcəli `meta` (fənn kodu) solğun.
+        div.className += " ems-ss__opt--meta";
+        div.appendChild(span("ems-ss__opt-label", o.label || o.text));
+        div.appendChild(span("ems-ss__opt-meta", o.meta));
+      } else {
+        div.textContent = o.text;
+      }
       // Klaviatura `Enter`-i eyni yoldan getsin deyə variant öz datasını
       // elementdə saxlayır — siçan və klaviatura ARASINDA davranış fərqi olmur.
       div._emsOpt = o;

@@ -84,6 +84,12 @@ urlpatterns = [
         views.exam_center_ticket_reentry,
         name="exam_center_ticket_reentry",
     ),
+    # Təhlükəsizlik dizaynı 2026-10-08: final cəhdinin «cihaz dəyişikliyi» təsdiqi (audit).
+    path(
+        "center/attempts/<int:attempt_id>/device-change/",
+        views.exam_center_final_device_change,
+        name="exam_center_final_device_change",
+    ),
     path(
         "center/sessions/<int:session_id>/open-entry/",
         views.exam_center_session_open_entry,

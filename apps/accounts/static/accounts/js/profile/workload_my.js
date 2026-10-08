@@ -36,6 +36,35 @@
         return tab ? tab.dataset.wlmSeason || "" : "";
     }
 
+    function rowsTotal(rows) {
+        return (rows || []).reduce(function (sum, row) {
+            return sum + (Number(row.hours) || 0);
+        }, 0);
+    }
+
+    /* 2026-10-08 (müəllim rəyi W1): «CƏMİ» xanası İLLİK cəmi (`total_hours`)
+       göstərirdi — «Payız» tabında sətirlər 300, cəm 630 idi. İndi GÖRÜNƏN
+       sətirlərin cəmidir (server `rows_total_hours`; köhnə cavabda sətirlərdən
+       hesablanır) və etiket semestri adlandırır. «İllik cəmi» KPI-ı illikdir. */
+    function renderTotal(summary, rows) {
+        var total = q("[data-wlm-total]");
+        if (total) {
+            var value = summary && summary.rows_total_hours !== undefined ?
+                summary.rows_total_hours : rowsTotal(rows);
+            total.textContent = value || 0;
+        }
+        var label = q("[data-wlm-total-label]");
+        if (!label) return;
+        var tab = q(".wlm-tab.is-active");
+        var season = activeSeason();
+        if (season && tab) {
+            label.textContent = (label.dataset.labelSeason || "{season}")
+                .replace("{season}", (tab.textContent || "").trim());
+        } else if (label.dataset.labelAll) {
+            label.textContent = label.dataset.labelAll;
+        }
+    }
+
     function renderSummary(summary) {
         if (!summary) return;
         var host = panel();
@@ -44,8 +73,6 @@
             var node = host.querySelector('[data-wlm-kpi="' + key + '"]');
             if (node) node.textContent = summary[key];
         });
-        var total = q("[data-wlm-total]");
-        if (total) total.textContent = summary.total_hours || 0;
     }
 
     function renderRows(rows) {
@@ -92,6 +119,7 @@
             .then(function (payload) {
                 renderRows(payload.rows || []);
                 renderSummary(payload.summary);
+                renderTotal(payload.summary, payload.rows || []);
                 var exportLink = q("[data-wlm-export]");
                 if (exportLink) {
                     exportLink.href = host.dataset.exportUrl + "?year=" + encodeURIComponent(year);

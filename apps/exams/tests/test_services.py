@@ -1489,14 +1489,15 @@ class ExamParsingServicesTest(TestCase):
 
     # ---- Düzgün cavab işarəsi tapılmayanda default "A" xəbərdarlığı -------------
 
-    def test_parse_bulk_mcq_defaulted_correct_emits_error_warning(self):
+    def test_parse_bulk_mcq_defaulted_correct_emits_warning(self):
+        # 2026-10-08 (müəllim rəyi S1): işarəsizlik XƏTA yox, sarı «Yoxlayın» xəbərdarlığıdır.
         raw = "1. Paytaxt hansıdır?\n" "A) Bakı\n" "B) Gəncə\n" "C) Sumqayıt\n" "D) Şəki\n" "E) Lənkəran\n"
         parsed = parsing.parse_bulk_mcq(raw)
         self.assertEqual(len(parsed), 1)
         self.assertEqual(parsed[0]["correct"], ["A"])
         defaulted = [w for w in parsed[0]["warnings"] if w["type"] == "correct_defaulted"]
         self.assertEqual(len(defaulted), 1)
-        self.assertEqual(defaulted[0]["severity"], "error")
+        self.assertEqual(defaulted[0]["severity"], "warning")
 
     def test_parse_bulk_mcq_marked_correct_has_no_defaulted_warning(self):
         raw = "1. Paytaxt hansıdır?\n" "*A) Bakı\n" "B) Gəncə\n" "C) Sumqayıt\n" "D) Şəki\n" "E) Lənkəran\n"

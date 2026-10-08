@@ -5,7 +5,7 @@
 Kontekst: `row` (siyahı sətri).{% endcomment %}
 <div class="ese-hist">
   <div class="ese-hist__head">
-    <div class="ese-hist__student">{{ row.student.get_full_name|default:row.student.username }}</div>
+    <div class="ese-hist__student">{{ row.name }}</div>
     <div class="ese-hist__meta">
       <span>{{ row.student.username }}</span>
       {% if row.student.fin %}<span>· FİN {{ row.student.fin }}</span>{% endif %}

@@ -24,6 +24,7 @@ from django.utils.dateparse import parse_datetime
 
 from apps.live_exam.auth import LIVE_CLIENT_ID_COOKIE_NAME, PLAYER_COOKIE_NAME, load_player_token_payload
 from apps.live_exam.constants import SERVER_AUTO_REVEAL_GRACE_SECONDS
+from core.asgi_scope import scope_client_ip
 
 #: Bir klient mesajının maksimal ölçüsü (simvol). Həqiqi cavab mesajı < 300 simvoldur.
 WS_MAX_MESSAGE_CHARS = 4096
@@ -44,11 +45,13 @@ AUTO_REVEAL_JITTER_SECONDS = 0.75
 
 
 def scope_ip(scope) -> str:
-    """Client IP from the ASGI scope (prod-da daphne ``--proxy-headers`` ilə real İP)."""
-    client = scope.get("client")
-    if client and isinstance(client, (list, tuple)) and len(client) >= 1:
-        return str(client[0])
-    return "unknown"
+    """Müştəri İP-si — HTTP ilə EYNİ etibarlı-proxy qaydası (2026-10-08, ``core.asgi_scope``).
+
+    Əvvəl ``scope["client"]`` idi: daphne ``--proxy-headers`` onu ``X-Forwarded-For``-un ƏN
+    SOL (müştərinin yaza bildiyi) üzvündən qurur. İndi ``get_client_ip`` semantikası —
+    sağdan ``TRUSTED_PROXY_HOPS``; başlıq yoxdursa ``scope["client"]``.
+    """
+    return scope_client_ip(scope) or "unknown"
 
 
 def scope_cookies(scope) -> dict[str, str]:

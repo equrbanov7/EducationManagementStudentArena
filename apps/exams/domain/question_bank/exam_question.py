@@ -170,12 +170,14 @@ class QuestionBank(models.Model):
 
     @property
     def subject_label(self):
-        """Görünüş üçün fənn etiketi: kataloq bağlantısı varsa "KOD — Ad",
-        yoxdursa köhnə sərbəst mətn."""
+        """Görünüş üçün fənn etiketi: kataloq bağlantısı varsa «Ad (KOD)» (2026-10-08, Q1:
+        ad əvvəl — kod müəllimə heç nə demir), yoxdursa köhnə sərbəst mətn."""
         if self.subject_ref_id and self.subject_ref:
             code = (self.subject_ref.code or "").strip()
             name = (self.subject_ref.name or "").strip()
-            return f"{code} — {name}" if code else name
+            if name and code:
+                return f"{name} ({code})"
+            return name or code
         return self.subject
 
 

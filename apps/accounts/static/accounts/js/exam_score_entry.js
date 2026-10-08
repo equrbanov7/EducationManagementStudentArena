@@ -183,7 +183,9 @@
         return state;
     }
 
-    /* Sual sayı / maksimumu dəyişəndə: sütunlar, `disabled`, variantlar, yekun sahəsinin rejimi. */
+    /* Sual sayı / maksimumu dəyişəndə: sütunlar, `disabled`, variantlar, yekun sahəsinin rejimi.
+       2026-10-08 (tutum): server xanada YALNIZ «—» + seçilmiş dəyəri render edir və `data-max=""`
+       qoyur — ilk render-də (EMSReady) bu funksiya hər xananın 0..max variantlarını qurur. */
     function applyQuestionGrid(host) {
         var count = questionCount(host);
         var max = questionMax(host);

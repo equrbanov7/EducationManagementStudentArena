@@ -299,3 +299,21 @@
     font-size: var(--ems-fs-xs);
     font-weight: 700;
 }
+
+/* 2026-10-08: davam edən final cəhdinin «cihaz dəyişikliyi» təsdiqi (pin_lookup.js). */
+.pl2-device {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    margin-top: var(--ems-sp-4);
+}
+
+.pl2-device__note {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.pl2-device__note--error {
+    color: var(--ems-danger-strong);
+}

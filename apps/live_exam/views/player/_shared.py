@@ -4,7 +4,6 @@ import secrets
 from itertools import product
 
 from django.conf import settings
-from django.utils.translation import get_language
 
 from apps.live_exam.auth import (
     LIVE_CLIENT_ID_COOKIE_MAX_AGE,
@@ -25,18 +24,15 @@ from core.utils import get_client_ip
 from .constants import (
     _AMBIGUOUS_PIN_GLYPHS,
     _MAX_AMBIGUOUS_PIN_CANDIDATES,
-    JOIN_RESUME_COPY,
     LIVE_PIN_IP_LIMIT_SCOPE,
     LIVE_PIN_IP_RATE_LIMIT_DEFAULT,
     LIVE_PIN_LIMIT_SCOPE,
-    NICKNAME_CONFLICT_COPY,
-    PIN_ENTRY_COPY,
 )
+from .texts import join_resume_copy, nickname_conflict_message, pin_entry_copy
 
 
 def _pin_entry_copy() -> dict[str, str]:
-    lang = (get_language() or "az")[:2].lower()
-    return PIN_ENTRY_COPY.get(lang, PIN_ENTRY_COPY["az"])
+    return pin_entry_copy()
 
 
 def _pin_entry_theme_key(session: LiveSession | None = None, raw_theme: str | None = None) -> str:
@@ -51,12 +47,7 @@ def _pin_entry_theme_key(session: LiveSession | None = None, raw_theme: str | No
 
 
 def _join_resume_copy(nickname: str) -> dict[str, str]:
-    lang = (get_language() or "az")[:2].lower()
-    copy = JOIN_RESUME_COPY.get(lang, JOIN_RESUME_COPY["az"]).copy()
-    safe_nickname = clean_nickname(nickname) or "Player"
-    for key, value in copy.items():
-        copy[key] = value.format(nickname=safe_nickname)
-    return copy
+    return join_resume_copy(clean_nickname(nickname) or "Player")
 
 
 def _normalize_pin(raw_pin: str | None) -> str:
@@ -117,8 +108,7 @@ def _resolve_live_session(raw_pin: str | None) -> tuple[str, LiveSession | None]
 
 
 def _nickname_conflict_message() -> str:
-    lang = (get_language() or "az")[:2].lower()
-    return NICKNAME_CONFLICT_COPY.get(lang, NICKNAME_CONFLICT_COPY["az"])
+    return nickname_conflict_message()
 
 
 def _random_join_avatar_key() -> str:

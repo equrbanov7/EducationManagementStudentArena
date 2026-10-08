@@ -315,7 +315,42 @@ Hər iki dəstdə 300/300 oyunçu qoşuldu. Stend paylaşılan maşındadır, on
 
 - channels `AuthMiddleware.get_user` hələ prosesin tək thread-indədir (WS qoşulması başına 1 iş).
   Qlobal ASGI stack-dir, imtahan WS-lərinə də aiddir, ayrıca dəyişiklikdir.
-- Real test serverində təkrar ölçmə lazımdır (`load-test.yml`, live rejimi, 2 × 150).
+- Real test serverində təkrar ölçmə lazımdır (`load-test.yml`, live rejimi, 2 × 150). → **Edildi, aşağıya bax.**
+
+## Beşinci ölçmə (2026-10-08 gecə, VM 20 vCPU / 48 GB, canlı image aad71c37)
+
+**1) Köhnə plan, köhnə resurs (8 app × 0.5 CPU, DB 2 CPU)** — nəticə əvvəlkindən xeyli pis çıxdı:
+- kabinet p95 12 s;
+- tələbə jurnalı 42 % xəta;
+- final mərkəzi p95 13 s.
+
+Kod səbəb deyil:
+- sorğu/request sayı azalıb (kabinet 9.7 → 9.2, final 9.8 → 7.2), amma EYNİ sorğular 4–20× yavaşlayıb (məs. final INSERT 3.7 → 82 ms);
+- app-sız ağır mərhələ olan export isə sürətlənib.
+
+Səbəb test stack-inin **CFS CPU kvotasıdır**. VM 10 → 20 vCPU olandan sonra DB-nin 60 backend-i 20 nüvəyə səpələnir, 2 CPU kvotasını period başında yandırır, hamısı (kilid sahibi də) throttle olunur → `LWLock:LockManager` konvoyu. Canlı Postgres-də CPU limiti yoxdur (yalnız `cpu_shares`) — prod-a aid deyil.
+
+**2) Prod-a yaxın resurs (10 app × 1.0 CPU, DB 6 CPU), eyni plan:**
+
+| Pillə | Xəta | p95 |
+|---|---|---|
+| login 500 | 0 % | 0.53 s |
+| kabinet 500 | 0 % | 0.21 s |
+| jurnal 500 | 0 % | 0.30 s |
+| imtahan 1000 | 0.2 % | 0.22 s |
+| tələbə jurnalı 1000 | 0.9 % | 0.47 s |
+| kollokvium/final balı 300 | 0 % | **5.0 s** (exam-score səhifəsi ağırdır — növbəti optimallaşdırma) |
+| final mərkəzi 500 | 0 % | 0.21–0.25 s |
+| export 100 | 0 % | 4.2 s |
+| canlı imtahan 300 | 0 % | 0.28 s — **host «start» 28 s → 0.24 s**, sual çatdırılması p95 0.25 s |
+
+İlk qaçışda canlı imtahan 9 % xəta verdi. Səbəb test edge nginx-inin `nofile=1024` limiti idi: WS-li mərhələlərdən sonra `accept4() failed (24)` xətası çıxırdı. Harness-də limit prod kimi 65536 edildi (ops a8b6e5ea), təkrar qaçış 0 xəta göstərdi.
+
+Bütövlük: bütün mərhələlərdə **0 uyğunsuzluq**.
+
+Hər iki test zamanı canlı sayt dəqiqədə bir ölçüldü: 116 ölçü, hamısı 200, orta 0.062 s, maks. 0.145 s.
+
+**Nəticə:** 20 vCPU ilə 1000 eyni-anlı imtahan + 1000 tələbə jurnalı + 500 final rahat keçir. Real tempdə (sual başına 1–3 dəq) bu, **~6000–10 000 eyni-anlı imtahan iştirakçısına** bərabərdir.
 
 ## 50 000 nəfər haqqında
 

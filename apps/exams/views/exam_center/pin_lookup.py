@@ -154,6 +154,37 @@ def _ticket_status_label(status):
     return str(labels.get(status, status))
 
 
+def _device_change_urls(organization, student) -> dict:
+    """``{exam_id: (url, təsdiq_gözləyir)}`` — tələbənin cihaza bağlı, davam edən final cəhdləri.
+
+    Təhlükəsizlik dizaynı 2026-10-08: mərkəz tələbənin cihazını buradan dəyişə bilir
+    (``exam_center_final_device_change``). İki sorğu, imtahan sayından asılı deyil.
+    """
+    from django.urls import reverse
+
+    from apps.exams.models import ExamAttempt
+    from apps.exams.services.final_center.device_binding import device_change_states
+
+    active = dict(
+        ExamAttempt.objects.filter(
+            user=student,
+            exam__organization=organization,
+            exam__exam_type_extended="final",
+            status__in=("draft", "in_progress"),
+            is_trial=False,
+        ).values_list("exam_id", "id")
+    )
+    states = device_change_states(active.values()) if active else {}
+    return {
+        exam_id: (
+            reverse("exams:exam_center_final_device_change", kwargs={"attempt_id": attempt_id}),
+            states[attempt_id],
+        )
+        for exam_id, attempt_id in active.items()
+        if attempt_id in states
+    }
+
+
 @login_required
 @require_GET
 def exam_center_student_pins(request, student_id):
@@ -162,6 +193,7 @@ def exam_center_student_pins(request, student_id):
     student = _pin_holder_student_queryset(organization).filter(id=student_id).first()
     if student is None:
         return JsonResponse({"error": "not_found"}, status=404)
+    device_changes = _device_change_urls(organization, student)
 
     tickets = (
         FinalExamTicket.objects.filter(organization=organization, student=student)
@@ -195,6 +227,8 @@ def exam_center_student_pins(request, student_id):
                 "language": ticket.get_language_display() if ticket.language else "",
                 "pin": pin or "",
                 "pin_available": bool(pin),
+                "device_change_url": device_changes.get(ticket.exam_id, ("", False))[0],
+                "device_change_pending": device_changes.get(ticket.exam_id, ("", False))[1],
             }
         )
 
@@ -225,6 +259,8 @@ def exam_center_student_pins(request, student_id):
                 "language": "",
                 "pin": pin or "",
                 "pin_available": bool(pin),
+                "device_change_url": device_changes.get(exam.pk, ("", False))[0],
+                "device_change_pending": device_changes.get(exam.pk, ("", False))[1],
             }
         )
 

@@ -1,11 +1,11 @@
-import { UI } from './dom.js?v=lx20261002';
-import { LOBBY_RESYNC_INTERVAL_MS, STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { applySessionSettings } from './settings.js?v=lx20261002';
-import { rebuildLobbyCloud, renderIdleStage } from './lobby.js?v=lx20261002';
-import { applyStateSnapshot } from './snapshot.js?v=lx20261002';
-import { openPresenterWindow } from './presentation.js?v=lx20261002';
-import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { LOBBY_RESYNC_INTERVAL_MS, STATE_POLL_INTERVAL_MS } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { applySessionSettings } from './settings.js?v=lx20261008';
+import { rebuildLobbyCloud, renderIdleStage } from './lobby.js?v=lx20261008';
+import { applyStateSnapshot } from './snapshot.js?v=lx20261008';
+import { openPresenterWindow } from './presentation.js?v=lx20261008';
+import { fmt, log, notifyHostShell, tr, updateServerTimeOffset } from './utils.js?v=lx20261008';
 
 let playWS = null;
 // Eyni URL-ə eyni anda ikinci POST göndərilmir (sürətli təkrar kliklər → 409 yox).

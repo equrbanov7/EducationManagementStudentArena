@@ -13,6 +13,54 @@ from django.contrib.contenttypes.models import ContentType
 from core.utils import get_client_ip
 
 
+def action_log_data(
+    action,
+    user=None,
+    organization=None,
+    obj=None,
+    old_values=None,
+    new_values=None,
+    changes=None,
+    reason="",
+    request=None,
+    resource_type="",
+    resource_id="",
+    resource_repr="",
+):
+    """``log_action``-un yazacağı ``AuditLog`` sahələri (dict) — INSERT etmədən.
+
+    2026-10-08: toplu yazı yolları (``log_actions``) eyni sahələri, eyni obyekt/sorğu
+    məlumatı və eyni View-as damğası ilə qurur — qayda bir yerdədir.
+    """
+    log_data = {
+        "action": action,
+        "user": user,
+        "organization": organization,
+        "old_values": old_values,
+        "new_values": new_values,
+        "changes": changes,
+        "reason": reason,
+        "resource_type": resource_type,
+        "resource_id": resource_id,
+        "resource_repr": resource_repr,
+    }
+
+    # Add object information if provided
+    if obj:
+        log_data["content_type"] = ContentType.objects.get_for_model(obj)
+        log_data["object_id"] = str(obj.pk)
+
+    # Add request information if provided
+    if request:
+        log_data["ip_address"] = get_client_ip(request)
+        log_data["user_agent"] = request.META.get("HTTP_USER_AGENT", "")[:500]
+        request_id = getattr(request, "request_id", None)
+        if request_id:
+            log_data["request_id"] = request_id
+        _stamp_impersonation(log_data, request)
+    return log_data
+
+
 def log_action(
     action,
     user=None,
@@ -45,35 +93,46 @@ def log_action(
         Created AuditLog instance
     """
     AuditLog = django_apps.get_model("audit", "AuditLog")
+    return AuditLog.objects.create(
+        **action_log_data(
+            action,
+            user=user,
+            organization=organization,
+            obj=obj,
+            old_values=old_values,
+            new_values=new_values,
+            changes=changes,
+            reason=reason,
+            request=request,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            resource_repr=resource_repr,
+        )
+    )
 
-    log_data = {
-        "action": action,
-        "user": user,
-        "organization": organization,
-        "old_values": old_values,
-        "new_values": new_values,
-        "changes": changes,
-        "reason": reason,
-        "resource_type": resource_type,
-        "resource_id": resource_id,
-        "resource_repr": resource_repr,
-    }
 
-    # Add object information if provided
-    if obj:
-        log_data["content_type"] = ContentType.objects.get_for_model(obj)
-        log_data["object_id"] = str(obj.pk)
+def create_audit_logs(rows) -> list:
+    """``AuditLog`` sətirlərini (sahə dict-ləri) BİR INSERT ilə yaz.
 
-    # Add request information if provided
-    if request:
-        log_data["ip_address"] = get_client_ip(request)
-        log_data["user_agent"] = request.META.get("HTTP_USER_AGENT", "")[:500]
-        request_id = getattr(request, "request_id", None)
-        if request_id:
-            log_data["request_id"] = request_id
-        _stamp_impersonation(log_data, request)
+    Manager-in sxem-uyğunluq rejimi (köhnə cədvəldə əskik sütunlar) aktivdirsə hər
+    sətir ``AuditLog.objects.create`` ilə yazılır — ``log_action`` ilə eyni davranış.
+    """
+    rows = list(rows)
+    if not rows:
+        return []
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    manager = AuditLog.objects
+    if manager._missing_field_names(manager.db):
+        return [manager.create(**row) for row in rows]
+    return manager.bulk_create([AuditLog(**row) for row in rows])
 
-    return AuditLog.objects.create(**log_data)
+
+def log_actions(entries) -> list:
+    """Bir neçə ``log_action`` çağırışı — eyni sahələr, BİR INSERT (toplu yazı yolları üçün).
+
+    ``entries`` — ``log_action`` açar-arqumentlərinin dict-ləri (``action`` daxil).
+    """
+    return create_audit_logs(action_log_data(**entry) for entry in entries)
 
 
 #: View-as altında yazılan qeydlərə əlavə olunan açar.

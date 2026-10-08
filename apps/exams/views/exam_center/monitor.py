@@ -189,6 +189,11 @@ def exam_center_ticket_reentry(request, session_id, ticket_id):
         raw_pin = regenerate_pin(ticket, request.user, request=request)
     except TicketStateError as exc:
         return JsonResponse({"success": False, "error": str(exc)}, status=409)
+    # 2026-10-08: cəhd cihaza bağlıdır — nəzarətçinin yenidən giriş PIN-i həm də «cihaz
+    # dəyişikliyi» təsdiqidir (tələbə başqa kompüterdən davam edə bilsin; audit-ə yazılır).
+    from apps.exams.services.final_center.device_binding import SOURCE_REENTRY_PIN, approve_device_change
+
+    approve_device_change(ticket.attempt, by=request.user, request=request, source=SOURCE_REENTRY_PIN)
 
     log_action(
         AuditAction.VIEW,

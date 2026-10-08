@@ -337,6 +337,45 @@
     }
 }
 
+/* 2026-10-08 (L4): uzun variantlar telefonda — yığcam plitə; tək seçimdə «✓» yeri boşaldılır.
+ * Mətn tam görünür (kəsilmir), ekran (lxp-stage) sürüşür; çox seçimdə «Göndər» paneli yapışqandır. */
+.lxp-tiles[data-multi="0"] .lxp-tile {
+    padding-right: 14px;
+}
+
+.lxp-tiles[data-long="1"] {
+    gap: 8px;
+}
+
+.lxp-tiles[data-long="1"] .lxp-tile {
+    gap: 10px;
+    min-height: 56px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 0.94rem;
+    line-height: 1.3;
+}
+
+.lxp-tiles[data-long="1"] .lxp-tile .lxp-tile__text {
+    font-size: inherit;
+    font-weight: 700;
+}
+
+.lxp-tiles[data-long="1"] .lxp-tile__shape {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+}
+
+.lxp-tiles[data-long="1"] .lxp-shape {
+    width: 20px;
+    height: 20px;
+}
+
+.lxp-round {
+    padding-bottom: 6px;
+}
+
 /* Tək sayda plitə (3 və ya 5): sonuncu iki sütunu tutur — boş xana qalmır. */
 .lxp-tiles[data-layout="grid"][data-count="3"] .lxp-tile:last-child,
 .lxp-tiles[data-layout="shapes"][data-count="3"] .lxp-tile:last-child,

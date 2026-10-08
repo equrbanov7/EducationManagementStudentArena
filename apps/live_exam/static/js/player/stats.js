@@ -1,8 +1,8 @@
 // LX-FE-PLAYER (2026-09-29): yer (rank) yaddaşı — yalnız SERVERİN göndərdiyi rank saxlanılır
 // (sual indeksi ilə); ardıcıl iki sualın server rank-ı məlumdursa ox (▲/▼) göstərilir.
 // Heç bir xal/yer müştəri tərəfində hesablanmır.
-import { BOOTSTRAP } from './config.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
+import { BOOTSTRAP } from './config.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
 
 const memory = { byIndex: {} };
 const storageKey = () => `lx.player.rank.${BOOTSTRAP.pin || ""}.${state.player.id || ""}`;

@@ -24,6 +24,15 @@ ANSWER_LATENCY_GRACE_SECONDS = 0.5
 SERVER_AUTO_REVEAL_GRACE_SECONDS = 2.0
 LOBBY_STATE_COALESCE_SECONDS = 0.25
 
+# 2026-10-08 (L2): sual vaxtı. Əvvəl sualın / imtahanın vaxtı boş olanda oyun SƏSSİZCƏ 15 s
+# götürürdü (müəllim «Hər sual üçün standart vaxt»-ı boş saxlayıb placeholder-i «Məs: 60» dəyər
+# sanırdı), aparıcının isə vaxtı dəyişmək üçün heç bir yeri yox idi. İndi: aparıcının seçimi
+# (``question_time_seconds``) → sualın öz vaxtı → imtahanın standart vaxtı → 30 s.
+DEFAULT_QUESTION_SECONDS = 30
+QUESTION_SECONDS_MIN = 5
+QUESTION_SECONDS_MAX = 300
+QUESTION_SECONDS_PRESETS = (10, 20, 30, 60, 90, 120)
+
 DEFAULT_AVATAR_KEY = "avatar_1"
 DEFAULT_ACCESSORY_KEY = "accessory_none"
 

@@ -43,6 +43,23 @@
         ns.progress.updateProgress(ctx);
     }
 
+    // 2026-10-08 (strict delivery, offline dayanıqlıq): yer tutucu slide-ın gövdəsi şəbəkə
+    // xətası/5xx səbəbindən gəlmədisə, slide hələ açıq ikən artan fasilə ilə (1→2→4…15 s)
+    // yenidən istənir. Server tərəfi idempotentdir — İLK başlanğıc anı saxlanılır.
+    function scheduleDeliveryRetry(ctx, slideElement) {
+        if (!slideElement || slideElement.getAttribute("data-server-delivery") !== "1") {
+            return;
+        }
+        var attempt = parseInt(slideElement.getAttribute("data-delivery-retry") || "0", 10) + 1;
+        slideElement.setAttribute("data-delivery-retry", String(attempt));
+        var delayMs = Math.min(15000, 1000 * Math.pow(2, Math.min(attempt - 1, 4)));
+        setTimeout(function () {
+            if (ctx.questionTimerSlide === slideElement && slideElement.getAttribute("data-server-delivery") === "1") {
+                ns.timers.syncQuestionTimerWithServer(ctx, slideElement);
+            }
+        }, delayMs);
+    }
+
     function refreshVisibleTimers(ctx) {
         if (!document.hidden) {
             if (typeof ctx.questionTimerTick === "function") {
@@ -91,6 +108,14 @@
             if (ns.draft && typeof ns.draft.bindAnswerInputs === "function") {
                 ns.draft.bindAnswerInputs(ctx, slideElement);
             }
+            // 2026-10-08: yazılı sualın cavab sahəsi — mövcud faylların sayı (progress) və
+            // rəsm kartı (paint_answer.js) inject olunan gövdə üçün də qoşulur.
+            slideElement.querySelectorAll(".file-preview-area").forEach(function (container) {
+                container.dataset.existingFileCount = String(container.querySelectorAll(".file-preview-item").length);
+            });
+            if (window.EMSPaintAnswer && typeof window.EMSPaintAnswer.initWithin === "function") {
+                window.EMSPaintAnswer.initWithin(slideElement);
+            }
 
             var markButton = slideElement.querySelector("[data-mark-question]");
             if (markButton) {
@@ -129,11 +154,17 @@
                 body: formData,
                 credentials: "same-origin"
             })
-                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (res) {
+                    if (!res.ok && (res.status === 0 || res.status >= 500)) {
+                        throw new Error("question_seen_unavailable");
+                    }
+                    return res.ok ? res.json() : null;
+                })
                 .then(function (data) {
                     if (!data || !data.success) {
                         return data;
                     }
+                    slideElement.removeAttribute("data-delivery-retry");
                     // Strict delivery: təhlükəsiz gövdəni yer tutucuya inject et
                     // (slide görünür olmasa da — məzmun bir dəfə hidrat olunsun).
                     if (data.html) {
@@ -154,6 +185,7 @@
                 })
                 .catch(function () {
                     // Şəbəkə xətasında local countdown davam edir (geriyə-uyğun).
+                    scheduleDeliveryRetry(ctx, slideElement);
                     return null;
                 });
         },

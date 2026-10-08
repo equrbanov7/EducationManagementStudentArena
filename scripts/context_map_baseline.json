@@ -56,7 +56,6 @@
   "apps/exams/services/unit_pin_sync.py": 1,
   "apps/exams/views/teacher/exams/lookups.py": 1,
   "apps/exams/views/teacher/question_library/crud.py": 1,
-  "apps/exams/views/teacher/submission_meta.py": 1,
   "apps/legacy_import/services/repair_pseudo_groups.py": 1,
   "apps/workload/services/task_workbook_import.py": 1
 }

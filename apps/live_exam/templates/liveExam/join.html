@@ -28,9 +28,11 @@
         </div>
         <header class="lxj-top">
             <span class="lxj-pinchip"><span>{% trans "game_pin_label" context "live_exam.join" %}</span><strong>{{ session.pin }}</strong></span>
+            {% if not session_language %}{# aparıcı dili sabitləyibsə səhifə həmin dildədir — seçici yoxdur #}
             <div class="lxj-lang">
                 {% include "partials/_language_switcher.html" with switcher_variant="floating" %}
             </div>
+            {% endif %}
         </header>
 
         <main class="lxj-main">
@@ -111,7 +113,8 @@
         "csrf": "{{ csrf_token }}",
         "resumeUrl": "{{ resume_url|escapejs }}",
         "pinEntryUrl": "{% url 'liveExam:pin_entry' %}",
-        "generatedNickname": "{{ generated_nickname|escapejs }}"
+        "generatedNickname": "{{ generated_nickname|escapejs }}",
+        "blockedMessage": "{{ join_blocked_message|escapejs }}"
     }</script>
     <script id="joinI18n" type="application/json">{
         "joinReady": "{% filter escapejs %}{% trans 'join_button' context 'live_exam.join' %}{% endfilter %}",
@@ -133,6 +136,6 @@
     <script src="{% static 'js/live_avatar_catalog.js' %}?v=lx-20260929"></script>
     <script src="{% static 'js/live_avatar_renderer.js' %}?v=lx-20260929"></script>
     <script src="{% static 'js/wait_room_nickname_editor.js' %}?v=lxp-20260929"></script>
-    <script src="{% static 'js/join.js' %}?v=lxp-20260929"></script>
+    <script src="{% static 'js/join.js' %}?v=lxp-20261008"></script>
 </body>
 </html>

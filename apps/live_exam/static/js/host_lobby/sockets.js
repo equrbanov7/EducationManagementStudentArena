@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { applySessionSettings } from './settings.js?v=lx20261002';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261002';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261002';
-import { applyRevealState } from './reveal.js?v=lx20261002';
-import { renderPodium } from './podium.js?v=lx20261002';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261002';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { applySessionSettings } from './settings.js?v=lx20261008';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261008';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261008';
+import { applyRevealState } from './reveal.js?v=lx20261008';
+import { renderPodium } from './podium.js?v=lx20261008';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261008';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261008';
 import {
     esc,
     fmt,
@@ -18,7 +18,7 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
@@ -91,7 +91,9 @@ function onPlayMessage(event) {
             rememberTimelinePayload(data);
             markStateMutation();
             const sameQuestion = state.currentQuestion && Number(state.currentQuestion.id) === Number(data.question?.id);
-            applyQuestionState(data.question, sameQuestion ? state.answeredCount : 0, state.totalPlayers);
+            // 2026-10-08 (L3): server bu suala cavab verməli oyunçu sayını göndərir (gec qoşulanlar növbəti sualdan).
+            const total = data.total_players != null ? Number(data.total_players) : state.totalPlayers;
+            applyQuestionState(data.question, sameQuestion ? state.answeredCount : 0, total);
             return;
         }
         if (data.type === "answer_progress") {

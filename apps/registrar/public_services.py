@@ -56,6 +56,10 @@ from .plan_hours import workload_hours_for_offering  # noqa: F401
 from .semester_open import build_semester_opening  # noqa: F401
 from .semester_open import offering_counts_by_chair  # noqa: F401
 from .syllabus_pdf import render_syllabus_pdf  # noqa: F401
+from .syllabus_reuse_targets import instructor_offering  # noqa: F401
+from .syllabus_reuse_targets import instructor_offerings  # noqa: F401
+from .syllabus_reuse_targets import plan_hours_by_offering  # noqa: F401
+from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
 
 __all__ = [
     "CORRECT_PERMISSION",
@@ -80,6 +84,8 @@ __all__ = [
     "handover",
     "handover_actions",
     "handover_query",
+    "instructor_offering",
+    "instructor_offerings",
     "interim_assessment",
     "is_custom",
     "journal_close",
@@ -93,7 +99,9 @@ __all__ = [
     "lessons_log",
     "movements",
     "offering_counts_by_chair",
+    "plan_hours_by_offering",
     "plan_hours_for_offering",
+    "programs_by_offering",
     "workload_hours_for_offering",
     "program_for_offering",
     "recompute_absence_hours",

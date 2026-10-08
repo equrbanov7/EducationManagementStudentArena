@@ -185,11 +185,12 @@ def notify_exam_center_ready(submission):
 # Marşrut: müəllim → kafedra
 # ---------------------------------------------------------------------------
 @transaction.atomic
-def route_submission_to_chair(submission, *, actor, resubmitted=False, groups=None):
+def route_submission_to_chair(submission, *, actor, resubmitted=False, groups=None, units=None):
     """Göndərişi kafedra mərhələsinə qoyur və təsdiqləyicilərə bildirir.
 
-    ``groups`` verilməzsə göndərişin öz qrupları oxunur.  Kafedra müdiri
-    tapılmasa DEKANLIĞA yönləndirilir (``routed_to_dean=True``).
+    ``groups`` verilməzsə göndərişin öz qrupları oxunur; ``units`` — reyestr
+    qrupları (2026-10-08, S2).  Kafedra müdiri tapılmasa DEKANLIĞA yönləndirilir
+    (``routed_to_dean=True``).
     """
     from_status = submission.status
     if groups is None:
@@ -200,6 +201,7 @@ def route_submission_to_chair(submission, *, actor, resubmitted=False, groups=No
         organization=submission.organization,
         teacher=submission.teacher,
         groups=groups,
+        units=units or (),
     )
     targets, routed_to_dean = chair_route_targets(submission.organization, chair_unit)
 

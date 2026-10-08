@@ -4,13 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20261002';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261002';
-import { fetchState } from './api.js?v=lx20261002';
-import { renderFinal } from './finale.js?v=lx20261002';
-import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261002';
-import { stopStatePolling } from './polling.js?v=lx20261002';
-import { setRank } from './ui.js?v=lx20261002';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261008';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261008';
+import { fetchState } from './api.js?v=lx20261008';
+import { renderFinal } from './finale.js?v=lx20261008';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261008';
+import { stopStatePolling } from './polling.js?v=lx20261008';
+import { setRank } from './ui.js?v=lx20261008';
 import {
     questionKeyOf,
     renderGetReady,
@@ -19,12 +19,12 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20261002';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261002';
-import { renderIdle, renderRemoved } from './render_status.js?v=lx20261002';
-import { applySessionSettings } from './settings.js?v=lx20261002';
-import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
+} from './render_round.js?v=lx20261008';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261008';
+import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261008';
+import { applySessionSettings } from './settings.js?v=lx20261008';
+import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
 import {
     clearAckTimer,
     clearAllTimers,
@@ -33,7 +33,7 @@ import {
     queuePhaseTransition,
     scheduleBoundary,
     startTicker,
-} from './timers.js?v=lx20261002';
+} from './timers.js?v=lx20261008';
 import {
     getRevealKey,
     getRevealTimings,
@@ -42,8 +42,8 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261002';
-import { currentViewEl } from './views.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { currentViewEl } from './views.js?v=lx20261008';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;
@@ -235,8 +235,28 @@ export function applyFinished(payload) {
     window.setTimeout(closePlayerSocket, 2500);
 }
 
-export function handleAuthLost() {
+// 2026-10-08 (L3): gec qoşulan oyunçu `active_from_index`-dən (0-dan) əvvəlki suallarda iştirak etmir.
+function activeFromIndex() {
+    return Math.max(0, Number(state.player && state.player.active_from_index) || 0);
+}
+
+function isPendingQuestion(question) {
+    return Boolean(question) && Number(question.index || 0) - 1 < activeFromIndex();
+}
+
+function enterLateJoinWait(payload) {
+    if (payload && payload.active_from_index != null) state.player.active_from_index = Number(payload.active_from_index);
+    clearAllTimers();
+    state.currentQuestion = null;
+    state.revealPayload = null;
+    resetRound();
+    renderLateJoin();
+}
+
+export function handleAuthLost(event) {
     if (state.phase === PHASES.FINAL || finalGate) return;
+    // 2026-10-08 (L6): 4403 = aparıcı çıxardı (aydın mesaj, «yenidən qoşul» yox — eyni cihaz qayıtmır).
+    if (event && event.code === 4403) state.kicked = true;
     state.removed = true;
     clearAllTimers();
     stopStatePolling();
@@ -250,6 +270,10 @@ export function handleSnapshot(snapshot) {
     rememberTimelinePayload(snapshot);
     if (snapshot.settings) applySessionSettings(snapshot.settings);
     if (Number(snapshot.total_players)) state.totalPlayers = Number(snapshot.total_players);
+    if (snapshot.late_join_pending) {
+        enterLateJoinWait(snapshot);
+        return;
+    }
     switch (snapshot.state) {
         case "finished":
             applyFinished(snapshot);
@@ -286,6 +310,10 @@ export function handleSocketMessage(message) {
         case "question_published":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            if (isPendingQuestion(data.question)) {
+                enterLateJoinWait(null);
+                break;
+            }
             applyQuestion(data.question, data.player_answer || null);
             break;
         case "answer_saved":
@@ -294,6 +322,11 @@ export function handleSocketMessage(message) {
         case "reveal":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            // Gec qoşulan: server keçən sualın cavabını göndərmir (`late_join_pending`) — gözləmə ekranı qalır.
+            if (data.late_join_pending) {
+                enterLateJoinWait(data);
+                break;
+            }
             applyReveal(data);
             break;
         case "finished":
@@ -303,6 +336,10 @@ export function handleSocketMessage(message) {
             break;
         case "error":
             handleAnswerError(data.message);
+            break;
+        case "kicked":
+            state.kicked = true;
+            handleAuthLost();
             break;
         default:
             break;

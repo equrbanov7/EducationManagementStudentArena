@@ -1,5 +1,5 @@
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının yeganə vəziyyət obyekti.
-import { BOOTSTRAP } from './config.js?v=lx20261002';
+import { BOOTSTRAP } from './config.js?v=lx20261008';
 
 export const state = {
     player: Object.assign({ score: 0 }, BOOTSTRAP.player || {}),
@@ -32,4 +32,6 @@ export const state = {
     hasServerOffset: false,
     timelineMeta: null,
     removed: false,
+    // 2026-10-08 (L6): aparıcı bu oyunçunu çıxarıb (WS `kicked` / 4403 / state 403 `kicked`).
+    kicked: false,
 };

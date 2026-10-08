@@ -1,9 +1,9 @@
-import { UI } from './dom.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { finishGame, nextQuestion, post, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20261002';
-import { unlockAudio } from './audio.js?v=lx20261002';
-import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20261002';
-import { controlsEnabled, fitAll } from './utils.js?v=lx20261002';
+import { UI } from './dom.js?v=lx20261008';
+import { finishGame, nextQuestion, postJson, refreshHostState, revealQuestion, startGame } from './api.js?v=lx20261008';
+import { unlockAudio } from './audio.js?v=lx20261008';
+import { openPresenterWindow, tryEnterFullscreen } from './presentation.js?v=lx20261008';
+import { refitLobbyCloud } from './lobby.js?v=lx20261008';
+import { controlsEnabled, fitAll } from './utils.js?v=lx20261008';
 
 export function bindHostEvents() {
     if (UI.startBtn) UI.startBtn.onclick = startGame;
@@ -15,16 +15,8 @@ export function bindHostEvents() {
     UI.presentationContent?.addEventListener("click", (event) => {
         if (event.target.closest("[data-action='open-qr']")) {
             if (typeof toggleQR === "function") toggleQR(true);
-            return;
         }
-        const button = event.target.closest("[data-remove-player-id]");
-        if (!button || !controlsEnabled() || state.sessionState !== "lobby") return;
-        button.disabled = true;
-        const formData = new FormData();
-        formData.append("player_id", button.dataset.removePlayerId);
-        post(CONFIG.urls.removePlayer, formData).finally(() => {
-            button.disabled = false;
-        });
+        // 2026-10-08 (L6): baloncuqdakı «×» təsdiq dialoqundan keçir — players_drawer.js (delegasiya).
     });
 
     // «Yenilə» (lobbi səhnəsi + idarə paneli): bir delegasiya dinləyicisi — səhnə yenidən
@@ -65,6 +57,7 @@ export function bindHostEvents() {
         resizeTimer = window.setTimeout(() => {
             fitAll(UI.presentationContent, "[data-fit]", { min: 18 });
             fitAll(UI.presentationContent, ".hx-tile__text", { min: 14 });
+            refitLobbyCloud();
         }, 160);
     });
 }

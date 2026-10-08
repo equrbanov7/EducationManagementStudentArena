@@ -74,8 +74,15 @@
             return ctx.i18n[key] || fallback;
         }
 
-        // datetime-local dəyəri (YYYY-MM-DDTHH:MM) icmalda "DD.MM.YYYY HH:MM" kimi.
+        // Tarix-saat icmalda HƏMİŞƏ "DD.MM.YYYY HH:MM" (EMSDateTime; ISO da qəbul olunur).
         function formatDateTimeLocal(value) {
+            var api = window.EMSDateTime;
+            if (api && typeof api.parse === "function") {
+                var res = api.parse(value || "");
+                if (res.ok) {
+                    return api.format(res.parts);
+                }
+            }
             var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value || "");
             return m ? m[3] + "." + m[2] + "." + m[1] + " " + m[4] + ":" + m[5] : (value || "");
         }
@@ -89,7 +96,7 @@
                 var opt = el.options[el.selectedIndex];
                 return opt ? (opt.textContent || "").trim() : "";
             }
-            if (el.type === "datetime-local") {
+            if (el.type === "datetime-local" || el.hasAttribute("data-ems-dt-input")) {
                 return formatDateTimeLocal((el.value || "").trim());
             }
             return (el.value || "").trim();

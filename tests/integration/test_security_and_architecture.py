@@ -694,11 +694,12 @@ class LiveExamServiceLayerTest(TestCase):
         session.refresh_from_db()
         self.assertFalse(session.is_locked)
 
-    def test_remove_player_from_non_lobby_raises(self):
+    def test_remove_player_from_finished_session_raises(self):
+        # 2026-10-08 (L6): oyun gedərkən (QUESTION/REVEAL) çıxarmaq artıq mümkündür — yalnız bitmiş oyunda olmaz.
         from apps.live_exam.services import create_live_session, remove_player
 
         session = create_live_session(self.exam, self.teacher)
-        session.state = LiveSession.STATE_QUESTION
+        session.state = LiveSession.STATE_FINISHED
         session.save(update_fields=["state"])
 
         with self.assertRaises(ValueError):

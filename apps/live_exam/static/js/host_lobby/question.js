@@ -1,11 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261002';
-import { PHASES } from './constants.js?v=lx20261002';
-import { state } from './state.js?v=lx20261002';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261002';
-import { icon } from './icons.js?v=lx20261002';
-import { answerTileMarkup, tilesGridClass } from './options.js?v=lx20261002';
-import { revealQuestion } from './api.js?v=lx20261002';
-import { playWipe } from './transitions.js?v=lx20261002';
+import { $, UI } from './dom.js?v=lx20261008';
+import { PHASES } from './constants.js?v=lx20261008';
+import { state } from './state.js?v=lx20261008';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261008';
+import { icon } from './icons.js?v=lx20261008';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261008';
+import { revealQuestion } from './api.js?v=lx20261008';
+import { playWipe } from './transitions.js?v=lx20261008';
+import { secondsLabel } from './time_setting.js?v=lx20261008';
 import {
     controlsEnabled,
     esc,
@@ -18,8 +19,8 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261002';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261002';
+} from './utils.js?v=lx20261008';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261008';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -60,11 +61,27 @@ function badgesMarkup(question) {
     return badges.join("");
 }
 
+/** 2026-10-08 (L2): cari sualın vaxtı proyektorda HƏMİŞƏ görünür (server nəşrdə dondurur). */
+function timePillMarkup(question) {
+    const seconds = Number(question?.time_limit || 0);
+    if (!seconds) return "";
+    return `<span class="hx-pill hx-pill--time" title="${esc(tr("timeLabel", "Hər sual üçün vaxt"))}">${icon("timer")}<span>${esc(secondsLabel(seconds))}</span></span>`;
+}
+
+/** 2026-10-08 (L3): gec qoşulma açıqdırsa PIN oyun gedərkən də görünür (gecikən tələbə qoşula bilsin). */
+function lateJoinPinMarkup() {
+    if (state.sessionSettings?.late_join_enabled === false || state.isLocked) return "";
+    const hint = tr("lateJoinPinHint", "Gecikənlər bu PIN ilə qoşula bilər");
+    return `<span class="hx-pill hx-pill--pin" title="${esc(hint)}" aria-label="${esc(hint)}: ${esc(CONFIG.pin)}">${icon("users")}<span>PIN</span><strong>${esc(CONFIG.pin)}</strong></span>`;
+}
+
 function headMarkup(question) {
     return `
         <header class="hx-qhead">
             <span class="hx-pill">${esc(progressLabel(question))}</span>
+            ${timePillMarkup(question)}
             ${badgesMarkup(question)}
+            ${lateJoinPinMarkup()}
         </header>
     `;
 }
@@ -181,7 +198,7 @@ function renderAnswersStage(question) {
         PHASES.ANSWERS,
         `${state.questionKey}:${PHASES.ANSWERS}`,
         `
-            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}">
+            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}" data-opt-len="${optionsLengthClass(options)}">
                 ${headMarkup(question)}
                 <div class="hx-qrow">
                     ${hudMarkup()}
@@ -198,7 +215,7 @@ function renderAnswersStage(question) {
         `,
         (root) => {
             fitQuestion(root);
-            fitAll(root, ".hx-tile__text", { min: 16 });
+            fitAll(root, ".hx-tile__text", { min: 15 });
         }
     );
     state.lastTimerSecond = -1;

@@ -1,11 +1,11 @@
 {% load i18n %}
 {% comment %}
-Üç dialoq (dizayn §3.1): «Yeni versiya», «Keçən ildən köçür», «Təqdimatı geri
-çağır». Hamısı EYNİ qabıqdan istifadə edir — JS yalnız görünən bloku açır.
+Dialoqlar (dizayn §3.1): «Yeni versiya», «Sillabus yarat», «Təqdimatı geri çağır».
+Hamısı EYNİ qabıqdan istifadə edir — JS yalnız görünən bloku açır. «Keçən ildən köçür»
+2026-10-08-dən təkrar istifadə dialoqundadır (`_reuse_dialog.html`, mənbə seçimi ilə).
 
 ⚠️ «Geri çağır» üçün SƏBƏB MƏCBURİDİR (ən azı 20 simvol) — həm JS, həm də
 `views/syllabus/api.py` yoxlayır (server son sözü deyir).
-⚠️ «Keçən ildən köçür» nəticəsi HƏR ZAMAN QARALAMADIR — avtomatik təsdiqlənmir.
 {% endcomment %}
 <div class="syl-modal" data-syl-modal hidden>
   <div class="syl-modal__backdrop" data-syl-modal-close></div>
@@ -53,9 +53,6 @@ KEÇMİR, ona görə tərcümələr burada `data-*` atributları ilə ötürül�
       data-t-newver-title="{% trans 'Yeni versiya yaradılsın?' context 'accounts.syllabus' %}"
       data-t-newver-body="{% trans 'Təsdiqlənmiş versiya olduğu kimi qalır və tələbələr onu görməyə davam edir. Yeni versiya qaralama kimi açılır, təsdiqlənəndən sonra aktiv olur.' context 'accounts.syllabus' %}"
       data-t-newver-ok="{% trans 'Qaralama yarat' context 'accounts.syllabus' %}"
-      data-t-copy-title="{% trans 'Keçən ilin sillabusundan köçürülsün?' context 'accounts.syllabus' %}"
-      data-t-copy-body="{% trans 'Ən son təsdiqlənmiş versiya mənbə kimi istifadə olunacaq. Nəticə yalnız QARALAMA olur — avtomatik təsdiqlənmir və tələbələrə görünmür.' context 'accounts.syllabus' %}"
-      data-t-copy-ok="{% trans 'Köçür və qaralama aç' context 'accounts.syllabus' %}"
       data-t-withdraw-title="{% trans 'Təqdimat geri çağırılsın?' context 'accounts.syllabus' %}"
       data-t-withdraw-body="{% trans 'Sillabus kafedra növbəsindən çıxarılır və yenidən qaralama statusuna qayıdır. Kafedra müdirinə bildiriş göndərilir.' context 'accounts.syllabus' %}"
       data-t-withdraw-ok="{% trans 'Geri çağır' context 'accounts.syllabus' %}"

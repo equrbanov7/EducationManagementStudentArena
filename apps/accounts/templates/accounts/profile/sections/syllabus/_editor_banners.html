@@ -6,7 +6,9 @@ Redaktorun VƏZİYYƏT bannerləri (dizayn §3.2 `saveState` + `viewState`).
 dördü autosave nəticəsindən asılıdır, ona görə gizli qalır və JS açır. Mətnlər
 şablonda qalır ki, 4 dilə tərcümə `{% trans %}` ilə getsin — JS-də mətn yoxdur.
 {% endcomment %}
-{% if se.readonly %}
+{% comment %}Bağlı sillabusda (`se.reuse.mode == 'linked'`) kilidin izahını təkrar istifadə banneri verir —
+«yeni versiya yaradın» məsləhəti orada YANLIŞ olardı (əvvəl «Ayır»).{% endcomment %}
+{% if se.readonly and se.reuse.mode != 'linked' %}
 <div class="syl-banner syl-banner--neutral" role="status">
   <i class="fas fa-lock syl-banner__icon" aria-hidden="true"></i>
   <div>

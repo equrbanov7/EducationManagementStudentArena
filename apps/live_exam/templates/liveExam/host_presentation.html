@@ -72,6 +72,7 @@
 
     {% if presentation_controls %}
     {% include "liveExam/_host_settings_drawer.html" %}
+    {% include "liveExam/partials/_host_players_drawer.html" %}
     {% endif %}
 
     <div id="finalPodium" class="final-podium" aria-live="off"></div>
@@ -89,6 +90,7 @@
 
     {{ session_settings|json_script:"hostPresentationSessionSettings" }}
     {{ host_questions|json_script:"hostQuestions" }}
+    {{ question_time_config|json_script:"hostQuestionTime" }}
     {% comment %}Konfiq/i18n JSON data-adalarındadır (CSP: inline skript yoxdur); `host_lobby_config.js` KLASSİK, defer-siz skriptdir.{% endcomment %}
     <script id="hostConfig" type="application/json">{
         "pin": "{{ session.pin|escapejs }}",

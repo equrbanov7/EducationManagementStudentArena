@@ -22,6 +22,7 @@ Heç bir ``from apps.exams``/``from apps.accounts`` importu yoxdur (module_deps)
 from __future__ import annotations
 
 import datetime
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -80,6 +81,30 @@ def offerings_for_group(*, organization, period, group_id):
         .select_related("subject", "group", "instructor")
         .order_by("subject__code", "subject__name")
     )
+
+
+def offering_selection_keys(*, organization, period, offering_id) -> dict:
+    """Dərin keçid (``?ese_offering=`` qrupsuz / fənnsiz): açılışın qrup və fənn id-ləri — BİR sorğu.
+
+    2026-10-08: yük testinin (və jurnaldan gələn keçidin) URL-i yalnız açılışı daşıyırdı —
+    seçici qrupu siyahının BİRİNCİSİ götürürdü və səhifə başqa açılışı açırdı. Açılış bu
+    təşkilatın / dövrün aktiv açılışı deyilsə boş dict (seçici əvvəlki defoltla davam edir;
+    əhatə süzgəci çağıranda qalır).
+    """
+    try:
+        uuid.UUID(str(offering_id))
+    except (TypeError, ValueError, AttributeError):
+        return {}
+    if organization is None or period is None:
+        return {}
+    row = (
+        CourseOffering.objects.filter(organization=organization, period=period, pk=offering_id, is_active=True)
+        .values("group_id", "subject_id")
+        .first()
+    )
+    if row is None:
+        return {}
+    return {"group_id": str(row["group_id"] or ""), "subject_id": str(row["subject_id"] or "")}
 
 
 def instructor_label(offering) -> str:
@@ -398,6 +423,7 @@ __all__ = [
     "groups_for_period",
     "instructor_label",
     "latest_sheet_defaults",
+    "offering_selection_keys",
     "offerings_for_group",
     "parse_exam_date",
     "resolve_staff_user",
