@@ -17,8 +17,8 @@ from apps.exams.services.bulk_workbench import (
     parse_points_payload,
     parse_selected_indices,
 )
+from apps.exams.services.submission_sources import subject_label
 from apps.exams.services.visual_import_upload import prepare_question_upload
-from apps.exams.views.teacher.submission_meta import _teacher_subjects
 from apps.exams.views.teacher.workbench_paste import paste_context
 
 
@@ -128,7 +128,7 @@ def initial_workbench_state(request, organization, *, raw_text, math_token):
 def build_workbench_context(
     request,
     organization,
-    groups,
+    sources,
     form_state,
     *,
     analysis,
@@ -155,19 +155,15 @@ def build_workbench_context(
         "dp_value": "1",
         "math_token": math_token,
         # Meta sahələri (workbench-dən kənar kart). Fənn dəyərləri Subject pk-dır.
-        "teacher_groups": groups,
+        # 2026-10-08 (S2): mənbə — dərs yükü (açılışlar + təsdiqlənmiş bölgü) + köhnə
+        # kohortlar; etiketdə fənn ADI əvvəl, kod ikinci; boşdursa `submission_notices` NİYƏ.
+        "teacher_groups": sources.groups,
         "teacher_group_subjects": {
-            str(group.id): [
-                {"value": str(subject.pk), "label": f"{subject.code} — {subject.name}"}
-                for subject in group.subjects.all()
-            ]
-            for group in groups
+            key: [{"value": str(subject.pk), "label": subject_label(subject)} for subject in subjects]
+            for key, subjects in sources.group_subjects.items()
         },
-        # Fənn müəllimin ÖZ fənlərindən (qrupdan asılı deyil); qrup çox-seçimli.
-        "teacher_subjects": [
-            {"value": str(s.pk), "label": f"{s.code} — {s.name}"}
-            for s in _teacher_subjects(request, organization, groups=groups)
-        ],
+        "teacher_subjects": [{"value": str(s.pk), "label": subject_label(s)} for s in sources.subjects],
+        "submission_notices": sources.notices,
         "submission_languages": EXAM_LANGUAGE_CHOICES,
         "submission_exam_kinds": QUESTION_EXAM_KIND_CHOICES,
         "form_state": form_state,

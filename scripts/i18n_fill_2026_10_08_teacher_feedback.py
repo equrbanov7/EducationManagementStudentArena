@@ -92,6 +92,55 @@ ROWS = {
     "exams.form.question.label": {
         "Variant %(n)s": ("Option %(n)s", "Вариант %(n)s", "Seçenek %(n)s"),
     },
+    # S2 — sual göndərişi: fənn/qrup dərs yükündən; boşdursa «niyə».
+    "exams.service.submission_sources": {
+        "Təşkilatda cari semestr təyin olunmayıb — fənlər dərs yükünüzdən göstərilə bilmir.": (
+            "No current semester is set for the organisation, so subjects cannot be shown from your teaching load.",
+            "В организации не задан текущий семестр — дисциплины из вашей нагрузки показать нельзя.",
+            "Kurumda geçerli dönem tanımlanmamış; dersler ders yükünüzden gösterilemiyor.",
+        ),
+        "Bu fənlər dərs yükünüzdə var, amma fənn kataloquna bağlanmayıb: {names}. Kafedraya müraciət edin.": (
+            "These subjects are in your teaching load but are not linked to the subject catalogue: {names}. "
+            "Please contact your department.",
+            "Эти дисциплины есть в вашей нагрузке, но не привязаны к каталогу дисциплин: {names}. "
+            "Обратитесь на кафедру.",
+            "Bu dersler ders yükünüzde var ancak ders kataloğuna bağlanmamış: {names}. Bölüme başvurun.",
+        ),
+        "Dərs yükünüz kafedra tərəfindən hələ təsdiqlənməyib — təsdiqdən sonra fənləriniz burada görünəcək.": (
+            "Your teaching load has not been approved by the department yet; your subjects will appear here "
+            "after approval.",
+            "Ваша нагрузка ещё не утверждена кафедрой — после утверждения дисциплины появятся здесь.",
+            "Ders yükünüz bölüm tarafından henüz onaylanmadı; onaydan sonra dersleriniz burada görünecek.",
+        ),
+        "Cari semestrdə ({period}) dərs yükünüz yoxdur. Fənlər yalnız cari semestr üzrə göstərilir.": (
+            "You have no teaching load in the current semester ({period}). Only current-semester subjects are shown.",
+            "В текущем семестре ({period}) у вас нет нагрузки. Показываются только дисциплины текущего семестра.",
+            "Geçerli dönemde ({period}) ders yükünüz yok. Yalnızca geçerli dönemin dersleri gösterilir.",
+        ),
+        "Cari semestrdə ({period}) sizin adınıza təsdiqlənmiş dərs yükü və ya jurnal tapılmadı. "
+        "Fənlər dərs yükündən gəlir — fənn qovluğu yaratmaq lazım deyil; kafedra müdirinə müraciət edin.": (
+            "No approved teaching load or journal was found for you in the current semester ({period}). "
+            "Subjects come from the teaching load — creating a subject folder is not required; "
+            "please contact the head of department.",
+            "В текущем семестре ({period}) для вас не найдены утверждённая нагрузка или журнал. "
+            "Дисциплины берутся из нагрузки — создавать папку дисциплины не нужно; обратитесь к заведующему кафедрой.",
+            "Geçerli dönemde ({period}) adınıza onaylanmış ders yükü veya not defteri bulunamadı. "
+            "Dersler ders yükünden gelir; ders klasörü oluşturmanız gerekmez, bölüm başkanına başvurun.",
+        ),
+    },
+    "exams.template.question_submission": {
+        "Cari semestr üzrə dərs yükünüzdəki fənlər görünür.": (
+            "Subjects from your teaching load for the current semester are shown.",
+            "Показаны дисциплины из вашей нагрузки на текущий семестр.",
+            "Geçerli dönem ders yükünüzdeki dersler gösterilir.",
+        ),
+        "Cari semestrin dərs yükündə sizə bağlı qrup tapılmadı — kafedra müdirinə müraciət edin.": (
+            "No groups are linked to you in the current semester's teaching load; please contact the head of "
+            "department.",
+            "В нагрузке текущего семестра нет привязанных к вам групп — обратитесь к заведующему кафедрой.",
+            "Geçerli dönemin ders yükünde size bağlı grup bulunamadı; bölüm başkanına başvurun.",
+        ),
+    },
     # W1 — «Dərs yüküm» cədvəlinin «CƏMİ» xanası görünən sətirlərin cəmidir.
     "accounts.workload": {
         "CƏMİ (bütün semestrlər)": ("TOTAL (all semesters)", "ИТОГО (все семестры)", "TOPLAM (tüm dönemler)"),
