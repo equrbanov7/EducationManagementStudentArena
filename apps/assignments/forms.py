@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import pgettext_lazy
 
+from core.datetime_input import DayFirstDateTimeField, DayFirstDateTimeInput
 from core.upload_security import randomize_uploaded_filename, validate_uploaded_file
 
 from .models import Assignment, AssignmentSubmission
@@ -12,6 +13,7 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignment
         fields = ["title", "description", "start_date", "due_date", "max_attempts", "status"]
+        field_classes = {"start_date": DayFirstDateTimeField, "due_date": DayFirstDateTimeField}
         widgets = {
             "title": forms.TextInput(
                 attrs={
@@ -26,8 +28,9 @@ class AssignmentForm(forms.ModelForm):
                     "placeholder": pgettext_lazy("assignment.form.placeholder", "description"),
                 }
             ),
-            "start_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
-            "due_date": forms.DateTimeInput(attrs={"class": "form-control", "type": "datetime-local"}),
+            # 2026-10-08: locale-dən asılı olmayan «gg.aa.iiii ss:dd» (24 saat) + ISO qəbulu.
+            "start_date": DayFirstDateTimeInput(),
+            "due_date": DayFirstDateTimeInput(),
             "max_attempts": forms.NumberInput(attrs={"class": "form-control", "min": 1, "value": 3}),
             "status": forms.Select(attrs={"class": "form-select"}),
         }

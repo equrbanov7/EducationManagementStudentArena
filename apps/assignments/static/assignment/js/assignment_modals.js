@@ -80,12 +80,14 @@
 
     const esc = s => s ? String(s).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'})[c]) : '';
 
+    // 2026-10-08: sahə «gg.aa.iiii ss:dd» (24 saat) mətnidir — server yerli ISO verir.
     const toLocal = dt => {
         if(!dt) return '';
+        if (window.EMSDateTime && window.EMSDateTime.display) return window.EMSDateTime.display(dt);
         const d = new Date(dt);
         if(isNaN(d)) return '';
         const p = n => String(n).padStart(2,'0');
-        return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+        return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
     };
 
     const updateCount = mode => {
