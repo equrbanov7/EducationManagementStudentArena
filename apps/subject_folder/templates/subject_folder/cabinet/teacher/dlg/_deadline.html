@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load ems_ui i18n %}
 <div class="ems-field">
     <label class="ems-field__label" for="sfDeadlineTask">{% trans "Tapşırıq" context "subject_folder.ui" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
     <div class="bootstrap-single-select bootstrap-single-select--ems">
@@ -10,11 +10,11 @@
 <div class="sfc-row2">
     <div class="ems-field">
         <label class="ems-field__label" for="sfDeadlineOpens">{% trans "Açılma vaxtı" context "subject_folder.ui" %}</label>
-        <input class="ems-input" type="datetime-local" id="sfDeadlineOpens" name="opens_at">
+        {% ems_datetime_input "opens_at" input_id="sfDeadlineOpens" css_class="ems-input" %}
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="sfDeadlineDue">{% trans "Son tarix" context "subject_folder.ui" %}</label>
-        <input class="ems-input" type="datetime-local" id="sfDeadlineDue" name="due_at">
+        {% ems_datetime_input "due_at" input_id="sfDeadlineDue" css_class="ems-input" %}
     </div>
 </div>
 <div class="ems-field">

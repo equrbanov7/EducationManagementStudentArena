@@ -6,6 +6,8 @@ CSP: inline stil/skript YOXDUR — CSS/JS xarici fayldır, panelin İÇİNDƏ y�
 {% sf_teacher_panel as sp %}
 <link rel="stylesheet" href="{% static 'subject_folder/css/cabinet.css' %}?v=20260925-1">
 <link rel="stylesheet" href="{% static 'subject_folder/css/forms.css' %}?v=20260925-1">
+{# 2026-10-08: son tarix dialoqu «gg.aa.iiii ss:dd» (24 saat) + təqvim seçicisi — core/datetime_input.py #}
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
 <div class="sfc" data-sf-root data-sf-section="subject-folders" data-sf-action-url="{{ sp.urls.action }}" {% include "subject_folder/cabinet/_i18n.html" %}>
 {% csrf_token %}
 {% if sp.state == "no_org" %}
@@ -23,4 +25,6 @@ CSP: inline stil/skript YOXDUR — CSS/JS xarici fayldır, panelin İÇİNDƏ y�
     {% include "subject_folder/cabinet/teacher/_list.html" %}
 {% endif %}
 </div>
+<script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
 <script defer src="{% static 'subject_folder/js/cabinet.js' %}?v=20260925-1"></script>
