@@ -5,7 +5,7 @@ Question-level forms (teacher-facing).
 import re
 
 from django import forms
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.constants import DEFAULT_EXAM_LANGUAGE
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
@@ -249,20 +249,8 @@ class ExamQuestionCreateForm(forms.ModelForm):
         return list(range(1, max_index + 1))
 
     def _option_label(self, index):
-        suffix_map = {
-            0: "cu",
-            1: "ci",
-            2: "ci",
-            3: "cü",
-            4: "cü",
-            5: "ci",
-            6: "cı",
-            7: "ci",
-            8: "ci",
-            9: "cu",
-        }
-        suffix = suffix_map[index % 10]
-        return f"{index}-{suffix} variant"
+        # 2026-10-08 (E2): AZ sıra şəkilçisi («1-ci variant») ingilis UI-da da görünürdü.
+        return pgettext("exams.form.question.label", "Variant %(n)s") % {"n": index}
 
     def _ensure_option_fields_exist(self):
         for index in self.option_indexes:

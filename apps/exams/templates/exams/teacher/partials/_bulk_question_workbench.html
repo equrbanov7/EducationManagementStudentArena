@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_rich.css' %}?v=20260914-2">
 {% comment %}2026-09-20 tema qatı (sahib): token-əsaslı görünüş, önizləmə skeletonu və
 göndərişdən əvvəl təsdiq xülasəsi — 5 səhifədə eyni (workbench_confirm.js).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20260920-theme">
+<link rel="stylesheet" href="{% static 'exams/css/workbench_theme.css' %}?v=20261008-1">
 {% include "partials/ems_ui/_math_assets.html" %}
 
 {% comment %}
@@ -317,6 +317,18 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                 </div>
                 <p class="format-tags-hint">{% trans "Word (.docx) faylındakı şəkillər və düsturlar (LaTeX) avtomatik tanınır; .doc/.docm qəbul edilmir." context "exams.template.test_question_bank" %}</p>
 
+                {% if wb_show_default_a %}
+                {# 2026-10-08 (S1): işarəsiz suallarda A düzgündür — mətndə *A) yazılır, xəbərdarlıq çıxmır. JS: workbench_default_a.js #}
+                <label class="wb-default-a" for="wbDefaultCorrectA">
+                    <input type="checkbox" name="default_correct_a" id="wbDefaultCorrectA" value="1" class="form-check-input" data-wb-default-a {% if wb_default_correct_a %}checked{% endif %}>
+                    <span class="wb-default-a__text">
+                        <strong>{% trans "Düzgün cavab həmişə A variantıdır" context "exams.template.test_question_bank" %}</strong>
+                        <small>{% trans "İşarəsiz suallarda A düzgün sayılır və mətndə «*A)» kimi işarələnir — «düzgün cavab tapılmadı» xəbərdarlığı çıxmır." context "exams.template.test_question_bank" %}</small>
+                    </span>
+                </label>
+                <script defer src="{% static 'exams/js/workbench_default_a.js' %}?v=20261008-1"></script>
+                {% endif %}
+
                 {% if wb_templates %}
                 <div class="template-download">
                     <div class="template-download__head">
@@ -454,6 +466,12 @@ Preview/validasiya kontekst dəyişənləri (view-dən):
                         <i class="fas fa-file-excel"></i> {% trans "Hesabatı yüklə" context "exams.template.test_question_bank" %}
                     </button>
                 </form>
+                {% endif %}
+                {% if wb_show_default_a and defaulted_count %}
+                <button type="button" class="btn-action confirm-default-a" data-wb-confirm-default-a
+                        data-confirm-text="{% blocktrans with count=defaulted_count context 'exams.template.test_question_bank' %}{{ count }} sualda düzgün cavab A kimi təsdiqlənəcək və mətndə «*A)» yazılacaq. Davam edilsin?{% endblocktrans %}">
+                    <i class="fas fa-check-double"></i> {% blocktrans with count=defaulted_count context "exams.template.test_question_bank" %}Hamısını təsdiqlə — A düzgündür ({{ count }}){% endblocktrans %}
+                </button>
                 {% endif %}
                 <button type="button" class="btn-action select-all" data-toggle-all="true">
                     <i class="fas fa-check-double"></i> {% trans "action_select_all" context "exams.template.test_question_bank" %}

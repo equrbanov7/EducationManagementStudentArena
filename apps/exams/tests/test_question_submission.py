@@ -44,7 +44,7 @@ VALID_TEXT = (
     "E) 7\n"
 )
 
-# Düzgün cavab işarələnməyib → correct_defaulted ERROR xəbərdarlığı çıxmalıdır.
+# Düzgün cavab işarələnməyib → correct_defaulted xəbərdarlığı (2026-10-08-dən XƏTA yox, «Yoxlayın»).
 TEXT_WITH_PROBLEM = (
     "1. Problemli sual hansıdır?\n" "A) Birinci\n" "B) İkinci\n" "C) Üçüncü\n" "D) Dördüncü\n" "E) Beşinci\n"
 )
@@ -147,7 +147,8 @@ class SubmissionServiceTests(_Base):
 
     def test_submit_records_warnings_for_problem_text(self):
         submission = self._submission(raw_text=TEXT_WITH_PROBLEM, title="Problemli toplu")
-        self.assertGreaterEqual(submission.error_count, 1)
+        self.assertGreaterEqual(submission.warning_count, 1)
+        self.assertEqual(submission.error_count, 0)
         warning_types = {w["type"] for q in submission.parsed_snapshot for w in q.get("warnings", [])}
         self.assertIn("correct_defaulted", warning_types)
 
@@ -863,7 +864,9 @@ class SubmissionQuestionsEndpointTests(_Base):
     def test_endpoint_filters_and_search(self):
         submission = self._to_center(self._submission(raw_text=TEXT_WITH_PROBLEM, title="Lazy filtr"))
         client = self._client_for(self.exam_center)
-        self.assertEqual(self._payload(client, submission, flag="error")["filtered_total"], 1)
+        # 2026-10-08 (S1): işarəsiz düzgün cavab XƏTA yox, xəbərdarlıqdır.
+        self.assertEqual(self._payload(client, submission, flag="warning")["filtered_total"], 1)
+        self.assertEqual(self._payload(client, submission, flag="error")["filtered_total"], 0)
         self.assertEqual(self._payload(client, submission, flag="clean")["filtered_total"], 0)
         self.assertEqual(self._payload(client, submission, q="Problemli")["filtered_total"], 1)
         # Variant mətnində də axtarır.

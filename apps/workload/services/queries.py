@@ -218,7 +218,14 @@ def _offering_links(organization, assignments) -> dict:
     return {(row["subject_id"], row["period_id"]): str(row["id"]) for row in rows}
 
 
-def teacher_workload_summary(*, organization, teacher, academic_year: str = "") -> dict:
+def teacher_workload_summary(*, organization, teacher, academic_year: str = "", season: str = "") -> dict:
+    """İllik KPI-lar + ``rows_total_hours`` — ``teacher_workload_rows(season=…)`` ilə EYNİ süzgəcin cəmi.
+
+    2026-10-08 (müəllim rəyi W1): cədvəlin altındakı «CƏMİ» xanası semestr tabından
+    asılı olmayaraq İLLİK cəmi (``total_hours``) göstərirdi — «Payız» tabında 300 saatlıq
+    sətirlərin altında 630 yazılırdı. İndi xana ``rows_total_hours``-dur (görünən
+    sətirlərin cəmi); «İllik cəmi» KPI-ı illik olaraq qalır.
+    """
     queryset = TeacherAssignment.objects.filter(
         organization=organization,
         teacher=teacher,
@@ -226,10 +233,14 @@ def teacher_workload_summary(*, organization, teacher, academic_year: str = "") 
     )
     if academic_year:
         queryset = queryset.filter(row__task__academic_year=academic_year)
-    total = int(queryset.aggregate(total=Sum("hours"))["total"] or 0)
+    by_season = {
+        item["row__season"]: int(item["total"] or 0)
+        for item in queryset.values("row__season").annotate(total=Sum("hours")).order_by()
+    }
+    total = sum(by_season.values())
     hourly = int(queryset.filter(is_hourly_paid=True).aggregate(total=Sum("hours"))["total"] or 0)
-    fall = int(queryset.filter(row__season=Season.FALL).aggregate(total=Sum("hours"))["total"] or 0)
-    spring = int(queryset.filter(row__season=Season.SPRING).aggregate(total=Sum("hours"))["total"] or 0)
+    fall = by_season.get(Season.FALL, 0)
+    spring = by_season.get(Season.SPRING, 0)
     profile = TeacherWorkloadProfile.objects.filter(
         organization=organization, teacher=teacher, academic_year=academic_year
     ).first()
@@ -238,6 +249,9 @@ def teacher_workload_summary(*, organization, teacher, academic_year: str = "") 
         "total_hours": total,
         "fall_hours": fall,
         "spring_hours": spring,
+        "summer_hours": by_season.get(Season.SUMMER, 0),
+        "season": season,
+        "rows_total_hours": by_season.get(season, 0) if season else total,
         "hourly_paid_hours": hourly,
         "norm_hours": norm,
         "fill_percent": int(round(total * 100 / norm)) if norm else 0,

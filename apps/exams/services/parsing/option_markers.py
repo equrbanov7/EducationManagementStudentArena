@@ -10,11 +10,13 @@ import re
 # W4 2026-09-14 (w3sweep R5): sənəddə düz cavab `*B)` prefiksi ilə yazılır, amma
 # müəllimlər tez-tez SONLUQ işarəsi işlədir («B) iki*»). Sətrin sonundakı tək
 # `*` (boşluqla və ya boşluqsuz) düz cavab markeri sayılır və mətndən silinir.
-_TRAILING_STAR_RE = re.compile(r"\s*\*$")
+# 2026-10-08 (müəllim rəyi S1): sonluq « +» (boşluqdan sonra) və «(+)» də marker sayılır
+# («B) iki +»); «2+2» kimi düsturun içindəki «+»-a toxunulmur (boşluq/mötərizə şərtdir).
+_TRAILING_STAR_RE = re.compile(r"(?:\s*\*|\s+\+|\s*\(\+\))$")
 
 
 def _option_from_match(m_opt) -> tuple[str, str, bool]:
-    """OPTION_RE uyğunluğundan (etiket, mətn, düzdür?) — prefiks `*` və ya sonluq `*`."""
+    """OPTION_RE uyğunluğundan (etiket, mətn, düzdür?) — prefiks `*`/`+` və ya sonluq `*`/` +`/`(+)`."""
     star = bool(m_opt.group(1))
     label = m_opt.group(2).upper()
     text = m_opt.group(3).strip()

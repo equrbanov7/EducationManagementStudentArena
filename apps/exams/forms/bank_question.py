@@ -9,7 +9,7 @@ paint sahələri yoxdur; əvəzinə bank üçün çətinlik, dil, bal sahələri
 import re
 
 from django import forms
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import pgettext, pgettext_lazy
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
 from apps.exams.models import BankQuestion, BankQuestionOption
@@ -107,7 +107,7 @@ class BankQuestionCreateForm(forms.ModelForm):
         return list(range(1, max_index + 1))
 
     def _option_label(self, index):
-        return f"{index}. variant"
+        return pgettext("exams.form.question.label", "Variant %(n)s") % {"n": index}
 
     def _ensure_option_fields_exist(self):
         for index in self.option_indexes:

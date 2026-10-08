@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}
+2026-10-08 (müəllim rəyi N1): müəllim canlı (Kahoot tipli) viktorina üçün sual
+əlavə etməyə «Sual göndərişləri»nə baxırdı. Bu bölmə imtahan mərkəzinə gedən
+sual topluları üçündür; canlı imtahanın sualları «İmtahanlarım»da — test imtahanı
+yaradılır, sualları imtahan səhifəsində əlavə olunur və «Canlı imtahanı başlat»
+düyməsi ilə sessiya açılır (apps/exams/templates/exams/teacher/teacher_exam_detail.html).
+Yalnız müəllimə (reviewer-ə yox) göstərilir.
+{% endcomment %}
+{% trans "Canlı imtahan (Kahoot) üçün suallar «İmtahanlarım» bölməsində əlavə olunur" context "accounts.profile.question_submissions" as qsub_live_title %}
+{% trans "Bu bölmə İmtahan Mərkəzinə göndərilən sual toplularıdır. Canlı viktorina üçün «İmtahanlarım»da test imtahanı yaradın, suallarını imtahan səhifəsində əlavə edin, imtahanı aktiv edin və «Canlı imtahanı başlat» düyməsini basın." context "accounts.profile.question_submissions" as qsub_live_body %}
+<div class="qsub-live-hint" data-qsub-live-hint>
+    {% include "partials/ems_ui/_banner.html" with banner_kind="info" banner_title=qsub_live_title banner_body=qsub_live_body banner_action_include="exams/teacher/partials/question_submissions/_live_exam_hint_action.html" %}
+</div>

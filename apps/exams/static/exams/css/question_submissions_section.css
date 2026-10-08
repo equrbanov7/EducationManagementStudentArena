@@ -18,6 +18,11 @@
     margin-top: var(--ems-sp-5);
 }
 
+/* ── Canlı imtahan (Kahoot) yönləndirmə ipucu (müəllim rəyi N1) ──────────── */
+.qsub-live-hint {
+    margin: var(--ems-sp-4) 0 var(--ems-sp-5);
+}
+
 /* ── Qaytarılmış göndəriş xəbərdarlığı ──────────────────────────────────── */
 .qsub-alert {
     display: flex;
