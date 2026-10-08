@@ -18,7 +18,7 @@ from apps.exams.services.bulk_workbench import (
     parse_selected_indices,
 )
 from apps.exams.services.parsing.answer_markers import count_defaulted, mark_default_correct_a
-from apps.exams.services.submission_sources import subject_label
+from apps.exams.services.subject_labels import subject_label
 from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.teacher.workbench_paste import paste_context
 

@@ -183,7 +183,7 @@
                                 </div>
                                 <select name="{{ form.subject.html_name }}" class="d-none" data-exam-subject-native>
                                     {% if form.instance.subject %}
-                                        <option value="{{ form.instance.subject.pk }}" selected>{{ form.instance.subject.code }} — {{ form.instance.subject.name }}</option>
+                                        <option value="{{ form.instance.subject.pk }}" selected>{{ form.instance.subject.name }} ({{ form.instance.subject.code }})</option>
                                     {% elif form.subject.value %}
                                         <option value="{{ form.subject.value }}" selected>{{ form.subject.value }}</option>
                                     {% endif %}

@@ -29,6 +29,8 @@ from django.apps import apps as django_apps
 from django.db.models import Q
 from django.utils.translation import pgettext
 
+from apps.exams.services.subject_labels import subject_label
+
 UNIT_PREFIX = "u:"
 APPROVED_TASK_STATUSES = ("distributed", "amended")
 _CTX = "exams.service.submission_sources"
@@ -66,15 +68,6 @@ class SubmissionSources:
         cohorts = [group.cohort for group in chosen if group.cohort is not None]
         units = [group.unit for group in chosen if group.unit is not None]
         return cohorts, units
-
-
-def subject_label(subject) -> str:
-    """Fənn ADI əvvəl, kod ikinci dərəcəli — «Verilənlər bazası (QKU-1234)»."""
-    name = (getattr(subject, "name", "") or "").strip()
-    code = (getattr(subject, "code", "") or "").strip()
-    if name and code:
-        return f"{name} ({code})"
-    return name or code
 
 
 def _legacy_cohorts(user, organization):
