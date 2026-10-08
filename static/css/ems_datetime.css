@@ -10,7 +10,8 @@
   width: 100%;
 }
 
-.ems-dt .ems-dt__input {
+/* Sehrbazın `.exam-wizard .ew-panel .form-control` padding-i (0,3,0) təqvim düyməsinin altına mətn salmasın. */
+.ems-dt input.form-control.ems-dt__input {
   flex: 1 1 auto;
   min-width: 0;
   padding-right: 44px;
