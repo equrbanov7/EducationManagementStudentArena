@@ -20,6 +20,7 @@ from core.permissions import has_permission
 
 User = get_user_model()
 _MIGRATION = importlib.import_module("apps.organizations.migrations.0059_board_chair_role")
+_MIGRATION_RECTOR = importlib.import_module("apps.organizations.migrations.0060_board_chair_rector_primary")
 
 
 class BoardChairRoleTest(TestCase):
@@ -73,3 +74,29 @@ class BoardChairRoleTest(TestCase):
 
         self._run(_MIGRATION.backward)
         self.assertEqual(Membership.objects.get(user=self.chair).role.name, "trustee")
+
+    def test_0060_turns_his_teacher_membership_into_rector_and_primary_into_board_chair(self):
+        from apps.accounts.models import UserProfile
+        from apps.organizations.models import OrgUnit as Unit
+
+        politology = Unit.objects.create(organization=self.org, unit_type=OrgUnitType.CHAIR, name="Politologiya")
+        Membership.objects.filter(user=self.chair).update(is_primary=False)
+        Membership.objects.create(
+            user=self.chair,
+            organization=self.org,
+            role=self.org.roles.get(name="teacher"),
+            scope_unit=politology,
+            is_primary=True,
+            is_active=True,
+        )
+        self._run(_MIGRATION.forward)
+        self._run(_MIGRATION_RECTOR.forward)
+        self._run(_MIGRATION_RECTOR.forward)  # idempotent
+        rows = {m.role.name: m for m in Membership.objects.filter(user=self.chair, is_active=True)}
+        self.assertEqual(set(rows), {"board_chair", "rector"})
+        self.assertIsNone(rows["rector"].scope_unit_id)
+        self.assertTrue(rows["board_chair"].is_primary)
+        self.assertFalse(rows["rector"].is_primary)
+        self.assertEqual(UserProfile.objects.get(user=self.chair).role, "org_admin")
+        # Başqa müəllimə toxunulmur.
+        self.assertEqual(Membership.objects.get(user=self.trustee).role.name, "trustee")

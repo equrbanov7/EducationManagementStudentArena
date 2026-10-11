@@ -171,6 +171,16 @@ def _collect_actor_permissions(user, organization, *, request=None):
     return effective_permissions, grantable_permissions
 
 
+def _can_manage_roles(user, organization) -> bool:
+    """Rolunda REAL `role.assign` və ya `org.manage_members` açarı var (`*` daxil) — alias sayılmır."""
+    if organization is None:
+        return False
+    from core.permissions import has_permission
+
+    permissions = list(_collect_actor_permissions(user, organization)[0])
+    return has_permission(permissions, "role.assign") or has_permission(permissions, "org.manage_members")
+
+
 def _role_capabilities(user, profile):
     scoped_roles = _extract_profile_roles_for_user(user)
     profile_role = getattr(profile, "role", ProfileRole.MEMBER) if profile else ProfileRole.MEMBER
@@ -360,13 +370,16 @@ def _role_capabilities(user, profile):
                 {
                     "my-exams",
                     "my-courses",
-                    "role-assignment",
                     "student-organization-management",
-                    "permission-editor",
-                    "manage-roles",
                     "publish-notification",
                 }
             )
+            # Sahib 2026-10-11: «Dekan rol verə bilir — olmaz; hər rol öz səlahiyyəti qədər». `org_admin` aliası
+            # səviyyə ≥ 80 olan HƏR rola (dekan, prorektor …) gəlir; rol idarəsi isə yalnız REAL açar daşıyana —
+            # `role.assign` / `org.manage_members` (rektor, sədr, RİM rəhbəri `*` ilə) və ya təşkilat sahibinə.
+            # Əməl qapısı (`roles/_gates.manage_roles_gate_error`) eyni açarları yoxlayır.
+            if is_owner_of_active_org or _can_manage_roles(user, active_organization):
+                allowed_sections.update({"role-assignment", "permission-editor", "manage-roles"})
 
         if is_teacher:
             allowed_sections.update(
