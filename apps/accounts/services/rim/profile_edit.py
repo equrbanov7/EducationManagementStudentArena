@@ -131,6 +131,23 @@ def _screen_name_changes(actor: RimActor, target_user, changes: dict, *, request
         raise RimAccessError("name_inappropriate", rejection.message, status=rejection.status)
 
 
+def can_edit_own_position(request) -> bool:
+    """«Profili redaktə et»də ÖZ «Vəzifə»sini (``staff_position``) yaza bilərmi (sahib 2026-10-11).
+
+    Başqasının vəzifəsini RİM «Məlumatları redaktə et» dəyişir (``user.edit``); özünü RİM siyahısında görməyən
+    RİM rəhbəri / əməkdaşı öz vəzifəsini profil redaktəsindən yazır — eyni ``user.edit`` açarı ilə (superadmin,
+    təşkilat sahibi daxil). Adi istifadəçi özünə vəzifə yaza BİLMƏZ (sahə yalnız oxunur).
+    """
+    from .policy import resolve_actor
+
+    actor = resolve_actor(request)
+    return bool(actor.user is not None and actor.has(PERM_EDIT))
+
+
+def normalize_position(raw) -> str:
+    return _clean_value("staff_position", raw)
+
+
 def update_user_fields(actor: RimActor, target_user, *, data, request=None, reason=""):
     """Hədəfin şəxsi məlumatlarını yeniləyir.
 

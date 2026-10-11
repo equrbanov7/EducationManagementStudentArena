@@ -104,3 +104,39 @@ class RimStaffPositionEditTests(RimCenterTestBase):
         self.act("edit", self.teacher, staff_position="", reason="səhv vəzifə")
         self.teacher.profile.refresh_from_db()
         self.assertEqual(self.teacher.profile.staff_position, "")
+
+
+class OwnPositionSelfEditTests(RimCenterTestBase):
+    """Sahib 2026-10-11: «özümü edit edib vəzifəni yazanmıram» — RİM redaktə hüququ olan özünə yazır, adi müəllim yox."""
+
+    def _post_profile(self, user, **extra):
+        from django.test import Client
+
+        client = Client()
+        client.force_login(user)
+        session = client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        payload = {
+            "profile_form": "edit-profile",
+            "section": "edit-profile",
+            "first_name": user.first_name or "Ad",
+            "last_name": user.last_name or "Soyad",
+            "email": user.email,
+            **extra,
+        }
+        return client, client.post(reverse("accounts:profile") + "?section=edit-profile", payload, follow=True)
+
+    def test_rim_operator_sets_own_position_and_sees_the_field(self):
+        client, _response = self._post_profile(self.operator, staff_position="  RİM   müdiri ")
+        self.operator.profile.refresh_from_db()
+        self.assertEqual(self.operator.profile.staff_position, "RİM müdiri")
+        html = client.get(reverse("accounts:profile"), {"section": "edit-profile"}).content.decode()
+        self.assertIn('name="staff_position"', html)
+
+    def test_plain_teacher_cannot_set_own_position(self):
+        client, _response = self._post_profile(self.teacher, staff_position="Rektor")
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.staff_position, "")
+        html = client.get(reverse("accounts:profile"), {"section": "edit-profile"}).content.decode()
+        self.assertNotIn('name="staff_position"', html)

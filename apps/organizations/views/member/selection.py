@@ -93,6 +93,19 @@ def select_organization(request):
     return render(request, "organizations/select_organization.html", context)
 
 
+def activate_organization(request, organization) -> None:
+    """Təşkilatı sessiyada aktiv edir (middleware onu NÖVBƏTİ sorğuda yükləyir).
+
+    Giriş qapısı (`_can_access_organization`) çağıranın məsuliyyətidir. Köhnə
+    müstəqil səhifələrin kabinetə körpüsü də bunu işlədir (bax `org_admin/legacy_redirect.py`).
+    """
+    request.session["active_organization"] = organization.slug
+    messages.success(
+        request,
+        pgettext("organizations.views.message", "switched_to_org").format(organization=organization.name),
+    )
+
+
 @login_required
 def switch_organization(request, slug):
     """
@@ -105,12 +118,7 @@ def switch_organization(request, slug):
         messages.error(request, pgettext("organizations.views.message", "no_org_access"))
         return redirect("organizations:select")
 
-    # Set active organization in session
-    request.session["active_organization"] = organization.slug
-    messages.success(
-        request,
-        pgettext("organizations.views.message", "switched_to_org").format(organization=organization.name),
-    )
+    activate_organization(request, organization)
 
     # Redirect to next or home (with validation to prevent open redirect)
     next_url = request.GET.get("next", "")

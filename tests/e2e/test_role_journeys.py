@@ -86,21 +86,19 @@ def _open_seeded_assigned_exam_list(page: Page) -> None:
 class TestRoleJourneys:
     """Stable role journeys that should pass once the deterministic scenario is seeded."""
 
-    def test_org_owner_can_open_org_settings(self, owner_page: Page) -> None:
+    def test_org_owner_settings_url_lands_in_cabinet(self, owner_page: Page) -> None:
+        # Sahib 2026-10-11: köhnə «Təşkilat Ayarları» səhifəsi silindi — URL kabinetə aparır.
         owner_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/settings/"))
         owner_page.wait_for_load_state("domcontentloaded")
 
-        assert owner_page.url.endswith(f"/organizations/{E2E_ORG_SLUG}/settings/")
-        expect(owner_page.locator("form")).to_be_visible()
-        expect(owner_page.locator("input[name='email']")).to_be_visible()
+        assert "/accounts/profile/" in owner_page.url
 
-    def test_org_admin_can_open_org_settings(self, org_admin_page: Page) -> None:
+    def test_org_admin_settings_url_lands_in_cabinet(self, org_admin_page: Page) -> None:
+        # Sahib 2026-10-11: köhnə «Təşkilat Ayarları» səhifəsi silindi — URL kabinetə aparır.
         org_admin_page.goto(build_url(f"/organizations/{E2E_ORG_SLUG}/settings/"))
         org_admin_page.wait_for_load_state("domcontentloaded")
 
-        assert org_admin_page.url.endswith(f"/organizations/{E2E_ORG_SLUG}/settings/")
-        expect(org_admin_page.locator("form")).to_be_visible()
-        expect(org_admin_page.locator("input[name='email']")).to_be_visible()
+        assert "/accounts/profile/" in org_admin_page.url
 
     def test_teacher_sees_seeded_course_and_exam(self, teacher_page: Page) -> None:
         teacher_page.goto(build_url("/accounts/profile/?section=my-courses"))

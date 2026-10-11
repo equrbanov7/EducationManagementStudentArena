@@ -4,7 +4,7 @@ from django.apps import apps as django_apps
 from django.contrib import messages
 from django.db import IntegrityError, transaction
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -23,6 +23,7 @@ from ..views import (
     _unique_unit_slug,
     _visible_units_queryset,
 )
+from ..views.org_admin.legacy_redirect import legacy_page_redirect
 from .constants import (
     _SORT_OPTIONS,
     HEAD_CANDIDATE_MIN_LEVEL,
@@ -415,44 +416,42 @@ def _structure_page_view(
     action_handler,
     partial_template,
     context_key,
-    page_template,
     redirect_url_name,
 ):
+    """Fakültə/kafedra URL-i: GET → kabinet bölməsi; POST → əməl (kabinet formaları).
+
+    Sahib 2026-10-11: müstəqil səhifə şablonu silindi — GET heç nə render etmir,
+    kabinetin ``section_name`` bölməsinə yönləndirir (bax ``legacy_redirect.py``).
+    AJAX POST bölmə fraqmentini (JSON) qaytarır; adi POST mesaj + yönləndirmə.
+    """
     organization, scope, redirect_response = _get_org_or_redirect(request, slug)
     if redirect_response is not None:
         return redirect_response
 
+    if request.method != "POST":
+        return legacy_page_redirect(request, organization, (section_name,))
+
     flags = _unit_permission_flags(request, organization)
-    form_errors = {}
-    form_values = {}
-    notice = ""
-
-    if request.method == "POST":
-        form_values = {
-            "action": (request.POST.get("action") or "").strip(),
-            "unit_id": (request.POST.get("unit_id") or "").strip(),
-            "name": (request.POST.get("name") or "").strip(),
-            "code": (request.POST.get("code") or "").strip(),
-            "parent": (request.POST.get("parent") or "").strip(),
-        }
-        form_errors, notice = action_handler(request, organization, scope, flags)
+    form_values = {
+        "action": (request.POST.get("action") or "").strip(),
+        "unit_id": (request.POST.get("unit_id") or "").strip(),
+        "name": (request.POST.get("name") or "").strip(),
+        "code": (request.POST.get("code") or "").strip(),
+        "parent": (request.POST.get("parent") or "").strip(),
+    }
+    form_errors, notice = action_handler(request, organization, scope, flags)
+    if _is_ajax_request(request):
         if not form_errors:
-            if _is_ajax_request(request):
-                context = context_builder(request, organization, notice=notice)
-                return _section_ajax_response(request, section_name, partial_template, context_key, context)
-            messages.success(request, notice)
-            return redirect(redirect_url_name, slug=organization.slug)
-        if not _is_ajax_request(request):
-            messages.error(
-                request,
-                form_errors.get("general")
-                or pgettext("organizations.views.message", "Əməliyyat yerinə yetirilə bilmədi."),
-            )
-
-    context = context_builder(request, organization, form_errors=form_errors, form_values=form_values, notice=notice)
-    context[context_key] = context
-
-    if request.method == "POST" and _is_ajax_request(request):
+            context = context_builder(request, organization, notice=notice)
+            return _section_ajax_response(request, section_name, partial_template, context_key, context)
+        context = context_builder(request, organization, form_errors=form_errors, form_values=form_values, notice="")
+        context[context_key] = context
         return _section_ajax_response(request, section_name, partial_template, context_key, context, status=400)
-
-    return render(request, page_template, context)
+    if form_errors:
+        messages.error(
+            request,
+            form_errors.get("general") or pgettext("organizations.views.message", "Əməliyyat yerinə yetirilə bilmədi."),
+        )
+    else:
+        messages.success(request, notice)
+    return redirect(redirect_url_name, slug=organization.slug)

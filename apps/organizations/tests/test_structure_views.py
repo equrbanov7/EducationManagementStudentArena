@@ -13,7 +13,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.test import Client, TestCase
+from django.test import Client, RequestFactory, TestCase
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
@@ -21,8 +21,33 @@ from apps.registrar.models import CourseOffering, Subject
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 
 from ..models import AcademicPeriod, Membership, Organization, OrgUnit
+from ..structure_views import build_organization_faculties_context, build_organization_kafedras_context
 
 User = get_user_model()
+
+
+def _org_request(user, organization, data=None):
+    """Middleware-in qurduğu request kontekstinin minimal surəti (kontekst qurucuları üçün).
+
+    Sahib 2026-10-11: müstəqil fakültə/kafedra səhifələri silindi (GET kabinetə
+    yönləndirir) — siyahı/sayğac qaydaları birbaşa kontekst qurucusunda yoxlanılır
+    (həmin qurucu AJAX POST cavabının fraqmentini də qurur).
+    """
+    request = RequestFactory().get("/", data or {})
+    request.user = user
+    request.organization = organization
+    memberships = list(
+        Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
+            "role", "scope_unit"
+        )
+    )
+    permissions = set()
+    for membership in memberships:
+        permissions.update(membership.role.permissions or [])
+    request.org_memberships = memberships
+    request.org_permissions = list(permissions)
+    user.set_active_organization_context(organization, memberships=memberships, permissions=list(permissions))
+    return request
 
 
 class StructureViewsTestBase(TestCase):
@@ -96,34 +121,45 @@ class StructureViewsTestBase(TestCase):
 
 
 class StructureAccessTests(StructureViewsTestBase):
-    def test_owner_can_open_both_pages(self):
+    def test_owner_get_redirects_into_cabinet_sections(self):
+        """Sahib 2026-10-11: köhnə müstəqil səhifə yoxdur — GET kabinet bölməsinə aparır."""
         self.client.force_login(self.owner)
-        for url in (self.faculties_url, self.kafedras_url):
-            response = self.client.get(url)
+        for url, section in ((self.faculties_url, "org-faculties"), (self.kafedras_url, "org-kafedras")):
+            response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200, msg=url)
+            final_url = response.redirect_chain[-1][0]
+            self.assertTrue(final_url.startswith(reverse("accounts:profile")), msg=final_url)
+            self.assertIn(f"section={section}", final_url)
+            self.assertTemplateNotUsed(response, "organizations/faculties.html")
+            self.assertTemplateNotUsed(response, "organizations/kafedras.html")
 
     def test_student_cannot_open_structure_pages(self):
         self.client.force_login(self.student_user)
         for url in (self.faculties_url, self.kafedras_url):
             response = self.client.get(url)
-            self.assertEqual(response.status_code, 302, msg=url)
+            self.assertRedirects(response, reverse("organizations:select"), fetch_redirect_response=False)
 
     def test_outsider_cannot_open_other_org_structure(self):
         self.client.force_login(self.outsider)
         for url in (self.faculties_url, self.kafedras_url):
             response = self.client.get(url)
-            self.assertEqual(response.status_code, 302, msg=url)
+            self.assertRedirects(response, reverse("organizations:select"), fetch_redirect_response=False)
 
     def test_search_and_faculty_filter(self):
-        self.client.force_login(self.owner)
-        response = self.client.get(self.faculties_url, {"faculty_search": "Tapilmayan"})
-        self.assertContains(response, "Nəticə tapılmadı")
-
-        response = self.client.get(
-            self.kafedras_url,
-            {"kafedra_search": "Test", "kafedra_faculty": str(self.faculty.id)},
+        context = build_organization_faculties_context(
+            _org_request(self.owner, self.organization, {"faculty_search": "Tapilmayan"}), self.organization
         )
-        self.assertContains(response, "Test Kafedrası")
+        self.assertEqual(list(context["faculties"]), [])
+
+        context = build_organization_kafedras_context(
+            _org_request(
+                self.owner,
+                self.organization,
+                {"kafedra_search": "Test", "kafedra_faculty": str(self.faculty.id)},
+            ),
+            self.organization,
+        )
+        self.assertEqual([kafedra.name for kafedra in context["kafedras"]], ["Test Kafedrası"])
 
 
 class FacultyCrudTests(StructureViewsTestBase):
@@ -133,7 +169,7 @@ class FacultyCrudTests(StructureViewsTestBase):
             self.faculties_url,
             {"action": "create", "name": "Yeni Fakültə", "code": "YF"},
         )
-        self.assertRedirects(response, self.faculties_url)
+        self.assertRedirects(response, self.faculties_url, fetch_redirect_response=False)
         self.assertTrue(
             OrgUnit.objects.filter(
                 organization=self.organization,
@@ -204,7 +240,7 @@ class KafedraCrudTests(StructureViewsTestBase):
             self.kafedras_url,
             {"action": "create", "name": "Yeni Kafedra", "code": "YK", "parent": str(self.faculty.id)},
         )
-        self.assertRedirects(response, self.kafedras_url)
+        self.assertRedirects(response, self.kafedras_url, fetch_redirect_response=False)
         created = OrgUnit.objects.get(organization=self.organization, name="Yeni Kafedra")
         self.assertEqual(created.parent_id, self.faculty.id)
         self.assertEqual(created.unit_type, OrgUnitType.CHAIR)
@@ -369,19 +405,21 @@ class TeacherCountTests(StructureViewsTestBase):
             instructor=self.past_teacher,
         )
 
+    def _kafedras(self):
+        request = _org_request(self.owner, self.organization)
+        return list(build_organization_kafedras_context(request, self.organization)["kafedras"])
+
     def test_kafedra_list_shows_active_and_total_counts_separately(self):
-        self.client.force_login(self.owner)
-        response = self.client.get(self.kafedras_url)
-        self.assertEqual(response.status_code, 200)
-        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        kafedra_row = self._kafedras()[0]
         self.assertEqual(kafedra_row.active_teacher_count, 1)
         self.assertEqual(kafedra_row.teacher_count, 2)
 
     def test_faculty_list_aggregates_teacher_counts_from_children(self):
-        self.client.force_login(self.owner)
-        response = self.client.get(self.faculties_url)
-        self.assertEqual(response.status_code, 200)
-        faculty_row = response.context["org_faculties_section"]["faculties"][0]
+        faculty_row = list(
+            build_organization_faculties_context(_org_request(self.owner, self.organization), self.organization)[
+                "faculties"
+            ]
+        )[0]
         self.assertEqual(faculty_row.active_teacher_count, 1)
         self.assertEqual(faculty_row.teacher_count, 2)
 
@@ -398,9 +436,7 @@ class TeacherCountTests(StructureViewsTestBase):
             is_active=True,
             scope_unit=self.kafedra,
         )
-        self.client.force_login(self.owner)
-        response = self.client.get(self.kafedras_url)
-        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        kafedra_row = self._kafedras()[0]
         self.assertEqual(kafedra_row.teacher_count, 3)
         self.assertEqual(kafedra_row.active_teacher_count, 1)
 
@@ -410,9 +446,7 @@ class TeacherCountTests(StructureViewsTestBase):
         annotate-based sayğac bunu nəzərə almırdı, siyahı isə nəzərə alırdı)."""
         self.teacher_user.is_active = False
         self.teacher_user.save(update_fields=["is_active"])
-        self.client.force_login(self.owner)
-        response = self.client.get(self.kafedras_url)
-        kafedra_row = response.context["org_kafedras_section"]["kafedras"][0]
+        kafedra_row = self._kafedras()[0]
         # Yalnız past_teacher qalır (indiyə kimi=1, aktiv=0).
         self.assertEqual(kafedra_row.teacher_count, 1)
         self.assertEqual(kafedra_row.active_teacher_count, 0)
@@ -458,48 +492,35 @@ class TeacherCountQueryBudgetTests(StructureViewsTestBase):
         )
         return kafedra
 
+    def _measure(self, builder):
+        request = _org_request(self.owner, self.organization)
+        with CaptureQueriesContext(connection) as captured:
+            builder(request, self.organization)
+        return len(captured.captured_queries)
+
     def test_kafedra_list_query_count_is_independent_of_unit_count(self):
         for i in range(2):
             self._add_kafedra_with_teacher(i)
-        # İsti-tur: ilk giriş sonrası sessiya sətri bir dəfəlik UPDATE olunur
-        # (Django session engine) — bu, ölçüyə aidiyyatı olmayan "gizli" sorğu
-        # sayı fərqi yaradırdı. Ölçümdən ƏVVƏL bir dəfə çağırıb sabitləşdiririk.
-        self.client.get(self.kafedras_url)
-        with CaptureQueriesContext(connection) as small:
-            response = self.client.get(self.kafedras_url)
-        self.assertEqual(response.status_code, 200)
+        self._measure(build_organization_kafedras_context)  # isti-tur (keşlər sabitləşsin)
+        small = self._measure(build_organization_kafedras_context)
 
         for i in range(2, 15):
             self._add_kafedra_with_teacher(i)
-        with CaptureQueriesContext(connection) as large:
-            response = self.client.get(self.kafedras_url)
-        self.assertEqual(response.status_code, 200)
+        large = self._measure(build_organization_kafedras_context)
 
-        self.assertEqual(
-            len(small.captured_queries),
-            len(large.captured_queries),
-            "Kafedra siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır",
-        )
+        self.assertEqual(small, large, "Kafedra siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır")
 
     def test_faculty_list_query_count_is_independent_of_unit_count(self):
         for i in range(2):
             self._add_kafedra_with_teacher(i)
-        self.client.get(self.faculties_url)  # isti-tur — bax yuxarıdakı şərh
-        with CaptureQueriesContext(connection) as small:
-            response = self.client.get(self.faculties_url)
-        self.assertEqual(response.status_code, 200)
+        self._measure(build_organization_faculties_context)  # isti-tur
+        small = self._measure(build_organization_faculties_context)
 
         for i in range(2, 15):
             self._add_kafedra_with_teacher(i)
-        with CaptureQueriesContext(connection) as large:
-            response = self.client.get(self.faculties_url)
-        self.assertEqual(response.status_code, 200)
+        large = self._measure(build_organization_faculties_context)
 
-        self.assertEqual(
-            len(small.captured_queries),
-            len(large.captured_queries),
-            "Fakültə siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır",
-        )
+        self.assertEqual(small, large, "Fakültə siyahısının sorğu sayı kafedra/müəllim sayı ilə artmamalıdır")
 
 
 class UnitDetailViewTests(StructureViewsTestBase):

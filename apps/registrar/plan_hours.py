@@ -60,7 +60,7 @@ def plan_hours_for_subject(*, organization, subject, program=None):
 
 
 def plan_hours_for_offering(offering):
-    """Açılışdan (``CourseOffering``) saat bölgüsü — ixtisas qrupdan çıxarılır.
+    """Açılışdan (``CourseOffering``) saat bölgüsü — əvvəl kafedra yükü, sonra plan (ixtisas qrupdan).
 
     Qrup ``OrgUnit``-dir və onun valideyni adətən İXTİSAS bölməsidir; ixtisas
     bölməsi ilə ``registrar.Program.specialty_unit`` arasındakı bağ proqramı
@@ -68,12 +68,21 @@ def plan_hours_for_offering(offering):
     """
     if offering is None:
         return {}
-    hours = plan_hours_for_subject(
-        organization=offering.organization,
-        subject=offering.subject,
-        program=program_for_offering(offering),
-    )
-    return hours or workload_hours_for_offering(offering)
+    from core.academic_rules import syllabus_hours_from_load
+
+    def from_plan():
+        return plan_hours_for_subject(
+            organization=offering.organization,
+            subject=offering.subject,
+            program=program_for_offering(offering),
+        )
+
+    # Sahib 2026-10-12: «sillabus dərs saatı YÜKƏ görə tənzimlənsin — müəllim əl ilə yazmasın». RİM açarı
+    # `syllabus.hours_from_load` (defolt yanılı): kafedranın paylanmış yükü (TAPŞIRIQ sətri: eyni fənn + dövr +
+    # qrup) əsasdır, plan ikinci; söndürülüdə əvvəlki sıra (plan → yük).
+    if syllabus_hours_from_load():
+        return workload_hours_for_offering(offering) or from_plan()
+    return from_plan() or workload_hours_for_offering(offering)
 
 
 def workload_hours_for_offering(offering) -> dict:

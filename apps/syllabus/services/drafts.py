@@ -410,6 +410,11 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
     # Forma/uzunluq yoxlaması — ixtiyari JSON redaktoru 500 ilə kilidləyirdi
     # (QA 2026-09-05 SYLLABUS-02/03).
     data = normalize_section_data(section_id, data or {})
+    if section_id == SectionKey.WEEK.value and isinstance(data.get("rows"), list):
+        # Sahib 2026-10-12: yükdə olmayan dərs növünə (məs. lab yoxdursa) saat yazılmır.
+        from ..week_plan import drop_unplanned_hours
+
+        data["rows"], _dropped = drop_unplanned_hours(data["rows"], version.plan_hours)
     if section_id == SectionKey.SELF.value:
         option = (data or {}).get("option") or ""
         if option and option not in SELFWORK_OPTIONS:

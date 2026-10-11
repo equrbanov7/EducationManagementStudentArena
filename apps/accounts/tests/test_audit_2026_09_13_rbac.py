@@ -280,14 +280,19 @@ class ForeignOrgStructurePageTest(_Base):
             self.assertEqual(response.url, reverse("organizations:select"), name)
 
     def test_own_rector_and_scoped_dean_still_see_page(self):
+        # Sahib 2026-10-11: köhnə müstəqil səhifə silindi — URL kabinetin «Fakültələr»
+        # bölməsinə aparır; əhatə orada eynidir.
         client = self.client_for(self.ua("rector"), self.A["org"])
-        response = client.get(reverse("organizations:structure_faculties", kwargs={"slug": self.A["org"].slug}))
+        url = reverse("organizations:structure_faculties", kwargs={"slug": self.A["org"].slug})
+        response = client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("section=org-faculties", response.redirect_chain[-1][0])
         self.assertContains(response, self.A["fac"].name)
 
         dean_client = self.client_for(self.ua("dean"), self.A["org"])
-        response = dean_client.get(reverse("organizations:structure_faculties", kwargs={"slug": self.A["org"].slug}))
+        response = dean_client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
+        self.assertIn("section=org-faculties", response.redirect_chain[-1][0])
         self.assertContains(response, self.A["fac"].name)
         self.assertNotContains(response, self.A["fac2"].name)
 

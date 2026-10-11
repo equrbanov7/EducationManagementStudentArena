@@ -256,9 +256,9 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
         lines.append("- Organization selection: /organizations/select/")
         return "\n".join(lines)
 
-    slug = organization.slug
-
-    lines.append(f"- Organization dashboard: /organizations/{slug}/")
+    # Sahib 2026-10-11: köhnə müstəqil təşkilat səhifələri (`/organizations/<slug>/…`)
+    # silindi — yalnız kabinetə yönləndirir; köməkçi kanonik kabinet bölmələrini təklif edir.
+    lines.append("- Organization panel: /accounts/profile/?section=org-overview")
 
     # URL auditi A8/A12/§4 (2026-10-10): köhnə müstəqil siyahılar (`/courses/my-courses/`,
     # `/courses/my-enrolled/`, `/exams/assigned/`, `/exams/pending-work/`) silindi və ya
@@ -276,13 +276,13 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
         lines.append("- Create exam: /accounts/profile/?section=my-exams")
 
     if request_has_permission_from_list(permissions, "member.view"):
-        lines.append(f"- Members: /organizations/{slug}/members/")
+        lines.append("- Members: /accounts/profile/?section=org-members")
 
     if request_has_permission_from_list(permissions, "unit.view"):
-        lines.append(f"- Organization structure: /organizations/{slug}/structure/")
+        lines.append("- Organization structure: /accounts/profile/?section=org-structure-tree")
 
     if request_has_permission_from_list(permissions, "role.view"):
-        lines.append(f"- Roles: /organizations/{slug}/roles/")
+        lines.append("- Roles: /accounts/profile/?section=org-roles")
 
     if request_has_permission_from_list(permissions, "grade.view"):
         lines.append("- Grades: (accessible from course dashboard)")

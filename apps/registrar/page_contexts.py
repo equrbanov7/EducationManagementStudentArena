@@ -418,7 +418,7 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
     if record and record.group and period:
         role = "student"
         owner_label = record.group.name
-        slots = schedule.get_group_schedule(organization=organization, group=record.group, period=period)
+        slots = schedule.get_student_schedule(organization, request.user, record.group, period)
         course_ids = list(
             CourseOffering.objects.filter(organization=organization, group=record.group, period=period).values_list(
                 "course_id", flat=True

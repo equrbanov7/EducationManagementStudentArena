@@ -10,11 +10,12 @@ NİYƏ RUNTIME HOOK? Bölmənin açıla bilib-bilməməsi (``allowed_sections``)
 modul-sərhəd qapısında qadağandır (``scripts/module_deps.py``). Ona görə
 accounts ``AppConfig.ready()``-də həlledicini QEYDİYYATDAN keçirir
 (``register_student_transfer`` naxışı). Həlledici yoxdursa və ya xəta verirsə
-cavab ``False``-dur (FAIL-CLOSED) — köhnə səhifə əvvəlki kimi render olunur.
+cavab ``False``-dur (FAIL-CLOSED) — aktor kabinetin özünə yönləndirilir.
 
 Yönləndirmə YALNIZ URL-dəki təşkilat AKTİV təşkilat olanda edilir: kabinet
-bölmələri aktiv təşkilat üzərində işləyir; başqa təşkilatın ``slug``-ı üçün
-köhnə davranış (müstəqil səhifə) qalır.
+bölmələri aktiv təşkilat üzərində işləyir. Sahib 2026-10-11: müstəqil səhifələr
+silindi — başqa təşkilatın ``slug``-ı üçün təşkilat əvvəl aktiv edilir (bax
+``views/org_admin/legacy_redirect.py``), heç bir köhnə səhifə render olunmur.
 """
 
 from __future__ import annotations
@@ -42,7 +43,7 @@ def cabinet_section_allowed(request, section: str) -> bool:
         return False
     try:
         return bool(_resolver(request, section))
-    except Exception:  # noqa: BLE001 — körpü heç vaxt köhnə səhifəni sındırmır
+    except Exception:  # noqa: BLE001 — körpü heç vaxt sorğunu sındırmır
         logger.exception("cabinet section resolver failed for %s", section)
         return False
 

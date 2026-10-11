@@ -108,6 +108,17 @@ SPECS: dict[str, Spec] = {
             ),
         ),
         Spec(
+            "syllabus.hours_from_load", "academic", "bool", _setting("SYLLABUS_HOURS_FROM_LOAD", True),
+            pgettext_lazy(_CTX, "Sillabus dərs saatları yükdən"),
+            pgettext_lazy(
+                _CTX,
+                "Yanılıda sillabusun mühazirə/seminar/laboratoriya saatları kafedranın paylanmış yükündən gəlir və "
+                "müəllim dəyişə bilmir; yükdə olmayan dərs növü (məs. lab yoxdursa) həftəlik planda görünmür və ona "
+                "saat yazılmır. Yükdə sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
+                "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir.",
+            ),
+        ),
+        Spec(
             "login.device_rate", "login", "rate", _setting("LOGIN_RATE_LIMIT", "5/10m"),
             pgettext_lazy(_CTX, "Bir cihazdan səhv parol cəhdi"), _RATE_HELP, min=3, max=100,
         ),

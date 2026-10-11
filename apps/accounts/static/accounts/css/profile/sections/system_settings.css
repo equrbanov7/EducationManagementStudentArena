@@ -51,3 +51,9 @@
     .sysset__row { grid-template-columns: 1fr; }
     .sysset__control { justify-content: flex-start; }
 }
+
+/* Sahib 2026-10-12: açar dəyişəndə təsdiq pəncərəsi. */
+.sysset__confirm-text {
+    margin: 0 0 12px;
+    line-height: 1.5;
+}

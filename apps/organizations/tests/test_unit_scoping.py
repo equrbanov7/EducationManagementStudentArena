@@ -215,9 +215,14 @@ class UnitScopingTest(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
 
+        # Sahib 2026-10-11: köhnə müstəqil səhifə silindi — URL kabinetə yönləndirir;
+        # əhatə kabinetin struktur bölməsinin kontekstində yoxlanılır.
         response = client.get(reverse("organizations:structure", kwargs={"slug": self.org.slug}))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("accounts:profile")), response.url)
+        response = client.get(reverse("accounts:profile"), {"section": "org-structure"})
         self.assertEqual(response.status_code, 200)
-        units = list(response.context["units"])
+        units = list(response.context["org_structure_section"]["units"])
         self.assertEqual([self.faculty_a], units)
 
 

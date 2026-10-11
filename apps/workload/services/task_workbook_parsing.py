@@ -147,7 +147,6 @@ PERIODS = {
     "spring": ("Yaz", date(2027, 2, 1), date(2027, 6, 30)),
 }
 _SPLIT_RE = re.compile(r"[\n|;,]+|\s{3,}")
-_BLOCK_CHOSEN_RE = re.compile(r"^\s*\d+[.)]?\s*(.+?)\s*\+\s*$")
 _ITEM_RE = re.compile(r"^\s*\d+[.)]\s*")
 _QKU_CODE_RE = re.compile(r"^QKU-(\d+)$")
 
@@ -222,20 +221,29 @@ def is_block(raw: str) -> bool:
 
 
 def block_chosen_subject(raw: str) -> str:
-    """Seçmə bloku → seçilən fənn: «+» ilə işarələnən; tək bənd; və ya «ATMF: X» formasında X."""
-    lines = [line.strip() for line in raw.splitlines() if line.strip()]
-    for line in lines:
-        match = _BLOCK_CHOSEN_RE.match(line)
-        if match:
-            return match.group(1).strip(" +")
-    items = [_ITEM_RE.sub("", line).strip(" +") for line in lines if _ITEM_RE.match(line)]
-    if len(items) == 1:
-        return items[0]
-    if not items:
-        head = re.sub(r"^\s*(ATMF|SF|S\.F)[^:]*:\s*", "", " ".join(lines)).strip()
-        if head and head != " ".join(lines):
-            return head
-    return ""
+    """Seçmə bloku (düz mətn) → seçilən fənn: ayrıca «+» ilə işarələnən; tək bənd; və ya «ATMF: X».
+
+    Qalın şrift (bold) yalnız zəngin mətndə görünür — bax :mod:`.task_workbook_choice`.
+    """
+    from .task_workbook_choice import choose_block_subject
+
+    return choose_block_subject(raw)[0]
+
+
+def with_choice(record: dict) -> dict:
+    """Sətir dict-inə ``chosen_subject`` / ``chosen_by`` əlavə edir (yoxdursa — düz mətndən).
+
+    Blok olmayan xana üçün ikisi də boşdur. Komanda zəngin mətn keçidini (qalın şrift,
+    ``--choice``) əvvəlcədən yazırsa toxunulmur.
+    """
+    if "chosen_by" in record:
+        return record
+    from .task_workbook_choice import choose_block_subject
+
+    if not is_block(record["subject_text"]):
+        return {**record, "chosen_subject": "", "chosen_by": ""}
+    chosen, how = choose_block_subject(record["subject_text"])
+    return {**record, "chosen_subject": chosen, "chosen_by": how}
 
 
 def _special_row_kind(record: dict) -> str:

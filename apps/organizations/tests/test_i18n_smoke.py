@@ -98,10 +98,12 @@ class OrganizationI18nSmokeTest(TestCase):
             select_response = self._get(reverse("organizations:select"), lang)
             self.assertContains(select_response, expected[lang]["org"])
 
-            structure_response = self._get(
-                reverse("organizations:structure", kwargs={"slug": self.organization.slug}),
-                lang,
-            )
+            # Sahib 2026-10-11: köhnə struktur səhifəsi silindi — URL kabinetə aparır;
+            # vahid növü etiketi kabinetin struktur bölməsində yoxlanılır.
+            legacy = self._get(reverse("organizations:structure", kwargs={"slug": self.organization.slug}), lang)
+            self.assertEqual(legacy.status_code, 302)
+            self.assertTrue(legacy.url.startswith(reverse("accounts:profile")), legacy.url)
+            structure_response = self._get(f"{reverse('accounts:profile')}?section=org-structure", lang)
             self.assertContains(structure_response, expected[lang]["unit"])
 
             # 2026-10-01: köhnə üzv səhifəsi kabinetin «Struktur üzvləri» reyestrinə
