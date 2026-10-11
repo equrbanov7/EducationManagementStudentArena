@@ -212,7 +212,9 @@
             ["patronymic", user.patronymic],
             ["email", user.email],
             ["phone", user.phone],
-            ["fin", user.fin]
+            ["fin", user.fin],
+            // Sahib 2026-10-11: profil kartındakı «Vəzifə» (sərbəst mətn) buradan dəyişir.
+            ["staff_position", user.staff_position]
         ];
         return (
             '<p class="rim-section-title">' +
@@ -308,6 +310,7 @@
             detailItem("email", user.email) +
             detailItem("fin", user.fin) +
             detailItem("phone", user.phone) +
+            detailItem("staff_position", user.staff_position) +
             "</div>" +
             '<p class="rim-section-title">' +
             esc(ns.t("roles")) +

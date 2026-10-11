@@ -62,6 +62,8 @@ def _members_queryset(organization, *, actor_level, is_superadmin, catalogue):
     scope = Q(memberships__organization=organization, memberships__is_active=True, memberships__role__is_active=True)
     queryset = (
         user_model.objects.filter(scope)
+        # Sahib 2026-10-11: platforma superadmini təşkilat heyəti deyil — rol siyahılarında görünmür.
+        .exclude(is_superuser=True)
         .annotate(
             top_level=Max("memberships__role__level", filter=scope),
             role_count=Count("memberships__role", distinct=True, filter=scope),
