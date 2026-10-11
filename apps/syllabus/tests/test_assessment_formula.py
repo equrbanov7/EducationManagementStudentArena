@@ -8,6 +8,8 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
+import pytest
+
 from apps.organizations.models import AcademicPeriod, Organization, OrgUnit
 from apps.registrar import services as registrar_services
 from apps.registrar.models import ScheduleSlot, Subject
@@ -18,6 +20,12 @@ from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
 User = get_user_model()
+
+
+@pytest.fixture(autouse=True)
+def selfwork_rule(settings):
+    """``conftest``-dəki eyni adlı fixture-u əvəzləyir: bu dəst DEFOLT (sərbəst işsiz) qaydanı yoxlayır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = False
 
 
 class AssessmentFormulaTest(TestCase):
@@ -103,7 +111,8 @@ class AssessmentFormulaTest(TestCase):
 
     @override_settings(ACADEMIC_SELFWORK_ENABLED=True)
     def test_selfwork_toggle_restores_the_old_standard(self):
-        """Tənzimləmə yandırılanda (və köhnə semestrdə) əvvəlki düstur: midterm 20 + sərbəst iş 10."""
+        """Tənzimləmə yandırılanda əvvəlki düstur: midterm 20 + sərbəst iş 10 (sahib 2026-10-11:
+        yalnız RİM açarı ilə — semestr qaydanı dəyişmir)."""
         rows = {row["key"]: row["score"] for row in af.formula_rows(("seminar",))}
         self.assertEqual(rows, {"attendance": 10, "midterm": 20, "selfwork": 10, "activity": 10, "final": 50})
 

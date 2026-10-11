@@ -2,7 +2,8 @@
 
 Bölmə kartlarının gövdəsi sənəd bloklarından MÖVQEYƏ görə yox, AÇARA görə götürülür: «Sərbəst iş» bloku
 düşəndə ədəbiyyat öz kartında qalmalıdır (əvvəl bir pillə sürüşüb «Sərbəst iş» kartına düşərdi).
-Köhnə (2025/2026) semestrin sənədi dəyişmir.
+Sahib 2026-10-11: qayda semestrdən asılı deyil — köhnə (2025/2026) semestrin sənədi də cari (sərbəst
+işsiz) qaydadadır; sərbəst iş yalnız RİM ``academic.selfwork_enabled`` açarı ilə geri qayıdır.
 """
 
 from __future__ import annotations
@@ -66,12 +67,17 @@ def test_approved_banner_does_not_mention_selfwork_without_it():
     assert banner_for(approved, LEGACY) == str(BANNERS[approved])
 
 
-# ── 2. Sənəd səhifəsi / siyahı baxışı — versiyanın semestrinə görə ───────────
+# ── 2. Sənəd səhifəsi / siyahı baxışı — semestrdən asılı deyil, RİM açarına görə ──
 @pytest.mark.django_db
-@pytest.mark.parametrize(("year", "has_selfwork"), [("2026/2027", False), ("2025/2026", True)])
-def test_detail_and_preview_follow_the_version_semester(year, has_selfwork):
-    org = make_org(f"swr-acc-{year[:4]}")
-    teacher = User.objects.create_user(f"swr_acc_{year[:4]}", f"swr_acc_{year[:4]}@x.test", "pw")
+@pytest.mark.parametrize(
+    ("year", "toggle", "has_selfwork"),
+    [("2026/2027", False, False), ("2025/2026", False, False), ("2025/2026", True, True)],
+)
+def test_detail_and_preview_follow_the_current_rule_not_the_semester(settings, year, toggle, has_selfwork):
+    settings.ACADEMIC_SELFWORK_ENABLED = toggle
+    slug = f"{year[:4]}-{int(toggle)}"
+    org = make_org(f"swr-acc-{slug}")
+    teacher = User.objects.create_user(f"swr_acc_{slug}", f"swr_acc_{slug}@x.test", "pw")
     activate_member(org, teacher, "teacher", permissions=["syllabus.view", "syllabus.edit", "grade.input"])
     stack = make_academic_stack(org, code=f"SWA{year[:4]}")
     AcademicPeriod.objects.filter(pk=stack["period"].pk).update(academic_year=year)

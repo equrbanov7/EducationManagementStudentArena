@@ -1,10 +1,11 @@
-"""Sahib 2026-10-10: sərbəst iş ləğv olunan dövrün (2026/2027+, RİM tənzimləməsi söndürülü — defolt) sillabusu.
+"""Sahib 2026-10-10: sərbəst iş ləğv olunub (RİM tənzimləməsi söndürülü — defolt) — sillabusun qaydası.
 
 Redaktorda 9 bölmə (``self`` yoxdur), tamamlanma 7 qayda bölməsi üzrə — sərbəst işsiz 100% və göndərmə
 mümkündür; qiymətləndirmə standartı midterm 30; sənəddə «Sərbəst iş» bloku yoxdur. ``self`` bölməsinin
-datası SİLİNMİR. Köhnə (2025/2026) semestr və tənzimləmə yandırılanda əvvəlki qayda işləyir.
-``recompute_syllabus_completion`` əmri açıq versiyaların keşini (faiz, bal bölgüsü) cari qaydaya gətirir;
-təsdiqlənmiş versiyaya toxunmur.
+datası SİLİNMİR. Sahib 2026-10-11: qayda SEMESTRDƏN ASILI DEYİL — köhnə (2025/2026) semestrin sillabusu
+da cari qaydadadır; sərbəst iş yalnız RİM ``academic.selfwork_enabled`` açarı ilə (bütün semestrlərdə)
+geri qayıdır. ``recompute_syllabus_completion`` əmri açıq versiyaların keşini (faiz, bal bölgüsü) cari
+qaydaya gətirir; təsdiqlənmiş versiyaya toxunmur.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ from django.utils import timezone
 import pytest
 
 from apps.organizations.models import AcademicPeriod
-from apps.syllabus import services
+from apps.syllabus import rules, services
 from apps.syllabus.assessment_formula import LABELS
 from apps.syllabus.constants import SectionKey, SyllabusStatus
 from apps.syllabus.document import BLOCK_TITLES, build_document
@@ -41,6 +42,12 @@ pytestmark = pytest.mark.django_db
 TEACHER_PERMS = ["syllabus.view", "syllabus.edit", "syllabus.submit", "grade.input"]
 SELF = SectionKey.SELF.value
 SKIP = {SectionKey.PREV.value, SectionKey.SEND.value}
+
+
+@pytest.fixture(autouse=True)
+def selfwork_rule(settings):
+    """``conftest``-dəki eyni adlı fixture-u əvəzləyir: burada DEFOLT (yeni) qayda — sərbəst iş söndürülüb."""
+    settings.ACADEMIC_SELFWORK_ENABLED = False
 
 
 def _world(slug, *, new_rule):
@@ -148,14 +155,48 @@ def test_new_rule_document_has_no_selfwork_block_but_keeps_the_data(new_world):
     assert services.section_data_map(version)[SELF] == stored  # gizli bölmənin datası yerindədir
 
 
-# ── 2. Köhnə semestr — dəyişmir ──────────────────────────────────────────────
-def test_legacy_period_still_requires_the_selfwork_section(legacy_world):
+# ── 2. Köhnə (2025/2026) semestr — sahib 2026-10-11: cari qayda, sərbəst iş YOXDUR ──
+def test_old_period_syllabus_follows_the_current_rule(legacy_world):
+    """Köhnə semestrin sillabusu da sərbəst işsiz 100% olur və göndərilir; sənəddə 7 blok, midterm 30."""
+    assert legacy_world["syllabus"].period.academic_year == "2025/2026"
+    assert rules.for_syllabus(legacy_world["syllabus"]) == rules.SyllabusRule(selfwork=False, split=True)
+    assert rules.for_version(legacy_world["version"]) == rules.for_version(legacy_world["version"], None)
+    with pytest.raises(TransitionDenied) as excinfo:  # `self` paneli yoxdur — gizli bölməyə yazı qəbul edilmir
+        services.save_section(
+            version=legacy_world["version"], section_id=SELF, data={"option": "2x5"}, actor=legacy_world["actor"]
+        )
+    assert excinfo.value.code == "section.unknown"
+
+    version = _fill(legacy_world, with_self=False)
+
+    assert version.completion_percent == 100
+    assert _split(version) == (30, 10)
+    document = build_document(legacy_world["syllabus"], version)
+    keys = [block["key"] for block in document["blocks"]]
+    assert "selfwork" not in keys and len(keys) == 7
+    assessment = next(block["body"] for block in document["blocks"] if block["key"] == "assessment")
+    assert f"{LABELS['midterm']} 30" in assessment and str(LABELS["selfwork"]) not in assessment
+    assert services.submit(version=version, actor=legacy_world["actor"]).status == SyllabusStatus.SUBMITTED
+
+
+def test_old_period_formula_rows_have_midterm_thirty_and_no_selfwork_key(legacy_world):
+    """2025/2026 semestrinin sillabusu: düstur sətirləri midterm 30, «selfwork» açarı YOXDUR (defolt)."""
+    version = _fill(legacy_world, with_self=False)
+    _root, se = render_editor_dom(user=legacy_world["teacher"], organization=legacy_world["org"], version=version)
+
+    rows = {row["key"]: row["score"] for row in se["assessment"]["rows"]}
+    assert rows == {"attendance": 10, "midterm": 30, "activity": 10, "final": 50}
+    assert "selfwork" not in rows
+    assert "midterm 30" in str(se["panels"][SectionKey.ASSESS.value]["hint"])
+    assert se["selfwork"] is None and len(se["nav"]) == 9
+
+
+def test_toggle_restores_selfwork_for_the_old_period_too(legacy_world, settings):
+    """RİM ``academic.selfwork_enabled`` yandırılanda köhnə semestrdə də midterm 20 + sərbəst iş qayıdır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True
     version = _fill(legacy_world, with_self=False)
     assert version.completion_percent < 100
     assert _split(version) == (20, 10)
-    with pytest.raises(TransitionDenied) as excinfo:
-        services.submit(version=version, actor=legacy_world["actor"])
-    assert excinfo.value.code == "transition.incomplete"
 
     version = _fill(legacy_world, with_self=True)
     assert version.completion_percent == 100

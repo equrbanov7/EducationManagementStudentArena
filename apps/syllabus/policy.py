@@ -31,13 +31,14 @@ from core import academic_rules
 
 from .constants import SELFWORK_TOTAL_SCORE
 
-#: Qiymətləndirmə çəkiləri — universitet STANDARTI (sahib qərarı 2026-09-20):
-#: davamiyyət 10 · midterm 20 · sərbəst iş 10 · seminar/lab ədədi ortası
-#: (``activity``) 10 → semestr 50; yekun imtahan 50. Müəllim HEÇ NƏ bölmür —
-#: ``flex`` (100 − kilidli cəm) hesablanır və standartda 0-dır; saxlanır ki,
-#: siyasət sonradan yumşaldılsa köhnə «sərbəst pay» yolu işləsin.
-#: Bu, SƏRBƏST İŞLİ standartdır; sərbəst iş söndürüləndə (sahib 2026-10-10) onun balı
-#: midterm-ə keçir — bax :func:`assessment_weights` (``selfwork=False`` → midterm 30).
+#: Qiymətləndirmə çəkilərinin BAZA cədvəli (sərbəst işli forma): davamiyyət 10 · midterm 20 ·
+#: sərbəst iş 10 · seminar/lab ədədi ortası (``activity``) 10 → semestr 50; yekun imtahan 50.
+#: Müəllim HEÇ NƏ bölmür — ``flex`` (100 − kilidli cəm) hesablanır və standartda 0-dır;
+#: saxlanır ki, siyasət sonradan yumşaldılsa köhnə «sərbəst pay» yolu işləsin.
+#: Cari universitet STANDARTI (sahib 2026-10-10) sərbəst işSİZdir — davamiyyət 10 · midterm 30 ·
+#: seminar/lab 10 · yekun 50: :func:`assessment_weights` ``selfwork=False`` ilə sərbəst işin balını
+#: midterm-ə keçirir. RİM ``academic.selfwork_enabled`` açarı yandırılanda baza cədvəl geri qayıdır.
+#: Ədədlər dəyişdirilmir — ``core.academic_rules`` sabitlərinin güzgüsüdür.
 DEFAULT_ASSESSMENT = {
     "attendance": academic_rules.ATTENDANCE_MAX,
     "midterm": academic_rules.MIDTERM_MAX_WITH_SELFWORK,
@@ -85,10 +86,10 @@ def assessment_weights(organization=None, *, selfwork=None) -> dict:
     saxlanan açarları köhnə adlarla qalır: ``midterm`` = midterm (aralıq imtahan) payı,
     ``project`` = seminar/lab ədədi ortası payı (``activity``).
 
-    ``selfwork`` — bu qiymətləndirmədə sərbəst iş varmı (sahib 2026-10-10): ``False`` olanda
-    onun balı midterm-ə keçir (20 + 10 = 30), ``selfwork`` çəkisi 0 olur — cəm dəyişmir.
-    ``None`` — CARİ qayda (``core.academic_rules.selfwork_enabled``); semestri bilən çağıran
-    ``SyllabusRule.selfwork`` ötürür (köhnə semestrlərdə sərbəst iş həmişə var).
+    ``selfwork`` — bu qiymətləndirmədə sərbəst iş varmı (sahib 2026-10-10): ``False`` (standart)
+    olanda onun balı midterm-ə keçir (20 + 10 = 30), ``selfwork`` çəkisi 0 olur — cəm dəyişmir.
+    ``None`` — CARİ qayda (``core.academic_rules.selfwork_enabled``); çağıran adətən
+    ``SyllabusRule.selfwork`` ötürür (sahib 2026-10-11: semestrdən asılı deyil, RİM açarıdır).
     """
     if selfwork is None:
         selfwork = academic_rules.selfwork_enabled()
@@ -123,7 +124,8 @@ def standard_splits(organization=None) -> frozenset:
 
 
 def standard_midterm(weights) -> int:
-    """Midterm (aralıq imtahan) payı — standart 20 (siyasət ``midterm``); köhnə siyasətdə flex-in yarısı."""
+    """Midterm (aralıq imtahan) payı — standart 30 (sərbəst işli formada 20; siyasət ``midterm``);
+    köhnə siyasətdə flex-in yarısı."""
     if "midterm" in weights:
         return int(weights["midterm"])
     return int(weights.get("flex", 0)) // 2

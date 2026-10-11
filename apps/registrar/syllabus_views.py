@@ -106,9 +106,10 @@ def offering_syllabus_json(request, offering_id):
 
 
 def _document(offering, syllabus, version) -> dict:
-    """Sənəd BAXILAN AÇILIŞIN semestrinin qaydası ilə (sahib 2026-10-10): sərbəst iş ləğv olunan dövrdə
-    «Sərbəst iş» bloku yoxdur, düstur midterm 30; semestrsiz «baza sillabus» köhnə semestrin tələbəsinə
-    köhnə qayda ilə göstərilir. Fəaliyyət növü də açılışdandır (seminar / laboratoriya / 5 + 5)."""
+    """Sənəd sillabusun CARİ qaydası ilə (sahib 2026-10-11: ``rule_for_period`` semestrdən asılı deyil —
+    köhnə açılışda da «Sərbəst iş» bloku yoxdur, düstur midterm 30; RİM ``academic.selfwork_enabled``
+    yandırılanda hər yerdə geri qayıdır). Jurnalın öz sərbəst iş qaydası (``core.academic_rules``) buna
+    tabe deyil. Fəaliyyət növü açılışdandır (seminar / laboratoriya / 5 + 5)."""
     return build_document(
         syllabus,
         version,

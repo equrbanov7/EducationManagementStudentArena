@@ -1,14 +1,22 @@
-"""Sillabusa tətbiq olunan akademik qayda — dövrə görə TƏK qərar nöqtəsi (sahib 2026-10-10).
+"""Sillabusa tətbiq olunan akademik qayda — TƏK qərar nöqtəsi (sahib 2026-10-10, dəqiqləşmə 2026-10-11).
 
-``core.academic_rules`` üzərində nazik qat: sillabusun / versiyanın / açılışın semestri → «sərbəst iş
-görünürmü və faizə daxildirmi», «seminar + laboratoriya 5 + 5-mi». Semestrin mənbəyi (prioritetlə):
-çağıranın verdiyi semestr (jurnal / tələbə kabineti — baxılan açılışın öz semestri) → versiyanın tətbiq
-semestri → dosyenin semestri → dosyenin açılışının semestri. Semestri olmayan «baza sillabus» CARİ
-qaydaya tabedir (dövr məlum deyil → yeni qayda).
+``core.academic_rules`` üzərində nazik qat: «sərbəst iş görünürmü və faizə daxildirmi», «seminar +
+laboratoriya 5 + 5-mi». Qayda RİM-in «Sistem tənzimləmələri» açarlarından oxunur
+(``academic.selfwork_enabled`` / ``academic.activity_split``).
 
-Köhnə (K1–K3 kollokvium) semestrlərin sillabusu DƏYİŞMİR — sərbəst iş bölməsi, düsturu və tamamlanma
-qaydası əvvəlki kimidir. ``self`` bölməsinin datası heç vaxt silinmir: qayda yalnız onu göstərib-
-göstərməməyi və faizə daxil edib-etməməyi təyin edir (RİM tənzimləməsi yandırılanda geri qayıdır).
+Sahib 2026-10-11: sillabus İRƏLİYƏ baxan sənəddir — CARİ qayda HƏR semestrin (köhnə 2025/2026 daxil)
+sillabusuna tətbiq olunur. Dövr (sillabusun / versiyanın / açılışın semestri) qaydanı DƏYİŞMİR:
+«Midterm 20 + Sərbəst iş 10» köhnə semestrin redaktorunda da görünməməlidir. Sərbəst işi geri
+qaytarmaq lazım olsa RİM ``academic.selfwork_enabled`` açarını yandırır — onda sərbəst iş bölməsi və
+midterm 20 HƏR yerdə (bütün semestrlərdə) geri qayıdır. ``self`` bölməsinin datası heç vaxt silinmir:
+qayda yalnız onu göstərib-göstərməməyi və faizə daxil edib-etməməyi təyin edir.
+
+Jurnal (``apps.registrar``) bu modula TABE DEYİL — köhnə semestrlərin qiymət tarixi
+``core.academic_rules.selfwork_active_for_period`` ilə əvvəlki kimi qalır.
+
+``syllabus_period`` / ``version_period`` köməkçiləri saxlanılır (semestri göstərmək üçün başqa kod
+onları idxal edir); ``for_*`` funksiyalarının ``period`` / ``organization`` parametrləri uyğunluq
+üçün qalır və cavaba təsir etmir.
 
 Modul sərhədi: ``apps.registrar`` idxal EDİLMİR (registrar → syllabus tək istiqamətlidir).
 """
@@ -44,20 +52,21 @@ class SyllabusRule:
         return SECTION_ORDER if self.selfwork else tuple(key for key in SECTION_ORDER if key != _SELF)
 
 
-#: Köhnə (2026/2027-dən əvvəlki) semestrlərin qaydası — sərbəst iş var, fəallıq birgə orta.
+#: Sərbəst işli (midterm 20 + sərbəst iş 10, fəallıq birgə orta) qayda — 2026-10-11-dən dövrə görə
+#: SEÇİLMİR; yalnız ``rule=`` açıq ötürən çağıranlar (testlər, müqayisə) üçün sabit kimi saxlanılır.
 LEGACY = SyllabusRule(selfwork=True, split=False)
 
 
-def for_period(period, organization=None) -> SyllabusRule:
-    """Semestrin qaydası; ``period=None`` → CARİ (yeni) qayda."""
-    if not academic_rules.period_uses_new_rules(period, organization):
-        return LEGACY
+def current(organization=None) -> SyllabusRule:
+    """CARİ qayda — RİM tənzimləmələrindən (``selfwork_enabled`` / ``activity_split``)."""
     return SyllabusRule(selfwork=academic_rules.selfwork_enabled(), split=academic_rules.activity_split())
 
 
-def current(organization=None) -> SyllabusRule:
-    """Semestri bilinməyən görünüş (məs. siyahı dialoqları) — CARİ qayda."""
-    return for_period(None, organization)
+def for_period(period, organization=None) -> SyllabusRule:
+    """Semestrin qaydası — sahib 2026-10-11: semestrdən asılı DEYİL, həmişə CARİ qayda.
+
+    ``period`` / ``organization`` çağıranların uyğunluğu üçün qəbul olunur, cavaba təsir etmir."""
+    return current(organization)
 
 
 def syllabus_period(syllabus):
