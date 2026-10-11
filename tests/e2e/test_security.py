@@ -22,7 +22,6 @@ PUBLIC_ROUTES = [
     "/",
     "/about/",
     "/accounts/login/",
-    "/accounts/register/",
     "/accounts/password-reset/",
     "/live/",
 ]
@@ -33,7 +32,7 @@ PROTECTED_ROUTES = [
     "/accounts/dashboard/student/",
     "/accounts/dashboard/teacher/",
     "/accounts/profile/",
-    "/accounts/grading-queue/",
+    "/accounts/profile/?section=pending-review",  # WP9b: köhnə /accounts/grading-queue/ silindi
     "/accounts/my-results/",
     "/accounts/pending-review/",
     "/accounts/role-assignment/",
@@ -46,15 +45,14 @@ PROTECTED_ROUTES = [
     "/accounts/student-organization-management/",
     "/organizations/select/",
     "/courses/create_course/",
-    "/courses/my-courses/",
-    "/courses/my-enrolled/",
+    "/accounts/profile/?section=my-courses",  # WP9a: köhnə /courses/my-courses|my-enrolled/ silindi
     "/exams/",
     "/exams/available/",
     "/exams/assigned/",
     "/exams/my-history/",
     "/exams/create/",
     "/exams/groups/",
-    "/notifications/",
+    "/accounts/profile/?section=notifications",  # WP9a: köhnə /notifications/ səhifəsi silindi
     "/audit/",
 ]
 
@@ -128,7 +126,6 @@ class TestCsrfPresence:
         "form_page",
         [
             "/accounts/login/",
-            "/accounts/register/",
             "/accounts/password-reset/",
         ],
     )

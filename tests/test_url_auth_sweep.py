@@ -31,7 +31,6 @@ PUBLIC_ALLOWLIST = {
     "accounts:login",  # rol seçici (bax [[project_login_portal_split]])
     "accounts:staff_login",  # /accounts/login/muellim/
     "accounts:student_login",  # /accounts/login/telebe/
-    "accounts:register",
     "accounts:logout",
     "accounts:password_reset",
     "accounts:password_reset_done",
@@ -48,8 +47,8 @@ PUBLIC_ALLOWLIST = {
     "home",
     "about",
     "contact",
-    "technology",
-    "subscribe",  # blog abunəsi — rate-limit ilə qorunur
+    "technology",  # postlar modulu qapısı (B7) — modul açıq olanda anonim görünür
+    "subscribe",  # blog abunəsi — universitet rejimində 404 (B2), marketinq rejimində rate-limit
     "robots_txt",
     "sitemap_xml",
     "site_webmanifest",

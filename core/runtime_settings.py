@@ -38,7 +38,7 @@ def _setting(name: str, fallback):
 class Spec:
     key: str
     group: str
-    kind: str  # "int" | "rate" | "choice"
+    kind: str  # "int" | "rate" | "choice" | "bool"
     default: Callable[[], Any]
     label: Any
     help: Any = ""
@@ -59,12 +59,13 @@ def _ai_model_choices() -> list:
 
 
 GROUPS = (
+    ("academic", pgettext_lazy(_CTX, "Akademik qaydalar")),
     ("login", pgettext_lazy(_CTX, "Giriş və parol cəhdləri")),
     ("otp", pgettext_lazy(_CTX, "E-poçt kodu (OTP)")),
     ("session", pgettext_lazy(_CTX, "Sessiya")),
     ("journal", pgettext_lazy(_CTX, "Elektron jurnal")),
     ("ai", pgettext_lazy(_CTX, "Süni intellekt")),
-    ("exam", pgettext_lazy(_CTX, "Final imtahan girişi")),
+    ("exam", pgettext_lazy(_CTX, "İmtahanlar")),
 )
 
 _RATE_HELP = pgettext_lazy(_CTX, "Pəncərə ərzində icazə verilən say; keçəndə istifadəçi gözləməli olur.")
@@ -72,6 +73,40 @@ _RATE_HELP = pgettext_lazy(_CTX, "Pəncərə ərzində icazə verilən say; keç
 SPECS: dict[str, Spec] = {
     spec.key: spec
     for spec in (
+        # ── Akademik qaydalar (sahib 2026-10-10 «Yeni qayda var») ─────────────────────────────────
+        # Defolt = YENİ qayda; sətir yazılanda köhnəyə qayıtmaq olur. Mühit/test dəyişəni ilə də
+        # (``ACADEMIC_*``) defolt dəyişə bilər — testlər ``override_settings`` ilə köhnə qaydanı yoxlayır.
+        # Oxu nöqtəsi YALNIZ ``core.academic_rules`` — çağıranlar açarı birbaşa oxumur.
+        Spec(
+            "academic.selfwork_enabled", "academic", "bool", _setting("ACADEMIC_SELFWORK_ENABLED", False),
+            pgettext_lazy(_CTX, "Sərbəst iş (10 bal)"),
+            pgettext_lazy(
+                _CTX,
+                "Söndürülüdə sərbəst iş jurnalda, sillabusda, fənn qovluğunda və kabinetdə görünmür, onun 10 balı "
+                "midterm-ə keçir (midterm 30). Yandırılanda əvvəlki qayda: midterm 20 + sərbəst iş 10. "
+                "Yalnız 2026/2027 və sonrakı semestrlərə aiddir; köhnə semestrlərin qiymətləri dəyişmir.",
+            ),
+        ),
+        Spec(
+            "academic.activity_split", "academic", "bool", _setting("ACADEMIC_ACTIVITY_SPLIT", True),
+            pgettext_lazy(_CTX, "Seminar və laboratoriya ayrıca (5 + 5 bal)"),
+            pgettext_lazy(
+                _CTX,
+                "Fəndə həm seminar, həm laboratoriya varsa fəallıq balı: seminar ballarının ortası 5 + laboratoriya "
+                "ballarının ortası 5. Yalnız biri varsa 10 bal onun ortasından. Söndürülüdə bütün seminar və "
+                "laboratoriya balları birgə ortalanır.",
+            ),
+        ),
+        Spec(
+            "academic.coursework_enabled", "academic", "bool", _setting("ACADEMIC_COURSEWORK_ENABLED", False),
+            pgettext_lazy(_CTX, "Kurs işi (jurnalda)"),
+            pgettext_lazy(
+                _CTX,
+                "Söndürülüdə jurnalda «Kurs işi» tabı, addımı və düzəlişi görünmür, tələbə öz jurnalında da görmür. "
+                "Kurs işi balı imtahana qədər bala daxil deyil — hesablamalar dəyişmir. Yalnız 2026/2027 və sonrakı "
+                "semestrlərə aiddir; köhnə semestrlərdə və mövcud datada heç nə silinmir.",
+            ),
+        ),
         Spec(
             "login.device_rate", "login", "rate", _setting("LOGIN_RATE_LIMIT", "5/10m"),
             pgettext_lazy(_CTX, "Bir cihazdan səhv parol cəhdi"), _RATE_HELP, min=3, max=100,
@@ -141,6 +176,25 @@ SPECS: dict[str, Spec] = {
             pgettext_lazy(_CTX, "saat"), min=1, max=72,
         ),
         Spec(
+            "journal.lesson_activation", "journal", "bool", _setting("JOURNAL_LESSON_ACTIVATION", False),
+            pgettext_lazy(_CTX, "Cədvəldəki dərsi «Aktivləşdir» düyməsi"),
+            pgettext_lazy(
+                _CTX,
+                "Söndürülüdə jurnalda «Aktivləşdir» düyməsi yoxdur — müəllim «Yeni dərs» ilə dərsi özü yaradır, "
+                "forma dərs cədvəli və son dərsə görə əvvəlcədən doldurulur.",
+            ),
+        ),
+        Spec(
+            "journal.hygiene_prevention", "journal", "bool", _setting("JOURNAL_HYGIENE_PREVENTION", True),
+            pgettext_lazy(_CTX, "Ayrılmış tələbələrin jurnala yazılmasının qarşısını al"),
+            pgettext_lazy(
+                _CTX,
+                "Yanılıdırsa hesabı arxivdə olan (məzun, xaric) tələbələr yeni jurnallara yazılmır, qrupun seçmə "
+                "fənni dəyişəndə və ya fənn ləğv olunanda köhnə BOŞ yazılışlar çıxarılır. Balı olan yazılışlara "
+                "toxunulmur.",
+            ),
+        ),
+        Spec(
             "ai.model", "ai", "choice", lambda: "",
             pgettext_lazy(_CTX, "AI modeli (köməkçi, xülasə, yoxlama)"),
             pgettext_lazy(_CTX, "«Avtomatik» — mövcud server tənzimləməsi; seçilən model hamısında birinci yoxlanılır."),
@@ -149,6 +203,24 @@ SPECS: dict[str, Spec] = {
         Spec(
             "ai.assistant_rate", "ai", "rate", _setting("AI_ASSISTANT_RATE_LIMIT", "25/1h"),
             pgettext_lazy(_CTX, "AI köməkçiyə bir istifadəçinin sual sayı"), _RATE_HELP, min=1, max=1000,
+        ),
+        Spec(
+            "ai.assistant_button", "ai", "bool", _setting("AI_ASSISTANT_BUTTON", True),
+            pgettext_lazy(_CTX, "AI köməkçi düyməsi"),
+            pgettext_lazy(
+                _CTX,
+                "Söndürülüdə ekranın küncündəki AI düyməsi heç kimə göstərilmir. Yanılıdırsa hər istifadəçi onu öz "
+                "ekranında gizlədə və sürüşdürüb yerini dəyişə bilər.",
+            ),
+        ),
+        Spec(
+            "exam.available_page", "exam", "bool", _setting("EXAM_AVAILABLE_PAGE", False),
+            pgettext_lazy(_CTX, "«Mövcud imtahanlar» səhifəsi"),
+            pgettext_lazy(
+                _CTX,
+                "Sahib 2026-10-10: hələlik lazım deyil. Söndürülüdə səhifə və ona aparan keçidlər görünmür; "
+                "kod saxlanılır — yandıranda geri qayıdır.",
+            ),
         ),
         Spec(
             "exam.pin_max_failures", "exam", "int", _setting("FINAL_EXAM_PIN_MAX_FAILURES", 5),
@@ -212,6 +284,10 @@ def invalidate() -> None:
         pass
 
 
+_TRUE_TEXT = frozenset({"1", "true", "on", "yes"})
+_FALSE_TEXT = frozenset({"0", "false", "off", "no"})
+
+
 def _rate_parts(raw) -> tuple[int, int] | None:
     from core.rate_limit import parse_rate
 
@@ -240,6 +316,15 @@ def coerce(spec: Spec, raw):
     if spec.kind == "choice":
         value = str(raw or "")
         return value if value in {code for code, _label in (spec.choices() if spec.choices else [])} else None
+    if spec.kind == "bool":
+        if isinstance(raw, bool):
+            return raw
+        text = str(raw if raw is not None else "").strip().lower()
+        if text in _TRUE_TEXT:
+            return True
+        if text in _FALSE_TEXT:
+            return False
+        return None
     return None
 
 
@@ -264,6 +349,11 @@ def get(key: str):
 
 def get_int(key: str) -> int:
     return int(get(key))
+
+
+def get_bool(key: str) -> bool:
+    """Bayraq oxusu. ⚠️ ``override(key) or fallback`` bayraqda İŞLƏMİR (``False`` atılır) — bunu çağırın."""
+    return bool(get(key))
 
 
 __all__ = [

@@ -47,7 +47,7 @@
                     <li><a href="{{ home_url }}" class="ems-footer__link">{% trans "Ana səhifə" %}</a></li>
                     <li><a href="{{ about_url }}" class="ems-footer__link">{% trans "Haqqımızda" %}</a></li>
                     <li><a href="{{ contact_url }}" class="ems-footer__link">{% trans "Əlaqə" %}</a></li>
-                    <li><a href="{% url 'exams:student_exam_list' %}" class="ems-footer__link">{% trans "İmtahanlar" %}</a></li>
+                    {% if academic_rules.available_exams %}<li><a href="{% url 'exams:student_exam_list' %}" class="ems-footer__link">{% trans "İmtahanlar" %}</a></li>{% endif %}
                 </ul>
             </nav>
 
@@ -59,9 +59,6 @@
                         <li><a href="{% url 'accounts:profile' %}" class="ems-footer__link">{% trans "Profilim" %}</a></li>
                     {% else %}
                         <li><a href="{% url 'accounts:login' %}" class="ems-footer__link">{% trans "Daxil ol" %}</a></li>
-                        {% if public_signup_enabled %}
-                        <li><a href="{% url 'accounts:register' %}" class="ems-footer__link">{% trans "Qeydiyyat" %}</a></li>
-                        {% endif %}
                     {% endif %}
                     <li><a href="{{ home_url }}?category=technology" class="ems-footer__link">{% trans "Texnologiya" %}</a></li>
                     <li><a href="{{ home_url }}?category=education" class="ems-footer__link">{% trans "Təhsil" %}</a></li>

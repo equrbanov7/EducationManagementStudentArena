@@ -97,7 +97,6 @@ NOINDEX_PREFIXES = (
     "/accounts/dashboard/",
     "/accounts/profile/",
     "/accounts/manage-roles/",
-    "/accounts/grading-queue/",
     "/accounts/superadmin/",
     "/i18n/",
 )
@@ -169,7 +168,14 @@ def seo_context(request):
 
 def feature_flags(request):
     """Expose lightweight feature flags to templates."""
+    from django.utils.functional import SimpleLazyObject
+
+    from core import academic_rules
+
     return {
+        # Sahib 2026-10-10: sərbəst iş / midterm 30 / 5+5 / «Aktivləşdir» / AI düyməsi — RİM tənzimləmələrindən.
+        # Tənbəl: yalnız şablon oxuyanda hesablanır (runtime_settings keşli; testlərdə bazaya sorğu yoxdur).
+        "academic_rules": SimpleLazyObject(academic_rules.snapshot),
         "exam_supervision_enabled": bool(getattr(settings, "EXAM_SUPERVISION_ENABLED", True)),
         "microsoft_clarity_project_id": getattr(settings, "MICROSOFT_CLARITY_PROJECT_ID", ""),
         # 2026-09-13 (Codex audit §11): session-replay YALNIZ anonim səhifələrdə;
@@ -184,9 +190,6 @@ def feature_flags(request):
             or bool(getattr(settings, "MICROSOFT_CLARITY_AUTHENTICATED", False))
         ),
         "practical_exams_enabled": bool(getattr(settings, "PRACTICAL_EXAMS_ENABLED", True)),
-        # e-university provisioning: public self-signup is off by default, so the
-        # login page hides the "register now" link unless a deployment re-opens it.
-        "public_signup_enabled": bool(getattr(settings, "PUBLIC_SIGNUP_ENABLED", False)),
         # White-label brand + university (cabinet-only) mode for templates.
         # The brand name is run through pgettext so the same deployment shows the
         # university's name in the active language (az/en/ru/tr) when a

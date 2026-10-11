@@ -111,5 +111,13 @@ class SettingsParityTest(TestCase):
 
     def test_deleted_otp_routes_are_not_in_request_queue_exclusions(self):
         base = _fresh_import("config.settings.base", {})
-        for gone in ("/accounts/send-otp/", "/accounts/verify-otp/", "/accounts/resend-otp/"):
+        for gone in (
+            "/accounts/send-otp/",
+            "/accounts/verify-otp/",
+            "/accounts/resend-otp/",
+            # Sahib 2026-10-10: açıq qeydiyyat axını silindi.
+            "/accounts/register/",
+            "/accounts/verify-code/",
+            "/accounts/resend-code/",
+        ):
             self.assertNotIn(gone, base.REQUEST_QUEUE_EXCLUDED_PATH_PREFIXES)

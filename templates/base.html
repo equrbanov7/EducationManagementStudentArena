@@ -56,7 +56,8 @@
     <link rel="stylesheet" href="{% static 'css/ems_confirm.css' %}?v=20260928-1">
     {# Qlobal modal fon-scroll kilidi (bax static/js/modal_scroll_lock.js) #}
     <link rel="stylesheet" href="{% static 'css/modal_scroll_lock.css' %}?v=20260926-1">
-    <link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}?v=20260920-hand">
+    {# AI köməkçi: RİM «Sistem tənzimləmələri» → «AI köməkçi düyməsi» söndürülüdə üslub, partial və skript yüklənmir (sahib 2026-10-10) #}
+    {% if academic_rules.ai_button %}<link rel="stylesheet" href="{% static 'css/ai_assistant.css' %}?v=20261010-wp5ai">{% endif %}
     <link rel="stylesheet" href="{% static 'css/skeleton.css' %}">
     <link rel="stylesheet" href="{% static 'css/legacy_mark.css' %}?v=20260901-notice">
     <link rel="stylesheet" href="{% static 'css/ems_components.css' %}?v=20260913-1">
@@ -160,8 +161,8 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
         {% if request.user.is_authenticated %}{% include "partials/_global_search.html" %}{% endif %}
     {% endblock %}
 
-    {# AI Assistant Widget (authenticated users only) — override with empty block to hide #}
-    {% block ai_assistant %}{% include "partials/_ai_assistant.html" %}{% endblock %}
+    {# AI Assistant Widget (authenticated users only) — override with empty block to hide; RİM açarı söndürülüdə heç kimə render olunmur #}
+    {% block ai_assistant %}{% if academic_rules.ai_button %}{% include "partials/_ai_assistant.html" %}{% endif %}{% endblock %}
 
     {# UX-15: qlobal təsdiq dialoqu markup-ı — bax static/js/ems_ui/confirm.js #}
     {% include "partials/_ems_confirm_modal.html" %}
@@ -205,7 +206,9 @@ JS Django şablonundan keçmir, ona görə data-atributla ötürülür).{% endco
    
 
     <!-- AI Assistant Widget -->
-    {% block ai_assistant_js %}<script src="{% static 'js/ai_assistant.js' %}?v=20261001-1"></script>{% endblock %}
+    {# ai_assistant_fab.js (gizlətmək/sürüşdürmək, `EMSAiFab`) ai_assistant.js-dən ƏVVƏL gəlməlidir #}
+    {% block ai_assistant_js %}{% if academic_rules.ai_button %}<script src="{% static 'js/ai_assistant_fab.js' %}?v=20261010-wp5ai"></script>
+    <script src="{% static 'js/ai_assistant.js' %}?v=20261010-wp5ai"></script>{% endif %}{% endblock %}
 
     <!-- Toast auto-hide -->
     <script src="{% static 'js/toast.js' %}?v=20260618-1"></script>

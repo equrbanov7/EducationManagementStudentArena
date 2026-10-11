@@ -156,19 +156,20 @@ def site_webmanifest(request):
 # --------------------------------------------------------------------------
 # robots.txt
 # --------------------------------------------------------------------------
-# Path prefixes that must never be crawled: tenant dashboards, admin, the
-# API surface and live/active exam pages (which leak nothing useful and
-# would waste crawl budget).
+# Path prefixes that must never be crawled: tenant dashboards, the API
+# surface and live/active exam pages (which leak nothing useful and would
+# waste crawl budget).
+# URL auditi B13 (2026-10-10): admin yolları (`/admin/`, `/manage/`) burada
+# SADALANMIR — robots.txt ictimaidir və köçürülmüş admin ünvanını dünyaya elan
+# edirdi. Admin onsuz da 2FA + LAN-only + nginx qaydaları ilə qorunur.
 ROBOTS_DISALLOW = [
-    "/admin/",
-    "/manage/",  # ADMIN_URL_PREFIX may relocate admin here
     "/dashboard/",
     "/teacher/",
     "/student/",
     "/organization/",
     "/organizations/",
     "/api/",
-    "/accounts/",  # login/register handled separately below
+    "/accounts/",  # login handled separately below (ROBOTS_ALLOW)
     "/exams/",  # exam taking, teacher exam mgmt — all private
     "/courses/",
     "/assignments/",
@@ -184,7 +185,6 @@ ROBOTS_DISALLOW = [
 # disallowed — they carry brand keywords and are safe to index.
 ROBOTS_ALLOW = [
     "/accounts/login/",
-    "/accounts/register/",
     "/favicon.ico",
     "/og-image.jpg",
     "/logo.png",
@@ -212,12 +212,12 @@ def robots_txt(request):
 # changefreq).  A leading "/" means a literal path; anything else is
 # treated as a Django URL name and reverse()-d (so the sitemap stays
 # correct if a route moves).
+# URL auditi B13 (2026-10-10): `home` (universitet rejimində yalnız login-ə
+# yönləndirir) və `register` (açıq qeydiyyat silinib) xəritədən çıxarılıb.
 SITEMAP_ENTRIES = [
-    ("home", "1.0", "weekly"),
     ("about", "0.7", "monthly"),
     ("contact", "0.6", "monthly"),
     ("login", "0.5", "yearly"),
-    ("register", "0.5", "yearly"),
 ]
 
 

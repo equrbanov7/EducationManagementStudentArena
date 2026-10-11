@@ -486,9 +486,7 @@ class Host:
         await self.ctx.all_joined.wait()
         await asyncio.sleep(1.0)
         self.ctx.start_posted_at = time.time()
-        await self.http.call(
-            "POST", f"/live/host/{self.ctx.pin}/start/", "host_start", data={"question_count": questions}
-        )
+        await self.http.call("POST", f"/live/{self.ctx.pin}/start/", "host_start", data={"question_count": questions})
         for _number in range(questions):
             published = await self._next_of("question_published")
             ends = server_ts(published["question"]["ends_at"])
@@ -506,7 +504,7 @@ class Host:
             if hold < 0:  # UI kimi: next_question_at-a qədər
                 hold = max(0.0, server_ts(reveal["next_question_at"]) - time.time())
             await asyncio.sleep(hold)
-            await self.http.call("POST", f"/live/host/{self.ctx.pin}/next/", "host_next")
+            await self.http.call("POST", f"/live/{self.ctx.pin}/next/", "host_next")
         self.final = await self._next_of("finished")
         await lobby.close()
         await play.close()

@@ -20,7 +20,7 @@ STUDENT_EXAM_LIST_URL = f"{BASE_URL}/exams/available/"
 ASSIGNED_EXAM_LIST_URL = f"{BASE_URL}/exams/assigned/"
 EXAM_HISTORY_URL = f"{BASE_URL}/exams/my-history/"
 CREATE_EXAM_URL = f"{BASE_URL}/exams/create/"
-PENDING_WORK_URL = f"{BASE_URL}/exams/pending-work/"
+PENDING_WORK_URL = f"{BASE_URL}/accounts/profile/?section=pending-review"  # WP9b: pending-work/ silindi
 LIVE_PIN_ENTRY_URL = f"{BASE_URL}/live/"
 
 # Paths that must redirect an anonymous user to login.
@@ -30,7 +30,7 @@ EXAM_PROTECTED_PATHS = [
     "/exams/assigned/",
     "/exams/my-history/",
     "/exams/create/",
-    "/exams/pending-work/",
+    "/accounts/profile/?section=pending-review",  # WP9b: köhnə /exams/pending-work/ silindi
 ]
 
 

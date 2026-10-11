@@ -57,7 +57,8 @@ class NotificationNextTest(SimpleTestCase):
 
     def test_local_and_query_targets_still_work(self):
         self.assertEqual(self._next("/bildirisler/?page=2"), "/bildirisler/?page=2")
-        self.assertEqual(self._next("?page=2"), reverse("notifications:notification_list") + "?page=2")
+        # WP9a (2026-10-10): `notifications/` qutusu silindi — sorğu-yalnız `next` kabinetə bağlanır.
+        self.assertEqual(self._next("?page=2"), reverse("accounts:profile") + "?page=2")
 
 
 class ExportJobRefererRedirectTest(TestCase):

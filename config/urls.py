@@ -26,6 +26,11 @@ from core.views import health_check, metrics_view, ping, test_error
 admin.site.site_url = reverse_lazy("home")
 
 
+# URL auditi WP9a (2026-10-10): ölü marşrutlar silindi — `blog/` köhnə ləqəbləri (A1) və `api/v1/` canlı
+# imtahan sarğısı (A4). `exmas/` yazı səhvi yönləndirməsi QALIR: 2026-07-06 imtahan zalında tələbələr
+# «/exmas/final» yazırdı (bax test_final_exam_center_page).
+
+
 def legacy_exmas_redirect(request, path=""):
     suffix = path.strip("/")
     target = "/exams/"
@@ -68,7 +73,6 @@ urlpatterns = [
     # (bax core/jsi18n.py).
     path("jsi18n/", javascript_catalog, name="javascript-catalog"),
     *_seo_urlpatterns,
-    path("blog/", include("apps.blog.legacy_urls")),
     # Public contact page (registered before catch-all blog urls so /contact/ resolves first)
     path("", include("apps.contact.urls")),
     # Trial-exam ("sınaq imtahanı") request — login-required student form.
@@ -118,8 +122,6 @@ urlpatterns = [
     path("api/ai-assistant/", include(("apps.ai_assistant.urls", "ai_assistant"), namespace="ai_assistant")),
     # Sistem Monitorinqi (superadmin-only; server-side icazə + audit).
     path("api/superadmin/monitoring/", include(("apps.monitoring.urls", "monitoring"), namespace="monitoring")),
-    # API versioned endpoints
-    path("api/v1/", include(("apps.live_exam.api.v1.urls", "live_exam_api_v1"), namespace="live_exam_api_v1")),
     path("health/", health_check, name="health_check"),
     path("ping/", ping, name="ping"),
     path("metrics/", metrics_view, name="metrics"),

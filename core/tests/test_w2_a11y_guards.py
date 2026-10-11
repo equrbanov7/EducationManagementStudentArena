@@ -166,7 +166,8 @@ class AuthErrorMarkupTest(SimpleTestCase):
         otp = (BASE / "templates/admin/verify_otp.html").read_text(encoding="utf-8")
         self.assertIn('id="{{ form.code.auto_id }}_error"', otp)
         self.assertIn('role="alert"', otp)
-        for rel in ("verify_code.html", "first_login_set_password.html"):
+        # verify_code.html açıq qeydiyyatla birlikdə silindi (sahib 2026-10-10).
+        for rel in ("first_login_set_password.html",):
             text = (BASE / "apps/accounts/templates/accounts" / rel).read_text(encoding="utf-8")
             self.assertIn("role=\"{% if 'error' in message.tags %}alert{% else %}status{% endif %}\"", text, rel)
 
@@ -192,10 +193,6 @@ class IconOnlyButtonNamesTest(SimpleTestCase):
         (
             "apps/accounts/templates/accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
             'class="contact-msg-search"',
-        ),
-        (
-            "apps/accounts/templates/accounts/partials/_student_org_request_content.html",
-            'type="submit" class="btn btn-primary"',
         ),
     ]
 

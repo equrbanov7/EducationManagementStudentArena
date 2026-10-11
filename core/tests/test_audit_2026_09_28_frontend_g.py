@@ -33,7 +33,6 @@ ALERT_SCOPES = (
     "apps/assignments/static",
     "apps/projects/static",
     "apps/courses/static",
-    "apps/notifications/static",
 )
 
 
@@ -43,24 +42,19 @@ def _strip_js_comments(text):
 
 
 class NotificationDeleteConfirmTest(SimpleTestCase):
-    TEMPLATES = (
-        "apps/notifications/templates/notifications/notification_list.html",
-        "apps/notifications/templates/notifications/notification_detail.html",
-    )
+    # WP9a (2026-10-10): müstəqil `notification_list|detail.html` səhifələri silindi — bildiriş
+    # qutusu kabinet bölməsidir; orada da CSP-nin blokladığı inline hadisə atributu olmamalıdır.
+    TEMPLATES = ("apps/accounts/templates/accounts/profile/sections/_notifications.html",)
 
-    def test_delete_uses_ems_confirm_not_inline_handler(self):
+    def test_delete_has_no_inline_handler(self):
         for rel in self.TEMPLATES:
             source = (BASE / rel).read_text(encoding="utf-8")
             with self.subTest(template=rel):
                 self.assertNotRegex(source, r"\son[a-z]+\s*=")
-                self.assertIn('data-ems-confirm="{% trans "Delete this notification?" %}"', source)
 
 
 class JsonI18nEscapeTest(SimpleTestCase):
-    BLOCKS = (
-        ("apps/accounts/templates/accounts/profile/sections/_people_directory.html", 'id="people-detail-i18n-'),
-        ("apps/accounts/templates/accounts/register.html", 'id="register-i18n-data"'),
-    )
+    BLOCKS = (("apps/accounts/templates/accounts/profile/sections/_people_directory.html", 'id="people-detail-i18n-'),)
 
     def _block(self, rel, marker):
         source = (BASE / rel).read_text(encoding="utf-8")
@@ -141,7 +135,11 @@ class LiveSessionStartIsPostTest(SimpleTestCase):
 
     def test_template_busts_cache(self):
         template = (BASE / "apps/exams/templates/exams/teacher/teacher_exam_detail.html").read_text(encoding="utf-8")
-        self.assertIn("teacher_exam_detail.js' %}?v=20260928-live-post", template)
+        # Versiya sonrakı dəyişikliklərlə irəli gedə bilər (məs. WP3 2026-10-10) — qayda:
+        # skript keş-buster daşıyır və o, POST düzəlişindən (20260928) KÖHNƏ deyil.
+        match = re.search(r"teacher_exam_detail\.js' %}\?v=(\d{8})", template)
+        self.assertIsNotNone(match, "teacher_exam_detail.js keş-buster-siz yüklənir")
+        self.assertGreaterEqual(match.group(1), "20260928")
 
 
 class ViewAsBlockedNamesTest(SimpleTestCase):
