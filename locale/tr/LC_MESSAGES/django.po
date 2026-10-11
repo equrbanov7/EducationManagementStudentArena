@@ -94996,7 +94996,7 @@ msgstr "Görev (yük profili)"
 
 msgctxt "accounts.hr_analytics"
 msgid "Yük bandı"
-msgstr "Yük bandı"
+msgstr "Yük aralığı"
 
 msgctxt "accounts.hr_analytics"
 msgid "filtr tətbiq olunub"

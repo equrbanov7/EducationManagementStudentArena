@@ -352,11 +352,17 @@ def chair_staff_load(*, organization, teacher_ids, academic_year: str = "") -> d
     return {"by_teacher": summaries, "totals": totals, "staff_fraction_total": round(staff_fraction_total, 2)}
 
 
+def position_labels() -> dict:
+    """Yük profilinin vəzifə açarı → etiket (``TeacherPosition``) — modul xaricindəki oxucular üçün."""
+    return {key: str(label) for key, label in TeacherPosition.choices}
+
+
 __all__ = [
     "STATUS_LABELS",
     "build_distribution_context",
     "build_my_workload_context",
     "chair_staff_load",
+    "position_labels",
     "teachers_for_offering",
     "teachers_for_offerings",
 ]

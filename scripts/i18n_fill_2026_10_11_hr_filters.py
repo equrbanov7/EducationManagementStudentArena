@@ -83,7 +83,7 @@ _HR = [
     ),
     _t("Vəzifə (yük profili)", "Position (workload profile)", "Должность (профиль нагрузки)", "Görev (yük profili)"),
     # ── digər filtrlər ───────────────────────────────────────────────────
-    _t("Yük bandı", "Load band", "Диапазон нагрузки", "Yük bandı"),
+    _t("Yük bandı", "Load band", "Диапазон нагрузки", "Yük aralığı"),
     _t("filtr tətbiq olunub", "filter applied", "фильтр применён", "filtre uygulandı"),
     _t(
         "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür",
@@ -124,7 +124,8 @@ _HR = [
 # ctx → msgid → {az, en, ru, tr}
 ENTRIES = {HR: {row["az"]: row for row in _HR}}
 
-FORCE = set()
+#: «Yük bandı» türkcədə əvvəl az ilə eyni yazılmışdı (i18n gate: identity borcu).
+FORCE = {(HR, "Yük bandı")}
 
 
 def fill(lang):
