@@ -230,7 +230,8 @@ def _write_sections(version, data_map: dict, actor_user):
 
 def _approve_as_reuse(draft, *, syllabus, source, base, actor, plan_hours, request=None, replaced=False):
     """QARALAMA → APPROVED (``Transition.REUSE``) — məzmun ``base``-in EYNİ nüsxəsi."""
-    from .drafts import recompute_completion, section_data_map
+    from ..rules import for_version as rule_for_version
+    from .drafts import _inherited_data, recompute_completion, section_data_map
     from .workflow import _archive_superseded
 
     locked = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=draft.pk)
@@ -244,7 +245,16 @@ def _approve_as_reuse(draft, *, syllabus, source, base, actor, plan_hours, reque
         in_scope=author,
     )
     snapshot = section_data_map(locked) if replaced else None
-    _write_sections(locked, {row.section_id: row.data for row in base.sections.all()}, actor.user)
+    # Məzmun mənbənin EYNİ nüsxəsidir, YALNIZ qiymətləndirmə bölgüsü hədəfin CARİ qaydasına gətirilir
+    # (sahib 2026-10-11: köhnə qaydada təsdiqlənmiş «midterm 20 + sərbəst iş 10» bağlananda midterm 30 olur;
+    # `note` və digər sahələr toxunulmur) — `copy_adjust` ilə eyni `_inherited_data` qaydası.
+    base_map = {row.section_id: row.data for row in base.sections.all()}
+    selfwork = rule_for_version(locked, syllabus.organization).selfwork
+    data_map = {
+        section_id: _inherited_data(section_id, base_map, syllabus.organization, selfwork=selfwork)
+        for section_id in base_map
+    }
+    _write_sections(locked, data_map, actor.user)
     now = timezone.now()
     _archive_superseded(locked, actor=actor, request=request, now=now)
     old_status = locked.status

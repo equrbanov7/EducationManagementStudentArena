@@ -236,3 +236,23 @@ def test_editor_banner_offers_copy_previous_on_a_blank_draft(world):
     )
     assert 'data-syl-action="copy"' in html
     assert "data-syl-reuse-modal" in html
+
+
+def test_copy_previous_from_an_old_rule_year_has_midterm_thirty_and_no_selfwork_step(world, settings):
+    """Sahib 2026-10-11: keçən ildən (midterm 20 + sərbəst iş 10) köçürülsə də qaralama CARİ qaydadadır."""
+    from apps.syllabus.assessment_formula import formula_rows
+    from apps.syllabus.rules import for_version
+
+    assert int(_sections(world["source_version"])[SectionKey.ASSESS.value]["midterm"]) == 20
+    settings.ACADEMIC_SELFWORK_ENABLED = False  # cari (defolt) qayda
+    _syllabus, version = services.reuse.copy_adjust(
+        source=world["source"], target=target(world, "o2"), actor=actor(world), previous=True
+    )
+    version.refresh_from_db()
+    assess = _sections(version)[SectionKey.ASSESS.value]
+    assert (int(assess["midterm"]), int(assess["project"])) == (30, 10)
+    rule = for_version(version, world["org"])
+    assert rule.selfwork is False
+    assert SectionKey.SELF.value not in rule.section_order  # «Sərbəst iş» addımı redaktorda yoxdur
+    keys = [row["key"] for row in formula_rows(("seminar",), world["org"], selfwork=rule.selfwork)]
+    assert "selfwork" not in keys

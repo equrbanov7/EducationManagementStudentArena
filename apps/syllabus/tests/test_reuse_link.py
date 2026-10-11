@@ -353,3 +353,24 @@ def test_a_legacy_source_under_another_chair_is_still_refused(world):
     with pytest.raises(TransitionDenied) as denied:
         services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))
     assert denied.value.code == rules.CODE_CHAIR_DIFFERS
+
+
+# ── Sahib 2026-10-11: köhnə qaydada təsdiqlənmiş mənbə (midterm 20 + sərbəst iş 10) ────────────
+
+
+def test_link_from_an_old_rule_source_normalizes_the_assessment_split(world, settings):
+    """Mənbə sərbəst işli qaydada təsdiqlənib; bağlananda hədəf CARİ qaydanın bölgüsünü alır (midterm 30)."""
+    source, source_version = approved_syllabus(world, "o1")  # paket fixture-u: sərbəst iş açıqdır
+    old_assess = _sections(source_version)[SectionKey.ASSESS.value]
+    assert (int(old_assess["midterm"]), int(old_assess["project"])) == (20, 10)
+
+    settings.ACADEMIC_SELFWORK_ENABLED = False  # cari (defolt) qayda
+    _syllabus, version = services.reuse.link(source=source, target=target(world, "o2"), actor=actor(world))
+    version.refresh_from_db()
+    assess = _sections(version)[SectionKey.ASSESS.value]
+    # `project` = seminar/lab ədədi ortası (10), sərbəst iş deyil; sərbəst iş bölgüdə ümumiyyətlə yoxdur.
+    assert (int(assess["midterm"]), int(assess["project"])) == (30, 10)
+    assert assess.get("note", "") == old_assess.get("note", "")  # müəllimin mətni toxunulmur
+    assert version.completion_percent == 100
+    # Mənbəyə toxunulmur (öz semestrinin tarixi).
+    assert int(_sections(source_version)[SectionKey.ASSESS.value]["midterm"]) == 20
