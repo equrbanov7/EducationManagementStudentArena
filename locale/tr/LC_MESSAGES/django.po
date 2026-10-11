@@ -95033,3 +95033,7 @@ msgstr "%(position)s · norm %(norm)s saat"
 msgctxt "accounts.hr_analytics"
 msgid "Əvvəlki ilə nisbətən dəyişib"
 msgstr "Önceki yıla göre değişti"
+
+msgctxt "roles.org_display_name"
+msgid "Qəyyumlar Şurasının sədri"
+msgstr "Mütevelli Heyeti Başkanı"
