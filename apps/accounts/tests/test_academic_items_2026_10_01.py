@@ -358,7 +358,11 @@ class AttachmentAccessPolicyTest(_MediaSandbox):
         self.assertNotIn("CCNA", anonymous.content.decode())
         # Baxan hədəflə ortaq təşkilatın aktiv üzvü olmalıdır.
         org = Organization.objects.create(
-            name="Acad10 Univ", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
+            name="Acad10 Univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.teacher,
+            status="active",
+            is_active=True,
         )
         for member, role in ((self.teacher, "teacher"), (self.student, "student")):
             Membership.objects.create(
