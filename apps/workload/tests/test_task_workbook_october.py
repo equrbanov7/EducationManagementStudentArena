@@ -166,6 +166,14 @@ class OctoberWorkbookTests(TestCase):
         self.assertEqual(self._report()["12"]["chosen_by"], "override")
         self.assertTrue(TeacherAssignment.objects.filter(row=spring, teacher=self.teachers["vefa.q"]).exists())
 
+    def test_chair_name_with_kafedrasi_suffix_is_found(self):
+        """Prod 2026-10-12: kafedra adı «… kafedrası» sonluğu ilə — vərəq ötürülməməlidir."""
+        OrgUnit.objects.filter(pk=self.chair.pk).update(name="Proqramlaşdırma və informasiya təhlükəsizliyi kafedrası")
+        self._write([("PAYIZ", "Veb texnologiyalar", "SƏKİNƏ")])
+        out = self._run("--apply", "--no-create-teachers")
+        self.assertNotIn("sheet_skipped", out)
+        self.assertEqual(TeachingTask.objects.get(organization=self.org, chair=self.chair).rows.count(), 1)
+
     def test_changed_cell_matches_existing_row_and_reassign(self):
         self._write(
             [
