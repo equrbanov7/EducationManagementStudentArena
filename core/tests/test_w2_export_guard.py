@@ -40,6 +40,9 @@ ALLOWED: dict[str, dict[str, int]] = {
     # 2026-10-11: Forma 7 tutuşdurması — `--details` CSV yalnız operatorun diskinə (şifrəli artifakt).
     "apps/accounts/management/commands/reconcile_teacher_roster.py": {"csv_writer": 1},
     "apps/accounts/management/commands/seed_staff_roster.py": {"csv_writer": 1},
+    # 2026-10-11: Forma 7 `--create-missing --credentials-out` — birdəfəlik parollar YALNIZ operatorun 0600
+    # faylına (seed_staff_roster ilə eyni); neytrallaşdırma «=»/«-» ilə başlayan parolu pozardı.
+    "apps/accounts/services/teacher_roster/create.py": {"csv_writer": 1},
     # İdxal şablonları — başlıq/ipucu sabitləri (istifadəçi mətni yoxdur).
     "apps/accounts/services/intake/spec.py": {"csv_writer": 1, "sheet_append": 2},
     "apps/accounts/services/intake/teachers.py": {"csv_writer": 1, "sheet_append": 2},

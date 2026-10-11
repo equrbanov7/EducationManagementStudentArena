@@ -43,7 +43,9 @@ User = get_user_model()
 #: User modelindəki sahələr.
 USER_FIELDS = ("first_name", "last_name", "email")
 #: UserProfile-dakı sahələr.
-PROFILE_FIELDS = ("patronymic", "phone", "fin")
+#: Sahib 2026-10-11: «Vəzifə» (profil kartındakı sərbəst mətn — heyət siyahısı idxalından gəlirdi, ekranda
+#: dəyişmək mümkün deyildi). Rol/üzvlük DEYİL — yalnız görünən vəzifə adıdır.
+PROFILE_FIELDS = ("patronymic", "phone", "fin", "staff_position")
 EDITABLE_FIELDS = USER_FIELDS + PROFILE_FIELDS
 
 FIELD_LABELS = {
@@ -53,6 +55,7 @@ FIELD_LABELS = {
     "email": "Email",
     "phone": "Telefon",
     "fin": "FİN",
+    "staff_position": "Vəzifə",
 }
 
 _MAX_LENGTHS = {
@@ -62,6 +65,7 @@ _MAX_LENGTHS = {
     "patronymic": 100,
     "phone": 20,
     "fin": 7,
+    "staff_position": 255,
 }
 
 #: FİN — kanonik forma `core.validators`-dadır (7 simvol, A-Z0-9, NULL-unique).
