@@ -202,6 +202,7 @@ def _population(organization, academic_year: str):
 def _admin_memberships(organization, user_ids) -> dict:
     """İnzibati vəzifələr: user → [{role, label, unit, unit_id, title, since}] (1 sorğu, rol səviyyəsinə görə)."""
     from apps.organizations.models import Membership
+    from core.staff_position import visible_role_label
 
     out = defaultdict(list)
     rows = (
@@ -227,7 +228,8 @@ def _admin_memberships(organization, user_ids) -> dict:
         out[row["user_id"]].append(
             {
                 "role": row["role__name"],
-                "label": row["role__display_name"] or row["role__name"],
+                # Seed-dən ingiliscə qalmış ad («Dean») → AZ etiket («Dekan»); admin dəyişdiyi ada toxunulmur.
+                "label": visible_role_label(row["role__name"], row["role__display_name"]) or row["role__name"],
                 "unit_id": str(row["scope_unit_id"] or ""),
                 "unit": row["scope_unit__name"] or "",
                 "title": row["title"] or "",
