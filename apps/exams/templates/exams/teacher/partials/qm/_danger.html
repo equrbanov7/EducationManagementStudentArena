@@ -1,0 +1,145 @@
+{% load i18n %}
+{% comment %}«Təhlükəli əməliyyatlar» zonası + gizli POST formaları (sahib 2026-10-10): geri qaytarılmayan
+əməllər əsas əməlin yanında deyil, səhifənin sonundadır; «Bütün sual bankını sil» imtahanın adını
+yazmaqla təsdiqlənir. POST müqaviləsi (bulk_action=delete_all/delete_language, bankın silinməsi)
+dəyişməyib; JS: teacher_questions_bank.js (+ bankManagement.js bank səhifəsində).{% endcomment %}
+{% if qm_show_delete_all or qm_context == 'bank' and qm_is_owner or language_filter and qm_can_delete_language or language_filter and qm_is_owner %}
+<section class="ems-card etp-danger eqb-danger" aria-labelledby="qmDangerTitle">
+    <div class="ems-card__head">
+        <div>
+            <h2 class="ems-card__title" id="qmDangerTitle"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "Təhlükəli əməliyyatlar" context "exams.template.teacher_questions_bank" %}</h2>
+            <p class="ems-card__sub">{% trans "Bu əməliyyatlar geri qaytarılmır." context "exams.template.teacher_questions_bank" %}</p>
+        </div>
+    </div>
+    <div class="ems-card__body">
+        {% if language_filter and qm_show_language_filter %}{% if qm_can_delete_language or qm_is_owner %}
+        <div class="etp-danger__row">
+            <p class="etp-danger__text">
+                <strong>{% trans "Bu dildəki bütün sualları sil" context "exams.template.teacher_questions_bank" %}</strong><br>
+                {% trans "Hazırkı dil" context "exams.template.teacher_questions_bank" %}: {% for code, label in language_choices %}{% if code == language_filter %}{{ label }}{% endif %}{% endfor %} — {% trans "bu dildə" context "exams.template.teacher_questions_bank" %} <b class="etp-num">{{ total_questions }}</b> {% trans "sual" context "exams.template.teacher_questions_bank" %}.
+            </p>
+            <button type="button" class="ems-btn etp-btn--danger-soft js-delete-language" data-language="{{ language_filter }}" data-count="{{ total_questions }}">
+                <i class="fas fa-trash" aria-hidden="true"></i>{% trans "Dil üzrə sil" context "exams.template.teacher_questions_bank" %}
+            </button>
+        </div>
+        {% endif %}{% endif %}
+        {% if qm_show_delete_all %}
+        <div class="etp-danger__row">
+            <p class="etp-danger__text">
+                <strong>{% trans "Bütün sual bankını sil" context "exams.template.teacher_questions_bank" %}</strong><br>
+                {% trans "İmtahanın bütün sualları həmişəlik silinir. Təsdiq üçün imtahanın adını yazmaq lazımdır." context "exams.template.teacher_questions_bank" %}
+            </p>
+            <button type="button" class="ems-btn etp-btn--danger-soft js-delete-all-questions" data-count="{{ all_questions_total|default:total_questions }}">
+                <i class="fas fa-trash" aria-hidden="true"></i>{% trans "Bütün sual bankını sil" context "exams.template.teacher_questions_bank" %}
+            </button>
+        </div>
+        {% endif %}
+        {% if qm_context == 'bank' and qm_is_owner %}
+        <div class="etp-danger__row">
+            <p class="etp-danger__text">
+                <strong>{% trans "Bankı sil" %}</strong><br>
+                {% trans "Bank və içindəki bütün suallar həmişəlik silinir." context "exams.template.teacher_questions_bank" %}
+            </p>
+            <button type="button" class="ems-btn etp-btn--danger-soft js-delete-bank">
+                <i class="fas fa-trash" aria-hidden="true"></i>{% trans "Bankı sil" %}
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<form method="post" id="singleDeleteForm" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" value="delete">
+    <input type="hidden" name="selected_question_ids" id="singleDeleteQuestionId" value="">
+    {% include "exams/teacher/partials/qm/_state_fields.html" %}
+</form>
+
+<form method="post" id="singleQuestionActionForm" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" id="singleQuestionActionValue" value="">
+    <input type="hidden" name="selected_question_ids" id="singleQuestionActionQuestionId" value="">
+    {% include "exams/teacher/partials/qm/_state_fields.html" %}
+</form>
+
+{% if qm_context == 'bank' and qm_is_owner %}
+<form method="post" id="bankDeleteForm" action="{{ qm_delete_url }}" hidden>{% csrf_token %}</form>
+{% endif %}
+
+{% if qm_show_language_filter and qm_can_delete_language or qm_context == 'bank' and qm_is_owner %}
+<form method="post" id="questionLangDeleteForm" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" value="delete_language">
+    <input type="hidden" name="language" id="questionLangDeleteValue" value="">
+    {% include "exams/teacher/partials/qm/_state_fields.html" with skip_language=True %}
+</form>
+{% endif %}
+
+{% if qm_show_delete_all %}
+<form method="post" id="questionBankDeleteAllForm" hidden>
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" value="delete_all">
+    {% include "exams/teacher/partials/qm/_state_fields.html" %}
+</form>
+
+{# Yazılı təsdiq: düymə yalnız imtahanın adı düz yazılanda aktivləşir. #}
+<div class="modal fade etp-modal" id="qbTypedConfirmModal" tabindex="-1" aria-hidden="true" aria-labelledby="qbTypedConfirmTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" data-qb-typed-form data-phrase="{{ exam.title }}" novalidate>
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="qbTypedConfirmTitle"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "Bütün sual bankını sil" context "exams.template.teacher_questions_bank" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p data-qb-typed-body data-template="{% trans 'İmtahanın {count} sualı həmişəlik silinəcək. Bu əməliyyat geri qaytarılmır.' context 'exams.template.teacher_questions_bank' %}"></p>
+                <label class="etp-label" for="qbTypedConfirmInput">{% trans "Təsdiq üçün imtahanın adını yazın" context "exams.template.teacher_questions_bank" %}: <strong class="eqb-phrase">{{ exam.title }}</strong></label>
+                <input type="text" class="ems-input" id="qbTypedConfirmInput" autocomplete="off" spellcheck="false" data-qb-typed-input>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "action_cancel" context "exams.template.teacher_questions_bank" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger" data-qb-typed-ok disabled>{% trans "Hamısını sil" context "exams.template.teacher_questions_bank" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if qm_context == 'bank' and qm_is_owner %}
+<div class="modal fade etp-modal" id="bankEditModal" tabindex="-1" aria-hidden="true" aria-labelledby="bankEditTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{{ qm_update_url }}" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="bankEditTitle">{% trans "Bankı redaktə et" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
+            </div>
+            <div class="modal-body eqb-edit">
+                <div><label class="etp-label" for="editBankName">{% trans "Bankın adı" %}<span class="etp-req" aria-hidden="true">*</span></label>
+                    <input type="text" class="ems-input" id="editBankName" name="name" value="{{ bank.name }}" required></div>
+                <div><label class="etp-label" for="editBankSubject">{% trans "Fənn / Mövzu" %}</label>
+                    <input type="text" class="ems-input" id="editBankSubject" name="subject" value="{{ bank.subject }}"></div>
+                <div class="eqb-edit__row">
+                    <div><label class="etp-label" for="editBankLanguage">{% trans "Əsas dil" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="editBankLanguage" name="language" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                                {% for code, label in language_choices %}<option value="{{ code }}" {% if bank.language == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                        </div></div>
+                    <div><label class="etp-label" for="editBankFormat">{% trans "Standart format" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="editBankFormat" name="default_question_type" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                                {% for value, label in qm_default_type_choices %}<option value="{{ value }}" {% if bank.default_question_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                        </div></div>
+                </div>
+                <label class="eqb-edit__switch"><input type="checkbox" name="is_shared" value="1" {% if bank.is_shared %}checked{% endif %}> <span>{% trans "Təşkilatda paylaş" %}</span></label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "İmtina" %}</button>
+                <button type="submit" class="ems-btn ems-btn--primary">{% trans "Yadda saxla" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}

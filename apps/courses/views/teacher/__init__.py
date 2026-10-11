@@ -1,7 +1,7 @@
 """Müəllim/owner səthi (F3 rol-skeleti, 2026-07-02)."""
 
 from .ai import CourseAIApplyView, CourseAIPlanView
-from .crud import CreateCourseView, DeleteCourseView, EditCourseView, MyCoursesListView, update_course_status
+from .crud import CreateCourseView, DeleteCourseView, EditCourseView, update_course_status
 from .groups import AddMembersBulkView, AvailableGroupsView, DeleteGroupFromCourseView
 from .membership import (
     AddMemberView,
@@ -20,7 +20,6 @@ __all__ = [
     "CreateCourseView",
     "EditCourseView",
     "DeleteCourseView",
-    "MyCoursesListView",
     "update_course_status",
     "AddTopicView",
     "EditTopicView",

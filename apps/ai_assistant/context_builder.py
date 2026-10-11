@@ -13,6 +13,7 @@ import logging
 
 from django.utils.translation import get_language
 
+from core.academic_rules import available_exams_page_enabled
 from core.permissions import is_superadmin_user
 
 logger = logging.getLogger(__name__)
@@ -80,27 +81,11 @@ _PAGE_CONTEXT_MAP = [
         },
     ),
     (
-        r"/exams/assigned/?$",
-        {
-            "name": "Təyin Edilmiş İmtahanlar / Assigned Exams",
-            "description": "Shows exams specifically assigned to this user by a teacher or admin.",
-            "hints": "These are mandatory exams the user must complete. Shows deadline, status, and allows starting the exam.",
-        },
-    ),
-    (
         r"/exams/my-history/?$",
         {
             "name": "İmtahan Tarixçəsi / Exam History",
             "description": "Shows the user's past exam attempts and results.",
             "hints": "User can review scores, see correct/wrong answers, track progress over time, and retake exams if allowed.",
-        },
-    ),
-    (
-        r"/exams/pending-work/?$",
-        {
-            "name": "Gözləyən Yoxlamalar / Pending Reviews",
-            "description": "Exams waiting for teacher review and grading.",
-            "hints": "Teachers can review submitted exam attempts, grade open-ended questions, and provide feedback.",
         },
     ),
     (
@@ -125,14 +110,6 @@ _PAGE_CONTEXT_MAP = [
             "name": "İmtahan Detalları / Exam Details",
             "description": "Detailed view of a specific exam.",
             "hints": "Shows exam info, questions, settings. Teachers can edit the exam. Students can start or view results.",
-        },
-    ),
-    (
-        r"/courses/(?:my-courses|my-enrolled)/?$",
-        {
-            "name": "Kurslarım / My Courses",
-            "description": "Lists courses the user teaches or is enrolled in.",
-            "hints": "Users can view course materials, access course exams, see enrolled students (teachers), and track progress.",
         },
     ),
     (
@@ -283,8 +260,11 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
 
     lines.append(f"- Organization dashboard: /organizations/{slug}/")
 
+    # URL auditi A8/A12/§4 (2026-10-10): köhnə müstəqil siyahılar (`/courses/my-courses/`,
+    # `/courses/my-enrolled/`, `/exams/assigned/`, `/exams/pending-work/`) silindi və ya
+    # yönləndirir — köməkçi kanonik kabinet bölmələrini təklif edir.
     if request_has_permission_from_list(permissions, "course.view"):
-        lines.append("- My courses: /courses/my-courses/")
+        lines.append("- My courses: /accounts/profile/?section=my-courses")
 
     if request_has_permission_from_list(permissions, "course.create"):
         lines.append("- Create course: /courses/create_course/")
@@ -310,14 +290,17 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
     # Student-specific pages
     is_student = _has_student_role(memberships)
     if is_student:
-        lines.append("- Available exams: /exams/available/")
-        lines.append("- Assigned exams: /exams/assigned/")
+        # Sahib 2026-10-10: «Mövcud imtahanlar» bağlıdırsa köməkçi onu təklif etməsin.
+        if available_exams_page_enabled():
+            lines.append("- Available exams: /exams/available/")
+        lines.append("- Assigned exams: /accounts/profile/?section=assigned-exams")
+        lines.append("- Assigned courses: /accounts/profile/?section=assigned-courses")
         lines.append("- Exam history: /exams/my-history/")
 
     # Teacher-specific pages
     is_teacher = _has_teacher_role(memberships)
     if is_teacher:
-        lines.append("- Pending exam reviews: /exams/pending-work/")
+        lines.append("- Pending reviews: /accounts/profile/?section=pending-review")
         # 2026-09-14: imtahanlar reyestr qruplarına təyin olunur; köhnə kohort səhifəsi
         # yalnız kohortu olan tenantlar üçündür — köməkçi reyestrə yönləndirir.
         lines.append("- Groups registry (exam assignment via wizard): /accounts/profile/?section=groups-registry")

@@ -1,0 +1,43 @@
+{% load i18n %}
+{% comment %}
+Önizləmə → səbəb → təsdiq dialoqu (`ems_ui/overlay.js`: fokus tələsi, Escape, səbəb ≥20 simvol sayğacı).
+Önizləmənin xülasəsi (`[data-jh-preview]`) JS ilə qurulur; «Bərpa et» üçün eyni dialoq xülasəsiz açılır.
+{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="jh-dialog" hidden data-ems-static="true">
+    <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="jh-dialog-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="jh-dialog-title" data-jh-dialog-title></h2>
+                <p class="ems-dialog__sub" data-jh-dialog-sub></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <div class="jh-preview" data-jh-preview aria-live="polite"></div>
+            <p class="ems-msg ems-msg--error jh-dialog__error" data-jh-dialog-error role="alert" hidden></p>
+            <div class="ems-reason" data-ems-min-length="{{ jh.min_reason }}">
+                <div class="ems-field">
+                    <label class="ems-field__label" for="jh-reason">
+                        {% trans "Səbəb" context "accounts.journal_hygiene" %} <span class="ems-field__req" aria-hidden="true">*</span>
+                    </label>
+                    <textarea class="ems-textarea" id="jh-reason" rows="3" required minlength="{{ jh.min_reason }}" maxlength="2000"
+                              aria-describedby="jh-reason-hint"
+                              placeholder="{% trans 'Məs.: Rektorun 12.09.2026 tarixli xaric əmrləri əsasında jurnallar təmizlənir.' context 'accounts.journal_hygiene' %}"></textarea>
+                </div>
+                <p class="ems-reason__hint" id="jh-reason-hint"
+                   data-hint="{% trans 'Səbəb qərar tarixçəsinə və audit jurnalına yazılır.' context 'accounts.journal_hygiene' %}"
+                   data-hint-invalid="{% trans 'Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil.' context 'accounts.journal_hygiene' %}">{% trans "Səbəb qərar tarixçəsinə və audit jurnalına yazılır." context "accounts.journal_hygiene" %}</p>
+            </div>
+        </div>
+        <div class="ems-dialog__foot">
+            <span class="ems-dialog__foot-note ems-reason__counter" aria-hidden="true">0 / {{ jh.min_reason }}</span>
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "ui.dialog" %}</button>
+            <button type="button" class="ems-btn ems-btn--primary" data-jh-repreview hidden>
+                <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Yenidən önizlə" context "accounts.journal_hygiene" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--danger" data-jh-confirm disabled aria-disabled="true">
+                {% trans "Təsdiqlə" context "accounts.journal_hygiene" %}
+            </button>
+        </div>
+    </div>
+</div>

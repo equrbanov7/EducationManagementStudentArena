@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Profil məlumatları» — HƏR rolda görünür (şərtsiz).
 
 `sidebar/items/` qovluğu (2026-09-25): hər fayl BİR menyu bəndidir və həm
@@ -13,7 +13,7 @@ bir-birindən ayrıla bilmir.{% endcomment %}
        data-title="{% trans 'profile_info' context 'profile.section' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'profile-info' %}active{% endif %}">
-        <i class="fas fa-user sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "user-round" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "profile_info" context "profile.sidebar" %}</span>
     </a>
 </li>

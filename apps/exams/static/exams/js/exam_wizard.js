@@ -316,6 +316,25 @@
            Addım 1 (əsaslar): ad, imtahan növü (kateqoriya), fənn.
            Addım 2 (vaxt): başlama və son təhvil vaxtı.
            Sahə boş qalarsa növbəti addıma keçid bağlanır. */
+        /* Fənn yalnız Final/Midterm kateqoriyasında məcburidir (sahib 2026-10-11) — ulduz da ona görə görünür. */
+        var SUBJECT_REQUIRED_CATEGORIES = ["final", "midterm"];
+        function subjectRequired() {
+            var category = form.querySelector('[name="exam_type_extended"]');
+            return !!category && SUBJECT_REQUIRED_CATEGORIES.indexOf(category.value) !== -1;
+        }
+        function syncSubjectRequired() {
+            var star = form.querySelector("[data-ew-subject-req]");
+            if (star) {
+                star.hidden = !subjectRequired();
+            }
+            if (!subjectRequired()) {
+                var group = form.querySelector("[data-ew-subject-group]");
+                if (group && group.querySelector("[data-ew-transient]")) {
+                    clearTransientError(group);
+                }
+            }
+        }
+
         function validateStep(index) {
             var firstInvalid = null;
 
@@ -343,11 +362,15 @@
                     form.querySelector('[name="exam_type_extended"]'),
                     i18n("categoryRequired", gettext("Kateqoriyanı seçin."))
                 );
-                requireField(
-                    form.querySelector("[data-exam-subject-native]"),
-                    i18n("subjectRequired", gettext("Fənn seçilməlidir.")),
-                    form.querySelector("#createExamSubjectSearch")
-                );
+                /* Sahib 2026-10-11: fənn yalnız Final/Midterm-də məcburidir (jurnala bal yazılır — server
+                   `ExamForm.clean` ilə eyni qayda); Sınaq və digərlərində fənnə bağlamaq istəyə görədir. */
+                if (subjectRequired()) {
+                    requireField(
+                        form.querySelector("[data-exam-subject-native]"),
+                        i18n("subjectRequired", gettext("Fənn seçilməlidir.")),
+                        form.querySelector("#createExamSubjectSearch")
+                    );
+                }
             } else if (index === 1) {
                 var startInput = form.querySelector('[name="start_datetime"]');
                 var endInput = form.querySelector('[name="end_datetime"]');
@@ -418,6 +441,12 @@
         }
         form.addEventListener("input", clearOnFix);
         form.addEventListener("change", clearOnFix);
+        form.addEventListener("change", function (event) {
+            if (event.target && event.target.name === "exam_type_extended") {
+                syncSubjectRequired();
+            }
+        });
+        syncSubjectRequired();
         if (backBtn) {
             backBtn.addEventListener("click", function () {
                 goTo(current - 1);

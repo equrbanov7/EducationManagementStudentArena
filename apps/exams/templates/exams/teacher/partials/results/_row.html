@@ -1,0 +1,100 @@
+{% load i18n exam_filters %}
+{% comment %}Nəticələr cədvəlinin bir sətri (item = view-dəki attempts_data elementi).
+JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
+`.js-attempt-checkbox` / `.js-single-delete-attempt` (results_bulk_actions.js).{% endcomment %}
+{% with att=item.attempt %}
+<tr data-seconds-remaining="{{ item.countdown_seconds|default:0 }}"{% if item.intervention and item.intervention.is_terminal %} class="etr-row--removed"{% endif %}>
+    {% if can_delete_attempts %}
+    <td class="etr-col-check">
+        {% if item.can_delete_attempt %}
+            <input type="checkbox" class="etr-check js-attempt-checkbox" value="{{ att.id }}"
+                   aria-label="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} — {% trans 'Seç' context 'accounts.a11y' %}">
+        {% else %}
+            <span class="etr-muted" title="{% trans 'Akademik tarixçə qorunur' %}"><i class="fas fa-lock" aria-hidden="true"></i><span class="visually-hidden">{% trans "Akademik tarixçə qorunur" %}</span></span>
+        {% endif %}
+    </td>
+    {% endif %}
+    <td class="etp-num etr-muted">{{ forloop.counter0|add:page_obj.start_index }}</td>
+    <th scope="row" class="etr-user">
+        {% if item.can_view_name %}
+            <span class="etr-user__name">{{ item.real_name }}</span>
+        {% else %}
+            <span class="etr-user__name etr-user__name--anon">{{ item.anonymous_name }}</span>
+            <span class="etr-user__meta">{% trans "label_anonymous_view" context "exams.template.teacher_exam_results" %}</span>
+        {% endif %}
+    </th>
+    <td>{% if item.can_view_name %}<span class="ems-mono">@{{ att.user.username }}</span>{% else %}<span class="etr-muted">—</span>{% endif %}</td>
+    <td>{% if item.can_view_name and att.user.email %}<span class="etr-email">{{ att.user.email }}</span>{% else %}<span class="etr-muted">—</span>{% endif %}</td>
+    <td>
+        <div class="etr-status">
+        {% if item.intervention and item.intervention.is_terminal %}
+            <span class="ems-badge ems-badge--danger"><i class="fas fa-user-slash" aria-hidden="true"></i>{% trans "badge_removed" context "exams.template.teacher_exam_results" %}</span>
+            {% if item.intervention.reason %}<span class="etr-reason" title="{{ item.intervention.reason }}">{{ item.intervention.reason }}</span>{% endif %}
+        {% elif att.status == 'expired' %}
+            <span class="ems-badge ems-badge--muted"><i class="fas fa-hourglass-end" aria-hidden="true"></i>{{ att.get_status_display }}</span>
+        {% elif exam.exam_type == 'test' or att.checked_by_teacher %}
+            <span class="ems-badge ems-badge--success"><i class="fas fa-circle-check" aria-hidden="true"></i>{{ att.get_status_display }}</span>
+        {% else %}
+            <span class="ems-badge ems-badge--info"><i class="fas fa-circle-half-stroke" aria-hidden="true"></i>{{ att.get_status_display }}</span>
+        {% endif %}
+        {% if att.checked_by_teacher %}
+            <span class="ems-badge ems-badge--primary"><i class="fas fa-check-double" aria-hidden="true"></i>{% trans "badge_checked" context "exams.template.teacher_exam_results" %}</span>
+        {% endif %}
+        </div>
+    </td>
+    {% if exam.exam_type == 'test' %}
+        <td class="etp-num etr-num etr-num--ok">{{ item.test_result.correct_count }}<span class="etr-of">/{{ item.test_result.delivered_count }}</span></td>
+        <td class="etp-num etr-num etr-num--bad">{{ item.test_result.wrong_count }}<span class="etr-of">/{{ item.test_result.delivered_count }}</span></td>
+        <td class="etp-num etr-num">{{ item.test_result.unanswered_count }}</td>
+        <td class="etp-num etr-num">
+            <strong>{{ item.test_result.score_display }}</strong><span class="etr-of">/{{ item.test_result.max_score_display }}</span>
+            {% if item.appeal_bonus %}
+                <span class="ems-badge ems-badge--info etr-bonus" title="{% blocktrans with bonus=item.appeal_bonus|floatformat:"-2" %}Apellyasiya ilə +{{ bonus }} bal əlavə olunub{% endblocktrans %}">+{{ item.appeal_bonus|floatformat:"-2" }}</span>
+            {% endif %}
+        </td>
+        <td class="etp-num etr-num etr-num--accent"><strong>{{ item.test_result.percentage_display }}%</strong></td>
+    {% else %}
+        <td class="etp-num etr-num etr-num--ok">{{ att.correct_count }}<span class="etr-of">/{{ item.delivered_count }}</span></td>
+        <td class="etp-num etr-num etr-num--bad">{{ att.wrong_count }}<span class="etr-of">/{{ item.delivered_count }}</span></td>
+    {% endif %}
+    {% if exam.exam_type == 'written' or exam.exam_type == 'coding' %}
+        <td class="etp-num etr-num"><strong>{{ att.teacher_score|default:0 }}</strong></td>
+    {% endif %}
+    <td class="etp-num">{{ att.started_at|date:"d.m.Y H:i" }}</td>
+    <td class="etp-num">
+        {% if item.effective_finish %}
+            {{ item.effective_finish|date:"d.m.Y H:i" }}
+            {% if item.finish_inferred %}<span class="etr-tag" title="{% trans 'Tələbə imtahanı bitirməyib — müddət bitmə vaxtı göstərilir' %}">{% trans "avto" context "exams.template.teacher_exam_results" %}</span>{% endif %}
+        {% else %}<span class="etr-muted">—</span>{% endif %}
+    </td>
+    <td class="etp-num">{% if item.effective_duration_seconds %}{{ item.effective_duration_seconds|format_duration_clock }}{% else %}<span class="etr-muted">—</span>{% endif %}</td>
+    <td class="etr-col-actions">
+        <div class="etr-actions">
+            <a href="{{ item.action_url }}" class="ems-btn{% if item.action_code != 'view' %} ems-btn--primary{% endif %}">
+                <i class="fas {% if item.action_code == 'view' %}fa-eye{% elif item.action_code == 'recheck' %}fa-pen-to-square{% else %}fa-clipboard-check{% endif %}" aria-hidden="true"></i>{{ item.action_label }}
+            </a>
+            {% if item.countdown_seconds %}
+                <span class="etr-countdown" title="{% if item.countdown_mode == 'recheck' %}{% trans 'Yenidən yoxlama üçün qalan vaxt' context 'exams.template.teacher_exam_results' %}{% else %}{% trans 'Ad gizli qalacaq müddət' context 'exams.template.teacher_exam_results' %}{% endif %}">
+                    <i class="fas {% if item.countdown_mode == 'recheck' %}fa-clock{% else %}fa-user-secret{% endif %}" aria-hidden="true"></i>
+                    <span class="timer-display">--:--</span>
+                </span>
+            {% endif %}
+            {% if can_delete_attempts and item.can_delete_attempt %}
+                <button type="button" class="ems-btn etp-btn--danger-soft js-single-delete-attempt" data-attempt-id="{{ att.id }}">
+                    <i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete" context "exams.template.teacher_exam_results" %}
+                </button>
+            {% endif %}
+            {% if item.attempts_left is not None %}
+                <form method="post" action="{% url 'exams:grant_extra_attempt' slug=exam.slug %}" class="etr-inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="student_id" value="{{ item.student_id }}">
+                    <button type="submit" class="ems-btn ems-btn--ghost" title="{% trans 'grant_extra_attempt_hint' context 'exams.template.teacher_exam_results' %}">
+                        <i class="fas fa-rotate-right" aria-hidden="true"></i>{% trans "grant_extra_attempt" context "exams.template.teacher_exam_results" %}
+                        <span class="etr-muted">({% trans "attempts_left_short" context "exams.template.teacher_exam_results" %}: {{ item.attempts_left }})</span>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </td>
+</tr>
+{% endwith %}

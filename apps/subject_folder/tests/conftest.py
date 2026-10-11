@@ -20,6 +20,17 @@ def _isolated_media(settings, tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def selfwork_rule(settings):
+    """Bu dəst sərbəst iş mexanizmini (slot, qəbul, bal, jurnal sinxronu) yoxlayır.
+
+    Sahib 2026-10-10: yeni qayda dövrlərində (fixture dövrü 2026/2027) sərbəst iş defoltda SÖNDÜRÜLÜDÜR —
+    burada RİM «Sistem tənzimləmələri» onu yandırmış kimi işləyir (geri qaytarılabilənlik: kod yenidən
+    yazılmadan qayıdır). Söndürülü qaydanı yoxlayan modul bu fixture-u eyni adla əvəzləyir
+    (``test_selfwork_rule_2026_10_10.py``)."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True
+
+
+@pytest.fixture(autouse=True)
 def _no_real_journal_hook(monkeypatch):
     """Registrar-ın REAL hook-u (paralel inkişafda ola/olmaya bilər) bu testlərə qarışmasın:
     default «hook yoxdur»; müqavilə testləri hook-u açıq ötürür və ya modul siyahısını qaytarır."""

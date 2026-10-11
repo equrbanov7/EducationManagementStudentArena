@@ -172,13 +172,7 @@ EXPECTED = {
     ("exams.partial.exam_modals", "action_close"): {"ru": "Закрыть", "tr": "Kapat"},
     # F2 — «Seçimi sıfırla» RU/TR-də «Sil» kimi görünürdü
     ("exams.template.test_question_bank", "action_deselect_all"): {"ru": "Снять выделение", "tr": "Seçimi temizle"},
-    # F3 — yoxlama linki 4 dildə «Geri/Back/Назад» idi
-    ("exams.template.teacher_pending_attempts", "action_check"): {
-        "az": "Yoxla",
-        "en": "Check",
-        "ru": "Проверить",
-        "tr": "Kontrol et",
-    },
+    # F3 — `exams/pending-work/` səhifəsi URL auditi A12 (2026-10-10) ilə silindi; açar mənbədən çıxdı.
     # F8 — mart ayı «Search/Поиск/Ara» idi
     ("abbrev. month", "March"): {"en": "March", "ru": "Март", "tr": "Mart"},
     ("alt. month", "March"): {"en": "March", "ru": "марта", "tr": "Mart"},

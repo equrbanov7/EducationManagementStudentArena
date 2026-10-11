@@ -348,10 +348,22 @@ class AttachmentAccessPolicyTest(_MediaSandbox):
         self.assertFalse(check_attachment_media_access(self.student, "academic_attachments/../avatars/a.png"))
 
     def test_public_profile_shows_chip_only_to_logged_in_viewers(self):
+        from apps.organizations.models import Membership, Organization
+        from core.constants import OrganizationType
+
         url = reverse("accounts:public_profile", args=[self.teacher.username])
+        # URL auditi B1 (2026-10-10): anonim baxış yoxdur — giriş səhifəsinə; məlumat sızmır.
         anonymous = self.client.get(url)
-        self.assertContains(anonymous, "CCNA")
-        self.assertNotContains(anonymous, self.pdf_item.attachment_url)
+        self.assertEqual(anonymous.status_code, 302)
+        self.assertNotIn("CCNA", anonymous.content.decode())
+        # Baxan hədəflə ortaq təşkilatın aktiv üzvü olmalıdır.
+        org = Organization.objects.create(
+            name="Acad10 Univ", org_type=OrganizationType.UNIVERSITY, owner=self.teacher, status="active", is_active=True
+        )
+        for member, role in ((self.teacher, "teacher"), (self.student, "student")):
+            Membership.objects.create(
+                user=member, organization=org, role=org.roles.get(name=role), is_active=True, is_primary=True
+            )
         self.client.force_login(self.student)
         logged_in = self.client.get(url)
         self.assertContains(logged_in, self.pdf_item.attachment_url)

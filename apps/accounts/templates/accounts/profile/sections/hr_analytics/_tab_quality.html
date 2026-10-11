@@ -1,0 +1,21 @@
+{% load i18n %}
+{% comment %}Məlumat keyfiyyəti — hər problem üçün say, nümunə adlar və süzülmüş siyahıya keçid. Kontekst: `hr.quality`.{% endcomment %}
+<p class="hr-help">{% trans "Kadr məlumatındakı boşluqlar. «Siyahıya bax» həmin problemi olan müəllimləri «Müəllimlər» tabında açır. Elmi dərəcənin olmaması səhv deyil — yalnız qeydin tamlığını göstərir." context "accounts.hr_analytics" %}</p>
+<div class="hr-quality">
+    {% for item in hr.quality %}
+    <section class="ems-card hr-card hr-quality__card{% if item.count and item.critical %} is-critical{% elif item.count %} is-warning{% endif %}" aria-labelledby="hr-q-{{ item.key }}">
+        <header class="ems-card__head">
+            <h3 class="ems-card__title" id="hr-q-{{ item.key }}">{{ item.label }}</h3>
+            <span class="ems-badge {% if not item.count %}ems-badge--success{% elif item.critical %}ems-badge--danger{% else %}ems-badge--warning{% endif %}">{{ item.count }}</span>
+        </header>
+        <div class="ems-card__body">
+            {% if item.count %}
+            <p class="hr-quality__sample">{{ item.sample|join:", " }}{% if item.more %} {% blocktrans trimmed with more=item.more context "accounts.hr_analytics" %}və daha {{ more }} nəfər{% endblocktrans %}{% endif %}</p>
+            <a class="ems-btn ems-btn--sm" href="{{ item.url }}" data-section="hr-analytics">{% trans "Siyahıya bax" context "accounts.hr_analytics" %}</a>
+            {% else %}
+            <p class="hr-muted">{% trans "Problem yoxdur." context "accounts.hr_analytics" %}</p>
+            {% endif %}
+        </div>
+    </section>
+    {% endfor %}
+</div>

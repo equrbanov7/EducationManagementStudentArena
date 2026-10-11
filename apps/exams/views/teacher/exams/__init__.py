@@ -2,7 +2,6 @@
 
 from .actions import (  # noqa: F401
     delete_exam,
-    deleted_exams_list,
     duplicate_exam,
     permanent_delete_exam,
     restore_exam,
@@ -20,7 +19,6 @@ from .list_detail import (  # noqa: F401
 from .lookups import (  # noqa: F401
     assigned_student_count,
     bank_teacher_search,
-    exam_available_question_count,
     group_search,
     invigilator_search,
     subject_search,
@@ -33,11 +31,9 @@ __all__ = [
     "invigilator_search",
     "createAndEditExamView",
     "delete_exam",
-    "deleted_exams_list",
     "duplicate_exam",
     "permanent_delete_exam",
     "restore_exam",
-    "exam_available_question_count",
     "grant_extra_attempt",
     "grant_extra_attempt_group",
     "group_search",

@@ -1,21 +1,21 @@
-{% load i18n static %}
-{# Token teması (sahib 2026-09-21): başlıq/sahə rəngləri design-tokens üzərindən. #}
-<link rel="stylesheet" href="{% static 'exams/css/question_form_modal_theme.css' %}?v=20260921-theme">
-
-<div class="modal fade exam-create-edit-modal question-form-modal" id="questionFormModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+{% load i18n %}
+{% comment %}«Yeni sual əlavə et» / «Sualı redaktə et» modalının qabığı — gövdəni (_question_form.html)
+host səhifənin JS-i AJAX ilə yükləyir (teacher_exam_detail.js / teacher_questions_bank.js).
+2026-10-10 redizayn: açıq başlıq (dialoq üslubu), gövdə öz-özünə sürüşür, alt əməllər yapışqan;
+fokus bağlananda açan düyməyə qayıdır (host JS). CSS: exams/css/question_form{,_media,_answers}.css.{% endcomment %}
+<div class="modal fade qf-modal" id="questionFormModal" tabindex="-1" aria-hidden="true" aria-labelledby="questionFormModalTitle">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header question-form-modal__header question-form-modal__header--create text-white">
-                <h5 class="modal-title" id="questionFormModalTitle">
+            <div class="modal-header qf-modal__head">
+                <h2 class="modal-title qf-modal__title" id="questionFormModalTitle">
                     {% trans "heading_add_new_question" context "exams.template.add_exam_question" %}
-                </h5>
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal"
-                        aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}"></button>
+                </h2>
+                <button type="button" class="qf-modal__close" data-bs-dismiss="modal"
+                        aria-label="{% trans 'aria_close' context 'exams.template.create_exam_modal' %}">
+                    <i class="fas fa-xmark" aria-hidden="true"></i>
+                </button>
             </div>
-
-            <div class="modal-body" id="questionFormModalBody">
+            <div class="modal-body qf-modal__body" id="questionFormModalBody">
                 <div class="create-exam-modal-loading">
                     {% trans "loading_form" context "exams.template.create_exam_modal" %}
                 </div>

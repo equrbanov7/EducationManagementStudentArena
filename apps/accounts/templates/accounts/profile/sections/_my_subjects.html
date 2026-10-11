@@ -72,6 +72,19 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
             {% with w=sec.assessment_weights %}
             <section class="msx-guide__box" aria-labelledby="msx-weights-title">
                 <h2 class="msx-guide__title" id="msx-weights-title">{% trans "Qiymətləndirmə strukturu" context "profile.subjects" %}</h2>
+                {% if w.standard %}
+                {% comment %}Yeni qayda (sahib 2026-10-10, «Sistem tənzimləmələri»): giriş balının hesabdakı hissələri —
+                10 / 10 / 30 / 50; sərbəst iş yalnız RİM-də açıq olanda (onda midterm 20).{% endcomment %}
+                <ul class="msx-weights">
+                    <li class="msx-weight"><span>{% trans "Davamiyyət" context "profile.subjects" %}</span><b>{{ w.attendance }}</b></li>
+                    <li class="msx-weight"><span>{% trans "Aktivlik (seminar / laboratoriya)" context "profile.subjects" %}</span><b>{{ w.activity }}</b></li>
+                    <li class="msx-weight"><span>{% trans "Midterm" context "profile.subjects" %}</span><b>{{ w.midterm }}</b></li>
+                    {% if w.show_selfwork %}<li class="msx-weight"><span>{% trans "Sərbəst iş" context "profile.subjects" %}</span><b>{{ w.selfwork }}</b></li>{% endif %}
+                    <li class="msx-weight msx-weight--final"><span>{% trans "Yekun imtahan" context "profile.subjects" %}</span><b>{{ w.final }}</b></li>
+                    <li class="msx-weight msx-weight--total"><span>{% trans "Cəmi" context "profile.subjects" %}</span><b>{{ w.total }}</b></li>
+                </ul>
+                <p class="msx-guide__hint">{% if w.show_selfwork %}{% trans "Giriş balı = davamiyyət + aktivlik + midterm + sərbəst iş (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan." context "profile.subjects" %}{% else %}{% trans "Giriş balı = davamiyyət + aktivlik + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə seminar və laboratoriya varsa aktivlik 5 + 5 hesablanır." context "profile.subjects" %}{% endif %}</p>
+                {% else %}
                 <ul class="msx-weights">
                     <li class="msx-weight"><span>{% trans "Davamiyyət" context "profile.subjects" %}</span><b>{{ w.attendance }}</b></li>
                     <li class="msx-weight"><span>{% trans "Sərbəst iş" context "profile.subjects" %}</span><b>{{ w.selfwork }}</b></li>
@@ -80,6 +93,7 @@ yox; hədəf `style-src-attr`-dan tam çıxmaqdır, bax csp.py).{% endcomment %}
                     <li class="msx-weight msx-weight--total"><span>{% trans "Cəmi" context "profile.subjects" %}</span><b>{{ w.total }}</b></li>
                 </ul>
                 <p class="msx-guide__hint">{% trans "Giriş balı = davamiyyət + sərbəst iş + cari qiymətləndirmə (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan." context "profile.subjects" %}</p>
+                {% endif %}
             </section>
             {% endwith %}
             {% endif %}

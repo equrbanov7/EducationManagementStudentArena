@@ -24,6 +24,7 @@ from core.constants import AuditAction
 
 from ..constants import SectionKey, SyllabusStatus
 from ..models import ChangeKind, SyllabusVersion
+from ..rules import for_version as rule_for_version
 
 #: Dəyişməsi avtomatik MAJOR tələb edən bölmələr (jurnal strukturunun mənbəyi).
 STRUCTURAL_SECTIONS = (
@@ -34,6 +35,25 @@ STRUCTURAL_SECTIONS = (
 
 #: Audit qeydində və UI mesajında işlədilən səbəb kodu.
 ESCALATION_CODE = "version.structural_change_requires_major"
+
+#: ``assess`` bölməsinin SİSTEMİN yazdığı açarları: bal bölgüsü universitet standartıdır
+#: (sahib 2026-09-20 — müəllim seçmir) və qayda dəyişəndə (sahib 2026-10-10: midterm 20 → 30)
+#: server özü yeniləyir — bu, müəllimin struktur dəyişikliyi deyil, MAJOR-a qaldırmır.
+SYSTEM_ASSESS_KEYS = frozenset({"midterm", "project"})
+
+
+def comparable_section_data(section_id, data):
+    """Müqayisə üçün bölmə datası — ``assess``-in sistem açarları (``SYSTEM_ASSESS_KEYS``) atılır."""
+    if section_id == SectionKey.ASSESS.value and isinstance(data, dict):
+        return {key: value for key, value in data.items() if key not in SYSTEM_ASSESS_KEYS}
+    return data
+
+
+def structural_sections_for(version) -> tuple:
+    """Versiyanın qaydasında struktur bölmələri — sərbəst işsiz qaydada ``self`` yoxdur (gizli bölmə)."""
+    if rule_for_version(version, version.organization).selfwork:
+        return STRUCTURAL_SECTIONS
+    return tuple(key for key in STRUCTURAL_SECTIONS if key != SectionKey.SELF.value)
 
 
 def baseline_for(version):
@@ -64,7 +84,11 @@ def structural_changes(version, *, baseline=None) -> tuple:
         return ()
     old = {row.section_id: (row.data or {}) for row in base.sections.all()}
     new = {row.section_id: (row.data or {}) for row in version.sections.all()}
-    return tuple(key for key in STRUCTURAL_SECTIONS if old.get(key, {}) != new.get(key, {}))
+    return tuple(
+        key
+        for key in structural_sections_for(version)
+        if comparable_section_data(key, old.get(key, {})) != comparable_section_data(key, new.get(key, {}))
+    )
 
 
 def classify(version, *, baseline=None) -> str:
@@ -128,6 +152,9 @@ def escalate_if_structural(version, *, actor=None, request=None):
 __all__ = [
     "ESCALATION_CODE",
     "STRUCTURAL_SECTIONS",
+    "SYSTEM_ASSESS_KEYS",
+    "comparable_section_data",
+    "structural_sections_for",
     "baseline_for",
     "classify",
     "escalate_if_structural",

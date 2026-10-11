@@ -1,6 +1,8 @@
 """exam_center paketi — PIN axtarışı (canlı, debounce + modal).
 
-* ``exam_center_pin_lookup``  — səhifə qabığı (axtarış qutusu + boş nəticə + modal).
+* Səhifə qabığı kabinet bölməsidir (``?section=exam-center-pins``,
+  ``_pin_lookup_body.html``); müstəqil ``center/pin-lookup/`` səhifəsi URL auditi
+  A12 (2026-10-10) ilə silindi.
 * ``exam_center_pin_search``  — AJAX: ada/istifadəçi adına görə tələbələr (PIN YOX).
 * ``exam_center_student_pins``— AJAX: seçilmiş tələbənin final biletləri + PIN-ləri
   (modal üçün). PIN yalnız icazəli imtahan mərkəzinə açılır; hər açılış audit-ə
@@ -14,7 +16,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import OuterRef, Q, Subquery
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 
@@ -34,23 +35,6 @@ User = get_user_model()
 
 _SEARCH_LIMIT_DEFAULT = 15
 _SEARCH_LIMIT_MAX = 50
-
-
-@login_required
-def exam_center_pin_lookup(request):
-    """PIN axtarış səhifəsinin qabığı (data AJAX ilə gəlir)."""
-    from django.urls import reverse
-
-    organization = center_org_or_403(request)
-    return render(
-        request,
-        "exams/exam_center/pin_lookup.html",
-        {
-            "organization": organization,
-            "search_url": reverse("exams:exam_center_pin_search"),
-            "detail_url_template": reverse("exams:exam_center_student_pins", kwargs={"student_id": 0}),
-        },
-    )
 
 
 def _kafedra_subquery(organization):
@@ -282,4 +266,4 @@ def exam_center_student_pins(request, student_id):
     )
 
 
-__all__ = ["exam_center_pin_lookup", "exam_center_pin_search", "exam_center_student_pins"]
+__all__ = ["exam_center_pin_search", "exam_center_student_pins"]

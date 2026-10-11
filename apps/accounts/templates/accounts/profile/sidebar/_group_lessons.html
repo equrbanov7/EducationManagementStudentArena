@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Dərs və cədvəl» qrupu — GÜNDƏLİK tədris işi: cədvəl, təqvim, jurnal,
 keçilmiş dərslər, fənn təhvili və müəllimin ÖZ dərs yükü.
 
@@ -13,7 +13,7 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
 <li class="sidebar-menu-group" data-sidebar-group="lessons">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-schedule|schedule-manage|academic-calendar|my-journal|lessons-log|subject-folders|journal-close|teaching-handover|my-workload|" %} open{% endif %}>
         {% trans "Dərs və cədvəl" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-calendar-week" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="calendar-days" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_my_schedule.html" %}
             {% comment %}Cədvəl idarəetməsi — `schedule.manage` (proqram koordinatoru, RİM,
@@ -26,7 +26,7 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
                    data-title="{% trans 'Cədvəl idarəetməsi' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'schedule-manage' %}active{% endif %}">
-                    <i class="fas fa-calendar-plus sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "calendar-cog" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Cədvəl idarəetməsi" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -43,7 +43,7 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
                    data-section="journal-close"
                    data-title="{% trans 'Jurnal bağlama' context 'profile.sidebar' %}"
                    class="sidebar-menu-link {% if active_section == 'journal-close' %}active{% endif %}">
-                    <i class="fas fa-lock sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "book-lock" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Jurnal bağlama" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -58,7 +58,7 @@ olanlar (cədvəl idarəetməsi, jurnal bağlama, fənn təhvili) burada qalır.
                    data-title="{% trans 'Fənn təhvili' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'teaching-handover' %}active{% endif %}">
-                    <i class="fas fa-right-left sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "arrow-left-right" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Fənn təhvili" context "profile.sidebar" %}</span>
                 </a>
             </li>

@@ -68,8 +68,9 @@ fənnin jurnal detalına SPA dərin keçididir (`?section=my-journal&period=…&
     Nişan + keçid TƏK xanada qalır ki, 3 sütunlu sətir düzümü pozulmasın.{% endcomment %}
     <span class="dash-lesson__now">
       {% if row.is_now %}<span class="ems-badge ems-badge--success">{% trans "indi" context "accounts.dashboard" %}</span>{% endif %}
+      {% comment %}Sahib 2026-10-10: «Aktivləşdir» RİM tənzimləməsidir (defolt söndürülü) — ipucu ona görə.{% endcomment %}
       <a class="ems-btn ems-btn--sm" href="{{ row.url }}" target="_blank" rel="noopener" data-force-navigation="true"
-         title="{% trans 'Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın' context 'accounts.dashboard' %}">
+         title="{% if academic_rules.lesson_activation %}{% trans 'Bu fənnin jurnalını aç — bu günün dərsini oradan «Aktivləşdir» ilə açın' context 'accounts.dashboard' %}{% else %}{% trans 'Bu fənnin jurnalını aç — bu günün dərsini oradan «Yeni dərs» ilə açın (forma cədvəldən dolu gəlir)' context 'accounts.dashboard' %}{% endif %}">
         <i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Jurnalı aç" context "accounts.dashboard" %}
       </a>
     </span>

@@ -184,12 +184,11 @@ def _is_logout_path(path: str) -> bool:
 
 
 #: `/jurnal/` altında olan, amma elektron jurnal OLMAYAN şəxsi səhifələr — tələbə/müəllim
-#: öz dərs cədvəlini, təqvimini və transkriptini kənardan da görür (sahib 2026-09-25:
+#: öz dərs cədvəlini və transkriptini kənardan da görür (sahib 2026-09-25:
 #: «kənardan elektron jurnala girmək olmasın, başqa şeylərə olar»). Yalnız DƏQİQ yol;
-#: nginx `docker/nginx/nginx.conf`-da eyni siyahı saxlanır.
-JOURNAL_EXTERNAL_OPEN_PATHS = frozenset(
-    {"/jurnal/cedvel/", "/jurnal/cedvel/export.ics", "/jurnal/teqvim/", "/jurnal/transkript.pdf"}
-)
+#: nginx `docker/nginx/nginx.conf`-da eyni siyahı saxlanır. URL auditi A11 (2026-10-10):
+#: `teqvim/` (təqvim kabinetdədir) və `cedvel/export.ics` (iCal ləğv edildi) silindi.
+JOURNAL_EXTERNAL_OPEN_PATHS = frozenset({"/jurnal/cedvel/", "/jurnal/transkript.pdf"})
 
 
 def _journal_path(path: str) -> bool:

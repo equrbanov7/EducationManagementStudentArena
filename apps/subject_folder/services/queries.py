@@ -24,7 +24,7 @@ from ..models import (
     SubmissionEvent,
     SubmissionFile,
 )
-from . import access, lookups
+from . import access, lookups, selfwork_rule
 
 _PERSON_FIELDS = ("student__first_name", "student__last_name", "student__username")
 _ORDERINGS = {
@@ -91,8 +91,9 @@ def folder_contents(folder, *, actor) -> dict:
 
     Tələbə (idarə etməyən, əməkdaş olmayan) YALNIZ dərc edilmiş, gizli olmayan
     məzmunu görür; auditoriyada olmayan aktor → ``FolderError("permission.denied")``.
-    Nəticə: ``{"topics": [{"topic", "materials", "tasks"}], "general": {"materials", "tasks"},
-    "is_staff_view": bool, "can_manage": bool}``.
+    Sahib 2026-10-10: qovluğun dövründə sərbəst iş ləğv olunubsa sərbəst iş tapşırıqları HEÇ KİMƏ
+    göstərilmir (data qalır). Nəticə: ``{"topics": [{"topic", "materials", "tasks"}],
+    "general": {"materials", "tasks"}, "is_staff_view": bool, "can_manage": bool, "selfwork_active": bool}``.
     """
     staff_view = access.is_staff_viewer(actor, folder)
     if not staff_view and not access.is_folder_student(actor, folder):
@@ -108,6 +109,9 @@ def folder_contents(folder, *, actor) -> dict:
         tasks = tasks.filter(is_published=True, is_archived=False).filter(
             Q(topic__isnull=True) | Q(topic__is_archived=False)
         )
+    selfwork_active = selfwork_rule.folder_active(folder)
+    if not selfwork_active:
+        tasks = tasks.exclude(kind=TaskKind.SELFWORK)
     by_topic = {topic.pk: {"topic": topic, "materials": [], "tasks": []} for topic in topics}
     general = {"materials": [], "tasks": []}
     for material in materials:
@@ -119,6 +123,7 @@ def folder_contents(folder, *, actor) -> dict:
         "general": general,
         "is_staff_view": staff_view,
         "can_manage": access.can_manage_folder(actor, folder),
+        "selfwork_active": selfwork_active,
     }
 
 
@@ -296,6 +301,8 @@ def submission_detail(submission, *, actor) -> dict:
             .order_by("-score")
         )
     can_review = access.can_review_assignment(actor, submission.assignment)
+    if submission.kind == TaskKind.SELFWORK and not selfwork_rule.offering_active(submission.assignment.offering):
+        can_review = False  # sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə qərar yoxdur (yalnız oxu)
     actions = []
     if can_review and submission.is_current and submission.status == SubmissionStatus.SUBMITTED:
         actions = (

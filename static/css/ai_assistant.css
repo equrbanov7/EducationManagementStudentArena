@@ -14,6 +14,8 @@
     background: var(--ems-primary-600); color: var(--ems-neutral-0);
     box-shadow: 0 10px 26px rgba(37, 99, 235, 0.35);
     cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    /* 2026-10-10: sürüşdürülür (static/js/ai_assistant_fab.js) — toxunuş səhifəni sürüşdürməsin, mətn seçilməsin. */
+    touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
 .ai-bot-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(37, 99, 235, 0.4); }
 .ai-bot-btn:focus-visible { outline: 3px solid var(--ems-primary-300); outline-offset: 3px; }
@@ -100,12 +102,15 @@ body:has(.sticky-footer) .ai-bot-tooltip { bottom: 94px; }
     font-size: var(--ems-fs-2xs); font-weight: 700; white-space: nowrap;
 }
 .ai-chat-limit-badge[hidden] { display: none; }
-.ai-chat-close-btn {
+.ai-chat-close-btn,
+.ai-chat-hide-btn {
     flex: 0 0 auto; width: 32px; height: 32px; border: 0; border-radius: var(--ems-r-md);
     background: var(--ems-neutral-100); color: var(--ems-neutral-600); cursor: pointer; font-size: var(--ems-fs-md);
 }
 .ai-chat-close-btn:hover { background: var(--ems-danger-100); color: var(--ems-danger-700); }
-.ai-chat-close-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+.ai-chat-hide-btn:hover { background: var(--ems-primary-50); color: var(--ems-primary-700); }
+.ai-chat-close-btn:focus-visible,
+.ai-chat-hide-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
 
 /* ── Mesajlar ────────────────────────────────────────────────────────────── */
 .ai-chat-messages {
@@ -186,8 +191,10 @@ body:has(.sticky-footer) .ai-bot-tooltip { bottom: 94px; }
      yazma sahəsi 16px — iOS fokusda səhifəni böyütməsin. */
 html.ems-scroll-locked .ai-bot-btn,
 html.ems-scroll-locked .ai-bot-tooltip,
+html.ems-scroll-locked .ai-fab-restore,
 body:has(.blog-header__user-menu--open) .ai-bot-btn,
-body:has(.blog-header__user-menu--open) .ai-bot-tooltip {
+body:has(.blog-header__user-menu--open) .ai-bot-tooltip,
+body:has(.blog-header__user-menu--open) .ai-fab-restore {
     opacity: 0; visibility: hidden; pointer-events: none;
 }
 @media (max-width: 768px) {
@@ -210,8 +217,116 @@ body:has(.blog-header__user-menu--open) .ai-bot-tooltip {
     }
     .ai-chat-footnote { padding-bottom: max(10px, env(safe-area-inset-bottom)); }
 }
+/* ═══ Gizlətmək · sürüşdürmək · geri qaytarmaq (sahib 2026-10-10) ═══════════
+   «AI buttonu gizlətmə, yerini dəyişmək… bəzən hansısa button üstündə dayana bilir».
+   Davranış: static/js/ai_assistant_fab.js; seçim istifadəçinin brauzerindədir. */
+.ai-bot-btn[hidden], .ai-fab-restore[hidden], .ai-chat-hide-btn[hidden], .ai-fab-menu-item[hidden] { display: none; }
+/* Saxlanmış yer/gizlətmə JS ilə tətbiq olunana qədər düymə görünmür — defolt küncdə «sıçramır». */
+.ai-fab:not(.ai-fab--ready) .ai-bot-btn { visibility: hidden; }
+
+/* «×» düymənin içindədir (düymədə ikinci düymə olmaz): siçanla üzərinə gələndə və fokusda
+   görünür, toxunma ekranında həmişə. Sağdakı yellənən əli örtməsin deyə sol küncdədir. */
+.ai-bot-btn__hide {
+    position: absolute; top: -8px; left: -8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-neutral-900); color: var(--ems-neutral-0);
+    border: 2px solid var(--ems-bg); box-shadow: var(--ems-sh-raised); font-size: 11px; line-height: 1;
+    opacity: 0; transform: scale(0.6); pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+.ai-bot-btn:hover .ai-bot-btn__hide,
+.ai-bot-btn:focus-visible .ai-bot-btn__hide { opacity: 1; transform: none; pointer-events: auto; }
+.ai-bot-btn__hide:hover { background: var(--ems-danger-600); }
+@media (hover: none) {
+    .ai-bot-btn__hide { opacity: 1; transform: none; pointer-events: auto; }
+}
+/* Panel açıq / düymə kənara çəkilib — görünməz «×» toxunuşu tutmasın. */
+.ai-bot-btn--hidden .ai-bot-btn__hide,
+.ai-bot-btn--tucked .ai-bot-btn__hide { pointer-events: none; }
+
+/* Gizlədilmiş düymənin yerində nazik nişan (saxlanmış tərəfdə); basanda düymə qayıdır. */
+.ai-fab-restore {
+    position: fixed; right: 0; bottom: 22px; z-index: 1040;
+    display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+    width: 30px; padding: 10px 0 12px; border: 0; border-radius: 12px 0 0 12px;
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
+    font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.04em; line-height: 1;
+    cursor: pointer; opacity: 0.88; transition: opacity 0.15s ease, width 0.15s ease;
+}
+.ai-fab-restore:hover, .ai-fab-restore:focus-visible { opacity: 1; width: 34px; }
+.ai-fab-restore:focus-visible { outline: 3px solid var(--ems-primary-300); outline-offset: 2px; }
+.ai-fab-restore__icon { font-size: 13px; }
+.ai-fab-restore__text { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+body:has(.sticky-footer) .ai-fab-restore { bottom: 86px; }
+
+/* İstifadəçi menyusundakı açar (`[data-ai-fab-toggle]`, templates/partials/_navbar.html). */
+.ai-fab-menu-item__switch {
+    position: relative; flex: 0 0 auto; margin-left: auto;
+    width: 30px; height: 18px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-300); transition: background 0.15s ease;
+}
+.ai-fab-menu-item__switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--ems-neutral-0); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25); transition: transform 0.15s ease;
+}
+.ai-fab-menu-item[aria-checked="true"] .ai-fab-menu-item__switch { background: var(--ems-primary-600); }
+.ai-fab-menu-item[aria-checked="true"] .ai-fab-menu-item__switch::after { transform: translateX(12px); }
+
+/* Bildirişdəki «Geri qaytar» — JS `EMSToast.show()`-un qaytardığı elementə əlavə edir. */
+.ai-fab-undo-row { display: block; margin-top: 8px; }
+.ai-fab-undo {
+    padding: 5px 12px; border: 0; border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50); color: var(--ems-primary-700);
+    font: inherit; font-size: var(--ems-fs-sm); font-weight: 700; cursor: pointer;
+}
+.ai-fab-undo:hover { background: var(--ems-primary-100); }
+.ai-fab-undo:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+
+/* `env(safe-area-inset-*)` JS-dən oxunmur — zond onu padding kimi daşıyır (sıxma hesabı üçün). */
+.ai-fab__safe {
+    position: fixed; top: 0; left: 0; width: 0; height: 0; overflow: hidden;
+    visibility: hidden; pointer-events: none;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Yer: tərəf · hündürlük · sürüşdürmə ─────────────────────────────────
+   Vəziyyət `#ai-fab` kökündədir: `ai-fab--left/--right`, `ai-fab--placed` + `--ai-fab-y`
+   (seçilmiş `top`, px), `ai-fab--dragging` + `--ai-fab-x`. Seçicilər ID ilə yazılıb: səhifə
+   qaydaları (jurnal `body:has(.jd2) .ai-bot-btn`, profil redaktəsi `#ai-bot-btn { bottom }`,
+   yapışqan alt panel) yalnız DEFOLT yerə aiddir — istifadəçinin seçdiyi yer onları üstələyir. */
+#ai-fab.ai-fab--placed #ai-bot-btn { top: var(--ai-fab-y); bottom: auto; }
+#ai-fab.ai-fab--placed #ai-bot-tooltip { top: calc(var(--ai-fab-y) + 2px); bottom: auto; }
+#ai-fab.ai-fab--placed #ai-fab-restore { top: var(--ai-fab-tab-y, var(--ai-fab-y)); bottom: auto; }
+#ai-fab.ai-fab--left #ai-bot-btn { left: 22px; right: auto; }
+#ai-fab.ai-fab--left #ai-bot-tooltip { left: 88px; right: auto; transform: translateX(-8px); }
+#ai-fab.ai-fab--left #ai-bot-tooltip.ai-bot-tooltip--visible { transform: none; }
+#ai-fab.ai-fab--left #ai-bot-tooltip::after { left: -6px; right: auto; }
+#ai-fab.ai-fab--left #ai-fab-restore { left: 0; right: auto; border-radius: 0 12px 12px 0; }
+@media (min-width: 481px) {
+    /* ≤480px-də panel tam ekrandır — tərəf yalnız ondan geniş ekranda. */
+    #ai-fab.ai-fab--left #ai-chat-panel { left: 22px; right: auto; }
+}
+@media (max-width: 768px) {
+    #ai-fab.ai-fab--left #ai-bot-btn { left: max(12px, env(safe-area-inset-left)); }
+    #ai-fab.ai-fab--left #ai-bot-tooltip { left: calc(max(12px, env(safe-area-inset-left)) + 58px); }
+    #ai-fab.ai-fab--left #ai-bot-btn.ai-bot-btn--tucked { transform: translateX(calc(-100% - 16px)); }
+}
+/* Sürüşdürmə anı: düymə göstəricini izləyir. Ən sonda — eyni çəkili qaydaları üstələsin. */
+#ai-fab.ai-fab--dragging #ai-bot-btn {
+    left: var(--ai-fab-x); top: var(--ai-fab-y); right: auto; bottom: auto;
+    transform: scale(1.06); transition: none; cursor: grabbing;
+    box-shadow: 0 18px 36px rgba(37, 99, 235, 0.45);
+}
+#ai-fab.ai-fab--dragging #ai-bot-tooltip { opacity: 0; }
+@media print {
+    .ai-fab { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .ai-bot-btn, .ai-chat-panel, .ai-bot-tooltip { transition: none; }
+    .ai-bot-btn__hide, .ai-fab-restore, .ai-fab-menu-item__switch, .ai-fab-menu-item__switch::after { transition: none; }
     .ai-bot-btn--wave .ai-bot-btn__pulse, .ai-bot-btn--wave .ai-bot-btn__icon, .ai-typing-dot,
     .ai-bot-btn__hand, .ai-bot-btn__eye { animation: none; }
 }

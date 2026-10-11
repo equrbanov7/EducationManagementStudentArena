@@ -335,15 +335,14 @@ class SubmissionOwnershipIsolationTest(TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Test: Cross-Tenant Create, Delete-Submissions, Remove-Student
+# Test: Cross-Tenant Create, Delete-Submissions
 # ---------------------------------------------------------------------------
 
 
 class AssignmentCreateDeleteCrossTenantTest(TestCase):
     """
     Endpoints that accept a cross-tenant course_id or assignment_id must reject.
-    Covers: create_assignment via course_id tampering, delete_submissions,
-    and remove_student_from_assignment.
+    Covers: create_assignment via course_id tampering and delete_submissions.
     """
 
     def setUp(self):
@@ -407,15 +406,7 @@ class AssignmentCreateDeleteCrossTenantTest(TestCase):
         self.assertIn(response.status_code, (302, 403, 404))
         self.assertTrue(Submission.objects.filter(id=sub.id).exists())
 
-    # -- Remove student cross-tenant ------------------------------------------
-
-    def test_remove_student_cross_tenant_blocked(self):
-        """Teacher A cannot remove a student from Org B's assignment."""
-        _login_with_org(self.client, self.teacher_a, self.org_a)
-        url = reverse("assignments:remove_student_from_assignment", kwargs={"pk": self.assignment_b.id})
-        response = self.client.post(url, {"student_id": self.student_b.id})
-        self.assertIn(response.status_code, (403, 404))
-        self.assertTrue(self.assignment_b.assigned_students.filter(id=self.student_b.id).exists())
+    # WP9a (2026-10-10): `<pk>/remove-student/` silindi — çarpaz-tenant testi də.
 
 
 # ---------------------------------------------------------------------------

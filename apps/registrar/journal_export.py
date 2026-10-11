@@ -17,6 +17,7 @@ from io import BytesIO
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.registrar.journal_names import journal_student_name
 from core.export_safety import neutralise_cell, sheet_append
 
 
@@ -99,7 +100,8 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     ws.append([])  # boş sətir
 
     # Sütun başlıqları.
-    head = [pgettext("registrar.journal", "Soyad, ad")]
+    # Sahib 2026-10-10: jurnaldakı kimi «Soyad Ad Ata adı» (adı-soyadı eyni tələbələr ayrılsın).
+    head = [pgettext("registrar.journal", "Soyad, ad, ata adı")]
     head += [f"{i + 1}\n{lesson.date.strftime('%d.%m')}" for i, lesson in enumerate(lessons)]
     head += [pgettext("registrar.journal", "Qayıb (q/b)"), pgettext("registrar.journal", "Giriş balı")]
     sheet_append(ws, head)
@@ -112,8 +114,10 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         cell.border = border
     ws.row_dimensions[header_row].height = 30
 
+    names = {}
     for r_idx, row in enumerate(journal["rows"]):
-        values = [row["student"].get_full_name() or row["student"].username]
+        names[row["student"].pk] = journal_student_name(row["student"])
+        values = [names[row["student"].pk]]
         for cell_data in row["cells"]:
             mark = cell_data["mark"]
             if mark is None:
@@ -210,7 +214,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         sheet_append(
             ws2,
             [
-                row["student"].get_full_name() or row["student"].username,
+                names.get(row["student"].pk) or journal_student_name(row["student"]),
                 float(result["entry_score"]),
                 float(result["exam_score"]) if result["exam_score"] is not None else "",
                 float(result["total"]) if result["graded"] else "",

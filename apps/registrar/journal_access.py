@@ -52,25 +52,6 @@ def offering_or_404(request, offering_id, *, select_related=True):
     return get_object_or_404(queryset, pk=offering_id, organization=organization)
 
 
-def schedule_slot_or_404(request, slot_id):
-    """Load a schedule slot only inside a verified active tenant context."""
-    from django.http import Http404
-    from django.shortcuts import get_object_or_404
-
-    from core.tenancy import get_request_organization, request_has_active_organization_context
-
-    from .models import ScheduleSlot
-
-    organization = get_request_organization(request)
-    if organization is None or not request_has_active_organization_context(request):
-        raise Http404
-    return get_object_or_404(
-        ScheduleSlot.objects.select_related("offering", "offering__organization"),
-        pk=slot_id,
-        offering__organization=organization,
-    )
-
-
 def _is_live_assigned_instructor(user, offering) -> bool:
     if not offering.instructor_id or offering.instructor_id != getattr(user, "id", None):
         return False

@@ -138,15 +138,7 @@ class AssignmentCourseTasksFixTests(TestCase):
         self.assertEqual(len(names), 13)
         self.assertEqual(names, sorted(names))
 
-    def test_remove_student_message_is_not_hardcoded_azerbaijani(self):
-        response = self.client.post(
-            reverse("assignments:remove_student_from_assignment", args=[self.assignment.id]),
-            {"student_id": str(self.s1.id)},
-        )
-        body = response.json()
-        self.assertTrue(body["success"])
-        self.assertNotIn("tapşırıqdan çıxarıldı", body["message"])
-        self.assertIn(self.s1.get_full_name() or self.s1.username, body["message"])
+    # WP9a (2026-10-10): `<pk>/remove-student/` (çağıranı yox idi) silindi.
 
 
 class AssignmentStudentVisibilityTests(TestCase):

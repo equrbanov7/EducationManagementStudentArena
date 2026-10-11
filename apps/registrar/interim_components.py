@@ -13,13 +13,20 @@ Mərkəzinin PƏNCƏRƏSİ ilə idarə olunur (``kollokvium_windows``): midterm 
 
 from __future__ import annotations
 
-from django.db import transaction
+import logging
+
+from django.db import IntegrityError, transaction
 from django.db.models.deletion import ProtectedError
 from django.utils import timezone
 
 from apps.registrar import interim_assessment
 from apps.registrar.gradebook import journal_is_locked
 from apps.registrar.models import AssessmentComponent, ComponentKind, ComponentScore, CriterionScore, Enrollment
+
+logger = logging.getLogger(__name__)
+
+#: Açılış nümunəsində əsas aralıq komponentin (Midterm) faktiki tavanı — ``score_options`` sorğusuz oxuyur.
+_PRIMARY_MAX_ATTR = "_ems_interim_primary_max"
 
 
 def _has_evidence(component) -> bool:
@@ -62,12 +69,15 @@ def _ensure_kollokvium_mode(offering, all_components, spec):
 
 
 def _ensure_midterm_mode(offering, all_components, spec):
-    """2026/2027-dən: TƏK «Midterm» komponenti (max 20) + köhnə kodun qalıqlarının təmizlənməsi.
+    """2026/2027-dən: TƏK «Midterm» komponenti (max 30; sərbəst iş açıqdırsa 20) + köhnə kodun qalıqlarının təmizlənməsi.
 
     Bu dövrdə köhnə kod (``ensure_kollokviums`` 3-K versiyası) jurnal açılanda «Kollokvium 1–3»
     komponentlərini yaratmış ola bilər. BALI/SÜBUTU OLMAYAN belə qalıqlar silinir; balı olan
     (nəzəri olaraq İKT keçidi ilə yazılmış) komponent heç vaxt silinmir — o, oxu-rejimli əlavə
-    sütun kimi göstərilir və giriş balına əvvəlki kimi daxildir (data itmir)."""
+    sütun kimi göstərilir və giriş balına əvvəlki kimi daxildir (data itmir).
+
+    Tavan (sahib 2026-10-10) RİM bayrağını izləyir: QALDIRMAQ həmişə (bal olsa da — heç bir balı etibarsız
+    etmir), ENDİRMƏK yalnız yeni tavandan böyük bal yoxdursa (əks halda tavan saxlanılır və log yazılır)."""
     name_key = spec.component_names[0].lower()
     midterm = next((c for c in all_components if c.name.strip().lower() == name_key), None)
     leftovers = []
@@ -92,16 +102,50 @@ def _ensure_midterm_mode(offering, all_components, spec):
             order=max((c.order for c in all_components), default=0) + 1,
         )
     else:
-        update_fields = []
         if midterm.kind != ComponentKind.KOLLOKVIUM:
             midterm.kind = ComponentKind.KOLLOKVIUM
-            update_fields.append("kind")
-        if midterm.max_score != spec.max_score and not _has_evidence(midterm):
-            midterm.max_score = spec.max_score
-            update_fields.append("max_score")
-        if update_fields:
-            midterm.save(update_fields=update_fields)
+            midterm.save(update_fields=["kind"])
+        if midterm.max_score != spec.max_score and max_change_allowed(midterm, spec.max_score):
+            _save_max(midterm, spec.max_score)
+    setattr(offering, _PRIMARY_MAX_ATTR, int(midterm.max_score))
     return [midterm, *sorted(leftovers, key=lambda c: (c.order, c.name))]
+
+
+def max_change_allowed(component, new_max) -> bool:
+    """Komponent tavanını ``new_max``-a dəyişmək olarmı — DB qoruyucusu ilə EYNİ qayda (miqrasiya ``0087``).
+
+    Rubriksiz aralıq komponentində (Midterm / kollokvium): yazılmış BÜTÜN ballar yeni tavana sığırsa — qaldırmaq
+    həmişə, endirmək yalnız ondan böyük bal yoxdursa.  Rubrikli / başqa növ komponentdə yalnız sübut yoxdursa.
+    Olmursa tavan saxlanılır və log yazılır."""
+    scores = ComponentScore.objects.filter(component=component)
+    rubric_evidence = CriterionScore.objects.filter(component=component).exists()
+    if rubric_evidence or component.rubric_id is not None or component.kind != ComponentKind.KOLLOKVIUM:
+        allowed = not rubric_evidence and not scores.exists()
+    else:
+        allowed = not scores.filter(score__gt=new_max).exists()
+    if not allowed:
+        logger.warning(
+            "interim max kept: component=%s max=%s target=%s (scores above target or rubric evidence)",
+            component.pk,
+            component.max_score,
+            new_max,
+        )
+    return allowed
+
+
+def _save_max(component, new_max) -> None:
+    """Tavanı yaz.  DB qoruyucusu rədd etsə (məs. ``0087`` hələ tətbiq olunmayıb və ya eyni anda yeni tavandan
+    böyük bal yazılıb) köhnə tavan qalır — jurnalın açılışı bu səbəbdən heç vaxt yıxılmır."""
+    previous = component.max_score
+    component.max_score = new_max
+    try:
+        with transaction.atomic():
+            component.save(update_fields=["max_score"])
+    except IntegrityError:
+        component.max_score = previous
+        logger.warning(
+            "interim max kept: component=%s max=%s target=%s (database guard)", component.pk, previous, new_max
+        )
 
 
 @transaction.atomic
@@ -109,7 +153,7 @@ def ensure_kollokviums(offering):
     """Aralıq qiymətləndirmə komponentlərini rejimə görə idempotent qur və sıralı qaytar.
 
     * kollokvium rejimi (keçmiş dövrlər) → [Kollokvium 1, 2, 3] (hər biri max 10);
-    * midterm rejimi (2026/2027-dən) → [Midterm] (max 20) + balı olan köhnə qalıqlar (varsa).
+    * midterm rejimi (2026/2027-dən) → [Midterm] (max 30; sərbəst iş açıqdırsa 20) + balı olan köhnə qalıqlar (varsa).
 
     Qaytarılan siyahıdakı MÖVQE İmtahan Mərkəzi pəncərəsinin ``k_index``-idir."""
     spec = interim_assessment.spec_for_offering(offering)
@@ -129,8 +173,22 @@ def set_kollokvium_date(*, component, held_on) -> bool:
 
 
 def score_options(offering) -> list[int]:
-    """Müəllimin bal seçimi: kollokviumda 0–10, midtermdə 0–20 (tam ədədlər)."""
-    return list(range(0, interim_assessment.spec_for_offering(offering).max_score + 1))
+    """Müəllimin bal seçimi (tam ədədlər): kollokviumda 0–10, midtermdə «Midterm» komponentinin FAKTİKİ tavanı
+    (0–30; endirmə bloklanıbsa saxlanılmış tavan) — seçim yazılmış balı həmişə əhatə etməlidir (yoxsa select
+    boş görünər və saxlama balı silərdi). Tavan ``ensure_kollokviums``-un memo-sundan, yoxdursa bir sorğu."""
+    spec = interim_assessment.spec_for_offering(offering)
+    top = spec.max_score
+    if spec.is_midterm:
+        top = getattr(offering, _PRIMARY_MAX_ATTR, None)
+        if top is None:
+            top = (
+                AssessmentComponent.objects.filter(
+                    offering=offering, kind=ComponentKind.KOLLOKVIUM, name__iexact=spec.component_names[0]
+                )
+                .values_list("max_score", flat=True)
+                .first()
+            ) or spec.max_score
+    return list(range(0, int(top) + 1))
 
 
 #: ``journal_extras``/``views`` üçün aydın ad (``journal_extras.interim_score_options``).
@@ -171,7 +229,7 @@ def get_kollokvium_grid(offering):
 
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student", "student__profile")
         .order_by("student__last_name", "student__username")
     )
     score_map = {}
@@ -201,6 +259,8 @@ def get_kollokvium_grid(offering):
         # «CƏMİ» sütunu yalnız bir neçə sütun olanda mənalıdır (kollokvium: /30).
         "show_total": len(columns) > 1,
         "total_max": sum(int(c.max_score) for c in components),
+        # Əsas sütunun (Midterm) faktiki şkalası — izah mətni «0–30 bal» (sahib 2026-10-10).
+        "primary_max": int(components[0].max_score) if components else spec.max_score,
     }
 
 
@@ -241,6 +301,7 @@ __all__ = [
     "get_kollokvium_grid",
     "interim_score_options",
     "kollokvium_columns_only",
+    "max_change_allowed",
     "score_options",
     "set_kollokvium_date",
 ]

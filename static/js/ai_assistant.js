@@ -9,6 +9,8 @@
  *    (`/…`) və ya https:// — kənar keçid yeni tabda, `rel="noopener noreferrer"`;
  *  • tarixçə localStorage-də istifadəçi+təşkilat açarı ilə, 15 dəq TTL;
  *  • inline style yox (CSP) — görünmə `hidden` atributu ilə.
+ * 2026-10-10 (sahib): düyməni gizlətmək / sürüşdürmək static/js/ai_assistant_fab.js-dədir
+ * (`EMSAiFab`, bu fayldan ƏVVƏL yüklənir); burada yalnız ona qoşulma nöqtələri var.
  * ID-lər şablonla müqavilədir: templates/partials/_ai_assistant.html.
  */
 (function () {
@@ -26,6 +28,7 @@
     const noticeText = notice ? notice.querySelector("[data-ai-notice-text]") : null;
     const inputWrap = document.getElementById("ai-chat-input-wrap");
     const statusEl = document.getElementById("ai-chat-status");
+    const fabRoot = document.getElementById("ai-fab");
 
     if (!botBtn || !panel || !messagesEl || !inputEl || !sendBtn) return;
 
@@ -136,6 +139,19 @@
         if (isOpen) { hasGreeted = true; addBotMessage(uiText.greeting); }
     }
 
+    // ── Gizlətmək / sürüşdürmək (sahib 2026-10-10) — static/js/ai_assistant_fab.js ──
+    // Modul yüklənməyibsə köhnə davranış qalır (sağ-alt künc, gizlətmə yoxdur).
+    const fab = window.EMSAiFab && fabRoot
+        ? window.EMSAiFab.create({
+            root: fabRoot,
+            button: botBtn,
+            tooltip,
+            onHide: () => { if (isOpen) closePanel(false); },
+        })
+        : null;
+    if (!fab && fabRoot) fabRoot.classList.add("ai-fab--ready");
+    const fabHidden = () => Boolean(fab && fab.isHidden());
+
     // ── Mobil qabıq (sahib 2026-09-30) — yalnız YERLƏŞMƏ ──────────────────
     // Telefonda (≤480px) panel tam ekrandır: açıq ikən arxa səhifə sürüşməsin
     // (ortaq `EMSScrollLock`, static/js/modal_scroll_lock.js). Ekran ölçüsü
@@ -160,6 +176,7 @@
         const delta = y - lastScrollY;
         if (Math.abs(delta) < 8) return;
         lastScrollY = y;
+        if (fabHidden()) return; // istifadəçi düyməni gizlədib — kənara çəkiləcək düymə yoxdur
         const atEdge = y < 80 || window.innerHeight + y >= root.scrollHeight - 4;
         const tuck = !!(phoneQuery && phoneQuery.matches) && !isOpen && delta > 0 && !atEdge;
         botBtn.classList.toggle("ai-bot-btn--tucked", tuck);
@@ -185,17 +202,20 @@
         if (!hasGreeted) { hasGreeted = true; addBotMessage(uiText.greeting); }
         if (isAvailable) inputEl.focus();
     }
-    function closePanel() {
+    function closePanel(restoreFocus) {
         isOpen = false;
         panel.classList.remove("ai-chat-panel--open");
         botBtn.classList.remove("ai-bot-btn--hidden");
         botBtn.setAttribute("aria-expanded", "false");
         syncChatLock();
         window.setTimeout(() => { if (!isOpen) panel.hidden = true; }, 180);
-        botBtn.focus();
+        if (restoreFocus !== false) botBtn.focus(); // gizlədəndə fokusu fab modulu bərpa nişanına verir
     }
-    botBtn.addEventListener("click", openPanel);
-    if (closeBtn) closeBtn.addEventListener("click", closePanel);
+    botBtn.addEventListener("click", (e) => {
+        if (fab && fab.handleClick(e)) return; // sürüşdürmənin sonu və ya küncdəki «×» — panel açılmır
+        openPanel();
+    });
+    if (closeBtn) closeBtn.addEventListener("click", () => closePanel());
     document.addEventListener("pointerdown", (e) => {
         if (!isOpen) return;
         if (panel.contains(e.target) || botBtn.contains(e.target)) return;
@@ -205,7 +225,7 @@
 
     // İlk dəfə (səhifə açılandan 6 s sonra) bir dəfə diqqət çəkir — daimi dalğa yox.
     window.setTimeout(() => {
-        if (isOpen || botBtn.classList.contains("ai-bot-btn--tucked")) return;
+        if (isOpen || fabHidden() || botBtn.classList.contains("ai-bot-btn--tucked")) return;
         botBtn.classList.add("ai-bot-btn--wave");
         tooltip.classList.add("ai-bot-tooltip--visible");
         window.setTimeout(() => botBtn.classList.remove("ai-bot-btn--wave"), 1600);

@@ -8,7 +8,6 @@ from ..._helpers import (
     STUDENT_ORG_MANAGEMENT_MIN_LEVEL,
     _append_query_params,
     _build_student_org_management_section,
-    _build_student_org_request_section,
     _collect_actor_permissions,
     _ensure_profile_admin_membership,
     _get_active_organization,
@@ -159,19 +158,8 @@ class _Stage3Mixin:
             )
             # `post_next_url` bölmə qurucusunun ÖZÜNDƏ hesablanır (filtr
             # parametrləri orada tanınır) — burada təkrarlanmır.
-        if "student-organization-request" in self.allowed_sections and self.active_section in {
-            "student-organization-request",
-            "profile-info",
-        }:
-            self.student_org_request_section = _build_student_org_request_section(
-                request=self.request, profile=self.profile
-            )
-            self.student_org_request_section["post_next_url"] = _append_query_params(
-                reverse("accounts:profile"),
-                section="student-organization-request",
-                student_org_request_search=self.student_org_request_section["search_query"],
-                student_org_request_type=self.student_org_request_section["org_type_filter"],
-            )
+        # URL auditi A7 (2026-10-10, WP8 qalığı): «student-organization-request» bölməsi heç kimə
+        # verilmir — onun qurucusu da silindi; profildəki dəvətlər `_stage2` defoltundan gəlir.
         if "permission-editor" in self.allowed_sections and self.active_section == "permission-editor":
             self.permission_editor_section = build_permission_editor_section(
                 self.request,

@@ -18,6 +18,10 @@
  * yenidən hesablanır, AMMA müəllim korpus/otağı özü seçibsə daha toxunulmur.
  * Yaddaş yoxdursa əvvəlki qayda: qrupun ixtisasına görə korpus defoltu.
  *
+ * «YENİ DƏRS» DOLDURMASI (sahib 2026-10-10): journal_lesson_prefill.js otaq veribsə (bu günün cədvəl
+ * slotunun otağı və ya server yaddaşı — `modal.dataset.jdPrefillRoom`) o, yaddaşdan ÜSTÜNDÜR, amma
+ * yalnız tarix + dərs tipi doldurulan kimi qaldıqca (`jdPrefillRoomKey`); dəyişəndə yuxarıdakı yaddaş qaydası.
+ *
  * QOŞULMA: journal_grid.js dərs modalını açanda `jd:lesson-modal-open` hadisəsini
  * göndərir (detail = redaktə datası, əlavə rejimində null). Bu modul yalnız ona
  * qulaq asır — yəni jurnal şəbəkəsi otaq məntiqindən xəbərsizdir və modul
@@ -210,14 +214,27 @@
         return "";
     }
 
+    /** «Yeni dərs» doldurmasının otağı — yalnız tarix + tip hələ doldurulan kimidirsə (journal_lesson_prefill.js). */
+    function prefillRoom(modal) {
+        var room = modal.dataset.jdPrefillRoom || "";
+        if (!room || !roomById(room)) return "";
+        var kindField = modal.querySelector("[name='lesson_kind']");
+        var dateField = modal.querySelector("[data-jd-lesson-date]");
+        var key = (kindField ? kindField.value : "") + "|" + (dateField ? dateField.value : "");
+        return key === (modal.dataset.jdPrefillRoomKey || "") ? room : "";
+    }
+
     /** Redaktədə: otağın korpusunu tapıb əvvəlcə onu, sonra otağı seç.
-     *  Əlavə rejimində (otaq yoxdur): qrupun ixtisasına görə korpus defoltu
-     *  (`data-default-building`, sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
+     *  Əlavə rejimində (otaq yoxdur): «Yeni dərs» doldurmasının otağı, sonra otaq yaddaşı, o da yoxdursa
+     *  qrupun ixtisasına görə korpus defoltu (`data-default-building`, sahib qərarı 2026-09-20) — müəllim dəyişə bilər. */
     function apply(modal, roomId) {
         var fromMemory = "";
         if (!roomId && modal.dataset.jdRoomMode === "add") {
-            fromMemory = rememberedRoom(modal);
-            roomId = fromMemory;
+            roomId = prefillRoom(modal);
+            if (!roomId) {
+                fromMemory = rememberedRoom(modal);
+                roomId = fromMemory;
+            }
         }
         var room = roomById(roomId || "");
         var building = room ? room.building : defaultBuilding(modal);

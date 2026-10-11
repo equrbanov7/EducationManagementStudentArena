@@ -16,8 +16,9 @@ from .conftest import BASE_URL, E2E_PASSWORD, E2E_USERNAME
 # ── URLs ─────────────────────────────────────────────────────────────────────
 
 CREATE_COURSE_URL = f"{BASE_URL}/courses/create_course/"
-MY_COURSES_URL = f"{BASE_URL}/courses/my-courses/"
-ENROLLED_COURSES_URL = f"{BASE_URL}/courses/my-enrolled/"
+# WP9a (2026-10-10): köhnə `/courses/my-courses|my-enrolled/` silindi — kabinet bölmələri.
+MY_COURSES_URL = f"{BASE_URL}/accounts/profile/?section=my-courses"
+ENROLLED_COURSES_URL = f"{BASE_URL}/accounts/profile/?section=assigned-courses"
 EXAM_GROUPS_URL = f"{BASE_URL}/exams/groups/"
 CREATE_GROUP_URL = f"{BASE_URL}/exams/groups/create/"
 
@@ -32,8 +33,7 @@ class TestCourseUnauthenticated:
         "course_path",
         [
             "/courses/create_course/",
-            "/courses/my-courses/",
-            "/courses/my-enrolled/",
+            "/accounts/profile/?section=my-courses",
         ],
     )
     def test_course_path_blocks_anonymous_user(self, page: Page, course_path: str) -> None:

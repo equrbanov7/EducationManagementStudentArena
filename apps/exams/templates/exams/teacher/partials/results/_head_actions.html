@@ -1,0 +1,14 @@
+{% load i18n %}
+{% comment %}Excel ixracı ikinci dərəcəli əməldir (səhifə əsasən oxumaq üçündür). Nəticə yoxdursa
+düymə söndürülür və səbəbi deyir — boş fayl endirilmir.{% endcomment %}
+{% if review_stats.total %}
+<a href="{{ export_xlsx_url }}" class="ems-btn">
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "exams.template.teacher_exam_results" %}
+</a>
+{% else %}
+<span class="ems-btn" role="button" aria-disabled="true" tabindex="0" aria-describedby="etrExportHint"
+      title="{% trans 'Yükləmək üçün nəticə yoxdur.' context 'exams.template.teacher_exam_results' %}">
+    <i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Excel-ə yüklə" context "exams.template.teacher_exam_results" %}
+    <span class="visually-hidden" id="etrExportHint">{% trans "Yükləmək üçün nəticə yoxdur." context "exams.template.teacher_exam_results" %}</span>
+</span>
+{% endif %}

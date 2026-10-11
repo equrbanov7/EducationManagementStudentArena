@@ -22,7 +22,7 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
@@ -81,6 +81,8 @@ def _login_with_org(client, user, organization):
     session.save()
 
 
+# «Mövcud imtahanlar» bayraqla söndürülüb (sahib 2026-10-10) — sorğu büdcəsi açıq səhifədə ölçülür.
+@override_settings(EXAM_AVAILABLE_PAGE=True)
 class _StudentListFixture(TestCase):
     """Tələbə + müəllim + org + jurnal (qayıb qapısı) + kurs + qrup fiksturası."""
 
@@ -364,24 +366,8 @@ class StudentListQueryBudgetTests(_StudentListFixture):
         )
         self.assertLessEqual(len(large), QUERY_BUDGET, [q["sql"][:160] for q in large])
 
-    def test_assigned_list_query_count_is_independent_of_exam_count(self):
-        self._rich_final_exam()
-        self.client.get(reverse("exams:assigned_exam_list"))
-        response, small = self._measure("exams:assigned_exam_list")
-        self.assertEqual(len(response.context["page_obj"].object_list), 1)
-
-        self._mixed_assigned_exams()
-        response, large = self._measure("exams:assigned_exam_list")
-        self.assertEqual(len(response.context["page_obj"].object_list), 7)
-
-        print(f"\n[P1-3] assigned_exam_list: 1 imtahan → {len(small)} sorğu, 7 imtahan → {len(large)} sorğu")
-        self.assertEqual(
-            len(small),
-            len(large),
-            "Təyinatlı imtahan siyahısının sorğu sayı kart sayı ilə artmamalıdır:\n"
-            + "\n".join(q["sql"][:160] for q in large),
-        )
-        self.assertLessEqual(len(large), QUERY_BUDGET, [q["sql"][:160] for q in large])
+    # URL auditi §4 (2026-10-10): `exams/assigned/` kabinet bölməsinə yönləndirir — onun büdcəsi
+    # `apps/accounts/tests/test_section_fragment_lean_context.py`-dadır (`assigned-exams`).
 
 
 class StudentListBatchParityTests(_StudentListFixture):

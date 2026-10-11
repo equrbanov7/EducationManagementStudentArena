@@ -173,6 +173,10 @@ def lesson_action(request, offering_id, lesson_id):
         from apps.registrar.journal_extras import locked_lesson_kind as _locked_lesson_kind
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
+        if start_time is None:  # cədvəl slotunun öz (standart olmayan) zəng saatı redaktədə silinmir (2026-10-10)
+            from apps.registrar.journal_lesson_prefill import own_lesson_time
+
+            start_time, end_time = own_lesson_time(lesson, request.POST.get("lesson_time"))
         # J-02 (audit 2026-09-28): «0»/«-5»/«abc» səssizcə qəbul/ignor olunmur — aralıq servisdə yoxlanır.
         hours_raw = (request.POST.get("lesson_hours") or "").strip()
         if hours_raw and not hours_raw.isdigit():
@@ -324,8 +328,13 @@ def selfwork_action(request, offering_id):
     ``swp__<topic>__<enrollment>`` = «» | 1…max (bal strukturlu mövzu; lövhə TAM bal
     təklif edir — kəsr yalnız fənn qovluğundan / sənədli düzəlişdən gəlir)."""
     from apps.registrar import selfwork_marks, selfwork_structure
+    from core.academic_rules import selfwork_active_for_offering
 
     offering = _offering_or_404(request, offering_id)
+    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə (RİM tənzimləməsi) bu səth YOXDUR — gizli tabdan yan
+    # keçən birbaşa POST da 404 alır (struktur, mövzu, bal yazılmır; mövcud data toxunulmur).
+    if not selfwork_active_for_offering(offering):
+        raise Http404
     blocked = _corrector_direct_write_blocked(request, offering, "serbest")
     if blocked:
         return blocked
@@ -419,7 +428,12 @@ def coursework_save(request, offering_id):
 
     İki format dəstəklənir: mockup formu (``cw_enrollment``/``cw_topic``/
     ``cw_score``/``cw_date`` — bir tələbə) və toplu ``cwtopic__<id>`` sahələri."""
+    from core.academic_rules import coursework_active_for_offering
+
     offering = _offering_or_404(request, offering_id)
+    # Sahib 2026-10-11: kurs işi söndürülən dövrdə gizli UI-dan yan keçən yazı da yoxdur (data toxunulmur).
+    if not coursework_active_for_offering(offering):
+        raise Http404
     blocked = _corrector_direct_write_blocked(request, offering, "kurs-isi")
     if blocked:
         return blocked

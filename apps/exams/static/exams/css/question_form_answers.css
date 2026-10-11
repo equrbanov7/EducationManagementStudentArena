@@ -1,0 +1,109 @@
+/* Sual formu — CAVABLAR (sahib 2026-10-10): variant kartları, «Düzgün cavab» açarı,
+   variant əlavə/sil. Dəstin qalanı: question_form.css + question_form_media.css. */
+
+/* ── Variantlar ────────────────────────────────────────────────────────── */
+.qf-options {
+    display: grid;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.qf-option {
+    padding: 10px 12px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.qf-option:has(.qf-correct input:checked) {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.qf-option__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.qf-option__title {
+    margin-right: auto;
+    font-size: var(--ems-fs-base);
+    font-weight: 800;
+    color: var(--ems-neutral-700);
+}
+
+.qf-correct {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 0 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+}
+
+.qf-correct input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--ems-success-700);
+}
+
+.qf-correct:has(input:checked) {
+    border-color: var(--ems-success-700);
+    color: var(--ems-success-700);
+}
+
+.qf-option__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid transparent;
+    border-radius: var(--ems-r-lg);
+    background: transparent;
+    color: var(--ems-neutral-600);
+    cursor: pointer;
+}
+
+.qf-option__remove:hover {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.qf-option__remove[hidden] {
+    display: none;
+}
+
+.qf-add-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--ems-h-field);
+    margin-top: 12px;
+    padding: 0 14px;
+    border: 1.5px dashed var(--ems-primary-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.qf-add-option:hover {
+    background: var(--ems-primary-100);
+}
+
+.qf .qf-correct:has(input:focus-visible) {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}

@@ -30,7 +30,8 @@ qeydiyyatı 4 yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
 2. REDAKTOR CONTEXT-i — ``build_syllabus_editor_context``
 ``{
     "syllabus": Syllabus, "version": SyllabusVersion,
-    "sections": [{"id", "label", "data", "is_complete", "revision"}],  # 10 sətir
+    "sections": [{"id", "label", "data", "is_complete", "revision"}],  # 10 sətir (sərbəst işsiz qaydada 9)
+    "rule": SyllabusRule, "selfwork_active": bool,   # sahib 2026-10-10 — versiyanın semestrinə görə
     "completion": {"percent": int, "sections": {id: bool}, "issues": [Issue…]},
     "view_state": "normal" | "readonly" | "permission",
     "actions": tuple[str],                # available_actions nəticəsi
@@ -95,7 +96,6 @@ from .constants import (
     PERM_REJECT,
     PERM_REVIEW,
     PERM_REVISE,
-    SECTION_ORDER,
     SELFWORK_DISALLOWED,
     SELFWORK_OPTIONS,
     STATUS_NEXT_STEP,
@@ -105,7 +105,8 @@ from .constants import (
     SyllabusStatus,
 )
 from .document import build_document  # noqa: F401
-from .policy import assessment_weights, standard_midterm, standard_project  # noqa: F401
+from .policy import assessment_weights, standard_midterm, standard_project, standard_splits  # noqa: F401
+from .rules import for_version as rule_for_version
 from .services import (  # noqa: F401
     GROUP_CHAIR,
     GROUP_PROGRAM,
@@ -218,8 +219,15 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
     rows = {row.section_id: row for row in version.sections.all()}
     # Audit 2026-09-28 SYL-7: redaktorun tamamlanması göndərmə ilə EYNİ
     # qaydadır — təşkilatın qiymətləndirmə çəkiləri (``recompute_completion``).
+    # Sahib 2026-10-10: qayda versiyanın semestrindəndir — sərbəst işsiz qaydada `self`
+    # bölməsi yoxdur (redaktorda 9 bölmə, faiz 7 qayda bölməsi üzrə), data isə saxlanılır.
+    rule = rule_for_version(version, organization)
     report = completion_rules.evaluate(
-        section_data_map(version), version.plan_hours or {}, assessment_weights(organization)
+        section_data_map(version),
+        version.plan_hours or {},
+        assessment_weights(organization, selfwork=rule.selfwork),
+        selfwork=rule.selfwork,
+        accepted_splits=standard_splits(organization),
     )
     sections = [
         {
@@ -231,7 +239,7 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
             "is_rule_section": section_id in report.sections,
             "revision": rows[section_id].revision if section_id in rows else 0,
         }
-        for section_id in SECTION_ORDER
+        for section_id in rule.section_order
     ]
     view_state = "normal" if version.status in EDITABLE_STATUSES else "readonly"
     return {
@@ -244,6 +252,8 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         # Audit 2026-09-28 SYL-7: GET zamanı yalnız MÜƏLLİFİN sessiyası plan
         # saatını/həftəlik bölgünü yazır — kafedranın baxışı heç nə dəyişmir.
         "is_author": is_author(actor, syllabus),
+        "rule": rule,
+        "selfwork_active": rule.selfwork,
         "selfwork_options": SELFWORK_OPTIONS,
         "selfwork_disallowed": SELFWORK_DISALLOWED,
         "teaching_methods": TEACHING_METHODS,

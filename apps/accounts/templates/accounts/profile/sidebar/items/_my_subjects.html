@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Fənlərim» — tələbənin akademik fənn kabineti (universitet rejimi). #}
 {% if "my-subjects" in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'my_subjects' context 'profile.section' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-subjects' %}active{% endif %}">
-        <i class="fas fa-book-open sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "library" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "my_subjects" context "profile.sidebar" %}</span>
     </a>
 </li>

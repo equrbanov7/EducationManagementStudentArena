@@ -31,8 +31,6 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, JsonResponse
-
-# from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
@@ -77,7 +75,6 @@ SECTION_PARTIALS: dict[str, str] = {
     "pending-review": "accounts/profile/sections/_pending_review.html",
     "review-results": "accounts/profile/sections/_review_results.html",
     "role-assignment": "accounts/profile/sections/_role_assignment.html",
-    "student-organization-request": "accounts/profile/sections/_student_org_request.html",
     "student-organization-management": "accounts/profile/sections/_student_org_management.html",
     "permission-editor": "accounts/profile/sections/_permission_editor.html",
     "manage-roles": "accounts/profile/sections/_manage_roles.html",
@@ -101,6 +98,7 @@ SECTION_PARTIALS: dict[str, str] = {
     "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
     "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "system-settings": "accounts/profile/sections/_system_settings.html",
+    "journal-hygiene": "accounts/profile/sections/_journal_hygiene.html",  # sahib 2026-10-10, RİM
     "superadmin-contact-messages": "accounts/profile/sections/superadmin/_superadmin_contact_messages.html",
     "system-monitoring": "accounts/profile/sections/superadmin/_system_monitoring.html",
     "statistics": "accounts/profile/sections/_statistics.html",
@@ -147,6 +145,7 @@ SECTION_PARTIALS: dict[str, str] = {
     # «Müəllimlər» / «Tələbələr» kataloqu (icazə: `people.*`, scope: unit)
     "people-teachers": "accounts/profile/sections/_people_teachers.html",
     "people-students": "accounts/profile/sections/_people_students.html",
+    "hr-analytics": "accounts/profile/sections/_hr_analytics.html",  # «Kadr analitikası» (sahib 2026-10-11)
     # Sillabus — müəllim səthi. Redaktor ayrıca TAM SƏHİFƏ deyil: o da profil
     # shell-inin içində açılır (sol sidebar qalır), hədəf versiya `?version=`
     # sorğu parametrindən gəlir.
@@ -277,6 +276,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         # JSON POST endpoint-inə gedir) → AJAX swap təhlükəsizdir.
         "people-teachers",
         "people-students",
+        "hr-analytics",  # «Kadr analitikası» — server-render OXU paneli; ixrac ayrıca GET-dir
         # Sillabus siyahısı və redaktoru OXU-ONLY render olunur — bütün yazı
         # əməliyyatları ayrıca JSON POST endpoint-inə gedir (autosave/əməllər),
         # ona görə AJAX swap təhlükəsizdir.
@@ -305,6 +305,7 @@ AJAX_SAFE_SECTIONS: frozenset[str] = frozenset(
         "legacy-grade-review",
         # «Sistem tənzimləmələri» — forma JSON POST-la saxlanılır (system_settings.js), panel oxu-only render.
         "system-settings",
+        "journal-hygiene",  # «Jurnal təmizliyi» — panel oxu-only; əməllər tək JSON POST-a gedir
         # Tədris şöbəsi bölmələri — server yalnız oxu panelini verir; yaratma,
         # redaktə, rəhbər təyini və arxivləmə ayrıca JSON POST-a gedir.
         "org-structure-tree",

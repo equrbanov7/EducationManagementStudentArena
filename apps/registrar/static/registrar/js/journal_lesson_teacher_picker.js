@@ -13,6 +13,10 @@
  * input üçün bu sadəcə `.value` təyinatıdır). Bu modul YALNIZ görünən çipin
  * İNSAN-OXUNAQLI adını tamamlayır — şəbəkə geciksə/uğursuz olsa belə POST
  * dəyəri təsirlənmir.
+ *
+ * 2026-10-10: «Yeni dərs» doldurması (journal_lesson_prefill.js) gizli dəyəri açılışdan ƏVVƏL qoyur;
+ * dərs tipi dəyişəndə müəllimi `window.EMSJournalLessonTeacher.show(id)` ilə dəyişir. Ad sorğusu
+ * uğursuz olsa da seçici «başlanğıc» vəziyyətində ilişib qalmır, köhnə cavab yenisinin üstünə yazılmır.
  */
 (function boot() {
     if (!window.EMSSearchableSelect) {
@@ -43,9 +47,13 @@
         return;
     }
 
+    var requestSeq = 0;
+
     /** Redaktədə/defaultda ARTIQ bilinən id-nin insan-oxunaqlı adını tapıb çipi doldurur. */
     function resolveLabel(id) {
+        var mine = ++requestSeq;
         if (!id || !url) {
+            initializing = false;
             return;
         }
         fetch(url + "?resolve=" + encodeURIComponent(id), { headers: { "X-Requested-With": "XMLHttpRequest" } })
@@ -54,30 +62,50 @@
             })
             .then(function (data) {
                 var row = data && data.results && data.results[0];
-                if (row) {
+                if (row && mine === requestSeq) {
                     initializing = true;
                     pick.setValue(row.id, row.text);
-                    initializing = false;
                 }
             })
             .catch(function () {
                 /* Sükutla keç — hidden dəyər onsuz da doğrudur, yalnız çip adsız qalır. */
+            })
+            .finally(function () {
+                if (mine === requestSeq) {
+                    initializing = false; // uğursuz sorğuda da müəllimin sonrakı seçimi yazılsın
+                }
             });
+    }
+
+    /** Gizli dəyəri + çipi proqramla qoy (açılışda və «Yeni dərs»də tip dəyişəndə). Ad məlumdursa
+     *  (doldurma — slotun öz müəllimi namizəd siyahısında olmaya bilər) sorğu göndərilmir. */
+    function show(id, label) {
+        initializing = true;
+        pick.reset();
+        hidden.value = id || "";
+        if (id && label) {
+            requestSeq++; // gecikən köhnə ad sorğusu bu seçimin üstünə yazmasın
+            pick.setValue(id, label);
+            initializing = false;
+            return;
+        }
+        resolveLabel(id || "");
     }
 
     document.addEventListener("jd:lesson-modal-open", function (event) {
         if (event.target !== modal) {
             return;
         }
-        initializing = true;
-        pick.reset();
         var editData = event.detail;
-        var id = (editData && editData.instructor) || hidden.value || "";
-        if (id) {
-            hidden.value = id;
-            resolveLabel(id);
+        if (editData) {
+            // Dərsin müəllimi slotun öz müəllimi ola bilər (namizəd siyahısında yoxdur) — ad doldurma adasından.
+            var id = editData.instructor || hidden.value || "";
+            var prefill = window.EMSJournalLessonPrefill;
+            show(id, (id && prefill && typeof prefill.labelFor === "function" && prefill.labelFor(id)) || "");
         } else {
-            initializing = false;
+            show(hidden.value || "", hidden.dataset.jdLabel || "");
         }
     });
+
+    window.EMSJournalLessonTeacher = { show: show };
 })();

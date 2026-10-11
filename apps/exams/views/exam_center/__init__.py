@@ -14,7 +14,7 @@ from .monitor import (
     exam_center_ticket_resume,
     exam_center_ticket_snapshot,
 )
-from .pin_lookup import exam_center_pin_lookup, exam_center_pin_search, exam_center_student_pins
+from .pin_lookup import exam_center_pin_search, exam_center_student_pins
 from .reports import exam_center_reports
 from .room_monitor import (
     exam_center_attempt_violations,
@@ -44,7 +44,6 @@ from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
 
 __all__ = [
     "exam_center_final_device_change",
-    "exam_center_pin_lookup",
     "exam_center_pin_search",
     "exam_center_student_pins",
     "exam_center_stats_ai",

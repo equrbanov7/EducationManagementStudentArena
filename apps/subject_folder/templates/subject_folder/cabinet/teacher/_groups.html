@@ -1,11 +1,12 @@
 {% load i18n %}
 {% comment %}«Qruplar və son tarixlər»: təyinat (aktorun tədris etdiyi açılışlar), hər qrup üzrə tapşırıq
-pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğacları.{% endcomment %}
+pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğacları. Sahib 2026-10-10: qovluğun dövründə
+sərbəst iş ləğv olunubsa (`sp.selfwork_active`) onun nişanları və izahı yoxdur.{% endcomment %}
 <section class="ems-card sfc-block" aria-labelledby="sfAssignTitle">
     <div class="ems-card__head">
         <div>
             <h3 class="ems-card__title" id="sfAssignTitle">{% trans "Qrupa təyinat" context "subject_folder.ui" %}</h3>
-            <p class="ems-card__sub">{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir." context "subject_folder.ui" %}</p>
+            <p class="ems-card__sub">{% if sp.selfwork_active %}{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir." context "subject_folder.ui" %}{% else %}{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür." context "subject_folder.ui" %}{% endif %}</p>
         </div>
     </div>
     <div class="ems-card__body">
@@ -20,7 +21,8 @@ pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğ
                 <li class="sfc-offering{% if row.is_active %} sfc-offering--active{% endif %}">
                     {% if row.is_active %}
                         <span class="sfc-offering__label"><i class="fas fa-circle-check sfc-ok" aria-hidden="true"></i> {{ row.label }}</span>
-                        {% if row.grades_selfwork %}<span class="ems-badge ems-badge--primary">{% trans "sərbəst iş buradan" context "subject_folder.ui" %}</span>
+                        {% if not sp.selfwork_active %}
+                        {% elif row.grades_selfwork %}<span class="ems-badge ems-badge--primary">{% trans "sərbəst iş buradan" context "subject_folder.ui" %}</span>
                         {% elif row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}
                         {% if sp.can_manage and not sp.is_archived %}
                             <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-sf-post="unassign" data-sf-field-assignment="{{ row.assignment.pk }}" data-sf-danger="1"
@@ -31,7 +33,7 @@ pəncərəsi (açılma / son tarix / gecikmə siyasəti) və irəliləyiş sayğ
                             <input type="checkbox" name="offering" value="{{ row.value }}"{% if not sp.can_manage or sp.is_archived %} disabled{% endif %}>
                             <span>{{ row.label }}</span>
                         </label>
-                        {% if row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}
+                        {% if sp.selfwork_active and row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}
                     {% endif %}
                 </li>
                 {% endfor %}

@@ -1,5 +1,6 @@
 {% load i18n %}
-{% trans "Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir." context "subject_folder.ui" as sf_subtitle %}
+{# Sahib 2026-10-10: sərbəst iş ləğv olunubsa (CARİ qayda) mətnlərdə də yoxdur; qovluq sayğacı qovluğun dövrünə görə. #}
+{% if academic_rules.selfwork %}{% trans "Hər fənn üçün tədris materialları, sərbəst iş və ev tapşırıqları bir qovluqda. Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusdan gəlir." context "subject_folder.ui" as sf_subtitle %}{% else %}{% trans "Hər fənn üçün tədris materialları və ev tapşırıqları bir qovluqda. Mövzular təsdiqlənmiş sillabusdan gəlir." context "subject_folder.ui" as sf_subtitle %}{% endif %}
 {% include "partials/ems_ui/_content_header.html" with header_subtitle=sf_subtitle header_actions_include="subject_folder/cabinet/teacher/_list_actions.html" %}
 {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sp.kpi_tiles kpi_variant="4" %}
 {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-folders" filter_prefix="sf_" filter_fields=sp.filter_fields filter_count_label=sp.filter_count_label filter_auto=True filter_bootstrap=True %}
@@ -20,7 +21,7 @@
                 <dl class="sfc-stats">
                     <div class="sfc-stats__item"><dt>{% trans "Mövzu" context "subject_folder.ui" %}</dt><dd>{{ row.counts.topics }}</dd></div>
                     <div class="sfc-stats__item"><dt>{% trans "Material" context "subject_folder.ui" %}</dt><dd>{{ row.counts.materials }}</dd></div>
-                    <div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ row.counts.selfwork }}</dd></div>
+                    {% if row.selfwork_active %}<div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ row.counts.selfwork }}</dd></div>{% endif %}
                     <div class="sfc-stats__item"><dt>{% trans "Ev tapşırığı" context "subject_folder.ui" %}</dt><dd>{{ row.counts.homework }}</dd></div>
                 </dl>
                 <div class="sfc-card__foot">
@@ -40,7 +41,7 @@
 {% else %}
     {% trans "Hələ fənn qovluğunuz yoxdur" context "subject_folder.ui" as st_title %}
     {% if sp.create_options %}
-        {% trans "«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və sərbəst iş slotları sillabusdan avtomatik çəkiləcək." context "subject_folder.ui" as st_body %}
+        {% if academic_rules.selfwork %}{% trans "«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular və sərbəst iş slotları sillabusdan avtomatik çəkiləcək." context "subject_folder.ui" as st_body %}{% else %}{% trans "«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular sillabusdan avtomatik çəkiləcək." context "subject_folder.ui" as st_body %}{% endif %}
     {% else %}
         {% trans "Qovluq yaratmaq üçün sizə fənn açılışı (qrup) təyin olunmalıdır." context "subject_folder.ui" as st_body %}
     {% endif %}

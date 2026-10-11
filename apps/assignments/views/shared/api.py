@@ -4,69 +4,23 @@ assignments/views/api.py
 API helper views for assignments (AJAX endpoints).
 
 Contains:
-- search_students
 - search_groups
 - students_by_groups
-- remove_student_from_assignment
+
+WP9a (2026-10-10): çağıranı olmayan ``search_students`` və
+``remove_student_from_assignment`` silindi.
 """
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
-from django.utils.translation import pgettext
 
 from apps.courses.models import CourseMembership
 from apps.task_submission_core.public import can_user_access_course_roster
 from core.search_text import tolerant_q
 
-from ._helpers import _get_tenant_assignment_or_404, _get_tenant_course_or_404
-
-# ════════════════════════════════════════════════════════════════════════════
-# Search Students
-# ════════════════════════════════════════════════════════════════════════════
-
-
-@login_required
-def search_students(request):
-    """
-    ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Tələbə axtarışı (AJAX)                                                  │
-    │ GET /assignments/api/students/?q=<query>&course_id=<id>                 │
-    │                                                                         │
-    │ Select2 dropdown üçün istifadə olunur                                   │
-    └─────────────────────────────────────────────────────────────────────────┘
-    """
-    query = request.GET.get("q", "")
-    course_id = request.GET.get("course_id")
-
-    if not course_id:
-        return JsonResponse({"results": []})
-
-    course = _get_tenant_course_or_404(request, course_id)
-
-    # Authorization check: user must be course owner or have teacher/assistant role
-    if not can_user_access_course_roster(request.user, course):
-        raise PermissionDenied("You do not have permission to access this course roster.")
-
-    # Kursda olan tələbələri axtar (az/ing hərfə dözümlü, tokenli — sahib 2026-09-26)
-    student_memberships = course.memberships.filter(role="student")
-    student_q = tolerant_q(query, ("user__username", "user__first_name", "user__last_name"))
-    if student_q is not None:
-        student_memberships = student_memberships.filter(student_q)
-    student_memberships = student_memberships.select_related("user")[:10]
-
-    results = [
-        {
-            "id": m.user.id,
-            "text": (f"{m.user.get_full_name()} ({m.user.username})" if m.user.first_name else m.user.username),
-            "group_name": m.group_name or "",
-        }
-        for m in student_memberships
-    ]
-
-    return JsonResponse({"results": results})
-
+from ._helpers import _get_tenant_course_or_404
 
 # ════════════════════════════════════════════════════════════════════════════
 # Search Groups
@@ -168,76 +122,3 @@ def students_by_groups(request):
             )
 
     return JsonResponse({"students": students})
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# Remove Student From Assignment (Manual Override)
-# ════════════════════════════════════════════════════════════════════════════
-
-
-@login_required
-def remove_student_from_assignment(request, pk):
-    """
-    ┌─────────────────────────────────────────────────────────────────────────┐
-    │ Tələbəni tapşırıqdan çıxar (müəllim tərəfindən manual override)         │
-    │ POST /assignments/<pk>/remove-student/                                  │
-    │                                                                         │
-    │ Body: student_id=<id>                                                   │
-    │                                                                         │
-    │ Bu əməliyyat yalnız assignment.assigned_students M2M-ə təsir edir;      │
-    │ tələbənin qrupu və ya kurs üzvlüyü dəyişmir.                            │
-    └─────────────────────────────────────────────────────────────────────────┘
-    """
-    from core.permissions import request_has_permission
-
-    if request.method != "POST":
-        return JsonResponse(
-            {"success": False, "error": pgettext("assignments.views.message", "Bu sorğu üsuluna icazə verilmir.")},
-            status=405,
-        )
-
-    assignment = _get_tenant_assignment_or_404(request, pk)
-
-    # Kurs sahibi olmaq + redaktə açarı. Audit `access` F-12 (2026-09-13):
-    # `assignment.edit` kataloqda YOX idi → heç bir default rol daşımırdı və
-    # endpoint faktiki yalnız `*`-lı rollara açıq idi (adi müəllim öz
-    # tapşırığından tələbə çıxara bilmirdi). Açar kataloqa + müəllim şablonuna
-    # əlavə edildi; mövcud tenantların köhnə şablondan yaranmış müəllim rolları
-    # üçün isə `course.edit` (FAZA 10-dan hər müəllim şablonundadır) də qapını
-    # açır — `_can_delete_submissions`-dakı `assignment.delete | course.delete`
-    # cütü ilə eyni naxış.
-    if (
-        not request.user.is_teacher_or_above
-        or assignment.course.owner != request.user
-        or not (request_has_permission(request, "assignment.edit") or request_has_permission(request, "course.edit"))
-    ):
-        raise PermissionDenied("You do not have permission to modify this assignment.")
-
-    student_id = (request.POST.get("student_id") or "").strip()
-    if not student_id or not student_id.isdigit():
-        return JsonResponse(
-            {"success": False, "error": pgettext("assignments.views.message", "Düzgün tələbə ID-si göndərilməlidir.")},
-            status=400,
-        )
-
-    membership = (
-        CourseMembership.objects.filter(course=assignment.course, user_id=int(student_id))
-        .select_related("user")
-        .first()
-    )
-    if not membership:
-        return JsonResponse(
-            {"success": False, "error": pgettext("assignments.views.message", "Tələbə bu kursda tapılmadı.")},
-            status=404,
-        )
-
-    student = membership.user
-    assignment.assigned_students.remove(student)
-
-    return JsonResponse(
-        {
-            "success": True,
-            "message": pgettext("assignments.views.message", "%(name)s sərbəst işdən çıxarıldı.")
-            % {"name": student.get_full_name() or student.username},
-        }
-    )

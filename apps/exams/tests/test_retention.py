@@ -163,13 +163,14 @@ class ExamRetentionTests(TestCase):
         self.exam.is_deleted = True
         self.exam.deleted_at = self.exam.created_at
         self.exam.save(update_fields=["is_deleted", "deleted_at"])
-        return self.client.get(reverse("exams:deleted_exams_list"))
+        # URL auditi A12 (2026-10-10): zibil qutusu kabinet alt-görünüşüdür (`exams/deleted/` silindi).
+        return self.client.get(reverse("accounts:profile"), {"section": "my-exams", "exam_view": "trash"})
 
     def test_trash_offers_permanent_delete_only_for_exam_without_attempts(self):
         response = self._trash_page()
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "js-purge-exam")
+        self.assertContains(response, "js-tx-purge")
 
     def test_trash_hides_permanent_delete_when_attempt_history_exists(self):
         """UI backend qaydası ilə uyğun olmalıdır.
@@ -183,7 +184,7 @@ class ExamRetentionTests(TestCase):
         response = self._trash_page()
 
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "js-purge-exam")
+        self.assertNotContains(response, "js-tx-purge")
 
     def test_trash_page_has_no_csp_blocked_inline_confirm(self):
         """Təsdiq inline `onsubmit` ilə deyil, xarici JS + modalla olmalıdır.

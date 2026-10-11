@@ -3,7 +3,6 @@
 from .distribution_api import (
     amend,
     assign,
-    chairs,
     confirm,
     curriculum,
     options,
@@ -19,7 +18,6 @@ from .teacher_api import my_export, my_rows
 __all__ = [
     "amend",
     "assign",
-    "chairs",
     "confirm",
     "curriculum",
     "my_export",

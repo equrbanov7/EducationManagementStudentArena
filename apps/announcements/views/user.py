@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import uuid
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import dateformat, timezone
@@ -20,7 +20,6 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.download_types import attachment_file_response
 
-from ..constants import PROFILE_SECTION
 from ..models import AnnouncementAttachment
 from ..services import access
 from ..services import apply as apply_service
@@ -149,10 +148,4 @@ def attachment_download(request, announcement_id, attachment_id):
     return attachment_file_response(attachment.file, filename=attachment.original_name)
 
 
-@require_GET
-def detail_redirect(request, announcement_id):
-    """Paylaşıla bilən qısa link → kabinetdəki detal (giriş/görünüş qapısı orada)."""
-    return HttpResponseRedirect(f"{reverse('accounts:profile')}?section={PROFILE_SECTION}&elan={announcement_id}")
-
-
-__all__ = ["ack", "apply", "attachment_download", "detail_redirect", "list_fragment", "mark_read", "popup_seen"]
+__all__ = ["ack", "apply", "attachment_download", "list_fragment", "mark_read", "popup_seen"]

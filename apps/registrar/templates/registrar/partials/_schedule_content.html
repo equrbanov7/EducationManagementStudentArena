@@ -116,16 +116,9 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                 {% if role == 'teacher' %}
                 <a class="sgx-primary-btn" data-sgx-f="journal_link" href="#" target="_blank" rel="noopener"><i class="fas fa-book-open"></i> {% trans "Jurnalı aç" context "registrar.schedule" %}</a>
                 {% endif %}
-                {% comment %}Silmə YALNIZ `schedule.manage` icazəsi ilə çıxır (server
-                tərəfdə də eyni açar yoxlanılır). Təsdiq soruşması XARİCİ JS-dədir
-                (`schedule_grid.js`) — inline `onsubmit` CSP-yə görə YAZILMIR.{% endcomment %}
-                {% if schedule_can_manage %}
-                <form method="post" data-sgx-delete-form data-sgx-confirm="{% trans 'Slotu silmək?' context 'registrar.schedule' %}">
-                    {% csrf_token %}
-                    {% if schedule_next_url %}<input type="hidden" name="next" value="{{ schedule_next_url }}">{% endif %}
-                    <button type="submit" class="sgx-danger-btn"><i class="fas fa-trash-can"></i> {% trans "Slotu sil" context "registrar.schedule" %}</button>
-                </form>
-                {% endif %}
+                {% comment %}URL auditi A11 (2026-10-10): ölü «Slotu sil» forması (kart heç vaxt
+                `data-delete-url` vermirdi) və `cedvel/slot/<uuid>/sil/` marşrutu silindi —
+                slot redaktəsi «Dərs cədvəli redaktoru»ndadır (`accounts/schedule-manage/editor/`).{% endcomment %}
                 <button type="button" class="sgx-ghost-btn" data-sgx-close>{% trans "Bağla" context "registrar.schedule" %}</button>
             </div>
         </div>

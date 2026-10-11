@@ -138,8 +138,21 @@ class JournalExportTest(TestCase):
         workbook = load_workbook(BytesIO(resp.content))
         self.assertEqual(len(workbook.sheetnames), 2)
         texts = "\n".join(str(c.value) for ws in workbook.worksheets for row in ws.iter_rows() for c in row if c.value)
-        self.assertIn("Əli Vəliyev", texts)
+        self.assertIn("Vəliyev Əli", texts)
         self.assertIn("CS101", texts)
+
+    def test_both_sheets_show_surname_name_patronymic(self):
+        """Sahib 2026-10-10: ixracda da jurnaldakı kimi «Soyad Ad Ata adı» (adı-soyadı eyni olanlar ayrılsın)."""
+        from openpyxl import load_workbook
+
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.filter(user=self.student).update(patronymic="Həsən")
+        resp = self._client(self.teacher).get(self._url())
+        workbook = load_workbook(BytesIO(resp.content))
+        for ws in workbook.worksheets:
+            cells = [str(c.value) for row in ws.iter_rows() for c in row if c.value]
+            self.assertIn("Vəliyev Əli Həsən", cells, ws.title)
 
     def test_student_cannot_export(self):
         resp = self._client(self.student).get(self._url())

@@ -20,6 +20,7 @@ from ...selectors import (
     get_top_liked_posts,
     get_top_viewed_posts,
 )
+from ..shared.module_gate import posts_module_required
 from .categories import render_category_page
 
 HOME_SEARCH_MAX_LENGTH = 200
@@ -156,6 +157,10 @@ def about(request):
     )
 
 
+# URL auditi B7 (2026-10-10, sahib: «qalsın, sonra istifadə olunacaq»): səhifə
+# silinmir, amma qardaşları kimi postlar modulu qapısının arxasındadır — modul
+# bağlıykən (universitet rejimində anonim də) 404; modul açılanda geri gəlir.
+@posts_module_required
 def technology(request):
     category = get_object_or_404(Category.objects.select_related("parent"), slug=DEFAULT_TECHNOLOGY_CATEGORY_SLUG)
     return render_category_page(request, category)

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load journal_names i18n %}
 {% comment %}Qiymətləndirmə tabı (mockup): solda TƏQVİM PLANI (kurs mövzuları +
 keçirilmə tarixi), sağda davamiyyət/bal grid-i. Başlıqlar sadədir (yalnız tarix
 + BU GÜN). Lecture xanası: i/e·q/b çipi. Seminar/lab xanası: bal (0-10) + q/b —
@@ -74,13 +74,14 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
             </nav>
             {% endif %}
             <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
-                <table class="jd2-table">
+                <table class="jd2-table" data-jd-hint>
                     <thead>
                         <tr>
                             <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                             {% for lm in journal.lesson_meta %}
                             <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}{% if lm.lesson.off_schedule_reason %} is-offsched{% endif %}"
                                 id="jd-lesson-{{ lm.lesson.id }}"
+                                data-jd-hint-col="{{ lm.lesson.date|date:'d.m.Y' }} · {{ lm.lesson.get_kind_display }}"
                                 title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.topic %} — {{ lm.lesson.topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
                                 {% if not lm.editable %}
                                 {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. #}
@@ -136,7 +137,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                             <td class="jd2-td-student">
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
-                                    <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                                    <span class="jd2-stu-name" data-jd-hint-name>{{ row.student|journal_name }}</span>
                                     {% if row.is_guest %}
                                     {% comment %}«Alt qrupdan əlavə olunub» nişanı — tooltip-də mənbə qrup.
                                     Koordinator/dekanlıq üçün eyni çip geri götürmə düyməsi də olur.{% endcomment %}
@@ -186,7 +187,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
                                         {% if cell.mark %}data-mark-id="{{ cell.mark.id }}"{% endif %}
                                         data-lesson-id="{{ cell.lesson.id }}"
                                         data-enrollment-id="{{ row.enrollment.id }}"
-                                        data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                        data-student="{{ row.student|journal_name }}"
                                         data-date="{{ cell.lesson.date|date:'d.m.Y' }}"
                                         data-kind="{{ cell.lesson.get_kind_display }}"
                                         data-allows-score="{% if cell.allows_score %}1{% else %}0{% endif %}"

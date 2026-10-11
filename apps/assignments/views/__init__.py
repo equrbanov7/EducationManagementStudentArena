@@ -6,7 +6,7 @@ rol qovluqlarına köçürülüb. Bu fasad bütün mövcud import səthini
 (`from . import views` → views.create_assignment və s.) DƏYİŞMƏDƏN saxlayır.
 """
 
-from .shared import remove_student_from_assignment, search_groups, search_students, students_by_groups
+from .shared import search_groups, students_by_groups
 from .student import assignment_detail, my_submissions, submit_assignment
 from .teacher import (
     create_assignment,
@@ -27,8 +27,6 @@ __all__ = [
     "review_submissions",
     "delete_submissions",
     "grade_submission",
-    "search_students",
     "search_groups",
     "students_by_groups",
-    "remove_student_from_assignment",
 ]

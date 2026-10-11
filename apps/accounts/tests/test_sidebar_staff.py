@@ -5,8 +5,8 @@ olsa da səliqəli olsun». Orkestratorun ekranda gördüyü üç qüsur: uzun q
 kəsilirdi («İMTAHAN VƏ QİYMƏTLƏNDİ…»), 11 bağlı böyük hərfli sayğaclı başlıq «mətn
 divarı» kimi oxunurdu, «Ümumi» adi qrup kimi görünürdü. Nəyi qoruyur:
 
-1. Qrup başlığı: hər akkordeon qrupu ORTAQ `_group_summary.html`-i 16px ikonla
-   işlədir; ad cümlə registrindədir və CSS onu kəsmir; QA süpürgəsi qrup adını
+1. Qrup başlığı: hər akkordeon qrupu ORTAQ `_group_summary.html`-i 18px xətti ikonla
+   (Lucide sprite, `{% nav_icon %}` — sahib 2026-10-11) işlədir; ad cümlə registrindədir və CSS onu kəsmir; QA süpürgəsi qrup adını
    yenə təmiz oxuyur.
 2. «Ümumi» bəndləri başlıqsız üst blokdur (`<details>`-dən kənar, qruplardan əvvəl).
 3. «Menyuda axtar» süzgəci YALNIZ > 20 bəndli menyuda render olunur (skripti də).
@@ -43,7 +43,7 @@ User = get_user_model()
 BASE = Path(settings.BASE_DIR)
 SIDEBAR_DIR = BASE / "apps/accounts/templates/accounts/profile/sidebar"
 CSS_DIR = BASE / "apps/accounts/static/accounts/css/profile"
-FA_CSS = BASE / "static/vendor/fontawesome/css/all.min.css"
+NAV_SPRITE = BASE / "static/vendor/lucide/ems-nav.svg"
 COMMENT_RE = re.compile(r"{%\s*comment\s*%}.*?{%\s*endcomment\s*%}|{#.*?#}", re.S)
 SUMMARY_RE = re.compile(r"<summary\b.*?</summary>", re.S)
 DETAILS_RE = re.compile(r"<details\b.*?</details>", re.S)
@@ -114,14 +114,17 @@ class StaffSidebarTemplateContractTest(SimpleTestCase):
                 self.assertNotIn("<summary", source, "başlıq ortaq `_group_summary.html`-dən gəlməlidir")
                 self.assertRegex(
                     source,
-                    r'as group_label %}\s*{% include "accounts/profile/sidebar/_group_summary\.html" with group_icon="fa-[a-z-]+" %}',
+                    r'as group_label %}\s*{% include "accounts/profile/sidebar/_group_summary\.html" with group_icon="[a-z0-9-]+" %}',
                 )
 
     def test_shared_header_keeps_the_qa_contract_icon_and_chevron_order(self):
         source = _source(SIDEBAR_DIR / "_group_summary.html")
         # QA `_GROUP_RE`: sinfin SONU `sidebar-menu-group-label"`, dərhal ardınca `<span`.
-        self.assertRegex(source, r'class="[^"]*sidebar-menu-group-label">\s*<span class="sidebar-menu-group-title"><i ')
-        self.assertIn('sidebar-menu-group-icon" aria-hidden="true"', source)
+        self.assertRegex(
+            source,
+            r'class="[^"]*sidebar-menu-group-label">\s*<span class="sidebar-menu-group-title">{% nav_icon group_icon ',
+        )
+        self.assertIn('{% nav_icon group_icon "sidebar-menu-group-icon" %}', source)
         self.assertLess(source.index("sidebar-menu-group-meta"), source.index("sidebar-menu-group-caret"))
 
     def test_group_labels_are_sentence_case_and_never_truncated(self):
@@ -141,15 +144,15 @@ class StaffSidebarTemplateContractTest(SimpleTestCase):
         self.assertNotIn("<summary", source)
         self.assertIn("items/_notifications.html", source)
 
-    def test_all_sidebar_icons_exist_in_the_vendored_font_awesome(self):
-        fa = FA_CSS.read_text(encoding="utf-8")
+    def test_all_sidebar_icons_exist_in_the_vendored_sprite(self):
+        sprite = set(re.findall(r'<symbol id="([a-z0-9-]+)"', NAV_SPRITE.read_text(encoding="utf-8")))
         icons = set()
         for path in [SIDEBAR_DIR.parent / "_sidebar.html", *SIDEBAR_DIR.rglob("*.html")]:
             source = _source(path)
-            icons.update(re.findall(r'group_icon="(fa-[a-z0-9-]+)"', source))
-            icons.update(re.findall(r'class="fas (fa-[a-z0-9-]+)', source))
-        missing = sorted(icon for icon in icons if not re.search(r"\." + re.escape(icon) + r"[:,{]", fa))
-        self.assertEqual(missing, [], "Font Awesome 6.4-də olmayan ikon")
+            icons.update(re.findall(r'group_icon="([a-z0-9-]+)"', source))
+            icons.update(re.findall(r'{% nav_icon "([a-z0-9-]+)"', source))
+        self.assertGreater(len(icons), 50)
+        self.assertEqual(sorted(icons - sprite), [], "sprite-da (`static/vendor/lucide/ems-nav.svg`) olmayan ikon")
 
 
 # ── 3–4. Render: heyət, kiçik heyət, sorğu bəndləri ────────────────────────
@@ -220,7 +223,11 @@ class StaffSidebarRenderTest(TestCase):
         summaries = SUMMARY_RE.findall(aside)
         self.assertGreaterEqual(len(summaries), 5)
         for summary in summaries:
-            self.assertRegex(summary, r'<i class="fas fa-[a-z-]+ sidebar-menu-group-icon" aria-hidden="true">')
+            self.assertRegex(
+                summary,
+                r'<svg class="ems-nav-icon sidebar-menu-group-icon" aria-hidden="true" focusable="false">'
+                r'<use href="[^"]*ems-nav\.svg[^"#]*#[a-z0-9-]+">',
+            )
         first_group = aside.index("<details")
         for key in ("dashboard", "notifications", "applications", "profile-info"):
             with self.subTest(key=key):
@@ -261,7 +268,7 @@ class StaffSidebarRenderTest(TestCase):
         self.assertIn('data-sidebar-layout="student"', aside)
         tasks = aside[aside.index('data-sidebar-section="tasks"') : aside.index('data-sidebar-section="communication"')]
         self.assertIn('href="/accounts/profile/?section=evaluation-survey"', tasks)
-        self.assertIn('class="fas fa-clipboard-question sidebar-menu-icon"', tasks)
+        self.assertIn('ems-nav.svg?v=20261011-wp10icons#clipboard-pen-line"', tasks)
         self.assertRegex(tasks, r'<span class="sidebar-menu-badge[^"]*" data-badge-key="evaluation_survey"></span>')
         self.assertNotIn("evaluation-survey", self._render(STUDENT_SECTIONS, caps))
 
@@ -277,9 +284,9 @@ class StaffSidebarRenderTest(TestCase):
         aside = self._render(base | {"evaluation-results", "evaluation-campaigns"}, {})
         group = aside[aside.index('data-sidebar-group="quality"') :]
         group = group[: group.index("</details>")]
-        self.assertIn("fa-clipboard-check sidebar-menu-group-icon", group)
-        self.assertIn("fa-chart-column sidebar-menu-icon", group)
-        self.assertIn("fa-bullhorn sidebar-menu-icon", group)
+        self.assertRegex(group, r'class="ems-nav-icon sidebar-menu-group-icon"[^>]*><use href="[^"]*#badge-check"')
+        self.assertRegex(group, r'class="ems-nav-icon sidebar-menu-icon"[^>]*><use href="[^"]*#chart-column"')
+        self.assertRegex(group, r'class="ems-nav-icon sidebar-menu-icon"[^>]*><use href="[^"]*#megaphone"')
         self.assertLess(
             group.index('data-section="evaluation-results"'), group.index('data-section="evaluation-campaigns"')
         )

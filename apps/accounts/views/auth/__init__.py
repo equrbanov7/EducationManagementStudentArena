@@ -13,13 +13,7 @@ from .login import (  # noqa: F401
     NamespacedPasswordResetView,
     login_portal,
 )
-from .register import (  # noqa: F401
-    logout_view,
-    register_view,
-    resend_code_view,
-    verify_code_view,
-    verify_email_link_view,
-)
+from .logout import logout_view  # noqa: F401
 
 __all__ = [
     "AUTH_DEVICE_COOKIE_NAME",
@@ -29,9 +23,5 @@ __all__ = [
     "NamespacedPasswordResetView",
     "login_portal",
     "logout_view",
-    "register_view",
-    "resend_code_view",
     "set_initial_password_view",
-    "verify_code_view",
-    "verify_email_link_view",
 ]

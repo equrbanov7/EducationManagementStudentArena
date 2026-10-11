@@ -24,9 +24,8 @@ urlpatterns = [
     ),
     path("submission/<int:pk>/grade/", views.grade_submission, name="grade_submission"),
     path("<int:pk>/my-submissions/", views.my_submissions, name="my_submissions"),
-    # AJAX endpoints
-    path("search-students/", views.search_students, name="search_students"),
+    # AJAX endpoints. WP9a (2026-10-10): çağıranı olmayan `search-students/` və
+    # `<pk>/remove-student/` silindi (modal yalnız qrup axtarışı + qrup tələbələrini işlədir).
     path("search-groups/", views.search_groups, name="search_groups"),
     path("students-by-groups/", views.students_by_groups, name="students_by_groups"),
-    path("<int:pk>/remove-student/", views.remove_student_from_assignment, name="remove_student_from_assignment"),
 ]

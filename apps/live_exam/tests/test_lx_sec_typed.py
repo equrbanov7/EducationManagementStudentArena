@@ -147,10 +147,8 @@ class TypedPreRevealLeakTest(_TypedBase):
         for secret in (_SECRET, "accepted_answers", "typed_summary", '"is_correct"'):
             self.assertNotIn(secret, own)
 
-        urls = (
-            reverse("liveExam:state_json", kwargs={"pin": self.session.pin}),
-            reverse("live_exam_api_v1:state_json", kwargs={"pin": self.session.pin}),
-        )
+        # WP9a (2026-10-10): `api/v1/live/<pin>/state/` sarğısı silindi — yeganə state ucu qalır.
+        urls = (reverse("liveExam:state_json", kwargs={"pin": self.session.pin}),)
         for url in urls:
             reset_rate_limits()
             with self.subTest(url=url):

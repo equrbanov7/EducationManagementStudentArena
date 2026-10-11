@@ -136,6 +136,15 @@ BLANK_SELF = {"option": "", "topics": [], "archived": []}
 
 
 @pytest.fixture()
+def selfwork_rule_on(settings):
+    """Sərbəst iş testləri köhnə qayda ilə (sahib 2026-10-10: RİM tənzimləməsi yandırılıb).
+
+    Köçürülmüş «baza sillabus»un semestri yoxdur → CARİ qayda; defoltda sərbəst iş söndürülüdür və
+    `self` paneli redaktorda göstərilmir. Bu testlər məhz həmin panelin daşıma qaydasını yoxlayır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True
+
+
+@pytest.fixture()
 def world():
     org = make_org("carryover-org")
     teacher = User.objects.create_user("carryover_teacher", "carryover@x.test", "pw")
@@ -212,6 +221,7 @@ def test_teacher_can_still_drop_a_migrated_method_explicitly(world):
 
 
 # ── 2. `self.topics` — variant seçilməyəndə mövzular itmir ─────────────────
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_migrated_selfwork_topics_survive_first_autosave(world):
     actor, version = _migrated_draft(
         world,
@@ -232,6 +242,7 @@ def test_migrated_selfwork_topics_survive_first_autosave(world):
     assert MIGRATED_TOPICS[-1] in _preview(version)[str(BLOCK_TITLES["selfwork"])]
 
 
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_selfwork_topics_survive_after_the_teacher_picks_a_structure(world):
     """Variant seçmək ARTIQ mövzuları səssizcə silmir — onlar yuva kimi qalır."""
     actor, version = _migrated_draft(
@@ -348,6 +359,7 @@ def test_outcome_count_is_unchanged_so_week_row_tn_references_hold(world):
 
 
 # ── 6. `self.topics[].title` — eyni sinif, mənbədə U+2028 ──────────────────
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_migrated_selfwork_title_line_break_survives_first_autosave(world):
     """Xam sütunda ``[\\r\\n]`` YOXDUR, buna baxmayaraq itki VAR.
 
@@ -485,6 +497,7 @@ def test_a_week_row_holding_a_hidden_carried_value_is_not_dropped(world):
     assert "2" in se["week_rows"][16]["extra_note"]
 
 
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_emptied_extra_selfwork_slots_leave_the_panel_on_the_next_render(world):
     """Eyni qayda sərbəst iş yuvalarında (~8,258 sillabus)."""
     actor, version = _migrated_draft(
@@ -516,6 +529,7 @@ def test_emptied_extra_selfwork_slots_leave_the_panel_on_the_next_render(world):
 
 
 # ── 9. Arxiv sətri də ORTAQ qaydaya tabedir ───────────────────────────────
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_a_disallowed_selfwork_option_can_never_be_stored(world):
     """«Sonuncu latent itki yolu» — ÖLÇÜLDÜ, itki yolu DEYİL.
 
@@ -544,6 +558,7 @@ def test_a_disallowed_selfwork_option_can_never_be_stored(world):
     assert excinfo.value.code == "self.option_not_allowed"
 
 
+@pytest.mark.usefixtures("selfwork_rule_on")
 def test_archived_rows_carry_unknown_keys_back_untouched(world):
     """`collectSelf` arxivi sıfırdan qururdu — naxış pozuq idi (bu gün 0 təsir).
 
@@ -564,3 +579,31 @@ def test_archived_rows_carry_unknown_keys_back_untouched(world):
     assert payload["archived"][0]["gelecek_sahe"] == {"nested": [1]}
     assert after["archived"][0]["title"] == "köhnə tapşırıq"
     assert after["archived"][0]["gelecek_sahe"] == {"nested": [1]}
+
+
+# ── Sahib 2026-10-10: sərbəst iş söndürülüb (defolt) — panel gizlidir, data SİLİNMİR ──────────────
+def test_without_selfwork_the_panel_is_hidden_and_its_data_is_kept(world):
+    topics = [{"title": title} for title in MIGRATED_TOPICS[:2]]
+    actor, version = _migrated_draft(world, {SectionKey.SELF.value: {**BLANK_SELF, "topics": topics}})
+
+    root, se = render_editor_dom(user=world["teacher"], organization=world["org"], version=version)
+
+    assert se["selfwork_active"] is False
+    assert not root.xpath("//*[@data-syl-panel='self']")
+    assert [step["id"] for step in se["nav"]] == [
+        "info",
+        "desc",
+        "out",
+        "week",
+        "method",
+        "assess",
+        "lit",
+        "prev",
+        "send",
+    ]
+    assert [step["index"] for step in se["nav"]] == list(range(1, 10))
+    assert se["completion"]["total"] == 7
+    # Gizli bölməyə yazı qəbul edilmir, mövcud datası isə olduğu kimi qalır.
+    with pytest.raises(TransitionDenied):
+        services.save_section(version=version, section_id=SectionKey.SELF.value, data=BLANK_SELF, actor=actor)
+    assert services.section_data_map(version)[SectionKey.SELF.value]["topics"] == topics

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Keyfiyyətə nəzarət» qrupu (2026-09-25) — müəllimlərin ANONİM qiymətləndirmə
 sorğusunun heyət tərəfi: kampaniyaların idarəsi və nəticələrin baxışı.
 
@@ -13,7 +13,7 @@ Sıra: nəticələr (dekan/kafedra tez-tez baxır) → kampaniyalar (semestrdə 
 <li class="sidebar-menu-group" data-sidebar-group="quality">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|evaluation-results|evaluation-campaigns|surveys-builder|" %} open{% endif %}>
         {% trans "Keyfiyyətə nəzarət" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-clipboard-check" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="badge-check" %}
         <ul class="sidebar-menu-group-items">
             {% if "evaluation-results" in allowed_sections %}
             <li class="sidebar-menu-item">
@@ -22,7 +22,7 @@ Sıra: nəticələr (dekan/kafedra tez-tez baxır) → kampaniyalar (semestrdə 
                    data-title="{% trans 'Sorğu nəticələri' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'evaluation-results' %}active{% endif %}">
-                    <i class="fas fa-chart-column sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "chart-column" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sorğu nəticələri" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -34,7 +34,7 @@ Sıra: nəticələr (dekan/kafedra tez-tez baxır) → kampaniyalar (semestrdə 
                    data-title="{% trans 'Sorğu kampaniyaları' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'evaluation-campaigns' %}active{% endif %}">
-                    <i class="fas fa-bullhorn sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "megaphone" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sorğu kampaniyaları" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -46,7 +46,7 @@ Sıra: nəticələr (dekan/kafedra tez-tez baxır) → kampaniyalar (semestrdə 
                    data-title="{% trans 'Sorğu qurucusu' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'surveys-builder' %}active{% endif %}">
-                    <i class="fas fa-pen-ruler sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "square-pen" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sorğu qurucusu" context "profile.sidebar" %}</span>
                 </a>
             </li>

@@ -62,11 +62,11 @@ class ResultsFilterLayoutTest(_UnitFixture):
         self.assertNotIn("action_apply_filter", html)
         self.assertNotIn('id="loadingOverlay"', html)
         self.assertIn("data-results-skeleton-target", html)
-        self.assertIn("ter-grant-card", html)
+        self.assertIn("etr-grant", html)  # 2026-10-10 redizayn: ortaq qabıq sinifləri
         # İç-içə form yoxdur: filtr formasının bağlanışı grant formasından ƏVVƏL gəlir.
         filters_form = html.index('id="resultsFiltersForm"')
         filters_close = html.index("</form>", filters_form)
-        grant_form = html.index("ter-group-grant-form")
+        grant_form = html.index("etr-grant__form")
         self.assertLess(filters_close, grant_form)
 
 
@@ -98,7 +98,7 @@ class BackButtonNeverSticksTest(_UnitFixture):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["profile_return_url"].startswith(detail))
         html = response.content.decode()
-        self.assertIn(f'href="{detail}?', html.split('class="ter-back-btn"')[0][-400:])
+        self.assertIn(f'href="{detail}?', html.split('class="etp-back"')[0][-400:])
         # Kabinet `return_to`-su axının başlanğıcıdır — nəticələrdə «Geri» yenə detala aparır.
         response = client.get(results, {"from_section": "my-exams", "return_to": "/accounts/profile/?section=my-exams"})
         self.assertTrue(response.context["profile_return_url"].startswith(detail))

@@ -44,12 +44,11 @@ LOGOUT_REDIRECT_URL = "/"
 # EMSArena is an e-university platform. Following the account-provisioning model
 # used by real universities (UNEC, ADA, Western Caspian, …), end users do NOT
 # self-register: the university administration provisions accounts and assigns
-# roles (see docs/operations/ACCOUNT_PROVISIONING.md). The public `accounts:register`
-# route is therefore DISABLED by default — it redirects to the login page with a
-# "contact your administrator" message. Set PUBLIC_SIGNUP_ENABLED=1 to re-open
-# public self-signup (e.g. for a non-university tenant or a marketing pilot).
-# The test settings enable it so the existing registration-flow tests keep
-# exercising the machinery.
+# roles (see docs/operations/ACCOUNT_PROVISIONING.md).
+# Owner decision 2026-10-10 (URL audit A5/B8): the public signup flow
+# (`accounts/register/`, `verify-code/`, `verify-email/`, `resend-code/`) was
+# DELETED. This flag is now INERT — nothing reads it; the line stays only so the
+# documented env switch (docker-compose / .env examples) keeps parsing.
 PUBLIC_SIGNUP_ENABLED = _env_bool_setting("PUBLIC_SIGNUP_ENABLED", False)
 
 # ---------------------------------------------------------------------------

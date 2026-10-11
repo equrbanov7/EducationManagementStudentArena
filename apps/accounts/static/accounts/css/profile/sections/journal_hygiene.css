@@ -1,0 +1,241 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Jurnal təmizliyi» (sahib 2026-10-10) — şablon: sections/journal_hygiene/_content.html.
+   Əsas görünüş ems_ui komponentlərindəndir (kpi, tabs, filters, table, badge, chip, dialog);
+   burada yalnız bölməyə xas düzülüş var. Rənglər YALNIZ --ems-* tokenləri ilə.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.jh {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.jh__notice {
+    margin: 0;
+}
+
+.jh-tabs {
+    margin-top: var(--ems-sp-2);
+}
+
+.jh-help {
+    margin: 0;
+    max-width: var(--ems-w-text);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+.jh-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.jh-chips:empty {
+    display: none;
+}
+
+/* ── Seçim + əməl paneli ────────────────────────────────────────────────── */
+.jh-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    padding: var(--ems-sp-3) var(--ems-sp-4);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.jh-toolbar__count {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.jh-toolbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+/* ── Cədvəl ─────────────────────────────────────────────────────────────── */
+.jh-th--check,
+.jh-td--check {
+    width: 40px;
+    text-align: center;
+}
+
+.jh-check {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.jh-check:disabled {
+    cursor: not-allowed;
+}
+
+.jh-row.is-strong td:first-child {
+    box-shadow: inset 3px 0 0 var(--ems-danger-600);
+}
+
+.jh-row.is-reverted {
+    color: var(--ems-text-muted);
+}
+
+.jh-row--state td {
+    padding: var(--ems-sp-6) var(--ems-sp-4);
+}
+
+.jh-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.jh-stack__main {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-1);
+    color: var(--ems-text);
+    font-weight: 600;
+}
+
+.jh-stack__sub {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.jh-reason-text .jh-stack__sub {
+    max-width: 320px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.jh-nowrap {
+    white-space: nowrap;
+}
+
+.jh-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-1);
+}
+
+.jh-badge {
+    font-size: var(--ems-fs-xs);
+}
+
+.jh-arrow {
+    color: var(--ems-text-muted);
+}
+
+.jh-strength {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+.jh-strength.is-strong {
+    color: var(--ems-danger-700);
+}
+
+.jh-pager {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-3);
+}
+
+.jh-pager:empty {
+    display: none;
+}
+
+.jh-pager__info {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* ── Önizləmə xülasəsi (dialoq) ─────────────────────────────────────────── */
+.jh-preview {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    margin-bottom: var(--ems-sp-4);
+}
+
+.jh-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: var(--ems-sp-2);
+}
+
+.jh-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg-subtle);
+}
+
+.jh-metric__value {
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+}
+
+.jh-metric__label {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.jh-preview__title {
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.jh-preview__list {
+    margin: 0;
+    padding-left: var(--ems-sp-5);
+    max-height: 180px;
+    overflow-y: auto;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-sm);
+}
+
+.jh-preview__note,
+.jh-preview__msg {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+}
+
+.jh-preview__note {
+    color: var(--ems-text-muted);
+}
+
+.jh-dialog__error {
+    margin: 0 0 var(--ems-sp-3);
+}
+
+@media (max-width: 720px) {
+    .jh-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .jh-pager {
+        justify-content: space-between;
+    }
+}

@@ -28,7 +28,8 @@ urlpatterns = [
     # GET /courses/create_course/ → Kurs yaratma forması
     # POST /courses/create_course/ → Kurs yaradılır → Redirect dashboard-a
     path("create_course/", views.CreateCourseView.as_view(), name="create_course"),
-    path("my-courses/", views.MyCoursesListView.as_view(), name="my_courses"),
+    # WP9a (2026-10-10): `my-courses/` və `my-enrolled/` siyahı səhifələri silindi — kabinet
+    # bölmələri `?section=my-courses` / `?section=assigned-courses` əvəz edir.
     # GET /courses/<id>/dashboard/ → Kurs profil səhifəsi (accordion)
     path(
         "<int:course_id>/dashboard/",
@@ -122,8 +123,6 @@ urlpatterns = [
         views.DeleteGroupFromCourseView.as_view(),
         name="delete_group_from_course",
     ),
-    # Tələbə kursları
-    path("my-enrolled/", views.StudentCoursesView.as_view(), name="student_courses"),
     # ═══════════════════════════════════════════════════════════════════════
     # İmtahanlar ilə əlaqələndirmə
     # ═══════════════════════════════════════════════════════════════════════

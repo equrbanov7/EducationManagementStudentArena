@@ -7,7 +7,6 @@ Contains:
 - CreateCourseView
 - EditCourseView
 - DeleteCourseView
-- MyCoursesListView
 """
 
 from django.contrib import messages
@@ -20,7 +19,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
-from django.views.generic import CreateView, ListView, UpdateView, View
+from django.views.generic import CreateView, UpdateView, View
 
 from apps.courses.forms import COURSE_STATUS_CHOICES, CourseForm
 from apps.courses.models import Course
@@ -32,7 +31,6 @@ from core.tenancy import get_request_organization, restore_request_organization_
 from ..shared._helpers import (
     IsCourseOwnerMixin,
     _get_owner_course_or_404,
-    _owner_courses_queryset,
     _require_org_permission,
 )
 
@@ -280,19 +278,3 @@ def update_course_status(request, course_id):
     if redirect_target:
         return redirect(redirect_target)
     return redirect("courses:course_dashboard", course_id=course.id)
-
-
-# ════════════════════════════════════════════════════════════════════════════
-# My Courses List
-# ════════════════════════════════════════════════════════════════════════════
-
-
-class MyCoursesListView(LoginRequiredMixin, ListView):
-    """Mənim kurslarım (owner)."""
-
-    template_name = "courses/my_courses.html"
-    context_object_name = "courses"
-    paginate_by = 12
-
-    def get_queryset(self):
-        return _owner_courses_queryset(self.request).order_by("-created_at")

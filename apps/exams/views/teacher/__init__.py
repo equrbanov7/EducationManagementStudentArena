@@ -13,12 +13,10 @@ from .exams import (
 )
 from .groups import (
     create_student_group,
-    teacher_add_student_to_group,
     teacher_create_group,
     teacher_delete_group,
     teacher_group_candidates,
     teacher_group_list,
-    teacher_remove_student_from_group,
     teacher_update_group,
 )
 from .question_bank import (
@@ -35,7 +33,6 @@ from .results import (
     export_exam_results_xlsx,
     teacher_check_attempt,
     teacher_exam_results,
-    teacher_pending_attempts,
     teacher_view_attempt,
 )
 
@@ -45,8 +42,6 @@ __all__ = [
     "teacher_group_candidates",
     "teacher_update_group",
     "teacher_delete_group",
-    "teacher_remove_student_from_group",
-    "teacher_add_student_to_group",
     "create_student_group",
     "teacher_exam_list",
     "createAndEditExamView",
@@ -72,5 +67,4 @@ __all__ = [
     "export_exam_results_xlsx",
     "teacher_view_attempt",
     "teacher_check_attempt",
-    "teacher_pending_attempts",
 ]

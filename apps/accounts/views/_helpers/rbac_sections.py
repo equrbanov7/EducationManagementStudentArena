@@ -270,6 +270,9 @@ def apply_permission_section_gates(
     from apps.announcements.public import section_visible as announcements_section_visible
     from apps.surveys.public import inbox_section_visible, student_section_visible
 
+    # «Kadr analitikası» (sahib 2026-10-11) — `people.hr_analytics` (HR; rektor `*` ilə; RİM rəhbəri privileged).
+    # Data qapısı və əhatə: `services/hr_analytics/policy.py` (hər yükləmədə və ixracda fail-closed).
+    can_view_hr_analytics = privileged or has_permission(permissions, "people.hr_analytics")
     can_view_survey_results = privileged or has_permission(permissions, "survey.results.view")
     can_manage_surveys = privileged or has_permission(permissions, "survey.manage")
 
@@ -298,6 +301,7 @@ def apply_permission_section_gates(
         (can_view_audit, "audit-log"),
         (can_use_rim_center, "rim-center"),
         (can_view_people_teachers, "people-teachers"),
+        (can_view_hr_analytics, "hr-analytics"),
         (can_view_people_students, "people-students"),
         (can_view_syllabus, "syllabus-list"),
         (can_view_syllabus, "syllabus-editor"),
@@ -311,6 +315,8 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         # «Sistem tənzimləmələri» — sahib 2026-10-03: YALNIZ RİM rəhbəri və superadmin (açar qapısı yox).
         (bool(is_superadmin or is_rim_head), "system-settings"),
+        # «Jurnal təmizliyi» — sahib 2026-10-10: eyni qapı; yazı servisdə `journal.correct` ilə yenidən yoxlanılır.
+        (bool(is_superadmin or is_rim_head), "journal-hygiene"),
         (can_manage_workload, "workload-distribution"),
         (can_view_workload, "my-workload"),
         (can_manage_workload, "workload-center"),

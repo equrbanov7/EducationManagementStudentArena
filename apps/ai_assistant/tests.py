@@ -246,7 +246,7 @@ class AIContextBuilderRegressionTests(TestCase):
         request.org_permissions = list(membership.role.permissions or [])
 
         # Must not raise ValueError and must include the enrolled course title.
-        context = build_user_context(request, current_page="/courses/my-courses/")
+        context = build_user_context(request, current_page="/accounts/profile/?section=assigned-courses")
         self.assertIn("Test Kursu", context)
 
 

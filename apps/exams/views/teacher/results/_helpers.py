@@ -1,6 +1,6 @@
 """results paketi — daxili köməkçilər və sabitlər (view-suz məntiq)."""
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from urllib.parse import urlencode, urlsplit
 
 from django.urls import reverse
@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamAnswer
 from apps.exams.services.ai_grading import has_ai_gradeable_answer_content, has_written_answer_content
 from apps.exams.services.manual_grading import answer_max_points as _answer_max_points
+from core.datetime_input import DateTimeTextError, parse_datetime_text
 from core.search_text import tolerant_q
 
 ANONYMOUS_NAME_TOKEN_SALT = "exams.teacher_results.anonymous_name"  # nosec B105
@@ -224,13 +225,22 @@ def _build_attempt_timing_context(attempt):
 
 
 def _parse_filter_date(raw_value):
+    """Nəticə filtrinin tarixi → (göstəriş mətni «gg.aa.iiii», ``date``) və ya ("", None).
+
+    2026-10-10 (sahib: tarix HƏMİŞƏ gg.aa.iiii): sahə artıq brauzer dilinə tabe native date
+    deyil — gün-əvvəl yazı qəbul olunur; köhnə ISO linkləri (``2026-10-06``) də işləyir.
+    Oxunmayan dəyər səssizcə nəzərə alınmır (əvvəlki kimi)."""
     raw_date = (raw_value or "").strip()
     if not raw_date:
         return "", None
     try:
-        return raw_date, datetime.strptime(raw_date, "%Y-%m-%d").date()
-    except ValueError:
+        parsed = parse_datetime_text(raw_date, require_time=False)
+    except DateTimeTextError:
         return "", None
+    if parsed is None:
+        return "", None
+    value = parsed.date()
+    return value.strftime("%d.%m.%Y"), value
 
 
 def _view_action_state():

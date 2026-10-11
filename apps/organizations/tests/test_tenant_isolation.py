@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
@@ -30,6 +30,12 @@ from ..services import (
 from ..signals import create_default_roles
 
 User = get_user_model()
+
+
+def _cabinet_section_url(section):
+    """WP9a (2026-10-10): köhnə `courses/my-courses|my-enrolled/` siyahıları silindi —
+    kurs siyahısının tenant qaydası kabinet bölməsinin fraqmentində yoxlanılır."""
+    return reverse("accounts:profile_section_fragment", kwargs={"section": section})
 
 
 def _assign_user_to_org(user, organization, profile_role, *, membership_role_name=None):
@@ -439,9 +445,12 @@ class HttpTenantIsolationTest(TestCase):
         session.pop("active_organization", None)
         session.save()
 
-        response = self.client.get(reverse("courses:my_courses"))
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context["courses"].exists())
+        response = self.client.get(_cabinet_section_url("my-courses"))
+        # Kabinet bölməsi tenant kontekstsiz müəllim bölməsini ümumiyyətlə açmır (403) —
+        # köhnə siyahının «boş 200»-ündən sərtdir; hər iki halda kurs adı sızmamalıdır.
+        self.assertIn(response.status_code, (200, 403))
+        self.assertNotContains(response, self.course_a.title, status_code=response.status_code)
+        self.assertNotContains(response, self.course_b.title, status_code=response.status_code)
 
     def test_student_courses_is_empty_without_active_organization(self):
         """
@@ -455,9 +464,10 @@ class HttpTenantIsolationTest(TestCase):
         session.pop("active_organization", None)
         session.save()
 
-        response = self.client.get(reverse("courses:student_courses"))
+        response = self.client.get(_cabinet_section_url("assigned-courses"))
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context["courses"].exists())
+        self.assertNotContains(response, self.course_a.title)
+        self.assertNotContains(response, self.course_b.title)
 
     def test_teacher_exam_list_requires_active_organization(self):
         """
@@ -474,6 +484,9 @@ class HttpTenantIsolationTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=my-exams")
 
+    # «Mövcud imtahanlar» səhifəsi defolt bağlıdır (sahib 2026-10-10, `exam.available_page`);
+    # bu test bayrağı deyil, tenant izolyasiyasını yoxlayır — səhifə açıq rejimdə sabitlənir.
+    @override_settings(EXAM_AVAILABLE_PAGE=True)
     def test_student_available_exams_empty_without_active_organization(self):
         """
         A student with no active_organization set in their session sees no
@@ -498,7 +511,7 @@ class HttpTenantIsolationTest(TestCase):
         session["active_organization"] = "this-org-does-not-exist"
         session.save()
 
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
         # The middleware must have cleared the invalid slug from the session.
         self.assertNotEqual(self.client.session.get("active_organization"), "this-org-does-not-exist")
@@ -515,7 +528,7 @@ class HttpTenantIsolationTest(TestCase):
         """
         _login_with_org(self.client, self.teacher_a, self.org_b)
 
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
         # The middleware must have restored org_a (the only real membership).
         active_slug = self.client.session.get("active_organization")
@@ -528,9 +541,9 @@ class HttpTenantIsolationTest(TestCase):
         """
         _login_with_org(self.client, self.teacher_a, self.org_b)
 
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
-        course_titles = [c.title for c in response.context["courses"]]
+        course_titles = response.content.decode()  # kabinet fraqmentinin HTML-i
         self.assertNotIn(self.course_b.title, course_titles)
 
     def test_forged_session_cannot_expose_cross_tenant_exams(self):
@@ -579,18 +592,18 @@ class HttpTenantIsolationTest(TestCase):
     def test_my_courses_shows_only_active_tenant_courses(self):
         """Teacher sees only their own org's courses in my_courses list."""
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
-        course_titles = [c.title for c in response.context["courses"]]
+        course_titles = response.content.decode()  # kabinet fraqmentinin HTML-i
         self.assertIn(self.course_a.title, course_titles)
         self.assertNotIn(self.course_b.title, course_titles)
 
     def test_student_courses_shows_only_active_tenant_courses(self):
         """Student sees only their own org's enrolled courses."""
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(reverse("courses:student_courses"))
+        response = self.client.get(_cabinet_section_url("assigned-courses"))
         self.assertEqual(response.status_code, 200)
-        course_titles = [c.title for c in response.context["courses"]]
+        course_titles = response.content.decode()  # kabinet fraqmentinin HTML-i
         self.assertIn(self.course_a.title, course_titles)
         self.assertNotIn(self.course_b.title, course_titles)
 
@@ -602,6 +615,9 @@ class HttpTenantIsolationTest(TestCase):
         self.assertContains(response, self.exam_a.title)
         self.assertNotContains(response, self.exam_b.title)
 
+    # «Mövcud imtahanlar» səhifəsi defolt bağlıdır (sahib 2026-10-10, `exam.available_page`);
+    # bu test bayrağı deyil, tenant izolyasiyasını yoxlayır — səhifə açıq rejimdə sabitlənir.
+    @override_settings(EXAM_AVAILABLE_PAGE=True)
     def test_student_available_exams_excludes_other_tenant_exams(self):
         """Student's available exam list does not include Org-B exams."""
         _login_with_org(self.client, self.student_a, self.org_a)
@@ -620,9 +636,9 @@ class HttpTenantIsolationTest(TestCase):
         even if they manually request the org-b session.
         """
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
-        course_titles = [c.title for c in response.context["courses"]]
+        course_titles = response.content.decode()  # kabinet fraqmentinin HTML-i
         self.assertIn(self.course_a.title, course_titles, "Teacher A must see their own org-a course")
         self.assertNotIn(self.course_b.title, course_titles, "Teacher A must NOT see org-b course")
 
@@ -632,9 +648,9 @@ class HttpTenantIsolationTest(TestCase):
         courses that belong to Org-B in any course listing view.
         """
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
-        course_titles = [c.title for c in response.context["courses"]]
+        course_titles = response.content.decode()  # kabinet fraqmentinin HTML-i
         self.assertNotIn(self.course_b.title, course_titles, "Org-A user must not see Org-B courses")
 
     def test_user_from_org_A_cannot_see_org_B_exams(self):
@@ -654,7 +670,6 @@ class HttpTenantIsolationTest(TestCase):
         than serving the file, using a path that unambiguously belongs to
         Org-B's private storage.
         """
-        from django.test import override_settings
 
         # Use a path under a private prefix so the view enforces tenant checks.
         # A real Org-B file path would be e.g. "exam_uploads/<org_b_id>/...".
@@ -682,7 +697,7 @@ class HttpTenantIsolationTest(TestCase):
         superuser = User.objects.create_superuser("superadmin_test", "superadmin@example.com", "SuperSecretPass123!")
         # Set the active org to org_b for the superadmin
         _login_with_org(self.client, superuser, self.org_b)
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(_cabinet_section_url("my-courses"))
         self.assertEqual(response.status_code, 200)
         # Superadmin sees all (or at least doesn't crash/get forbidden)
         # The key assertion: the response succeeded and does not display a
@@ -772,71 +787,8 @@ class CrossTenantAssignmentIsolationTest(TestCase):
             end_datetime=timezone.now() + datetime.timedelta(days=30),
         )
 
-    def test_remove_student_api_rejects_cross_tenant_student_id(self):
-        """
-        A teacher from Org A cannot remove a student from Org B via the
-        remove-student endpoint, even if they know the student's primary key.
-
-        The view must scope the student lookup to the assignment's course,
-        so an Org-B student_id returns 404 instead of silently succeeding or
-        exposing user data.
-        """
-        from apps.organizations.models import Role as OrgRole
-
-        # Give teacher_a the permissions required to reach the student lookup
-        role = OrgRole.objects.create(
-            organization=self.org_a,
-            name="ct_teacher_role_reject",
-            display_name="Teacher",
-            level=80,
-            scope_type=RoleScopeType.ORGANIZATION,
-            permissions=["assignment.edit"],
-        )
-        Membership.objects.filter(user=self.teacher_a, organization=self.org_a).update(role=role)
-
-        assignment_a = self._make_assignment(self.course_a, "CT Assignment A")
-        assignment_a.assigned_students.add(self.student_a)
-
-        _login_with_org(self.client, self.teacher_a, self.org_a)
-
-        response = self.client.post(
-            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment_a.pk}),
-            data={"student_id": str(self.student_b.pk)},
-        )
-        # The endpoint must not find Org-B's student via this assignment's course.
-        self.assertEqual(response.status_code, 404)
-
-    def test_remove_student_api_accepts_same_tenant_student(self):
-        """
-        A teacher from Org A CAN remove an Org-A student from their own
-        assignment (happy-path sanity check).
-        """
-        import json
-
-        from apps.organizations.models import Role as OrgRole
-
-        role = OrgRole.objects.create(
-            organization=self.org_a,
-            name="ct_teacher_role",
-            display_name="Teacher",
-            level=80,
-            scope_type=RoleScopeType.ORGANIZATION,
-            permissions=["assignment.edit"],
-        )
-        Membership.objects.filter(user=self.teacher_a, organization=self.org_a).update(role=role)
-
-        assignment_a = self._make_assignment(self.course_a, "CT Assignment A Same Tenant")
-        assignment_a.assigned_students.add(self.student_a)
-
-        _login_with_org(self.client, self.teacher_a, self.org_a)
-
-        response = self.client.post(
-            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment_a.pk}),
-            data={"student_id": str(self.student_a.pk)},
-        )
-        self.assertEqual(response.status_code, 200)
-        data = json.loads(response.content)
-        self.assertTrue(data.get("success"))
+    # WP9a (2026-10-10): `assignments/<pk>/remove-student/` (çağıranı yox idi) silindi — onun
+    # çarpaz-tenant testləri də.
 
     def test_lab_preview_rejects_cross_tenant_student(self):
         """

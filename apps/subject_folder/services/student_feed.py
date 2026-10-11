@@ -3,7 +3,8 @@
 Sorğu sayı SABİTDİR (qovluq/tapşırıq sayından asılı deyil): qeydiyyatlar,
 təyinatlar, tapşırıqlar, son tarixlər, cari cəhdlər — hər biri bir sorğu.
 Tələbə yalnız AKTİV qovluğun, AKTİV təyinatın, dərc edilmiş və gizli
-olmayan tapşırığını görür; sərbəst iş yalnız ``grades_selfwork`` təyinatında.
+olmayan tapşırığını görür; sərbəst iş yalnız ``grades_selfwork`` təyinatında və yalnız
+açılışın dövründə sərbəst iş ləğv olunmayıbsa (sahib 2026-10-10, ``selfwork_rule``).
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ from django.utils import timezone
 from ..constants import FINAL_STATUSES, FolderStatus, SubmissionStatus, TaskKind
 from ..errors import FolderError
 from ..models import FolderAssignment, FolderTask, Submission, TaskDeadline
-from . import lookups
+from . import lookups, selfwork_rule
 from .assignments import WINDOW_CLOSED, WINDOW_NOT_OPEN, window_state
 from .submissions import resolve_enrollment
 
@@ -91,8 +92,10 @@ def student_folders(*, organization, student, period=None) -> list[dict]:
     result = []
     for assignment in assignments:
         rows = []
+        selfwork_active = selfwork_rule.offering_active(assignment.offering, organization)
+        selfwork_on = assignment.grades_selfwork and selfwork_active
         for task in tasks_by_folder.get(assignment.folder_id, []):
-            if task.kind == TaskKind.SELFWORK and not assignment.grades_selfwork:
+            if task.kind == TaskKind.SELFWORK and not selfwork_on:
                 continue
             key = (assignment.pk, task.pk)
             rows.append(_task_state(task, assignment, deadlines.get(key), currents.get(key), now))
@@ -101,6 +104,7 @@ def student_folders(*, organization, student, period=None) -> list[dict]:
                 "folder": assignment.folder,
                 "assignment": assignment,
                 "offering": assignment.offering,
+                "selfwork_active": selfwork_active,
                 "tasks": rows,
                 "counts": {
                     "selfwork": sum(1 for row in rows if row["task"].kind == TaskKind.SELFWORK),

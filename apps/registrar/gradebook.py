@@ -17,7 +17,7 @@ from django.db.models import Count
 from django.utils import timezone
 
 from apps.registrar import grade_audit  # noqa: F401 — `gradebook.grade_audit` köhnə giriş yolu (testlər/çağıranlar)
-from apps.registrar import absence_limit, exam_eligibility, journal_window, services
+from apps.registrar import absence_limit, activity_kinds, exam_eligibility, journal_window, services
 from apps.registrar.models import (
     AssessmentScheme,
     AttendanceStatus,
@@ -171,10 +171,12 @@ def get_offering_journal(*, offering, newest_first=False, lesson_limit=None, les
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student", "source_group")
+        .select_related("student", "student__profile", "source_group")
         .order_by("student__last_name", "student__username")
     )
-    mark_map = {(m.enrollment_id, m.lesson_id): m for m in LessonMark.objects.filter(lesson__offering=offering)}
+    # Dərs növü eyni sorğuda (JOIN artıq var) — giriş balının 5 + 5 aktivliyi üçün (``activity_kinds``).
+    marks = activity_kinds.annotate_kind(LessonMark.objects.filter(lesson__offering=offering))
+    mark_map = {(m.enrollment_id, m.lesson_id): m for m in marks}
     # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
     # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
     from apps.registrar import finals_batch

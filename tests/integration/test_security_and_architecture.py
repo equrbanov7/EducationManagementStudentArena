@@ -630,11 +630,6 @@ class ExamFormsImportTest(TestCase):
 
         self.assertTrue(callable(StudentGroupForm))
 
-    def test_accounts_register_form_importable(self):
-        from apps.accounts.forms import RegisterForm
-
-        self.assertTrue(callable(RegisterForm))
-
     def test_accounts_login_form_importable(self):
         from apps.accounts.forms import CustomLoginForm
 

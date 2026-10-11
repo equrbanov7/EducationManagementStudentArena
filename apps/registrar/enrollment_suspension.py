@@ -16,6 +16,10 @@ QAYDA (sahib, tövsiyə olunan variant):
   dəyişirsə, köçürmə xidməti (``transfer_student_group``) bundan SONRA işləyir
   və bərpa olunmuş qeydiyyatları yeni qrupa aparır.
 
+GƏLƏCƏK DÖVRLƏR (sahib 2026-10-10, «Jurnal təmizliyi»): əvvəlcədən açılmış gələcək semestrin (aktiv,
+``start_date`` > bu gün) jurnalı açıq qeydiyyatları da eyni qaydaya düşür — əks halda xaric olunmuş
+tələbə növbəti semestrin jurnalında qalırdı. Açar: ``journal_hygiene_guard.prevention_enabled``.
+
 TOXUNULMAYANLAR: keçmiş dövrlər, ``completed`` / ``dropped`` sətirlər,
 jurnalı BAĞLI (``assessment_scheme.is_published``) açılışlar — yekunlaşmış
 jurnalın tərkibi sonradan dəyişmir. Məzuniyyət (graduated) qeydiyyatları
@@ -52,14 +56,17 @@ def _direction(previous, to_status):
 
 
 def current_period_enrollments(record, status):
-    """Tələbənin CARİ (aktiv) dövrdə, jurnalı açıq açılışlardakı ``status`` qeydiyyatları."""
-    return Enrollment.objects.filter(
-        organization_id=record.organization_id,
-        student_id=record.student_id,
-        status=status,
-        offering__period__is_current=True,
-        offering__period__is_active=True,
-    ).exclude(offering__assessment_scheme__is_published=True)
+    """Tələbənin CARİ (aktiv) — açar yanılıdırsa həm də GƏLƏCƏK — dövrdə, jurnalı açıq açılışlardakı qeydiyyatları."""
+    from apps.registrar import journal_hygiene, journal_hygiene_guard
+
+    queryset = Enrollment.objects.filter(
+        organization_id=record.organization_id, student_id=record.student_id, status=status
+    )
+    if journal_hygiene_guard.prevention_enabled():
+        queryset = queryset.filter(journal_hygiene.open_period_q())
+    else:
+        queryset = queryset.filter(offering__period__is_current=True, offering__period__is_active=True)
+    return queryset.exclude(offering__assessment_scheme__is_published=True)
 
 
 def sync_enrollments_for_status(*, record, previous, to_status, actor=None, reason="") -> dict:

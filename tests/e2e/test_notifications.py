@@ -3,10 +3,11 @@ EMS Arena — Notification Workflows E2E Tests
 =============================================
 Covers:
   J. Notifications and user feedback
-     - Notification inbox page load
-     - Unread count API endpoint
-     - Notification detail page
-     - Mark-read / mark-unread actions
+     - Notification inbox (cabinet section) load
+     - Mark-all-read action
+
+WP9a (2026-10-10): standalone `/notifications/`, `<pk>/`, `<pk>/unread/` and
+`unread-count/` were removed — the inbox is the cabinet section.
 """
 
 from __future__ import annotations
@@ -18,8 +19,7 @@ from .conftest import BASE_URL, E2E_PASSWORD, E2E_USERNAME
 
 # ── URLs ─────────────────────────────────────────────────────────────────────
 
-NOTIFICATION_LIST_URL = f"{BASE_URL}/notifications/"
-NOTIFICATION_UNREAD_COUNT_URL = f"{BASE_URL}/notifications/unread-count/"
+NOTIFICATION_LIST_URL = f"{BASE_URL}/accounts/profile/?section=notifications"
 NOTIFICATION_READ_ALL_URL = f"{BASE_URL}/notifications/read-all/"
 
 
@@ -32,8 +32,7 @@ class TestNotificationsUnauthenticatedAccess:
     @pytest.mark.parametrize(
         "notif_path",
         [
-            "/notifications/",
-            "/notifications/unread-count/",
+            "/accounts/profile/?section=notifications",
         ],
     )
     def test_notification_path_blocks_anonymous_user(self, page: Page, notif_path: str) -> None:
@@ -83,43 +82,6 @@ class TestNotificationInbox:
         authenticated_page.wait_for_load_state("domcontentloaded")
         body_text = authenticated_page.locator("body").inner_text()
         assert len(body_text.strip()) > 0, "Notification list page body is empty"
-
-
-# ── Unread count AJAX endpoint ────────────────────────────────────────────────
-
-
-class TestNotificationUnreadCountEndpoint:
-    """Tests for the unread-count AJAX endpoint used by the navbar badge."""
-
-    @pytest.mark.skipif(
-        not E2E_USERNAME or not E2E_PASSWORD,
-        reason="E2E_USERNAME / E2E_PASSWORD not set",
-    )
-    def test_unread_count_endpoint_returns_valid_response(self, authenticated_page: Page) -> None:
-        """
-        The unread-count endpoint must return HTTP 200 with a JSON body
-        containing a numeric unread count for an authenticated user.
-        """
-        # Use Playwright's evaluate to make a fetch request with the current
-        # session cookies (the page is already authenticated).
-        response_data = authenticated_page.evaluate(f"""async () => {{
-                const resp = await fetch("{NOTIFICATION_UNREAD_COUNT_URL}", {{
-                    headers: {{ "X-Requested-With": "XMLHttpRequest" }}
-                }});
-                return {{ status: resp.status, body: await resp.text() }};
-            }}""")
-
-        assert response_data["status"] == 200, f"Unread count endpoint returned HTTP {response_data['status']}"
-        import json
-
-        try:
-            payload = json.loads(response_data["body"])
-        except (json.JSONDecodeError, ValueError):
-            pytest.fail(f"Unread count endpoint did not return JSON: {response_data['body'][:200]}")
-
-        assert (
-            "count" in payload or "unread_count" in payload or isinstance(payload, dict)
-        ), f"Unread count response does not contain a count field: {payload}"
 
 
 # ── Mark-read-all action ──────────────────────────────────────────────────────

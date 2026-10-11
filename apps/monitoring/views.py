@@ -21,12 +21,11 @@ import time
 from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponseForbidden, JsonResponse
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from . import queries
-from .clients import LOKI_MAX_LINES, AlertmanagerClient, LokiClient, PrometheusClient, degraded
+from .clients import LOKI_MAX_LINES, AlertmanagerClient, LokiClient, degraded
 from .models import Incident, IncidentStatus, SecurityEvent
 from .pagination import clamp_page, paginated_data, parse_pagination
 from .permissions import monitoring_view_required, superadmin_monitoring_required
@@ -53,75 +52,6 @@ def _range_seconds(request) -> int:
         return int(request.GET.get("range", 3600))
     except (TypeError, ValueError):
         return 3600
-
-
-@require_GET
-@monitoring_view_required
-def overview_api(request):
-    prom = PrometheusClient()
-    targets = prom.query("up")
-    if targets is None:
-        return JsonResponse(degraded("prometheus", "Metrik servisi müvəqqəti əlçatmazdır"))
-
-    up_by_job: dict[str, bool] = {}
-    for item in targets:
-        job = item.get("metric", {}).get("job", "?")
-        try:
-            value = float(item["value"][1])
-        except (KeyError, IndexError, TypeError, ValueError):
-            value = 0.0
-        up_by_job[job] = up_by_job.get(job, True) and value == 1.0
-
-    containers_alive = prom.scalar(f"count(time() - container_last_seen{{{queries.CONTAINER_RE}}} < 60)", 0.0)
-    data = {
-        "generated_at": timezone.now().isoformat(),
-        "targets": up_by_job,
-        "server": {
-            "cpu_percent": prom.scalar('100 * (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m])))'),
-            "memory_percent": prom.scalar("100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)"),
-            "disk_percent": prom.scalar(queries.ROOT_DISK_USED_PERCENT_PROMQL),
-            "uptime_seconds": prom.scalar("node_time_seconds - node_boot_time_seconds"),
-        },
-        "containers_alive": containers_alive,
-        "app": {
-            "request_rate": prom.scalar("sum(rate(http_requests_total[5m]))"),
-            "error_rate_percent": prom.scalar(
-                'sum(rate(http_requests_total{status_code=~"5.."}[5m]))'
-                " / clamp_min(sum(rate(http_requests_total[5m])), 0.001) * 100"
-            ),
-            "p95_seconds": prom.scalar(
-                "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[15m])))"
-            ),
-        },
-        "services": {
-            "postgres_up": prom.scalar("pg_up"),
-            "redis_up": prom.scalar("redis_up"),
-            "nginx_up": prom.scalar("nginx_up"),
-            "endpoint_probes_up": prom.scalar('min(probe_success{job="emsarena-blackbox"})'),
-            "celery_workers": prom.scalar("emsarena_celery_workers_online"),
-            "backup_age_seconds": prom.scalar("emsarena_backup_age_seconds"),
-        },
-        "incidents_open": Incident.objects.exclude(status=IncidentStatus.RESOLVED).count(),
-        "incidents_critical_open": Incident.objects.filter(severity="critical")
-        .exclude(status=IncidentStatus.RESOLVED)
-        .count(),
-    }
-    from apps.exams.models import Exam, ExamAttempt
-
-    now = timezone.now()
-    scope = _scope(request)
-    exam_q = Q() if scope is None or scope.platform else Q(organization_id=scope.organization_id)
-    attempt_q = Q() if scope is None or scope.platform else Q(exam__organization_id=scope.organization_id)
-    data["security_events_24h"] = SecurityEvent.objects.filter(
-        _org_filter(request), last_seen_at__gte=now - timezone.timedelta(hours=24)
-    ).count()
-    data["exams"] = {
-        "active_exams": Exam.objects.filter(
-            exam_q, is_deleted=False, start_datetime__lte=now, end_datetime__gte=now
-        ).count(),
-        "students_in_exam": ExamAttempt.objects.filter(attempt_q, status="in_progress").count(),
-    }
-    return JsonResponse({"status": "ok", "data": data})
 
 
 @require_GET

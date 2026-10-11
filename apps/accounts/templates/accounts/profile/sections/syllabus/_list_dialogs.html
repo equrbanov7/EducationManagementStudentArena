@@ -27,7 +27,8 @@ Hamısı EYNİ qabıqdan istifadə edir — JS yalnız görünən bloku açır. 
         <span class="syl-pick__radio" aria-hidden="true"></span>
         <span>
           <span class="syl-pick__title">{% trans "Böyük dəyişiklik" context "accounts.syllabus" %}</span>
-          <span class="syl-pick__note">{% trans "Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir." context "accounts.syllabus" %}</span>
+          {# Sahib 2026-10-10: sərbəst iş söndürülübsə (CARİ qayda) mətndə də yoxdur. #}
+          <span class="syl-pick__note">{% if academic_rules.selfwork %}{% trans "Həftəlik mövzular, qiymətləndirmə çəkiləri və ya sərbəst iş strukturu dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir." context "accounts.syllabus" %}{% else %}{% trans "Həftəlik mövzular və ya qiymətləndirmə çəkiləri dəyişir. Yalnız növbəti semestrdən qüvvəyə minir — cari jurnal təsirlənmir." context "accounts.syllabus" %}{% endif %}</span>
         </span>
       </button>
     </div>

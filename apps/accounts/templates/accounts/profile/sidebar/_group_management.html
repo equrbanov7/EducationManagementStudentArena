@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«İdarəetmə» qrupu — İSTİFADƏÇİ və İCAZƏ əməliyyatları: rol təyinatı,
 RİM mərkəzi, toplu müəllim idxalı, heyət/tələbə idarəetməsi, icazə redaktoru.
 
@@ -10,9 +10,9 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
 {% if can_manage_org or 'superadmin-organizations' in allowed_sections or 'student-organization-management' in allowed_sections or 'superadmin-exam-rooms' in allowed_sections or 'rim-center' in allowed_sections or 'student-intake' in allowed_sections or 'system-settings' in allowed_sections %}
 {% if 'role-assignment' in allowed_sections or 'rim-center' in allowed_sections or 'system-settings' in allowed_sections or 'teacher-intake' in allowed_sections or 'student-organization-management' in allowed_sections or 'permission-editor' in allowed_sections or 'manage-roles' in allowed_sections %}
 <li class="sidebar-menu-group" data-sidebar-group="management">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|role-assignment|rim-center|system-settings|teacher-intake|student-organization-management|permission-editor|manage-roles|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|role-assignment|rim-center|system-settings|journal-hygiene|teacher-intake|student-organization-management|permission-editor|manage-roles|" %} open{% endif %}>
         {% trans "group_management" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-user-shield" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="shield-user" %}
         <ul class="sidebar-menu-group-items">
             {% if 'role-assignment' in allowed_sections %}
             <li class="sidebar-menu-item">
@@ -21,7 +21,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'role_assignment' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}?section=role-assignment"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'role-assignment' %}active{% endif %}">
-                    <i class="fas fa-user-shield sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "user-check" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "role_assignment" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -34,7 +34,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'RİM mərkəzi' context 'profile.rim' %}"
                    data-source-url="{{ profile_base_url }}?section=rim-center"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'rim-center' %}active{% endif %}">
-                    <i class="fas fa-id-card-alt sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "briefcase-business" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "RİM mərkəzi" context "profile.rim" %}</span>
                 </a>
             </li>
@@ -48,11 +48,12 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'Sistem tənzimləmələri' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}?section=system-settings"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'system-settings' %}active{% endif %}">
-                    <i class="fas fa-sliders sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "sliders-horizontal" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sistem tənzimləmələri" context "profile.section" %}</span>
                 </a>
             </li>
             {% endif %}
+            {% include "accounts/profile/sidebar/items/_journal_hygiene.html" %}
 
             {% comment %}Tələbə idxalı — `user.import` (RİM, HR, rektor). RİM mərkəzinin
             YANINDA dayanır: biri MÖVCUD hesabı idarə edir, digəri YENİ hesab gətirir.
@@ -71,7 +72,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'Müəllim əlavəsi (toplu)' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}?section=teacher-intake"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'teacher-intake' %}active{% endif %}">
-                    <i class="fas fa-file-import sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "file-input" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Müəllim əlavəsi (toplu)" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -84,7 +85,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% if role_capabilities.teacher_can_manage_students %}{% trans 'student_management' context 'profile.section' %}{% else %}{% trans 'staff_management' context 'profile.section' %}{% endif %}"
                    data-source-url="{% url 'accounts:student_organization_management' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'student-organization-management' %}active{% endif %}">
-                    <i class="fas fa-users-cog sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "users-round" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% if role_capabilities.teacher_can_manage_students %}{% trans "student_management" context "profile.sidebar" %}{% else %}{% trans "staff_management" context "profile.sidebar" %}{% endif %}</span>
                 </a>
             </li>
@@ -97,7 +98,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'permissions' context 'profile.section' %}"
                    data-source-url="{% url 'accounts:permission_editor' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'permission-editor' %}active{% endif %}">
-                    <i class="fas fa-key sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "key-round" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "permissions" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -110,7 +111,7 @@ görünürlüyü dəyişməsin. Daxili bəndlərin öz açarları da toxunulmay�
                    data-title="{% trans 'manage_roles' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-roles' %}active{% endif %}">
-                    <i class="fas fa-user-cog sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "user-cog" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "manage_roles" context "profile.sidebar" %}</span>
                 </a>
             </li>

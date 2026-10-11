@@ -317,67 +317,10 @@ class NotificationViewTest(TestCase):
     def _make_notification(self, title="Test", **kwargs):
         return create_notification(recipient=self.user, title=title, **kwargs)
 
-    # ── List ──────────────────────────────────────────────────────────────
+    # WP9a (2026-10-10): müstəqil qutu/detal səhifələri, `<pk>/unread/` və `unread-count/`
+    # silindi — qutu kabinet bölməsidir; reqressiya: tests/test_dead_routes_wp9a_2026_10_10.py.
 
-    def test_list_view_returns_200(self):
-        response = self.client.get(reverse("notifications:notification_list"))
-        self.assertEqual(response.status_code, 200)
-
-    def test_list_view_requires_login(self):
-        self.client.logout()
-        response = self.client.get(reverse("notifications:notification_list"))
-        self.assertEqual(response.status_code, 302)
-
-    def test_list_shows_own_notifications(self):
-        self._make_notification(title="My notif")
-        create_notification(recipient=self.other, title="Others")
-        response = self.client.get(reverse("notifications:notification_list"))
-        self.assertContains(response, "My notif")
-        self.assertNotContains(response, "Others")
-
-    def test_list_excludes_deleted(self):
-        n = self._make_notification(title="Gone")
-        n.soft_delete()
-        response = self.client.get(reverse("notifications:notification_list"))
-        self.assertNotContains(response, "Gone")
-
-    def test_list_filter_unread(self):
-        self._make_notification(title="Unread notif")
-        n2 = self._make_notification(title="Read notif")
-        n2.mark_read()
-        response = self.client.get(reverse("notifications:notification_list") + "?filter=unread")
-        self.assertContains(response, "Unread notif")
-        self.assertNotContains(response, "Read notif")
-
-    def test_list_search_query_filters_results(self):
-        self._make_notification(title="Deadline update", message="Lab deadline moved")
-        self._make_notification(title="Exam notice", message="Schedule changed")
-
-        response = self.client.get(reverse("notifications:notification_list") + "?q=deadline")
-
-        self.assertContains(response, "Deadline update")
-        self.assertNotContains(response, "Exam notice")
-
-    # ── Detail ────────────────────────────────────────────────────────────
-
-    def test_detail_view_returns_200(self):
-        n = self._make_notification()
-        response = self.client.get(reverse("notifications:notification_detail", args=[n.pk]))
-        self.assertEqual(response.status_code, 200)
-
-    def test_detail_marks_as_read(self):
-        n = self._make_notification()
-        self.assertFalse(n.is_read)
-        self.client.get(reverse("notifications:notification_detail", args=[n.pk]))
-        n.refresh_from_db()
-        self.assertTrue(n.is_read)
-
-    def test_detail_other_user_gets_404(self):
-        other_n = create_notification(recipient=self.other, title="Theirs")
-        response = self.client.get(reverse("notifications:notification_detail", args=[other_n.pk]))
-        self.assertEqual(response.status_code, 404)
-
-    # ── Mark Read / Unread ────────────────────────────────────────────────
+    # ── Mark Read ─────────────────────────────────────────────────────────
 
     def test_mark_read_post(self):
         n = self._make_notification()
@@ -395,13 +338,6 @@ class NotificationViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content, {"success": True, "is_read": True})
         self.assertTrue(n.is_read)
-
-    def test_mark_unread_post(self):
-        n = self._make_notification()
-        n.mark_read()
-        self.client.post(reverse("notifications:notification_mark_unread", args=[n.pk]))
-        n.refresh_from_db()
-        self.assertFalse(n.is_read)
 
     def test_mark_read_other_user_gets_404(self):
         other_n = create_notification(recipient=self.other, title="T")
@@ -429,7 +365,9 @@ class NotificationViewTest(TestCase):
             reverse("notifications:notification_delete", args=[n.pk]),
             {"next": "?filter=all&page=1"},
         )
-        self.assertRedirects(response, reverse("notifications:notification_list") + "?filter=all&page=1")
+        self.assertRedirects(
+            response, reverse("accounts:profile") + "?filter=all&page=1", fetch_redirect_response=False
+        )
         n.refresh_from_db()
         self.assertTrue(n.is_deleted)
 
@@ -457,38 +395,21 @@ class NotificationViewTest(TestCase):
             reverse("notifications:notification_mark_all_read"),
             {"next": "?filter=unread&page=2"},
         )
-        self.assertRedirects(response, reverse("notifications:notification_list") + "?filter=unread&page=2")
+        self.assertRedirects(
+            response, reverse("accounts:profile") + "?filter=unread&page=2", fetch_redirect_response=False
+        )
+
+    def test_actions_without_next_fall_back_to_cabinet_inbox(self):
+        """WP9a (2026-10-10): köhnə `notifications/` qutusu yoxdur — defolt hədəf kabinet bölməsidir."""
+        n = self._make_notification()
+        response = self.client.post(reverse("notifications:notification_mark_read", args=[n.pk]))
+        self.assertRedirects(
+            response, reverse("accounts:profile") + "?section=notifications", fetch_redirect_response=False
+        )
 
     # ── Unread count ──────────────────────────────────────────────────────
-
-    def test_unread_count_endpoint(self):
-        self._make_notification()
-        response = self.client.get(reverse("notifications:unread_count"))
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data["unread_count"], 1)
 
     def test_unread_count_updates_after_read(self):
         n = self._make_notification()
         self.client.post(reverse("notifications:notification_mark_read", args=[n.pk]))
-        response = self.client.get(reverse("notifications:unread_count"))
-        self.assertEqual(response.json()["unread_count"], 0)
-
-    # ── Pagination ────────────────────────────────────────────────────────
-
-    def test_pagination_works(self):
-        for i in range(20):
-            self._make_notification(title=f"N{i}")
-        response = self.client.get(reverse("notifications:notification_list"))
-        self.assertEqual(response.status_code, 200)
-        # PAGE_SIZE is 15; page 1 should have at most 15 items
-        page_obj = response.context["page_obj"]
-        self.assertLessEqual(len(page_obj.object_list), 15)
-
-    def test_pagination_page_2(self):
-        for i in range(20):
-            self._make_notification(title=f"N{i}")
-        response = self.client.get(reverse("notifications:notification_list") + "?page=2")
-        self.assertEqual(response.status_code, 200)
-        page_obj = response.context["page_obj"]
-        self.assertEqual(page_obj.number, 2)
+        self.assertEqual(get_unread_count(user=self.user), 0)

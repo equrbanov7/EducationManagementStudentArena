@@ -13,10 +13,7 @@ All views are re-exported here for backward compatibility with existing URLs.
 """
 
 # Account management views
-from .account_management import (
-    delete_account,
-    superadmin_user_management,
-)
+from .account_management import superadmin_user_management
 
 # «Müraciətlərim» — «Təyin et» dialoqunun namizəd siyahısı
 from .applications import applications_assignees
@@ -29,11 +26,7 @@ from .auth import (
     NamespacedPasswordResetView,
     login_portal,
     logout_view,
-    register_view,
-    resend_code_view,
     set_initial_password_view,
-    verify_code_view,
-    verify_email_link_view,
 )
 
 # Dashboard views
@@ -42,7 +35,6 @@ from .dashboard import (
     assigned_exams,
     cabinet_entry,
     dashboard,
-    grading_queue,
     my_result_detail,
     my_results,
     pending_answers,
@@ -88,10 +80,8 @@ from .legacy_review import (
 
 # Organization views
 from .organization import (
-    student_leave_organization,
     student_org_invitation_action,
     student_organization_management,
-    student_organization_request,
 )
 
 # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı, superadmin-only DEYİL)
@@ -192,10 +182,6 @@ __all__ = [
     "NamespacedPasswordResetView",
     "NamespacedPasswordResetDoneView",
     "NamespacedPasswordResetConfirmView",
-    "register_view",
-    "verify_code_view",
-    "verify_email_link_view",
-    "resend_code_view",
     "set_initial_password_view",
     "logout_view",
     # Profile
@@ -222,7 +208,6 @@ __all__ = [
     "staff_cabinet_entry",
     "teacher_dashboard",
     "student_dashboard",
-    "grading_queue",
     "assigned_exams",
     "assigned_courses",
     "my_results",
@@ -238,11 +223,8 @@ __all__ = [
     "permission_editor",
     # Organization
     "student_organization_management",
-    "student_organization_request",
     "student_org_invitation_action",
-    "student_leave_organization",
     # Account management
-    "delete_account",
     "superadmin_user_management",
     # RİM mərkəzi — hesab idarəetməsi (axtarış/parol/blok/silmə/redaktə)
     "people_list",

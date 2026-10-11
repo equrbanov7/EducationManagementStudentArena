@@ -287,9 +287,9 @@ class ViewAsMiddleware:
         {
             "accounts:set_initial_password",
             # Audit 2026-09-28 SA-01/02: parolsuz OTP JSON API-ləri (send/verify/resend_otp_api)
-            # silindi — adları burada saxlamağa ehtiyac yoxdur.
-            "accounts:resend_code",
-            "accounts:delete_account",
+            # silindi — adları burada saxlamağa ehtiyac yoxdur. URL auditi 2026-10-10:
+            # `accounts:resend_code` (açıq qeydiyyat) və `accounts:delete_account` (B6)
+            # marşrutları da silindi.
             # 2026-10-01: profil şəklinin JSON API-si — `update-avatar` forması
             # kimi bütün rejimlərdə bağlıdır (hədəfin şəklini dəyişmək olmaz).
             "accounts:profile_avatar_api",
@@ -302,7 +302,6 @@ class ViewAsMiddleware:
         self.get_response = get_response
         self._exit_path = None
         self._logout_path = None
-        self._delete_account_path = None
         self._blocked_paths = None
         self._admin_prefix = None
 
@@ -313,7 +312,6 @@ class ViewAsMiddleware:
 
             self._exit_path = reverse("accounts:view_as_stop")
             self._logout_path = reverse("accounts:logout")
-            self._delete_account_path = reverse("accounts:delete_account")
 
             blocked = set()
             for name in self.BLOCKED_URL_NAMES:
@@ -549,7 +547,7 @@ class ViewAsMiddleware:
 
             # Həssas profil əməliyyatları FULL rejimdə də bloklanır.
             profile_form = (request.POST.get("profile_form") or "").strip()
-            if request.path == self._delete_account_path or profile_form in self.BLOCKED_PROFILE_FORMS:
+            if profile_form in self.BLOCKED_PROFILE_FORMS:
                 self._audit_view_as_write(request, target, mode, url_name, allowed=False)
                 return self._reject(
                     request,

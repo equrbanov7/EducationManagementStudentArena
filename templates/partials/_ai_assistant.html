@@ -6,10 +6,27 @@ Yalnız daxil olmuş istifadəçiyə göstərilir. Struktur: üzən düymə → 
 (başlıq · mesajlar · vəziyyət lövhəsi · yazma sahəsi). Bütün mətn/URL-lər
 data-atributla JS-ə ötürülür (static/js/ai_assistant.js) — inline script/style
 YOX (CSP). Söndürülü («tezliklə») vəziyyəti server `quota` cavabındakı
-`enabled`/`configured` bayraqlarından gəlir. ID-lər JS qarmaqlarıdır.{% endcomment %}
+`enabled`/`configured` bayraqlarından gəlir. ID-lər JS qarmaqlarıdır.
+
+2026-10-10 (sahib: «AI buttonu gizlətmə, yerini dəyişmək və s. də olsun — bəzən hansısa button
+üstündə dayana bilir, user onun yerini tutaraq dəyişə bilsin»): hamısı `#ai-fab` kökündədir.
+İstifadəçi düyməni gizlədir (paneldə «Gizlət», küncdəki «×», Delete) və sürüşdürüb yerini
+dəyişir (Alt + oxlar); seçim onun brauzerində `data-pref-key` açarı ilə saxlanılır
+(static/js/ai_assistant_fab.js). Gizlədəndə kənarda «AI köməkçi» nişanı görünür. JS-in
+aktivləşdirdiyi idarələr `hidden` render olunur — skript yoxdursa görünmür. RİM «Sistem
+tənzimləmələri» → «AI köməkçi düyməsi» söndürülüdə bu partial render olunmur (base.html).{% endcomment %}
 {% if user.is_authenticated %}
+<div id="ai-fab" class="ai-fab"
+     data-pref-key="ems.aiFab.v1:{{ user.id }}"
+     data-hidden-message="{% trans 'AI köməkçi gizlədildi. Ekranın kənarındakı «AI köməkçi» nişanı və ya istifadəçi menyusu ilə geri qaytara bilərsiniz.' context 'ai_assistant.fab' %}"
+     data-undo-label="{% trans 'Geri qaytar' context 'ai_assistant.fab' %}"
+     data-moved-left="{% trans 'AI köməkçi sol kənara köçürüldü' context 'ai_assistant.fab' %}"
+     data-moved-right="{% trans 'AI köməkçi sağ kənara köçürüldü' context 'ai_assistant.fab' %}"
+     data-moved-up="{% trans 'AI köməkçi yuxarı çəkildi' context 'ai_assistant.fab' %}"
+     data-moved-down="{% trans 'AI köməkçi aşağı endirildi' context 'ai_assistant.fab' %}">
 <button id="ai-bot-btn" class="ai-bot-btn" type="button"
         aria-label="{% trans 'AI Assistant' context 'ai_assistant.aria' %}"
+        aria-describedby="ai-fab-hint"
         aria-haspopup="dialog" aria-expanded="false" aria-controls="ai-chat-panel">
     <svg class="ai-bot-btn__icon" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         {# Baş + ekran + gözlər; sağda YELLƏNƏN əl (`.ai-bot-btn__hand`, CSS animasiyası ~14 s-də bir). #}
@@ -28,6 +45,18 @@ YOX (CSP). Söndürülü («tezliklə») vəziyyəti server `quota` cavabındak�
         </g>
     </svg>
     <span class="ai-bot-btn__pulse" aria-hidden="true"></span>
+    {# «×» siçan/toxunma üçündür (düymənin içində ikinci düymə ola bilməz); klaviatura yolu — Delete və paneldəki «Gizlət». #}
+    <span class="ai-bot-btn__hide" data-ai-fab-hide aria-hidden="true" title="{% trans 'Gizlət' context 'ai_assistant.fab' %}"><i class="fas fa-xmark"></i></span>
+</button>
+<span id="ai-fab-hint" class="visually-hidden">{% trans "Yerini dəyişmək üçün Alt ilə ox düymələrini basın: sol və sağ ox — kənar, yuxarı və aşağı ox — hündürlük. Delete — gizlətmək." context "ai_assistant.fab" %}</span>
+<span id="ai-fab-live" class="visually-hidden" aria-live="polite"></span>
+<span class="ai-fab__safe" data-ai-fab-safe aria-hidden="true"></span>
+
+<button id="ai-fab-restore" class="ai-fab-restore" type="button" hidden
+        aria-label="{% trans 'AI köməkçini göstər' context 'ai_assistant.fab' %}"
+        title="{% trans 'AI köməkçini göstər' context 'ai_assistant.fab' %}">
+    <i class="fas fa-robot ai-fab-restore__icon" aria-hidden="true"></i>
+    <span class="ai-fab-restore__text">{% trans "AI köməkçi" context "ai_assistant.fab" %}</span>
 </button>
 
 <div id="ai-bot-tooltip" class="ai-bot-tooltip" role="status">
@@ -70,6 +99,11 @@ YOX (CSP). Söndürülü («tezliklə») vəziyyəti server `quota` cavabındak�
         <span id="ai-chat-limit" class="ai-chat-limit-badge" aria-live="polite" title="{% trans 'Saatlıq sorğu limiti' context 'ai_assistant.limit' %}">
             {% trans "Sorğular" context "ai_assistant.limit" %}: {% trans "yüklənir..." context "ai_assistant.limit" %}
         </span>
+        <button id="ai-chat-hide" class="ai-chat-hide-btn" type="button" hidden
+                aria-label="{% trans 'AI köməkçini gizlət' context 'ai_assistant.fab' %}"
+                title="{% trans 'AI köməkçini gizlət' context 'ai_assistant.fab' %}">
+            <i class="fas fa-eye-slash" aria-hidden="true"></i>
+        </button>
         <button id="ai-chat-close" class="ai-chat-close-btn" type="button" aria-label="{% trans 'Bağla' context 'ai_assistant.action' %}">
             <i class="fas fa-xmark" aria-hidden="true"></i>
         </button>
@@ -93,4 +127,5 @@ YOX (CSP). Söndürülü («tezliklə») vəziyyəti server `quota` cavabındak�
     </div>
     <p class="ai-chat-footnote">{% trans "Cavablar avtomatik yaradılır və səhv ola bilər. Şəxsi məlumat (şifrə, kart, FİN) yazmayın." context "ai_assistant.footnote" %}</p>
 </section>
+</div>
 {% endif %}

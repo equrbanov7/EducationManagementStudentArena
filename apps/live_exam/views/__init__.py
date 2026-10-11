@@ -26,7 +26,6 @@ from .host import (
     host_toggle_lock,
     host_update_settings,
     live_create_session_by_slug,
-    live_host_lobby,
     live_host_presentation,
 )
 
@@ -56,7 +55,6 @@ from .results_export import teacher_live_session_export
 __all__ = [
     # Host
     "live_create_session_by_slug",
-    "live_host_lobby",
     "live_host_presentation",
     "host_start_game",
     "host_next_question",

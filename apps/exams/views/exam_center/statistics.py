@@ -281,8 +281,6 @@ def _row(attempt):
     }
 
 
-@login_required
-@require_GET
 def _paper_kind_stats(request, organization):
     """KAĞIZ (yazılı / praktiki) imtahan KPI-ları — növ üzrə (addendum 2026-09-14, W2 `w2paper`).
 
@@ -305,6 +303,10 @@ def _paper_kind_stats(request, organization):
     )
 
 
+# URL auditi B9 (2026-10-10): dekoratorlar köməkçidə (`_paper_kind_stats`) idi, view-da yox —
+# POST `HttpResponseNotAllowed` obyektini JsonResponse-a ötürüb 500 verirdi; indi 405.
+@login_required
+@require_GET
 def exam_center_stats_data(request):
     """Filtrlənmiş, səhifələnən nəticələr + sayğaclar (JSON)."""
     organization = _stats_org(request)

@@ -139,11 +139,36 @@ def other_period_subject_rows(organization, record, period, semester_number, exi
     return rows
 
 
-def assessment_weights_view(organization) -> dict:
-    """Qiymətləndirmə çəkiləri (10/10/30/50; cari = 20 midterm + 10 seminar/lab) — ekran 10-un «struktur» zolağı."""
-    from apps.syllabus.public import assessment_weights, standard_midterm, standard_project
+def assessment_weights_view(organization, period=None) -> dict:
+    """Qiymətləndirmə çəkiləri — ekran 10-un «struktur» zolağı.
 
-    weights = assessment_weights(organization)
+    Yeni qayda dövrü (2026/2027+, ``core.academic_rules``; ``period`` yoxdursa da): giriş balının HESABDAKI
+    hissələri (``standard=True``) — davamiyyət 10 · aktivlik 10 · midterm 30 · yekun imtahan 50 (sahib 2026-10-10;
+    sərbəst iş RİM-də açılsa midterm 20 + sərbəst iş 10, ``show_selfwork``).  Keçmiş dövrdə köhnə siyasət zolağı
+    (10/10/30/50; cari = 20 midterm/kollokvium + 10 seminar/lab)."""
+    from apps.syllabus.public import assessment_weights, standard_midterm, standard_project
+    from core import academic_rules
+
+    if academic_rules.period_uses_new_rules(period, organization):
+        weights = assessment_weights(organization)
+        selfwork = academic_rules.selfwork_active_for_period(period, organization)
+        parts = {
+            "attendance": academic_rules.ATTENDANCE_MAX,
+            "activity": academic_rules.ACTIVITY_MAX,
+            "midterm": academic_rules.midterm_max(),
+            "selfwork": academic_rules.SELFWORK_POINTS if selfwork else 0,
+        }
+        semester = sum(parts.values())
+        return {
+            **parts,
+            "standard": True,
+            "show_selfwork": selfwork,
+            "current": parts["activity"] + parts["midterm"],
+            "final": weights["final"],
+            "total": semester + weights["final"],
+        }
+    # Keçmiş dövrdə sərbəst iş HƏMİŞƏ var — siyasət sərbəst işli variantda oxunur (cari RİM bayrağından asılı deyil).
+    weights = assessment_weights(organization, selfwork=True)
     # «Cari» = midterm (20; keçmiş dövrlərdə kollokvium) + seminar/lab ədədi ortası (10) + qalıq flex (standartda 0).
     current = standard_midterm(weights) + standard_project(weights) + weights["flex"]
     return {
@@ -152,6 +177,8 @@ def assessment_weights_view(organization) -> dict:
         "current": current,
         "final": weights["final"],
         "total": weights["attendance"] + weights["selfwork"] + current + weights["final"],
+        "standard": False,
+        "show_selfwork": True,
     }
 
 

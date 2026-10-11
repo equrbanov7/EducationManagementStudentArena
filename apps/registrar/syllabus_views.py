@@ -23,7 +23,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from apps.syllabus import public as syllabus_services
-from apps.syllabus.public import build_document
+from apps.syllabus.public import activity_kinds_for_offering, build_document, rule_for_period
 
 from . import journal_access
 from .audit_write import create_audit_row
@@ -85,7 +85,7 @@ def _resolve(request, offering_id):
 def offering_syllabus_json(request, offering_id):
     """Oxu-rejimli sillabus sənədi — jurnalın və kabinetin panelini doldurur."""
     offering, syllabus, version, mode = _resolve(request, offering_id)
-    document = build_document(syllabus, version)
+    document = _document(offering, syllabus, version)
     approved_at = document.pop("approved_at", None)
     return JsonResponse(
         {
@@ -102,6 +102,18 @@ def offering_syllabus_json(request, offering_id):
             "pdf_url": _pdf_url(offering_id),
             **document,
         }
+    )
+
+
+def _document(offering, syllabus, version) -> dict:
+    """Sənəd BAXILAN AÇILIŞIN semestrinin qaydası ilə (sahib 2026-10-10): sərbəst iş ləğv olunan dövrdə
+    «Sərbəst iş» bloku yoxdur, düstur midterm 30; semestrsiz «baza sillabus» köhnə semestrin tələbəsinə
+    köhnə qayda ilə göstərilir. Fəaliyyət növü də açılışdandır (seminar / laboratoriya / 5 + 5)."""
+    return build_document(
+        syllabus,
+        version,
+        rule=rule_for_period(offering.period, offering.organization),
+        activity_kinds=activity_kinds_for_offering(offering),
     )
 
 
@@ -122,7 +134,7 @@ def offering_syllabus_pdf(request, offering_id):
         organization=offering.organization,
         syllabus=syllabus,
         version=version,
-        document=build_document(syllabus, version),
+        document=_document(offering, syllabus, version),
     )
     filename = f"sillabus-{offering.subject.code}-{version.label}.pdf"
     response = HttpResponse(payload, content_type="application/pdf")

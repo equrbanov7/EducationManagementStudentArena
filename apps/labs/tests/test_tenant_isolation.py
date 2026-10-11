@@ -182,12 +182,13 @@ class LabCrossTenantAccessTest(TestCase):
         self.assertIn(response.status_code, (302, 403, 404))
 
     def test_teacher_a_cannot_publish_org_b_lab(self):
-        """Teacher from Org A cannot publish Org B's lab."""
+        """Teacher from Org A cannot publish Org B's lab (status is set via the edit modal)."""
+        # WP9a (2026-10-10): `<pk>/publish/` silindi — status yalnız redaktə ucundan dəyişir.
         self.lab_b.status = "draft"
         self.lab_b.save(update_fields=["status"])
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        url = reverse("labs:publish_lab", kwargs={"pk": self.lab_b.id})
-        response = self.client.post(url)
+        url = reverse("labs:edit_lab", kwargs={"pk": self.lab_b.id})
+        response = self.client.post(url, {"title": self.lab_b.title, "status": "published"})
         self.assertIn(response.status_code, (302, 403, 404))
         self.lab_b.refresh_from_db()
         self.assertEqual(self.lab_b.status, "draft")

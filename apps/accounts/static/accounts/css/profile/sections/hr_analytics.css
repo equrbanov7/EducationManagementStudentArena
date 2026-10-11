@@ -1,0 +1,345 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Kadr analitikası» (sahib 2026-10-11) — şablon: sections/hr_analytics/_content.html.
+   Əsas görünüş ems_ui komponentlərindəndir (kpi, tabs, filters, table, badge, card, bar);
+   burada yalnız bölməyə xas düzülüş var. Rənglər YALNIZ --ems-* tokenləri ilə.
+   Zolaq eni `hr-w-NN` sinfindən gəlir (CSP: inline stil yoxdur) — `.ems-bar__fill`
+   eni `--ems-bar-pct`-dən oxuyur.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.hr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.hr__notice {
+    margin: 0;
+}
+
+.hr__count {
+    margin: 0;
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+.hr-tabs {
+    margin-top: var(--ems-sp-2);
+    flex-wrap: wrap;
+}
+
+.hr-help {
+    margin: 0 0 var(--ems-sp-4);
+    max-width: var(--ems-w-text, 72ch);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+.hr-muted {
+    color: var(--ems-text-muted);
+}
+
+.hr-block {
+    display: block;
+}
+
+.hr-strong {
+    font-weight: 800;
+}
+
+.hr-warn {
+    color: var(--ems-warning-700);
+    font-weight: 700;
+}
+
+.hr-section-gap {
+    margin-top: var(--ems-sp-6);
+}
+
+.hr-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ── Kart şəbəkəsi ─────────────────────────────────────────────────────── */
+.hr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.hr-card {
+    min-width: 0;
+}
+
+/* ── Üfüqi zolaqlar ─────────────────────────────────────────────────────── */
+.hr-bars {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.hr-bars__row {
+    display: grid;
+    grid-template-columns: minmax(110px, 38%) 1fr auto;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    font-size: var(--ems-fs-base);
+}
+
+.hr-bars__track,
+.hr .ems-bar__fill {
+    display: block;
+}
+
+.hr-bars__label {
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
+
+.hr-bars__value {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.hr-bars__value small {
+    font-weight: 400;
+    color: var(--ems-text-muted);
+}
+
+/* ── Cədvəllər ──────────────────────────────────────────────────────────── */
+.hr-table th[scope="row"] {
+    font-weight: 600;
+    text-align: left;
+}
+
+.hr-table__group th {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-neutral-800);
+    font-weight: 800;
+    font-size: var(--ems-fs-sm);
+    text-transform: none;
+}
+
+.hr-table__chair {
+    padding-left: var(--ems-sp-7);
+}
+
+.hr-table__subtotal th,
+.hr-table__subtotal td {
+    background: var(--ems-primary-50);
+    font-weight: 700;
+}
+
+.hr-table__total th,
+.hr-table__total td {
+    border-top: 2px solid var(--ems-neutral-300);
+    font-weight: 800;
+}
+
+.hr-table__meter {
+    min-width: 150px;
+    white-space: nowrap;
+}
+
+.hr-meter {
+    display: inline-block;
+    width: 90px;
+    vertical-align: middle;
+}
+
+.hr-meter__value {
+    margin-left: var(--ems-sp-2);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.hr-people__name small,
+.hr-people td small {
+    display: block;
+    font-weight: 400;
+    color: var(--ems-text-muted);
+}
+
+.hr-issue {
+    margin: 0 var(--ems-sp-1) var(--ems-sp-1) 0;
+}
+
+/* ── Siyahılar ──────────────────────────────────────────────────────────── */
+.hr-issues,
+.hr-ranklist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+}
+
+.hr-issues__row {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+}
+
+.hr-ranklist__row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: var(--ems-sp-4);
+}
+
+.hr-ranklist__name small {
+    display: block;
+    color: var(--ems-text-muted);
+}
+
+/* ── Məlumat keyfiyyəti ─────────────────────────────────────────────────── */
+.hr-quality {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.hr-quality__card.is-critical {
+    border-left: 4px solid var(--ems-danger);
+}
+
+.hr-quality__card.is-warning {
+    border-left: 4px solid var(--ems-warning-500);
+}
+
+.hr-quality__sample {
+    margin: 0 0 var(--ems-sp-4);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+/* ── Səhifələmə ─────────────────────────────────────────────────────────── */
+.hr-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ems-sp-5);
+    margin-top: var(--ems-sp-5);
+}
+
+.hr-pager__info {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+}
+
+/* 8 KPI kartı: geniş ekranda 4 × 2 (auto-fit 5 + 3 qoyurdu). */
+@media (min-width: 1100px) {
+    .hr .ems-kpis {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .hr-bars__row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .hr-bars__track {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}
+
+/* ── Zolaq enləri (5%-lik addım) ────────────────────────────────────────── */
+.hr-w-0 {
+    --ems-bar-pct: 0%;
+}
+
+.hr-w-5 {
+    --ems-bar-pct: 5%;
+}
+
+.hr-w-10 {
+    --ems-bar-pct: 10%;
+}
+
+.hr-w-15 {
+    --ems-bar-pct: 15%;
+}
+
+.hr-w-20 {
+    --ems-bar-pct: 20%;
+}
+
+.hr-w-25 {
+    --ems-bar-pct: 25%;
+}
+
+.hr-w-30 {
+    --ems-bar-pct: 30%;
+}
+
+.hr-w-35 {
+    --ems-bar-pct: 35%;
+}
+
+.hr-w-40 {
+    --ems-bar-pct: 40%;
+}
+
+.hr-w-45 {
+    --ems-bar-pct: 45%;
+}
+
+.hr-w-50 {
+    --ems-bar-pct: 50%;
+}
+
+.hr-w-55 {
+    --ems-bar-pct: 55%;
+}
+
+.hr-w-60 {
+    --ems-bar-pct: 60%;
+}
+
+.hr-w-65 {
+    --ems-bar-pct: 65%;
+}
+
+.hr-w-70 {
+    --ems-bar-pct: 70%;
+}
+
+.hr-w-75 {
+    --ems-bar-pct: 75%;
+}
+
+.hr-w-80 {
+    --ems-bar-pct: 80%;
+}
+
+.hr-w-85 {
+    --ems-bar-pct: 85%;
+}
+
+.hr-w-90 {
+    --ems-bar-pct: 90%;
+}
+
+.hr-w-95 {
+    --ems-bar-pct: 95%;
+}
+
+.hr-w-100 {
+    --ems-bar-pct: 100%;
+}

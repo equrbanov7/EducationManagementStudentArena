@@ -4,13 +4,8 @@
 {% block title %}{{ exam.title }} - {% trans "title_questions_bank" context "exams.template.teacher_questions_bank" %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part1.css' %}?v=20260607-management">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_questions_bank/_part2.css' %}?v=20260607-management">
-    <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260607-1">
-    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
-    <link rel="stylesheet" href="{% static 'css/pagination.css' %}">
-    {# Ortaq token teması (sahib 2026-09-21): imtahan səthləri eyni dildə. #}
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_surfaces_theme.css' %}?v=20260921-theme">
+    {# 2026-10-10 redizayn: ortaq ems_ui qatı + müəllim səhifə qabığı + sual bankı/forma CSS-i. #}
+    {% include "exams/teacher/partials/qm/_assets_css.html" %}
 {% endblock %}
 
 {% block content %}
@@ -49,8 +44,8 @@
 }
 </script>
 <script src="{% static 'exams/js/teacher_questions_bank/i18n_bootstrap.js' %}"></script>
-<script src="{% static 'exams/js/question_form.js' %}?v=20260914-1"></script>
+<script src="{% static 'exams/js/question_form.js' %}?v=20261010-wp3exams"></script>
 {# QB 2026-09-30: «son aktiv suallar» → EMSConfirm «imtahan deaktiv edilsin?» axını. #}
-<script src="{% static 'exams/js/teacher_questions_bank/guarded_submit.js' %}?v=20260930-qb"></script>
-<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20260930-qb"></script>
+<script src="{% static 'exams/js/teacher_questions_bank/guarded_submit.js' %}?v=20261010-wp3exams"></script>
+<script src="{% static 'exams/js/teacher_questions_bank.js' %}?v=20261010-wp3exams"></script>
 {% endblock %}

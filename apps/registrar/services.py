@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from django.db import transaction
 
-from . import exam_eligibility
+from . import exam_eligibility, journal_hygiene_guard
 from .integrity import (
     validate_group_elective_target,
     validate_offering_target,
@@ -32,6 +32,9 @@ from .models import (
     GroupElectiveChoice,
     StudentAcademicRecord,
 )
+
+# Fənn ↔ Kurs (LMS) körpüsü ayrıca moduldadır (ölçü büdcəsi); ``services.*`` adları qorunur.
+from .offering_course import ensure_offering_course, sync_offering_course_members  # noqa: F401
 
 
 def get_or_create_offering(*, organization, subject, period, group, course=None):
@@ -56,11 +59,13 @@ def get_or_create_offering(*, organization, subject, period, group, course=None)
     return offering
 
 
-def enroll_student_in_subject(*, record, subject, period, kind):
+def enroll_student_in_subject(*, record, subject, period, kind, allow_inactive=False):
     """Ensure the student is enrolled in *subject* for *period* (their group section).
 
     Existing rows, including historical ones, are never reactivated implicitly;
     callers that require a current enrollment must inspect ``status``.
+    Jurnal təmizliyi (sahib 2026-10-10): oxumayan tələbəyə (arxiv / qeyri-aktiv qeyd) YENİ sətir yaranmır —
+    mövcud sətir və ya ``None`` qayıdır; ``allow_inactive`` köçürmənin 1:1 daşınması üçündür.
     """
     validate_same_organization(
         organization=record.organization,
@@ -68,6 +73,8 @@ def enroll_student_in_subject(*, record, subject, period, kind):
         subject=subject,
         period=period,
     )
+    if not allow_inactive and not journal_hygiene_guard.record_is_enrollable(record):
+        return journal_hygiene_guard.existing_enrollment(record, subject=subject, period=period), False
     offering = get_or_create_offering(
         organization=record.organization, subject=subject, period=period, group=record.group
     )
@@ -85,14 +92,16 @@ def enroll_mandatory_subjects(*, record, period, semester_number):
     """Enroll the student in every MANDATORY subject of their curriculum semester.
 
     Returns the number of new enrollments created (idempotent — re-running is a
-    no-op for already-enrolled subjects)."""
+    no-op for already-enrolled subjects). Oxumayan tələbə (arxiv / qeyri-aktiv qeyd) → 0."""
+    if not journal_hygiene_guard.record_is_enrollable(record):
+        return 0
     rows = CurriculumSubject.objects.filter(
         curriculum=record.curriculum, semester_number=semester_number, is_elective=False
     ).select_related("subject")
     created = 0
     for row in rows:
         _, was_created = enroll_student_in_subject(
-            record=record, subject=row.subject, period=period, kind=EnrollmentKind.MANDATORY
+            record=record, subject=row.subject, period=period, kind=EnrollmentKind.MANDATORY, allow_inactive=True
         )
         created += int(was_created)
     return created
@@ -137,18 +146,23 @@ def choose_group_elective(
                 f"{period.registration_start} — {period.registration_end}"
             )
 
+    block = dict(organization=organization, group=group, period=period, elective_group=elective_group)
+    previous = GroupElectiveChoice.objects.filter(**block).values_list("chosen_subject_id", flat=True).first()
     choice, _ = GroupElectiveChoice.objects.update_or_create(
-        organization=organization,
-        group=group,
-        period=period,
-        elective_group=elective_group,
-        defaults={"chosen_subject": subject, "decided_by": decided_by},
+        **block, defaults={"chosen_subject": subject, "decided_by": decided_by}
     )
     offering = get_or_create_offering(organization=organization, subject=subject, period=period, group=group)
-    records = StudentAcademicRecord.objects.filter(
-        organization=organization, group=group, curriculum=curriculum, is_active=True
+    records = list(
+        journal_hygiene_guard.enrollable_records(
+            StudentAcademicRecord.objects.filter(
+                organization=organization, group=group, curriculum=curriculum, is_active=True
+            )
+        ).select_related("student")
     )
-    enrolled = 0
+    # Qrup əvvəl dəyişdirdiyi seçimə qayıdır: alətin çıxardığı boş sətirlər bərpa olunur (yenidən yazılmış sayılır).
+    enrolled = journal_hygiene_guard.restore_replaced_elective(
+        organization=organization, offering=offering, student_ids={rec.student_id for rec in records}, actor=decided_by
+    )
     for rec in records:
         _, created = Enrollment.objects.get_or_create(
             organization=organization,
@@ -157,6 +171,15 @@ def choose_group_elective(
             defaults={"kind": EnrollmentKind.ELECTIVE},
         )
         enrolled += int(created)
+    # Sahib 2026-10-10: köhnə seçimin BOŞ qeydiyyatları nəticələrdən çıxır (məlumatlı sətir toxunulmur).
+    journal_hygiene_guard.drop_replaced_elective(
+        organization=organization,
+        group=group,
+        period=period,
+        old_subject_id=previous,
+        new_subject=subject,
+        actor=decided_by,
+    )
     return choice, enrolled
 
 
@@ -330,64 +353,6 @@ def get_student_cabinet_data(*, record, period, semester_number):
     }
 
 
-# ── Fənn ↔ Kurs (LMS) körpüsü (W1) ───────────────────────────────────────────
-#
-# Registrar akademik planı ilə `courses` (məzmun) arasında bağ: offering üçün
-# real Course yaradılır/bağlanır ki, tələbə "Fənlərim"də fənnə klik edəndə fənn
-# içinə (mövzu/resurs) çatsın. `courses` modeli STATİK import olunmur (modul-
-# sərhəd qrafı asiklik qalsın) — app registry ilə həll olunur.
-
-
-def ensure_offering_course(*, offering, owner=None):
-    """Idempotently link/create the LMS ``Course`` for *offering*.
-
-    Owner precedence: explicit *owner* → the offering instructor → the org
-    owner (Course.owner is required). Returns the linked Course."""
-    from django.apps import apps as django_apps
-
-    if offering.course_id:
-        return offering.course
-
-    Course = django_apps.get_model("courses", "Course")
-    course_owner = owner or offering.instructor or offering.organization.owner
-    course = Course.objects.create(
-        owner=course_owner,
-        title=offering.subject.name,
-        organization=offering.organization,
-        unit=offering.group,
-        period=offering.period,
-        status="published",
-    )
-    offering.course = course
-    offering.save(update_fields=["course", "updated_at"])
-    return course
-
-
-def sync_offering_course_members(*, offering):
-    """Grant the instructor + enrolled students access to the linked Course.
-
-    So the "fənn içi" (course dashboard) is reachable by the section's students.
-    Returns the number of student memberships created."""
-    from django.apps import apps as django_apps
-
-    if not offering.course_id:
-        return 0
-    CourseMembership = django_apps.get_model("courses", "CourseMembership")
-
-    if offering.instructor_id:
-        CourseMembership.objects.get_or_create(
-            course_id=offering.course_id, user_id=offering.instructor_id, defaults={"role": "teacher"}
-        )
-    created = 0
-    enrolled = offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related("student")
-    for enrollment in enrolled:
-        _, was_created = CourseMembership.objects.get_or_create(
-            course_id=offering.course_id, user=enrollment.student, defaults={"role": "student"}
-        )
-        created += int(was_created)
-    return created
-
-
 # ── Plan → qruplar: qrupun kursu + qrupun açılışa TOPLU qeydiyyatı (2026-09-25) ──
 #
 # Sahib 2026-09-25: «tədris planı kafedralara göndəriləndə fənn avtomatik qruplara
@@ -498,6 +463,7 @@ def _enroll_own_students(org_id, offerings, records_by_group, kind, report) -> N
         )
         .values_list("user_id", flat=True)
     )
+    members -= journal_hygiene_guard.archived_student_ids(student_ids)  # arxiv hesabı (məzun/xaric) üzv sayılmır
     pending = []
     for offering, record in own:
         key = (offering.pk, record.student_id)
@@ -535,11 +501,13 @@ def _rollup_combined_groups(org_id, offerings, *, by_user, reason, report) -> No
     )
     submap = subgroup_rollup.subgroup_map(org_id, list(groups.only("id", "name", "parent_id", "settings")))
     records: dict = {}
-    for record in StudentAcademicRecord.objects.filter(
-        organization_id=org_id,
-        group_id__in={unit.pk for units in submap.values() for unit in units},
-        is_active=True,
-        status="enrolled",
+    for record in journal_hygiene_guard.enrollable_records(  # arxiv hesabı (məzun/xaric) alt qrupdan düşmür
+        StudentAcademicRecord.objects.filter(
+            organization_id=org_id,
+            group_id__in={unit.pk for units in submap.values() for unit in units},
+            is_active=True,
+            status="enrolled",
+        )
     ).select_related("student", "group"):
         records.setdefault(record.group_id, []).append(record)
     for offering in offerings:

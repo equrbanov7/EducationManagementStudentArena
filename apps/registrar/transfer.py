@@ -174,6 +174,7 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
             subject=enrollment.offering.subject,
             period=period,
             kind=enrollment.kind,
+            allow_inactive=True,  # aktiv sətir 1:1 daşınır — yeni fantom yaranmır (jurnal təmizliyi qapısı)
         )
         if successor.status != Enrollment.Status.ENROLLED:
             raise ValidationError(

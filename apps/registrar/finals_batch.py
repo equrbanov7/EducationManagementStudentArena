@@ -26,7 +26,7 @@ from collections.abc import Mapping
 
 from django.db.models import F
 
-from apps.registrar import entry_standard, exam_eligibility, selfwork_points
+from apps.registrar import activity_kinds, entry_standard, exam_eligibility, selfwork_points
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
@@ -84,6 +84,11 @@ class FinalsBatch:
     istisnası) ``rule`` kimi ötürür: ``with_finals=True``-da hazır xəritələrdən, yalnız giriş
     balı dəstində isə çağıranın :meth:`provide_attendance` ilə verdiyi dəyərlərdən (verməyibsə
     — Midterm açılışları üçün BİR dəfə toplu oxunur).
+
+    YENİ QAYDA (sahib 2026-10-10): RİM bayraqları (``flags``) dəst qurulanda BİR dəfə oxunur; açılışın
+    seminar/lab maskası (``activity_bits``, 5 + 5 aktivlik) komponent sorğusunun ÖZÜNDƏN gəlir, komponenti
+    olmayan Midterm açılışları üçün isə yalnız lazım olanda hamısına TƏK sorğu (``pending_bits``).
+    Sərbəst iş sayılmayan (söndürülmüş) Midterm açılışlarının sərbəst iş cəmi ümumiyyətlə oxunmur.
     """
 
     __slots__ = (
@@ -103,6 +108,9 @@ class FinalsBatch:
         "enrollments",
         "attendance_ready",
         "attendance_provided",
+        "flags",
+        "activity_bits",
+        "pending_bits",
     )
 
     def __init__(self, **kwargs):
@@ -144,7 +152,23 @@ class FinalsBatch:
             lesson_hours=exam_eligibility.lesson_hours_for(offering, hours_map=self.hours_map),
             limit_percent=self.limit_percent_for_enrollment(enrollment),
             exempt=self.exempt_for(enrollment),
+            activity_bits=self.activity_bits_for(offering.id),
+            flags=self.flags,
         )
+
+    def activity_bits_for(self, offering_id):
+        """Açılışın seminar/lab maskası: hazır ədəd, tənbəl toplu çağırış və ya ``None`` (tək-sətir yolu oxuyur)."""
+        bits = (self.activity_bits or {}).get(offering_id)
+        if bits is None and self.pending_bits is not None:
+            return self.pending_bits.lazy(offering_id)
+        return bits
+
+    def activity_split_for(self, offering) -> bool:
+        """Bu açılışda 5 + 5 aktivlik qaydası tətbiq olunurmu (başlıq/sütun qərarı üçün)."""
+        if not (self.flags and self.flags.activity_split and self.is_midterm(offering)):
+            return False
+        bits = self.activity_bits_for(offering.id)
+        return activity_kinds.splits(bits if bits is not None else activity_kinds.bits_for_offering(offering))
 
     def provide_attendance(self, *, hours_map=None, limits=None, exempt_ids=None) -> None:
         """Çağıranın buraxılış qərarında ONSUZ DA işlətdiyi girişlər — giriş balının davamiyyəti
@@ -248,22 +272,29 @@ def _exempt_ids(enrollments) -> frozenset:
     return frozenset(exempt)
 
 
-def _components_with_period(offering_ids):
+def _components_with_period(offering_ids, *, with_bits=False):
     """Açılışların komponentləri + (JOIN) dövr sahələri və təşkilatın ``midterm_from_year`` açarı.
 
     Rejim (``entry_standard``) üçün lazım olan hər şey EYNİ sorğudan gəlir — ayrıca dövr
-    oxunuşu yoxdur.  Qaytarır ``(komponentlər, {offering_id: (tədris ili, başlanğıc, xam il)})``."""
+    oxunuşu yoxdur.  ``with_bits`` — açılışın seminar/lab maskası da eyni sorğuda
+    (:func:`activity_kinds.bits_expression`).  Qaytarır ``(komponentlər, {offering_id: (tədris ili,
+    başlanğıc, xam il)}, {offering_id: maska})``."""
     rows = AssessmentComponent.objects.filter(offering_id__in=offering_ids).annotate(
         ems_period_year=F("offering__period__academic_year"),
         ems_period_start=F("offering__period__start_date"),
         ems_from_year=F("offering__organization__settings__registrar__midterm_from_year"),
     )
+    if with_bits:
+        rows = rows.annotate(**{activity_kinds.BITS_ATTR: activity_kinds.bits_expression("offering__")})
     components: dict = defaultdict(list)
     carried: dict = {}
+    bits: dict = {}
     for comp in rows:
         components[comp.offering_id].append(comp)
         carried.setdefault(comp.offering_id, (comp.ems_period_year, comp.ems_period_start, comp.ems_from_year))
-    return components, carried
+        if with_bits:
+            bits.setdefault(comp.offering_id, int(getattr(comp, activity_kinds.BITS_ATTR) or 0))
+    return components, carried, bits
 
 
 def build(
@@ -298,16 +329,24 @@ def build(
         if offering is not None:
             offerings.setdefault(offering.id, offering)
     offering_ids = list(offerings)
+    # Yeni qaydanın RİM bayraqları BİR dəfə (sətir başına oxu yox) — bütün sətirlərin qaydası eynidir.
+    flags = entry_standard.rule_flags()
 
     components_by_offering: dict = defaultdict(list)
     carried: dict = {}
+    activity_bits: dict = {}
     if offering_ids:
-        components_by_offering, carried = _components_with_period(offering_ids)
+        components_by_offering, carried, activity_bits = _components_with_period(
+            offering_ids, with_bits=flags.activity_split
+        )
     component_ids = [c.id for comps in components_by_offering.values() for c in comps]
     # Rejim — komponent sorğusunun daşıdığı dövr sahələrindən / keşdən (bax ``entry_standard``).
     midterm_by_offering = entry_standard.midterm_flags(
         [e.offering for e in enrollments], organization=organization, period=period, carried=carried
     )
+    # Komponenti olmayan Midterm açılışlarının maskası — yalnız lazım olanda, hamısına TƏK sorğu.
+    missing_bits = [oid for oid in offering_ids if midterm_by_offering.get(oid) and oid not in activity_bits]
+    pending_bits = activity_kinds.PendingBits(missing_bits) if flags.activity_split and missing_bits else None
 
     scores_by_enrollment: dict = defaultdict(list)
     if component_ids and enr_ids:
@@ -315,8 +354,13 @@ def build(
             scores_by_enrollment[score.enrollment_id].append(score)
 
     selfwork_totals: dict = {}
+    # Sərbəst iş söndürülübsə (sahib 2026-10-10) Midterm açılışlarında sayılmır — cəmi oxunmur da;
+    # keçmiş (kollokvium) dövrlərdə həmişə sayılır.
     selfwork_offerings = [
-        oid for oid, comps in components_by_offering.items() if any(c.kind == ComponentKind.SELF_WORK for c in comps)
+        oid
+        for oid, comps in components_by_offering.items()
+        if any(c.kind == ComponentKind.SELF_WORK for c in comps)
+        and (flags.selfwork or not midterm_by_offering.get(oid))
     ]
     if selfwork_offerings and enr_ids:
         loader = selfwork_loader or selfwork_points.selfwork_totals_by_offering
@@ -331,8 +375,11 @@ def build(
         ]
         if lesson_sum_offerings:
             wanted = [e.id for e in enrollments if e.offering_id in set(lesson_sum_offerings)]
+            marks = LessonMark.objects.filter(enrollment_id__in=wanted)
+            if flags.activity_split and any(midterm_by_offering.get(oid) for oid in lesson_sum_offerings):
+                marks = activity_kinds.annotate_kind(marks)  # 5 + 5 üçün dərs növü — eyni sorğu
             marks_by_enrollment = defaultdict(list)
-            for mark in LessonMark.objects.filter(enrollment_id__in=wanted):
+            for mark in marks:
                 marks_by_enrollment[mark.enrollment_id].append(mark)
             marks_by_enrollment = {eid: marks_by_enrollment.get(eid, []) for eid in wanted}
 
@@ -353,6 +400,9 @@ def build(
         "enrollments": enrollments,
         "attendance_ready": bool(with_finals),
         "attendance_provided": set(),
+        "flags": flags,
+        "activity_bits": activity_bits,
+        "pending_bits": pending_bits,
     }
 
     if with_finals and enr_ids:

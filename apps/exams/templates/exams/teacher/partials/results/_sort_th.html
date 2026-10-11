@@ -1,0 +1,9 @@
+{% comment %}Sıralanan sütun başlığı (nəticələr cədvəli). Davranış köhnə ilə eynidir:
+artan → azalan → sıfır (defolt sıra). `aria-sort` ekran oxuyucuya cari sıranı deyir.
+Kontekst: sort_key, sort_label, sort_title (opsional), sort_by, sort_dir, sort_base_query.{% endcomment %}
+<th scope="col"{% if sort_by == sort_key and sort_dir %} aria-sort="{% if sort_dir == 'asc' %}ascending{% else %}descending{% endif %}"{% endif %}>
+    <a class="ems-sort" href="?{{ sort_base_query }}&sort_by={{ sort_key }}&sort_dir={% if sort_by == sort_key and sort_dir == 'asc' %}desc{% elif sort_by == sort_key and sort_dir == 'desc' %}{% else %}asc{% endif %}"{% if sort_title %} title="{{ sort_title }}"{% endif %}>
+        <span>{{ sort_label }}</span>
+        <span class="ems-sort__arrow" aria-hidden="true">{% if sort_by == sort_key and sort_dir == 'asc' %}▲{% elif sort_by == sort_key and sort_dir == 'desc' %}▼{% else %}↕{% endif %}</span>
+    </a>
+</th>

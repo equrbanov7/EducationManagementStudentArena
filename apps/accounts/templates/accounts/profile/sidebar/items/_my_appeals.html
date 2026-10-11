@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Apellyasiyalarım» — `can_view_student_assignments` VƏ `can_view_my_appeals` (köhnə iç-içə şərt olduğu kimi). #}
 {% if can_view_student_assignments and role_capabilities.can_view_my_appeals %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'Apellyasiyalarım' context 'appeals.template' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'my-appeals' %}active{% endif %}">
-        <i class="fas fa-gavel sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "scale" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "Apellyasiyalarım" context "appeals.template" %}</span>
     </a>
 </li>

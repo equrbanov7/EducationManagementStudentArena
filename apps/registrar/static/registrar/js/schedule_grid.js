@@ -81,7 +81,7 @@
             }
         }
 
-        // Müəllim linkləri: jurnal (yeni tab) + slot silmə.
+        // Müəllim linki: jurnal (yeni tab). Slot silmə forması URL auditi A11 (2026-10-10) ilə silindi.
         var journalLink = modal.querySelector('[data-sgx-f="journal_link"]');
         if (journalLink) {
             if (d.journalUrl) {
@@ -91,16 +91,6 @@
                 journalLink.hidden = true;
             }
         }
-        var delForm = modal.querySelector("[data-sgx-delete-form]");
-        if (delForm) {
-            if (d.deleteUrl) {
-                delForm.action = d.deleteUrl;
-                delForm.hidden = false;
-            } else {
-                delForm.hidden = true;
-            }
-        }
-
         openModal(modal);
     }
 
@@ -118,30 +108,6 @@
         if (event.target.closest("[data-sgx-close]")) {
             closeModals();
         }
-    });
-
-    // Slot silmə təsdiqi — inline `onsubmit` CSP-yə görə YAZILMIR (CLAUDE.md).
-    document.addEventListener("submit", function (event) {
-        var form = event.target.closest("[data-sgx-delete-form]");
-        if (!form) return;
-        var question = form.getAttribute("data-sgx-confirm");
-        if (!question) return;
-        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-        if (form.dataset.emsConfirmed === "1") {
-            delete form.dataset.emsConfirmed;
-            return;
-        }
-        event.preventDefault();
-        var submitter = event.submitter || null;
-        window.EMSConfirm.open({ body: question, danger: true }).then(function (ok) {
-            if (!ok) return;
-            form.dataset.emsConfirmed = "1";
-            if (typeof form.requestSubmit === "function") {
-                form.requestSubmit(submitter && submitter.form === form ? submitter : undefined);
-            } else {
-                form.submit();
-            }
-        });
     });
 
     document.addEventListener("keydown", function (event) {

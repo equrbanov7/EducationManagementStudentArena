@@ -328,7 +328,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     hidden_today = LessonMark.objects.filter(enrollment=enrollment, lesson__date=today).exists()
 
     kollokviums = []
-    # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–20).
+    # Aralıq qiymətləndirmə: keçmiş dövrlərdə K1–K3, 2026/2027-dən tək Midterm (0–30; sərbəst iş açıqdırsa 0–20).
     interim, kcomps = journal_extras.display_components(offering)
     if kcomps:
         score_by = {
@@ -343,6 +343,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # Rəsmi düzəliş almış xanalar (tələbə tərəfdə sarı + tarixçə üçün, sənədsiz).
     from apps.registrar import corrections as _corrections
     from apps.registrar import legacy_excuse as _legacy_excuse
+    from core.academic_rules import coursework_active_for_offering
 
     corr_map = _corrections.corrections_map_for_enrollment(enrollment)
     # Köhnə sistemdən köçürülmüş üzrlü-qayıb sənədi — eyni sarı + ✎ mexanizmi.
@@ -375,10 +376,6 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             _seen_kinds.add(m.lesson.kind)
             section_kinds.append({"value": m.lesson.kind, "label": m.lesson.get_kind_display()})
 
-    # Tələbə görünüşü sillabusu OXUMUR (struktur yalnız qurulmuş mövzulardan) — sorğu büdcəsi sabit.
-    selfwork = journal_extras.get_selfwork_board(offering, with_structure=False)
-    own_selfwork = next((r for r in selfwork["rows"] if r["enrollment"].id == enrollment.id), None)
-
     scheme = getattr(offering, "assessment_scheme", None)
     cap = scheme.entry_score_max if scheme else 50
     journal_row = next((s for s in summary["subjects"] if s["enrollment"].id == enrollment.id), None)
@@ -400,6 +397,11 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         entry_rule = entry_standard.EntryRule(True, dav_lesson_hours, dav_limit_percent, exempt)
     standard = gradebook_components.entry_parts_for(enrollment, cap, rule=entry_rule)
     entry = standard.total if standard is not None else gradebook.entry_score_for(enrollment, cap, rule=entry_rule)
+    # Sərbəst iş (sahib 2026-10-10): söndürülmüş Midterm dövründə nə bala düşür, nə görünür — lövhə oxunmur.
+    # Tələbə görünüşü sillabusu OXUMUR (struktur yalnız qurulmuş mövzulardan) — sorğu büdcəsi sabit.
+    selfwork_active = standard is None or standard.selfwork_active
+    selfwork = journal_extras.get_selfwork_board(offering, with_structure=False) if selfwork_active else {}
+    own_selfwork = next((r for r in selfwork.get("rows", []) if r["enrollment"].id == enrollment.id), None)
     dav_eligibility = exam_eligibility.resolve(
         absence_hours=enrollment.absence_hours,
         lesson_hours=dav_lesson_hours,
@@ -434,9 +436,11 @@ def build_student_journal_context(request, *, organization) -> dict | None:
         "koll_avg": koll_avg,
         "dav_score": dav_score,
         "dav_barred": dav_barred,
-        "selfwork_topics": selfwork["topics"],
+        "selfwork_topics": selfwork.get("topics", []),
         "selfwork_row": own_selfwork,
-        "coursework": getattr(enrollment, "course_work", None),
+        "selfwork_active": selfwork_active,
+        # Sahib 2026-10-11: kurs işi söndürülən dövrdə tələbənin öz jurnalında da görünmür (data qalır).
+        "coursework": getattr(enrollment, "course_work", None) if coursework_active_for_offering(offering) else None,
         "entry_score": entry,
         "entry_score_max": cap,
         "entry_pct": _pct(entry),

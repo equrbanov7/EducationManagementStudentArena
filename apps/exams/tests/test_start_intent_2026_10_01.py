@@ -83,6 +83,7 @@ class StartIntentTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertEqual(self._attempts(), 0)
 
+    @override_settings(EXAM_AVAILABLE_PAGE=True)  # siyahı səhifəsi bayraqla açılır (sahib 2026-10-10)
     def test_student_exam_list_links_carry_a_working_token(self):
         response = self.client.get(reverse("exams:student_exam_list"))
         self.assertEqual(response.status_code, 200)

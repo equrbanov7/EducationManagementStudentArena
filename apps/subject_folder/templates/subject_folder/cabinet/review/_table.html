@@ -11,7 +11,7 @@
             <div class="bootstrap-single-select bootstrap-single-select--ems">
                 <select class="ems-select bootstrap-single-select__native" id="sfBulkAction" name="bulk_action" data-sf-bulk-action data-bootstrap-select>
                     <option value="check">{% trans "Yoxlanıldı (ev tapşırığı)" context "subject_folder.ui" %}</option>
-                    <option value="accept">{% trans "Qəbul et — eyni bal (sərbəst iş)" context "subject_folder.ui" %}</option>
+                    {% if rp.has_selfwork_items %}<option value="accept">{% trans "Qəbul et — eyni bal (sərbəst iş)" context "subject_folder.ui" %}</option>{% endif %}
                     <option value="return">{% trans "Rəylə qaytar" context "subject_folder.ui" %}</option>
                     <option value="reject">{% trans "Rədd et" context "subject_folder.ui" %}</option>
                 </select>

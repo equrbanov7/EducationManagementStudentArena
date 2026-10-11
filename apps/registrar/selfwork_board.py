@@ -192,7 +192,7 @@ def get_selfwork_board(offering, *, with_structure=True):
     topics = list(SelfWorkTopic.objects.filter(offering=offering).order_by("order", "created_at"))
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student", "student__profile")
         .order_by("student__last_name", "student__username")
     )
     now = timezone.now()

@@ -41,13 +41,8 @@ adları — `profile-notif-item(--unread)`, `profile-notif-body.js-notif-open`,
                 <p class="nfx-callout__note">{{ pending_request.message }}</p>
                 {% endif %}
             </div>
-            <form method="post" action="{% url 'accounts:student_organization_request' %}" class="nfx-callout__actions">
-                {% csrf_token %}
-                <input type="hidden" name="next" value="{{ profile_base_url }}?section=notifications">
-                <input type="hidden" name="action" value="clear_request">
-                <input type="hidden" name="request_id" value="{{ pending_request.id }}">
-                <button type="submit" class="nfx-btn">{% trans "cancel" context "profile.notifications" %}</button>
-            </form>
+            {% comment %}URL auditi A7 (2026-10-10): «Ləğv et» forması silindi — qoşulma müraciəti
+            marşrutu yoxdur; köhnə müraciətə təşkilat administratoru cavab verir.{% endcomment %}
         </div>
         {% endfor %}
 

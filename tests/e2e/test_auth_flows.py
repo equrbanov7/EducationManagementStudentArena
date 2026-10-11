@@ -27,6 +27,7 @@ LOGOUT_URL = f"{BASE_URL}/accounts/logout/"
 REGISTER_URL = f"{BASE_URL}/accounts/register/"
 VERIFY_CODE_URL = f"{BASE_URL}/accounts/verify-code/"
 RESEND_CODE_URL = f"{BASE_URL}/accounts/resend-code/"
+VERIFY_EMAIL_URL = f"{BASE_URL}/accounts/verify-email/"
 PASSWORD_RESET_URL = f"{BASE_URL}/accounts/password-reset/"
 DASHBOARD_URL = f"{BASE_URL}/accounts/dashboard/"
 
@@ -216,30 +217,21 @@ class TestInvalidCredentials:
 # ── Registration page ─────────────────────────────────────────────────────────
 
 
-class TestPublicSignupDisabled:
-    """E-university provisioning: public self-signup is disabled in production.
+class TestPublicSignupRemoved:
+    """E-university provisioning: the public self-signup flow was DELETED (owner, 2026-10-10).
 
-    The prod image ships with PUBLIC_SIGNUP_ENABLED=False (accounts are created by
-    the university administration — see docs/operations/ACCOUNT_PROVISIONING.md), so the
-    public register route redirects to login and the login page exposes no
-    "register" link. (If a deployment re-enables signup, these expectations
-    change — update alongside the flag.)
+    Accounts are created by the university administration (see
+    docs/operations/ACCOUNT_PROVISIONING.md); the register / verify-code /
+    verify-email / resend-code routes no longer exist and the login page exposes
+    no "register" link.
     """
 
-    def test_register_redirects_to_login(self, page: Page) -> None:
-        """Visiting the register route must land on the login page (302 → login)."""
-        response = page.goto(REGISTER_URL)
+    @pytest.mark.parametrize("url", [REGISTER_URL, VERIFY_CODE_URL, VERIFY_EMAIL_URL, RESEND_CODE_URL])
+    def test_signup_routes_are_gone(self, page: Page, url: str) -> None:
+        """Every former signup route must answer 404 (no redirect, no 5xx)."""
+        response = page.goto(url)
         assert response is not None
-        # Playwright follows the redirect, so the final document is the login page.
-        assert response.status == 200, f"Register route returned HTTP {response.status}"
-        assert "/accounts/login/" in page.url, f"Register did not redirect to login; landed on {page.url}"
-
-    def test_register_landing_has_no_wizard(self, page: Page) -> None:
-        """The redirected page is the login form, not the registration wizard."""
-        page.goto(REGISTER_URL)
-        page.wait_for_load_state("domcontentloaded")
-        wizard = page.locator(".register-wizard-steps, .wizard-step")
-        assert wizard.count() == 0, "Registration wizard is reachable while public signup is disabled"
+        assert response.status == 404, f"{url} returned HTTP {response.status}"
 
     def test_login_page_has_no_signup_link(self, page: Page) -> None:
         """The login page must not offer a public self-registration link."""
@@ -275,28 +267,6 @@ class TestPasswordResetFlow:
         assert response.status < 500, f"Password reset done page returned server error HTTP {response.status}"
 
 
-# ── OTP / email verification pages ───────────────────────────────────────────
-
-
-class TestOtpVerificationPages:
-    """Tests for OTP and email verification pages."""
-
-    def test_verify_code_page_accessible(self, page: Page) -> None:
-        """The OTP verification page must load without a server error."""
-        response = page.goto(VERIFY_CODE_URL)
-        assert response is not None
-        # The page may redirect to login or registration if no pending OTP exists.
-        # Either is acceptable; 5xx is not.
-        assert response.status < 500, f"OTP verify page returned server error HTTP {response.status}"
-
-    def test_resend_code_page_redirects_gracefully(self, page: Page) -> None:
-        """Accessing the resend-code URL without a session must redirect, not crash."""
-        response = page.goto(RESEND_CODE_URL)
-        page.wait_for_load_state("domcontentloaded")
-        if response is not None:
-            assert response.status < 500, f"Resend code page returned server error HTTP {response.status}"
-
-
 # ── Unauthenticated access guards ─────────────────────────────────────────────
 
 
@@ -310,7 +280,7 @@ class TestUnauthenticatedRedirects:
             "/accounts/dashboard/student/",
             "/accounts/dashboard/teacher/",
             "/accounts/profile/",
-            "/accounts/grading-queue/",
+            "/accounts/profile/?section=pending-review",  # WP9b: köhnə /accounts/grading-queue/ silindi
             "/accounts/my-results/",
             "/accounts/pending-review/",
             "/accounts/role-assignment/",

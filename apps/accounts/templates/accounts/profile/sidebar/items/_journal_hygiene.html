@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{% comment %}2026-10-10 (sahib): «Jurnal təmizliyi» — yalnız RİM rəhbəri / superadmin (qapı: rbac_sections.py).{% endcomment %}
+{% if 'journal-hygiene' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=journal-hygiene"
+       data-section="journal-hygiene"
+       data-title="{% trans 'Jurnal təmizliyi' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}?section=journal-hygiene"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'journal-hygiene' %}active{% endif %}">
+        {% nav_icon "list-x" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Jurnal təmizliyi" context "profile.section" %}</span>
+    </a>
+</li>
+{% endif %}

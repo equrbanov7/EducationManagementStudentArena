@@ -11,7 +11,7 @@ urlpatterns = [
     path("create/<int:course_id>/", views.create_lab, name="create_lab"),
     path("<int:pk>/edit/", views.edit_lab, name="edit_lab"),
     path("<int:pk>/delete/", views.delete_lab, name="delete_lab"),
-    path("<int:pk>/publish/", views.publish_lab, name="publish_lab"),
+    # WP9a (2026-10-10): `<pk>/publish/` silindi — status redaktə modalından təyin olunur.
     # ═══════════════════════════════════════════════════════════════════
     # Block CRUD
     # ═══════════════════════════════════════════════════════════════════
@@ -69,9 +69,6 @@ urlpatterns = [
     # ═══════════════════════════════════════════════════════════════════
     path("api/groups/<int:course_id>/", views.api_get_groups, name="api_get_groups"),
     path("api/students/<int:course_id>/", views.api_get_students, name="api_get_students"),
-    path(
-        "submissions/<int:pk>/answers/",
-        views.submission_answers,
-        name="submission_answers",
-    ),
+    # WP9a (2026-10-10): `submissions/<pk>/answers/` JSON-u silindi — qiymət səhifəsi cavabları
+    # server tərəfdə render edir.
 ]

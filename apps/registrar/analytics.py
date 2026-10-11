@@ -125,19 +125,17 @@ def _selfwork_map(enrollment_ids):
     return selfwork_points.selfwork_totals(enrollment_ids)
 
 
-def _lesson_sum_map(enrollment_ids) -> tuple[dict, dict]:
-    """``(cəm, say)`` — balı olan dərs işarələri üzrə, TƏK sorğu (say Midterm aktivlik ortası üçündür)."""
+def _lesson_sum_map(enrollment_ids) -> dict:
+    """``{enrollment_id: LessonTotals}`` — balı olan dərs işarələri, dərs növü üzrə, TƏK sorğu.
+
+    Köhnə qol yalnız birgə cəmi (``.total``) oxuyur — növlərin cəmi əvvəlki tək cəmlə eynidir; Midterm
+    aktivliyi say + seminar/lab bölgüsünü (5 + 5, :mod:`apps.registrar.activity_kinds`) işlədir."""
     rows = (
         LessonMark.objects.filter(enrollment_id__in=enrollment_ids, score__isnull=False)
-        .values("enrollment_id")
+        .values_list("enrollment_id", "lesson__kind")
         .annotate(total=Sum("score"), scored=Count("score"))
     )
-    sums: dict = {}
-    counts: dict = {}
-    for r in rows:
-        sums[r["enrollment_id"]] = r["total"] or Decimal("0")
-        counts[r["enrollment_id"]] = r["scored"] or 0
-    return sums, counts
+    return entry_standard.lesson_totals_by_key(rows)
 
 
 def _exam_map(enrollment_ids):
@@ -184,26 +182,29 @@ def _evaluate(enrollment, maps):
     # baxmaq jurnal qridindən ayrılmaq demək idi.  Toplu map → əlavə sorğu yox.
     lesson_hours = exam_eligibility.lesson_hours_for(offering, hours_map=maps.get("lesson_hours", {}))
 
+    lesson_totals = maps["lesson_totals"].get(enrollment.id)
     if offering.id in maps.get("midterm_offerings", ()):
         # Midterm rejimi (2026/2027-dən): sillabus standartı — TƏK düstur ``entry_standard``-da,
-        # davamiyyət bu güzgünün öz buraxılış girişləri ilə (saat, hədd, istisna).
+        # davamiyyət bu güzgünün öz buraxılış girişləri ilə (saat, hədd, istisna); RİM bayraqları və
+        # açılışın seminar/lab maskası map-lardan (bir dəfə oxunub — sahib 2026-10-10).
         entry = entry_standard.compose_from_totals(
             cap=entry_max,
             lesson_hours=lesson_hours,
             absence_hours=enrollment.absence_hours,
             limit_percent=limit,
             exempt=bool(record and record.national_athlete_exemption),
-            score_sum=maps["lesson_sums"].get(enrollment.id, Decimal("0")),
-            score_count=maps["lesson_counts"].get(enrollment.id, 0),
+            lesson_totals=lesson_totals or entry_standard.LessonTotals(),
+            activity_bits=maps["activity_bits"].get(offering.id, 0),
             interim_total=maps["kollokvium_sums"].get(enrollment.id, Decimal("0")),
             selfwork_points=maps["selfwork_sums"].get(enrollment.id, Decimal("0")),
             selfwork_counted=offering.id in maps["selfwork_offerings"],
+            flags=maps["rule_flags"],
         ).total
     else:
         if offering.id in maps["component_offerings"]:
             raw_entry = maps["component_sums"].get(enrollment.id, Decimal("0"))
         else:
-            raw_entry = maps["lesson_sums"].get(enrollment.id, Decimal("0"))
+            raw_entry = lesson_totals.total if lesson_totals is not None else Decimal("0")
         # Kollokvium + sərbəst iş həmişə üstəgəl (gradebook.entry_score_for güzgüsü).
         raw_entry += maps["kollokvium_sums"].get(enrollment.id, Decimal("0"))
         raw_entry += maps["selfwork_sums"].get(enrollment.id, Decimal("0"))
@@ -404,12 +405,17 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
     """
     generic_offerings, selfwork_offerings = _component_offerings(offering_ids)
     component_sums, kollokvium_sums = _entry_sum_maps(enrollment_ids)
-    lesson_sums, lesson_counts = _lesson_sum_map(enrollment_ids)
     if offerings is not None:
         flags = entry_standard.midterm_flags(offerings, organization=organization)
         midterm_offerings = frozenset(oid for oid, flag in flags.items() if flag)
     else:
         midterm_offerings = entry_standard.midterm_offering_ids(offering_ids)
+    # Yeni qayda (sahib 2026-10-10): RİM bayraqları bir dəfə; Midterm açılışlarının seminar/lab maskası
+    # (5 + 5 aktivlik) — yalnız bölgü açıqdırsa, TƏK sorğu.
+    rule_flags = entry_standard.rule_flags()
+    activity_bits = (
+        entry_standard.activity_bits_map(midterm_offerings) if rule_flags.activity_split and midterm_offerings else {}
+    )
     return {
         "schemes": _scheme_map(offering_ids),
         # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
@@ -421,11 +427,12 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
         "component_offerings": generic_offerings,
         "selfwork_offerings": selfwork_offerings,
         "midterm_offerings": midterm_offerings,
+        "rule_flags": rule_flags,
+        "activity_bits": activity_bits,
         "component_sums": component_sums,
         "kollokvium_sums": kollokvium_sums,
         "selfwork_sums": _selfwork_map(enrollment_ids),
-        "lesson_sums": lesson_sums,
-        "lesson_counts": lesson_counts,
+        "lesson_totals": _lesson_sum_map(enrollment_ids),
         "exams": _exam_map(enrollment_ids),
         "resits": _resit_map(enrollment_ids),
         "records": _record_map(organization, student_ids),

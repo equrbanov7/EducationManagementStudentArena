@@ -1,6 +1,9 @@
-{% load i18n %}
+{% load journal_names i18n %}
 {% comment %}Yekun qiymət: saatlar və buraxılış qərarı get_final_breakdown-dan gəlir.
-Midterm rejimi: davamiyyət/10 + aktivlik/10 + Midterm/20 + sərbəst iş/10.
+Midterm rejimi (sahib 2026-10-10): davamiyyət/10 + aktivlik/10 + Midterm/30; fəndə seminar VƏ
+laboratoriya varsa (activity_split) aktivlik sütunu seminar ortası · lab ortası · 5 + 5 payı ilə açılır;
+sərbəst iş/10 sütunu YALNIZ RİM-də açıq olanda (selfwork_active — onda Midterm/20). Rəqəmlər
+get_final_breakdown-dan gəlir, şablonda yazılmır.
 Keçmiş dövrlərdə kollokvium, seminar, laboratoriya və kurs işi sütunları saxlanılır.
 Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomment %}
 {% with midterm=final_breakdown.interim.is_midterm %}
@@ -14,12 +17,12 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
                 <th rowspan="2" class="jd2-fb-aud">{% trans "QAYIB %" context "registrar.journal" %}<div class="jd2-th-sub">{% trans "buraxılan ÷ plan" context "registrar.journal" %}</div></th>
                 <th rowspan="2">{% trans "DAVAMİYYƏT" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
                 {% if midterm %}
-                <th rowspan="2" class="jd2-fb-midterm">{% trans "MIDTERM" context "registrar.journal" %}<div class="jd2-th-sub">/20</div></th>
-                <th class="jd2-fb-semhead">{% trans "Aktivlik" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
+                <th rowspan="2" class="jd2-fb-midterm">{% trans "MIDTERM" context "registrar.journal" %}<div class="jd2-th-sub">/{{ final_breakdown.midterm_max|floatformat:"-2" }}</div></th>
+                <th {% if final_breakdown.activity_split %}colspan="3" {% endif %}class="jd2-fb-semhead">{% trans "Aktivlik" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
                 {% else %}
                 <th colspan="{{ final_breakdown.kolls|length|add:2 }}" class="jd2-fb-semhead">{% trans "SEMİNAR" context "registrar.journal" %}</th>
                 {% endif %}
-                <th rowspan="2">{% trans "SƏRBƏST İŞ" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>
+                {% if not midterm or final_breakdown.selfwork_active %}<th rowspan="2">{% trans "SƏRBƏST İŞ" context "registrar.journal" %}<div class="jd2-th-sub">/10</div></th>{% endif %}
                 {% if not midterm %}<th rowspan="2">{% trans "LAB. İŞİ" context "registrar.journal" %}</th>
                 <th rowspan="2">{% trans "KURS İŞİ" context "registrar.journal" %}<div class="jd2-th-sub">/100</div></th>{% endif %}
                 <th rowspan="2" class="jd2-fb-entryhead">{% trans "İMTAHANA QƏDƏR BAL" context "registrar.journal" %}<div>/{{ final_breakdown.entry_max }}</div></th>
@@ -30,7 +33,13 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
                 {% for c in final_breakdown.kolls %}<th class="jd2-fb-sub">{{ c.name }}</th>{% endfor %}
                 <th class="jd2-fb-sub">{% trans "Kollokvium orta balı" context "registrar.journal" %}</th>
                 {% endif %}
+                {% if midterm and final_breakdown.activity_split %}
+                <th class="jd2-fb-sub">{% trans "Seminar ortası" context "registrar.journal" %}</th>
+                <th class="jd2-fb-sub">{% trans "Lab ortası" context "registrar.journal" %}</th>
+                <th class="jd2-fb-sub" title="{% trans 'Fəndə seminar və laboratoriya var: hər növün ədədi ortasının yarısı toplanır (5 + 5); balı olmayan növ 0 sayılır.' context 'registrar.journal' %}">{% trans "Bal (5 + 5)" context "registrar.journal" %}</th>
+                {% else %}
                 <th class="jd2-fb-sub"{% if midterm %} title="{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}"{% endif %}>{% if midterm %}{% trans "Orta bal" context "registrar.journal" %}{% else %}{% trans "Seminarın orta balı" context "registrar.journal" %}{% endif %}</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -38,7 +47,7 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
             <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}">
                 <td class="jd2-td-student">
                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
-                    <span class="jd2-stu-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                    <span class="jd2-stu-name">{{ row.student|journal_name }}</span>
                 </td>
                 <td class="jd2-fb-num jd2-fb-dim">{{ final_breakdown.held_hours }} / {{ final_breakdown.lesson_hours|floatformat:'-1' }}</td>
                 <td class="jd2-fb-num{% if row.absence_hours %} jd2-fb-absent{% endif %}">{{ row.absence_hours|floatformat:'-1' }}</td>
@@ -51,8 +60,16 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
                 {% for v in row.kvals %}<td class="jd2-fb-num jd2-fb-dim">{% if v is not None %}{{ v|floatformat:'-1' }}{% else %}—{% endif %}</td>{% endfor %}
                 <td class="jd2-fb-num jd2-fb-accent">{% if row.korta is not None %}{{ row.korta|floatformat:'-1' }}{% else %}—{% endif %}</td>
                 {% endif %}
+                {% if midterm and final_breakdown.activity_split %}
+                {% with detail=row.parts.activity_detail %}
+                <td class="jd2-fb-num jd2-fb-dim">{% if detail.seminar_mean is not None %}{{ detail.seminar_mean|floatformat:"-2" }}{% else %}—{% endif %}</td>
+                <td class="jd2-fb-num jd2-fb-dim">{% if detail.lab_mean is not None %}{{ detail.lab_mean|floatformat:"-2" }}{% else %}—{% endif %}</td>
+                {% endwith %}
+                <td class="jd2-fb-num">{{ row.parts.activity|floatformat:"-2" }}</td>
+                {% else %}
                 <td class="jd2-fb-num">{% if midterm %}{{ row.parts.activity|floatformat:"-2" }}{% elif row.sorta is not None %}{{ row.sorta|floatformat:'-1' }}{% else %}—{% endif %}</td>
-                <td class="jd2-fb-num">{% if midterm %}{{ row.parts.selfwork|floatformat:"-2" }}{% else %}{{ row.selfwork }}{% endif %}</td>
+                {% endif %}
+                {% if not midterm or final_breakdown.selfwork_active %}<td class="jd2-fb-num">{% if midterm %}{{ row.parts.selfwork|floatformat:"-2" }}{% else %}{{ row.selfwork }}{% endif %}</td>{% endif %}
                 {% if not midterm %}
                 <td class="jd2-fb-num jd2-fb-dim">{% if row.lab_orta is not None %}{{ row.lab_orta|floatformat:'-1' }}{% else %}—{% endif %}</td>
                 <td class="jd2-fb-num">{% if row.coursework and row.coursework.score is not None %}{{ row.coursework.score|floatformat:'-2' }}{% else %}—{% endif %}</td>
@@ -74,7 +91,8 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
     </table>
 </div>
 <div class="jd2-footbar">
-    <span class="jd2-foot-note">{% if midterm %}{% trans "Giriş balı = davamiyyət + aktivlik + Midterm + sərbəst iş; tam ədədə yuvarlaqlaşdırılır (tavan" context "registrar.journal" %}{% else %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %}{% endif %} {{ final_breakdown.entry_max }}).</span>
+    <span class="jd2-foot-note">{% if midterm %}{% if final_breakdown.selfwork_active %}{% trans "Giriş balı = davamiyyət + aktivlik + Midterm + sərbəst iş; tam ədədə yuvarlaqlaşdırılır (tavan" context "registrar.journal" %}{% else %}{% trans "Giriş balı = davamiyyət + aktivlik + Midterm; tam ədədə yuvarlaqlaşdırılır (tavan" context "registrar.journal" %}{% endif %}{% else %}{% trans "İmtahana qədər bal — jurnalın kanonik giriş balıdır (dərs balları + kollokvium + sərbəst iş, tavan" context "registrar.journal" %}{% endif %} {{ final_breakdown.entry_max }}).</span>
+    {% if midterm and final_breakdown.activity_split %}<span class="jd2-foot-note">{% trans "Aktivlik = seminar ortasının yarısı + laboratoriya ortasının yarısı (5 + 5); balı olmayan növ 0 sayılır." context "registrar.journal" %}</span>{% endif %}
     <span class="jd2-foot-note">{% trans "Qayıb % = buraxılan saat ÷ auditoriya saatı (plan) — buraxılış qərarı ilə eyni məxrəc." context "registrar.journal" %}</span>
     <span class="jd2-foot-chips">
         <span class="jd2-limitchip jd2-limitchip--warn">■ {% trans "Qayıb limitinə yaxın" context "registrar.journal" %}</span>

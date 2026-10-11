@@ -10,13 +10,15 @@
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_kselect.css' %}?v=20260926-1">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2_window.css' %}?v=20260925-audit">
-    <link rel="stylesheet" href="{% static 'registrar/css/rubric_grade.css' %}?v=20260705-1">
+    {% comment %}Sahib 2026-10-10: rubrik qiymətləndirməsi gizlidir (`REGISTRAR_RUBRICS_ENABLED`) —
+    `rubric_grade.css` yalnız rubrik səhifəsinin özündə yüklənir (jurnalda heç bir rubrik sinfi yoxdur).{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
-    <link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">
+    {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20260830-syl1">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20260925-hist2">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20260925-act">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261010-hint">
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261005-touch">
@@ -120,12 +122,16 @@
             <button type="button" class="jd2-tab{% if active_tab == "kollokvium" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kollokvium" %}true{% else %}false{% endif %}" data-jt-url="?jt=kollokvium" data-jtab="kollokvium" id="jd-tab-kollokvium" aria-controls="jd-panel-kollokvium">
                 {% if kollokvium_grid.spec.is_midterm %}{% trans "Midterm" context "registrar.journal" %}{% else %}{% trans "Kollokvium" context "registrar.journal" %}{% endif %}
             </button>
+            {% if coursework_active %}{# sahib 2026-10-11: «Kurs işi» RİM tənzimləməsi ilə (2026/2027+ defolt söndürülü) #}
             <button type="button" class="jd2-tab{% if active_tab == "kurs-isi" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "kurs-isi" %}true{% else %}false{% endif %}" data-jt-url="?jt=kurs-isi" data-jtab="kurs-isi" data-jd-step-of="4" id="jd-tab-kurs-isi" aria-controls="jd-panel-kurs-isi">
                 {% trans "Kurs işi" context "registrar.journal" %}
             </button>
+            {% endif %}
+            {% if selfwork_active %}{# sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə tab yoxdur (RİM tənzimləməsi) #}
             <button type="button" class="jd2-tab{% if active_tab == "serbest" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "serbest" %}true{% else %}false{% endif %}" data-jt-url="?jt=serbest" data-jtab="serbest" data-jd-step-of="5" id="jd-tab-serbest" aria-controls="jd-panel-serbest">
                 {% trans "Sərbəst iş" context "registrar.journal" %}
             </button>
+            {% endif %}
             <button type="button" class="jd2-tab{% if active_tab == "yekun" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "yekun" %}true{% else %}false{% endif %}" data-jt-url="?jt=yekun" data-jtab="yekun" data-jd-step-of="6" id="jd-tab-yekun" aria-controls="jd-panel-yekun">
                 {% trans "Yekun qiymət" context "registrar.journal" %}
             </button>
@@ -210,14 +216,14 @@
         {% endif %}
 
         {# ═══ Kurs işi (siyahı + sağda form — mockup) ════════════════════════ #}
-        {% if active_tab == "kurs-isi" %}
+        {% if active_tab == "kurs-isi" and coursework_active %}
         <section class="jd-panel is-active" data-jtab-panel="kurs-isi" id="jd-panel-kurs-isi" role="tabpanel" aria-labelledby="jd-tab-kurs-isi">
             {% include "registrar/partials/_jd_coursework.html" %}
         </section>
         {% endif %}
 
         {# ═══ Sərbəst iş (mövzu çeklisti — mockup) ═══════════════════════════ #}
-        {% if active_tab == "serbest" %}
+        {% if active_tab == "serbest" and selfwork_active %}
         <section class="jd-panel is-active" data-jtab-panel="serbest" id="jd-panel-serbest" role="tabpanel" aria-labelledby="jd-tab-serbest">
             {% include "registrar/partials/_jd_selfwork.html" %}
         </section>
@@ -313,8 +319,10 @@
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261003-bulk"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
+    <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261010-wp4lesson"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
+    <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261010-hint"></script>
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>

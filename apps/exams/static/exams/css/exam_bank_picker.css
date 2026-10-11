@@ -1,3 +1,235 @@
-/* Source: exams/teacher/exam_bank_picker.html
-   Extracted from an inline <style> for CSP (no unsafe-inline). */
-.exam-bank-picker-1 { max-width: 1040px; }
+/* «Bankdan sual əlavə et» müstəqil səhifəsi (sahib 2026-10-10 redizayn) — ortaq qabıq:
+   teacher_page_shell.css. Modal variant (bank_picker_modal.css) ayrıca qalır. */
+
+.ebp-filters {
+    padding: var(--ems-sp-6) 18px;
+}
+
+.ebp-bank-field {
+    flex-basis: 280px;
+}
+
+/* ── Bank xülasəsi + dil çipləri ───────────────────────────────────────── */
+.ebp-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: 14px 18px;
+}
+
+.ebp-summary__main {
+    min-width: 0;
+}
+
+.ebp-summary__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.ebp-summary__title i {
+    color: var(--ems-primary-600);
+}
+
+.ebp-summary__meta {
+    margin-top: 2px;
+}
+
+.ebp-langs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+}
+
+.ebp-chip {
+    text-decoration: none;
+}
+
+.ebp-chip[aria-current="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.ebp-chip__n {
+    color: var(--ems-text-muted);
+}
+
+/* ── Sual siyahısı ─────────────────────────────────────────────────────── */
+.ebp-list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.ebp-list-title {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.ebp-range {
+    margin: 0;
+}
+
+.ebp-list-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin-left: auto;
+}
+
+.ebp-pagecheck {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    min-height: var(--ems-h-field);
+    padding: 0 12px;
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+}
+
+.ebp-pagecheck input,
+.ebp-item__check {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.ebp-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ebp-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 var(--ems-sp-5);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+}
+
+.ebp-item:last-child {
+    border-bottom: 0;
+}
+
+.ebp-item:hover,
+.ebp-item:has(.ebp-item__check:checked) {
+    background: var(--ems-primary-50);
+}
+
+.ebp-item__check {
+    margin-top: 3px;
+}
+
+.ebp-item__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+    cursor: pointer;
+}
+
+.ebp-item__text {
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.ebp-item__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.ebp-item__opts {
+    grid-column: 2;
+    margin-top: var(--ems-sp-3);
+}
+
+.ebp-item__opts > summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    cursor: pointer;
+}
+
+.ebp-opts {
+    display: grid;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ebp-opt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 6px 10px;
+    border: 1px solid var(--ems-neutral-100);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base);
+}
+
+.ebp-opt.is-correct {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.ebp-opt__label {
+    font-weight: 800;
+    color: var(--ems-neutral-600);
+}
+
+.ebp-opt__text {
+    flex: 1 1 200px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.ebp-pager {
+    gap: var(--ems-sp-5);
+}
+
+.ebp-pager__links {
+    display: flex;
+    gap: var(--ems-sp-3);
+}
+
+.ebp-actionbar {
+    margin-top: var(--ems-sp-6);
+}
+
+@media (max-width: 768px) {
+    .ebp-list-tools {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .ebp-item__opts {
+        grid-column: 1 / -1;
+    }
+}

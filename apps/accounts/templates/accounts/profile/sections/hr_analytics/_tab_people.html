@@ -1,0 +1,51 @@
+{% load i18n %}
+{% comment %}Müəllimlər — süzülmüş siyahı (axtarış + problem filtri), server səhifələməsi (linklər bölməni yerində
+yeniləyir). Əlaqə məlumatı yoxdur. Kontekst: `hr.people`.{% endcomment %}
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra hr-table hr-people">
+            <caption class="hr-sr">{% trans "Müəllimlər siyahısı" context "accounts.hr_analytics" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Fakültə · kafedra" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Elmi ad · dərəcə" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Ştat" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Dərs yükü" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Jurnal / dərs" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Hesab" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Problemlər" context "accounts.hr_analytics" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in hr.people.results %}
+                <tr>
+                    <th scope="row" class="hr-people__name">{{ row.name }}<small>{{ row.username }}</small></th>
+                    <td>{{ row.chair|default:"—" }}<small class="hr-muted hr-block">{{ row.faculty }}</small></td>
+                    <td>{{ row.title_label }}{% if row.title_from_position %} <span class="hr-muted" title="{% trans 'Yük profilindəki vəzifədən' context 'accounts.hr_analytics' %}">*</span>{% endif %}{% if row.degree_label %}<small class="hr-block">{{ row.degree_label }}</small>{% endif %}</td>
+                    <td>{{ row.staff_label }}{% if row.staff_fraction is not None and row.staff_type != "hourly" %} <small class="hr-muted">({{ row.staff_fraction|floatformat:"-2" }})</small>{% endif %}</td>
+                    <td>{% if row.load_band == "none" %}<span class="hr-muted">—</span>{% else %}{{ row.planned_load }} / {{ row.norm_hours }} <small class="hr-muted">({{ row.fill_percent }}%)</small>{% endif %}</td>
+                    <td class="ems-table__num">{{ row.journals }} / {{ row.lessons }}</td>
+                    <td>
+                        <span class="ems-badge {% if row.status == 'active' %}ems-badge--success{% else %}ems-badge--danger{% endif %}">{{ row.status_label }}</span>
+                        {% if row.never_logged_in %}<small class="hr-block hr-muted">{% trans "heç daxil olmayıb" context "accounts.hr_analytics" %}</small>{% endif %}
+                        {% if row.not_activated %}<small class="hr-block hr-muted">{% trans "ilkin parolda" context "accounts.hr_analytics" %}</small>{% endif %}
+                    </td>
+                    <td>
+                        {% for label in row.issue_labels %}<span class="ems-badge ems-badge--warning ems-badge--wrap hr-issue">{{ label }}</span>{% empty %}<span class="hr-muted">—</span>{% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="hr-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.hr_analytics" %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if hr.people.num_pages > 1 %}
+<nav class="hr-pager" aria-label="{% trans 'Səhifələmə' context 'accounts.hr_analytics' %}">
+    {% if hr.people.prev_url %}<a class="ems-btn ems-btn--sm" href="{{ hr.people.prev_url }}" data-section="hr-analytics"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.hr_analytics" %}</a>{% endif %}
+    <span class="hr-pager__info">{% blocktrans trimmed with page=hr.people.page pages=hr.people.num_pages total=hr.people.total context "accounts.hr_analytics" %}Səhifə {{ page }} / {{ pages }} · {{ total }} müəllim{% endblocktrans %}</span>
+    {% if hr.people.next_url %}<a class="ems-btn ems-btn--sm" href="{{ hr.people.next_url }}" data-section="hr-analytics">{% trans "Növbəti" context "accounts.hr_analytics" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}

@@ -49,7 +49,6 @@ from django.test import RequestFactory
 import pytest
 
 from apps.accounts.models import ProfileRole
-from apps.accounts.views._helpers import _build_student_org_request_section
 from apps.assignments.models import Assignment, Submission
 from apps.courses.models import Course, CourseGroup, CourseMembership
 from apps.exams.models import (
@@ -1845,52 +1844,9 @@ class TestRLSProfilePendingRequests:
         assert state["pending_student_join_org_name"] == org_a.name
         assert state["pending_student_join_message"] == "Qoşulmaq istəyirəm"
 
-    def test_student_org_request_section_restores_legacy_request_without_active_tenant(self, two_orgs):
-        _skip_if_not_pg()
-        org_a, _org_b = two_orgs
-
-        from django.contrib.auth import get_user_model
-
-        User = get_user_model()
-        student = User.objects.create_user("section_pending_student", "sps@rls.test", "pw")
-        profile = student.profile
-        profile.organization = None
-        profile.role = ProfileRole.STUDENT
-        profile.requested_organization = org_a
-        profile.requested_organization_name = org_a.name
-        profile.requested_organization_message = "Qoşulmaq istəyirəm"
-        profile.student_university_name = org_a.name
-        profile.save(
-            update_fields=[
-                "organization",
-                "role",
-                "requested_organization",
-                "requested_organization_name",
-                "requested_organization_message",
-                "student_university_name",
-                "updated_at",
-            ]
-        )
-
-        request = RequestFactory().get("/accounts/profile/")
-        request.user = student
-
-        _enable_rls()
-        section = _build_student_org_request_section(request=request, profile=profile)
-
-        assert len(section["pending_student_requests"]) == 1
-        assert section["pending_student_requests"][0].organization_id == org_a.id
-        assert section["pending_requested_organization"].id == org_a.id
-        with bypass_rls():
-            assert (
-                StudentOrganizationRequest.objects.filter(
-                    user=student,
-                    organization=org_a,
-                    role_type="student",
-                    status="pending",
-                ).count()
-                == 1
-            )
+    # URL auditi A7 (2026-10-10): «Təşkilata qoşul» bölməsi (`student-organization-request/`)
+    # silindi — bölmə qurucusunun RLS testi də çıxarıldı; gözləyən müraciətin RLS altında
+    # oxunması yuxarıdakı bildiriş-vəziyyəti testi ilə qorunur.
 
 
 # ---------------------------------------------------------------------------

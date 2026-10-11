@@ -1,0 +1,41 @@
+{% load i18n %}
+{% comment %}Avto filtr paneli — `filter_bar.js` MARKUP MÜQAVİLƏSİ: select dəyişən kimi, axtarış isə debounce
+ilə bölmə yerində yenidən yüklənir; tab (`hr_tab`) URL-də qalır, səhifə 1-ə qayıdır. Select-lər layihə
+komponentidir (bootstrap-single-select, uzun siyahıda daxili axtarış).{% endcomment %}
+<form class="ems-filters ems-filters--auto hr-filters" data-ems-filters data-ems-filters-auto="1"
+      data-section="{{ hr.section }}" data-param-prefix="hr_" data-base-url="{{ hr.base_url }}"
+      role="search" aria-label="{% trans 'Kadr analitikası filtrləri' context 'accounts.hr_analytics' %}">
+    {% for field in hr.filter_fields %}
+    <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
+        <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}>
+                {% for option in field.options %}
+                <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endfor %}
+    {% if hr.tab == "people" %}
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="f-hr_issue">{% trans "Problem" context "accounts.hr_analytics" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="f-hr_issue" name="hr_issue" data-ems-filter data-bootstrap-select>
+                {% for option in hr.people.issue_options %}
+                <option value="{{ option.value }}"{% if option.selected %} selected{% endif %}>{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    {% endif %}
+    <div class="ems-field ems-field--wide">
+        <label class="ems-field__label" for="f-hr_q">{% trans "Axtarış" context "accounts.hr_analytics" %}</label>
+        <input class="ems-input" type="search" id="f-hr_q" name="hr_q" value="{{ hr.filters.q }}"
+               placeholder="{% trans 'Ad, soyad, istifadəçi adı, kafedra…' context 'accounts.hr_analytics' %}"
+               autocomplete="off" maxlength="100" data-ems-filter data-ems-filter-search>
+    </div>
+    <div class="ems-filters__actions">
+        <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
+    </div>
+</form>

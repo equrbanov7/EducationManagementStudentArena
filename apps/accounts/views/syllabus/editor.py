@@ -10,13 +10,14 @@ CONTEXT MÜQAVİLƏSİ — ``syllabus_editor_section`` (dict)
 ──────────────────────────────────────────────────────────────────────────────
     view_state   "normal" | "readonly" | "permission" | "missing"
     header       {code,name,meta,status_label,status_tone,version_label}
-    nav          [{id,index,label,state,issue_count}]      — 10 addım
+    nav          [{id,index,label,state,issue_count}]      — 10 addım (sərbəst işsiz qaydada 9)
     panels       [{id,title,hint,is_rule,is_complete,data,revision}]
     completion   {percent,tone,done,total,note}
     issues       [{section,section_title,text}]
     summary      [{label,value,tone}]
     history      [{title,meta,tone}]
-    selfwork     {option,options,slots,planned_count,extra_count,archived,total_score}
+    selfwork     {option,options,slots,planned_count,extra_count,archived,total_score} | None
+    selfwork_active  bool — sahib 2026-10-10: versiyanın semestrində sərbəst iş varmı
     methods      {catalog:[{label,value,active}], custom:[…], custom_count}
     plan_hours   {lecture,seminar,lab,total}
     week_rows    [{index,topic,lecture,seminar,lab,outcome,cells,extra,is_extra}]
@@ -33,7 +34,6 @@ from apps.syllabus.public import (
     MIN_DESCRIPTION_CHARS,
     MIN_GOAL_CHARS,
     MIN_OUTCOMES,
-    RULE_SECTIONS,
     WEEK_ROWS,
     SectionKey,
     SyllabusStatus,
@@ -64,7 +64,9 @@ NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı və ya artıq mövcud deyi
 # Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — tək mənbə
 # apps.syllabus.policy (davamiyyət 10 · midterm 20 · sərbəst iş 10 ·
 # seminar/lab ədədi ortası 10 · yekun 50); müəllim heç nə bölmür.
-ASSESSMENT_POLICY = assessment_weights(None)
+# Sərbəst işli BAZA standartı — import vaxtı RİM tənzimləməsi oxunmur; redaktorun düsturu
+# versiyanın qaydası ilə qurulur (``_assessment``, sahib 2026-10-10).
+ASSESSMENT_POLICY = assessment_weights(None, selfwork=True)
 
 #: Sol naviqasiyanın QISA etiketi + bölmə başlığı + izah mətni (dizayn `SEC`).
 SECTION_META = {
@@ -149,6 +151,13 @@ SECTION_META = {
     ),
 }
 
+#: Sahib 2026-10-10: sərbəst işi söndürülmüş qaydada `assess` bölməsinin izahı (midterm 30).
+ASSESS_HINT_NO_SELFWORK = pgettext_lazy(
+    _CTX,
+    "Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 30, seminar/laboratoriya balları 10 "
+    "(semestr 50) və yekun imtahan 50 — müəllim dəyişmir. Fəaliyyət növü dərs yükündən gəlir.",
+)
+
 #: Sərbəst iş variantlarının izah mətni (dizayn §3.2 kart mətnləri).
 SELFWORK_NOTES = {
     "1x10": pgettext_lazy(_CTX, "Bir böyük sərbəst iş — semestr layihəsi formatına uyğundur."),
@@ -192,19 +201,22 @@ def _selfwork(data):
     return panels_builder.selfwork(data, SELFWORK_NOTES)
 
 
-def _assessment(data, syllabus=None):
-    """Standart düstur (müəllim seçmir) + fəaliyyət növü (seminar/lab) dərs yükündən."""
+def _assessment(data, syllabus=None, rule=None, organization=None):
+    """Standart düstur (müəllim seçmir) + fəaliyyət növü (seminar/lab) dərs yükündən.
+
+    ``rule`` — versiyanın semestrinin qaydası (sahib 2026-10-10: midterm 30, sərbəst iş sətri yox, 5 + 5)."""
     kinds = activity_kinds_for_syllabus(syllabus) if syllabus is not None else ("seminar",)
-    rows = formula_rows(kinds)
+    selfwork, split = (rule.selfwork, rule.split) if rule is not None else (None, None)
+    rows = formula_rows(kinds, organization, selfwork=selfwork, split=split)
     semester = sum(row["score"] for row in rows if row["key"] != "final")
     return {
         "rows": rows,
         "semester": semester,
         "total": sum(row["score"] for row in rows),
-        "activity_label": activity_label(kinds),
-        "activity_note": activity_note(kinds),
+        "activity_label": activity_label(kinds, split=split),
+        "activity_note": activity_note(kinds, split=split),
         "activity_kinds": list(kinds),
-        "formula": formula_text(kinds),
+        "formula": formula_text(kinds, organization, selfwork=selfwork, split=split),
         "note": (data.get("note") or "").strip(),
     }
 
@@ -289,7 +301,7 @@ def _locked_rows(syllabus, hours):
 
 
 def _nav_state(section_id, report_sections, issue_counts):
-    if section_id not in RULE_SECTIONS:
+    if section_id not in report_sections:
         return "check"
     if report_sections.get(section_id):
         return "done"
@@ -334,11 +346,18 @@ def _summary(*, syllabus, version, panels, completion, hours, selfwork_view, sec
             "value": str(_UNIT_SELECTED) % {"count": len(methods)},
             "tone": "default",
         },
-        {
-            "label": _SUMMARY_LABELS["selfwork"],
-            "value": (f"{selfwork_view['option']}" if selfwork_view["option"] else str(_NOT_SELECTED)),
-            "tone": "default" if selfwork_view["option"] else bad,
-        },
+        # Sahib 2026-10-10: sərbəst işsiz qaydada bu sətir yoxdur (``selfwork_view`` None).
+        *(
+            [
+                {
+                    "label": _SUMMARY_LABELS["selfwork"],
+                    "value": (f"{selfwork_view['option']}" if selfwork_view["option"] else str(_NOT_SELECTED)),
+                    "tone": "default" if selfwork_view["option"] else bad,
+                }
+            ]
+            if selfwork_view is not None
+            else []
+        ),
         {"label": _SUMMARY_LABELS["assessment"], "value": _UNIT_POINTS, "tone": ok},
         {
             "label": _SUMMARY_LABELS["literature"],
@@ -430,8 +449,11 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     # açılan xəritə — şablon bölməni birbaşa `panels.info.data.teacher` kimi
     # oxusun deyə (uzun `{% for %}` + `{% if %}` zənciri olmasın).
     nav, panels = [], {}
+    rule = context["rule"]
     for index, row in enumerate(context["sections"], start=1):
         short_label, title, hint = SECTION_META[row["id"]]
+        if row["id"] == SectionKey.ASSESS.value and not rule.selfwork:
+            hint = ASSESS_HINT_NO_SELFWORK
         nav.append(
             {
                 "id": row["id"],
@@ -470,8 +492,9 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
         {"kind": kind, "label": HOUR_KIND_LABELS[kind], "value": int((plan_hours or {}).get(kind) or 0)}
         for kind in ("lecture", "seminar", "lab")
     ]
-    selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {}))
-    assessment_view = _assessment(section_map.get(SectionKey.ASSESS.value, {}), syllabus)
+    selfwork_view = _selfwork(section_map.get(SectionKey.SELF.value, {})) if rule.selfwork else None
+    assessment_view = _assessment(section_map.get(SectionKey.ASSESS.value, {}), syllabus, rule, organization)
+    step = request.GET.get("step") or SectionKey.INFO.value
     readonly = context["view_state"] != "normal"
     version_row = context["version"]
 
@@ -495,16 +518,18 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             },
             "nav": nav,
             "panels": panels,
-            "active_id": (request.GET.get("step") or SectionKey.INFO.value),
+            # Gizli bölməyə (`?step=self`, sərbəst işsiz qayda) keçid boş redaktor açmasın.
+            "active_id": step if step in panels else SectionKey.INFO.value,
+            "selfwork_active": rule.selfwork,
             "completion": {
                 "percent": completion["percent"],
                 "tone": "success" if completion["percent"] >= 100 else "primary",
-                "done": sum(1 for key in RULE_SECTIONS if completion["sections"].get(key)),
-                "total": len(RULE_SECTIONS),
+                "done": sum(1 for key in rule.rule_sections if completion["sections"].get(key)),
+                "total": len(rule.rule_sections),
                 "note": str(_COMPLETION_NOTE)
                 % {
-                    "done": sum(1 for key in RULE_SECTIONS if completion["sections"].get(key)),
-                    "total": len(RULE_SECTIONS),
+                    "done": sum(1 for key in rule.rule_sections if completion["sections"].get(key)),
+                    "total": len(rule.rule_sections),
                 },
             },
             "issues": issues,
@@ -520,7 +545,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "history": _history(context["history"]),
             # `prev` bölməsi tələbənin/kafedranın gördüyü EYNİ mətni göstərir —
             # mənbə `preview.py`-dır, dublikat şablon məntiqi yoxdur.
-            "preview_blocks": build_preview_blocks(section_map),
+            "preview_blocks": build_preview_blocks(section_map, assessment_view["activity_kinds"], rule=rule),
             "locked": _locked_rows(syllabus, hours),
             "outcome_tags": tags,
             "week_rows": week_rows,
@@ -561,6 +586,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
 __all__ = [
     "ACCESS_DENIED",
     "ASSESSMENT_POLICY",
+    "ASSESS_HINT_NO_SELFWORK",
     "NOT_FOUND",
     "SECTION_META",
     "SELFWORK_NOTES",

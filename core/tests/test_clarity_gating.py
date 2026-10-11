@@ -29,8 +29,6 @@ PROJECT_ID = "codextestclarity"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PII_FORM_TEMPLATES = (
     "apps/accounts/templates/accounts/login.html",
-    "apps/accounts/templates/accounts/register.html",
-    "apps/accounts/templates/accounts/verify_code.html",
     "apps/accounts/templates/accounts/password_reset.html",
     "apps/accounts/templates/accounts/password_reset_confirm.html",
     "apps/accounts/templates/accounts/first_login_set_password.html",

@@ -188,9 +188,10 @@ class DegradedApiTests(TestCase):
         client.force_login(self.superadmin)
         return client.get(reverse(url_name), params)
 
-    def test_overview_degraded_without_prometheus(self):
+    def test_server_degraded_without_prometheus(self):
+        # WP9a (2026-10-10): `overview/` silindi — eyni degraded müqaviləsi `server/`-də.
         with mock.patch("apps.monitoring.clients._get_json", return_value=None):
-            response = self._get("monitoring:overview")
+            response = self._get("monitoring:server")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(payload["status"], "degraded")

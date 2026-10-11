@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Anonim sorğu» — tələbənin müəllim qiymətləndirmə sorğusu (2026-09-25).
 Bölmə başqa işdə qurulur; bənd yalnız açar `allowed_sections`-da olanda görünür
 (o vaxta qədər zərərsizdir). Badge HƏMİŞƏ render olunur və boşdur — sayğac
@@ -11,7 +11,7 @@ boş badge CSS-lə gizlidir (`.sidebar-menu-badge:empty`).{% endcomment %}
        data-title="{% trans 'Anonim sorğu' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'evaluation-survey' %}active{% endif %}">
-        <i class="fas fa-clipboard-question sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "clipboard-pen-line" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "Anonim sorğu" context "profile.sidebar" %}</span>
         <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="evaluation_survey"></span>
     </a>

@@ -11,6 +11,25 @@ from urllib.parse import urlencode
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
+from core.academic_rules import available_exams_page_enabled
+
+
+def cabinet_exams_url(user=None):
+    """Kabinetin imtahan bölməsi: müəllim → «İmtahanlarım», tələbə → «Təyin olunmuş tapşırıqlar»."""
+    section = "my-exams" if getattr(user, "is_teacher_or_above", False) else "assigned-exams"
+    return f"{reverse('accounts:profile')}?section={section}"
+
+
+def student_exams_home_url(user=None):
+    """İmtahan axınlarının ehtiyat «evi» (geri / uğursuz başlama).
+
+    Sahib 2026-10-10: «Mövcud imtahanlar» (``exams:student_exam_list``) hələlik bağlıdır — bayraq
+    söndürülüdə hədəf kabinetin imtahan bölməsidir (tələbə imtahanlarını orada başladır);
+    yandırılanda köhnə davranış (siyahı səhifəsi) qayıdır."""
+    if available_exams_page_enabled():
+        return reverse("exams:student_exam_list")
+    return cabinet_exams_url(user)
+
 
 def safe_same_origin_redirect_path(request, candidate_url):
     """Yalnız eyni-origin nisbi yönləndirmə yollarını qəbul et (open-redirect qoruması)."""

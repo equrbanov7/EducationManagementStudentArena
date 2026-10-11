@@ -33,7 +33,7 @@ həm modul ölçü büdcəsini, həm də məsuliyyət ayrımını saxlayır.{% e
 {% endif %}
 {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'student-registry' in asset_sections %}
 {% comment %}2026-10-03: hesabı dayandırma — səbəb seçimi + «kimə yaxınlaşsın» (kataloq və reyestr dialoqları).{% endcomment %}
-<script src="{% static 'accounts/js/profile/account_block_fields.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/account_block_fields.js' %}?v=20261011-wp13roster"></script>
 {% endif %}
 {% if 'people-teachers' in asset_sections or 'people-students' in asset_sections %}
 {% comment %}Analitika modulu kataloqdan ƏVVƏL yüklənir: o, `people:filters`
@@ -82,7 +82,7 @@ null-safe oxuyur, ona görə sıra pozulsa da səhifə çökmür.{% endcomment %
 (kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
 (EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
 <script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261003-block"></script>
-<script src="{% static 'accounts/js/profile/student_registry_account.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/student_registry_account.js' %}?v=20261011-wp13roster"></script>
 {% endif %}
 {% if 'teaching-handover' in asset_sections %}
 {% comment %}Fənn təhvili — server-render panel (2026-09-09). Cədvəli JS ÇƏKMİR,
@@ -131,7 +131,7 @@ paketi (STATS_DATA verilmədiyi üçün) heç nə etmirdi və çıxarıldı. İs
 <script src="{% static 'accounts/js/category_management.js' %}"></script>
 {% endif %}
 {% if 'my-journal' in asset_sections or 'my-schedule' in asset_sections or 'journal-close' in asset_sections or 'schedule-manage' in asset_sections %}
-<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20260712-4"></script>
+<script src="{% static 'registrar/js/schedule_grid.js' %}?v=20261010-wp9b"></script>
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20260712-3"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
@@ -192,7 +192,7 @@ qurulub, panel swap-da yenidən qoşulmağa ehtiyac yoxdur.{% endcomment %}
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
 <script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
 <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
-<script src="{% static 'exams/js/exam_wizard.js' %}?v=20261008-1"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20261011-1"></script>
 <script src="{% static 'accounts/js/my_exams_dashboard.js' %}?v=20260926-search"></script>
 {% endif %}
 {% if 'question-bank' in asset_sections %}

@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Təyin olunmuş tapşırıqlar». Qapı bölmə açarı DEYİL, `can_view_student_assignments`
 bayrağıdır (tələbə + adi üzv) — köhnə `_group_my_studies.html` blokunun şərti OLDUĞU KİMİ;
 məzun bu bəndi görmür.{% endcomment %}
@@ -9,7 +9,7 @@ məzun bu bəndi görmür.{% endcomment %}
        data-title="{% trans 'assigned_tasks' context 'profile.section' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'assigned-exams' %}active{% endif %}">
-        <i class="fas fa-tasks sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "clipboard-check" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "assigned_tasks" context "profile.sidebar" %}</span>
         {% if assigned_tasks_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="assigned_tasks_count">{{ assigned_tasks_count }}</span>{% endif %}
     </a>

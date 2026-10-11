@@ -78,7 +78,7 @@
                         {% trans "contact" context "nav" %}
                     </a>
                 </li>
-                {% if request.user.is_authenticated %}
+                {% if request.user.is_authenticated and academic_rules.available_exams %}{# sahib 2026-10-10: «Mövcud imtahanlar» tənzimləmə ilə #}
                 <li class="blog-header__nav-item">
                     <a href="{% url 'exams:student_exam_list' %}"
                        {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
@@ -240,6 +240,15 @@
                                     <span class="blog-header__user-menu-badge">{{ notif_count }}</span>
                                 {% endif %}
                             </a>
+                            {% if academic_rules.ai_button %}
+                            {# 2026-10-10 (sahib): AI köməkçi düyməsini göstər/gizlət açarı — static/js/ai_assistant_fab.js aktivləşdirir; skript olmayan səhifədə görünmür. #}
+                            <button type="button" id="ai-fab-menu-toggle" class="blog-header__user-menu-item ai-fab-menu-item"
+                                    role="switch" aria-checked="true" data-ai-fab-toggle hidden>
+                                <i class="fas fa-robot blog-header__user-menu-icon" aria-hidden="true"></i>
+                                <span>{% trans "AI köməkçi düyməsi" context "ai_assistant.fab" %}</span>
+                                <span class="ai-fab-menu-item__switch" aria-hidden="true"></span>
+                            </button>
+                            {% endif %}
 
                             {% comment %}2026-09-30 (sahib): «Profili redaktə et» və «Şifrəni dəyiş»
                             buradan kabinetin sol menyusundakı «Tənzimləmələr» qrupuna köçdü
@@ -261,11 +270,6 @@
                         <a href="{% url 'accounts:login' %}" class="blog-header__nav-link blog-header__nav-link--muted">
                             {% trans "login" context "nav" %}
                         </a>
-                        {% if public_signup_enabled %}
-                        <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
-                            {% trans "signup" context "nav" %}
-                        </a>
-                        {% endif %}
                     </div>
                 {% endif %}
 
@@ -342,7 +346,7 @@
                 <span>{% trans "contact" context "nav" %}</span>
             </a>
         </li>
-        {% if request.user.is_authenticated %}
+        {% if request.user.is_authenticated and academic_rules.available_exams %}{# sahib 2026-10-10: «Mövcud imtahanlar» tənzimləmə ilə #}
         <li class="blog-header__nav-item">
             <a href="{% url 'exams:student_exam_list' %}"
                {% if request.resolver_match.namespace == 'exams' and request.resolver_match.url_name != 'create_exam' or active_main_nav == 'exams' %}aria-current="page"{% endif %}
@@ -422,13 +426,6 @@
                 <span>{% trans "login" context "nav" %}</span>
             </a>
         </li>
-        {% if public_signup_enabled %}
-        <li class="blog-header__nav-item">
-            <a href="{% url 'accounts:register' %}" class="blog-header__nav-link blog-header__nav-link--primary">
-                <span>{% trans "signup" context "nav" %}</span>
-            </a>
-        </li>
-        {% endif %}
         {% endif %}
 
         <li class="blog-header__nav-item blog-header__nav-item--language">

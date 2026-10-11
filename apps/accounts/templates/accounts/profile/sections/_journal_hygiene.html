@@ -1,0 +1,27 @@
+{% load i18n static journal_hygiene_tags %}
+{% comment %}
+«Jurnal təmizliyi» (sahib 2026-10-10) — YALNIZ RİM rəhbəri / superadmin (menyu qapısı: rbac_sections.py).
+Üç siyahı: oxumayan, amma jurnalda adı qalan tələbələr, nəticələrə «boş» düşmüş fənlər və qrupda keçirilməyən
+fənlər (heç kimin imtahan balı yoxdur, sahib 2026-10-11); dördüncü tab —
+qərar tarixçəsi və «Bərpa et». Heç nə silinmir: sətir dondurulur (suspended) və ya nəticələrdən çıxarılır
+(dropped), hər qərar jurnala və audit-ə yazılır.
+
+Panel SPA-dır: çərçivə `{% journal_hygiene_panel %}` tag-ından gəlir (profil qurucusuna toxunulmur),
+sətirlər JSON-la (`accounts:journal_hygiene_rows`), əməllər tək JSON POST-la (`accounts:journal_hygiene_action`).
+CSS/JS xarici fayldadır və panelin İÇİNDƏDİR (AJAX swap-dan sonra da işləsin).
+{% endcomment %}
+{% if 'journal-hygiene' in allowed_sections %}
+<section class="profile-section-panel profile-section--journal-hygiene {% if active_section == 'journal-hygiene' %}is-active{% endif %}"
+         data-profile-section-panel="journal-hygiene"
+         data-source-url="{{ profile_base_url }}?section=journal-hygiene">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/journal_hygiene.css' %}?v=20261011-wp14notheld">
+{% journal_hygiene_panel as jh %}
+{% if not jh.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=jh.access_denied_message %}
+{% else %}
+    {% include "accounts/profile/sections/journal_hygiene/_content.html" %}
+    <script src="{% static 'accounts/js/profile/journal_hygiene_render.js' %}?v=20261011-wp14notheld" defer></script>
+    <script src="{% static 'accounts/js/profile/journal_hygiene.js' %}?v=20261011-wp14notheld" defer></script>
+{% endif %}
+</section>
+{% endif %}

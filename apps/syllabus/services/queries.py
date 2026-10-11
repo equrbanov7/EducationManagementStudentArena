@@ -212,8 +212,11 @@ def version_diff(old_version, new_version) -> dict:
     """İki versiyanın bölmə-bölmə fərqi.
 
     Nəticə: ``{section_id: {"changed": bool, "old": data, "new": data}}`` —
-    dizayndakı yanaşı diff kartı bunun üzərində qurulur.
+    dizayndakı yanaşı diff kartı bunun üzərində qurulur. ``assess`` bal bölgüsünü sistem
+    yazır (standart; sahib 2026-10-10 qaydası onu 20 → 30 dəyişə bilər) — o, «dəyişib» sayılmır.
     """
+    from .versioning import comparable_section_data
+
     old_map = {row.section_id: (row.data or {}) for row in old_version.sections.all()} if old_version else {}
     new_map = {row.section_id: (row.data or {}) for row in new_version.sections.all()} if new_version else {}
     result = {}
@@ -221,7 +224,7 @@ def version_diff(old_version, new_version) -> dict:
         old_data = old_map.get(section_id, {})
         new_data = new_map.get(section_id, {})
         result[section_id] = {
-            "changed": old_data != new_data,
+            "changed": comparable_section_data(section_id, old_data) != comparable_section_data(section_id, new_data),
             "old": old_data,
             "new": new_data,
         }

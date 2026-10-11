@@ -11,10 +11,9 @@ from django.db.models import Case, IntegerField, Q, Value, When
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from apps.exams.models import Exam, StudentGroup
+from apps.exams.models import StudentGroup
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.subject_labels import subject_option
-from apps.exams.views.shared.tenant import tenant_scoped_exams
 from apps.organizations.public import organization_role_user_queryset
 from core.roles import ProfileRole
 from core.search_text import starts_with_q, tolerant_q, word_prefix_q
@@ -370,21 +369,3 @@ def assigned_student_count(request):
         qs = qs.exclude(id__in=excluded_user_ids)
     total = qs.distinct().count()
     return JsonResponse({"total": total})
-
-
-@login_required
-@require_GET
-def exam_available_question_count(request, slug):
-    """Redaktə olunan imtahanda mövcud aktiv sual sayı (canlı xəbərdarlıq üçün)."""
-    _ensure_teacher(request.user)
-    organization = _resolve_required_organization(request)
-    if organization is None:
-        return JsonResponse({"count": 0})
-
-    exam = tenant_scoped_exams(request, Exam.objects.filter(slug=slug)).first()
-    if exam is None:
-        return JsonResponse({"count": 0})
-
-    from apps.exams.services.randomizer import available_question_count
-
-    return JsonResponse({"count": available_question_count(exam)})

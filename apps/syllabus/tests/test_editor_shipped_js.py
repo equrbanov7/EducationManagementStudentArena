@@ -94,7 +94,10 @@ MIGRATED_SECTIONS = {
 
 
 @pytest.fixture()
-def migrated(db):
+def migrated(db, settings):
+    # Sahib 2026-10-10: baza sillabus CARİ qaydaya tabedir — sərbəst iş panelinin render qapısı
+    # (``data-selfwork-title``) köhnə qayda ilə yoxlanır (RİM tənzimləməsi yandırılıb).
+    settings.ACADEMIC_SELFWORK_ENABLED = True
     org = make_org("shipped-js-org")
     teacher = User.objects.create_user("shipped_js_teacher", "shipped@x.test", "pw")
     stack = make_academic_stack(org, code="SJS101")

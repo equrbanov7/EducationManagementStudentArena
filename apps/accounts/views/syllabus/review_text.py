@@ -236,6 +236,11 @@ DECISION_DIALOGS = {
     },
 }
 
+#: Sahib 2026-10-10: CARİ qaydada sərbəst iş söndürülübsə təsdiq dialoqunun 1-ci sətri (sərbəst iş YOX).
+APPROVE_SOURCE_LINE_NO_SELFWORK = pgettext_lazy(
+    _CTX, "Təsdiqlənmiş versiya həftəlik mövzuların və qiymətləndirmə strukturunun yeganə mənbəyi olur"
+)
+
 #: Panelin DİNAMİK etiketləri — JS onları JSON blokundan oxuyur.
 #: (Xarici `.js` Django template engine-dən keçmir; mətn kodda qalmır.)
 PANEL_TEXTS = {
@@ -262,8 +267,13 @@ def dialog_payload() -> dict:
     ⚠️ ``str()`` qəsdəndir: lazy translation proxy-si JSON-a serializasiya
     olunmur (bax `project_jsonfield_lazy_proxy_tx_poison` tələsi).
     """
+    from core.academic_rules import selfwork_enabled
+
     rows = {}
     for key, config in DECISION_DIALOGS.items():
+        lines = [str(line) for line in config["lines"]]
+        if key == "approve" and lines and not selfwork_enabled():
+            lines[0] = str(APPROVE_SOURCE_LINE_NO_SELFWORK)
         rows[key] = {
             "title": str(config["title"]),
             "body": str(config["body"]),
@@ -272,7 +282,7 @@ def dialog_payload() -> dict:
             "reason_required": config["reason_required"],
             "reason_label": str(config.get("reason_label", "")),
             "reason_placeholder": str(config.get("reason_placeholder", "")),
-            "lines": [str(line) for line in config["lines"]],
+            "lines": lines,
         }
     return rows
 

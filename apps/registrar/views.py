@@ -131,7 +131,17 @@ def journal_detail(request, offering_id):
     # AKTİV TAB (P1-8): əvvəl beş tabın hamısı — hər biri 555 sətirlik cədvəl —
     # eyni HTML-ə render olunurdu. İndi yalnız aktiv tabın datası qurulur.
     active_tab = request.GET.get("jt", "grid")
-    if active_tab not in _JOURNAL_TABS:
+    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə (RİM tənzimləməsi) «serbest» tabı YOXDUR — qrafikə düşür;
+    # data və kod qalır, köhnə (K1–K3) semestrlərdə tab həmişə var (``core.academic_rules``).
+    from core.academic_rules import coursework_active_for_offering, selfwork_active_for_offering
+
+    selfwork_active = selfwork_active_for_offering(offering)
+    coursework_active = coursework_active_for_offering(offering)  # sahib 2026-10-11: «Kurs işi» də açarla
+    if (
+        active_tab not in _JOURNAL_TABS
+        or (active_tab == "serbest" and not selfwork_active)
+        or (active_tab == "kurs-isi" and not coursework_active)
+    ):
         active_tab = "grid"
     # DƏRS TİPİ süzgəci (sahib tələbi 2026-09-06): siyahıdakı «Mühazirə/Seminar/
     # Laboratoriya» pilləsi jurnalın İÇİNDƏ də davam edir — müəllim seminar
@@ -195,6 +205,8 @@ def journal_detail(request, offering_id):
             else journal_extras.kollokvium_columns_only(offering)
         ),
         "selfwork_board": journal_extras.get_selfwork_board(offering) if active_tab == "serbest" else None,
+        "selfwork_active": selfwork_active,  # tab, stepper addımı, düzəliş modalı (sahib 2026-10-10)
+        "coursework_active": coursework_active,  # eyni üç yer — «Kurs işi» (sahib 2026-10-11)
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
         "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
@@ -257,6 +269,9 @@ def journal_detail(request, offering_id):
 
         context.update(item_corrections.annotate_normal_view(offering, context))
     context.update(journal_activation.strip_context(offering, context))  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
+    from apps.registrar.journal_lesson_prefill import modal_context as lesson_prefill  # «Yeni dərs» dolu (2026-10-10)
+
+    context.update(lesson_prefill(offering, context))
     return render(request, "registrar/journal_detail.html", context)
 
 
@@ -286,7 +301,11 @@ def rubric_grade_view(request, offering_id, component_id):
     servis qatında)."""
     from apps.registrar import rubrics as rubrics_service
     from apps.registrar.models import AssessmentComponent
+    from apps.registrar.rubric_flags import rubrics_enabled
 
+    # Sahib 2026-10-10: rubrik qiymətləndirməsi gizlidir (bayraq söndürülü → səhifə yoxdur).
+    if not rubrics_enabled():
+        raise Http404
     offering = _offering_for_detail(request, offering_id)
     # Rubrik kriteriya balları ComponentScore yazır → yalnız birbaşa redaktor (İKT yox).
     if not _is_direct_editor(request.user, offering):
@@ -375,7 +394,7 @@ def _handle_add_lesson(request, offering):
     """Create a new lesson column (date + type + topic + standart dərs saatı)."""
     # README §8/2 — siyasət açıqdırsa təsdiqlənmiş sillabussuz dərs açılmır:
     # 403 + SƏBƏB KODU (mesaj/redirect deyil, çünki qayda acceptance şərtidir).
-    from apps.registrar import journal_activation, journal_policy
+    from apps.registrar import journal_activation, journal_lesson_prefill, journal_policy
 
     gate = journal_policy.syllabus_gate(offering)
     if gate["locked"]:
@@ -411,6 +430,15 @@ def _handle_add_lesson(request, offering):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
+    # Modal bu günün cədvəl slotundan doldurulubsa (gizli slot_id, sahib 2026-10-10) saat slotdandır — təşkilatın
+    # öz zəng saatı da keçir, səbəb tələb olunmur; yad / başqa günün slotu rədd olunur (journal_lesson_prefill).
+    try:
+        slot = journal_lesson_prefill.posted_slot(offering, request.POST, date=date, kind=kind)
+    except gradebook.LessonRuleError as exc:
+        messages.error(request, str(exc))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    if slot is not None:
+        start_time, end_time = slot.start_time, slot.end_time
     # Dərs saatı MƏCBURİDİR — standart saat seçilmədən dərs açılmasın.
     if not start_time or not end_time:
         messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
@@ -459,6 +487,7 @@ def _handle_add_lesson(request, offering):
             instructor=instructor,
             room=room,
             allow_past=allow_past,
+            slot=slot,
             off_schedule_reason=off_reason,
         )
         if allow_past:  # geriyə-dönük sütun audit izinə düşür (2026-08 auditi)
