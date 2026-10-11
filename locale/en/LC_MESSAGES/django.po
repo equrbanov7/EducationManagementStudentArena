@@ -95472,3 +95472,103 @@ msgid ""
 msgstr ""
 "{n} offering(s) partially selected — a subject that was not held is removed "
 "as a whole. Select all students of the offering («Select all matching»)."
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab vəziyyəti"
+msgstr "Account state"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dayandırılıb (blok + arxiv)"
+msgstr "Suspended (blocked + archived)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bloklanıb"
+msgstr "Blocked"
+
+msgctxt "accounts.hr_analytics"
+msgid "Arxivdə"
+msgstr "Archived"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktivləşdirilməyib (ilkin parolda)"
+msgstr "Not activated (initial password)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bu il yeni hesab"
+msgstr "New account this year"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə"
+msgstr "Administrative position"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifələr"
+msgstr "Administrative positions"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi var"
+msgstr "Has an administrative position"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi yoxdur"
+msgstr "No administrative position"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə qeyd olunmayıb."
+msgstr "No administrative position recorded."
+
+msgctxt "accounts.hr_analytics"
+msgid "profildəki «Vəzifə» sahəsindən"
+msgstr "from the “Position” field of the profile"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(since)s tarixindən"
+msgstr "since %(since)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(year)s yük profilindəki vəzifə: %(position)s"
+msgstr "Position in the %(year)s workload profile: %(position)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Vəzifə (yük profili)"
+msgstr "Position (workload profile)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük bandı"
+msgstr "Load band"
+
+msgctxt "accounts.hr_analytics"
+msgid "filtr tətbiq olunub"
+msgstr "filter applied"
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür"
+msgstr "Click an account card to filter the list by that state"
+
+msgctxt "accounts.hr_analytics"
+msgid "s/h"
+msgstr "hourly"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tarixçə"
+msgstr "History"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat tarixçəsi"
+msgstr "Staffing history"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat / vəzifə dəyişikliyi"
+msgstr "Staffing / position change"
+
+msgctxt "accounts.hr_analytics"
+msgid "Heç bir tədris ili üçün yük profili (ştat) yoxdur."
+msgstr "No workload profile (staffing) for any academic year."
+
+msgctxt "accounts.hr_analytics"
+msgid "%(position)s · norma %(norm)s saat"
+msgstr "%(position)s · norm %(norm)s h"
+
+msgctxt "accounts.hr_analytics"
+msgid "Əvvəlki ilə nisbətən dəyişib"
+msgstr "Changed compared with the previous year"

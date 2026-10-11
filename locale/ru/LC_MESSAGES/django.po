@@ -95654,3 +95654,103 @@ msgid ""
 msgstr ""
 "Курсов выбрано не полностью: {n} — непроведённый предмет убирается целиком. "
 "Выберите всех студентов курса («Выбрать все подходящие»)."
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab vəziyyəti"
+msgstr "Состояние аккаунта"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dayandırılıb (blok + arxiv)"
+msgstr "Приостановлен (блок + архив)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bloklanıb"
+msgstr "Заблокирован"
+
+msgctxt "accounts.hr_analytics"
+msgid "Arxivdə"
+msgstr "В архиве"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktivləşdirilməyib (ilkin parolda)"
+msgstr "Не активирован (начальный пароль)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bu il yeni hesab"
+msgstr "Новый аккаунт в этом году"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə"
+msgstr "Административная должность"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifələr"
+msgstr "Административные должности"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi var"
+msgstr "Есть административная должность"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi yoxdur"
+msgstr "Нет административной должности"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə qeyd olunmayıb."
+msgstr "Административная должность не указана."
+
+msgctxt "accounts.hr_analytics"
+msgid "profildəki «Vəzifə» sahəsindən"
+msgstr "из поля «Должность» в профиле"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(since)s tarixindən"
+msgstr "с %(since)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(year)s yük profilindəki vəzifə: %(position)s"
+msgstr "Должность в профиле нагрузки %(year)s: %(position)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Vəzifə (yük profili)"
+msgstr "Должность (профиль нагрузки)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük bandı"
+msgstr "Диапазон нагрузки"
+
+msgctxt "accounts.hr_analytics"
+msgid "filtr tətbiq olunub"
+msgstr "фильтр применён"
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür"
+msgstr "Клик по карточке аккаунта фильтрует список по этому состоянию"
+
+msgctxt "accounts.hr_analytics"
+msgid "s/h"
+msgstr "почас."
+
+msgctxt "accounts.hr_analytics"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat tarixçəsi"
+msgstr "История штата"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat / vəzifə dəyişikliyi"
+msgstr "Изменение штата / должности"
+
+msgctxt "accounts.hr_analytics"
+msgid "Heç bir tədris ili üçün yük profili (ştat) yoxdur."
+msgstr "Нет профиля нагрузки (штата) ни за один учебный год."
+
+msgctxt "accounts.hr_analytics"
+msgid "%(position)s · norma %(norm)s saat"
+msgstr "%(position)s · норма %(norm)s ч"
+
+msgctxt "accounts.hr_analytics"
+msgid "Əvvəlki ilə nisbətən dəyişib"
+msgstr "Изменилось по сравнению с предыдущим годом"

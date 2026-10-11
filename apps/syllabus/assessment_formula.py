@@ -1,20 +1,20 @@
 """Qiymətləndirmə strukturu — UNİVERSİTET STANDARTI (sahib qərarı 2026-09-20).
 
-«Balı müəllim tənzimləmir, standartdır»: davamiyyət 10 · midterm (aralıq
-imtahan) 20 · sərbəst iş 10 · seminar/laboratoriya ədədi ortası 10 → semestr 50; yekun
-imtahan 50; cəmi 100.  Müəllim heç nə seçmir — YALNIZ fəaliyyət növü (seminar,
-laboratoriya və ya hər ikisi) tədris yükündən (TAPŞIRIQ sətri) gəlir və
-düsturda göstərilir:
+«Balı müəllim tənzimləmir, standartdır» (sahib 2026-10-10): davamiyyət 10 · midterm (aralıq
+imtahan) 30 · seminar/laboratoriya ədədi ortası 10 → semestr 50; yekun imtahan 50; cəmi 100.
+Müəllim heç nə seçmir — YALNIZ fəaliyyət növü (seminar, laboratoriya və ya hər ikisi) tədris
+yükündən (TAPŞIRIQ sətri) gəlir və düsturda göstərilir:
 
 * yalnız seminar  → «Seminar (ədədi orta) 10»
 * yalnız lab      → «Laboratoriya (ədədi orta) 10»
 * hər ikisi       → «Seminar + laboratoriya (birgə ədədi orta — cəm 2n-ə bölünür) 10»
 
-Sahib 2026-10-10 (yeni qayda dövrləri, RİM tənzimləməsi ilə dəyişir): sərbəst iş ləğv olunanda
-onun 10 balı midterm-ə keçir (midterm 30, sərbəst iş sətri YOX); seminar + laboratoriya olan
-fəndə fəallıq 5 + 5 — «Seminar ballarının ortası 5 + Laboratoriya ballarının ortası 5». Köhnə
-semestrlərin düsturu (yuxarıdakı) DƏYİŞMİR — çağıran semestrin qaydasını ötürür
-(:mod:`apps.syllabus.rules`); ötürməsə CARİ qayda işlənir.
+Sərbəst iş ləğv olunub — onun 10 balı midterm-ə keçib (20 + 10 = 30). RİM «Sistem tənzimləmələri»
+``academic.selfwork_enabled`` açarını yandıranda əvvəlki bölgü (midterm 20 + sərbəst iş 10) geri
+qayıdır; ``academic.activity_split`` seminar + laboratoriya olan fəndə fəallığı 5 + 5 edir —
+«Seminar ballarının ortası 5 + Laboratoriya ballarının ortası 5». Sahib 2026-10-11: qayda
+semestrdən asılı DEYİL — köhnə (2025/2026) semestrin sillabusu da cari düsturu göstərir; çağıran
+:mod:`apps.syllabus.rules`-dan aldığı qaydanı ötürür, ötürməsə CARİ qayda işlənir.
 
 Fəaliyyət növü ``CourseOffering`` üzərindən tapılır: əvvəl dərs yükü sətri
 (``workload.TeachingTaskRow``: eyni fənn + dövr + qrup, ``seminar_*``/``lab_*``
@@ -165,8 +165,8 @@ def _activity_rows(kinds, score: int, split: bool) -> list[dict]:
 def formula_rows(kinds, organization=None, *, selfwork=None, split=None) -> list[dict]:
     """Redaktor/sənəd üçün sətirlər: ``[{key, label, score}]`` — semestr + yekun.
 
-    ``selfwork`` / ``split`` — semestrin qaydası (``SyllabusRule``); ``None`` → CARİ qayda.
-    Sərbəst işsiz qaydada sərbəst iş sətri yoxdur və midterm 30-dur (cəm yenə 50 + 50)."""
+    ``selfwork`` / ``split`` — tətbiq olunan qayda (``SyllabusRule``); ``None`` → CARİ qayda.
+    Standart (sərbəst işsiz) qaydada sərbəst iş sətri yoxdur və midterm 30-dur (cəm yenə 50 + 50)."""
     if selfwork is None:
         selfwork = academic_rules.selfwork_enabled()
     weights = assessment_weights(organization, selfwork=selfwork)

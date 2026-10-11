@@ -2,8 +2,9 @@
 
 RİM «Sistem tənzimləmələri»ndə sərbəst iş söndürülüdür (defolt) → 2026/2027 açılışında tab, stepper
 addımı, birbaşa POST, sənədli düzəliş hədəfi və fənn qovluğu hook-u yoxdur. Köhnə (2025/2026, K1–K3)
-semestrdə hamısı əvvəlki kimidir (tarix dəyişmir), tənzimləmə yandırılanda 2026/2027-də də geri qayıdır —
-kod, model və data toxunulmur.
+semestrdə JURNAL əvvəlki kimidir (tarix dəyişmir), tənzimləmə yandırılanda 2026/2027-də də geri qayıdır —
+kod, model və data toxunulmur. Sillabus SƏNƏDİ isə (sahib 2026-10-11) semestrdən asılı deyil — hər iki
+açılışda cari qayda (bax ``apps.syllabus.rules``).
 """
 
 import datetime
@@ -176,8 +177,19 @@ class SelfworkHiddenJournalTest(TestCase):
             response = self._client(self.teacher).get(reverse("registrar:journal_list"))
         self.assertContains(response, STEP)
 
-    def test_syllabus_document_follows_the_viewed_offering_semester(self):
-        """Semestrsiz «baza sillabus» hər iki açılışa göstərilir — sənəd BAXILAN açılışın qaydası ilədir."""
+    def _syllabus_documents(self):
+        client = self._client(self.teacher)
+        documents = {}
+        for name, offering in (("new", self.new_offering), ("old", self.old_offering)):
+            response = client.get(reverse("registrar:offering_syllabus_json", args=[offering.id]))
+            self.assertEqual(response.status_code, 200)
+            documents[name] = {block["key"]: block["body"] for block in response.json()["blocks"]}
+        return documents
+
+    def test_syllabus_document_follows_the_current_rule_in_both_semesters(self):
+        """Sahib 2026-10-11: sillabus sənədi İRƏLİYƏ baxan sənəddir — baxılan açılışın semestri (2025/2026 də)
+        onu dəyişmir: sərbəst iş bloku yoxdur, midterm 30. Jurnalın özü (tab, stepper, bal) isə köhnə
+        semestrdə əvvəlki kimidir — bax aşağıdakı ``test_legacy_period_keeps_the_tab_step_panel_and_post``."""
         with bypass_rls():
             syllabus_services.import_migrated_version(
                 organization=self.org,
@@ -186,17 +198,18 @@ class SelfworkHiddenJournalTest(TestCase):
                 author=self.teacher,
                 section_data=complete_section_data(),
             )
-        client = self._client(self.teacher)
-        documents = {}
-        for name, offering in (("new", self.new_offering), ("old", self.old_offering)):
-            response = client.get(reverse("registrar:offering_syllabus_json", args=[offering.id]))
-            self.assertEqual(response.status_code, 200)
-            documents[name] = {block["key"]: block["body"] for block in response.json()["blocks"]}
-        self.assertNotIn("selfwork", documents["new"])
-        self.assertIn("Midterm (aralıq imtahan) 30", documents["new"]["assessment"])
-        self.assertTrue(documents["new"]["literature"].startswith("Cormen"))
-        self.assertIn("Birinci sərbəst iş mövzusu", documents["old"]["selfwork"])
-        self.assertIn("Midterm (aralıq imtahan) 20", documents["old"]["assessment"])
+        documents = self._syllabus_documents()
+        for name in ("new", "old"):
+            self.assertNotIn("selfwork", documents[name])
+            self.assertIn("Midterm (aralıq imtahan) 30", documents[name]["assessment"])
+            self.assertNotIn("Sərbəst iş", documents[name]["assessment"])
+            self.assertTrue(documents[name]["literature"].startswith("Cormen"))
+        # RİM açarı yandırılanda sərbəst iş bloku və midterm 20 HƏR iki semestrdə geri qayıdır.
+        with override_settings(ACADEMIC_SELFWORK_ENABLED=True):
+            documents = self._syllabus_documents()
+        for name in ("new", "old"):
+            self.assertIn("Birinci sərbəst iş mövzusu", documents[name]["selfwork"])
+            self.assertIn("Midterm (aralıq imtahan) 20", documents[name]["assessment"])
 
     # ── 2025/2026 (köhnə qayda — tarix dəyişmir) ─────────────────────────────
     def test_legacy_period_keeps_the_tab_step_panel_and_post(self):

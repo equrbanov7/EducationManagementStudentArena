@@ -220,7 +220,7 @@ def build_review_payload(version, *, now) -> dict:
     )
 
     syllabus = version.syllabus
-    rule = rule_for_version(version)  # sahib 2026-10-10 — versiyanın semestrinin qaydası
+    rule = rule_for_version(version)  # sahib 2026-10-10/11 — cari RİM qaydası (semestrdən asılı deyil)
     kinds = activity_kinds_for_syllabus(syllabus)
     approved = syllabus.approved_version
     days = waiting_days(version, now=now)

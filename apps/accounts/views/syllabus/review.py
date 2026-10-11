@@ -98,8 +98,8 @@ def _policy_breaches(versions, organization=None) -> set:
 
     Yalnız cari SƏHİFƏNİN versiyaları üçün TƏK sorğu atılır — N+1 yoxdur.
     Boş seçim «pozuntu» sayılmır: o, `çatışmayan bölmə` riski ilə onsuz da
-    göstərilir, iki çip eyni şeyi təkrarlamamalıdır. Sahib 2026-10-10: semestrində
-    sərbəst iş söndürülmüş versiyada `self` bölməsi gizlidir — onun üzrə xəbərdarlıq YOXDUR.
+    göstərilir, iki çip eyni şeyi təkrarlamamalıdır. Sahib 2026-10-10/11: sərbəst iş
+    söndürülmüş (cari RİM) qaydada `self` bölməsi gizlidir — onun üzrə xəbərdarlıq YOXDUR.
     """
     ids = [version.pk for version in versions if rule_for_version(version, organization).selfwork]
     if not ids:

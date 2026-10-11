@@ -582,7 +582,8 @@ def test_archived_rows_carry_unknown_keys_back_untouched(world):
 
 
 # ── Sahib 2026-10-10: sərbəst iş söndürülüb (defolt) — panel gizlidir, data SİLİNMİR ──────────────
-def test_without_selfwork_the_panel_is_hidden_and_its_data_is_kept(world):
+def test_without_selfwork_the_panel_is_hidden_and_its_data_is_kept(world, settings):
+    settings.ACADEMIC_SELFWORK_ENABLED = False  # defolt qayda (``conftest`` bu dəstdə açarı yandırır)
     topics = [{"title": title} for title in MIGRATED_TOPICS[:2]]
     actor, version = _migrated_draft(world, {SectionKey.SELF.value: {**BLANK_SELF, "topics": topics}})
 

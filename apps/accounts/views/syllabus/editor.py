@@ -62,10 +62,11 @@ NOT_FOUND = pgettext_lazy(_CTX, "Sillabus tapılmadı və ya artıq mövcud deyi
 #: Müəllim yalnız `flex` (30 bal) hissəsini aralıq imtahan ↔ semestr layihəsi
 #: arasında bölür; cəm HƏMİŞƏ 100 qalır.
 # Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR — tək mənbə
-# apps.syllabus.policy (davamiyyət 10 · midterm 20 · sərbəst iş 10 ·
-# seminar/lab ədədi ortası 10 · yekun 50); müəllim heç nə bölmür.
-# Sərbəst işli BAZA standartı — import vaxtı RİM tənzimləməsi oxunmur; redaktorun düsturu
-# versiyanın qaydası ilə qurulur (``_assessment``, sahib 2026-10-10).
+# apps.syllabus.policy (davamiyyət 10 · midterm 30 · seminar/lab ədədi ortası 10 ·
+# yekun 50; RİM ``academic.selfwork_enabled`` yandırılanda midterm 20 + sərbəst iş 10);
+# müəllim heç nə bölmür. Aşağıdakı sabit sərbəst işli BAZA cədvəldir — import vaxtı RİM
+# tənzimləməsi oxunmur; redaktorun düsturu cari qayda ilə qurulur (``_assessment``,
+# sahib 2026-10-10/11 — semestrdən asılı deyil).
 ASSESSMENT_POLICY = assessment_weights(None, selfwork=True)
 
 #: Sol naviqasiyanın QISA etiketi + bölmə başlığı + izah mətni (dizayn `SEC`).
@@ -111,6 +112,8 @@ SECTION_META = {
         pgettext_lazy(_CTX, "Tədris metodları"),
         pgettext_lazy(_CTX, "Fənn üzrə istifadə olunan metodlar. Ən azı 2 metod seçilməlidir."),
     ),
+    # Sərbəst iş YANDIRILMIŞ (RİM ``academic.selfwork_enabled``) halın izahı; standart (sərbəst işsiz)
+    # qaydada ``ASSESS_HINT_NO_SELFWORK`` (midterm 30) göstərilir — bax ``build_editor_context``.
     SectionKey.ASSESS.value: (
         pgettext_lazy(_CTX, "Qiymətləndirmə"),
         pgettext_lazy(_CTX, "Qiymətləndirmə strukturu"),
@@ -151,7 +154,8 @@ SECTION_META = {
     ),
 }
 
-#: Sahib 2026-10-10: sərbəst işi söndürülmüş qaydada `assess` bölməsinin izahı (midterm 30).
+#: Sahib 2026-10-10: standart (sərbəst işsiz) qaydada `assess` bölməsinin izahı (midterm 30) — sahib
+#: 2026-10-11: semestrdən asılı olmayaraq, köhnə (2025/2026) semestrin redaktorunda da.
 ASSESS_HINT_NO_SELFWORK = pgettext_lazy(
     _CTX,
     "Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 30, seminar/laboratoriya balları 10 "
@@ -204,7 +208,8 @@ def _selfwork(data):
 def _assessment(data, syllabus=None, rule=None, organization=None):
     """Standart düstur (müəllim seçmir) + fəaliyyət növü (seminar/lab) dərs yükündən.
 
-    ``rule`` — versiyanın semestrinin qaydası (sahib 2026-10-10: midterm 30, sərbəst iş sətri yox, 5 + 5)."""
+    ``rule`` — cari RİM qaydası (sahib 2026-10-10/11, semestrdən asılı deyil: midterm 30, sərbəst iş
+    sətri yox, 5 + 5)."""
     kinds = activity_kinds_for_syllabus(syllabus) if syllabus is not None else ("seminar",)
     selfwork, split = (rule.selfwork, rule.split) if rule is not None else (None, None)
     rows = formula_rows(kinds, organization, selfwork=selfwork, split=split)

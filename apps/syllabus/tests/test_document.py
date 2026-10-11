@@ -16,6 +16,8 @@ from __future__ import annotations
 
 import re
 
+import pytest
+
 from apps.syllabus.assessment_formula import LABELS, formula_text
 from apps.syllabus.constants import SectionKey
 from apps.syllabus.document import (
@@ -53,6 +55,12 @@ EMPTY = str(_EMPTY)
 #: Sahib 2026-09-20: bal bölgüsü universitet STANDARTIDIR və HƏMİŞƏ çap olunur
 #: (uydurma deyil — siyasətin özü). Defolt fəaliyyət: seminar.
 FORMULA = formula_text(("seminar",))
+
+
+@pytest.fixture(autouse=True)
+def selfwork_rule(settings):
+    """``conftest``-dəki eyni adlı fixture-u əvəzləyir: bu dəst DEFOLT (sərbəst işsiz) qaydanı yoxlayır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = False
 
 
 def _blocks(section_map):
@@ -118,7 +126,8 @@ def test_the_formula_names_every_component_and_the_hundred():
 
 
 def test_the_legacy_formula_keeps_selfwork_and_midterm_twenty():
-    """Köhnə semestrin (və tənzimləmə yandırılanda) düsturu dəyişmir: midterm 20 + sərbəst iş 10."""
+    """Sərbəst işli qayda (``rule`` açıq ötürüləndə / RİM tənzimləməsi yandırılanda): midterm 20 +
+    sərbəst iş 10. Sahib 2026-10-11: köhnə semestr bu düsturu ÖZÜ-ÖZÜNƏ vermir."""
     legacy = formula_text(("seminar",), selfwork=True, split=False)
     assert f"{LABELS['midterm']} 20" in legacy and f"{LABELS['selfwork']} 10" in legacy
     assert f"= 100 {POINTS}" in legacy

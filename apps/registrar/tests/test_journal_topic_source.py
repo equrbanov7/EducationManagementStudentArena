@@ -41,6 +41,15 @@ CHAIR_PERMS = ["syllabus.view", "syllabus.review", "syllabus.approve", "syllabus
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture(autouse=True)
+def _selfwork_rule_on(settings):
+    """Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş SÖNDÜRÜLÜDÜR və
+    ``self`` bölməsi redaktorda yoxdur (ona yazı ``section.unknown`` verir). Bu dəstin fixture-ları 8
+    bölməni (sərbəst iş daxil) doldurur, ona görə RİM «Sistem tənzimləmələri» sərbəst işi yandırmış
+    kimi işləyir. Söndürülü (defolt) qaydanı ``test_*selfwork_rule_2026_10_10.py`` dəstləri yoxlayır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True
+
+
 @pytest.fixture()
 def bridge():
     org = make_org("syl-bridge")

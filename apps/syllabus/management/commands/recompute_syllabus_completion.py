@@ -3,8 +3,9 @@
 Niyə lazımdır
 -------------
 ``SyllabusVersion.completion_percent`` (və bölmə ``is_complete``) KEŞDİR. RİM «Sistem tənzimləmələri»
-sərbəst işi söndürəndə/yandıranda yeni qayda dövrlərinin (2026/2027+) sillabusunda ``self`` bölməsi
-faizə daxil olmur/olur (8 ↔ 7 bölmə), qiymətləndirmə standartı isə dəyişir (midterm 20 ↔ 30). Redaktə
+sərbəst işi söndürəndə/yandıranda BÜTÜN semestrlərin (sahib 2026-10-11: köhnə 2025/2026 daxil)
+sillabusunda ``self`` bölməsi faizə daxil olmur/olur (8 ↔ 7 bölmə), qiymətləndirmə standartı isə
+dəyişir (midterm 30 ↔ 20). Redaktə
 və göndərmə yolları onsuz da CARİ qayda ilə yenidən hesablayır — bu əmr isə toxunulmamış qaralamaların
 və növbədəki versiyaların siyahıdakı faizini dərhal düzəldir.
 

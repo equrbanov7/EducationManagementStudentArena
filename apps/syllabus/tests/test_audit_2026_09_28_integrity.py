@@ -494,5 +494,6 @@ def test_editor_completion_uses_the_organization_weights(world):
     with mock.patch.object(public.completion_rules, "evaluate", side_effect=spy):
         public.build_syllabus_editor_context(request, organization=org, version=version)
 
-    # Sahib 2026-10-10: çəkilər versiyanın semestrinin qaydasıdır — test dünyası 2025/2026 (köhnə qayda).
+    # Sahib 2026-10-11: çəkilər cari RİM qaydasıdır (semestrdən asılı deyil) — bu dəst ``conftest``
+    # ilə sərbəst işi YANDIRMIŞ kimi işləyir, ona görə sərbəst işli cədvəl gözlənilir.
     assert seen and seen[0] == assessment_weights(org, selfwork=True)

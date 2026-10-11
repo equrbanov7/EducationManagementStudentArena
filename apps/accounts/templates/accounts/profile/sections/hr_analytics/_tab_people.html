@@ -1,29 +1,38 @@
 {% load i18n %}
-{% comment %}Müəllimlər — süzülmüş siyahı (axtarış + problem filtri), server səhifələməsi (linklər bölməni yerində
-yeniləyir). Əlaqə məlumatı yoxdur. Kontekst: `hr.people`.{% endcomment %}
+{% comment %}Müəllimlər — süzülmüş siyahı (axtarış + hesab / inzibati vəzifə / problem filtrləri), SERVER sıralaması
+(başlıq linkləri `hr_sort`, ikinci klik istiqaməti çevirir) və server səhifələməsi (linklər bölməni yerində
+yeniləyir). «Ştat» sütunu qısa dəyərdir (1 · 0,5 · s/h · —); «Tarixçə» düyməsi sətrin altında ştat
+tarixçəsini (bütün illərin yük profilləri) və inzibati vəzifələri açır (hr_analytics.js, JS-siz də
+`hidden` atributu ilə bağlıdır). Əlaqə məlumatı yoxdur. Kontekst: `hr.people`.{% endcomment %}
 <div class="ems-tablewrap">
     <div class="ems-tablescroll">
         <table class="ems-table ems-table--zebra hr-table hr-people">
             <caption class="hr-sr">{% trans "Müəllimlər siyahısı" context "accounts.hr_analytics" %}</caption>
             <thead>
                 <tr>
-                    <th scope="col">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
-                    <th scope="col">{% trans "Fakültə · kafedra" context "accounts.hr_analytics" %}</th>
-                    <th scope="col">{% trans "Elmi ad · dərəcə" context "accounts.hr_analytics" %}</th>
-                    <th scope="col">{% trans "Ştat" context "accounts.hr_analytics" %}</th>
-                    <th scope="col">{% trans "Dərs yükü" context "accounts.hr_analytics" %}</th>
-                    <th scope="col" class="ems-table__num">{% trans "Jurnal / dərs" context "accounts.hr_analytics" %}</th>
-                    <th scope="col">{% trans "Hesab" context "accounts.hr_analytics" %}</th>
+                    {% for col in hr.people.columns %}
+                    <th scope="col"{% if col.num %} class="ems-table__num"{% endif %}{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}>
+                        <a class="ems-sort" href="{{ col.url }}" data-section="{{ hr.section }}">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a>
+                    </th>
+                    {% endfor %}
                     <th scope="col">{% trans "Problemlər" context "accounts.hr_analytics" %}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for row in hr.people.results %}
                 <tr>
-                    <th scope="row" class="hr-people__name">{{ row.name }}<small>{{ row.username }}</small></th>
+                    <th scope="row" class="hr-people__name">
+                        {{ row.name }}<small>{{ row.username }}</small>
+                        <button type="button" class="ems-btn ems-btn--ghost ems-btn--sm hr-people__history-btn" data-hr-history-toggle="hr-history-{{ row.id }}" aria-expanded="false" aria-controls="hr-history-{{ row.id }}">
+                            <i class="fas fa-history" aria-hidden="true"></i> {% trans "Tarixçə" context "accounts.hr_analytics" %}{% if row.history_changes %} <span class="ems-badge ems-badge--warning hr-people__changes" title="{% trans 'Ştat / vəzifə dəyişikliyi' context 'accounts.hr_analytics' %}">{{ row.history_changes }}</span>{% endif %}
+                        </button>
+                    </th>
                     <td>{{ row.chair|default:"—" }}<small class="hr-muted hr-block">{{ row.faculty }}</small></td>
                     <td>{{ row.title_label }}{% if row.title_from_position %} <span class="hr-muted" title="{% trans 'Yük profilindəki vəzifədən' context 'accounts.hr_analytics' %}">*</span>{% endif %}{% if row.degree_label %}<small class="hr-block">{{ row.degree_label }}</small>{% endif %}</td>
-                    <td>{{ row.staff_label }}{% if row.staff_fraction is not None and row.staff_type != "hourly" %} <small class="hr-muted">({{ row.staff_fraction|floatformat:"-2" }})</small>{% endif %}</td>
+                    <td class="ems-table__num hr-people__staff"><span class="hr-people__staff-value{% if row.staff_type == 'none' %} hr-muted{% endif %}">{{ row.staff_short }}</span><small>{{ row.staff_label }}</small></td>
+                    <td class="hr-people__admin">
+                        {% for item in row.admin_roles %}<span class="ems-badge ems-badge--info ems-badge--wrap hr-admin">{{ item.label }}{% if item.unit %} <span class="hr-admin__unit">· {{ item.unit }}</span>{% endif %}</span>{% empty %}{% if row.staff_position %}<span class="ems-badge ems-badge--neutral ems-badge--wrap hr-admin">{{ row.staff_position }}</span>{% else %}<span class="hr-muted">—</span>{% endif %}{% endfor %}
+                    </td>
                     <td>{% if row.load_band == "none" %}<span class="hr-muted">—</span>{% else %}{{ row.planned_load }} / {{ row.norm_hours }} <small class="hr-muted">({{ row.fill_percent }}%)</small>{% endif %}</td>
                     <td class="ems-table__num">{{ row.journals }} / {{ row.lessons }}</td>
                     <td>
@@ -35,8 +44,41 @@ yeniləyir). Əlaqə məlumatı yoxdur. Kontekst: `hr.people`.{% endcomment %}
                         {% for label in row.issue_labels %}<span class="ems-badge ems-badge--warning ems-badge--wrap hr-issue">{{ label }}</span>{% empty %}<span class="hr-muted">—</span>{% endfor %}
                     </td>
                 </tr>
+                <tr class="hr-history" id="hr-history-{{ row.id }}" hidden>
+                    <td colspan="9">
+                        <div class="hr-history__grid">
+                            <section class="hr-history__col" aria-label="{% trans 'Ştat tarixçəsi' context 'accounts.hr_analytics' %}">
+                                <h4 class="hr-history__title">{% trans "Ştat tarixçəsi" context "accounts.hr_analytics" %}</h4>
+                                {% if row.history %}
+                                    <p class="hr-history__summary">
+                                        {% for item in row.history reversed %}<span class="hr-history__step{% if item.changed %} is-changed{% endif %}{% if item.current %} is-current{% endif %}"><span class="hr-history__year">{{ item.year }}</span> {{ item.staff_short }}</span>{% if not forloop.last %}<span class="hr-history__arrow" aria-hidden="true">→</span>{% endif %}{% endfor %}
+                                    </p>
+                                    {% trans "Ştat tarixçəsi" context "accounts.hr_analytics" as tl_label %}
+                                    {% include "partials/ems_ui/_timeline.html" with timeline=row.history timeline_label=tl_label %}
+                                {% else %}
+                                    <p class="hr-muted hr-history__empty">{% trans "Heç bir tədris ili üçün yük profili (ştat) yoxdur." context "accounts.hr_analytics" %}</p>
+                                {% endif %}
+                            </section>
+                            <section class="hr-history__col" aria-label="{% trans 'İnzibati vəzifələr' context 'accounts.hr_analytics' %}">
+                                <h4 class="hr-history__title">{% trans "İnzibati vəzifələr" context "accounts.hr_analytics" %}</h4>
+                                {% if row.admin_roles %}
+                                <ul class="hr-history__roles">
+                                    {% for item in row.admin_roles %}
+                                    <li><strong>{{ item.label }}</strong>{% if item.unit %} · {{ item.unit }}{% endif %}{% if item.title %} <span class="hr-muted">({{ item.title }})</span>{% endif %}{% if item.since %}<small class="hr-block hr-muted">{% blocktrans trimmed with since=item.since|date:"d.m.Y" context "accounts.hr_analytics" %}{{ since }} tarixindən{% endblocktrans %}</small>{% endif %}</li>
+                                    {% endfor %}
+                                </ul>
+                                {% elif row.staff_position %}
+                                <p class="hr-history__empty">{{ row.staff_position }} <small class="hr-muted hr-block">{% trans "profildəki «Vəzifə» sahəsindən" context "accounts.hr_analytics" %}</small></p>
+                                {% else %}
+                                <p class="hr-muted hr-history__empty">{% trans "İnzibati vəzifə qeyd olunmayıb." context "accounts.hr_analytics" %}</p>
+                                {% endif %}
+                                {% if row.position_label %}<p class="hr-history__note hr-muted">{% blocktrans trimmed with position=row.position_label year=hr.filters.year context "accounts.hr_analytics" %}{{ year }} yük profilindəki vəzifə: {{ position }}{% endblocktrans %}</p>{% endif %}
+                            </section>
+                        </div>
+                    </td>
+                </tr>
                 {% empty %}
-                <tr><td colspan="8" class="hr-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.hr_analytics" %}</td></tr>
+                <tr><td colspan="9" class="hr-muted">{% trans "Filtrə uyğun müəllim yoxdur." context "accounts.hr_analytics" %}</td></tr>
                 {% endfor %}
             </tbody>
         </table>

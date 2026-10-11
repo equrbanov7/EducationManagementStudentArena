@@ -219,8 +219,8 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
     rows = {row.section_id: row for row in version.sections.all()}
     # Audit 2026-09-28 SYL-7: redaktorun tamamlanması göndərmə ilə EYNİ
     # qaydadır — təşkilatın qiymətləndirmə çəkiləri (``recompute_completion``).
-    # Sahib 2026-10-10: qayda versiyanın semestrindəndir — sərbəst işsiz qaydada `self`
-    # bölməsi yoxdur (redaktorda 9 bölmə, faiz 7 qayda bölməsi üzrə), data isə saxlanılır.
+    # Sahib 2026-10-10/11: qayda cari RİM tənzimləməsidir (semestrdən asılı deyil) — sərbəst işsiz
+    # qaydada `self` bölməsi yoxdur (redaktorda 9 bölmə, faiz 7 qayda bölməsi üzrə), data saxlanılır.
     rule = rule_for_version(version, organization)
     report = completion_rules.evaluate(
         section_data_map(version),

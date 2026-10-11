@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
@@ -47,6 +47,9 @@ LEGACY_ASSESSMENT_COLUMN = (
 FABRICATED_SPLIT_RE = re.compile(r"\d+ \+ \d+ \+ \d+ \+ \d+ \+ \d+ = ")
 
 
+# Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş söndürülüdür və `self`
+# bölməsinə yazı `section.unknown` verir; bu dəstin fixture-ı 8 bölməni doldurur → RİM açarı yanılı kimi.
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True)
 class JournalSyllabusBridgeTest(TestCase):
     """Hər test öz sillabus vəziyyətini qurur, ona görə `setUp` (setUpTestData yox)."""
 

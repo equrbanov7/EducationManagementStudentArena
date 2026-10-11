@@ -22,7 +22,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.syllabus import services
@@ -70,6 +70,9 @@ FIELD_HOOKS = (
 )
 
 
+# Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş söndürülüdür və `self`
+# bölməsinə yazı `section.unknown` verir; bu dəstin fixture-ı 8 bölməni doldurur → RİM açarı yanılı kimi.
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True)
 class SyllabusEditorRenderTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -263,6 +266,9 @@ class SyllabusEditorRenderTest(TestCase):
         self.assertIn("data-t-warn=", html)
 
 
+# Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş söndürülüdür və `self`
+# bölməsinə yazı `section.unknown` verir; bu dəstin fixture-ı 8 bölməni doldurur → RİM açarı yanılı kimi.
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True)
 class SyllabusEditorAssetWiringTest(TestCase):
     """Şablon ↔ statik fayl bağı: istinad edilən hər JS diskdə OLMALIDIR.
 
