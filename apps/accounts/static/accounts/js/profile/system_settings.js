@@ -18,6 +18,10 @@
     }
 
     function setValue(field, value) {
+        if (field.type === "checkbox") {
+            field.checked = value === "1";
+            return;
+        }
         field.value = value;
         if (field.tagName === "SELECT") {
             field.dispatchEvent(new Event("change", { bubbles: true }));
@@ -80,7 +84,8 @@
         var data = {};
         form.querySelectorAll("input[name], select[name]").forEach(function (field) {
             if (field.name !== "csrfmiddlewaretoken") {
-                data[field.name] = field.value;
+                // Bayraq: işarəsiz checkbox da göndərilir («0») — əks halda söndürmə heç vaxt yazılmazdı.
+                data[field.name] = field.type === "checkbox" ? (field.checked ? "1" : "0") : field.value;
             }
         });
         var submit = form.querySelector("[data-ss-submit]");

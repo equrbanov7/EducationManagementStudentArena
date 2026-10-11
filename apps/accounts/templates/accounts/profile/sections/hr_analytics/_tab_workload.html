@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}Dərs yükü — kafedra üzrə norma vs bölgü saatı, doluluq, bant sayları (workload.public.chair_staff_load)
+və ən çox / ən az yüklənmiş müəllimlər. Kontekst: `hr.workload`.{% endcomment %}
+<p class="hr-help">{% trans "Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə yazılmış illik saat; norma — yük profilindəki illik norma (profil yoxdursa 500 saat). Doluluq kafedra cəmindən hesablanır." context "accounts.hr_analytics" %}</p>
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table hr-table">
+            <caption class="hr-sr">{% trans "Kafedralar üzrə dərs yükü" context "accounts.hr_analytics" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Kafedra" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Yükü olan" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Norma" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Yük" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "Doluluq" context "accounts.hr_analytics" %}</th>
+                    {% for label in hr.workload.band_headers %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                </tr>
+            </thead>
+            {% for group in hr.workload.tree.groups %}
+            <tbody>
+                <tr class="hr-table__group"><th scope="rowgroup" colspan="{{ hr.workload.band_headers|length|add:6 }}">{{ group.name }}</th></tr>
+                {% for row in group.chairs %}{% include "accounts/profile/sections/hr_analytics/_workload_row.html" with label=row.name m=row %}{% endfor %}
+                {% trans "Fakültə üzrə" context "accounts.hr_analytics" as fac_label %}
+                {% include "accounts/profile/sections/hr_analytics/_workload_row.html" with label=fac_label m=group.total row_class="hr-table__subtotal" %}
+            </tbody>
+            {% endfor %}
+            <tfoot>
+                {% trans "Cəmi" context "accounts.hr_analytics" as total_label %}
+                {% include "accounts/profile/sections/hr_analytics/_workload_row.html" with label=total_label m=hr.workload.tree.total row_class="hr-table__total" %}
+            </tfoot>
+        </table>
+    </div>
+</div>
+<div class="hr-grid hr-section-gap">
+    {% trans "Ən çox yüklənənlər (>100%)" context "accounts.hr_analytics" as over_title %}
+    {% trans "Ən az yüklənənlər (<70%)" context "accounts.hr_analytics" as under_title %}
+    {% include "accounts/profile/sections/hr_analytics/_load_list.html" with list_title=over_title list_rows=hr.workload.over list_id="hr-wl-over" list_tone="danger" %}
+    {% include "accounts/profile/sections/hr_analytics/_load_list.html" with list_title=under_title list_rows=hr.workload.under list_id="hr-wl-under" list_tone="warning" %}
+</div>

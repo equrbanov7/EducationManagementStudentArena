@@ -5,9 +5,11 @@ These tests pin the CURRENT behavior of the four organization views before the
 file is split into a package:
 
 * ``student_organization_management``
-* ``student_organization_request``
 * ``student_org_invitation_action``
-* ``student_leave_organization``
+
+(``student_organization_request`` və ``student_leave_organization`` URL auditi B3/A7
+ilə 2026-10-10-da silindi — onların testləri də; silinmə reqressiyası
+``test_url_audit_wp8_2026_10_10.py``-dadır.)
 
 They are behavior-only: they lock the existing contract (redirects, permission
 gates, membership/profile state transitions, invitation accept/reject) so the
@@ -20,11 +22,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.notifications.models import (
-    MembershipRequestRoleType,
-    StudentOrganizationRequest,
-    StudentOrganizationRequestStatus,
-)
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
 
@@ -147,83 +144,6 @@ class StudentOrganizationManagementViewTest(TestCase):
         self.assertIsNone(target.profile.organization)
 
 
-class StudentOrganizationRequestViewTest(TestCase):
-    """Pin student_organization_request view behavior."""
-
-    def setUp(self):
-        self.client = Client()
-        self.owner = User.objects.create_user(username="req_owner", email="ro@example.com", password="pw12345678")
-        self.org = _make_org("Request Target Org", "request-target-org", self.owner)
-        self.student = User.objects.create_user(username="req_student", email="rs@example.com", password="pw12345678")
-        profile = self.student.profile
-        profile.role = ProfileRole.STUDENT
-        profile.organization = None
-        profile.organization_type = OrganizationType.INDIVIDUAL
-        profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
-
-    def test_requires_login(self):
-        resp = self.client.get(reverse("accounts:student_organization_request"))
-        self.assertEqual(resp.status_code, 302)
-
-    def test_get_renders_for_unassigned_student(self):
-        self.client.force_login(self.student)
-        resp = self.client.get(reverse("accounts:student_organization_request"))
-        self.assertEqual(resp.status_code, 200)
-
-    def test_submit_request_creates_pending_request(self):
-        self.client.force_login(self.student)
-        resp = self.client.post(
-            reverse("accounts:student_organization_request"),
-            {
-                "action": "submit_request",
-                "organization_id": str(self.org.id),
-                "request_message": "Please let me in",
-            },
-        )
-        self.assertEqual(resp.status_code, 302)
-        self.assertTrue(
-            StudentOrganizationRequest.objects.filter(
-                user=self.student,
-                organization=self.org,
-                status=StudentOrganizationRequestStatus.PENDING,
-            ).exists()
-        )
-
-    def test_submit_request_without_org_redirects_with_error(self):
-        self.client.force_login(self.student)
-        resp = self.client.post(
-            reverse("accounts:student_organization_request"),
-            {"action": "submit_request"},
-        )
-        self.assertEqual(resp.status_code, 302)
-        self.assertFalse(StudentOrganizationRequest.objects.filter(user=self.student).exists())
-
-    def test_clear_request_cancels_pending_request(self):
-        self.client.force_login(self.student)
-        req = StudentOrganizationRequest.objects.create(
-            user=self.student,
-            organization=self.org,
-            role_type=MembershipRequestRoleType.STUDENT,
-            message="",
-            status=StudentOrganizationRequestStatus.PENDING,
-        )
-        resp = self.client.post(
-            reverse("accounts:student_organization_request"),
-            {"action": "clear_request", "request_id": str(req.id)},
-        )
-        self.assertEqual(resp.status_code, 302)
-        req.refresh_from_db()
-        self.assertEqual(req.status, StudentOrganizationRequestStatus.CANCELLED)
-
-    def test_unknown_action_redirects_with_error(self):
-        self.client.force_login(self.student)
-        resp = self.client.post(
-            reverse("accounts:student_organization_request"),
-            {"action": "nonsense-action"},
-        )
-        self.assertEqual(resp.status_code, 302)
-
-
 class StudentOrgInvitationActionViewTest(TestCase):
     """Pin student_org_invitation_action view behavior."""
 
@@ -249,11 +169,12 @@ class StudentOrgInvitationActionViewTest(TestCase):
             title=STUDENT_PENDING_INVITE_TITLE,
         )
 
-    def test_get_redirects_to_request_section(self):
+    def test_get_redirects_to_notifications_section(self):
+        # URL auditi A7 (2026-10-10): «Təşkilata qoşul» bölməsi yoxdur — dəvətlər «Bildirişlər»-dədir.
         self.client.force_login(self.student)
         resp = self.client.get(reverse("accounts:student_org_invitation_action"))
         self.assertEqual(resp.status_code, 302)
-        self.assertIn("section=student-organization-request", resp.url)
+        self.assertIn("section=notifications", resp.url)
 
     def test_accept_invite_activates_membership(self):
         invite = self._create_pending_invite()
@@ -289,46 +210,3 @@ class StudentOrgInvitationActionViewTest(TestCase):
             {"invite_id": "00000000-0000-0000-0000-000000000000", "action": "accept"},
         )
         self.assertEqual(resp.status_code, 404)
-
-
-class StudentLeaveOrganizationViewTest(TestCase):
-    """Pin student_leave_organization view behavior."""
-
-    def setUp(self):
-        self.client = Client()
-        self.owner = User.objects.create_user(username="leave_owner", email="lo@example.com", password="pw12345678")
-        self.org = _make_org("Leave Org", "leave-org", self.owner)
-        self.student = User.objects.create_user(username="leave_student", email="ls@example.com", password="pw12345678")
-        _assign_user_to_org(self.student, self.org, ProfileRole.STUDENT)
-
-    def test_get_redirects_to_profile_info(self):
-        self.client.force_login(self.student)
-        resp = self.client.get(reverse("accounts:student_leave_organization"))
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn("section=profile-info", resp.url)
-
-    def test_leave_without_reason_redirects_with_error(self):
-        _login_with_org(self.client, self.student, self.org)
-        resp = self.client.post(reverse("accounts:student_leave_organization"), {})
-        self.assertEqual(resp.status_code, 302)
-        # Still a member — leaving without a reason is rejected.
-        self.assertTrue(Membership.objects.filter(user=self.student, organization=self.org, is_active=True).exists())
-
-    def test_leave_with_reason_deactivates_membership(self):
-        _login_with_org(self.client, self.student, self.org)
-        resp = self.client.post(
-            reverse("accounts:student_leave_organization"),
-            {"leave_reason": "Graduated"},
-        )
-        self.assertEqual(resp.status_code, 302)
-        self.assertFalse(Membership.objects.filter(user=self.student, organization=self.org, is_active=True).exists())
-        self.student.profile.refresh_from_db()
-        self.assertIsNone(self.student.profile.organization)
-
-    def test_org_owner_cannot_leave(self):
-        _login_with_org(self.client, self.owner, self.org)
-        resp = self.client.post(
-            reverse("accounts:student_leave_organization"),
-            {"leave_reason": "Trying to leave my own org"},
-        )
-        self.assertEqual(resp.status_code, 302)

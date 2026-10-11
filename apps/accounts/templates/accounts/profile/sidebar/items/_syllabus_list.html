@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Sillabuslar» — redaktor (`syllabus-editor`) siyahıdan açılır və bu bəndi aktiv saxlayır (ayrıca menyu sətri yoxdur). #}
 {% if "syllabus-list" in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'Sillabuslar' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-list' or active_section == 'syllabus-editor' %}active{% endif %}">
-        <i class="fas fa-file-lines sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "file-text" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "Sillabuslar" context "profile.sidebar" %}</span>
     </a>
 </li>

@@ -27,7 +27,7 @@ saxlananda sətir silinir (defolt işləyir). Göndəriş JSON POST-dur (system_
                     {% if f.help %}<p class="sysset__help">{{ f.help }}</p>{% endif %}
                     <p class="sysset__default">
                         {% trans "Standart" context "accounts.runtime_settings" %}:
-                        {% if f.kind == "rate" %}{{ f.default_count }} / {{ f.default_window }} {% trans "dəq." context "accounts.runtime_settings" %}{% elif f.kind == "choice" %}{% if f.default %}{{ f.default }}{% else %}{% trans "Avtomatik" context "accounts.runtime_settings" %}{% endif %}{% else %}{{ f.default }} {{ f.unit }}{% endif %}
+                        {% if f.kind == "rate" %}{{ f.default_count }} / {{ f.default_window }} {% trans "dəq." context "accounts.runtime_settings" %}{% elif f.kind == "bool" %}{% if f.default %}{% trans "Yanılı" context "accounts.runtime_settings" %}{% else %}{% trans "Söndürülü" context "accounts.runtime_settings" %}{% endif %}{% elif f.kind == "choice" %}{% if f.default %}{{ f.default }}{% else %}{% trans "Avtomatik" context "accounts.runtime_settings" %}{% endif %}{% else %}{{ f.default }} {{ f.unit }}{% endif %}
                         {% if f.overridden %}<span class="sysset__badge" title="{{ f.updated_at|date:'d.m.Y H:i' }}">{% trans "Dəyişdirilib" context "accounts.runtime_settings" %}{% if f.updated_by %} · {{ f.updated_by }}{% endif %}{% if f.updated_at %} · {{ f.updated_at|date:"d.m.Y H:i" }}{% endif %}</span>{% endif %}
                     </p>
                     <p class="sysset__error" data-ss-error hidden></p>
@@ -38,6 +38,14 @@ saxlananda sətir silinir (defolt işləyir). Göndəriş JSON POST-dur (system_
                     <span class="sysset__unit">{% trans "dəfə /" context "accounts.runtime_settings" %}</span>
                     <input class="ems-input sysset__num" type="number" name="{{ f.key }}.window" min="1" max="1440" value="{{ f.window }}" data-default="{{ f.default_window }}" aria-label="{% trans 'Pəncərə (dəqiqə)' context 'accounts.runtime_settings' %}">
                     <span class="sysset__unit">{% trans "dəqiqədə" context "accounts.runtime_settings" %}</span>
+                    {% elif f.kind == "bool" %}
+                    {% comment %}Açar (switch): JS «1»/«0» göndərir — işarəsiz checkbox da forma ilə gedir.{% endcomment %}
+                    <label class="sysset__switch">
+                        <input class="sysset__switch-input" type="checkbox" role="switch" id="ss-{{ f.key }}" name="{{ f.key }}" value="1"{% if f.value %} checked{% endif %} data-default="{% if f.default %}1{% else %}0{% endif %}">
+                        <span class="sysset__switch-track" aria-hidden="true"></span>
+                        <span class="sysset__switch-text" data-ss-switch-on>{% trans "Yanılı" context "accounts.runtime_settings" %}</span>
+                        <span class="sysset__switch-text" data-ss-switch-off>{% trans "Söndürülü" context "accounts.runtime_settings" %}</span>
+                    </label>
                     {% elif f.kind == "choice" %}
                     <div class="bootstrap-single-select bootstrap-single-select--ems sysset__select">
                         <select class="bootstrap-single-select__native" id="ss-{{ f.key }}" name="{{ f.key }}" data-bootstrap-select data-default="{{ f.default }}">
@@ -67,7 +75,7 @@ saxlananda sətir silinir (defolt işləyir). Göndəriş JSON POST-dur (system_
 </div>
 {% endif %}
 {% endwith %}
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/system_settings.css' %}?v=20261003-ss">
-<script src="{% static 'accounts/js/profile/system_settings.js' %}?v=20261003-ss" defer></script>
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/system_settings.css' %}?v=20261010-bool">
+<script src="{% static 'accounts/js/profile/system_settings.js' %}?v=20261010-bool" defer></script>
 </section>
 {% endif %}

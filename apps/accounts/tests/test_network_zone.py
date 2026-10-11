@@ -64,7 +64,7 @@ class ZoneMiddlewareTest(ViewAsTestBase):
 
     @override_settings(**ZONE)
     def test_own_schedule_calendar_transcript_stay_open_outside(self):
-        for path in ("/jurnal/cedvel/", "/jurnal/teqvim/", "/jurnal/transkript.pdf", "/jurnal/cedvel/export.ics"):
+        for path in ("/jurnal/cedvel/", "/jurnal/transkript.pdf"):
             response = self._get(self.student, path, self.EXT)
             self.assertNotEqual(response.status_code, 403, path)
         for path in (
@@ -72,6 +72,9 @@ class ZoneMiddlewareTest(ViewAsTestBase):
             "/jurnal/00000000-0000-0000-0000-000000000001/",
             "/jurnal/cedvel/../",
             "/jurnal/analitika/",
+            # URL auditi A11 (2026-10-10): silinmiş yollar allow-list-dən də çıxdı.
+            "/jurnal/teqvim/",
+            "/jurnal/cedvel/export.ics",
         ):
             self.assertEqual(self._get(self.teacher, path, self.EXT).status_code, 403, path)
 

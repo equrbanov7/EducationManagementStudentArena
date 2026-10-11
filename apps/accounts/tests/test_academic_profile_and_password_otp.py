@@ -314,19 +314,30 @@ class PublicProfileVisibilityTest(TestCase):
         )
         self.url = reverse("accounts:public_profile", args=[self.teacher.username])
 
-    def test_anonymous_viewer_sees_no_phone_but_sees_academic_items(self):
+    def test_anonymous_viewer_is_redirected_to_login(self):
+        # URL auditi B1 (2026-10-10): anonim baxış yoxdur — heç bir profil məlumatı sızmır.
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "+994 50 111 22 33")
-        self.assertNotContains(response, "+994 55 444 55 66")
-        self.assertContains(response, "Konsensus alqoritmləri")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+        self.assertNotIn("Konsensus alqoritmləri", response.content.decode())
 
-    def test_student_viewer_sees_no_phone(self):
+    def test_same_org_student_viewer_sees_academic_items_but_no_phone(self):
+        from apps.organizations.models import Organization
+
+        from .test_profile_views import _assign_user_to_org
+
+        org = Organization.objects.create(
+            name="Gating Org S", org_type="university", owner=self.teacher, status="active", is_active=True
+        )
+        _assign_user_to_org(self.teacher, org, ProfileRole.TEACHER)
         student = _make_user("pub_student_viewer", ProfileRole.STUDENT)
+        _assign_user_to_org(student, org, ProfileRole.STUDENT)
         self.client.force_login(student)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Konsensus alqoritmləri")
         self.assertNotContains(response, "+994 50 111 22 33")
+        self.assertNotContains(response, "+994 55 444 55 66")
 
     def test_same_org_teacher_sees_phones_cross_org_teacher_does_not(self):
         """Telefon gating tenant-scoped-dur: yalnız profil sahibi ilə EYNİ
@@ -354,9 +365,10 @@ class PublicProfileVisibilityTest(TestCase):
         response = self.client.get(self.url)
         self.assertContains(response, "+994 50 111 22 33")
 
+        # URL auditi B1: ortaq təşkilat yoxdur → profil ümumiyyətlə yoxdur (404, orakul yox).
         self.client.force_login(cross_org_teacher)
         response = self.client.get(self.url)
-        self.assertNotContains(response, "+994 50 111 22 33")
+        self.assertEqual(response.status_code, 404)
 
         self.client.force_login(same_org_student)
         response = self.client.get(self.url)

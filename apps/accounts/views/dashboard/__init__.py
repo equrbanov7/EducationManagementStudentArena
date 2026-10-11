@@ -8,8 +8,8 @@ in the URLConf) keep working unchanged.
 
 Modules:
 * ``dispatch`` — ``dashboard`` role dispatcher
-* ``teacher``  — ``teacher_dashboard``, ``grading_queue``
-* ``student``  — ``student_dashboard``, ``assigned_exams``, ``assigned_courses``,
+* ``teacher``  — ``teacher_dashboard`` (yönləndirmə)
+* ``student``  — ``student_dashboard`` (yönləndirmə), ``assigned_exams``, ``assigned_courses``,
   ``my_results``, ``pending_answers``
 * ``results``  — ``my_result_detail``
 * ``review``   — ``pending_review``, ``pending_review_detail``,
@@ -31,7 +31,7 @@ from .student import (
     pending_answers,
     student_dashboard,
 )
-from .teacher import grading_queue, teacher_dashboard
+from .teacher import teacher_dashboard
 
 __all__ = [
     "dashboard",
@@ -41,7 +41,6 @@ __all__ = [
     "resolve_cabinet_url",
     "teacher_dashboard",
     "student_dashboard",
-    "grading_queue",
     "assigned_exams",
     "assigned_courses",
     "my_results",

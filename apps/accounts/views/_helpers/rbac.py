@@ -324,7 +324,7 @@ def _role_capabilities(user, profile):
             "edit-profile",
             "change-password",
             "publish-notification",
-            "delete-account",
+            # URL auditi B6 (2026-10-10): «delete-account» açarı çıxarıldı — özünü silmə yoxdur.
             "statistics",
         }
     else:
@@ -337,7 +337,6 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
             "change-password",
-            "delete-account",
             "statistics",
         }
         # QA 2026-09-05 (P3-5): «Nəticələrim» sidebar-da `can_view_student_assignments`
@@ -442,24 +441,9 @@ def _role_capabilities(user, profile):
     # `exams.StudentGroup` modeli və /exams/groups/ səhifəsi imtahan yaratma axını
     # üçün qalır; kabinetdə ayrıca menyu yoxdur.
 
-    has_admin_control_role = (
-        _user_has_any_role(user, {ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER}) or is_owner_of_active_org
-    )
-
-    if (
-        profile_role
-        in {
-            ProfileRole.STUDENT,
-            ProfileRole.LEAD_STUDENT,
-            ProfileRole.TEACHER,
-            ProfileRole.ASSISTANT_TEACHER,
-            ProfileRole.MEMBER,
-            ProfileRole.HR,
-        }
-        and not is_superadmin
-        and not has_admin_control_role
-    ):
-        allowed_sections.add("student-organization-request")
+    # URL auditi A7 (2026-10-10): «student-organization-request» («Təşkilata qoşul»,
+    # menyudan gizli) bölməsi heç kimə VERİLMİR — marşrutu silindi (istənilən aktiv
+    # təşkilata müraciət reyestr axınını yan keçirirdi). Dəvətlər «Bildirişlər»-dədir.
 
     if can_manage_blog:
         allowed_sections.add("create-post")

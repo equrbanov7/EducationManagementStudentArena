@@ -217,13 +217,7 @@ class ViewAsFlowTests(ViewAsTestBase):
             HTTP_X_REQUESTED_WITH="XMLHttpRequest",
         )
         self.assertEqual(response.status_code, 403)
-
-        response = self.client.post(
-            reverse("accounts:delete_account"),
-            {},
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-        self.assertEqual(response.status_code, 403)
+        # (`accounts:delete_account` URL auditi B6 ilə 2026-10-10-da silindi.)
 
     def test_student_cannot_start(self):
         self._login(self.student)
@@ -750,7 +744,6 @@ class MutatingGetRouteScanTests(TestCase):
     #: istifadəçinin görə biləcəyi vəziyyəti dəyişmir.
     REVIEWED_SAFE = {
         "accounts:profile_badges_api",
-        "accounts:public_profile",
         "accounts:statistics_export_csv",
         "exams:exam_center_stats_export",
         "liveExam:qr_png",

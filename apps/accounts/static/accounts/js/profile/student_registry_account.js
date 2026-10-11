@@ -184,7 +184,8 @@
                 var reason = form.querySelector("[data-block-reason]");
                 var contact = form.querySelector("[data-block-contact]");
                 applyResult("blocked", {
-                    reason: reason ? reason.options[reason.selectedIndex].text : "",
+                    // 2026-10-11: «Digər» — operatorun yazdığı səbəb göstərilir.
+                    reason: picked.payload.reason_other || (reason ? reason.options[reason.selectedIndex].text : ""),
                     contact: contact ? contact.options[contact.selectedIndex].text : "",
                     note: result.contact_note || "",
                     blocked_at: today(),

@@ -132,7 +132,6 @@ class CountdownIntervalLeakTest(SimpleTestCase):
         "apps/accounts/static/accounts/js/pending_answers_countdown.js",
         "apps/accounts/static/accounts/js/pending_review_countdown.js",
         "apps/assignments/static/assignment/js/review_submissions.js",
-        "apps/exams/static/exams/js/teacher_pending_attempts.js",
     )
 
     def test_per_node_intervals_stop_when_node_is_detached(self):
@@ -211,18 +210,6 @@ class TextContrastTokenTest(SimpleTestCase):
             "apps/accounts/static/accounts/css/profile/sections/overall_academic.css": (
                 ".oa-status.is-pass {",
                 "--ems-success-700",
-            ),
-            "apps/accounts/static/accounts/css/student_dashboard.css": (
-                ".deadline-badge.soon {",
-                "--ems-warning-700",
-            ),
-            "apps/exams/static/exams/css/teacher_pending_attempts.css": (
-                ".filter-tab:hover {",
-                "--ems-primary-600",
-            ),
-            "apps/accounts/static/accounts/css/register/_part1.css": (
-                ".register-field-error {",
-                "--ems-danger-600",
             ),
         }
         for rel, (selector, token) in expectations.items():

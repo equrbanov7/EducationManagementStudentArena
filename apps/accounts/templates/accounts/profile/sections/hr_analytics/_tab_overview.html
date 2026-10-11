@@ -1,0 +1,53 @@
+{% load i18n %}
+{% comment %}Ümumi baxış: ştat növü, elmi ad, yük bantları və ən çox rast gəlinən məlumat boşluqları. Kontekst: `hr.overview`.{% endcomment %}
+<div class="hr-grid">
+    <section class="ems-card hr-card" aria-labelledby="hr-ov-staff">
+        <header class="ems-card__head">
+            <div>
+                <h3 class="ems-card__title" id="hr-ov-staff">{% trans "Ştat növü" context "accounts.hr_analytics" %}</h3>
+                <p class="ems-card__sub">{% blocktrans trimmed with units=hr.overview.staff_total.units|floatformat:"-2" context "accounts.hr_analytics" %}Cəmi ştat vahidi: {{ units }}{% endblocktrans %}</p>
+            </div>
+        </header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.overview.staff %}</div>
+    </section>
+    <section class="ems-card hr-card" aria-labelledby="hr-ov-titles">
+        <header class="ems-card__head">
+            <div>
+                <h3 class="ems-card__title" id="hr-ov-titles">{% trans "Elmi ad / vəzifə" context "accounts.hr_analytics" %}</h3>
+                <p class="ems-card__sub">{% trans "Profil sahəsi; boşdursa yük profilindəki vəzifə." context "accounts.hr_analytics" %}</p>
+            </div>
+        </header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.overview.titles %}</div>
+    </section>
+    <section class="ems-card hr-card" aria-labelledby="hr-ov-load">
+        <header class="ems-card__head">
+            <div>
+                <h3 class="ems-card__title" id="hr-ov-load">{% trans "Dərs yükü doluluğu" context "accounts.hr_analytics" %}</h3>
+                <p class="ems-card__sub">{% trans "Bölgü üzrə illik yük / norma." context "accounts.hr_analytics" %}</p>
+            </div>
+        </header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.overview.bands %}</div>
+    </section>
+    <section class="ems-card hr-card" aria-labelledby="hr-ov-quality">
+        <header class="ems-card__head">
+            <div>
+                <h3 class="ems-card__title" id="hr-ov-quality">{% trans "Məlumat boşluqları" context "accounts.hr_analytics" %}</h3>
+                <p class="ems-card__sub">{% trans "Ən çox rast gəlinən problemlər." context "accounts.hr_analytics" %}</p>
+            </div>
+        </header>
+        <div class="ems-card__body">
+            {% if hr.overview.quality %}
+            <ul class="hr-issues">
+                {% for item in hr.overview.quality %}
+                <li class="hr-issues__row">
+                    <span class="ems-badge {% if item.critical %}ems-badge--danger{% else %}ems-badge--warning{% endif %}">{{ item.count }}</span>
+                    <span>{{ item.label }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="hr-muted">{% trans "Problem tapılmadı." context "accounts.hr_analytics" %}</p>
+            {% endif %}
+        </div>
+    </section>
+</div>

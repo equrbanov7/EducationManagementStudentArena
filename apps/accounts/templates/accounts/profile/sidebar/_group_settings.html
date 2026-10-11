@@ -18,7 +18,7 @@ sidebar-dan məhz təkrar olduğu üçün çıxarılmışdı.{% endcomment %}
 <li class="sidebar-menu-group" data-sidebar-group="settings">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|edit-profile|change-password|account-password-reset|" %} open{% endif %}>
         {% trans "Tənzimləmələr" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-gear" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="settings" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_edit_profile.html" %}
             {% include "accounts/profile/sidebar/items/_change_password.html" %}

@@ -1,11 +1,12 @@
 """İmtahan Mərkəzi «Midterm pəncərələri» ekranı — semestrin rejiminə görə (sahib 2026-09-25).
 
-Sahibin qərarı: 2026/2027-dən 3 kollokvium əvəzinə TƏK midterm (20 bal); bal yazma
+Sahibin qərarı: 2026/2027-dən 3 kollokvium əvəzinə TƏK midterm (20 bal; 2026-10-10-dan sərbəst iş
+ləğv olunduğu üçün 30 bal — RİM-də sərbəst iş açılsa 20); bal yazma
 vaxtını İmtahan Mərkəzi təyin edir; keçmiş dövrlərdə K1/K2/K3 olduğu kimi qalır.
 Rejimin tək mənbəyi ``apps.registrar.interim_assessment``-dir. Bu fayl kabinet
 tərəfinin müqaviləsini kilidləyir:
 
-* midterm semestri → TƏK «Midterm — bal yazma pəncərəsi (0–20 bal)» kartı;
+* midterm semestri → TƏK «Midterm — bal yazma pəncərəsi (0–30 bal)» kartı;
   ``k_index=1/2`` POST-la göndərilsə belə server rədd edir (forma + view);
 * keçmiş (kollokvium) semestr → əvvəlki kimi 3 kart, K-sıra qaydası qüvvədədir;
 * ``k_index=0`` üçün yadda saxla / aktivləşdir / əlavə gün / sil əvvəlki kimi işləyir;
@@ -26,6 +27,7 @@ from django.utils import timezone, translation
 from apps.accounts.forms.kollokvium_windows import KollokviumWindowForm
 from apps.organizations.models import AcademicPeriod, Membership, Organization
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
+from core import academic_rules
 from core.constants import AcademicPeriodType, OrganizationType
 from core.rls import bypass_rls
 
@@ -135,13 +137,19 @@ class MidtermScreenRenderTests(_MidtermScreenBase):
         self.assertTrue(section["interim"].is_midterm)
         self.assertEqual([row["label"] for row in section["k_rows"]], ["Midterm"])
         self.assertEqual(response.content.decode().count(_CARD), 1)
-        self.assertContains(response, "Midterm — bal yazma pəncərəsi (0–20 bal)")
+        self.assertContains(response, "Midterm — bal yazma pəncərəsi (0–30 bal)")
         self.assertContains(response, 'name="k_index" value="0"')
         self.assertNotContains(response, 'id="kw-save-1"')
         self.assertNotContains(response, 'id="kw-save-2"')
         # Uyğunlaşdırılmış KPI: say əvəzinə şkala; K-sıra kilidi (əvvəlki kollokvium) yoxdur.
         self.assertContains(response, "Bal şkalası")
         self.assertNotContains(response, "Əvvəlcə əvvəlki kollokvium təyin edilməlidir.")
+
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True)
+    def test_midterm_card_scale_follows_selfwork_setting(self):
+        # Geri dönüş: RİM-də sərbəst iş açılanda midterm yenidən 0–20 (sahib 2026-10-10).
+        response = self._get(self.midterm_period)
+        self.assertContains(response, "Midterm — bal yazma pəncərəsi (0–20 bal)")
 
     def test_kollokvium_period_keeps_three_cards(self):
         response = self._get(self.kollokvium_period)
@@ -150,7 +158,7 @@ class MidtermScreenRenderTests(_MidtermScreenBase):
         self.assertFalse(section["interim"].is_midterm)
         self.assertEqual([row["label"] for row in section["k_rows"]], ["K1", "K2", "K3"])
         self.assertEqual(response.content.decode().count(_CARD), 3)
-        self.assertNotContains(response, "bal yazma pəncərəsi (0–20 bal)")
+        self.assertNotContains(response, "Midterm — bal yazma pəncərəsi")
         # K1 təyin olunmayıb → K2/K3 kartında sıra kilidi (köhnə davranış).
         self.assertContains(response, "Əvvəlcə əvvəlki kollokvium təyin edilməlidir.")
         # Niyə «Midterm pəncərələri» altında K1–K3 göründüyünün izahı.
@@ -284,5 +292,6 @@ class MidtermWordingTests(SimpleTestCase):
 
         with translation.override("az"):
             self.assertEqual(str(LABELS["midterm"]), "Midterm (aralıq imtahan)")
-            self.assertIn("Midterm (aralıq imtahan) 20", formula_text(("seminar",)))
+            # Sahib 2026-10-10: sərbəst iş söndürülüb → midterm 30 (açılsa 20).
+            self.assertIn(f"Midterm (aralıq imtahan) {academic_rules.midterm_max()}", formula_text(("seminar",)))
             self.assertNotIn("Kollokvium", formula_text(("seminar",)))

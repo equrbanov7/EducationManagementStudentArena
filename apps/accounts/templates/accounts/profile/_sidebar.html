@@ -1,4 +1,4 @@
-{% load i18n static profile_shell %}
+{% load i18n static profile_shell nav_icons %}
 {% comment %}
 Kabinet sol menyusu — İKİ DÜZÜM, BİR GÖRÜNÜŞ DİLİ (2026-09-25 redizaynı).
 
@@ -73,7 +73,7 @@ Bu fayllar yalnız TƏQDİMATdır: hansı bənd hansı qrupda, hansı sırada du
         Forma deyil (göndərilən heç nə yoxdur); `type="search"` + görünməz `<label>`.{% endcomment %}
         <div class="sidebar-search" role="search">
             <label class="sidebar-search__label" for="sidebarFilter">{% trans "Menyuda axtar" context "profile.sidebar" %}</label>
-            <i class="fas fa-magnifying-glass sidebar-search__icon" aria-hidden="true"></i>
+            {% nav_icon "search" "sidebar-search__icon" %}
             <input type="search"
                    class="sidebar-search__input"
                    id="sidebarFilter"

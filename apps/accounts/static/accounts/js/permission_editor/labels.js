@@ -37,7 +37,7 @@
             member: "Üzvlər",
             role: "Rollar",
             course: "Kurslar",
-            assignment: "Sərbəst işlər",
+            assignment: "Tapşırıqlar",
             project: "Kurs işləri",
             lab: "Lab işləri",
             grade: "Qiymətləndirmə",

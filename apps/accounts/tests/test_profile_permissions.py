@@ -16,6 +16,8 @@ from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
 from apps.blog.models import Category, Post
+from apps.organizations.models import Membership, Organization
+from core.constants import OrganizationType
 
 User = get_user_model()
 
@@ -246,7 +248,25 @@ class PublicProfileViewTest(TestCase):
                 },
             )
 
-    def test_public_profile_is_accessible_anonymously_and_hides_private_sections(self):
+        # URL auditi B1 (2026-10-10): ictimai profil anonim deyil — baxan hədəflə ortaq
+        # təşkilatın AKTİV üzvü olmalıdır. Hamı bir universitetə üzv edilir, baxan daxil olur.
+        self.org = Organization.objects.create(
+            name="Public Profile Univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.owner,
+            status="active",
+            is_active=True,
+        )
+        members = [self.owner, self.viewer, *User.objects.filter(username__in=self.reported_zap_usernames)]
+        for member in members:
+            Membership.objects.get_or_create(
+                user=member,
+                organization=self.org,
+                defaults={"role": self.org.roles.get(name="teacher"), "is_active": True, "is_primary": True},
+            )
+        self.client.force_login(self.viewer)
+
+    def test_public_profile_is_visible_to_same_org_member_and_hides_private_sections(self):
         response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
 
         self.assertEqual(response.status_code, 200)
@@ -255,7 +275,6 @@ class PublicProfileViewTest(TestCase):
         self.assertContains(response, "Açıq bio məlumatı")
         self.assertContains(response, "Bakı")
         self.assertNotContains(response, reverse("create_post"))
-        self.assertNotContains(response, reverse("courses:my_courses"))
         self.assertNotContains(response, reverse("courses:create_course"))
         self.assertNotContains(response, reverse("exams:create_exam"))
         self.assertNotContains(response, reverse("accounts:assigned_exams"))
@@ -268,7 +287,8 @@ class PublicProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("accounts:profile"))
 
-    def test_public_profile_hides_avatar_image_from_anonymous_visitors(self):
+    def test_public_profile_redirects_anonymous_visitors_to_login(self):
+        """URL auditi B1: anonim baxış yoxdur — profil məlumatı (və avatar) heç göstərilmir."""
         tiny_png = (
             b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01"
             b"\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0cIDATx\x9cc`\x00"
@@ -276,17 +296,13 @@ class PublicProfileViewTest(TestCase):
         )
         self.owner.profile.avatar = SimpleUploadedFile("avatar.png", tiny_png, content_type="image/png")
         self.owner.profile.save(update_fields=["avatar", "updated_at"])
+        self.client.logout()
 
         response = self.client.get(reverse("accounts:public_profile", args=[self.owner.username]))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(
-            response,
-            reverse("accounts:profile_avatar", kwargs={"user_id": self.owner.id}),
-            html=False,
-        )
-        # 2026-09-07 redizaynı: `.public-profile-avatar__fallback` → `.ppx-hero__initials`.
-        self.assertContains(response, "ppx-hero__initials", html=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response.url)
+        self.assertNotIn("Açıq bio məlumatı", response.content.decode())
 
     def test_public_profile_search_and_pagination_work(self):
         search_response = self.client.get(

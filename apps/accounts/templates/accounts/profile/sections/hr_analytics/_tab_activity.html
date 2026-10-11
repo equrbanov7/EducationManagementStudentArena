@@ -1,0 +1,35 @@
+{% load i18n %}
+{% comment %}Tədris fəaliyyəti — seçilmiş ilin jurnalları (açılışlar), keçirilmiş dərslər və saatları; plan —
+jurnalın semestr kontakt saatı. Kontekst: `hr.activity`.{% endcomment %}
+<p class="hr-help">{% trans "Jurnal — müəllimin seçilmiş tədris ilindəki aktiv fənn açılışı; keçirilmiş saat — jurnala yazılmış dərslərin cəmi; plan — jurnalın semestr kontakt saatı. Cari semestrdə icra faizinin aşağı olması normaldır." context "accounts.hr_analytics" %}</p>
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table hr-table">
+            <caption class="hr-sr">{% trans "Kafedralar üzrə tədris fəaliyyəti" context "accounts.hr_analytics" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Kafedra" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərs deyən" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Jurnal" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Dərs" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Keçirilmiş saat" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Plan saat" context "accounts.hr_analytics" %}</th>
+                    <th scope="col">{% trans "İcra" context "accounts.hr_analytics" %}</th>
+                </tr>
+            </thead>
+            {% for group in hr.activity.groups %}
+            <tbody>
+                <tr class="hr-table__group"><th scope="rowgroup" colspan="8">{{ group.name }}</th></tr>
+                {% for row in group.chairs %}{% include "accounts/profile/sections/hr_analytics/_activity_row.html" with label=row.name m=row %}{% endfor %}
+                {% trans "Fakültə üzrə" context "accounts.hr_analytics" as fac_label %}
+                {% include "accounts/profile/sections/hr_analytics/_activity_row.html" with label=fac_label m=group.total row_class="hr-table__subtotal" %}
+            </tbody>
+            {% endfor %}
+            <tfoot>
+                {% trans "Cəmi" context "accounts.hr_analytics" as total_label %}
+                {% include "accounts/profile/sections/hr_analytics/_activity_row.html" with label=total_label m=hr.activity.total row_class="hr-table__total" %}
+            </tfoot>
+        </table>
+    </div>
+</div>

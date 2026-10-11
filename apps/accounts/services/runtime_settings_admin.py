@@ -94,6 +94,10 @@ def _as_text(spec, value) -> str:
     if spec.kind == "rate":
         parts = rs._rate_parts(value)
         return f"{parts[0]}/{parts[1]}m" if parts else ""
+    if spec.kind == "bool":
+        # Forma bayrağı «1»/«0» göndərir; ``str(True)`` («True») ilə müqayisə «dəyişib» sanardı.
+        coerced = rs.coerce(spec, value)
+        return "" if coerced is None else ("1" if coerced else "0")
     return str(value if value is not None else "")
 
 
@@ -129,6 +133,8 @@ def save_values(*, actor, data, request=None) -> dict:
         if value is None:
             if spec.kind == "choice":
                 errors[spec.key] = pgettext(_CTX, "Siyahıdan seçin.")
+            elif spec.kind == "bool":
+                errors[spec.key] = pgettext(_CTX, "Yandırılmış və ya söndürülmüş olmalıdır.")
             else:
                 errors[spec.key] = pgettext(_CTX, "Dəyər %(min)s–%(max)s aralığında olmalıdır.") % {
                     "min": spec.min,

@@ -255,7 +255,16 @@ def build_people_section(request, kind: str) -> dict:
             "min_reason_length": MIN_REASON_LENGTH,
             "max_reason_length": MAX_REASON_LENGTH,
             # 2026-10-03: dayandırma səbəbi SEÇİLİR + tələbənin girişdə görəcəyi «kimə yaxınlaşmalı».
-            "block_options": account_block_reasons.form_options() if actor.can_manage_status else {},
+            # 2026-10-11: səbəblər və mətnlər hədəfin statusuna görə (tələbə / müəllim).
+            "block_options": (
+                account_block_reasons.form_options(
+                    account_block_reasons.AUDIENCE_STUDENT
+                    if kind == "students"
+                    else account_block_reasons.AUDIENCE_STAFF
+                )
+                if actor.can_manage_status
+                else {}
+            ),
             "block_note_max": account_block_reasons.MAX_NOTE_LENGTH,
             "sort_options": _options(_SORT_KEYS[kind], _SORT_LABELS),
             "status_options": _options(("all", "active", "blocked", "archived", "deleted"), _STATUS_LABELS),

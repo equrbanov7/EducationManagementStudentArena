@@ -1,0 +1,78 @@
+{% load i18n %}
+{% comment %}Tərkib — elmi ad / dərəcə (UserProfile), cins və yaş (yalnız demoqrafiya icazəsi ilə) və
+kafedralar üzrə matris. Kontekst: `hr.composition`.{% endcomment %}
+<div class="hr-grid">
+    <section class="ems-card hr-card" aria-labelledby="hr-cp-titles">
+        <header class="ems-card__head"><h3 class="ems-card__title" id="hr-cp-titles">{% trans "Elmi ad / vəzifə" context "accounts.hr_analytics" %}</h3></header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.composition.titles %}</div>
+    </section>
+    <section class="ems-card hr-card" aria-labelledby="hr-cp-degrees">
+        <header class="ems-card__head"><h3 class="ems-card__title" id="hr-cp-degrees">{% trans "Elmi dərəcə" context "accounts.hr_analytics" %}</h3></header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.composition.degrees bar_tone="success" %}</div>
+    </section>
+    {% if hr.can_view_demographics %}
+    <section class="ems-card hr-card" aria-labelledby="hr-cp-gender">
+        <header class="ems-card__head"><h3 class="ems-card__title" id="hr-cp-gender">{% trans "Cins" context "accounts.hr_analytics" %}</h3></header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.composition.gender %}</div>
+    </section>
+    <section class="ems-card hr-card" aria-labelledby="hr-cp-age">
+        <header class="ems-card__head">
+            <div>
+                <h3 class="ems-card__title" id="hr-cp-age">{% trans "Yaş qrupları" context "accounts.hr_analytics" %}</h3>
+                <p class="ems-card__sub">{% blocktrans trimmed with unknown=hr.composition.age_unknown context "accounts.hr_analytics" %}Doğum tarixi bilinməyən: {{ unknown }}{% endblocktrans %}</p>
+            </div>
+        </header>
+        <div class="ems-card__body">{% include "accounts/profile/sections/hr_analytics/_bars.html" with bars=hr.composition.age %}</div>
+    </section>
+    {% endif %}
+</div>
+<div class="ems-tablewrap hr-section-gap">
+    <div class="ems-tablescroll">
+        <table class="ems-table hr-table">
+            <caption class="hr-sr">{% trans "Kafedralar üzrə elmi ad və dərəcə" context "accounts.hr_analytics" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Kafedra" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
+                    {% for label in hr.composition.title_headers %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">PhD</th>
+                    <th scope="col" class="ems-table__num">{% trans "Elmlər doktoru" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Elmi dərəcəli" context "accounts.hr_analytics" %}</th>
+                </tr>
+            </thead>
+            {% for group in hr.composition.tree.groups %}
+            <tbody>
+                <tr class="hr-table__group"><th scope="rowgroup" colspan="{{ hr.composition.title_headers|length|add:5 }}">{{ group.name }}</th></tr>
+                {% for chair in group.chairs %}
+                <tr>
+                    <th scope="row" class="hr-table__chair">{{ chair.name }}</th>
+                    <td class="ems-table__num">{{ chair.teachers }}</td>
+                    {% for value in chair.titles %}<td class="ems-table__num">{{ value }}</td>{% endfor %}
+                    <td class="ems-table__num">{{ chair.phd }}</td>
+                    <td class="ems-table__num">{{ chair.dsc }}</td>
+                    <td class="ems-table__num hr-strong">{{ chair.degree_percent }}%</td>
+                </tr>
+                {% endfor %}
+                <tr class="hr-table__subtotal">
+                    <th scope="row">{% trans "Fakültə üzrə" context "accounts.hr_analytics" %}</th>
+                    <td class="ems-table__num">{{ group.total.teachers }}</td>
+                    {% for value in group.total.titles %}<td class="ems-table__num">{{ value }}</td>{% endfor %}
+                    <td class="ems-table__num">{{ group.total.phd }}</td>
+                    <td class="ems-table__num">{{ group.total.dsc }}</td>
+                    <td class="ems-table__num hr-strong">{{ group.total.degree_percent }}%</td>
+                </tr>
+            </tbody>
+            {% endfor %}
+            <tfoot>
+                <tr class="hr-table__total">
+                    <th scope="row">{% trans "Cəmi" context "accounts.hr_analytics" %}</th>
+                    <td class="ems-table__num">{{ hr.composition.tree.total.teachers }}</td>
+                    {% for value in hr.composition.tree.total.titles %}<td class="ems-table__num">{{ value }}</td>{% endfor %}
+                    <td class="ems-table__num">{{ hr.composition.tree.total.phd }}</td>
+                    <td class="ems-table__num">{{ hr.composition.tree.total.dsc }}</td>
+                    <td class="ems-table__num hr-strong">{{ hr.composition.tree.total.degree_percent }}%</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

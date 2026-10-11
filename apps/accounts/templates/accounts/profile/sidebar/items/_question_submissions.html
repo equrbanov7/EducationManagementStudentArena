@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Sual göndərişləri» — müəllim göndərir, imtahan mərkəzi qutuda baxır (eyni açar, məzmun rola görə). #}
 {% if 'question-submissions' in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'Sual göndərişləri' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-submissions' %}active{% endif %}">
-        <i class="fas fa-paper-plane sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "file-up" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans 'Sual göndərişləri' %}</span>
     </a>
 </li>

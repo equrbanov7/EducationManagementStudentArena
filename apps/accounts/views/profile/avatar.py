@@ -3,6 +3,11 @@ Profile avatar serving view.
 
 Serves a logged-in user's requested profile avatar through Django so that
 avatar files are never exposed via a public media URL.
+
+URL auditi B5 (2026-10-10): şəkil (proktorinqdə də istifadə olunan kimlik
+fotosu) yalnız özünə, superadmin-ə və hədəflə ortaq təşkilatda AKTİV üzvlüyü
+olan baxana verilir (``core.people_visibility``); qalanlara 404 — ardıcıl id ilə
+bütün tenant-ların şəkillərini toplu yükləmək olmur.
 """
 
 import mimetypes
@@ -13,6 +18,8 @@ from django.core.exceptions import ValidationError
 from django.http import FileResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.http import http_date
+
+from core.people_visibility import can_view_person
 
 from ...models import UserProfile
 from .search import _validate_profile_avatar_version
@@ -29,6 +36,8 @@ def profile_avatar(request, user_id):
         return HttpResponseBadRequest("Invalid avatar version parameter.")
 
     target_user = get_object_or_404(User, id=user_id, is_active=True)
+    if not can_view_person(request.user, target_user.pk):
+        raise Http404("Avatar tapılmadı.")
     target_profile = UserProfile.objects.filter(user=target_user).only("avatar", "updated_at").first()
     if not target_profile or not target_profile.avatar:
         raise Http404("Avatar tapılmadı.")

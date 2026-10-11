@@ -1,0 +1,13 @@
+<tr{% if row_class %} class="{{ row_class }}"{% endif %}>
+    <th scope="row"{% if not row_class %} class="hr-table__chair"{% endif %}>{{ label }}</th>
+    <td class="ems-table__num">{{ m.teachers }}</td>
+    <td class="ems-table__num">{{ m.teaching }}</td>
+    <td class="ems-table__num">{{ m.journals }}</td>
+    <td class="ems-table__num">{{ m.lessons }}</td>
+    <td class="ems-table__num">{{ m.held }}</td>
+    <td class="ems-table__num">{{ m.planned }}</td>
+    <td class="hr-table__meter">
+        <span class="ems-bar hr-meter" aria-hidden="true"><span class="ems-bar__fill {{ m.width }}"></span></span>
+        <span class="hr-meter__value">{{ m.done }}%</span>
+    </td>
+</tr>

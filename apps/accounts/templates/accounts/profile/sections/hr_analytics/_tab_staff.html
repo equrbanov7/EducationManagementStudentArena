@@ -1,0 +1,60 @@
+{% load i18n %}
+{% comment %}Ştat vahidləri — fakültə → kafedra: müəllim sayı, ştat növü üzrə bölgü və ştat vahidlərinin cəmi
+(`TeacherWorkloadProfile.staff_fraction`, saathesabı cəmə düşmür). Kontekst: `hr.staff`.{% endcomment %}
+<p class="hr-help">{% trans "Ştat vahidi seçilmiş tədris ilinin dərs yükü profilindən gəlir (tam = 1, yarım = 0,5). Saathesabı müəllimlər ştat vahidinə daxil edilmir; «Təyin edilməyib» — bu il üçün profili olmayanlar." context "accounts.hr_analytics" %}</p>
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table hr-table">
+            <caption class="hr-sr">{% trans "Fakültə və kafedralar üzrə ştat vahidləri" context "accounts.hr_analytics" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Kafedra" context "accounts.hr_analytics" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Müəllim" context "accounts.hr_analytics" %}</th>
+                    {% for label in hr.staff_headers %}<th scope="col" class="ems-table__num">{{ label }}</th>{% endfor %}
+                    <th scope="col" class="ems-table__num">{% trans "Ştat vahidi" context "accounts.hr_analytics" %}</th>
+                </tr>
+            </thead>
+            {% for group in hr.staff.groups %}
+            <tbody>
+                <tr class="hr-table__group">
+                    <th scope="rowgroup" colspan="{{ hr.staff_headers|length|add:3 }}">{{ group.name }}</th>
+                </tr>
+                {% for chair in group.chairs %}
+                <tr>
+                    <th scope="row" class="hr-table__chair">{{ chair.name }}</th>
+                    <td class="ems-table__num">{{ chair.teachers }}</td>
+                    <td class="ems-table__num">{{ chair.full }}</td>
+                    <td class="ems-table__num">{{ chair.half }}</td>
+                    <td class="ems-table__num">{{ chair.partial }}</td>
+                    <td class="ems-table__num">{{ chair.hourly }}</td>
+                    <td class="ems-table__num{% if chair.none %} hr-warn{% endif %}">{{ chair.none }}</td>
+                    <td class="ems-table__num hr-strong">{{ chair.units|floatformat:"-2" }}</td>
+                </tr>
+                {% endfor %}
+                <tr class="hr-table__subtotal">
+                    <th scope="row">{% trans "Fakültə üzrə" context "accounts.hr_analytics" %}</th>
+                    <td class="ems-table__num">{{ group.total.teachers }}</td>
+                    <td class="ems-table__num">{{ group.total.full }}</td>
+                    <td class="ems-table__num">{{ group.total.half }}</td>
+                    <td class="ems-table__num">{{ group.total.partial }}</td>
+                    <td class="ems-table__num">{{ group.total.hourly }}</td>
+                    <td class="ems-table__num">{{ group.total.none }}</td>
+                    <td class="ems-table__num hr-strong">{{ group.total.units|floatformat:"-2" }}</td>
+                </tr>
+            </tbody>
+            {% endfor %}
+            <tfoot>
+                <tr class="hr-table__total">
+                    <th scope="row">{% trans "Cəmi" context "accounts.hr_analytics" %}</th>
+                    <td class="ems-table__num">{{ hr.staff.total.teachers }}</td>
+                    <td class="ems-table__num">{{ hr.staff.total.full }}</td>
+                    <td class="ems-table__num">{{ hr.staff.total.half }}</td>
+                    <td class="ems-table__num">{{ hr.staff.total.partial }}</td>
+                    <td class="ems-table__num">{{ hr.staff.total.hourly }}</td>
+                    <td class="ems-table__num">{{ hr.staff.total.none }}</td>
+                    <td class="ems-table__num hr-strong">{{ hr.staff.total.units|floatformat:"-2" }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

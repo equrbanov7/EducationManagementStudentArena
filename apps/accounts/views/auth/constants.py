@@ -3,7 +3,6 @@
 import logging
 import re
 
-from django.conf import settings
 from django.contrib.auth import get_user_model
 
 logger = logging.getLogger(__name__)
@@ -98,14 +97,3 @@ AUTH_REDIRECT_DISALLOWED_CHARS = frozenset({"'", '"', "\\", "\r", "\n", "\t"})
 
 
 PASSWORD_RESET_EMAIL_SESSION_KEY = "accounts_password_reset_email"
-
-
-def _register_seo() -> dict:
-    """Brand-driven SEO metadata for the signup page (no hard-coded product name)."""
-    brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
-    return {
-        "seo_title": f"Hesab yaradın | {brand}",
-        "seo_description": (
-            f"{brand}-da təşkilat, müəllim və ya tələbə hesabı yaradın və " "rəqəmsal təhsil platformasına qoşulun."
-        ),
-    }

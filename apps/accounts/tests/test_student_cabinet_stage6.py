@@ -52,8 +52,29 @@ class TranscriptPolicyTest(TestCase):
 
 
 class AssessmentWeightsTest(TestCase):
-    def test_locked_weights_sum_to_one_hundred(self):
+    """Zolaq giriş balının HESABDAKI hissələrini göstərir (sahib 2026-10-10: 10 / 10 / 30 / 50)."""
+
+    def test_new_rule_weights_sum_to_one_hundred(self):
         weights = assessment_weights_view(None)
+        self.assertTrue(weights["standard"])
+        self.assertFalse(weights["show_selfwork"])
+        self.assertEqual(
+            (weights["attendance"], weights["activity"], weights["midterm"], weights["selfwork"]), (10, 10, 30, 0)
+        )
+        self.assertEqual((weights["current"], weights["final"], weights["total"]), (40, 50, 100))
+
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True)
+    def test_selfwork_enabled_restores_twenty_plus_ten(self):
+        weights = assessment_weights_view(None)
+        self.assertTrue(weights["show_selfwork"])
+        self.assertEqual((weights["midterm"], weights["selfwork"], weights["current"]), (20, 10, 30))
+        self.assertEqual(weights["total"], 100)
+
+    def test_legacy_period_keeps_locked_policy_weights(self):
+        from apps.organizations.models import AcademicPeriod
+
+        weights = assessment_weights_view(None, period=AcademicPeriod(academic_year="2024/2025"))
+        self.assertFalse(weights["standard"])
         self.assertEqual(weights["attendance"], 10)
         self.assertEqual(weights["selfwork"], 10)
         self.assertEqual(weights["current"], 30)

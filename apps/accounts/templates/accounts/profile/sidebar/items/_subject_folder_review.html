@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Tapşırıq yoxlaması» — fənn qovluqlarına göndərilən işlər (müəllim). #}
 {% if "subject-folder-review" in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'Tapşırıq yoxlaması' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'subject-folder-review' %}active{% endif %}">
-        <i class="fas fa-file-circle-check sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "folder-check" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "Tapşırıq yoxlaması" context "profile.sidebar" %}</span>
     </a>
 </li>

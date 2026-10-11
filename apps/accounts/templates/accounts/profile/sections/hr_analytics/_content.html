@@ -1,0 +1,46 @@
+{% load i18n %}
+{% comment %}«Kadr analitikası» çərçivəsi: başlıq + ixrac, avto filtrlər, KPI zolağı, server tab-ları (link),
+aktiv tabın məzmunu. Kontekst: `hr` (services/hr_analytics/panel.py).{% endcomment %}
+{% trans "Müəllim heyəti haqqında bütün göstəricilər: say və hesab vəziyyəti, ştat vahidləri, elmi ad və dərəcə, dərs yükü, tədris fəaliyyəti və məlumat boşluqları. Filtrlər bütün tablara tətbiq olunur; ixrac cari filtr dəstini Excel-ə çıxarır." context "accounts.hr_analytics" as hr_subtitle %}
+<div class="hr" data-hr-root>
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=hr_subtitle header_actions_include="accounts/profile/sections/hr_analytics/_actions.html" %}
+    {% if hr.view_as %}
+    <div class="ems-msg ems-msg--info hr__notice" role="status">
+        <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "«Başqasının adından» rejimindəsiniz — analitika yalnız baxış üçündür, ixrac bağlıdır." context "accounts.hr_analytics" %}</div>
+    </div>
+    {% endif %}
+    {% include "accounts/profile/sections/hr_analytics/_filters.html" %}
+    <p class="hr__count" aria-live="polite">
+        {% blocktrans trimmed with shown=hr.total total=hr.total_all year=hr.filters.year context "accounts.hr_analytics" %}
+        {{ year }} tədris ili · göstərilir: {{ shown }} / {{ total }} müəllim
+        {% endblocktrans %}
+    </p>
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=hr.kpis kpi_variant="4" %}
+    <nav class="ems-tabs hr-tabs" aria-label="{% trans 'Kadr analitikası bölmələri' context 'accounts.hr_analytics' %}">
+        {% for tab in hr.tabs %}
+        <a class="ems-tabs__btn" href="{{ tab.url }}" data-section="{{ hr.section }}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+        {% endfor %}
+    </nav>
+    <div class="hr-body" data-ems-filter-target>
+        {% if hr.total_all == 0 %}
+            {% trans "Bu tədris ili üçün müəllim tapılmadı" context "accounts.hr_analytics" as st_title %}
+            {% trans "Heyət aktiv müəllim üzvlüyündən və ya seçilmiş ilin dərs yükü profilindən (ştat vahidi) yığılır. Başqa il seçin və ya müəllim siyahısını idxal edin." context "accounts.hr_analytics" as st_body %}
+            {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-users-slash" %}
+        {% elif hr.tab == "staff" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_staff.html" %}
+        {% elif hr.tab == "composition" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_composition.html" %}
+        {% elif hr.tab == "workload" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_workload.html" %}
+        {% elif hr.tab == "activity" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_activity.html" %}
+        {% elif hr.tab == "quality" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_quality.html" %}
+        {% elif hr.tab == "people" %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_people.html" %}
+        {% else %}
+            {% include "accounts/profile/sections/hr_analytics/_tab_overview.html" %}
+        {% endif %}
+    </div>
+</div>

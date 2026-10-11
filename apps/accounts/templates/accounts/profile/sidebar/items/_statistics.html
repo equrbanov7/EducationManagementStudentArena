@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Statistika» — tam səhifə naviqasiyası (`data-force-navigation`): qrafik skriptləri AJAX swap-da yenidən qurulmur. #}
 {% if 'statistics' in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -8,7 +8,7 @@
        data-force-navigation="true"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'statistics' %}active{% endif %}">
-        <i class="fas fa-chart-bar sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "chart-column" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "statistics" context "profile.sidebar" %}</span>
     </a>
 </li>
