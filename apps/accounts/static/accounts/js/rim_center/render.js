@@ -47,8 +47,19 @@
             .join("");
     }
 
+    function lastLogin(user) {
+        if (!user.last_login) {
+            return '<span class="rim-flag"><i class="fas fa-user-clock"></i> ' + esc(ns.t("never_logged_in")) + "</span>";
+        }
+        var when = new Date(user.last_login);
+        var text = isNaN(when.getTime()) ? user.last_login : when.toLocaleString(document.documentElement.lang || undefined, {
+            year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
+        });
+        return '<span class="rim-flag"><i class="fas fa-right-to-bracket"></i> ' + esc(ns.t("last_login")) + ": " + esc(text) + "</span>";
+    }
+
     function flags(user) {
-        var out = [];
+        var out = [lastLogin(user)];
         if (user.password_change_required) {
             out.push('<span class="rim-flag"><i class="fas fa-hourglass-half"></i> ' + esc(ns.t("password_change_required")) + "</span>");
         }
@@ -122,7 +133,22 @@
             container.innerHTML = '<div class="rim-state"><i class="fas fa-user-slash"></i> ' + esc(ns.t("empty")) + "</div>";
             return;
         }
-        container.innerHTML = results.map(render.card).join("");
+        // Sorğusuz açılış: nə göstərildiyini izah edən qısa sətir (ekran «boş» deyil, ən yenilərdir).
+        var hint = payload && !payload.query && payload.sort === "recent"
+            ? '<p class="rim-hint"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> ' + esc(ns.t("latest_hint")) + "</p>"
+            : "";
+        container.innerHTML = hint + results.map(render.card).join("");
+    };
+
+    /** Status tablarının sayları (cari axtarış + növ + vəziyyət filtrlərinə görə). */
+    render.counts = function counts(map) {
+        var nodes = document.querySelectorAll("[data-rim-count]");
+        Array.prototype.forEach.call(nodes, function (node) {
+            var key = node.getAttribute("data-rim-count");
+            var value = map && Object.prototype.hasOwnProperty.call(map, key) ? map[key] : null;
+            node.textContent = value === null ? "" : String(value);
+            node.classList.toggle("is-zero", value === 0);
+        });
     };
 
     render.state = function state(messageKey, iconClass) {

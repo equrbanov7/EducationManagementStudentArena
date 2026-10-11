@@ -95138,3 +95138,63 @@ msgstr "Əvvəlki ilə nisbətən dəyişib"
 msgctxt "roles.org_display_name"
 msgid "Qəyyumlar Şurasının sədri"
 msgstr "Qəyyumlar Şurasının sədri"
+
+msgctxt "profile.rim"
+msgid "Hesab növü"
+msgstr "Hesab növü"
+
+msgctxt "profile.rim"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "profile.rim"
+msgid "Müəllimlər"
+msgstr "Müəllimlər"
+
+msgctxt "profile.rim"
+msgid "Heyət (inzibati)"
+msgstr "Heyət (inzibati)"
+
+msgctxt "profile.rim"
+msgid "Rolu olmayanlar"
+msgstr "Rolu olmayanlar"
+
+msgctxt "profile.rim"
+msgid "İlk giriş gözlənilir"
+msgstr "İlk giriş gözlənilir"
+
+msgctxt "profile.rim"
+msgid "Heç daxil olmayıb"
+msgstr "Heç daxil olmayıb"
+
+msgctxt "profile.rim"
+msgid "Sıralama"
+msgstr "Sıralama"
+
+msgctxt "profile.rim"
+msgid "Avtomatik"
+msgstr "Avtomatik"
+
+msgctxt "profile.rim"
+msgid "Ən yeni hesablar"
+msgstr "Ən yeni hesablar"
+
+msgctxt "profile.rim"
+msgid "Soyad (A→Z)"
+msgstr "Soyad (A→Z)"
+
+msgctxt "profile.rim"
+msgid "Son giriş"
+msgstr "Son giriş"
+
+msgctxt "profile.rim"
+msgid "Filtrləri sıfırla"
+msgstr "Filtrləri sıfırla"
+
+msgctxt "profile.rim"
+msgid ""
+"Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
+"axtarın."
+msgstr ""
+"Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
+"axtarın."
