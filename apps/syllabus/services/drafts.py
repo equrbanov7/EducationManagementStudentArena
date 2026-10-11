@@ -109,7 +109,7 @@ def _create_sections(version, *, source=None, actor_user=None):
     """10 bölməni yaradır; ``source`` verilibsə məzmunu ondan köçürür.
 
     ``self`` bölməsi sərbəst işi söndürülmüş qaydada da yaradılır/köçürülür (data saxlanılır —
-    sahib 2026-10-10); qiymətləndirmə bölgüsü versiyanın qaydasının standartıdır."""
+    sahib 2026-10-10); qiymətləndirmə bölgüsü cari qaydanın standartıdır (semestrdən asılı deyil)."""
     source_map = {}
     if source is not None:
         source_map = {row.section_id: row.data for row in source.sections.all()}
@@ -139,8 +139,8 @@ def recompute_completion(version, *, persist: bool = True):
 
     Bölmə sətirlərinin ``is_complete`` bayrağı və versiyanın
     ``completion_percent`` sahəsi KEŞDİR — həqiqət mənbəyi
-    :mod:`apps.syllabus.completion`-dır. Qayda versiyanın semestrindəndir (sahib
-    2026-10-10: sərbəst işsiz qaydada ``self`` faizə daxil deyil, keşi toxunulmur).
+    :mod:`apps.syllabus.completion`-dır. Qayda cari RİM tənzimləməsidir — semestrdən asılı
+    deyil (sahib 2026-10-10/11: sərbəst işsiz qaydada ``self`` faizə daxil deyil, keşi toxunulmur).
     """
     organization = version.organization
     rule = rule_for_version(version, organization)

@@ -129,7 +129,8 @@ def _identity_rows(syllabus, version) -> list:
 def _section_rows(version, rule=None) -> list:
     """8 məzmun bölməsi — gövdə SƏTİRLƏRƏ bölünür (şablon `<li>` kimi yazır).
 
-    Sahib 2026-10-10: qayda versiyanın semestrindəndir — sərbəst işsiz qaydada «Sərbəst iş» yoxdur (7)."""
+    Sahib 2026-10-10/11: qayda cari RİM tənzimləməsidir (semestrdən asılı deyil) — sərbəst işsiz
+    qaydada «Sərbəst iş» yoxdur (7)."""
     rule = rule or rule_for_version(version)
     kinds = activity_kinds_for_syllabus(version.syllabus)
     bodies = compose_bodies(section_data_map(version), rule=rule, activity_kinds=kinds)

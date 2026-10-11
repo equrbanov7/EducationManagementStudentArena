@@ -43,6 +43,16 @@ User = get_user_model()
 
 pytestmark = pytest.mark.django_db
 
+
+@pytest.fixture(autouse=True)
+def _selfwork_rule_on(settings):
+    """Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş SÖNDÜRÜLÜDÜR və
+    ``self`` bölməsi redaktorda yoxdur (ona yazı ``section.unknown`` verir). Bu dəstin fixture-ları 8
+    bölməni (sərbəst iş daxil) doldurur, ona görə RİM «Sistem tənzimləmələri» sərbəst işi yandırmış
+    kimi işləyir. Söndürülü (defolt) qaydanı ``test_*selfwork_rule_2026_10_10.py`` dəstləri yoxlayır."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True
+
+
 TEACHER_PERMS = ["syllabus.view", "syllabus.edit", "syllabus.submit", "grade.input"]
 CHAIR_PERMS = ["syllabus.view", "syllabus.review", "syllabus.approve", "syllabus.revise", "syllabus.reject"]
 #: Semestr 2025-09-01 – 2026-01-31; «bu gün» ilk həftədən sonra.

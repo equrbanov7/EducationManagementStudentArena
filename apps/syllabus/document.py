@@ -41,9 +41,11 @@ Eyni ailədən daha üç qayda (2026-08-31 baxışı)
   clean_multiline_text``) abzas fasiləsini QƏSDƏN saxlayır; oxucu onu artıq
   atmır (bax :func:`_prose_lines`).
 
-Sahib 2026-10-10: sənəd semestrin qaydası ilə qurulur (:mod:`apps.syllabus.rules`) — sərbəst işi
-söndürülmüş qaydada «Sərbəst iş» bloku YOXDUR və düstur midterm 30 göstərir; köhnə semestrin sənədi
-dəyişmir. Hər blok sabit ``key`` daşıyır — istehlakçılar bloku MÖVQEYƏ görə yox, açara görə tapır.
+Sahib 2026-10-10: sənəd cari qayda ilə qurulur (:mod:`apps.syllabus.rules`) — standart (sərbəst
+işsiz) qaydada «Sərbəst iş» bloku YOXDUR və düstur midterm 30 göstərir; sahib 2026-10-11: bu, köhnə
+(2025/2026) semestrin sənədinə də aiddir — yalnız RİM ``academic.selfwork_enabled`` açarı bloku və
+midterm 20-ni geri qaytarır. Hər blok sabit ``key`` daşıyır — istehlakçılar bloku MÖVQEYƏ görə yox,
+açara görə tapır.
 """
 
 from __future__ import annotations
@@ -186,7 +188,7 @@ def _assessment_body(assess: dict, activity_kinds=None, rule=None, organization=
     tərəfindən doldurulmur, ona görə düstur HƏMİŞƏ çap olunur (uydurma deyil —
     siyasətin özüdür).  Fəaliyyət növü (seminar / laboratoriya / hər ikisi)
     dərs yükündən gəlir (bax :mod:`apps.syllabus.assessment_formula`); düsturun
-    özü semestrin qaydasıdır (``rule``).
+    özü tətbiq olunan qaydadır (``rule`` — cari RİM qaydası, semestrdən asılı deyil).
     """
     from .assessment_formula import activity_note, formula_text
 
@@ -222,7 +224,7 @@ def build_preview_blocks(section_map: dict, activity_kinds=None, *, rule=None, o
 
     ``activity_kinds`` — qiymətləndirmə düsturunun seminar/lab sətri üçün
     (bax :mod:`apps.syllabus.assessment_formula`); verilməsə defolt (seminar).
-    ``rule`` — semestrin qaydası (``SyllabusRule``); verilməsə CARİ qayda. Sərbəst işsiz
+    ``rule`` — tətbiq olunan qayda (``SyllabusRule``); verilməsə CARİ qayda. Sərbəst işsiz
     qaydada ``selfwork`` bloku YOXDUR (sahib 2026-10-10) — bloku açarla axtarın.
     """
     info = section_map.get(SectionKey.DESC.value, {}) or {}
@@ -300,9 +302,9 @@ def build_document(syllabus, version, *, rule=None, activity_kinds=None) -> dict
     tələbə həmişə ``approved_version``-u görür, müəllim isə üzərində işlədiyi
     cari versiyanı. Mənbəni çağıran tərəf seçir — bu funksiya seçmir.
 
-    ``rule`` — baxılan açılışın semestrinin qaydası (jurnal / tələbə kabineti onu ötürür:
-    semestrsiz «baza sillabus» köhnə semestrin tələbəsinə də göstərilir); verilməsə versiyanın
-    semestrindən. ``activity_kinds`` verilməsə dosyenin açılışından (dərs yükü / cədvəl).
+    ``rule`` — tətbiq olunan qayda (``SyllabusRule``); verilməsə ``rules.for_version`` (sahib
+    2026-10-11: cari RİM qaydası — versiyanın semestri cavabı dəyişmir). ``activity_kinds`` verilməsə
+    dosyenin açılışından (dərs yükü / cədvəl).
     """
     from .assessment_formula import activity_kinds_for_syllabus
     from .services import section_data_map

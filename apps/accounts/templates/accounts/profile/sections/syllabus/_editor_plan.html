@@ -7,10 +7,11 @@ Redaktorun 4–6-cı bölmələri: `week`, `method`, `assess`.
 saatı olmayan növün sütunu göstərilmir; müəllim «+» ilə sətir artıra bilər
 (sahib 2026-09-21). Hər dərs növü üzrə saat AYRICA yoxlanılır — bir mövzu həm
 mühazirədə, həm seminarda keçilə bilər.
-`assess`-də bölgü universitet STANDARTIDIR (sahib 2026-09-20): davamiyyət 10 ·
-midterm 20 · sərbəst iş 10 · seminar/lab ədədi ortası 10 · yekun 50; müəllim
-heç nə seçmir, fəaliyyət növü dərs yükündən gəlir. Sahib 2026-10-10: sərbəst işsiz
-qaydada midterm 30, seminar + laboratoriya 5 + 5 (sətirlər `se.assessment.rows`-dan).
+`assess`-də bölgü universitet STANDARTIDIR (sahib 2026-09-20 / 2026-10-10): davamiyyət 10 ·
+midterm 30 · seminar/lab ədədi ortası 10 · yekun 50 (seminar + laboratoriya olanda 5 + 5);
+müəllim heç nə seçmir, fəaliyyət növü dərs yükündən gəlir. Sətirlər `se.assessment.rows`-dan
+gəlir; RİM `academic.selfwork_enabled` yandırılanda midterm 20 + sərbəst iş 10 geri qayıdır
+(sahib 2026-10-11: semestrdən asılı deyil).
 {% endcomment %}
 
 {% with p=se.panels.week %}

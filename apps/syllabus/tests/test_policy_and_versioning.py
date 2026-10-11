@@ -45,7 +45,8 @@ class _Org:
 
 
 @pytest.mark.django_db(transaction=False)
-def test_policy_defaults_match_the_owner_decisions():
+def test_policy_defaults_match_the_owner_decisions(settings):
+    settings.ACADEMIC_SELFWORK_ENABLED = False  # defolt qayda (``conftest`` bu dəstdə açarı yandırır)
     assert policy.sla_days(None) == 5
     assert policy.escalation_days(None) == 10
     assert policy.second_approval_enabled(None) is False

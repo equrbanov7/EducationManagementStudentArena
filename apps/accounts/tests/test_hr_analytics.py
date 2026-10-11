@@ -79,8 +79,19 @@ class HrAnalyticsTest(TestCase):
             cls.t5 = cls._teacher("t5", "Aysel", "Quliyeva", cls.c3)  # t1 ilə eyni ad-soyad
             cls.t6 = cls._user("t6", "Samir", "Babayev")  # yalnız yük profili, üzvlük yoxdur
             cls.h1 = cls._teacher("h1", "Kamran", "Rzayev", cls.c2, title="docent", role="chair_head")
+            # t1 həm də dekandır (inzibati vəzifə) — ikinci, qeyri-əsas üzvlük.
+            Membership.objects.create(
+                user=cls.t1,
+                organization=cls.org,
+                role=cls.org.roles.get(name="dean"),
+                scope_unit=cls.f2,
+                is_primary=False,
+                is_active=True,
+            )
+            UserProfile.objects.filter(user=cls.t5).update(staff_position="Metodist")
 
             cls._profile(cls.t1, "1.00", position="dosent")
+            cls._profile(cls.t1, "0.50", position="muellim", year="2025/2026")
             cls._profile(cls.t2, "0.50", position="bas_muellim")
             cls._profile(cls.t3, "1.00", external=True)
             cls._profile(cls.t6, "1.00")
@@ -150,11 +161,11 @@ class HrAnalyticsTest(TestCase):
         return user
 
     @classmethod
-    def _profile(cls, user, fraction, *, position="muellim", external=False):
+    def _profile(cls, user, fraction, *, position="muellim", external=False, year=YEAR):
         TeacherWorkloadProfile.objects.create(
             organization=cls.org,
             teacher=user,
-            academic_year=YEAR,
+            academic_year=year,
             position=position,
             staff_fraction=fraction,
             is_external=external,
@@ -326,9 +337,114 @@ class HrAnalyticsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("spreadsheetml", response["Content-Type"])
         workbook = load_workbook(io.BytesIO(response.content))
-        self.assertEqual(len(workbook.sheetnames), 6)
-        names = [row[0] for row in workbook.worksheets[0].iter_rows(min_row=2, values_only=True)]
+        self.assertEqual(len(workbook.sheetnames), 7)
+        people = list(workbook.worksheets[0].iter_rows(values_only=True))
+        self.assertIn("İnzibati vəzifə", people[0])
+        names = [row[0] for row in people[1:]]
         self.assertEqual(len(names), 2)
+        admin_col = people[0].index("İnzibati vəzifə")
+        self.assertIn("Humanitar", next(row[admin_col] for row in people[1:] if row[1] == "t1"))
+        history = list(workbook.worksheets[1].iter_rows(values_only=True))
+        self.assertEqual(history[0][3], "Tədris ili")
+        t1_years = [row[3] for row in history[1:] if row[1] == "t1"]
+        self.assertEqual(t1_years, [YEAR, "2025/2026"])
         log = AuditLog.objects.filter(resource_type="accounts.hr_analytics").latest("created_at")
         self.assertEqual(log.new_values["rows"], 2)
         self.assertEqual(log.user_id, self.hr.pk)
+
+    # ── Sahib 2026-10-11: hesab / inzibati vəzifə / dərəcə / band filtrləri, sıralama, tarixçə ───
+    def test_account_admin_degree_and_band_filters(self):
+        cases = {
+            "hr_status": ("active", {"t1", "t2", "t4", "t5", "t6", "h1"}),
+            "hr_status=stopped": ("stopped", {"t3"}),
+            "hr_status=blocked": ("blocked", {"t3"}),
+            "hr_status=never": ("never", {"t2"}),
+            "hr_status=initial": ("initial", {"t2"}),
+            "hr_admin": ("any", {"t1", "t5", "h1"}),
+            "hr_admin=none": ("none", {"t2", "t3", "t4", "t6"}),
+            "hr_admin=dean": ("dean", {"t1"}),
+            "hr_admin=chair_head": ("chair_head", {"h1"}),
+            "hr_degree": ("phd", {"t1"}),
+            "hr_degree=none": ("none", {"t2", "t4", "t5", "t6", "h1"}),
+            "hr_band": ("none", {"t3", "t4", "t5", "t6", "h1"}),
+            "hr_q=admin": ("dean humanitar", {"t1"}),  # inzibati vəzifə + vahid adı axtarışdadır
+        }
+        for label, (value, expected) in cases.items():
+            param = label.split("=")[0]
+            with self.subTest(filter=label):
+                _actor, _filters, rows = self._rows(**{param: value})
+                self.assertEqual({row["username"] for row in rows}, expected)
+        # Tanınmayan dəyərlər səssizcə boşalır (500 yox); rol adı yalnız datada varsa qəbul olunur.
+        _actor, filters, rows = self._rows(hr_status="x", hr_admin="rector", hr_degree="y", hr_band="z")
+        self.assertEqual((filters.status, filters.admin, filters.degree, filters.band, len(rows)), ("", "", "", "", 7))
+        _actor, filters, _rows = self._rows(hr_admin="../etc")
+        self.assertEqual(filters.admin, "")
+
+    def test_admin_roles_and_staff_position_on_rows(self):
+        _actor, _filters, rows = self._rows()
+        by = self._by_name(rows)
+        self.assertEqual([item["role"] for item in by["t1"]["admin_roles"]], ["dean"])
+        self.assertEqual(by["t1"]["admin_roles"][0]["unit"], "Humanitar")
+        self.assertIn("Humanitar", by["t1"]["admin_label"])
+        self.assertEqual(by["h1"]["admin_role_names"], ["chair_head"])
+        self.assertEqual(by["t5"]["admin_label"], "Metodist")
+        self.assertEqual(by["t2"]["admin_label"], "")
+
+    def test_people_sorting(self):
+        def usernames(**params):
+            panel = build_panel(self._request(self.hr, hr_tab="people", **params))
+            return [row["username"] for row in panel["people"]["results"]]
+
+        self.assertEqual(usernames()[0], "t6")  # ad üzrə (Babayev) — defolt
+        by_staff = usernames(hr_sort="-staff")
+        self.assertEqual(by_staff[:2], ["t1", "t6"])  # 1,00 · 1,00 (azalan: ad tərsinə)
+        self.assertEqual(by_staff[2:4], ["t2", "t3"])  # 0,50 · saathesabı
+        self.assertEqual(set(by_staff[4:]), {"t4", "t5", "h1"})  # profilsizlər sonda
+        self.assertEqual(usernames(hr_sort="staff")[0], "t5")
+        self.assertEqual(usernames(hr_sort="-load")[0], "t1")
+        self.assertEqual(usernames(hr_sort="-activity")[0], "t1")
+        self.assertEqual(usernames(hr_sort="status")[-1], "t3")
+        self.assertEqual(usernames(hr_sort="admin")[:3], ["t1", "h1", "t5"])  # vəzifəsi olanlar əvvəl
+        self.assertEqual(usernames(hr_sort="bogus"), usernames())
+        self.assertEqual(usernames(hr_sort="-"), usernames())
+        panel = build_panel(self._request(self.hr, hr_tab="people", hr_sort="-staff"))
+        columns = {col["key"]: col for col in panel["people"]["columns"]}
+        self.assertEqual(columns["staff"]["dir"], "descending")
+        self.assertIn("hr_sort=staff", columns["staff"]["url"])  # ikinci klik istiqaməti çevirir
+        self.assertEqual(columns["name"]["dir"], "")
+        self.assertNotIn("hr_sort", columns["name"]["url"])  # defolt açar URL-ə yazılmır
+        self.assertIn("hr_sort=-staff", panel["tabs"][-1]["url"])  # sıralama tab linklərində qalır
+
+    def test_people_history_and_kpi_filter_wiring(self):
+        panel = build_panel(self._request(self.hr, hr_tab="people", hr_status="active"))
+        rows = {row["username"]: row for row in panel["people"]["results"]}
+        timeline = rows["t1"]["history"]
+        self.assertEqual([item["year"] for item in timeline], [YEAR, "2025/2026"])
+        self.assertEqual([item["staff_short"] for item in timeline], ["1", "0,5"])
+        self.assertTrue(timeline[0]["changed"])
+        self.assertTrue(timeline[0]["current"])
+        self.assertFalse(timeline[1]["changed"])
+        self.assertEqual(rows["t1"]["history_changes"], 1)
+        self.assertEqual(rows["t4"]["staff_short"], "—")
+        self.assertEqual(rows["t2"]["staff_short"], "0,5")
+        self.assertNotIn("t3", rows)  # hr_status=active — dayandırılmış hesab siyahıda yoxdur
+        everyone = build_panel(self._request(self.hr, hr_tab="people"))["people"]["results"]
+        self.assertEqual(next(row["staff_short"] for row in everyone if row["username"] == "t3"), "s/h")
+        tiles = {tile["key"]: tile for tile in panel["kpis"]}
+        self.assertEqual(tiles["active"]["filter"], "active")
+        self.assertTrue(tiles["active"]["pressed"])
+        self.assertFalse(tiles["blocked"]["pressed"])
+        self.assertNotIn("filter", tiles["fill"])
+        self.assertIn('"blocked": "stopped"', panel["kpi_filter_map"])
+        self.assertTrue(panel["is_filtered"])
+
+        client = self._client(self.hr)
+        response = client.get(reverse("accounts:profile_section_fragment", args=[SECTION]), {"hr_tab": "people"})
+        html = response.json()["html"]
+        self.assertIn("hr_analytics.js", html)
+        self.assertIn('data-hr-history-toggle="hr-history-%s"' % self.t1.pk, html)
+        self.assertIn('name="hr_status"', html)
+        self.assertIn('name="hr_admin"', html)
+        self.assertIn('data-ems-kpi-filter="active"', html)
+        self.assertIn('aria-sort="ascending"', html)
+        self.assertIn("2025/2026", html)

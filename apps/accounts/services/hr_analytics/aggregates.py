@@ -27,12 +27,15 @@ def width_class(percent) -> str:
 
 
 def _labels() -> dict:
+    from apps.workload.constants import TeacherPosition
+
     titles = dict(UserProfile.AcademicTitle.choices)
     degrees = dict(UserProfile.AcademicDegree.choices)
     return {
         "title": {**{key: str(titles[key]) for key in C.TITLE_ORDER}, C.TITLE_NONE: str(C.UNSET_LABEL)},
         "degree": {**{key: str(degrees[key]) for key in C.DEGREE_ORDER}, C.DEGREE_NONE: pgettext(C.CTX, "Yoxdur")},
         "staff": {key: str(label) for key, label in C.STAFF_TYPES},
+        "position": {key: str(label) for key, label in TeacherPosition.choices},
     }
 
 

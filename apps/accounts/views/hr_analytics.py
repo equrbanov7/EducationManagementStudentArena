@@ -51,7 +51,7 @@ def hr_analytics_export(request):
     if actor.view_as:
         return JsonResponse({"ok": False, "error": "view_as_read_only"}, status=403)
     rows = apply_filters(all_rows, filters, with_issue=False)
-    payload = xlsx_bytes(build_tables(rows, demographics=actor.can_view_demographics))
+    payload = xlsx_bytes(build_tables(rows, demographics=actor.can_view_demographics, organization=actor.organization))
     _audit(request, actor, filters, len(rows))
     stamp = timezone.localdate().isoformat()
     response = HttpResponse(payload, content_type=_XLSX)

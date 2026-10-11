@@ -19,7 +19,7 @@ import zipfile
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
@@ -126,6 +126,9 @@ class IndividualPlanQueryBudgetTest(_GroupScaleMixin, _StudentsBase):
         self.assertIn("Mühəndislik", xml)
 
 
+# Sahib 2026-10-11: sillabus qaydası semestrdən asılı deyil — defoltda sərbəst iş söndürülüdür və `self`
+# bölməsinə yazı `section.unknown` verir; bu dəstin fixture-ı 8 bölməni doldurur → RİM açarı yanılı kimi.
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True)
 class SyllabusListSectionBudgetTest(TestCase):
     """F-12."""
 
