@@ -229,12 +229,10 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'appeals/css/appeals/_part3.css' %}?v=20260908-calm">
     {% endif %}
     {# U12 — registrar kabinet bölmələri (statik, keşlənən): jurnal/cədvəl/təqvim/analitika #}
-    {% comment %}RESP 2026-09-30: analitika cədvəlləri də `journal-grid-wrap`/`journal-grid`
-    işlədir (müstəqil `registrar/analytics.html` də journal.css yükləyir) — jurnal bölməsi
-    olmayan rolda (İM rəhbəri) cədvəl sürüşmə qabı olmadan mobil ekranın sağından
-    kəsilirdi. Əvvəl analitika qrupunda İKİNCİ nüsxə idi; 2026-10-07-dən hər fayl
-    şablonda BİR dəfədir (kaskad sırası = `data-ems-css-order`).{% endcomment %}
-    {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections or 'analytics' in asset_sections %}
+    {% comment %}2026-10-11: analitika artıq `journal-grid` İŞLƏTMİR (ortaq `ems-table` +
+    `ems-tablescroll`) — journal.css yalnız jurnal bölmələri üçündür. 2026-10-07-dən
+    hər fayl şablonda BİR dəfədir (kaskad sırası = `data-ems-css-order`).{% endcomment %}
+    {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     {% endif %}
     {% if 'my-journal' in asset_sections or 'journal-close' in asset_sections %}
@@ -278,8 +276,7 @@ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260909-empty">
     {% endif %}
     {% if 'analytics' in asset_sections %}
-    {% comment %}`journal.css` yuxarıda (jurnal qrupunda) analitika üçün də gəlir.{% endcomment %}
-    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20260705-1">
+    <link rel="stylesheet" href="{% static 'registrar/css/analytics.css' %}?v=20261011-tidy">
     {% endif %}
     {% comment %}Tədris şöbəsi (ekran 01–04) — YALNIZ düzüm; kart/cədvəl/badge/KPI
     ORTAQ `ems_ui` qatındadır (qabıqda bir dəfə yüklənir).{% endcomment %}

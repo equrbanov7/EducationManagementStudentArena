@@ -18,6 +18,7 @@ from ..._dashboard_helpers import (
     _collect_my_results,
     _collect_pending_answer_items,
     academic_filter_options,
+    academic_filter_selection,
 )
 from ..._dashboard_helpers.cheap_counts import compute_profile_badge_counts
 from ..._helpers import (
@@ -391,8 +392,8 @@ class _Stage1Mixin:
                     self.assigned_courses_qs = self.assigned_courses_qs.filter(courses_q)
                 self.assigned_courses = list(self.assigned_courses_qs[:20])
             if self.active_section == "my-results":
-                self.my_results_year = (self.request.GET.get("results_year", "") or "").strip()
-                self.my_results_season = (self.request.GET.get("results_season", "") or "").strip()
+                # İlk açılışda cari semestr (payız/yaz) defoltdur — bax `academic_filter_selection`.
+                self.my_results_year, self.my_results_season = academic_filter_selection(self.request)
                 self.my_result_items, self.my_result_counts, self.my_results_active_filter = _collect_my_results(
                     self.request,
                     filter_type=self.request.GET.get("results_type"),

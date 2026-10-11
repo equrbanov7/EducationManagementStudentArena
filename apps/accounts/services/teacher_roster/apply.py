@@ -7,6 +7,9 @@
 * paketin manifesti (kim bloklandı, hansı sahə köhnə → yeni) BİR audit qeydində saxlanılır
   (``resource_type=accounts.teacher_roster_batch``, ``resource_id=<batch>``) — ``undo`` onu oxuyur.
 
+``--create-missing``: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı (``create.py``); manifestin ``created``
+siyahısı ``undo``-da hesabı silir (toxunulmayıbsa) və ya bloklayır (istifadə olunubsa).
+
 ``undo`` yalnız HƏLƏ də bu paketin vəziyyətində qalanı qaytarır: başqa səbəblə yenidən bloklanmış və ya
 sonradan əl ilə dəyişdirilmiş sahələrə toxunmur. Təkrar ``undo`` zərərsizdir (idempotent).
 """
@@ -82,9 +85,18 @@ def _apply_profile(user, changes: dict, *, actor, organization, batch_id) -> dic
     return {"user": user.pk, "before": before, "after": after}
 
 
-def execute(plan, *, actor, reason: str, batch_id: str = "", do_updates=True, do_blocks=True) -> dict:
-    """Planı yazır. Çağıran ``rls_worker_atomic`` + RLS konteksti içində olmalıdır (bir tranzaksiya)."""
+def execute(
+    plan, *, actor, reason: str, batch_id: str = "", do_updates=True, do_blocks=True, keep_passwords=False
+) -> dict:
+    """Planı yazır. Çağıran ``rls_worker_atomic`` + RLS konteksti içində olmalıdır (bir tranzaksiya).
+
+    ``plan.new_accounts`` doludursa (``--create-missing``) «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı
+    yaradılır (bax ``create.py``); birdəfəlik parollar YALNIZ ``keep_passwords`` ilə nəticənin
+    ``credentials`` açarında qayıdır (manifestə/audit-ə yazılmır).
+    """
     from apps.workload.public import sync_roster_profile
+
+    from .create import create_accounts
 
     reason = clean_reason(reason)
     batch_id = batch_id or new_batch_id()
@@ -94,7 +106,24 @@ def execute(plan, *, actor, reason: str, batch_id: str = "", do_updates=True, do
         .objects.select_related("profile")
         .in_bulk([*plan.users.keys(), *(account.user_id for account in plan.block)])
     )
-    manifest = {"academic_year": plan.academic_year, "profiles": [], "workload": [], "blocked": [], "failed": []}
+    manifest = {
+        "academic_year": plan.academic_year,
+        "profiles": [],
+        "workload": [],
+        "blocked": [],
+        "failed": [],
+        "created": [],
+    }
+    credentials = []
+    if plan.new_accounts:
+        manifest["created"], created_workload, credentials = create_accounts(
+            plan.new_accounts,
+            plan=plan,
+            actor=actor,
+            tag=marker(batch_id),
+            keep_passwords=keep_passwords,
+        )
+        manifest["workload"].extend(created_workload)
 
     if do_updates:
         for user_id, user_plan in plan.users.items():
@@ -150,7 +179,7 @@ def execute(plan, *, actor, reason: str, batch_id: str = "", do_updates=True, do
         resource_id=batch_id,
         resource_repr=f"Forma 7 {plan.academic_year}",
     )
-    return {"batch": batch_id, **manifest}
+    return {"batch": batch_id, **manifest, "credentials": credentials}
 
 
 def _manifest(batch_id: str):
@@ -166,6 +195,8 @@ def undo(batch_id: str, *, actor, reason: str = "") -> dict:
     """Paketi geri qaytarır (bloklar → açılır, sahələr → köhnə dəyər)."""
     from apps.workload.public import restore_roster_profile
 
+    from .create import undo_created
+
     entry = _manifest(batch_id)
     manifest = entry.changes or {}
     organization = entry.organization
@@ -175,7 +206,7 @@ def undo(batch_id: str, *, actor, reason: str = "") -> dict:
     ids = {*manifest.get("blocked", []), *(item["user"] for item in manifest.get("profiles", []))}
     ids |= {item["user"] for item in manifest.get("workload", [])}
     users = get_user_model().objects.select_related("profile").in_bulk(list(ids))
-    result = {"batch": batch_id, "unblocked": [], "profiles": 0, "workload": {}, "skipped": []}
+    result = {"batch": batch_id, "unblocked": [], "profiles": 0, "workload": {}, "skipped": [], "created": {}}
 
     for user_id in manifest.get("blocked", []):
         user = users.get(user_id)
@@ -219,6 +250,12 @@ def undo(batch_id: str, *, actor, reason: str = "") -> dict:
             reason=note,
         )
         result["workload"][outcome] = result["workload"].get(outcome, 0) + 1
+
+    # Yaradılmış hesablar SONDA: yük profili yuxarıda artıq geri alınıb, hesab «təmiz»dirsə silinir.
+    if manifest.get("created"):
+        result["created"] = undo_created(
+            manifest["created"], actor=actor, organization=organization, tag=tag, note=note
+        )
 
     log_action(
         AuditAction.UPDATE,

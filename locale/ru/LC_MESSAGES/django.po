@@ -95818,3 +95818,64 @@ msgid ""
 msgstr ""
 "Показаны последние созданные аккаунты — ищите по имени, фамилии, email или "
 "FIN."
+
+msgctxt "registrar.analytics"
+msgid "Hələ yekunlaşmış qiymət yoxdur"
+msgstr "Итоговых оценок пока нет"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "%(passed)s / %(definite)s yekunlaşmış nəticə"
+msgstr "%(passed)s / %(definite)s итоговых результатов"
+
+msgctxt "registrar.analytics"
+msgid "Yekunlaşmış qiymət olmadan hesablanmır"
+msgstr "Не рассчитывается без итоговых оценок"
+
+msgctxt "registrar.analytics"
+msgid "Kredit-çəkili, 100 bal şkalası"
+msgstr "Взвешено по кредитам, 100-балльная шкала"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində: %(count)s qeydiyyat"
+msgstr "Превышен лимит пропусков: %(count)s записей"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində qeydiyyat yoxdur"
+msgstr "Нет записей с превышением лимита пропусков"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Proqram: %(programs)s · qrup: %(groups)s"
+msgstr "Программ: %(programs)s · групп: %(groups)s"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Yekunlaşıb: %(done)s · davam edir: %(open)s"
+msgstr "Завершено: %(done)s · в процессе: %(open)s"
+
+msgctxt "registrar.analytics"
+msgid ""
+"Seçilmiş semestrdə əhatənizdəki qruplara fənn qeydiyyatı yoxdur. Yuxarıdan "
+"başqa semestr seçin."
+msgstr ""
+"В выбранном семестре у групп в вашей зоне нет записей на дисциплины. "
+"Выберите другой семестр выше."
+
+msgctxt "registrar.analytics"
+msgid ""
+"Keçid faizi və orta GPA yalnız yekunlaşmış nəticələrdən hesablanır; hələ "
+"yoxdursa «—»."
+msgstr ""
+"Процент сдачи и средний GPA считаются только по итоговым результатам; «—» — "
+"их пока нет."
+
+msgctxt "registrar.analytics"
+msgid "Sətir sayı"
+msgstr "Количество строк"
+
+msgctxt "registrar.analytics"
+msgid "«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlarının sayı."
+msgstr ""
+"«Превышен лимит» — число записей на дисциплины, превысивших лимит пропусков."

@@ -148,6 +148,38 @@ def academic_filter_options(request) -> tuple[list, list]:
     return list(data.get("year_options") or []), list(data.get("season_options") or [])
 
 
+def _is_current_period(period, today) -> bool:
+    if period is None:
+        return False
+    if getattr(period, "is_current", False):
+        return True
+    start, end = getattr(period, "start_date", None), getattr(period, "end_date", None)
+    return bool(start and end and start <= today <= end)
+
+
+def academic_filter_selection(request) -> tuple[str, str]:
+    """«Nəticələrim» il/semestr süzgəcinin seçimi (sahib 2026-10-11).
+
+    Parametrlər URL-də VARSA (boş da olsa — «Bütün illər» qəsdən seçilib) toxunulmur. Heç biri yoxdursa (ilk
+    açılış) CARİ semestr defolt seçilir: əvvəl ``is_current`` dövrü, yoxdursa bu günü əhatə edən dövr — payızda
+    payız, yazda yaz fənləri; tələbənin həmin dövrdə fənni yoxdursa defolt QOYULMUR (ekran boş qalmasın).
+    """
+    params = request.GET
+    if "results_year" in params or "results_season" in params:
+        return (params.get("results_year", "") or "").strip(), (params.get("results_season", "") or "").strip()
+    data = academic_record_for(request)
+    semesters = data.get("semesters") or []
+    today = timezone.localdate()
+    flagged = [s for s in semesters if getattr(s.get("period"), "is_current", False)]
+    candidates = flagged or [s for s in semesters if _is_current_period(s.get("period"), today)]
+    for semester in candidates:
+        year = getattr(semester.get("period"), "year_display", "") or ""
+        season = semester.get("season") or ""
+        if year or season:
+            return year, season
+    return "", ""
+
+
 def collect_academic_items(request, *, year="", season="") -> list[dict]:
     """Akademik fənn nəticələrini "Nəticələrim" kart sözlüklərinə çevirir.
 
@@ -234,6 +266,7 @@ def _build_item(row, *, period_label, sort_at) -> dict:
 
 
 __all__ = [
+    "academic_filter_selection",
     "academic_filter_options",
     "academic_record_for",
     "collect_academic_items",
