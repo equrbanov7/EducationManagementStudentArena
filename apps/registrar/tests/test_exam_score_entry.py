@@ -440,6 +440,7 @@ class ExamScoreEntryNarrowedPermissionTests(TestCase):
         # Rektor `*` ilə əhatə olunur; qalanlar YALNIZ imtahan mərkəzinin qərar rollarıdır.
         # 2026-09-06-dan sonra imtahan mərkəzi TƏK roldur (`exam_center` birləşdirildi).
         # Sahibin qərarı (2026-09-14): RİM rəhbəri (`ikt_rehber`) də kağız balları köçürür.
-        self.assertEqual(holders - {"rector"}, {"exam_center_head", "ikt_rehber"})
+        # Sahib 2026-10-11: «Qəyyumlar Şurasının sədri» (`board_chair`) rektor kimi `*` daşıyır.
+        self.assertEqual(holders - {"rector", "board_chair"}, {"exam_center_head", "ikt_rehber"})
         for denied in ("teacher", "dean", "chair_head", "vice_rector", "exam_center_staff"):
             self.assertNotIn(denied, holders, f"{denied} yekun imtahan balını yaza bilməməlidir")
