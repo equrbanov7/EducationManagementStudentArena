@@ -178,7 +178,18 @@ def _can_manage_roles(user, organization) -> bool:
     from core.permissions import has_permission
 
     permissions = list(_collect_actor_permissions(user, organization)[0])
-    return has_permission(permissions, "role.assign") or has_permission(permissions, "org.manage_members")
+    if has_permission(permissions, "role.assign") or has_permission(permissions, "org.manage_members"):
+        return True
+    # AÇIQ «Təşkilat Admini» / sahib rolu (adı ilə) — səviyyədən gələn alias DEYİL.
+    from apps.organizations.models import Membership
+
+    return Membership.objects.filter(
+        user=user,
+        organization=organization,
+        is_active=True,
+        role__is_active=True,
+        role__name__in=(ProfileRole.ORG_ADMIN, ProfileRole.ORG_OWNER),
+    ).exists()
 
 
 def _role_capabilities(user, profile):
