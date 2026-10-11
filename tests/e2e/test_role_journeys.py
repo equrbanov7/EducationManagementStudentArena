@@ -32,13 +32,16 @@ def _open_seeded_course_dashboard(page: Page, listing_path: str) -> None:
     dashboard_url = page.evaluate(
         """
         (courseTitle) => {
-            const cards = Array.from(document.querySelectorAll('.course-card'));
+            // Kabinet «Təyin olunmuş kurslar» bölməsində kartın ÖZÜ keçiddir (`a.mc-card[data-mc-card]`);
+            // köhnə siyahı səhifəsində (`.course-card`) keçid kartın içindədir (URL auditi 2026-10-10).
+            const cards = Array.from(document.querySelectorAll('.course-card, [data-mc-card]'));
             const matchingCard = cards.find((card) => (card.textContent || '').includes(courseTitle));
             if (!matchingCard) {
                 return null;
             }
 
-            const match = matchingCard.querySelector('a[href*="/courses/"][href*="/dashboard/"]');
+            const selector = 'a[href*="/courses/"][href*="/dashboard/"]';
+            const match = matchingCard.matches(selector) ? matchingCard : matchingCard.querySelector(selector);
             return match ? match.href : null;
         }
         """,
