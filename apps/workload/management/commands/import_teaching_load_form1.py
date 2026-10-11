@@ -68,6 +68,11 @@ class Command(BaseCommand):
         )
         parser.add_argument("--teacher", action="append", default=[], help="«Soyad Ad=istifadəçi.adı»")
         parser.add_argument("--reassign", action="store_true")
+        parser.add_argument(
+            "--allow-outside-chair",
+            action="store_true",
+            help="Kafedrada tapılmayan müəllim üçün təşkilatda TƏK uyğun aktiv hesabı qəbul et (başqa kafedra/rol)",
+        )
         parser.add_argument("--apply", action="store_true")
 
     def handle(self, *args, **options):
@@ -114,7 +119,12 @@ class Command(BaseCommand):
                 reassign=options["reassign"],
             )
             importer.applier.note = f"«Forma 1» dərs yükü {options['year']} — müəllim bölgüsü sənədə uyğunlaşdırıldı"
-            form1 = Form1Importer(importer=importer, chair=chair, teacher_map=teacher_map)
+            form1 = Form1Importer(
+                importer=importer,
+                chair=chair,
+                teacher_map=teacher_map,
+                allow_outside_chair=options["allow_outside_chair"],
+            )
             self.stdout.write(f"Forma 1: {len(entries)} yük sətri · tapşırıq sətri {task.rows.count()}")
             form1.run(task, entries, skipped)
             self.form1 = form1
