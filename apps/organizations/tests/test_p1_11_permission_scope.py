@@ -299,6 +299,18 @@ class MembersContextCallersTest(_WorldMixin, TestCase):
         self.assertIn(self.student_b.id, hr_ids)
         self.assertTrue(resolve_members_access(_request(self.hr, self.org), self.org).is_org_wide)
 
+    def test_superadmin_with_a_role_membership_is_not_listed(self):
+        """Sahib 2026-10-11: platforma superadmini «Rektor» üzvlüyü olsa belə üzv reyestrində görünmür."""
+        superadmin = User.objects.create_superuser("p111_su", "p111_su@p111.test", PASSWORD)
+        _member(self.org, superadmin, "rector")
+        section = build_members_section(_request(self.hr, self.org), self.org)
+        self.assertNotIn(superadmin.id, {row["user_id"] for row in section["rows"]})
+        access = resolve_members_access(_request(self.hr, self.org), self.org)
+        self.assertFalse(access.memberships.filter(user=superadmin).exists())
+        self.assertIn(self.vice_rector.id, {row["user_id"] for row in section["rows"]})
+        # Üzvlük sətri silinmir — yalnız göstərilmir.
+        self.assertTrue(Membership.objects.filter(user=superadmin, organization=self.org).exists())
+
     def test_members_page_for_lent_dean(self):
         # 2026-10-01: köhnə URL kabinetin «Struktur üzvləri» reyestrinə yönləndirir.
         response = _client(self.dean_lent, self.org).get(

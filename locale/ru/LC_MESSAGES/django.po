@@ -95754,3 +95754,7 @@ msgstr "%(position)s · норма %(norm)s ч"
 msgctxt "accounts.hr_analytics"
 msgid "Əvvəlki ilə nisbətən dəyişib"
 msgstr "Изменилось по сравнению с предыдущим годом"
+
+msgctxt "roles.org_display_name"
+msgid "Qəyyumlar Şurasının sədri"
+msgstr "Председатель Попечительского совета"

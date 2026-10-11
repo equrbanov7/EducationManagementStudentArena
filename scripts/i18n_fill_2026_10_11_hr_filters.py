@@ -121,8 +121,19 @@ _HR = [
     ),
 ]
 
+#: Sahib 2026-10-11: rektordan yuxarı «Qəyyumlar Şurasının sədri» rolu (organizations 0059).
+ROLES = "roles.org_display_name"
+_ROLES = [
+    _t(
+        "Qəyyumlar Şurasının sədri",
+        "Chair of the Board of Trustees",
+        "Председатель Попечительского совета",
+        "Mütevelli Heyeti Başkanı",
+    ),
+]
+
 # ctx → msgid → {az, en, ru, tr}
-ENTRIES = {HR: {row["az"]: row for row in _HR}}
+ENTRIES = {HR: {row["az"]: row for row in _HR}, ROLES: {row["az"]: row for row in _ROLES}}
 
 #: «Yük bandı» türkcədə əvvəl az ilə eyni yazılmışdı (i18n gate: identity borcu).
 FORCE = {(HR, "Yük bandı")}
