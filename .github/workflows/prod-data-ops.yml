@@ -177,7 +177,7 @@ jobs:
             journal_hygiene_report)
               case "$HYGIENE_CATEGORY" in (all|left|empty|not_held) ;; (*) echo "hygiene_category yanlışdır" >&2; exit 2;; esac
               case "$HYGIENE_CODE" in (""|[a-z_]*) ;; (*) echo "hygiene_code yalnız a-z və _" >&2; exit 2;; esac
-              printf '%s' "$HYGIENE_CODE" | grep -Eq '^[a-z_]*$' || { echo "hygiene_code yalnız a-z və _" >&2; exit 2; }
+              test -z "$HYGIENE_CODE" || printf '%s\n' "$HYGIENE_CODE" | grep -Eq '^[a-z_]+$' || { echo "hygiene_code yalnız a-z və _" >&2; exit 2; }
               # Loga ŞƏXS ADI düşməsin: yalnız saylar (--show 0).
               args=(--organization "$ORG" --category "$HYGIENE_CATEGORY" --show 0)
               test -z "$HYGIENE_CODE" || args+=(--code "$HYGIENE_CODE")
