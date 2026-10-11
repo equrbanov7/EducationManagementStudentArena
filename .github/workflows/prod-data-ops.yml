@@ -17,6 +17,14 @@
 #       bloklayır (inzibati rollar qorunur); `batch` verilsə həmin paketi geri qaytarır (--undo).
 #       `create_missing` → YALNIZ «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı (--create-missing);
 #       apply-da birdəfəlik parollar seed_staff_roster kimi şifrəli artifaktdadır, loga yalnız saylar düşür.
+#   import_teaching_task_workbook — paylanmış TAPŞIRIQ kitabçası (ŞİFRƏLİ release asset, `teaching-task-…` →
+#       tapsiriq.xlsx.enc): `task_sheet` vərəqi (defolt Proqramlaşdırma); seçmə blokunda QALIN/«+» seçim, işarəsiz
+#       blok üçün `choices` («144=1,145=1»); mövcud sətirlər mətn dəyişsə də tapılır; `reassign` → fərqli müəllim
+#       düzəliş axını ilə dəyişir (jurnal sahibi də); HƏMİŞƏ --no-create-teachers. `teacher_map` — qeyri-müəyyən ad
+#       işarəsinin açıq həlli («MURAD=istifadəçi.adı»). Loga yalnız saylar; CSV hesabat şifrəli artifaktdadır.
+#   import_teaching_load_form1 — kafedranın «Forma 1» dərs yükü (Word; ŞİFRƏLİ release asset, `teaching-load-…` →
+#       forma1.docx.enc): `task_chair` kafedrasının mövcud tapşırıq sətirlərinə müəllim bölgüsü (tam adla, hesab
+#       yaradılmır); `choices` (cədvəl sətri, 0-dan), `teacher_map` («Soyad Ad=istifadəçi.adı»), `reassign` eyni.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -52,6 +60,8 @@ on:
           - recompute_syllabus_completion
           - journal_hygiene_report
           - reconcile_teacher_roster
+          - import_teaching_task_workbook
+          - import_teaching_load_form1
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -66,7 +76,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster: şifrəli siyahının release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_*: şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -92,6 +102,27 @@ on:
         required: false
         type: boolean
         default: false
+      task_sheet:
+        description: "import_teaching_task_workbook: vərəq (prefiks)"
+        required: false
+        default: "Proqramlaşdırma"
+      task_chair:
+        description: "import_teaching_load_form1: kafedra adı"
+        required: false
+        default: ""
+      reassign:
+        description: "import_teaching_*: fərqli müəllimi düzəliş axını ilə dəyiş"
+        required: false
+        type: boolean
+        default: false
+      choices:
+        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1)"
+        required: false
+        default: ""
+      teacher_map:
+        description: "import_teaching_*: qeyri-müəyyən müəllim — AD=istifadəçi.adı, vergüllə"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -118,33 +149,49 @@ jobs:
       HYGIENE_CODE: ${{ github.event.inputs.hygiene_code }}
       BATCH: ${{ github.event.inputs.batch }}
       CREATE_MISSING: ${{ github.event.inputs.create_missing }}
+      TASK_SHEET: ${{ github.event.inputs.task_sheet }}
+      TASK_CHAIR: ${{ github.event.inputs.task_chair }}
+      REASSIGN: ${{ github.event.inputs.reassign }}
+      CHOICES: ${{ github.event.inputs.choices }}
+      TEACHER_MAP: ${{ github.event.inputs.teacher_map }}
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
-      - name: 🔐 Şifrəli heyət siyahısı
-        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '')
+      - name: 🔐 Şifrəli heyət siyahısı / yük sənədi
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '') || startsWith(github.event.inputs.command, 'import_teaching_')
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
           set -euo pipefail
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
-          case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*|teacher-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1;; esac
+          # Asset adı və konteynerdəki fayl əmrdən asılıdır (tag prefiksi ilə birlikdə yoxlanılır).
+          case "$COMMAND" in
+            import_teaching_task_workbook)
+              printf '%s' "$ROSTER_TAG" | grep -Eq '^teaching-task-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-task-…" >&2; exit 1; }
+              asset=tapsiriq.xlsx.enc; target="/tmp/teaching_task_${GITHUB_RUN_ID}.xlsx" ;;
+            import_teaching_load_form1)
+              printf '%s' "$ROSTER_TAG" | grep -Eq '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
+              asset=forma1.docx.enc; target="/tmp/teaching_load_${GITHUB_RUN_ID}.docx" ;;
+            *)
+              case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*|teacher-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1;; esac
+              asset=roster.xlsx.enc; target="/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" ;;
+          esac
           # Serverdə `gh` YOXDUR — release asset-i birbaşa yüklənir (şifrəlidir; token private repo üçün).
           umask 077
           curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
-            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/roster.xlsx.enc" \
-            -o "$RUNNER_TEMP/roster.xlsx.enc"
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/${asset}" \
+            -o "$RUNNER_TEMP/input.enc"
           openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
-            -in "$RUNNER_TEMP/roster.xlsx.enc" -out "$RUNNER_TEMP/roster.xlsx"
+            -in "$RUNNER_TEMP/input.enc" -out "$RUNNER_TEMP/input.bin"
           # `docker cp` runner UID-sini saxlayır (umask 077 → app istifadəçisi oxuya bilmir) — stdin ilə
           # konteynerin ÖZ istifadəçisi yazır.
-          docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" < "$RUNNER_TEMP/roster.xlsx"
+          docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > $target" < "$RUNNER_TEMP/input.bin"
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
-          rm -f "$RUNNER_TEMP/roster.xlsx" "$RUNNER_TEMP/roster.xlsx.enc"
+          rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
         run: |
           set -euo pipefail
@@ -227,6 +274,28 @@ jobs:
               fi
               custom_apply=1
               ;;
+            import_teaching_task_workbook|import_teaching_load_form1)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              test -z "$CHOICES" || printf '%s' "$CHOICES" | grep -Eq '^[0-9]+=[0-9]+(,[0-9]+=[0-9]+)*$' \
+                || { echo "choices formatı: 144=1,145=1" >&2; exit 2; }
+              test -z "$TEACHER_MAP" || { [ "${#TEACHER_MAP}" -le 1000 ] && printf '%s' "$TEACHER_MAP" | grep -Eq '^[^=,]+=[A-Za-z0-9._-]+(,[^=,]+=[A-Za-z0-9._-]+)*$'; } \
+                || { echo "teacher_map formatı: AD=istifadəçi.adı,…" >&2; exit 2; }
+              report_dir="/tmp/teaching_report_${GITHUB_RUN_ID}"
+              if [ "$COMMAND" = "import_teaching_task_workbook" ]; then
+                test -n "$TASK_SHEET" && [ "${#TASK_SHEET}" -le 60 ] || { echo "task_sheet boş/uzundur" >&2; exit 2; }
+                # Hesab YARADILMIR (sahib 2026-10-12) — --no-create-teachers həmişə.
+                args=(--file "/tmp/teaching_task_${GITHUB_RUN_ID}.xlsx" --org "$ORG" --year "$YEAR" --actor "$actor"
+                      --sheet "$TASK_SHEET" --report "$report_dir" --no-create-teachers)
+              else
+                test -n "$TASK_CHAIR" && [ "${#TASK_CHAIR}" -le 120 ] || { echo "task_chair verilməlidir" >&2; exit 2; }
+                args=(--file "/tmp/teaching_load_${GITHUB_RUN_ID}.docx" --org "$ORG" --year "$YEAR" --actor "$actor"
+                      --chair "$TASK_CHAIR" --report "$report_dir")
+              fi
+              test -z "$CHOICES" || args+=(--choice "$CHOICES")
+              test -z "$TEACHER_MAP" || args+=(--teacher "$TEACHER_MAP")
+              test "$REASSIGN" != "true" || args+=(--reassign)
+              ;;
             sync_plan_offerings)
               actor="$(superadmin_actor)"
               test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -261,6 +330,19 @@ jobs:
             grep -E '^(DRY-RUN|\(DRY-RUN|Bloklandı|Yeniləndi|Geri qaytarıldı|Paket|YAZILDI|GERİ QAYTARILDI|  YENİ HESAB|  yaradılmış hesablar)' "$RUNNER_TEMP/out.log" | cut -c1-160 >> "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' | cut -c1-200 || true; exit "$status"; }
+          elif [ "$COMMAND" = "import_teaching_task_workbook" ] || [ "$COMMAND" = "import_teaching_load_form1" ]; then
+            # Hesabat CSV-də şəxs adları var → loga YALNIZ saylar (əmr özü ad çap etmir; yenə də süzülür),
+            # CSV şifrəli artifaktdadır (aşağıdakı addım).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            for f in tapsiriq_import.csv forma1_import.csv; do
+              if docker exec "$APP_CONTAINER" test -s "/tmp/teaching_report_${GITHUB_RUN_ID}/$f"; then
+                docker exec "$APP_CONTAINER" cat "/tmp/teaching_report_${GITHUB_RUN_ID}/$f" > "$RUNNER_TEMP/details.csv"
+              fi
+            done
+            grep -E '^([a-z_]+=[0-9]+( · [a-z_]+=[0-9]+)*|Forma 1: [0-9]+ .*|  · vərəq → kafedra: .*|Yaradılan [^:]+: [0-9]+|Qeyri-müəyyən [^:]+: [0-9]+|DRY-RUN.*)$' \
+              "$RUNNER_TEMP/out.log" | cut -c1-2000 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'CommandError|Error|Exception' | cut -c1-200 || true; exit "$status"; }
           elif [ "$COMMAND" = "seed_staff_roster" ]; then
             # Repo/loglar AÇIQDIR: heyət hesabatında şəxs adları var → loga yalnız saylar düşür,
             # tam hesabat şifrəli artifakt kimi yüklənir (aşağıdakı addımlar).
@@ -282,7 +364,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_'))
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -316,8 +398,8 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster' || startsWith(github.event.inputs.command, 'import_teaching_'))
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true

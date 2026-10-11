@@ -3,6 +3,11 @@
 Sahibin qərarı 2026-09-19: fənn/qrup/ixtisas yoxdursa yaradılır; müəllim tapılmırsa
 yarım məlumatla yaradılır, qeyri-müəyyəndirsə vakant qalır; bölgü təsdiqi →
 ``CourseOffering`` + tələbə qeydiyyatı. Oxunma qaydaları `task_workbook_parsing`-dədir.
+
+2026-10-12: seçmə blokunda seçim QALIN şriftlə (`task_workbook_choice`); işarəsiz blok
+sətri yaradılmır; mövcud sətirlər mətn dəyişsə də tapılır (`task_row_matching`); müəllim
+dəyişikliyi ``--reassign`` ilə düzəliş axınından (`task_load_reassign`); ``--no-create-teachers``
+ilə heç bir hesab yaradılmır (`task_workbook_teachers`).
 """
 
 from __future__ import annotations
@@ -12,10 +17,9 @@ import re
 import secrets
 from collections import Counter
 
-from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 
-from apps.organizations.models import AcademicPeriod, Membership, OrgUnit, Role
+from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.registrar.models import CourseOffering, StudentAcademicRecord, Subject
 from apps.registrar.public import enroll_student_in_subject
 from apps.workload.constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, RowKind, TaskStatus
@@ -23,8 +27,16 @@ from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRo
 from apps.workload.services.assignments import assign_teacher, remaining_hours
 from apps.workload.services.distribution import confirm_distribution
 from apps.workload.services.imports import normalize
-from apps.workload.services.people import chair_teacher_memberships
 from apps.workload.services.scoping import resolve_actor
+from apps.workload.services.task_load_reassign import (
+    ASSIGNED,
+    REASSIGNED,
+    UNCHANGED,
+    WOULD_ASSIGN,
+    RowPlanApplier,
+)
+from apps.workload.services.task_row_matching import GROUPS_CHANGED, SUBJECT_CHANGED, RowMatcher
+from apps.workload.services.task_workbook_choice import CHOSEN_NONE
 from apps.workload.services.task_workbook_parsing import (
     _ITEM_RE,
     _QKU_CODE_RE,
@@ -36,26 +48,45 @@ from apps.workload.services.task_workbook_parsing import (
     _int,
     _key,
     _special_row_kind,
-    _title_az,
     block_chosen_subject,
     clean_subject_name,
     group_year_from_name,
     is_block,
     slug_name,
     split_tokens,
+    with_choice,
 )
+from apps.workload.services.task_workbook_teachers import TeacherResolverMixin
 from apps.workload.services.tasks import resolve_specialty_and_faculty
 from core.constants import OrgUnitType
 
 
-class Importer:
-    def __init__(self, *, organization, year: str, actor_user, apply: bool, stdout):
+class Importer(TeacherResolverMixin):
+    def __init__(
+        self,
+        *,
+        organization,
+        year: str,
+        actor_user,
+        apply: bool,
+        stdout,
+        create_teachers: bool = True,
+        reassign: bool = False,
+    ):
         self.org = organization
         self.year = year
         self.actor_user = actor_user
         self.actor = resolve_actor(actor_user, organization)
         self.apply = apply
         self.stdout = stdout
+        self.create_teachers = create_teachers
+        self.applier = RowPlanApplier(
+            organization=organization,
+            actor=self.actor,
+            apply=apply,
+            reassign=reassign,
+            note=f"Rəsmi TAPŞIRIQ kitabçası {year} — müəllim bölgüsü sənədə uyğunlaşdırıldı",
+        )
         self.report_rows: list[dict] = []
         self.counters: Counter = Counter()
         self.subject_index = {normalize(s.name): s for s in Subject.objects.filter(organization=organization)}
@@ -87,8 +118,9 @@ class Importer:
         self.ambiguous_teachers: list[str] = []
 
     # ── köməkçilər ────────────────────────────────────────────────────────
-    def note(self, **fields):
+    def note(self, **fields) -> dict:
         self.report_rows.append(fields)
+        return fields
 
     def ensure_periods(self):
         for season, (name, start, end) in PERIODS.items():
@@ -157,11 +189,14 @@ class Importer:
         self.created_specialties.append(full_name)
         return unit
 
-    def resolve_subject(self, raw: str, chair, credits: str, special_kind: str = "") -> tuple:
-        """→ (Subject|None, action, resolved_name). Xüsusi sətir (təcrübə/buraxılış) fənn YARATMIR."""
+    def resolve_subject(self, raw: str, chair, credits: str, special_kind: str = "", chosen=None) -> tuple:
+        """→ (Subject|None, action, resolved_name). Xüsusi sətir (təcrübə/buraxılış) fənn YARATMIR.
+
+        ``chosen`` — zəngin mətndən (qalın/«+»/override) əvvəlcədən seçilmiş bənd."""
         candidates = [raw]
         block = is_block(raw)
-        chosen = block_chosen_subject(raw) if block else ""
+        if chosen is None:
+            chosen = block_chosen_subject(raw) if block else ""
         if chosen:
             candidates.insert(0, chosen)
         single = clean_subject_name(raw)
@@ -245,138 +280,8 @@ class Importer:
         self.created_groups.append(token)
         return [(unit, "created")]
 
-    def _teacher_candidates(self, token: str, chair) -> list:
-        """Ad (böyük hərflə, bəzən soyad inisialı ilə) → kafedra, sonra təşkilat üzrə müəllimlər."""
-        parts = token.replace("I", "İ").split()
-        first = slug_name(parts[0]) if parts else ""
-        initial = slug_name(parts[1])[:1] if len(parts) > 1 else ""
-        if not first:
-            return []
-
-        def pick(memberships):
-            seen = {}
-            for membership in memberships:
-                user = membership.user
-                if user is None or not user.is_active or user.pk in seen:
-                    continue
-                if slug_name(user.first_name) != first:
-                    continue
-                if initial and slug_name(user.last_name)[:1] != initial:
-                    continue
-                seen[user.pk] = user
-            return list(seen.values())
-
-        found = pick(chair_teacher_memberships(self.org, chair, include_unscoped=False))
-        if found:
-            return found
-        org_wide = Membership.objects.filter(
-            organization=self.org, is_active=True, role__name__in=("teacher", "assistant"), role__is_active=True
-        ).select_related("user")
-        return pick(org_wide)
-
-    def resolve_teacher(self, token: str, chair) -> tuple:
-        """→ (User|None, action). Eyni ad-soyadlı dublikatlar ən köhnə hesaba yığılır."""
-        token = token.strip()
-        cache_key = (slug_name(token), chair.pk)
-        if cache_key in self.teacher_cache:
-            return self.teacher_cache[cache_key]
-        candidates = self._teacher_candidates(token, chair)
-        by_full = {}
-        for user in candidates:
-            by_full.setdefault(f"{slug_name(user.first_name)}.{slug_name(user.last_name)}", []).append(user)
-        result: tuple
-        if len(by_full) > 1:
-            # Eyni ad, fərqli soyad: keçən illərdə bu kafedranın fənlərini kim aparıb?
-            preferred = self._prefer_by_history(chair, [users for users in by_full.values()])
-            if preferred is not None:
-                by_full = {k: v for k, v in by_full.items() if preferred in v}
-        if len(by_full) == 1:
-            users = self._order_duplicates(next(iter(by_full.values())))
-            result = (users[0], "matched" if len(users) == 1 else "matched_duplicate_accounts")
-        elif len(by_full) > 1:
-            result = (None, "ambiguous:" + " / ".join(sorted(by_full)))
-            self.ambiguous_teachers.append(f"{token} → {' / '.join(sorted(by_full))}")
-        else:
-            result = (self._create_teacher(token, chair), "created")
-        if (
-            result[0] is not None
-            and result[0].pk
-            and not chair_teacher_memberships(self.org, chair).filter(user=result[0]).exists()
-        ):
-            self.counters["membership_added"] += 1
-            if self.apply:
-                role = Role.objects.get(organization=self.org, name="teacher")
-                Membership.objects.get_or_create(
-                    organization=self.org,
-                    user=result[0],
-                    role=role,
-                    scope_unit=chair,
-                    defaults={"is_active": True, "assigned_by": self.actor_user},
-                )
-            result = (result[0], result[1] + "+chair_membership")
-        self.teacher_cache[cache_key] = result
-        return result
-
-    def _order_duplicates(self, users):
-        """Dublikat hesablar: RİM rəhbəri üzvlüyü / son giriş / e-poçt olan hesab önə."""
-
-        def rank(user):
-            is_head = Membership.objects.filter(
-                organization=self.org, user=user, is_active=True, role__name="ikt_rehber"
-            ).exists()
-            return (not is_head, user.last_login is None, not bool(user.email), user.pk)
-
-        return sorted(users, key=rank)
-
-    def _prefer_by_history(self, chair, groups_of_users):
-        """Fərqli soyadlı namizədlərdən kafedranın fənlərini əvvəl aparanı seçir (yeganə olsa)."""
-        scores = []
-        for users in groups_of_users:
-            count = CourseOffering.objects.filter(
-                organization=self.org, instructor__in=users, subject__chair_unit=chair
-            ).count()
-            scores.append((count, users[0]))
-        scores.sort(key=lambda item: -item[0])
-        if scores and scores[0][0] > 0 and (len(scores) == 1 or scores[1][0] == 0):
-            return scores[0][1]
-        return None
-
-    def _create_teacher(self, token: str, chair):
-        User = get_user_model()
-        first = _title_az(token.replace("I", "İ").split()[0])
-        base = slug_name(first) or "muellim"
-        username, suffix = base, 2
-        while User.objects.filter(username__iexact=username).exists():
-            username, suffix = f"{base}{suffix}", suffix + 1
-        self.counters["teacher_created"] += 1
-        self.created_teachers.append(f"{first} ({username})")
-        if not self.apply:
-            return User(username=username, first_name=first, is_active=True)
-        user = User.objects.create_user(
-            username=username, email="", password=secrets.token_urlsafe(12), first_name=first
-        )
-        profile = getattr(user, "profile", None)
-        if profile is not None:
-            profile.organization = self.org
-            profile.password_change_required = True
-            profile.email_verified = False
-            profile.save(update_fields=["organization", "password_change_required", "email_verified", "updated_at"])
-        role = Role.objects.get(organization=self.org, name="teacher")
-        Membership.objects.create(
-            organization=self.org, user=user, role=role, scope_unit=chair, is_active=True, assigned_by=self.actor_user
-        )
-        return user
-
     # ── əsas axın ─────────────────────────────────────────────────────────
-    def import_sheet(self, title: str, records: list[dict]):
-        chair = self.chair_for_sheet(title)
-        if chair is None:
-            self.stdout.write(f"  ! «{title}» vərəqi üçün kafedra tapılmadı — ötürüldü")
-            self.counters["sheet_skipped"] += 1
-            return
-        if not records:
-            self.stdout.write(f"  · «{title}» ({chair.name}): sətir yoxdur — ötürüldü")
-            return
+    def _task_for(self, chair):
         task = TeachingTask.objects.filter(organization=self.org, chair=chair, academic_year=self.year).first()
         if task is None:
             self.counters["task_created"] += 1
@@ -388,113 +293,157 @@ class Importer:
                     created_by=self.actor_user,
                     status=TaskStatus.DRAFT,
                 )
-        existing = set()
-        if task is not None and task.pk:
-            existing = set(task.rows.values_list("season", "subject_text", "groups_text"))
-        rows_to_assign: list[tuple] = []
+        return task
+
+    def _resolve_groups(self, record, chair) -> tuple[list, list]:
+        tokens = split_tokens(record["groups_text"])
+        spec_tokens = [t for t in _SPLIT_RE.split(record["specialty_text"]) if t.strip()]
+        groups, group_actions = [], []
+        for position, token in enumerate(tokens):
+            # İxtisas sütunu qrup sayından azdırsa artıq qruplar üçün ƏVVƏLCƏ qrup
+            # kodunun hərfləri («236 M» → Meşəçilik), sonra ilk ixtisas mətni.
+            if position < len(spec_tokens):
+                spec_text = spec_tokens[position]
+            elif self.resolve_specialty("", token, None) is not None:
+                spec_text = ""
+            else:
+                spec_text = spec_tokens[0] if spec_tokens else ""
+            specialty = self.resolve_specialty(spec_text, token, chair)
+            self._current_spec_text = spec_text
+            for unit, action in self.resolve_group(token, specialty):
+                group_actions.append(f"{unit.name if unit is not None else token}:{action}")
+                if unit is not None and unit.pk:
+                    groups.append(unit)
+        return groups, group_actions
+
+    def import_sheet(self, title: str, records: list[dict]):
+        chair = self.chair_for_sheet(title)
+        if chair is None:
+            self.stdout.write(f"  ! «{title}» vərəqi üçün kafedra tapılmadı — ötürüldü")
+            self.counters["sheet_skipped"] += 1
+            return
+        if not records:
+            self.stdout.write(f"  · «{title}» ({chair.name}): sətir yoxdur — ötürüldü")
+            return
+        task = self._task_for(chair)
+        existing_rows = task.rows.prefetch_related("groups") if task is not None and task.pk else []
+        matcher = RowMatcher(existing_rows)
+        rows_to_plan: list[tuple] = []
         for record in records:
-            special_kind = _special_row_kind(record)
-            subject, subject_action, subject_name = self.resolve_subject(
-                record["subject_text"], chair, record["credits"], special_kind
-            )
-            tokens = split_tokens(record["groups_text"])
-            spec_tokens = [t for t in _SPLIT_RE.split(record["specialty_text"]) if t.strip()]
-            groups, group_actions = [], []
-            for position, token in enumerate(tokens):
-                # İxtisas sütunu qrup sayından azdırsa artıq qruplar üçün ƏVVƏLCƏ qrup
-                # kodunun hərfləri («236 M» → Meşəçilik), sonra ilk ixtisas mətni.
-                if position < len(spec_tokens):
-                    spec_text = spec_tokens[position]
-                elif self.resolve_specialty("", token, None) is not None:
-                    spec_text = ""
-                else:
-                    spec_text = spec_tokens[0] if spec_tokens else ""
-                specialty = self.resolve_specialty(spec_text, token, chair)
-                self._current_spec_text = spec_text
-                for unit, action in self.resolve_group(token, specialty):
-                    group_actions.append(f"{unit.name if unit is not None else token}:{action}")
-                    if unit is not None and unit.pk:
-                        groups.append(unit)
-            teacher_tokens = [t for t in re.split(r"\s*[-–]\s*", record["teacher_text"]) if t.strip()]
-            teachers = []
-            for token in teacher_tokens:
-                user, action = self.resolve_teacher(token, chair)
-                teachers.append((token, user, action))
-            specialty_unit, faculty = (groups[0].parent, None) if groups else (None, None)
-            if specialty_unit is not None:
-                specialty_unit, faculty = resolve_specialty_and_faculty(self.org, specialty_unit.pk)
-            key = (record["season"], record["subject_text"][:255], record["groups_text"][:255])
-            row_action = "exists" if key in existing else "created"
-            row = None
-            if row_action == "created":
-                self.counters["row_created"] += 1
-                if self.apply:
-                    row = TeachingTaskRow(
-                        organization=self.org,
-                        task=task,
-                        season=record["season"],
-                        row_kind=special_kind or RowKind.TEACHING,
-                        period=self.periods[record["season"]],
-                        subject=subject if subject is not None and subject.pk else None,
-                        subject_text=record["subject_text"][:255],
-                        specialty=specialty_unit,
-                        specialty_text=record["specialty_text"][:255],
-                        faculty=faculty,
-                        groups_text=record["groups_text"][:255],
-                        student_count=record["student_count"],
-                        student_count_text=record["student_count_text"][:100],
-                        union_count=record["union_count"],
-                        subgroup_count=record["subgroup_count"],
-                        lecture_plan=record.get("lecture_plan", 0),
-                        lecture_total=record["lecture_total"],
-                        seminar_plan=record.get("seminar_plan", 0),
-                        seminar_total=record["seminar_total"],
-                        lab_plan=record.get("lab_plan", 0),
-                        lab_total=record["lab_total"],
-                        consult_hours=record.get("consult_hours", 0),
-                        exam_hours=record.get("exam_hours", 0),
-                        thesis_hours=record.get("thesis_hours", 0),
-                        postgrad_hours=record.get("postgrad_hours", 0),
-                        practice_research_hours=record.get("practice_research_hours", 0),
-                        practice_production_hours=record.get("practice_production_hours", 0),
-                        credits=record["credits"][:20],
-                        credits_value=_int(record["credits"]),
-                    )
-                    row.total_hours = record["total_hours"] or row.computed_total_hours
-                    row.save()
-                    if groups:
-                        row.groups.set(groups)
-            elif task is not None:
-                row = task.rows.filter(season=key[0], subject_text=key[1], groups_text=key[2]).first()
-            if teachers and row is not None:
-                rows_to_assign.append((row, teachers))
-            elif teachers:
-                self.counters["assignment_planned"] += 1
-            self.note(
+            record = with_choice(record)
+            entry = self.note(
                 sheet=title,
                 line=record["line"],
                 season=record["season"],
-                subject_raw=clean_subject_name(record["subject_text"]),
-                subject_action=subject_action,
-                subject_resolved=subject_name,
                 groups_raw=record["groups_text"].replace("\n", " | "),
-                groups=" ; ".join(group_actions),
+                subject_raw=clean_subject_name(record["subject_text"]),
+                chosen_subject=record["chosen_subject"],
+                chosen_by=record["chosen_by"],
                 teacher_raw=record["teacher_text"],
-                teachers=" ; ".join(
-                    f"{t}:{a}:{(u.get_full_name() or u.username) if u else ''}" for t, u, a in teachers
-                ),
-                row=row_action,
             )
-        assigned = 0
+            if record["chosen_by"] == CHOSEN_NONE:
+                # Seçim işarəsi yoxdur: sətir yaradılmır/təyin olunmur (mövcud sətir toxunulmaz qalır).
+                row, how = matcher.match(
+                    season=record["season"], subject_text=record["subject_text"], groups_text=record["groups_text"]
+                )
+                entry.update(row=f"no_choice_marker:{how}", assignment="skipped")
+                self.counters["row_no_choice_marker"] += 1
+                continue
+            self._import_record(record, entry, chair, task, matcher, rows_to_plan)
+        planned = self._plan_rows(task, rows_to_plan)
+        for row in matcher.unmatched():
+            self.counters["row_not_in_file"] += 1
+            self.note(
+                sheet=title, season=row.season, groups_raw=row.groups_text, subject_raw=row.subject_label,
+                row="not_in_file", assignment="untouched",
+            )  # fmt: skip
         if self.apply and task is not None:
-            if rows_to_assign and task.status == TaskStatus.DRAFT:
-                self._approve_official_workbook(task)
-            assigned = self._assign_rows(task, rows_to_assign)
-            if assigned and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING):
+            task.refresh_from_db(fields=["status"])
+            amended = task.status == TaskStatus.AMENDED and self.applier.counters["amendment_opened"]
+            if (planned and task.status in (TaskStatus.APPROVED, TaskStatus.DISTRIBUTING)) or amended:
                 self._confirm_and_enroll(task)
-        self.stdout.write(
-            f"  · «{title}» → {chair.name}: {len(records)} sətir, təyinat {assigned or len(rows_to_assign)} sətirdə"
+        self.stdout.write(f"  · vərəq → kafedra: {len(records)} sətir, bölgü planı {len(rows_to_plan)} sətirdə")
+
+    def _import_record(self, record, entry, chair, task, matcher, rows_to_plan) -> None:
+        special_kind = _special_row_kind(record)
+        subject, subject_action, subject_name = self.resolve_subject(
+            record["subject_text"], chair, record["credits"], special_kind, chosen=record["chosen_subject"]
         )
+        groups, group_actions = self._resolve_groups(record, chair)
+        teacher_tokens = [t for t in re.split(r"\s*[-–]\s*", record["teacher_text"]) if t.strip()]
+        teachers = [(token, *self.resolve_teacher(token, chair)) for token in teacher_tokens]
+        entry.update(
+            subject_action=subject_action,
+            subject_resolved=subject_name,
+            groups=" ; ".join(group_actions),
+            teachers=" ; ".join(f"{t}:{a}:{u.username if u is not None else ''}" for t, u, a in teachers),
+        )
+        row, how = matcher.match(
+            season=record["season"],
+            subject_text=record["subject_text"],
+            groups_text=record["groups_text"],
+            subject=subject,
+            group_ids=[g.pk for g in groups],
+        )
+        if how in (SUBJECT_CHANGED, GROUPS_CHANGED):
+            # Bənd seçimi / qrup tərkibi dəyişib — dublikat yaratmırıq, mövcud sətrə toxunmuruq;
+            # hesabatda əl ilə düzəliş (amendment) üçün.
+            self.counters[f"row_{how}"] += 1
+            entry.update(row=how, assignment="skipped")
+            return
+        if row is None:
+            self.counters["row_created"] += 1
+            row = self._create_row(record, task, special_kind, subject, groups) if self.apply else None
+            entry["row"] = "new"
+        else:
+            self.counters[f"row_matched_{how}"] += 1
+            entry["row"] = f"matched:{how}"
+            if row.subject_id is None and subject is not None:
+                # Sentyabrda seçimi bilinməyən blok sətri — fənn indi məlumdur (boş sahə doldurulur).
+                entry["row"] += ":" + self.applier.fill_subject(row, subject)
+        if teachers:
+            rows_to_plan.append((row, teachers, entry))
+
+    def _create_row(self, record, task, special_kind, subject, groups):
+        specialty_unit, faculty = (groups[0].parent, None) if groups else (None, None)
+        if specialty_unit is not None:
+            specialty_unit, faculty = resolve_specialty_and_faculty(self.org, specialty_unit.pk)
+        row = TeachingTaskRow(
+            organization=self.org,
+            task=task,
+            season=record["season"],
+            row_kind=special_kind or RowKind.TEACHING,
+            period=self.periods[record["season"]],
+            subject=subject if subject is not None and subject.pk else None,
+            subject_text=record["subject_text"][:255],
+            specialty=specialty_unit,
+            specialty_text=record["specialty_text"][:255],
+            faculty=faculty,
+            groups_text=record["groups_text"][:255],
+            student_count=record["student_count"],
+            student_count_text=record["student_count_text"][:100],
+            union_count=record["union_count"],
+            subgroup_count=record["subgroup_count"],
+            lecture_plan=record.get("lecture_plan", 0),
+            lecture_total=record["lecture_total"],
+            seminar_plan=record.get("seminar_plan", 0),
+            seminar_total=record["seminar_total"],
+            lab_plan=record.get("lab_plan", 0),
+            lab_total=record["lab_total"],
+            consult_hours=record.get("consult_hours", 0),
+            exam_hours=record.get("exam_hours", 0),
+            thesis_hours=record.get("thesis_hours", 0),
+            postgrad_hours=record.get("postgrad_hours", 0),
+            practice_research_hours=record.get("practice_research_hours", 0),
+            practice_production_hours=record.get("practice_production_hours", 0),
+            credits=record["credits"][:20],
+            credits_value=_int(record["credits"]),
+        )
+        row.total_hours = record["total_hours"] or row.computed_total_hours
+        row.save()
+        if groups:
+            row.groups.set(groups)
+        return row
 
     def _approve_official_workbook(self, task):
         """Audit 2026-09-28 W1: göndərilməmiş qaralama artıq bölünmür.
@@ -522,37 +471,60 @@ class Importer:
             resource_repr=f"{task.chair_id} · {task.academic_year}",
         )
 
-    def _assign_rows(self, task, rows_to_assign) -> int:
-        assigned_rows = 0
-        for row, teachers in rows_to_assign:
-            if TeacherAssignment.objects.filter(row=row).exists():
-                self.counters["assignment_exists"] += 1
+    def _plan_rows(self, task, rows_to_plan) -> int:
+        """Sətirlərin müəllim bölgüsü :class:`~.task_load_reassign.RowPlanApplier` ilə.
+
+        Bölgüsüz sətir — ilk təyinat (köhnə davranış); bölgülü sətir — fayldakı müəllim
+        fərqlidirsə yalnız ``--reassign`` ilə dəyişir (əks halda ``teacher_differs``).
+        Həll olunmamış ad işarəsi mövcud bölgünü DƏYİŞMİR.
+        """
+        if self.apply and rows_to_plan and task is not None and task.status == TaskStatus.DRAFT:
+            self._approve_official_workbook(task)
+        written = 0
+        for row, teachers, entry in rows_to_plan:
+            if row is None:  # dry-run-da yeni sətir
+                self.counters["assignment_planned"] += 1
+                entry["assignment"] = WOULD_ASSIGN
                 continue
-            users = [u for _, u, _ in teachers if u is not None and u.pk]
-            plan = []
+            users = self._with_current_teachers(row, teachers)
+            unresolved = None in users
+            fresh = not TeacherAssignment.objects.filter(row=row).exists()
+            desired = {}
             for index, activity in enumerate(TEACHING_ACTIVITIES):
                 hours = int(getattr(row, ACTIVITY_TOTAL_FIELD[activity], 0) or 0)
                 if not hours:
                     continue
                 # «A-B» cütü: mühazirə birinciyə, seminar/lab ikinciyə; tək müəllim hamısını alır.
-                user = (users[0] if index == 0 or len(users) == 1 else users[-1]) if users else None
-                plan.append((activity, hours, user))
-            for activity, hours, user in plan:
-                try:
-                    assign_teacher(
-                        row=row,
-                        actor=self.actor,
-                        activity=str(activity),
-                        teacher_id=user.pk if user else None,
-                        hours=hours,
-                        note="TAPŞIRIQ kitabçası idxalı 2026/2027" if user else "Vakant — idxalda müəllim tapılmadı",
-                    )
-                    self.counters["assignment_created" if user else "assignment_vacant"] += 1
-                except Exception as exc:  # noqa: BLE001 — bir sətrin xətası bütün idxalı dayandırmasın
-                    self.counters["assignment_failed"] += 1
-                    self.note(sheet=task.chair.name, line=0, subject_raw=row.subject_label, teachers=f"XƏTA: {exc}")
-            assigned_rows += 1
-        return assigned_rows
+                user = users[0] if index == 0 else users[-1]
+                if user is None:
+                    if fresh:
+                        desired[str(activity)] = [(None, hours, False)]
+                    continue
+                desired[str(activity)] = [(user.pk, hours, False)]
+            action, detail = self.applier.apply_plan(row, desired)
+            if unresolved and action == UNCHANGED:
+                action = "teacher_unresolved"
+            entry["assignment"] = f"{action}:{detail}" if detail else action
+            written += action in (ASSIGNED, REASSIGNED)
+        return written
+
+    @staticmethod
+    def _with_current_teachers(row, teachers) -> list:
+        """Həll olunmamış ad işarəsi (eyni adlı iki müəllim / başqa kafedrada) sətrin CARİ
+        müəllimi ilə eyni addırsa — cari müəllim saxlanılır (dəyişiklik yoxdur)."""
+        users = [u if u is not None and u.pk else None for _, u, _ in teachers]
+        if None not in users:
+            return users
+        current = [a.teacher for a in TeacherAssignment.objects.filter(row=row).select_related("teacher")]
+        current.sort(key=lambda teacher: teacher is None)
+        for position, (token, _, _) in enumerate(teachers):
+            if users[position] is not None:
+                continue
+            first = slug_name(token.replace("I", "İ").split()[0]) if token.split() else ""
+            same = {t.pk: t for t in current if t is not None and slug_name(t.first_name) == first}
+            if len(same) == 1:
+                users[position] = next(iter(same.values()))
+        return users
 
     def _confirm_and_enroll(self, task):
         # Bölgüsüz qalan dərs sətirləri «Vakant» ilə doldurulur ki, təsdiq keçsin
