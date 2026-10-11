@@ -262,3 +262,85 @@ ul.rim-note {
         flex: 1 1 auto;
     }
 }
+
+
+/* ── Sahib 2026-10-11: filtr sətri, tab sayları, açılış izahı ─────────────── */
+
+/* Brauzerin öz «×» düyməsi bizim `.rim-search-clear` ilə ikiləşirdi. */
+.rim-search-input::-webkit-search-cancel-button,
+.rim-search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.rim-search-clear[hidden] {
+    display: none;
+}
+
+.rim-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.rim-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 0 1 220px;
+    min-width: 180px;
+}
+
+.rim-filter__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.rim-filters__reset[hidden] {
+    display: none;
+}
+
+.rim-status-count {
+    display: inline-block;
+    min-width: 1.6em;
+    margin-left: 6px;
+    padding: 0 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-200);
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+}
+
+.rim-status-count:empty {
+    display: none;
+}
+
+.rim-status-tab.is-active .rim-status-count {
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-100);
+}
+
+.rim-status-count.is-zero {
+    opacity: 0.55;
+}
+
+.rim-hint {
+    margin: 0 0 4px;
+    font-size: 0.85rem;
+    color: var(--ems-neutral-600);
+}
+
+@media (max-width: 640px) {
+    .rim-filter {
+        flex: 1 1 100%;
+    }
+}

@@ -95758,3 +95758,63 @@ msgstr "Изменилось по сравнению с предыдущим г�
 msgctxt "roles.org_display_name"
 msgid "Qəyyumlar Şurasının sədri"
 msgstr "Председатель Попечительского совета"
+
+msgctxt "profile.rim"
+msgid "Hesab növü"
+msgstr "Тип аккаунта"
+
+msgctxt "profile.rim"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "profile.rim"
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+msgctxt "profile.rim"
+msgid "Heyət (inzibati)"
+msgstr "Персонал (административный)"
+
+msgctxt "profile.rim"
+msgid "Rolu olmayanlar"
+msgstr "Без роли"
+
+msgctxt "profile.rim"
+msgid "İlk giriş gözlənilir"
+msgstr "Ожидается первый вход"
+
+msgctxt "profile.rim"
+msgid "Heç daxil olmayıb"
+msgstr "Ни разу не входил"
+
+msgctxt "profile.rim"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "profile.rim"
+msgid "Avtomatik"
+msgstr "Автоматически"
+
+msgctxt "profile.rim"
+msgid "Ən yeni hesablar"
+msgstr "Новые аккаунты"
+
+msgctxt "profile.rim"
+msgid "Soyad (A→Z)"
+msgstr "Фамилия (А→Я)"
+
+msgctxt "profile.rim"
+msgid "Son giriş"
+msgstr "Последний вход"
+
+msgctxt "profile.rim"
+msgid "Filtrləri sıfırla"
+msgstr "Сбросить фильтры"
+
+msgctxt "profile.rim"
+msgid ""
+"Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
+"axtarın."
+msgstr ""
+"Показаны последние созданные аккаунты — ищите по имени, фамилии, email или "
+"FIN."

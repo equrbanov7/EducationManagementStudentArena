@@ -95037,3 +95037,63 @@ msgstr "Önceki yıla göre değişti"
 msgctxt "roles.org_display_name"
 msgid "Qəyyumlar Şurasının sədri"
 msgstr "Mütevelli Heyeti Başkanı"
+
+msgctxt "profile.rim"
+msgid "Hesab növü"
+msgstr "Hesap türü"
+
+msgctxt "profile.rim"
+msgid "Tələbələr"
+msgstr "Öğrenciler"
+
+msgctxt "profile.rim"
+msgid "Müəllimlər"
+msgstr "Öğretim elemanları"
+
+msgctxt "profile.rim"
+msgid "Heyət (inzibati)"
+msgstr "Personel (idari)"
+
+msgctxt "profile.rim"
+msgid "Rolu olmayanlar"
+msgstr "Rolü olmayanlar"
+
+msgctxt "profile.rim"
+msgid "İlk giriş gözlənilir"
+msgstr "İlk giriş bekleniyor"
+
+msgctxt "profile.rim"
+msgid "Heç daxil olmayıb"
+msgstr "Hiç giriş yapmadı"
+
+msgctxt "profile.rim"
+msgid "Sıralama"
+msgstr "Sıralama ölçütü"
+
+msgctxt "profile.rim"
+msgid "Avtomatik"
+msgstr "Otomatik"
+
+msgctxt "profile.rim"
+msgid "Ən yeni hesablar"
+msgstr "En yeni hesaplar"
+
+msgctxt "profile.rim"
+msgid "Soyad (A→Z)"
+msgstr "Soyadı (A→Z)"
+
+msgctxt "profile.rim"
+msgid "Son giriş"
+msgstr "Son oturum açma"
+
+msgctxt "profile.rim"
+msgid "Filtrləri sıfırla"
+msgstr "Filtreleri sıfırla"
+
+msgctxt "profile.rim"
+msgid ""
+"Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
+"axtarın."
+msgstr ""
+"En son oluşturulan hesaplar gösteriliyor — ad, soyad, e-posta veya FİN ile "
+"arayın."

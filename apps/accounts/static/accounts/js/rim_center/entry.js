@@ -14,6 +14,14 @@
         return;
     }
 
+    /** «Filtrləri sıfırla» düyməsi yalnız ən azı bir filtr seçiləndə görünür. */
+    ns.syncFilterReset = function syncFilterReset() {
+        var btn = document.querySelector("[data-rim-filters-reset]");
+        if (btn) {
+            btn.hidden = !(ns.state.kind || ns.state.flag || ns.state.sort);
+        }
+    };
+
     /* ── Delegasiya olunmuş hadisələr — bir dəfə qeydiyyat ──────────────── */
 
     window.EMSReady.once("rim-center-delegates", function () {
@@ -88,6 +96,33 @@
             ns.actions.search();
         });
 
+        // Sahib 2026-10-11: hesab növü / vəziyyət / sıralama — dəyişən kimi siyahı yenilənir.
+        D.on("change", "[data-rim-filter]", function (event, select) {
+            var key = select.getAttribute("data-rim-filter");
+            if (!key) {
+                return;
+            }
+            ns.state[key] = select.value || "";
+            ns.state.page = 1;
+            ns.syncFilterReset();
+            ns.actions.search();
+        });
+
+        D.on("click", "[data-rim-filters-reset]", function (event) {
+            event.preventDefault();
+            var selects = document.querySelectorAll("[data-rim-filter]");
+            Array.prototype.forEach.call(selects, function (select) {
+                select.value = "";
+                ns.state[select.getAttribute("data-rim-filter")] = "";
+                if (window.EMSBootstrapSelect) {
+                    window.EMSBootstrapSelect.sync(select);
+                }
+            });
+            ns.state.page = 1;
+            ns.syncFilterReset();
+            ns.actions.search();
+        });
+
         D.on("click", "[data-rim-search-clear]", function (event) {
             event.preventDefault();
             var input = document.querySelector("[data-rim-search]");
@@ -139,5 +174,14 @@
         ns.state.selectedUser = null;
         ns.state.pendingAction = null;
         ns.modals.closeAll();
+
+        // Sahib 2026-10-11: ilk açılışda siyahı DƏRHAL yüklənir (boş ekran yoxdur). Swap-dan sonra
+        // DOM təzədir — vəziyyəti DOM-a uyğunlaşdır (sorğu/filtr select-ləri defoltdadır).
+        ns.state.query = input ? input.value.trim() : "";
+        ns.state.status = "all";
+        ns.state.kind = ns.state.flag = ns.state.sort = "";
+        ns.state.page = 1;
+        ns.syncFilterReset();
+        ns.actions.search();
     });
 })(window, document);

@@ -22,28 +22,34 @@
             return;
         }
         var query = ns.state.query;
-        // Boş sorğuda «hamısı» siyahısını çəkmirik: 8000+ hesablı tenantda bu
-        // mənasız yükdür və operator onsuz da konkret adamı axtarır.
-        if (!query) {
-            ns.render.state("type_to_search", "fa-keyboard");
-            ns.render.pager(null);
-            return;
-        }
+        // Sahib 2026-10-11: «ilk daxil olanda boş görünməsin» — boş sorğu da çəkilir (server
+        // səhifələyir, defolt «ən yeni hesablar»). Tab sayları yalnız 1-ci səhifədə istənir.
         ns.render.state("loading", "fa-spinner fa-spin");
-
-        var url =
-            cfg.searchUrl +
-            "?q=" +
-            encodeURIComponent(query) +
-            "&status=" +
-            encodeURIComponent(ns.state.status) +
-            "&page=" +
-            encodeURIComponent(ns.state.page);
+        var token = (ns.state.requestToken = (ns.state.requestToken || 0) + 1);
+        var params = [
+            "q=" + encodeURIComponent(query),
+            "status=" + encodeURIComponent(ns.state.status),
+            "page=" + encodeURIComponent(ns.state.page),
+            "kind=" + encodeURIComponent(ns.state.kind || ""),
+            "flag=" + encodeURIComponent(ns.state.flag || ""),
+            "sort=" + encodeURIComponent(ns.state.sort || "")
+        ];
+        if (ns.state.page === 1) {
+            params.push("counts=1");
+        }
+        var url = cfg.searchUrl + "?" + params.join("&");
 
         fetchJSON(url)
             .then(function (payload) {
+                // Gec gələn köhnə cavab (sürətli yazı) yenisini əvəz etməsin.
+                if (token !== ns.state.requestToken) {
+                    return;
+                }
                 ns.render.list(payload);
                 ns.render.pager(payload);
+                if (payload && payload.counts) {
+                    ns.render.counts(payload.counts);
+                }
             })
             .catch(function (err) {
                 var container = document.querySelector("[data-rim-results]");
