@@ -86,6 +86,7 @@ def serialize_row(user, actor: RimActor):
         "email": user.email or "",
         "fin": getattr(profile, "fin", "") or "",
         "phone": getattr(profile, "phone", "") or "",
+        "staff_position": getattr(profile, "staff_position", "") or "",
         "status": status,
         "status_label": {
             "active": "Aktiv",

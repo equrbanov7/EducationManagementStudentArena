@@ -78,3 +78,29 @@ class RimListTests(RimCenterTestBase):
         # Babayeva < Dadaşov (ASCII başlanğıc — «Ə»-nin yeri collation-dan asılıdır).
         self.assertLess(by_name.index("rim_student"), by_name.index("rim_orphan"))
         self.assertEqual(self.search("", sort="bogus").json()["sort"], "recent")
+
+
+class RimStaffPositionEditTests(RimCenterTestBase):
+    """Sahib 2026-10-11: profildəki «Vəzifə» (staff_position) RİM-in «Məlumatları redaktə et» formasından dəyişir."""
+
+    def test_edit_staff_position_is_saved_audited_and_shown_on_the_profile(self):
+        from apps.audit.models import AuditLog
+
+        self.login_operator()
+        response = self.act("edit", self.teacher, staff_position="  Kafedra  müdiri ", reason="əmr №12")
+        self.assertEqual(response.status_code, 200)
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.staff_position, "Kafedra müdiri")
+        entry = AuditLog.objects.filter(resource_id=str(self.teacher.pk)).order_by("-created_at").first()
+        self.assertEqual(entry.new_values["staff_position"], "Kafedra müdiri")
+        detail = self.client.get(reverse("accounts:rim_user_detail", args=[self.teacher.pk])).json()
+        self.assertEqual(detail["user"]["staff_position"], "Kafedra müdiri")
+
+    def test_clearing_staff_position_falls_back_to_the_role(self):
+        from apps.accounts.models import UserProfile
+
+        UserProfile.objects.filter(user=self.teacher).update(staff_position="Müdir müavini")
+        self.login_operator()
+        self.act("edit", self.teacher, staff_position="", reason="səhv vəzifə")
+        self.teacher.profile.refresh_from_db()
+        self.assertEqual(self.teacher.profile.staff_position, "")
