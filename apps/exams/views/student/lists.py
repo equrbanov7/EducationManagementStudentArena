@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count, Exists, F, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
 
@@ -14,8 +16,10 @@ from apps.exams.constants import (
 )
 from apps.exams.domain.unit_assignment import student_assigned_exams_q, student_excluded_exams_q
 from apps.exams.models import Exam, ExamAttempt
+from apps.exams.navigation import cabinet_exams_url, current_return_to
 from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.views.shared.tenant import tenant_scoped_exams
+from core.academic_rules import available_exams_page_enabled
 from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
@@ -432,23 +436,41 @@ def _render_exam_list(
 
 @login_required
 def assigned_student_exam_list(request):
-    ensure_student_exam_tenant_context(request)
-    user = request.user
+    """Köhnə «Təyin olunmuş imtahanlar» siyahısı — kabinet bölməsinə yönləndirmə.
 
-    # Yalnız user-ə təyin olunmuş aktiv imtahanlar (is_public=False).
-    base_queryset = tenant_scoped_exams(
-        request,
-        Exam.objects.filter(is_active=True, is_public=False)
-        # Semi-join təyinat şərti (tutum testi 2026-10-05) — DISTINCT lazım deyil.
-        .filter(student_assigned_exams_q(user)).exclude(student_excluded_exams_q(user)),
-    )
+    URL auditi §4 (2026-10-10): eyni seçim (təyinat semi-join-i, istisnalar, ``is_public=False``,
+    aktiv tenant) kabinetin ``?section=assigned-exams`` bölməsindədir; bildiriş linkləri və AI
+    ipucu da ora aparır. URL adı köhnə əlfəcinlər üçün saxlanılır; ``q`` axtarışı bölmənin
+    ``assigned_search`` parametrinə ötürülür.
+    """
+    from urllib.parse import urlencode
 
-    return _render_exam_list(
-        request,
-        base_queryset=base_queryset,
-        page_title=pgettext_lazy("exams.view.student.list.title", "assigned_exams"),
-        current_url_name="assigned_exam_list",
-    )
+    target = f"{reverse('accounts:profile')}?section=assigned-exams"
+    search = (request.GET.get("q") or "").strip()
+    if search:
+        target += "&" + urlencode({"assigned_search": search})
+    return redirect(target)
+
+
+def _available_page_closed_redirect(request):
+    """«Mövcud imtahanlar» söndürülüb (sahib 2026-10-10: «hələ ki ona ehtiyac yoxdu»).
+
+    Kod qalır — RİM «Sistem tənzimləmələri»ndə ``exam.available_page`` yandırılanda səhifə qayıdır.
+    Təhlükəsiz ``return_to``/``next`` varsa ora (axın öz mesajını artıq verib), yoxdursa kabinetin
+    imtahan bölməsinə qısa izahla: tələbə təyin olunmuş imtahanlarını oradan başladır."""
+    target = current_return_to(request)
+    if target.split("?", 1)[0] == reverse("exams:student_exam_list"):
+        target = ""
+    if not target:
+        messages.info(
+            request,
+            pgettext(
+                "exams.available_page",
+                "«Mövcud imtahanlar» səhifəsi hələlik bağlıdır. İmtahanlarınızı kabinetdən başlaya bilərsiniz.",
+            ),
+        )
+        target = cabinet_exams_url(request.user)
+    return redirect(target)
 
 
 @login_required
@@ -461,6 +483,8 @@ def student_exam_list(request):
     placement və canlı imtahanlar üçündür — tələbə kabinetdən buraya keçib
     sınaq verə bilir.
     """
+    if not available_exams_page_enabled():
+        return _available_page_closed_redirect(request)
     ensure_student_exam_tenant_context(request)
     user = request.user
     now = timezone.now()

@@ -35,6 +35,7 @@ from ._helpers import (
     current_return_to,
     ensure_student_exam_tenant_context,
     safe_same_origin_redirect_path,
+    student_exams_home_url,
 )
 
 FINAL_RESULT_REVIEW_SECONDS = FINAL_CENTER_REVIEW_SECONDS
@@ -78,10 +79,11 @@ def _format_score_delta(value):
     return format(decimal_value.normalize(), "f")
 
 
-def _default_exam_back_url(exam):
+def _default_exam_back_url(exam, user=None):
     if exam.course_id:
         return reverse("courses:course_dashboard", kwargs={"course_id": exam.course_id})
-    return reverse("exams:student_exam_list")
+    # Sahib 2026-10-10: «Mövcud imtahanlar» bağlıdırsa kabinetin imtahan bölməsi.
+    return student_exams_home_url(user)
 
 
 def _coding_submission_file_items(submission):
@@ -106,7 +108,7 @@ def _coding_submission_file_items(submission):
 
 def _resolve_result_navigation(request, exam, return_to):
     history_view_path = reverse("exams:student_exam_history")
-    default_back_url = _default_exam_back_url(exam)
+    default_back_url = _default_exam_back_url(exam, request.user)
 
     if not return_to:
         return default_back_url, build_exam_history_url(exam, return_to=default_back_url)
@@ -452,7 +454,7 @@ def student_exam_history(request):
         if exam and exam.course_id:
             back_url = reverse("courses:course_dashboard", kwargs={"course_id": exam.course_id})
         else:
-            back_url = reverse("exams:student_exam_list")
+            back_url = student_exams_home_url(request.user)
 
     history_max_score = None
     if exam:

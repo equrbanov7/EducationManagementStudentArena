@@ -1,0 +1,32 @@
+{% comment %}
+Müəllim imtahan səhifələrinin ORTAQ başlığı (sahib 2026-10-10 «modern UX/UI»):
+geri keçidi + breadcrumb («İmtahanlarım / imtahan / səhifə»), H1, alt sətir,
+status nişanları, sağda əməllər (mobildə sarılır, tam en olur).
+CSS: css/ems_ui/header.css + exams/css/teacher_page_shell.css.
+
+KONTEKST
+  exam_crumbs           — [{label, url}] (views/shared/breadcrumbs.py)
+  head_title            — H1 (məcburi)
+  head_subtitle         — bir cümləlik izah (opsional)
+  head_back_url / head_back_label — geri keçidi (opsional)
+  head_pills_include    — status nişanları şablonu (opsional)
+  head_actions_include  — sağdakı əməllər şablonu (opsional)
+{% endcomment %}
+<header class="ems-header etp-head">
+    <div class="ems-header__main">
+        <div class="etp-head__top">
+            {% if head_back_url %}
+            <a href="{{ head_back_url }}" class="etp-back">
+                <i class="fas fa-arrow-left" aria-hidden="true"></i><span>{{ head_back_label }}</span>
+            </a>
+            {% endif %}
+            {% include "exams/partials/_exam_crumbs.html" %}
+        </div>
+        <h1 class="ems-header__title">{{ head_title }}</h1>
+        {% if head_subtitle %}<p class="ems-header__subtitle">{{ head_subtitle }}</p>{% endif %}
+        {% if head_pills_include %}<div class="etp-pills">{% include head_pills_include %}</div>{% endif %}
+    </div>
+    {% if head_actions_include %}
+    <div class="ems-header__actions">{% include head_actions_include %}</div>
+    {% endif %}
+</header>

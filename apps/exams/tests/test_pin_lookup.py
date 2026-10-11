@@ -84,10 +84,18 @@ class PinLookupTests(TestCase):
         return client
 
     def test_page_shell_renders(self):
-        # Səhifə qabığı (data AJAX ilə gəlir — PIN səhifədə birbaşa YOX).
-        response = self._client(self.center).get(reverse("exams:exam_center_pin_lookup"))
+        # Kabinet bölməsi qabığı (data AJAX ilə gəlir — PIN səhifədə birbaşa YOX).
+        # URL auditi A12 (2026-10-10): müstəqil `center/pin-lookup/` səhifəsi silindi.
+        response = self._client(self.center).get(reverse("accounts:profile"), {"section": "exam-center-pins"})
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("exams:exam_center_pin_search"))
         self.assertNotContains(response, self.raw_pin)
+
+    def test_standalone_page_route_is_gone(self):
+        from django.urls import NoReverseMatch
+
+        with self.assertRaises(NoReverseMatch):
+            reverse("exams:exam_center_pin_lookup")
 
     def test_search_finds_student(self):
         response = self._client(self.center).get(reverse("exams:exam_center_pin_search"), {"q": "pl_student"})
@@ -140,8 +148,7 @@ class PinLookupTests(TestCase):
         self.assertNotIn(self.raw_pin, pins)
 
     def test_non_center_forbidden(self):
-        # Müəllim imtahan mərkəzi deyil → 403 (səhifə + AJAX).
-        self.assertEqual(self._client(self.teacher).get(reverse("exams:exam_center_pin_lookup")).status_code, 403)
+        # Müəllim imtahan mərkəzi deyil → 403 (AJAX).
         self.assertEqual(
             self._client(self.teacher).get(reverse("exams:exam_center_pin_search"), {"q": "pl"}).status_code, 403
         )

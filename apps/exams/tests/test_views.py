@@ -361,30 +361,15 @@ class MyGroupsTenantIsolationTest(TestCase):
         self.assertContains(response, reverse("exams:teacher_update_group", args=[0]))
         self.assertContains(response, reverse("exams:teacher_delete_group", args=[group.id]))
 
-    def test_add_single_student_to_group(self):
-        # U6.2 — manual add (resit / transfer student) via the single-add endpoint.
-        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Add Group")
-        self._login_as(self.org_admin_a)
-        self._set_active_org(self.org_a)
-        resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_a.id]))
-        self.assertEqual(resp.status_code, 302)
-        self.assertTrue(group.students.filter(id=self.student_a.id).exists())
+    def test_single_student_group_routes_are_gone(self):
+        # URL auditi A12 (2026-10-10): tək-tələbə əlavə/çıxarma marşrutlarının çağıranı yox idi —
+        # qrup tərkibi `teacher_update_group` ilə dəyişir. `/exams/groups/` qalır.
+        from django.urls import NoReverseMatch
 
-    def test_add_student_rejects_cross_tenant(self):
-        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="XT Add Group")
-        self._login_as(self.org_admin_a)
-        self._set_active_org(self.org_a)
-        # student_b belongs to org_b → not addable to an org_a group.
-        resp = self.client.post(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_b.id]))
-        self.assertEqual(resp.status_code, 404)
-        self.assertFalse(group.students.filter(id=self.student_b.id).exists())
-
-    def test_add_student_requires_post(self):
-        group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="GET Add Group")
-        self._login_as(self.teacher)
-        self._set_active_org(self.org_a)
-        resp = self.client.get(reverse("exams:teacher_add_student_to_group", args=[group.id, self.student_a.id]))
-        self.assertEqual(resp.status_code, 405)
+        for name in ("exams:teacher_add_student_to_group", "exams:teacher_remove_student_from_group"):
+            with self.subTest(name=name), self.assertRaises(NoReverseMatch):
+                reverse(name, args=[1, 1])
+        self.assertTrue(reverse("exams:teacher_group_list"))
 
     def test_student_cannot_access_group_management_routes(self):
         group = StudentGroup.objects.create(teacher=self.teacher, organization=self.org_a, name="Protected Group")
@@ -1110,9 +1095,11 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         response = self.client.get(reverse("exams:edit_exam", args=[self.exam_visible.slug]))
         self.assertEqual(response.status_code, 404)
 
-    def test_deleted_exams_list_lists_soft_deleted_exam(self):
+    def test_cabinet_trash_lists_soft_deleted_exam(self):
+        # URL auditi A12 (2026-10-10): köhnə `exams/deleted/` səhifəsi silindi —
+        # zibil qutusu kabinetdə «İmtahanlarım» bölməsinin alt-görünüşüdür.
         self.client.post(reverse("exams:delete_exam", args=[self.exam_visible.slug]))
-        response = self.client.get(reverse("exams:deleted_exams_list"))
+        response = self.client.get(reverse("accounts:profile"), {"section": "my-exams", "exam_view": "trash"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.exam_visible.title)
 
@@ -1154,8 +1141,8 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         # Silinmiş imtahanın nəticələrinə "Zibil qutusu"ndan baxmaq olar.
         response = self.client.get(reverse("exams:teacher_exam_results", args=[self.exam_visible.slug]))
         self.assertEqual(response.status_code, 200)
-        # Yalnız-oxu banneri "Zibil qutusu"na keçid göstərir.
-        self.assertContains(response, reverse("exams:deleted_exams_list"))
+        # Yalnız-oxu banneri kabinetin "Zibil qutusu"na keçid göstərir.
+        self.assertContains(response, f"{reverse('accounts:profile')}?section=my-exams&amp;exam_view=trash")
 
         # Qiymətləndirmə POST-u bloklanır (redirect).
         post = self.client.post(
@@ -1464,7 +1451,7 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertContains(response, "Geri")
         self.assertNotContains(response, "Profilə Qayıt")
         self.assertNotContains(response, "Profile geri dön")
-        self.assertContains(response, "results-filter-card")
+        self.assertContains(response, "resultsFiltersForm")  # 2026-10-10 redizayn: alət zolağı
         self.assertContains(response, "resultsFilterSearchInput")
         self.assertContains(response, "css/pagination.css")
 
@@ -2476,6 +2463,9 @@ class TeacherExamListOwnershipFilteringTest(TestCase):
         self.assertNotContains(response, "status-empty")
 
 
+# Sahib 2026-10-10: «Mövcud imtahanlar» bayraqla söndürülüb (default False); bu sinif
+# səhifənin özünü (geri qaytarıla bilən köhnə davranışı) yoxlayır.
+@override_settings(EXAM_AVAILABLE_PAGE=True)
 class StudentExamVisibilityFilteringTest(TestCase):
     def setUp(self):
         self.teacher = User.objects.create_user(
@@ -2819,7 +2809,7 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(grouped_available_response.status_code, 200)
         self.assertContains(grouped_available_response, self.group_assigned_exam.title)
 
-        assigned_response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.group_assigned_exam.title})
+        assigned_response = self._assigned_section(self.group_assigned_exam.title)
         self.assertEqual(assigned_response.status_code, 200)
         self.assertContains(assigned_response, self.group_assigned_exam.title)
 
@@ -2827,36 +2817,48 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(start_response.status_code, 302)
         self.assertTrue(self.group_assigned_exam.attempts.filter(user=self.student).exists())
 
+    def _assigned_section(self, query):
+        # URL auditi §4 (2026-10-10): `exams/assigned/` kabinetin `assigned-exams` bölməsinə yönləndirir.
+        return self.client.get(reverse("accounts:profile"), {"section": "assigned-exams", "assigned_search": query})
+
+    def test_assigned_exam_list_redirects_to_cabinet_section(self):
+        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": "abc"})
+        self.assertRedirects(
+            response,
+            f"{reverse('accounts:profile')}?section=assigned-exams&assigned_search=abc",
+            fetch_redirect_response=False,
+        )
+
     def test_student_assigned_exam_list_shows_only_assigned_in_active_tenant(self):
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.assigned_exam.title})
+        response = self._assigned_section(self.assigned_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.assigned_exam.title)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.course_assigned_exam.title})
+        response = self._assigned_section(self.course_assigned_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_assigned_exam.title)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.code_assigned_exam.title})
+        response = self._assigned_section(self.code_assigned_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.code_assigned_exam.title)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.group_assigned_exam.title})
+        response = self._assigned_section(self.group_assigned_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.group_assigned_exam.title)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.assigned_public_exam.title})
+        response = self._assigned_section(self.assigned_public_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.assigned_public_exam.slug)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.unassigned_public_exam.title})
+        response = self._assigned_section(self.unassigned_public_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.unassigned_public_exam.slug)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.unassigned_private_exam.title})
+        response = self._assigned_section(self.unassigned_private_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.unassigned_private_exam.slug)
 
-        response = self.client.get(reverse("exams:assigned_exam_list"), {"q": self.other_tenant_exam.title})
+        response = self._assigned_section(self.other_tenant_exam.title)
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.other_tenant_exam.slug)
 

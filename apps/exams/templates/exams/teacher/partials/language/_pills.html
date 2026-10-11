@@ -1,0 +1,4 @@
+{% load i18n %}
+{# Dil variantları başlığının status nişanları — rəng + ikon + MƏTN (yalnız rəng yox). #}
+<span class="ems-badge ems-badge--neutral"><i class="fas fa-language" aria-hidden="true"></i>{% trans "Dillər" context "exams.template.language_manager" %}: <b class="etp-num">{{ variant_rows|length }}</b></span>
+<span class="ems-badge {% if active_variant_count %}ems-badge--success{% else %}ems-badge--warning{% endif %}"><i class="fas {% if active_variant_count %}fa-circle-check{% else %}fa-triangle-exclamation{% endif %}" aria-hidden="true"></i>{% trans "Aktiv" context "exams.template.language_manager" %}: <b class="etp-num">{{ active_variant_count }}</b></span>

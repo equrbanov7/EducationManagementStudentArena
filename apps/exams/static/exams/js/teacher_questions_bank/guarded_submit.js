@@ -10,7 +10,8 @@
    digər imtinalar EMSToast ilə göstərilir. Uğurda server `redirect_url` verir
    (Django mesajları orada toast kimi görünür).
 
-   Yalnız `.qb-page[data-qm-context="exam"]` səhifəsində işləyir (müstəqil
+   Yalnız `[data-qm-context="exam"]` səhifəsində işləyir (2026-10-10 redizaynda
+   kök `.etp-page` oldu — sinif yox, data-atribut yoxlanır) (müstəqil
    sual bankı səhifəsi adi form göndərişində qalır). Gözlənilməz cavabda
    (şəbəkə, HTML xəta səhifəsi) köhnə yol — adi form göndərişi.
 
@@ -28,7 +29,7 @@
 
   function enabled() {
     return !!(
-      document.querySelector('.qb-page[data-qm-context="exam"]') &&
+      document.querySelector('[data-qm-context="exam"]') &&
       window.EMSCore &&
       typeof window.EMSCore.fetchJSON === "function" &&
       typeof window.FormData === "function"

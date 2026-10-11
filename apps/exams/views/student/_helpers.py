@@ -11,6 +11,7 @@ from apps.exams.navigation import (  # noqa: F401
     build_exam_result_url,
     current_return_to,
     safe_same_origin_redirect_path,
+    student_exams_home_url,
 )
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 from core.tenancy import request_has_active_organization_context, restore_request_organization_from_profile
@@ -36,7 +37,8 @@ def resolve_exam_failure_redirect(request):
             assigned_type = "all"
         return f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type={assigned_type}"
 
-    return reverse("exams:student_exam_list")
+    # Sahib 2026-10-10: «Mövcud imtahanlar» bağlıdırsa kabinetin imtahan bölməsi.
+    return student_exams_home_url(request.user)
 
 
 def resolve_author_failure_redirect(request, exam):

@@ -1,0 +1,482 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Müəllim imtahan səhifələri — ORTAQ QABIQ (sahib 2026-10-10 «modern UX/UI»)
+   ───────────────────────────────────────────────────────────────────────────
+   Dil variantları · Nəticələr · Bankdan sual · Sual bankı · sual formu eyni
+   dildə danışır: başlıq (`ems_ui/header.css`), düymə/sahə/kart
+   (`ems_ui/controls.css`), badge (`ems_ui/badge.css`), cədvəl/boş vəziyyət
+   (`ems_ui/table.css`) ortaq qatdandır; bu fayl yalnız onların ÜSTÜNƏ səhifə
+   konteyneri, KPI, alət zolağı, menyu, yapışqan əməl zolağı və təhlükə
+   zonasını əlavə edir. Rəng YALNIZ `--ems-*` tokenləri ilə.
+   Prefiks: `etp-` (exam teacher page).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Səhifə konteyneri: max-en + 16px mobil kənar (üfüqi scroll YOX) ─────── */
+/* Fon hər imtahan tipində eyni (workbench CSS-i `body`-ni öz rənginə boyayırdı). */
+body:has(.etp-page) {
+    background-color: var(--ems-bg-subtle);
+}
+
+.etp-page {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--ems-w-page);
+    margin: 0 auto;
+    padding: var(--ems-sp-8) var(--ems-sp-8) 56px;
+    color: var(--ems-text);
+}
+
+.etp-page *,
+.etp-page *::before,
+.etp-page *::after {
+    box-sizing: border-box;
+}
+
+.etp-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+}
+
+/* ── Başlıq: geri keçidi + breadcrumb bir sırada ─────────────────────────── */
+.etp-head__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3) var(--ems-sp-5);
+    margin-bottom: var(--ems-sp-3);
+}
+
+.etp-head__top .exam-crumbs .ems-crumbs {
+    margin: 0;
+}
+
+.etp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    min-height: var(--ems-h-field);
+    padding: 0 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.etp-back:hover {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.etp-head .ems-header__title {
+    overflow-wrap: anywhere;
+}
+
+.etp-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin-top: var(--ems-sp-4);
+}
+
+.etp-pills .ems-badge i {
+    font-size: 0.85em;
+}
+
+/* ── Etiket (cümlə registri; CAPS yalnız kiçik bölmə qaşı üçün) ─────────── */
+.etp-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.etp-req {
+    margin-left: 2px;
+    color: var(--ems-danger-strong);
+}
+
+.etp-hint {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+    color: var(--ems-text-muted);
+}
+
+.etp-eyebrow {
+    margin: 0 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-500);
+}
+
+/* ── Məlumat lenti ─────────────────────────────────────────────────────── */
+.etp-note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-4);
+    padding: 12px 16px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+}
+
+.etp-note > i {
+    margin-top: 3px;
+    color: var(--ems-primary-600);
+}
+
+/* ── KPI: rəngli ikon kvadratı + rəqəm + QISA etiket (tək sətir) ─────────── */
+.etp-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--ems-sp-5);
+}
+
+.etp-kpi {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+    min-height: 68px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+    color: var(--ems-text);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+}
+
+button.etp-kpi,
+a.etp-kpi {
+    cursor: pointer;
+}
+
+button.etp-kpi:hover,
+a.etp-kpi:hover {
+    border-color: var(--ems-primary-300);
+}
+
+.etp-kpi[aria-pressed="true"],
+.etp-kpi[aria-current="true"] {
+    border-color: var(--ems-primary-600);
+    box-shadow: 0 0 0 1px var(--ems-primary-600);
+    background: var(--ems-primary-50);
+}
+
+.etp-kpi__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+}
+
+.etp-kpi__body {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.etp-kpi__value {
+    font-size: var(--ems-fs-2xl);
+    font-weight: 800;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.etp-kpi__label {
+    overflow: hidden;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-neutral-600);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.etp-kpi--primary .etp-kpi__icon { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+.etp-kpi--success .etp-kpi__icon { background: var(--ems-success-bg); color: var(--ems-success-700); }
+.etp-kpi--warning .etp-kpi__icon { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.etp-kpi--danger .etp-kpi__icon { background: var(--ems-danger-bg); color: var(--ems-danger-strong); }
+.etp-kpi--violet .etp-kpi__icon { background: var(--ems-violet-100); color: var(--ems-violet-800); }
+
+/* ── Alət zolağı: axtarış (çevik) · seçicilər · menyular — TƏK sıra ──────── */
+.etp-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--ems-sp-5);
+    min-width: 0;
+}
+
+.etp-toolbar__field {
+    flex: 0 1 190px;
+    min-width: 150px;
+}
+
+.etp-toolbar__field--grow {
+    flex: 1 1 260px;
+}
+
+.etp-toolbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin-left: auto;
+}
+
+.etp-search {
+    position: relative;
+}
+
+.etp-search > i {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-500);
+    pointer-events: none;
+}
+
+.etp-search .ems-input {
+    padding-left: 38px;
+}
+
+.etp-page .ems-input::placeholder,
+.etp-page .ems-textarea::placeholder {
+    /* AA: neutral-500 ağ üzərində 4.76 (neutral-400 — 2.56 idi). */
+    color: var(--ems-neutral-500);
+    opacity: 1;
+}
+
+/* ── Bootstrap dropdown menyusu («Yüklə ▾», «Digər ▾», split düymə) ──────── */
+.etp-menu.dropdown-menu {
+    min-width: 230px;
+    padding: 6px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.etp-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    min-height: var(--ems-h-field);
+    padding: 8px 12px;
+    border-radius: var(--ems-r-md);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-base);
+    font-weight: 600;
+    white-space: normal;
+}
+
+.etp-menu .dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+
+.etp-menu .dropdown-item:hover,
+.etp-menu .dropdown-item:focus {
+    background: var(--ems-bg-subtle);
+    color: var(--ems-text);
+}
+
+.etp-menu .dropdown-item.etp-menu__danger,
+.etp-menu .dropdown-item.etp-menu__danger i {
+    color: var(--ems-danger-strong);
+}
+
+.etp-menu .dropdown-item.etp-menu__danger:hover {
+    background: var(--ems-danger-bg);
+}
+
+.etp-split {
+    display: inline-flex;
+}
+
+.etp-split > .ems-btn:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.etp-split > .ems-btn + .ems-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-color: var(--ems-primary-700);
+    padding: 0 12px;
+}
+
+/* İkinci dərəcəli təhlükəli düymə — ağ fon, qırmızı mətn (primary ilə yarışmır). */
+.ems-btn.etp-btn--danger-soft {
+    border-color: var(--ems-danger-bd);
+    color: var(--ems-danger-strong);
+}
+
+.ems-btn.etp-btn--danger-soft:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+/* ── Cədvəl: yapışqan başlıq, cədvəl öz qutusunda sürüşür ───────────────── */
+.etp-tablescroll {
+    max-height: min(72vh, 760px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.etp-tablescroll .ems-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--ems-bg-subtle);
+}
+
+.etp-num {
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+/* ── Yapışqan əməl zolağı («N sual seçildi» + əsas əməl) ─────────────────── */
+.etp-actionbar {
+    position: sticky;
+    bottom: var(--ems-sp-5);
+    z-index: 20;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: 10px 12px 10px 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-raised);
+}
+
+.etp-actionbar__count {
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    font-variant-numeric: tabular-nums;
+}
+
+.etp-actionbar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+}
+
+/* ── Təhlükə zonası (geri qaytarılmayan əməllər) ─────────────────────────── */
+.etp-danger {
+    border-color: var(--ems-danger-bd);
+}
+
+.etp-danger .ems-card__title {
+    color: var(--ems-danger-strong);
+}
+
+.etp-danger__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+}
+
+.etp-danger__row + .etp-danger__row {
+    margin-top: var(--ems-sp-5);
+    padding-top: var(--ems-sp-5);
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.etp-danger__text {
+    max-width: 62ch;
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    color: var(--ems-neutral-700);
+}
+
+/* ── Bootstrap dialoqu (təsdiq / redaktə) — ortaq görünüş ─────────────────── */
+.etp-modal .modal-content {
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    box-shadow: var(--ems-sh-dialog);
+}
+
+.etp-modal .modal-header,
+.etp-modal .modal-footer {
+    border-color: var(--ems-border);
+}
+
+.etp-modal .modal-footer {
+    gap: var(--ems-sp-3);
+}
+
+.etp-modal__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.etp-modal__title .fa-triangle-exclamation {
+    color: var(--ems-danger);
+}
+
+/* ── Görünən fokus halqası (klaviatura) ─────────────────────────────────── */
+.etp-page a:focus-visible,
+.etp-page button:focus-visible,
+.etp-page summary:focus-visible,
+.etp-page input:focus-visible,
+.etp-page [tabindex]:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ── Mobil: 16px kənar, əməllər tam en ──────────────────────────────────── */
+@media (max-width: 768px) {
+    .etp-page {
+        padding: var(--ems-sp-6) var(--ems-sp-6) 40px;
+    }
+
+    .etp-toolbar__field,
+    .etp-toolbar__field--grow {
+        flex: 1 1 100%;
+    }
+
+    .etp-toolbar__actions {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .etp-toolbar__actions > *,
+    .etp-actionbar__actions,
+    .etp-actionbar__actions > * {
+        flex: 1 1 auto;
+    }
+
+    .etp-actionbar {
+        bottom: var(--ems-sp-3);
+    }
+}

@@ -472,7 +472,7 @@ class ExamForm(CodingExamFieldsMixin, forms.ModelForm):
         # təyin olunur, suallar sonra əlavə olunur. Randomizer say mövcud sual
         # sayından çoxdursa avtomatik hamısını verir. Ona görə burada bloklamırıq;
         # sehrbaz "Sistemdə yalnız N sual var" xəbərdarlığını canlı göstərir
-        # (exam_available_question_count endpoint + review summary).
+        # (review summary).
         return value
 
     def _clean_enabled_toggle(self, field_name, *, default):

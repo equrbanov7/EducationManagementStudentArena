@@ -289,7 +289,7 @@
         var questionModalElement = document.getElementById("questionFormModal");
         var questionModalBody = document.getElementById("questionFormModalBody");
         var questionModalTitle = document.getElementById("questionFormModalTitle");
-        var questionModalHeader = questionModalElement ? questionModalElement.querySelector(".modal-header") : null;
+        var questionModalTrigger = null;
         var deleteModalElement = document.getElementById("examDetailDeleteConfirmModal");
         var deleteModalMessage = document.getElementById("examDetailDeleteConfirmMessage");
         var deleteModalTarget = document.getElementById("examDetailDeleteConfirmTarget");
@@ -338,16 +338,9 @@
                 questionModalTitle.textContent = isEdit ? (i18n.questionEditTitle || "Edit question") : (i18n.questionCreateTitle || "Add question");
             }
 
-            if (questionModalHeader) {
-                questionModalHeader.classList.remove(
-                    "bg-primary",
-                    "bg-info",
-                    "question-form-modal__header--create",
-                    "question-form-modal__header--edit"
-                );
-                questionModalHeader.classList.add("question-form-modal__header");
-                questionModalHeader.classList.add(isEdit ? "question-form-modal__header--edit" : "question-form-modal__header--create");
-                questionModalHeader.classList.add("text-white");
+            // 2026-10-10 redizayn: açıq başlıq — rejim yalnız modal modifikatoru ilə.
+            if (questionModalElement) {
+                questionModalElement.classList.toggle("is-edit", isEdit);
             }
         }
 
@@ -432,6 +425,7 @@
             }
 
             applyQuestionModalMode(mode);
+            questionModalTrigger = document.activeElement;
             questionModalBody.innerHTML = getLoadingMarkup();
             questionModal.show();
 
@@ -530,6 +524,11 @@
                 if (questionModalBody) {
                     questionModalBody.innerHTML = getLoadingMarkup();
                 }
+                // Fokus modalı açan düyməyə qayıdır (a11y).
+                if (questionModalTrigger && document.contains(questionModalTrigger) && questionModalTrigger.focus) {
+                    questionModalTrigger.focus();
+                }
+                questionModalTrigger = null;
             });
         }
     });

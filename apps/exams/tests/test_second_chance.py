@@ -227,13 +227,13 @@ class StudentListGrantAwareTests(_Base):
         )
 
         client = self._client_for(self.student)
-        # Tələbə imtahan siyahısı — limit bitib → SQL filtri imtahanı gizlədir.
-        response = client.get(reverse("exams:assigned_exam_list"))
+        # Tələbə imtahan siyahısı (kabinet bölməsi) — limit bitib → SQL filtri imtahanı gizlədir.
+        response = client.get(reverse("accounts:profile"), {"section": "assigned-exams"})
         self.assertNotContains(response, "Limitli imtahan", status_code=200)
 
         grant_second_chance(exam=exam, students=[self.student], granted_by=self.center)
         # Grant limiti artırır → imtahan həm siyahıda, həm tapşırıqlarda geri gəlir.
-        response = client.get(reverse("exams:assigned_exam_list"))
+        response = client.get(reverse("accounts:profile"), {"section": "assigned-exams"})
         self.assertContains(response, "Limitli imtahan")
 
 

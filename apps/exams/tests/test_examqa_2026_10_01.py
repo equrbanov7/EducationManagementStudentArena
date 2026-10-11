@@ -391,7 +391,13 @@ class StudentPagesQueryBudgetTests(TestCase):
 
 @override_settings(CACHES=LOCMEM_CACHE)
 class TeacherPendingQueryBudgetTests(TestCase):
-    """Yoxlanılacaq yazılı işlər siyahısı cəhd sayından asılı olmayan sorğu sayı ilə açılır."""
+    """Yoxlanılacaq yazılı işlər siyahısı cəhd sayından asılı olmayan sorğu sayı ilə açılır.
+
+    URL auditi A12 (2026-10-10): köhnə `exams/pending-work/` səhifəsi silindi — eyni
+    büdcə kanonik kabinet bölməsində (`?section=pending-review`) yoxlanılır.
+    """
+
+    PENDING_PARAMS = {"section": "pending-review"}
 
     @classmethod
     def setUpTestData(cls):
@@ -413,7 +419,7 @@ class TeacherPendingQueryBudgetTests(TestCase):
 
     def _count(self, client):
         with CaptureQueriesContext(connection) as ctx:
-            response = client.get(reverse("exams:teacher_pending_attempts"))
+            response = client.get(reverse("accounts:profile"), self.PENDING_PARAMS)
         self.assertEqual(response.status_code, 200)
         return len(ctx.captured_queries)
 
@@ -421,7 +427,7 @@ class TeacherPendingQueryBudgetTests(TestCase):
         client = Client()
         _login_with_org(client, self.teacher, self.org)
         self._written_attempts(1)
-        client.get(reverse("exams:teacher_pending_attempts"))
+        client.get(reverse("accounts:profile"), self.PENDING_PARAMS)
         small = self._count(client)
         self._written_attempts(5)
         large = self._count(client)

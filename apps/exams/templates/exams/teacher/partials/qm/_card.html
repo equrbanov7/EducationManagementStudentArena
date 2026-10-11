@@ -1,0 +1,114 @@
+{% load i18n exam_filters %}
+{% comment %}Sual kartı (imtahan sualı və ya bank sualı). JS qarmaqları: `.qb-card` (kartı klikləmək
+seçir, `is-selected`), `.question-checkbox`, `.js-open-question-form-modal`,
+`.js-single-question-action`, `.js-open-delete-modal` (teacher_questions_bank.js).
+Keyfiyyət nişanları ikon + MƏTN (yalnız rəng/ikon yox).{% endcomment %}
+{% with meta=q.analysis_meta %}
+<article class="eqb-card qb-card{% if not q.is_active %} is-inactive{% endif %}{% if meta and meta.top_severity != 'none' %} eqb-card--{{ meta.top_severity }}{% endif %}" id="qcard-{{ q.id }}">
+    <div class="eqb-card__select">
+        <input type="checkbox" class="question-checkbox eqb-check" name="selected_question_ids" value="{{ q.id }}"
+               aria-label="{% if qm_context == 'exam' %}#{{ q.order }}{% else %}#{{ forloop.counter0|add:page_obj.start_index }}{% endif %} — {{ q.text|striptags|truncatechars:60 }}">
+    </div>
+    <div class="eqb-card__main">
+        <div class="eqb-card__top">
+            <span class="eqb-card__num etp-num">{% if qm_context == 'exam' %}#{{ q.order }}{% else %}#{{ forloop.counter0|add:page_obj.start_index }}{% endif %}</span>
+            {% if not q.image_replaces_text or not q.image %}<p class="eqb-card__text">{{ q.text }}</p>{% endif %}
+            <div class="eqb-card__badges">
+                {% if q.is_active %}
+                <span class="ems-badge ems-badge--success"><i class="fas fa-circle-check" aria-hidden="true"></i>{% trans "status_active" context "exams.template.teacher_questions_bank" %}</span>
+                {% else %}
+                <span class="ems-badge ems-badge--muted"><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "status_inactive" context "exams.template.teacher_questions_bank" %}</span>
+                {% endif %}
+                {% if analysis_enabled and meta %}
+                    {% if meta.total_count %}
+                        {% if meta.error_count %}<span class="ems-badge ems-badge--danger"><i class="fas fa-circle-xmark" aria-hidden="true"></i>{{ meta.error_count }}<span class="visually-hidden"> {% trans "Xətalı" context "exams.template.teacher_questions_bank" %}</span></span>{% endif %}
+                        {% if meta.warning_count %}<span class="ems-badge ems-badge--warning"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i>{{ meta.warning_count }}<span class="visually-hidden"> {% trans "Xəbərdarlıq" context "exams.template.teacher_questions_bank" %}</span></span>{% endif %}
+                        {% if meta.has_duplicate %}<span class="ems-badge ems-badge--primary"><i class="fas fa-clone" aria-hidden="true"></i>{% trans "Dublikat" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                        {% if meta.has_balance_issue %}<span class="ems-badge ems-badge--neutral"><i class="fas fa-scale-unbalanced" aria-hidden="true"></i>{% trans "Uzunluq balansı" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                    {% else %}
+                        <span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{% trans "Təmiz" context "exams.template.teacher_questions_bank" %}</span>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if q.image %}
+        <div class="eqb-card__media">
+            <img src="{{ q.image|protected_media_url }}" alt="{% if q.image_replaces_text %}{{ q.text }}{% endif %}" loading="lazy">
+        </div>
+        {% endif %}
+
+        <div class="eqb-card__meta">
+            {% if qm_context == 'exam' %}
+                {% if q.block %}<span class="ems-badge ems-badge--info">{{ q.block.name }}</span>{% else %}<span class="ems-badge ems-badge--neutral">{% trans "label_no_block" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                {% if qm_show_language_filter %}<span class="ems-badge ems-badge--neutral">{{ q.get_language_display }}</span>{% endif %}
+            {% else %}
+                <span class="ems-badge ems-badge--info">{% if q.question_type == 'written' %}{% trans "Yazılı" %}{% else %}{% trans "Test" %}{% endif %}</span>
+                <span class="ems-badge ems-badge--neutral">{{ q.get_language_display }}</span>
+                <span class="ems-badge ems-badge--neutral">{{ q.get_difficulty_display }}</span>
+            {% endif %}
+            <span class="eqb-card__date"><i class="far fa-clock" aria-hidden="true"></i> {% trans "label_added_at" context "exams.template.teacher_questions_bank" %}: <span class="etp-num">{{ q.created_at|date:"d.m.Y H:i" }}</span></span>
+        </div>
+
+        {% with opts=q.options.all %}
+        {% if opts %}
+        <ol class="eqb-opts" role="list">
+            {% for opt in opts %}
+            <li class="eqb-opt{% if opt.is_correct %} is-correct{% endif %}">
+                <span class="eqb-opt__label">{{ opt.label|default:"•" }}</span>
+                {% if not opt.image_replaces_text or not opt.image %}<span class="eqb-opt__text">{{ opt.text }}</span>{% endif %}
+                {% if opt.image %}<img src="{{ opt.image|protected_media_url }}" alt="{% if opt.image_replaces_text %}{{ opt.text }}{% endif %}" class="eqb-opt__image" loading="lazy">{% endif %}
+                {% if opt.is_correct %}<span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{% trans "Düzgün" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+        {% elif qm_context == 'bank' and q.correct_answer %}
+        <div class="eqb-written"><strong>{% trans "Cavab" %}:</strong> {{ q.correct_answer|truncatechars:200 }}</div>
+        {% endif %}
+        {% endwith %}
+
+        {% if analysis_enabled and q.analysis_warnings %}
+        <details class="eqb-warnings eqb-warnings--{{ meta.top_severity|default:'warning' }}"{% if meta.error_count or meta.has_duplicate %} open{% endif %}>
+            <summary>
+                <i class="fas fa-list-check" aria-hidden="true"></i> {% trans "Xəbərdarlıqları göstər" context "exams.template.teacher_questions_bank" %}
+                <span class="ems-badge ems-badge--neutral etp-num">{{ meta.total_count }}</span>
+            </summary>
+            <ul class="eqb-warnings__list" role="list">
+                {% for w in q.analysis_warnings %}
+                <li class="eqb-warning eqb-warning--{{ w.severity|default:'warning' }}">
+                    <i class="fas {% if w.severity == 'error' %}fa-circle-xmark{% elif w.severity == 'info' %}fa-circle-info{% else %}fa-triangle-exclamation{% endif %}" aria-hidden="true"></i>
+                    <span>{{ w.msg }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+        {% endif %}
+
+        <div class="eqb-card__actions">
+            {% if qm_context == 'exam' %}
+            <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}" class="ems-btn js-open-question-form-modal"
+               data-question-modal-mode="edit" data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
+                <i class="fas fa-pen-to-square" aria-hidden="true"></i>{% trans "action_edit" context "exams.template.teacher_questions_bank" %}
+            </a>
+            {% else %}
+            <a href="{% url 'exams:bank_question_edit' bank.id q.id %}" class="ems-btn js-open-question-form-modal"
+               data-question-modal-mode="edit" data-question-modal-url="{% url 'exams:bank_question_edit' bank.id q.id %}">
+                <i class="fas fa-pen-to-square" aria-hidden="true"></i>{% trans "action_edit" context "exams.template.teacher_questions_bank" %}
+            </a>
+            {% endif %}
+            {% if q.is_active %}
+            <button type="button" class="ems-btn ems-btn--ghost js-single-question-action" data-action-value="deactivate" data-question-id="{{ q.id }}">
+                <i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "action_deactivate" context "exams.template.teacher_questions_bank" %}
+            </button>
+            {% else %}
+            <button type="button" class="ems-btn ems-btn--ghost js-single-question-action" data-action-value="activate" data-question-id="{{ q.id }}">
+                <i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "action_activate" context "exams.template.teacher_questions_bank" %}
+            </button>
+            {% endif %}
+            <button type="button" class="ems-btn ems-btn--ghost eqb-card__delete js-open-delete-modal" data-question-id="{{ q.id }}" data-question-text="{{ q.text|truncatechars:120 }}">
+                <i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete" context "exams.template.teacher_questions_bank" %}
+            </button>
+        </div>
+    </div>
+</article>
+{% endwith %}

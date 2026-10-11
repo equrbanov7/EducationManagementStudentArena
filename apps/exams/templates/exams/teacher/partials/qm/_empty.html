@@ -1,0 +1,21 @@
+{% load i18n %}
+{# Sual siyahısının boş vəziyyətləri — ortaq ems_ui komponenti, səbəbə görə mətn + növbəti addım. #}
+{% if active_flag %}
+    {% trans "Bu süzgəcə uyğun sual yoxdur." context "exams.template.teacher_questions_bank" as state_title %}
+    {% trans "Süzgəci sıfırla" context "exams.template.teacher_questions_bank" as state_action_label %}
+    {% with reset_url=qm_base_url|add:"?"|add:filters_query %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter-circle-xmark" state_body="" state_action_url=reset_url %}
+    {% endwith %}
+{% elif search_query %}
+    {% trans "empty_no_results" context "exams.template.teacher_questions_bank" as state_title %}
+    {% trans "Başqa söz yoxlayın və ya süzgəcləri dəyişin." context "exams.template.teacher_questions_bank" as state_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-magnifying-glass" state_action_label="" %}
+{% elif qm_context == "bank" %}
+    {% trans "Bu bankda hələ sual yoxdur." context "exams.question_bank.empty" as state_title %}
+    {% trans "«Sual əlavə et» ilə tək-tək və ya toplu əlavə ilə fayldan yükləyin." context "exams.template.teacher_questions_bank" as state_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-database" state_action_label="" %}
+{% else %}
+    {% trans "empty_no_questions" context "exams.template.teacher_questions_bank" as state_title %}
+    {% trans "«Sual əlavə et» ilə tək-tək və ya toplu əlavə ilə fayldan yükləyin." context "exams.template.teacher_questions_bank" as state_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-lightbulb" state_action_label="" %}
+{% endif %}

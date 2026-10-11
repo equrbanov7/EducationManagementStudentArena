@@ -1,123 +1,161 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
-{% block title %}{% trans "Dil idarəetməsi" %} — {{ exam.title }}{% endblock %}
+{% block title %}{% trans "Dil variantları" context "exams.template.language_manager" %} — {{ exam.title }}{% endblock %}
 
 {% block extraCss %}
+    {% if is_test_exam and variant_rows %}
+    {# Toplu yükləmə workbench-i (yalnız test imtahanı) — öz ortaq CSS-i ilə. #}
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part1.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part2.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/test_question_bank/_part3.css' %}?v=20260621-sticky-footer">
     <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part1.css' %}?v=20260607-drawer">
-    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20260930-resp">
+    <link rel="stylesheet" href="{% static 'exams/css/bulk_workbench_extras/_part2.css' %}?v=20261010-wp3exams">
+    {% endif %}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_language_manager.css' %}?v=20261010-wp3exams">
 {% endblock %}
 
 {% block content %}
-<div class="bulk-page-wrapper elm-wrapper-flush">
+{% comment %}2026-10-10 redizayn (sahib: «modern UX/UI, mövcud rənglər»): ortaq başlıq,
+sətir əməli «Deaktiv et» təsdiq dialoqu ilə (əvvəl az kataloqundakı «Bəli, deaktiv et»
+mətni düyməyə sızırdı), «Aktiv et» təsdiqsiz. Form sahələri/əməllər dəyişməyib.{% endcomment %}
+<div class="etp-page elm-page">
+    {% trans "Dil variantları" context "exams.template.language_manager" as head_title %}
+    {% trans "Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir." context "exams.template.language_manager" as head_subtitle %}
+    {% trans "İmtahana qayıt" context "exams.template.language_manager" as head_back_label %}
+    {% url 'exams:teacher_exam_detail' exam.slug as head_back_url %}
+    {% include "exams/teacher/partials/_page_head.html" with head_pills_include="exams/teacher/partials/language/_pills.html" %}
 
-    <header class="page-header">
-        <div class="title-section">
-            <h1 class="page-title">{% trans "Dil variantları" %}</h1>
-            <p class="page-subtitle">{{ exam.title }}</p>
-        </div>
-        <div class="page-header-links">
-            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="page-header-link page-header-link--secondary">
-                <i class="fas fa-arrow-left"></i> {% trans "İmtahana qayıt" %}
-            </a>
-        </div>
-    </header>
-
-    <div class="wb-info-banner">
-        <i class="fas fa-circle-info"></i>
-        <span>{% trans "Bu imtahan altında müxtəlif dillərdə sual dəstləri saxlaya bilərsiniz. Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin dilin sualları yüklənir." %}</span>
-    </div>
-
-    {# ── Mövcud dillər ── #}
-    <div class="wb-panel">
-        <div class="wb-panel__head"><i class="fas fa-language"></i> {% trans "Mövcud dillər" %}</div>
-        <div class="wb-panel__body wb-panel__body--flush">
+    <div class="elm-grid">
+        <section class="ems-card elm-card" aria-labelledby="elmLanguagesTitle">
+            <div class="ems-card__head">
+                <div>
+                    <h2 class="ems-card__title" id="elmLanguagesTitle">{% trans "Mövcud dillər" context "exams.template.language_manager" %}</h2>
+                    <p class="ems-card__sub">{% trans "Deaktiv dil tələbəyə təklif olunmur; sualları silinmir." context "exams.template.language_manager" %}</p>
+                </div>
+            </div>
             {% if variant_rows %}
-            <table class="wb-lang-table">
-                <thead>
-                    <tr>
-                        <th>{% trans "Dil" %}</th>
-                        <th>{% trans "Sual sayı" %}</th>
-                        <th>{% trans "Status" %}</th>
-                        <th class="elm-cell-right">{% trans "Əməliyyat" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for row in variant_rows %}
-                    <tr>
-                        <td class="wb-lang-table__name">{{ row.variant.display_name|default:row.label }}</td>
-                        <td class="wb-lang-table__count">{{ row.count }}</td>
-                        <td>
-                            {% if row.variant.is_active %}
-                            <span class="wb-status wb-status--active"><i class="fas fa-circle-check"></i> {% trans "Aktiv" %}</span>
-                            {% else %}
-                            <span class="wb-status wb-status--inactive"><i class="fas fa-circle-pause"></i> {% trans "Deaktiv" %}</span>
-                            {% endif %}
-                        </td>
-                        <td class="elm-cell-right">
-                            <form method="post" class="elm-inline-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="toggle_variant">
-                                <input type="hidden" name="variant_id" value="{{ row.variant.id }}">
-                                <button type="submit" class="qbx-btn qbx-btn--ghost qbx-btn--compact">
-                                    {% if row.variant.is_active %}{% trans "Deaktiv et" %}{% else %}{% trans "Aktiv et" %}{% endif %}
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="elm-tablewrap">
+                <table class="ems-table elm-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Dil" context "exams.template.language_manager" %}</th>
+                            <th scope="col" class="elm-col-num">{% trans "Aktiv sual" context "exams.template.language_manager" %}</th>
+                            <th scope="col">{% trans "Status" context "exams.template.language_manager" %}</th>
+                            <th scope="col" class="elm-col-action"><span class="visually-hidden">{% trans "Əməliyyat" context "exams.template.language_manager" %}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in variant_rows %}
+                        {% with name=row.variant.display_name|default:row.label %}
+                        <tr>
+                            <th scope="row">
+                                <span class="elm-lang">{{ name }}</span>
+                                <span class="ems-mono elm-code">{{ row.variant.language|upper }}</span>
+                            </th>
+                            <td class="elm-col-num etp-num" data-label="{% trans 'Aktiv sual' context 'exams.template.language_manager' %}">{{ row.count }}</td>
+                            <td data-label="{% trans 'Status' context 'exams.template.language_manager' %}">
+                                {% if row.variant.is_active %}
+                                <span class="ems-badge ems-badge--success"><i class="fas fa-circle-check" aria-hidden="true"></i>{% trans "Aktiv" context "exams.template.language_manager" %}</span>
+                                {% else %}
+                                <span class="ems-badge ems-badge--muted"><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "Deaktiv" context "exams.template.language_manager" %}</span>
+                                {% endif %}
+                            </td>
+                            <td class="elm-col-action">
+                                <form method="post" class="elm-row-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle_variant">
+                                    <input type="hidden" name="variant_id" value="{{ row.variant.id }}">
+                                    {% if row.variant.is_active %}
+                                    <button type="submit" class="ems-btn etp-btn--danger-soft"
+                                            data-elm-deactivate
+                                            data-confirm-title="{% trans 'Dil variantını deaktiv et' context 'exams.template.language_manager' %}"
+                                            data-confirm-body="{% blocktrans trimmed context 'exams.template.language_manager' %}«{{ name }}» deaktiv edilsin? Tələbələr bu dildə imtahana başlaya bilməyəcək. Suallar silinmir — istənilən vaxt yenidən aktiv edə bilərsiniz.{% endblocktrans %}"
+                                            data-confirm-label="{% trans 'Deaktiv et' context 'exams.template.language_manager' %}"
+                                            aria-label="{% blocktrans trimmed context 'exams.template.language_manager' %}«{{ name }}» dilini deaktiv et{% endblocktrans %}">
+                                        <i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "Deaktiv et" context "exams.template.language_manager" %}
+                                    </button>
+                                    {% else %}
+                                    <button type="submit" class="ems-btn"
+                                            aria-label="{% blocktrans trimmed context 'exams.template.language_manager' %}«{{ name }}» dilini aktiv et{% endblocktrans %}">
+                                        <i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "Aktiv et" context "exams.template.language_manager" %}
+                                    </button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                        </tr>
+                        {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-            <div class="qb-empty qb-empty--padded">{% trans "Hələ heç bir dil variantı yoxdur." %}</div>
+                {% trans "Hələ dil variantı yoxdur" context "exams.template.language_manager" as state_title %}
+                {% trans "Sağdakı formadan ilk dili əlavə edin — sonra bu dilə sual yükləyə bilərsiniz." context "exams.template.language_manager" as state_body %}
+                {% include "partials/ems_ui/_empty.html" with state_icon="fa-language" %}
             {% endif %}
-        </div>
-    </div>
+        </section>
 
-    {# ── Yeni dil əlavə et ── #}
-    {% if addable_languages %}
-    <div class="wb-panel">
-        <div class="wb-panel__head"><i class="fas fa-plus-circle"></i> {% trans "Yeni dil əlavə et" %}</div>
-        <div class="wb-panel__body">
-            <form method="post" class="wb-mini-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="add_variant">
-                <div class="qb-field">
-                    <label class="qb-field__label" for="add_language">{% trans "Dil" %}</label>
-                    <div class="bootstrap-single-select">
-                        <select class="qb-select form-select bootstrap-single-select__native js-bootstrap-single-select" id="add_language" name="language" data-bootstrap-select>
-                            {% for code, label in addable_languages %}
-                            <option value="{{ code }}">{{ label }}</option>
-                            {% endfor %}
-                        </select>
+        <section class="ems-card elm-card elm-add" aria-labelledby="elmAddTitle">
+            <div class="ems-card__head">
+                <div>
+                    <h2 class="ems-card__title" id="elmAddTitle">{% trans "Yeni dil əlavə et" context "exams.template.language_manager" %}</h2>
+                    <p class="ems-card__sub">{% trans "Əlavə olunan dil dərhal aktiv olur." context "exams.template.language_manager" %}</p>
+                </div>
+            </div>
+            <div class="ems-card__body">
+                {% if addable_languages %}
+                <form method="post" class="elm-add-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_variant">
+                    <div class="elm-field">
+                        <label class="etp-label" for="add_language">{% trans "Dil" context "exams.template.language_manager" %}<span class="etp-req" aria-hidden="true">*</span></label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select class="ems-select bootstrap-single-select__native" id="add_language" name="language" data-bootstrap-select required>
+                                {% for code, label in addable_languages %}
+                                <option value="{{ code }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
-                </div>
-                <div class="qb-field">
-                    <label class="qb-field__label" for="add_display_name">{% trans "Göstəriş adı (opsional)" %}</label>
-                    <input type="text" class="qb-input" id="add_display_name" name="display_name"
-                           placeholder="{% trans 'məs. Azərbaycan (2024 buraxılış)' %}">
-                </div>
-                <div class="qb-field qb-field--end">
-                    <button type="submit" class="qbx-btn"><i class="fas fa-plus"></i> {% trans "Əlavə et" %}</button>
-                </div>
-            </form>
-        </div>
+                    <div class="elm-field">
+                        <label class="etp-label" for="add_display_name">{% trans "Göstəriş adı" context "exams.template.language_manager" %} <span class="elm-optional">({% trans "istəyə bağlı" context "exams.template.language_manager" %})</span></label>
+                        <input type="text" class="ems-input" id="add_display_name" name="display_name" maxlength="80"
+                               aria-describedby="add_display_name_hint"
+                               placeholder="{% trans 'məs. Azərbaycan (2024 buraxılış)' context 'exams.template.language_manager' %}">
+                        <p class="etp-hint" id="add_display_name_hint">{% trans "Boş qalsa dilin adı göstərilir." context "exams.template.language_manager" %}</p>
+                    </div>
+                    <button type="submit" class="ems-btn ems-btn--primary elm-add-submit">
+                        <i class="fas fa-plus" aria-hidden="true"></i>{% trans "Dil əlavə et" context "exams.template.language_manager" %}
+                    </button>
+                </form>
+                {% else %}
+                <p class="etp-hint elm-all-added"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Bütün dəstəklənən dillər artıq əlavə olunub." context "exams.template.language_manager" %}</p>
+                {% endif %}
+            </div>
+        </section>
     </div>
-    {% endif %}
 </div>
 
 {# ── Dilə toplu sual yüklə (ortaq workbench — yalnız test imtahanı) ── #}
 {% if is_test_exam and variant_rows %}
+<div class="elm-upload">
     {% include "exams/teacher/partials/_bulk_question_workbench.html" %}
+</div>
 {% endif %}
 {% endblock %}
 
 {% block extraJs %}
+{% if is_test_exam and variant_rows %}
 {# 2026-09-21 bölgüsü: testQuestionBank 2 hissədə — SIRA VACİBDİR. #}
 <script src="{% static 'exams/js/testQuestionBank.js' %}?v=20260926-search"></script>
 <script src="{% static 'exams/js/testQuestionBank_upload.js' %}?v=20260921-split"></script>
 <script src="{% static 'exams/js/questionWorkbench.js' %}?v=20260607-workbench"></script>
+{% endif %}
+<script src="{% static 'exams/js/exam_language_manager.js' %}?v=20261010-wp3exams"></script>
 {% endblock %}

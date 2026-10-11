@@ -1,453 +1,384 @@
+/* =========================================================================
+   question_form.js — sual formu (imtahan sualı modalı + bank sualı modalı +
+   ehtiyat səhifə). API: window.ExamQuestionForm.init(root) — host səhifə
+   (teacher_exam_detail.js, teacher_questions_bank.js) formanı AJAX ilə
+   modal gövdəsinə qoyandan sonra çağırır; müstəqil səhifədə EMSReady.
+
+   2026-10-10 redizayn (sahib «modern UX/UI»):
+     • Fayl zonası: klik/klaviatura, sürükləyib-buraxma, önizləmə (şəkil),
+       ad + ölçü, «×» ilə götürmə, növ/ölçü yoxlaması (10 MB / 30 MB) —
+       native «Choose File / No file chosen» (brauzer dili) görünmür.
+     • Mövcud media silinməsi EMSConfirm ilə; nəticə alert() əvəzinə sahədə.
+     • Variant etiketi serverin «Variant %(n)s» nümunəsindən (əvvəl JS
+       ingilis UI-da da «1-ci variant» yazırdı).
+     • Tək cavab rejimində ikinci «düzgün» işarəsi bloklanır + izah.
+   İdempotent: hər kök bir dəfə bağlanır (WeakSet).
+   ========================================================================= */
 (function () {
-    var initializedRoots = new WeakSet();
+    "use strict";
 
-    function setHidden(element, hidden) {
-        if (!element) {
-            return;
+    var initialized = new WeakSet();
+    var IMAGE_EXT = /\.(jpe?g|jfif|png|gif|webp)$/i;
+    var VIDEO_EXT = /\.(mp4|webm|mov)$/i;
+
+    function formatSize(bytes) {
+        if (bytes >= 1024 * 1024) {
+            return (bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/, "") + " MB";
         }
-        element.hidden = !!hidden;
+        return Math.max(1, Math.round(bytes / 1024)) + " KB";
     }
 
-    function setCurrentPreviewOpacity(previewElement, hasPendingReplacement) {
-        if (!previewElement) {
-            return;
+    function fileAllowed(kind, file) {
+        var type = String(file.type || "").toLowerCase();
+        if (kind === "image") {
+            return type.indexOf("image/") === 0 || IMAGE_EXT.test(file.name || "");
         }
-        previewElement.style.opacity = hasPendingReplacement ? "0.45" : "1";
+        return ["video/mp4", "video/webm", "video/quicktime"].indexOf(type) !== -1 || VIDEO_EXT.test(file.name || "");
     }
 
-    function initQuestionForm(root) {
-        if (!root || initializedRoots.has(root)) {
+    /* ── Fayl zonası ─────────────────────────────────────────────────────── */
+    function initDropzone(root, drop) {
+        var kind = drop.getAttribute("data-qf-drop");
+        var input = drop.querySelector(".qf-drop__input");
+        var zone = drop.querySelector(".qf-drop__zone");
+        var box = drop.querySelector("[data-qf-file]");
+        var nameEl = drop.querySelector("[data-qf-file-name]");
+        var sizeEl = drop.querySelector("[data-qf-file-size]");
+        var thumb = drop.querySelector("[data-qf-thumb]");
+        var video = drop.querySelector("[data-qf-video]");
+        var errorEl = drop.querySelector("[data-qf-file-error]");
+        var current = drop.querySelector("[data-qf-current]");
+        var clearInput = drop.querySelector(".qf-clear-input");
+        var maxBytes = (parseFloat(drop.getAttribute("data-max-mb")) || 10) * 1024 * 1024;
+        var objectUrl = null;
+        if (!input || !zone) {
             return;
         }
-        initializedRoots.add(root);
 
-        if (window.EMSBootstrapSelect) {
-            window.EMSBootstrapSelect.init(root);
+        function setError(message) {
+            if (!errorEl) {
+                return;
+            }
+            errorEl.textContent = message || "";
+            errorEl.hidden = !message;
         }
 
-        var imageInput = root.querySelector('input[name="image"]');
-        var videoInput = root.querySelector('input[name="video"]');
-        var imageClearInput = root.querySelector('input[name="image-clear"]');
-        var videoClearInput = root.querySelector('input[name="video-clear"]');
-        var imageFileName = root.querySelector("[data-question-image-file-name]");
-        var videoFileName = root.querySelector("[data-question-video-file-name]");
-        var currentImagePreview = root.querySelector("[data-current-image-preview]");
-        var currentVideoPreview = root.querySelector("[data-current-video-preview]");
-        var newImagePreview = root.querySelector("[data-new-image-preview]");
-        var newVideoPreview = root.querySelector("[data-new-video-preview]");
-        var newImage = root.querySelector("[data-new-image]");
-        var newVideo = root.querySelector("[data-new-video]");
-        var newVideoSource = root.querySelector("[data-new-video-source]");
-        var imageRemoveButton = root.querySelector('[data-question-clear-media="image"]');
-        var videoRemoveButton = root.querySelector('[data-question-clear-media="video"]');
+        function releaseUrl() {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+        }
+
+        function reset() {
+            releaseUrl();
+            input.value = "";
+            drop.classList.remove("has-file");
+            if (box) {
+                box.hidden = true;
+            }
+            if (thumb) {
+                thumb.removeAttribute("src");
+            }
+            if (video) {
+                video.removeAttribute("src");
+                video.load();
+            }
+            if (current) {
+                current.classList.remove("is-pending");
+            }
+        }
+
+        function show(file) {
+            releaseUrl();
+            objectUrl = URL.createObjectURL(file);
+            if (thumb) {
+                thumb.src = objectUrl;
+            }
+            if (video) {
+                video.src = objectUrl;
+            }
+            if (nameEl) {
+                nameEl.textContent = file.name;
+            }
+            if (sizeEl) {
+                sizeEl.textContent = formatSize(file.size);
+            }
+            if (box) {
+                box.hidden = false;
+            }
+            drop.classList.add("has-file");
+            if (current) {
+                current.classList.add("is-pending");
+            }
+            if (clearInput) {
+                clearInput.checked = false;
+            }
+        }
+
+        function handle() {
+            var file = input.files && input.files[0];
+            setError("");
+            if (!file) {
+                reset();
+                return;
+            }
+            if (!fileAllowed(kind, file)) {
+                reset();
+                setError(root.getAttribute("data-file-wrong-type") || "");
+                return;
+            }
+            if (file.size > maxBytes) {
+                reset();
+                setError((root.getAttribute("data-file-too-large") || "").replace("{max}", String(maxBytes / 1048576)));
+                return;
+            }
+            show(file);
+        }
+
+        input.addEventListener("change", handle);
+
+        var removeBtn = drop.querySelector("[data-qf-file-remove]");
+        if (removeBtn) {
+            removeBtn.addEventListener("click", function () {
+                reset();
+                setError("");
+                input.focus();
+            });
+        }
+
+        ["dragenter", "dragover"].forEach(function (type) {
+            zone.addEventListener(type, function (event) {
+                event.preventDefault();
+                drop.classList.add("is-dragover");
+            });
+        });
+        ["dragleave", "dragend"].forEach(function (type) {
+            zone.addEventListener(type, function () {
+                drop.classList.remove("is-dragover");
+            });
+        });
+        zone.addEventListener("drop", function (event) {
+            event.preventDefault();
+            drop.classList.remove("is-dragover");
+            var files = event.dataTransfer && event.dataTransfer.files;
+            if (!files || !files.length) {
+                return;
+            }
+            try {
+                var transfer = new DataTransfer();
+                transfer.items.add(files[0]);
+                input.files = transfer.files;
+            } catch (err) {
+                return; // köhnə brauzer: klik ilə seçim işləməyə davam edir
+            }
+            handle();
+        });
+
+        var clearBtn = drop.querySelector("[data-qf-clear-current]");
+        if (clearBtn && current) {
+            clearBtn.addEventListener("click", function () {
+                var message = root.getAttribute(kind === "image" ? "data-confirm-delete-image" : "data-confirm-delete-video");
+                var confirmer = window.EMSConfirm ? window.EMSConfirm.open({ body: message || "", danger: true }) :
+                    Promise.resolve(true);
+                confirmer.then(function (ok) {
+                    if (!ok) {
+                        clearBtn.focus();
+                        return;
+                    }
+                    if (clearInput) {
+                        clearInput.checked = true;
+                    }
+                    reset();
+                    current.classList.add("is-cleared");
+                    var note = current.querySelector("[data-qf-clear-note]");
+                    if (note) {
+                        note.hidden = false;
+                    }
+                    input.focus();
+                });
+            });
+        }
+    }
+
+    /* ── Variantlar ──────────────────────────────────────────────────────── */
+    function initOptions(root) {
+        var list = root.querySelector("[data-option-list]");
+        var template = root.querySelector("[data-option-card-template]");
+        var answerMode = root.querySelector('select[name="answer_mode"]');
+        var warning = root.querySelector("[data-single-answer-warning]");
         var form = root.querySelector("form");
-        var answerModeSelect = root.querySelector('select[name="answer_mode"]');
-        var singleAnswerWarning = root.querySelector("[data-single-answer-warning]");
-        var variantsSection = root.querySelector(".variants-section");
-        var optionList = root.querySelector("[data-option-list]");
-        var optionCardTemplate = root.querySelector("[data-option-card-template]");
-        var minOptionCount = parseInt(root.dataset.minOptionCount || "2", 10);
+        var minCount = parseInt(root.getAttribute("data-min-option-count") || "2", 10);
+        var pattern = root.getAttribute("data-option-label-pattern") || "Variant %(n)s";
 
-        function getCorrectOptionCheckboxes() {
+        function label(index) {
+            return pattern.replace("%(n)s", String(index));
+        }
+
+        function cards() {
+            return list ? Array.prototype.slice.call(list.querySelectorAll("[data-option-card]")) : [];
+        }
+
+        function correctBoxes() {
             return Array.prototype.slice.call(root.querySelectorAll('input[name$="_is_correct"]'));
         }
 
-        function getOptionCards() {
-            if (!optionList) {
-                return [];
-            }
-            return Array.prototype.slice.call(optionList.querySelectorAll("[data-option-card]"));
+        function checkedCount() {
+            return correctBoxes().filter(function (box) { return box.checked; }).length;
         }
 
-        function getOptionTextInput(card) {
-            return card ? card.querySelector('input[type="text"]') : null;
+        function isSingle() {
+            return !!answerMode && answerMode.value === "single";
         }
 
-        function getOptionCheckbox(card) {
-            return card ? card.querySelector('input[type="checkbox"]') : null;
-        }
-
-        function getOptionTextLabel(card) {
-            return card ? card.querySelector("[data-option-text-label]") : null;
-        }
-
-        function getOrdinalSuffix(index) {
-            var suffixMap = {
-                0: "cu",
-                1: "ci",
-                2: "ci",
-                3: gettext("cü"),
-                4: gettext("cü"),
-                5: "ci",
-                6: gettext("cı"),
-                7: "ci",
-                8: "ci",
-                9: "cu"
-            };
-            return suffixMap[index % 10] || "ci";
-        }
-
-        function formatOptionLabel(index) {
-            return index + "-" + getOrdinalSuffix(index) + " variant";
-        }
-
-        function getCheckedCorrectCount() {
-            return getCorrectOptionCheckboxes().reduce(function (count, checkbox) {
-                return count + (checkbox.checked ? 1 : 0);
-            }, 0);
-        }
-
-        function hideSingleAnswerWarning() {
-            if (!singleAnswerWarning) {
+        function setWarning(show) {
+            if (!warning) {
                 return;
             }
-            singleAnswerWarning.textContent = "";
-            setHidden(singleAnswerWarning, true);
+            warning.textContent = show ? (root.getAttribute("data-single-answer-warning-message") || "") : "";
+            warning.hidden = !show;
         }
 
-        function showSingleAnswerWarning() {
-            if (!singleAnswerWarning) {
-                return;
-            }
-            singleAnswerWarning.textContent =
-                root.dataset.singleAnswerWarningMessage ||
-                gettext("Cavab rejimini tək seçimdən çoxlu seçimə dəyişmək lazımdır.");
-            setHidden(singleAnswerWarning, false);
+        function syncWarning() {
+            setWarning(isSingle() && checkedCount() > 1);
         }
 
-        function isSingleAnswerMode() {
-            return !!answerModeSelect && answerModeSelect.value === "single";
-        }
-
-        function syncSingleAnswerWarning() {
-            if (!answerModeSelect || !getCorrectOptionCheckboxes().length) {
-                return;
-            }
-
-            if (isSingleAnswerMode() && getCheckedCorrectCount() > 1) {
-                showSingleAnswerWarning();
-                return;
-            }
-
-            hideSingleAnswerWarning();
-        }
-
-        function updateRemoveButtons() {
-            var cards = getOptionCards();
-            cards.forEach(function (card) {
-                var button = card.querySelector("[data-remove-option-btn]");
-                if (button) {
-                    button.hidden = cards.length <= minOptionCount;
-                }
-            });
-        }
-
-        function renumberOptionCards() {
-            var cards = getOptionCards();
-            cards.forEach(function (card, position) {
-                var index = position + 1;
-                var label = formatOptionLabel(index);
-                var textInput = getOptionTextInput(card);
-                var checkbox = getOptionCheckbox(card);
-                var textLabel = getOptionTextLabel(card);
-
-                card.dataset.optionIndex = String(index);
-
-                if (textLabel) {
-                    textLabel.textContent = label + ":";
-                    textLabel.setAttribute("for", "id_option" + index + "_text");
-                }
-
-                if (textInput) {
-                    textInput.name = "option" + index + "_text";
-                    textInput.id = "id_option" + index + "_text";
-                }
-
-                if (checkbox) {
-                    checkbox.name = "option" + index + "_is_correct";
-                    checkbox.id = "id_option" + index + "_is_correct";
-                }
-            });
-
-            updateRemoveButtons();
-            syncSingleAnswerWarning();
-        }
-
-        function buildOptionCard(index) {
-            if (!optionCardTemplate) {
-                return null;
-            }
-
-            var label = formatOptionLabel(index);
-            var html = optionCardTemplate.innerHTML
-                .replace(/__INDEX__/g, String(index))
-                .replace(/__LABEL__/g, label);
-
-            var temp = document.createElement("div");
-            temp.innerHTML = html.trim();
-            return temp.firstElementChild;
-        }
-
-        function addOptionCard() {
-            if (!optionList) {
-                return;
-            }
-
-            var nextIndex = getOptionCards().length + 1;
-            var card = buildOptionCard(nextIndex);
-            if (!card) {
-                return;
-            }
-
-            optionList.appendChild(card);
-            renumberOptionCards();
-
-            var textInput = getOptionTextInput(card);
-            if (textInput) {
-                textInput.focus();
-            }
-        }
-
-        function removeOptionCard(button) {
-            var card = button.closest("[data-option-card]");
-            if (!card) {
-                return;
-            }
-
-            if (getOptionCards().length <= minOptionCount) {
-                return;
-            }
-
-            card.remove();
-            renumberOptionCards();
-        }
-
-        /* 2026-09-14 (W3 `w3sweep`): «cavab rejimi» artıq layihənin
-           `bootstrap-single-select` komponentidir — native `<select>` vizual
-           gizlidir (`is-enhanced`), fokus onun görünən toggle düyməsinə getməlidir. */
         function focusAnswerMode() {
-            if (!answerModeSelect) {
+            if (!answerMode) {
                 return;
             }
-            var wrap = answerModeSelect.closest(".bootstrap-single-select");
+            var wrap = answerMode.closest(".bootstrap-single-select");
             var toggle = wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
-            if (answerModeSelect.classList.contains("is-enhanced") && toggle) {
-                toggle.focus();
-                return;
-            }
-            answerModeSelect.focus();
+            (answerMode.classList.contains("is-enhanced") && toggle ? toggle : answerMode).focus();
         }
 
-        function handleCorrectOptionChange(event) {
-            if (!answerModeSelect || !isSingleAnswerMode()) {
-                hideSingleAnswerWarning();
+        function renumber() {
+            var all = cards();
+            all.forEach(function (card, position) {
+                var index = position + 1;
+                var text = card.querySelector('input[type="text"]');
+                var box = card.querySelector('input[type="checkbox"]');
+                var title = card.querySelector("[data-option-text-label]");
+                var srLabel = card.querySelector("[data-option-sr-label]");
+                card.setAttribute("data-option-index", String(index));
+                if (title) {
+                    title.textContent = label(index);
+                    title.setAttribute("for", "id_option" + index + "_text");
+                }
+                if (srLabel) {
+                    srLabel.textContent = label(index) + ": ";
+                }
+                if (text) {
+                    text.name = "option" + index + "_text";
+                    text.id = "id_option" + index + "_text";
+                }
+                if (box) {
+                    box.name = "option" + index + "_is_correct";
+                    box.id = "id_option" + index + "_is_correct";
+                }
+                var remove = card.querySelector("[data-remove-option-btn]");
+                if (remove) {
+                    remove.hidden = all.length <= minCount;
+                }
+            });
+            syncWarning();
+        }
+
+        function addCard() {
+            if (!list || !template) {
                 return;
             }
-
-            if (!event.target.checked) {
-                syncSingleAnswerWarning();
+            var index = cards().length + 1;
+            var holder = document.createElement("div");
+            holder.innerHTML = template.innerHTML.replace(/__INDEX__/g, String(index))
+                .replace(/__LABEL__/g, label(index)).trim();
+            var card = holder.firstElementChild;
+            if (!card) {
                 return;
             }
+            list.appendChild(card);
+            renumber();
+            var text = card.querySelector('input[type="text"]');
+            if (text) {
+                text.focus();
+            }
+        }
 
-            if (getCheckedCorrectCount() > 1) {
-                event.target.checked = false;
-                showSingleAnswerWarning();
+        root.addEventListener("click", function (event) {
+            if (event.target.closest("[data-add-option-btn]")) {
+                addCard();
+                return;
+            }
+            var remove = event.target.closest("[data-remove-option-btn]");
+            if (remove && cards().length > minCount) {
+                var card = remove.closest("[data-option-card]");
+                var next = card && (card.nextElementSibling || card.previousElementSibling);
+                if (card) {
+                    card.remove();
+                }
+                renumber();
+                var focusTarget = next && next.querySelector('input[type="text"]');
+                if (focusTarget) {
+                    focusTarget.focus();
+                }
+            }
+        });
+
+        root.addEventListener("change", function (event) {
+            var target = event.target;
+            if (!target || !/_is_correct$/.test(target.name || "")) {
+                return;
+            }
+            if (isSingle() && target.checked && checkedCount() > 1) {
+                target.checked = false;
+                setWarning(true);
                 focusAnswerMode();
                 return;
             }
+            syncWarning();
+        });
 
-            hideSingleAnswerWarning();
-        }
-
-        function handleFormSubmit(event) {
-            if (!isSingleAnswerMode() || getCheckedCorrectCount() <= 1) {
-                return;
-            }
-
-            event.preventDefault();
-            showSingleAnswerWarning();
-            focusAnswerMode();
-        }
-
-        function showFileName(labelElement, file) {
-            if (!labelElement) {
-                return;
-            }
-            if (!file) {
-                labelElement.textContent = "";
-                setHidden(labelElement, true);
-                return;
-            }
-            labelElement.textContent = file.name;
-            setHidden(labelElement, false);
-        }
-
-        function clearImageSelectionState() {
-            showFileName(imageFileName, null);
-            if (newImage) {
-                newImage.src = "";
-            }
-            setHidden(newImagePreview, true);
-            setCurrentPreviewOpacity(currentImagePreview, false);
-        }
-
-        function clearVideoSelectionState() {
-            showFileName(videoFileName, null);
-            if (newVideoSource) {
-                newVideoSource.src = "";
-            }
-            if (newVideo) {
-                newVideo.load();
-            }
-            setHidden(newVideoPreview, true);
-            setCurrentPreviewOpacity(currentVideoPreview, false);
-        }
-
-        function handleImageChange(event) {
-            var file = event.target.files && event.target.files[0];
-            if (!file) {
-                clearImageSelectionState();
-                return;
-            }
-
-            if (imageClearInput) {
-                imageClearInput.checked = false;
-            }
-
-            showFileName(imageFileName, file);
-
-            var reader = new FileReader();
-            reader.onload = function (loadEvent) {
-                if (newImage) {
-                    newImage.src = loadEvent.target.result;
-                }
-                setHidden(newImagePreview, false);
-                setCurrentPreviewOpacity(currentImagePreview, true);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function handleVideoChange(event) {
-            var file = event.target.files && event.target.files[0];
-            if (!file) {
-                clearVideoSelectionState();
-                return;
-            }
-
-            if (videoClearInput) {
-                videoClearInput.checked = false;
-            }
-
-            showFileName(videoFileName, file);
-
-            var objectUrl = URL.createObjectURL(file);
-            if (newVideoSource) {
-                newVideoSource.src = objectUrl;
-            }
-            if (newVideo) {
-                newVideo.load();
-            }
-            setHidden(newVideoPreview, false);
-            setCurrentPreviewOpacity(currentVideoPreview, true);
-        }
-
-        // 2026-09-14 (audit FE-F19): native confirm() → EMSConfirm (vahid dialoq); ləğv = sorğu yoxdur.
-        function clearImage() {
-            var confirmMessage = root.dataset.confirmDeleteImage || "Delete image?";
-            var alertMessage = root.dataset.alertImageWillBeDeleted || "";
-            window.EMSConfirm.open({ body: confirmMessage, danger: true }).then(function (ok) {
-                if (!ok) {
-                    return;
-                }
-                if (imageClearInput) {
-                    imageClearInput.checked = true;
-                }
-                if (imageInput) {
-                    imageInput.value = "";
-                }
-                if (currentImagePreview) {
-                    currentImagePreview.style.display = "none";
-                }
-                clearImageSelectionState();
-                if (alertMessage) {
-                    window.alert(alertMessage);
-                }
-            });
-        }
-
-        function clearVideo() {
-            var confirmMessage = root.dataset.confirmDeleteVideo || "Delete video?";
-            var alertMessage = root.dataset.alertVideoWillBeDeleted || "";
-            window.EMSConfirm.open({ body: confirmMessage, danger: true }).then(function (ok) {
-                if (!ok) {
-                    return;
-                }
-                if (videoClearInput) {
-                    videoClearInput.checked = true;
-                }
-                if (videoInput) {
-                    videoInput.value = "";
-                }
-                if (currentVideoPreview) {
-                    currentVideoPreview.style.display = "none";
-                }
-                clearVideoSelectionState();
-                if (alertMessage) {
-                    window.alert(alertMessage);
-                }
-            });
-        }
-
-        if (imageInput) {
-            imageInput.addEventListener("change", handleImageChange);
-        }
-        if (videoInput) {
-            videoInput.addEventListener("change", handleVideoChange);
-        }
-        if (imageRemoveButton) {
-            imageRemoveButton.addEventListener("click", clearImage);
-        }
-        if (videoRemoveButton) {
-            videoRemoveButton.addEventListener("click", clearVideo);
-        }
-        if (answerModeSelect) {
-            answerModeSelect.addEventListener("change", syncSingleAnswerWarning);
-            syncSingleAnswerWarning();
-        }
-        if (variantsSection) {
-            variantsSection.addEventListener("click", function (event) {
-                var addButton = event.target.closest("[data-add-option-btn]");
-                if (addButton) {
-                    addOptionCard();
-                    return;
-                }
-
-                var removeButton = event.target.closest("[data-remove-option-btn]");
-                if (removeButton) {
-                    removeOptionCard(removeButton);
-                }
-            });
-
-            variantsSection.addEventListener("change", function (event) {
-                if (event.target && /_is_correct$/.test(event.target.name || "")) {
-                    handleCorrectOptionChange(event);
-                }
-            });
-
-            renumberOptionCards();
-        } else {
-            updateRemoveButtons();
+        if (answerMode) {
+            answerMode.addEventListener("change", syncWarning);
         }
         if (form) {
-            form.addEventListener("submit", handleFormSubmit);
+            form.addEventListener("submit", function (event) {
+                if (isSingle() && checkedCount() > 1) {
+                    event.preventDefault();
+                    setWarning(true);
+                    focusAnswerMode();
+                }
+            });
+        }
+        renumber();
+    }
+
+    function initQuestionForm(root) {
+        if (!root || initialized.has(root)) {
+            return;
+        }
+        initialized.add(root);
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.init(root);
+        }
+        Array.prototype.forEach.call(root.querySelectorAll("[data-qf-drop]"), function (drop) {
+            initDropzone(root, drop);
+        });
+        initOptions(root);
+        // Modalda: ilk xətalı sahəyə, yoxdursa sual mətninə fokus (klaviatura istifadəçisi üçün).
+        if (root.classList.contains("qf--modal")) {
+            var first = root.querySelector('[aria-invalid="true"]:not([type="file"])') || root.querySelector("textarea");
+            if (first) {
+                first.focus({ preventScroll: true });
+            }
         }
     }
 
-    window.ExamQuestionForm = {
-        init: initQuestionForm
-    };
+    window.ExamQuestionForm = { init: initQuestionForm };
 
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".js-exam-question-form-root").forEach(initQuestionForm);
-    });
+    if (window.EMSReady) {
+        window.EMSReady(function () {
+            Array.prototype.forEach.call(document.querySelectorAll(".js-exam-question-form-root"), initQuestionForm);
+        });
+    }
 })();

@@ -1,0 +1,26 @@
+{% load i18n %}
+{% comment %}Sual bankı başlığının əməlləri (sahib 2026-10-10): TƏK əsas əməl «Sual əlavə et»,
+toplu/blok əlavəsi onun açılan hissəsində; təhlükəli əməllər burada YOX — səhifənin
+sonundakı «Təhlükəli əməliyyatlar» zonasındadır.{% endcomment %}
+{% if qm_context == 'bank' and qm_is_owner %}
+<button type="button" class="ems-btn" data-bs-toggle="modal" data-bs-target="#bankEditModal">
+    <i class="fas fa-pen" aria-hidden="true"></i>{% trans "Bankı redaktə et" %}
+</button>
+{% endif %}
+{% if qm_add_single_url %}
+<div class="btn-group etp-split">
+    <a href="{{ qm_add_single_url }}" class="ems-btn ems-btn--primary js-open-question-form-modal"
+       data-question-modal-mode="create" data-question-modal-url="{{ qm_add_single_url }}">
+        <i class="fas fa-plus" aria-hidden="true"></i>{% trans "action_add_question" context "exams.template.teacher_questions_bank" %}
+    </a>
+    {% if qm_bulk_add_url %}
+    <button type="button" class="ems-btn ems-btn--primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"
+            aria-label="{% trans 'Digər əlavə üsulları' context 'exams.template.teacher_questions_bank' %}"></button>
+    <ul class="dropdown-menu dropdown-menu-end etp-menu">
+        <li><a class="dropdown-item" href="{{ qm_bulk_add_url }}"><i class="fas fa-layer-group" aria-hidden="true"></i>{{ qm_bulk_add_label }}</a></li>
+    </ul>
+    {% endif %}
+</div>
+{% elif qm_bulk_add_url %}
+<a href="{{ qm_bulk_add_url }}" class="ems-btn ems-btn--primary"><i class="fas fa-layer-group" aria-hidden="true"></i>{{ qm_bulk_add_label }}</a>
+{% endif %}

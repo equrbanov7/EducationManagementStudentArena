@@ -1,0 +1,57 @@
+{% load i18n exam_filters %}
+{% comment %}Fayl seçici (sahib 2026-10-10): native «Choose File / No file chosen» (brauzer dili)
+əvəzinə tərcümə olunan zona — klik/klaviatura ilə seçim, sürükləyib-buraxma, önizləmə, ad +
+ölçü, «×» ilə götürmə, qəbul olunan formatlar və limit görünür. Sahə adı (`image`/`video`)
+və «təmizlə» qutusu (`<ad>-clear`, ClearableFileInput müqaviləsi) dəyişməyib.
+Kontekst: field (BoundField), kind ("image"|"video"), current (mövcud fayl, redaktədə).{% endcomment %}
+<div class="qf-drop" data-qf-drop="{{ kind }}" data-max-mb="{% if kind == 'image' %}10{% else %}30{% endif %}">
+    <span class="etp-label">{{ field.label }}</span>
+    <input type="file" class="qf-drop__input" name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+           accept="{{ field.field.widget.attrs.accept }}" aria-describedby="{{ field.id_for_label }}_hint"
+           {% if field.errors %}aria-invalid="true"{% endif %}>
+    <label class="qf-drop__zone" for="{{ field.id_for_label }}">
+        <i class="fas {% if kind == 'image' %}fa-image{% else %}fa-film{% endif %} qf-drop__icon" aria-hidden="true"></i>
+        <span class="qf-drop__title">{% if kind == 'image' %}{% trans "Şəkil seçin" context "exams.template.question_form" %}{% else %}{% trans "Video seçin" context "exams.template.question_form" %}{% endif %}</span>
+        <span class="qf-drop__sub">{% trans "və ya faylı bura sürüşdürüb buraxın" context "exams.template.question_form" %}</span>
+    </label>
+    <p class="etp-hint qf-drop__hint" id="{{ field.id_for_label }}_hint">
+        {% if kind == 'image' %}{% trans "JPG, PNG, GIF, WEBP · ən çox 10 MB" context "exams.template.question_form" %}{% else %}{% trans "MP4, WEBM, MOV · ən çox 30 MB" context "exams.template.question_form" %}{% endif %}
+    </p>
+
+    <div class="qf-file" data-qf-file hidden>
+        {% if kind == 'image' %}
+        <img class="qf-file__thumb" src="" alt="" data-qf-thumb>
+        {% else %}
+        <span class="qf-file__icon" aria-hidden="true"><i class="fas fa-film"></i></span>
+        {% endif %}
+        <span class="qf-file__meta">
+            <span class="qf-file__name" data-qf-file-name></span>
+            <span class="qf-file__size" data-qf-file-size></span>
+        </span>
+        <button type="button" class="qf-file__remove" data-qf-file-remove
+                aria-label="{% if kind == 'image' %}{% trans 'Seçilmiş şəkli götür' context 'exams.template.question_form' %}{% else %}{% trans 'Seçilmiş videonu götür' context 'exams.template.question_form' %}{% endif %}">
+            <i class="fas fa-xmark" aria-hidden="true"></i>
+        </button>
+        {% if kind == 'video' %}<video class="qf-file__video" controls preload="metadata" data-qf-video></video>{% endif %}
+    </div>
+    <p class="qf-error" data-qf-file-error role="alert" hidden></p>
+
+    {% if current %}
+    <div class="qf-current" data-qf-current>
+        <span class="qf-current__label">{% if kind == 'image' %}{% trans "label_current_image" context "exams.template.add_exam_question" %}{% else %}{% trans "label_current_video" context "exams.template.add_exam_question" %}{% endif %}</span>
+        {% if kind == 'image' %}
+        <img class="qf-current__media" src="{{ current|protected_media_url }}" alt="{% trans 'alt_question_image' context 'exams.template.add_exam_question' %}">
+        {% else %}
+        <video class="qf-current__media" controls preload="metadata"><source src="{{ current|protected_media_url }}"></video>
+        {% endif %}
+        <button type="button" class="ems-btn etp-btn--danger-soft qf-current__remove" data-qf-clear-current>
+            <i class="fas fa-trash" aria-hidden="true"></i>{% if kind == 'image' %}{% trans "action_remove_image" context "exams.template.add_exam_question" %}{% else %}{% trans "action_remove_video" context "exams.template.add_exam_question" %}{% endif %}
+        </button>
+        <input type="checkbox" class="qf-clear-input" name="{{ field.html_name }}-clear" id="{{ field.html_name }}-clear_id" hidden>
+        <p class="qf-note" data-qf-clear-note hidden>
+            {% if kind == 'image' %}{% trans "alert_image_will_be_deleted_after_save" context "exams.template.add_exam_question" %}{% else %}{% trans "alert_video_will_be_deleted_after_save" context "exams.template.add_exam_question" %}{% endif %}
+        </p>
+    </div>
+    {% endif %}
+    {% if field.errors %}<div class="qf-error" role="alert">{{ field.errors }}</div>{% endif %}
+</div>

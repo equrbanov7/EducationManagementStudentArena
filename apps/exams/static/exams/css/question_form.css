@@ -1,3 +1,313 @@
-/* Source: exams/teacher/partials/_question_form.html
-   Extracted from an inline <style> for CSP (no unsafe-inline). */
-.question-form-1 { width:100%; border-radius:8px; }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Sual formu + «Yeni sual əlavə et» modalı (sahib 2026-10-10 redizayn)
+   ───────────────────────────────────────────────────────────────────────────
+   Tək mənbə: imtahan sualı (modal + ehtiyat səhifə) və bank sualı modalı.
+   Əvvəlki üç qat (question_form_modal.css + _theme.css + add_exam_question.css)
+   bu dəstlə əvəz olundu. Bölmələr: Sual · Media · Parametrlər · Cavablar; alt
+   əməllər yapışqandır. Etiket/düymə bazası: teacher_page_shell.css +
+   ems_ui/controls.css. Rəng yalnız `--ems-*` tokenləri ilə.
+   Dəst (hamısı birlikdə yüklənir, 600 sətir həddi üçün bölünüb):
+     question_form.css         — modal qabığı, bölmələr, sahələr, xətalar, əməllər
+     question_form_media.css   — şəkil/video fayl zonası, cari media, rəsm açarı
+     question_form_answers.css — variantlar (düzgün cavab, əlavə/sil)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Modal qabığı ──────────────────────────────────────────────────────── */
+.qf-modal .modal-dialog {
+    max-width: min(920px, calc(100vw - 32px));
+}
+
+.qf-modal .modal-content {
+    overflow: hidden;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg-subtle);
+    box-shadow: var(--ems-sh-dialog);
+}
+
+.qf-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+    padding: 14px 16px 14px 22px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+}
+
+.qf-modal__title {
+    margin: 0;
+    font-size: var(--ems-fs-xl);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.qf-modal.is-edit .qf-modal__title::before {
+    content: "\f303"; /* fa-pencil */
+    margin-right: 8px;
+    font-family: "Font Awesome 6 Free", "Font Awesome 5 Free";
+    font-weight: 900;
+    color: var(--ems-primary-600);
+}
+
+.qf-modal__close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--ems-h-field);
+    height: var(--ems-h-field);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    cursor: pointer;
+}
+
+.qf-modal__close:hover {
+    background: var(--ems-neutral-100);
+    color: var(--ems-text);
+}
+
+.qf-modal__close:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.qf-modal__body {
+    padding: 0;
+}
+
+/* ── Forma kökü ────────────────────────────────────────────────────────── */
+.qf {
+    color: var(--ems-text);
+}
+
+.qf--modal {
+    padding: 18px 22px 0;
+}
+
+.qf--page {
+    max-width: 880px;
+}
+
+.qf-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    margin: 0 0 14px;
+    font-size: var(--ems-fs-base);
+}
+
+.qf-context__name {
+    font-weight: 800;
+    color: var(--ems-primary-700);
+    overflow-wrap: anywhere;
+}
+
+.qf-context__kind {
+    color: var(--ems-text-muted);
+}
+
+.qf-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    counter-reset: qf-step;
+}
+
+/* ── Bölmə kartı (nömrə CSS sayğacından — şərti bölmələr ardıcıl qalır) ─── */
+.qf-section {
+    padding: 16px 18px 18px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg);
+}
+
+.qf-section__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ems-sp-5);
+}
+
+.qf-section__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0 0 12px;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.qf-section__title::before {
+    counter-increment: qf-step;
+    content: counter(qf-step);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.qf-section__hint {
+    margin: -6px 0 12px;
+}
+
+.qf-optional {
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.qf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+.qf-field {
+    min-width: 0;
+}
+
+.qf-field--wide {
+    grid-column: 1 / -1;
+}
+
+/* Django vidcetləri (`form-control`) — ems sahə görünüşü. */
+.qf .form-control,
+.qf input[type="text"],
+.qf input[type="number"],
+.qf textarea {
+    display: block;
+    width: 100%;
+    min-height: var(--ems-h-field);
+    padding: 9px 12px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-text);
+    font: inherit;
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+    box-shadow: none;
+}
+
+.qf textarea {
+    min-height: 104px;
+    resize: vertical;
+}
+
+.qf .form-control:focus,
+.qf input[type="text"]:focus,
+.qf input[type="number"]:focus,
+.qf textarea:focus {
+    outline: none;
+    border-color: var(--ems-primary-500);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.qf .form-control::placeholder,
+.qf textarea::placeholder {
+    color: var(--ems-neutral-500);
+    opacity: 1;
+}
+
+.qf [aria-invalid="true"] {
+    border-color: var(--ems-danger);
+}
+
+/* ── Xəta / xəbərdarlıq ────────────────────────────────────────────────── */
+.qf-error {
+    margin-top: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-danger-strong);
+}
+
+.qf-error .errorlist,
+.qf-alert .errorlist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.qf-alert {
+    display: flex;
+    gap: var(--ems-sp-4);
+    padding: 12px 14px;
+    border: 1px solid var(--ems-danger-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+    font-weight: 600;
+}
+
+.qf-warning {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.qf-note {
+    margin: 8px 0 0;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-warning-800);
+}
+
+.qf button:focus-visible {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+/* ── Alt əməllər (modalda yapışqan) ────────────────────────────────────── */
+.qf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 0 18px;
+}
+
+.qf--modal .qf-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 0 -22px;
+    padding: 12px 22px;
+    border-top: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+}
+
+@media (max-width: 640px) {
+    .qf--modal {
+        padding: 14px 14px 0;
+    }
+
+    .qf--modal .qf-actions {
+        margin: 0 -14px;
+        padding: 12px 14px;
+    }
+
+    .qf-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .qf-actions > * {
+        flex: 1 1 auto;
+    }
+}

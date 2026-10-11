@@ -18,6 +18,7 @@ urlpatterns = [
     path("final/waiting/<int:ticket_id>/cancel/", views.final_exam_cancel, name="final_exam_cancel"),
     path("final/waiting/<int:ticket_id>/begin/", views.final_exam_begin, name="final_exam_begin"),
     path("final/waiting/<int:ticket_id>/state/", views.final_ticket_state, name="final_ticket_state"),
+    # URL auditi §4 (2026-10-10): köhnə siyahı → kabinet `?section=assigned-exams` (yönləndirmə).
     path("assigned/", views.assigned_student_exam_list, name="assigned_exam_list"),
     path("my-history/", views.student_exam_history, name="student_exam_history"),
     path("code-check/", views.exam_code_check, name="exam_code_check"),
@@ -123,7 +124,8 @@ urlpatterns = [
     path("center/stats/filters/", views.exam_center_stats_filters, name="exam_center_stats_filters"),
     path("center/stats/charts/", views.exam_center_stats_charts, name="exam_center_stats_charts"),
     path("center/stats/ai/", views.exam_center_stats_ai, name="exam_center_stats_ai"),
-    path("center/pin-lookup/", views.exam_center_pin_lookup, name="exam_center_pin_lookup"),
+    # URL auditi A12 (2026-10-10): müstəqil `center/pin-lookup/` səhifəsi silindi — kabinet
+    # `?section=exam-center-pins` eyni gövdəni göstərir; AJAX son nöqtələri qalır.
     path("center/pin-lookup/search/", views.exam_center_pin_search, name="exam_center_pin_search"),
     path(
         "center/pin-lookup/student/<int:student_id>/",
@@ -146,11 +148,6 @@ urlpatterns = [
     path("lookups/invigilators/", views.invigilator_search, name="invigilator_search"),
     path("lookups/assigned-count/", views.assigned_student_count, name="assigned_student_count"),
     path(
-        "<slug:slug>/available-question-count/",
-        views.exam_available_question_count,
-        name="exam_available_question_count",
-    ),
-    path(
         "<slug:slug>/grant-extra-attempt/",
         views.grant_extra_attempt,
         name="grant_extra_attempt",
@@ -160,7 +157,8 @@ urlpatterns = [
         views.grant_extra_attempt_group,
         name="grant_extra_attempt_group",
     ),
-    path("pending-work/", views.teacher_pending_attempts, name="teacher_pending_attempts"),
+    # URL auditi A12 (2026-10-10): `<slug>/available-question-count/` (çağıranı yox) və köhnə
+    # `pending-work/` səhifəsi (əvəzi kabinet `?section=pending-review`) silindi.
     # ==========================
     # TEACHER - Question Bank library (imtahandan asılı olmayan) (sabit)
     # ==========================
@@ -267,16 +265,8 @@ urlpatterns = [
         views.teacher_delete_group,
         name="teacher_delete_group",
     ),
-    path(
-        "groups/<int:group_id>/students/<int:student_id>/remove/",
-        views.teacher_remove_student_from_group,
-        name="teacher_remove_student_from_group",
-    ),
-    path(
-        "groups/<int:group_id>/students/<int:student_id>/add/",
-        views.teacher_add_student_to_group,
-        name="teacher_add_student_to_group",
-    ),
+    # URL auditi A12 (2026-10-10): tək-tələbə `students/<id>/remove|add/` silindi — tərkib
+    # `teacher_update_group` ilə dəyişir.
     # ==========================
     # SLUG - Teacher Attempts (spesifik)
     # ==========================
@@ -410,7 +400,8 @@ urlpatterns = [
     ),
     path("<slug:slug>/edit/", views.createAndEditExamView, name="edit_exam"),
     path("<slug:slug>/delete/", views.delete_exam, name="delete_exam"),
-    path("deleted/", views.deleted_exams_list, name="deleted_exams_list"),
+    # URL auditi A12 (2026-10-10): köhnə `deleted/` səhifəsi silindi — zibil qutusu kabinetdədir
+    # (`?section=my-exams&exam_view=trash`).
     path("<slug:slug>/restore/", views.restore_exam, name="restore_exam"),
     path("<slug:slug>/permanent-delete/", views.permanent_delete_exam, name="permanent_delete_exam"),
     path("<slug:slug>/archive/", views.toggle_exam_archive, name="toggle_exam_archive"),
