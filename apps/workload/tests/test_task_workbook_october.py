@@ -208,6 +208,21 @@ class OctoberWorkbookTests(TestCase):
         self.assertEqual(task.status, "distributed")
         self.assertTrue(WorkloadAmendment.objects.filter(task=task, target_id=row.pk).exists())
 
+    def test_two_empty_block_subjects_are_filled_in_a_distributed_task(self):
+        """Prod 2026-10-12: birinci sətrin düzəlişi tapşırığı «amended» edir — İKİNCİ sətrin fənni də yazılmalıdır."""
+        self._write([("PAYIZ", "Veb texnologiyalar", "SƏKİNƏ"), ("YAZ", "Qraflar", "SƏKİNƏ")])
+        self._run("--apply", "--no-create-teachers")
+        task = TeachingTask.objects.get(organization=self.org, chair=self.chair)
+        self.assertEqual(task.status, "distributed")
+        # Sentyabr vəziyyəti: hər iki sətir işarəsiz blok idi → fənn boş.
+        block = "ATMF I blok:\n1. Alqoritmlər\n2. Qraflar"
+        task.rows.update(subject=None, subject_text=block)
+        self._write([("PAYIZ", self._bold_block(True), "SƏKİNƏ"), ("YAZ", self._bold_block(False), "SƏKİNƏ")])
+        out = self._run("--apply", "--no-create-teachers")
+        self.assertIn("subject_filled=2", out)
+        self.assertNotIn("subject_fill_blocked", out)
+        self.assertEqual(sorted(task.rows.values_list("subject__name", flat=True)), ["Alqoritmlər", "Qraflar"])
+
     def test_reassign_blocked_when_journal_was_handed_to_someone_else(self):
         self._write([("PAYIZ", "Veb texnologiyalar", "SƏKİNƏ")])
         self._run("--apply", "--no-create-teachers")
