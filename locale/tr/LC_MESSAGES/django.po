@@ -95159,3 +95159,19 @@ msgid "«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlar�
 msgstr ""
 "«Devamsızlık sınırında» — devamsızlık sınırını aşan ders kayıtlarının "
 "sayısı."
+
+msgctxt "accounts.manage_roles"
+msgid "Bölmədən çıxarılır"
+msgstr "Birimden çıkarılıyor"
+
+msgctxt "accounts.manage_roles"
+msgid "Qalan rollar"
+msgstr "Kalan roller"
+
+msgctxt "accounts.manage_roles"
+msgid ""
+"Yalnız bu üzvlük (rol + bölmə) söndürülür; şəxsin digər rolları toxunulmadan"
+" qalır. Əməl audit jurnalına yazılır."
+msgstr ""
+"Yalnızca bu üyelik (rol + birim) devre dışı bırakılır; kişinin diğer rolleri"
+" değişmeden kalır. İşlem denetim günlüğüne yazılır."

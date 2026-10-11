@@ -329,3 +329,9 @@
         margin-bottom: 8px;
     }
 }
+
+/* Sahib 2026-10-11: «Bölmədən çıxarılır» / «Qalan rollar» sətirləri dəyər yoxdursa gizlidir
+   (`.rls-target { display: flex }` `hidden` atributunu basdırmasın). */
+.rls-target[hidden] {
+    display: none;
+}

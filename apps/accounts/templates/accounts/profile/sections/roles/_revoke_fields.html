@@ -11,7 +11,17 @@ server onu rədd edir və izah mesajı qaytarır.{% endcomment %}
         <span class="rls-target__label">{% trans "Geri alınacaq rol" context "accounts.manage_roles" %}</span>
         <strong data-roles-target-role></strong>
     </div>
-    <p class="ems-msg ems-msg--warning">{% trans "Şəxsin digər rolları toxunulmadan qalır. Əməl audit jurnalına yazılır." context "accounts.manage_roles" %}</p>
+    {% comment %}Sahib 2026-10-11: eyni rol iki bölmədə ola bilər (RİM əməkdaşı · kafedra / · mərkəz) — dialoq
+    HANSI bölmədən çıxarıldığını və nəyin QALDIĞINI açıq deyir (roles_ui.js doldurur, boşdursa gizlidir).{% endcomment %}
+    <div class="rls-target rls-form__full" data-roles-target-scope-row hidden>
+        <span class="rls-target__label">{% trans "Bölmədən çıxarılır" context "accounts.manage_roles" %}</span>
+        <strong data-roles-target-scope></strong>
+    </div>
+    <div class="rls-target rls-form__full" data-roles-target-remaining-row hidden>
+        <span class="rls-target__label">{% trans "Qalan rollar" context "accounts.manage_roles" %}</span>
+        <strong data-roles-target-remaining></strong>
+    </div>
+    <p class="ems-msg ems-msg--warning">{% trans "Yalnız bu üzvlük (rol + bölmə) söndürülür; şəxsin digər rolları toxunulmadan qalır. Əməl audit jurnalına yazılır." context "accounts.manage_roles" %}</p>
     <div class="ems-field rls-form__full">
         <label class="ems-field__label" for="mr-revoke-reason">{% trans "Qeyd" context "accounts.manage_roles" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.manage_roles" %}</span></label>
         <textarea class="ems-input ems-textarea" id="mr-revoke-reason" name="reason" rows="2" maxlength="500"
