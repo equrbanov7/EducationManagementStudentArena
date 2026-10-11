@@ -63,6 +63,7 @@ def summary(plan) -> dict:
         "protected": len(plan.protected),
         "protected_reasons": dict(protected),
         "already_blocked": len(plan.already_blocked),
+        "create": len(plan.new_accounts) if plan.new_accounts is not None else None,
     }
 
 
@@ -135,6 +136,15 @@ def render_markdown(plan, *, max_names: int = 10, title: str = "") -> str:
             f"{counts.get('chair_mismatch', 0)} |"
         )
 
+    if plan.new_accounts is not None:
+        new = plan.new_accounts
+        out += ["", "## Yeni hesablar (--create-missing)", ""]
+        out.append(f"* «hesab yoxdur» sətirindən yaradılacaq müəllim hesabı (FİN-siz): **{len(new)}**")
+        out.append(
+            f"* kafedrası tanınmayan (təşkilat səviyyəli üzvlük): {sum(1 for item in new if not item.chair_ids)}"
+        )
+        out.append(f"* bir neçə sətirdən birləşən: {sum(1 for item in new if len(item.rows) > 1)}")
+
     out += ["", f"## Nümunələr (hər kateqoriyada ən çoxu {max_names} ad)", ""]
     for status in (STATUS_NOT_FOUND, STATUS_AMBIGUOUS, STATUS_CONFLICT, STATUS_REVIEW, STATUS_STUDENT_ONLY):
         names = [match.row.name.display for match in plan.matches if match.status == status]
@@ -155,6 +165,12 @@ def render_markdown(plan, *, max_names: int = 10, title: str = "") -> str:
         if user.profile_changes
     ]
     out.append(f"* profil fərqləri ({len(diffs)}): {_names(diffs, max_names)}")
+    if plan.new_accounts:
+        out += ["", "### Yaradılacaq hesablar (istifadəçi adı önizləməsi)", ""]
+        units = {mapped["unit"][0]: mapped["unit"][1] for mapped in plan.chair_map.values() if mapped.get("unit")}
+        for item in plan.new_accounts:
+            chairs = ", ".join(units.get(chair, "?") for chair in item.chair_ids) or "— (təşkilat)"
+            out.append(f"* `{item.username}` — {item.display} · {chairs} · {item.title or '—'}/{item.degree or '—'}")
     if plan.roster.skipped:
         out.append(f"* ötürülən sətirlər: {_names((f'#{n} {reason}' for n, _t, reason in plan.roster.skipped), 20)}")
     return "\n".join(out) + "\n"

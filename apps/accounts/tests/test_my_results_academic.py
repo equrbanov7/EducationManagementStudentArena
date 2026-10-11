@@ -154,7 +154,13 @@ class MyResultsAcademicTest(TestCase):
 
     def _results(self, user, **params):
         params.setdefault("section", "my-results")
+        # Sahib 2026-10-11: ilk açılışda CARİ semestr defoltdur; bu dəstin testləri bütün semestrləri yoxlayır —
+        # «Bütün illər» seçilmiş kimi (boş parametr). Defolt davranış ayrıca testlərdədir.
+        params.setdefault("results_year", "")
         return self._client(user).get(reverse("accounts:profile"), params)
+
+    def _first_open(self, user):
+        return self._client(user).get(reverse("accounts:profile"), {"section": "my-results"})
 
     def _legacy_fact(self, *, source_pk, kind="summary", **scores):
         enrollment = self.student.enrollments.get(offering__subject=self.subject_old)
@@ -343,6 +349,33 @@ class MyResultsAcademicTest(TestCase):
         resp = self._results(self.student, results_season="Yaz")
         titles = [item["title"] for item in resp.context["my_result_items"]]
         self.assertEqual(titles, ["Fizika"])
+
+    def test_first_open_defaults_to_the_current_semester(self):
+        """Sahib 2026-10-11: payız/yaz qarışmasın — ilk açılışda yalnız cari semestr (is_current) fənləri."""
+        resp = self._first_open(self.student)
+        self.assertEqual((resp.context["my_results_year"], resp.context["my_results_season"]), ("2024/2025", "Yaz"))
+        self.assertEqual([item["title"] for item in resp.context["my_result_items"]], ["Fizika"])
+        self.assertEqual(resp.context["my_result_counts"]["academic"], 2)  # tab sayğacı süzgəcdən asılı deyil
+
+    def test_explicit_all_years_is_respected(self):
+        resp = self._results(self.student, results_season="")
+        self.assertEqual({item["title"] for item in resp.context["my_result_items"]}, {"Fizika", "Riyaziyyat"})
+
+    def test_no_default_when_the_student_has_nothing_in_the_current_semester(self):
+        with bypass_rls():
+            AcademicPeriod.objects.filter(pk=self.period_new.pk).update(is_current=False)
+            AcademicPeriod.objects.create(
+                organization=self.org,
+                name="2025/2026 Payız",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2025/2026",
+                start_date="2025-09-01",
+                end_date="2026-01-31",
+                is_current=True,
+            )
+        resp = self._first_open(self.student)
+        self.assertEqual((resp.context["my_results_year"], resp.context["my_results_season"]), ("", ""))
+        self.assertEqual(len(resp.context["my_result_items"]), 2)
 
     def test_stray_year_param_does_not_blank_a_non_academic_tab(self):
         """URL-də ilişib qalmış ?results_year= "İmtahanlar" tabını boşaltmamalıdır —

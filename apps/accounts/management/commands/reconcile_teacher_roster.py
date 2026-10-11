@@ -6,9 +6,11 @@ bloklanıb dayandırılacaq.»
 NƏ EDİR (``apps.accounts.services.teacher_roster``):
     * faylı oxuyur (kafedra blokları; ad / elmi dərəcə / ştat normallaşdırılır);
     * hər sətri mövcud hesabla tutuşdurur (soyad + ad + ata adı; eyni kafedra üstün) — tapıldı / çox mənalı /
-      ata adı fərqli / oxşar / yoxdur; YENİ HESAB YARATMIR (yoxdursa hesabatda siyahı);
+      ata adı fərqli / oxşar / yoxdur; defolt YENİ HESAB YARATMIR (yoxdursa hesabatda siyahı);
     * tapılanlara: ``UserProfile.academic_title/academic_degree`` (fərq varsa) və illik yük profili
       (vəzifə / ştat payı / saathesabı) — kafedra fərqi YALNIZ hesabatdır, köçürmə yoxdur;
+    * ``--create-missing`` ilə YALNIZ «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yaradır (kafedra
+      üzvlüyü, elmi ad/dərəcə, yük profili; parol yoxdur — RİM verir, və ya ``--credentials-out`` 0600 CSV);
     * siyahıda olmayan MÜƏLLİM hesablarını mövcud «Hesabı dayandır» servisi ilə bloklayır (səbəb «İşdən
       ayrılıb / müqavilə bitib», müraciət «Kadrlar şöbəsi»); inzibati rol daşıyanlar, sahib, superuser və
       tələbələr HEÇ VAXT bloklanmır.
@@ -87,6 +89,16 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Dəyişiklikləri YAZ (defolt: yalnız hesabat)")
         parser.add_argument("--skip-blocks", action="store_true", help="--apply: bloklamanı ötür")
         parser.add_argument("--skip-updates", action="store_true", help="--apply: profil/yük yeniləməsini ötür")
+        parser.add_argument(
+            "--create-missing",
+            action="store_true",
+            help="«Hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat (yalnız bu kateqoriya)",
+        )
+        parser.add_argument(
+            "--credentials-out",
+            default="",
+            help="--create-missing --apply: birdəfəlik parolların CSV yolu (0600); verilməsə hesablar parolsuz yaranır",
+        )
         parser.add_argument("--undo", default="", help="Paketi geri qaytar (paket id-si)")
         parser.add_argument("--reason", default="", help="Qərarın səbəbi (≥20 simvol) — --apply ilə məcburi")
         parser.add_argument("--actor", default="", help="Aktorun istifadəçi adı (defolt: təşkilatın sahibi)")
@@ -142,6 +154,12 @@ class Command(BaseCommand):
             chair_overrides=_chair_overrides(options["chair_map"]),
             protect_ids=protect_ids,
         )
+        if options["create_missing"]:
+            from apps.accounts.services.teacher_roster.create import plan_new_accounts
+
+            plan.new_accounts = plan_new_accounts(plan)
+        elif options["credentials_out"]:
+            raise CommandError("roster_credentials_without_create: --credentials-out yalnız --create-missing ilə")
         self._print_summary(plan)
         if options["report"]:
             pathlib.Path(options["report"]).expanduser().write_text(
@@ -162,11 +180,18 @@ class Command(BaseCommand):
                 reason=options["reason"],
                 do_updates=not options["skip_updates"],
                 do_blocks=not options["skip_blocks"],
+                keep_passwords=bool(options["credentials_out"]),
             )
         except roster_apply.RosterError as error:
             raise CommandError(f"roster_{error.code}: {error.message}") from None
+        if result["credentials"]:
+            from apps.accounts.services.teacher_roster.create import write_credentials
+
+            write_credentials(options["credentials_out"], result["credentials"])
+            self.stdout.write(f"Birdəfəlik parollar (0600): {options['credentials_out']}")
         self.stdout.write(
-            f"\nYAZILDI — paket {result['batch']}: profil {len(result['profiles'])}, yük profili "
+            f"\nYAZILDI — paket {result['batch']}: yeni hesab {len(result['created'])}, profil "
+            f"{len(result['profiles'])}, yük profili "
             f"{len(result['workload'])}, bloklandı {len(result['blocked'])}, alınmadı {len(result['failed'])}.\n"
             f"Geri qaytarma: manage.py reconcile_teacher_roster --organization {organization.slug} "
             f"--undo {result['batch']}"
@@ -181,6 +206,12 @@ class Command(BaseCommand):
             f"GERİ QAYTARILDI — paket {batch_id}: blokdan çıxdı {len(result['unblocked'])}, "
             f"profil {result['profiles']}, yük profili {result['workload']}, ötürüldü {len(result['skipped'])}."
         )
+        created = result.get("created") or {}
+        if created:
+            self.stdout.write(
+                f"  yaradılmış hesablar: silindi {len(created['deleted'])}, bloklandı (istifadə olunub) "
+                f"{len(created['deactivated'])}, toxunulmadı {len(created['kept'])}."
+            )
 
     def _print_summary(self, plan):
         data = roster_report.summary(plan)
@@ -198,6 +229,8 @@ class Command(BaseCommand):
             f"  BLOKLANACAQ: {data['block']} · qorunan: {data['protected']} {data['protected_reasons']} · "
             f"onsuz da bloklu: {data['already_blocked']}"
         )
+        if data["create"] is not None:
+            self.stdout.write(f"  YENİ HESAB yaradılacaq (FİN-siz, «hesab yoxdur»): {data['create']}")
         for chair, mapped in plan.chair_map.items():
             unit = mapped["unit"]
             self.stdout.write(f"    kafedra «{chair}» → {unit[1] if unit else '—'} ({mapped['score']:.2f})")

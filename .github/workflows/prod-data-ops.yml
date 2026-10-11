@@ -15,6 +15,8 @@
 #   reconcile_teacher_roster — «Forma 7» aktiv müəllim siyahısı (ŞİFRƏLİ release asset, `teacher-roster-…`):
 #       tapılanlara elmi ad/dərəcə + ştat, siyahıda olmayan MÜƏLLİM hesablarını mövcud «Hesabı dayandır» ilə
 #       bloklayır (inzibati rollar qorunur); `batch` verilsə həmin paketi geri qaytarır (--undo).
+#       `create_missing` → YALNIZ «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı (--create-missing);
+#       apply-da birdəfəlik parollar seed_staff_roster kimi şifrəli artifaktdadır, loga yalnız saylar düşür.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -85,6 +87,11 @@ on:
         description: "reconcile_teacher_roster: geri qaytarılacaq paket id-si (undo)"
         required: false
         default: ""
+      create_missing:
+        description: "reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -110,6 +117,7 @@ jobs:
       HYGIENE_CATEGORY: ${{ github.event.inputs.hygiene_category }}
       HYGIENE_CODE: ${{ github.event.inputs.hygiene_code }}
       BATCH: ${{ github.event.inputs.batch }}
+      CREATE_MISSING: ${{ github.event.inputs.create_missing }}
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
@@ -204,9 +212,17 @@ jobs:
               else
                 args=("/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" --organization "$ORG"
                       --report "/tmp/roster_report_${GITHUB_RUN_ID}.md" --details "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
+                if [ "$CREATE_MISSING" = "true" ]; then
+                  args+=(--create-missing)
+                fi
                 if [ "$APPLY" = "true" ]; then
                   args+=(--apply --reason "Forma 7 (2026/2027) aktiv müəllim siyahısı — sahibin 2026-10-11 tapşırığı"
                          --actor "$actor" --i-know-this-is-production)
+                  # Yeni hesabların birdəfəlik parolları: 0600 fayl → serverdə /home/wcu/creds + şifrəli artifakt
+                  # (seed_staff_roster ilə eyni addım); loga DÜŞMÜR.
+                  if [ "$CREATE_MISSING" = "true" ]; then
+                    args+=(--credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv")
+                  fi
                 fi
               fi
               custom_apply=1
@@ -242,7 +258,7 @@ jobs:
               sed '/^## Nümunələr/,$d' "$RUNNER_TEMP/report.md" > "$RUNNER_TEMP/summary.log"
             fi
             grep -Eo 'roster-[0-9]{8}-[0-9]{6}-[0-9a-z]+' "$RUNNER_TEMP/out.log" | sort -u | sed 's/^/paket: /' >> "$RUNNER_TEMP/summary.log" || true
-            grep -E '^(DRY-RUN|\(DRY-RUN|Bloklandı|Yeniləndi|Geri qaytarıldı|Paket)' "$RUNNER_TEMP/out.log" | cut -c1-120 >> "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(DRY-RUN|\(DRY-RUN|Bloklandı|Yeniləndi|Geri qaytarıldı|Paket|YAZILDI|GERİ QAYTARILDI|  YENİ HESAB|  yaradılmış hesablar)' "$RUNNER_TEMP/out.log" | cut -c1-160 >> "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' | cut -c1-200 || true; exit "$status"; }
           elif [ "$COMMAND" = "seed_staff_roster" ]; then

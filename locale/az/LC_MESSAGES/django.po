@@ -95198,3 +95198,64 @@ msgid ""
 msgstr ""
 "Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
 "axtarın."
+
+msgctxt "registrar.analytics"
+msgid "Hələ yekunlaşmış qiymət yoxdur"
+msgstr "Hələ yekunlaşmış qiymət yoxdur"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "%(passed)s / %(definite)s yekunlaşmış nəticə"
+msgstr "%(passed)s / %(definite)s yekunlaşmış nəticə"
+
+msgctxt "registrar.analytics"
+msgid "Yekunlaşmış qiymət olmadan hesablanmır"
+msgstr "Yekunlaşmış qiymət olmadan hesablanmır"
+
+msgctxt "registrar.analytics"
+msgid "Kredit-çəkili, 100 bal şkalası"
+msgstr "Kredit-çəkili, 100 bal şkalası"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində: %(count)s qeydiyyat"
+msgstr "Kəsilmə həddində: %(count)s qeydiyyat"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində qeydiyyat yoxdur"
+msgstr "Kəsilmə həddində qeydiyyat yoxdur"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Proqram: %(programs)s · qrup: %(groups)s"
+msgstr "Proqram: %(programs)s · qrup: %(groups)s"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Yekunlaşıb: %(done)s · davam edir: %(open)s"
+msgstr "Yekunlaşıb: %(done)s · davam edir: %(open)s"
+
+msgctxt "registrar.analytics"
+msgid ""
+"Seçilmiş semestrdə əhatənizdəki qruplara fənn qeydiyyatı yoxdur. Yuxarıdan "
+"başqa semestr seçin."
+msgstr ""
+"Seçilmiş semestrdə əhatənizdəki qruplara fənn qeydiyyatı yoxdur. Yuxarıdan "
+"başqa semestr seçin."
+
+msgctxt "registrar.analytics"
+msgid ""
+"Keçid faizi və orta GPA yalnız yekunlaşmış nəticələrdən hesablanır; hələ "
+"yoxdursa «—»."
+msgstr ""
+"Keçid faizi və orta GPA yalnız yekunlaşmış nəticələrdən hesablanır; hələ "
+"yoxdursa «—»."
+
+msgctxt "registrar.analytics"
+msgid "Sətir sayı"
+msgstr "Sətir sayı"
+
+msgctxt "registrar.analytics"
+msgid "«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlarının sayı."
+msgstr ""
+"«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlarının sayı."

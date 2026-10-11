@@ -60,9 +60,10 @@ class Plan:
     protected: list  # [(Account, [səbəb])]
     already_blocked: list  # siyahıda olmayan, onsuz da bloklu müəllim hesabları
     candidate_ids: set
+    new_accounts: list | None = None  # ``--create-missing``: «hesab yoxdur» sətirlərindən yaradılacaqlar
 
 
-def _aggregate_rate(rows):
+def aggregate_rate(rows):
     rates = [row.rate for row in rows if row.rate.kind != RATE_UNKNOWN]
     if not rates:
         return None, None
@@ -72,21 +73,21 @@ def _aggregate_rate(rows):
     return min(total, MAX_STAFF_FRACTION), False
 
 
-def _best(values, rank):
+def best_value(values, rank):
     present = [value for value in values if value]
     return max(present, key=lambda value: rank.get(value, 0)) if present else None
 
 
 def _user_plan(user_plan: UserPlan, chair_ids_by_row) -> None:
     account = user_plan.account
-    user_plan.title = _best([row.title for row in user_plan.rows], TITLE_RANK)
-    user_plan.degree = _best([row.degree for row in user_plan.rows], DEGREE_RANK)
+    user_plan.title = best_value([row.title for row in user_plan.rows], TITLE_RANK)
+    user_plan.degree = best_value([row.degree for row in user_plan.rows], DEGREE_RANK)
     if user_plan.title and user_plan.title != account.title:
         user_plan.profile_changes["academic_title"] = (account.title, user_plan.title)
     if user_plan.degree and user_plan.degree != account.degree:
         user_plan.profile_changes["academic_degree"] = (account.degree, user_plan.degree)
     user_plan.position = TITLE_TO_POSITION.get(user_plan.title or "")
-    user_plan.staff_fraction, user_plan.is_external = _aggregate_rate(user_plan.rows)
+    user_plan.staff_fraction, user_plan.is_external = aggregate_rate(user_plan.rows)
 
     file_chairs = {chair_ids_by_row[row.row_no] for row in user_plan.rows if chair_ids_by_row.get(row.row_no)}
     if not account.chairs:
@@ -195,4 +196,4 @@ def build_plan(organization, roster, *, academic_year: str, chair_overrides=None
     )
 
 
-__all__ = ["TITLE_TO_POSITION", "Plan", "UserPlan", "build_plan"]
+__all__ = ["TITLE_TO_POSITION", "Plan", "UserPlan", "aggregate_rate", "best_value", "build_plan"]

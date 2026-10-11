@@ -16,7 +16,7 @@ from django.apps import apps as django_apps
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.registrar import analytics_cache, journal_scope, schedule
+from apps.registrar import analytics_cache, analytics_display, journal_scope, schedule
 from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
 
@@ -353,7 +353,7 @@ def analytics_context(request, organization, *, embedded=False) -> dict:
         if period is not None
         else {"has_data": False, "period": None, "totals": None, "programs": [], "groups": [], "at_risk": []}
     )
-    return {"periods": periods, "analytics": data, "analytics_embedded": embedded}
+    return analytics_display.view_context(periods, data, embedded=embedded)
 
 
 def _has_active_student_membership(organization, user) -> bool:
