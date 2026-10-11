@@ -25,6 +25,10 @@
 #   import_teaching_load_form1 — kafedranın «Forma 1» dərs yükü (Word; ŞİFRƏLİ release asset, `teaching-load-…` →
 #       forma1.docx.enc): `task_chair` kafedrasının mövcud tapşırıq sətirlərinə müəllim bölgüsü (tam adla, hesab
 #       yaradılmır); `choices` (cədvəl sətri, 0-dan), `teacher_map` («Soyad Ad=istifadəçi.adı»), `reassign` eyni.
+#   import_timetable_docx — məktəbin Word «əsas dərs cədvəli» (ŞİFRƏLİ release asset, `timetable-…` →
+#       timetable.docx.enc) → canlı cədvəl slotları (`period`, məs. «Payız 2026/2027»). Açılış/qrup/fənn/hesab
+#       YARADILMIR; tapılmayan/toqquşan hüceyrə yazılmır; idempotent. `replace_group_slots` → fayldakı qrupların
+#       digər slotları yumşaq silinir (defolt sönülü). Loga yalnız saylar; CSV hesabat şifrəli artifaktdadır.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -62,6 +66,7 @@ on:
           - reconcile_teacher_roster
           - import_teaching_task_workbook
           - import_teaching_load_form1
+          - import_timetable_docx
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -76,7 +81,7 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_*: şifrəli faylın release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster / import_teaching_* / import_timetable_docx: şifrəli faylın release tag-ı"
         required: false
         default: ""
       hygiene_category:
@@ -123,6 +128,15 @@ on:
         description: "import_teaching_*: qeyri-müəyyən müəllim — AD=istifadəçi.adı, vergüllə"
         required: false
         default: ""
+      period:
+        description: "import_timetable_docx: semestr (məs. Payız 2026/2027)"
+        required: false
+        default: "Payız 2026/2027"
+      replace_group_slots:
+        description: "import_timetable_docx: fayldakı qrupların DİGƏR slotlarını yumşaq sil"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -154,6 +168,8 @@ jobs:
       REASSIGN: ${{ github.event.inputs.reassign }}
       CHOICES: ${{ github.event.inputs.choices }}
       TEACHER_MAP: ${{ github.event.inputs.teacher_map }}
+      PERIOD: ${{ github.event.inputs.period }}
+      REPLACE_GROUP_SLOTS: ${{ github.event.inputs.replace_group_slots }}
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
@@ -193,6 +209,7 @@ jobs:
           # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/input.bin" "$RUNNER_TEMP/input.enc"
       - name: 🧰 Run
+        if: github.event.inputs.command != 'import_timetable_docx'
         run: |
           set -euo pipefail
           case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
@@ -403,3 +420,78 @@ jobs:
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
           docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv /tmp/teaching_task_*.xlsx /tmp/teaching_load_*.docx; rm -rf /tmp/teaching_report_*' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true
+      # ── import_timetable_docx (dərs cədvəli; öz addımları — digər əmrlərin axınına toxunmur) ──────────
+      - name: 🗓️ Dərs cədvəli — şifrəli fayl + idxal
+        if: github.event.inputs.command == 'import_timetable_docx'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
+          printf '%s' "$ROSTER_TAG" | grep -Eq '^timetable-[0-9a-z-]+$' || { echo "roster_tag formatı: timetable-…" >&2; exit 1; }
+          printf '%s' "$PERIOD" | grep -Eq '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+          umask 077
+          curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
+            "https://github.com/${GITHUB_REPOSITORY}/releases/download/${ROSTER_TAG}/timetable.docx.enc" \
+            -o "$RUNNER_TEMP/timetable.enc"
+          openssl enc -d -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -pass env:STAFF_PLAN_KEY \
+            -in "$RUNNER_TEMP/timetable.enc" -out "$RUNNER_TEMP/timetable.docx"
+          docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/timetable_${GITHUB_RUN_ID}.docx" < "$RUNNER_TEMP/timetable.docx"
+          rm -f "$RUNNER_TEMP/timetable.docx" "$RUNNER_TEMP/timetable.enc"
+          actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+            "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+          test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+          echo "::add-mask::$actor"
+          args=(--file "/tmp/timetable_${GITHUB_RUN_ID}.docx" --org "$ORG" --period "$PERIOD" --actor "$actor"
+                --report "/tmp/timetable_report_${GITHUB_RUN_ID}")
+          test "$REPLACE_GROUP_SLOTS" != "true" || args+=(--replace-group-slots)
+          if [ "$APPLY" = "true" ]; then
+            echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
+            docker exec "$BACKUP_CONTAINER" /backup.sh
+            echo "::endgroup::"
+            args+=(--apply --i-know-this-is-production)
+          fi
+          # Hesabat CSV-də şəxs adları var → loga YALNIZ saylar/səbəb kodları (əmr ad çap etmir; yenə də süzülür).
+          docker exec -i "$APP_CONTAINER" python manage.py import_timetable_docx "${args[@]}" > "$RUNNER_TEMP/tt_out.log" 2>&1 || status=$?
+          if docker exec "$APP_CONTAINER" test -s "/tmp/timetable_report_${GITHUB_RUN_ID}/timetable_import.csv"; then
+            docker exec "$APP_CONTAINER" cat "/tmp/timetable_report_${GITHUB_RUN_ID}/timetable_import.csv" > "$RUNNER_TEMP/tt_details.csv"
+          fi
+          grep -E '^(DRY-RUN|YAZILDI): |^  ([a-z]+ +[0-9]+|oxunmayan sətir: [0-9]+|tapılmayan qrup başlığı: [0-9]+|tələbəsi görünməyən açılış: [0-9]+|yumşaq silinən köhnə slot: [0-9]+|yaradıldı: [0-9]+|səbəb\[[a-z]+\]: [a-z_0-9=, ]+)$' \
+            "$RUNNER_TEMP/tt_out.log" | cut -c1-400 > "$RUNNER_TEMP/tt_summary.log" || true
+          cat "$RUNNER_TEMP/tt_summary.log"
+          {
+            echo "## 🗓️ import_timetable_docx — $([ "$APPLY" = "true" ] && echo APPLY || echo dry-run)"
+            echo '```'
+            cat "$RUNNER_TEMP/tt_summary.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/tt_out.log" | grep -E 'CommandError|Error|Exception' | cut -c1-200 || true; exit "$status"; }
+      - name: 🔑 Dərs cədvəli hesabatı (şifrəli)
+        id: tt_report
+        if: always() && github.event.inputs.command == 'import_timetable_docx'
+        env:
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: |
+          set -euo pipefail
+          enc() { openssl enc -aes-256-cbc -md sha256 -pbkdf2 -iter 200000 -salt -pass env:STAFF_PLAN_KEY -in "$1" -out "$2"; }
+          mkdir -p "$RUNNER_TEMP/tt-out"
+          for f in tt_out.log tt_details.csv; do
+            if [ -s "$RUNNER_TEMP/$f" ]; then
+              enc "$RUNNER_TEMP/$f" "$RUNNER_TEMP/tt-out/$f.enc"
+              echo "saved=1" >> "$GITHUB_OUTPUT"
+            fi
+          done
+          rm -f "$RUNNER_TEMP/tt_out.log" "$RUNNER_TEMP/tt_details.csv" "$RUNNER_TEMP/tt_summary.log"
+      - name: 📦 Şifrəli dərs cədvəli hesabatı
+        if: always() && steps.tt_report.outputs.saved != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: timetable-import-encrypted
+          path: ${{ runner.temp }}/tt-out/
+          retention-days: 1
+      - name: 🧹 Dərs cədvəli — müvəqqəti faylları sil
+        if: always() && github.event.inputs.command == 'import_timetable_docx'
+        run: |
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/timetable_*.docx; rm -rf /tmp/timetable_report_*' || true
+          rm -rf "$RUNNER_TEMP/tt-out" "$RUNNER_TEMP/timetable.enc" "$RUNNER_TEMP/timetable.docx" || true
