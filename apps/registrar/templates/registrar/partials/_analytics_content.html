@@ -1,155 +1,148 @@
-{% load static i18n %}
-{% comment %}QA dalğa 2 (2026-09-03): bu partial həm müstəqil səhifədə, həm də
-kabinet qabığında göstərilir.  Qabıq başlığı `#profileSectionTitle` OLARAQ eyni
-mətni artıq `<h1>` ilə verir → embed halında burada ikinci `<h1>` görünən
-dublikat yaradırdı.  Embed-də `<h2>`-yə enirik (CSS class-əsaslıdır, görünüş
-dəyişmir).{% endcomment %}
-<div class="journal-page">
-    <div class="journal-head analytics-head">
-        <div>
-            <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="journal-title">
-                <i class="fas fa-chart-line"></i> {% trans "Akademik analitika" context "registrar.analytics" %}
-            </{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
-            <p class="journal-subtitle">{% trans "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət." context "registrar.analytics" %}</p>
-        </div>
-        {% if periods %}
-        <form method="get" class="analytics-period-form">
-            {% if analytics_embedded %}<input type="hidden" name="section" value="analytics">{% endif %}
-            <label class="analytics-period-label" for="analytics-period">{% trans "Semestr" context "registrar.analytics" %}</label>
-            <div class="bootstrap-single-select">
-                <select id="analytics-period" name="period" class="analytics-period-select form-select bootstrap-single-select__native js-bootstrap-single-select" data-autosubmit data-bootstrap-select>
-                    {% for p in periods %}
-                    <option value="{{ p.id }}" {% if analytics.period and p.id == analytics.period.id %}selected{% endif %}>{{ p.name }} · {{ p.year_display }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <noscript><button type="submit" class="journal-save-btn">{% trans "Göstər" context "registrar.analytics" %}</button></noscript>
-        </form>
-        {% endif %}
-    </div>
+{% load i18n ems_ui %}
+{% comment %}«Akademik analitika» (2026-10-11 səliqə: sahib skrinşotu).
+
+Kabinet qabığı (`embedded_in_shell`) bölmə adını artıq `<h1 id="profileSectionTitle">`
+kimi verir → burada başlıq YAZILMIR, yalnız ortaq content header (alt-yazı +
+semestr seçicisi). Qabıqdan kənar render-də (`embedded_in_shell` yox) başlıq
+`header_title` ilə gəlir.
+
+Komponentlər: KPI — `partials/ems_ui/_kpi_row.html` (kartlar
+`apps/registrar/analytics_display.py`-də qurulur: yekunlaşmış nəticə yoxdursa «—»
++ səbəb qeydi); cədvəl — `ems-card` + `ems-tablescroll` + `ems-table`
+(`th scope`, `ems-table__num`, sticky birinci sütun); boş vəziyyət —
+`partials/ems_ui/_empty.html`. Sürətli axtarış `static/js/ems_table.js`
+(`data-ems-table-filter`) cədvəlin ÜSTÜNƏ (sürüşmə qabının içinə) əlavə edilir —
+`analytics.css` onu kartın alət zolağı kimi düzür. Bölmə JS-i yoxdur.{% endcomment %}
+{% trans "Proqram və qruplar üzrə keçid faizi, orta GPA və davamiyyət." context "registrar.analytics" as an_subtitle %}
+<div class="analytics">
+    {% if embedded_in_shell %}
+        {% include "partials/ems_ui/_content_header.html" with header_subtitle=an_subtitle header_actions_include="registrar/partials/_analytics_actions.html" %}
+    {% else %}
+        {% trans "Akademik analitika" context "registrar.analytics" as an_title %}
+        {% include "partials/ems_ui/_content_header.html" with header_title=an_title header_subtitle=an_subtitle header_actions_include="registrar/partials/_analytics_actions.html" %}
+    {% endif %}
 
     {% if not analytics.has_data %}
-    <div class="journal-empty">
-        <i class="fas fa-chart-area"></i>
-        <p>{% trans "Bu semestr üçün hələ qiymətləndirmə datası yoxdur." context "registrar.analytics" %}</p>
+    <div class="ems-card">
+        {% trans "Bu semestr üçün hələ qiymətləndirmə datası yoxdur." context "registrar.analytics" as st_title %}
+        {% trans "Seçilmiş semestrdə əhatənizdəki qruplara fənn qeydiyyatı yoxdur. Yuxarıdan başqa semestr seçin." context "registrar.analytics" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-chart-area" %}
     </div>
     {% else %}
-    {% with t=analytics.totals %}
 
     {# ── Ümumi göstəricilər ────────────────────────────────────────────── #}
-    <div class="analytics-cards">
-        <div class="analytics-card">
-            <span class="analytics-card-value">{{ t.students }}</span>
-            <span class="analytics-card-label"><i class="fas fa-user-graduate"></i> {% trans "Tələbə" context "registrar.analytics" %}</span>
-        </div>
-        <div class="analytics-card">
-            <span class="analytics-card-value">{{ t.enrollments }}</span>
-            <span class="analytics-card-label"><i class="fas fa-book-open"></i> {% trans "Fənn qeydiyyatı" context "registrar.analytics" %}</span>
-        </div>
-        <div class="analytics-card analytics-card--pass">
-            <span class="analytics-card-value">{{ t.pass_rate }}%</span>
-            <span class="analytics-card-label"><i class="fas fa-check-circle"></i> {% trans "Keçid faizi" context "registrar.analytics" %}</span>
-            <span class="analytics-card-hint">{{ t.passed }} / {{ t.definite }} {% trans "yekunlaşmış" context "registrar.analytics" %}</span>
-        </div>
-        <div class="analytics-card analytics-card--gpa">
-            <span class="analytics-card-value{% if not t.avg_gpa_available %} analytics-card-value--na{% endif %}">{% if t.avg_gpa_available %}{{ t.avg_gpa }}{% else %}{{ t.avg_gpa_unavailable_label }}{% endif %}</span>
-            <span class="analytics-card-label"><i class="fas fa-award"></i> {% trans "Orta GPA (kredit-çəkili)" context "registrar.analytics" %}</span>
-        </div>
-        <div class="analytics-card {% if t.absence_rate > 15 %}analytics-card--warn{% endif %}">
-            <span class="analytics-card-value">{{ t.absence_rate }}%</span>
-            <span class="analytics-card-label"><i class="fas fa-user-clock"></i> {% trans "Qayıb faizi" context "registrar.analytics" %}</span>
-            <span class="analytics-card-hint">{{ t.barred }} {% trans "tələbə kəsilmə həddində" context "registrar.analytics" %}</span>
-        </div>
-    </div>
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=analytics_kpis kpi_variant="5" %}
 
     {# ── Proqramlar üzrə ───────────────────────────────────────────────── #}
     {% if analytics.programs %}
-    <h2 class="journal-finals-title"><i class="fas fa-graduation-cap"></i> {% trans "Proqramlar üzrə" context "registrar.analytics" %}</h2>
-    <div class="journal-grid-wrap">
-        <table class="journal-grid analytics-table" data-ems-table data-ems-table-filter>
-            <thead>
-                <tr>
-                    <th class="ta-left">{% trans "Proqram" context "registrar.analytics" %}</th>
-                    <th>{% trans "Tələbə" context "registrar.analytics" %}</th>
-                    <th>{% trans "Qeydiyyat" context "registrar.analytics" %}</th>
-                    <th>{% trans "Keçid" context "registrar.analytics" %} %</th>
-                    <th>{% trans "Orta GPA" context "registrar.analytics" %}</th>
-                    <th>{% trans "Orta yekun bal" context "registrar.analytics" %}</th>
-                    <th>{% trans "Qayıb" context "registrar.analytics" %} %</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in analytics.programs %}
-                <tr>
-                    <td class="ta-left">{% if row.sublabel %}<span class="analytics-code">{{ row.sublabel }}</span> {% endif %}{{ row.label }}</td>
-                    <td>{{ row.students }}</td>
-                    <td>{{ row.enrollments }}</td>
-                    <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
-                    <td>{% if row.graded %}{{ row.avg_total }}{% else %}—{% endif %}</td>
-                    <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <section class="ems-card analytics-panel" aria-labelledby="analytics-programs-title">
+        <header class="ems-card__head">
+            <div>
+                <h2 class="ems-card__title" id="analytics-programs-title">{% trans "Proqramlar üzrə" context "registrar.analytics" %}</h2>
+                <p class="ems-card__sub">{% trans "Keçid faizi və orta GPA yalnız yekunlaşmış nəticələrdən hesablanır; hələ yoxdursa «—»." context "registrar.analytics" %}</p>
+            </div>
+            <span class="ems-badge ems-badge--neutral analytics-count" title="{% trans 'Sətir sayı' context 'registrar.analytics' %}">
+                <span class="sr-only">{% trans "Sətir sayı" context "registrar.analytics" %}:</span> {{ analytics.programs|length }}
+            </span>
+        </header>
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--sticky analytics-table" aria-labelledby="analytics-programs-title" data-ems-table data-ems-table-filter>
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Proqram" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Tələbə" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Qeydiyyat" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Keçid" context "registrar.analytics" %} %</th>
+                        <th scope="col" class="ems-table__num">{% trans "Orta GPA" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Orta yekun bal" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Qayıb" context "registrar.analytics" %} %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in analytics.programs %}
+                    <tr>
+                        <th scope="row">{% if row.sublabel %}<span class="analytics-code">{{ row.sublabel }}</span>{% endif %}<span class="analytics-label">{{ row.label }}</span></th>
+                        <td class="ems-table__num">{{ row.students }}</td>
+                        <td class="ems-table__num">{{ row.enrollments }}</td>
+                        <td class="ems-table__num">{% if row.definite %}<span class="analytics-rate{% if row.pass_rate < analytics_pass_low %} is-low{% endif %}">{{ row.pass_rate }}%</span>{% else %}<span class="analytics-na">—</span>{% endif %}</td>
+                        <td class="ems-table__num">{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}<span class="analytics-na">—</span>{% endif %}</td>
+                        <td class="ems-table__num">{% if row.graded %}{{ row.avg_total }}{% else %}<span class="analytics-na">—</span>{% endif %}</td>
+                        <td class="ems-table__num"><span class="analytics-rate{% if row.absence_rate > analytics_absence_warn %} is-high{% endif %}">{{ row.absence_rate }}%</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
     {% endif %}
 
     {# ── Qruplar üzrə ──────────────────────────────────────────────────── #}
     {% if analytics.groups %}
-    <h2 class="journal-finals-title"><i class="fas fa-users"></i> {% trans "Qruplar üzrə" context "registrar.analytics" %}</h2>
-    <div class="journal-grid-wrap">
-        <table class="journal-grid analytics-table" data-ems-table data-ems-table-filter>
-            <thead>
-                <tr>
-                    <th class="ta-left">{% trans "Qrup" context "registrar.analytics" %}</th>
-                    <th>{% trans "Tələbə" context "registrar.analytics" %}</th>
-                    <th>{% trans "Keçid" context "registrar.analytics" %} %</th>
-                    <th>{% trans "Orta GPA" context "registrar.analytics" %}</th>
-                    <th>{% trans "Qayıb" context "registrar.analytics" %} %</th>
-                    <th>{% trans "Kəsilmə həddində" context "registrar.analytics" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in analytics.groups %}
-                <tr>
-                    <td class="ta-left">{{ row.label }}</td>
-                    <td>{{ row.students }}</td>
-                    <td><span class="analytics-rate {% if row.definite and row.pass_rate < 60 %}is-low{% endif %}">{% if row.definite %}{{ row.pass_rate }}%{% else %}—{% endif %}</span></td>
-                    <td>{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}—{% endif %}</td>
-                    <td><span class="analytics-rate {% if row.absence_rate > 15 %}is-high{% endif %}">{{ row.absence_rate }}%</span></td>
-                    <td>{% if row.barred %}<span class="journal-badge journal-badge--barred">{{ row.barred }}</span>{% else %}<span class="journal-badge journal-badge--ok">0</span>{% endif %}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <section class="ems-card analytics-panel" aria-labelledby="analytics-groups-title">
+        <header class="ems-card__head">
+            <div>
+                <h2 class="ems-card__title" id="analytics-groups-title">{% trans "Qruplar üzrə" context "registrar.analytics" %}</h2>
+                <p class="ems-card__sub">{% trans "«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlarının sayı." context "registrar.analytics" %}</p>
+            </div>
+            <span class="ems-badge ems-badge--neutral analytics-count" title="{% trans 'Sətir sayı' context 'registrar.analytics' %}">
+                <span class="sr-only">{% trans "Sətir sayı" context "registrar.analytics" %}:</span> {{ analytics.groups|length }}
+            </span>
+        </header>
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--sticky analytics-table analytics-table--groups" aria-labelledby="analytics-groups-title" data-ems-table data-ems-table-filter>
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Qrup" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Tələbə" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Keçid" context "registrar.analytics" %} %</th>
+                        <th scope="col" class="ems-table__num">{% trans "Orta GPA" context "registrar.analytics" %}</th>
+                        <th scope="col" class="ems-table__num">{% trans "Qayıb" context "registrar.analytics" %} %</th>
+                        <th scope="col" class="ems-table__num">{% trans "Kəsilmə həddində" context "registrar.analytics" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in analytics.groups %}
+                    <tr>
+                        <th scope="row"><span class="analytics-label">{{ row.label }}</span></th>
+                        <td class="ems-table__num">{{ row.students }}</td>
+                        <td class="ems-table__num">{% if row.definite %}<span class="analytics-rate{% if row.pass_rate < analytics_pass_low %} is-low{% endif %}">{{ row.pass_rate }}%</span>{% else %}<span class="analytics-na">—</span>{% endif %}</td>
+                        <td class="ems-table__num">{% if row.avg_gpa_available %}{{ row.avg_gpa }}{% else %}<span class="analytics-na">—</span>{% endif %}</td>
+                        <td class="ems-table__num"><span class="analytics-rate{% if row.absence_rate > analytics_absence_warn %} is-high{% endif %}">{{ row.absence_rate }}%</span></td>
+                        <td class="ems-table__num">{% if row.barred %}<span class="ems-badge ems-badge--danger">{{ row.barred }}</span>{% else %}<span class="analytics-na">0</span>{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
     {% endif %}
 
     {# ── Risk fənləri ──────────────────────────────────────────────────── #}
     {% if analytics.at_risk %}
-    <h2 class="journal-finals-title"><i class="fas fa-triangle-exclamation"></i> {% trans "Diqqət tələb edən fənlər" context "registrar.analytics" %}
-        <span class="journal-components-hint">{% trans "kəsilmə faizi ən yüksək fənn açılışları" context "registrar.analytics" %}</span>
-    </h2>
-    <div class="analytics-risk-list">
-        {% for row in analytics.at_risk %}
-        <div class="analytics-risk-item">
-            <div class="analytics-risk-main">
-                <span class="analytics-code">{{ row.sublabel }}</span>
-                <span class="analytics-risk-name">{{ row.label }}</span>
+    <section class="ems-card analytics-panel" aria-labelledby="analytics-risk-title">
+        <header class="ems-card__head">
+            <div>
+                <h2 class="ems-card__title" id="analytics-risk-title">{% trans "Diqqət tələb edən fənlər" context "registrar.analytics" %}</h2>
+                <p class="ems-card__sub">{% trans "kəsilmə faizi ən yüksək fənn açılışları" context "registrar.analytics" %}</p>
             </div>
-            <div class="analytics-risk-figures">
-                <span class="analytics-risk-fail">{{ row.fail_rate }}% {% trans "kəsilmə" context "registrar.analytics" %}</span>
-                <span class="analytics-risk-meta">{{ row.failed }} / {{ row.definite }} · {% trans "orta bal" context "registrar.analytics" %} {{ row.avg_total }}</span>
-            </div>
-            <div class="analytics-risk-bar"><div class="analytics-risk-fill" data-width="{{ row.fail_rate }}"></div></div>
-        </div>
-        {% endfor %}
-    </div>
+        </header>
+        <ol class="analytics-risk">
+            {% for row in analytics.at_risk %}
+            <li class="analytics-risk__item">
+                <div class="analytics-risk__main">
+                    {% if row.sublabel %}<span class="analytics-code">{{ row.sublabel }}</span>{% endif %}
+                    <span class="analytics-risk__name">{{ row.label }}</span>
+                </div>
+                <div class="analytics-risk__figures">
+                    <span class="analytics-risk__fail">{{ row.fail_rate }}% {% trans "kəsilmə" context "registrar.analytics" %}</span>
+                    <span class="analytics-risk__meta">{{ row.failed }} / {{ row.definite }} · {% trans "orta bal" context "registrar.analytics" %} {{ row.avg_total }}</span>
+                </div>
+                <div class="ems-bar analytics-risk__bar" aria-hidden="true"><div class="ems-bar__fill ems-bar__fill--danger" style="{% ems_pct_style row.fail_rate %}"></div></div>
+            </li>
+            {% endfor %}
+        </ol>
+    </section>
     {% endif %}
 
-    {% endwith %}
     {% endif %}
 </div>
-<script src="{% static 'registrar/js/analytics.js' %}?v=20260705-1"></script>
-

@@ -95636,3 +95636,63 @@ msgid ""
 msgstr ""
 "Showing the most recently created accounts — search by name, surname, email "
 "or FIN."
+
+msgctxt "registrar.analytics"
+msgid "Hələ yekunlaşmış qiymət yoxdur"
+msgstr "No finalized grades yet"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "%(passed)s / %(definite)s yekunlaşmış nəticə"
+msgstr "%(passed)s / %(definite)s finalized results"
+
+msgctxt "registrar.analytics"
+msgid "Yekunlaşmış qiymət olmadan hesablanmır"
+msgstr "Not calculated until grades are finalized"
+
+msgctxt "registrar.analytics"
+msgid "Kredit-çəkili, 100 bal şkalası"
+msgstr "Credit-weighted, 100-point scale"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində: %(count)s qeydiyyat"
+msgstr "Over the absence bar: %(count)s enrollments"
+
+msgctxt "registrar.analytics"
+msgid "Kəsilmə həddində qeydiyyat yoxdur"
+msgstr "No enrollments over the absence bar"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Proqram: %(programs)s · qrup: %(groups)s"
+msgstr "Programmes: %(programs)s · groups: %(groups)s"
+
+#, python-format
+msgctxt "registrar.analytics"
+msgid "Yekunlaşıb: %(done)s · davam edir: %(open)s"
+msgstr "Finalized: %(done)s · in progress: %(open)s"
+
+msgctxt "registrar.analytics"
+msgid ""
+"Seçilmiş semestrdə əhatənizdəki qruplara fənn qeydiyyatı yoxdur. Yuxarıdan "
+"başqa semestr seçin."
+msgstr ""
+"There are no enrollments for the groups in your scope in the selected "
+"semester. Pick another semester above."
+
+msgctxt "registrar.analytics"
+msgid ""
+"Keçid faizi və orta GPA yalnız yekunlaşmış nəticələrdən hesablanır; hələ "
+"yoxdursa «—»."
+msgstr ""
+"Pass rate and average GPA count only finalized results; “—” means none yet."
+
+msgctxt "registrar.analytics"
+msgid "Sətir sayı"
+msgstr "Row count"
+
+msgctxt "registrar.analytics"
+msgid "«Kəsilmə həddində» — qayıb limitini keçmiş fənn qeydiyyatlarının sayı."
+msgstr ""
+"“Over absence bar” — number of enrollments that exceeded the absence limit."

@@ -1,141 +1,267 @@
-/* Akademik analitika paneli (U10) — dekan/kafedra dashboard.
-   WCU blue tokens only; table styles inherit journal.css (.journal-grid). */
+/* ═══════════════════════════════════════════════════════════════════════════
+   registrar/css/analytics.css — «Akademik analitika» (kabinet bölməsi).
 
-.analytics-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
+   2026-10-11 səliqə (sahib skrinşotu): başlıq/KPI/cədvəl ortaq `ems_ui`
+   komponentlərinə köçdü — `ems-header`, `ems-kpis`, `ems-card`,
+   `ems-tablescroll` + `ems-table`, `ems-state`, `ems-bar`. Bu fayl YALNIZ
+   bölməyə xas düzəlişləri saxlayır. Yalnız `--ems-*` tokenlər.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.analytics-period-form {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.analytics-period-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--ems-neutral-600);
-    margin: 0;
-}
-.analytics-period-select {
-    padding: 7px 12px;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    color: var(--ems-neutral-800);
-    background: #fff;
-}
-
-/* ── Stat cards ───────────────────────────────────────────────────────────── */
-.analytics-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 0.8rem;
-    margin: 1rem 0 1.4rem;
-}
-.analytics-card {
-    background: #fff;
-    border: 1px solid var(--ems-neutral-200);
-    border-top: 3px solid var(--ems-primary-500);
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
+.analytics {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-}
-.analytics-card--pass { border-top-color: var(--ems-success-600); }
-.analytics-card--gpa { border-top-color: var(--ems-primary-700); }
-.analytics-card--warn { border-top-color: var(--ems-warning-500); }
-.analytics-card-value {
-    font-size: 1.55rem;
-    font-weight: 800;
-    color: var(--ems-neutral-900);
-    line-height: 1.1;
-}
-/* Orta ÜOMG hesablana bilmir (qəti nəticəli fənn yoxdur) — sıfır YAZILMIR. */
-.analytics-card-value--na {
-    font-size: 0.95rem;
-    color: var(--ems-neutral-500);
-}
-.analytics-card-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--ems-neutral-600);
-}
-.analytics-card-label i { color: var(--ems-primary-500); margin-right: 4px; }
-.analytics-card--pass .analytics-card-label i { color: var(--ems-success-600); }
-.analytics-card--warn .analytics-card-label i { color: var(--ems-warning-800); }
-.analytics-card-hint {
-    font-size: 0.72rem;
-    color: var(--ems-neutral-500);
+    gap: var(--ems-sp-6);
+    min-width: 0;
 }
 
-/* ── Tables (extends .journal-grid) ───────────────────────────────────────── */
-.analytics-table .ta-left { text-align: left; }
+/* Blok aralığını `gap` verir — komponentlərin öz alt boşluğu ikiqat olmasın. */
+.analytics > .ems-header,
+.analytics > .ems-kpis {
+    margin-bottom: 0;
+}
+
+/* ── Semestr seçicisi (başlıq yuvası) ─────────────────────────────────────── */
+.analytics-period {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    min-width: 0;
+}
+
+.analytics-period__label {
+    margin: 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+    white-space: nowrap;
+}
+
+.analytics-period__select {
+    min-width: 220px;
+}
+
+.analytics-period__select .bootstrap-single-select__toggle {
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* ── KPI: telefonda 2 sütun (ortaq qayda 1 sütundur — 5 kart çox uzanırdı) ── */
+.analytics .ems-kpis {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.analytics .ems-kpi__value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Cədvəl kartları ──────────────────────────────────────────────────────── */
+.analytics-panel {
+    min-width: 0;
+    overflow: hidden; /* künc radiusu cədvəl başlığının fonunu kəssin */
+}
+
+.analytics-panel > .ems-card__head > div {
+    min-width: 0;
+}
+
+.analytics-count {
+    font-variant-numeric: tabular-nums;
+}
+
+/* `ems_table.js` sürətli axtarışı cədvəldən ƏVVƏL, sürüşmə qabının içinə qoyur.
+   Burada o, kartın alət zolağıdır: cədvəl üfüqi sürüşəndə yerində qalır
+   (sticky left), eni görünən sahə qədərdir — sağa daşmır. */
+.analytics-panel .ems-table-filter {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    margin: 0;
+    padding: var(--ems-sp-4) 18px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg);
+    justify-content: flex-end;
+}
+
+.analytics-panel .ems-table-filter-input {
+    width: 100%;
+    max-width: 280px;
+    min-width: 0;
+    min-height: var(--ems-h-xs);
+    border-radius: var(--ems-r-lg);
+    font-size: var(--ems-fs-base);
+}
+
+.analytics-table {
+    min-width: 720px;
+}
+
+.analytics-table--groups {
+    min-width: 640px;
+}
+
+.analytics-table th[scope="col"].ems-table__num {
+    text-align: right;
+}
+
+.analytics-table td,
+.analytics-table th[scope="row"] {
+    vertical-align: middle;
+}
+
+/* Rəqəmlər: sağa düzülü, cədvəl rəqəmləri (tabular), BÜTÜN sütunlarda eyni çəki. */
+.analytics-table .ems-table__num {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-neutral-700);
+}
+
+.analytics-table th[scope="col"].ems-table__num {
+    font-weight: 800;
+    color: var(--ems-neutral-600);
+}
+
+.analytics-table th[scope="row"] {
+    min-width: 200px;
+    max-width: 360px;
+    font-weight: 600;
+    color: var(--ems-text);
+}
+
+/* Sticky birinci sütun sətir hover fonunu da izləsin. */
+.analytics-table tbody tr:hover th[scope="row"] {
+    background: var(--ems-bg-subtle);
+}
+
+.analytics-label {
+    overflow-wrap: anywhere;
+}
+
+/* «—» / 0 — hər sütunda eyni: nazik, səssiz. */
+.analytics-na {
+    font-weight: 400;
+    color: var(--ems-text-muted);
+}
+
 .analytics-code {
     display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--ems-primary-700);
-    background: var(--ems-primary-100);
-    border-radius: 6px;
+    margin-inline-end: var(--ems-sp-2);
     padding: 1px 7px;
-    margin-right: 6px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    white-space: nowrap;
 }
-.analytics-rate { font-weight: 600; }
-.analytics-rate.is-low { color: var(--ems-danger-strong); }
-.analytics-rate.is-high { color: var(--ems-warning-800); }
 
-/* ── At-risk subjects ─────────────────────────────────────────────────────── */
-.analytics-risk-list {
+/* Aşağı keçid / yüksək qayıb — rəng + fon (yalnız rəngə güvənmirik: çip forması). */
+.analytics-rate.is-low,
+.analytics-rate.is-high {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: var(--ems-r-pill);
+    font-weight: 700;
+}
+
+.analytics-rate.is-low {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.analytics-rate.is-high {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+/* ── Risk fənləri ─────────────────────────────────────────────────────────── */
+.analytics-risk {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    margin-top: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
-.analytics-risk-item {
-    background: #fff;
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: 12px;
-    padding: 0.75rem 1rem 0.9rem;
+
+.analytics-risk__item {
+    padding: var(--ems-sp-5) 18px;
+    border-bottom: 1px solid var(--ems-neutral-100);
 }
-.analytics-risk-main {
+
+.analytics-risk__item:last-child {
+    border-bottom: 0;
+}
+
+.analytics-risk__main {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
-    margin-bottom: 0.2rem;
-}
-.analytics-risk-name { font-weight: 600; color: var(--ems-neutral-800); font-size: 0.9rem; }
-.analytics-risk-figures {
-    display: flex;
-    align-items: baseline;
-    gap: 0.8rem;
-    margin-bottom: 0.45rem;
     flex-wrap: wrap;
+    gap: var(--ems-sp-1);
+    min-width: 0;
 }
-.analytics-risk-fail {
-    font-size: 0.85rem;
+
+.analytics-risk__name {
+    min-width: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 600;
+    color: var(--ems-text);
+    overflow-wrap: anywhere;
+}
+
+.analytics-risk__figures {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ems-sp-1) var(--ems-sp-5);
+    margin: var(--ems-sp-1) 0 var(--ems-sp-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.analytics-risk__fail {
+    font-size: var(--ems-fs-md);
     font-weight: 700;
     color: var(--ems-danger-strong);
 }
-.analytics-risk-meta { font-size: 0.76rem; color: var(--ems-neutral-500); }
-.analytics-risk-bar {
-    height: 6px;
-    border-radius: 999px;
-    background: var(--ems-neutral-100);
-    overflow: hidden;
-}
-.analytics-risk-fill {
-    height: 100%;
-    width: 0;
-    border-radius: 999px;
-    background: linear-gradient(90deg, var(--ems-warning-500), var(--ems-danger-strong));
-    transition: width 0.4s ease;
+
+.analytics-risk__meta {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
 }
 
-@media (max-width: 640px) {
-    .analytics-cards { grid-template-columns: repeat(2, 1fr); }
+.analytics-risk__bar {
+    height: 6px;
+}
+
+/* ── Mobil ────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .analytics .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* 5 kart → sonuncu tək qalmasın, tam enə yayılsın. */
+    .analytics .ems-kpis > :last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .analytics-period {
+        width: 100%;
+    }
+
+    .analytics-period__select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .analytics-panel .ems-table-filter {
+        padding: var(--ems-sp-4) var(--ems-sp-6);
+    }
+
+    .analytics-panel .ems-table-filter-input {
+        max-width: none;
+    }
+
+    .analytics-table th[scope="row"] {
+        min-width: 150px;
+        max-width: 220px;
+    }
 }
