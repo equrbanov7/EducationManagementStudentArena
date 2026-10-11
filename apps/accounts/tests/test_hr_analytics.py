@@ -367,7 +367,7 @@ class HrAnalyticsTest(TestCase):
             "hr_degree": ("phd", {"t1"}),
             "hr_degree=none": ("none", {"t2", "t4", "t5", "t6", "h1"}),
             "hr_band": ("none", {"t3", "t4", "t5", "t6", "h1"}),
-            "hr_q=admin": ("dean humanitar", {"t1"}),  # inzibati vəzifə + vahid adı axtarışdadır
+            "hr_q=admin": ("dekan humanitar", {"t1"}),  # inzibati vəzifə + vahid adı axtarışdadır
         }
         for label, (value, expected) in cases.items():
             param = label.split("=")[0]
@@ -385,6 +385,8 @@ class HrAnalyticsTest(TestCase):
         by = self._by_name(rows)
         self.assertEqual([item["role"] for item in by["t1"]["admin_roles"]], ["dean"])
         self.assertEqual(by["t1"]["admin_roles"][0]["unit"], "Humanitar")
+        self.assertEqual(by["t1"]["admin_roles"][0]["label"], "Dekan")  # seed «Dean» → AZ
+        self.assertEqual(by["h1"]["admin_roles"][0]["label"], "Kafedra müdiri")
         self.assertIn("Humanitar", by["t1"]["admin_label"])
         self.assertEqual(by["h1"]["admin_role_names"], ["chair_head"])
         self.assertEqual(by["t5"]["admin_label"], "Metodist")
