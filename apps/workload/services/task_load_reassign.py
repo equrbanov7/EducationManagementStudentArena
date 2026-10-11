@@ -157,9 +157,19 @@ class RowPlanApplier:
         return action
 
     def _ensure_amended(self, row) -> None:
+        """Sətir üçün açıq düzəliş təmin edir.
+
+        Prod 2026-10-12: birinci sətirdən sonra tapşırıq ``amended`` olur və sonrakı sətirlər üçün düzəliş
+        AÇILMIRDI → ``save_row`` «task_not_editable» verirdi (16 ATMF sətrinin fənni yazılmadı). İndi
+        ``amended`` statusunda da sətir düzəlişin hədəfi deyilsə onun üçün düzəliş açılır."""
+        from .tasks import _amendment_target_row_ids
+
         task = row.task
         task.refresh_from_db(fields=["status"])
-        if task.status == TaskStatus.DISTRIBUTED:
+        needs = task.status == TaskStatus.DISTRIBUTED or (
+            task.status == TaskStatus.AMENDED and row.pk not in _amendment_target_row_ids(task)
+        )
+        if needs:
             open_amendment(
                 task=task,
                 actor=self.actor,
