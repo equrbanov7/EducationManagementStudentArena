@@ -133,31 +133,27 @@ def _selfwork_map(enrollment_ids) -> dict:
     return selfwork_points.selfwork_totals(enrollment_ids, key=_text("enrollment_id"))
 
 
-def _lesson_sum_map(enrollment_ids, offering_ids) -> tuple[dict, dict]:
-    """Dərs balı ``(cəm, say)`` — YALNIZ generic komponenti OLMAYAN açılışlar (və Midterm
-    rejimli açılışların HAMISI — aktivlik ortası üçün say lazımdır) üçün, TƏK sorğu.
+def _lesson_sum_map(enrollment_ids, offering_ids) -> dict:
+    """Dərs balı ``{açar: LessonTotals}`` (cəm/say, seminar və lab ayrıca) — YALNIZ generic komponenti
+    OLMAYAN açılışlar (və Midterm rejimli açılışların HAMISI — aktivlik ortası və 5 + 5 üçün) üçün, TƏK sorğu.
 
     ``analytics`` bunu bütün yazılışlar üçün hesablayır, amma nəticə yalnız
     ``use_components`` yanlış olan açılışlarda oxunur — komponentli açılışın
     dərs cəmi heç vaxt heç nəyə təsir etmir.  Ölçülüb (QA klonu, 2026-09-05):
     223 837 ``LessonMark`` sətrinin 216 453-ü (97 %) məhz belə «boş yerə»
-    aqreqasiya olunurdu.  Süzgəc rəqəmləri dəyişmir, yalnız işi atır."""
+    aqreqasiya olunurdu.  Süzgəc rəqəmləri dəyişmir, yalnız işi atır.  Dərs növü üzrə qruplaşma birgə
+    cəmi dəyişmir (köhnə qol ``.total`` oxuyur)."""
     if not offering_ids:
-        return {}, {}
+        return {}
     rows = (
         LessonMark.objects.filter(
             enrollment_id__in=enrollment_ids, score__isnull=False, enrollment__offering_id__in=offering_ids
         )
         .annotate(key_text=_text("enrollment_id"))
-        .values_list("key_text")
+        .values_list("key_text", "lesson__kind")
         .annotate(total=Sum("score"), scored=Count("score"))
     )
-    sums: dict = {}
-    counts: dict = {}
-    for key, total, scored in rows:
-        sums[key] = total or _ZERO
-        counts[key] = scored or 0
-    return sums, counts
+    return entry_standard.lesson_totals_by_key(rows)
 
 
 def _exam_map(enrollment_ids) -> dict:
@@ -196,7 +192,7 @@ def _record_map(organization, student_ids) -> dict:
 # ── Açılış-səviyyəli sabitlər (yazılış başına DEYİL, açılış başına bir dəfə) ──
 
 
-def _offering_info(offering_ids) -> tuple[dict, list]:
+def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
     """``offering_id`` (mətn) → açılışın bütün sabitləri, tək demət halında.
 
     Demət: ``(entry_max, pass_threshold, min_exam, komponentlidir?,
@@ -209,7 +205,9 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
     açılış sayı yazılış sayından ~13× azdır.
 
     İkinci qaytarma dəyəri — dərs balı cəmi LAZIM olan açılışların id-ləri
-    (generic komponenti olmayanlar); bax :func:`_lesson_sum_map`."""
+    (generic komponenti olmayanlar); bax :func:`_lesson_sum_map`.  Üçüncü — ``with_bits`` olanda Midterm
+    açılışlarının seminar/lab maskası (5 + 5 aktivlik, sahib 2026-10-10), mətn açarı ilə; yalnız Midterm
+    açılışları üçün TƏK sorğu (keçmiş dövrlərin açılışları sorğuya düşmür)."""
     schemes = {
         key: (entry_max, pass_threshold, min_exam)
         for key, entry_max, pass_threshold, min_exam in AssessmentScheme.objects.filter(offering_id__in=offering_ids)
@@ -233,6 +231,7 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
 
     info: dict = {}
     lesson_source_ids: list = []
+    midterm_keys: dict = {}
     rows = (
         CourseOffering.objects.filter(id__in=offering_ids)
         .annotate(key_text=_text("id"))
@@ -257,6 +256,8 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
         midterm = entry_standard.is_midterm_fields(academic_year, start_date, from_year_raw=from_year_raw)
         if midterm or not use_components:
             lesson_source_ids.append(offering_id)
+        if midterm:
+            midterm_keys[offering_id] = key
         info[key] = (
             Decimal(entry_max),
             pass_threshold,
@@ -268,7 +269,8 @@ def _offering_info(offering_ids) -> tuple[dict, list]:
             midterm,
             key in with_selfwork,
         )
-    return info, lesson_source_ids
+    bits = entry_standard.activity_bits_map(midterm_keys) if with_bits and midterm_keys else {}
+    return info, lesson_source_ids, {midterm_keys[oid]: value for oid, value in bits.items()}
 
 
 # ── Aqreqasiya ───────────────────────────────────────────────────────────────
@@ -285,12 +287,16 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
     enrollment_ids = flat.values("id")
     offering_ids = flat.values("offering_id")
 
-    info, lesson_source_ids = _offering_info(offering_ids)
+    # Yeni qaydanın RİM bayraqları BİR dəfə (sətir başına oxu yox — sahib 2026-10-10).
+    flags = entry_standard.rule_flags()
+    info, lesson_source_ids, activity_bits = _offering_info(offering_ids, with_bits=flags.activity_split)
     if not info:
         return
     component_sums, kollokvium_sums = _component_sum_maps(enrollment_ids)
-    selfwork_sums = _selfwork_map(enrollment_ids)
-    lesson_sums, lesson_counts = _lesson_sum_map(enrollment_ids, lesson_source_ids)
+    # Sərbəst iş yalnız keçmiş dövrlərdə və ya RİM-də açıq olanda sayılır — əks halda cəmi oxunmur.
+    needs_selfwork = flags.selfwork or any(not row[7] for row in info.values())
+    selfwork_sums = _selfwork_map(enrollment_ids) if needs_selfwork else {}
+    lesson_totals = _lesson_sum_map(enrollment_ids, lesson_source_ids)
     exams = _exam_map(enrollment_ids)
     resits = _resit_map(enrollment_ids)
     records = _record_map(organization, flat.values("student_id"))
@@ -325,6 +331,7 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
         limit, exempt = records.get(student_key, (_DEFAULT_ABSENCE_LIMIT, False))
 
         # ── Giriş balı (gradebook.entry_score_for güzgüsü) ────────────────────
+        totals = lesson_totals.get(enrollment_key)
         if midterm:
             # Sillabus standartı (2026/2027-dən) — TƏK düstur ``entry_standard``-da.
             entry = entry_standard.compose_from_totals(
@@ -333,15 +340,18 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
                 absence_hours=absence_hours,
                 limit_percent=limit,
                 exempt=exempt,
-                score_sum=lesson_sums.get(enrollment_key, _ZERO),
-                score_count=lesson_counts.get(enrollment_key, 0),
+                lesson_totals=totals or entry_standard.LessonTotals(),
+                activity_bits=activity_bits.get(offering_key, 0),
                 interim_total=kollokvium_sums.get(enrollment_key, _ZERO),
                 selfwork_points=selfwork_sums.get(enrollment_key, _ZERO),
                 selfwork_counted=has_selfwork,
+                flags=flags,
             ).total
         else:
-            source = component_sums if use_components else lesson_sums
-            raw_entry = source.get(enrollment_key, _ZERO)
+            if use_components:
+                raw_entry = component_sums.get(enrollment_key, _ZERO)
+            else:
+                raw_entry = totals.total if totals is not None else _ZERO
             kollokvium = kollokvium_sums.get(enrollment_key)
             if kollokvium is not None:
                 raw_entry += kollokvium

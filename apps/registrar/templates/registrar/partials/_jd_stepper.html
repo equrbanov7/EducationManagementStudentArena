@@ -2,7 +2,11 @@
 {% comment %}6 addımlı jurnal stepper-i (mockup). `stepper_step` = aktiv addım (1-6).
 Detal səhifəsində addımlar klikləndikdə uyğun tab açılır (journal_grid.js
 data-jd-step → tab sinxronu); addım 1 qrup seçiminə qayıdır, addım 3 yeni-dərs
-modalını açır. Siyahı səhifəsində yalnız addım 1 aktivdir.{% endcomment %}
+modalını açır. Siyahı səhifəsində yalnız addım 1 aktivdir.
+Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə 5-ci addım («Sərbəst iş») YOXDUR — detalda açılışın
+qərarı (`selfwork_active`, view), siyahıda CARİ qayda (`academic_rules.selfwork`). Daxili
+`data-jd-step` nömrələri dəyişmir (journal_grid.js `setStep` onlarla müqayisə edir) — yalnız
+«Yekun qiymət» addımının GÖRÜNƏN nömrəsi 5 olur.{% endcomment %}
 <div class="jd2-stepper" data-jd-stepper>
     {% if stepper_detail %}
     <a class="jd2-step" href="{% url 'registrar:journal_list' %}" data-jd-step="1">
@@ -25,19 +29,23 @@ modalını açır. Siyahı səhifəsində yalnız addım 1 aktivdir.{% endcommen
         <span class="jd2-step-no {% if stepper_step == 3 %}is-active{% elif stepper_step > 3 %}is-done{% endif %}">3</span>
         <span class="jd2-step-label {% if stepper_step == 3 %}is-active{% elif stepper_step > 3 %}is-done{% endif %}">{% trans "Yeni dərs" context "registrar.journal" %}</span>
     </button>
+    {% if stepper_detail and coursework_active or not stepper_detail and academic_rules.coursework %}{# sahib 2026-10-11: «Kurs işi» RİM tənzimləməsi ilə #}
     <span class="jd2-step-line"></span>
     <button type="button" class="jd2-step" data-jd-step="4" data-jd-step-tab="kurs-isi" {% if not stepper_detail %}disabled{% endif %}>
         <span class="jd2-step-no {% if stepper_step == 4 %}is-active{% elif stepper_step > 4 %}is-done{% endif %}">4</span>
         <span class="jd2-step-label {% if stepper_step == 4 %}is-active{% elif stepper_step > 4 %}is-done{% endif %}">{% trans "Kurs işi" context "registrar.journal" %}</span>
     </button>
+    {% endif %}
+    {% if stepper_detail and selfwork_active or not stepper_detail and academic_rules.selfwork %}
     <span class="jd2-step-line"></span>
     <button type="button" class="jd2-step" data-jd-step="5" data-jd-step-tab="serbest" {% if not stepper_detail %}disabled{% endif %}>
-        <span class="jd2-step-no {% if stepper_step == 5 %}is-active{% elif stepper_step > 5 %}is-done{% endif %}">5</span>
+        <span class="jd2-step-no {% if stepper_step == 5 %}is-active{% elif stepper_step > 5 %}is-done{% endif %}">{% if stepper_detail and coursework_active or not stepper_detail and academic_rules.coursework %}5{% else %}4{% endif %}</span>
         <span class="jd2-step-label {% if stepper_step == 5 %}is-active{% elif stepper_step > 5 %}is-done{% endif %}">{% trans "Sərbəst iş" context "registrar.journal" %}</span>
     </button>
+    {% endif %}
     <span class="jd2-step-line"></span>
     <button type="button" class="jd2-step" data-jd-step="6" data-jd-step-tab="yekun" {% if not stepper_detail %}disabled{% endif %}>
-        <span class="jd2-step-no {% if stepper_step == 6 %}is-active{% endif %}">6</span>
+        <span class="jd2-step-no {% if stepper_step == 6 %}is-active{% endif %}">{% if stepper_detail and coursework_active or not stepper_detail and academic_rules.coursework %}{% if stepper_detail and selfwork_active or not stepper_detail and academic_rules.selfwork %}6{% else %}5{% endif %}{% elif stepper_detail and selfwork_active or not stepper_detail and academic_rules.selfwork %}5{% else %}4{% endif %}</span>
         <span class="jd2-step-label {% if stepper_step == 6 %}is-active{% endif %}">{% trans "Yekun qiymət" context "registrar.journal" %}</span>
     </button>
 </div>

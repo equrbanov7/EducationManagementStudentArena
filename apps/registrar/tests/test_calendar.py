@@ -3,7 +3,7 @@
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -80,15 +80,23 @@ class CalendarTest(TestCase):
         self.assertIsNone(past.exam_session_state)  # not configured
 
     # ── View ─────────────────────────────────────────────────────────────────
+    # URL auditi A11 (2026-10-10): müstəqil `jurnal/teqvim/` silindi — kabinet `academic-calendar` bölməsi.
+    @override_settings(UNIVERSITY_MODE=True)  # kabinetin registrar bölmələri universitet rejimindədir
     def test_calendar_lists_periods_with_badges(self):
-        resp = self._client(self.student).get(reverse("registrar:calendar"))
+        resp = self._client(self.student).get(reverse("accounts:profile"), {"section": "academic-calendar"})
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "Cari semestr")
         self.assertContains(resp, "acal-state--open")  # registration open
         self.assertContains(resp, "acal-state--upcoming")  # exam session upcoming
 
+    def test_standalone_route_is_gone(self):
+        from django.urls import NoReverseMatch
+
+        with self.assertRaises(NoReverseMatch):
+            reverse("registrar:calendar")
+
     def test_anonymous_redirected(self):
-        resp = Client().get(reverse("registrar:calendar"))
+        resp = Client().get(reverse("accounts:profile"), {"section": "academic-calendar"})
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 

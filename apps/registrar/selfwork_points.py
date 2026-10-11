@@ -28,6 +28,13 @@ SAYMA YERLƏRİ (hamısı BURADAN — güzgü pozulmasın):
 o, giriş balının GENERIC qalığının içindədir (bax ``gradebook_components`` və
 ``selfwork_board`` modullarındakı xəbərdarlıq).
 
+SƏRBƏST İŞ BAYRAĞI (sahib 2026-10-10 — ləğv olunub, kod/data qalır): yeni qayda (Midterm) dövrlərində
+bu cəm giriş balına YALNIZ RİM «Sistem tənzimləmələri»ndə sərbəst iş açıq olanda düşür
+(``core.academic_rules.selfwork_active_for_period``). Qapı TƏK yerdədir — ``entry_standard.selfwork_part``;
+söndürülübsə toplu yollar (``finals_batch``, ``analytics_fast``, ``academic_summary``, jurnalın «Yekun» tabı,
+tələbə jurnalı) bu modulun cəmini ümumiyyətlə oxumur. Keçmiş (kollokvium) dövrlərdə cəm həmişə sayılır.
+Buradakı funksiyalar dövrdən xəbərsizdir və DƏYİŞMİR (lövhə/hook/arxiv eyni qalır).
+
 Fənn qovluğu (``apps.subject_folder``) üçün hook müqaviləsi — :func:`record_points`
 və :func:`preview` — ``apps.registrar.public_services.selfwork_points`` kimi ixrac
 olunur; icra ``selfwork_hook`` modulundadır, struktur ``selfwork_structure``-dadır.

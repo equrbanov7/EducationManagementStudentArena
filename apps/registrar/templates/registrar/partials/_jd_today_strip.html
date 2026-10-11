@@ -3,10 +3,14 @@
 
 Kontekst: `today_strip` (apps/registrar/journal_activation.py::strip_context). Açılışın BU GÜNKÜ
 cədvəl slotları (həftə günü + üst/alt paritet + dövr; parklanmış slot xaric): saat · növ · otaq ·
-müəllim və sillabusdakı NÖVBƏTİ keçilməmiş mövzu. «Aktivləşdir» dərsi slotdan açır (POST,
-tək klik); artıq açılmış slot «Aktivləşdirilib ✓» və həmin sütuna keçid göstərir. Formlar
-grid formasından KƏNARDADIR (iç-içə form olmasın). CSP: inline yoxdur — ikiqat göndəriş
-qapısı journal_activation.js-dədir.{% endcomment %}
+müəllim və sillabusdakı NÖVBƏTİ keçilməmiş mövzu. Artıq açılmış slot ✓ və həmin sütuna keçid göstərir.
+
+İki rejim (RİM «Sistem tənzimləmələri» → `journal.lesson_activation`, sahib 2026-10-10):
+* söndürülü (defolt) — `strip.can_add`: açılmamış slotun yanında «Yeni dərs»; modal həmin slotdan dolu
+  açılır (journal_lesson_prefill.js, `data-jd-prefill-slot`). Aktivləşdirmə forması/ünvanı YOXDUR.
+* yandırılı — `strip.can_activate`: «Aktivləşdir» dərsi slotdan tək kliklə açır (POST). Formlar grid
+  formasından KƏNARDADIR (iç-içə form olmasın); ikiqat göndəriş qapısı journal_activation.js-dədir.
+CSP: inline yoxdur.{% endcomment %}
 {% with strip=today_strip %}
 <section class="jd2-today" aria-labelledby="jd2-today-title">
     <header class="jd2-today__head">
@@ -17,6 +21,8 @@ qapısı journal_activation.js-dədir.{% endcomment %}
         </div>
         {% if strip.can_activate and strip.items %}
         <span class="jd2-today__hint">{% trans "Dərsi bir kliklə açın — saat, növ, otaq və növbəti mövzu cədvəldən və sillabusdan götürülür." context "registrar.journal_activation" %}</span>
+        {% elif strip.can_add and strip.items %}
+        <span class="jd2-today__hint">{% trans "Dərsi «Yeni dərs» ilə açın — forma bu dərsin saatı, növü, otağı, müəllimi və növbəti mövzusu ilə dolu açılır." context "registrar.journal_prefill" %}</span>
         {% endif %}
     </header>
     {% if strip.items %}
@@ -48,7 +54,7 @@ qapısı journal_activation.js-dədir.{% endcomment %}
                 {% if item.lesson_id %}
                 <a class="jd2-slot__done" href="?jt=grid#jd-lesson-{{ item.lesson_id }}"
                    title="{% trans 'Jurnalda bu dərsin sütununa keç' context 'registrar.journal_activation' %}">
-                    <i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Aktivləşdirilib" context "registrar.journal_activation" %}
+                    <i class="fas fa-circle-check" aria-hidden="true"></i> {% if strip.activation %}{% trans "Aktivləşdirilib" context "registrar.journal_activation" %}{% else %}{% trans "Dərs açılıb" context "registrar.journal_prefill" %}{% endif %}
                 </a>
                 {% elif strip.can_activate %}
                 <form method="post" action="{{ item.activate_url }}" data-jd-activate-form>
@@ -57,8 +63,13 @@ qapısı journal_activation.js-dədir.{% endcomment %}
                         <i class="fas fa-play" aria-hidden="true"></i> {% trans "Aktivləşdir" context "registrar.journal_activation" %}
                     </button>
                 </form>
+                {% elif strip.can_add %}
+                <button type="button" class="jd2-slot__btn" data-jd-open-lesson-modal data-jd-prefill-slot="{{ item.slot_id }}"
+                        title="{% trans 'Yeni dərs formasını bu cədvəl dərsinin məlumatları ilə aç' context 'registrar.journal_prefill' %}">
+                    <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni dərs" context "registrar.journal" %}
+                </button>
                 {% else %}
-                <span class="jd2-slot__pending">{% trans "Aktivləşdirilməyib" context "registrar.journal_activation" %}</span>
+                <span class="jd2-slot__pending">{% if strip.activation %}{% trans "Aktivləşdirilməyib" context "registrar.journal_activation" %}{% else %}{% trans "Dərs açılmayıb" context "registrar.journal_prefill" %}{% endif %}</span>
                 {% endif %}
             </div>
         </li>

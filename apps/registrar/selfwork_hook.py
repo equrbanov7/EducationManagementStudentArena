@@ -21,6 +21,9 @@ Müqavilə ``apps/subject_folder/public.py`` §9-dadır; ictimai giriş nöqtəs
 
 ``preview`` — yazısız, ≤ 3 sorğu (açılış+sxem+mövzular+tələbənin işarələri TƏK
 sorğuda; struktur hələ qurulmayıbsa sillabus üçün +2).
+
+Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə (RİM tənzimləməsi, ``core.academic_rules``) hook HEÇ NƏ
+yazmır — ``(False, «… tətbiq olunmur»)``; struktur / komponent də yaradılmır (köhnə semestr dəyişmir).
 """
 
 from __future__ import annotations
@@ -67,6 +70,16 @@ def _msg_already(label, points, max_points, total) -> str:
     return pgettext(
         _CTX, "Jurnalda artıq yazılıb: %(slot)s · %(points)s/%(max)s (cəmi %(total)s/%(max_total)s)"
     ) % _fmt(label, points, max_points, total)
+
+
+def _msg_inactive() -> str:
+    return pgettext(_CTX, "Bu semestrdə sərbəst iş tətbiq olunmur — bal jurnala yazılmadı.")
+
+
+def _selfwork_active(offering) -> bool:
+    from core.academic_rules import selfwork_active_for_offering
+
+    return selfwork_active_for_offering(offering)
 
 
 def _msg_locked() -> str:
@@ -164,6 +177,8 @@ def _journal_locked(offering) -> bool:
 
 def record_points(*, offering, enrollment, slot_index, slot_title, max_points, points, source_ref, by_user):
     """Bax modul docstring-i → ``(ok: bool, mesaj: str)``."""
+    if not _selfwork_active(offering):
+        return False, _msg_inactive()
     slot = _slot_number(slot_index)
     try:
         folder_max = rules.parse_points(max_points)
@@ -334,6 +349,8 @@ def preview(*, offering, enrollment, slot_index, points) -> dict:
         "blocked": False,
         "reason": "",
     }
+    if not _selfwork_active(offering):
+        return {**result, "blocked": True, "reason": _msg_inactive()}
     slot = _slot_number(slot_index)
     if slot is None:
         return {**result, "blocked": True, "reason": _msg_no_slot(None, slot_index)}

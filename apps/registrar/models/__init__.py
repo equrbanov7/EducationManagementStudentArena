@@ -76,6 +76,7 @@ from .journal_close_notice import (
     JournalCloseNotice,
     JournalCloseScope,
 )
+from .journal_hygiene import HYGIENE_REASON_MIN_LENGTH, HygieneCategory, JournalHygieneDecision
 from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
     KollokviumExtraGrant,
@@ -182,6 +183,9 @@ __all__ = [
     "SelfWorkMark",
     "SelfWorkTopic",
     "TeachingHandover",
+    "HYGIENE_REASON_MIN_LENGTH",
+    "HygieneCategory",
+    "JournalHygieneDecision",
     "SlotKind",
     "StudentAcademicRecord",
     "StudentMovement",

@@ -26,7 +26,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.db import connection
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
@@ -54,6 +54,9 @@ User = get_user_model()
 BOARD_POST_BUDGET = 25
 
 
+# Sahib 2026-10-10: 2026/2027-də sərbəst iş defoltda söndürülüdür (lövhə POST-u 404) — büdcə lövhənin özünü
+# ölçür, ona görə RİM tənzimləməsi yandırılmış kimi (köhnə qayda) işləyir.
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True)
 class SelfworkBoardQueryBudgetTest(TestCase):
     @classmethod
     def setUpTestData(cls):

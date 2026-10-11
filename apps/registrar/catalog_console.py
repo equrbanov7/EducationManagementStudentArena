@@ -46,12 +46,21 @@ from .models import (
     StudentAcademicRecord,
     Subject,
 )
+from .rubric_flags import rubrics_enabled
 from .views import _current_period
 
 MANAGE_PERMISSION = "course.edit"
 
 #: Tabların sabit sırası — sidebar-dakı «Registrar (kataloq)» bölməsinin içi.
 TAB_KEYS = ("programs", "subjects", "curricula", "offerings", "rubrics", "students")
+
+
+def tab_keys() -> tuple:
+    """Hazırda görünən tablar — «Rubriklər» yalnız ``REGISTRAR_RUBRICS_ENABLED`` ilə (sahib 2026-10-10)."""
+    if rubrics_enabled():
+        return TAB_KEYS
+    return tuple(key for key in TAB_KEYS if key != "rubrics")
+
 
 #: Siyahılar səhifələnmir; kataloq kiçikdir, amma pəncərə yenə də məhdudlaşır ki,
 #: nasaz məlumatda panel donmasın.
@@ -132,7 +141,7 @@ def counts(organization, period=None) -> dict:
         "subjects": _subjects(organization).count(),
         "curricula": Curriculum.objects.filter(organization=organization).count(),
         "offerings": _offerings(organization, period).count(),
-        "rubrics": Rubric.objects.filter(organization=organization).count(),
+        "rubrics": Rubric.objects.filter(organization=organization).count() if rubrics_enabled() else 0,
         "students": StudentAcademicRecord.objects.filter(organization=organization).count(),
     }
 
@@ -311,7 +320,7 @@ def rows(organization, *, tab, period=None, query="", status="", program="", fla
     if tab == "offerings":
         return _offering_rows(organization, period, query, flag)
     if tab == "rubrics":
-        return _rubric_rows(organization, query, status)
+        return _rubric_rows(organization, query, status) if rubrics_enabled() else []
     if tab == "students":
         return _student_rows(organization, query, status, program)
     return []
@@ -410,6 +419,8 @@ def save(organization, *, tab, pk, data, actor=None):
     Rubrik ayrıca gedir, çünki meyarları mətn sahəsindən oxunur.
     """
     if tab == "rubrics":
+        if not rubrics_enabled():
+            return None, {"__all__": ["unknown_tab"]}
         return _save_rubric(organization, pk=pk, data=data)
     entry = _FORMS.get(tab)
     if entry is None:
@@ -489,6 +500,8 @@ def _save_rubric(organization, *, pk, data):
 def entity_values(organization, *, tab, pk) -> dict:
     """Redaktə dialoqunu doldurmaq üçün mövcud sətrin dəyərləri."""
     if tab == "rubrics":
+        if not rubrics_enabled():
+            return {}
         from . import rubrics as rubrics_service
 
         item = _instance(Rubric, organization, pk)

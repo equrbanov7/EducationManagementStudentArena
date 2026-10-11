@@ -73,25 +73,22 @@ def _active_org(request):
     return org
 
 
-@login_required
-def correction_offering_list(request):
-    """DEPRECATED — ayrı düzəliş siyahısı ləğv edildi. Korrektor jurnal siyahısından
-    (bütün offering-lər) istənilən jurnalı açıb yerində "Jurnal düzəlişi" toggle ilə
-    düzəldir. Köhnə URL jurnal siyahısına yönləndirir."""
-    _require_corrector(request)
-    _active_org(request)
-    return redirect("registrar:journal_list")
-
-
 def build_correction_context(offering, request) -> dict:
-    """Jurnal-düzəliş editoru üçün paylaşılan kontekst — HƏM standalone
-    ``correction_journal`` səhifəsi, HƏM DƏ ``journal_detail``-in yerində düzəliş
-    rejimi (``?correct=1``) eyni audited editoru göstərsin deyə. Bütün yazma
+    """Jurnal-düzəliş editoru üçün paylaşılan kontekst — ``journal_detail``-in yerində
+    düzəliş rejimi (``?correct=1``) audited editoru göstərsin deyə (köhnə standalone
+    ``duzelis/<uuid>/`` şimi URL auditi A11, 2026-10-10 ilə silindi). Bütün yazma
     ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
+    from core.academic_rules import coursework_active_for_offering, selfwork_active_for_offering
+
     from . import item_corrections, journal_extras, legacy_excuse
 
-    sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True)
-    cw_map = item_corrections.coursework_corrections_map(offering, include_document=True)
+    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə düzəliş hədəfi də YOXDUR — lövhə qurulmur, xəritə boşdur
+    # (servis — ``item_corrections`` — onsuz da rədd edir; data toxunulmur).
+    selfwork_active = selfwork_active_for_offering(offering)
+    sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True) if selfwork_active else {}
+    # Sahib 2026-10-11: kurs işi söndürülən dövrdə onun düzəliş hədəfi və tarixçəsi də yoxdur.
+    coursework_active = coursework_active_for_offering(offering)
+    cw_map = item_corrections.coursework_corrections_map(offering, include_document=True) if coursework_active else {}
     cm_map = item_corrections.component_corrections_map(offering, include_document=True)
     journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
     corrections_map = corrections.corrections_map_for_offering(offering, include_document=True)
@@ -102,10 +99,18 @@ def build_correction_context(offering, request) -> dict:
         "journal": journal,
         "corrections_map": corrections_map,
         # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
-        "selfwork_board": item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map),
-        "coursework_rows": item_corrections.annotate_coursework_rows(
-            journal_extras.get_course_work_rows(offering), cw_map
+        "selfwork_board": (
+            item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map)
+            if selfwork_active
+            else None
         ),
+        "selfwork_active": selfwork_active,
+        "coursework_rows": (
+            item_corrections.annotate_coursework_rows(journal_extras.get_course_work_rows(offering), cw_map)
+            if coursework_active
+            else []
+        ),
+        "coursework_active": coursework_active,
         "kollokvium_grid": item_corrections.annotate_kollokvium_grid(
             journal_extras.get_kollokvium_grid(offering), cm_map
         ),
@@ -122,16 +127,6 @@ def build_correction_context(offering, request) -> dict:
         "delete_url": reverse("registrar:correction_delete", args=[offering.pk]),
         "corrector_name": request.user.get_full_name() or request.user.username,
     }
-
-
-@login_required
-def correction_journal(request, offering_id):
-    """DEPRECATED — ayrı düzəliş səhifəsi ləğv edildi; yerində düzəliş rejiminə
-    (journal_detail ?correct=1, normal grid-in özündə) yönləndirir."""
-    _require_corrector(request)
-    org = _active_org(request)
-    offering = get_object_or_404(CourseOffering, pk=offering_id, organization=org)
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]) + "?correct=1")
 
 
 def _apply_item_correction(request, offering):
@@ -304,6 +299,7 @@ def _revert_requested_correction(request, offering):
                 enrollment=enrollment,
                 **common,
             )
+        item_corrections.ensure_coursework_active(offering)  # sahib 2026-10-11
         return item_corrections.revert_last_coursework_correction(enrollment=enrollment, **common)
 
     if correction_id:

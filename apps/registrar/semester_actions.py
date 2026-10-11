@@ -24,7 +24,7 @@ import uuid
 
 from django.apps import apps as django_apps
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -33,6 +33,7 @@ from django.views.decorators.http import require_POST
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import journal_hygiene_guard
 from .models import CourseOffering, Program
 from .models.curriculum_meta import PLAN_REASON_MIN_LENGTH
 from .semester_open import (
@@ -245,19 +246,24 @@ def _cancel_offering(request, organization):
     if failure is not None:
         return failure
 
-    offering.is_active = False
-    offering.save(update_fields=["is_active", "updated_at"])
-    log_action(
-        action=AuditAction.UPDATE,
-        user=request.user,
-        organization=organization,
-        obj=offering,
-        request=request,
-        reason=f"semester: offering cancelled — {reason}",
-        old_values={"is_active": True},
-        new_values={"is_active": False, "reason": reason},
-    )
-    return JsonResponse({"ok": True, "id": str(offering.id)})
+    with transaction.atomic():
+        offering.is_active = False
+        offering.save(update_fields=["is_active", "updated_at"])
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=organization,
+            obj=offering,
+            request=request,
+            reason=f"semester: offering cancelled — {reason}",
+            old_values={"is_active": True},
+            new_values={"is_active": False, "reason": reason},
+        )
+        # Sahib 2026-10-10 («Jurnal təmizliyi»): BOŞ qeydiyyatlar nəticələrdən çıxır, məlumatlı sətir qalır.
+        dropped = journal_hygiene_guard.drop_cancelled_offering(
+            offering, reason=reason, actor=request.user, request=request
+        )
+    return JsonResponse({"ok": True, "id": str(offering.id), "dropped_empty": dropped})
 
 
 def _lock(request, organization):

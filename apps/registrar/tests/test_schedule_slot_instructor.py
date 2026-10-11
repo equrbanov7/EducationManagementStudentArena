@@ -377,6 +377,7 @@ class PublishTest(SlotInstructorBase):
         self.assertEqual(live, 0)
 
 
+@override_settings(JOURNAL_LESSON_ACTIVATION=True)  # «Aktivləşdir» RİM tənzimləməsidir (defolt söndürülü, 2026-10-10)
 class ActivationTest(SlotInstructorBase):
     code = "siact"
 

@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -209,7 +209,10 @@ class RubricServiceTest(RubricBaseTest):
         self.assertEqual(grid["criteria_max_total"], 10)
 
 
+@override_settings(REGISTRAR_RUBRICS_ENABLED=True)
 class RubricViewTest(RubricBaseTest):
+    """Bayraq AÇIQ — köhnə davranış (geri dönüş yolu, sahib 2026-10-10)."""
+
     def test_rubric_grade_page_renders(self):
         resp = self._client(self.teacher).get(
             reverse("registrar:rubric_grade", args=[self.offering.id, self.component.id])
@@ -275,3 +278,42 @@ class RubricViewTest(RubricBaseTest):
         # Jurnal detalında köhnə komponent formu artıq render olunmur.
         detail = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertNotContains(detail, "comp_rubric__0")
+
+
+class RubricHiddenByDefaultTest(RubricBaseTest):
+    """Sahib 2026-10-10 («lazım deyilsə göstərmə»): REGISTRAR_RUBRICS_ENABLED defolt False."""
+
+    def _url(self):
+        return reverse("registrar:rubric_grade", args=[self.offering.id, self.component.id])
+
+    def test_rubric_page_is_404_and_post_writes_nothing(self):
+        self.assertEqual(self._client(self.teacher).get(self._url()).status_code, 404)
+        with bypass_rls():
+            criterion = self.rubric.criteria.get(name="Məzmun")
+        resp = self._client(self.teacher).post(self._url(), {f"rpoints__{criterion.id}__{self.enrollment.id}": "3.5"})
+        self.assertEqual(resp.status_code, 404)
+        with bypass_rls():
+            self.assertFalse(
+                ComponentScore.objects.filter(component=self.component, enrollment=self.enrollment).exists()
+            )
+
+    def test_catalog_rubric_save_is_refused(self):
+        resp = self._client(self.owner).post(
+            reverse("accounts:registrar_catalog_action"),
+            data=json.dumps({"action": "save", "tab": "rubrics", "name": "Gizli", "criteria_text": "A:5"}),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        with bypass_rls():
+            self.assertFalse(Rubric.objects.filter(organization=self.org, name="Gizli").exists())
+
+    def test_journal_detail_does_not_load_rubric_css(self):
+        detail = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertEqual(detail.status_code, 200)
+        self.assertNotContains(detail, "rubric_grade.css")
+
+    def test_rubric_service_and_data_stay(self):
+        # Xidmət və data toxunulmur — yalnız UI/marşrut gizlidir.
+        with bypass_rls():
+            grid = rubrics.get_rubric_grid(self.component)
+        self.assertEqual(len(grid["criteria"]), 3)

@@ -4,8 +4,9 @@ Cədvəl slotu (həftə günü + üst/alt paritet + açılışın dövrü) KEÇM
 həmin açılışın həmin tarixdə dərs sütunu (``Lesson``) yoxdur → «qeydə alınmayıb».
 
 * **Pəncərə:** bölmədə seçilmiş dövr/aralıq, amma yalnız KEÇMİŞ günlər (bu gün sayılmır —
-  müəllim onu hələ jurnalın «Aktivləşdir» düyməsi ilə aça bilər) və pəncərənin sonundan ən
-  çoxu :data:`LOOKBACK_DAYS` gün geri («bütün illər» seçimi bütün tarixçəni gəzməsin).
+  müəllim onu hələ jurnalda «Yeni dərs» ilə, RİM tənzimləməsi açıqdırsa «Aktivləşdir» ilə aça
+  bilər) və pəncərənin sonundan ən çoxu :data:`LOOKBACK_DAYS` gün geri («bütün illər» seçimi
+  bütün tarixçəni gəzməsin).
 * **Uyğunlaşdırma** (eyni açılış + eyni tarix daxilində): əvvəl eyni başlama saatı, sonra
   eyni növ, sonra istənilən dərs — dərs başqa saata yazılıbsa belə keçirilmiş sayılır
   (yalançı həyəcan olmasın). Parklanmış slotlar sayılmır; hər gün HƏMİN GÜN qüvvədə olan

@@ -11,7 +11,7 @@ giriş balına CƏM kimi əlavə, sənədli düzəliş axını, bildirişlər) o
 arasında fərq yalnız bu üç şeydir:
 
 * SAY — 3 (K1/K2/K3) → 1;
-* TAVAN — hər biri 10 → 20;
+* TAVAN — hər biri 10 → 20 (sahib 2026-10-10: sərbəst iş ləğv olunanda 30 — :func:`midterm_max`);
 * AD — «Kollokvium N» → «Midterm».
 
 Beləliklə hesablama yolları (``gradebook.entry_score_for``, ``analytics`` güzgüsü,
@@ -28,29 +28,42 @@ kabineti və sillabus eyni cavabı buradan alır.
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 
 from django.utils.translation import pgettext_lazy
+
+# Dövr-il məntiqi sillabus/fənn qovluğu ilə ortaqdır (onlar registrar-ı import edə bilmir) — tək mənbə core-dadır;
+# adlar bu modulda qalır ki, mövcud çağıranlar (``interim_assessment.midterm_from_year`` …) dəyişməsin.
+from core.academic_rules import (  # noqa: F401
+    MIDTERM_FROM_YEAR,
+    midterm_from_year,
+    period_start_year,
+    period_uses_new_rules,
+)
 
 _CTX = "registrar.interim"
 
 MODE_KOLLOKVIUM = "kollokvium"
 MODE_MIDTERM = "midterm"
 
-#: Midterm rejimi bu tədris ilindən başlayır (2026 → «2026/2027»).
-MIDTERM_FROM_YEAR = 2026
-
 KOLLOKVIUM_COUNT = 3
 KOLLOKVIUM_MAX = 10
 MIDTERM_COUNT = 1
+#: Sərbəst iş AÇIQ olanda midterm tavanı (2026-09-25 qaydası). Cari tavan — :func:`midterm_max`:
+#: sahib 2026-10-10 sərbəst işi ləğv etdi, onun 10 balı midterm-ə keçir (30); RİM bayrağı ilə geri qayıdır.
 MIDTERM_MAX = 20
+
+
+def midterm_max() -> int:
+    """Midterm komponentinin cari tavanı (30; sərbəst iş açıqdırsa 20) — ``core.academic_rules``."""
+    from core.academic_rules import midterm_max as _rule
+
+    return _rule()
+
 
 #: Komponent adı DB-də saxlanan DATA-dır (tərcümə olunmur); görünən ad ``InterimSpec``-dən gəlir.
 MIDTERM_COMPONENT_NAME = "Midterm"
 KOLLOKVIUM_NAME_PATTERN = "Kollokvium {n}"
-
-_YEAR_RE = re.compile(r"\d{4}")
 
 
 @dataclass(frozen=True)
@@ -65,7 +78,7 @@ class InterimSpec:
     short_labels: tuple[str, ...]
     #: Bölmə/tab başlığı: «Kollokvium» / «Midterm».
     title: str
-    #: Tam izah: «3 kollokvium (hər biri 0–10 bal)» / «Midterm — aralıq imtahan (0–20 bal)».
+    #: Tam izah: «3 kollokvium (hər biri 0–10 bal)» / «Midterm — aralıq imtahan (0–30 bal)» (tavan :func:`midterm_max`).
     description: str
 
     @property
@@ -100,14 +113,15 @@ def _kollokvium_spec() -> InterimSpec:
 
 
 def _midterm_spec() -> InterimSpec:
+    max_score = midterm_max()
     return InterimSpec(
         mode=MODE_MIDTERM,
         count=MIDTERM_COUNT,
-        max_score=MIDTERM_MAX,
+        max_score=max_score,
         component_names=(MIDTERM_COMPONENT_NAME,),
         short_labels=(str(pgettext_lazy(_CTX, "Midterm")),),
         title=str(pgettext_lazy(_CTX, "Midterm")),
-        description=str(pgettext_lazy(_CTX, "Midterm — aralıq imtahan (0–20 bal)")),
+        description=str(pgettext_lazy(_CTX, "Midterm — aralıq imtahan (0–%(max)s bal)") % {"max": max_score}),
     )
 
 
@@ -116,42 +130,9 @@ def spec_for_mode(mode: str) -> InterimSpec:
     return _midterm_spec() if mode == MODE_MIDTERM else _kollokvium_spec()
 
 
-def midterm_from_year(organization=None) -> int:
-    """Təşkilatın midterm başlanğıc ili — ``settings["registrar"]["midterm_from_year"]`` və ya 2026."""
-    settings = getattr(organization, "settings", None)
-    section = settings.get("registrar") if isinstance(settings, dict) else None
-    raw = section.get("midterm_from_year") if isinstance(section, dict) else None
-    try:
-        value = int(raw)
-    except (TypeError, ValueError):
-        return MIDTERM_FROM_YEAR
-    return value if 2000 <= value <= 2100 else MIDTERM_FROM_YEAR
-
-
-def period_start_year(period) -> int | None:
-    """Dövrün tədris ilinin BAŞLANĞIC ili: «2026/2027» → 2026.
-
-    ``academic_year`` sərbəst mətndir («2026/2027», «2026-2027», «2026»); ondan il tapılmasa
-    ``start_date``-dən çıxarılır (avqustdan əvvəlki aylar əvvəlki tədris ilinə aiddir)."""
-    if period is None:
-        return None
-    match = _YEAR_RE.search(str(getattr(period, "academic_year", "") or ""))
-    if match:
-        return int(match.group())
-    start = getattr(period, "start_date", None)
-    if start is None:
-        return None
-    return start.year if start.month >= 8 else start.year - 1
-
-
 def mode_for_period(period, organization=None) -> str:
-    """Dövr üçün rejim. Dövr/il məlum deyilsə — yeni qayda (midterm)."""
-    if organization is None:
-        organization = getattr(period, "organization", None) if period is not None else None
-    year = period_start_year(period)
-    if year is None:
-        return MODE_MIDTERM
-    return MODE_MIDTERM if year >= midterm_from_year(organization) else MODE_KOLLOKVIUM
+    """Dövr üçün rejim. Dövr/il məlum deyilsə — yeni qayda (midterm). Qərar ``core.academic_rules``-dadır."""
+    return MODE_MIDTERM if period_uses_new_rules(period, organization) else MODE_KOLLOKVIUM
 
 
 def mode_for_offering(offering) -> str:
@@ -184,6 +165,7 @@ __all__ = [
     "MODE_MIDTERM",
     "is_midterm_offering",
     "midterm_from_year",
+    "midterm_max",
     "mode_for_offering",
     "mode_for_period",
     "period_start_year",

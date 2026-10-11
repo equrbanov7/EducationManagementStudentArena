@@ -211,7 +211,10 @@ class SchedulePermissionGateTest(ScheduleManageBase):
                 end_time=datetime.time(10, 30),
                 room="101",
             )
-        resp = self._client(self.teacher).post(reverse("registrar:schedule_slot_delete", args=[slot.id]))
+        # URL auditi A11 (2026-10-10): köhnə `cedvel/slot/<uuid>/sil/` silindi — silmə JSON əməlidir.
+        resp = self._client(self.teacher).post(
+            reverse("accounts:schedule_manage_action"), data={"action": "delete", "slot_id": str(slot.id)}
+        )
         self.assertEqual(resp.status_code, 403)
         with bypass_rls():
             self.assertTrue(ScheduleSlot.objects.filter(pk=slot.pk).exists())
@@ -230,8 +233,10 @@ class SchedulePermissionGateTest(ScheduleManageBase):
                 start_time=datetime.time(9, 0),
                 end_time=datetime.time(10, 30),
             )
-        resp = self._client(self.coordinator).post(reverse("registrar:schedule_slot_delete", args=[slot.id]))
-        self.assertEqual(resp.status_code, 302)
+        resp = self._client(self.coordinator).post(
+            reverse("accounts:schedule_manage_action"), data={"action": "delete", "slot_id": str(slot.id)}
+        )
+        self.assertEqual(resp.status_code, 200)
         with bypass_rls():
             self.assertFalse(ScheduleSlot.objects.filter(pk=slot.pk).exists())
 

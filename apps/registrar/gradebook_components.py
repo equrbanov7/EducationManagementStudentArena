@@ -58,8 +58,9 @@ def entry_score_for(
     """Canonical semester entry score, capped at ``cap`` (≈ entry_score_max).
 
     MIDTERM REJİMİ (2026/2027-dən, sahibin qərarı 2026-09-25): giriş balı sillabus
-    standartıdır — davamiyyət 10 + aktivlik 10 + midterm 20 + sərbəst iş 10 (TƏK düstur
-    :mod:`apps.registrar.entry_standard`).  ``rule`` (:class:`entry_standard.EntryRule`) rejimi
+    standartıdır — davamiyyət 10 + aktivlik 10 + midterm 30 (sahib 2026-10-10: sərbəst iş ləğv;
+    RİM-də açılsa midterm 20 + sərbəst iş 10) — TƏK düstur
+    :mod:`apps.registrar.entry_standard`.  ``rule`` (:class:`entry_standard.EntryRule`) rejimi
     və davamiyyət girişlərini daşıyır; verilməsə rejim açılışın dövründən həll olunur (dövr +
     təşkilat keşdədirsə sorğusuz).  Aşağıdakı qayda YALNIZ keçmiş (kollokvium) dövrlərə aiddir
     və DƏYİŞMƏYİB.
@@ -212,14 +213,21 @@ def save_components(*, offering, definitions, by_user=None):
         rubric = org_rubrics.get(str(defn.get("rubric_id") or ""))  # U22: meyar şablonu (opsional)
         component = existing.get(str(defn.get("id") or "")) or existing_by_name.get(name.lower())
         if component is not None and str(component.id) not in seen:
-            has_evidence = (
-                CriterionScore.objects.filter(component=component).exists()
-                or ComponentScore.objects.filter(component=component).exists()
+            rubric_evidence = CriterionScore.objects.filter(component=component).exists()
+            has_evidence = rubric_evidence or ComponentScore.objects.filter(component=component).exists()
+            # İstisna (sahib 2026-10-10: midterm 20 → 30): rubriksiz aralıq (Midterm/kollokvium) komponentinin
+            # tavanını QALDIRMAQ sübut olsa da olar — heç bir yazılmış bal etibarsız olmur (DB qoruyucusu 0087).
+            raise_allowed = (
+                max_score > component.max_score
+                and component.kind == ComponentKind.KOLLOKVIUM
+                and component.rubric_id is None
+                and rubric is None
+                and not rubric_evidence
             )
             if has_evidence and (
                 component.name != name
                 or component.rubric_id != getattr(rubric, "id", None)
-                or component.max_score != max_score
+                or (max_score != component.max_score and not raise_allowed)
             ):
                 raise ValidationError(
                     "Qiymətləndirmə sübutu olan komponentin adı, rubriki və tavanı dəyişdirilə bilməz.",

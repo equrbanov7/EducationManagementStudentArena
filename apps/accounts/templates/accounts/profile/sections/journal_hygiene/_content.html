@@ -1,0 +1,245 @@
+{% load i18n %}
+{% comment %}
+«Jurnal təmizliyi» panelinin çərçivəsi. Rəqəmlər, çiplər, sətirlər və səhifələmə JS ilə (`journal_hygiene*.js`)
+doldurulur; burada yalnız qablar, süzgəclər və dialoq skeleti var. Seçicilər layihənin
+`bootstrap-single-select` komponentidir (uzun qrup siyahısında daxili axtarış).
+{% endcomment %}
+{% trans "Oxumayan, amma jurnalda adı qalan tələbələri, nəticələrə «boş» düşmüş və qrupda keçirilməmiş fənləri tapın. Heç nə silinmir: sətir dondurulur və ya nəticələrdən çıxarılır, hər qərar tarixçəyə və audit jurnalına yazılır və «Bərpa et» ilə geri qaytarılır." context "accounts.journal_hygiene" as jh_subtitle %}
+<div class="jh" data-jh-root
+     data-rows-url="{{ jh.rows_url }}"
+     data-action-url="{{ jh.action_url }}"
+     data-page-size="{{ jh.page_size }}"
+     data-max-batch="{{ jh.max_batch }}"
+     data-min-reason="{{ jh.min_reason }}"
+     data-can-apply="{% if jh.can_apply %}1{% else %}0{% endif %}">
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=jh_subtitle %}
+
+    {% if jh.view_as %}
+    <div class="ems-msg ems-msg--info jh__notice" role="status">
+        <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "«Başqasının adından» rejimindəsiniz — siyahılar yalnız oxunur." context "accounts.journal_hygiene" %}</div>
+    </div>
+    {% elif not jh.can_apply %}
+    <div class="ems-msg ems-msg--info jh__notice" role="status">
+        <i class="fas fa-eye ems-msg__icon" aria-hidden="true"></i>
+        <div>{% trans "Siyahıları görürsünüz, amma qərar vermək üçün təşkilat miqyaslı «journal.correct» səlahiyyəti lazımdır." context "accounts.journal_hygiene" %}</div>
+    </div>
+    {% endif %}
+
+    <div class="ems-kpis ems-kpis--5 jh-kpis" aria-live="polite">
+        <div class="ems-kpi ems-kpi--accent-warning">
+            <div class="ems-kpi__label">{% trans "Ayrılmış tələbələr" context "accounts.journal_hygiene" %}</div>
+            <div class="ems-kpi__value" data-jh-kpi="left">—</div>
+            <div class="ems-kpi__note">{% trans "jurnalda adı qalan sətir" context "accounts.journal_hygiene" %}</div>
+        </div>
+        <div class="ems-kpi ems-kpi--accent-danger">
+            <div class="ems-kpi__label">{% trans "Boş fənlər" context "accounts.journal_hygiene" %}</div>
+            <div class="ems-kpi__value" data-jh-kpi="empty">—</div>
+            <div class="ems-kpi__note">{% trans "nəticədə boş görünən sətir" context "accounts.journal_hygiene" %}</div>
+        </div>
+        <div class="ems-kpi ems-kpi--accent-danger">
+            <div class="ems-kpi__label">{% trans "Keçirilməyən fənlər" context "accounts.journal_hygiene" %}</div>
+            <div class="ems-kpi__value" data-jh-kpi="not_held">—</div>
+            <div class="ems-kpi__note" data-jh-kpi-note="not_held">{% trans "açılış (fənn × qrup × semestr)" context "accounts.journal_hygiene" %}</div>
+        </div>
+        <div class="ems-kpi ems-kpi--accent-primary">
+            <div class="ems-kpi__label">{% trans "Güclü siqnal" context "accounts.journal_hygiene" %}</div>
+            <div class="ems-kpi__value" data-jh-kpi="strong">—</div>
+            <div class="ems-kpi__note">{% trans "seçilmiş tab üzrə" context "accounts.journal_hygiene" %}</div>
+        </div>
+        <div class="ems-kpi ems-kpi--accent-success">
+            <div class="ems-kpi__label">{% trans "Qərarlar" context "accounts.journal_hygiene" %}</div>
+            <div class="ems-kpi__value" data-jh-kpi="history">—</div>
+            <div class="ems-kpi__note" data-jh-kpi-note="history">{% trans "geri qaytarılan daxil" context "accounts.journal_hygiene" %}</div>
+        </div>
+    </div>
+
+    <nav class="ems-tabs jh-tabs" data-ems-tabs aria-label="{% trans 'Jurnal təmizliyi bölmələri' context 'accounts.journal_hygiene' %}">
+        <button type="button" class="ems-tabs__btn" data-ems-tab="left" aria-current="page">
+            {% trans "Ayrılmış tələbələr" context "accounts.journal_hygiene" %}
+            <span class="ems-tabs__count" data-jh-tab-count="left"></span>
+        </button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="empty" tabindex="-1">
+            {% trans "Boş fənlər" context "accounts.journal_hygiene" %}
+            <span class="ems-tabs__count" data-jh-tab-count="empty"></span>
+        </button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="not_held" tabindex="-1">
+            {% trans "Keçirilməyən fənlər" context "accounts.journal_hygiene" %}
+            <span class="ems-tabs__count" data-jh-tab-count="not_held"></span>
+        </button>
+        <button type="button" class="ems-tabs__btn" data-ems-tab="history" tabindex="-1">
+            {% trans "Tarixçə" context "accounts.journal_hygiene" %}
+            <span class="ems-tabs__count" data-jh-tab-count="history"></span>
+        </button>
+    </nav>
+
+    <p class="jh-help" data-jh-only="left">{% trans "Cari və gələcək semestrin AÇIQ jurnallarında qalan, amma oxumayan tələbələr: hesab arxivdədir, xaric / akademik məzuniyyət / məzun, qeyd passivdir, oxu müddəti bitib və ya akademik qeydi yoxdur. «Dondur» sətri jurnal və imtahan siyahısından çıxarır (bərpa əmri onu qaytarır); məlumatı olmayan sətir nəticələrdən də çıxarıla bilər." context "accounts.journal_hygiene" %}</p>
+    <p class="jh-help" data-jh-only="empty" hidden>{% trans "Heç bir balı, davamiyyəti, sənədi və ya imtahan yazısı olmayan qeydiyyatlar: dövr bitib / jurnal bağlanıb, açılış ləğv olunub və ya qrup seçmə fənni dəyişib. «Güclü siqnal» — açılışda bir dərs də yoxdur və qrupda heç kimin datası yoxdur; qalanları əvvəlcə yoxlayın." context "accounts.journal_hygiene" %}</p>
+    <p class="jh-help" data-jh-only="not_held" hidden>{% trans "Bitmiş semestrdə qrupun HEÇ BİR tələbəsinin imtahan («çıxış») balı yoxdur — yalnız giriş balı və ya heç nə, nəticədə hamı kəsr / nəticəsiz görünür. Vahid açılışdır: bütün tələbələri birlikdə nəticələrdən çıxarılır. «Güclü siqnal» — qrupun eyni semestrdəki digər fənlərinin ən azı yarısında imtahan var və bu fənndə dərs / kollokvium izi yoxdur; «Dərs / kollokvium izi var» etiketli fənn keçirilib, amma imtahanı yazılmayıb ola bilər — əvvəlcə yoxlayın." context "accounts.journal_hygiene" %}</p>
+    <p class="jh-help" data-jh-only="history" hidden>{% trans "Bu alətin bütün qərarları. «Bərpa et» yalnız statusu o vaxtdan dəyişməmiş sətirləri əvvəlki vəziyyətinə qaytarır." context "accounts.journal_hygiene" %}</p>
+
+    <div class="ems-filters ems-filters--auto jh-filters" data-jh-filters role="search">
+        <div class="ems-field ems-field--wide">
+            <label class="ems-field__label" for="jh-q">{% trans "Axtarış" context "accounts.journal_hygiene" %}</label>
+            <input type="search" id="jh-q" name="q" class="ems-input" autocomplete="off" maxlength="100"
+                   placeholder="{% trans 'Tələbə, istifadəçi adı, fənn…' context 'accounts.journal_hygiene' %}">
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="jh-period">{% trans "Semestr" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-period" name="period" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+                        data-live-search="true" data-live-search-placeholder="{% trans 'Semestr axtar…' context 'accounts.journal_hygiene' %}">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.periods %}
+                    <option value="{{ option.value }}">{{ option.label }}{% if option.current %} · {% trans "cari" context "accounts.journal_hygiene" %}{% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="jh-faculty">{% trans "Fakültə" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-faculty" name="faculty" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.faculties %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field">
+            <label class="ems-field__label" for="jh-group">{% trans "Qrup" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-group" name="group" class="ems-select bootstrap-single-select__native" data-bootstrap-select
+                        data-live-search="true" data-live-search-placeholder="{% trans 'Qrup axtar…' context 'accounts.journal_hygiene' %}">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.groups %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-jh-only="left">
+            <label class="ems-field__label" for="jh-cat-left">{% trans "Səbəb" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-cat-left" name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-jh-category="left">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.left_categories %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-jh-only="empty" hidden>
+            <label class="ems-field__label" for="jh-cat-empty">{% trans "Mənbə" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-cat-empty" name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-jh-category="empty">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.empty_categories %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-jh-only="not_held" hidden>
+            <label class="ems-field__label" for="jh-cat-not-held">{% trans "Əlamət" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-cat-not-held" name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-jh-category="not_held">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    {% for option in jh.not_held_categories %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-jh-only="history" hidden>
+            <label class="ems-field__label" for="jh-cat-history">{% trans "Növ" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-cat-history" name="category" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-jh-category="history">
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    <option value="left_student">{% trans "Ayrılmış tələbə" context "registrar.journal_hygiene" %}</option>
+                    <option value="empty_subject">{% trans "Boş fənn" context "registrar.journal_hygiene" %}</option>
+                    <option value="not_held">{% trans "Keçirilməyən fənn" context "registrar.journal_hygiene" %}</option>
+                </select>
+            </div>
+        </div>
+        <div class="ems-field" data-jh-only="history" hidden>
+            <label class="ems-field__label" for="jh-state">{% trans "Vəziyyət" context "accounts.journal_hygiene" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="jh-state" name="state" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                    <option value="">{% trans "Hamısı" context "accounts.journal_hygiene" %}</option>
+                    <option value="active">{% trans "Qüvvədədir" context "accounts.journal_hygiene" %}</option>
+                    <option value="reverted">{% trans "Geri qaytarılıb" context "accounts.journal_hygiene" %}</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="jh-chips" data-jh-chips role="group" aria-label="{% trans 'Səbəb süzgəcləri' context 'accounts.journal_hygiene' %}"></div>
+
+    <div class="jh-toolbar" data-jh-toolbar>
+        <p class="jh-toolbar__count" data-jh-selection aria-live="polite"></p>
+        <div class="jh-toolbar__actions">
+            <button type="button" class="ems-btn ems-btn--sm" data-jh-select-all data-jh-only-rows>
+                <i class="fas fa-check-double" aria-hidden="true"></i> {% trans "Uyğun olanların hamısını seç" context "accounts.journal_hygiene" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--ghost" data-jh-clear>
+                {% trans "Seçimi təmizlə" context "accounts.journal_hygiene" %}
+            </button>
+            {% if jh.can_apply %}
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-jh-act="preview" data-jh-target="suspend" data-jh-only="left" disabled>
+                <i class="fas fa-user-lock" aria-hidden="true"></i> {% trans "Jurnaldan dondur" context "accounts.journal_hygiene" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-jh-act="preview" data-jh-target="drop" data-jh-only-rows disabled>
+                <i class="fas fa-eraser" aria-hidden="true"></i> {% trans "Nəticələrdən çıxar" context "accounts.journal_hygiene" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-jh-act="revert" data-jh-only="history" hidden disabled>
+                <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "accounts.journal_hygiene" %}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="ems-tablewrap jh-tablewrap" data-jh-only-rows>
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra jh-table" data-jh-table="rows" aria-busy="false">
+                <thead>
+                    <tr>
+                        <th scope="col" class="jh-th--check"><input type="checkbox" class="jh-check" data-jh-check-page aria-label="{% trans 'Səhifədəki bütün sətirləri seç' context 'accounts.journal_hygiene' %}"></th>
+                        <th scope="col">{% trans "Tələbə" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Fənn · qrup" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Semestr" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Niyə burada" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Məlumat" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Status" context "accounts.journal_hygiene" %}</th>
+                    </tr>
+                </thead>
+                <tbody data-jh-body="rows"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="ems-tablewrap jh-tablewrap" data-jh-only="history" hidden>
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra jh-table" data-jh-table="history" aria-busy="false">
+                <thead>
+                    <tr>
+                        <th scope="col" class="jh-th--check"><input type="checkbox" class="jh-check" data-jh-check-page aria-label="{% trans 'Səhifədəki bütün sətirləri seç' context 'accounts.journal_hygiene' %}"></th>
+                        <th scope="col">{% trans "Tarix" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Tələbə" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Fənn · qrup · semestr" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Qərar" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Kim / səbəb" context "accounts.journal_hygiene" %}</th>
+                        <th scope="col">{% trans "Vəziyyət" context "accounts.journal_hygiene" %}</th>
+                    </tr>
+                </thead>
+                <tbody data-jh-body="history"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="jh-pager" data-jh-pager></div>
+
+    {% include "accounts/profile/sections/journal_hygiene/_dialog.html" %}
+    {{ jh.i18n|json_script:"jh-i18n" }}
+</div>

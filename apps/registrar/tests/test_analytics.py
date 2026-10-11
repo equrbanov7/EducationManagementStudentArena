@@ -4,7 +4,7 @@ import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -223,7 +223,26 @@ class AnalyticsServiceTest(_AnalyticsBase):
         self.assertFalse(data["has_data"])
 
 
+# Kabinetin registrar bölmələri yalnız universitet rejimində verilir (test settings-də defolt False).
+@override_settings(UNIVERSITY_MODE=True)
 class AnalyticsViewTest(_AnalyticsBase):
+    """Kabinetin «Akademik analitika» bölməsi (URL auditi A11, 2026-10-10: müstəqil
+    `jurnal/analitika/` səhifəsi silindi — eyni ``page_contexts.analytics_context`` burada)."""
+
+    def _get(self, client, **params):
+        return client.get(reverse("accounts:profile"), {"section": "analytics", **params})
+
+    def _assert_denied(self, resp):
+        self.assertEqual(resp.status_code, 200)
+        self.assertNotIn("analytics", resp.context["allowed_sections"])
+        self.assertNotEqual(resp.context["active_section"], "analytics")
+
+    def test_standalone_route_is_gone(self):
+        from django.urls import NoReverseMatch
+
+        with self.assertRaises(NoReverseMatch):
+            reverse("registrar:analytics")
+
     def _client(self, user):
         client = Client()
         client.force_login(user)
@@ -233,16 +252,15 @@ class AnalyticsViewTest(_AnalyticsBase):
         return client
 
     def test_dean_sees_dashboard(self):
-        resp = self._client(self.dean).get(reverse("registrar:analytics"))
+        resp = self._get(self._client(self.dean))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "KE-101")
         self.assertContains(resp, "CS101")
 
-    def test_teacher_gets_404(self):
-        resp = self._client(self.teacher).get(reverse("registrar:analytics"))
-        self.assertEqual(resp.status_code, 404)
+    def test_teacher_is_denied(self):
+        self._assert_denied(self._get(self._client(self.teacher)))
 
-    def test_unscoped_dean_gets_404(self):
+    def test_unscoped_dean_is_denied(self):
         with bypass_rls():
             unscoped = User.objects.create_user("an_unscoped", "an_unscoped@qku.edu.az", "pw")
             Membership.objects.create(
@@ -251,7 +269,7 @@ class AnalyticsViewTest(_AnalyticsBase):
                 role=self.org.roles.get(name="dean"),
                 is_active=True,
             )
-        self.assertEqual(self._client(unscoped).get(reverse("registrar:analytics")).status_code, 404)
+        self._assert_denied(self._get(self._client(unscoped)))
 
     def test_org_scoped_role_with_view_unit_permission_sees_dashboard(self):
         with bypass_rls():
@@ -262,7 +280,7 @@ class AnalyticsViewTest(_AnalyticsBase):
                 role=self.org.roles.get(name="hr"),
                 is_active=True,
             )
-        response = self._client(hr_user).get(reverse("registrar:analytics"))
+        response = self._get(self._client(hr_user))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "KE-101")
 
@@ -297,7 +315,7 @@ class AnalyticsViewTest(_AnalyticsBase):
                 offering=other_offering,
             )
 
-        resp = self._client(self.dean).get(reverse("registrar:analytics"))
+        resp = self._get(self._client(self.dean))
         self.assertEqual(resp.status_code, 200)
         self.assertNotContains(resp, "OUT-OF-SCOPE")
 
@@ -311,11 +329,11 @@ class AnalyticsViewTest(_AnalyticsBase):
                 start_date="2025-02-01",
                 end_date="2025-06-30",
             )
-        resp = self._client(self.dean).get(reverse("registrar:analytics"), {"period": str(empty.id)})
+        resp = self._get(self._client(self.dean), period=str(empty.id))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, "hələ qiymətləndirmə datası yoxdur")
 
     def test_anonymous_redirected(self):
-        resp = Client().get(reverse("registrar:analytics"))
+        resp = Client().get(reverse("accounts:profile"), {"section": "analytics"})
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)

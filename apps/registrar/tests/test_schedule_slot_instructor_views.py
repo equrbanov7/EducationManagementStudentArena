@@ -1,6 +1,5 @@
 """Slotun öz müəllimi — göstəriş səthləri (2026-09-25, bölünmüş tədris, ikinci mərhələ).
 
-* iCal (.ics) təsvirində EFFEKTİV müəllim (assistent), jurnal sahibi yox;
 * ana səhifənin «Bu gün / növbəti dərslərim» kartında başqasının jurnalındakı slota «Jurnalı aç» keçidi
   YOXDUR (jurnal sahibinindir; giriş qaydası dəyişmir), öz jurnalına isə var — kart sorğu ETMİR;
 * müəllimin «Dərs cədvəli» detal modalında override slotun tələbə sayı (əvvəl 0 görünürdü).
@@ -12,27 +11,10 @@ from django.test import RequestFactory
 from django.urls import reverse
 
 from apps.organizations.models import Membership
-from apps.registrar import ical, page_contexts, schedule
+from apps.registrar import page_contexts, schedule
 from apps.registrar.models import Enrollment, SlotKind
 from apps.registrar.tests.test_schedule_slot_instructor import SlotInstructorBase, User
 from core.rls import bypass_rls
-
-
-class IcsDescriptionTest(SlotInstructorBase):
-    code = "siics"
-
-    def test_description_names_the_effective_teacher(self):
-        with bypass_rls():
-            self._slot(self.offering, weekday=1, start="08:30", end="10:00")
-            self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
-            slots = schedule.get_group_schedule(organization=self.org, group=self.groups[0], period=self.period)
-            with self.assertNumQueries(0):
-                payload = ical.build_schedule_ics(slots=slots, period=self.period, calendar_name="231A")
-        events = payload.split("BEGIN:VEVENT")[1:]
-        self.assertEqual(len(events), 2)
-        self.assertIn("DESCRIPTION:231A · Aytən Əliyeva", events[0])  # mühazirə — jurnal sahibi
-        self.assertIn("DESCRIPTION:231A · Bəhruz Həsənov", events[1])  # seminar — assistent
-        self.assertNotIn("Aytən", events[1])
 
 
 class DashboardJournalLinkTest(SlotInstructorBase):

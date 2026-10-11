@@ -131,7 +131,7 @@ def get_course_work_rows(offering):
     """Kurs işi tabı: tələbə → (mövzu, bal, tarix, kilid bayrağı)."""
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student", "student__profile")
         .order_by("student__last_name", "student__username")
     )
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
@@ -155,7 +155,7 @@ def get_course_work_rows(offering):
 
 def get_final_breakdown(offering):
     """ "Yekun qiymət" tabı: mockup sütunları — Davamiyyət/10, K1-K3 + orta (keçmiş dövrlər)
-    və ya Midterm/20 (2026/2027-dən), Seminar orta, Sərbəst iş/10, Lab orta, Kurs işi/100,
+    və ya Midterm/30 (2026/2027-dən; sərbəst iş açıqdırsa /20), Seminar orta, Sərbəst iş/10, Lab orta, Kurs işi/100,
     İmtahana qədər bal.
 
     UNEC «Yekun qiymət» kimi audit sütunları (2026-09-25): Auditoriya saatı (plan =
@@ -166,9 +166,11 @@ def get_final_breakdown(offering):
     İmtahana qədər bal KANONİK :func:`gradebook.entry_score_for`-dan gəlir —
     sütunlar informativdir, cəm mənbəyi dəyişmir.
 
-    MIDTERM REJİMİ (2026/2027-dən, ``standard=True``): sütunlar sillabus standartının DÖRD
-    hissəsidir — Davamiyyət /10 · Aktivlik /10 · Midterm /20 · Sərbəst iş /10 (sətirdə ``parts``,
-    :mod:`apps.registrar.entry_standard`) və «İmtahana qədər bal» = onların cəmi (tavan ilə).
+    MIDTERM REJİMİ (2026/2027-dən, ``standard=True``): sütunlar sillabus standartının hissələridir —
+    Davamiyyət /10 · Aktivlik /10 · Midterm /30 (sahib 2026-10-10; sərbəst iş açıqdırsa /20 + Sərbəst iş /10)
+    (sətirdə ``parts``, :mod:`apps.registrar.entry_standard`) və «İmtahana qədər bal» = onların cəmi (tavan ilə).
+    Fəndə seminar VƏ laboratoriya varsa (``activity_split``) aktivlik sütunu seminar / lab ortası + 5 + 5 payı
+    ilə açılır; sərbəst iş sütunu yalnız ``selfwork_active`` olanda (söndürülübsə lövhə oxunmur da).
     Hissələr giriş balının ÖZÜNDƏN gəlir (``entry_parts_for`` — eyni toplu dəst, eyni
     davamiyyət girişləri), yəni cəm ilə bölgü ayrıla bilməz; keçmiş dövrlər köhnə sütunlarla."""
     from apps.registrar import finals_batch, gradebook, gradebook_components
@@ -178,7 +180,7 @@ def get_final_breakdown(offering):
     interim, kolls = display_components(offering)
     enrollments = list(
         offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student", "student__profile")
         .order_by("student__last_name", "student__username")
     )
     kscore_map = {}
@@ -198,10 +200,16 @@ def get_final_breakdown(offering):
                 agg["sem"].append(m.score)
             elif m.lesson.kind == LessonKind.LAB:
                 agg["lab"].append(m.score)
-    # Sərbəst iş sütunu lövhənin CƏMİ-dir (arxiv qaydası daxil) — struktur/sillabus oxunmur.
-    selfwork_totals = {
-        r["enrollment"].id: r["total"] for r in get_selfwork_board(offering, with_structure=False)["rows"]
-    }
+    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=entry_marks)
+    standard = entry_batch.is_midterm(offering)
+    # Sərbəst iş sütunu lövhənin CƏMİ-dir (arxiv qaydası daxil) — struktur/sillabus oxunmur; söndürülmüş
+    # Midterm dövründə (sahib 2026-10-10) sütun yoxdur, lövhə də oxunmur.
+    selfwork_active = not standard or entry_batch.flags.selfwork
+    selfwork_totals = (
+        {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering, with_structure=False)["rows"]}
+        if selfwork_active
+        else {}
+    )
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
     lessons_all = list(offering.lessons.all())
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
@@ -218,9 +226,7 @@ def get_final_breakdown(offering):
     # Giriş balı üçün komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
     # 4 sorğu idi — bax :mod:`apps.registrar.finals_batch`).  Midterm davamiyyəti buraxılış
     # qərarının EYNİ məxrəci/həddi/istisnası ilə (sorğusuz).
-    entry_batch = finals_batch.entry_batch(enrollments, marks_by_enrollment=entry_marks)
     entry_batch.provide_attendance(hours_map={offering.id: allowed}, limits=row_limits, exempt_ids=exempt_ids)
-    standard = entry_batch.is_midterm(offering)
 
     def _avg(values):
         return (sum(values) / len(values)).quantize(Decimal("0.1")) if values else None
@@ -286,6 +292,10 @@ def get_final_breakdown(offering):
         "rows": rows,
         # Giriş balı sillabus standartı ilədir (Midterm rejimi) — şablon dörd hissəli sütunları seçir.
         "standard": standard,
+        # Yeni qayda (sahib 2026-10-10): sərbəst iş sütunu, 5 + 5 aktivlik sütunları, midterm tavanı.
+        "selfwork_active": selfwork_active,
+        "activity_split": standard and entry_batch.activity_split_for(offering),
+        "midterm_max": entry_batch.flags.midterm_max,
         "entry_max": scheme.entry_score_max,
         "allowed_absence": allowed_absence,
         "lesson_hours": allowed,  # Auditoriya saatı — plan (buraxılışın kanonik məxrəci)

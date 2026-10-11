@@ -102,7 +102,8 @@
         });
     }
 
-    function openModal(editData) {
+    // `options.slotId` — «Bu günün cədvəl dərsləri» zolağındakı slot düyməsi (modal həmin slotdan dolur).
+    function openModal(editData, options) {
         var editing = Boolean(editData);
         titleAdd.hidden = editing;
         titleEdit.hidden = !editing;
@@ -111,6 +112,9 @@
         if (timeError) timeError.hidden = true;
         var _tg = timeToggle();
         if (_tg) _tg.classList.remove("is-invalid");
+        // Cədvəl slotu bağı (gizli slot_id) yalnız YENİ dərsin doldurulmasında qurulur (journal_lesson_prefill.js).
+        var slotField = modal.querySelector("[data-jd-lesson-slot]");
+        if (slotField) slotField.value = "";
         var kindField = modal.querySelector("select[data-jd-lesson-kind]");
         var topicField = modal.querySelector("[data-jd-lesson-topic]");
         if (editing) {
@@ -127,12 +131,22 @@
             setSelectValue(modal.querySelector("[data-jd-lesson-hours]"), String(editData.hours || 2));
             // Standart dərs saatı: mövcud start-end cütünü seçimdə tap.
             setSelectValue(timeSelect, editData.start && editData.end ? editData.start + "|" + editData.end : "");
-            // Dərsin müəllimi (fənn 2 müəllim arasında bölünübsə).
+            // Dərsin müəllimi (fənn 2 müəllim arasında bölünübsə); müəllimsiz köhnə dərsdə — jurnal sahibi
+            // (əvvəl əvvəlki açılışın dəyəri qalırdı).
             var instrField = modal.querySelector("[data-jd-lesson-instructor]");
-            if (instrField && editData.instructor) setSelectValue(instrField, editData.instructor);
+            if (instrField) setSelectValue(instrField, editData.instructor || instrField.getAttribute("data-jd-default") || "");
         } else {
             form.action = form.getAttribute("data-add-url");
             actionInput.value = "add_lesson";
+            // Sahib 2026-10-10: «Yeni dərs» DOLU açılır — journal_lesson_prefill.js sahələri bu SİNXRON hadisədə
+            // doldurur (əvvəlki redaktənin dəyərləri də sıfırlanır) ki, aşağıdakı açılış hadisəsinin dinləyiciləri
+            // (otaq kaskadı, müəllim seçicisi, «cədvəldən kənar» sahəsi) artıq doğru dəyərləri oxusun.
+            modal.dispatchEvent(
+                new CustomEvent("jd:lesson-modal-prepare", {
+                    detail: { slotId: (options && options.slotId) || "" },
+                    bubbles: true,
+                })
+            );
         }
         // Korpus → otaq kaskadı ayrı modula (journal_lesson_room.js) buradan xəbər verilir.
         modal.dispatchEvent(new CustomEvent("jd:lesson-modal-open", { detail: editData || null, bubbles: true }));
@@ -173,8 +187,9 @@
     }
 
     document.addEventListener("click", function (event) {
-        if (event.target.closest("[data-jd-open-lesson-modal]")) {
-            openModal(null);
+        var opener = event.target.closest("[data-jd-open-lesson-modal]");
+        if (opener) {
+            openModal(null, { slotId: opener.getAttribute("data-jd-prefill-slot") || "" });
             return;
         }
         var editBtn = event.target.closest("[data-jd-edit-lesson]");

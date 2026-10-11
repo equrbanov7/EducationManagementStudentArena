@@ -44,6 +44,7 @@ correction_reasons.
                 <input type="number" name="new_score_cm" min="0" max="10" step="1" class="corr-input" data-corr-cm-score>
             </label>
 
+            {% if selfwork_active %}{# sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə bu hədəf yoxdur #}
             {# Sərbəst iş: təhvil 0/1 (çeklist xanası). #}
             <label class="corr-field" data-corr-sw-wrap hidden>
                 <span class="corr-field-label">{% trans "Təhvil (sərbəst iş)" context "registrar.correction" %}</span>
@@ -62,6 +63,7 @@ correction_reasons.
                        placeholder="—" aria-describedby="corrSwpHint">
                 <small class="jd-swp-hint" id="corrSwpHint">{% trans "Boş saxlasanız bal silinir («—»). 0 yazılmır." context "registrar.selfwork" %}</small>
             </label>
+            {% endif %}
 
             {# Kurs işi: bal (0-100) + mövzu + tarix. #}
             <div data-corr-cw-wrap hidden>
