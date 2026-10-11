@@ -180,3 +180,35 @@ class Form1ImportTests(TestCase):
         self.assertEqual(
             set(TeacherAssignment.objects.filter(row=veb).values_list("teacher__username", flat=True)), {"minaye.a"}
         )
+
+    def test_allow_outside_chair_accepts_a_unique_account_of_another_unit(self):
+        """Sahib 2026-10-12: başqa kafedranın (və ya dekan müavini kimi qeyri-müəllim rolunun) TƏK hesabı bağlanır."""
+        other_chair = OrgUnit.objects.create(
+            organization=self.org, name="Ekologiya kafedrası", unit_type=OrgUnitType.CHAIR
+        )
+        outsider = User.objects.create_user("lamiye.a", "l@x.test", "pw", first_name="Lamiyə", last_name="Abasova")
+        activate_member(
+            self.org, outsider, "teacher", permissions=TEACHER_PERMS, scope_unit=other_chair,
+            scope_type=RoleScopeType.COURSE,
+        )  # fmt: skip
+        vice = User.objects.create_user("aynure.q", "a@x.test", "pw", first_name="Aynurə", last_name="Qocuyeva")
+        activate_member(self.org, vice, "vice_dean", permissions=["unit.view"], level=75)
+        rows = [
+            ["1. Abasova Lamiyə Vidadi q. (Ştat)", "235 EKO", "Veb texnologiyalar", "20", "30", "30", "", "", "", ""],
+            ["2. Qocuyeva Aynurə Füzuli q.", "235 EKO", "Alqoritmlər", "20", "30", "30", "", "", "", ""],
+        ]
+        path = self._docx(rows)
+        self._run(path)
+        actions = {row["line"]: row["teacher_action"] for row in self._report()}
+        self.assertEqual(set(actions.values()), {"outside_chair", "not_found"})
+        self._run(path, "--allow-outside-chair")
+        report = {row["line"]: row for row in self._report()}
+        self.assertEqual({r["teacher_action"] for r in report.values()}, {"matched_outside_chair"})
+        self.assertEqual({r["username"] for r in report.values()}, {"lamiye.a", "aynure.q"})
+        # İki eyni adlı hesab varsa qəbul edilmir.
+        twin = User.objects.create_user("lamiye.b", "l2@x.test", "pw", first_name="Lamiyə", last_name="Abasova")
+        activate_member(self.org, twin, "teacher", permissions=TEACHER_PERMS, scope_unit=other_chair)
+        self._run(path, "--allow-outside-chair")
+        self.assertEqual(
+            {r["line"]: r["teacher_action"] for r in self._report()}[report and min(report)], "outside_chair"
+        )

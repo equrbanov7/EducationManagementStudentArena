@@ -91,7 +91,12 @@ class TeacherResolverMixin:
             self.ambiguous_teachers.append(f"{token} → {' / '.join(sorted(by_full))}")
         elif strict:
             outside = self._teacher_candidates(token, chair, org_wide=True)
-            result = (None, TEACHER_OUTSIDE_CHAIR if outside else TEACHER_NOT_FOUND)
+            outside_users = {u.pk: u for u in outside}
+            if getattr(self, "allow_outside_chair", False) and len(outside_users) == 1:
+                # Sahib 2026-10-12: başqa kafedranın TƏK uyğun müəllimi qəbul olunur (üzvlük yaradılmır).
+                result = (next(iter(outside_users.values())), "matched_outside_chair")
+            else:
+                result = (None, TEACHER_OUTSIDE_CHAIR if outside else TEACHER_NOT_FOUND)
             self.counters[f"teacher_{result[1]}"] += 1
         else:
             result = (self._create_teacher(token, chair), "created")
