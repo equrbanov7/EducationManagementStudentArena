@@ -1,7 +1,7 @@
 """«Kadr analitikası» Excel ixracı — cari filtr dəstinin cədvəlləri (sahib 2026-10-11).
 
-Vərəqlər: müəllimlər (sətir-sətir), ştat vahidləri, tərkib, dərs yükü, tədris fəaliyyəti, məlumat
-keyfiyyəti. Mətn xanaları ``core.export_safety.sheet_append`` ilə formula-neytrallaşdırılır; əlaqə
+Vərəqlər: müəllimlər (sətir-sətir, inzibati vəzifə ilə), ştat tarixçəsi (müəllim × tədris ili — bütün
+illərin yük profilləri), ştat vahidləri, tərkib, dərs yükü, tədris fəaliyyəti, məlumat keyfiyyəti. Mətn xanaları ``core.export_safety.sheet_append`` ilə formula-neytrallaşdırılır; əlaqə
 məlumatı (telefon, e-poçt, FİN) YOXDUR; cins/yaş yalnız demoqrafiya icazəsi ilə. Audit ixrac view-undadır.
 """
 
@@ -36,6 +36,7 @@ def _people_table(rows, *, demographics: bool) -> dict:
         pgettext(C.CTX, "Elmi dərəcə"),
         pgettext(C.CTX, "Ştat növü"),
         pgettext(C.CTX, "Ştat payı"),
+        pgettext(C.CTX, "İnzibati vəzifə"),
         pgettext(C.CTX, "Norma (saat)"),
         pgettext(C.CTX, "Bölgü üzrə yük (saat)"),
         pgettext(C.CTX, "Doluluq %"),
@@ -62,6 +63,7 @@ def _people_table(rows, *, demographics: bool) -> dict:
             "" if row["degree"] == C.DEGREE_NONE else labels["degree"].get(row["degree"], ""),
             labels["staff"].get(row["staff_type"], ""),
             row["staff_fraction"],
+            row["admin_label"],
             row["norm_hours"] if row["load_band"] != "none" else None,
             row["planned_load"],
             row["fill_percent"] if row["load_band"] != "none" else None,
@@ -78,6 +80,44 @@ def _people_table(rows, *, demographics: bool) -> dict:
         line.append("; ".join(issue_labels[key] for key in row["issues"]))
         body.append(line)
     return {"title": pgettext(C.CTX, "Müəllimlər"), "header": header, "rows": body}
+
+
+def _history_table(rows, organization) -> dict:
+    """Ştat tarixçəsi — hər müəllim × tədris ili bir sətir (1 sorğu, ``dataset.profile_history``)."""
+    from .dataset import profile_history
+
+    labels = agg._labels()
+    yes = pgettext(C.CTX, "Bəli")
+    header = [
+        pgettext(C.CTX, "Ad Soyad Ata adı"),
+        pgettext(C.CTX, "İstifadəçi adı"),
+        pgettext(C.CTX, "Kafedra"),
+        pgettext(C.CTX, "Tədris ili"),
+        pgettext(C.CTX, "Vəzifə (yük profili)"),
+        pgettext(C.CTX, "Ştat növü"),
+        pgettext(C.CTX, "Ştat payı"),
+        pgettext(C.CTX, "Norma (saat)"),
+        pgettext(C.CTX, "Əvvəlki ilə nisbətən dəyişib"),
+    ]
+    ordered = sorted(rows, key=lambda item: item["name"].casefold())[: C.EXPORT_LIMIT]
+    history = profile_history(organization, [row["id"] for row in ordered]) if organization is not None else {}
+    body = []
+    for row in ordered:
+        for item in history.get(row["id"], []):
+            body.append(
+                [
+                    row["name"],
+                    row["username"],
+                    row["chair"],
+                    item["year"],
+                    labels["position"].get(item["position"], item["position"]),
+                    labels["staff"].get(item["staff_type"], ""),
+                    item["staff_fraction"] if item["staff_type"] not in (C.STAFF_HOURLY, C.STAFF_NONE) else None,
+                    item["norm"] or None,
+                    yes if item["changed"] else "",
+                ]
+            )
+    return {"title": pgettext(C.CTX, "Ştat tarixçəsi"), "header": header, "rows": body}
 
 
 def _tree_table(title, rows, metrics, columns) -> dict:
@@ -101,7 +141,7 @@ def _pick(key, index=None):
     return lambda metrics: metrics[key][index]
 
 
-def build_tables(rows, *, demographics: bool) -> list[dict]:
+def build_tables(rows, *, demographics: bool, organization=None) -> list[dict]:
     labels = agg._labels()
     teachers = (pgettext(C.CTX, "Müəllim"), lambda m: m["teachers"])
     staff_columns = [teachers] + [(labels["staff"][key], _pick(key)) for key in C.STAFF_KEYS]
@@ -139,6 +179,7 @@ def build_tables(rows, *, demographics: bool) -> list[dict]:
     }
     return [
         _people_table(rows, demographics=demographics),
+        _history_table(rows, organization),
         _tree_table(pgettext(C.CTX, "Ştat vahidləri"), rows, agg.staff_metrics, staff_columns),
         _tree_table(pgettext(C.CTX, "Tərkib"), rows, agg.composition_metrics, composition_columns),
         _tree_table(pgettext(C.CTX, "Dərs yükü"), rows, agg.workload_metrics, workload_columns),

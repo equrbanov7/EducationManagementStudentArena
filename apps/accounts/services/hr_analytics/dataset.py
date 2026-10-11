@@ -8,10 +8,14 @@ Mənbələr (hamısı mövcud data — yeni sahə yoxdur):
 * elmi ad / dərəcə / cins / doğum tarixi: ``UserProfile``; elmi ad boşdursa yük profilinin vəzifəsi;
 * ştat vahidi: ``TeacherWorkloadProfile.staff_fraction`` + ``is_external`` (Forma 7 idxalı buraya yazır);
 * plan saat / norma / doluluq: ``apps.workload.public.chair_staff_load`` (modul daxilinə girmədən);
-* tədris fəaliyyəti: ``apps.registrar.public.instructor_activity`` (jurnal + keçirilmiş dərs).
+* tədris fəaliyyəti: ``apps.registrar.public.instructor_activity`` (jurnal + keçirilmiş dərs);
+* inzibati vəzifə (sahib 2026-10-11): akademik roldan BAŞQA aktiv üzvlüklər (dekan, kafedra müdiri,
+  prorektor, HR …) + profilin sərbəst «Vəzifə» mətni — bir sorğu, bütün namizədlər üçün;
+* ştat tarixçəsi (``profile_history``): müəllimin BÜTÜN illərin yük profilləri — yalnız açıq səhifənin
+  sətirləri üçün (1 sorğu / səhifə), siyahıda «Tarixçə» xülasəsi kimi göstərilir.
 
-Sorğu büdcəsi SABİTDİR (sətir sayından asılı deyil): üzvlüklər 1, yük profilləri 1, istifadəçilər 1,
-struktur 1, illər 2, yük aqreqatı 3 (fasad), jurnallar 1, dərslər 1 — cəmi ~11.
+Sorğu büdcəsi SABİTDİR (sətir sayından asılı deyil): üzvlüklər 1, inzibati üzvlüklər 1, yük profilləri
+1, istifadəçilər 1, struktur 1, illər 2, yük aqreqatı 3 (fasad), jurnallar 1, dərslər 1 — cəmi ~12.
 Filtr / aqreqat / səhifələmə bundan sonra Python-da gedir (heyət ~10³ sətirdir).
 """
 
@@ -33,6 +37,8 @@ User = get_user_model()
 _FACULTY_TYPES = (OrgUnitType.FACULTY, OrgUnitType.DEANERY)
 _CHAIR_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
 _TEACHER_ROLES = frozenset(C.ACADEMIC_ROLE_NAMES)
+#: İnzibati vəzifə sayılmayan rollar — sırf dərs deyən rollar (kafedra müdiri inzibatidir).
+_PLAIN_TEACHER_ROLES = frozenset(C.ACADEMIC_ROLE_NAMES) - frozenset(C.ADMIN_ROLE_NAMES_ALSO)
 
 
 # ── Tədris ili ──────────────────────────────────────────────────────────────
@@ -193,6 +199,44 @@ def _population(organization, academic_year: str):
     return memberships, profiles
 
 
+def _admin_memberships(organization, user_ids) -> dict:
+    """İnzibati vəzifələr: user → [{role, label, unit, unit_id, title, since}] (1 sorğu, rol səviyyəsinə görə)."""
+    from apps.organizations.models import Membership
+
+    out = defaultdict(list)
+    rows = (
+        Membership.objects.filter(
+            organization=organization, is_active=True, role__organization=organization, role__is_active=True
+        )
+        .filter(user_id__in=user_ids)
+        .exclude(role__name__in=_PLAIN_TEACHER_ROLES)
+        .exclude(role__name__in=("student", "alumni", "member", "lead_student"))
+        .values(
+            "user_id",
+            "role__name",
+            "role__display_name",
+            "role__level",
+            "scope_unit_id",
+            "scope_unit__name",
+            "title",
+            "created_at",
+        )
+        .order_by("-role__level", "created_at")
+    )
+    for row in rows:
+        out[row["user_id"]].append(
+            {
+                "role": row["role__name"],
+                "label": row["role__display_name"] or row["role__name"],
+                "unit_id": str(row["scope_unit_id"] or ""),
+                "unit": row["scope_unit__name"] or "",
+                "title": row["title"] or "",
+                "since": row["created_at"].date() if row["created_at"] else None,
+            }
+        )
+    return out
+
+
 _USER_FIELDS = (
     "pk",
     "username",
@@ -210,6 +254,7 @@ _USER_FIELDS = (
     "profile__password_change_required",
     "profile__is_deleted",
     "profile__access_state",
+    "profile__staff_position",
 )
 
 
@@ -227,6 +272,7 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
     if not candidate_ids:
         return []
     units = _structure(organization)
+    admin = _admin_memberships(organization, candidate_ids)
     users = list(User.objects.filter(pk__in=candidate_ids, is_superuser=False).values(*_USER_FIELDS))
     year_start, year_end = year_bounds(academic_year)
 
@@ -243,6 +289,8 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
         profile = profiles.get(values["pk"])
         title = values["profile__academic_title"] or C.POSITION_TO_TITLE.get((profile or {}).get("position") or "", "")
         joined = values["date_joined"].date() if values["date_joined"] else None
+        admin_roles = admin.get(values["pk"], [])
+        staff_position = " ".join((values["profile__staff_position"] or "").split())
         rows.append(
             {
                 "id": values["pk"],
@@ -272,6 +320,10 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
                 "staff_fraction": float(profile["staff_fraction"] or 0) if profile else None,
                 "is_external": bool(profile and profile["is_external"]),
                 "position": (profile or {}).get("position") or "",
+                "admin_roles": admin_roles,
+                "admin_role_names": [item["role"] for item in admin_roles],
+                "staff_position": staff_position,
+                "admin_label": _admin_label(admin_roles, staff_position),
             }
         )
     _attach_load(rows, organization, academic_year, chair_staff_load)
@@ -283,6 +335,16 @@ def build_rows(actor, academic_year: str, *, today: date | None = None) -> list[
     )
     _attach_issues(rows)
     return rows
+
+
+def _admin_label(admin_roles, staff_position: str) -> str:
+    """Siyahı xanası / sıralama / ixrac üçün tək sətir: «Dekan · Mühəndislik; Kafedra müdiri · İnformatika»."""
+    parts = []
+    for item in admin_roles:
+        parts.append(f"{item['label']} · {item['unit']}" if item["unit"] else item["label"])
+    if not parts and staff_position:
+        parts.append(staff_position)
+    return "; ".join(parts)
 
 
 def _attach_load(rows, organization, academic_year, chair_staff_load) -> None:
@@ -329,6 +391,63 @@ def _attach_issues(rows) -> None:
         row["issues"] = issues
 
 
+def profile_history(organization, teacher_ids) -> dict:
+    """Ştat tarixçəsi: teacher → [{year, position, staff_type, staff_fraction, is_external, norm, confirmed,
+    changed}] — yenidən köhnəyə; ``changed`` əvvəlki ilə (xronoloji) nisbətən ştat/vəzifə fərqidir.
+
+    Yalnız açıq səhifənin sətirləri üçün çağırılır (1 sorğu); ``academic_year`` boş olan profil atılır."""
+    from apps.workload.models import TeacherWorkloadProfile
+
+    ids = [pk for pk in teacher_ids if pk]
+    if not ids:
+        return {}
+    by_teacher = defaultdict(list)
+    rows = (
+        TeacherWorkloadProfile.objects.filter(organization=organization, teacher_id__in=ids)
+        .exclude(academic_year="")
+        .values(
+            "teacher_id",
+            "academic_year",
+            "position",
+            "staff_fraction",
+            "is_external",
+            "annual_norm_hours",
+            "load_confirmed_at",
+        )
+        .order_by("academic_year")
+    )
+    for row in rows:
+        by_teacher[row["teacher_id"]].append(row)
+    out = {}
+    for teacher_id, items in by_teacher.items():
+        timeline = []
+        previous = None
+        for item in items:
+            kind = staff_type(item)
+            entry = {
+                "year": item["academic_year"],
+                "position": item["position"] or "",
+                "staff_type": kind,
+                "staff_fraction": float(item["staff_fraction"] or 0),
+                "is_external": bool(item["is_external"]),
+                "norm": int(item["annual_norm_hours"] or 0),
+                "confirmed": item["load_confirmed_at"] is not None,
+                "changed": bool(
+                    previous
+                    and (
+                        previous["staff_type"] != kind
+                        or previous["staff_fraction"] != float(item["staff_fraction"] or 0)
+                        or previous["position"] != (item["position"] or "")
+                    )
+                ),
+            }
+            timeline.append(entry)
+            previous = entry
+        timeline.reverse()
+        out[teacher_id] = timeline
+    return out
+
+
 def structure_options(organization, actor) -> tuple[list[dict], list[dict]]:
     """Filtr üçün (fakültələr, kafedralar) — əhatə daxilində, ada görə (1 sorğu)."""
     units = _structure(organization)
@@ -346,4 +465,4 @@ def structure_options(organization, actor) -> tuple[list[dict], list[dict]]:
     return faculties, chairs
 
 
-__all__ = ["build_rows", "staff_type", "structure_options", "year_bounds", "year_options"]
+__all__ = ["build_rows", "profile_history", "staff_type", "structure_options", "year_bounds", "year_options"]

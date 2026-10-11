@@ -95034,3 +95034,103 @@ msgid ""
 msgstr ""
 "{n} açılış yarımçıq seçilib — keçirilməyən fənn bütöv çıxarılır. Açılışın "
 "bütün tələbələrini seçin («Uyğun olanların hamısını seç»)."
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab vəziyyəti"
+msgstr "Hesab vəziyyəti"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dayandırılıb (blok + arxiv)"
+msgstr "Dayandırılıb (blok + arxiv)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bloklanıb"
+msgstr "Bloklanıb"
+
+msgctxt "accounts.hr_analytics"
+msgid "Arxivdə"
+msgstr "Arxivdə"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktivləşdirilməyib (ilkin parolda)"
+msgstr "Aktivləşdirilməyib (ilkin parolda)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bu il yeni hesab"
+msgstr "Bu il yeni hesab"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə"
+msgstr "İnzibati vəzifə"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifələr"
+msgstr "İnzibati vəzifələr"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi var"
+msgstr "İnzibati vəzifəsi var"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifəsi yoxdur"
+msgstr "İnzibati vəzifəsi yoxdur"
+
+msgctxt "accounts.hr_analytics"
+msgid "İnzibati vəzifə qeyd olunmayıb."
+msgstr "İnzibati vəzifə qeyd olunmayıb."
+
+msgctxt "accounts.hr_analytics"
+msgid "profildəki «Vəzifə» sahəsindən"
+msgstr "profildəki «Vəzifə» sahəsindən"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(since)s tarixindən"
+msgstr "%(since)s tarixindən"
+
+msgctxt "accounts.hr_analytics"
+msgid "%(year)s yük profilindəki vəzifə: %(position)s"
+msgstr "%(year)s yük profilindəki vəzifə: %(position)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Vəzifə (yük profili)"
+msgstr "Vəzifə (yük profili)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük bandı"
+msgstr "Yük bandı"
+
+msgctxt "accounts.hr_analytics"
+msgid "filtr tətbiq olunub"
+msgstr "filtr tətbiq olunub"
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür"
+msgstr "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür"
+
+msgctxt "accounts.hr_analytics"
+msgid "s/h"
+msgstr "s/h"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tarixçə"
+msgstr "Tarixçə"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat tarixçəsi"
+msgstr "Ştat tarixçəsi"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat / vəzifə dəyişikliyi"
+msgstr "Ştat / vəzifə dəyişikliyi"
+
+msgctxt "accounts.hr_analytics"
+msgid "Heç bir tədris ili üçün yük profili (ştat) yoxdur."
+msgstr "Heç bir tədris ili üçün yük profili (ştat) yoxdur."
+
+msgctxt "accounts.hr_analytics"
+msgid "%(position)s · norma %(norm)s saat"
+msgstr "%(position)s · norma %(norm)s saat"
+
+msgctxt "accounts.hr_analytics"
+msgid "Əvvəlki ilə nisbətən dəyişib"
+msgstr "Əvvəlki ilə nisbətən dəyişib"

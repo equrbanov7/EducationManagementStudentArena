@@ -2,7 +2,7 @@
 {% comment %}«Kadr analitikası» çərçivəsi: başlıq + ixrac, avto filtrlər, KPI zolağı, server tab-ları (link),
 aktiv tabın məzmunu. Kontekst: `hr` (services/hr_analytics/panel.py).{% endcomment %}
 {% trans "Müəllim heyəti haqqında bütün göstəricilər: say və hesab vəziyyəti, ştat vahidləri, elmi ad və dərəcə, dərs yükü, tədris fəaliyyəti və məlumat boşluqları. Filtrlər bütün tablara tətbiq olunur; ixrac cari filtr dəstini Excel-ə çıxarır." context "accounts.hr_analytics" as hr_subtitle %}
-<div class="hr" data-hr-root>
+<div class="hr" data-hr-root data-hr-kpi-map="{{ hr.kpi_filter_map }}">
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=hr_subtitle header_actions_include="accounts/profile/sections/hr_analytics/_actions.html" %}
     {% if hr.view_as %}
     <div class="ems-msg ems-msg--info hr__notice" role="status">
@@ -15,8 +15,10 @@ aktiv tabın məzmunu. Kontekst: `hr` (services/hr_analytics/panel.py).{% endcom
         {% blocktrans trimmed with shown=hr.total total=hr.total_all year=hr.filters.year context "accounts.hr_analytics" %}
         {{ year }} tədris ili · göstərilir: {{ shown }} / {{ total }} müəllim
         {% endblocktrans %}
+        {% if hr.is_filtered %}<span class="hr__count-filtered">· {% trans "filtr tətbiq olunub" context "accounts.hr_analytics" %}</span>{% endif %}
     </p>
-    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=hr.kpis kpi_variant="4" %}
+    {% trans "Hesab kartına klik — siyahını həmin vəziyyətə görə süzür" context "accounts.hr_analytics" as kpi_hint %}
+    <div title="{{ kpi_hint }}">{% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=hr.kpis kpi_variant="4" %}</div>
     <nav class="ems-tabs hr-tabs" aria-label="{% trans 'Kadr analitikası bölmələri' context 'accounts.hr_analytics' %}">
         {% for tab in hr.tabs %}
         <a class="ems-tabs__btn" href="{{ tab.url }}" data-section="{{ hr.section }}"{% if tab.current %} aria-current="page"{% endif %}>{{ tab.label }}</a>

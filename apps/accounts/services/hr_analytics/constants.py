@@ -84,6 +84,74 @@ STATUS_LABELS = {
     STATUS_ARCHIVED: pgettext_lazy(CTX, "Arxiv"),
     STATUS_DELETED: pgettext_lazy(CTX, "Silinib"),
 }
+STATUS_ORDER = (STATUS_ACTIVE, STATUS_BLOCKED, STATUS_ARCHIVED, STATUS_DELETED)
+
+# ── Hesab vəziyyəti filtri (``hr_status``) — KPI kartları ilə EYNİ dəstlər ─
+#: «Dayandırılıb» KPI-si blok + arxivdir; filtrdə hər ikisi ayrıca da seçilir.
+ACCOUNT_ACTIVE = "active"
+ACCOUNT_STOPPED = "stopped"
+ACCOUNT_BLOCKED = "blocked"
+ACCOUNT_ARCHIVED = "archived"
+ACCOUNT_NEVER = "never"
+ACCOUNT_INITIAL = "initial"
+ACCOUNT_NEW = "new"
+ACCOUNT_FILTERS = (
+    (ACCOUNT_ACTIVE, pgettext_lazy(CTX, "Aktiv hesab")),
+    (ACCOUNT_STOPPED, pgettext_lazy(CTX, "Dayandırılıb (blok + arxiv)")),
+    (ACCOUNT_BLOCKED, pgettext_lazy(CTX, "Bloklanıb")),
+    (ACCOUNT_ARCHIVED, pgettext_lazy(CTX, "Arxivdə")),
+    (ACCOUNT_NEVER, pgettext_lazy(CTX, "Heç daxil olmayıb")),
+    (ACCOUNT_INITIAL, pgettext_lazy(CTX, "Aktivləşdirilməyib (ilkin parolda)")),
+    (ACCOUNT_NEW, pgettext_lazy(CTX, "Bu il yeni hesab")),
+)
+ACCOUNT_KEYS = tuple(key for key, _label in ACCOUNT_FILTERS)
+#: KPI kartı → ``hr_status`` dəyəri (kart klik ediləndə filtr; ``""`` — filtri götür).
+KPI_TO_ACCOUNT = {
+    "total": "",
+    "active": ACCOUNT_ACTIVE,
+    "blocked": ACCOUNT_STOPPED,
+    "never": ACCOUNT_NEVER,
+    "initial": ACCOUNT_INITIAL,
+    "new": ACCOUNT_NEW,
+}
+
+# ── İnzibati vəzifə (``hr_admin``) ─────────────────────────────────────────
+#: Müəllimin akademik rolundan BAŞQA aktiv üzvlüyü (rektor, prorektor, dekan, kafedra müdiri, HR …)
+#: inzibati vəzifə sayılır; rol adı kataloqdan (``Role.display_name``), vahid ``scope_unit``-dən.
+#: Rol olmayanda profilin sərbəst «Vəzifə» mətni (``UserProfile.staff_position``) göstərilir.
+ADMIN_ANY = "any"
+ADMIN_NONE = "none"
+ADMIN_FIXED = (
+    (ADMIN_ANY, pgettext_lazy(CTX, "İnzibati vəzifəsi var")),
+    (ADMIN_NONE, pgettext_lazy(CTX, "İnzibati vəzifəsi yoxdur")),
+)
+#: Rol kataloqunda akademik sayılan, amma inzibati vəzifə KİMİ DƏ göstərilən rollar.
+ADMIN_ROLE_NAMES_ALSO = ("chair_head", "department_head")
+
+# ── Dərs yükü bandı filtri (``hr_band``) ``LOAD_BANDS`` açarları ilə ───────
+
+# ── Sıralama (``hr_sort``; «-» prefiksi azalan) ────────────────────────────
+SORT_NAME = "name"
+SORT_CHAIR = "chair"
+SORT_TITLE = "title"
+SORT_STAFF = "staff"
+SORT_ADMIN = "admin"
+SORT_LOAD = "load"
+SORT_ACTIVITY = "activity"
+SORT_STATUS = "status"
+SORT_JOINED = "joined"
+SORT_KEYS = (
+    SORT_NAME,
+    SORT_CHAIR,
+    SORT_TITLE,
+    SORT_STAFF,
+    SORT_ADMIN,
+    SORT_LOAD,
+    SORT_ACTIVITY,
+    SORT_STATUS,
+    SORT_JOINED,
+)
+SORT_DEFAULT = SORT_NAME
 
 # ── Dərs yükü bantları (workload.public.chair_staff_load ilə EYNİ sərhədlər) ─
 LOAD_BANDS = (
