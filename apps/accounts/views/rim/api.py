@@ -47,6 +47,11 @@ def rim_user_search(request):
             status=request.GET.get("status", "all"),
             page=request.GET.get("page", 1),
             page_size=request.GET.get("page_size", 20),
+            kind=request.GET.get("kind", ""),
+            flag=request.GET.get("flag", ""),
+            sort=request.GET.get("sort", ""),
+            # Tab sayları yalnız istənəndə (səhifə dəyişəndə təkrar hesablanmır).
+            with_counts=request.GET.get("counts") == "1",
         )
     except RimAccessError as exc:
         return _error_response(exc)
@@ -56,6 +61,10 @@ def rim_user_search(request):
             "ok": True,
             "query": payload["query"],
             "status": payload["status"],
+            "kind": payload["kind"],
+            "flag": payload["flag"],
+            "sort": payload["sort"],
+            "counts": payload["counts"],
             "page": payload["page"],
             "num_pages": payload["num_pages"],
             "total": payload["total"],

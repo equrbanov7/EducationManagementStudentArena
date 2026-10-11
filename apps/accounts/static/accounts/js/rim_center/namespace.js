@@ -99,6 +99,10 @@
     ns.state = {
         query: "",
         status: "all",
+        // Sahib 2026-10-11: əlavə filtrlər (boş = hamısı; sort boşdursa server seçir).
+        kind: "",
+        flag: "",
+        sort: "",
         page: 1,
         selectedUser: null,
         pendingAction: null

@@ -132,8 +132,40 @@ _ROLES = [
     ),
 ]
 
+#: Sahib 2026-10-11: RİM mərkəzi — ilk açılışda siyahı, hesab növü / vəziyyət / sıralama filtrləri.
+RIM = "profile.rim"
+_RIM = [
+    _t("Hesab növü", "Account type", "Тип аккаунта", "Hesap türü"),
+    _t("Hamısı", "All", "Все", "Tümü"),
+    _t("Tələbələr", "Students", "Студенты", "Öğrenciler"),
+    _t("Müəllimlər", "Teachers", "Преподаватели", "Öğretim elemanları"),
+    _t("Heyət (inzibati)", "Staff (administrative)", "Персонал (административный)", "Personel (idari)"),
+    _t("Rolu olmayanlar", "Without a role", "Без роли", "Rolü olmayanlar"),
+    _t("Vəziyyət", "State", "Состояние", "Durum"),
+    _t("İlk giriş gözlənilir", "Awaiting first sign-in", "Ожидается первый вход", "İlk giriş bekleniyor"),
+    _t("Heç daxil olmayıb", "Never signed in", "Ни разу не входил", "Hiç giriş yapmadı"),
+    _t("Email təsdiqlənməyib", "Email not verified", "Email не подтверждён", "E-posta doğrulanmadı"),
+    _t("Sıralama", "Sort", "Сортировка", "Sıralama ölçütü"),
+    _t("Avtomatik", "Automatic", "Автоматически", "Otomatik"),
+    _t("Ən yeni hesablar", "Newest accounts", "Новые аккаунты", "En yeni hesaplar"),
+    _t("Soyad (A→Z)", "Surname (A→Z)", "Фамилия (А→Я)", "Soyadı (A→Z)"),
+    _t("Son giriş", "Last sign-in", "Последний вход", "Son oturum açma"),
+    _t("Filtrləri sıfırla", "Reset filters", "Сбросить фильтры", "Filtreleri sıfırla"),
+    _t("Yüklənir…", "Loading…", "Загрузка…", "Yükleniyor…"),
+    _t(
+        "Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq axtarın.",
+        "Showing the most recently created accounts — search by name, surname, email or FIN.",
+        "Показаны последние созданные аккаунты — ищите по имени, фамилии, email или FIN.",
+        "En son oluşturulan hesaplar gösteriliyor — ad, soyad, e-posta veya FİN ile arayın.",
+    ),
+]
+
 # ctx → msgid → {az, en, ru, tr}
-ENTRIES = {HR: {row["az"]: row for row in _HR}, ROLES: {row["az"]: row for row in _ROLES}}
+ENTRIES = {
+    HR: {row["az"]: row for row in _HR},
+    ROLES: {row["az"]: row for row in _ROLES},
+    RIM: {row["az"]: row for row in _RIM},
+}
 
 #: «Yük bandı» türkcədə əvvəl az ilə eyni yazılmışdı (i18n gate: identity borcu).
 FORCE = {(HR, "Yük bandı")}

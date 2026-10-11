@@ -72,21 +72,63 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
 
       <div class="rim-status-tabs" role="tablist" data-rim-status-tabs>
         <button type="button" class="rim-status-tab is-active" role="tab" data-rim-status="all">
-          {% trans "Hamısı" context "profile.rim" %}
+          {% trans "Hamısı" context "profile.rim" %}<span class="rim-status-count" data-rim-count="all" aria-hidden="true"></span>
         </button>
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="active">
-          {% trans "Aktiv" context "profile.rim" %}
+          {% trans "Aktiv" context "profile.rim" %}<span class="rim-status-count" data-rim-count="active" aria-hidden="true"></span>
         </button>
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="blocked">
-          {% trans "Bloklanmış" context "profile.rim" %}
+          {% trans "Bloklanmış" context "profile.rim" %}<span class="rim-status-count" data-rim-count="blocked" aria-hidden="true"></span>
         </button>
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="archived">
-          {% trans "Arxiv" context "profile.rim" %}
+          {% trans "Arxiv" context "profile.rim" %}<span class="rim-status-count" data-rim-count="archived" aria-hidden="true"></span>
         </button>
         <button type="button" class="rim-status-tab" role="tab" data-rim-status="deleted">
-          {% trans "Silinmiş" context "profile.rim" %}
+          {% trans "Silinmiş" context "profile.rim" %}<span class="rim-status-count" data-rim-count="deleted" aria-hidden="true"></span>
         </button>
       </div>
+    </div>
+
+    {% comment %}Sahib 2026-10-11: əlavə filtrlər (hesab növü · vəziyyət · sıralama) — dəyişən kimi siyahı
+    yenilənir (entry.js, `data-rim-filter`). Select-lər layihə komponentidir (bootstrap-single-select).{% endcomment %}
+    <div class="rim-filters" data-rim-filters>
+      <div class="rim-filter">
+        <label class="rim-filter__label" for="rim-filter-kind">{% trans "Hesab növü" context "profile.rim" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="rim-filter-kind" class="ems-select bootstrap-single-select__native" data-rim-filter="kind" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "profile.rim" %}</option>
+            <option value="student">{% trans "Tələbələr" context "profile.rim" %}</option>
+            <option value="teacher">{% trans "Müəllimlər" context "profile.rim" %}</option>
+            <option value="staff">{% trans "Heyət (inzibati)" context "profile.rim" %}</option>
+            <option value="none">{% trans "Rolu olmayanlar" context "profile.rim" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="rim-filter">
+        <label class="rim-filter__label" for="rim-filter-flag">{% trans "Vəziyyət" context "profile.rim" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="rim-filter-flag" class="ems-select bootstrap-single-select__native" data-rim-filter="flag" data-bootstrap-select>
+            <option value="">{% trans "Hamısı" context "profile.rim" %}</option>
+            <option value="initial">{% trans "İlk giriş gözlənilir" context "profile.rim" %}</option>
+            <option value="never">{% trans "Heç daxil olmayıb" context "profile.rim" %}</option>
+            <option value="unverified">{% trans "Email təsdiqlənməyib" context "profile.rim" %}</option>
+          </select>
+        </div>
+      </div>
+      <div class="rim-filter">
+        <label class="rim-filter__label" for="rim-filter-sort">{% trans "Sıralama" context "profile.rim" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="rim-filter-sort" class="ems-select bootstrap-single-select__native" data-rim-filter="sort" data-bootstrap-select>
+            <option value="">{% trans "Avtomatik" context "profile.rim" %}</option>
+            <option value="recent">{% trans "Ən yeni hesablar" context "profile.rim" %}</option>
+            <option value="name">{% trans "Soyad (A→Z)" context "profile.rim" %}</option>
+            <option value="last_login">{% trans "Son giriş" context "profile.rim" %}</option>
+          </select>
+        </div>
+      </div>
+      <button type="button" class="rim-btn rim-btn--ghost rim-btn--sm rim-filters__reset" data-rim-filters-reset hidden>
+        {% trans "Filtrləri sıfırla" context "profile.rim" %}
+      </button>
     </div>
 
     {% comment %}
@@ -101,8 +143,8 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
 
     <div class="rim-results" data-rim-results aria-live="polite">
       <div class="rim-state">
-        <i class="fas fa-keyboard"></i>
-        {% trans "Axtarışa başlamaq üçün ad, soyad və ya ata adı yazın." context "profile.rim" %}
+        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+        {% trans "Yüklənir…" context "profile.rim" %}
       </div>
     </div>
 
@@ -254,7 +296,10 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
       "prev": "{% trans 'Əvvəlki'|escapejs context 'profile.rim' %}",
       "next": "{% trans 'Sonrakı'|escapejs context 'profile.rim' %}",
       "page_of": "{% trans 'səhifə'|escapejs context 'profile.rim' %}",
-      "total_found": "{% trans 'tapıldı'|escapejs context 'profile.rim' %}"
+      "total_found": "{% trans 'tapıldı'|escapejs context 'profile.rim' %}",
+      "latest_hint": "{% trans 'Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq axtarın.'|escapejs context 'profile.rim' %}",
+      "last_login": "{% trans 'Son giriş'|escapejs context 'profile.rim' %}",
+      "never_logged_in": "{% trans 'Heç daxil olmayıb'|escapejs context 'profile.rim' %}"
     }</script>
 
     {% endif %}

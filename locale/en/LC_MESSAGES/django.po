@@ -95576,3 +95576,63 @@ msgstr "Changed compared with the previous year"
 msgctxt "roles.org_display_name"
 msgid "Qəyyumlar Şurasının sədri"
 msgstr "Chair of the Board of Trustees"
+
+msgctxt "profile.rim"
+msgid "Hesab növü"
+msgstr "Account type"
+
+msgctxt "profile.rim"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "profile.rim"
+msgid "Müəllimlər"
+msgstr "Teachers"
+
+msgctxt "profile.rim"
+msgid "Heyət (inzibati)"
+msgstr "Staff (administrative)"
+
+msgctxt "profile.rim"
+msgid "Rolu olmayanlar"
+msgstr "Without a role"
+
+msgctxt "profile.rim"
+msgid "İlk giriş gözlənilir"
+msgstr "Awaiting first sign-in"
+
+msgctxt "profile.rim"
+msgid "Heç daxil olmayıb"
+msgstr "Never signed in"
+
+msgctxt "profile.rim"
+msgid "Sıralama"
+msgstr "Sort"
+
+msgctxt "profile.rim"
+msgid "Avtomatik"
+msgstr "Automatic"
+
+msgctxt "profile.rim"
+msgid "Ən yeni hesablar"
+msgstr "Newest accounts"
+
+msgctxt "profile.rim"
+msgid "Soyad (A→Z)"
+msgstr "Surname (A→Z)"
+
+msgctxt "profile.rim"
+msgid "Son giriş"
+msgstr "Last sign-in"
+
+msgctxt "profile.rim"
+msgid "Filtrləri sıfırla"
+msgstr "Reset filters"
+
+msgctxt "profile.rim"
+msgid ""
+"Ən son yaradılan hesablar göstərilir — ad, soyad, email və ya FİN yazaraq "
+"axtarın."
+msgstr ""
+"Showing the most recently created accounts — search by name, surname, email "
+"or FIN."
