@@ -10,6 +10,12 @@ düsturda göstərilir:
 * yalnız lab      → «Laboratoriya (ədədi orta) 10»
 * hər ikisi       → «Seminar + laboratoriya (birgə ədədi orta — cəm 2n-ə bölünür) 10»
 
+Sahib 2026-10-10 (yeni qayda dövrləri, RİM tənzimləməsi ilə dəyişir): sərbəst iş ləğv olunanda
+onun 10 balı midterm-ə keçir (midterm 30, sərbəst iş sətri YOX); seminar + laboratoriya olan
+fəndə fəallıq 5 + 5 — «Seminar ballarının ortası 5 + Laboratoriya ballarının ortası 5». Köhnə
+semestrlərin düsturu (yuxarıdakı) DƏYİŞMİR — çağıran semestrin qaydasını ötürür
+(:mod:`apps.syllabus.rules`); ötürməsə CARİ qayda işlənir.
+
 Fəaliyyət növü ``CourseOffering`` üzərindən tapılır: əvvəl dərs yükü sətri
 (``workload.TeachingTaskRow``: eyni fənn + dövr + qrup, ``seminar_*``/``lab_*``
 saatları), tapılmasa dərs cədvəli slotları (``registrar.ScheduleSlot`` növləri),
@@ -22,6 +28,8 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
+
+from core import academic_rules
 
 from .policy import assessment_weights
 
@@ -54,6 +62,31 @@ ACTIVITY_NOTES = {
         "Fənndə həm seminar, həm laboratoriya var: bütün seminar və laboratoriya qiymətləri toplanıb "
         "ümumi sayına (2n) bölünür — birgə ədədi orta, maksimum 10.",
     ),
+}
+#: Sahib 2026-10-10 — 5 + 5 qaydası (seminar və laboratoriya AYRICA ortalanır).
+SPLIT_LABELS = {
+    (SEMINAR,): pgettext_lazy(_CTX, "Seminar ballarının ədədi ortası"),
+    (LAB,): pgettext_lazy(_CTX, "Laboratoriya ballarının ədədi ortası"),
+    (SEMINAR, LAB): pgettext_lazy(
+        _CTX, "Seminar və laboratoriya: seminar ballarının ortası 5 + laboratoriya ballarının ortası 5"
+    ),
+}
+SPLIT_NOTES = {
+    (SEMINAR,): pgettext_lazy(
+        _CTX, "Seminar ballarının ədədi ortası (10): semestr ərzində yazılmış bütün seminar ballarının ortası."
+    ),
+    (LAB,): pgettext_lazy(
+        _CTX,
+        "Laboratoriya ballarının ədədi ortası (10): semestr ərzində yazılmış bütün laboratoriya ballarının ortası.",
+    ),
+    (SEMINAR, LAB): pgettext_lazy(
+        _CTX, "Seminar və laboratoriya: seminar ballarının ortası 5 + laboratoriya ballarının ortası 5 (cəmi 10)."
+    ),
+}
+#: 5 + 5 düsturunun İKİ sətri (seminar + laboratoriya olan fəndə).
+SPLIT_PART_LABELS = {
+    SEMINAR: pgettext_lazy(_CTX, "Seminar ballarının ortası"),
+    LAB: pgettext_lazy(_CTX, "Laboratoriya ballarının ortası"),
 }
 SEMESTER_KEYS = ("attendance", "midterm", "selfwork", "activity")
 
@@ -103,28 +136,53 @@ def activity_kinds_for_syllabus(syllabus) -> tuple[str, ...]:
     return activity_kinds_for_offering(getattr(syllabus, "offering", None))
 
 
-def activity_label(kinds) -> str:
-    return str(ACTIVITY_LABELS[normalize_kinds(kinds)])
+def _split(split) -> bool:
+    return academic_rules.activity_split() if split is None else bool(split)
 
 
-def activity_note(kinds) -> str:
-    return str(ACTIVITY_NOTES[normalize_kinds(kinds)])
+def activity_label(kinds, *, split=None) -> str:
+    """Fəallıq sətrinin adı; ``split`` — 5 + 5 qaydası (``None`` → CARİ RİM tənzimləməsi)."""
+    labels = SPLIT_LABELS if _split(split) else ACTIVITY_LABELS
+    return str(labels[normalize_kinds(kinds)])
 
 
-def formula_rows(kinds, organization=None) -> list[dict]:
-    """Redaktor/sənəd üçün sətirlər: ``[{key, label, score}]`` — semestr + yekun."""
-    weights = assessment_weights(organization)
-    rows = []
-    for key in SEMESTER_KEYS:
-        label = activity_label(kinds) if key == "activity" else str(LABELS[key])
-        rows.append({"key": key, "label": label, "score": int(weights.get(key, 0))})
+def activity_note(kinds, *, split=None) -> str:
+    notes = SPLIT_NOTES if _split(split) else ACTIVITY_NOTES
+    return str(notes[normalize_kinds(kinds)])
+
+
+def _activity_rows(kinds, score: int, split: bool) -> list[dict]:
+    kinds = normalize_kinds(kinds)
+    if split and kinds == (SEMINAR, LAB):
+        half = score // 2
+        return [
+            {"key": "activity_seminar", "label": str(SPLIT_PART_LABELS[SEMINAR]), "score": half},
+            {"key": "activity_lab", "label": str(SPLIT_PART_LABELS[LAB]), "score": score - half},
+        ]
+    return [{"key": "activity", "label": activity_label(kinds, split=split), "score": score}]
+
+
+def formula_rows(kinds, organization=None, *, selfwork=None, split=None) -> list[dict]:
+    """Redaktor/sənəd üçün sətirlər: ``[{key, label, score}]`` — semestr + yekun.
+
+    ``selfwork`` / ``split`` — semestrin qaydası (``SyllabusRule``); ``None`` → CARİ qayda.
+    Sərbəst işsiz qaydada sərbəst iş sətri yoxdur və midterm 30-dur (cəm yenə 50 + 50)."""
+    if selfwork is None:
+        selfwork = academic_rules.selfwork_enabled()
+    weights = assessment_weights(organization, selfwork=selfwork)
+    rows = [
+        {"key": key, "label": str(LABELS[key]), "score": int(weights.get(key, 0))} for key in ("attendance", "midterm")
+    ]
+    if selfwork:
+        rows.append({"key": "selfwork", "label": str(LABELS["selfwork"]), "score": int(weights.get("selfwork", 0))})
+    rows.extend(_activity_rows(kinds, int(weights.get("activity", 0)), _split(split)))
     rows.append({"key": "final", "label": str(LABELS["final"]), "score": int(weights.get("final", 0))})
     return rows
 
 
-def formula_text(kinds, organization=None) -> str:
+def formula_text(kinds, organization=None, *, selfwork=None, split=None) -> str:
     """«Davamiyyət 10 + … + Yekun imtahan 50 = 100 bal» — tək sətir."""
-    rows = formula_rows(kinds, organization)
+    rows = formula_rows(kinds, organization, selfwork=selfwork, split=split)
     total = sum(row["score"] for row in rows)
     semester = sum(row["score"] for row in rows if row["key"] != "final")
     parts = " + ".join(f"{row['label']} {row['score']}" for row in rows)
@@ -135,6 +193,9 @@ __all__ = [
     "LAB",
     "SEMINAR",
     "SEMESTER_KEYS",
+    "SPLIT_LABELS",
+    "SPLIT_NOTES",
+    "SPLIT_PART_LABELS",
     "activity_kinds_for_offering",
     "activity_kinds_for_syllabus",
     "activity_label",

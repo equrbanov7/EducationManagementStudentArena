@@ -28,7 +28,7 @@ from django.utils.translation import pgettext
 
 from ..constants import SECTION_REVIEW, SECTION_STUDENT, FolderStatus, SubmissionStatus, TaskKind
 from ..errors import display_number
-from . import lookups
+from . import lookups, selfwork_rule
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +102,8 @@ def task_published(task) -> None:
     if folder.status != FolderStatus.ACTIVE:
         return
     offering_ids = list(folder.assignments.filter(is_active=True).values_list("offering_id", flat=True))
+    if task.kind == TaskKind.SELFWORK:  # sahib 2026-10-10: sərbəst iş ləğv olunan qrupa «Yeni sərbəst iş» getmir
+        offering_ids = sorted(selfwork_rule.active_offering_ids(offering_ids), key=str)
     if not offering_ids:
         return
     label = (

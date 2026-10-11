@@ -6,8 +6,11 @@ Redaktorun 7–10-cu bölmələri: `self`, `lit`, `prev`, `send`.
 `disabled` kart (3 × 5 = 15 bal, siyasətə uyğun deyil). Həmin kart QƏSDƏN
 saxlanılır: siyasəti izah edir.
 `prev` və `send` qayda bölməsi deyil — tamamlanma faizinə daxil deyillər.
+Sahib 2026-10-10: versiyanın semestrində sərbəst iş söndürülübsə (`se.selfwork_active`) `self`
+paneli render olunmur — bölmənin datası DB-də qalır, tənzimləmə yandırılanda geri qayıdır.
 {% endcomment %}
 
+{% if se.selfwork_active %}
 {% with p=se.panels.self sw=se.selfwork %}
 <article class="syl-panel{% if se.active_id == 'self' %} is-on{% endif %}" data-syl-panel="self" data-revision="{{ p.revision }}">
   <header class="syl-panel__head">
@@ -104,6 +107,7 @@ saxlanılır: siyasəti izah edir.
   </div>
 </article>
 {% endwith %}
+{% endif %}
 
 {% with p=se.panels.lit %}
 <article class="syl-panel{% if se.active_id == 'lit' %} is-on{% endif %}" data-syl-panel="lit" data-revision="{{ p.revision }}">

@@ -22,10 +22,12 @@ Sahib qərarları (`HANDOFF_FULL_PLAN.md` §2/18–20):
 
 Modul sərhədi: burada ``apps.*`` importu YOXDUR — yalnız ötürülən obyektin
 ``settings`` atributu oxunur (ördək tipi), ona görə ``module_deps`` qrafında yeni
-kənar yaranmır.
+kənar yaranmır. Sərbəst iş bayrağı ``core.academic_rules``-dan gəlir (sahib 2026-10-10).
 """
 
 from __future__ import annotations
+
+from core import academic_rules
 
 from .constants import SELFWORK_TOTAL_SCORE
 
@@ -34,11 +36,13 @@ from .constants import SELFWORK_TOTAL_SCORE
 #: (``activity``) 10 → semestr 50; yekun imtahan 50. Müəllim HEÇ NƏ bölmür —
 #: ``flex`` (100 − kilidli cəm) hesablanır və standartda 0-dır; saxlanır ki,
 #: siyasət sonradan yumşaldılsa köhnə «sərbəst pay» yolu işləsin.
+#: Bu, SƏRBƏST İŞLİ standartdır; sərbəst iş söndürüləndə (sahib 2026-10-10) onun balı
+#: midterm-ə keçir — bax :func:`assessment_weights` (``selfwork=False`` → midterm 30).
 DEFAULT_ASSESSMENT = {
-    "attendance": 10,
-    "midterm": 20,
+    "attendance": academic_rules.ATTENDANCE_MAX,
+    "midterm": academic_rules.MIDTERM_MAX_WITH_SELFWORK,
     "selfwork": SELFWORK_TOTAL_SCORE,
-    "activity": 10,
+    "activity": academic_rules.ACTIVITY_MAX,
     "final": 50,
 }
 
@@ -73,14 +77,21 @@ def _positive_int(value, fallback: int) -> int:
     return parsed if parsed > 0 else fallback
 
 
-def assessment_weights(organization=None) -> dict:
+def assessment_weights(organization=None, *, selfwork=None) -> dict:
     """Kilidli çəkilər + hesablanmış ``flex`` (standartda 0).
 
     ``flex`` SAXLANILMIR, hər dəfə ``100 − kilidli cəm`` kimi hesablanır ki,
     siyasət dəyişəndə iki mənbə bir-birindən ayrılmasın.  ``assess`` bölməsinin
     saxlanan açarları köhnə adlarla qalır: ``midterm`` = midterm (aralıq imtahan) payı,
     ``project`` = seminar/lab ədədi ortası payı (``activity``).
+
+    ``selfwork`` — bu qiymətləndirmədə sərbəst iş varmı (sahib 2026-10-10): ``False`` olanda
+    onun balı midterm-ə keçir (20 + 10 = 30), ``selfwork`` çəkisi 0 olur — cəm dəyişmir.
+    ``None`` — CARİ qayda (``core.academic_rules.selfwork_enabled``); semestri bilən çağıran
+    ``SyllabusRule.selfwork`` ötürür (köhnə semestrlərdə sərbəst iş həmişə var).
     """
+    if selfwork is None:
+        selfwork = academic_rules.selfwork_enabled()
     override = _raw(organization).get("assessment")
     weights = dict(DEFAULT_ASSESSMENT)
     if isinstance(override, dict):
@@ -90,9 +101,25 @@ def assessment_weights(organization=None) -> dict:
                     weights[key] = max(0, int(override[key]))
                 except (TypeError, ValueError):
                     continue
+    if not selfwork:
+        weights["midterm"] += weights["selfwork"]
+        weights["selfwork"] = 0
     locked = sum(weights.values())
     weights["flex"] = max(0, ASSESSMENT_TOTAL - locked)
     return weights
+
+
+def standard_splits(organization=None) -> frozenset:
+    """Hər iki qaydanın (sərbəst işli / sərbəst işsiz) STANDART bölgüsü — ``{(midterm, project), …}``.
+
+    RİM tənzimləməsi dəyişəndə əvvəlki standartla saxlanmış ``assess`` bölgüsü «natamam»
+    sayılmasın deyə tamamlanma yoxlaması ikisini də qəbul edir (təsdiqlənmiş versiya dəyişməzdir);
+    redaktə yolu (``save_section``) isə həmişə versiyanın CARİ standartını yazır."""
+    splits = set()
+    for flag in (True, False):
+        weights = assessment_weights(organization, selfwork=flag)
+        splits.add((standard_midterm(weights), standard_project(weights)))
+    return frozenset(splits)
 
 
 def standard_midterm(weights) -> int:
@@ -148,4 +175,5 @@ __all__ = [
     "sla_days",
     "standard_midterm",
     "standard_project",
+    "standard_splits",
 ]

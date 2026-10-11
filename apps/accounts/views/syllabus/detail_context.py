@@ -15,7 +15,7 @@ CONTEXT MÜQAVİLƏSİ — ``syllabus_detail`` (dict)
     status            {key,label,tone,banner,reason}
     percent           int                — tamamlanma faizi
     percent_tone      str                — zolağın tonu (`success`/`primary`/…)
-    sections          [{id,label,lines}] — 8 məzmun bölməsi, sətirlərə bölünmüş
+    sections          [{id,label,lines}] — 8 məzmun bölməsi (sərbəst işsiz qaydada 7), sətirlərə bölünmüş
     timeline          [{what,when,who,body,tone}] — YALNIZ ``TIMELINE_MODES``
     pdf_url           str
     is_student        bool               — tələbə rejimi (yalnız APPROVED nüsxə)
@@ -41,10 +41,17 @@ from __future__ import annotations
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from apps.syllabus.public import RULE_SECTIONS, SectionKey, SyllabusStatus, section_data_map, version_timeline
+from apps.syllabus.public import (
+    SectionKey,
+    SyllabusStatus,
+    activity_kinds_for_syllabus,
+    rule_for_version,
+    section_data_map,
+    version_timeline,
+)
 
 from .labels import STATUS_TONES
-from .preview import BANNERS
+from .preview import banner_for
 from .review_panel import build_timeline, compose_bodies
 from .rows import percent_tone
 
@@ -119,11 +126,15 @@ def _identity_rows(syllabus, version) -> list:
     return [{"key": key, "label": label, "value": values[key]} for key, label in _IDENTITY_LABELS.items()]
 
 
-def _section_rows(version) -> list:
-    """8 məzmun bölməsi — gövdə SƏTİRLƏRƏ bölünür (şablon `<li>` kimi yazır)."""
-    bodies = compose_bodies(section_data_map(version))
+def _section_rows(version, rule=None) -> list:
+    """8 məzmun bölməsi — gövdə SƏTİRLƏRƏ bölünür (şablon `<li>` kimi yazır).
+
+    Sahib 2026-10-10: qayda versiyanın semestrindəndir — sərbəst işsiz qaydada «Sərbəst iş» yoxdur (7)."""
+    rule = rule or rule_for_version(version)
+    kinds = activity_kinds_for_syllabus(version.syllabus)
+    bodies = compose_bodies(section_data_map(version), rule=rule, activity_kinds=kinds)
     rows = []
-    for section_id in RULE_SECTIONS:
+    for section_id in rule.rule_sections:
         body = bodies.get(section_id, "")
         rows.append(
             {
@@ -166,6 +177,7 @@ def build_detail_context(*, organization, syllabus, version, mode, is_student: b
     """Tam-səhifə sənədin context-i (yuxarıdakı müqaviləyə bax)."""
     status = version.status
     percent = version.completion_percent or 0
+    rule = rule_for_version(version, organization)
     detail_kwargs = {"syllabus_id": str(syllabus.pk)}
     pdf_url = reverse("accounts:syllabus_detail_pdf", kwargs=detail_kwargs)
     if not is_student:
@@ -185,12 +197,12 @@ def build_detail_context(*, organization, syllabus, version, mode, is_student: b
                 "key": status,
                 "label": str(SyllabusStatus(status).label),
                 "tone": STATUS_TONES.get(status, "neutral"),
-                "banner": str(BANNERS.get(status, "")),
+                "banner": banner_for(status, rule),
                 "reason": _decision_reason(version, mode),
             },
             "percent": percent,
             "percent_tone": percent_tone(percent),
-            "sections": _section_rows(version),
+            "sections": _section_rows(version, rule),
             "timeline": _timeline(syllabus, mode),
             "pdf_url": pdf_url,
             "pdf_label": PDF_LABEL,

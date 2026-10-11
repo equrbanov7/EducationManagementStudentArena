@@ -40,6 +40,10 @@ Eyni ailədən daha üç qayda (2026-08-31 baxışı)
 * **Abzas boşluğu oxucuya çatır.** Köçürmə təmizləyicisi (``legacy_text.
   clean_multiline_text``) abzas fasiləsini QƏSDƏN saxlayır; oxucu onu artıq
   atmır (bax :func:`_prose_lines`).
+
+Sahib 2026-10-10: sənəd semestrin qaydası ilə qurulur (:mod:`apps.syllabus.rules`) — sərbəst işi
+söndürülmüş qaydada «Sərbəst iş» bloku YOXDUR və düstur midterm 30 göstərir; köhnə semestrin sənədi
+dəyişmir. Hər blok sabit ``key`` daşıyır — istehlakçılar bloku MÖVQEYƏ görə yox, açara görə tapır.
 """
 
 from __future__ import annotations
@@ -49,6 +53,9 @@ import logging
 from django.utils.translation import pgettext_lazy
 
 from .constants import SELFWORK_OPTIONS, SectionKey, SyllabusStatus
+from .rules import current as current_rule
+from .rules import for_syllabus as rule_for_syllabus
+from .rules import for_version as rule_for_version
 
 _CTX = "syllabus.document"
 
@@ -172,19 +179,24 @@ def _int_or_zero(value) -> int:
         return 0
 
 
-def _assessment_body(assess: dict, activity_kinds=None) -> str:
+def _assessment_body(assess: dict, activity_kinds=None, rule=None, organization=None) -> str:
     """Qiymətləndirmə bloku — STANDART düstur + qaydanın öz mətni + imtahan sualları.
 
     Sahib qərarı 2026-09-20: bal bölgüsü universitet standartıdır və müəllim
     tərəfindən doldurulmur, ona görə düstur HƏMİŞƏ çap olunur (uydurma deyil —
     siyasətin özüdür).  Fəaliyyət növü (seminar / laboratoriya / hər ikisi)
-    dərs yükündən gəlir (bax :mod:`apps.syllabus.assessment_formula`).
+    dərs yükündən gəlir (bax :mod:`apps.syllabus.assessment_formula`); düsturun
+    özü semestrin qaydasıdır (``rule``).
     """
     from .assessment_formula import activity_note, formula_text
 
+    rule = rule or current_rule(organization)
     note = _prose_lines(assess.get("note"))
     questions = _prose_lines(assess.get("exam_questions"))
-    body: list = [formula_text(activity_kinds), activity_note(activity_kinds)]
+    body: list = [
+        formula_text(activity_kinds, organization, selfwork=rule.selfwork, split=rule.split),
+        activity_note(activity_kinds, split=rule.split),
+    ]
     body.extend(note)
     if questions:
         body.append(f"{_EXAM_QUESTIONS_LABEL}:")
@@ -205,11 +217,13 @@ def _selfwork_line(index, row, config) -> str:
     return f"{index}. {title} ({config['per_score']} {_POINTS})"
 
 
-def build_preview_blocks(section_map: dict, activity_kinds=None) -> list:
-    """``{section_id: data}`` → oxunaqlı bloklar (başlıq + çoxsətirli gövdə).
+def build_preview_blocks(section_map: dict, activity_kinds=None, *, rule=None, organization=None) -> list:
+    """``{section_id: data}`` → oxunaqlı bloklar (``key`` + başlıq + çoxsətirli gövdə).
 
     ``activity_kinds`` — qiymətləndirmə düsturunun seminar/lab sətri üçün
     (bax :mod:`apps.syllabus.assessment_formula`); verilməsə defolt (seminar).
+    ``rule`` — semestrin qaydası (``SyllabusRule``); verilməsə CARİ qayda. Sərbəst işsiz
+    qaydada ``selfwork`` bloku YOXDUR (sahib 2026-10-10) — bloku açarla axtarın.
     """
     info = section_map.get(SectionKey.DESC.value, {}) or {}
     outcomes = _lines((section_map.get(SectionKey.OUT.value, {}) or {}).get("outcomes"))
@@ -224,48 +238,82 @@ def build_preview_blocks(section_map: dict, activity_kinds=None) -> list:
     option = _text(selfwork.get("option"))
     config = SELFWORK_OPTIONS.get(option)
     topics = [row for row in (selfwork.get("topics") or []) if isinstance(row, dict)]
+    rule = rule or current_rule(organization)
 
-    return [
-        {"title": BLOCK_TITLES["description"], "body": _text(info.get("description")) or str(_EMPTY)},
-        {"title": BLOCK_TITLES["goal"], "body": _text(info.get("goal")) or str(_EMPTY)},
+    blocks = [
         {
+            "key": "description",
+            "title": BLOCK_TITLES["description"],
+            "body": _text(info.get("description")) or str(_EMPTY),
+        },
+        {"key": "goal", "title": BLOCK_TITLES["goal"], "body": _text(info.get("goal")) or str(_EMPTY)},
+        {
+            "key": "outcomes",
             "title": BLOCK_TITLES["outcomes"],
             "body": "\n".join(f"TN{index}. {text}" for index, text in enumerate(outcomes, start=1)) or str(_EMPTY),
         },
         {
+            "key": "weeks",
             "title": BLOCK_TITLES["weeks"],
             "body": "\n".join(_week_line(index, row) for index, row in enumerate(weeks, start=1)) or str(_EMPTY),
         },
         {
+            "key": "methods",
             "title": BLOCK_TITLES["methods"],
             "body": "\n".join(_prose_lines(method.get("methods")) + _prose_lines(method.get("note"))) or str(_EMPTY),
         },
-        {"title": BLOCK_TITLES["assessment"], "body": _assessment_body(assess, activity_kinds)},
         {
-            "title": BLOCK_TITLES["selfwork"],
-            "body": "\n".join(_selfwork_line(index, row, config) for index, row in enumerate(topics, start=1))
-            or str(_EMPTY),
+            "key": "assessment",
+            "title": BLOCK_TITLES["assessment"],
+            "body": _assessment_body(assess, activity_kinds, rule, organization),
         },
+    ]
+    if rule.selfwork:
+        blocks.append(
+            {
+                "key": "selfwork",
+                "title": BLOCK_TITLES["selfwork"],
+                "body": "\n".join(_selfwork_line(index, row, config) for index, row in enumerate(topics, start=1))
+                or str(_EMPTY),
+            }
+        )
+    blocks.append(
         {
+            "key": "literature",
             "title": BLOCK_TITLES["literature"],
             "body": "\n".join(_prose_lines(literature.get("primary")) + _prose_lines(literature.get("additional")))
             or str(_EMPTY),
-        },
-    ]
+        }
+    )
+    return blocks
 
 
-def build_document(syllabus, version) -> dict:
-    """Bir versiyanın TAM oxu-rejimli sənədi — başlıq bloku + 8 məzmun bloku.
+def blocks_by_key(blocks) -> dict:
+    """``{key: body}`` — istehlakçı bloku MÖVQEYƏ görə yox, açara görə götürsün (sahib 2026-10-10)."""
+    return {block["key"]: block["body"] for block in blocks}
+
+
+def build_document(syllabus, version, *, rule=None, activity_kinds=None) -> dict:
+    """Bir versiyanın TAM oxu-rejimli sənədi — başlıq bloku + 8 məzmun bloku (sərbəst işsiz qaydada 7).
 
     ⚠️ ``version`` AÇIQ verilir, ``syllabus.current_version``-dan GÖTÜRÜLMÜR:
     tələbə həmişə ``approved_version``-u görür, müəllim isə üzərində işlədiyi
     cari versiyanı. Mənbəni çağıran tərəf seçir — bu funksiya seçmir.
+
+    ``rule`` — baxılan açılışın semestrinin qaydası (jurnal / tələbə kabineti onu ötürür:
+    semestrsiz «baza sillabus» köhnə semestrin tələbəsinə də göstərilir); verilməsə versiyanın
+    semestrindən. ``activity_kinds`` verilməsə dosyenin açılışından (dərs yükü / cədvəl).
     """
+    from .assessment_formula import activity_kinds_for_syllabus
     from .services import section_data_map
 
     status = version.status if version is not None else SyllabusStatus.DRAFT.value
     section_map = section_data_map(version) if version is not None else {}
     approver = getattr(version, "approved_by", None) if version is not None else None
+    if rule is None:
+        rule = rule_for_version(version) if version is not None else rule_for_syllabus(syllabus)
+    if activity_kinds is None:
+        activity_kinds = activity_kinds_for_syllabus(syllabus)
 
     return {
         "code": syllabus.subject.code,
@@ -281,7 +329,8 @@ def build_document(syllabus, version) -> dict:
         "approval_note": reuse_approval_note(version) if version is not None else "",
         "author": _author_name(syllabus),
         "blocks": [
-            {"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)
+            {"key": block["key"], "title": str(block["title"]), "body": block["body"]}
+            for block in build_preview_blocks(section_map, activity_kinds, rule=rule)
         ],
     }
 
@@ -296,4 +345,4 @@ def _author_name(syllabus) -> str:
     return (author.get_full_name() or author.username).strip()
 
 
-__all__ = ["BLOCK_TITLES", "build_document", "build_preview_blocks", "reuse_approval_note"]
+__all__ = ["BLOCK_TITLES", "blocks_by_key", "build_document", "build_preview_blocks", "reuse_approval_note"]

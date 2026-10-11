@@ -25,7 +25,7 @@ from ..constants import (
 )
 from ..errors import FolderError
 from ..models import FolderTask, TaskAttachment
-from . import access, notify
+from . import access, notify, selfwork_rule
 from .events import audit_change
 from .folders import clean_text, clean_title, next_order
 from .topics import topic_in_folder
@@ -170,6 +170,8 @@ def set_task_published(task, *, by_user, published: bool, request=None) -> Folde
     access.ensure_can_manage(by_user, task.folder)
     if published:
         _ensure_editable(task)
+        if task.kind == TaskKind.SELFWORK and not selfwork_rule.folder_active(task.folder):
+            raise FolderError.of("selfwork.disabled")  # sahib 2026-10-10: gizli slot dərc olunmur
     if task.is_published == bool(published):
         return task
     task.is_published = bool(published)

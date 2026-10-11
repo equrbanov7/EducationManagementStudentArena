@@ -10,7 +10,9 @@ Qaydalar:
     VAXT silinmir və balı dəyişdirilmir — arxivlənir, slot üçün yeni tapşırıq
     açılır (``lineage_key`` saxlanılır, plagiat müqayisəsi davam edir);
   * müəllim başlığı dəyişməyibsə (``title == syllabus_title``) sillabusun yeni
-    başlığı götürülür, dəyişibsə müəllimin mətni qalır.
+    başlığı götürülür, dəyişibsə müəllimin mətni qalır;
+  * sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə (RİM tənzimləməsi, ``selfwork_rule``) sərbəst iş
+    slotları YARADILMIR və mövcudlarına TOXUNULMUR — tənzimləmə yandırılanda növbəti sinxron qurur.
 """
 
 from __future__ import annotations
@@ -24,7 +26,7 @@ from django.utils.translation import pgettext
 
 from ..constants import TaskKind, TopicSource
 from ..models import FolderTask, FolderTopic
-from . import syllabus_bridge
+from . import selfwork_rule, syllabus_bridge
 
 _CTX = "subject_folder.sync"
 _FUZZY_THRESHOLD = 0.75
@@ -214,7 +216,10 @@ def sync_from_syllabus(folder, *, by_user=None, offering=None, version=None) -> 
     # Paralel sinxronlar eyni slotu iki dəfə yaratmasın — qovluq sətri kilidlənir.
     type(folder).objects.select_for_update().filter(pk=folder.pk).first()
     topics = _sync_topics(folder, version)
-    selfwork = _sync_selfwork(folder, version, by_user=by_user)
+    if selfwork_rule.folder_active(folder, offering=offering, version=version):
+        selfwork = _sync_selfwork(folder, version, by_user=by_user)
+    else:  # sahib 2026-10-10: sərbəst iş yoxdur — slot yaradılmır, mövcud data toxunulmur
+        selfwork = {"option": None, "created": [], "updated": [], "archived": [], "deleted": [], "disabled": True}
     folder.syllabus_ref = version.pk
     folder.synced_at = timezone.now()
     folder.save(update_fields=["selfwork_option", "syllabus_ref", "synced_at", "updated_at"])

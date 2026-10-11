@@ -485,13 +485,14 @@ def test_editor_completion_uses_the_organization_weights(world):
     seen = []
     real = public.completion_rules.evaluate
 
-    def spy(section_data, plan_hours=None, assessment=None):
+    def spy(section_data, plan_hours=None, assessment=None, **kwargs):
         seen.append(assessment)
-        return real(section_data, plan_hours, assessment)
+        return real(section_data, plan_hours, assessment, **kwargs)
 
     request = RequestFactory().get("/profile/")
     request.user = world["teacher"]
     with mock.patch.object(public.completion_rules, "evaluate", side_effect=spy):
         public.build_syllabus_editor_context(request, organization=org, version=version)
 
-    assert seen and seen[0] == assessment_weights(org)
+    # Sahib 2026-10-10: çəkilər versiyanın semestrinin qaydasıdır — test dünyası 2025/2026 (köhnə qayda).
+    assert seen and seen[0] == assessment_weights(org, selfwork=True)

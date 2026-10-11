@@ -24,7 +24,7 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_POST
 
 from apps.syllabus.models import SyllabusVersion
-from apps.syllabus.public import RULE_SECTIONS, SyllabusStatus, Transition, TransitionDenied, services
+from apps.syllabus.public import RULE_SECTIONS, SyllabusStatus, Transition, TransitionDenied, rule_for_version, services
 
 from .._helpers import _get_active_organization
 from .labels import transition_text
@@ -111,14 +111,14 @@ def _scoped_version(organization, actor, version_id):
     )
 
 
-def _section_comments(payload) -> dict:
-    """Bölmə şərhləri — yalnız TANINAN bölmə açarları, kəsilmiş uzunluqla."""
+def _section_comments(payload, sections=RULE_SECTIONS) -> dict:
+    """Bölmə şərhləri — yalnız versiyanın qayda bölmələri (sahib 2026-10-10: gizli `self` YOX)."""
     raw = payload.get("sections")
     if not isinstance(raw, dict):
         return {}
     rows = {}
     for section_id, text in raw.items():
-        if section_id not in RULE_SECTIONS or not isinstance(text, str):
+        if section_id not in sections or not isinstance(text, str):
             continue
         value = text.strip()[:MAX_SECTION_COMMENT]
         if value:
@@ -199,7 +199,7 @@ def syllabus_decision(request, version_id):
         "version": version,
         "actor": actor,
         "comment": (payload.get("comment") or "").strip(),
-        "section_comments": _section_comments(payload),
+        "section_comments": _section_comments(payload, rule_for_version(version, organization).rule_sections),
         "request": request,
     }
     if reason_required:

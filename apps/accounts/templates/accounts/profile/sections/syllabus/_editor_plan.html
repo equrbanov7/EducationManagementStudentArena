@@ -9,7 +9,8 @@ saatı olmayan növün sütunu göstərilmir; müəllim «+» ilə sətir artır
 mühazirədə, həm seminarda keçilə bilər.
 `assess`-də bölgü universitet STANDARTIDIR (sahib 2026-09-20): davamiyyət 10 ·
 midterm 20 · sərbəst iş 10 · seminar/lab ədədi ortası 10 · yekun 50; müəllim
-heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
+heç nə seçmir, fəaliyyət növü dərs yükündən gəlir. Sahib 2026-10-10: sərbəst işsiz
+qaydada midterm 30, seminar + laboratoriya 5 + 5 (sətirlər `se.assessment.rows`-dan).
 {% endcomment %}
 
 {% with p=se.panels.week %}
@@ -200,7 +201,8 @@ heç nə seçmir, fəaliyyət növü dərs yükündən gəlir.
   </ul>
 
   <p class="syl-hintbox syl-hintbox--ok">
-    {% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + sərbəst iş + seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}
+    {% if se.selfwork_active %}{% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + sərbəst iş + seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}
+    {% else %}{% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + seminar/laboratoriya balları), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}{% endif %}
     <b>{{ a.formula }}</b>
   </p>
   <p class="syl-hintbox">{{ a.activity_note }}</p>

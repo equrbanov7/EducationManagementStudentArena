@@ -3,7 +3,8 @@
 Siyahı ``public.list_submissions`` üzərindədir: görünürlük queryset səviyyəsində
 (qrupun canlı müəllimi / inzibatçı / əhatəli əməkdaş — yalnız oxu), qaralamalar
 heç vaxt düşmür. Defolt süzgəc «Yoxlanılır» (baxış növbəsi); sayğaclar status
-süzgəcindən ƏVVƏLKİ dəst üzrə tək GROUP BY sorğusudur.
+süzgəcindən ƏVVƏLKİ dəst üzrə tək GROUP BY sorğusudur. Sahib 2026-10-10: dövründə sərbəst iş
+ləğv olunmuş qrupların sərbəst iş göndərişləri siyahıya düşmür (data qalır, ``selfwork_rule``).
 """
 
 from __future__ import annotations
@@ -14,10 +15,12 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.utils.translation import pgettext
 
+from core import academic_rules
+
 from .. import public
 from ..constants import SECTION_REVIEW, MatchMethod, SubmissionStatus, TaskKind
 from ..models import SubjectFolder
-from ..services import lookups
+from ..services import lookups, selfwork_rule
 from . import common
 
 _CTX = "subject_folder.ui"
@@ -53,6 +56,15 @@ def review_panel(context) -> dict:
         late=True if late else None,
         student_query=search,
         order=order,
+    )
+    hidden = selfwork_rule.inactive_offering_ids(
+        base_rows.filter(kind=TaskKind.SELFWORK).values_list("assignment__offering_id", flat=True).distinct(),
+        organization,
+    )
+    if hidden:
+        base_rows = base_rows.exclude(kind=TaskKind.SELFWORK, assignment__offering_id__in=hidden)
+    selfwork_visible = (
+        academic_rules.selfwork_enabled() or kind == "selfwork" or base_rows.filter(kind=TaskKind.SELFWORK).exists()
     )
     counts = public.status_counts(base_rows)
     rows = base_rows if status == "all" else base_rows.filter(status=status)
@@ -98,7 +110,12 @@ def review_panel(context) -> dict:
                 "name": "sf_kind",
                 "label": pgettext(_CTX, "Növ"),
                 "kind": "select",
-                "options": everything + [{"value": key, "label": str(TaskKind(key).label)} for key in _KIND_FILTERS],
+                "options": everything
+                + [
+                    {"value": key, "label": str(TaskKind(key).label)}
+                    for key in _KIND_FILTERS
+                    if key != TaskKind.SELFWORK or selfwork_visible
+                ],
                 "value": kind,
             },
             {
@@ -127,6 +144,8 @@ def review_panel(context) -> dict:
         "filter_count_label": pgettext(_CTX, "Nəticə: %(count)d göndəriş") % {"count": page.paginator.count},
         "kpi_tiles": _kpis(counts),
         "can_bulk": any(item["can_bulk"] for item in items),
+        "selfwork_visible": selfwork_visible,
+        "has_selfwork_items": any(item["submission"].kind == TaskKind.SELFWORK for item in items),
         "bulk_limit": 100,
         "reject_reasons": [{"value": value, "label": str(label)} for value, label in public.RejectReason.choices],
         "empty_title": (

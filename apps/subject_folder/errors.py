@@ -135,6 +135,10 @@ MESSAGES = {
     "review.selfwork_needs_points": pgettext_lazy(_CTX, "Sərbəst iş bal ilə qəbul edilir."),
     "review.reason_invalid": pgettext_lazy(_CTX, "Rədd səbəbi seçilməyib."),
     "review.not_rejected": pgettext_lazy(_CTX, "Yalnız rədd edilmiş göndəriş yenidən açıla bilər."),
+    # Sahib 2026-10-10: RİM «Sistem tənzimləmələri» — yeni qayda dövrlərində sərbəst iş ləğv oluna bilər.
+    "selfwork.disabled": pgettext_lazy(
+        _CTX, "Bu semestrdə sərbəst iş tətbiq olunmur (universitet qaydası) — əməliyyat mümkün deyil."
+    ),
 }
 
 __all__ = ["FolderError", "MESSAGES", "display_number"]
