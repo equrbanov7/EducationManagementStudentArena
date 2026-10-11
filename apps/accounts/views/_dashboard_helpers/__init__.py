@@ -19,7 +19,7 @@ Modules:
 * ``evaluated_review`` — ``_collect_evaluated_review_items``
 """
 
-from .academic_results import academic_filter_options, count_academic_items
+from .academic_results import academic_filter_options, academic_filter_selection, count_academic_items
 from .assigned_tasks import _collect_assigned_tasks
 from .constants import SUBMISSION_DATE_ORDER_CHOICES
 from .evaluated_review import _collect_evaluated_review_items, fill_evaluated_test_scores
@@ -41,6 +41,7 @@ from .results import _collect_my_results
 __all__ = [
     "SUBMISSION_DATE_ORDER_CHOICES",
     "academic_filter_options",
+    "academic_filter_selection",
     "count_academic_items",
     "_build_student_group_map_and_available",
     "_format_score_display",
