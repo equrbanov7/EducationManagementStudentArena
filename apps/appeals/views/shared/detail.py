@@ -3,7 +3,6 @@
 from decimal import Decimal, InvalidOperation
 
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
@@ -99,8 +98,10 @@ def appeal_detail(request, appeal_id):
     is_owner = appeal.student_id == request.user.id
     # Audit 2026-09-28 EXA-03: dekan / koordinator (tələbəni əhatə edən
     # ``student.registry_view``) də YALNIZ-OXU baxa bilir — fraqment qərar formu vermir.
+    # URL auditi B11 (2026-10-10): özgə müraciət «yoxdur» halı ilə EYNİ cavabı alır
+    # (əvvəl 403 idi — ardıcıl ID-lərlə mövcudluq orakulu yaradırdı).
     if not is_owner and not can_view_appeal(request, appeal):
-        raise PermissionDenied
+        return _missing_appeal_redirect(request, section="my-appeals")
 
     # Standalone detal səhifəsi yoxdur — detal yalnız dashboard modalında
     # açılır; birbaşa URL sidebar-lı müvafiq bölməyə yönləndirilir.

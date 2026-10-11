@@ -128,8 +128,9 @@ class CourseCrossTenantAccessTest(TestCase):
 
     def test_teacher_dashboard_only_shows_own_org_course(self):
         """A teacher in Org A should see only Org A's courses on my-courses."""
+        # WP9a (2026-10-10): köhnə `courses/my-courses/` silindi — kabinet bölməsi yoxlanılır.
         _login_with_org(self.client, self.teacher_a, self.org_a)
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "my-courses"}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_a.title)
         self.assertNotContains(response, self.course_b.title)
@@ -172,7 +173,8 @@ class CourseCrossTenantAccessTest(TestCase):
         """A student from Org A should not see Org B courses in their enrolled list."""
         CourseMembership.objects.create(course=self.course_b, user=self.student_a, role="student")
         _login_with_org(self.client, self.student_a, self.org_a)
-        response = self.client.get(reverse("courses:student_courses"))
+        # WP9a (2026-10-10): köhnə `courses/my-enrolled/` silindi — kabinet bölməsi yoxlanılır.
+        response = self.client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "assigned-courses"}))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, self.course_b.title)
 
@@ -287,23 +289,20 @@ class CourseNoOrgContextTest(TestCase):
         Course.objects.create(owner=self.teacher, title="NoOrg Course", status="published", organization=self.org)
 
     def test_my_courses_empty_without_active_org(self):
-        """my_courses returns empty list when no active_organization is in the session."""
+        """Owner course scope is empty when no active_organization is in the request.
+
+        WP9a (2026-10-10): köhnə siyahı səhifəsi silindi — eyni tenant süzgəci
+        (``_owner_courses_queryset``) birbaşa yoxlanılır.
+        """
         from django.test import RequestFactory
 
-        from apps.courses.views import MyCoursesListView
+        from apps.courses.views.shared._helpers import _owner_courses_queryset
 
-        factory = RequestFactory()
-        request = factory.get(reverse("courses:my_courses"))
+        request = RequestFactory().get("/")
         request.user = self.teacher
         request.organization = None
-        request.org_memberships = []
-        request.org_permissions = []
 
-        response = MyCoursesListView.as_view()(request)
-        response.render()
-
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context_data["courses"].exists())
+        self.assertFalse(_owner_courses_queryset(request).exists())
 
 
 # ---------------------------------------------------------------------------

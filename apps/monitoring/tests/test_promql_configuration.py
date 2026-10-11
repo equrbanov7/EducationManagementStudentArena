@@ -37,14 +37,15 @@ class RootFilesystemPromqlTests(SimpleTestCase):
             self.assertIn('mountpoint="/"', item)
             self.assertNotIn('mountpoint="/host"', item)
 
-    def test_overview_uses_shared_root_disk_query(self):
-        source = (MONITORING_DIR / "views.py").read_text(encoding="utf-8")
+    # WP9a (2026-10-10): `overview/` silindi — xülasə metrikləri `summary_metrics.py`-dadır.
+    def test_summary_uses_shared_root_disk_query(self):
+        source = (MONITORING_DIR / "summary_metrics.py").read_text(encoding="utf-8")
 
         self.assertIn("queries.ROOT_DISK_USED_PERCENT_PROMQL", source)
         self.assertNotIn('mountpoint="/host"', source)
 
-    def test_overview_checks_real_blackbox_probes(self):
-        source = (MONITORING_DIR / "views.py").read_text(encoding="utf-8")
+    def test_summary_checks_real_blackbox_probes(self):
+        source = (MONITORING_DIR / "summary_metrics.py").read_text(encoding="utf-8")
 
         self.assertIn('min(probe_success{job="emsarena-blackbox"})', source)
 

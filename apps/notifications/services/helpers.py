@@ -183,6 +183,10 @@ def _membership_request_notification_message(request_obj: StudentOrganizationReq
     return "\n".join(lines)
 
 
+def _assigned_exams_section_link() -> str:
+    return f"{reverse('accounts:profile')}?section=assigned-exams"
+
+
 def _task_detail_link(task, task_kind: str) -> str:
     if task_kind == "assignment":
         return reverse("assignments:assignment_detail", args=[task.id])
@@ -191,7 +195,8 @@ def _task_detail_link(task, task_kind: str) -> str:
     if task_kind == "lab":
         return reverse("labs:lab_detail", args=[task.id])
     if task_kind == "exam":
-        return reverse("exams:assigned_exam_list")
+        # URL auditi §4 (2026-10-10): köhnə `exams/assigned/` siyahısı yox — kabinet bölməsi.
+        return _assigned_exams_section_link()
     return ""
 
 
@@ -218,7 +223,7 @@ def _task_result_link(task, task_kind: str, metadata: dict) -> str:
         attempt_id = metadata.get("attempt_id")
         if attempt_id:
             return reverse("exams:exam_result", args=[task.slug, attempt_id])
-        return reverse("exams:assigned_exam_list")
+        return _assigned_exams_section_link()
     return ""
 
 

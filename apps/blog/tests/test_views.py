@@ -10,7 +10,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 
 from apps.accounts.models import ProfileRole
-from apps.blog.models import Category, Post, Question
+from apps.blog.models import Category, Post
 from apps.exams.models import StudentGroup
 from apps.organizations.models import Membership, Organization
 from core.constants import OrganizationType
@@ -246,11 +246,8 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.context["extra_query"], "q=Teacher&category=test-technology")
         self.assertContains(response, "/?category=test-technology&q=Teacher")
 
-    def test_legacy_blog_home_redirects_to_root(self):
-        response = self.client.get("/blog/?q=Teacher&page=2")
-
-        self.assertEqual(response.status_code, 301)
-        self.assertEqual(response.url, "/?q=Teacher&page=2")
+    # WP9a A1 (2026-10-10): `blog/…` köhnə ləqəbləri silindi (301/POST ötürmələri) —
+    # reqressiya: tests/test_dead_routes_wp9a_2026_10_10.py.
 
     def test_student_can_open_create_post_page(self):
         self.client.force_login(self.student)
@@ -259,27 +256,8 @@ class BlogRoleAccessTest(TestCase):
         self.assertNotContains(response, 'name="new_category"')
         self.assertContains(response, 'name="subcategory"')
 
-    def test_teacher_question_pages_render_without_server_error(self):
-        Question.objects.create(
-            author=self.teacher,
-            question_text="What is EMS Arena?",
-            answer_text="A learning platform.",
-            visible_to_all=True,
-        )
-
-        self._activate_org(self.teacher)
-
-        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
-            with self.subTest(url_name=url_name):
-                response = self.client.get(reverse(url_name))
-                self.assertLess(response.status_code, 500)
-
-    def test_question_pages_redirect_anonymous_users_to_login(self):
-        for url_name in ("questions_i_can_see", "my_questions", "create_question"):
-            with self.subTest(url_name=url_name):
-                response = self.client.get(reverse(url_name))
-                self.assertEqual(response.status_code, 302)
-                self.assertIn(reverse("accounts:login"), response.url)
+    # WP9a (2026-10-10): «Suallar» səhifələri (`questions/…`) silindi — reqressiya:
+    # tests/test_dead_routes_wp9a_2026_10_10.py.
 
     def test_student_cannot_edit_other_users_post(self):
         self.client.force_login(self.student)
@@ -352,17 +330,8 @@ class BlogRoleAccessTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, f"{reverse('accounts:profile')}?section=posts")
 
-    def test_legacy_user_profile_redirects_own_username_to_accounts_profile(self):
-        self.client.force_login(self.teacher)
-        response = self.client.get(reverse("user_profile", args=[self.teacher.username]))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("accounts:profile"))
-
-    def test_legacy_user_profile_redirects_other_username_to_accounts_public_profile(self):
-        self.client.force_login(self.teacher)
-        response = self.client.get(reverse("user_profile", args=[self.student.username]))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("accounts:public_profile", args=[self.student.username]))
+    # URL auditi B1 (2026-10-10): `blog/users/<username>/` ləqəbi silindi — anonim istifadəçi
+    # adı orakulu idi. Reqressiya: accounts/tests/test_url_audit_wp8_2026_10_10.py.
 
     def test_article_detail_renders_back_link_with_public_profile_fallback(self):
         response = self.client.get(reverse("article_detail", args=[self.teacher_post.slug]))
@@ -394,12 +363,6 @@ class BlogRoleAccessTest(TestCase):
 
         self.assertEqual(self.teacher_post.view_count, 2)
 
-    def test_legacy_blog_article_detail_redirects_to_article_route(self):
-        response = self.client.get(f"/blog/posts/{self.teacher_post.slug}/")
-
-        self.assertEqual(response.status_code, 301)
-        self.assertEqual(response.url, reverse("article_detail", args=[self.teacher_post.slug]))
-
     def test_author_can_create_post_via_ajax(self):
         self.client.force_login(self.teacher)
         response = self.client.post(
@@ -419,27 +382,6 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, '"success": true')
         created_post = Post.objects.get(author=self.teacher, title="Ajax Created Post")
         self.assertEqual(created_post.category, self.ai_category)
-
-    def test_legacy_blog_create_post_ajax_endpoint_still_works(self):
-        self.client.force_login(self.teacher)
-        response = self.client.post(
-            "/blog/posts/create/",
-            {
-                "title": "Legacy Ajax Created Post",
-                "content": "Legacy ajax content",
-                "excerpt": "Legacy ajax excerpt",
-                "category": str(self.education_category.id),
-                "subcategory": "",
-                "image_url": "",
-                "is_published": "on",
-            },
-            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, '"success": true')
-        created_post = Post.objects.get(author=self.teacher, title="Legacy Ajax Created Post")
-        self.assertEqual(created_post.category, self.education_category)
 
     def test_student_created_post_stays_pending_until_approval(self):
         self.client.force_login(self.student)

@@ -160,14 +160,14 @@ class ReturnToNavigationTest(_ResultsBase):
 
 
 class HostEndpointAuthorizationMatrixTest(TestCase):
-    """Bütün host marşrutları (alias-lar daxil) — icazəsiz aktor heç nə dəyişə bilmir."""
+    """Bütün host marşrutları — icazəsiz aktor heç nə dəyişə bilmir.
+
+    WP9a (2026-10-10): `live/host/<pin>/start|next|finish/` ləqəbləri silindi — qısa adlar qalır.
+    """
 
     POST_ROUTES = (
-        "host_start_game",
-        "host_next_question",
         "host_skip_question_intro",
         "host_reveal",
-        "host_finish",
         "host_toggle_lock",
         "host_update_settings",
         "host_remove_player",
@@ -229,7 +229,7 @@ class HostEndpointAuthorizationMatrixTest(TestCase):
         self.assertEqual(self._snapshot(), before)
 
     def test_host_pages_hidden_from_other_actors(self):
-        pages = ("host_lobby", "host_presentation", "qr_png")
+        pages = ("host_presentation", "qr_png")
         actors = {
             "student": login_client(self.student, self.org),
             "colleague": login_client(self.colleague, self.org),

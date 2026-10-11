@@ -143,8 +143,10 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         session["active_organization"] = self.org_a.slug
         session.save()
 
+    # WP9a (2026-10-10): köhnə `my-courses/` / `my-enrolled/` səhifələri silindi — eyni
+    # tenant qaydası kabinet bölmələrində yoxlanılır.
     def test_my_courses_only_shows_owner_courses_in_active_tenant(self):
-        response = self.client.get(reverse("courses:my_courses"))
+        response = self.client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "my-courses"}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_a.title)
         self.assertNotContains(response, self.course_b.title)
@@ -155,32 +157,19 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         session["active_organization"] = self.org_a.slug
         session.save()
 
-        response = self.client.get(reverse("courses:student_courses"))
+        response = self.client.get(reverse("accounts:profile_section_fragment", kwargs={"section": "assigned-courses"}))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.course_a.title)
         self.assertNotContains(response, self.course_b.title)
 
     def test_my_courses_shows_no_data_without_active_organization(self):
-        from apps.courses.views import MyCoursesListView
+        from apps.courses.views.shared._helpers import _owner_courses_queryset
 
-        request = RequestFactory().get(reverse("courses:my_courses"))
+        request = RequestFactory().get("/")
         request.user = self.owner
         request.organization = None
-        request.org_memberships = []
-        request.org_permissions = []
-        response = MyCoursesListView.as_view()(request)
-        response.render()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context_data["courses"].exists())
-
-    def test_my_courses_requires_login(self):
-        self.client.logout()
-
-        response = self.client.get(reverse("courses:my_courses"))
-
-        self.assertEqual(response.status_code, 302)
-        self.assertIn(reverse("accounts:login"), response.url)
+        self.assertFalse(_owner_courses_queryset(request).exists())
 
     def test_course_dashboard_preserves_assigned_tasks_profile_return_context(self):
         self.client.force_login(self.student)

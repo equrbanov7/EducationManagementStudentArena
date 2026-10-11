@@ -82,5 +82,6 @@ class QrJoinLoginStatesTest(TestCase):
         set_password = reverse("accounts:set_initial_password")
         self.assertEqual(client.get(reverse("accounts:profile"))["Location"], set_password)
         self.assertEqual(
-            client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin}))["Location"], set_password
+            client.get(reverse("liveExam:host_presentation", kwargs={"pin": self.session.pin}))["Location"],
+            set_password,
         )

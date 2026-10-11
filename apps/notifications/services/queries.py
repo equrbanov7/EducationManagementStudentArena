@@ -21,7 +21,7 @@ def get_user_notifications(*, user, filter_by: str = "all", notification_type: s
     real security boundary). Because notifications now carry an ``organization``
     FK enforced by RLS, callers that must show a user's FULL inbox regardless
     of the active organisation should evaluate this queryset inside
-    ``core.rls.bypass_rls()`` — see ``notifications.views.notification_list``.
+    ``core.rls.bypass_rls()`` — see the cabinet section ``accounts/views/profile/_sections/notifications.py``.
     """
     qs = InAppNotification.objects.filter(
         recipient=user,

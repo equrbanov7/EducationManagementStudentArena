@@ -37,7 +37,7 @@ ROLE_MATRIX = [
 PERMITTED_ROLES = ("rector", "ikt_rehber")
 
 API_NAMES = [
-    "monitoring:overview",
+    "monitoring:summary",  # WP9a (2026-10-10): köhnə `overview` əvəzinə
     "monitoring:server",
     "monitoring:containers",
     "monitoring:application",
@@ -88,29 +88,29 @@ class MonitoringAccessTests(TestCase):
         for role_name, user in self.role_users.items():
             if role_name in PERMITTED_ROLES:
                 continue
-            response = self._get(user, "monitoring:overview")
+            response = self._get(user, "monitoring:summary")
             self.assertEqual(response.status_code, 403, f"{role_name} 403 almalı idi")
 
     def test_permitted_roles_can_read(self):
         for role_name in PERMITTED_ROLES:
-            response = self._get(self.role_users[role_name], "monitoring:overview")
+            response = self._get(self.role_users[role_name], "monitoring:summary")
             self.assertEqual(response.status_code, 200, f"{role_name} 200 almalı idi")
 
     def test_org_owner_gets_403(self):
-        response = self._get(self.owner, "monitoring:overview")
+        response = self._get(self.owner, "monitoring:summary")
         self.assertEqual(response.status_code, 403)
 
     def test_is_staff_alone_is_not_enough(self):
-        response = self._get(self.staff_only, "monitoring:overview")
+        response = self._get(self.staff_only, "monitoring:summary")
         self.assertEqual(response.status_code, 403)
 
     def test_anonymous_gets_401(self):
-        response = self._get(None, "monitoring:overview")
+        response = self._get(None, "monitoring:summary")
         self.assertEqual(response.status_code, 401)
 
     def test_unauthorized_attempt_is_recorded(self):
         before = SecurityEvent.objects.filter(event_type="unauthorized_monitoring").count()
-        self._get(self.role_users["student"], "monitoring:overview")
+        self._get(self.role_users["student"], "monitoring:summary")
         after = SecurityEvent.objects.filter(event_type="unauthorized_monitoring").count()
         self.assertGreater(after, before)
 

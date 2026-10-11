@@ -45,32 +45,32 @@ class HostFlowGuardsTest(TestCase):
     def test_full_cycle_and_double_clicks(self):
         update_session_settings(self.session, {"randomize_questions": False})
         with self.captureOnCommitCallbacks(execute=True):
-            self.assertEqual(self._post("host_start_game", {"question_count": "2"}).status_code, 200)
+            self.assertEqual(self._post("start_game", {"question_count": "2"}).status_code, 200)
         # İkinci «Başla» — 409 (kilid altında yoxlanır).
-        self.assertEqual(self._post("host_start_game").status_code, 409)
+        self.assertEqual(self._post("start_game").status_code, 409)
         self.session.refresh_from_db()
         first_started = self.session.question_started_at
         self.assertEqual(self.session.current_question_id, self.q1.id)
 
         # QUESTION vəziyyətində «next» ARTIQ sualı yenidən nəşr etmir (LXBE-05).
-        self.assertEqual(self._post("host_next_question").status_code, 409)
+        self.assertEqual(self._post("next_question").status_code, 409)
         self.session.refresh_from_db()
         self.assertEqual(self.session.question_started_at, first_started)
 
         self.assertEqual(self._post("host_reveal").status_code, 200)
         self.assertEqual(self._post("host_reveal").status_code, 409)  # ikiqat reveal
 
-        first_next = self._post("host_next_question")
+        first_next = self._post("next_question")
         self.assertEqual(first_next.json(), {"ok": True, "index": 2, "total": 2})
-        self.assertEqual(self._post("host_next_question").status_code, 409)  # ikiqat klik
+        self.assertEqual(self._post("next_question").status_code, 409)  # ikiqat klik
         self.session.refresh_from_db()
         self.assertEqual(self.session.current_question_id, self.q2.id)
 
         self.assertEqual(self._post("host_reveal").status_code, 200)
-        self.assertEqual(self._post("host_next_question").json(), {"ok": True, "finished": True})
+        self.assertEqual(self._post("next_question").json(), {"ok": True, "finished": True})
         self.session.refresh_from_db()
         self.assertEqual(self.session.state, LiveSession.STATE_FINISHED)
-        self.assertEqual(self._post("host_finish").status_code, 409)
+        self.assertEqual(self._post("finish_game").status_code, 409)
 
     def test_game_started_payload_has_redirect_jitter(self):
         with (
@@ -78,7 +78,7 @@ class HostFlowGuardsTest(TestCase):
             mock.patch("apps.live_exam.views.host.game.broadcast_play"),
         ):
             with self.captureOnCommitCallbacks(execute=True):
-                self._post("host_start_game")
+                self._post("start_game")
         payload = lobby.call_args[0][1]
         self.assertEqual(payload["type"], "game_started")
         self.assertEqual(payload["redirect_jitter_ms"], services.GAME_START_REDIRECT_JITTER_MS)

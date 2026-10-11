@@ -31,7 +31,6 @@ User = get_user_model()
 
 READ_APIS = [
     "monitoring:summary",
-    "monitoring:overview",
     "monitoring:server",
     "monitoring:containers",
     "monitoring:application",

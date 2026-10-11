@@ -1,7 +1,6 @@
 """Labs — müəllim submission idarəetməsi və qiymətləndirmə (F2, 2026-07-02)."""
 
 import logging
-import os
 from datetime import datetime
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -11,7 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -369,39 +367,3 @@ def grade_submission_page(request, pk):
     }
 
     return render(request, "labs/grade_submission.html", context)
-
-
-@login_required
-def submission_answers(request, pk):
-    """Submission-un cavablarını JSON olaraq qaytar"""
-    submission = _get_tenant_submission_or_404(request, pk)
-
-    if not can_teacher_access_lab(submission.assignment.lab, request.user):
-        return JsonResponse(
-            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
-        )
-
-    # Bu submission-a aid cavabları al
-    answers = (
-        LabAnswer.objects.filter(
-            lab=submission.assignment.lab,
-            student=submission.assignment.student,
-            is_draft=False,
-        )
-        .select_related("question")
-        .order_by("question__block__order", "question__question_number")
-    )
-
-    answers_data = []
-    for ans in answers:
-        answers_data.append(
-            {
-                "question": ans.question.question_text,
-                "answer": ans.answer or "",
-                "file_url": ans.answer_file.url if ans.answer_file else None,
-                "file_name": (os.path.basename(ans.answer_file.name) if ans.answer_file else None),
-                "score": float(ans.score) if ans.score else None,
-            }
-        )
-
-    return JsonResponse({"success": True, "answers": answers_data})

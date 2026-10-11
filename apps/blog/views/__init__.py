@@ -2,25 +2,21 @@
 blog/views — FASAD (F7 rol-skeleti, 2026-07-02, AGENTS §6).
 
 Fayllar views/{public,author,moderator}/ rol paketlərinə bölünüb
-(posts.py üç rola ayrılıb). urls.py/legacy_urls.py üçün import səthi dəyişmir.
+(posts.py üç rola ayrılıb). urls.py üçün import səthi dəyişmir (WP9a 2026-10-10:
+köhnə ``legacy_urls.py`` ləqəbləri və «Suallar» səhifələri silindi).
 """
 
-from .author import create_post, create_question, my_questions, post_edit_ajax, questions_i_can_see
+from .author import create_post, post_edit_ajax
 from .moderator import delete_post, review_post, teacher_moderate_post
 from .public import (
     about,
     category_detail,
     home,
     list_posts,
-    logout_view,
     post_detail,
-    register_view,
-    resend_code_view,
     search_posts,
     subscribe_page,
     technology,
-    verify_code_view,
-    verify_email_link_view,
 )
 
 __all__ = [
@@ -37,12 +33,4 @@ __all__ = [
     "post_detail",
     "subscribe_page",
     "category_detail",
-    "create_question",
-    "my_questions",
-    "questions_i_can_see",
-    "register_view",
-    "verify_code_view",
-    "verify_email_link_view",
-    "resend_code_view",
-    "logout_view",
 ]

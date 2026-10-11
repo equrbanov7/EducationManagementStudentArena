@@ -341,8 +341,7 @@ class BlogPostAuditLogTest(TestCase):
 
 class BlogQuestionIsolationTest(TestCase):
     """
-    Teachers author questions; students must not create questions, and
-    a user must not see private questions they were not granted access to.
+    A user must not see private questions they were not granted access to.
     """
 
     def setUp(self):
@@ -374,54 +373,23 @@ class BlogQuestionIsolationTest(TestCase):
             visible_to_all=False,
         )
 
-    def test_student_cannot_create_question(self):
-        """Students are denied access to create_question (teacher_only guard)."""
-        self.client.force_login(self.student)
-        url = reverse("create_question")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 403)
+    # WP9a (2026-10-10): «Suallar» səhifələri silindi — görünürlük qaydası artıq model
+    # səviyyəsində (``Question.visible_q``) yoxlanılır; data və model qalır.
 
-    def test_student_cannot_post_create_question(self):
-        """Students cannot create a question via POST."""
-        self.client.force_login(self.student)
-        url = reverse("create_question")
-        response = self.client.post(url, {"question_text": "injected", "answer_text": "hack"})
-        self.assertEqual(response.status_code, 403)
+    def _visible_ids(self, user, organization=None):
+        from apps.blog.models import Question
 
-    def test_my_questions_shows_only_own(self):
-        """my_questions returns only the current user's questions."""
-        self.client.force_login(self.other_teacher)
-        url = reverse("my_questions")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        for q in response.context["questions"]:
-            self.assertEqual(q.author_id, self.other_teacher.id)
+        return set(
+            Question.objects.filter(Question.visible_q(user, organization)).distinct().values_list("pk", flat=True)
+        )
 
     def test_private_question_not_visible_to_unauthorised_user(self):
-        """A private question is not returned in questions_i_can_see for a non-granted user."""
-        self.client.force_login(self.other_teacher)
-        url = reverse("questions_i_can_see")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        returned_ids = [q.id for q in response.context["questions"]]
-        self.assertNotIn(self.private_question.id, returned_ids)
+        """A private question is not visible to a non-granted user."""
+        self.assertNotIn(self.private_question.id, self._visible_ids(self.other_teacher))
 
     def test_private_question_visible_to_author(self):
-        """A private question is visible in questions_i_can_see for its author."""
-        self.client.force_login(self.teacher)
-        url = reverse("questions_i_can_see")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        returned_ids = [q.id for q in response.context["questions"]]
-        self.assertIn(self.private_question.id, returned_ids)
-
-    def test_anonymous_cannot_access_questions(self):
-        """Anonymous users are redirected to login for question pages."""
-        for url_name in ("create_question", "my_questions", "questions_i_can_see"):
-            url = reverse(url_name)
-            response = self.client.get(url)
-            self.assertEqual(response.status_code, 302, f"{url_name} should redirect anon")
-            self.assertIn("login", response.url, f"{url_name} should redirect to login")
+        """A private question stays visible to its author."""
+        self.assertIn(self.private_question.id, self._visible_ids(self.teacher))
 
 
 # ---------------------------------------------------------------------------
@@ -471,18 +439,18 @@ class BlogQuestionVisibleToAllCrossOrgTest(TestCase):
 
     def test_visible_to_all_question_hidden_from_other_org_teacher(self):
         """A legacy (organization-less) visible_to_all question no longer leaks to other users."""
-        self.client.force_login(self.teacher_org_b)
-        url = reverse("questions_i_can_see")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        returned_ids = [q.id for q in response.context["questions"]]
+        from apps.blog.models import Question
+
+        returned_ids = set(
+            Question.objects.filter(Question.visible_q(self.teacher_org_b, None)).values_list("pk", flat=True)
+        )
         self.assertNotIn(self.public_question.id, returned_ids)
 
     def test_private_question_hidden_from_other_org_teacher(self):
         """A private question is not visible to teachers in other orgs."""
-        self.client.force_login(self.teacher_org_b)
-        url = reverse("questions_i_can_see")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        returned_ids = [q.id for q in response.context["questions"]]
+        from apps.blog.models import Question
+
+        returned_ids = set(
+            Question.objects.filter(Question.visible_q(self.teacher_org_b, None)).values_list("pk", flat=True)
+        )
         self.assertNotIn(self.private_question.id, returned_ids)

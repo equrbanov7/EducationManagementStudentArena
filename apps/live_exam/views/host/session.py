@@ -103,19 +103,6 @@ def live_create_session_by_slug(request, slug):
 
 
 @login_required
-def live_host_lobby(request, pin):
-    session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
-
-    if session.host_user != request.user:
-        raise Http404(pgettext("live_exam.view.permission", "not_allowed"))
-
-    _ensure_host_org_permission(request, session.exam.organization)
-
-    context = _host_session_context(request, session)
-    return render(request, "liveExam/host_lobby.html", context)
-
-
-@login_required
 def live_host_presentation(request, pin):
     session = get_object_or_404(LiveSession.objects.select_related("exam__organization"), pin=pin)
 

@@ -1,12 +1,11 @@
 # blog/forms.py
 from django import forms
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.utils.translation import pgettext_lazy
 
 from core.upload_security import IMAGE_ALLOWED_EXTENSIONS, randomize_uploaded_filename, validate_uploaded_file
 
-from .models import Category, Comment, Post, Question
+from .models import Category, Comment, Post
 from .selectors import build_post_category_picker_options, get_post_category_tree
 from .services import resolve_post_category_selection
 from .taxonomy import SUPPORTED_CATEGORY_LANGUAGES
@@ -24,61 +23,6 @@ class SubscriptionForm(forms.Form):
             }
         ),
     )
-
-
-class RegisterForm(forms.ModelForm):
-    password = forms.CharField(
-        label=pgettext_lazy("blog.form.register", "password_label"),
-        widget=forms.PasswordInput(
-            attrs={
-                "placeholder": pgettext_lazy("blog.form.register", "password_placeholder"),
-                "class": "form-control",
-            }
-        ),
-    )
-    password2 = forms.CharField(
-        label=pgettext_lazy("blog.form.register", "password_confirm_label"),
-        widget=forms.PasswordInput(
-            attrs={
-                "placeholder": pgettext_lazy("blog.form.register", "password_confirm_placeholder"),
-                "class": "form-control",
-            }
-        ),
-    )
-
-    class Meta:
-        model = User
-        fields = ("username", "email")
-        widgets = {
-            "username": forms.TextInput(
-                attrs={
-                    "placeholder": pgettext_lazy("blog.form.register", "username_placeholder"),
-                    "class": "form-control",
-                }
-            ),
-            "email": forms.EmailInput(
-                attrs={
-                    "placeholder": pgettext_lazy("blog.form.register", "email_placeholder"),
-                    "class": "form-control",
-                }
-            ),
-        }
-
-    def clean(self):
-        cleaned_data = super().clean()
-        p1 = cleaned_data.get("password")
-        p2 = cleaned_data.get("password2")
-
-        if p1 and p2 and p1 != p2:
-            raise forms.ValidationError(pgettext_lazy("blog.form.register", "password_mismatch"))
-
-        return cleaned_data
-
-    def clean_email(self):
-        email = self.cleaned_data.get("email")
-        if email and User.objects.filter(email=email).exists():
-            raise forms.ValidationError(pgettext_lazy("blog.form.register", "email_exists"))
-        return email
 
 
 class PostForm(forms.ModelForm):
@@ -363,55 +307,3 @@ class CommentForm(forms.ModelForm):
                 }
             ),
         }
-
-
-class QuestionForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = ["question_text", "answer_text", "visible_to_all", "visible_users"]
-        widgets = {
-            "question_text": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "rows": 3,
-                    "placeholder": pgettext_lazy("blog.form.question", "question_placeholder"),
-                }
-            ),
-            "answer_text": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "rows": 3,
-                    "placeholder": pgettext_lazy("blog.form.question", "answer_placeholder"),
-                }
-            ),
-            "visible_to_all": forms.CheckboxInput(
-                attrs={
-                    "class": "form-check-input",
-                }
-            ),
-            "visible_users": forms.SelectMultiple(
-                attrs={
-                    "class": "form-control",
-                }
-            ),
-        }
-        labels = {
-            "question_text": pgettext_lazy("blog.form.question", "label_question"),
-            "answer_text": pgettext_lazy("blog.form.question", "label_answer"),
-            "visible_to_all": pgettext_lazy("blog.form.question", "label_visible_to_all"),
-            "visible_users": pgettext_lazy("blog.form.question", "label_visible_users"),
-        }
-
-    def __init__(self, *args, organization=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Təhlükəsizlik auditi 2026-10-05: default queryset ``User.objects.all()`` idi —
-        # müəllim BÜTÜN tenant-ların istifadəçilərini görür və seçə bilirdi. Seçim yalnız
-        # aktiv təşkilatın aktiv üzvləridir; təşkilat konteksti yoxdursa — boş.
-        users = self.fields["visible_users"].queryset
-        if organization is None:
-            users = users.none()
-        else:
-            users = users.filter(
-                memberships__organization=organization, memberships__is_active=True, is_active=True
-            ).distinct()
-        self.fields["visible_users"].queryset = users
