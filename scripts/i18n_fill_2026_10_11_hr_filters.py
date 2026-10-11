@@ -176,8 +176,73 @@ _MR = [
     ),
 ]
 
+#: Sahib 2026-10-11: öz «Vəzifə»ni profil redaktəsindən yazmaq (RİM redaktə hüququ ilə).
+PE = "profile.edit_v2"
+_PE = [
+    _t("Vəzifə", "Position", "Должность", "Görev"),
+    _t(
+        "məs: Rəqəmsal İnkişaf Mərkəzinin müdiri",
+        "e.g. Head of the Digital Development Centre",
+        "напр.: руководитель Центра цифрового развития",
+        "ör.: Dijital Gelişim Merkezi müdürü",
+    ),
+    _t(
+        "Profil kartında «Vəzifə» kimi görünür; boş qalsa ən yüksək rolunuz göstərilir.",
+        "Shown as “Position” on your profile card; if empty, your highest role is shown.",
+        "Отображается как «Должность» в карточке профиля; если пусто — показывается ваша высшая роль.",
+        "Profil kartında «Görev» olarak görünür; boş kalırsa en yüksek rolünüz gösterilir.",
+    ),
+]
+
+#: Sahib 2026-10-12: «Sistem tənzimləmələri» — sillabus saatları yükdən + açar dəyişəndə təsdiq.
+RS = "accounts.runtime_settings"
+_RS = [
+    _t(
+        "Sillabus dərs saatları yükdən",
+        "Syllabus hours from the teaching load",
+        "Часы силлабуса из учебной нагрузки",
+        "Ders izlencesi saatleri yükten",
+    ),
+    _t(
+        "Yanılıda sillabusun mühazirə/seminar/laboratoriya saatları kafedranın paylanmış yükündən gəlir və "
+        "müəllim dəyişə bilmir; yükdə olmayan dərs növü (məs. lab yoxdursa) həftəlik planda görünmür və ona "
+        "saat yazılmır. Yükdə sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
+        "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir.",
+        "When on, the syllabus lecture/seminar/lab hours come from the chair's distributed teaching load and the "
+        "teacher cannot change them; a lesson type that is not in the load (e.g. no lab) is not shown in the weekly "
+        "plan and no hours can be entered for it. If the load has no row, the teacher chooses the hours. When off, "
+        "the previous rule applies: the approved curriculum first, then the load; extra types are shown too.",
+        "Если включено, часы лекций/семинаров/лабораторных в силлабусе берутся из распределённой нагрузки кафедры, "
+        "преподаватель не может их менять; вид занятий, которого нет в нагрузке (например, нет лабораторных), не "
+        "показывается в недельном плане, и часы для него не вводятся. Если в нагрузке нет строки, преподаватель "
+        "выбирает часы сам. Если выключено — прежнее правило: сначала утверждённый учебный план, затем нагрузка; "
+        "лишние виды тоже показываются.",
+        "Açıkken izlencenin teori/seminer/laboratuvar saatleri bölümün dağıtılmış ders yükünden gelir ve öğretim "
+        "elemanı değiştiremez; yükte olmayan ders türü (ör. laboratuvar yoksa) haftalık planda görünmez ve ona saat "
+        "yazılamaz. Yükte satır yoksa öğretim elemanı saati kendisi seçer. Kapalıyken önceki kural: önce onaylı "
+        "öğretim planı, sonra yük; fazla türler de gösterilir.",
+    ),
+    _t("Dəyişikliyi təsdiqləyin", "Confirm the change", "Подтвердите изменение", "Değişikliği onaylayın"),
+    _t("yandırılacaq.", "will be turned on.", "будет включено.", "açılacak."),
+    _t("söndürüləcək.", "will be turned off.", "будет выключено.", "kapatılacak."),
+    _t(
+        "Dəyişiklik «Yadda saxla» basılandan sonra bütün istifadəçilər üçün qüvvəyə minir və audit jurnalına yazılır.",
+        "The change takes effect for all users after you press “Save” and is written to the audit log.",
+        "Изменение вступает в силу для всех пользователей после нажатия «Сохранить» и записывается в журнал аудита.",
+        "Değişiklik «Kaydet»e basıldıktan sonra tüm kullanıcılar için geçerli olur ve denetim günlüğüne yazılır.",
+    ),
+    _t("Ləğv et", "Cancel", "Отмена", "İptal"),
+    _t("Təsdiqlə", "Confirm", "Подтвердить", "Onayla"),
+]
+
+#: Spec etiketləri `core.runtime_settings` kontekstindədir (core/runtime_settings.py `_CTX`).
+CRS = "core.runtime_settings"
+
 # ctx → msgid → {az, en, ru, tr}
 ENTRIES = {
+    CRS: {row["az"]: row for row in _RS[:2]},
+    RS: {row["az"]: row for row in _RS},
+    PE: {row["az"]: row for row in _PE},
     MR: {row["az"]: row for row in _MR},
     HR: {row["az"]: row for row in _HR},
     ROLES: {row["az"]: row for row in _ROLES},

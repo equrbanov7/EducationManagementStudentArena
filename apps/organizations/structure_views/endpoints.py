@@ -26,7 +26,7 @@ from .unit_detail import build_unit_detail_context
 
 @login_required
 def organization_faculties(request, slug):
-    """Fakültələrin idarə edilməsi (siyahı, yaratma, redaktə, silmə, dekan təyini)."""
+    """Fakültə əməlləri (POST); GET → kabinetin «Fakültələr» (`org-faculties`) bölməsi."""
     return _structure_page_view(
         request,
         slug,
@@ -35,14 +35,13 @@ def organization_faculties(request, slug):
         action_handler=_handle_faculty_action,
         partial_template="accounts/profile/sections/_org_faculties.html",
         context_key="org_faculties_section",
-        page_template="organizations/faculties.html",
         redirect_url_name="organizations:structure_faculties",
     )
 
 
 @login_required
 def organization_kafedras(request, slug):
-    """Kafedraların idarə edilməsi (siyahı, filtr, CRUD, müdir/müəllim təyinatı)."""
+    """Kafedra əməlləri (POST); GET → kabinetin «Kafedralar» (`org-kafedras`) bölməsi."""
     return _structure_page_view(
         request,
         slug,
@@ -51,7 +50,6 @@ def organization_kafedras(request, slug):
         action_handler=_handle_kafedra_action,
         partial_template="accounts/profile/sections/_org_kafedras.html",
         context_key="org_kafedras_section",
-        page_template="organizations/kafedras.html",
         redirect_url_name="organizations:structure_kafedras",
     )
 

@@ -72,10 +72,12 @@ saxlananda sətir silinir (defolt işləyir). Göndəriş JSON POST-dur (system_
             </button>
         </div>
     </form>
+    {% trans "Dəyişikliyi təsdiqləyin" context "accounts.runtime_settings" as ss_confirm_title %}
+    {% include "partials/ems_ui/_dialog.html" with dialog_id="ssConfirmDialog" dialog_title=ss_confirm_title dialog_body_include="accounts/profile/sections/system_settings/_confirm_body.html" dialog_foot_include="accounts/profile/sections/system_settings/_confirm_foot.html" dialog_static=True %}
 </div>
 {% endif %}
 {% endwith %}
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/system_settings.css' %}?v=20261010-bool">
-<script src="{% static 'accounts/js/profile/system_settings.js' %}?v=20261010-bool" defer></script>
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/system_settings.css' %}?v=20261012-confirm">
+<script src="{% static 'accounts/js/profile/system_settings.js' %}?v=20261012-confirm" defer></script>
 </section>
 {% endif %}

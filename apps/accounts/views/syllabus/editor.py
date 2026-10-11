@@ -272,7 +272,8 @@ def _ensure_plan_hours(syllabus, context) -> tuple[dict, bool]:
     author = bool(context.get("is_author"))
     found = plan_hours_for_offering(getattr(syllabus, "offering", None))
     if found:
-        if not plan_hours:
+        # Sahib 2026-10-12: yük dəyişibsə müəllifin açıq qaralaması uyğunlaşır (təsdiqlənmişə yazılmır).
+        if dict(found) != plan_hours:
             if author:
                 set_plan_hours(context["version"], found)
             return dict(found), False

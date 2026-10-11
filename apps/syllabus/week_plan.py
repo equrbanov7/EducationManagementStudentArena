@@ -58,14 +58,48 @@ def hour_choices(plan_hours=None) -> tuple:
 def visible_hour_kinds(plan_hours, rows=()) -> tuple:
     """Cədvəldə göstərilən dərs növləri.
 
-    Plan yoxdursa hamısı; varsa planda saatı olan növlər + sətirlərdə saatı
-    olan növlər (köçürülmüş dəyər gizlənməsin).
+    Plan (yük) yoxdursa hamısı; varsa YALNIZ yükdə saatı olan növlər — sahib 2026-10-12: «seminar və ya lab
+    yoxdursa göstərmə, yazmaq olmasın; yükdə nə gəlibsə o görünsün». Köçürülmüş sətirlərdə qalan artıq
+    dəyər sütunu geri qaytarmır (saxlananda ``drop_unplanned_hours`` onu sıfırlayır). ``rows`` uyğunluq üçün qalır.
     """
     planned = _planned(plan_hours)
     if not any(planned.values()):
         return tuple(LESSON_HOUR_KINDS)
+    if _strict():
+        return tuple(kind for kind in LESSON_HOUR_KINDS if planned[kind])
+    # Açar söndürülüdə əvvəlki qayda: sətirlərdə saatı olan növ də görünür (köçürülmüş dəyər gizlənməsin).
     used = {kind for row in rows if isinstance(row, dict) for kind in LESSON_HOUR_KINDS if _int(row.get(kind))}
     return tuple(kind for kind in LESSON_HOUR_KINDS if planned[kind] or kind in used)
+
+
+def _strict() -> bool:
+    from core.academic_rules import syllabus_hours_from_load
+
+    return syllabus_hours_from_load()
+
+
+def drop_unplanned_hours(rows, plan_hours) -> tuple:
+    """Yükdə saatı OLMAYAN növlərin sətir saatlarını sıfırlayır → ``(sətirlər, dəyişdi)``.
+
+    Plan boşdursa (yük/plan tapılmayıb — müəllim saatı özü seçir) və ya RİM açarı `syllabus.hours_from_load`
+    söndürülübsə heç nə dəyişmir.
+    """
+    planned = _planned(plan_hours)
+    if not any(planned.values()) or not _strict():
+        return list(rows or []), False
+    changed = False
+    out = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            out.append(row)
+            continue
+        row = dict(row)
+        for kind in LESSON_HOUR_KINDS:
+            if not planned[kind] and _int(row.get(kind)):
+                row[kind] = 0
+                changed = True
+        out.append(row)
+    return out, changed
 
 
 def default_distribution(hours: int) -> list:
@@ -135,6 +169,7 @@ def fit_rows_to_hours(rows, plan_hours) -> tuple:
 
 __all__ = [
     "default_distribution",
+    "drop_unplanned_hours",
     "expected_week_rows",
     "fit_rows_to_hours",
     "hour_choices",

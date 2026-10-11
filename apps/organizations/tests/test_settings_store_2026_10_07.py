@@ -193,7 +193,9 @@ class SnapshotSurvivesStaleWritersTest(_StaleWorld):
         self.assertFalse([q for q in queries.captured_queries if "FOR UPDATE" in q["sql"]])
 
     def test_org_settings_page_post_does_not_write_settings_json(self):
+        """Sahib 2026-10-11: köhnə «Təşkilat Ayarları» səhifəsi silindi — POST heç nə YAZMIR."""
         stale, ann, gate = self._stale_then_snapshots()
+        email_before = _fresh(self.org).email
         self.client.force_login(self.owner)
         with CaptureQueriesContext(connection) as queries:
             response = self.client.post(
@@ -202,10 +204,9 @@ class SnapshotSurvivesStaleWritersTest(_StaleWorld):
             )
         self.assertEqual(response.status_code, 302)
         updates = [q["sql"] for q in queries.captured_queries if q["sql"].startswith('UPDATE "organizations_org')]
-        self.assertTrue(updates)
-        self.assertFalse([sql for sql in updates if '"settings"' in sql], updates)
+        self.assertEqual(updates, [])
         self._assert_snapshots(ann, gate)
-        self.assertEqual(_fresh(self.org).email, "info@qku.edu.az")
+        self.assertEqual(_fresh(self.org).email, email_before)
 
 
 class SettingsStoreHelperTest(_StaleWorld):

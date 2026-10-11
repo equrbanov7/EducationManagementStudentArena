@@ -180,7 +180,6 @@ def _build_user_organization_access_rows(
         row["dashboard_url"] = reverse("organizations:dashboard", kwargs={"slug": organization.slug})
         row["members_url"] = reverse("organizations:members", kwargs={"slug": organization.slug})
         row["roles_url"] = reverse("organizations:roles", kwargs={"slug": organization.slug})
-        row["settings_url"] = reverse("organizations:settings", kwargs={"slug": organization.slug})
         if row["is_current"]:
             for key, section in _CABINET_LINKS:
                 if section in cabinet_sections:

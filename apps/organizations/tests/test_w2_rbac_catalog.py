@@ -186,41 +186,55 @@ class Migration0051Test(_Base):
 
 
 class OrganizationSettingsGateTest(_Base):
+    """Sahib 2026-10-11: köhnə «Təşkilat Ayarları» səhifəsi silindi.
+
+    URL qalır (köhnə əlfəcinlər), amma heç nə render ETMİR və heç nə YAZMIR —
+    yalnız kabinetə yönləndirir. Açar/səviyyə nə olursa olsun POST bazaya toxunmur.
+    """
+
     def url(self):
         return reverse("organizations:settings", kwargs={"slug": self.org.slug})
 
-    def test_template_holders_and_owner_still_pass(self):
-        for key in ("vice_rector", "ikt_rehber", "rector"):
-            self.assertEqual(self.client_for(self.user(key)).get(self.url()).status_code, 200, key)
-        owner_client = self.client_for(self.A["owner"])
-        self.assertEqual(owner_client.get(self.url()).status_code, 200)
-        response = self.client_for(self.user("vice_rector")).post(self.url(), {"description": "yeni təsvir"})
-        self.assertEqual(response.status_code, 302)
+    def assert_cabinet_redirect(self, response, msg=None):
+        self.assertEqual(response.status_code, 302, msg)
+        self.assertTrue(response.url.startswith(reverse("accounts:profile")), f"{msg}: {response.url}")
+
+    def assert_description_unchanged(self, before):
         with bypass_rls():
             self.org.refresh_from_db()
-        self.assertEqual(self.org.description, "yeni təsvir")
+        self.assertEqual(self.org.description, before)
+
+    def test_template_holders_and_owner_still_pass(self):
+        before = self.org.description
+        for key in ("vice_rector", "ikt_rehber", "rector"):
+            self.assert_cabinet_redirect(self.client_for(self.user(key)).get(self.url()), key)
+        self.assert_cabinet_redirect(self.client_for(self.A["owner"]).get(self.url()), "owner")
+        response = self.client_for(self.user("vice_rector")).post(self.url(), {"description": "yeni təsvir"})
+        self.assert_cabinet_redirect(response, "post")
+        self.assert_description_unchanged(before)
 
     def test_without_org_settings_key_the_page_is_closed(self):
         self.strip("vice_rector", "org.settings")
         response = self.client_for(self.user("vice_rector")).get(self.url())
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("organizations:dashboard", kwargs={"slug": self.org.slug}))
+        self.assert_cabinet_redirect(response)
+        self.assertTemplateNotUsed(response, "organizations/settings.html")
 
     def test_without_org_edit_key_get_is_open_but_post_is_closed(self):
+        before = self.org.description
         self.strip("vice_rector", "org.edit")
         client = self.client_for(self.user("vice_rector"))
-        self.assertEqual(client.get(self.url()).status_code, 200)
-        response = client.post(self.url(), {"description": "dəyişməməlidir"})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("organizations:dashboard", kwargs={"slug": self.org.slug}))
-        with bypass_rls():
-            self.org.refresh_from_db()
-        self.assertNotEqual(self.org.description, "dəyişməməlidir")
+        self.assert_cabinet_redirect(client.get(self.url()))
+        self.assert_cabinet_redirect(client.post(self.url(), {"description": "dəyişməməlidir"}))
+        self.assert_description_unchanged(before)
 
     def test_level_below_90_with_keys_is_still_closed(self):
-        """Səviyyə qapısı qalır — açar tək başına kifayət etmir (dekan 80)."""
+        """Səviyyə qapısı yerinə: heç kimə səhifə yoxdur, POST heç nə yazmır (dekan 80)."""
+        before = self.org.description
         self.grant("dean", "org.settings", "org.edit")
-        self.assertEqual(self.client_for(self.user("dean")).get(self.url()).status_code, 302)
+        client = self.client_for(self.user("dean"))
+        self.assertEqual(client.get(self.url()).status_code, 302)
+        client.post(self.url(), {"description": "dekan yazmasın"})
+        self.assert_description_unchanged(before)
 
 
 class PermissionEditorRoleEditTest(_Base):

@@ -144,8 +144,14 @@ class AcademicRulesSettingsTest(TestCase):
         groups = {group["key"]: group for group in response.context["system_settings_section"]["groups"]}
         self.assertEqual(
             [field["key"] for field in groups["academic"]["fields"]],
-            ["academic.selfwork_enabled", "academic.activity_split", "academic.coursework_enabled"],
+            [
+                "academic.selfwork_enabled",
+                "academic.activity_split",
+                "academic.coursework_enabled",
+                "syllabus.hours_from_load",  # sahib 2026-10-12
+            ],
         )
+        self.assertIn('id="ssConfirmDialog"', content)  # açar dəyişəndə təsdiq pəncərəsi
 
 
 class PeriodScopeTest(SimpleTestCase):

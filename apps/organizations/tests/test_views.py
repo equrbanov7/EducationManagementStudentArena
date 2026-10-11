@@ -47,7 +47,11 @@ class OrganizationViewAccessTest(TestCase):
         self.client.force_login(self.member)
         response = self.client.get(reverse("organizations:switch", kwargs={"slug": self.organization.slug}))
 
-        self.assertRedirects(response, reverse("organizations:dashboard", kwargs={"slug": self.organization.slug}))
+        self.assertRedirects(
+            response,
+            reverse("organizations:dashboard", kwargs={"slug": self.organization.slug}),
+            fetch_redirect_response=False,
+        )
 
     def test_superadmin_can_access_any_organization_pages_without_membership(self):
         self.client.force_login(self.superadmin)
@@ -64,11 +68,15 @@ class OrganizationViewAccessTest(TestCase):
             reverse("organizations:roles", kwargs={"slug": self.organization.slug}),
             reverse("organizations:settings", kwargs={"slug": self.organization.slug}),
         ]
-        # 2026-10-01: panel / üzvlər / rollar kabinet bölmələrinə yönləndirir — son
-        # səhifə (kabinet və ya köhnə səhifə) 200 olmalıdır.
+        # Sahib 2026-10-11: köhnə müstəqil səhifələr silindi — hamısı kabinetə yönləndirir.
         for url in urls:
             response = self.client.get(url, follow=True)
             self.assertEqual(response.status_code, 200, msg=f"Expected 200 for {url}")
+            self.assertTrue(response.redirect_chain, msg=url)
+            self.assertTrue(
+                response.redirect_chain[-1][0].startswith(reverse("accounts:profile")),
+                msg=f"{url} → {response.redirect_chain[-1][0]}",
+            )
 
     def test_regular_member_cannot_open_members_or_roles_pages(self):
         self.client.force_login(self.member)

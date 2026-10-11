@@ -292,12 +292,16 @@ class LegacyRedirectTests(_OrgPagesBase):
         dean = _client(self.dean, self.org).get(reverse("organizations:roles", args=[self.org.slug]))
         self.assertRedirects(dean, reverse("organizations:select"), fetch_redirect_response=False)
 
-    def test_member_without_overview_gets_the_legacy_panel_without_audit_feed(self):
+    def test_member_without_overview_lands_in_the_cabinet_not_a_legacy_page(self):
+        """Sahib 2026-10-11: köhnə müstəqil panel silindi — bölməsi olmayan üzv kabinetə düşür."""
         response = _client(self.student, self.org).get(reverse("organizations:dashboard", args=[self.org.slug]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "organizations/dashboard.html")
-        self.assertEqual(list(response.context["recent_activity"]), [])
-        self.assertNotContains(response, "A-daxili dəyişiklik")
+        self.assertRedirects(response, PROFILE, fetch_redirect_response=False)
+        final = _client(self.student, self.org).get(
+            reverse("organizations:dashboard", args=[self.org.slug]), follow=True
+        )
+        self.assertEqual(final.status_code, 200)
+        self.assertTemplateNotUsed(final, "organizations/dashboard.html")
+        self.assertNotContains(final, "A-daxili dəyişiklik")
 
     def test_dashboard_for_another_org_switches_then_opens_the_overview(self):
         Membership.objects.create(
@@ -316,7 +320,8 @@ class LegacyRedirectTests(_OrgPagesBase):
         self.assertEqual(final.context["active_section"], "org-overview")
         self.assertEqual(final.context["org_overview_section"]["organization"], self.org)
 
-    def test_members_of_a_non_active_org_render_the_standalone_registry(self):
+    def test_members_of_a_non_active_org_switch_then_open_the_cabinet_registry(self):
+        """Sahib 2026-10-11: başqa təşkilatın üzv URL-i müstəqil reyestr DEYİL — keçid + kabinet."""
         Membership.objects.create(
             user=self.rector_b,
             organization=self.org,
@@ -324,14 +329,24 @@ class LegacyRedirectTests(_OrgPagesBase):
             is_primary=False,
             is_active=True,
         )
-        response = _client(self.rector_b, self.org_b).get(reverse("organizations:members", args=[self.org.slug]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "organizations/members.html")
-        ids = {row["user_id"] for row in response.context["org_members_section"]["rows"]}
+        client = _client(self.rector_b, self.org_b)
+        url = reverse("organizations:members", args=[self.org.slug])
+        first = client.get(url, {"role": "student"})
+        self.assertEqual(first.status_code, 302)
+        self.assertTrue(first["Location"].startswith(url + "?"), first["Location"])
+        self.assertIn("switched=1", first["Location"])
+        self.assertEqual(client.session["active_organization"], self.org.slug)
+        second = client.get(first["Location"])
+        self.assertEqual(second.status_code, 302)
+        self.assertTrue(second["Location"].startswith(PROFILE + "?section=org-members"), second["Location"])
+        self.assertIn("om_role=student", second["Location"])
+        self.assertNotIn("switched", second["Location"])
+        final = client.get(second["Location"])
+        self.assertEqual(final.status_code, 200)
+        self.assertTemplateNotUsed(final, "organizations/members.html")
+        ids = {row["user_id"] for row in final.context["org_members_section"]["rows"]}
         self.assertIn(self.student.id, ids)
         self.assertNotIn(self.student_b.id, ids)
-        # Aktiv olmayan təşkilat üçün ixrac düyməsi yoxdur (qapı aktiv təşkilat tələb edir).
-        self.assertEqual(response.context["org_members_section"]["export_url"], "")
 
 
 # ─── Üzv reyestri: süzgəclər, çiplər, CSV ────────────────────────────────────

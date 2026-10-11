@@ -24,7 +24,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
+from apps.registrar.models import Enrollment, ScheduleSlot, SlotKind, WeekType
 
 
 def effective_instructor_id(slot):
@@ -254,6 +254,19 @@ def get_group_schedule(*, organization, group, period):
     return _slots_for(
         ScheduleSlot.objects.filter(organization=organization, offering__group=group, offering__period=period)
     )
+
+
+def get_student_schedule(organization, student, group, period):
+    """Tələbə görünüşü: qrupunun slotları + bu semestrdə AKTİV qeydiyyatı olan digər açılışların slotları.
+
+    2026-10-12 (cədvəl idxalı): alt qrup birləşməsində (``subgroup_rollup``) tələbə öz alt qrupunda qalır,
+    dərs isə birləşik qrupun açılışında keçir («alt qrupdan əlavə» qeydiyyatı) — həmçinin təkrar/seçmə
+    fənn başqa qrupun açılışındadır. Yalnız qrupa görə süzgəc bu dərsləri tələbənin cədvəlindən gizlədirdi."""
+    enrolled = Enrollment.objects.filter(
+        organization=organization, student=student, status=Enrollment.Status.ENROLLED, offering__period=period
+    ).values("offering_id")
+    scope = Q(offering__group=group) | Q(offering_id__in=enrolled) if group is not None else Q(offering_id__in=enrolled)
+    return _slots_for(ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(scope))
 
 
 def get_teacher_schedule(*, organization, teacher, period):

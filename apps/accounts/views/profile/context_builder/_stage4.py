@@ -6,6 +6,7 @@ from django.utils.translation import pgettext_lazy
 from apps.notifications.models import NotificationType
 
 from ....models import UserProfile
+from ....services.rim.profile_edit import can_edit_own_position as _can_edit_own_position
 from .._sections.labels import DIRECT_PROFILE_SECTION_TEMPLATES, build_section_titles
 from ..constants import PROFILE_EXAM_NAV_SECTIONS
 from ..contact_inbox import build_contact_inbox_context
@@ -167,6 +168,8 @@ class _Stage4Mixin:
             "academic_item_display_groups": self.academic_item_display_groups,
             "academic_title_choices": UserProfile.AcademicTitle.choices,
             "academic_degree_choices": UserProfile.AcademicDegree.choices,
+            # Sahib 2026-10-11: RİM redaktə hüququ olan öz «Vəzifə»sini profil redaktəsindən yazır.
+            "can_edit_own_position": self.active_section == "edit-profile" and _can_edit_own_position(self.request),
             # OTP ilə şifrə dəyişmə («mövcud şifrəni unutdum» axını).
             "password_otp_form": self.password_otp_form,
             "password_otp_masked_email": mask_email(self.request.user.email),
