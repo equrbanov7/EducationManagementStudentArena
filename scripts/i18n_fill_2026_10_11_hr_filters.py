@@ -160,8 +160,25 @@ _RIM = [
     ),
 ]
 
+#: Sahib 2026-10-11: «Rolu geri al» dialoqu — bölmə və qalan rollar.
+MR = "accounts.manage_roles"
+_MR = [
+    _t("Bölmədən çıxarılır", "Removed from unit", "Удаляется из подразделения", "Birimden çıkarılıyor"),
+    _t("Qalan rollar", "Remaining roles", "Остающиеся роли", "Kalan roller"),
+    _t(
+        "Yalnız bu üzvlük (rol + bölmə) söndürülür; şəxsin digər rolları toxunulmadan qalır. Əməl audit jurnalına yazılır.",
+        "Only this membership (role + unit) is deactivated; the person's other roles stay unchanged. "
+        "The action is written to the audit log.",
+        "Отключается только это членство (роль + подразделение); остальные роли человека не затрагиваются. "
+        "Действие записывается в журнал аудита.",
+        "Yalnızca bu üyelik (rol + birim) devre dışı bırakılır; kişinin diğer rolleri değişmeden kalır. "
+        "İşlem denetim günlüğüne yazılır.",
+    ),
+]
+
 # ctx → msgid → {az, en, ru, tr}
 ENTRIES = {
+    MR: {row["az"]: row for row in _MR},
     HR: {row["az"]: row for row in _HR},
     ROLES: {row["az"]: row for row in _ROLES},
     RIM: {row["az"]: row for row in _RIM},

@@ -121,6 +121,18 @@
         if (role) {
             role.textContent = text(btn.getAttribute("data-roles-role"));
         }
+        // Bölmə və qalan rollar (sahib 2026-10-11) — dəyər yoxdursa sətir gizlədilir.
+        [["scope", "data-roles-scope"], ["remaining", "data-roles-remaining"]].forEach(function (pair) {
+            var target = dialog.querySelector("[data-roles-target-" + pair[0] + "]");
+            var row = dialog.querySelector("[data-roles-target-" + pair[0] + "-row]");
+            var value = text(btn.getAttribute(pair[1])).replace(/[;\s]+$/, "");
+            if (target) {
+                target.textContent = value;
+            }
+            if (row) {
+                row.hidden = !value;
+            }
+        });
         if (window.EMSOverlay) {
             window.EMSOverlay.open(dialog);
         }
