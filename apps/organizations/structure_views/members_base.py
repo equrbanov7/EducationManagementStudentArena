@@ -40,6 +40,7 @@ MEMBER_VIEW_MIN_LEVEL = 65
 #: Adına görə rəhbər heyət sayılan rollar (seed kataloqu + köhnə adlar).
 LEADERSHIP_ROLE_NAMES = frozenset(
     {
+        "board_chair",
         "rector",
         "vice_rector",
         "dean",
@@ -173,7 +174,10 @@ def resolve_members_access(request, organization) -> MembersAccess:
             and (scope.is_unit_scoped or get_user_org_role_level(request.user, organization) >= MEMBER_VIEW_MIN_LEVEL)
         )
     )
-    memberships = Membership.objects.filter(organization=organization, is_active=True)
+    # Sahib 2026-10-11: platforma superadmini (`is_superuser`) təşkilatın heyəti DEYİL — bazada rol üzvlüyü
+    # (məs. «Rektor») olsa belə üzv reyestrində, KPI-lərdə, ixracda və ümumi baxışda göstərilmir. Girişi
+    # rol üzvlüyündən deyil, superadmin bayrağından gəlir; üzvlük sətrinə TOXUNULMUR (Kadr analitikası ilə eyni).
+    memberships = Membership.objects.filter(organization=organization, is_active=True).exclude(user__is_superuser=True)
     if scope.is_unit_scoped:
         return MembersAccess(
             has_access=has_access,

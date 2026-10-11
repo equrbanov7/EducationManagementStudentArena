@@ -260,6 +260,7 @@ def map_org_role_to_profile_role(role):
 # `raw_display_name` HƏLƏ DƏ dəyişməmiş default seed dəyəridirsə (və ya
 # boşdursa) əvəzləyir. Admin fərqli bir ad yazıbsa TOXUNULMUR.
 ORG_ROLE_DISPLAY_LABELS = {
+    "board_chair": pgettext_lazy("roles.org_display_name", "Qəyyumlar Şurasının sədri"),
     "rector": pgettext_lazy("roles.org_display_name", "Rektor"),
     "vice_rector": pgettext_lazy("roles.org_display_name", "Prorektor"),
     "dean": pgettext_lazy("roles.org_display_name", "Dekan"),

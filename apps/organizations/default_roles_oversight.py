@@ -73,7 +73,21 @@ _ADMIN_UNIT_HEAD_PERMISSIONS = [
     *PEOPLE_DIRECTORY_READ,
 ]
 
+#: Sahib 2026-10-11: Qəyyumlar Şurasının sədri (Hüseynqulu Bağırov) — «rektor kimi hər şeyə çıxışı olsun,
+#: superadmin olmasın, siyahının başında dursun». Ona görə `*` (təşkilat daxilində rektorla eyni) və səviyyə
+#: 110 — rektordan (100) yuxarı, üzv reyestrinin «Rol (yuxarıdan aşağı)» sırasında birinci. Superadmin DEYİL:
+#: platforma səthləri (`is_superuser`) və başqa təşkilatlar açılmır. Adi qəyyumlar 78-də, yalnız oxuda qalır.
+BOARD_CHAIR_ROLE = "board_chair"
+
 OVERSIGHT_ROLES = [
+    {
+        "name": BOARD_CHAIR_ROLE,
+        "display_name": "Qəyyumlar Şurasının sədri",
+        "level": 110,
+        "scope_type": RoleScopeType.ORGANIZATION,
+        "permissions": ["*"],
+        "description": "Chair of the board of trustees — full organization access like the rector (not superadmin)",
+    },
     {
         "name": "trustee",
         "display_name": "Qəyyumlar Şurası üzvü",
