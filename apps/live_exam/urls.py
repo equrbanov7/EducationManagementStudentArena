@@ -12,14 +12,12 @@ urlpatterns = [
         name="create_session_slug",
     ),
     path("live/", views.live_pin_entry, name="pin_entry"),
-    # Host lobby + idarəetmə
-    path("live/host/<str:pin>/", views.live_host_lobby, name="host_lobby"),
+    # Host idarəetmə. WP9a (2026-10-10): köhnə `live/host/<pin>/` lobbisi (təqdimat
+    # `?controls=1` əvəz edib) və `live/host/<pin>/start|next|finish/` dublikat ləqəbləri silindi —
+    # oyun axını yalnız `live/<pin>/start|next|finish/` (aşağıda).
     path("live/host/<str:pin>/presentation/", views.live_host_presentation, name="host_presentation"),
-    path("live/host/<str:pin>/start/", views.host_start_game, name="host_start_game"),
-    path("live/host/<str:pin>/next/", views.host_next_question, name="host_next_question"),
     path("live/host/<str:pin>/skip-intro/", views.host_skip_question_intro, name="host_skip_question_intro"),
     path("live/host/<str:pin>/reveal/", views.host_reveal, name="host_reveal"),
-    path("live/host/<str:pin>/finish/", views.host_finish, name="host_finish"),
     path("live/host/<str:pin>/lock/", views.host_toggle_lock, name="host_toggle_lock"),
     path("live/host/<str:pin>/settings/", views.host_update_settings, name="host_update_settings"),
     path("live/host/<str:pin>/players/remove/", views.host_remove_player, name="host_remove_player"),

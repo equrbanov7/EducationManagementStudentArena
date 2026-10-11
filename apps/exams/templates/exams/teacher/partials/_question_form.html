@@ -1,336 +1,193 @@
-{% load i18n static exam_filters %}
-
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (xarici CSS).{% endcomment %}
-<link rel="stylesheet" href="{% static 'exams/css/question_form.css' %}">
-
-<div class="{% if is_modal %}question-form-shell question-form-shell--modal{% else %}question-container question-form-shell{% endif %} js-exam-question-form-root"
+{% load i18n static %}
+{% comment %}
+Sual formu — imtahan sualı (modal + ehtiyat səhifə) və müstəqil bank sualı (modal) üçün TƏK
+partial. 2026-10-10 redizayn (sahib «modern UX/UI»): bölmələr Sual · Media · Parametrlər ·
+Cavablar; cümlə registrli etiketlər (iki nöqtəsiz), məcburi sahə nişanı; tərcümə olunan fayl
+zonası (native «Choose File» yox); alt əməllər yapışqan. Sahə adları/ID-lər, POST müqaviləsi,
+`.js-exam-question-form-root` / `.js-close-question-form-modal` qarmaqları dəyişməyib.
+CSS: exams/css/question_form{,_media,_answers}.css (+ teacher_page_shell.css etiketləri) · JS: question_form.js.
+{% endcomment %}
+<div class="qf {% if is_modal %}qf--modal{% else %}qf--page{% endif %} js-exam-question-form-root"
      data-confirm-delete-image="{% trans 'confirm_delete_image' context 'exams.template.add_exam_question' %}"
      data-confirm-delete-video="{% trans 'confirm_delete_video' context 'exams.template.add_exam_question' %}"
-     data-alert-image-will-be-deleted="{% trans 'alert_image_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}"
-     data-alert-video-will-be-deleted="{% trans 'alert_video_will_be_deleted_after_save' context 'exams.template.add_exam_question' %}"
      data-single-answer-warning-message="{% trans 'single_only_one_correct' context 'exams.form.question.error' %}"
      data-min-option-count="2"
-     data-add-option-label="{% trans 'action_add_option' context 'exams.template.add_exam_question' %}"
-     data-remove-option-label="{% trans 'action_remove_option' context 'exams.template.add_exam_question' %}"
-     data-option-correct-label="{% trans 'label_this_option_is_correct' context 'exams.template.add_exam_question' %}">
-    {% if not is_modal %}
-        <div class="form-header">
-            {% if editing %}
-                 <h1>{% trans "heading_edit_question" context "exams.template.add_exam_question" %}</h1>
-                 <p class="subtitle">{{ exam.title }}</p>
-            {% else %}
-                 <h1>{% trans "heading_add_new_question" context "exams.template.add_exam_question" %}</h1>
-
-                 {% if exam.exam_type == "test" %}
-                     <p class="info-text">{% trans "info_adding_question_for_test_exam" context "exams.template.add_exam_question" %}</p>
-                 {% elif exam.exam_type == "coding" %}
-                     <p class="info-text">{% trans "Practical Coding Exam question" context "exams.template.add_exam_question" %}</p>
-                 {% else %}
-                     <p class="info-text">{% trans "info_adding_question_for_written_exam" context "exams.template.add_exam_question" %}</p>
-                 {% endif %}
-            {% endif %}
-        </div>
-    {% else %}
-        <div class="question-form-modal-intro">
-            <p class="question-form-modal-context">{% if bank %}{{ bank.name }}{% else %}{{ exam.title }}{% endif %}</p>
-            {% if bank %}
-                <p class="info-text">
-                    {% if form.question_type == 'written' %}{% trans "Yazılı (sərbəst cavab) sual" %}{% else %}{% trans "Test (variantlı) sual" %}{% endif %}
-                </p>
-            {% else %}
-                {% if editing %}
-                    <p class="info-text">{% trans "info_editing_question" context "exams.template.add_exam_question" %}</p>
-                {% else %}
-                    <p class="info-text">{% trans "info_adding_question" context "exams.template.add_exam_question" %}</p>
-                {% endif %}
-            {% endif %}
-        </div>
+     data-option-label-pattern="{% trans 'Variant %(n)s' context 'exams.form.question.label' %}"
+     data-file-too-large="{% trans 'Fayl çox böyükdür — ən çox {max} MB ola bilər.' context 'exams.template.question_form' %}"
+     data-file-wrong-type="{% trans 'Bu fayl növü qəbul olunmur — siyahıdakı formatlardan birini seçin.' context 'exams.template.question_form' %}">
+    {% if is_modal %}
+    <p class="qf-context">
+        <span class="qf-context__name">{% if bank %}{{ bank.name }}{% else %}{{ exam.title }}{% endif %}</span>
+        <span class="qf-context__kind">
+            {% if bank %}{% if form.question_type == 'written' %}{% trans "Yazılı (sərbəst cavab) sual" %}{% else %}{% trans "Test (variantlı) sual" %}{% endif %}
+            {% elif editing %}{% trans "info_editing_question" context "exams.template.add_exam_question" %}
+            {% else %}{% trans "info_adding_question" context "exams.template.add_exam_question" %}{% endif %}
+        </span>
+    </p>
     {% endif %}
 
-    <form method="post" enctype="multipart/form-data" id="question-form" action="{{ request.get_full_path }}">
+    <form method="post" enctype="multipart/form-data" id="question-form" action="{{ request.get_full_path }}" class="qf-form">
         {% csrf_token %}
-        {% if is_modal %}
-            <input type="hidden" name="modal" value="1">
-        {% endif %}
+        {% if is_modal %}<input type="hidden" name="modal" value="1">{% endif %}
 
         {% if form.non_field_errors %}
-            <div class="alert alert-error">
-                {{ form.non_field_errors }}
-            </div>
+        <div class="qf-alert" role="alert"><i class="fas fa-circle-exclamation" aria-hidden="true"></i><div>{{ form.non_field_errors }}</div></div>
         {% endif %}
 
-        <div class="form-group">
-            <label for="{{ form.text.id_for_label }}">{{ form.text.label }}:</label>
-            {{ form.text }}
-            <div class="error-msg">{{ form.text.errors }}</div>
-
-            {% if form.image or form.video or form.enable_paint %}
-            <div class="media-help">
-                <strong class="media-help-title">{% trans "media_help_title" context "exams.template.add_exam_question" %}</strong>
-                <p class="media-help-text">{% trans "media_help_text" context "exams.template.add_exam_question" %}</p>
+        {# ── Sual ── #}
+        <section class="qf-section" aria-labelledby="qfSecQuestion">
+            <h3 class="qf-section__title" id="qfSecQuestion">{% trans "Sual" context "exams.template.question_form" %}</h3>
+            <div class="qf-field">
+                <label class="etp-label" for="{{ form.text.id_for_label }}">{{ form.text.label }}{% if form.text.field.required %}<span class="etp-req" aria-hidden="true">*</span>{% endif %}</label>
+                {{ form.text }}
+                {% if form.text.errors %}<div class="qf-error" role="alert">{{ form.text.errors }}</div>{% endif %}
             </div>
+        </section>
 
-            <div class="form-row">
-                {% if form.image %}
-                <div class="form-group half">
-                    <label for="{{ form.image.id_for_label }}">{{ form.image.label }}:</label>
-                    <div class="file-input-wrapper">
-                        {{ form.image }}
-                        <div class="file-name-display" data-question-image-file-name hidden></div>
-                    </div>
-                    <div class="error-msg">{{ form.image.errors }}</div>
-
-                    {% if editing and form.instance.image %}
-                        <div class="media-preview" data-current-image-preview>
-                            <span class="media-preview-label">{% trans "label_current_image" context "exams.template.add_exam_question" %}:</span>
-                            <img src="{{ form.instance.image|protected_media_url }}" alt="{% trans 'alt_question_image' context 'exams.template.add_exam_question' %}" data-current-image>
-                            <button type="button" class="clear-media-btn" data-question-clear-media="image">
-                                {% trans "action_remove_image" context "exams.template.add_exam_question" %}
-                            </button>
-                        </div>
-                    {% endif %}
-
-                    <div class="media-preview" data-new-image-preview hidden>
-                        <span class="media-preview-label">{% trans "label_selected_image_preview" context "exams.template.add_exam_question" %}:</span>
-                        <img src="" alt="Preview" data-new-image>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if form.video %}
-                <div class="form-group half">
-                    <label for="{{ form.video.id_for_label }}">{{ form.video.label }}:</label>
-                    <div class="file-input-wrapper">
-                        {{ form.video }}
-                        <div class="file-name-display" data-question-video-file-name hidden></div>
-                    </div>
-                    <div class="error-msg">{{ form.video.errors }}</div>
-
-                    {% if editing and form.instance.video %}
-                        <div class="media-preview" data-current-video-preview>
-                            <span class="media-preview-label">{% trans "label_current_video" context "exams.template.add_exam_question" %}:</span>
-                            <video controls class="question-form-1" data-current-video>
-                                <source src="{{ form.instance.video|protected_media_url }}">
-                            </video>
-                            <button type="button" class="clear-media-btn" data-question-clear-media="video">
-                                {% trans "action_remove_video" context "exams.template.add_exam_question" %}
-                            </button>
-                        </div>
-                    {% endif %}
-
-                    <div class="media-preview" data-new-video-preview hidden>
-                        <span class="media-preview-label">{% trans "label_selected_video_preview" context "exams.template.add_exam_question" %}:</span>
-                        <video controls class="question-form-1" data-new-video>
-                            <source src="" data-new-video-source>
-                        </video>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if form.enable_paint %}
-                    <div class="form-group paint-answer-form-group">
-                        <label class="question-paint-toggle" for="{{ form.enable_paint.id_for_label }}">
-                        {{ form.enable_paint }}
-                            <span class="question-paint-toggle__box" aria-hidden="true">
-                                <i class="fas fa-paint-brush"></i>
-                            </span>
-                            <span class="question-paint-toggle__copy">
-                                <span class="question-paint-toggle__title">
-                                    {% trans "label_enable_paint_answer" context "exams.template.add_exam_question" %}
-                                </span>
-                                <span class="question-paint-toggle__hint">
-                                    {% trans "help_enable_paint_answer" context "exams.template.add_exam_question" %}
-                                </span>
-                            </span>
-                        </label>
-                        {% if form.enable_paint.errors %}
-                            <div class="text-danger small">{{ form.enable_paint.errors.0 }}</div>
-                        {% endif %}
-                    </div>
-                    {% if editing and question %}
-                        <div class="question-paint-state-card">
-                            <div class="question-paint-state-card__line">
-                                <strong>{% trans "label_paint_current_state" context "exams.template.add_exam_question" %}:</strong>
-                                {% if question.paint_enabled_effective %}
-                                    {% trans "paint_state_active" context "exams.template.add_exam_question" %}
-                                {% else %}
-                                    {% trans "paint_state_inactive" context "exams.template.add_exam_question" %}
-                                {% endif %}
-                            </div>
-                            <div class="question-paint-state-card__line">
-                                <strong>{% trans "label_paint_source" context "exams.template.add_exam_question" %}:</strong>
-                                {% if question.paint_priority_source == "question" %}
-                                    {% trans "paint_source_question" context "exams.template.add_exam_question" %}
-                                {% elif question.paint_priority_source == "block" %}
-                                    {% trans "paint_source_block" context "exams.template.add_exam_question" %}
-                                {% else %}
-                                    {% trans "paint_source_exam" context "exams.template.add_exam_question" %}
-                                {% endif %}
-                            </div>
-                            <div class="question-paint-state-card__hint">
-                                {% trans "paint_priority_order" context "exams.template.add_exam_question" %}
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endif %}
+        {# ── Media (istəyə bağlı) ── #}
+        {% if form.image or form.video or form.enable_paint %}
+        <section class="qf-section" aria-labelledby="qfSecMedia">
+            <h3 class="qf-section__title" id="qfSecMedia">{% trans "Media" context "exams.template.question_form" %} <span class="qf-optional">{% trans "istəyə bağlı" context "exams.template.question_form" %}</span></h3>
+            <p class="etp-hint qf-section__hint">{% trans "media_help_text" context "exams.template.add_exam_question" %}</p>
+            {% if form.image or form.video %}
+            <div class="qf-media">
+                {% if form.image %}{% include "exams/teacher/partials/question_form/_dropzone.html" with field=form.image kind="image" current=form.instance.image %}{% endif %}
+                {% if form.video %}{% include "exams/teacher/partials/question_form/_dropzone.html" with field=form.video kind="video" current=form.instance.video %}{% endif %}
             </div>
             {% endif %}
-        </div>
-
-        {% if exam.exam_type == "written" or exam.exam_type == "coding" %}
-        <div class="form-group">
-            <label for="{{ form.block.id_for_label }}">{{ form.block.label }}:</label>
-            <div class="bootstrap-single-select question-block-select-wrap">
-            {{ form.block }}
-            </div>
-            <div class="error-msg">{{ form.block.errors }}</div>
-            <p class="help-text">{% trans "help_question_block_required" context "exams.template.add_exam_question" %}</p>
-        </div>
-        {% endif %}
-
-        {% if form.difficulty or form.language or form.points %}
-        <div class="form-row">
-            {% if form.difficulty %}
-            <div class="form-group half">
-                <label for="{{ form.difficulty.id_for_label }}">{{ form.difficulty.label }}:</label>
-                <div class="bootstrap-single-select question-block-select-wrap">
-                    {{ form.difficulty }}
-                </div>
-                <div class="error-msg">{{ form.difficulty.errors }}</div>
-            </div>
+            {% if form.enable_paint %}
+            <label class="qf-switch" for="{{ form.enable_paint.id_for_label }}">
+                {{ form.enable_paint }}
+                <span class="qf-switch__track" aria-hidden="true"></span>
+                <span class="qf-switch__copy">
+                    <span class="qf-switch__title"><i class="fas fa-paint-brush" aria-hidden="true"></i> {% trans "label_enable_paint_answer" context "exams.template.add_exam_question" %}</span>
+                    <span class="etp-hint">{% trans "help_enable_paint_answer" context "exams.template.add_exam_question" %}</span>
+                </span>
+            </label>
+            {% if form.enable_paint.errors %}<div class="qf-error" role="alert">{{ form.enable_paint.errors.0 }}</div>{% endif %}
+            {% if editing and question %}
+            <dl class="qf-paint-state">
+                <div><dt>{% trans "label_paint_current_state" context "exams.template.add_exam_question" %}</dt>
+                    <dd>{% if question.paint_enabled_effective %}{% trans "paint_state_active" context "exams.template.add_exam_question" %}{% else %}{% trans "paint_state_inactive" context "exams.template.add_exam_question" %}{% endif %}</dd></div>
+                <div><dt>{% trans "label_paint_source" context "exams.template.add_exam_question" %}</dt>
+                    <dd>{% if question.paint_priority_source == "question" %}{% trans "paint_source_question" context "exams.template.add_exam_question" %}{% elif question.paint_priority_source == "block" %}{% trans "paint_source_block" context "exams.template.add_exam_question" %}{% else %}{% trans "paint_source_exam" context "exams.template.add_exam_question" %}{% endif %}</dd></div>
+                <p class="etp-hint">{% trans "paint_priority_order" context "exams.template.add_exam_question" %}</p>
+            </dl>
             {% endif %}
-            {% if form.language %}
-            <div class="form-group half">
-                <label for="{{ form.language.id_for_label }}">{{ form.language.label }}:</label>
-                <div class="bootstrap-single-select question-block-select-wrap">
-                    {{ form.language }}
-                </div>
-                <div class="error-msg">{{ form.language.errors }}</div>
-            </div>
             {% endif %}
-        </div>
-        {% if form.points %}
-        <div class="form-group">
-            <label for="{{ form.points.id_for_label }}">{{ form.points.label }}:</label>
-            {{ form.points }}
-            <div class="error-msg">{{ form.points.errors }}</div>
-        </div>
-        {% endif %}
+        </section>
         {% endif %}
 
-        {% if form.answer_mode and exam.exam_type == "test" %}
-            <div class="form-row">
-                <div class="form-group half">
-                    <label for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}:</label>
-                    <div class="bootstrap-single-select question-block-select-wrap">
-                        {{ form.answer_mode }}
-                    </div>
-                    <div class="error-msg">{{ form.answer_mode.errors }}</div>
-                    <div class="single-answer-mode-warning" data-single-answer-warning role="alert" aria-live="polite" hidden></div>
+        {# ── Parametrlər ── #}
+        <section class="qf-section" aria-labelledby="qfSecSettings">
+            <h3 class="qf-section__title" id="qfSecSettings">{% trans "Parametrlər" context "exams.template.question_form" %}</h3>
+            <div class="qf-grid">
+                {% if exam.exam_type == "written" or exam.exam_type == "coding" %}
+                <div class="qf-field qf-field--wide">
+                    <label class="etp-label" for="{{ form.block.id_for_label }}">{{ form.block.label }}<span class="etp-req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.block }}</div>
+                    <p class="etp-hint">{% trans "help_question_block_required" context "exams.template.add_exam_question" %}</p>
+                    {% if form.block.errors %}<div class="qf-error" role="alert">{{ form.block.errors }}</div>{% endif %}
                 </div>
-                <div class="form-group half">
-                    <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
+                {% endif %}
+                {% for field in form %}{% if field.name == "difficulty" or field.name == "language" %}
+                <div class="qf-field">
+                    <label class="etp-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="etp-req" aria-hidden="true">*</span>{% endif %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">{{ field }}</div>
+                    {% if field.errors %}<div class="qf-error" role="alert">{{ field.errors }}</div>{% endif %}
+                </div>
+                {% endif %}{% endfor %}
+                {% if form.points %}
+                <div class="qf-field">
+                    <label class="etp-label" for="{{ form.points.id_for_label }}">{{ form.points.label }}</label>
+                    {{ form.points }}
+                    {% if form.points.errors %}<div class="qf-error" role="alert">{{ form.points.errors }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if form.answer_mode and exam.exam_type == "test" %}
+                <div class="qf-field">
+                    <label class="etp-label" for="{{ form.answer_mode.id_for_label }}">{{ form.answer_mode.label }}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">{{ form.answer_mode }}</div>
+                    {% if form.answer_mode.errors %}<div class="qf-error" role="alert">{{ form.answer_mode.errors }}</div>{% endif %}
+                    <div class="qf-warning" data-single-answer-warning role="alert" aria-live="polite" hidden></div>
+                </div>
+                {% endif %}
+                {% if form.time_limit_seconds %}
+                <div class="qf-field">
+                    <label class="etp-label" for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}</label>
                     {{ form.time_limit_seconds }}
-                    <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
-                    <p class="help-text">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
+                    <p class="etp-hint">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
+                    {% if form.time_limit_seconds.errors %}<div class="qf-error" role="alert">{{ form.time_limit_seconds.errors }}</div>{% endif %}
                 </div>
+                {% endif %}
             </div>
-        {% elif form.time_limit_seconds %}
-            <div class="form-group">
-                <label for="{{ form.time_limit_seconds.id_for_label }}">{{ form.time_limit_seconds.label }}:</label>
-                {{ form.time_limit_seconds }}
-                <div class="error-msg">{{ form.time_limit_seconds.errors }}</div>
-                <p class="help-text">{% trans "help_time_limit_seconds" context "exams.template.add_exam_question" %}</p>
-            </div>
-        {% endif %}
+        </section>
 
-        {% if exam.exam_type == "written" or exam.exam_type == "coding" or form.question_type == "written" %}
+        {# ── Cavablar ── #}
+        <section class="qf-section" aria-labelledby="qfSecAnswers">
+            {% if exam.exam_type == "written" or exam.exam_type == "coding" or form.question_type == "written" %}
+            <h3 class="qf-section__title" id="qfSecAnswers">{% trans "Cavab" context "exams.template.question_form" %} <span class="qf-optional">{% trans "istəyə bağlı" context "exams.template.question_form" %}</span></h3>
             {% if form.correct_answer %}
-            <div class="form-group">
-                <label for="{{ form.correct_answer.id_for_label }}">{{ form.correct_answer.label }}:</label>
+            <div class="qf-field">
+                <label class="etp-label" for="{{ form.correct_answer.id_for_label }}">{{ form.correct_answer.label }}</label>
                 {{ form.correct_answer }}
-                <div class="error-msg">{{ form.correct_answer.errors }}</div>
+                {% if form.correct_answer.errors %}<div class="qf-error" role="alert">{{ form.correct_answer.errors }}</div>{% endif %}
             </div>
             {% endif %}
-        {% else %}
-            <div class="variants-section">
-                <div class="variants-header">
-                    <div>
-                        <h4>{% trans "heading_options" context "exams.template.add_exam_question" %}</h4>
-                        <p class="info-text">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
-                    </div>
-                    <button type="button" class="variant-add-btn" data-add-option-btn>
-                        <i class="fas fa-plus"></i> {% trans "action_add_option" context "exams.template.add_exam_question" %}
-                    </button>
+            {% else %}
+            <div class="qf-section__head">
+                <div>
+                    <h3 class="qf-section__title" id="qfSecAnswers">{% trans "heading_options" context "exams.template.add_exam_question" %}</h3>
+                    <p class="etp-hint">{% trans "info_fill_options_and_mark_correct" context "exams.template.add_exam_question" %}</p>
                 </div>
-
-                <div class="variant-list" data-option-list>
-                    {% for option in form.option_fields %}
-                        <div class="variant-card" data-option-card data-option-index="{{ option.index }}">
-                            <div class="variant-card-header">
-                                <label class="variant-card-title" for="{{ option.text_field.id_for_label }}" data-option-text-label>
-                                    {{ option.label }}:
-                                </label>
-                                <button type="button" class="variant-remove-btn" data-remove-option-btn>
-                                    {% trans "action_remove_option" context "exams.template.add_exam_question" %}
-                                </button>
-                            </div>
-                            <div class="variant-input">
-                                {{ option.text_field }}
-                            </div>
-                            <div class="variant-check">
-                                <label class="custom-checkbox-container">
-                                    {{ option.is_correct_field }}
-                                    <span class="checkmark"></span>
-                                    <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                                </label>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <template data-option-card-template>
-                    <div class="variant-card" data-option-card data-option-index="__INDEX__">
-                        <div class="variant-card-header">
-                            <label class="variant-card-title" for="id_option__INDEX___text" data-option-text-label>__LABEL__:</label>
-                            <button type="button" class="variant-remove-btn" data-remove-option-btn>{% trans "action_remove_option" context "exams.template.add_exam_question" %}</button>
-                        </div>
-                        <div class="variant-input">
-                            <input type="text" name="option__INDEX___text" class="form-control" id="id_option__INDEX___text">
-                        </div>
-                        <div class="variant-check">
-                            <label class="custom-checkbox-container">
-                                <input type="checkbox" name="option__INDEX___is_correct" class="form-check-input" id="id_option__INDEX___is_correct">
-                                <span class="checkmark"></span>
-                                <span class="label-text">{% trans "label_this_option_is_correct" context "exams.template.add_exam_question" %}</span>
-                            </label>
-                        </div>
+            </div>
+            <div class="qf-options" data-option-list>
+                {% for option in form.option_fields %}
+                <div class="qf-option" data-option-card data-option-index="{{ option.index }}">
+                    <div class="qf-option__head">
+                        <label class="qf-option__title" for="{{ option.text_field.id_for_label }}" data-option-text-label>{{ option.label }}</label>
+                        <label class="qf-correct">
+                            {{ option.is_correct_field }}
+                            <span><span class="visually-hidden" data-option-sr-label>{{ option.label }}: </span>{% trans "Düzgün cavab" context "exams.template.question_form" %}</span>
+                        </label>
+                        <button type="button" class="qf-option__remove" data-remove-option-btn aria-label="{% trans 'action_remove_option' context 'exams.template.add_exam_question' %}">
+                            <i class="fas fa-xmark" aria-hidden="true"></i>
+                        </button>
                     </div>
-                </template>
+                    {{ option.text_field }}
+                </div>
+                {% endfor %}
             </div>
-        {% endif %}
+            <button type="button" class="qf-add-option" data-add-option-btn>
+                <i class="fas fa-plus" aria-hidden="true"></i>{% trans "action_add_option" context "exams.template.add_exam_question" %}
+            </button>
+            <template data-option-card-template>
+                <div class="qf-option" data-option-card data-option-index="__INDEX__">
+                    <div class="qf-option__head">
+                        <label class="qf-option__title" for="id_option__INDEX___text" data-option-text-label>__LABEL__</label>
+                        <label class="qf-correct">
+                            <input type="checkbox" name="option__INDEX___is_correct" class="form-check-input" id="id_option__INDEX___is_correct">
+                            <span><span class="visually-hidden" data-option-sr-label>__LABEL__: </span>{% trans "Düzgün cavab" context "exams.template.question_form" %}</span>
+                        </label>
+                        <button type="button" class="qf-option__remove" data-remove-option-btn aria-label="{% trans 'action_remove_option' context 'exams.template.add_exam_question' %}">
+                            <i class="fas fa-xmark" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <input type="text" name="option__INDEX___text" class="form-control" id="id_option__INDEX___text">
+                </div>
+            </template>
+            {% endif %}
+        </section>
 
-        {% if is_modal %}
-            <div class="modal-buttons question-form-modal-actions">
-                <button type="button" class="modal-cancel-btn js-close-question-form-modal">
-                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
-                </button>
-                <button type="submit" name="save" class="modal-confirm-btn">
-                    {% trans "action_save" context "exams.template.add_exam_question" %}
-                </button>
-            </div>
-        {% else %}
-            <div class="form-actions">
-                <button type="submit" name="save" class="btn-save">
-                    {% trans "action_save" context "exams.template.add_exam_question" %}
-                </button>
-                <button type="submit" name="save_and_continue" class="btn-save-add">
-                    {% trans "action_save_and_add_new_question" context "exams.template.add_exam_question" %}
-                </button>
-                <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_navigation_query %}?{{ question_navigation_query }}{% endif %}" class="btn-cancel">
-                    {% trans "action_cancel" context "exams.template.add_exam_question" %}
-                </a>
-            </div>
-        {% endif %}
+        <div class="qf-actions">
+            {% if is_modal %}
+            <button type="button" class="ems-btn js-close-question-form-modal">{% trans "action_cancel" context "exams.template.add_exam_question" %}</button>
+            <button type="submit" name="save" class="ems-btn ems-btn--primary"><i class="fas fa-check" aria-hidden="true"></i>{% trans "action_save" context "exams.template.add_exam_question" %}</button>
+            {% else %}
+            <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_navigation_query %}?{{ question_navigation_query }}{% endif %}" class="ems-btn ems-btn--ghost">{% trans "action_cancel" context "exams.template.add_exam_question" %}</a>
+            <button type="submit" name="save_and_continue" class="ems-btn">{% trans "action_save_and_add_new_question" context "exams.template.add_exam_question" %}</button>
+            <button type="submit" name="save" class="ems-btn ems-btn--primary"><i class="fas fa-check" aria-hidden="true"></i>{% trans "action_save" context "exams.template.add_exam_question" %}</button>
+            {% endif %}
+        </div>
     </form>
 </div>

@@ -8,6 +8,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
 from apps.exams.models import Exam
+from apps.exams.navigation import student_exams_home_url
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     get_attempt_limit_result_redirect_url,
@@ -45,7 +46,8 @@ def _resolve_exam_failure_redirect(request):
             assigned_type = "all"
         return f"{reverse('accounts:profile')}?section=assigned-exams&assigned_type={assigned_type}"
 
-    return reverse("exams:student_exam_list")
+    # Sahib 2026-10-10: «Mövcud imtahanlar» bağlıdırsa kabinetin imtahan bölməsi.
+    return student_exams_home_url(request.user)
 
 
 def _is_ajax_request(request):

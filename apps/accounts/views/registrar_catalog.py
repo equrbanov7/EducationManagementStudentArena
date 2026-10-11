@@ -64,7 +64,8 @@ def registrar_catalog_action(request):
     data = _payload(request)
     action = (data.get("action") or "").strip()
     tab = (data.get("tab") or "").strip()
-    if action not in ALLOWED_ACTIONS or tab not in console.TAB_KEYS:
+    # `tab_keys()`: «Rubriklər» REGISTRAR_RUBRICS_ENABLED söndürülü ikən naməlum tabdır (400).
+    if action not in ALLOWED_ACTIONS or tab not in console.tab_keys():
         return JsonResponse({"ok": False, "error": "bad_request"}, status=400)
 
     pk = (data.get("id") or "").strip()

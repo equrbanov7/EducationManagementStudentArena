@@ -1,0 +1,287 @@
+/* «İmtahan nəticələri» (sahib 2026-10-10 redizayn) — ortaq qabıq: teacher_page_shell.css.
+   Köhnə `teacher_exam_results/_part*.css` labs/tapşırıq/layihə yoxlama səhifələrində
+   işlənməyə davam edir — bu səhifə onları artıq yükləmir. */
+
+.etp-note--warning {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.etp-note--warning > i {
+    color: var(--ems-warning-700);
+}
+
+.etp-note a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+/* ── Filtr kartı ───────────────────────────────────────────────────────── */
+.etr-filters {
+    padding: var(--ems-sp-6) 18px;
+}
+
+.etr-date {
+    flex: 0 1 160px;
+    min-width: 140px;
+}
+
+.etr-date__wrap {
+    position: relative;
+}
+
+.etr-date__wrap > i {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--ems-neutral-500);
+    pointer-events: none;
+}
+
+.etr-date__wrap .ems-input {
+    padding-left: 36px;
+    font-variant-numeric: tabular-nums;
+}
+
+.etr-date .ems-input[aria-invalid="true"] {
+    border-color: var(--ems-danger);
+}
+
+.etr-date__error {
+    margin: 6px 0 0;
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+    color: var(--ems-danger-strong);
+}
+
+.etr-date-hint {
+    flex: 1 1 100%;
+    margin: 0;
+}
+
+/* ── Qrupa ikinci şans ─────────────────────────────────────────────────── */
+.etr-grant {
+    padding: var(--ems-sp-5) 18px;
+}
+
+.etr-grant__form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-5);
+    margin: 0;
+}
+
+.etr-grant__copy {
+    flex: 1 1 280px;
+    min-width: 0;
+}
+
+.etr-grant__copy .etp-hint {
+    margin-top: 2px;
+}
+
+.etr-grant__title {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.etr-grant__title i {
+    color: var(--ems-primary-600);
+}
+
+.etr-grant__field {
+    flex: 0 1 240px;
+    min-width: 180px;
+}
+
+/* ── Nəticələr cədvəli ─────────────────────────────────────────────────── */
+.etr-results__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-4);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ems-border);
+}
+
+.etr-results__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.etr-bulk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin-left: auto;
+}
+
+.etr-bulk__count {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    font-variant-numeric: tabular-nums;
+}
+
+.etr-table td,
+.etr-table th[scope="row"] {
+    vertical-align: middle;
+}
+
+.etr-col-check {
+    width: 1%;
+}
+
+.etr-check {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.etr-user {
+    min-width: 170px;
+}
+
+.etr-user__name {
+    display: block;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.etr-user__name--anon {
+    color: var(--ems-violet-800);
+}
+
+.etr-user__meta {
+    display: block;
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+    color: var(--ems-text-muted);
+}
+
+.etr-email {
+    color: var(--ems-neutral-700);
+    overflow-wrap: anywhere;
+}
+
+.etr-muted {
+    color: var(--ems-text-muted);
+}
+
+.etr-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    min-width: 140px;
+}
+
+.etr-reason {
+    display: block;
+    max-width: 220px;
+    overflow: hidden;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-danger-strong);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.etr-row--removed {
+    background: var(--ems-danger-bg);
+}
+
+.etr-num {
+    text-align: right;
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.etr-num--ok {
+    color: var(--ems-success-700);
+}
+
+.etr-num--bad {
+    color: var(--ems-danger-strong);
+}
+
+.etr-num--accent {
+    color: var(--ems-primary-700);
+}
+
+.etr-of {
+    margin-left: 1px;
+    font-weight: 500;
+    color: var(--ems-text-muted);
+}
+
+.etr-bonus {
+    margin-left: var(--ems-sp-2);
+}
+
+.etr-tag {
+    display: inline-block;
+    margin-left: var(--ems-sp-2);
+    padding: 0 6px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    font-size: var(--ems-fs-xs);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.etr-col-actions {
+    text-align: right;
+}
+
+.etr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ems-sp-3);
+    min-width: 170px;
+}
+
+.etr-inline-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.etr-countdown {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: 2px 10px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.etr-results .pagination-wrapper {
+    padding: 12px 16px;
+    border-top: 1px solid var(--ems-border);
+}
+
+@media (max-width: 768px) {
+    .etr-date,
+    .etr-grant__field {
+        flex: 1 1 100%;
+    }
+
+    .etr-bulk {
+        width: 100%;
+        margin-left: 0;
+    }
+}

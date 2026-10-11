@@ -1,16 +1,15 @@
 """Müəllim səthi (F2 rol-skeleti, 2026-07-02)."""
 
 from .blocks import create_block, delete_block, edit_block, manage_blocks, update_questions_per_student
-from .crud import create_lab, delete_lab, edit_lab, publish_lab
+from .crud import create_lab, delete_lab, edit_lab
 from .preview import preview_randomization
 from .questions import create_question, delete_question, edit_question, import_questions
-from .submissions import delete_submissions, grade_submission_page, lab_submissions, submission_answers
+from .submissions import delete_submissions, grade_submission_page, lab_submissions
 
 __all__ = [
     "create_lab",
     "edit_lab",
     "delete_lab",
-    "publish_lab",
     "manage_blocks",
     "create_block",
     "edit_block",
@@ -23,6 +22,5 @@ __all__ = [
     "lab_submissions",
     "delete_submissions",
     "grade_submission_page",
-    "submission_answers",
     "preview_randomization",
 ]

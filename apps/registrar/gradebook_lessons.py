@@ -129,7 +129,8 @@ def create_lesson(
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
     ``allow_past`` İKT rəhbəri/seed üçün keçmiş tarixi keçir.
 
-    ``slot`` — cədvəldən «Aktivləşdir» yolu (UNEC P1-1, bax ``journal_activation``): saat və
+    ``slot`` — cədvəl slotu yolu: «Aktivləşdir» (UNEC P1-1, bax ``journal_activation``) və slotdan
+    doldurulmuş «Yeni dərs» modalı (gizli ``slot_id``, bax ``journal_lesson_prefill``): saat və
     növ HƏMİŞƏ slotdan, otaq / müəllim / akademik saat açıq verilməyibsə slotdan köçürülür;
     slot bu açılışın olmalı və həmin TARİXDƏ keçirilməlidir. Qalan bütün qaydalar (kilid,
     sillabus qapısı, keçmiş tarix, dövr sərhədi, dublikat) dəyişmədən tətbiq olunur.

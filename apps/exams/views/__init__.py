@@ -6,7 +6,6 @@
 from .exam_center import (
     exam_center_attempt_violations,
     exam_center_final_device_change,
-    exam_center_pin_lookup,
     exam_center_pin_search,
     exam_center_reports,
     exam_center_room_assign_invigilators,
@@ -64,9 +63,7 @@ from .teacher.exams import (
     bank_teacher_search,
     createAndEditExamView,
     delete_exam,
-    deleted_exams_list,
     duplicate_exam,
-    exam_available_question_count,
     grant_extra_attempt,
     grant_extra_attempt_group,
     group_search,
@@ -94,12 +91,10 @@ from .teacher.extract_jobs import (
 # ═══════════════════════════════════════════════════════════════
 from .teacher.groups import (
     create_student_group,
-    teacher_add_student_to_group,
     teacher_create_group,
     teacher_delete_group,
     teacher_group_candidates,
     teacher_group_list,
-    teacher_remove_student_from_group,
     teacher_update_group,
 )
 from .teacher.languages import exam_language_manager
@@ -131,7 +126,6 @@ from .teacher.results import (
     export_exam_results_xlsx,
     teacher_check_attempt,
     teacher_exam_results,
-    teacher_pending_attempts,
     teacher_view_attempt,
 )
 from .teacher.statistics import teacher_exam_statistics
@@ -179,8 +173,6 @@ __all__ = [
     "teacher_update_group",
     "teacher_delete_group",
     "create_student_group",
-    "teacher_remove_student_from_group",
-    "teacher_add_student_to_group",
     # Teacher - Exams
     "teacher_exam_list",
     "createAndEditExamView",
@@ -190,12 +182,10 @@ __all__ = [
     "toggle_exam_archive",
     "toggle_exam_results_visibility",
     "delete_exam",
-    "deleted_exams_list",
     "restore_exam",
     "permanent_delete_exam",
     "duplicate_exam",
     "assigned_student_count",
-    "exam_available_question_count",
     "grant_extra_attempt",
     "grant_extra_attempt_group",
     "group_search",
@@ -220,7 +210,6 @@ __all__ = [
     "export_exam_results_xlsx",
     "teacher_view_attempt",
     "teacher_check_attempt",
-    "teacher_pending_attempts",
     "ai_grade_answer",
     # Teacher - Statistics
     "teacher_exam_statistics",
@@ -278,7 +267,6 @@ __all__ = [
     "final_exam_waiting",
     "final_ticket_state",
     # Exam Center - zallar / oturumlar / monitor / hesabat
-    "exam_center_pin_lookup",
     "exam_center_pin_search",
     "exam_center_stats_ai",
     "exam_center_stats_charts",

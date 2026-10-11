@@ -17,8 +17,6 @@ urlpatterns = [
     path("posts/<int:post_id>/moderate/", views.teacher_moderate_post, name="teacher_moderate_post"),
     # ---- Category URL-ləri ----
     path("categories/<slug:slug>/", views.category_detail, name="category_detail"),
-    # ---- Question URL-ləri ----
-    path("questions/create/", views.create_question, name="create_question"),
-    path("questions/my/", views.my_questions, name="my_questions"),
-    path("questions/", views.questions_i_can_see, name="questions_i_can_see"),
+    # URL auditi WP9a A2 (2026-10-10): giriş nöqtəsi olmayan «Suallar» səhifələri
+    # (`questions/create|my/`, `questions/`) silindi; ``Question`` modeli və datası qalır.
 ]

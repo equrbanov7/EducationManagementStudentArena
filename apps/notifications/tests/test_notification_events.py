@@ -139,18 +139,18 @@ class NotificationEventFlowTests(TestCase):
             ]
         )
 
-        self.client.force_login(applicant)
-        response = self.client.post(
-            reverse("accounts:student_organization_request"),
-            {
-                "action": "submit_request",
-                "organization_id": str(self.organization.id),
-                "request_message": "Təşkilata qoşulmaq istəyirəm.",
-                "next": reverse("accounts:profile") + "?section=student-organization-request",
-            },
+        # URL auditi A7 (2026-10-10): müraciət view-u silindi — bildiriş servisi birbaşa yoxlanılır
+        # (qeydiyyat/üzvlük servisləri onu hələ də çağırır).
+        notify_org_admins_of_new_request(
+            request_obj=StudentOrganizationRequest.objects.create(
+                user=applicant,
+                organization=self.organization,
+                role_type=MembershipRequestRoleType.STUDENT,
+                message="Təşkilata qoşulmaq istəyirəm.",
+                status=StudentOrganizationRequestStatus.PENDING,
+            )
         )
 
-        self.assertEqual(response.status_code, 302)
         self.assertTrue(
             InAppNotification.objects.filter(
                 recipient=self.owner,
@@ -281,7 +281,7 @@ class NotificationEventFlowTests(TestCase):
             InAppNotification.objects.filter(
                 recipient=self.student,
                 notification_type=NotificationType.ASSIGNMENT,
-                title__icontains="Yeni sərbəst iş təyin olundu",
+                title__icontains="Yeni tapşırıq təyin olundu",
             ).exists()
         )
 
@@ -296,7 +296,7 @@ class NotificationEventFlowTests(TestCase):
             InAppNotification.objects.filter(
                 recipient=self.teacher,
                 notification_type=NotificationType.ASSIGNMENT,
-                title__icontains="Yeni sərbəst iş cavabı",
+                title__icontains="Yeni tapşırıq cavabı",
             ).exists()
         )
 
@@ -312,7 +312,7 @@ class NotificationEventFlowTests(TestCase):
             InAppNotification.objects.filter(
                 recipient=self.student,
                 notification_type=NotificationType.GRADE,
-                title__icontains="Sərbəst iş nəticəniz hazırdır",
+                title__icontains="Tapşırıq nəticəniz hazırdır",
             ).exists()
         )
 

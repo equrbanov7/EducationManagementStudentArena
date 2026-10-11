@@ -43,14 +43,29 @@ BANNERS = {
     ),
 }
 
+#: Sahib 2026-10-10: sərbəst işi söndürülmüş qaydada təsdiqlənmiş versiyanın izahı (sərbəst iş YOX).
+APPROVED_BANNER_NO_SELFWORK = pgettext_lazy(
+    _CTX,
+    "Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu siyahısı və qiymətləndirmə "
+    "strukturu bu sənəddən götürülür.",
+)
+
+
+def banner_for(status, rule) -> str:
+    """Statusun izah banneri — sərbəst işsiz qaydada təsdiq mətnində sərbəst iş çəkilmir."""
+    if status == SyllabusStatus.APPROVED.value and not rule.selfwork:
+        return str(APPROVED_BANNER_NO_SELFWORK)
+    return str(BANNERS.get(status, ""))
+
 
 def build_preview_payload(syllabus) -> dict:
-    """Siyahının baxış paneli üçün JSON gövdəsi."""
-    from apps.syllabus.public import section_data_map, version_timeline
+    """Siyahının baxış paneli üçün JSON gövdəsi (qayda versiyanın semestrindəndir — sahib 2026-10-10)."""
+    from apps.syllabus.public import activity_kinds_for_syllabus, rule_for_version, section_data_map, version_timeline
 
     version = syllabus.current_version
     status = version.status if version is not None else SyllabusStatus.DRAFT.value
     section_map = section_data_map(version) if version is not None else {}
+    rule = rule_for_version(version)
 
     history = []
     for event in version_timeline(syllabus):
@@ -80,13 +95,21 @@ def build_preview_payload(syllabus) -> dict:
         "status": status,
         "status_label": str(SyllabusStatus(status).label),
         "status_tone": STATUS_TONES.get(status, "neutral"),
-        "banner": str(BANNERS.get(status, "")),
+        "banner": banner_for(status, rule),
         "decision_reason": (version.decision_reason or "") if version is not None else "",
         "blocks": [
-            {"title": str(block["title"]), "body": block["body"]} for block in build_preview_blocks(section_map)
+            {"key": block["key"], "title": str(block["title"]), "body": block["body"]}
+            for block in build_preview_blocks(section_map, activity_kinds_for_syllabus(syllabus), rule=rule)
         ],
         "history": history,
     }
 
 
-__all__ = ["BANNERS", "BLOCK_TITLES", "build_preview_blocks", "build_preview_payload"]
+__all__ = [
+    "APPROVED_BANNER_NO_SELFWORK",
+    "BANNERS",
+    "BLOCK_TITLES",
+    "banner_for",
+    "build_preview_blocks",
+    "build_preview_payload",
+]

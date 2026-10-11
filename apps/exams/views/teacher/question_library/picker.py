@@ -14,6 +14,7 @@ from apps.exams.services.question_bank_attach import (
     attach_bank_questions_to_exam,
     bank_questions_queryset,
 )
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.tenancy import get_request_organization
 
@@ -141,8 +142,17 @@ def exam_bank_picker(request, slug):
             questions = list(question_qs[offset : offset + _PICKER_PAGE_SIZE])
             has_more = total_count > offset + len(questions)
 
+    page_start = (page - 1) * _PICKER_PAGE_SIZE + 1 if questions else 0
     context = {
         "exam": exam,
+        # 2026-10-10 redizayn (müstəqil səhifə): ortaq başlıq + səhifələmə aralığı «1–40 / 120».
+        "exam_crumbs": exam_breadcrumbs(
+            request, exam, current=pgettext("exams.template.bank_picker", "Bankdan sual əlavə et")
+        ),
+        "page_start": page_start,
+        "page_end": page_start + len(questions) - 1 if questions else 0,
+        "prev_page": page - 1 if page > 1 else None,
+        "picker_page_size": _PICKER_PAGE_SIZE,
         "banks": banks,
         "selected_bank": selected_bank,
         "questions": questions,

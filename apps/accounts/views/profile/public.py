@@ -2,16 +2,23 @@
 Public user profile view.
 
 Renders a user's public profile: only published posts and non-confidential
-profile information are exposed. Safe for anonymous visitors.
+profile information are exposed.
+
+URL auditi B1 (2026-10-10): anonim baxış YOXDUR — giriş tələb olunur və baxan
+hədəflə aktiv üzvlüyü olan ortaq təşkilatda olmalıdır (və ya özü / superadmin,
+``core.people_visibility``). Əks halda 404 (``ad.soyad`` adları ilə orakul olmasın).
 
 M2 (2026-07-02): post siyahısı/filtr məntiqi blog-a köçüb —
 profile_hooks.public_posts_context (apps/blog/profile_sections.py).
 """
 
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
+from django.http import Http404
+from django.shortcuts import redirect, render
 from django.views.decorators.http import require_safe
 
+from core.people_visibility import can_view_person
 from core.permissions import is_superadmin_user
 from core.staff_position import resolve_position_label
 from core.tenancy import get_request_organization
@@ -88,6 +95,7 @@ def _viewer_can_see_contact(request, profile_user):
     ).exists()
 
 
+@login_required
 @require_safe
 def public_user_profile(request, username):
     """
@@ -97,14 +105,17 @@ def public_user_profile(request, username):
     ``?preview=1`` — sahibin öz profilinin kənardan necə göründüyünə baxışı
     (redaktə səhifəsindəki «Önizləmə» düyməsi); yalnız öz profilində keçərlidir.
     """
-    profile_user = get_object_or_404(User, username=username)
+    profile_user = User.objects.filter(username=username).first()
+    if profile_user is None or not can_view_person(request.user, profile_user.pk):
+        raise Http404("Profil tapılmadı.")
 
-    is_self = request.user.is_authenticated and request.user == profile_user
+    is_self = request.user == profile_user
     is_self_preview = is_self and request.GET.get("preview") == "1"
     if is_self and not is_self_preview:
         return redirect("accounts:profile")
 
-    profile, _created = UserProfile.objects.get_or_create(user=profile_user)
+    # B1: GET heç nə YAZMIR — profili olmayan hesab üçün yaddaşda boş nüsxə.
+    profile = UserProfile.objects.filter(user=profile_user).first() or UserProfile(user=profile_user)
 
     posts_result = profile_hooks.public_posts_context(request, profile_user)
     if posts_result["response"] is not None:

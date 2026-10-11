@@ -5,7 +5,16 @@
 # YALNIZ aşağıdakı, review olunmuş, idempotent, DEFOLT DRY-RUN əmrləri işlədir:
 #
 #   normalize_interim_components — Midterm dövrlərində (2026/2027-dən) cari jurnalların boş
-#       K1–K3 komponentlərini tək «Midterm» (0–20) komponentinə gətirir (bal olan jurnala toxunmur).
+#       K1–K3 komponentlərini tək «Midterm» komponentinə gətirir; 2026-10-11-dən Midterm tavanını
+#       sərbəst işsiz qaydaya görə 30-a QALDIRIR (mövcud ballar qalır).
+#   recompute_syllabus_completion — açıq sillabus versiyalarının tamamlanma faizini cari qaydaya görə
+#       yenidən hesablayır (sərbəst iş söndürülüb → 7 bölmə; təsdiqlənmişlərə toxunmur).
+#   journal_hygiene_report — «Jurnal təmizliyi»: ayrılmış tələbələr (left) / boş fənlər (empty) /
+#       qrupun keçmədiyi fənlər (not_held). Loga yalnız saylar düşür (--show 0); apply → DROPPED/SUSPENDED,
+#       hər qərar ledger-dədir və «Bərpa et» ilə geri qayıdır.
+#   reconcile_teacher_roster — «Forma 7» aktiv müəllim siyahısı (ŞİFRƏLİ release asset, `teacher-roster-…`):
+#       tapılanlara elmi ad/dərəcə + ştat, siyahıda olmayan MÜƏLLİM hesablarını mövcud «Hesabı dayandır» ilə
+#       bloklayır (inzibati rollar qorunur); `batch` verilsə həmin paketi geri qaytarır (--undo).
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
 #       (backfill; `--include-drafts` BURADA YOXDUR — qaralama planlar sahibin qərarıdır).
 #   apply_org_structure — struktur planı (scripts/data/qku_structure_2026_09_27.json, yalnız vahid
@@ -38,6 +47,9 @@ on:
           - seed_staff_roster
           - surveys_shuffle_responses
           - superadmin_role_count
+          - recompute_syllabus_completion
+          - journal_hygiene_report
+          - reconcile_teacher_roster
       apply:
         description: "Faktiki yaz (işarələnməsə dry-run)"
         required: false
@@ -52,7 +64,25 @@ on:
         required: false
         default: "2026/2027"
       roster_tag:
-        description: "seed_staff_roster: şifrəli siyahının release tag-ı"
+        description: "seed_staff_roster / reconcile_teacher_roster: şifrəli siyahının release tag-ı"
+        required: false
+        default: ""
+      hygiene_category:
+        description: "journal_hygiene_report: kateqoriya"
+        required: false
+        type: choice
+        default: all
+        options:
+          - all
+          - left
+          - empty
+          - not_held
+      hygiene_code:
+        description: "journal_hygiene_report: səbəb kodu və ya strong|review (boş = hamısı)"
+        required: false
+        default: ""
+      batch:
+        description: "reconcile_teacher_roster: geri qaytarılacaq paket id-si (undo)"
         required: false
         default: ""
 
@@ -77,6 +107,9 @@ jobs:
       APPLY: ${{ github.event.inputs.apply }}
       YEAR: ${{ github.event.inputs.year }}
       ROSTER_TAG: ${{ github.event.inputs.roster_tag }}
+      HYGIENE_CATEGORY: ${{ github.event.inputs.hygiene_category }}
+      HYGIENE_CODE: ${{ github.event.inputs.hygiene_code }}
+      BATCH: ${{ github.event.inputs.batch }}
     steps:
       - name: 📥 Checkout (struktur planı)
         if: github.event.inputs.command == 'apply_org_structure'
@@ -84,14 +117,14 @@ jobs:
         with:
           persist-credentials: false
       - name: 🔐 Şifrəli heyət siyahısı
-        if: github.event.inputs.command == 'seed_staff_roster'
+        if: github.event.inputs.command == 'seed_staff_roster' || (github.event.inputs.command == 'reconcile_teacher_roster' && github.event.inputs.batch == '')
         env:
           GH_TOKEN: ${{ github.token }}
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
           set -euo pipefail
           test -n "$STAFF_PLAN_KEY" || { echo "STAFF_PLAN_KEY sirri yoxdur" >&2; exit 1; }
-          case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-…" >&2; exit 1;; esac
+          case "$ROSTER_TAG" in (staff-roster-[0-9a-z-]*|teacher-roster-[0-9a-z-]*) ;; (*) echo "roster_tag formatı: staff-roster-… / teacher-roster-…" >&2; exit 1;; esac
           # Serverdə `gh` YOXDUR — release asset-i birbaşa yüklənir (şifrəlidir; token private repo üçün).
           umask 077
           curl -sSfL -H "Authorization: Bearer $GH_TOKEN" \
@@ -102,12 +135,18 @@ jobs:
           # `docker cp` runner UID-sini saxlayır (umask 077 → app istifadəçisi oxuya bilmir) — stdin ilə
           # konteynerin ÖZ istifadəçisi yazır.
           docker exec -i "$APP_CONTAINER" sh -c "umask 077; cat > /tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" < "$RUNNER_TEMP/roster.xlsx"
+          # reconcile_teacher_roster eyni faylı oxuyur (ad fərqi yalnız aydınlıq üçün deyil — təmizlik eyni qlobdur).
           rm -f "$RUNNER_TEMP/roster.xlsx" "$RUNNER_TEMP/roster.xlsx.enc"
       - name: 🧰 Run
         run: |
           set -euo pipefail
           case "$YEAR" in (20[0-9][0-9]/20[0-9][0-9]) ;; (*) echo "year formatı YYYY/YYYY olmalıdır" >&2; exit 1;; esac
           args=()
+          custom_apply=0
+          superadmin_actor() {
+            docker exec -i "$APP_CONTAINER" python manage.py shell -c \
+              "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1
+          }
           case "$COMMAND" in
             normalize_interim_components)
               args=(--organization "$ORG")
@@ -132,9 +171,48 @@ jobs:
               echo "## 🔎 superadmin_role_count: $count" >> "$GITHUB_STEP_SUMMARY"
               exit 0
               ;;
+            recompute_syllabus_completion)
+              args=(--org "$ORG")
+              ;;
+            journal_hygiene_report)
+              case "$HYGIENE_CATEGORY" in (all|left|empty|not_held) ;; (*) echo "hygiene_category yanlışdır" >&2; exit 2;; esac
+              case "$HYGIENE_CODE" in (""|[a-z_]*) ;; (*) echo "hygiene_code yalnız a-z və _" >&2; exit 2;; esac
+              printf '%s' "$HYGIENE_CODE" | grep -Eq '^[a-z_]*$' || { echo "hygiene_code yalnız a-z və _" >&2; exit 2; }
+              # Loga ŞƏXS ADI düşməsin: yalnız saylar (--show 0).
+              args=(--organization "$ORG" --category "$HYGIENE_CATEGORY" --show 0)
+              test -z "$HYGIENE_CODE" || args+=(--code "$HYGIENE_CODE")
+              if [ "$APPLY" = "true" ]; then
+                test "$HYGIENE_CATEGORY" != "all" || { echo "apply üçün konkret kateqoriya seçin" >&2; exit 2; }
+                actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+                echo "::add-mask::$actor"
+                if [ "$HYGIENE_CATEGORY" = "left" ]; then
+                  reason="Jurnal təmizliyi: universitetdən ayrılmış tələbələr jurnaldan çıxarılır — sahibin 2026-10-11 tapşırığı"
+                else
+                  reason="Jurnal təmizliyi: qrupun keçmədiyi / boş fənlər nəticələrdən çıxarılır — sahibin 2026-10-11 tapşırığı"
+                fi
+                args+=(--apply --reason "$reason" --actor "$actor" --i-know-this-is-production)
+                custom_apply=1
+              fi
+              ;;
+            reconcile_teacher_roster)
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              if [ -n "$BATCH" ]; then
+                printf '%s' "$BATCH" | grep -Eq '^roster-[0-9a-z-]+$' || { echo "batch formatı: roster-…" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args=(--organization "$ORG" --undo "$BATCH" --actor "$actor" --i-know-this-is-production)
+              else
+                args=("/tmp/staff_roster_${GITHUB_RUN_ID}.xlsx" --organization "$ORG"
+                      --report "/tmp/roster_report_${GITHUB_RUN_ID}.md" --details "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
+                if [ "$APPLY" = "true" ]; then
+                  args+=(--apply --reason "Forma 7 (2026/2027) aktiv müəllim siyahısı — sahibin 2026-10-11 tapşırığı"
+                         --actor "$actor" --i-know-this-is-production)
+                fi
+              fi
+              custom_apply=1
+              ;;
             sync_plan_offerings)
-              actor="$(docker exec -i "$APP_CONTAINER" python manage.py shell -c \
-                "from django.contrib.auth import get_user_model as g; u=g().objects.filter(is_superuser=True, is_active=True).order_by('date_joined').first(); print(u.username if u else '')" | tail -n1)"
+              actor="$(superadmin_actor)"
               test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               # İstifadəçi adı loglarda görünməsin (təhlükəsizlik yoxlaması, info).
               echo "::add-mask::$actor"
@@ -148,13 +226,26 @@ jobs:
             echo "::group::💾 Ehtiyat nüsxə (postgres-backup /backup.sh)"
             docker exec "$BACKUP_CONTAINER" /backup.sh
             echo "::endgroup::"
-            args+=(--apply)
+            test "$custom_apply" = 1 || args+=(--apply)
             if [ "$COMMAND" = "seed_staff_roster" ]; then
               args+=(--credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv")
             fi
           fi
           echo "::group::▶ $COMMAND ${args[*]}"
-          if [ "$COMMAND" = "seed_staff_roster" ]; then
+          if [ "$COMMAND" = "reconcile_teacher_roster" ]; then
+            # Hesabatda şəxs adları var → loga yalnız «Nümunələr»-ə qədərki saylar + paket id-si düşür;
+            # tam hesabat/CSV şifrəli artifaktdadır (aşağıdakı addım).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            if docker exec "$APP_CONTAINER" test -s "/tmp/roster_report_${GITHUB_RUN_ID}.md"; then
+              docker exec "$APP_CONTAINER" cat "/tmp/roster_report_${GITHUB_RUN_ID}.md" > "$RUNNER_TEMP/report.md"
+              docker exec "$APP_CONTAINER" cat "/tmp/roster_details_${GITHUB_RUN_ID}.csv" > "$RUNNER_TEMP/details.csv" || true
+              sed '/^## Nümunələr/,$d' "$RUNNER_TEMP/report.md" > "$RUNNER_TEMP/summary.log"
+            fi
+            grep -Eo 'roster-[0-9]{8}-[0-9]{6}-[0-9a-z]+' "$RUNNER_TEMP/out.log" | sort -u | sed 's/^/paket: /' >> "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(DRY-RUN|\(DRY-RUN|Bloklandı|Yeniləndi|Geri qaytarıldı|Paket)' "$RUNNER_TEMP/out.log" | cut -c1-120 >> "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            test "${status:-0}" = 0 || { tail -n 5 "$RUNNER_TEMP/out.log" | grep -E 'Error|Exception' | cut -c1-200 || true; exit "$status"; }
+          elif [ "$COMMAND" = "seed_staff_roster" ]; then
             # Repo/loglar AÇIQDIR: heyət hesabatında şəxs adları var → loga yalnız saylar düşür,
             # tam hesabat şifrəli artifakt kimi yüklənir (aşağıdakı addımlar).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
@@ -175,7 +266,7 @@ jobs:
           rm -f "$RUNNER_TEMP/summary.log"
       - name: 🔑 Hesabat + parollar (serverdə saxla, şifrəli artifakt)
         id: creds
-        if: always() && github.event.inputs.command == 'seed_staff_roster'
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'reconcile_teacher_roster')
         env:
           STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
         run: |
@@ -186,7 +277,13 @@ jobs:
             enc "$RUNNER_TEMP/out.log" "$RUNNER_TEMP/staff-out/report.log.enc"
             echo "saved=1" >> "$GITHUB_OUTPUT"
           fi
-          rm -f "$RUNNER_TEMP/out.log"
+          for f in report.md details.csv; do
+            if [ -s "$RUNNER_TEMP/$f" ]; then
+              enc "$RUNNER_TEMP/$f" "$RUNNER_TEMP/staff-out/$f.enc"
+              echo "saved=1" >> "$GITHUB_OUTPUT"
+            fi
+          done
+          rm -f "$RUNNER_TEMP/out.log" "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/details.csv"
           if [ "$APPLY" = "true" ] && docker exec "$APP_CONTAINER" test -s "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"; then
             mkdir -p "$HOME/creds" && chmod 700 "$HOME/creds"
             out="$HOME/creds/staff_$(date +%Y%m%d_%H%M%S).csv"
@@ -203,8 +300,8 @@ jobs:
           path: ${{ runner.temp }}/staff-out/
           retention-days: 1
       - name: 🧹 Konteynerdə müvəqqəti faylları sil
-        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure')
+        if: always() && (github.event.inputs.command == 'seed_staff_roster' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'reconcile_teacher_roster')
         run: |
           # root kimi: fərqli UID-li qalıqlar (sticky /tmp) app istifadəçisi ilə silinmir.
-          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json' || true
+          docker exec -u 0 "$APP_CONTAINER" sh -c 'rm -f /tmp/staff_roster*.xlsx /tmp/staff_creds*.csv /tmp/org_structure.json /tmp/roster_report_*.md /tmp/roster_details_*.csv' || true
           rm -rf "$RUNNER_TEMP/staff-out" "$RUNNER_TEMP/out.log" || true

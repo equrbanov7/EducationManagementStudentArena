@@ -9,7 +9,7 @@ app_name = "monitoring"
 urlpatterns = [
     path("summary/", views_summary.summary_api, name="summary"),
     path("ai-analysis/", views_summary.ai_analysis_api, name="ai_analysis"),
-    path("overview/", views.overview_api, name="overview"),
+    # WP9a (2026-10-10): `overview/` silindi — panel `summary/`-dən istifadə edir (2026-10-01).
     path("server/", views.server_api, name="server"),
     path("containers/", views.containers_api, name="containers"),
     path("application/", views.application_api, name="application"),

@@ -151,7 +151,7 @@ def validate_window_save(*, organization, period, k_index, opens_on, closes_on, 
     if not 0 <= int(k_index) < spec.count:
         if spec.is_midterm:
             raise KollokviumWindowRuleError(
-                "Bu dövrdə 3 kollokvium yoxdur — tək Midterm (0–20 bal) pəncərəsi təyin olunur."
+                f"Bu dövrdə 3 kollokvium yoxdur — tək Midterm (0–{spec.max_score} bal) pəncərəsi təyin olunur."
             )
         raise KollokviumWindowRuleError(f"Kollokvium nömrəsi K1–K{spec.count} aralığında olmalıdır.")
 

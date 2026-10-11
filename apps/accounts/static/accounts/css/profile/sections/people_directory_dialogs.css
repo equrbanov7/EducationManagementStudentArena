@@ -272,3 +272,8 @@
 /* Hesabı dayandırma sahələri (2026-10-03): səbəb + «kimə yaxınlaşsın» + tələbəyə qeyd. */
 .people-block-fields { display: flex; flex-direction: column; gap: 12px; }
 .people-block-fields[hidden] { display: none; }
+/* 2026-10-11: «Digər» → məcburi «Səbəbi yazın» sahəsi səbəbin altında; qeyd sahəsi «istəyə bağlı». */
+.people-block-fields__other { padding-left: 12px; border-left: 3px solid var(--ems-warning, var(--ems-primary)); }
+.people-block-fields__other[hidden] { display: none; }
+.people-block-fields__other .ems-textarea[aria-invalid="true"] { border-color: var(--ems-danger); }
+.people-block-fields__optional { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ems-text-muted); }

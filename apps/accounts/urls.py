@@ -10,6 +10,8 @@ from .views import academic_records as academic_records_views
 from .views import account_password_reset as password_reset_views
 from .views import exam_score_entry_changes as exam_score_changes_views
 from .views import exam_score_import as exam_score_import_views
+from .views import hr_analytics as hr_analytics_views
+from .views import journal_hygiene as journal_hygiene_views
 from .views import network_zone_page
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
@@ -19,10 +21,8 @@ urlpatterns = [
     # Authentication
     # Şəbəkə zonası izah səhifəsi — nginx kənardan /jurnal/ və /manage/ sorğularını bura yönləndirir.
     path("sebeke/<slug:area>/", network_zone_page.network_zone_denied, name="network_zone_denied"),
-    path("register/", views.register_view, name="register"),
-    path("verify-code/", views.verify_code_view, name="verify_code"),
-    path("verify-email/", views.verify_email_link_view, name="verify_email_link"),
-    path("resend-code/", views.resend_code_view, name="resend_code"),
+    # Sahib 2026-10-10 (URL auditi A5/B8): açıq qeydiyyat axını SİLİNDİ — `register/`,
+    # `verify-code/`, `verify-email/`, `resend-code/`. Hesabları universitet yaradır.
     # Audit 2026-09-28 SA-01/SA-02: köhnə JSON OTP marşrutları (`send-otp/`,
     # `verify-otp/`, `resend-otp/`) silindi — heç bir UI istifadə etmirdi, amma
     # parolsuz giriş (yalnız e-poçt OTP) və hesab orakulu yaradırdı.
@@ -156,8 +156,9 @@ urlpatterns = [
     path("users/<str:username>/", views.public_user_profile, name="public_profile"),
     # Role management
     path("manage-roles/", views.manage_roles, name="manage_roles"),
-    # Grading
-    path("grading-queue/", views.grading_queue, name="grading_queue"),
+    # URL auditi A6 (2026-10-10): köhnə `grading-queue/` səhifəsi silindi — kabinetin
+    # `?section=pending-review` bölməsi onu əvəz edir. `dashboard/student/` isə
+    # `dashboard/teacher/` kimi kabinetə yönləndirir.
     # Assigned items
     path("assigned-exams/", views.assigned_exams, name="assigned_exams"),
     path("assigned-courses/", views.assigned_courses, name="assigned_courses"),
@@ -185,20 +186,13 @@ urlpatterns = [
         name="student_organization_management",
     ),
     path(
-        "student-organization-request/",
-        views.student_organization_request,
-        name="student_organization_request",
-    ),
-    path(
         "student-organization-invitation/",
         views.student_org_invitation_action,
         name="student_org_invitation_action",
     ),
-    path(
-        "student-leave-organization/",
-        views.student_leave_organization,
-        name="student_leave_organization",
-    ),
+    # URL auditi B3/A7 (2026-10-10): `student-leave-organization/` (özbaşına təşkilatdan
+    # çıxış) və `student-organization-request/` (istənilən təşkilata qoşulma müraciəti)
+    # SİLİNDİ — reyestr hərəkəti iş axınını yan keçirdilər.
     path("permission-editor/", views.permission_editor, name="permission_editor"),
     # Superadmin oversight
     path("superadmin/organizations/", views.superadmin_organizations, name="superadmin_organizations"),
@@ -234,8 +228,7 @@ urlpatterns = [
     ),
     # RİM — semestr sonu toplu jurnal bağlaması + bağlanma xəbərdarlığı
     path("jurnal-baglama/", views.journal_close, name="journal_close"),
-    # Account management
-    path("delete-account/", views.delete_account, name="delete_account"),
+    # Account management — `delete-account/` (özünü silmə) URL auditi B6 ilə silindi.
     path("superadmin/users/", views.superadmin_user_management, name="superadmin_user_management"),
     # RİM mərkəzi — hesab idarəetməsi (icazə-qapılı: `user.*`, bax
     # apps/organizations/permissions.py «users» kateqoriyası). Superadmin
@@ -334,6 +327,11 @@ urlpatterns = [
     path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
     # 2026-10-03: «Sistem tənzimləmələri» — saxlama (yalnız RİM rəhbəri / superadmin).
     path("system-settings/save/", views.system_settings_save, name="system_settings_save"),
+    # 2026-10-10: «Jurnal təmizliyi» — siyahı (GET) + önizləmə/tətbiq/bərpa (tək JSON POST); RİM rəhbəri.
+    path("journal-hygiene/rows/", journal_hygiene_views.journal_hygiene_rows, name="journal_hygiene_rows"),
+    path("journal-hygiene/action/", journal_hygiene_views.journal_hygiene_action, name="journal_hygiene_action"),
+    # 2026-10-11: «Kadr analitikası» — Excel ixracı (HR / rektor / RİM rəhbəri; audit olunur).
+    path("hr-analytics/export/", hr_analytics_views.hr_analytics_export, name="hr_analytics_export"),
     # 2026-10-03: qrupun «ilk giriş» çap vərəqi (QR + təlimat + aktivləşdirməyənlər, PAROLSUZ).
     path(
         "student-registry/activation-sheet/",

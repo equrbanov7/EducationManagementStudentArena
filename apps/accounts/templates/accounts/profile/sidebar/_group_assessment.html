@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«İmtahan və qiymətləndirmə» qrupu — köhnə «Tədris işi» qrupunun
 qiymətləndirmə nüvəsi: müəllimin imtahanları/kursları, yoxlama növbəsi,
 dəyərləndirilmiş nəticələr və apellyasiya idarəetməsi.
@@ -10,7 +10,7 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
 <li class="sidebar-menu-group" data-sidebar-group="assessment">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|my-exams|my-courses|courses|pending-review|subject-folder-review|review-results|manage-appeals|" %} open{% endif %}>
         {% trans "İmtahan və qiymətləndirmə" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-list-check" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="clipboard-check" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_my_exams.html" %}
             {% include "accounts/profile/sidebar/items/_my_courses.html" %}
@@ -24,7 +24,7 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
                    data-title="{% trans 'my_courses' context 'profile.section' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'courses' %}active{% endif %}">
-                    <i class="fas fa-graduation-cap sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "book-open" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "my_courses" context "profile.sidebar" %}</span>
                     {% if courses_count > 0 %}<span class="sidebar-menu-badge" data-badge-key="courses_count">{{ courses_count }}</span>{% endif %}
                 </a>
@@ -42,7 +42,7 @@ onlar məzmun hazırlığıdır, qiymətləndirmə deyil. İcazə şərtləri D�
                    data-title="{% trans 'Apellyasiyalar' context 'appeals.template' %}"
                    data-source-url="{% url 'appeals:manage_appeals' %}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'manage-appeals' %}active{% endif %}">
-                    <i class="fas fa-gavel sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "scale" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Apellyasiyalar" context "appeals.template" %}</span>
                     {% comment %}Boş badge CSS-lə gizlənir (`.sidebar-menu-badge:empty`) —
                     inline `style` ATRİBUTU CSP hədəfinə görə yazılmır; sayğac boruları

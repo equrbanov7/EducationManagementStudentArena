@@ -37,7 +37,7 @@ from ..constants import (
 )
 from ..errors import FolderError
 from ..models import Submission, SubmissionFile
-from . import lookups, notify
+from . import lookups, notify, selfwork_rule
 from .assignments import WINDOW_CLOSED, WINDOW_LATE, WINDOW_NOT_OPEN, deadline_for, window_state
 from .events import record_event
 from .locks import advisory_lock
@@ -60,6 +60,8 @@ def resolve_enrollment(task, assignment, student):
         raise FolderError.of("task.not_published")
     if task.kind == TaskKind.SELFWORK and not assignment.grades_selfwork:
         raise FolderError.of("assignment.selfwork_elsewhere")
+    if task.kind == TaskKind.SELFWORK and not selfwork_rule.offering_active(assignment.offering):
+        raise FolderError.of("selfwork.disabled")  # sahib 2026-10-10: bu dövrdə sərbəst iş yoxdur
     enrollment = lookups.active_enrollment(assignment.offering_id, student)
     if enrollment is None:
         raise FolderError.of("audience.not_enrolled")

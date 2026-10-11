@@ -32,7 +32,7 @@ from ..shared._helpers import (
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
-# Yaradılış/redaktə modalında seçilə bilən statuslar (publish_lab ilə eyni məna).
+# Yaradılış/redaktə modalında seçilə bilən statuslar (köhnə `publish_lab` ilə eyni məna).
 _EDITABLE_STATUSES = {"draft", "published", "archived"}
 
 
@@ -149,7 +149,7 @@ def create_lab(request, course_id):
             )
 
         # 2026-09-28: modalın «Status» seçimi nəzərə alınır — «Yayımla» seçilibsə
-        # `publish_lab` kimi təyin olunanlara bildiriş gedir (əvvəl həmişə draft idi).
+        # Köhnə `publish_lab` kimi təyin olunanlara bildiriş gedir (əvvəl həmişə draft idi).
         if lab.status == "published":
             from apps.notifications.public import get_lab_assigned_user_ids, notify_task_assignment
 
@@ -332,27 +332,3 @@ def delete_lab(request, pk):
             "redirect_url": reverse("courses:course_dashboard", args=[course_id]),
         }
     )
-
-
-@login_required
-@require_POST
-def publish_lab(request, pk):
-    """Lab yayımla"""
-    lab = _get_tenant_lab_or_404(request, pk)
-
-    if lab.created_by != request.user:
-        return JsonResponse(
-            {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
-        )
-
-    lab.status = "published"
-    lab.save()
-    from apps.notifications.public import get_lab_assigned_user_ids, notify_task_assignment
-
-    notify_task_assignment(
-        task=lab,
-        user_ids=get_lab_assigned_user_ids(lab),
-        task_kind="lab",
-    )
-    messages.success(request, pgettext("labs.view.message", "lab_published"))
-    return JsonResponse({"success": True})

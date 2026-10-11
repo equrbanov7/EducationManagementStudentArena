@@ -141,7 +141,7 @@ class TeacherDashboardTest(TestCase):
 
 
 class StudentDashboardTest(TestCase):
-    """Pin student_dashboard view behavior."""
+    """Pin student_dashboard view behavior (URL auditi A6: kabinetə yönləndirmə)."""
 
     def setUp(self):
         self.client = Client()
@@ -151,38 +151,12 @@ class StudentDashboardTest(TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn("/login", resp.url)
 
-    def test_student_renders_200(self):
+    def test_student_redirected_to_profile(self):
         student = User.objects.create_user(username="sd_student", email="sds@example.com", password="pw12345678")
         self.client.force_login(student)
         resp = self.client.get(reverse("accounts:student_dashboard"))
-        self.assertEqual(resp.status_code, 200)
-
-
-class GradingQueueTest(TestCase):
-    """Pin grading_queue view behavior."""
-
-    def setUp(self):
-        self.client = Client()
-
-    def test_requires_login(self):
-        resp = self.client.get(reverse("accounts:grading_queue"))
         self.assertEqual(resp.status_code, 302)
-        self.assertIn("/login", resp.url)
-
-    def test_non_teacher_redirected_home(self):
-        student = User.objects.create_user(username="gq_student", email="gqs@example.com", password="pw12345678")
-        student.profile.role = ProfileRole.STUDENT
-        student.profile.save(update_fields=["role", "updated_at"])
-        self.client.force_login(student)
-        resp = self.client.get(reverse("accounts:grading_queue"))
-        self.assertEqual(resp.status_code, 302)
-        self.assertEqual(resp.url, reverse("home"))
-
-    def test_teacher_renders_200(self):
-        admin = User.objects.create_superuser(username="gq_teacher", email="gqt@example.com", password="pw12345678")
-        self.client.force_login(admin)
-        resp = self.client.get(reverse("accounts:grading_queue"))
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.url, reverse("accounts:profile"))
 
 
 class ResultViewsLoginGateTest(TestCase):

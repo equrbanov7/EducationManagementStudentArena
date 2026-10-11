@@ -1,0 +1,127 @@
+{% load i18n %}
+{% comment %}Bank seçiləndən sonrakı hissə (müstəqil «Bankdan sual əlavə et» səhifəsi).
+POST müqaviləsi köhnə ilə eynidir: action=attach, bank, question_ids[] və ya «hamısını seç»
+rejimində select_all=1 + cari filtrlər (q/language/difficulty) + excluded_ids[].{% endcomment %}
+<section class="ems-card ebp-summary" aria-label="{% trans 'Bank xülasəsi' context 'exams.template.bank_picker' %}">
+    <div class="ebp-summary__main">
+        <h2 class="ebp-summary__title"><i class="fas fa-database" aria-hidden="true"></i> {{ selected_bank.name }}</h2>
+        <p class="etp-hint ebp-summary__meta">
+            {% if compatible_type == 'written' %}{% trans "Yazılı sual" context "exams.template.bank_picker" %}{% else %}{% trans "Test sualı" context "exams.template.bank_picker" %}{% endif %}: <b class="etp-num">{{ bank_total_questions }}</b>
+            · {% trans "Dil" context "exams.template.bank_picker" %}: <b class="etp-num">{{ bank_language_count }}</b>
+        </p>
+    </div>
+    {% if bank_language_stats %}
+    <nav class="ebp-langs" aria-label="{% trans 'Dil üzrə süz' context 'exams.template.bank_picker' %}">
+        <a class="ems-chip ebp-chip" href="?bank={{ selected_bank.id }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}"{% if not language_filter %} aria-current="true"{% endif %}>
+            {% trans "Hamısı" context "exams.template.bank_picker" %}
+        </a>
+        {% for stat in bank_language_stats %}
+        <a class="ems-chip ebp-chip" href="?bank={{ selected_bank.id }}&language={{ stat.code }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}"{% if language_filter == stat.code %} aria-current="true"{% endif %}>
+            {{ stat.label }} <span class="ebp-chip__n etp-num">{{ stat.count }}</span>
+        </a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+</section>
+
+{% if questions %}
+<form method="post" class="ebp-attach" id="ebpAttachForm" data-ebp-attach
+      data-total="{{ total_count }}"
+      data-count-template="{% trans '{n} sual seçildi' context 'exams.template.bank_picker' %}">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="attach">
+    <input type="hidden" name="bank" value="{{ selected_bank.id }}">
+    {# «Hamısını seç» rejimi (server cari filtrlərə uyğun BÜTÜN sualları əlavə edir). #}
+    <input type="hidden" name="select_all" value="" data-ebp-select-all-input>
+    <input type="hidden" name="q" value="{{ search_query }}">
+    <input type="hidden" name="language" value="{{ language_filter }}">
+    <input type="hidden" name="difficulty" value="{{ difficulty_filter }}">
+    <div data-ebp-excluded></div>
+
+    <section class="ems-tablewrap ebp-list-card" aria-labelledby="ebpListTitle">
+        <div class="ebp-list-head">
+            <h2 class="ebp-list-title" id="ebpListTitle">
+                {% trans "Tapılan suallar" context "exams.template.bank_picker" %}: <span class="etp-num">{{ total_count }}</span>
+            </h2>
+            <span class="etp-hint ebp-range etp-num">{{ page_start }}–{{ page_end }} / {{ total_count }}</span>
+            <div class="ebp-list-tools">
+                <label class="ebp-pagecheck">
+                    <input type="checkbox" data-ebp-page-toggle>
+                    <span>{% trans "Bu səhifədəkiləri seç" context "exams.template.bank_picker" %}</span>
+                </label>
+                {% if total_count > questions|length %}
+                <button type="button" class="ems-btn ems-btn--ghost" data-ebp-select-all>
+                    <i class="fas fa-check-double" aria-hidden="true"></i>{% blocktrans trimmed with n=total_count context "exams.template.bank_picker" %}Bütün {{ n }} sualı seç{% endblocktrans %}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        <ul class="ebp-list" role="list">
+            {% for q in questions %}
+            <li class="ebp-item">
+                <input class="ebp-item__check" type="checkbox" name="question_ids" value="{{ q.id }}" id="ebpQ{{ q.id }}" data-ebp-check>
+                <label class="ebp-item__main" for="ebpQ{{ q.id }}">
+                    <span class="ebp-item__text">{{ q.text|striptags|truncatechars:220 }}</span>
+                    <span class="ebp-item__tags">
+                        <span class="ems-badge ems-badge--neutral">{{ q.get_language_display }}</span>
+                        <span class="ems-badge ems-badge--muted">{{ q.get_difficulty_display }}</span>
+                    </span>
+                </label>
+                {% if q.question_type == 'test' %}
+                <details class="ebp-item__opts">
+                    <summary>{% trans "Variantlar" context "exams.template.bank_picker" %}</summary>
+                    <ol class="ebp-opts" role="list">
+                        {% for opt in q.options.all %}
+                        <li class="ebp-opt{% if opt.is_correct %} is-correct{% endif %}">
+                            <span class="ebp-opt__label">{{ opt.label|default:'•' }}</span>
+                            <span class="ebp-opt__text">{{ opt.text }}</span>
+                            {% if opt.is_correct %}<span class="ems-badge ems-badge--success"><i class="fas fa-check" aria-hidden="true"></i>{% trans "Düzgün" context "exams.template.bank_picker" %}</span>{% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="ebp-opt etp-hint">{% trans "Variant yoxdur" context "exams.template.bank_picker" %}</li>
+                        {% endfor %}
+                    </ol>
+                </details>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% if prev_page or has_more %}
+        <nav class="ems-tablefoot ebp-pager" aria-label="{% trans 'Səhifələr' context 'exams.template.bank_picker' %}">
+            <span>{% trans "Səhifəni dəyişəndə seçim sıfırlanır — hamısını əlavə etmək üçün «Bütün sualları seç» düyməsindən istifadə edin." context "exams.template.bank_picker" %}</span>
+            <span class="ebp-pager__links">
+                {% if prev_page %}<a class="ems-btn" href="?bank={{ selected_bank.id }}&page={{ prev_page }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if language_filter %}&language={{ language_filter }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}"><i class="fas fa-chevron-left" aria-hidden="true"></i>{% trans "Əvvəlki" context "exams.template.bank_picker" %}</a>{% endif %}
+                {% if has_more %}<a class="ems-btn" href="?bank={{ selected_bank.id }}&page={{ next_page }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}{% if language_filter %}&language={{ language_filter }}{% endif %}{% if difficulty_filter %}&difficulty={{ difficulty_filter }}{% endif %}">{% trans "Növbəti" context "exams.template.bank_picker" %}<i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+            </span>
+        </nav>
+        {% endif %}
+    </section>
+
+    <div class="etp-actionbar ebp-actionbar" role="region" aria-label="{% trans 'Seçim' context 'exams.template.bank_picker' %}">
+        <span class="etp-actionbar__count" data-ebp-count aria-live="polite">{% trans "Heç bir sual seçilməyib" context "exams.template.bank_picker" %}</span>
+        <div class="etp-actionbar__actions">
+            <button type="button" class="ems-btn ems-btn--ghost" data-ebp-clear>{% trans "Təmizlə" context "exams.template.bank_picker" %}</button>
+            <button type="submit" class="ems-btn ems-btn--primary" data-ebp-submit
+                    data-empty-label="{% trans 'Heç bir sual seçilməyib' context 'exams.template.bank_picker' %}">
+                <i class="fas fa-plus" aria-hidden="true"></i>{% trans "Seçilənləri əlavə et" context "exams.template.bank_picker" %}
+            </button>
+        </div>
+    </div>
+</form>
+{% elif not bank_total_questions %}
+{# Bankın özündə uyğun sual yoxdur — filtr sıfırlamaq kömək etməz. #}
+<section class="ems-card">
+    {% trans "Bu bankda uyğun sual yoxdur" context "exams.template.bank_picker" as state_title %}
+    {% trans "Başqa bank seçin və ya kitabxanada bu banka sual əlavə edin." context "exams.template.bank_picker" as state_body %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-inbox" state_action_label="" %}
+</section>
+{% else %}
+<section class="ems-card">
+    {% trans "Filtrlərə uyğun sual tapılmadı" context "exams.template.bank_picker" as state_title %}
+    {% trans "Axtarışı dəyişin və ya filtrləri sıfırlayın." context "exams.template.bank_picker" as state_body %}
+    {% trans "Filtrləri sıfırla" context "exams.template.bank_picker" as state_action_label %}
+    {% with bank_id=selected_bank.id|stringformat:"s" %}{% with reset_url="?bank="|add:bank_id %}
+    {% include "partials/ems_ui/_empty.html" with state_icon="fa-filter-circle-xmark" state_action_url=reset_url %}
+    {% endwith %}{% endwith %}
+</section>
+{% endif %}

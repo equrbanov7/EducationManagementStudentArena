@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load journal_names i18n %}
 {% comment %}Kurs işi tabı (mockup): solda qeydiyyat siyahısı, sağda "Yeni kurs işi"
 formu. Sətirdəki ✎ formu doldurur (yalnız 2 saat pəncərəsi içində); bal 0-100
 server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
@@ -26,7 +26,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                 {% if row.work or correction_mode %}
                 <tr>
                     <td class="jd2-cw-no">{{ forloop.counter }}</td>
-                    <td class="jd2-cw-name">{{ row.student.get_full_name|default:row.student.username }}</td>
+                    <td class="jd2-cw-name">{{ row.student|journal_name }}</td>
                     <td class="jd2-cw-topic">{{ row.work.topic }}</td>
                     <td class="jd2-cw-date">{% if row.work.submitted_on %}{{ row.work.submitted_on|date:"d.m.Y" }}{% else %}—{% endif %}</td>
                     <td class="jd2-cw-score {% if row.corrected %}corr-fixed{% endif %}">
@@ -41,7 +41,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                         <button type="button" class="jd2-cw-editbtn{% if row.corrected %} corr-fixed{% endif %}"
                                 data-corr-cell data-corr-target="coursework"
                                 data-enrollment-id="{{ row.enrollment.id }}"
-                                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                data-student="{{ row.student|journal_name }}"
                                 data-kind="{% trans 'Kurs işi' context 'registrar.journal' %}"
                                 data-cw-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
                                 data-cw-topic="{{ row.work.topic }}"
@@ -54,7 +54,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                         {% if not row.locked or can_override_lessons %}
                         <button type="button" class="jd2-cw-editbtn" data-jd-cw-edit
                                 data-enrollment="{{ row.enrollment.id }}"
-                                data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                data-student="{{ row.student|journal_name }}"
                                 data-topic="{{ row.work.topic }}"
                                 data-score="{% if row.work.score is not None %}{{ row.work.score|floatformat:'-2' }}{% endif %}"
                                 data-date="{% if row.work.submitted_on %}{{ row.work.submitted_on|date:'Y-m-d' }}{% endif %}"
@@ -86,7 +86,7 @@ server tərəfdə clamp olunur, qeyd 2 saatdan sonra dondurulur.{% endcomment %}
                             data-live-search-empty="{% trans 'Uyğun tələbə yoxdur' context 'registrar.journal' %}">
                         <option value="">{% trans "Seçin…" context "registrar.journal" %}</option>
                         {% for row in coursework_rows %}
-                        <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student.get_full_name|default:row.student.username }}{% if row.work %} ✓{% endif %}</option>
+                        <option value="{{ row.enrollment.id }}" {% if row.locked and not can_override_lessons %}disabled{% endif %}>{{ row.student|journal_name }}{% if row.work %} ✓{% endif %}</option>
                         {% endfor %}
                     </select>
                 </div>

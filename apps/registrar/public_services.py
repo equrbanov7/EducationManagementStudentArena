@@ -12,6 +12,9 @@ from . import handover_actions  # noqa: F401
 from . import handover_query  # noqa: F401
 from . import interim_assessment  # noqa: F401
 from . import journal_close  # noqa: F401
+from . import journal_hygiene  # noqa: F401
+from . import journal_hygiene_actions  # noqa: F401
+from . import journal_hygiene_rows  # noqa: F401
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
@@ -60,6 +63,7 @@ from .syllabus_reuse_targets import instructor_offering  # noqa: F401
 from .syllabus_reuse_targets import instructor_offerings  # noqa: F401
 from .syllabus_reuse_targets import plan_hours_by_offering  # noqa: F401
 from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
+from .teaching_activity import instructor_activity  # noqa: F401 — «Kadr analitikası» (2026-10-11)
 
 __all__ = [
     "CORRECT_PERMISSION",
@@ -84,11 +88,15 @@ __all__ = [
     "handover",
     "handover_actions",
     "handover_query",
+    "instructor_activity",
     "instructor_offering",
     "instructor_offerings",
     "interim_assessment",
     "is_custom",
     "journal_close",
+    "journal_hygiene",
+    "journal_hygiene_actions",
+    "journal_hygiene_rows",
     "journal_scope",
     "kollokvium_notifications",
     "kollokvium_windows",

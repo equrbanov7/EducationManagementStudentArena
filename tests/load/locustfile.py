@@ -262,11 +262,10 @@ class StudentUser(_TlsAwareHttpUser):
 
     @task(3)
     def course_list(self):
-        # `/courses/` marşrutu YOXDUR (kök URL təyin olunmayıb) — siyahı
-        # `/courses/my-courses/`-dadır. Köhnə yazılış hər sorğuda 404 alırdı və
-        # yük testi «%88 uğursuz» göstərirdi: rəqəm tətbiqin deyil, ssenarinin
-        # qüsuru idi.
-        self.client.get("/courses/my-courses/", name="[student] Course list")
+        # `/courses/` marşrutu YOXDUR (kök URL təyin olunmayıb). WP9a (2026-10-10):
+        # köhnə `/courses/my-courses/` səhifəsi də silindi — tələbə siyahısı kabinet
+        # bölməsidir (`?section=assigned-courses`).
+        self.client.get("/accounts/profile/?section=assigned-courses", name="[student] Course list")
 
     @task(2)
     def course_dashboard(self):
@@ -276,7 +275,8 @@ class StudentUser(_TlsAwareHttpUser):
 
     @task(1)
     def notifications(self):
-        self.client.get("/notifications/", name="[student] Notifications")
+        # WP9a (2026-10-10): `/notifications/` səhifəsi silindi — bildirişlər kabinet bölməsidir.
+        self.client.get("/accounts/profile/?section=notifications", name="[student] Notifications")
 
     def on_stop(self):
         # CSRF cookie-dən oxunur. Boş token göndərmək 403 verirdi — Django
@@ -313,7 +313,7 @@ class LiveExamJoiner(_TlsAwareHttpUser):
     @task(1)
     def state_poll(self):
         self.client.get(
-            f"/api/v1/live/{_LIVE_PIN}/state/",
+            f"/live/state/{_LIVE_PIN}/",
             name="[live] State poll",
         )
 
@@ -321,7 +321,7 @@ class LiveExamJoiner(_TlsAwareHttpUser):
 class LiveExamPlayer(_TlsAwareHttpUser):
     """Simulates a player already in a live session polling for state updates.
 
-    Models the JavaScript polling loop that calls /api/v1/live/<pin>/state/
+    Models the JavaScript polling loop that calls /live/state/<pin>/
     approximately every 500 ms.  The rate limit is 120 requests/minute so
     this scenario deliberately stays below that threshold.
     """
@@ -335,7 +335,7 @@ class LiveExamPlayer(_TlsAwareHttpUser):
     @task
     def poll_state(self):
         with self.client.get(
-            f"/api/v1/live/{_LIVE_PIN}/state/",
+            f"/live/state/{_LIVE_PIN}/",
             catch_response=True,
             name="[player] State poll",
         ) as resp:

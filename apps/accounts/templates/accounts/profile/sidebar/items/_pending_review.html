@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Yoxlanılacaq» — müəllimin yoxlama növbəsi. #}
 {% if 'pending-review' in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'pending_review' context 'profile.section' %}"
        data-source-url="{% url 'accounts:pending_review' %}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'pending-review' %}active{% endif %}">
-        <i class="fas fa-tasks sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "list-todo" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "pending_review" context "profile.sidebar" %}</span>
         {% if pending_review_count > 0 %}
         <span class="sidebar-menu-badge sidebar-menu-badge--warning sidebar-menu-badge--pulse" data-badge-key="pending_review_count">{{ pending_review_count }}</span>

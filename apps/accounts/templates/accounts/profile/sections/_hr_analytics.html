@@ -1,0 +1,24 @@
+{% load i18n static hr_analytics_tags %}
+{% comment %}
+«Kadr analitikası» (sahib 2026-10-11) — İnsan resursları, rektor, RİM rəhbəri və superadmin
+(menyu qapısı: rbac_sections.py, açar `people.hr_analytics`; data qapısı: services/hr_analytics/policy.py).
+Müəllim heyəti: say və hesab statusu, ştat vahidləri, elmi ad / dərəcə, dərs yükü, tədris fəaliyyəti,
+məlumat keyfiyyəti, axtarışlı siyahı və Excel ixracı.
+
+Panel SERVER-render-dir və AJAX-safe-dir: avto filtr paneli (`filter_bar.js`, `hr_*` URL-də), tab və
+səhifə linkləri bölməni yerində yeniləyir. CSS xarici fayldadır və panelin İÇİNDƏDİR; JS lazım deyil
+(zolaq enləri `hr-w-NN` sinifləri ilə — inline stil YOXDUR).
+{% endcomment %}
+{% if 'hr-analytics' in allowed_sections %}
+<section class="profile-section-panel profile-section--hr-analytics {% if active_section == 'hr-analytics' %}is-active{% endif %}"
+         data-profile-section-panel="hr-analytics"
+         data-source-url="{{ profile_base_url }}?section=hr-analytics">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/hr_analytics.css' %}?v=20261011-wp12hr">
+{% hr_analytics_panel as hr %}
+{% if not hr.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=hr.access_denied_message %}
+{% else %}
+    {% include "accounts/profile/sections/hr_analytics/_content.html" %}
+{% endif %}
+</section>
+{% endif %}

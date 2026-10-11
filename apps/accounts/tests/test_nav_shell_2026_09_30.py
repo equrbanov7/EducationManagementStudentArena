@@ -365,7 +365,7 @@ class SidebarTemplateRenderTest(SimpleTestCase):
         aside = self._render(allowed, caps, can_reset=True)
         block = aside[aside.index('data-sidebar-group="settings"') :]
         self.assertIn('href="/accounts/profile/?section=account-password-reset"', block)
-        self.assertIn('class="fas fa-key sidebar-menu-icon"', block)
+        self.assertRegex(block, r'class="ems-nav-icon sidebar-menu-icon"[^>]*><use href="[^"]*#key-round"')
         allowed, caps = self.TEACHER
         aside = self._render(allowed, caps, can_reset=True)
         self.assertIn('data-sidebar-layout="teacher"', aside)

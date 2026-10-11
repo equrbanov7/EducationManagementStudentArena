@@ -1,0 +1,11 @@
+{% comment %}Üfüqi zolaq siyahısı — `bars` ([{label, count, percent, width}]). Rəqəm + faiz MƏTNLƏ də yazılır
+(yalnız rəngə/uzunluğa söykənmir). Eni `hr-w-NN` sinfindən (CSP: inline stil yoxdur).{% endcomment %}
+<ul class="hr-bars">
+    {% for item in bars %}
+    <li class="hr-bars__row">
+        <span class="hr-bars__label">{{ item.label }}</span>
+        <span class="ems-bar hr-bars__track" aria-hidden="true"><span class="ems-bar__fill hr-bars__fill {{ item.width }}{% if bar_tone %} ems-bar__fill--{{ bar_tone }}{% endif %}"></span></span>
+        <span class="hr-bars__value">{{ item.count }} <small>· {{ item.percent }}%</small></span>
+    </li>
+    {% endfor %}
+</ul>

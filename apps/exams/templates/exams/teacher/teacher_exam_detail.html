@@ -9,7 +9,12 @@
     <link rel="stylesheet" href="{% static 'exams/css/exam_create_edit_modal.css' %}?v=20260707-wizard2">
     <link rel="stylesheet" href="{% static 'exams/css/exam_wizard.css' %}?v=20260914-2">
     <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261008-1">
-    <link rel="stylesheet" href="{% static 'exams/css/question_form_modal.css' %}?v=20260607-unified-question-modal">
+    {# 2026-10-10: «Yeni sual əlavə et» modalının redizaynı — ortaq etiket/düymə qatı + forma CSS-i. #}
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_media.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_answers.css' %}?v=20261010-wp3exams">
     {# Token teması (sahib 2026-09-21): rənglər/kartlar/düymələr design-tokens üzərindən. #}
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_detail_theme.css' %}?v=20260921-theme">
 {% endblock %}
@@ -497,7 +502,7 @@
 }
 </script>
 <script src="{% static 'exams/js/teacher_exam_detail_i18n_bootstrap.js' %}"></script>
-<script src="{% static 'exams/js/question_form.js' %}?v=20260914-1"></script>
+<script src="{% static 'exams/js/question_form.js' %}?v=20261010-wp3exams"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/namespace.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/markup.js' %}?v=20260707-wizard2"></script>
 <script src="{% static 'exams/js/exam_create_edit_modal/searchable_select.js' %}?v=20261001-examqa"></script>
@@ -507,6 +512,6 @@
 <script src="{% static 'exams/js/exam_create_edit_modal/entry.js' %}?v=20260914-1"></script>
 <script src="{% static 'js/ems_datetime.js' %}?v=20261008-1"></script>
 <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261008-1"></script>
-<script src="{% static 'exams/js/exam_wizard.js' %}?v=20261008-1"></script>
-<script src="{% static 'exams/js/teacher_exam_detail.js' %}?v=20260928-live-post"></script>
+<script src="{% static 'exams/js/exam_wizard.js' %}?v=20261011-1"></script>
+<script src="{% static 'exams/js/teacher_exam_detail.js' %}?v=20261010-wp3exams"></script>
 {% endblock %}

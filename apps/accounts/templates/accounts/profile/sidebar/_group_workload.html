@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Dərs yükü» qrupu — Mərhələ 4 yük ZƏNCİRİ: tədris şöbəsi mərkəzi (12),
 kafedra bölgüsü, koordinator vizası (13), dekanlıq təsdiqi (15), rektorluq ümumi
 baxışı (17). Hər biri ÖZ icazə açarındadır; panellər server-render OXU-ONLYdir.
@@ -9,7 +9,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
 <li class="sidebar-menu-group" data-sidebar-group="workload">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|workload-center|workload-visa|workload-approval|workload-overview|workload-distribution|" %} open{% endif %}>
         {% trans "Dərs yükü" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-scale-balanced" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="clock" %}
         <ul class="sidebar-menu-group-items">
             {% if "workload-center" in allowed_sections %}
             <li class="sidebar-menu-item">
@@ -18,7 +18,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                    data-title="{% trans 'Dərs yükü mərkəzi' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-center' %}active{% endif %}">
-                    <i class="fas fa-diagram-project sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "layout-dashboard" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Dərs yükü mərkəzi" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -33,7 +33,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                    data-title="{% trans 'Yük bölgüsü' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-distribution' %}active{% endif %}">
-                    <i class="fas fa-scale-balanced sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "chart-pie" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Yük bölgüsü" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -45,7 +45,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                    data-title="{% trans 'Yük vizası' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-visa' %}active{% endif %}">
-                    <i class="fas fa-clipboard-check sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "signature" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Yük vizası" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -57,7 +57,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                    data-title="{% trans 'Yük təsdiqi' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-approval' %}active{% endif %}">
-                    <i class="fas fa-stamp sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "stamp" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Yük təsdiqi" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -69,7 +69,7 @@ və «Dərs və cədvəl» qrupundadır.{% endcomment %}
                    data-title="{% trans 'Yük — ümumi baxış' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'workload-overview' %}active{% endif %}">
-                    <i class="fas fa-chart-pie sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "chart-bar-big" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Yük — ümumi baxış" context "profile.sidebar" %}</span>
                 </a>
             </li>

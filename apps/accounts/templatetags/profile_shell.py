@@ -115,7 +115,6 @@ SIDEBAR_LAYOUT_NEUTRAL_SECTIONS = frozenset(
     {
         "blog",
         "delete-account",
-        "student-organization-request",  # «Təşkilata qoşul» menyudan gizlidir
         "student-intake",  # «Tələbə qəbulu» (`student-admission`) onu əvəz edir
         "syllabus-editor",  # «Sillabuslar» bəndindən açılır, onu aktiv saxlayır
         "org-structure",  # köhnə açar — menyu bəndi yoxdur

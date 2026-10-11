@@ -9,7 +9,7 @@
         {% if sp.folder.description %}<p class="sfc-head__desc">{{ sp.folder.description|linebreaksbr }}</p>{% endif %}
         <p class="sfc-head__meta">
             <span class="ems-badge ems-badge--{{ sp.chip.tone }}">{{ sp.chip.label }}</span>
-            {% if sp.folder.selfwork_option %}<span class="ems-badge ems-badge--info">{% blocktrans trimmed with option=sp.folder.selfwork_option context "subject_folder.ui" %}Sərbəst iş: {{ option }}{% endblocktrans %}</span>{% endif %}
+            {% if sp.selfwork_active and sp.folder.selfwork_option %}<span class="ems-badge ems-badge--info">{% blocktrans trimmed with option=sp.folder.selfwork_option context "subject_folder.ui" %}Sərbəst iş: {{ option }}{% endblocktrans %}</span>{% endif %}
             {% if sp.folder.synced_at %}<span class="sfc-muted">{% trans "Sillabusla uzlaşdırılıb:" context "subject_folder.ui" %} {{ sp.folder.synced_at|date:"d.m.Y H:i" }}</span>{% endif %}
             {% if not sp.can_manage %}<span class="sfc-muted">{% trans "Sahibi:" context "subject_folder.ui" %} {{ sp.owner_name }}</span>{% endif %}
         </p>
@@ -23,7 +23,7 @@
                     <i class="fas fa-pen" aria-hidden="true"></i> {% trans "Redaktə et" context "subject_folder.ui" %}
                 </button>
                 <button type="button" class="ems-btn ems-btn--sm" data-sf-post="folder_resync" data-sf-field-folder="{{ sp.folder.pk }}"
-                        data-sf-confirm="{% trans 'Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? Göndərişi olan heç nə silinmir.' context 'subject_folder.ui' %}">
+                        data-sf-confirm="{% if sp.selfwork_active %}{% trans 'Mövzular və sərbəst iş slotları təsdiqlənmiş sillabusla uzlaşdırılsın? Göndərişi olan heç nə silinmir.' context 'subject_folder.ui' %}{% else %}{% trans 'Mövzular təsdiqlənmiş sillabusla uzlaşdırılsın? Göndərişi olan heç nə silinmir.' context 'subject_folder.ui' %}{% endif %}">
                     <i class="fas fa-rotate" aria-hidden="true"></i> {% trans "Sillabusla uzlaşdır" context "subject_folder.ui" %}
                 </button>
             {% endif %}

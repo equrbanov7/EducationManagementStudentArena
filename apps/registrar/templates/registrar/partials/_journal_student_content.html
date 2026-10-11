@@ -107,11 +107,11 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
             <div class="sjx-kpi-bar"><span class="sjx-kpi-barfill {% if d.journal.barred %}is-danger{% endif %}" data-sjx-abs="{{ d.journal.absence_hours }}" data-sjx-limit="{{ d.journal.allowed_absence|floatformat:0 }}"></span></div>
         </div>
         {% if d.interim.is_midterm %}
-        {# 2026/2027-dən: TƏK midterm (0–20) — orta bal yoxdur, balın özü göstərilir. #}
+        {# 2026/2027-dən: TƏK midterm (0–30; sərbəst iş açıqdırsa 0–20) — orta bal yoxdur, balın özü; şkala komponentin tavanından. #}
         {% with mt=d.kollokviums.0 %}
         <div class="sjx-kpi">
             <div class="sjx-kpi-label">{% trans "MIDTERM" context "registrar.journal" %}</div>
-            <div class="sjx-kpi-value is-blue">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %} <span class="sjx-kpi-unit">/ {{ d.interim.max_score }}</span></div>
+            <div class="sjx-kpi-value is-blue">{% if mt and mt.score is not None %}{{ mt.score|floatformat:'-1' }}{% else %}—{% endif %} <span class="sjx-kpi-unit">/ {% if mt %}{{ mt.component.max_score }}{% else %}{{ d.interim.max_score }}{% endif %}</span></div>
             <div class="sjx-kpi-sub">{% if mt and mt.score is not None %}{% trans "aralıq imtahan balı" context "registrar.journal" %}{% else %}{% trans "hələ yazılmayıb" context "registrar.journal" %}{% endif %}</div>
         </div>
         {% endwith %}
@@ -262,7 +262,7 @@ kollokvium markerləri). BU GÜNÜN qeydləri gizlidir (2 saat qaydası).{% endc
     </div>
 
     {# ── Sərbəst iş + kurs işi (öz vəziyyəti) ─────────────────────────────── #}
-    {% if d.selfwork_topics and d.selfwork_row %}
+    {% if d.selfwork_active and d.selfwork_topics and d.selfwork_row %}
     <div class="sjx-swbox">
         <div class="jd2-panel-label">{% trans "SƏRBƏST İŞ" context "registrar.journal" %} <span class="sjx-h3-badge">{{ d.selfwork_row.total }} / 10</span></div>
         <ol class="sjx-sw-list">

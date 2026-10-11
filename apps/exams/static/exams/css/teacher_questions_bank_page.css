@@ -1,0 +1,369 @@
+/* «Sual bankı» (imtahan sualları) + kitabxana bankı — 2026-10-10 redizayn.
+   Ortaq qabıq: teacher_page_shell.css. Köhnə `teacher_questions_bank/_part*.css` sual
+   göndərişi səhifələrində işlənməyə davam edir — bu səhifələr onları artıq yükləmir.
+   `.qb-card` / `.question-checkbox` yalnız JS qarmağıdır, görünüş `eqb-*` siniflərindədir. */
+
+.eqb-filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-sp-6) 18px;
+}
+
+/* ── Keyfiyyət süzgəci (tək çip zolağı) ────────────────────────────────── */
+.eqb-quality {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding-top: var(--ems-sp-5);
+    border-top: 1px solid var(--ems-neutral-100);
+}
+
+.eqb-quality__label {
+    margin-right: var(--ems-sp-2);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.eqb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: var(--ems-h-xs);
+    padding: 0 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.eqb-chip:hover {
+    border-color: var(--ems-primary-300);
+    color: var(--ems-primary-800);
+}
+
+.eqb-chip[aria-current="true"] {
+    border-color: var(--ems-primary-600);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.eqb-chip__n {
+    padding: 0 7px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-xs);
+}
+
+/* Sıfır sayğac: zəifləşdirilir, amma mətn kontrastı AA qalır (neutral-600, 6.9:1). */
+.eqb-chip.is-empty {
+    border-style: dashed;
+    color: var(--ems-neutral-600);
+}
+
+.eqb-chip--error i { color: var(--ems-danger-strong); }
+.eqb-chip--warning i { color: var(--ems-warning-700); }
+.eqb-chip--dup i { color: var(--ems-violet-800); }
+.eqb-chip--clean i { color: var(--ems-success-700); }
+
+.eqb-lang-hint {
+    margin: 0;
+}
+
+/* ── Sual siyahısı ─────────────────────────────────────────────────────── */
+.eqb-bulk {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    margin: 0;
+}
+
+.eqb-list__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--ems-border);
+    background: var(--ems-bg-subtle);
+}
+
+.eqb-list__title {
+    display: flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.eqb-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 var(--ems-sp-5);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ems-neutral-100);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.eqb-card:last-child {
+    border-bottom: 0;
+}
+
+.eqb-card:hover {
+    background: var(--ems-bg-subtle);
+}
+
+.eqb-card.is-selected {
+    background: var(--ems-primary-50);
+    border-left-color: var(--ems-primary-600);
+}
+
+.eqb-card--error {
+    border-left-color: var(--ems-danger);
+}
+
+.eqb-card--warning {
+    border-left-color: var(--ems-warning-500);
+}
+
+.eqb-card.is-inactive .eqb-card__text,
+.eqb-card.is-inactive .eqb-opts {
+    opacity: 0.72;
+}
+
+.eqb-check {
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--ems-primary-600);
+    cursor: pointer;
+}
+
+.eqb-card__main {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+    cursor: default;
+}
+
+.eqb-card__top {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--ems-sp-4);
+}
+
+.eqb-card__num {
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+    color: var(--ems-neutral-500);
+    line-height: 1.6;
+}
+
+.eqb-card__text {
+    margin: 0;
+    font-size: var(--ems-fs-md);
+    line-height: 1.55;
+    color: var(--ems-text);
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.eqb-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+}
+
+.eqb-card__media img {
+    max-width: min(100%, 520px);
+    max-height: 260px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+}
+
+.eqb-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-2) var(--ems-sp-3);
+}
+
+.eqb-card__date {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.eqb-opts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.eqb-opt {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    padding: 6px 10px;
+    border: 1px solid var(--ems-neutral-100);
+    border-radius: var(--ems-r-md);
+    background: var(--ems-bg);
+    font-size: var(--ems-fs-base);
+}
+
+.eqb-opt.is-correct {
+    border-color: var(--ems-success-bd);
+    background: var(--ems-success-bg);
+}
+
+.eqb-opt__label {
+    font-weight: 800;
+    color: var(--ems-neutral-600);
+}
+
+.eqb-opt__text {
+    flex: 1 1 140px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.eqb-opt__image {
+    max-width: 100%;
+    max-height: 120px;
+    border-radius: var(--ems-r-sm);
+}
+
+.eqb-written {
+    padding: 8px 12px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    font-size: var(--ems-fs-base);
+}
+
+.eqb-warnings > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    min-height: 32px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+    cursor: pointer;
+}
+
+.eqb-warnings--error > summary { color: var(--ems-danger-strong); }
+.eqb-warnings--warning > summary { color: var(--ems-warning-800); }
+
+.eqb-warnings__list {
+    display: grid;
+    gap: var(--ems-sp-2);
+    margin: var(--ems-sp-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.eqb-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    padding: 6px 10px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+}
+
+.eqb-warning--error {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.eqb-warning--info {
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.eqb-warning i {
+    margin-top: 2px;
+}
+
+.eqb-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.eqb-card__delete {
+    color: var(--ems-danger-strong);
+}
+
+.eqb-card__delete:hover:not(:disabled) {
+    background: var(--ems-danger-bg);
+}
+
+.eqb-danger .ems-card__title i {
+    color: var(--ems-danger);
+}
+
+.eqb-phrase {
+    overflow-wrap: anywhere;
+    color: var(--ems-danger-strong);
+}
+
+/* ── Bank redaktə dialoqu (kitabxana bankı) ────────────────────────────── */
+.eqb-edit {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+}
+
+.eqb-edit__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ems-sp-6);
+}
+
+.eqb-edit__switch {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-3);
+    font-weight: 600;
+}
+
+.eqb-edit__switch input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ems-primary-600);
+}
+
+@media (max-width: 640px) {
+    .eqb-card__top {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .eqb-card__badges {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+    }
+
+    .eqb-edit__row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

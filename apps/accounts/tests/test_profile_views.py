@@ -89,12 +89,11 @@ class ProfileViewTest(TestCase):
         )
 
     def _delete_account(self, user, *, password="testpass123"):
-        self.client.force_login(user)
-        return self.client.post(
-            reverse("accounts:delete_account"),
-            {"password": password},
-            follow=True,
-        )
+        """Özünü silmə marşrutu URL auditi B6 ilə silindi (2026-10-10) — servis qalır
+        (RİM / superadmin işlədir), davranışı birbaşa yoxlanılır."""
+        from apps.accounts.services.account_deletion import soft_delete_account
+
+        soft_delete_account(user, password=password)
 
     def test_profile_requires_login(self):
         """Test that profile page requires authentication."""
@@ -379,9 +378,8 @@ class ProfileViewTest(TestCase):
                 )
                 _assign_user_to_org(user, organization, profile_role, membership_role_name=membership_role_name)
 
-                response = self._delete_account(user)
+                self._delete_account(user)
 
-                self.assertRedirects(response, reverse("accounts:login"))
                 user.refresh_from_db()
                 user.profile.refresh_from_db()
                 self.assertFalse(user.is_active)
@@ -430,9 +428,8 @@ class ProfileViewTest(TestCase):
             message="Join request",
         )
 
-        response = self._delete_account(requester)
+        self._delete_account(requester)
 
-        self.assertRedirects(response, reverse("accounts:login"))
         requester.refresh_from_db()
         requester.profile.refresh_from_db()
         pending_request.refresh_from_db()
@@ -473,9 +470,8 @@ class ProfileViewTest(TestCase):
             title="__student_pending_invite__",
         )
 
-        response = self._delete_account(invited_user)
+        self._delete_account(invited_user)
 
-        self.assertRedirects(response, reverse("accounts:login"))
         invited_user.refresh_from_db()
         invited_user.profile.refresh_from_db()
         pending_invite.refresh_from_db()
@@ -502,9 +498,8 @@ class ProfileViewTest(TestCase):
                     is_active=True,
                 )
 
-                response = self._delete_account(owner)
+                self._delete_account(owner)
 
-                self.assertRedirects(response, reverse("accounts:login"))
                 owner.refresh_from_db()
                 owner.profile.refresh_from_db()
                 self.assertFalse(owner.is_active)
@@ -527,9 +522,11 @@ class ProfileViewTest(TestCase):
             is_active=True,
         )
 
-        response = self._delete_account(owner)
+        from apps.accounts.services.account_deletion import AccountDeletionError
 
-        self.assertRedirects(response, reverse("accounts:profile") + "?section=profile-info")
+        with self.assertRaisesMessage(AccountDeletionError, "last_org_admin"):
+            self._delete_account(owner)
+
         owner.refresh_from_db()
         owner.profile.refresh_from_db()
         self.assertTrue(owner.is_active)
@@ -695,7 +692,8 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, "?section=role-assignment")
         self.assertEqual(self.client.session.get("active_organization"), approved_org.slug)
 
-    def test_join_organization_sidebar_and_section_are_translated_in_english(self):
+    def test_join_organization_section_is_no_longer_granted(self):
+        """URL auditi A7 (2026-10-10): «Təşkilata qoşul» bölməsi heç kimə verilmir."""
         profile = self.user.profile
         profile.role = ProfileRole.TEACHER
         profile.organization = None
@@ -709,8 +707,9 @@ class ProfileViewTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Join organization")
-        self.assertContains(response, "Search current organizations, choose one")
+        self.assertNotEqual(response.context["active_section"], "student-organization-request")
+        self.assertNotIn("student-organization-request", response.context["allowed_sections"])
+        self.assertNotContains(response, "Search current organizations, choose one")
 
     def test_staff_management_sidebar_and_section_are_translated_in_english(self):
         owner = User.objects.create_user(
@@ -1290,7 +1289,7 @@ class ProfileViewTest(TestCase):
         self.assertContains(response, reverse("accounts:my_results"))
         self.assertContains(response, reverse("accounts:pending_answers"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
-        self.assertNotContains(response, reverse("accounts:student_organization_request"))
+        self.assertNotContains(response, "/accounts/student-organization-request/")
         self.assertContains(response, reverse("accounts:profile") + "?section=notifications")
 
     def test_student_with_pending_join_request_can_open_profile_without_active_org(self):
@@ -1777,9 +1776,9 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("accounts:superadmin_organizations"))
         self.assertNotContains(response, reverse("accounts:student_organization_management"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
-        self.assertNotContains(response, reverse("accounts:student_organization_request"))
+        self.assertNotContains(response, "/accounts/student-organization-request/")
         # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
-        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
+        self.assertNotContains(response, "/accounts/student-leave-organization/")
 
     def test_profile_restores_org_context_for_teacher_course_modal(self):
         personal_org = Organization.objects.create(
@@ -1850,9 +1849,9 @@ class ProfileViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, f"{reverse('accounts:profile')}?section=student-organization-request")
-        self.assertNotContains(response, reverse("accounts:student_organization_request"))
+        self.assertNotContains(response, "/accounts/student-organization-request/")
 
-    def test_profile_info_shows_pending_organization_invites_for_student_without_selected_org(self):
+    def test_notifications_show_pending_organization_invites_for_student_without_selected_org(self):
         owner = User.objects.create_user(
             username="invite_owner",
             email="invite_owner@example.com",
@@ -1896,15 +1895,16 @@ class ProfileViewTest(TestCase):
             title="__student_pending_invite__",
         )
 
+        # URL auditi A7 (2026-10-10): dəvət kartı «Təşkilata qoşul» bölməsinin qurucusundan
+        # gəlirdi — bölmə silindi; dəvət «Bildirişlər»-də qəbul / rədd formları ilə görünür.
         self.client.login(username="testuser", password="testpass123")
-        response = self.client.get(reverse("accounts:profile") + "?section=profile-info")
+        response = self.client.get(reverse("accounts:profile") + "?section=notifications")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Təşkilat dəvətləri")
         self.assertContains(response, "Invite Ready Org")
-        self.assertContains(response, "Qəbul et")
         self.assertContains(response, reverse("accounts:student_org_invitation_action"))
-        self.assertContains(response, "?section=student-organization-request")
+        self.assertContains(response, 'name="action" value="accept"', html=False)
+        self.assertNotContains(response, "?section=student-organization-request")
 
     def test_student_without_selected_org_can_accept_invite_from_profile_info(self):
         owner = User.objects.create_user(
@@ -1993,9 +1993,9 @@ class ProfileViewTest(TestCase):
         self.assertNotContains(response, reverse("exams:teacher_group_list"))
         self.assertNotContains(response, reverse("accounts:pending_review"))
         # "Təşkilata qoşul" sidebar bəndi gizlədilib (istifadəçilər admin əlavə edir).
-        self.assertNotContains(response, reverse("accounts:student_organization_request"))
+        self.assertNotContains(response, "/accounts/student-organization-request/")
         # "Təşkilatdan çıx" profildən çıxarıldı (istifadəçi tələbi) — link olmamalıdır.
-        self.assertNotContains(response, reverse("accounts:student_leave_organization"))
+        self.assertNotContains(response, "/accounts/student-leave-organization/")
 
     def test_org_admin_profile_shows_groups_and_management_navigation(self):
         organization = Organization.objects.create(
@@ -4397,127 +4397,36 @@ class PendingAnswersViewTest(TestCase):
         self.assertNotContains(response, "Async Written Exam")
 
 
-class StudentDashboardAssignmentVisibilityTest(TestCase):
+class LegacyDashboardRoutesTest(TestCase):
+    """URL auditi A6 (2026-10-10): köhnə tələbə paneli kabinetə yönləndirir,
+    `grading-queue/` səhifəsi isə silinib (əvəzi — `?section=pending-review`)."""
+
     def setUp(self):
-        from datetime import timedelta
-
-        from django.utils import timezone
-
-        from apps.accounts.models import ProfileRole
-        from apps.assignments.models import Assignment
-        from apps.courses.models import Course, CourseMembership
-
         self.client = Client()
-        self.teacher = User.objects.create_user(
-            username="dashboard_teacher",
-            email="dashboard_teacher@example.com",
-            password="testpass123",
-        )
         self.student = User.objects.create_user(
-            username="dashboard_student",
-            email="dashboard_student@example.com",
-            password="testpass123",
+            username="dashboard_student", email="dashboard_student@example.com", password="testpass123"
         )
         self.organization = Organization.objects.create(
-            name="Student Dashboard Org",
+            name="Dashboard Org",
             org_type=OrganizationType.SCHOOL,
-            owner=self.teacher,
+            owner=self.student,
             status="active",
             is_active=True,
         )
-        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
         _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
 
-        self.course = Course.objects.create(owner=self.teacher, title="Dashboard Course", status="published")
-        CourseMembership.objects.create(course=self.course, user=self.student, role="student")
-
-        self.visible_assignment = Assignment.objects.create(
-            course=self.course,
-            title="Visible Dashboard Assignment",
-            start_date=timezone.now() - timedelta(days=1),
-            due_date=timezone.now() + timedelta(days=2),
-            status="published",
-        )
-        self.visible_assignment.assigned_students.add(self.student)
-
-        self.hidden_assignment = Assignment.objects.create(
-            course=self.course,
-            title="Hidden Dashboard Assignment",
-            start_date=timezone.now() - timedelta(days=1),
-            due_date=timezone.now() + timedelta(days=2),
-            status="published",
-        )
-
-    def test_student_dashboard_only_lists_assignments_assigned_to_student(self):
+    def test_student_dashboard_redirects_to_cabinet(self):
         _login_with_org(self.client, self.student, self.organization)
         response = self.client.get(reverse("accounts:student_dashboard"))
+        self.assertRedirects(response, reverse("accounts:profile"), fetch_redirect_response=False)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Visible Dashboard Assignment")
-        self.assertNotContains(response, "Hidden Dashboard Assignment")
+    def test_grading_queue_route_is_gone(self):
+        from django.urls import NoReverseMatch, Resolver404, resolve
 
-
-class GradingQueueViewTest(TestCase):
-    def setUp(self):
-        from datetime import timedelta
-
-        from django.utils import timezone
-
-        from apps.accounts.models import ProfileRole
-        from apps.assignments.models import Assignment, Submission
-        from apps.courses.models import Course
-
-        self.client = Client()
-        self.teacher = User.objects.create_user(
-            username="grading_queue_teacher",
-            email="grading_queue_teacher@example.com",
-            password="testpass123",
-        )
-        self.student = User.objects.create_user(
-            username="grading_queue_student",
-            email="grading_queue_student@example.com",
-            password="testpass123",
-        )
-        self.organization = Organization.objects.create(
-            name="Grading Queue Org",
-            org_type=OrganizationType.SCHOOL,
-            owner=self.teacher,
-            status="active",
-            is_active=True,
-        )
-        _assign_user_to_org(self.teacher, self.organization, ProfileRole.TEACHER)
-        _assign_user_to_org(self.student, self.organization, ProfileRole.STUDENT)
-
-        self.course = Course.objects.create(owner=self.teacher, title="Grading Queue Course", status="published")
-        self.assignment = Assignment.objects.create(
-            course=self.course,
-            title="Queue Assignment",
-            start_date=timezone.now() - timedelta(days=1),
-            due_date=timezone.now() + timedelta(days=2),
-            status="published",
-            max_score=75,
-        )
-        self.submission = Submission.objects.create(
-            assignment=self.assignment,
-            user=self.student,
-            content="Queue answer body",
-            status="submitted",
-            files=[{"name": "queue-answer.pdf", "path": "assignments/submissions/queue-answer.pdf"}],
-        )
-
-    def test_grading_queue_renders_assignment_review_actions_and_stats(self):
-        _login_with_org(self.client, self.teacher, self.organization)
-        response = self.client.get(reverse("accounts:grading_queue"))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Queue Assignment")
-        self.assertContains(response, "Queue answer body")
-        self.assertContains(response, reverse("assignments:grade_submission", kwargs={"pk": self.submission.id}))
-        self.assertContains(response, "/ 75")
-        self.assertContains(response, "/media/assignments/submissions/queue-answer.pdf")
-        # Student identity must be hidden during grading phase.
-        self.assertContains(response, "Anonim tələbə")
-        self.assertNotContains(response, "grading_queue_student")
+        with self.assertRaises(NoReverseMatch):
+            reverse("accounts:grading_queue")
+        with self.assertRaises(Resolver404):
+            resolve("/accounts/grading-queue/")
 
 
 class PendingReviewViewTest(TestCase):

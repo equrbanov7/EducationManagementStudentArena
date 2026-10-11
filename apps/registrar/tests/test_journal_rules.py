@@ -5,7 +5,7 @@ import datetime
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
@@ -261,9 +261,12 @@ class SelfWorkTest(TestCase):
                 journal_extras.set_selfwork_mark(
                     offering=self.offering, topic_id=t.id, enrollment_id=self.enrollment.id, done=True
                 )
-            # 2026/2027 (Midterm rejimi, sillabus standartı — entry_standard): davamiyyət 10
-            # (qayıb yoxdur) + sərbəst iş 4 (çeklistdə 4 təhvil = 4 bal).
-            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("14"))
+            # 2026/2027 (Midterm rejimi, sillabus standartı — entry_standard): sahib 2026-10-10 sərbəst işi
+            # ləğv etdi — giriş balı yalnız davamiyyət 10 (qayıb yoxdur); təhvillər data kimi qalır.
+            self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("10"))
+            # RİM-də sərbəst iş açılsa köhnə qayda qayıdır: + sərbəst iş 4 (çeklistdə 4 təhvil = 4 bal).
+            with override_settings(ACADEMIC_SELFWORK_ENABLED=True):
+                self.assertEqual(gradebook.entry_score_for(self.enrollment, 50), Decimal("14"))
 
     def test_revoke_blocked_after_window(self):
         with bypass_rls():

@@ -1,0 +1,283 @@
+/* Sual formu — MEDIA (sahib 2026-10-10): stilləşdirilmiş fayl zonası («Şəkil seçin» /
+   «Video seçin», sürüklə-burax, önbaxış, ad + ölçü, ×), cari media və rəsm cavabı açarı.
+   Dəstin qalanı: question_form.css (qabıq/sahələr) + question_form_answers.css. */
+
+/* ── Fayl zonası (şəkil / video) ───────────────────────────────────────── */
+.qf-media {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 16px;
+}
+
+.qf-drop {
+    position: relative;
+    min-width: 0;
+}
+
+/* Native input görünmür, amma fokuslana bilir (klaviatura → Enter/Space ilə seçim). */
+.qf-drop__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.qf-drop__zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 116px;
+    padding: 16px;
+    border: 1.5px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-bg-subtle);
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+
+.qf-drop__zone:hover,
+.qf-drop.is-dragover .qf-drop__zone {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+
+.qf-drop__input:focus-visible + .qf-drop__zone {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.qf-drop__icon {
+    font-size: 22px;
+    color: var(--ems-primary-600);
+}
+
+.qf-drop__title {
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+    color: var(--ems-primary-700);
+}
+
+.qf-drop__sub {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.qf-drop.has-file .qf-drop__zone {
+    min-height: 0;
+    padding: 10px 16px;
+}
+
+.qf-drop.has-file .qf-drop__icon,
+.qf-drop.has-file .qf-drop__sub {
+    display: none;
+}
+
+.qf-file {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 12px;
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+}
+
+.qf-file[hidden] {
+    display: none;
+}
+
+.qf-file__thumb,
+.qf-file__icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--ems-r-md);
+    object-fit: cover;
+    background: var(--ems-neutral-100);
+}
+
+.qf-file__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ems-neutral-600);
+}
+
+.qf-file__meta {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.qf-file__name {
+    overflow: hidden;
+    font-size: var(--ems-fs-base);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.qf-file__size {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.qf-file__remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ems-h-field);
+    height: var(--ems-h-field);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    color: var(--ems-neutral-600);
+    cursor: pointer;
+}
+
+.qf-file__remove:hover {
+    border-color: var(--ems-danger-bd);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.qf-file__video {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-height: 220px;
+    border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-900);
+}
+
+.qf-current {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.qf-current__label {
+    flex: 1 1 100%;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-600);
+}
+
+.qf-current__media {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: var(--ems-r-md);
+}
+
+.qf-current.is-pending .qf-current__media {
+    opacity: 0.45;
+}
+
+.qf-current.is-cleared .qf-current__media,
+.qf-current.is-cleared .qf-current__remove {
+    display: none;
+}
+
+/* ── Rəsm cavabı açarı ─────────────────────────────────────────────────── */
+.qf-switch {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    cursor: pointer;
+}
+
+.qf-switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.qf-switch__track {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 24px;
+    margin-top: 2px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-300);
+    transition: background-color 0.15s ease;
+}
+
+.qf-switch__track::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-card);
+    transition: transform 0.15s ease;
+}
+
+.qf-switch input:checked + .qf-switch__track {
+    background: var(--ems-primary-600);
+}
+
+.qf-switch input:checked + .qf-switch__track::after {
+    transform: translateX(16px);
+}
+
+.qf-switch input:focus-visible + .qf-switch__track {
+    outline: 2px solid var(--ems-primary-600);
+    outline-offset: 2px;
+}
+
+.qf-switch__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.qf-switch__title {
+    font-weight: 700;
+}
+
+.qf-paint-state {
+    display: grid;
+    gap: 4px;
+    margin: 10px 0 0;
+    font-size: var(--ems-fs-sm);
+}
+
+.qf-paint-state div {
+    display: flex;
+    gap: 6px;
+}
+
+.qf-paint-state dt {
+    font-weight: 700;
+}
+
+.qf-paint-state dd {
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .qf-media {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

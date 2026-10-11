@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load journal_names i18n %}
 {% comment %}«Alt qrupdan tələbə əlavə et» modalı — koordinator/dekanlıq səthi.
 
 Fənn və hədəf qrup KONTEKSTDƏN gəlir (jurnal açılışı) — yenidən soruşulmur,
@@ -159,7 +159,7 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
                 <ul class="jgs-current-list">
                     {% for row in journal.guest_rows %}
                     <li class="jgs-current-item" data-jgs-item="{{ row.enrollment.id }}">
-                        <span class="jgs-current-name">{{ row.student.get_full_name|default:row.student.username }}</span>
+                        <span class="jgs-current-name">{{ row.student|journal_name }}</span>
                         {% if row.source_group %}<span class="jgs-current-group">{{ row.source_group.name }}</span>{% endif %}
                         {% if row.guest_document %}
                         <a class="jgs-current-doc" href="{{ row.guest_document.1 }}" target="_blank" rel="noopener"

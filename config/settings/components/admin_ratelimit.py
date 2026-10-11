@@ -106,6 +106,10 @@ PRACTICAL_EXAMS_ENABLED = os.getenv("PRACTICAL_EXAMS_ENABLED", "True").strip().l
     "yes",
     "on",
 }
+# Sahib 2026-10-10 («lazım deyilsə göstərmə»): rubrik (meyar-meyar) qiymətləndirməsi
+# gizlidir — `jurnal/<uuid>/rubrik/<uuid>/` 404, kataloqun «Rubriklər» tabı yoxdur.
+# Modellər, `rubrics.py` xidməti və mövcud data QALIR; .env ilə geri açılır.
+REGISTRAR_RUBRICS_ENABLED = _env_bool_setting("REGISTRAR_RUBRICS_ENABLED", False)
 EXAM_SUPERVISION_ENABLED = os.getenv("EXAM_SUPERVISION_ENABLED", "True").strip().lower() in {
     "1",
     "true",

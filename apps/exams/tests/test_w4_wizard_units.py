@@ -166,10 +166,12 @@ class AssignedListsUnitTests(_UnitFixture):
         exam = self._exam(title="W4U Unit Assigned")
         exam.allowed_units.add(self.group)
         client = _login(self.student, self.org)
-        response = client.get(reverse("exams:assigned_exam_list"))
+        # `exams/assigned/` kabinet bölməsinə yönləndirir (URL auditi §4, 2026-10-10).
+        section = {"section": "assigned-exams"}
+        response = client.get(reverse("accounts:profile"), section)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "W4U Unit Assigned")
-        response = _login(self.student_other_group, self.org).get(reverse("exams:assigned_exam_list"))
+        response = _login(self.student_other_group, self.org).get(reverse("accounts:profile"), section)
         self.assertNotContains(response, "W4U Unit Assigned")
 
     def test_batch_group_ids_include_units_with_constant_query_count(self):

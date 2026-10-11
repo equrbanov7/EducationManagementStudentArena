@@ -13,6 +13,7 @@ solda qalıb sağda bu açmalıdı». Bu modul həmin müqaviləni qoruyur:
 * icazəsiz aktor nə bölməni, nə də son nöqtəni görür (fail-closed).
 """
 
+from django.test import override_settings
 from django.urls import reverse
 
 from apps.registrar.models import Subject
@@ -71,13 +72,35 @@ class RegistrarCatalogSectionTest(_OrgUnitsBase):
     def test_every_tab_is_offered_and_only_the_active_one_is_computed(self):
         section = self._section().context["registrar_catalog_section"]
         keys = [tab["key"] for tab in section["tabs"]]
-        self.assertEqual(keys, ["programs", "subjects", "curricula", "offerings", "rubrics", "students"])
+        # Sahib 2026-10-10: «Rubriklər» defolt gizlidir (REGISTRAR_RUBRICS_ENABLED=False).
+        self.assertEqual(keys, ["programs", "subjects", "curricula", "offerings", "students"])
         self.assertEqual(section["tab"], "programs")
         self.assertTrue(all("count" in tab for tab in section["tabs"]))
 
         subjects = self._section(rc_tab="subjects").context["registrar_catalog_section"]
         self.assertEqual(subjects["tab"], "subjects")
 
+    def test_rubrics_tab_hidden_and_refused_by_default(self):
+        # Gizli tab URL ilə də açılmır — defolt taba düşür; JSON əməli naməlum tab kimi 400 verir.
+        section = self._section(rc_tab="rubrics").context["registrar_catalog_section"]
+        self.assertEqual(section["tab"], "programs")
+        self.assertNotIn("rubrik", section["header_subtitle"])
+        for action in ("values", "save"):
+            with self.subTest(action=action):
+                response = self._action(
+                    "teaching_office_head", {"action": action, "tab": "rubrics", "id": "x", "name": "R"}
+                )
+                self.assertEqual(response.status_code, 400)
+
+    @override_settings(REGISTRAR_RUBRICS_ENABLED=True)
+    def test_rubrics_tab_returns_with_the_flag(self):
+        section = self._section().context["registrar_catalog_section"]
+        keys = [tab["key"] for tab in section["tabs"]]
+        self.assertEqual(keys, ["programs", "subjects", "curricula", "offerings", "rubrics", "students"])
+        self.assertIn("rubrik", section["header_subtitle"])
+        self.assertEqual(self._section(rc_tab="rubrics").context["registrar_catalog_section"]["tab"], "rubrics")
+
+    @override_settings(REGISTRAR_RUBRICS_ENABLED=True)
     def test_table_headers_match_the_row_cells_on_every_tab(self):
         """Fakültə reyestrindəki sütun sürüşməsi burada təkrarlanmır."""
         for tab in ("programs", "subjects", "curricula", "offerings", "rubrics", "students"):

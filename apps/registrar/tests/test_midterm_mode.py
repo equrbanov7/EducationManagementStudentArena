@@ -1,5 +1,7 @@
-"""Midterm rejimi (sahibin qərarı 2026-09-25): 2026/2027-dən 3 kollokvium əvəzinə TƏK 20 ballıq midterm.
+"""Midterm rejimi (sahibin qərarı 2026-09-25): 2026/2027-dən 3 kollokvium əvəzinə TƏK midterm.
 
+Sahib 2026-10-10: sərbəst iş ləğv olundu, midterm 30 ballıqdır; RİM-də sərbəst iş açılsa 20-yə qayıdır
+(``ACADEMIC_SELFWORK_ENABLED=True`` variantları köhnə qaydanı kilidləyir).
 Keçmiş dövrlər K1–K3 (hər biri 10) formasında qalır — o hissə ``test_journal_rules`` və
 ``test_kollokvium_window_validation``-da (açıq şəkildə kollokvium dövrü ilə) yoxlanılır.
 """
@@ -7,7 +9,7 @@ Keçmiş dövrlər K1–K3 (hər biri 10) formasında qalır — o hissə ``test
 import datetime
 from decimal import Decimal
 
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -46,15 +48,19 @@ class InterimModePolicyTest(TestCase):
 
     def test_specs(self):
         midterm = interim_assessment.spec_for_mode("midterm")
-        self.assertEqual((midterm.count, midterm.max_score, midterm.component_names), (1, 20, ("Midterm",)))
+        self.assertEqual((midterm.count, midterm.max_score, midterm.component_names), (1, 30, ("Midterm",)))
         self.assertEqual(midterm.label_for(0), "Midterm")
+        self.assertIn("0–30", midterm.description)
+        with override_settings(ACADEMIC_SELFWORK_ENABLED=True):
+            old = interim_assessment.spec_for_mode("midterm")
+        self.assertEqual((old.max_score, old.scale_label), (20, "0–20"))
         koll = interim_assessment.spec_for_mode("kollokvium")
         self.assertEqual((koll.count, koll.max_score, koll.total_max), (3, 10, 30))
         self.assertEqual([koll.label_for(i) for i in range(3)], ["K1", "K2", "K3"])
 
 
 class MidtermComponentsTest(TestCase):
-    """2026/2027 dövrü (``_setup_offering`` defoltu) — jurnalda tək Midterm (0–20)."""
+    """2026/2027 dövrü (``_setup_offering`` defoltu) — jurnalda tək Midterm (0–30; köhnə qaydada 0–20)."""
 
     @classmethod
     def setUpTestData(cls):
@@ -66,7 +72,7 @@ class MidtermComponentsTest(TestCase):
             first = journal_extras.ensure_kollokviums(self.offering)
             second = journal_extras.ensure_kollokviums(self.offering)
         self.assertEqual([c.name for c in first], ["Midterm"])
-        self.assertEqual(first[0].max_score, 20)
+        self.assertEqual(first[0].max_score, 30)
         self.assertEqual(first[0].kind, ComponentKind.KOLLOKVIUM)
         self.assertEqual([c.id for c in first], [c.id for c in second])
 
@@ -111,27 +117,38 @@ class MidtermComponentsTest(TestCase):
         self.assertFalse(leftover["open"])
         self.assertTrue(grid["show_total"])
 
-    def test_midterm_score_is_capped_at_20(self):
+    def _save_midterm(self, score):
         with bypass_rls():
             midterm = journal_extras.ensure_kollokviums(self.offering)[0]
             gradebook.save_component_scores(
                 offering=self.offering,
-                entries=[{"component_id": midterm.id, "enrollment_id": self.enrollment.id, "score": "25"}],
+                entries=[{"component_id": midterm.id, "enrollment_id": self.enrollment.id, "score": score}],
                 by_user=self.teacher,
                 bypass_edit_window=True,
             )
-            score = ComponentScore.objects.get(component=midterm, enrollment=self.enrollment).score
-            entry = gradebook.entry_score_for(self.enrollment, 50)
+            stored = ComponentScore.objects.get(component=midterm, enrollment=self.enrollment).score
+            return stored, gradebook.entry_score_for(self.enrollment, 50)
+
+    def test_midterm_score_is_capped_at_30(self):
+        score, entry = self._save_midterm("35")
+        self.assertEqual(score, Decimal("30"))
+        # Midterm giriş balına düşür (0–30 hissə, sahib 2026-10-10): davamiyyət 10 (qayıb yoxdur)
+        # + aktivlik 0 + midterm 30 (sərbəst iş yoxdur).
+        self.assertEqual(entry, Decimal("40"))
+
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True)
+    def test_midterm_score_is_capped_at_20_when_selfwork_enabled(self):
+        score, entry = self._save_midterm("25")
         self.assertEqual(score, Decimal("20"))
-        # Midterm giriş balına düşür (0–20 hissə).  2026-09-25 sillabus standartı (entry_standard):
-        # bu dövrdə giriş balı = davamiyyət 10 (qayıb yoxdur) + aktivlik 0 + midterm 20 + sərbəst iş 0.
+        # Köhnə qayda (2026-09-25): davamiyyət 10 + aktivlik 0 + midterm 20 + sərbəst iş 0.
         self.assertEqual(entry, Decimal("30"))
 
     def test_score_options_and_grid_spec(self):
         with bypass_rls():
             grid = journal_extras.get_kollokvium_grid(self.offering)
             options = journal_extras.interim_score_options(self.offering)
-        self.assertEqual(options, list(range(0, 21)))
+        self.assertEqual(options, list(range(0, 31)))
+        self.assertEqual(grid["primary_max"], 30)
         self.assertTrue(grid["spec"].is_midterm)
         self.assertEqual([col["label"] for col in grid["columns"]], ["Midterm"])
         self.assertFalse(grid["show_total"])  # tək sütunda «CƏMİ» göstərilmir
@@ -211,7 +228,7 @@ class MidtermWindowRuleTest(TestCase):
 
 
 class MidtermSaveViewTest(TestCase):
-    """Müəllim POST-u (`journal_kollokvium_save`): açıq pəncərədə 0–20 yazılır, bağlıda yox."""
+    """Müəllim POST-u (`journal_kollokvium_save`): açıq pəncərədə 0–30 yazılır, bağlıda yox."""
 
     @classmethod
     def setUpTestData(cls):
@@ -267,9 +284,11 @@ class MidtermSaveViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
         self.assertIn("Midterm", html)
-        self.assertIn('<option value="20"', html)
+        self.assertIn('<option value="30"', html)
+        self.assertIn("şkala 0–30", html)
+        self.assertIn("0–30 bal", html)
         self.assertNotIn(">K1<", html)
-        self.assertNotIn("/30<", html)
+        self.assertNotIn("jd2-th-koll is-total", html)  # tək sütunda «CƏMİ» yoxdur
 
 
 class NormalizeInterimCommandTest(TestCase):

@@ -24,8 +24,6 @@ from .teacher import (
     lab_submissions,
     manage_blocks,
     preview_randomization,
-    publish_lab,
-    submission_answers,
     update_questions_per_student,
 )
 
@@ -33,7 +31,6 @@ __all__ = [
     "create_lab",
     "edit_lab",
     "delete_lab",
-    "publish_lab",
     "manage_blocks",
     "create_block",
     "edit_block",
@@ -48,7 +45,6 @@ __all__ = [
     "grade_submission_page",
     "auto_save_answer",
     "submit_lab",
-    "submission_answers",
     "preview_randomization",
     "lab_detail",
     "my_lab_answers",

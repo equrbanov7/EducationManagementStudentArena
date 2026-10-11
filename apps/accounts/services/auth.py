@@ -12,14 +12,12 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
 from django.template.loader import render_to_string
-from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.translation import pgettext_lazy
 
 from apps.accounts.models import EmailOTP
 from core.mailing import sender_for, system_reply_to
 from core.utils import (
-    build_absolute_url,
     generate_otp,
     get_auth_otp_expiry_minutes,
     get_auth_otp_expiry_seconds,
@@ -122,17 +120,6 @@ def _otp_template_prefix_for_purpose(purpose: str) -> str:
     return "accounts/emails/verification_email"
 
 
-def _build_verification_link(*, user, purpose: str, request=None) -> str:
-    if purpose != EmailOTP.Purpose.SIGNUP or user is None:
-        return ""
-
-    from apps.accounts.views._helpers import signer
-
-    verification_url = build_absolute_url(reverse("accounts:verify_email_link"), request=request)
-    token = signer.sign(str(user.pk))
-    return f"{verification_url}?token={token}"
-
-
 def _build_email_context(*, user, email: str, purpose: str, code: str, request=None, expires_at=None) -> dict:
     recipient_name = ""
     if user is not None:
@@ -149,7 +136,9 @@ def _build_email_context(*, user, email: str, purpose: str, code: str, request=N
         "otp_intro_action": _otp_intro_for_purpose(purpose),
         "cta_label": _otp_cta_label_for_purpose(purpose),
         "code": code,
-        "verification_link": _build_verification_link(user=user, purpose=purpose, request=request),
+        # Sahib 2026-10-10: açıq qeydiyyat (və `accounts/verify-email/` link-aktivləşdirməsi)
+        # silindi — məktubda yalnız kod var; şablon boş linki göstərmir.
+        "verification_link": "",
         "otp_expiry_minutes": get_auth_otp_expiry_minutes(),
         "expires_at": expires_at,
         "purpose": purpose,

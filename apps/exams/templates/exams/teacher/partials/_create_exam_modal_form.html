@@ -167,7 +167,7 @@
 
                         {# Fənn — tək seçimli axtarışlı siyahı (qrup/tələbə axtarışı ilə eyni üslub). Final/midterm-də məcburidir. #}
                         <div class="form-group form-group-full" data-ew-subject-group>
-                            <label class="ew-label create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }} <span class="ew-req" aria-hidden="true">*</span></label>
+                            <label class="ew-label create-exam-searchable-label" for="createExamSubjectSearch">{{ form.subject.label }} <span class="ew-req" aria-hidden="true" data-ew-subject-req hidden>*</span></label>
                             <div class="create-exam-searchable-select create-exam-subject-select" data-exam-subject-control
                                  data-search-url="{% url 'exams:subject_search' %}">
                                 <div class="create-exam-search-wrap">

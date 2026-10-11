@@ -13,6 +13,7 @@ from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_studen
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
 from .default_roles_vice_dean import VICE_DEAN_ROLES
 from .permissions_announcements import apply_announcement_grants
+from .permissions_hr import apply_hr_grants
 
 #: Akademik kurasiya açarları — `program_coordinator` VƏ `tutor` üçün ORTAQ.
 #:
@@ -557,3 +558,6 @@ apply_quality_control_grants(UNIVERSITY_ROLES)
 
 # «Elanlar» (2026-10-06): `announcement.manage` — dekanlıq, kafedra, tədris şöbəsi, TXM. Mövcud: announcements/0003.
 apply_announcement_grants(UNIVERSITY_ROLES)
+
+# «Kadr analitikası» (sahib 2026-10-11): `people.hr_analytics` — `hr`. Mövcud: organizations/0058.
+apply_hr_grants(UNIVERSITY_ROLES)

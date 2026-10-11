@@ -373,7 +373,8 @@ def _migrated_then_reopened(world):
     return draft_version, actor
 
 
-def test_the_next_version_inherits_the_migrated_assessment_text(world):
+@pytest.mark.parametrize(("selfwork", "split_sum"), [(False, 40), (True, 30)])
+def test_the_next_version_inherits_the_migrated_assessment_text(world, settings, selfwork, split_sum):
     """Qoruma tələsi: itki yalnız İRS ALINMIŞ məzmunda görünür.
 
     ⚠️ 2026-09-03-dən BİR İSTİSNA var: köçürülmüş qeydin ``midterm``/``project``
@@ -382,16 +383,20 @@ def test_the_next_version_inherits_the_migrated_assessment_text(world):
     əvəzlənir.  Qalan açarlar (``note``, ``exam_questions``) HƏLƏ DƏ toxunulmaz
     qalmalıdır — data itkisi tələsi məhz onlarda idi.
     """
+    settings.ACADEMIC_SELFWORK_ENABLED = selfwork
     version, _actor_obj = _migrated_then_reopened(world)
 
     data = services.section_data_map(version)[SectionKey.ASSESS.value]
     assert data["note"] == MIGRATED_ASSESS["note"]
     assert data["exam_questions"] == MIGRATED_ASSESS["exam_questions"]
-    # Etibarsız 0/0 bölgüsü siyasətə uyğun başlanğıc bölgüsü ilə əvəzlənib.
-    assert data["midterm"] + data["project"] == 30
+    # Etibarsız 0/0 bölgüsü siyasətə uyğun başlanğıc bölgüsü ilə əvəzlənib. Baza sillabus CARİ
+    # qaydadadır (sahib 2026-10-10): sərbəst işsiz midterm 30 + fəallıq 10; yandırılanda 20 + 10.
+    assert data["midterm"] + data["project"] == split_sum
 
 
-def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world):
+@pytest.mark.parametrize(("selfwork", "split"), [(False, (30, 10)), (True, (20, 10))])
+def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world, settings, selfwork, split):
+    settings.ACADEMIC_SELFWORK_ENABLED = selfwork
     version, actor = _migrated_then_reopened(world)
 
     services.save_section(
@@ -402,8 +407,9 @@ def test_an_editor_autosave_does_not_delete_the_fields_it_cannot_send(world):
     )
 
     data = services.section_data_map(version)[SectionKey.ASSESS.value]
-    # Bal açarları STANDARTA gətirilib (sahib 2026-09-20 — kliyent dəyəri nəzərə alınmır)…
-    assert (data["midterm"], data["project"]) == (20, 10)
+    # Bal açarları STANDARTA gətirilib (sahib 2026-09-20 — kliyent dəyəri nəzərə alınmır;
+    # sahib 2026-10-10 — standart versiyanın qaydasıdır)…
+    assert (data["midterm"], data["project"]) == split
     # …göndərilməyənlər İSƏ toxunulmaz qalıb.
     assert data["note"] == MIGRATED_ASSESS["note"]
     assert data["exam_questions"] == MIGRATED_ASSESS["exam_questions"]

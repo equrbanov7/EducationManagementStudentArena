@@ -198,14 +198,16 @@ def _working_draft(syllabus, *, actor, plan_hours, request=None):
 
 def _write_sections(version, data_map: dict, actor_user):
     """10 bölməni ``data_map`` ilə əvəzləyir; ``revision`` artır (açıq redaktor konflikt alır)."""
+    from ..rules import for_version as rule_for_version
     from .drafts import blank_section_data
 
     rows = {row.section_id: row for row in SyllabusSection.objects.filter(version=version)}
     now = timezone.now()
     to_update, to_create = [], []
+    selfwork = rule_for_version(version, version.organization).selfwork  # sahib 2026-10-10
     for section_id in SECTION_ORDER:
         data = data_map.get(section_id)
-        data = _copy.deepcopy(data) if data else blank_section_data(section_id, version.organization)
+        data = _copy.deepcopy(data) if data else blank_section_data(section_id, version.organization, selfwork=selfwork)
         row = rows.get(section_id)
         if row is None:
             to_create.append(
@@ -352,6 +354,7 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
     fənnin BAŞQA semestrindəki (və ya semestrsiz baza) dosyesidir; əhatə qapısı
     ``copy_from_previous`` ilə eynidir (``copy_code``), nəticə həmişə QARALAMADIR.
     """
+    from ..rules import for_version as rule_for_version
     from .drafts import _inherited_data, create_draft, recompute_completion, section_data_map
 
     source = rules.reuse_root(source)
@@ -384,8 +387,11 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
         snapshot = section_data_map(version)
     hours = hours or rules.normalize_hours(version.plan_hours)
     base_map = {row.section_id: row.data for row in base.sections.all()}
+    # Bölgü HƏDƏF versiyanın qaydasının standartıdır (sahib 2026-10-10: sərbəst işsiz → midterm 30).
+    selfwork = rule_for_version(version, syllabus.organization).selfwork
     data_map = {
-        section_id: _inherited_data(section_id, base_map, syllabus.organization) for section_id in SECTION_ORDER
+        section_id: _inherited_data(section_id, base_map, syllabus.organization, selfwork=selfwork)
+        for section_id in SECTION_ORDER
     }
     week = dict(data_map.get(SectionKey.WEEK.value) or {})
     rows, adjusted = fit_rows_to_hours(week.get("rows") or [], hours)

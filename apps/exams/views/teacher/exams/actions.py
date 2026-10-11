@@ -29,9 +29,9 @@ logger = logging.getLogger(__name__)
 def _teacher_profile_trash_url():
     """«Zibil qutusu» — 2026-09-14 (W3 `w3myexams`) kabinetdə alt-görünüşdür.
 
-    Bərpa / birdəfəlik silmədən sonra müəllim ayrıca `deleted_exams_list`
-    səhifəsinə deyil, «İmtahanlarım» bölməsinin zibil qutusu tabına qayıdır
-    (Django mesajı orada toast kimi görünür). Köhnə səhifə URL-i saxlanılır.
+    Bərpa / birdəfəlik silmədən sonra müəllim «İmtahanlarım» bölməsinin zibil
+    qutusu tabına qayıdır (Django mesajı orada toast kimi görünür). Köhnə ayrıca
+    `exams/deleted/` səhifəsi URL auditi A12 (2026-10-10) ilə silindi.
     """
     return f"{_teacher_profile_my_exams_url()}&exam_view=trash"
 
@@ -312,40 +312,6 @@ def duplicate_exam(request, slug):
     else:
         messages.warning(request, pgettext("exams.view.exams.message", "exam_duplicated_source_empty"))
     return redirect(_teacher_profile_my_exams_url())
-
-
-@login_required
-def deleted_exams_list(request):
-    """ "Zibil qutusu" — müəllimin yumşaq silinmiş imtahanları.
-
-    Silinmiş imtahanların sətri və nəticələri qorunur; buradan onlara baxıla,
-    imtahan bərpa oluna və ya birdəfəlik (CASCADE) silinə bilər. Hər imtahan
-    üçün saxlanan cəhd (nəticə) sayı göstərilir.
-    """
-    from django.db.models import Count
-
-    from apps.exams.models import Exam
-    from apps.exams.views.shared.tenant import tenant_scoped_exams
-
-    organization = _resolve_required_organization(request)
-    if organization is None:
-        return _organization_selection_redirect(request)
-    _ensure_teacher(request.user)
-
-    deleted_exams = (
-        tenant_scoped_exams(
-            request,
-            Exam.objects.filter(author=request.user, is_deleted=True),
-            include_deleted=True,
-        )
-        .annotate(attempts_total=Count("attempts", distinct=True))
-        .order_by("-deleted_at", "-created_at")
-    )
-    return render(
-        request,
-        "exams/teacher/deleted_exams.html",
-        {"deleted_exams": list(deleted_exams)},
-    )
 
 
 @login_required

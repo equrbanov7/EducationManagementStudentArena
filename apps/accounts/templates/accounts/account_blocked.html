@@ -4,6 +4,8 @@
 «Hesabınız dayandırılıb» (sahib 2026-10-03) — YALNIZ doğru parol yazılanda göstərilir
 (accounts.views.auth.login → services.account_block_notice). Sessiya AÇILMIR: kabinetə keçid yoxdur,
 yalnız səbəb və «blokdan çıxmaq üçün kimə yaxınlaşmalı» (+ operatorun qeydi: otaq, telefon).
+2026-10-11 (sahib): mətn şəxsin statusuna görədir — `notice.audience` («student» → bal/davamiyyət
+xatırlatması; qalanlarına neytral mətn).
 {% endcomment %}
 {% block page_title %}{% trans 'Hesabınız dayandırılıb' context 'accounts.account_block' %}{% endblock %}
 {% block code %}403{% endblock %}
@@ -12,7 +14,11 @@ yalnız səbəb və «blokdan çıxmaq üçün kimə yaxınlaşmalı» (+ operat
 {% block kicker %}{% trans 'Giriş müvəqqəti bağlıdır' context 'accounts.account_block' %}{% endblock %}
 {% block title %}{% trans 'Hesabınız müvəqqəti dayandırılıb' context 'accounts.account_block' %}{% endblock %}
 {% block description %}
+    {% if notice.audience == "student" %}
     <p class="error-zone-lead">{% trans 'İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet tərəfindən müvəqqəti dayandırılıb. Məlumatlarınız, ballarınız və davamiyyətiniz silinməyib.' context 'accounts.account_block' %}</p>
+    {% else %}
+    <p class="error-zone-lead">{% trans 'İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet tərəfindən müvəqqəti dayandırılıb. Hesabınızdakı məlumatlar silinməyib.' context 'accounts.account_block' %}</p>
+    {% endif %}
     <p class="error-block-reason">
         <b>{% trans 'Səbəb' context 'accounts.account_block' %}:</b> {% if notice.has_reason %}{{ notice.reason }}{% else %}{% trans 'səbəb qeyd olunmayıb' context 'accounts.account_block' %}{% endif %}
     </p>

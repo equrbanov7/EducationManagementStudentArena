@@ -196,8 +196,7 @@ class HostLobbyRefreshTest(TestCase):
         url = reverse("liveExam:host_presentation", kwargs={"pin": self.session.pin})
         with_controls = client.get(f"{url}?controls=1").content.decode()
         self.assertIn('data-action="refresh-state"', with_controls)
-        lobby = client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin})).content.decode()
-        self.assertIn('data-action="refresh-state"', lobby)
+        # WP9a (2026-10-10): köhnə `live/host/<pin>/` lobbisi silindi — idarə paneli yalnız `?controls=1`-dədir.
 
 
 @override_settings(CHANNEL_LAYERS=IN_MEMORY_LAYERS)

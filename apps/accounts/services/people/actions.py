@@ -119,20 +119,35 @@ def _actor_level(actor) -> int:
     return level
 
 
-def _block_notice(reason: str, reason_code: str, contact_code: str, contact_note: str) -> tuple[str, dict]:
-    """Seçilmiş səbəb + «kimə müraciət etməli» (sahib 2026-10-03). Kod yoxdursa köhnə sərbəst mətn yolu."""
+def _block_notice(
+    reason: str, reason_code: str, contact_code: str, contact_note: str, reason_other=None
+) -> tuple[str, dict]:
+    """Seçilmiş səbəb + «kimə müraciət etməli» (sahib 2026-10-03). Kod yoxdursa köhnə sərbəst mətn yolu.
+
+    2026-10-11: «Digər» üçün izah ayrıca ``reason_other`` sahəsindədir və MƏCBURİDİR (server də yoxlayır).
+    """
     if not reason_code and str(reason or "").strip():
         return reason, {}
     try:
-        code, contact, note = block_reasons.normalize_choice(reason_code, contact_code, contact_note)
+        code, contact, note = block_reasons.normalize_choice(reason_code, contact_code, contact_note, reason_other)
+        other = block_reasons.clean_other_text(code, reason_other) if reason_other is not None else ""
     except block_reasons.BlockReasonError as exc:
         raise RimAccessError(exc.code, exc.message, status=400) from exc
-    text = str(reason or "").strip() or block_reasons.audit_text(code, note)
+    text = str(reason or "").strip() or block_reasons.audit_text(code, note, other)
     return text, {"reason_code": code, "contact_code": contact, "contact_note": note}
 
 
 def set_account_status(
-    actor, target, *, active: bool, reason: str, request=None, reason_code="", contact_code="", contact_note=""
+    actor,
+    target,
+    *,
+    active: bool,
+    reason: str,
+    request=None,
+    reason_code="",
+    contact_code="",
+    contact_note="",
+    reason_other=None,
 ) -> dict:
     """Hesabı dayandırır (``active=False``) və ya bərpa edir (``active=True``)."""
     _require(actor, PERM_MANAGE_STATUS)
@@ -144,7 +159,7 @@ def set_account_status(
         applied_reason = rim_lifecycle.unblock_user(rim, target, reason=reason, request=request)
         action_name = "people.account_unblocked"
     else:
-        reason, notice = _block_notice(reason, reason_code, contact_code, contact_note)
+        reason, notice = _block_notice(reason, reason_code, contact_code, contact_note, reason_other)
         applied_reason = rim_lifecycle.block_user(rim, target, reason=reason, request=request, **notice)
         action_name = "people.account_blocked"
 

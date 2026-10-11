@@ -34,7 +34,7 @@ from ..constants import (
 )
 from ..errors import FolderError, display_number
 from ..models import Submission
-from . import access, notify, syllabus_bridge
+from . import access, notify, selfwork_rule, syllabus_bridge
 from .events import display_name, record_event
 from .journal import journal_side_preview, schedule_journal_sync, slot_label
 from .locks import advisory_lock
@@ -142,12 +142,29 @@ def _lock_for_review(submission, by_user) -> Submission:
     # və tələbənin User sətri KİLİDLƏNMƏSİN — PG ``FOR UPDATE`` default olaraq bütün JOIN cədvəllərini kilidləyir.
     locked = (
         Submission.objects.select_for_update(of=("self",))
-        .select_related("task", "assignment", "assignment__offering", "enrollment", "student")
+        .select_related(
+            "task",
+            "assignment",
+            "assignment__offering",
+            # sərbəst iş qaydası (sahib 2026-10-10) açılışın dövrünə baxır — sətir başına əlavə sorğu olmasın
+            "assignment__offering__period",
+            "assignment__offering__organization",
+            "enrollment",
+            "student",
+        )
         .get(pk=submission.pk)
     )
     if locked.status != SubmissionStatus.SUBMITTED or not locked.is_current:
         raise FolderError.of("submission.not_reviewable")
+    _ensure_selfwork_active(locked)
     return locked
+
+
+def _ensure_selfwork_active(row) -> None:
+    """Sahib 2026-10-10: dövründə sərbəst iş ləğv olunmuş qrupun sərbəst iş göndərişinə qərar YOXDUR
+    (gizli UI-dan yan keçən sorğu da) — bal yazılmır, jurnala getmir; data toxunulmur."""
+    if row.kind == TaskKind.SELFWORK and not selfwork_rule.offering_active(row.assignment.offering):
+        raise FolderError.of("selfwork.disabled")
 
 
 def _stamp(row, by_user, feedback) -> None:
@@ -272,6 +289,7 @@ def reopen(submission, *, by_user, feedback: str = "", request=None) -> Submissi
     row = Submission.objects.select_for_update().get(pk=submission.pk)
     if row.status != SubmissionStatus.REJECTED:
         raise FolderError.of("review.not_rejected")
+    _ensure_selfwork_active(row)
     _stamp(row, by_user, _clean_feedback(feedback, required=False) or row.feedback)
     row.status = SubmissionStatus.RETURNED
     row.reject_reason = ""

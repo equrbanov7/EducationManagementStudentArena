@@ -3,7 +3,12 @@
 həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu TƏSDİQLƏNMİŞ
 sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
 kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
-varsa dərs tipi kilidlidir.{% endcomment %}
+varsa dərs tipi kilidlidir.
+
+«Yeni dərs» ƏVVƏLCƏDƏN DOLU açılır (sahib 2026-10-10): `lesson_prefill` JSON adası
+(apps/registrar/journal_lesson_prefill.py) → journal_lesson_prefill.js — bu günün cədvəl dərsi
+(gizli `slot_id`; saat təşkilatın öz zəng saatı da ola bilər) və ya son dərsə görə defoltlar;
+əvvəlki redaktənin dəyərləri sıfırlanır, mövzular dərs tipinə görə süzülür.{% endcomment %}
 <div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
      data-period-end="{% if offering.period %}{{ offering.period.end_date|date:'Y-m-d' }}{% endif %}"
      data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
@@ -29,7 +34,23 @@ varsa dərs tipi kilidlidir.{% endcomment %}
         <form method="post" enctype="multipart/form-data" class="jd-modal-form" data-jd-lesson-form data-add-url="{% url 'registrar:journal_detail' offering.id %}">
             {% csrf_token %}
             <input type="hidden" name="action" value="add_lesson" data-jd-lesson-action>
+            {# Cədvəl slotundan doldurulmuş YENİ dərs: tarix + saat + tip slotla eyni qaldıqca JS doldurur, dəyişən kimi boşaldır. #}
+            <input type="hidden" name="slot_id" value="" data-jd-lesson-slot>
             <div class="jd-modal-body">
+                {% if lesson_prefill %}
+                {% comment %}Doldurmanın mənbəyi — yalnız YENİ dərsdə görünür (JS: slot ipucu forma hələ slotla eyni
+                olduqca, «son dərs» ipucu son dərsə görə doldurulanda).{% endcomment %}
+                <p class="jd-modal-note" data-jd-prefill-hint="slot" hidden>
+                    <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                    {% trans "Forma bu günün cədvəl dərsindən doldurulub" context "registrar.journal_prefill" %}: <b data-jd-prefill-label></b>.
+                    {% trans "Saat, tip, otaq, müəllim və növbəti mövzu cədvəldən və sillabusdan götürülüb — yoxlayıb «Tətbiq et» basın." context "registrar.journal_prefill" %}
+                </p>
+                <p class="jd-modal-note" data-jd-prefill-hint="last" hidden>
+                    <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+                    {% trans "Sahələr bu fənnin son dərsinə və sillabusdakı növbəti mövzuya görə doldurulub — yoxlayın, lazım olsa dəyişin." context "registrar.journal_prefill" %}
+                </p>
+                {{ lesson_prefill|json_script:"jdLessonPrefill" }}
+                {% endif %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
                     <span class="jd2-date-row">
@@ -83,8 +104,11 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                         <span class="jd2-field-label">{% trans "SAAT" context "registrar.journal" %}</span>
                         <div class="bootstrap-single-select bootstrap-single-select--ems">
                             <select name="lesson_hours" class="ems-select bootstrap-single-select__native" data-jd-lesson-hours data-bootstrap-select>
+                                {# 1..4 — server tavanı ilə eyni (journal_activation.MAX_SLOT_HOURS; 3–4 saatlıq cədvəl dərsi). #}
                                 <option value="1">1</option>
                                 <option value="2" selected>2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
                             </select>
                         </div>
                     </div>
@@ -152,7 +176,11 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                     <textarea name="off_schedule_reason" rows="2" maxlength="255" data-jd-offsched-reason
                               placeholder="{% trans 'Məs.: əvəzetmə, kompensasiya dərsi, cədvəl dəyişikliyi…' context 'registrar.journal_activation' %}"
                               aria-label="{% trans 'Cədvəldən kənar dərsin səbəbi' context 'registrar.journal_activation' %}"></textarea>
+                    {% if academic_rules.lesson_activation %}
                     <small class="jd-field-hint">{% trans "Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün jurnalın üstündəki «Aktivləşdir» düyməsini işlədin." context "registrar.journal_activation" %}</small>
+                    {% else %}
+                    <small class="jd-field-hint">{% trans "Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün tarixi və saatı cədvələ uyğun seçin." context "registrar.journal_prefill" %}</small>
+                    {% endif %}
                 </div>
                 {{ lesson_slot_pattern|json_script:"jdSlotPattern" }}
                 {% endif %}
@@ -164,7 +192,7 @@ varsa dərs tipi kilidlidir.{% endcomment %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRSİN MÜƏLLİMİ" context "registrar.journal" %}</span>
                     <input type="hidden" name="lesson_instructor" value="{{ offering.instructor_id|default:'' }}"
-                           data-jd-lesson-instructor
+                           data-jd-lesson-instructor data-jd-default="{{ offering.instructor_id|default:'' }}"
                            data-search-url="{% url 'registrar:journal_lesson_teacher_search' offering.id %}">
                     {% trans "müəllim axtar…" as jdt_teacher_ph %}
                     {% include "accounts/profile/sections/_searchable_picker.html" with prefix="jdt" hook="jdt-teacher" placeholder=jdt_teacher_ph %}

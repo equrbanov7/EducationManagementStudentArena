@@ -527,24 +527,16 @@ class CorrectionViewTest(_BaseJournalSetup):
         session["active_organization"] = self.org.slug
         session.save()
 
-    def test_non_corrector_cannot_open_correction_list(self):
-        self.client.force_login(self.student)
-        session = self.client.session
-        session["active_organization"] = self.org.slug
-        session.save()
-        resp = self.client.get("/jurnal/duzelis/")
-        self.assertEqual(resp.status_code, 404)
+    def test_legacy_correction_shims_are_gone(self):
+        # URL auditi A11 (2026-10-10): `duzelis/` və `duzelis/<uuid>/` yönləndirmə şimləri silindi;
+        # düzəliş rejimi `journal_detail?correct=1`, JS-in tətbiq/sil son nöqtələri qalır.
+        from django.urls import NoReverseMatch, reverse
 
-    def test_corrector_correction_urls_redirect_in_place(self):
-        # Ayrı düzəliş səhifələri ləğv edildi → jurnal siyahısına / yerində düzəliş
-        # rejiminə (journal_detail ?correct=1) yönləndirir.
-        self._login_corrector()
-        resp = self.client.get("/jurnal/duzelis/")
-        self.assertEqual(resp.status_code, 302)
-        self.assertTrue(resp.url.endswith("/jurnal/"))
-        resp2 = self.client.get(f"/jurnal/duzelis/{self.offering.id}/")
-        self.assertEqual(resp2.status_code, 302)
-        self.assertIn("?correct=1", resp2.url)
+        for name, args in (("registrar:correction_list", []), ("registrar:correction_journal", [self.offering.id])):
+            with self.subTest(name=name), self.assertRaises(NoReverseMatch):
+                reverse(name, args=args)
+        self.assertTrue(reverse("registrar:correction_apply", args=[self.offering.id]))
+        self.assertTrue(reverse("registrar:correction_delete", args=[self.offering.id]))
 
     def test_apply_endpoint_records_correction(self):
         _lesson, mark = self._seminar_mark(7, 3)

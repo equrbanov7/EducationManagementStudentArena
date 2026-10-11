@@ -21,9 +21,7 @@ import re
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.utils import timezone
 
-from apps.courses.models import Course, CourseMembership
 from apps.organizations.models import Membership, Organization, OrgUnit
 from core.constants import OrganizationType, OrgUnitType
 from core.rls import bypass_rls
@@ -220,7 +218,9 @@ _SKIP_DIRS = {"tests", "migrations", "__pycache__", "node_modules", "static", "v
 # `role.edit`, `audit.export`, `journal.view`, `analytics.view_own`), ya da
 # kataloqdan çıxarıldı (`org.delete`, `role.create`, `role.delete`,
 # `grade.override`, `qa.*` — miqrasiya organizations.0051) → siyahı BOŞDUR.
-KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset()
+# 2026-10-10 (URL auditi WP9a): `assignment.edit` yeganə istifadəçisi — UI-dan çağırılmayan
+# `assignments/<pk>/remove-student/` — silindi; açar rol şablonlarında qalır (rol redaktoru göstərir).
+KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset({"assignment.edit"})
 
 
 def _referenced_permission_keys(root, catalog):
@@ -267,7 +267,6 @@ class PermissionCatalogDriftTest(TestCase):
         referenced = _referenced_permission_keys(str(settings.BASE_DIR), catalog)
         self.assertIn("member.remove", referenced)
         self.assertIn("assignment.edit", catalog)
-        self.assertIn("assignment.edit", referenced)
 
 
 class ForeignOrgStructurePageTest(_Base):
@@ -305,45 +304,6 @@ class AssignmentEditKeyTest(_Base):
         self.assertTrue(str(PERMISSION_LABELS["assignment.edit"]).strip())
         university_teacher = next(r for r in DEFAULT_ROLES[OrganizationType.UNIVERSITY] if r["name"] == "teacher")
         self.assertIn("assignment.edit", university_teacher["permissions"])
-
-    def test_default_teacher_can_remove_student_from_own_assignment(self):
-        from apps.assignments.models import Assignment
-
-        teacher = self.ua("teacher")
-        student = self.ua("student")
-        with bypass_rls():
-            course = Course.objects.create(
-                owner=teacher, title="F-12 Course", status="published", organization=self.A["org"]
-            )
-            CourseMembership.objects.create(course=course, user=student, role="student")
-            assignment = Assignment.objects.create(course=course, title="F-12 Assignment", start_date=timezone.now())
-            assignment.assigned_students.add(student)
-
-        client = self.client_for(teacher, self.A["org"])
-        response = client.post(
-            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment.pk}),
-            data={"student_id": str(student.pk)},
-        )
-        self.assertEqual(response.status_code, 200, response.content[:200])
-        self.assertTrue(response.json().get("success"))
-        with bypass_rls():
-            self.assertFalse(assignment.assigned_students.filter(pk=student.pk).exists())
-
-    def test_teacher2_is_not_course_owner(self):
-        from apps.assignments.models import Assignment
-
-        teacher = self.ua("teacher")
-        with bypass_rls():
-            course = Course.objects.create(
-                owner=teacher, title="F-12 Course 2", status="published", organization=self.A["org"]
-            )
-            assignment = Assignment.objects.create(course=course, title="F-12 Assignment 2", start_date=timezone.now())
-        client = self.client_for(self.ua("teacher2"), self.A["org"])
-        response = client.post(
-            reverse("assignments:remove_student_from_assignment", kwargs={"pk": assignment.pk}),
-            data={"student_id": str(self.ua("student").pk)},
-        )
-        self.assertEqual(response.status_code, 403)
 
 
 class WorkloadRowsForeignChairTest(_Base):

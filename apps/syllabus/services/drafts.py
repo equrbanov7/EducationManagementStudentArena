@@ -26,7 +26,8 @@ from ..constants import (
     SyllabusStatus,
 )
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
-from ..policy import assessment_weights, standard_midterm, standard_project
+from ..policy import assessment_weights, standard_midterm, standard_project, standard_splits
+from ..rules import for_version as rule_for_version
 from ..state_machine import TransitionDenied
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .scoping import is_author
@@ -48,20 +49,21 @@ BLANK_SECTION_DATA = {
 }
 
 
-def default_assess_data(organization=None) -> dict:
+def default_assess_data(organization=None, *, selfwork=None) -> dict:
     """Qiymətləndirmənin BAŞLANĞIC bölgüsü — ``flex`` balı bərabər bölür.
 
     README §8/4 bölünməmiş bal qoymağa icazə vermir (cəm 100 olmalıdır), ona görə
     boş sxem 0/0 DEYİL: yeni qaralama dərhal etibarlı bölgü ilə açılır, müəllim
-    isə sürüşdürücü ilə nisbəti dəyişir.
+    isə sürüşdürücü ilə nisbəti dəyişir. ``selfwork`` — versiyanın qaydası (sahib
+    2026-10-10: sərbəst işsiz standart midterm 30); ``None`` — CARİ qayda.
     """
-    weights = assessment_weights(organization)
+    weights = assessment_weights(organization, selfwork=selfwork)
     return {"midterm": standard_midterm(weights), "project": standard_project(weights), "note": ""}
 
 
-def assess_split_is_valid(data, organization=None) -> bool:
+def assess_split_is_valid(data, organization=None, *, selfwork=None) -> bool:
     """Bölgü STANDARTA bərabərdirmi (sahib 2026-09-20: müəllim bal seçmir)."""
-    weights = assessment_weights(organization)
+    weights = assessment_weights(organization, selfwork=selfwork)
     try:
         midterm = int((data or {}).get("midterm") or 0)
         project = int((data or {}).get("project") or 0)
@@ -70,7 +72,7 @@ def assess_split_is_valid(data, organization=None) -> bool:
     return midterm == standard_midterm(weights) and project == standard_project(weights)
 
 
-def blank_section_data(section_id: str, organization=None) -> dict:
+def blank_section_data(section_id: str, organization=None, *, selfwork=None) -> dict:
     """Bölmənin boş sxemi (dərin kopya)."""
     import copy
 
@@ -79,11 +81,11 @@ def blank_section_data(section_id: str, organization=None) -> dict:
             "rows": [{"topic": "", **{kind: 0 for kind in LESSON_HOUR_KINDS}, "outcome": ""} for _ in range(WEEK_ROWS)]
         }
     if section_id == SectionKey.ASSESS.value:
-        return default_assess_data(organization)
+        return default_assess_data(organization, selfwork=selfwork)
     return copy.deepcopy(BLANK_SECTION_DATA.get(section_id, {}))
 
 
-def _inherited_data(section_id: str, source_map: dict, organization):
+def _inherited_data(section_id: str, source_map: dict, organization, *, selfwork=None):
     """Köçürülən bölmə məzmunu — ``assess`` üçün siyasət yoxlaması ilə.
 
     Köçürülmüş (legacy) sillabusların ``assess`` bölməsi ``{midterm: 0,
@@ -94,27 +96,31 @@ def _inherited_data(section_id: str, source_map: dict, organization):
     """
     data = source_map.get(section_id)
     if not data:
-        return blank_section_data(section_id, organization)
-    if section_id == SectionKey.ASSESS.value and not assess_split_is_valid(data, organization):
+        return blank_section_data(section_id, organization, selfwork=selfwork)
+    if section_id == SectionKey.ASSESS.value and not assess_split_is_valid(data, organization, selfwork=selfwork):
         # YALNIZ bölgü açarları əvəzlənir — `note` və köçürmədən gələn digər
         # sahələr (`exam_questions`, …) TOXUNULMUR (R-1 data itkisi dərsi).
-        split = default_assess_data(organization)
+        split = default_assess_data(organization, selfwork=selfwork)
         return {**data, "midterm": split["midterm"], "project": split["project"]}
     return data
 
 
 def _create_sections(version, *, source=None, actor_user=None):
-    """10 bölməni yaradır; ``source`` verilibsə məzmunu ondan köçürür."""
+    """10 bölməni yaradır; ``source`` verilibsə məzmunu ondan köçürür.
+
+    ``self`` bölməsi sərbəst işi söndürülmüş qaydada da yaradılır/köçürülür (data saxlanılır —
+    sahib 2026-10-10); qiymətləndirmə bölgüsü versiyanın qaydasının standartıdır."""
     source_map = {}
     if source is not None:
         source_map = {row.section_id: row.data for row in source.sections.all()}
     organization = version.organization
+    selfwork = rule_for_version(version, organization).selfwork
     rows = [
         SyllabusSection(
             organization_id=version.organization_id,
             version=version,
             section_id=section_id,
-            data=_inherited_data(section_id, source_map, organization),
+            data=_inherited_data(section_id, source_map, organization, selfwork=selfwork),
             updated_by=actor_user,
         )
         for section_id in SECTION_ORDER
@@ -133,16 +139,23 @@ def recompute_completion(version, *, persist: bool = True):
 
     Bölmə sətirlərinin ``is_complete`` bayrağı və versiyanın
     ``completion_percent`` sahəsi KEŞDİR — həqiqət mənbəyi
-    :mod:`apps.syllabus.completion`-dır.
+    :mod:`apps.syllabus.completion`-dır. Qayda versiyanın semestrindəndir (sahib
+    2026-10-10: sərbəst işsiz qaydada ``self`` faizə daxil deyil, keşi toxunulmur).
     """
+    organization = version.organization
+    rule = rule_for_version(version, organization)
     report = completion_rules.evaluate(
         section_data_map(version),
         version.plan_hours or {},
-        assessment_weights(version.organization),
+        assessment_weights(organization, selfwork=rule.selfwork),
+        selfwork=rule.selfwork,
+        accepted_splits=standard_splits(organization),
     )
     if persist:
         for row in version.sections.all():
-            expected = bool(report.sections.get(row.section_id, False))
+            if row.section_id not in report.sections:
+                continue  # yoxlama (prev/send) və ya gizli (self) bölmə — keş toxunulmur
+            expected = bool(report.sections[row.section_id])
             if row.is_complete != expected:
                 SyllabusSection.objects.filter(pk=row.pk).update(is_complete=expected)
         if version.completion_percent != report.percent:
@@ -389,7 +402,10 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
     if not is_author(actor, syllabus):
         raise TransitionDenied("transition.author_only", params={"transition": "save_section"})
-    if section_id not in SECTION_ORDER:
+    # Sahib 2026-10-10: sərbəst işi söndürülmüş qaydada `self` bölməsi redaktorda YOXDUR — gizli
+    # bölməyə yazı da qəbul edilmir (data toxunulmur, tənzimləmə yandırılanda geri qayıdır).
+    rule = rule_for_version(version, version.organization)
+    if section_id not in rule.section_order:
         raise TransitionDenied("section.unknown", params={"section": section_id})
     # Forma/uzunluq yoxlaması — ixtiyari JSON redaktoru 500 ilə kilidləyirdi
     # (QA 2026-09-05 SYLLABUS-02/03).
@@ -410,7 +426,7 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         # müəllim seçmir.  HTTP səthi ixtiyari JSON qəbul etdiyi üçün gələn
         # `midterm`/`project` dəyərləri NƏZƏRƏ ALINMIR — həmişə standart yazılır;
         # `note`/`exam_questions` kimi mətn açarları isə birləşmə ilə qorunur.
-        split = default_assess_data(version.organization)
+        split = default_assess_data(version.organization, selfwork=rule.selfwork)
         merged["midterm"] = split["midterm"]
         merged["project"] = split["project"]
     row.data = merged

@@ -1,6 +1,7 @@
 """Explicit public contracts for cross-module consumers; implementation stays local."""
 
 from . import services  # noqa: F401
+from .assessment_formula import activity_kinds_for_offering  # noqa: F401
 from .constants import LESSON_HOUR_KINDS  # noqa: F401
 from .constants import MIN_DESCRIPTION_CHARS  # noqa: F401
 from .constants import MIN_GOAL_CHARS  # noqa: F401
@@ -19,11 +20,22 @@ from .constants import WEEK_ROWS  # noqa: F401
 from .constants import SectionKey  # noqa: F401
 from .constants import SyllabusStatus  # noqa: F401
 from .document import BLOCK_TITLES  # noqa: F401
+from .document import blocks_by_key  # noqa: F401
 from .document import build_document  # noqa: F401
 from .document import build_preview_blocks  # noqa: F401
 from .document import reuse_approval_note  # noqa: F401
 from .policy import escalation_days  # noqa: F401
 from .policy import sla_days  # noqa: F401
+from .policy import standard_splits  # noqa: F401
+
+# Sahib 2026-10-10: sərbəst iş / 5 + 5 qaydası — sillabus görünüşləri dövrə görə (bax ``rules``).
+from .rules import LEGACY as LEGACY_RULE  # noqa: F401
+from .rules import SyllabusRule  # noqa: F401
+from .rules import selfwork_active_for_version  # noqa: F401
+from .rules import current as current_rule  # noqa: F401
+from .rules import for_period as rule_for_period  # noqa: F401
+from .rules import for_syllabus as rule_for_syllabus  # noqa: F401
+from .rules import for_version as rule_for_version  # noqa: F401
 from .services import section_data_map  # noqa: F401
 from .services import version_diff  # noqa: F401
 from .services import version_timeline  # noqa: F401
@@ -32,6 +44,16 @@ from .state_machine import TransitionDenied  # noqa: F401
 
 __all__ = [
     "BLOCK_TITLES",
+    "LEGACY_RULE",
+    "blocks_by_key",
+    "SyllabusRule",
+    "activity_kinds_for_offering",
+    "current_rule",
+    "rule_for_period",
+    "rule_for_syllabus",
+    "rule_for_version",
+    "selfwork_active_for_version",
+    "standard_splits",
     "LESSON_HOUR_KINDS",
     "MIN_DESCRIPTION_CHARS",
     "MIN_GOAL_CHARS",

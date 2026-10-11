@@ -24,6 +24,7 @@ from core.permissions import (  # noqa: F401
 
 from .permissions_account import merge_account_permissions
 from .permissions_announcements import merge_announcement_permissions
+from .permissions_hr import merge_hr_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 from .permissions_system import merge_system_permissions
@@ -465,6 +466,8 @@ merge_account_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PER
 merge_system_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Elanlar» (2026-10-06) — `announcement.manage` (struktur əhatəsinə tabe).
 merge_announcement_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# «Kadr analitikası» (2026-10-11) — `people.hr_analytics` («people» kateqoriyasına, HR).
+merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:

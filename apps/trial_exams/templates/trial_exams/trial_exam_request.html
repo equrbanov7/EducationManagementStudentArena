@@ -89,7 +89,7 @@
                             <a href="{% url 'trial_exams:request' %}" class="trial__btn trial__btn--ghost">
                                 <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni sınaq imtahanı" %}
                             </a>
-                            <a href="{% url 'exams:student_exam_list' %}" class="trial__btn trial__btn--primary">
+                            <a href="{% if academic_rules.available_exams %}{% url 'exams:student_exam_list' %}{% else %}{% url 'accounts:profile' %}?section=assigned-exams{% endif %}" class="trial__btn trial__btn--primary">
                                 <i class="fas fa-list-check" aria-hidden="true"></i> {% trans "İmtahanlarıma keç" %}
                             </a>
                         </div>

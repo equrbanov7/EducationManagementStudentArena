@@ -511,11 +511,31 @@ class PublicProfileViewTest(TestCase):
     def setUp(self):
         self.client = Client()
         self.author = User.objects.create_user(username="publicauthor", email="pa@example.com", password="pw12345678")
+        # URL auditi B1 (2026-10-10): baxan hədəflə ortaq təşkilatın aktiv üzvü olmalıdır.
+        self.viewer = User.objects.create_user(username="publicviewer2", email="pv2@example.com", password="pw12345678")
+        org = Organization.objects.create(
+            name="Public Char Univ",
+            org_type=OrganizationType.UNIVERSITY,
+            owner=self.author,
+            status="active",
+            is_active=True,
+        )
+        for member in (self.author, self.viewer):
+            Membership.objects.create(
+                user=member, organization=org, role=org.roles.get(name="teacher"), is_active=True, is_primary=True
+            )
+        self.client.force_login(self.viewer)
 
-    def test_public_profile_renders_for_anonymous(self):
+    def test_public_profile_renders_for_same_org_member(self):
         resp = self.client.get(reverse("accounts:public_profile", kwargs={"username": "publicauthor"}))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context["profile_user"], self.author)
+
+    def test_public_profile_requires_login(self):
+        self.client.logout()
+        resp = self.client.get(reverse("accounts:public_profile", kwargs={"username": "publicauthor"}))
+        self.assertEqual(resp.status_code, 302)
+        self.assertIn("/accounts/login/", resp.url)
 
     def test_public_profile_self_redirects_to_private_profile(self):
         self.client.force_login(self.author)

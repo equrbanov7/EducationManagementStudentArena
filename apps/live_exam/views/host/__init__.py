@@ -12,7 +12,6 @@ from .game import (  # noqa: F401
 )
 from .session import (  # noqa: F401
     live_create_session_by_slug,
-    live_host_lobby,
     live_host_presentation,
 )
 
@@ -26,6 +25,5 @@ __all__ = [
     "host_toggle_lock",
     "host_update_settings",
     "live_create_session_by_slug",
-    "live_host_lobby",
     "live_host_presentation",
 ]

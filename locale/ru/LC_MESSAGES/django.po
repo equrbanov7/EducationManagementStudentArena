@@ -3292,7 +3292,7 @@ msgstr "Практический"
 #: apps/accounts/templates/accounts/partials/_pending_answers_content.html:40
 msgctxt "accounts.pending_answers"
 msgid "filter_free_work"
-msgstr "Самостоятельная работа"
+msgstr "Задание"
 
 #: apps/accounts/templates/accounts/partials/_pending_answers_content.html:41
 msgctxt "accounts.pending_answers"
@@ -8529,7 +8529,7 @@ msgstr "Экзамены"
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:18
 msgctxt "profile.assigned_tasks"
 msgid "tab_assignments"
-msgstr "Свободные работы"
+msgstr "Задания"
 
 #: apps/accounts/templates/accounts/profile/sections/_assigned_exams.html:22
 msgctxt "profile.assigned_tasks"
@@ -9577,7 +9577,7 @@ msgstr "Экзамены"
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:36
 msgctxt "profile.results"
 msgid "tab_assignments"
-msgstr "Свободные работы"
+msgstr "Задания"
 
 #: apps/accounts/templates/accounts/profile/sections/_my_results.html:40
 msgctxt "profile.results"
@@ -16417,7 +16417,7 @@ msgstr "Результат ещё не подведён. Он появится �
 #: apps/accounts/views/dashboard/results.py:128
 msgctxt "accounts.my_result_detail.type"
 msgid "course"
-msgstr "Самостоятельная работа"
+msgstr "Задание"
 
 #: apps/accounts/views/dashboard/results.py:185
 msgctxt "accounts.my_result_detail.type"
@@ -18607,7 +18607,7 @@ msgstr "Статус"
 #: apps/assignments/apps.py:8
 msgctxt "assignment.app"
 msgid "title"
-msgstr "Самостоятельные работы"
+msgstr "Задания"
 
 #: apps/assignments/forms.py:19
 msgctxt "assignment.form.placeholder"
@@ -18832,12 +18832,12 @@ msgstr "Студенты"
 #: apps/assignments/models.py:149
 msgctxt "assignment.model.meta"
 msgid "verbose_name"
-msgstr "Самостоятельная работа"
+msgstr "Задание"
 
 #: apps/assignments/models.py:150
 msgctxt "assignment.model.meta"
 msgid "verbose_name_plural"
-msgstr "Самостоятельные работы"
+msgstr "Задания"
 
 #: apps/assignments/models.py:213
 msgctxt "assignment.submission.choice.status"
@@ -19117,7 +19117,7 @@ msgstr "Подтвердить отправку"
 #: apps/assignments/templates/assignments/assignment_detail.html:171
 msgctxt "assignment.detail"
 msgid "Bu sərbəst işi göndərmək istədiyinizə əminsiniz?"
-msgstr "Вы уверены, что хотите отправить эту самостоятельную работу?"
+msgstr "Вы уверены, что хотите отправить это задание?"
 
 #: apps/assignments/templates/assignments/assignment_detail.html:176
 msgctxt "assignment.detail"
@@ -19161,7 +19161,7 @@ msgstr "В настоящее время невозможно отправить
 #: apps/assignments/templates/assignments/assignment_section.html:12
 msgctxt "assignment.section"
 msgid "title"
-msgstr "Самостоятельные работы"
+msgstr "Задания"
 
 #: apps/assignments/templates/assignments/assignment_section.html:29
 msgctxt "assignment.section"
@@ -19221,12 +19221,12 @@ msgstr "Удалить"
 #: apps/assignments/templates/assignments/assignment_section.html:95
 msgctxt "assignment.section"
 msgid "empty_teacher"
-msgstr "Самостоятельных работ пока нет"
+msgstr "Заданий пока нет"
 
 #: apps/assignments/templates/assignments/assignment_section.html:97
 msgctxt "assignment.section"
 msgid "add_first"
-msgstr "Добавьте первую самостоятельную работу"
+msgstr "Добавьте первое задание"
 
 #: apps/assignments/templates/assignments/assignment_section.html:136
 msgctxt "assignment.section"
@@ -19263,12 +19263,12 @@ msgstr "Срок истёк"
 #: apps/assignments/templates/assignments/assignment_section.html:180
 msgctxt "assignment.section"
 msgid "empty_student"
-msgstr "Вам не назначено ни одной самостоятельной работы"
+msgstr "Вам не назначено ни одного задания"
 
 #: apps/assignments/templates/assignments/assignment_section.html:187
 msgctxt "assignment.section"
 msgid "empty_generic"
-msgstr "Самостоятельных работ нет"
+msgstr "Заданий нет"
 
 #: apps/assignments/templates/assignments/detail.html:25
 msgctxt "assignment.legacy.detail"
@@ -19375,7 +19375,7 @@ msgstr "Отзыв"
 #: apps/assignments/templates/assignments/modals.html:11
 msgctxt "assignment.legacy.modals"
 msgid "modal_add_title"
-msgstr "Добавить новую самостоятельную работу"
+msgstr "Добавить новое задание"
 
 #: apps/assignments/templates/assignments/modals.html:12
 msgctxt "assignment.legacy.modals"
@@ -19749,7 +19749,7 @@ msgstr "Вы уверены, что хотите удалить?"
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:23
 msgctxt "assignment.modals"
 msgid "modal_add_title"
-msgstr "Новая самостоятельная работа"
+msgstr "Новое задание"
 
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:31
 #: apps/assignments/templates/assignments/partials/_assignment_modals.html:105
@@ -20056,7 +20056,7 @@ msgstr "Просмотр"
 #: apps/assignments/templates/assignments/review.html:99
 msgctxt "assignment.legacy.review"
 msgid "empty_not_found"
-msgstr "Самостоятельные работы не найдены"
+msgstr "Задания не найдены"
 
 #: apps/assignments/templates/assignments/review_submissions.html:4
 msgctxt "assignment.review_submissions"
@@ -20183,8 +20183,7 @@ msgstr "Удалить выбранные ответы"
 #: apps/assignments/templates/assignments/review_submissions.html:259
 msgid "Bu seçim geri qaytarılmır. Seçilmiş sərbəst iş cavabları silinəcək."
 msgstr ""
-"Это действие нельзя отменить. Выбранные ответы по самостоятельным работам "
-"будут удалены."
+"Это действие нельзя отменить. Выбранные ответы на задания будут удалены."
 
 #: apps/assignments/templates/assignments/review_submissions.html:263
 #: apps/labs/templates/labs/lab_submissions.html:302
@@ -20237,7 +20236,7 @@ msgstr "Напишите отзыв для студента..."
 #: apps/assignments/views/student/endpoints.py:184
 msgctxt "assignments.views.message"
 msgid "no_assignment_access"
-msgstr "У вас нет доступа к этой самостоятельной работе."
+msgstr "У вас нет доступа к этому заданию."
 
 #: apps/assignments/views/student/endpoints.py:122
 msgctxt "assignments.views.message"
@@ -56044,7 +56043,7 @@ msgstr "Удаление курса"
 #. saxlanılıb.
 msgctxt "organizations.permission.label"
 msgid "Sərbəst işi silmək"
-msgstr "Удаление самостоятельной работы"
+msgstr "Удаление задания"
 
 #. xgettext bu sətri çıxara bilmir (kontekst dəyişəndir); tərcümə qorunub
 #. saxlanılıb.
@@ -71685,7 +71684,7 @@ msgstr "курсовые работы"
 
 msgctxt "accounts.pending_answers"
 msgid "kpi_free_work_note"
-msgstr "сдачи самостоятельных работ"
+msgstr "ответы на задания"
 
 msgctxt "accounts.pending_answers"
 msgid "kpi_lab_note"
@@ -73481,7 +73480,7 @@ msgstr "Просмотр проведённых занятий кафедры"
 
 msgctxt "organizations.permission.label"
 msgid "Sərbəst işi redaktə etmək"
-msgstr "Редактировать самостоятельную работу"
+msgstr "Редактирование задания"
 
 msgctxt "organizations.permission.label"
 msgid "Toplu hesab əlavəsi (siyahıdan tələbə/müəllim yaratmaq)"
@@ -83426,7 +83425,7 @@ msgstr "Программа курса и понедельная структур
 
 msgctxt "courses.dashboard"
 msgid "hint_assignments"
-msgstr "Самостоятельные работы и сдачи студентов"
+msgstr "Задания и ответы студентов"
 
 msgctxt "courses.dashboard"
 msgid "hint_labs"
@@ -83816,7 +83815,7 @@ msgstr "Средний балл"
 
 msgctxt "review.page"
 msgid "kind_assignment"
-msgstr "Самостоятельная работа"
+msgstr "Задание"
 
 msgctxt "review.page"
 msgid "kind_project"
@@ -92977,3 +92976,2681 @@ msgstr "Подтвердить все — верен A (%(count)s)"
 msgctxt "exams.model.question_submission.field"
 msgid "Reyestr qrupları"
 msgstr "Группы реестра"
+
+msgctxt "accounts.runtime_settings"
+msgid "Yanılı"
+msgstr "Включено"
+
+msgctxt "accounts.runtime_settings"
+msgid "Söndürülü"
+msgstr "Выключено"
+
+msgctxt "accounts.runtime_settings"
+msgid "Yandırılmış və ya söndürülmüş olmalıdır."
+msgstr "Должно быть включено или выключено."
+
+msgctxt "core.runtime_settings"
+msgid "Akademik qaydalar"
+msgstr "Академические правила"
+
+msgctxt "core.runtime_settings"
+msgid "İmtahanlar"
+msgstr "Экзамены"
+
+msgctxt "core.runtime_settings"
+msgid "Sərbəst iş (10 bal)"
+msgstr "Самостоятельная работа (10 баллов)"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Söndürülüdə sərbəst iş jurnalda, sillabusda, fənn qovluğunda və kabinetdə "
+"görünmür, onun 10 balı midterm-ə keçir (midterm 30). Yandırılanda əvvəlki "
+"qayda: midterm 20 + sərbəst iş 10. Yalnız 2026/2027 və sonrakı semestrlərə "
+"aiddir; köhnə semestrlərin qiymətləri dəyişmir."
+msgstr ""
+"В выключенном состоянии самостоятельная работа скрыта в журнале, силлабусе, "
+"папке предмета и кабинете, а её 10 баллов переходят к промежуточному "
+"экзамену (midterm 30). Во включённом — прежнее правило: midterm 20 + "
+"самостоятельная работа 10. Действует только для семестров 2026/2027 и позже;"
+" оценки прошлых семестров не меняются."
+
+msgctxt "core.runtime_settings"
+msgid "Seminar və laboratoriya ayrıca (5 + 5 bal)"
+msgstr "Семинар и лаборатория отдельно (5 + 5 баллов)"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Fəndə həm seminar, həm laboratoriya varsa fəallıq balı: seminar ballarının "
+"ortası 5 + laboratoriya ballarının ortası 5. Yalnız biri varsa 10 bal onun "
+"ortasından. Söndürülüdə bütün seminar və laboratoriya balları birgə "
+"ortalanır."
+msgstr ""
+"Если у предмета есть и семинары, и лабораторные, балл активности: среднее по"
+" семинарам 5 + среднее по лабораторным 5. Если есть только один вид — 10 "
+"баллов из его среднего. В выключенном состоянии все оценки семинаров и "
+"лабораторных усредняются вместе."
+
+msgctxt "core.runtime_settings"
+msgid "Cədvəldəki dərsi «Aktivləşdir» düyməsi"
+msgstr "Кнопка «Активировать» для занятия из расписания"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Söndürülüdə jurnalda «Aktivləşdir» düyməsi yoxdur — müəllim «Yeni dərs» ilə "
+"dərsi özü yaradır, forma dərs cədvəli və son dərsə görə əvvəlcədən "
+"doldurulur."
+msgstr ""
+"В выключенном состоянии в журнале нет кнопки «Активировать» — преподаватель "
+"сам создаёт занятие через «Новое занятие», форма заранее заполняется по "
+"расписанию и последнему занятию."
+
+msgctxt "core.runtime_settings"
+msgid "AI köməkçi düyməsi"
+msgstr "Кнопка ИИ-помощника"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Söndürülüdə ekranın küncündəki AI düyməsi heç kimə göstərilmir. Yanılıdırsa "
+"hər istifadəçi onu öz ekranında gizlədə və sürüşdürüb yerini dəyişə bilər."
+msgstr ""
+"В выключенном состоянии кнопка ИИ в углу экрана никому не показывается. Во "
+"включённом каждый пользователь может скрыть её у себя или перетащить в "
+"другое место."
+
+msgctxt "core.runtime_settings"
+msgid "«Mövcud imtahanlar» səhifəsi"
+msgstr "Страница «Доступные экзамены»"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Sahib 2026-10-10: hələlik lazım deyil. Söndürülüdə səhifə və ona aparan "
+"keçidlər görünmür; kod saxlanılır — yandıranda geri qayıdır."
+msgstr ""
+"Владелец 2026-10-10: пока не нужна. В выключенном состоянии страница и "
+"ссылки на неё скрыты; код сохранён — при включении она возвращается."
+
+msgctxt "core.runtime_settings"
+msgid "Ayrılmış tələbələrin jurnala yazılmasının qarşısını al"
+msgstr "Не записывать в журналы выбывших студентов"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Yanılıdırsa hesabı arxivdə olan (məzun, xaric) tələbələr yeni jurnallara "
+"yazılmır, qrupun seçmə fənni dəyişəndə və ya fənn ləğv olunanda köhnə BOŞ "
+"yazılışlar çıxarılır. Balı olan yazılışlara toxunulmur."
+msgstr ""
+"Во включённом состоянии студенты с архивным аккаунтом (выпускники, "
+"отчисленные) не записываются в новые журналы, а старые ПУСТЫЕ записи "
+"удаляются при смене группой элективного предмета или отмене предмета. Записи"
+" с оценками не затрагиваются."
+
+msgctxt "registrar.journal"
+msgid "Soyad, ad, ata adı"
+msgstr "Фамилия, имя, отчество"
+
+msgctxt "registrar.journal"
+msgid "Seminar ortası"
+msgstr "Средний за семинары"
+
+msgctxt "registrar.journal"
+msgid "Lab ortası"
+msgstr "Средний за лабораторные"
+
+msgctxt "registrar.journal"
+msgid "Bal (5 + 5)"
+msgstr "Балл (5 + 5)"
+
+msgctxt "registrar.journal"
+msgid "lab"
+msgstr "лаб."
+
+msgctxt "registrar.journal"
+msgid ""
+"Fəndə seminar və laboratoriya var: hər növün ədədi ortasının yarısı toplanır"
+" (5 + 5); balı olmayan növ 0 sayılır."
+msgstr ""
+"В предмете есть и семинары, и лабораторные: складывается половина среднего "
+"арифметического каждого вида (5 + 5); вид без оценок считается 0."
+
+msgctxt "registrar.journal"
+msgid ""
+"Giriş balı = davamiyyət + aktivlik + Midterm; tam ədədə yuvarlaqlaşdırılır "
+"(tavan"
+msgstr ""
+"Входной балл = посещаемость + активность + Midterm; округляется до целого "
+"(максимум"
+
+msgctxt "registrar.journal"
+msgid ""
+"Aktivlik = seminar ortasının yarısı + laboratoriya ortasının yarısı (5 + 5);"
+" balı olmayan növ 0 sayılır."
+msgstr ""
+"Активность = половина среднего за семинары + половина среднего за "
+"лабораторные (5 + 5); вид без оценок считается 0."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid ""
+"Midterm — aralıq imtahandır, 0–%(max)s bal. Bal-yazma aralığını İmtahan "
+"Mərkəzi təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə "
+"bilərsiniz; bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır."
+msgstr ""
+"Мидтерм — промежуточный экзамен, 0–%(max)s баллов. Интервал ввода баллов "
+"устанавливает Экзаменационный центр. Пока окно открыто, баллы можно свободно"
+" вводить и менять; после закрытия они блокируются. Пустой балл считается 0."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "şkala 0–%(max)s"
+msgstr "шкала 0–%(max)s"
+
+#, python-format
+msgctxt "registrar.interim"
+msgid "Midterm — aralıq imtahan (0–%(max)s bal)"
+msgstr "Мидтерм — промежуточный экзамен (0–%(max)s баллов)"
+
+msgctxt "profile.subjects"
+msgid "Aktivlik (seminar / laboratoriya)"
+msgstr "Активность (семинар / лабораторная)"
+
+msgctxt "profile.subjects"
+msgid "Midterm"
+msgstr "Мидтерм"
+
+msgctxt "profile.subjects"
+msgid ""
+"Giriş balı = davamiyyət + aktivlik + midterm + sərbəst iş (imtahana qədər "
+"toplanan hissə); yekun bal = giriş balı + yekun imtahan."
+msgstr ""
+"Входной балл = посещаемость + активность + мидтерм + самостоятельная работа "
+"(часть, набранная до экзамена); итоговый балл = входной балл + итоговый "
+"экзамен."
+
+msgctxt "profile.subjects"
+msgid ""
+"Giriş balı = davamiyyət + aktivlik + midterm (imtahana qədər toplanan "
+"hissə); yekun bal = giriş balı + yekun imtahan. Fəndə seminar və "
+"laboratoriya varsa aktivlik 5 + 5 hesablanır."
+msgstr ""
+"Входной балл = посещаемость + активность + мидтерм (часть, набранная до "
+"экзамена); итоговый балл = входной балл + итоговый экзамен. Если в предмете "
+"есть семинары и лабораторные, активность считается как 5 + 5."
+
+msgctxt "syllabus.assessment"
+msgid "Seminar ballarının ortası"
+msgstr "Среднее баллов за семинары"
+
+msgctxt "syllabus.assessment"
+msgid "Laboratoriya ballarının ortası"
+msgstr "Среднее баллов за лабораторные"
+
+msgctxt "syllabus.assessment"
+msgid "Seminar ballarının ədədi ortası"
+msgstr "Среднее арифметическое баллов за семинары"
+
+msgctxt "syllabus.assessment"
+msgid "Laboratoriya ballarının ədədi ortası"
+msgstr "Среднее арифметическое баллов за лабораторные"
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Seminar və laboratoriya: seminar ballarının ortası 5 + laboratoriya "
+"ballarının ortası 5"
+msgstr ""
+"Семинар и лабораторные: среднее за семинары 5 + среднее за лабораторные 5"
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Seminar ballarının ədədi ortası (10): semestr ərzində yazılmış bütün seminar"
+" ballarının ortası."
+msgstr ""
+"Среднее арифметическое баллов за семинары (10): среднее всех баллов за "
+"семинары, выставленных в семестре."
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Laboratoriya ballarının ədədi ortası (10): semestr ərzində yazılmış bütün "
+"laboratoriya ballarının ortası."
+msgstr ""
+"Среднее арифметическое баллов за лабораторные (10): среднее всех баллов за "
+"лабораторные, выставленных в семестре."
+
+msgctxt "syllabus.assessment"
+msgid ""
+"Seminar və laboratoriya: seminar ballarının ortası 5 + laboratoriya "
+"ballarının ortası 5 (cəmi 10)."
+msgstr ""
+"Семинар и лабораторные: среднее за семинары 5 + среднее за лабораторные 5 "
+"(всего 10)."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bal bölgüsü universitet standartıdır: davamiyyət 10, midterm 30, "
+"seminar/laboratoriya balları 10 (semestr 50) və yekun imtahan 50 — müəllim "
+"dəyişmir. Fəaliyyət növü dərs yükündən gəlir."
+msgstr ""
+"Распределение баллов — стандарт университета: посещаемость 10, мидтерм 30, "
+"баллы за семинары/лабораторные 10 (семестр 50) и итоговый экзамен 50 — "
+"преподаватель его не меняет. Вид занятий берётся из нагрузки."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu versiya təsdiqlənib və dəyişdirilə bilmir. Elektron jurnalın mövzu "
+"siyahısı və qiymətləndirmə strukturu bu sənəddən götürülür."
+msgstr ""
+"Эта версия утверждена и не может быть изменена. Список тем электронного "
+"журнала и структура оценивания берутся из этого документа."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Təsdiqlənmiş versiya həftəlik mövzuların və qiymətləndirmə strukturunun "
+"yeganə mənbəyi olur"
+msgstr ""
+"Утверждённая версия становится единственным источником еженедельных тем и "
+"структуры оценивания"
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Həftəlik mövzular və ya qiymətləndirmə çəkiləri dəyişir. Yalnız növbəti "
+"semestrdən qüvvəyə minir — cari jurnal təsirlənmir."
+msgstr ""
+"Меняются еженедельные темы или веса оценивания. Вступает в силу только со "
+"следующего семестра — текущий журнал не затрагивается."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Semestr balı %(semester)s (davamiyyət + midterm + seminar/laboratoriya "
+"balları), yekun imtahan 50 — cəmi %(total)s bal. Bölgü universitet "
+"standartıdır və dəyişdirilmir."
+msgstr ""
+"Балл за семестр %(semester)s (посещаемость + мидтерм + баллы за "
+"семинары/лабораторные), итоговый экзамен 50 — всего %(total)s баллов. "
+"Распределение — стандарт университета и не меняется."
+
+msgctxt "registrar.selfwork"
+msgid "Bu semestrdə sərbəst iş tətbiq olunmur — düzəliş mümkün deyil."
+msgstr ""
+"В этом семестре самостоятельная работа не применяется — корректировка "
+"невозможна."
+
+msgctxt "registrar.selfwork_hook"
+msgid "Bu semestrdə sərbəst iş tətbiq olunmur — bal jurnala yazılmadı."
+msgstr ""
+"В этом семестре самостоятельная работа не применяется — балл не записан в "
+"журнал."
+
+msgctxt "subject_folder.error"
+msgid ""
+"Bu semestrdə sərbəst iş tətbiq olunmur (universitet qaydası) — əməliyyat "
+"mümkün deyil."
+msgstr ""
+"В этом семестре самостоятельная работа не применяется (правило университета)"
+" — действие невозможно."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Fənn qovluqlarına göndərilən ev tapşırıqları. Bəyənilməyən iş rəylə "
+"qaytarılır — 0 yazılmır."
+msgstr ""
+"Домашние задания, отправленные в папки предметов. Неудачная работа "
+"возвращается с отзывом — ноль не ставится."
+
+msgctxt "subject_folder.ui"
+msgid "Müəllimlərinizin paylaşdığı tədris materialları və ev tapşırıqları."
+msgstr "Учебные материалы и домашние задания от ваших преподавателей."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Mövzular təsdiqlənmiş sillabusla uzlaşdırılsın? Göndərişi olan heç nə "
+"silinmir."
+msgstr ""
+"Согласовать темы с утверждённым силлабусом? Ничего с отправками не "
+"удаляется."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin "
+"olunmuş qovluğu görür."
+msgstr ""
+"Назначьте папку группам, которые вы ведёте, — студенты видят только "
+"назначенные папки."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"Hər fənn üçün tədris materialları və ev tapşırıqları bir qovluqda. Mövzular "
+"təsdiqlənmiş sillabusdan gəlir."
+msgstr ""
+"Учебные материалы и домашние задания по каждому предмету в одной папке. Темы"
+" берутся из утверждённого силлабуса."
+
+msgctxt "subject_folder.ui"
+msgid ""
+"«Yeni qovluq» ilə tədris etdiyiniz fənn üçün qovluq yaradın — mövzular "
+"sillabusdan avtomatik çəkiləcək."
+msgstr ""
+"Создайте папку для своего предмета кнопкой «Новая папка» — темы подтянутся "
+"из силлабуса автоматически."
+
+msgctxt "exams.available_page"
+msgid ""
+"«Mövcud imtahanlar» səhifəsi hələlik bağlıdır. İmtahanlarınızı kabinetdən "
+"başlaya bilərsiniz."
+msgstr ""
+"Страница «Доступные экзамены» пока закрыта. Начать экзамены можно из личного"
+" кабинета."
+
+msgctxt "exams.form.question.label"
+msgid "Variant %%(n)s"
+msgstr "Вариант %%(n)s"
+
+msgctxt "exams.template.bank_picker"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "exams.template.bank_picker"
+msgid "Axtarışı dəyişin və ya filtrləri sıfırlayın."
+msgstr "Измените запрос или сбросьте фильтры."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank axtar…"
+msgstr "Поиск банка…"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank seçin"
+msgstr "Выберите банк"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank və filtrlər"
+msgstr "Банк и фильтры"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bank xülasəsi"
+msgstr "Сводка по банку"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bankdan sual əlavə et"
+msgstr "Добавить вопросы из банка"
+
+msgctxt "exams.template.bank_picker"
+msgid ""
+"Bu imtahanın tipinə uyğun bank tapılmadı. Sual bankları kitabxanasında yeni "
+"bank yaradın və ya sizinlə paylaşılmasını xahiş edin."
+msgstr ""
+"Нет банка, подходящего к типу этого экзамена. Создайте новый банк в "
+"библиотеке банков вопросов или попросите коллегу поделиться банком."
+
+msgctxt "exams.template.bank_picker"
+msgid "Bu səhifədəkiləri seç"
+msgstr "Выбрать на этой странице"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bütün %(n)s sualı seç"
+msgstr "Выбрать все вопросы (%(n)s)"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bütün dillər"
+msgstr "Все языки"
+
+msgctxt "exams.template.bank_picker"
+msgid "Dil"
+msgstr "Язык"
+
+msgctxt "exams.template.bank_picker"
+msgid "Dil üzrə süz"
+msgstr "Фильтр по языку"
+
+msgctxt "exams.template.bank_picker"
+msgid "Düzgün"
+msgstr "Верный"
+
+msgctxt "exams.template.bank_picker"
+msgid "Filtrləri sıfırla"
+msgstr "Сбросить фильтры"
+
+msgctxt "exams.template.bank_picker"
+msgid "Filtrlərə uyğun sual tapılmadı"
+msgstr "Нет вопросов, подходящих под фильтры"
+
+msgctxt "exams.template.bank_picker"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.template.bank_picker"
+msgid "Bu bankda uyğun sual yoxdur"
+msgstr "В этом банке нет подходящих вопросов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Başqa bank seçin və ya kitabxanada bu banka sual əlavə edin."
+msgstr "Выберите другой банк или добавьте вопросы в этот банк в библиотеке."
+
+msgctxt "exams.template.bank_picker"
+msgid "Heç bir sual seçilməyib"
+msgstr "Вопросы не выбраны"
+
+msgctxt "exams.template.bank_picker"
+msgid ""
+"Kitabxanadakı sual bankından sual seçib bu imtahana əlavə edin. Yalnız test "
+"bankları göstərilir."
+msgstr ""
+"Выберите вопросы из банка в библиотеке и добавьте их в этот экзамен. "
+"Показаны только тестовые банки."
+
+msgctxt "exams.template.bank_picker"
+msgid ""
+"Kitabxanadakı sual bankından sual seçib bu imtahana əlavə edin. Yalnız "
+"yazılı sual bankları göstərilir."
+msgstr ""
+"Выберите вопросы из банка в библиотеке и добавьте их в этот экзамен. "
+"Показаны только банки письменных вопросов."
+
+msgctxt "exams.template.bank_picker"
+msgid "Mövcud bankdan sual əlavə et"
+msgstr "Добавить вопросы из существующего банка"
+
+msgctxt "exams.template.bank_picker"
+msgid "Növbəti"
+msgstr "Далее"
+
+msgctxt "exams.template.bank_picker"
+msgid "Seçilənləri əlavə et"
+msgstr "Добавить выбранные"
+
+msgctxt "exams.template.bank_picker"
+msgid "Seçim"
+msgstr "Выбор"
+
+msgctxt "exams.template.bank_picker"
+msgid "Sual banklarına keç"
+msgstr "Перейти к банкам вопросов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Sual bankı"
+msgstr "Банк вопросов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Sual mətnində axtar"
+msgstr "Поиск по тексту вопроса"
+
+msgctxt "exams.template.bank_picker"
+msgid ""
+"Sualları görmək üçün yuxarıdan sual bankını seçin — sonra axtarış və "
+"filtrlərlə daraldın."
+msgstr ""
+"Выберите банк вопросов выше, чтобы увидеть вопросы, затем сузьте список "
+"поиском и фильтрами."
+
+msgctxt "exams.template.bank_picker"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "exams.template.bank_picker"
+msgid ""
+"Səhifəni dəyişəndə seçim sıfırlanır — hamısını əlavə etmək üçün «Bütün "
+"sualları seç» düyməsindən istifadə edin."
+msgstr ""
+"При смене страницы выбор сбрасывается — чтобы добавить всё, используйте "
+"«Выбрать все вопросы»."
+
+msgctxt "exams.template.bank_picker"
+msgid "Tapılan suallar"
+msgstr "Найденные вопросы"
+
+msgctxt "exams.template.bank_picker"
+msgid "Test sualı"
+msgstr "Тестовый вопрос"
+
+msgctxt "exams.template.bank_picker"
+msgid "Təmizlə"
+msgstr "Очистить"
+
+msgctxt "exams.template.bank_picker"
+msgid "Uyğun bank yoxdur"
+msgstr "Нет подходящего банка"
+
+msgctxt "exams.template.bank_picker"
+msgid "Uyğun sual bankı yoxdur"
+msgstr "Нет подходящего банка вопросов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Variant yoxdur"
+msgstr "Нет вариантов"
+
+msgctxt "exams.template.bank_picker"
+msgid "Variantlar"
+msgstr "Варианты"
+
+msgctxt "exams.template.bank_picker"
+msgid "Yazılı sual"
+msgstr "Письменный вопрос"
+
+msgctxt "exams.template.bank_picker"
+msgid "{n} sual seçildi"
+msgstr "Выбрано вопросов: {n}"
+
+msgctxt "exams.template.bank_picker"
+msgid "Çətinlik"
+msgstr "Сложность"
+
+msgctxt "exams.template.bank_picker"
+msgid "İmtahana qayıt"
+msgstr "Назад к экзамену"
+
+msgctxt "exams.template.bank_picker"
+msgid "Əvvəl bank seçin"
+msgstr "Сначала выберите банк"
+
+msgctxt "exams.template.bank_picker"
+msgid "Əvvəlki"
+msgstr "Назад"
+
+msgctxt "exams.template.language_manager"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "exams.template.language_manager"
+msgid "Aktiv et"
+msgstr "Активировать"
+
+msgctxt "exams.template.language_manager"
+msgid "Aktiv sual"
+msgstr "Активные вопросы"
+
+msgctxt "exams.template.language_manager"
+msgid "Boş qalsa dilin adı göstərilir."
+msgstr "Если оставить пустым, показывается название языка."
+
+msgctxt "exams.template.language_manager"
+msgid "Bütün dəstəklənən dillər artıq əlavə olunub."
+msgstr "Все поддерживаемые языки уже добавлены."
+
+msgctxt "exams.template.language_manager"
+msgid "Deaktiv"
+msgstr "Неактивен"
+
+msgctxt "exams.template.language_manager"
+msgid "Deaktiv dil tələbəyə təklif olunmur; sualları silinmir."
+msgstr "Неактивный язык не предлагается студентам; его вопросы не удаляются."
+
+msgctxt "exams.template.language_manager"
+msgid "Deaktiv et"
+msgstr "Деактивировать"
+
+msgctxt "exams.template.language_manager"
+msgid "Dil"
+msgstr "Язык"
+
+msgctxt "exams.template.language_manager"
+msgid "Dil variantları"
+msgstr "Языковые версии"
+
+msgctxt "exams.template.language_manager"
+msgid "Dil variantını deaktiv et"
+msgstr "Деактивировать языковую версию"
+
+msgctxt "exams.template.language_manager"
+msgid "Dil əlavə et"
+msgstr "Добавить язык"
+
+msgctxt "exams.template.language_manager"
+msgid "Dillər"
+msgstr "Языки"
+
+msgctxt "exams.template.language_manager"
+msgid "Göstəriş adı"
+msgstr "Отображаемое название"
+
+msgctxt "exams.template.language_manager"
+msgid "Hələ dil variantı yoxdur"
+msgstr "Языковых версий пока нет"
+
+msgctxt "exams.template.language_manager"
+msgid "Mövcud dillər"
+msgstr "Текущие языки"
+
+msgctxt "exams.template.language_manager"
+msgid ""
+"Sağdakı formadan ilk dili əlavə edin — sonra bu dilə sual yükləyə "
+"bilərsiniz."
+msgstr ""
+"Добавьте первый язык с помощью формы справа — затем в него можно загружать "
+"вопросы."
+
+msgctxt "exams.template.language_manager"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "exams.template.language_manager"
+msgid ""
+"Tələbə imtahana başlayanda aktiv dillərdən birini seçir və yalnız həmin "
+"dilin sualları yüklənir."
+msgstr ""
+"Начиная экзамен, студент выбирает один из активных языков, и загружаются "
+"только вопросы на этом языке."
+
+msgctxt "exams.template.language_manager"
+msgid "Yeni dil əlavə et"
+msgstr "Добавить новый язык"
+
+msgctxt "exams.template.language_manager"
+msgid "istəyə bağlı"
+msgstr "необязательно"
+
+msgctxt "exams.template.language_manager"
+msgid "məs. Azərbaycan (2024 buraxılış)"
+msgstr "напр. Азербайджанский (выпуск 2024)"
+
+msgctxt "exams.template.language_manager"
+msgid ""
+"«%(name)s» deaktiv edilsin? Tələbələr bu dildə imtahana başlaya bilməyəcək. "
+"Suallar silinmir — istənilən vaxt yenidən aktiv edə bilərsiniz."
+msgstr ""
+"Деактивировать «%(name)s»? Студенты не смогут начать экзамен на этом языке. "
+"Вопросы не удаляются — язык можно снова активировать в любое время."
+
+msgctxt "exams.template.language_manager"
+msgid "«%(name)s» dilini aktiv et"
+msgstr "Активировать «%(name)s»"
+
+msgctxt "exams.template.language_manager"
+msgid "«%(name)s» dilini deaktiv et"
+msgstr "Деактивировать «%(name)s»"
+
+msgctxt "exams.template.language_manager"
+msgid "İmtahana qayıt"
+msgstr "Назад к экзамену"
+
+msgctxt "exams.template.language_manager"
+msgid "Əlavə olunan dil dərhal aktiv olur."
+msgstr "Добавленный язык сразу становится активным."
+
+msgctxt "exams.template.language_manager"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "exams.template.question_form"
+msgid "Bu fayl növü qəbul olunmur — siyahıdakı formatlardan birini seçin."
+msgstr "Этот тип файла не принимается — выберите один из указанных форматов."
+
+msgctxt "exams.template.question_form"
+msgid "Cavab"
+msgstr "Ответ"
+
+msgctxt "exams.template.question_form"
+msgid "Düzgün cavab"
+msgstr "Правильный ответ"
+
+msgctxt "exams.template.question_form"
+msgid "Fayl çox böyükdür — ən çox {max} MB ola bilər."
+msgstr "Файл слишком большой — максимум {max} МБ."
+
+msgctxt "exams.template.question_form"
+msgid "JPG, PNG, GIF, WEBP · ən çox 10 MB"
+msgstr "JPG, PNG, GIF, WEBP · до 10 МБ"
+
+msgctxt "exams.template.question_form"
+msgid "MP4, WEBM, MOV · ən çox 30 MB"
+msgstr "MP4, WEBM, MOV · до 30 МБ"
+
+msgctxt "exams.template.question_form"
+msgid "Media"
+msgstr "Медиа"
+
+msgctxt "exams.template.question_form"
+msgid "Parametrlər"
+msgstr "Параметры"
+
+msgctxt "exams.template.question_form"
+msgid "Seçilmiş videonu götür"
+msgstr "Убрать выбранное видео"
+
+msgctxt "exams.template.question_form"
+msgid "Seçilmiş şəkli götür"
+msgstr "Убрать выбранное изображение"
+
+msgctxt "exams.template.question_form"
+msgid "Sual"
+msgstr "Вопрос"
+
+msgctxt "exams.template.question_form"
+msgid "Video seçin"
+msgstr "Выберите видео"
+
+msgctxt "exams.template.question_form"
+msgid "istəyə bağlı"
+msgstr "необязательно"
+
+msgctxt "exams.template.question_form"
+msgid "və ya faylı bura sürüşdürüb buraxın"
+msgstr "или перетащите файл сюда"
+
+msgctxt "exams.template.question_form"
+msgid "İmtahana qayıt"
+msgstr "Назад к экзамену"
+
+msgctxt "exams.template.question_form"
+msgid "Şəkil seçin"
+msgstr "Выберите изображение"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad Soyad"
+msgstr "Имя и фамилия"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad gizli qalacaq müddət"
+msgstr "Время, пока имя скрыто"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Axtarışı dəyişin və ya filtrləri sıfırlayın."
+msgstr "Измените запрос или сбросьте фильтры."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bal"
+msgstr "Балл"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Başlama"
+msgstr "Начало"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Başlama: -dan"
+msgstr "Начало: с"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Başlama: -dək"
+msgstr "Начало: по"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Bitmə"
+msgstr "Окончание"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Cavabsız"
+msgstr "Без ответа"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Cəhdləri sil"
+msgstr "Удалить попытки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Deaktiv"
+msgstr "Неактивен"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Düzgün"
+msgstr "Верно"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Düzgün / verilmiş sual"
+msgstr "Верно / выдано вопросов"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "E-poçt"
+msgstr "Эл. почта"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Excel-ə yüklə"
+msgstr "Выгрузить в Excel"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Faiz"
+msgstr "Процент"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Filtrlər"
+msgstr "Фильтры"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Filtrləri sıfırla"
+msgstr "Сбросить фильтры"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Filtrlərə uyğun nəticə yoxdur"
+msgstr "Нет результатов, подходящих под фильтры"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Gözləyir"
+msgstr "Ожидает"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Hələ iştirakçı yoxdur"
+msgstr "Участников пока нет"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Maks. bal"
+msgstr "Макс. балл"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Müddət"
+msgstr "Длительность"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Qrup axtar…"
+msgstr "Поиск группы…"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Seçim"
+msgstr "Выбор"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Sınaq cəhdləri"
+msgstr "Попытки экзамена"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Səhv"
+msgstr "Неверно"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Səhv / verilmiş sual"
+msgstr "Неверно / выдано вопросов"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tarix imtahana başlama gününə görə süzülür (gg.aa.iiii)."
+msgstr "Даты фильтруются по дню начала экзамена (дд.мм.гггг)."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tarixi gg.aa.iiii formatında yazın (məs. 06.10.2026)."
+msgstr "Введите дату в формате дд.мм.гггг (напр. 06.10.2026)."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Tələbələr imtahanı verdikcə nəticələr burada görünəcək."
+msgstr "Результаты появятся здесь по мере прохождения экзамена студентами."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Uyğun qrup yoxdur"
+msgstr "Нет подходящей группы"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Yenidən yoxlama üçün qalan vaxt"
+msgstr "Время, оставшееся на перепроверку"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Yoxlanma"
+msgstr "Статус проверки"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Yoxlanılıb"
+msgstr "Проверено"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "Yükləmək üçün nəticə yoxdur."
+msgstr "Нет результатов для выгрузки."
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "avto"
+msgstr "авто"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "gg.aa.iiii"
+msgstr "дд.мм.гггг"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "İştirakçı"
+msgstr "Участник"
+
+msgctxt "exams.template.teacher_exam_results"
+msgid "İştirakçıların nəticələri · Müəllim: %(teacher)s (@%(handle)s)"
+msgstr "Результаты участников · Преподаватель: %(teacher)s (@%(handle)s)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Aktiv"
+msgstr "Активные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Axtarış və süzgəclər"
+msgstr "Поиск и фильтры"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bank və içindəki bütün suallar həmişəlik silinir."
+msgstr "Банк и все его вопросы удаляются безвозвратно."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Başqa söz yoxlayın və ya süzgəcləri dəyişin."
+msgstr "Попробуйте другое слово или измените фильтры."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Bu əməliyyatlar geri qaytarılmır."
+msgstr "Эти действия нельзя отменить."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Cəmi"
+msgstr "Всего"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Deaktiv"
+msgstr "Неактивные"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Digər əlavə üsulları"
+msgstr "Другие способы добавления"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Düzgün"
+msgstr "Верный"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Hamısını sil"
+msgstr "Удалить всё"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Keyfiyyət"
+msgstr "Качество"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Keyfiyyət hesabatı (Excel)"
+msgstr "Отчёт о качестве (Excel)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Keyfiyyət süzgəci"
+msgstr "Фильтр качества"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Seçilmiş suallar"
+msgstr "Выбранные вопросы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Sual, blok və ya variant mətni"
+msgstr "Текст вопроса, блока или варианта"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Suallar"
+msgstr "Вопросы"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Suallar (Word)"
+msgstr "Вопросы (Word)"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Sıralama"
+msgstr "Сортировка"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Təhlükəli əməliyyatlar"
+msgstr "Опасная зона"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Təsdiq üçün imtahanın adını yazın"
+msgstr "Для подтверждения введите название экзамена"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Yüklə"
+msgstr "Скачать"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "«Sual əlavə et» ilə tək-tək və ya toplu əlavə ilə fayldan yükləyin."
+msgstr ""
+"Добавляйте по одному через «Добавить вопрос» или загрузите из файла массовым"
+" добавлением."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid ""
+"İmtahanın bütün sualları həmişəlik silinir. Təsdiq üçün imtahanın adını "
+"yazmaq lazımdır."
+msgstr ""
+"Все вопросы экзамена удаляются безвозвратно. Для подтверждения нужно ввести "
+"название экзамена."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid ""
+"İmtahanın {count} sualı həmişəlik silinəcək. Bu əməliyyat geri qaytarılmır."
+msgstr ""
+"Вопросы экзамена ({count}) будут удалены безвозвратно. Это действие нельзя "
+"отменить."
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Ən köhnə"
+msgstr "Сначала старые"
+
+msgctxt "exams.template.teacher_questions_bank"
+msgid "Ən yeni"
+msgstr "Сначала новые"
+
+msgctxt "accounts.dashboard"
+msgid ""
+"Bu fənnin jurnalını aç — bu günün dərsini oradan «Yeni dərs» ilə açın (forma"
+" cədvəldən dolu gəlir)"
+msgstr ""
+"Открыть журнал предмета — откройте там сегодняшнее занятие кнопкой «Новое "
+"занятие» (форма заполняется по расписанию)"
+
+msgctxt "registrar.journal_activation"
+msgid ""
+"Bu tarix və saatda cədvəldə bu fənnin dərsi yoxdur — cədvəldən kənar dərs "
+"üçün səbəbi yazın (məs. əvəzetmə, kompensasiya dərsi). Cədvəldəki dərs üçün "
+"tarixi və saatı cədvələ uyğun seçin."
+msgstr ""
+"В расписании нет занятия по этому предмету в эту дату и время — укажите "
+"причину занятия вне расписания (напр. замена, компенсационное занятие). Для "
+"занятия по расписанию выберите дату и время по расписанию."
+
+msgctxt "registrar.journal_prefill"
+msgid ""
+"Dərsi «Yeni dərs» ilə açın — forma bu dərsin saatı, növü, otağı, müəllimi və"
+" növbəti mövzusu ilə dolu açılır."
+msgstr ""
+"Откройте занятие кнопкой «Новое занятие» — форма откроется заполненной "
+"временем, типом, аудиторией, преподавателем и следующей темой этого занятия."
+
+msgctxt "registrar.journal_prefill"
+msgid "Dərs açılıb"
+msgstr "Занятие открыто"
+
+msgctxt "registrar.journal_prefill"
+msgid "Dərs açılmayıb"
+msgstr "Занятие не открыто"
+
+msgctxt "registrar.journal_prefill"
+msgid "Yeni dərs formasını bu cədvəl dərsinin məlumatları ilə aç"
+msgstr "Открыть форму нового занятия с данными этого занятия по расписанию"
+
+msgctxt "registrar.journal_prefill"
+msgid "Forma bu günün cədvəl dərsindən doldurulub"
+msgstr "Форма заполнена по сегодняшнему занятию из расписания"
+
+msgctxt "registrar.journal_prefill"
+msgid ""
+"Saat, tip, otaq, müəllim və növbəti mövzu cədvəldən və sillabusdan götürülüb"
+" — yoxlayıb «Tətbiq et» basın."
+msgstr ""
+"Время, тип, аудитория, преподаватель и следующая тема взяты из расписания и "
+"силлабуса — проверьте и нажмите «Применить»."
+
+msgctxt "registrar.journal_prefill"
+msgid ""
+"Sahələr bu fənnin son dərsinə və sillabusdakı növbəti mövzuya görə "
+"doldurulub — yoxlayın, lazım olsa dəyişin."
+msgstr ""
+"Поля заполнены по последнему занятию предмета и следующей теме силлабуса — "
+"проверьте и при необходимости измените."
+
+msgctxt "registrar.journal_prefill"
+msgid ""
+"Bu tarix və saatda cədvəldə dərs yoxdur — səbəb məcburidir və «Keçilmiş "
+"dərslər»də «cədvəldən kənar» kimi işarələnir. Cədvəldəki dərs üçün tarixi və"
+" saatı cədvələ uyğun seçin."
+msgstr ""
+"В расписании нет занятия в эту дату и время — причина обязательна, а занятие"
+" помечается «вне расписания» в «Проведённых занятиях». Для занятия по "
+"расписанию выберите дату и время по расписанию."
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi"
+msgstr "ИИ-помощник"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi düyməsi"
+msgstr "Кнопка ИИ-помощника"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçini göstər"
+msgstr "Показать ИИ-помощника"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçini gizlət"
+msgstr "Скрыть ИИ-помощника"
+
+msgctxt "ai_assistant.fab"
+msgid "Gizlət"
+msgstr "Скрыть"
+
+msgctxt "ai_assistant.fab"
+msgid "Geri qaytar"
+msgstr "Вернуть"
+
+msgctxt "ai_assistant.fab"
+msgid ""
+"AI köməkçi gizlədildi. Ekranın kənarındakı «AI köməkçi» nişanı və ya "
+"istifadəçi menyusu ilə geri qaytara bilərsiniz."
+msgstr ""
+"ИИ-помощник скрыт. Вернуть его можно ярлыком «ИИ-помощник» у края экрана или"
+" через меню пользователя."
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi sol kənara köçürüldü"
+msgstr "ИИ-помощник перемещён к левому краю"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi sağ kənara köçürüldü"
+msgstr "ИИ-помощник перемещён к правому краю"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi yuxarı çəkildi"
+msgstr "ИИ-помощник перемещён выше"
+
+msgctxt "ai_assistant.fab"
+msgid "AI köməkçi aşağı endirildi"
+msgstr "ИИ-помощник перемещён ниже"
+
+msgctxt "ai_assistant.fab"
+msgid ""
+"Yerini dəyişmək üçün Alt ilə ox düymələrini basın: sol və sağ ox — kənar, "
+"yuxarı və aşağı ox — hündürlük. Delete — gizlətmək."
+msgstr ""
+"Чтобы переместить, нажимайте Alt со стрелками: влево и вправо — край, вверх "
+"и вниз — высота. Delete — скрыть."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Hesab arxivdədir"
+msgstr "Учётная запись в архиве"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Xaric olunub"
+msgstr "Отчислен"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Akademik məzuniyyətdədir"
+msgstr "В академическом отпуске"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Məzun olub"
+msgstr "Выпускник"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Akademik qeyd passivdir"
+msgstr "Академическая запись неактивна"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Oxu müddəti bitib"
+msgstr "Срок обучения истёк"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Akademik qeydi yoxdur"
+msgstr "Нет академической записи"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Qrupu dəyişib"
+msgstr "Сменил группу"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Açılış ləğv olunub"
+msgstr "Курс отменён"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Seçmə fənn dəyişdirilib"
+msgstr "Элективный предмет заменён"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Tədris planında yoxdur"
+msgstr "Нет в учебном плане"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Köhnə sistemdə nəticə yoxdur"
+msgstr "Нет результата в старой системе"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Mənbəsi bəlli deyil"
+msgstr "Источник неизвестен"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Güclü siqnal"
+msgstr "Сильный сигнал"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Yoxlanmalı"
+msgstr "Требует проверки"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Ayrılmış tələbə"
+msgstr "Выбывший студент"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Boş fənn"
+msgstr "Пустой предмет"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Jurnal təmizliyi üçün səlahiyyətiniz yoxdur (journal.correct)."
+msgstr "У вас нет прав на очистку журналов (journal.correct)."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Heç bir sətir seçilməyib."
+msgstr "Не выбрано ни одной строки."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Bir əməldə ən çox %(n)d sətir emal olunur."
+msgstr "За одно действие обрабатывается не более %(n)d строк."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr ""
+"Причина должна содержать не менее 20 символов — короткой записи недостаточно"
+" для аудита."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Bu kateqoriya üçün naməlum əməliyyat."
+msgstr "Неизвестное действие для этой категории."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Seçilmiş sətirlər bu arada dəyişib — siyahını yeniləyin."
+msgstr "Выбранные строки за это время изменились — обновите список."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Əvvəlcə önizləməyə baxın."
+msgstr "Сначала откройте предпросмотр."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Siyahı önizləmədən sonra dəyişib — yenidən önizləyin."
+msgstr "Список изменился после предпросмотра — повторите предпросмотр."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Məlumatı olan sətir yalnız dondurula bilər."
+msgstr "Строку с данными можно только заморозить."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Qərar tapılmadı və ya artıq geri qaytarılıb."
+msgstr "Решение не найдено или уже отменено."
+
+msgctxt "registrar.journal_hygiene"
+msgid ""
+"Bəzi qərarlar geri qaytarıla bilmir: qeydiyyatın statusu o vaxtdan dəyişib "
+"və ya tələbə həmin fənn üzrə başqa jurnalda aktivdir."
+msgstr ""
+"Некоторые решения нельзя отменить: статус записи с тех пор изменился или "
+"студент активен в другом журнале по тому же предмету."
+
+msgctxt "registrar.journal_hygiene"
+msgid ""
+"Qrupun seçmə fənni dəyişdirildi (%(group)s → %(subject)s): köhnə seçimin boş"
+" qeydiyyatı çıxarıldı."
+msgstr ""
+"Элективный предмет группы изменён (%(group)s → %(subject)s): пустая запись "
+"прежнего выбора исключена."
+
+msgctxt "registrar.journal_hygiene"
+msgid ""
+"Qrup bu seçmə fənni yenidən seçdi — əvvəl çıxarılmış boş qeydiyyat bərpa "
+"olundu."
+msgstr ""
+"Группа снова выбрала этот элективный предмет — ранее исключённая пустая "
+"запись восстановлена."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Açılış ləğv olundu: %(reason)s"
+msgstr "Курс отменён: %(reason)s"
+
+msgctxt "registrar.model.journal_hygiene.meta"
+msgid "journal hygiene decision"
+msgstr "решение по очистке журнала"
+
+msgctxt "registrar.model.journal_hygiene.meta"
+msgid "journal hygiene decisions"
+msgstr "решения по очистке журналов"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Dərs xanası (davamiyyət / bal)"
+msgstr "Ячейка занятия (посещаемость / балл)"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Komponent balı"
+msgstr "Балл компонента"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Rubrik balı"
+msgstr "Балл по рубрике"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Sərbəst iş"
+msgstr "Самостоятельная работа"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Kurs işi"
+msgstr "Курсовая работа"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Təkrar imtahan"
+msgstr "Пересдача"
+
+msgctxt "accounts.journal_hygiene"
+msgid "İmtahan balı yazısı"
+msgstr "Запись экзаменационного балла"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Köhnə sistemin nəticəsi"
+msgstr "Результат из старой системы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Yekun qiymət"
+msgstr "Итоговая оценка"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal düzəlişi"
+msgstr "Исправление журнала"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Sərbəst iş düzəlişi"
+msgstr "Исправление самостоятельной работы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Kurs işi düzəlişi"
+msgstr "Исправление курсовой работы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Komponent düzəlişi"
+msgstr "Исправление компонента"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Alt qrup sənədi"
+msgstr "Документ подгруппы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Köçürmə tarixçəsi"
+msgstr "История перевода"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Fənn qovluğu təhvili"
+msgstr "Сдача в папку предмета"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Oxumayan, amma jurnalda adı qalan tələbələri və nəticələrə «boş» düşmüş "
+"fənləri tapın. Heç nə silinmir: sətir dondurulur və ya nəticələrdən "
+"çıxarılır, hər qərar tarixçəyə və audit jurnalına yazılır və «Bərpa et» ilə "
+"geri qaytarılır."
+msgstr ""
+"Найдите студентов, которые больше не учатся, но остались в журналах, и "
+"предметы, попавшие в результаты «пустыми». Ничего не удаляется: строка "
+"замораживается или исключается из результатов, каждое решение записывается в"
+" историю и журнал аудита и отменяется кнопкой «Восстановить»."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal təmizliyi yalnız RİM rəhbəri və superadmin üçündür."
+msgstr "Очистка журналов доступна только руководителю RİM и суперадмину."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal təmizliyi əməlləri yalnız RİM rəhbəri üçündür."
+msgstr "Действия очистки журналов доступны только руководителю RİM."
+
+msgctxt "accounts.journal_hygiene"
+msgid "«Başqasının adından» rejimindəsiniz — siyahılar yalnız oxunur."
+msgstr "Вы в режиме «от имени другого» — списки доступны только для чтения."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Siyahıları görürsünüz, amma qərar vermək üçün təşkilat miqyaslı "
+"«journal.correct» səlahiyyəti lazımdır."
+msgstr ""
+"Вы видите списки, но для решений нужно право «journal.correct» на уровне "
+"организации."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Ayrılmış tələbələr"
+msgstr "Выбывшие студенты"
+
+msgctxt "accounts.journal_hygiene"
+msgid "jurnalda adı qalan sətir"
+msgstr "строк ещё в журналах"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Boş fənlər"
+msgstr "Пустые предметы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "nəticədə boş görünən sətir"
+msgstr "строк пустых в результатах"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Güclü siqnal"
+msgstr "Сильный сигнал"
+
+msgctxt "accounts.journal_hygiene"
+msgid "seçilmiş tab üzrə"
+msgstr "по выбранной вкладке"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qərarlar"
+msgstr "Решения"
+
+msgctxt "accounts.journal_hygiene"
+msgid "geri qaytarılan daxil"
+msgstr "включая отменённые"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal təmizliyi bölmələri"
+msgstr "Разделы очистки журналов"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Cari və gələcək semestrin AÇIQ jurnallarında qalan, amma oxumayan tələbələr:"
+" hesab arxivdədir, xaric / akademik məzuniyyət / məzun, qeyd passivdir, oxu "
+"müddəti bitib və ya akademik qeydi yoxdur. «Dondur» sətri jurnal və imtahan "
+"siyahısından çıxarır (bərpa əmri onu qaytarır); məlumatı olmayan sətir "
+"nəticələrdən də çıxarıla bilər."
+msgstr ""
+"Студенты, которые больше не учатся, но остались в ОТКРЫТЫХ журналах текущего"
+" и следующего семестров: учётная запись в архиве, отчислен / академический "
+"отпуск / выпускник, запись неактивна, срок обучения истёк или нет "
+"академической записи. «Заморозить» убирает строку из журнала и "
+"экзаменационного списка (приказ о восстановлении возвращает её); строку без "
+"данных можно также исключить из результатов."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Heç bir balı, davamiyyəti, sənədi və ya imtahan yazısı olmayan qeydiyyatlar:"
+" dövr bitib / jurnal bağlanıb, açılış ləğv olunub və ya qrup seçmə fənni "
+"dəyişib. «Güclü siqnal» — açılışda bir dərs də yoxdur və qrupda heç kimin "
+"datası yoxdur; qalanları əvvəlcə yoxlayın."
+msgstr ""
+"Записи без единого балла, посещаемости, документа или экзаменационной "
+"записи: период завершён / журнал закрыт, курс отменён или группа сменила "
+"элективный предмет. «Сильный сигнал» — в курсе нет ни одного занятия и ни у "
+"кого в группе нет данных; остальные сначала проверьте."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Bu alətin bütün qərarları. «Bərpa et» yalnız statusu o vaxtdan dəyişməmiş "
+"sətirləri əvvəlki vəziyyətinə qaytarır."
+msgstr ""
+"Все решения этого инструмента. «Восстановить» возвращает в прежнее состояние"
+" только строки, статус которых с тех пор не менялся."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Tələbə, istifadəçi adı, fənn…"
+msgstr "Студент, логин, предмет…"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Semestr axtar…"
+msgstr "Поиск семестра…"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.journal_hygiene"
+msgid "cari"
+msgstr "текущий"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qrup axtar…"
+msgstr "Поиск группы…"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Mənbə"
+msgstr "Источник"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qüvvədədir"
+msgstr "Действует"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Geri qaytarılıb"
+msgstr "Отменено"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səbəb süzgəcləri"
+msgstr "Фильтры причин"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Uyğun olanların hamısını seç"
+msgstr "Выбрать все подходящие"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Seçimi təmizlə"
+msgstr "Снять выбор"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnaldan dondur"
+msgstr "Заморозить в журнале"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Nəticələrdən çıxar"
+msgstr "Исключить из результатов"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səhifədəki bütün sətirləri seç"
+msgstr "Выбрать все строки на странице"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Fənn · qrup"
+msgstr "Предмет · группа"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Niyə burada"
+msgstr "Почему здесь"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Məlumat"
+msgstr "Данные"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Status"
+msgstr "Статус"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Fənn · qrup · semestr"
+msgstr "Предмет · группа · семестр"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qərar"
+msgstr "Решение"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Kim / səbəb"
+msgstr "Кто / причина"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Məs.: Rektorun 12.09.2026 tarixli xaric əmrləri əsasında jurnallar "
+"təmizlənir."
+msgstr ""
+"Напр.: журналы очищаются на основании приказов ректора об отчислении от "
+"12.09.2026."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səbəb qərar tarixçəsinə və audit jurnalına yazılır."
+msgstr "Причина записывается в историю решений и журнал аудита."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səbəb ən azı 20 simvol olmalıdır — qısa qeyd audit üçün yetərli deyil."
+msgstr ""
+"Причина должна содержать не менее 20 символов — короткой записи недостаточно"
+" для аудита."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Yenidən önizlə"
+msgstr "Повторить предпросмотр"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Təsdiqlə"
+msgstr "Подтвердить"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Naməlum əməliyyat."
+msgstr "Неизвестное действие."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Yazıldı: %(n)d sətir. Geri qaytarmaq üçün «Tarixçə»yə keçin."
+msgstr "Записано строк: %(n)d. Чтобы отменить, откройте «История»."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Geri qaytarıldı: %(n)d qərar."
+msgstr "Отменено решений: %(n)d."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Bu süzgəcə uyğun ayrılmış tələbə yoxdur."
+msgstr "Нет выбывших студентов по этому фильтру."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Bu süzgəcə uyğun boş fənn yoxdur."
+msgstr "Нет пустых предметов по этому фильтру."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Hələ qərar yoxdur."
+msgstr "Решений пока нет."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Siyahı yüklənmədi. Bir az sonra yenidən cəhd edin."
+msgstr "Список не загрузился. Попробуйте ещё раз чуть позже."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.journal_hygiene"
+msgid "{n} sətir seçilib"
+msgstr "Выбрано строк: {n}"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Sətir seçin — əməl düymələri seçimdən sonra açılır."
+msgstr "Выберите строки — кнопки действий станут доступны после выбора."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Süzgəcə uyğun ilk {n} sətir seçildi."
+msgstr "Выбраны первые {n} подходящих строк."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Əvvəlki"
+msgstr "Назад"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Sonrakı"
+msgstr "Далее"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Səhifə {page} / {pages} · {total} sətir"
+msgstr "Страница {page} / {pages} · строк: {total}"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Məlumat var"
+msgstr "Есть данные"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Boş"
+msgstr "Пусто"
+
+msgctxt "accounts.journal_hygiene"
+msgid "{n} saat qayıb"
+msgstr "{n} ч пропусков"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal bağlıdır"
+msgstr "Журнал закрыт"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Status o vaxtdan dəyişib — geri qaytarılmır"
+msgstr "Статус с тех пор изменился — отмена невозможна"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnaldan dondurmaq — önizləmə"
+msgstr "Заморозить в журнале — предпросмотр"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Nəticələrdən çıxarmaq — önizləmə"
+msgstr "Исключить из результатов — предпросмотр"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qərarları geri qaytarmaq"
+msgstr "Отменить решения"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Sətirlər jurnaldan və imtahan siyahısından çıxır, tarixçə qalır; bərpa əmri "
+"və ya «Bərpa et» qaytarır."
+msgstr ""
+"Строки уходят из журнала и экзаменационного списка, история сохраняется; "
+"приказ о восстановлении или «Восстановить» возвращает их."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Sətirlər nəticə səthlərindən (transkript, statistika) də çıxır. Qeydiyyat "
+"silinmir — «Bərpa et» qaytarır."
+msgstr ""
+"Строки исключаются и из результатов (транскрипт, статистика). Запись не "
+"удаляется — «Восстановить» возвращает её."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Seçilmiş qərarlar ləğv olunur və qeydiyyatlar əvvəlki statusuna qayıdır."
+msgstr "Выбранные решения отменяются, записи возвращаются к прежнему статусу."
+
+msgctxt "accounts.journal_hygiene"
+msgid "{n} qərar geri qaytarılacaq."
+msgstr "Будет отменено решений: {n}."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Sətir"
+msgstr "Строки"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Jurnal"
+msgstr "Журналы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Məlumatı olan"
+msgstr "С данными"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Yeni status"
+msgstr "Новый статус"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Toxunulan jurnallar"
+msgstr "Затронутые журналы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "və daha {n} jurnal"
+msgstr "и ещё журналов: {n}"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Qeydiyyatlardakı məlumat"
+msgstr "Данные в записях"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Seçilmiş sətirlərdə heç bir bal, davamiyyət və ya sənəd yoxdur."
+msgstr "В выбранных строках нет баллов, посещаемости или документов."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"{n} sətirdə məlumat var — onlar nəticələrdən çıxarıla bilməz, yalnız "
+"dondurula bilər. Seçimi dəyişin."
+msgstr ""
+"В {n} строках есть данные — их нельзя исключить из результатов, только "
+"заморозить. Измените выбор."
+
+msgctxt "accounts.journal_hygiene"
+msgid "{n} sətir artıq siyahıda deyil — siyahını yeniləyib yenidən seçin."
+msgstr "{n} строк(и) больше нет в списке — обновите список и выберите снова."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Siyahı önizləmədən sonra dəyişib — yenidən önizləyin."
+msgstr "Список изменился после предпросмотра — повторите предпросмотр."
+
+msgctxt "accounts.journal_hygiene"
+msgid "sətir"
+msgstr "строк"
+
+msgctxt "profile.section"
+msgid "Jurnal təmizliyi"
+msgstr "Очистка журналов"
+
+msgctxt "notifications.event"
+msgid "You were removed from {organization}."
+msgstr "Вы были удалены из организации {organization}."
+
+msgctxt "notifications.event"
+msgid ""
+"{organization} sent you an invitation as {role_label}. You can accept or "
+"decline it in the \"Notifications\" section of your profile."
+msgstr ""
+"{organization} отправила вам приглашение в роли {role_label}. Принять или "
+"отклонить его можно в разделе «Уведомления» вашего профиля."
+
+msgctxt "registrar.catalog"
+msgid ""
+"Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları və"
+" tələbə təyinatları. Hər əməl bu səhifədə, dialoqda aparılır — kabinetdən "
+"çıxmır."
+msgstr ""
+"Академический каталог: специальности, предметы, учебные планы, открытия "
+"семестра и назначения студентов. Каждое действие выполняется на этой "
+"странице, в диалоге — не покидая кабинет."
+
+msgctxt "core.runtime_settings"
+msgid "Kurs işi (jurnalda)"
+msgstr "Курсовая работа (в журнале)"
+
+msgctxt "core.runtime_settings"
+msgid ""
+"Söndürülüdə jurnalda «Kurs işi» tabı, addımı və düzəlişi görünmür, tələbə öz"
+" jurnalında da görmür. Kurs işi balı imtahana qədər bala daxil deyil — "
+"hesablamalar dəyişmir. Yalnız 2026/2027 və sonrakı semestrlərə aiddir; köhnə"
+" semestrlərdə və mövcud datada heç nə silinmir."
+msgstr ""
+"В выключенном состоянии в журнале нет вкладки, шага и исправлений «Курсовая "
+"работа», студент тоже не видит её в своём журнале. Курсовая работа не входит"
+" в балл до экзамена — расчёты не меняются. Действует только для семестров "
+"2026/2027 и позже; в прошлых семестрах и данных ничего не удаляется."
+
+msgctxt "registrar.correction"
+msgid "Bu semestrdə kurs işi tətbiq olunmur — düzəliş mümkün deyil."
+msgstr ""
+"В этом семестре курсовая работа не применяется — исправление невозможно."
+
+msgctxt "accounts.hr_analytics"
+msgid "%(year)s tədris ili · göstərilir: %(shown)s / %(total)s müəllim"
+msgstr ""
+"Учебный год %(year)s · показано: %(shown)s из %(total)s преподавателей"
+
+msgctxt "accounts.hr_analytics"
+msgid "0,5 ştat"
+msgstr "0,5 ставки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ad Soyad Ata adı"
+msgstr "ФИО"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ad, soyad, istifadəçi adı, kafedra…"
+msgstr "Имя, фамилия, логин, кафедра…"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktiv hesab"
+msgstr "Активные учётные записи"
+
+msgctxt "accounts.hr_analytics"
+msgid "Aktivləşdirilməyib"
+msgstr "Не активирован"
+
+msgctxt "accounts.hr_analytics"
+msgid "Arxiv"
+msgstr "Архив"
+
+msgctxt "accounts.hr_analytics"
+msgid "Axtarış"
+msgstr "Поиск"
+
+msgctxt "accounts.hr_analytics"
+msgid "Az yüklü (<70%)"
+msgstr "Недогружен (<70%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Belə müəllim yoxdur."
+msgstr "Таких преподавателей нет."
+
+msgctxt "accounts.hr_analytics"
+msgid "Bu il yeni"
+msgstr "Новые в этом году"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bu tədris ili üçün müəllim tapılmadı"
+msgstr "Для этого учебного года преподаватели не найдены"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bölgü üzrə illik yük / norma."
+msgstr "Распределённая годовая нагрузка / норма."
+
+msgctxt "accounts.hr_analytics"
+msgid "Bölgü üzrə yük (saat)"
+msgstr "Распределённая нагрузка (ч)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bütün müəllimlər"
+msgstr "Все преподаватели"
+
+msgctxt "accounts.hr_analytics"
+msgid "Bəli"
+msgstr "Да"
+
+msgctxt "accounts.hr_analytics"
+msgid "Cins"
+msgstr "Пол"
+
+msgctxt "accounts.hr_analytics"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "accounts.hr_analytics"
+msgid "Cəmi ştat vahidi: %(units)s"
+msgstr "Всего ставок: %(units)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dayandırılıb"
+msgstr "Приостановлен"
+
+msgctxt "accounts.hr_analytics"
+msgid "Digər pay"
+msgstr "Другая доля"
+
+msgctxt "accounts.hr_analytics"
+msgid "Doluluq"
+msgstr "Заполненность"
+
+msgctxt "accounts.hr_analytics"
+msgid "Doluluq %"
+msgstr "Заполненность, %"
+
+msgctxt "accounts.hr_analytics"
+msgid "Doğum tarixi bilinməyən: %(unknown)s"
+msgstr "Дата рождения неизвестна: %(unknown)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dərs"
+msgstr "Занятия"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dərs deyən"
+msgstr "Ведут занятия"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dərs yükü"
+msgstr "Учебная нагрузка"
+
+msgctxt "accounts.hr_analytics"
+msgid "Dərs yükü doluluğu"
+msgstr "Заполненность нагрузки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi ad / vəzifə"
+msgstr "Учёное звание / должность"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi ad · dərəcə"
+msgstr "Звание · степень"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi adı / vəzifəsi yoxdur"
+msgstr "Нет звания / должности"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi dərəcə"
+msgstr "Учёная степень"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi dərəcəli"
+msgstr "Со степенью"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi dərəcəli %"
+msgstr "Со степенью, %"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmi dərəcəsi qeyd olunmayıb"
+msgstr "Учёная степень не указана"
+
+msgctxt "accounts.hr_analytics"
+msgid "Elmlər doktoru"
+msgstr "Доктор наук"
+
+msgctxt "accounts.hr_analytics"
+msgid "Excel-ə ixrac"
+msgstr "Экспорт в Excel"
+
+msgctxt "accounts.hr_analytics"
+msgid "Eyni ad-soyadlı hesablar"
+msgstr "Учётные записи с одинаковым ФИО"
+
+msgctxt "accounts.hr_analytics"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.hr_analytics"
+msgid "Fakültə və kafedralar üzrə ştat vahidləri"
+msgstr "Ставки по факультетам и кафедрам"
+
+msgctxt "accounts.hr_analytics"
+msgid "Fakültə · kafedra"
+msgstr "Факультет · кафедра"
+
+msgctxt "accounts.hr_analytics"
+msgid "Fakültə üzrə"
+msgstr "По факультету"
+
+msgctxt "accounts.hr_analytics"
+msgid "Fakültəsiz"
+msgstr "Без факультета"
+
+msgctxt "accounts.hr_analytics"
+msgid "Filtrə uyğun müəllim yoxdur."
+msgstr "Нет преподавателей, соответствующих фильтрам."
+
+msgctxt "accounts.hr_analytics"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab"
+msgstr "Учётная запись"
+
+msgctxt "accounts.hr_analytics"
+msgid "Hesab statusu"
+msgstr "Статус учётной записи"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Heyət aktiv müəllim üzvlüyündən və ya seçilmiş ilin dərs yükü profilindən "
+"(ştat vahidi) yığılır. Başqa il seçin və ya müəllim siyahısını idxal edin."
+msgstr ""
+"Состав формируется из активных членств преподавателей или профилей нагрузки "
+"выбранного года (ставки). Выберите другой год или импортируйте список "
+"преподавателей."
+
+msgctxt "accounts.hr_analytics"
+msgid "Heç daxil olmayıb"
+msgstr "Ни разу не входил"
+
+msgctxt "accounts.hr_analytics"
+msgid "Həddən artıq (>120%)"
+msgstr "Перегружен (>120%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Jurnal"
+msgstr "Журналы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Jurnal / dərs"
+msgstr "Журналы / занятия"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Jurnal — müəllimin seçilmiş tədris ilindəki aktiv fənn açılışı; keçirilmiş "
+"saat — jurnala yazılmış dərslərin cəmi; plan — jurnalın semestr kontakt "
+"saatı. Cari semestrdə icra faizinin aşağı olması normaldır."
+msgstr ""
+"Журнал — активный курс преподавателя в выбранном учебном году; проведённые "
+"часы — сумма занятий, записанных в журнал; план — контактные часы семестра "
+"по журналу. Низкий процент выполнения в текущем семестре — это нормально."
+
+msgctxt "accounts.hr_analytics"
+msgid "Kadr analitikası bölmələri"
+msgstr "Разделы кадровой аналитики"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kadr analitikası filtrləri"
+msgstr "Фильтры кадровой аналитики"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Kadr analitikası İnsan resursları, rektor, RİM rəhbəri və superadmin "
+"üçündür."
+msgstr ""
+"Кадровая аналитика доступна отделу кадров, ректору, руководителю RİM и "
+"суперадминистратору."
+
+msgctxt "accounts.hr_analytics"
+msgid "Kadr analitikasının ixracı"
+msgstr "Экспорт кадровой аналитики"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Kadr məlumatındakı boşluqlar. «Siyahıya bax» həmin problemi olan müəllimləri"
+" «Müəllimlər» tabında açır. Elmi dərəcənin olmaması səhv deyil — yalnız "
+"qeydin tamlığını göstərir."
+msgstr ""
+"Пробелы в кадровых данных. «Показать список» открывает преподавателей с этой"
+" проблемой на вкладке «Преподаватели». Отсутствие учёной степени — не "
+"ошибка, а лишь показатель полноты данных."
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedralar üzrə dərs yükü"
+msgstr "Нагрузка по кафедрам"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedralar üzrə elmi ad və dərəcə"
+msgstr "Звания и степени по кафедрам"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedralar üzrə tədris fəaliyyəti"
+msgstr "Учебная деятельность по кафедрам"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedrasız"
+msgstr "Без кафедры"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kafedraya bağlı deyil"
+msgstr "Не привязан к кафедре"
+
+msgctxt "accounts.hr_analytics"
+msgid "Keçirilmiş dərs"
+msgstr "Проведённые занятия"
+
+msgctxt "accounts.hr_analytics"
+msgid "Keçirilmiş saat"
+msgstr "Проведённые часы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Kişi"
+msgstr "Мужчины"
+
+msgctxt "accounts.hr_analytics"
+msgid "Müəllim"
+msgstr "Преподаватели"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Müəllim heyəti haqqında bütün göstəricilər: say və hesab vəziyyəti, ştat "
+"vahidləri, elmi ad və dərəcə, dərs yükü, tədris fəaliyyəti və məlumat "
+"boşluqları. Filtrlər bütün tablara tətbiq olunur; ixrac cari filtr dəstini "
+"Excel-ə çıxarır."
+msgstr ""
+"Все показатели профессорско-преподавательского состава: численность и статус"
+" учётных записей, ставки, учёные звания и степени, нагрузка, учебная "
+"деятельность и пробелы в данных. Фильтры применяются ко всем вкладкам; "
+"экспорт выгружает текущий набор фильтров в Excel."
+
+msgctxt "accounts.hr_analytics"
+msgid "Müəllimlər"
+msgstr "Преподаватели"
+
+msgctxt "accounts.hr_analytics"
+msgid "Müəllimlər siyahısı"
+msgstr "Список преподавателей"
+
+msgctxt "accounts.hr_analytics"
+msgid "Məlumat boşluqları"
+msgstr "Пробелы в данных"
+
+msgctxt "accounts.hr_analytics"
+msgid "Məlumat keyfiyyəti"
+msgstr "Качество данных"
+
+msgctxt "accounts.hr_analytics"
+msgid "Norma"
+msgstr "Норма"
+
+msgctxt "accounts.hr_analytics"
+msgid "Norma (saat)"
+msgstr "Норма (ч)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Normal (70–100%)"
+msgstr "Норма (70–100%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Növbəti"
+msgstr "Далее"
+
+msgctxt "accounts.hr_analytics"
+msgid "Plan saat"
+msgstr "Плановые часы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Plan saat (jurnal)"
+msgstr "Плановые часы (журнал)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Problem"
+msgstr "Проблема"
+
+msgctxt "accounts.hr_analytics"
+msgid "Problem tapılmadı."
+msgstr "Проблем не найдено."
+
+msgctxt "accounts.hr_analytics"
+msgid "Problem yoxdur."
+msgstr "Проблем нет."
+
+msgctxt "accounts.hr_analytics"
+msgid "Problemlər"
+msgstr "Проблемы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Profil sahəsi; boşdursa yük profilindəki vəzifə."
+msgstr "Поле профиля; если пусто — должность из профиля нагрузки."
+
+msgctxt "accounts.hr_analytics"
+msgid "Qadın"
+msgstr "Женщины"
+
+msgctxt "accounts.hr_analytics"
+msgid "Saathesabı"
+msgstr "Почасовая оплата"
+
+msgctxt "accounts.hr_analytics"
+msgid "Saathesabı saat"
+msgstr "Почасовые часы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Say"
+msgstr "Количество"
+
+msgctxt "accounts.hr_analytics"
+msgid "Seçilmiş il üçün ştat vahidi yoxdur"
+msgstr "Нет ставки на выбранный год"
+
+msgctxt "accounts.hr_analytics"
+msgid "Silinib"
+msgstr "Удалён"
+
+msgctxt "accounts.hr_analytics"
+msgid "Sistemə heç daxil olmayıb"
+msgstr "Ни разу не входил в систему"
+
+msgctxt "accounts.hr_analytics"
+msgid "Siyahıya bax"
+msgstr "Показать список"
+
+msgctxt "accounts.hr_analytics"
+msgid "Səhifə %(page)s / %(pages)s · %(total)s müəllim"
+msgstr "Страница %(page)s из %(pages)s · %(total)s преподавателей"
+
+msgctxt "accounts.hr_analytics"
+msgid "Səhifələmə"
+msgstr "Пагинация"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tam ştat"
+msgstr "Полная ставка"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tədris fəaliyyəti"
+msgstr "Учебная деятельность"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tədris ili"
+msgstr "Учебный год"
+
+msgctxt "accounts.hr_analytics"
+msgid "Tərkib"
+msgstr "Состав"
+
+msgctxt "accounts.hr_analytics"
+msgid "Təyin edilməyib"
+msgstr "Не указано"
+
+msgctxt "accounts.hr_analytics"
+msgid "Universitet üzrə"
+msgstr "По университету"
+
+msgctxt "accounts.hr_analytics"
+msgid "Xeyr"
+msgstr "Нет"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yalnız baxış"
+msgstr "Только просмотр"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yaş"
+msgstr "Возраст"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yaş qrupları"
+msgstr "Возрастные группы"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yoxdur"
+msgstr "Нет"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük"
+msgstr "Нагрузка"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük doluluğu"
+msgstr "Заполненность нагрузки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük profilindəki vəzifədən"
+msgstr "Из должности в профиле нагрузки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yük yoxdur"
+msgstr "Нет нагрузки"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Yük — dərs yükü bölgüsündə (paylanmış / düzəlişli tapşırıqlar) müəllimə "
+"yazılmış illik saat; norma — yük profilindəki illik norma (profil yoxdursa "
+"500 saat). Doluluq kafedra cəmindən hesablanır."
+msgstr ""
+"Нагрузка — годовые часы, закреплённые за преподавателем в распределении "
+"нагрузки (распределённые / исправленные задания); норма — годовая норма из "
+"профиля нагрузки (500 часов, если профиля нет). Заполненность рассчитывается"
+" по итогу кафедры."
+
+msgctxt "accounts.hr_analytics"
+msgid "Yüklü (100–120%)"
+msgstr "Загружен (100–120%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Yükü olan"
+msgstr "С нагрузкой"
+
+msgctxt "accounts.hr_analytics"
+msgid "akademik heyət"
+msgstr "преподавательский состав"
+
+msgctxt "accounts.hr_analytics"
+msgid "blok + arxiv"
+msgstr "заблокированы + архив"
+
+msgctxt "accounts.hr_analytics"
+msgid "hesab yaradılıb"
+msgstr "учётных записей создано"
+
+msgctxt "accounts.hr_analytics"
+msgid "heç daxil olmayıb"
+msgstr "ни разу не входил"
+
+msgctxt "accounts.hr_analytics"
+msgid "ilk giriş yoxdur"
+msgstr "нет первого входа"
+
+msgctxt "accounts.hr_analytics"
+msgid "ilkin parolda"
+msgstr "с начальным паролем"
+
+msgctxt "accounts.hr_analytics"
+msgid "plan / norma"
+msgstr "план / норма"
+
+msgctxt "accounts.hr_analytics"
+msgid "saat"
+msgstr "ч"
+
+msgctxt "accounts.hr_analytics"
+msgid "və daha %(more)s nəfər"
+msgstr "и ещё %(more)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "«Başqasının adından» rejimində ixrac bağlıdır"
+msgstr "В режиме «от имени другого» экспорт недоступен"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"«Başqasının adından» rejimindəsiniz — analitika yalnız baxış üçündür, ixrac "
+"bağlıdır."
+msgstr ""
+"Вы в режиме «от имени другого» — аналитика только для просмотра, экспорт "
+"недоступен."
+
+msgctxt "accounts.hr_analytics"
+msgid "Ümumi baxış"
+msgstr "Обзор"
+
+msgctxt "accounts.hr_analytics"
+msgid "İcra"
+msgstr "Выполнение"
+
+msgctxt "accounts.hr_analytics"
+msgid "İcra %"
+msgstr "Выполнение, %"
+
+msgctxt "accounts.hr_analytics"
+msgid "İstifadəçi adı"
+msgstr "Логин"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat"
+msgstr "Ставка"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat növü"
+msgstr "Тип ставки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat payı"
+msgstr "Доля ставки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat vahidi"
+msgstr "Ставки"
+
+msgctxt "accounts.hr_analytics"
+msgid ""
+"Ştat vahidi seçilmiş tədris ilinin dərs yükü profilindən gəlir (tam = 1, "
+"yarım = 0,5). Saathesabı müəllimlər ştat vahidinə daxil edilmir; «Təyin "
+"edilməyib» — bu il üçün profili olmayanlar."
+msgstr ""
+"Ставки берутся из профилей нагрузки выбранного учебного года (полная = 1, "
+"половина = 0,5). Почасовики в ставки не входят; «Не указано» — нет профиля "
+"на этот год."
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştat vahidləri"
+msgstr "Ставки"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştatlı / saathesabı"
+msgstr "Штатные / почасовые"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ştatı var, amma aktiv üzvlüyü yoxdur"
+msgstr "Есть ставка, но нет активного членства"
+
+msgctxt "accounts.hr_analytics"
+msgid "ştat vahidi: %(units)s"
+msgstr "ставок: %(units)s"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ən az yüklənənlər (<70%)"
+msgstr "Наименее загруженные (<70%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Ən çox rast gəlinən problemlər."
+msgstr "Наиболее частые проблемы."
+
+msgctxt "accounts.hr_analytics"
+msgid "Ən çox yüklənənlər (>100%)"
+msgstr "Наиболее загруженные (>100%)"
+
+msgctxt "accounts.hr_analytics"
+msgid "Əvvəlki"
+msgstr "Назад"
+
+msgctxt "profile.sidebar"
+msgid "Kadr analitikası"
+msgstr "Кадровая аналитика"
+
+msgctxt "organizations.permission.label"
+msgid "Kadr analitikası (ştat, tərkib, dərs yükü, ixrac)"
+msgstr "Кадровая аналитика (ставки, состав, нагрузка, экспорт)"
+
+msgctxt "accounts.account_block"
+msgid "Kadrlar şöbəsi (İnsan resursları)"
+msgstr "Отдел кадров (человеческие ресурсы)"
+
+msgctxt "accounts.account_block"
+msgid "Kafedra müdiri"
+msgstr "Заведующий кафедрой"
+
+msgctxt "accounts.account_block"
+msgid "İşdən ayrılıb / müqavilə bitib"
+msgstr "Уволился / контракт завершён"
+
+msgctxt "accounts.account_block"
+msgid ""
+"«Digər» seçilib — səbəbi «Səbəbi yazın» sahəsinə yazın (ən azı 3 simvol)."
+msgstr ""
+"Выбрано «Другое» — укажите причину в поле «Напишите причину» (не менее 3 "
+"символов)."
+
+msgctxt "accounts.account_block"
+msgid "Səbəbi yazın"
+msgstr "Напишите причину"
+
+msgctxt "accounts.account_block"
+msgid "məs: hesab sahibinin yazılı müraciəti ilə"
+msgstr "напр.: по письменному заявлению владельца аккаунта"
+
+msgctxt "accounts.account_block"
+msgid ""
+"«Digər» seçilib — səbəbi bu sahəyə yazın (məcburi). Tələbə girişdə məhz bu "
+"mətni görəcək."
+msgstr ""
+"Выбрано «Другое» — укажите причину здесь (обязательно). Студент увидит "
+"именно этот текст при входе."
+
+msgctxt "accounts.account_block"
+msgid ""
+"«Digər» seçilib — səbəbi bu sahəyə yazın (məcburi). Müəllim girişdə məhz bu "
+"mətni görəcək."
+msgstr ""
+"Выбрано «Другое» — укажите причину здесь (обязательно). Преподаватель увидит"
+" именно этот текст при входе."
+
+msgctxt "accounts.account_block"
+msgid ""
+"«Digər» seçilib — səbəbi bu sahəyə yazın (məcburi). İstifadəçi girişdə məhz "
+"bu mətni görəcək."
+msgstr ""
+"Выбрано «Другое» — укажите причину здесь (обязательно). Пользователь увидит "
+"именно этот текст при входе."
+
+msgctxt "accounts.account_block"
+msgid "Müəllimə qeyd (otaq, telefon, iş saatı)"
+msgstr "Примечание для преподавателя (кабинет, телефон, часы)"
+
+msgctxt "accounts.account_block"
+msgid "İstifadəçiyə qeyd (otaq, telefon, iş saatı)"
+msgstr "Примечание для пользователя (кабинет, телефон, часы)"
+
+msgctxt "accounts.account_block"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "accounts.account_block"
+msgid ""
+"Müəllim istifadəçi adı və parolunu yazanda səbəbi, bu ünvanı və qeydi "
+"görəcək — sistemə isə daxil ola bilməyəcək."
+msgstr ""
+"Введя имя пользователя и пароль, преподаватель увидит причину, это место "
+"обращения и примечание, но войти в систему не сможет."
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adı və parol yazılanda səbəb, bu ünvan və qeyd göstəriləcək — "
+"sistemə isə daxil olmaq mümkün olmayacaq."
+msgstr ""
+"При вводе имени пользователя и пароля будут показаны причина, это место "
+"обращения и примечание, но войти в систему будет невозможно."
+
+msgctxt "accounts.account_block"
+msgid ""
+"İstifadəçi adınız və parolunuz düzgündür, amma hesabınıza giriş universitet "
+"tərəfindən müvəqqəti dayandırılıb. Hesabınızdakı məlumatlar silinməyib."
+msgstr ""
+"Имя пользователя и пароль верны, но университет временно приостановил доступ"
+" к вашему аккаунту. Данные в аккаунте не удалены."
+
+msgctxt "registrar.journal_hygiene"
+msgid "Keçirilməyən fənn"
+msgstr "Непроведённый предмет"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Fənn keçirilməyib — qrupda heç kimin imtahan balı yoxdur"
+msgstr "Предмет не проводился — ни у кого в группе нет экзаменационного балла"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Yalnız giriş balı"
+msgstr "Только допускной балл"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Heç bir bal yoxdur"
+msgstr "Нет ни одного балла"
+
+msgctxt "registrar.journal_hygiene"
+msgid "Dərs / kollokvium izi var"
+msgstr "Есть записи занятий / коллоквиумов"
+
+msgctxt "registrar.journal_hygiene"
+msgid ""
+"Keçirilməyən fənn bütöv açılış kimi çıxarılır — açılışın bütün sətirlərini "
+"seçin."
+msgstr ""
+"Непроведённый предмет убирается целиком — выберите все строки этого курса."
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Oxumayan, amma jurnalda adı qalan tələbələri, nəticələrə «boş» düşmüş və "
+"qrupda keçirilməmiş fənləri tapın. Heç nə silinmir: sətir dondurulur və ya "
+"nəticələrdən çıxarılır, hər qərar tarixçəyə və audit jurnalına yazılır və "
+"«Bərpa et» ilə geri qaytarılır."
+msgstr ""
+"Найдите студентов, которые не учатся, но остались в журналах, «пустые» "
+"предметы в результатах и предметы, не проводившиеся в группе. Ничего не "
+"удаляется: строка замораживается или убирается из результатов, каждое "
+"решение записывается в историю и журнал аудита и отменяется кнопкой "
+"«Восстановить»."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Keçirilməyən fənlər"
+msgstr "Непроведённые предметы"
+
+msgctxt "accounts.journal_hygiene"
+msgid "açılış (fənn × qrup × semestr)"
+msgstr "курсы (предмет × группа × семестр)"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"Bitmiş semestrdə qrupun HEÇ BİR tələbəsinin imtahan («çıxış») balı yoxdur — "
+"yalnız giriş balı və ya heç nə, nəticədə hamı kəsr / nəticəsiz görünür. "
+"Vahid açılışdır: bütün tələbələri birlikdə nəticələrdən çıxarılır. «Güclü "
+"siqnal» — qrupun eyni semestrdəki digər fənlərinin ən azı yarısında imtahan "
+"var və bu fənndə dərs / kollokvium izi yoxdur; «Dərs / kollokvium izi var» "
+"etiketli fənn keçirilib, amma imtahanı yazılmayıb ola bilər — əvvəlcə "
+"yoxlayın."
+msgstr ""
+"В завершённом семестре НИ У ОДНОГО студента группы нет экзаменационного "
+"(«выходного») балла — только допускной балл или ничего, поэтому все выглядят"
+" несдавшими / без результата. Единица — курс: все его студенты убираются из "
+"результатов вместе. «Сильный сигнал» — хотя бы у половины других предметов "
+"группы в том же семестре есть экзамен, а у этого предмета нет записей "
+"занятий / коллоквиумов; предмет с меткой «Есть записи занятий / "
+"коллоквиумов» мог проводиться, но экзамен не был внесён — сначала проверьте."
+
+msgctxt "accounts.journal_hygiene"
+msgid "Əlamət"
+msgstr "Признак"
+
+msgctxt "accounts.journal_hygiene"
+msgid "Bu süzgəcə uyğun keçirilməyən fənn yoxdur."
+msgstr "Нет непроведённых предметов по этому фильтру."
+
+msgctxt "accounts.journal_hygiene"
+msgid "açılışda {n} tələbə"
+msgstr "студентов в курсе: {n}"
+
+msgctxt "accounts.journal_hygiene"
+msgid "açılış · {n} sətir"
+msgstr "курсов · строк: {n}"
+
+msgctxt "accounts.journal_hygiene"
+msgid ""
+"{n} açılış yarımçıq seçilib — keçirilməyən fənn bütöv çıxarılır. Açılışın "
+"bütün tələbələrini seçin («Uyğun olanların hamısını seç»)."
+msgstr ""
+"Курсов выбрано не полностью: {n} — непроведённый предмет убирается целиком. "
+"Выберите всех студентов курса («Выбрать все подходящие»)."

@@ -202,11 +202,10 @@ def notify_member_removed_from_organization(
     Notify a user that they were removed from an organization by an admin.
     """
     actor_name = _display_name(removed_by) if removed_by is not None else ""
-    message = pgettext(
-        "notifications.event",
-        'You were removed from {organization}. You can submit a new request from the "Join organization" '
-        "section in your profile.",
-    ).format(organization=organization.name)
+    # URL auditi A7 (2026-10-10): «Təşkilata qoşul» bölməsi silindi — mətn ona yönləndirmir.
+    message = pgettext("notifications.event", "You were removed from {organization}.").format(
+        organization=organization.name
+    )
     if actor_name:
         actor_text = pgettext("notifications.event", "Action performed by: {actor}.").format(actor=actor_name)
         message = f"{message} {actor_text}"
@@ -218,13 +217,13 @@ def notify_member_removed_from_organization(
         recipient=removed_user,
         title=pgettext("notifications.event", "You were removed from the organization"),
         message=message,
-        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'student-organization-request'})}",
+        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'notifications'})}",
         notification_type=NotificationType.SYSTEM,
         metadata={
             "organization_id": getattr(organization, "id", None),
             "organization_name": getattr(organization, "name", ""),
             "removed_by_id": getattr(removed_by, "id", None),
-            "link_label": pgettext("notifications.event", "Open Join organization section"),
+            "link_label": pgettext("notifications.event", "Open notifications"),
             "removal_reason": reason.strip(),
         },
     )
@@ -238,10 +237,11 @@ def notify_user_invited_to_organization(
     """
     actor_name = _display_name(invited_by) if invited_by is not None else ""
     role_label = (role_label or "").strip() or pgettext("membership_request.role", "Member").lower()
+    # URL auditi A7 (2026-10-10): dəvət «Bildirişlər» bölməsində qəbul / rədd olunur.
     message = pgettext(
         "notifications.event",
-        '{organization} sent you an invitation as {role_label}. You can accept the invitation from the "Join '
-        'organization" section in your profile.',
+        "{organization} sent you an invitation as {role_label}. You can accept or decline it in the "
+        '"Notifications" section of your profile.',
     ).format(organization=organization.name, role_label=role_label)
     if actor_name:
         invited_by_text = pgettext("notifications.event", "Invited by: {actor}.").format(actor=actor_name)
@@ -253,7 +253,7 @@ def notify_user_invited_to_organization(
             organization=organization.name
         ),
         message=message,
-        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'student-organization-request'})}",
+        link=f"{reverse('accounts:profile')}?{urlencode({'section': 'notifications'})}",
         notification_type=NotificationType.APPROVAL,
         metadata={
             "organization_id": getattr(organization, "id", None),

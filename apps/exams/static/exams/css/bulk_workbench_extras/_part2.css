@@ -45,7 +45,8 @@
 }
 
 /* ====================================================================== */
-/* DİL VARİANTLARI MENECERİ (exam_language_manager) — workbench üslubu     */
+/* Workbench bölmə başlığı (dil variantları səhifəsinin cədvəl/forma       */
+/* stilləri 2026-10-10 redizaynında exam_language_manager.css-ə köçdü)    */
 /* ====================================================================== */
 .wb-section-heading {
     display: flex;
@@ -59,121 +60,6 @@
 
 .wb-section-heading i {
     color: var(--primary, #4361ee);
-}
-
-.wb-info-banner {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 16px 18px;
-    margin-bottom: 24px;
-    background: #eef6ff;
-    border: 1px solid #cfe3fb;
-    border-radius: 14px;
-    color: #1e3a5f;
-    font-size: 0.9rem;
-    line-height: 1.45;
-}
-
-.wb-info-banner i {
-    color: var(--ems-primary-600);
-    font-size: 1.1rem;
-    margin-top: 2px;
-}
-
-.wb-panel {
-    background: var(--card-bg, var(--ems-neutral-0));
-    border: 1px solid var(--border, #e1e4e8);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-    margin-bottom: 24px;
-    overflow: hidden;
-}
-
-.wb-panel__head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 20px;
-    border-bottom: 1px solid #eef1f6;
-    font-weight: 800;
-    color: var(--text-dark, #2d3436);
-    background: linear-gradient(120deg, #f6f9ff 0%, var(--ems-neutral-0) 100%);
-}
-
-.wb-panel__head i {
-    color: var(--primary, #4361ee);
-}
-
-.wb-panel__body {
-    padding: 20px;
-}
-
-.wb-lang-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.wb-lang-table th {
-    text-align: left;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--text-muted, #636e72);
-    padding: 12px 20px;
-    border-bottom: 1px solid #eef1f6;
-}
-
-.wb-lang-table td {
-    padding: 14px 20px;
-    border-bottom: 1px solid #f1f3f7;
-    color: var(--text-dark, #2d3436);
-    vertical-align: middle;
-}
-
-.wb-lang-table tr:last-child td {
-    border-bottom: none;
-}
-
-.wb-lang-table__name {
-    font-weight: 700;
-}
-
-.wb-lang-table__count {
-    font-variant-numeric: tabular-nums;
-    font-weight: 700;
-    color: var(--primary, #4361ee);
-}
-
-.wb-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 11px;
-    border-radius: 999px;
-    font-size: 0.74rem;
-    font-weight: 700;
-}
-
-.wb-status--active {
-    background: var(--ems-success-100);
-    color: #15803d;
-}
-
-.wb-status--inactive {
-    background: #f1f3f7;
-    color: var(--ems-neutral-500);
-}
-
-.wb-mini-form {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr auto;
-    gap: 14px;
-    align-items: end;
-}
-
-.wb-mini-form .qb-field {
-    margin: 0;
 }
 
 /* Bankdakı mövcud suallar siyahısı */
@@ -253,28 +139,7 @@
 }
 
 @media (max-width: 720px) {
-    .qb-form,
-    .wb-mini-form {
+    .qb-form {
         grid-template-columns: 1fr;
     }
 }
-
-
-/* ═══ Faza 6.4 Sprint-4 (2026-07-02): exam_language_manager inline → klass ═══ */
-.elm-wrapper-flush { padding-bottom: 0; }
-.wb-panel__body--flush { padding: 0; }
-
-/* RESP 2026-09-30: «Mövcud dillər» cədvəli 320–390px-də `.wb-panel`-in
-   `overflow: hidden`-ı ilə kəsilirdi — «Əməliyyat» sütunu (Aktiv/Deaktiv et)
-   tamamilə görünmürdü. Dar ekranda xanalar sıxılır, sığmasa cədvəl öz
-   gövdəsinin içində üfüqi sürüşür. */
-.wb-panel__body--flush { overflow-x: auto; }
-@media (max-width: 576px) {
-    .wb-lang-table th,
-    .wb-lang-table td { padding-left: 12px; padding-right: 12px; }
-}
-.elm-cell-right { text-align: right; }
-.elm-inline-form { display: inline; }
-.qbx-btn--compact { padding: 7px 14px; }
-.qb-empty--padded { padding: 32px; }
-.qb-field--end { justify-content: flex-end; }

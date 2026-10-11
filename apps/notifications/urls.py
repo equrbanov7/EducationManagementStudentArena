@@ -4,18 +4,14 @@ from . import views
 
 app_name = "notifications"
 
+# WP9a (2026-10-10): müstəqil qutu/detal səhifələri (`""`, `<pk>/`), `<pk>/unread/` və
+# `unread-count/` silindi — bildiriş qutusu kabinet bölməsidir (`?section=notifications`)
+# və yalnız aşağıdakı əməliyyat uclarını işlədir.
 urlpatterns = [
-    # Inbox
-    path("", views.notification_list, name="notification_list"),
-    # Detail
-    path("<int:pk>/", views.notification_detail, name="notification_detail"),
-    # Read / Unread
+    # Read
     path("<int:pk>/read/", views.notification_mark_read, name="notification_mark_read"),
-    path("<int:pk>/unread/", views.notification_mark_unread, name="notification_mark_unread"),
     path("read-all/", views.notification_mark_all_read, name="notification_mark_all_read"),
     # Delete
     path("<int:pk>/delete/", views.notification_delete, name="notification_delete"),
     path("bulk-delete/", views.notification_bulk_delete, name="notification_bulk_delete"),
-    # Unread count (AJAX)
-    path("unread-count/", views.unread_count, name="unread_count"),
 ]

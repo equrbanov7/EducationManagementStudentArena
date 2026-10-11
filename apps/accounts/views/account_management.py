@@ -1,11 +1,15 @@
 """
-Account management views: account deletion and superadmin user management.
+Account management views: superadmin user management.
+
+URL auditi B6 (2026-10-10): özünü silmə (``accounts/delete-account/``) marşrutu və
+view-u SİLİNDİ — UI yox idi, hesablar universitet tərəfindən idarə olunur. Silmə
+servisi (``services.account_deletion``) RİM / superadmin üçün qalır.
 """
 
 import logging
 
 from django.contrib import messages
-from django.contrib.auth import get_user_model, logout
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator
@@ -14,7 +18,6 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.views.decorators.http import require_POST
 
 from core.search_text import tolerant_q
 from core.staff_position import resolve_position_label
@@ -301,37 +304,6 @@ def build_superadmin_user_management_context(request, *, base_url=None, include_
         "deleted_count": deleted_count,
         "embedded_in_profile": include_section,
     }
-
-
-@login_required
-@require_POST
-def delete_account(request):
-    """
-    Handle account deletion request from the profile page.
-    Requires password confirmation via POST data.
-    """
-    password = (request.POST.get("password") or "").strip()
-
-    if not password:
-        messages.error(request, _("delete_account_password_required"))
-        return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-
-    try:
-        soft_delete_account(request.user, request=request, password=password)
-    except AccountDeletionError as exc:
-        error_key = str(exc)
-        if error_key == "password_incorrect":
-            messages.error(request, _("delete_account_password_incorrect"))
-        elif error_key == "last_org_admin":
-            messages.error(request, _("delete_account_last_admin"))
-        else:
-            messages.error(request, _("delete_account_error"))
-        return redirect(f"{reverse('accounts:profile')}?section=profile-info")
-
-    # Log the user out after deletion
-    logout(request)
-    messages.success(request, _("delete_account_success"))
-    return redirect(reverse("accounts:login"))
 
 
 @login_required

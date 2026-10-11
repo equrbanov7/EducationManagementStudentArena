@@ -1,7 +1,18 @@
 {% load i18n %}
+{% comment %}Midterm rejimi (2026/2027+) giriş balının hissələri — `parts` = entry_standard.EntryParts.
+Tavanlar hesabın İŞLƏTDİYİ qaydadan gəlir (sahib 2026-10-10): Midterm /30, sərbəst iş söndürülübsə nişan yoxdur
+(açıqdırsa Midterm /20 + Sərbəst iş /10); fəndə seminar VƏ laboratoriya varsa aktivlik 5 + 5 bölgüsü ilə.{% endcomment %}
 <div class="d-flex flex-wrap gap-2" data-entry-standard>
-    <span class="ems-badge ems-badge--neutral">{% trans "Davamiyyət" context "registrar.journal" %}: <strong>{{ parts.attendance|floatformat:"-2" }}</strong>/10</span>
-    <span class="ems-badge ems-badge--neutral" title="{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/10</span>
-    <span class="ems-badge ems-badge--neutral">{% trans "Midterm" context "registrar.journal" %}: <strong>{{ parts.midterm|floatformat:"-2" }}</strong>/20</span>
-    <span class="ems-badge ems-badge--neutral">{% trans "Sərbəst iş" context "registrar.journal" %}: <strong>{{ parts.selfwork|floatformat:"-2" }}</strong>/10</span>
+    <span class="ems-badge ems-badge--neutral">{% trans "Davamiyyət" context "registrar.journal" %}: <strong>{{ parts.attendance|floatformat:"-2" }}</strong>/{{ parts.attendance_max|floatformat:"-2" }}</span>
+    {% with detail=parts.activity_detail %}
+    {% if detail.split %}
+    <span class="ems-badge ems-badge--neutral" title="{% trans 'Fəndə seminar və laboratoriya var: hər növün ədədi ortasının yarısı toplanır (5 + 5); balı olmayan növ 0 sayılır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }} ({% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }})</span>
+    {% else %}
+    <span class="ems-badge ems-badge--neutral" title="{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }}</span>
+    {% endif %}
+    {% endwith %}
+    <span class="ems-badge ems-badge--neutral">{% trans "Midterm" context "registrar.journal" %}: <strong>{{ parts.midterm|floatformat:"-2" }}</strong>/{{ parts.midterm_max|floatformat:"-2" }}</span>
+    {% if parts.selfwork_active %}
+    <span class="ems-badge ems-badge--neutral">{% trans "Sərbəst iş" context "registrar.journal" %}: <strong>{{ parts.selfwork|floatformat:"-2" }}</strong>/{{ parts.selfwork_max|floatformat:"-2" }}</span>
+    {% endif %}
 </div>

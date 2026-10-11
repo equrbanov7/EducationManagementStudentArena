@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {% comment %}«Sillabus və sual» qrupu — fənnin MƏZMUN sənədləri və onların təsdiq
 növbələri: sillabus (yazan + təsdiqləyən) və sual dəstləri (bank, göndəriş,
 kafedra təsdiqi).
@@ -10,7 +10,7 @@ DƏYİŞMƏYİB. 2026-09-25: müəllimin də gördüyü üç bənd `sidebar/item
 <li class="sidebar-menu-group" data-sidebar-group="syllabus">
     <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|syllabus-list|syllabus-editor|syllabus-review|question-bank|question-submissions|question-chair-review|" %} open{% endif %}>
         {% trans "Sillabus və sual" context "profile.sidebar" as group_label %}
-        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="fa-file-lines" %}
+        {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="file-text" %}
         <ul class="sidebar-menu-group-items">
             {% include "accounts/profile/sidebar/items/_syllabus_list.html" %}
             {% comment %}Sillabus təsdiqi — AYRI icazə açarı (`syllabus.review`): kafedra
@@ -22,7 +22,7 @@ DƏYİŞMƏYİB. 2026-09-25: müəllimin də gördüyü üç bənd `sidebar/item
                    data-title="{% trans 'Sillabus təsdiqi' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'syllabus-review' %}active{% endif %}">
-                    <i class="fas fa-clipboard-check sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "file-check" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sillabus təsdiqi" context "profile.sidebar" %}</span>
                 </a>
             </li>
@@ -38,7 +38,7 @@ DƏYİŞMƏYİB. 2026-09-25: müəllimin də gördüyü üç bənd `sidebar/item
                    data-title="{% trans 'Sual təsdiqi' context 'profile.sidebar' %}"
                    data-source-url="{{ profile_base_url }}"
                    class="sidebar-menu-link js-profile-section-link {% if active_section == 'question-chair-review' %}active{% endif %}">
-                    <i class="fas fa-file-circle-check sidebar-menu-icon" aria-hidden="true"></i>
+                    {% nav_icon "list-checks" "sidebar-menu-icon" %}
                     <span class="sidebar-menu-text">{% trans "Sual təsdiqi" context "profile.sidebar" %}</span>
                     <span class="sidebar-menu-badge sidebar-menu-badge--warning" data-badge-key="question_chair_pending_count">{% if question_chair_pending_count %}{{ question_chair_pending_count }}{% endif %}</span>
                 </a>

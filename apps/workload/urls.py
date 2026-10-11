@@ -14,7 +14,7 @@ app_name = "workload"
 urlpatterns = [
     # Oxu
     path("setirler/", views.rows, name="rows"),
-    path("kafedralar/", views.chairs, name="chairs"),
+    # WP9a (2026-10-10): `kafedralar/` silindi — kafedra siyahısı bölmə konteksti ilə gəlir (public.py).
     path("muellimler/", views.teachers, name="teachers"),
     path("secimler/", views.options, name="options"),
     path("tedris-plani/", views.curriculum, name="curriculum"),

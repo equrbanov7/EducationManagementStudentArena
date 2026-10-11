@@ -104,7 +104,8 @@ def _component_breakdown(batch, enrollment, *, midterm=False, selfwork_slots=Non
     """``gradebook.get_component_breakdown``-un toplu güzgüsü (eyni forma, sorğusuz).
 
     ``midterm`` (2026/2027-dən): köhnə kodun bu dövrdə yaratdığı BALSIZ «Kollokvium N»
-    qalıqları çip kimi göstərilmir — tələbə yalnız «Midterm …/20» görür.
+    qalıqları çip kimi göstərilmir — tələbə yalnız «Midterm …/30» görür; sərbəst iş RİM-də
+    söndürülübsə (sahib 2026-10-10) onun çipi də yoxdur (bala düşmür).
 
     SƏRBƏST İŞ çipi (2026-09-25): giriş balına DÜŞƏN bal (``selfwork_points`` cəmi,
     komponent tavanı ilə — ``entry_score_for`` güzgüsü); canlı bal yoxdursa köçürülmüş
@@ -121,6 +122,8 @@ def _component_breakdown(batch, enrollment, *, midterm=False, selfwork_slots=Non
             for c in components
             if c.kind != ComponentKind.KOLLOKVIUM or c.name.strip().lower() == keep or score_by.get(c.id) is not None
         ]
+    if batch.midterm_by_offering.get(enrollment.offering_id) and not (batch.flags is None or batch.flags.selfwork):
+        components = [c for c in components if c.kind != ComponentKind.SELF_WORK]
     chips = []
     for c in components:
         chip = {"name": c.name, "score": score_by.get(c.id), "max": c.max_score}
@@ -347,7 +350,7 @@ def build_section(*, request, organization, record, period, semester_number) -> 
         "credit_summary": data["credit_summary"],
         # Qiymətləndirmə çəkiləri — universitet SİYASƏTİ ilə kilidli (README §8/4:
         # davamiyyət 10 · sərbəst iş 10 · cari 30 · yekun 50). Kodda hardcode YOX.
-        "assessment_weights": assessment_weights_view(organization),
+        "assessment_weights": assessment_weights_view(organization, period=period),
         "kpis": kpis,
         "kpi_tiles": kpi_tiles(kpis) if data["subjects"] else [],
         "legend": LEGEND,

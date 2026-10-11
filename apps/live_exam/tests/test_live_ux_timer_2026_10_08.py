@@ -62,7 +62,7 @@ class QuestionTimerRegressionTest(TestCase):
     def test_empty_exam_default_no_longer_falls_back_to_15_seconds(self):
         """Boş imtahan vaxtı + aparıcı seçimi yoxdur → 30 s (əvvəl 15 s)."""
         self.assertIsNone(self.exam.default_question_time_seconds)
-        self.assertEqual(self._post("host_start_game", {"question_count": "2"}).status_code, 200)
+        self.assertEqual(self._post("start_game", {"question_count": "2"}).status_code, 200)
         self.assertEqual(answer_window_seconds(self.session), 30)
         self.assertEqual(self._state()["question"]["time_limit"], 30)
 
@@ -71,7 +71,7 @@ class QuestionTimerRegressionTest(TestCase):
         response = self._save_time(45)
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()["settings"]["question_time_seconds"], 45)
-        self.assertEqual(self._post("host_start_game", {"question_count": "2"}).status_code, 200)
+        self.assertEqual(self._post("start_game", {"question_count": "2"}).status_code, 200)
         self.assertEqual(answer_window_seconds(self.session), 45)
         self.assertEqual(self._state()["question"]["time_limit"], 45)
 
@@ -91,7 +91,7 @@ class QuestionTimerRegressionTest(TestCase):
         self.assertEqual(question_time_limit(session, self.q1), 15)
 
     def test_change_between_questions_applies_to_next_question_only(self):
-        self.assertEqual(self._post("host_start_game", {"question_count": "2"}).status_code, 200)
+        self.assertEqual(self._post("start_game", {"question_count": "2"}).status_code, 200)
         self.assertEqual(answer_window_seconds(self.session), 30)
         ends_before = LiveSession.objects.get(pk=self.session.pk).question_ends_at
 
@@ -101,13 +101,13 @@ class QuestionTimerRegressionTest(TestCase):
         self.assertEqual(self._state()["question"]["time_limit"], 30)
 
         self.assertEqual(self._post("host_reveal").status_code, 200)
-        self.assertEqual(self._post("host_next_question").status_code, 200)
+        self.assertEqual(self._post("next_question").status_code, 200)
         self.assertEqual(answer_window_seconds(self.session), 90)
         self.assertEqual(self._state()["question"]["time_limit"], 90)
 
     def test_skip_intro_keeps_the_frozen_time(self):
         self._save_time(20)
-        self.assertEqual(self._post("host_start_game", {"question_count": "2"}).status_code, 200)
+        self.assertEqual(self._post("start_game", {"question_count": "2"}).status_code, 200)
         self._save_time(120)  # sual gedərkən dəyişir
         self.assertEqual(self._post("host_skip_question_intro").status_code, 200)
         session = LiveSession.objects.get(pk=self.session.pk)
@@ -129,7 +129,8 @@ class QuestionTimerRegressionTest(TestCase):
     def test_host_pages_ship_the_time_control(self):
         self.exam.default_question_time_seconds = 40
         self.exam.save(update_fields=["default_question_time_seconds"])
-        for name, query in (("host_lobby", ""), ("host_presentation", "?controls=1")):
+        # WP9a (2026-10-10): köhnə `host_lobby` konsolu silindi — idarə yalnız təqdimat `?controls=1`-dədir.
+        for name, query in (("host_presentation", "?controls=1"),):
             response = self.client.get(reverse(f"liveExam:{name}", kwargs={"pin": self.session.pin}) + query)
             self.assertEqual(response.status_code, 200)
             html = response.content.decode()

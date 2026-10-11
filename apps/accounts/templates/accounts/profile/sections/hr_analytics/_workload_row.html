@@ -1,0 +1,12 @@
+<tr{% if row_class %} class="{{ row_class }}"{% endif %}>
+    <th scope="row"{% if not row_class %} class="hr-table__chair"{% endif %}>{{ label }}</th>
+    <td class="ems-table__num">{{ m.teachers }}</td>
+    <td class="ems-table__num">{{ m.with_load }}</td>
+    <td class="ems-table__num">{{ m.norm }}</td>
+    <td class="ems-table__num">{{ m.planned }}</td>
+    <td class="hr-table__meter">
+        <span class="ems-bar hr-meter" aria-hidden="true"><span class="ems-bar__fill {{ m.width }}{% if m.fill > 120 %} ems-bar__fill--danger{% elif m.fill > 100 %} ems-bar__fill--warning{% elif m.fill >= 70 %} ems-bar__fill--success{% endif %}"></span></span>
+        <span class="hr-meter__value">{{ m.fill }}%</span>
+    </td>
+    {% for value in m.bands %}<td class="ems-table__num">{{ value }}</td>{% endfor %}
+</tr>

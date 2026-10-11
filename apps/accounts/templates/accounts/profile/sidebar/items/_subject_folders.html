@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Fənn qovluqları» — müəllimin fənn qovluqları (apps.subject_folder). #}
 {% if "subject-folders" in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'Fənn qovluqları' context 'profile.sidebar' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'subject-folders' %}active{% endif %}">
-        <i class="fas fa-folder-tree sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "folders" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "Fənn qovluqları" context "profile.sidebar" %}</span>
     </a>
 </li>

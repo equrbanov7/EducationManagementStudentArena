@@ -20,11 +20,7 @@ from apps.exams.services.review_visibility import attempt_review_window_locked a
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
 )
-from apps.exams.views.shared.tenant import (
-    get_result_viewable_exam_or_404,
-    get_teacher_exam_or_404,
-    tenant_scoped_exams,
-)
+from apps.exams.views.shared.tenant import get_result_viewable_exam_or_404, get_teacher_exam_or_404
 from core.permissions import request_has_permission
 from core.search_text import tolerant_match
 
@@ -364,59 +360,3 @@ def ai_grade_answer(request, slug, attempt_id):
         paint_image=getattr(answer, "paint_image", None),
     )
     return JsonResponse(result)
-
-
-@login_required
-def teacher_pending_attempts(request):
-    """
-    Müəllimin bütün imtahanlarından yığılmış,
-    yoxlanılmağı gözləyən (Pending) işlərin siyahısı.
-    """
-    _ensure_teacher(request.user)
-
-    teacher_exams = tenant_scoped_exams(request, request.user.exams.all())
-
-    # Yoxlanılacaq işləri tapırıq
-    pending_attempts = (
-        ExamAttempt.objects.filter(
-            exam__in=teacher_exams,  # Bu müəllimin aktiv tenant imtahanları
-            status__in=["submitted", "expired"],  # Bitmiş imtahanlar
-            checked_by_teacher=False,  # Hələ yoxlanmayıb
-        )
-        .exclude(exam__exam_type="test")  # Testləri çıxarırıq
-        # EXAMQA 2026-10-01: ad-görünürlüyü qərarı ``exam.organization``-a baxır (N+1).
-        .select_related("user", "exam", "exam__organization")
-        .order_by("finished_at")
-    )
-
-    now = timezone.now()
-    attempts_data = []
-
-    for att in pending_attempts:
-        anonymous_name = _build_anonymous_name(attempt_id=att.id, user_id=att.user_id, exam_id=att.exam_id)
-
-        can_view_name, seconds_remaining = _resolve_attempt_name_visibility(att, current_time=now)
-
-        attempts_data.append(
-            {
-                "attempt": att,
-                "anonymous_name": anonymous_name,
-                "real_name": att.user.get_full_name() or att.user.username,
-                "can_view_name": can_view_name,
-                "seconds_remaining": seconds_remaining,
-            }
-        )
-
-    # ═══════════════════════════════════════════════════════════════════
-    # ✅ YENİ: Tip üzrə saylar (Yazılı və Praktiki)
-    # ═══════════════════════════════════════════════════════════════════
-    essay_count = sum(1 for att in pending_attempts if att.exam.exam_type == "written")
-    practical_count = sum(1 for att in pending_attempts if att.exam.exam_type == "coding")
-
-    context = {
-        "pending_attempts": pending_attempts,
-        "attempts_data": attempts_data,  # ✅ YENİ - anonim adlar
-        "essay_count": essay_count,  # ✅ YENİ - yazılı say
-        "practical_count": practical_count,  # ✅ YENİ - praktiki say
-    }
-    return render(request, "exams/teacher/teacher_pending_attempts.html", context)

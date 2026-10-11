@@ -5,7 +5,7 @@ Tətbiq nöqtələri:
 * profil «Məlumatları redaktə et» (``profile_form=edit-profile``) — ad / soyad;
 * RİM şəxsi məlumat redaktəsi (``accounts:rim_action`` → ``edit``) — ad / soyad / ata adı;
 * RİM «Yeni hesab» (``services.rim.create.create_account``) — ad / soyad / ata adı;
-* açıq qeydiyyat (``accounts:register``, prod-da söndürülüb) — ad / soyad.
+* (açıq qeydiyyat ``accounts:register`` sahib 2026-10-10 qərarı ilə SİLİNDİ — testi də.)
 
 Hər biri: rədd (söz təkrarlanmır), heç nə saxlanmır, audit qeydi (kim, IP, sahə).
 DƏYİŞMƏYƏN köhnə ad yenidən yoxlanmır — idxal olunmuş ad başqa sahənin
@@ -20,14 +20,10 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import UserProfile
-from apps.accounts.services import get_pending_registration
 from apps.accounts.services.rim import create as rim_create
 from apps.audit.models import AuditLog
-from apps.organizations.models import Country
 from core import rate_limit as rate_limit_module
-from core.constants import OrganizationType
 from core.moderation.enforcement import PROFANITY_RESOURCE_TYPE, rejection_message
-from core.roles import ProfileRole
 
 from .test_rim_account_create import RimCreateBase, base_payload
 from .test_rim_center import RimCenterTestBase
@@ -136,46 +132,3 @@ class RimCreateModerationTest(RimCreateBase):
 
     def test_payload_helper_is_clean(self):
         self.assertEqual(base_payload()["first_name"], "Nigar")
-
-
-class RegisterModerationTest(TestCase):
-    def setUp(self):
-        rate_limit_module._RATE_LIMIT_FALLBACK_CACHE.clear()
-        Country.objects.get_or_create(code="AZ", defaults={"name": "Azerbaijan", "is_active": True})
-        self.client = Client(REMOTE_ADDR=IP)
-
-    def _payload(self, **overrides):
-        payload = {
-            "username": "modnewuser",
-            "email": "modnewuser@example.com",
-            "password": "StrongPass123!",
-            "password2": "StrongPass123!",
-            "first_name": "Aysel",
-            "last_name": "Quliyeva",
-            "country": "AZ",
-            "organization_type": OrganizationType.INDIVIDUAL,
-            "join_organization": "",
-            "institution": "",
-            "institution_not_listed_name": "",
-            "organization_identifier": "ORG-001",
-            "organization_license_identifier": "LIC-001",
-            "initial_role": ProfileRole.MEMBER,
-            "accept_privacy_policy": "on",
-        }
-        payload.update(overrides)
-        return payload
-
-    def test_profane_signup_name_is_a_form_error_and_is_logged_anonymously(self):
-        response = self.client.post(reverse("accounts:register"), self._payload(last_name="Orospuoğlu"))
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(rejection_message(), response.context["form"].errors.get("last_name", []))
-        self.assertIsNone(get_pending_registration("modnewuser@example.com"))
-        row = _rows().get()
-        self.assertIsNone(row.user_id)
-        self.assertEqual(row.ip_address, IP)
-        self.assertEqual(row.resource_repr, "accounts.register.last_name")
-
-    def test_real_signup_name_passes_the_filter(self):
-        response = self.client.post(reverse("accounts:register"), self._payload())
-        self.assertRedirects(response, reverse("accounts:verify_code"))
-        self.assertFalse(_rows().exists())

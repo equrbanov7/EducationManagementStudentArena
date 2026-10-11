@@ -1,0 +1,9 @@
+{# POST-dan sonra səhifəyə eyni süzgəc/səhifə/naviqasiya ilə qayıtmaq üçün gizli sahələr (view: _bank_post_redirect_url). #}
+<input type="hidden" name="q" value="{{ search_query }}">
+<input type="hidden" name="status" value="{{ status_filter }}">
+<input type="hidden" name="sort" value="{{ sort_filter }}">
+<input type="hidden" name="flag" value="{{ active_flag }}">
+{% if qm_show_language_filter and not skip_language %}<input type="hidden" name="language" value="{{ language_filter }}">{% endif %}
+<input type="hidden" name="page" value="{{ page_obj.number }}">
+{% if navigation_from_section %}<input type="hidden" name="from_section" value="{{ navigation_from_section }}">{% endif %}
+{% if navigation_return_to %}<input type="hidden" name="return_to" value="{{ navigation_return_to }}">{% endif %}

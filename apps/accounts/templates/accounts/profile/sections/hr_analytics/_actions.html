@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if hr.view_as %}
+<span class="ems-badge ems-badge--muted" title="{% trans '«Başqasının adından» rejimində ixrac bağlıdır' context 'accounts.hr_analytics' %}">
+    <i class="fas fa-eye" aria-hidden="true"></i> {% trans "Yalnız baxış" context "accounts.hr_analytics" %}
+</span>
+{% else %}
+<a class="ems-btn ems-btn--primary" href="{{ hr.export_url }}" data-force-navigation="true" download>
+    <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə ixrac" context "accounts.hr_analytics" %}
+</a>
+{% endif %}

@@ -34,6 +34,7 @@ from django.utils.translation import pgettext
 
 from ..constants import EventKind, JournalSyncStatus, SubmissionStatus, TaskKind
 from ..models import Submission
+from . import selfwork_rule
 from .events import record_event
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,12 @@ def _apply(submission, status, message, *, synced: bool = False) -> None:
 
 
 def is_syncable(submission) -> bool:
-    return submission.kind == TaskKind.SELFWORK and submission.status == SubmissionStatus.ACCEPTED
+    """Qəbul edilmiş sərbəst iş — və açılışın dövründə sərbəst iş ləğv olunmayıbsa (sahib 2026-10-10)."""
+    return (
+        submission.kind == TaskKind.SELFWORK
+        and submission.status == SubmissionStatus.ACCEPTED
+        and selfwork_rule.offering_active(submission.assignment.offering)
+    )
 
 
 def sync_submission_to_journal(submission, *, hook=None) -> dict:
@@ -222,6 +228,11 @@ def retry_pending(*, organization_id=None, include_blocked: bool = False, limit:
     ).select_related("task", "assignment__offering", "enrollment", "reviewed_by")
     if organization_id is not None:
         rows = rows.filter(organization_id=organization_id)
+    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrün balları jurnala ötürülmür — növbədən çıxarılır (status
+    # dəyişmir, tənzimləmə yandırılanda yenə götürülür). Süzgəc SQL-dədir ki, onlar `limit`-i tutub aclıq yaratmasın.
+    inactive = selfwork_rule.inactive_offering_ids(rows.values_list("assignment__offering_id", flat=True).distinct())
+    if inactive:
+        rows = rows.exclude(assignment__offering_id__in=inactive)
     # Fon işi tutumu 2026-10-07: əvvəl yalnız `reviewed_at` sırası idi — hook-u hər dəfə istisna
     # atan (pending qalan) ən köhnə `limit` sətir hər 10 dəqiqədə yenidən götürülür və yeni
     # pending ballar HEÇ VAXT növbəyə düşmürdü (aclıq). İndi ən az cəhd edilmişlər əvvəl.

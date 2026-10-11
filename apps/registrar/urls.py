@@ -7,7 +7,6 @@ onun yerini kabinet bölməsi tutdu (`accounts:profile?section=registrar-catalog
 from django.urls import path
 
 from . import (
-    analytics_views,
     catalog_actions,
     correction_views,
     curriculum_actions,
@@ -31,8 +30,8 @@ urlpatterns = [
     path("", views.journal_list, name="journal_list"),
     # Admin jurnal düzəlişi (üzrlü qayıb / sənədli korreksiya) — literal prefiks,
     # uuid catch-all-dan əvvəl.
-    path("duzelis/", correction_views.correction_offering_list, name="correction_list"),
-    path("duzelis/<uuid:offering_id>/", correction_views.correction_journal, name="correction_journal"),
+    # URL auditi A11 (2026-10-10): köhnə `duzelis/` və `duzelis/<uuid>/` yönləndirmə şimləri
+    # silindi — düzəliş rejimi `journal_detail?correct=1`-dir; JS-in işlətdiyi tətbiq/sil qalır.
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
     # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
@@ -49,20 +48,21 @@ urlpatterns = [
         individual_plan_views.group_individual_plan,
         name="group_individual_plan",
     ),
-    path("analitika/", analytics_views.analytics_dashboard, name="analytics"),
+    # URL auditi A11 (2026-10-10): `analitika/` səhifəsi silindi — kabinet `?section=analytics`.
     # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
     path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
-    path("teqvim/", schedule_views.calendar_view, name="calendar"),
     path("cedvel/", schedule_views.schedule_view, name="schedule"),
-    path("cedvel/export.ics", pdf_views.schedule_ics, name="schedule_ics"),
-    path("cedvel/slot/<uuid:slot_id>/sil/", schedule_views.schedule_slot_delete, name="schedule_slot_delete"),
+    # URL auditi A11 (2026-10-10): `teqvim/` (kabinet `?section=academic-calendar`),
+    # `cedvel/export.ics` (sahib: iCal ləğv — jurnal yekunu jurnalın «Export» xlsx-i ilə) və
+    # `cedvel/slot/<uuid>/sil/` (slot redaktəsi `accounts/schedule-manage/editor/`-dədir) silindi.
     # Rəsmi transkript PDF-i (U9) — köhnə «Registrar idarəetməsi» konsolu
     # silinəndə (2026-09-10) bu səth TOXUNULMAZ qaldı: URL adı
     # (`student_transcript_pdf`), icazəsi və görünüşü eynidir, yalnız yol
     # `idareetme/` prefiksindən çıxarıldı. Literal prefiks — uuid catch-all-dan
     # ƏVVƏL durmalıdır.
     path("telebe/<uuid:pk>/transkript.pdf", pdf_views.student_transcript_pdf, name="student_transcript_pdf"),
+    # Rubrik qiymətləndirməsi `REGISTRAR_RUBRICS_ENABLED` söndürülü ikən 404 verir (sahib 2026-10-10).
     path("<uuid:offering_id>/rubrik/<uuid:component_id>/", views.rubric_grade_view, name="rubric_grade"),
     path("<uuid:offering_id>/export.xlsx", pdf_views.journal_xlsx, name="journal_xlsx"),
     # «Sillabusa bax» — jurnal (müəllim) və kabinet (tələbə) üçün ORTAQ oxu səthi.

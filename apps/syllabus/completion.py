@@ -1,7 +1,8 @@
 """Tamamlanma — BİZNES QAYDASINA görə, doldurulmuş input sayına görə YOX.
 
 README §3.2-dəki 8 qayda bölməsi (``RULE_SECTIONS``) ayrı-ayrılıqda «ödənilib /
-ödənilməyib» kimi qiymətləndirilir; faiz = ödənilən bölmə / 8. Boş qalmış
+ödənilməyib» kimi qiymətləndirilir; faiz = ödənilən bölmə / 8 (sərbəst işi söndürülmüş
+qaydada — sahib 2026-10-10 — ``self`` daxil deyil: / 7). Boş qalmış
 opsional sahə faizi aşağı SALMIR, yarımçıq məcburi qayda isə bölməni TAM
 ödənilməmiş sayır — «10 sahədən 7-si doldurulub = 70%» sayğacı QƏSDƏN yoxdur.
 
@@ -32,6 +33,7 @@ from .constants import (
     SELFWORK_OPTIONS,
     SectionKey,
 )
+from .rules import SyllabusRule
 from .week_plan import expected_week_rows
 
 
@@ -218,7 +220,7 @@ def _check_self(data, issues) -> bool:
     return True
 
 
-def _check_assess(data, weights, issues) -> bool:
+def _check_assess(data, weights, issues, accepted=()) -> bool:
     """Qiymətləndirmə çəkiləri — README §8/4: cəm HƏMİŞƏ 100.
 
     Davamiyyət / sərbəst iş / yekun imtahan universitet SİYASƏTİ ilə kilidlidir
@@ -229,6 +231,10 @@ def _check_assess(data, weights, issues) -> bool:
     Qayda domen qatındadır, redaktor slaydında yox: HTTP səthi
     (``syllabus_section_save``) ixtiyari JSON qəbul edir, yəni struktur
     invariantı yalnız burada və ``services.drafts.save_section``-da qorunur.
+
+    ``accepted`` — standartdan əlavə qəbul olunan ``(midterm, project)`` cütləri
+    (``policy.standard_splits``): sahib 2026-10-10 qaydası standartı dəyişəndə (midterm
+    20 → 30) əvvəlki standartla saxlanmış bölgü yalnız buna görə «natamam» sayılmır.
     """
     from .policy import standard_midterm, standard_project
 
@@ -241,7 +247,7 @@ def _check_assess(data, weights, issues) -> bool:
     # saxlanan dəyər standarta bərabər deyilsə bölmə tamamlanmamış sayılır
     # (növbəti autosave-də `save_section` onu standarta gətirir).
     need_midterm, need_project = standard_midterm(weights), standard_project(weights)
-    if midterm != need_midterm or project != need_project:
+    if (midterm, project) != (need_midterm, need_project) and (midterm, project) not in accepted:
         issues.append(
             Issue(
                 SectionKey.ASSESS.value,
@@ -272,7 +278,14 @@ def _check_lit(data, issues) -> bool:
     return ok
 
 
-def evaluate(section_data: dict, plan_hours: dict | None = None, assessment: dict | None = None) -> CompletionReport:
+def evaluate(
+    section_data: dict,
+    plan_hours: dict | None = None,
+    assessment: dict | None = None,
+    *,
+    selfwork: bool = True,
+    accepted_splits=(),
+) -> CompletionReport:
     """Bölmə məzmunundan tamamlanma hesabatı qurur.
 
     ``section_data`` — ``{section_id: data}`` xəritəsi (``SyllabusSection.data``).
@@ -284,10 +297,17 @@ def evaluate(section_data: dict, plan_hours: dict | None = None, assessment: dic
     ``assess`` bölməsi ARTIQ AVTOMATİK ÖDƏNİLMİŞ SAYILMIR (2026-09-03): kilidli
     çəkilər müəllimə açıq deyil, amma qalan ``flex`` balın TAM bölünməsi məhz
     müəllimin işidir və README §8/4 cəmi 100 tələb edir.
+
+    ``selfwork`` — sərbəst iş bölməsi qaydaya daxildirmi. Sahib 2026-10-10: yeni qayda
+    dövrlərində sərbəst iş söndürüləndə ``self`` yoxlanmır və faizə daxil deyil (7 bölmə),
+    bölmənin datası isə toxunulmur. Defolt ``True`` — tam kataloq; semestri bilən çağıran
+    ``SyllabusRule.selfwork`` ötürür (``services.drafts.recompute_completion``).
+    ``accepted_splits`` — :func:`_check_assess`-ə ötürülür.
     """
     from .policy import assessment_weights
 
-    weights = assessment or assessment_weights(None)
+    weights = assessment or assessment_weights(None, selfwork=selfwork)
+    sections = SyllabusRule(selfwork=selfwork).rule_sections
     data = {key: (section_data.get(key) or {}) for key in RULE_SECTIONS}
     issues: list = []
     results = {
@@ -296,12 +316,13 @@ def evaluate(section_data: dict, plan_hours: dict | None = None, assessment: dic
         SectionKey.OUT.value: _check_out(data[SectionKey.OUT], data[SectionKey.WEEK], issues),
         SectionKey.WEEK.value: _check_week(data[SectionKey.WEEK], plan_hours, issues),
         SectionKey.METHOD.value: _check_method(data[SectionKey.METHOD], issues),
-        SectionKey.ASSESS.value: _check_assess(data[SectionKey.ASSESS], weights, issues),
-        SectionKey.SELF.value: _check_self(data[SectionKey.SELF], issues),
-        SectionKey.LIT.value: _check_lit(data[SectionKey.LIT], issues),
+        SectionKey.ASSESS.value: _check_assess(data[SectionKey.ASSESS], weights, issues, accepted_splits or ()),
     }
-    done = sum(1 for key in RULE_SECTIONS if results[key])
-    percent = round(done / len(RULE_SECTIONS) * 100)
+    if selfwork:
+        results[SectionKey.SELF.value] = _check_self(data[SectionKey.SELF], issues)
+    results[SectionKey.LIT.value] = _check_lit(data[SectionKey.LIT], issues)
+    done = sum(1 for key in sections if results[key])
+    percent = round(done / len(sections) * 100)
     return CompletionReport(sections=results, percent=percent, issues=tuple(issues))
 
 

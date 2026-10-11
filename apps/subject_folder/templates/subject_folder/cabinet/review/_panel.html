@@ -14,7 +14,8 @@ HTML fraqmenti ilə doldurur (`review.js`); qərarlar `subject_folder:action`-a 
     {% include "partials/ems_ui/_empty.html" with state_title=st_title state_icon="fa-building" %}
 {% else %}
     {% csrf_token %}
-    {% trans "Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə qaytarılır — 0 yazılmır." context "subject_folder.ui" as rv_subtitle %}
+    {# Sahib 2026-10-10: sərbəst iş ləğv olunubsa və göstəriləcək sərbəst iş yoxdursa izahda da yoxdur. #}
+    {% if rp.selfwork_visible %}{% trans "Fənn qovluqlarına göndərilən sərbəst iş və ev tapşırıqları. Sərbəst iş bal ilə qəbul olunur və bal avtomatik jurnala düşür; bəyənilməyən iş rəylə qaytarılır — 0 yazılmır." context "subject_folder.ui" as rv_subtitle %}{% else %}{% trans "Fənn qovluqlarına göndərilən ev tapşırıqları. Bəyənilməyən iş rəylə qaytarılır — 0 yazılmır." context "subject_folder.ui" as rv_subtitle %}{% endif %}
     {% include "partials/ems_ui/_content_header.html" with header_subtitle=rv_subtitle %}
     {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=rp.kpi_tiles kpi_variant="4" %}
     {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-folder-review" filter_prefix="sf_" filter_fields=rp.filter_fields filter_count_label=rp.filter_count_label filter_auto=True filter_bootstrap=True %}

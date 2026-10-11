@@ -80,7 +80,6 @@ class LiveExamViewsImportTest(TestCase):
 
         # Host views
         self.assertTrue(hasattr(views, "live_create_session_by_slug"))
-        self.assertTrue(hasattr(views, "live_host_lobby"))
         self.assertTrue(hasattr(views, "live_host_presentation"))
         self.assertTrue(hasattr(views, "host_start_game"))
         self.assertTrue(hasattr(views, "host_next_question"))
@@ -1644,12 +1643,11 @@ class URLPatternTest(TestCase):
         urls_to_test = [
             ("liveExam:create_session_slug", {"slug": self.exam.slug}),
             ("liveExam:pin_entry", {}),
-            ("liveExam:host_lobby", {"pin": self.session.pin}),
             ("liveExam:host_presentation", {"pin": self.session.pin}),
-            ("liveExam:host_start_game", {"pin": self.session.pin}),
-            ("liveExam:host_next_question", {"pin": self.session.pin}),
+            ("liveExam:start_game", {"pin": self.session.pin}),
+            ("liveExam:next_question", {"pin": self.session.pin}),
             ("liveExam:host_reveal", {"pin": self.session.pin}),
-            ("liveExam:host_finish", {"pin": self.session.pin}),
+            ("liveExam:finish_game", {"pin": self.session.pin}),
             ("liveExam:join_page", {"pin": self.session.pin}),
             ("liveExam:join_enter", {"pin": self.session.pin}),
             ("liveExam:player_screen", {"pin": self.session.pin}),
@@ -1692,16 +1690,6 @@ class LiveExamFrontendAssetHardeningTest(TestCase):
             is_active=True,
         )
         self.session = LiveSession.objects.create(exam=self.exam, host_user=self.teacher)
-
-    def test_host_lobby_uses_local_chart_bundle(self):
-        self.client.force_login(self.teacher)
-        _set_active_org(self.client, self.org)
-
-        response = self.client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin}))
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "vendor/chartjs/chart.umd.min.js")
-        self.assertNotContains(response, "cdn.jsdelivr.net/npm/chart.js")
 
     def test_host_presentation_uses_local_chart_bundle(self):
         self.client.force_login(self.teacher)
@@ -1768,17 +1756,16 @@ class HostOrgRBACTest(TestCase):
     def _host_urls(self):
         """Return all host management endpoint URLs for this session."""
         return [
-            ("liveExam:host_lobby", {"pin": self.session.pin}),
             ("liveExam:host_presentation", {"pin": self.session.pin}),
         ]
 
     def _host_post_urls(self):
         return [
-            ("liveExam:host_start_game", {"pin": self.session.pin}),
-            ("liveExam:host_next_question", {"pin": self.session.pin}),
+            ("liveExam:start_game", {"pin": self.session.pin}),
+            ("liveExam:next_question", {"pin": self.session.pin}),
             ("liveExam:host_skip_question_intro", {"pin": self.session.pin}),
             ("liveExam:host_reveal", {"pin": self.session.pin}),
-            ("liveExam:host_finish", {"pin": self.session.pin}),
+            ("liveExam:finish_game", {"pin": self.session.pin}),
             ("liveExam:host_toggle_lock", {"pin": self.session.pin}),
             ("liveExam:host_remove_player", {"pin": self.session.pin}),
             ("liveExam:host_update_settings", {"pin": self.session.pin}),
@@ -1844,7 +1831,7 @@ class HostOrgRBACTest(TestCase):
         session = LiveSession.objects.create(exam=self.exam, host_user=no_perm_user)
 
         for url_name, kwargs in [
-            ("liveExam:host_lobby", {"pin": session.pin}),
+            ("liveExam:host_presentation", {"pin": session.pin}),
         ]:
             with self.subTest(url_name=url_name):
                 response = no_perm_client.get(reverse(url_name, kwargs=kwargs))
@@ -1899,7 +1886,7 @@ class SuspendedOrgHostActionTest(TestCase):
             self.org.is_active = False
         self.org.save()
 
-        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:start_game", kwargs={"pin": self.session.pin}))
         # Blocked access may be a redirect-to-login (302) from SuspendedOrganizationMiddleware
         # or a PermissionDenied (403) from the RBAC check in the view.  Both are correct.
         self.assertIn(
@@ -2292,13 +2279,13 @@ class LiveExamHostActionHardeningTest(TestCase):
     def test_host_start_session_rejected_for_non_org_member(self):
         """An authenticated user without org membership cannot start a session."""
         self.client.force_login(self.intruder)
-        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:start_game", kwargs={"pin": self.session.pin}))
         # 403 = denied, 302 = redirect to login, 404 = session not visible to intruder (all acceptable)
         self.assertIn(response.status_code, (403, 302, 404))
 
     def test_host_finish_rejected_for_anonymous(self):
         """Anonymous users cannot finish a host session."""
-        response = self.client.post(reverse("liveExam:host_finish", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:finish_game", kwargs={"pin": self.session.pin}))
         self.assertIn(response.status_code, (302, 403))  # redirect to login or 403
 
 
@@ -2363,11 +2350,11 @@ class HostOwnershipEnforcementTest(TestCase):
     def _all_host_post_urls(self):
         pin = self.session.pin
         return [
-            ("liveExam:host_start_game", {"pin": pin}),
-            ("liveExam:host_next_question", {"pin": pin}),
+            ("liveExam:start_game", {"pin": pin}),
+            ("liveExam:next_question", {"pin": pin}),
             ("liveExam:host_skip_question_intro", {"pin": pin}),
             ("liveExam:host_reveal", {"pin": pin}),
-            ("liveExam:host_finish", {"pin": pin}),
+            ("liveExam:finish_game", {"pin": pin}),
             ("liveExam:host_toggle_lock", {"pin": pin}),
             ("liveExam:host_remove_player", {"pin": pin}),
             ("liveExam:host_update_settings", {"pin": pin}),
@@ -2386,11 +2373,6 @@ class HostOwnershipEnforcementTest(TestCase):
                     404,
                     f"{url_name}: non-host colleague must get 404 (got {response.status_code})",
                 )
-
-    def test_non_host_colleague_blocked_from_host_lobby(self):
-        """Non-host colleague cannot access the host lobby page."""
-        response = self.client.get(reverse("liveExam:host_lobby", kwargs={"pin": self.session.pin}))
-        self.assertEqual(response.status_code, 404)
 
     def test_non_host_colleague_blocked_from_host_presentation(self):
         """Non-host colleague cannot access the host presentation page."""
@@ -2452,19 +2434,19 @@ class StateTransitionGuardTest(TestCase):
     def test_start_game_rejected_when_already_in_question(self):
         """start_game from QUESTION state → 409."""
         self._set_state(LiveSession.STATE_QUESTION)
-        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:start_game", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)
 
     def test_start_game_rejected_when_in_reveal(self):
         """start_game from REVEAL state → 409."""
         self._set_state(LiveSession.STATE_REVEAL)
-        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:start_game", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)
 
     def test_start_game_rejected_when_finished(self):
         """start_game from FINISHED state → 409."""
         self._set_state(LiveSession.STATE_FINISHED)
-        response = self.client.post(reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:start_game", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)
 
     # ── host_reveal ──
@@ -2492,13 +2474,13 @@ class StateTransitionGuardTest(TestCase):
     def test_next_question_rejected_from_lobby(self):
         """next_question from LOBBY state → 409."""
         self._set_state(LiveSession.STATE_LOBBY)
-        response = self.client.post(reverse("liveExam:host_next_question", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:next_question", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)
 
     def test_next_question_rejected_from_finished(self):
         """next_question from FINISHED state → 409."""
         self._set_state(LiveSession.STATE_FINISHED)
-        response = self.client.post(reverse("liveExam:host_next_question", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:next_question", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)
 
     # ── host_finish ──
@@ -2506,5 +2488,5 @@ class StateTransitionGuardTest(TestCase):
     def test_finish_rejected_when_already_finished(self):
         """finish from FINISHED state (double-finish) → 409."""
         self._set_state(LiveSession.STATE_FINISHED)
-        response = self.client.post(reverse("liveExam:host_finish", kwargs={"pin": self.session.pin}))
+        response = self.client.post(reverse("liveExam:finish_game", kwargs={"pin": self.session.pin}))
         self.assertEqual(response.status_code, 409)

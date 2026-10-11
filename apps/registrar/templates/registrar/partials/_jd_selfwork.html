@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load journal_names i18n static %}
 {% comment %}Sərbəst iş tabı: solda nömrəli MÖVZULAR (slotlar, CARİ badge), altında "Yeni mövzu
 daxil edin" input; sağda slot sütunlu grid + canlı CƏMİ /10. Struktur sillabusdan gəlir
 (apps/registrar/selfwork_structure.py): 2 × 5 / 1 × 10 — xanada bal seçimi (1…max, «—»),
@@ -89,11 +89,11 @@ göstərilir (dəyişiklik yalnız sənədli düzəlişlə). Mövzu əlavə olun
     <form method="post" action="{% url 'registrar:journal_selfwork_action' offering.id %}" class="jd-sw2-gridcol" data-jd-draft="selfwork">
         {% csrf_token %}
         <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
-            <table class="jd2-table jd-sw2-table{% if selfwork_board.points_mode %} jd-swp-table{% endif %}">
+            <table class="jd2-table jd-sw2-table{% if selfwork_board.points_mode %} jd-swp-table{% endif %}" data-jd-hint>
                 <thead>
                     <tr>
                         <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
-                        {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %}>{{ slot.index }}{% if slot.max_points > 1 %}<span class="jd-swp-th-max">/{{ slot.max_points }}</span>{% endif %}</th>{% endfor %}
+                        {% for slot in selfwork_board.slots %}<th class="jd-sw2-th-col" {% if slot.topic %}title="{{ slot.topic.title }}"{% endif %} data-jd-hint-col="{% trans 'Sərbəst iş' context 'registrar.journal' %} {{ slot.index }}{% if slot.topic %} — {{ slot.topic.title }}{% endif %}">{{ slot.index }}{% if slot.max_points > 1 %}<span class="jd-swp-th-max">/{{ slot.max_points }}</span>{% endif %}</th>{% endfor %}
                         {% if selfwork_board.has_archive %}<th class="jd-sw2-th-arch" title="{% trans 'Köhnə sistemdən köçürülmüş sərbəst iş balı — oxu-only' context 'registrar.journal' %}">{% trans "ARXİV" context "registrar.journal" %}</th>{% endif %}
                         <th class="jd-sw2-th-sum">{% trans "CƏMİ" context "registrar.journal" %} /{{ selfwork_board.total_max }}</th>
                     </tr>
@@ -105,7 +105,7 @@ göstərilir (dəyişiklik yalnız sənədli düzəlişlə). Mövzu əlavə olun
                     "təhvil verilmiş" işarələnmir.{% endcomment %}
                     {% for row in selfwork_board.rows %}
                     <tr class="journal-row" data-jd-sw-row{% if row.archive_score is not None %} data-jd-sw-archive="{{ row.archive_score }}"{% endif %}>
-                        <td class="jd2-td-student"><span class="jd2-rowno">{{ forloop.counter }}</span> {{ row.student.get_full_name|default:row.student.username }}</td>
+                        <td class="jd2-td-student"><span class="jd2-rowno">{{ forloop.counter }}</span> <span data-jd-hint-name>{{ row.student|journal_name }}</span></td>
                         {% for cell in row.cells %}
                         <td class="jd-sw2-cell">
                             {% if not cell.topic %}
@@ -115,7 +115,7 @@ göstərilir (dəyişiklik yalnız sənədli düzəlişlə). Mövzu əlavə olun
                             <button type="button" class="sw-chip {% if cell.points is not None %}sw-chip--on{% else %}sw-chip--off{% endif %}{% if cell.from_folder %} jd-swp-folder{% endif %}{% if cell.corrected %} corr-fixed{% endif %}"
                                     data-corr-cell data-corr-target="selfwork"
                                     data-topic-id="{{ cell.topic.id }}" data-enrollment-id="{{ row.enrollment.id }}"
-                                    data-student="{{ row.student.get_full_name|default:row.student.username }}"
+                                    data-student="{{ row.student|journal_name }}"
                                     data-date="{{ cell.topic.title }}" data-kind="{% trans 'Sərbəst iş' context 'registrar.journal' %}"
                                     data-done="{% if cell.done %}1{% else %}0{% endif %}"
                                     data-sw-max="{{ cell.max_points }}" data-sw-points="{{ cell.points_value }}"

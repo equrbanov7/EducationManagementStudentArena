@@ -23,12 +23,15 @@ DÜSTUR (Midterm rejimi) — TƏK yer :func:`compose`
 * **Aktivlik (0–10)** — seminar/lab dərs ballarının ƏDƏDİ ORTASI.  Dərs balı 0–10 tam ədəddir
   (``gradebook.LESSON_SCORE_MAX``) və yalnız seminar/lab dərsinə yazılır
   (``gradebook.lesson_allows_score``) — orta birbaşa 10-luq şkaladadır, miqyaslama yoxdur.
-  Balsız dərslər sayılmır; heç bal yoxdursa 0.  2 onluğa yarım-yuxarı.
-* **Midterm (0–20)** — KOLLOKVIUM növlü «Midterm» komponentinin balı (öz tavanı ilə).  Bu
+  Balsız dərslər sayılmır; heç bal yoxdursa 0.  2 onluğa yarım-yuxarı.  Sahib 2026-10-10: fəndə
+  seminar VƏ laboratoriya varsa 5 + 5 (hər növün ortasının yarısı) — qayda :mod:`apps.registrar.activity_kinds`.
+* **Midterm (0–30)** — KOLLOKVIUM növlü «Midterm» komponentinin balı (öz tavanı ilə).  Bu
   dövrdə balı olan köhnə «Kollokvium N» qalığı varsa (``interim_components``) o da cəmə düşür,
-  hissə 20 ilə kəsilir.
+  hissə ``academic_rules.midterm_max()`` ilə kəsilir (sərbəst iş açıqdırsa 20, sahib 2026-10-10).
 * **Sərbəst iş (0–10)** — :mod:`apps.registrar.selfwork_points` cəmi (≤ 10); köhnə qayda kimi
-  YALNIZ SELF_WORK komponenti olan jurnalda (canlı yazı yolları komponenti həmişə yaradır).
+  YALNIZ SELF_WORK komponenti olan jurnalda (canlı yazı yolları komponenti həmişə yaradır) VƏ yalnız
+  RİM «Sistem tənzimləmələri»ndə sərbəst iş AÇIQDIRSA (sahib 2026-10-10: ləğv olunub, defolt söndürülü;
+  açılanda midterm yenidən 20 olur — cəm 50 qalır).
 * GENERIC komponentlər (köhnə çəkili sxem / köçürmə qalığı) bu rejimdə giriş balına DAXİL
   DEYİL — standartın dörd hissəsi var (2026-09-25 prod nüsxəsi: 2026/2027 açılışlarında 0).
 * **Giriş balı** = ``round_score(min(cəm, entry_score_max))`` — tam ədəd, yarım-yuxarı.
@@ -42,18 +45,20 @@ sorğu büdcələri dəyişmir.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass
-from decimal import ROUND_HALF_UP, Decimal
+from dataclasses import dataclass, field
+from decimal import Decimal
+from functools import partial
 from types import SimpleNamespace
 
-from apps.registrar import attendance, exam_eligibility, interim_assessment
+from apps.registrar import activity_kinds, attendance, exam_eligibility, interim_assessment
+from core import academic_rules
 
 ZERO = Decimal("0")
-_TWO_PLACES = Decimal("0.01")
 
-#: Hissələrin tavanları (standart: 10 + 10 + 20 + 10 = 50).
+#: Hissələrin tavanları (sərbəst iş açıqdırsa 10 + 10 + 20 + 10, söndürülübsə 10 + 10 + 30 = 50).
 ATTENDANCE_MAX = attendance.MAX_SCORE
-ACTIVITY_MAX = Decimal("10")  # = gradebook.LESSON_SCORE_MAX (test ilə kilidlənib)
+ACTIVITY_MAX = activity_kinds.ACTIVITY_MAX  # = gradebook.LESSON_SCORE_MAX (test ilə kilidlənib)
+#: Sərbəst iş AÇIQ olanda midterm tavanı; cari tavan — :func:`midterm_max` (``core.academic_rules``).
 MIDTERM_MAX = Decimal(interim_assessment.MIDTERM_MAX)
 SELFWORK_MAX = Decimal("10")  # = selfwork_points.TOTAL_MAX (test ilə kilidlənib)
 STANDARD_TOTAL = ATTENDANCE_MAX + ACTIVITY_MAX + MIDTERM_MAX + SELFWORK_MAX
@@ -66,16 +71,42 @@ _SELF_WORK = "self_work"
 
 
 @dataclass(frozen=True)
+class RuleFlags:
+    """Yeni qaydanın RİM bayraqları (``core.academic_rules``) — toplu yollarda BİR DƏFƏ oxunur, sətir başına yox."""
+
+    selfwork: bool
+    midterm_max: Decimal
+    activity_split: bool
+
+
+def rule_flags() -> RuleFlags:
+    return RuleFlags(
+        selfwork=academic_rules.selfwork_enabled(),
+        midterm_max=Decimal(academic_rules.midterm_max()),
+        activity_split=academic_rules.activity_split(),
+    )
+
+
+def midterm_max() -> Decimal:
+    """Midterm hissəsinin cari tavanı: sərbəst iş söndürülübsə 30, açıqdırsa 20 (sahib 2026-10-10)."""
+    return Decimal(academic_rules.midterm_max())
+
+
+@dataclass(frozen=True)
 class EntryRule:
     """Giriş balının hesab qaydası: rejim + (Midterm-də) davamiyyət girişləri.
 
     ``lesson_hours`` / ``limit_percent`` / ``exempt`` — buraxılış qərarının İŞLƏTDİYİ dəyərlər;
-    ``None`` olanı tək-sətir yolunda oxunur (:func:`attendance_inputs`)."""
+    ``None`` olanı tək-sətir yolunda oxunur (:func:`attendance_inputs`).  ``activity_bits`` — açılışın
+    seminar/lab növ maskası (:mod:`apps.registrar.activity_kinds`; ədəd və ya tənbəl çağırış, ``None`` —
+    lazım olanda oxunur); ``flags`` — toplu dəstin bir dəfə oxuduğu RİM bayraqları (``None`` — indi oxunur)."""
 
     midterm: bool
     lesson_hours: Decimal | None = None
     limit_percent: int | None = None
     exempt: bool | None = None
+    activity_bits: object = None
+    flags: RuleFlags | None = None
 
 
 #: Keçmiş dövrlər (kollokvium rejimi) — köhnə qayda.
@@ -84,7 +115,10 @@ LEGACY = EntryRule(midterm=False)
 
 @dataclass(frozen=True)
 class EntryParts:
-    """Midterm rejimində giriş balının dörd hissəsi + yekun (UI və parite testləri üçün)."""
+    """Midterm rejimində giriş balının hissələri + yekun (UI və parite testləri üçün).
+
+    ``midterm_max`` / ``selfwork_active`` — hesabın İŞLƏTDİYİ qayda (şablonlar «/30», «Sərbəst iş» nişanını
+    buradan oxuyur); ``activity_detail`` — seminar/lab bölgüsü (yalnız görünüş, müqayisəyə girmir)."""
 
     attendance: Decimal
     activity: Decimal
@@ -93,10 +127,25 @@ class EntryParts:
     total: Decimal
     #: Davamiyyət həddi keçilib (istisnasız) → davamiyyət hissəsi 0.
     attendance_barred: bool = False
+    midterm_max: Decimal = MIDTERM_MAX
+    selfwork_active: bool = True
+    activity_detail: activity_kinds.ActivityDetail | None = field(default=None, compare=False)
 
     @property
     def raw_sum(self) -> Decimal:
         return self.attendance + self.activity + self.midterm + self.selfwork
+
+    @property
+    def attendance_max(self) -> Decimal:
+        return ATTENDANCE_MAX
+
+    @property
+    def activity_max(self) -> Decimal:
+        return ACTIVITY_MAX
+
+    @property
+    def selfwork_max(self) -> Decimal:
+        return SELFWORK_MAX
 
 
 # ── Hissələr (saf funksiyalar) ───────────────────────────────────────────────
@@ -119,29 +168,35 @@ def attendance_part(*, lesson_hours, absence_hours, limit_percent, exempt) -> tu
 
 
 def activity_part(score_sum, score_count) -> Decimal:
-    """Seminar/lab ballarının ortası (0–10, 2 onluq, yarım-yuxarı); bal yoxdursa 0."""
-    count = int(score_count or 0)
-    if count <= 0:
-        return ZERO
-    mean = (_dec(score_sum) / Decimal(count)).quantize(_TWO_PLACES, rounding=ROUND_HALF_UP)
-    return min(mean, ACTIVITY_MAX)
+    """Bütün balı olan dərslərin BİRGƏ ortası (0–10, 2 onluq, yarım-yuxarı); bal yoxdursa 0.
+
+    5 + 5 bölgüsü (seminar + laboratoriya) :func:`apps.registrar.activity_kinds.activity`-dədir."""
+    return activity_kinds.pooled_mean(score_sum, score_count)
 
 
-def midterm_part(interim_total) -> Decimal:
-    """Midterm (+ balı olan köhnə kollokvium qalığı) cəmi, 20 ilə kəsilmiş."""
-    return min(_dec(interim_total), MIDTERM_MAX)
+def midterm_part(interim_total, cap=None) -> Decimal:
+    """Midterm (+ balı olan köhnə kollokvium qalığı) cəmi, cari tavanla (30 / 20) kəsilmiş."""
+    return min(_dec(interim_total), midterm_max() if cap is None else _dec(cap))
 
 
-def selfwork_part(points, *, counted: bool) -> Decimal:
-    """Sərbəst iş (≤ 10) — yalnız SELF_WORK komponenti olan jurnalda sayılır."""
-    return min(_dec(points), SELFWORK_MAX) if counted else ZERO
+def selfwork_part(points, *, counted: bool, active: bool | None = None) -> Decimal:
+    """Sərbəst iş (≤ 10) — SELF_WORK komponenti olan jurnalda VƏ sərbəst iş RİM-də açıq olanda sayılır.
+
+    Bu funksiya yalnız yeni qayda (Midterm) dövrlərinin hesabındadır; köhnə dövrlərdə sərbəst iş həmişə
+    sayılır (``gradebook_components.entry_score_for``-un köhnə qolu)."""
+    if active is None:
+        active = academic_rules.selfwork_enabled()
+    return min(_dec(points), SELFWORK_MAX) if counted and active else ZERO
 
 
-def compose(*, attendance_score, activity, midterm, selfwork, cap, attendance_barred=False) -> EntryParts:
-    """Dörd hissə → :class:`EntryParts` (cəm ``cap`` ilə kəsilir, ``round_score`` ilə tam ədəd)."""
+def compose(
+    *, attendance_score, activity, midterm, selfwork, cap, attendance_barred=False, activity_detail=None, flags=None
+) -> EntryParts:
+    """Hissələr → :class:`EntryParts` (cəm ``cap`` ilə kəsilir, ``round_score`` ilə tam ədəd)."""
     # Dövri idxal: ``gradebook_components`` bu modulu idxal edir.
     from apps.registrar.gradebook_components import round_score
 
+    flags = flags or rule_flags()
     raw = attendance_score + activity + midterm + selfwork
     return EntryParts(
         attendance=attendance_score,
@@ -150,6 +205,9 @@ def compose(*, attendance_score, activity, midterm, selfwork, cap, attendance_ba
         selfwork=selfwork,
         total=round_score(min(raw, _dec(cap))),
         attendance_barred=attendance_barred,
+        midterm_max=flags.midterm_max,
+        selfwork_active=flags.selfwork,
+        activity_detail=activity_detail or activity_kinds.ActivityDetail(activity),
     )
 
 
@@ -160,24 +218,35 @@ def compose_from_totals(
     absence_hours,
     limit_percent,
     exempt,
-    score_sum,
-    score_count,
     interim_total,
     selfwork_points,
     selfwork_counted,
+    score_sum=ZERO,
+    score_count=0,
+    lesson_totals=None,
+    activity_bits=None,
+    flags=None,
 ) -> EntryParts:
     """Aqreqat dəyərlərdən (SQL güzgüləri: ``analytics``, ``analytics_fast``, ``academic_summary``)
-    — :func:`parts_for` ilə EYNİ düstur, yalnız giriş formasıdır."""
+    — :func:`parts_for` ilə EYNİ düstur, yalnız giriş formasıdır.
+
+    ``lesson_totals`` (:class:`activity_kinds.LessonTotals`) verilməsə yalnız birgə cəm/say (``score_sum`` /
+    ``score_count``) bilinir — 5 + 5 bölgüsü üçün növ cəmləri və açılışın ``activity_bits`` maskası lazımdır."""
+    flags = flags or rule_flags()
     att, barred = attendance_part(
         lesson_hours=lesson_hours, absence_hours=absence_hours, limit_percent=limit_percent, exempt=exempt
     )
+    totals = lesson_totals if lesson_totals is not None else activity_kinds.LessonTotals(score_sum, score_count)
+    detail = activity_kinds.activity(totals, activity_bits, split_enabled=flags.activity_split)
     return compose(
         attendance_score=att,
-        activity=activity_part(score_sum, score_count),
-        midterm=midterm_part(interim_total),
-        selfwork=selfwork_part(selfwork_points, counted=selfwork_counted),
+        activity=detail.value,
+        midterm=midterm_part(interim_total, flags.midterm_max),
+        selfwork=selfwork_part(selfwork_points, counted=selfwork_counted, active=flags.selfwork),
         cap=cap,
         attendance_barred=barred,
+        activity_detail=detail,
+        flags=flags,
     )
 
 
@@ -206,10 +275,13 @@ def parts_for(enrollment, cap, *, rule, components, marks=None, component_scores
     """Bir yazılışın Midterm hissələri — ``gradebook_components.entry_score_for`` ilə EYNİ girişlər.
 
     ``components`` məcburidir (çağıran onsuz da oxuyur); ``marks`` / ``component_scores`` /
-    ``selfwork_points`` verilməsə köhnə qolun sorğuları ilə eyni şəkildə oxunur."""
+    ``selfwork_points`` verilməsə köhnə qolun sorğuları ilə eyni şəkildə oxunur.  ``marks`` dərs növünü
+    daşımalıdır (annotasiya və ya keşlənmiş ``lesson`` — :func:`activity_kinds.mark_kind`).  Açılışın
+    seminar/lab maskası qaydada yoxdursa bal sorğusunun ÖZÜNƏ qatılır (əlavə sorğu yoxdur)."""
     from apps.registrar import selfwork_points as selfwork_rules
-    from apps.registrar.models import ComponentScore, LessonMark
+    from apps.registrar.models import ComponentScore
 
+    flags = rule.flags or rule_flags()
     interim = {c.id: _dec(c.max_score) for c in components if c.kind == _KOLLOKVIUM}
     interim_total = ZERO
     if interim:
@@ -219,10 +291,16 @@ def parts_for(enrollment, cap, *, rule, components, marks=None, component_scores
             (min(cs.score or ZERO, interim[cs.component_id]) for cs in component_scores if cs.component_id in interim),
             ZERO,
         )
+    offering = _cached(enrollment, "offering")
+    bits = rule.activity_bits if rule.activity_bits is not None else activity_kinds.known_bits(offering)
     if marks is None:
-        marks = LessonMark.objects.filter(enrollment=enrollment, score__isnull=False)
-    scores = [m.score for m in marks if m.score is not None]
-    counted = any(c.kind == _SELF_WORK for c in components)
+        marks = _own_scored_marks(enrollment, with_bits=flags.activity_split and bits is None)
+        if bits is None:
+            bits = activity_kinds.known_bits(offering, marks)
+    if bits is None:  # yalnız tələbənin balları TƏK növdə olanda oxunur (activity_kinds.activity)
+        bits = partial(_offering_bits, enrollment)
+    totals = activity_kinds.totals_from_marks(marks, need_kinds=flags.activity_split)
+    counted = flags.selfwork and any(c.kind == _SELF_WORK for c in components)
     if counted and selfwork_points is None:
         selfwork_points = selfwork_rules.selfwork_total_for(enrollment)
     hours, limit, exempt = attendance_inputs(enrollment, rule)
@@ -232,12 +310,27 @@ def parts_for(enrollment, cap, *, rule, components, marks=None, component_scores
         absence_hours=enrollment.absence_hours,
         limit_percent=limit,
         exempt=exempt,
-        score_sum=sum(scores, ZERO),
-        score_count=len(scores),
+        lesson_totals=totals,
+        activity_bits=bits,
         interim_total=interim_total,
         selfwork_points=selfwork_points or ZERO,
         selfwork_counted=counted,
+        flags=flags,
     )
+
+
+def _own_scored_marks(enrollment, *, with_bits):
+    """Yazılışın balı olan işarələri + dərs növü (+ lazım olsa açılışın növ maskası) — TƏK sorğu."""
+    from apps.registrar.models import LessonMark
+
+    marks = activity_kinds.annotate_kind(LessonMark.objects.filter(enrollment=enrollment, score__isnull=False))
+    if with_bits:
+        marks = marks.annotate(**{activity_kinds.BITS_ATTR: activity_kinds.bits_expression("lesson__offering__")})
+    return list(marks)
+
+
+def _offering_bits(enrollment) -> int:
+    return activity_kinds.bits_for_offering(enrollment.offering)
 
 
 # ── Rejim (keşdən / toplu, əlavə sorğusuz) ───────────────────────────────────
@@ -365,27 +458,46 @@ def rule_for(enrollment, *, organization=None) -> EntryRule:
     return EntryRule(midterm=True) if offering_is_midterm(enrollment.offering, organization=organization) else LEGACY
 
 
+# ── SQL güzgüləri üçün (``apps.accounts`` yalnız ``registrar.public`` fasadından oxuyur) ─────
+#: ``{offering_id: seminar/lab maskası}`` — TƏK sorğu (:mod:`apps.registrar.activity_kinds`).
+activity_bits_map = activity_kinds.bits_map
+#: Maskanın SQL ifadəsi — mövcud açılış sorğusuna qatmaq üçün (``prefix`` — açılışa gedən yol).
+activity_bits_expression = activity_kinds.bits_expression
+#: ``(açar, dərs növü, cəm, say)`` sətirləri → ``{açar: LessonTotals}``.
+lesson_totals_by_key = activity_kinds.totals_by_key
+LessonTotals = activity_kinds.LessonTotals
+ACTIVITY_BITS_ATTR = activity_kinds.BITS_ATTR
+
+
 __all__ = [
+    "ACTIVITY_BITS_ATTR",
     "ACTIVITY_MAX",
     "ATTENDANCE_MAX",
     "EntryParts",
     "EntryRule",
     "LEGACY",
+    "LessonTotals",
     "MIDTERM_MAX",
+    "RuleFlags",
     "SELFWORK_MAX",
     "STANDARD_TOTAL",
+    "activity_bits_expression",
+    "activity_bits_map",
     "activity_part",
     "attendance_inputs",
     "attendance_part",
     "compose",
     "compose_from_totals",
     "is_midterm_fields",
+    "lesson_totals_by_key",
     "midterm_flags",
+    "midterm_max",
     "midterm_offering_ids",
     "midterm_part",
     "offering_is_midterm",
     "parts_for",
     "period_is_midterm",
+    "rule_flags",
     "rule_for",
     "selfwork_part",
 ]

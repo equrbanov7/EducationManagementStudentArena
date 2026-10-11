@@ -49,7 +49,17 @@ def test_policy_defaults_match_the_owner_decisions():
     assert policy.sla_days(None) == 5
     assert policy.escalation_days(None) == 10
     assert policy.second_approval_enabled(None) is False
+    # Sahib 2026-10-10 (defolt — yeni qayda): sərbəst iş yoxdur, onun 10 balı midterm-ə keçir.
     assert policy.assessment_weights(None) == {
+        "attendance": 10,
+        "midterm": 30,
+        "selfwork": 0,
+        "activity": 10,
+        "final": 50,
+        "flex": 0,
+    }
+    # Köhnə semestr / tənzimləmə yandırılıb — əvvəlki standart.
+    assert policy.assessment_weights(None, selfwork=True) == {
         "attendance": 10,
         "midterm": 20,
         "selfwork": 10,
@@ -57,6 +67,19 @@ def test_policy_defaults_match_the_owner_decisions():
         "final": 50,
         "flex": 0,
     }
+    assert policy.standard_splits(None) == frozenset({(20, 10), (30, 10)})
+
+
+def test_selfwork_toggle_makes_the_old_standard_the_default(settings):
+    settings.ACADEMIC_SELFWORK_ENABLED = True
+    assert (policy.assessment_weights(None)["midterm"], policy.assessment_weights(None)["selfwork"]) == (20, 10)
+
+
+def test_an_organization_override_keeps_the_hundred_when_selfwork_moves_to_the_midterm():
+    org = _Org({"syllabus": {"assessment": {"selfwork": 5, "final": 55}}})
+    weights = policy.assessment_weights(org, selfwork=False)
+    assert (weights["midterm"], weights["selfwork"], weights["flex"]) == (25, 0, 0)
+    assert sum(weights[key] for key in ("attendance", "midterm", "selfwork", "activity", "final", "flex")) == 100
 
 
 def test_policy_reads_the_organization_override():

@@ -61,7 +61,7 @@ class HostStartGameAtomicTest(TestCase):
         session = self.client.session
         session["active_organization"] = self.org.slug
         session.save()
-        self.url = reverse("liveExam:host_start_game", kwargs={"pin": self.session.pin})
+        self.url = reverse("liveExam:start_game", kwargs={"pin": self.session.pin})
 
     def test_audit_failure_rolls_back_both_session_saves(self):
         with mock.patch.object(AuditLog.objects, "create", side_effect=RuntimeError("audit boom")):

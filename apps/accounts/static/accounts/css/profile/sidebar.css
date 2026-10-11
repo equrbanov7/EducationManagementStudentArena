@@ -220,7 +220,7 @@
     font-size: 16px;
     line-height: 1;
     text-align: center;
-    /* Rəng bəndin mənasından gəlir (`sidebar_icons.css` → `--sb-icon`). */
+    /* Monoxrom ton `sidebar_icons.css` → `--sb-icon` (sahib 2026-10-11). */
     color: var(--sb-icon, var(--sb-muted));
     transition: color 0.14s ease;
 }
@@ -231,12 +231,6 @@
 
 .sidebar-menu-link.active .sidebar-menu-icon {
     color: var(--sb-accent);
-}
-
-/* İmtahan mərkəzi qrupunun «qırmızı» ikonları hover-də də öz tonunda qalır. */
-.sidebar-menu-icon--danger,
-.sidebar-menu-link:hover .sidebar-menu-icon--danger {
-    color: var(--ems-danger);
 }
 
 /* Yeni tabda / ayrıca səhifədə açılan link (elektron jurnal, nəzarət sistemi). */

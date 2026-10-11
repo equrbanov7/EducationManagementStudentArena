@@ -18,7 +18,7 @@ from django.utils import timezone
 from ..constants import FolderStatus, LatePolicy
 from ..errors import FolderError
 from ..models import FolderAssignment, TaskDeadline
-from . import access, lookups, notify, syllabus_bridge
+from . import access, lookups, notify, selfwork_rule, syllabus_bridge
 from .events import audit_change
 from .locks import advisory_lock
 
@@ -113,6 +113,8 @@ def assign_folder(folder, offerings, *, by_user, request=None) -> list[dict]:
         assignment = FolderAssignment.objects.select_for_update().filter(folder=folder, offering=offering).first()
         created = reactivated = False
         grades, warnings = _grader_decision(folder, offering, assignment, option)
+        if not selfwork_rule.offering_active(offering):
+            warnings = []  # sahib 2026-10-10: bu dövrdə sərbəst iş yoxdur — onun xəbərdarlığı da yoxdur
         now = timezone.now()
         if assignment is None:
             assignment = FolderAssignment.objects.create(

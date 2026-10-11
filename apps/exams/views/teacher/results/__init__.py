@@ -4,7 +4,6 @@ from ._attempt_views import (  # noqa: F401
     ai_grade_answer,
     delete_exam_attempts,
     teacher_check_attempt,
-    teacher_pending_attempts,
     teacher_view_attempt,
 )
 from ._helpers import (  # noqa: F401
@@ -25,7 +24,6 @@ __all__ = [
     "export_exam_results_xlsx",
     "teacher_check_attempt",
     "teacher_exam_results",
-    "teacher_pending_attempts",
     "teacher_view_attempt",
     "ANONYMOUS_NAME_CODE_LENGTH",
     "ANONYMOUS_NAME_TOKEN_SALT",

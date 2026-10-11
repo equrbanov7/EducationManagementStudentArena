@@ -23,9 +23,6 @@ HOME_URL = f"{BASE_URL}/"
 ABOUT_URL = f"{BASE_URL}/about/"
 TECHNOLOGY_URL = f"{BASE_URL}/technology/"
 CREATE_POST_URL = f"{BASE_URL}/posts/create/"
-QUESTIONS_URL = f"{BASE_URL}/questions/"
-MY_QUESTIONS_URL = f"{BASE_URL}/questions/my/"
-CREATE_QUESTION_URL = f"{BASE_URL}/questions/create/"
 
 
 # ── Public pages ──────────────────────────────────────────────────────────────
@@ -98,43 +95,6 @@ class TestPostCreation:
         assert response.status < 500, f"Create post page returned HTTP {response.status}"
         authenticated_page.wait_for_load_state("domcontentloaded")
         expect(authenticated_page.locator("body")).to_be_visible()
-
-
-# ── Question pages ────────────────────────────────────────────────────────────
-
-
-class TestQuestionsPages:
-    """Tests for the community Q&A pages."""
-
-    @pytest.mark.skipif(
-        not E2E_USERNAME or not E2E_PASSWORD,
-        reason="E2E_USERNAME / E2E_PASSWORD not set",
-    )
-    def test_questions_list_loads(self, authenticated_page: Page) -> None:
-        """Questions list page must load for an authenticated user."""
-        response = authenticated_page.goto(QUESTIONS_URL)
-        assert response is not None
-        assert response.status < 500, f"Questions list returned HTTP {response.status}"
-
-    @pytest.mark.skipif(
-        not E2E_USERNAME or not E2E_PASSWORD,
-        reason="E2E_USERNAME / E2E_PASSWORD not set",
-    )
-    def test_my_questions_page_loads(self, authenticated_page: Page) -> None:
-        """My questions page must load for an authenticated user."""
-        response = authenticated_page.goto(MY_QUESTIONS_URL)
-        assert response is not None
-        assert response.status < 500, f"My questions page returned HTTP {response.status}"
-
-    @pytest.mark.skipif(
-        not E2E_USERNAME or not E2E_PASSWORD,
-        reason="E2E_USERNAME / E2E_PASSWORD not set",
-    )
-    def test_create_question_page_loads(self, authenticated_page: Page) -> None:
-        """Create question page must load for an authenticated user."""
-        response = authenticated_page.goto(CREATE_QUESTION_URL)
-        assert response is not None
-        assert response.status < 500, f"Create question page returned HTTP {response.status}"
 
 
 # ── Audit log pages ───────────────────────────────────────────────────────────

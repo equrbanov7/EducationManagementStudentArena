@@ -17,7 +17,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.models import ReviewDecision, SyllabusReview
-from apps.syllabus.public import RULE_SECTIONS, SectionKey, SyllabusStatus
+from apps.syllabus.public import SectionKey, SyllabusStatus, blocks_by_key, current_rule
 
 from .labels import STATUS_TONES
 from .preview import build_preview_blocks
@@ -89,36 +89,40 @@ def _info_body(data: dict) -> str:
     return "\n".join(lines) or str(_EMPTY)
 
 
-def compose_bodies(section_map: dict) -> dict:
-    """``{section_id: oxunaqlı mətn}`` — 8 məzmun bölməsi üçün.
+#: Bölmə → sənəd blokunun AÇARI (``apps.syllabus.document``). Mövqe ilə indeksləmə OLMAZ: sərbəst işsiz
+#: qaydada (sahib 2026-10-10) «Sərbəst iş» bloku yoxdur və ədəbiyyat bir pillə sürüşür.
+_SECTION_BLOCKS = (
+    (SectionKey.OUT.value, "outcomes"),
+    (SectionKey.WEEK.value, "weeks"),
+    (SectionKey.METHOD.value, "methods"),
+    (SectionKey.ASSESS.value, "assessment"),
+    (SectionKey.SELF.value, "selfwork"),
+    (SectionKey.LIT.value, "literature"),
+)
+
+
+def compose_bodies(section_map: dict, *, rule=None, activity_kinds=None) -> dict:
+    """``{section_id: oxunaqlı mətn}`` — 8 məzmun bölməsi üçün (sərbəst işsiz qaydada 7).
 
     ``desc`` bölməsi oxu-rejimində İKİ blok verir (təsvir + məqsəd); burada onlar
     bir bölmə kartında birləşdirilir ki, kart sayı redaktordakı bölmə sayı ilə
-    eyni qalsın.
+    eyni qalsın. Bloklar AÇARLA götürülür; ``rule`` — versiyanın qaydası.
     """
-    blocks = build_preview_blocks(section_map)
+    blocks = blocks_by_key(build_preview_blocks(section_map, activity_kinds, rule=rule))
     bodies = {SectionKey.INFO.value: _info_body(section_map.get(SectionKey.INFO.value, {}) or {})}
-    bodies[SectionKey.DESC.value] = "\n\n".join([blocks[0]["body"], blocks[1]["body"]])
-    for index, section_id in enumerate(
-        (
-            SectionKey.OUT.value,
-            SectionKey.WEEK.value,
-            SectionKey.METHOD.value,
-            SectionKey.ASSESS.value,
-            SectionKey.SELF.value,
-            SectionKey.LIT.value,
-        ),
-        start=2,
-    ):
-        bodies[section_id] = blocks[index]["body"]
+    bodies[SectionKey.DESC.value] = "\n\n".join([blocks["description"], blocks["goal"]])
+    for section_id, key in _SECTION_BLOCKS:
+        if key in blocks:
+            bodies[section_id] = blocks[key]
     return bodies
 
 
-def build_sections(section_map: dict, diff: dict, notes: dict) -> list:
+def build_sections(section_map: dict, diff: dict, notes: dict, *, rule=None, activity_kinds=None) -> list:
     """Bölmə kartları — başlıq, mətn, «dəyişib» nişanı, mövcud şərh."""
-    bodies = compose_bodies(section_map)
+    rule = rule or current_rule()
+    bodies = compose_bodies(section_map, rule=rule, activity_kinds=activity_kinds)
     rows = []
-    for section_id in RULE_SECTIONS:
+    for section_id in rule.rule_sections:
         rows.append(
             {
                 "id": section_id,
@@ -131,12 +135,13 @@ def build_sections(section_map: dict, diff: dict, notes: dict) -> list:
     return rows
 
 
-def build_diffs(old_map: dict, new_map: dict, diff: dict) -> dict:
-    """Yanaşı müqayisə kartları + dəyişiklik sayğacı."""
-    old_bodies = compose_bodies(old_map)
-    new_bodies = compose_bodies(new_map)
+def build_diffs(old_map: dict, new_map: dict, diff: dict, *, rule=None, activity_kinds=None) -> dict:
+    """Yanaşı müqayisə kartları + dəyişiklik sayğacı (gizli bölmə — məs. `self` — müqayisə olunmur)."""
+    rule = rule or current_rule()
+    old_bodies = compose_bodies(old_map, rule=rule, activity_kinds=activity_kinds)
+    new_bodies = compose_bodies(new_map, rule=rule, activity_kinds=activity_kinds)
     rows, changed = [], 0
-    for section_id in RULE_SECTIONS:
+    for section_id in rule.rule_sections:
         is_changed = bool((diff.get(section_id) or {}).get("changed"))
         changed += 1 if is_changed else 0
         if is_changed:
@@ -156,7 +161,7 @@ def build_diffs(old_map: dict, new_map: dict, diff: dict) -> dict:
         )
     return {
         "rows": rows,
-        "count": str(_DIFF_COUNT) % {"changed": changed, "same": len(RULE_SECTIONS) - changed},
+        "count": str(_DIFF_COUNT) % {"changed": changed, "same": len(rule.rule_sections) - changed},
     }
 
 
@@ -206,9 +211,17 @@ def _existing_notes(version) -> dict:
 
 def build_review_payload(version, *, now) -> dict:
     """Baxış panelinin JSON gövdəsi (dizayn §3.3 sağ panel)."""
-    from apps.syllabus.public import section_data_map, version_diff, version_timeline
+    from apps.syllabus.public import (
+        activity_kinds_for_syllabus,
+        rule_for_version,
+        section_data_map,
+        version_diff,
+        version_timeline,
+    )
 
     syllabus = version.syllabus
+    rule = rule_for_version(version)  # sahib 2026-10-10 — versiyanın semestrinin qaydası
+    kinds = activity_kinds_for_syllabus(syllabus)
     approved = syllabus.approved_version
     days = waiting_days(version, now=now)
     new_map = section_data_map(version)
@@ -246,8 +259,8 @@ def build_review_payload(version, *, now) -> dict:
             str(_COMPARE) % {"old": approved.label, "new": version.label} if approved is not None else str(_NO_BASE)
         ),
         "has_base": approved is not None,
-        "sections": build_sections(new_map, diff, notes),
-        "diff": build_diffs(old_map, new_map, diff),
+        "sections": build_sections(new_map, diff, notes, rule=rule, activity_kinds=kinds),
+        "diff": build_diffs(old_map, new_map, diff, rule=rule, activity_kinds=kinds),
         "timeline": build_timeline(version_timeline(syllabus)),
     }
 

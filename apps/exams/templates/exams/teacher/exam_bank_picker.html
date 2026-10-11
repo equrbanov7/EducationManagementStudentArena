@@ -4,105 +4,102 @@
 {% block title %}{% blocktrans with title=exam.title %}Bankdan sual əlavə et — {{ title }}{% endblocktrans %}{% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/exam_bank_picker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/badge.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20260914-a11y">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_bank_picker.css' %}?v=20261010-wp3exams">
 {% endblock %}
 
 {% block content %}
-{% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara (exam_bank_picker.css) köçürüldü.{% endcomment %}
-<div class="container py-4 exam-bank-picker-1">
-
-    <div class="d-flex justify-content-between align-items-start mb-3">
-        <div>
-            <h1 class="h4 mb-1">{% trans 'Mövcud bankdan sual əlavə et' %}</h1>
-            <div class="text-muted small">{{ exam.title }}</div>
-        </div>
-        <a href="{% url 'exams:teacher_exam_detail' exam.slug %}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i>{% trans 'İmtahana qayıt' %}
-        </a>
-    </div>
-
-    {# ── Bank seçimi + filtr (GET) ── #}
-    <form method="get" class="card card-body mb-3">
-        <div class="row g-2 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label small text-muted mb-1" for="bank">Bank</label>
-                <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" id="bank" name="bank" data-bootstrap-select>
-                        <option value="">{% trans '— Bank seçin —' %}</option>
-                        {% for bank in banks %}
-                        <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small text-muted mb-1" for="pickerSearch">{% trans 'Axtarış' %}</label>
-                <input type="text" id="pickerSearch" class="form-control form-control-sm" name="q" value="{{ search_query }}" placeholder="{% trans 'Sual mətnində axtar' %}">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small text-muted mb-1" for="picker-difficulty">{% trans 'Çətinlik' %}</label>
-                <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" id="picker-difficulty" name="difficulty" data-bootstrap-select>
-                        <option value="">{% trans 'Bütün çətinliklər' %}</option>
-                        {% for value, label in difficulty_choices %}
-                        <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small text-muted mb-1" for="picker-language">Dil</label>
-                <div class="bootstrap-single-select">
-                    <select class="form-select bootstrap-single-select__native" id="picker-language" name="language" data-bootstrap-select>
-                        <option value="">{% trans 'Bütün dillər' %}</option>
-                        {% for code, label in language_choices %}
-                        <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-1 d-grid">
-                <button type="submit" class="btn btn-outline-primary btn-sm">{% trans 'Göstər' %}</button>
-            </div>
-        </div>
-    </form>
-
-    {% if selected_bank %}
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <div class="text-muted small">{% trans 'Tapılan suallar:' %} <strong>{{ total_count }}</strong>{% if total_count > 300 %} {% trans '(ilk 300 göstərilir)' %}{% endif %}</div>
-    </div>
-
-    {% if questions %}
-    <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="attach">
-        <input type="hidden" name="bank" value="{{ selected_bank.id }}">
-
-        <div class="list-group mb-3">
-            {% for q in questions %}
-            <label class="list-group-item d-flex gap-2 align-items-start">
-                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox" name="question_ids" value="{{ q.id }}">
-                <span>
-                    <span>{{ q.text|striptags|truncatechars:180 }}</span>
-                    <span class="badge bg-light text-dark ms-1">{{ q.get_difficulty_display }}</span>
-                    <span class="badge bg-light text-dark">{{ q.get_language_display }}</span>
-                </span>
-            </label>
-            {% endfor %}
-        </div>
-
-        <div class="d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i>{% trans 'Seçilmişləri imtahana əlavə et' %}
-            </button>
-        </div>
-    </form>
+{% comment %}2026-10-10 redizayn (sahib: köhnə Bootstrap görünüşü → saytın üslubu): ortaq başlıq,
+filtr kartı (bank birinci və məcburi, sonra axtarış/çətinlik/dil — dəyişəndə dərhal tətbiq),
+yoxlama qutulu siyahı + yapışqan «N sual seçildi · Seçilənləri əlavə et» zolağı, izahlı boş
+vəziyyətlər, səhifələmə. Form sahələri (bank, q, difficulty, language, question_ids,
+select_all, excluded_ids) və POST müqaviləsi dəyişməyib.{% endcomment %}
+<div class="etp-page ebp-page" data-ebp-root>
+    {% trans "Mövcud bankdan sual əlavə et" context "exams.template.bank_picker" as head_title %}
+    {% if compatible_type == 'written' %}
+        {% trans "Kitabxanadakı sual bankından sual seçib bu imtahana əlavə edin. Yalnız yazılı sual bankları göstərilir." context "exams.template.bank_picker" as head_subtitle %}
     {% else %}
-    <div class="text-center text-muted py-5">{% trans 'Filtrlərə uyğun sual tapılmadı.' %}</div>
+        {% trans "Kitabxanadakı sual bankından sual seçib bu imtahana əlavə edin. Yalnız test bankları göstərilir." context "exams.template.bank_picker" as head_subtitle %}
     {% endif %}
+    {% trans "İmtahana qayıt" context "exams.template.bank_picker" as head_back_label %}
+    {% url 'exams:teacher_exam_detail' exam.slug as head_back_url %}
+    {% include "exams/teacher/partials/_page_head.html" %}
 
-    {% else %}
-    <div class="alert alert-secondary">{% trans 'Sual əlavə etmək üçün yuxarıdan bank seçin.' %}</div>
-    {% endif %}
+    <div class="etp-stack">
+        <section class="ems-card ebp-filters" aria-label="{% trans 'Bank və filtrlər' context 'exams.template.bank_picker' %}">
+            <form method="get" class="etp-toolbar" id="ebpFilters" role="search" data-ebp-filters>
+                <div class="etp-toolbar__field etp-toolbar__field--grow ebp-bank-field">
+                    <label class="etp-label" for="bank">{% trans "Sual bankı" context "exams.template.bank_picker" %}<span class="etp-req" aria-hidden="true">*</span></label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="bank" name="bank" data-bootstrap-select data-ebp-auto required
+                                data-live-search="true"
+                                data-live-search-placeholder="{% trans 'Bank axtar…' context 'exams.template.bank_picker' %}"
+                                data-live-search-empty="{% trans 'Uyğun bank yoxdur' context 'exams.template.bank_picker' %}">
+                            <option value="">{% trans "Bank seçin" context "exams.template.bank_picker" %}</option>
+                            {% for bank in banks %}
+                            <option value="{{ bank.id }}" {% if selected_bank and selected_bank.id == bank.id %}selected{% endif %}>{{ bank.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="etp-toolbar__field etp-toolbar__field--grow">
+                    <label class="etp-label" for="pickerSearch">{% trans "Axtarış" context "exams.template.bank_picker" %}</label>
+                    <div class="etp-search">
+                        <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
+                        <input type="search" id="pickerSearch" class="ems-input" name="q" value="{{ search_query }}" autocomplete="off" data-ebp-search
+                               placeholder="{% trans 'Sual mətnində axtar' context 'exams.template.bank_picker' %}">
+                    </div>
+                </div>
+                <div class="etp-toolbar__field">
+                    <label class="etp-label" for="picker-difficulty">{% trans "Çətinlik" context "exams.template.bank_picker" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="picker-difficulty" name="difficulty" data-bootstrap-select data-ebp-auto>
+                            <option value="">{% trans "Hamısı" context "exams.template.bank_picker" %}</option>
+                            {% for value, label in difficulty_choices %}
+                            <option value="{{ value }}" {% if difficulty_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="etp-toolbar__field">
+                    <label class="etp-label" for="picker-language">{% trans "Dil" context "exams.template.bank_picker" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="ems-select bootstrap-single-select__native" id="picker-language" name="language" data-bootstrap-select data-ebp-auto>
+                            <option value="">{% trans "Bütün dillər" context "exams.template.bank_picker" %}</option>
+                            {% for code, label in language_choices %}
+                            <option value="{{ code }}" {% if language_filter == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        {% if not banks %}
+            <section class="ems-card">
+                {% trans "Uyğun sual bankı yoxdur" context "exams.template.bank_picker" as state_title %}
+                {% trans "Bu imtahanın tipinə uyğun bank tapılmadı. Sual bankları kitabxanasında yeni bank yaradın və ya sizinlə paylaşılmasını xahiş edin." context "exams.template.bank_picker" as state_body %}
+                {% trans "Sual banklarına keç" context "exams.template.bank_picker" as state_action_label %}
+                {% url 'exams:question_bank_list' as state_action_url %}
+                {% include "partials/ems_ui/_empty.html" with state_icon="fa-database" %}
+            </section>
+        {% elif not selected_bank %}
+            <section class="ems-card">
+                {% trans "Əvvəl bank seçin" context "exams.template.bank_picker" as state_title %}
+                {% trans "Sualları görmək üçün yuxarıdan sual bankını seçin — sonra axtarış və filtrlərlə daraldın." context "exams.template.bank_picker" as state_body %}
+                {% include "partials/ems_ui/_empty.html" with state_icon="fa-arrow-up" state_action_label="" %}
+            </section>
+        {% else %}
+            {% include "exams/teacher/partials/bank_picker/_results.html" %}
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'exams/js/exam_bank_picker_page.js' %}?v=20261010-wp3exams"></script>
 {% endblock %}

@@ -4,6 +4,8 @@ Vəziyyətlər (``state``): ``no_org`` · ``list`` · ``folder`` · ``missing`` 
 tapılmadı / görmə hüququ yoxdur). Qovluq görünüşünün tab-ı ``sf_tab``:
 ``content`` (mövzular → materiallar + tapşırıqlar) və ya ``groups`` (təyinat, son
 tarix, irəliləyiş). Sorğu sayı sətir sayından asılı deyil (servislərin annotasiyaları).
+Sahib 2026-10-10: qovluğun dövründə sərbəst iş ləğv olunubsa (``selfwork_rule``) sərbəst iş slotları,
+sayğacı və nişanları göstərilmir — data qalır.
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from django.utils.translation import pgettext
 from .. import public
 from ..constants import SECTION_TEACHER, TaskKind
 from ..models import SubjectFolder, TaskDeadline
-from ..services import lookups
+from ..services import lookups, selfwork_rule
 from . import common
 
 _CTX = "subject_folder.ui"
@@ -89,7 +91,7 @@ def _list_state(request, organization, user, base, urls) -> dict:
         statuses=[status] if status in _STATUS_FILTERS else None,
         search=search,
     )
-    rows = [_folder_card(folder, base) for folder in folders]
+    rows = [_folder_card(folder, base, organization) for folder in folders]
     everything = [{"value": "", "label": pgettext(_CTX, "Hamısı")}]
     filter_fields = [
         {
@@ -147,9 +149,10 @@ def _list_state(request, organization, user, base, urls) -> dict:
     }
 
 
-def _folder_card(folder, base) -> dict:
+def _folder_card(folder, base, organization=None) -> dict:
     return {
         "folder": folder,
+        "selfwork_active": selfwork_rule.folder_active(folder, organization=organization),
         "chip": common.folder_chip(folder.status),
         "url": common.section_url(base, SECTION_TEACHER, folder=folder.pk),
         "period_label": _period_label(folder.period),
@@ -182,6 +185,7 @@ def _folder_state(request, organization, user, base, urls, raw_id) -> dict:
     can_manage = public.can_manage_folder(user, folder)
     data = {
         "state": "folder",
+        "selfwork_active": selfwork_rule.folder_active(folder, organization=organization),
         "urls": urls,
         "folder": folder,
         "chip": common.folder_chip(folder.status),
@@ -252,7 +256,8 @@ def _content_context(folder, user) -> dict:
         "material_kinds": [{"value": value, "label": str(label)} for value, label in public.MaterialKind.choices],
         "code_languages": [{"value": value, "label": str(label)} for value, label in public.CodeLanguage.choices],
         "selfwork_total": sum(row["task"].max_points or 0 for row in selfwork if not row["task"].is_archived),
-        "selfwork_option": folder.selfwork_option,
+        # Sərbəst iş ləğv olunubsa (sahib 2026-10-10) «struktur sillabusdan gəlir» qeydi də yoxdur.
+        "selfwork_option": folder.selfwork_option if contents.get("selfwork_active", True) else "",
     }
 
 
@@ -291,7 +296,10 @@ def _task_row(task) -> dict:
 def _groups_context(folder, user) -> dict:
     offerings = public.assignable_offerings(folder, user)
     assignments = [row["assignment"] for row in offerings if row["assignment"] is not None and row["is_active"]]
-    tasks = list(folder.tasks.filter(is_archived=False).order_by("kind", "slot_index", "order", "created_at"))
+    tasks = folder.tasks.filter(is_archived=False).order_by("kind", "slot_index", "order", "created_at")
+    if not selfwork_rule.folder_active(folder):  # sahib 2026-10-10: gizli sərbəst iş slotlarına son tarix yoxdur
+        tasks = tasks.exclude(kind=TaskKind.SELFWORK)
+    tasks = list(tasks)
     deadlines = {
         (row.assignment_id, row.task_id): row for row in TaskDeadline.objects.filter(assignment__in=assignments)
     }

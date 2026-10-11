@@ -1,4 +1,4 @@
-"""Dərs cədvəli (U4) və akademik təqvim (U11) — müəllim/tələbə üzü.
+"""Dərs cədvəli (U4) — müəllim/tələbə üzü.
 
 Bu görünüşlər ``views.py``-dan ayrılıb: jurnal/ballama axını ilə ortaq heç nəyi
 yoxdur (yalnız `_current_period` və redaktə hüququ köməkçilərini paylaşır) və
@@ -25,7 +25,6 @@ from django.utils.translation import gettext as _
 from core.http_ids import parse_uuid
 
 from . import schedule_manage, schedule_manage_actions
-from .journal_access import schedule_slot_or_404 as _schedule_slot_or_404
 from .models import CourseOffering
 from .views import _current_period
 
@@ -109,38 +108,3 @@ def _handle_add_slot(request, organization, period):
     else:
         messages.success(request, _("Dərs cədvəlinə slot əlavə edildi."))
     return _redirect_after_schedule(request)
-
-
-@login_required
-def schedule_slot_delete(request, slot_id):
-    """Delete a slot — `schedule.manage` + struktur əhatəsi (audit + bildiriş)."""
-    slot = _schedule_slot_or_404(request, slot_id)
-    organization = getattr(request, "organization", None)
-    if request.method != "POST":
-        return _redirect_after_schedule(request)
-    if not schedule_manage.can_manage_offering(request.user, organization, slot.offering):
-        raise PermissionDenied
-    schedule_manage_actions.delete_slot(actor=request.user, organization=organization, slot=slot, request=request)
-    messages.success(request, _("Slot silindi."))
-    return _redirect_after_schedule(request)
-
-
-# ── Akademik təqvim (U11) ────────────────────────────────────────────────────
-
-
-@login_required
-def calendar_view(request):
-    """Academic calendar: semesters with their registration + exam-session windows.
-
-    Read-only and open to every authenticated member of the active organization
-    (students plan around these dates as much as staff). Window editing lives in
-    the AcademicPeriod admin — tenant-configurable, per the variable-structure rule."""
-    from apps.registrar.calendar_context import calendar_context
-
-    organization = getattr(request, "organization", None)
-    if organization is None:
-        return render(request, "registrar/calendar.html", {"has_context": False, "active_main_nav": "calendar"})
-
-    context = calendar_context(organization, year=(request.GET.get("ac_year") or "").strip())
-    context["active_main_nav"] = "calendar"
-    return render(request, "registrar/calendar.html", context)

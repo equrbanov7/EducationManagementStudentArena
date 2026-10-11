@@ -18,7 +18,7 @@ from apps.exams.domain.attempt_deadline import lazy_expiry_cutoff
 from apps.exams.metrics import record_attempt_started
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.navigation import append_return_to as _append_return_to
-from apps.exams.navigation import current_return_to
+from apps.exams.navigation import current_return_to, student_exams_home_url
 from apps.exams.services.language_variants import (
     available_language_options,
     effective_needed_count_for_attempt,
@@ -467,7 +467,7 @@ def _new_attempt_language(request, exam: Exam, *, return_to):
                 request,
                 pgettext("exams.service.attempt.message", "language_required_for_multilingual_exam"),
             )
-            return None, redirect(_append_return_to(reverse("exams:student_exam_list"), return_to))
+            return None, redirect(_append_return_to(student_exams_home_url(request.user), return_to))
         return chosen_language, None
     return None, None
 

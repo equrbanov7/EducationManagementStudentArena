@@ -1,0 +1,25 @@
+{% load i18n %}
+{# Keyfiyyət süzgəci — TƏK nümunə (KPI-lər klik olunmur). Aktiv çip `aria-current`; sıfır sayğac da AA kontrastlı. #}
+{% with base=qm_base_url %}
+<a class="eqb-chip" href="{{ base }}{% if filters_query %}?{{ filters_query }}{% endif %}"{% if not active_flag %} aria-current="true"{% endif %}>
+    {% trans "Hamısı" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ analyzed_total }}</span>
+</a>
+<a class="eqb-chip eqb-chip--error{% if not error_count %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-error"{% if active_flag == 'has-error' %} aria-current="true"{% endif %}>
+    <i class="fas fa-circle-xmark" aria-hidden="true"></i>{% trans "Xətalı" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ error_count|default:0 }}</span>
+</a>
+<a class="eqb-chip eqb-chip--warning{% if not category_counts.warnings %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-warning"{% if active_flag == 'has-warning' %} aria-current="true"{% endif %}>
+    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>{% trans "Xəbərdarlıq" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ category_counts.warnings|default:0 }}</span>
+</a>
+<a class="eqb-chip eqb-chip--dup{% if not duplicate_count %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-dup"{% if active_flag == 'has-dup' %} aria-current="true"{% endif %}>
+    <i class="fas fa-clone" aria-hidden="true"></i>{% trans "Dublikat" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ duplicate_count|default:0 }}</span>
+</a>
+<a class="eqb-chip{% if not category_counts.structure %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-structure"{% if active_flag == 'has-structure' %} aria-current="true"{% endif %}>
+    <i class="fas fa-list-ol" aria-hidden="true"></i>{% trans "Variant problemi" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ category_counts.structure|default:0 }}</span>
+</a>
+<a class="eqb-chip{% if not category_counts.balance %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=has-balance"{% if active_flag == 'has-balance' %} aria-current="true"{% endif %}>
+    <i class="fas fa-scale-unbalanced" aria-hidden="true"></i>{% trans "Uzunluq balansı" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ category_counts.balance|default:0 }}</span>
+</a>
+<a class="eqb-chip eqb-chip--clean{% if not category_counts.clean %} is-empty{% endif %}" href="{{ base }}?{% if filters_query %}{{ filters_query }}&{% endif %}flag=is-clean"{% if active_flag == 'is-clean' %} aria-current="true"{% endif %}>
+    <i class="fas fa-check-circle" aria-hidden="true"></i>{% trans "Təmiz" context "exams.template.teacher_questions_bank" %}<span class="eqb-chip__n etp-num">{{ category_counts.clean|default:0 }}</span>
+</a>
+{% endwith %}

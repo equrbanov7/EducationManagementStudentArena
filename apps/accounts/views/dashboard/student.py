@@ -6,10 +6,8 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.assignments.models import Assignment, Submission
 from core.search_text import tolerant_q
 from core.tenancy import restore_request_organization_from_profile
 
@@ -27,50 +25,13 @@ User = get_user_model()
 
 @login_required
 def student_dashboard(request):
+    """Köhnə tələbə paneli URL-i — kanonik kabinet ``accounts:profile``-dir.
+
+    URL auditi A6 (2026-10-10): köhnə ``student_dashboard.html`` səhifəsi silindi;
+    ``teacher_dashboard`` kimi yalnız yönləndirmədir (login «next» auditoriya
+    xəritəsi URL adını işlətməyə davam edir).
     """
-    Student dashboard with enrolled courses, assignments, and upcoming exams.
-    """
-    # Get enrolled courses
-    enrolled_courses = _assigned_courses_queryset(request, request.user)[:6]
-
-    now = timezone.now()
-
-    # Get pending assignments
-    pending_assignments = (
-        Assignment.objects.filter(
-            course__in=enrolled_courses,
-            assigned_students=request.user,
-            due_date__gte=now,
-            status__in=["published", "active"],
-        )
-        .distinct()
-        .order_by("due_date")[:5]
-    )
-    pending_assignments = list(pending_assignments)
-    for assignment in pending_assignments:
-        days_until_deadline = (assignment.due_date - now).total_seconds() / 86400
-        assignment.deadline_badge_variant = (
-            "urgent" if days_until_deadline <= 1 else "soon" if days_until_deadline <= 3 else "normal"
-        )
-
-    # Get upcoming exams
-    upcoming_exams = (
-        _assigned_exams_queryset(request, request.user, active_only=True)
-        .filter(start_datetime__gte=now)
-        .order_by("start_datetime")[:5]
-    )
-
-    # Get recent grades
-    recent_grades = Submission.objects.filter(user=request.user, status="graded").order_by("-graded_at")[:5]
-
-    context = {
-        "enrolled_courses": enrolled_courses,
-        "pending_assignments": pending_assignments,
-        "upcoming_exams": upcoming_exams,
-        "recent_grades": recent_grades,
-    }
-
-    return render(request, "accounts/student_dashboard.html", context)
+    return redirect("accounts:profile")
 
 
 @login_required

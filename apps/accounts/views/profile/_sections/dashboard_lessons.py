@@ -72,7 +72,8 @@ def _lesson_row(slot, *, with_group: bool, now=None, journal_link: bool = False,
         "is_now": is_now,
     }
     # «Jurnalı aç» (UNEC müqayisəsi P1-1, 2026-09-25) — müəllim sətrindən həmin açılışın
-    # jurnalına; jurnalın üstündə bu günün slotu «Aktivləşdir» ilə açılır. Sorğu YOXDUR.
+    # jurnalına; bu günün dərsi orada «Yeni dərs» ilə (forma cədvəldən dolu, sahib 2026-10-10), RİM
+    # tənzimləməsi açıqdırsa «Aktivləşdir» ilə açılır. Sorğu YOXDUR.
     url = _journal_url(slot, viewer_id) if journal_link else ""
     if url:
         row["url"] = url

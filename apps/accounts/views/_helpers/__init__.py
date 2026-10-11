@@ -54,10 +54,7 @@ from .membership import (
     _sync_user_role_memberships,
 )
 from .org_access import _build_user_organization_access_rows
-from .org_sections import (
-    _build_student_org_management_section,
-    _build_student_org_request_section,
-)
+from .org_sections import _build_student_org_management_section
 from .profile_load import _load_user_profile
 from .rbac import (
     _assignable_profile_roles_for_user,
@@ -147,7 +144,6 @@ __all__ = [
     # org access / sections
     "_build_user_organization_access_rows",
     "_build_student_org_management_section",
-    "_build_student_org_request_section",
     # profile load (2026-09-13, audit §14/§21)
     "_load_user_profile",
     # rbac

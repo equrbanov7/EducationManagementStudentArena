@@ -160,8 +160,6 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_review_results.html" %}
             {% elif active_section == "role-assignment" %}
                 {% include "accounts/profile/sections/_role_assignment.html" %}
-            {% elif active_section == "student-organization-request" %}
-                {% include "accounts/profile/sections/_student_org_request.html" %}
             {% elif active_section == "student-organization-management" %}
                 {% include "accounts/profile/sections/_student_org_management.html" %}
             {% elif active_section == "permission-editor" %}
@@ -202,6 +200,10 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_legacy_grade_review.html" %}
             {% elif active_section == "system-settings" and 'system-settings' in allowed_sections %}
                 {% include "accounts/profile/sections/_system_settings.html" %}
+            {% elif active_section == "journal-hygiene" and 'journal-hygiene' in allowed_sections %}
+                {% include "accounts/profile/sections/_journal_hygiene.html" %}
+            {% elif active_section == "hr-analytics" and 'hr-analytics' in allowed_sections %}
+                {% include "accounts/profile/sections/_hr_analytics.html" %}
             {% elif active_section == "exam-chance" and 'exam-chance' in allowed_sections %}
                 {% include "accounts/profile/sections/_exam_chance.html" %}
             {% elif active_section == "superadmin-contact-messages" and 'superadmin-contact-messages' in allowed_sections %}

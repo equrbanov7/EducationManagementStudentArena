@@ -245,7 +245,8 @@ def build_registrar_catalog_section(request, section, *, active_organization, al
 
     params = request.GET
     tab = (params.get(PREFIX + "tab") or "programs").strip()
-    if tab not in console.TAB_KEYS:
+    visible_tabs = console.tab_keys()  # «Rubriklər» yalnız bayraqla (sahib 2026-10-10)
+    if tab not in visible_tabs:
         tab = "programs"
     period = console.current_period(active_organization)
 
@@ -268,10 +269,17 @@ def build_registrar_catalog_section(request, section, *, active_organization, al
             "tab_param": PREFIX + "tab",
             "prefix": PREFIX,
             "action_url": reverse("accounts:registrar_catalog_action"),
-            "header_subtitle": _t(
-                "Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
-                "qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
-                "dialoqda aparılır — kabinetdən çıxmır."
+            "header_subtitle": (
+                _t(
+                    "Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları, "
+                    "qiymətləndirmə rubrikləri və tələbə təyinatları. Hər əməl bu səhifədə, "
+                    "dialoqda aparılır — kabinetdən çıxmır."
+                )
+                if "rubrics" in visible_tabs
+                else _t(
+                    "Akademik kataloq: ixtisaslar, fənlər, tədris planları, semestr açılışları "
+                    "və tələbə təyinatları. Hər əməl bu səhifədə, dialoqda aparılır — kabinetdən çıxmır."
+                )
             ),
             "header_note": period.name if period is not None else _t("Aktiv semestr yoxdur"),
             "kpi_tiles": _kpi_tiles(stats, period),
@@ -284,7 +292,7 @@ def build_registrar_catalog_section(request, section, *, active_organization, al
                     "current": key == tab,
                     "url": f"{reverse('accounts:profile')}?section={SECTION}&{PREFIX}tab={key}",
                 }
-                for key in console.TAB_KEYS
+                for key in visible_tabs
             ],
             "filter_fields": fields,
             "filter_count_label": _t("Nəticə: %(n)s sətir") % {"n": len(rows)},

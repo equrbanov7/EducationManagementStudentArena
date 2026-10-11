@@ -104,6 +104,8 @@ def people_action(request):
                 reason_code=str(payload.get("reason_code") or ""),
                 contact_code=str(payload.get("contact_code") or ""),
                 contact_note=str(payload.get("contact_note") or ""),
+                # 2026-10-11: «Digər» seçiləndə yazılan səbəb (məcburi, ayrıca sahə).
+                reason_other=str(payload.get("reason_other") or ""),
             )
         elif action == "assign_unit":
             result = people.assign_teacher_unit(

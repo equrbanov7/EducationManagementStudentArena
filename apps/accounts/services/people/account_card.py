@@ -15,7 +15,9 @@ def account_card(user) -> dict:
         code = profile.block_reason_code or ""
         data.update(
             {
-                "reason": block_reasons.reason_label(code) if code else (profile.block_reason or ""),
+                "reason": (
+                    block_reasons.display_reason(code, profile.block_reason) if code else (profile.block_reason or "")
+                ),
                 "contact": block_reasons.contact_label(profile.block_contact_code, code),
                 "note": profile.block_contact_note or "",
                 "blocked_at": profile.blocked_at.strftime("%d.%m.%Y") if profile.blocked_at else "",

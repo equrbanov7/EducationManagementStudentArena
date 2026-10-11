@@ -1,0 +1,8 @@
+{% load i18n %}
+{# Nəticələr başlığının status nişanları — ikon + mətn (yalnız rəng yox). #}
+<span class="ems-badge ems-badge--neutral"><i class="fas fa-clipboard-list" aria-hidden="true"></i>{{ exam.get_exam_type_display }}</span>
+{% if exam.is_active %}
+<span class="ems-badge ems-badge--success"><i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "Aktiv" context "exams.template.teacher_exam_results" %}</span>
+{% else %}
+<span class="ems-badge ems-badge--muted"><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "Deaktiv" context "exams.template.teacher_exam_results" %}</span>
+{% endif %}

@@ -26,6 +26,26 @@
 .sysset__num { width: 92px; }
 .sysset__unit { font-size: 12.5px; color: var(--ems-text-muted, #64748b); white-space: nowrap; }
 .sysset__select { min-width: 220px; }
+/* Bayraq açarı (switch) — 2026-10-10 akademik qaydalar. Mətn vəziyyətə görə dəyişir (CSS, JS-siz). */
+.sysset__switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.sysset__switch-input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sysset__switch-track {
+    position: relative; width: 42px; height: 24px; border-radius: 999px; flex: none;
+    background: var(--ems-neutral-300, #cbd5e1); transition: background-color .15s ease;
+}
+.sysset__switch-track::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 3px rgba(15, 23, 42, .3); transition: transform .15s ease;
+}
+.sysset__switch-input:checked + .sysset__switch-track { background: var(--ems-primary-600, #2563eb); }
+.sysset__switch-input:checked + .sysset__switch-track::after { transform: translateX(18px); }
+.sysset__switch-input:focus-visible + .sysset__switch-track { outline: 2px solid var(--ems-primary-600, #2563eb); outline-offset: 2px; }
+.sysset__switch-text { font-size: 12.5px; font-weight: 700; min-width: 72px; }
+.sysset__switch-input:checked ~ [data-ss-switch-off],
+.sysset__switch-input:not(:checked) ~ [data-ss-switch-on] { display: none; }
+@media (prefers-reduced-motion: reduce) {
+    .sysset__switch-track, .sysset__switch-track::after { transition: none; }
+}
 .sysset__actions { display: flex; justify-content: flex-end; position: sticky; bottom: 0; padding: 10px 0; }
 @media (max-width: 760px) {
     .sysset__row { grid-template-columns: 1fr; }

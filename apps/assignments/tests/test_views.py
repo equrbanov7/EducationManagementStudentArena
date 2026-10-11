@@ -106,7 +106,7 @@ class AssignmentDetailBackUrlTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "courseActionConfirmModal")
-        self.assertContains(response, "Bu sərbəst işi göndərmək istədiyinizə əminsiniz?")
+        self.assertContains(response, "Bu tapşırığı göndərmək istədiyinizə əminsiniz?")
 
 
 class AssignmentTenantIsolationTest(TestCase):
@@ -161,9 +161,10 @@ class AssignmentTenantIsolationTest(TestCase):
         session["active_organization"] = self.org_a.slug
         session.save()
 
-    def test_search_students_blocks_cross_tenant_course_id(self):
+    def test_roster_search_blocks_cross_tenant_course_id(self):
+        # WP9a (2026-10-10): `search-students/` silindi — eyni roster qapısı `search-groups/`-dadır.
         response = self.client.get(
-            reverse("assignments:search_students"),
+            reverse("assignments:search_groups"),
             {"course_id": self.course_b.id, "q": "student"},
         )
         self.assertEqual(response.status_code, 404)
@@ -570,40 +571,14 @@ class RosterAPIAuthorizationTest(TestCase):
     def _login_as(self, user):
         _login_with_org(self.client, user, self.organization)
 
-    def test_search_students_owner_can_access(self):
-        """Course owner should be able to search students"""
-        self._login_as(self.owner)
-        response = self.client.get(
-            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("results", response.json())
-
-    def test_search_students_teacher_can_access(self):
-        """Teacher should be able to search students"""
-        self._login_as(self.teacher)
-        response = self.client.get(
-            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("results", response.json())
-
-    def test_search_students_assistant_can_access(self):
-        """Assistant should be able to search students"""
+    # WP9a (2026-10-10): `search-students/` silindi — köməkçi müəllimin roster girişi
+    # `search-groups/` üzərində yoxlanılır (eyni ``can_user_access_course_roster`` qapısı).
+    def test_search_groups_assistant_can_access(self):
+        """Assistant should be able to search groups"""
         self._login_as(self.assistant)
-        response = self.client.get(
-            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
-        )
+        response = self.client.get(reverse("assignments:search_groups"), {"course_id": self.course.id, "q": "Group"})
         self.assertEqual(response.status_code, 200)
         self.assertIn("results", response.json())
-
-    def test_search_students_unauthorized_denied(self):
-        """Unauthorized user should be denied"""
-        self._login_as(self.unauthorized_user)
-        response = self.client.get(
-            reverse("assignments:search_students"), {"course_id": self.course.id, "q": "student"}
-        )
-        self.assertEqual(response.status_code, 403)
 
     def test_search_groups_owner_can_access(self):
         """Course owner should be able to search groups"""

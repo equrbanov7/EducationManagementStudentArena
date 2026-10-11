@@ -378,14 +378,17 @@ def test_the_assessment_rule_text_reaches_the_student_instead_of_a_default_split
 
 def test_a_migrated_syllabus_shows_no_score_for_selfwork_topics():
     """Mənbədə sərbəst iş VARİANTI yoxdur → «(0 bal)» yazmaq yanlış məlumatdır."""
-    from apps.syllabus.document import build_preview_blocks
+    from apps.syllabus.document import blocks_by_key, build_preview_blocks
+    from apps.syllabus.rules import LEGACY
 
     data, _codes = build_section_data(
         _document(sections={SELF_WORK_TABLE: [_section(1, "Birinci mövzu"), _section(2, "İkinci mövzu")]})
     )
 
     assert data["self"]["option"] == ""
-    assert build_preview_blocks(data)[6]["body"].split("\n") == ["1. Birinci mövzu", "2. İkinci mövzu"]
+    # Sahib 2026-10-10: «Sərbəst iş» bloku yalnız köhnə qaydada var (köçürmə = köhnə semestr) — blok AÇARLA.
+    body = blocks_by_key(build_preview_blocks(data, rule=LEGACY))["selfwork"]
+    assert body.split("\n") == ["1. Birinci mövzu", "2. İkinci mövzu"]
 
 
 def test_the_assessment_note_counter_stays_silent_without_a_source_row():

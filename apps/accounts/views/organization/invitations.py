@@ -40,12 +40,14 @@ def student_org_invitation_action(request):
     from apps.organizations.public import create_audit_log
     from core.rls import bypass_rls
 
+    # URL auditi A7 (2026-10-10): «Təşkilata qoşul» bölməsi yoxdur — dəvətlər «Bildirişlər»-dədir.
+    default_back = f"{reverse('accounts:profile')}?section=notifications"
     if request.method != "POST":
-        return redirect(f"{reverse('accounts:profile')}?section=student-organization-request")
+        return redirect(default_back)
 
     invite_id = request.POST.get("invite_id")
     action = (request.POST.get("action") or "").strip().lower()
-    back_url = _resolve_next_url(request, f"{reverse('accounts:profile')}?section=student-organization-request")
+    back_url = _resolve_next_url(request, default_back)
 
     # The user may not have an active org context yet (they are looking to
     # join one), so the Membership table RLS would hide the invite row.

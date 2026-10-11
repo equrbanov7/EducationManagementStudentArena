@@ -30,7 +30,6 @@ from ..services import (
     ensure_can_view,
     find_task,
     get_or_create_task,
-    manageable_chairs,
     open_amendment,
     resolve_chair,
     row_warnings,
@@ -458,23 +457,9 @@ def amend(request) -> JsonResponse:
     )
 
 
-@never_cache
-@login_required
-@require_GET
-def chairs(request) -> JsonResponse:
-    """Aktorun əhatəsindəki kafedralar (RİM/rektorluq üçün seçici)."""
-    organization = active_organization(request)
-    if organization is None:
-        return no_org()
-    actor = actor_for(request)
-    units = manageable_chairs(actor)
-    return JsonResponse({"ok": True, "results": [{"id": str(unit.pk), "name": unit.name} for unit in units]})
-
-
 __all__ = [
     "amend",
     "assign",
-    "chairs",
     "confirm",
     "curriculum",
     "options",

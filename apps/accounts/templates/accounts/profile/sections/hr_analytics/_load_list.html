@@ -1,0 +1,19 @@
+{% load i18n %}
+<section class="ems-card hr-card" aria-labelledby="{{ list_id }}">
+    <header class="ems-card__head"><h3 class="ems-card__title" id="{{ list_id }}">{{ list_title }}</h3></header>
+    <div class="ems-card__body">
+        {% if list_rows %}
+        <ol class="hr-ranklist">
+            {% for row in list_rows %}
+            <li class="hr-ranklist__row">
+                <span class="hr-ranklist__name">{{ row.name }}<small>{{ row.chair|default:"—" }}</small></span>
+                <span class="ems-badge ems-badge--{{ list_tone }}">{{ row.fill_percent }}%</span>
+                <span class="hr-muted">{{ row.planned_load }} / {{ row.norm_hours }} {% trans "saat" context "accounts.hr_analytics" %}</span>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p class="hr-muted">{% trans "Belə müəllim yoxdur." context "accounts.hr_analytics" %}</p>
+        {% endif %}
+    </div>
+</section>

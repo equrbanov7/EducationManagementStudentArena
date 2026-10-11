@@ -71,6 +71,19 @@ def _audit(offering, by_user, kind, changes, correction, request):
 # ── Sərbəst iş ───────────────────────────────────────────────────────────────
 
 
+def ensure_selfwork_active(offering) -> None:
+    """Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə (RİM tənzimləməsi) sənədli düzəliş də YOXDUR.
+
+    Gizli UI-dan yan keçən sorğu bal yaza / geri ala bilməsin — xəta düzəliş axınının adi
+    yolu ilə (JSON 400 / mesaj) qayıdır; mövcud data toxunulmur."""
+    from core.academic_rules import selfwork_active_for_offering
+
+    if not selfwork_active_for_offering(offering):
+        raise ValidationError(
+            pgettext("registrar.selfwork", "Bu semestrdə sərbəst iş tətbiq olunmur — düzəliş mümkün deyil.")
+        )
+
+
 #: ``apply_selfwork_correction(new_points=...)`` verilmədikdə — bal ``request.POST["new_points"]``-dən
 #: oxunur (``correction_views`` yalnız ``new_done`` ötürür; bal mövzusunda modal ``new_points`` göndərir).
 _FROM_REQUEST = object()
@@ -95,6 +108,7 @@ def apply_selfwork_correction(
     * bal xanası (``max_points>1`` və ya fənn qovluğu balı): YENİ EFFEKTİV bal
       (``new_points``; boş = «—», qiymət silinir) — 2 saat pəncərəsi və fənn qovluğu
       balının oxu-only qorumasını YALNIZ bu sənədli yol keçir."""
+    ensure_selfwork_active(offering)
     note = _validate(reason, note, document)
     from .correction_target_locks import lock_selfwork
 
@@ -179,6 +193,7 @@ def revert_last_selfwork_correction(*, topic, enrollment, by_user, request=None,
     from . import correction_reversals as reversals
     from .correction_target_locks import lock_selfwork
 
+    ensure_selfwork_active(topic.offering)
     correction, already_reversed = reversals._select_active(
         SelfWorkCorrection, "selfwork_correction", {"topic": topic, "enrollment": enrollment}, correction_id
     )
@@ -225,11 +240,24 @@ def revert_last_selfwork_correction(*, topic, enrollment, by_user, request=None,
 # ── Kurs işi ─────────────────────────────────────────────────────────────────
 
 
+def ensure_coursework_active(offering) -> None:
+    """Sahib 2026-10-11: kurs işi söndürülən dövrdə (RİM tənzimləməsi) sənədli düzəliş/geri alma da YOXDUR.
+
+    Sərbəst işdəki kimi: gizli UI-dan yan keçən sorğu adi düzəliş xətası (JSON 400 / mesaj) alır; data qalır."""
+    from core.academic_rules import coursework_active_for_offering
+
+    if not coursework_active_for_offering(offering):
+        raise ValidationError(
+            pgettext("registrar.correction", "Bu semestrdə kurs işi tətbiq olunmur — düzəliş mümkün deyil.")
+        )
+
+
 @transaction.atomic
 def apply_coursework_correction(
     *, enrollment, new_score, new_topic, new_date, reason, note, document, by_user, request=None
 ):
     """Kurs işi xanasına (tələbə) sənədli düzəliş: bal / mövzu / tarix."""
+    ensure_coursework_active(enrollment.offering)
     note = _validate(reason, note, document)
     from .correction_target_locks import lock_coursework
 
@@ -486,8 +514,9 @@ def annotate_normal_view(offering, context):
     et (yerində) və read-only tarixçə map-larını qaytar (sənədsiz). Beləcə bal
     xanası kimi bu tab-larda da düzəlişli xana normal görünüşdə sarı olur + kliklə
     tarixçə açılır. Kontekst-də board-lar artıq qurulub — onları dəyişirik."""
-    sw = selfwork_corrections_map(offering)
-    cw = coursework_corrections_map(offering)
+    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə tarixçə xəritəsi də səhifəyə düşmür (gizli bölmə).
+    sw = selfwork_corrections_map(offering) if context.get("selfwork_active", True) else {}
+    cw = coursework_corrections_map(offering) if context.get("coursework_active", True) else {}
     cm = component_corrections_map(offering)
     if context.get("selfwork_board"):
         annotate_selfwork_board(context["selfwork_board"], sw)

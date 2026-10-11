@@ -240,13 +240,13 @@ class LiveTransitionScalingTest(TransactionTestCase):
             }
             return started
 
-        await window("start", "host_start_game", "question_published")
+        await window("start", "start_game", "question_published")
         reveal_started = await window("skip_intro+auto_reveal", "host_skip_question_intro", "reveal")
         results["skip_intro+auto_reveal"]["reveal_events_per_player"] = max(
             socket.count(reveal_started)["reveal"] for socket in play
         )
-        await window("next", "host_next_question", "question_published")
-        await window("finish", "host_finish", "finished")
+        await window("next", "next_question", "question_published")
+        await window("finish", "finish_game", "finished")
         for socket in [host, *lobby, *play]:
             await socket.close()
         return results

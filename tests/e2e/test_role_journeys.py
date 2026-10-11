@@ -100,7 +100,7 @@ class TestRoleJourneys:
         expect(org_admin_page.locator("input[name='email']")).to_be_visible()
 
     def test_teacher_sees_seeded_course_and_exam(self, teacher_page: Page) -> None:
-        teacher_page.goto(build_url("/courses/my-courses/"))
+        teacher_page.goto(build_url("/accounts/profile/?section=my-courses"))
         teacher_page.wait_for_load_state("domcontentloaded")
         expect(teacher_page.get_by_text(E2E_SCENARIO_COURSE_TITLE)).to_be_visible()
 
@@ -109,7 +109,7 @@ class TestRoleJourneys:
         expect(teacher_page.get_by_text(E2E_SCENARIO_EXAM_TITLE)).to_be_visible()
 
     def test_student_sees_seeded_course_assignment_and_exam(self, student_page: Page) -> None:
-        _open_seeded_course_dashboard(student_page, "/courses/my-enrolled/")
+        _open_seeded_course_dashboard(student_page, "/accounts/profile/?section=assigned-courses")
 
         _open_seeded_assignment_detail(student_page)
         expect(
@@ -120,7 +120,7 @@ class TestRoleJourneys:
         expect(student_page.get_by_text(E2E_SCENARIO_EXAM_TITLE)).to_be_visible()
 
     def test_late_student_inherits_group_based_access(self, late_student_page: Page) -> None:
-        _open_seeded_course_dashboard(late_student_page, "/courses/my-enrolled/")
+        _open_seeded_course_dashboard(late_student_page, "/accounts/profile/?section=assigned-courses")
 
         _open_seeded_assignment_detail(late_student_page)
         expect(

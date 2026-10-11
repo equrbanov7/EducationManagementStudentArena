@@ -44,15 +44,8 @@ class RosterSearchTolerantTests(TestCase):
         self.client = Client()
         _login_with_org(self.client, self.owner, self.organization)
 
-    def test_search_students_aliyev_and_shahzad(self):
-        for query in ("Aliyev", "shahzad", "Şahzad Əliyev"):
-            with self.subTest(query=query):
-                response = self.client.get(
-                    reverse("assignments:search_students"), {"course_id": self.course.id, "q": query}
-                )
-                self.assertEqual([row["id"] for row in response.json()["results"]], [self.aliyev.id])
-        response = self.client.get(reverse("assignments:search_students"), {"course_id": self.course.id, "q": ""})
-        self.assertEqual(len(response.json()["results"]), 2)
+    # WP9a (2026-10-10): `search-students/` (çağıranı yox idi) silindi; dözümlü axtarış
+    # qrup axtarışında və cavab süzgəcində yoxlanılır.
 
     def test_search_groups_is_compact(self):
         for query in ("234king", "234k ing", "234 K ing"):

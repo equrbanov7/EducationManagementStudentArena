@@ -31,6 +31,7 @@ from apps.exams.services.language_variants import (
     set_variant_active,
 )
 from apps.exams.services.visual_import_upload import prepare_question_upload
+from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from apps.exams.views.teacher.workbench_paste import paste_context, paste_image_response, requested_paste_action
 from core.http_ids import parse_int
@@ -209,6 +210,11 @@ def exam_language_manager(request, slug):
 
     context = {
         "exam": exam,
+        # 2026-10-10 redizayn: ortaq başlıq (breadcrumb + aktiv dil sayı nişanı).
+        "exam_crumbs": exam_breadcrumbs(
+            request, exam, current=pgettext("exams.template.language_manager", "Dil variantları")
+        ),
+        "active_variant_count": sum(1 for row in variant_rows if row["variant"].is_active),
         "variant_rows": variant_rows,
         "addable_languages": addable_languages,
         "language_choices": EXAM_LANGUAGE_CHOICES,

@@ -1,123 +1,79 @@
-document.addEventListener("DOMContentLoaded", function () {
-  var i18n = window.TEACHER_QUESTIONS_BANK_I18N || {};
-  var searchForm = document.getElementById("questionSearchForm");
-  var searchInput = document.getElementById("questionSearchInput");
-  var bulkForm = document.getElementById("bulkForm");
-  var tableSelectAll = document.getElementById("tableSelectAll");
-  var selectAllPageBtn = document.getElementById("selectAllPageBtn");
-  var clearSelectionBtn = document.getElementById("clearSelectionBtn");
-  var selectedCountLabel = document.getElementById("selectedCountLabel");
-  var bulkActionButtons = Array.prototype.slice.call(document.querySelectorAll(".js-bulk-action-btn"));
-  var singleDeleteForm = document.getElementById("singleDeleteForm");
-  var singleDeleteQuestionId = document.getElementById("singleDeleteQuestionId");
-  var singleQuestionActionForm = document.getElementById("singleQuestionActionForm");
-  var singleQuestionActionValue = document.getElementById("singleQuestionActionValue");
-  var singleQuestionActionQuestionId = document.getElementById("singleQuestionActionQuestionId");
-  var questionLangDeleteForm = document.getElementById("questionLangDeleteForm");
-  var questionLangDeleteValue = document.getElementById("questionLangDeleteValue");
-  var questionBankDeleteAllForm = document.getElementById("questionBankDeleteAllForm");
-  var questionModalElement = document.getElementById("questionFormModal");
-  var questionModalBody = document.getElementById("questionFormModalBody");
-  var questionModalTitle = document.getElementById("questionFormModalTitle");
-  var questionModalHeader = questionModalElement ? questionModalElement.querySelector(".modal-header") : null;
-  var paginationLinks = Array.prototype.slice.call(document.querySelectorAll(".pagination-wrapper .page-link[href]"));
-  var questionModal = null;
-  var questionSubmitInFlight = false;
+/* =========================================================================
+   teacher_questions_bank.js — imtahanın «Sual bankı» + kitabxana bankı səhifəsi.
 
-  // ── Ümumi təsdiq modalı ──
-  var confirmModal = document.getElementById("qbConfirmModal");
-  var confirmIcon = document.getElementById("qbConfirmIcon");
-  var confirmTitle = document.getElementById("qbConfirmTitle");
-  var confirmBody = document.getElementById("qbConfirmBody");
-  var confirmOk = document.getElementById("qbConfirmOk");
-  var confirmCancelEls = Array.prototype.slice.call(document.querySelectorAll(".js-qb-confirm-cancel"));
-  var pendingConfirm = null;
+   2026-10-10 redizayn (sahib «modern UX/UI»):
+   - təsdiqlər qlobal EMSConfirm dialoqu ilə (səhifənin öz təsdiq modalı yoxdur);
+     ləğvdə fokus əməli açan düyməyə qayıdır;
+   - «Bütün sual bankını sil» YAZILI təsdiqlə: #qbTypedConfirmModal-da imtahanın
+     adı yazılmayınca «Hamısını sil» söndürülüdür;
+   - sual modalı (yarat/redaktə) bağlananda fokus onu açan düyməyə qayıdır.
+   POST müqaviləsi dəyişməyib: bulk_action = activate|deactivate|delete|
+   delete_language|delete_all (+ guarded_submit.js «son aktiv suallar» axını).
 
-  // Azərbaycanca defolt mətnlər (i18n override edə bilər)
-  var TXT = {
-    cancel: i18n.cancel || gettext("İmtina"),
-    deleteTitle: i18n.confirmDeleteTitle || gettext("Silməyi təsdiqlə"),
-    deactivateTitle: i18n.confirmDeactivateTitle || gettext("Deaktiv etməyi təsdiqlə"),
-    activateTitle: i18n.confirmActivateTitle || gettext("Aktiv etməyi təsdiqlə"),
-    okDelete: i18n.okDelete || gettext("Bəli, sil"),
-    okDeactivate: i18n.okDeactivate || gettext("Bəli, deaktiv et"),
-    okActivate: i18n.okActivate || gettext("Bəli, aktiv et"),
-    bulkDelete: i18n.bulkDeleteBody || gettext("Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"),
-    bulkDeactivate: i18n.bulkDeactivateBody || gettext("Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"),
-    bulkActivate: i18n.bulkActivateBody || gettext("Seçilmiş {count} sual aktiv ediləcək. Davam edək?"),
-    singleDelete: i18n.deleteQuestionBody || gettext("Bu sual silinəcək: {question}"),
-    singleDeactivate: i18n.singleDeactivateBody || gettext("Bu sual deaktiv ediləcək. Davam edək?"),
-    singleActivate: i18n.singleActivateBody || gettext("Bu sual aktiv ediləcək. Davam edək?"),
-    deleteAllTitle: i18n.deleteAllTitle || gettext("Sual bankını sil"),
-    deleteAllBody: i18n.deleteAllBody || gettext("Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"),
-    languageDeleteTitle: i18n.languageDeleteTitle || gettext("Dil üzrə sil"),
-    languageDeleteBody: i18n.languageDeleteBody || gettext("Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"),
-  };
+   AJAX-safe: EMSReady + kök bayrağı (`data-qb-bound`) — document/window-a
+   dinləyici yığılmır. Qarmaqlar: partials/_question_management.html,
+   qm/_card.html, qm/_danger.html.
+   ========================================================================= */
+(function () {
+  "use strict";
 
-  var checkboxes = Array.prototype.slice.call(document.querySelectorAll(".question-checkbox"));
-  var debounceTimer = null;
+  var SEARCH_DEBOUNCE_MS = 420;
+  var SCROLL_FLAG = "qb_scroll_to_top";
+  var INTERACTIVE_SELECTOR = "a,button,input,textarea,select,details,summary,label";
 
-  function setConfirmVariant(variant) {
-    var map = {
-      danger: { icon: "fa-trash-alt", cls: "qb-confirm-icon--danger", btn: "qb-btn-red" },
-      warn: { icon: "fa-pause-circle", cls: "qb-confirm-icon--warn", btn: "qb-btn-amber" },
-      success: { icon: "fa-play-circle", cls: "qb-confirm-icon--success", btn: "qb-btn-green" },
-      info: { icon: "fa-circle-info", cls: "qb-confirm-icon--info", btn: "qb-btn-blue" },
-    };
-    var cfg = map[variant] || map.danger;
-    if (confirmIcon) {
-      confirmIcon.className = "qb-confirm-icon " + cfg.cls;
-      confirmIcon.innerHTML = '<i class="fas ' + cfg.icon + '"></i>';
-    }
-    if (confirmOk) {
-      confirmOk.className = "qb-btn " + cfg.btn;
-    }
+  function t(key, fallback) {
+    var i18n = window.TEACHER_QUESTIONS_BANK_I18N || {};
+    return i18n[key] || gettext(fallback);
   }
 
-  function openConfirm(opts) {
-    if (!confirmModal) {
-      // Modal yoxdursa qlobal EMSConfirm fallback (UX-15 — native confirm() yox).
-      window.EMSConfirm.open({ body: opts.body || "?", danger: (opts.variant || "danger") === "danger" }).then(function (ok) {
-        if (ok && typeof opts.onConfirm === "function") opts.onConfirm();
-      });
-      return;
-    }
-    pendingConfirm = typeof opts.onConfirm === "function" ? opts.onConfirm : null;
-    setConfirmVariant(opts.variant || "danger");
-    if (confirmTitle) confirmTitle.textContent = opts.title || "";
-    if (confirmBody) confirmBody.textContent = opts.body || "";
-    if (confirmOk) confirmOk.textContent = opts.okLabel || "OK";
-    confirmModal.classList.add("is-open");
-    confirmModal.setAttribute("aria-hidden", "false");
-  }
-
-  function closeConfirm() {
-    if (!confirmModal) return;
-    confirmModal.classList.remove("is-open");
-    confirmModal.setAttribute("aria-hidden", "true");
-    pendingConfirm = null;
-  }
-
-  confirmCancelEls.forEach(function (el) {
-    el.addEventListener("click", closeConfirm);
-  });
-  if (confirmOk) {
-    confirmOk.addEventListener("click", function () {
-      var fn = pendingConfirm;
-      closeConfirm();
-      if (typeof fn === "function") fn();
+  function fill(template, values) {
+    return String(template || "").replace(/\{(\w+)\}/g, function (match, name) {
+      return Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match;
     });
   }
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") closeConfirm();
-  });
 
-  // Bank-only əməliyyatlar (bankManagement.js) eyni təsdiq modalını işlətsin
-  window.qbConfirm = openConfirm;
+  /* Yazılı təsdiq: boşluqlar və i/İ/I/ı fərqi nəzərə alınmır (məqsəd — düşünülmüş əməl). */
+  function normalizePhrase(value) {
+    return String(value || "")
+      .replace(/[İIı]/g, "i")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
-  // QB 2026-09-30: imtahan səhifəsində sil/deaktiv AJAX ilə gedir — server «son aktiv
-  // suallar» halında EMSConfirm təsdiqi istəyir (bax teacher_questions_bank/guarded_submit.js).
-  // Köməkçi yoxdursa (müstəqil bank səhifəsi) false → köhnə adi form göndərişi.
+  function phraseMatches(typed, phrase) {
+    var expected = normalizePhrase(phrase);
+    return expected !== "" && normalizePhrase(typed) === expected;
+  }
+
+  function focusBack(node) {
+    if (node && document.contains(node) && typeof node.focus === "function") node.focus();
+  }
+
+  function modalApi(element) {
+    if (!element || !window.bootstrap || !window.bootstrap.Modal) return null;
+    return window.bootstrap.Modal.getOrCreateInstance(element);
+  }
+
+  /* EMSConfirm → təsdiqdə `onConfirm`, ləğvdə fokus düyməyə qayıdır. */
+  function confirmThen(opts, onConfirm, trigger) {
+    var api = window.EMSConfirm;
+    // EMSConfirm base.html-də qlobal yüklənir; yoxdursa əməl təsdiqsiz İCRA OLUNMUR
+    // (native confirm() qadağandır — FE-F19).
+    if (!api || typeof api.open !== "function") return;
+    api.open({
+      title: opts.title || "",
+      body: opts.body || "",
+      confirmLabel: opts.confirmLabel || "",
+      danger: !!opts.danger,
+    }).then(function (ok) {
+      if (ok) onConfirm();
+      else focusBack(trigger);
+    });
+  }
+
+  /* QB 2026-09-30: imtahan səhifəsində sil/deaktiv AJAX ilə gedir (guarded_submit.js);
+     köməkçi yoxdursa (kitabxana bankı) false → adi form göndərişi. */
   function guardedSubmit(form, fields) {
     var guard = window.QBGuardedSubmit;
     if (!form || !guard || !guard.enabled()) return false;
@@ -125,327 +81,392 @@ document.addEventListener("DOMContentLoaded", function () {
     return true;
   }
 
-  function normalizeSearchInput() {
-    if (!searchInput) return;
-    var maxLength = parseInt(searchInput.getAttribute("data-max-length") || searchInput.getAttribute("maxlength"), 10);
-    var value = (searchInput.value || "").trim();
-    if (Number.isFinite(maxLength) && maxLength > 0 && value.length > maxLength) {
-      value = value.slice(0, maxLength);
+  function submitWith(form, fields, guarded) {
+    if (!form) return;
+    if (guarded && guardedSubmit(form, fields)) return;
+    Object.keys(fields || {}).forEach(function (name) {
+      var hidden = document.createElement("input");
+      hidden.type = "hidden";
+      hidden.name = name;
+      hidden.value = fields[name];
+      form.appendChild(hidden);
+    });
+    form.submit();
+  }
+
+  /* ── Axtarış + süzgəclər (dərhal tətbiq) + səhifələmə ─────────────────── */
+  function bindFilters(root) {
+    var form = document.getElementById("questionSearchForm");
+    var input = document.getElementById("questionSearchInput");
+    var timer = null;
+    if (!form) return;
+
+    function normalizeInput() {
+      if (!input) return;
+      var max = parseInt(input.getAttribute("data-max-length") || input.getAttribute("maxlength"), 10);
+      var value = (input.value || "").trim();
+      if (Number.isFinite(max) && max > 0 && value.length > max) value = value.slice(0, max);
+      input.value = value;
     }
-    searchInput.value = value;
-  }
 
-  function submitSearchForm() {
-    if (!searchForm) return;
-    normalizeSearchInput();
-    if (typeof searchForm.requestSubmit === "function") {
-      searchForm.requestSubmit();
-      return;
+    function submitSearch() {
+      normalizeInput();
+      if (typeof form.requestSubmit === "function") form.requestSubmit();
+      else form.submit();
     }
-    searchForm.submit();
-  }
 
-  if (questionModalElement && typeof bootstrap !== "undefined") {
-    questionModal = bootstrap.Modal.getOrCreateInstance(questionModalElement);
-  }
+    form.addEventListener("submit", normalizeInput);
+    form.addEventListener("change", function (event) {
+      if (event.target && event.target.tagName === "SELECT") submitSearch();
+    });
+    if (input) {
+      input.addEventListener("input", function () {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(submitSearch, SEARCH_DEBOUNCE_MS);
+      });
+    }
 
-  function setPaginationScrollFlag() {
-    try { window.sessionStorage.setItem("qb_scroll_to_top", "1"); } catch (e) {}
-  }
-  function consumePaginationScrollFlag() {
+    root.querySelectorAll(".pagination-wrapper .page-link[href]").forEach(function (link) {
+      link.addEventListener("click", function () {
+        try { window.sessionStorage.setItem(SCROLL_FLAG, "1"); } catch (e) { /* storage bağlıdır */ }
+      });
+    });
     try {
-      if (window.sessionStorage.getItem("qb_scroll_to_top") !== "1") return;
-      window.sessionStorage.removeItem("qb_scroll_to_top");
-      window.requestAnimationFrame(function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
-    } catch (e) {}
-  }
-  if ("scrollRestoration" in window.history) { window.history.scrollRestoration = "manual"; }
-  consumePaginationScrollFlag();
-
-  function selectedCountText(count) {
-    if (count === 0) return i18n.selectedCountZero || gettext("0 seçilib");
-    return (i18n.selectedCount || gettext("{count} seçilib")).replace("{count}", String(count));
-  }
-
-  function syncCardState(checkbox) {
-    var card = checkbox.closest(".qb-card");
-    if (card) card.classList.toggle("is-selected", checkbox.checked);
-  }
-
-  function selectedCount() {
-    return checkboxes.filter(function (item) { return item.checked; }).length;
-  }
-
-  function updateSelectionUI() {
-    checkboxes.forEach(syncCardState);
-    var count = selectedCount();
-    if (selectedCountLabel) selectedCountLabel.textContent = selectedCountText(count);
-    if (tableSelectAll) {
-      var total = checkboxes.length;
-      tableSelectAll.checked = total > 0 && count === total;
-      tableSelectAll.indeterminate = count > 0 && count < total;
-    }
-    bulkActionButtons.forEach(function (button) {
-      button.disabled = count === 0;
-      button.classList.toggle("is-disabled", count === 0);
-      button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
-    });
-  }
-
-  function setAllCheckboxes(value) {
-    checkboxes.forEach(function (item) { item.checked = value; });
-    updateSelectionUI();
-  }
-
-  if (searchInput && searchForm) {
-    searchInput.addEventListener("input", function () {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(submitSearchForm, 420);
-    });
-  }
-  if (searchForm) {
-    searchForm.addEventListener("submit", normalizeSearchInput);
-    searchForm.querySelectorAll("select").forEach(function (item) {
-      item.addEventListener("change", submitSearchForm);
-    });
-  }
-  paginationLinks.forEach(function (link) { link.addEventListener("click", setPaginationScrollFlag); });
-
-  if (tableSelectAll) tableSelectAll.addEventListener("change", function () { setAllCheckboxes(tableSelectAll.checked); });
-  if (selectAllPageBtn) selectAllPageBtn.addEventListener("click", function () { setAllCheckboxes(true); });
-  if (clearSelectionBtn) clearSelectionBtn.addEventListener("click", function () { setAllCheckboxes(false); });
-  checkboxes.forEach(function (item) { item.addEventListener("change", updateSelectionUI); });
-
-  var INTERACTIVE_SELECTOR = "a,button,input,textarea,select,details,summary,label";
-  document.querySelectorAll(".qb-card").forEach(function (card) {
-    card.addEventListener("click", function (event) {
-      if (event.target.closest(INTERACTIVE_SELECTOR)) return;
-      var cb = card.querySelector(".question-checkbox");
-      if (!cb) return;
-      cb.checked = !cb.checked;
-      updateSelectionUI();
-    });
-  });
-
-  // ── Toplu əməliyyat → təsdiq modalı ──
-  if (bulkForm) {
-    bulkForm.addEventListener("submit", function (event) {
-      var submitter = event.submitter;
-      if (!submitter || submitter.name !== "bulk_action") return;
-      event.preventDefault();
-
-      var count = selectedCount();
-      if (count === 0) {
-        openConfirm({ variant: "info", title: TXT.deleteTitle, body: i18n.selectAtLeastOne || gettext("Ən azı bir sual seçin."), okLabel: "OK", onConfirm: null });
-        return;
+      if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+      if (window.sessionStorage.getItem(SCROLL_FLAG) === "1") {
+        window.sessionStorage.removeItem(SCROLL_FLAG);
+        window.requestAnimationFrame(function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
       }
+    } catch (e) { /* storage bağlıdır */ }
+  }
 
-      var action = submitter.value;
-      var cfg = { variant: "danger", title: TXT.deleteTitle, body: TXT.bulkDelete, okLabel: TXT.okDelete };
-      if (action === "deactivate") cfg = { variant: "warn", title: TXT.deactivateTitle, body: TXT.bulkDeactivate, okLabel: TXT.okDeactivate };
-      else if (action === "activate") cfg = { variant: "success", title: TXT.activateTitle, body: TXT.bulkActivate, okLabel: TXT.okActivate };
-      cfg.body = cfg.body.replace("{count}", String(count));
+  /* ── Seçim + toplu əməllər ────────────────────────────────────────────── */
+  function bindSelection(root) {
+    var bulkForm = document.getElementById("bulkForm");
+    var countLabel = document.getElementById("selectedCountLabel");
+    var checkboxes = Array.prototype.slice.call(root.querySelectorAll(".question-checkbox"));
+    var bulkButtons = Array.prototype.slice.call(root.querySelectorAll(".js-bulk-action-btn"));
 
-      openConfirm({
-        variant: cfg.variant, title: cfg.title, body: cfg.body, okLabel: cfg.okLabel,
-        onConfirm: function () {
-          if (action !== "activate" && guardedSubmit(bulkForm, { bulk_action: action })) return;
-          var hidden = document.createElement("input");
-          hidden.type = "hidden";
-          hidden.name = "bulk_action";
-          hidden.value = action;
-          bulkForm.appendChild(hidden);
-          bulkForm.submit();
-        },
+    function selectedCount() {
+      return checkboxes.filter(function (box) { return box.checked; }).length;
+    }
+
+    function refresh() {
+      var count = selectedCount();
+      checkboxes.forEach(function (box) {
+        var card = box.closest(".qb-card");
+        if (card) card.classList.toggle("is-selected", box.checked);
+      });
+      if (countLabel) {
+        countLabel.textContent = count === 0
+          ? t("selectedCountZero", "0 seçilib")
+          : fill(t("selectedCount", "{count} seçilib"), { count: count });
+      }
+      bulkButtons.forEach(function (button) {
+        button.disabled = count === 0;
+        button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
+      });
+    }
+
+    function setAll(value) {
+      checkboxes.forEach(function (box) { box.checked = value; });
+      refresh();
+    }
+
+    var selectAllBtn = document.getElementById("selectAllPageBtn");
+    var clearBtn = document.getElementById("clearSelectionBtn");
+    if (selectAllBtn) selectAllBtn.addEventListener("click", function () { setAll(true); });
+    if (clearBtn) clearBtn.addEventListener("click", function () { setAll(false); });
+    checkboxes.forEach(function (box) { box.addEventListener("change", refresh); });
+
+    // Kartın boş yerinə klik onu seçir (düymə/keçid/sahə klikləri istisna).
+    root.querySelectorAll(".qb-card").forEach(function (card) {
+      card.addEventListener("click", function (event) {
+        if (event.target.closest(INTERACTIVE_SELECTOR)) return;
+        var box = card.querySelector(".question-checkbox");
+        if (!box) return;
+        box.checked = !box.checked;
+        refresh();
+      });
+    });
+
+    if (bulkForm) {
+      bulkForm.addEventListener("submit", function (event) {
+        var submitter = event.submitter;
+        if (!submitter || submitter.name !== "bulk_action") return;
+        event.preventDefault();
+        var count = selectedCount();
+        if (count === 0) {
+          if (window.EMSToast) window.EMSToast.show(t("selectAtLeastOne", "Ən azı bir sual seçin."), "warning");
+          return;
+        }
+        var action = submitter.value;
+        var cfg = {
+          delete: { title: t("confirmDeleteTitle", "Silməyi təsdiqlə"), body: t("bulkDeleteBody", "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"), confirmLabel: t("okDelete", "Bəli, sil"), danger: true },
+          deactivate: { title: t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"), body: t("bulkDeactivateBody", "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"), confirmLabel: t("okDeactivate", "Bəli, deaktiv et"), danger: true },
+          activate: { title: t("confirmActivateTitle", "Aktiv etməyi təsdiqlə"), body: t("bulkActivateBody", "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"), confirmLabel: t("okActivate", "Bəli, aktiv et"), danger: false },
+        }[action];
+        if (!cfg) return;
+        cfg.body = fill(cfg.body, { count: count });
+        confirmThen(cfg, function () {
+          submitWith(bulkForm, { bulk_action: action }, action !== "activate");
+        }, submitter);
+      });
+    }
+
+    refresh();
+  }
+
+  /* ── Tək sual: aktiv/deaktiv/sil; dil üzrə sil ─────────────────────────── */
+  function bindRowActions(root) {
+    var deleteForm = document.getElementById("singleDeleteForm");
+    var deleteId = document.getElementById("singleDeleteQuestionId");
+    var actionForm = document.getElementById("singleQuestionActionForm");
+    var actionValue = document.getElementById("singleQuestionActionValue");
+    var actionId = document.getElementById("singleQuestionActionQuestionId");
+    var langForm = document.getElementById("questionLangDeleteForm");
+    var langValue = document.getElementById("questionLangDeleteValue");
+
+    root.querySelectorAll(".js-open-delete-modal").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var qid = button.getAttribute("data-question-id");
+        if (!deleteForm || !deleteId || !qid) return;
+        confirmThen({
+          title: t("confirmDeleteTitle", "Silməyi təsdiqlə"),
+          body: fill(t("deleteQuestionBody", "Bu sual silinəcək: {question}"), { question: button.getAttribute("data-question-text") || "" }),
+          confirmLabel: t("okDelete", "Bəli, sil"),
+          danger: true,
+        }, function () {
+          deleteId.value = qid;
+          submitWith(deleteForm, null, true);
+        }, button);
+      });
+    });
+
+    root.querySelectorAll(".js-single-question-action").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var action = button.getAttribute("data-action-value") || "";
+        var qid = button.getAttribute("data-question-id") || "";
+        if (!actionForm || !actionValue || !actionId || !qid) return;
+        var activate = action === "activate";
+        confirmThen({
+          title: activate ? t("confirmActivateTitle", "Aktiv etməyi təsdiqlə") : t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"),
+          body: activate ? t("singleActivateBody", "Bu sual aktiv ediləcək. Davam edək?") : t("singleDeactivateBody", "Bu sual deaktiv ediləcək. Davam edək?"),
+          confirmLabel: activate ? t("okActivate", "Bəli, aktiv et") : t("okDeactivate", "Bəli, deaktiv et"),
+          danger: !activate,
+        }, function () {
+          actionValue.value = action;
+          actionId.value = qid;
+          submitWith(actionForm, null, !activate);
+        }, button);
+      });
+    });
+
+    root.querySelectorAll(".js-delete-language").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var lang = button.getAttribute("data-language") || "";
+        if (!langForm || !langValue || !lang) return;
+        confirmThen({
+          title: t("languageDeleteTitle", "Dil üzrə sil"),
+          body: fill(t("languageDeleteBody", "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: button.getAttribute("data-count") || "0" }),
+          confirmLabel: t("okDelete", "Bəli, sil"),
+          danger: true,
+        }, function () {
+          langValue.value = lang;
+          submitWith(langForm, null, true);
+        }, button);
       });
     });
   }
 
-  // ── Tək sual: redaktə modalı (mövcud davranış) ──
-  function buildModalUrl(rawUrl) {
-    try {
-      var parsed = new URL(rawUrl, window.location.origin);
-      parsed.searchParams.set("modal", "1");
-      return parsed.pathname + parsed.search;
-    } catch (error) {
-      return rawUrl + (rawUrl.indexOf("?") === -1 ? "?modal=1" : "&modal=1");
+  /* ── «Bütün sual bankını sil» — yazılı təsdiq ─────────────────────────── */
+  function bindDeleteAll(root) {
+    var form = document.getElementById("questionBankDeleteAllForm");
+    var modal = document.getElementById("qbTypedConfirmModal");
+    var typedForm = modal && modal.querySelector("[data-qb-typed-form]");
+    var input = modal && modal.querySelector("[data-qb-typed-input]");
+    var okBtn = modal && modal.querySelector("[data-qb-typed-ok]");
+    var body = modal && modal.querySelector("[data-qb-typed-body]");
+    var trigger = null;
+    var confirmed = false;
+    if (!form) return;
+
+    function phrase() {
+      return typedForm ? typedForm.getAttribute("data-phrase") || "" : "";
     }
+
+    function sync() {
+      var ok = !!input && phraseMatches(input.value, phrase());
+      if (okBtn) okBtn.disabled = !ok;
+      if (input) input.setAttribute("aria-invalid", input.value && !ok ? "true" : "false");
+      return ok;
+    }
+
+    if (typedForm && input && okBtn) {
+      input.addEventListener("input", sync);
+      typedForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (!sync()) return;
+        confirmed = true;
+        var api = modalApi(modal);
+        if (api) api.hide();
+        submitWith(form, null, true);
+      });
+      modal.addEventListener("shown.bs.modal", function () { input.focus(); });
+      modal.addEventListener("hidden.bs.modal", function () {
+        if (!confirmed) focusBack(trigger);
+        trigger = null;
+      });
+    }
+
+    root.querySelectorAll(".js-delete-all-questions").forEach(function (button) {
+      button.addEventListener("click", function () {
+        var count = button.getAttribute("data-count") || "0";
+        var api = modalApi(modal);
+        if (!api || !typedForm || !input || !okBtn) {
+          // Bootstrap/dialoq yoxdursa — adi təhlükə təsdiqi (heç vaxt sınmır).
+          confirmThen({
+            title: t("deleteAllTitle", "Sual bankını sil"),
+            body: fill(t("deleteAllBody", "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: count }),
+            confirmLabel: t("okDelete", "Bəli, sil"),
+            danger: true,
+          }, function () { submitWith(form, null, true); }, button);
+          return;
+        }
+        trigger = button;
+        confirmed = false;
+        if (body) body.textContent = fill(body.getAttribute("data-template"), { count: count });
+        input.value = "";
+        sync();
+        api.show();
+      });
+    });
   }
-  function getQuestionModalLoadingMarkup() {
-    return '<div class="create-exam-modal-loading skeleton" aria-busy="true" role="status">' +
-        '<span class="visually-hidden">' + (i18n.loadingForm || gettext("Yüklənir...")) + "</span>" +
+
+  /* ── Sual modalı (yarat/redaktə) — mövcud axın ────────────────────────── */
+  function bindQuestionModal(root) {
+    var element = document.getElementById("questionFormModal");
+    var body = document.getElementById("questionFormModalBody");
+    var title = document.getElementById("questionFormModalTitle");
+    var modal = modalApi(element);
+    var trigger = null;
+    var inFlight = false;
+    if (!element || !body || !modal) return;
+
+    function loadingMarkup() {
+      return '<div class="create-exam-modal-loading skeleton" aria-busy="true" role="status">' +
+        '<span class="visually-hidden">' + t("loadingForm", "Yüklənir...") + "</span>" +
         '<div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div><div class="skeleton-line"></div>' +
         '<div class="skeleton-line skeleton-line--sm"></div><div class="skeleton-line skeleton-line--lg"></div><div class="skeleton-line"></div>' +
         "</div>";
-  }
-  function getQuestionModalErrorMarkup() {
-    return '<div class="create-exam-modal-error">' + (i18n.submitError || gettext("Yenidən cəhd edin.")) + "</div>";
-  }
-  function applyQuestionModalMode(mode) {
-    var isEdit = mode === "edit";
-    if (questionModalTitle) {
-      questionModalTitle.textContent = isEdit ? (i18n.questionEditTitle || gettext("Sualı redaktə et")) : (i18n.questionCreateTitle || gettext("Sual əlavə et"));
     }
-    if (questionModalHeader) {
-      questionModalHeader.classList.remove(
-        "bg-primary",
-        "bg-info",
-        "question-form-modal__header--create",
-        "question-form-modal__header--edit"
-      );
-      questionModalHeader.classList.add("question-form-modal__header");
-      questionModalHeader.classList.add(isEdit ? "question-form-modal__header--edit" : "question-form-modal__header--create");
-      questionModalHeader.classList.add("text-white");
+
+    function errorMarkup() {
+      var box = document.createElement("div");
+      box.className = "create-exam-modal-error";
+      box.textContent = t("submitError", "Yenidən cəhd edin.");
+      return box.outerHTML;
     }
-  }
-  function bindQuestionModalForm() {
-    if (!questionModalBody) return;
-    var formRoot = questionModalBody.querySelector(".js-exam-question-form-root");
-    if (window.ExamQuestionForm && formRoot) window.ExamQuestionForm.init(formRoot);
-    var closeInlineBtn = questionModalBody.querySelector(".js-close-question-form-modal");
-    if (closeInlineBtn && questionModal) {
-      closeInlineBtn.addEventListener("click", function () { questionModal.hide(); });
-    }
-    var form = questionModalBody.querySelector("form");
-    if (!form) return;
-    form.addEventListener("submit", async function (event) {
-      event.preventDefault();
-      if (questionSubmitInFlight) return;
-      questionSubmitInFlight = true;
-      var submitButton = form.querySelector('button[type="submit"]');
-      if (submitButton) submitButton.disabled = true;
+
+    function modalUrl(rawUrl) {
       try {
-        var response = await fetch(form.getAttribute("action"), {
-          method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" },
-        });
-        var contentType = response.headers.get("content-type") || "";
-        if (contentType.indexOf("application/json") !== -1) {
-          var payload = await response.json();
-          if (response.ok && payload.success) {
-            if (questionModal) questionModal.hide();
-            window.location.reload();
-            return;
-          }
-          if (payload.html) { questionModalBody.innerHTML = payload.html; bindQuestionModalForm(); return; }
-        }
-        var html = await response.text();
-        questionModalBody.innerHTML = html || getQuestionModalErrorMarkup();
-        bindQuestionModalForm();
+        var parsed = new URL(rawUrl, window.location.origin);
+        parsed.searchParams.set("modal", "1");
+        return parsed.pathname + parsed.search;
       } catch (error) {
-        questionModalBody.innerHTML = getQuestionModalErrorMarkup();
-      } finally {
-        questionSubmitInFlight = false;
-        if (submitButton) submitButton.disabled = false;
+        return rawUrl + (rawUrl.indexOf("?") === -1 ? "?modal=1" : "&modal=1");
       }
-    });
-  }
-  async function openQuestionModal(rawUrl, mode) {
-    if (!questionModal || !questionModalBody || !rawUrl) return;
-    applyQuestionModalMode(mode);
-    questionModalBody.innerHTML = getQuestionModalLoadingMarkup();
-    questionModal.show();
-    try {
-      var response = await fetch(buildModalUrl(rawUrl), { headers: { "X-Requested-With": "XMLHttpRequest" } });
-      if (!response.ok) throw new Error("request_failed");
-      questionModalBody.innerHTML = await response.text();
-      bindQuestionModalForm();
-    } catch (error) {
-      questionModalBody.innerHTML = getQuestionModalErrorMarkup();
     }
-  }
 
-  document.querySelectorAll(".js-open-question-form-modal").forEach(function (trigger) {
-    trigger.addEventListener("click", function (event) {
-      if (!questionModal || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      openQuestionModal(
-        trigger.getAttribute("data-question-modal-url") || trigger.getAttribute("href"),
-        trigger.getAttribute("data-question-modal-mode") || "edit"
-      );
-    });
-  });
+    function bindForm() {
+      var formRoot = body.querySelector(".js-exam-question-form-root");
+      if (window.ExamQuestionForm && formRoot) window.ExamQuestionForm.init(formRoot);
+      var closeBtn = body.querySelector(".js-close-question-form-modal");
+      if (closeBtn) closeBtn.addEventListener("click", function () { modal.hide(); });
+      var form = body.querySelector("form");
+      if (!form) return;
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        if (inFlight) return;
+        inFlight = true;
+        var submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.disabled = true;
+        try {
+          var response = await fetch(form.getAttribute("action"), {
+            method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" },
+          });
+          var contentType = response.headers.get("content-type") || "";
+          if (contentType.indexOf("application/json") !== -1) {
+            var payload = await response.json();
+            if (response.ok && payload.success) {
+              modal.hide();
+              window.location.reload();
+              return;
+            }
+            if (payload.html) { body.innerHTML = payload.html; bindForm(); return; }
+          }
+          var html = await response.text();
+          body.innerHTML = html || errorMarkup();
+          bindForm();
+        } catch (error) {
+          body.innerHTML = errorMarkup();
+        } finally {
+          inFlight = false;
+          if (submitButton) submitButton.disabled = false;
+        }
+      });
+    }
 
-  // ── Tək sual: sil (təsdiq modalı) ──
-  document.querySelectorAll(".js-open-delete-modal").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var qid = button.getAttribute("data-question-id");
-      var qtext = button.getAttribute("data-question-text") || "";
-      openConfirm({
-        variant: "danger", title: TXT.deleteTitle, body: TXT.singleDelete.replace("{question}", qtext), okLabel: TXT.okDelete,
-        onConfirm: function () {
-          if (!singleDeleteForm || !singleDeleteQuestionId || !qid) return;
-          singleDeleteQuestionId.value = qid;
-          if (guardedSubmit(singleDeleteForm)) return;
-          singleDeleteForm.submit();
-        },
+    async function open(rawUrl, mode) {
+      var isEdit = mode === "edit";
+      if (title) title.textContent = isEdit ? t("questionEditTitle", "Sualı redaktə et") : t("questionCreateTitle", "Sual əlavə et");
+      element.classList.toggle("is-edit", isEdit);
+      trigger = document.activeElement;
+      body.innerHTML = loadingMarkup();
+      modal.show();
+      try {
+        var response = await fetch(modalUrl(rawUrl), { headers: { "X-Requested-With": "XMLHttpRequest" } });
+        if (!response.ok) throw new Error("request_failed");
+        body.innerHTML = await response.text();
+        bindForm();
+      } catch (error) {
+        body.innerHTML = errorMarkup();
+      }
+    }
+
+    root.querySelectorAll(".js-open-question-form-modal").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        var url = link.getAttribute("data-question-modal-url") || link.getAttribute("href");
+        if (!url) return;
+        event.preventDefault();
+        open(url, link.getAttribute("data-question-modal-mode") || "edit");
       });
     });
-  });
 
-  // ── Tək sual: aktiv/deaktiv (təsdiq modalı) ──
-  document.querySelectorAll(".js-single-question-action").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var action = button.getAttribute("data-action-value") || "";
-      var qid = button.getAttribute("data-question-id") || "";
-      var cfg = action === "activate"
-        ? { variant: "success", title: TXT.activateTitle, body: TXT.singleActivate, okLabel: TXT.okActivate }
-        : { variant: "warn", title: TXT.deactivateTitle, body: TXT.singleDeactivate, okLabel: TXT.okDeactivate };
-      openConfirm({
-        variant: cfg.variant, title: cfg.title, body: cfg.body, okLabel: cfg.okLabel,
-        onConfirm: function () {
-          if (!singleQuestionActionForm || !singleQuestionActionValue || !singleQuestionActionQuestionId) return;
-          singleQuestionActionValue.value = action;
-          singleQuestionActionQuestionId.value = qid;
-          if (action === "deactivate" && guardedSubmit(singleQuestionActionForm)) return;
-          singleQuestionActionForm.submit();
-        },
-      });
-    });
-  });
-
-  // ── Seçilmiş dil üzrə bütün sualları sil ──
-  document.querySelectorAll(".js-delete-language").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var lang = button.getAttribute("data-language") || "";
-      var count = button.getAttribute("data-count") || "0";
-      openConfirm({
-        variant: "danger",
-        title: TXT.languageDeleteTitle,
-        body: TXT.languageDeleteBody.replace("{count}", String(count)),
-        okLabel: TXT.okDelete,
-        onConfirm: function () {
-          if (!questionLangDeleteForm || !questionLangDeleteValue || !lang) return;
-          questionLangDeleteValue.value = lang;
-          if (guardedSubmit(questionLangDeleteForm)) return;
-          questionLangDeleteForm.submit();
-        },
-      });
-    });
-  });
-
-  // ── İmtahanın bütün sual bankını sil ──
-  document.querySelectorAll(".js-delete-all-questions").forEach(function (button) {
-    button.addEventListener("click", function () {
-      var count = button.getAttribute("data-count") || "0";
-      openConfirm({
-        variant: "danger",
-        title: TXT.deleteAllTitle,
-        body: TXT.deleteAllBody.replace("{count}", String(count)),
-        okLabel: TXT.okDelete,
-        onConfirm: function () {
-          if (!questionBankDeleteAllForm || guardedSubmit(questionBankDeleteAllForm)) return;
-          questionBankDeleteAllForm.submit();
-        },
-      });
-    });
-  });
-
-  if (questionModalElement) {
-    questionModalElement.addEventListener("hidden.bs.modal", function () {
-      questionSubmitInFlight = false;
-      if (questionModalBody) questionModalBody.innerHTML = getQuestionModalLoadingMarkup();
+    element.addEventListener("hidden.bs.modal", function () {
+      inFlight = false;
+      body.innerHTML = loadingMarkup();
+      focusBack(trigger); // a11y: fokus modalı açan düyməyə qayıdır
+      trigger = null;
     });
   }
 
-  updateSelectionUI();
-});
+  function init() {
+    var root = document.querySelector("[data-qm-context]");
+    if (!root || root.getAttribute("data-qb-bound") === "1") return;
+    root.setAttribute("data-qb-bound", "1");
+    bindFilters(root);
+    bindSelection(root);
+    bindRowActions(root);
+    bindDeleteAll(root);
+    bindQuestionModal(root);
+  }
+
+  // jsdom testləri üçün saf funksiyalar (tests/js/teacher_questions_bank.test.js).
+  window.QBTypedConfirm = { normalize: normalizePhrase, matches: phraseMatches };
+
+  if (typeof window.EMSReady === "function") window.EMSReady(init);
+  else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();

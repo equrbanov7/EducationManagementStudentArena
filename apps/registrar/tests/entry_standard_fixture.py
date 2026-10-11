@@ -15,9 +15,10 @@ Dövrlər / açılışlar (4 tələbə, hər biri tək akademik qeydli; ``esd_s3
 
 * **NEW** — 2026/2027 Payız (MIDTERM rejimi, cari dövr, yeni standart):
 
-  - ``M1`` (ESD201) — 3 seminar + 1 lab + 2 mühazirə (plan 30 saat), Midterm (0–20) + balı olan
-    köhnə «Kollokvium 1» qalığı (20 ilə kəsilir), 2 × 5 sərbəst iş; buraxılmayan tələbə
-    (10 saat > 7.5) təkrar imtahanla keçir, idmançı istisnası, 17.50 → 18 yuvarlaqlaşdırma sərhədi.
+  - ``M1`` (ESD201) — 3 seminar + 1 lab + 2 mühazirə (plan 30 saat), Midterm (0–30; sərbəst iş açıq
+    olan köhnə qayda variantında 0–20) + balı olan köhnə «Kollokvium 1» qalığı (midterm tavanı ilə kəsilir),
+    2 × 5 sərbəst iş; buraxılmayan tələbə (10 saat > 7.5) təkrar imtahanla keçir, idmançı istisnası,
+    17.50 → 18 yuvarlaqlaşdırma sərhədi (köhnə qayda).  Seminar + lab balları var → yeni qaydada aktivlik 5 + 5.
   - ``M2`` (ESD202) — dərs YOXDUR, plan saatı 0 (davamiyyət məxrəci naməlum → kanonik 10.00),
     ``entry_score_max=35`` (tavan), GENERIC komponent (Midterm rejimində giriş balına DAXİL DEYİL),
     1 × 10 sərbəst iş.
@@ -32,7 +33,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
-from apps.registrar import finals, gradebook, journal_extras, selfwork_structure, services
+from apps.registrar import finals, gradebook, interim_assessment, journal_extras, selfwork_structure, services
 from apps.registrar.models import (
     AssessmentComponent,
     ComponentKind,
@@ -344,7 +345,7 @@ class EntryStandardFixture:
         )
         offering = cls.offerings["M1"]
         midterm = journal_extras.ensure_kollokviums(offering)[0]
-        assert (midterm.name, midterm.max_score) == ("Midterm", 20)
+        assert (midterm.name, midterm.max_score) == ("Midterm", interim_assessment.midterm_max())
         cls._component_scores("M1", midterm, {"esd_s0": 17, "esd_s1": 20, "esd_s3": 18})
         leftover = AssessmentComponent.objects.create(
             organization=cls.org,

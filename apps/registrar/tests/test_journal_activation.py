@@ -1,11 +1,15 @@
 """«Dərsi aktivləşdir» (UNEC müqayisəsi P1-1, 2026-09-25): bu günün cədvəl zolağı, slotdan dərs,
 cədvəldən kənar dərsin səbəbi — bütün mövcud jurnal qaydaları (bu gün, saat həddi, sillabus qapısı,
-dublikat, kilid) slot yolunda da qüvvədədir."""
+dublikat, kilid) slot yolunda da qüvvədədir.
+
+2026-10-10: «Aktivləşdir» RİM tənzimləməsidir (``journal.lesson_activation``, defolt SÖNDÜRÜLÜ) — bu
+testlər yandırılmış rejimi (köhnə davranış, geri dönüş yolu) yoxlayır; söndürülü rejim və «Yeni dərs»
+doldurması: ``test_journal_lesson_prefill_2026_10_10.py``."""
 
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -24,6 +28,7 @@ def _other(parity):
     return WeekType.EVEN if parity == WeekType.ODD else WeekType.ODD
 
 
+@override_settings(JOURNAL_LESSON_ACTIVATION=True)
 class JournalActivationTest(TestCase):
     @classmethod
     def setUpTestData(cls):

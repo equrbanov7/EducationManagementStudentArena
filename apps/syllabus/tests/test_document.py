@@ -16,14 +16,16 @@ from __future__ import annotations
 
 import re
 
-from apps.syllabus.assessment_formula import formula_text
+from apps.syllabus.assessment_formula import LABELS, formula_text
 from apps.syllabus.constants import SectionKey
 from apps.syllabus.document import (
     _EMPTY,
     _POINTS,
     BLOCK_TITLES,
+    blocks_by_key,
     build_preview_blocks,
 )
+from apps.syllabus.rules import LEGACY
 from apps.syllabus.services.drafts import blank_section_data
 from apps.syllabus.tests.factories import complete_section_data
 
@@ -109,8 +111,17 @@ def test_an_empty_assessment_section_still_prints_the_standard_formula():
 
 
 def test_the_formula_names_every_component_and_the_hundred():
-    assert "10" in FORMULA and "20" in FORMULA and "50" in FORMULA
+    """Sahib 2026-10-10 (defolt — yeni qayda): sərbəst iş yoxdur, onun 10 balı midterm-ə keçib (30)."""
+    assert "10" in FORMULA and "30" in FORMULA and "50" in FORMULA
+    assert str(LABELS["selfwork"]) not in FORMULA
     assert f"= 100 {POINTS}" in FORMULA
+
+
+def test_the_legacy_formula_keeps_selfwork_and_midterm_twenty():
+    """Köhnə semestrin (və tənzimləmə yandırılanda) düsturu dəyişmir: midterm 20 + sərbəst iş 10."""
+    legacy = formula_text(("seminar",), selfwork=True, split=False)
+    assert f"{LABELS['midterm']} 20" in legacy and f"{LABELS['selfwork']} 10" in legacy
+    assert f"= 100 {POINTS}" in legacy
 
 
 # ── 2b. Abzas boşluğu OXUCUYA ÇATIR ──────────────────────────────────────────
@@ -154,14 +165,14 @@ def test_selfwork_topics_without_a_known_option_carry_no_score():
         "archived": [],
     }
 
-    body = build_preview_blocks(data)[6]["body"]
+    body = blocks_by_key(build_preview_blocks(data, rule=LEGACY))["selfwork"]
 
     assert body.split("\n") == ["1. Birinci mövzu", "2. İkinci mövzu"]
     assert POINTS not in body  # bal MƏLUM DEYİL → heç bir bal yazılmır
 
 
 def test_selfwork_score_is_printed_when_the_option_is_known():
-    body = build_preview_blocks(complete_section_data())[6]["body"]  # 2x5
+    body = blocks_by_key(build_preview_blocks(complete_section_data(), rule=LEGACY))["selfwork"]  # 2x5
 
     assert body.split("\n") == [
         f"1. Birinci sərbəst iş mövzusu (5 {POINTS})",
@@ -173,9 +184,25 @@ def test_selfwork_score_is_printed_when_the_option_is_known():
 
 
 def test_the_document_still_has_the_same_eight_blocks_in_the_same_order():
-    titles = list(_blocks(complete_section_data()))
+    """Köhnə semestr: 8 blok, eyni sıra."""
+    blocks = build_preview_blocks(complete_section_data(), rule=LEGACY)
+    titles = [str(block["title"]) for block in blocks]
 
     assert len(titles) == 8
     assert titles[5] == str(BLOCK_TITLES["assessment"])
     assert titles[6] == str(BLOCK_TITLES["selfwork"])
     assert titles[7] == str(BLOCK_TITLES["literature"])
+
+
+def test_without_selfwork_the_block_is_dropped_and_keys_stay_stable():
+    """Sahib 2026-10-10 (defolt — yeni qayda): «Sərbəst iş» bloku YOXDUR, ədəbiyyat açarla tapılır.
+
+    Data silinmir — eyni bölmə xəritəsi köhnə qaydada yenə sərbəst iş blokunu verir."""
+    data = complete_section_data()
+    blocks = build_preview_blocks(data)
+    keys = [block["key"] for block in blocks]
+
+    assert keys == ["description", "goal", "outcomes", "weeks", "methods", "assessment", "literature"]
+    assert str(BLOCK_TITLES["selfwork"]) not in [str(block["title"]) for block in blocks]
+    assert blocks_by_key(blocks)["literature"].startswith("Cormen")
+    assert "selfwork" in blocks_by_key(build_preview_blocks(data, rule=LEGACY))

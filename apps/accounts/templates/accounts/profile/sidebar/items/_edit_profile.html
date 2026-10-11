@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n nav_icons %}
 {# «Profili redaktə et» — «Tənzimləmələr» qrupu (sahib 2026-09-30; əvvəl header menyusunda idi). #}
 {% if 'edit-profile' in allowed_sections %}
 <li class="sidebar-menu-item">
@@ -7,7 +7,7 @@
        data-title="{% trans 'edit_profile' context 'profile.section' %}"
        data-source-url="{{ profile_base_url }}"
        class="sidebar-menu-link js-profile-section-link {% if active_section == 'edit-profile' %}active{% endif %}">
-        <i class="fas fa-user-pen sidebar-menu-icon" aria-hidden="true"></i>
+        {% nav_icon "user-pen" "sidebar-menu-icon" %}
         <span class="sidebar-menu-text">{% trans "edit_profile" context "profile.sidebar" %}</span>
     </a>
 </li>

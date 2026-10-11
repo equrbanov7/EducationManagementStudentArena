@@ -2,7 +2,7 @@
 ``transaction.atomic`` içindədir — ikinci yazı sınanda birinci geri alınır.
 
 * parol bərpası (`password_reset_done`): parol + OTP «istifadə olundu» birlikdə;
-* təşkilata müraciət (`student_organization_request`): müraciət sətri + profil;
+* (təşkilata müraciət — `student_organization_request` URL auditi A7 ilə 2026-10-10-da silindi);
 * icazə redaktoru (`permission_editor`): rol icazələri + audit qeydi.
 """
 
@@ -16,9 +16,8 @@ from django.core import mail
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from apps.accounts.models import EmailOTP, ProfileRole
+from apps.accounts.models import EmailOTP
 from apps.audit.models import AuditLog
-from apps.notifications.models import StudentOrganizationRequest
 from apps.organizations.models import Membership, Organization, Role
 from core.constants import OrganizationType
 from core.rls import bypass_rls
@@ -78,47 +77,6 @@ class PasswordResetDoneAtomicTest(TestCase):
         self.assertTrue(self.user.check_password("New-Pass-2026!"))
         otp.refresh_from_db()
         self.assertTrue(otp.is_used)
-
-
-class StudentOrganizationRequestAtomicTest(TestCase):
-    def setUp(self):
-        self.owner = User.objects.create_user("w2req_owner", "w2req_owner@example.com", PW)
-        self.org = _org("W2 Request Org", "w2-request-org", self.owner, OrganizationType.SCHOOL)
-        self.student = User.objects.create_user("w2req_student", "w2req_student@example.com", PW)
-        profile = self.student.profile
-        profile.role = ProfileRole.STUDENT
-        profile.organization = None
-        profile.organization_type = OrganizationType.INDIVIDUAL
-        profile.save(update_fields=["role", "organization", "organization_type", "updated_at"])
-        self.client.force_login(self.student)
-
-    def _submit(self):
-        return self.client.post(
-            reverse("accounts:student_organization_request"),
-            {"action": "submit_request", "organization_id": str(self.org.id), "request_message": "Salam"},
-        )
-
-    def test_profile_save_failure_rolls_back_the_request_row(self):
-        from apps.accounts.models import UserProfile
-
-        with mock.patch.object(UserProfile, "save", side_effect=RuntimeError("profile boom")):
-            with self.assertRaises(RuntimeError):
-                self._submit()
-        with bypass_rls():
-            self.assertFalse(
-                StudentOrganizationRequest.objects.filter(user=self.student, organization=self.org).exists()
-            )
-        self.student.profile.refresh_from_db()
-        self.assertIsNone(self.student.profile.requested_organization_id)
-
-    def test_happy_path_writes_request_and_profile(self):
-        self.assertEqual(self._submit().status_code, 302)
-        with bypass_rls():
-            self.assertTrue(
-                StudentOrganizationRequest.objects.filter(user=self.student, organization=self.org).exists()
-            )
-        self.student.profile.refresh_from_db()
-        self.assertEqual(self.student.profile.requested_organization_id, self.org.id)
 
 
 class PermissionEditorAtomicTest(TestCase):

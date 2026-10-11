@@ -43,6 +43,7 @@ from apps.syllabus.public import (
     SectionKey,
     SyllabusStatus,
     build_review_queue_context,
+    rule_for_version,
 )
 
 from .labels import STATUS_TONES
@@ -92,14 +93,15 @@ def _text(request, key: str, default: str = "") -> str:
     return (request.GET.get(key) or default).strip()
 
 
-def _policy_breaches(versions) -> set:
+def _policy_breaches(versions, organization=None) -> set:
     """Sərbəst iş strukturu SİYASƏTƏ UYĞUN OLMAYAN versiyalar (məs. 3×5).
 
     Yalnız cari SƏHİFƏNİN versiyaları üçün TƏK sorğu atılır — N+1 yoxdur.
     Boş seçim «pozuntu» sayılmır: o, `çatışmayan bölmə` riski ilə onsuz da
-    göstərilir, iki çip eyni şeyi təkrarlamamalıdır.
+    göstərilir, iki çip eyni şeyi təkrarlamamalıdır. Sahib 2026-10-10: semestrində
+    sərbəst iş söndürülmüş versiyada `self` bölməsi gizlidir — onun üzrə xəbərdarlıq YOXDUR.
     """
-    ids = [version.pk for version in versions]
+    ids = [version.pk for version in versions if rule_for_version(version, organization).selfwork]
     if not ids:
         return set()
     rows = SyllabusSection.objects.filter(version_id__in=ids, section_id=SectionKey.SELF.value).values_list(
@@ -275,7 +277,7 @@ def build_syllabus_review_section(request, *, organization) -> dict:
     paginator = Paginator(versions, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
     page_versions = list(page.object_list)
-    breached = _policy_breaches(page_versions)
+    breached = _policy_breaches(page_versions, organization)
     now = timezone.now()
     warn_days, late_days = thresholds(organization)
     rows = [

@@ -22,7 +22,7 @@ ROLE_ASSIGNMENT_URL = f"{BASE_URL}/accounts/role-assignment/"
 PERMISSION_EDITOR_URL = f"{BASE_URL}/accounts/permission-editor/"
 MANAGE_ROLES_URL = f"{BASE_URL}/accounts/manage-roles/"
 STUDENT_ORG_MGMT_URL = f"{BASE_URL}/accounts/student-organization-management/"
-GRADING_QUEUE_URL = f"{BASE_URL}/accounts/grading-queue/"
+GRADING_QUEUE_URL = f"{BASE_URL}/accounts/profile/?section=pending-review"  # WP9b: grading-queue/ silindi
 REVIEW_RESULTS_URL = f"{BASE_URL}/accounts/review-results/"
 MY_RESULTS_URL = f"{BASE_URL}/accounts/my-results/"
 PENDING_REVIEW_URL = f"{BASE_URL}/accounts/pending-review/"
@@ -34,16 +34,16 @@ PROTECTED_PATHS = [
     "/accounts/role-assignment/",
     "/accounts/permission-editor/",
     "/accounts/manage-roles/",
-    "/accounts/grading-queue/",
+    "/accounts/profile/?section=pending-review",  # WP9b: köhnə /accounts/grading-queue/ silindi
     "/accounts/review-results/",
     "/accounts/my-results/",
     "/accounts/pending-review/",
     "/accounts/assigned-exams/",
     "/accounts/assigned-courses/",
     "/courses/create_course/",
-    "/courses/my-courses/",
+    "/accounts/profile/?section=my-courses",  # WP9a: köhnə /courses/my-courses/ silindi
     "/exams/",
-    "/notifications/",
+    "/accounts/profile/?section=notifications",  # WP9a: köhnə /notifications/ silindi
 ]
 
 

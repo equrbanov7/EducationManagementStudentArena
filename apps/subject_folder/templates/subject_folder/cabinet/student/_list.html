@@ -1,5 +1,6 @@
 {% load i18n %}
-{% trans "Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür." context "subject_folder.ui" as sf_subtitle %}
+{# Sahib 2026-10-10: sərbəst iş ləğv olunubsa (CARİ qayda) izahda da yoxdur; kartın sayğacı açılışın dövrünə görə. #}
+{% if academic_rules.selfwork %}{% trans "Müəllimlərinizin paylaşdığı tədris materialları, sərbəst iş və ev tapşırıqları. Sərbəst iş qəbul olunanda bal avtomatik jurnala düşür." context "subject_folder.ui" as sf_subtitle %}{% else %}{% trans "Müəllimlərinizin paylaşdığı tədris materialları və ev tapşırıqları." context "subject_folder.ui" as sf_subtitle %}{% endif %}
 {% include "partials/ems_ui/_content_header.html" with header_subtitle=sf_subtitle %}
 {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=sp.kpi_tiles kpi_variant="4" %}
 {% if sp.cards %}
@@ -15,7 +16,7 @@
         </div>
         <div class="ems-card__body">
             <dl class="sfc-stats">
-                <div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ card.counts.selfwork }}</dd></div>
+                {% if card.entry.selfwork_active %}<div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ card.counts.selfwork }}</dd></div>{% endif %}
                 <div class="sfc-stats__item"><dt>{% trans "Ev tapşırığı" context "subject_folder.ui" %}</dt><dd>{{ card.counts.homework }}</dd></div>
                 <div class="sfc-stats__item"><dt>{% trans "Yekunlaşıb" context "subject_folder.ui" %}</dt><dd>{{ card.counts.done }}</dd></div>
             </dl>

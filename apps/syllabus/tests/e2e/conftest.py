@@ -12,4 +12,13 @@ Bu qoşqu 19 mutasiyanın 19-unu öldürmüşdü.  Daimi qapıya çevirmək üç
 node əlavə olunmalıdır (həmin sənəddə ölçüsü və variantları yazılıb).
 """
 
+import pytest
+
 collect_ignore_glob = ["*"]
+
+
+@pytest.fixture(autouse=True)
+def _selfwork_rule_on(settings):
+    """Sahib 2026-10-10: qoşqular `self` panelini də yoxlayır — baza sillabus CARİ qaydadadır və sərbəst iş
+    defoltda söndürülüdür; əl ilə işlədiləndə RİM tənzimləməsi yandırılmış kimi (köhnə qayda) işləyir."""
+    settings.ACADEMIC_SELFWORK_ENABLED = True

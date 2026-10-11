@@ -211,13 +211,6 @@ RUNTIME_SETTINGS_ENABLED = False
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = "http://testserver"
 
-# Keep public self-registration ENABLED in the test settings so the existing
-# registration-flow tests keep exercising the signup machinery. Production
-# defaults to disabled (e-university provisioning model — see
-# docs/operations/ACCOUNT_PROVISIONING.md). The dedicated "signup disabled" behaviour is
-# covered by tests that opt in via @override_settings(PUBLIC_SIGNUP_ENABLED=False).
-PUBLIC_SIGNUP_ENABLED = True
-
 # Keep the public marketing surfaces reachable in tests so the existing
 # home/about/contact/nav tests exercise them. Production defaults to
 # UNIVERSITY_MODE=True (login → cabinet only); the mode-specific behaviour is

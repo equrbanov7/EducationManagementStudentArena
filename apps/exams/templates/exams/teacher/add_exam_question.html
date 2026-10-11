@@ -10,13 +10,38 @@
 {% endblock %}
 
 {% block extraCss %}
-    <link rel="stylesheet" href="{% static 'exams/css/add_exam_question.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/controls.css' %}?v=20260909-hover">
+    <link rel="stylesheet" href="{% static 'css/ems_ui/header.css' %}?v=20260903-3">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_media.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/question_form_answers.css' %}?v=20261010-wp3exams">
 {% endblock %}
 
 {% block content %}
-{% include "exams/teacher/partials/_question_form.html" with is_modal=False %}
+{% comment %}Ehtiyat səhifə: sual əlavəsi/redaktəsi modalda gedir (sahib 2026-09-21); bu şablon yalnız
+JS-siz POST xətasında görünür. 2026-10-10: modal ilə eyni forma + ortaq başlıq.{% endcomment %}
+<div class="etp-page">
+    {% if editing %}
+        {% trans "heading_edit_question" context "exams.template.add_exam_question" as head_title %}
+        {% trans "info_editing_question" context "exams.template.add_exam_question" as head_subtitle %}
+    {% else %}
+        {% trans "heading_add_new_question" context "exams.template.add_exam_question" as head_title %}
+        {% if exam.exam_type == "test" %}
+            {% trans "info_adding_question_for_test_exam" context "exams.template.add_exam_question" as head_subtitle %}
+        {% elif exam.exam_type == "coding" %}
+            {% trans "Practical Coding Exam question" context "exams.template.add_exam_question" as head_subtitle %}
+        {% else %}
+            {% trans "info_adding_question_for_written_exam" context "exams.template.add_exam_question" as head_subtitle %}
+        {% endif %}
+    {% endif %}
+    {% trans "İmtahana qayıt" context "exams.template.question_form" as head_back_label %}
+    {% url 'exams:teacher_exam_detail' exam.slug as head_back_url %}
+    {% include "exams/teacher/partials/_page_head.html" %}
+    {% include "exams/teacher/partials/_question_form.html" with is_modal=False %}
+</div>
 {% endblock %}
 
 {% block extraJs %}
-<script src="{% static 'exams/js/question_form.js' %}?v=20260914-1"></script>
+<script src="{% static 'exams/js/question_form.js' %}?v=20261010-wp3exams"></script>
 {% endblock %}

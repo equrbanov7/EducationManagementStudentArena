@@ -82,7 +82,7 @@ class MyExamsTrashSubviewTests(TestCase):
         self.assertContains(response, "data-tx-trash-link", html=False)
         self.assertContains(response, "data-tx-trash-count>2<", html=False)
         self.assertContains(response, "exam_view=trash", html=False)
-        self.assertNotContains(response, f'href="{reverse("exams:deleted_exams_list")}"', html=False)
+        self.assertNotContains(response, 'href="/exams/deleted/"', html=False)
         # Tablar: aktiv siyahı cari, zibil qutusu sayğaclı.
         self.assertContains(response, "data-tx-tabs", html=False)
         # Siyahı görünüşündə KPI zolağı və toolbar var, zibil paneli yoxdur.

@@ -5,6 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
 from django.utils.translation import pgettext
@@ -30,7 +31,19 @@ def _subscribe_limit_keys(request, email):
     ]
 
 
+def subscribe_closed() -> bool:
+    """URL auditi B2 (2026-10-10): universitet rejimində (prod) abunə səthi YOXDUR.
+
+    Anonim POST sistem poçt qutusundan (OTP-ləri çatdıran `verification@`)
+    istənilən ünvana məktub göndərirdi — spam / OTP çatdırılmasının bloku riski.
+    Kod qeyri-universitet (marketinq) rejimi üçün qalır.
+    """
+    return bool(getattr(settings, "UNIVERSITY_MODE", True))
+
+
 def subscribe_page(request):
+    if subscribe_closed():
+        raise Http404("Abunə universitet rejimində bağlıdır.")
     if request.method == "POST":
         form = SubscriptionForm(request.POST)
         raw_email = request.POST.get("email", "")
