@@ -171,6 +171,15 @@ görünüş stabillik … titlelər 2 dəfə təkrarlanmasın»):
                         </select>
                     </div>
                 </div>
+                {% if can_edit_own_position %}
+                <div class="info-item">
+                    <label class="info-label" for="staff_position">{% trans 'Vəzifə' context 'profile.edit_v2' %}</label>
+                    <input type="text" class="form-control" id="staff_position" name="staff_position" maxlength="255"
+                           value="{{ profile.staff_position|default:'' }}"
+                           placeholder="{% trans 'məs: Rəqəmsal İnkişaf Mərkəzinin müdiri' context 'profile.edit_v2' %}">
+                    <small class="edit-profile-field-hint">{% trans 'Profil kartında «Vəzifə» kimi görünür; boş qalsa ən yüksək rolunuz göstərilir.' context 'profile.edit_v2' %}</small>
+                </div>
+                {% endif %}
                 <div class="info-item">
                     <label class="info-label" for="academic_degree">{% trans 'Elmi dərəcə' context 'profile.edit_v2' %}</label>
                     <div class="bootstrap-single-select">

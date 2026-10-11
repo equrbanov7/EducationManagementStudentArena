@@ -70,6 +70,62 @@
         });
     });
 
+    /* Sahib 2026-10-12: açar (switch) dəyişəndə təsdiq pəncərəsi — «Ləğv et» açarı geri qaytarır. */
+    var pending = null;
+
+    function confirmDialog() {
+        return document.getElementById("ssConfirmDialog");
+    }
+
+    document.addEventListener("change", function (event) {
+        var input = event.target;
+        if (!input || !input.matches || !input.matches("[data-ss-form] .sysset__switch-input")) {
+            return;
+        }
+        var dialog = confirmDialog();
+        if (!dialog || !window.EMSOverlay) {
+            return;
+        }
+        var row = input.closest("[data-ss-field]");
+        var label = row ? row.querySelector(".sysset__label") : null;
+        dialog.querySelector("[data-ss-confirm-label]").textContent = label ? label.textContent.trim() : "";
+        dialog.querySelector("[data-ss-confirm-on]").hidden = !input.checked;
+        dialog.querySelector("[data-ss-confirm-off]").hidden = input.checked;
+        pending = input;
+        window.EMSOverlay.open(dialog);
+    });
+
+    function closeConfirm(keep) {
+        var dialog = confirmDialog();
+        if (pending && !keep) {
+            pending.checked = !pending.checked;
+        }
+        pending = null;
+        if (dialog && window.EMSOverlay) {
+            window.EMSOverlay.close(dialog);
+        }
+    }
+
+    document.addEventListener("click", function (event) {
+        var target = event.target.closest ? event.target : null;
+        if (!target) {
+            return;
+        }
+        if (target.closest("[data-ss-confirm-ok]")) {
+            event.preventDefault();
+            closeConfirm(true);
+        } else if (target.closest("[data-ss-confirm-cancel]") || target.closest("#ssConfirmDialog [data-ems-overlay-close]")) {
+            event.preventDefault();
+            closeConfirm(false);
+        }
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && pending) {
+            closeConfirm(false);
+        }
+    });
+
     document.addEventListener("submit", function (event) {
         var form = event.target;
         if (!form || !form.matches || !form.matches("[data-ss-form]")) {

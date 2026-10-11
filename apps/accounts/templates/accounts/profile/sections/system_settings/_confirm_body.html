@@ -1,0 +1,8 @@
+{% load i18n %}
+{% comment %}«Sistem tənzimləmələri» — açar dəyişəndə təsdiq (sahib 2026-10-12). system_settings.js doldurur.{% endcomment %}
+<p class="sysset__confirm-text">
+    <strong data-ss-confirm-label></strong>
+    <span data-ss-confirm-on hidden>{% trans "yandırılacaq." context "accounts.runtime_settings" %}</span>
+    <span data-ss-confirm-off hidden>{% trans "söndürüləcək." context "accounts.runtime_settings" %}</span>
+</p>
+<p class="ems-msg ems-msg--warning">{% trans "Dəyişiklik «Yadda saxla» basılandan sonra bütün istifadəçilər üçün qüvvəyə minir və audit jurnalına yazılır." context "accounts.runtime_settings" %}</p>

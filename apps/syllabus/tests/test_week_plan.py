@@ -46,9 +46,25 @@ class WeekPlanRulesTest(SimpleTestCase):
         self.assertEqual(default_distribution(0), [])
 
     def test_a_kind_without_plan_hours_is_hidden_unless_a_row_uses_it(self):
-        self.assertEqual(visible_hour_kinds({"lecture": 15, "seminar": 15}), ("lecture", "seminar"))
+        """Köhnə qayda — RİM açarı `syllabus.hours_from_load` SÖNDÜRÜLÜDƏ."""
+        from django.test import override_settings
+
+        with override_settings(SYLLABUS_HOURS_FROM_LOAD=False):
+            self.assertEqual(visible_hour_kinds({"lecture": 15, "seminar": 15}), ("lecture", "seminar"))
+            rows = [{"lecture": 2, "seminar": 0, "lab": 2}]
+            self.assertEqual(visible_hour_kinds({"lecture": 15, "seminar": 15}, rows), ("lecture", "seminar", "lab"))
+            self.assertEqual(visible_hour_kinds({}), ("lecture", "seminar", "lab"))
+
+    def test_only_load_kinds_are_visible_and_extra_hours_are_dropped(self):
+        """Sahib 2026-10-12 (defolt): yükdə olmayan növ görünmür, ona yazılan saat sıfırlanır."""
+        from apps.syllabus.week_plan import drop_unplanned_hours
+
         rows = [{"lecture": 2, "seminar": 0, "lab": 2}]
-        self.assertEqual(visible_hour_kinds({"lecture": 15, "seminar": 15}, rows), ("lecture", "seminar", "lab"))
+        self.assertEqual(visible_hour_kinds({"lecture": 15, "seminar": 15}, rows), ("lecture", "seminar"))
+        cleaned, changed = drop_unplanned_hours(rows, {"lecture": 15, "seminar": 15})
+        self.assertTrue(changed)
+        self.assertEqual(cleaned[0]["lab"], 0)
+        self.assertEqual(drop_unplanned_hours(rows, {}), (rows, False))  # yük yoxdursa müəllim seçir
         self.assertEqual(visible_hour_kinds({}), ("lecture", "seminar", "lab"))
 
     def test_seeding_fills_only_kinds_whose_total_is_zero(self):
@@ -145,7 +161,8 @@ def test_without_a_plan_the_table_keeps_sixteen_rows_and_three_columns(world):
 
 
 @pytest.mark.django_db
-def test_a_migrated_lab_value_keeps_the_lab_column_visible(world):
+def test_a_migrated_lab_value_keeps_the_lab_column_visible(world, settings):
+    settings.SYLLABUS_HOURS_FROM_LOAD = False  # köhnə qayda (açar söndürülü)
     actor, version = _fresh_draft(world, {"lecture": 15, "seminar": 15})
     rows = [{"topic": "Köhnə", "lecture": 2, "seminar": 2, "lab": 4, "outcome": ""}]
     services.save_section(version=version, section_id=SectionKey.WEEK.value, data={"rows": rows}, actor=actor)
@@ -155,3 +172,17 @@ def test_a_migrated_lab_value_keeps_the_lab_column_visible(world):
     assert se["hours"]["kinds"] == ("lecture", "seminar", "lab")
     # 4 saat siyahıda olmasa da seçili qalır (autosave 0 yazmasın).
     assert root.xpath("//tr[@data-syl-week-row='1']//select[@data-week='lab']/option[@value='4'][@selected]")
+
+
+@pytest.mark.django_db
+def test_lab_hours_are_not_saved_when_the_load_has_no_lab(world):
+    """Sahib 2026-10-12: yükdə lab yoxdursa lab sütunu yoxdur və saxlanan lab saatı 0 olur."""
+    actor, version = _fresh_draft(world, {"lecture": 15, "seminar": 15})
+    rows = [{"topic": "Mövzu", "lecture": 2, "seminar": 2, "lab": 4, "outcome": ""}]
+    services.save_section(version=version, section_id=SectionKey.WEEK.value, data={"rows": rows}, actor=actor)
+    saved = version.sections.get(section_id=SectionKey.WEEK.value).data["rows"][0]
+    assert (saved["lecture"], saved["seminar"], saved["lab"]) == (2, 2, 0)
+    _root, se = render_editor_dom(
+        user=world["teacher"], organization=world["org"], version=version, step=SectionKey.WEEK.value
+    )
+    assert se["hours"]["kinds"] == ("lecture", "seminar")

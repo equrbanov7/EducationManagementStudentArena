@@ -186,18 +186,8 @@ def _links(request, organization, allowed_sections) -> list[dict]:
         for section, icon, title, body in _LINKS
         if section in allowed_sections
     ]
-    from apps.organizations.public import can_manage_org_settings
-
-    if can_manage_org_settings(request.user, organization):
-        links.append(
-            {
-                "section": "",
-                "icon": "fa-sliders",
-                "title": pgettext(_CTX, "Təşkilat ayarları"),
-                "body": pgettext(_CTX, "Əlaqə məlumatı, ünvan və sayt"),
-                "url": reverse("organizations:settings", kwargs={"slug": organization.slug}),
-            }
-        )
+    # Sahib 2026-10-11: köhnə «Təşkilat ayarları» səhifəsi (/organizations/<slug>/settings/) çıxarıldı —
+    # kabinetə yönləndirir, ona görə keçid də göstərilmir.
     return links
 
 

@@ -229,6 +229,14 @@ def handle_profile_post(
             if degree_value in valid_degrees or degree_value == "":
                 profile.academic_degree = degree_value
 
+        # Sahib 2026-10-11: «Vəzifə» (staff_position) — YALNIZ RİM redaktə hüququ olan özünə yazır; başqaları
+        # üçün sahə formda yoxdur və POST-dan gələn dəyər nəzərə alınmır.
+        if "staff_position" in request.POST:
+            from ...services.rim.profile_edit import can_edit_own_position, normalize_position
+
+            if can_edit_own_position(request):
+                profile.staff_position = normalize_position(request.POST.get("staff_position"))
+
         # Handle avatar upload
         uploaded_avatar = request.FILES.get("avatar")
         replaced_avatar = None

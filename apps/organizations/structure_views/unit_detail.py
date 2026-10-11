@@ -12,10 +12,10 @@ sorğular işlədilir (N+1-in özü yoxdur, çünki N=1 vahiddir)."""
 
 from django.apps import apps as django_apps
 from django.db.models import Count, Q
-from django.urls import reverse
 
 from core.constants import OrgUnitType
 
+from ..cabinet_links import cabinet_section_url
 from ..models import AcademicPeriod, OrgUnit
 from ._shared import (
     _active_teacher_user_ids,
@@ -180,8 +180,6 @@ def build_unit_detail_context(request, organization, scope, unit):
         "year_breakdown": year_breakdown,
         "max_year_count": max_year_count,
         "can_assign_teachers": flags["can_assign_members"],
-        "structure_list_url": reverse(
-            "organizations:structure_faculties" if is_faculty else "organizations:structure_kafedras",
-            kwargs={"slug": organization.slug},
-        ),
+        # Sahib 2026-10-11: müstəqil siyahı səhifəsi yoxdur — kabinet bölməsi.
+        "structure_list_url": cabinet_section_url("org-faculties" if is_faculty else "org-kafedras"),
     }

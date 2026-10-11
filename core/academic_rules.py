@@ -61,6 +61,11 @@ def coursework_enabled() -> bool:
     return runtime_settings.get_bool("academic.coursework_enabled")
 
 
+def syllabus_hours_from_load() -> bool:
+    """Sillabus saatları kafedra yükündən (əsas mənbə) + yükdə olmayan növ gizli (sahib 2026-10-12)."""
+    return runtime_settings.get_bool("syllabus.hours_from_load")
+
+
 def lesson_activation_enabled() -> bool:
     """Jurnalda cədvəl dərsinin «Aktivləşdir» düyməsi (söndürülüdə yalnız «Yeni dərs»)."""
     return runtime_settings.get_bool("journal.lesson_activation")
@@ -182,5 +187,6 @@ __all__ = [
     "selfwork_active_for_period",
     "selfwork_enabled",
     "selfwork_max",
+    "syllabus_hours_from_load",
     "snapshot",
 ]
