@@ -12,6 +12,8 @@ alma (×) düyməsi olur və `mrRevokeDialog` dialoqunu açır.{% endcomment %}
                 data-roles-open="mrRevokeDialog"
                 data-roles-person="{{ row.data.name }}"
                 data-roles-role="{{ chip.label }}"
+                data-roles-scope="{{ chip.scope|default:'' }}"
+                data-roles-remaining="{% for other in row.data.visible_roles %}{% if other.membership_id != chip.membership_id %}{{ other.label }}{% if other.scope %} · {{ other.scope }}{% endif %}{% if not forloop.last %}; {% endif %}{% endif %}{% endfor %}{% if row.data.extra_roles %}{% if row.data.visible_roles|length > 1 %}; {% endif %}+{{ row.data.extra_roles }}{% endif %}"
                 data-roles-prefill='{"membership_id": "{{ chip.membership_id }}", "reason": ""}'
                 title="{% trans 'Rolu geri al' context 'accounts.manage_roles' %}"
                 aria-label="{% blocktrans context 'accounts.manage_roles' with person=row.data.name role=chip.label %}{{ person }} — «{{ role }}» rolunu geri al{% endblocktrans %}">×</button>
