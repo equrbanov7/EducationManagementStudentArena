@@ -103,8 +103,10 @@ class _RowIndex:
 
 
 class Form1Importer:
-    def __init__(self, *, importer, chair, teacher_map=None):
+    def __init__(self, *, importer, chair, teacher_map=None, allow_outside_chair=False):
         self.importer = importer
+        #: Sahib 2026-10-12: başqa kafedranın (və ya müəllim rolu olmayan — dekan müavini) TƏK uyğun hesabı qəbul.
+        self.allow_outside_chair = allow_outside_chair
         self.org = importer.org
         self.chair = chair
         self.applier = importer.applier
@@ -134,6 +136,8 @@ class Form1Importer:
                 result = (next(iter(found.values())), "matched")
             elif len(found) > 1:
                 result = (None, "ambiguous")
+            elif self.allow_outside_chair and (outside := self._outside_users(words)) and len(outside) == 1:
+                result = (outside[0], "matched_outside_chair")
             elif self._outside_chair(words):
                 result = (None, "outside_chair")
         self.counters[f"teacher_{result[1]}"] += 1
@@ -144,6 +148,16 @@ class Form1Importer:
     def _name_match(user, words) -> bool:
         first, last = slug_name(user.first_name), slug_name(user.last_name)
         return bool(first and last) and first in words and last in words
+
+    def _outside_users(self, words) -> list:
+        """Təşkilatın İSTƏNİLƏN aktiv qeyri-tələbə üzvü (ad + soyad) — unikal istifadəçilər."""
+        memberships = (
+            Membership.objects.filter(organization=self.org, is_active=True, role__is_active=True)
+            .exclude(role__name__in=("student", "lead_student", "alumni"))
+            .select_related("user")
+        )
+        found = {m.user.pk: m.user for m in memberships if m.user is not None and m.user.is_active}
+        return [u for u in found.values() if self._name_match(u, words)]
 
     def _outside_chair(self, words) -> bool:
         memberships = Membership.objects.filter(

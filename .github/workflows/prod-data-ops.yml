@@ -128,6 +128,11 @@ on:
         description: "import_teaching_*: qeyri-müəyyən müəllim — AD=istifadəçi.adı, vergüllə"
         required: false
         default: ""
+      allow_outside_chair:
+        description: "import_teaching_*: kafedrada tapılmayan adı təşkilatda TƏK uyğun hesaba bağla"
+        required: false
+        type: boolean
+        default: false
       period:
         description: "import_timetable_docx: semestr (məs. Payız 2026/2027)"
         required: false
@@ -168,6 +173,7 @@ jobs:
       REASSIGN: ${{ github.event.inputs.reassign }}
       CHOICES: ${{ github.event.inputs.choices }}
       TEACHER_MAP: ${{ github.event.inputs.teacher_map }}
+      ALLOW_OUTSIDE_CHAIR: ${{ github.event.inputs.allow_outside_chair }}
       PERIOD: ${{ github.event.inputs.period }}
       REPLACE_GROUP_SLOTS: ${{ github.event.inputs.replace_group_slots }}
     steps:
@@ -312,6 +318,7 @@ jobs:
               test -z "$CHOICES" || args+=(--choice "$CHOICES")
               test -z "$TEACHER_MAP" || args+=(--teacher "$TEACHER_MAP")
               test "$REASSIGN" != "true" || args+=(--reassign)
+              test "$ALLOW_OUTSIDE_CHAIR" != "true" || args+=(--allow-outside-chair)
               ;;
             sync_plan_offerings)
               actor="$(superadmin_actor)"

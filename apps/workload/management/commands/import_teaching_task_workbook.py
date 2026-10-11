@@ -71,6 +71,11 @@ class Command(BaseCommand):
         parser.add_argument("--actor", required=True, help="Bölgünü təsdiqləyən superadmin istifadəçi adı")
         parser.add_argument("--report", default="", help="Hesabat CSV qovluğu")
         parser.add_argument("--sheet", action="append", default=[], help="Yalnız bu vərəq(lər) (prefiks)")
+        parser.add_argument(
+            "--allow-outside-chair",
+            action="store_true",
+            help="Kafedrada tapılmayan ad üçün təşkilatda TƏK uyğun müəllimi qəbul et",
+        )
         parser.add_argument("--apply", action="store_true")
         parser.add_argument(
             "--reassign", action="store_true", help="Tutuşan sətrin fərqli müəllimini düzəliş axını ilə dəyiş"
@@ -134,6 +139,7 @@ class Command(BaseCommand):
                 reassign=options["reassign"],
             )
             importer.teacher_map = parse_teacher_map(options["teacher"])
+            importer.allow_outside_chair = options["allow_outside_chair"]
             importer.ensure_periods()
             self.stdout.write(f"Təşkilat: {organization.name} · il {options['year']} · vərəq: {len(sheets)}")
             for title, records in sheets:
