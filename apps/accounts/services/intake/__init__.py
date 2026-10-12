@@ -44,7 +44,7 @@ from .create import (
     teacher_role,
 )
 from .parsing import MAX_ROWS, MAX_UPLOAD_BYTES, IntakeFileError, read_rows
-from .policy import PERM_IMPORT, IntakeAccessError, can_import, require_import
+from .policy import PERM_IMPORT, PERM_IMPORT_STAFF, IntakeAccessError, can_import, can_import_staff, require_import
 from .spec import build_template, columns, header_row
 from .validate import PLACEHOLDER_DOMAIN, RowPlan, build_plans, summarize
 
@@ -55,6 +55,7 @@ __all__ = [
     "MAX_ROWS",
     "MAX_UPLOAD_BYTES",
     "PERM_IMPORT",
+    "PERM_IMPORT_STAFF",
     "PLACEHOLDER_DOMAIN",
     "IntakeAccessError",
     "IntakeApplyError",
@@ -65,6 +66,7 @@ __all__ = [
     "build_plans",
     "build_template",
     "can_import",
+    "can_import_staff",
     "columns",
     "create_account",
     "generate_initial_password",

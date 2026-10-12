@@ -47,7 +47,7 @@ class RimStaffTemplateTest(SimpleTestCase):
     def test_support_surface_is_present(self):
         permissions = set(RIM_STAFF_ROLES[0]["permissions"])
         # `qa.view` 2026-09-14-də kataloqdan çıxarıldı (audit F-06) — yerinə `audit.export`.
-        for expected in ("org.view", "unit.view", "exam.view", "audit.export", "audit.view", "people.view_students"):
+        for expected in ("unit.view", "exam.view", "audit.export", "audit.view", "people.view_students"):
             self.assertIn(expected, permissions, expected)
 
 

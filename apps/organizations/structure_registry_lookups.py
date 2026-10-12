@@ -91,6 +91,9 @@ def structure_unit_staff(request, slug, unit_id):
     groups = []
     order = [VICE_DEAN_ROLE, COORDINATOR_ROLE, "teacher"] if is_faculty else ["teacher", COORDINATOR_ROLE]
     for key in order:
+        # 2026-10-13 (rol auditi B9): müəllim qrupu üzvlük baxımıdır (`member.edit`), müavin/koordinator
+        # qrupu isə roldur (`role.assign`) — «Əlavə et»/«Sil» düymələri qrup-qrup bu bayraqla görünür.
+        can_manage_group = flags["can_assign_members"] if key == "teacher" else flags["can_assign_roles"]
         if key == "teacher":
             rows = [m for m in memberships if m.role.name in TEACHER_ROLE_NAMES]
             # Fakültədə müəllimlər KAFEDRA üzrədir — çekmecədə kafedra adı görünür.
@@ -102,7 +105,8 @@ def structure_unit_staff(request, slug, unit_id):
             {
                 "key": key,
                 "label": label,
-                "removable": flags["can_assign_members"],
+                "removable": can_manage_group,
+                "addable": can_manage_group,
                 "members": [_member_row(m, unit=unit) for m in rows],
             }
         )
@@ -149,6 +153,7 @@ def structure_unit_staff(request, slug, unit_id):
             "children": children,
             "children_label": pgettext(_CTX, "Kafedralar") if is_faculty else pgettext(_CTX, "İxtisaslar"),
             "can_assign_members": flags["can_assign_members"],
+            "can_assign_roles": flags["can_assign_roles"],
             "can_assign_head": flags["can_assign_head"],
         }
     )
@@ -181,12 +186,18 @@ def structure_role_candidates(request, slug):
     organization = get_object_or_404(Organization, slug=slug, is_active=True)
     scope = tree_scope(request, organization)
     flags = registry_flags(request, organization) if scope.has_structure_access else None
-    if flags is None or not (flags["can_assign_members"] or flags["can_assign_head"]):
+    kind = (request.GET.get("kind") or "staff").strip()
+    # 2026-10-13 (rol auditi B9): namizəd adları yalnız HƏMİN təyinatı edə bilənə sızır — müəllim
+    # siyahısı `member.edit`, heyət (rəhbər/müavin/koordinator) siyahısı `role.assign` / `unit.assign_head`.
+    if kind == "teacher":
+        allowed = flags is not None and flags["can_assign_members"]
+    else:
+        allowed = flags is not None and (flags["can_assign_roles"] or flags["can_assign_head"])
+    if not allowed:
         return JsonResponse({"results": [], "has_more": False}, status=403)
 
     offset, limit = _bounds(request)
     term = (request.GET.get("q") or "").strip()[:80]
-    kind = (request.GET.get("kind") or "staff").strip()
 
     if kind == "teacher":
         queryset = _teacher_memberships_qs(organization)

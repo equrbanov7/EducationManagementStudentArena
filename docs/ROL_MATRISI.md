@@ -1,6 +1,6 @@
 # Rol matrisi — hansı rol hansı profil bölməsini görür
 
-**Ölçmə tarixi:** 2026-09-03 · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901`
+**Ölçmə tarixi:** 2026-10-13 (əvvəlki: 2026-09-03) · **Baza:** QA klonu `emsarena_rehearsal_a0d170000901`
 (`:55433`, bax `docs/audits/2026-09-02/`) — **HEÇ VAXT** lokal `emsarena_db`-yə
 (qorunan, köçürülmüş real data) qarşı işlədilməyib.
 **Mənbə:** `scripts/role_open_all.py` — bu cədvəl ƏLLƏ yazılmayıb, skriptin
@@ -35,88 +35,140 @@ Niyə vacibdir: bölmə görünürlüyü **dörd ayrı siyahıda** qeyd olunur �
 menyuda görünmür, ya da açılanda 500 verir.  Süpürgə həmin fərqi bir keçidə
 üzə çıxarır.
 
-## Nəticə — 2026-09-03 (QA klonu)
+## Nəticə — 2026-10-13 (QA klonu, rol auditi A+B tətbiq olunub: `organizations 0063` / `registrar 0088`)
 
-| rol | səviyyə | görünən bölmə | 500 |
-|---|---:|---:|---:|
-| `ikt_rehber` | 88 | 46 | 0 |
-| `rector` | 100 | 40 | 0 |
-| `chair_head` | 70 | 34 | 0 |
-| `dean` | 80 | 33 | 0 |
-| `exam_center` | 85 | 28 | 0 |
-| `exam_center_staff` | 60 | 24 | 0 |
-| `hr` | 65 | 22 | 0 |
-| `teacher` | 50 | 20 | 0 |
-| `assistant` | 40 | 19 | 0 |
-| `student` | 10 | 17 | 0 |
-| `member` | 20 | 14 | 0 |
-| `program_coordinator` | 45 | 14 | 0 |
-| `alumni` | 5 | 0 | 0 |
+Nümunə hesab seçimi 2026-10-13-dən **tək-rolludur**: əvvəl «teacher» sütununa müəllim + kafedra müdiri olan
+hesab düşə bilirdi (49 bölmə, rolların birləşməsi). İndi `_pick_users()` əvvəlcə YALNIZ bir aktiv üzvlüyü olan
+hesabı götürür; tapılmasa çoxrollu hesaba düşür və bu, «əlavə rollar» sütununda göstərilir
+(`board_chair` klonda yalnız rektorla birlikdə mövcuddur).
 
-| bölmə | `ikt_rehber` | `rector` | `chair_head` | `dean` | `exam_center` | `exam_center_staff` | `hr` | `teacher` | `assistant` | `student` | `member` | `program_coordinator` | `alumni` |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `academic-calendar` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `academic-records` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
-| `analytics` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | ✅ | · |
-| `appeal-stats` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `applications` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · |
-| `assigned-courses` | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · |
-| `assigned-exams` | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · |
-| `audit-log` | ✅ | ✅ | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · |
-| `change-password` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `dashboard` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `edit-profile` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `exam-center-pins` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `exam-center-stats` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `exam-chance` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `exam-score-entry` | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
-| `groups` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | ✅ | · | · |
-| `journal-close` | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · |
-| `kollokvium-windows` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `legacy-grade-review` | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · |
-| `manage-appeals` | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · |
-| `manage-roles` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · |
-| `my-appeals` | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · |
-| `my-courses` | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · |
-| `my-exams` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | · | · | · |
-| `my-journal` | ✅ | ✅ | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · |
-| `my-results` | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · |
-| `my-schedule` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `my-subjects` | · | · | · | · | · | · | · | · | · | ✅ | · | · | · |
-| `my-workload` | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | ✅ | · |
-| `notifications` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `org-faculties` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · |
-| `org-kafedras` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · |
-| `org-members` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | ✅ | · |
-| `org-roles` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `overall-academic` | · | · | · | · | · | · | · | · | · | ✅ | · | · | · |
-| `pending-answers` | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · |
-| `pending-review` | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · | · |
-| `people-students` | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | ✅ | · |
-| `people-teachers` | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · |
-| `permission-editor` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `profile-info` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `publish-notification` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · |
-| `question-bank` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | · | · | · |
-| `question-chair-review` | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `question-submissions` | ✅ | · | · | · | ✅ | ✅ | · | ✅ | ✅ | · | · | · | · |
-| `review-results` | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · | · |
-| `rim-center` | ✅ | ✅ | · | · | · | · | ✅ | · | · | · | · | · | · |
-| `role-assignment` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · |
-| `schedule-manage` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | ✅ | · |
-| `statistics` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
-| `student-intake` | ✅ | ✅ | · | · | · | · | ✅ | · | · | · | · | · | · |
-| `student-organization-management` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · |
-| `superadmin-exam-rooms` | ✅ | · | · | · | · | · | · | · | · | · | · | · | · |
-| `syllabus-list` | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | · | · | · | · | · |
-| `syllabus-review` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `teaching-handover` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `unit-exams` | · | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · |
-| `workload-distribution` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · |
+⚠️ Klon DSN-i **cədvəl sahibi** (`emsarena_staging`) olmalıdır: `emsarena_app` RLS altında tenant konteksti
+olmadan `Membership` sətirlərini görmür (skript indi bu halda exit 2 ilə dayanır).
 
-Cəmi 311 bölmə açılışı.
+Menyu YALNIZ `<aside class="profile-sidebar">` blokundan oxunur (dashboard vidcetlərindəki
+`data-section` sayılmır), müəllim/admin üçün `/jurnal/` yeni-tab linki `my-journal` kimi sayılır.
+
+| rol | səviyyə | görünən bölmə | 500 | əlavə rollar (çoxrollu nümunə) |
+|---|---:|---:|---:|---|
+| `ikt_rehber` | 95 | 75 | 0 | — |
+| `board_chair` | 110 | 64 | 0 | `rector` |
+| `rector` | 100 | 64 | 0 | — |
+| `vice_rector` | 90 | 50 | 0 | — |
+| `chair_head` | 70 | 45 | 0 | — |
+| `dean` | 80 | 44 | 0 | — |
+| `rim_staff` | 60 | 40 | 0 | — |
+| `vice_dean` | 75 | 36 | 0 | — |
+| `exam_center_head` | 85 | 34 | 0 | — |
+| `exam_center_staff` | 60 | 33 | 0 | — |
+| `teaching_office_head` | 85 | 33 | 0 | — |
+| `teaching_office_staff` | 60 | 30 | 0 | — |
+| `program_coordinator` | 45 | 29 | 0 | — |
+| `hr` | 65 | 28 | 0 | — |
+| `assistant` | 40 | 24 | 0 | — |
+| `teacher` | 50 | 24 | 0 | — |
+| `lab_assistant` | 40 | 23 | 0 | — |
+| `admin_unit_head` | 65 | 22 | 0 | — |
+| `student_services` | 60 | 22 | 0 | — |
+| `lead_student` | 30 | 21 | 0 | — |
+| `student` | 10 | 20 | 0 | — |
+| `tutor` | 40 | 15 | 0 | — |
+| `member` | 20 | 11 | 0 | — |
+| `alumni` | 5 | 0 | 0 | — |
+
+| bölmə | `ikt_rehber` | `board_chair` | `rector` | `vice_rector` | `chair_head` | `dean` | `rim_staff` | `vice_dean` | `exam_center_head` | `exam_center_staff` | `teaching_office_head` | `teaching_office_staff` | `program_coordinator` | `hr` | `assistant` | `teacher` | `lab_assistant` | `admin_unit_head` | `student_services` | `lead_student` | `student` | `tutor` | `member` | `alumni` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `academic-calendar` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `academic-records` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · |
+| `account-password-reset` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `analytics` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | ✅ | · | · |
+| `announcements` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `appeal-stats` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `applications` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `assigned-courses` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `assigned-exams` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `audit-log` | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `chair-profile` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `change-password` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `curriculum-editor` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · |
+| `dashboard` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `edit-profile` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `evaluation-campaigns` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `evaluation-results` | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · |
+| `exam-center-pins` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `exam-center-stats` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `exam-chance` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `exam-score-entry` | ✅ | ✅ | ✅ | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `groups-registry` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `hr-analytics` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `journal-close` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `journal-hygiene` | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `kollokvium-windows` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `legacy-grade-review` | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `lessons-log` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | ✅ | ✅ | ✅ | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `manage-appeals` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `manage-roles` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `my-appeals` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `my-courses` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `my-exams` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `my-group` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · |
+| `my-journal` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | ✅ | ✅ | ✅ | · | ✅ | ✅ | ✅ | · | · | ✅ | ✅ | · | · | · |
+| `my-results` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `my-schedule` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `my-subject-folders` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `my-subjects` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `my-workload` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `notifications` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `org-faculties` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `org-kafedras` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `org-members` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | ✅ | · | · | · | · | · | · | · | ✅ | · | · |
+| `org-overview` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | ✅ | · | · |
+| `org-roles` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `org-structure-tree` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `overall-academic` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `pending-answers` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | · | · | · |
+| `pending-review` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `people-students` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | ✅ | ✅ | · | · | ✅ | · | · |
+| `people-teachers` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | ✅ | · | · | · | · | · | · |
+| `permission-editor` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `profile-info` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `programs-registry` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `publish-notification` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `question-bank` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `question-chair-review` | ✅ | ✅ | ✅ | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `question-submissions` | ✅ | · | · | · | · | · | ✅ | · | ✅ | ✅ | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `registrar-catalog` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `review-results` | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `rim-center` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `role-assignment` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `schedule-manage` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | ✅ | ✅ | · | · | · | · | ✅ | · | · | · | · | · | · |
+| `semester-opening` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · |
+| `statistics` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `student-admission` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · |
+| `student-organization-management` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `student-registry` | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | ✅ | · | ✅ | · | · | · | · | · | ✅ | · | · | · | · | · |
+| `subject-catalog` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | ✅ | ✅ | · | · | · | · | · |
+| `subject-folder-review` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `subject-folders` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | ✅ | ✅ | ✅ | · | · | · | · | · | · | · |
+| `superadmin-exam-rooms` | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `surveys-builder` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `surveys-inbox` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · |
+| `syllabus-list` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · | · |
+| `syllabus-review` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `system-monitoring` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `system-settings` | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `teacher-intake` | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · |
+| `teaching-handover` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `unit-exams` | · | · | · | · | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `workload-approval` | ✅ | ✅ | ✅ | ✅ | · | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `workload-center` | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · |
+| `workload-distribution` | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | ✅ | ✅ | · | · | · | · | · | · | · | · | · | · | · | · |
+| `workload-overview` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | ✅ | · | · | · | · | · | · | · | · | · | · | · | · | · |
+| `workload-visa` | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | · | · | · | ✅ | · | · | · | · | · | · | · | · | · | · | · |
+
+Cəmi 787 bölmə açılışı.
 
 **500 / istisna: yoxdur.**
+
 
 `ui-gallery` (superadmin-only) bu cədvəldə **görünmür** — süpürgə YALNIZ aktiv
 `Membership`-i olan rolları gəzir (`_pick_users()`), superadmin isə QA

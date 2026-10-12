@@ -81,7 +81,11 @@ def _get_publish_notification_targets(user, capabilities, organization=None):
     kafedra / qrup) və şöbə-heyət hədəfləri (imtahan mərkəzi, tədris şöbəsi…)
     əlavə olunur — bax `services.notification_scopes`.
     """
-    from apps.accounts.services.notification_scopes import CATEGORY_LABELS, organization_targets
+    from apps.accounts.services.notification_scopes import (
+        CATEGORY_LABELS,
+        can_target_whole_organization,
+        organization_targets,
+    )
     from apps.exams.models import StudentGroup
 
     targets = []
@@ -126,7 +130,7 @@ def _get_publish_notification_targets(user, capabilities, organization=None):
     # Audit 2026-09-28 T-01: org admini yalnız AKTİV təşkilatı hədəfləyə bilər
     # (əvvəl istənilən üzvlüyü olan bütün org-lar siyahıda idi — server də
     # yalnız aktiv org-u qəbul edir, bax ``resolve_notification_recipients``).
-    if is_org_admin and organization is not None:
+    if is_org_admin and organization is not None and can_target_whole_organization(user, capabilities, organization):
         org_prefix_label = _("target_org_prefix")
         all_members_label = _("target_org_all_members")
         targets.append(

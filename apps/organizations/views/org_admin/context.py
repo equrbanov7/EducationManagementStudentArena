@@ -17,6 +17,7 @@ from core.search_text import tolerant_q
 from ...models import OrgUnit
 from ..shared._helpers import (
     _can_manage_organization,
+    _can_view_role_matrix,
     _can_view_structure,
     _get_structure_scope,
     _has_org_permission,
@@ -287,13 +288,17 @@ def build_organization_roles_context(request, organization):
             "ui": {},
         }
 
-    roles = list(organization.roles.all().order_by("-level", "name"))
+    # 2026-10-13 (rol auditi B15): kataloq (bütün rollar + icazə açarları, org-wide) KONKRET `role.view` ilə —
+    # köhnə müstəqil səhifə ilə eyni qapı (`endpoints.organization_roles`, audit P2-2). Əvvəl kabinet bölməsi
+    # `org_admin` ALİASI ilə dolu gəlirdi: bir fakültəyə bağlı dekan / kafedra müdiri bütün kataloqu görürdü.
+    can_view = _can_view_role_matrix(request.user, organization)
+    roles = list(organization.roles.all().order_by("-level", "name")) if can_view else []
     return {
         "organization": organization,
         "roles": roles,
         "permission_categories": PERMISSION_CATEGORIES,
-        "can_view": _can_manage_organization(request.user, organization),
+        "can_view": can_view,
         "profile_base_url": reverse("accounts:profile"),
         "embedded_in_profile": False,
-        "ui": build_roles_ui(request, organization, roles),
+        "ui": build_roles_ui(request, organization, roles) if can_view else {},
     }

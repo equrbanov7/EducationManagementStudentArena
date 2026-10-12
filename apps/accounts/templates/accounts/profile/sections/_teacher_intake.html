@@ -5,8 +5,9 @@ Tələbə bölməsinin (`_student_intake.html`) ƏKİZİDİR: eyni axın, eyni k
 dəsti, eyni `data-six-*` müqaviləsi — fərq yalnız endpoint-lər, «Kafedra»
 sütunu və mətnlərdədir. İkisi yan-yana baxılanda eyni ailədən görünməlidir.
 
-İcazə: `user.import` (RİM, HR, rektor `*`); faktiki əməl
-`services/intake/policy.py`-da fail-closed yenidən yoxlanılır.
+İcazə: `user.import_staff` (HR, RİM rəhbəri / rektor `*`) — 2026-10-13 rol auditi B3-ə qədər
+tələbə qəbulunun `user.import` açarı idi (Tələbə xidmətləri müəllim hesabı yarada bilirdi);
+faktiki əməl `services/intake/policy.py::can_import_staff`-da fail-closed yenidən yoxlanılır.
 
 ⚠️ Daxili adlar (bölmə açarı `teacher-intake`, kontekst açarı
 `teacher_intake_section`, `data-six-*` çəngəlləri, tərcümə kontekstləri)

@@ -15,7 +15,7 @@ from django.utils.translation import pgettext
 
 from apps.exams.public import is_exam_center_user
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
-from core.permissions import is_superadmin_user
+from core.permissions import is_superadmin_user, request_has_permission
 from core.search_text import tolerant_q
 from core.tenancy import get_request_organization
 
@@ -27,10 +27,14 @@ from ...constants import (
     APPEAL_STATUS_VALUES,
     APPEAL_TYPE_CHOICES,
     APPEAL_TYPE_VALUES,
+    PERM_APPEAL_DECIDE,
+    PERM_APPEAL_RESPOND,
 )
 from ...models import Appeal
 from ...services import (
     accept_appeal_item,
+    can_decide_appeal,
+    can_respond_appeal,
     can_review_appeal,
     delivered_question_points,
     effective_test_score,
@@ -106,7 +110,13 @@ def build_manage_appeals_context(request, *, list_action, section=""):
     """
     user = request.user
     organization = get_request_organization(request)
-    can_decide = is_exam_center_user(user)
+    # 2026-10-13 (rol auditi B1): qərar bayrağı rol adı ilə yox, açarla (işçi/RİM yalnız görür).
+    can_decide = is_exam_center_user(user) and (
+        is_superadmin_user(user)
+        or (
+            request_has_permission(request, PERM_APPEAL_RESPOND) and request_has_permission(request, PERM_APPEAL_DECIDE)
+        )
+    )
 
     appeals = Appeal.objects.select_related("exam", "attempt", "student", "reviewed_by").prefetch_related("items")
 
@@ -249,8 +259,7 @@ def review_appeal(request, appeal_id):
         from apps.appeals.views.shared.detail import _missing_appeal_redirect
 
         return _missing_appeal_redirect(request, section="manage-appeals")
-    review_can_decide = can_review_appeal(request, appeal)
-    if not review_can_decide:
+    if not can_review_appeal(request, appeal):
         # Yalnız təşkilatın imtahan mərkəzi istifadəçisi (və superadmin) apellyasiyanı
         # açıb qərar verə bilir; başqaları üçün fraqment sorğusuna generik "Loading
         # failed" əvəzinə mənalı 403 mesajı qaytarırıq.
@@ -277,6 +286,10 @@ def review_appeal(request, appeal_id):
 
     is_test = appeal.exam.exam_type == "test"
 
+    # 2026-10-13 (rol auditi B1): mərkəz işçisi / RİM əməkdaşı apellyasiyanı AÇIR (yalnız-oxu), amma
+    # cavab + qəbul/rədd (bal dəyişir) yalnız ``appeal.respond`` + ``appeal.decide`` açarı ilə.
+    review_can_decide = can_respond_appeal(request, appeal) and can_decide_appeal(request, appeal)
+
     # Dashboard daxili AJAX (manage-appeals bölməsi) → fraqment/JSON rejimi.
     is_fragment = request.GET.get("fragment") == "1" or request.headers.get("x-requested-with") == "XMLHttpRequest"
     # Standalone qərar səhifəsi yoxdur — qərar yalnız dashboard modalında
@@ -294,6 +307,11 @@ def review_appeal(request, appeal_id):
         return bool(item.resolved_at and now >= item.resolved_at + REVIEW_EDIT_LOCK_WINDOW)
 
     if request.method == "POST":
+        if not review_can_decide:
+            denied = pgettext("appeals.view.message", "Apellyasiya qərarı vermək icazəniz yoxdur.")
+            if is_fragment:
+                return JsonResponse({"ok": False, "error": str(denied)}, status=403)
+            raise PermissionDenied(denied)
         score_before, _, _ = _current_review_score(appeal, is_test)
         # Validasiya: (1) kilidli olmayan HƏR sual üçün qərar verilməlidir —
         # apellyasiya açıldıqdan sonra yarımçıq qərar saxlanıla bilməz; (2) qərar

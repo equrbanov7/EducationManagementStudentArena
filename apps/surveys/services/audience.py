@@ -4,8 +4,10 @@ Ailələr (rol adına görə, ``ProfileRole.normalize_membership_role_name``):
 
 * ``students`` — ``student`` / ``lead_student``;
 * ``teachers`` — tədris rolları (``teacher``, ``instructor``, ``assistant`` …);
-* ``staff`` — qalan hər rol (rektorluq, dekanlıq, kafedra müdiri, RİM, tədris şöbəsi …);
-* neytral rollar (``member``, ``alumni``, ``parent`` …) heç bir ailəyə düşmür.
+* ``staff`` — qalan hər rol (rektorluq, dekanlıq, kafedra müdiri, RİM, tədris şöbəsi …) — ``member`` DAXİL
+  (rol auditi 2026-10-13 B7: universitetdə ``member`` xəritələnməmiş ofis işçisidir, əvvəl heyət sorğusundan
+  kənarda qalırdı; elan auditoriyası ilə eyni qayda);
+* neytral rollar (``alumni``, ``parent`` …) heç bir ailəyə düşmür.
 
 ``everyone`` = üç ailənin birləşməsi. Superuser / view-as heç vaxt auditoriya deyil (qapı və
 inbox onları ayrıca kənarlaşdırır).
@@ -51,7 +53,7 @@ TEACHER_ROLE_NAMES = frozenset(
         "lab_assistant",
     }
 )
-NEUTRAL_ROLE_NAMES = frozenset({"member", "alumni", "parent", "trustee", "collaborator", "owner", ""})
+NEUTRAL_ROLE_NAMES = frozenset({"alumni", "parent", "trustee", "collaborator", "owner", ""})  # B7: `member` → staff
 #: DB-də saxlanan (normallaşdırılmamış) adlar da daxil — sorğu filtri üçün.
 _STUDENT_DB_NAMES = tuple(sorted(STUDENT_ROLE_NAMES))
 _TEACHER_DB_NAMES = tuple(sorted(TEACHER_ROLE_NAMES))

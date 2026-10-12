@@ -7,7 +7,8 @@ axtarışlı və səhifəlidir: istifadəçi yazır → server 20 nəticə qayta
 
 QAPI KATALOQA GÖRƏ DƏYİŞİR:
 
-* ``group`` / ``unit`` (hesab formu)   → ``user.import`` (bax `create.require_create`);
+* ``group`` (tələbə formu)             → ``user.import`` (bax `create.require_create`);
+* ``unit`` (müəllim formu — kafedra)    → ``user.import_staff`` (rol auditi 2026-10-13 B3);
 * ``admin_parent`` (inzibati bölmə)    → ``unit.tree_manage`` (bax `create_unit.require_create_unit`).
 
 Yəni seçici HEÇ VAXT öz axınının açarından ZƏİF qapıdan keçmir: hesab yarada
@@ -22,6 +23,7 @@ from __future__ import annotations
 from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
+from ..intake.create import KIND_STUDENT, KIND_TEACHER
 from .create import require_create
 from .create_form import CHAIR_UNIT_TYPES
 from .create_unit import parent_units_queryset, require_create_unit
@@ -103,7 +105,8 @@ def search_catalog(actor, *, catalog: str, query: str = "", limit=DEFAULT_LIMIT,
     if catalog == CATALOG_ADMIN_PARENT:
         require_create_unit(actor)
     else:
-        require_create(actor)
+        # B3 (2026-10-13): seçici öz FORMUNUN növ açarından keçir — qrup tələbə, kafedra müəllim formundadır.
+        require_create(actor, {CATALOG_GROUP: KIND_STUDENT, CATALOG_UNIT: KIND_TEACHER}.get(catalog))
     if catalog not in CATALOGS:
         return {"results": [], "has_more": False}
 

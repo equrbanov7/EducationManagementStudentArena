@@ -288,11 +288,13 @@
                 (payload.can_assign_head ? headButton(host, unit) : "") + "</div>";
         }
         var html = "";
+        /* 2026-10-13 (rol auditi B9): «Əlavə et» qrup-qrup serverin `addable` bayrağı ilədir —
+           müəllim qrupu `member.edit`, müavin/koordinator qrupu `role.assign` tələb edir. */
         (payload.groups || []).forEach(function (group) {
             var members = group.members || [];
             html += '<section class="ou-staff__group"><div class="ou-staff__grouphead"><h3 class="ou-staff__label">' + esc(group.label) +
                 ' <span class="ou-staff__count">' + esc(fmt(t(host, "count"), [members.length])) + "</span></h3>" +
-                (payload.can_assign_members ? groupAddButton(host, group, unit) : "") + "</div>";
+                (group.addable ? groupAddButton(host, group, unit) : "") + "</div>";
             if (!members.length) {
                 html += '<p class="ou-staff__empty">' + esc(t(host, "empty")) + "</p>";
             } else {

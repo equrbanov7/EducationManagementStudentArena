@@ -58,7 +58,6 @@ SURVEY_PERMISSION_LABELS = {
 
 #: Keyfiyyət şöbəsinin ORTAQ oxu səthi (struktur/kataloq adları filtrlərdə lazımdır).
 _QUALITY_SHARED = [
-    "org.view",
     "unit.view",
     "member.view",
     "catalog.view",

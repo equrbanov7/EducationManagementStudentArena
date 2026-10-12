@@ -7,7 +7,7 @@ from urllib.parse import quote
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
@@ -3156,6 +3156,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("accounts:pending_review"))
 
+    # Rol auditi B12 (2026-10-13): «Sərbəst iş»/«Kurs işi» sətirləri yalnız açar yanılı olanda görünür.
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)
     def test_assigned_tasks_section_lists_exam_assignment_lab_and_project(self):
         from datetime import timedelta
 
@@ -3331,6 +3333,8 @@ class ProfileViewTest(TestCase):
         self.assertEqual(second_response.status_code, 200)
         self.assertEqual(second_response.json()["badges"]["assigned_tasks_count"], 0)
 
+    # Rol auditi B12 (2026-10-13): «Sərbəst iş»/«Kurs işi» sətirləri yalnız açar yanılı olanda görünür.
+    @override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)
     def test_assigned_tasks_search_filters_items(self):
         from datetime import timedelta
 
@@ -3930,6 +3934,10 @@ class AssignedItemsViewTest(TestCase):
         self.assertEqual(self.client.session.get("active_organization"), self.organization.slug)
 
 
+# 2026-10-13 (rol auditi B12): defoltda kurs tapşırığı / layihə sətirləri gizlidir — bu dəstlər həmin
+# növlərin axınını yoxlayır, ona görə RİM bayraqları yandırılmış kimi işləyir (söndürülü hal:
+# `test_role_audit_b_misc_2026_10_13.py`).
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)
 class MyResultsViewTest(TestCase):
     def setUp(self):
         from datetime import timedelta
@@ -4227,6 +4235,7 @@ class MyResultsViewTest(TestCase):
         self.assertIn("section=my-results", response.url)
 
 
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)  # rol auditi B12 (yuxarı)
 class PendingAnswersViewTest(TestCase):
     """Tests for student pending answers section and standalone view."""
 
@@ -4429,6 +4438,7 @@ class LegacyDashboardRoutesTest(TestCase):
             resolve("/accounts/grading-queue/")
 
 
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)  # rol auditi B12 (yuxarı)
 class PendingReviewViewTest(TestCase):
     """Tests for pending review view (teacher-only)."""
 
@@ -5244,6 +5254,7 @@ class PendingReviewViewTest(TestCase):
         self.assertContains(locked_response, "Yoxlama bağlanıb.")
 
 
+@override_settings(ACADEMIC_SELFWORK_ENABLED=True, ACADEMIC_COURSEWORK_ENABLED=True)  # rol auditi B12 (yuxarı)
 class ReviewResultsViewTest(TestCase):
     """Tests for evaluated review results view (teacher-only)."""
 

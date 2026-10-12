@@ -3,8 +3,10 @@
 İmtahan mərkəzi bu platformada imtahan məzmununu da mərkəzi olaraq yaradır, ona
 görə öz yaratdığı imtahana gələn apellyasiyaya da qərar verə bilir — köhnə
 "reviewer müstəqilliyi" (müəllif öz işinə qərar verə bilməz) qadağası
-qaldırılıb; imtahan mərkəzi rolu onsuz da tək qərar səlahiyyətidir. Tenant
-kənarı və qeyri-mərkəz istifadəçilər üçün icazə bağlı qalır.
+qaldırılıb. Tenant kənarı və qeyri-mərkəz istifadəçilər üçün icazə bağlı qalır.
+
+2026-10-13 (rol auditi B1): baxış (review) mərkəz rolu ilə, QƏRAR isə ``appeal.decide`` açarı ilədir —
+qərar testləri açarı ``_has_appeal_key`` patch-i ilə verir; açarsız mərkəz istifadəçisi yalnız baxır.
 """
 
 from types import SimpleNamespace
@@ -12,7 +14,7 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
-from apps.appeals.services.permissions import can_decide_appeal, can_review_appeal
+from apps.appeals.services.permissions import can_decide_appeal, can_respond_appeal, can_review_appeal
 
 
 def _request(user):
@@ -24,18 +26,20 @@ def _appeal(author_id, org_id=1):
 
 
 class AppealReviewPermissionTests(SimpleTestCase):
+    @patch("apps.appeals.services.permissions._has_appeal_key", return_value=True)
     @patch("apps.appeals.services.permissions.is_exam_center_user", return_value=True)
     @patch("apps.appeals.services.permissions._same_tenant", return_value=True)
-    def test_exam_center_author_can_review_and_decide(self, _tenant, _center):
+    def test_exam_center_author_can_review_and_decide(self, _tenant, _center, _key):
         # Yeni davranış: imtahanı yaradan mərkəz istifadəçisi öz imtahanına da qərar verə bilir.
         author = SimpleNamespace(id=7, is_superuser=False, is_superadmin=False)
         appeal = _appeal(author_id=7)
         self.assertTrue(can_review_appeal(_request(author), appeal))
         self.assertTrue(can_decide_appeal(_request(author), appeal))
 
+    @patch("apps.appeals.services.permissions._has_appeal_key", return_value=True)
     @patch("apps.appeals.services.permissions.is_exam_center_user", return_value=True)
     @patch("apps.appeals.services.permissions._same_tenant", return_value=True)
-    def test_independent_exam_center_user_can_review_and_decide(self, _tenant, _center):
+    def test_independent_exam_center_user_can_review_and_decide(self, _tenant, _center, _key):
         reviewer = SimpleNamespace(id=99, is_superuser=False, is_superadmin=False)
         appeal = _appeal(author_id=7)
         self.assertTrue(can_review_appeal(_request(reviewer), appeal))
@@ -56,3 +60,14 @@ class AppealReviewPermissionTests(SimpleTestCase):
         appeal = _appeal(author_id=7, org_id=2)
         self.assertFalse(can_review_appeal(_request(reviewer), appeal))
         self.assertFalse(can_decide_appeal(_request(reviewer), appeal))
+
+    @patch("apps.appeals.services.permissions._has_appeal_key", return_value=False)
+    @patch("apps.appeals.services.permissions.is_exam_center_user", return_value=True)
+    @patch("apps.appeals.services.permissions._same_tenant", return_value=True)
+    def test_exam_center_user_without_keys_reviews_but_cannot_decide(self, _tenant, _center, _key):
+        # Rol auditi B1: işçi / RİM əməkdaşı (mərkəz rolu, açarsız) — açır, amma cavab/qərar vermir.
+        staff = SimpleNamespace(id=55, is_superuser=False, is_superadmin=False)
+        appeal = _appeal(author_id=7)
+        self.assertTrue(can_review_appeal(_request(staff), appeal))
+        self.assertFalse(can_respond_appeal(_request(staff), appeal))
+        self.assertFalse(can_decide_appeal(_request(staff), appeal))

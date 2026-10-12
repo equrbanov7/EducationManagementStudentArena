@@ -30,7 +30,8 @@ from django.utils.translation import pgettext
 from apps.organizations.models import Membership, Organization, OrgUnit
 from apps.organizations.public import KAFEDRA_UNIT_TYPES, TEACHER_ROLE_NAMES, get_permission_scope
 from apps.organizations.public import visible_units_queryset as _visible_units_queryset
-from core.constants import OrgUnitType
+from core.constants import OrgUnitType, RoleScopeType
+from core.roles import ProfileRole
 
 _CTX = "profile.publish_notification"
 
@@ -92,7 +93,44 @@ def _access(user, capabilities, organization) -> _Access:
     if not is_member:
         return _Access(False, False, None)
     scope = get_permission_scope(user, organization, "unit.view")
-    return _Access(True, bool(capabilities.get("is_org_admin")) or scope.is_org_wide, scope)
+    # Rol auditi 2026-10-13: `is_org_admin` ALİASDIR (səviyyə ≥ 80 / admin-ekvivalent ad) və UNIT
+    # əhatəli dekana, dekan müavininə, kafedra müdirinə də gəlir — əvvəl onlar bununla org-wide
+    # olurdu və yuxarıdakı «dekan / kafedra müdiri yalnız öz alt-ağacı» qaydası pozulurdu. İndi
+    # alias yalnız ORGANIZATION əhatəli üzvlükdən gəlirsə org-wide sayılır.
+    org_wide = scope.is_org_wide or (
+        bool(capabilities.get("is_org_admin")) and _has_org_level_admin_membership(user, organization)
+    )
+    return _Access(True, org_wide, scope)
+
+
+def _has_org_level_admin_membership(user, organization) -> bool:
+    """Aktorun `org_admin` aliası verən ORGANIZATION əhatəli aktiv üzvlüyü varmı."""
+    memberships = Membership.objects.filter(
+        user=user, organization=organization, is_active=True, role__scope_type=RoleScopeType.ORGANIZATION
+    ).select_related("role")
+    return any(
+        ProfileRole.ORG_ADMIN
+        in ProfileRole.aliases_for_membership_role(m.role.name, level=getattr(m.role, "level", 0) or 0)
+        for m in memberships
+    )
+
+
+def can_target_whole_organization(user, capabilities, organization) -> bool:
+    """«Bütün təşkilat (bütün üzvlər)» hədəfi: org admini VƏ org-wide `unit.view` əhatəsi.
+
+    Dekan (`org_admin` aliası, UNIT əhatə) bütün universitetə göndərmir; HR / imtahan mərkəzi
+    kimi alias-dan muaf rollar əvvəlki kimi bu hədəfi almır (yalnız daralır, genişlənmir).
+    """
+    if capabilities.get("is_superadmin"):
+        return True
+    if organization is None:
+        return False
+    # Sahibin üzvlük sətri olmaya bilər (`_access` onu «üzv deyil» sayardı) — əvvəlki kimi açıq.
+    if getattr(organization, "owner_id", None) == getattr(user, "pk", None):
+        return True
+    if not capabilities.get("is_org_admin"):
+        return False
+    return _access(user, capabilities, organization).org_wide
 
 
 def _in_scope(unit, scope) -> bool:

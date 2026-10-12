@@ -1,6 +1,7 @@
 """Müəllim idxalı (toplu Excel) + kataloqdan yaratma düymələri (2026-09-08).
 
-* şablon: müəllim sütunları (FİN, kafedra məcburi); `user.import` olmayan 403;
+* şablon: müəllim sütunları (FİN, kafedra məcburi); `user.import_staff` olmayan 403
+  (2026-10-13 rol auditi B3-ə qədər `user.import` idi — bax `test_role_audit_b_access_2026_10_13.py`);
 * quru icra: kafedra tapılmayan sətir xəta, düzgün sətir «Yaradılacaq»;
 * tətbiq: hesab + kafedraya bağlı müəllim üzvlüyü + vəzifə/tabel №; parol
   yalnız cavabda; audit sətri;
@@ -56,7 +57,13 @@ class _IntakeBase(Stage2BaseTest):
     def setUpTestData(cls):
         super().setUpTestData()
         head = cls.roles["teaching_office_head"]
-        head.permissions = list(head.permissions) + ["user.import", "people.view_teachers", "people.view_students"]
+        # Hər iki idxal açarı: tələbə (`user.import`) + müəllim/heyət (`user.import_staff`, B3 2026-10-13).
+        head.permissions = list(head.permissions) + [
+            "user.import",
+            "user.import_staff",
+            "people.view_teachers",
+            "people.view_students",
+        ]
         head.save(update_fields=["permissions"])
 
     def _post(self, role, name, file):

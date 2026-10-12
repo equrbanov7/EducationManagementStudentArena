@@ -17,7 +17,6 @@ from core.constants import RoleScopeType
 #: Tədris şöbəsinin ORTAQ səthi — struktur ağacı, ixtisas və fənn kataloqu.
 #: Rəhbər və əməkdaş EYNİ ekranları görür; fərq təsdiq/təyinat açarlarındadır.
 _TEACHING_OFFICE_SHARED = [
-    "org.view",
     # Struktur ağacı (ekran 01) + kafedra profili (ekran 02).
     #
     # ⚠️ PREFİKS QAYDASI: `structure.*` LEGACY sayılır və

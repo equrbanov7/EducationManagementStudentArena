@@ -39,12 +39,13 @@
       data-i18n-incomplete-ok="{% trans 'Anladım' context 'appeals.template' %}">
     {% csrf_token %}
 
+    {# 2026-10-13 (rol auditi B1): `review_can_decide` = appeal.respond + appeal.decide açarı (işçi/RİM yalnız baxır). #}
     {% if not review_can_decide %}
     <div class="ems-banner ems-banner--info appeal-banner" role="status">
         <i class="fas fa-eye appeal-banner__icon" aria-hidden="true"></i>
         <div>
             <div class="ems-banner__title">{% trans "Yalnız baxış rejimi" context "appeals.template" %}</div>
-            <div class="ems-banner__body">{% trans "Qərarı yalnız müstəqil imtahan mərkəzi istifadəçisi verə bilər — imtahanın müəllifi/qiymətləndirəni öz işinə qərar verə bilməz." context "appeals.template" %}</div>
+            <div class="ems-banner__body">{% trans "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir." context "appeals.template" %}</div>
         </div>
     </div>
     {% endif %}

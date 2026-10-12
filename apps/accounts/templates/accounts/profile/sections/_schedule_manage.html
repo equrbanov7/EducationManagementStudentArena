@@ -7,6 +7,11 @@ dəst, RİM org-wide, dekan, kafedra müdiri). Menyu görünürlüyü
 `apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə fail-closed
 yenidən yoxlanılır.
 
+YALNIZ-OXU (2026-10-13, rol auditi B11): `schedule.view` daşıyan aktorda
+`sec.read_only` — «Avtomatik cədvəl», park çekmecəsi, yaratma/redaktə/köçürmə
+dialoqları RENDER OLUNMUR, matris `matrix_editable=False` ilə detal rejimindədir.
+Yazı endpoint-ləri `schedule.manage`-i serverdə yenidən tələb edir.
+
 QURULUŞ (ems_ui komponent qatı):
   başlıq (yalnız subtitle — h1 qabıqdadır) → KPI → filtr paneli (avto) →
   həftə pilləri → HƏMİŞƏ görünən matris → legend; dialoqlar sonda.
@@ -62,6 +67,7 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
     </div>
     <div class="sedit__bar-right">
       <span class="sedit__owner">{{ sec.owner_label }}</span>
+      {% if not sec.read_only %}
       <a class="ems-btn" href="{% url 'timetable:home' %}{% if sec.period %}?period={{ sec.period.id }}{% endif %}">
         <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
         {% trans "Avtomatik cədvəl" context "accounts.schedule_manage" %}
@@ -70,10 +76,15 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
         <i class="fas fa-inbox" aria-hidden="true"></i>
         {% trans "Yenidən yerləşdirilməli" context "accounts.schedule_manage" %} ({{ sec.parked|length }})
       </button>
+      {% endif %}
     </div>
   </div>
 
-  {% if not sec.can_edit %}
+  {% if sec.read_only %}
+  <p class="sedit__note" role="status" data-sedit-read-only>
+    {% trans "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır." context "accounts.schedule_manage" %}
+  </p>
+  {% elif not sec.can_edit %}
   <p class="sedit__note" role="status">
     {% trans "Müəllim görünüşü yalnız-oxudur — dərs qoymaq üçün «Qrup cədvəli» görünüşünə keçin." context "accounts.schedule_manage" %}
   </p>
@@ -85,7 +96,7 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lecture"></span> {% trans "Mühazirə" context "accounts.schedule_manage" %}</span>
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--seminar"></span> {% trans "Məşğələ" context "accounts.schedule_manage" %}</span>
     <span class="sedit__legend-item"><span class="sedit__swatch sedit__swatch--lab"></span> {% trans "Laboratoriya" context "accounts.schedule_manage" %}</span>
-    <span class="sedit__legend-item">{% trans "Dərsi sürüşdürüb başqa xanaya buraxın — təsdiq soruşulacaq." context "accounts.schedule_manage" %}</span>
+    {% if not sec.read_only %}<span class="sedit__legend-item">{% trans "Dərsi sürüşdürüb başqa xanaya buraxın — təsdiq soruşulacaq." context "accounts.schedule_manage" %}</span>{% endif %}
   </div>
   {% endif %}
 
@@ -101,6 +112,7 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
        data-place-here="{% trans 'Bura qoy' context 'accounts.schedule_manage' %}"></div>
 </div>
 
+{% if not sec.read_only %}
 {# ── Hüceyrə dialoqu (yarat / redaktə et) ────────────────────────────────── #}
 {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="seditCell" form_dialog_wide=True form_dialog_title=sec.dialog_title form_dialog_subtitle=sec.dialog_subtitle form_dialog_body_include="accounts/profile/sections/schedule/_cell_fields.html" form_dialog_submit_label=sec.dialog_submit_label form_dialog_data=sec.dialog_data %}
 
@@ -113,6 +125,7 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
 
 {# ── «Yenidən yerləşdirilməli» çekmecəsi ─────────────────────────────────── #}
 {% include "partials/ems_ui/_drawer.html" with drawer_id="seditParked" drawer_title=sec.parked_title drawer_subtitle=sec.parked_subtitle drawer_body_include="accounts/profile/sections/schedule/_parked_body.html" %}
+{% endif %}
 {% endif %}
 </section>
 {% endwith %}

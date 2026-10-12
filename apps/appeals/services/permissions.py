@@ -3,11 +3,14 @@ Apellyasiya icazə məntiqi — mərkəzi RBAC üzərində.
 
 - create:  student yalnız ÖZ bitmiş, NƏTİCƏSİ DƏRC OLUNMUŞ final/midterm
            attempt-i üçün, pəncərə açıqdırsa, ``appeal.create`` icazəsi ilə.
-- respond/decide: apellyasiyalar mərkəzləşdirilmiş qaydada imtahan mərkəzi
-           tərəfindən idarə olunur. İmtahan mərkəzi bu platformada imtahan
-           məzmununu da mərkəzi olaraq yaradır, ona görə öz yaratdığı imtahana
-           gələn apellyasiyaya da qərar verə bilir (müstəqillik qadağası yoxdur
-           — imtahan mərkəzi rolu onsuz da tək qərar səlahiyyətidir).
+- review:  apellyasiyalar mərkəzləşdirilmiş qaydada imtahan mərkəzi tərəfindən
+           idarə olunur — mərkəz istifadəçisi (rəhbər, işçi, RİM) siyahını və
+           detalı GÖRÜR. İmtahan mərkəzi imtahan məzmununu da mərkəzi yaradır,
+           ona görə öz imtahanına gələn apellyasiyaya da qərar verə bilir.
+- respond/decide: 2026-10-13 (rol auditi B1) — QƏRAR rol ADI ilə yox, AÇARLA:
+           ``appeal.respond`` (cavab mətni) + ``appeal.decide`` (qəbul/rədd,
+           yenidən qərar). Şablonda yalnız rəhbərdədir; işçi və RİM əməkdaşı
+           «görür və köməklik edir, dəyişdirmir» (``default_roles_rim.py``).
 - view:    yuxarıdakılar + tələbənin qrupunu əhatə edən akademik nəzarət
            (dekan, proqram koordinatoru — ``student.registry_view`` scope-u),
            YALNIZ-OXU (Audit 2026-09-28 EXA-03, sahibin 2026-09-07 memo-su).
@@ -17,7 +20,7 @@ Bütün hallarda tenant uyğunluğu yoxlanılır (superadmin istisna).
 
 from django.apps import apps as django_apps
 
-from apps.appeals.constants import PERM_APPEAL_CREATE
+from apps.appeals.constants import PERM_APPEAL_CREATE, PERM_APPEAL_DECIDE, PERM_APPEAL_RESPOND
 from apps.exams.public import SECURE_EXAM_CATEGORIES, is_exam_center_user
 from core.permissions import is_superadmin_user, request_has_permission
 from core.tenancy import get_request_organization
@@ -93,25 +96,34 @@ def can_create_appeal(request, attempt, *, at_time=None):
 
 
 def can_review_appeal(request, appeal):
-    """Apellyasiyaya baxıb item-lərə cavab verə bilərmi (imtahan mərkəzi).
+    """Apellyasiyanı reviewer panelində aça bilərmi (imtahan mərkəzi, YALNIZ-OXU daxil).
 
     İmtahan mərkəzi istifadəçisi (və superadmin) təşkilatının bütün
-    apellyasiyalarına — öz yaratdığı imtahanlar daxil — baxa bilir.
+    apellyasiyalarına — öz yaratdığı imtahanlar daxil — baxa bilir. Qərar
+    hüququ ayrıca açardır (``can_respond_appeal`` / ``can_decide_appeal``).
     """
     if not _same_tenant(request, appeal):
         return False
     return is_exam_center_user(getattr(request, "user", None))
+
+
+def _has_appeal_key(request, permission):
+    # Superadmin aktiv org konteksti olmadan da (cross-org siyahı) qərar verə bilirdi — saxlanılır.
+    return is_superadmin_user(getattr(request, "user", None)) or request_has_permission(request, permission)
+
+
+def can_respond_appeal(request, appeal):
+    """Item-lərə cavab (izah mətni) yaza bilərmi — mərkəz + ``appeal.respond`` (rol auditi B1)."""
+    return can_review_appeal(request, appeal) and _has_appeal_key(request, PERM_APPEAL_RESPOND)
 
 
 def can_decide_appeal(request, appeal):
-    """Yekun status qərarı / override verə bilərmi (imtahan mərkəzi).
+    """Qəbul/rədd qərarı və 5 dəqiqəlik pəncərədə yenidən qərar (override) verə bilərmi.
 
-    İmtahan mərkəzi bu platformada mərkəzi qərar səlahiyyətidir; imtahan
-    müəllifi eyni zamanda mərkəz istifadəçisidirsə də qərar verə bilir.
+    2026-10-13 (rol auditi B1): əvvəl ``is_exam_center_user`` (rol adı) kifayət edirdi —
+    işçi və RİM əməkdaşı da bal dəyişən qərar verirdi. İndi ``appeal.decide`` açarı lazımdır.
     """
-    if not _same_tenant(request, appeal):
-        return False
-    return is_exam_center_user(getattr(request, "user", None))
+    return can_review_appeal(request, appeal) and _has_appeal_key(request, PERM_APPEAL_DECIDE)
 
 
 def oversight_covers_student(user, organization, student_id):
@@ -154,6 +166,7 @@ __all__ = [
     "appeal_block_reason",
     "can_create_appeal",
     "can_decide_appeal",
+    "can_respond_appeal",
     "can_review_appeal",
     "can_view_appeal",
     "appeal_applicable",

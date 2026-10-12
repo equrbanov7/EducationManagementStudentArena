@@ -20,6 +20,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
@@ -30,7 +31,10 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
     user = request.user
     search_query = (search if search is not None else request.GET.get("pending_search", "")).strip()
     selected_filter = filter_type if filter_type is not None else request.GET.get("pending_type")
-    filter_type = _normalize_pending_answers_filter(selected_filter)
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» (``courses``) / «Kurs işi» (``independent``)
+    # tabı seçilə bilməz, təhvilləri sorğulanmır və sayılmır.
+    hidden_types = hidden_task_filters("pending-answers")
+    filter_type = visible_task_filter("pending-answers", _normalize_pending_answers_filter(selected_filter))
 
     now = timezone.now()
     scoped_exams = _tenant_scoped_exams(request)
@@ -133,7 +137,9 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
         )
 
     assignment_submissions = (
-        Submission.objects.filter(
+        Submission.objects.none()
+        if "courses" in hidden_types
+        else Submission.objects.filter(
             user=user,
             assignment__course_id__in=scoped_course_ids,
         )
@@ -207,7 +213,9 @@ def _collect_pending_answer_items(request, search=None, filter_type=None):
         )
 
     project_submissions = (
-        ProjectSubmission.objects.filter(
+        ProjectSubmission.objects.none()
+        if "independent" in hidden_types
+        else ProjectSubmission.objects.filter(
             student=user,
             project__course_id__in=scoped_course_ids,
         )

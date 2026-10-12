@@ -1,4 +1,6 @@
-{% load i18n static %}
+{% load i18n static task_kinds %}
+{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı göstərilmir (RİM tənzimləməsi). #}
+{% task_kind_visibility as tkv %}
 {% comment %}
 "Nəticələrim" — yeni sistemin cəhd/təhvil nəticələri (imtahan, sərbəst iş, lab,
 kurs işi) İLƏ BİRLİKDƏ registrar/jurnal fənn nəticələri ("Akademik" tabı).
@@ -50,18 +52,22 @@ mənsubiyyəti yoxdur) — ona görə yalnız "Hamısı"/"Akademik" tablarında 
                class="modern-tab {% if my_results_active_filter == 'exams' %}active{% endif %}">
                 {% trans "tab_exams" context "profile.results" %} <span class="tab-count">{{ my_result_counts.exams|default:0 }}</span>
             </a>
+            {% if tkv.selfwork %}
             <a href="{{ profile_base_url }}?section=my-results&results_type=courses{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'courses' %}active{% endif %}">
                   {% trans "tab_assignments" context "profile.results" %} <span class="tab-count">{{ my_result_counts.courses|default:0 }}</span>
             </a>
+            {% endif %}
             <a href="{{ profile_base_url }}?section=my-results&results_type=labs{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'labs' %}active{% endif %}">
                 {% trans "tab_labs" context "profile.results" %} <span class="tab-count">{{ my_result_counts.labs|default:0 }}</span>
             </a>
+            {% if tkv.coursework %}
             <a href="{{ profile_base_url }}?section=my-results&results_type=independent{% if my_results_search_query %}&results_search={{ my_results_search_query|urlencode }}{% endif %}"
                class="modern-tab {% if my_results_active_filter == 'independent' %}active{% endif %}">
                {% trans "tab_independent" context "profile.results" %} <span class="tab-count">{{ my_result_counts.independent|default:0 }}</span>
             </a>
+            {% endif %}
         </div>
 
         <form method="get" class="results-section-search-form js-profile-debounce-search" data-debounce-ms="700" data-my-results-filter-form>

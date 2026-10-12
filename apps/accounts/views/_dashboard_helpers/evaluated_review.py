@@ -21,6 +21,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
 from .formatters import (
     _build_student_group_map_and_available,
     _format_score_display,
@@ -61,8 +62,13 @@ def fill_evaluated_test_scores(items):
 
 def _collect_evaluated_review_items(request, search=None, filter_type=None, filter_group=None, submitted_order=None):
     search_query = (search if search is not None else request.GET.get("evaluated_search", "")).strip()
-    normalized_type = _normalize_pending_review_type(
-        filter_type if filter_type is not None else request.GET.get("evaluated_type", "all")
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı seçilə bilməz, sətirləri yığılmır.
+    hidden_types = hidden_task_filters("review-results")
+    normalized_type = visible_task_filter(
+        "review-results",
+        _normalize_pending_review_type(
+            filter_type if filter_type is not None else request.GET.get("evaluated_type", "all")
+        ),
     )
     selected_group = (filter_group if filter_group is not None else request.GET.get("evaluated_group", "")).strip()
     normalized_submitted_order = _normalize_submission_date_order(
@@ -157,7 +163,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 }
             )
 
-    if normalized_type in {"all", "assignments"}:
+    if normalized_type in {"all", "assignments"} and "assignments" not in hidden_types:
         submissions = (
             Submission.objects.filter(
                 assignment__course__in=teacher_courses,
@@ -196,7 +202,7 @@ def _collect_evaluated_review_items(request, search=None, filter_type=None, filt
                 }
             )
 
-    if normalized_type in {"all", "projects"}:
+    if normalized_type in {"all", "projects"} and "projects" not in hidden_types:
         project_submissions = (
             ProjectSubmission.objects.filter(
                 project__course__in=teacher_courses,

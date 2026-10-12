@@ -41,7 +41,7 @@ class RimUnitPermissionTest(RimCreateBase):
         self.assertTrue(rim_unit.can_create_unit(self.actor_for(self.rim)))
 
     def test_importer_without_the_tree_key_cannot(self):
-        # HR `user.import` daşıyır (hesab yarada bilir), `unit.tree_manage` YOX.
+        # HR `user.import_staff` daşıyır (müəllim hesabı yarada bilir), `unit.tree_manage` YOX.
         actor = self.actor_for(self.hr)
         self.assertNotIn("unit.tree_manage", self.org.roles.get(name="hr").permissions)
         self.assertFalse(rim_unit.can_create_unit(actor))
@@ -135,8 +135,11 @@ class RimUnitSectionTest(RimCreateBase):
         self.assertEqual(section["unit_type_choices"], [])
         self.assertNotContains(response, 'data-rimc-open="unit"')
         self.assertNotContains(response, 'id="rimc-admin-unit"')
-        # Hesab axını toxunulmaz qalır.
-        self.assertContains(response, 'data-rimc-open="student"')
+        # Hesab axını toxunulmaz qalır — 2026-10-13 (rol auditi B3) yalnız HR-ın AÇARI olan növ:
+        # müəllim (`user.import_staff`); tələbə və toplu tələbə siyahısı (`user.import`) təklif olunmur.
+        self.assertContains(response, 'data-rimc-open="teacher"')
+        self.assertNotContains(response, 'data-rimc-open="student"')
+        self.assertNotContains(response, 'data-rimc-open="bulk"')
 
     def test_account_only_operator_keeps_the_account_flow(self):
         response = self._section(self.rim_staff)

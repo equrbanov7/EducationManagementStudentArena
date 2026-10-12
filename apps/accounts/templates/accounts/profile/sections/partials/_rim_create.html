@@ -47,7 +47,9 @@ Django şablon mühərrikindən keçmir).
       </div>
       <div class="ems-dialog__body">
         <div class="rimc-choices">
-          {% if rim_center_section.can_create %}
+          {% comment %}Rol auditi 2026-10-13 B3: növlər AÇARA görə — tələbə + toplu tələbə siyahısı `user.import`,
+            müəllim `user.import_staff`. Server (`services/rim/create.py::create_account`) növü yenidən yoxlayır.{% endcomment %}
+          {% if rim_center_section.can_create_student %}
           <button type="button" class="rimc-choice" data-rimc-open="student">
             <span class="rimc-choice__icon rimc-choice__icon--student" aria-hidden="true"><i class="fas fa-user-graduate"></i></span>
             <span class="rimc-choice__text">
@@ -56,6 +58,8 @@ Django şablon mühərrikindən keçmir).
             </span>
             <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
           </button>
+          {% endif %}
+          {% if rim_center_section.can_create_teacher %}
           <button type="button" class="rimc-choice" data-rimc-open="teacher">
             <span class="rimc-choice__icon rimc-choice__icon--teacher" aria-hidden="true"><i class="fas fa-chalkboard-user"></i></span>
             <span class="rimc-choice__text">
@@ -64,6 +68,8 @@ Django şablon mühərrikindən keçmir).
             </span>
             <i class="fas fa-chevron-right rimc-choice__go" aria-hidden="true"></i>
           </button>
+          {% endif %}
+          {% if rim_center_section.can_create_student %}
           <button type="button" class="rimc-choice" data-rimc-open="bulk">
             <span class="rimc-choice__icon rimc-choice__icon--bulk" aria-hidden="true"><i class="fas fa-file-arrow-up"></i></span>
             <span class="rimc-choice__text">

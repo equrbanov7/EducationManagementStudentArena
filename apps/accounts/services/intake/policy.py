@@ -16,6 +16,9 @@ from core.permissions import has_permission, is_superadmin_user
 
 #: Kanonik açar (bax `apps/organizations/permissions.py` «users» kateqoriyası).
 PERM_IMPORT = "user.import"
+#: Müəllim / heyət hesabları — AYRI açar (rol auditi 2026-10-13 B3). Əvvəl müəllim idxalı da `user.import`-dan
+#: keçirdi və tələbə qəbulu üçün açarı alan Tələbə xidmətləri toplu MÜƏLLİM hesabı yarada bilirdi.
+PERM_IMPORT_STAFF = "user.import_staff"
 
 
 class IntakeAccessError(Exception):
@@ -35,8 +38,8 @@ def _is_owner(user, organization) -> bool:
     return bool(organization is not None and getattr(organization, "owner_id", None) == getattr(user, "pk", None))
 
 
-def can_import(user, organization) -> bool:
-    """Aktorun bu təşkilatda tələbə idxalı səlahiyyəti varmı."""
+def can_import(user, organization, permission: str = PERM_IMPORT) -> bool:
+    """Aktorun bu təşkilatda idxal səlahiyyəti varmı (default: TƏLƏBƏ — ``user.import``)."""
 
     if user is None or not getattr(user, "is_authenticated", False) or not getattr(user, "is_active", False):
         return False
@@ -57,11 +60,17 @@ def can_import(user, organization) -> bool:
     ).select_related("role")
     permissions: set = set()
     for membership in memberships:
-        for permission in membership.role.permissions or []:
+        for key in membership.role.permissions or []:
             # `grant:<perm>` delegasiya prefiksidir — icazəni AKTİV ETMİR.
-            if not str(permission).startswith("grant:"):
-                permissions.add(permission)
-    return has_permission(list(permissions), PERM_IMPORT)
+            if not str(key).startswith("grant:"):
+                permissions.add(key)
+    return has_permission(list(permissions), permission)
+
+
+def can_import_staff(user, organization) -> bool:
+    """Müəllim / heyət hesablarının yaradılması — ``user.import_staff`` (B3, 2026-10-13)."""
+
+    return can_import(user, organization, PERM_IMPORT_STAFF)
 
 
 def require_import(user, organization) -> None:
@@ -74,4 +83,4 @@ def require_import(user, organization) -> None:
         )
 
 
-__all__ = ["PERM_IMPORT", "IntakeAccessError", "can_import", "require_import"]
+__all__ = ["PERM_IMPORT", "PERM_IMPORT_STAFF", "IntakeAccessError", "can_import", "can_import_staff", "require_import"]

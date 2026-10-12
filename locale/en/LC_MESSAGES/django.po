@@ -95794,3 +95794,195 @@ msgstr ""
 " hours can be entered for it. If the load has no row, the teacher chooses "
 "the hours. When off, the previous rule applies: the approved curriculum "
 "first, then the load; extra types are shown too."
+
+msgctxt "appeals.template"
+msgid "Apellyasiyaya baxa bilərsiniz, amma qərarı yalnız «Apellyasiya qərarı vermək» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "You can view this appeal, but only a user with the “Decide appeals” permission (the exam centre head) can decide it."
+
+msgctxt "appeals.view.message"
+msgid "Apellyasiya qərarı vermək icazəniz yoxdur."
+msgstr "You do not have permission to decide appeals."
+
+msgctxt "accounts.exam_chance"
+msgid "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "You do not have the decision permission required to grant exam chances."
+
+msgctxt "accounts.exam_chance"
+msgid "Yalnız baxış: imtahan şansını «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "View only: exam chances are granted by a user with the “Exam centre decisions” permission (the exam centre head)."
+
+msgctxt "accounts.kollokvium_windows"
+msgid "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur."
+msgstr "You do not have the decision permission required to change the windows."
+
+msgctxt "registrar.kollokvium_window"
+msgid "Yalnız baxış: pəncərələri «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) təyin edir və dəyişir."
+msgstr "View only: the windows are set and changed by a user with the “Exam centre decisions” permission (the exam centre head)."
+
+msgctxt "exams.view.question_submission.permission"
+msgid "Göndərişə qərar vermək səlahiyyətiniz yoxdur."
+msgstr "You do not have permission to decide on this submission."
+
+msgctxt "exams.template.question_submission"
+msgid "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir."
+msgstr "View only: the decision on this submission is made by a user with the “Exam centre decisions” permission (the exam centre head)."
+
+msgctxt "organizations.registry"
+msgid "Rəhbər təyini üçün `role.assign` və ya `unit.assign_head` lazımdır."
+msgstr "Assigning a head requires `role.assign` or `unit.assign_head`."
+
+msgctxt "organizations.registry"
+msgid "Rol təyinatı üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Assigning a role requires the `role.assign` permission."
+
+msgctxt "organizations.registry"
+msgid "Bu rol təyinatını silmək üçün `role.assign` səlahiyyəti lazımdır."
+msgstr "Removing this role assignment requires the `role.assign` permission."
+
+msgctxt "organizations.roles_registry"
+msgid "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır."
+msgstr "Viewing the role catalogue requires the «role.view» permission."
+
+msgctxt "accounts.schedule_manage"
+msgid "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın."
+msgstr "You have view-only access to the timetable — pick a group or a teacher to see the week."
+
+msgctxt "accounts.schedule_manage"
+msgid "Yalnız baxış rejimi — cədvəli dəyişmək üçün «Cədvəl idarəetməsi» (schedule.manage) icazəsi lazımdır."
+msgstr "View-only mode — changing the timetable requires the “Timetable management” (schedule.manage) permission."
+
+msgctxt "organizations.permission.label"
+msgid "Bildiriş göndərmək (alıcılar öz əhatəsində)"
+msgstr "Send notifications (recipients within own scope)"
+
+msgctxt "teacher_intake"
+msgid "Toplu müəllim əlavəsi üçün icazəniz yoxdur — bu bölmə yalnız `user.import_staff` açarı olan rollar üçündür."
+msgstr "You do not have permission to add teachers in bulk — this section is only for roles with the `user.import_staff` key."
+
+msgctxt "profile.sidebar"
+msgid "Qrupum"
+msgstr "My group"
+
+msgctxt "accounts.my_group"
+msgid "Sizə təyin olunmuş akademik qrup tapılmadı."
+msgstr "No academic group is assigned to you."
+
+msgctxt "accounts.my_group"
+msgid "Qrup nümayəndəsi rolu qrupa bağlanmayıb. Dekanlığa müraciət edin."
+msgstr "Your group representative role is not linked to a group. Please contact the dean's office."
+
+msgctxt "accounts.my_group"
+msgid "Tələbə sayı: %(total)s"
+msgstr "Students: %(total)s"
+
+msgctxt "accounts.my_group"
+msgid "Davamiyyət: %(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz). Yalnız baxış üçündür."
+msgstr "Attendance: %(period)s %(year)s — absence hours and their share of class hours (percent). View only."
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib — yalnız qrup siyahısı göstərilir."
+msgstr "The current academic period is not set — only the group list is shown."
+
+msgctxt "accounts.my_group"
+msgid "Qrupda qeydiyyatlı tələbə yoxdur."
+msgstr "There are no enrolled students in the group."
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri və fənn üzrə davamiyyəti"
+msgstr "Students of group %(group)s and their attendance by subject"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "accounts.my_group"
+msgid "Tələbə nömrəsi"
+msgstr "Student number"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi qayıb"
+msgstr "Total absences"
+
+msgctxt "accounts.my_group"
+msgid "%(absence)s / %(hours)s saat"
+msgstr "%(absence)s / %(hours)s hours"
+
+msgctxt "accounts.my_group"
+msgid "Bu fənnə yazılmayıb"
+msgstr "Not enrolled in this subject"
+
+msgctxt "accounts.my_group"
+msgid "Rəng izahı"
+msgstr "Colour legend"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddinə yaxındır"
+msgstr "Close to the absence limit"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb həddi aşılıb"
+msgstr "Absence limit exceeded"
+
+msgctxt "accounts.my_group"
+msgid "Bu dövr üçün fənn yazılışı hələ yoxdur."
+msgstr "There are no subject enrolments for this period yet."
+
+msgctxt "organizations.permission.label"
+msgid "İmtahan mərkəzinin qərarları (ikinci şans, kollokvium pəncərəsi, sual göndərişi)"
+msgstr "Exam centre decisions (second chance, colloquium window, question submissions)"
+
+msgctxt "organizations.permission.label"
+msgid "Akademik qeydlərə baxış (ÜOMG, transkript)"
+msgstr "View academic records (GPA, transcript)"
+
+msgctxt "organizations.permission.label"
+msgid "Müəllim/heyət hesablarının toplu idxalı"
+msgstr "Bulk import of teacher/staff accounts"
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşlarının yalnız adı və tələbə nömrəsi görünür; davamiyyət şəxsi məlumatdır və yalnız özünüzə göstərilir."
+msgstr "Only classmates' names and student numbers are shown; attendance is personal and shown only to you."
+
+msgctxt "accounts.my_group"
+msgid "Mənim davamiyyətim"
+msgstr "My attendance"
+
+msgctxt "accounts.my_group"
+msgid "%(period)s %(year)s — qayıb saatı və dərs saatına nisbəti (faiz)."
+msgstr "%(period)s %(year)s — absence hours and their share of lesson hours (percent)."
+
+msgctxt "accounts.my_group"
+msgid "Fənn üzrə davamiyyətim"
+msgstr "My attendance by subject"
+
+msgctxt "accounts.my_group"
+msgid "Fənn"
+msgstr "Subject"
+
+msgctxt "accounts.my_group"
+msgid "Qayıb (saat)"
+msgstr "Absence (hours)"
+
+msgctxt "accounts.my_group"
+msgid "Faiz"
+msgstr "Percent"
+
+msgctxt "accounts.my_group"
+msgid "Ümumi"
+msgstr "Total"
+
+msgctxt "accounts.my_group"
+msgid "Cari tədris dövrü müəyyən edilməyib."
+msgstr "The current academic period is not set."
+
+msgctxt "accounts.my_group"
+msgid "Qrup yoldaşları"
+msgstr "Classmates"
+
+msgctxt "accounts.my_group"
+msgid "%(group)s qrupunun tələbələri"
+msgstr "Students of group %(group)s"
+
+msgctxt "accounts.my_group"
+msgid "siz"
+msgstr "you"

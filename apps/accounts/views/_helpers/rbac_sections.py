@@ -81,6 +81,9 @@ def apply_permission_section_gates(
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
     from core.permissions import has_permission
 
+    from .rbac_my_group import my_group_sections
+    from .rbac_scope_sections import scope_gated_sections, teaches_workload
+
     # RİM rəhbəri (`ikt_rehber`) — SAHİBİN QƏRARI (2026-09-14 «hər şeyin icazəsi»,
     # 2026-09-21 «hər roldakı bütün özəllikləri görsün»): bölmə görünürlüyü üçün
     # sahib/superadmin kimi privileged sayılır. Rolun DB icazə siyahısı
@@ -147,6 +150,10 @@ def apply_permission_section_gates(
     # bilməsi `apps/registrar/schedule_manage.py`-da struktur əhatəsi ilə
     # fail-closed yenidən yoxlanılır (əhatəsiz aktor boş siyahı görür).
     can_manage_schedule = privileged or has_permission(permissions, "schedule.manage")
+    # 2026-10-13 (rol auditi B11): `schedule.view` əvvəl heç nəyi açmırdı (prorektor, Tədris şöbəsi, RİM
+    # əməkdaşı, qəyyum, inzibati bölmə). İndi eyni bölmə YALNIZ-OXU açılır — redaktə/yaratma/köçürmə
+    # idarələri render olunmur, yazı endpoint-ləri isə `schedule.manage`-i serverdə yenidən tələb edir.
+    can_view_schedule = can_manage_schedule or has_permission(permissions, "schedule.view")
 
     # «Tələbə idxalı» — `user.import`. QƏSDƏN RİM mərkəzinin (`user.search` və s.)
     # açarlarından AYRIDIR: mövcud hesabı idarə etmək hüququ heç bir rola
@@ -180,12 +187,18 @@ def apply_permission_section_gates(
     #     və RİM/prorektor; bölgü ekranını AÇIR. Konkret kafedranın əhatəyə
     #     düşməsi `apps/workload/services/scoping.py`-da fail-closed yenidən
     #     yoxlanılır (əhatəsi olmayan aktor boş kafedra siyahısı görür).
-    #   `workload.view` → HƏR müəllim; yalnız ÖZ bölgü sətirlərini göstərən
-    #     «Dərs yüküm» bölməsini açır (sorğu `teacher=request.user` ilə daralıb,
-    #     yəni açar başqasının yükünü GÖSTƏRMİR).
+    #   `workload.view` → yalnız ÖZ bölgü sətirlərini göstərən «Dərs yüküm» bölməsinin
+    #     data qapısı (sorğu `teacher=request.user` ilə daralıb — başqasının yükünü
+    #     GÖSTƏRMİR). Menyu isə 2026-10-13-dən (rol auditi B16) əlavə olaraq `workload.object`
+    #     (müəllim şablonu) VƏ YA faktiki bölgü sətri tələb edir: `workload.view` Tədris
+    #     şöbəsi / RİM əməkdaşı / qəyyumda da var və onlar boş səhifə görürdü. Sorğu
+    #     (`teaches_workload`, tək EXISTS) YALNIZ açar yoxlaması uğursuz olanda gedir.
     can_distribute_workload = privileged or has_permission(permissions, "workload.distribute")
     can_manage_workload = can_distribute_workload or has_permission(permissions, "workload.manage")
     can_view_workload = can_manage_workload or has_permission(permissions, "workload.view")
+    show_my_workload = can_view_workload and (
+        privileged or has_permission(permissions, "workload.object") or teaches_workload(user, organization)
+    )
 
     # Mərhələ 4 — zəncirin üç yeni səthi. Hər biri ÖZ açarındadır (səlahiyyət
     # ayrılığı): tədris şöbəsi göndərir, koordinator viza verir, dekan
@@ -308,9 +321,9 @@ def apply_permission_section_gates(
         (can_review_syllabus, "syllabus-review"),
         (can_review_question_chair, "question-chair-review"),
         (can_reassign_teaching, "teaching-handover"),
-        (can_manage_schedule, "schedule-manage"),
+        (can_view_schedule, "schedule-manage"),  # B11: `schedule.view` → yalnız-oxu (2026-10-13)
         (can_import_students, "student-intake"),
-        (can_import_students, "teacher-intake"),
+        (privileged or has_permission(permissions, "user.import_staff"), "teacher-intake"),  # B3 (2026-10-13)
         (can_use_applications, "applications"),
         (can_watch_legacy_grades, "legacy-grade-review"),
         # «Sistem tənzimləmələri» — sahib 2026-10-03: YALNIZ RİM rəhbəri və superadmin (açar qapısı yox).
@@ -318,7 +331,7 @@ def apply_permission_section_gates(
         # «Jurnal təmizliyi» — sahib 2026-10-10: eyni qapı; yazı servisdə `journal.correct` ilə yenidən yoxlanılır.
         (bool(is_superadmin or is_rim_head), "journal-hygiene"),
         (can_manage_workload, "workload-distribution"),
-        (can_view_workload, "my-workload"),
+        (show_my_workload, "my-workload"),  # B16: `workload.object` və ya faktiki bölgü sətri
         (can_manage_workload, "workload-center"),
         (can_review_workload, "workload-visa"),
         (can_approve_workload, "workload-approval"),
@@ -349,6 +362,14 @@ def apply_permission_section_gates(
     ):
         if enabled:
             allowed_sections.add(section)
+    # «Akademik qeydlər» (B2) + `journal.view` ilə jurnal linki (B5) — açar + struktur əhatəsi (2026-10-13).
+    allowed_sections |= scope_gated_sections(user, organization, permissions, privileged=privileged)
+    # «Qrupum» (B10, 2026-10-13): `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) — sorğusuz.
+    allowed_sections |= my_group_sections(user, organization)
+    # «Rollar» (`org-roles`, B15): menyu alias ilə açılır (`rbac_university_sections`), data isə
+    # `role.view` istəyir (`org_admin/context.py`) — açarsız aktor boş panel görməsin.
+    if not (privileged or has_permission(permissions, "role.view")):
+        allowed_sections.discard("org-roles")
 
     # «Təşkilat paneli» (`org-overview`, sahib 2026-10-01) — köhnə müstəqil
     # `/organizations/<slug>/` panelinin kabinet varisi. Menyu yalnız təşkilat
@@ -373,6 +394,7 @@ def apply_permission_section_gates(
         "can_review_question_chair": can_review_question_chair,
         "can_reassign_teaching": can_reassign_teaching,
         "can_manage_schedule": can_manage_schedule,
+        "can_view_schedule": can_view_schedule,
         "can_import_students": can_import_students,
         "can_view_student_registry": can_view_student_registry,
         "can_move_students": can_move_students,

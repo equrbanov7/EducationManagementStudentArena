@@ -59,6 +59,7 @@ COMPACT_SIDEBAR_TREES = {
             "my-transcript",
             "overall-academic",
             "academic-calendar",
+            "my-group",  # «Qrupum» — baş tələbə (rol auditi 2026-10-13 B10)
             "my-subject-folders",
             "assigned-exams",
             "assigned-courses",

@@ -34,10 +34,9 @@ class VisaGateBase(TestCase):
         cls.office = User.objects.create_user("wvisa.office", "wvisa.office@x.test", "pw")
         cls.dean = User.objects.create_user("wvisa.dean", "wvisa.dean@x.test", "pw")
         activate_member(cls.org, cls.office, "teaching_office_head", permissions=OFFICE_PERMS, level=85)
-        # Rol adı QƏSDƏN "dean" DEYİL: `workflow.COORDINATOR_ROLES` özü "dean"
-        # adını daşıyan üzvləri də əhatə sayır (dekan öz sətrinə viza verə
-        # bilər) — `NoCoordinatorCoverageTest`-in "heç bir baxa bilən yoxdur"
-        # ssenarisini yoxlaması üçün dekanın rolu bu kataloqdan kənarda olmalıdır.
+        # Rol adı QƏSDƏN "dean" DEYİL (tarixi səbəb: əvvəl əhatə rol ADI ilə idi). 2026-10-13
+        # (rol auditi B18): əhatə artıq açarladır — dekanda `workload.review` yoxdur, ona görə
+        # `NoCoordinatorCoverageTest`-in "heç bir baxa bilən yoxdur" ssenarisi adından asılı deyil.
         activate_member(
             cls.org,
             cls.dean,

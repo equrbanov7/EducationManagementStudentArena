@@ -97,10 +97,19 @@ def test_rector_wildcard_covers_syllabus():
 
 
 def test_unrelated_roles_get_nothing_by_default():
-    for name in ("student", "assistant", "tutor", "hr", "exam_center_head"):
+    # `assistant` 2026-10-13-dən müəllim kimi sillabus yazır (rol auditi B4) — bax aşağıdakı test.
+    for name in ("student", "tutor", "hr", "exam_center_head"):
         permissions = _role(name)["permissions"]
         for permission in ALL_SYLLABUS_PERMS:
             assert not has_permission(permissions, permission), f"{name} → {permission}"
+
+
+def test_assistant_authors_like_a_teacher():
+    permissions = _role("assistant")["permissions"]
+    for permission in ("syllabus.view", "syllabus.edit", "syllabus.submit"):
+        assert has_permission(permissions, permission), permission
+    for permission in ("syllabus.review", "syllabus.approve"):
+        assert not has_permission(permissions, permission), permission
 
 
 def test_final_score_style_prefix_isolation():

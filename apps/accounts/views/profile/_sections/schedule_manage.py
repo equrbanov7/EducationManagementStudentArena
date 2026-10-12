@@ -215,11 +215,11 @@ def _nav_prefix(*, period, view_mode, group, teacher, selected_year):
     return "%s?%s&" % (reverse("accounts:profile"), urlencode(params))
 
 
-def _selection(section, request, organization, period):
-    """Qrup / müəllim seçimi — YALNIZ aktorun əhatəsindən (fail-closed)."""
+def _selection(section, request, organization, period, *, permission):
+    """Qrup / müəllim seçimi — YALNIZ aktorun ``permission`` əhatəsindən (fail-closed)."""
     from apps.organizations.models import OrgUnit
 
-    groups = list(schedule_manage.scoped_groups(request.user, organization).values("id", "name"))
+    groups = list(schedule_manage.scoped_groups(request.user, organization, permission=permission).values("id", "name"))
     section["groups"] = groups
     requested = (request.GET.get(PREFIX + "group") or "").strip()
     group = None
@@ -229,7 +229,7 @@ def _selection(section, request, organization, period):
         group = OrgUnit.objects.filter(pk=chosen).first()
     section["group"] = group
 
-    scoped = schedule_manage.scoped_offerings(request.user, organization, period=period)
+    scoped = schedule_manage.scoped_offerings(request.user, organization, period=period, permission=permission)
     teachers = _teachers_in_scope(scoped)
     section["scope_teachers"] = teachers
 
@@ -257,25 +257,37 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
         _CTX, "Dərs cədvəlini idarə etmək üçün icazəniz yoxdur — bu bölmə yalnız səlahiyyətli rollar üçündür."
     )
     section["access_denied_message"] = section["state_body"]
-    has_access = bool(active_organization is not None and schedule_manage.can_manage(request.user, active_organization))
+    # 2026-10-13 (rol auditi B11): `schedule.view` daşıyan (prorektor, Tədris şöbəsi, RİM əməkdaşı…)
+    # bölməni YALNIZ-OXU görür — matris kartları detal rejimindədir, yaratma/redaktə/köçürmə/park
+    # idarələri və dialoqlar render OLUNMUR. Yazı endpoint-ləri `schedule.manage`-i ayrıca yoxlayır.
+    can_manage = bool(active_organization is not None and schedule_manage.can_manage(request.user, active_organization))
+    has_access = can_manage or bool(
+        active_organization is not None and schedule_manage.can_view(request.user, active_organization)
+    )
     section["has_access"] = has_access
+    section["read_only"] = not can_manage
     if not has_access:
         return
 
     organization = active_organization
-    scope = schedule_manage.actor_scope(request.user, organization)
+    permission = schedule_manage.SCHEDULE_PERMISSION if can_manage else schedule_manage.SCHEDULE_VIEW_PERMISSION
+    scope = schedule_manage.actor_scope(request.user, organization, permission)
     org_wide = scope.is_org_wide or request.user.is_superuser or organization.owner_id == request.user.pk
     section["scope_label"] = (
         pgettext(_CTX, "Bütün universitet") if org_wide else pgettext(_CTX, "Yalnız öz struktur bölmələriniz")
     )
-    section["header_subtitle"] = pgettext(
-        _CTX,
-        "Qrupu seçin, boş xanaya klikləyib dərs qoyun, dərsi sürüşdürüb yerini dəyişin. "
-        "Toqquşmalar saxlamadan əvvəl göstərilir; hər dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir.",
+    section["header_subtitle"] = (
+        pgettext(
+            _CTX,
+            "Qrupu seçin, boş xanaya klikləyib dərs qoyun, dərsi sürüşdürüb yerini dəyişin. "
+            "Toqquşmalar saxlamadan əvvəl göstərilir; hər dəyişiklik müəllimə və qrupun tələbələrinə bildiriş kimi gedir.",
+        )
+        if can_manage
+        else pgettext(_CTX, "Cədvələ yalnız baxış icazəniz var — qrup və ya müəllim seçib həftəlik cədvələ baxın.")
     )
 
     period = _periods(section, request, organization)
-    group, teacher, view_mode, teachers = _selection(section, request, organization, period)
+    group, teacher, view_mode, teachers = _selection(section, request, organization, period, permission=permission)
     section["filters"] = _filter_fields(
         section, groups=section["groups"], teachers=teachers, view_mode=view_mode, group=group, teacher=teacher
     )
@@ -294,7 +306,9 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
     # yerindən çıxan dərs adətən BAŞQA qrupundur və dərhal görünməlidir.
     # Əhatə isə fail-closed — yalnız aktorun `schedule.manage` alt-ağacı.
     section["parked"] = (
-        editor.parked_rows(organization=organization, period=period, actor=request.user) if period is not None else []
+        editor.parked_rows(organization=organization, period=period, actor=request.user)
+        if (period is not None and can_manage)
+        else []
     )
     section["subjects"] = schedule_editor.allowed_subjects(organization=organization, group=group, period=period)
     section["teachers"] = schedule_editor.teacher_choices(organization)
@@ -328,7 +342,7 @@ def build_schedule_manage_section(request, section, *, active_organization, allo
     section["owner_label"] = (
         _person_name(teacher) if (view_mode == "teacher" and teacher is not None) else getattr(group, "name", "")
     )
-    section["can_edit"] = view_mode == "group" and group is not None and period is not None
+    section["can_edit"] = can_manage and view_mode == "group" and group is not None and period is not None
     _dialog_labels(section)
 
 

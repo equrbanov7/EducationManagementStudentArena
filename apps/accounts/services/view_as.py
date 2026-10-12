@@ -85,6 +85,10 @@ UNIT_SCOPED_ROLE_NAMES = {"tutor", "dean", "vice_dean", "department_head"}
 ROLE_MODE_MAP = {
     ProfileRole.ORG_OWNER: MODE_FULL,
     ProfileRole.ORG_ADMIN: MODE_FULL,
+    # Qəyyumlar Şurasının sədri — sahib 2026-10-11: «rektor kimi hər şeyə çıxış»
+    # (`default_roles_oversight.BOARD_CHAIR_ROLE`). Rol adı ilə xəritələnir, alias
+    # sayılmır — yalnız `board_chair` üzvlüyü olan sədr əvvəl view-as almırdı.
+    "board_chair": MODE_FULL,
     "rector": MODE_FULL,
     "vice_rector": MODE_FULL,
     ProfileRole.IKT_REHBER: MODE_FULL,
@@ -127,7 +131,7 @@ ROLE_FILTER_MAP = {
         "lab_assistant",
     },
     "student": {ProfileRole.STUDENT, ProfileRole.LEAD_STUDENT},
-    "admin": {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN, "rector", "vice_rector"},
+    "admin": {ProfileRole.ORG_OWNER, ProfileRole.ORG_ADMIN, "board_chair", "rector", "vice_rector"},
     # «Əməkdaşlar» = inzibati vəzifəlilər də daxil (sahib 2026-09-21): tədris
     # şöbəsi, RİM, imtahan mərkəzi, inzibati şöbə, tələbə xidmətləri, dekanlıq,
     # kafedra müdiri, koordinator, qəyyum, HR, tyutor, adi üzv.

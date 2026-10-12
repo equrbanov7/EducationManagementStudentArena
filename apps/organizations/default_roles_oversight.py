@@ -47,7 +47,6 @@ from .default_roles_shared import PEOPLE_DIRECTORY_READ
 
 #: Qəyyum: yalnız ÜMUMİ mənzərə — bir dənə də yazma açarı yoxdur.
 _TRUSTEE_PERMISSIONS = [
-    "org.view",
     "unit.view",
     "member.view",
     "catalog.view",
@@ -64,7 +63,6 @@ _TRUSTEE_PERMISSIONS = [
 
 #: İnzibati şöbə müdiri: öz vahidi + kataloq oxusu.
 _ADMIN_UNIT_HEAD_PERMISSIONS = [
-    "org.view",
     "unit.view",
     "member.view",
     "catalog.view",

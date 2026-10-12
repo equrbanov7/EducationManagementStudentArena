@@ -26,6 +26,7 @@ from .._helpers import (
     _normalize_assigned_tasks_filter,
     _task_state_badge_data,
 )
+from .._helpers.task_kind_visibility import coursework_tasks_visible, selfwork_tasks_visible
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
@@ -309,6 +310,10 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
         .distinct()
         .order_by("-created_at")
     )
+    # Rol auditi B12 (2026-10-13): «Sərbəst iş» bağlıdırsa kurs tapşırıqları bu siyahıda da görünmür
+    # (`task_kind_visibility` — digər kurs bölmələri ilə eyni qayda; data silinmir).
+    if not selfwork_tasks_visible():
+        assignments_qs = assignments_qs.none()
     counts["assignments"] = assignments_qs.count()
     if filter_type in {"all", "assignments"}:
         for assignment in assignments_qs:
@@ -401,6 +406,8 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
         .distinct()
         .order_by("-created_at")
     )
+    if not coursework_tasks_visible():  # B12: «Kurs işi» bağlıdırsa layihələr də.
+        projects_qs = projects_qs.none()
     counts["independent"] = projects_qs.count()
     if filter_type in {"all", "independent"}:
         for project in projects_qs:
