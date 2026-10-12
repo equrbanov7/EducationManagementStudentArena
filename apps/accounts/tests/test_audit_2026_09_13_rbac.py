@@ -220,7 +220,9 @@ _SKIP_DIRS = {"tests", "migrations", "__pycache__", "node_modules", "static", "v
 # `grade.override`, `qa.*` — miqrasiya organizations.0051) → siyahı BOŞDUR.
 # 2026-10-10 (URL auditi WP9a): `assignment.edit` yeganə istifadəçisi — UI-dan çağırılmayan
 # `assignments/<pk>/remove-student/` — silindi; açar rol şablonlarında qalır (rol redaktoru göstərir).
-KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset({"assignment.edit"})
+# 2026-10-13 (rol auditi B13): `assignment.edit` və `grade.publish` kataloqdan və rollardan ÇIXARILDI
+# (miqrasiya organizations.0061) → siyahı yenə BOŞDUR.
+KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset()
 
 
 def _referenced_permission_keys(root, catalog):
@@ -266,7 +268,8 @@ class PermissionCatalogDriftTest(TestCase):
         catalog = set(get_all_permissions())
         referenced = _referenced_permission_keys(str(settings.BASE_DIR), catalog)
         self.assertIn("member.remove", referenced)
-        self.assertIn("assignment.edit", catalog)
+        # 2026-10-13: ölü `assignment.edit` kataloqdan çıxarıldı (rol auditi B13).
+        self.assertNotIn("assignment.edit", catalog)
 
 
 class ForeignOrgStructurePageTest(_Base):
@@ -298,17 +301,19 @@ class ForeignOrgStructurePageTest(_Base):
 
 
 class AssignmentEditKeyTest(_Base):
-    """F-12 — `assignment.edit` kataloqda, müəllim şablonunda və endpoint müəllimə açıqdır."""
+    """F-12 → 2026-10-13 (rol auditi B13): heç nəyi qapılamayan `assignment.edit` / `grade.publish`
+    kataloqdan və bütün default rol şablonlarından çıxarılıb («yalançı düymə» qalmasın)."""
 
-    def test_key_in_catalog_and_teacher_templates(self):
+    def test_dead_keys_removed_from_catalog_and_templates(self):
         from apps.organizations.default_roles import DEFAULT_ROLES
-        from apps.organizations.permissions import PERMISSION_CATEGORIES, PERMISSION_LABELS, get_all_permissions
+        from apps.organizations.permissions import PERMISSION_LABELS, get_all_permissions
 
-        self.assertIn("assignment.edit", PERMISSION_CATEGORIES["courses"])
-        self.assertIn("assignment.edit", get_all_permissions())
-        self.assertTrue(str(PERMISSION_LABELS["assignment.edit"]).strip())
-        university_teacher = next(r for r in DEFAULT_ROLES[OrganizationType.UNIVERSITY] if r["name"] == "teacher")
-        self.assertIn("assignment.edit", university_teacher["permissions"])
+        for key in ("assignment.edit", "grade.publish"):
+            self.assertNotIn(key, get_all_permissions(), key)
+            self.assertNotIn(key, PERMISSION_LABELS, key)
+            for org_type, roles in DEFAULT_ROLES.items():
+                for role in roles:
+                    self.assertNotIn(key, role["permissions"], f"{org_type}/{role['name']}")
 
 
 class WorkloadRowsForeignChairTest(_Base):

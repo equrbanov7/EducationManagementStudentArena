@@ -6,6 +6,7 @@ from core.constants import RoleScopeType
 from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
 from .default_roles_rim import RIM_STAFF_ROLES
+from .default_roles_role_audit import apply_role_audit_grants
 from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
 from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
@@ -118,7 +119,6 @@ UNIVERSITY_ROLES = [
             # final_score.entry `exam.*`-a DAXİL DEYİL (ayrıca prefiks) — açıq verilir.
             "final_score.entry",
             "grade.view",
-            "grade.publish",
             "appeal.respond",
             "appeal.decide",
             "people.view_teachers",
@@ -194,10 +194,9 @@ UNIVERSITY_ROLES = [
             # RİM-in yalnız QEYRİ-DAĞIDICI hissəsi (tap + düzəlt).
             "user.search",
             "user.edit",
-            # Tələbə idxalı — qəbul siyahısının yüklənməsi kadr/qeydiyyat işidir.
-            # Dağıdıcı açar DEYİL: mövcud hesabı dəyişmir, yalnız yeni sətir yaradır
-            # (mövcud FİN/username ötürülür).
-            "user.import",
+            # Tələbə idxalı (`user.import`) və tələbə kataloqu (`people.view_students`) 2026-10-13-də
+            # Tələbə xidmətlərinə keçdi (rol auditi B6) — HR müəllim/heyət idxalını `user.import_staff`
+            # ilə alır (bax `default_roles_role_audit.py`, sonda tətbiq olunur).
             # Kadr kataloqu: HR tam OXU + müəllim statusu təyinatı alır.
             # `people.manage_status` QƏSDƏN YOXDUR — HR-da `user.block` da yoxdur,
             # yəni hesab dayandırma səlahiyyəti bu rolda ümumiyyətlə mövcud deyil.
@@ -340,8 +339,6 @@ UNIVERSITY_ROLES = [
             # Dərs yükü: müəllim YALNIZ ÖZ bölgü sətirlərini görür («Dərs yüküm»);
             # sorğu qatı `teacher=request.user` ilə daraldılıb (fail-closed).
             "workload.view",
-            # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-            "assignment.edit",
             "assignment.delete",
             "project.delete",
             "lab.delete",
@@ -480,9 +477,10 @@ UNIVERSITY_ROLES = [
 # ────────────────────────────────────────────────────────────────────────────
 
 #: Müraciət GÖNDƏRƏ bilməyən rollar: `alumni` (arxiv — heç bir hüququ yoxdur),
-#: `member` (təyinatdan əvvəlki onboarding rolu), `rector` (`*` ilə onsuz da
-#: əhatə olunur — açarı təkrar yazmaq kataloqu şişirdir).
-_APPLICATION_CREATE_EXEMPT = {"alumni", "member", "rector"}
+#: `rector` (`*` ilə onsuz da əhatə olunur — açarı təkrar yazmaq kataloqu şişirdir).
+#: `member` 2026-10-13-də ÇIXDI (rol auditi B7): o, «onboarding» yox, vəzifəsi xəritələnməmiş
+#: ofis işçisidir (mühasib, kitabxanaçı… — `staff_roster.py`) və arayış/ərizə göndərməlidir.
+_APPLICATION_CREATE_EXEMPT = {"alumni", "rector"}
 
 #: GƏLƏN müraciətə qərar verən rollar (şöbə emalçıları). Açar səthi açır;
 #: konkret müraciətə əməl həm də şöbənin `handler_role_names`-inə düşməkdən
@@ -561,3 +559,7 @@ apply_announcement_grants(UNIVERSITY_ROLES)
 
 # «Kadr analitikası» (sahib 2026-10-11): `people.hr_analytics` — `hr`. Mövcud: organizations/0058.
 apply_hr_grants(UNIVERSITY_ROLES)
+
+# Rol auditi (2026-10-13, sahib «tövsiyə olunan variantlarla»): açar verilişi/alınması + ölü açarlar.
+# Mövcud tenantlar: organizations/0061. SONUNCU olmalıdır — əvvəlki addımların əlavələrini də süzür.
+apply_role_audit_grants(UNIVERSITY_ROLES)

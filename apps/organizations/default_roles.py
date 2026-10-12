@@ -78,8 +78,6 @@ DEFAULT_ROLES = {
                 "exam.edit",
                 "exam.host",
                 "exam.delete",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
@@ -161,8 +159,6 @@ DEFAULT_ROLES = {
                 "grade.view",
                 "grade.input",
                 "exam.*",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
@@ -213,8 +209,6 @@ DEFAULT_ROLES = {
                 "course.*",
                 "grade.*",
                 "exam.*",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",

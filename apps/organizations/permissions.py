@@ -25,6 +25,7 @@ from core.permissions import (  # noqa: F401
 from .permissions_account import merge_account_permissions
 from .permissions_announcements import merge_announcement_permissions
 from .permissions_hr import merge_hr_permissions
+from .permissions_role_audit import merge_role_audit_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
 from .permissions_system import merge_system_permissions
@@ -90,12 +91,8 @@ PERMISSION_CATEGORIES = {
         "course.create",
         "course.edit",
         "course.delete",
-        # `assignment.edit` (2026-09-13, audit `access` F-12): tapşırığın siyahısını
-        # (tələbəni tapşırıqdan çıxarmaq) redaktə açarı. Kod bu açarı 2026-dan
-        # yoxlayırdı, amma kataloqda YOX idi → heç bir default rol daşımırdı və
-        # icazə redaktorundan verilə bilmirdi. `assignment.delete` ilə eyni
-        # ailədədir; qapı `course.edit` ilə də açılır (bax assignments/views/shared/api.py).
-        "assignment.edit",
+        # `assignment.edit` 2026-10-13-də ÇIXARILDI (rol auditi B13): heç bir kod onu
+        # yoxlamırdı — redaktorda «yalançı düymə» idi. Mövcud rollardan: miqrasiya 0061.
         "assignment.delete",
         "project.delete",
         "lab.delete",
@@ -103,7 +100,7 @@ PERMISSION_CATEGORIES = {
     "grading": [
         "grade.view",
         "grade.input",
-        "grade.publish",
+        # `grade.publish` 2026-10-13-də ÇIXARILDI (rol auditi B13) — heç nəyi qapılamırdı.
     ],
     # Jurnal düzəlişi (correction) — 2 saat/bitmiş-semestr limitlərini sənədli
     # (PDF + audit) keçmə hüququ. İKT Rəhbəri rolunun açar icazəsi.
@@ -372,14 +369,12 @@ PERMISSION_LABELS = {
     "course.create": pgettext_lazy(_PERM_CTX, "Kurs yaratmaq"),
     "course.edit": pgettext_lazy(_PERM_CTX, "Kursu redaktə etmək"),
     "course.delete": pgettext_lazy(_PERM_CTX, "Kursu silmək"),
-    "assignment.edit": pgettext_lazy(_PERM_CTX, "Sərbəst işi redaktə etmək"),
     "assignment.delete": pgettext_lazy(_PERM_CTX, "Sərbəst işi silmək"),
     "project.delete": pgettext_lazy(_PERM_CTX, "Kurs işini silmək"),
     "lab.delete": pgettext_lazy(_PERM_CTX, "Lab işini silmək"),
     # grading
     "grade.view": pgettext_lazy(_PERM_CTX, "Qiymətlərə baxış"),
     "grade.input": pgettext_lazy(_PERM_CTX, "Qiymət yazmaq"),
-    "grade.publish": pgettext_lazy(_PERM_CTX, "Qiymətləri dərc etmək"),
     # journal
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
@@ -468,6 +463,8 @@ merge_system_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERM
 merge_announcement_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Kadr analitikası» (2026-10-11) — `people.hr_analytics` («people» kateqoriyasına, HR).
 merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+# Rol auditi (2026-10-13) — `exam_center.decide`, `student.records_view`, `user.import_staff`.
+merge_role_audit_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 
 
 def get_permission_label(permission: str) -> str:
