@@ -47,7 +47,7 @@ ENTRIES = {
             "ru": "Студенты группы %(group)s",
             "tr": "%(group)s grubunun öğrencileri",
         },
-        "siz": {"en": "you", "ru": "вы", "tr": "siz"},
+        "siz": {"en": "you", "ru": "вы", "tr": "Siz"},
     },
 }
 

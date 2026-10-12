@@ -73,7 +73,7 @@ ENTRIES = {
         "%(absence)s / %(hours)s saat": {
             "en": "%(absence)s / %(hours)s hours",
             "ru": "%(absence)s / %(hours)s ч",
-            "tr": "%(absence)s / %(hours)s saat",
+            "tr": "%(absence)s / %(hours)s sa.",
         },
         "Bu fənnə yazılmayıb": {
             "en": "Not enrolled in this subject",

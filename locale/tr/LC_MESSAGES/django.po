@@ -95366,7 +95366,7 @@ msgstr "Toplam devamsızlık"
 
 msgctxt "accounts.my_group"
 msgid "%(absence)s / %(hours)s saat"
-msgstr "%(absence)s / %(hours)s saat"
+msgstr "%(absence)s / %(hours)s sa."
 
 msgctxt "accounts.my_group"
 msgid "Bu fənnə yazılmayıb"
@@ -95446,4 +95446,4 @@ msgstr "%(group)s grubunun öğrencileri"
 
 msgctxt "accounts.my_group"
 msgid "siz"
-msgstr "siz"
+msgstr "Siz"
