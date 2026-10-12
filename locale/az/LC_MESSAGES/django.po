@@ -95355,3 +95355,7 @@ msgstr ""
 "(məs. lab yoxdursa) həftəlik planda görünmür və ona saat yazılmır. Yükdə "
 "sətir yoxdursa müəllim saatı özü seçir. Söndürülüdə əvvəlki qayda: əvvəl "
 "təsdiqlənmiş tədris planı, sonra yük; artıq növlər də göstərilir."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "Alman dili"

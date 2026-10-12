@@ -95794,3 +95794,7 @@ msgstr ""
 " hours can be entered for it. If the load has no row, the teacher chooses "
 "the hours. When off, the previous rule applies: the approved curriculum "
 "first, then the load; extra types are shown too."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "German"

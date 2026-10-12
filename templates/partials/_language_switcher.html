@@ -25,6 +25,8 @@ qaydası (`bottom: 100%`) birbaşa işləyir — Popper lazım deyil.{% endcomme
                 RU
             {% elif current_lang == "tr" %}
                 TR
+            {% elif current_lang == "de" %}
+                DE
             {% else %}
                 AZ
             {% endif %}
@@ -75,6 +77,18 @@ qaydası (`bottom: 100%`) birbaşa işləyir — Popper lazım deyil.{% endcomme
             <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'tr' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'tr' %}true{% else %}false{% endif %}">
                 <span class="language-switcher__option-code">TR</span>
                 <span class="language-switcher__option-label">{% trans "name_tr" context "language" %}</span>
+                <span class="language-switcher__option-check" aria-hidden="true">✓</span>
+            </button>
+        </form>
+
+        {% comment %}2026-10-13 (gecə): alman dili (sahibin istəyi) — digər dillərlə eyni forma/sıra.{% endcomment %}
+        <form action="{% url 'set_language' %}" method="post" class="language-switcher__form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="language" value="de">
+            <button type="submit" class="language-switcher__option dropdown-item {% if current_lang == 'de' %}is-active{% endif %}" role="option" aria-selected="{% if current_lang == 'de' %}true{% else %}false{% endif %}">
+                <span class="language-switcher__option-code">DE</span>
+                <span class="language-switcher__option-label">{% trans "name_de" context "language" %}</span>
                 <span class="language-switcher__option-check" aria-hidden="true">✓</span>
             </button>
         </form>

@@ -74,6 +74,7 @@ def _language_name(code: str) -> str:
         "en": "English",
         "ru": "Russian",
         "tr": "Turkish",
+        "de": "German",  # 2026-10-13 (gecə): alman dili interfeysi
     }
     return mapping.get(code, "English")
 

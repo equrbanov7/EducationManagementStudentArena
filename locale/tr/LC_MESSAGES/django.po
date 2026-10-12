@@ -95255,3 +95255,7 @@ msgstr ""
 " (ör. laboratuvar yoksa) haftalık planda görünmez ve ona saat yazılamaz. "
 "Yükte satır yoksa öğretim elemanı saati kendisi seçer. Kapalıyken önceki "
 "kural: önce onaylı öğretim planı, sonra yük; fazla türler de gösterilir."
+
+msgctxt "language"
+msgid "name_de"
+msgstr "Almanca"

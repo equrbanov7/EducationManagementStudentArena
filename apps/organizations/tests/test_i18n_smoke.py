@@ -17,7 +17,7 @@ User = get_user_model()
 class OrganizationI18nSmokeTest(TestCase):
     """Basic smoke coverage for organizations page localization."""
 
-    LANGUAGES = ["az", "en", "ru", "tr"]
+    LANGUAGES = ["az", "en", "ru", "tr", "de"]  # 2026-10-13 (gecə): alman dili
 
     def setUp(self):
         # Avoid default-role signal noise for deterministic fixtures.
@@ -92,6 +92,7 @@ class OrganizationI18nSmokeTest(TestCase):
             "en": {"org": "University", "unit": "Faculty"},
             "ru": {"org": "Университет", "unit": "Факультет"},
             "tr": {"org": "Üniversite", "unit": "Fakülte"},
+            "de": {"org": "Universität", "unit": "Fakultät"},
         }
 
         for lang in self.LANGUAGES:
