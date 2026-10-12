@@ -44,6 +44,10 @@ ROLE_LEVELS = {
     "ikt_rehber": 95,
 }
 
+#: Menyusu açarla qapılı rollar üçün real şablon açarları (`default_roles_university` HR):
+#: 2026-10-13-dən HR-ın rol menyuları AD ilə yox, `role.assign` ilə açılır.
+ROLE_PERMISSIONS = {"hr": ["role.view", "role.assign"]}
+
 #: TƏLƏBƏ səthləri — yalnız tələbədə olmalıdır.
 #:
 #: ``my-transcript`` qəsdən burada QALIR: 2026-08-dən o, TƏLƏBƏDƏ də yoxdur
@@ -77,7 +81,7 @@ class SidebarRoleMatrixTest(TestCase):
                     "display_name": name.replace("_", " ").title(),
                     "level": level,
                     "scope_type": RoleScopeType.ORGANIZATION,
-                    "permissions": [],
+                    "permissions": ROLE_PERMISSIONS.get(name, []),
                     "is_system": False,
                     "is_active": True,
                 },

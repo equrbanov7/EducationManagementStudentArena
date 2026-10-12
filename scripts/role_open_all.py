@@ -80,13 +80,26 @@ def _pick_users():
     richest = Enrollment.objects.values("student_id").annotate(n=Count("id")).order_by("-n").first()
     richest_id = richest["student_id"] if richest else None
 
+    # Çoxrollu hesab (məs. müəllim + kafedra müdiri) kabinetdə rolların BİRLƏŞMƏSİNİ
+    # görür — «teacher» sütunu müdirin bölmələri ilə şişir.  Ona görə əvvəlcə YALNIZ
+    # bir aktiv üzvlüyü olan hesab seçilir; tapılmasa çoxrollu hesaba düşülür
+    # (sütun `pure=False` ilə işarələnir).
+    role_counts = dict(
+        Membership.objects.filter(is_active=True).values("user_id").annotate(n=Count("id")).values_list("user_id", "n")
+    )
     picked: dict = {}
+    fallback: dict = {}
     memberships = Membership.objects.filter(is_active=True).select_related("user", "role").order_by("-role__level")
     for membership in memberships:
         # Tələbə üçün ən "dolu" hesab seçilir: boş hesabda bölmələr yanlış boş görünür.
         if membership.role.name == "student" and richest_id and membership.user_id != richest_id:
             continue
-        picked.setdefault(membership.role.name, membership)
+        if role_counts.get(membership.user_id, 0) == 1:
+            picked.setdefault(membership.role.name, membership)
+        else:
+            fallback.setdefault(membership.role.name, membership)
+    for name, membership in fallback.items():
+        picked.setdefault(name, membership)
     return picked
 
 
@@ -102,10 +115,22 @@ def _unlock(profile) -> bool:
     return True
 
 
-def _sections_of(html: str) -> list:
+#: Sol menyu bloku.  Yalnız ORADAN oxunur: dashboard vidcetləri də ``data-section``
+#: daşıyır (məs. RİM kabinetində «my-journal» kartı) və bütün səhifə oxunanda
+#: menyuda olmayan açar sütuna düşürdü.
+SIDEBAR_RE = re.compile(r'<aside class="profile-sidebar".*?</aside>', re.S)
+
+
+def _sections_of(html: str, journal_href: str) -> list:
+    match = SIDEBAR_RE.search(html)
+    sidebar = match.group(0) if match else html
     found: set = set()
     for pattern in SECTION_ATTRS:
-        found |= set(re.findall(pattern, html))
+        found |= set(re.findall(pattern, sidebar))
+    # Müəllim/admin üçün «Elektron jurnal» ``data-section``-suz, yeni tabda açılan
+    # ``/jurnal/`` linkidir (bax sidebar/items/_my_journal.html) — regex onu görmürdü.
+    if f'href="{journal_href}"' in sidebar:
+        found.add("my-journal")
     return sorted(found)
 
 
@@ -114,6 +139,7 @@ def sweep(settings_module: str) -> dict:
     from django.urls import reverse
 
     profile_url = reverse("accounts:profile")
+    journal_href = reverse("registrar:journal_list")
     result: dict = {"roles": {}, "failures": collections.defaultdict(list), "total_opens": 0}
 
     for role_name, membership in _pick_users().items():
@@ -124,7 +150,7 @@ def sweep(settings_module: str) -> dict:
             client = Client()
             client.force_login(user)
             html = client.get(profile_url, follow=True).content.decode("utf-8", "replace")
-            sections = _sections_of(html)
+            sections = _sections_of(html, journal_href)
             failures = 0
             for section in sections:
                 result["total_opens"] += 1
@@ -138,13 +164,22 @@ def sweep(settings_module: str) -> dict:
                 if status >= 500:
                     result["failures"][role_name].append([section, status])
                     failures += 1
+            other_roles = sorted(
+                type(membership)
+                .objects.filter(user=user, is_active=True)
+                .exclude(pk=membership.pk)
+                .values_list("role__name", flat=True)
+            )
             result["roles"][role_name] = {
                 "username": user.get_username(),
+                "pure": not other_roles,
+                "other_roles": other_roles,
                 "level": membership.role.level,
                 "sections": sections,
                 "failures": failures,
             }
-            print(f"[{role_name:22s}] {len(sections):2d} bölmə · 500: {failures}", file=sys.stderr)
+            mark = "" if not other_roles else f" (+{','.join(other_roles)})"
+            print(f"[{role_name:22s}] {len(sections):2d} bölmə · 500: {failures}{mark}", file=sys.stderr)
         finally:
             # Bayraq HƏR HALDA geri qaytarılır (istisna/Ctrl-C daxil).
             if unlocked:
@@ -159,10 +194,11 @@ def render_markdown(result: dict) -> str:
     order = sorted(roles, key=lambda name: (-len(roles[name]["sections"]), name))
     every = sorted({section for row in roles.values() for section in row["sections"]})
 
-    lines = ["| rol | səviyyə | görünən bölmə | 500 |", "|---|---:|---:|---:|"]
+    lines = ["| rol | səviyyə | görünən bölmə | 500 | əlavə rollar (çoxrollu nümunə) |", "|---|---:|---:|---:|---|"]
     for name in order:
         row = roles[name]
-        lines.append(f"| `{name}` | {row['level']} | {len(row['sections'])} | {row['failures']} |")
+        extra = ", ".join(f"`{other}`" for other in row.get("other_roles", [])) or "—"
+        lines.append(f"| `{name}` | {row['level']} | {len(row['sections'])} | {row['failures']} | {extra} |")
 
     lines += ["", "| bölmə | " + " | ".join(f"`{name}`" for name in order) + " |"]
     lines.append("|---" * (len(order) + 1) + "|")
@@ -190,6 +226,11 @@ def main() -> int:
 
     _bootstrap(args.settings)
     result = sweep(args.settings)
+    if not result["roles"]:
+        # RLS altında (məs. `emsarena_app` DSN-i, tenant konteksti yoxdur) `Membership`
+        # boş görünür — «0 rol, 0 xəta» uğur kimi görünməsin.
+        print("XƏTA: heç bir aktiv üzvlük tapılmadı — DSN cədvəl sahibi deyil (RLS)?", file=sys.stderr)
+        return 2
 
     if args.json_path:
         with open(args.json_path, "w", encoding="utf-8") as handle:

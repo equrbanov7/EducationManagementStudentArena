@@ -418,9 +418,11 @@ def _role_capabilities(user, profile):
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
         if is_hr:
-            allowed_sections.update(
-                {"student-organization-management", "role-assignment", "manage-roles", "publish-notification"}
-            )
+            allowed_sections.update({"student-organization-management", "publish-notification"})
+            # Rol menyuları AD ilə yox, açarla (sahib 2026-10-11): icazə redaktorunda HR-dan
+            # `role.assign` alınarsa menyu da itir — əvvəl görünür qalırdı, əməl isə 403 verirdi.
+            if _can_manage_roles(user, active_organization):
+                allowed_sections.update({"role-assignment", "manage-roles"})
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
@@ -512,7 +514,11 @@ def _role_capabilities(user, profile):
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.
     can_use_question_bank = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_manage_appeals = is_superadmin or is_exam_center
-    can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
+    # Menyu (`_my_appeals.html`) ilə eyni şərt: əvvəl inkar-qayda HR/tyutor kimi heyətə bölməni
+    # fraqment URL-i ilə açırdı (`my-results` üçün P3-5-də bağlanan eyni sinif; audit 2026-10-13).
+    can_view_my_appeals = can_view_student_assignments and (
+        is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
+    )
 
     # İcazə-qapılı bölmələr (audit / RİM / müəllim-tələbə kataloqu) TƏK yerdən:
     # bax `rbac_sections.apply_permission_section_gates` (yalnız GÖRÜNÜRLÜK).

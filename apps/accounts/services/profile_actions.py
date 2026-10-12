@@ -115,7 +115,10 @@ def resolve_notification_recipients(user, capabilities, target: str, *, organiza
         if not is_superadmin:
             if organization is None or str(org.pk) != str(getattr(organization, "pk", "")):
                 return None
-            if not capabilities.get("is_org_admin"):
+            from .notification_scopes import can_target_whole_organization
+
+            # Rol auditi 2026-10-13: UNIT əhatəli admin (dekan) bütün təşkilata göndərmir.
+            if not can_target_whole_organization(user, capabilities, organization):
                 return None
         member_user_ids = Membership.objects.filter(organization=org, is_active=True).values_list("user_id", flat=True)
         return User.objects.filter(pk__in=member_user_ids, is_active=True)

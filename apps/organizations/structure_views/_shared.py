@@ -32,15 +32,34 @@ from .constants import (
 )
 
 
+def _is_structure_superuser(user, organization) -> bool:
+    """Açar yoxlamasından yan keçən YEGANƏ aktorlar: platforma superadmini və təşkilat sahibi."""
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    user_id = getattr(user, "id", None)
+    return user_id is not None and getattr(organization, "owner_id", None) == user_id
+
+
 def _unit_permission_flags(request, organization):
-    """Cari istifadəçinin struktur üzərində yazma icazələri (mərkəzi RBAC)."""
+    """Cari istifadəçinin struktur üzərində yazma icazələri (mərkəzi RBAC).
+
+    Vahid yaratma/redaktə/silmə `org_admin` ALİASI ilə də açılır (dekan öz fakültəsində kafedra
+    yaradır — `test_org_units_sections.test_dean_scope_limits_creation`; əhatə əməldə yoxlanılır).
+
+    Üzv/rəhbər TƏYİNATI isə rol verməkdir — sahib 2026-10-11 («Dekan rol verə bilir — olmaz;
+    hər rol öz səlahiyyəti qədər»): yalnız REAL `member.edit` açarı (rektor/sədr/RİM rəhbəri `*`,
+    prorektor `member.*`, dekan, HR) və ya superadmin/sahib. Əvvəl alias bunu da açırdı və
+    `member.edit` daşımayan dekan müavini / kafedra müdiri öz alt-ağacında dekan və ya kafedra
+    müdiri təyin edə bilirdi (köhnə rəhbərin üzvlüyü deaktiv olurdu).
+    """
     can_manage = _can_manage_organization(request.user, organization)
     return {
         "can_create": can_manage or _has_org_permission(request, "unit.create"),
         "can_edit": can_manage or _has_org_permission(request, "unit.edit"),
         "can_delete": can_manage or _has_org_permission(request, "unit.delete"),
         # Müəllim/rəhbər təyinatı üzv redaktəsidir (HR-ın `member.edit` icazəsi var).
-        "can_assign_members": can_manage or _has_org_permission(request, "member.edit"),
+        "can_assign_members": _is_structure_superuser(request.user, organization)
+        or _has_org_permission(request, "member.edit"),
     }
 
 
