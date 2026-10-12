@@ -1,0 +1,157 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   «Qrupum» (rol auditi 2026-10-13 B10) — şablon: sections/_my_group.html.
+   Cədvəlin əsası ems_ui/table.css-dədir (sticky ad sütunu, zebra); burada yalnız
+   bölməyə xas düzülüş və qayıb hüceyrələrinin rəngləri. Rənglər YALNIZ --ems-* tokenləri ilə.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4);
+}
+
+.mg-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+}
+
+.mg-head__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-lg);
+    font-weight: 700;
+}
+
+.mg-head__count {
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.mg-head__note,
+.mg-note {
+    margin: 0;
+    max-width: var(--ems-w-text);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-sm);
+    line-height: 1.5;
+}
+
+/* Bölmə başlıqları: «Mənim davamiyyətim» / «Qrup yoldaşları» (sahib 2026-10-13: davamiyyət yalnız şəxsi). */
+.mg-subtitle {
+    margin: var(--ems-sp-2) 0 0;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.mg-table__index {
+    width: 3rem;
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.mg-table__total-row th,
+.mg-table__total-row td {
+    border-top: 2px solid var(--ems-border);
+}
+
+.mg-row--me th,
+.mg-row--me td {
+    background: var(--ems-primary-50);
+}
+
+.mg-me-badge {
+    margin-left: var(--ems-sp-2);
+    padding: 0 var(--ems-sp-2);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-xs);
+    font-weight: 600;
+}
+
+.mg-table__name {
+    white-space: nowrap;
+}
+
+.mg-table__number {
+    color: var(--ems-text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.mg-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.mg-cell__pct {
+    margin-left: var(--ems-sp-2);
+    color: var(--ems-text-muted);
+    font-size: var(--ems-fs-xs);
+}
+
+.mg-cell--na {
+    color: var(--ems-neutral-500);
+}
+
+.mg-cell--total {
+    font-weight: 700;
+}
+
+.mg-cell--near {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.mg-cell--over {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.mg-cell--near .mg-cell__pct,
+.mg-cell--over .mg-cell__pct {
+    color: inherit;
+}
+
+.mg-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.mg-legend__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+}
+
+.mg-legend__item::before {
+    content: "";
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: var(--ems-r-pill);
+    border: 1px solid var(--ems-border);
+}
+
+.mg-legend__item--near::before {
+    background: var(--ems-warning-bg);
+    border-color: var(--ems-warning-bd);
+}
+
+.mg-legend__item--over::before {
+    background: var(--ems-danger-bg);
+    border-color: var(--ems-danger);
+}

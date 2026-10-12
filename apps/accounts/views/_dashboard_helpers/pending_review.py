@@ -24,6 +24,7 @@ from .._helpers import (
     _tenant_scoped_courses,
     _tenant_scoped_exams,
 )
+from .._helpers.task_kind_visibility import hidden_task_filters, visible_task_filter
 from .formatters import (
     _build_student_group_map_and_available,
     _normalize_pending_review_status,
@@ -42,8 +43,11 @@ def _collect_pending_review_items(
     request, search=None, filter_type=None, filter_status=None, submitted_order=None, filter_group=None
 ):
     search_query = (search if search is not None else request.GET.get("search", "")).strip()
-    normalized_type = _normalize_pending_review_type(
-        filter_type if filter_type is not None else request.GET.get("type", "all")
+    # 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» tabı seçilə bilməz, sətirləri yığılmır.
+    hidden_types = hidden_task_filters("pending-review")
+    normalized_type = visible_task_filter(
+        "pending-review",
+        _normalize_pending_review_type(filter_type if filter_type is not None else request.GET.get("type", "all")),
     )
     normalized_status = _normalize_pending_review_status(
         filter_status if filter_status is not None else request.GET.get("status", "all")
@@ -153,7 +157,7 @@ def _collect_pending_review_items(
                 }
             )
 
-    if normalized_type in {"all", "assignments"}:
+    if normalized_type in {"all", "assignments"} and "assignments" not in hidden_types:
         submissions = (
             Submission.objects.filter(
                 assignment__course__in=teacher_courses,
@@ -215,7 +219,7 @@ def _collect_pending_review_items(
                 }
             )
 
-    if normalized_type in {"all", "projects"}:
+    if normalized_type in {"all", "projects"} and "projects" not in hidden_types:
         project_submissions = (
             ProjectSubmission.objects.filter(
                 project__course__in=teacher_courses,

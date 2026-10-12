@@ -8,7 +8,7 @@ qərar (qəbul/rədd) + sual siyahısının lazy fraqment endpoint-i. Müəllim 
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
@@ -38,6 +38,18 @@ from apps.exams.views.teacher.submission_meta import (
     filter_snapshot_questions,
     snapshot_flag_counts,
 )
+from core.permissions import request_has_permission
+
+#: 2026-10-13 (rol auditi B1): qəbul / rədd / düzəlişə qaytarma QƏRARDIR — əvvəl mərkəz rolu ADI
+#: (``is_exam_center_user``) kifayət edirdi, işçi və RİM əməkdaşı da müəllimin suallarını banka yazırdı.
+#: İndi açar lazımdır (şablonda rəhbərdə); işçi göndərişi və sualları GÖRÜR. Kataloq açarı:
+#: ``organizations/permissions_role_audit.py`` (xüsusi modul — sətir burada lokal saxlanılır).
+PERM_EXAM_CENTER_DECIDE = "exam_center.decide"
+
+
+def _can_decide_as_center(request):
+    # Görünüş qapısı (``ensure_can_review_submission``) çağırandadır; burada yalnız qərar açarı.
+    return request_has_permission(request, PERM_EXAM_CENTER_DECIDE)
 
 
 # ---------------------------------------------------------------------------
@@ -61,8 +73,11 @@ def question_submission_review(request, submission_id):
         organization=organization,
     )
     ensure_can_review_submission(request.user, submission)
-    # Mərkəz göndərişi AÇDI — iz lentinə düşür (chair_approved → center_review).
-    open_center_review(submission, reviewer=request.user)
+    can_decide = _can_decide_as_center(request)
+    # Mərkəz göndərişi AÇDI — iz lentinə düşür (chair_approved → center_review). Yalnız qərar verə
+    # bilən açanda: yalnız-oxu işçinin baxışı «mərkəz baxır» statusu yaratmamalıdır (rol auditi B1).
+    if can_decide:
+        open_center_review(submission, reviewer=request.user)
 
     # Bank seçimi: göndərişin fənninə/imtahan növünə uyğun banklar önə düşür
     # (0 = fənn+növ, 1 = fənn, 2 = növ, 3 = qalan) — mərkəz düzgün bankı
@@ -100,6 +115,7 @@ def question_submission_review(request, submission_id):
         "exams/teacher/question_submission_review.html",
         {
             "submission": submission,
+            "can_decide": can_decide,
             "parsed_questions": questions[:QUESTIONS_PAGE_SIZE],
             "question_flag_counts": snapshot_flag_counts(questions),
             "questions_has_more": len(questions) > QUESTIONS_PAGE_SIZE,
@@ -175,6 +191,10 @@ def question_submission_decide(request, submission_id):
     organization = _require_organization(request)
     submission = get_object_or_404(QuestionSubmission, id=submission_id, organization=organization)
     ensure_can_review_submission(request.user, submission)
+    if not _can_decide_as_center(request):
+        raise PermissionDenied(
+            pgettext("exams.view.question_submission.permission", "Göndərişə qərar vermək səlahiyyətiniz yoxdur.")
+        )
 
     decision = (request.POST.get("decision") or "").strip()
     note = (request.POST.get("note") or "").strip()

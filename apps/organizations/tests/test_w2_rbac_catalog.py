@@ -167,8 +167,10 @@ class Migration0051Test(_Base):
             self.assertEqual(custom.permissions, ["org.view", "org.settings", "org.edit"])
             self.assertEqual(viewer.permissions, ["audit.view", "audit.export"])
             self.assertEqual(list(self.role("rector").permissions), rector_before)
+            # `org.view` 0051-də hələ etibarlı idi; 2026-10-13-də kataloqdan çıxdı və 0063 onu silir.
             for role in Role.objects.filter(organization=self.org):
-                self.assertTrue(validate_permissions(role.permissions), role.name)
+                remaining = [key for key in role.permissions if key != "org.view"]
+                self.assertTrue(validate_permissions(remaining), role.name)
 
     def test_backward_removes_only_seeded_keys(self):
         with bypass_rls():

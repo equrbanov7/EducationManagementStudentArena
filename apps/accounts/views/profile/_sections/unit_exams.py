@@ -21,6 +21,41 @@ def _defaults() -> dict:
     }
 
 
+def _subtree_exam_q(Exam, Membership, org, subtree_ids):
+    """İmtahan alt-ağaca aiddirmi — əvvəl imtahanın ÖZ bağlantısı, yoxdursa müəllifin ƏSAS üzvlüyü.
+
+    2026-10-13 (rol auditi B19): əvvəl müəllifin alt-ağacda İSTƏNİLƏN üzvlüyü kifayət edirdi — başqa
+    kafedranın yükünü alan müəllimə verilən ƏLAVƏ müəllim üzvlüyü (``is_primary=False``, workload Forma 1
+    importu) həmin müəllimin bütün imtahanlarını (başqa fakültənin fənləri daxil) bu dekana/müdirə açırdı.
+
+    * Öz bağlantı (dəqiq): fənnin kafedrası (``subject.chair_unit``), kursun vahidi (``course.unit``) və ya
+      təyin olunmuş reyestr qrupu (``allowed_units``) alt-ağacdadır.
+    * Bağlantısız imtahan (fənn/kurs/qrup yoxdur) — müəllifin «ev» üzvlüyü alt-ağacdadırsa: vahidli ƏSAS
+      üzvlüyü varsa yalnız o sayılır; yoxdursa (əsas işarəsiz köhnə hesablar) hər aktiv üzvlüyü (köhnə qayda).
+    """
+    from django.db.models import Exists, OuterRef
+
+    group_link = Exam.allowed_units.through.objects.filter(exam_id=OuterRef("pk"))
+    own_link = (
+        Q(subject__chair_unit__in=subtree_ids)
+        | Q(course__unit__in=subtree_ids)
+        | Exists(group_link.filter(orgunit_id__in=subtree_ids))
+    )
+    unlinked = (
+        Q(subject__chair_unit__isnull=True)
+        & (Q(course__isnull=True) | Q(course__unit__isnull=True))
+        & ~Exists(group_link)
+    )
+    active = Membership.objects.filter(organization=org, is_active=True)
+    with_unit_primary = active.filter(is_primary=True, scope_unit__isnull=False).values("user_id")
+    home_authors = (
+        active.filter(scope_unit__in=subtree_ids)
+        .filter(Q(is_primary=True) | ~Q(user_id__in=with_unit_primary))
+        .values("user_id")
+    )
+    return own_link | (unlinked & Q(author_id__in=home_authors))
+
+
 def build_unit_exams_context(request, *, allowed_sections, active_section) -> dict:
     """Unit imtahanları bölməsi üçün ``context`` açarlarını qaytarır. Bölmə aktiv
     deyil / org yoxdur / istifadəçi unit-scoped deyilsə default dəyərlər (davranış
@@ -45,14 +80,9 @@ def build_unit_exams_context(request, *, allowed_sections, active_section) -> di
         return _defaults()
 
     unit_ids = OrgUnit.objects.filter(organization=org).filter(scope.unit_subtree_q())
-    member_user_ids = Membership.objects.filter(
-        organization=org,
-        is_active=True,
-        scope_unit__in=unit_ids.values("pk"),
-    ).values("user_id")
     qs = (
         Exam.objects.filter(organization=org, is_deleted=False)
-        .filter(Q(course__unit__in=unit_ids.values("pk")) | Q(author_id__in=member_user_ids))
+        .filter(_subtree_exam_q(Exam, Membership, org, unit_ids.values("pk")))
         .select_related("author", "course")
         .annotate(attempts_total=Count("attempts", distinct=True))
         .order_by("-created_at")

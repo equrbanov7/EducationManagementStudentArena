@@ -37,6 +37,9 @@ from . import journal_hygiene_guard
 from .models import CourseOffering, Program
 from .models.curriculum_meta import PLAN_REASON_MIN_LENGTH
 from .semester_open import (
+    PERM_LOCK,
+    PERM_OPEN,
+    PERM_UNLOCK,
     can_lock_semester,
     can_open_semester,
     can_unlock_semester,
@@ -53,6 +56,23 @@ def _error(message, *, status=400, code="invalid", field=""):
     if field:
         payload["field"] = field
     return JsonResponse(payload, status=status)
+
+
+def _org_wide_grant(request, organization, permission) -> bool:
+    """Açar TƏŞKİLAT səviyyəsində verilibmi (yalnız açarın varlığı yox).
+
+    2026-10-13 (rol auditi B17): semestr əməlləri (yarat / kafedraya göndər / ləğv / kilid / kilidi aç /
+    xatırlat / dövr) bütün universitetin dövrünə təsir edir, amma əvvəl yalnız açara baxırdı. Rol
+    redaktorunda açar kafedra/fakültə (UNIT) roluna verilsə, həmin rol bütün təşkilatın semestrini
+    dəyişərdi. İndi açarı daşıyan ORGANIZATION rolu (və ya sahib/superadmin) lazımdır — UNIT rolu → 403.
+    """
+    from apps.organizations.public import get_permission_scope
+
+    return get_permission_scope(request.user, organization, permission, request=request).is_org_wide
+
+
+def _may_open(request, organization) -> bool:
+    return can_open_semester(request) and _org_wide_grant(request, organization, PERM_OPEN)
 
 
 def _reason_or_none(request):
@@ -153,7 +173,7 @@ def _set_current(request, organization):
 
 
 def _generate(request, organization):
-    if not can_open_semester(request):
+    if not _may_open(request, organization):
         return _error(pgettext(_CTX, "Semestr açmaq üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     period = _period(organization, request.POST.get("period"))
     if period is None:
@@ -207,7 +227,7 @@ def _generate(request, organization):
 
 
 def _send_to_chairs(request, organization):
-    if not can_open_semester(request):
+    if not _may_open(request, organization):
         return _error(pgettext(_CTX, "Bu əməl üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     period = _period(organization, request.POST.get("period"))
     if period is None:
@@ -232,7 +252,7 @@ def _send_to_chairs(request, organization):
 
 def _cancel_offering(request, organization):
     """Açılışı LƏĞV edir — sətir qalır, `is_active=False` (silmə yoxdur)."""
-    if not can_open_semester(request):
+    if not _may_open(request, organization):
         return _error(pgettext(_CTX, "Bu əməl üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     offering = CourseOffering.objects.filter(
         organization=organization, pk=(request.POST.get("id") or "").strip()
@@ -267,7 +287,7 @@ def _cancel_offering(request, organization):
 
 
 def _lock(request, organization):
-    if not can_lock_semester(request):
+    if not (can_lock_semester(request) and _org_wide_grant(request, organization, PERM_LOCK)):
         return _error(pgettext(_CTX, "Semestri kilidləmək səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     period = _period(organization, request.POST.get("period"))
     if period is None:
@@ -304,7 +324,7 @@ def _lock(request, organization):
 
 
 def _unlock(request, organization):
-    if not can_unlock_semester(request):
+    if not (can_unlock_semester(request) and _org_wide_grant(request, organization, PERM_UNLOCK)):
         return _error(pgettext(_CTX, "Kilidi açmaq səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     period = _period(organization, request.POST.get("period"))
     if period is None:
@@ -405,7 +425,7 @@ def _remind_readiness(request, organization):
     """«Semestr hazırlığı» → «Xatırlat»: kafedranın müəllimlərinə və rəhbərinə bildiriş (12 saatda bir)."""
     from .semester_reminders import send_reminders
 
-    if not can_open_semester(request):
+    if not _may_open(request, organization):
         return _error(pgettext(_CTX, "Bu əməl üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     period = _period(organization, request.POST.get("period"))
     if period is None:
@@ -472,7 +492,7 @@ def semester_action(request):
         return _error(pgettext(_CTX, "Naməlum əməl."), code="unknown_action")
     # `save_period` və `set_current` də AÇILIŞ səlahiyyəti tələb edir: təqvim
     # dövrünü dəyişmək semestrin özünü açmaqla eyni ağırlıqdadır.
-    if handler in (_save_period, _set_current) and not can_open_semester(request):
+    if handler in (_save_period, _set_current) and not _may_open(request, organization):
         return _error(pgettext(_CTX, "Bu əməl üçün səlahiyyətiniz yoxdur."), status=403, code="forbidden")
     return handler(request, organization)
 

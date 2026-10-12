@@ -214,12 +214,18 @@ def can_export_members(request, organization) -> bool:
     və ya `member.edit` daşıyan (HR). Əhatə reyestrlə eynidir (dekan öz alt-ağacı).
     URL-dəki təşkilat AKTİV təşkilat olmalıdır — `_has_org_permission` aktiv
     təşkilatın icazələrini oxuyur (audit `access` F-07 dərsi).
+
+    2026-10-13 (rol auditi B15): «idarəetmə rolu» `org_admin` ALİASI idi — `member.edit`-siz dekan müavini /
+    kafedra müdiri də kütləvi e-poçt çıxarışı alırdı. İndi YALNIZ superadmin · sahib · REAL `member.edit`
+    (rektor/sədr `*`, prorektor `member.*`, dekan, HR); əhatə yenə reyestrlə eynidir (alt-ağac).
     """
     active = getattr(request, "organization", None)
     if active is None or getattr(active, "pk", None) != getattr(organization, "pk", None):
         return False
     user = request.user
-    if _can_manage_organization(user, organization):
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    if getattr(organization, "owner_id", None) == getattr(user, "id", None):
         return True
     return _user_holds_org_permission(user, organization, "member.edit")
 

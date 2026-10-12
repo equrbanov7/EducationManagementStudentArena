@@ -15,11 +15,13 @@ təşkilat (A, B), default universitet rolları, iki fakültə.
 
 from __future__ import annotations
 
+import ast
 import os
 import re
+import tempfile
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, SimpleTestCase, TestCase
 from django.urls import reverse
 
 from apps.organizations.models import Membership, Organization, OrgUnit
@@ -209,7 +211,23 @@ class MemberRemovalGateTest(_Base):
 
 
 _KEY_PATTERN = re.compile(r"""["']([a-z_]+\.[a-z_]+(?:\.[a-z_]+)?)["']""")
-_SKIP_DIRS = {"tests", "migrations", "__pycache__", "node_modules", "static", "venv", ".venv", "locale", "docs"}
+_KEY_FULL = re.compile(r"[a-z_]+\.[a-z_]+(?:\.[a-z_]+)?")
+# 2026-10-13 (rol auditi B13): `management` (seed/ops komandaları) qapı deyil — açarı orada yazmaq
+# (rol seed-i, hesabat) heç kimin girişini qapılamır, ona görə istinad sayılmır.
+_SKIP_DIRS = {
+    "tests",
+    "migrations",
+    "management",
+    "__pycache__",
+    "node_modules",
+    "static",
+    "venv",
+    ".venv",
+    "locale",
+    "docs",
+}
+_SKIP_PREFIXES = ("apps/organizations/permissions", "apps/organizations/default_roles")
+_CONSTANT_NAME = re.compile(r"^_*[A-Z][A-Z0-9_]*$")
 
 # F-06 — reyestrdə olub kodda HEÇ YERDƏ istinad olunmayan açarlar. Siyahı
 # RATCHET-dir: yeni «ölü» açar → test qırılır (ya qapıya bağla, ya bura səbəblə
@@ -220,11 +238,14 @@ _SKIP_DIRS = {"tests", "migrations", "__pycache__", "node_modules", "static", "v
 # `grade.override`, `qa.*` — miqrasiya organizations.0051) → siyahı BOŞDUR.
 # 2026-10-10 (URL auditi WP9a): `assignment.edit` yeganə istifadəçisi — UI-dan çağırılmayan
 # `assignments/<pk>/remove-student/` — silindi; açar rol şablonlarında qalır (rol redaktoru göstərir).
-KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset({"assignment.edit"})
+# 2026-10-13 (rol auditi B13): `assignment.edit` və `grade.publish` kataloqdan və rollardan ÇIXARILDI
+# (miqrasiya organizations.0061) → siyahı yenə BOŞDUR.
+# 2026-10-13 (rol auditi B13, sərtləşdirilmiş skan) `org.view`-i tapdı — sahibin qərarı ilə («lazım deyilsə
+# çıxar») kataloqdan və rollardan ÇIXARILDI (miqrasiya organizations.0063) → siyahı yenə BOŞDUR.
+KNOWN_UNREFERENCED_PERMISSION_KEYS = frozenset()
 
 
-def _referenced_permission_keys(root, catalog):
-    found = set()
+def _iter_source_files(root):
     for base in ("apps", "core", "config", "templates"):
         for dirpath, dirnames, filenames in os.walk(os.path.join(root, base)):
             dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
@@ -232,13 +253,92 @@ def _referenced_permission_keys(root, catalog):
                 if not filename.endswith((".py", ".html")) or filename.startswith("test"):
                     continue
                 path = os.path.join(dirpath, filename)
-                rel = os.path.relpath(path, root)
-                if rel.startswith(("apps/organizations/permissions", "apps/organizations/default_roles")):
+                if os.path.relpath(path, root).startswith(_SKIP_PREFIXES):
                     continue
-                with open(path, encoding="utf-8", errors="ignore") as handle:
-                    for match in _KEY_PATTERN.finditer(handle.read()):
-                        if match.group(1) in catalog:
-                            found.add(match.group(1))
+                yield path
+
+
+def _constant_targets(node):
+    """Modul/sinif səviyyəsində `NAME = ...` (BÖYÜK hərfli ad) → hədəf adları; başqa hal → []."""
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, ast.AnnAssign) and node.value is not None:
+        targets = [node.target]
+    else:
+        return []
+    names = [t.id for t in targets if isinstance(t, ast.Name)]
+    if not names or len(names) != len(targets) or not all(_CONSTANT_NAME.match(n) for n in names):
+        return []
+    return names
+
+
+def _scan_python(source, catalog, direct, definitions, loads_outside, loads_inside):
+    """Bir .py faylı: birbaşa açar istinadları, sabit tərifləri və ad istifadələri."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:  # yarımçıq fayl (paralel redaktə) — mətn kimi say, test yalançı qırılmasın
+        direct.update(m.group(1) for m in _KEY_PATTERN.finditer(source) if m.group(1) in catalog)
+        return
+    constant_nodes = {}
+    bodies = [tree.body] + [n.body for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+    for body in bodies:
+        for stmt in body:
+            names = _constant_targets(stmt)
+            if names:
+                constant_nodes[id(stmt.value)] = names
+
+    def visit(node, owners):
+        if id(node) in constant_nodes:
+            owners = constant_nodes[id(node)]
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if _KEY_FULL.fullmatch(node.value) and node.value in catalog:
+                if owners:
+                    for name in owners:
+                        definitions.setdefault(name, set()).add(node.value)
+                else:
+                    direct.add(node.value)
+        elif isinstance(node, (ast.Name, ast.Attribute)) and isinstance(node.ctx, ast.Load):
+            name = node.id if isinstance(node, ast.Name) else node.attr
+            if owners:
+                for owner in owners:
+                    loads_inside.setdefault(owner, set()).add(name)
+            else:
+                loads_outside.add(name)
+        for child in ast.iter_child_nodes(node):
+            visit(child, owners)
+
+    visit(tree, None)
+
+
+def _referenced_permission_keys(root, catalog):
+    """Kodda real istinad olunan reyestr açarları.
+
+    2026-10-13 (rol auditi B13): əvvəl istənilən sitatlı sətir sayılırdı — yalnız SABİT TƏYİN edən
+    (`PERM_X = "a.b"`, `constants.py`-dakı dict/tuple datası) və seed komandaları da «istinad» idi,
+    ölü açar tutulmurdu. İndi: (1) `management/` sayılmır; (2) BÖYÜK hərfli modul/sinif sabitinin
+    dəyərindəki açar yalnız həmin sabit (ad ilə) başqa yerdə OXUNANDA sayılır — sabit başqa canlı
+    sabitin içində oxunursa, zəncir izlənir; (3) şablonlar (.html) mətn kimi oxunur (`has_perm "a.b"`).
+    """
+    direct, definitions, loads_outside, loads_inside = set(), {}, set(), {}
+    for path in _iter_source_files(root):
+        with open(path, encoding="utf-8", errors="ignore") as handle:
+            source = handle.read()
+        if path.endswith(".html"):
+            direct.update(m.group(1) for m in _KEY_PATTERN.finditer(source) if m.group(1) in catalog)
+        else:
+            _scan_python(source, catalog, direct, definitions, loads_outside, loads_inside)
+    constants = set(definitions) | set(loads_inside)
+    live = {name for name in constants if name in loads_outside}
+    pending = list(live)
+    while pending:
+        # Canlı sabitin dəyərində oxunan başqa sabit də canlıdır (`ALL = (PERM_A, PERM_B)`).
+        for name in loads_inside.get(pending.pop(), ()):
+            if name in constants and name not in live:
+                live.add(name)
+                pending.append(name)
+    found = set(direct)
+    for name in live:
+        found |= definitions.get(name, set())
     return found
 
 
@@ -266,7 +366,35 @@ class PermissionCatalogDriftTest(TestCase):
         catalog = set(get_all_permissions())
         referenced = _referenced_permission_keys(str(settings.BASE_DIR), catalog)
         self.assertIn("member.remove", referenced)
-        self.assertIn("assignment.edit", catalog)
+        # 2026-10-13: ölü `assignment.edit` kataloqdan çıxarıldı (rol auditi B13).
+        self.assertNotIn("assignment.edit", catalog)
+
+
+class PermissionScannerStrictnessTest(SimpleTestCase):
+    """2026-10-13 (rol auditi B13) — skaner sabit TƏRİFİNİ və seed komandasını istinad saymır."""
+
+    CATALOG = {"a.used", "a.defined_only", "a.seed_only", "a.via_const", "a.chained", "a.template", "a.comment"}
+
+    def _write(self, root, rel, text):
+        path = os.path.join(root, rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write(text)
+
+    def test_only_real_references_count(self):
+        with tempfile.TemporaryDirectory() as root:
+            self._write(root, "apps/x/views.py", 'from .constants import PERM_VIA\nhas_permission(u, o, "a.used")\n')
+            self._write(root, "apps/x/gate.py", "def f(u, o):\n    return check(u, o, PERM_VIA) or any(ALL_KEYS)\n")
+            self._write(
+                root,
+                "apps/x/constants.py",
+                'PERM_DEAD = "a.defined_only"\nPERM_VIA = "a.via_const"\nCHAIN = "a.chained"\n'
+                'ALL_KEYS = (CHAIN,)\n# "a.comment" şərhdə\n',
+            )
+            self._write(root, "apps/x/management/commands/seed.py", 'ROLE = ["a.seed_only"]\nprint("a.seed_only")\n')
+            self._write(root, "templates/x.html", '{% if "a.template" in perms %}{% endif %}')
+            found = _referenced_permission_keys(root, self.CATALOG)
+        self.assertEqual(found, {"a.used", "a.via_const", "a.chained", "a.template"})
 
 
 class ForeignOrgStructurePageTest(_Base):
@@ -298,17 +426,19 @@ class ForeignOrgStructurePageTest(_Base):
 
 
 class AssignmentEditKeyTest(_Base):
-    """F-12 — `assignment.edit` kataloqda, müəllim şablonunda və endpoint müəllimə açıqdır."""
+    """F-12 → 2026-10-13 (rol auditi B13): heç nəyi qapılamayan `assignment.edit` / `grade.publish`
+    kataloqdan və bütün default rol şablonlarından çıxarılıb («yalançı düymə» qalmasın)."""
 
-    def test_key_in_catalog_and_teacher_templates(self):
+    def test_dead_keys_removed_from_catalog_and_templates(self):
         from apps.organizations.default_roles import DEFAULT_ROLES
-        from apps.organizations.permissions import PERMISSION_CATEGORIES, PERMISSION_LABELS, get_all_permissions
+        from apps.organizations.permissions import PERMISSION_LABELS, get_all_permissions
 
-        self.assertIn("assignment.edit", PERMISSION_CATEGORIES["courses"])
-        self.assertIn("assignment.edit", get_all_permissions())
-        self.assertTrue(str(PERMISSION_LABELS["assignment.edit"]).strip())
-        university_teacher = next(r for r in DEFAULT_ROLES[OrganizationType.UNIVERSITY] if r["name"] == "teacher")
-        self.assertIn("assignment.edit", university_teacher["permissions"])
+        for key in ("assignment.edit", "grade.publish", "org.view"):
+            self.assertNotIn(key, get_all_permissions(), key)
+            self.assertNotIn(key, PERMISSION_LABELS, key)
+            for org_type, roles in DEFAULT_ROLES.items():
+                for role in roles:
+                    self.assertNotIn(key, role["permissions"], f"{org_type}/{role['name']}")
 
 
 class WorkloadRowsForeignChairTest(_Base):

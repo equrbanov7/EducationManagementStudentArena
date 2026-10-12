@@ -22,6 +22,10 @@ partial-ın öz içindədir ki, AJAX swap-dan sonra da yüklənsin
 {% if not s.organization %}
     {% trans "Aktiv təşkilat tapılmadı." context "organizations.roles_registry" as rolreg_no_org %}
     {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-building" state_title=rolreg_no_org %}
+{% elif not s.can_view %}
+    {% comment %}2026-10-13 (rol auditi B15): kataloq yalnız `role.view` ilə — alias (dekan, müdir) data almır.{% endcomment %}
+    {% trans "Rol kataloquna baxmaq üçün «role.view» icazəsi lazımdır." context "organizations.roles_registry" as rolreg_no_perm %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=rolreg_no_perm %}
 {% else %}
 <div class="rolreg" data-rolreg-root>
 

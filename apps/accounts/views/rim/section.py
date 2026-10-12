@@ -19,10 +19,9 @@ from apps.accounts.services.rim import (
     PERM_EDIT,
     PERM_SEARCH,
     PERM_SOFT_DELETE,
-    can_create,
     resolve_actor,
 )
-from apps.accounts.services.rim.create import MAX_NOTE_LENGTH
+from apps.accounts.services.rim.create import MAX_NOTE_LENGTH, creatable_kinds
 from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.rim.profile_edit import FIELD_LABELS
@@ -46,9 +45,14 @@ def _create_context(actor) -> dict:
     qapısı, eyni plan qurucusu) — RİM üçün ayrıca parser/validator yazılmır.
     """
 
-    allowed = can_create(actor)
+    # B3 (2026-10-13): növ seçimində YALNIZ aktorun açarı olan növlər — tələbə (+ toplu tələbə siyahısı)
+    # `user.import`, müəllim `user.import_staff`. Server `create_account`-da növü yenidən yoxlayır.
+    kinds = creatable_kinds(actor)
+    allowed = bool(kinds)
     return {
         "can_create": allowed,
+        "can_create_student": "student" in kinds,
+        "can_create_teacher": "teacher" in kinds,
         "create_url": reverse("accounts:rim_create_account"),
         "create_catalog_url": reverse("accounts:rim_create_catalog"),
         "intake_template_url": reverse("accounts:student_intake_template"),

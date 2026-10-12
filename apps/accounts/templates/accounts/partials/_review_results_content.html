@@ -1,4 +1,6 @@
-{% load i18n static %}
+{% load i18n static task_kinds %}
+{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» seçimi göstərilmir (RİM tənzimləməsi). #}
+{% task_kind_visibility as tkv %}
 <div class="section-card pending-review-results-card">
     <div class="section-title">
         <i class="fas fa-table"></i>
@@ -28,8 +30,8 @@
                             data-bootstrap-select>
                         <option value="all" {% if evaluated_review_filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
                         <option value="exams" {% if evaluated_review_filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-                        <option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
-                        <option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+                        {% if tkv.selfwork %}<option value="assignments" {% if evaluated_review_filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>{% endif %}
+                        {% if tkv.coursework %}<option value="projects" {% if evaluated_review_filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>{% endif %}
                         <option value="labs" {% if evaluated_review_filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
                     </select>
                 </div>

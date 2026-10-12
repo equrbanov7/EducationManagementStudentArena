@@ -29,6 +29,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.accounts.forms.kollokvium_windows import KollokviumExtraGrantForm, KollokviumWindowForm
+from apps.accounts.services.exam_center_decide import can_exam_center_decide
 from apps.exams.public import is_exam_center_user
 from apps.registrar.models import KollokviumExtraGrant, KollokviumWindow
 from apps.registrar.public import interim_assessment, kollokvium_notifications
@@ -142,6 +143,13 @@ def kollokvium_windows(request):
     fallback_next = _append_query_params(reverse("accounts:profile"), section="kollokvium-windows")
 
     if request.method == "POST":
+        # 2026-10-13 (rol auditi B1): pəncərə yaratmaq/dəyişmək/aktivləşdirmək/silmək (və əlavə gün) QƏRAR
+        # əməlidir — əvvəl rol adı kifayət edirdi, işçi və RİM əməkdaşı da müəllimlərin bal yazma vaxtını
+        # dəyişirdi. İndi `exam_center.decide` açarı lazımdır; bölmə (GET) mərkəzə görünür qalır.
+        if not can_exam_center_decide(request):
+            return HttpResponseForbidden(
+                pgettext("accounts.kollokvium_windows", "Pəncərələri dəyişmək üçün qərar səlahiyyətiniz yoxdur.")
+            )
         action = (request.POST.get("action") or "").strip()
         organization = _resolve_target_org(request)
         next_url = _resolve_next_url(request, fallback_next)

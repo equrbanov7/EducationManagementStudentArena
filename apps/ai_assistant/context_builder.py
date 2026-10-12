@@ -276,7 +276,13 @@ def _navigation_section(user, organization, memberships, permissions) -> str:
         lines.append("- Create exam: /accounts/profile/?section=my-exams")
 
     if request_has_permission_from_list(permissions, "member.view"):
-        lines.append("- Members: /accounts/profile/?section=org-members")
+        # Rol auditi 2026-10-13 B10: `member.view` əhatəsi AKADEMİK QRUP olan aktor (baş tələbə) «Üzvlər»
+        # bölməsini aça bilmir (rol bayrağı ilə qapalıdır) — ona kabinetin «Qrupum» bölməsi təklif olunur.
+        group_scoped, other_scoped = _member_view_scopes(memberships)
+        if group_scoped:
+            lines.append("- My group (classmates + attendance, read-only): /accounts/profile/?section=my-group")
+        if other_scoped or not group_scoped:
+            lines.append("- Members: /accounts/profile/?section=org-members")
 
     if request_has_permission_from_list(permissions, "unit.view"):
         lines.append("- Organization structure: /accounts/profile/?section=org-structure-tree")
@@ -407,6 +413,31 @@ def _has_teacher_role(memberships) -> bool:
         if role and getattr(role, "name", "").lower() in ("teacher", "müəllim", "instructor"):
             return True
     return False
+
+
+def _member_view_scopes(memberships) -> tuple[bool, bool]:
+    """``(qrup əhatəli, başqa əhatəli)`` — `member.view` daşıyan üzvlüklərin əhatə növü (B10, 2026-10-13).
+
+    Kabinetin «Qrupum» qapısı (``accounts/views/_helpers/rbac_my_group.py``) ilə eyni qayda: UNIT rolu +
+    ``scope_unit`` akademik qrupdur. Modul sərhədi səbəbindən burada təkrarlanır; üzvlük sətirləri
+    middleware-dən ``scope_unit`` yüklü gəlir (əlavə sorğu yoxdur).
+    """
+    from core.constants import OrgUnitType, RoleScopeType
+    from core.permissions import has_permission
+
+    group_scoped = other_scoped = False
+    for membership in memberships:
+        role = getattr(membership, "role", None)
+        if role is None or not has_permission(list(getattr(role, "permissions", None) or []), "member.view"):
+            continue
+        unit = getattr(membership, "scope_unit", None)
+        if getattr(role, "scope_type", None) == RoleScopeType.UNIT and getattr(unit, "unit_type", None) == (
+            OrgUnitType.GROUP
+        ):
+            group_scoped = True
+        else:
+            other_scoped = True
+    return group_scoped, other_scoped
 
 
 def request_has_permission_from_list(permissions: list, permission: str) -> bool:

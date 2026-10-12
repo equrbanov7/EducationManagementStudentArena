@@ -20,7 +20,8 @@ from django.db.models import Count, Q
 from django.utils import timezone
 
 from core.audit import log_action
-from core.constants import AuditAction, OrgUnitType
+from core.constants import AuditAction, OrgUnitType, RoleScopeType
+from core.permissions import has_permission
 
 from .. import policy
 from .. import state_machine as sm
@@ -252,14 +253,11 @@ def _ensure_slice_reviewed(slice_obj, task) -> None:
         if specialty is None:
             continue
         if specialty.pk not in covered:
-            covered[specialty.pk] = bool(
-                _unit_role_users(
-                    slice_obj.organization,
-                    [specialty],
-                    COORDINATOR_ROLES,
-                    permission=PERM_REVIEW,
-                )
-            )
+            # 2026-10-13 (rol auditi B18): əhatə AÇARLA — ixtisası əhatə edən UNIT rolu `workload.review`
+            # daşıyırsa «baxan var». Əvvəl rol ADI (`COORDINATOR_ROLES`) da tələb olunurdu: redaktorda
+            # açarı alan başqa adlı rol nəzərə alınmırdı. Mərkəzi (ORGANIZATION) baxış rolları — rektor,
+            # prorektor — sayılmır: onlar hər ixtisası «əhatə edib» bütün dilimləri vizaya kilidləyərdi.
+            covered[specialty.pk] = bool(_unit_key_holders(slice_obj.organization, [specialty], PERM_REVIEW))
         blocked += int(covered[specialty.pk])
     if blocked:
         raise WorkloadDenied(
@@ -421,13 +419,37 @@ def _unit_role_users(organization, units, role_names, permission=None):
     return list(users.values())
 
 
-#: Viza verə bilən rollar — sətrin ixtisasını əhatə edən koordinator/dekanlıq.
-#: DİQQƏT: əhatə yoxlanışı bu adlarla YANAŞI `workload.review` icazəsini də
-#: tələb edir (aşağı), əks halda icazəsiz «dekan» rolu «baxan var» sayılıb
-#: dilimi əbədi kilidləyərdi.
-COORDINATOR_ROLES = ("program_coordinator", "tutor", "vice_dean", "dean", "chair_head", "department_head")
+def _key_role_names(organization, permission, *, scope_type) -> list:
+    """Təşkilatda ``permission`` açarını daşıyan (``*`` / ``workload.*`` daxil) aktiv rolların adları."""
+    from django.apps import apps as django_apps
 
-FACULTY_ACTOR_ROLES = ("dean", "vice_dean", "program_coordinator")
+    Role = django_apps.get_model("organizations", "Role")
+    roles = Role.objects.filter(organization=organization, is_active=True, scope_type=scope_type)
+    return [
+        role.name
+        for role in roles.only("name", "permissions")
+        if has_permission(list(role.permissions or []), permission)
+    ]
+
+
+def _unit_key_holders(organization, units, permission, *, org_wide_fallback=False) -> list:
+    """Vahidi əhatə edən, ``permission`` daşıyan UNIT üzvlərinin istifadəçiləri (rol ADINDAN asılı deyil).
+
+    2026-10-13 (rol auditi B18): əvvəl alıcı/viza əhatəsi rol adları ilə idi — açarı olmayan dekan
+    müavini / koordinator «təsdiq gözləyir» alırdı. ``org_wide_fallback`` — vahid səviyyəsində heç kim
+    yoxdursa açarı daşıyan mərkəzi rollar (məs. dekansız fakültədə rektor) — dilim səssiz qalmasın.
+    """
+    users = _unit_role_users(
+        organization, units, _key_role_names(organization, permission, scope_type=RoleScopeType.UNIT), permission
+    )
+    if not users and org_wide_fallback:
+        org_names = _key_role_names(organization, permission, scope_type=RoleScopeType.ORGANIZATION)
+        users = _unit_role_users(organization, units, org_names, permission)
+    return users
+
+
+# 2026-10-13 (rol auditi B18): `COORDINATOR_ROLES` / `FACULTY_ACTOR_ROLES` (rol ADI siyahıları) silindi —
+# viza əhatəsi və «təsdiq gözləyir» alıcıları açarla seçilir (``_unit_key_holders``).
 CHAIR_ACTOR_ROLES = ("chair_head", "department_head", "section_head")
 
 
@@ -455,14 +477,20 @@ def send_notification(organization, recipients, *, title, body, link, event, met
 
 
 def _notify_faculty_actors(task, faculty_ids) -> int:
-    """Dekan + fakültənin koordinatorları «yeni dilim gəldi» bildirişi alır."""
+    """Fakültədə dilimi TƏSDİQLƏYƏ BİLƏNLƏR (``workload.approve``) «təsdiq gözləyir» bildirişi alır.
+
+    2026-10-13 (rol auditi B18): əvvəl alıcılar rol ADI ilə idi (dekan + dekan müavini + koordinator) və
+    fakültə rəhbəri (``OrgUnit.head``) — müavin/koordinatorda `workload.approve` yoxdur, bildiriş onları
+    heç bir əmələ aparmırdı. İndi yalnız açar daşıyanlar; fakültə səviyyəsində yoxdursa mərkəzi açar
+    sahibləri (dilim səssiz qalmasın)."""
     from django.apps import apps as django_apps
 
     OrgUnit = django_apps.get_model("organizations", "OrgUnit")
-    faculties = list(OrgUnit.objects.filter(pk__in=list(faculty_ids)).select_related("head"))
-    unique = {u.pk: u for u in [unit.head for unit in faculties] if u is not None}
-    for user in _unit_role_users(task.organization, faculties, FACULTY_ACTOR_ROLES):
-        unique.setdefault(user.pk, user)
+    faculties = list(OrgUnit.objects.filter(pk__in=list(faculty_ids)))
+    unique: dict = {}
+    for faculty in faculties:
+        for user in _unit_key_holders(task.organization, [faculty], PERM_APPROVE, org_wide_fallback=True):
+            unique.setdefault(user.pk, user)
     return send_notification(
         task.organization,
         list(unique.values()),

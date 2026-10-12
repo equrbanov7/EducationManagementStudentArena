@@ -1,4 +1,6 @@
-{% load i18n static %}
+{% load i18n static task_kinds %}
+{# 2026-10-13 (rol auditi B12): söndürülmüş «Sərbəst iş» / «Kurs işi» seçimi göstərilmir (RİM tənzimləməsi). #}
+{% task_kind_visibility as tkv %}
 
 
 {% comment %}C3 (2026-07-03): mikro inline-style-lar klass-lara köçürüldü (external CSS).{% endcomment %}
@@ -25,8 +27,8 @@
                         data-bootstrap-select>
                     <option value="all" {% if filter_type == 'all' %}selected{% endif %}>{% trans "type_all" context "profile.pending_review" %}</option>
                     <option value="exams" {% if filter_type == 'exams' %}selected{% endif %}>{% trans "type_exam" context "profile.pending_review" %}</option>
-                    <option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>
-                    <option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>
+                    {% if tkv.selfwork %}<option value="assignments" {% if filter_type == 'assignments' %}selected{% endif %}>{% trans "type_assignment" context "profile.pending_review" %}</option>{% endif %}
+                    {% if tkv.coursework %}<option value="projects" {% if filter_type == 'projects' %}selected{% endif %}>{% trans "type_project" context "profile.pending_review" %}</option>{% endif %}
                     <option value="labs" {% if filter_type == 'labs' %}selected{% endif %}>{% trans "type_lab" context "profile.pending_review" %}</option>
                 </select>
             </div>

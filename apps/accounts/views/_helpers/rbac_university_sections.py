@@ -60,8 +60,8 @@ def university_role_sections(
             sections.add("exam-score-entry")
         if can_view_unit_analytics:
             sections.add("analytics")
-        if is_superadmin or is_org_admin or is_unit_manager:
-            sections.add("academic-records")
+        # «academic-records» və `journal.view` ilə «my-journal» — 2026-10-13 (rol auditi B2/B5): rol adı ilə
+        # yox, icazə açarının əhatəsi ilə `rbac_sections.apply_permission_section_gates`-də açılır.
         # «Fənn qovluğu» (apps.subject_folder): müəllimin qovluq redaktoru + tapşırıq
         # yoxlaması; tələbənin «Fənn qovluqlarım». Faktiki qapı servisdədir (sahib /
         # qrupun canlı müəllimi / auditoriya) — burada yalnız menyu görünürlüyü.

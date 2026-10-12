@@ -174,8 +174,10 @@ def _archive_unit(request, organization, scope, flags):
 
 
 def _assign_head(request, organization, scope, flags):
+    # 2026-10-13 (rol auditi B9): rəhbər təyini ROL verməkdir — `role.assign` və ya `unit.assign_head`;
+    # `member.edit` (dekan) artıq kafedra müdiri təyin etmir (sahib 2026-10-11 «hər rol öz səlahiyyəti qədər»).
     if not flags["can_assign_head"]:
-        return _forbidden(pgettext(_CTX, "Rəhbər təyini üçün `unit.assign_head` və ya `member.edit` lazımdır."))
+        return _forbidden(pgettext(_CTX, "Rəhbər təyini üçün `role.assign` və ya `unit.assign_head` lazımdır."))
     unit = _visible_unit(organization, scope, (request.POST.get("id") or "").strip())
     if unit is None:
         return _error(pgettext(_CTX, "Bölmə tapılmadı və ya əhatənizdə deyil."), status=404, code="not_found")
@@ -236,8 +238,9 @@ def _assign_head(request, organization, scope, flags):
 
 
 def _add_role(request, organization, scope, flags):
-    if not flags["can_assign_members"]:
-        return _forbidden(pgettext(_CTX, "Heyət təyinatı üçün `member.edit` səlahiyyəti lazımdır."))
+    # 2026-10-13 (rol auditi B9): müavin/koordinator ROLUDUR — `member.edit` yox, `role.assign`.
+    if not flags["can_assign_roles"]:
+        return _forbidden(pgettext(_CTX, "Rol təyinatı üçün `role.assign` səlahiyyəti lazımdır."))
     unit = _visible_unit(organization, scope, (request.POST.get("id") or "").strip())
     if unit is None:
         return _error(pgettext(_CTX, "Bölmə tapılmadı və ya əhatənizdə deyil."), status=404, code="not_found")
@@ -360,7 +363,7 @@ def _add_teacher(request, organization, scope, flags):
 
 
 def _remove_role(request, organization, scope, flags):
-    if not flags["can_assign_members"]:
+    if not (flags["can_assign_members"] or flags["can_assign_roles"] or flags["can_assign_head"]):
         return _forbidden(pgettext(_CTX, "Heyət təyinatını silmək üçün `member.edit` səlahiyyəti lazımdır."))
     unit = _visible_unit(organization, scope, (request.POST.get("id") or "").strip())
     if unit is None:
@@ -376,6 +379,17 @@ def _remove_role(request, organization, scope, flags):
         return _error(pgettext(_CTX, "Bu bölmədə belə təyinat tapılmadı."), status=404, code="not_found")
 
     role_name = membership.role.name
+    # 2026-10-13 (rol auditi B9): müəllimi kafedradan AYIRMAQ üzvlük baxımıdır (`member.edit`); müavin /
+    # koordinator / rəhbər üzvlüyünü SÖNDÜRMƏK isə rol almaqdır — verən açarla eyni (`role.assign`,
+    # rəhbər üçün həm də `unit.assign_head`). Əks halda dekan öz kafedra müdirini rolsuz qoya bilərdi.
+    if role_name in TEACHER_ROLE_NAMES:
+        allowed = flags["can_assign_members"]
+    elif role_name in (DEAN_ROLE, CHAIR_HEAD_ROLE):
+        allowed = flags["can_assign_head"]
+    else:
+        allowed = flags["can_assign_roles"]
+    if not allowed:
+        return _forbidden(pgettext(_CTX, "Bu rol təyinatını silmək üçün `role.assign` səlahiyyəti lazımdır."))
     reason = (request.POST.get("reason") or "").strip()[:500]
     name = _display_name(membership.user)
     try:

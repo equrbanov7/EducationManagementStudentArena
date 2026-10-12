@@ -8,6 +8,7 @@ from django.apps import apps as django_apps
 from django.test import SimpleTestCase, TestCase
 
 from apps.organizations.default_roles_quality import QUALITY_CONTROL_ROLES, SURVEY_GRANTS
+from apps.organizations.default_roles_role_audit import DEAD_PERMISSION_KEYS
 from apps.organizations.default_roles_university import UNIVERSITY_ROLES
 from apps.organizations.models import Role
 from apps.organizations.permissions import PERMISSION_LABELS, get_all_permissions, validate_permissions
@@ -50,7 +51,9 @@ class TemplateTest(SimpleTestCase):
         by_name = {role["name"]: role for role in UNIVERSITY_ROLES}
         for spec in _MIGRATION.ROLE_SPECS:
             live = by_name[spec["name"]]
-            self.assertEqual(sorted(spec["permissions"]), sorted(live["permissions"]), spec["name"])
+            # Sonradan kataloqdan çıxarılan ölü açarlar (rol auditi 2026-10-13, miqrasiya 0061/0063) şablonda yoxdur.
+            frozen = sorted(key for key in spec["permissions"] if key not in DEAD_PERMISSION_KEYS)
+            self.assertEqual(frozen, sorted(live["permissions"]), spec["name"])
             for key in ("display_name", "level", "scope_type", "description"):
                 self.assertEqual(spec[key], live[key], (spec["name"], key))
         self.assertEqual(dict(_MIGRATION.GRANTS), dict(SURVEY_GRANTS))

@@ -26,7 +26,6 @@ DEFAULT_ROLES = {
             "level": 90,
             "scope_type": RoleScopeType.ORGANIZATION,
             "permissions": [
-                "org.view",
                 "org.edit",
                 "unit.*",
                 "member.*",
@@ -41,6 +40,8 @@ DEFAULT_ROLES = {
                 # Audit 2026-09-13 F-06 (2026-09-14): ayarlar səhifəsi səviyyə (≥90)
                 # əvəzinə `org.settings` açarı ilə qapılanır — bu rol (90) əvvəl də girirdi.
                 "org.settings",
+                # Rol auditi 2026-10-13 B14: «Bildiriş göndər» açarla (əvvəl org_admin aliası ilə).
+                "notification.publish",
             ],
             "description": "Deputy director with broad permissions",
         },
@@ -59,6 +60,8 @@ DEFAULT_ROLES = {
                 "group.manage",
                 "exam.*",
                 "analytics.view_unit",
+                # Rol auditi 2026-10-13 B14: «Bildiriş göndər» açarla (əvvəl org_admin aliası ilə).
+                "notification.publish",
             ],
             "description": "Section head managing teachers and courses",
         },
@@ -78,12 +81,12 @@ DEFAULT_ROLES = {
                 "exam.edit",
                 "exam.host",
                 "exam.delete",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
                 "analytics.view_own",
+                # Rol auditi 2026-10-13 B14: «Bildiriş göndər» açarla (əvvəl müəllim bayrağı ilə).
+                "notification.publish",
             ],
             "description": "Teacher with course and grading permissions",
         },
@@ -147,6 +150,8 @@ DEFAULT_ROLES = {
                 "group.manage",
                 "exam.*",
                 "analytics.view_unit",
+                # Rol auditi 2026-10-13 B14: «Bildiriş göndər» açarla (əvvəl org_admin aliası ilə).
+                "notification.publish",
             ],
             "description": "Branch manager",
         },
@@ -161,12 +166,12 @@ DEFAULT_ROLES = {
                 "grade.view",
                 "grade.input",
                 "exam.*",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",
                 "analytics.view_own",
+                # Rol auditi 2026-10-13 B14: «Bildiriş göndər» açarla (əvvəl müəllim bayrağı ilə).
+                "notification.publish",
             ],
             "description": "Course instructor",
         },
@@ -213,8 +218,6 @@ DEFAULT_ROLES = {
                 "course.*",
                 "grade.*",
                 "exam.*",
-                # F-12 (2026-09-13): `assignment.edit` kataloqa girdi — `assignment.delete` ilə cüt.
-                "assignment.edit",
                 "assignment.delete",
                 "project.delete",
                 "lab.delete",

@@ -21,94 +21,71 @@ from django.views.decorators.http import require_GET
 
 from apps.accounts import academic_records
 from apps.organizations.models import OrgUnit
-from apps.organizations.public import ORG_WIDE_SCOPE, get_permission_scope, scope_org_units
+from apps.organizations.public import get_permission_scope, scope_org_units
 from apps.registrar.models import Program, StudentAcademicRecord
 from apps.registrar.public import transcript
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
-from core.roles import user_has_any_role
 from core.search_text import tolerant_q
 
 _FILTER_KEYS = ("faculty", "department", "program", "group", "student", "year", "season")
 _PAGE_DEFAULT = 10
 _PAGE_MAX = 50
 
-# İmtahan mərkəzi + İKT rəhbəri MƏRKƏZİ rollardır — unit scope-ları olmasa da bütün
-# təşkilat üzrə akademik nəticələri görməlidirlər (mərkəzi imtahan/idarəetmə nəzarəti).
-# Dekan/kafedra müdiri unit-scope ilə qalır; adi müəllim/tələbə giriş almır.
-_CENTRAL_ROLES = frozenset({"exam_center", "exam_center_head", "exam_center_staff", "ikt_rehber"})
-
-#: Unit-scope ilə akademik qeydlərə baxa bilən İDARƏETMƏ rolları.
-_UNIT_MANAGER_ROLES = frozenset({"dean", "vice_dean", "department_head"})
-
-#: Org-səviyyə idarəetmə.
-_ORG_ADMIN_ROLES = frozenset({"org_admin", "org_owner"})
-
-#: Bu endpoint-lərə giriş hüququ olan bütün rollar.
+#: Bölmənin VƏ bütün endpoint-lərin TƏK qapısı + əhatə mənbəyi.
 #:
-#: TƏHLÜKƏSİZLİK (2026-07-31 auditi): əvvəllər burada rol qapısı ÜMUMİYYƏTLƏ yox
-#: idi — endpoint-lər yalnız ``scope.has_structure_access`` yoxlayırdı.
-#: Köhnə ümumi resolver (``get_unit_scope``, 2026-09-12 P1-11 ilə silinib) isə
-#: rolun adına/səviyyəsinə baxmadan HƏR üzvlüyün ``scope_unit_id``-sini scope-a
-#: əlavə edirdi, «Müəllimi kafedraya təyin et» əməliyyatı isə məhz onu
-#: doldurur. Nəticədə adi müəllim öz kafedra alt-ağacındakı BÜTÜN tələbələrin
-#: GPA, semestr detalı və transkriptini oxuya bilirdi. Sidebar ona
-#: ``academic-records`` bölməsini vermirdi — yəni endpoint UI-dan geniş idi
-#: (gizli PII sızması). Siyahı sidebar qapısı ilə eyni saxlanılır
-#: (``views/_helpers/rbac.py``: is_superadmin / is_org_admin / is_unit_manager /
-#: is_exam_center).
-ACADEMIC_RECORDS_ROLES = _CENTRAL_ROLES | _UNIT_MANAGER_ROLES | _ORG_ADMIN_ROLES
+#: 2026-10-13 (rol auditi B2, sahib: «hər rol öz səlahiyyəti qədər»): əvvəl qapı rol ADI ilə idi
+#: (``ACADEMIC_RECORDS_ROLES`` = imtahan mərkəzi / İKT / dekan / kafedra müdiri / org admin), əhatə
+#: ``grade.view``-dan gəlirdi, mərkəzi rollar isə açarsız ``ORG_WIDE_SCOPE``-a yüksəldilirdi
+#: (``_CENTRAL_ROLES``). Nəticədə icazə redaktorunda ``grade.view`` almaq heç nəyi bağlamır, vermək heç
+#: nəyi açmırdı. İndi menyu (``rbac_sections``) və data EYNİ açardan: ORGANIZATION rolu → bütün
+#: təşkilat, UNIT rolu → ``scope_unit`` alt-ağacı, açarsız / ``scope_unit``-siz → giriş yoxdur
+#: (fail-closed). ``grade.view`` seçilmədi: o, müəllimdə/laborantda da var — GPA reyestri onlara açılardı.
+#: Açarı bu gün bölməni görən hər rol miqrasiya ``organizations/0061`` ilə alıb.
+#: (Kataloq sabiti: ``organizations.permissions_role_audit.PERM_STUDENT_RECORDS_VIEW``.)
+RECORDS_SCOPE_PERMISSION = "student.records_view"
 
 
 # ── Ortaq köməkçilər ─────────────────────────────────────────────────────────
 
 
-def can_view_academic_records(user, organization) -> bool:
-    """Akademik qeyd endpoint-lərinə rol qapısı (scope-dan ƏVVƏL).
+def records_scope(user, organization, *, request=None):
+    """``student.records_view`` struktur əhatəsi (superadmin / təşkilat sahibi → org-wide)."""
+    return get_permission_scope(user, organization, RECORDS_SCOPE_PERMISSION, request=request)
 
-    Scope «nəyi görürsən» sualına cavab verir, «görməyə haqqın varmı» sualına
-    yox. Qapı fail-closed-dur: rol tanınmırsa giriş yoxdur.
-    """
-    if user is None or not getattr(user, "is_authenticated", False):
+
+def can_view_academic_records(user, organization, *, request=None) -> bool:
+    """Akademik qeydlərə giriş — açar struktur əhatəsi verirsə (menyu ilə eyni qayda)."""
+    if user is None or not getattr(user, "is_authenticated", False) or organization is None:
         return False
-    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
-        return True
-    if organization is not None and getattr(organization, "owner_id", None) == getattr(user, "pk", None):
-        return True
-    return user_has_any_role(user, ACADEMIC_RECORDS_ROLES)
-
-
-#: Əhatənin çıxarıldığı icazə açarı. Endpoint-lər tələbənin QİYMƏT izini (ÜOMG,
-#: semestr detalı, transkript) açır — rol qapısından keçən hər rol (dekan, dekan
-#: müavini, kafedra müdiri, rektorat, imtahan mərkəzi, RİM) məhz ``grade.view``
-#: daşıyır; UNIT rollarda o, ``scope_unit`` alt-ağacına bağlanır.
-RECORDS_SCOPE_PERMISSION = "grade.view"
+    return records_scope(user, organization, request=request).has_structure_access
 
 
 def _scope(request):
     """(organization, scope) — aktiv təşkilat + istifadəçinin görünüş sahəsi.
 
-    Rol qapısı (``can_view_academic_records``) ƏVVƏL, əhatə SONRA. Əhatə
-    ``get_permission_scope(…, "grade.view")`` ilə: superadmin/owner/rektorat
-    org-wide, dekan/kafedra müdiri öz alt-ağacı. 2026-09-12 (P1-11): köhnə
-    ``get_unit_scope`` dekanın əlaqəsiz üzvlüyünün (məs. başqa fakültənin
-    kafedrasına müəllim təyinatı) unitini də əhatəyə salırdı — sərt resolver
-    yalnız ``grade.view`` daşıyan üzvlüyün unitini sayır. Mərkəzi rollar
-    (imtahan mərkəzi / İKT rəhbəri) ORGANIZATION rolu ilə org-wide alır;
-    aşağıdakı yüksəltmə yalnız köhnə ``exam_center`` sətirləri üçün qalır.
-
-    Rol qapısından keçməyən istifadəçi üçün ``(None, None)`` qaytarılır: bütün
-    çağıran endpoint-lər ``organization is None`` şərtini yoxlayır, yəni cavab
-    ``has_access: False`` olur.
+    Əhatə YALNIZ ``get_permission_scope(…, "student.records_view")``-dandır (B2, 2026-10-13): rol adına
+    görə yüksəltmə yoxdur. Açarı ümumiyyətlə daşımayan aktor ``(None, None)`` alır (qapı əhatədən ƏVVƏL);
+    açarı olan, amma ``scope_unit``-siz UNIT rolu BOŞ əhatə alır — hər endpoint ``scope.has_structure_access``
+    yoxlayır → ``has_access: False``. 2026-09-12 (P1-11) qaydası qalır: sərt resolver yalnız açarı
+    daşıyan üzvlüyün unitini sayır — dekanın başqa fakültədəki müəllim üzvlüyü əhatəyə düşmür.
     """
     organization = getattr(request, "organization", None)
     if organization is None:
         return None, None
-    if not can_view_academic_records(request.user, organization):
+    scope = records_scope(request.user, organization, request=request)
+    if not scope.has_structure_access and not _holds_records_key(request.user, organization):
         return None, None
-    scope = get_permission_scope(request.user, organization, RECORDS_SCOPE_PERMISSION, request=request)
-    if not scope.has_structure_access and user_has_any_role(request.user, _CENTRAL_ROLES):
-        scope = ORG_WIDE_SCOPE
     return organization, scope
+
+
+def _holds_records_key(user, organization) -> bool:
+    """Aktorun aktiv üzvlüklərindən biri açarı (və ya onun wildcard-ını) daşıyırmı (memoizasiyalı)."""
+    from core.permissions import has_permission
+
+    from ._helpers.rbac import _collect_actor_permissions
+
+    permissions, _grantable = _collect_actor_permissions(user, organization)
+    return has_permission(list(permissions), RECORDS_SCOPE_PERMISSION)
 
 
 def _int_param(request, name, default):
@@ -234,7 +211,7 @@ def records_student_detail(request):
     """Bir tələbənin semestr-üzrə fənn detalı (yalnız scope daxilində)."""
     organization, scope = _scope(request)
     student_id = (request.GET.get("student") or "").strip()
-    if organization is None or scope is None or not student_id:
+    if organization is None or scope is None or not scope.has_structure_access or not student_id:
         return JsonResponse({"has_access": False, "semesters": []})
 
     # Mühafizə + tələbə obyekti BİR sorğuda (əvvəl ``EXISTS`` + ayrıca ``User``

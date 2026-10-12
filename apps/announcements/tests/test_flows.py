@@ -239,9 +239,14 @@ class ManagerVisibilityTest(TestCase):
         self.assertIn(reverse("announcements:manage_list"), client.get(CABINET).content.decode())
         self.assertEqual(client.get(reverse("announcements:manage_list")).status_code, 200)
 
-    def test_neutral_member_sees_section_but_nothing_targeted(self):
+    def test_member_is_staff_audience(self):
+        # Rol auditi 2026-10-13 B7: universitetdə `member` xəritələnməmiş ofis işçisidir — heyət elanını alır,
+        # tələbə elanını yox (əvvəl neytral idi və heç bir elan ona düşmürdü).
         with bypass_rls():
             user = member(self.w["org"], "annmv_member", "member")
-        make_announcement(self.w, title="Hamıya", families=["students", "teachers", "staff"])
+        make_announcement(self.w, title="Heyətə", families=["staff"])
+        make_announcement(self.w, title="Yalnız tələbələrə", families=["students"])
         client = client_for(self.w["org"], user)
-        self.assertNotIn("Hamıya", client.get(reverse("announcements:list")).json()["html"])
+        html = client.get(reverse("announcements:list")).json()["html"]
+        self.assertIn("Heyətə", html)
+        self.assertNotIn("Yalnız tələbələrə", html)

@@ -194,7 +194,9 @@ def _create_block(request, kind: str) -> dict:
     from apps.accounts.views.rim.section import _create_context
 
     rim_actor = resolve_rim_actor(request)
-    allowed = bool(getattr(rim_actor, "organization", None) is not None and can_create(rim_actor))
+    # B3 (2026-10-13): səhifənin öz növü — müəllim kataloqu / idxalı `user.import_staff`, tələbə `user.import`.
+    account_kind = "teacher" if kind == "teachers" else "student"
+    allowed = bool(getattr(rim_actor, "organization", None) is not None and can_create(rim_actor, account_kind))
     if not allowed:
         return {"can_create": False, "rim_create": None, "intake_section_url": ""}
     create = _create_context(rim_actor)

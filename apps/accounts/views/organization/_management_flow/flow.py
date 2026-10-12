@@ -28,7 +28,7 @@ from ..._helpers import (
     _set_student_org_request_status,
     _sync_profile_pending_request_snapshot,
 )
-from ._invites import _InvitesMixin
+from ._invites import INVITE_GATED_ACTIONS, _InvitesMixin
 from ._members import _MembersMixin
 from ._requests import _RequestsMixin
 
@@ -47,6 +47,7 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
         self.remove_reason = None
         self.student_role = None
         self.user_level = None
+        self.teacher_student_only = False
 
     def run(self):
         from apps.organizations.models import Membership
@@ -83,6 +84,7 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
                     "Bu bölmədən istifadə üçün minimum HR, təşkilat admini və ya daha yüksək səlahiyyət tələb olunur.",
                 )
                 return redirect("accounts:profile")
+        self.teacher_student_only = teacher_student_only
         self.student_role = _resolve_membership_role(self.org, ProfileRole.STUDENT)
         if self.request.method == "POST":
             action = (self.request.POST.get("action") or "").strip().lower()
@@ -109,6 +111,12 @@ class _StudentOrgManagementFlow(_RequestsMixin, _InvitesMixin, _MembersMixin):
             if teacher_student_only and action == "revoke_sent_invites":
                 self.request.POST = self.request.POST.copy()
                 self.request.POST["revoke_role_type"] = MembershipRequestRoleType.STUDENT
+            # 2026-10-13 (rol auditi B8): dəvət/təsdiq səviyyə ilə yox, `member.invite` + əhatə ilə.
+            if action in INVITE_GATED_ACTIONS:
+                gate_error = self._invite_gate_error()
+                if gate_error:
+                    messages.error(self.request, gate_error)
+                    return redirect(next_url)
             if action in {"approve_requested_student", "add_student"}:
                 target_user_id = self.request.POST.get("user_id")
                 target_profile = get_object_or_404(UserProfile.objects.select_related("user"), user_id=target_user_id)

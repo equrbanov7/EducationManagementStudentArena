@@ -5,21 +5,25 @@ soft-delete, bərpa, şəxsi məlumat) — YARATMAQ isə yeganə eksik həlqə i
 tək bir müəllim və ya sonradan gələn bir tələbə üçün operator ya 1 sətirlik
 Excel faylı düzəldirdi, ya da server aləti tələb edirdi.
 
-İCAZƏ QAPISI — ``user.import``
-------------------------------
+İCAZƏ QAPISI — hesab NÖVÜNƏ görə (rol auditi 2026-10-13 B3)
+-----------------------------------------------------------
 Yeni kimlik yaratmaq toplu idxalla EYNİ səlahiyyətdir, ona görə EYNİ açardan
-keçir (``intake.policy.PERM_IMPORT``). Ayrıca `user.create` açarı QƏSDƏN
-YARADILMIR: iki açar olsaydı, bir universitet birini verib digərini unudardı və
-«RİM-dən yarada bilirəm, fayldan yox» kimi izahsız fərq çıxardı.
+keçir — amma növə görə: TƏLƏBƏ ``user.import`` (tələbə qəbulu, ``intake.policy.
+PERM_IMPORT``), MÜƏLLİM / heyət ``user.import_staff`` (müəllim idxalı, HR).
+Ayrıca `user.create` açarı QƏSDƏN YARADILMIR: «RİM-dən yarada bilirəm, fayldan
+yox» kimi izahsız fərq çıxmasın. 2026-10-13-ə qədər hər iki növ `user.import`-dan
+keçirdi və tələbə qəbulu üçün açarı alan Tələbə xidmətləri müəllim hesabı da
+yarada bilirdi.
 
 Qapı İKİ şərtdən keçir (fail-closed):
 
 1. RİM aktoru həll olunmalıdır (AKTİV təşkilat konteksti + AKTİV üzvlük) —
    bax `policy.resolve_actor`;
-2. Aktorun ``user.import`` açarı olmalıdır — bax `intake.policy.can_import`
-   (superadmin və təşkilat sahibi istisnadır).
+2. Aktorun həmin NÖVÜN açarı olmalıdır — bax `intake.policy.can_import`
+   (superadmin və təşkilat sahibi istisnadır). UI yalnız aktorun yarada
+   bildiyi növləri təklif edir (``creatable_kinds``).
 
-⚠️ ``rim_staff`` (RİM ƏMƏKDAŞI, səviyyə 60) bu açarı DAŞIMIR və burada ona
+⚠️ ``rim_staff`` (RİM ƏMƏKDAŞI, səviyyə 60) bu açarları DAŞIMIR və burada ona
 səssiz güzəşt EDİLMİR — yeni kimlik yaratmaq mərkəzin RƏHBƏRİNİN
 (`ikt_rehber`) və HR-in səlahiyyətidir (bax `default_roles_rim.py`).
 
@@ -39,7 +43,7 @@ from django.utils.translation import pgettext
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
 
 from ..intake import create as intake_create
-from ..intake.policy import PERM_IMPORT, can_import
+from ..intake.policy import PERM_IMPORT, PERM_IMPORT_STAFF, can_import
 from .create_form import build_draft
 from .policy import RimAccessError, RimActor
 
@@ -47,8 +51,11 @@ logger = logging.getLogger(__name__)
 
 _CTX = "profile.rim"
 
-#: Yaratma səlahiyyətinin açarı — toplu idxalla EYNİ (yuxarıdakı izaha bax).
+#: Yaratma səlahiyyətinin açarları — toplu idxalla EYNİ (yuxarıdakı izaha bax).
 PERM_CREATE = PERM_IMPORT
+PERM_CREATE_STAFF = PERM_IMPORT_STAFF
+#: Hesab növü → açar (B3, 2026-10-13). Naməlum növ — açar yoxdur → fail-closed.
+KIND_PERMISSIONS = {intake_create.KIND_STUDENT: PERM_CREATE, intake_create.KIND_TEACHER: PERM_CREATE_STAFF}
 
 #: Rate-limit: bir aktor saatda neçə hesab yarada bilər (tək-tək səth üçün).
 #: Toplu idxal bundan KƏNARDIR — o, öz faylını bir əməliyyatda tətbiq edir.
@@ -82,25 +89,36 @@ def field_error(message: str, fields: dict, *, code: str = "validation_failed", 
     return error
 
 
-def can_create(actor: RimActor) -> bool:
-    """Aktor bu təşkilatda yeni hesab yarada bilərmi (fail-closed)."""
+def creatable_kinds(actor: RimActor) -> tuple:
+    """Aktorun bu təşkilatda yarada bildiyi hesab növləri (``ACCOUNT_KINDS`` sırası ilə; fail-closed)."""
 
     if actor is None or getattr(actor, "user", None) is None:
-        return False
+        return ()
     if getattr(actor, "organization", None) is None:
-        return False
-    return bool(actor.has(PERM_CREATE) and can_import(actor.user, actor.organization))
+        return ()
+    return tuple(
+        kind
+        for kind in intake_create.ACCOUNT_KINDS
+        if actor.has(KIND_PERMISSIONS[kind]) and can_import(actor.user, actor.organization, KIND_PERMISSIONS[kind])
+    )
 
 
-def require_create(actor: RimActor) -> None:
-    """İcazə yoxdursa ``RimAccessError`` (403)."""
+def can_create(actor: RimActor, kind: str | None = None) -> bool:
+    """Aktor yeni hesab yarada bilərmi — ``kind`` verilməyibsə HƏR HANSI növ, verilibsə məhz o növ."""
+
+    kinds = creatable_kinds(actor)
+    return bool(kinds) if kind is None else kind in kinds
+
+
+def require_create(actor: RimActor, kind: str | None = None) -> None:
+    """İcazə yoxdursa ``RimAccessError`` (403). ``kind`` — bax ``can_create``."""
 
     if getattr(actor, "user", None) is None or getattr(actor, "organization", None) is None:
         raise RimAccessError(
             "no_organization_context",
             pgettext(_CTX, "Aktiv təşkilat konteksti yoxdur."),
         )
-    if not can_create(actor):
+    if not can_create(actor, kind):
         raise RimAccessError(
             "permission_denied",
             pgettext(_CTX, "Yeni hesab yaratmaq üçün icazəniz yoxdur."),
@@ -167,6 +185,8 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
             {"kind": pgettext(_CTX, "Naməlum hesab növü.")},
             code="account_kind_unknown",
         )
+    # B3: növün öz açarı — `user.import` (tələbə) müəllim hesabı yaratmağa icazə VERMİR və əksinə.
+    require_create(actor, kind)
 
     rate, key_parts = _check_rate_limit(actor)
     organization = actor.organization
@@ -221,12 +241,15 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
 
 __all__ = [
     "DEFAULT_CREATE_RATE",
+    "KIND_PERMISSIONS",
     "MAX_NOTE_LENGTH",
     "PERM_CREATE",
+    "PERM_CREATE_STAFF",
     "RATE_LIMIT_SCOPE",
     "RimCreateError",
     "can_create",
     "create_account",
+    "creatable_kinds",
     "field_error",
     "require_create",
 ]

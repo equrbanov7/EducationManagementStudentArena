@@ -20,8 +20,13 @@ QAPILAR (fail-closed, RBAC kataloqu ilə eyni açarlar):
 
 * baxış/əhatə — ``unit.view`` (``tree_scope``; dekan yalnız öz fakültəsini görür);
 * yaratma/redaktə/arxiv — ``unit.create`` / ``unit.edit`` / ``unit.delete``;
-* rəhbər (dekan/müdir) — ``unit.assign_head`` VƏ YA ``member.edit``;
-* müavin/koordinator/müəllim — ``member.edit``.
+* rəhbər (dekan/müdir) — ``role.assign`` VƏ YA ``unit.assign_head``;
+* müavin/koordinator (vermək və silmək) — ``role.assign``;
+* müəllim köçürmə / kafedradan ayırma — ``member.edit``.
+
+2026-10-13 (rol auditi B9): əvvəl rəhbər/müavin/koordinator ``member.edit`` ilə də açılırdı — dekan
+(``member.edit`` var, ``role.assign`` yox) öz fakültəsində rol paylayırdı. Sahib 2026-10-11:
+«Dekan rol verə bilir — olmaz; hər rol öz səlahiyyəti qədər».
 
 TƏLƏBƏ QORUMASI: aktiv akademik qeydi və ya tələbə rolu olan hesaba heç bir
 heyət rolu verilmir (sahib, 2026-09-07) — 409 ``target_is_student``.

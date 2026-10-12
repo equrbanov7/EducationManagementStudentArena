@@ -43,9 +43,13 @@ def test_almost_every_role_may_send_an_application():
         assert has_permission(_role(name)["permissions"], PERM_CREATE), name
 
 
-def test_archive_and_onboarding_roles_may_not_send():
-    for name in ("alumni", "member"):
-        assert not has_permission(_role(name)["permissions"], PERM_CREATE), name
+def test_archive_role_may_not_send():
+    assert not has_permission(_role("alumni")["permissions"], PERM_CREATE)
+
+
+def test_member_office_staff_may_send():
+    """2026-10-13 (rol auditi B7): `member` = vəzifəsi xəritələnməmiş ofis işçisi, onboarding deyil."""
+    assert has_permission(_role("member")["permissions"], PERM_CREATE)
 
 
 def test_handler_roles_hold_the_handle_key():

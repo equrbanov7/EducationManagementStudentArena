@@ -130,7 +130,13 @@
     </div>
     {% endif %}
 
-    {% if submission.is_pending %}
+    {% if submission.is_pending and not can_decide %}
+    {# 2026-10-13 (rol auditi B1): işçi / RİM əməkdaşı yalnız görür — qərar `exam_center.decide` açarı ilədir. #}
+    <div class="qsubr-error-note" role="status">
+        <i class="fas fa-eye"></i>
+        <div>{% trans "Yalnız baxış: göndərişə qərarı «İmtahan mərkəzinin qərarları» səlahiyyəti olan istifadəçi (imtahan mərkəzi rəhbəri) verir." context "exams.template.question_submission" %}</div>
+    </div>
+    {% elif submission.is_pending %}
     <h2 class="qsubd-section-title" id="qsubDecision"><i class="fas fa-gavel"></i> {% trans "Qərar" context "exams.template.question_submission" %}</h2>
     {% if submission.error_count %}
     <div class="qsubr-error-note" role="alert">

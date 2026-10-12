@@ -16,6 +16,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 
+from apps.accounts.services.exam_center_decide import can_exam_center_decide
 from apps.exams.models import Exam, StudentGroup
 from apps.exams.public import SECURE_EXAM_CATEGORIES, SecondChanceError, grant_second_chance, is_exam_center_user
 from apps.organizations.public import organization_user_queryset
@@ -71,6 +72,13 @@ def exam_chance(request):
     fallback_next = _append_query_params(reverse("accounts:profile"), section="exam-chance")
 
     if request.method == "POST":
+        # 2026-10-13 (rol auditi B1): əvvəl rol adı (`is_exam_center_user`) kifayət edirdi — işçi və RİM
+        # əməkdaşı da yeni PIN + final biletini sıfırlayan şans verirdi. İndi bölməni GÖRÜRLƏR (siyahı,
+        # son şanslar), şans vermək `exam_center.decide` açarı ilədir (şablonda rəhbərdə).
+        if not can_exam_center_decide(request):
+            return HttpResponseForbidden(
+                pgettext("accounts.exam_chance", "İmtahan şansı vermək üçün qərar səlahiyyətiniz yoxdur.")
+            )
         next_url = _resolve_next_url(request, fallback_next)
         organization = _get_active_organization(request)
         if organization is None:

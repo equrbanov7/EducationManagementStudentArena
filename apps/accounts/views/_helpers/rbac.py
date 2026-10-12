@@ -9,6 +9,7 @@ effective/grantable permissions. Keep tenant and permission checks strict.
 from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
+from .rbac_member_sections import can_notify, member_is_learner
 from .rbac_memberships import _bound_active_org_memberships, _invalidate_actor_permissions_cache  # noqa: F401
 from .rbac_sections import apply_permission_section_gates
 from .rbac_university_sections import alumni_sections, university_role_sections
@@ -152,11 +153,11 @@ def _collect_actor_permissions(user, organization, *, request=None):
     grantable_permissions = set()
 
     memberships = _bound_active_org_memberships(user, org_id)
-    if memberships is None:
-        memberships = Membership.objects.filter(user=user, organization=organization, is_active=True).select_related(
-            "role"
-        )
-    for membership in memberships:
+    if memberships is None:  # B21 (2026-10-13): deaktiv rol menyuya açar gətirmir — panel qapısı ilə eyni.
+        memberships = Membership.objects.filter(
+            user=user, organization=organization, is_active=True, role__is_active=True
+        ).select_related("role")
+    for membership in (m for m in memberships if getattr(m.role, "is_active", True)):
         for permission in membership.role.permissions or []:
             if permission.startswith("grant:"):
                 grantable_permissions.add(permission.split("grant:", 1)[1].strip())
@@ -283,7 +284,7 @@ def _role_capabilities(user, profile):
         can_search_directory = False
     can_view_owned_learning = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_review_submissions = is_superadmin or is_teacher
-    can_view_student_assignments = is_student or _user_has_any_role(user, {ProfileRole.MEMBER})
+    can_view_student_assignments = is_student or member_is_learner(user, active_organization)  # B7 (2026-10-13)
     # MƏZUN: hesab sahibi, amma tələbə deyil — səthi `alumni_sections()`-dədir (P2-32).
     is_alumni = _user_has_any_role(user, {"alumni"})
     can_manage_blog = getattr(user, "is_authenticated", False)
@@ -344,7 +345,6 @@ def _role_capabilities(user, profile):
             "blog",
             "edit-profile",
             "change-password",
-            "publish-notification",
             # URL auditi B6 (2026-10-10): «delete-account» açarı çıxarıldı — özünü silmə yoxdur.
             "statistics",
         }
@@ -382,7 +382,6 @@ def _role_capabilities(user, profile):
                     "my-exams",
                     "my-courses",
                     "student-organization-management",
-                    "publish-notification",
                 }
             )
             # Sahib 2026-10-11: «Dekan rol verə bilir — olmaz; hər rol öz səlahiyyəti qədər». `org_admin` aliası
@@ -393,9 +392,7 @@ def _role_capabilities(user, profile):
                 allowed_sections.update({"role-assignment", "permission-editor", "manage-roles"})
 
         if is_teacher:
-            allowed_sections.update(
-                {"my-exams", "my-courses", "pending-review", "review-results", "publish-notification"}
-            )
+            allowed_sections.update({"my-exams", "my-courses", "pending-review", "review-results"})
             if teacher_has_student_org_access:
                 allowed_sections.add("student-organization-management")
 
@@ -405,22 +402,22 @@ def _role_capabilities(user, profile):
             allowed_sections.update(
                 {
                     "my-exams",
-                    "publish-notification",
                     "exam-center-pins",
                     "exam-center-stats",
                     "appeal-stats",
                     "kollokvium-windows",
                     "exam-chance",
-                    # Mərkəzi rol → bütün tələbələrin akademik qeydlərini görür.
-                    "academic-records",
+                    # «academic-records» — 2026-10-13 B2: rol adı ilə yox, `student.records_view` (rbac_sections).
                 }
             )
 
         # HR — əməkdaş/üzv idarəetməsi və rol təyinatları. İmtahan/kurs YOXDUR.
         if is_hr:
-            allowed_sections.update(
-                {"student-organization-management", "role-assignment", "manage-roles", "publish-notification"}
-            )
+            allowed_sections.add("student-organization-management")
+            # Rol menyuları AD ilə yox, açarla (sahib 2026-10-11): icazə redaktorunda HR-dan
+            # `role.assign` alınarsa menyu da itir — əvvəl görünür qalırdı, əməl isə 403 verirdi.
+            if _can_manage_roles(user, active_organization):
+                allowed_sections.update({"role-assignment", "manage-roles"})
 
         if is_student:
             allowed_sections.update({"assigned-exams", "assigned-courses"})
@@ -457,7 +454,7 @@ def _role_capabilities(user, profile):
         # QƏSDƏN verilmir, əks halda «Kurslarım» sidebar-da iki dəfə çıxardı
         # (bax ``test_student_profile_keeps_single_assigned_courses_sidebar_entry``).
         # Matris: ``apps/accounts/tests/test_sidebar_role_matrix.py``.
-        if _user_has_any_role(user, {ProfileRole.MEMBER}):
+        if member_is_learner(user, active_organization):  # B7: universitetdə member = ofis heyəti
             allowed_sections.update({"courses", "assigned-exams", "assigned-courses"})
 
     # «Qruplar» (imtahan kohortu) kabinet bölməsi 2026-09-08-də SAHİBİN QƏRARI ilə
@@ -491,6 +488,8 @@ def _role_capabilities(user, profile):
         can_enter_exam_scores=can_enter_exam_scores,
         can_view_unit_analytics=can_view_unit_analytics,
     )
+    if can_notify(user, active_organization, is_superadmin=is_superadmin, is_owner=is_owner_of_active_org):
+        allowed_sections.add("publish-notification")  # B14 (2026-10-13): rol bayrağı yox, `notification.publish`
     # U16 — Kabinet modul görünürlüyü: superadminin söndürdüyü modulların
     # bölmələri allowed_sections-dan çıxarılır (sidebar + render + fragment API
     # eyni yerdən bağlanır).
@@ -512,7 +511,11 @@ def _role_capabilities(user, profile):
     # _ensure_teacher) aparılır; bu flag-lar yalnız menyu görünürlüyü üçündür.
     can_use_question_bank = is_superadmin or is_teacher or is_org_admin or is_exam_center
     can_manage_appeals = is_superadmin or is_exam_center
-    can_view_my_appeals = is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
+    # Menyu (`_my_appeals.html`) ilə eyni şərt: əvvəl inkar-qayda HR/tyutor kimi heyətə bölməni
+    # fraqment URL-i ilə açırdı (`my-results` üçün P3-5-də bağlanan eyni sinif; audit 2026-10-13).
+    can_view_my_appeals = can_view_student_assignments and (
+        is_student or not (is_teacher or is_org_admin or is_exam_center or is_superadmin)
+    )
 
     # İcazə-qapılı bölmələr (audit / RİM / müəllim-tələbə kataloqu) TƏK yerdən:
     # bax `rbac_sections.apply_permission_section_gates` (yalnız GÖRÜNÜRLÜK).
